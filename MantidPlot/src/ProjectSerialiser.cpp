@@ -537,24 +537,24 @@ void ProjectSerialiser::openMatrix(const std::string &lines,
   Mantid::Kernel::Strings::convert<int>(values[1], rows);
   Mantid::Kernel::Strings::convert<int>(values[2], cols);
 
+  TSVSerialiser tsv(newLines);
+  std::string gStr;
+  if (tsv.hasLine("geometry")) {
+    std::string gStr = tsv.lineAsString("geometry");
+  }
+
   Matrix *w = new Matrix(window->scriptingEnv(), rows, cols, "", window, 0);
   window->initMatrix(w, caption);
   if (w->objectName() != caption) // the matrix was renamed
     window->renamedTables << caption << w->objectName();
 
+  w->loadFromProject(newLines, window, fileVersion);
   w->showNormal();
-
   window->setListViewDate(caption, date);
   w->setBirthDate(date);
-
-  TSVSerialiser tsv(newLines);
-
-  if (tsv.hasLine("geometry")) {
-    std::string gStr = tsv.lineAsString("geometry");
-    window->restoreWindowGeometry(window, w, QString::fromStdString(gStr));
+  if(!gStr.empty()) {
+      window->restoreWindowGeometry(window, w, QString::fromStdString(gStr));
   }
-
-  w->loadFromProject(newLines, window, fileVersion);
 }
 
 /**
@@ -630,22 +630,22 @@ void ProjectSerialiser::openMultiLayer(const std::string &lines,
   std::vector<std::string> values;
   boost::split(values, firstLine, boost::is_any_of("\t"));
 
-  std::string caption = values[0];
+  QString caption = QString::fromUtf8(values[0].c_str());
   int rows = 1;
   int cols = 1;
   Mantid::Kernel::Strings::convert<int>(values[1], rows);
   Mantid::Kernel::Strings::convert<int>(values[2], cols);
-  std::string birthDate = values[3];
+  QString birthDate = QString::fromStdString(values[3]);
 
+  // create instance
+  QString label = caption;
   MultiLayer *plot = new MultiLayer(window, 0, rows, cols);
-  QString label = QString::fromUtf8(caption.c_str());
   window->initMultilayerPlot(plot, label.replace(QRegExp("_"), "-"));
 
-  plot->setBirthDate(QString::fromStdString(birthDate));
-  window->setListViewDate(QString::fromStdString(caption),
-                          QString::fromStdString(birthDate));
-
+  // populate with values
   plot->loadFromProject(multiLayerLines, window, fileVersion);
+  plot->setBirthDate(birthDate);
+  window->setListViewDate(caption, birthDate);
 }
 
 /**
@@ -671,6 +671,7 @@ void ProjectSerialiser::openTable(const std::string &lines,
   Mantid::Kernel::Strings::convert<int>(valVec[1], rows);
   Mantid::Kernel::Strings::convert<int>(valVec[2], cols);
 
+  // create instance
   Table *w = new Table(window->scriptingEnv(), rows, cols, "", window, 0);
   window->initTable(w, caption);
   if (w->objectName() != caption) { // the table was renamed
@@ -683,11 +684,12 @@ void ProjectSerialiser::openTable(const std::string &lines,
               .arg(w->objectName()));
     }
   }
-  w->showNormal();
 
-  window->setListViewDate(caption, date);
-  w->setBirthDate(date);
+  // populate with values
   w->loadFromProject(lines, window, fileVersion);
+  w->showNormal();
+  w->setBirthDate(date);
+  window->setListViewDate(caption, date);
 }
 
 /**
@@ -708,10 +710,10 @@ void ProjectSerialiser::openTableStatistics(const std::string &lines,
   if (firstLineVec.size() < 4)
     return;
 
-  const std::string name = firstLineVec[0];
+  QString name = QString::fromStdString(firstLineVec[0]);
   const std::string tableName = firstLineVec[1];
   const std::string type = firstLineVec[2];
-  const std::string birthDate = firstLineVec[3];
+  QString birthDate = QString::fromStdString(firstLineVec[3]);
 
   TSVSerialiser tsv(lines);
 
@@ -733,6 +735,7 @@ void ProjectSerialiser::openTableStatistics(const std::string &lines,
     targets << target;
   }
 
+  // create instance
   int typeCode = type == "row" ? TableStatistics::row : TableStatistics::column;
   TableStatistics *s = new TableStatistics(window->scriptingEnv(), window,
                                            window->table(QString::fromStdString(tableName)),
@@ -740,18 +743,16 @@ void ProjectSerialiser::openTableStatistics(const std::string &lines,
   if (!s)
     return;
 
-  QString caption = QString::fromStdString(name);
-  if (caption.isEmpty())
+  if (name.isEmpty())
     window->initTable(s, s->objectName());
   else
-    window->initTable(s, caption);
+    window->initTable(s, name);
 
-  s->showNormal();
-  window->setListViewDate(QString::fromStdString(name),
-                          QString::fromStdString(birthDate));
-  s->setBirthDate(QString::fromStdString(birthDate));
-
+  // populate with values
   s->loadFromProject(lines, window, fileVersion);
+  s->showNormal();
+  s->setBirthDate(birthDate);
+  window->setListViewDate(name, birthDate);
 }
 
 /**
@@ -771,8 +772,8 @@ void ProjectSerialiser::openSurfacePlot(const std::string &lines,
   if (valVec.size() < 2)
     return;
 
-  const std::string caption = valVec[0];
-  const std::string dateStr = valVec[1];
+  QString caption = QString::fromStdString(valVec[0]);
+  QString dateStr = QString::fromStdString(valVec[1]);
   valVec.clear();
 
   const std::string tsvLines = boost::algorithm::join(lineVec, "\n");
@@ -789,16 +790,16 @@ void ProjectSerialiser::openSurfacePlot(const std::string &lines,
     const QString funcQStr = QString::fromStdString(funcStr);
 
     if (funcQStr.endsWith("(Y)", Qt::CaseSensitive)) {
-      plot = window->dataPlot3D(QString::fromStdString(caption),
+      plot = window->dataPlot3D(caption,
                                 QString::fromStdString(funcStr), val2, val3,
                                 val4, val5, val6, val7);
     } else if (funcQStr.contains("(Z)", Qt::CaseSensitive) > 0) {
-      plot = window->openPlotXYZ(QString::fromStdString(caption),
+      plot = window->openPlotXYZ(caption,
                                  QString::fromStdString(funcStr), val2, val3,
                                  val4, val5, val6, val7);
     } else if (funcQStr.startsWith("matrix<", Qt::CaseSensitive) &&
                funcQStr.endsWith(">", Qt::CaseInsensitive)) {
-      plot = window->openMatrixPlot3D(QString::fromStdString(caption),
+      plot = window->openMatrixPlot3D(caption,
                                       QString::fromStdString(funcStr), val2,
                                       val3, val4, val5, val6, val7);
     } else if (funcQStr.contains("mantidMatrix3D")) {
@@ -836,20 +837,19 @@ void ProjectSerialiser::openSurfacePlot(const std::string &lines,
         plot = window->plotSurface(l[0], val2, val3, val4, val5, val6, val7,
                                    l[1].toInt(), l[2].toInt());
       }
-      window->setWindowName(plot, QString::fromStdString(caption));
+      window->setWindowName(plot, caption);
     }
   }
 
   if (!plot)
     return;
 
-  window->setListViewDate(QString::fromStdString(caption),
-                          QString::fromStdString(dateStr));
-  plot->setBirthDate(QString::fromStdString(dateStr));
+  plot->loadFromProject(tsvLines, window, fileVersion);
+  plot->setBirthDate(dateStr);
+  window->setListViewDate(caption, dateStr);
   plot->setIgnoreFonts(true);
   window->restoreWindowGeometry(
       window, plot, QString::fromStdString(tsv.lineAsString("geometry")));
-  plot->loadFromProject(tsvLines, window, fileVersion);
 }
 
 /**
