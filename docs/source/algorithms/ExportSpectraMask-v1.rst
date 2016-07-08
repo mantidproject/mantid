@@ -27,23 +27,24 @@ Usage
     test_ws = CreateSampleWorkspace()
     test_ws.maskDetectors(masks)
     
-    f_name = os.path.join(config.getString('defaultsave.directory'),'test_ws.msk')
+    f_name = 'test_ws_mask.msk'
     
     #extract mask:
     r_masks = ExportSpectraMask(test_ws,Filename=f_name)
     
     # Compare results:
     wmsk = ''
-    with open(f_name,'r') as res_file:
+    final_fname = os.path.join(config.getString('defaultsave.directory'),f_name) 
+    with open(final_fname,'r') as res_file:
         for line in res_file:
             wmsk = line
-    os.remove(f_name)            
+    os.remove(final_fname)
     
     sys.stdout.write("Input mask: {0}\n".format(masks))
     sys.stdout.write("Extracted mask: {0}\n".format(r_masks))
     sys.stdout.write("Saved mask: {0}".format(wmsk))
 
-    
+
 Output:
 
 .. testoutput:: ExExportSpectraMask

@@ -1,7 +1,7 @@
 #pylint: disable=invalid-name, no-init
 import os
 from mantid import config
-from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, mtd
+from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, mtd, FileProperty, FileAction
 from mantid.kernel import Direction, logger, IntArrayProperty
 
 def export_masks(ws,fileName='',returnMasksOnly=False):
@@ -174,14 +174,17 @@ class ExportSpectraMask(PythonAlgorithm):
 
     def summary(self):
         return "Returns list of spectra numbers which are masked"\
-            " and save these numbers into legacy ASCII file with .msk extension."
+            " and save these numbers into legacy .msk file."
 
     def PyInit(self):
         """ Declare properties
         """
         self.declareProperty(WorkspaceProperty("Workspace", "",Direction.Input), "The workspace to export masks from.")
-        self.declareProperty("Filename","","Name of the file to save mask to."\
-                            " If empty, the name of the input workspace is used")
+
+        self.declareProperty(FileProperty(name="Filename",defaultValue="",action=FileAction.OptionalSave,\
+                                extensions = [".msk"],direction=Direction.Input),\
+                                doc="The name or full path to the file to save mask to."\
+                            " If empty, the name of the input workspace and default save directory are used.")
         self.declareProperty("ExportMaskOnly",False,"If true, algorithm will not save mask in a file"\
                              "and only returns the list containing numbers of masked spectra.",\
                               Direction.Input)
