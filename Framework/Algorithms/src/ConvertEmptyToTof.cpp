@@ -140,7 +140,7 @@ void ConvertEmptyToTof::exec() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (m_outputWS != m_inputWS) {
-    m_outputWS = API::WorkspaceFactory::Instance().create(m_inputWS);
+    m_outputWS = m_inputWS->clone();
   }
 
   setTofInWS(tofAxis, m_outputWS);
@@ -217,7 +217,7 @@ std::map<int, int> ConvertEmptyToTof::findElasticPeakPositions(
 
   for (auto spectrumIndex : spectraIndices) {
 
-    const Mantid::MantidVec &thisSpecY = m_inputWS->dataY(spectrumIndex);
+    auto &thisSpecY = m_inputWS->y(spectrumIndex);
 
     int minChannelIndex = *(channelIndices.begin());
     int maxChannelIndex = *(channelIndices.end() - 1);
@@ -252,10 +252,9 @@ std::map<int, int> ConvertEmptyToTof::findElasticPeakPositions(
  * Estimated the FWHM for Gaussian peak fitting
  *
  */
-void ConvertEmptyToTof::estimateFWHM(const Mantid::MantidVec &spec,
-                                     double &center, double &sigma,
-                                     double &height, double &minX,
-                                     double &maxX) {
+void ConvertEmptyToTof::estimateFWHM(
+    const Mantid::HistogramData::HistogramY &spec, double &center,
+    double &sigma, double &height, double &minX, double &maxX) {
 
   auto maxValueIt =
       std::max_element(spec.begin() + static_cast<size_t>(minX),
@@ -509,20 +508,16 @@ void ConvertEmptyToTof::setTofInWS(const std::vector<double> &tofAxis,
                 << numberOfSpectra << '\n';
 
   auto axisPtr = Kernel::make_cow<HistogramData::HistogramX>(tofAxis);
+  HistogramData::BinEdges edges(tofAxis);
   Progress prog(this, 0.0, 0.2, numberOfSpectra);
-  PARALLEL_FOR2(m_inputWS, outputWS)
+
   for (int64_t i = 0; i < numberOfSpectraInt64; ++i) {
-    PARALLEL_START_INTERUPT_REGION
-    // Just copy over
-    outputWS->dataY(i) = m_inputWS->readY(i);
-    outputWS->dataE(i) = m_inputWS->readE(i);
-    // copy
-    outputWS->setX(i, axisPtr);
+	//Replace bin edges with tof axis
+	outputWS->setBinEdges(i, edges);
 
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
   } // end for i
-  PARALLEL_CHECK_INTERUPT_REGION
+
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 }
 
