@@ -565,13 +565,13 @@ There are two issues you might encounter when implementing new algorithms or whe
 1. Exceptions to due size mismatch.
    The ``Histogram`` type validates the size of X, Y, and E data in (non-legacy) setters.
    The best solution is to determine the correct size at creation time of the workspace.
-   Alternatively, you can simply set a new histogram with different size via ``MatrixWorkspace::setHistogram()``.
+   Alternatively, you can simply set a new histogram with different size via ``MatrixWorkspace::setHistogram()`` (not yet available in Python).
 
 2. Exceptions about the storage mode of the X data, ``Histogram::Xmode``.
    This happens rarely, typically by creating a workspace that contains histogram data (bin edges) and modifying the size via the legacy interface to store point data (or vice versa).
    These size modifications are only possible via the legacy interface.
-   The best solution is to determine the storage mode at creation time of the workspace.
-   If that is not possible, use the new setters such as `setPoints()`, they will trigger a conversion of the internal storage mode.
+   The best solution is to determine the storage mode at creation time of the workspace, by specifying the correct length of the X data.
+   If that is not possible, use the new setters such as `setBinEdges()`, they will trigger a conversion of the internal storage mode (not yet available in Python).
 
 
 
