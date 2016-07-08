@@ -96,11 +96,9 @@ void HRPDSlabCanAbsorption::exec() {
 
   const size_t numHists = workspace->getNumberHistograms();
   const size_t specSize = workspace->blocksize();
-  const bool isHist = workspace->isHistogramData();
   //
   Progress progress(this, 0.91, 1.0, numHists);
   for (size_t i = 0; i < numHists; ++i) {
-    const MantidVec &X = workspace->readX(i);
     MantidVec &Y = workspace->dataY(i);
 
     // Get detector position
@@ -132,8 +130,9 @@ void HRPDSlabCanAbsorption::exec() {
       angleFactor = 1.0 / std::abs(cos(theta));
     }
 
+    const auto lambdas = workspace->points(i);
     for (size_t j = 0; j < specSize; ++j) {
-      const double lambda = (isHist ? (0.5 * (X[j] + X[j + 1])) : X[j]);
+      const double lambda = lambdas[j];
 
       // Front vanadium window - 0.5-1% effect, increasing with lambda
       Y[j] *= exp(vanWinThickness * ((vanRefAtten * lambda) + vanScat));

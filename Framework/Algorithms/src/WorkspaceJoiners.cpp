@@ -45,8 +45,7 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
 
   // Create the X values inside a cow pointer - they will be shared in the
   // output workspace
-  cow_ptr<MantidVec> XValues;
-  XValues.access() = ws1->readX(0);
+  auto XValues = ws1->refX(0);
 
   // Initialize the progress reporting object
   m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
@@ -61,7 +60,8 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
 
     // Copy X,Y,E
     outSpec.setX(XValues);
-    outSpec.setData(inSpec.dataY(), inSpec.dataE());
+    outSpec.dataY() = inSpec.dataY();
+    outSpec.dataE() = inSpec.dataE();
     // Copy the spectrum number/detector IDs
     outSpec.copyInfoFrom(inSpec);
 
@@ -92,7 +92,8 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
 
     // Copy X,Y,E
     outSpec.setX(XValues);
-    outSpec.setData(inSpec.dataY(), inSpec.dataE());
+    outSpec.dataY() = inSpec.dataY();
+    outSpec.dataE() = inSpec.dataE();
     // Copy the spectrum number/detector IDs
     outSpec.copyInfoFrom(inSpec);
 
@@ -141,11 +142,6 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
   // Copy over geometry (but not data) from first input workspace
   WorkspaceFactory::Instance().initializeFromParent(event_ws1, output, true);
 
-  // Create the X values inside a cow pointer - they will be shared in the
-  // output workspace
-  cow_ptr<MantidVec> XValues;
-  XValues.access() = event_ws1->readX(0);
-
   // Initialize the progress reporting object
   m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
 
@@ -188,7 +184,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
   }
 
   // Set the same bins for all output pixels
-  output->setAllX(XValues);
+  output->setAllX(HistogramData::BinEdges(event_ws1->refX(0)));
 
   fixSpectrumNumbers(event_ws1, event_ws2, output);
 
