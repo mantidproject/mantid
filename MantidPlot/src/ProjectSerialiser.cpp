@@ -634,7 +634,8 @@ void ProjectSerialiser::openMultiLayer(const std::string &lines,
 
   // create instance
   QString label = caption;
-  MultiLayer *plot = new MultiLayer(window, 0, rows, cols);
+  MultiLayer *plot = new MultiLayer();
+  plot->init(window, 0, rows, cols);
   window->initMultilayerPlot(plot, label.replace(QRegExp("_"), "-"));
 
   // populate with values

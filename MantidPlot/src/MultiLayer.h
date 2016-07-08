@@ -76,10 +76,15 @@ class MultiLayer : public MdiSubWindow, public Mantid::IProjectSerialisable {
   Q_OBJECT
 
 public:
-  MultiLayer(QWidget *parent = 0, int layers = 1, int rows = 1,
+  MultiLayer(QWidget *parent, int layers = 1, int rows = 1,
              int cols = 1, const QString &label = "", const char *name = 0,
              Qt::WFlags f = 0);
+  MultiLayer();
   ~MultiLayer() override;
+
+  void init(QWidget *parent, int layers = 1, int rows = 1,
+             int cols = 1, const QString &label = "", const char *name = 0,
+             Qt::WFlags f = 0);
 
   QSize minimumSizeHint() const override;
 

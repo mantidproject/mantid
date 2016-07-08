@@ -100,60 +100,74 @@ void LayerButton::mouseDoubleClickEvent(QMouseEvent *) {
 MultiLayer::MultiLayer(QWidget *parent, int layers, int rows,
                        int cols, const QString &label, const char *name,
                        Qt::WFlags f)
-    : MdiSubWindow(parent, label, name, f), active_graph(NULL), d_cols(cols),
+    : MdiSubWindow(), active_graph(NULL), d_cols(cols),
       d_rows(rows), graph_width(500), graph_height(400), colsSpace(5),
       rowsSpace(5), left_margin(5), right_margin(5), top_margin(5),
       bottom_margin(5), l_canvas_width(400), l_canvas_height(300),
       hor_align(HCenter), vert_align(VCenter), d_scale_on_print(true),
       d_print_cropmarks(false), d_close_on_empty(false),
       d_is_waterfall_plot(false), d_waterfall_fill_color(/*Invalid color*/) {
-  layerButtonsBox = new QHBoxLayout();
-  waterfallBox = new QHBoxLayout();
-  buttonsLine = new QHBoxLayout();
-  buttonsLine->addLayout(layerButtonsBox);
-  buttonsLine->addStretch();
-  buttonsLine->addLayout(waterfallBox);
+    init(parent, layers, rows, cols, label, name, f);
+}
 
-  canvas = new QWidget();
-
-  QWidget *mainWidget = new QWidget();
-  mainWidget->setAutoFillBackground(true);
-  mainWidget->setBackgroundRole(QPalette::Window);
-
-  // setAutoFillBackground(true);
-  // setBackgroundRole(QPalette::Window);
-
-  QVBoxLayout *layout = new QVBoxLayout(mainWidget);
-  // QVBoxLayout* layout = new QVBoxLayout(this);
-
-  layout->addLayout(buttonsLine);
-  layout->addWidget(canvas, 1);
-  layout->setMargin(0);
-  layout->setSpacing(0);
-  setWidget(mainWidget);
-
-  int canvas_width = graph_width + left_margin + right_margin;
-  int canvas_height = graph_height + top_margin + bottom_margin;
-  setGeometry(
-      QRect(0, 0, canvas_width, canvas_height + LayerButton::btnSize()));
-
-  canvas->resize(canvas_width, canvas_height);
-  canvas->installEventFilter(this);
-
-  QPalette pal = palette();
-  pal.setColor(QPalette::Window, QColor(Qt::white));
-  setPalette(pal);
-
-  for (int i = 0; i < layers; i++)
-    addLayer();
-
-  // setFocusPolicy(Qt::StrongFocus);
-  // setFocus();
-
-  setAcceptDrops(true);
+MultiLayer::MultiLayer()
+    : MdiSubWindow(), active_graph(NULL), d_cols(0),
+      d_rows(0), graph_width(500), graph_height(400), colsSpace(5),
+      rowsSpace(5), left_margin(5), right_margin(5), top_margin(5),
+      bottom_margin(5), l_canvas_width(400), l_canvas_height(300),
+      hor_align(HCenter), vert_align(VCenter), d_scale_on_print(true),
+      d_print_cropmarks(false), d_close_on_empty(false),
+      d_is_waterfall_plot(false), d_waterfall_fill_color(/*Invalid color*/) {
 }
 
 MultiLayer::~MultiLayer() {}
+
+void MultiLayer::init(QWidget *parent, int layers, int rows,
+                       int cols, const QString &label, const char *name,
+                       Qt::WFlags f)
+{
+    MdiSubWindow::init(parent, label, name, f);
+    d_cols = cols;
+    d_rows = rows;
+
+    layerButtonsBox = new QHBoxLayout();
+    waterfallBox = new QHBoxLayout();
+    buttonsLine = new QHBoxLayout();
+    buttonsLine->addLayout(layerButtonsBox);
+    buttonsLine->addStretch();
+    buttonsLine->addLayout(waterfallBox);
+
+    canvas = new QWidget();
+
+    QWidget *mainWidget = new QWidget();
+    mainWidget->setAutoFillBackground(true);
+    mainWidget->setBackgroundRole(QPalette::Window);
+
+    QVBoxLayout *layout = new QVBoxLayout(mainWidget);
+
+    layout->addLayout(buttonsLine);
+    layout->addWidget(canvas, 1);
+    layout->setMargin(0);
+    layout->setSpacing(0);
+    setWidget(mainWidget);
+
+    int canvas_width = graph_width + left_margin + right_margin;
+    int canvas_height = graph_height + top_margin + bottom_margin;
+    setGeometry(
+                QRect(0, 0, canvas_width, canvas_height + LayerButton::btnSize()));
+
+    canvas->resize(canvas_width, canvas_height);
+    canvas->installEventFilter(this);
+
+    QPalette pal = palette();
+    pal.setColor(QPalette::Window, QColor(Qt::white));
+    setPalette(pal);
+
+    for (int i = 0; i < layers; i++)
+        addLayer();
+
+    setAcceptDrops(true);
+}
 
 QSize MultiLayer::minimumSizeHint() const { return QSize(200, 200); }
 
