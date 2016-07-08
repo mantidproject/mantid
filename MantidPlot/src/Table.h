@@ -42,7 +42,6 @@
 
 #include "Mantid/IProjectSerialisable.h"
 
-class Folder;
 class QTableWidgetItem;
 
 class MyTable : public QTableWidget {
@@ -119,7 +118,7 @@ public:
   };
 
   Table(ScriptingEnv *env, int r, int c, const QString &label,
-        ApplicationWindow *parent, const QString &name = QString(),
+        QWidget *parent, const QString &name = QString(),
         Qt::WFlags f = 0);
 
   int topSelectedRow() const { return d_table->topSelectedRow(); }
@@ -135,8 +134,6 @@ public:
   //! Updates the decimal separators when importing ASCII files on user request
   void updateDecimalSeparators(const QLocale &oldSeparators);
   void setAutoUpdateValues(bool on = true);
-  /// Get the pointer to the parent folder of the window
-  Folder *folder() { return m_folder; }
 
 public slots:
   MyTable *table() { return d_table; };
@@ -449,8 +446,6 @@ private:
 
   //! Internal function to change the column header
   void setColumnHeader(int index, const QString &label);
-  /// Pointer to the parent folder of the window
-  Folder *m_folder;
 };
 
 #endif

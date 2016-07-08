@@ -42,6 +42,7 @@ class QCloseEvent;
 class QString;
 class FloatingWindow;
 class ApplicationWindow;
+class Folder;
 
 class MdiSubWindowParent_t : public QFrame {
   Q_OBJECT
@@ -132,7 +133,8 @@ public:
 
   /// Get the pointer to ApplicationWindow
   ApplicationWindow *applicationWindow() { return d_app; }
-
+  /// Get the pointer to Folder
+  Folder *folder() { return d_folder; }
 public slots:
 
   //! Return the window label
@@ -301,6 +303,9 @@ private:
   void updateCaption();
   /// Store the pointer to the ApplicationWindow
   ApplicationWindow *d_app;
+  /// Store the pointer to the Folder
+  Folder* d_folder;
+
   //! The window label
   /**
    * \sa setWindowLabel(), windowLabel(), setCaptionPolicy()

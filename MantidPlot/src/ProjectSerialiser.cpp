@@ -664,18 +664,30 @@ void ProjectSerialiser::openTable(const std::string &lines,
   if (valVec.size() < 4)
     return;
 
-  std::string caption = valVec[0];
-  std::string date = valVec[3];
+  QString caption = QString::fromStdString(valVec[0]);
+  QString date = QString::fromStdString(valVec[3]);
   int rows = 1;
   int cols = 1;
   Mantid::Kernel::Strings::convert<int>(valVec[1], rows);
   Mantid::Kernel::Strings::convert<int>(valVec[2], cols);
 
-  auto t = window->newTable(QString::fromStdString(caption), rows, cols);
-  window->setListViewDate(QString::fromStdString(caption),
-                          QString::fromStdString(date));
-  t->setBirthDate(QString::fromStdString(date));
-  t->loadFromProject(lines, window, fileVersion);
+  Table *w = new Table(window->scriptingEnv(), rows, cols, "", window, 0);
+  window->initTable(w, caption);
+  if (w->objectName() != caption) { // the table was renamed
+    window->renamedTables << caption << w->objectName();
+    if (window->d_inform_rename_table) {
+      QMessageBox::warning(
+          window, window->tr("MantidPlot - Renamed Window"),
+          window->tr("The table '%1' already exists. It has been renamed '%2'.")
+              .arg(caption)
+              .arg(w->objectName()));
+    }
+  }
+  w->showNormal();
+
+  window->setListViewDate(caption, date);
+  w->setBirthDate(date);
+  w->loadFromProject(lines, window, fileVersion);
 }
 
 /**

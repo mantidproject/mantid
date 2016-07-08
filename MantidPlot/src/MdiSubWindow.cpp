@@ -29,6 +29,7 @@
 #include "MdiSubWindow.h"
 #include "FloatingWindow.h"
 #include "ApplicationWindow.h"
+#include "Folder.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -50,7 +51,7 @@ using std::string;
 MdiSubWindow::MdiSubWindow(QWidget *parent, const QString &label,
                            const QString &name, Qt::WFlags f)
     : MdiSubWindowParent_t(parent, f),
-      d_app(static_cast<ApplicationWindow *>(parent)), d_label(label),
+      d_app(static_cast<ApplicationWindow *>(parent)), d_folder(d_app->currentFolder()), d_label(label),
       d_status(Normal), d_caption_policy(Both), d_confirm_close(true),
       d_birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)),
       d_min_restore_size(QSize()) {
