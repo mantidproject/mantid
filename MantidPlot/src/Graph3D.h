@@ -43,8 +43,6 @@
 #include "Table.h"
 #include "Matrix.h"
 
-using namespace Qwt3D;
-
 class UserFunction2D;
 class UserParametricSurface;
 class Function2D; // Mantid
@@ -291,7 +289,7 @@ public slots:
 
   QString colorMap() { return color_map; };
   void setDataColorMap(const QString &fileName);
-  bool openColorMap(ColorVector &cv, QString fname);
+  bool openColorMap(Qwt3D::ColorVector &cv, QString fname);
 
   void setMeshColor(const QColor &);
   void setAxesColor(const QColor &);
@@ -418,11 +416,11 @@ private:
 };
 
 //! Class for user defined parametric surfaces
-class UserParametricSurface : public ParametricSurface {
+class UserParametricSurface : public Qwt3D::ParametricSurface {
 public:
   UserParametricSurface(const QString &xFormula, const QString &yFormula,
-                        const QString &zFormula, SurfacePlot &pw);
-  Triple operator()(double u, double v) override;
+                        const QString &zFormula, Qwt3D::SurfacePlot &pw);
+  Qwt3D::Triple operator()(double u, double v) override;
 
   unsigned int rows() { return d_rows; };
   unsigned int columns() { return d_columns; };

@@ -123,7 +123,7 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
   double xmax_wksp = inputWS->getXMax();
   EventWorkspace_const_sptr inputEventWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (inputEventWS != nullptr) {
+  if (inputEventWS != nullptr && inputEventWS->getNumberEvents() > 0) {
     xmin_wksp = inputEventWS->getTofMin();
     xmax_wksp = inputEventWS->getTofMax();
   }
@@ -208,6 +208,12 @@ double ResampleX::determineBinning(MantidVec &xValues, const double xmin,
       throw std::invalid_argument("Cannot calculate log of xmin=0");
     if (xmax == 0)
       throw std::invalid_argument("Cannot calculate log of xmax=0");
+    if (xmin < 0. && xmax > 0.) {
+      std::stringstream msg;
+      msg << "Cannot calculate logorithmic binning that changes sign (xmin="
+          << xmin << ", xmax=" << xmax << ")";
+      throw std::invalid_argument(msg.str());
+    }
 
     const int MAX_ITER(100); // things went wrong if we get this far
 
@@ -256,7 +262,8 @@ double ResampleX::determineBinning(MantidVec &xValues, const double xmin,
   if (numBoundaries != expNumBoundaries) {
     g_log.warning()
         << "Did not generate the requested number of bins: generated "
-        << numBoundaries << " requested " << expNumBoundaries << "\n";
+        << numBoundaries << " requested " << expNumBoundaries
+        << "(xmin=" << xmin << ", xmax=" << xmax << ")\n";
   }
 
   // return the delta value so the caller can do debug printing

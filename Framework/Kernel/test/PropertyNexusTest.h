@@ -1,15 +1,14 @@
 #ifndef MANTID_API_PROPERTYNEXUSTEST_H_
 #define MANTID_API_PROPERTYNEXUSTEST_H_
 
-#include <boost/scoped_ptr.hpp>
-#include "MantidAPI/PropertyNexus.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/NexusTestHelper.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/PropertyNexus.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Timer.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -42,12 +41,12 @@ public:
     PropertyWithValue<std::vector<double>> pvd("vector_double_val",
                                                std::vector<double>(2, 1.4));
 
-    PropertyNexus::saveProperty(th.file, &pi);
-    PropertyNexus::saveProperty(th.file, &pu);
-    PropertyNexus::saveProperty(th.file, &pd);
-    PropertyNexus::saveProperty(th.file, &pf);
-    PropertyNexus::saveProperty(th.file, &ps);
-    PropertyNexus::saveProperty(th.file, &pvd);
+    pi.saveProperty(th.file);
+    pu.saveProperty(th.file);
+    pd.saveProperty(th.file);
+    pf.saveProperty(th.file);
+    ps.saveProperty(th.file);
+    pvd.saveProperty(th.file);
 
     TimeSeriesProperty<int> tspi("int_series");
     tspi.addValue(DateAndTime("2011-01-01T00:00:01"), 1234);
@@ -65,46 +64,29 @@ public:
     tsps.addValue(DateAndTime("2011-01-01T00:00:01"), "help me i");
     tsps.addValue(DateAndTime("2011-01-01T00:01:02"), "am stuck in a NXS file");
 
-    PropertyNexus::saveProperty(th.file, &tspi);
-    PropertyNexus::saveProperty(th.file, &tspd);
-    PropertyNexus::saveProperty(th.file, &tspb);
-    PropertyNexus::saveProperty(th.file, &tsps);
+    tspi.saveProperty(th.file);
+    tspd.saveProperty(th.file);
+    tspb.saveProperty(th.file);
+    tsps.saveProperty(th.file);
 
     // ---- Now re-load and compare to the original ones
     // ----------------------------
     th.reopenFile();
 
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "int_val")).get(),
-               &pi);
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "uint_val")).get(),
-               &pu);
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "double_val")).get(),
-               &pd);
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "float_val")).get(),
-               &pf);
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "string_val")).get(),
-               &ps);
-    check_prop(
-        boost::scoped_ptr<Property>(
-            PropertyNexus::loadProperty(th.file, "vector_double_val")).get(),
-        &pvd);
+    check_prop(PropertyNexus::loadProperty(th.file, "int_val").get(), &pi);
+    check_prop(PropertyNexus::loadProperty(th.file, "uint_val").get(), &pu);
+    check_prop(PropertyNexus::loadProperty(th.file, "double_val").get(), &pd);
+    check_prop(PropertyNexus::loadProperty(th.file, "float_val").get(), &pf);
+    check_prop(PropertyNexus::loadProperty(th.file, "string_val").get(), &ps);
+    check_prop(PropertyNexus::loadProperty(th.file, "vector_double_val").get(),
+               &pvd);
 
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "int_series")).get(),
-               &tspi);
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "double_series")).get(),
+    check_prop(PropertyNexus::loadProperty(th.file, "int_series").get(), &tspi);
+    check_prop(PropertyNexus::loadProperty(th.file, "double_series").get(),
                &tspd);
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "bool_series")).get(),
+    check_prop(PropertyNexus::loadProperty(th.file, "bool_series").get(),
                &tspb);
-    check_prop(boost::scoped_ptr<Property>(
-                   PropertyNexus::loadProperty(th.file, "string_series")).get(),
+    check_prop(PropertyNexus::loadProperty(th.file, "string_series").get(),
                &tsps);
   }
 };

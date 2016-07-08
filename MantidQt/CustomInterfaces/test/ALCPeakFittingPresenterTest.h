@@ -17,6 +17,7 @@
 #include <qwt_data.h>
 
 using namespace Mantid;
+using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 

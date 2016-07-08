@@ -56,6 +56,12 @@ Rebin::rebinParamsFromInput(const std::vector<double> &inParams,
     rbParams[0] = xmin;
     rbParams[1] = inParams[0];
     rbParams[2] = xmax;
+    if ((rbParams[1] < 0.) && (xmin < 0.) && (xmax > 0.)) {
+      std::stringstream msg;
+      msg << "Cannot create logorithmic binning that changes sign (xmin="
+          << xmin << ", xmax=" << xmax << ")";
+      throw std::runtime_error(msg.str());
+    }
   }
   return rbParams;
 }
