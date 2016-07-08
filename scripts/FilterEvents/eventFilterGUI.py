@@ -245,6 +245,9 @@ class MainWindow(QtGui.QMainWindow):
 
         ##defaults
 
+        #register startup
+        mantid.UsageService.registerFeatureUsage("Interface","EventFilter",False)
+
         return
 
 
