@@ -138,22 +138,22 @@ void IntegratePeaksMDHKL::exec() {
 
 MDHistoWorkspace_sptr IntegratePeaksMDHKL::normalize(
     int h, int k, int l, double box, int gridPts,
-    MatrixWorkspace_sptr flux,
-    MatrixWorkspace_sptr sa, IMDEventWorkspace_sptr ws) {
+    const MatrixWorkspace_sptr &flux,
+    const MatrixWorkspace_sptr &sa, const IMDEventWorkspace_sptr &ws) {
   IAlgorithm_sptr normAlg = createChildAlgorithm("MDNormSCD");
   normAlg->setProperty("InputWorkspace", ws);
   normAlg->setProperty("AlignedDim0",
                        "[H,0,0]," + boost::lexical_cast<std::string>(h - box) +
                            "," + boost::lexical_cast<std::string>(h + box) +
-                           "," + boost::lexical_cast<std::string>(gridPts));
+                           "," + std::to_string(gridPts));
   normAlg->setProperty("AlignedDim1",
                        "[0,K,0]," + boost::lexical_cast<std::string>(k - box) +
                            "," + boost::lexical_cast<std::string>(k + box) +
-                           "," + boost::lexical_cast<std::string>(gridPts));
+                           "," + std::to_string(gridPts));
   normAlg->setProperty("AlignedDim2",
                        "[0,0,L]," + boost::lexical_cast<std::string>(l - box) +
                            "," + boost::lexical_cast<std::string>(l + box) +
-                           "," + boost::lexical_cast<std::string>(gridPts));
+                           "," + std::to_string(gridPts));
   normAlg->setProperty("FluxWorkspace", flux);
   normAlg->setProperty("SolidAngleWorkspace", sa);
   normAlg->setProperty("OutputWorkspace", "mdout");
@@ -259,7 +259,7 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
  */
 MDHistoWorkspace_sptr IntegratePeaksMDHKL::binEvent(int h, int k, int l,
                                                     double box, int gridPts,
-                                                    IMDWorkspace_sptr ws) {
+                                                    const IMDWorkspace_sptr &ws) {
   IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
   binMD->setProperty("InputWorkspace", ws);
   binMD->setProperty("AlignedDim0",
@@ -288,7 +288,7 @@ MDHistoWorkspace_sptr IntegratePeaksMDHKL::binEvent(int h, int k, int l,
  */
 MDHistoWorkspace_sptr IntegratePeaksMDHKL::cropHisto(int h, int k, int l,
                                                      double box,
-                                                     IMDWorkspace_sptr ws) {
+                                                     const IMDWorkspace_sptr &ws) {
   IAlgorithm_sptr cropMD =
       createChildAlgorithm("IntegrateMDHistoWorkspace", 0.0, 0.3);
   cropMD->setProperty("InputWorkspace", ws);

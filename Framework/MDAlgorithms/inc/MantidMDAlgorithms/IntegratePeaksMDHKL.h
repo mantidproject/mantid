@@ -41,14 +41,14 @@ private:
 
   DataObjects::MDHistoWorkspace_sptr normalize(int h, int k, int l, double box,
                                                int gridPts,
-                                               API::MatrixWorkspace_sptr flux,
-                                               API::MatrixWorkspace_sptr sa,
-                                               API::IMDEventWorkspace_sptr ws);
+                                               const API::MatrixWorkspace_sptr &flux,
+                                               const API::MatrixWorkspace_sptr &sa,
+                                               const API::IMDEventWorkspace_sptr &ws);
   DataObjects::MDHistoWorkspace_sptr binEvent(int h, int k, int l, double box,
                                               int gridPts,
-                                              API::IMDWorkspace_sptr ws);
+                                              const API::IMDWorkspace_sptr &ws);
   DataObjects::MDHistoWorkspace_sptr cropHisto(int h, int k, int l, double box,
-                                               API::IMDWorkspace_sptr ws);
+                                               const API::IMDWorkspace_sptr &ws);
   void integratePeak(const int neighborPts,
                      DataObjects::MDHistoWorkspace_sptr out, double &intensity,
                      double &errorSquared);
