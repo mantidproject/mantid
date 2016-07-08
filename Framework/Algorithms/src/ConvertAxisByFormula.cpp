@@ -147,7 +147,6 @@ void ConvertAxisByFormula::exec() {
     }
   }
 
-  double result(0);
   // Create muparser
   mu::Parser p;
   try {
