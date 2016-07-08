@@ -83,6 +83,8 @@ public:
   }
   /// Update the stored plot type
   void setPlotType(const Muon::PlotType &plotType) { m_plotType = plotType; }
+  /// Create workspaces to fit
+  void createWorkspacesToFit(const std::vector<std::string> &names) const;
 
 public slots:
   /// Transforms fit results when a simultaneous fit finishes
@@ -99,13 +101,13 @@ public slots:
   void openSequentialFitDialog();
 
 private:
-  /// Create workspaces to fit and update fit browser (model)
-  void createWorkspacesToFit(const std::vector<std::string> &names) const;
   /// Generate names of workspaces to be created
   std::vector<std::string> generateWorkspaceNames(bool overwrite) const;
   /// Create analysis workspace
   Mantid::API::Workspace_sptr createWorkspace(const std::string &name,
                                               std::string &groupLabel) const;
+  /// Update model and view with names of workspaces to fit
+  void updateWorkspaceNames(const std::vector<std::string> &names) const;
   /// Get rebin options for analysis
   std::string getRebinParams(const Mantid::API::Workspace_sptr ws) const;
   /// Rename fit workspaces, add logs and generate params table

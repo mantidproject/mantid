@@ -96,6 +96,7 @@ void MuonAnalysisFitDataPresenter::handleDataPropertiesChanged() {
 void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(bool overwrite) {
   const auto names = generateWorkspaceNames(overwrite);
   createWorkspacesToFit(names);
+  updateWorkspaceNames(names);
 }
 
 /**
@@ -171,8 +172,15 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
       }
     }
   }
+}
 
-  // Update model with these
+/**
+ * After new workspaces have been created, update the fit browser and data
+ * selector with their names
+ * @param names :: [input] List of workspace names
+ */
+void MuonAnalysisFitDataPresenter::updateWorkspaceNames(
+    const std::vector<std::string> &names) const {
   QStringList qNames;
   std::transform(
       names.begin(), names.end(), std::back_inserter(qNames),
