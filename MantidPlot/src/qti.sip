@@ -1218,6 +1218,7 @@ public:
   sipRes = sipCpp->currentFolder();
 %End
 
+  void newProject(const bool doNotSave = false);
   Folder* appendProject(const QString& file_name, Folder* parentFolder = 0);
   Folder* projectFolder() /PyName=rootFolder/;
 
@@ -1232,6 +1233,8 @@ public:
   void disableTools();
 
   void saveProjectAs(const QString& fileName = QString(), bool = false);
+  ApplicationWindow *openProject(const QString &workingDir, const QString &filename, const int fileVersion);
+
   MdiSubWindow* clone(MdiSubWindow*);
 
   Matrix* tableToMatrix(Table* t);
@@ -1377,7 +1380,7 @@ class InstrumentWindow: MdiSubWindow /PyName=InstrumentView/
     also a tree view of the instrument hierarchy.
 
     For further help see the functions defined on each of the following
-		- InstrumentWidget
+        - InstrumentWidget
         - InstrumentWidgetRenderTab
         - InstrumentWidgetPickTab
         - InstrumentWidgetMaskTab

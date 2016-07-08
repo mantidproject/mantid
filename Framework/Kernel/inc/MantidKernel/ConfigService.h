@@ -201,6 +201,8 @@ public:
   void setDataSearchDirs(const std::string &searchDirs);
   /// Adds the passed path to the end of the list of data search paths
   void appendDataSearchDir(const std::string &path);
+  /// Appends subdirectory to each of the specified data search directories
+  void appendDataSearchSubDir(const std::string &subdir);
   /// Get the list of user search paths
   const std::vector<std::string> &getUserSearchDirs() const;
   /// Get instrument search directory

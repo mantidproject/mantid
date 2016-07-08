@@ -68,6 +68,9 @@ bool MultiPeriodGroupAlgorithm::processGroups() {
   }
 
   this->setExecuted(result);
+
+  notificationCenter().postNotification(
+      new FinishedNotification(this, isExecuted()));
   return result;
 }
 

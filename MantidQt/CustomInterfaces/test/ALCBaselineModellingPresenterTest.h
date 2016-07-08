@@ -14,6 +14,7 @@
 
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h"
 
+using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 using boost::scoped_ptr;

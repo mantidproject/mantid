@@ -257,7 +257,8 @@ class PeakProcessHelper(object):
         :param peak_intensity:
         :return:
         """
-        assert isinstance(peak_intensity, float) and peak_intensity >= -0.
+        assert isinstance(peak_intensity, float), 'Input peak intensity %s is not a float.' % str(peak_intensity)
+        assert peak_intensity >= -0., 'Input peak intensity %f is negative.' % peak_intensity
 
         self._myIntensity = peak_intensity
 
