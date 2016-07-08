@@ -158,6 +158,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
 
+        progress = Progress(self,start=0.0,end=1.0,nreports=2)
+
         self.setUp()
 
         if self._sum_runs:
@@ -166,6 +168,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         Load(Filename=self._run_file_name,OutputWorkspace=self._raw_ws_name)
 
         self.log().information('Loaded .nxs file(s) : %s' % self._run_file_name)
+
+        progress.report("In progress...")
 
         if isinstance(mtd[self._raw_ws_name],WorkspaceGroup):
             self._instrument = mtd[self._raw_ws_name].getItem(0).getInstrument()
@@ -192,6 +196,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         if self._plot_flag:
             self._plot()
+
+        progress.report("Done")
 
     def _loadParamFiles(self):
         """
@@ -299,7 +305,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         else:
            run_number = ""
 
-
         grouped =  run_number + self._grouped_ws_name
         mnorm = run_number + self._mnorm_ws_name
         monitor =  run_number + self._monitor_ws_name
@@ -309,11 +314,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         LoadParameterFile(Workspace=ws, Filename=self._parameter_file_name)
 
-        AddSampleLog(Workspace=ws,
-                     LogName="Facility",
-                     LogType="String",
-                     LogText="ILL")
-
         ExtractSingleSpectrum(InputWorkspace=ws,
                               OutputWorkspace=monitor,
                               WorkspaceIndex=0)
@@ -321,23 +321,30 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         GroupDetectors(InputWorkspace=ws,
                        OutputWorkspace=grouped,
                        MapFile=self._map_file_name,
-                       Behaviour='Average')
+                       Behaviour='Sum')
 
         NormaliseToMonitor(InputWorkspace = grouped,
                            MonitorWorkspace = monitor,
                            OutputWorkspace = mnorm)
 
+        ReplaceSpecialValues(InputWorkspace=mnorm,
+                             OutputWorkspace=mnorm,
+                             NaNValue=0)
+
         if self._calib_ws_name != '':
-            vnorm = self._normalise_to_vanadium(mnorm, self._calib_ws_name)
+            vnorm = Divide(mnorm, self._calib_ws_name)
         else:
-            vnorm = mnorm
+            vnorm = CloneWorkspace(mnorm)
 
-        if self._mirror_sense:
-            unmirror = self._unmirror(vnorm)
-        else:
-            unmirror = vnorm
+        #this should be removed after unmirror is integrated
+        unmirror = CloneWorkspace(vnorm)
 
-        red = self._calculate_energy(mnorm, red) #should be unmirror
+        #if self._mirror_sense:
+        #    unmirror = self._unmirror(vnorm)
+        #else:
+        #    unmirror = CloneWorkspace(vnorm)
+
+        red = self._calculate_energy(mnorm, red)
 
         if not self._control_mode:
             if not multiple:
@@ -345,32 +352,12 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             DeleteWorkspace(monitor)
             DeleteWorkspace(mnorm)
             DeleteWorkspace(grouped)
+            DeleteWorkspace(unmirror)
+            DeleteWorkspace(vnorm)
             return red
         else:
             return [monitor,grouped,mnorm,
                     vnorm,unmirror,red]
-
-    def _normalise_to_vanadium(self, ws, van):
-        """
-        Normalises to vanadium workspace.
-
-        @param ws  :: name of the spectra to normalise
-        @param van :: name of the vanadium reference workspace
-        @return    :: the spectra normalised to vanadium
-        """
-        return ws
-
-    def _unmirror(self, ws):
-        """
-        Sums up left and right wings of IN16B data.
-
-        @param ws :: name of the input workspace containing two wings
-        @return   :: unmirrored workspace
-        """
-
-        #switch over self._unmirror_option and do correspondingly
-
-        return ws
 
     def _calculate_energy(self, ws, red):
         """
@@ -403,19 +390,27 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         """
         x = mtd[ws].readX(0)
         npt = len(x)
-        imid = float(npt / 2 + 1)
+        imid = float(npt - 1) / 2
         gRun = mtd[ws].getRun()
         wave = gRun.getLogData('wavelength').value
-        self.log().information('Wavelength : %s' % wave)
-
-        if gRun.hasProperty('Doppler.maximum_delta_energy'):
-            energy = gRun.getLogData('Doppler.maximum_delta_energy').value
-            self.log().information('Doppler max energy : %s' % energy)
-
-        dele = 2.0 * energy / npt
+        energy = gRun.getLogData('Doppler.maximum_delta_energy').value
+        self.log().information('Wavelength : %s, Energy : %s' % (wave,energy))
+        dele = 2.0 * energy / (npt - 1)
         formula = '(x-%f)*%f' % (imid, dele)
 
         return formula
+
+    def _unmirror(self, ws):
+        """
+        Sums up left and right wings of IN16B data.
+
+        @param ws :: name of the input workspace containing two wings
+        @return   :: unmirrored workspace
+        """
+
+        #switch over self._unmirror_option and do correspondingly
+
+        return ws
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReduction)
