@@ -75,22 +75,18 @@ void CreateUserDefinedBackground::exec() {
 
 /**
  * Cleans up input points table by sorting points and removing any (0, 0) blank
- * rows
+ * rows from the end of the table
+ * (Only delete (0, 0) from the end as other (0, 0) are real points.)
  * @param table :: [input, output] Table of points to work on
  */
 void CreateUserDefinedBackground::cleanUpTable(
     API::ITableWorkspace_sptr &table) const {
-  // Sort the table
-  std::vector<std::pair<std::string, bool>> sortArgs;
-  sortArgs.emplace_back(table->getColumn(0)->name(), true);
-  table->sort(sortArgs);
-
-  // Delete blank (zero) rows
+  // Delete blank (zero) rows at the end of the table
   std::vector<size_t> blankRows;
   const auto isZero = [](const double n) {
     return !(fabs(n) > std::numeric_limits<double>::epsilon());
   };
-  for (size_t i = 0; i < table->rowCount(); i++) {
+  for (size_t i = table->rowCount() - 1; i > 0; i--) {
     double x, y;
     API::TableRow row = table->getRow(i);
     row >> x >> y;
@@ -103,6 +99,11 @@ void CreateUserDefinedBackground::cleanUpTable(
   for (const auto &row : blankRows) {
     table->removeRow(row);
   }
+
+  // Sort the table
+  std::vector<std::pair<std::string, bool>> sortArgs;
+  sortArgs.emplace_back(table->getColumn(0)->name(), true);
+  table->sort(sortArgs);
 }
 
 /**
