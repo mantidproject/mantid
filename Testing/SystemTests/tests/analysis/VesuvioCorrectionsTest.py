@@ -144,7 +144,7 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(stresstesting.MantidStressTest):
         _validate_group_structure(self, corrections_wsg, 3)
         corrections_gb_peak = 0.013565531122
         corrections_ts_peak = 0.157937557587
-        corrections_ms_peak = 0.000170937010
+        corrections_ms_peak = 0.000168789876
         corrections_ts_bin = 724
         corrections_ms_bin = 721
         if _is_old_boost_version():
@@ -205,9 +205,9 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(stresstesting.MantidStressTest):
         # Test Corrections Workspaces
         corrections_wsg = self._algorithm.getProperty("CorrectionWorkspaces").value
         _validate_group_structure(self, corrections_wsg, 3)
-        corrections_gb_peak = 0.0100670422624
+        corrections_gb_peak = 0.010067042262
         corrections_ts_peak = 0.156099834417
-        corrections_ms_peak = 0.000226355717662
+        corrections_ms_peak = 0.000224572965
         correction_ms_bin = 46
         if _is_old_boost_version():
             corrections_ms_peak = 0.000217384521001
@@ -265,7 +265,7 @@ class TestMsCorrectWithContainer(stresstesting.MantidStressTest):
         # Test Corrections Workspaces
         corrections_wsg = self._algorithm.getProperty("CorrectionWorkspaces").value
         _validate_group_structure(self, corrections_wsg, 3)
-        corrections_gb_peak = 0.0269981401253
+        corrections_gb_peak = 0.026998140125
         corrections_ts_peak = 0.138476364257
         corrections_ms_peak = 0.000147974497
         corrections_ts_bin = 724
@@ -524,9 +524,9 @@ def _validate_table_values_top_to_bottom(self, table_ws, expected_values, tolera
         if expected_values[i] != 'skip':
             tolerance_value = expected_values[i] * tolerance
             abs_difference = abs(expected_values[i] - table_ws.cell(i,1))
-            logger.warning("expected = " + str(expected_values[i]) + ", Actual = " + str(table_ws.cell(i,1)))
             self.assertTrue(abs_difference <= abs(tolerance_value))
 
+#pylint: disable=too-many-arguments
 def _validate_matrix_peak_height(self, matrix_ws, expected_height, expected_bin, ws_index=0, tolerance=0.05):
     """
     Checks that the heightest peak value is as expected
@@ -541,8 +541,6 @@ def _validate_matrix_peak_height(self, matrix_ws, expected_height, expected_bin,
     peak_bin = np.argmax(y_data)
     tolerance_value = expected_height * tolerance
     abs_difference = abs(expected_height - peak_height)
-    logger.warning("expected = " + str(expected_height) + ", Actual = " + str(peak_height))
-    logger.warning("expected bin = " + str(expected_bin) + ", actual = " + str(peak_bin))  
     self.assertTrue(abs_difference <= abs(tolerance_value))
     self.assertTrue(abs(peak_bin - expected_bin) <= 1)
 
