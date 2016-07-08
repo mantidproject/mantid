@@ -82,15 +82,22 @@ private:
   void execPeaks(DataObjects::PeaksWorkspace_sptr WS);
   void fillIndexListFromSpectra(std::vector<size_t> &indexList,
                                 const std::vector<specnum_t> &spectraList,
-                                const API::MatrixWorkspace_sptr WS);
+                                const API::MatrixWorkspace_sptr WS,
+                                const std::tuple<size_t, size_t, bool> &range_info);
   void appendToIndexListFromWS(std::vector<size_t> &indexList,
-                               const API::MatrixWorkspace_sptr maskedWorkspace);
+                               const API::MatrixWorkspace_sptr maskedWorkspace, 
+                               const std::tuple<size_t, size_t, bool> &range_info);
   void appendToIndexListFromMaskWS(
       std::vector<size_t> &indexList,
-      const DataObjects::MaskWorkspace_const_sptr maskedWorkspace);
+      const DataObjects::MaskWorkspace_const_sptr maskedWorkspace,
+      const std::tuple<size_t, size_t, bool> &range_info);
   void
   extractMaskedWSDetIDs(std::vector<detid_t> &detectorList,
                         const DataObjects::MaskWorkspace_const_sptr &maskWS);
+  void constrainMaskedIndexes(std::vector<size_t> &indexList,
+                        const std::tuple<size_t, size_t, bool> &range_info);
+
+   std::tuple<size_t,size_t, bool> getRanges(const API::MatrixWorkspace_sptr & targWS);
 };
 
 } // namespace DataHandling

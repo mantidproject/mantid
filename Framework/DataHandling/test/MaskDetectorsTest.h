@@ -361,7 +361,7 @@ public:
     const std::string inputWSName("inputWS"), existingMaskName("existingMask");
     const int numInputSpec(9);
     setUpWS(false, inputWSName, false, numInputSpec);
-    const int numMaskWSSpec(3);
+    const int numMaskWSSpec(5);
     setUpWS(false, existingMaskName, true, numMaskWSSpec);
     MatrixWorkspace_sptr existingMask =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -372,10 +372,11 @@ public:
     TS_ASSERT(existingMask);
     TS_ASSERT(inputWS);
 
-    // Mask workspace index 0,2 in MaskWS. These will be maped to index 3,5 in
+    // Mask workspace index 0,3,4 in MaskWS. These will be maped to index 3,5 in
     // the test input
     existingMask->dataY(0)[0] = 1.0;
-    existingMask->dataY(2)[0] = 1.0;
+    existingMask->dataY(3)[0] = 1.0;
+    existingMask->dataY(4)[0] = 1.0;
 
     // Apply
     MaskDetectors masker;
@@ -393,7 +394,7 @@ public:
     for (int i = 0; i < numInputSpec; ++i) {
       IDetector_const_sptr det;
       TS_ASSERT_THROWS_NOTHING(det = inputWS->getDetector(i));
-      if (i == 3 || i == 5) {
+      if (i == 3 || i == 4) {
         TS_ASSERT_EQUALS(det->isMasked(), true);
       } else {
         TS_ASSERT_EQUALS(det->isMasked(), false);
@@ -403,6 +404,40 @@ public:
     AnalysisDataService::Instance().remove(inputWSName);
     AnalysisDataService::Instance().remove(existingMaskName);
   }
+  //
+  void test_rangeMasking() {
+      const std::string inputWSName("inputWS");
+      size_t numInputSpec(18);
+      setUpWS(false, inputWSName, false, numInputSpec);
+
+      MaskDetectors masker;
+      masker.initialize();
+      masker.setPropertyValue("Workspace", inputWSName);
+      masker.setPropertyValue("StartWorkspaceIndex", "3");
+      masker.setPropertyValue("EndWorkspaceIndex", "5");
+      masker.execute();
+
+      TS_ASSERT(masker.isExecuted());
+      auto inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          inputWSName);
+
+      // Check masking
+      for (int i = 0; i < numInputSpec; ++i) {
+          IDetector_const_sptr det;
+          TS_ASSERT_THROWS_NOTHING(det = inputWS->getDetector(i));
+          if (i == 3 || i == 4 || i == 5) {
+              TS_ASSERT_EQUALS(det->isMasked(), true);
+          }
+          else {
+              TS_ASSERT_EQUALS(det->isMasked(), false);
+          }
+      }
+
+      AnalysisDataService::Instance().remove(inputWSName);
+
+  }
+
+  // -- helper function for the next procedure
   void mask_block(MatrixWorkspace_sptr &existingMask, size_t n_first_index,
                   size_t n_dets) {
 
@@ -474,6 +509,7 @@ public:
     AnalysisDataService::Instance().remove(inputWSName);
     AnalysisDataService::Instance().remove(existingMaskName);
   }
+
   void test_MaskWorksForGroupedWSSingleDet() {
     const std::string inputWSName("inputWS"), existingMaskName("existingMask");
     const int numInputSpec(90);
