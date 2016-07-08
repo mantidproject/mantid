@@ -7,10 +7,10 @@ from mantid.kernel import Direction, logger, IntArrayProperty
 def export_masks(ws,fileName='',returnMasksOnly=False):
     """Exports masks applied to Mantid workspace
        (e.g. drawn using the instrument view) and write these masks
-       into the old fashioned ascii msk file containing masked spectra numbers.
+       into the old fashioned ASCII .msk file containing masked spectra numbers.
 
-       The file is Libisis/Mantid old ISIS format compartible and can be read by libisis
-       or Manid LoadMasks algorithm
+       The file is Libisis/Mantid old ISIS format compatible and can be read by Libisis
+       or Mantid LoadMasks algorithm
 
        If optional parameter fileName is present, the masks are saved
        in the file with this name
@@ -98,7 +98,7 @@ def  writeISISmasks(filename,masks,nSpectraInRow=8):
        which can be used separately
 
        namely, if one have array 1,2,3,4, 20, 30,31,32
-       file will have the following ascii stgings:
+       file will have the following ASCII stings:
        1-4 20 30-32
 
        nSpectaInRow indicates the number of the separate spectra ID (numbers) which the program
@@ -160,7 +160,7 @@ def  writeISISmasks(filename,masks,nSpectraInRow=8):
 
 
 class ExportSpectraMask(PythonAlgorithm):
-    """ Export workspace's masks
+    """ Export workspace's mask
     """
     def category(self):
         """ Return category
@@ -173,7 +173,7 @@ class ExportSpectraMask(PythonAlgorithm):
         return "ExportSpectraMask"
 
     def summary(self):
-        return "Returns list of spectra mnumbers which are masksed"\
+        return "Returns list of spectra numbers which are masked"\
             " and save these numbers into legacy ASCII file with .msk extension."
 
     def PyInit(self):
@@ -183,7 +183,7 @@ class ExportSpectraMask(PythonAlgorithm):
         self.declareProperty("Filename","","Name of the file to save mask to."\
                             " If empty, the name of the input workspace is used")
         self.declareProperty("ExportMaskOnly",False,"If true, algorithm will not save mask in a file"\
-                             "and only returns the list containing numbers of masted spectra.",\
+                             "and only returns the list containing numbers of masked spectra.",\
                               Direction.Input)
         self.declareProperty(IntArrayProperty(name="SpectraMasks",direction = Direction.Output),\
                          doc="List of the masked  spectra numbers.")
