@@ -9,7 +9,6 @@ set ( SRC_FILES
 	src/FrequencyStandardDeviations.cpp
 	src/FrequencyVariances.cpp
 	src/Histogram.cpp
-	src/HistogramX.cpp
 	src/PointStandardDeviations.cpp
 	src/PointVariances.cpp
 	src/Points.cpp

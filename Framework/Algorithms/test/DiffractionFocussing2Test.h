@@ -16,8 +16,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
 
-#include <numeric>
-
 using namespace Mantid;
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
@@ -125,9 +123,8 @@ public:
     // workspace index #
     for (size_t pix = 0; pix < inputW->getNumberHistograms(); pix++) {
       // Set an X-axis
-      HistogramData::BinEdges edges(5);
-      std::iota(begin(edges), end(edges), static_cast<double>(1 + pix));
-      inputW->setX(pix, edges.cowData());
+      double x = static_cast<double>(1 + pix);
+      inputW->setHistogram(pix, BinEdges{x + 0, x + 1, x + 2, x + 3, 1e6});
       inputW->getSpectrum(pix).addEventQuickly(TofEvent(1000.0));
     }
 
