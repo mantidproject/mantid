@@ -7,6 +7,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <math.h>
 
 namespace Mantid {
 
@@ -14,6 +15,17 @@ namespace PhysicalConstants {
 
 /// Reference wavelength for absorption cross section values.
 const double NeutronAtom::ReferenceLambda = 1.7982;
+
+namespace {
+const double INV_FOUR_PI = 1. / (4. * M_PI);
+}
+
+void calculateScatteringLengths(NeutronAtom *atom) {
+  // 1 barn = 100 fm
+  atom->tot_scatt_length = 10. * std::sqrt(atom->tot_scatt_xs * INV_FOUR_PI);
+  atom->coh_scatt_length = 10. * std::sqrt(atom->coh_scatt_xs * INV_FOUR_PI);
+  atom->inc_scatt_length = 10. * std::sqrt(atom->inc_scatt_xs * INV_FOUR_PI);
+}
 
 /**
  * Atom constructor
@@ -32,7 +44,9 @@ NeutronAtom::NeutronAtom(const uint16_t z, const double coh_b_real,
     : z_number(z), a_number(0), coh_scatt_length_real(coh_b_real),
       coh_scatt_length_img(0.), inc_scatt_length_real(inc_b_real),
       inc_scatt_length_img(0.), coh_scatt_xs(coh_xs), inc_scatt_xs(inc_xs),
-      tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
+      tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {
+  calculateScatteringLengths(this);
+}
 /**
  * Atom constructor
  * @param z :: The atomic number of the atom
@@ -51,7 +65,9 @@ NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
     : z_number(z), a_number(a), coh_scatt_length_real(coh_b_real),
       coh_scatt_length_img(0.), inc_scatt_length_real(inc_b_real),
       inc_scatt_length_img(0.), coh_scatt_xs(coh_xs), inc_scatt_xs(inc_xs),
-      tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
+      tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {
+  calculateScatteringLengths(this);
+}
 /**
  * Atom constructor
  * @param z :: The atomic number of the atom
@@ -73,7 +89,9 @@ NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
     : z_number(z), a_number(a), coh_scatt_length_real(coh_b_real),
       coh_scatt_length_img(coh_b_img), inc_scatt_length_real(inc_b_real),
       inc_scatt_length_img(inc_b_img), coh_scatt_xs(coh_xs),
-      inc_scatt_xs(inc_xs), tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
+      inc_scatt_xs(inc_xs), tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {
+  calculateScatteringLengths(this);
+}
 
 /**
  * DO NOT USE THIS! This constructor generates a complete garbage NeutronAtom
