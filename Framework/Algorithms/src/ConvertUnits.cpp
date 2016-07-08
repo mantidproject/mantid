@@ -124,8 +124,7 @@ void ConvertUnits::exec() {
   if (inputWS->x(0).size() < 2) {
     std::stringstream msg;
     msg << "Input workspace has invalid X axis binning parameters. Should have "
-           "at least 2 values. Found "
-        << inputWS->x(0).size() << ".";
+           "at least 2 values. Found " << inputWS->x(0).size() << ".";
     throw std::runtime_error(msg.str());
   }
   if (inputWS->x(0).front() > inputWS->x(0).back() ||
@@ -270,7 +269,7 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS,
       // Calculate the new (common) X values
       for (auto iter = outputWS->mutableX(0).begin();
            iter != outputWS->x(0).end(); ++iter) {
-        *iter = factor * std::pow(*iter, power);
+        *iter = factor *std::pow(*iter, power);
       }
 
       auto xVals = outputWS->sharedX(0);
@@ -300,7 +299,7 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS,
     if (!commonBoundaries) {
       for (auto it = outputWS->mutableX(k).begin(); it != outputWS->x(k).end();
            ++it) {
-        *it = factor * std::pow(*it, power);
+        *it = factor *std::pow(*it, power);
       }
     }
     // Convert the events themselves if necessary. Inefficiently.
@@ -466,21 +465,21 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
 
       /// @todo Don't yet consider hold-off (delta)
       const double delta = 0.0;
-	  std::vector<double> vals(outputWS->x(i).begin(), outputWS->x(i).end());
+      std::vector<double> vals(outputWS->x(i).begin(), outputWS->x(i).end());
       // Convert the input unit to time-of-flight
-      localFromUnit->toTOF(vals, emptyVec, l1, l2, twoTheta,
-                           emode, efixed, delta);
+      localFromUnit->toTOF(vals, emptyVec, l1, l2, twoTheta, emode, efixed,
+                           delta);
 
       // Convert from time-of-flight to the desired unit
-      localOutputUnit->fromTOF(vals, emptyVec, l1, l2, twoTheta,
-                               emode, efixed, delta);
+      localOutputUnit->fromTOF(vals, emptyVec, l1, l2, twoTheta, emode, efixed,
+                               delta);
 
-	  outputWS->mutableX(i) = HistogramX(vals);
+      outputWS->mutableX(i) = HistogramX(vals);
 
       // EventWorkspace part, modifying the EventLists.
       if (m_inputEvents) {
-        eventWS->getSpectrum(i).convertUnitsViaTof(localFromUnit,
-                                                   localOutputUnit);
+        eventWS->getSpectrum(i)
+            .convertUnitsViaTof(localFromUnit, localOutputUnit);
 
         //        std::vector<double> tofs;
         //        eventWS->getSpectrum(i).getTofs(tofs);
@@ -685,11 +684,11 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
     for (int64_t j = 0; j < int64_t(numSpec); ++j) {
       int k;
       for (k = 0; k < lastBins[j] - 1; ++k) {
-		  result->mutableX(j)[k] = workspace->x(j)[k];
-		  result->mutableY(j)[k] = workspace->y(j)[k];
-		  result->mutableE(j)[k] = workspace->e(j)[k];
+        result->mutableX(j)[k] = workspace->x(j)[k];
+        result->mutableY(j)[k] = workspace->y(j)[k];
+        result->mutableE(j)[k] = workspace->e(j)[k];
       }
-	  result->mutableX(j)[k] = workspace->x(j)[k];
+      result->mutableX(j)[k] = workspace->x(j)[k];
       ++k;
       // If necessary, add on some fake values to the end of the X array (Y&E
       // will be zero)
@@ -712,8 +711,7 @@ void ConvertUnits::putBackBinWidth(const API::MatrixWorkspace_sptr outputWS) {
 
   for (size_t i = 0; i < m_numberOfSpectra; ++i) {
     for (size_t j = 0; j < outSize; ++j) {
-      const double width =
-          std::abs(outputWS->x(i)[j + 1] - outputWS->x(i)[j]);
+      const double width = std::abs(outputWS->x(i)[j + 1] - outputWS->x(i)[j]);
       outputWS->mutableY(i)[j] = outputWS->y(i)[j] / width;
       outputWS->mutableE(i)[j] = outputWS->e(i)[j] / width;
     }

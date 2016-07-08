@@ -128,8 +128,7 @@ void ConvertUnitsUsingDetectorTable::exec() {
   if (inputWS->x(0).size() < 2) {
     std::stringstream msg;
     msg << "Input workspace has invalid X axis binning parameters. Should have "
-           "at least 2 values. Found "
-        << inputWS->x(0).size() << ".";
+           "at least 2 values. Found " << inputWS->x(0).size() << ".";
     throw std::runtime_error(msg.str());
   }
   if (inputWS->x(0).front() > inputWS->x(0).back() ||
@@ -371,8 +370,8 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
 
         // EventWorkspace part, modifying the EventLists.
         if (m_inputEvents) {
-          eventWS->getSpectrum(wsid).convertUnitsViaTof(localFromUnit,
-                                                        localOutputUnit);
+          eventWS->getSpectrum(wsid)
+              .convertUnitsViaTof(localFromUnit, localOutputUnit);
         }
         // Clear unit memory
         delete localFromUnit;
@@ -432,7 +431,7 @@ void ConvertUnitsUsingDetectorTable::convertQuickly(
       // Calculate the new (common) X values
       for (auto iter = outputWS->mutableX(0).begin();
            iter != outputWS->x(0).end(); ++iter) {
-        *iter = factor * std::pow(*iter, power);
+        *iter = factor *std::pow(*iter, power);
       }
 
       auto xVals = outputWS->refX(0);
@@ -462,7 +461,7 @@ void ConvertUnitsUsingDetectorTable::convertQuickly(
     if (!commonBoundaries) {
       for (auto it = outputWS->mutableX(k).begin(); it != outputWS->x(k).end();
            ++it) {
-        *it = factor * std::pow(*it, power);
+        *it = factor *std::pow(*it, power);
       }
     }
     // Convert the events themselves if necessary. Inefficiently.

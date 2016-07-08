@@ -55,7 +55,7 @@ void ConvertToMatrixWorkspace::exec() {
       auto &outSpec = outputWorkspace->getSpectrum(i);
 
       outSpec.copyInfoFrom(inSpec);
-	  outSpec.setHistogram(inSpec.histogram());
+      outSpec.setHistogram(inSpec.histogram());
 
       prog.report("Binning");
 

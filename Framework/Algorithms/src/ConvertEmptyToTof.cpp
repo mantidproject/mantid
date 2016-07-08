@@ -512,8 +512,8 @@ void ConvertEmptyToTof::setTofInWS(const std::vector<double> &tofAxis,
   Progress prog(this, 0.0, 0.2, numberOfSpectra);
 
   for (int64_t i = 0; i < numberOfSpectraInt64; ++i) {
-	//Replace bin edges with tof axis
-	outputWS->setBinEdges(i, edges);
+    // Replace bin edges with tof axis
+    outputWS->setBinEdges(i, edges);
 
     prog.report();
   } // end for i

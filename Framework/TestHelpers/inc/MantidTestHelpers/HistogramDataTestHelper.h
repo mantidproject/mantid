@@ -11,9 +11,9 @@
 
 namespace HistogramDataTestHelper {
 template <class T>
-bool operator==(
-    const Mantid::HistogramData::detail::FixedLengthVector<T> &lhs,
-    const Mantid::HistogramData::detail::FixedLengthVector<T> &rhs) {
+bool
+operator==(const Mantid::HistogramData::detail::FixedLengthVector<T> &lhs,
+           const Mantid::HistogramData::detail::FixedLengthVector<T> &rhs) {
   return lhs.rawData() == rhs.rawData();
 }
 

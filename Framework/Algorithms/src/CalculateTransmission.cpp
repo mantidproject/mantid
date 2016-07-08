@@ -31,7 +31,7 @@ using namespace Kernel;
 using namespace API;
 
 namespace // anonymous
-{
+    {
 // For LOQ at least, the transmission monitor is 3.  (The incident beam
 // monitor's UDET is 2.)
 const detid_t LOQ_TRANSMISSION_MONITOR_UDET = 3;
