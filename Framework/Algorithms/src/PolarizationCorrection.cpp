@@ -234,7 +234,7 @@ PolarizationCorrection::copyShapeAndFill(MatrixWorkspace_sptr &base,
   MatrixWorkspace_sptr wsTemplate = WorkspaceFactory::Instance().create(base);
   // Copy the x-array across to the new workspace.
   for (size_t i = 0; i < wsTemplate->getNumberHistograms(); ++i) {
-    wsTemplate->setX(i, base->readX(i));
+    wsTemplate->setX(i, base->refX(i));
   }
   auto zeroed = this->multiply(wsTemplate, 0);
   auto filled = this->add(zeroed, value);
