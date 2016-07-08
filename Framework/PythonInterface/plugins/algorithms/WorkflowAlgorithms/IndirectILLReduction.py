@@ -158,18 +158,20 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
 
-        progress = Progress(self,start=0.0,end=1.0,nreports=2)
+        progress = Progress(self,start=0.0,end=1.0,nreports=3)
 
         self.setUp()
 
         if self._sum_runs:
             self._run_file_name = self._run_file_name.replace(',','+')
 
+        progress.report('Loading file(s) : %s' % self._run_file_name)
+
         Load(Filename=self._run_file_name,OutputWorkspace=self._raw_ws_name)
 
         self.log().information('Loaded .nxs file(s) : %s' % self._run_file_name)
 
-        progress.report("In progress...")
+        progress.report('Running reduction')
 
         if isinstance(mtd[self._raw_ws_name],WorkspaceGroup):
             self._instrument = mtd[self._raw_ws_name].getItem(0).getInstrument()
