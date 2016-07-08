@@ -26,6 +26,12 @@ Atom::Atom(const Atom &other)
       mass_density(other.mass_density), number_density(other.number_density),
       neutron(getNeutronNoExceptions(other.z_number, other.a_number)) {}
 
+Atom::Atom(const NeutronAtom &neutron)
+  :symbol("user"), z_number(neutron.z_number), a_number(neutron.a_number), abundance(0),
+    mass(0.), mass_density(0.), number_density(0.),
+    neutron(neutron)
+{}
+
 // ---------- START DO NOT EDIT AREA----------
 /// \cond
 static const Atom H("H", 1, 0, 0.000000, 1.007940, 0.0708);
