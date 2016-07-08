@@ -244,11 +244,22 @@ std::tuple<size_t, size_t, bool> MaskDetectors::getRanges(const MatrixWorkspace_
         return std::tuple<size_t, size_t, bool>(0, max_ind, false);
     }
     else {
+        if (startIndex < 0) {
+            startIndex = 0;
+        }
         size_t startIndex_l = static_cast<size_t>(startIndex);
         size_t endIndex_l = static_cast<size_t>(endIndex);
+
         if (endIndex == EMPTY_INT()) {
             endIndex_l = max_ind;
         }
+        if (endIndex_l > max_ind) {
+            endIndex_l = max_ind;
+        }
+        if (startIndex_l > endIndex_l) {
+            startIndex_l = endIndex_l;
+        }
+
         return std::tuple<size_t, size_t, bool>(startIndex_l, endIndex_l, true);
     }
 }

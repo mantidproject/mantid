@@ -15,11 +15,18 @@ data in the spectra for MatrixWorkspaces related to those detectors.  For PeaksW
 detectors listed are masked and the mask must be specified by a DetectorList or MaskedWorkspace.
 
 All but the first property are optional and at least one of them must be
-set. If several are set, the first will be used.
+set. If several are set, the combination of them will be used
 
 The set of detectors to be masked can be given as a list of either
-spectrum numbers, detector IDs or workspace indices. The list should be
-set against the appropriate property.
+spectrum numbers, detector IDs, workspace indices or workspace indexes range.
+The list should be set against the appropriate property.
+
+If workspace indexes range is provided alone, the workspace is masked 
+within this range.
+
+If workspace indexes range is provided in combination with any other masking
+property, only the indexes in this range are masked.
+
 
 Mask Detectors According To Instrument
 ######################################
@@ -65,6 +72,9 @@ mask detectors, including
 -  General :ref:`MatrixWorkspace <MatrixWorkspace>` other than
    MaskWorkspace (In this case, the mask will be
    extracted from this workspace)
+-  Workspace indexes range specified by setting either *StartWorkspacIndex* or *EndWorkspaceIndex* to non-default value.
+   **Note:** Setting *EndWorkspaceIndex* to the value, exceeding the number of histogram in the target workspace would mask
+   the entire workspace.
 
 Rules
 #####
@@ -98,10 +108,6 @@ In the plan, the workflow to mask detectors should be
 2. Mask detectors according to MaskWorkspace.
 3. Clear data on all spectra, which have at least one detector that is masked.
 
-Concern
-#######
-
--  Speed!
 
 Usage
 -----
@@ -313,7 +319,88 @@ Output
   Detector 102 is masked: False
   Detector 103 is masked: True
   Detector 104 is masked: False
+  
+Example 5: Specifying a masking range
+#####################################
 
+.. testcode:: ExMaskInRange
+
+  # Create a data workspace
+  ws = CreateSampleWorkspace()
+  # Mask 3 detectors using the masking range
+  MaskDetectors(ws, StartWorkspaceIndex=2, EndWorkspaceIndex=4)  
+
+  # Check masking of first 6 detectors
+  for ind in xrange(0,6):
+    det = ws.getDetector(ind)
+    print 'Detector',det.getID(),'is masked:',det.isMasked()
+
+
+Output
+^^^^^^
+
+.. testoutput:: ExMaskInRange
+
+  Detector 100 is masked: False
+  Detector 101 is masked: False
+  Detector 102 is masked: True
+  Detector 103 is masked: True
+  Detector 104 is masked: True
+  Detector 105 is masked: False
+  
+Example 6: Constrain the masking range
+######################################
+
+.. testcode:: ExMaskConstrainInRange
+
+  # Create a masking workspace
+
+  # Create a intermediate workspace to help create the masking workspace
+  tmp = CreateSampleWorkspace()
+  # Mask four detectors:
+  MaskDetectors(tmp,StartWorkspaceIndex=2, EndWorkspaceIndex=5)
+  # Extract created mask into specialised masking workspace
+  masking_ws,_ = ExtractMask( tmp )
+
+  for ind in xrange(0,7):
+    val = masking_ws.readY(ind)[0]
+    if val>0:
+        print 'Unmasked spectrum, value=',val    
+    else:
+        print 'Masked spectrum,   value=',val
+  print
+
+  # Create a data workspace
+  ws = CreateSampleWorkspace()
+  # Mask it using the mask in masking_ws constraining masking range:
+  MaskDetectors(ws, MaskedWorkspace=masking_ws,StartWorkspaceIndex=4, EndWorkspaceIndex=5)
+
+  # Check masking of first 7 detectors
+  for ind in xrange(0,7):
+    det = ws.getDetector(ind)
+    print 'Detector',det.getID(),'is masked:',det.isMasked()
+
+Output
+^^^^^^
+
+.. testoutput:: ExMaskConstrainInRange
+
+  Masked spectrum,   value= 0.0
+  Masked spectrum,   value= 0.0
+  Unmasked spectrum, value= 1.0
+  Unmasked spectrum, value= 1.0
+  Unmasked spectrum, value= 1.0
+  Unmasked spectrum, value= 1.0
+  Masked spectrum,   value= 0.0
+
+  Detector 100 is masked: False
+  Detector 101 is masked: False
+  Detector 102 is masked: False
+  Detector 103 is masked: False
+  Detector 104 is masked: True
+  Detector 105 is masked: True
+  Detector 106 is masked: False
+    
 .. categories::
 
 .. sourcelink::
