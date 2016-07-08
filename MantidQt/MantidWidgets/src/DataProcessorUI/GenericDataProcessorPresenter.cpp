@@ -335,18 +335,17 @@ void GenericDataProcessorPresenter::process() {
 
   // If "Output Notebook" checkbox is checked then create an ipython notebook
   if (m_view->getEnableNotebook()) {
-    saveNotebook(groups, rows);
+    saveNotebook(rows);
   }
 }
 
 /**
 Display a dialog to choose save location for notebook, then save the notebook
 there
-@param groups : groups of rows to stitch
 @param rows : rows to reduce
 */
 void GenericDataProcessorPresenter::saveNotebook(
-    const std::set<int> &groups, const std::map<int, std::set<int>> &rows) {
+    const std::map<int, std::set<int>> &rows) {
 
   std::string filename = m_view->requestNotebookPath();
   if (filename == "") {

@@ -108,9 +108,9 @@ QModelIndex QDataProcessorTreeModel::index(int row, int column,
 */
 QModelIndex QDataProcessorTreeModel::parent(const QModelIndex &index) const {
 
-  return index.internalId() >= qint64(0)
-             ? createIndex(index.internalId(), 0, -1)
-             : QModelIndex();
+  int internalIdInt = int(index.internalId());
+
+  return internalIdInt >= 0 ? createIndex(internalIdInt, 0, -1) : QModelIndex();
 }
 
 /** Adds elements to the tree
