@@ -2,10 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CorrectKiKf.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -130,11 +130,11 @@ void CorrectKiKf::exec() {
         }
     }
 
-    MantidVec &yOut = outputWS->dataY(i);
-    MantidVec &eOut = outputWS->dataE(i);
+    auto &yOut = outputWS->mutableY(i);
+    auto &eOut = outputWS->mutableE(i);
     const auto &xIn = inputWS->points(i);
-    const MantidVec &yIn = inputWS->readY(i);
-    const MantidVec &eIn = inputWS->readE(i);
+    auto &yIn = inputWS->y(i);
+    auto &eIn = inputWS->e(i);
     // Copy the energy transfer axis
     outputWS->setX(i, inputWS->refX(i));
     for (unsigned int j = 0; j < size; ++j) {
@@ -291,8 +291,9 @@ void CorrectKiKf::execEvent() {
   if (inputWS->getNumberEvents() != outputWS->getNumberEvents()) {
     g_log.information() << "Ef <= 0 or Ei <= 0 for "
                         << inputWS->getNumberEvents() -
-                               outputWS->getNumberEvents() << " events, out of "
-                        << inputWS->getNumberEvents() << '\n';
+                               outputWS->getNumberEvents()
+                        << " events, out of " << inputWS->getNumberEvents()
+                        << '\n';
     if (efixedProp == EMPTY_DBL())
       g_log.information() << "Try to set fixed energy\n";
   }
