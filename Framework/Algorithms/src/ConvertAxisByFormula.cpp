@@ -155,7 +155,7 @@ void ConvertAxisByFormula::exec() {
     for (auto variable : variables) {
       p.DefineVar(variable->name, &(variable->value));
     }
-    //set some constants
+    // set some constants
     double pi = M_PI;
     p.DefineVar("pi", &pi);
     double h = PhysicalConstants::h;
@@ -186,24 +186,25 @@ void ConvertAxisByFormula::exec() {
       Progress prog(this, 0.6, 1.0, numberOfSpectra_i);
       for (size_t i = 0; i < numberOfSpectra_i; ++i) {
         try {
-          GeometryInfo geomInfo = GeometryInfo(geometryFactory, outputWs->getSpectrum(i));
+          GeometryInfo geomInfo =
+              GeometryInfo(geometryFactory, outputWs->getSpectrum(i));
           MantidVec &vec = outputWs->dataX(i);
           setGeometryValues(geomInfo, variables);
           calculateValues(p, vec, variables);
-        } catch (std::runtime_error& ) 
-          // two possible exceptions runtime error and NotFoundError
-          // both handled the same way
+        } catch (std::runtime_error &)
+        // two possible exceptions runtime error and NotFoundError
+        // both handled the same way
         {
-          //could not find the geometry info for this spectra
+          // could not find the geometry info for this spectra
           outputWs->maskWorkspaceIndex(i);
           failedDetectorCount++;
         }
         prog.report();
       }
       if (failedDetectorCount != 0) {
-        g_log.information() << "Unable to calculate sample-detector distance for "
-          << failedDetectorCount
-          << " spectra. Masking spectrum.\n";
+        g_log.information()
+            << "Unable to calculate sample-detector distance for "
+            << failedDetectorCount << " spectra. Masking spectrum.\n";
       }
     } else {
       // common bins - we only have to calculate once
@@ -272,8 +273,8 @@ void ConvertAxisByFormula::setAxisValue(const double &value,
   }
 }
 
-void ConvertAxisByFormula::calculateValues(mu::Parser &p, MantidVec &vec,
-                                           std::vector<Variable_ptr> variables) {
+void ConvertAxisByFormula::calculateValues(
+    mu::Parser &p, MantidVec &vec, std::vector<Variable_ptr> variables) {
   MantidVec::iterator iter;
   for (iter = vec.begin(); iter != vec.end(); ++iter) {
     setAxisValue(*iter, variables);
@@ -281,8 +282,8 @@ void ConvertAxisByFormula::calculateValues(mu::Parser &p, MantidVec &vec,
   }
 }
 
-void ConvertAxisByFormula::setGeometryValues(API::GeometryInfo &geomInfo,
-                                             std::vector<Variable_ptr> &variables) {
+void ConvertAxisByFormula::setGeometryValues(
+    API::GeometryInfo &geomInfo, std::vector<Variable_ptr> &variables) {
   for (auto variable : variables) {
     if (variable->isGeometric) {
       if (variable->name == "twotheta") {

@@ -17,7 +17,8 @@ class GeometryInfo;
 }
 
 namespace Algorithms {
-/** ConvertAxisByFormula : Performs a unit conversion based on a supplied formula
+/** ConvertAxisByFormula : Performs a unit conversion based on a supplied
+  formula
 
   Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -51,13 +52,11 @@ public:
 
   int version() const override;
   const std::string category() const override;
+
 protected:
-  const std::string workspaceMethodName() const override {
-    return "";
-  }
-  const std::string workspaceMethodInputProperty() const override {
-    return "";
-  }
+  const std::string workspaceMethodName() const override { return ""; }
+  const std::string workspaceMethodInputProperty() const override { return ""; }
+
 private:
   void init() override;
   void exec() override;

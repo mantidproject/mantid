@@ -45,7 +45,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     if (!alg.isExecuted()) {
-      cleanupWorkspaces(std::vector<std::string> {inputWs});
+      cleanupWorkspaces(std::vector<std::string>{inputWs});
       return;
     }
 
@@ -76,7 +76,7 @@ public:
       }
     }
 
-    cleanupWorkspaces(std::vector<std::string> {inputWs, resultWs});
+    cleanupWorkspaces(std::vector<std::string>{inputWs, resultWs});
   }
 
   void testSquareXNumericAxis() {
@@ -102,7 +102,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     if (!alg.isExecuted()) {
-      cleanupWorkspaces(std::vector<std::string> {inputWs});
+      cleanupWorkspaces(std::vector<std::string>{inputWs});
       return;
     }
 
@@ -121,7 +121,7 @@ public:
       TS_ASSERT_DELTA(ax->getValue(i), 9.0, 0.0001);
     }
 
-    cleanupWorkspaces(std::vector<std::string> {inputWs, resultWs});
+    cleanupWorkspaces(std::vector<std::string>{inputWs, resultWs});
   }
 
   void testSquareYNumericAxisDefaultUnits() {
@@ -146,7 +146,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     if (!alg.isExecuted()) {
-      cleanupWorkspaces(std::vector<std::string> {inputWs});
+      cleanupWorkspaces(std::vector<std::string>{inputWs});
       return;
     }
 
@@ -165,7 +165,7 @@ public:
       TS_ASSERT_DELTA(ax->getValue(i), (i + 1 + 2) * (i + 1 + 2), 0.0001);
     }
 
-    cleanupWorkspaces(std::vector<std::string> {inputWs, resultWs});
+    cleanupWorkspaces(std::vector<std::string>{inputWs, resultWs});
   }
 
   void testYNumericAxisDisalowsGeometricOperators() {
@@ -190,18 +190,19 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(!alg.isExecuted());
-    cleanupWorkspaces(std::vector<std::string> {inputWs});
+    cleanupWorkspaces(std::vector<std::string>{inputWs});
   }
 
-  bool runConvertAxisByFormula(std::string testName, std::string formula, std::string axis, std::string& inputWs, std::string& resultWs)
-  {
+  bool runConvertAxisByFormula(std::string testName, std::string formula,
+                               std::string axis, std::string &inputWs,
+                               std::string &resultWs) {
     Mantid::Algorithms::ConvertAxisByFormula alg;
     alg.initialize();
-    inputWs = alg.name() + "_" + testName +"_Input";
-    resultWs = alg.name() + "_" + testName +"_Result";
+    inputWs = alg.name() + "_" + testName + "_Input";
+    resultWs = alg.name() + "_" + testName + "_Result";
     Mantid::API::AnalysisDataService::Instance().add(
-      inputWs,
-      WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10));
+        inputWs,
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWs));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", resultWs));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Formula", formula));
@@ -210,14 +211,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     if (!alg.isExecuted()) {
-      cleanupWorkspaces(std::vector<std::string> {inputWs});
+      cleanupWorkspaces(std::vector<std::string>{inputWs});
     }
     return alg.isExecuted();
   }
 
-  void cleanupWorkspaces(const std::vector<std::string>& wsList)
-  {
-    for (const auto& wsName : wsList) {
+  void cleanupWorkspaces(const std::vector<std::string> &wsList) {
+    for (const auto &wsName : wsList) {
       if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName)) {
         Mantid::API::AnalysisDataService::Instance().remove(wsName);
       }
@@ -233,7 +233,8 @@ public:
     std::string axis = "X";
     std::string inputWs;
     std::string resultWs;
-    TS_ASSERT(runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
+    TS_ASSERT(
+        runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
@@ -249,9 +250,9 @@ public:
     Axis *axIn = in->getAxis(0);
     Axis *ax = result->getAxis(0);
     for (size_t i = 0; i < ax->length(); ++i) {
-      TS_ASSERT_DELTA(ax->getValue(i), axIn->getValue(i)+l1, 0.0001);
+      TS_ASSERT_DELTA(ax->getValue(i), axIn->getValue(i) + l1, 0.0001);
     }
-    cleanupWorkspaces(std::vector<std::string> {inputWs, resultWs});
+    cleanupWorkspaces(std::vector<std::string>{inputWs, resultWs});
   }
 
   void testGeomteryOperatorl2() {
@@ -263,15 +264,16 @@ public:
     std::string axis = "X";
     std::string inputWs;
     std::string resultWs;
-    TS_ASSERT(runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
+    TS_ASSERT(
+        runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-      in = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(inputWs)));
+        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-      result = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(resultWs)));
+        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(resultWs)));
 
     GeometryInfoFactory geometryFactory(*in);
     const size_t xsize = result->blocksize();
@@ -286,13 +288,13 @@ public:
       GeometryInfo geomInfo = GeometryInfo(geometryFactory, in->getSpectrum(i));
       double l2 = geomInfo.getL2();
       for (size_t j = 0; j < xsize; ++j) {
-        TS_ASSERT_DELTA(outX[j], inX[j] / l2,0.0001);
+        TS_ASSERT_DELTA(outX[j], inX[j] / l2, 0.0001);
         TS_ASSERT_EQUALS(outY[j], inY[j]);
         TS_ASSERT_EQUALS(outE[j], inE[j]);
       }
     }
 
-    cleanupWorkspaces(std::vector<std::string> {inputWs, resultWs});
+    cleanupWorkspaces(std::vector<std::string>{inputWs, resultWs});
   }
 
   void testGeomteryOperatortwotheta() {
@@ -304,15 +306,16 @@ public:
     std::string axis = "X";
     std::string inputWs;
     std::string resultWs;
-    TS_ASSERT(runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
+    TS_ASSERT(
+        runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-      in = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(inputWs)));
+        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-      result = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(resultWs)));
+        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(resultWs)));
 
     GeometryInfoFactory geometryFactory(*in);
     const size_t xsize = result->blocksize();
@@ -328,15 +331,15 @@ public:
       double twoTheta = geomInfo.getTwoTheta();
       for (size_t j = 0; j < xsize; ++j) {
 
-        TS_ASSERT_DELTA(outX[j], inX[j] * (1+twoTheta), 0.001);
+        TS_ASSERT_DELTA(outX[j], inX[j] * (1 + twoTheta), 0.001);
         TS_ASSERT_EQUALS(outY[j], inY[j]);
         TS_ASSERT_EQUALS(outE[j], inE[j]);
       }
     }
 
-    cleanupWorkspaces(std::vector<std::string> {inputWs, resultWs});
+    cleanupWorkspaces(std::vector<std::string>{inputWs, resultWs});
   }
-  
+
   void testGeomteryOperatorsignedtwotheta() {
     using namespace Mantid::API;
     using namespace Mantid::Kernel;
@@ -346,15 +349,16 @@ public:
     std::string axis = "X";
     std::string inputWs;
     std::string resultWs;
-    TS_ASSERT(runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
+    TS_ASSERT(
+        runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-      in = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(inputWs)));
+        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-      result = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(resultWs)));
+        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(resultWs)));
 
     GeometryInfoFactory geometryFactory(*in);
     const size_t xsize = result->blocksize();
@@ -375,7 +379,7 @@ public:
       }
     }
 
-    cleanupWorkspaces(std::vector<std::string> {inputWs, resultWs});
+    cleanupWorkspaces(std::vector<std::string>{inputWs, resultWs});
   }
 
   void testWorkspaceReversedIfNeeded() {
@@ -387,21 +391,22 @@ public:
     std::string axis = "X";
     std::string inputWs;
     std::string resultWs;
-    TS_ASSERT(runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
+    TS_ASSERT(
+        runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-      in = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(inputWs)));
+        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-      result = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(resultWs)));
+        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(resultWs)));
 
     GeometryInfoFactory geometryFactory(*in);
     const size_t xsize = result->blocksize();
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
       const auto &outX = result->readX(i);
-      const auto &outY = result->readY(i); 
+      const auto &outY = result->readY(i);
       const auto &outE = result->readE(i);
       const auto &inX = in->readX(i);
       const auto &inY = in->readY(i);
@@ -410,13 +415,13 @@ public:
       GeometryInfo geomInfo = GeometryInfo(geometryFactory, in->getSpectrum(i));
       double signedTwoTheta = geomInfo.getSignedTwoTheta();
       for (size_t j = 0; j < xsize; ++j) {
-        TS_ASSERT_DELTA(outX[j], -inX[xsize-j], 0.0001);
-        TS_ASSERT_EQUALS(outY[j], inY[xsize-j-1]);
-        TS_ASSERT_EQUALS(outE[j], inE[xsize-j-1]);
+        TS_ASSERT_DELTA(outX[j], -inX[xsize - j], 0.0001);
+        TS_ASSERT_EQUALS(outY[j], inY[xsize - j - 1]);
+        TS_ASSERT_EQUALS(outE[j], inE[xsize - j - 1]);
       }
     }
 
-    cleanupWorkspaces(std::vector<std::string> {inputWs, resultWs});
+    cleanupWorkspaces(std::vector<std::string>{inputWs, resultWs});
   }
 
   void testConstant() {
@@ -428,15 +433,16 @@ public:
     std::string axis = "X";
     std::string inputWs;
     std::string resultWs;
-    TS_ASSERT(runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
+    TS_ASSERT(
+        runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-      in = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(inputWs)));
+        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-      result = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(resultWs)));
+        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve(resultWs)));
 
     GeometryInfoFactory geometryFactory(*in);
     const size_t xsize = result->blocksize();
@@ -457,9 +463,8 @@ public:
       }
     }
 
-    cleanupWorkspaces(std::vector<std::string> {inputWs, resultWs});
+    cleanupWorkspaces(std::vector<std::string>{inputWs, resultWs});
   }
-
 };
 
 #endif /* MANTID_ALGORITHMS_CONVERTAXISBYFORMULATEST_H_ */

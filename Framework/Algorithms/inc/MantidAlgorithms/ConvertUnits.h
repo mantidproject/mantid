@@ -89,7 +89,7 @@ protected:
   /// For conversions to energy transfer, removes bins corresponding to
   /// inaccessible values
   API::MatrixWorkspace_sptr
-    removeUnphysicalBins(const API::MatrixWorkspace_const_sptr workspace);
+  removeUnphysicalBins(const API::MatrixWorkspace_const_sptr workspace);
 
   const std::string workspaceMethodName() const override {
     return "convertUnits";
@@ -99,8 +99,6 @@ protected:
   }
 
 private:
-
-
   // Overridden Algorithm methods
   void init() override;
   void exec() override;

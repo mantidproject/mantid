@@ -571,14 +571,13 @@ const std::vector<double> ConvertUnits::calculateRebinParams(
  *  @param WS The workspace to operate on
  */
 void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
-  EventWorkspace_sptr eventWS =
-    boost::dynamic_pointer_cast<EventWorkspace>(WS);
+  EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
   bool isInputEvents = static_cast<bool>(eventWS);
   size_t numberOfSpectra = WS->getNumberHistograms();
   if (WorkspaceHelpers::commonBoundaries(WS) && !isInputEvents) {
-    //common boundaries and histogram
+    // common boundaries and histogram
     std::reverse(WS->dataX(0).begin(), WS->dataX(0).end());
-    std::reverse(WS->dataY(0).begin(), WS->dataY(0).end()); 
+    std::reverse(WS->dataY(0).begin(), WS->dataY(0).end());
     std::reverse(WS->dataE(0).begin(), WS->dataE(0).end());
 
     MantidVecPtr xVals;
@@ -591,7 +590,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
         interruption_point();
     }
   } else {
-    //either events or ragged boundaries
+    // either events or ragged boundaries
     int numberOfSpectra_i = static_cast<int>(numberOfSpectra);
     PARALLEL_FOR1(WS)
     for (int j = 0; j < numberOfSpectra_i; ++j) {
