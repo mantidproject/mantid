@@ -1,5 +1,6 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include <boost/python/class.hpp>
@@ -11,6 +12,8 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IPeaksWorkspace)
 
 namespace {
 

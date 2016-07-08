@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/IPropertyManager.h"
 #include <boost/python/class.hpp>
@@ -5,6 +6,8 @@
 
 using Mantid::Kernel::IPropertySettings;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IPropertySettings)
 
 void export_IPropertySettings() {
   register_ptr_to_python<IPropertySettings *>();

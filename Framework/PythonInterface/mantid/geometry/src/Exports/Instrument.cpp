@@ -1,5 +1,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 
 #include <boost/python/class.hpp>
@@ -9,6 +10,8 @@ using namespace Mantid::Geometry;
 using Mantid::detid_t;
 using namespace boost::python;
 using Mantid::PythonInterface::Policies::RemoveConstSharedPtr;
+
+GET_POINTER_SPECIALIZATION(Instrument)
 
 void export_Instrument() {
   register_ptr_to_python<boost::shared_ptr<Instrument>>();

@@ -9,6 +9,7 @@
 #pragma warning(default : 4250)
 #endif
 #include "MantidKernel/Strings.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/IsNone.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/MapToPyDictionary.h"
@@ -34,6 +35,8 @@ using Mantid::PythonInterface::AlgorithmIDProxy;
 using Mantid::PythonInterface::isNone;
 using Mantid::PythonInterface::Policies::VectorToNumpy;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IAlgorithm)
 
 namespace {
 

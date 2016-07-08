@@ -10,6 +10,7 @@
 using Mantid::Geometry::Goniometer;
 using namespace boost::python;
 
+
 namespace //<unnamed>
     {
 ///@cond

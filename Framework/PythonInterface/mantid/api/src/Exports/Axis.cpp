@@ -3,11 +3,12 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/overloads.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/ssize_t.hpp> //For Py_ssize_t. We can get rid of this when RHEL5 goes
 
 // See
@@ -20,6 +21,8 @@ using namespace Mantid::API;
 using Mantid::Kernel::Unit_sptr;
 using Mantid::specnum_t;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(Axis)
 
 namespace {
 namespace bpl = boost::python;
