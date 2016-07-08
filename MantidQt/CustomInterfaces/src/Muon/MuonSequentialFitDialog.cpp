@@ -25,16 +25,16 @@ const std::string MuonSequentialFitDialog::SEQUENTIAL_PREFIX("MuonSeqFit_");
  * Constructor
  * @param fitPropBrowser :: [input] Pointer to fit property browser
  * @param dataPresenter :: [input] Pointer to fit data presenter
- * @param groupNames :: [input] List of groups/pairs to fit for each run
- * @param periods :: [input] List of periods to fit for each run
+ * @param grouping :: [input] Grouping used for data
+ * @param plotType :: [input] Plot type used in interface
  */
 MuonSequentialFitDialog::MuonSequentialFitDialog(
     MuonFitPropertyBrowser *fitPropBrowser,
-    MuonAnalysisFitDataPresenter *dataPresenter,
-    const std::vector<std::string> &groupNames,
-    const std::vector<std::string> &periods)
+    MuonAnalysisFitDataPresenter *dataPresenter, const Grouping &grouping,
+    const Muon::PlotType &plotType)
     : QDialog(fitPropBrowser), m_fitPropBrowser(fitPropBrowser),
-      m_dataPresenter(dataPresenter), m_groups(groupNames), m_periods(periods) {
+      m_dataPresenter(dataPresenter), m_grouping(grouping),
+      m_plotType(plotType) {
   m_ui.setupUi(this);
 
   setState(Stopped);
@@ -326,6 +326,11 @@ void MuonSequentialFitDialog::continueFit() {
     setState(Stopped);
     return;
   }
+
+  // Get names of workspaces to fit
+  const auto wsNames = m_dataPresenter->generateWorkspaceNames(
+      m_ui.runs->getInstrumentOverride().toStdString(),
+      m_ui.runs->getText().toStdString(), m_grouping, m_plotType, false);
 
   QStringList runFilenames = m_ui.runs->getFilenames();
 

@@ -1,11 +1,12 @@
 #ifndef MANTID_CUSTOMINTERFACES_MUONSEQUENTIALFITDIALOG_H_
 #define MANTID_CUSTOMINTERFACES_MUONSEQUENTIALFITDIALOG_H_
 
-#include "MantidKernel/System.h"
-
 #include "ui_MuonSequentialFitDialog.h"
 
+#include "MantidAPI/GroupingLoader.h"
+#include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 
 #include <QDialog>
@@ -46,8 +47,7 @@ public:
   MuonSequentialFitDialog(
       MantidQt::MantidWidgets::MuonFitPropertyBrowser *fitPropBrowser,
       MuonAnalysisFitDataPresenter *dataPresenter,
-      const std::vector<std::string> &groupNames,
-      const std::vector<std::string> &periods);
+      const Mantid::API::Grouping &grouping, const Muon::PlotType &plotType);
   ~MuonSequentialFitDialog() override;
 
   enum DialogState { Preparing, Running, Stopped };
@@ -95,11 +95,11 @@ private:
   /// Fit data presenter passed in to constructor
   MuonAnalysisFitDataPresenter *m_dataPresenter;
 
-  /// List of groups/pairs
-  const std::vector<std::string> m_groups;
+  /// Grouping used for data
+  const Mantid::API::Grouping m_grouping;
 
-  /// List of periods
-  const std::vector<std::string> m_periods;
+  /// Plot type used for data
+  const Muon::PlotType m_plotType;
 
   // -- STATIC MEMBERS ------------------------------------------------------
 

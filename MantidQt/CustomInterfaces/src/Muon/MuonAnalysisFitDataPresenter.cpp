@@ -197,6 +197,7 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
 
 /**
  * Gets names of all workspaces required by asking the view
+ * This overload gets the instrument/runs from the view
  * @param grouping :: [input] Grouping table from interface
  * @param plotType :: [input] Type of plot currently selected in interface
  * @param overwrite :: [input] Whether overwrite is on or off in interface
@@ -205,17 +206,36 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
 std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
     const Mantid::API::Grouping &grouping, const Muon::PlotType &plotType,
     bool overwrite) const {
+  const auto instrument = m_dataSelector->getInstrumentName().toStdString();
+  const auto runs = m_dataSelector->getRuns().toStdString();
+  return generateWorkspaceNames(instrument, runs, grouping, plotType,
+                                overwrite);
+}
+
+/**
+ * Gets names of all workspaces required by asking the view
+ * Instrument/runs passed in separately, so can be used by sequential fits too
+ * @param instrument :: [input] Name of instrument
+ * @param runString :: [input] Range of runs as a string
+ * @param grouping :: [input] Grouping table from interface
+ * @param plotType :: [input] Type of plot currently selected in interface
+ * @param overwrite :: [input] Whether overwrite is on or off in interface
+ * @returns :: list of workspace names
+ */
+std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
+    const std::string &instrument, const std::string &runString,
+    const Mantid::API::Grouping &grouping,
+    const MantidQt::CustomInterfaces::Muon::PlotType &plotType,
+    bool overwrite) const {
   // From view, get names of all workspaces needed
   std::vector<std::string> workspaceNames;
   const auto groups = m_dataSelector->getChosenGroups();
   const auto periods = m_dataSelector->getPeriodSelections();
 
   Muon::DatasetParams params;
-  QString instRuns = m_dataSelector->getInstrumentName();
-  instRuns.append(m_dataSelector->getRuns());
+  const std::string instRuns = instrument + runString;
   std::vector<int> selectedRuns;
-  MuonAnalysisHelper::parseRunLabel(instRuns.toStdString(), params.instrument,
-                                    selectedRuns);
+  MuonAnalysisHelper::parseRunLabel(instRuns, params.instrument, selectedRuns);
   params.version = 1;
   params.plotType = plotType;
 
@@ -377,7 +397,8 @@ void MuonAnalysisFitDataPresenter::handleSimultaneousFitLabelChanged() const {
  * - split parameter table
  * @param status :: [input] Fit status (unused)
  */
-void MuonAnalysisFitDataPresenter::handleFitFinished(const QString &status) const {
+void MuonAnalysisFitDataPresenter::handleFitFinished(
+    const QString &status) const {
   Q_UNUSED(status);
   // Test if this was a simultaneous fit, or a co-add fit with multiple
   // groups/periods
@@ -563,9 +584,7 @@ void MuonAnalysisFitDataPresenter::openSequentialFitDialog() {
 
   // Open the dialog
   fitBrowser->blockSignals(true);
-  MuonSequentialFitDialog dialog(
-      fitBrowser, this, toVector(m_dataSelector->getChosenGroups()),
-      toVector(m_dataSelector->getPeriodSelections()));
+  MuonSequentialFitDialog dialog(fitBrowser, this);
   dialog.exec();
   fitBrowser->blockSignals(false);
 }

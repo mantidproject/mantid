@@ -75,6 +75,12 @@ public:
   void setTimeZero(double timeZero) { m_timeZero = timeZero; }
   /// Change the stored rebin args
   void setRebinArgs(const RebinOptions &rebinArgs) { m_rebinArgs = rebinArgs; }
+  /// Generate names of workspaces to be created
+  std::vector<std::string> generateWorkspaceNames(
+      const std::string &instrument, const std::string &runString,
+      const Mantid::API::Grouping &grouping,
+      const MantidQt::CustomInterfaces::Muon::PlotType &plotType,
+      bool overwrite) const;
 
 public slots:
   /// Transforms fit results when a simultaneous fit finishes
