@@ -610,7 +610,6 @@ void ProjectSerialiser::openMantidMatrix(const std::string &lines) {
  */
 void ProjectSerialiser::openMultiLayer(const std::string &lines,
                                        const int fileVersion) {
-  MultiLayer *plot = nullptr;
   std::string multiLayerLines = lines;
 
   // The very first line of a multilayer section has some important settings,
@@ -638,8 +637,10 @@ void ProjectSerialiser::openMultiLayer(const std::string &lines,
   Mantid::Kernel::Strings::convert<int>(values[2], cols);
   std::string birthDate = values[3];
 
-  plot =
-      window->multilayerPlot(QString::fromUtf8(caption.c_str()), 0, rows, cols);
+  MultiLayer *plot = new MultiLayer(window, 0, rows, cols);
+  QString label = QString::fromUtf8(caption.c_str());
+  window->initMultilayerPlot(plot, label.replace(QRegExp("_"), "-"));
+
   plot->setBirthDate(QString::fromStdString(birthDate));
   window->setListViewDate(QString::fromStdString(caption),
                           QString::fromStdString(birthDate));
