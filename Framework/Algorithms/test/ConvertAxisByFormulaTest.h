@@ -413,7 +413,6 @@ public:
       const auto &inE = in->readE(i);
 
       GeometryInfo geomInfo = GeometryInfo(geometryFactory, in->getSpectrum(i));
-      double signedTwoTheta = geomInfo.getSignedTwoTheta();
       for (size_t j = 0; j < xsize; ++j) {
         TS_ASSERT_DELTA(outX[j], -inX[xsize - j], 0.0001);
         TS_ASSERT_EQUALS(outY[j], inY[xsize - j - 1]);
@@ -444,18 +443,14 @@ public:
         result = boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(resultWs)));
 
-    GeometryInfoFactory geometryFactory(*in);
     const size_t xsize = result->blocksize();
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
       const auto &outX = result->readX(i);
       const auto &outY = result->readY(i);
       const auto &outE = result->readE(i);
-      const auto &inX = in->readX(i);
       const auto &inY = in->readY(i);
       const auto &inE = in->readE(i);
 
-      GeometryInfo geomInfo = GeometryInfo(geometryFactory, in->getSpectrum(i));
-      double twoTheta = geomInfo.getTwoTheta();
       for (size_t j = 0; j < xsize; ++j) {
         TS_ASSERT_DELTA(outX[j], M_PI, 0.0001);
         TS_ASSERT_EQUALS(outY[j], inY[j]);
