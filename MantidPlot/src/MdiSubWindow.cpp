@@ -55,10 +55,27 @@ MdiSubWindow::MdiSubWindow(QWidget *parent, const QString &label,
       d_status(Normal), d_caption_policy(Both), d_confirm_close(true),
       d_birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)),
       d_min_restore_size(QSize()) {
+    init(parent, label, name, f);
+}
+
+MdiSubWindow::MdiSubWindow() : MdiSubWindowParent_t(nullptr, 0), d_app(nullptr), d_folder(nullptr),
+    d_label(""), d_status(Normal), d_caption_policy(Both), d_confirm_close(true),
+    d_birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)), d_min_restore_size(QSize()) {
+
+}
+
+void MdiSubWindow::init(QWidget *parent, const QString &label, const QString &name, Qt::WFlags flags) {
+  setParent(parent);
   setObjectName(name);
   setName(name);
   setAttribute(Qt::WA_DeleteOnClose);
   setLocale(parent->locale());
+  setWindowFlags(flags);
+
+  d_app = static_cast<ApplicationWindow *>(parent);
+  d_folder = d_app->currentFolder();
+  d_label = label;
+
   confirmClose(false);
   if (parent->metaObject()->indexOfSlot(
           QMetaObject::normalizedSignature("changeToDocked(MdiSubWindow*)"))) {
@@ -66,9 +83,8 @@ MdiSubWindow::MdiSubWindow(QWidget *parent, const QString &label,
             SLOT(changeToDocked(MdiSubWindow *)));
     connect(this, SIGNAL(undockFromMDIArea(MdiSubWindow *)), parent,
             SLOT(changeToFloating(MdiSubWindow *)));
-  }
+    }
 }
-
 void MdiSubWindow::updateCaption() {
   switch (d_caption_policy) {
   case Name:
@@ -95,6 +111,10 @@ void MdiSubWindow::updateCaption() {
     wrapper->setWindowTitle(windowTitle());
   }
   emit captionChanged(objectName(), d_label);
+}
+
+void MdiSubWindow::setLabel(const QString &label) {
+    d_label = label;
 }
 
 void MdiSubWindow::resizeEvent(QResizeEvent *e) {

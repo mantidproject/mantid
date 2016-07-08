@@ -577,17 +577,13 @@ void ProjectSerialiser::openMantidMatrix(const std::string &lines) {
       if (!ws)
           return;
 
-      m = new MantidMatrix(ws, window, "Mantid",
-                           QString::fromStdString(wsName), -1, -1);
-
-      if (!m)
-          return;
-
-      window->addMdiSubWindow(m);
+      m = new MantidMatrix();
+      m->init(ws, window, "Mantid", QString::fromStdString(wsName), -1, -1);
   }
 
-  if (!m)
-    return;
+  // Append to the list of mantid matrix windows
+  window->addMantidMatrixWindow(m);
+  window->addMdiSubWindow(m);
 
   if (tsv.selectLine("geometry")) {
     const std::string geometry = tsv.lineAsString("geometry");
@@ -599,8 +595,6 @@ void ProjectSerialiser::openMantidMatrix(const std::string &lines) {
     window->restoreWindowGeometry(window, m, QString::fromStdString(geometry));
   }
 
-  // Append to the list of mantid matrix windows
-  window->addMantidMatrixWindow(m);
 }
 
 /**

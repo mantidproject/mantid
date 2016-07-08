@@ -123,6 +123,11 @@ public:
   MdiSubWindow(QWidget *parent, const QString &label = QString(),
                const QString &name = QString(), Qt::WFlags f = 0);
 
+  MdiSubWindow();
+
+  /// Setup the window without constructor
+  void init(QWidget *parent, const QString &label, const QString &name, Qt::WFlags flags);
+
   //! Possible window captions.
   enum CaptionPolicy {
     Name = 0,  //!< caption determined by the window name
@@ -263,8 +268,9 @@ public: // non-slot methods
   bool isDocked() const;
   /// Detach this window from any parent window
   void detach();
-///@}
-
+  ///@}
+  /// Set the label property on the widget
+  void setLabel(const QString &label);
 signals:
   //! Emitted when the window was closed
   void closedWindow(MdiSubWindow *);
