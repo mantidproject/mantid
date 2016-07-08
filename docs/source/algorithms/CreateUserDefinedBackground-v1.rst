@@ -28,30 +28,42 @@ Typical use case
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - CreateUserDefinedBackground**
 
 .. testcode:: CreateUserDefinedBackgroundExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
+   # Create data: background + peak
+   dataX = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+   background = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45]
+   peak = [0, 1, 4, 1, 0, 0, 0, 0, 0, 0]
+   dataY = [a + b for a, b in zip(background, peak)]
+   dataWS = CreateWorkspace(dataX, dataY)
 
-   wsOut = CreateUserDefinedBackground()
+   # Create table of user-supplied background points
+   # In real use this would be done via the GUI
+   background_points = CreateEmptyTableWorkspace()
+   background_points.addColumn("double", "X", 1)
+   background_points.addColumn("double", "Y", 2)
+   for i in range(10):
+      background_points.addRow([dataX[i], background[i]])
 
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+   # Create background workspace and subtract it from data
+   backgroundWS = CreateUserDefinedBackground(InputWorkspace=dataWS, BackgroundPoints=background_points)
+   peakWS = Minus(dataWS, backgroundWS)
+
+
+   # Check that workspace matches expected peak
+   expected = CreateWorkspace(dataX, peak)
+   result, messages = CompareWorkspaces(peakWS, expected)
+   print "Workspaces match:", result
+
 
 Output:
 
 .. testoutput:: CreateUserDefinedBackgroundExample
 
-  The output workspace has ?? spectra
+   Workspaces match: True
 
 .. categories::
 
