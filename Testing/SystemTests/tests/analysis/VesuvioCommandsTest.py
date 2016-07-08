@@ -148,8 +148,8 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
 
-        index_one_first = -0.00656639296531
-        index_one_last = 0.00722060223067
+        index_one_first = -0.00553133541138
+        index_one_last = 0.00722053823154
         calc_data_height_expected = 0.13302098172
         calc_data_bin_expected = 635
         if _is_old_boost_version():
