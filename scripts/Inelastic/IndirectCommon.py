@@ -1,6 +1,5 @@
 #pylint: disable=invalid-name
 from mantid.simpleapi import *
-from mantid.api import TextAxis
 from mantid import config, logger
 
 from IndirectImport import import_mantidplot
@@ -10,7 +9,6 @@ import math
 import datetime
 import re
 import numpy as np
-import itertools
 
 
 def StartTime(prog):
