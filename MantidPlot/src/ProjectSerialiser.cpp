@@ -546,42 +546,8 @@ void ProjectSerialiser::openMultiLayer(const std::string &lines,
  */
 void ProjectSerialiser::openTable(const std::string &lines,
                                   const int fileVersion) {
-  std::vector<std::string> lineVec, valVec;
-  boost::split(lineVec, lines, boost::is_any_of("\n"));
-
-  const std::string firstLine = lineVec.front();
-  boost::split(valVec, firstLine, boost::is_any_of("\t"));
-
-  if (valVec.size() < 4)
-    return;
-
-  QString caption = QString::fromStdString(valVec[0]);
-  QString date = QString::fromStdString(valVec[3]);
-  int rows = 1;
-  int cols = 1;
-  Mantid::Kernel::Strings::convert<int>(valVec[1], rows);
-  Mantid::Kernel::Strings::convert<int>(valVec[2], cols);
-
-  // create instance
   Table *w = new Table();
-  w->init(window->scriptingEnv(), rows, cols, "", window);
-  window->initTable(w, caption);
-  if (w->objectName() != caption) { // the table was renamed
-    window->renamedTables << caption << w->objectName();
-    if (window->d_inform_rename_table) {
-      QMessageBox::warning(
-          window, window->tr("MantidPlot - Renamed Window"),
-          window->tr("The table '%1' already exists. It has been renamed '%2'.")
-              .arg(caption)
-              .arg(w->objectName()));
-    }
-  }
-
-  // populate with values
   w->loadFromProject(lines, window, fileVersion);
-  w->showNormal();
-  w->setBirthDate(date);
-  window->setListViewDate(caption, date);
 }
 
 /**

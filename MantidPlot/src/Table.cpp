@@ -3011,6 +3011,36 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
                             const int fileVersion) {
   Q_UNUSED(fileVersion);
 
+  std::vector<std::string> lineVec, valVec;
+  boost::split(lineVec, lines, boost::is_any_of("\n"));
+
+  const std::string firstLine = lineVec.front();
+  boost::split(valVec, firstLine, boost::is_any_of("\t"));
+
+  if (valVec.size() < 4)
+    return;
+
+  QString caption = QString::fromStdString(valVec[0]);
+  QString date = QString::fromStdString(valVec[3]);
+  int rows = 1;
+  int cols = 1;
+  Mantid::Kernel::Strings::convert<int>(valVec[1], rows);
+  Mantid::Kernel::Strings::convert<int>(valVec[2], cols);
+
+  // create instance
+  init(app->scriptingEnv(), rows, cols, "", app);
+  app->initTable(this, caption);
+  if (objectName() != caption) { // the table was renamed
+    app->renamedTables << caption << objectName();
+    if (app->d_inform_rename_table) {
+      QMessageBox::warning(
+          app, app->tr("MantidPlot - Renamed Window"),
+          app->tr("The table '%1' already exists. It has been renamed '%2'.")
+              .arg(caption)
+              .arg(objectName()));
+    }
+  }
+
   TSVSerialiser tsv(lines);
 
   if (tsv.selectLine("geometry"))
@@ -3143,6 +3173,10 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
     QApplication::restoreOverrideCursor();
     table()->blockSignals(false);
   }
+
+  showNormal();
+  setBirthDate(date);
+  app->setListViewDate(caption, date);
 }
 
 std::string Table::saveTableMetadata() {
