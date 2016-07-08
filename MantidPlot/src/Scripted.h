@@ -38,15 +38,16 @@ class Scripted {
 public:
   /// Constructor
   explicit Scripted(ScriptingEnv *env);
+  Scripted();
   /// Destructor
   ~Scripted();
   /// Called when the scripting environment changes
   void scriptingChangeEvent(ScriptingChangeEvent *);
   /// Access the current environment
   ScriptingEnv *scriptingEnv() { return m_scriptEnv; }
-
+  /// Initilise an uninilised scripting enviroment
+  void init(ScriptingEnv *env);
 private:
-  Scripted();
   /// A pointer to the current environment
   ScriptingEnv *m_scriptEnv;
 };

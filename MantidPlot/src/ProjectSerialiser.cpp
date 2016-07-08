@@ -543,7 +543,8 @@ void ProjectSerialiser::openMatrix(const std::string &lines,
     std::string gStr = tsv.lineAsString("geometry");
   }
 
-  Matrix *w = new Matrix(window->scriptingEnv(), rows, cols, "", window, 0);
+  Matrix *w = new Matrix();
+  w->init(window->scriptingEnv(), rows, cols, "", window, "");
   window->initMatrix(w, caption);
   if (w->objectName() != caption) // the matrix was renamed
     window->renamedTables << caption << w->objectName();
