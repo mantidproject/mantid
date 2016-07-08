@@ -387,16 +387,16 @@ void MuonSequentialFitDialog::continueFit() {
       // If ApplyDeadTimeCorrection is set but no dead time table is set,
       // we need to load one from the file.
       bool loadDeadTimesFromFile = false;
-      bool applyDTC = m_processAlg->getProperty("ApplyDeadTimeCorrection");
-      if (applyDTC) {
-        if (auto deadTimes =
-                m_processAlg->getPointerToProperty("DeadTimeTable")) {
-          if (deadTimes->value() == "") {
-            // No workspace set for dead time table - we need to load one
-            loadDeadTimesFromFile = true;
-          }
-        }
-      }
+      //bool applyDTC = m_processAlg->getProperty("ApplyDeadTimeCorrection");
+      //if (applyDTC) {
+      //  if (auto deadTimes =
+      //          m_processAlg->getPointerToProperty("DeadTimeTable")) {
+      //    if (deadTimes->value() == "") {
+      //      // No workspace set for dead time table - we need to load one
+      //      loadDeadTimesFromFile = true;
+      //    }
+      //  }
+      //}
 
       // Use LoadMuonNexus to load the file
       auto loadAlg = AlgorithmManager::Instance().create("LoadMuonNexus");
@@ -417,7 +417,7 @@ void MuonSequentialFitDialog::continueFit() {
       process->initialize();
       process->setChild(true);
       process->setRethrows(true);
-      process->updatePropertyValues(*m_processAlg);
+      //process->updatePropertyValues(*m_processAlg);
       process->setProperty("InputWorkspace", loadedWS);
       process->setProperty("LoadedTimeZero", loadedTimeZero);
       process->setPropertyValue("OutputWorkspace", "__YouDontSeeMeIAmNinja");
