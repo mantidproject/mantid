@@ -288,8 +288,48 @@ void TableStatistics::loadFromProject(const std::string &lines,
                                       ApplicationWindow *app,
                                       const int fileVersion) {
   Q_UNUSED(fileVersion);
+  std::vector<std::string> lineVec;
+  boost::split(lineVec, lines, boost::is_any_of("\n"));
+
+  const std::string firstLine = lineVec.front();
+
+  std::vector<std::string> firstLineVec;
+  boost::split(firstLineVec, firstLine, boost::is_any_of("\t"));
+
+  if (firstLineVec.size() < 4)
+    return;
+
+  QString name = QString::fromStdString(firstLineVec[0]);
+  const std::string tableName = firstLineVec[1];
+  const std::string type = firstLineVec[2];
+  QString birthDate = QString::fromStdString(firstLineVec[3]);
 
   TSVSerialiser tsv(lines);
+
+  if (!tsv.hasLine("Targets"))
+    return;
+
+  const std::string targetsLine = tsv.lineAsString("Targets");
+
+  std::vector<std::string> targetsVec;
+  boost::split(targetsVec, targetsLine, boost::is_any_of("\t"));
+
+  // Erase the first item ("Targets")
+  targetsVec.erase(targetsVec.begin());
+
+  QList<int> targets;
+  for (auto &it : targetsVec) {
+    int target = 0;
+    Mantid::Kernel::Strings::convert<int>(it, target);
+    targets << target;
+  }
+
+  // create instance
+  int typeCode = type == "row" ? TableStatistics::row : TableStatistics::column;
+
+  init(app->scriptingEnv(), app,
+          app->table(QString::fromStdString(tableName)),
+          (TableStatistics::Type)typeCode, targets);
 
   if (tsv.selectLine("geometry"))
     app->restoreWindowGeometry(
@@ -363,6 +403,16 @@ void TableStatistics::loadFromProject(const std::string &lines,
       }
     }
   }
+
+  if (name.isEmpty())
+    app->initTable(this, objectName());
+  else
+    app->initTable(this, name);
+
+  // populate with values
+  showNormal();
+  setBirthDate(birthDate);
+  app->setListViewDate(name, birthDate);
 }
 
 std::string TableStatistics::saveToProject(ApplicationWindow *app) {
