@@ -384,7 +384,7 @@ void GetAllEi::exec() {
     Signal[i] = peaks[i].height;
     Error[i] = peaks[i].sigma;
   }
-  result_ws->setX(0, peaks_positions);
+  result_ws->setPoints(0, peaks_positions);
 
   setProperty("OutputWorkspace", result_ws);
 }
@@ -881,8 +881,8 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   auto &pSpectr2 = inputWS->getSpectrum(wsIndex1);
   // assuming equally binned ws.
   // auto bins       = inputWS->dataX(wsIndex0);
-  auto bins = pSpectr1.dataX();
-  size_t XLength = bins.size();
+  auto bins = pSpectr1.ptrX();
+  size_t XLength = bins->size();
   size_t YLength = inputWS->dataY(wsIndex0).size();
   auto working_ws =
       API::WorkspaceFactory::Instance().create(inputWS, 2, XLength, YLength);

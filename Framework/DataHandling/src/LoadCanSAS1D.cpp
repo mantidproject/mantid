@@ -177,7 +177,8 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
   MantidVec &X = dataWS->dataX(0);
   MantidVec &Y = dataWS->dataY(0);
   MantidVec &E = dataWS->dataE(0);
-  MantidVec &Dx = dataWS->dataDx(0);
+  dataWS->setPointStandardDeviations(0, nBins);
+  auto &Dx = dataWS->mutableDx(0);
   int vecindex = 0;
   std::string yUnit = "";
   bool isCommon = true;

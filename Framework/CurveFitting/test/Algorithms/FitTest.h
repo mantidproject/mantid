@@ -949,9 +949,9 @@ public:
     TS_ASSERT(alg2.isInitialized());
 
     // create mock data to test against
-    std::string wsName = "ExpDecayMockData";
-    int histogramNumber = 1;
-    int timechannels = 20;
+    const std::string wsName = "ExpDecayMockData";
+    const int histogramNumber = 1;
+    const int timechannels = 20;
     Workspace_sptr ws = WorkspaceFactory::Instance().create(
         "Workspace2D", histogramNumber, timechannels, timechannels);
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
@@ -967,17 +967,13 @@ public:
          0.0656186436847, 0.04701781275748, 0.03368973499543, 0.02413974996916,
          0.01729688668232, 0.01239376088333, 0};
 
-    e.assign(19, 1.0);
-
-    // put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(
-        AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
+    e.assign(timechannels, 1.0);
 
     // alg2.setFunction(fn);
     alg2.setPropertyValue("Function", "name=ExpDecay,Height=1,Lifetime=1");
 
     // Set which spectrum to fit against and initial starting values
-    alg2.setPropertyValue("InputWorkspace", wsName);
+    alg2.setProperty("InputWorkspace", ws);
     alg2.setPropertyValue("WorkspaceIndex", "0");
     alg2.setPropertyValue("StartX", "0");
     alg2.setPropertyValue("EndX", "20");

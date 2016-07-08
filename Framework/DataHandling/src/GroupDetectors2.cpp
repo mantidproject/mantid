@@ -240,8 +240,7 @@ void GroupDetectors2::execEvent() {
   }
 
   // Set all X bins on the output
-  cow_ptr<MantidVec> XValues;
-  XValues.access() = inputWS->readX(0);
+  auto XValues = HistogramData::BinEdges(inputWS->readX(0));
   outputWS->setAllX(XValues);
 
   g_log.information() << name() << " algorithm has finished\n";

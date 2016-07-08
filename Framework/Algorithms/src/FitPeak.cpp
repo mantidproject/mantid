@@ -356,19 +356,22 @@ bool FitOneSinglePeak::simpleFit() {
 /** Generate a new temporary workspace for removed background peak
   */
 API::MatrixWorkspace_sptr FitOneSinglePeak::genFitWindowWS() {
-  size_t size = i_maxFitX - i_minFitX + 1;
-  MatrixWorkspace_sptr purePeakWS =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, size, size);
   const MantidVec &vecX = m_dataWS->readX(m_wsIndex);
   const MantidVec &vecY = m_dataWS->readY(m_wsIndex);
   const MantidVec &vecE = m_dataWS->readE(m_wsIndex);
+  size_t size = i_maxFitX - i_minFitX + 1;
+  size_t ysize = size;
+  size_t ishift = i_maxFitX + 1;
+  if (ishift >= vecY.size())
+    ysize = vecY.size() - i_minFitX;
+  MatrixWorkspace_sptr purePeakWS =
+      WorkspaceFactory::Instance().create("Workspace2D", 1, size, ysize);
 
   MantidVec &dataX = purePeakWS->dataX(0);
   MantidVec &dataY = purePeakWS->dataY(0);
   MantidVec &dataE = purePeakWS->dataE(0);
 
   dataX.assign(vecX.begin() + i_minFitX, vecX.begin() + i_maxFitX + 1);
-  size_t ishift = i_maxFitX + 1;
   if (ishift < vecY.size()) {
     dataY.assign(vecY.begin() + i_minFitX, vecY.begin() + i_maxFitX + 1);
     dataE.assign(vecE.begin() + i_minFitX, vecE.begin() + i_maxFitX + 1);

@@ -1408,8 +1408,8 @@ void EnggDiffractionPresenter::setDataToClonedWS(std::string &current_WS,
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   auto currentPeakWS = ADS.retrieveWS<MatrixWorkspace>(current_WS);
   auto currentClonedWS = ADS.retrieveWS<MatrixWorkspace>(cloned_WS);
-  currentClonedWS->getSpectrum(0)
-      .setData(currentPeakWS->readY(0), currentPeakWS->readE(0));
+  currentClonedWS->dataY(0) = currentPeakWS->readY(0);
+  currentClonedWS->dataE(0) = currentPeakWS->readE(0);
 }
 
 void EnggDiffractionPresenter::setBankItems() {
