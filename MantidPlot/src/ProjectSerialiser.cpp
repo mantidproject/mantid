@@ -734,9 +734,10 @@ void ProjectSerialiser::openTableStatistics(const std::string &lines,
 
   // create instance
   int typeCode = type == "row" ? TableStatistics::row : TableStatistics::column;
-  TableStatistics *s = new TableStatistics(window->scriptingEnv(), window,
-                                           window->table(QString::fromStdString(tableName)),
-                                           (TableStatistics::Type)typeCode, targets);
+  TableStatistics *s = new TableStatistics();
+  s->init(window->scriptingEnv(), window,
+          window->table(QString::fromStdString(tableName)),
+          (TableStatistics::Type)typeCode, targets);
   if (!s)
     return;
 

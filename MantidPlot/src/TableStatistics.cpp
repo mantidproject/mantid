@@ -44,8 +44,24 @@
 
 TableStatistics::TableStatistics(ScriptingEnv *env, QWidget *parent,
                                  Table *base, Type t, QList<int> targets)
-    : Table(env, 1, 1, "", parent, ""), d_base(base), d_type(t),
+    : Table(), d_base(base), d_type(t),
       d_targets(targets) {
+    init(env, parent, base, t, targets);
+}
+
+TableStatistics::TableStatistics()
+    : Table(), d_base(nullptr), d_type(), d_targets()
+{
+
+}
+
+void TableStatistics::init(ScriptingEnv *env, QWidget *parent, Table *base, Type type, QList<int> targets)
+{
+    Table::init(env, 1, 1, "", parent, "");
+    d_base = base;
+    d_type = type;
+    d_targets = targets;
+
   setCaptionPolicy(MdiSubWindow::Both);
   if (d_type == row) {
     setName(QString(d_base->objectName()) + "-" + tr("RowStats"));
