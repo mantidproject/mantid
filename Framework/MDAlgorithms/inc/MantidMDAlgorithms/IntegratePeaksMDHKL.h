@@ -19,7 +19,7 @@ namespace MDAlgorithms {
  */
 class DLLExport IntegratePeaksMDHKL : public API::Algorithm {
 public:
-  IntegratePeaksMDHKL();
+
   /// Algorithm's name for identification
   const std::string name() const override { return "IntegratePeaksMDHKL"; };
   /// Summary of algorithms purpose

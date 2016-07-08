@@ -8,8 +8,10 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
-
 #include "MantidGeometry/Crystal/IPeak.h"
+#include <boost/math/special_functions/round.hpp>
+#include <algorithm>
+#include <limits>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -23,12 +25,6 @@ using namespace Mantid::Geometry;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegratePeaksMDHKL)
-
-//----------------------------------------------------------------------------------------------
-/**
- * Constructor
- */
-IntegratePeaksMDHKL::IntegratePeaksMDHKL() {}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -116,9 +112,9 @@ void IntegratePeaksMDHKL::exec() {
 
     IPeak &p = peakWS->getPeak(i);
     // round to integer
-    int h = static_cast<int>(std::round(p.getH()));
-    int k = static_cast<int>(std::round(p.getK()));
-    int l = static_cast<int>(std::round(p.getL()));
+    int h = static_cast<int>(boost::math::iround(p.getH()));
+    int k = static_cast<int>(boost::math::iround(p.getK()));
+    int l = static_cast<int>(boost::math::iround(p.getL()));
     MDHistoWorkspace_sptr histoBox;
     if (m_histoWS) {
       histoBox = cropHisto(h, k, l, box, m_histoWS);
@@ -141,7 +137,8 @@ void IntegratePeaksMDHKL::exec() {
 }
 
 MDHistoWorkspace_sptr IntegratePeaksMDHKL::normalize(
-    int h, int k, int l, double box, int gridPts, MatrixWorkspace_sptr flux,
+    int h, int k, int l, double box, int gridPts,
+    MatrixWorkspace_sptr flux,
     MatrixWorkspace_sptr sa, IMDEventWorkspace_sptr ws) {
   IAlgorithm_sptr normAlg = createChildAlgorithm("MDNormSCD");
   normAlg->setProperty("InputWorkspace", ws);
@@ -185,19 +182,16 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
   }
 
   double *F = out->getSignalArray();
-  double Fmax = 0;
-  double Fmin = 1e300;
+  double Fmax = 0.;
+  double Fmin = std::numeric_limits<double>::max();
   double sum = 0.0;
   for (int i = 0; i < gridPts[0] * gridPts[1] * gridPts[2]; i++) {
-    if (!boost::math::isnan(F[i]) && !boost::math::isinf(F[i]) && F[i] != 0.0) {
+    if (std::isnormal(F[i])) {
       sum += F[i];
-      if (F[i] < Fmin)
-        Fmin = F[i];
-      if (F[i] > Fmax)
-        Fmax = F[i];
+      Fmin = std::min(Fmin, F[i]);
+      Fmax = std::max(Fmax, F[i]);
     }
   }
-
   double *SqError = out->getErrorSquaredArray();
 
   double minIntensity = Fmin + 0.01 * (Fmax - Fmin);
@@ -211,7 +205,7 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
     for (int Kindex = 0; Kindex < gridPts[1]; Kindex++) {
       for (int Lindex = 0; Lindex < gridPts[2]; Lindex++) {
         int iHKL = Hindex + gridPts[0] * (Kindex + gridPts[1] * Lindex);
-        if (!boost::math::isnan(F[iHKL]) && !boost::math::isinf(F[iHKL])) {
+        if (std::isfinite(F[iHKL])) {
           measuredPoints = measuredPoints + 1;
           measuredSum = measuredSum + F[iHKL];
           measuredErrSqSum = measuredErrSqSum + SqError[iHKL];
@@ -271,15 +265,15 @@ MDHistoWorkspace_sptr IntegratePeaksMDHKL::binEvent(int h, int k, int l,
   binMD->setProperty("AlignedDim0",
                      "[H,0,0]," + boost::lexical_cast<std::string>(h - box) +
                          "," + boost::lexical_cast<std::string>(h + box) + "," +
-                         boost::lexical_cast<std::string>(gridPts));
+                         std::to_string(gridPts));
   binMD->setProperty("AlignedDim1",
                      "[0,K,0]," + boost::lexical_cast<std::string>(k - box) +
                          "," + boost::lexical_cast<std::string>(k + box) + "," +
-                         boost::lexical_cast<std::string>(gridPts));
+                         std::to_string(gridPts));
   binMD->setProperty("AlignedDim2",
                      "[0,0,L]," + boost::lexical_cast<std::string>(l - box) +
                          "," + boost::lexical_cast<std::string>(l + box) + "," +
-                         boost::lexical_cast<std::string>(gridPts));
+                         std::to_string(gridPts));
   binMD->setPropertyValue("AxisAligned", "1");
   binMD->setPropertyValue("OutputWorkspace", "out");
   binMD->executeAsChildAlg();
