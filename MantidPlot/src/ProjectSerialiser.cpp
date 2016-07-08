@@ -535,43 +535,8 @@ void ProjectSerialiser::openMantidMatrix(const std::string &lines) {
  */
 void ProjectSerialiser::openMultiLayer(const std::string &lines,
                                        const int fileVersion) {
-  std::string multiLayerLines = lines;
-
-  // The very first line of a multilayer section has some important settings,
-  // and lacks a name. Take it out and parse it manually.
-
-  if (multiLayerLines.length() == 0)
-    return;
-
-  std::vector<std::string> lineVec;
-  boost::split(lineVec, multiLayerLines, boost::is_any_of("\n"));
-
-  std::string firstLine = lineVec.front();
-  // Remove the first line
-  lineVec.erase(lineVec.begin());
-  multiLayerLines = boost::algorithm::join(lineVec, "\n");
-
-  // Split the line up into its values
-  std::vector<std::string> values;
-  boost::split(values, firstLine, boost::is_any_of("\t"));
-
-  QString caption = QString::fromUtf8(values[0].c_str());
-  int rows = 1;
-  int cols = 1;
-  Mantid::Kernel::Strings::convert<int>(values[1], rows);
-  Mantid::Kernel::Strings::convert<int>(values[2], cols);
-  QString birthDate = QString::fromStdString(values[3]);
-
-  // create instance
-  QString label = caption;
   MultiLayer *plot = new MultiLayer();
-  plot->init(window, 0, rows, cols);
-  window->initMultilayerPlot(plot, label.replace(QRegExp("_"), "-"));
-
-  // populate with values
-  plot->loadFromProject(multiLayerLines, window, fileVersion);
-  plot->setBirthDate(birthDate);
-  window->setListViewDate(caption, birthDate);
+  plot->loadFromProject(lines, window, fileVersion);
 }
 
 /**

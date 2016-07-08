@@ -1742,6 +1742,38 @@ void WaterfallFillDialog::setFillMode() {
 void MultiLayer::loadFromProject(const std::string &lines,
                                  ApplicationWindow *app,
                                  const int fileVersion) {
+  std::string multiLayerLines = lines;
+
+  // The very first line of a multilayer section has some important settings,
+  // and lacks a name. Take it out and parse it manually.
+
+  if (multiLayerLines.length() == 0)
+    return;
+
+  std::vector<std::string> lineVec;
+  boost::split(lineVec, multiLayerLines, boost::is_any_of("\n"));
+
+  std::string firstLine = lineVec.front();
+  // Remove the first line
+  lineVec.erase(lineVec.begin());
+  multiLayerLines = boost::algorithm::join(lineVec, "\n");
+
+  // Split the line up into its values
+  std::vector<std::string> values;
+  boost::split(values, firstLine, boost::is_any_of("\t"));
+
+  QString caption = QString::fromUtf8(values[0].c_str());
+  int rows = 1;
+  int cols = 1;
+  Mantid::Kernel::Strings::convert<int>(values[1], rows);
+  Mantid::Kernel::Strings::convert<int>(values[2], cols);
+  QString birthDate = QString::fromStdString(values[3]);
+
+  // create instance
+  QString label = caption;
+
+  init(app, 0, rows, cols);
+
   TSVSerialiser tsv(lines);
 
   if (tsv.hasLine("geometry"))
@@ -1807,6 +1839,13 @@ void MultiLayer::loadFromProject(const std::string &lines,
   }
 
   blockSignals(false);
+
+  app->initMultilayerPlot(this, label.replace(QRegExp("_"), "-"));
+
+  // populate with values
+  loadFromProject(multiLayerLines, app, fileVersion);
+  setBirthDate(birthDate);
+  app->setListViewDate(caption, birthDate);
 }
 
 std::string MultiLayer::saveToProject(ApplicationWindow *app) {
