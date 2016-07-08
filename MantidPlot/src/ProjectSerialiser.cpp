@@ -514,48 +514,8 @@ void ProjectSerialiser::saveProjectFile(QFile *fileHandle,
  */
 void ProjectSerialiser::openMatrix(const std::string &lines,
                                    const int fileVersion) {
-  // The first line specifies the name, dimensions and date.
-  std::vector<std::string> lineVec;
-  boost::split(lineVec, lines, boost::is_any_of("\n"));
-  std::string firstLine = lineVec.front();
-  lineVec.erase(lineVec.begin());
-  std::string newLines = boost::algorithm::join(lineVec, "\n");
-
-  // Parse the first line
-  std::vector<std::string> values;
-  boost::split(values, firstLine, boost::is_any_of("\t"));
-
-  if (values.size() < 4) {
-    return;
-  }
-
-  const QString caption = QString::fromStdString(values[0]);
-  const QString date = QString::fromStdString(values[3]);
-
-  int rows = 0;
-  int cols = 0;
-  Mantid::Kernel::Strings::convert<int>(values[1], rows);
-  Mantid::Kernel::Strings::convert<int>(values[2], cols);
-
-  TSVSerialiser tsv(newLines);
-  std::string gStr;
-  if (tsv.hasLine("geometry")) {
-    std::string gStr = tsv.lineAsString("geometry");
-  }
-
   Matrix *w = new Matrix();
-  w->init(window->scriptingEnv(), rows, cols, "", window, "");
-  window->initMatrix(w, caption);
-  if (w->objectName() != caption) // the matrix was renamed
-    window->renamedTables << caption << w->objectName();
-
-  w->loadFromProject(newLines, window, fileVersion);
-  w->showNormal();
-  window->setListViewDate(caption, date);
-  w->setBirthDate(date);
-  if(!gStr.empty()) {
-      window->restoreWindowGeometry(window, w, QString::fromStdString(gStr));
-  }
+  w->loadFromProject(lines, window, fileVersion);
 }
 
 /**

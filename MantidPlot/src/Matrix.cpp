@@ -1522,10 +1522,39 @@ Matrix::~Matrix() {
 
 void Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
                              const int fileVersion) {
-  Q_UNUSED(app);
   Q_UNUSED(fileVersion);
+  std::vector<std::string> lineVec;
+  boost::split(lineVec, lines, boost::is_any_of("\n"));
+  std::string firstLine = lineVec.front();
+  lineVec.erase(lineVec.begin());
+  std::string newLines = boost::algorithm::join(lineVec, "\n");
 
-  TSVSerialiser tsv(lines);
+  // Parse the first line
+  std::vector<std::string> values;
+  boost::split(values, firstLine, boost::is_any_of("\t"));
+
+  if (values.size() < 4) {
+    return;
+  }
+
+  const QString caption = QString::fromStdString(values[0]);
+  const QString date = QString::fromStdString(values[3]);
+
+  int rows = 0;
+  int cols = 0;
+  Mantid::Kernel::Strings::convert<int>(values[1], rows);
+  Mantid::Kernel::Strings::convert<int>(values[2], cols);
+
+  TSVSerialiser tsv(newLines);
+  std::string gStr;
+  if (tsv.hasLine("geometry")) {
+    std::string gStr = tsv.lineAsString("geometry");
+  }
+
+  init(app->scriptingEnv(), rows, cols, "", app, "");
+  app->initMatrix(this, caption);
+  if (objectName() != caption) // the matrix was renamed
+    app->renamedTables << caption << objectName();
 
   if (tsv.selectLine("ColWidth")) {
     setColumnsWidth(tsv.asInt(1));
@@ -1612,6 +1641,13 @@ void Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
       valVec.clear();
     }
     resetView();
+  }
+
+  showNormal();
+  app->setListViewDate(caption, date);
+  setBirthDate(date);
+  if(!gStr.empty()) {
+      app->restoreWindowGeometry(app, this, QString::fromStdString(gStr));
   }
 }
 
