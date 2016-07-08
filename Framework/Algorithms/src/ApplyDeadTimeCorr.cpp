@@ -98,8 +98,8 @@ void ApplyDeadTimeCorr::exec() {
                 outputWs->mutableY(index)[j] = inputWs->y(index)[j] / temp;
               } else {
                 g_log.error() << "1 - MeasuredCount * (Deadtime/TimeBin width "
-                                 "is currently ("
-                              << temp << "). Can't divide by this amount.\n";
+                                 "is currently (" << temp
+                              << "). Can't divide by this amount.\n";
 
                 throw std::invalid_argument("Can't divide by 0");
               }

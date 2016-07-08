@@ -167,8 +167,9 @@ private:
     for (size_t i = 0; i < nHist; ++i) {
       for (size_t j = 0; j < nBins - 1; ++j) {
         // gaussian peak centred at 50,and h=10
-        testWS->mutableY(i)[j] = 10 * exp(-pow((static_cast<double>(j) - 50), 2) /
-                                       (2 * pow(1.5, 2)));
+        testWS->mutableY(i)[j] =
+            10 *
+            exp(-pow((static_cast<double>(j) - 50), 2) / (2 * pow(1.5, 2)));
       }
     }
     return testWS;

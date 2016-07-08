@@ -161,8 +161,8 @@ public:
     Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
     // Check that the output unit is correct
     TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "Wavelength");
-    
-	// Test that y & e data is unchanged
+
+    // Test that y & e data is unchanged
     TS_ASSERT_EQUALS(output2D->y(101).size(), 10);
     TS_ASSERT_EQUALS(output2D->e(101).size(), 10);
 
@@ -237,7 +237,7 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "quickOut"));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "dSpacing");
-	//What is this meant to be testing should this be input vs output?
+    // What is this meant to be testing should this be input vs output?
     TS_ASSERT_EQUALS(&(output->x(0)[0]), &(output->x(0)[0]));
     const size_t xsize = output->blocksize();
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
