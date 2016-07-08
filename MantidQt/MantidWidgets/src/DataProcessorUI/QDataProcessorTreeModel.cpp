@@ -279,7 +279,7 @@ bool QDataProcessorTreeModel::removeGroups(int position, int count) {
   int absolutePosition =
       (m_rowsOfGroup[position].size() > 0)
           ? m_rowsOfGroup[position][0]
-          : (position > 0) ? m_rowsOfGroup[position - 1].back() : 0;
+          : (position > 0) ? m_rowsOfGroup[position - 1].back() + 1: 0;
 
   for (int group = position; group < position + count; group++) {
     for (int row = 0; row < rowCount(index(group, 0)); row++)
