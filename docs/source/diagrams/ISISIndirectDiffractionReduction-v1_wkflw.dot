@@ -12,6 +12,7 @@ digraph ISISIndirectDiffractionReduction {
     $param_style
     InputFiles
     SumFiles
+    CalibrationFile
     Instrument
     Mode
     SpectraRange
@@ -52,13 +53,24 @@ digraph ISISIndirectDiffractionReduction {
     e_mode                        [label="Elastic"]
     dspacing_unit                 [label="dSpacing"]
   }
+  
+  subgraph descision {
+    $decision_style
+    has_calib_file                [label="Using Calibration File"]
+  }
 
   InputFiles                  -> load_files
   SpectraRange                -> load_files
   Instrument                  -> load_files
   Mode                        -> load_files
   SumFiles                    -> load_files
-  load_files                  -> get_multi_frame_rebin
+  load_files                  -> has_calib_file
+  has_calib_file              -> AlignDetectors                [label="Yes"]
+  CalibrationFile             -> AlignDetectors
+  AlignDetectors              -> DiffractionFocussing
+  CalibrationFile             -> DiffractionFocussing
+  DiffractionFocussing        -> get_multi_frame_rebin
+  has_calib_file              -> get_multi_frame_rebin         [label="No"]
   RebinParam                  -> get_multi_frame_rebin
   get_multi_frame_rebin       -> multi_frame_rebin_string
   get_multi_frame_rebin       -> multi_frame_num_bins

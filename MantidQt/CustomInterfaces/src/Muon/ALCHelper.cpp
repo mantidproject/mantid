@@ -7,6 +7,8 @@
 
 #include "QMessageBox"
 
+using namespace Mantid::API;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ALCHelper {

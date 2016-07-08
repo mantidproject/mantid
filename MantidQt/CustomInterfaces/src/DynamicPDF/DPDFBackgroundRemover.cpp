@@ -10,6 +10,7 @@
 // Mantid headers from other projects
 #include "MantidKernel/make_unique.h"
 #include "MantidQtAPI/HelpWindow.h"
+#include "MantidKernel/UsageService.h"
 // 3rd party library headers
 // System includes
 
@@ -31,7 +32,8 @@ DECLARE_SUBWINDOW(BackgroundRemover)
 BackgroundRemover::BackgroundRemover(QWidget *parent)
     : UserSubWindow{parent}, m_sliceSelector(), m_inputDataControl(),
       m_displayControl(), m_fitControl{nullptr}, m_fourierTransform{nullptr} {
-  // nothing in the body
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Interface", "DynamicPDF->BackgroundRemover", false);
 }
 
 /**
