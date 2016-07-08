@@ -10,6 +10,7 @@
 
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidUI.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/MantidVersion.h"
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
 
@@ -562,7 +563,22 @@ void ProjectSerialiser::openMantidMatrix(const std::string &lines) {
   MantidMatrix *m = nullptr;
 
   if (tsv.selectLine("WorkspaceName")) {
-    m = window->mantidUI->openMatrixWorkspace(tsv.asString(1), -1, -1);
+      const std::string wsName = tsv.asString(1);
+      MatrixWorkspace_sptr ws;
+
+      if (AnalysisDataService::Instance().doesExist(wsName))
+          ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+
+      if (!ws)
+          return;
+
+      m = new MantidMatrix(ws, window, "Mantid",
+                           QString::fromStdString(wsName), -1, -1);
+
+      if (!m)
+          return;
+
+      window->addMdiSubWindow(m);
   }
 
   if (!m)

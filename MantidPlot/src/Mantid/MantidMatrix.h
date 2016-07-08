@@ -90,7 +90,7 @@ class MantidMatrix : public MdiSubWindow,
 
 public:
   MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
-               ApplicationWindow *parent, const QString &label,
+               QWidget *parent, const QString &label,
                const QString &name = QString(), int start = -1, int end = -1);
 
   void connectTableView(QTableView *, MantidMatrixModel *);

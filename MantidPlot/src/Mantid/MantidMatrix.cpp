@@ -83,13 +83,12 @@ int modelTypeToInt(MantidMatrixModel::Type type) {
 }
 
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
-                           ApplicationWindow *parent, const QString &label,
+                           QWidget *parent, const QString &label,
                            const QString &name, int start, int end)
     : MdiSubWindow(parent, label, name, 0), WorkspaceObserver(),
-      m_appWindow(parent), m_workspace(ws), y_start(0.0), y_end(0.0),
-      m_histogram(false), m_min(0), m_max(0), m_are_min_max_set(false),
-      m_boundingRect(), m_strName(name.toStdString()), m_selectedRows(),
-      m_selectedCols() {
+      m_workspace(ws), y_start(0.0), y_end(0.0), m_histogram(false), m_min(0),
+      m_max(0), m_are_min_max_set(false), m_boundingRect(),
+      m_strName(name.toStdString()), m_selectedRows(), m_selectedCols() {
   setup(ws, start, end);
   setWindowTitle(name);
   setName(name);
@@ -1080,7 +1079,8 @@ QChar MantidMatrix::numberFormat() { return activeModel()->format(); }
 int MantidMatrix::precision() { return activeModel()->precision(); }
 
 void MantidMatrix::setMatrixProperties() {
-  MantidMatrixDialog dlg(m_appWindow);
+  QWidget* parent = parentWidget();
+  MantidMatrixDialog dlg(parent);
   dlg.setMatrix(this);
   dlg.exec();
 }
