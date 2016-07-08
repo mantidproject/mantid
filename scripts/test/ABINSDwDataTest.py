@@ -5,13 +5,13 @@ import numpy as np
 
 class DwDataTest(unittest.TestCase):
     # fake DW tensors for two atoms
-    _good_data = [ np.asarray([[1.0, 1.0, 1.0],
+    _good_data = np.asarray([ [[1.0, 1.0, 1.0],
                                [1.0, 1.0, 1.0],
                                [1.0, 1.0, 1.0]] # array 3x3
-                             ),
-                   np.asarray([[1.0, 1.0, 1.0],
+                             ,
+                              [[1.0, 1.0, 1.0],
                                [1.0, 1.0, 1.0],
-                               [1.0, 1.0, 1.0]])] # array 3x3
+                               [1.0, 1.0, 1.0]]]) # array 3x3
 
 
     def setUp(self):
@@ -36,27 +36,35 @@ class DwDataTest(unittest.TestCase):
                      [1.0, 1.0, 1.0]] # list 3x3
 
         with self.assertRaises(ValueError):
-            self.tester.append(_bad_item)
+            self.tester.append(item=_bad_item, num_atom=0)
 
         # bad shape of numpy array
         _bad_item = np.asarray([[1.0, 1.0, 1.0],
                                 [1.0, 1.0, 1.0]]) # array 2x3 instead of 3x3
 
         with self.assertRaises(ValueError):
-            self.tester.append(_bad_item)
+            self.tester.append(item=_bad_item, num_atom=0)
+
+        # bad type of elements: integers instead of floats
+        _bad_item = np.asarray([[1, 1, 1],
+                                [1, 1, 1],
+                                [1, 1, 1]]) # list 3x3
+        with self.assertRaises(ValueError):
+            self.tester.append(item=_bad_item, num_atom=0)
 
 
     def test_wrong_set(self):
 
-        bad_numpy_items = [self._good_data[0]]  # only one entry in the list since the number of atoms is 2 there should be 2 entries
+        bad_numpy_items = self._good_data[0]  # only one entry; there should be 2 entries
         with self.assertRaises(ValueError):
             self.tester.set(bad_numpy_items)
 
-        bad_list_items = [ [[1.0, 1.0, 1.0], # list 3x3 instead of numpy array
+        # list instead of numpy array
+        bad_list_items = [[[1.0, 1.0, 1.0],
                            [1.0, 1.0, 1.0],
                            [1.0, 1.0, 1.0]],
 
-                           [[1.0, 1.0, 1.0], # list 3x3 instead of numpy array
+                           [[1.0, 1.0, 1.0],
                            [1.0, 1.0, 1.0],
                            [1.0, 1.0, 1.0]]
                         ]
@@ -67,11 +75,11 @@ class DwDataTest(unittest.TestCase):
 
     def test_good_case(self):
 
-        self.tester.append(self._good_data[0])
-        self.tester.append(self._good_data[1])
+        self.tester.append(item=self._good_data[0], num_atom=0)
+        self.tester.append(item=self._good_data[1], num_atom=1)
         self.assertEqual(True, np.allclose(self._good_data, self.tester.extract()))
 
-        self.tester.set(self._good_data)
+        self.tester.set(items=self._good_data)
         self.assertEqual(True, np.allclose(self._good_data, self.tester.extract()))
 
 

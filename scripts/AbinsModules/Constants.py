@@ -1,8 +1,13 @@
+import numpy as np
+
 """
 Constants for instruments and ABINS
 """
 
 # ABINS internal constants
+
+floats_id = np.dtype(np.float64).num
+floats_type = np.dtype(np.float64)
 
 DFT_group = "PhononAB" # name of the group in the hdf file in which extracted data from DFT phonon calculations are stored
 
@@ -34,6 +39,16 @@ all_symbols = ["Ac", "Ag", "Al", "Am", "Ar",  "As", "At" , "Au" , "B"  , "Ba", "
                "Rg", "Rh", "Rn", "Ru", "S" ,  "Sb", "Sc" , "Se" , "Sg" , "Si", "Sm", "Sn", "Sr", "Ta", "Tb", "Tc", "Te",
                "Th", "Ti", "Tl", "Tm", "U" , "Uuo", "Uup", "Uus", "Uut", "V" , "W" , "Xe", "Y" , "Yb", "Zn", "Zr",
                ]
+
+
+# conversion constants taken from  (http://physics.nist.gov/cgi-bin/cuu/Convert?exp=0&num=1&From=k&To=hr&Action=Only+show+factor)
+k_2_hartree = 3.16681050000000e-06 # 1 K * k_2_hartree = 1 Hartree
+cm1_2_hartree = 4.556335252767e-6 # 1 cm-1 * cm1_2_hartree = 1 Hartree
+
+
+# https://en.wikipedia.org/wiki/Atomic_mass_unit
+m_2_hartree = 1822.88839  # 1 amu * m2_hartree = 1 Hartree
+
 
 # Instruments constants
 TOSCA_constant = 1 / 16.0 # magic number for TOSCA...

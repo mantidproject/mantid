@@ -67,7 +67,7 @@ class KpointsData(GeneralData):
             raise ValueError("Value of k-point should be an array.")
         if value.shape[0] != 3:
             raise ValueError("Value of k-point should be an numpy array with three float elements.")
-        if not all([isinstance(value[el], float) for el in range(value.shape[0])]):
+        if value.dtype.num !=  Constants.floats_id:
             raise ValueError("All coordinates of each k-vector should be represented by a real numbers.")
 
         freq = item["frequencies"]
@@ -75,11 +75,9 @@ class KpointsData(GeneralData):
             raise ValueError("Frequencies for the given k-point should have a form of a numpy array.")
         if len(freq.shape) != 1:
             raise ValueError("Frequencies for the given k-point should have a form of one dimentional numpy array.")
-
         if freq.size != self._num_freq:
             raise ValueError("Incorrect number of frequencies.")
-
-        if not all([isinstance(freq[el], float) for el in range(freq.shape[0])]):
+        if freq.dtype.num != Constants.floats_id:
             raise ValueError("Wrong type of frequencies. Frequencies should have real values")
 
         displacements = item["atomic_displacements"]
@@ -93,9 +91,8 @@ class KpointsData(GeneralData):
         if displacements.shape[1] != 3:
             raise ValueError("Atomic displacements for the given k-point should have a form of the"
                              "two dimentional numpy arrays with the second dimension equal to three.")
-        for el1 in range(displacements.shape[0]):
-            if not (all([isinstance(displacements[el1][el2], float)   for el2 in range(displacements.shape[1])])):
-                raise  ValueError("Atomic displacements should have a form of the two dimentional"
+        if displacements.dtype.num != Constants.floats_id:
+            raise  ValueError("Atomic displacements should have a form of the two dimentional"
                                   " numpy arrays with real elements.")
 
         self._data.append(item)

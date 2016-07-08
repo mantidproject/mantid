@@ -37,7 +37,7 @@ class AtomsDaTa(GeneralData):
             raise ValueError("Coordinates should have a form of 1D numpy array.")
         if fract_coord.shape[0] != 3:
             raise ValueError("Coordinates should have a form of numpy array with three elements.")
-        if not all([isinstance(fract_coord[el], float) for el in range(fract_coord.shape[0])]):
+        if fract_coord.dtype.num !=  Constants.floats_id:
             raise ValueError("All coordinates should be real numbers.")
 
         # "atom"
