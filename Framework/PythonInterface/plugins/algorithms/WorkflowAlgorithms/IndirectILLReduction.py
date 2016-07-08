@@ -235,7 +235,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         graph = mtd_plot.newGraph()
         mtd_plot.plotSpectrum(self._red_ws_name, 0, window=graph)
         layer = graph.activeLayer()
-        layer.setAxisTitle(mtd_plot.Layer.Bottom, 'Energy Transfer (micro eV)')
+        layer.setAxisTitle(mtd_plot.Layer.Bottom, 'Energy Transfer (ueV)')
         layer.setAxisTitle(mtd_plot.Layer.Left, '')
         layer.setTitle('')
 

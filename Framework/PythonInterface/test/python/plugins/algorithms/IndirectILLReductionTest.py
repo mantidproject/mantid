@@ -14,9 +14,8 @@ class IndirectILLReductionTest(unittest.TestCase):
     _multi_run_name = None
 
     def setUp(self):
-        self._run_name = '146190'
-        self._multi_run_name = '146190,146191'
-        self._run_path = 'ILL/IN16B/'
+        self._run_name = 'ILL/IN16B/146191'
+        self._multi_run_name = 'ILL/IN16B/146191,ILL/IN16B/146192'
 
     def tearDown(self):
         #clean up any files we made
