@@ -67,7 +67,7 @@ class Matrix : public MdiSubWindow,
   Q_OBJECT
 
 protected:
-  Matrix(ScriptingEnv *env, const QString &label, ApplicationWindow *parent,
+  Matrix(ScriptingEnv *env, const QString &label, QWidget *parent,
          const QString &name = QString(), Qt::WFlags f = 0);
 
 public:
@@ -84,10 +84,10 @@ public:
    * @param f :: window flags
    */
   Matrix(ScriptingEnv *env, int r, int c, const QString &label,
-         ApplicationWindow *parent, const QString &name = QString(),
+         QWidget *parent, const QString &name = QString(),
          Qt::WFlags f = 0);
   Matrix(ScriptingEnv *env, const QImage &image, const QString &label,
-         ApplicationWindow *parent, const QString &name = QString(),
+         QWidget *parent, const QString &name = QString(),
          Qt::WFlags f = 0);
   ~Matrix() override;
 

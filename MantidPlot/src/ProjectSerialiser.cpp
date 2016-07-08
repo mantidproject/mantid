@@ -529,27 +529,32 @@ void ProjectSerialiser::openMatrix(const std::string &lines,
     return;
   }
 
-  const std::string caption = values[0];
-  const std::string date = values[3];
+  const QString caption = QString::fromStdString(values[0]);
+  const QString date = QString::fromStdString(values[3]);
 
   int rows = 0;
   int cols = 0;
   Mantid::Kernel::Strings::convert<int>(values[1], rows);
   Mantid::Kernel::Strings::convert<int>(values[2], cols);
 
-  auto m = window->newMatrix(QString::fromStdString(caption), rows, cols);
-  window->setListViewDate(QString::fromStdString(caption),
-                          QString::fromStdString(date));
-  m->setBirthDate(QString::fromStdString(date));
+  Matrix *w = new Matrix(window->scriptingEnv(), rows, cols, "", window, 0);
+  window->initMatrix(w, caption);
+  if (w->objectName() != caption) // the matrix was renamed
+    window->renamedTables << caption << w->objectName();
+
+  w->showNormal();
+
+  window->setListViewDate(caption, date);
+  w->setBirthDate(date);
 
   TSVSerialiser tsv(newLines);
 
   if (tsv.hasLine("geometry")) {
     std::string gStr = tsv.lineAsString("geometry");
-    window->restoreWindowGeometry(window, m, QString::fromStdString(gStr));
+    window->restoreWindowGeometry(window, w, QString::fromStdString(gStr));
   }
 
-  m->loadFromProject(newLines, window, fileVersion);
+  w->loadFromProject(newLines, window, fileVersion);
 }
 
 /**
