@@ -11,6 +11,9 @@ Algorithms
 New
 ###
 
+- :ref:`CreateUserDefinedBackground <algm-CreateUserDefinedBackground>` takes a set of points
+  that the user has chosen and creates a background workspace out of them. It interpolates the
+  points so the resulting background can be subtracted from the original data.
 
 Improved
 ########
