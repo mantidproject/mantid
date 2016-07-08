@@ -40,6 +40,18 @@ The formula is defined in a simple math syntax. For example:
 
 *x* and *y* can be used interchangeably to refer to the current axis value.
 
+Using Constants
+###############
+
+The following constants are predeined for use in your equations:
+
+* pi - The ratio of a circle's circumference to its diameter
+* h - Planck constant in J*s
+* h_bar - Planck constant in J*s, divided by 2 PI
+* g - Standard acceleration due to gravity. Precise value in ms\ :sup:`-2`
+* mN - Mass of the neutron in kg
+* mNAMU -  Mass of the neutron in AMU
+
 Using geometry variables
 ########################
 
@@ -131,7 +143,7 @@ Output:
    wsWavelength = CreateSampleWorkspace(XUnit='Wavelength', XMin=2, XMax=6, BinWidth=0.050000000000000003)
    # Convert to momentum transfer
    # directly using a formula
-   wsMTbyFormula = ConvertAxisByFormula(InputWorkspace=wsWavelength,  Formula='(4*3.14159265359*sin(twotheta/2))/x', AxisUnits='MomentumTransfer')
+   wsMTbyFormula = ConvertAxisByFormula(InputWorkspace=wsWavelength,  Formula='(4*pi*sin(twotheta/2))/x', AxisUnits='MomentumTransfer')
    # using convert units (this will convert via time of flight)
    wsMTbyConvertUnits = ConvertUnits(InputWorkspace=wsWavelength, Target='MomentumTransfer')
 

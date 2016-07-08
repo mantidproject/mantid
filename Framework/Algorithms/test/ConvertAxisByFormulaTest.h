@@ -8,6 +8,8 @@
 #include "MantidAPI/Axis.h"
 #include <MantidAPI/GeometryInfoFactory.h>
 #include <MantidAPI/GeometryInfo.h>
+#include <MantidKernel/PhysicalConstants.h>
+#include <math.h>
 
 using Mantid::Algorithms::ConvertAxisByFormula;
 
@@ -367,7 +369,7 @@ public:
       GeometryInfo geomInfo = GeometryInfo(geometryFactory, in->getSpectrum(i));
       double signedTwoTheta = geomInfo.getSignedTwoTheta();
       for (size_t j = 0; j < xsize; ++j) {
-        TS_ASSERT_DELTA(outX[j], inX[j] - signedTwoTheta, 0.001);
+        TS_ASSERT_DELTA(outX[j], inX[j] - signedTwoTheta, 0.0001);
         TS_ASSERT_EQUALS(outY[j], inY[j]);
         TS_ASSERT_EQUALS(outE[j], inE[j]);
       }
@@ -411,6 +413,47 @@ public:
         TS_ASSERT_DELTA(outX[j], -inX[xsize-j], 0.0001);
         TS_ASSERT_EQUALS(outY[j], inY[xsize-j-1]);
         TS_ASSERT_EQUALS(outE[j], inE[xsize-j-1]);
+      }
+    }
+
+    cleanupWorkspaces(std::vector<std::string> {inputWs, resultWs});
+  }
+
+  void testConstant() {
+    using namespace Mantid::API;
+    using namespace Mantid::Kernel;
+
+    std::string testName = "testConstant";
+    std::string formula = "pi";
+    std::string axis = "X";
+    std::string inputWs;
+    std::string resultWs;
+    TS_ASSERT(runConvertAxisByFormula(testName, formula, axis, inputWs, resultWs));
+
+    MatrixWorkspace_const_sptr in, result;
+    TS_ASSERT_THROWS_NOTHING(
+      in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(inputWs)));
+    TS_ASSERT_THROWS_NOTHING(
+      result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(resultWs)));
+
+    GeometryInfoFactory geometryFactory(*in);
+    const size_t xsize = result->blocksize();
+    for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
+      const auto &outX = result->readX(i);
+      const auto &outY = result->readY(i);
+      const auto &outE = result->readE(i);
+      const auto &inX = in->readX(i);
+      const auto &inY = in->readY(i);
+      const auto &inE = in->readE(i);
+
+      GeometryInfo geomInfo = GeometryInfo(geometryFactory, in->getSpectrum(i));
+      double twoTheta = geomInfo.getTwoTheta();
+      for (size_t j = 0; j < xsize; ++j) {
+        TS_ASSERT_DELTA(outX[j], M_PI, 0.0001);
+        TS_ASSERT_EQUALS(outY[j], inY[j]);
+        TS_ASSERT_EQUALS(outE[j], inE[j]);
       }
     }
 

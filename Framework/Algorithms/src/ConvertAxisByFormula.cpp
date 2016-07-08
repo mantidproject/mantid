@@ -6,6 +6,7 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/shared_ptr.hpp>
@@ -154,6 +155,20 @@ void ConvertAxisByFormula::exec() {
     for (auto variable : variables) {
       p.DefineVar(variable->name, &(variable->value));
     }
+    //set some constants
+    double pi = M_PI;
+    p.DefineVar("pi", &pi);
+    double h = PhysicalConstants::h;
+    p.DefineVar("h", &h);
+    double hBar = PhysicalConstants::h_bar;
+    p.DefineVar("h_bar", &hBar);
+    double g = PhysicalConstants::g;
+    p.DefineVar("g", &g);
+    double mN = PhysicalConstants::NeutronMass;
+    p.DefineVar("mN", &mN);
+    double mNAMU = PhysicalConstants::NeutronMassAMU;
+    p.DefineVar("mNAMU", &mNAMU);
+
     p.SetExpr(formula);
   } catch (mu::Parser::exception_type &e) {
     std::stringstream ss;
