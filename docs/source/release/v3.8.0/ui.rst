@@ -31,6 +31,7 @@ Algorithms
 .. figure::  ../../images/GroupWorkspaces_multipleInput.png
    :width: 487
    :align: right
+
 - Algorithms can now use a multiple selection list box for property input, :ref:`MergeRuns <algm-MergeRuns>` and :ref:`GroupWorkspaces <algm-GroupWorkspaces>` use this so far. To select multiple rows use the Shift or Ctrl (Cmd) keys while clicking  with the mouse.
 
 
@@ -54,6 +55,7 @@ Bugs Resolved
 SliceViewer Improvements
 ------------------------
 * When opening the sliceviewer, it will default to showing the first two non-integrated dimensions
+
 |
 
 Full list of

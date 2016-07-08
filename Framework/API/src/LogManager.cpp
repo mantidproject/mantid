@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/LogManager.h"
-#include "MantidAPI/PropertyNexus.h"
+#include "MantidKernel/PropertyNexus.h"
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSplitter.h"
@@ -343,7 +343,7 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group,
   std::vector<Property *> props = m_manager.getProperties();
   for (auto &prop : props) {
     try {
-      PropertyNexus::saveProperty(file, prop);
+      prop->saveProperty(file);
     } catch (std::invalid_argument &exc) {
       g_log.warning(exc.what());
     }
@@ -371,8 +371,7 @@ void LogManager::loadNexus(::NeXus::File *file, const std::string &group,
   for (const auto &name_class : entries) {
     // NXLog types are the main one.
     if (name_class.second == "NXlog") {
-      auto prop = std::unique_ptr<Property>(
-          PropertyNexus::loadProperty(file, name_class.first));
+      auto prop = PropertyNexus::loadProperty(file, name_class.first);
       if (prop) {
         if (m_manager.existsProperty(prop->name())) {
           m_manager.removeProperty(prop->name());
@@ -403,8 +402,8 @@ void LogManager::clearLogs() { m_manager.clear(); }
   LogManager::getPropertyValueAsType(const std::string &) const;
 
 INSTANTIATE(double)
-INSTANTIATE(int)
-INSTANTIATE(long)
+INSTANTIATE(int32_t)
+INSTANTIATE(int64_t)
 INSTANTIATE(uint32_t)
 INSTANTIATE(uint64_t)
 INSTANTIATE(std::string)
