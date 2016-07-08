@@ -668,7 +668,8 @@ void ProjectSerialiser::openTable(const std::string &lines,
   Mantid::Kernel::Strings::convert<int>(valVec[2], cols);
 
   // create instance
-  Table *w = new Table(window->scriptingEnv(), rows, cols, "", window, 0);
+  Table *w = new Table();
+  w->init(window->scriptingEnv(), rows, cols, "", window);
   window->initTable(w, caption);
   if (w->objectName() != caption) { // the table was renamed
     window->renamedTables << caption << w->objectName();

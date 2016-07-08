@@ -68,11 +68,18 @@
 
 Table::Table(ScriptingEnv *env, int r, int c, const QString &label,
              QWidget *parent, const QString &name, Qt::WFlags f)
-    : MdiSubWindow(parent, label, name, f), Scripted(env) {
-  init(r, c);
+    : MdiSubWindow(), Scripted() {
+  init(env, r, c, label, parent, name, f);
 }
 
-void Table::init(int rows, int cols) {
+Table::Table() : MdiSubWindow(), Scripted() {}
+
+void Table::init(ScriptingEnv *env, int rows, int cols, const QString &label,
+        QWidget *parent, const QString &name,
+        Qt::WFlags f) {
+  MdiSubWindow::init(parent, label, name, f);
+  Scripted::init(env);
+
   selectedCol = -1;
   d_saved_cells = nullptr;
   d_show_comments = false;
