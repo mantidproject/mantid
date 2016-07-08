@@ -136,10 +136,11 @@ void IntegratePeaksMDHKL::exec() {
   setProperty("OutputWorkspace", peakWS);
 }
 
-MDHistoWorkspace_sptr IntegratePeaksMDHKL::normalize(
-    int h, int k, int l, double box, int gridPts,
-    const MatrixWorkspace_sptr &flux,
-    const MatrixWorkspace_sptr &sa, const IMDEventWorkspace_sptr &ws) {
+MDHistoWorkspace_sptr
+IntegratePeaksMDHKL::normalize(int h, int k, int l, double box, int gridPts,
+                               const MatrixWorkspace_sptr &flux,
+                               const MatrixWorkspace_sptr &sa,
+                               const IMDEventWorkspace_sptr &ws) {
   IAlgorithm_sptr normAlg = createChildAlgorithm("MDNormSCD");
   normAlg->setProperty("InputWorkspace", ws);
   normAlg->setProperty("AlignedDim0",
@@ -257,9 +258,9 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
  * All slicing algorithm properties are passed along
  * @return MDHistoWorkspace as a result of the binning
  */
-MDHistoWorkspace_sptr IntegratePeaksMDHKL::binEvent(int h, int k, int l,
-                                                    double box, int gridPts,
-                                                    const IMDWorkspace_sptr &ws) {
+MDHistoWorkspace_sptr
+IntegratePeaksMDHKL::binEvent(int h, int k, int l, double box, int gridPts,
+                              const IMDWorkspace_sptr &ws) {
   IAlgorithm_sptr binMD = createChildAlgorithm("BinMD", 0.0, 0.3);
   binMD->setProperty("InputWorkspace", ws);
   binMD->setProperty("AlignedDim0",
@@ -286,9 +287,9 @@ MDHistoWorkspace_sptr IntegratePeaksMDHKL::binEvent(int h, int k, int l,
  * All slicing algorithm properties are passed along
  * @return MDHistoWorkspace as a result of the binning
  */
-MDHistoWorkspace_sptr IntegratePeaksMDHKL::cropHisto(int h, int k, int l,
-                                                     double box,
-                                                     const IMDWorkspace_sptr &ws) {
+MDHistoWorkspace_sptr
+IntegratePeaksMDHKL::cropHisto(int h, int k, int l, double box,
+                               const IMDWorkspace_sptr &ws) {
   IAlgorithm_sptr cropMD =
       createChildAlgorithm("IntegrateMDHistoWorkspace", 0.0, 0.3);
   cropMD->setProperty("InputWorkspace", ws);

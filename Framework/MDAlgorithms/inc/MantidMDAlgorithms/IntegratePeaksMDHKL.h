@@ -19,7 +19,6 @@ namespace MDAlgorithms {
  */
 class DLLExport IntegratePeaksMDHKL : public API::Algorithm {
 public:
-
   /// Algorithm's name for identification
   const std::string name() const override { return "IntegratePeaksMDHKL"; };
   /// Summary of algorithms purpose
@@ -39,16 +38,16 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  DataObjects::MDHistoWorkspace_sptr normalize(int h, int k, int l, double box,
-                                               int gridPts,
-                                               const API::MatrixWorkspace_sptr &flux,
-                                               const API::MatrixWorkspace_sptr &sa,
-                                               const API::IMDEventWorkspace_sptr &ws);
+  DataObjects::MDHistoWorkspace_sptr
+  normalize(int h, int k, int l, double box, int gridPts,
+            const API::MatrixWorkspace_sptr &flux,
+            const API::MatrixWorkspace_sptr &sa,
+            const API::IMDEventWorkspace_sptr &ws);
   DataObjects::MDHistoWorkspace_sptr binEvent(int h, int k, int l, double box,
                                               int gridPts,
                                               const API::IMDWorkspace_sptr &ws);
-  DataObjects::MDHistoWorkspace_sptr cropHisto(int h, int k, int l, double box,
-                                               const API::IMDWorkspace_sptr &ws);
+  DataObjects::MDHistoWorkspace_sptr
+  cropHisto(int h, int k, int l, double box, const API::IMDWorkspace_sptr &ws);
   void integratePeak(const int neighborPts,
                      DataObjects::MDHistoWorkspace_sptr out, double &intensity,
                      double &errorSquared);
