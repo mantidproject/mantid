@@ -396,6 +396,68 @@ public:
                      "group1_row0_col1");
   }
 
+  void testRemoveRowsFourRowTableTwoGroups() {
+
+    // Create the table ws
+    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+    ws->addColumn("str", "Group");
+    ws->addColumn("str", "Column1");
+    ws->addColumn("str", "Column2");
+
+    TableRow row = ws->appendRow();
+    row << "1"
+        << "13462"
+        << "2.3";
+    row = ws->appendRow();
+    row << "2"
+        << "13470"
+        << "2.3";
+    row = ws->appendRow();
+    row << ""
+        << "13460"
+        << "0.7";
+    row = ws->appendRow();
+    row << ""
+        << "13469"
+        << "0.7";
+
+    QDataProcessorTreeModel model(ws, m_whitelist);
+
+    // Delete second row
+    TS_ASSERT_EQUALS(model.removeRows(0, 1, model.index(1, 0)), true);
+
+    // Test tree data
+    // Groups
+    TS_ASSERT_EQUALS(model.rowCount(), 2);
+    TS_ASSERT_EQUALS(model.rowCount(model.index(0, 0)), 1);
+    TS_ASSERT_EQUALS(model.rowCount(model.index(1, 0)), 2);
+
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0)))
+                         .toString()
+                         .toStdString(),
+                     "13462");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(0, 0)))
+                         .toString()
+                         .toStdString(),
+                     "2.3");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(1, 0)))
+                         .toString()
+                         .toStdString(),
+                     "13460");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 1, model.index(1, 0)))
+                         .toString()
+                         .toStdString(),
+                     "0.7");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(1, 0)))
+                         .toString()
+                         .toStdString(),
+                     "13469");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 1, model.index(1, 0)))
+                         .toString()
+                         .toStdString(),
+                     "0.7");
+  }
+
 private:
   DataProcessorWhiteList m_whitelist;
 };
