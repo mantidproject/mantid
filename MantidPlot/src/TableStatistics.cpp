@@ -42,7 +42,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-TableStatistics::TableStatistics(ScriptingEnv *env, ApplicationWindow *parent,
+TableStatistics::TableStatistics(ScriptingEnv *env, QWidget *parent,
                                  Table *base, Type t, QList<int> targets)
     : Table(env, 1, 1, "", parent, ""), d_base(base), d_type(t),
       d_targets(targets) {

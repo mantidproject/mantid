@@ -733,19 +733,25 @@ void ProjectSerialiser::openTableStatistics(const std::string &lines,
     targets << target;
   }
 
-  auto t = window->newTableStatistics(
-      window->table(QString::fromStdString(tableName)),
-      type == "row" ? TableStatistics::row : TableStatistics::column, targets,
-      QString::fromStdString(name));
-
-  if (!t)
+  int typeCode = type == "row" ? TableStatistics::row : TableStatistics::column;
+  TableStatistics *s = new TableStatistics(window->scriptingEnv(), window,
+                                           window->table(QString::fromStdString(tableName)),
+                                           (TableStatistics::Type)typeCode, targets);
+  if (!s)
     return;
 
+  QString caption = QString::fromStdString(name);
+  if (caption.isEmpty())
+    window->initTable(s, s->objectName());
+  else
+    window->initTable(s, caption);
+
+  s->showNormal();
   window->setListViewDate(QString::fromStdString(name),
                           QString::fromStdString(birthDate));
-  t->setBirthDate(QString::fromStdString(birthDate));
+  s->setBirthDate(QString::fromStdString(birthDate));
 
-  t->loadFromProject(lines, window, fileVersion);
+  s->loadFromProject(lines, window, fileVersion);
 }
 
 /**
