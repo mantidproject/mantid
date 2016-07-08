@@ -62,7 +62,7 @@ def _equal_within_tolerance(self, expected, actual, tolerance=0.05):
     abs_difference = abs(expected - actual)
     self.assertTrue(abs_difference <= abs(tolerance_value))
 
-def _get_maximum_peak_height_max_and_index(workspace, ws_index):
+def _get_peak_height_and_index(workspace, ws_index):
     """
     returns the maximum height in y of a given spectrum of a workspace
     workspace is assumed to be a matrix workspace
@@ -154,12 +154,11 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         calc_data_bin_expected = 635
         if _is_old_boost_version():
             index_one_first = 0.000605572768745
-            index_two_first = -0.00487957546659
 
         _equal_within_tolerance(self, index_one_first, fitted_ws.readY(0)[0])
         _equal_within_tolerance(self, index_one_last, fitted_ws.readY(0)[-1])
 
-        calc_data_height_actual, calc_data_bin_actual = _get_maximum_peak_height_max_and_index(fitted_ws, 1)
+        calc_data_height_actual, calc_data_bin_actual = _get_peak_height_and_index(fitted_ws, 1)
         _equal_within_tolerance(self, calc_data_height_expected, calc_data_height_actual)
         self.assertTrue(abs(calc_data_bin_expected - calc_data_bin_actual) <= 1)
 
