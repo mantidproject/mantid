@@ -1,7 +1,9 @@
 import unittest
 from mantid.simpleapi import *
-from AbinsModules import DwData
 import numpy as np
+
+from AbinsModules import DwData
+
 
 class DwDataTest(unittest.TestCase):
     # fake DW tensors for two atoms
@@ -48,7 +50,7 @@ class DwDataTest(unittest.TestCase):
         # bad type of elements: integers instead of floats
         _bad_item = np.asarray([[1, 1, 1],
                                 [1, 1, 1],
-                                [1, 1, 1]]) # list 3x3
+                                [1, 1, 1]]) # array 3x3
         with self.assertRaises(ValueError):
             self.tester.append(item=_bad_item, num_atom=0)
 
