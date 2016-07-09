@@ -585,9 +585,7 @@ std::vector<V3D> V3D::makeVectorsOrthogonal(std::vector<V3D> &vectors) {
   \todo Check Error handling
   @param IX :: Input Stream
 */
-void V3D::read(std::istream &IX) {
-  IX >> x >> y >> z;
-}
+void V3D::read(std::istream &IX) { IX >> x >> y >> z; }
 
 void V3D::write(std::ostream &OX) const
 /**

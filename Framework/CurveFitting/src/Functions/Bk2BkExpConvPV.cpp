@@ -42,9 +42,7 @@ void Bk2BkExpConvPV::init() {
 
 /** Set peak height
   */
-void Bk2BkExpConvPV::setHeight(const double h) {
-  setParameter("Height", h);
-}
+void Bk2BkExpConvPV::setHeight(const double h) { setParameter("Height", h); }
 
 /** Get peak height
   */
