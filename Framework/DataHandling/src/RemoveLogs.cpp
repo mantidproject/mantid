@@ -61,14 +61,19 @@ void RemoveLogs::exec() {
   const std::vector<Mantid::Kernel::Property *> &logData =
       localWorkspace->run().getLogData();
   std::vector<std::string> keepLogs = getProperty("KeepLogs");
+  std::vector<std::string> logNames;
   for (const auto property : logData) {
-    const std::string &name = property->name();
+    logNames.push_back(property->name());
+  }
+  for (const auto &name : logNames) {
     auto location = std::find(keepLogs.cbegin(), keepLogs.cend(), name);
     if (location == keepLogs.cend()) {
       localWorkspace->mutableRun().removeLogData(name);
     }
   }
+
   // operation was a success and ended normally
+  return;
 }
 
 } // namespace DataHandling
