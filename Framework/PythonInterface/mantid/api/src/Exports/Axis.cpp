@@ -71,7 +71,7 @@ PyObject *extractAxisValues(Axis &self) {
                       reinterpret_cast<char *>(pos), value);
     } else {
       const std::string s = self.label(static_cast<size_t>(i));
-      PyObject *value = PyBytes_FromString(s.c_str());
+      PyObject *value = to_python_value<const std::string &>()(s);
       PyList_SetItem(array, (Py_ssize_t)i, value);
     }
   }

@@ -1,4 +1,6 @@
 #pylint: disable=no-init, no-name-in-module
+from __future__ import (absolute_import, division, print_function)
+
 import math
 import numpy as np
 from scipy.stats import chisquare

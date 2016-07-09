@@ -127,7 +127,7 @@ private:
   /// Read in the time bin boundaries
   int64_t m_lengthIn;
   /// time channels vector
-  std::vector<boost::shared_ptr<MantidVec>> m_timeChannelsVec;
+  std::vector<boost::shared_ptr<HistogramData::HistogramX>> m_timeChannelsVec;
   /// total number of specs
   int64_t m_total_specs;
   /// A list of periods to read. Each value is between 1 and m_numberOfPeriods

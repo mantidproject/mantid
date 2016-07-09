@@ -3,6 +3,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -26,6 +27,9 @@ using namespace Geometry;
 using namespace DataObjects;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
+using HistogramData::Counts;
+using HistogramData::CountVariances;
+using HistogramData::CountStandardDeviations;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSampleWorkspace)
@@ -289,30 +293,22 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
     int numPixels, int numBins, double x0, double binDelta,
     int start_at_pixelID, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
-  MantidVecPtr x, y, e;
-  x.access().resize(numBins + 1);
-  e.access().resize(numBins);
+  HistogramData::BinEdges x(numBins + 1);
   for (int i = 0; i < numBins + 1; ++i) {
-    x.access()[i] = x0 + i * binDelta;
+    x.mutableData()[i] = x0 + i * binDelta;
   }
 
-  std::vector<double> xValues(x.access().begin(), x.access().end() - 1);
-  y.access() = evalFunction(functionString, xValues, isRandom ? 1 : 0);
-  e.access().resize(numBins);
+  std::vector<double> xValues(cbegin(x), cend(x) - 1);
+  Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
+  CountStandardDeviations e(CountVariances(y.cbegin(), y.cend()));
 
-  // calculate e as sqrt(y)
-  typedef double (*uf)(double);
-  uf dblSqrt = std::sqrt;
-  std::transform(y.access().begin(), y.access().end(), e.access().begin(),
-                 dblSqrt);
-
-  MatrixWorkspace_sptr retVal = boost::make_shared<DataObjects::Workspace2D>();
-  retVal->initialize(numPixels, numBins + 1, numBins);
+  auto retVal = createWorkspace<Workspace2D>(numPixels, numBins + 1, numBins);
   retVal->setInstrument(inst);
 
   for (size_t wi = 0; wi < static_cast<size_t>(numPixels); wi++) {
-    retVal->setX(wi, x);
-    retVal->setData(wi, y, e);
+    retVal->setBinEdges(wi, x);
+    retVal->setCounts(wi, y);
+    retVal->setCountStandardDeviations(wi, e);
     retVal->getSpectrum(wi).setDetectorID(detid_t(start_at_pixelID + wi));
     retVal->getSpectrum(wi).setSpectrumNo(specnum_t(wi + 1));
   }
@@ -337,9 +333,8 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
   retVal->setInstrument(inst);
 
   // Create the x-axis for histogramming.
-  MantidVecPtr x1;
-  MantidVec &xRef = x1.access();
-  xRef.resize(numXBins);
+  HistogramData::BinEdges x1(numXBins);
+  auto &xRef = x1.mutableData();
   for (int i = 0; i < numXBins; ++i) {
     xRef[i] = x0 + i * binDelta;
   }

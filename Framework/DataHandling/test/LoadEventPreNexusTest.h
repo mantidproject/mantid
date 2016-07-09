@@ -30,6 +30,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Kernel::Exception;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using Mantid::HistogramData::HistogramX;
 
 using std::runtime_error;
 using std::size_t;
@@ -212,7 +213,7 @@ public:
                       inputWS->getSpectrum(wkspIndex).getEvents()[0].tof());
 
     // Setting X should still be possible
-    Kernel::cow_ptr<MantidVec> x;
+    Kernel::cow_ptr<HistogramX> x;
     TS_ASSERT_THROWS_NOTHING(outputWS->setX(0, x));
     // Accessing Y is still possible
     const MantidVec Y =

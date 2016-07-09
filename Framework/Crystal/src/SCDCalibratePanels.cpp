@@ -111,12 +111,8 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
   //   X = peak index (repeated 3 times
   //   Y = 0. as the function evals to (Q-vec) - (UB * hkl * 2pi)
   //   E = the weighting as used in the cost function
-  Mantid::MantidVecPtr pX;
-  Mantid::MantidVec &xRef = pX.access();
-  Mantid::MantidVecPtr yvals;
-  Mantid::MantidVec &yvalB = yvals.access();
-  Mantid::MantidVecPtr errs;
-  Mantid::MantidVec &errB = errs.access();
+  Mantid::MantidVec xRef;
+  Mantid::MantidVec errB;
   bounds.clear();
   bounds.push_back(0);
 
@@ -149,18 +145,16 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
     bounds.push_back(N);
   } // for @ bank name
 
-  yvalB.assign(xRef.size(), 0.0);
-
   if (N < 4) // If not well indexed
     return boost::make_shared<DataObjects::Workspace2D>();
 
-  MatrixWorkspace_sptr mwkspc =
-      API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * N, 3 * N);
+  auto mwkspc = API::createWorkspace<Workspace2D>(1, N, N);
 
-  mwkspc->setX(0, pX);
-  mwkspc->setData(0, yvals, errs);
+  mwkspc->setPoints(0, xRef);
+  mwkspc->setCounts(0, xRef.size(), 0.0);
+  mwkspc->setCountStandardDeviations(0, std::move(errB));
 
-  return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(mwkspc);
+  return mwkspc;
 }
 
 /**

@@ -7,7 +7,7 @@
 # Disable unused import warning
 # pylint: disable=W0611
 try:
-    from mantid.kernel import ConfigService, Logger, version_str
+    from mantid.kernel import ConfigService, Logger, version_str, UsageService
 
     HAS_MANTID = True
 except (ImportError, ImportWarning):
@@ -356,6 +356,10 @@ class BaseReductionScripter(object):
         self._output_directory = os.path.expanduser('~')
         if HAS_MANTID:
             config = ConfigService.Instance()
+            #register startup
+            if HAS_MANTID:
+                UsageService.registerFeatureUsage("Interface",
+                                                  "Reduction_gui:{0:.5}-{1:.10}".format(facility, name),False)
             try:
                 head, _tail = os.path.split(config.getUserFilename())
                 if os.path.isdir(head):

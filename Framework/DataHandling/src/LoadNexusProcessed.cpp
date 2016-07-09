@@ -168,7 +168,7 @@ bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS,
 
 /// Default constructor
 LoadNexusProcessed::LoadNexusProcessed()
-    : m_shared_bins(false), m_xbins(), m_axis1vals(), m_list(false),
+    : m_shared_bins(false), m_xbins(0), m_axis1vals(), m_list(false),
       m_interval(false), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT()),
       m_spec_list(), m_filtered_spec_idxs(), m_cppFile(nullptr) {}
 
@@ -740,13 +740,14 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
 
       // Set the X axis
       if (this->m_shared_bins)
-        el.setX(this->m_xbins);
+        el.setX(this->m_xbins.cowData());
       else {
         MantidVec x;
         x.resize(xbins.dim1());
         for (int i = 0; i < xbins.dim1(); i++)
           x[i] = xbins(static_cast<int>(wi), i);
-        el.setX(x);
+        // Workspace and el was just created, so we can just set a new histogram
+        el.setX(make_cow<HistogramData::HistogramX>(x));
       }
     }
 
@@ -1483,7 +1484,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
     xlength = xbins.dim0();
     m_shared_bins = true;
     xbins.load();
-    m_xbins.access().assign(xbins(), xbins() + xlength);
+    m_xbins = HistogramData::HistogramX(xbins(), xbins() + xlength);
   } else {
     throw std::runtime_error("Unknown axis1 dimension encountered.");
   }
@@ -1837,7 +1838,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   double *err_end = err_start + nchannels;
   double *farea_start = nullptr;
   double *farea_end = nullptr;
-  const int64_t nxbins(m_xbins->size());
+  const int64_t nxbins(m_xbins.size());
   double *xErrors_start = nullptr;
   double *xErrors_end = nullptr;
   RebinnedOutput_sptr rb_workspace;
@@ -1870,13 +1871,14 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       farea_end += nchannels;
     }
     if (hasXErrors) {
-      MantidVec &DX = local_workspace->dataDx(hist);
-      DX.assign(xErrors_start, xErrors_end);
+      local_workspace->setSharedDx(
+          hist, Kernel::make_cow<HistogramData::HistogramDx>(xErrors_start,
+                                                             xErrors_end));
       xErrors_start += nxbins;
       xErrors_end += nxbins;
     }
 
-    local_workspace->setX(hist, m_xbins);
+    local_workspace->setX(hist, m_xbins.cowData());
     ++hist;
   }
 }
@@ -1914,7 +1916,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   double *err_end = err_start + nchannels;
   double *farea_start = nullptr;
   double *farea_end = nullptr;
-  const int64_t nxbins(m_xbins->size());
+  const int64_t nxbins(m_xbins.size());
   double *xErrors_start = nullptr;
   double *xErrors_end = nullptr;
   RebinnedOutput_sptr rb_workspace;
@@ -1947,12 +1949,13 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       farea_end += nchannels;
     }
     if (hasXErrors) {
-      MantidVec &DX = local_workspace->dataDx(wsIndex);
-      DX.assign(xErrors_start, xErrors_end);
+      local_workspace->setSharedDx(
+          wsIndex, Kernel::make_cow<HistogramData::HistogramDx>(xErrors_start,
+                                                                xErrors_end));
       xErrors_start += nxbins;
       xErrors_end += nxbins;
     }
-    local_workspace->setX(wsIndex, m_xbins);
+    local_workspace->setX(wsIndex, m_xbins.cowData());
     ++hist;
     ++wsIndex;
   }
@@ -2029,8 +2032,9 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       farea_end += nchannels;
     }
     if (hasXErrors) {
-      MantidVec &DX = local_workspace->dataDx(wsIndex);
-      DX.assign(xErrors_start, xErrors_end);
+      local_workspace->setSharedDx(
+          wsIndex, Kernel::make_cow<HistogramData::HistogramDx>(xErrors_start,
+                                                                xErrors_end));
       xErrors_start += nxbins;
       xErrors_end += nxbins;
     }

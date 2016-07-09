@@ -1229,13 +1229,13 @@ double DataModeHandler::getNewRCRadius() {
  * @param yvals   The y(row) values of the data to be considered
  * @param counts  The intensity at the given row and column (and timeslice)
  */
-void DataModeHandler::setHeightHalfWidthInfo(Mantid::MantidVecPtr &xvals,
-                                             Mantid::MantidVecPtr &yvals,
-                                             Mantid::MantidVecPtr &counts) {
+void DataModeHandler::setHeightHalfWidthInfo(const MantidVec &xvals,
+                                             const MantidVec &yvals,
+                                             const MantidVec &counts) {
   double minCount, maxCount;
-  MantidVec X = xvals.access();
-  MantidVec Y = yvals.access();
-  MantidVec C = counts.access();
+  const auto &X = xvals;
+  const auto &Y = yvals;
+  const auto &C = counts;
   VarxHW = -1;
   VaryHW = -1;
   int N = static_cast<int>(X.size());
@@ -1566,15 +1566,10 @@ void IntegratePeakTimeSlices::SetUpData1(
   for (int i = 0; i < NAttributes + 2; i++)
     StatBase.push_back(0);
 
-  Mantid::MantidVecPtr yvals;
-  Mantid::MantidVecPtr errs;
-  Mantid::MantidVecPtr xvals;
-  Mantid::MantidVecPtr Yvals;
-
-  Mantid::MantidVec &yvalB = yvals.access();
-  Mantid::MantidVec &errB = errs.access();
-  Mantid::MantidVec &xvalB = xvals.access();
-  Mantid::MantidVec &YvalB = Yvals.access();
+  Mantid::MantidVec yvalB;
+  Mantid::MantidVec errB;
+  Mantid::MantidVec xvalB;
+  Mantid::MantidVec YvalB;
 
   double TotBoundaryIntensities = 0;
   int nBoundaryCells = 0;
@@ -1586,9 +1581,8 @@ void IntegratePeakTimeSlices::SetUpData1(
   double minRow = 20000, maxRow = -1, minCol = 20000, maxCol = -1;
 
   int jj = 0;
-  Mantid::MantidVecPtr pX;
 
-  Mantid::MantidVec &xRef = pX.access();
+  Mantid::MantidVec xRef;
   for (int i = 2; i < m_NeighborIDs[1]; i++) {
     int DetID = m_NeighborIDs[i];
 
@@ -1681,14 +1675,16 @@ void IntegratePeakTimeSlices::SetUpData1(
   if (m_AttributeValues->EdgeX <= 1)
     m_AttributeValues->EdgeX = 0;
 
+  auto pX = Kernel::make_cow<HistogramData::HistogramX>(std::move(xRef));
   Data->setX(0, pX);
   Data->setX(1, pX);
   Data->setX(2, pX);
 
-  ws->setData(0, yvals, errs);
-  ws->setData(1, xvals);
-  ws->setData(2, Yvals);
-  m_AttributeValues->setHeightHalfWidthInfo(xvals, Yvals, yvals);
+  ws->setCounts(0, yvalB);
+  ws->setCountStandardDeviations(0, errB);
+  ws->setCounts(1, xvalB);
+  ws->setCounts(2, YvalB);
+  m_AttributeValues->setHeightHalfWidthInfo(xvalB, YvalB, yvalB);
 
   StatBase[IStartRow] = minRow;
   StatBase[IStartCol] = minCol;

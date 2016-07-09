@@ -645,11 +645,7 @@ void LoadEventPreNexus::procEvents(
   workspace->clearMRU();
 
   // Now, create a default X-vector for histogramming, with just 2 bins.
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &xRef = axis.access();
-  xRef.resize(2);
-  xRef[0] = shortest_tof - 1; // Just to make sure the bins hold it all
-  xRef[1] = longest_tof + 1;
+  auto axis = HistogramData::BinEdges{shortest_tof - 1, longest_tof + 1};
   workspace->setAllX(axis);
   this->pixel_to_wkspindex.clear();
 
