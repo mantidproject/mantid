@@ -96,76 +96,74 @@ public:
 
 private:
   std::string m_key;
-  };
+};
+}
+
+std::unique_ptr<Surface>
+SurfaceFactory::createSurface(const std::string &Key) const
+/**
+  Creates an instance of tally
+  given a valid key.
+
+  @param Key :: Item to get
+  @throw NotFoundError for the key if not found
+  @return new tally object.
+*/
+{
+  MapType::const_iterator vc;
+  vc = std::find_if(SGrid.begin(), SGrid.end(), KeyEquals(Key));
+  if (vc == SGrid.end()) {
+    throw Kernel::Exception::NotFoundError("SurfaceFactory::createSurface",
+                                           Key);
+  }
+  return vc->second->clone();
+}
+
+std::unique_ptr<Surface>
+SurfaceFactory::createSurfaceID(const std::string &Key) const
+/**
+  Creates an instance of tally
+  given a valid key.
+
+  @param Key :: Form of first ID
+  @throw NotFoundError for the key if not found
+  @return new tally object.
+*/
+{
+  std::map<char, std::string>::const_iterator mc;
+
+  mc = (Key.empty()) ? ID.end() : ID.find(static_cast<char>(tolower(Key[0])));
+  if (mc == ID.end()) {
+    throw Kernel::Exception::NotFoundError("SurfaceFactory::createSurfaceID",
+                                           Key);
   }
 
-  std::unique_ptr<Surface> SurfaceFactory::createSurface(const std::string &Key)
-      const
-  /**
-    Creates an instance of tally
-    given a valid key.
+  return createSurface(mc->second);
+}
 
-    @param Key :: Item to get
-    @throw NotFoundError for the key if not found
-    @return new tally object.
-  */
-  {
-    MapType::const_iterator vc;
-    vc = std::find_if(SGrid.begin(), SGrid.end(), KeyEquals(Key));
-    if (vc == SGrid.end()) {
-      throw Kernel::Exception::NotFoundError("SurfaceFactory::createSurface",
-                                             Key);
-    }
-    return vc->second->clone();
+std::unique_ptr<Surface>
+SurfaceFactory::processLine(const std::string &Line) const
+/**
+  Creates an instance of a surface
+  given a valid line
+
+  @param Line :: Full description of line
+  @throw InContainerError for the key if not found
+  @return new surface object.
+*/
+{
+  std::string key;
+  if (!Mantid::Kernel::Strings::convert(Line, key))
+    throw Kernel::Exception::NotFoundError("SurfaceFactory::processLine", Line);
+
+  std::unique_ptr<Surface> X = createSurfaceID(key);
+  if (X->setSurface(Line)) {
+    std::cerr << "X:: " << X->setSurface(Line) << '\n';
+    throw Kernel::Exception::NotFoundError("SurfaceFactory::processLine", Line);
   }
 
-  std::unique_ptr<Surface> SurfaceFactory::createSurfaceID(
-      const std::string &Key) const
-  /**
-    Creates an instance of tally
-    given a valid key.
-
-    @param Key :: Form of first ID
-    @throw NotFoundError for the key if not found
-    @return new tally object.
-  */
-  {
-    std::map<char, std::string>::const_iterator mc;
-
-    mc = (Key.empty()) ? ID.end() : ID.find(static_cast<char>(tolower(Key[0])));
-    if (mc == ID.end()) {
-      throw Kernel::Exception::NotFoundError("SurfaceFactory::createSurfaceID",
-                                             Key);
-    }
-
-    return createSurface(mc->second);
-  }
-
-  std::unique_ptr<Surface> SurfaceFactory::processLine(const std::string &Line)
-      const
-  /**
-    Creates an instance of a surface
-    given a valid line
-
-    @param Line :: Full description of line
-    @throw InContainerError for the key if not found
-    @return new surface object.
-  */
-  {
-    std::string key;
-    if (!Mantid::Kernel::Strings::convert(Line, key))
-      throw Kernel::Exception::NotFoundError("SurfaceFactory::processLine",
-                                             Line);
-
-    std::unique_ptr<Surface> X = createSurfaceID(key);
-    if (X->setSurface(Line)) {
-      std::cerr << "X:: " << X->setSurface(Line) << '\n';
-      throw Kernel::Exception::NotFoundError("SurfaceFactory::processLine",
-                                             Line);
-    }
-
-    return X;
-  }
+  return X;
+}
 
 } // NAMESPACE Geometry
 
