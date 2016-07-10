@@ -13,7 +13,7 @@ class AtomsDaTa(GeneralData):
         self._num_atoms = num_atoms
 
 
-    def append(self, item=None):
+    def _append(self, item=None):
         """
         Adds one elements to the collection of atoms data.
         @param item: element to be added
@@ -74,7 +74,11 @@ class AtomsDaTa(GeneralData):
         if len(items) != self._num_atoms:
             raise ValueError("Inconsistent size of new data and number of atoms. (%s != %s)"%(len(items), self._num_atoms))
 
-        super(AtomsDaTa, self).set(items=items)
+        if isinstance(items, list):
+            self._data = []
+            for item in items:
+                self._append(item=item)
+
 
 
     def extract(self):

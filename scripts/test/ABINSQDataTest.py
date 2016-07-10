@@ -16,7 +16,7 @@ class ABINSQvectorsTEST(unittest.TestCase):
         # Q frequency dependent: wrong items to extract
         vectors_Q = QData(frequency_dependence=True)
         vectors_Q.set_k(k=2) # k should be 1
-        vectors_Q.append(item=self._good_array)
+        vectors_Q._append(item=self._good_array)
         with self.assertRaises(ValueError):
              wrong_data = vectors_Q.extract()
 
@@ -24,7 +24,7 @@ class ABINSQvectorsTEST(unittest.TestCase):
         vectors_Q = QData(frequency_dependence=True)
         vectors_Q.set_k(k=1)
         with self.assertRaises(ValueError):
-             vectors_Q.append(item=[1,2,4]) # list instead of numpy array
+             vectors_Q._append(item=[1, 2, 4]) # list instead of numpy array
 
         # Q frequency dependent: wrong items to set
         vectors_Q = QData(frequency_dependence=True)
@@ -38,7 +38,7 @@ class ABINSQvectorsTEST(unittest.TestCase):
 
         # Q frequency independent: wrong items added
         vectors_Q = QData(frequency_dependence=False)
-        vectors_Q.append(np.asarray([1.0,3.0,2.0,0.0])) # should be 3 elements not 4
+        vectors_Q._append(np.asarray([1.0, 3.0, 2.0, 0.0])) # should be 3 elements not 4
         with self.assertRaises(ValueError):
             wrong_data = vectors_Q.extract()
 
@@ -51,7 +51,7 @@ class ABINSQvectorsTEST(unittest.TestCase):
         # Q frequency dependent: good items to append
         vectors_Q = QData(frequency_dependence=True)
         vectors_Q.set_k(k=1)
-        vectors_Q.append(item=self._good_array)
+        vectors_Q._append(item=self._good_array)
         self.assertEqual(True, np.allclose(self._good_array, vectors_Q.extract()[0]))
 
         # Q frequency dependent: good items to set
@@ -62,8 +62,8 @@ class ABINSQvectorsTEST(unittest.TestCase):
 
         # Q frequency independent: good items to append
         vectors_Q = QData(frequency_dependence=False)
-        vectors_Q.append(item=self._good_array)
-        vectors_Q.append(item=self._good_array)
+        vectors_Q._append(item=self._good_array)
+        vectors_Q._append(item=self._good_array)
         self.assertEqual(True, np.allclose([self._good_array, self._good_array], vectors_Q.extract()))
 
         # Q frequency independent: good items to set as an array

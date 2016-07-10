@@ -3,30 +3,32 @@ import numpy as np
 from mantid.simpleapi import *
 from AbinsModules import KpointsData
 
+
 class KpointsDataTest(unittest.TestCase):
 
-    _good_data= [{"value":np.asarray([0.2, 0.1, 0.2]),
-                   "weight":0.3,
-                   "frequencies":np.asarray([1.0, 2.0, 34.0, 4.9,  1.0, 2.0]),  # 6 frequencies
-                   "atomic_displacements":np.asarray([[1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0],
-                                                      [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0],
-                                                      [1.0,1.0,1.0],[1.0,1.0,111.0],[1.0,1.0,1.0],
-                                                      [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0]]) }, # 12 atomic displacements
-                  {"value":np.asarray([0.1, 0.0, 0.2]),
-                   "weight":0.2,
-                   "frequencies":np.asarray([11.0, 12.0, 134.0, 14.9,  11.0, 12.0]),  # 6 frequencies
-                   "atomic_displacements":np.asarray([[1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0],
-                                                      [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0],
-                                                      [1.0,1.0,1.0],[1.0,1.0,221.0],[1.0,1.0,1.0],
-                                                      [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0]]) },
-                  {"value":np.asarray([0.2, 0.2, 0.2]),
-                   "weight":0.5,
-                   "frequencies":np.asarray([1.0, 2.0, 34.0, 4.9,  1.0, 2.0]),  # 6 frequencies
-                   "atomic_displacements":np.asarray([[1.0,1.0,1.0],[1.0,1.0,41.0],  [1.0,1.0,1.0],
-                                                      [1.0,1.0,1.0],[1.0,1.0,31.0],  [1.0,1.0,1.0],
-                                                      [1.0,1.0,1.0],[1.0,1.0,1.0],   [1.0,1.0,1.0],
-                                                      [1.0,1.0,1.0],[1.0,1.0,41.0],  [1.0,1.0,1.0]]) } # 12 atomic displacements
-                  ]
+    _good_data = {"k_vectors": np.asarray([[0.2, 0.1, 0.2], [0.1, 0.0, 0.2], [0.2, 0.2, 0.2]]),
+                  "weights": np.asarray([0.3, 0.2, 0.5]),
+                  "frequencies": np.asarray([[1.0, 2.0, 34.0, 4.9, 1.0, 2.0],
+                                             [11.0, 12.0, 134.0, 14.9, 11.0, 12.0],
+                                             [1.0, 2.0, 34.0, 4.9, 1.0, 2.0]]), # 6 frequencies for one k-point
+                  "atomic_displacements": np.asarray([[[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
+                                                      [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
+                                                      [1.0, 1.0, 1.0], [1.0, 1.0, 111.0], [1.0, 1.0, 1.0],
+                                                      [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]],
+
+                                                     [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
+                                                      [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
+                                                      [1.0, 1.0, 1.0], [1.0, 1.0, 221.0], [1.0, 1.0, 1.0],
+                                                      [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0]],
+
+                                                     [[1.0, 1.0, 1.0], [1.0, 1.0, 41.0], [1.0, 1.0, 1.0],
+                                                      [1.0, 1.0, 1.0], [1.0, 1.0, 31.0], [1.0, 1.0, 1.0],
+                                                      [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
+                                                      [1.0, 1.0, 1.0], [1.0, 1.0, 41.0], [1.0, 1.0, 1.0]]
+                                                     # 12 atomic displacements for each k-point
+                                                     ])}
+
+
 
     def setUp(self):
         self.tester = KpointsData(num_k=3, num_atoms=2)
@@ -37,114 +39,115 @@ class KpointsDataTest(unittest.TestCase):
 
         # Case no dict to append
         with self.assertRaises(ValueError):
-            wrong_dict = ["value", 2, "freq"]
-            self.tester.append(item=wrong_dict)
+            wrong_dict = ["k_vectors", 2, "freq"]
+            self.tester.set(items=wrong_dict)
 
     def test_missing_key(self):
         # missing atomic_displacements
-        item = {"value":self._good_data[0]["value"],
-                "weight":self._good_data[0]["weight"],
-                "frequencies": self._good_data[0]["frequencies"]}
+        items = {"k_vectors": self._good_data["k_vectors"],
+                 "weights": self._good_data["weights"],
+                 "frequencies": self._good_data["frequencies"]}
         with self.assertRaises(ValueError):
-            self.tester.append(item=item)
+            self.tester.set(items=items)
 
 
     def test_wrong_value(self):
-        # value should be a real number
-        item = {"value":"wrong_value",
-                "weight":self._good_data[0]["weight"],
-                "frequencies": self._good_data[0]["frequencies"],
-                "atomic_displacements":  self._good_data[0]["atomic_displacements"]}
+        # value should be a numpy array with real numbers
+        items = {"k_vectors": "wrong_value",
+                 "weights": self._good_data["weights"],
+                 "frequencies": self._good_data["frequencies"],
+                 "atomic_displacements":  self._good_data["atomic_displacements"]}
         with self.assertRaises(ValueError):
-            self.tester.append(item=item)
+            self.tester.set(items=items)
 
 
     def test_wrong_weight(self):
-        # complex weight (weight should be represented as a positive real number)
-        item = { "value": self._good_data[0]["value"],
-                 "weight": -0.1,
-                 "frequencies": self._good_data[0]["frequencies"],
-                 "atomic_displacements":  self._good_data[0]["atomic_displacements"]}
+        # negative weight (weight should be represented as a positive real number)
+        items = { "k_vectors": self._good_data["k_vectors"],
+                  "weights": np.asarray([-0.1, 0.3, 0.2]),
+                  "frequencies": self._good_data["frequencies"],
+                  "atomic_displacements": self._good_data["atomic_displacements"]}
         with self.assertRaises(ValueError):
-            self.tester.append(item=item)
+            self.tester.set(items=items)
 
 
     def test_wrong_freq(self):
         # frequencies as a string
-        item = {"value":self._good_data[0]["value"],
-                "weight":self._good_data[0]["weight"],
-                "frequencies":"Wrong_freq",
-                "atomic_displacements":self._good_data[0]["atomic_displacements"]}
+        wrong_items = {"k_vectors": self._good_data["k_vectors"],
+                       "weights": self._good_data["weights"],
+                       "frequencies":"Wrong_freq",
+                       "atomic_displacements": self._good_data["atomic_displacements"]}
         with self.assertRaises(ValueError):
-            self.tester.append(item=item)
+            self.tester.set(items=wrong_items)
 
 
 
         # complex frequencies
-        item = {"value":self._good_data[0]["value"],
-                "weight":self._good_data[0]["weight"],
-                "frequencies":self._good_data[0]["frequencies"].astype(complex),
-                "atomic_displacements":self._good_data[0]["atomic_displacements"]
-                }
+        wrong_items = {"k_vectors": self._good_data["k_vectors"],
+                       "weights": self._good_data["weights"],
+                       "frequencies": self._good_data["frequencies"].astype(complex),
+                       "atomic_displacements": self._good_data["atomic_displacements"]}
         with self.assertRaises(ValueError):
-            self.tester.append(item=item)
+            self.tester.set(items=wrong_items)
 
-        # frequencies as 2D arrays
-        item    = {"value":self._good_data[0]["value"],
-                   "weight":self._good_data[0]["weight"],
-                   "frequencies":np.asarray([[1.0,2.0,34.0],[4.9,1.0,1.0]]),
-                   "atomic_displacements":self._good_data[0]["atomic_displacements"]}
+        # frequencies as 2D arrays but with a bad shape
+        wrong_items   = {"k_vectors": self._good_data["k_vectors"],
+                         "weights": self._good_data["weights"],
+                         "frequencies": np.asarray([[1.0,2.0,34.0],[4.9,1.0,1.0]]),
+                         "atomic_displacements": self._good_data["atomic_displacements"]}
         with self.assertRaises(ValueError):
-            self.tester.append(item=item)
+            self.tester.set(items=wrong_items)
 
 
     def test_wrong_displacements(self):
         # displacements as a number
-        item = {"value":self._good_data[0]["value"],
-                "weight":self._good_data[0]["weight"],
-                "frequencies":self._good_data[0]["frequencies"],
-                "atomic_displacements":1}
+        wrong_items = {"k_vectors": self._good_data["k_vectors"],
+                       "weights": self._good_data["weights"],
+                       "frequencies": self._good_data["frequencies"],
+                       "atomic_displacements":1}
         with self.assertRaises(ValueError):
-            self.tester.append(item=item)
+            self.tester.set(items=wrong_items)
 
         # wrong size of the second dimension
-        item = {"value":self._good_data[0]["value"],
-                "weight":self._good_data[0]["weight"],
-                "frequencies":self._good_data[0]["frequencies"],
-                "atomic_displacements":np.asarray([[1.,1.,11.],[1.,1.,1.,1.0],[1.0,1.0, 1.0],
-                                                   [1,1.0,1.0],[1.,1.,11.],   [1.,1.,11.],
-                                                   [1,1.0,1.0],[1.,1.,11.],   [1.,1.,11.],
-                                                   [1,1.0,1.0],[1.,1.,11.],   [1.,1.,11.]])}
+        wrong_items = {"k_vectors": self._good_data["k_vectors"],
+                       "weights": self._good_data["weights"],
+                       "frequencies": self._good_data["frequencies"],
+                       "atomic_displacements": np.asarray([[[1., 1., 11.],[1.,  1., 1., 1.0], [1.0,1.0, 1.0],
+                                                            [1., 1.0, 1.0],[1., 1., 11.],     [1., 1.,  11.],
+                                                            [1., 1.0, 1.0],[1., 1., 11.],     [1., 1.,  11.],
+                                                            [1., 1.0, 1.0],[1., 1., 11.],     [1., 1.,  11.]],
+
+                                                   self._good_data["atomic_displacements"][1],
+                                                   self._good_data["atomic_displacements"][2]]
+                                                  )}
         with self.assertRaises(ValueError):
-            self.tester.append(item=item)
+            self.tester.set(items=wrong_items)
 
         # displacements as numpy arrays with integers
-        item = {"value":self._good_data[0]["value"],
-                "weight":self._good_data[0]["weight"],
-                "frequencies":self._good_data[0]["frequencies"],
-                "atomic_displacements": self._good_data[0]["atomic_displacements"].astype(int)}
+        wrong_items = {"k_vectors": self._good_data["k_vectors"],
+                       "weights": self._good_data["weights"],
+                       "frequencies": self._good_data["frequencies"],
+                       "atomic_displacements": self._good_data["atomic_displacements"].astype(int)}
         with self.assertRaises(ValueError):
-            self.tester.append(item=item)
+            self.tester.set(items=wrong_items)
 
         # displacements as a 1D array
-        item    = {"value":self._good_data[0]["value"],
-                   "weight":self._good_data[0]["weight"],
-                   "frequencies":self._good_data[0]["frequencies"],
-                   "atomic_displacements":np.ravel(self._good_data[0]["atomic_displacements"])}
+        wrong_items    = {"k_vectors": self._good_data["k_vectors"],
+                          "weights": self._good_data["weights"],
+                          "frequencies": self._good_data["frequencies"],
+                          "atomic_displacements": np.ravel(self._good_data["atomic_displacements"])}
         with self.assertRaises(ValueError):
-            self.tester.append(item=item)
+            self.tester.set(items=wrong_items)
 
 
-    def test_append_good_case(self):
-        for good_item in self._good_data:
-            self.tester.append(item=good_item)
+    def test_set_good_case(self):
+        self.tester.set(items=self._good_data)
 
         collected_data = self.tester.extract()
-        for i in range(len(self._good_data)):
-            self.assertEqual(self._good_data[i]["weight"], collected_data[i]["weight"])
-            self.assertEqual(True, np.allclose(self._good_data[i]["value"], collected_data[i]["value"]))
-            self.assertEqual(True, np.allclose(self._good_data[i]["frequencies"], collected_data[i]["frequencies"]))
-            self.assertEqual(True, np.allclose(self._good_data[i]["atomic_displacements"], collected_data[i]["atomic_displacements"]))
+        self.assertEqual(True,np.allclose(self._good_data["weights"], collected_data["weights"]))
+        self.assertEqual(True, np.allclose(self._good_data["k_vectors"], collected_data["k_vectors"]))
+        self.assertEqual(True, np.allclose(self._good_data["frequencies"], collected_data["frequencies"]))
+        self.assertEqual(True, np.allclose(self._good_data["atomic_displacements"], collected_data["atomic_displacements"]))
 
 
     # tests for set method
@@ -162,29 +165,5 @@ class KpointsDataTest(unittest.TestCase):
             poor_tester = KpointsData(num_k=1, num_atoms=-2)
 
 
-    #tests for extract method
-    def test_wrong_k(self):
-        poor_tester = KpointsData(num_k=1, num_atoms=2)
-        poor_tester.set(items=self._good_data)
-        with self.assertRaises(ValueError):
-            poor_data = poor_tester.extract()
-
-
-    def test_wrong_atoms(self):
-        poor_tester = KpointsData(num_k=3, num_atoms=4)
-        with self.assertRaises(ValueError):
-            poor_tester.set(items=self._good_data)
-
-
-    def test_extract_good_case(self):
-        self.tester.set(self._good_data)
-        collected_data = self.tester.extract()
-
-        for i in range(len(self._good_data)):
-            self.assertEqual(self._good_data[i]["weight"], collected_data[i]["weight"])
-            self.assertEqual(True, np.allclose(self._good_data[i]["value"], collected_data[i]["value"]))
-            self.assertEqual(True, np.allclose(self._good_data[i]["frequencies"], collected_data[i]["frequencies"]))
-            self.assertEqual(True, np.allclose(self._good_data[i]["atomic_displacements"], collected_data[i]["atomic_displacements"]))
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

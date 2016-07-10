@@ -25,7 +25,7 @@ all_instruments = ["None", "TOSCA"] # supported instruments
 all_sample_forms = ["SingleCrystal", "Powder"] # valid forms of samples
 
 # keywords which define data structure of KpointsData
-all_keywords_k_data = ["weight", "value", "frequencies", "atomic_displacements"]
+all_keywords_k_data = ["weights", "k_vectors", "frequencies", "atomic_displacements"]
 
 # keywords which define data structure of AtomsData
 all_keywords_atoms_data = ["symbol", "fract_coord", "atom", "sort", "mass"]

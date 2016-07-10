@@ -57,7 +57,7 @@ class CalculateQ(IOmodule):
         """
         _freq_squared = frequencies * frequencies
         if self._sample_form == "Powder":
-            self._Qvectors.append(item=_freq_squared * Constants.TOSCA_constant)
+            self._Qvectors._append(item=_freq_squared * Constants.TOSCA_constant)
         else:
             raise ValueError("SingleCrystal user case is not implemented.")
 
@@ -68,10 +68,10 @@ class CalculateQ(IOmodule):
         """
 
         self._Qvectors = QData(frequency_dependence=True)
-        num_k = len(self._k_points_data)
+        num_k = len(self._k_points_data["k_vectors"])
         self._Qvectors.set_k(k=num_k)
         for k in range(num_k):
-            self._functions[self._instrument](self._k_points_data[k]["frequencies"])
+            self._functions[self._instrument](self._k_points_data["frequencies"][k])
 
 
     def getQvectors(self):

@@ -94,16 +94,25 @@ class LoadCASTEP(GeneralDFTProgram):
 
     def _parse_phonon_freq_block(self, f_handle):
         """
-        Iterator to parse a block of frequencies from a .phonon file.
+        Reads frequencies block from <>.phonon file.
 
         @param f_handle: handle to the file.
         """
 
-        for _ in xrange(self._num_branches):
+        # for _ in xrange(self._num_branches):
+        #     line = f_handle.readline()
+            # line_data = line.strip().split()[1:]
+            # line_data = [float(x) for x in line_data]
+            # yield line_data
+
+        _freq = []
+        for n in range(self._num_branches):
             line = f_handle.readline()
-            line_data = line.strip().split()[1:]
-            line_data = [float(x) for x in line_data]
-            yield line_data
+            _freq.append(float(line.strip().split()[1]))
+
+        return _freq
+
+
 
     # noinspection PyMethodMayBeStatic
     def _parse_phonon_unit_cell_vectors(self, f_handle):
@@ -142,7 +151,7 @@ class LoadCASTEP(GeneralDFTProgram):
 
         return np.asarray(vectors)
 
-    def _check_accoustic_sum(self):
+    def _check_acoustic_sum(self):
         """
         Cheks if acoustic sum correction has been applied during calculations.
         @return: True is correction has been applied, otherwise False.
@@ -181,7 +190,7 @@ class LoadCASTEP(GeneralDFTProgram):
         _sum_rule_header =   r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s) + (%(s)s) + (%(s)s) + (%(s)s)" % {'s': self._float_regex}
         _no_sum_rule_header =  r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) +(%(s)s)" % {'s': self._float_regex}
 
-        if self._check_accoustic_sum():
+        if self._check_acoustic_sum():
             header_regex_str = _sum_rule_header
             self._sum_rule = True
         else:
@@ -195,8 +204,9 @@ class LoadCASTEP(GeneralDFTProgram):
         eigenvectors_regex = re.compile(r"\s*Mode\s+Ion\s+X\s+Y\s+Z\s*")
         block_count = 0
 
-        frequencies, ir_intensities, raman_intensities, weights, k_vectors, eigenvectors = [], [], [], [], [], []
-        data_lists = (frequencies, ir_intensities, raman_intensities)
+        # frequencies, ir_intensities, raman_intensities, weights, k_vectors, eigenvectors = [], [], [], [], [], []
+        # data_lists = (frequencies, ir_intensities, raman_intensities)
+        frequencies, weights, k_vectors, eigenvectors = [], [], [], []
         with open(self._input_filename, 'rU') as f_handle:
             file_data.update(self._parse_phonon_file_header(f_handle))
             header_found = False
@@ -215,9 +225,10 @@ class LoadCASTEP(GeneralDFTProgram):
                     k_vectors.append(k_vector)
 
                     # Parse block of frequencies
-                    for line_data in self._parse_phonon_freq_block(f_handle):
-                        for data_list, item in zip(data_lists, line_data):
-                            data_list.append(item)
+                    # for line_data in self._parse_phonon_freq_block(f_handle):
+                    #     for data_list, item in zip(data_lists, line_data):
+                    #         data_list.append(item)
+                    frequencies.append(self._parse_phonon_freq_block(f_handle))
 
                     block_count += 1
 

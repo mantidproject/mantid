@@ -111,16 +111,12 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
         # check rearranged_data
         _correct_k_points = correct_data["rearranged_data"]["k_points_data"]
-        num_k = len(_correct_k_points)
         _items = data["rearranged_data"]["k_points_data"]
-        for k in range(num_k):
-            _correct_item = _correct_k_points[k]
-            _item =  _items[k]
 
-            self.assertEqual(True, np.allclose(np.array(_correct_item["frequencies"]), _item["frequencies"]))
-            self.assertEqual(True, np.allclose(np.array(_correct_item["atomic_displacements"]), _item["atomic_displacements"]))
-            self.assertEqual(True, np.allclose(np.array(_correct_item["value"]), _item["value"]))
-            self.assertEqual(True, np.allclose(np.array(_correct_item["weight"]), _item["weight"]))
+        self.assertEqual(True, np.allclose(_correct_k_points["frequencies"], _items["frequencies"]))
+        self.assertEqual(True, np.allclose(_correct_k_points["atomic_displacements"], _items["atomic_displacements"]))
+        self.assertEqual(True, np.allclose(_correct_k_points["k_vectors"], _items["k_vectors"]))
+        self.assertEqual(True, np.allclose(_correct_k_points["weights"], _items["weights"]))
 
         _correct_atoms = correct_data["rearranged_data"]["atoms_data"]
         _atoms = data["rearranged_data"]["atoms_data"]
@@ -165,14 +161,11 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         _correct_items = correct_data["rearranged_data"]["k_points_data"]
         num_k = len(_correct_items)
         _items = _loaded_data["k_points_data"]
-        for k in range(num_k):
-            _correct_item = _correct_items[k]
-            _item =  _items[k]
 
-            self.assertEqual(True, np.allclose(np.array(_correct_item["frequencies"]), _item["frequencies"]))
-            self.assertEqual(True, np.allclose(np.array(_correct_item["atomic_displacements"]), _item["atomic_displacements"]))
-            self.assertEqual(True, np.allclose(np.array(_correct_item["value"]), _item["value"]))
-            self.assertEqual(True, np.allclose(np.array(_correct_item["weight"]), _item["weight"]))
+        self.assertEqual(True, np.allclose(_correct_items["frequencies"], _items["frequencies"]))
+        self.assertEqual(True, np.allclose(_correct_items["atomic_displacements"], _items["atomic_displacements"]))
+        self.assertEqual(True, np.allclose(_correct_items["k_vectors"], _items["k_vectors"]))
+        self.assertEqual(True, np.allclose(_correct_items["weights"], _items["weights"]))
 
         # atoms
         _correct_atoms = correct_data["structured_datasets"]["atoms"]

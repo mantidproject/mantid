@@ -29,7 +29,7 @@ class DwData(GeneralData):
         self._data = np.zeros((self._num_atoms, 3, 3), dtype=Constants.floats_type)
 
 
-    def append(self, item=None, num_atom=None):
+    def _append(self, item=None, num_atom=None):
         """
         Appends DW tensor for one atom.
 
@@ -48,7 +48,7 @@ class DwData(GeneralData):
         @param items: new value of DW
         """
 
-        self._check_items(data=items)
+        self._check_items(items=items)
         self._data = items
 
 
@@ -59,7 +59,6 @@ class DwData(GeneralData):
         # atom -- index of atom
         # i, j = 1, 2, 3 define 3x3 matrix which is created from outer product of atomic displacements.
 
-        self._check_items(data=self._data)
         return self._data
 
 
@@ -83,16 +82,17 @@ class DwData(GeneralData):
             raise ValueError("Invalid type of DW factors. Floating numbers are expected.")
 
 
-    def _check_items(self, data=None):
+    def _check_items(self, items=None):
         """
-        Checks if data id valid.
-        @param data: data to check
+        Checks if structure of Debye-Waller factor is valid.
+        @param items: Debye-Waller factor to check
+        @param atom:  number of atom
         """
-        if not isinstance(data, np.ndarray):
-            raise ValueError("Improper format of Debye-Waller data.")
-        if data.shape[0] != self._num_atoms:
-            raise ValueError("Size of Debye-Waller factors data and number of atoms are inconsistent.")
-        if data.shape[1] != 3 or data.shape[2] != 3:
-            raise ValueError("Improper size of Debye-Waller factors.")
-        if data.dtype.num != Constants.floats_id:
-            raise ValueError("Invalid type of DW factors. Numpy array with floating numbers is expected.")
+
+        if not isinstance(items, np.ndarray):
+            raise ValueError("Debye-Waller factor should have a form of a numpy array.")
+        if items.shape != (self._num_atoms, 3, 3):
+            raise ValueError("Debye-Waller factor should have a form of 3x3 numpy array"
+                             " (outer product of atomic displacements).")
+        if items.dtype.num != Constants.floats_id:
+            raise ValueError("Invalid type of DW factors. Floating numbers are expected.")

@@ -6,25 +6,25 @@ from GeneralData import  GeneralData
 
 class KpointsData(GeneralData):
     """
-    Class for storing kpoints data. The Data  is arranged as a list of dictionaries.
-    The list has the following form:
+    Class for storing k-points data. The data is arranged as a dictionary.
+    The dictionary has the following form:
 
-    data= [ {"frequencies": numpy.array, "atomic_displacements: numpy.array, "weight": numpy._float, "value":numpy.array},
-            {"frequencies": numpy.array, "atomic_displacements: numpy.array, "weight": numpy._float, "value":numpy.array}
-            .............................................................................................................
-            .............................................................................................................
-          ]
+    data = {"frequencies": numpy.array,
+            "atomic_displacements: numpy.array,
+            "weights": numpy.array,
+            "k_vectors": numpy.array}
 
-    Each entry in the list corresponds to one k-point. Each item in the list is a dictionary. The meaning of
-    keys in each dictionary is as follows:
 
-    "weight" - weight of k-point
+    Each entry in the dictionary corresponds to all k-points. Each item in the dictionary is a numpy array. The meaning
+    of keys in the dictionary is as follows:
 
-    "value"  - value of k-point (numpy array of dimension 3)
+    "weights" - weights of all k-points; weights.shape == (self._num_k,)
 
-    "frequencies" - frequencies for the given k-point
+    "k_vectors"  - k_vectors of all k-points;  k_vectors.shape == (self._num_k, 3)
 
-    "atomic_displacements - atomic displacements for the given k-point
+    "frequencies" - frequencies for all k-points; frequencies.shape == (self._num_k, self._num_freq)
+
+    "atomic_displacements - atomic displacements for all k-points; atomic_displacements.shape == (self._num_k, self._num_displacements, 3)
     """
 
     def __init__(self, num_k=None, num_atoms=None):
@@ -33,74 +33,80 @@ class KpointsData(GeneralData):
         @param num_atoms: total number of atoms in the unit cell (int)
         """
         super(KpointsData, self).__init__()
+        dim = 3 # number of coordinates
 
-        if isinstance(num_k, int) and num_k>0:
+        if isinstance(num_k, int) and num_k > 0:
             self._num_k = num_k
         else:
             raise ValueError("Invalid number of k-points.")
 
-        if isinstance(num_atoms, int) and num_atoms>0:
-            self._num_freq = 3 * num_atoms # number of phonons for one k-point
-            self._num_displacements = self._num_freq * num_atoms * 3 # number of displacements coordinates for one k-point
+        if isinstance(num_atoms, int) and num_atoms > 0:
+            self._num_freq = dim * num_atoms # number of phonons for one k-point
+            self._num_displacements = self._num_freq * num_atoms # number of displacements for one k-point
         else:
             raise ValueError("Invalid number of atoms.")
 
 
-    def append(self, item=None):
-        """
-        Adds one item to the collection of k-points data. Each item corresponds to one k-point.
+        self._data={}
 
-        @param item: item to be added.
-        """
-        if not isinstance(item, dict):
-            raise ValueError("Each element of KpointsData should be a dictionary.")
 
-        if not sorted(item.keys()) == sorted(Constants.all_keywords_k_data):
-            raise ValueError("Invalid structure of the dictionary to be added.")
+    def set(self, items=None):
 
-        weight = item["weight"]
-        if not (isinstance(weight, float) and weight > 0):
-            raise ValueError("Invalid value of weight.")
+        if not isinstance(items, dict):
+           raise ValueError("New value of KpointsData should be a dictionary.")
 
-        value = item["value"]
-        if not isinstance(value ,np.ndarray):
-            raise ValueError("Value of k-point should be an array.")
-        if value.shape[0] != 3:
-            raise ValueError("Value of k-point should be an numpy array with three float elements.")
-        if value.dtype.num !=  Constants.floats_id:
-            raise ValueError("All coordinates of each k-vector should be represented by a real numbers.")
+        if not sorted(items.keys()) == sorted(Constants.all_keywords_k_data):
+           raise ValueError("Invalid structure of the dictionary.")
 
-        freq = item["frequencies"]
-        if not isinstance(freq, np.ndarray):
-            raise ValueError("Frequencies for the given k-point should have a form of a numpy array.")
-        if len(freq.shape) != 1:
-            raise ValueError("Frequencies for the given k-point should have a form of one dimentional numpy array.")
-        if freq.size != self._num_freq:
-            raise ValueError("Incorrect number of frequencies.")
-        if freq.dtype.num != Constants.floats_id:
-            raise ValueError("Wrong type of frequencies. Frequencies should have real values")
 
-        displacements = item["atomic_displacements"]
-        if not isinstance(displacements, np.ndarray):
-            raise ValueError("Atomic displacements for the given k-point should have a form of a numpy array.")
-        if not len(displacements.shape) == 2:
-            raise ValueError("Atomic displacements for the given k-point should "
-                             "have a form of the two dimentional numpy array.")
-        if displacements.size != self._num_displacements:
-            raise ValueError("Invalid number of displacements.")
-        if displacements.shape[1] != 3:
-            raise ValueError("Atomic displacements for the given k-point should have a form of the"
-                             "two dimentional numpy arrays with the second dimension equal to three.")
-        if displacements.dtype.num != Constants.floats_id:
-            raise  ValueError("Atomic displacements should have a form of the two dimentional"
-                                  " numpy arrays with real elements.")
+        dim = 3
+        #  "weights"
+        weights = items["weights"]
 
-        self._data.append(item)
+        if  (isinstance(weights, np.ndarray) and
+            weights.shape == (self._num_k,) and
+            weights.dtype.num == Constants.floats_id and
+            np.allclose(weights, weights[weights>=0])):
+
+            self._data["weights"] = weights
+        else:
+           raise ValueError("Invalid value of weights.")
+
+        #  "k_vectors"
+        k_vectors = items["k_vectors"]
+
+        if  (isinstance(k_vectors, np.ndarray) and
+             k_vectors.shape == (self._num_k, dim) and
+             k_vectors.dtype.num == Constants.floats_id):
+
+            self._data["k_vectors"] = k_vectors
+        else:
+            raise ValueError("Invalid value of k_vectors.")
+
+
+        #  "frequencies"
+        frequencies = items["frequencies"]
+
+        if  (isinstance(frequencies, np.ndarray) and
+             frequencies.shape == (self._num_k, self._num_freq) and
+             frequencies.dtype.num == Constants.floats_id):
+
+            self._data["frequencies"] = frequencies
+        else:
+            raise ValueError("Invalid value of frequencies.")
+
+        #  "atomic_displacements"
+        atomic_displacements = items["atomic_displacements"]
+
+        if  (isinstance(atomic_displacements, np.ndarray) and
+             atomic_displacements.shape == (self._num_k, self._num_displacements, dim) and
+             atomic_displacements.dtype.num == Constants.floats_id):
+
+            self._data["atomic_displacements"] = atomic_displacements
+        else:
+            raise ValueError("Invalid value of atomic_displacements.")
 
 
     def extract(self):
 
-        if self._num_k == len(self._data):
-            return self._data
-        else:
-            raise ValueError("Size of KpointsData is different then number of k-points.")
+        return self._data

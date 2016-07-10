@@ -94,27 +94,15 @@ class GeneralDFTProgram(IOmodule):
 
                         "DFT_program" - name of the DFT program which was used to obtain phonon data (for CASTEP -> CASTEP).
 
+                        "filename" - name of input DFT file
+
           For more details about these fields please look at the documentation of IOmodule class.
 
-        @return: Method should return a list of dictionaries with the following structure:
-
-               data= [ {"frequencies": numpy.array, "atomic_displacements: numpy.array, "weight": numpy._float, "value":numpy.array},
-                       {"frequencies": numpy.array, "atomic_displacements: numpy.array, "weight": numpy._float, "value":numpy.array}
-                     ]
-
-             Each entry in the list corresponds to one k-point. Each item in the list is a dictionary. The meaning of
-             keys in each dictionary is as follows:
-
-                      "frequencies" - frequencies for the given k-point
-
-                      "value"  - value of k-point (numpy array of dimension 3)
-
-                      "atomic_displacements - atomic displacements for the given k-point
-
-                      "weight" - weight of k-point
+        @return: Method should return an object of type AbinsData.
 
         """
         return None
+
 
     def validData(self):
         """
@@ -130,19 +118,18 @@ class GeneralDFTProgram(IOmodule):
 
         return current_hash == saved_hash["attributes"]["hash"]
 
+
     def loadData(self):
         """
         Loads data from hdf file.
         @return:
         """
         _data = self.load(list_of_numpy_datasets=["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell"],
-                         list_of_structured_datasets=["atoms"])
+                          list_of_structured_datasets=["atoms"])
         _datasets = _data["datasets"]
         _atoms_data = _data["structured_datasets"]["atoms"]
         self._num_k = _datasets["k_vectors"].shape[0]
-        self._num_atoms = int(_datasets["atomic_displacements"][0].shape[0] /
-                              float(_datasets["frequencies"].shape[0]) *
-                              self._num_k)
+        self._num_atoms = len(_atoms_data)
 
         _loaded_data = {"frequencies":_datasets["frequencies"],
                         "weights": _datasets["weights"],
@@ -165,6 +152,7 @@ class GeneralDFTProgram(IOmodule):
 
         pass
 
+
     def _calculateHash(self):
         """
         This method calculates hash of the phonon file according to SHA-2 algorithm from hashlib library: sha512.
@@ -183,6 +171,7 @@ class GeneralDFTProgram(IOmodule):
 
         return sha.hexdigest()
 
+
     def _rearrange_data(self, data=None):
         """
         This method rearranges data read from phonon DFT file.
@@ -196,15 +185,10 @@ class GeneralDFTProgram(IOmodule):
         atoms = AtomsDaTa(num_atoms=self._num_atoms)
         atoms.set(data["atoms"])
 
-        for i in range(self._num_k):
-
-            temp_1 = i * _number_of_phonons
-            k_points.append({"weight":data["weights"][i],
-                             "value" :data["k_vectors"][i],
-                             "frequencies": data["frequencies"][temp_1:temp_1 + _number_of_phonons],
-                             "atomic_displacements": data["atomic_displacements"][i]
-                                    } )
-
+        k_points.set({"weights": data["weights"],
+                      "k_vectors": data["k_vectors"],
+                      "frequencies":data["frequencies"],
+                      "atomic_displacements":data["atomic_displacements"]})
 
         return AbinsData(k_points_data=k_points, atoms_data=atoms)
 

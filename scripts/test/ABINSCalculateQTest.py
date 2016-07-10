@@ -40,15 +40,15 @@ class ABINSCalculateQTest(unittest.TestCase):
 
         raw_data = KpointsData(num_k=1, num_atoms=2)
 
-        raw_data.append({"value":np.asarray([0.2, 0.1, 0.2]),
-                         "weight":0.3,
-                         "frequencies":np.asarray([1.0, 2.0, 3.0, 4.0,  5.0, 6.0]),  # 6 frequencies
-                         "atomic_displacements":np.asarray([[1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0],
-                                                       [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0],
-                                                       [1.0,1.0,1.0],[1.0,1.0,111.0],[1.0,1.0,1.0],
-                                                       [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0]]) }) # 12 atomic displacements
+        raw_data.set({"k_vectors":np.asarray([[0.2, 0.1, 0.2]]),
+                      "weights":np.asarray([0.3]),
+                      "frequencies":np.asarray([[1.0, 2.0, 3.0, 4.0,  5.0, 6.0]]),  # 6 frequencies
+                      "atomic_displacements":np.asarray([[[1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0],
+                                                         [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0],
+                                                         [1.0,1.0,1.0],[1.0,1.0,111.0],[1.0,1.0,1.0],
+                                                         [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0]]]) }) # 12 atomic displacements
         extracted_raw_data = raw_data.extract()
-        correct_q_data = extracted_raw_data[0]["frequencies"] * extracted_raw_data[0]["frequencies"] / 16.0
+        correct_q_data = extracted_raw_data["frequencies"][0] * extracted_raw_data["frequencies"][0] / 16.0
 
         q_calculator = CalculateQ(filename="TestingFile_TOSCA.phonon",
                                   instrument="TOSCA",
@@ -56,10 +56,12 @@ class ABINSCalculateQTest(unittest.TestCase):
         q_calculator.collectFrequencies(k_points_data=raw_data)
         q_vectors = q_calculator.getQvectors()
 
+        # noinspection PyTypeChecker
         self.assertEqual(True,np.allclose(correct_q_data, q_vectors.extract()))
 
         loaded_q = q_calculator.loadData()
 
+        # noinspection PyTypeChecker
         self.assertEqual(True,np.allclose(correct_q_data, loaded_q.extract()))
 
         # here we have a list not a KpointsData

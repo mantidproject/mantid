@@ -26,23 +26,23 @@ class AtomsDataTest(unittest.TestCase):
                       "mass":self._good_data[0]["mass"]
                       }
         with self.assertRaises(ValueError):
-            self.tester.append(item=wrong_data)
+            self.tester._append(item=wrong_data)
 
         wrong_data["sort"] = 2 # we count from zero so 2 is also to large
         with self.assertRaises(ValueError):
-            self.tester.append(item=wrong_data)
+            self.tester._append(item=wrong_data)
 
         # negative
         wrong_data["sort"] = -1,
 
         with self.assertRaises(ValueError):
-            self.tester.append(item=wrong_data)
+            self.tester._append(item=wrong_data)
 
         # string instead of number
         wrong_data["sort"] = "-1"
 
         with self.assertRaises(ValueError):
-            self.tester.append(item=wrong_data)
+            self.tester._append(item=wrong_data)
 
 
     def test_wrong_symbol(self):
@@ -53,7 +53,7 @@ class AtomsDataTest(unittest.TestCase):
                       "mass":self._good_data[0]["mass"]
                       }
         with self.assertRaises(ValueError):
-            self.tester.append(item=wrong_data)
+            self.tester._append(item=wrong_data)
 
 
     def test_wrong_fract_coord(self):
@@ -64,15 +64,15 @@ class AtomsDataTest(unittest.TestCase):
                       "mass":self._good_data[0]["mass"]
                       }
         with self.assertRaises(ValueError):
-            self.tester.append(item=wrong_data)
+            self.tester._append(item=wrong_data)
 
         wrong_data["fract_coord"] = np.asarray([[1,2],[4]])
         with self.assertRaises(ValueError):
-            self.tester.append(item=wrong_data)
+            self.tester._append(item=wrong_data)
 
         wrong_data["fract_coord"] = np.asarray([1,2])
         with self.assertRaises(ValueError):
-            self.tester.append(item=wrong_data)
+            self.tester._append(item=wrong_data)
 
 
     def  test_wrong_atom(self):
@@ -83,15 +83,15 @@ class AtomsDataTest(unittest.TestCase):
                        "mass":self._good_data[0]["mass"]
                        }
          with self.assertRaises(ValueError):
-             self.tester.append(item=wrong_data)
+             self.tester._append(item=wrong_data)
 
          wrong_data["atom"] = 2
          with self.assertRaises(ValueError):
-             self.tester.append(item=wrong_data)
+             self.tester._append(item=wrong_data)
 
          wrong_data["atom"] = 3
          with self.assertRaises(ValueError):
-             self.tester.append(item=wrong_data)
+             self.tester._append(item=wrong_data)
 
 
     def test_wrong_mass(self):
@@ -103,11 +103,11 @@ class AtomsDataTest(unittest.TestCase):
                       "mass":-1.0,
                       }
         with self.assertRaises(ValueError):
-            self.tester.append(item=wrong_data)
+            self.tester._append(item=wrong_data)
 
         wrong_data["mass"] =  28 # int instead of float
         with self.assertRaises(ValueError):
-            self.tester.append(item=wrong_data)
+            self.tester._append(item=wrong_data)
 
     # set
     def test_wrong_list(self):
@@ -119,15 +119,15 @@ class AtomsDataTest(unittest.TestCase):
 
     # extract
     def wrong_size_of_data(self):
-        self.tester.append(self._good_data[0])
+        self.tester._append(self._good_data[0])
         with self.assertRaises(ValueError):
             self.tester.extract()
 
     # valid situations
     def test_good_append(self):
 
-        self.tester.append(self._good_data[0])
-        self.tester.append(self._good_data[1])
+        self.tester._append(self._good_data[0])
+        self.tester._append(self._good_data[1])
 
         data = self.tester.extract()
         elements = len(self._good_data)

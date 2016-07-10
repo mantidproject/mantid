@@ -19,7 +19,7 @@ class QData(GeneralData):
         self._num_k = None
 
 
-    def append(self, item=None):
+    def _append(self, item=None):
         """
         Appends one item to the collection of Q data.
         @param item: item to be added
@@ -28,6 +28,16 @@ class QData(GeneralData):
             raise ValueError("Invalid value of item to be added to a collection of Q items.")
 
         self._data.append(item)
+
+    def set(self, items=None):
+
+        if isinstance(items, np.ndarray):
+            self._data = items
+
+        if isinstance(items, list):
+            self._data = []
+            for item in items:
+                self._append(item=item)
 
 
     def set_k(self, k):
