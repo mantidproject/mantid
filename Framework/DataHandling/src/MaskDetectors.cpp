@@ -128,17 +128,15 @@ void MaskDetectors::exec() {
 
   bool mask_defined(false);
   if (!indexList.empty() || !spectraList.empty() || !detectorList.empty() ||
-        prevMasking) {
-      mask_defined = true;
+      prevMasking) {
+    mask_defined = true;
   }
   // Index range are provided as min/max values
   if (!mask_defined && range_constrained) {
-      size_t list_size =
-          std::get<1>(ranges_info) - std::get<0>(ranges_info) + 1;
-      indexList.resize(list_size);
-      std::iota(indexList.begin(), indexList.end(), std::get<0>(ranges_info));
+    size_t list_size = std::get<1>(ranges_info) - std::get<0>(ranges_info) + 1;
+    indexList.resize(list_size);
+    std::iota(indexList.begin(), indexList.end(), std::get<0>(ranges_info));
   }
-
 
   if (prevMasking) {
     DataObjects::MaskWorkspace_const_sptr maskWS =
