@@ -115,10 +115,15 @@ void MaskDetectors::exec() {
   auto ranges_info = getRanges(WS);
   bool range_constrained = std::get<2>(ranges_info);
 
+  bool mask_defined(false);
+  if (!indexList.empty() || !spectraList.empty() || !detectorList.empty() ||
+      prevMasking) {
+      mask_defined = true;
+  }
+
   // each one of these values is optional but the user can not leave all six
   // blank
-  if (indexList.empty() && spectraList.empty() && detectorList.empty() &&
-      !range_constrained && !prevMasking) {
+  if (!mask_defined && !range_constrained) {
     g_log.information(
         name() +
         ": There is nothing to mask, the index, spectra, "
@@ -126,17 +131,15 @@ void MaskDetectors::exec() {
     return;
   }
 
-  bool mask_defined(false);
-  if (!indexList.empty() || !spectraList.empty() || !detectorList.empty() ||
-      prevMasking) {
-    mask_defined = true;
-  }
+
   // Index range are provided as min/max values
   if (!mask_defined && range_constrained) {
-    size_t list_size = std::get<1>(ranges_info) - std::get<0>(ranges_info) + 1;
-    indexList.resize(list_size);
-    std::iota(indexList.begin(), indexList.end(), std::get<0>(ranges_info));
+      size_t list_size =
+          std::get<1>(ranges_info) - std::get<0>(ranges_info) + 1;
+      indexList.resize(list_size);
+      std::iota(indexList.begin(), indexList.end(), std::get<0>(ranges_info));
   }
+  
 
   if (prevMasking) {
     DataObjects::MaskWorkspace_const_sptr maskWS =
@@ -445,7 +448,7 @@ void MaskDetectors::appendToIndexListFromWS(
   if (range_constrained) {
     constrainIndexInRange(indexList, tmp_index, startIndex, endIndex);
 
-    for (int64_t i = startIndex; i <= endIndex; ++i) {
+    for (size_t i = startIndex; i <= endIndex; ++i) {
       IDetector_const_sptr det;
       try {
         det = sourceWS->getDetector(i);

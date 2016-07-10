@@ -408,7 +408,7 @@ public:
   //
   void test_rangeMasking() {
     const std::string inputWSName("inputWS");
-    size_t numInputSpec(18);
+    int numInputSpec(18);
     setUpWS(false, inputWSName, false, numInputSpec);
 
     MaskDetectors masker;
