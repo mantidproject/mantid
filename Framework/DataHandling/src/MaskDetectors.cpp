@@ -113,7 +113,6 @@ void MaskDetectors::exec() {
   const MatrixWorkspace_sptr prevMasking = getProperty("MaskedWorkspace");
 
   auto ranges_info = getRanges(WS);
-  bool mask_defined(false);
   bool range_constrained = std::get<2>(ranges_info);
 
   // each one of these values is optional but the user can not leave all six
@@ -125,19 +124,21 @@ void MaskDetectors::exec() {
         ": There is nothing to mask, the index, spectra, "
         "detector lists and masked workspace properties are all empty");
     return;
-  } else {
-    if (!indexList.empty() || !spectraList.empty() || !detectorList.empty() ||
+  }
+
+  bool mask_defined(false);
+  if (!indexList.empty() || !spectraList.empty() || !detectorList.empty() ||
         prevMasking) {
       mask_defined = true;
-    }
-    // Index range are provided as min/max values
-    if (!mask_defined && range_constrained) {
+  }
+  // Index range are provided as min/max values
+  if (!mask_defined && range_constrained) {
       size_t list_size =
           std::get<1>(ranges_info) - std::get<0>(ranges_info) + 1;
       indexList.resize(list_size);
       std::iota(indexList.begin(), indexList.end(), std::get<0>(ranges_info));
-    }
   }
+
 
   if (prevMasking) {
     DataObjects::MaskWorkspace_const_sptr maskWS =
