@@ -385,11 +385,13 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
   }
 }
 
-/**
- * Convert a list of spectra numbers into the corresponding workspace indices
+/* Convert a list of spectra numbers into the corresponding workspace indices.
+ *
  * @param indexList :: An output index list from the given spectra list
  * @param spectraList :: A list of spectra numbers
  * @param WS :: The input workspace to be masked
+ * @param range_info :: tuple containing the range of spectra to process and boolean
+ *                      indicating if these ranges are defined
  */
 void MaskDetectors::fillIndexListFromSpectra(
     std::vector<size_t> &indexList, const std::vector<specnum_t> &spectraList,
@@ -424,15 +426,14 @@ void MaskDetectors::fillIndexListFromSpectra(
   tmp_index.swap(indexList);
 }
 
-/**
- * Append the indices of the masked spectra from the given workspace list to the
+/* Append the indices of the masked spectra from the given workspace list to the
  * given list
- * @param indexList :: An existing list of indices
- * @param sourceWS  :: An workspace with masked spectra
- * @param range_info    :: tuple containing the information on
- *                       if copied indexes are constrained by ranges and if yes
- *                       -- the range of indexes to topy
- */
+ *
+ * @param indexList :: An existing list of indices.
+ * @param sourceWS  :: An workspace with masked spectra.
+ * @param range_info :: tuple containing the range of spectra to process and boolean
+ *                      indicating if these ranges are defined
+*/
 void MaskDetectors::appendToIndexListFromWS(
     std::vector<size_t> &indexList, const MatrixWorkspace_sptr sourceWS,
     const std::tuple<size_t, size_t, bool> &range_info) {
