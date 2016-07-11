@@ -390,7 +390,8 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
  * @param indexList :: An output index list from the given spectra list
  * @param spectraList :: A list of spectra numbers
  * @param WS :: The input workspace to be masked
- * @param range_info :: tuple containing the range of spectra to process and boolean
+ * @param range_info :: tuple containing the range of spectra to process and
+ *boolean
  *                      indicating if these ranges are defined
  */
 void MaskDetectors::fillIndexListFromSpectra(
@@ -431,7 +432,8 @@ void MaskDetectors::fillIndexListFromSpectra(
  *
  * @param indexList :: An existing list of indices.
  * @param sourceWS  :: An workspace with masked spectra.
- * @param range_info :: tuple containing the range of spectra to process and boolean
+ * @param range_info :: tuple containing the range of spectra to process and
+ *boolean
  *                      indicating if these ranges are defined
 */
 void MaskDetectors::appendToIndexListFromWS(
