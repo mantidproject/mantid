@@ -136,7 +136,7 @@ Output:
    New Y units: y*2
    New Y title: Doubled Y
 
-   **Example - Converting from Wavelength to Momentum Transfer:**
+**Example - Converting from Wavelength to Momentum Transfer:**
 
 .. testcode:: ExWv2MT
 
