@@ -3,6 +3,7 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
@@ -23,6 +24,8 @@ using namespace Mantid::PythonInterface::Policies;
 using namespace Mantid::PythonInterface::Registry;
 namespace NumPy = Mantid::PythonInterface::NumPy;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(MatrixWorkspace)
 
 namespace {
 /// Typedef for data access, i.e. dataX,Y,E members

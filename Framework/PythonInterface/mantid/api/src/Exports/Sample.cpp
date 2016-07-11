@@ -2,6 +2,8 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidKernel/Material.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
+
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -10,6 +12,10 @@ using Mantid::API::Sample;
 using Mantid::Geometry::OrientedLattice;
 using Mantid::Kernel::Material;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(Material)
+GET_POINTER_SPECIALIZATION(OrientedLattice)
+GET_POINTER_SPECIALIZATION(Sample)
 
 void export_Sample() {
   register_ptr_to_python<Sample *>();
