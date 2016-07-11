@@ -69,6 +69,9 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_linalg.h>
 
+// Register the window into the WindowFactory
+DECLARE_WINDOW(Matrix)
+
 Matrix::Matrix(ScriptingEnv *env, const QString &label,
                QWidget *parent, const QString &name, Qt::WFlags f)
     : MdiSubWindow(parent, label, name, f), Scripted(env), d_matrix_model(NULL),

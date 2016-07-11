@@ -515,7 +515,7 @@ void ProjectSerialiser::saveProjectFile(QFile *fileHandle,
  */
 void ProjectSerialiser::openMatrix(const std::string &lines,
                                    const int fileVersion) {
-  Matrix *w = new Matrix();
+  auto w = WindowFactory::Instance().createUnwrapped("Matrix");
   w->loadFromProject(lines, window, fileVersion);
 }
 
@@ -525,8 +525,8 @@ void ProjectSerialiser::openMatrix(const std::string &lines,
  * @param lines :: string of characters from a Mantid project file
  */
 void ProjectSerialiser::openMantidMatrix(const std::string &lines) {
-    MantidMatrix *m = new MantidMatrix();
-    m->loadFromProject(lines, window, -1);
+  auto w = WindowFactory::Instance().createUnwrapped("MantidMatrix");
+  w->loadFromProject(lines, window, -1);
 }
 
 /**
@@ -536,8 +536,8 @@ void ProjectSerialiser::openMantidMatrix(const std::string &lines) {
  */
 void ProjectSerialiser::openMultiLayer(const std::string &lines,
                                        const int fileVersion) {
-  MultiLayer *plot = new MultiLayer();
-  plot->loadFromProject(lines, window, fileVersion);
+  auto w = WindowFactory::Instance().createUnwrapped("MultiLayer");
+  w->loadFromProject(lines, window, fileVersion);
 }
 
 /**
@@ -547,7 +547,7 @@ void ProjectSerialiser::openMultiLayer(const std::string &lines,
  */
 void ProjectSerialiser::openTable(const std::string &lines,
                                   const int fileVersion) {
-  Table *w = new Table();
+  auto w = WindowFactory::Instance().createUnwrapped("Table");
   w->loadFromProject(lines, window, fileVersion);
 }
 
@@ -558,8 +558,8 @@ void ProjectSerialiser::openTable(const std::string &lines,
  */
 void ProjectSerialiser::openTableStatistics(const std::string &lines,
                                             const int fileVersion) {
-  TableStatistics *s = new TableStatistics();
-  s->loadFromProject(lines, window, fileVersion);
+  auto w = WindowFactory::Instance().createUnwrapped("TableStatistics");
+  w->loadFromProject(lines, window, fileVersion);
 }
 
 /**

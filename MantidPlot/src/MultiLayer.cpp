@@ -73,6 +73,9 @@
 
 #include "TSVSerialiser.h"
 
+// Register the window into the WindowFactory
+DECLARE_WINDOW(MultiLayer)
+
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MultiLayer");

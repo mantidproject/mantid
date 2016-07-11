@@ -29,6 +29,8 @@
 #ifndef MdiSubWindow_H
 #define MdiSubWindow_H
 
+#include "WindowFactory.h"
+#include "MantidKernel/RegistrationHelper.h"
 #include "Mantid/IProjectSerialisable.h"
 #include <QMdiSubWindow>
 #include <QDockWidget>
@@ -342,5 +344,16 @@ private:
 };
 
 typedef QList<MdiSubWindow *> MDIWindowList;
+
+/* Used to register classes into the factory. creates a global object in an
+ * anonymous namespace. The object itself does nothing, but the comma operator
+ * is used in the call to its constructor to effect a call to the factory's
+ * subscribe method.
+ */
+#define DECLARE_WINDOW(classname)                                           		  \
+  namespace {                                                                  		  \
+  Mantid::Kernel::RegistrationHelper register_alg_##classname((                		  \
+      (Mantid::API::WindowFactory::Instance().subscribe<classname>(#classname)), 0)); \
+  }
 
 #endif

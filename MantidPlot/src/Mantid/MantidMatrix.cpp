@@ -32,6 +32,9 @@ using namespace Mantid::Kernel;
 using namespace MantidQt::API;
 using namespace Mantid::Geometry;
 
+// Register the window into the WindowFactory
+DECLARE_WINDOW(MantidMatrix)
+
 namespace {
 Logger g_log("MantidMatrix");
 }
