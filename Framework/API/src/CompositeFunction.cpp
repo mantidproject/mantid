@@ -68,12 +68,20 @@ std::string CompositeFunction::asString() const {
     ostr << ';';
   }
   for (size_t i = 0; i < nFunctions(); i++) {
+    const std::vector<std::string> localAttr = this->getLocalAttributeNames();
     IFunction_sptr fun = getFunction(i);
     bool isComp =
         boost::dynamic_pointer_cast<CompositeFunction>(fun) != nullptr;
     if (isComp)
       ostr << '(';
     ostr << fun->asString();
+    for (const auto &localAttName : localAttr) {
+      const std::string localAttValue =
+          this->getLocalAttribute(i, localAttName).value();
+      if (!localAttValue.empty()) {
+        ostr << ',' << '$' << localAttName << '=' << localAttValue;
+      }
+    }
     if (isComp)
       ostr << ')';
     if (i < nFunctions() - 1) {
