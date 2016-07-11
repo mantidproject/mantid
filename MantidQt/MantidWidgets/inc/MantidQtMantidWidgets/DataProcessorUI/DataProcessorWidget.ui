@@ -169,7 +169,7 @@
     <string>Process</string>
    </property>
    <property name="whatsThis">
-    <string>Processes the selected rows. If no rows are selected then all rows are processed.</string>
+    <string>Processes the selected rows/groups. Selected rows are reduced sequentially and independently. When a group is selected, rows are in addition post-processed together. If nothing is selected the behaviour is as if all groups were selected.</string>
    </property>
   </action>
    <action name="actionExpandSelection">
@@ -184,7 +184,7 @@
     <string>Select an entire group</string>
    </property>
    <property name="whatsThis">
-    <string>Expands the current selection to include any rows that are in the same group as any selected row.</string>
+    <string>Expands the current selection to include any rows that are in the same group as any selected row. This effectively means selecting the group to which the selected row belongs.</string>
    </property>
   </action>
    <action name="actionPlotRow">
@@ -200,7 +200,7 @@
        <string>Plot the selected rows</string>
      </property>
      <property name="whatsThis">
-       <string>Creates a plot of the IvsQ workspaces produced by the selected rows.</string>
+       <string>Creates a plot of the reduced workspaces produced by the selected rows.</string>
      </property>
    </action>
    <action name="actionPlotGroup">
@@ -216,7 +216,7 @@
        <string>Plot the selected groups</string>
      </property>
      <property name="whatsThis">
-       <string>Creates a plot of the stitched IvsQ workspaces produced by any groups any selected rows are in.</string>
+       <string>Creates a plot of the post-processed workspaces produced by any groups any selected rows are in.</string>
      </property>
    </action>
    <action name="actionAppendRow">
@@ -334,7 +334,7 @@
        <string>Paste Selected</string>
      </property>
      <property name="whatsThis">
-       <string>Pastes the contents of the clipboard into the selected rows. If no rows are selected, new ones are added at the end of the table.</string>
+       <string>Pastes the contents of the clipboard into the selected rows. If no rows are selected, new ones are added at the end of the group.</string>
      </property>
      <property name="shortcut">
        <string>Ctrl+V</string>
@@ -350,7 +350,7 @@
        <string>Clear Selected</string>
      </property>
      <property name="whatsThis">
-       <string>Clears the contents of the selected rows and ungroups them, placing each row into a unique group.</string>
+       <string>Clears the contents of the selected rows.</string>
      </property>
    </action>
    <action name="actionHelp">

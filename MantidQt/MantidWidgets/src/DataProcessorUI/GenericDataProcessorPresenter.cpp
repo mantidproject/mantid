@@ -1265,6 +1265,9 @@ void GenericDataProcessorPresenter::expandSelection() {
   std::set<int> groupIds;
 
   auto items = m_view->getSelectedRows();
+  if (items.empty())
+    return;
+
   for (auto group = items.begin(); group != items.end(); ++group)
     groupIds.insert(group->first);
 
