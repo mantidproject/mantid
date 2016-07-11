@@ -118,7 +118,7 @@ private:
   /// total number of specs
   specnum_t m_total_specs;
   /// time channel vector
-  std::vector<boost::shared_ptr<MantidVec>> m_timeChannelsVec;
+  std::vector<boost::shared_ptr<HistogramData::HistogramX>> m_timeChannelsVec;
 };
 }
 }

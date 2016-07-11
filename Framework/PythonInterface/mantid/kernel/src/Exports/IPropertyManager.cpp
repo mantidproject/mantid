@@ -1,4 +1,5 @@
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
@@ -13,6 +14,8 @@
 using namespace Mantid::Kernel;
 namespace Registry = Mantid::PythonInterface::Registry;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IPropertyManager)
 
 namespace {
 /**

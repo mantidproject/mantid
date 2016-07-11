@@ -80,7 +80,8 @@ set ( SRC_FILES
 	src/PropertyManager.cpp
 	src/PropertyManagerDataService.cpp
 	src/PropertyManagerOwner.cpp
-	src/PropertyManagerProperty.cpp
+    	src/PropertyManagerProperty.cpp
+    	src/PropertyNexus.cpp
 	src/PropertyWithValue.cpp
 	src/ProxyInfo.cpp
 	src/PseudoRandomNumberGenerator.cpp
@@ -129,7 +130,7 @@ set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
         src/PropertyManager.cpp
         src/Unit.cpp
         src/System.cpp
-        )
+)
 
 set ( INC_FILES
 	inc/MantidKernel/ANN/ANN.h
@@ -240,6 +241,7 @@ set ( INC_FILES
 	inc/MantidKernel/PropertyManagerOwner.h
 	inc/MantidKernel/PropertyManagerProperty.h
 	inc/MantidKernel/PropertyManager_fwd.h
+    	inc/MantidKernel/PropertyNexus.h
 	inc/MantidKernel/PropertyWithValue.h
 	inc/MantidKernel/ProxyInfo.h
 	inc/MantidKernel/PseudoRandomNumberGenerator.h
@@ -379,6 +381,7 @@ set ( TEST_FILES
 	PropertyManagerDataServiceTest.h
 	PropertyManagerPropertyTest.h
 	PropertyManagerTest.h
+    	PropertyNexusTest.h
 	PropertyTest.h
 	PropertyWithValueTest.h
 	ProxyInfoTest.h
@@ -465,7 +468,7 @@ set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 if ( GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5" )
  target_link_libraries ( Kernel LINK_PRIVATE stdc++ )
 endif()
-target_link_libraries ( Kernel LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${NEXUS_LIBRARIES} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} )
+target_link_libraries ( Kernel LINK_PUBLIC ${NEXUS_LIBRARIES} LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} )
 
 if (WITH_ASAN)
   target_link_libraries ( Kernel LINK_PRIVATE -lasan )

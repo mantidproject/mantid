@@ -91,6 +91,9 @@ class CWSCDReductionControl(object):
         # A dictionary to manage all loaded and processed MDEventWorkspaces
         # self._expDataDict = {}
 
+        #register startup
+        mantid.UsageService.registerFeatureUsage("Interface","4-Circle Reduction",False)
+
         return
 
     def _add_merged_ws(self, exp_number, scan_number, pt_number_list):

@@ -1,13 +1,11 @@
 #ifndef MANTID_KERNEL_PROPERTYNEXUS_H_
 #define MANTID_KERNEL_PROPERTYNEXUS_H_
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/Property.h"
-#include <nexus/NeXusFile.hpp>
+#include "MantidKernel/System.h"
 
 namespace Mantid {
-namespace API {
-
+namespace Kernel {
 /** Namespace with helper methods for loading and saving Property's (logs)
  * to NXS files.
 
@@ -37,11 +35,8 @@ namespace API {
 */
 namespace PropertyNexus {
 
-DLLExport Mantid::Kernel::Property *loadProperty(::NeXus::File *file,
+DLLExport std::unique_ptr<Property> loadProperty(::NeXus::File *file,
                                                  const std::string &group);
-
-DLLExport void saveProperty(::NeXus::File *file,
-                            Mantid::Kernel::Property *prop);
 }
 
 } // namespace API

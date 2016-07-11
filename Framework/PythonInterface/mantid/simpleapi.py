@@ -168,7 +168,7 @@ def Load(*args, **kwargs):
     lhs_args = _get_args_from_lhs(lhs, algm)
     final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
     # Check for any properties that aren't known and warn they will not be used
-    for key in final_keywords.keys():
+    for key in list(final_keywords.keys()):
         if key not in algm:
             logger.warning("You've passed a property (%s) to Load() that doesn't apply to this file type." % key)
             del final_keywords[key]
@@ -244,14 +244,14 @@ def fitting_algorithm(f):
             del algm['InputWorkspace']
 
         # Set all workspace properties before others
-        for key in kwargs.keys():
+        for key in list(kwargs.keys()):
             if key.startswith('InputWorkspace_'):
                 algm.setProperty(key, kwargs[key])
                 del kwargs[key]
 
         lhs = _lhs_info()
         # Check for any properties that aren't known and warn they will not be used
-        for key in kwargs.keys():
+        for key in list(kwargs.keys()):
             if key not in algm:
                 logger.warning("You've passed a property (%s) to %s() that doesn't apply to any of the input workspaces." % (key,function_name))
                 del kwargs[key]

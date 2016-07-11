@@ -298,7 +298,7 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
     localworkspace->dataY(0) = ydata;
     localworkspace->dataE(0) = errdata;
     if (hasXError) {
-      localworkspace->dataDx(0) = xError;
+      localworkspace->setPointStandardDeviations(0, xError);
     }
     return localworkspace;
   } else {
@@ -314,7 +314,7 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
 
     if (hasXError) {
       for (int index = 0; index < pointsToRead; ++index) {
-        localworkspace->dataDx(index)[0] = xError[index];
+        localworkspace->setPointStandardDeviations(0, 1, xError[index]);
       }
     }
     return localworkspace;
@@ -337,10 +337,9 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
   Progress prog(read2DHeader(firstLine, outWrksp, axis0Data));
   const size_t nAxis1Values = outWrksp->getNumberHistograms();
 
+  // set the X-values to the common bin values we read above
+  auto toPass = Kernel::make_cow<HistogramData::HistogramX>(axis0Data);
   for (size_t i = 0; i < nAxis1Values; ++i) {
-    // set the X-values to the common bin values we read above
-    MantidVecPtr toPass;
-    toPass.access() = axis0Data;
     outWrksp->setX(i, toPass);
 
     // now read in the Y values

@@ -22,6 +22,7 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace API {
@@ -107,6 +108,13 @@ template class MANTID_API_DLL
 #endif /* _WIN32 */
 typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>
     WorkspaceFactory;
+
+template <class T, class... InitArgs>
+boost::shared_ptr<T> createWorkspace(InitArgs... args) {
+  auto ws = boost::make_shared<T>();
+  ws->initialize(args...);
+  return ws;
+}
 
 } // namespace Kernel
 } // namespace Mantid
