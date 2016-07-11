@@ -1,17 +1,19 @@
 #include "globals.h"
-#include "ProjectSerialiser.h"
 #include "ApplicationWindow.h"
-#include "ScriptingWindow.h"
-#include "Note.h"
-#include "Matrix.h"
-#include "TableStatistics.h"
 #include "Graph3D.h"
-
+#include "Matrix.h"
+#include "Note.h"
+#include "ProjectSerialiser.h"
+#include "ScriptingWindow.h"
+#include "TableStatistics.h"
 #include "WindowFactory.h"
+
+#include "Mantid/InstrumentWidget/InstrumentWindow.h"
 #include "Mantid/MantidUI.h"
+#include "Mantid/MantidMatrixFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/MantidVersion.h"
-#include "Mantid/InstrumentWidget/InstrumentWindow.h"
+#include "MantidQtAPI/PlotAxis.h"
 
 #include <QTextCodec>
 #include <QTextStream>
@@ -508,61 +510,37 @@ void ProjectSerialiser::openSurfacePlot(const std::string &lines,
   const std::string tsvLines = boost::algorithm::join(lineVec, "\n");
 
   TSVSerialiser tsv(tsvLines);
-
-  Graph3D *plot = nullptr;
+  Graph3D *plot = new Graph3D("", window, 0);
 
   if (tsv.selectLine("SurfaceFunction")) {
     auto params = readSurfaceFunction(tsv);
 
+    plot = new Graph3D("", window, 0);
+
     switch(params.type) {
     case Plot3D:
-      plot = window->dataPlot3D(caption,
-                                QString::fromStdString(params.formula),
-                                params.xStart, params.xStop,
-                                params.yStart, params.yStop,
-                                params.zStart, params.zStop);
+      setupPlot3D(plot, caption, params);
         break;
     case XYZ:
-      plot = window->openPlotXYZ(caption,
-                                QString::fromStdString(params.formula),
-                                params.xStart, params.xStop,
-                                params.yStart, params.yStop,
-                                params.zStart, params.zStop);
+      setupPlotXYZ(plot, caption, params);
         break;
     case MatrixPlot3D:
-      plot = window->openMatrixPlot3D(caption,
-                                QString::fromStdString(params.formula),
-                                params.xStart, params.xStop,
-                                params.yStart, params.yStop,
-                                params.zStart, params.zStop);
+        setupMatrixPlot3D(plot, caption, params);
         break;
     case MantidMatrixPlot3D:
-        plot = openMantidMatrix(tsv);
+        setupMantidMatrixPlot3D(tsv, plot);
         break;
     case ParametricSurface:
-        plot = window->plotParametricSurface(QString::fromStdString(params.xFormula),
-                                             QString::fromStdString(params.yFormula),
-                                             QString::fromStdString(params.zFormula),
-                                             params.uStart, params.uEnd,
-                                             params.vStart, params.vEnd,
-                                             params.columns, params.rows,
-                                             params.uPeriodic, params.vPeriodic);
+        setupPlotParametricSurface(plot, params);
         break;
     case Surface:
-        plot = window->plotSurface(QString::fromStdString(params.xFormula),
-                                   params.xStart, params.xStop,
-                                   params.yStart, params.yStop,
-                                   params.zStart, params.zStop,
-                                   params.columns, params.rows);
+        setupPlotSurface(plot, params);
         break;
     default:
         // just break and do nothing if we cannot find it
         break;
     }
   }
-
-  if (!plot)
-      return;
 
   window->setWindowName(plot, caption);
   plot->loadFromProject(tsvLines, window, fileVersion);
@@ -572,13 +550,179 @@ void ProjectSerialiser::openSurfacePlot(const std::string &lines,
   window->restoreWindowGeometry(window, plot, QString::fromStdString(tsv.lineAsString("geometry")));
 }
 
-Graph3D *ProjectSerialiser::openMantidMatrix(TSVSerialiser &tsv) {
-    Graph3D* plot = nullptr;
+void ProjectSerialiser::setupPlot3D(Graph3D* plot, const QString &caption, const SurfaceFunctionParams &params) {
+      QString func = QString::fromStdString(params.formula);
+      int pos = func.indexOf("_", 0);
+      QString wCaption = func.left(pos);
+
+      Table *w = window->table(wCaption);
+      if (!w)
+          return;
+
+      int posX = func.indexOf("(", pos);
+      QString xCol = func.mid(pos + 1, posX - pos - 1);
+
+      pos = func.indexOf(",", posX);
+      posX = func.indexOf("(", pos);
+      QString yCol = func.mid(pos + 1, posX - pos - 1);
+
+      plot->addData(w, xCol, yCol,
+                    params.xStart, params.xStop,
+                    params.yStart, params.yStop,
+                    params.zStart, params.zStop);
+      plot->update();
+
+      QString label = caption;
+      while (window->alreadyUsedName(label))
+          label = window->generateUniqueName("Graph");
+
+      plot->setWindowTitle(label);
+      plot->setName(label);
+      window->initPlot3D(plot);
+}
+
+void ProjectSerialiser::setupPlotXYZ(Graph3D* plot, const QString &caption, const SurfaceFunctionParams &params) {
+    QString formula = QString::fromStdString(params.formula);
+    int pos = formula.indexOf("_", 0);
+    QString wCaption = formula.left(pos);
+
+    Table *w = window->table(wCaption);
+    if (!w)
+        return;
+
+    int posX = formula.indexOf("(X)", pos);
+    QString xColName = formula.mid(pos + 1, posX - pos - 1);
+
+    pos = formula.indexOf(",", posX);
+
+    posX = formula.indexOf("(Y)", pos);
+    QString yColName = formula.mid(pos + 1, posX - pos - 1);
+
+    pos = formula.indexOf(",", posX);
+    posX = formula.indexOf("(Z)", pos);
+    QString zColName = formula.mid(pos + 1, posX - pos - 1);
+
+    int xCol = w->colIndex(xColName);
+    int yCol = w->colIndex(yColName);
+    int zCol = w->colIndex(zColName);
+
+    plot->loadData(w, xCol, yCol, zCol,
+                    params.xStart, params.xStop,
+                    params.yStart, params.yStop,
+                    params.zStart, params.zStop);
+
+    QString label = caption;
+    if (window->alreadyUsedName(label))
+        label = window->generateUniqueName("Graph");
+
+    plot->setWindowTitle(label);
+    plot->setName(label);
+    window->initPlot3D(plot);
+}
+
+void ProjectSerialiser::setupPlotParametricSurface(Graph3D* plot, const SurfaceFunctionParams &params) {
+  QString label = window->generateUniqueName("Graph");
+
+  plot->resize(500, 400);
+  plot->setWindowTitle(label);
+  plot->setName(label);
+  window->customPlot3D(plot);
+  plot->addParametricSurface(QString::fromStdString(params.xFormula),
+                             QString::fromStdString(params.yFormula),
+                             QString::fromStdString(params.zFormula),
+                             params.uStart, params.uEnd,
+                             params.vStart, params.vEnd,
+                             params.columns, params.rows,
+                             params.uPeriodic, params.vPeriodic);
+  window->initPlot3D(plot);
+}
+
+void ProjectSerialiser::setupPlotSurface(Graph3D* plot, const SurfaceFunctionParams &params) {
+
+  QString label = window->generateUniqueName("Graph");
+
+  plot->resize(500, 400);
+  plot->setWindowTitle(label);
+  plot->setName(label);
+  window->customPlot3D(plot);
+  plot->addFunction(QString::fromStdString(params.xFormula),
+                    params.xStart, params.xStop,
+                    params.yStart, params.yStop,
+                    params.zStart, params.zStop,
+                    params.columns, params.rows);
+
+  window->initPlot3D(plot);
+}
+
+void ProjectSerialiser::setupMatrixPlot3D(Graph3D* plot, const QString &caption, const SurfaceFunctionParams &params) {
+
+  QString name = QString::fromStdString(params.formula);
+  name.remove("matrix<", Qt::CaseSensitive);
+  name.remove(">", Qt::CaseSensitive);
+  Matrix *m = window->matrix(name);
+  if (!m)
+    return;
+
+  plot->setWindowTitle(caption);
+  plot->setName(caption);
+  plot->addMatrixData(m,
+                      params.xStart, params.xStop,
+                      params.yStart, params.yStop,
+                      params.zStart, params.zStop);
+  plot->update();
+
+  window->initPlot3D(plot);
+}
+
+void ProjectSerialiser::setupMantidMatrixPlot3D(TSVSerialiser &tsv, Graph3D* plot) {
     MantidMatrix* matrix = readWorkspaceForPlot(tsv);
     int style = read3DPlotStyle(tsv);
-    if (matrix)
+
+    if (matrix) {
         plot = matrix->plotGraph3D(style);
-    return plot;
+        QString labl = window->generateUniqueName("Graph");
+
+        plot->resize(500, 400);
+        plot->setWindowTitle(labl);
+        plot->setName(labl);
+        plot->setTitle("Workspace " + matrix->name());
+        window->customPlot3D(plot);
+        plot->customPlotStyle(style);
+        int resCol = matrix->numCols() / 200;
+        int resRow = matrix->numRows() / 200;
+        plot->setResolution(qMax(resCol, resRow));
+
+        double zMin = 1e300;
+        double zMax = -1e300;
+        for (int i = 0; i < matrix->numRows(); i++) {
+            for (int j = 0; j < matrix->numCols(); j++) {
+                double val = matrix->cell(i, j);
+                if (val < zMin)
+                    zMin = val;
+                if (val > zMax)
+                    zMax = val;
+            }
+        }
+
+        // Calculate xStart(), xEnd(), yStart(), yEnd()
+        matrix->boundingRect();
+
+        MantidMatrixFunction *fun = new MantidMatrixFunction(*matrix);
+        plot->addFunction(fun,
+                          matrix->xStart(), matrix->xEnd(),
+                          matrix->yStart(), matrix->yEnd(),
+                          zMin, zMax,
+                          matrix->numCols(), matrix->numRows());
+
+        using MantidQt::API::PlotAxis;
+        plot->setXAxisLabel(PlotAxis(*matrix->workspace(), 0).title());
+        plot->setYAxisLabel(PlotAxis(*matrix->workspace(), 1).title());
+        plot->setZAxisLabel(PlotAxis(false, *matrix->workspace()).title());
+
+        window->initPlot3D(plot);
+        // plot->confirmClose(false);
+        QApplication::restoreOverrideCursor();
+    }
 }
 
 MantidMatrix *ProjectSerialiser::readWorkspaceForPlot( TSVSerialiser &tsv) {

@@ -141,11 +141,18 @@ private:
   void populateMantidTreeWidget(const QString &lines);
   /// Load a single workspaces to the ADS
   void loadWsToMantidTree(const std::string &wsName);
+
+  // 3D plotting functions
   SurfaceFunctionParams readSurfaceFunction(TSVSerialiser &tsv);
   SurfaceFunctionType readSurfaceFunctionType(const std::string &formula);
   MantidMatrix *readWorkspaceForPlot(TSVSerialiser &tsv);
   int read3DPlotStyle(TSVSerialiser &tsv);
-  Graph3D *openMantidMatrix(TSVSerialiser &tsv);
+  void setupMantidMatrixPlot3D(TSVSerialiser &tsv, Graph3D* plot);
+  void setupPlot3D(Graph3D *plot, const QString& caption, const SurfaceFunctionParams &params);
+  void setupPlotXYZ(Graph3D *plot, const QString &caption, const SurfaceFunctionParams &params);
+  void setupPlotParametricSurface(Graph3D *plot, const SurfaceFunctionParams &params);
+  void setupPlotSurface(Graph3D *plot, const SurfaceFunctionParams &params);
+  void setupMatrixPlot3D(Graph3D *plot, const QString &caption, const SurfaceFunctionParams &params);
 };
 
 
