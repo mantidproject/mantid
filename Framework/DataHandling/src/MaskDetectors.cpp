@@ -296,16 +296,18 @@ void MaskDetectors::extractMaskedWSDetIDs(
 
   int64_t nHist = maskWS->getNumberHistograms();
   for (int64_t i = 0; i < nHist; ++i) {
-    if (maskWS->readY(i)[0] > 0) {
+    if (maskWS->readY(i)[0] > 0.5) {
 
-      IDetector_const_sptr det;
       try {
-        det = maskWS->getDetector(i);
+        const auto dets = maskWS->getSpectrum(i).getDetectorIDs();
+        for (auto det : dets) {
+            detectorList.push_back(det);
+        }
       } catch (Exception::NotFoundError &) {
         continue;
       }
 
-      detectorList.push_back(det->getID());
+
     }
   }
 }
