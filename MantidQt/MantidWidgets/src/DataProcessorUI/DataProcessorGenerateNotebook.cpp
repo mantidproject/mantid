@@ -425,7 +425,9 @@ std::string getReducedWorkspaceName(int groupNo, int rowNo,
  @param preprocessingOptionsMap : a map containing the pre-processing options
  @param processingOptions : the pre-processing options specified via hinting
  line edit
- @return tuple containing the python string and the output workspace names
+ @return tuple containing the python string and the output workspace names.
+ First item in the tuple is the python code that performs the reduction, and
+ second item are the names of the output workspaces.
 */
 boost::tuple<std::string, std::string> reduceRowString(
     const int groupNo, const int rowNo, const std::string &instrument,

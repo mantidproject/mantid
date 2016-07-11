@@ -82,7 +82,7 @@ boost::tuple<std::string, std::string> DLLExport reduceRowString(
     const std::map<std::string, std::string> &preprocessOoptionsMap,
     const std::string &processingOptions);
 
-boost::tuple<std::string, std::string>
+boost::tuple<std::string, std::string> DLLExport
 loadWorkspaceString(const std::string &runStr, const std::string &instrument,
                     const DataProcessorPreprocessingAlgorithm &preprocessor,
                     const std::string &options);

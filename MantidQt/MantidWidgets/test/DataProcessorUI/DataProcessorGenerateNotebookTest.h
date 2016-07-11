@@ -214,7 +214,31 @@ public:
     }
   }
 
-  void testTableString() {
+  void testTableStringOneRow() {
+
+    std::map<int, std::set<int>> rows;
+    rows[1].insert(1);
+
+    std::string output = tableString(reflModel(), reflWhitelist(), rows);
+
+    std::vector<std::string> notebookLines;
+    boost::split(notebookLines, output, boost::is_any_of("\n"));
+
+    const std::string result[] = {
+        "Group | Run(s) | Angle | Transmission Run(s) | Q min | Q max | dQ/Q | "
+        "Scale | Options",
+        "--- | --- | --- | --- | --- | --- | --- | "
+        "---",
+        "1 | 24682 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 | ", ""};
+
+    int i = 0;
+    for (auto it = notebookLines.begin(); it != notebookLines.end();
+         ++it, ++i) {
+      TS_ASSERT_EQUALS(*it, result[i])
+    }
+  }
+
+  void testTableStringAllRows() {
 
     std::map<int, std::set<int>> rows;
     rows[0].insert(0);
@@ -262,7 +286,55 @@ public:
     TS_ASSERT_EQUALS(output, result)
   }
 
+  void testPlusStringWithOptions() {
+
+    auto preprocessMap = reflPreprocessMap();
+    auto transProcessor = preprocessMap["Transmission Run(s)"];
+    std::string output = plusString("INPUT_WS", "OUTPUT_WS", transProcessor,
+                                    "WavelengthMin = 0.5, WavelengthMax = 5.0");
+    std::string result =
+        "OUTPUT_WS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun "
+        "= 'OUTPUT_WS', SecondTransmissionRun = 'INPUT_WS', WavelengthMin = "
+        "0.5, WavelengthMax = 5.0)\n";
+    TS_ASSERT_EQUALS(output, result)
+  }
+
+  void testLoadWorkspaceStringOneRun() {
+
+    auto processor = reflPreprocessMap()["Transmission Run(s)"];
+    auto output = loadWorkspaceString("RUN", "INST_", processor, "");
+    TS_ASSERT_EQUALS(boost::get<1>(output), "TRANS_RUN");
+    TS_ASSERT_EQUALS(boost::get<0>(output),
+                     "TRANS_RUN = Load(Filename = 'INST_RUN')\n");
+  }
+
+  void testLoadWorkspaceStringThreeRunsWithOptions() {
+
+    DataProcessorPreprocessingAlgorithm preprocessor("WeightedMean");
+    auto output = loadWorkspaceString("RUN1+RUN2,RUN3", "INST_", preprocessor,
+                                      "Property1 = 1, Property2 = 2");
+    std::vector<std::string> outputLines;
+    boost::split(outputLines, boost::get<0>(output), boost::is_any_of("\n"));
+
+    // The python code that does the loading
+    const std::string result[] = {
+        "RUN1 = Load(Filename = 'INST_RUN1')", "RUN1_RUN2_RUN3 = RUN1",
+        "RUN2 = Load(Filename = 'INST_RUN2')",
+        "RUN1_RUN2_RUN3 = WeightedMean(InputWorkspace1 = 'RUN1_RUN2_RUN3', "
+        "InputWorkspace2 = 'RUN2', Property1 = 1, Property2 = 2)",
+        "RUN3 = Load(Filename = 'INST_RUN3')",
+        "RUN1_RUN2_RUN3 = WeightedMean(InputWorkspace1 = 'RUN1_RUN2_RUN3', "
+        "InputWorkspace2 = 'RUN3', Property1 = 1, Property2 = 2)"};
+    for (int i = 0; i < 6; i++)
+      TS_ASSERT_EQUALS(outputLines[i], result[i]);
+
+    // The loaded workspace
+    TS_ASSERT_EQUALS(boost::get<1>(output), "RUN1_RUN2_RUN3");
+  }
+
   void testReduceRowString() {
+    // Reduce a single row, no pre-processing is needed because there's
+    // only one run in the 'Run(s)' column and no transmission runs
 
     std::map<std::string, std::string> userPreProcessingOptions = {
         {"Run(s)", ""}, {"Transmission Run(s)", ""}};
@@ -274,8 +346,10 @@ public:
     const std::string result[] = {
         "TOF_12346 = Load(Filename = 'INSTRUMENT12346')",
         "IvsQ_TOF_12346, IvsLam_TOF_12346, _ = "
-        "ReflectometryReductionOneAuto(InputWorkspace = 'TOF_12346', ThetaIn = "
-        "1.5, MomentumTransferMinimum = 1.4, MomentumTransferMaximum = 2.9, "
+        "ReflectometryReductionOneAuto(InputWorkspace = 'TOF_12346', "
+        "ThetaIn = "
+        "1.5, MomentumTransferMinimum = 1.4, MomentumTransferMaximum = "
+        "2.9, "
         "MomentumTransferStep = 0.04, ScaleFactor = 1)",
         ""};
 
@@ -289,7 +363,63 @@ public:
     }
   }
 
+  void testReduceRowStringWithPreprocessing() {
+    // Reduce a single row, one column need pre-processing
+
+    // Create a whitelist
+    DataProcessorWhiteList whitelist;
+    whitelist.addElement("Run", "InputWorkspace", "", true);
+    whitelist.addElement("Angle", "ThetaIn", "", true, "angle_");
+    // Create a table workspace
+    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+    ws->addColumn("str", "Group");
+    ws->addColumn("str", "Run");
+    ws->addColumn("str", "Angle");
+    TableRow row = ws->appendRow();
+    row << "0"
+        << "1000+1001"
+        << "0.5";
+    // Create the model
+    auto model = boost::shared_ptr<QDataProcessorTreeModel>(
+        new QDataProcessorTreeModel(ws, whitelist));
+    // Create a pre-process map
+    std::map<std::string, DataProcessorPreprocessingAlgorithm> preprocessMap = {
+        {"Run", DataProcessorPreprocessingAlgorithm("Plus", "RUN_",
+                                                    std::set<std::string>())}};
+    // Specify some pre-processing options
+    std::map<std::string, std::string> userPreProcessingOptions = {
+        {"Run", "Property=prop"}};
+
+    boost::tuple<std::string, std::string> output =
+        reduceRowString(0, 0, "INST", model, whitelist, preprocessMap,
+                        reflProcessor(), userPreProcessingOptions, "");
+
+    const std::string result[] = {
+        "RUN_1000 = Load(Filename = 'INST1000')", "RUN_1000_1001 = RUN_1000",
+        "RUN_1001 = Load(Filename = 'INST1001')",
+        "RUN_1000_1001 = Plus(LHSWorkspace = 'RUN_1000_1001', RHSWorkspace = "
+        "'RUN_1001', Property=prop)",
+        "IvsQ_1000_1001_angle_0.5, IvsLam_1000_1001_angle_0.5, _ = "
+        "ReflectometryReductionOneAuto(InputWorkspace = 'RUN_1000_1001')",
+        ""};
+
+    // Check the names of the reduced workspaces
+    TS_ASSERT_EQUALS(boost::get<1>(output),
+                     "IvsQ_1000_1001_angle_0.5, IvsLam_1000_1001_angle_0.5");
+
+    // Check the python code
+    std::vector<std::string> notebookLines;
+    boost::split(notebookLines, boost::get<0>(output), boost::is_any_of("\n"));
+    int i = 0;
+    for (auto it = notebookLines.begin(); it != notebookLines.end();
+         ++it, ++i) {
+      TS_ASSERT_EQUALS(*it, result[i])
+    }
+  }
+
   void testReduceRowStringNoPreProcessing() {
+    // Reduce a run without pre-processing algorithm specified (i.e. empty
+    // pre-process map)
 
     std::map<std::string, DataProcessorPreprocessingAlgorithm>
         emptyPreProcessMap;
@@ -325,29 +455,20 @@ public:
     std::string userOptions = "Params = '0.1, -0.04, 2.9', StartOverlaps = "
                               "'1.4, 0.1, 1.4', EndOverlaps = '1.6, 2.9, 1.6'";
 
-    DataProcessorWhiteList whitelist;
-    whitelist.addElement("Run(s)", "InputWorkspace", "", true);
-    whitelist.addElement("Angle", "ThetaIn", "");
-    whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "");
-    whitelist.addElement("Q min", "MomentumTransferMinimum", "");
-    whitelist.addElement("Q max", "MomentumTransferMaximum", "");
-    whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
-    whitelist.addElement("Scale", "ScaleFactor", "");
-    whitelist.addElement("Group", "Group", "");
-    whitelist.addElement("Options", "Options", "");
-
     std::set<int> groups;
     groups.insert(0);
     groups.insert(1);
     boost::tuple<std::string, std::string> output = postprocessGroupString(
-        groups, m_model, whitelist, reflProcessor(),
+        groups, m_model, reflWhitelist(), reflProcessor(),
         DataProcessorPostprocessingAlgorithm(), userOptions);
 
     const std::string result[] = {
         "#Post-process workspaces",
-        "IvsQ_12345_12346_24681_24682, _ = Stitch1DMany(InputWorkspaces = "
-        "'IvsQ_12345, IvsQ_12346, IvsQ_24681,"
-        " IvsQ_24682', Params = '0.1, -0.04, 2.9', StartOverlaps = '1.4, 0.1, "
+        "IvsQ_TOF_12345_TOF_12346_TOF_24681_TOF_24682, _ = "
+        "Stitch1DMany(InputWorkspaces = "
+        "'IvsQ_TOF_12345, IvsQ_TOF_12346, IvsQ_TOF_24681,"
+        " IvsQ_TOF_24682', Params = '0.1, -0.04, 2.9', StartOverlaps = '1.4, "
+        "0.1, "
         "1.4', EndOverlaps = '1.6, 2.9, 1.6')",
         ""};
 
