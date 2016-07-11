@@ -55,6 +55,8 @@ EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
 }
 
 EnggDiffFittingViewQtWidget::~EnggDiffFittingViewQtWidget() {
+  m_presenter->notify(IEnggDiffFittingPresenter::ShutDown);
+
   for (auto curves : m_focusedDataVector) {
     curves->detach();
     delete curves;
