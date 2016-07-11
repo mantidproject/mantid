@@ -70,7 +70,7 @@
 #include <gsl/gsl_linalg.h>
 
 // Register the window into the WindowFactory
-DECLARE_WINDOW(Matrix)
+DECLARE_WINDOW(Matrix, Matrix)
 
 Matrix::Matrix(ScriptingEnv *env, const QString &label,
                QWidget *parent, const QString &name, Qt::WFlags f)

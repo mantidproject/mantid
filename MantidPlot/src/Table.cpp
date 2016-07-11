@@ -67,7 +67,7 @@
 #include <ctime>
 
 // Register the window into the WindowFactory
-DECLARE_WINDOW(Table)
+DECLARE_WINDOW(Table, Table)
 
 Table::Table(ScriptingEnv *env, int r, int c, const QString &label,
              QWidget *parent, const QString &name, Qt::WFlags f)

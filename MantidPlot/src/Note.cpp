@@ -46,7 +46,7 @@
 #include "MantidQtAPI/FileDialogHandler.h"
 
 // Register the window into the WindowFactory
-DECLARE_WINDOW(Note)
+DECLARE_WINDOW(Note, Note)
 
 Note::Note(const QString &label, QWidget *parent, const QString &name,
            Qt::WFlags f)

@@ -53,6 +53,9 @@
 #include <gsl/gsl_vector.h>
 #include <fstream>
 
+// Register the window into the WindowFactory
+DECLARE_WINDOW(Graph3D, SurfacePlot)
+
 using namespace Qwt3D;
 
 UserParametricSurface::UserParametricSurface(const QString &xFormula,
@@ -109,11 +112,16 @@ Triple UserParametricSurface::operator()(double u, double v) {
 
 Graph3D::Graph3D(const QString &label, QWidget *parent, const char *name,
                  Qt::WFlags f)
-    : MdiSubWindow(parent, label, name, f) {
-  initPlot();
+    : MdiSubWindow() {
+  init(label, parent, name, f);
 }
 
-void Graph3D::initPlot() {
+Graph3D::Graph3D() : MdiSubWindow() {}
+
+
+void Graph3D::init(const QString &label, QWidget *parent, const char *name,
+                 Qt::WFlags f) {
+  MdiSubWindow::init(parent, label, name, f);
   d_table = 0;
   d_matrix = 0;
   plotAssociation = QString();

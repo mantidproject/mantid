@@ -74,7 +74,7 @@
 #include "TSVSerialiser.h"
 
 // Register the window into the WindowFactory
-DECLARE_WINDOW(MultiLayer)
+DECLARE_WINDOW(MultiLayer, MultiLayer)
 
 namespace {
 /// static logger
