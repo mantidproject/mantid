@@ -380,6 +380,9 @@ protected:
   std::vector<WorkspaceVector> m_groups;
   /// Size of the group(s) being processed
   size_t m_groupSize;
+  /// distinguish between base processGroups() and overriden/algorithm specific
+  /// versions
+  bool m_usingBaseProcessGroups = false;
 
 private:
   void lockWorkspaces();
@@ -390,6 +393,8 @@ private:
   void logAlgorithmInfo() const;
 
   bool executeAsyncImpl(const Poco::Void &i);
+
+  bool doCallProcessGroups(Mantid::Kernel::DateAndTime &start_time);
 
   // Report that the algorithm has completed.
   void reportCompleted(const double &duration,
