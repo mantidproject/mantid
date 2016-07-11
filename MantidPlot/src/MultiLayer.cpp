@@ -1840,11 +1840,8 @@ void MultiLayer::loadFromProject(const std::string &lines,
 
   blockSignals(false);
 
-  app->initMultilayerPlot(this, label.replace(QRegExp("_"), "-"));
-
-  // populate with values
-  loadFromProject(multiLayerLines, app, fileVersion);
   setBirthDate(birthDate);
+  app->initMultilayerPlot(this, label.replace(QRegExp("_"), "-"));
   app->setListViewDate(caption, birthDate);
 }
 
