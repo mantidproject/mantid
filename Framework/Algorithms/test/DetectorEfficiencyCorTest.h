@@ -67,8 +67,8 @@ public:
     MatrixWorkspace_sptr result = grouper.getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1);
-    TS_ASSERT_DELTA(result->readY(0).front(), 10.07373656, 1e-8);
-    TS_ASSERT_DELTA(result->readY(0).back(), 0.0, 1e-8);
+    TS_ASSERT_DELTA(result->y(0).front(), 10.07373656, 1e-8);
+    TS_ASSERT_DELTA(result->y(0).back(), 0.0, 1e-8);
   }
 
   void testDataWithGroupedDetectors() {
@@ -98,8 +98,8 @@ public:
     MatrixWorkspace_sptr result = grouper.getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1);
-    TS_ASSERT_DELTA(result->readY(0).front(), 10.07367566, 1e-8);
-    TS_ASSERT_DELTA(result->readY(0).back(), 0.0, 1e-8);
+    TS_ASSERT_DELTA(result->y(0).front(), 10.07367566, 1e-8);
+    TS_ASSERT_DELTA(result->y(0).back(), 0.0, 1e-8);
   }
 
 private:
@@ -123,8 +123,8 @@ private:
     std::vector<double> e{sqrt(5.0), sqrt(5.0), sqrt(5.0), 0.0};
 
     space2D->setBinEdges(0, x);
-    space2D->dataY(0) = y;
-    space2D->dataE(0) = e;
+    space2D->mutableY(0) = y;
+    space2D->mutableE(0) = e;
 
     std::string xmlShape = "<cylinder id=\"shape\"> ";
     xmlShape += "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
