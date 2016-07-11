@@ -1,16 +1,21 @@
 #include "MantidAPI/Run.h"
-#include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
-#include <boost/python/overloads.hpp>
-#include <boost/python/list.hpp>
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include <boost/python/copy_const_reference.hpp>
-
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
+#include <boost/python/class.hpp>
+#include <boost/python/copy_const_reference.hpp>
+#include <boost/python/list.hpp>
+#include <boost/python/overloads.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
+
 using Mantid::API::Run;
+using Mantid::Geometry::Goniometer;
 using Mantid::Kernel::Property;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(Goniometer)
+GET_POINTER_SPECIALIZATION(Run)
 
 namespace {
 namespace bpl = boost::python;
