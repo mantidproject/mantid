@@ -30,6 +30,9 @@ Improved
   workspaces with the same workspace numbers as specified by the
   ``SplittersWorkspace``.
 
+- :ref:`SavePlot1D <algm-SavePlot1D>` has options for writing out
+  plotly html files.
+
 Deprecated
 ##########
 
