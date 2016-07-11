@@ -88,8 +88,7 @@ private:
  * [ assigned to thzs ]
  */
 class Table : public MdiSubWindow,
-              public Scripted,
-              public Mantid::IProjectSerialisable {
+              public Scripted {
   Q_OBJECT
 
 public:

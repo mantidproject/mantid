@@ -62,8 +62,7 @@ class QUndoStack;
 
 //! Matrix worksheet class
 class Matrix : public MdiSubWindow,
-               public Scripted,
-               public Mantid::IProjectSerialisable {
+               public Scripted {
   Q_OBJECT
 
 protected:

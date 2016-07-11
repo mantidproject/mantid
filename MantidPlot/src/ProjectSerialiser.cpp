@@ -8,6 +8,7 @@
 #include "TableStatistics.h"
 #include "Graph3D.h"
 
+#include "WindowFactory.h"
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidUI.h"
 #include "MantidAPI/MatrixWorkspace.h"

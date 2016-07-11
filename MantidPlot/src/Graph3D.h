@@ -60,7 +60,7 @@ class Function2D; // Mantid
  *directly to a file, so they
  * can't be combined with output generated via QPrinter.
  */
-class Graph3D : public MdiSubWindow, public Mantid::IProjectSerialisable {
+class Graph3D : public MdiSubWindow {
   Q_OBJECT
 
 public:

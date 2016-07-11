@@ -9,7 +9,6 @@
 #include "MantidMatrixModel.h"
 #include "MantidMatrixTabExtension.h"
 
-#include "Mantid/IProjectSerialisable.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -84,8 +83,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 */
 class MantidMatrix : public MdiSubWindow,
-                     MantidQt::API::WorkspaceObserver,
-                     public Mantid::IProjectSerialisable {
+                     MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 
 public:

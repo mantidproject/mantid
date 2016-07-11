@@ -72,7 +72,7 @@ class WaterfallFillDialog;
  *could handle things like creating
  * tables by calling methods of Project instead of sending signals.
  */
-class MultiLayer : public MdiSubWindow, public Mantid::IProjectSerialisable {
+class MultiLayer : public MdiSubWindow {
   Q_OBJECT
 
 public:

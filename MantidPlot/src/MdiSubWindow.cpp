@@ -117,6 +117,20 @@ void MdiSubWindow::setLabel(const QString &label) {
     d_label = label;
 }
 
+void MdiSubWindow::loadFromProject(const std::string &lines, ApplicationWindow *app, const int fileVersion)
+{
+    Q_UNUSED(lines);
+    Q_UNUSED(app);
+    Q_UNUSED(fileVersion);
+   throw std::runtime_error("LoadToProject not implemented for raw MdiSubWindow");
+}
+
+std::string MdiSubWindow::saveToProject(ApplicationWindow *app)
+{
+   Q_UNUSED(app);
+   throw std::runtime_error("SaveToProject not implemented for raw MdiSubWindow");
+}
+
 void MdiSubWindow::resizeEvent(QResizeEvent *e) {
   emit resizedWindow(this);
   MdiSubWindowParent_t::resizeEvent(e);

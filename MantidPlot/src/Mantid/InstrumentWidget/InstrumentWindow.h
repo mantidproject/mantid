@@ -17,8 +17,7 @@ class InstrumentWidgetTab;
 }
 }
 
-class InstrumentWindow : public MdiSubWindow,
-                         public Mantid::IProjectSerialisable {
+class InstrumentWindow : public MdiSubWindow {
   Q_OBJECT
 public:
   explicit InstrumentWindow(const QString &wsName,

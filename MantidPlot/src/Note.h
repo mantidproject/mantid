@@ -41,7 +41,7 @@ class ApplicationWindow;
  * \section future Future Plans
  * - Search and replace
  */
-class Note : public MdiSubWindow, public Mantid::IProjectSerialisable {
+class Note : public MdiSubWindow {
   Q_OBJECT
 
 public:
