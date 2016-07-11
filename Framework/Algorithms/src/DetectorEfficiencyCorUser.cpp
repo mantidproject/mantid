@@ -4,9 +4,9 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidGeometry/muParser_Silent.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -83,12 +83,12 @@ void DetectorEfficiencyCorUser::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     // MantidVec& xOut = m_outputWS->dataX(i);
-    MantidVec &yOut = m_outputWS->dataY(i);
-    MantidVec &eOut = m_outputWS->dataE(i);
-    const MantidVec &xIn = m_inputWS->readX(i);
-    const MantidVec &yIn = m_inputWS->readY(i);
-    const MantidVec &eIn = m_inputWS->readE(i);
-    m_outputWS->setX(i, m_inputWS->refX(i));
+    auto &yOut = m_outputWS->mutableY(i);
+    auto &eOut = m_outputWS->mutableE(i);
+    auto &xIn = m_inputWS->x(i);
+    auto &yIn = m_inputWS->y(i);
+    auto &eIn = m_inputWS->e(i);
+    m_outputWS->setSharedX(i, m_inputWS->sharedX(i));
 
     const MantidVec effVec = calculateEfficiency(eff0, effFormula, xIn);
     // run this outside to benefit from parallel for (?)
@@ -113,8 +113,10 @@ void DetectorEfficiencyCorUser::exec() {
  * @param eOut corrected spectrum errors
  */
 void DetectorEfficiencyCorUser::applyDetEfficiency(
-    const size_t numberOfChannels, const MantidVec &yIn, const MantidVec &eIn,
-    const MantidVec &effVec, MantidVec &yOut, MantidVec &eOut) {
+    const size_t numberOfChannels, const Mantid::HistogramData::HistogramY &yIn,
+    const Mantid::HistogramData::HistogramE &eIn, const MantidVec &effVec,
+    Mantid::HistogramData::HistogramY &yOut,
+    Mantid::HistogramData::HistogramE &eOut) {
 
   for (unsigned int j = 0; j < numberOfChannels; ++j) {
     // xOut[j] = xIn[j];
@@ -147,24 +149,6 @@ DetectorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
   }
 }
 
-// MantidVec DetectorEfficiencyCorUser::calculateEfficiency(double eff0,
-//		const std::string& formula, const MantidVec& xIn) {
-//
-//	MantidVec effOut(xIn.size() - 1); // x are bins and have more one value
-// than y
-//
-//	MantidVec::const_iterator xIn_it = xIn.begin();
-//	MantidVec::iterator effOut_it = effOut.begin();
-//	for (; effOut_it != effOut.end(); ++xIn_it, ++effOut_it) {
-//		double deltaE = std::fabs((*xIn_it + *(xIn_it + 1)) / 2 - m_Ei);
-//		double e = m_Ei - deltaE;
-//
-//		double eff = calculateFormulaValue(formula, e);
-//		*effOut_it = eff / eff0;
-//	}
-//	return effOut;
-//}
-
 /**
  * Calculate detector efficiency given a formula, the efficiency at the elastic
  * line,
@@ -177,7 +161,8 @@ DetectorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
  * @return a vector with the efficiencies
  */
 MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
-    double eff0, const std::string &formula, const MantidVec &xIn) {
+    double eff0, const std::string &formula,
+    const Mantid::HistogramData::HistogramX &xIn) {
 
   MantidVec effOut(xIn.size() - 1); // x are bins and have more one value than y
 
