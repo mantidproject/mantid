@@ -2,7 +2,6 @@
 #include "ProjectSerialiser.h"
 #include "ApplicationWindow.h"
 #include "ScriptingWindow.h"
-#include "TSVSerialiser.h"
 #include "Note.h"
 #include "Matrix.h"
 #include "TableStatistics.h"
@@ -134,40 +133,7 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
     window->currentFolder()->folderListItem()->setExpanded(openValue);
   }
 
-  if (tsv.hasSection("mantidmatrix")) {
-    auto matrices = tsv.sections("mantidmatrix");
-    for (auto &it : matrices) {
-      openMantidMatrix(it);
-    }
-  }
-
-  if (tsv.hasSection("table")) {
-    auto tableSections = tsv.sections("table");
-    for (auto &it : tableSections) {
-      openTable(it, fileVersion);
-    }
-  }
-
-  if (tsv.hasSection("TableStatistics")) {
-    auto tableStatsSections = tsv.sections("TableStatistics");
-    for (auto &it : tableStatsSections) {
-      openTableStatistics(it, fileVersion);
-    }
-  }
-
-  if (tsv.hasSection("matrix")) {
-    auto matrixSections = tsv.sections("matrix");
-    for (auto &it : matrixSections) {
-      openMatrix(it, fileVersion);
-    }
-  }
-
-  if (tsv.hasSection("multiLayer")) {
-    auto multiLayer = tsv.sections("multiLayer");
-    for (auto &it : multiLayer) {
-      openMultiLayer(it, fileVersion);
-    }
-  }
+  loadWindows(tsv, fileVersion);
 
   if (tsv.hasSection("SurfacePlot")) {
     auto plotSections = tsv.sections("SurfacePlot");
@@ -223,6 +189,26 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
     for (auto &it : folders) {
       load(it, fileVersion, false);
     }
+  }
+}
+
+/** Load open project windows from the project file
+ *
+ * This uses the dynamic window factory to create the various different types
+ * of windows.
+ *
+ * @param lines :: string of characters from a Mantid project file
+ * @param fileVersion :: version of the project file loaded
+ */
+void ProjectSerialiser::loadWindows(const TSVSerialiser &tsv, const int fileVersion)
+{
+  for (auto &classname : WindowFactory::Instance().getKeys()) {
+        if (tsv.hasSection(classname)) {
+            for (auto &section : tsv.sections(classname)) {
+                auto w = WindowFactory::Instance().createUnwrapped(classname);
+                w->loadFromProject(section, window, fileVersion);
+            }
+        }
   }
 }
 
@@ -505,61 +491,6 @@ void ProjectSerialiser::saveProjectFile(QFile *fileHandle,
   }
 
   QApplication::restoreOverrideCursor();
-}
-
-/**
- * Open a new matrix window
- *
- * @param lines :: string of characters from a Mantid project file
- * @param fileVersion :: the version of the project file
- */
-void ProjectSerialiser::openMatrix(const std::string &lines,
-                                   const int fileVersion) {
-  auto w = WindowFactory::Instance().createUnwrapped("Matrix");
-  w->loadFromProject(lines, window, fileVersion);
-}
-
-/**
- * Open a new Mantid Matrix window.
- *
- * @param lines :: string of characters from a Mantid project file
- */
-void ProjectSerialiser::openMantidMatrix(const std::string &lines) {
-  auto w = WindowFactory::Instance().createUnwrapped("MantidMatrix");
-  w->loadFromProject(lines, window, -1);
-}
-
-/**
- * Open a new Multi-Layer plot window
- * @param lines :: string of characters from a Mantid project file.
- * @param fileVersion :: the version of the project file
- */
-void ProjectSerialiser::openMultiLayer(const std::string &lines,
-                                       const int fileVersion) {
-  auto w = WindowFactory::Instance().createUnwrapped("MultiLayer");
-  w->loadFromProject(lines, window, fileVersion);
-}
-
-/**
- * Open a new table window
- * @param lines :: chracters from a Mantid project file
- * @param fileVersion :: the version of the project file
- */
-void ProjectSerialiser::openTable(const std::string &lines,
-                                  const int fileVersion) {
-  auto w = WindowFactory::Instance().createUnwrapped("Table");
-  w->loadFromProject(lines, window, fileVersion);
-}
-
-/**
- * Open a new table statistics window
- * @param lines :: chracters from a Mantid project file
- * @param fileVersion :: the version of the project file
- */
-void ProjectSerialiser::openTableStatistics(const std::string &lines,
-                                            const int fileVersion) {
-  auto w = WindowFactory::Instance().createUnwrapped("TableStatistics");
-  w->loadFromProject(lines, window, fileVersion);
 }
 
 /**

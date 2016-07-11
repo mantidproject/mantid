@@ -10,6 +10,8 @@
 #include <QDir>
 #include <QApplication>
 
+#include "TSVSerialiser.h"
+
 #include "qstring.h"
 #include "Folder.h"
 
@@ -91,20 +93,12 @@ private:
   /// Load sections of the folder
   void loadProjectSections(const std::string &lines, const int fileVersion,
                            const bool isTopLevel);
+  /// Load project windows from the project file
+  void loadWindows(const TSVSerialiser &tsv, const int fileVersion);
   /// Open the script window and load scripts from string
   void openScriptWindow(const std::string &files, const int fileVersion);
-  /// Open a Mantid matrix from a workspaces
-  void openMantidMatrix(const std::string &lines);
-  /// Open a (non-Mantid) matrix
-  void openMatrix(const std::string &lines, const int fileVersion);
-  /// Open a multi-layer plot window
-  void openMultiLayer(const std::string &lines, const int fileVersion);
   /// Open a surface plot window
   void openSurfacePlot(const std::string &lines, const int fileVersion);
-  /// Open a table window
-  void openTable(const std::string &lines, const int fileVersion);
-  /// Open a table statistics window
-  void openTableStatistics(const std::string &lines, const int fileVersion);
   /// Load Nexus files and add workspaces to the ADS
   void populateMantidTreeWidget(const QString &lines);
   /// Load a single workspaces to the ADS

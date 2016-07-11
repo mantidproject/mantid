@@ -33,6 +33,17 @@
 
   File change history is stored at: <https://github.com/mantidproject/mantid>
 */
+
+struct CaseInsensitiveStringComparator {
+  bool operator()(const std::string &s1, const std::string &s2) const {
+#ifdef _MSC_VER
+    return stricmp(s1.c_str(), s2.c_str()) < 0;
+#else
+    return strcasecmp(s1.c_str(), s2.c_str()) < 0;
+#endif
+  }
+};
+
 class TSVSerialiser {
 public:
   TSVSerialiser();
@@ -79,8 +90,8 @@ public:
   void writeInlineSection(const std::string &name, const std::string &body);
 
 private:
-  std::map<std::string, std::vector<std::string>> m_sections;
-  std::map<std::string, std::vector<std::string>> m_lines;
+  std::map<std::string, std::vector<std::string>, CaseInsensitiveStringComparator> m_sections;
+  std::map<std::string, std::vector<std::string>, CaseInsensitiveStringComparator> m_lines;
 
   std::vector<std::string> m_curValues;
   int m_curIndex;
