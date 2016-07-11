@@ -29,6 +29,7 @@ class QData(GeneralData):
 
         self._data.append(item)
 
+
     def set(self, items=None):
 
         if isinstance(items, np.ndarray):

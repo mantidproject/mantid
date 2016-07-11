@@ -21,15 +21,18 @@ algorithms and data objects that are:
 
 from IOmodule import  IOmodule
 
+# Calculating modules
 from GeneralDFTProgram import GeneralDFTProgram
 from LoadCASTEP import LoadCASTEP
-
 from CalculateQ import CalculateQ
 
-
+# Data
 from GeneralData import GeneralData
 from QData import  QData
 from KpointsData import KpointsData
 from AtomsData import AtomsDaTa
 from AbinsData import  AbinsData
 from DwData import  DwData
+
+# Instruments
+from InstrumentProducer import  InstrumentProducer

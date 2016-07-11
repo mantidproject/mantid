@@ -4,7 +4,8 @@ import numpy
 import Constants
 from IOmodule import IOmodule
 from QData import  QData
-from KpointsData import  KpointsData
+from KpointsData import KpointsData
+from Instruments import InstrumentInterface
 
 
 class CalculateQ(IOmodule):
@@ -20,20 +21,20 @@ class CalculateQ(IOmodule):
         """
         super(CalculateQ, self).__init__(input_filename=filename, group_name=Constants.Q_data_group)
 
-        if not instrument in Constants.all_instruments:
-            raise ValueError("Unsupported instrument")
-        self._instrument = instrument
+        if isinstance(instrument, InstrumentInterface):
+            self._instrument = instrument
+        elif instrument is None:
+            self._instrument = None
+        else:
+            raise ValueError("Invalid instrument.")
 
         if not sample_form in Constants.all_sample_forms:
             raise ValueError("Invalid value of the sample form. Please specify one of the two options: 'SingleCrystal', 'Powder'.")
         self._sample_form = sample_form
 
         self._k_points_data = None
-
-         # _functions  defined in the form of dictionary with keys as names of instruments. If a name of
-        #  instrument is set to 'None' then Q vectors do not depend on frequency.
-        self._functions = {"TOSCA": self._calculate_qvectors_tosca}
         self._Qvectors = None # data with Q vectors
+
 
     def  collectFrequencies(self, k_points_data=None):
         """
@@ -41,7 +42,7 @@ class CalculateQ(IOmodule):
         @param k_points_data: frequencies in the form of numpy array
         """
 
-        if self._instrument == "None":
+        if self._instrument is None:
             raise ValueError("Q vectors do not depend on frequency so collecting  frequencies is not needed.")
         
         if not isinstance(k_points_data, KpointsData):
@@ -51,27 +52,20 @@ class CalculateQ(IOmodule):
         self._k_points_data = k_points_data.extract()
 
 
-    def _calculate_qvectors_tosca(self, frequencies=None):
-        """
-        Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
-        """
-        _freq_squared = frequencies * frequencies
-        if self._sample_form == "Powder":
-            self._Qvectors._append(item=_freq_squared * Constants.TOSCA_constant)
-        else:
-            raise ValueError("SingleCrystal user case is not implemented.")
-
-
     def _calculate_qvectors_instrument(self):
         """
         Calculates Q vectors for the given instrument.
         """
 
         self._Qvectors = QData(frequency_dependence=True)
-        num_k = len(self._k_points_data["k_vectors"])
+        num_k = self._k_points_data["k_vectors"].shape[0]
         self._Qvectors.set_k(k=num_k)
-        for k in range(num_k):
-            self._functions[self._instrument](self._k_points_data["frequencies"][k])
+
+        if self._sample_form == "Powder":
+            for k in range(num_k):
+                self._Qvectors._append(self._instrument.calculate_q(frequencies=self._k_points_data["frequencies"][k]))
+        else:
+            raise ValueError("SingleCrystal user case is not implemented.")
 
 
     def getQvectors(self):
@@ -79,14 +73,14 @@ class CalculateQ(IOmodule):
         Calculates Q vectors and return them. Saves Q vectors to an hdf file.
         @return: Q vectors for the required instrument
         """
-        if self._instrument != "None":
+        if isinstance(self._instrument, InstrumentInterface):
             self._calculate_qvectors_instrument()
         else:
             raise ValueError("General case of Q data not implemented yet.")
 
         self.addNumpyDataset("data", self._Qvectors.extract()) # Q vectors in the form of numpy array
         self.addAttribute("frequency_dependence",self._Qvectors._frequency_dependence)
-        self.addAttribute("instrument", self._instrument)
+        self.addAttribute("instrument_name", self._instrument._name)
         self.addAttribute("sample_Form", self._sample_form)
         self.addAttribute("filename", self._input_filename)
         self.save()

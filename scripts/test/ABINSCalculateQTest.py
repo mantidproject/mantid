@@ -5,7 +5,7 @@ from mantid.simpleapi import *
 
 from AbinsModules import  CalculateQ
 from AbinsModules import KpointsData
-
+from AbinsModules.InstrumentProducer import InstrumentProducer
 
 class ABINSCalculateQTest(unittest.TestCase):
 
@@ -14,10 +14,11 @@ class ABINSCalculateQTest(unittest.TestCase):
         """
         Tests various  assertions
         """
-
+        producer = InstrumentProducer()
+        tosca_instrument = producer.produceInstrument("TOSCA")
         # wrong file name
         with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename=1, instrument="TOSCA", sample_form="Powder")
+            poor_q_calculator = CalculateQ(filename=1, instrument=tosca_instrument, sample_form="Powder")
 
         # wrong instrument
         with self.assertRaises(ValueError):
@@ -25,10 +26,10 @@ class ABINSCalculateQTest(unittest.TestCase):
 
         # wrong sample form
         with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename="one_file", instrument="TOSCA", sample_form="Solid")
+            poor_q_calculator = CalculateQ(filename="one_file", instrument=tosca_instrument, sample_form="Solid")
 
         # no frequencies required for the case when Q vectors do not depend on frequencies
-        poor_q_calculator = CalculateQ(filename="one_file", instrument="None", sample_form="Powder")
+        poor_q_calculator = CalculateQ(filename="one_file", sample_form="Powder")
         with self.assertRaises(ValueError):
             poor_q_calculator.collectFrequencies(k_points_data=np.array([1, 2, 3, 4]))
 
@@ -51,8 +52,10 @@ class ABINSCalculateQTest(unittest.TestCase):
         extracted_raw_data = raw_data.extract()
         correct_q_data = extracted_raw_data["frequencies"][0] * extracted_raw_data["frequencies"][0] / 16.0
 
+        producer = InstrumentProducer()
+        tosca_instrument = producer.produceInstrument("TOSCA")
         q_calculator = CalculateQ(filename="TestingFile_TOSCA.phonon",
-                                  instrument="TOSCA",
+                                  instrument=tosca_instrument,
                                   sample_form="Powder")
         q_calculator.collectFrequencies(k_points_data=raw_data)
         q_vectors = q_calculator.getQvectors()
