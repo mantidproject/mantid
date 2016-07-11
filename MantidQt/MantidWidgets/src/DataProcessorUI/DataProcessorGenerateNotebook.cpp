@@ -399,7 +399,7 @@ std::string getReducedWorkspaceName(int groupNo, int rowNo,
 
         // But we may have things like '1+2' which we want to replace with '1_2'
         std::vector<std::string> value;
-        boost::split(value, valueStr, boost::is_any_of("+"));
+        boost::split(value, valueStr, boost::is_any_of("+,"));
 
         names.push_back(whitelist.prefix(col) +
                         boost::algorithm::join(value, "_"));

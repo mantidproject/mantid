@@ -450,6 +450,95 @@ public:
     }
   }
 
+  void testReducedWorkspaceNameOnlyRun() {
+
+    // Create a whitelist
+    DataProcessorWhiteList whitelist;
+    whitelist.addElement("Run", "", "", true, "run_");
+    whitelist.addElement("Angle", "", "", false, "");
+    whitelist.addElement("Trans", "", "", false, "");
+
+    // Create a table ws
+    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+    ws->addColumn("str", "Group");
+    ws->addColumn("str", "Run");
+    ws->addColumn("str", "Angle");
+    ws->addColumn("str", "Trans");
+    TableRow row = ws->appendRow();
+    row << "0"
+        << "1000,1001"
+        << "0.5"
+        << "2000,2001";
+
+    // Create a tree model
+    QDataProcessorTreeModel_sptr model =
+        boost::shared_ptr<QDataProcessorTreeModel>(
+            new QDataProcessorTreeModel(ws, whitelist));
+
+    std::string name = getReducedWorkspaceName(0, 0, model, whitelist, "IvsQ_");
+    TS_ASSERT_EQUALS(name, "IvsQ_run_1000_1001")
+  }
+
+  void testReducedWorkspaceNameRunAndTrans() {
+
+    // Create a whitelist
+    DataProcessorWhiteList whitelist;
+    whitelist.addElement("Run", "", "", true, "run_");
+    whitelist.addElement("Angle", "", "", false, "");
+    whitelist.addElement("Trans", "", "", true, "trans_");
+
+    // Create a table ws
+    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+    ws->addColumn("str", "Group");
+    ws->addColumn("str", "Run");
+    ws->addColumn("str", "Angle");
+    ws->addColumn("str", "Trans");
+    TableRow row = ws->appendRow();
+    row << "0"
+        << "1000,1001"
+        << "0.5"
+        << "2000,2001";
+
+    // Create a tree model
+    QDataProcessorTreeModel_sptr model =
+        boost::shared_ptr<QDataProcessorTreeModel>(
+            new QDataProcessorTreeModel(ws, whitelist));
+
+    std::string name =
+        getReducedWorkspaceName(0, 0, model, whitelist, "Prefix_");
+    TS_ASSERT_EQUALS(name, "Prefix_run_1000_1001_trans_2000_2001")
+  }
+
+  void testReducedWorkspaceNameTransNoPrefix() {
+
+    // Create a whitelist
+    DataProcessorWhiteList whitelist;
+    whitelist.addElement("Run", "", "", false, "");
+    whitelist.addElement("Angle", "", "", false, "");
+    whitelist.addElement("Trans", "", "", true, "");
+
+    // Create a table ws
+    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+    ws->addColumn("str", "Group");
+    ws->addColumn("str", "Run");
+    ws->addColumn("str", "Angle");
+    ws->addColumn("str", "Trans");
+    TableRow row = ws->appendRow();
+    row << "0"
+        << "1000,1001"
+        << "0.5"
+        << "2000+2001";
+
+    // Create a tree model
+    QDataProcessorTreeModel_sptr model =
+        boost::shared_ptr<QDataProcessorTreeModel>(
+            new QDataProcessorTreeModel(ws, whitelist));
+
+    std::string name =
+        getReducedWorkspaceName(0, 0, model, whitelist, "Prefix_");
+    TS_ASSERT_EQUALS(name, "Prefix_2000_2001")
+  }
+
   void testPostprocessGroupString() {
     std::string userOptions = "Params = '0.1, -0.04, 2.9', StartOverlaps = "
                               "'1.4, 0.1, 1.4', EndOverlaps = '1.6, 2.9, 1.6'";
