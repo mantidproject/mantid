@@ -77,6 +77,12 @@ private:
   /// Helper function to create new item for Diagnosis table
   QTableWidgetItem *createTableWidgetItem(const QString &text);
 
+  /// Reorganise workspaces after fit of one run finished
+  void finishAfterRun(const std::string &labelGroupName,
+                      const Mantid::API::IAlgorithm_sptr &fitAlg,
+                      bool simultaneous,
+                      const Mantid::API::MatrixWorkspace_sptr &firstWS) const;
+
   // -- MEMBER VARIABLES -----------------------------------------------
 
   /// UI form

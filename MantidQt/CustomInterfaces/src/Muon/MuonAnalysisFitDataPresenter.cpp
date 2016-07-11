@@ -418,15 +418,17 @@ void MuonAnalysisFitDataPresenter::handleFitFinished(
 /**
  * Rename fitted workspaces so they can be linked to the input and found by the
  * results table generation code. Add special logs and generate params table.
- * @param groupName :: [input] Name of group that workspaces belong to
+ * @param baseName :: [input] Base name for workspaces
+ * @param groupName :: [input] Name of group that workspaces belong to. Leave
+ * empty to be the same as baseName (usual case).
  */
 void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
-    const std::string &groupName) const {
+    const std::string &baseName, const std::string &groupName) const {
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   const auto resultsGroup =
-      ads.retrieveWS<WorkspaceGroup>(groupName + "_Workspaces");
+      ads.retrieveWS<WorkspaceGroup>( baseName + "_Workspaces");
   const auto paramsTable =
-      ads.retrieveWS<ITableWorkspace>(groupName + "_Parameters");
+      ads.retrieveWS<ITableWorkspace>(baseName + "_Parameters");
   if (resultsGroup && paramsTable) {
     const size_t offset = paramsTable->rowCount() - resultsGroup->size();
     for (size_t i = 0; i < resultsGroup->size(); i++) {
@@ -438,7 +440,7 @@ void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
       addSpecialLogs(oldName, wsDetails);
       // Generate new name and rename workspace
       std::ostringstream newName;
-      newName << groupName << "_" << wsDetails.label << "_"
+      newName << baseName << "_" << wsDetails.label << "_"
               << wsDetails.itemName << "_" << wsDetails.periods;
       ads.rename(oldName, newName.str() + "_Workspace");
       // Generate new parameters table for this dataset
@@ -446,28 +448,37 @@ void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
       if (fitTable) {
         const std::string fitTableName = newName.str() + "_Parameters";
         ads.add(fitTableName, fitTable);
-        ads.addToGroup(groupName, fitTableName);
+        // If user has specified a group to add to, add to that.
+        // Otherwise the group is called the same thing as the base name.
+        const std::string groupToAddTo =
+            groupName.empty() ? baseName : groupName;
+        ads.addToGroup(groupToAddTo, fitTableName);
       }
     }
     // Now that we have split parameters table, can delete it
-    ads.remove(groupName + "_Parameters");
+    ads.remove(baseName + "_Parameters");
   }
 }
 
 /**
  * Moves all workspaces in group "groupName_Workspaces" up a level into
  * "groupName"
- * @param groupName :: [input] Name of upper group e.g. "MuonSimulFit_Label"
+ * @param baseName :: [input] Base name for workspaces
+ * @param groupName :: [input] Name of upper group e.g. "MuonSimulFit_Label". If
+ * empty, use same as baseName.
  */
 void MuonAnalysisFitDataPresenter::extractFittedWorkspaces(
-    const std::string &groupName) const {
+    const std::string &baseName, const std::string &groupName) const {
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-  const std::string resultsGroupName = groupName + "_Workspaces";
+  const std::string resultsGroupName = baseName + "_Workspaces";
   const auto resultsGroup = ads.retrieveWS<WorkspaceGroup>(resultsGroupName);
-  if (ads.doesExist(groupName) && resultsGroup) {
+  // If user has specified a group to add to, add to that.
+  // Otherwise the group is called the same thing as the base name.
+  const std::string groupToAddTo = groupName.empty() ? baseName : groupName;
+  if (ads.doesExist(groupToAddTo) && resultsGroup) {
     for (const auto &name : resultsGroup->getNames()) {
       ads.removeFromGroup(resultsGroupName, name);
-      ads.addToGroup(groupName, name);
+      ads.addToGroup(groupToAddTo, name);
     }
     ads.remove(resultsGroupName); // should be empty now
   }

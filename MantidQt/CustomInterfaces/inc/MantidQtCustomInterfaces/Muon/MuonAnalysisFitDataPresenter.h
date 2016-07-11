@@ -86,9 +86,11 @@ public:
   /// Create workspaces to fit
   void createWorkspacesToFit(const std::vector<std::string> &names) const;
   /// Rename fit workspaces, add logs and generate params table
-  void handleFittedWorkspaces(const std::string &groupName) const;
+  void handleFittedWorkspaces(const std::string &baseName,
+                              const std::string &groupName = "") const;
   /// Extract workspaces from group and move up a level
-  void extractFittedWorkspaces(const std::string &groupName) const;
+  void extractFittedWorkspaces(const std::string &baseName,
+                               const std::string &groupName = "") const;
 
 public slots:
   /// Transforms fit results when a simultaneous fit finishes

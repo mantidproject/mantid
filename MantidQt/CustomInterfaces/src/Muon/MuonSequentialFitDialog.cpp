@@ -4,6 +4,8 @@
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
@@ -471,21 +473,14 @@ void MuonSequentialFitDialog::continueFit() {
       break;
     }
 
+    // Copy log values and group created fit workspaces
+    finishAfterRun(labelGroupName, fit, datasetsPerRun > 1, matrixWS);
+
     // If fit was simultaneous, transform results
     if (datasetsPerRun > 1) {
-      m_dataPresenter->handleFittedWorkspaces(wsBaseName);
-      m_dataPresenter->extractFittedWorkspaces(wsBaseName);
+      m_dataPresenter->handleFittedWorkspaces(wsBaseName, labelGroupName);
+      m_dataPresenter->extractFittedWorkspaces(wsBaseName, labelGroupName);
     }
-
-    // Make sure created fit workspaces end up in the group
-    // TODO: this really should use loop
-    ads.addToGroup(labelGroupName, wsBaseName + "_NormalisedCovarianceMatrix");
-    ads.addToGroup(labelGroupName, wsBaseName + "_Parameters");
-    ads.addToGroup(labelGroupName, wsBaseName + "_Workspace");
-
-    // Copy log values
-    auto fitWs = ads.retrieveWS<MatrixWorkspace>(wsBaseName + "_Workspace");
-    fitWs->copyExperimentInfoFrom(matrixWS.get());
 
     // Add information about the fit to the diagnosis table
     addDiagnosisEntry(runTitle, fit->getProperty("OutputChi2OverDof"),
@@ -497,6 +492,67 @@ void MuonSequentialFitDialog::continueFit() {
   }
 
   setState(Stopped);
+}
+
+/**
+ * Handle reorganising workspaces after fit of a single run has finished
+ * Group output together and copy log values
+ * @param labelGroupName :: [input] Label for group
+ * @param fitAlg :: [input] Pointer to fit algorithm
+ * @param simultaneous :: [input] Whether several groups/periods were fitted
+ * simultaneously or not
+ * @param firstWS :: [input] Pointer to first input workspace (to copy logs
+ * from)
+ */
+void MuonSequentialFitDialog::finishAfterRun(
+    const std::string &labelGroupName, const IAlgorithm_sptr &fitAlg,
+    bool simultaneous, const MatrixWorkspace_sptr &firstWS) const {
+  auto &ads = AnalysisDataService::Instance();
+  const std::string wsBaseName = fitAlg->getPropertyValue("Output");
+  if (simultaneous) {
+    // copy logs
+    auto fitWSGroup =
+        ads.retrieveWS<WorkspaceGroup>(wsBaseName + "_Workspaces");
+    for (size_t i = 0; i < fitWSGroup->size(); i++) {
+      auto fitWs =
+          boost::dynamic_pointer_cast<MatrixWorkspace>(fitWSGroup->getItem(i));
+      if (fitWs) {
+        fitWs->copyExperimentInfoFrom(firstWS.get());
+      }
+    }
+    // insert workspace names into table
+    try {
+      const std::string paramTableName =
+          fitAlg->getProperty("OutputParameters");
+      const auto paramTable = ads.retrieveWS<ITableWorkspace>(paramTableName);
+      if (paramTable) {
+        Mantid::API::TableRow f0Row = paramTable->appendRow();
+        f0Row << "f0=" + fitAlg->getPropertyValue("InputWorkspace") << 0.0
+              << 0.0;
+        for (size_t i = 1; i < fitWSGroup->size(); i++) {
+          const std::string suffix = boost::lexical_cast<std::string>(i);
+          const auto wsName =
+              fitAlg->getPropertyValue("InputWorkspace_" + suffix);
+          Mantid::API::TableRow row = paramTable->appendRow();
+          row << "f" + suffix + "=" + wsName << 0.0 << 0.0;
+        }
+      }
+    } catch (const Mantid::Kernel::Exception::NotFoundError &) {
+      // Not a fatal error, but shouldn't happen
+      g_log.warning(
+          "Could not find output parameters table for simultaneous fit");
+    }
+    // Group output together
+    ads.addToGroup(labelGroupName, wsBaseName + "_NormalisedCovarianceMatrix");
+    ads.addToGroup(labelGroupName, wsBaseName + "_Parameters");
+    ads.addToGroup(labelGroupName, wsBaseName + "_Workspaces");
+  } else {
+    ads.addToGroup(labelGroupName, wsBaseName + "_NormalisedCovarianceMatrix");
+    ads.addToGroup(labelGroupName, wsBaseName + "_Parameters");
+    ads.addToGroup(labelGroupName, wsBaseName + "_Workspace");
+    auto fitWs = ads.retrieveWS<MatrixWorkspace>(wsBaseName + "_Workspace");
+    fitWs->copyExperimentInfoFrom(firstWS.get());
+  }
 }
 
 /**
