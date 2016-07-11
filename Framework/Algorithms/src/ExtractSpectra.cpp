@@ -135,8 +135,7 @@ void ExtractSpectra::execHistogram() {
 
   cow_ptr<HistogramData::HistogramX> newX(nullptr);
   if (m_commonBoundaries) {
-    auto &oldX =
-        m_inputWorkspace->x(m_workspaceIndexList.front());
+    auto &oldX = m_inputWorkspace->x(m_workspaceIndexList.front());
     newX = make_cow<HistogramData::HistogramX>(oldX.begin() + m_minX,
                                                oldX.begin() + m_maxX);
   }
@@ -165,9 +164,11 @@ void ExtractSpectra::execHistogram() {
     }
 
     auto &oldY = m_inputWorkspace->y(i);
-    outputWorkspace->mutableY(j) = HistogramData::HistogramY(oldY.begin() + m_minX, oldY.begin() + (m_maxX - m_histogram));
+    outputWorkspace->mutableY(j) = HistogramData::HistogramY(
+        oldY.begin() + m_minX, oldY.begin() + (m_maxX - m_histogram));
     auto &oldE = m_inputWorkspace->e(i);
-    outputWorkspace->mutableE(j) = HistogramData::HistogramE(oldE.begin() + m_minX, oldE.begin() + (m_maxX - m_histogram));
+    outputWorkspace->mutableE(j) = HistogramData::HistogramE(
+        oldE.begin() + m_minX, oldE.begin() + (m_maxX - m_histogram));
 
     // copy over the axis entry for each spectrum, regardless of the type of
     // axes present
@@ -180,8 +181,8 @@ void ExtractSpectra::execHistogram() {
       // spectra axis is handled by copyInfoFrom line
     }
     // Copy spectrum number & detectors
-    outputWorkspace->getSpectrum(j)
-        .copyInfoFrom(m_inputWorkspace->getSpectrum(i));
+    outputWorkspace->getSpectrum(j).copyInfoFrom(
+        m_inputWorkspace->getSpectrum(i));
 
     if (!m_commonBoundaries)
       this->cropRagged(outputWorkspace, static_cast<int>(i), j);
@@ -247,8 +248,7 @@ void ExtractSpectra::execEvent() {
   this->checkProperties();
   HistogramData::BinEdges XValues_new(0);
   if (m_commonBoundaries) {
-    auto &oldX =
-        m_inputWorkspace->x(m_workspaceIndexList.front());
+    auto &oldX = m_inputWorkspace->x(m_workspaceIndexList.front());
     XValues_new =
         HistogramData::BinEdges(oldX.begin() + m_minX, oldX.begin() + m_maxX);
   }
@@ -335,7 +335,7 @@ void ExtractSpectra::execEvent() {
       outEL.setSharedDx(el.sharedDx());
     } else {
       // Common bin boundaries get all set to the same value
-		outEL.setX(XValues_new.cowData());
+      outEL.setX(XValues_new.cowData());
       if (hasDx) {
         auto &oldDx = m_inputWorkspace->dx(i);
         outEL.setBinEdgeStandardDeviations(oldDx.begin() + m_minX,

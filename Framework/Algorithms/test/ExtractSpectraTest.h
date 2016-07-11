@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ExtractSpectra.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/ExtractSpectra.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/UnitFactory.h"
@@ -447,7 +447,8 @@ private:
         space->mutableX(j)[k] = double(j + k);
       }
       space->mutableY(j) = HistogramData::HistogramY(nBins, double(j + 1));
-      space->mutableE(j) = HistogramData::HistogramE(nBins, sqrt(double(j + 1)));
+      space->mutableE(j) =
+          HistogramData::HistogramE(nBins, sqrt(double(j + 1)));
     }
     return space;
   }
