@@ -56,7 +56,7 @@ std::string DLLExport tableString(QDataProcessorTreeModel_sptr model,
 std::string DLLExport titleString(const std::string &wsName);
 
 boost::tuple<std::string, std::string> DLLExport postprocessGroupString(
-    const std::set<int> &groups, QDataProcessorTreeModel_sptr model,
+    int group, const std::set<int> &rows, QDataProcessorTreeModel_sptr model,
     const DataProcessorWhiteList &whitelist,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
@@ -114,7 +114,8 @@ public:
       const std::string postprocessingInstructions);
   virtual ~DataProcessorGenerateNotebook(){};
 
-  std::string generateNotebook(const std::map<int, std::set<int>> &rows);
+  std::string generateNotebook(const std::set<int> &groups,
+                               const std::map<int, std::set<int>> &rows);
 
 private:
   // The table ws name

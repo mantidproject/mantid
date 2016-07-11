@@ -157,8 +157,8 @@ public:
         reflProcessor(), DataProcessorPostprocessingAlgorithm(),
         std::map<std::string, std::string>(), "", "");
 
-    std::string generatedNotebook =
-        notebook->generateNotebook(std::map<int, std::set<int>>());
+    std::string generatedNotebook = notebook->generateNotebook(
+        std::set<int>(), std::map<int, std::set<int>>());
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));
@@ -451,23 +451,24 @@ public:
   }
 
   void testPostprocessGroupString() {
-
     std::string userOptions = "Params = '0.1, -0.04, 2.9', StartOverlaps = "
                               "'1.4, 0.1, 1.4', EndOverlaps = '1.6, 2.9, 1.6'";
 
-    std::set<int> groups;
-    groups.insert(0);
-    groups.insert(1);
+    // All rows in first group
+
+    std::set<int> rows;
+    rows.insert(0);
+    rows.insert(1);
     boost::tuple<std::string, std::string> output = postprocessGroupString(
-        groups, m_model, reflWhitelist(), reflProcessor(),
+        0, rows, m_model, reflWhitelist(), reflProcessor(),
         DataProcessorPostprocessingAlgorithm(), userOptions);
 
-    const std::string result[] = {
+    std::vector<std::string> result = {
         "#Post-process workspaces",
-        "IvsQ_TOF_12345_TOF_12346_TOF_24681_TOF_24682, _ = "
+        "IvsQ_TOF_12345_TOF_12346, _ = "
         "Stitch1DMany(InputWorkspaces = "
-        "'IvsQ_TOF_12345, IvsQ_TOF_12346, IvsQ_TOF_24681,"
-        " IvsQ_TOF_24682', Params = '0.1, -0.04, 2.9', StartOverlaps = '1.4, "
+        "'IvsQ_TOF_12345, IvsQ_TOF_12346', Params = "
+        "'0.1, -0.04, 2.9', StartOverlaps = '1.4, "
         "0.1, "
         "1.4', EndOverlaps = '1.6, 2.9, 1.6')",
         ""};
@@ -476,6 +477,32 @@ public:
     boost::split(notebookLines, boost::get<0>(output), boost::is_any_of("\n"));
 
     int i = 0;
+    for (auto it = notebookLines.begin(); it != notebookLines.end();
+         ++it, ++i) {
+      TS_ASSERT_EQUALS(*it, result[i])
+    }
+
+    // All rows in second group
+
+    rows.clear();
+    rows.insert(0);
+    rows.insert(1);
+    output = postprocessGroupString(
+        1, rows, m_model, reflWhitelist(), reflProcessor(),
+        DataProcessorPostprocessingAlgorithm(), userOptions);
+
+    result = {"#Post-process workspaces",
+              "IvsQ_TOF_24681_TOF_24682, _ = "
+              "Stitch1DMany(InputWorkspaces = "
+              "'IvsQ_TOF_24681, IvsQ_TOF_24682', Params = "
+              "'0.1, -0.04, 2.9', StartOverlaps = '1.4, "
+              "0.1, "
+              "1.4', EndOverlaps = '1.6, 2.9, 1.6')",
+              ""};
+
+    boost::split(notebookLines, boost::get<0>(output), boost::is_any_of("\n"));
+
+    i = 0;
     for (auto it = notebookLines.begin(); it != notebookLines.end();
          ++it, ++i) {
       TS_ASSERT_EQUALS(*it, result[i])
