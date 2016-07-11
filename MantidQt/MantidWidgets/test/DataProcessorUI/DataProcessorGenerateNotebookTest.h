@@ -647,6 +647,38 @@ public:
     }
   }
 
+  void testPlotsStringNoPostprocessing() {
+    // Reduced workspaces
+    std::vector<std::string> unprocessed_ws;
+    unprocessed_ws.emplace_back("TEST_WS1_1, TEST_WS1_2");
+    unprocessed_ws.emplace_back("TEST_WS2_1, TEST_WS2_2");
+    // Post-processed ws (empty)
+    std::string postprocessed_ws;
+
+    std::string output =
+        plotsString(unprocessed_ws, postprocessed_ws, reflProcessor());
+
+    const std::string result[] = {
+        "#Group workspaces to be plotted on same axes",
+        "IvsQ_groupWS = GroupWorkspaces(InputWorkspaces = 'TEST_WS1_1, "
+        "TEST_WS2_1')",
+        "IvsLam_groupWS = GroupWorkspaces(InputWorkspaces = 'TEST_WS1_2, "
+        "TEST_WS2_2')",
+        "#Plot workspaces", "fig = plots([IvsQ_groupWS, IvsLam_groupWS, ], "
+                            "title=['IvsQ_groupWS', 'IvsLam_groupWS', ''], "
+                            "legendLocation=[1, 1, 4])",
+        ""};
+
+    std::vector<std::string> notebookLines;
+    boost::split(notebookLines, output, boost::is_any_of("\n"));
+
+    int i = 0;
+    for (auto it = notebookLines.begin(); it != notebookLines.end();
+         ++it, ++i) {
+      TS_ASSERT_EQUALS(*it, result[i])
+    }
+  }
+
   void testVectorParamString() {
     std::vector<std::string> stringVector;
     stringVector.emplace_back("A");
