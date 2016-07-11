@@ -8,7 +8,6 @@
 #include "Graph3D.h"
 
 #include "WindowFactory.h"
-#include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidUI.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/MantidVersion.h"
@@ -513,26 +512,76 @@ void ProjectSerialiser::openSurfacePlot(const std::string &lines,
   Graph3D *plot = nullptr;
 
   if (tsv.selectLine("SurfaceFunction")) {
-    std::string funcStr;
-    double val2, val3, val4, val5, val6, val7;
-    tsv >> funcStr >> val2 >> val3 >> val4 >> val5 >> val6 >> val7;
+    auto params = readSurfaceFunction(tsv);
 
-    const QString funcQStr = QString::fromStdString(funcStr);
-
-    if (funcQStr.endsWith("(Y)", Qt::CaseSensitive)) {
+    switch(params.type) {
+    case Plot3D:
       plot = window->dataPlot3D(caption,
-                                QString::fromStdString(funcStr), val2, val3,
-                                val4, val5, val6, val7);
-    } else if (funcQStr.contains("(Z)", Qt::CaseSensitive) > 0) {
+                                QString::fromStdString(params.formula),
+                                params.xStart, params.xStop,
+                                params.yStart, params.yStop,
+                                params.zStart, params.zStop);
+        break;
+    case XYZ:
       plot = window->openPlotXYZ(caption,
-                                 QString::fromStdString(funcStr), val2, val3,
-                                 val4, val5, val6, val7);
-    } else if (funcQStr.startsWith("matrix<", Qt::CaseSensitive) &&
-               funcQStr.endsWith(">", Qt::CaseInsensitive)) {
+                                QString::fromStdString(params.formula),
+                                params.xStart, params.xStop,
+                                params.yStart, params.yStop,
+                                params.zStart, params.zStop);
+        break;
+    case MatrixPlot3D:
       plot = window->openMatrixPlot3D(caption,
-                                      QString::fromStdString(funcStr), val2,
-                                      val3, val4, val5, val6, val7);
-    } else if (funcQStr.contains("mantidMatrix3D")) {
+                                QString::fromStdString(params.formula),
+                                params.xStart, params.xStop,
+                                params.yStart, params.yStop,
+                                params.zStart, params.zStop);
+        break;
+    case MantidMatrixPlot3D:
+        plot = openMantidMatrix(tsv);
+        break;
+    case ParametricSurface:
+        plot = window->plotParametricSurface(QString::fromStdString(params.xFormula),
+                                             QString::fromStdString(params.yFormula),
+                                             QString::fromStdString(params.zFormula),
+                                             params.uStart, params.uEnd,
+                                             params.vStart, params.vEnd,
+                                             params.columns, params.rows,
+                                             params.uPeriodic, params.vPeriodic);
+        break;
+    case Surface:
+        plot = window->plotSurface(QString::fromStdString(params.xFormula),
+                                   params.xStart, params.xStop,
+                                   params.yStart, params.yStop,
+                                   params.zStart, params.zStop,
+                                   params.columns, params.rows);
+        break;
+    default:
+        // just break and do nothing if we cannot find it
+        break;
+    }
+  }
+
+  if (!plot)
+      return;
+
+  window->setWindowName(plot, caption);
+  plot->loadFromProject(tsvLines, window, fileVersion);
+  plot->setBirthDate(dateStr);
+  window->setListViewDate(caption, dateStr);
+  plot->setIgnoreFonts(true);
+  window->restoreWindowGeometry(window, plot, QString::fromStdString(tsv.lineAsString("geometry")));
+}
+
+Graph3D *ProjectSerialiser::openMantidMatrix(TSVSerialiser &tsv) {
+    Graph3D* plot = nullptr;
+    MantidMatrix* matrix = readWorkspaceForPlot(tsv);
+    int style = read3DPlotStyle(tsv);
+    if (matrix)
+        plot = matrix->plotGraph3D(style);
+    return plot;
+}
+
+MantidMatrix *ProjectSerialiser::readWorkspaceForPlot( TSVSerialiser &tsv) {
       MantidMatrix *m = nullptr;
       if (tsv.selectLine("title")) {
         std::string wsName = tsv.asString(1);
@@ -540,46 +589,88 @@ void ProjectSerialiser::openSurfacePlot(const std::string &lines,
         // wsName is actually "Workspace workspacename", so we chop off
         // the first 10 characters.
         if (wsName.length() < 11)
-          return;
+          return m;
 
         wsName = wsName.substr(10, std::string::npos);
         m = window->findMantidMatrixWindow(wsName);
       } // select line "title"
+      return m;
+}
 
+int ProjectSerialiser::read3DPlotStyle(TSVSerialiser &tsv) {
       int style = Qwt3D::WIREFRAME;
       if (tsv.selectLine("Style"))
         tsv >> style;
+      return style;
+}
 
-      if (m)
-        plot = m->plotGraph3D(style);
-    } else if (funcQStr.contains(",")) {
-      QStringList l = funcQStr.split(",", QString::SkipEmptyParts);
-      plot = window->plotParametricSurface(
-          l[0], l[1], l[2], l[3].toDouble(), l[4].toDouble(), l[5].toDouble(),
-          l[6].toDouble(), l[7].toInt(), l[8].toInt(), l[9].toInt(),
-          l[10].toInt());
-    } else {
-      QStringList l = funcQStr.split(";", QString::SkipEmptyParts);
-      if (l.count() == 1) {
-        plot =
-            window->plotSurface(funcQStr, val2, val3, val4, val5, val6, val7);
-      } else if (l.count() == 3) {
-        plot = window->plotSurface(l[0], val2, val3, val4, val5, val6, val7,
-                                   l[1].toInt(), l[2].toInt());
+
+SurfaceFunctionParams ProjectSerialiser::readSurfaceFunction(TSVSerialiser &tsv) {
+    SurfaceFunctionParams params;
+    tsv >> params.formula;
+    params.type = readSurfaceFunctionType(params.formula);
+
+    tsv >> params.xStart;
+    tsv >> params.xStop;
+    tsv >> params.yStart;
+    tsv >> params.yStop;
+    tsv >> params.zStart;
+    tsv >> params.zStop;
+
+    if(params.type == ParametricSurface) {
+      QString func = QString::fromStdString(params.formula);
+      QStringList funcParts = func.split(";", QString::SkipEmptyParts);
+
+      params.xFormula = funcParts[0].toStdString();
+      params.yFormula = funcParts[1].toStdString();
+      params.zFormula = funcParts[2].toStdString();
+      params.uStart = funcParts[3].toDouble();
+      params.uEnd = funcParts[4].toDouble();
+      params.vStart = funcParts[5].toDouble();
+      params.vEnd = funcParts[6].toDouble();
+      params.columns = funcParts[7].toInt();
+      params.rows = funcParts[8].toInt();
+      params.uPeriodic = funcParts[9].toInt();
+      params.vPeriodic = funcParts[10].toInt();
+
+    } else if(params.type == Surface) {
+      QString func = QString::fromStdString(params.formula);
+      QStringList funcParts = func.split(";", QString::SkipEmptyParts);
+
+      if(funcParts.count() > 1) {
+          params.formula = funcParts[0].toStdString();
+          params.columns = funcParts[1].toInt();
+          params.rows = funcParts[2].toInt();
+      } else {
+          // set to defaults
+          params.columns = 40;
+          params.rows = 30;
       }
-      window->setWindowName(plot, caption);
     }
-  }
 
-  if (!plot)
-    return;
 
-  plot->loadFromProject(tsvLines, window, fileVersion);
-  plot->setBirthDate(dateStr);
-  window->setListViewDate(caption, dateStr);
-  plot->setIgnoreFonts(true);
-  window->restoreWindowGeometry(
-      window, plot, QString::fromStdString(tsv.lineAsString("geometry")));
+    return params;
+}
+
+SurfaceFunctionType ProjectSerialiser::readSurfaceFunctionType(const std::string &formula) {
+    SurfaceFunctionType type;
+
+    QString func = QString::fromStdString(formula);
+    if (func.endsWith("(Y)", Qt::CaseSensitive))
+        type = Plot3D;
+    else if (func.contains("(Z)", Qt::CaseSensitive) > 0)
+        type = XYZ;
+    else if (func.startsWith("matrix<", Qt::CaseSensitive) &&
+               func.endsWith(">", Qt::CaseInsensitive))
+        type = MatrixPlot3D;
+    else if (func.contains("mantidMatrix3D"))
+        type = MantidMatrixPlot3D;
+    else if (func.contains(","))
+        type = ParametricSurface;
+    else
+        type = Surface;
+
+    return type;
 }
 
 /**
@@ -594,9 +685,6 @@ void ProjectSerialiser::openScriptWindow(const std::string &lines,
 
   if (!scriptingWindow)
     return;
-
-  scriptingWindow->setWindowTitle(
-      "MantidPlot: " + window->scriptingEnv()->languageName() + " Window");
 
   scriptingWindow->loadFromProject(lines, window, fileVersion);
 }

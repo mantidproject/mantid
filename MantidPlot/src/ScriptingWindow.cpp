@@ -436,6 +436,8 @@ void ScriptingWindow::loadFromProject(const std::string &lines,
   TSVSerialiser sTSV(lines);
   QStringList files;
 
+  setWindowTitle("MantidPlot: " + app->scriptingEnv()->languageName() + " Window");
+
   auto scriptNames = sTSV.values("ScriptNames");
 
   // Iterate, ignoring scriptNames[0] which is just "ScriptNames"

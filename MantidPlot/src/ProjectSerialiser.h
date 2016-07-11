@@ -14,6 +14,8 @@
 
 #include "qstring.h"
 #include "Folder.h"
+#include "Graph3D.h"
+#include "Mantid/MantidMatrix.h"
 
 // Forward declare Mantid classes.
 class ApplicationWindow;
@@ -46,6 +48,42 @@ class ApplicationWindow;
 
 namespace MantidQt {
 namespace API {
+
+enum SurfaceFunctionType {
+    XYZ,
+    Plot3D,
+    MatrixPlot3D,
+    MantidMatrixPlot3D,
+    Surface,
+    ParametricSurface
+};
+
+// A POD struct to pass around all of the parameters
+// for the 3D plots
+struct SurfaceFunctionParams {
+   std::string formula;
+   SurfaceFunctionType type;
+   double xStart;
+   double xStop;
+   double yStart;
+   double yStop;
+   double zStart;
+   double zStop;
+
+   // surface plot parameters
+   std::string xFormula;
+   std::string yFormula;
+   std::string zFormula;
+   double uStart;
+   double uEnd;
+   double vStart;
+   double vEnd;
+   int columns;
+   int rows;
+   int uPeriodic;
+   int vPeriodic;
+};
+
 class ProjectSerialiser {
 public:
   /// Create a new serialiser with the current application window
@@ -103,7 +141,14 @@ private:
   void populateMantidTreeWidget(const QString &lines);
   /// Load a single workspaces to the ADS
   void loadWsToMantidTree(const std::string &wsName);
+  SurfaceFunctionParams readSurfaceFunction(TSVSerialiser &tsv);
+  SurfaceFunctionType readSurfaceFunctionType(const std::string &formula);
+  MantidMatrix *readWorkspaceForPlot(TSVSerialiser &tsv);
+  int read3DPlotStyle(TSVSerialiser &tsv);
+  Graph3D *openMantidMatrix(TSVSerialiser &tsv);
 };
+
+
 }
 }
 
