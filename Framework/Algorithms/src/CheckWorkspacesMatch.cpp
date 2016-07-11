@@ -115,10 +115,6 @@ bool CheckWorkspacesMatch::processGroups() {
 
   setProperty("Result", result);
 
-  setExecuted(true);
-  notificationCenter().postNotification(
-      new FinishedNotification(this, this->isExecuted()));
-
   return true;
 }
 

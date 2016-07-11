@@ -519,10 +519,6 @@ bool SaveNexusProcessed::processGroups() {
   }
 
   nexusFile->closeNexusFile();
-  // We finished successfully.
-  setExecuted(true);
-  notificationCenter().postNotification(
-      new FinishedNotification(this, isExecuted()));
 
   return true;
 }

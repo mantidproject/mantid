@@ -185,14 +185,6 @@ bool CompareWorkspaces::processGroups() {
   setProperty("Result", m_Result);
   setProperty("Messages", m_Messages);
 
-  // Store output workspace in AnalysisDataService
-  if (!isChild())
-    this->store();
-
-  setExecuted(true);
-  notificationCenter().postNotification(
-      new FinishedNotification(this, this->isExecuted()));
-
   return true;
 }
 

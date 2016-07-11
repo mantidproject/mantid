@@ -833,9 +833,7 @@ bool ReflectometryReductionOneAuto::processGroups() {
   // setting output properties.
   this->setPropertyValue("OutputWorkspace", outputIvsQ);
   this->setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
-  setExecuted(true);
-  notificationCenter().postNotification(
-      new FinishedNotification(this, isExecuted()));
+
   return true;
 }
 } // namespace Algorithms
