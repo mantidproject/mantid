@@ -1809,12 +1809,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   if (metaDataOnly) {
     // Now, create a default X-vector for histogramming, with just 2 bins.
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec &xRef = axis.access();
-    xRef.resize(2);
-    xRef[0] = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1 -
-              1; // Just to make sure the bins hold it all
-    xRef[1] = 1;
+    auto axis = HistogramData::BinEdges{
+        static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1 - 1, 1};
     // Set the binning axis using this.
     m_ws->setAllX(axis);
 
@@ -2025,15 +2021,10 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
   }
   // Now, create a default X-vector for histogramming, with just 2 bins.
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &xRef = axis.access();
-  xRef.resize(2, 0.0);
-  if (eventsLoaded > 0) {
-    xRef[0] = shortest_tof - 1; // Just to make sure the bins hold it all
-    xRef[1] = longest_tof + 1;
-  }
-  // Set the binning axis using this.
-  m_ws->setAllX(axis);
+  if (eventsLoaded > 0)
+    m_ws->setAllX(HistogramData::BinEdges{shortest_tof - 1, longest_tof + 1});
+  else
+    m_ws->setAllX(HistogramData::BinEdges(2, 0.0));
 
   // if there is time_of_flight load it
   loadTimeOfFlight(m_ws, m_top_entry_name, classType);

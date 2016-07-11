@@ -35,7 +35,12 @@ IFunction::Attribute createAttributeFromPythonValue(const object &value) {
     attr = IFunction::Attribute(extract<int>(rawptr)());
   } else if (PyFloat_Check(rawptr) == 1) {
     attr = IFunction::Attribute(extract<double>(rawptr)());
-  } else if (PyBytes_Check(rawptr) == 1) {
+  }
+#if PY_MAJOR_VERSION >= 3
+  else if (PyUnicode_Check(rawptr) == 1) {
+#else
+  else if (PyBytes_Check(rawptr) == 1) {
+#endif
     attr = IFunction::Attribute(extract<std::string>(rawptr)());
   } else
     throw std::invalid_argument(

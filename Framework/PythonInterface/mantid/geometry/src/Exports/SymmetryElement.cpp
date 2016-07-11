@@ -14,7 +14,7 @@ Mantid::Kernel::V3D getAxis(SymmetryElement &self) {
     SymmetryElementWithAxis &axisElement =
         dynamic_cast<SymmetryElementWithAxis &>(self);
     return Mantid::Kernel::V3D(axisElement.getAxis());
-  } catch (std::bad_cast) {
+  } catch (std::bad_cast &) {
     return Mantid::Kernel::V3D(0, 0, 0);
   }
 }
@@ -24,8 +24,8 @@ SymmetryElementRotation::RotationSense getRotationSense(SymmetryElement &self) {
     SymmetryElementRotation &rotationElement =
         dynamic_cast<SymmetryElementRotation &>(self);
     return rotationElement.getRotationSense();
-  } catch (std::bad_cast) {
-    return SymmetryElementRotation::None;
+  } catch (std::bad_cast &) {
+    return SymmetryElementRotation::NoRotation;
   }
 }
 }
@@ -39,7 +39,7 @@ void export_SymmetryElement() {
   enum_<SymmetryElementRotation::RotationSense>("RotationSense")
       .value("Positive", SymmetryElementRotation::Positive)
       .value("Negative", SymmetryElementRotation::Negative)
-      .value("None", SymmetryElementRotation::None);
+      .value("NoRotation", SymmetryElementRotation::NoRotation);
 
   class_<SymmetryElement, boost::noncopyable>("SymmetryElement", no_init)
       .def("getHMSymbol", &SymmetryElement::hmSymbol, arg("self"),

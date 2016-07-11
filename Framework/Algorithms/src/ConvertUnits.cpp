@@ -272,8 +272,7 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS,
         *iter = factor *std::pow(*iter, power);
       }
 
-      MantidVecPtr xVals;
-      xVals.access() = outputWS->dataX(0);
+      auto xVals = outputWS->refX(0);
 
       PARALLEL_FOR1(outputWS)
       for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
@@ -576,8 +575,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
     std::reverse(WS->dataY(0).begin(), WS->dataY(0).end());
     std::reverse(WS->dataE(0).begin(), WS->dataE(0).end());
 
-    MantidVecPtr xVals;
-    xVals.access() = WS->dataX(0);
+    auto xVals = WS->refX(0);
     for (size_t j = 1; j < m_numberOfSpectra; ++j) {
       WS->setX(j, xVals);
       std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());

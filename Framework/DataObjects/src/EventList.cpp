@@ -1,5 +1,5 @@
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
@@ -118,25 +118,34 @@ bool compareEventPulseTimeTOF(const TofEvent &e1, const TofEvent &e2) {
 // -------------------------------------------------------------------
 
 /// Constructor (empty)
-EventList::EventList() : eventType(TOF), order(UNSORTED), mru(nullptr) {}
+// EventWorkspace is always histogram data and so is thus EventList
+EventList::EventList()
+    : m_histogram(HistogramData::Histogram::XMode::BinEdges), eventType(TOF),
+      order(UNSORTED), mru(nullptr) {}
 
 /** Constructor with a MRU list
  * @param mru :: pointer to the MRU of the parent EventWorkspace
  * @param specNo :: the spectrum number for the event list
  */
 EventList::EventList(EventWorkspaceMRU *mru, specnum_t specNo)
-    : IEventList(specNo), eventType(TOF), order(UNSORTED), mru(mru) {}
+    : IEventList(specNo),
+      m_histogram(HistogramData::Histogram::XMode::BinEdges), eventType(TOF),
+      order(UNSORTED), mru(mru) {}
 
 /** Constructor copying from an existing event list
  * @param rhs :: EventList object to copy*/
-EventList::EventList(const EventList &rhs) : IEventList(rhs), mru(rhs.mru) {
+EventList::EventList(const EventList &rhs)
+    : IEventList(rhs), m_histogram(HistogramData::Histogram::XMode::BinEdges),
+      mru(rhs.mru) {
   // Call the copy operator to do the job,
   this->operator=(rhs);
 }
 
 /** Constructor, taking a vector of events.
  * @param events :: Vector of TofEvent's */
-EventList::EventList(const std::vector<TofEvent> &events) : mru(nullptr) {
+EventList::EventList(const std::vector<TofEvent> &events)
+    : m_histogram(HistogramData::Histogram::XMode::BinEdges), eventType(TOF),
+      mru(nullptr) {
   this->events.assign(events.begin(), events.end());
   this->eventType = TOF;
   this->order = UNSORTED;
@@ -144,7 +153,8 @@ EventList::EventList(const std::vector<TofEvent> &events) : mru(nullptr) {
 
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEvent's */
-EventList::EventList(const std::vector<WeightedEvent> &events) : mru(nullptr) {
+EventList::EventList(const std::vector<WeightedEvent> &events)
+    : m_histogram(HistogramData::Histogram::XMode::BinEdges), mru(nullptr) {
   this->weightedEvents.assign(events.begin(), events.end());
   this->eventType = WEIGHTED;
   this->order = UNSORTED;
@@ -153,7 +163,7 @@ EventList::EventList(const std::vector<WeightedEvent> &events) : mru(nullptr) {
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEventNoTime's */
 EventList::EventList(const std::vector<WeightedEventNoTime> &events)
-    : mru(nullptr) {
+    : m_histogram(HistogramData::Histogram::XMode::BinEdges), mru(nullptr) {
   this->weightedEventsNoTime.assign(events.begin(), events.end());
   this->eventType = WEIGHTED_NOTIME;
   this->order = UNSORTED;
@@ -275,6 +285,7 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
  * */
 EventList &EventList::operator=(const EventList &rhs) {
   IEventList::operator=(rhs);
+  m_histogram = rhs.m_histogram;
   events = rhs.events;
   weightedEvents = rhs.weightedEvents;
   weightedEventsNoTime = rhs.weightedEventsNoTime;
@@ -1326,9 +1337,8 @@ EventSortType EventList::getSortType() const { return this->order; }
  * */
 void EventList::reverse() {
   // reverse the histogram bin parameters
-  MantidVec x = this->refX.access();
+  MantidVec &x = dataX();
   std::reverse(x.begin(), x.end());
-  this->refX.access() = x;
 
   // flip the events if they are tof sorted
   if (this->isSortedByTof()) {
@@ -1409,7 +1419,7 @@ size_t EventList::getMemorySize() const {
 /** Return the size of the histogram data.
  * @return the size of the histogram representation of the data (size of Y) **/
 size_t EventList::histogram_size() const {
-  size_t x_size = refX->size();
+  size_t x_size = readX().size();
   if (x_size > 1)
     return x_size - 1;
   else
@@ -1421,53 +1431,43 @@ size_t EventList::histogram_size() const {
 // -----------------------
 // ==============================================================================================
 
-/** Set the x-component for the histogram view. This will NOT cause the
- * histogram to be calculated.
+/** Deprecated, use setSharedX() instead. Set the x-component for the histogram
+ * view. This will NOT cause the histogram to be calculated.
  * @param X :: The vector of doubles to set as the histogram limits.
  */
-void EventList::setX(const MantidVecPtr::ptr_type &X) {
-  this->refX = X;
+void EventList::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
+  m_histogram.setX(X);
   if (mru)
     mru->deleteIndex(this->m_specNo);
 }
 
-/** Set the x-component for the histogram view. This will NOT cause the
- * histogram to be calculated.
- * @param X :: The vector of doubles to set as the histogram limits.
- */
-void EventList::setX(const MantidVecPtr &X) {
-  this->refX = X;
-  if (mru)
-    mru->deleteIndex(this->m_specNo);
-}
-
-/** Set the x-component for the histogram view. This will NOT cause the
- * histogram to be calculated.
- * @param X :: The vector of doubles to set as the histogram limits.
- */
-void EventList::setX(const MantidVec &X) {
-  this->refX.access() = X;
-  if (mru)
-    mru->deleteIndex(this->m_specNo);
-}
-
-/** Returns a reference to the x data.
+/** Deprecated, use mutableX() instead. Returns a reference to the x data.
  *  @return a reference to the X (bin) vector.
  */
 MantidVec &EventList::dataX() {
   if (mru)
     mru->deleteIndex(this->m_specNo);
-  return this->refX.access();
+  return m_histogram.dataX();
 }
 
-/** Returns a const reference to the x data.
+/** Deprecated, use x() instead. Returns a const reference to the x data.
  *  @return a reference to the X (bin) vector. */
-const MantidVec &EventList::dataX() const { return *this->refX; }
+const MantidVec &EventList::dataX() const { return m_histogram.dataX(); }
 
-/** Returns a reference to the x data.
- *  @return a reference to the X (bin) vector.
- */
-const MantidVec &EventList::constDataX() const { return *this->refX; }
+/// Deprecated, use x() instead. Returns the x data const
+const MantidVec &EventList::readX() const { return m_histogram.readX(); }
+
+/// Deprecated, use sharedX() instead. Returns a pointer to the x data
+Kernel::cow_ptr<HistogramData::HistogramX> EventList::ptrX() const {
+  return m_histogram.ptrX();
+}
+
+/// Deprecated, use mutableDx() instead.
+MantidVec &EventList::dataDx() { return m_histogram.dataDx(); }
+/// Deprecated, use dx() instead.
+const MantidVec &EventList::dataDx() const { return m_histogram.dataDx(); }
+/// Deprecated, use dx() instead.
+const MantidVec &EventList::readDx() const { return m_histogram.readDx(); }
 
 // ==============================================================================================
 // --- Return Data Vectors --------------------------------------------------
@@ -1482,7 +1482,7 @@ MantidVec *EventList::makeDataY() const {
   auto Y = new MantidVec();
   MantidVec E;
   // Generate the Y histogram while skipping the E if possible.
-  generateHistogram(*this->refX, *Y, E, true);
+  generateHistogram(readX(), *Y, E, true);
   return Y;
 }
 
@@ -1494,51 +1494,130 @@ MantidVec *EventList::makeDataY() const {
 MantidVec *EventList::makeDataE() const {
   MantidVec Y;
   auto E = new MantidVec();
-  generateHistogram(*this->refX, Y, *E);
+  generateHistogram(readX(), Y, *E);
   // Y is unused.
   return E;
 }
 
-/** Look in the MRU to see if the Y histogram has been generated before.
- * If so, return that. If not, calculate, cache and return it.
- *
- * @return reference to the Y vector.
- */
-const MantidVec &EventList::constDataY() const {
-  if (!mru)
-    throw std::runtime_error(
-        "EventList::constDataY() called with no MRU set. This is not allowed.");
+HistogramData::Histogram EventList::histogram() const {
+  HistogramData::Histogram ret(m_histogram);
+  ret.setCounts(counts());
+  ret.setCountStandardDeviations(countStandardDeviations());
+  return ret;
+}
 
+HistogramData::Counts EventList::counts() const {
   // This is the thread number from which this function was called.
   int thread = PARALLEL_THREAD_NUMBER;
-  mru->ensureEnoughBuffersY(thread);
+
+  HistogramData::Counts yData;
 
   // Is the data in the mrulist?
-  MantidVecWithMarker *yData;
-  yData = mru->findY(thread, this->m_specNo);
+  if (mru) {
+    mru->ensureEnoughBuffersY(thread);
+    yData = mru->findY(thread, this->m_specNo);
+  }
 
-  if (yData == nullptr) {
+  if (!yData) {
     // Create the MRU object
-    yData = new MantidVecWithMarker(this->m_specNo);
+    yData = HistogramData::Counts(0);
 
     // prepare to update the uncertainties
-    auto eData = new MantidVecWithMarker(this->m_specNo);
-    mru->ensureEnoughBuffersE(thread);
+    auto eData = HistogramData::CountStandardDeviations(0);
 
     // see if E should be calculated;
     bool skipErrors = (eventType == TOF);
 
     // Set the Y data in it
-    this->generateHistogram(*refX, yData->m_data, eData->m_data, skipErrors);
+    this->generateHistogram(readX(), yData.mutableRawData(),
+                            eData.mutableRawData(), skipErrors);
 
     // Lets save it in the MRU
-    mru->insertY(thread, yData);
-    if (!skipErrors) {
-      mru->insertE(thread, eData);
-    } else
-      delete eData; // Need to clear up this memory if it wasn't put into MRU
+    if (mru) {
+      mru->insertY(thread, yData, this->m_specNo);
+      if (!skipErrors) {
+        mru->ensureEnoughBuffersE(thread);
+        mru->insertE(thread, eData, this->m_specNo);
+      }
+    }
   }
-  return yData->m_data;
+  return yData;
+}
+
+HistogramData::CountVariances EventList::countVariances() const {
+  return HistogramData::CountVariances(countStandardDeviations());
+}
+
+HistogramData::CountStandardDeviations
+EventList::countStandardDeviations() const {
+  // This is the thread number from which this function was called.
+  int thread = PARALLEL_THREAD_NUMBER;
+
+  HistogramData::CountStandardDeviations eData;
+
+  // Is the data in the mrulist?
+  if (mru) {
+    mru->ensureEnoughBuffersE(thread);
+    eData = mru->findE(thread, this->m_specNo);
+  }
+
+  if (!eData) {
+    eData = HistogramData::CountStandardDeviations(0);
+
+    // Now use that to get E -- Y values are generated from another function
+    MantidVec Y_ignored;
+    this->generateHistogram(readX(), Y_ignored, eData.mutableRawData());
+
+    // Lets save it in the MRU
+    if (mru)
+      mru->insertE(thread, eData, this->m_specNo);
+  }
+  return eData;
+}
+HistogramData::Frequencies EventList::frequencies() const {
+  return HistogramData::Frequencies(counts(), binEdges());
+}
+HistogramData::FrequencyVariances EventList::frequencyVariances() const {
+  return HistogramData::FrequencyVariances(countVariances(), binEdges());
+}
+HistogramData::FrequencyStandardDeviations
+EventList::frequencyStandardDeviations() const {
+  return HistogramData::FrequencyStandardDeviations(countStandardDeviations(),
+                                                    binEdges());
+}
+const HistogramData::HistogramY &EventList::y() const {
+  if (!mru)
+    throw std::runtime_error(
+        "'EventList::y()' called with no MRU set. This is not allowed.");
+
+  return counts().data();
+}
+const HistogramData::HistogramE &EventList::e() const {
+  if (!mru)
+    throw std::runtime_error(
+        "'EventList::e()' called with no MRU set. This is not allowed.");
+
+  return countStandardDeviations().data();
+}
+Kernel::cow_ptr<HistogramData::HistogramY> EventList::sharedY() const {
+  return counts().cowData();
+}
+Kernel::cow_ptr<HistogramData::HistogramE> EventList::sharedE() const {
+  return countStandardDeviations().cowData();
+}
+/** Look in the MRU to see if the Y histogram has been generated before.
+ * If so, return that. If not, calculate, cache and return it.
+ *
+ * @return reference to the Y vector.
+ */
+const MantidVec &EventList::dataY() const {
+  if (!mru)
+    throw std::runtime_error(
+        "'EventList::dataY()' called with no MRU set. This is not allowed.");
+
+  // WARNING: counts() is stored in MRU, returning reference fine as long as it
+  // stays there.
+  return counts().rawData();
 }
 
 /** Look in the MRU to see if the E histogram has been generated before.
@@ -1546,31 +1625,14 @@ const MantidVec &EventList::constDataY() const {
  *
  * @return reference to the E vector.
  */
-const MantidVec &EventList::constDataE() const {
+const MantidVec &EventList::dataE() const {
   if (!mru)
     throw std::runtime_error(
-        "EventList::constDataE() called with no MRU set. This is not allowed.");
+        "'EventList::dataE()' called with no MRU set. This is not allowed.");
 
-  // This is the thread number from which this function was called.
-  int thread = PARALLEL_THREAD_NUMBER;
-  mru->ensureEnoughBuffersE(thread);
-
-  // Is the data in the mrulist?
-  MantidVecWithMarker *eData;
-  eData = mru->findE(thread, this->m_specNo);
-
-  if (eData == nullptr) {
-    // Create the MRU object
-    eData = new MantidVecWithMarker(this->m_specNo);
-
-    // Now use that to get E -- Y values are generated from another function
-    MantidVec Y_ignored;
-    this->generateHistogram(*refX, Y_ignored, eData->m_data);
-
-    // Lets save it in the MRU
-    mru->insertE(thread, eData);
-  }
-  return eData->m_data;
+  // WARNING: countStandardDeviations() is stored in MRU, returning reference
+  // fine as long as it stays there.
+  return countStandardDeviations().rawData();
 }
 
 // --------------------------------------------------------------------------
@@ -2485,7 +2547,7 @@ void EventList::integrate(const double minX, const double maxX,
 void EventList::convertTof(std::function<double(double)> func,
                            const int sorting) {
   // fix the histogram parameter
-  MantidVec &x = this->refX.access();
+  MantidVec &x = dataX();
   transform(x.begin(), x.end(), x.begin(), func);
 
   // do nothing if sorting > 0
@@ -2534,10 +2596,9 @@ void EventList::convertTofHelper(std::vector<T> &events,
  */
 void EventList::convertTof(const double factor, const double offset) {
   // fix the histogram parameter
-  MantidVec &x = this->refX.access();
+  MantidVec &x = dataX();
   for (double &iter : x)
     iter = iter * factor + offset;
-  // this->refX.access() = x;
 
   if ((factor < 0.) && (this->getSortType() == TOF_SORT))
     this->reverse();
@@ -3718,7 +3779,7 @@ void EventList::filterByPulseTime(DateAndTime start, DateAndTime stop,
   output.switchTo(eventType);
   // Copy the detector IDs
   output.detectorIDs = this->detectorIDs;
-  output.refX = this->refX;
+  output.setX(this->ptrX());
 
   // Iterate through all events (sorted by pulse time)
   switch (eventType) {
@@ -3752,7 +3813,7 @@ void EventList::filterByTimeAtSample(Kernel::DateAndTime start,
   output.switchTo(eventType);
   // Copy the detector IDs
   output.detectorIDs = this->detectorIDs;
-  output.refX = this->refX;
+  output.setX(this->ptrX());
 
   // Iterate through all events (sorted by pulse time)
   switch (eventType) {
@@ -3958,7 +4019,7 @@ void EventList::splitByTime(Kernel::TimeSplitterType &splitter,
   for (size_t i = 0; i < numOutputs; i++) {
     outputs[i]->clear();
     outputs[i]->detectorIDs = this->detectorIDs;
-    outputs[i]->refX = this->refX;
+    outputs[i]->setX(this->ptrX());
     // Match the output event type.
     outputs[i]->switchTo(eventType);
   }
@@ -4103,7 +4164,7 @@ void EventList::splitByFullTime(Kernel::TimeSplitterType &splitter,
     EventList *opeventlist = outiter->second;
     opeventlist->clear();
     opeventlist->detectorIDs = this->detectorIDs;
-    opeventlist->refX = this->refX;
+    opeventlist->setX(this->ptrX());
     // Match the output event type.
     opeventlist->switchTo(eventType);
   }
@@ -4233,7 +4294,7 @@ std::string EventList::splitByFullTimeMatrixSplitter(
     EventList *opeventlist = outiter->second;
     opeventlist->clear();
     opeventlist->detectorIDs = this->detectorIDs;
-    opeventlist->refX = this->refX;
+    opeventlist->setX(this->ptrX());
     // Match the output event type.
     opeventlist->switchTo(eventType);
   }
@@ -4355,7 +4416,7 @@ void EventList::splitByPulseTime(Kernel::TimeSplitterType &splitter,
     EventList *opeventlist = outiter->second;
     opeventlist->clear();
     opeventlist->detectorIDs = this->detectorIDs;
-    opeventlist->refX = this->refX;
+    opeventlist->setX(this->ptrX());
     // Match the output event type.
     opeventlist->switchTo(eventType);
   }
@@ -4525,6 +4586,32 @@ void EventList::convertUnitsQuickly(const double &factor, const double &power) {
     convertUnitsQuicklyHelper(this->weightedEventsNoTime, factor, power);
     break;
   }
+}
+
+HistogramData::Histogram &EventList::mutableHistogramRef() {
+  if (mru)
+    mru->deleteIndex(this->m_specNo);
+  return m_histogram;
+}
+
+void EventList::checkHistogram(
+    const HistogramData::Histogram &histogram) const {
+  if (histogram.xMode() != HistogramData::Histogram::XMode::BinEdges)
+    throw std::runtime_error("EventList: setting histogram with storage mode "
+                             "other than BinEdges is not possible");
+  if (histogram.sharedY() || histogram.sharedE())
+    throw std::runtime_error("EventList: setting histogram data with non-null "
+                             "Y or E data is not possible");
+}
+
+void EventList::checkWorksWithPoints() const {
+  throw std::runtime_error("EventList: setting Points as X data is not "
+                           "possible, only BinEdges are supported");
+}
+
+void EventList::checkIsYAndEWritable() const {
+  throw std::runtime_error("EventList: Cannot set Y or E data, these data are "
+                           "generated automatically based on the events");
 }
 
 } /// namespace DataObjects
