@@ -6,10 +6,10 @@
 
 namespace Mantid {
 
-namespace HistogramData{
-	class HistogramX;
-	class HistogramY;
-	class HistogramE;
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+class HistogramE;
 }
 
 namespace Algorithms {
