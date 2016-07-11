@@ -508,6 +508,7 @@ void ConvertEmptyToTof::setTofInWS(const std::vector<double> &tofAxis,
   g_log.debug() << "Setting the TOF X Axis for numberOfSpectra="
                 << numberOfSpectra << '\n';
 
+  auto axisPtr = Kernel::make_cow<HistogramData::HistogramX>(tofAxis);
   Progress prog(this, 0.0, 0.2, numberOfSpectra);
   PARALLEL_FOR2(m_inputWS, outputWS)
   for (int64_t i = 0; i < numberOfSpectraInt64; ++i) {
@@ -516,7 +517,7 @@ void ConvertEmptyToTof::setTofInWS(const std::vector<double> &tofAxis,
     outputWS->dataY(i) = m_inputWS->readY(i);
     outputWS->dataE(i) = m_inputWS->readE(i);
     // copy
-    outputWS->setX(i, tofAxis);
+    outputWS->setX(i, axisPtr);
 
     prog.report();
     PARALLEL_END_INTERUPT_REGION

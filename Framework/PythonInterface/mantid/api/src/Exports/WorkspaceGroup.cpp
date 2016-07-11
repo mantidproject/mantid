@@ -1,4 +1,5 @@
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/ToWeakPtr.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
@@ -8,6 +9,8 @@
 using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(WorkspaceGroup)
 
 void export_WorkspaceGroup() {
   class_<WorkspaceGroup, bases<Workspace>, boost::noncopyable>("WorkspaceGroup",

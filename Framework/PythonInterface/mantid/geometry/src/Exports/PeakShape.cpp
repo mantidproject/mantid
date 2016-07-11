@@ -1,9 +1,12 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Geometry::PeakShape;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(PeakShape)
 
 void export_PeakShape() {
   register_ptr_to_python<Mantid::Geometry::PeakShape_sptr>();

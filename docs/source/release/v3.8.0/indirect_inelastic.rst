@@ -40,5 +40,6 @@ Bugfixes
 * The documentation for :ref:`TransformToIqt <algm-TransformToIqt>` now correctly states that the ParameterWorkspace is a TableWorkspace
 * Fix memory leak in :ref:`LoadSassena <algm-LoadSassena>`
 * The *ResNorm* interface should no longer crash when using workspaces (rather than files) as input.
+* Fix bug showing incorrect doublet peaks in :ref:`ISISIndirectDiffractionReduction <algm-ISISIndirectDiffractionReduction>`
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_

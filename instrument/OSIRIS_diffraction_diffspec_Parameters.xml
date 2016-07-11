@@ -19,11 +19,11 @@
 </parameter>
 
 <parameter name="spectra-max">
-	<value val="15" />
+	<value val="962" />
 </parameter>
 
 <parameter name="Workflow.Diffraction.Correction" type="string">
-    <value val="None" />
+    <value val="Calibration" />
 </parameter>
 
 

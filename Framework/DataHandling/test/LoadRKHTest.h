@@ -224,7 +224,7 @@ public:
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 1);
 
     TS_ASSERT_EQUALS(static_cast<int>(data->dataX(0).size()), 10);
-    TS_ASSERT_EQUALS(static_cast<int>(data->dataDx(0).size()), 10);
+    TS_ASSERT_EQUALS(static_cast<int>(data->dx(0).size()), 10);
     TS_ASSERT_EQUALS(static_cast<int>(data->dataY(0).size()), 10);
     TS_ASSERT_EQUALS(static_cast<int>(data->dataY(0).size()), 10);
     TS_ASSERT_EQUALS(static_cast<int>(data->dataE(0).size()), 10);
@@ -243,9 +243,9 @@ public:
     TS_ASSERT_DELTA(data->dataE(0)[0], 1.000000e+00, tolerance);
     TS_ASSERT_DELTA(data->dataE(0)[1], 1.000000e+00, tolerance);
 
-    TS_ASSERT_DELTA(data->dataDx(0)[0], 5.000000e-01, tolerance);
-    TS_ASSERT_DELTA(data->dataDx(0)[1], 1.207107e+00, tolerance);
-    TS_ASSERT_DELTA(data->dataDx(0)[2], 1.573132e+00, tolerance);
+    TS_ASSERT_DELTA(data->dx(0)[0], 5.000000e-01, tolerance);
+    TS_ASSERT_DELTA(data->dx(0)[1], 1.207107e+00, tolerance);
+    TS_ASSERT_DELTA(data->dx(0)[2], 1.573132e+00, tolerance);
 
     remove(tempFile2.c_str());
   }
