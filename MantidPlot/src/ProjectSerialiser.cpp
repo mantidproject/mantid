@@ -149,14 +149,6 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
     }
   }
 
-  if (tsv.hasSection("note")) {
-    auto noteSections = tsv.sections("note");
-    for (auto &it : noteSections) {
-      auto n = window->newNote("");
-      n->loadFromProject(it, window, fileVersion);
-    }
-  }
-
   if (tsv.hasSection("scriptwindow")) {
     auto scriptSections = tsv.sections("scriptwindow");
     for (auto &it : scriptSections) {

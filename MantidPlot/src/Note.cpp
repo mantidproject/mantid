@@ -45,15 +45,24 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 
+// Register the window into the WindowFactory
+DECLARE_WINDOW(Note)
+
 Note::Note(const QString &label, QWidget *parent, const QString &name,
            Qt::WFlags f)
-    : MdiSubWindow(parent, label, name, f) {
-  init();
+    : MdiSubWindow() {
+  init(label, parent, name, f);
 }
 
-void Note::init() {
+Note::Note()
+    : MdiSubWindow() {
+}
+
+void Note::init(const QString &label, QWidget *parent, const QString &name,
+           Qt::WFlags f) {
+  MdiSubWindow::init(parent, label, name, f);
   te = new QTextEdit(this);
-  te->setObjectName(name());
+  te->setObjectName(name);
   setWidget(te);
 
   setGeometry(0, 0, 500, 200);

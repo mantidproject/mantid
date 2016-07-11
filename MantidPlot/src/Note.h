@@ -47,8 +47,11 @@ class Note : public MdiSubWindow {
 public:
   Note(const QString &label, QWidget *parent, const QString &name = QString(),
        Qt::WFlags f = 0);
+  Note();
   ~Note() override{};
 
+  void init(const QString &label, QWidget *parent, const QString &name = QString(),
+       Qt::WFlags f = 0);
   void loadFromProject(const std::string &lines, ApplicationWindow *app,
                        const int fileVersion) override;
   std::string saveToProject(ApplicationWindow *app) override;
@@ -68,7 +71,6 @@ public slots:
   QString exportASCII(const QString &filename = QString::null);
 
 private:
-  void init();
 
   QTextEdit *te;
 };
