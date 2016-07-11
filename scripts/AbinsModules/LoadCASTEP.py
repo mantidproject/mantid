@@ -62,7 +62,7 @@ class LoadCASTEP(GeneralDFTProgram):
             if 'Number of ions' in line:
                 self._num_atoms = int(line.strip().split()[-1])
             elif 'Number of branches' in line:
-                self._num_branches = int(line.strip().split()[-1])
+                self._num_phonons = int(line.strip().split()[-1])
             elif 'Number of wavevectors' in line:
                 self._num_k =  int(line.strip().split()[-1])
             elif 'Unit cell vectors' in line:
@@ -86,7 +86,7 @@ class LoadCASTEP(GeneralDFTProgram):
                     file_data["atoms"].append(ion)
 
             if 'END header' in line:
-                if self._num_atoms is None or self._num_branches is None:
+                if self._num_atoms is None or self._num_phonons is None:
                     raise IOError("Failed to parse file. Invalid file header.")
                 return file_data
 
@@ -106,7 +106,7 @@ class LoadCASTEP(GeneralDFTProgram):
             # yield line_data
 
         _freq = []
-        for n in range(self._num_branches):
+        for n in range(self._num_phonons):
             line = f_handle.readline()
             _freq.append(float(line.strip().split()[1]))
 
@@ -138,7 +138,7 @@ class LoadCASTEP(GeneralDFTProgram):
         @return: eigenvectors (atomic displacements) for all k-points
         """
         vectors = []
-        for _ in xrange(self._num_atoms * self._num_branches):
+        for _ in xrange(self._num_atoms * self._num_phonons):
             line = f_handle.readline()
 
             if not line:
@@ -204,8 +204,6 @@ class LoadCASTEP(GeneralDFTProgram):
         eigenvectors_regex = re.compile(r"\s*Mode\s+Ion\s+X\s+Y\s+Z\s*")
         block_count = 0
 
-        # frequencies, ir_intensities, raman_intensities, weights, k_vectors, eigenvectors = [], [], [], [], [], []
-        # data_lists = (frequencies, ir_intensities, raman_intensities)
         frequencies, weights, k_vectors, eigenvectors = [], [], [], []
         with open(self._input_filename, 'rU') as f_handle:
             file_data.update(self._parse_phonon_file_header(f_handle))
@@ -225,9 +223,6 @@ class LoadCASTEP(GeneralDFTProgram):
                     k_vectors.append(k_vector)
 
                     # Parse block of frequencies
-                    # for line_data in self._parse_phonon_freq_block(f_handle):
-                    #     for data_list, item in zip(data_lists, line_data):
-                    #         data_list.append(item)
                     frequencies.append(self._parse_phonon_freq_block(f_handle))
 
                     block_count += 1
@@ -235,8 +230,15 @@ class LoadCASTEP(GeneralDFTProgram):
                 vector_match = eigenvectors_regex.match(line)
                 if vector_match and header_found:
                     header_found = False
-                    vectors = self._parse_phonon_eigenvectors(f_handle)
-                    eigenvectors.append(vectors)
+                    all_vectors = self._parse_phonon_eigenvectors(f_handle)
+                    rearranged_vectors = []
+                    for atom in range(self._num_atoms):
+                        temp_atoms = []
+                        for freq in range(self._num_phonons):
+                             temp_atoms.append(all_vectors[atom + freq * self._num_atoms])
+                        rearranged_vectors.append(temp_atoms)
+
+                    eigenvectors.append(rearranged_vectors)
 
         file_data.update({"frequencies": np.asarray(frequencies),
                           "weights": np.asarray(weights),

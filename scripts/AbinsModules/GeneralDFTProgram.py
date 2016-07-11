@@ -187,8 +187,8 @@ class GeneralDFTProgram(IOmodule):
 
         k_points.set({"weights": data["weights"],
                       "k_vectors": data["k_vectors"],
-                      "frequencies":data["frequencies"],
-                      "atomic_displacements":data["atomic_displacements"]})
+                      "frequencies": data["frequencies"],
+                      "atomic_displacements": data["atomic_displacements"]})
 
         return AbinsData(k_points_data=k_points, atoms_data=atoms)
 

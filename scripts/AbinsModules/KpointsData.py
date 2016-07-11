@@ -42,7 +42,7 @@ class KpointsData(GeneralData):
 
         if isinstance(num_atoms, int) and num_atoms > 0:
             self._num_freq = dim * num_atoms # number of phonons for one k-point
-            self._num_displacements = self._num_freq * num_atoms # number of displacements for one k-point
+            self._num_atoms = num_atoms # number of displacements for one k-point
         else:
             raise ValueError("Invalid number of atoms.")
 
@@ -99,7 +99,7 @@ class KpointsData(GeneralData):
         atomic_displacements = items["atomic_displacements"]
 
         if  (isinstance(atomic_displacements, np.ndarray) and
-             atomic_displacements.shape == (self._num_k, self._num_displacements, dim) and
+             atomic_displacements.shape == (self._num_k, self._num_atoms, self._num_freq, dim) and
              atomic_displacements.dtype.num == Constants.floats_id):
 
             self._data["atomic_displacements"] = atomic_displacements
