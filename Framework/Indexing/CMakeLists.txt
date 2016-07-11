@@ -4,7 +4,9 @@ set ( SRC_FILES
 
 set ( INC_FILES
 	inc/MantidIndexing/DllConfig.h
+	inc/MantidIndexing/IPartitioning.h
 	inc/MantidIndexing/IndexSet.h
+	inc/MantidIndexing/RoundRobinPartitioning.h
 	inc/MantidIndexing/SpectrumIndexSet.h
 	inc/MantidIndexing/SpectrumNumber.h
 	inc/MantidIndexing/SpectrumNumberTranslator.h
@@ -12,6 +14,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	IndexSetTest.h
+	RoundRobinPartitioningTest.h
 	SpectrumIndexSetTest.h
 	SpectrumNumberTest.h
 	SpectrumNumberTranslatorTest.h

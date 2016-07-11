@@ -1,15 +1,16 @@
-#ifndef MANTID_INDEXING_SPECTRUMNUMBER_H_
-#define MANTID_INDEXING_SPECTRUMNUMBER_H_
+#ifndef MANTID_INDEXING_IPARTITIONING_H_
+#define MANTID_INDEXING_IPARTITIONING_H_
 
 #include "MantidIndexing/DllConfig.h"
+#include "MantidIndexing/SpectrumNumber.h"
 
 namespace Mantid {
 namespace Indexing {
 
-/** SpectrumNumber : TODO: DESCRIPTION
+/** IPartitioning : TODO: DESCRIPTION
 
-  @author Simon Heybrock
-  @date 2016
+  The main intention of this class is defining partitioning of all spectrum
+  numbers into subsets for an MPI-based Mantid run.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -32,22 +33,16 @@ namespace Indexing {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_INDEXING_DLL SpectrumNumber {
+class MANTID_INDEXING_DLL IPartitioning {
 public:
-  explicit SpectrumNumber(int64_t number) noexcept : m_number(number) {}
-  explicit operator int64_t() const noexcept { return m_number; }
-  template <class T> bool operator==(const T &other) const noexcept {
-    return m_number == SpectrumNumber(other).m_number;
-  }
-  template <class T> bool operator!=(const T &other) const noexcept {
-    return m_number != SpectrumNumber(other).m_number;
-  }
+  virtual ~IPartitioning() = default;
 
-private:
-  int64_t m_number;
+  virtual int numberOfPartitions() const = 0;
+  virtual int partitionIndex() const = 0;
+  virtual int partitionIndexOf(const SpectrumNumber &spectrumNumber) const = 0;
 };
 
 } // namespace Indexing
 } // namespace Mantid
 
-#endif /* MANTID_INDEXING_SPECTRUMNUMBER_H_ */
+#endif /* MANTID_INDEXING_IPARTITIONING_H_ */

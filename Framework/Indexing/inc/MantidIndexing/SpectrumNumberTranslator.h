@@ -2,6 +2,7 @@
 #define MANTID_INDEXING_SPECTRUMNUMBERTRANSLATOR_H_
 
 #include "MantidIndexing/DllConfig.h"
+#include "MantidIndexing/IPartitioning.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidIndexing/SpectrumNumber.h"
 
@@ -39,26 +40,33 @@ namespace Indexing {
 class MANTID_INDEXING_DLL SpectrumNumberTranslator {
 public:
   SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers,
-                           const std::vector<size_t> &indices) {
+                           const IPartitioning &partitioning)
+      : m_partition(partitioning.partitionIndex()) {
+    size_t currentIndex = 0;
     for (size_t i = 0; i < spectrumNumbers.size(); ++i) {
-      m_ranks[spectrumNumbers[i]] = m_rank;
-      m_indices[spectrumNumbers[i]] = indices[i];
+      auto number = spectrumNumbers[i];
+      auto partition = partitioning.partitionIndexOf(number);
+      m_partitions[number] = partition;
+      if (partition == m_partition)
+        m_indices[number] = currentIndex++;
     }
   }
 
   // Full set
   SpectrumIndexSet makeIndexSet() { return SpectrumIndexSet(m_indices.size()); }
 
-  // This one is more difficult with MPI, need to deal with partial overlaps, etc.
-  //SpectrumIndexSet makeIndexSet(SpectrumNumber min, SpectrumNumber max);
+  // This one is more difficult with MPI, need to deal with partial overlaps,
+  // etc.
+  // SpectrumIndexSet makeIndexSet(SpectrumNumber min, SpectrumNumber max);
 
-  SpectrumIndexSet makeIndexSet(const std::vector<SpectrumNumber> &spectrumNumbers) {
+  SpectrumIndexSet
+  makeIndexSet(const std::vector<SpectrumNumber> &spectrumNumbers) {
     std::vector<size_t> indices;
-    for(const auto &spectrumNumber : spectrumNumbers) {
-      const auto rank_iterator = m_ranks.find(spectrumNumber);
-      if (rank_iterator == m_ranks.end())
+    for (const auto &spectrumNumber : spectrumNumbers) {
+      const auto rank_iterator = m_partitions.find(spectrumNumber);
+      if (rank_iterator == m_partitions.end())
         throw std::out_of_range("Invalid spectrum number.");
-      if (rank_iterator->second == m_rank)
+      if (rank_iterator->second == m_partition)
         indices.push_back(m_indices.at(spectrumNumber));
     }
     return SpectrumIndexSet(indices, m_indices.size());
@@ -72,11 +80,10 @@ private:
     }
   };
 
-  int m_rank{0};
-  std::unordered_map<SpectrumNumber, int, SpectrumNumberHash> m_ranks;
+  int m_partition;
+  std::unordered_map<SpectrumNumber, int, SpectrumNumberHash> m_partitions;
   std::unordered_map<SpectrumNumber, size_t, SpectrumNumberHash> m_indices;
 };
-
 
 } // namespace Indexing
 } // namespace Mantid
