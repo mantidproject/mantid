@@ -2,7 +2,7 @@
 #define MANTID_INDEXING_SPECTRUMNUMBERTRANSLATOR_H_
 
 #include "MantidIndexing/DllConfig.h"
-#include "MantidIndexing/IPartitioning.h"
+#include "MantidIndexing/Partitioning.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidIndexing/SpectrumNumber.h"
 
@@ -40,7 +40,7 @@ namespace Indexing {
 class MANTID_INDEXING_DLL SpectrumNumberTranslator {
 public:
   SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers,
-                           const IPartitioning &partitioning)
+                           const Partitioning &partitioning)
       : m_partition(partitioning.partitionIndex()) {
     size_t currentIndex = 0;
     for (size_t i = 0; i < spectrumNumbers.size(); ++i) {

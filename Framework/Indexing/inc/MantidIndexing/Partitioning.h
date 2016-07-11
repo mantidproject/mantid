@@ -1,5 +1,5 @@
-#ifndef MANTID_INDEXING_IPARTITIONING_H_
-#define MANTID_INDEXING_IPARTITIONING_H_
+#ifndef MANTID_INDEXING_PARTITIONING_H_
+#define MANTID_INDEXING_PARTITIONING_H_
 
 #include "MantidIndexing/DllConfig.h"
 #include "MantidIndexing/SpectrumNumber.h"
@@ -7,7 +7,7 @@
 namespace Mantid {
 namespace Indexing {
 
-/** IPartitioning : TODO: DESCRIPTION
+/** Partitioning : TODO: DESCRIPTION
 
   The main intention of this class is defining partitioning of all spectrum
   numbers into subsets for an MPI-based Mantid run.
@@ -33,9 +33,9 @@ namespace Indexing {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_INDEXING_DLL IPartitioning {
+class MANTID_INDEXING_DLL Partitioning {
 public:
-  virtual ~IPartitioning() = default;
+  virtual ~Partitioning() = default;
 
   virtual int numberOfPartitions() const = 0;
   virtual int partitionIndex() const = 0;
@@ -45,4 +45,4 @@ public:
 } // namespace Indexing
 } // namespace Mantid
 
-#endif /* MANTID_INDEXING_IPARTITIONING_H_ */
+#endif /* MANTID_INDEXING_PARTITIONING_H_ */

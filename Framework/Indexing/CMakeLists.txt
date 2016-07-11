@@ -4,8 +4,8 @@ set ( SRC_FILES
 
 set ( INC_FILES
 	inc/MantidIndexing/DllConfig.h
-	inc/MantidIndexing/IPartitioning.h
 	inc/MantidIndexing/IndexSet.h
+	inc/MantidIndexing/Partitioning.h
 	inc/MantidIndexing/RoundRobinPartitioning.h
 	inc/MantidIndexing/SpectrumIndexSet.h
 	inc/MantidIndexing/SpectrumNumber.h

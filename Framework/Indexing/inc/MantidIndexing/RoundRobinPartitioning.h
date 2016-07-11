@@ -2,7 +2,7 @@
 #define MANTID_INDEXING_ROUNDROBINPARTITIONING_H_
 
 #include "MantidIndexing/DllConfig.h"
-#include "MantidIndexing/IPartitioning.h"
+#include "MantidIndexing/Partitioning.h"
 
 #include <stdexcept>
 
@@ -35,7 +35,7 @@ namespace Indexing {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_INDEXING_DLL RoundRobinPartitioning : public IPartitioning {
+class MANTID_INDEXING_DLL RoundRobinPartitioning : public Partitioning {
 public:
   RoundRobinPartitioning(int numberOfPartitions, int thisPartition)
       : m_partitions(numberOfPartitions), m_partition(thisPartition) {
