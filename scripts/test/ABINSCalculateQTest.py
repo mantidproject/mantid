@@ -43,10 +43,11 @@ class ABINSCalculateQTest(unittest.TestCase):
         raw_data.set({"k_vectors":np.asarray([[0.2, 0.1, 0.2]]),
                       "weights":np.asarray([0.3]),
                       "frequencies":np.asarray([[1.0, 2.0, 3.0, 4.0,  5.0, 6.0]]),  # 6 frequencies
-                      "atomic_displacements":np.asarray([[[1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0],
-                                                         [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0],
-                                                         [1.0,1.0,1.0],[1.0,1.0,111.0],[1.0,1.0,1.0],
-                                                         [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0]]]) }) # 12 atomic displacements
+                      "atomic_displacements":np.asarray([[[[1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0],
+                                                         [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0]],
+
+                                                         [[1.0,1.0,1.0],[1.0,1.0,111.0],[1.0,1.0,1.0],
+                                                         [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0]]]]) }) # 12 atomic displacements
         extracted_raw_data = raw_data.extract()
         correct_q_data = extracted_raw_data["frequencies"][0] * extracted_raw_data["frequencies"][0] / 16.0
 
