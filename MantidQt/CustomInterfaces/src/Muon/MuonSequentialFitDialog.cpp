@@ -327,11 +327,24 @@ void MuonSequentialFitDialog::continueFit() {
   const auto wsNames = m_dataPresenter->generateWorkspaceNames(
       m_ui.runs->getInstrumentOverride().toStdString(),
       m_ui.runs->getText().toStdString(), false);
+  if (wsNames.size() == 0) {
+    QMessageBox::critical(
+        this, "No data to fit",
+        "No data was found to fit (the list of workspaces to fit was empty).");
+    setState(Stopped);
+    return;
+  }
 
   // Create the workspaces to fit
   m_dataPresenter->createWorkspacesToFit(wsNames);
 
   QStringList runFilenames = m_ui.runs->getFilenames();
+  const auto numRuns = static_cast<size_t>(runFilenames.size());
+
+  // This must divide with no remainder:
+  // datasets per run = groups * periods
+  assert(wsNames.size() % numRuns == 0);
+  const auto datasetsPerRun = wsNames.size() / numRuns;
 
   const std::string label = m_ui.labelInput->text().toStdString();
   const std::string labelGroupName = SEQUENTIAL_PREFIX + label;
@@ -375,8 +388,8 @@ void MuonSequentialFitDialog::continueFit() {
   setState(Running);
   m_stopRequested = false;
 
-  for (auto fileIt = runFilenames.constBegin();
-       fileIt != runFilenames.constEnd(); ++fileIt) {
+  // For each run, fit "datasetsPerRun" groups and periods simultaneously
+  for (size_t i = 0; i < numRuns; i++) {
     // Process events (so that Stop button press is processed)
     QApplication::processEvents();
 
@@ -384,13 +397,27 @@ void MuonSequentialFitDialog::continueFit() {
     if (m_stopRequested)
       break;
 
-    MatrixWorkspace_sptr ws;
+    // Workspaces to be fitted simultaneously for this run
+    std::vector<std::string> workspacesToFit;
+    const auto startIter = wsNames.begin() + i * datasetsPerRun;
+    std::copy(startIter, startIter + datasetsPerRun,
+              std::back_inserter(workspacesToFit));
 
-    // TODO: get the workspace from somewhere
-    // (They are all in the ADS)
-    // Need to set up simultaneous fit each time if more than one
-
-    const std::string runTitle = getRunTitle(ws);
+    // Get run title. Workspaces should be in ADS
+    MatrixWorkspace_sptr matrixWS;
+    try {
+      const auto matrixWS =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              workspacesToFit.front());
+    } catch (const Mantid::Kernel::Exception::NotFoundError &err) {
+      QMessageBox::critical(
+          this, "Data not found",
+          QString::fromStdString("Workspace to fit not found in ADS: " +
+                                 workspacesToFit.front() + err.what()));
+      setState(Stopped);
+      return;
+    }
+    const std::string runTitle = getRunTitle(matrixWS);
     const std::string wsBaseName = labelGroupName + "_" + runTitle;
 
     IFunction_sptr functionToFit;
@@ -412,7 +439,7 @@ void MuonSequentialFitDialog::continueFit() {
       // Set function. Gets updated when fit is done.
       fit->setProperty("Function", functionToFit);
 
-      fit->setProperty("InputWorkspace", ws);
+      fit->setProperty("InputWorkspace", workspacesToFit.front());
       fit->setProperty("Output", wsBaseName);
 
       // We should have one spectrum only in the workspace, so use the first
@@ -424,6 +451,17 @@ void MuonSequentialFitDialog::continueFit() {
       fit->setProperty("EndX", m_fitPropBrowser->endX());
       fit->setProperty("Minimizer", m_fitPropBrowser->minimizer());
       fit->setProperty("CostFunction", m_fitPropBrowser->costFunction());
+
+      // If multiple groups/periods, set up simultaneous fit
+      if (datasetsPerRun > 1) {
+        for (int i = 1; i < workspacesToFit.size(); i++) {
+          std::string suffix = boost::lexical_cast<std::string>(i);
+          fit->setPropertyValue("InputWorkspace_" + suffix, workspacesToFit[i]);
+          fit->setProperty("WorkspaceIndex_" + suffix, 0);
+          fit->setProperty("StartX_" + suffix, m_fitPropBrowser->startX());
+          fit->setProperty("EndX_" + suffix, m_fitPropBrowser->endX());
+        }
+      }
 
       fit->execute();
     } catch (...) {
@@ -441,7 +479,7 @@ void MuonSequentialFitDialog::continueFit() {
 
     // Copy log values
     auto fitWs = ads.retrieveWS<MatrixWorkspace>(wsBaseName + "_Workspace");
-    fitWs->copyExperimentInfoFrom(ws.get());
+    fitWs->copyExperimentInfoFrom(matrixWS.get());
 
     // Add information about the fit to the diagnosis table
     addDiagnosisEntry(runTitle, fit->getProperty("OutputChi2OverDof"),
