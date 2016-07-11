@@ -2052,8 +2052,8 @@ void MuonAnalysis::loadFittings() {
   m_fitDataPresenter =
       Mantid::Kernel::make_unique<MuonAnalysisFitDataPresenter>(
           m_uiForm.fitBrowser, m_dataSelector, m_dataLoader,
-          m_groupingHelper.parseGroupingTable(),
-          parsePlotType(m_uiForm.frontPlotFuncs), m_dataTimeZero);
+          m_groupingHelper.parseGroupingTable(), PlotType::Asymmetry,
+          m_dataTimeZero);
   updateRebinParams(); // set initial params for fit data presenter
   m_fitFunctionPresenter =
       Mantid::Kernel::make_unique<MuonAnalysisFitFunctionPresenter>(

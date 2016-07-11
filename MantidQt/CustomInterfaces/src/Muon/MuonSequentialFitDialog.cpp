@@ -406,9 +406,8 @@ void MuonSequentialFitDialog::continueFit() {
     // Get run title. Workspaces should be in ADS
     MatrixWorkspace_sptr matrixWS;
     try {
-      const auto matrixWS =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              workspacesToFit.front());
+      matrixWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          workspacesToFit.front());
     } catch (const Mantid::Kernel::Exception::NotFoundError &err) {
       QMessageBox::critical(
           this, "Data not found",
@@ -464,11 +463,18 @@ void MuonSequentialFitDialog::continueFit() {
       }
 
       fit->execute();
-    } catch (...) {
+    } catch (const std::exception &err) {
+      g_log.error(err.what());
       QMessageBox::critical(
           this, "Fitting failed",
           "Unable to fit one of the files.\n\nCheck log for details");
       break;
+    }
+
+    // If fit was simultaneous, transform results
+    if (datasetsPerRun > 1) {
+      m_dataPresenter->handleFittedWorkspaces(wsBaseName);
+      m_dataPresenter->extractFittedWorkspaces(wsBaseName);
     }
 
     // Make sure created fit workspaces end up in the group

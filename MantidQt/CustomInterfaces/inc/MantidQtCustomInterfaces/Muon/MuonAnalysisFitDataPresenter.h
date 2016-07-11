@@ -85,6 +85,10 @@ public:
   void setPlotType(const Muon::PlotType &plotType) { m_plotType = plotType; }
   /// Create workspaces to fit
   void createWorkspacesToFit(const std::vector<std::string> &names) const;
+  /// Rename fit workspaces, add logs and generate params table
+  void handleFittedWorkspaces(const std::string &groupName) const;
+  /// Extract workspaces from group and move up a level
+  void extractFittedWorkspaces(const std::string &groupName) const;
 
 public slots:
   /// Transforms fit results when a simultaneous fit finishes
@@ -110,10 +114,6 @@ private:
   void updateWorkspaceNames(const std::vector<std::string> &names) const;
   /// Get rebin options for analysis
   std::string getRebinParams(const Mantid::API::Workspace_sptr ws) const;
-  /// Rename fit workspaces, add logs and generate params table
-  void handleFittedWorkspaces(const std::string &groupName) const;
-  /// Extract workspaces from group and move up a level
-  void extractFittedWorkspaces(const std::string &groupName) const;
   /// Add special logs to fitted workspaces
   void addSpecialLogs(
       const std::string &wsName,
