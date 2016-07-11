@@ -1,1 +1,2 @@
-from .fitting import CrystalField, PeaksFunction, Background, Function
+from .fitting import CrystalField, CrystalFieldFit
+from .function import PeaksFunction, Background, Function

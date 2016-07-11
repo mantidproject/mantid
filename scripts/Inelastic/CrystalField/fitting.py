@@ -32,6 +32,10 @@ class CrystalField(object):
 
     default_spectrum_size = 200
 
+    field_parameter_names = ['BmolX','BmolY','BmolZ','BextX','BextY','BextZ',
+                             'B20','B21','B22','B40','B41','B42','B43','B44','B60','B61','B62','B63','B64','B65','B66',
+                             'IB21','IB22','IB41','IB42','IB43','IB44','IB61','IB62','IB63','IB64','IB65','IB66']
+
     def __init__(self, Ion, Symmetry, **kwargs):
         """
         Constructor.
@@ -92,17 +96,19 @@ class CrystalField(object):
                         FWHM: A default value for the full width at half maximum of the peaks.
                         Temperature: A temperature "of the spectrum" in Kelvin
         """
+        from .function import PeaksFunction
         self._ion = Ion
         self._symmetry = Symmetry
         self._toleranceEnergy = 1e-10
         self._toleranceIntensity = 1e-3
-        self._temperature = None
-        self._intensityScaling = 1.0
-        self._FWHM = None
-        self._resolutionModel = None
         self._fieldParameters = {}
+        self._fieldTies = {}
+        self._temperature = None
+        self._FWHM = None
+        self._intensityScaling = 1.0
+        self._resolutionModel = None
 
-        self.peaks = None
+        self.peaks = PeaksFunction()
         self.background = None
 
         for key in kwargs:
@@ -137,6 +143,8 @@ class CrystalField(object):
         self._spectra = {}
         self._plot_window = {}
 
+        self._setDefaultTies()
+
     def _getTemperature(self, i):
         """Get temperature value for i-th spectrum."""
         if self._temperature is None:
@@ -167,8 +175,6 @@ class CrystalField(object):
                 raise RuntimeError('Cannot get FWHM for spectrum %s. Only %s FWHM are given.' % (i, n))
 
     def _getPeaksFunction(self, i):
-        if self.peaks is None:
-            raise RuntimeError('Peaks function(s) must be set.')
         if isinstance(self.peaks, list):
             return self.peaks[i]
         return self.peaks
@@ -184,7 +190,7 @@ class CrystalField(object):
             self._eigenvalues, self._eigenvectors, self._hamiltonian = energies(nre, **self._fieldParameters)
             self._dirty_eigensystem = False
 
-    def _makePeaksFunction(self, i):
+    def makePeaksFunction(self, i):
         """Form a definition string for the CrystalFieldPeaks function
         @param i: Index of a spectrum.
         """
@@ -194,22 +200,27 @@ class CrystalField(object):
         s += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.iteritems()])
         return s
 
-    def _makeSpectrumFunction(self, i):
+    def makeSpectrumFunction(self, i=0):
         """Form a definition string for the CrystalFieldSpectrum function
         @param i: Index of a spectrum.
         """
         temperature = self._getTemperature(i)
         s = 'name=CrystalFieldSpectrum,Ion=%s,Symmetry=%s,Temperature=%s' % (self._ion, self._symmetry, temperature)
         s += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
-        if self.peaks is not None:
-            s += ',PeakShape=%s' % self.getPeak(i).name
+        s += ',PeakShape=%s' % self.getPeak(i).name
         if self._FWHM is not None:
             s += ',FWHM=%s' % self._getFWHM(i)
         s += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.iteritems()])
-        if self.peaks is not None:
-            params = self.getPeak(i).paramString()
-            if len(params) > 0:
-                s += ',%s' % params
+        peaks = self.getPeak(i)
+        params = peaks.paramString()
+        if len(params) > 0:
+            s += ',%s' % params
+        ties = peaks.tiesString()
+        if len(ties) > 0:
+            s += ',%s' % ties
+        constraints = peaks.constraintsString()
+        if len(constraints) > 0:
+            s += ',%s' % constraints
         if self.background is not None:
             s = '%s;%s' % (self.background.toString(), s)
         return s
@@ -221,7 +232,7 @@ class CrystalField(object):
             alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
             alg.initialize()
             alg.setChild(True)
-            alg.setProperty('Function',  self._makePeaksFunction(i))
+            alg.setProperty('Function', self.makePeaksFunction(i))
             del alg['InputWorkspace']
             alg.setProperty('OutputWorkspace', 'dummy')
             alg.execute()
@@ -239,7 +250,7 @@ class CrystalField(object):
         alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
         alg.initialize()
         alg.setChild(True)
-        alg.setProperty('Function', self._makeSpectrumFunction(i))
+        alg.setProperty('Function', self.makeSpectrumFunction(i))
         alg.setProperty("InputWorkspace", workspace)
         alg.setProperty('WorkspaceIndex', ws_index)
         alg.setProperty('OutputWorkspace', 'dummy')
@@ -357,6 +368,7 @@ class CrystalField(object):
         self._dirty_spectra = True
 
     def setPeaks(self, name):
+        from .function import PeaksFunction
         """Define the shape of the peaks and create PeakFunction instances."""
         if self._temperature is None or not isinstance(self._temperature, list):
             self.peaks = PeaksFunction(name)
@@ -364,8 +376,6 @@ class CrystalField(object):
             self.peaks = [PeaksFunction(name) for t in self._temperature]
 
     def getPeak(self, i=0):
-        if self.peaks is None:
-            raise RuntimeError('Peaks function is undefined.')
         if isinstance(self.peaks, list):
             return self.peaks[i]
         else:
@@ -468,230 +478,31 @@ class CrystalField(object):
             ws = CreateWorkspace(x, y, OutputWorkspace=ws_name)
             plotSpectrum(ws, 0)
 
+    def _setDefaultTies(self):
+        for name in self.field_parameter_names:
+            if name not in self._fieldParameters:
+                self._fieldTies[name] = '0'
 
-class Function(object):
-    """A helper object that simplifies getting and setting parameters of a simple named function."""
-
-    def __init__(self, name, **kwargs):
-        """
-        Initialise new instance.
-        @param name: A valid name registered with the FunctionFactory.
-        @param kwargs: Parameters (but not attributes) of this function. To set attributes use `attr` property.
-                Example:
-                    f = Function('TabulatedFunction', Scaling=2.0)
-                    f.attr['Workspace'] = 'workspace_with_data'
-        """
-        self._name = name
-        # Function attributes.
-        self._attrib = {}
-        # Function parameters.
-        self._params = {}
-        for param in kwargs:
-            self._params[param] = kwargs[param]
-
-    @property
-    def name(self):
-        """Read only name of this function"""
-        return self._name
-
-    @property
-    def attr(self):
-        return self._attrib
-
-    @property
-    def param(self):
-        return self._params
-
-    def toString(self):
-        """Create function initialisation string"""
-        attrib = ['%s=%s' % item for item in self._attrib.iteritems()] + \
-                 ['%s=%s' % item for item in self._params.iteritems()]
-        if len(attrib) > 0:
-            return 'name=%s,%s' % (self._name, ','.join(attrib))
-        return 'name=%s' % self._name
+    def getFieldTies(self):
+        ties = ['%s=%s' % item for item in self._fieldTies.iteritems()]
+        return ','.join(ties)
 
 
-class CompositeProperties(object):
-    """
-    A dictionary of dictionaries of function properties: attributes or parameters.
-    It mimics properties of a CompositeFunction: the key is a function index and the value
-    id a map 'param_name' -> param_value.
+class CrystalFieldFit(object):
 
-    Example:
-        {
-          0: {'Height': 100, 'Sigma': 1.0}, # Parameters of the first function
-          1: {'Height': 120, 'Sigma': 2.0}, # Parameters of the second function
-          5: {'Height': 300, 'Sigma': 3.0}, # Parameters of the sixth function
-          ...
-        }
-    """
+    def __init__(self, Model=None, Temperature=None, FWHM=None, InputWorkspace=None):
+        self.model = Model
+        if Temperature is not None:
+            self.model.Temperature = Temperature
+        if FWHM is not None:
+            self.model.FWHM = FWHM
+        self._input_workspace = InputWorkspace
+        self._output_workspace_base_name = 'fit'
 
-    def __init__(self):
-        self._properties = {}
-
-    def __getitem__(self, item):
-        """Get a map of properties for a function number <item>"""
-        if item not in self._properties:
-            self._properties[item] = {}
-        return self._properties[item]
-
-    def getSize(self):
-        """Get number of maps (functions) defined here"""
-        s = self._properties.keys()
-        if len(s) > 0:
-            return max(s) + 1
-        return 0
-
-    def toStringList(self):
-        """Format all properties into a list of strings where each string is a comma-separated
-        list of name=value pairs.
-        """
-        prop_list = []
-        for i in range(self.getSize()):
-            if i in self._properties:
-                props = self._properties[i]
-                prop_list.append(','.join(['%s=%s' % item for item in props.iteritems()]))
-            else:
-                prop_list.append('')
-        return prop_list
-
-    def toCompositeString(self):
-        """Format all properties as a comma-separated list of name=value pairs where name is formatted
-        in the CompositeFunction style.
-
-        Example:
-            'f0.Height=100,f0.Sigma=1.0,f1.Height=120,f1.Sigma=2.0,f5.Height=300,f5.Sigma=3.0'
-        """
-        s = ''
-        for i in self._properties:
-            f = 'f%s.' % i
-            props = self._properties[i]
-            if len(s) > 0:
-                s += ','
-            s += ','.join(['%s%s=%s' % ((f,) + item) for item in props.iteritems()])
-        return s[:]
-
-
-class PeaksFunction(object):
-    """A helper object that simplifies getting and setting parameters of a composite function
-    containing multiple peaks of the same type.
-
-    The object of this class has no access to the C++ fit function it represents. It means that
-    it doesn't know what attributes or parameters the function defines and relies on the user
-    to provide correct information.
-    """
-    def __init__(self, name):
-        """
-        Constructor.
-
-        @param name: The name of the function of each peak.  E.g. Gaussian
-        """
-        # Name of the peaks
-        self._name = name
-        # Collection of all attributes
-        self._attrib = CompositeProperties()
-        # Collection of all parameters
-        self._params = CompositeProperties()
-
-    @property
-    def name(self):
-        """Read only name of the peak function"""
-        return self._name
-
-    @property
-    def attr(self):
-        """Get a dict of all currently set attributes.
-        Use this property to set or get an attribute.
-        You can only get an attribute that has been previously set via this property.
-        """
-        return self._attrib
-
-    @property
-    def param(self):
-        """Get a dict of all currently set parameters
-        Use this property to set or get a parameter.
-        You can only get an parameter that has been previously set via this property.
-        Example:
-
-            fun = PeaksFunction('Gaussian')
-            # Set Sigma parameter of the second peak
-            peaks.param[1]['Sigma'] = 0.1
-            ...
-            # Get the value of a previously set parameter
-            sigma = peaks.param[1]['Sigma']
-            ...
-            # Trying to get a value that wasn't set results in an error
-            height = peaks[1]['Height'] # error
-        """
-        return self._params
-
-    def nPeaks(self):
-        """Get the number of peaks"""
-        n = max(self._attrib.getSize(), self._params.getSize())
-        if n == 0:
-            raise RuntimeError('PeaksFunction has no defined parameters or attributes')
-        return n
-
-    def toString(self):
-        """Create function initialisation string"""
-        n = self.nPeaks()
-        attribs = self._attrib.toStringList()
-        params = self._params.toStringList()
-        if len(attribs) < n:
-            attribs += [''] * (n - len(attribs))
-        if len(params) < n:
-            params += [''] * (n - len(params))
-        peaks = []
-        for i in range(n):
-            a = attribs[i]
-            p = params[i]
-            if len(a) != 0 or len(p) != 0:
-                if len(a) == 0:
-                    peaks.append('name=%s,%s' % (self._name, p))
-                elif len(p) == 0:
-                    peaks.append('name=%s,%s' % (self._name, a))
-                else:
-                    peaks.append('name=%s,%s,%s' % (self._name, a,p))
-            else:
-                peaks.append('name=%s' % self._name)
-        return ';'.join(peaks)
-
-    def paramString(self):
-        """Format a comma-separated list of all peaks attributes and parameters in a CompositeFunction
-        style.
-        """
-        na = self._attrib.getSize()
-        np = self._params.getSize()
-        if na == 0 and np == 0:
-            return ''
-        elif na == 0:
-            return self._params.toCompositeString()
-        elif np == 0:
-            return self._attrib.toCompositeString()
-        else:
-            return '%s,%s' % (self._attrib.toCompositeString(), self._params.toCompositeString())
-
-
-class Background(object):
-    """Object representing spectrum background: a sum of a central peak and a
-    background.
-    """
-
-    def __init__(self, peak=None, background=None):
-        """
-        Initialise new instance.
-        @param peak: An instance of Function class meaning to be the elastic peak.
-        @param background: An instance of Function class serving as the background.
-        """
-        self.peak = peak
-        self.background = background
-
-    def toString(self):
-        if self.peak is None and self.background is None:
-            return ''
-        if self.peak is None:
-            return self.background.toString()
-        if self.background is None:
-            return self.peak.toString()
-        return '%s;%s' % (self.peak.toString(), self.background.toString())
-
+    def fit(self):
+        from mantid.simpleapi import Fit
+        fun = self.model.makeSpectrumFunction()
+        ties = self.model.getFieldTies()
+        if len(ties) > 0:
+            fun += ',ties=(%s,IntensityScaling=1)' % ties
+        return Fit(fun, self._input_workspace, Output=self._output_workspace_base_name)

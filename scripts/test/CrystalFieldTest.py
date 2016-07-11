@@ -247,5 +247,24 @@ class CrystalFieldTests(unittest.TestCase):
         self.assertAlmostEqual(y[80], 2.5853135104737239, 8)
         self.assertAlmostEqual(y[90], 6.6726231052015859, 8)
 
+
+class CrystalFieldFitTest(unittest.TestCase):
+
+    def test_CrystalFieldFit(self):
+        from CrystalField.fitting import MakeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit
+        origin = CrystalField('Ce', 'C2v', B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068,
+                          Temperature=10.0, FWHM=0.1)
+        x, y = origin.getSpectrum()
+        ws = MakeWorkspace(x, y)
+
+        cf = CrystalField('Ce', 'C2v', B20=0.035, B40=-0.01, B43=-0.03, B60=-0.0001, B63=0.002, B66=0.006,
+                              Temperature=10.0, FWHM=0.1)
+        cf.setPeaks('Gaussian')
+        cf.peaks.ties({'f0.Sigma':1.0, 'f1.Sigma': '2*f0.Sigma'})
+        print cf.makeSpectrumFunction()
+        #fit = CrystalFieldFit(cf, InputWorkspace=ws)
+        #print fit.fit()
+
 if __name__ == "__main__":
     unittest.main()
