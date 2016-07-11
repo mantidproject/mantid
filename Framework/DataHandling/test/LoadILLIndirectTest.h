@@ -39,9 +39,13 @@ public:
     TS_ASSERT_EQUALS(loader.version(), 1);
   }
 
-  void test_Load_2013_Format() { doExecTest(m_dataFile2013); }
+  void test_Load_2013_Format() {
+    doExecTest(m_dataFile2013, 2057); // all single detectors
+  }
 
-  void test_Load_2015_Format() { doExecTest(m_dataFile2015); }
+  void test_Load_2015_Format() {
+    doExecTest(m_dataFile2015, 2051); // only 2 out of 8 single detectors
+  }
 
   void test_Confidence_2013_Format() { doConfidenceTest(m_dataFile2013); }
 
@@ -56,7 +60,7 @@ public:
     TS_ASSERT_EQUALS(alg.confidence(descr), 80);
   }
 
-  void doExecTest(const std::string &file) {
+  void doExecTest(const std::string &file, int numHist) {
     // Name of the output workspace.
     std::string outWSName("LoadILLIndirectTest_OutputWS");
 
@@ -78,7 +82,7 @@ public:
 
     MatrixWorkspace_sptr output2D =
         boost::dynamic_pointer_cast<MatrixWorkspace>(output);
-    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 2057);
+    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), numHist);
 
     const Mantid::API::Run &runlogs = output->run();
     TS_ASSERT(runlogs.hasProperty("Facility"));

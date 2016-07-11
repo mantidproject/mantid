@@ -8,6 +8,7 @@
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 
 #include <nexus/napi.h>
 
@@ -27,7 +28,8 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLIndirect)
 LoadILLIndirect::LoadILLIndirect()
     : API::IFileLoader<Kernel::NexusDescriptor>(), m_numberOfTubes(0),
       m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
-      m_numberOfSimpleDetectors(0), m_numberOfHistograms(0) {
+      m_numberOfSimpleDetectors(0), m_numberOfHistograms(0),
+      m_numberOfMonitors(0) {
   m_supportedInstruments.emplace_back("IN16B");
 }
 
@@ -87,6 +89,7 @@ void LoadILLIndirect::init() {
 /** Execute the algorithm.
  */
 void LoadILLIndirect::exec() {
+
   // Retrieve filename
   std::string filenameData = getPropertyValue("Filename");
 
@@ -151,10 +154,31 @@ void LoadILLIndirect::loadDataDetails(NeXus::NXEntry &entry) {
   m_numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
   m_numberOfChannels = static_cast<size_t>(data.dim2());
 
+  // check which single detectors are enabled, and store their indices
   NXData dataSDGroup = entry.openNXData("dataSD");
   NXInt dataSD = dataSDGroup.openIntData();
 
-  m_numberOfSimpleDetectors = static_cast<size_t>(dataSD.dim0());
+  for (int i = 1; i <= dataSD.dim0(); ++i) {
+    try {
+      std::string entryNameFlagSD =
+          boost::str(boost::format("instrument/SingleD/tubes%i_function") % i);
+      NXFloat flagSD = entry.openNXFloat(entryNameFlagSD);
+      flagSD.load();
+
+      if (flagSD[0] == 1.0) // is enabled
+      {
+        m_activeSDIndices.insert(i);
+      }
+    } catch (...) {
+        // if the flags are not present in the file (e.g. old format), load all
+        m_activeSDIndices.insert(i);
+    }
+  }
+
+  m_numberOfSimpleDetectors = m_activeSDIndices.size();
+
+  g_log.information() << "Number of activated single detectors is: "
+                      << m_numberOfSimpleDetectors << std::endl;
 }
 
 /**
@@ -179,6 +203,7 @@ LoadILLIndirect::loadMonitors(NeXus::NXEntry &entry) {
   std::vector<std::vector<int>> monitors(1);
   std::vector<int> monitor(data(), data() + data.size());
   monitors[0].swap(monitor);
+  m_numberOfMonitors = monitors.size();
   return monitors;
 }
 
@@ -244,11 +269,10 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   /// detectorTofBins.end());
 
   size_t spec = 0;
-  size_t nb_monitors = monitorsData.size();
-  size_t nb_SD_detectors = dataSD.dim0();
 
   Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube +
-                                    nb_monitors + nb_SD_detectors);
+                                    m_numberOfMonitors +
+                                    m_numberOfSimpleDetectors);
 
   // Assign fake values to first X axis <<to be completed>>
   for (size_t i = 0; i <= m_numberOfChannels; ++i) {
@@ -256,7 +280,7 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   }
 
   // First, Monitor
-  for (size_t im = 0; im < nb_monitors; im++) {
+  for (size_t im = 0; im < m_numberOfMonitors; im++) {
 
     if (im > 0) {
       m_localWorkspace->dataX(im) = m_localWorkspace->readX(0);
@@ -275,15 +299,15 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
 
       // just copy the time binning axis to every spectra
-      m_localWorkspace->dataX(spec + nb_monitors) = m_localWorkspace->readX(0);
+      m_localWorkspace->dataX(spec + m_numberOfMonitors) = m_localWorkspace->readX(0);
 
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      m_localWorkspace->dataY(spec + nb_monitors)
+      m_localWorkspace->dataY(spec + m_numberOfMonitors)
           .assign(data_p, data_p + m_numberOfChannels);
 
       // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec + nb_monitors);
+      MantidVec &E = m_localWorkspace->dataE(spec + m_numberOfMonitors);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
                      LoadILLIndirect::calculateError);
 
@@ -293,18 +317,19 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
   } // for m_numberOfTubes
 
   // Then add Simple Detector (SD)
-  for (int i = 0; i < dataSD.dim0(); ++i) {
-
+  size_t offset = 0;
+  for (auto &index : m_activeSDIndices) {
     // just copy again the time binning axis to every spectra
-    m_localWorkspace->dataX(spec + nb_monitors + i) =
+    m_localWorkspace->dataX(spec + m_numberOfMonitors + offset) =
         m_localWorkspace->readX(0);
 
-    // Assign Y
-    int *dataSD_p = &dataSD(i, 0, 0);
-    m_localWorkspace->dataY(spec + nb_monitors + i)
+    // Assign Y, note that index starts from 1
+    int *dataSD_p = &dataSD(index - 1, 0, 0);
+    m_localWorkspace->dataY(spec + m_numberOfMonitors + offset)
         .assign(dataSD_p, dataSD_p + m_numberOfChannels);
 
     progress.report();
+    ++offset;
   }
 
 } // LoadILLIndirect::loadDataIntoTheWorkSpace

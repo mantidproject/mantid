@@ -138,7 +138,7 @@ class IndirectILLReductionTest(unittest.TestCase):
 
         IndirectILLReduction(**self._args)
 
-        self.assertEqual(24, mtd['red'].getNumberHistograms())
+        self.assertEqual(18, mtd['red'].getNumberHistograms())
 
 if __name__ == '__main__':
     unittest.main()
