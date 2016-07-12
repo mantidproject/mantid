@@ -146,9 +146,8 @@ public:
 
   void test_setAssignedFirstRun_singleWorkspace() {
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
-    EXPECT_CALL(*m_dataSelector,
-                setWorkspaceDetails(QString("00015189"), QString("MUSR")))
-        .Times(1);
+    EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(QString("00015189"),
+                                                     QString("MUSR"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
     EXPECT_CALL(*m_fitBrowser, allowSequentialFits(true)).Times(1);
     m_presenter->setAssignedFirstRun(wsName);
@@ -156,9 +155,8 @@ public:
 
   void test_setAssignedFirstRun_contiguousRange() {
     const QString wsName("MUSR00015189-91; Pair; long; Asym; 1; #1");
-    EXPECT_CALL(*m_dataSelector,
-                setWorkspaceDetails(QString("00015189-91"), QString("MUSR")))
-        .Times(1);
+    EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(QString("00015189-91"),
+                                                     QString("MUSR"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
     EXPECT_CALL(*m_fitBrowser, allowSequentialFits(false)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(1);
@@ -168,10 +166,9 @@ public:
 
   void test_setAssignedFirstRun_nonContiguousRange() {
     const QString wsName("MUSR00015189-91, 15193; Pair; long; Asym; 1; #1");
-    EXPECT_CALL(
-        *m_dataSelector,
-        setWorkspaceDetails(QString("00015189-91, 15193"), QString("MUSR")))
-        .Times(1);
+    EXPECT_CALL(*m_dataSelector,
+                setWorkspaceDetails(QString("00015189-91, 15193"),
+                                    QString("MUSR"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
     EXPECT_CALL(*m_fitBrowser, allowSequentialFits(false)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(1);

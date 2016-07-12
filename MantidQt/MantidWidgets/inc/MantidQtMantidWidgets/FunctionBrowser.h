@@ -82,7 +82,7 @@ public:
   /// Clear the contents
   void clear() override;
   /// Set the function in the browser
-  void setFunction(const QString& funStr) override;
+  void setFunction(const QString &funStr) override;
   /// Set the function in the browser
   void setFunction(Mantid::API::IFunction_sptr fun);
   /// Return FunctionFactory function string
@@ -108,7 +108,8 @@ public:
   void setParamError(const QString &funcIndex, const QString &paramName,
                      double error);
   /// Get a value of a parameter
-  double getParameter(const QString& funcIndex, const QString& paramName) const override;
+  double getParameter(const QString &funcIndex,
+                      const QString &paramName) const override;
   /// Update the function parameter value
   void setParameter(const QString &paramName, double value);
   /// Update the function parameter error
@@ -116,7 +117,7 @@ public:
   /// Get a value of a parameter
   double getParameter(const QString &paramName) const;
   /// Update parameter values in the browser to match those of a function.
-  void updateParameters(const Mantid::API::IFunction& fun) override;
+  void updateParameters(const Mantid::API::IFunction &fun) override;
 
   /// Get a list of names of global parameters
   QStringList getGlobalParameters() const;

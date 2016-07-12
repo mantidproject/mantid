@@ -368,11 +368,11 @@ void MuonAnalysisDataLoader::setProcessAlgorithmProperties(
 
   // ---- Analysis ----
   // Find if name is in group/pair collection
-  const auto isContainedIn = [](const std::string &name,
-                                const std::vector<std::string> &collection) {
-    return std::find(collection.begin(), collection.end(), name) !=
-           collection.end();
-  };
+  const auto isContainedIn =
+      [](const std::string &name, const std::vector<std::string> &collection) {
+        return std::find(collection.begin(), collection.end(), name) !=
+               collection.end();
+      };
   // Find index of a name in a collection
   const auto indexOf = [](const std::string &name,
                           const std::vector<std::string> &collection) {

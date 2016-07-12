@@ -19,7 +19,6 @@
 #include <QGridLayout>
 #include <QVBoxLayout>
 
-
 /**
  * Constructor.
  * @param parent :: A parent widget
@@ -58,7 +57,8 @@ SelectFunctionDialog::SelectFunctionDialog(
   // their respective fit functions.
   constructFunctionTree(categories, restrictions);
 
-  connect(m_form->fitTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(accept()));
+  connect(m_form->fitTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)),
+          this, SLOT(accept()));
   m_form->fitTree->setToolTip("Select a function type and press OK.");
 }
 

@@ -138,8 +138,7 @@ public:
         .WillByDefault(Return(paramValue));
     EXPECT_CALL(*m_funcBrowser, getParameter(funcIndex, paramName)).Times(1);
     EXPECT_CALL(*m_fitBrowser,
-                setParameterValue(funcIndex, paramName, paramValue))
-        .Times(1);
+                setParameterValue(funcIndex, paramName, paramValue)).Times(1);
     m_presenter->handleParameterEdited(funcIndex, paramName);
   }
 
@@ -184,8 +183,7 @@ private:
     ON_CALL(*m_fitBrowser, getFunction()).WillByDefault(Return(function));
     EXPECT_CALL(*m_fitBrowser, getFunction()).Times(1);
     EXPECT_CALL(*m_funcBrowser,
-                updateMultiDatasetParameters(testing::Ref(*function)))
-        .Times(1);
+                updateMultiDatasetParameters(testing::Ref(*function))).Times(1);
     m_presenter->handleFitFinished(wsName);
   }
 

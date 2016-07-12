@@ -31,11 +31,12 @@ public:
 protected:
   /// Ui elements form
   Ui::SelectFunctionDialog *m_form;
+
 private:
   /// Construct QTreeWidget with categories and functions
   void
-  constructFunctionTree(const std::map<std::string, std::vector<std::string>>
-                            &categoryFunctionsMap,
+  constructFunctionTree(const std::map<std::string, std::vector<std::string>> &
+                            categoryFunctionsMap,
                         const std::vector<std::string> &restrictions);
 };
 

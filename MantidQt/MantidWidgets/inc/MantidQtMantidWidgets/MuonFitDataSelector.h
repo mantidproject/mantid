@@ -148,7 +148,7 @@ private:
   /// Map of period names to checkboxes
   QMap<QString, QCheckBox *> m_periodBoxes;
 
-  private slots:
+private slots:
   /// Set normal cursor and enable input
   void unsetBusyState();
   /// Change dataset to previous one

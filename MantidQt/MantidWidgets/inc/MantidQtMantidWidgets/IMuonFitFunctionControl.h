@@ -5,7 +5,6 @@
 #include "MantidAPI/IFunction.h"
 #include <QObject>
 
-
 namespace MantidQt {
 namespace MantidWidgets {
 

@@ -38,7 +38,7 @@ struct AnalysisOptions {
   std::string rebinArgs;     /// Arguments for rebin (empty to not rebin)
   std::string groupPairName; /// Name of group or pair to use
   const Mantid::API::Grouping grouping; /// Grouping to use
-  PlotType plotType;                     /// Type of analysis to perform
+  PlotType plotType;                    /// Type of analysis to perform
   explicit AnalysisOptions(const Mantid::API::Grouping &g) : grouping(g){};
 };
 } // namespace Muon

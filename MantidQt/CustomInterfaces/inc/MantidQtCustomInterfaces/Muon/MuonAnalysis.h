@@ -241,7 +241,6 @@ private slots:
   void dataToFitChanged();
 
 private:
- 
   /// Initialize local Python environment
   void initLocalPython() override;
 
