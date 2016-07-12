@@ -144,7 +144,7 @@ void LoadIDFFromNexus::exec() {
     }
   } else {
     g_log.notice() << "No correction parameter file applies to the date for "
-                      "correection file.\n";
+                      "correction file.\n";
   }
 
   return;
