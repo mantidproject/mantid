@@ -329,15 +329,9 @@ void ExportTimeSeriesLog::setupEventWorkspace(
   outEventWS->sortAll(TOF_SORT, nullptr);
 
   // Now, create a default X-vector for histogramming, with just 2 bins.
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &xRef = axis.access();
-  xRef.resize(2);
   std::vector<WeightedEventNoTime> &events = outEL.getWeightedEventsNoTime();
-  xRef[0] = events.begin()->tof();
-  xRef[1] = events.rbegin()->tof();
-
-  // Set the binning axis using this.
-  outEventWS->setX(0, axis);
+  outEventWS->setBinEdges(0, HistogramData::BinEdges{events.begin()->tof(),
+                                                     events.rbegin()->tof()});
 
   return;
 }

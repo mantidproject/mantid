@@ -5,6 +5,17 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+HistogramData
+-------------
+
+A new module for dealing with histogram data has been added, it is now being used internally in Mantid to store data in various workspace types.
+
+- For C++ users, details can be found in the `transition documentation <http://docs.mantidproject.org/nightly/concepts/HistogramData.html>`_.
+- For Python users, the interface is so far unchanged.
+  However, to ensure data consistency and to reduce the risk of bugs, histograms now enforce length limitations. For example, there must be one bin edge more than data (Y and E) values.
+  If you experience trouble, in particular exceptions about size mismatch, please refer to the section `Dealing with problems <http://docs.mantidproject.org/nightly/concepts/HistogramData.html#dealing-with-problems>`_.
+
+
 Algorithms
 ----------
 
@@ -20,6 +31,9 @@ Improved
   ``SplittersWorkspace``.
 - :ref:`ConvertAxisByFormula <algm-ConvertAxisByFormula>` now supports instrument geometry vairables and several constants within the formula.  Axes are now reversed if the need to be to maintain increasing axis values.
 
+- :ref:`SavePlot1D <algm-SavePlot1D>` has options for writing out
+  plotly html files.
+
 Deprecated
 ##########
 
@@ -28,6 +42,10 @@ MD Algorithms (VATES CLI)
 
 Performance
 -----------
+
+- The introduction of the HistogramData module may have influenced the performance of some algorithms and many workflows.
+  A moderate number of algorithms should experience a speedup and reduced memory consumption.
+  If you experience unusual slowdowns, please contact the developer team.
 
 CurveFitting
 ------------

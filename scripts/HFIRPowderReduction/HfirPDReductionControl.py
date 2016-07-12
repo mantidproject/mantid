@@ -58,6 +58,9 @@ class PDRManager(object):
 
         self._wavelength = None
 
+        #register startup
+        mantid.UsageService.registerFeatureUsage("Interface","HfirPowderReduction",False)
+
         return
 
     def applySmoothVanadium(self, smoothaccept):

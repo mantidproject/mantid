@@ -671,8 +671,8 @@ void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo,
   auto timeChannels = new float[lengthIn + 1]();
   nxload.getTimeChannels(timeChannels, static_cast<const int>(lengthIn + 1));
   // Put the read in array into a vector (inside a shared pointer)
-  boost::shared_ptr<MantidVec> timeChannelsVec(
-      new MantidVec(timeChannels, timeChannels + lengthIn + 1));
+  auto timeChannelsVec = boost::make_shared<HistogramData::HistogramX>(
+      timeChannels, timeChannels + lengthIn + 1);
 
   localWorkspace->setX(hist, timeChannelsVec);
   localWorkspace->getSpectrum(hist).setSpectrumNo(specNo);

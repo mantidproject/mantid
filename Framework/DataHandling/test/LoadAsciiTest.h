@@ -46,9 +46,9 @@ public:
     const std::string filename("LoadAsciiTest_test_No_Header_4.txt");
     writeFourColumnTestFile(filename);
     Mantid::API::MatrixWorkspace_sptr outputWS = runTest(filename, "CSV", true);
-    TS_ASSERT_EQUALS(outputWS->readDx(0)[0], 0.1);
-    TS_ASSERT_EQUALS(outputWS->readDx(0)[18], 1.9);
-    TS_ASSERT_EQUALS(outputWS->readDx(0)[29], 0.8);
+    TS_ASSERT_EQUALS(outputWS->dx(0)[0], 0.1);
+    TS_ASSERT_EQUALS(outputWS->dx(0)[18], 1.9);
+    TS_ASSERT_EQUALS(outputWS->dx(0)[29], 0.8);
     Poco::File(filename).remove();
   }
 
@@ -288,21 +288,19 @@ private:
     } else {
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(outputWS->blocksize(), 51);
+      TS_ASSERT(!outputWS->sharedDx(0));
 
       TS_ASSERT_EQUALS(outputWS->readX(0)[0], 0.25);
       TS_ASSERT_EQUALS(outputWS->readY(0)[0], 0.19104);
       TS_ASSERT_EQUALS(outputWS->readE(0)[0], 0.0);
-      TS_ASSERT_EQUALS(outputWS->readDx(0)[0], 0.0);
 
       TS_ASSERT_EQUALS(outputWS->readX(0)[18], 0.34);
       TS_ASSERT_EQUALS(outputWS->readY(0)[18], 0.1825);
       TS_ASSERT_EQUALS(outputWS->readE(0)[18], 0.0);
-      TS_ASSERT_EQUALS(outputWS->readDx(0)[18], 0.0);
 
       TS_ASSERT_EQUALS(outputWS->readX(0)[50], 0.50);
       TS_ASSERT_EQUALS(outputWS->readY(0)[50], 0.16611);
       TS_ASSERT_EQUALS(outputWS->readE(0)[50], 0.0);
-      TS_ASSERT_EQUALS(outputWS->readDx(0)[50], 0.0);
     }
   }
 };

@@ -141,6 +141,7 @@ target_link_libraries ( PythonAPIModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTI
             PythonKernelModule
             API
             Kernel
+            HistogramData
             Geometry
             ${PYTHON_LIBRARIES}
             ${POCO_LIBRARIES}

@@ -353,7 +353,7 @@ public:
 
   void testBinIndexOf() {
     WorkspaceTester wkspace;
-    wkspace.initialize(1, 4, 2);
+    wkspace.initialize(1, 4, 3);
     // Data is all 1.0s
     wkspace.dataX(0)[1] = 2.0;
     wkspace.dataX(0)[2] = 3.0;
@@ -1307,18 +1307,18 @@ public:
     size_t workspaceIndexWithDx[3] = {0, 1, 2};
 
     Mantid::MantidVec dxSpec0(j, values[0]);
-    Mantid::MantidVecPtr dxSpec1 =
-        Kernel::make_cow<Mantid::MantidVec>(j, values[1]);
-    boost::shared_ptr<Mantid::MantidVec> dxSpec2 =
-        boost::make_shared<Mantid::MantidVec>(Mantid::MantidVec(j, values[2]));
+    auto dxSpec1 =
+        Kernel::make_cow<Mantid::HistogramData::HistogramDx>(j, values[1]);
+    auto dxSpec2 = boost::make_shared<Mantid::HistogramData::HistogramDx>(
+        Mantid::MantidVec(j, values[2]));
 
     // Act
     for (size_t spec = 0; spec < numspec; ++spec) {
       TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(spec));
     }
-    ws.setDx(workspaceIndexWithDx[0], dxSpec0);
-    ws.setDx(workspaceIndexWithDx[1], dxSpec1);
-    ws.setDx(workspaceIndexWithDx[2], dxSpec2);
+    ws.dataDx(workspaceIndexWithDx[0]) = dxSpec0;
+    ws.setSharedDx(workspaceIndexWithDx[1], dxSpec1);
+    ws.setSharedDx(workspaceIndexWithDx[2], dxSpec2);
 
     // Assert
     auto compareValue =
@@ -1340,7 +1340,7 @@ public:
                  std::all_of(std::begin(readDx), std::end(readDx),
                              compareValueForSpecificWorkspaceIndex));
 
-      auto refDx = ws.refDx(index);
+      auto refDx = ws.sharedDx(index);
       TSM_ASSERT("readDx should allow access to the spectrum",
                  std::all_of(std::begin(*refDx), std::end(*refDx),
                              compareValueForSpecificWorkspaceIndex));

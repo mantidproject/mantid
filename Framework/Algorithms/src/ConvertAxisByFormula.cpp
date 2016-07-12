@@ -128,6 +128,7 @@ void ConvertAxisByFormula::exec() {
   variables.push_back(boost::make_shared<Variable>("l1", true));
   variables.push_back(boost::make_shared<Variable>("l2", true));
 
+
   bool isGeometryRequired = false;
   for (auto variablesIter = variables.begin();
        variablesIter != variables.end();) {

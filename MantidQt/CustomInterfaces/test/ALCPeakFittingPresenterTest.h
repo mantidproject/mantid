@@ -15,6 +15,7 @@
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h"
 
 using namespace Mantid;
+using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 

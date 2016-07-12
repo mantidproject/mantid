@@ -62,6 +62,7 @@ create_module ( ${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES} )
 # Helper code
 #############################################################################################
 set ( SRC_FILES
+  src/NdArray.cpp
   src/Converters/CloneToNumpy.cpp
   src/Converters/NDArrayToVector.cpp
   src/Converters/NDArrayTypeIndex.cpp
@@ -81,6 +82,7 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
+  ${HEADER_DIR}/kernel/NdArray.h
   ${HEADER_DIR}/kernel/Converters/CArrayToNDArray.h
   ${HEADER_DIR}/kernel/Converters/MapToPyDictionary.h
   ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h
