@@ -186,7 +186,7 @@ TimeSplitterType removeFilterOverlap(const TimeSplitterType &a) {
       ++it;
     }
     // We've reached a gap point. Output this merged interval and move on.
-    out.push_back(SplittingInterval(start, stop, 0));
+    out.emplace_back(start, stop, 0);
   }
 
   return out;
@@ -242,8 +242,7 @@ TimeSplitterType operator~(const TimeSplitterType &a) {
 
   // No entries: then make a "filter" that keeps everything
   if ((temp.empty())) {
-    out.push_back(
-        SplittingInterval(DateAndTime::minimum(), DateAndTime::maximum(), 0));
+    out.emplace_back(DateAndTime::minimum(), DateAndTime::maximum(), 0);
     return out;
   }
 
@@ -251,7 +250,7 @@ TimeSplitterType operator~(const TimeSplitterType &a) {
   ait = temp.begin();
   if (ait != temp.end()) {
     // First entry; start at -infinite time
-    out.push_back(SplittingInterval(DateAndTime::minimum(), ait->start(), 0));
+    out.emplace_back(DateAndTime::minimum(), ait->start(), 0);
     // Now start at the second entry
     while (ait != temp.end()) {
       DateAndTime start, stop;
@@ -262,7 +261,7 @@ TimeSplitterType operator~(const TimeSplitterType &a) {
       } else { // Stop at the start of the next entry
         stop = ait->start();
       }
-      out.push_back(SplittingInterval(start, stop, 0));
+      out.emplace_back(start, stop, 0);
     }
   }
   return out;

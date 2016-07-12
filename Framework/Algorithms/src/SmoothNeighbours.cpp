@@ -250,7 +250,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
   // Build a map to sort by the detectorID
   std::vector<std::pair<int, int>> v1;
   for (int i = 0; i < static_cast<int>(detList.size()); i++)
-    v1.push_back(std::pair<int, int>(detList[i]->getAtXY(0, 0)->getID(), i));
+    v1.emplace_back(detList[i]->getAtXY(0, 0)->getID(), i);
 
   // To sort in descending order
   if (sum)
@@ -287,7 +287,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
               auto mapEntry = pixel_to_wi.find(pixelID);
               if (mapEntry != pixel_to_wi.end()) {
                 size_t wi = mapEntry->second;
-                neighbours.push_back(weightedNeighbour(wi, smweight));
+                neighbours.emplace_back(wi, smweight);
                 // Count the total weight
                 totalWeight += smweight;
               }
@@ -421,7 +421,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
             noNeigh++;
             used[neighWI] = true;
           }
-          neighbours.push_back(weightedNeighbour(neighWI, weight));
+          neighbours.emplace_back(neighWI, weight);
           totalWeight += weight;
         }
       }

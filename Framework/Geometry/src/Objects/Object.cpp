@@ -1835,12 +1835,12 @@ int Object::searchForObject(Kernel::V3D &point) const {
     return 1;
   std::vector<Kernel::V3D> axes;
   axes.reserve(6);
-  axes.push_back(Kernel::V3D(1, 0, 0));
-  axes.push_back(Kernel::V3D(-1, 0, 0));
-  axes.push_back(Kernel::V3D(0, 1, 0));
-  axes.push_back(Kernel::V3D(0, -1, 0));
-  axes.push_back(Kernel::V3D(0, 0, 1));
-  axes.push_back(Kernel::V3D(0, 0, -1));
+  axes.emplace_back(1, 0, 0);
+  axes.emplace_back(-1, 0, 0);
+  axes.emplace_back(0, 1, 0);
+  axes.emplace_back(0, -1, 0);
+  axes.emplace_back(0, 0, 1);
+  axes.emplace_back(0, 0, -1);
   std::vector<Kernel::V3D>::const_iterator dir;
   for (dir = axes.begin(); dir != axes.end(); ++dir) {
     Geometry::Track tr(point, (*dir));

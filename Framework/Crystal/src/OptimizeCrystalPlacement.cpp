@@ -190,8 +190,7 @@ void OptimizeCrystalPlacement::exec() {
 
       Geometry::Goniometer Gon(peak.getGoniometerMatrix());
       std::vector<double> phichiOmega = Gon.getEulerAngles("YZY");
-      ChiPhiOmega.push_back(
-          V3D(phichiOmega[1], phichiOmega[2], phichiOmega[0]));
+      ChiPhiOmega.emplace_back(phichiOmega[1], phichiOmega[2], phichiOmega[0]);
     }
 
     if (use) // add to lists for workspace
