@@ -262,34 +262,6 @@ class IndirectCommonTests(unittest.TestCase):
         self.assert_table_workspace_dimensions(params_table, expected_row_count=26, expected_column_count=3)
         self.assert_table_workspace_dimensions(output_name, expected_row_count=5, expected_column_count=11)
 
-    def test_search_for_fit_params(self):
-        ws = self.make_dummy_QENS_workspace()
-
-        #make a parameter table to search in
-        function = "name=LinearBackground, A0=0, A1=0;"
-        function += "name=Gaussian, Sigma=0.1, PeakCentre=0, Height=10;"
-        table_ws = PlotPeakByLogValue(Input=ws+",v", Function=function)
-
-        params = indirect_common.search_for_fit_params("Sigma", table_ws.name())
-
-        self.assertEqual(len(params), 1)
-        self.assertEqual(params[0], "f1.Sigma")
-
-    def test_convertParametersToWorkspace(self):
-        ws = self.make_dummy_QENS_workspace()
-
-        #make a parameter table to search in
-        function = "name=LinearBackground, A0=0, A1=0;"
-        function += "name=Gaussian, Sigma=0.1, PeakCentre=0, Height=10;"
-        table_ws = PlotPeakByLogValue(Input=ws + ",v0:10", Function=function)
-
-        param_names = ['A0', 'Sigma', 'PeakCentre']
-        indirect_common.convertParametersToWorkspace(table_ws.name(), 'axis-1', param_names, "params_workspace")
-        params_workspace = mtd["params_workspace"]
-
-        self.assert_matrix_workspace_dimensions(params_workspace.name(),
-                                                expected_num_histograms=3, expected_blocksize=5)
-
     #-----------------------------------------------------------
     # Custom assertion functions
     #-----------------------------------------------------------
