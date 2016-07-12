@@ -683,14 +683,9 @@ void EventList::switchToWeightedEvents() {
     break;
 
   case TOF:
-    weightedEvents.clear();
     weightedEventsNoTime.clear();
     // Convert and copy all TofEvents to the weightedEvents list.
-    std::vector<TofEvent>::const_iterator it;
-    std::vector<TofEvent>::const_iterator it_end =
-        events.end(); // Cache for speed
-    for (it = events.begin(); it != it_end; ++it)
-      this->weightedEvents.emplace_back(*it);
+    this->weightedEvents.assign(events.cbegin(), events.cend());
     // Get rid of the old events
     events.clear();
     eventType = WEIGHTED;
@@ -710,12 +705,7 @@ void EventList::switchToWeightedEventsNoTime() {
 
   case TOF: {
     // Convert and copy all TofEvents to the weightedEvents list.
-    weightedEventsNoTime.clear();
-    std::vector<TofEvent>::const_iterator it;
-    std::vector<TofEvent>::const_iterator it_end =
-        events.end(); // Cache for speed
-    for (it = events.begin(); it != it_end; ++it)
-      this->weightedEventsNoTime.emplace_back(*it);
+    this->weightedEventsNoTime.assign(events.cbegin(), events.cend());
     // Get rid of the old events
     events.clear();
     weightedEvents.clear();
@@ -724,12 +714,8 @@ void EventList::switchToWeightedEventsNoTime() {
 
   case WEIGHTED: {
     // Convert and copy all TofEvents to the weightedEvents list.
-    weightedEventsNoTime.clear();
-    std::vector<WeightedEvent>::const_iterator it;
-    std::vector<WeightedEvent>::const_iterator it_end =
-        weightedEvents.end(); // Cache for speed
-    for (it = weightedEvents.begin(); it != it_end; ++it)
-      this->weightedEventsNoTime.emplace_back(*it);
+    this->weightedEventsNoTime.assign(weightedEvents.cbegin(),
+                                      weightedEvents.cend());
     // Get rid of the old events
     events.clear();
     weightedEvents.clear();

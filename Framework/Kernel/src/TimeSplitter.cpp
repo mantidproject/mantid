@@ -168,6 +168,7 @@ TimeSplitterType operator&(const TimeSplitterType &a,
  */
 TimeSplitterType removeFilterOverlap(const TimeSplitterType &a) {
   TimeSplitterType out;
+  out.reserve(a.size());
 
   // Now we have to merge duplicate/overlapping intervals together
   auto it = a.cbegin();
