@@ -1,4 +1,5 @@
 #include "MantidQtMantidWidgets/MuonFitDataSelector.h"
+#include "MantidKernel/Logger.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("MuonFitDataSelector");

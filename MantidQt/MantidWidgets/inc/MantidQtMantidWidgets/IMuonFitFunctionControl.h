@@ -52,4 +52,4 @@ signals:
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif MANTID_MANTIDWIDGETS_IMUONFITFUNCTIONCONTROL_H
+#endif // MANTID_MANTIDWIDGETS_IMUONFITFUNCTIONCONTROL_H

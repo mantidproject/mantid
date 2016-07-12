@@ -31,6 +31,41 @@ namespace CustomInterfaces {
 
 /**
  * Constructor
+ * Defaults values for time zero (0.0) and rebinning (none)
+ * @param fitBrowser :: [input] Pointer to fit browser to update
+ * @param dataSelector :: [input] Pointer to data selector to get input from
+ * @param dataLoader :: [input] Data loader (shared with MuonAnalysis)
+ * @param grouping :: [input] Grouping set in interface for data
+ * @param plotType :: [input] Plot type set in interface
+ */
+MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
+    IWorkspaceFitControl *fitBrowser, IMuonFitDataSelector *dataSelector,
+    MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
+    const Muon::PlotType &plotType)
+    : MuonAnalysisFitDataPresenter(fitBrowser, dataSelector, dataLoader,
+                                   grouping, plotType, 0.0,
+                                   RebinOptions(RebinType::NoRebin, "")) {}
+
+/**
+ * Constructor
+ * Defaults value for rebinning (none)
+ * @param fitBrowser :: [input] Pointer to fit browser to update
+ * @param dataSelector :: [input] Pointer to data selector to get input from
+ * @param dataLoader :: [input] Data loader (shared with MuonAnalysis)
+ * @param grouping :: [input] Grouping set in interface for data
+ * @param timeZero :: [input] Time zero from MuonAnalysis interface (optional)
+ * @param plotType :: [input] Plot type set in interface
+ */
+MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
+    IWorkspaceFitControl *fitBrowser, IMuonFitDataSelector *dataSelector,
+    MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
+    const Muon::PlotType &plotType, double timeZero)
+    : MuonAnalysisFitDataPresenter(fitBrowser, dataSelector, dataLoader,
+                                   grouping, plotType, timeZero,
+                                   RebinOptions(RebinType::NoRebin, "")) {}
+
+/**
+ * Constructor
  * @param fitBrowser :: [input] Pointer to fit browser to update
  * @param dataSelector :: [input] Pointer to data selector to get input from
  * @param dataLoader :: [input] Data loader (shared with MuonAnalysis)
@@ -42,7 +77,8 @@ namespace CustomInterfaces {
 MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
     IWorkspaceFitControl *fitBrowser, IMuonFitDataSelector *dataSelector,
     MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
-    const Muon::PlotType &plotType, double timeZero, RebinOptions &rebinArgs)
+    const Muon::PlotType &plotType, double timeZero,
+    const RebinOptions &rebinArgs)
     : m_fitBrowser(fitBrowser), m_dataSelector(dataSelector),
       m_dataLoader(dataLoader), m_timeZero(timeZero), m_rebinArgs(rebinArgs),
       m_grouping(grouping), m_plotType(plotType) {

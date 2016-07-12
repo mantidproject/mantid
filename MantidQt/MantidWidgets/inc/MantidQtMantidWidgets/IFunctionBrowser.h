@@ -68,4 +68,4 @@ public:
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif MANTID_MANTIDWIDGETS_IFUNCTIONBROWSER_H
+#endif // MANTID_MANTIDWIDGETS_IFUNCTIONBROWSER_H

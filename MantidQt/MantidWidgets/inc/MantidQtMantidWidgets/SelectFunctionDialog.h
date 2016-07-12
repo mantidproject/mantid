@@ -7,6 +7,7 @@
 #include "WidgetDllOption.h"
 
 #include <QDialog>
+#include <map>
 
 namespace Ui {
 class SelectFunctionDialog;

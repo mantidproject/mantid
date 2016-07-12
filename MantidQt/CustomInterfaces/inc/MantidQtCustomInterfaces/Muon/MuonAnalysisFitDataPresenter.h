@@ -53,16 +53,25 @@ class MANTIDQT_CUSTOMINTERFACES_DLL MuonAnalysisFitDataPresenter
     : public QObject {
   Q_OBJECT
 public:
+  /// Constructor overload with default arguments
+  MuonAnalysisFitDataPresenter(
+      MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
+      MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
+      MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
+      const Muon::PlotType &plotType);
+  /// Constructor overload with default argument
+  MuonAnalysisFitDataPresenter(
+      MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
+      MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
+      MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
+      const Muon::PlotType &plotType, double timeZero);
   /// Constructor
   MuonAnalysisFitDataPresenter(
       MantidQt::MantidWidgets::IWorkspaceFitControl *fitBrowser,
       MantidQt::MantidWidgets::IMuonFitDataSelector *dataSelector,
       MuonAnalysisDataLoader &dataLoader, const Mantid::API::Grouping &grouping,
-      const Muon::PlotType &plotType, double timeZero = 0,
-      RebinOptions &rebinArgs =
-          RebinOptions(MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::
-                           RebinType::NoRebin,
-                       ""));
+      const Muon::PlotType &plotType, double timeZero,
+      const RebinOptions &rebinArgs);
   /// Handles "selected data changed"
   void handleSelectedDataChanged(bool overwrite);
   /// Handles peak picker being reassigned to a new graph

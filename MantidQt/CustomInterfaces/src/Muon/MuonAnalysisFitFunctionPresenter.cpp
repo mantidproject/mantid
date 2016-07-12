@@ -165,7 +165,7 @@ void MuonAnalysisFitFunctionPresenter::handleFunctionLoaded(
 /**
  * Called when the number of datasets to fit is changed in the model.
  * Update the view with the new number of datasets.
- * @param n :: [input] Number of datasets to fit
+ * @param nDatasets :: [input] Number of datasets to fit
  */
 void MuonAnalysisFitFunctionPresenter::updateNumberOfDatasets(int nDatasets) {
   m_funcBrowser->setNumberOfDatasets(nDatasets);

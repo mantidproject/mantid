@@ -41,10 +41,14 @@ public:
   virtual void setEndX(double end) = 0;
   virtual void setWorkspaceIndex(int i) = 0;
   virtual void allowSequentialFits(bool allow) = 0;
-  virtual void setWorkspaceNames(const QStringList &wsNames) {}
-  virtual void workspacesToFitChanged(int n) {}
-  virtual void setSimultaneousLabel(const std::string &label) {}
-  virtual void userChangedDataset(int index) {}
+  virtual void setWorkspaceNames(const QStringList &wsNames) {
+    UNUSED_ARG(wsNames)
+  }
+  virtual void workspacesToFitChanged(int n) { UNUSED_ARG(n) }
+  virtual void setSimultaneousLabel(const std::string &label) {
+    UNUSED_ARG(label)
+  }
+  virtual void userChangedDataset(int index) { UNUSED_ARG(index) }
 };
 
 } // namespace MantidWidgets

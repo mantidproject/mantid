@@ -2876,8 +2876,8 @@ void MuonAnalysis::updateRebinParams() {
   rebinParams.first = m_optionTab->getRebinType();
   if (rebinParams.first == MuonAnalysisOptionTab::RebinType::FixedRebin) {
     rebinParams.second = std::to_string(m_optionTab->getRebinStep());
-  } else if (rebinParams.first =
-                 MuonAnalysisOptionTab::RebinType::VariableRebin) {
+  } else if (rebinParams.first ==
+             MuonAnalysisOptionTab::RebinType::VariableRebin) {
     rebinParams.second = m_optionTab->getRebinParams();
   }
   m_fitDataPresenter->setRebinArgs(rebinParams);
