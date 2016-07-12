@@ -2,11 +2,14 @@
 #define MANTID_INDEXING_PARTITIONINDEX_H_
 
 #include "MantidIndexing/DllConfig.h"
+#include "MantidIndexing/IndexType.h"
 
 namespace Mantid {
 namespace Indexing {
 
 /** PartitionIndex : TODO: DESCRIPTION
+
+  Partition index. This is an int since it is used as MPI rank.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -29,20 +32,10 @@ namespace Indexing {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_INDEXING_DLL PartitionIndex {
-public:
-  explicit PartitionIndex(int index) noexcept : m_index(index) {}
-  operator int() const noexcept { return m_index; }
-  template <class T> bool operator==(const T &other) const noexcept {
-    return m_index == PartitionIndex(other).m_index;
-  }
-  template <class T> bool operator!=(const T &other) const noexcept {
-    return m_index != PartitionIndex(other).m_index;
-  }
-
-private:
-  /// Partition index. This is an int since it is used as MPI rank.
-  int m_index;
+class MANTID_INDEXING_DLL PartitionIndex
+    : public detail::IndexType<PartitionIndex, int> {
+  using detail::IndexType<PartitionIndex, int>::IndexType;
+  using detail::IndexType<PartitionIndex, int>::operator=;
 };
 
 } // namespace Indexing

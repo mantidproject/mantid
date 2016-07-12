@@ -5,7 +5,8 @@
 
 #include "MantidIndexing/PartitionIndex.h"
 
-using Mantid::Indexing::PartitionIndex;
+using namespace Mantid;
+using namespace Indexing;
 
 class PartitionIndexTest : public CxxTest::TestSuite {
 public:
@@ -14,31 +15,18 @@ public:
   static PartitionIndexTest *createSuite() { return new PartitionIndexTest(); }
   static void destroySuite(PartitionIndexTest *suite) { delete suite; }
 
-  void test_construct() {
-    PartitionIndex number(42);
-    TS_ASSERT_EQUALS(number, 42);
-  }
-
-  void test_operator_equals() {
-    PartitionIndex data(42);
-    PartitionIndex same(42);
-    PartitionIndex different(100);
-    TS_ASSERT(data == data);
-    TS_ASSERT(data == same);
-    TS_ASSERT(!(data == different));
-    TS_ASSERT(data == 42);
-    TS_ASSERT(!(data == 100));
-  }
-
-  void test_operator_not_equals() {
-    PartitionIndex data(42);
-    PartitionIndex same(42);
-    PartitionIndex different(100);
-    TS_ASSERT(!(data != data));
-    TS_ASSERT(!(data != same));
-    TS_ASSERT(data != different);
-    TS_ASSERT(!(data != 42));
-    TS_ASSERT(data != 100);
+  void test_has_correct_mixins() {
+    PartitionIndex data(0);
+// AppleClang gives warning if the result is unused.
+#if __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+#endif
+    TS_ASSERT_THROWS_NOTHING(
+        (dynamic_cast<detail::IndexType<PartitionIndex, int> &>(data)));
+#if __clang__
+#pragma clang diagnostic pop
+#endif
   }
 };
 

@@ -60,6 +60,30 @@ public:
     TS_ASSERT(!(data != 42));
     TS_ASSERT(data != 100);
   }
+
+  void test_operator_greater() {
+    MyIndex data(42);
+    TS_ASSERT(data > 41);
+    TS_ASSERT(!(data > 42));
+  }
+
+  void test_operator_greater_equal() {
+    MyIndex data(42);
+    TS_ASSERT(data >= 42);
+    TS_ASSERT(!(data >= 43));
+  }
+
+  void test_operator_less() {
+    MyIndex data(42);
+    TS_ASSERT(data < 43);
+    TS_ASSERT(!(data < 42));
+  }
+
+  void test_operator_less_equal() {
+    MyIndex data(42);
+    TS_ASSERT(data <= 42);
+    TS_ASSERT(!(data <= 41));
+  }
 };
 
 #endif /* MANTID_INDEXING_INDEXTYPETEST_H_ */

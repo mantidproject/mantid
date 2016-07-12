@@ -46,6 +46,18 @@ public:
   template <class T> bool operator!=(const T &other) const noexcept {
     return m_data != IndexType(other).m_data;
   }
+  template <class T> bool operator>(const T &other) const noexcept {
+    return m_data > IndexType(other).m_data;
+  }
+  template <class T> bool operator>=(const T &other) const noexcept {
+    return m_data >= IndexType(other).m_data;
+  }
+  template <class T> bool operator<(const T &other) const noexcept {
+    return m_data < IndexType(other).m_data;
+  }
+  template <class T> bool operator<=(const T &other) const noexcept {
+    return m_data <= IndexType(other).m_data;
+  }
 
 private:
   Int m_data;
