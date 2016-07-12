@@ -4,6 +4,8 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidKernel/Strings.h"
@@ -69,8 +71,17 @@ void LoadMask::init() {
 
   // 1. Declare property
   declareProperty("Instrument", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the instrument to apply the mask.");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace> >("Workspace", "",
+          Direction::Input),
+      "The name of the workspace with defined insrtument and spectra, "
+      "used as the source of the spectra-detector map for the mask to load.");
+ 
+  setPropertySettings("Workspace",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+      "Instrument", Kernel::ePropertyCriterion::IS_DEFAULT));
+
   const std::vector<std::string> maskExts{".xml", ".msk"};
   declareProperty(Kernel::make_unique<FileProperty>(
                       "InputFile", "", FileProperty::Load, maskExts),
@@ -88,7 +99,13 @@ void LoadMask::init() {
 void LoadMask::exec() {
   // 1. Load Instrument and create output Mask workspace
   const std::string instrumentname = getProperty("Instrument");
+  m_sourceMapWS = getProperty("Workspace");
+
   m_instrumentPropValue = instrumentname;
+  if (m_instrumentPropValue.size() == 0) { 
+     // m_mapWS is not empty and has instrument due to the validator
+      m_instrumentPropValue = m_sourceMapWS->getInstrument()->getName();
+  }
 
   this->intializeMaskWorkspace();
   setProperty("OutputWorkspace", m_maskWS);
@@ -820,35 +837,85 @@ void LoadMask::parseISISStringToVector(string ins,
 /** Initialize the Mask Workspace with instrument
  */
 void LoadMask::intializeMaskWorkspace() {
-  const bool ignoreDirs(true);
-  const std::string idfPath = API::FileFinder::Instance().getFullPath(
-      m_instrumentPropValue, ignoreDirs);
+    MatrixWorkspace_sptr tempWs(new DataObjects::Workspace2D());
 
-  MatrixWorkspace_sptr tempWs(new DataObjects::Workspace2D());
+    if (m_sourceMapWS) {
+        m_maskWS = DataObjects::MaskWorkspace_sptr(
+            new DataObjects::MaskWorkspace(m_sourceMapWS->getInstrument()));
+    }
+    else {
+        const bool ignoreDirs(true);
+        const std::string idfPath = API::FileFinder::Instance().getFullPath(
+            m_instrumentPropValue, ignoreDirs);
 
-  auto loadInst = createChildAlgorithm("LoadInstrument");
-  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", tempWs);
+        auto loadInst = createChildAlgorithm("LoadInstrument");
+        loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", tempWs);
 
-  if (idfPath.empty())
-    loadInst->setPropertyValue("InstrumentName", m_instrumentPropValue);
-  else
-    loadInst->setPropertyValue("Filename", m_instrumentPropValue);
+        if (idfPath.empty())
+            loadInst->setPropertyValue("InstrumentName", m_instrumentPropValue);
+        else
+            loadInst->setPropertyValue("Filename", m_instrumentPropValue);
 
-  loadInst->setProperty("RewriteSpectraMap",
-                        Mantid::Kernel::OptionalBool(false));
-  loadInst->executeAsChildAlg();
+        loadInst->setProperty("RewriteSpectraMap",
+            Mantid::Kernel::OptionalBool(false));
+        loadInst->executeAsChildAlg();
 
-  if (!loadInst->isExecuted()) {
-    g_log.error() << "Unable to load Instrument " << m_instrumentPropValue
-                  << '\n';
-    throw std::invalid_argument(
-        "Incorrect instrument name or invalid IDF given.");
-  }
+        if (!loadInst->isExecuted()) {
+            g_log.error() << "Unable to load Instrument " << m_instrumentPropValue
+                << '\n';
+            throw std::invalid_argument(
+                "Incorrect instrument name or invalid IDF given.");
+        }
 
-  m_maskWS = DataObjects::MaskWorkspace_sptr(
-      new DataObjects::MaskWorkspace(tempWs->getInstrument()));
-  m_maskWS->setTitle("Mask");
+        m_maskWS = DataObjects::MaskWorkspace_sptr(
+            new DataObjects::MaskWorkspace(tempWs->getInstrument()));
+
+    }
+    m_maskWS->setTitle("Mask");
 }
+
+/**Validates if either input workspace or instriment name is defined
+@return the inconsistency between Instrument/Workspace properties or empty list if no errors is found.
+*/
+std::map<std::string, std::string> LoadMask::validateInputs() {
+
+    std::map<std::string, std::string> result;
+
+    API::MatrixWorkspace_sptr inputWS = getProperty("Workspace");
+    std::string InstrName = getProperty("Instrument");
+    if (InstrName.size() == 0) {
+        if (!inputWS) {
+            result["Instrumet"] = "Either Instrument Name or Workspace have to be defined";
+        }
+        else {
+            try {
+                auto inst = inputWS->getInstrument();
+            }
+            catch (Kernel::Exception::NotFoundError &) {
+                result["Workspace"] = "If workspace is defined, it mast have an instrument";
+            }
+        }
+    }
+    else {
+        if (inputWS) {
+            try {
+                auto inst = inputWS->getInstrument();
+                std::string Name = inst->getName();
+                if (Name != InstrName) {
+                    result["Workspace"] = "If both workspace and instrument name are defined, "
+                        "workspace has to have the instrument with the same name";
+                }
+            }
+            catch (Kernel::Exception::NotFoundError &) {
+                result["Workspace"] = "If workspace is defined, it mast have instrument";
+            }
+        }
+    }
+
+    return result;
+
+}
+
 
 } // namespace Mantid
 } // namespace DataHandling

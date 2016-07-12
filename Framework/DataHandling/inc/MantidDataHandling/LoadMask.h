@@ -113,11 +113,14 @@ private:
   void loadISISMaskFile(std::string isisfilename);
   void parseISISStringToVector(std::string ins, std::vector<int> &rangestartvec,
                                std::vector<int> &rangeendvec);
+  std::map<std::string, std::string> validateInputs();
 
   /// Mask Workspace
   DataObjects::MaskWorkspace_sptr m_maskWS;
   /// Instrument name
   std::string m_instrumentPropValue;
+  /// optional source workspace, containing spectra-detector mapping
+  API::MatrixWorkspace_sptr m_sourceMapWS;
   /// XML document loaded
   Poco::XML::Document *m_pDoc;
   /// Root element of the parsed XML
