@@ -335,9 +335,9 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
   std::map<std::string, std::string> qAttributes;
   auto qUnit = getUnitFromMDDimension(workspace->getDimension(0));
   qUnit = getMomentumTransferLabel(qUnit);
-  qAttributes.insert(std::make_pair(sasUnitAttr, qUnit));
+  qAttributes.emplace(sasUnitAttr, qUnit);
   if (workspace->hasDx(0)) {
-    qAttributes.insert(std::make_pair(sasUncertaintyAttr, sasDataQdev));
+    qAttributes.emplace(sasUncertaintyAttr, sasDataQdev);
   }
 
   if (workspace->isHistogramData()) {
@@ -353,8 +353,8 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
   const auto intensity = workspace->readY(0);
   std::map<std::string, std::string> iAttributes;
   auto iUnit = workspace->YUnit();
-  iAttributes.insert(std::make_pair(sasUnitAttr, iUnit));
-  iAttributes.insert(std::make_pair(sasUncertaintyAttr, sasDataIdev));
+  iAttributes.emplace(sasUnitAttr, iUnit);
+  iAttributes.emplace(sasUncertaintyAttr, sasDataIdev);
 
   writeArray1DWithStrAttributes(data, sasDataI, intensity, iAttributes);
 
@@ -373,7 +373,7 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
   if (workspace->hasDx(0)) {
     const auto qResolution = workspace->readDx(0);
     std::map<std::string, std::string> xUncertaintyAttributes;
-    xUncertaintyAttributes.insert(std::make_pair(sasUnitAttr, qUnit));
+    xUncertaintyAttributes.emplace(sasUnitAttr, qUnit);
 
     if (workspace->isHistogramData()) {
       std::vector<double> qResolutionCentres;
@@ -515,7 +515,7 @@ void addData2D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
   std::map<std::string, std::string> qxAttributes;
   auto qxUnit = getUnitFromMDDimension(workspace->getXDimension());
   qxUnit = getMomentumTransferLabel(qxUnit);
-  qxAttributes.insert(std::make_pair(sasUnitAttr, qxUnit));
+  qxAttributes.emplace(sasUnitAttr, qxUnit);
   QxExtractor<double> qxExtractor;
   write2DWorkspace(data, workspace, sasDataQx, qxExtractor, qxAttributes);
 
@@ -523,7 +523,7 @@ void addData2D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
   std::map<std::string, std::string> qyAttributes;
   auto qyUnit = getUnitFromMDDimension(workspace->getDimension(1));
   qyUnit = getMomentumTransferLabel(qyUnit);
-  qyAttributes.insert(std::make_pair(sasUnitAttr, qyUnit));
+  qyAttributes.emplace(sasUnitAttr, qyUnit);
 
   SpectrumAxisValueProvider spectrumAxisValueProvider(workspace);
   write2DWorkspace(data, workspace, sasDataQy, spectrumAxisValueProvider,
@@ -533,8 +533,8 @@ void addData2D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
   std::map<std::string, std::string> iAttributes;
   auto iUnit = workspace->YUnit();
   iUnit = getIntensityUnitLabel(iUnit);
-  iAttributes.insert(std::make_pair(sasUnitAttr, iUnit));
-  iAttributes.insert(std::make_pair(sasUncertaintyAttr, sasDataIdev));
+  iAttributes.emplace(sasUnitAttr, iUnit);
+  iAttributes.emplace(sasUncertaintyAttr, sasDataIdev);
 
   auto iExtractor = [](Mantid::API::MatrixWorkspace_sptr ws, int index) {
     return ws->dataY(index).data();
@@ -605,9 +605,9 @@ void addTransmission(H5::Group &group,
   if (unit.empty()) {
     unit = sasNone;
   }
-  transmissionAttributes.insert(std::make_pair(sasUnitAttr, unit));
-  transmissionAttributes.insert(
-      std::make_pair(sasUncertaintyAttr, sasTransmissionSpectrumTdev));
+  transmissionAttributes.emplace(sasUnitAttr, unit);
+  transmissionAttributes.emplace(sasUncertaintyAttr,
+                                 sasTransmissionSpectrumTdev);
 
   writeArray1DWithStrAttributes(transmission, sasTransmissionSpectrumT,
                                 transmissionData, transmissionAttributes);
@@ -616,7 +616,7 @@ void addTransmission(H5::Group &group,
   // Add Tdev with units
   const auto transmissionErrors = workspace->readE(0);
   std::map<std::string, std::string> transmissionErrorAttributes;
-  transmissionErrorAttributes.insert(std::make_pair(sasUnitAttr, unit));
+  transmissionErrorAttributes.emplace(sasUnitAttr, unit);
 
   writeArray1DWithStrAttributes(transmission, sasTransmissionSpectrumTdev,
                                 transmissionErrors,
@@ -630,7 +630,7 @@ void addTransmission(H5::Group &group,
   if (lambdaUnit.empty() || lambdaUnit == "Angstrom") {
     lambdaUnit = sasAngstrom;
   }
-  lambdaAttributes.insert(std::make_pair(sasUnitAttr, lambdaUnit));
+  lambdaAttributes.emplace(sasUnitAttr, lambdaUnit);
 
   writeArray1DWithStrAttributes(transmission, sasTransmissionSpectrumLambda,
                                 lambda, lambdaAttributes);
@@ -694,14 +694,14 @@ std::map<std::string, std::string> SaveNXcanSAS::validateInputs() {
   if (!workspace ||
       !boost::dynamic_pointer_cast<const Mantid::DataObjects::Workspace2D>(
           workspace)) {
-    result.insert(std::make_pair("InputWorkspace",
-                                 "The InputWorkspace must be a Workspace2D."));
+    result.emplace("InputWorkspace",
+                   "The InputWorkspace must be a Workspace2D.");
   }
 
   // Don't allow ragged workspaces for now
   if (!API::WorkspaceHelpers::commonBoundaries(workspace)) {
-    result.insert(std::make_pair(
-        "InputWorkspace", "The InputWorkspace cannot be a ragged workspace."));
+    result.emplace("InputWorkspace",
+                   "The InputWorkspace cannot be a ragged workspace.");
   }
 
   // Transmission data should be 1D
@@ -712,9 +712,8 @@ std::map<std::string, std::string> SaveNXcanSAS::validateInputs() {
   auto checkTransmission = [&result](Mantid::API::MatrixWorkspace_sptr trans,
                                      std::string propertyName) {
     if (trans->getNumberHistograms() != 1) {
-      result.insert(std::make_pair(
-          propertyName,
-          "The input workspaces for transmissions have to be 1D."));
+      result.emplace(propertyName,
+                     "The input workspaces for transmissions have to be 1D.");
     }
   };
 
