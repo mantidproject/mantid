@@ -9,6 +9,11 @@
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+
+namespace HistogramData {
+class HistogramX;
+}
+
 namespace Algorithms {
 
 /** Performs a Fast Fourier Transform of data
@@ -60,9 +65,9 @@ private:
   void init() override;
   void exec() override;
   /// Check whether supplied values are evenly spaced
-  bool areBinWidthsUneven(const MantidVec &xValues) const;
+  bool areBinWidthsUneven(const HistogramData::HistogramX &xValues) const;
   /// Get phase shift - user supplied or auto-calculated
-  double getPhaseShift(const MantidVec &xValues);
+  double getPhaseShift(const HistogramData::HistogramX &xValues);
 };
 
 } // namespace Algorithm

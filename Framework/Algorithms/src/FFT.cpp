@@ -19,11 +19,11 @@
 #define REAL(z, i) ((z)[2 * (i)])
 #define IMAG(z, i) ((z)[2 * (i) + 1])
 
-#include <sstream>
-#include <numeric>
 #include <algorithm>
-#include <functional>
 #include <cmath>
+#include <functional>
+#include <numeric>
+#include <sstream>
 
 namespace Mantid {
 namespace Algorithms {
@@ -91,7 +91,7 @@ void FFT::exec() {
   const int iImag = getProperty("Imaginary");
   const bool isComplex = iImag != EMPTY_INT();
 
-  const MantidVec &X = inWS->readX(iReal);
+  auto &X = inWS->x(iReal);
   const int ySize = static_cast<int>(inWS->blocksize());
   const int xSize = static_cast<int>(X.size());
 
@@ -194,10 +194,9 @@ void FFT::exec() {
      */
     for (int i = 0; i < ySize; i++) {
       int j = centerShift ? (ySize / 2 + i) % ySize : i;
-      data[2 * i] =
-          inWS->dataY(iReal)[j]; // even indexes filled with the real part
+      data[2 * i] = inWS->y(iReal)[j]; // even indexes filled with the real part
       data[2 * i + 1] = isComplex
-                            ? inImagWS->dataY(iImag)[j]
+                            ? inImagWS->y(iImag)[j]
                             : 0.; // odd indexes filled with the imaginary part
     }
 
@@ -217,47 +216,47 @@ void FFT::exec() {
      */
     for (int i = 0; i < ySize; i++) {
       int j = (ySize / 2 + i + dys) % ySize;
-      outWS->dataX(iRe)[i] =
+      outWS->mutableX(iRe)[i] =
           df * (-ySize / 2 + i); // zero frequency at i = ySize/2
       double re = data[2 * j] *
                   dx; // use j from ySize/2 to ySize for negative frequencies
       double im = data[2 * j + 1] * dx;
       // shift
       {
-        double c = cos(outWS->dataX(iRe)[i] * shift);
-        double s = sin(outWS->dataX(iRe)[i] * shift);
+        double c = cos(outWS->x(iRe)[i] * shift);
+        double s = sin(outWS->x(iRe)[i] * shift);
         double re1 = re * c - im * s;
         double im1 = re * s + im * c;
         re = re1;
         im = im1;
       }
-      outWS->dataY(iRe)[i] = re;                       // real part
-      outWS->dataY(iIm)[i] = im;                       // imaginary part
-      outWS->dataY(iAbs)[i] = sqrt(re * re + im * im); // modulus
+      outWS->mutableY(iRe)[i] = re;                       // real part
+      outWS->mutableY(iIm)[i] = im;                       // imaginary part
+      outWS->mutableY(iAbs)[i] = sqrt(re * re + im * im); // modulus
       if (addPositiveOnly) {
         outWS->dataX(0)[i] = df * i;
         if (j < ySize / 2) {
-          outWS->dataY(0)[j] = re;                      // real part
-          outWS->dataY(1)[j] = im;                      // imaginary part
-          outWS->dataY(2)[j] = sqrt(re * re + im * im); // modulus
+          outWS->mutableY(0)[j] = re;                      // real part
+          outWS->mutableY(1)[j] = im;                      // imaginary part
+          outWS->mutableY(2)[j] = sqrt(re * re + im * im); // modulus
         } else {
-          outWS->dataY(0)[j] = 0.; // real part
-          outWS->dataY(1)[j] = 0.; // imaginary part
-          outWS->dataY(2)[j] = 0.; // modulus
+          outWS->mutableY(0)[j] = 0.; // real part
+          outWS->mutableY(1)[j] = 0.; // imaginary part
+          outWS->mutableY(2)[j] = 0.; // modulus
         }
       }
     }
     if (xSize == ySize + 1) {
-      outWS->dataX(0)[ySize] = outWS->dataX(0)[ySize - 1] + df;
+      outWS->mutableX(0)[ySize] = outWS->x(0)[ySize - 1] + df;
       if (addPositiveOnly)
-        outWS->dataX(iRe)[ySize] = outWS->dataX(iRe)[ySize - 1] + df;
+        outWS->mutableX(iRe)[ySize] = outWS->x(iRe)[ySize - 1] + df;
     }
   } else // Backward
   {
     for (int i = 0; i < ySize; i++) {
       int j = (ySize / 2 + i) % ySize;
-      data[2 * i] = inWS->dataY(iReal)[j];
-      data[2 * i + 1] = isComplex ? inImagWS->dataY(iImag)[j] : 0.;
+      data[2 * i] = inWS->y(iReal)[j];
+      data[2 * i + 1] = isComplex ? inImagWS->y(iImag)[j] : 0.;
     }
     gsl_fft_complex_inverse(data.get(), 1, ySize, wavetable, workspace);
     for (int i = 0; i < ySize; i++) {
@@ -265,27 +264,27 @@ void FFT::exec() {
       if (centerShift) {
         x -= df * (ySize / 2);
       }
-      outWS->dataX(0)[i] = x;
+      outWS->mutableX(0)[i] = x;
       int j = centerShift ? (ySize / 2 + i + dys) % ySize : i;
       double re = data[2 * j] / df;
       double im = data[2 * j + 1] / df;
-      outWS->dataY(0)[i] = re;                      // real part
-      outWS->dataY(1)[i] = im;                      // imaginary part
-      outWS->dataY(2)[i] = sqrt(re * re + im * im); // modulus
+      outWS->mutableY(0)[i] = re;                      // real part
+      outWS->mutableY(1)[i] = im;                      // imaginary part
+      outWS->mutableY(2)[i] = sqrt(re * re + im * im); // modulus
     }
     if (xSize == ySize + 1)
-      outWS->dataX(0)[ySize] = outWS->dataX(0)[ySize - 1] + df;
+      outWS->mutableX(0)[ySize] = outWS->x(0)[ySize - 1] + df;
   }
 
   gsl_fft_complex_wavetable_free(wavetable);
   gsl_fft_complex_workspace_free(workspace);
 
-  outWS->dataX(1) = outWS->dataX(0);
-  outWS->dataX(2) = outWS->dataX(0);
+  outWS->mutableX(1) = outWS->x(0);
+  outWS->mutableX(2) = outWS->x(0);
 
   if (addPositiveOnly) {
-    outWS->dataX(iIm) = outWS->dataX(iRe);
-    outWS->dataX(iAbs) = outWS->dataX(iRe);
+    outWS->mutableX(iIm) = outWS->x(iRe);
+    outWS->mutableX(iAbs) = outWS->x(iRe);
   }
 
   setProperty("OutputWorkspace", outWS);
@@ -306,7 +305,7 @@ std::map<std::string, std::string> FFT::validateInputs() {
   if (inWS) {
     const int iReal = getProperty("Real");
     const int iImag = getProperty("Imaginary");
-    const MantidVec &X = inWS->readX(iReal);
+    auto &X = inWS->x(iReal);
 
     // check that the workspace isn't empty
     if (X.size() < 2) {
@@ -352,12 +351,13 @@ std::map<std::string, std::string> FFT::validateInputs() {
  * @param xValues :: [input] Values to check
  * @returns :: True if unevenly spaced, False if not (or accepting errors)
  */
-bool FFT::areBinWidthsUneven(const MantidVec &xValues) const {
+bool FFT::areBinWidthsUneven(const HistogramData::HistogramX &xValues) const {
   const bool acceptXRoundingErrors = getProperty("AcceptXRoundingErrors");
   const double tolerance = acceptXRoundingErrors ? 0.5 : 1e-7;
   const double warnValue = acceptXRoundingErrors ? 0.1 : -1;
 
-  Kernel::EqualBinsChecker binChecker(xValues, tolerance, warnValue);
+  // TODO should be added to HistogramData as a convenience function
+  Kernel::EqualBinsChecker binChecker(xValues.rawData(), tolerance, warnValue);
 
   // Compatibility with previous behaviour
   if (!acceptXRoundingErrors) {
@@ -378,7 +378,7 @@ bool FFT::areBinWidthsUneven(const MantidVec &xValues) const {
  * @param xValues :: [input] Reference to X values of input workspace
  * @returns :: Phase shift
  */
-double FFT::getPhaseShift(const MantidVec &xValues) {
+double FFT::getPhaseShift(const HistogramData::HistogramX &xValues) {
   double shift = 0.0;
   const bool autoshift = getProperty("AutoShift");
   if (autoshift) {
