@@ -426,7 +426,7 @@ void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
     const std::string &baseName, const std::string &groupName) const {
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   const auto resultsGroup =
-      ads.retrieveWS<WorkspaceGroup>( baseName + "_Workspaces");
+      ads.retrieveWS<WorkspaceGroup>(baseName + "_Workspaces");
   const auto paramsTable =
       ads.retrieveWS<ITableWorkspace>(baseName + "_Parameters");
   if (resultsGroup && paramsTable) {
@@ -440,8 +440,8 @@ void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
       addSpecialLogs(oldName, wsDetails);
       // Generate new name and rename workspace
       std::ostringstream newName;
-      newName << baseName << "_" << wsDetails.label << "_"
-              << wsDetails.itemName << "_" << wsDetails.periods;
+      newName << baseName << "_" << wsDetails.label << "_" << wsDetails.itemName
+              << "_" << wsDetails.periods;
       ads.rename(oldName, newName.str() + "_Workspace");
       // Generate new parameters table for this dataset
       const auto fitTable = generateParametersTable(wsName, paramsTable);

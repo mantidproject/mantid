@@ -359,6 +359,90 @@ public:
     }
   }
 
+  void test_handleFittedWorkspaces_defaultGroupName() {
+    const auto label = m_dataSelector->getSimultaneousFitLabel().toStdString();
+    const std::vector<std::string> inputNames{
+        "MUSR00015189; Pair; long; Asym; 1; #1",
+        "MUSR00015190; Pair; long; Asym; 1; #1"};
+    createFittedWorkspacesGroup(label, inputNames);
+    const std::string baseName = "MuonSimulFit_" + label;
+    m_presenter->handleFittedWorkspaces(baseName);
+    // extracted = false as we have not called extractFittedWorkspaces
+    checkFittedWorkspacesHandledCorrectly(label, inputNames, false);
+  }
+
+  void test_handleFittedWorkspaces_otherGroupName() {
+    const auto label = m_dataSelector->getSimultaneousFitLabel().toStdString();
+    const std::vector<std::string> inputNames{
+        "MUSR00015189; Pair; long; Asym; 1; #1",
+        "MUSR00015189; Group; fwd; Asym; 1; #1"};
+    createFittedWorkspacesGroup(label, inputNames, true);
+    const std::string baseName = "MuonSimulFit_" + label;
+    m_presenter->handleFittedWorkspaces(baseName + "_MUSR15189", baseName);
+    // extracted = false as we have not called extractFittedWorkspaces
+    // differentGroupName = true as group is different to base name
+    checkFittedWorkspacesHandledCorrectly(label, inputNames, false, true);
+  }
+
+  void test_extractFittedWorkspaces_defaultGroupName() {
+    // Set up workspaces
+    auto &ads = AnalysisDataService::Instance();
+    auto &wsf = WorkspaceFactory::Instance();
+    const std::string baseName = "MuonSimulFit_Label";
+    const std::string groupName = "MuonSimulFit_Label_Workspaces";
+    ads.add(baseName, boost::make_shared<WorkspaceGroup>());
+    ads.add(groupName, boost::make_shared<WorkspaceGroup>());
+    ads.addToGroup(baseName, groupName);
+    constexpr size_t nWorkspaces = 3;
+    std::array<std::string, nWorkspaces> workspaceNames;
+    for (size_t i = 0; i < nWorkspaces; i++) {
+      const std::string name = baseName + "_Workspace" + std::to_string(i);
+      workspaceNames[i] = name;
+      const auto matrixWs = wsf.create("Workspace2D", 1, 1, 1);
+      const auto ws = boost::dynamic_pointer_cast<Workspace>(matrixWs);
+      ads.add(name, ws);
+      ads.addToGroup(groupName, name);
+    }
+    // Perform extraction and test results
+    m_presenter->extractFittedWorkspaces(baseName);
+    TS_ASSERT(ads.doesExist(groupName) == false);
+    const auto baseWS = ads.retrieveWS<WorkspaceGroup>(baseName);
+    TS_ASSERT(baseWS);
+    for (const auto &name : workspaceNames) {
+      TS_ASSERT(baseWS->contains(name));
+    }
+  }
+
+  void test_extractFittedWorkspaces_otherGroupName() {
+    // Set up workspaces
+    auto &ads = AnalysisDataService::Instance();
+    auto &wsf = WorkspaceFactory::Instance();
+    const std::string outerName = "MuonSimulFit_Label";
+    const std::string baseName = outerName + "_MUSR15189";
+    const std::string innerName = baseName + "_Workspaces";
+    ads.add(outerName, boost::make_shared<WorkspaceGroup>());
+    ads.add(innerName, boost::make_shared<WorkspaceGroup>());
+    ads.addToGroup(outerName, innerName);
+    constexpr size_t nWorkspaces = 3;
+    std::array<std::string, nWorkspaces> workspaceNames;
+    for (size_t i = 0; i < nWorkspaces; i++) {
+      const std::string name = baseName + "_Workspace" + std::to_string(i);
+      workspaceNames[i] = name;
+      const auto matrixWs = wsf.create("Workspace2D", 1, 1, 1);
+      const auto ws = boost::dynamic_pointer_cast<Workspace>(matrixWs);
+      ads.add(name, ws);
+      ads.addToGroup(innerName, name);
+    }
+    // Perform extraction and test results
+    m_presenter->extractFittedWorkspaces(baseName, outerName);
+    TS_ASSERT(ads.doesExist(innerName) == false);
+    const auto baseWS = ads.retrieveWS<WorkspaceGroup>(outerName);
+    TS_ASSERT(baseWS);
+    for (const auto &name : workspaceNames) {
+      TS_ASSERT(baseWS->contains(name));
+    }
+  }
+
 private:
   void doTest_handleSelectedDataChanged(IMuonFitDataSelector::FitType fitType) {
     auto &ads = AnalysisDataService::Instance();
@@ -458,18 +542,23 @@ private:
    *
    * @param label :: [input] Selected label for fit
    * @param inputNames :: [input] Names of input workspaces
+   * @param differentGroupName :: [input] Set true if workspace base name is not
+   * the same as group name
    */
   void createFittedWorkspacesGroup(const std::string &label,
-                                   const std::vector<std::string> &inputNames) {
+                                   const std::vector<std::string> &inputNames,
+                                   bool differentGroupName = false) {
     auto &ads = AnalysisDataService::Instance();
     auto &wsf = WorkspaceFactory::Instance();
-    const std::string baseName = "MuonSimulFit_" + label;
-    const std::string groupName = baseName + "_Workspaces";
+    const std::string groupName = "MuonSimulFit_" + label;
+    const std::string baseName =
+        differentGroupName ? groupName + "_MUSR15189" : groupName;
+    const std::string wsGroupName = baseName + "_Workspaces";
     const std::string paramName = baseName + "_Parameters";
-    const std::string ncmName = baseName + "_NormalisedCovarianceMatrix";
-    ads.add(baseName, boost::make_shared<WorkspaceGroup>());
+    const std::string ncmName = groupName + "_NormalisedCovarianceMatrix";
     ads.add(groupName, boost::make_shared<WorkspaceGroup>());
-    ads.addToGroup(baseName, groupName);
+    ads.add(wsGroupName, boost::make_shared<WorkspaceGroup>());
+    ads.addToGroup(groupName, wsGroupName);
     auto paramTable = wsf.createTable();
     paramTable->addColumn("str", "Name");
     paramTable->addColumn("double", "Value");
@@ -479,7 +568,7 @@ private:
       const auto matrixWs = wsf.create("Workspace2D", 1, 1, 1);
       const auto ws = boost::dynamic_pointer_cast<Workspace>(matrixWs);
       ads.add(name, ws);
-      ads.addToGroup(groupName, name);
+      ads.addToGroup(wsGroupName, name);
       TableRow rowA0 = paramTable->appendRow();
       TableRow rowA1 = paramTable->appendRow();
       rowA0 << "f" + std::to_string(i) + ".A0" << 0.1 << 0.01;
@@ -494,11 +583,11 @@ private:
       row << oss.str() << 0.0 << 0.0;
     }
     ads.add(paramName, paramTable);
-    ads.addToGroup(baseName, paramName);
+    ads.addToGroup(groupName, paramName);
     const auto ncmWs = boost::dynamic_pointer_cast<Workspace>(
         wsf.create("Workspace2D", 1, 1, 1));
     ads.add(ncmName, ncmWs);
-    ads.addToGroup(baseName, ncmName);
+    ads.addToGroup(groupName, ncmName);
   }
 
   /**
@@ -513,18 +602,28 @@ private:
    *
    * @param label :: [input] Selected label for fit
    * @param inputNames :: [input] Names of input workspaces
+   * @param extracted :: [input] Whether workspaces should have been extracted
+   * from "_Workspaces" group or not
+   * @param differentGroupName :: [input] Set true if workspace base name is not
+   * the same as group name
    */
   void checkFittedWorkspacesHandledCorrectly(
-      const std::string &label, const std::vector<std::string> &inputNames) {
+      const std::string &label, const std::vector<std::string> &inputNames,
+      bool extracted = true, bool differentGroupName = false) {
     auto &ads = AnalysisDataService::Instance();
 
-    const std::string baseName = "MuonSimulFit_" + label;
-    const auto baseGroup = ads.retrieveWS<WorkspaceGroup>(baseName);
+    const std::string groupName = "MuonSimulFit_" + label;
+    const std::string baseName =
+        differentGroupName ? groupName + "_MUSR15189" : groupName;
+    const auto baseGroup = ads.retrieveWS<WorkspaceGroup>(groupName);
     TS_ASSERT(baseGroup);
     if (baseGroup) {
       // generate expected names
-      std::vector<std::string> expectedNames{baseName +
+      std::vector<std::string> expectedNames{groupName +
                                              "_NormalisedCovarianceMatrix"};
+      if (!extracted) {
+        expectedNames.push_back(baseName + "_Workspaces");
+      }
       for (const auto &name : inputNames) {
         std::ostringstream oss;
         const auto wsParams =
@@ -532,7 +631,9 @@ private:
                 name);
         oss << baseName << "_" << wsParams.label << "_" << wsParams.itemName
             << "_" << wsParams.periods;
-        expectedNames.push_back(oss.str() + "_Workspace");
+        if (extracted) {
+          expectedNames.push_back(oss.str() + "_Workspace");
+        }
         expectedNames.push_back(oss.str() + "_Parameters");
       }
       // Check expected workspaces in group
