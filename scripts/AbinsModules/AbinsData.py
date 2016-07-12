@@ -19,4 +19,7 @@ class AbinsData(GeneralData):
 
 
     def extract(self):
+        if self._data["k_points_data"]["atomic_displacements"].shape[1] != len(self._data["atoms_data"]):
+            raise ValueError("Abins data is inconsistent.")
+
         return self._data
