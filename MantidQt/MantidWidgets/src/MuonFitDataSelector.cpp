@@ -409,8 +409,10 @@ void MuonFitDataSelector::setChosenPeriod(const QString &period) {
       m_ui.txtSecond->clear();
     }
   } else {
+    // Test if period can be cast to int (just one period) or if it's a
+    // combination e.g. "1+2"
     bool onePeriod(false);
-    const int chosenPeriod = period.toInt(&onePeriod);
+    /*const int chosenPeriod = */ period.toInt(&onePeriod);
     if (onePeriod) {
       // set just one
       for (auto iter = m_periodBoxes.constBegin();

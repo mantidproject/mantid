@@ -273,20 +273,20 @@ private:
   bool isGroupingSet() const;
 
   /// Creates workspace for specified group/pair and plots it
-  void plotItem(ItemType itemType, int tableRow, PlotType plotType);
+  void plotItem(Muon::ItemType itemType, int tableRow, Muon::PlotType plotType);
 
   /// Creates workspace ready for analysis and plotting
-  Mantid::API::Workspace_sptr createAnalysisWorkspace(ItemType itemType,
+  Mantid::API::Workspace_sptr createAnalysisWorkspace(Muon::ItemType itemType,
                                                       int tableRow,
-                                                      PlotType type,
+                                                      Muon::PlotType type,
                                                       bool isRaw = false);
 
   /// Returns PlotType as chosen using given selector
-  PlotType parsePlotType(QComboBox *selector);
+  Muon::PlotType parsePlotType(QComboBox *selector);
 
   /// Finds a name for new analysis workspace
-  std::string getNewAnalysisWSName(ItemType itemType, int tableRow,
-                                   PlotType plotType);
+  std::string getNewAnalysisWSName(Muon::ItemType itemType, int tableRow,
+                                   Muon::PlotType plotType);
 
   /// Update front anc pair combo box
   void updateFrontAndCombo();

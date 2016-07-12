@@ -14,8 +14,10 @@
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
 using Mantid::API::AnalysisDataService;
+using Mantid::API::ITableWorkspace;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::TableRow;
+using Mantid::API::WorkspaceGroup;
 typedef MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType
     RebinType;
 
@@ -352,8 +354,8 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
  * @param ws :: [input] Workspace to get bin size from
  * @returns :: parameter string for rebinning
  */
-std::string
-MuonAnalysisFitDataPresenter::getRebinParams(const Workspace_sptr ws) const {
+std::string MuonAnalysisFitDataPresenter::getRebinParams(
+    const Mantid::API::Workspace_sptr ws) const {
   std::string params = "";
   if (m_rebinArgs.first == RebinType::FixedRebin) {
     try {
@@ -405,7 +407,6 @@ void MuonAnalysisFitDataPresenter::handleFitFinished(
   }();
   // If fitting was simultaneous, transform the results.
   if (isSimultaneousFit) {
-    AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
     const auto label = m_dataSelector->getSimultaneousFitLabel();
     const auto groupName =
         MantidWidgets::MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX +
@@ -424,7 +425,7 @@ void MuonAnalysisFitDataPresenter::handleFitFinished(
  */
 void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
     const std::string &baseName, const std::string &groupName) const {
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  auto &ads = AnalysisDataService::Instance();
   const auto resultsGroup =
       ads.retrieveWS<WorkspaceGroup>(baseName + "_Workspaces");
   const auto paramsTable =
@@ -469,7 +470,7 @@ void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
  */
 void MuonAnalysisFitDataPresenter::extractFittedWorkspaces(
     const std::string &baseName, const std::string &groupName) const {
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  auto &ads = AnalysisDataService::Instance();
   const std::string resultsGroupName = baseName + "_Workspaces";
   const auto resultsGroup = ads.retrieveWS<WorkspaceGroup>(resultsGroupName);
   // If user has specified a group to add to, add to that.
@@ -510,9 +511,11 @@ void MuonAnalysisFitDataPresenter::addSpecialLogs(
  * @param inputTable :: [input] Fit parameters table for all datasets
  * @returns :: individual table for the given workspace
  */
-ITableWorkspace_sptr MuonAnalysisFitDataPresenter::generateParametersTable(
-    const std::string &wsName, ITableWorkspace_sptr inputTable) const {
-  ITableWorkspace_sptr fitTable =
+Mantid::API::ITableWorkspace_sptr
+MuonAnalysisFitDataPresenter::generateParametersTable(
+    const std::string &wsName,
+    Mantid::API::ITableWorkspace_sptr inputTable) const {
+  Mantid::API::ITableWorkspace_sptr fitTable =
       Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
   auto nameCol = fitTable->addColumn("str", "Name");
   nameCol->setPlotType(6); // label
