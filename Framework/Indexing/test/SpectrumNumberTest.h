@@ -5,7 +5,8 @@
 
 #include "MantidIndexing/SpectrumNumber.h"
 
-using Mantid::Indexing::SpectrumNumber;
+using namespace Mantid;
+using namespace Indexing;
 
 class SpectrumNumberTest : public CxxTest::TestSuite {
 public:
@@ -14,31 +15,18 @@ public:
   static SpectrumNumberTest *createSuite() { return new SpectrumNumberTest(); }
   static void destroySuite(SpectrumNumberTest *suite) { delete suite; }
 
-  void test_construct() {
-    SpectrumNumber number(42);
-    TS_ASSERT_EQUALS(number, 42);
-  }
-
-  void test_operator_equals() {
-    SpectrumNumber data(42);
-    SpectrumNumber same(42);
-    SpectrumNumber different(100);
-    TS_ASSERT(data == data);
-    TS_ASSERT(data == same);
-    TS_ASSERT(!(data == different));
-    TS_ASSERT(data == 42);
-    TS_ASSERT(!(data == 100));
-  }
-
-  void test_operator_not_equals() {
-    SpectrumNumber data(42);
-    SpectrumNumber same(42);
-    SpectrumNumber different(100);
-    TS_ASSERT(!(data != data));
-    TS_ASSERT(!(data != same));
-    TS_ASSERT(data != different);
-    TS_ASSERT(!(data != 42));
-    TS_ASSERT(data != 100);
+  void test_has_correct_mixins() {
+    SpectrumNumber data(0);
+// AppleClang gives warning if the result is unused.
+#if __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+#endif
+    TS_ASSERT_THROWS_NOTHING(
+        (dynamic_cast<detail::IndexType<SpectrumNumber, int64_t> &>(data)));
+#if __clang__
+#pragma clang diagnostic pop
+#endif
   }
 };
 

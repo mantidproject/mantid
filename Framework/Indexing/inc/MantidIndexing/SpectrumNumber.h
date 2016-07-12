@@ -2,6 +2,7 @@
 #define MANTID_INDEXING_SPECTRUMNUMBER_H_
 
 #include "MantidIndexing/DllConfig.h"
+#include "MantidIndexing/IndexType.h"
 
 namespace Mantid {
 namespace Indexing {
@@ -32,19 +33,10 @@ namespace Indexing {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_INDEXING_DLL SpectrumNumber {
-public:
-  explicit SpectrumNumber(int64_t number) noexcept : m_number(number) {}
-  explicit operator int64_t() const noexcept { return m_number; }
-  template <class T> bool operator==(const T &other) const noexcept {
-    return m_number == SpectrumNumber(other).m_number;
-  }
-  template <class T> bool operator!=(const T &other) const noexcept {
-    return m_number != SpectrumNumber(other).m_number;
-  }
-
-private:
-  int64_t m_number;
+struct MANTID_INDEXING_DLL SpectrumNumber
+    : public detail::IndexType<SpectrumNumber, int64_t> {
+  using detail::IndexType<SpectrumNumber, int64_t>::IndexType;
+  using detail::IndexType<SpectrumNumber, int64_t>::operator=;
 };
 
 } // namespace Indexing

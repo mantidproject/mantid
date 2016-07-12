@@ -1,7 +1,7 @@
 #ifndef MANTID_INDEXING_INDEXTYPE_H_
 #define MANTID_INDEXING_INDEXTYPE_H_
 
-#include "MantidIndexing/DllConfig.h"
+#include <type_traits>
 
 namespace Mantid {
 namespace Indexing {
