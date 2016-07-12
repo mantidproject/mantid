@@ -96,8 +96,18 @@ private:
   /// Load sections of the folder
   void loadProjectSections(const std::string &lines, const int fileVersion,
                            const bool isTopLevel);
+  /// Load workspaces from the project file
+  void loadWorkspaces(const TSVSerialiser &tsv);
   /// Load project windows from the project file
   void loadWindows(const TSVSerialiser &tsv, const int fileVersion);
+  /// Load all subfolders of the current folder
+  void loadSubFolders(const TSVSerialiser &tsv, const int fileVersion);
+  /// Load scripts into the script window
+  void loadScriptWindow(const TSVSerialiser &tsv, const int fileVersion);
+  /// Load saved log data into the log
+  void loadLogData(const TSVSerialiser &tsv);
+  /// Load information about the current folder
+  void loadCurrentFolder(const TSVSerialiser &tsv);
   /// Open the script window and load scripts from string
   void openScriptWindow(const std::string &files, const int fileVersion);
   /// Load Nexus files and add workspaces to the ADS

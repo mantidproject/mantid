@@ -121,41 +121,32 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
 
   // If this is the top level folder of the project, we'll need to load the
   // workspaces before anything else.
-  if (isTopLevel && tsv.hasSection("mantidworkspaces")) {
+  if (isTopLevel) {
+      loadWorkspaces(tsv);
+  }
+
+  loadCurrentFolder(tsv);
+  loadWindows(tsv, fileVersion);
+  loadLogData(tsv);
+  loadScriptWindow(tsv, fileVersion);
+
+  // Deal with subfolders last.
+  loadSubFolders(tsv, fileVersion);
+}
+
+/**
+ * Load workspaces listed in the project file.
+ *
+ * This function should only be called once.
+ *
+ * @param tsv :: the TSVserialiser object for the project file
+ */
+void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv)
+{
+  if (tsv.hasSection("mantidworkspaces")) {
     // There should only be one of these, so we only read the first.
     std::string workspaces = tsv.sections("mantidworkspaces").front();
     populateMantidTreeWidget(QString::fromStdString(workspaces));
-  }
-
-  if (tsv.hasSection("open")) {
-    std::string openStr = tsv.sections("open").front();
-    int openValue = 0;
-    std::stringstream(openStr) >> openValue;
-    window->currentFolder()->folderListItem()->setExpanded(openValue);
-  }
-
-  loadWindows(tsv, fileVersion);
-
-  if (tsv.hasSection("log")) {
-    auto logSections = tsv.sections("log");
-    for (auto &it : logSections) {
-      window->currentFolder()->appendLogInfo(QString::fromStdString(it));
-    }
-  }
-
-  if (tsv.hasSection("scriptwindow")) {
-    auto scriptSections = tsv.sections("scriptwindow");
-    for (auto &it : scriptSections) {
-      openScriptWindow(it, fileVersion);
-    }
-  }
-
-  // Deal with subfolders last.
-  if (tsv.hasSection("folder")) {
-    auto folders = tsv.sections("folder");
-    for (auto &it : folders) {
-      load(it, fileVersion, false);
-    }
   }
 }
 
@@ -176,6 +167,68 @@ void ProjectSerialiser::loadWindows(const TSVSerialiser &tsv, const int fileVers
                 w->loadFromProject(section, window, fileVersion);
             }
         }
+  }
+}
+
+/**
+ * Load subfolders from the project file.
+ *
+ * @param tsv :: the TSVserialiser object for the project file
+ * @param fileVersion :: the version of the project file
+ */
+void ProjectSerialiser::loadSubFolders(const TSVSerialiser &tsv, const int fileVersion)
+{
+  if (tsv.hasSection("folder")) {
+    auto folders = tsv.sections("folder");
+    for (auto &it : folders) {
+      load(it, fileVersion, false);
+    }
+  }
+}
+
+/**
+ * Load the script window from the project file.
+ *
+ * @param tsv :: the TSVserialiser object for the project file
+ * @param fileVersion :: the version of the project file
+ */
+void ProjectSerialiser::loadScriptWindow(const TSVSerialiser &tsv, const int fileVersion)
+{
+  if (tsv.hasSection("scriptwindow")) {
+    auto scriptSections = tsv.sections("scriptwindow");
+    for (auto &it : scriptSections) {
+      openScriptWindow(it, fileVersion);
+    }
+  }
+}
+
+/**
+ * Load any log entries from the project file.
+ *
+ * @param tsv :: the TSVserialiser object for the project file
+ */
+void ProjectSerialiser::loadLogData(const TSVSerialiser &tsv)
+{
+  if (tsv.hasSection("log")) {
+    auto logSections = tsv.sections("log");
+    for (auto &it : logSections) {
+      window->currentFolder()->appendLogInfo(QString::fromStdString(it));
+    }
+  }
+}
+
+/**
+ * Load data about the current folder from the project file.
+ *
+ * @param tsv :: the TSVserialiser object for the project file
+ */
+void ProjectSerialiser::loadCurrentFolder(const TSVSerialiser &tsv)
+{
+  if (tsv.hasSection("open")) {
+    std::string openStr = tsv.sections("open").front();
+    int openValue = 0;
+    std::stringstream(openStr) >> openValue;
+    window->currentFolder()->folderListItem()->setExpanded(openValue);
   }
 }
 
