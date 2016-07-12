@@ -379,7 +379,6 @@ std::string constructXMLForMDEvHelperData(
              xDimensionIdMapping, yDimensionIdMapping, zDimensionIdMapping,
              tDimensionIdMapping) +
          "</MDInstruction>";
-  `
 }
 
 Mantid::API::Workspace_sptr createSimple3DWorkspace() {
