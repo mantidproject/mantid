@@ -184,8 +184,8 @@ Create a field data entry containing (as contents) the argument text.
 @param testData : Text to enter
 @return new vtkFieldData object containing text.
 */
-GCC_UNUSED_FUNCTION vtkFieldData *
-createFieldDataWithCharArray(std::string testData) {
+vtkFieldData *
+createFieldDataWithCharArray(std::string testData) GCC_UNUSED_FUNCTION {
   vtkFieldData *fieldData = vtkFieldData::New();
   vtkCharArray *charArray = vtkCharArray::New();
   charArray->SetName(Mantid::VATES::XMLDefinitions::metaDataId().c_str());
@@ -269,11 +269,11 @@ view.
 view.
 @return full xml as string.
 */
-GCC_UNUSED_FUNCTION std::string
+std::string
 constructXML(const std::string &xDimensionIdMapping,
              const std::string &yDimensionIdMapping,
              const std::string &zDimensionIdMapping,
-             const std::string &tDimensionIdMapping) {
+             const std::string &tDimensionIdMapping) GCC_UNUSED_FUNCTION {
   return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
          "<MDInstruction>" + "<MDWorkspaceName>Input</MDWorkspaceName>" +
          "<MDWorkspaceLocation>test_horace_reader.sqw</MDWorkspaceLocation>" +
@@ -367,11 +367,11 @@ view.
 view.
 @return full xml as string.
 */
-GCC_UNUSED_FUNCTION std::string
-constructXMLForMDEvHelperData(const std::string &xDimensionIdMapping,
-                              const std::string &yDimensionIdMapping,
-                              const std::string &zDimensionIdMapping,
-                              const std::string &tDimensionIdMapping) {
+std::string constructXMLForMDEvHelperData(
+    const std::string &xDimensionIdMapping,
+    const std::string &yDimensionIdMapping,
+    const std::string &zDimensionIdMapping,
+    const std::string &tDimensionIdMapping) GCC_UNUSED_FUNCTION {
   return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
          "<MDInstruction>" + "<MDWorkspaceName>Input</MDWorkspaceName>" +
          "<MDWorkspaceLocation>test_horace_reader.sqw</MDWorkspaceLocation>" +
@@ -379,6 +379,7 @@ constructXMLForMDEvHelperData(const std::string &xDimensionIdMapping,
              xDimensionIdMapping, yDimensionIdMapping, zDimensionIdMapping,
              tDimensionIdMapping) +
          "</MDInstruction>";
+  `
 }
 
 Mantid::API::Workspace_sptr createSimple3DWorkspace() {
@@ -398,8 +399,8 @@ Mantid::API::Workspace_sptr createSimple3DWorkspace() {
   return outWs;
 }
 
-GCC_UNUSED_FUNCTION Mantid::API::Workspace_sptr
-get3DWorkspace(bool integratedTDimension, bool sliceMD) {
+Mantid::API::Workspace_sptr get3DWorkspace(bool integratedTDimension,
+                                           bool sliceMD) GCC_UNUSED_FUNCTION {
   using namespace Mantid::API;
   using namespace Mantid::DataObjects;
 
@@ -437,8 +438,8 @@ get3DWorkspace(bool integratedTDimension, bool sliceMD) {
  * @param fieldName : The requested field data entry
  * @return The value of the requested field data entry
  */
-GCC_UNUSED_FUNCTION std::string getStringFieldDataValue(vtkDataSet *ds,
-                                                        std::string fieldName) {
+std::string getStringFieldDataValue(vtkDataSet *ds,
+                                    std::string fieldName) GCC_UNUSED_FUNCTION {
   vtkAbstractArray *value =
       ds->GetFieldData()->GetAbstractArray(fieldName.c_str());
   vtkStringArray *array = vtkStringArray::SafeDownCast(value);
