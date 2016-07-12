@@ -19,6 +19,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 class FindDeadDetectorsTest : public CxxTest::TestSuite {
 public:
@@ -42,28 +44,31 @@ public:
     work_in->setInstrument(instr);
 
     // yVeryDead is a detector that never responds and produces no counts
-    boost::shared_ptr<Mantid::MantidVec> yVeryDead(
-        new Mantid::MantidVec(sizex, 0));
+    Counts yVeryDead(sizex, 0);
+    CountStandardDeviations eVeryDead(sizex, 0);
     // yTooDead gives some counts at the start but has a whole region full of
     // zeros
     double TD[sizex] = {2, 4, 5, 1, 0, 0, 0, 0, 0, 0};
-    boost::shared_ptr<Mantid::MantidVec> yTooDead(
-        new Mantid::MantidVec(TD, TD + 10));
+    Counts yTooDead(TD, TD + 10);
+    CountStandardDeviations eTooDead(TD, TD + 10);
     // yStrange dies after giving some counts but then comes back
     double S[sizex] = {0.2, 4, 50, 0.001, 0, 0, 0, 0, 1, 0};
-    boost::shared_ptr<Mantid::MantidVec> yStrange(
-        new Mantid::MantidVec(S, S + 10));
+    Counts yStrange(S, S + 10);
+    CountStandardDeviations eStrange(S, S + 10);
     for (int i = 0; i < sizey; i++) {
       if (i % 3 == 0) { // the last column is set arbitrarily to have the same
                         // values as the second because the errors shouldn't
                         // make any difference
-        work_in->setData(i, yTooDead, yTooDead);
+        work_in->setCounts(i, yTooDead);
+        work_in->setCountStandardDeviations(i, eTooDead);
       }
       if (i % 2 == 0) {
-        work_in->setData(i, yVeryDead, yVeryDead);
+        work_in->setCounts(i, yVeryDead);
+        work_in->setCountStandardDeviations(i, eVeryDead);
       }
       if (i == 19) {
-        work_in->setData(i, yStrange, yTooDead);
+        work_in->setCounts(i, yStrange);
+        work_in->setCountStandardDeviations(i, eTooDead);
       }
       work_in->getSpectrum(i).setSpectrumNo(i);
 

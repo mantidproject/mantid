@@ -18,6 +18,7 @@ if ( CXXTEST_FOUND )
             API
             DataObjects
             Geometry
+            HistogramData
             Kernel
 			MantidWidgets
             ${Boost_LIBRARIES}

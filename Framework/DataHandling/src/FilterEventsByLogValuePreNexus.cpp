@@ -1068,11 +1068,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
     workspace->clearMRU();
 
     // Now, create a default X-vector for histogramming, with just 2 bins.
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec &xRef = axis.access();
-    xRef.resize(2);
-    xRef[0] = m_shortestTof - 1; // Just to make sure the bins hold it all
-    xRef[1] = m_longestTof + 1;
+    auto axis = HistogramData::BinEdges{m_shortestTof - 1, m_longestTof + 1};
     workspace->setAllX(axis);
     this->m_pixelToWkspindex.clear();
 
@@ -1698,11 +1694,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
     m_localWorkspace->clearMRU();
 
     // Now, create a default X-vector for histogramming, with just 2 bins.
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec &xRef = axis.access();
-    xRef.resize(2);
-    xRef[0] = m_shortestTof - 1; // Just to make sure the bins hold it all
-    xRef[1] = m_longestTof + 1;
+    auto axis = HistogramData::BinEdges{m_shortestTof - 1, m_longestTof + 1};
     m_localWorkspace->setAllX(axis);
     this->m_pixelToWkspindex.clear();
 

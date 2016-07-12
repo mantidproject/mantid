@@ -15,6 +15,7 @@
 using namespace MantidQt::CustomInterfaces::MuonAnalysisHelper;
 
 using namespace Mantid;
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 class MuonAnalysisHelperTest : public CxxTest::TestSuite {

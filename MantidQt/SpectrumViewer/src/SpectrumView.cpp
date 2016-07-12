@@ -1,6 +1,7 @@
 #include "MantidQtSpectrumViewer/SpectrumView.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/UsageService.h"
 #include "MantidQtSpectrumViewer/ColorMaps.h"
 #include "MantidQtSpectrumViewer/SVConnections.h"
 #include "MantidQtSpectrumViewer/SpectrumDisplay.h"
@@ -44,6 +45,8 @@ SpectrumView::SpectrumView(QWidget *parent)
   observeAfterReplace();
   observePreDelete();
   observeADSClear();
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Interface", "SpectrumView", false);
 }
 
 SpectrumView::~SpectrumView() {

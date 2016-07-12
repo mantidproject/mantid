@@ -127,8 +127,6 @@ void AbsorptionCorrection::exec() {
   g_log.information(message.str());
   message.str("");
 
-  const bool isHist = m_inputWS->isHistogramData();
-
   // Calculate the cached values of L1 and element volumes.
   initialiseCachedDistances();
   // If sample not at origin, shift cached positions.
@@ -188,8 +186,9 @@ void AbsorptionCorrection::exec() {
     MantidVec &Y = correctionFactors->dataY(i);
 
     // Loop through the bins in the current spectrum every m_xStep
+    const auto lambdas = m_inputWS->points(i);
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
-      const double lambda = (isHist ? (0.5 * (X[j] + X[j + 1])) : X[j]);
+      const double lambda = lambdas[j];
       if (m_emode == 0) // Elastic
       {
         Y[j] = this->doIntegration(lambda, L2s);

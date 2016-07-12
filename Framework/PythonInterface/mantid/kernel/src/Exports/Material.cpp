@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/NeutronAtom.h"
@@ -12,6 +13,8 @@ using Mantid::Kernel::Material;
 using Mantid::PhysicalConstants::Atom;
 using Mantid::PhysicalConstants::NeutronAtom;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(Material)
 
 namespace {
 /**

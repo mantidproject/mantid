@@ -36,43 +36,41 @@ struct DatasetParams {
 }
 namespace MuonAnalysisHelper {
 
-using namespace Mantid::API;
-using namespace Mantid::Kernel;
-
 /// Sets double validator for specified field
 MANTIDQT_CUSTOMINTERFACES_DLL void setDoubleValidator(QLineEdit *field,
                                                       bool allowEmpty = false);
 
 /// Returns a first period MatrixWorkspace in a run workspace
-MANTIDQT_CUSTOMINTERFACES_DLL MatrixWorkspace_sptr
-firstPeriod(Workspace_sptr ws);
+MANTIDQT_CUSTOMINTERFACES_DLL Mantid::API::MatrixWorkspace_sptr
+firstPeriod(Mantid::API::Workspace_sptr ws);
 
 /// Validates the field and returns the value
 MANTIDQT_CUSTOMINTERFACES_DLL double
 getValidatedDouble(QLineEdit *field, const QString &defaultValue,
-                   const QString &valueDescr, Logger &log);
+                   const QString &valueDescr, Mantid::Kernel::Logger &log);
 
 /// Returns a number of periods in a run workspace
-MANTIDQT_CUSTOMINTERFACES_DLL size_t numPeriods(Workspace_sptr ws);
+MANTIDQT_CUSTOMINTERFACES_DLL size_t numPeriods(Mantid::API::Workspace_sptr ws);
 
 /// Print various information about the run
-MANTIDQT_CUSTOMINTERFACES_DLL void printRunInfo(MatrixWorkspace_sptr runWs,
-                                                std::ostringstream &out);
+MANTIDQT_CUSTOMINTERFACES_DLL void
+printRunInfo(Mantid::API::MatrixWorkspace_sptr runWs, std::ostringstream &out);
 
 /// Get a run label for the workspace
-MANTIDQT_CUSTOMINTERFACES_DLL std::string getRunLabel(const Workspace_sptr &ws);
+MANTIDQT_CUSTOMINTERFACES_DLL std::string
+getRunLabel(const Mantid::API::Workspace_sptr &ws);
 
 /// Get a run label for a list of workspaces
 MANTIDQT_CUSTOMINTERFACES_DLL std::string
-getRunLabel(const std::vector<Workspace_sptr> &wsList);
+getRunLabel(const std::vector<Mantid::API::Workspace_sptr> &wsList);
 
 /// Get a run label given instrument and run numbers
 MANTIDQT_CUSTOMINTERFACES_DLL std::string
 getRunLabel(const std::string &instrument, const std::vector<int> &runNumbers);
 
 /// Sums a list of workspaces together
-MANTIDQT_CUSTOMINTERFACES_DLL Workspace_sptr
-sumWorkspaces(const std::vector<Workspace_sptr> &workspaces);
+MANTIDQT_CUSTOMINTERFACES_DLL Mantid::API::Workspace_sptr
+sumWorkspaces(const std::vector<Mantid::API::Workspace_sptr> &workspaces);
 
 /// Makes sure the specified workspaces are in specified group
 MANTIDQT_CUSTOMINTERFACES_DLL void

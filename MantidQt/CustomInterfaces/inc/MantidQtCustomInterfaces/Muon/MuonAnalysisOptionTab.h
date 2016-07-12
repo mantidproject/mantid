@@ -10,7 +10,6 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-using namespace MuonAnalysisHelper;
 
 namespace Muon {
 
@@ -104,7 +103,7 @@ private:
   Ui::MuonAnalysis &m_uiForm;
 
   /// Auto-saver for all the widgets
-  WidgetAutoSaver m_autoSaver;
+  MuonAnalysisHelper::WidgetAutoSaver m_autoSaver;
 
 private slots:
   /// Open the Muon Analysis Settings help (Wiki).

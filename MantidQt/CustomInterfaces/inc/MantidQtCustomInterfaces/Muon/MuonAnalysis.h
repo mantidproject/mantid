@@ -31,11 +31,6 @@ namespace CustomInterfaces {
 class MuonAnalysisFitDataPresenter;
 class MuonAnalysisFitFunctionPresenter;
 
-using namespace Mantid;
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
-using namespace Mantid::Geometry;
-
 namespace Muon {
 // Tab classes
 class MuonAnalysisOptionTab;
@@ -47,8 +42,6 @@ struct GroupResult {
   boost::shared_ptr<Mantid::API::Grouping> groupingUsed;
 };
 }
-
-using namespace Muon;
 
 /**
 This is the main class for the MuonAnalysis interface
@@ -271,8 +264,8 @@ private:
   void inputFileChanged(const QStringList &filenames);
 
   /// Get grouping for the loaded workspace
-  boost::shared_ptr<GroupResult>
-  getGrouping(boost::shared_ptr<LoadResult> loadResult) const;
+  boost::shared_ptr<Muon::GroupResult>
+  getGrouping(boost::shared_ptr<Muon::LoadResult> loadResult) const;
 
   /// Set whether the loading buttons and MWRunFiles widget are enabled.
   void allowLoading(bool enabled);
@@ -284,8 +277,10 @@ private:
   void plotItem(ItemType itemType, int tableRow, PlotType plotType);
 
   /// Creates workspace ready for analysis and plotting
-  Workspace_sptr createAnalysisWorkspace(ItemType itemType, int tableRow,
-                                         PlotType type, bool isRaw = false);
+  Mantid::API::Workspace_sptr createAnalysisWorkspace(ItemType itemType,
+                                                      int tableRow,
+                                                      PlotType type,
+                                                      bool isRaw = false);
 
   /// Returns PlotType as chosen using given selector
   PlotType parsePlotType(QComboBox *selector);
@@ -406,7 +401,7 @@ private:
 
   /// Returns params string which can be passed to Rebin, according to what user
   /// specified
-  std::string rebinParams(Workspace_sptr wsForRebin);
+  std::string rebinParams(Mantid::API::Workspace_sptr wsForRebin);
 
   /// Updates rebin params in the fit data presenter
   void updateRebinParams();
@@ -464,14 +459,15 @@ private:
   void loadWidgetValue(QWidget *target, const QVariant &defaultValue);
 
   /// Groups the workspace
-  Workspace_sptr groupWorkspace(const std::string &wsName,
-                                const std::string &groupingName) const;
+  Mantid::API::Workspace_sptr
+  groupWorkspace(const std::string &wsName,
+                 const std::string &groupingName) const;
 
   /// Groups loaded workspace using information from Grouping Options tab
   void groupLoadedWorkspace();
 
   /// Parses grouping information from the UI table.
-  ITableWorkspace_sptr parseGrouping();
+  Mantid::API::ITableWorkspace_sptr parseGrouping();
 
   /// When no data loaded set various buttons etc to inactive
   void noDataAvailable();
@@ -509,7 +505,7 @@ private:
   size_t m_numPeriods;
 
   /// Grouping helper class
-  MuonGroupingHelper m_groupingHelper;
+  Muon::MuonGroupingHelper m_groupingHelper;
 
   /// Get period number string in summed set
   std::string getSummedPeriods() const;
