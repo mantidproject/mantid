@@ -49,41 +49,6 @@ class ApplicationWindow;
 namespace MantidQt {
 namespace API {
 
-enum SurfaceFunctionType {
-    XYZ,
-    Plot3D,
-    MatrixPlot3D,
-    MantidMatrixPlot3D,
-    Surface,
-    ParametricSurface
-};
-
-// A POD struct to pass around all of the parameters
-// for the 3D plots
-struct SurfaceFunctionParams {
-   std::string formula;
-   SurfaceFunctionType type;
-   double xStart;
-   double xStop;
-   double yStart;
-   double yStop;
-   double zStart;
-   double zStop;
-
-   // surface plot parameters
-   std::string xFormula;
-   std::string yFormula;
-   std::string zFormula;
-   double uStart;
-   double uEnd;
-   double vStart;
-   double vEnd;
-   int columns;
-   int rows;
-   int uPeriodic;
-   int vPeriodic;
-};
-
 class ProjectSerialiser {
 public:
   /// Create a new serialiser with the current application window
@@ -135,26 +100,11 @@ private:
   void loadWindows(const TSVSerialiser &tsv, const int fileVersion);
   /// Open the script window and load scripts from string
   void openScriptWindow(const std::string &files, const int fileVersion);
-  /// Open a surface plot window
-  void openSurfacePlot(const std::string &lines, const int fileVersion);
   /// Load Nexus files and add workspaces to the ADS
   void populateMantidTreeWidget(const QString &lines);
   /// Load a single workspaces to the ADS
   void loadWsToMantidTree(const std::string &wsName);
-
-  // 3D plotting functions
-  SurfaceFunctionParams readSurfaceFunction(TSVSerialiser &tsv);
-  SurfaceFunctionType readSurfaceFunctionType(const std::string &formula);
-  MantidMatrix *readWorkspaceForPlot(TSVSerialiser &tsv);
-  int read3DPlotStyle(TSVSerialiser &tsv);
-  void setupMantidMatrixPlot3D(TSVSerialiser &tsv, Graph3D* plot);
-  void setupPlot3D(Graph3D *plot, const QString& caption, const SurfaceFunctionParams &params);
-  void setupPlotXYZ(Graph3D *plot, const QString &caption, const SurfaceFunctionParams &params);
-  void setupPlotParametricSurface(Graph3D *plot, const SurfaceFunctionParams &params);
-  void setupPlotSurface(Graph3D *plot, const SurfaceFunctionParams &params);
-  void setupMatrixPlot3D(Graph3D *plot, const QString &caption, const SurfaceFunctionParams &params);
 };
-
 
 }
 }

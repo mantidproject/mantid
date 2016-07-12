@@ -31,6 +31,10 @@
 #include "Bar.h"
 #include "Cone3D.h"
 #include "MyParser.h"
+#include "Mantid/MantidMatrix.h"
+#include "Mantid/MantidMatrixFunction.h"
+#include "MantidQtAPI/PlotAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MatrixModel.h"
 #include "UserFunction.h" //Mantid
 
@@ -57,6 +61,7 @@
 DECLARE_WINDOW(Graph3D, SurfacePlot)
 
 using namespace Qwt3D;
+using namespace MantidQt::API;
 
 UserParametricSurface::UserParametricSurface(const QString &xFormula,
                                              const QString &yFormula,
@@ -2493,10 +2498,55 @@ Graph3D::~Graph3D() {
 
 void Graph3D::loadFromProject(const std::string &lines, ApplicationWindow *app,
                               const int fileVersion) {
-  Q_UNUSED(app);
   Q_UNUSED(fileVersion);
 
-  TSVSerialiser tsv(lines);
+  init("", app, "", 0);
+
+  std::vector<std::string> lineVec, valVec;
+  boost::split(lineVec, lines, boost::is_any_of("\n"));
+
+  // First line is name\tdate
+  const std::string firstLine = lineVec[0];
+  boost::split(valVec, firstLine, boost::is_any_of("\t"));
+
+  if (valVec.size() < 2)
+    return;
+
+  QString caption = QString::fromStdString(valVec[0]);
+  QString dateStr = QString::fromStdString(valVec[1]);
+  valVec.clear();
+
+  const std::string tsvLines = boost::algorithm::join(lineVec, "\n");
+
+  TSVSerialiser tsv(tsvLines);
+
+  if (tsv.selectLine("SurfaceFunction")) {
+    auto params = readSurfaceFunction(tsv);
+
+    switch(params.type) {
+    case Plot3D:
+        setupPlot3D(app, caption, params);
+        break;
+    case XYZ:
+        setupPlotXYZ(app, caption, params);
+        break;
+    case MatrixPlot3D:
+        setupMatrixPlot3D(app, caption, params);
+        break;
+    case MantidMatrixPlot3D:
+        setupMantidMatrixPlot3D(app, tsv);
+        break;
+    case ParametricSurface:
+        setupPlotParametricSurface(app, params);
+        break;
+    case Surface:
+        setupPlotSurface(app, params);
+        break;
+    default:
+        // just break and do nothing if we cannot find it
+        break;
+    }
+  }
 
   if (tsv.selectLine("grids")) {
     setGrid(tsv.asInt(1));
@@ -2605,7 +2655,282 @@ void Graph3D::loadFromProject(const std::string &lines, ApplicationWindow *app,
 
   setIgnoreFonts(true);
   update();
+
+  app->setWindowName(this, caption);
+  setBirthDate(dateStr);
+  app->setListViewDate(caption, dateStr);
+  setIgnoreFonts(true);
+  app->restoreWindowGeometry(app, this, QString::fromStdString(tsv.lineAsString("geometry")));
 }
+
+void Graph3D::setupPlot3D(ApplicationWindow* app, const QString &caption, const SurfaceFunctionParams &params) {
+      QString func = QString::fromStdString(params.formula);
+      int pos = func.indexOf("_", 0);
+      QString wCaption = func.left(pos);
+
+      Table *w = app->table(wCaption);
+      if (!w)
+          return;
+
+      int posX = func.indexOf("(", pos);
+      QString xCol = func.mid(pos + 1, posX - pos - 1);
+
+      pos = func.indexOf(",", posX);
+      posX = func.indexOf("(", pos);
+      QString yCol = func.mid(pos + 1, posX - pos - 1);
+
+      addData(w, xCol, yCol,
+                    params.xStart, params.xStop,
+                    params.yStart, params.yStop,
+                    params.zStart, params.zStop);
+      update();
+
+      QString label = caption;
+      while (app->alreadyUsedName(label))
+          label = app->generateUniqueName("Graph");
+
+      setWindowTitle(label);
+      setName(label);
+      app->initPlot3D(this);
+}
+
+void Graph3D::setupPlotXYZ(ApplicationWindow* app, const QString &caption, const SurfaceFunctionParams &params) {
+    QString formula = QString::fromStdString(params.formula);
+    int pos = formula.indexOf("_", 0);
+    QString wCaption = formula.left(pos);
+
+    Table *w = app->table(wCaption);
+    if (!w)
+        return;
+
+    int posX = formula.indexOf("(X)", pos);
+    QString xColName = formula.mid(pos + 1, posX - pos - 1);
+
+    pos = formula.indexOf(",", posX);
+
+    posX = formula.indexOf("(Y)", pos);
+    QString yColName = formula.mid(pos + 1, posX - pos - 1);
+
+    pos = formula.indexOf(",", posX);
+    posX = formula.indexOf("(Z)", pos);
+    QString zColName = formula.mid(pos + 1, posX - pos - 1);
+
+    int xCol = w->colIndex(xColName);
+    int yCol = w->colIndex(yColName);
+    int zCol = w->colIndex(zColName);
+
+    loadData(w, xCol, yCol, zCol,
+                    params.xStart, params.xStop,
+                    params.yStart, params.yStop,
+                    params.zStart, params.zStop);
+
+    QString label = caption;
+    if (app->alreadyUsedName(label))
+        label = app->generateUniqueName("Graph");
+
+    setWindowTitle(label);
+    setName(label);
+    app->initPlot3D(this);
+}
+
+void Graph3D::setupPlotParametricSurface(ApplicationWindow* app, const SurfaceFunctionParams &params) {
+  QString label = app->generateUniqueName("Graph");
+
+  resize(500, 400);
+  setWindowTitle(label);
+  setName(label);
+  app->customPlot3D(this);
+  addParametricSurface(QString::fromStdString(params.xFormula),
+                             QString::fromStdString(params.yFormula),
+                             QString::fromStdString(params.zFormula),
+                             params.uStart, params.uEnd,
+                             params.vStart, params.vEnd,
+                             params.columns, params.rows,
+                             params.uPeriodic, params.vPeriodic);
+  app->initPlot3D(this);
+}
+
+void Graph3D::setupPlotSurface(ApplicationWindow* app, const SurfaceFunctionParams &params) {
+
+  QString label = app->generateUniqueName("Graph");
+
+  resize(500, 400);
+  setWindowTitle(label);
+  setName(label);
+  app->customPlot3D(this);
+  addFunction(QString::fromStdString(params.xFormula),
+                    params.xStart, params.xStop,
+                    params.yStart, params.yStop,
+                    params.zStart, params.zStop,
+                    params.columns, params.rows);
+
+  app->initPlot3D(this);
+}
+
+void Graph3D::setupMatrixPlot3D(ApplicationWindow* app, const QString &caption, const SurfaceFunctionParams &params) {
+
+  QString name = QString::fromStdString(params.formula);
+  name.remove("matrix<", Qt::CaseSensitive);
+  name.remove(">", Qt::CaseSensitive);
+  Matrix *m = app->matrix(name);
+  if (!m)
+    return;
+
+  setWindowTitle(caption);
+  setName(caption);
+  addMatrixData(m,
+                      params.xStart, params.xStop,
+                      params.yStart, params.yStop,
+                      params.zStart, params.zStop);
+  update();
+
+  app->initPlot3D(this);
+}
+
+void Graph3D::setupMantidMatrixPlot3D(ApplicationWindow* app, TSVSerialiser &tsv) {
+    using MantidQt::API::PlotAxis;
+    MantidMatrix* matrix = readWorkspaceForPlot(app, tsv);
+    int style = read3DPlotStyle(tsv);
+
+    if (matrix) {
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        QString labl = app->generateUniqueName("Graph");
+
+        resize(500, 400);
+        setWindowTitle(labl);
+        setName(labl);
+        setTitle("Workspace " + matrix->name());
+        app->customPlot3D(this);
+        customPlotStyle(style);
+        int resCol = matrix->numCols() / 200;
+        int resRow = matrix->numRows() / 200;
+        setResolution(qMax(resCol, resRow));
+
+        double zMin = 1e300;
+        double zMax = -1e300;
+        for (int i = 0; i < matrix->numRows(); i++) {
+            for (int j = 0; j < matrix->numCols(); j++) {
+                double val = matrix->cell(i, j);
+                if (val < zMin)
+                    zMin = val;
+                if (val > zMax)
+                    zMax = val;
+            }
+        }
+
+        // Calculate xStart(), xEnd(), yStart(), yEnd()
+        matrix->boundingRect();
+
+        MantidMatrixFunction *fun = new MantidMatrixFunction(*matrix);
+        addFunction(fun,
+                          matrix->xStart(), matrix->xEnd(),
+                          matrix->yStart(), matrix->yEnd(),
+                          zMin, zMax,
+                          matrix->numCols(), matrix->numRows());
+
+        auto workspace = matrix->workspace();
+        setXAxisLabel(PlotAxis(*workspace, 0).title());
+        setYAxisLabel(PlotAxis(*workspace, 1).title());
+        setZAxisLabel(PlotAxis(false, *workspace).title());
+
+        app->initPlot3D(this);
+        // confirmClose(false);
+        QApplication::restoreOverrideCursor();
+    }
+}
+
+MantidMatrix *Graph3D::readWorkspaceForPlot(ApplicationWindow* app, TSVSerialiser &tsv) {
+      MantidMatrix *m = nullptr;
+      if (tsv.selectLine("title")) {
+        std::string wsName = tsv.asString(1);
+
+        // wsName is actually "Workspace workspacename", so we chop off
+        // the first 10 characters.
+        if (wsName.length() < 11)
+          return m;
+
+        wsName = wsName.substr(10, std::string::npos);
+        m = app->findMantidMatrixWindow(wsName);
+      } // select line "title"
+      return m;
+}
+
+int Graph3D::read3DPlotStyle(TSVSerialiser &tsv) {
+      int style = Qwt3D::WIREFRAME;
+      if (tsv.selectLine("Style"))
+        tsv >> style;
+      return style;
+}
+
+
+Graph3D::SurfaceFunctionParams Graph3D::readSurfaceFunction(TSVSerialiser &tsv) {
+    SurfaceFunctionParams params;
+    tsv >> params.formula;
+    params.type = readSurfaceFunctionType(params.formula);
+
+    tsv >> params.xStart;
+    tsv >> params.xStop;
+    tsv >> params.yStart;
+    tsv >> params.yStop;
+    tsv >> params.zStart;
+    tsv >> params.zStop;
+
+    if(params.type == ParametricSurface) {
+      QString func = QString::fromStdString(params.formula);
+      QStringList funcParts = func.split(";", QString::SkipEmptyParts);
+
+      params.xFormula = funcParts[0].toStdString();
+      params.yFormula = funcParts[1].toStdString();
+      params.zFormula = funcParts[2].toStdString();
+      params.uStart = funcParts[3].toDouble();
+      params.uEnd = funcParts[4].toDouble();
+      params.vStart = funcParts[5].toDouble();
+      params.vEnd = funcParts[6].toDouble();
+      params.columns = funcParts[7].toInt();
+      params.rows = funcParts[8].toInt();
+      params.uPeriodic = funcParts[9].toInt();
+      params.vPeriodic = funcParts[10].toInt();
+
+    } else if(params.type == Surface) {
+      QString func = QString::fromStdString(params.formula);
+      QStringList funcParts = func.split(";", QString::SkipEmptyParts);
+
+      if(funcParts.count() > 1) {
+          params.formula = funcParts[0].toStdString();
+          params.columns = funcParts[1].toInt();
+          params.rows = funcParts[2].toInt();
+      } else {
+          // set to defaults
+          params.columns = 40;
+          params.rows = 30;
+      }
+    }
+
+
+    return params;
+}
+
+Graph3D::SurfaceFunctionType Graph3D::readSurfaceFunctionType(const std::string &formula) {
+    SurfaceFunctionType type;
+
+    QString func = QString::fromStdString(formula);
+    if (func.endsWith("(Y)", Qt::CaseSensitive))
+        type = Plot3D;
+    else if (func.contains("(Z)", Qt::CaseSensitive) > 0)
+        type = XYZ;
+    else if (func.startsWith("matrix<", Qt::CaseSensitive) &&
+               func.endsWith(">", Qt::CaseInsensitive))
+        type = MatrixPlot3D;
+    else if (func.contains("mantidMatrix3D"))
+        type = MantidMatrixPlot3D;
+    else if (func.contains(","))
+        type = ParametricSurface;
+    else
+        type = Surface;
+
+    return type;
+}
+
 
 std::string Graph3D::saveToProject(ApplicationWindow *app) {
   TSVSerialiser tsv;
