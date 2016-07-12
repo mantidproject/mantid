@@ -6,8 +6,8 @@
 #include <Poco/File.h>
 #include <Poco/Thread.h>
 
+#include <cstdlib>
 #include <nexus/NeXusFile.hpp>
-#include <stdlib.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -17,16 +17,6 @@ namespace DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(NexusTester)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-NexusTester::NexusTester() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-NexusTester::~NexusTester() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -48,14 +38,14 @@ const std::string NexusTester::category() const {
 void NexusTester::init() {
   std::initializer_list<std::string> exts = {".nxs"};
 
-  declareProperty(
-      new FileProperty("SaveFilename", "", FileProperty::OptionalSave, exts),
-      "The name of the Nexus file to write.");
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "SaveFilename", "", FileProperty::OptionalSave, exts),
+                  "The name of the Nexus file to write.");
 
-  declareProperty(
-      new FileProperty("LoadFilename", "", FileProperty::OptionalLoad, exts),
-      "The name of the Nexus file to load (optional).\n"
-      "Must have been written by NexusTester algorithm.");
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "LoadFilename", "", FileProperty::OptionalLoad, exts),
+                  "The name of the Nexus file to load (optional).\n"
+                  "Must have been written by NexusTester algorithm.");
 
   declareProperty("ChunkSize", 10,
                   "Chunk size for writing/loading, in kb of data");
@@ -67,10 +57,8 @@ void NexusTester::init() {
       "Clear the linux disk cache before loading.\n"
       "Only works on linux AND you need to run MantidPlot in sudo mode (!).");
 
-  std::vector<std::string> types;
-  types.push_back("Zeros");
-  types.push_back("Incrementing Numbers");
-  types.push_back("Random Numbers");
+  std::vector<std::string> types{"Zeros", "Incrementing Numbers",
+                                 "Random Numbers"};
   declareProperty("FakeData", "Incrementing Numbers",
                   boost::make_shared<StringListValidator>(types),
                   "For writing: type of fake data to generate.");
@@ -126,7 +114,7 @@ void NexusTester::exec() {
   // Total size in BYTES
   double dataSizeMB =
       double(chunkSize * NumChunks * sizeof(uint32_t)) / (1024. * 1024.);
-  g_log.notice() << "Data size is " << dataSizeMB << " MB" << std::endl;
+  g_log.notice() << "Data size is " << dataSizeMB << " MB\n";
 
   // ------------------------ Save a File ----------------------------
   if (!SaveFilename.empty()) {
@@ -145,22 +133,21 @@ void NexusTester::exec() {
     file.close();
     double seconds = tim.elapsedWallClock(false);
     double MBperSec = dataSizeMB / seconds;
-    g_log.notice() << tim << " to save the file = " << MBperSec << " MB/sec"
-                   << std::endl;
+    g_log.notice() << tim << " to save the file = " << MBperSec << " MB/sec\n";
     this->setProperty("SaveSpeed", MBperSec);
   }
 
   // Check the size of the file created/loaded
   Poco::File info(SaveFilename.empty() ? LoadFilename : SaveFilename);
   double fileSizeMB = double(info.getSize()) / (1024. * 1024.);
-  g_log.notice() << "File size is " << fileSizeMB << " MB" << std::endl;
+  g_log.notice() << "File size is " << fileSizeMB << " MB\n";
 
   double CompressionFactor = fileSizeMB / dataSizeMB;
   this->setProperty("CompressionFactor", CompressionFactor);
 
   bool ClearDiskCache = this->getProperty("ClearDiskCache");
   if (ClearDiskCache) {
-    g_log.information() << "Clearing disk cache." << std::endl;
+    g_log.information() << "Clearing disk cache.\n";
     if (system("sync ; echo 3 > /proc/sys/vm/drop_caches") != 0)
       g_log.error("Error clearing disk cache");
     Poco::Thread::sleep(100);
@@ -191,7 +178,7 @@ void NexusTester::exec() {
     this->setProperty("LoadSpeed", MBperSec);
     g_log.notice() << tim << " to load the file = " << MBperSec
                    << " MB/sec (data), " << MBperSec * CompressionFactor
-                   << " MB/sec (file)" << std::endl;
+                   << " MB/sec (file)\n";
   }
 
   delete[] fakeData;

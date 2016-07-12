@@ -35,7 +35,7 @@ bool IndirectMolDyn::validate() {
     QString filename = m_uiForm.mwRun->getFirstFilename();
     QString version = m_uiForm.cbVersion->currentText();
     QFileInfo finfo(filename);
-    QString ext = finfo.extension().toLower();
+    QString ext = finfo.suffix().toLower();
 
     if (version == "3") {
       if (ext != "dat" && ext != "cdl")

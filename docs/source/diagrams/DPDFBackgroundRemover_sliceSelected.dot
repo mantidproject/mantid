@@ -1,0 +1,13 @@
+digraph DPDFBackgroundRemoverSliceSelected {
+  label = "User Case - Selecting a slice for fitting"
+
+  subgraph algorithms {
+    $algorithm_style
+    SliceSelector   [label="SliceSelector"]
+    InputDataControl [label="InputDataControl::updateSliceForFitting"]
+    DisplayControl [label="DisplayControl::updateSliceForFitting"]
+}
+
+  SliceSelector -> InputDataControl  [label="signalSliceForFittingSelected"]
+  InputDataControl -> DisplayControl [label="signalSliceForFittingUpdated"]
+}

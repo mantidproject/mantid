@@ -45,32 +45,32 @@ class MANTID_GEOMETRY_DLL Sphere : public Quadratic {
 private:
   Kernel::V3D Centre; ///< Point for centre
   double Radius;      ///< Radius of sphere
-  void rotate(const Kernel::Matrix<double> &);
-  void displace(const Kernel::V3D &);
+  void rotate(const Kernel::Matrix<double> &) override;
+  void displace(const Kernel::V3D &) override;
   /// Compute the distance from the centre of the sphere to the given point
   double centreToPoint(const Kernel::V3D &pt) const;
-  Sphere *doClone() const;
+  Sphere *doClone() const override;
 
 protected:
-  Sphere(const Sphere &);
-  Sphere &operator=(const Sphere &);
+  Sphere(const Sphere &) = default;
+  Sphere &operator=(const Sphere &) = default;
 
 public:
   Sphere();
   std::unique_ptr<Sphere> clone() const;
   /// Effective typename
-  virtual std::string className() const { return "Sphere"; }
+  std::string className() const override { return "Sphere"; }
   // Visit acceptor
-  virtual void acceptVisitor(BaseVisit &A) const { A.Accept(*this); }
+  void acceptVisitor(BaseVisit &A) const override { A.Accept(*this); }
   /// Set the sphere defination by input string in MCNP format
-  int setSurface(const std::string &);
+  int setSurface(const std::string &) override;
   /// Checks the given input point to be inside, outside or on the surface of
   /// sphere
-  int side(const Kernel::V3D &) const;
+  int side(const Kernel::V3D &) const override;
   /// Checks whether the give input point is on the surface
-  int onSurface(const Kernel::V3D &) const;
+  int onSurface(const Kernel::V3D &) const override;
   /// Gets the distance from the sphere to the input point
-  double distance(const Kernel::V3D &) const;
+  double distance(const Kernel::V3D &) const override;
   /// Setter for centre of sphere
   void setCentre(const Kernel::V3D &);
   /// Get Centre
@@ -83,18 +83,18 @@ public:
     setBaseEqn();
   }
   /// Generates the quadratic equation.
-  void setBaseEqn();
+  void setBaseEqn() override;
   /// Writes the sphere equatation in MCNP format
-  void write(std::ostream &) const;
+  void write(std::ostream &) const override;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
-                      double &ymin, double &zmin);
+                      double &ymin, double &zmin) override;
 
   /// The number of slices to approximate a sphere
   static int g_nslices;
   /// The number of stacks to approximate a sphere
   static int g_nstacks;
 #ifdef ENABLE_OPENCASCADE
-  virtual TopoDS_Shape createShape();
+  TopoDS_Shape createShape() override;
 #endif
 };
 

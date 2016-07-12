@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SaveNISTDAT.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -24,10 +25,11 @@ void SaveNISTDAT::init() {
   wsValidator->add(
       boost::make_shared<WorkspaceUnitValidator>("MomentumTransfer"));
   wsValidator->add<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator));
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, ".dat"),
-                  "The filename of the output text file");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+      "InputWorkspace", "", Direction::Input, wsValidator));
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".dat"),
+      "The filename of the output text file");
 }
 
 void SaveNISTDAT::exec() {

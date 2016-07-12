@@ -17,11 +17,12 @@ using namespace DataObjects;
 
 void CloneWorkspace::init() {
   declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
+                                                Direction::Input),
       "Name of the input workspace. Must be a MatrixWorkspace (2D or "
       "EventWorkspace), a PeaksWorkspace or a MDEventWorkspace.");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the newly created cloned workspace.");
 }
 
@@ -36,7 +37,7 @@ void CloneWorkspace::exec() {
 
   if (inputMatrix || iTableWS) {
     // Workspace::clone() is polymorphic, we can use the same for all types
-    Workspace_sptr outputWS(inputWorkspace->clone().release());
+    Workspace_sptr outputWS(inputWorkspace->clone());
     setProperty("OutputWorkspace", outputWS);
   } else if (inputMD) {
     // Call the CloneMDWorkspace algo to handle MDEventWorkspace

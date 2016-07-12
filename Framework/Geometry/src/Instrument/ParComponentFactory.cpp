@@ -6,7 +6,9 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -19,22 +21,12 @@ namespace Geometry {
  * @param map A pointer to the ParameterMap
  * @returns A pointer to a parameterized component
  */
-boost::shared_ptr<Detector>
+boost::shared_ptr<IDetector>
 ParComponentFactory::createDetector(const IDetector *base,
                                     const ParameterMap *map) {
-  // RectangularDetectorPixel subclasses Detector so it has to be checked
-  // before.
-  const RectangularDetectorPixel *rdp =
-      dynamic_cast<const RectangularDetectorPixel *>(base);
-  if (rdp)
-    return boost::shared_ptr<Detector>(new RectangularDetectorPixel(rdp, map));
-
-  const Detector *baseDet = dynamic_cast<const Detector *>(base);
-  if (baseDet)
-    return boost::shared_ptr<Detector>(
-        new Detector(baseDet, map)); // g_detPool.create(baseDet,map);
-
-  return boost::shared_ptr<Detector>();
+  // Clone may be a Detector or RectangularDetectorPixel instance (or nullptr)
+  auto clone = base->cloneParameterized(map);
+  return boost::shared_ptr<IDetector>(clone);
 }
 
 /**
@@ -48,7 +40,7 @@ ParComponentFactory::createDetector(const IDetector *base,
 boost::shared_ptr<Instrument>
 ParComponentFactory::createInstrument(boost::shared_ptr<const Instrument> base,
                                       boost::shared_ptr<ParameterMap> map) {
-  return boost::shared_ptr<Instrument>(new Instrument(base, map));
+  return boost::make_shared<Instrument>(base, map);
 }
 
 /**
@@ -62,14 +54,6 @@ ParComponentFactory::createInstrument(boost::shared_ptr<const Instrument> base,
 IComponent_sptr
 ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
                             const ParameterMap *map) {
-  // RectangularDetectorPixel subclasses Detector so it has to be checked
-  // before.
-  const RectangularDetectorPixel *rdp =
-      dynamic_cast<const RectangularDetectorPixel *>(base.get());
-  if (rdp)
-    return boost::shared_ptr<IComponent>(
-        new RectangularDetectorPixel(rdp, map));
-
   boost::shared_ptr<const IDetector> det_sptr =
       boost::dynamic_pointer_cast<const IDetector>(base);
   if (det_sptr) {
@@ -91,26 +75,31 @@ ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
   // Everything gets created on the fly. Note that the order matters here
   // @todo Really could do with a better system than this. Virtual function
   // maybe?
+  const StructuredDetector *sd =
+      dynamic_cast<const StructuredDetector *>(base.get());
+  if (sd)
+    return boost::make_shared<StructuredDetector>(sd, map);
+
   const RectangularDetector *rd =
       dynamic_cast<const RectangularDetector *>(base.get());
   if (rd)
-    return boost::shared_ptr<IComponent>(new RectangularDetector(rd, map));
+    return boost::make_shared<RectangularDetector>(rd, map);
 
   const CompAssembly *ac = dynamic_cast<const CompAssembly *>(base.get());
   if (ac)
-    return boost::shared_ptr<IComponent>(new CompAssembly(ac, map));
+    return boost::make_shared<CompAssembly>(ac, map);
   const ObjCompAssembly *oac =
       dynamic_cast<const ObjCompAssembly *>(base.get());
   if (oac)
-    return boost::shared_ptr<IComponent>(new ObjCompAssembly(oac, map));
+    return boost::make_shared<ObjCompAssembly>(oac, map);
 
   const ObjComponent *oc = dynamic_cast<const ObjComponent *>(base.get());
   if (oc)
-    return boost::shared_ptr<IComponent>(new ObjComponent(oc, map));
+    return boost::make_shared<ObjComponent>(oc, map);
   // Must be a component
   const IComponent *cc = dynamic_cast<const IComponent *>(base.get());
   if (cc)
-    return boost::shared_ptr<IComponent>(new Component(cc, map));
+    return boost::make_shared<Component>(cc, map);
 
   return IComponent_sptr();
 }

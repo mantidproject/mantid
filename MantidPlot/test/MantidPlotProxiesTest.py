@@ -1,4 +1,4 @@
-"""
+﻿"""
 Test the use of proxy objects in MantidPlot that
 prevent crashes when accessing the python object
 after deletion of the object
@@ -39,7 +39,7 @@ class MantidPlotProxiesTest(unittest.TestCase):
         access the variable to see if it has been set to None """
         self.assertFalse(obj._getHeldObject() is None, msg + "'s return value was not None to begin with")
         # No closing dialog
-        obj.confirmClose(False)
+        #obj.confirmClose(False)
         # This should close (and hopefully delete) obj
         obj.close()
         # Make sure the event passes

@@ -107,9 +107,7 @@ public:
 
   void test_threshold_too_high_gives_no_peaks() {
     // ------- Make the fake input
-    std::vector<V3D> hklValues;
-    // Add a single peak.
-    hklValues.push_back(V3D(2, 2, 2));
+    std::vector<V3D> hklValues{{2, 2, 2}};
     const double peakRadius = 1;
     const double threshold = 10000; // Threshold will filter out everything
                                     // given the nEventsInPeak restriction.
@@ -123,7 +121,7 @@ public:
     IMDHistoWorkspace_sptr outClustersWS = integratedWorkspaces.get<0>();
     IPeaksWorkspace_sptr outPeaksWS = integratedWorkspaces.get<1>();
 
-    std::set<Mantid::signal_t> labelIds;
+    std::unordered_set<Mantid::signal_t> labelIds;
     for (size_t i = 0; i < outClustersWS->getNPoints(); ++i) {
       labelIds.insert(outClustersWS->getSignalAt(i));
     }
@@ -140,9 +138,7 @@ public:
 
   void test_integrate_single_peak() {
     // ------- Make the fake input
-    std::vector<V3D> hklValues;
-    // Add a single peak.
-    hklValues.push_back(V3D(2, 2, 2));
+    std::vector<V3D> hklValues{{2, 2, 2}};
     const double peakRadius = 1;
     const double threshold = 100;
     const size_t nEventsInPeak = 10000;
@@ -162,7 +158,7 @@ public:
     TS_ASSERT_EQUALS(outPeaksWS->getNumberPeaks(), peaksWS->getNumberPeaks());
     TS_ASSERT_EQUALS(mdWS->getNPoints(), outClustersWS->getNPoints());
     // Check clusters by extracting unique label ids.
-    std::set<Mantid::signal_t> labelIds;
+    std::unordered_set<Mantid::signal_t> labelIds;
     for (size_t i = 0; i < outClustersWS->getNPoints(); ++i) {
       labelIds.insert(outClustersWS->getSignalAt(i));
     }
@@ -182,10 +178,8 @@ public:
 
   void test_integrate_two_separate_but_identical_peaks() {
     // ------- Make the fake input
-    std::vector<V3D> hklValues;
     // Add several peaks. These are NOT overlapping.
-    hklValues.push_back(V3D(1, 1, 1));
-    hklValues.push_back(V3D(6, 6, 6));
+    std::vector<V3D> hklValues{{1, 1, 1}, {6, 6, 6}};
     const double peakRadius = 1;
     const double threshold = 100;
     const size_t nEventsInPeak = 10000;
@@ -205,7 +199,7 @@ public:
     TS_ASSERT_EQUALS(outPeaksWS->getNumberPeaks(), peaksWS->getNumberPeaks());
     TS_ASSERT_EQUALS(mdWS->getNPoints(), outClustersWS->getNPoints());
     // Check clusters by extracting unique label ids.
-    std::set<Mantid::signal_t> labelIds;
+    std::unordered_set<Mantid::signal_t> labelIds;
     for (size_t i = 0; i < outClustersWS->getNPoints(); ++i) {
       labelIds.insert(outClustersWS->getSignalAt(i));
     }
@@ -234,10 +228,8 @@ public:
 
   void test_integrate_two_peaks_of_different_magnitude() {
     // ------- Make the fake input
-    std::vector<V3D> hklValues;
     // Add several peaks. These are NOT overlapping.
-    hklValues.push_back(V3D(1, 1, 1));
-    hklValues.push_back(V3D(6, 6, 6));
+    std::vector<V3D> hklValues{{1, 1, 1}, {6, 6, 6}};
     const double peakRadius = 1;
     const double threshold = 100;
     std::vector<size_t> nEventsInPeakVec;
@@ -262,7 +254,7 @@ public:
     TS_ASSERT_EQUALS(outPeaksWS->getNumberPeaks(), peaksWS->getNumberPeaks());
     TS_ASSERT_EQUALS(mdWS->getNPoints(), outClustersWS->getNPoints());
     // Check clusters by extracting unique label ids.
-    std::set<Mantid::signal_t> labelIds;
+    std::unordered_set<Mantid::signal_t> labelIds;
     for (size_t i = 0; i < outClustersWS->getNPoints(); ++i) {
       labelIds.insert(outClustersWS->getSignalAt(i));
     }
@@ -322,7 +314,7 @@ public:
     for (double i = -10; i < 10; i += 4) {
       for (double j = -10; j < 10; j += 4) {
         for (double k = -10; k < 10; k += 4) {
-          hklValues.push_back(V3D(i, j, k));
+          hklValues.emplace_back(i, j, k);
         }
       }
     }

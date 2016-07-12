@@ -41,11 +41,11 @@ public:
   FunctionDomainMD(IMDWorkspace_const_sptr ws, size_t start = 0,
                    size_t length = 0);
   /// Destructor.
-  ~FunctionDomainMD();
+  ~FunctionDomainMD() override;
   /// Return the number of arguments in the domain
-  virtual size_t size() const { return m_size; }
+  size_t size() const override { return m_size; }
   /// Reset the iterator to point to the start of the domain.
-  virtual void reset() const;
+  void reset() const override;
   /// Next iterator.
   const IMDIterator *getNextIterator() const;
   /// Returns the pointer to the original workspace

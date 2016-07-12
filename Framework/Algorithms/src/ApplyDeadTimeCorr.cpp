@@ -2,12 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ApplyDeadTimeCorr.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/EqualBinSizesValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
+
 #include "boost/lexical_cast.hpp"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/TableRow.h"
 
 #include <cmath>
 
@@ -26,17 +29,18 @@ DECLARE_ALGORITHM(ApplyDeadTimeCorr)
    */
 void ApplyDeadTimeCorr::init() {
 
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
-                      "InputWorkspace", "", Direction::Input),
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<EqualBinSizesValidator>(0.5)),
                   "The name of the input workspace containing measured counts");
 
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
                       "DeadTimeTable", "", Direction::Input),
                   "Name of the Dead Time Table");
 
   declareProperty(
-      new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "",
-                                                       Direction::Output),
+      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "The name of the output workspace containing corrected counts");
 }
 
@@ -95,7 +99,7 @@ void ApplyDeadTimeCorr::exec() {
               } else {
                 g_log.error() << "1 - MeasuredCount * (Deadtime/TimeBin width "
                                  "is currently (" << temp
-                              << "). Can't divide by this amount." << std::endl;
+                              << "). Can't divide by this amount.\n";
 
                 throw std::invalid_argument("Can't divide by 0");
               }
@@ -108,7 +112,7 @@ void ApplyDeadTimeCorr::exec() {
         }
       } else {
         g_log.error() << "The time bin width is currently (" << timeBinWidth
-                      << "). Can't divide by this amount." << std::endl;
+                      << "). Can't divide by this amount.\n";
 
         throw std::invalid_argument("Can't divide by 0");
       }
@@ -121,7 +125,7 @@ void ApplyDeadTimeCorr::exec() {
     g_log.error()
         << "Row count(" << deadTimeTable->rowCount()
         << ") of Dead time table is bigger than the Number of Histograms("
-        << inputWs->getNumberHistograms() << ")." << std::endl;
+        << inputWs->getNumberHistograms() << ").\n";
 
     throw std::invalid_argument(
         "Row count was bigger than the Number of Histograms.");

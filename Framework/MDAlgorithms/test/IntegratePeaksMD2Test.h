@@ -40,7 +40,7 @@ using Mantid::Kernel::V3D;
 class IntegratePeaksMD2Test : public CxxTest::TestSuite {
 public:
   IntegratePeaksMD2Test() { Mantid::API::FrameworkManager::Instance(); }
-  ~IntegratePeaksMD2Test() {}
+  ~IntegratePeaksMD2Test() override {}
 
   void test_Init() {
     IntegratePeaksMD2 alg;
@@ -160,7 +160,7 @@ public:
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2, 1e-2);
 
     // Test profile Gaussian
     std::string fnct = "Gaussian";
@@ -168,7 +168,7 @@ public:
     // More accurate integration changed values
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
     // Error is also calculated
-    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2, 1e-2);
     Poco::File(Mantid::Kernel::ConfigService::Instance().getString(
                    "defaultsave.directory") +
                "IntegratePeaksMD2Test_MDEWSGaussian.dat").remove();
@@ -179,7 +179,7 @@ public:
 
     // TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 0.2);
     // Error is also calculated
-    // TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0),
+    // TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2,
     // 0.2);
     Poco::File(Mantid::Kernel::ConfigService::Instance().getString(
                    "defaultsave.directory") +
@@ -190,7 +190,7 @@ public:
     TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0),
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2,
     1e-2);*/
 
     // ------------- Adaptive Integration r=MQ+b where b is PeakRadius and m is
@@ -210,7 +210,7 @@ public:
     TS_ASSERT_DELTA(peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    TS_ASSERT_DELTA(peakWS0->getPeak(0).getSigmaIntensity(), M_SQRT2, 1e-2);
 
     AnalysisDataService::Instance().remove("IntegratePeaksMD2Test_peaks");
 
@@ -513,14 +513,14 @@ public:
     AnalysisDataService::Instance().add("IntegratePeaksMD2Test_peaks", peakWS);
   }
 
-  ~IntegratePeaksMD2TestPerformance() {
+  ~IntegratePeaksMD2TestPerformance() override {
     AnalysisDataService::Instance().remove("IntegratePeaksMD2Test_MDEWS");
     AnalysisDataService::Instance().remove("IntegratePeaksMD2Test_peaks");
   }
 
-  void setUp() {}
+  void setUp() override {}
 
-  void tearDown() {}
+  void tearDown() override {}
 
   void test_performance_NoBackground() {
     for (size_t i = 0; i < 10; i++) {

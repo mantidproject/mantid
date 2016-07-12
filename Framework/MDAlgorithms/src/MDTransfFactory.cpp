@@ -3,11 +3,6 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-MDTransfFactoryImpl::MDTransfFactoryImpl()
-    : Kernel::DynamicFactory<MDTransfInterface>(), m_createdTransf() {}
-
-MDTransfFactoryImpl::~MDTransfFactoryImpl() {}
-
 /** Returns an instance of the class with the given name. Overrides the base
 * class method.
 *  If an instance already exists, a pointer to it is returned, otherwise

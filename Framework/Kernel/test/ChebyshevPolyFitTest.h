@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/Math/ChebyshevPolyFit.h"
-#include <boost/assign/list_of.hpp>
 
 using Mantid::Kernel::ChebyshevPolyFit;
 
@@ -18,10 +17,9 @@ public:
   static void destroySuite(ChebyshevPolyFitTest *suite) { delete suite; }
 
   void test_case_with_quadratic_polynomial() {
-    using namespace boost::assign;
-    const std::vector<double> xs = list_of(1.0)(2.0)(3.0)(4.0)(5.0);
-    const std::vector<double> ys = list_of(1.0)(4.0)(9.0)(16.0)(25.0);
-    const std::vector<double> wgts = list_of(1.0)(0.9)(0.5)(0.2)(0.05);
+    const std::vector<double> xs = {1.0, 2.0, 3.0, 4.0, 5.0};
+    const std::vector<double> ys = {1.0, 4.0, 9.0, 16.0, 25.0};
+    const std::vector<double> wgts = {1.0, 0.9, 0.5, 0.2, 0.05};
 
     ChebyshevPolyFit polyfit(2);
     auto coeffs = polyfit(xs, ys, wgts);

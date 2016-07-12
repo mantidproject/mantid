@@ -42,11 +42,11 @@ namespace API {
 class MANTID_API_DLL JointDomain : public CompositeDomain {
 public:
   /// Return the number of points in the domain
-  virtual size_t size() const;
+  size_t size() const override;
   /// Return the number of parts in the domain
-  virtual size_t getNParts() const;
+  size_t getNParts() const override;
   /// Return i-th domain
-  virtual const FunctionDomain &getDomain(size_t i) const;
+  const FunctionDomain &getDomain(size_t i) const override;
   void addDomain(FunctionDomain_sptr domain);
 
 protected:

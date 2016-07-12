@@ -23,30 +23,25 @@ using Geometry::Instrument_const_sptr;
 using Geometry::IDetector_const_sptr;
 using namespace DataObjects;
 
-/// (Empty) Constructor
-MaskDetectors::MaskDetectors() {}
-
-/// Destructor
-MaskDetectors::~MaskDetectors() {}
-
 /*
  * Define input arguments
  */
 void MaskDetectors::init() {
   declareProperty(
-      new WorkspaceProperty<Workspace>("Workspace", "", Direction::InOut),
+      make_unique<WorkspaceProperty<Workspace>>("Workspace", "",
+                                                Direction::InOut),
       "The name of the input and output workspace on which to perform the "
       "algorithm.");
-  declareProperty(new ArrayProperty<specid_t>("SpectraList"),
+  declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectraList"),
                   "An ArrayProperty containing a list of spectra to mask");
   declareProperty(
-      new ArrayProperty<detid_t>("DetectorList"),
+      make_unique<ArrayProperty<detid_t>>("DetectorList"),
       "An ArrayProperty containing a list of detector ID's to mask");
-  declareProperty(new ArrayProperty<size_t>("WorkspaceIndexList"),
+  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "An ArrayProperty containing the workspace indices to mask");
-  declareProperty(new WorkspaceProperty<>("MaskedWorkspace", "",
-                                          Direction::Input,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>("MaskedWorkspace", "",
+                                                   Direction::Input,
+                                                   PropertyMode::Optional),
                   "If given but not as a SpecialWorkspace2D, the masking from "
                   "this workspace will be copied. If given as a "
                   "SpecialWorkspace2D, the masking is read from its Y values.");
@@ -85,7 +80,7 @@ void MaskDetectors::exec() {
   MaskWorkspace_sptr isMaskWS = boost::dynamic_pointer_cast<MaskWorkspace>(WS);
 
   std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
-  std::vector<specid_t> spectraList = getProperty("SpectraList");
+  std::vector<specnum_t> spectraList = getProperty("SpectraList");
   const std::vector<detid_t> detectorList = getProperty("DetectorList");
   const MatrixWorkspace_sptr prevMasking = getProperty("MaskedWorkspace");
 
@@ -109,7 +104,7 @@ void MaskDetectors::exec() {
   } // End dealing with spectraList
   else if (!detectorList.empty()) {
     // Convert from detectors to workspace indexes
-    WS->getIndicesFromDetectorIDs(detectorList, indexList);
+    indexList = WS->getIndicesFromDetectorIDs(detectorList);
   }
   // If we have a workspace that could contain masking,copy that in too
 
@@ -124,7 +119,7 @@ void MaskDetectors::exec() {
       }
 
       g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
-                    << ")" << std::endl;
+                    << ")\n";
       appendToIndexListFromMaskWS(indexList, maskWS);
     } else {
       // Check the provided workspace has the same number of spectra as the
@@ -133,8 +128,8 @@ void MaskDetectors::exec() {
         g_log.error() << "Input workspace has " << WS->getNumberHistograms()
                       << " histograms   vs. "
                       << "Input masking workspace has "
-                      << prevMasking->getNumberHistograms() << " histograms. "
-                      << std::endl;
+                      << prevMasking->getNumberHistograms()
+                      << " histograms. \n";
         throw std::runtime_error("Size mismatch between two input workspaces.");
       }
       appendToIndexListFromWS(indexList, prevMasking);
@@ -157,8 +152,7 @@ void MaskDetectors::exec() {
           pmap.addBool(det, "masked", true);
         }
       } catch (Kernel::Exception::NotFoundError &e) {
-        g_log.warning() << e.what() << " Found while running MaskDetectors"
-                        << std::endl;
+        g_log.warning() << e.what() << " Found while running MaskDetectors\n";
       }
     }
   }
@@ -238,7 +232,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
       }
 
       g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
-                    << ")" << std::endl;
+                    << ")\n";
       std::vector<detid_t> detectorIDs = maskInstrument->getDetectorIDs();
       std::vector<detid_t>::const_iterator it;
       for (it = detectorIDs.begin(); it != detectorIDs.end(); ++it) {
@@ -252,8 +246,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
               detectorList.push_back(detID);
           }
         } catch (Kernel::Exception::NotFoundError &e) {
-          g_log.warning() << e.what() << " Found while running MaskDetectors"
-                          << std::endl;
+          g_log.warning() << e.what() << " Found while running MaskDetectors\n";
         }
       }
     }
@@ -271,8 +264,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
           pmap.addBool(det, "masked", true);
         }
       } catch (Kernel::Exception::NotFoundError &e) {
-        g_log.warning() << e.what() << " Found while running MaskDetectors"
-                        << std::endl;
+        g_log.warning() << e.what() << " Found while running MaskDetectors\n";
       }
     }
   }
@@ -284,7 +276,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
  * @param WS :: The input workspace to be masked
  */
 void MaskDetectors::fillIndexListFromSpectra(
-    std::vector<size_t> &indexList, const std::vector<specid_t> &spectraList,
+    std::vector<size_t> &indexList, const std::vector<specnum_t> &spectraList,
     const API::MatrixWorkspace_sptr WS) {
   // Convert the vector of properties into a set for easy searching
   std::set<int64_t> spectraSet(spectraList.begin(), spectraList.end());
@@ -293,7 +285,7 @@ void MaskDetectors::fillIndexListFromSpectra(
   indexList.reserve(WS->getNumberHistograms());
 
   for (int i = 0; i < static_cast<int>(WS->getNumberHistograms()); ++i) {
-    const specid_t currentSpec = WS->getSpectrum(i)->getSpectrumNo();
+    const specnum_t currentSpec = WS->getSpectrum(i).getSpectrumNo();
     if (spectraSet.find(currentSpec) != spectraSet.end()) {
       indexList.push_back(i);
     }
@@ -352,8 +344,7 @@ void MaskDetectors::appendToIndexListFromMaskWS(
 
     if (maskedWorkspace->dataY(i - startIndex)[0] > 0.5 &&
         existingIndices.count(i) == 0) {
-      g_log.debug() << "Adding WorkspaceIndex " << i << " to mask."
-                    << std::endl;
+      g_log.debug() << "Adding WorkspaceIndex " << i << " to mask.\n";
       indexList.push_back(i);
     }
   }

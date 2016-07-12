@@ -3,8 +3,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
 #include <fstream>
+
+#include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -137,22 +139,19 @@ class DetParameters;
 
 class DLLExport FindDetectorsPar : public API::Algorithm {
 public:
-  FindDetectorsPar();
-  virtual ~FindDetectorsPar();
-
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FindDetectorsPar"; };
+  const std::string name() const override { return "FindDetectorsPar"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The algorithm returns the angular parameters and second flight "
            "path for a workspace detectors (data, usually availble in par or "
            "phx file)";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Instrument";
   }
   /// the accessors, used to return algorithm results when called as Child
@@ -170,15 +169,15 @@ public:
 
 private:
   // Implement abstract Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   /**  the variable defines if algorithm needs to calculate linear ranges for
    * the detectors (dX,dY)
    *    instead of azimuthal_width and polar_width */
-  bool m_SizesAreLinear;
+  bool m_SizesAreLinear = false;
 
   // numner of real(valid and non-monitor) detectors calculated by the alvorithm
-  size_t m_nDetectors;
+  size_t m_nDetectors = 0;
   // the vectors which represent detector's parameters as linear structure
   std::vector<double> azimuthal;
   std::vector<double> polar;
@@ -189,7 +188,7 @@ private:
 
   // calculate generic detectors parameters:
   void calcDetPar(const Geometry::IDetector_const_sptr &spDet,
-                  const Kernel::V3D &GroupCenter, DetParameters &Detector);
+                  const Kernel::V3D &Observer, DetParameters &Detector);
 
   /// if ASCII file is selected as the datasource, this structure describes the
   /// type of this file.
@@ -267,7 +266,7 @@ public:
         m_nComponents(0) {}
   void addDetInfo(const Geometry::IDetector_const_sptr &spDet,
                   const Kernel::V3D &Observer);
-  void returnAvrgDetPar(DetParameters &det);
+  void returnAvrgDetPar(DetParameters &avrgDet);
 
   void setUseSpherical(bool shouldWe = true) { m_useSphericalSizes = shouldWe; }
 

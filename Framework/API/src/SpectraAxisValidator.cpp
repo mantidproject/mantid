@@ -1,5 +1,6 @@
-#include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectraAxisValidator.h"
 
 namespace Mantid {
 namespace API {

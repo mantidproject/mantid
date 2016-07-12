@@ -1,14 +1,15 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLMEASURETRANSFERSTRATEGYTEST_H_
 #define MANTID_CUSTOMINTERFACES_REFLMEASURETRANSFERSTRATEGYTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "ReflMainViewMockObjects.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
-#include "MantidKernel/make_unique.h"
-#include <memory>
+#include "ReflMainViewMockObjects.h"
+#include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
+#include <memory>
 #include <utility>
 
 using namespace testing;
@@ -17,10 +18,11 @@ using namespace MantidQt::CustomInterfaces;
 class MockReflMeasurementItemSource
     : public MantidQt::CustomInterfaces::ReflMeasurementItemSource {
 public:
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_CONST_METHOD2(obtain, MantidQt::CustomInterfaces::MeasurementItem(
                                  const std::string &, const std::string &));
   MOCK_CONST_METHOD0(clone, MockReflMeasurementItemSource *());
-  ~MockReflMeasurementItemSource() {}
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 class ReflMeasureTransferStrategyTest : public CxxTest::TestSuite {

@@ -2,10 +2,12 @@
     File                 : Cone3D.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
-    Description          : 3D cone class (code from Cone class  in QwtPlot3D library with modified destructor)
-                           
+    Description          : 3D cone class (code from Cone class  in QwtPlot3D
+ library with modified destructor)
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -32,24 +34,23 @@
 #include <qwt3d_plot.h>
 
 //! 3D cone class (based on QwtPlot3D)
-class Cone3D : public Qwt3D::VertexEnrichment
-{
+class Cone3D : public Qwt3D::VertexEnrichment {
 public:
   Cone3D();
   Cone3D(double rad, unsigned quality);
-  ~Cone3D();
+  ~Cone3D() override;
 
-  Qwt3D::Enrichment* clone() const {return new Cone3D(*this);}
-  
+  Qwt3D::Enrichment *clone() const override { return new Cone3D(*this); }
+
   void configure(double rad, unsigned quality);
-  void draw(Qwt3D::Triple const&);
+  void draw(Qwt3D::Triple const &) override;
 
 private:
-  	GLUquadricObj *hat;
-	GLUquadricObj *disk;
-	unsigned quality_;
-	double radius_;
-	GLboolean oldstate_;
+  GLUquadricObj *hat;
+  GLUquadricObj *disk;
+  unsigned quality_;
+  double radius_;
+  GLboolean oldstate_;
 };
 
 #endif

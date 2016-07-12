@@ -15,39 +15,29 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //--------------------------------------------------------------------------
-/** Constructor
- */
-SelectCellWithForm::SelectCellWithForm() {}
-
-//--------------------------------------------------------------------------
-/** Destructor
- */
-SelectCellWithForm::~SelectCellWithForm() {}
-
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SelectCellWithForm::init() {
-  this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
 
-  this->declareProperty(new PropertyWithValue<int>(
+  this->declareProperty(make_unique<PropertyWithValue<int>>(
                             "FormNumber", 0, mustBePositive, Direction::Input),
                         "Form number for the desired cell");
   this->declareProperty("Apply", false, "Update UB and re-index the peaks");
   this->declareProperty("Tolerance", 0.12, "Indexing Tolerance");
 
   this->declareProperty(
-      new PropertyWithValue<int>("NumIndexed", 0, Direction::Output),
+      make_unique<PropertyWithValue<int>>("NumIndexed", 0, Direction::Output),
       "The number of indexed peaks if apply==true.");
 
-  this->declareProperty(
-      new PropertyWithValue<double>("AverageError", 0.0, Direction::Output),
-      "The average HKL indexing error if apply==true.");
+  this->declareProperty(make_unique<PropertyWithValue<double>>(
+                            "AverageError", 0.0, Direction::Output),
+                        "The average HKL indexing error if apply==true.");
 
   this->declareProperty("AllowPermutations", true,
                         "Allow permutations of conventional cells");
@@ -96,8 +86,8 @@ Kernel::Matrix<double> SelectCellWithForm::DetermineErrors(
   }
 
   if (!latErrorsValid) {
-    for (size_t i = 0; i < sigabc.size(); i++)
-      sigabc[i] = 0;
+    for (double &sig : sigabc)
+      sig = 0;
     return UB;
 
   } else
@@ -141,7 +131,7 @@ void SelectCellWithForm::exec() {
   Kernel::Matrix<double> T(UB);
   T.Invert();
   T = newUB * T;
-  g_log.notice() << "Transformation Matrix =  " << T.str() << std::endl;
+  g_log.notice() << "Transformation Matrix =  " << T.str() << '\n';
 
   if (apply) {
     //----------------------------------- Try to optimize(LSQ) to find lattice
@@ -178,10 +168,10 @@ void SelectCellWithForm::exec() {
     }
 
     // Tell the user what happened.
-    g_log.notice() << "Re-indexed the peaks with the new UB. " << std::endl;
+    g_log.notice() << "Re-indexed the peaks with the new UB. \n";
     g_log.notice() << "Now, " << num_indexed
                    << " are indexed with average error " << average_error
-                   << std::endl;
+                   << '\n';
 
     // Save output properties
 

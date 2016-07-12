@@ -190,9 +190,8 @@ public:
   @retval 0 :: All passed
   */
   {
-    std::vector<std::string> SphStr;
-    SphStr.push_back("so 1");             // sphere origin
-    SphStr.push_back("s 1.5 -2.5 1.8 1"); // sphere
+    std::vector<std::string> SphStr{
+        "so 1", "s 1.5 -2.5 1.8 1"}; // sphere origin, sphere
     Kernel::V3D P(3, 7, 4);
     Kernel::V3D Q(0, 0, 4);
     std::vector<std::string>::const_iterator vc;
@@ -206,12 +205,12 @@ public:
         TS_ASSERT_DELTA(A.distance(P), A.distance(P), 1e-6);
         std::cout << "Sphere == ";
         A.Surface::write(std::cout);
-        std::cout << "TestPoint == " << P << std::endl;
+        std::cout << "TestPoint == " << P << '\n';
         std::cout << "Distance == " << A.distance(P) << " === " << A.distance(P)
-                  << std::endl;
-        std::cout << "--------------" << std::endl;
+                  << '\n';
+        std::cout << "--------------\n";
         std::cout << "Distance == " << A.distance(Q) << " === " << A.distance(Q)
-                  << std::endl;
+                  << '\n';
       }
     }
   }

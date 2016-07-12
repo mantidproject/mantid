@@ -46,16 +46,18 @@ SaveISISNexus::SaveISISNexus()
  *
  */
 void SaveISISNexus::init() {
+  const std::vector<std::string> inputExts{".raw", ".s*", ".add"};
   declareProperty(
-      new FileProperty("InputFilename", "", FileProperty::Load,
-                       {".raw", ".s*", ".add"}),
+      Kernel::make_unique<FileProperty>("InputFilename", "", FileProperty::Load,
+                                        inputExts),
       "The name of the RAW file to read, including its full or relative\n"
       "path. (N.B. case sensitive if running on Linux).");
 
   // Declare required parameters, filename with ext {.nx,.nx5,xml} and input
-  // workspac
-  declareProperty(new FileProperty("OutputFilename", "", FileProperty::Save,
-                                   {".nxs", ".nx5", ".xml"}),
+  // workspace
+  const std::vector<std::string> outputExts{".nxs", ".nx5", ".xml"};
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "OutputFilename", "", FileProperty::Save, outputExts),
                   "The name of the Nexus file to write, as a full or relative\n"
                   "path");
 }
@@ -100,7 +102,7 @@ void SaveISISNexus::exec() {
 
   m_isisRaw = new ISISRAW2;
   rawFile = fopen(inputFilename.c_str(), "rb");
-  if (rawFile == NULL) {
+  if (rawFile == nullptr) {
     throw Exception::FileError("Cannot open file ", inputFilename);
   }
   m_isisRaw->ioRAW(rawFile, true);
@@ -169,8 +171,7 @@ void SaveISISNexus::exec() {
   saveChar("title", m_isisRaw->r_title, 80);
   saveInt("good_frames", &m_isisRaw->rpb.r_goodfrm);
 
-  std::string experiment_identifier =
-      boost::lexical_cast<std::string>(m_isisRaw->rpb.r_prop);
+  std::string experiment_identifier = std::to_string(m_isisRaw->rpb.r_prop);
   saveChar("experiment_identifier", &experiment_identifier[0],
            static_cast<int>(experiment_identifier.size()));
   int tmp_int(0);
@@ -322,8 +323,8 @@ int SaveISISNexus::saveStringVectorOpen(const char *name,
   }
   int buff_size = max_str_size;
   if (buff_size <= 0)
-    for (std::size_t i = 0; i < str_vec.size(); ++i) {
-      buff_size = std::max(buff_size, int(str_vec[i].size()));
+    for (const auto &str : str_vec) {
+      buff_size = std::max(buff_size, int(str.size()));
     }
   if (buff_size <= 0)
     buff_size = 1;
@@ -641,7 +642,7 @@ void SaveISISNexus::monitor_i(int i) {
   NXmakegroup(handle, ostr.str().c_str(), "NXmonitor");
   NXopengroup(handle, ostr.str().c_str(), "NXmonitor");
 
-  //  int imon = m_isisRaw->mdet[i]; // spectrum index
+  //  int imon = m_isisRaw->mdet[i]; // spectrum number
   NXmakedata(handle, "data", NX_INT32, 3, dim);
   NXopendata(handle, "data");
   for (int p = 0; p < nper; ++p) {
@@ -969,8 +970,8 @@ void SaveISISNexus::selog() {
 
   // create a log for each of the found log files
   std::size_t nBase = base_name.size() + 1;
-  for (std::size_t i = 0; i < potentialLogFiles.size(); ++i) {
-    std::string logName = Poco::Path(potentialLogFiles[i]).getFileName();
+  for (auto &potentialLogFile : potentialLogFiles) {
+    std::string logName = Poco::Path(potentialLogFile).getFileName();
     logName.erase(0, nBase);
     logName.erase(logName.size() - 4);
     if (logName.size() > 3) {
@@ -980,9 +981,9 @@ void SaveISISNexus::selog() {
         continue;
     }
 
-    std::ifstream fil(potentialLogFiles[i].c_str());
+    std::ifstream fil(potentialLogFile.c_str());
     if (!fil) {
-      g_log.warning("Cannot open log file " + potentialLogFiles[i]);
+      g_log.warning("Cannot open log file " + potentialLogFile);
       continue;
     }
 

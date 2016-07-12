@@ -21,7 +21,7 @@
 #else
 #include <Poco/FileStream.h>
 #include <Poco/NullStream.h>
-#include <stdlib.h>
+#include <cstdlib>
 #endif
 
 // jsoncpp
@@ -87,29 +87,28 @@ void DownloadInstrument::exec() {
   } catch (Mantid::Kernel::Exception::InternetError &ex) {
     std::string errorText(ex.what());
     if (errorText.find("rate limit") != std::string::npos) {
-      g_log.notice() << "Instrument Definition Update: " << errorText
-                     << std::endl;
+      g_log.notice() << "Instrument Definition Update: " << errorText << '\n';
     } else {
       // log the failure at Notice Level
       g_log.notice() << "Internet Connection Failed - cannot update instrument "
-                        "definitions." << std::endl;
+                        "definitions.\n";
       // log this error at information level
-      g_log.information() << errorText << std::endl;
+      g_log.information() << errorText << '\n';
     }
     return;
   }
 
-  if (fileMap.size() == 0) {
+  if (fileMap.empty()) {
     g_log.notice("All instrument definitions up to date");
   } else {
     std::string s = (fileMap.size() > 1) ? "s" : "";
     g_log.notice() << "Downloading " << fileMap.size() << " file" << s
-                   << " from the instrument repository" << std::endl;
+                   << " from the instrument repository\n";
   }
 
-  for (auto itMap = fileMap.begin(); itMap != fileMap.end(); ++itMap) {
+  for (auto &itMap : fileMap) {
     // download a file
-    doDownloadFile(itMap->first, itMap->second);
+    doDownloadFile(itMap.first, itMap.second);
   }
 
   setProperty("FileDownloadCount", static_cast<int>(fileMap.size()));
@@ -119,7 +118,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   // get the instrument directories
   auto instrumentDirs =
       Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
-  Poco::Path installPath(instrumentDirs[instrumentDirs.size() - 1]);
+  Poco::Path installPath(instrumentDirs.back());
   installPath.makeDirectory();
   Poco::Path localPath(instrumentDirs[0]);
   localPath.makeDirectory();
@@ -135,10 +134,9 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
 
   // get the file list from github
   StringToStringMap headers;
-  headers.insert(
-      std::make_pair("if-modified-since",
-                     Poco::DateTimeFormatter::format(
-                         gitHubJsonDate, Poco::DateTimeFormat::HTTP_FORMAT)));
+  headers.emplace("if-modified-since",
+                  Poco::DateTimeFormatter::format(
+                      gitHubJsonDate, Poco::DateTimeFormat::HTTP_FORMAT));
   std::string gitHubInstrumentRepoUrl =
       ConfigService::Instance().getString("UpdateInstrumentDefinitions.URL");
   if (gitHubInstrumentRepoUrl == "") {
@@ -178,10 +176,9 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   }
   fileStream.close();
 
-  std::set<std::string> repoFilenames;
+  std::unordered_set<std::string> repoFilenames;
 
-  for (Json::ArrayIndex i = 0; i < serverContents.size(); ++i) {
-    const auto &serverElement = serverContents[i];
+  for (auto &serverElement : serverContents) {
     std::string name = serverElement.get("name", "").asString();
     repoFilenames.insert(name);
     Poco::Path filePath(localPath, name);
@@ -198,14 +195,14 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
     // this will also catch when file is only present on github (as local sha
     // will be "")
     if ((sha != installSha) && (sha != localSha)) {
-      fileMap.insert(std::make_pair(
-          htmlUrl, filePath.toString())); // ACTION - DOWNLOAD to localPath
+      fileMap.emplace(htmlUrl,
+                      filePath.toString()); // ACTION - DOWNLOAD to localPath
     } else if ((localSha != "") && (sha == installSha) &&
                (sha != localSha)) // matches install, but different local
     {
-      fileMap.insert(std::make_pair(
+      fileMap.emplace(
           htmlUrl,
-          filePath.toString())); // ACTION - DOWNLOAD to localPath and overwrite
+          filePath.toString()); // ACTION - DOWNLOAD to localPath and overwrite
     }
   }
 
@@ -246,12 +243,12 @@ DownloadInstrument::getFileShas(const std::string &directoryPath) {
         continue;
       std::string sha1 = ChecksumHelper::gitSha1FromFile(entryPath.toString());
       // Track sha1
-      filesToSha.insert(std::make_pair(entryPath.getFileName(), sha1));
+      filesToSha.emplace(entryPath.getFileName(), sha1);
     }
   } catch (Poco::Exception &ex) {
     g_log.error() << "DownloadInstrument: failed to parse the directory: "
                   << directoryPath << " : " << ex.className() << " : "
-                  << ex.displayText() << std::endl;
+                  << ex.displayText() << '\n';
     // silently ignore this exception.
   } catch (std::exception &ex) {
     std::stringstream ss;
@@ -270,10 +267,10 @@ DownloadInstrument::getFileShas(const std::string &directoryPath) {
 **/
 size_t DownloadInstrument::removeOrphanedFiles(
     const std::string &directoryPath,
-    const std::set<std::string> &filenamesToKeep) const {
+    const std::unordered_set<std::string> &filenamesToKeep) const {
   // hold files to delete in a set so we don't remove files while iterating over
   // the directory.
-  std::set<std::string> filesToDelete;
+  std::vector<std::string> filesToDelete;
 
   try {
     using Poco::DirectoryIterator;
@@ -285,14 +282,14 @@ size_t DownloadInstrument::removeOrphanedFiles(
       if (filenamesToKeep.find(entryPath.getFileName()) ==
           filenamesToKeep.end()) {
         g_log.debug() << "File not found in remote instrument repository, will "
-                         "be deleted: " << entryPath.getFileName() << std::endl;
-        filesToDelete.insert(it->path());
+                         "be deleted: " << entryPath.getFileName() << '\n';
+        filesToDelete.push_back(it->path());
       }
     }
   } catch (Poco::Exception &ex) {
     g_log.error() << "DownloadInstrument: failed to list the directory: "
                   << directoryPath << " : " << ex.className() << " : "
-                  << ex.displayText() << std::endl;
+                  << ex.displayText() << '\n';
     // silently ignore this exception.
   } catch (std::exception &ex) {
     std::stringstream ss;
@@ -303,14 +300,14 @@ size_t DownloadInstrument::removeOrphanedFiles(
 
   // delete any identified files
   try {
-    for (auto it = filesToDelete.begin(); it != filesToDelete.end(); ++it) {
-      Poco::File file(*it);
+    for (const auto &filename : filesToDelete) {
+      Poco::File file(filename);
       file.remove();
     }
   } catch (Poco::Exception &ex) {
     g_log.error() << "DownloadInstrument: failed to delete file: "
                   << " : " << ex.className() << " : " << ex.displayText()
-                  << std::endl;
+                  << '\n';
     // silently ignore this exception.
   } catch (std::exception &ex) {
     std::stringstream ss;
@@ -318,7 +315,7 @@ size_t DownloadInstrument::removeOrphanedFiles(
     throw std::runtime_error(ss.str());
   }
 
-  g_log.debug() << filesToDelete.size() << " Files deleted." << std::endl;
+  g_log.debug() << filesToDelete.size() << " Files deleted.\n";
 
   return filesToDelete.size();
 }

@@ -12,6 +12,8 @@
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDPanelErrors.h"
 
+#include <boost/math/special_functions/round.hpp>
+
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -35,8 +37,6 @@ PeakHKLErrors::PeakHKLErrors() : ParamFunction(), IFunction1D() {
   PeakWorkspaceName = "";
   initMode = 0;
 }
-
-PeakHKLErrors::~PeakHKLErrors() {}
 
 void PeakHKLErrors::init() {
   declareParameter("SampleXOffset", 0.0, "Sample x offset");
@@ -71,12 +71,10 @@ void PeakHKLErrors::setUpOptRuns() {
 
   boost::split(OptRunNums, OptRunstemp, boost::is_any_of("/"));
 
-  for (size_t i = 0; i < OptRunNums.size(); i++) {
-    declareParameter("phi" + OptRunNums[i], 0.0,
-                     "Phi sample orientation value");
-    declareParameter("chi" + OptRunNums[i], 0.0,
-                     "Chi sample orientation value");
-    declareParameter("omega" + OptRunNums[i], 0.0,
+  for (auto &OptRunNum : OptRunNums) {
+    declareParameter("phi" + OptRunNum, 0.0, "Phi sample orientation value");
+    declareParameter("chi" + OptRunNum, 0.0, "Chi sample orientation value");
+    declareParameter("omega" + OptRunNum, 0.0,
                      "Omega sample orientation value");
   }
 }
@@ -117,40 +115,40 @@ void PeakHKLErrors::cLone(
     return;
   if (component->isParametrized()) {
 
-    std::set<std::string> nms = pmapSv->names(component.get());
-    for (auto it = nms.begin(); it != nms.end(); ++it) {
+    auto nms = pmapSv->names(component.get());
+    for (const auto &nm : nms) {
 
-      if (pmapSv->contains(component.get(), *it, "double")) {
+      if (pmapSv->contains(component.get(), nm, "double")) {
         std::vector<double> dparams =
-            pmapSv->getDouble(component->getName(), *it);
-        pmap->addDouble(component.get(), *it, dparams[0]);
+            pmapSv->getDouble(component->getName(), nm);
+        pmap->addDouble(component.get(), nm, dparams[0]);
         continue;
       }
 
-      if (pmapSv->contains(component.get(), *it, "V3D")) {
-        std::vector<V3D> V3Dparams = pmapSv->getV3D(component->getName(), *it);
-        pmap->addV3D(component.get(), *it, V3Dparams[0]);
+      if (pmapSv->contains(component.get(), nm, "V3D")) {
+        std::vector<V3D> V3Dparams = pmapSv->getV3D(component->getName(), nm);
+        pmap->addV3D(component.get(), nm, V3Dparams[0]);
         continue;
       }
 
-      if (pmapSv->contains(component.get(), *it, "int")) {
+      if (pmapSv->contains(component.get(), nm, "int")) {
         std::vector<int> iparams =
-            pmapSv->getType<int>(component->getName(), *it);
-        pmap->addInt(component.get(), *it, iparams[0]);
+            pmapSv->getType<int>(component->getName(), nm);
+        pmap->addInt(component.get(), nm, iparams[0]);
         continue;
       }
 
-      if (pmapSv->contains(component.get(), *it, "string")) {
+      if (pmapSv->contains(component.get(), nm, "string")) {
         std::vector<std::string> sparams =
-            pmapSv->getString(component->getName(), *it);
-        pmap->addString(component.get(), *it, sparams[0]);
+            pmapSv->getString(component->getName(), nm);
+        pmap->addString(component.get(), nm, sparams[0]);
         continue;
       }
 
-      if (pmapSv->contains(component.get(), *it, "Quat")) {
+      if (pmapSv->contains(component.get(), nm, "Quat")) {
         std::vector<Kernel::Quat> sparams =
-            pmapSv->getType<Kernel::Quat>(component->getName(), *it);
-        pmap->addQuat(component.get(), *it, sparams[0]);
+            pmapSv->getType<Kernel::Quat>(component->getName(), nm);
+        pmap->addQuat(component.get(), nm, sparams[0]);
         continue;
       }
     }
@@ -183,7 +181,7 @@ void PeakHKLErrors::cLone(
 boost::shared_ptr<Geometry::Instrument>
 PeakHKLErrors::getNewInstrument(PeaksWorkspace_sptr Peaks) const {
   Geometry::Instrument_const_sptr instSave = Peaks->getPeak(0).getInstrument();
-  boost::shared_ptr<Geometry::ParameterMap> pmap(new Geometry::ParameterMap());
+  auto pmap = boost::make_shared<Geometry::ParameterMap>();
   boost::shared_ptr<const Geometry::ParameterMap> pmapSv =
       instSave->getParameterMap();
 
@@ -191,20 +189,18 @@ PeakHKLErrors::getNewInstrument(PeaksWorkspace_sptr Peaks) const {
     g_log.error(" Peaks workspace does not have an instrument");
     throw std::invalid_argument(" Not all peaks have an instrument");
   }
-  boost::shared_ptr<Geometry::Instrument> instChange(
-      new Geometry::Instrument());
+  auto instChange = boost::shared_ptr<Geometry::Instrument>();
 
   if (!instSave->isParametrized()) {
 
     boost::shared_ptr<Geometry::Instrument> instClone(instSave->clone());
-    boost::shared_ptr<Geometry::Instrument> Pinsta(
-        new Geometry::Instrument(instSave, pmap));
+    auto Pinsta = boost::make_shared<Geometry::Instrument>(instSave, pmap);
 
     instChange = Pinsta;
   } else // catch(... )
   {
-    boost::shared_ptr<Geometry::Instrument> P1(
-        new Geometry::Instrument(instSave->baseInstrument(), pmap));
+    auto P1 = boost::make_shared<Geometry::Instrument>(
+        instSave->baseInstrument(), pmap);
     instChange = P1;
   }
 
@@ -249,7 +245,7 @@ void PeakHKLErrors::getRun2MatMap(
     Geometry::IPeak &peak_old = Peaks->getPeak(i);
 
     int runNum = peak_old.getRunNumber();
-    std::string runNumStr = boost::lexical_cast<std::string>(runNum);
+    std::string runNumStr = std::to_string(runNum);
     size_t N = OptRuns.find("/" + runNumStr + "/");
     if (N < OptRuns.size()) {
       double chi =
@@ -376,11 +372,11 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
 
   double ChiSqTot = 0.0;
   for (size_t i = 0; i < nData; i += 3) {
-    int peakNum = static_cast<int>(.5 + xValues[i]);
+    int peakNum = boost::math::iround(xValues[i]);
     IPeak &peak_old = Peaks->getPeak(peakNum);
 
     int runNum = peak_old.getRunNumber();
-    std::string runNumStr = boost::lexical_cast<std::string>(runNum);
+    std::string runNumStr = std::to_string(runNum);
     Peak peak =
         SCDPanelErrors::createNewPeak(peak_old, instNew, 0, peak_old.getL1());
 
@@ -407,13 +403,13 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
   }
 
   g_log.debug() << "------------------------Function---------------------------"
-                   "--------------------" << std::endl;
+                   "--------------------\n";
   for (size_t p = 0; p < nParams(); p++) {
     g_log.debug() << parameterName(p) << "(" << getParameter(p) << "),";
     if ((p + 1) % 6 == 0)
-      g_log.debug() << std::endl;
+      g_log.debug() << '\n';
   }
-  g_log.debug() << std::endl;
+  g_log.debug() << '\n';
   g_log.debug() << "Off constraints=";
   for (size_t p = 0; p < nParams(); p++) {
     IConstraint *constr = getConstraint(p);
@@ -422,10 +418,10 @@ void PeakHKLErrors::function1D(double *out, const double *xValues,
         g_log.debug() << "(" << parameterName(p) << "=" << constr->check()
                       << ");";
   }
-  g_log.debug() << std::endl;
+  g_log.debug() << '\n';
 
   g_log.debug() << "    Chi**2 = " << ChiSqTot << "     nData = " << nData
-                << std::endl;
+                << '\n';
 }
 
 void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
@@ -456,8 +452,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   getRun2MatMap(Peaks, OptRuns, RunNums2GonMatrix);
 
   g_log.debug()
-      << "----------------------------Derivative------------------------"
-      << std::endl;
+      << "----------------------------Derivative------------------------\n";
 
   V3D samplePosition = instNew->getSample()->getPos();
   IPeak &ppeak = Peaks->getPeak(0);
@@ -473,13 +468,13 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
                         parameterIndex(std::string("SampleZOffset"))};
 
   for (size_t i = 0; i < nData; i += 3) {
-    int peakNum = static_cast<int>(.5 + xValues[i]);
+    int peakNum = boost::math::iround(xValues[i]);
     IPeak &peak_old = Peaks->getPeak(peakNum);
     Peak peak =
         SCDPanelErrors::createNewPeak(peak_old, instNew, 0, peak_old.getL1());
 
     int runNum = peak_old.getRunNumber();
-    std::string runNumStr = boost::lexical_cast<std::string>(runNum);
+    std::string runNumStr = std::to_string(runNum);
 
     for (int kk = 0; kk < static_cast<int>(nParams()); kk++) {
       out->set(i, kk, 0.0);
@@ -515,8 +510,6 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     // NOTE:Use getQLabFrame except for below.
     // For parameters the getGoniometerMatrix should remove GonRot, for derivs
     // wrt GonRot*, wrt chi*,phi*,etc.
-
-    V3D hkl = UBinv * peak.getQSampleFrame();
 
     // Deriv wrt chi phi and omega
     if (phiParamNum < nParams()) {
@@ -598,7 +591,6 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     V3D D = peak.getDetPos() - samplePosition;
     double vmag = (L0 + D.norm()) / peak.getTOF();
     double t1 = peak.getTOF() - L0 / vmag;
-    V3D V = D / t1;
 
     // Derivs wrt sample x, y, z
     // Ddsx =( - 1, 0, 0),  d|D|^2/dsx -> 2|D|d|D|/dsx =d(tranp(D)* D)/dsx =2

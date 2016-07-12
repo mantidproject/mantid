@@ -26,8 +26,8 @@ void RotateSource::init() {
 
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<Workspace>("Workspace", "Anonymous",
-                                                   Direction::InOut),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+                      "Workspace", "Anonymous", Direction::InOut),
                   "The name of the workspace for which the new instrument "
                   "configuration will have an effect. Any other workspaces "
                   "stored in the analysis data service will be unaffected.");

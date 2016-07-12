@@ -12,11 +12,6 @@ namespace API {
 MultiPeriodGroupAlgorithm::MultiPeriodGroupAlgorithm()
     : m_worker(new MultiPeriodGroupWorker) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MultiPeriodGroupAlgorithm::~MultiPeriodGroupAlgorithm() {}
-
 /** Check the input workspace properties for groups.
  *
  * Overriden from base Algorithm class.
@@ -35,7 +30,7 @@ bool MultiPeriodGroupAlgorithm::checkGroups() {
     m_worker.reset(new MultiPeriodGroupWorker(propName));
   }
   m_multiPeriodGroups = m_worker->findMultiPeriodGroups(this);
-  bool useDefaultGroupingBehaviour = m_multiPeriodGroups.size() == 0;
+  bool useDefaultGroupingBehaviour = m_multiPeriodGroups.empty();
   /*
    * Give the opportunity to treat this as a regular group workspace.
    */
@@ -73,6 +68,9 @@ bool MultiPeriodGroupAlgorithm::processGroups() {
   }
 
   this->setExecuted(result);
+
+  notificationCenter().postNotification(
+      new FinishedNotification(this, isExecuted()));
   return result;
 }
 

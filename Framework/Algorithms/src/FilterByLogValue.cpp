@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FilterByLogValue.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -23,22 +24,14 @@ using DataObjects::EventWorkspace_const_sptr;
 std::string CENTRE("Centre");
 std::string LEFT("Left");
 
-//========================================================================
-//========================================================================
-/// (Empty) Constructor
-FilterByLogValue::FilterByLogValue() {}
-
-/// Destructor
-FilterByLogValue::~FilterByLogValue() {}
-
 //-----------------------------------------------------------------------
 void FilterByLogValue::init() {
-  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input event workspace");
 
-  declareProperty(new WorkspaceProperty<EventWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 
   declareProperty(
@@ -93,7 +86,7 @@ std::map<std::string, std::string> FilterByLogValue::validateInputs() {
   try {
     ITimeSeriesProperty *log =
         dynamic_cast<ITimeSeriesProperty *>(inputWS->run().getLogData(logname));
-    if (log == NULL) {
+    if (log == nullptr) {
       errors["LogName"] = "'" + logname + "' is not a time-series log.";
       return errors;
     }
@@ -193,7 +186,7 @@ void FilterByLogValue::exec() {
       PARALLEL_START_INTERUPT_REGION
 
       // this is the input event list
-      EventList &input_el = inputWS->getEventList(i);
+      EventList &input_el = inputWS->getSpectrum(i);
 
       // Perform the filtering in place.
       input_el.filterInPlace(splitter);
@@ -232,12 +225,10 @@ void FilterByLogValue::exec() {
       PARALLEL_START_INTERUPT_REGION
 
       // Get the output event list (should be empty)
-      EventList *output_el = outputWS->getEventListPtr(i);
-      std::vector<EventList *> outputs;
-      outputs.push_back(output_el);
+      std::vector<EventList *> outputs{&outputWS->getSpectrum(i)};
 
       // and this is the input event list
-      const EventList &input_el = inputWS->getEventList(i);
+      const EventList &input_el = inputWS->getSpectrum(i);
 
       // Perform the filtering (using the splitting function and just one
       // output)

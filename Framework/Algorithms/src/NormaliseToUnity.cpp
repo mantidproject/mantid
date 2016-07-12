@@ -24,11 +24,12 @@ void NormaliseToUnity::init() {
   wsValidator->add<HistogramValidator>();
   wsValidator->add<CommonBinsValidator>();
 
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "The name with which to store the output workspace in the [[Analysis "
       "Data Service]]");
 

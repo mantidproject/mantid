@@ -77,7 +77,7 @@ bool DampingMinimizer::iterate(size_t) {
     for (size_t j = 0; j < n; ++j) {
       std::cerr << dd.get(j) << ' ';
     }
-    std::cerr << std::endl;
+    std::cerr << '\n';
   }
 
   /// Parameter corrections
@@ -90,8 +90,7 @@ bool DampingMinimizer::iterate(size_t) {
     for (size_t j = 0; j < n; ++j) {
       std::cerr << dx.get(j) << ' ';
     }
-    std::cerr << std::endl
-              << std::endl;
+    std::cerr << "\n\n";
   }
 
   // Update the parameters of the cost function.
@@ -99,7 +98,7 @@ bool DampingMinimizer::iterate(size_t) {
     double d = m_leastSquares->getParameter(i) + dx.get(i);
     m_leastSquares->setParameter(i, d);
     if (debug) {
-      std::cerr << "P" << i << ' ' << d << std::endl;
+      std::cerr << "P" << i << ' ' << d << '\n';
     }
   }
   m_leastSquares->getFittingFunction()->applyTies();
@@ -110,11 +109,7 @@ bool DampingMinimizer::iterate(size_t) {
   GSLVector p(n);
   m_leastSquares->getParameters(p);
   double dx_norm = gsl_blas_dnrm2(dx.gsl());
-  if (dx_norm < m_relTol) {
-    return false;
-  }
-
-  return true;
+  return dx_norm >= m_relTol;
 }
 
 /// Return current value of the cost function

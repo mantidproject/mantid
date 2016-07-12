@@ -41,7 +41,7 @@ Examples
 ''''''''
 
 -  :ref:`DGSReduction <algm-DgsReduction>`
--  :ref:`MuonLoad <algm-MuonLoad>`
+-  :ref:`MuonProcess <algm-MuonProcess>`
 
 
 

@@ -42,7 +42,15 @@
 
 // things to make the macros clearer
 #define GCC_DIAG_STR(s) #s
+// undefine definition from Poco 1.6
+#ifdef GCC_DIAG_JOINSTR
+#undef GCC_DIAG_JOINSTR
+#endif
 #define GCC_DIAG_JOINSTR(x, y) GCC_DIAG_STR(x##y)
+// undefine definition from Poco 1.6
+#ifdef GCC_DIAG_DO_PRAGMA
+#undef GCC_DIAG_DO_PRAGMA
+#endif
 #define GCC_DIAG_DO_PRAGMA(x) _Pragma(#x)
 #define GCC_DIAG_PRAGMA(x) GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
 
@@ -68,5 +76,17 @@
 #define GCC_DIAG_OFF(x)
 #define GCC_DIAG_ON(x)
 #endif
+
+// Defining this macro separately since clang-tidy tries to add spaces around
+// the hyphen and we use it in a lot of test files.
+// clang-format off
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
+#define GCC_DIAG_OFF_SUGGEST_OVERRIDE GCC_DIAG_OFF(suggest-override)
+#define GCC_DIAG_ON_SUGGEST_OVERRIDE GCC_DIAG_ON(suggest-override)
+#else
+#define GCC_DIAG_OFF_SUGGEST_OVERRIDE
+#define GCC_DIAG_ON_SUGGEST_OVERRIDE
+#endif
+// clang-format on
 
 #endif /*MANTID_KERNEL_WARNINGSUPPRESSIONS_H_*/

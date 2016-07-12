@@ -46,22 +46,23 @@ public:
   Resolution();
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "Resolution"; }
+  std::string name() const override { return "Resolution"; }
   /// Function values
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
   ///  function derivatives
   void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData);
+                       const size_t nData) override;
   /// Returns the number of attributes associated with the function
-  size_t nAttributes() const;
+  size_t nAttributes() const override;
   /// Returns a list of attribute names
-  std::vector<std::string> getAttributeNames() const;
+  std::vector<std::string> getAttributeNames() const override;
   /// Return a value of attribute attName
-  Attribute getAttribute(const std::string &attName) const;
+  Attribute getAttribute(const std::string &attName) const override;
   /// Set a value to attribute attName
-  void setAttribute(const std::string &attName, const Attribute &);
+  void setAttribute(const std::string &attName, const Attribute &) override;
   /// Check if attribute attName exists
-  bool hasAttribute(const std::string &attName) const;
+  bool hasAttribute(const std::string &attName) const override;
 
 private:
   /// Function that does the actual job

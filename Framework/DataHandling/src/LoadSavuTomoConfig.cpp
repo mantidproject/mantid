@@ -16,22 +16,19 @@ DECLARE_ALGORITHM(LoadSavuTomoConfig)
 
 using namespace Mantid::API;
 
-LoadSavuTomoConfig::LoadSavuTomoConfig() {}
-
-LoadSavuTomoConfig::~LoadSavuTomoConfig() {}
-
 /**
  * Standard Initialisation method. Declares properties.
  */
 void LoadSavuTomoConfig::init() {
   // Required input properties
+  const std::vector<std::string> exts{".nxs", ".nx5", ".xml"};
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load,
-                       {".nxs", ".nx5", ".xml"}),
+      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                        exts),
       "The name of the Nexus parameterization file to read, as a full "
       "or relative path.");
 
-  declareProperty(new WorkspaceProperty<ITableWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "OutputWorkspace", "savuTomoConfig",
                       Kernel::Direction::Output, PropertyMode::Mandatory),
                   "The name of the workspace to be created as output of "
@@ -62,7 +59,7 @@ void LoadSavuTomoConfig::exec() {
     }
   } catch (std::exception &e) {
     g_log.error() << "Failed to load savu tomography reconstruction "
-                     "parameterization file: " << e.what() << std::endl;
+                     "parameterization file: " << e.what() << '\n';
     return;
   }
 
@@ -86,7 +83,7 @@ bool LoadSavuTomoConfig::checkOpenFile(std::string fname,
       f->getEntries();
   } catch (NeXus::Exception &e) {
     g_log.error() << "Failed to open as a NeXus file: '" << fname
-                  << "', error description: " << e.what() << std::endl;
+                  << "', error description: " << e.what() << '\n';
     return false;
   }
   return true;
@@ -158,15 +155,14 @@ ITableWorkspace_sptr LoadSavuTomoConfig::loadFile(std::string &fname,
   for (size_t j = 0; j < pluginsLen; j++) {
     API::TableRow table = ws->appendRow();
 
-    std::string entryIdx = boost::lexical_cast<std::string>(j);
+    std::string entryIdx = std::to_string(j);
     try {
       f->openGroup(entryIdx, "NXnote");
     } catch (NeXus::Exception &e) {
       // detailed NeXus error message and throw...
       g_log.error() << "Failed to load plugin '" << j
                     << "' from"
-                       "NeXus file. Error description: " << e.what()
-                    << std::endl;
+                       "NeXus file. Error description: " << e.what() << '\n';
       throw std::runtime_error(
           "Could not load one or more plugin "
           "entries from the tomographic reconstruction parameterization "
@@ -194,7 +190,7 @@ ITableWorkspace_sptr LoadSavuTomoConfig::loadFile(std::string &fname,
       g_log.warning()
           << "Failed to read some fields in tomographic "
              "reconstruction plugin line. The file seems to be wrong. Error "
-             "description: " << e.what() << std::endl;
+             "description: " << e.what() << '\n';
     }
 
     table << id << params << name << cite;

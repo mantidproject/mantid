@@ -48,15 +48,15 @@ const std::string IntegrateFlux::summary() const {
 /** Initialize the algorithm's properties.
  */
 void IntegrateFlux::init() {
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
   auto validator = boost::make_shared<Kernel::BoundedValidator<int>>();
   validator->setLower(2);
   declareProperty("NPoints", 1000, validator,
                   "Number of points per output spectrum.");
-  declareProperty(new WorkspaceProperty<API::Workspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -65,7 +65,7 @@ void IntegrateFlux::init() {
  */
 void IntegrateFlux::exec() {
   API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  size_t nX = static_cast<size_t>((int)getProperty("NPoints"));
+  size_t nX = static_cast<size_t>(static_cast<int>(getProperty("NPoints")));
 
   auto outputWS = createOutputWorkspace(*inputWS, nX);
 
@@ -170,7 +170,7 @@ template <class EventType>
 void IntegrateFlux::integrateSpectraEvents(
     const DataObjects::EventWorkspace &inputWS,
     API::MatrixWorkspace &integrWS) const {
-  inputWS.sortAll(DataObjects::TOF_SORT, NULL);
+  inputWS.sortAll(DataObjects::TOF_SORT, nullptr);
   size_t nSpec = inputWS.getNumberHistograms();
   assert(nSpec == integrWS.getNumberHistograms());
 
@@ -178,7 +178,7 @@ void IntegrateFlux::integrateSpectraEvents(
   // loop overr the spectra and integrate
   for (size_t sp = 0; sp < nSpec; ++sp) {
     const std::vector<EventType> *el;
-    DataObjects::getEventsFrom(inputWS.getEventList(sp), el);
+    DataObjects::getEventsFrom(inputWS.getSpectrum(sp), el);
     auto &outY = integrWS.dataY(sp);
     double sum = 0;
     auto x = X.begin() + 1;
@@ -479,7 +479,7 @@ IntegrateFlux::getMaxNumberOfPoints(const API::MatrixWorkspace &inputWS) const {
   // if it's events we shouldn't care about binning
   auto eventWS = dynamic_cast<const DataObjects::EventWorkspace *>(&inputWS);
   if (eventWS) {
-    return eventWS->getEventList(0).getNumberEvents();
+    return eventWS->getSpectrum(0).getNumberEvents();
   }
 
   return inputWS.blocksize();

@@ -40,42 +40,41 @@ public:
   /// Constructor
   Cluster(const size_t &label);
 
-  /// Destructor
-  virtual ~Cluster();
-
   /// integrate the cluster
   ClusterIntegratedValues
-  integrate(boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const;
+  integrate(boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws)
+      const override;
 
   /// Apply labels to the workspace
-  void writeTo(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const;
+  void
+  writeTo(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const override;
 
   /// Get the cluster label
-  size_t getLabel() const;
+  size_t getLabel() const override;
 
   /// Get the original label
-  size_t getOriginalLabel() const;
+  size_t getOriginalLabel() const override;
 
   /// Number of indexes tracked
-  size_t size() const;
+  size_t size() const override;
 
   /// Track a linear IMDHistoWorkspace index that belongs to the cluster.
-  void addIndex(const size_t &index);
+  void addIndex(const size_t &index) override;
 
   /// Resolve the proper label for this cluster.
-  void toUniformMinimum(std::vector<DisjointElement> &disjointSet);
+  void toUniformMinimum(std::vector<DisjointElement> &disjointSet) override;
 
   /// Overloaded equals.
   bool operator==(const Cluster &other) const;
 
   /// Set the root cluster
-  void setRootCluster(ICluster const *root);
+  void setRootCluster(ICluster const *root) override;
 
   /// Get a representative index of the cluster
-  virtual size_t getRepresentitiveIndex() const;
+  size_t getRepresentitiveIndex() const override;
 
   /// Does the cluster contain the label.
-  virtual bool containsLabel(const size_t &label) const;
+  bool containsLabel(const size_t &label) const override;
 
 private:
   /// Disabled copy construction

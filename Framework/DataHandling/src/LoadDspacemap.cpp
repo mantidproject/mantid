@@ -23,38 +23,25 @@ namespace DataHandling {
 DECLARE_ALGORITHM(LoadDspacemap)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadDspacemap::LoadDspacemap() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadDspacemap::~LoadDspacemap() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadDspacemap::init() {
   // 3 properties for getting the right instrument
   LoadCalFile::getInstrument3WaysInit(this);
 
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".dat", ".bin"}),
-      "The DspacemapFile containing the d-space mapping.");
+  const std::vector<std::string> exts{".dat", ".bin"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
+                  "The DspacemapFile containing the d-space mapping.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("POWGEN");
-  propOptions.push_back("VULCAN-ASCII");
-  propOptions.push_back("VULCAN-Binary");
+  std::vector<std::string> propOptions{"POWGEN", "VULCAN-ASCII",
+                                       "VULCAN-Binary"};
   declareProperty("FileType", "POWGEN",
                   boost::make_shared<StringListValidator>(propOptions),
                   "The type of file being read.");
 
-  declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputWorkspace", "",
-                                                          Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output OffsetsWorkspace.");
 }
 
@@ -164,9 +151,8 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
   // At this point, instrument VULCAN has been created?
   Instrument_const_sptr instrument = offsetsWS->getInstrument();
 
-  g_log.notice() << "Name of instrument = " << instrument->getName()
-                 << std::endl;
-  g_log.notice() << "Input map (dict):  size = " << vulcan.size() << std::endl;
+  g_log.notice() << "Name of instrument = " << instrument->getName() << '\n';
+  g_log.notice() << "Input map (dict):  size = " << vulcan.size() << '\n';
 
   // To get all the detector ID's
   detid2det_map allDetectors;
@@ -175,7 +161,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
   detid2det_map::const_iterator it;
   int numfinds = 0;
   g_log.notice() << "Input number of detectors = " << allDetectors.size()
-                 << std::endl;
+                 << '\n';
 
   // Get detector information
   double l1, beamline_norm;
@@ -192,7 +178,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
 
     std::string parentname =
   it->second->getParent()->getComponentID()->getName();
-    g_log.notice() << "Name = " << parentname << std::endl;
+    g_log.notice() << "Name = " << parentname << '\n';
     // parents.insert(parentid, true);
   }
   ***/
@@ -231,7 +217,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
     }
 
     // g_log.notice() << "Selected Detector with ID = " << detectorID << "  ID2
-    // = " << id2 << std::endl; proved to be same
+    // = " << id2 << '\n'; proved to be same
 
     double intermoduleoffset = 0;
     double interstackoffset = 0;
@@ -240,7 +226,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
     vulcan_iter = vulcan.find(intermoduleid);
     if (vulcan_iter == vulcan.end()) {
       g_log.error() << "Cannot find inter-module offset ID = " << intermoduleid
-                    << std::endl;
+                    << '\n';
     } else {
       intermoduleoffset = vulcan_iter->second;
     }
@@ -249,7 +235,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
     vulcan_iter = vulcan.find(interstackid);
     if (vulcan_iter == vulcan.end()) {
       g_log.error() << "Cannot find inter-module offset ID = " << intermoduleid
-                    << std::endl;
+                    << '\n';
     } else {
       interstackoffset = vulcan_iter->second;
     }
@@ -303,16 +289,16 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
           intermoduleid != 29998 && intermoduleid != 33748 &&
           intermoduleid != 34998 && intermoduleid != 36248) {
         g_log.error() << "Detector ID = " << detectorID
-                      << "  Inter-Module ID = " << intermoduleid << std::endl;
+                      << "  Inter-Module ID = " << intermoduleid << '\n';
         throw std::invalid_argument("Indexing error!");
       }
 
     } catch (std::invalid_argument &) {
-      g_log.notice() << "Misses Detector ID = " << detectorID << std::endl;
+      g_log.notice() << "Misses Detector ID = " << detectorID << '\n';
     }
   } // for
 
-  g_log.notice() << "Number of matched detectors =" << numfinds << std::endl;
+  g_log.notice() << "Number of matched detectors =" << numfinds << '\n';
 }
 
 //-----------------------------------------------------------------------
@@ -330,7 +316,7 @@ void LoadDspacemap::readVulcanAsciiFile(const std::string &fileName,
                                         std::map<detid_t, double> &vulcan) {
   std::ifstream grFile(fileName.c_str());
   if (!grFile) {
-    g_log.error() << "Unable to open vulcan file " << fileName << std::endl;
+    g_log.error() << "Unable to open vulcan file " << fileName << '\n';
     return;
   }
   vulcan.clear();
@@ -343,12 +329,11 @@ void LoadDspacemap::readVulcanAsciiFile(const std::string &fileName,
     int32_t udet;
     double correction;
     istr >> udet >> correction;
-    vulcan.insert(std::make_pair(udet, correction));
+    vulcan.emplace(udet, correction);
     numentries++;
   }
 
-  g_log.notice() << "Read Vulcan ASCII File:  # Entry = " << numentries
-                 << std::endl;
+  g_log.notice() << "Read Vulcan ASCII File:  # Entry = " << numentries << '\n';
 }
 
 /** Structure of the vulcan binary file */
@@ -373,15 +358,10 @@ struct VulcanCorrectionFactor {
 void LoadDspacemap::readVulcanBinaryFile(const std::string &fileName,
                                          std::map<detid_t, double> &vulcan) {
   BinaryFile<VulcanCorrectionFactor> file(fileName);
-  std::vector<VulcanCorrectionFactor> *results = file.loadAll();
-  if (results) {
-    for (auto it = results->begin(); it != results->end(); ++it) {
-      // std::cout << it->pixelID << " :! " << it->factor << std::endl;
-      vulcan[static_cast<detid_t>(it->pixelID)] = it->factor;
-    }
+  std::vector<VulcanCorrectionFactor> results = file.loadAll();
+  for (auto &result : results) {
+    vulcan[static_cast<detid_t>(result.pixelID)] = result.factor;
   }
-
-  delete results;
 }
 
 } // namespace Mantid

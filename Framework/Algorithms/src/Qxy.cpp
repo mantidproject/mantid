@@ -6,7 +6,9 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -29,12 +31,12 @@ void Qxy::init() {
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "The corrected data in units of wavelength.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the corrected workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the corrected workspace.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(1.0e-12);
@@ -44,21 +46,22 @@ void Qxy::init() {
       "The upper limit of the Qx-Qy grid (goes from -MaxQxy to +MaxQxy).");
   declareProperty("DeltaQ", -1.0, mustBePositive,
                   "The dimension of a Qx-Qy cell.");
-  declareProperty(new WorkspaceProperty<>("PixelAdj", "", Direction::Input,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "PixelAdj", "", Direction::Input, PropertyMode::Optional),
                   "The scaling to apply to each spectrum e.g. for detector "
                   "efficiency, must have just one bin per spectrum and the "
                   "same number of spectra as DetBankWorkspace.");
   auto wavVal = boost::make_shared<CompositeValidator>();
   wavVal->add<WorkspaceUnitValidator>("Wavelength");
   wavVal->add<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<>("WavelengthAdj", "", Direction::Input,
-                                          PropertyMode::Optional, wavVal),
-                  "The scaling to apply to each bin to account for monitor "
-                  "counts, transmission fraction, etc. Must be one spectrum "
-                  "with the same binning as the InputWorkspace, the same units "
-                  "(counts) and the same [[ConvertToDistribution|distribution "
-                  "status]].");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("WavelengthAdj", "", Direction::Input,
+                                       PropertyMode::Optional, wavVal),
+      "The scaling to apply to each bin to account for monitor "
+      "counts, transmission fraction, etc. Must be one spectrum "
+      "with the same binning as the InputWorkspace, the same units "
+      "(counts) and the same [[ConvertToDistribution|distribution "
+      "status]].");
   declareProperty("AccountForGravity", false,
                   "Whether to correct for the effects of gravity.",
                   Direction::Input);
@@ -106,10 +109,8 @@ void Qxy::exec() {
   MatrixWorkspace_sptr weights =
       WorkspaceFactory::Instance().create(outputWorkspace);
   // Copy the X values from the output workspace to the solidAngles one
-  cow_ptr<MantidVec> axis;
-  axis.access() = outputWorkspace->readX(0);
   for (size_t i = 0; i < weights->getNumberHistograms(); ++i)
-    weights->setX(i, axis);
+    weights->setX(i, outputWorkspace->refX(0));
 
   const size_t numSpec = inputWorkspace->getNumberHistograms();
   const size_t numBins = inputWorkspace->blocksize();
@@ -129,9 +130,8 @@ void Qxy::exec() {
     try {
       det = inputWorkspace->getDetector(i);
     } catch (Exception::NotFoundError &) {
-      g_log.warning() << "Spectrum index " << i
-                      << " has no detector assigned to it - discarding"
-                      << std::endl;
+      g_log.warning() << "Workspace index " << i
+                      << " has no detector assigned to it - discarding\n";
       // Catch if no detector. Next line tests whether this happened - test
       // placed
       // outside here because Mac Intel compiler doesn't like 'continue' in a
@@ -159,7 +159,7 @@ void Qxy::exec() {
     double phi = atan2(detPos.Y(), detPos.X());
     double a = cos(phi);
     double b = sin(phi);
-    double sinTheta = sin(inputWorkspace->detectorTwoTheta(det) / 2.0);
+    double sinTheta = sin(inputWorkspace->detectorTwoTheta(*det) * 0.5);
 
     // Get references to the data for this spectrum
     const MantidVec &X = inputWorkspace->readX(i);
@@ -297,8 +297,8 @@ void Qxy::exec() {
   // left to be executed here for computational efficiency
   size_t numHist = weights->getNumberHistograms();
   for (size_t i = 0; i < numHist; i++) {
-    for (size_t j = 0; j < weights->dataE(i).size(); j++) {
-      weights->dataE(i)[j] = sqrt(weights->dataE(i)[j]);
+    for (double &j : weights->dataE(i)) {
+      j = sqrt(j);
     }
   }
 
@@ -318,7 +318,7 @@ void Qxy::exec() {
 
   // Divide the output data by the solid angles
   outputWorkspace /= weights;
-  outputWorkspace->isDistribution(true);
+  outputWorkspace->setDistribution(true);
 
   // Count of the number of empty cells
   const size_t nhist = outputWorkspace->getNumberHistograms();
@@ -369,9 +369,8 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   outputWorkspace->replaceAxis(1, verticalAxis);
 
   // Build up the X values
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &horizontalAxisRef = axis.access();
-  horizontalAxisRef.resize(bins);
+  HistogramData::BinEdges axis(bins);
+  auto &horizontalAxisRef = axis.mutableData();
   for (int i = 0; i < bins; ++i) {
     const double currentVal = startVal + i * delta;
     // Set the X value
@@ -382,7 +381,7 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
 
   // Fill the X vectors in the output workspace
   for (int i = 0; i < bins - 1; ++i) {
-    outputWorkspace->setX(i, axis);
+    outputWorkspace->setBinEdges(i, axis);
     for (int j = 0; j < bins - j; ++j) {
       outputWorkspace->dataY(i)[j] = std::numeric_limits<double>::quiet_NaN();
       outputWorkspace->dataE(i)[j] = std::numeric_limits<double>::quiet_NaN();

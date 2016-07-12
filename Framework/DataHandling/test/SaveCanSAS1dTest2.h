@@ -2,9 +2,11 @@
 #define SAVECANSAS1D2TEST_H
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/SaveCanSAS1D2.h"
 #include "MantidDataHandling/LoadCanSAS1D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 #include <Poco/Path.h>
 #include <Poco/File.h>
@@ -94,7 +96,7 @@ public:
 
   // saving is required by all the following test so, if this test fails so will
   // all the others!
-  void setUp() {
+  void setUp() override {
     SaveCanSAS1D2 savealg;
 
     TS_ASSERT_THROWS_NOTHING(savealg.initialize());
@@ -109,7 +111,7 @@ public:
     m_filename = savealg.getPropertyValue("Filename");
   }
 
-  void tearDown() {
+  void tearDown() override {
     if (Poco::File(m_filename).exists())
       Poco::File(m_filename).remove();
   }

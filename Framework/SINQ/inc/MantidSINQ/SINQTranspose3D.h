@@ -41,29 +41,25 @@
 
 class MANTID_SINQ_DLL SINQTranspose3D : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  SINQTranspose3D() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  virtual ~SINQTranspose3D() {}
   /// Algorithm's name
-  virtual const std::string name() const { return "Transpose3D"; }
+  const std::string name() const override { return "Transpose3D"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "SINQ specific MD data reordering";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "MDAlgorithms\\Transforms";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   void doYXZ(Mantid::API::IMDHistoWorkspace_sptr inws);
   void doXZY(Mantid::API::IMDHistoWorkspace_sptr inws);

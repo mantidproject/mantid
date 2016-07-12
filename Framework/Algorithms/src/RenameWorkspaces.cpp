@@ -21,14 +21,14 @@ using namespace API;
  */
 void RenameWorkspaces::init() {
   declareProperty(
-      new ArrayProperty<std::string>(
+      Kernel::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "Names of the Input Workspaces");
   // WorkspaceNames - List of new names
-  declareProperty(
-      new ArrayProperty<std::string>("WorkspaceNames", Direction::Input),
-      "New Names of the Workspaces");
+  declareProperty(Kernel::make_unique<ArrayProperty<std::string>>(
+                      "WorkspaceNames", Direction::Input),
+                  "New Names of the Workspaces");
   // --or--
   // Prefix
   declareProperty("Prefix", std::string(""),
@@ -53,11 +53,11 @@ void RenameWorkspaces::exec() {
   std::string suffix = getPropertyValue("Suffix");
 
   // Check properties
-  if (newWsName.size() == 0 && prefix == "" && suffix == "") {
+  if (newWsName.empty() && prefix == "" && suffix == "") {
     throw std::invalid_argument(
         "No list of Workspace names, prefix or suffix has been supplied.");
   }
-  if (newWsName.size() > 0 && (prefix != "" || suffix != "")) {
+  if (!newWsName.empty() && (prefix != "" || suffix != "")) {
     throw std::invalid_argument("Both a list of workspace names and a prefix "
                                 "or suffix has been supplied.");
   }
@@ -73,7 +73,7 @@ void RenameWorkspaces::exec() {
   }
 
   size_t nWs = inputWsName.size();
-  if (newWsName.size() > 0) {
+  if (!newWsName.empty()) {
     // We are using a list of new names
     if (nWs > newWsName.size()) {
       nWs = newWsName.size();
@@ -90,8 +90,8 @@ void RenameWorkspaces::exec() {
   for (size_t i = 0; i < nWs; ++i) {
     std::ostringstream os;
     os << "OutputWorkspace_" << i + 1;
-    declareProperty(new WorkspaceProperty<Workspace>(os.str(), newWsName[i],
-                                                     Direction::Output));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+        os.str(), newWsName[i], Direction::Output));
     auto alg = createChildAlgorithm("RenameWorkspace");
     alg->setPropertyValue("InputWorkspace", inputWsName[i]);
     alg->setPropertyValue("OutputWorkspace", newWsName[i]);

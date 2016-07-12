@@ -13,11 +13,11 @@ public:
   Quasi(QWidget *parent = 0);
 
   // Inherited methods from IndirectBayesTab
-  void setup();
-  bool validate();
-  void run();
+  void setup() override;
+  bool validate() override;
+  void run() override;
   /// Load default settings into the interface
-  void loadSettings(const QSettings &settings);
+  void loadSettings(const QSettings &settings) override;
 
 private slots:
   /// Slot for when the min range on the range selector changes
@@ -25,7 +25,7 @@ private slots:
   /// Slot for when the min range on the range selector changes
   void maxValueChanged(double max);
   /// Slot to update the guides when the range properties change
-  void updateProperties(QtProperty *prop, double val);
+  void updateProperties(QtProperty *prop, double val) override;
   /// Slot to handle when a new sample file is available
   void handleSampleInputReady(const QString &filename);
   /// Slot to handle when a new resolution file is available

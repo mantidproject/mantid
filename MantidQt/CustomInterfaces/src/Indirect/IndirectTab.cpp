@@ -1,7 +1,11 @@
 #include "MantidQtCustomInterfaces/Indirect/IndirectTab.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Unit.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
@@ -70,7 +74,7 @@ bool IndirectTab::validateTab() { return validate(); }
 void IndirectTab::exportPythonScript() {
   g_log.information() << "Python export for workspace: " << m_pythonExportWsName
                       << ", between " << m_tabStartTime << " and "
-                      << m_tabEndTime << std::endl;
+                      << m_tabEndTime << '\n';
 
   // Take the search times to be a second either side of the actual times, just
   // in case
@@ -211,10 +215,9 @@ QString IndirectTab::getWorkspaceBasename(const QString &wsName) {
  * This uses the plotSpectrum function from the Python API.
  *
  * @param workspaceNames List of names of workspaces to plot
- * @param specIndex Index of spectrum from each workspace to plot
+ * @param wsIndex Index of spectrum from each workspace to plot
  */
-void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
-                               int specIndex) {
+void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int wsIndex) {
   if (workspaceNames.isEmpty())
     return;
 
@@ -223,7 +226,7 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
   pyInput += "plotSpectrum(['";
   pyInput += workspaceNames.join("','");
   pyInput += "'], ";
-  pyInput += QString::number(specIndex);
+  pyInput += QString::number(wsIndex);
   pyInput += ")\n";
 
   m_pythonRunner.runPythonCode(pyInput);
@@ -234,15 +237,15 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames,
  * index.
  *
  * @param workspaceName Names of workspace to plot
- * @param specIndex Index of spectrum to plot
+ * @param wsIndex Workspace Index of spectrum to plot
  */
-void IndirectTab::plotSpectrum(const QString &workspaceName, int specIndex) {
+void IndirectTab::plotSpectrum(const QString &workspaceName, int wsIndex) {
   if (workspaceName.isEmpty())
     return;
 
   QStringList workspaceNames;
   workspaceNames << workspaceName;
-  plotSpectrum(workspaceNames, specIndex);
+  plotSpectrum(workspaceNames, wsIndex);
 }
 
 /**
@@ -320,10 +323,9 @@ void IndirectTab::plot2D(const QString &workspaceName) {
  * This uses the plotTimeBin function from the Python API.
  *
  * @param workspaceNames List of names of workspaces to plot
- * @param specIndex Index of spectrum from each workspace to plot
+ * @param binIndex Index of spectrum from each workspace to plot
  */
-void IndirectTab::plotTimeBin(const QStringList &workspaceNames,
-                              int specIndex) {
+void IndirectTab::plotTimeBin(const QStringList &workspaceNames, int binIndex) {
   if (workspaceNames.isEmpty())
     return;
 
@@ -332,7 +334,7 @@ void IndirectTab::plotTimeBin(const QStringList &workspaceNames,
   pyInput += "plotTimeBin(['";
   pyInput += workspaceNames.join("','");
   pyInput += "'], ";
-  pyInput += QString::number(specIndex);
+  pyInput += QString::number(binIndex);
   pyInput += ")\n";
 
   m_pythonRunner.runPythonCode(pyInput);
@@ -343,15 +345,15 @@ void IndirectTab::plotTimeBin(const QStringList &workspaceNames,
  * index.
  *
  * @param workspaceName Names of workspace to plot
- * @param specIndex Index of spectrum to plot
+ * @param binIndex Index of spectrum to plot
  */
-void IndirectTab::plotTimeBin(const QString &workspaceName, int specIndex) {
+void IndirectTab::plotTimeBin(const QString &workspaceName, int binIndex) {
   if (workspaceName.isEmpty())
     return;
 
   QStringList workspaceNames;
   workspaceNames << workspaceName;
-  plotTimeBin(workspaceNames, specIndex);
+  plotTimeBin(workspaceNames, binIndex);
 }
 
 /**
@@ -403,7 +405,7 @@ std::string IndirectTab::getEMode(Mantid::API::MatrixWorkspace_sptr ws) {
   Mantid::Kernel::Unit_sptr xUnit = ws->getAxis(0)->unit();
   std::string xUnitName = xUnit->caption();
 
-  g_log.debug() << "X unit name is: " << xUnitName << std::endl;
+  g_log.debug() << "X unit name is: " << xUnitName << '\n';
 
   if (boost::algorithm::find_first(xUnitName, "d-Spacing"))
     return "Elastic";
@@ -496,7 +498,7 @@ void IndirectTab::runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm) {
   size_t batchQueueLength = m_batchAlgoRunner->queueLength();
   if (batchQueueLength > 0)
     g_log.warning() << "Batch queue already contains " << batchQueueLength
-                    << " algorithms!" << std::endl;
+                    << " algorithms!\n";
 
   m_batchAlgoRunner->addAlgorithm(algorithm);
   m_batchAlgoRunner->executeBatchAsync();

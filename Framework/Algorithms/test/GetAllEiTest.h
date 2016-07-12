@@ -5,6 +5,7 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/GetAllEi.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -141,8 +142,8 @@ public:
     m_getAllEi.setProperty("FilterBaseLog", "proton_charge");
     m_getAllEi.setProperty("FilterWithDerivative", false);
 
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopSpeed(
-        new Kernel::TimeSeriesProperty<double>("Chopper_Speed"));
+    auto chopSpeed = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "Chopper_Speed");
     for (int i = 0; i < 10; i++) {
       chopSpeed->addValue(Kernel::DateAndTime(10000 + 10 * i, 0), 1.);
     }
@@ -170,10 +171,10 @@ public:
     TS_ASSERT_DELTA(val, 10., 1.e-6);
 
     // Test sort log by log.
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopDelay(
-        new Kernel::TimeSeriesProperty<double>("Chopper_Delay"));
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> goodFram(
-        new Kernel::TimeSeriesProperty<double>("proton_charge"));
+    auto chopDelay = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "Chopper_Delay");
+    auto goodFram = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "proton_charge");
 
     for (int i = 0; i < 10; i++) {
       auto time = Kernel::DateAndTime(200 + 10 * i, 0);
@@ -207,7 +208,8 @@ public:
     TSM_ASSERT_DELTA("Chopper delay should have special speed ",
                      (10 * 0.1 + 20) / 12., chop_delay, 1.e-6);
 
-    goodFram.reset(new Kernel::TimeSeriesProperty<double>("proton_charge"));
+    goodFram = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "proton_charge");
     for (int i = 0; i < 10; i++) {
       auto time = Kernel::DateAndTime(100 + 10 * i, 0);
       goodFram->addValue(time, 1);
@@ -236,12 +238,12 @@ public:
     m_getAllEi.setProperty("FilterWithDerivative", true);
 
     // Test select log by log derivative
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopDelay(
-        new Kernel::TimeSeriesProperty<double>("Chopper_Delay"));
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopSpeed(
-        new Kernel::TimeSeriesProperty<double>("Chopper_Speed"));
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> protCharge(
-        new Kernel::TimeSeriesProperty<double>("proton_charge"));
+    auto chopDelay = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "Chopper_Delay");
+    auto chopSpeed = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "Chopper_Speed");
+    auto protCharge = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "proton_charge");
 
     double gf(0);
     for (int i = 0; i < 50; i++) {
@@ -316,10 +318,8 @@ public:
                                                                      true);
     auto det1 = tws->getDetector(0);
     auto det2 = tws->getDetector(4);
-    auto spec1 = tws->getSpectrum(0);
-    auto spec2 = tws->getSpectrum(4);
-    auto detID1 = spec1->getDetectorIDs();
-    auto detID2 = spec2->getDetectorIDs();
+    auto detID1 = tws->getSpectrum(0).getDetectorIDs();
+    auto detID2 = tws->getSpectrum(4).getDetectorIDs();
 
     m_getAllEi.initialize();
     m_getAllEi.setProperty("Workspace", tws);
@@ -340,15 +340,13 @@ public:
     TSM_ASSERT_EQUALS("Detector's ID for the first spectrum and new workspace "
                       "should coincide",
                       *(detID1.begin()),
-                      (*wws->getSpectrum(0)->getDetectorIDs().begin()));
+                      (*wws->getSpectrum(0).getDetectorIDs().begin()));
     TSM_ASSERT_EQUALS("Detector's ID for the second spectrum and new workspace "
                       "should coincide",
                       *(detID2.begin()),
-                      (*wws->getSpectrum(1)->getDetectorIDs().begin()));
-    auto pSpec1 = wws->getSpectrum(0);
-    auto pSpec2 = wws->getSpectrum(1);
-    auto Xsp1 = pSpec1->dataX();
-    auto Xsp2 = pSpec2->dataX();
+                      (*wws->getSpectrum(1).getDetectorIDs().begin()));
+    auto Xsp1 = wws->getSpectrum(0).dataX();
+    auto Xsp2 = wws->getSpectrum(1).dataX();
     size_t nSpectra = Xsp2.size();
     TS_ASSERT_EQUALS(nSpectra, 101);
     TS_ASSERT(boost::math::isinf(Xsp1[nSpectra - 1]));
@@ -538,7 +536,7 @@ private:
         double tm2 = t - t2;
         y[i] = (10000 * std::exp(-tm1 * tm1 / 1000.) +
                 20000 * std::exp(-tm2 * tm2 / 1000.));
-        // std::cout<<"t="<<t<<" signal="<<y[i]<<" ind="<<i<<std::endl;
+        // std::cout<<"t="<<t<<" signal="<<y[i]<<" ind="<<i<<'\n';
       }
     }
     // signal at second monitor
@@ -552,19 +550,19 @@ private:
         double tm2 = t - t2;
         y[i] = (100 * std::exp(-tm1 * tm1 / 1000.) +
                 200 * std::exp(-tm2 * tm2 / 1000.));
-        // std::cout<<"t="<<t<<" signal="<<y[i]<<" ind="<<i<<std::endl;
+        // std::cout<<"t="<<t<<" signal="<<y[i]<<" ind="<<i<<'\n';
       }
     }
 
     if (noLogs)
       return ws;
 
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopDelayLog(
-        new Kernel::TimeSeriesProperty<double>("Chopper_Delay"));
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> chopSpeedLog(
-        new Kernel::TimeSeriesProperty<double>("Chopper_Speed"));
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> isRunning(
-        new Kernel::TimeSeriesProperty<double>("is_running"));
+    auto chopDelayLog = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "Chopper_Delay");
+    auto chopSpeedLog = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+        "Chopper_Speed");
+    auto isRunning =
+        Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("is_running");
 
     for (int i = 0; i < 10; i++) {
       auto time = Kernel::DateAndTime(10 * i, 0);

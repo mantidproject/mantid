@@ -2,6 +2,7 @@
 #define MANTID_CRYSTAL_PEAKINTENSITYVSRADIUSTEST_H_
 
 #include "MantidCrystal/PeakIntensityVsRadius.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -48,7 +49,7 @@ public:
                                       "PeakParams", mess.str().c_str());
   }
 
-  void setUp() {
+  void setUp() override {
     // Fake MDWorkspace with 2 peaks
     createMDEW();
     addPeak(1000, 0, 0, 0, 1.0);

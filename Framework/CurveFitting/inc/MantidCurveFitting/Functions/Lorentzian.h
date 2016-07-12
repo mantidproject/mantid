@@ -46,28 +46,39 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport Lorentzian : public API::IPeakFunction {
 public:
-  /// Destructor
-  virtual ~Lorentzian(){};
-
+  Lorentzian();
   /// overwrite IPeakFunction base class methods
-  virtual double centre() const { return getParameter("PeakCentre"); }
-  virtual double height() const;
-  virtual double fwhm() const { return getParameter("FWHM"); }
-  virtual void setCentre(const double c) { setParameter("PeakCentre", c); }
-  virtual void setHeight(const double h);
-  virtual void setFwhm(const double w) { setParameter("FWHM", w); }
+  double centre() const override { return getParameter("PeakCentre"); }
+  double height() const override;
+  double fwhm() const override { return getParameter("FWHM"); }
+  double intensity() const override { return getParameter("Amplitude"); }
+  void setCentre(const double c) override { setParameter("PeakCentre", c); }
+  void setHeight(const double h) override;
+  void setFwhm(const double w) override;
+  void setIntensity(const double i) override { setParameter("Amplitude", i); }
+  void fixCentre() override;
+  void unfixCentre() override;
+  void fixIntensity() override;
+  void unfixIntensity() override;
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "Lorentzian"; }
-  virtual const std::string category() const { return "Peak"; }
+  std::string name() const override { return "Lorentzian"; }
+  const std::string category() const override { return "Peak"; }
 
 protected:
-  virtual void functionLocal(double *out, const double *xValues,
-                             const size_t nData) const;
-  virtual void functionDerivLocal(API::Jacobian *out, const double *xValues,
-                                  const size_t nData);
+  void functionLocal(double *out, const double *xValues,
+                     const size_t nData) const override;
+  void functionDerivLocal(API::Jacobian *out, const double *xValues,
+                          const size_t nData) override;
   /// overwrite IFunction base class method, which declare function parameters
-  virtual void init();
+  void init() override;
+
+private:
+  /// When Amplitude is set via setHeight() and fwhm() == 0 height is made equal
+  /// to Amplitude.
+  /// The flag is used after that when FWHM is set to non-zero value.
+  /// The height in this case must remain the same but amplitude change.
+  bool m_amplitudeEqualHeight;
 };
 
 } // namespace Functions

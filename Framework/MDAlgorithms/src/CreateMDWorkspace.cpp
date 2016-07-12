@@ -1,20 +1,20 @@
+#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/MDFrame.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidGeometry/MDGeometry/QLab.h"
-#include "MantidGeometry/MDGeometry/HKL.h"
-#include "MantidGeometry/MDGeometry/GeneralFrame.h"
-#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/System.h"
-#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidKernel/Memory.h"
-#include <math.h>
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Memory.h"
+#include "MantidKernel/System.h"
+#include <cmath>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -27,40 +27,29 @@ using namespace Mantid::DataObjects;
 DECLARE_ALGORITHM(CreateMDWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateMDWorkspace::CreateMDWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateMDWorkspace::~CreateMDWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CreateMDWorkspace::init() {
-  declareProperty(new PropertyWithValue<int>("Dimensions", 1, Direction::Input),
-                  "Number of dimensions that the workspace will have.");
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("Dimensions", 1, Direction::Input),
+      "Number of dimensions that the workspace will have.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("MDEvent");
-  propOptions.push_back("MDLeanEvent");
+  std::vector<std::string> propOptions{"MDEvent", "MDLeanEvent"};
   declareProperty("EventType", "MDLeanEvent",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which underlying data type will event take.");
 
-  declareProperty(new ArrayProperty<double>("Extents"),
+  declareProperty(make_unique<ArrayProperty<double>>("Extents"),
                   "A comma separated list of min, max for each dimension,\n"
                   "specifying the extents of each dimension.");
 
-  declareProperty(new ArrayProperty<std::string>("Names"),
+  declareProperty(make_unique<ArrayProperty<std::string>>("Names"),
                   "A comma separated list of the name of each dimension.");
 
-  declareProperty(new ArrayProperty<std::string>("Units"),
+  declareProperty(make_unique<ArrayProperty<std::string>>("Units"),
                   "A comma separated list of the units of each dimension.");
   declareProperty(
-      new ArrayProperty<std::string>("Frames"),
+      make_unique<ArrayProperty<std::string>>("Frames"),
       " A comma separated list of the frames of each dimension. "
       " The frames can be"
       " **General Frame**: Any frame which is not a Q-based frame."
@@ -73,7 +62,7 @@ void CreateMDWorkspace::init() {
   // Set the box controller properties
   this->initBoxControllerProps("5", 1000, 5);
 
-  declareProperty(new PropertyWithValue<int>("MinRecursionDepth", 0),
+  declareProperty(make_unique<PropertyWithValue<int>>("MinRecursionDepth", 0),
                   "Optional. If specified, then all the boxes will be split to "
                   "this minimum recursion depth. 0 = no splitting, 1 = one "
                   "level of splitting, etc.\n"
@@ -82,21 +71,22 @@ void CreateMDWorkspace::init() {
                   "NumDimensions)).");
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::OptionalSave, {".nxs"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                ".nxs"),
       "Optional: to use a file as the back end, give the path to the file to "
       "save.");
 
   declareProperty(
-      new PropertyWithValue<int>("Memory", -1),
+      make_unique<PropertyWithValue<int>>("Memory", -1),
       "If Filename is specified to use a file back end:\n"
       "  The amount of memory (in MB) to allocate to the in-memory cache.\n"
       "  If not specified, a default of 40% of free physical memory is used.");
-  setPropertySettings("Memory",
-                      new EnabledWhenProperty("Filename", IS_NOT_DEFAULT));
+  setPropertySettings(
+      "Memory", make_unique<EnabledWhenProperty>("Filename", IS_NOT_DEFAULT));
 }
 
 /** Finish initialisation
@@ -191,14 +181,14 @@ void CreateMDWorkspace::exec() {
   std::string filename = getProperty("Filename");
   if (!filename.empty()) {
     // First save to the NXS file
-    g_log.notice() << "Running SaveMD" << std::endl;
+    g_log.notice() << "Running SaveMD\n";
     IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("InputWorkspace",
                      boost::dynamic_pointer_cast<IMDWorkspace>(out));
     alg->executeAsChildAlg();
     // And now re-load it with this file as the backing.
-    g_log.notice() << "Running LoadMD" << std::endl;
+    g_log.notice() << "Running LoadMD\n";
     alg = createChildAlgorithm("LoadMD");
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("FileBackEnd", true);
@@ -229,15 +219,14 @@ std::map<std::string, std::string> CreateMDWorkspace::validateInputs() {
   int ndims_prop = getProperty("Dimensions");
   auto ndims = static_cast<size_t>(ndims_prop);
 
-  std::vector<std::string> targetFrames;
-  targetFrames.push_back(Mantid::Geometry::GeneralFrame::GeneralFrameName);
-  targetFrames.push_back(Mantid::Geometry::HKL::HKLName);
-  targetFrames.push_back(Mantid::Geometry::QLab::QLabName);
-  targetFrames.push_back(Mantid::Geometry::QSample::QSampleName);
+  std::vector<std::string> targetFrames{
+      Mantid::Geometry::GeneralFrame::GeneralFrameName,
+      Mantid::Geometry::HKL::HKLName, Mantid::Geometry::QLab::QLabName,
+      Mantid::Geometry::QSample::QSampleName};
 
   auto isValidFrame = true;
-  for (auto it = frames.begin(); it != frames.end(); ++it) {
-    auto result = checkIfFrameValid(*it, targetFrames);
+  for (auto &frame : frames) {
+    auto result = checkIfFrameValid(frame, targetFrames);
     if (!result) {
       isValidFrame = result;
     }
@@ -251,7 +240,7 @@ std::map<std::string, std::string> CreateMDWorkspace::validateInputs() {
     std::string message = "The selected frames can be 'HKL', 'QSample', 'QLab' "
                           "or 'General Frame'. You must specify as many frames "
                           "as there are dimensions.";
-    errors.insert(std::make_pair(framePropertyName, message));
+    errors.emplace(framePropertyName, message);
   }
   return errors;
 }
@@ -264,9 +253,8 @@ std::map<std::string, std::string> CreateMDWorkspace::validateInputs() {
  */
 bool CreateMDWorkspace::checkIfFrameValid(
     const std::string &frame, const std::vector<std::string> &targetFrames) {
-  for (auto targetFrame = targetFrames.begin();
-       targetFrame != targetFrames.end(); ++targetFrame) {
-    if (*targetFrame == frame) {
+  for (const auto &targetFrame : targetFrames) {
+    if (targetFrame == frame) {
       return true;
     }
   }

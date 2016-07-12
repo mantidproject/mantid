@@ -57,26 +57,17 @@ template <class SingleValueParameterType>
 class DLLExport SingleValueParameterParser
     : public Mantid::API::ImplicitFunctionParameterParser {
 public:
-  SingleValueParameterParser();
-
   Mantid::API::ImplicitFunctionParameter *
-  createParameter(Poco::XML::Element *parameterElement);
+  createParameter(Poco::XML::Element *parameterElement) override;
 
   SingleValueParameterType *
   createWithoutDelegation(Poco::XML::Element *parameterElement);
 
-  void
-  setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser *paramParser);
-
-  ~SingleValueParameterParser();
+  void setSuccessorParser(
+      Mantid::API::ImplicitFunctionParameterParser *paramParser) override;
 };
 
 //////////////////////////////////////////////////////////////////////////////////
-
-/// Default constructor
-template <class SingleValueParameterType>
-SingleValueParameterParser<
-    SingleValueParameterType>::SingleValueParameterParser() {}
 
 //------------------------------------------------------------------------------
 /* Creates a parameter from an xml element, otherwise defers to a successor
@@ -134,11 +125,6 @@ void SingleValueParameterParser<SingleValueParameterType>::setSuccessorParser(
   Mantid::API::ImplicitFunctionParameterParser::SuccessorType temp(paramParser);
   m_successor.swap(temp);
 }
-
-/// Destructor.
-template <class SingleValueParameterType>
-SingleValueParameterParser<
-    SingleValueParameterType>::~SingleValueParameterParser() {}
 }
 }
 

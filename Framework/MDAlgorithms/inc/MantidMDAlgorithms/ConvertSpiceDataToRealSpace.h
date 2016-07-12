@@ -1,11 +1,11 @@
 #ifndef MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACE_H_
 #define MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/FileDescriptor.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/FileDescriptor.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -36,24 +36,21 @@ namespace MDAlgorithms {
 */
 class DLLExport ConvertSpiceDataToRealSpace : public API::Algorithm {
 public:
-  ConvertSpiceDataToRealSpace();
-  virtual ~ConvertSpiceDataToRealSpace();
-
   /// Algorithm's name
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "ConvertSpiceDataToRealSpace";
   }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load a HFIR powder diffractometer SPICE file.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\ConstantWavelength;DataHandling\\Text";
   }
 
@@ -65,10 +62,10 @@ private:
   typedef std::deque<std::string> DataCollectionType;
 
   /// Initialisation code
-  void init();
+  void init() override;
 
   /// Execution code
-  void exec();
+  void exec() override;
 
   /// Load data by call
   DataObjects::TableWorkspace_sptr
@@ -120,9 +117,8 @@ private:
                    const std::vector<Kernel::DateAndTime> &vectimes);
 
   /// Parse detector efficiency table workspace to map
-  void
-  parseDetectorEfficiencyTable(DataObjects::TableWorkspace_sptr detefftablews,
-                               std::map<detid_t, double> &deteffmap);
+  std::map<detid_t, double>
+  parseDetectorEfficiencyTable(DataObjects::TableWorkspace_sptr detefftablews);
 
   /// Apply the detector's efficiency correction to
   void
@@ -133,7 +129,7 @@ private:
   std::string m_instrumentName;
 
   /// Number of detectors
-  size_t m_numSpec;
+  size_t m_numSpec = 0;
 
   /// x-y-z-value minimum
   std::vector<double> m_extentMins;
@@ -142,7 +138,7 @@ private:
   /// Number of bins
   std::vector<size_t> m_numBins;
   /// Dimension of the output MDEventWorkspace
-  size_t m_nDimensions;
+  size_t m_nDimensions = 3;
 };
 
 } // namespace DataHandling

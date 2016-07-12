@@ -43,7 +43,7 @@ void moveComponent(const IComponent &comp, ParameterMap &pmap,
     break;
   default:
     throw std::invalid_argument("moveComponent -  Unknown positionType: " +
-                                boost::lexical_cast<std::string>(positionType));
+                                std::to_string(positionType));
   }
 
   // Then find the corresponding relative position
@@ -89,7 +89,7 @@ void rotateComponent(const IComponent &comp, ParameterMap &pmap,
     newRot = Rot0 * rot;
   } else {
     throw std::invalid_argument("rotateComponent -  Unknown rotType: " +
-                                boost::lexical_cast<std::string>(rotType));
+                                std::to_string(rotType));
   }
 
   // Add a parameter for the new rotation
@@ -133,7 +133,7 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
   instrument->markAsSamplePos(sample);
 
   // A detector
-  Detector *det = new Detector("point-detector", 1 /*detector id*/, NULL);
+  Detector *det = new Detector("point-detector", 1 /*detector id*/, nullptr);
   det->setPos(detectorPos);
   det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));
   instrument->add(det);
@@ -169,7 +169,7 @@ createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
   size_t numdets = vecdetpos.size();
   for (size_t i = 0; i < numdets; ++i) {
     Detector *det =
-        new Detector("point-detector", vecdetid[i] /*detector id*/, NULL);
+        new Detector("point-detector", vecdetid[i] /*detector id*/, nullptr);
     det->setPos(vecdetpos[i]);
     // FIXME - should be cubi... pixel
     det->setShape(createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"));

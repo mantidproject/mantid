@@ -29,7 +29,7 @@ public:
    pre-calculates and caches to cos theta for speed.
    @param thetaIncident: incident theta value in degrees
    */
-  void setThetaIncident(double thetaIncident) {
+  void setThetaIncident(double thetaIncident) override {
     m_cos_theta_i = cos(thetaIncident * to_radians_factor);
     m_sin_theta_i = sin(thetaIncident * to_radians_factor);
   }
@@ -39,7 +39,7 @@ public:
    pre-calculates and caches to cos theta for speed.
    @param thetaFinal: final theta value in degrees
    */
-  void setThetaFinal(double thetaFinal) {
+  void setThetaFinal(double thetaFinal) override {
     const double c_cos_theta_f = cos(thetaFinal * to_radians_factor);
     m_dirQx = (c_cos_theta_f - m_cos_theta_i);
     const double c_sin_theta_f = sin(thetaFinal * to_radians_factor);
@@ -50,7 +50,7 @@ public:
    Executes the calculation to determine Qx
    @param wavelength : wavelenght in Anstroms
    */
-  double calculateDim0(double wavelength) const {
+  double calculateDim0(double wavelength) const override {
     double wavenumber = 2 * M_PI / wavelength;
     return wavenumber * m_dirQx;
   }
@@ -59,14 +59,14 @@ public:
    Executes the calculation to determine Qz
    @param wavelength : wavelenght in Anstroms
    */
-  double calculateDim1(double wavelength) const {
+  double calculateDim1(double wavelength) const override {
     double wavenumber = 2 * M_PI / wavelength;
     return wavenumber * m_dirQz;
   }
 
   Mantid::Geometry::Quadrilateral createQuad(double lamUpper, double lamLower,
                                              double thetaUpper,
-                                             double thetaLower) {
+                                             double thetaLower) override {
     setThetaFinal(thetaLower);
     const Mantid::Kernel::V2D firstVertex(calculateDim0(lamLower), // highest qx
                                           calculateDim1(lamLower));

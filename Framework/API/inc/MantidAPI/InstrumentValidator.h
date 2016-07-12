@@ -43,9 +43,9 @@ public:
   // The default is historical so I don't break a lot of user code
   InstrumentValidator(const unsigned int flags = SamplePosition);
   std::string getType() const;
-  Kernel::IValidator_sptr clone() const;
+  Kernel::IValidator_sptr clone() const override;
   std::string
-  checkValidity(const boost::shared_ptr<ExperimentInfo> &value) const;
+  checkValidity(const boost::shared_ptr<ExperimentInfo> &value) const override;
 
 private:
   unsigned int m_requires;

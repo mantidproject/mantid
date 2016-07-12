@@ -5,6 +5,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/IQTransform.h"
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/UnitFactory.h"
 
 class IQTransformTest : public CxxTest::TestSuite {
@@ -19,16 +20,16 @@ public:
     inWS_hist = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 2);
     inWS_hist->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
-    inWS_hist->isDistribution(true);
+    inWS_hist->setDistribution(true);
 
     inWS_point = WorkspaceCreationHelper::Create2DWorkspace154(1, 1);
     inWS_point->dataX(0)[0] = 3.0; // 1 is not a good number to test with
     inWS_point->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
-    inWS_point->isDistribution(true);
+    inWS_point->setDistribution(true);
   }
 
-  ~IQTransformTest() {
+  ~IQTransformTest() override {
     // Tidy up
     Mantid::API::AnalysisDataService::Instance().clear();
   }

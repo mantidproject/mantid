@@ -21,10 +21,12 @@ public:
     UserTestJacobian(int nData, int nParams) : m_nParams(nParams) {
       m_buffer.resize(nData * nParams);
     }
-    void set(size_t iY, size_t iP, double value) {
+    void set(size_t iY, size_t iP, double value) override {
       m_buffer[iY * m_nParams + iP] = value;
     }
-    double get(size_t iY, size_t iP) { return m_buffer[iY * m_nParams + iP]; }
+    double get(size_t iY, size_t iP) override {
+      return m_buffer[iY * m_nParams + iP];
+    }
   };
 
   void testIt() {

@@ -10,12 +10,6 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace API {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MultiPeriodGroupWorker::MultiPeriodGroupWorker()
-    : m_workspacePropertyName("") {}
-
 /**
  * Constructor
  * @param workspacePropertyName : Property name to treat as source of
@@ -24,11 +18,6 @@ MultiPeriodGroupWorker::MultiPeriodGroupWorker()
 MultiPeriodGroupWorker::MultiPeriodGroupWorker(
     const std::string &workspacePropertyName)
     : m_workspacePropertyName(workspacePropertyName) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MultiPeriodGroupWorker::~MultiPeriodGroupWorker() {}
 
 /**
  * Try to add the input workspace to the multiperiod input group list.
@@ -78,10 +67,10 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
         sourceAlg->getProperty(this->m_workspacePropertyName);
 
     // Inspect all the input workspaces in the ArrayProperty input.
-    for (auto it = workspaces.begin(); it != workspaces.end(); ++it) {
-      Workspace_sptr ws = AnalysisDataService::Instance().retrieve(*it);
+    for (auto &workspace : workspaces) {
+      Workspace_sptr ws = AnalysisDataService::Instance().retrieve(workspace);
       if (!ws) {
-        throw Kernel::Exception::NotFoundError("Workspace", *it);
+        throw Kernel::Exception::NotFoundError("Workspace", workspace);
       }
       tryAddInputWorkspaceToInputGroups(ws, vecWorkspaceGroups);
     }
@@ -91,8 +80,8 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
     WorkspaceVector outWorkspaces;
     sourceAlg->findWorkspaceProperties(inWorkspaces, outWorkspaces);
     UNUSED_ARG(outWorkspaces);
-    for (auto it = inWorkspaces.begin(); it != inWorkspaces.end(); ++it) {
-      tryAddInputWorkspaceToInputGroups(*it, vecWorkspaceGroups);
+    for (auto &inWorkspace : inWorkspaces) {
+      tryAddInputWorkspaceToInputGroups(inWorkspace, vecWorkspaceGroups);
     }
   }
 
@@ -130,9 +119,8 @@ std::string MultiPeriodGroupWorker::createFormattedInputWorkspaceNames(
     const size_t &periodIndex, const VecWSGroupType &vecWorkspaceGroups) const {
   std::string prefix = "";
   std::string inputWorkspaces = "";
-  for (size_t j = 0; j < vecWorkspaceGroups.size(); ++j) {
-    inputWorkspaces +=
-        prefix + vecWorkspaceGroups[j]->getItem(periodIndex)->name();
+  for (const auto &vecWorkspaceGroup : vecWorkspaceGroups) {
+    inputWorkspaces += prefix + vecWorkspaceGroup->getItem(periodIndex)->name();
     prefix = ",";
   }
   return inputWorkspaces;
@@ -155,8 +143,7 @@ void MultiPeriodGroupWorker::copyInputWorkspaceProperties(
     IAlgorithm *targetAlg, IAlgorithm *sourceAlg,
     const int &periodNumber) const {
   std::vector<Property *> props = sourceAlg->getProperties();
-  for (size_t j = 0; j < props.size(); j++) {
-    Property *prop = props[j];
+  for (auto prop : props) {
     if (prop) {
       if (prop->direction() == Direction::Input) {
         if (const IWorkspaceProperty *wsProp =
@@ -195,7 +182,7 @@ bool MultiPeriodGroupWorker::processGroups(
     Algorithm *const sourceAlg,
     const VecWSGroupType &vecMultiPeriodGroups) const {
   // If we are not processing multiperiod groups, use the base behaviour.
-  if (vecMultiPeriodGroups.size() < 1) {
+  if (vecMultiPeriodGroups.empty()) {
     return false; // Indicates that this is not a multiperiod group workspace.
   }
   Property *outputWorkspaceProperty = sourceAlg->getProperty("OutputWorkspace");
@@ -205,12 +192,20 @@ bool MultiPeriodGroupWorker::processGroups(
   WorkspaceGroup_sptr outputWS = boost::make_shared<WorkspaceGroup>();
   AnalysisDataService::Instance().addOrReplace(outName, outputWS);
 
+  double progress_proportion = 1.0 / static_cast<double>(nPeriods);
   // Loop through all the periods. Create spawned algorithms of the same type as
   // this to process pairs from the input groups.
   for (size_t i = 0; i < nPeriods; ++i) {
     const int periodNumber = static_cast<int>(i + 1);
-    Algorithm_sptr alg_sptr = API::AlgorithmManager::Instance().createUnmanaged(
-        sourceAlg->name(), sourceAlg->version());
+    // use create Child Algorithm that look like this one
+    Algorithm_sptr alg_sptr = sourceAlg->createChildAlgorithm(
+        sourceAlg->name(), progress_proportion * periodNumber,
+        progress_proportion * (1 + periodNumber), sourceAlg->isLogging(),
+        sourceAlg->version());
+    // Don't make the new algorithm a child so that it's workspaces are stored
+    // correctly
+    alg_sptr->setChild(false);
+    alg_sptr->setRethrows(true);
     IAlgorithm *alg = alg_sptr.get();
     if (!alg) {
       throw std::runtime_error("Algorithm creation failed.");

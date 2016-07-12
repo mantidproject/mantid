@@ -2,8 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CalculateEfficiency.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include <vector>
 
@@ -23,10 +25,11 @@ using namespace DataObjects;
  */
 void CalculateEfficiency::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The workspace containing the flood data");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
@@ -37,6 +40,8 @@ void CalculateEfficiency::init() {
   declareProperty(
       "MaxEfficiency", EMPTY_DBL(), positiveDouble,
       "Maximum efficiency for a pixel to be considered (default: no maximum).");
+  declareProperty("MaskedFullComponent", "",
+                  "Component Name to fully mask according to the IDF file.");
 }
 
 /** Executes the algorithm
@@ -52,6 +57,25 @@ void CalculateEfficiency::exec() {
   // Get the input workspace
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr rebinnedWS; // = inputWS;
+
+  /* BioSANS has 2 detectors and reduces one at the time: one is masked!
+   * We must use that masked detector
+   **/
+  const std::string maskComponent = getPropertyValue("MaskedFullComponent");
+  if (!maskComponent.empty()) {
+    g_log.debug() << "Masking Full Component: " << maskComponent
+                  << " in workspace name: '" << inputWS->name()
+                  << "' in workspace getName: '" << inputWS->getName()
+                  << "' in workspace: " << inputWS->toString() << "\n";
+
+    IAlgorithm_sptr maskAlgo = createChildAlgorithm("SANSMask");
+    maskAlgo->initialize();
+    maskAlgo->setProperty("Workspace", inputWS);
+    // maskAlgo->setProperty<MatrixWorkspace_sptr>("Workspace", inputWS);
+    // maskAlgo->setProperty("Workspace", inputWS->name());
+    maskAlgo->setProperty("MaskedFullComponent", maskComponent);
+    maskAlgo->execute();
+  }
 
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS; // = getProperty("OutputWorkspace");
@@ -145,6 +169,9 @@ void CalculateEfficiency::sumUnmaskedDetectors(MatrixWorkspace_sptr rebinnedWS,
     nPixels++;
   }
 
+  g_log.debug() << "sumUnmaskedDetectors: unmasked pixels = " << nPixels
+                << " from a total of " << numberOfSpectra << "\n";
+
   error = std::sqrt(error);
 }
 
@@ -207,6 +234,13 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
     if (!isEmpty(max_eff) && YOut[0] > max_eff)
       dets_to_mask.push_back(i);
   }
+
+  g_log.debug() << "normalizeDetectors: Masked pixels outside the acceptable "
+                   "efficiency range [" << min_eff << "," << max_eff
+                << "] = " << dets_to_mask.size()
+                << " from a total of non masked = " << nPixels
+                << " (from a total number of spectra in the ws = "
+                << numberOfSpectra << ")\n";
 
   // If we identified pixels to be masked, mask them now
   if (!dets_to_mask.empty()) {

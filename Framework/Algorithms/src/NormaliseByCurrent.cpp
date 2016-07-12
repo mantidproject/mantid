@@ -16,18 +16,12 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-/// Default constructor
-NormaliseByCurrent::NormaliseByCurrent() : Algorithm() {}
-
-// Destructor
-NormaliseByCurrent::~NormaliseByCurrent() {}
-
 void NormaliseByCurrent::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
 }
 
@@ -57,6 +51,8 @@ double NormaliseByCurrent::extractCharge(
                            "wrong current.\n";
   }
   // Handle multiperiod data.
+  // The number of periods is set above by reference
+  // cppcheck-suppress knownConditionTrueFalse
   if (nPeriods > 1) {
     // Fetch the period property
     Property *currentPeriodNumberProperty = run.getLogData("current_period");
@@ -110,8 +106,7 @@ void NormaliseByCurrent::exec() {
   // Get the good proton charge and check it's valid
   double charge = extractCharge(inputWS);
 
-  g_log.information() << "Normalisation current: " << charge << " uamps"
-                      << std::endl;
+  g_log.information() << "Normalisation current: " << charge << " uamps\n";
 
   double invcharge = 1.0 / charge; // Inverse of the charge to be multiplied by
 

@@ -10,7 +10,8 @@
   @author Janik Zikovsky
   @date 06/24/2011
 
-  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -33,49 +34,37 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
 class vtkPolyData;
 
-namespace Mantid
-{
-namespace VATES
-{
+namespace Mantid {
+namespace VATES {
 // Forward dec.
-class ProgressAction; 
+class ProgressAction;
 
-class DLLExport vtkPeakMarkerFactory
-{
+class DLLExport vtkPeakMarkerFactory {
 public:
-
   /// Enum describing which dimension to show single-crystal peaks
-  enum ePeakDimensions
-  {
-    Peak_in_Q_lab, ///< Q in the lab frame
+  enum ePeakDimensions {
+    Peak_in_Q_lab,    ///< Q in the lab frame
     Peak_in_Q_sample, ///< Q in the sample frame (goniometer rotation taken out)
-    Peak_in_HKL ///< HKL miller indices
+    Peak_in_HKL       ///< HKL miller indices
   };
 
   /// Constructor
-  vtkPeakMarkerFactory(const std::string& scalarname, ePeakDimensions dimensions = Peak_in_Q_lab);
-
-  /// Assignment operator
-  vtkPeakMarkerFactory& operator=(const vtkPeakMarkerFactory& other);
-
-  /// Copy constructor.
-  vtkPeakMarkerFactory(const vtkPeakMarkerFactory& other);
-
-  /// Destructor
-  ~vtkPeakMarkerFactory();
+  vtkPeakMarkerFactory(const std::string &scalarname,
+                       ePeakDimensions dimensions = Peak_in_Q_lab);
 
   /// Initialize the object with a workspace.
   virtual void initialize(Mantid::API::Workspace_sptr workspace);
 
   /// Factory method
-  vtkPolyData* create(ProgressAction& progressUpdating) const;
+  vtkSmartPointer<vtkPolyData> create(ProgressAction &progressUpdating) const;
 
-  virtual std::string getFactoryTypeName() const
-  {
+  virtual std::string getFactoryTypeName() const {
     return "vtkPeakMarkerFactory";
   }
 
@@ -86,13 +75,25 @@ public:
   bool isPeaksWorkspaceIntegrated() const;
 
 protected:
-
   virtual void validate() const;
 
 private:
   void validateWsNotNull() const;
 
   void validateDimensionsPresent() const;
+
+  /// Get glyph position
+  Kernel::V3D getPosition(const Mantid::Geometry::IPeak &peak) const;
+
+  /// Get ellipsoid axes
+  std::vector<Mantid::Kernel::V3D>
+  getAxes(const Mantid::DataObjects::PeakShapeEllipsoid &ellipticalShape,
+          const Mantid::Geometry::IPeak &peak) const;
+
+  /// Get the tranform tensor for vtkTensorGlyph
+  std::array<float, 9> getTransformTensor(
+      const Mantid::DataObjects::PeakShapeEllipsoid &ellipticalShape,
+      const Mantid::Geometry::IPeak &peak) const;
 
   /// Peaks workspace containg peaks to mark
   Mantid::API::IPeaksWorkspace_sptr m_workspace;
@@ -104,7 +105,7 @@ private:
   ePeakDimensions m_dimensionToShow;
 
   /// peak radius value.
-  double m_peakRadius; 
+  double m_peakRadius;
 };
 }
 }

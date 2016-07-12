@@ -10,6 +10,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidMDAlgorithms/ConvertMDHistoToMatrixWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"

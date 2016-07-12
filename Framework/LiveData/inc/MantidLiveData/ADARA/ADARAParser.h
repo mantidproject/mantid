@@ -1,10 +1,10 @@
 #ifndef __ADARA_PARSER_H
 #define __ADARA_PARSER_H
 
-#include <string>
-#include <stdint.h>
-#include <stdexcept>
+#include <cstdint>
 #include <map>
+#include <stdexcept>
+#include <string>
 
 #include "ADARA.h"
 #include "ADARAPackets.h"
@@ -23,11 +23,34 @@ namespace ADARA {
 class DLLExport Parser {
 public:
   /// Constructor
-  Parser(unsigned int inital_buffer_size = 1024 * 1024,
-         unsigned int max_pkt_size = 8 * 1024 * 1024);
+  Parser(uint32_t initial_buffer_size = 1024 * 1024,
+         uint32_t max_pkt_size = 8 * 1024 * 1024);
 
   /// Destructor
   virtual ~Parser();
+
+  int64_t last_bytes_read;
+  int64_t last_last_bytes_read;
+  int64_t last_pkts_parsed;
+  int64_t last_last_pkts_parsed;
+  uint64_t last_total_bytes;
+  uint64_t last_last_total_bytes;
+  uint32_t last_total_packets;
+  uint32_t last_last_total_packets;
+  uint32_t last_read_count;
+  uint32_t last_last_read_count;
+  uint32_t last_loop_count;
+  uint32_t last_last_loop_count;
+  double last_parse_elapsed_total;
+  double last_last_parse_elapsed_total;
+  double last_read_elapsed_total;
+  double last_last_read_elapsed_total;
+  double last_parse_elapsed;
+  double last_last_parse_elapsed;
+  double last_read_elapsed;
+  double last_last_read_elapsed;
+  double last_elapsed;
+  double last_last_elapsed;
 
 protected:
   /** @name Buffer Manipulation Functions
@@ -37,7 +60,7 @@ protected:
     *
     * bufferFillAddress() returns the address at which to begin
     * placing additional data. bufferFillLength() returns the
-    *  maximum amount of data that can be appended at that address.
+    * maximum amount of data that can be appended at that address.
     * The address is guaranteed to be non-NULL if the length is
     * non-zero, but will be NULL if length is zero.
     * Users must not cache the return values from these functions
@@ -48,13 +71,13 @@ protected:
     * new data has been placed in the buffer.
     **/
   /**@{*/
-  uint8_t *bufferFillAddress(void) const {
+  uint8_t *bufferFillAddress() const {
     if (bufferFillLength())
       return m_buffer + m_len;
-    return NULL;
+    return nullptr;
   }
 
-  unsigned int bufferFillLength(void) const { return m_size - m_len; }
+  unsigned int bufferFillLength() const { return m_size - m_len; }
 
   void bufferBytesAppended(unsigned int count) {
     if (bufferFillLength() < count) {
@@ -83,7 +106,7 @@ protected:
 
   /** Flush the internal buffers and get ready to restart parsing.
     **/
-  virtual void reset(void);
+  virtual void reset();
 
   /** @name Generic rxPacket Functions
     * The rxPacket function gets called for every packet that fits in the
@@ -157,7 +180,7 @@ protected:
 
   /* Reset the collected "discarded packet" statistics.
     */
-  void resetDiscardedPacketsStats(void);
+  void resetDiscardedPacketsStats();
 
 private:
   uint8_t *m_buffer;
@@ -169,7 +192,7 @@ private:
   unsigned int m_oversize_len;
   unsigned int m_oversize_offset;
 
-  std::map<PacketType::Enum, uint64_t> m_discarded_packets;
+  std::map<PacketType::Type, uint64_t> m_discarded_packets;
 };
 
 } /* namespacce ADARA */

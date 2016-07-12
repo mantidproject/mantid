@@ -87,11 +87,6 @@ void MDBoxImplicitFunction::construct(const Mantid::Kernel::VMD &min,
   m_volume = volume;
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MDBoxImplicitFunction::~MDBoxImplicitFunction() {}
-
 /**
  * Calculate volume
  * @return box volume

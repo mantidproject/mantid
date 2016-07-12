@@ -2,13 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadCanSAS1D2.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -33,17 +35,12 @@ namespace DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D2)
 
-/// constructor
-LoadCanSAS1D2::LoadCanSAS1D2() : LoadCanSAS1D() {}
-
-/// destructor
-LoadCanSAS1D2::~LoadCanSAS1D2() {}
-
 /// Overwrites Algorithm Init method.
 void LoadCanSAS1D2::init() {
   LoadCanSAS1D::init();
   declareProperty(
-      new PropertyWithValue<bool>("LoadTransmission", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("LoadTransmission", false,
+                                           Direction::Input),
       "Load the transmission related data from the file if it is present "
       "(optional, default False).");
 }
@@ -54,7 +51,7 @@ void LoadCanSAS1D2::exec() {
   if (!loadTrans)
     return; // all done. It is not to load the transmission, nor check if it
             // exists.
-  if (trans_gp.size() == 0 && trans_can_gp.size() == 0) {
+  if (trans_gp.empty() && trans_can_gp.empty()) {
     return; // all done, not transmission inside
   }
 
@@ -90,7 +87,7 @@ void LoadCanSAS1D2::processTransmission(
   if (trans_gp.size() == 1) {
     MatrixWorkspace_sptr WS = trans_gp[0];
     WS->mutableRun().addProperty("Filename", fileName);
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+    declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                         propertyWS, trans_wsname, Direction::Output),
                     doc);
 
@@ -105,15 +102,15 @@ void LoadCanSAS1D2::processTransmission(
       std::stringstream name;
       pname << propertyWS << i;
       name << trans_wsname << i;
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+      declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                           pname.str(), name.str(), Direction::Output),
                       doc);
       setProperty(pname.str(), newWork);
       group->addWorkspace(newWork);
     }
     std::string pname = std::string(propertyWS).append("GP");
-    declareProperty(new WorkspaceProperty<WorkspaceGroup>(pname, trans_wsname,
-                                                          Direction::Output),
+    declareProperty(Kernel::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                        pname, trans_wsname, Direction::Output),
                     doc);
     setProperty(pname, group);
   }
@@ -147,7 +144,7 @@ LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
       workspaceElem->getElementsByTagName("SAStransmission_spectrum");
   if (!sasTransList->length()) {
     g_log.warning() << "There is no transmission data for this file "
-                    << getPropertyValue("Filename") << std::endl;
+                    << getPropertyValue("Filename") << '\n';
     return main_out;
   }
 
@@ -176,7 +173,7 @@ LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
     title += ":trans";
     title += sasTrasElem->getAttribute("name");
     dataWS->setTitle(title);
-    dataWS->isDistribution(true);
+    dataWS->setDistribution(true);
     dataWS->setYUnit("");
 
     // load workspace data

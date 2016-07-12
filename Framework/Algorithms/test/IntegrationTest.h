@@ -17,7 +17,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::MantidVec;
-using Mantid::specid_t;
+using Mantid::specnum_t;
 
 class IntegrationTest : public CxxTest::TestSuite {
 public:
@@ -39,17 +39,14 @@ public:
       for (int k = 0; k < 6; ++k) {
         space2D->dataX(j)[k] = k;
       }
-      space2D->setData(
-          j, boost::shared_ptr<Mantid::MantidVec>(
-                 new Mantid::MantidVec(a + (5 * j), a + (5 * j) + 5)),
-          boost::shared_ptr<Mantid::MantidVec>(
-              new Mantid::MantidVec(e + (5 * j), e + (5 * j) + 5)));
+      space2D->dataY(j) = Mantid::MantidVec(a + (5 * j), a + (5 * j) + 5);
+      space2D->dataE(j) = Mantid::MantidVec(e + (5 * j), e + (5 * j) + 5);
     }
     // Register the workspace in the data service
     AnalysisDataService::Instance().add("testSpace", space);
   }
 
-  ~IntegrationTest() { AnalysisDataService::Instance().clear(); }
+  ~IntegrationTest() override { AnalysisDataService::Instance().clear(); }
 
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -193,7 +190,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         input = AnalysisDataService::Instance().retrieve("testSpace"));
     Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(output);
-    input2D->isDistribution(true);
+    input2D->setDistribution(true);
     // Replace workspace
     AnalysisDataService::Instance().addOrReplace("testSpace", input2D);
 
@@ -240,12 +237,7 @@ public:
     integ.execute();
     TS_ASSERT(integ.isExecuted());
 
-    // No longer output an EventWorkspace, Rebin should be used instead
-    // EventWorkspace_sptr output;
-    // TS_ASSERT_THROWS_NOTHING(output =
-    // boost::dynamic_pointer_cast<EventWorkspace>(
-    // AnalysisDataService::Instance().retrieve(outName) ) );
-
+    // No longer output an EventWorkspace
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outName));
@@ -269,9 +261,9 @@ public:
       TS_ASSERT_DELTA(Y[0], 20.0, 1e-6);
       TS_ASSERT_DELTA(E[0], sqrt(20.0), 1e-6);
       // Correct spectra etc?
-      specid_t specNo = output2D->getSpectrum(i)->getSpectrumNo();
+      specnum_t specNo = output2D->getSpectrum(i).getSpectrumNo();
       TS_ASSERT_EQUALS(specNo, StartWorkspaceIndex + i);
-      TS_ASSERT(output2D->getSpectrum(i)->hasDetectorID(specNo));
+      TS_ASSERT(output2D->getSpectrum(i).hasDetectorID(specNo));
     }
 
     AnalysisDataService::Instance().remove(inName);

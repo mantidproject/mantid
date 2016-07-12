@@ -3,6 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/SofQW.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 
 #include <boost/make_shared.hpp>

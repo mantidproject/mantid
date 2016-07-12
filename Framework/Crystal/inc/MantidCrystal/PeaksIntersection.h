@@ -38,9 +38,6 @@ typedef std::vector<VecV3D> VecVecV3D;
 */
 class DLLExport PeaksIntersection : public API::Algorithm {
 public:
-  PeaksIntersection();
-  virtual ~PeaksIntersection();
-
   static std::string detectorSpaceFrame();
   static std::string qLabFrame();
   static std::string qSampleFrame();
@@ -53,7 +50,7 @@ protected:
   void initBaseProperties();
 
   /// Run the algorithm.
-  void executePeaksIntersection(const bool checkExtents = true);
+  void executePeaksIntersection(const bool checkPeakExtents = true);
 
   /// Get the peak radius.
   double getPeakRadius() const;
@@ -78,7 +75,7 @@ private:
                                const Mantid::Kernel::V3D &faceVertex) const = 0;
 
   // The peak radius.
-  double m_peakRadius;
+  double m_peakRadius = 0.0;
 };
 
 } // namespace Crystal

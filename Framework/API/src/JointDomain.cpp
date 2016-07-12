@@ -2,17 +2,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/JointDomain.h"
+#include <numeric>
 
 namespace Mantid {
 namespace API {
 /// Return the overall size the domain which is a sum of sizes of the
 /// member domains.
 size_t JointDomain::size() const {
-  size_t n = 0;
-  for (auto d = m_domains.begin(); d != m_domains.end(); ++d) {
-    n += (**d).size();
-  };
-  return n;
+  return std::accumulate(m_domains.begin(), m_domains.end(), size_t{0},
+                         [](size_t n, const FunctionDomain_sptr &domain) {
+                           return n + domain->size();
+                         });
 }
 /// Return the number of parts in the domain
 size_t JointDomain::getNParts() const { return m_domains.size(); }

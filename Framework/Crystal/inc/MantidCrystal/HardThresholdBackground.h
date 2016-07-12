@@ -36,25 +36,17 @@ class DLLExport HardThresholdBackground : public BackgroundStrategy {
 public:
   /// Contructor
   HardThresholdBackground(const double thresholdSignal,
-                          const Mantid::API::MDNormalization normalisation);
-
-  /// Copy constructor
-  HardThresholdBackground(const HardThresholdBackground &other);
-
-  /// Assignment operator
-  HardThresholdBackground &operator=(const HardThresholdBackground &other);
+                          const Mantid::API::MDNormalization normalization);
 
   /// Overriden isBackground
-  virtual bool isBackground(Mantid::API::IMDIterator *iterator) const;
+  bool isBackground(Mantid::API::IMDIterator *iterator) const override;
 
   /// Overriden configureIterator.
-  void configureIterator(Mantid::API::IMDIterator *const iterator) const;
+  void
+  configureIterator(Mantid::API::IMDIterator *const iterator) const override;
 
   /// Virtual constructor
-  virtual HardThresholdBackground *clone() const;
-
-  /// Destructor
-  virtual ~HardThresholdBackground();
+  HardThresholdBackground *clone() const override;
 
 private:
   /// Cutoff

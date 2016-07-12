@@ -1,4 +1,7 @@
 #include "MantidAlgorithms/CopyLogs.h"
+
+#include "MantidAPI/Run.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Property.h"
 
@@ -10,16 +13,6 @@ DECLARE_ALGORITHM(CopyLogs)
 
 using namespace API;
 using namespace Kernel;
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CopyLogs::CopyLogs() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CopyLogs::~CopyLogs() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -38,17 +31,15 @@ const std::string CopyLogs::category() const { return "Utility\\Workspaces"; }
  */
 void CopyLogs::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Workspace to copy logs from.");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::InOut),
-      "Workspace to copy logs too.");
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::InOut),
+      "Workspace to copy logs to.");
 
   // options for the type of strategy to take
-  std::vector<std::string> strategies;
-  strategies.push_back("WipeExisting");
-  strategies.push_back("MergeKeepExisting");
-  strategies.push_back("MergeReplaceExisting");
+  std::vector<std::string> strategies{"WipeExisting", "MergeKeepExisting",
+                                      "MergeReplaceExisting"};
 
   auto strategiesValidator =
       boost::make_shared<StringListValidator>(strategies);
@@ -82,7 +73,7 @@ void CopyLogs::exec() {
     throw std::runtime_error("Cannot copy logs using unknown merge strategy");
   }
 
-  setPropertyValue("OutputWorkspace", outputWs->name());
+  setProperty("OutputWorkspace", outputWs->getName());
 }
 
 /**
@@ -91,8 +82,7 @@ void CopyLogs::exec() {
  */
 void CopyLogs::mergeReplaceExisting(
     const std::vector<Kernel::Property *> &inputLogs, Run &outputRun) {
-  for (auto iter = inputLogs.begin(); iter != inputLogs.end(); ++iter) {
-    Kernel::Property *prop = *iter;
+  for (auto prop : inputLogs) {
     // if the log exists, remove and replace it
     if (outputRun.hasProperty(prop->name())) {
       outputRun.removeLogData(prop->name());
@@ -107,8 +97,7 @@ void CopyLogs::mergeReplaceExisting(
  */
 void CopyLogs::mergeKeepExisting(
     const std::vector<Kernel::Property *> &inputLogs, Run &outputRun) {
-  for (auto iter = inputLogs.begin(); iter != inputLogs.end(); ++iter) {
-    Kernel::Property *prop = *iter;
+  for (auto prop : inputLogs) {
     // add the log only if it doesn't already exist
     if (!outputRun.hasProperty(prop->name())) {
       outputRun.addLogData(prop->clone());
@@ -125,13 +114,13 @@ void CopyLogs::wipeExisting(const std::vector<Kernel::Property *> &inputLogs,
   auto outputLogs = outputRun.getLogData();
 
   // remove each of the logs from the second workspace
-  for (auto iter = outputLogs.begin(); iter != outputLogs.end(); ++iter) {
-    outputRun.removeLogData((*iter)->name());
+  for (auto &outputLog : outputLogs) {
+    outputRun.removeLogData(outputLog->name());
   }
 
   // add all the logs from the new workspace
-  for (auto iter = inputLogs.begin(); iter != inputLogs.end(); ++iter) {
-    outputRun.addLogData((*iter)->clone());
+  for (auto inputLog : inputLogs) {
+    outputRun.addLogData(inputLog->clone());
   }
 }
 

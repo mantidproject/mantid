@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakColumn.h"
+#include "MantidKernel/Exception.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
@@ -103,6 +104,16 @@ public:
     TS_ASSERT_EQUALS(qlab0, m_peaks[0].getQLabFrame());
     const Mantid::Kernel::V3D &qlab1 = pc2.cell<Mantid::Kernel::V3D>(1);
     TS_ASSERT_EQUALS(qlab1, m_peaks[1].getQLabFrame());
+  }
+
+  void test_get_read_only_returns_correct_value() {
+    PeakColumn pc1(m_peaks, "h");
+    auto readOnly = pc1.getReadOnly();
+    TS_ASSERT(!readOnly);
+
+    PeakColumn pc2(m_peaks, "DetID");
+    readOnly = pc2.getReadOnly();
+    TS_ASSERT(readOnly);
   }
 
 private:

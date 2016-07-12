@@ -193,8 +193,8 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
   // Quick size check
   if (this->size() != rhs.size()) {
     return std::string("Number of parameters does not match: ") +
-           boost::lexical_cast<std::string>(this->size()) + " not equal to " +
-           boost::lexical_cast<std::string>(rhs.size());
+           std::to_string(this->size()) + " not equal to " +
+           std::to_string(rhs.size());
   }
 
   // Run this same loops as in operator==
@@ -224,7 +224,7 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
       strOutput << "Parameter mismatch LHS=RHS for LHS parameter in component "
                    "with name: " << fullName
                 << ". Parameter name is: " << (*param).name()
-                << " and value: " << (*param).asString() << std::endl;
+                << " and value: " << (*param).asString() << '\n';
       bool componentWithSameNameRHS = false;
       bool parameterWithSameNameRHS = false;
       for (auto rhsIt = rhs.m_map.cbegin(); rhsIt != rhsEnd; ++rhsIt) {
@@ -235,16 +235,16 @@ const std::string ParameterMap::diff(const ParameterMap &rhs,
           if ((*param).name() == (*rhsIt->second).name()) {
             parameterWithSameNameRHS = true;
             strOutput << "RHS param with same name has value: "
-                      << (*rhsIt->second).asString() << std::endl;
+                      << (*rhsIt->second).asString() << '\n';
           }
         }
       }
       if (!componentWithSameNameRHS) {
-        strOutput << "No matching RHS component name" << std::endl;
+        strOutput << "No matching RHS component name\n";
       }
       if (componentWithSameNameRHS && !parameterWithSameNameRHS) {
-        strOutput << "Found matching RHS component name but not parameter name"
-                  << std::endl;
+        strOutput
+            << "Found matching RHS component name but not parameter name\n";
       }
       if (firstDiffOnly)
         return strOutput.str();
@@ -344,7 +344,7 @@ void ParameterMap::add(const IComponent *comp,
     if (existing_par != m_map.end()) {
       existing_par->second = par;
     } else {
-      m_map.insert(std::make_pair(comp->getComponentID(), par));
+      m_map.emplace(comp->getComponentID(), par);
     }
   }
 }
@@ -823,7 +823,7 @@ Parameter_sptr ParameterMap::getByType(const IComponent *comp,
           }
         } // found->firdst
       }   // it_found != m_map.end()
-    }     //!m_map.empty()
+    }     //! m_map.empty()
   }       // PARALLEL_CRITICAL(m_map_access)
   return result;
 }
@@ -837,7 +837,7 @@ Parameter_sptr ParameterMap::getByType(const IComponent *comp,
 Parameter_sptr ParameterMap::getRecursiveByType(const IComponent *comp,
                                                 const std::string &type) const {
   boost::shared_ptr<const IComponent> compInFocus(comp, NoDeleting());
-  while (compInFocus != NULL) {
+  while (compInFocus != nullptr) {
     Parameter_sptr param = getByType(compInFocus.get(), type);
     if (param) {
       return param;
@@ -939,10 +939,10 @@ std::set<std::string> ParameterMap::names(const IComponent *comp) const {
  */
 std::string ParameterMap::asString() const {
   std::stringstream out;
-  for (auto it = m_map.cbegin(); it != m_map.cend(); ++it) {
-    boost::shared_ptr<Parameter> p = it->second;
-    if (p && it->first) {
-      const IComponent *comp = (const IComponent *)(it->first);
+  for (const auto &mappair : m_map) {
+    const boost::shared_ptr<Parameter> &p = mappair.second;
+    if (p && mappair.first) {
+      const IComponent *comp = (const IComponent *)(mappair.first);
       const IDetector *det = dynamic_cast<const IDetector *>(comp);
       if (det) {
         out << "detID:" << det->getID();
@@ -1045,13 +1045,11 @@ void ParameterMap::copyFromParameterMap(const IComponent *oldComp,
                                         const IComponent *newComp,
                                         const ParameterMap *oldPMap) {
 
-  std::set<std::string> oldParameterNames = oldPMap->names(oldComp);
-
-  for (auto it = oldParameterNames.begin(); it != oldParameterNames.end();
-       ++it) {
-    Parameter_sptr thisParameter = oldPMap->get(oldComp, *it);
+  auto oldParameterNames = oldPMap->names(oldComp);
+  for (const auto &oldParameterName : oldParameterNames) {
+    Parameter_sptr thisParameter = oldPMap->get(oldComp, oldParameterName);
     // Insert the fetched parameter in the m_map
-    m_map.insert(std::make_pair(newComp->getComponentID(), thisParameter));
+    m_map.emplace(newComp->getComponentID(), thisParameter);
   }
 }
 

@@ -2,11 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/DiffractionFocussing.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Unit.h"
 
+#include <fstream>
 #include <limits>
 #include <map>
-#include <fstream>
 
 namespace Mantid {
 namespace Algorithms {
@@ -30,15 +34,15 @@ using API::FileProperty;
  *
  */
 void DiffractionFocussing::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The result of diffraction focussing of InputWorkspace");
-  declareProperty(
-      new FileProperty("GroupingFileName", "", FileProperty::Load, ".cal"),
-      "The name of the CalFile with grouping data");
+  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
+                                            FileProperty::Load, ".cal"),
+                  "The name of the CalFile with grouping data");
 }
 
 /** Executes the algorithm
@@ -58,10 +62,7 @@ void DiffractionFocussing::exec() {
   bool dist = inputW->isDistribution();
 
   // do this first to check that a valid file is available before doing any work
-  std::multimap<int64_t, int64_t> detectorGroups; // <group, UDET>
-  if (!readGroupingFile(groupingFileName, detectorGroups)) {
-    throw Exception::FileError("Error reading .cal file", groupingFileName);
-  }
+  auto detectorGroups = readGroupingFile(groupingFileName); // <group, UDET>
 
   // Convert to d-spacing units
   API::MatrixWorkspace_sptr tmpW = convertUnitsToDSpacing(inputW);
@@ -123,8 +124,7 @@ void DiffractionFocussing::exec() {
       ++discarded;
     }
   g_log.warning() << "Discarded " << discarded
-                  << " spectra that were not assigned to any group"
-                  << std::endl;
+                  << " spectra that were not assigned to any group\n";
 
   // Running GroupDetectors leads to a load of redundant spectra
   // Create a new workspace that's the right size for the meaningful spectra and
@@ -145,14 +145,14 @@ void DiffractionFocussing::exec() {
     outE.assign(tmpE.begin(), tmpE.end());
     outY.assign(tmpY.begin(), tmpY.end());
     outX.assign(tmpX.begin(), tmpX.end());
-    API::ISpectrum *inSpec = tmpW->getSpectrum(i);
-    outputW->getSpectrum(hist)->setSpectrumNo(inSpec->getSpectrumNo());
-    inSpec->setSpectrumNo(-1);
+    auto &inSpec = tmpW->getSpectrum(i);
+    outputW->getSpectrum(hist).setSpectrumNo(inSpec.getSpectrumNo());
+    inSpec.setSpectrumNo(-1);
   }
 
   progress(1.);
 
-  outputW->isDistribution(dist);
+  outputW->setDistribution(dist);
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputW);
@@ -188,10 +188,7 @@ void DiffractionFocussing::RebinWorkspace(
   double step = 0;
 
   calculateRebinParams(workspace, min, max, step);
-  std::vector<double> paramArray;
-  paramArray.push_back(min);
-  paramArray.push_back(-step);
-  paramArray.push_back(max);
+  std::vector<double> paramArray{min, -step, max};
 
   g_log.information() << "Rebinning from " << min << " to " << max << " in "
                       << step << " logaritmic steps.\n";
@@ -221,14 +218,12 @@ void DiffractionFocussing::calculateRebinParams(
   int64_t length = workspace->getNumberHistograms();
   for (int64_t i = 0; i < length; i++) {
     const MantidVec &xVec = workspace->readX(i);
-    const double &localMin = xVec[0];
-    const double &localMax = xVec[xVec.size() - 1];
+    const double &localMin = xVec.front();
+    const double &localMax = xVec.back();
     if (localMin != std::numeric_limits<double>::infinity() &&
         localMax != std::numeric_limits<double>::infinity()) {
-      if (localMin < min)
-        min = localMin;
-      if (localMax > max)
-        max = localMax;
+      min = std::min(min, localMin);
+      max = std::max(max, localMax);
     }
   }
 
@@ -240,18 +235,22 @@ void DiffractionFocussing::calculateRebinParams(
   step = (log(max) - log(min)) / n;
 }
 
-/// Reads in the file with the grouping information
-bool DiffractionFocussing::readGroupingFile(
-    std::string groupingFileName,
-    std::multimap<int64_t, int64_t> &detectorGroups) {
+/**
+ * Reads in the file with the grouping information
+ * @param groupingFileName :: [input] Grouping .cal file name
+ * @returns :: map of groups to detector IDs
+ * @throws FileError if can't read the file
+ */
+std::multimap<int64_t, int64_t>
+DiffractionFocussing::readGroupingFile(std::string groupingFileName) {
   std::ifstream grFile(groupingFileName.c_str());
   if (!grFile) {
     g_log.error() << "Unable to open grouping file " << groupingFileName
-                  << std::endl;
-    return false;
+                  << '\n';
+    throw Exception::FileError("Error reading .cal file", groupingFileName);
   }
 
-  detectorGroups.clear();
+  std::multimap<int64_t, int64_t> detectorGroups;
   std::string str;
   while (getline(grFile, str)) {
     if (str.empty() || str[0] == '#')
@@ -264,10 +263,10 @@ bool DiffractionFocussing::readGroupingFile(
     // if ( ! istr.good() ) return false;
     // only allow groups with +ve ids
     if ((sel) && (group > 0)) {
-      detectorGroups.insert(std::make_pair(group, udet));
+      detectorGroups.emplace(group, udet);
     }
   }
-  return true;
+  return detectorGroups;
 }
 
 } // namespace Algorithm

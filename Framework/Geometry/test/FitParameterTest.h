@@ -16,8 +16,8 @@ public:
   void test1() {
     FitParameter fitP;
 
-    fitP.setValue() = 9.1;
-    fitP.setTie() = "bob";
+    fitP.setValue(9.1);
+    fitP.setTie("bob");
 
     TS_ASSERT_DELTA(fitP.getValue(), 9.1, 0.0001);
     TS_ASSERT(fitP.getTie().compare("bob") == 0);

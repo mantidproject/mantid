@@ -34,11 +34,6 @@ TimeAtSampleStrategyDirect::TimeAtSampleStrategyDirect(
                                 PhysicalConstants::NeutronMass);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-TimeAtSampleStrategyDirect::~TimeAtSampleStrategyDirect() {}
-
 /**
  * @brief Calculate corrections to get a Time at Sample for a DG instrument.
  * @return Correction struct

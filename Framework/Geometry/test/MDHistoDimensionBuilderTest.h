@@ -12,6 +12,30 @@ using Mantid::Geometry::IMDDimension_sptr;
 
 class MDHistoDimensionBuilderTest : public CxxTest::TestSuite {
 public:
+  void test_resizeToFit_Min_Positive_Max_Positive() {
+    const Mantid::coord_t min0(0.1f), max0(0.5f);
+    Mantid::coord_t min1(min0), max1(max0);
+    MDHistoDimensionBuilder::resizeToFitMDBox(min1, max1);
+    TS_ASSERT(min1 < min0);
+    TS_ASSERT(max1 > max0);
+  }
+
+  void test_resizeToFit_Min_Negative_Max_Positive() {
+    const Mantid::coord_t min0(-0.1f), max0(0.5f);
+    Mantid::coord_t min1(min0), max1(max0);
+    MDHistoDimensionBuilder::resizeToFitMDBox(min1, max1);
+    TS_ASSERT(min1 < min0);
+    TS_ASSERT(max1 > max0);
+  }
+
+  void test_resizeToFit_Min_Negative_Max_Negative() {
+    const Mantid::coord_t min0(-0.5f), max0(-0.1f);
+    Mantid::coord_t min1(min0), max1(max0);
+    MDHistoDimensionBuilder::resizeToFitMDBox(min1, max1);
+    TS_ASSERT(min1 < min0);
+    TS_ASSERT(max1 > max0);
+  }
+
   void testConstructRaw() {
     MDHistoDimensionBuilder builder;
     builder.setName("testDimName");

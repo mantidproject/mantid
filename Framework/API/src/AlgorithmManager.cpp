@@ -6,9 +6,6 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/MultiThreaded.h"
-
-using Mantid::Kernel::Mutex;
 
 namespace Mantid {
 namespace API {
@@ -25,14 +22,14 @@ AlgorithmManagerImpl::AlgorithmManagerImpl() : m_managed_algs() {
     m_max_no_algs = 100; // Default to keeping 100 algorithms if not specified
   }
 
-  g_log.debug() << "Algorithm Manager created." << std::endl;
+  g_log.debug() << "Algorithm Manager created.\n";
 }
 
 /** Private destructor
 *  Prevents client from calling 'delete' on the pointer handed
 *  out by Instance
 */
-AlgorithmManagerImpl::~AlgorithmManagerImpl() {}
+AlgorithmManagerImpl::~AlgorithmManagerImpl() = default;
 
 /** Creates an instance of an algorithm, but does not own that instance
 *
@@ -66,7 +63,7 @@ Algorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string &algName,
 IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
                                              const int &version,
                                              bool makeProxy) {
-  Mutex::ScopedLock _lock(this->m_managedMutex);
+  std::lock_guard<std::mutex> _lock(this->m_managedMutex);
   IAlgorithm_sptr alg;
   try {
     Algorithm_sptr unmanagedAlg = AlgorithmFactory::Instance().create(
@@ -95,12 +92,12 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
             << "All algorithms in the AlgorithmManager are running. "
             << "Cannot pop oldest algorithm. "
             << "You should increase your 'algorithms.retained' value. "
-            << m_managed_algs.size() << " in queue." << std::endl;
+            << m_managed_algs.size() << " in queue.\n";
         break;
       } else {
         // Normal; erase that algorithm
         g_log.debug() << "Popping out oldest algorithm " << (*it)->name()
-                      << std::endl;
+                      << '\n';
         m_managed_algs.erase(it);
       }
     }
@@ -111,7 +108,7 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
 
   } catch (std::runtime_error &ex) {
     g_log.error() << "AlgorithmManager:: Unable to create algorithm " << algName
-                  << ' ' << ex.what() << std::endl;
+                  << ' ' << ex.what() << '\n';
     throw std::runtime_error("AlgorithmManager:: Unable to create algorithm " +
                              algName + ' ' + ex.what());
   }
@@ -122,7 +119,7 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
  * Clears all managed algorithm objects.
  */
 void AlgorithmManagerImpl::clear() {
-  Mutex::ScopedLock _lock(this->m_managedMutex);
+  std::lock_guard<std::mutex> _lock(this->m_managedMutex);
   m_managed_algs.clear();
   return;
 }
@@ -148,10 +145,10 @@ void AlgorithmManagerImpl::setMaxAlgorithms(int n) {
  * @returns A shared pointer to the algorithm
  */
 IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const {
-  Mutex::ScopedLock _lock(this->m_managedMutex);
-  for (auto a = m_managed_algs.cbegin(); a != m_managed_algs.cend(); ++a) {
-    if ((**a).getAlgorithmID() == id)
-      return *a;
+  std::lock_guard<std::mutex> _lock(this->m_managedMutex);
+  for (const auto &managed_alg : m_managed_algs) {
+    if ((*managed_alg).getAlgorithmID() == id)
+      return managed_alg;
   }
   return IAlgorithm_sptr();
 }
@@ -161,16 +158,16 @@ IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const {
  * @param id :: The ID of the algorithm
  */
 void AlgorithmManagerImpl::removeById(AlgorithmID id) {
-  Mutex::ScopedLock _lock(this->m_managedMutex);
+  std::lock_guard<std::mutex> _lock(this->m_managedMutex);
   auto itend = m_managed_algs.end();
   for (auto it = m_managed_algs.begin(); it != itend; ++it) {
     if ((**it).getAlgorithmID() == id) {
       if (!(*it)->isRunning()) {
-        g_log.debug() << "Removing algorithm " << (*it)->name() << std::endl;
+        g_log.debug() << "Removing algorithm " << (*it)->name() << '\n';
         m_managed_algs.erase(it);
       } else {
         g_log.debug() << "Unable to remove algorithm " << (*it)->name()
-                      << ". The algorithm is running." << std::endl;
+                      << ". The algorithm is running.\n";
       }
       break;
     }
@@ -206,9 +203,8 @@ AlgorithmManagerImpl::newestInstanceOf(const std::string &algorithmName) const {
 std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(
     const std::string &algorithmName) const {
   std::vector<IAlgorithm_const_sptr> theRunningInstances;
-  Mutex::ScopedLock _lock(this->m_managedMutex);
-  for (auto alg = m_managed_algs.begin(); alg != m_managed_algs.end(); ++alg) {
-    auto currentAlgorithm = *alg;
+  std::lock_guard<std::mutex> _lock(this->m_managedMutex);
+  for (const auto &currentAlgorithm : m_managed_algs) {
     if (currentAlgorithm->name() == algorithmName &&
         currentAlgorithm->isRunning()) {
       theRunningInstances.push_back(currentAlgorithm);
@@ -220,10 +216,10 @@ std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(
 
 /// Requests cancellation of all running algorithms
 void AlgorithmManagerImpl::cancelAll() {
-  Mutex::ScopedLock _lock(this->m_managedMutex);
-  for (auto it = m_managed_algs.begin(); it != m_managed_algs.end(); ++it) {
-    if ((*it)->isRunning())
-      (*it)->cancel();
+  std::lock_guard<std::mutex> _lock(this->m_managedMutex);
+  for (auto &managed_alg : m_managed_algs) {
+    if (managed_alg->isRunning())
+      managed_alg->cancel();
   }
 }
 

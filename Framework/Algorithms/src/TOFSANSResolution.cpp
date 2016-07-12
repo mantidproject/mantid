@@ -3,9 +3,12 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/TOFSANSResolution.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -29,16 +32,16 @@ TOFSANSResolution::TOFSANSResolution()
 
 void TOFSANSResolution::init() {
   declareProperty(
-      new WorkspaceProperty<>(
+      make_unique<WorkspaceProperty<>>(
           "InputWorkspace", "", Direction::InOut,
           boost::make_shared<WorkspaceUnitValidator>("MomentumTransfer")),
       "Name the workspace to calculate the resolution for");
 
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
-  declareProperty(new WorkspaceProperty<>("ReducedWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "ReducedWorkspace", "", Direction::Input, wsValidator),
                   "I(Q) workspace");
-  declareProperty(new ArrayProperty<double>(
+  declareProperty(make_unique<ArrayProperty<double>>(
       "OutputBinning", boost::make_shared<RebinParamsValidator>()));
 
   declareProperty("MinWavelength", EMPTY_DBL(), "Minimum wavelength to use.");
@@ -65,6 +68,22 @@ double TOFSANSResolution::getTOFResolution(double wl) {
   return m_wl_resolution;
 }
 
+/*
+ * Return the effective pixel size in X, in meters
+ */
+double TOFSANSResolution::getEffectiveXPixelSize() {
+  double pixel_size_x = getProperty("PixelSizeX");
+  return pixel_size_x / 1000.0;
+}
+
+/*
+ * Return the effective pixel size in Y, in meters
+ */
+double TOFSANSResolution::getEffectiveYPixelSize() {
+  double pixel_size_y = getProperty("PixelSizeY");
+  return pixel_size_y / 1000.0;
+}
+
 void TOFSANSResolution::exec() {
   MatrixWorkspace_sptr iqWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr reducedWS = getProperty("ReducedWorkspace");
@@ -72,13 +91,11 @@ void TOFSANSResolution::exec() {
       boost::dynamic_pointer_cast<EventWorkspace>(reducedWS);
   const double min_wl = getProperty("MinWavelength");
   const double max_wl = getProperty("MaxWavelength");
-  double pixel_size_x = getProperty("PixelSizeX");
-  double pixel_size_y = getProperty("PixelSizeY");
+  double pixel_size_x = getEffectiveXPixelSize();
+  double pixel_size_y = getEffectiveYPixelSize();
   double R1 = getProperty("SourceApertureRadius");
   double R2 = getProperty("SampleApertureRadius");
   // Convert to meters
-  pixel_size_x /= 1000.0;
-  pixel_size_y /= 1000.0;
   R1 /= 1000.0;
   R2 /= 1000.0;
   m_wl_resolution = getProperty("DeltaT");
@@ -93,22 +110,24 @@ void TOFSANSResolution::exec() {
   // Create workspaces with each component of the resolution for debugging
   // purposes
   MatrixWorkspace_sptr thetaWS = WorkspaceFactory::Instance().create(iqWS);
-  declareProperty(new WorkspaceProperty<>("ThetaError", "", Direction::Output));
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("ThetaError", "", Direction::Output));
   setPropertyValue("ThetaError", "__" + iqWS->getName() + "_theta_error");
   setProperty("ThetaError", thetaWS);
-  thetaWS->setX(0, iqWS->readX(0));
+  thetaWS->setX(0, iqWS->refX(0));
   MantidVec &ThetaY = thetaWS->dataY(0);
 
   MatrixWorkspace_sptr tofWS = WorkspaceFactory::Instance().create(iqWS);
-  declareProperty(new WorkspaceProperty<>("TOFError", "", Direction::Output));
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("TOFError", "", Direction::Output));
   setPropertyValue("TOFError", "__" + iqWS->getName() + "_tof_error");
   setProperty("TOFError", tofWS);
-  tofWS->setX(0, iqWS->readX(0));
+  tofWS->setX(0, iqWS->refX(0));
   MantidVec &TOFY = tofWS->dataY(0);
 
   // Initialize Dq
   MantidVec &DxOut = iqWS->dataDx(0);
-  for (int i = 0; i < xLength - 1; i++)
+  for (int i = 0; i < xLength; i++)
     DxOut[i] = 0.0;
 
   const V3D samplePos = reducedWS->getInstrument()->getSample()->getPos();
@@ -127,9 +146,8 @@ void TOFSANSResolution::exec() {
     try {
       det = reducedWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
-      g_log.warning() << "Spectrum index " << i
-                      << " has no detector assigned to it - discarding"
-                      << std::endl;
+      g_log.warning() << "Workspace index " << i
+                      << " has no detector assigned to it - discarding\n";
       // Catch if no detector. Next line tests whether this happened - test
       // placed
       // outside here because Mac Intel compiler doesn't like 'continue' in a
@@ -146,8 +164,8 @@ void TOFSANSResolution::exec() {
 
     // Multiplicative factor to go from lambda to Q
     // Don't get fooled by the function name...
-    const double theta = reducedWS->detectorTwoTheta(det);
-    const double factor = 4.0 * M_PI * sin(theta / 2.0);
+    const double theta = reducedWS->detectorTwoTheta(*det);
+    const double factor = 4.0 * M_PI * sin(0.5 * theta);
 
     const MantidVec &XIn = reducedWS->readX(i);
     const MantidVec &YIn = reducedWS->readY(i);
@@ -160,6 +178,7 @@ void TOFSANSResolution::exec() {
 
     for (int j = 0; j < wlLength - 1; j++) {
       const double wl = (XIn[j + 1] + XIn[j]) / 2.0;
+      const double wl_bin = XIn[j + 1] - XIn[j];
       if (!isEmpty(min_wl) && wl < min_wl)
         continue;
       if (!isEmpty(max_wl) && wl > max_wl)
@@ -186,14 +205,18 @@ void TOFSANSResolution::exec() {
                (L2 * L2)) /
           12.0;
 
+      // This term is related to the TOF resolution
       const double dwl_over_wl =
           3.9560 * getTOFResolution(wl) / (1000.0 * (L1 + L2) * wl);
+      // This term is related to the wavelength binning
+      const double wl_bin_over_wl = wl_bin / wl;
       const double dq_over_q =
-          std::sqrt(dTheta2 / (theta * theta) + dwl_over_wl * dwl_over_wl);
+          std::sqrt(dTheta2 / (theta * theta) + dwl_over_wl * dwl_over_wl +
+                    wl_bin_over_wl * wl_bin_over_wl);
 
       // By using only events with a positive weight, we use only the data
-      // distribution and
-      // leave out the background events
+      // distribution and leave out the background events.
+      // Note: we are looping over bins, therefore the xLength-1.
       if (iq >= 0 && iq < xLength - 1 && !boost::math::isnan(dq_over_q) &&
           dq_over_q > 0 && YIn[j] > 0) {
         _dx[iq] += q * dq_over_q * YIn[j];
@@ -204,6 +227,7 @@ void TOFSANSResolution::exec() {
     }
 
     // Move over the distributions for that pixel
+    // Note: we are looping over bins, therefore the xLength-1.
     PARALLEL_CRITICAL(iq) /* Write to shared memory - must protect */
     for (int iq = 0; iq < xLength - 1; iq++) {
       DxOut[iq] += _dx[iq];
@@ -216,7 +240,9 @@ void TOFSANSResolution::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
   // Normalize according to the chosen weighting scheme
+  // Note: we are looping over bins, therefore the xLength-1.
   for (int i = 0; i < xLength - 1; i++) {
     if (XNorm[i] == 0)
       continue;

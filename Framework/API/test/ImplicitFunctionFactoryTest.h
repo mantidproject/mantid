@@ -1,31 +1,34 @@
 #ifndef IMPLICIT_FUNCTION_FACTORY_TEST_H_
 #define IMPLICIT_FUNCTION_FACTORY_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <vector>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include "MantidAPI/ImplicitFunctionFactory.h"
+#include "MantidAPI/ImplicitFunctionParameter.h"
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include "MantidAPI/ImplicitFunctionParserFactory.h"
-#include "MantidAPI/ImplicitFunctionFactory.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidAPI/ImplicitFunctionParameter.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <memory>
+#include <vector>
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class ImplicitFunctionFactoryTest : public CxxTest::TestSuite {
 private:
   class MockImplicitFunctionA : public Mantid::Geometry::MDImplicitFunction {
   public:
-    virtual std::string getName() const { return "MockImplicitFunctionA"; }
+    std::string getName() const override { return "MockImplicitFunctionA"; }
     MOCK_METHOD1(isPointContained, bool(const Mantid::coord_t *pPoint));
     MOCK_METHOD1(isPointContained, bool(const std::vector<Mantid::coord_t> &));
     // Unhide base class methods (avoids Intel compiler warning)
     using MDImplicitFunction::isPointContained;
     MOCK_CONST_METHOD0(toXMLString, std::string());
-    ~MockImplicitFunctionA() { ; }
+    ~MockImplicitFunctionA() override { ; }
   };
 
   class MockImplicitFunctionB : public Mantid::Geometry::MDImplicitFunction {
@@ -34,9 +37,9 @@ private:
     MOCK_METHOD1(isPointContained, bool(const std::vector<Mantid::coord_t> &));
     // Unhide base class methods (avoids Intel compiler warning)
     using MDImplicitFunction::isPointContained;
-    virtual std::string getName() const { return "MockImplicitFunctionB"; }
+    std::string getName() const override { return "MockImplicitFunctionB"; }
     MOCK_CONST_METHOD0(toXMLString, std::string());
-    ~MockImplicitFunctionB() {}
+    ~MockImplicitFunctionB() override {}
   };
 
   class MockImplicitFunctionParserA
@@ -46,16 +49,17 @@ private:
         : Mantid::API::ImplicitFunctionParser(
               new MockImplicitFunctionParameterParserA) {}
     Mantid::API::ImplicitFunctionBuilder *
-    createFunctionBuilder(Poco::XML::Element *) {
+    createFunctionBuilder(Poco::XML::Element *) override {
       return new MockImplicitFunctionBuilderA;
     }
-    void setSuccessorParser(Mantid::API::ImplicitFunctionParser *successor) {
+    void setSuccessorParser(
+        Mantid::API::ImplicitFunctionParser *successor) override {
       Mantid::API::ImplicitFunctionParser::SuccessorType successor_uptr(
           successor);
       m_successor.swap(successor_uptr);
     }
-    void
-    setParameterParser(Mantid::API::ImplicitFunctionParameterParser *parser) {
+    void setParameterParser(
+        Mantid::API::ImplicitFunctionParameterParser *parser) override {
       Mantid::API::ImplicitFunctionParameterParser::SuccessorType successor(
           parser);
       m_paramParserRoot.swap(successor);
@@ -69,16 +73,17 @@ private:
         : Mantid::API::ImplicitFunctionParser(
               new MockImplicitFunctionParameterParserB) {}
     Mantid::API::ImplicitFunctionBuilder *
-    createFunctionBuilder(Poco::XML::Element *) {
+    createFunctionBuilder(Poco::XML::Element *) override {
       return new MockImplicitFunctionBuilderB;
     }
-    void setSuccessorParser(Mantid::API::ImplicitFunctionParser *successor) {
+    void setSuccessorParser(
+        Mantid::API::ImplicitFunctionParser *successor) override {
       Mantid::API::ImplicitFunctionParser::SuccessorType successor_uptr(
           successor);
       m_successor.swap(successor_uptr);
     }
-    void
-    setParameterParser(Mantid::API::ImplicitFunctionParameterParser *parser) {
+    void setParameterParser(
+        Mantid::API::ImplicitFunctionParameterParser *parser) override {
       Mantid::API::ImplicitFunctionParameterParser::SuccessorType successor(
           parser);
       m_paramParserRoot.swap(successor);
@@ -102,11 +107,12 @@ private:
     MOCK_METHOD1(setSuccessorParser,
                  void(Mantid::API::ImplicitFunctionParameterParser *successor));
   };
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 
   class MockImplicitFunctionBuilderA
       : public Mantid::API::ImplicitFunctionBuilder {
   public:
-    Mantid::Geometry::MDImplicitFunction *create() const {
+    Mantid::Geometry::MDImplicitFunction *create() const override {
       return new MockImplicitFunctionA;
     }
   };
@@ -114,7 +120,7 @@ private:
   class MockImplicitFunctionBuilderB
       : public Mantid::API::ImplicitFunctionBuilder {
   public:
-    Mantid::Geometry::MDImplicitFunction *create() const {
+    Mantid::Geometry::MDImplicitFunction *create() const override {
       return new MockImplicitFunctionA;
     }
   };

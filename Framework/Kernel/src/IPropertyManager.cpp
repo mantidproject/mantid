@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/OptionalBool.h"
 
 ///@cond
 DEFINE_IPROPERTYMANAGER_GETVALUE(int16_t)
@@ -72,10 +71,10 @@ bool IPropertyManager::existsProperty(const std::string &name) const {
  */
 void IPropertyManager::updatePropertyValues(const IPropertyManager &other) {
   auto props = this->getProperties();
-  for (auto prop = props.begin(); prop != props.end(); ++prop) {
-    const std::string propName = (**prop).name();
+  for (auto &prop : props) {
+    const std::string propName = (*prop).name();
     if (other.existsProperty(propName)) {
-      (**prop).setValueFromProperty(*other.getPointerToProperty(propName));
+      (*prop).setValueFromProperty(*other.getPointerToProperty(propName));
     }
   }
 }

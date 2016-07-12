@@ -16,37 +16,27 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //--------------------------------------------------------------------------
-/** Constructor
- */
-ShowPossibleCells::ShowPossibleCells() {}
-
-//--------------------------------------------------------------------------
-/** Destructor
- */
-ShowPossibleCells::~ShowPossibleCells() {}
-
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ShowPossibleCells::init() {
-  this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
-  this->declareProperty(new PropertyWithValue<double>("MaxScalarError", 0.2,
-                                                      mustBePositive,
-                                                      Direction::Input),
-                        "Max Scalar Error (0.2)");
+  this->declareProperty(
+      make_unique<PropertyWithValue<double>>("MaxScalarError", 0.2,
+                                             mustBePositive, Direction::Input),
+      "Max Scalar Error (0.2)");
 
   this->declareProperty("BestOnly", true,
                         "Show at most one for each Bravais Lattice");
 
-  this->declareProperty(
-      new PropertyWithValue<int>("NumberOfCells", 0, Direction::Output),
-      "Gets set with the number of possible cells.");
+  this->declareProperty(make_unique<PropertyWithValue<int>>("NumberOfCells", 0,
+                                                            Direction::Output),
+                        "Gets set with the number of possible cells.");
 
   this->declareProperty("AllowPermutations", true,
                         "Allow permutations of conventional cells");
@@ -81,7 +71,7 @@ void ShowPossibleCells::exec() {
   size_t num_cells = list.size();
 
   // now tell the user the number of possible conventional cells:
-  g_log.notice() << "Num Cells : " << num_cells << std::endl;
+  g_log.notice() << "Num Cells : " << num_cells << '\n';
 
   for (size_t i = 0; i < num_cells; i++) {
     DblMatrix newUB = list[i].GetNewUB();

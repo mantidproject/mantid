@@ -4,6 +4,8 @@
 #include "cxxtest/TestSuite.h"
 #include "MantidDataHandling/LoadGSS.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 
 using namespace Mantid;
@@ -77,7 +79,7 @@ public:
     checkWorkspace(loader->getProperty("OutputWorkspace"), 1, 6);
   }
 
-  /** Test LoadGSS with setting spectrum ID as bank ID
+  /** Test LoadGSS with setting spectrum No as bank ID
     */
   void test_load_gss_use_spec() {
     // Set property and execute
@@ -102,9 +104,9 @@ public:
     if (outws->getNumberHistograms() != 3)
       return;
 
-    TS_ASSERT_EQUALS(outws->getSpectrum(0)->getSpectrumNo(), 1);
-    TS_ASSERT_EQUALS(outws->getSpectrum(1)->getSpectrumNo(), 3);
-    TS_ASSERT_EQUALS(outws->getSpectrum(2)->getSpectrumNo(), 5);
+    TS_ASSERT_EQUALS(outws->getSpectrum(0).getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(outws->getSpectrum(1).getSpectrumNo(), 3);
+    TS_ASSERT_EQUALS(outws->getSpectrum(2).getSpectrumNo(), 5);
 
     API::AnalysisDataService::Instance().remove("TestWS");
   }

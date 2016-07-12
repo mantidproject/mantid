@@ -38,10 +38,9 @@ public:
                               const int firstPairIndex,
                               const int secondPairIndex,
                               const double alpha = 1);
-  virtual ~MuonPairAsymmetryCalculator();
 
   /// Performs pair asymmetry calculation
-  virtual API::MatrixWorkspace_sptr calculate() const override;
+  API::MatrixWorkspace_sptr calculate() const override;
 
 private:
   /// Calculate asymmetry for the given workspace

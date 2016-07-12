@@ -7,7 +7,6 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidMDAlgorithms/MergeMDFiles.h"
-#include "MantidAPI/MemoryManager.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <Poco/File.h>
@@ -28,7 +27,7 @@ DECLARE_ALGORITHM(MergeMDFiles)
 MergeMDFiles::MergeMDFiles()
     : m_nDims(0), m_MDEventType(), m_fileBasedTargetWS(false), m_Filenames(),
       m_EventLoader(), m_OutIWS(), totalEvents(0), totalLoaded(0), fileMutex(),
-      statsMutex(), prog(NULL) {}
+      statsMutex(), prog(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -42,12 +41,13 @@ MergeMDFiles::~MergeMDFiles() { clearEventLoaders(); }
  */
 void MergeMDFiles::init() {
   std::vector<std::string> exts(1, ".nxs");
-  declareProperty(new MultipleFileProperty("Filenames", exts),
+  declareProperty(Kernel::make_unique<MultipleFileProperty>("Filenames", exts),
                   "Select several MDEventWorkspace NXS files to merge "
                   "together. Files must have common box structure.");
 
   declareProperty(
-      new FileProperty("OutputFilename", "", FileProperty::OptionalSave, exts),
+      Kernel::make_unique<FileProperty>("OutputFilename", "",
+                                        FileProperty::OptionalSave, exts),
       "Choose a file to which to save the output workspace. \n"
       "Optional: if specified, the workspace created will be file-backed. \n"
       "If not, it will be created in memory.");
@@ -56,7 +56,7 @@ void MergeMDFiles::init() {
                   "Run the loading tasks in parallel.\n"
                   "This can be faster but might use more memory.");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output MDEventWorkspace.");
 }
@@ -77,7 +77,7 @@ void MergeMDFiles::loadBoxData() {
   totalEvents = 0;
 
   m_fileComponentsStructure.resize(m_Filenames.size());
-  m_EventLoader.assign(m_Filenames.size(), NULL);
+  m_EventLoader.assign(m_Filenames.size(), nullptr);
 
   try {
     for (size_t i = 0; i < m_Filenames.size(); i++) {
@@ -125,8 +125,7 @@ void MergeMDFiles::loadBoxData() {
   const std::vector<int> &boxType = m_BoxStruct.getBoxType();
   // calculate event positions in the target file.
   uint64_t eventsStart = 0;
-  for (size_t i = 0; i < Boxes.size(); i++) {
-    API::IMDNode *mdBox = Boxes[i];
+  for (auto mdBox : Boxes) {
     mdBox->clear();
     size_t ID = mdBox->getID();
 
@@ -143,7 +142,7 @@ void MergeMDFiles::loadBoxData() {
   }
 
   g_log.notice() << totalEvents << " events in " << m_Filenames.size()
-                 << " files." << std::endl;
+                 << " files.\n";
 }
 
 /** Task that loads all of the events from corresponded boxes of all files
@@ -213,7 +212,7 @@ void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,
   if (m_fileBasedTargetWS) {
     bc->setFileBacked(saver, outputFile);
     // Complete the file-back-end creation.
-    g_log.notice() << "Setting cache to 400 MB write." << std::endl;
+    g_log.notice() << "Setting cache to 400 MB write.\n";
     bc->getFileIO()->setWriteBufferSize(400000000 / m_OutIWS->sizeofEvent());
   }
 
@@ -242,7 +241,7 @@ void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,
   auto ts = new ThreadSchedulerFIFO();
   ThreadPool tp(ts);
 
-  Kernel::DiskBuffer *DiskBuf(NULL);
+  Kernel::DiskBuffer *DiskBuf(nullptr);
   if (m_fileBasedTargetWS) {
     DiskBuf = bc->getFileIO();
   }
@@ -292,7 +291,7 @@ void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,
   }
   //// Run any final tasks
   // tp.joinAll();
-  g_log.information() << overallTime << " to do all the adding." << std::endl;
+  g_log.information() << overallTime << " to do all the adding.\n";
 
   // Close any open file handle
   clearEventLoaders();
@@ -309,11 +308,10 @@ void MergeMDFiles::finalizeOutput(const std::string &outputFile) {
   this->progress(0.90, "Refreshing Cache");
   m_OutIWS->refreshCache();
 
-  g_log.information() << overallTime << " to run refreshCache()." << std::endl;
+  g_log.information() << overallTime << " to run refreshCache().\n";
 
   if (!outputFile.empty()) {
-    g_log.notice() << "Starting SaveMD to update the file back-end."
-                   << std::endl;
+    g_log.notice() << "Starting SaveMD to update the file back-end.\n";
     // create or open WS group and put there additional information about WS and
     // its dimensions
     bool old_data_there;
@@ -338,8 +336,7 @@ void MergeMDFiles::finalizeOutput(const std::string &outputFile) {
     // Save box structure;
     m_BoxStruct.saveBoxStructure(outputFile);
 
-    g_log.information() << overallTime << " to run SaveMD structure"
-                        << std::endl;
+    g_log.information() << overallTime << " to run SaveMD structure\n";
   }
 }
 
@@ -359,7 +356,7 @@ void MergeMDFiles::exec() {
   }
   m_Filenames =
       MultipleFileProperty::flattenFileNames(multiFileProp->operator()());
-  if (m_Filenames.size() == 0)
+  if (m_Filenames.empty())
     throw std::invalid_argument("Must specify at least one filename.");
   std::string firstFile = m_Filenames[0];
 
@@ -399,11 +396,9 @@ void MergeMDFiles::exec() {
 }
 /**Delete all event loaders */
 void MergeMDFiles::clearEventLoaders() {
-  for (size_t i = 0; i < m_EventLoader.size(); i++) {
-    if (m_EventLoader[i]) {
-      delete m_EventLoader[i];
-      m_EventLoader[i] = NULL;
-    }
+  for (auto &loader : m_EventLoader) {
+    delete loader;
+    loader = nullptr;
   }
 }
 

@@ -1,12 +1,13 @@
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/VMD.h"
-#include "MantidKernel/Utils.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Utils.h"
+#include "MantidKernel/VMD.h"
 #include <algorithm>
-#include <utility>
+#include <boost/math/special_functions/round.hpp>
 #include <functional>
 #include <numeric>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -155,7 +156,7 @@ void MDHistoWorkspaceIterator::init(
     Mantid::Geometry::MDImplicitFunction *function, size_t beginPos,
     size_t endPos) {
   m_ws = workspace;
-  if (m_ws == NULL)
+  if (m_ws == nullptr)
     throw std::invalid_argument(
         "MDHistoWorkspaceIterator::ctor(): NULL workspace given.");
 
@@ -245,7 +246,7 @@ MDHistoWorkspaceIterator::~MDHistoWorkspaceIterator() {
 
   if (m_function)
     delete m_function;
-  m_function = NULL;
+  m_function = nullptr;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -276,7 +277,7 @@ MDHistoWorkspaceIterator::jumpToNearest(const VMD &fromLocation) {
   coord_t sqDiff = 0;
   for (size_t d = 0; d < m_nd; ++d) {
     coord_t dExact = getDExact(fromLocation[d], m_origin[d], m_binWidth[d]);
-    size_t dRound = size_t(dExact + 0.5); // Round to nearest bin edge.
+    size_t dRound = std::lround(dExact); // Round to nearest bin edge.
     sqDiff += (dExact - coord_t(dRound)) * (dExact - coord_t(dRound)) *
               m_binWidth[d] * m_binWidth[d];
     indexes[d] = dRound;
@@ -322,7 +323,7 @@ bool MDHistoWorkspaceIterator::next() {
     // still valid.
     do {
       m_pos++;
-    } while (m_skippingPolicy->keepGoing() && m_pos < m_max);
+    } while (m_pos < m_max && m_skippingPolicy->keepGoing());
   }
 
   bool ret = m_pos < m_max;
@@ -526,12 +527,12 @@ MDHistoWorkspaceIterator::findNeighbourIndexesFaceTouching() const {
   std::vector<size_t> neighbourIndexes; // Accumulate neighbour indexes.
   std::vector<int> widths(
       m_nd, 3); // Face touching width is always 3 in each dimension
-  for (size_t i = 0; i < m_permutationsFaceTouching.size(); ++i) {
-    if (m_permutationsFaceTouching[i] == 0) {
+  for (auto permutation : m_permutationsFaceTouching) {
+    if (permutation == 0) {
       continue;
     }
 
-    size_t neighbour_index = m_pos + m_permutationsFaceTouching[i];
+    size_t neighbour_index = m_pos + permutation;
     if (neighbour_index < m_ws->getNPoints() &&
         Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
                                     m_indexMaker, m_indexMax, widths)) {
@@ -569,7 +570,7 @@ std::vector<int64_t> MDHistoWorkspaceIterator::createPermutations(
     if (widths[0] % 2 == 0) {
       throw std::invalid_argument("MDHistoWorkspaceIterator::"
                                   "findNeighbourIndexesByWidth, width must "
-                                  "always be an even number");
+                                  "always be an odd number");
     }
     if (widths.size() != m_nd) {
       throw std::invalid_argument("MDHistoWorkspaceIterator::"
@@ -655,12 +656,12 @@ std::vector<size_t> MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(
   // Accumulate neighbour indexes.
   std::vector<size_t> neighbourIndexes(permutationsVertexTouching.size());
   size_t nextFree = 0;
-  for (size_t i = 0; i < permutationsVertexTouching.size(); ++i) {
-    if (permutationsVertexTouching[i] == 0) {
+  for (auto permutation : permutationsVertexTouching) {
+    if (permutation == 0) {
       continue;
     }
 
-    size_t neighbour_index = m_pos + permutationsVertexTouching[i];
+    size_t neighbour_index = m_pos + permutation;
     if (neighbour_index < m_ws->getNPoints() &&
         Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
                                     m_indexMaker, m_indexMax, widths)) {
@@ -675,6 +676,59 @@ std::vector<size_t> MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(
       std::unique(neighbourIndexes.begin(), neighbourIndexes.end()),
       neighbourIndexes.end());
   return neighbourIndexes;
+}
+
+/**
+ * Find vertex-touching neighbours. This function always returns a vector of
+ * indexes which has a size equal to the product of the widths. This is
+ * because it also returns a vector of bools (of the same size) which
+ * records the validity of each index, rather than removing invalid indexes
+ * from the list. This function only allows a width vector to have one
+ * non-singleton dimension.
+ * NB, the index of the central pixel is included in the output array.
+ * @param width : Width in the non-singleton dimension
+ * @param width_dimension : The non-singleton dimension of the widths vector
+ * @return collection of indexes.
+ */
+std::pair<std::vector<size_t>, std::vector<bool>>
+MDHistoWorkspaceIterator::findNeighbourIndexesByWidth1D(
+    const int &width, const int &width_dimension) const {
+
+  std::vector<int> widths;
+  for (size_t dimension = 0; dimension < m_nd; ++dimension) {
+    if (static_cast<int>(dimension) == width_dimension) {
+      widths.push_back(width);
+    } else {
+      widths.push_back(1);
+    }
+  }
+
+  // Find existing or create required index permutations.
+  std::vector<int64_t> permutationsVertexTouching = createPermutations(widths);
+
+  std::vector<bool> indexValidity(permutationsVertexTouching.size(), false);
+
+  Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker,
+                                                  m_indexMax, m_index);
+
+  std::sort(permutationsVertexTouching.begin(),
+            permutationsVertexTouching.end());
+
+  // Accumulate neighbour indexes.
+  // Record indexes as valid only if they are actually neighbours.
+  std::vector<size_t> neighbourIndexes(permutationsVertexTouching.size());
+  for (size_t i = 0; i < permutationsVertexTouching.size(); ++i) {
+
+    size_t neighbour_index = m_pos + permutationsVertexTouching[i];
+    neighbourIndexes[i] = neighbour_index;
+    if (neighbour_index < m_ws->getNPoints() &&
+        Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
+                                    m_indexMaker, m_indexMax, widths)) {
+      indexValidity[i] = true;
+    }
+  }
+
+  return std::make_pair(neighbourIndexes, indexValidity);
 }
 
 /**

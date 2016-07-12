@@ -45,9 +45,6 @@ FunctionProperty &FunctionProperty::operator+=(Kernel::Property const *) {
   return *this;
 }
 
-/// Virtual destructor
-FunctionProperty::~FunctionProperty() {}
-
 /** Get the function definition
 *  @return The function definition
 */

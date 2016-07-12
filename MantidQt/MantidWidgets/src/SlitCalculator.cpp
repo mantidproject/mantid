@@ -1,6 +1,8 @@
 #include "MantidQtMantidWidgets/SlitCalculator.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Progress.h"
+#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
 #include <math.h>

@@ -37,14 +37,14 @@ class DLLExport MDNormSCD : public SlicingAlgorithm {
 public:
   MDNormSCD();
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   void cacheInputs();
   std::string inputEnergyMode() const;

@@ -2,13 +2,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertTableToMatrixWorkspace.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 #include <boost/mpl/if.hpp>
 #include <boost/type_traits.hpp>
+
 #include <sstream>
 
 namespace Mantid {
@@ -21,12 +25,12 @@ using namespace Kernel;
 using namespace API;
 
 void ConvertTableToMatrixWorkspace::init() {
-  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input TableWorkspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output Workspace2D.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output Workspace2D.");
   declareProperty("ColumnX", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The column name for the X vector.");

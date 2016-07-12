@@ -145,6 +145,7 @@
            </property>
            <property name="font">
             <font>
+             <family>Segoe UI</family>
              <pointsize>10</pointsize>
              <weight>50</weight>
              <bold>false</bold>
@@ -1224,6 +1225,30 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>title_edit</tabstop>
+  <tabstop>starttime_edit</tabstop>
+  <tabstop>stoptime_edit</tabstop>
+  <tabstop>run_number_edit</tabstop>
+  <tabstop>load_button</tabstop>
+  <tabstop>log_name_combo</tabstop>
+  <tabstop>plot_log_button</tabstop>
+  <tabstop>syn_logname_button</tabstop>
+  <tabstop>info_text_browser</tabstop>
+  <tabstop>timefilter_checkBox</tabstop>
+  <tabstop>timintervallength_edit</tabstop>
+  <tabstop>timeunit_combo</tabstop>
+  <tabstop>logvaluefilter_checkBox</tabstop>
+  <tabstop>logname_edit</tabstop>
+  <tabstop>valuechange_combo</tabstop>
+  <tabstop>logintervalvalue_edit</tabstop>
+  <tabstop>timetol_edit</tabstop>
+  <tabstop>logminvalue_edit</tabstop>
+  <tabstop>logmaxvalue_edit</tabstop>
+  <tabstop>logtol_edit</tabstop>
+  <tabstop>logbound_combo</tabstop>
+  <tabstop>scrollArea</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

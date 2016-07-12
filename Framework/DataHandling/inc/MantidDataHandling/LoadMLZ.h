@@ -37,23 +37,22 @@ namespace DataHandling {
 class DLLExport LoadMLZ : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadMLZ();
-  virtual ~LoadMLZ();
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads a nexus file from MLZ facility.";
   }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   // int getEPPFromVanadium(const std::string
   // &,Mantid::API::MatrixWorkspace_sptr);
@@ -106,6 +105,8 @@ private:
 
   double m_l1;
   double m_l2;
+
+  double m_t1; // time of flight from source to sample
 
   std::vector<std::string> m_supportedInstruments;
   LoadHelper m_mlzloader;

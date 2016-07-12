@@ -29,9 +29,6 @@ class DLLExport MDBin {
 public:
   MDBin();
 
-  /// Destructor
-  ~MDBin() {}
-
   /** The accumulated signal in this bin.
    * This is public so as to avoid the need (and slowdown) of getters/setters
    */

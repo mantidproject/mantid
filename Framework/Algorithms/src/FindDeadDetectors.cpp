@@ -2,9 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindDeadDetectors.h"
-#include "MantidKernel/System.h"
-#include <fstream>
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
+
+#include <fstream>
 
 namespace Mantid {
 namespace Algorithms {
@@ -18,10 +19,11 @@ using namespace API;
 /// Initialisation method.
 void FindDeadDetectors::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Name of the input workspace");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "Each histogram from the input workspace maps to a histogram in this\n"
       "workspace with one value that indicates if there was a dead detector");
 
@@ -72,7 +74,7 @@ void FindDeadDetectors::exec() {
 
   // Try and open the output file, if specified, and write a header
   std::ofstream file(getPropertyValue("OutputFile").c_str());
-  file << "Index Spectrum UDET(S)" << std::endl;
+  file << "Index Spectrum UDET(S)\n";
 
   // Get the integrated input workspace
   MatrixWorkspace_sptr integratedWorkspace = integrateWorkspace();
@@ -81,7 +83,7 @@ void FindDeadDetectors::exec() {
   int countSpec = 0, countDets = 0;
 
   // iterate over the data values setting the live and dead values
-  g_log.information() << "Marking dead detectors" << std::endl;
+  g_log.information() << "Marking dead detectors\n";
   const int64_t numSpec = integratedWorkspace->getNumberHistograms();
   const double numSpec_d = static_cast<double>(numSpec);
   int64_t iprogress_step = numSpec / 100;
@@ -89,28 +91,27 @@ void FindDeadDetectors::exec() {
     iprogress_step = 1;
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
     // Spectrum in the integratedWorkspace
-    ISpectrum *spec = integratedWorkspace->getSpectrum(i);
-    double &y = spec->dataY()[0];
+    auto &spec = integratedWorkspace->getSpectrum(i);
+    double &y = spec.dataY()[0];
     if (y > deadThreshold) {
       y = liveValue;
     } else {
       ++countSpec;
       y = deadValue;
-      const specid_t specNo = spec->getSpectrumNo();
+      const specnum_t specNo = spec.getSpectrumNo();
       // Write the spectrum number to file
       file << i << " " << specNo;
       // Get the list of detectors for this spectrum and iterate over
-      const std::set<detid_t> &dets = spec->getDetectorIDs();
-      std::set<detid_t>::const_iterator it;
-      for (it = dets.begin(); it != dets.end(); ++it) {
+      const auto &dets = spec.getDetectorIDs();
+      for (const auto &det : dets) {
         // Write the detector ID to file, log & the FoundDead output property
-        file << " " << *it;
+        file << " " << det;
         // we could write dead detectors to the log but if they are viewing the
         // log in the MantidPlot viewer it will crash MantidPlot
-        deadDets.push_back(*it);
+        deadDets.push_back(det);
         ++countDets;
       }
-      file << std::endl;
+      file << '\n';
     }
     if (i % iprogress_step == 0) {
       progress(static_cast<double>(i) / numSpec_d);
@@ -120,7 +121,7 @@ void FindDeadDetectors::exec() {
 
   g_log.notice() << "Found a total of " << countDets
                  << " 'dead' detectors within " << countSpec
-                 << " 'dead' spectra." << std::endl;
+                 << " 'dead' spectra.\n";
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", integratedWorkspace);
@@ -133,7 +134,7 @@ void FindDeadDetectors::exec() {
 
 /// Run Integration as a Child Algorithm
 MatrixWorkspace_sptr FindDeadDetectors::integrateWorkspace() {
-  g_log.information() << "Integrating input workspace" << std::endl;
+  g_log.information() << "Integrating input workspace\n";
 
   API::IAlgorithm_sptr childAlg = createChildAlgorithm("Integration");
   // Now execute integration.

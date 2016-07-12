@@ -2,56 +2,42 @@
 // Includes
 //----------------------
 #include "MantidQtCustomInterfaces/SANSRunWindow.h"
-#include "MantidQtCustomInterfaces/SANSAddFiles.h"
-#include "MantidQtAPI/ManageUserDirectories.h"
-#include "MantidQtAPI/FileDialogHandler.h"
+
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/PropertyWithValue.h"
-
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/PropertyManagerDataService.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/IEventWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IComponent.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/Exception.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
-#include <QLineEdit>
-#include <QHash>
-#include <QTextStream>
-#include <QTreeWidgetItem>
-#include <QMessageBox>
-#include <QInputDialog>
-#include <QSignalMapper>
-#include <QHeaderView>
-#include <QApplication>
+#include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/ManageUserDirectories.h"
+#include "MantidQtCustomInterfaces/SANSAddFiles.h"
+#include "MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h"
+#include "MantidQtCustomInterfaces/SANSEventSlicing.h"
+
 #include <QClipboard>
-#include <QTemporaryFile>
-#include <QDateTime>
 #include <QDesktopServices>
+#include <QTemporaryFile>
+#include <QTextStream>
 #include <QUrl>
 
 #include <Poco/StringTokenizer.h>
 #include <Poco/Message.h>
 
 #include <boost/lexical_cast.hpp>
-
-#include "MantidGeometry/IDetector.h"
-
-#include "MantidQtCustomInterfaces/SANSEventSlicing.h"
-
-#include <boost/assign.hpp>
 #include <boost/foreach.hpp>
-#include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>
+
 #include <cmath>
 
 using Mantid::detid_t;
@@ -144,9 +130,40 @@ void setStringSetting(const QString &settingName, const QString &settingValue) {
 
   if (!settings->existsProperty(name))
     settings->declareProperty(
-        new Kernel::PropertyWithValue<std::string>(name, ""), value);
+        Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(name, ""),
+        value);
   else
     settings->setProperty(name, value);
+}
+
+/**
+ * Converts a c++ bool into a Python string representation.
+ * @param input: a c++ bool
+ * @returns a string which is either True or False
+ */
+QString convertBoolToPythonBoolString(bool input) {
+  return input
+             ? MantidQt::CustomInterfaces::SANSConstants::getPythonTrueKeyword()
+             : MantidQt::CustomInterfaces::SANSConstants::
+                   getPythonFalseKeyword();
+}
+
+/**
+ * Converts string representation of a Python bool to a C++ bool
+ * @param input: the python string representation
+ * @returns a true or false
+*/
+bool convertPythonBoolStringToBool(QString input) {
+  bool value = false;
+  if (input ==
+      MantidQt::CustomInterfaces::SANSConstants::getPythonTrueKeyword()) {
+    value = true;
+  } else if (input == MantidQt::CustomInterfaces::SANSConstants::
+                          getPythonFalseKeyword()) {
+    value = false;
+  }
+
+  return value;
 }
 }
 
@@ -228,12 +245,12 @@ void SANSRunWindow::initLayout() {
   m_uiForm.batch_table->setContextMenuPolicy(Qt::ActionsContextMenu);
   m_batch_paste = new QAction(tr("&Paste"), m_uiForm.batch_table);
   m_batch_paste->setShortcut(tr("Ctrl+P"));
-  connect(m_batch_paste, SIGNAL(activated()), this, SLOT(pasteToBatchTable()));
+  connect(m_batch_paste, SIGNAL(triggered()), this, SLOT(pasteToBatchTable()));
   m_uiForm.batch_table->addAction(m_batch_paste);
 
   m_batch_clear = new QAction(tr("&Clear"), m_uiForm.batch_table);
   m_uiForm.batch_table->addAction(m_batch_clear);
-  connect(m_batch_clear, SIGNAL(activated()), this, SLOT(clearBatchTable()));
+  connect(m_batch_clear, SIGNAL(triggered()), this, SLOT(clearBatchTable()));
 
   // Main Logging
   m_uiForm.logging_field->attachLoggingChannel();
@@ -379,7 +396,7 @@ void SANSRunWindow::makeValidator(QLabel *const newValid, QWidget *control,
   newValid->setPalette(pal);
   newValid->setToolTip(errorMsg);
 
-  // regester the validator       and say      where it's control is
+  // register the validator       and say      where it's control is
   m_validators[newValid] = std::pair<QWidget *, QWidget *>(control, tab);
 }
 
@@ -404,8 +421,7 @@ void SANSRunWindow::initLocalPython() {
   // Make sure that user file is valid
   if (!isValidUserFile()) {
     m_cfg_loaded = false;
-  }
-  else {
+  } else {
     loadUserFile();
     handleInstrumentChange();
     m_cfg_loaded = true;
@@ -455,10 +471,8 @@ void SANSRunWindow::saveWorkspacesDialog() {
   // Connect the request for a zero-error-free workspace
   // cpp-check does not understand that the input are two references
   connect(m_saveWorkspaces,
-          // cppcheck-suppress duplicateExpression
-          SIGNAL(createZeroErrorFreeWorkspace(QString &, QString &)),
-          // cppcheck-suppress duplicateExpression
-          this, SLOT(createZeroErrorFreeClone(QString &, QString &)));
+          SIGNAL(createZeroErrorFreeWorkspace(QString &, QString &)), this,
+          SLOT(createZeroErrorFreeClone(QString &, QString &)));
   // Connect the request for deleting a zero-error-free workspace
   connect(m_saveWorkspaces, SIGNAL(deleteZeroErrorFreeWorkspace(QString &)),
           this, SLOT(deleteZeroErrorFreeClone(QString &)));
@@ -531,12 +545,12 @@ void SANSRunWindow::connectAnalysDetSignals() {
           SLOT(updateTransInfo(int)));
   connect(m_uiForm.transFit_ck_can, SIGNAL(stateChanged(int)), this,
           SLOT(updateTransInfo(int)));
-  updateTransInfo(m_uiForm.transFit_ck->state());
+  updateTransInfo(m_uiForm.transFit_ck->checkState());
   m_uiForm.transFit_ck_can->toggle();
 
   connect(m_uiForm.frontDetQrangeOnOff, SIGNAL(stateChanged(int)), this,
           SLOT(updateFrontDetQrange(int)));
-  updateFrontDetQrange(m_uiForm.frontDetQrangeOnOff->state());
+  updateFrontDetQrange(m_uiForm.frontDetQrangeOnOff->checkState());
 
   connect(m_uiForm.enableRearFlood_ck, SIGNAL(stateChanged(int)), this,
           SLOT(prepareFlood(int)));
@@ -670,7 +684,7 @@ void SANSRunWindow::readSettings() {
                 << "\nFound previous user mask file "
                 << m_uiForm.userfile_edit->text().toStdString()
                 << "\nFound instrument definition directory "
-                << m_ins_defdir.toStdString() << std::endl;
+                << m_ins_defdir.toStdString() << '\n';
 }
 /** Sets the states of the checkboxes in the save box using those
 * in the passed QSettings object
@@ -738,7 +752,7 @@ QString SANSRunWindow::runReduceScriptFunction(const QString &pycode) {
   if (!m_have_reducemodule) {
     return QString();
   }
-  g_log.debug() << "Executing Python: " << pycode.toStdString() << std::endl;
+  g_log.debug() << "Executing Python: " << pycode.toStdString() << '\n';
 
   const static QString PYTHON_SEP("C++runReduceScriptFunctionC++");
   QString code_torun = pycode + ";print '" + PYTHON_SEP + "p'";
@@ -1042,6 +1056,10 @@ bool SANSRunWindow::loadUserFile() {
   // Setup the QResolution
   retrieveQResolutionSettings();
 
+  // Setup the BackgroundCorrection
+  initializeBackgroundCorrection();
+  retrieveBackgroundCorrection();
+
   if (runReduceScriptFunction("print i.ReductionSingleton().mask.phi_mirror")
           .trimmed() == "True") {
     m_uiForm.mirror_phi->setChecked(true);
@@ -1062,6 +1080,9 @@ bool SANSRunWindow::loadUserFile() {
   m_uiForm.tabWidget->setTabEnabled(1, true);
   m_uiForm.tabWidget->setTabEnabled(2, true);
   m_uiForm.tabWidget->setTabEnabled(3, true);
+
+  // Display which IDf is currently being used by the reducer
+  updateIDFFilePath();
 
   return true;
 }
@@ -1087,7 +1108,7 @@ bool SANSRunWindow::loadCSVFile() {
     if (!line.isEmpty()) {
       // if first line of batch contain string MANTID_BATCH_FILE this is a
       // 'metadata' line
-      if (!line.upper().contains("MANTID_BATCH_FILE"))
+      if (!line.toUpper().contains("MANTID_BATCH_FILE"))
         errors += addBatchLine(line, ",");
     }
   }
@@ -1419,12 +1440,10 @@ bool SANSRunWindow::workspaceExists(const QString &ws_name) const {
  * @returns A list of the currently available workspaces
  */
 QStringList SANSRunWindow::currentWorkspaceList() const {
-  std::set<std::string> ws_list =
-      AnalysisDataService::Instance().getObjectNames();
-  std::set<std::string>::const_iterator iend = ws_list.end();
+  auto ws_list = AnalysisDataService::Instance().getObjectNames();
+  auto iend = ws_list.end();
   QStringList current_list;
-  for (std::set<std::string>::const_iterator itr = ws_list.begin(); itr != iend;
-       ++itr) {
+  for (auto itr = ws_list.begin(); itr != iend; ++itr) {
     current_list.append(QString::fromStdString(*itr));
   }
   return current_list;
@@ -1633,7 +1652,7 @@ void SANSRunWindow::setGeometryDetails() {
 
   // Moderator-monitor distance is common to LOQ and SANS2D.
   size_t monitorWsIndex = 0;
-  const specid_t monitorSpectrum = m_uiForm.monitor_spec->text().toInt();
+  const specnum_t monitorSpectrum = m_uiForm.monitor_spec->text().toInt();
   try {
     monitorWsIndex = monitorWs->getIndexFromSpectrumNumber(monitorSpectrum);
   } catch (std::runtime_error &) {
@@ -1645,8 +1664,7 @@ void SANSRunWindow::setGeometryDetails() {
     return;
   }
 
-  const std::set<detid_t> &dets =
-      monitorWs->getSpectrum(monitorWsIndex)->getDetectorIDs();
+  const auto &dets = monitorWs->getSpectrum(monitorWsIndex).getDetectorIDs();
   if (dets.empty())
     return;
 
@@ -2104,6 +2122,10 @@ bool SANSRunWindow::handleLoadButtonClick() {
   updateBeamCenterCoordinates();
   // Set the beam finder specific settings
   setBeamFinderDetails();
+
+  // Display which IDF is currently being used by the reducer
+  updateIDFFilePath();
+
   return true;
 }
 
@@ -2307,6 +2329,9 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type) {
   // Set the QResolution settings
   writeQResolutionSettingsToPythonScript(exec_reduce);
 
+  // Set the BackgroundCorrection settings
+  writeBackgroundCorrectionToPythonScript(exec_reduce);
+
   // set the user defined center (Geometry Tab)
   // this information is used just after loading the data in order to move to
   // the center
@@ -2358,7 +2383,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
   const States type = typeStr == "1D" ? OneD : TwoD;
 
   // Make sure that all settings are valid
-  if (!areSettingsValid()) {
+  if (!areSettingsValid(type)) {
     return;
   }
 
@@ -3614,10 +3639,9 @@ void SANSRunWindow::resetGeometryDetailsBox() {
 void SANSRunWindow::cleanup() {
   Mantid::API::AnalysisDataServiceImpl &ads =
       Mantid::API::AnalysisDataService::Instance();
-  std::set<std::string> workspaces = ads.getObjectNames();
-  std::set<std::string>::const_iterator iend = workspaces.end();
-  for (std::set<std::string>::const_iterator itr = workspaces.begin();
-       itr != iend; ++itr) {
+  auto workspaces = ads.getObjectNames();
+  auto iend = workspaces.end();
+  for (auto itr = workspaces.begin(); itr != iend; ++itr) {
     QString name = QString::fromStdString(*itr);
     if (name.endsWith("_raw") || name.endsWith("_nxs")) {
       ads.remove(*itr);
@@ -4388,10 +4412,19 @@ void SANSRunWindow::resetToM3IfNecessary() {
  * Check tha the Settings are valid. We need to do this for inputs which cannot
  * be checked with simple validators
  */
-bool SANSRunWindow::areSettingsValid() {
+bool SANSRunWindow::areSettingsValid(States type) {
   bool isValid = true;
   QString message;
   // ------------ GUI INPUT CHECKS ------------
+
+  // We currently do not allow a 2D reduction with a merged flag
+  auto isMergedReduction = m_uiForm.detbank_sel->currentIndex() == 3;
+  if (type == States::TwoD && isMergedReduction) {
+    isValid = false;
+    message +=
+        "A merged Detector Bank selection is currently not supported for 2D "
+        "reductions.\n";
+  }
 
   // R_MAX -- can be only >0 or -1
   auto r_max = m_uiForm.rad_max->text().simplified().toDouble();
@@ -4861,11 +4894,124 @@ void SANSRunWindow::initQResolutionSettings() {
 }
 
 /**
+ * Initialize the background corrections, ie reset all fields
+ */
+void SANSRunWindow::initializeBackgroundCorrection() {
+  m_uiForm.sansBackgroundCorrectionWidget->resetEntries();
+}
+
+/**
+ * Retrieve background correction settings and set them in the UI
+ */
+void SANSRunWindow::retrieveBackgroundCorrection() {
+  // Get all settings from the python side
+  auto timeDetector = retrieveBackgroundCorrectionSetting(true, false);
+  auto timeMonitor = retrieveBackgroundCorrectionSetting(true, true);
+  auto uampDetector = retrieveBackgroundCorrectionSetting(false, false);
+  auto uampMonitor = retrieveBackgroundCorrectionSetting(false, true);
+
+  // Apply the settings to the background correction widget
+  m_uiForm.sansBackgroundCorrectionWidget->setDarkRunSettingForTimeDetectors(
+      timeDetector);
+  m_uiForm.sansBackgroundCorrectionWidget->setDarkRunSettingForTimeMonitors(
+      timeMonitor);
+  m_uiForm.sansBackgroundCorrectionWidget->setDarkRunSettingForUampDetectors(
+      uampDetector);
+  m_uiForm.sansBackgroundCorrectionWidget->setDarkRunSettingForUampMonitors(
+      uampMonitor);
+}
+
+/**
+ * Get a single background correction setting
+ * @param isTime: if is time or uamp
+ * @param isMon: if is monitor or detector
+ * @returns a settings object
+ */
+SANSBackgroundCorrectionSettings
+SANSRunWindow::retrieveBackgroundCorrectionSetting(bool isTime, bool isMon) {
+  std::map<QString, QString> commandMap = {
+      {"run_number", ""}, {"is_mean", ""}, {"is_mon", ""}, {"mon_number", ""}};
+
+  auto createPythonScript = [](bool isTime, bool isMon, QString component) {
+    return "i.get_background_correction(is_time = " +
+           convertBoolToPythonBoolString(isTime) + ", is_mon=" +
+           convertBoolToPythonBoolString(isMon) + ", component='" + component +
+           "')";
+  };
+
+  for (auto &command : commandMap) {
+    auto element =
+        runPythonCode(createPythonScript(isTime, isMon, command.first));
+    element = element.simplified();
+    if (element != m_constants.getPythonEmptyKeyword()) {
+      command.second = element;
+    }
+  }
+
+  QString runNumber = commandMap["run_number"];
+  bool useMean = convertPythonBoolStringToBool(commandMap["is_mean"]);
+  bool useMon = convertPythonBoolStringToBool(commandMap["is_mon"]);
+  QString monNumber = commandMap["mon_number"];
+
+  return SANSBackgroundCorrectionSettings(runNumber, useMean, useMon,
+                                          monNumber);
+}
+
+/**
+ * Sends the background correction user setting
+ * @param pythonCode: the python code to attaceh the new commands
+ */
+void SANSRunWindow::writeBackgroundCorrectionToPythonScript(
+    QString &pythonCode) {
+  // Clear the stored settings. Else we will overwrite settings
+  runPythonCode("i.clear_background_correction()");
+
+  // Get the settings
+  auto timeDetectors = m_uiForm.sansBackgroundCorrectionWidget
+                           ->getDarkRunSettingForTimeDetectors();
+  auto timeMonitors = m_uiForm.sansBackgroundCorrectionWidget
+                          ->getDarkRunSettingForTimeMonitors();
+
+  auto uampDetectors = m_uiForm.sansBackgroundCorrectionWidget
+                           ->getDarkRunSettingForUampDetectors();
+  auto uampMonitors = m_uiForm.sansBackgroundCorrectionWidget
+                          ->getDarkRunSettingForUampMonitors();
+
+  addBackgroundCorrectionToPythonScript(pythonCode, timeDetectors, true);
+  addBackgroundCorrectionToPythonScript(pythonCode, timeMonitors, true);
+
+  addBackgroundCorrectionToPythonScript(pythonCode, uampDetectors, false);
+  addBackgroundCorrectionToPythonScript(pythonCode, uampMonitors, false);
+}
+
+/**
+ * Add specific background correction setting to python script
+ * @param pythonCode: the python code to attaceh the new commands
+ * @param setting: a background correction settings object
+ * @param isTimeBased: flag if it is time-based
+ */
+void SANSRunWindow::addBackgroundCorrectionToPythonScript(
+    QString &pythonCode,
+    MantidQt::CustomInterfaces::SANSBackgroundCorrectionSettings setting,
+    bool isTimeBased) {
+
+  QString newSetting =
+      "i.set_background_correction(run_number='" + setting.getRunNumber() +
+      "'," + "is_time_based=" + convertBoolToPythonBoolString(isTimeBased) +
+      "," + "is_mon=" + convertBoolToPythonBoolString(setting.getUseMon()) +
+      "," + "is_mean=" + convertBoolToPythonBoolString(setting.getUseMean()) +
+      "," + "mon_numbers = '" + setting.getMonNumber() + "')\n";
+
+  pythonCode += newSetting;
+}
+
+/**
  * Check if the user file has a valid extension
  */
 bool SANSRunWindow::hasUserFileValidFileExtension() {
   auto userFile = m_uiForm.userfile_edit->text().trimmed();
-  QString checkValidity = "i.has_user_file_valid_extension('" + userFile +"')\n";
+  QString checkValidity =
+      "i.has_user_file_valid_extension('" + userFile + "')\n";
 
   QString resultCheckValidity(runPythonCode(checkValidity, false));
   resultCheckValidity = resultCheckValidity.simplified();
@@ -4875,10 +5021,11 @@ bool SANSRunWindow::hasUserFileValidFileExtension() {
   }
 
   if (!isValid) {
-    QMessageBox::critical(this, "User File extension issue",
-                                "The specified user file does not seem to have a \n"
-				"valid file extension. Make sure that the user file \n" 
-				"has a .txt extension.");
+    QMessageBox::critical(
+        this, "User File extension issue",
+        "The specified user file does not seem to have a \n"
+        "valid file extension. Make sure that the user file \n"
+        "has a .txt extension.");
   }
 
   return isValid;
@@ -4903,7 +5050,7 @@ bool SANSRunWindow::isValidUserFile() {
   QString filetext = m_uiForm.userfile_edit->text().trimmed();
   if (filetext.isEmpty()) {
     QMessageBox::warning(this, "Error loading user file",
-      "No user file has been specified");
+                         "No user file has been specified");
     m_cfg_loaded = false;
     return false;
   }
@@ -4911,7 +5058,7 @@ bool SANSRunWindow::isValidUserFile() {
   QFile user_file(filetext);
   if (!user_file.open(QIODevice::ReadOnly)) {
     QMessageBox::critical(this, "Error loading user file",
-      "Could not open user file \"" + filetext + "\"");
+                          "Could not open user file \"" + filetext + "\"");
     m_cfg_loaded = false;
     return false;
   }
@@ -4920,6 +5067,17 @@ bool SANSRunWindow::isValidUserFile() {
   return true;
 }
 
-
+void SANSRunWindow::updateIDFFilePath() {
+  QString getIdf = "i.get_current_idf_path_in_reducer()\n";
+  QString resultIdf(runPythonCode(getIdf, false));
+  auto teset1 = resultIdf.toStdString();
+  resultIdf = resultIdf.simplified();
+  auto test2 = resultIdf.toStdString();
+  if (resultIdf != m_constants.getPythonEmptyKeyword() &&
+      !resultIdf.isEmpty()) {
+    auto test = resultIdf.toStdString();
+    m_uiForm.current_idf_path->setText(resultIdf);
+  }
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

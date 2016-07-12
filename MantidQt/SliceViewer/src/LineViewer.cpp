@@ -2,17 +2,15 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/VMD.h"
+#include "MantidKernel/UsageService.h"
 #include "MantidQtSliceViewer/LineViewer.h"
-#include <QIntValidator>
 #include <qwt_plot_curve.h>
 #include <qwt_plot.h>
 #include <qwt_scale_engine.h>
-#include <qwt_scale_div.h>
 #include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
-#include "MantidAPI/NullCoordTransform.h"
 #include "MantidQtSliceViewer/LinePlotOptions.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -97,7 +95,9 @@ LineViewer::LineViewer(QWidget *parent)
   m_plotLayout = new QVBoxLayout(ui.frmPlot);
   m_plot = new QwtPlot();
   m_plot->autoRefresh();
-  m_plot->setBackgroundColor(QColor(255, 255, 255)); // White background
+  QPalette palette;
+  palette.setColor(m_plot->backgroundRole(), QColor(255, 255, 255));
+  m_plot->setPalette(palette);
   m_plotLayout->addWidget(m_plot, 1);
 
   // Make the 2 curves
@@ -141,6 +141,9 @@ LineViewer::LineViewer(QWidget *parent)
                    SLOT(refreshPlot()));
   QObject::connect(m_lineOptions, SIGNAL(changedYLogScaling()), this,
                    SLOT(onToggleLogYAxis()));
+
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "SliceViewer->LineViewer", false);
 }
 
 LineViewer::~LineViewer() {}
@@ -318,8 +321,8 @@ LineViewer::applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
   const double planeWidth = getPlanarWidth();
 
   if (planeWidth <= 0) {
-    g_log.error() << "Planar width must be > 0" << std::endl;
-    g_log.error() << "Planar width is: " << planeWidth << std::endl;
+    g_log.error() << "Planar width must be > 0\n";
+    g_log.error() << "Planar width is: " << planeWidth << '\n';
     return IAlgorithm_sptr();
   }
 
@@ -327,8 +330,8 @@ LineViewer::applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
   const double lengthX = m_end[m_freeDimX] - m_start[m_freeDimX];
   const double lengthY = m_end[m_freeDimY] - m_start[m_freeDimY];
   const bool lineIsHorizontal = fabs(lengthX) > fabs(lengthY);
-  const bool axesAreFlipped = m_freeDimX == m_initFreeDimY &&
-    m_freeDimY == m_initFreeDimX;
+  const bool axesAreFlipped =
+      m_freeDimX == m_initFreeDimY && m_freeDimY == m_initFreeDimX;
   // True when (NOT lineIsHorizontal) XOR axesAreFlipped
   // The truth table simplifies down to lineIsHorizontal == axesAreFlipped
   const bool shouldTranspose = lineIsHorizontal == axesAreFlipped;
@@ -379,8 +382,8 @@ LineViewer::applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
     }
   } catch (std::exception &e) {
     // Log the error
-    g_log.error() << "Invalid property passed to Rebin2D:" << std::endl;
-    g_log.error() << e.what() << std::endl;
+    g_log.error() << "Invalid property passed to Rebin2D:\n";
+    g_log.error() << e.what() << '\n';
     return IAlgorithm_sptr();
   }
 
@@ -414,7 +417,7 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
     const int axis = dx != 0 ? m_freeDimX : m_freeDimY;
     const int paxis = dx != 0 ? m_freeDimY : m_freeDimX;
 
-    //One per axis
+    // One per axis
     std::stringstream pbin[5];
     for (size_t i = 0; i < histWS->getNumDims(); ++i) {
       if (static_cast<int>(i) == axis) {
@@ -472,9 +475,11 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   alg->setPropertyValue("OutputWorkspace", m_integratedWSName);
   alg->setProperty("AxisAligned", false);
 
-  // If we are rebinning from an existing MDHistoWorkspace, and that workspace has been created with basis vectors normalized, then we reapply that setting here.
-  if(boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws)){
-      alg->setProperty("NormalizeBasisVectors", m_ws->allBasisNormalized());
+  // If we are rebinning from an existing MDHistoWorkspace, and that workspace
+  // has been created with basis vectors normalized, then we reapply that
+  // setting here.
+  if (boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws)) {
+    alg->setProperty("NormalizeBasisVectors", m_ws->allBasisNormalized());
   }
 
   std::vector<int> OutputBins;
@@ -535,14 +540,15 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
  * */
 void LineViewer::apply() {
 
- if (m_allDimsFree) {
-     throw std::runtime_error(
-      "Not currently supported with all dimensions free!");
- }
+  if (m_allDimsFree) {
+    throw std::runtime_error(
+        "Not currently supported with all dimensions free!");
+  }
   m_algoRunner->cancelRunningAlgorithm();
 
   // Make a name for the line-cut
-  m_integratedWSName = proposeIntegratedWSName(m_ws->getName(), ui.ckOverWrite->isChecked());
+  m_integratedWSName =
+      proposeIntegratedWSName(m_ws->getName(), ui.ckOverWrite->isChecked());
 
   // Different call for
   MatrixWorkspace_sptr matrixWs =
@@ -783,9 +789,9 @@ void LineViewer::setFreeDimensions(bool all, int dimX, int dimY) {
     throw std::runtime_error("LineViewer::setFreeDimensions(): Free Y "
                              "dimension index is out of range.");
 
-  if(m_initFreeDimX < 0)
+  if (m_initFreeDimX < 0)
     m_initFreeDimX = int(dimX);
-  if(m_initFreeDimY < 0)
+  if (m_initFreeDimY < 0)
     m_initFreeDimY = int(dimY);
 
   m_allDimsFree = all;
@@ -800,9 +806,9 @@ void LineViewer::setFreeDimensions(bool all, int dimX, int dimY) {
  * @param dimY :: index of the Y-dimension of the plane
  */
 void LineViewer::setFreeDimensions(size_t dimX, size_t dimY) {
-  if(m_initFreeDimX < 0)
+  if (m_initFreeDimX < 0)
     m_initFreeDimX = int(dimX);
-  if(m_initFreeDimY < 0)
+  if (m_initFreeDimY < 0)
     m_initFreeDimY = int(dimY);
 
   m_allDimsFree = false;

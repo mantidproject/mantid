@@ -1,5 +1,7 @@
 #include "MantidAlgorithms/StripVanadiumPeaks.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -20,11 +22,12 @@ StripVanadiumPeaks::StripVanadiumPeaks() : API::Algorithm() {}
 
 void StripVanadiumPeaks::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Name of the input workspace. If you use the default vanadium peak "
       "positions are used, the workspace must be in units of d-spacing.");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "The name of the workspace to be created as the output of the "
       "algorithm.\n"
       "If the input workspace is an EventWorkspace, then the output must be "

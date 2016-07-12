@@ -75,8 +75,8 @@ namespace Geometry {
         SymmetryOperation inversion("-x,-y,-z");
         SymmetryOperation identity = inversion * inversion;
 
-    Please note that the components of the vector are wrapped to
-    the interval (0, 1] when two symmetry operations are combined.
+    In context of Group, the vector of SymmetryOperation is wrapped onto the
+    interval (0, 1] using the getUnitCellIntervalOperation-function.
 
     Constructing a SymmetryOperation object from a string is heavy, because the
     string has to be parsed every time. It's preferable to use
@@ -125,11 +125,6 @@ public:
   SymmetryOperation(const Kernel::IntMatrix &matrix, const V3R &vector);
   SymmetryOperation(const Kernel::DblMatrix &matrix, const V3R &vector);
 
-  SymmetryOperation(const SymmetryOperation &other);
-  SymmetryOperation &operator=(const SymmetryOperation &other);
-
-  ~SymmetryOperation() {}
-
   const Kernel::IntMatrix &matrix() const;
   const V3R &vector() const;
   const V3R &reducedVector() const;
@@ -157,14 +152,14 @@ public:
   bool operator<(const SymmetryOperation &other) const;
 
 protected:
-  void init(const Kernel::IntMatrix &matrix, const V3R &vector);
+  void init(const MatrixVectorPair<int, V3R> &matrixVectorPair);
 
   size_t getOrderFromMatrix(const Kernel::IntMatrix &matrix) const;
   V3R getReducedVector(const Kernel::IntMatrix &matrix,
                        const V3R &vector) const;
 
   size_t m_order;
-  Kernel::IntMatrix m_inverseMatrix;
+  Kernel::IntMatrix m_transposedInverseMatrix;
   V3R m_reducedVector;
   std::string m_identifier;
 
@@ -178,6 +173,9 @@ MANTID_GEOMETRY_DLL std::istream &operator>>(std::istream &stream,
 
 MANTID_GEOMETRY_DLL V3R getWrappedVector(const V3R &vector);
 MANTID_GEOMETRY_DLL Kernel::V3D getWrappedVector(const Kernel::V3D &vector);
+
+MANTID_GEOMETRY_DLL SymmetryOperation
+getUnitCellIntervalOperation(const SymmetryOperation &symOp);
 
 template <typename T, typename U>
 Kernel::Matrix<T> convertMatrix(const Kernel::Matrix<U> &matrix) {

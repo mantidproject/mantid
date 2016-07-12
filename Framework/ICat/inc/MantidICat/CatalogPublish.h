@@ -49,28 +49,30 @@ public:
   /// constructor
   CatalogPublish() : API::Algorithm() {}
   /// Destructor
-  ~CatalogPublish() {}
+  ~CatalogPublish() override {}
   /// Algorithm's name for identification.
-  virtual const std::string name() const { return "CatalogPublish"; }
+  const std::string name() const override { return "CatalogPublish"; }
   /// Summary of algorithms purpose.
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Allows the user to publish datafiles or workspaces to the "
            "information catalog.";
   }
   /// Algorithm's version for identification.
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification.
-  virtual const std::string category() const { return "DataHandling\\Catalog"; }
+  const std::string category() const override {
+    return "DataHandling\\Catalog";
+  }
 
 private:
   /// Override algorithm initialisation method.
-  void init();
+  void init() override;
   /// Override algorithm execute method.
-  void exec();
+  void exec() override;
   /// Stream the contents of a file to a given URL.
   void publish(std::istream &fileContents, const std::string &uploadURL);
   /// We want "SaveNexus" to take care of checking groups. Not this algorithm.
-  bool checkGroups() { return false; }
+  bool checkGroups() override { return false; }
   /// True if the extension of the file is a datafile.
   bool isDataFile(const std::string &filePath);
   /// Saves the workspace as a nexus file to the user's default directory.

@@ -27,23 +27,29 @@ class QLresTest(stresstesting.MantidStressTest):
         return not platform.system() == "Windows"
 
     def runTest(self):
-        import IndirectBayes as Main
-        nbins = ['1', '1']
         sname = 'irs26176_graphite002_red'
         rname = 'irs26173_graphite002_res'
-        rsname = ''
-        wfile = ''
-        erange = [-0.5, 0.5]
-        fitOp = [True, 'Sloping', False, False] #elastic, background, width, resnorm
+        e_min = -0.5
+        e_max = 0.5
+        background = 'Sloping'
+        fixed_width = False
         loopOp = False
-        plotOp = False
-        saveOp = False
 
         spath = sname+'.nxs'    # path name for sample nxs file
         LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
         rpath = rname+'.nxs'    # path name for res nxs file
         LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
-        Main.QLRun('QL',sname,rname,rsname,erange,nbins,fitOp,wfile,loopOp,plotOp,saveOp)
+        BayesQuasi(Program = 'QL',
+                   SampleWorkspace=sname,
+                   ResolutionWorkspace=rname,
+                   MinRange=e_min,
+                   MaxRange=e_max,
+                   Background = background,
+                   FixedWidth = fixed_width,
+                   Loop = loopOp,
+                   OutputWorkspaceFit='irs26176_graphite002_QLr_Workspace',
+                   OutputWorkspaceResult='irs26176_graphite002_QLr_Result',
+                   OutputWorkspaceProb='irs26176_graphite002_QLr_Probability')
 
     def validate(self):
         self.tolerance = 1e-4
@@ -130,23 +136,28 @@ class QSeTest(stresstesting.MantidStressTest):
         return not platform.system() == "Windows"
 
     def runTest(self):
-        import IndirectBayes as Main
-        nbins = ['1', '1']
         sname = 'irs26176_graphite002_red'
         rname = 'irs26173_graphite002_res'
-        rsname = ''
-        wfile = ''
-        erange = [-0.5, 0.5]
-        fitOp = [True, 'Sloping', False, False] #elastic, background, width, resnorm
+        e_min = -0.5
+        e_max = 0.5
+        background = 'Sloping'
+        fixed_width = False
         loopOp = False
-        plotOp = False
-        saveOp = False
 
         spath = sname+'.nxs'    # path name for sample nxs file
         LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
         rpath = rname+'.nxs'    # path name for res nxs file
         LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
-        Main.QLRun('QSe',sname,rname,rsname,erange,nbins,fitOp,wfile,loopOp,plotOp,saveOp)
+        BayesQuasi(Program = 'QSe',
+                   SampleWorkspace=sname,
+                   ResolutionWorkspace=rname,
+                   MinRange=e_min,
+                   MaxRange=e_max,
+                   Background = background,
+                   FixedWidth = fixed_width,
+                   Loop = loopOp,
+                   OutputWorkspaceFit='irs26176_graphite002_QSe_Workspace',
+                   OutputWorkspaceResult='irs26176_graphite002_QSe_Result')
 
     def validate(self):
         self.tolerance = 1e-1
@@ -166,23 +177,30 @@ class QLDataTest(stresstesting.MantidStressTest):
         return not platform.system() == "Windows"
 
     def runTest(self):
-        import IndirectBayes as Main
-        nbins = ['1', '1']
         sname = 'irs26176_graphite002_red'
         rname = 'irs26173_graphite002_red'
-        rsname = ''
-        wfile = ''
-        erange = [-0.5, 0.5]
-        fitOp = [True, 'Sloping', False, False] #elastic, background, width, resnorm
+        e_min = -0.5
+        e_max = 0.5
+        background = 'Sloping'
+        fixed_width = False
         loopOp = False
-        plotOp = False
-        saveOp = False
+
 
         spath = sname+'.nxs'    # path name for sample nxs file
         LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
         rpath = rname+'.nxs'    # path name for res nxs file
         LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
-        Main.QLRun('QL',sname,rname,rsname,erange,nbins,fitOp,wfile,loopOp,plotOp,saveOp)
+        BayesQuasi(Program = 'QL',
+                   SampleWorkspace=sname,
+                   ResolutionWorkspace=rname,
+                   MinRange=e_min,
+                   MaxRange=e_max,
+                   Background = background,
+                   FixedWidth = fixed_width,
+                   Loop = loopOp,
+                   OutputWorkspaceFit='irs26176_graphite002_QLr_Workspace',
+                   OutputWorkspaceResult='irs26176_graphite002_QLr_Result',
+                   OutputWorkspaceProb='irs26176_graphite002_QLr_Probability')
 
     def validate(self):
         self.tolerance = 1e-4
@@ -203,18 +221,14 @@ class QLResNormTest(stresstesting.MantidStressTest):
         return not platform.system() == "Windows"
 
     def runTest(self):
-        import IndirectBayes as Main
-
-        nbins = ['1', '1']
         sname = 'irs26176_graphite002_red'
         rname = 'irs26173_graphite002_res'
         rsname = 'irs26173_graphite002_ResNorm'
-        wfile = ''
-        erange = [-0.5, 0.5]
-        fitOp = [True, 'Sloping', False, True] #elastic, background, width, resnorm
-        loopOp = True
-        plotOp = False
-        saveOp = False
+        e_min = -0.5
+        e_max = 0.5
+        background = 'Sloping'
+        fixed_width = False
+        use_resNorm = True
 
         spath = sname+'.nxs'    # path name for sample nxs file
         LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
@@ -222,7 +236,18 @@ class QLResNormTest(stresstesting.MantidStressTest):
         LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
         rspath = rsname+'_Paras.nxs'    # path name for resNorm nxs file
         LoadNexusProcessed(Filename=rspath, OutputWorkspace=rsname)
-        Main.QLRun('QL',sname,rname,rsname,erange,nbins,fitOp,wfile,loopOp,plotOp,saveOp)
+        BayesQuasi(Program = 'QL',
+                   SampleWorkspace=sname,
+                   ResolutionWorkspace=rname,
+                   ResNormWorkspace=rsname,
+                   MinRange=e_min,
+                   MaxRange=e_max,
+                   Background = background,
+                   FixedWidth = fixed_width,
+                   UseResNorm = use_resNorm,
+                   OutputWorkspaceFit='irs26176_graphite002_QLr_Workspace',
+                   OutputWorkspaceResult='irs26176_graphite002_QLr_Result',
+                   OutputWorkspaceProb='irs26176_graphite002_QLr_Probability')
 
     def validate(self):
         self.tolerance = 1e-1
@@ -243,24 +268,29 @@ class QLWidthTest(stresstesting.MantidStressTest):
         return not platform.system() == "Windows"
 
     def runTest(self):
-        import IndirectBayes as Main
-
-        nbins = ['1', '1']
         sname = 'irs26176_graphite002_red'
         rname = 'irs26173_graphite002_res'
-        rsname = ''
         wfile = 'irs26176_graphite002_width_water.dat'
-        erange = [-0.5, 0.5]
-        fitOp = [True, 'Sloping', True, False] #elastic, background, width, resnorm
+        e_min = -0.5
+        e_max = 0.5
+        background = 'Sloping'
         loopOp = False
-        plotOp = False
-        saveOp = False
 
         spath = sname+'.nxs'    # path name for sample nxs file
         LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
         rpath = rname+'.nxs'    # path name for res nxs file
         LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
-        Main.QLRun('QL',sname,rname,rsname,erange,nbins,fitOp,wfile,loopOp,plotOp,saveOp)
+        BayesQuasi(Program = 'QL',
+                   SampleWorkspace=sname,
+                   ResolutionWorkspace=rname,
+                   MinRange=e_min,
+                   MaxRange=e_max,
+                   Background = background,
+                   WidthFile = wfile,
+                   Loop = loopOp,
+                   OutputWorkspaceFit='irs26176_graphite002_QLr_Workspace',
+                   OutputWorkspaceResult='irs26176_graphite002_QLr_Result',
+                   OutputWorkspaceProb='irs26176_graphite002_QLr_Probability')
 
     def validate(self):
         self.tolerance = 1e-1

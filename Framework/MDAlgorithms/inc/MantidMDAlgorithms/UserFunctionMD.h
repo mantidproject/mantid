@@ -42,24 +42,24 @@ class DLLExport UserFunctionMD : virtual public API::IFunctionMD,
                                  virtual public API::ParamFunction {
 public:
   UserFunctionMD();
-  std::string name() const { return "UserFunctionMD"; }
+  std::string name() const override { return "UserFunctionMD"; }
 
-  std::vector<std::string> getAttributeNames() const;
-  bool hasAttribute(const std::string &attName) const;
-  Attribute getAttribute(const std::string &attName) const;
-  void setAttribute(const std::string &attName, const Attribute &attr);
+  std::vector<std::string> getAttributeNames() const override;
+  bool hasAttribute(const std::string &attName) const override;
+  Attribute getAttribute(const std::string &attName) const override;
+  void setAttribute(const std::string &attName, const Attribute &attr) override;
   /**
     * Defining function's parameters here, ie after the workspace is set and
     * the dimensions are known.
     */
-  void initDimensions();
+  void initDimensions() override;
 
 protected:
   /**
     * Calculate the function value at a point r in the MD workspace
     * @param r :: MD workspace iterator with a reference to the current point
     */
-  double functionMD(const API::IMDIterator &r) const;
+  double functionMD(const API::IMDIterator &r) const override;
   /** Static callback function used by MuParser to initialize variables
   implicitly
   @param varName :: The name of a new variable

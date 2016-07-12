@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Scale.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
@@ -15,9 +16,9 @@ using namespace API;
 
 void Scale::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input));
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input));
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output));
 
   declareProperty("Factor", 1.0,
                   "The value by which to scale the input workspace");
@@ -50,7 +51,7 @@ void Scale::exec() {
 
     if (outputWS == inputWS) {
       if (hasDx) {
-        bufferWS = MatrixWorkspace_sptr(inputWS->clone().release());
+        bufferWS = inputWS->clone();
       }
       inputWS *= factor;
     } else {
@@ -62,7 +63,7 @@ void Scale::exec() {
 
     if (outputWS == inputWS) {
       if (hasDx) {
-        bufferWS = MatrixWorkspace_sptr(inputWS->clone().release());
+        bufferWS = inputWS->clone();
       }
       inputWS += factor;
     } else {
@@ -79,7 +80,7 @@ void Scale::exec() {
       bufferWS = inputWS;
     }
     for (size_t index = 0; index < bufferWS->getNumberHistograms(); ++index) {
-      outputWS->setDx(0, bufferWS->dataDx(0));
+      outputWS->setSharedDx(index, bufferWS->sharedDx(index));
     }
   }
 

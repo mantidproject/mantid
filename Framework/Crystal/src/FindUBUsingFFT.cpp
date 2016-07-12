@@ -15,14 +15,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //--------------------------------------------------------------------------
-/** Constructor
- */
-FindUBUsingFFT::FindUBUsingFFT() {}
-
-//--------------------------------------------------------------------------
-/** Destructor
- */
-FindUBUsingFFT::~FindUBUsingFFT() {}
 
 const std::string FindUBUsingFFT::name() const { return "FindUBUsingFFT"; }
 
@@ -36,12 +28,11 @@ const std::string FindUBUsingFFT::category() const {
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingFFT::init() {
-  this->declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  this->declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  boost::shared_ptr<BoundedValidator<double>> mustBePositive(
-      new BoundedValidator<double>());
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
   // use negative values, force user to input all parameters
@@ -77,8 +68,8 @@ void FindUBUsingFFT::exec() {
   double error = IndexingUtils::Find_UB(UB, q_vectors, min_d, max_d, tolerance,
                                         degrees_per_step);
 
-  g_log.notice() << "Error = " << error << std::endl;
-  g_log.notice() << "UB = " << UB << std::endl;
+  g_log.notice() << "Error = " << error << '\n';
+  g_log.notice() << "UB = " << UB << '\n';
 
   if (!IndexingUtils::CheckUB(UB)) // UB not found correctly
   {

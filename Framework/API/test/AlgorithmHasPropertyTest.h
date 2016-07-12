@@ -12,39 +12,43 @@ class AlgorithmHasPropertyTest : public CxxTest::TestSuite {
 private:
   class AlgorithmWithWorkspace : public Algorithm {
   public:
-    const std::string name() const { return "AlgorithmWithWorkspace"; }
-    int version() const { return 1; }
-    const std::string category() const { return "Cat"; }
-    const std::string summary() const { return "Test summary"; }
+    const std::string name() const override { return "AlgorithmWithWorkspace"; }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Cat"; }
+    const std::string summary() const override { return "Test summary"; }
 
-    void init() { declareProperty("OutputWorkspace", ""); }
-    void exec() {}
+    void init() override { declareProperty("OutputWorkspace", ""); }
+    void exec() override {}
   };
 
   class AlgorithmWithNoWorkspace : public Algorithm {
   public:
-    const std::string name() const { return "AlgorithmWithNoWorkspace"; }
-    int version() const { return 1; }
-    const std::string category() const { return "Cat"; }
-    const std::string summary() const { return "Test summary"; }
+    const std::string name() const override {
+      return "AlgorithmWithNoWorkspace";
+    }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Cat"; }
+    const std::string summary() const override { return "Test summary"; }
 
-    void init() { declareProperty("NotOutputWorkspace", ""); }
-    void exec() {}
+    void init() override { declareProperty("NotOutputWorkspace", ""); }
+    void exec() override {}
   };
 
   class AlgorithmWithInvalidProperty : public Algorithm {
   public:
-    const std::string name() const { return "AlgorithmWithInvalidProperty"; }
-    int version() const { return 1; }
-    const std::string category() const { return "Cat"; }
-    const std::string summary() const { return "Test summary"; }
+    const std::string name() const override {
+      return "AlgorithmWithInvalidProperty";
+    }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Cat"; }
+    const std::string summary() const override { return "Test summary"; }
 
-    void init() {
+    void init() override {
       auto lower = boost::make_shared<Mantid::Kernel::BoundedValidator<int>>();
       lower->setLower(0);
       declareProperty("OutputValue", -1, lower);
     }
-    void exec() {}
+    void exec() override {}
   };
 
 public:

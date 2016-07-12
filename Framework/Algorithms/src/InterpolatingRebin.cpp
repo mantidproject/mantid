@@ -2,9 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/InterpolatingRebin.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
@@ -23,15 +27,15 @@ using namespace API;
 */
 void InterpolatingRebin::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Workspace containing the input data");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to give the output workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to give the output workspace");
 
   declareProperty(
-      new ArrayProperty<double>("Params",
-                                boost::make_shared<RebinParamsValidator>()),
+      make_unique<ArrayProperty<double>>(
+          "Params", boost::make_shared<RebinParamsValidator>()),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally "
       "this can be followed by a comma and more widths and last boundary "
@@ -57,10 +61,10 @@ void InterpolatingRebin::exec() {
   // retrieve the properties
   std::vector<double> rb_params =
       Rebin::rebinParamsFromInput(getProperty("Params"), *inputW, g_log);
-  MantidVecPtr XValues_new;
+  HistogramData::BinEdges XValues_new(0);
   // create new output X axis
-  const int ntcnew =
-      VectorHelper::createAxisFromRebinParams(rb_params, XValues_new.access());
+  const int ntcnew = VectorHelper::createAxisFromRebinParams(
+      rb_params, XValues_new.mutableRawData());
 
   const int nHists = static_cast<int>(inputW->getNumberHistograms());
   // make output Workspace the same type as the input but with the new axes
@@ -69,7 +73,7 @@ void InterpolatingRebin::exec() {
   // Copy over the 'vertical' axis
   if (inputW->axes() > 1)
     outputW->replaceAxis(1, inputW->getAxis(1)->clone(outputW.get()));
-  outputW->isDistribution(true);
+  outputW->setDistribution(true);
 
   // this calculation requires a distribution workspace but deal with the
   // situation when we don't get this
@@ -101,7 +105,7 @@ void InterpolatingRebin::exec() {
     // non-distribution workspace they maybe not expect it, so convert back to
     // the same form that was given
     WorkspaceHelpers::makeDistribution(outputW, false);
-    outputW->isDistribution(false);
+    outputW->setDistribution(false);
   }
 
   // Now propagate any masking correctly to the output workspace
@@ -129,19 +133,20 @@ void InterpolatingRebin::exec() {
 * the histograms must corrospond with the number of x-values in XValues_new
 */
 void InterpolatingRebin::outputYandEValues(
-    API::MatrixWorkspace_const_sptr inputW, const MantidVecPtr &XValues_new,
+    API::MatrixWorkspace_const_sptr inputW,
+    const HistogramData::BinEdges &XValues_new,
     API::MatrixWorkspace_sptr outputW) {
   g_log.debug()
       << "Preparing to calculate y-values using splines and estimate errors\n";
 
   // prepare to use GSL functions but don't let them terminate Mantid
-  gsl_error_handler_t *old_handler = gsl_set_error_handler(NULL);
+  gsl_error_handler_t *old_handler = gsl_set_error_handler(nullptr);
 
   const int histnumber = static_cast<int>(inputW->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, histnumber);
   for (int hist = 0; hist < histnumber; ++hist) {
     // get const references to input Workspace arrays (no copying)
-    const MantidVec &XValues = inputW->readX(hist);
+    const auto &XValues = inputW->binEdges(hist);
     const MantidVec &YValues = inputW->readY(hist);
     const MantidVec &YErrors = inputW->readE(hist);
 
@@ -151,15 +156,15 @@ void InterpolatingRebin::outputYandEValues(
 
     try {
       // output data arrays are implicitly filled by function
-      cubicInterpolation(XValues, YValues, YErrors, *XValues_new, YValues_new,
+      cubicInterpolation(XValues, YValues, YErrors, XValues_new, YValues_new,
                          Errors_new);
     } catch (std::exception &ex) {
-      g_log.error() << "Error in rebin function: " << ex.what() << std::endl;
+      g_log.error() << "Error in rebin function: " << ex.what() << '\n';
       throw;
     }
 
     // Populate the output workspace X values
-    outputW->setX(hist, XValues_new);
+    outputW->setBinEdges(hist, XValues_new);
 
     prog.report();
   }
@@ -195,9 +200,12 @@ void InterpolatingRebin::outputYandEValues(
 *  @throw invalid_argument if any output x-values are outside the range of input
 *x-values
 **/
-void InterpolatingRebin::cubicInterpolation(
-    const MantidVec &xOld, const MantidVec &yOld, const MantidVec &eOld,
-    const MantidVec &xNew, MantidVec &yNew, MantidVec &eNew) const {
+void InterpolatingRebin::cubicInterpolation(const HistogramData::BinEdges &xOld,
+                                            const MantidVec &yOld,
+                                            const MantidVec &eOld,
+                                            const HistogramData::BinEdges &xNew,
+                                            MantidVec &yNew,
+                                            MantidVec &eNew) const {
   // Make sure y and e vectors are of correct sizes
   const size_t size_old = yOld.size();
   if (size_old == 0)
@@ -212,10 +220,10 @@ void InterpolatingRebin::cubicInterpolation(
 
   // get the bin centres of the input data
   std::vector<double> xCensOld(size_new);
-  VectorHelper::convertToBinCentre(xOld, xCensOld);
+  VectorHelper::convertToBinCentre(xOld.rawData(), xCensOld);
   // the centres of the output data
   std::vector<double> xCensNew(size_new);
-  VectorHelper::convertToBinCentre(xNew, xCensNew);
+  VectorHelper::convertToBinCentre(xNew.rawData(), xCensNew);
 
   // find the range of input values whose x-values just suround the output
   // x-values
@@ -283,11 +291,12 @@ void InterpolatingRebin::cubicInterpolation(
       throw std::invalid_argument(
           std::string("At least one x-value to interpolate to is outside the "
                       "range of the original data.\n") +
-          "original data range: " + boost::lexical_cast<std::string>(xOld[0]) +
-          " to " + boost::lexical_cast<std::string>(xOld[xOld.size() - 1]) +
-          "\n" + "range to try to interpolate to " +
-          boost::lexical_cast<std::string>(xNew[0]) + " to " +
-          boost::lexical_cast<std::string>(xNew[xNew.size() - 1]));
+          "original data range: " +
+          boost::lexical_cast<std::string>(xOld.front()) + " to " +
+          boost::lexical_cast<std::string>(xOld.back()) + "\n" +
+          "range to try to interpolate to " +
+          boost::lexical_cast<std::string>(xNew.front()) + " to " +
+          boost::lexical_cast<std::string>(xNew.back()));
     }
   }
 
@@ -298,8 +307,8 @@ void InterpolatingRebin::cubicInterpolation(
   }
 
   // get the GSL to allocate the memory
-  gsl_interp_accel *acc = NULL;
-  gsl_spline *spline = NULL;
+  gsl_interp_accel *acc = nullptr;
+  gsl_spline *spline = nullptr;
   try {
     acc = gsl_interp_accel_alloc();
     const size_t nPoints = oldIn2 - oldIn1 + 1;
@@ -345,14 +354,15 @@ void InterpolatingRebin::cubicInterpolation(
 *  @param[out] eNew is overwritten with errors from the errors on the nearest
 * input data points
 */
-void InterpolatingRebin::noInterpolation(const MantidVec &xOld,
+void InterpolatingRebin::noInterpolation(const HistogramData::BinEdges &xOld,
                                          const double yOld,
                                          const MantidVec &eOld,
-                                         const MantidVec &xNew, MantidVec &yNew,
+                                         const HistogramData::BinEdges &xNew,
+                                         MantidVec &yNew,
                                          MantidVec &eNew) const {
   yNew.assign(yNew.size(), yOld);
   for (MantidVec::size_type i = 0; i < eNew.size(); ++i) {
-    eNew[i] = estimateError(xOld, eOld, xNew[i]);
+    eNew[i] = estimateError(xOld.rawData(), eOld, xNew[i]);
   }
 }
 /**Estimates the error on each interpolated point by assuming it is similar to

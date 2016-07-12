@@ -44,13 +44,13 @@ class FunctionDomainMD;
 class MANTID_API_DLL CompositeDomainMD : public CompositeDomain {
 public:
   CompositeDomainMD(IMDWorkspace_const_sptr ws, size_t maxDomainSize);
-  ~CompositeDomainMD();
+  ~CompositeDomainMD() override;
   /// Return the total number of arguments in the domain
-  virtual size_t size() const { return m_totalSize; }
+  size_t size() const override { return m_totalSize; }
   /// Return the number of parts in the domain
-  virtual size_t getNParts() const { return m_domains.size(); }
+  size_t getNParts() const override { return m_domains.size(); }
   /// Return i-th domain
-  virtual const FunctionDomain &getDomain(size_t i) const;
+  const FunctionDomain &getDomain(size_t i) const override;
 
 protected:
   mutable IMDIterator *m_iterator; ///< IMDIterator

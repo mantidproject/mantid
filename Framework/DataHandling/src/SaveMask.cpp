@@ -40,25 +40,14 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(SaveMask)
 
-//----------------------------------------------------------------------------------------------
-/**
- * Constructor
- */
-SaveMask::SaveMask() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveMask::~SaveMask() {}
-
 /// Define input parameters
 void SaveMask::init() {
 
-  declareProperty(new API::WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Workspace to output masking to XML file");
   declareProperty(
-      new FileProperty("OutputFile", "", FileProperty::Save, ".xml"),
+      make_unique<FileProperty>("OutputFile", "", FileProperty::Save, ".xml"),
       "File to save the detectors mask in XML format");
 }
 
@@ -91,31 +80,15 @@ void SaveMask::exec() {
   for (size_t i = 0; i < inpWS->getNumberHistograms(); i++) {
     if (inpWS->dataY(i)[0] > 0.1) {
       // It is way from 0 but smaller than 1
-      // a) workspace index -> spectrum -> detector ID
-      const API::ISpectrum *spec = inpWS->getSpectrum(i);
-      if (!spec) {
-        g_log.error() << "No spectrum corresponds to workspace index " << i
-                      << std::endl;
-        throw std::invalid_argument("Cannot find spectrum");
+      for (const auto &det_id : inpWS->getSpectrum(i).getDetectorIDs()) {
+        detid0s.push_back(det_id);
       }
-
-      const std::set<detid_t> detids = spec->getDetectorIDs();
-
-      // b) get detector id & Store
-      detid_t detid;
-      ;
-      std::set<detid_t>::const_iterator it;
-      for (it = detids.begin(); it != detids.end(); ++it) {
-        detid = *it;
-        // c) store
-        detid0s.push_back(detid);
-      }
-    } // if
-  }   // for
+    }
+  }
 
   // d) sort
   g_log.debug() << "Number of detectors to be masked = " << detid0s.size()
-                << std::endl;
+                << '\n';
 
   // 3. Count workspace to count 1 and 0
   std::vector<detid_t> idx0sts; // starting point of the pair
@@ -150,8 +123,7 @@ void SaveMask::exec() {
 
     for (size_t i = 0; i < idx0sts.size(); i++) {
       g_log.information() << "Section " << i << " : " << idx0sts[i] << "  ,  "
-                          << idx0eds[i] << " to be masked and recorded."
-                          << std::endl;
+                          << idx0eds[i] << " to be masked and recorded.\n";
     }
   } // Only work for detid > 0
 
@@ -191,7 +163,7 @@ void SaveMask::exec() {
   } // for
   std::string textvalue = ss.str();
   g_log.debug() << "SaveMask main text:  available section = " << idx0sts.size()
-                << "\n" << textvalue << std::endl;
+                << "\n" << textvalue << '\n';
 
   // c2. Create element
   AutoPtr<Element> pDetid = pDoc->createElement("detids");

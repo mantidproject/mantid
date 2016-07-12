@@ -5,6 +5,7 @@
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include <vector>
 
 namespace Mantid {
@@ -141,7 +142,8 @@ double ZFKT(const double x, const double G) {
 double HKT(const double x, const double G, const double F) {
 
   const double q = G * G * x * x;
-  const double gm = 2 * M_PI * 0.01355342; // Muon gyromagnetic ratio * 2 * PI
+  // Muon gyromagnetic ratio * 2 * PI
+  const double gm = 2 * M_PI * PhysicalConstants::MuonGyromagneticRatio;
 
   double w;
   if (F > 2 * G) {
@@ -309,9 +311,7 @@ void DynamicKuboToyabe::setActiveParameter(size_t i, double value) {
  * @return A list of attribute names
  */
 std::vector<std::string> DynamicKuboToyabe::getAttributeNames() const {
-  std::vector<std::string> res;
-  res.push_back("BinWidth");
-  return res;
+  return {"BinWidth"};
 }
 
 //----------------------------------------------------------------------------------------------

@@ -32,63 +32,67 @@ namespace DataObjects {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport Histogram1D : public Mantid::API::ISpectrum {
-protected:
-  MantidVecPtr refY; ///< RefCounted Y
-  MantidVecPtr refE; ///< RefCounted Error
+private:
+  /// Histogram object holding the histogram data.
+  HistogramData::Histogram m_histogram;
 
 public:
-  Histogram1D();
-  Histogram1D(const Histogram1D &);
-  Histogram1D &operator=(const Histogram1D &);
-  virtual ~Histogram1D();
-
-  /// Sets the data.
-  void setData(const MantidVec &Y) { refY.access() = Y; };
-  /// Sets the data and errors
-  void setData(const MantidVec &Y, const MantidVec &E) {
-    refY.access() = Y;
-    refE.access() = E;
+  Histogram1D(HistogramData::Histogram::XMode mode)
+      : API::ISpectrum(), m_histogram(mode) {
+    m_histogram.setCounts(0);
+    m_histogram.setCountStandardDeviations(0);
   }
 
-  /// Sets the data.
-  void setData(const MantidVecPtr &Y) { refY = Y; }
-  /// Sets the data and errors
-  void setData(const MantidVecPtr &Y, const MantidVecPtr &E) {
-    refY = Y;
-    refE = E;
-  }
+  Histogram1D(const Histogram1D &) = default;
+  Histogram1D(Histogram1D &&) = default;
+  Histogram1D(const ISpectrum &other);
 
-  /// Sets the data.
-  void setData(const MantidVecPtr::ptr_type &Y) { refY = Y; }
-  /// Sets the data and errors
-  void setData(const MantidVecPtr::ptr_type &Y,
-               const MantidVecPtr::ptr_type &E) {
-    refY = Y;
-    refE = E;
-  }
+  Histogram1D &operator=(const Histogram1D &) = default;
+  Histogram1D &operator=(Histogram1D &&) = default;
+  Histogram1D &operator=(const ISpectrum &rhs);
+
+  void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) override;
+  MantidVec &dataX() override;
+  const MantidVec &dataX() const override;
+  const MantidVec &readX() const override;
+  Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const override;
+
+  MantidVec &dataDx() override;
+  const MantidVec &dataDx() const override;
+  const MantidVec &readDx() const override;
 
   /// Zero the data (Y&E) in this spectrum
-  void clearData();
+  void clearData() override;
 
-  // Get the array data
-  /// Returns the y data const
-  virtual const MantidVec &dataY() const { return *refY; }
-  /// Returns the error data const
-  virtual const MantidVec &dataE() const { return *refE; }
+  /// Deprecated, use y() instead. Returns the y data const
+  const MantidVec &dataY() const override { return m_histogram.dataY(); }
+  /// Deprecated, use e() instead. Returns the error data const
+  const MantidVec &dataE() const override { return m_histogram.dataE(); }
 
-  /// Returns the y data
-  virtual MantidVec &dataY() { return refY.access(); }
-  /// Returns the error data
-  virtual MantidVec &dataE() { return refE.access(); }
+  /// Deprecated, use mutableY() instead. Returns the y data
+  MantidVec &dataY() override { return m_histogram.dataY(); }
+  /// Deprecated, use mutableE() instead. Returns the error data
+  MantidVec &dataE() override { return m_histogram.dataE(); }
 
-  virtual std::size_t size() const { return refY->size(); } ///< get pseudo size
+  virtual std::size_t size() const {
+    return m_histogram.readY().size();
+  } ///< get pseudo size
 
   /// Checks for errors
-  bool isError() const { return refE->empty(); }
+  bool isError() const { return readE().empty(); }
 
   /// Gets the memory size of the histogram
-  size_t getMemorySize() const {
-    return ((refX->size() + refY->size() + refE->size()) * sizeof(double));
+  size_t getMemorySize() const override {
+    return ((readX().size() + readY().size() + readE().size()) *
+            sizeof(double));
+  }
+
+private:
+  const HistogramData::Histogram &histogramRef() const override {
+    return m_histogram;
+  }
+  HistogramData::Histogram &mutableHistogramRef() override {
+    return m_histogram;
   }
 };
 

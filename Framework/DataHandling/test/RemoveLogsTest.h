@@ -34,7 +34,7 @@ public:
   /**
    * Creates a sample workspace in ADS.
    */
-  void setUp() {
+  void setUp() override {
     m_sampleWorkspace = "__remove_logs_test_ws";
     createSampleWorkspace();
   }
@@ -42,7 +42,9 @@ public:
   /**
    * Removes the sample workspace from ADS.
    */
-  void tearDown() { AnalysisDataService::Instance().remove(m_sampleWorkspace); }
+  void tearDown() override {
+    AnalysisDataService::Instance().remove(m_sampleWorkspace);
+  }
 
   /**
    * Tests creation and initialisation of the algorithm.

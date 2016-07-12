@@ -50,18 +50,20 @@ public:
   /// Constructor
   CatalogDownloadDataFiles() : API::Algorithm(), m_prog(0.0) {}
   /// Destructor
-  ~CatalogDownloadDataFiles() {}
+  ~CatalogDownloadDataFiles() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "CatalogDownloadDataFiles"; }
+  const std::string name() const override { return "CatalogDownloadDataFiles"; }
   /// Summary of algorithms purpose.
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Downloads datafiles from the archives based on the ID of a "
            "datafile.";
   }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Catalog"; }
+  const std::string category() const override {
+    return "DataHandling\\Catalog";
+  }
 
   /** This method is used for unit testing purpose.
    * as the Poco::Net library httpget throws an exception when the nd server n/w
@@ -76,9 +78,9 @@ public:
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
   /// True if the extension of the file is a datafile.
   bool isDataFile(const std::string &fileName);
   /// Saves the downloaded file to disc

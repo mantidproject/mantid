@@ -400,8 +400,8 @@ ANNkd_ptr rbd_tree(          // recursive construction of bd-tree
     ANNkd_ptr out = rbd_tree( // build outer subtree pidx[n_in..n]
         pa, pidx + n_in, n - n_in, dim, bsp, bnd_box, splitter, shrink);
 
-    ANNorthHSArray bnds = NULL; // bounds (alloc in Box2Bnds and
-                                // ...freed in bd_shrink destroyer)
+    ANNorthHSArray bnds = nullptr; // bounds (alloc in Box2Bnds and
+                                   // ...freed in bd_shrink destroyer)
 
     annBox2Bnds(   // convert inner box to bounds
         inner_box, // inner box

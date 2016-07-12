@@ -96,6 +96,7 @@ class SavePlot1DAsJson(PythonAlgorithm):
                 list(workspace.readX(i)),
                 list(workspace.readY(i)),
                 list(workspace.readE(i)),
+                list(workspace.readDx(i)),
                 ]
             serialized['data'][spectrum_no] = arr
             continue

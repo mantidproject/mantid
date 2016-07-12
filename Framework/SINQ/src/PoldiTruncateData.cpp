@@ -1,3 +1,4 @@
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidSINQ/PoldiTruncateData.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 
@@ -126,15 +127,15 @@ size_t PoldiTruncateData::getCalculatedBinCount() {
 size_t PoldiTruncateData::getActualBinCount() { return m_actualBinCount; }
 
 void PoldiTruncateData::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Input workspace containing raw POLDI data.");
   declareProperty(
-      new PropertyWithValue<std::string>("ExtraCountsWorkspaceName", "",
-                                         Direction::Input),
+      make_unique<PropertyWithValue<std::string>>("ExtraCountsWorkspaceName",
+                                                  "", Direction::Input),
       "Workspace name for extra counts. Leave empty if not required.");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output workspace with truncated POLDI data.");
 }
 
@@ -155,23 +156,22 @@ void PoldiTruncateData::exec() {
 
         std::string extraCountsWorkspaceName =
             getProperty("ExtraCountsWorkspaceName");
-        declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+        declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
             "ExtraCountsWorkspace", extraCountsWorkspaceName,
             Direction::Output));
         setProperty("ExtraCountsWorkspace", extraCounts);
       } catch (std::invalid_argument) {
         m_log.warning() << "Extra count information was requested, but there "
-                           "are no extra bins." << std::endl;
+                           "are no extra bins.\n";
       }
     }
   } catch (std::invalid_argument) {
     m_log.error()
-        << "Cannot crop workspace. Please check the timing information."
-        << std::endl;
+        << "Cannot crop workspace. Please check the timing information.\n";
     m_log.error() << "  Calculated bin count: " << getCalculatedBinCount()
-                  << std::endl;
+                  << '\n';
     m_log.error() << "  Bin count in the workspace: " << getActualBinCount()
-                  << std::endl;
+                  << '\n';
 
     removeProperty("OutputWorkspace");
   }

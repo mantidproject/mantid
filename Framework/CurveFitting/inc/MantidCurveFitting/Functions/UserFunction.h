@@ -48,33 +48,35 @@ public:
   /// Constructor
   UserFunction();
   /// Destructor
-  ~UserFunction();
+  ~UserFunction() override;
 
   /// Returns the function's name
-  std::string name() const { return "UserFunction"; }
+  std::string name() const override { return "UserFunction"; }
   // Returns Category
-  virtual const std::string category() const { return "General"; }
+  const std::string category() const override { return "General"; }
 
   /// Function you want to fit to.
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
   /// Derivatives of function with respect to active parameters
   void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian);
+                     API::Jacobian &jacobian) override;
 
   /// Returns the number of attributes associated with the function
-  size_t nAttributes() const { return 1; }
+  size_t nAttributes() const override { return 1; }
   /// Returns a list of attribute names
-  std::vector<std::string> getAttributeNames() const {
+  std::vector<std::string> getAttributeNames() const override {
     return std::vector<std::string>(1, "Formula");
   }
   /// Return a value of attribute attName
-  Attribute getAttribute(const std::string &attName) const {
+  Attribute getAttribute(const std::string &attName) const override {
     return attName == "Formula" ? Attribute(m_formula) : getAttribute(attName);
   }
   /// Set a value to attribute attName
-  void setAttribute(const std::string &attName, const Attribute &value);
+  void setAttribute(const std::string &attName,
+                    const Attribute &value) override;
   /// Check if attribute attName exists
-  bool hasAttribute(const std::string &attName) const {
+  bool hasAttribute(const std::string &attName) const override {
     return attName == "Formula";
   }
 

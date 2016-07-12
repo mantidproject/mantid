@@ -3,12 +3,15 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Q1D2.h"
 #include "MantidAlgorithms/Qhelper.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -34,34 +37,36 @@ void Q1D2::init() {
   dataVal->add<HistogramValidator>();
   dataVal->add<InstrumentValidator>();
   dataVal->add<CommonBinsValidator>();
-  declareProperty(new WorkspaceProperty<>("DetBankWorkspace", "",
-                                          Direction::Input, dataVal),
+  declareProperty(make_unique<WorkspaceProperty<>>("DetBankWorkspace", "",
+                                                   Direction::Input, dataVal),
                   "Particle counts as a function of wavelength");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "Name of the workspace that will contain the result of the calculation");
   declareProperty(
-      new ArrayProperty<double>("OutputBinning",
-                                boost::make_shared<RebinParamsValidator>()),
+      make_unique<ArrayProperty<double>>(
+          "OutputBinning", boost::make_shared<RebinParamsValidator>()),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally\n"
       "this can be followed by a comma and more widths and last boundary "
       "pairs.\n"
       "Negative width values indicate logarithmic binning.");
-  declareProperty(new WorkspaceProperty<>("PixelAdj", "", Direction::Input,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "PixelAdj", "", Direction::Input, PropertyMode::Optional),
                   "Scaling to apply to each spectrum. Must have\n"
                   "the same number of spectra as the DetBankWorkspace");
   auto wavVal = boost::make_shared<CompositeValidator>();
   wavVal->add<WorkspaceUnitValidator>("Wavelength");
   wavVal->add<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<>("WavelengthAdj", "", Direction::Input,
-                                          PropertyMode::Optional, wavVal),
-                  "Scaling to apply to each bin.\n"
-                  "Must have the same number of bins as the DetBankWorkspace");
   declareProperty(
-      new WorkspaceProperty<>("WavePixelAdj", "", Direction::Input,
-                              PropertyMode::Optional, dataVal),
+      make_unique<WorkspaceProperty<>>("WavelengthAdj", "", Direction::Input,
+                                       PropertyMode::Optional, wavVal),
+      "Scaling to apply to each bin.\n"
+      "Must have the same number of bins as the DetBankWorkspace");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("WavePixelAdj", "", Direction::Input,
+                                       PropertyMode::Optional, dataVal),
       "Scaling that depends on both pixel and wavelength together.\n"
       "Must have the same number of bins and spectra as the DetBankWorkspace.");
   declareProperty("AccountForGravity", false,
@@ -89,9 +94,10 @@ void Q1D2::init() {
   declareProperty("ExtraLength", 0.0, mustBePositive,
                   "Additional length for gravity correction.");
 
-  declareProperty(new WorkspaceProperty<>("QResolution", "", Direction::Input,
-                                          PropertyMode::Optional, dataVal),
-                  "Workspace to calculate the Q resolution.\n");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("QResolution", "", Direction::Input,
+                                       PropertyMode::Optional, dataVal),
+      "Workspace to calculate the Q resolution.\n");
 }
 /**
   @ throw invalid_argument if the workspaces are not mututially compatible
@@ -112,15 +118,15 @@ void Q1D2::exec() {
   // FIXME: how to examine the wavePixelAdj?
   g_log.debug() << "All input workspaces were found to be valid\n";
   // normalization as a function of wavelength (i.e. centers of x-value bins)
-  double const *const binNorms = waveAdj ? &(waveAdj->readY(0)[0]) : NULL;
+  double const *const binNorms = waveAdj ? &(waveAdj->readY(0)[0]) : nullptr;
   // error on the wavelength normalization
-  double const *const binNormEs = waveAdj ? &(waveAdj->readE(0)[0]) : NULL;
+  double const *const binNormEs = waveAdj ? &(waveAdj->readE(0)[0]) : nullptr;
 
   // define the (large number of) data objects that are going to be used in all
   // iterations of the loop below
 
   // Flag to decide if Q Resolution is to be used
-  auto useQResolution = qResolution ? true : false;
+  auto useQResolution = static_cast<bool>(qResolution);
 
   // this will become the output workspace from this algorithm
   MatrixWorkspace_sptr outputWS =
@@ -134,14 +140,8 @@ void Q1D2::exec() {
   // the error on the normalisation
   MantidVec normError2(YOut.size(), 0.0);
 
-  // the averaged Q resolution. We need the a named dummy variable although it
-  // won't be
-  // used since we only want to create a reference to DX if it is really
-  // required. Referencing
-  // DX sets a flag which might not be desirable.
-  MantidVec dummy;
-  MantidVec &qResolutionOut =
-      useQResolution ? outputWS->dataDx(0) : outputWS->dataY(0);
+  // the averaged Q resolution.
+  HistogramData::HistogramDx qResolutionOut(QOut.size(), 0.0);
 
   const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.05, 1.0, numSpec + 1);
@@ -155,9 +155,8 @@ void Q1D2::exec() {
       det = m_dataWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
       g_log.warning() << "Workspace index " << i << " (SpectrumIndex = "
-                      << m_dataWS->getSpectrum(i)->getSpectrumNo()
-                      << ") has no detector assigned to it - discarding"
-                      << std::endl;
+                      << m_dataWS->getSpectrum(i).getSpectrumNo()
+                      << ") has no detector assigned to it - discarding\n";
       // Catch if no detector. Next line tests whether this happened - test
       // placed
       // outside here because Mac Intel compiler doesn't like 'continue' in a
@@ -254,9 +253,9 @@ void Q1D2::exec() {
     PARALLEL_CRITICAL(q1d_spectra_map) {
       progress.report("Computing I(Q)");
       // Add up the detector IDs in the output spectrum at workspace index 0
-      const ISpectrum *inSpec = m_dataWS->getSpectrum(i);
-      ISpectrum *outSpec = outputWS->getSpectrum(0);
-      outSpec->addDetectorIDs(inSpec->getDetectorIDs());
+      const auto &inSpec = m_dataWS->getSpectrum(i);
+      auto &outSpec = outputWS->getSpectrum(0);
+      outSpec.addDetectorIDs(inSpec.getDetectorIDs());
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -282,6 +281,7 @@ void Q1D2::exec() {
     if (qResolutionOut.size() > 1) {
       qResolutionOut.rbegin()[0] = qResolutionOut.rbegin()[1];
     }
+    outputWS->setBinEdgeStandardDeviations(0, std::move(qResolutionOut));
   }
 
   bool doOutputParts = getProperty("OutputParts");
@@ -290,9 +290,7 @@ void Q1D2::exec() {
         WorkspaceFactory::Instance().create(outputWS);
     ws_sumOfCounts->dataX(0) = outputWS->dataX(0);
     ws_sumOfCounts->dataY(0) = outputWS->dataY(0);
-    if (useQResolution) {
-      ws_sumOfCounts->dataDx(0) = outputWS->dataDx(0);
-    }
+    ws_sumOfCounts->setSharedDx(0, outputWS->sharedDx(0));
     for (size_t i = 0; i < outputWS->dataE(0).size(); i++) {
       ws_sumOfCounts->dataE(0)[i] = sqrt(outputWS->dataE(0)[i]);
     }
@@ -300,9 +298,7 @@ void Q1D2::exec() {
     MatrixWorkspace_sptr ws_sumOfNormFactors =
         WorkspaceFactory::Instance().create(outputWS);
     ws_sumOfNormFactors->dataX(0) = outputWS->dataX(0);
-    if (useQResolution) {
-      ws_sumOfNormFactors->dataDx(0) = outputWS->dataDx(0);
-    }
+    ws_sumOfNormFactors->setSharedDx(0, outputWS->sharedDx(0));
     for (size_t i = 0; i < ws_sumOfNormFactors->dataY(0).size(); i++) {
       ws_sumOfNormFactors->dataY(0)[i] = normSum[i];
       ws_sumOfNormFactors->dataE(0)[i] = sqrt(normError2[i]);
@@ -326,9 +322,9 @@ void Q1D2::exec() {
 API::MatrixWorkspace_sptr
 Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
   // Calculate the output binning
-  MantidVecPtr XOut;
-  size_t sizeOut = static_cast<size_t>(
-      VectorHelper::createAxisFromRebinParams(binParams, XOut.access()));
+  HistogramData::BinEdges XOut(0);
+  size_t sizeOut = static_cast<size_t>(VectorHelper::createAxisFromRebinParams(
+      binParams, XOut.mutableRawData()));
 
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS =
@@ -338,11 +334,11 @@ Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
   outputWS->setYUnitLabel("1/cm");
 
   // Set the X vector for the output workspace
-  outputWS->setX(0, XOut);
-  outputWS->isDistribution(true);
+  outputWS->setBinEdges(0, XOut);
+  outputWS->setDistribution(true);
 
-  outputWS->getSpectrum(0)->clearDetectorIDs();
-  outputWS->getSpectrum(0)->setSpectrumNo(1);
+  outputWS->getSpectrum(0).clearDetectorIDs();
+  outputWS->getSpectrum(0).setSpectrumNo(1);
 
   return outputWS;
 }
@@ -350,9 +346,9 @@ Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
 /** Calculate the normalization term for each output bin
 *  @param wavStart [in] the index number of the first bin in the input
 * wavelengths that is actually being used
-*  @param specInd [in] the spectrum to calculate
+*  @param wsIndex [in] the ws index of the spectrum to calculate
 *  @param pixelAdj [in] if not NULL this is workspace contains single bins with
-* the adjustments, e.g. detector efficencies, for the given spectrum index
+* the adjustments, e.g. detector efficencies, for the given ws index
 *  @param wavePixelAdj [in] if not NULL this is workspace that contains the
 * adjustments for the pixels and wavelenght dependend values.
 *  @param binNorms [in] pointer to a contigious array of doubles that are the
@@ -364,7 +360,7 @@ Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
 *  @param normETo2 [out] this pointer must point to the end of the norm array,
 * it will be filled with the total of the error on the normalization
 */
-void Q1D2::calculateNormalization(const size_t wavStart, const size_t specInd,
+void Q1D2::calculateNormalization(const size_t wavStart, const size_t wsIndex,
                                   API::MatrixWorkspace_const_sptr pixelAdj,
                                   API::MatrixWorkspace_const_sptr wavePixelAdj,
                                   double const *const binNorms,
@@ -372,7 +368,7 @@ void Q1D2::calculateNormalization(const size_t wavStart, const size_t specInd,
                                   const MantidVec::iterator norm,
                                   const MantidVec::iterator normETo2) const {
   double detectorAdj, detAdjErr;
-  pixelWeight(pixelAdj, specInd, detectorAdj, detAdjErr);
+  pixelWeight(pixelAdj, wsIndex, detectorAdj, detAdjErr);
   // use that the normalization array ends at the start of the error array
   for (MantidVec::iterator n = norm, e = normETo2; n != normETo2; ++n, ++e) {
     *n = detectorAdj;
@@ -383,32 +379,32 @@ void Q1D2::calculateNormalization(const size_t wavStart, const size_t specInd,
     if (wavePixelAdj)
       // pass the iterator for the wave pixel Adj dependent
       addWaveAdj(binNorms + wavStart, binNormEs + wavStart, norm, normETo2,
-                 wavePixelAdj->readY(specInd).begin() + wavStart,
-                 wavePixelAdj->readE(specInd).begin() + wavStart);
+                 wavePixelAdj->readY(wsIndex).begin() + wavStart,
+                 wavePixelAdj->readE(wsIndex).begin() + wavStart);
     else
       addWaveAdj(binNorms + wavStart, binNormEs + wavStart, norm, normETo2);
   }
-  normToMask(wavStart, specInd, norm, normETo2);
+  normToMask(wavStart, wsIndex, norm, normETo2);
 }
 
 /** Calculates the normalisation for the spectrum specified by the index number
 * that was passed
-*  as the solid anlge multiplied by the pixelAdj that was passed
+*  as the solid angle multiplied by the pixelAdj that was passed
 *  @param[in] pixelAdj if not NULL this is workspace contains single bins with
-* the adjustments, e.g. detector efficencies, for the given spectrum index
-*  @param[in] specIndex the spectrum index to return the data from
-*  @param[out] weight the solid angle or if pixelAdj the solid anlge times the
+* the adjustments, e.g. detector efficiencies, for the given ws index
+*  @param[in] wsIndex the workspace index to return the data from
+*  @param[out] weight the solid angle or if pixelAdj the solid angle times the
 * pixel adjustment for this spectrum
 *  @param[out] error the error on the weight, only non-zero if pixelAdj
 *  @throw LogicError if the solid angle is tiny or negative
 */
 void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,
-                       const size_t specIndex, double &weight,
+                       const size_t wsIndex, double &weight,
                        double &error) const {
   const V3D samplePos = m_dataWS->getInstrument()->getSample()->getPos();
 
   if (m_doSolidAngle)
-    weight = m_dataWS->getDetector(specIndex)->solidAngle(samplePos);
+    weight = m_dataWS->getDetector(wsIndex)->solidAngle(samplePos);
   else
     weight = 1.0;
 
@@ -418,8 +414,8 @@ void Q1D2::pixelWeight(API::MatrixWorkspace_const_sptr pixelAdj,
   }
   // this input multiplies up the adjustment if it exists
   if (pixelAdj) {
-    weight *= pixelAdj->readY(specIndex)[0];
-    error = weight * pixelAdj->readE(specIndex)[0];
+    weight *= pixelAdj->readY(wsIndex)[0];
+    error = weight * pixelAdj->readE(wsIndex)[0];
   } else {
     error = 0.0;
   }
@@ -517,21 +513,21 @@ void Q1D2::addWaveAdj(const double *c, const double *Dc,
 }
 
 /** Scaled to bin masking, to the normalization
-*  @param[in] offSet the inex number of the first bin in the input wavelengths
+*  @param[in] offSet the index number of the first bin in the input wavelengths
 * that is actually being used
-*  @param[in] specIndex the spectrum to calculate
+*  @param[in] wsIndex the spectrum to calculate
 *  @param[in,out] theNorms normalization for each bin, this is multiplied by the
 * proportion that is not masked and the normalization workspace
 *  @param[in,out] errorSquared the running total of the square of the
 * uncertainty in the normalization
 */
-void Q1D2::normToMask(const size_t offSet, const size_t specIndex,
+void Q1D2::normToMask(const size_t offSet, const size_t wsIndex,
                       const MantidVec::iterator theNorms,
                       const MantidVec::iterator errorSquared) const {
   // if any bins are masked it is normally a small proportion
-  if (m_dataWS->hasMaskedBins(specIndex)) {
+  if (m_dataWS->hasMaskedBins(wsIndex)) {
     // Get a reference to the list of masked bins
-    const MatrixWorkspace::MaskList &mask = m_dataWS->maskedBins(specIndex);
+    const MatrixWorkspace::MaskList &mask = m_dataWS->maskedBins(wsIndex);
     // Now iterate over the list, adjusting the weights for the affected bins
     MatrixWorkspace::MaskList::const_iterator it;
     for (it = mask.begin(); it != mask.end(); ++it) {
@@ -553,7 +549,7 @@ void Q1D2::normToMask(const size_t offSet, const size_t specIndex,
 /** Fills a vector with the Q values calculated from the wavelength bin centers
 * from the input workspace and
 *  the workspace geometry as Q = 4*pi*sin(theta)/lambda
-*  @param[in] specInd the spectrum to calculate
+*  @param[in] wsInd the spectrum to calculate
 *  @param[in] doGravity if to include gravity in the calculation of Q
 *  @param[in] offset index number of the first input bin to use
 *  @param[in] extraLength for gravitational correction
@@ -562,17 +558,17 @@ void Q1D2::normToMask(const size_t offSet, const size_t specIndex,
 *  @throw NotFoundError if the detector associated with the spectrum is not
 * found in the instrument definition
 */
-void Q1D2::convertWavetoQ(const size_t specInd, const bool doGravity,
+void Q1D2::convertWavetoQ(const size_t wsInd, const bool doGravity,
                           const size_t offset, MantidVec::iterator Qs,
                           const double extraLength) const {
   static const double FOUR_PI = 4.0 * M_PI;
 
-  IDetector_const_sptr det = m_dataWS->getDetector(specInd);
+  IDetector_const_sptr det = m_dataWS->getDetector(wsInd);
 
   // wavelengths (lamda) to be converted to Q
-  auto waves = m_dataWS->readX(specInd).cbegin() + offset;
+  auto waves = m_dataWS->readX(wsInd).cbegin() + offset;
   // going from bin boundaries to bin centered x-values the size goes down one
-  const MantidVec::const_iterator end = m_dataWS->readX(specInd).end() - 1;
+  const MantidVec::const_iterator end = m_dataWS->readX(wsInd).end() - 1;
   if (doGravity) {
     GravitySANSHelper grav(m_dataWS, det, extraLength);
     for (; waves != end; ++Qs, ++waves) {
@@ -589,7 +585,7 @@ void Q1D2::convertWavetoQ(const size_t specInd, const bool doGravity,
     // Calculate the Q values for the current spectrum, using Q =
     // 4*pi*sin(theta)/lambda
     const double factor =
-        2.0 * FOUR_PI * sin(m_dataWS->detectorTwoTheta(det) / 2.0);
+        2.0 * FOUR_PI * sin(m_dataWS->detectorTwoTheta(*det) * 0.5);
     for (; waves != end; ++Qs, ++waves) {
       // the HistogramValidator at the start should ensure that we have one more
       // bin on the input wavelengths

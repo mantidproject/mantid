@@ -5,77 +5,63 @@
 
 #include "MantidCurveFitting/Functions/Quadratic.h"
 
-#include "MantidCurveFitting/Algorithms/Fit.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Exception.h"
-#include "MantidDataHandling/LoadNexus.h"
-#include "MantidAPI/FunctionFactory.h"
+#include <array>
+#include <numeric>
 
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
 using Mantid::CurveFitting::Functions::Quadratic;
-using Mantid::CurveFitting::Algorithms::Fit;
-using namespace Mantid::DataObjects;
-using namespace Mantid::DataHandling;
 
 class QuadraticTest : public CxxTest::TestSuite {
 public:
-  void testAgainstHRPDData() {
-    // create mock data to test against
-    std::string wsName = "quadraticTest";
-    int histogramNumber = 1;
-    int timechannels = 5;
-    Workspace_sptr ws = WorkspaceFactory::Instance().create(
-        "Workspace2D", histogramNumber, timechannels, timechannels);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-    for (int i = 0; i < timechannels; i++) {
-      ws2D->dataX(0)[i] = i + 1;
-      ws2D->dataY(0)[i] = (i + 1) * (i + 1);
-      ws2D->dataE(0)[i] = 1.0;
-    }
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static QuadraticTest *createSuite() { return new QuadraticTest(); }
+  static void destroySuite(QuadraticTest *suite) { delete suite; }
 
-    // put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+  void test_category() {
+    Quadratic cfn;
+    cfn.initialize();
 
-    Fit alg2;
-    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT(alg2.isInitialized());
+    std::vector<std::string> cats;
+    TS_ASSERT_THROWS_NOTHING(cats = cfn.categories());
+    TS_ASSERT_LESS_THAN_EQUALS(1, cats.size());
+    TS_ASSERT_EQUALS(cats.front(), "Background");
+    // This would enfonce one and only one category:
+    // TS_ASSERT(cfn.category() == "Background");
+  }
 
-    // set up gaussian fitting function
+  void test_parameters() {
     Quadratic quad;
     quad.initialize();
 
-    quad.setParameter("A0", 1.0);
+    TS_ASSERT_THROWS(quad.setParameter("X", 1.0), std::invalid_argument);
+    TS_ASSERT_THROWS(quad.setAttributeValue("n", 3), std::invalid_argument);
+    TS_ASSERT_THROWS(quad.setParameter("A99", 0.0), std::invalid_argument);
+  }
 
-    // alg2.setFunction(quad);
-    alg2.setPropertyValue("Function", quad.asString());
+  void test_calculate() {
+    Quadratic quad;
+    quad.initialize();
 
-    // Set which spectrum to fit against and initial starting values
-    alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("WorkspaceIndex", "0");
+    const double a2 = -0.2;
+    const double a1 = 1.3;
+    const double a0 = 34.5;
+    quad.setParameter("A0", a0);
+    quad.setParameter("A1", a1);
+    quad.setParameter("A2", a2);
 
-    // execute fit
-    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(alg2.execute()))
+    const std::size_t numPoints = 50;
+    std::array<double, numPoints> xValues;
+    std::iota(xValues.begin(), xValues.end(), 0);
 
-    TS_ASSERT(alg2.isExecuted());
+    std::array<double, numPoints> yValues;
+    quad.function1D(yValues.data(), xValues.data(), numPoints);
 
-    // test the output from fit is what you expect
-    double dummy = alg2.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA(dummy, 0.0, 0.1);
-
-    IFunction_sptr out = alg2.getProperty("Function");
-    TS_ASSERT_DELTA(out->getParameter("A0"), 0.0, 0.01);
-    TS_ASSERT_DELTA(out->getParameter("A1"), 0.0, 0.01);
-    TS_ASSERT_DELTA(out->getParameter("A2"), 1.0, 0.0001);
-
-    // check its categories
-    const std::vector<std::string> categories = out->categories();
-    TS_ASSERT(categories.size() == 1);
-    TS_ASSERT(categories[0] == "Background");
+    for (size_t i = 0; i < numPoints; i++) {
+      auto i2 = static_cast<double>(i);
+      i2 *= i2;
+      TS_ASSERT_DELTA(yValues[i], a0 + a1 * static_cast<double>(i) + a2 * i2,
+                      1e-12);
+    }
   }
 };
 

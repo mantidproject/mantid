@@ -2,6 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSPatchSensitivity.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -14,10 +18,11 @@ using namespace API;
 using namespace Geometry;
 
 void EQSANSPatchSensitivity::init() {
-  declareProperty(new WorkspaceProperty<>("Workspace", "", Direction::InOut),
-                  "Input sensitivity workspace to be patched");
   declareProperty(
-      new WorkspaceProperty<>("PatchWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+      "Input sensitivity workspace to be patched");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("PatchWorkspace", "", Direction::Input),
       "Workspace defining the patch. Masked detectors will be patched.");
   declareProperty("UseLinearRegression", true, "If true, a linear regression "
                                                "will be used instead of "
@@ -56,7 +61,7 @@ void EQSANSPatchSensitivity::exec() {
       // EQSANS-specific: get detector ID from pixel coordinates
       int iDet = ny_pixels * i + j;
       if (iDet > numberOfSpectra) {
-        g_log.notice() << "Got an invalid detector ID " << iDet << std::endl;
+        g_log.notice() << "Got an invalid detector ID " << iDet << '\n';
         continue;
       }
 
@@ -99,13 +104,13 @@ void EQSANSPatchSensitivity::exec() {
 
       // Apply patch
       progress(0.91, "Applying patch");
-      for (size_t k = 0; k < patched_ids.size(); k++) {
+      for (auto patched_id : patched_ids) {
         const Geometry::ComponentID det =
-            inputWS->getDetector(patched_ids[k])->getComponentID();
+            inputWS->getDetector(patched_id)->getComponentID();
         try {
           if (det) {
-            MantidVec &YValues = inputWS->dataY(patched_ids[k]);
-            MantidVec &YErrors = inputWS->dataE(patched_ids[k]);
+            MantidVec &YValues = inputWS->dataY(patched_id);
+            MantidVec &YErrors = inputWS->dataE(patched_id);
             if (useRegression) {
               YValues[0] = alpha + beta * det->getPos().Y();
               YErrors[0] = error;
@@ -117,8 +122,7 @@ void EQSANSPatchSensitivity::exec() {
             pmap.addBool(det, "masked", false);
           }
         } catch (Kernel::Exception::NotFoundError &e) {
-          g_log.warning() << e.what() << " Found while setting mask bit"
-                          << std::endl;
+          g_log.warning() << e.what() << " Found while setting mask bit\n";
         }
       }
     }

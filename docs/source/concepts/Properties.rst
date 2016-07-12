@@ -38,7 +38,10 @@ these options.
 
 An ArrayProperty can be declared in a algorithm as follows:
 
-``declareProperty(new ArrayProperty``\ \ ``(...));``
+``declareProperty(Mantid::Kernel::make_unique<ArrayProperty>``\ \ ``(...));``
+
+(note the use of ``make_unique`` rather than ``new``, as the algorithm takes
+ownership of the property)
 
 or, if creating using an already existing vector:
 
@@ -96,11 +99,14 @@ pointer <Shared Pointer>` to the workspace.
 The syntax to declare a WorkspaceProperty
 in an algorithm is:
 
-``declareProperty(new WorkspaceProperty("PropertyName","WorkspaceName",direction));``
+``declareProperty(Mantid::Kernel::make_unique<WorkspaceProperty<>>("PropertyName","WorkspaceName",direction));``
 
 In this case, the direction (see below) must be explicitly declared. An
 optional :ref:`validator <Properties Validators>` may also be appended to
 the above declaration.
+
+Note that the algorithm takes ownership of the property, and that it is
+passed in as a ``unique_ptr`` rather than creating it with ``new``.
 
 Other 'Property Properties'
 ---------------------------
@@ -165,6 +171,8 @@ Workspace properties:
 -  RawCountValidator - requires that the workspace data is raw counts.
 -  CommonBinsValidator - checks that all spectra in a workspace have the
    same bins.
+-  EqualBinSizesValidator - checks that all bins in each spectrum are equally
+   sized, up to a given tolerance.
 -  SpectraAxisValidator - checks that the axis of the workspace contains
    spectra numbers.
 -  NumericAxisValidator - checks that the axis of the workspace contains
@@ -176,7 +184,7 @@ In addition to the above, if used, Workspace properties also have a
 built in validator that requires that input workspaces exist and are of
 the correct type and that output workspaces have a name set.
 
-For more details on using validators, see the :ref:`PropertyAlgorithm <algm-PropertyAlgorithm>`
+For more details on using validators, see the PropertyAlgorithm 
 example or the full documentation for the individual validators (linked
 above).
 

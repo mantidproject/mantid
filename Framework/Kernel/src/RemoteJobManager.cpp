@@ -25,7 +25,7 @@ Logger g_log("RemoteJobManager");
 RemoteJobManager::RemoteJobManager(const Poco::XML::Element *elem)
     : m_displayName(elem->getAttribute("name")),
       m_session(
-          NULL) // Make sure this is always either NULL or a valid pointer.
+          nullptr) // Make sure this is always either NULL or a valid pointer.
 {
   // Sanity check m_displayName
   if (m_displayName.length() == 0) {
@@ -79,7 +79,7 @@ std::istream &RemoteJobManager::httpGet(const std::string &path,
   // session cookie.
   std::vector<Poco::Net::HTTPCookie> newCookies;
   m_response.getCookies(newCookies);
-  if (newCookies.size() > 0) {
+  if (!newCookies.empty()) {
     m_cookies = newCookies;
   }
 
@@ -168,7 +168,7 @@ std::istream &RemoteJobManager::httpPost(const std::string &path,
   // session cookie.
   std::vector<Poco::Net::HTTPCookie> newCookies;
   m_response.getCookies(newCookies);
-  if (newCookies.size() > 0) {
+  if (!newCookies.empty()) {
     m_cookies = newCookies;
   }
 
@@ -196,7 +196,7 @@ void RemoteJobManager::initHTTPRequest(Poco::Net::HTTPRequest &req,
   // Set up the session object
   if (m_session) {
     delete m_session;
-    m_session = NULL;
+    m_session = nullptr;
   }
 
   if (Poco::URI(m_serviceBaseUrl).getScheme() == "https") {

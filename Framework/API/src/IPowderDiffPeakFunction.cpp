@@ -36,11 +36,6 @@ IPowderDiffPeakFunction::IPowderDiffPeakFunction()
 }
 
 //----------------------------------------------------------------------------------------------
-/** Desctructor
-  */
-IPowderDiffPeakFunction::~IPowderDiffPeakFunction() {}
-
-//----------------------------------------------------------------------------------------------
 /** Override setting parameter by parameter index
   * @param i :: parameter index in function;
   * @param value :: parameter name
@@ -213,17 +208,12 @@ void IPowderDiffPeakFunction::setPeakRadius(const int &r) {
 /** Check whether a parameter is a profile parameter
   */
 bool IPowderDiffPeakFunction::hasProfileParameter(std::string paramname) {
-  std::vector<std::string>::iterator niter;
-  niter = lower_bound(m_sortedProfileParameterNames.begin(),
-                      m_sortedProfileParameterNames.end(), paramname);
-  if (niter == m_sortedProfileParameterNames.end())
+  auto candname = lower_bound(m_sortedProfileParameterNames.begin(),
+                              m_sortedProfileParameterNames.end(), paramname);
+  if (candname == m_sortedProfileParameterNames.end())
     return false;
 
-  std::string candname = *niter;
-  if (candname.compare(paramname))
-    return false;
-
-  return true;
+  return candname->compare(paramname) != 0;
 }
 
 //-------------------------  External Functions
@@ -243,7 +233,7 @@ std::complex<double> E1(std::complex<double> z) {
     exp_e1 = r;
   } else if (az <= 10.0 || (rz < 0.0 && az < 20.0)) {
     // Some interesting region, equal to integrate to infinity, converged
-    // cout << "[DB] Type 1" << endl;
+    // cout << "[DB] Type 1\n";
 
     std::complex<double> r(1.0, 0.0);
     exp_e1 = r;

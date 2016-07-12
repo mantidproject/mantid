@@ -52,6 +52,8 @@ class Workspace;
  */
 class MANTID_API_DLL FrameworkManagerImpl {
 public:
+  FrameworkManagerImpl(const FrameworkManagerImpl &) = delete;
+  FrameworkManagerImpl &operator=(const FrameworkManagerImpl &) = delete;
   /// Load a set of plugins using a key from the ConfigService
   void loadPluginsUsingKey(const std::string &key);
 
@@ -108,13 +110,9 @@ private:
   FrameworkManagerImpl();
   /// Private Destructor
   ~FrameworkManagerImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  FrameworkManagerImpl(const FrameworkManagerImpl &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  FrameworkManagerImpl &operator=(const FrameworkManagerImpl &);
 
   /// Set up the global locale
-  void setGlobalLocaleToAscii();
+  void setGlobalNumericLocaleToC();
   /// Silence NeXus output
   void disableNexusOutput();
   /// Starts asynchronous tasks that are done as part of Start-up
@@ -134,6 +132,8 @@ private:
    * class interface.
    */
   boost::mpi::environment m_mpi_environment;
+  int argc = 0;
+  char **argv;
 #endif
 };
 

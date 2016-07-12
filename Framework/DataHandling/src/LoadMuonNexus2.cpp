@@ -3,10 +3,11 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataHandling/LoadMuonNexus1.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -14,6 +15,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 
@@ -116,10 +118,10 @@ void LoadMuonNexus2::doExec() {
 
   std::string detectorName;
   // Only the first NXdata found
-  for (unsigned int i = 0; i < entry.groups().size(); i++) {
-    std::string className = entry.groups()[i].nxclass;
+  for (auto &group : entry.groups()) {
+    std::string className = group.nxclass;
     if (className == "NXdata") {
-      detectorName = entry.groups()[i].nxname;
+      detectorName = group.nxname;
       break;
     }
   }
@@ -171,7 +173,7 @@ void LoadMuonNexus2::doExec() {
   // Set y axis unit
   localWorkspace->setYUnit("Counts");
 
-  // g_log.error()<<" number of perioids= "<<m_numberOfPeriods<<std::endl;
+  // g_log.error()<<" number of perioids= "<<m_numberOfPeriods<<'\n';
   WorkspaceGroup_sptr wsGrpSptr = WorkspaceGroup_sptr(new WorkspaceGroup);
   if (entry.containsDataSet("title")) {
     wsGrpSptr->setTitle(entry.getString("title"));
@@ -230,8 +232,8 @@ void LoadMuonNexus2::doExec() {
       suffix << (period + 1);
       outws = outputWorkspace + "_" + suffix.str();
       std::string WSName = localWSName + "_" + suffix.str();
-      declareProperty(
-          new WorkspaceProperty<Workspace>(outws, WSName, Direction::Output));
+      declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+          outws, WSName, Direction::Output));
       if (wsGrpSptr)
         wsGrpSptr->addWorkspace(localWorkspace);
     }
@@ -247,18 +249,17 @@ void LoadMuonNexus2::doExec() {
          spec <= static_cast<int>(m_spec_max); ++spec) {
       int i = index_spectrum[spec]; // if spec not found i is 0
       loadData(counts, timeBins, counter, period, i, localWorkspace);
-      localWorkspace->getSpectrum(counter)->setSpectrumNo(spectrum_index[i]);
+      localWorkspace->getSpectrum(counter).setSpectrumNo(spectrum_index[i]);
       counter++;
       progress.report();
     }
 
     // Read in the spectra in the optional list parameter, if set
     if (m_list) {
-      for (unsigned int i = 0; i < m_spec_list.size(); ++i) {
-        int spec = m_spec_list[i];
+      for (auto spec : m_spec_list) {
         int k = index_spectrum[spec]; // if spec not found k is 0
         loadData(counts, timeBins, counter, period, k, localWorkspace);
-        localWorkspace->getSpectrum(counter)->setSpectrumNo(spectrum_index[k]);
+        localWorkspace->getSpectrum(counter).setSpectrumNo(spectrum_index[k]);
         counter++;
         progress.report();
       }
@@ -297,7 +298,7 @@ void LoadMuonNexus2::loadData(const Mantid::NeXus::NXInt &counts,
   X.assign(timeBins.begin(), timeBins.end());
 
   int nBins = 0;
-  int *data = NULL;
+  int *data = nullptr;
 
   if (counts.rank() == 3) {
     nBins = counts.dim2();
@@ -348,8 +349,7 @@ void LoadMuonNexus2::loadLogs(API::MatrixWorkspace_sptr ws, NXEntry &entry,
     ws->setComment(entry.getString("notes"));
   }
 
-  std::string run_num =
-      boost::lexical_cast<std::string>(entry.getInt("run_number"));
+  std::string run_num = std::to_string(entry.getInt("run_number"));
   // The sample is left to delete the property
   ws->mutableRun().addLogData(
       new PropertyWithValue<std::string>("run_number", run_num));

@@ -219,7 +219,7 @@ class CreateGroupingWorkspaceTestPerformance : public CxxTest::TestSuite {
 public:
   std::string outWSName;
 
-  void setUp() {
+  void setUp() override {
     outWSName = "CreateGroupingWorkspaceTestPerformance_OutputWS";
     // Load a small test file
     FrameworkManager::Instance().exec("LoadEmptyInstrument", 4, "Filename",
@@ -227,7 +227,7 @@ public:
                                       "OutputWorkspace", "TOPAZ_2010");
   }
 
-  void tearDown() {
+  void tearDown() override {
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
     AnalysisDataService::Instance().remove("TOPAZ_2010");

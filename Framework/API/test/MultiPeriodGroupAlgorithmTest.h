@@ -17,13 +17,15 @@ using namespace Mantid::Kernel;
 class TestAlgorithmA : public MultiPeriodGroupAlgorithm {
 public:
   TestAlgorithmA() {}
-  virtual const std::string name() const { return "TestAlgorithmA"; }
-  virtual int version() const { return 1; }
-  virtual const std::string summary() const { return "Test summary"; }
-  virtual void init() {
-    declareProperty(new ArrayProperty<std::string>("MyInputWorkspaces"));
+  const std::string name() const override { return "TestAlgorithmA"; }
+  int version() const override { return 1; }
+  const std::string summary() const override { return "Test summary"; }
+  void init() override {
     declareProperty(
-        new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output), "");
+        make_unique<ArrayProperty<std::string>>("MyInputWorkspaces"));
+    declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                     Direction::Output),
+                    "");
     declareProperty(
         "PropertyA", 1,
         boost::make_shared<Kernel::MandatoryValidator<int>>()); // I'm only
@@ -35,14 +37,14 @@ public:
                                                                 // spawned
                                                                 // algorithms.
   }
-  virtual void exec() {
+  void exec() override {
     setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester));
   }
-  virtual std::string fetchInputPropertyName() const {
+  std::string fetchInputPropertyName() const override {
     return "MyInputWorkspaces";
   }
-  virtual bool useCustomInputPropertyName() const { return true; }
-  virtual ~TestAlgorithmA() {}
+  bool useCustomInputPropertyName() const override { return true; }
+  ~TestAlgorithmA() override {}
 };
 DECLARE_ALGORITHM(TestAlgorithmA)
 // ------------------------------------------------------------------
@@ -54,18 +56,19 @@ DECLARE_ALGORITHM(TestAlgorithmA)
 class TestAlgorithmB : public MultiPeriodGroupAlgorithm {
 public:
   TestAlgorithmB() {}
-  virtual const std::string name() const { return "TestAlgorithmB"; }
-  virtual int version() const { return 1; }
-  virtual const std::string summary() const { return "Test summary"; }
-  virtual void init() {
+  const std::string name() const override { return "TestAlgorithmB"; }
+  int version() const override { return 1; }
+  const std::string summary() const override { return "Test summary"; }
+  void init() override {
     declareProperty(
-        new WorkspaceProperty<>("PropertyA", "ws1", Direction::Input));
+        make_unique<WorkspaceProperty<>>("PropertyA", "ws1", Direction::Input));
     declareProperty(
-        new WorkspaceProperty<>("PropertyB", "ws2", Direction::Input));
+        make_unique<WorkspaceProperty<>>("PropertyB", "ws2", Direction::Input));
     declareProperty(
-        new WorkspaceProperty<>("PropertyC", "ws3", Direction::Input));
-    declareProperty(
-        new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output), "");
+        make_unique<WorkspaceProperty<>>("PropertyC", "ws3", Direction::Input));
+    declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                     Direction::Output),
+                    "");
     declareProperty(
         "PropertyX", 1,
         boost::make_shared<Kernel::MandatoryValidator<int>>()); // I'm only
@@ -77,7 +80,7 @@ public:
                                                                 // spawned
                                                                 // algorithms.
   }
-  virtual void exec() {
+  void exec() override {
     MatrixWorkspace_sptr a = getProperty("PropertyA");
     MatrixWorkspace_sptr b = getProperty("PropertyB");
     MatrixWorkspace_sptr c = getProperty("PropertyC");
@@ -89,9 +92,9 @@ public:
 
     setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester));
   }
-  virtual std::string fetchInputPropertyName() const { return ""; }
-  virtual bool useCustomInputPropertyName() const { return false; }
-  virtual ~TestAlgorithmB() {}
+  std::string fetchInputPropertyName() const override { return ""; }
+  bool useCustomInputPropertyName() const override { return false; }
+  ~TestAlgorithmB() override {}
 };
 DECLARE_ALGORITHM(TestAlgorithmB)
 // ------------------------------------------------------------------
@@ -117,25 +120,25 @@ public:
     // Test Algorithm with input property that is not an array.
     class BrokenAlgorithm : public MultiPeriodGroupAlgorithm {
     public:
-      virtual const std::string name() const { return "BrokenAlgorithm"; }
-      virtual int version() const { return 1; }
-      virtual const std::string summary() const { return "Test summary"; }
-      virtual void init() {
-        declareProperty(new WorkspaceProperty<WorkspaceGroup>(
+      const std::string name() const override { return "BrokenAlgorithm"; }
+      int version() const override { return 1; }
+      const std::string summary() const override { return "Test summary"; }
+      void init() override {
+        declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
                             "InputWorkspaces", "", Direction::Input),
                         "");
-        declareProperty(
-            new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-            "");
+        declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                         Direction::Output),
+                        "");
       }
-      virtual void exec() {
+      void exec() override {
         setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester));
       }
-      virtual std::string fetchInputPropertyName() const {
+      std::string fetchInputPropertyName() const override {
         return "InputWorkspaces";
       }
-      virtual bool useCustomInputPropertyName() const { return true; }
-      virtual ~BrokenAlgorithm() {}
+      bool useCustomInputPropertyName() const override { return true; }
+      ~BrokenAlgorithm() override {}
     };
     // ------------------------------------------------------------------
     // End class dec
@@ -158,23 +161,24 @@ public:
     // Test Algorithm with fetchInputPropertyName incorrectly wired-up.
     class BrokenAlgorithm : public MultiPeriodGroupAlgorithm {
     public:
-      virtual const std::string name() const { return "BrokenAlgorithm"; }
-      virtual int version() const { return 1; }
-      virtual const std::string summary() const { return "Test summary"; }
-      virtual void init() {
-        declareProperty(new ArrayProperty<std::string>("InputWorkspaces"));
+      const std::string name() const override { return "BrokenAlgorithm"; }
+      int version() const override { return 1; }
+      const std::string summary() const override { return "Test summary"; }
+      void init() override {
         declareProperty(
-            new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-            "Name of the output workspace");
+            make_unique<ArrayProperty<std::string>>("InputWorkspaces"));
+        declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                         Direction::Output),
+                        "Name of the output workspace");
       }
-      virtual void exec() {
+      void exec() override {
         setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester));
       }
-      virtual std::string fetchInputPropertyName() const {
+      std::string fetchInputPropertyName() const override {
         return "made_up_property_name";
       }
-      virtual bool useCustomInputPropertyName() const { return true; }
-      virtual ~BrokenAlgorithm() {}
+      bool useCustomInputPropertyName() const override { return true; }
+      ~BrokenAlgorithm() override {}
     };
     // ------------------------------------------------------------------
     // End class dec

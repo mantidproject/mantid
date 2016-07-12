@@ -305,7 +305,7 @@ private:
 
   public:
     TestableInterpolation() : Interpolation() {}
-    ~TestableInterpolation() {}
+    ~TestableInterpolation() override {}
   };
 };
 

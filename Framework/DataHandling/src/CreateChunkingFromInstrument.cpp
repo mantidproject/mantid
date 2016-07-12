@@ -3,11 +3,13 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/CreateChunkingFromInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
-#include <boost/tokenizer.hpp>
+#include "MantidKernel/StringTokenizer.h"
+
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 
@@ -19,7 +21,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace std;
 
-typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+typedef Mantid::Kernel::StringTokenizer tokenizer;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateChunkingFromInstrument)
@@ -44,16 +46,6 @@ const string PARAM_OUT_WKSP("OutputWorkspace");
 /// Maximum number of banks to look for
 const string PARAM_MAX_BANK_NUM("MaxBankNumber");
 }
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateChunkingFromInstrument::CreateChunkingFromInstrument() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateChunkingFromInstrument::~CreateChunkingFromInstrument() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -82,24 +74,27 @@ void CreateChunkingFromInstrument::init() {
   // instrument selection
   string grp1Name("Specify the Instrument");
 
+  std::vector<std::string> extensions{"_event.nxs", ".nxs.h5", ".nxs"};
   this->declareProperty(
-      new FileProperty(PARAM_IN_FILE, "", FileProperty::OptionalLoad,
-                       {"_event.nxs", ".nxs.h5", ".nxs"}),
+      Kernel::make_unique<FileProperty>(PARAM_IN_FILE, "",
+                                        FileProperty::OptionalLoad, extensions),
       "The name of the event nexus file to read, including its full or "
       "relative path.");
 
   this->declareProperty(
-      new WorkspaceProperty<>(PARAM_IN_WKSP, "", Direction::Input,
-                              PropertyMode::Optional),
+      Kernel::make_unique<WorkspaceProperty<>>(
+          PARAM_IN_WKSP, "", Direction::Input, PropertyMode::Optional),
       "Optional: An input workspace with the instrument we want to use.");
 
   this->declareProperty(
-      new PropertyWithValue<string>(PARAM_INST_NAME, "", Direction::Input),
+      Kernel::make_unique<PropertyWithValue<string>>(PARAM_INST_NAME, "",
+                                                     Direction::Input),
       "Optional: Name of the instrument to base the ChunkingWorkpace on which "
       "to base the GroupingWorkspace.");
 
   this->declareProperty(
-      new FileProperty(PARAM_INST_FILE, "", FileProperty::OptionalLoad, ".xml"),
+      Kernel::make_unique<FileProperty>(PARAM_INST_FILE, "",
+                                        FileProperty::OptionalLoad, ".xml"),
       "Optional: Path to the instrument definition file on which to base the "
       "ChunkingWorkpace.");
 
@@ -116,12 +111,7 @@ void CreateChunkingFromInstrument::init() {
                   "as separate groups. "
                   "Use / or , to separate multiple groups. "
                   "If empty, then an empty GroupingWorkspace will be created.");
-  vector<string> grouping;
-  grouping.push_back("");
-  grouping.push_back("All");
-  grouping.push_back("Group");
-  grouping.push_back("Column");
-  grouping.push_back("bank");
+  vector<string> grouping{"", "All", "Group", "Column", "bank"};
   declareProperty(
       PARAM_CHUNK_BY, "", boost::make_shared<StringListValidator>(grouping),
       "Only used if GroupNames is empty: All detectors as one group, Groups "
@@ -136,7 +126,7 @@ void CreateChunkingFromInstrument::init() {
   declareProperty(PARAM_MAX_BANK_NUM, 300,
                   "Maximum bank number to search for in the instrument");
 
-  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       PARAM_OUT_WKSP, "", Direction::Output),
                   "An output workspace describing the cunking.");
 }
@@ -246,17 +236,17 @@ string parentName(IComponent_const_sptr comp, const string &prefix) {
  */
 string parentName(IComponent_const_sptr comp, const vector<string> &names) {
   // handle the special case of the component has the name
-  for (auto name = names.begin(); name != names.end(); ++name)
-    if (name->compare(comp->getName()) == 0)
-      return (*name);
+  for (const auto &name : names)
+    if (name.compare(comp->getName()) == 0)
+      return name;
 
   // find the parent with the correct name
   IComponent_const_sptr parent = comp->getParent();
   if (parent) {
     // see if this is the parent
-    for (auto name = names.begin(); name != names.end(); ++name)
-      if (name->compare(parent->getName()) == 0)
-        return (*name);
+    for (const auto &name : names)
+      if (name.compare(parent->getName()) == 0)
+        return name;
 
     // or recurse
     return parentName(parent, names);
@@ -272,20 +262,12 @@ string parentName(IComponent_const_sptr comp, const vector<string> &names) {
  * @return The vector of instrument component names.
  */
 vector<string> getGroupNames(const string &names) {
-  vector<string> groups;
-
   // check that there is something
   if (names.empty())
-    return groups;
-
+    return std::vector<string>();
   // do the actual splitting
-  const boost::char_separator<char> SEPERATOR(",");
-  tokenizer tokens(names, SEPERATOR);
-  for (auto item = tokens.begin(); item != tokens.end(); ++item) {
-    groups.push_back(*item);
-  }
-
-  return groups;
+  tokenizer tokens(names, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  return tokens.asVector();
 }
 
 /**
@@ -401,8 +383,8 @@ void CreateChunkingFromInstrument::exec() {
   } else if (inst->getName().compare("SNAP") == 0 &&
              groupLevel.compare("Group") == 0) {
     groupNames.clear();
-    groupNames.push_back("East");
-    groupNames.push_back("West");
+    groupNames.emplace_back("East");
+    groupNames.emplace_back("West");
   }
 
   // set up a progress bar with the "correct" number of steps
@@ -448,12 +430,11 @@ void CreateChunkingFromInstrument::exec() {
       throw std::runtime_error("Failed to find any banks in the instrument");
 
     // fill in the table workspace
-    for (auto group = grouping.begin(); group != grouping.end(); ++group) {
+    for (auto &group : grouping) {
       stringstream banks;
-      for (auto bank = group->second.begin(); bank != group->second.end();
-           ++bank)
-        banks << (*bank) << ",";
-
+      for (const auto &bank : group.second) {
+        banks << bank << ",";
+      }
       // remove the trailing comma
       string banksStr = banks.str();
       banksStr = banksStr.substr(0, banksStr.size() - 1);

@@ -21,16 +21,6 @@ using namespace Kernel;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PoldiCreatePeaksFromCell)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
-   */
-PoldiCreatePeaksFromCell::PoldiCreatePeaksFromCell() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-   */
-PoldiCreatePeaksFromCell::~PoldiCreatePeaksFromCell() {}
-
 const std::string PoldiCreatePeaksFromCell::name() const {
   return "PoldiCreatePeaksFromCell";
 }
@@ -202,8 +192,8 @@ void PoldiCreatePeaksFromCell::init() {
                   "Smallest allowed lattice spacing.");
   declareProperty("LatticeSpacingMax", 0.0, "Largest allowed lattice spacing.");
 
-  declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "List with calculated peaks.");
 }
 
@@ -220,7 +210,7 @@ void PoldiCreatePeaksFromCell::exec() {
                                              pointGroup->getCoordinateSystem());
 
   g_log.information() << "Constrained unit cell is: " << unitCellToStr(unitCell)
-                      << std::endl;
+                      << '\n';
 
   CompositeBraggScatterer_sptr scatterers = CompositeBraggScatterer::create(
       IsotropicAtomBraggScattererParser(getProperty("Atoms"))());

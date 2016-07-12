@@ -64,10 +64,19 @@ public:
 
     V3D hkl(1, 1, 1);
     TS_ASSERT_EQUALS(inversion * hkl, hkl * -1.0);
+  }
 
-    // translational components are wrapped to the unit cell
+  void testStringConstructorArbitraryFractions() {
+    SymmetryOperation symOp("-x,-y+10/20,-z+34/45");
+
+    V3R vector = symOp.vector();
+    TS_ASSERT_EQUALS(vector.y(), RationalNumber(1, 2));
+    TS_ASSERT_EQUALS(vector.z(), RationalNumber(34, 45));
+  }
+
+  void testStringConstructorNoWrapping() {
     SymmetryOperation screw21z("-x,-y,z+3/2");
-    TS_ASSERT_EQUALS(screw21z.identifier(), "-x,-y,z+1/2");
+    TS_ASSERT_EQUALS(screw21z.identifier(), "-x,-y,z+3/2");
   }
 
   void testCopyConstructor() {
@@ -128,10 +137,10 @@ public:
 
   void testMultiplicationOperatorSymmetryOperation() {
     SymmetryOperation screw21z("-x,-y,z+1/2");
-    SymmetryOperation identity;
 
-    // should be identity, since 1/2 + 1/2 = 1 => 0
-    TS_ASSERT_EQUALS(screw21z * screw21z, identity);
+    // should be identity, since 1/2 + 1/2 = 1
+    TS_ASSERT_EQUALS(getUnitCellIntervalOperation(screw21z * screw21z),
+                     SymmetryOperation());
   }
 
   void testInverse() {
@@ -145,7 +154,7 @@ public:
 
     SymmetryOperation fourOneScrewZPlus("-y,x,z+1/4");
     SymmetryOperation fourOneScrewZMinus = fourOneScrewZPlus.inverse();
-    TS_ASSERT_EQUALS(fourOneScrewZMinus.identifier(), "y,-x,z+3/4");
+    TS_ASSERT_EQUALS(fourOneScrewZMinus.identifier(), "y,-x,z-1/4");
 
     // (Op^-1)^-1 = Op
     TS_ASSERT_EQUALS(fourOneScrewZMinus.inverse(), fourOneScrewZPlus);
@@ -169,6 +178,15 @@ public:
 
     V3R five = one + 10;
     TS_ASSERT_EQUALS(one, getWrappedVector(five));
+
+    V3R six = V3R(0, 0, 0) + 1;
+    TS_ASSERT_EQUALS(V3R(0, 0, 0), getWrappedVector(six));
+
+    V3R seven = V3R(0, 0, 0) - 1;
+    TS_ASSERT_EQUALS(V3R(0, 0, 0), getWrappedVector(seven));
+
+    V3R eight = V3R(0, 0, 0) - 8;
+    TS_ASSERT_EQUALS(V3R(0, 0, 0), getWrappedVector(eight));
   }
 
   void testGetWrappedVectorV3D() {
@@ -186,30 +204,57 @@ public:
 
     V3D five = one + V3D(10.0, 10.0, 10.0);
     TS_ASSERT_EQUALS(one, getWrappedVector(five));
+
+    V3D six = V3D(1, 1, 1);
+    TS_ASSERT_EQUALS(V3D(0, 0, 0), getWrappedVector(six));
+
+    V3D seven = V3D(-1, -1, -1);
+    TS_ASSERT_EQUALS(V3D(0, 0, 0), getWrappedVector(seven));
+
+    V3D eight = V3D(-8, -8, -8);
+    TS_ASSERT_EQUALS(V3D(0, 0, 0), getWrappedVector(eight));
+  }
+
+  void testGetUnitCellIntervalSymmetryOperation() {
+    SymmetryOperation symOpNegative =
+        getUnitCellIntervalOperation(SymmetryOperation("y,-x,z-1/4"));
+
+    TS_ASSERT_EQUALS(symOpNegative.vector(), V3R(0, 0, 3) / 4);
+
+    SymmetryOperation symOpGreaterOne =
+        getUnitCellIntervalOperation(SymmetryOperation("y,-x,z+12/4"));
+
+    TS_ASSERT_EQUALS(symOpGreaterOne.vector(), V3R(0, 0, 0));
+
+    SymmetryOperation symOpLessThanMinusOne =
+        getUnitCellIntervalOperation(SymmetryOperation("y,-x,z-12/4"));
+
+    TSM_ASSERT_EQUALS(V3D(symOpLessThanMinusOne.vector()).toString(),
+                      symOpLessThanMinusOne.vector(), V3R(0, 0, 0));
   }
 
   void testGetOrderFromComponents() {
     TestableSymmetryOperation symOp;
 
     // identity - 0
-    std::pair<Mantid::Kernel::IntMatrix, V3R> param1 =
+    MatrixVectorPair<int, V3R> param1 =
         SymmetryOperationSymbolParser::parseIdentifier("x, y, z");
-    TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param1.first), 1);
+    TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param1.getMatrix()), 1);
 
     // inversion - 1
-    std::pair<Mantid::Kernel::IntMatrix, V3R> param2 =
+    MatrixVectorPair<int, V3R> param2 =
         SymmetryOperationSymbolParser::parseIdentifier("-x, -y, -z");
-    TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param2.first), 2);
+    TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param2.getMatrix()), 2);
 
     // mirror perpendicular to z
-    std::pair<Mantid::Kernel::IntMatrix, V3R> param3 =
+    MatrixVectorPair<int, V3R> param3 =
         SymmetryOperationSymbolParser::parseIdentifier("x, y, -z");
-    TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param3.first), 2);
+    TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param3.getMatrix()), 2);
 
     // 4_1 screw axis along z
-    std::pair<Mantid::Kernel::IntMatrix, V3R> param4 =
+    MatrixVectorPair<int, V3R> param4 =
         SymmetryOperationSymbolParser::parseIdentifier("-y, x, z+1/4");
-    TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param4.first), 4);
+    TS_ASSERT_EQUALS(symOp.getOrderFromMatrix(param4.getMatrix()), 4);
 
     // check that random matrices don't work
     Mantid::Kernel::IntMatrix randMatrix(3, 3, false);

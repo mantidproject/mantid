@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_DETECTOREFFICIENCYCORUSER_H_
 #define MANTID_ALGORITHMS_DETECTOREFFICIENCYCORUSER_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -39,22 +39,19 @@ namespace Algorithms {
  */
 class DLLExport DetectorEfficiencyCorUser : public API::Algorithm {
 public:
-  DetectorEfficiencyCorUser();
-  virtual ~DetectorEfficiencyCorUser();
-
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm calculates the detector efficiency according the "
            "formula set in the instrument definition file/parameters.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void retrieveProperties();
   double calculateFormulaValue(const std::string &, double);
   MantidVec calculateEfficiency(double, const std::string &, const MantidVec &);
@@ -70,7 +67,7 @@ private:
   /// The output workspace, maybe the same as the input one
   API::MatrixWorkspace_sptr m_outputWS;
   /// stores the user selected value for incidient energy of the neutrons
-  double m_Ei;
+  double m_Ei = 0.0;
 };
 
 } // namespace Algorithms

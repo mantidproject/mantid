@@ -31,12 +31,7 @@ const std::string LOG_CHARGE_NAME("proton_charge");
 }
 
 //========================================================================
-//========================================================================
-/// (Empty) Constructor
-FilterBadPulses::FilterBadPulses() {}
 
-/// Destructor
-FilterBadPulses::~FilterBadPulses() {}
 /// Algorithm's name for identification overriding a virtual method
 const std::string FilterBadPulses::name() const { return "FilterBadPulses"; }
 
@@ -51,11 +46,11 @@ const std::string FilterBadPulses::category() const {
 //-----------------------------------------------------------------------
 /// Initialise the properties
 void FilterBadPulses::init() {
-  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An event workspace");
-  declareProperty(new WorkspaceProperty<EventWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
   auto range = boost::make_shared<BoundedValidator<double>>();
   range->setBounds(0., 100.);
@@ -115,7 +110,7 @@ void FilterBadPulses::exec() {
         "proton_charge window filters out all of the data");
   }
   this->g_log.information() << "Filtering pcharge outside of " << min_pcharge
-                            << " to " << max_pcharge << std::endl;
+                            << " to " << max_pcharge << '\n';
   size_t inputNumEvents = inputWS->getNumberEvents();
 
   // Child Algorithme does all of the actual work - do not set the output

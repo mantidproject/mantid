@@ -1,6 +1,7 @@
 #ifndef LOADRAWSAVENXSLOADNXSTEST_H_
 #define LOADRAWSAVENXSLOADNXSTEST_H_
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -9,6 +10,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -170,9 +172,9 @@ public:
     //----------------------------------------------------------------------
     // Tests to check that spectra-detector mapping is done correctly
     //----------------------------------------------------------------------
-    TS_ASSERT_EQUALS(output2D->getSpectrum(0)->getDetectorIDs().size(), 1);
-    TS_ASSERT_EQUALS(output2D->getSpectrum(0)->getSpectrumNo(), 1);
-    TS_ASSERT(output2D->getSpectrum(0)->hasDetectorID(1));
+    TS_ASSERT_EQUALS(output2D->getSpectrum(0).getDetectorIDs().size(), 1);
+    TS_ASSERT_EQUALS(output2D->getSpectrum(0).getSpectrumNo(), 1);
+    TS_ASSERT(output2D->getSpectrum(0).hasDetectorID(1));
 
     // obtain the expected log data which was read from the Nexus file (NXlog)
 

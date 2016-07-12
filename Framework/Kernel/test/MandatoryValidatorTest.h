@@ -75,7 +75,7 @@ public:
     TS_ASSERT(svec.empty())
     TS_ASSERT_EQUALS(s.isValid(svec),
                      "A value must be entered for this parameter")
-    svec.push_back("OK");
+    svec.emplace_back("OK");
     TS_ASSERT_EQUALS(s.isValid(svec), "")
 
     MandatoryValidator<int> validate_int;

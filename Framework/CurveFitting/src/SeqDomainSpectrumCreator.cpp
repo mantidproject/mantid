@@ -1,13 +1,14 @@
 #include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidCurveFitting/SeqDomain.h"
 #include "MantidCurveFitting/FunctionDomain1DSpectrumCreator.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Jacobian.h"
-#include "MantidKernel/Matrix.h"
+#include "MantidCurveFitting/SeqDomain.h"
 #include "MantidAPI/IEventWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -166,7 +167,7 @@ Workspace_sptr SeqDomainSpectrumCreator::createOutputWorkspace(
   if (!boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(
           m_matrixWorkspace)) {
     if (m_matrixWorkspace->isDistribution()) {
-      outputWs->isDistribution(true);
+      outputWs->setDistribution(true);
     }
   }
 

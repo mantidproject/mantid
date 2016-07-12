@@ -34,7 +34,7 @@ public:
   ScriptFileInterpreter(QWidget *parent = NULL,
                         const QString &settingsGroup = "");
   /// Destroy the object
-  ~ScriptFileInterpreter();
+  ~ScriptFileInterpreter() override;
   /// Determine if the script is ready to be closed
   virtual bool shouldClose();
   /// Setup from a script envment
@@ -179,59 +179,59 @@ public:
   NullScriptFileInterpreter() : ScriptFileInterpreter(NULL) {}
 
   /// Does nothing
-  bool shouldClose() { return false; }
+  bool shouldClose() override { return false; }
   /// Does nothing
-  void setup(const ScriptingEnv &, const QString &) {}
+  void setup(const ScriptingEnv &, const QString &) override {}
 
   /// Does nothing
-  QString filename() const { return QString(); }
+  QString filename() const override { return QString(); }
   /// Does nothing
-  bool isScriptModified() const { return false; }
+  bool isScriptModified() const override { return false; }
 
 private slots:
   /// Does nothing
-  void undo() {}
+  void undo() override {}
   /// Does nothing
-  void redo() {}
+  void redo() override {}
   /// Does nothing
-  void copy() {}
+  void copy() override {}
   /// Does nothing
-  void cut() {}
+  void cut() override {}
   /// Does nothing
-  void paste() {}
+  void paste() override {}
   /// Does nothing
-  void showFindReplaceDialog() {}
+  void showFindReplaceDialog() override {}
 
   /// Does nothing
-  virtual void executeAll(const Script::ExecutionMode) {}
+  void executeAll(const Script::ExecutionMode) override {}
   /// Does nothing
-  virtual void executeSelection(const Script::ExecutionMode) {}
+  void executeSelection(const Script::ExecutionMode) override {}
   /// Does nothing
-  virtual void abort() {}
+  void abort() override {}
   /// Does nothing
-  virtual void clearVariables() {}
+  void clearVariables() override {}
 
   /// Does nothing
   virtual void zoomInOnScript() {}
   /// Does nothing
   virtual void zoomOutOnScript() {}
   /// Does nothing
-  virtual void toggleProgressReporting(bool) {}
+  void toggleProgressReporting(bool) override {}
   /// Does nothing
-  virtual void toggleCodeFolding(bool) {}
+  void toggleCodeFolding(bool) override {}
 
   /// Does nothing
-  virtual void saveToCurrentFile() {}
+  void saveToCurrentFile() override {}
   /// Does nothing
-  virtual void saveAs() {}
+  void saveAs() override {}
   /// Does nothing
-  virtual void saveScript(const QString &) {}
+  void saveScript(const QString &) override {}
   /// Does nothing
-  virtual void saveOutput(const QString &) {}
+  void saveOutput(const QString &) override {}
   /// Does nothing
-  virtual void printScript() {}
+  void printScript() override {}
   /// Does nothing
-  virtual void printOutput() {}
+  void printOutput() override {}
 };
 
 //-----------------------------------------------------------------------------

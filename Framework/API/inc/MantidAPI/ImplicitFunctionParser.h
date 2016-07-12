@@ -83,7 +83,7 @@ protected:
   }
 
   void checkSuccessorExists() {
-    if (0 == m_successor.get()) {
+    if (!m_successor) {
       std::string message = "There is no successor function parser. Is this an "
                             "empty composite function?";
       throw std::runtime_error(message);
@@ -98,7 +98,7 @@ public:
   createFunctionBuilder(Poco::XML::Element *functionElement) = 0;
   virtual void setSuccessorParser(ImplicitFunctionParser *parser) = 0;
   virtual void setParameterParser(ImplicitFunctionParameterParser *parser) = 0;
-  virtual ~ImplicitFunctionParser() {}
+  virtual ~ImplicitFunctionParser() = default;
 };
 }
 }

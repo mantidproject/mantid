@@ -55,7 +55,7 @@ MANTID_DATAOBJECTS_DLL bool
 getIntersectionRegion(API::MatrixWorkspace_const_sptr outputWS,
                       const std::vector<double> &verticalAxis,
                       const Geometry::Quadrilateral &inputQ, size_t &qstart,
-                      size_t &qend, size_t &en_start, size_t &en_end);
+                      size_t &qend, size_t &x_start, size_t &x_end);
 
 /// Compute sqrt of errors and put back in bin width division if necessary
 MANTID_DATAOBJECTS_DLL void

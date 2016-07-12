@@ -3,8 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/UnaryOperation.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
@@ -15,17 +17,15 @@ UnaryOperation::UnaryOperation() : API::Algorithm() {
   this->useHistogram = false;
 }
 
-UnaryOperation::~UnaryOperation() {}
-
 /** Initialisation method.
  *  Defines input and output workspace properties
  */
 void UnaryOperation::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(inputPropName(), "",
-                                                         Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      inputPropName(), "", Direction::Input),
                   "The name of the input workspace");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(outputPropName(), "",
-                                                         Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      outputPropName(), "", Direction::Output),
                   "The name to use for the output workspace (can be the same "
                   "as the input one).");
 
@@ -42,7 +42,7 @@ void UnaryOperation::exec() {
   // Check if it is an event workspace
   EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const EventWorkspace>(in_work);
-  if ((eventW != NULL) && !(this->useHistogram)) {
+  if ((eventW != nullptr) && !(this->useHistogram)) {
     this->execEvent();
     return;
   }
@@ -70,7 +70,6 @@ void UnaryOperation::exec() {
 
   const size_t numSpec = in_work->getNumberHistograms();
   const size_t specSize = in_work->blocksize();
-  const bool isHist = in_work->isHistogramData();
 
   // Initialise the progress reporting object
   Progress progress(this, 0.0, 1.0, numSpec);
@@ -87,15 +86,13 @@ void UnaryOperation::exec() {
     // if it's shared, which isn't thread-safe.
     MantidVec &YOut = out_work->dataY(i);
     MantidVec &EOut = out_work->dataE(i);
-    const MantidVec &X = in_work->readX(i);
+    const auto X = in_work->points(i);
     const MantidVec &Y = in_work->readY(i);
     const MantidVec &E = in_work->readE(i);
 
     for (size_t j = 0; j < specSize; ++j) {
-      // Use the bin centre for the X value if this is histogram data
-      const double XIn = isHist ? (X[j] + X[j + 1]) / 2.0 : X[j];
       // Call the abstract function, passing in the current values
-      performUnaryOperation(XIn, Y[j], E[j], YOut[j], EOut[j]);
+      performUnaryOperation(X[j], Y[j], E[j], YOut[j], EOut[j]);
     }
 
     progress.report();
@@ -109,57 +106,40 @@ void UnaryOperation::exec() {
 void UnaryOperation::execEvent() {
   g_log.information("Processing event workspace");
 
-  const MatrixWorkspace_const_sptr matrixInputWS =
-      this->getProperty(inputPropName());
-  EventWorkspace_const_sptr inputWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
+  const MatrixWorkspace_const_sptr matrixInputWS = getProperty(inputPropName());
 
   // generate the output workspace pointer
-  API::MatrixWorkspace_sptr matrixOutputWS =
-      this->getProperty(outputPropName());
-  EventWorkspace_sptr outputWS;
-  if (matrixOutputWS == matrixInputWS) {
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
-  } else {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                           false);
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom((*inputWS));
-
-    // Cast to the matrixOutputWS and save it
-    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
-    this->setProperty("OutputWorkspace", matrixOutputWS);
+  API::MatrixWorkspace_sptr matrixOutputWS = getProperty(outputPropName());
+  if (matrixOutputWS != matrixInputWS) {
+    matrixOutputWS = matrixInputWS->clone();
+    setProperty(outputPropName(), matrixOutputWS);
   }
+  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   // Now fetch any properties defined by concrete algorithm
   retrieveProperties();
 
-  int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
+  int64_t numHistograms = static_cast<int64_t>(outputWS->getNumberHistograms());
   API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
   PARALLEL_FOR1(outputWS)
   for (int64_t i = 0; i < numHistograms; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // switch to weighted events if needed, and use the appropriate helper
     // function
-    EventList *evlist = outputWS->getEventListPtr(i);
-    switch (evlist->getEventType()) {
+    auto &evlist = outputWS->getSpectrum(i);
+    switch (evlist.getEventType()) {
     case TOF:
       // Switch to weights if needed.
-      evlist->switchTo(WEIGHTED);
+      evlist.switchTo(WEIGHTED);
     /* no break */
     // Fall through
 
     case WEIGHTED:
-      unaryOperationEventHelper(evlist->getWeightedEvents());
+      unaryOperationEventHelper(evlist.getWeightedEvents());
       break;
 
     case WEIGHTED_NOTIME:
-      unaryOperationEventHelper(evlist->getWeightedEventsNoTime());
+      unaryOperationEventHelper(evlist.getWeightedEventsNoTime());
       break;
     }
 
@@ -169,8 +149,9 @@ void UnaryOperation::execEvent() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   outputWS->clearMRU();
+  auto inputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
   if (inputWS->getNumberEvents() != outputWS->getNumberEvents()) {
-    g_log.information() << "Number of events has changed!!!" << std::endl;
+    g_log.information() << "Number of events has changed!!!\n";
   }
 }
 

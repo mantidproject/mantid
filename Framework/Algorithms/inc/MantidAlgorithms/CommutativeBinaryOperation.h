@@ -41,17 +41,12 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class DLLExport CommutativeBinaryOperation : public BinaryOperation {
 public:
-  /// Default constructor
-  CommutativeBinaryOperation() : BinaryOperation(){};
-  /// Destructor
-  virtual ~CommutativeBinaryOperation(){};
-
 protected:
   // Overridden BinaryOperation method
   /// Checks the overall size compatability of two workspaces
-  virtual std::string
-  checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                         const API::MatrixWorkspace_const_sptr rhs) const;
+  std::string checkSizeCompatibility(
+      const API::MatrixWorkspace_const_sptr lhs,
+      const API::MatrixWorkspace_const_sptr rhs) const override;
 };
 
 } // namespace Algorithm

@@ -34,19 +34,19 @@ namespace MDAlgorithms {
 class DLLExport Strontium122 : public ForegroundModel {
 private:
   /// String name of the model
-  std::string name() const { return "Strontium122"; }
+  std::string name() const override { return "Strontium122"; }
 
   /// Setup the model
-  void init();
+  void init() override;
   /// Called when an attribute is set
   void setAttribute(const std::string &name,
-                    const API::IFunction::Attribute &attr);
+                    const API::IFunction::Attribute &attr) override;
 
   /// Returns the type of model
-  ModelType modelType() const { return Broad; }
+  ModelType modelType() const override { return Broad; }
   /// Calculates the intensity for the model for the current parameters.
-  double scatteringIntensity(const API::ExperimentInfo &exptDescr,
-                             const std::vector<double> &point) const;
+  double scatteringIntensity(const API::ExperimentInfo &exptSetup,
+                             const std::vector<double> &point) const override;
 
   /// Twin type attribute
   int m_twinType;

@@ -47,12 +47,14 @@ public:
   // Unhide base class members (at minimum, avoids Intel compiler warning)
   using PropertyWithValue<HeldType>::operator=;
   /// 'Virtual copy constructor'
-  inline MatrixProperty *clone() const { return new MatrixProperty(*this); }
+  inline MatrixProperty *clone() const override {
+    return new MatrixProperty(*this);
+  }
   /// Destructor
-  ~MatrixProperty();
+  ~MatrixProperty() override;
 
   /// Add the value of another property. Doesn't make sense here.
-  virtual MatrixProperty &operator+=(Kernel::Property const *) {
+  MatrixProperty &operator+=(Kernel::Property const *) override {
     throw Exception::NotImplementedError(
         "+= operator is not implemented for MatrixProperty.");
     return *this;

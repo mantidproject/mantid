@@ -57,6 +57,7 @@ set ( SRC_FILES
 	src/IntegrateMDHistoWorkspace.cpp
 	src/IntegratePeaksMD.cpp
 	src/IntegratePeaksMD2.cpp
+	src/IntegratePeaksCWSD.cpp
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
 	src/LessThanMD.cpp
@@ -64,6 +65,7 @@ set ( SRC_FILES
 	src/LoadILLAsciiHelper.cpp
 	src/LoadMD.cpp
 	src/LoadSQW.cpp
+	src/LoadSQW2.cpp
 	src/LogarithmMD.cpp
 	src/MDEventWSWrapper.cpp
 	src/MDNormDirectSC.cpp
@@ -121,7 +123,6 @@ set ( SRC_FILES
 	src/UnaryOperationMD.cpp
 	src/UnitsConversionHelper.cpp
 	src/UserFunctionMD.cpp
-	src/Vector3DParameterParser.cpp
 	src/WeightedMeanMD.cpp
 	src/XorMD.cpp
 )
@@ -184,6 +185,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/IntegrateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD2.h
+	inc/MantidMDAlgorithms/IntegratePeaksCWSD.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/LessThanMD.h
@@ -191,12 +193,14 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/LoadILLAsciiHelper.h
 	inc/MantidMDAlgorithms/LoadMD.h
 	inc/MantidMDAlgorithms/LoadSQW.h
+	inc/MantidMDAlgorithms/LoadSQW2.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
 	inc/MantidMDAlgorithms/MDEventWSWrapper.h
 	inc/MantidMDAlgorithms/MDNormDirectSC.h
 	inc/MantidMDAlgorithms/MDNormSCD.h
 	inc/MantidMDAlgorithms/MDTransfAxisNames.h
 	inc/MantidMDAlgorithms/MDTransfFactory.h
+	inc/MantidMDAlgorithms/MDTransfInterface.h
 	inc/MantidMDAlgorithms/MDTransfModQ.h
 	inc/MantidMDAlgorithms/MDTransfNoQ.h
 	inc/MantidMDAlgorithms/MDTransfQ3D.h
@@ -309,11 +313,13 @@ set ( TEST_FILES
 	IntegrateMDHistoWorkspaceTest.h
 	IntegratePeaksMD2Test.h
 	IntegratePeaksMDTest.h
+	IntegratePeaksCWSDTest.h
 	InvalidParameterParserTest.h
 	InvalidParameterTest.h
 	LessThanMDTest.h
 	LoadMDTest.h
 	LoadSQWTest.h
+	LoadSQW2Test.h
 	LogarithmMDTest.h
 	MDEventWSWrapperTest.h
 	MDNormDirectSCTest.h

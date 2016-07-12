@@ -65,7 +65,7 @@ void ParameterTie::set(const std::string &expr) {
        it != m_varMap.end(); ++it) {
     delete it->first;
   }
-  if (m_varMap.size()) {
+  if (!m_varMap.empty()) {
     m_varMap.clear();
   }
   try { // Set the expression and initialize the variables
@@ -100,7 +100,7 @@ void ParameterTie::set(const std::string &expr) {
   m_expression = "";
   while (boost::regex_search(start, end, res, rx)) {
     m_expression.append(start, res[0].first);
-    m_expression += "#" + boost::lexical_cast<std::string>(varNames[res[1]]);
+    m_expression += "#" + std::to_string(varNames[res[1]]);
     start = res[0].second;
   }
   m_expression.append(start, end);
@@ -137,7 +137,7 @@ std::string ParameterTie::asString(const IFunction *fun) const {
   try {
     res_expression = fun->parameterName(fun->getParameterIndex(*this)) + "=";
 
-    if (m_varMap.size() == 0) { // constants
+    if (m_varMap.empty()) { // constants
       return res_expression + m_expression;
       ;
     }
@@ -152,10 +152,10 @@ std::string ParameterTie::asString(const IFunction *fun) const {
 
       int iTemp = boost::lexical_cast<int>(res[1]);
       int i = 0;
-      for (auto it = m_varMap.cbegin(); it != m_varMap.cend(); ++it) {
+      for (const auto &var : m_varMap) {
         if (i == iTemp) {
           res_expression +=
-              fun->parameterName(fun->getParameterIndex(it->second));
+              fun->parameterName(fun->getParameterIndex(var.second));
           break;
         }
         i++;
@@ -176,8 +176,8 @@ std::string ParameterTie::asString(const IFunction *fun) const {
  * @return True if any of the parameters is used as a variable in the mu::Parser
  */
 bool ParameterTie::findParametersOf(const IFunction *fun) const {
-  for (auto it = m_varMap.cbegin(); it != m_varMap.cend(); ++it) {
-    if (it->second.getFunction() == fun) {
+  for (const auto &varPair : m_varMap) {
+    if (varPair.second.getFunction() == fun) {
       return true;
     }
   }

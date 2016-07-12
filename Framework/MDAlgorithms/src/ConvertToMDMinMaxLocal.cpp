@@ -18,16 +18,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(ConvertToMDMinMaxLocal)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-ConvertToMDMinMaxLocal::ConvertToMDMinMaxLocal() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ConvertToMDMinMaxLocal::~ConvertToMDMinMaxLocal() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToMDMinMaxLocal::name() const {
   return "ConvertToMDMinMaxLocal";
@@ -37,10 +27,10 @@ const std::string ConvertToMDMinMaxLocal::name() const {
 void ConvertToMDMinMaxLocal::init() {
   ConvertToMDParent::init();
 
-  declareProperty(
-      new Kernel::ArrayProperty<double>("MinValues", Direction::Output));
-  declareProperty(
-      new Kernel::ArrayProperty<double>("MaxValues", Direction::Output));
+  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
+      "MinValues", Direction::Output));
+  declareProperty(make_unique<Kernel::ArrayProperty<double>>(
+      "MaxValues", Direction::Output));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -106,7 +96,7 @@ void ConvertToMDMinMaxLocal::exec() {
     MsliceProj.setUVvectors(ut, vt, wt);
   } catch (std::invalid_argument &) {
     g_log.error() << "The projections are coplanar. Will use defaults "
-                     "[1,0,0],[0,1,0] and [0,0,1]" << std::endl;
+                     "[1,0,0],[0,1,0] and [0,0,1]\n";
   }
 
   // set up target coordinate system and identify/set the (multi) dimension's
@@ -165,7 +155,7 @@ void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription,
     pQtransf->calcYDepCoordinates(locCoord, iSpctr);
 
     // get the range of the input data in the spectra
-    auto source_range = inWS->getSpectrum(iSpctr)->getXDataRange();
+    auto source_range = inWS->getSpectrum(iSpctr).getXDataRange();
 
     // extract part of this range which has well defined unit conversion
     source_range = unitsConverter.getConversionRange(source_range.first,
@@ -176,9 +166,9 @@ void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription,
 
     std::vector<double> range = pQtransf->getExtremumPoints(x1, x2, iSpctr);
     // transform coordinates
-    for (size_t k = 0; k < range.size(); k++) {
+    for (double &k : range) {
 
-      pQtransf->calcMatrixCoord(range[k], locCoord, signal, errorSq);
+      pQtransf->calcMatrixCoord(k, locCoord, signal, errorSq);
       // identify min-max ranges for current spectrum
       for (size_t j = 0; j < nDims; j++) {
         if (locCoord[j] < MinValues[j])

@@ -224,7 +224,6 @@ public:
     boost::shared_ptr<Geometry::ParameterMap> pmap =
         Inst->getParameterMap(); // check if parameterized.
     Geometry::IComponent_const_sptr sample = Inst->getSample();
-    Kernel::V3D oldSampPos = sample->getPos(); // Should reset Inst
 
     pmap->addPositionCoordinate(sample.get(), "x", SampPos.X());
     pmap->addPositionCoordinate(sample.get(), "y", SampPos.Y());
@@ -256,7 +255,7 @@ public:
     /*  for (size_t i = 0; i < table->rowCount(); ++i)
        {
        std::string nm = table->String(i, 0);
-       std::cout<<nm<<","<<table->Double(i,1)<<","<<table->Double(i,2)<<std::endl;
+       std::cout<<nm<<","<<table->Double(i,1)<<","<<table->Double(i,2)<<'\n';
        }
   */
   }

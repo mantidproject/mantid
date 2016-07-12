@@ -1,12 +1,15 @@
 #ifndef MANTID_DIFFROTDISCRETECIRCLE_H_
 #define MANTID_DIFFROTDISCRETECIRCLE_H_
 
-#include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/FunctionDomain.h"
-#include "MantidAPI/Jacobian.h"
+// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
+// Mantid Headers from the same project
+#include "MantidCurveFitting/Functions/ElasticDiffRotDiscreteCircle.h"
+#include "MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h"
+// Mantid headers from other projects
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/ImmutableCompositeFunction.h"
-#include "DeltaFunction.h"
+// 3rd party library headers (N/A)
+// standard library (N/A)
 
 namespace Mantid {
 namespace CurveFitting {
@@ -37,60 +40,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-/* Class representing the elastic portion of DiffRotDiscreteCircle
- * Contains a Delta Dirac.
- */
-class DLLExport ElasticDiffRotDiscreteCircle : public DeltaFunction {
-public:
-  /// Constructor
-  ElasticDiffRotDiscreteCircle();
-
-  /// Destructor
-  virtual ~ElasticDiffRotDiscreteCircle(){};
-
-  /// overwrite IFunction base class methods
-  virtual std::string name() const { return "ElasticDiffRotDiscreteCircle"; }
-
-  virtual const std::string category() const { return "QuasiElastic"; }
-
-  /// overwrite IFunction base class method, which declare function parameters
-  virtual void init();
-
-  /// A rescaling of the peak intensity
-  double HeightPrefactor() const;
-};
-
-/* Class representing the inelastic portion of DiffRotDiscreteCircle
- * Contains a linear combination of Lorentzians.
- */
-class DLLExport InelasticDiffRotDiscreteCircle : public API::ParamFunction,
-                                                 public API::IFunction1D {
-public:
-  /// Constructor
-  InelasticDiffRotDiscreteCircle();
-
-  /// Destructor
-  virtual ~InelasticDiffRotDiscreteCircle() {}
-
-  virtual std::string name() const { return "InelasticDiffRotDiscreteCircle"; }
-
-  virtual const std::string category() const { return "QuasiElastic"; }
-
-  virtual void init();
-
-protected:
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
-
-private:
-  /// Cache Q values from the workspace
-  void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
-
-  const double m_hbar; // Plank constant, in meV*THz (or ueV*PHz)
-
-  std::vector<double> m_qValueCache; // List of calculated Q values
-};
-
 /* Class representing the dynamics structure factor of a particle undergoing
  * discrete jumps on N-sites evenly distributed in a circle. The particle can
  * only
@@ -99,16 +48,13 @@ private:
  */
 class DLLExport DiffRotDiscreteCircle : public API::ImmutableCompositeFunction {
 public:
-  /// Destructor
-  ~DiffRotDiscreteCircle(){};
+  std::string name() const override { return "DiffRotDiscreteCircle"; }
 
-  virtual std::string name() const { return "DiffRotDiscreteCircle"; }
-
-  virtual const std::string category() const { return "QuasiElastic"; }
+  const std::string category() const override { return "QuasiElastic"; }
 
   virtual int version() const { return 1; }
 
-  virtual void init();
+  void init() override;
 
   /// Propagate an attribute to member functions
   virtual void trickleDownAttribute(const std::string &name);
@@ -118,7 +64,8 @@ public:
                                 const API::IFunction::Attribute &defaultValue);
 
   /// Override parent definition
-  virtual void setAttribute(const std::string &attName, const Attribute &att);
+  void setAttribute(const std::string &name,
+                    const API::IFunction::Attribute &att) override;
 
 private:
   boost::shared_ptr<ElasticDiffRotDiscreteCircle> m_elastic;

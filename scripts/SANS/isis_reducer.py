@@ -1,4 +1,4 @@
-﻿#pylint: disable=invalid-name
+﻿# pylint: disable=invalid-name, property-on-old-class, redefined-builtin, protected-access
 """
     ISIS-specific implementation of the SANS Reducer.
 
@@ -8,6 +8,7 @@
 """
 from reducer_singleton import Reducer
 import isis_reduction_steps
+import isis_instrument
 from reduction_settings import get_settings_object
 from mantid.simpleapi import *
 from mantid.api import *
@@ -16,7 +17,6 @@ from mantid.api import IEventWorkspace
 import SANSUtility as su
 import os
 import copy
-
 import sys
 
 logger = Logger("ISISReducer")
@@ -26,8 +26,12 @@ logger = Logger("ISISReducer")
 # http://bugs.python.org/issue1515
 if sys.version_info[0] == 2 and sys.version_info[1] == 6:
     import types
+
+
     def _deepcopy_method(x, memo):
         return type(x)(x.im_func, copy.deepcopy(x.im_self, memo), x.im_class)
+
+
     copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
 ################################################################################
 
@@ -36,14 +40,16 @@ __version__ = '0.0'
 
 current_settings = None
 
+
 class Sample(object):
     ISSAMPLE = True
+
     def __init__(self):
-        #will contain a LoadSample() object that converts the run number into a file name and loads that file
+        # will contain a LoadSample() object that converts the run number into a file name and loads that file
         self.loader = None
-        #geometry that comes from the run and can be overridden by user settings
+        # geometry that comes from the run and can be overridden by user settings
         self.geometry = isis_reduction_steps.GetSampleGeom()
-        #record options for the set_run
+        # record options for the set_run
         self.run_option = None
         self.reload_option = None
         self.period_option = None
@@ -56,7 +62,7 @@ class Sample(object):
         """
         if self.run_option is None:
             raise RuntimeError('Trying to reload without set_run is impossible!')
-        self.set_run(self.run_option,self.reload_option,self.period_option, reducer)
+        self.set_run(self.run_option, self.reload_option, self.period_option, reducer)
 
     def set_run(self, run, reload, period, reducer):
         """
@@ -65,7 +71,7 @@ class Sample(object):
             @param reload: if this sample should be reloaded before the first reduction
             @param period: the period within the sample to be analysed
         """
-        self.run_option = str(run) #to self-guard against keeping reference to workspace
+        self.run_option = str(run)  # to self-guard against keeping reference to workspace
         self.reload_option = reload
         self.period_option = period
 
@@ -80,7 +86,7 @@ class Sample(object):
     def get_monitor(self, index=None):
         try:
             _ws = mtd[self.loader.wksp_name + "_monitors"]
-        except:
+        except (StandardError, Warning):
             _ws = mtd[self.loader.wksp_name]
 
         if index is not None:
@@ -95,14 +101,16 @@ class Sample(object):
     wksp_name = property(get_wksp_name, None, None, None)
     periods_in_file = property(get_periods_in_file, None, None, None)
 
+
 class Can(Sample):
     ISSAMPLE = False
-    def set_run(self, run, reload, period, reducer):
 
+    def set_run(self, run, reload, period, reducer):
         super(Can, self).set_run(run, reload, period, reducer)
 
 
 class ISISReducer(Reducer):
+    # pylint: disable=too-many-public-methods
     """
         ISIS Reducer
 
@@ -123,9 +131,9 @@ class ISISReducer(Reducer):
     DQY = None
 
     # Component positions
-    PHIMIN=-90.0
-    PHIMAX=90.0
-    PHIMIRROR=True
+    PHIMIN = -90.0
+    PHIMAX = 90.0
+    PHIMIRROR = True
 
     ## Path for user settings files
     _user_file_path = '.'
@@ -171,52 +179,53 @@ class ISISReducer(Reducer):
 
         self._can = [self._background_subtracter]
 
-#        self._tidy = [self._zero_error_flags]
+        #        self._tidy = [self._zero_error_flags]
         self._tidy = [self._rem_nans]
 
-        #the last step in the list must be ConvertToQ or can processing wont work
+        # the last step in the list must be ConvertToQ or can processing wont work
         self._conv_Q = proc_TOF + proc_wav + [self.to_Q]
 
-        #list of steps to completely reduce a workspace
+        # list of steps to completely reduce a workspace
         self._reduction_steps = (self._conv_Q + self._can + self._tidy)
 
     def _init_steps(self):
         """
             Initialises the steps that are not initialised by (ISIS)CommandInterface.
         """
-        #these steps are not executed by reduce
-        self.user_settings =   None
-        self._out_name =       isis_reduction_steps.GetOutputName()
+        # these steps are not executed by reduce
+        self.user_settings = None
+        self._out_name = isis_reduction_steps.GetOutputName()
 
-        #except self.prep_normalize all the steps below are used by the reducer
-        self.event2hist =      isis_reduction_steps.SliceEvent()
-        self.crop_detector =   isis_reduction_steps.CropDetBank()
+        # except self.prep_normalize all the steps below are used by the reducer
+        self.event2hist = isis_reduction_steps.SliceEvent()
+        self.crop_detector = isis_reduction_steps.CropDetBank()
         self.mask = isis_reduction_steps.Mask_ISIS()
-        self.to_wavelen =      isis_reduction_steps.UnitsConvert('Wavelength')
-        self.norm_mon =        isis_reduction_steps.NormalizeToMonitor()
-        self.transmission_calculator =\
-                               isis_reduction_steps.TransmissionCalc(loader=None)
+        self.to_wavelen = isis_reduction_steps.UnitsConvert('Wavelength')
+        self.norm_mon = isis_reduction_steps.NormalizeToMonitor()
+        self.transmission_calculator = \
+            isis_reduction_steps.TransmissionCalc(loader=None)
         self._corr_and_scale = isis_reduction_steps.AbsoluteUnitsISIS()
 
         # note CalculateNormISIS does not inherit from ReductionStep
         # so currently do not understand why it is in isis_reduction_steps
         # Also the main purpose of this class is to use it as an input argument
         # to ConvertToQ below
-        self.prep_normalize = isis_reduction_steps.CalculateNormISIS(\
-                            [self.norm_mon, self.transmission_calculator])
+        self.prep_normalize = isis_reduction_steps.CalculateNormISIS( \
+            [self.norm_mon, self.transmission_calculator])
 
-        self.to_Q =            isis_reduction_steps.ConvertToQISIS(\
-                                                        self.prep_normalize)
+        self.to_Q = isis_reduction_steps.ConvertToQISIS( \
+            self.prep_normalize)
         self._background_subtracter = isis_reduction_steps.CanSubtraction()
-        self.geometry_correcter =       isis_reduction_steps.SampleGeomCor()
-#        self._zero_error_flags=isis_reduction_steps.ReplaceErrors()
-        self._rem_nans =      isis_reduction_steps.StripEndNans()
+        self.geometry_correcter = isis_reduction_steps.SampleGeomCor()
+        #        self._zero_error_flags=isis_reduction_steps.ReplaceErrors()
+        self._rem_nans = isis_reduction_steps.StripEndNans()
 
         self.set_Q_output_type(self.to_Q.output_type)
         # keep information about event slicing
         self._slices_def = []
         self._slice_index = 0
 
+        # As mentioned above, this is not a reductions step!
 
     def _clean_loaded_data(self):
         self._sample_run = Sample()
@@ -225,23 +234,24 @@ class ISISReducer(Reducer):
         self.can_trans_load = None
 
     def __init__(self):
+        # pylint: disable=super-on-old-class
         super(ISISReducer, self).__init__()
         self.output_wksp = None
         self.full_trans_wav = False
         self._monitor_set = False
-        #workspaces that this reducer uses and will delete at the end
+        # workspaces that this reducer uses and will delete at the end
         self._temporys = {}
-        #the output workspaces created by a data analysis
+        # the output workspaces created by a data analysis
         self._outputs = {}
-        #all workspaces created by this reducer
+        # all workspaces created by this reducer
         self._workspace = [self._temporys, self._outputs]
 
         self._clean_loaded_data()
         self._init_steps()
 
-        #process the background (can) run instead of the sample
+        # process the background (can) run instead of the sample
         self._process_can = False
-        #option to indicate if wide_angle_correction will be applied.
+        # option to indicate if wide_angle_correction will be applied.
         self.wide_angle_correction = False
         # Due to the way that ISISReducer is used to the reduction of the Can
         # creating a new copy of ISISReducer through the SingleTon interface, we have
@@ -254,6 +264,9 @@ class ISISReducer(Reducer):
 
         self.settings = get_settings_object()
 
+        # Dark Run Subtraction handler. This is not a step but a utility class
+        # which gets used during cropping and Tranmission calculation
+        self.dark_run_subtraction = isis_reduction_steps.DarkRunSubtraction()
 
     def set_instrument(self, configuration):
         """
@@ -275,13 +288,15 @@ class ISISReducer(Reducer):
         if not self.user_settings.executed:
             raise RuntimeError('User settings must be loaded before the sample can be assigned, run UserFile() first')
 
+        # At this point we need to check if the IDF associated with the
+        self._match_IDF(run = run)
+
         # ensure that when you set sample, you start with no can, transmission previously used.
         self._clean_loaded_data()
         self._sample_run.set_run(run, reload, period, self)
 
     def set_can(self, run, reload, period):
         self._can_run.set_run(run, reload, period, self)
-
 
     def get_sample(self):
         """
@@ -326,7 +341,7 @@ class ISISReducer(Reducer):
         name = str(sample_obj.shortrun_no)
         if show_period and (sample_obj.periods_in_file > 1 or sample_obj._period != -1):
             period = sample_obj.curr_period()
-            name += 'p'+str(period)
+            name += 'p' + str(period)
 
         name += self.instrument.cur_detector().name('short')
         name += '_' + self.to_Q.output_type
@@ -337,12 +352,13 @@ class ISISReducer(Reducer):
         if self.getNumSlices() > 0:
             limits = self.getCurrSliceLimit()
             if limits[0] != -1:
-                name += '_t%.2f'%limits[0]
+                name += '_t%.2f' % limits[0]
             if limits[1] != -1:
-                name += '_T%.2f'%limits[1]
+                name += '_T%.2f' % limits[1]
 
         return name
 
+    # pylint: disable=global-statement
     def deep_copy(self):
         """
             Returns a copy of the reducer that was created when the settings were set but
@@ -390,12 +406,12 @@ class ISISReducer(Reducer):
         # create the workspace that will be used throughout the reduction
         CloneWorkspace(self.get_sample().wksp_name, OutputWorkspace=self.output_wksp)
 
-        #the main part of the reduction is done here, go through and execute each step
+        # the main part of the reduction is done here, go through and execute each step
         for item in steps:
             if item:
                 item.execute(self, self.output_wksp)
 
-        #any clean up, possibly removing workspaces
+        # any clean up, possibly removing workspaces
         if post:
             self.post_process()
 
@@ -419,10 +435,10 @@ class ISISReducer(Reducer):
 
         can_steps = self._conv_Q
         if not run_Q:
-            #the last step in the list must be ConvertToQ or this wont work
-            can_steps = can_steps[0:len(can_steps)-1]
+            # the last step in the list must be ConvertToQ or this wont work
+            can_steps = can_steps[0:len(can_steps) - 1]
 
-        #the reducer is completely setup, run it
+        # the reducer is completely setup, run it
         self._reduce(init=False, post=False, steps=can_steps)
 
         # restore settings
@@ -468,7 +484,7 @@ class ISISReducer(Reducer):
             user_file = 'None'
         else:
             user_file = self.user_settings.filename
-        AddSampleLog(Workspace=self.output_wksp,LogName="UserFile", LogText=user_file)
+        AddSampleLog(Workspace=self.output_wksp, LogName="UserFile", LogText=user_file)
 
         # get the value of __transmission_sample from the transmission_calculator if it has
         if (not self.get_can()) and self.transmission_calculator.output_wksp:
@@ -481,9 +497,11 @@ class ISISReducer(Reducer):
         # to the SampleLog, to be connected to the workspace, and be available outside. These values
         # are current being used for saving CanSAS (ticket #6929)
         if self.__transmission_sample:
-            AddSampleLog(Workspace=self.output_wksp,LogName= "Transmission", LogText=self.__transmission_sample + str('_unfitted'))
+            AddSampleLog(Workspace=self.output_wksp, LogName="Transmission",
+                         LogText=self.__transmission_sample + str('_unfitted'))
         if self.__transmission_can:
-            AddSampleLog(Workspace=self.output_wksp,LogName= "TransmissionCan", LogText=self.__transmission_can + str('_unfitted'))
+            AddSampleLog(Workspace=self.output_wksp, LogName="TransmissionCan",
+                         LogText=self.__transmission_can + str('_unfitted'))
 
         # clean these values for subsequent executions
         self.__transmission_sample = ""
@@ -492,8 +510,8 @@ class ISISReducer(Reducer):
         for role in self._temporys.keys():
             try:
                 DeleteWorkspace(Workspace=self._temporys[role])
-            except:
-            #if cleaning up isn't possible there is probably nothing we can do
+            except (StandardError, Warning):
+                # if cleaning up isn't possible there is probably nothing we can do
                 pass
 
     def set_user_path(self, path):
@@ -514,19 +532,20 @@ class ISISReducer(Reducer):
     def set_trans_fit(self, lambda_min=None, lambda_max=None, fit_method="Log", selector='BOTH'):
         self.transmission_calculator.set_trans_fit(fit_method, lambda_min, lambda_max, override=True, selector=selector)
 
-    def set_trans_sample(self, sample, direct, reload=True, period_t = -1, period_d = -1):
+    # pylint: disable=too-many-arguments
+    def set_trans_sample(self, sample, direct, reload=True, period_t=-1, period_d=-1):
         self.samp_trans_load = isis_reduction_steps.LoadTransmissions(reload=reload)
         self.samp_trans_load.set_trans(sample, period_t)
         self.samp_trans_load.set_direc(direct, period_d)
 
-    def set_trans_can(self, can, direct, reload = True, period_t = -1, period_d = -1):
+    def set_trans_can(self, can, direct, reload=True, period_t=-1, period_d=-1):
         self.can_trans_load = isis_reduction_steps.LoadTransmissions(is_can=True, reload=reload)
         self.can_trans_load.set_trans(can, period_t)
         self.can_trans_load.set_direc(direct, period_d)
 
     def set_monitor_spectrum(self, specNum, interp=False, override=True):
         if override:
-            self._monitor_set=True
+            self._monitor_set = True
 
         self.instrument.set_interpolating_norm(interp)
 
@@ -553,11 +572,23 @@ class ISISReducer(Reducer):
         """
         return self.instrument
 
-    #quicker to write than .instrument
+    def get_instrument_name(self):
+        """
+            Get the name of the instrument
+        """
+        return self.instrument._NAME
+
+    def get_idf_file_path(self):
+        """
+            Get the IDF path
+        """
+        return self.instrument.get_idf_file_path()
+
+    # quicker to write than .instrument
     inst = property(get_instrument, None, None, None)
 
     def Q_string(self):
-        return '    Q range: ' + self.to_Q.binning +'\n    QXY range: ' + self.QXY2+'-'+self.DQXY
+        return '    Q range: ' + self.to_Q.binning + '\n    QXY range: ' + self.QXY2 + '-' + self.DQXY
 
     def ViewCurrentMask(self):
         """
@@ -591,7 +622,7 @@ class ISISReducer(Reducer):
         else:
             raise RuntimeError, "Reducer.set_beam_finder expects an object of class ReductionStep"
 
-    def get_beam_center(self, bank = None):
+    def get_beam_center(self, bank=None):
         """
         Return the beam center position according to the
         bank detector current selected.
@@ -610,7 +641,7 @@ class ISISReducer(Reducer):
             else:
                 return self._front_beam_finder.get_beam_center()
         else:
-            if bank in ['front','FRONT','hab','HAB'] and self._front_beam_finder:
+            if bank in ['front', 'FRONT', 'hab', 'HAB'] and self._front_beam_finder:
                 return self._front_beam_finder.get_beam_center()
             else:
                 return self._beam_finder.get_beam_center()
@@ -660,9 +691,10 @@ class ISISReducer(Reducer):
             try:
                 if wk and wk in mtd:
                     DeleteWorkspace(Workspace=wk)
-            except:
-                #if the workspace can't be deleted this function does nothing
+            except (StandardError, Warning):
+                # if the workspace can't be deleted this function does nothing
                 pass
+
     def get_reduction_steps(self):
         '''
         Provides a way to access the reduction steps
@@ -699,3 +731,134 @@ class ISISReducer(Reducer):
         # Update the beam centre finder for the rear
         self._beam_finder.update_beam_center(centre_pos1, centre_pos2)
 
+    def _match_IDF(self, run):
+        '''
+        Compares the IDF in the stored instrument with the IDF in the workspace.
+        If they are the same all is well. If they diff, then load the adequate
+        user file.
+        @param run: name of the run for which the file is to be extracted
+        '''
+        # We need the instrument name and the measurement time to determine
+        # the IDF
+        measurement_time = None
+        instrument_name = self.get_instrument_name()
+        # We need to be able to handle file-based and workspace-based queries
+        # If we have a workspace we look at the end time, else we
+        # need a sophisticated extraction mechanism
+        if isinstance(run, Workspace):
+            ws = None
+            if isinstance(run, WorkspaceGroup):
+                # Just look at the first element in a workspace group
+                ws = run[0]
+            else:
+                ws = run
+            measurement_time = str(ws.getRun().endTime()).strip()
+        else:
+            if run is None or run == "":
+                return
+            measurement_time = su.get_measurement_time_from_file(run)
+
+        # Get the path to the instrument definition file
+        idf_path_workspace = ExperimentInfo.getInstrumentFilename(instrument_name, measurement_time)
+        idf_path_workspace = os.path.normpath(idf_path_workspace)
+
+        # Get the idf from the reducer
+        idf_path_reducer = self.get_idf_file_path()
+        idf_path_reducer = os.path.normpath(idf_path_reducer)
+
+        # Now check if both idf paths and underlying files. If they are, then don't do anything
+        # else switch the underlying instrument
+        if idf_path_reducer == idf_path_workspace and su.are_two_files_identical(idf_path_reducer, idf_path_reducer):
+            return
+        else:
+            logger.notice("Updating the IDF of the Reducer. Switching from " +
+                          str(idf_path_reducer) + " to " + str(idf_path_workspace))
+            idf_path = os.path.basename(idf_path_workspace)
+            instrument = self._get_correct_instrument(instrument_name, idf_path)
+
+            # Get detector of the old instrument
+            old_instrument = self.get_instrument()
+            old_detector_selection = old_instrument.get_detector_selection()
+
+            if instrument is not None:
+                self.set_instrument(instrument)
+
+                # We need to update the instrument, by reloading the user file.
+                # This is pretty bad, but looking at the reducer architecture this
+                # seems to be the only reasonable way to do this.
+                self.user_settings.execute(self)
+
+                # Now we set the correct detector, this is also being done in the GUI
+                self.get_instrument().setDetector(old_detector_selection)
+
+    def _get_correct_instrument(self, instrument_name, idf_path = None):
+        '''
+        Creates an ISIS instrument based on the name and the chosen idf_path
+        @param instrument_name: the name of the instrument
+        @param idf_path: the full path to the IDF
+        '''
+        instrument = None
+        try:
+            if instrument_name.upper() == "LARMOR":
+                instrument = isis_instrument.LARMOR(idf_path)
+            elif instrument_name.upper() == "SANS2D":
+                instrument = isis_instrument.SANS2D(idf_path)
+            elif instrument_name.upper() == "LOQ":
+                instrument = isis_instrument.LOQ(idf_path)
+        # pylint: disable=bare-except
+        except:
+            instrument = None
+        return instrument
+
+    def add_dark_run_setting(self, dark_run_setting):
+        '''
+        Adds a dark run setting to the dark run subtraction
+        @param dark_run_setting: a dark run setting
+        '''
+        self.dark_run_subtraction.add_setting(dark_run_setting)
+
+    def get_dark_run_setting(self, is_time, is_mon):
+        '''
+        Gets one of the four dark run setttings
+        @param is_time: is it time_based or not
+        @param is_mon: monitors or not
+        @returns the requested setting
+        '''
+        setting = None
+        if is_time and is_mon:
+            setting = self.dark_run_subtraction.get_time_based_setting_monitors()
+        elif is_time and not is_mon:
+            setting = self.dark_run_subtraction.get_time_based_setting_detectors()
+        elif not is_time and is_mon:
+            setting = self.dark_run_subtraction.get_uamp_based_setting_monitors()
+        elif not is_time and not is_mon:
+            setting = self.dark_run_subtraction.get_uamp_based_setting_detectors()
+        return setting
+
+    def clear_dark_run_settings(self):
+        self.dark_run_subtraction.clear_settings()
+
+    def is_based_on_event(self):
+        '''
+        One way to determine if we are dealing with an original event workspace
+        is if the monitor workspace was loaded separately
+        @returns true if the input was an event workspace
+        '''
+        was_event = False
+        if self.is_can():
+            sample = self.get_can()
+            try:
+                dummy_ws = mtd[can.loader.wksp_name + "_monitors"]
+                was_event = True
+            # pylint: disable=bare-except
+            except:
+                was_event = False
+        else:
+            sample = self.get_sample()
+            try:
+                dummy_ws = mtd[sample.loader.wksp_name + "_monitors"]
+                was_event = True
+            # pylint: disable=bare-except
+            except:
+                was_event = False
+        return was_event

@@ -27,7 +27,7 @@ using namespace Mantid;
 MuonNexusReader::MuonNexusReader()
     : nexus_instrument_name(), nexus_samplename(), nexusLogCount(0),
       startTime_time_t(), t_nsp1(0), t_ntc1(0), t_nper(0),
-      corrected_times(NULL), counts(NULL), detectorGroupings(NULL),
+      corrected_times(nullptr), counts(nullptr), detectorGroupings(nullptr),
       numDetectors(0) {}
 
 /// Destructor deletes temp storage
@@ -44,9 +44,9 @@ MuonNexusReader::~MuonNexusReader() {
 void MuonNexusReader::openFirstNXentry(NeXus::File &handle) {
   std::map<string, string> entries = handle.getEntries();
   bool found = false;
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    if (it->second == NXENTRY) {
-      handle.openGroup(it->first, NXENTRY);
+  for (auto &entrie : entries) {
+    if (entrie.second == NXENTRY) {
+      handle.openGroup(entrie.first, NXENTRY);
       found = true;
       break;
     }
@@ -78,9 +78,9 @@ void MuonNexusReader::readFromFile(const string &filename) {
   // find all of the NXdata in the entry
   std::vector<string> nxdataname;
   std::map<string, string> entries = handle.getEntries();
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    if (it->second == NXDATA) {
-      nxdataname.push_back(it->first);
+  for (auto &entry : entries) {
+    if (entry.second == NXDATA) {
+      nxdataname.push_back(entry.first);
     }
   }
   handle.openGroup(nxdataname.front(), NXDATA);
@@ -129,8 +129,8 @@ void MuonNexusReader::readFromFile(const string &filename) {
   // If not available set as one period.
   entries = handle.getEntries();
   t_nper = 1;
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    if (it->first == "switching_states") {
+  for (auto &entrie : entries) {
+    if (entrie.first == "switching_states") {
       int ssPeriods;
       handle.readData("switching_states", ssPeriods);
       t_nper = abs(ssPeriods);
@@ -169,7 +169,7 @@ string MuonNexusReader::getInstrumentName() const {
 //            Zero or more NXlog entries which are of the form: <time>,<value>
 //            <time> is 32bit float time wrt start_time and <value> either 32bit
 //            float
-//            or sting.
+//            or string.
 //
 // @param filename ::  name of existing NeXus Muon file to read
 void MuonNexusReader::readLogData(const string &filename) {
@@ -184,9 +184,9 @@ void MuonNexusReader::readLogData(const string &filename) {
   // memory
   // Also get the start_time string needed to change these times into ISO times
   std::map<string, string> entries = handle.getEntries();
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    string nxname = it->first;
-    string nxclass = it->second;
+  for (auto &entrie : entries) {
+    string nxname = entrie.first;
+    string nxclass = entrie.second;
 
     if (nxclass == NXLOG) {
       handle.openGroup(nxname, nxclass);

@@ -51,7 +51,7 @@ public:
 
   SIP_PYOBJECT windowLabel();
 %MethodCode
-  sipRes = PyString_FromString(sipCpp->windowLabel());
+  sipRes = FROM_CSTRING(sipCpp->windowLabel().toAscii().constData());
 %End
   void setWindowLabel(const QString&);
 
@@ -87,11 +87,11 @@ class Table: MdiSubWindow
 #include <QMessageBox>
 #define CHECK_TABLE_COL(arg)\
     int col;\
-    if (PyInt_Check(arg)) {\
-      col = (int)PyInt_AsLong(arg) - 1;\
+    if (INT_CHECK(arg)) {\
+      col = (int)TO_LONG(arg) - 1;\
 		if (col < 0 || col >= sipCpp->numCols()) {\
 			sipIsErr = 1;\
-			PyErr_Format(PyExc_ValueError, "There's no column %d in table %s!", col+1, sipCpp->name().ascii());\
+			PyErr_Format(PyExc_ValueError, "There's no column %d in table %s!", col+1, sipCpp->name().toAscii().constData());\
 		}\
 	 } else {\
       PyObject *tmp = PyObject_Str(arg);\
@@ -99,11 +99,11 @@ class Table: MdiSubWindow
 			sipIsErr = 1;\
 			PyErr_Format(PyExc_TypeError, "Column argument must be either int or string.");\
 		} else {\
-			col = sipCpp->colNames().findIndex(PyString_AsString(tmp));\
+			col = sipCpp->colNames().indexOf(TO_CSTRING(tmp));\
 			if (col < 0) {\
 				sipIsErr = 1;\
-				PyErr_Format(PyExc_ValueError, "There's no column named %s in table %s!", PyString_AsString(tmp),\
-						sipCpp->name().ascii());\
+				PyErr_Format(PyExc_ValueError, "There's no column named %s in table %s!", TO_CSTRING(tmp),\
+						sipCpp->name().toAscii().constData());\
 				Py_DECREF(tmp);\
 			}\
 		}\
@@ -113,7 +113,7 @@ class Table: MdiSubWindow
    int row = arg-1;\
 	if (row < 0 || row >= sipCpp->numRows()) {\
 		sipIsErr = 1;\
-		PyErr_Format(PyExc_ValueError, "There's no row %d in table %s!", row+1, sipCpp->name().ascii());\
+		PyErr_Format(PyExc_ValueError, "There's no row %d in table %s!", row+1, sipCpp->name().toAscii().constData());\
 	}
 %End
 
@@ -130,11 +130,12 @@ public:
 
   SIP_PYOBJECT text(SIP_PYOBJECT, int);
 %MethodCode
+  
   sipIsErr = 0;
   CHECK_TABLE_COL(a0);
   CHECK_TABLE_ROW(a1);
   if (sipIsErr == 0) {
-		PyObject *encstr = PyString_FromString(sipCpp->text(row, col).utf8());
+		PyObject *encstr = FROM_CSTRING(sipCpp->text(row, col).toUtf8());
 		if (encstr) {
 			sipRes = PyUnicode_FromEncodedObject(encstr, "utf8", 0);
 			Py_DECREF(encstr);
@@ -181,7 +182,7 @@ public:
 		sipIsErr = 1;\
 		PyErr_SetString(PyExc_ValueError, "Invalid column argument");\
 	} else
-		sipRes = PyString_FromString(sipCpp->colLabel(a0-1));
+		sipRes = FROM_CSTRING(sipCpp->colLabel(a0-1).toAscii().constData());
 %End
   void setColName(SIP_PYOBJECT, const QString&, bool=false);
 %MethodCode
@@ -220,7 +221,7 @@ public:
   for (int i=0; i<n; i++) {
     PyObject *str = PyObject_Str(PyTuple_GET_ITEM(a0,i));
     if (str) {
-      l << PyString_AsString(str);
+      l << TO_CSTRING(str);
 		Py_DECREF(str);
 	 } else {
       sipIsErr = 1;
@@ -292,13 +293,13 @@ class Matrix: MdiSubWindow
 	int col = arg-1;\
    if (col < 0 || col >= sipCpp->numCols()) {\
 		sipIsErr = 1;\
-		PyErr_Format(PyExc_ValueError, "There's no column %d in matrix %s!", col+1, sipCpp->name().ascii());\
+		PyErr_Format(PyExc_ValueError, "There's no column %d in matrix %s!", col+1, sipCpp->name().toAscii().constData());\
 	}
 #define CHECK_MATRIX_ROW(arg)\
    int row = arg-1;\
 	if (row < 0 || row >= sipCpp->numRows()) {\
 		sipIsErr = 1;\
-		PyErr_Format(PyExc_ValueError, "There's no row %d in matrix %s!", row+1, sipCpp->name().ascii());\
+		PyErr_Format(PyExc_ValueError, "There's no row %d in matrix %s!", row+1, sipCpp->name().toAscii().constData());\
 	}
 %End
 public:
@@ -318,7 +319,7 @@ public:
 	CHECK_MATRIX_ROW(a0);
 	CHECK_MATRIX_COL(a1);
 	if (sipIsErr == 0)
-		sipRes = PyString_FromString(sipCpp->text(row, col));
+		sipRes = FROM_CSTRING(sipCpp->text(row, col).toAscii().constData());
 %End
   double cell(int, int);
 %MethodCode
@@ -683,17 +684,6 @@ private:
 	Grid(const Grid&);
 };
 
-namespace GraphOptions
-{
-%TypeHeaderCode
-#include "MantidQtAPI/GraphOptions.h"
-%End
-
-  enum ScaleType {Linear, Log10};
-
-  enum Axis{Left, Right, Bottom, Top};
-};
-
 namespace MantidQt 
 {
 %TypeHeaderCode 
@@ -718,7 +708,7 @@ public:
   bool isPiePlot();
   SIP_PYOBJECT pieLegendText() /PyName=pieLegend/;
 %MethodCode
-  sipRes = PyString_FromString(sipCpp->pieLegendText());
+  sipRes = FROM_CSTRING(sipCpp->pieLegendText().toAscii().constData());
 %End
 
   bool insertCurve(Table*, const QString&, int style = 1, int startRow = 0, int endRow = -1);
@@ -732,7 +722,7 @@ public:
   for (int i=0; i<n; i++) {
     PyObject *str = PyObject_Str(PyTuple_GET_ITEM(a1,i));
     if (str) {
-      l << PyString_AsString(str);
+      l << TO_CSTRING(str);
 		Py_DECREF(str);
 	 } else {
       sipIsErr = 1;
@@ -1110,7 +1100,7 @@ class ApplicationWindow: QMainWindow
 // we have to do this to override casting in qt/qobject.sip (PyQt 3.16)
 // Russell Taylor, 4/8/09: Change needed for mac build.
 //   Taken from main qtiplot svn revision 1187.
-sipClass=sipFindClass(sipCpp->className());
+sipClass=sipFindClass(sipCpp->metaObject()->className());
 %End
 
 public:
@@ -1165,7 +1155,7 @@ public:
   for (int i=0; i<n; i++) {
     PyObject *str = PyObject_Str(PyTuple_GET_ITEM(a1,i));
     if (str) {
-      l << PyString_AsString(str);
+      l << TO_CSTRING(str);
 		Py_DECREF(str);
 	 } else {
       sipIsErr = 1;
@@ -1192,7 +1182,7 @@ public:
     for (int i=0; i<n; i++) {
     PyObject *str = PyObject_Str(PyTuple_GET_ITEM(a1,i));
     if (str) {
-      l << PyString_AsString(str);
+      l << TO_CSTRING(str);
       Py_DECREF(str);
      } else {
       sipIsErr = 1;
@@ -1228,13 +1218,13 @@ public:
   sipRes = sipCpp->currentFolder();
 %End
 
+  void newProject(const bool doNotSave = false);
   Folder* appendProject(const QString& file_name, Folder* parentFolder = 0);
   Folder* projectFolder() /PyName=rootFolder/;
 
   Folder* addFolder(QString name, Folder* parent = 0);
   bool deleteFolder(Folder *);
   bool changeFolder(Folder *, bool force = false);
-  bool copyFolder(Folder *src, Folder *dest);
 
   void setWindowName(MdiSubWindow *, const QString &);
   void setPreferences(Graph*);
@@ -1243,6 +1233,8 @@ public:
   void disableTools();
 
   void saveProjectAs(const QString& fileName = QString(), bool = false);
+  ApplicationWindow *openProject(const QString &workingDir, const QString &filename, const int fileVersion);
+
   MdiSubWindow* clone(MdiSubWindow*);
 
   Matrix* tableToMatrix(Table* t);
@@ -1375,22 +1367,7 @@ private:
   MantidMatrix(const MantidMatrix&);
 };
 
-class InstrumentWindowTab: QFrame
-{
-%TypeHeaderCode
-#include "src/Mantid/InstrumentWidget/InstrumentWindowTab.h"
-%End
-public:
-	// This is a duplicate from the same enum in InstrumentWindow, just so you
-	// can do like InstrumentWindowRenderTab.FULL3D
-	enum SurfaceType { FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z,
-                     SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z,
-                     RENDERMODE_SIZE };
-private:
-  InstrumentWindowTab(const InstrumentWindowTab &);
-};
-
-class InstrumentWindow: MdiSubWindow
+class InstrumentWindow: MdiSubWindow /PyName=InstrumentView/
 {
 %TypeHeaderCode
 #include "src/Mantid/InstrumentWidget/InstrumentWindow.h"
@@ -1403,20 +1380,15 @@ class InstrumentWindow: MdiSubWindow
     also a tree view of the instrument hierarchy.
 
     For further help see the functions defined on each of the following
-        - InstrumentWindowRenderTab
-        - InstrumentWindowPickTab
-        - InstrumentWindowMaskTab
+        - InstrumentWidget
+        - InstrumentWidgetRenderTab
+        - InstrumentWidgetPickTab
+        - InstrumentWidgetMaskTab
 %End
 
 public:
-  // Note this enum is also defined in InstrumentWindowTab
-  enum SurfaceType { FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z,
-                     SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z,
-                     RENDERMODE_SIZE };
-  enum Tab { RENDER, PICK, MASK, TREE };
-
-
-  InstrumentWindowTab * getTab(const QString & title) const;
+  // Note this enum is also defined in InstrumentWidgetTab and InstrumentWidget
+  MantidQt::MantidWidgets::InstrumentWidgetTab * getTab(const QString & title) const;
 %Docstring
     Returns a handler to the requested tab
 
@@ -1429,14 +1401,14 @@ public:
 
 %End
 
-  InstrumentWindowTab * getTab(const Tab tab) const;
+  MantidQt::MantidWidgets::InstrumentWidgetTab * getTab(int tab) const;
 %Docstring
     Returns a handler to the requested tab
 
     Args:
         tab One of the Tab enumeration types:
-	    InstrumentWindow.RENDER,InstrumentWindow.PICK,
-	    InstrumentWindow.MASK,InstrumentWindow.TREE
+	    InstrumentWidget.RENDER,InstrumentWidget.PICK,
+	    InstrumentWidget.MASK,InstrumentWidget.TREE
 
     Returns:
         a pointer to the requested tab widget
@@ -1484,205 +1456,6 @@ InstrumentWindow();
 InstrumentWindow(const InstrumentWindow &);
 };
 
-class InstrumentWindowRenderTab: InstrumentWindowTab
-{
-%TypeHeaderCode
-#include "src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h"
-%End
-
-public:
-
-  GraphOptions::ScaleType getScaleType() const;
-%Docstring
-    Returns the current scale type. 0=Linear, 1=Log10
-%End
-
-  void setScaleType(GraphOptions::ScaleType type);
-%Docstring
-    Set the scale type for the colour bar.
-
-    Args:
-        type The new type Options are: GraphOptions.Linear, GraphOptions.Log10
-%End
-
-  void setAxis(const QString& axisName);
-%Docstring
-    Set the current viewing axis by name.
-
-    Args:
-       axisName The name of a view in a string: X+,X-,Y+,Y-,Z+,Z-
-%End
-
-  void setMinValue(double value, bool apply = true);
-%Docstring
-    Set the minimum value for the colour scale
-
-    Args:
-       value The new value for the minimum
-%End
-
-  void setMaxValue(double value, bool apply = true);
-%Docstring
-    Set the maximum value for the colour scale
-
-    Args:
-       value The new value for the maximum
-%End
-
-  void setRange(double minValue, double maxValue, bool apply = true);
-%Docstring
-    Set the range of the colour bar
-
-    Args:
-        minValue The new value for the minimum
-        maxValue The new value for the maximum
-%End
-
-  void showAxes(bool on);
-%Docstring
-    Set the axes on/off
-
-    Args:
-        on True/False indicating whether the axes are visible
-%End
-
-  void setColorMapAutoscaling(bool on);
-%Docstring
-    Set whether the colour scale should auto scale when the data is updated
-
-    Args:
-        on True/False indicating whether auto scaling is active
-%End
-
-  void displayDetectorsOnly(bool yes);
-%Docstring
-    Set whether only detectors should be shown.
-
-    Args:
-        yes True/False indicating whether only detectors are shown
-%End
-
-  void enableGL(bool on);
-%Docstring
-    Toggle the use of OpenGL. This can only be used for the unwrapped views.
-
-    Args:
-        on True/False indicating whether OpenGL should be used.
-%End
-
-  void changeColorMap(const QString & filename = "");
-%Docstring
-    Change the color map for the given one. If blank then a dialog is raised
-
-    Args:
-        filename A filename giving the full path to a color map file
-%End
-
-  void setSurfaceType(int type);
-%Docstring
-    Set the surface type of the current window.
-
-    Args:
-        type A known suface type: FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y,
-                                  CYLINDRICAL_Z,SPHERICAL_X, SPHERICAL_Y,
-                                  SPHERICAL_Z
-%End
-
-  void flipUnwrappedView(bool on);
-%Docstring
-    Set whether an unwrapped view is flipped
-
-    Args:
-        on True/False indicatingif to flip the view
-%End
-
-  void saveImage(QString filename = "");
-%Docstring
-    Save the current display buffer to an image file. The format is chosen by the filename extension and must
-    be one of .bmp,.jpeg,.jpeg,.png,.ppm,.tiff,.xbm,.xpm
-
-    Args:
-        filename The filename for the saved image. An empty string raises a dialog box.
-%End
-
-private:
-  InstrumentWindowRenderTab();
-  InstrumentWindowRenderTab(const InstrumentWindowRenderTab &);
-};
-
-class InstrumentWindowPickTab: InstrumentWindowTab
-{
-%TypeHeaderCode
-#include "src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h"
-%End
-
-public:
-  enum ToolType {Zoom, PixelSelect, TubeSelect, PeakSelect, PeakErase};
-
-  void selectTool(const ToolType tool);
-%Docstring
-    Select the active tool.
-
-    Args:
-        tool One of InstrumentWindowPickTab.{Zoom, PixelSelect, TubeSelect, PeakSelect, PeakErase}
-%End
-
-private:
-  InstrumentWindowPickTab();
-  InstrumentWindowPickTab(const InstrumentWindowPickTab &);
-};
-
-class InstrumentWindowMaskTab: InstrumentWindowTab
-{
-%TypeHeaderCode
-#include "src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.h"
-%End
-
-public:
-  enum Mode {Mask, Group};
-  enum Activity {Move,Select,DrawEllipse,DrawRectangle,DrawEllipticalRing,DrawRectangularRing};
-
-  void setMode(Mode mode);
-%Docstring
-  Set the mode to either group/mask
-
-  Args:
-      mode One of the Mode enumerations InstrumentWindowMaskTab.{Mask, Group}
-%End
-
-  void selectTool(Activity tool);
-%Docstring
-  Set the mode to either group/mask
-
-  Args:
-      tool One of the Activity enumerations InstrumentWindowMaskTab.{Move,Select,DrawEllipse,DrawRectangle,DrawEllipticalRing,DrawRectangularRing}
-%End
-
-private:
-  InstrumentWindowMaskTab();
-  InstrumentWindowMaskTab(const InstrumentWindowMaskTab &);
-};
-
-class InstrumentWindowTreeTab: InstrumentWindowTab
-{
-%TypeHeaderCode
-#include "src/Mantid/InstrumentWidget/InstrumentWindowTreeTab.h"
-%End
-
-public:
-  void selectComponentByName(const QString& name);
-%Docstring
-    Sets the tree tab to center the view on the named component
-
-    Args:
-        name The name of a component in the instrument
-%End
-
-private:
-  InstrumentWindowTreeTab();
-  InstrumentWindowTreeTab(const InstrumentWindowTreeTab &);
-};
-
 class MantidUI: QObject
 {
 %TypeHeaderCode
@@ -1692,7 +1465,7 @@ class MantidUI: QObject
 // we have to do this to override casting in qt/qobject.sip (PyQt 3.16)
 // Russell Taylor, 4/8/09: Change needed for mac build.
 //   Taken from main qtiplot svn revision 1187.
-sipClass=sipFindClass(sipCpp->className());
+sipClass=sipFindClass(sipCpp->metaObject()->className());
 %End
 
 public:
@@ -1712,15 +1485,14 @@ public:
 
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   void convertToWaterfall(MultiLayer*);
-
-  // Methods relating to creating or getting handles to GUI objects
-  MantidMatrix* getMantidMatrix(const QString &);
-  QString getSelectedWorkspaceName();
   InstrumentWindow* getInstrumentView(const QString &, int tab = -1);
 %MethodCode
   sipRes = sipCpp->getInstrumentView(*a0,a1);
   if(sipRes) sipRes->hide();
 %End
+  // Methods relating to creating or getting handles to GUI objects
+  MantidMatrix* getMantidMatrix(const QString &);
+  QString getSelectedWorkspaceName();
   MantidMatrix* importMatrixWorkspace(const QString&,int = -1, int = -1, bool = false, bool = false);
   Table* createTableFromSpectraList(const QString& tableName, const QString& workspaceName,
       QList<int> indexList, bool errs=true, bool binCentres=false) /PyName = workspaceToTable/;

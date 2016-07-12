@@ -22,57 +22,39 @@ public:
                       int binIndex, const bool logScale);
 
   //! @return Pointer to a copy (virtual copy constructor)
-  virtual QwtWorkspaceBinData *copy() const;
+  QwtWorkspaceBinData *copy() const override;
 
   /// Return a new data object of the same type but with a new workspace
-  virtual QwtWorkspaceBinData *
-  copyWithNewSource(const Mantid::API::MatrixWorkspace &workspace) const;
+  QwtWorkspaceBinData *copyWithNewSource(
+      const Mantid::API::MatrixWorkspace &workspace) const override;
 
   //! @return Size of the data set
-  virtual size_t size() const;
+  size_t size() const override;
+  /// Return the label to use for the X axis
+  QString getXAxisLabel() const override;
+  /// Return the label to use for the Y axis
+  QString getYAxisLabel() const override;
 
+protected:
+  // Assignment operator.
+  QwtWorkspaceBinData &operator=(const QwtWorkspaceBinData &);
   /**
   Return the x value of data point i
   @param i :: Index
   @return x X value of data point i
   */
-  virtual double x(size_t i) const;
+  double getX(size_t i) const override;
   /**
   Return the y value of data point i
   @param i :: Index
   @return y Y value of data point i
   */
-  virtual double y(size_t i) const;
+  double getY(size_t i) const override;
 
   /// Returns the error of the i-th data point
-  double e(size_t i) const;
+  double getE(size_t i) const override;
   /// Returns the x position of the error bar for the i-th data point (bin)
-  double ex(size_t i) const;
-  /// Number of error bars to plot
-  size_t esize() const;
-
-  double getYMin() const;
-  double getYMax() const;
-  /// Return the label to use for the X axis
-  QString getXAxisLabel() const;
-  /// Return the label to use for the Y axis
-  QString getYAxisLabel() const;
-
-  /// Inform the data that it is to be plotted on a log y scale
-  void setLogScale(bool on);
-  bool logScale() const { return m_logScale; }
-  void saveLowestPositiveValue(const double v);
-
-  // Set offsets for and enables waterfall plots
-  void setXOffset(const double x);
-  void setYOffset(const double y);
-  void setWaterfallPlot(bool on);
-
-protected:
-  // Assignment operator (virtualized). MSVC not happy with compiler generated
-  // one
-  QwtWorkspaceBinData &
-  operator=(const QwtWorkspaceBinData &); // required by QwtData base class
+  double getEX(size_t i) const override;
 
 private:
   /// Initialize the object
@@ -91,26 +73,5 @@ private:
   QString m_xTitle;
   /// A title for the Y axis
   QString m_yTitle;
-
-  /// Indicates that the data is plotted on a log y scale
-  bool m_logScale;
-
-  /// lowest y value
-  double m_minY;
-
-  /// lowest positive y value
-  double m_minPositive;
-
-  /// highest y value
-  double m_maxY;
-
-  /// Indicates whether or not waterfall plots are enabled
-  bool m_isWaterfall;
-
-  /// x-axis offset for waterfall plots
-  double m_offsetX;
-
-  /// y-axis offset for waterfall plots
-  double m_offsetY;
 };
 #endif

@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/WeightedMeanOfWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 
@@ -13,16 +14,6 @@ using namespace Kernel;
 namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(WeightedMeanOfWorkspace)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-WeightedMeanOfWorkspace::WeightedMeanOfWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-WeightedMeanOfWorkspace::~WeightedMeanOfWorkspace() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -45,11 +36,11 @@ const std::string WeightedMeanOfWorkspace::category() const {
  */
 void WeightedMeanOfWorkspace::init() {
   this->declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
-  this->declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                         Direction::Output),
+                        "An output workspace.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -60,7 +51,7 @@ void WeightedMeanOfWorkspace::exec() {
   // Check if it is an event workspace
   EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (eventW != NULL) {
+  if (eventW != nullptr) {
     throw std::runtime_error(
         "WeightedMeanOfWorkspace cannot handle EventWorkspaces!");
   }

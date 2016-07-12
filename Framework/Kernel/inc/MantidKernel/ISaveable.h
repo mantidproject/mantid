@@ -2,10 +2,10 @@
 #define MANTID_KERNEL_ISAVEABLE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidKernel/MultiThreaded.h"
 #include <list>
 #include <vector>
 #include <algorithm>
+#include <mutex>
 #ifndef Q_MOC_RUN
 #include <boost/optional.hpp>
 #endif
@@ -47,7 +47,7 @@ class DLLExport ISaveable {
 public:
   ISaveable();
   ISaveable(const ISaveable &other);
-  virtual ~ISaveable(){};
+  virtual ~ISaveable() = default;
 
   ///** @return the position in the file where the data will be stored. This is
   /// used to optimize file writing. */
@@ -190,7 +190,7 @@ private:
   void clearBufferState();
 
   // the mutex to protect changes in this memory
-  Kernel::Mutex m_setter;
+  std::mutex m_setter;
 };
 
 } // namespace Kernel

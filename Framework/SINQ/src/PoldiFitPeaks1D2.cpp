@@ -52,10 +52,6 @@ RefinedRange::RefinedRange(double xStart, double xEnd,
   setRangeBorders(xStart, xEnd);
 }
 
-RefinedRange::RefinedRange(const RefinedRange &other)
-    : m_peaks(other.m_peaks), m_xStart(other.m_xStart), m_xEnd(other.m_xEnd),
-      m_width(other.m_width) {}
-
 double RefinedRange::getWidth() const { return m_width; }
 
 bool RefinedRange::operator<(const RefinedRange &other) const {
@@ -117,10 +113,9 @@ bool operator<(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs) {
 DECLARE_ALGORITHM(PoldiFitPeaks1D2)
 
 PoldiFitPeaks1D2::PoldiFitPeaks1D2()
-    : m_peaks(), m_profileTemplate(), m_fitplots(new WorkspaceGroup),
-      m_fwhmMultiples(1.0), m_maxRelativeFwhm(0.02) {}
-
-PoldiFitPeaks1D2::~PoldiFitPeaks1D2() {}
+    : m_peaks(), m_profileTemplate(),
+      m_fitplots(boost::make_shared<WorkspaceGroup>()), m_fwhmMultiples(1.0),
+      m_maxRelativeFwhm(0.02) {}
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PoldiFitPeaks1D2::name() const { return "PoldiFitPeaks1D"; }
@@ -133,8 +128,8 @@ const std::string PoldiFitPeaks1D2::category() const { return "SINQ\\Poldi"; }
 
 void PoldiFitPeaks1D2::init() {
   declareProperty(
-      new WorkspaceProperty<Workspace2D>("InputWorkspace", "",
-                                         Direction::Input),
+      make_unique<WorkspaceProperty<Workspace2D>>("InputWorkspace", "",
+                                                  Direction::Input),
       "An input workspace containing a POLDI auto-correlation spectrum.");
   boost::shared_ptr<BoundedValidator<double>> minFwhmPerDirection =
       boost::make_shared<BoundedValidator<double>>();
@@ -164,14 +159,14 @@ void PoldiFitPeaks1D2::init() {
                   "Peak function that will be fitted to all peaks.",
                   Direction::Input);
 
-  declareProperty(new WorkspaceProperty<TableWorkspace>("PoldiPeakTable", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "PoldiPeakTable", "", Direction::Input),
                   "A table workspace containing POLDI peak data.");
 
-  declareProperty(new WorkspaceProperty<TableWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
                       "OutputWorkspace", "RefinedPeakTable", Direction::Output),
                   "Output workspace with refined peak data.");
-  declareProperty(new WorkspaceProperty<Workspace>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "FitPlotsWorkspace", "FitPlots", Direction::Output),
                   "Plots of all peak fits.");
 }
@@ -182,7 +177,7 @@ void PoldiFitPeaks1D2::setPeakFunction(const std::string &peakFunction) {
 
 PoldiPeakCollection_sptr PoldiFitPeaks1D2::getInitializedPeakCollection(
     const DataObjects::TableWorkspace_sptr &peakTable) const {
-  PoldiPeakCollection_sptr peakCollection(new PoldiPeakCollection(peakTable));
+  auto peakCollection = boost::make_shared<PoldiPeakCollection>(peakTable);
   peakCollection->setProfileFunctionName(m_profileTemplate);
 
   return peakCollection;
@@ -227,16 +222,16 @@ std::vector<RefinedRange_sptr> PoldiFitPeaks1D2::getReducedRanges(
 
 API::IFunction_sptr
 PoldiFitPeaks1D2::getRangeProfile(const RefinedRange_sptr &range, int n) const {
-  CompositeFunction_sptr totalProfile(new CompositeFunction);
+  auto totalProfile = boost::make_shared<CompositeFunction>();
   totalProfile->initialize();
 
   std::vector<PoldiPeak_sptr> peaks = range->getPeaks();
-  for (auto it = peaks.begin(); it != peaks.end(); ++it) {
-    totalProfile->addFunction(getPeakProfile(*it));
+  for (auto &peak : peaks) {
+    totalProfile->addFunction(getPeakProfile(peak));
   }
 
   totalProfile->addFunction(FunctionFactory::Instance().createInitialized(
-      "name=Chebyshev,n=" + boost::lexical_cast<std::string>(n) + ",StartX=" +
+      "name=Chebyshev,n=" + std::to_string(n) + ",StartX=" +
       boost::lexical_cast<std::string>(range->getXStart()) + ",EndX=" +
       boost::lexical_cast<std::string>(range->getXEnd())));
 
@@ -277,19 +272,18 @@ PoldiFitPeaks1D2::getFwhmWidthRelation(IPeakFunction_sptr peakFunction) const {
 
 PoldiPeakCollection_sptr
 PoldiFitPeaks1D2::fitPeaks(const PoldiPeakCollection_sptr &peaks) {
-  g_log.information() << "Peaks to fit: " << peaks->peakCount() << std::endl;
+  g_log.information() << "Peaks to fit: " << peaks->peakCount() << '\n';
 
   std::vector<RefinedRange_sptr> rawRanges = getRefinedRanges(peaks);
   std::vector<RefinedRange_sptr> reducedRanges = getReducedRanges(rawRanges);
 
   g_log.information() << "Ranges used for fitting: " << reducedRanges.size()
-                      << std::endl;
+                      << '\n';
 
   Workspace2D_sptr dataWorkspace = getProperty("InputWorkspace");
   m_fitplots->removeAll();
 
-  for (size_t i = 0; i < reducedRanges.size(); ++i) {
-    RefinedRange_sptr currentRange = reducedRanges[i];
+  for (auto currentRange : reducedRanges) {
     int nMin = getBestChebyshevPolynomialDegree(dataWorkspace, currentRange);
 
     if (nMin > -1) {
@@ -354,7 +348,7 @@ int PoldiFitPeaks1D2::getBestChebyshevPolynomialDegree(
   } else {
     g_log.information() << "Chi^2 for range [" << range->getXStart() << " - "
                         << range->getXEnd() << "] is minimal at n = " << nMin
-                        << " with Chi^2 = " << chiSquareMin << std::endl;
+                        << " with Chi^2 = " << chiSquareMin << '\n';
   }
 
   return nMin;

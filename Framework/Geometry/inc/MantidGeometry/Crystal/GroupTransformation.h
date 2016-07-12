@@ -52,7 +52,7 @@ public:
   GroupTransformation(const MatrixVectorPair<double, V3R> &operation);
   GroupTransformation(const std::string &operationString);
 
-  virtual ~GroupTransformation() {}
+  virtual ~GroupTransformation() = default;
 
   Group operator()(const Group &other) const;
 

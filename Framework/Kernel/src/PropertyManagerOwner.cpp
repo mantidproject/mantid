@@ -36,9 +36,9 @@ operator=(const PropertyManagerOwner &po) {
 * exists
 *  @throw std::invalid_argument  if the property declared has an empty name.
 */
-void PropertyManagerOwner::declareProperty(Property *p,
+void PropertyManagerOwner::declareProperty(std::unique_ptr<Property> p,
                                            const std::string &doc) {
-  m_properties->declareProperty(p, doc);
+  m_properties->declareProperty(std::move(p), doc);
 }
 
 /** Set the ordered list of properties by one string of values, separated by
@@ -53,7 +53,7 @@ void PropertyManagerOwner::declareProperty(Property *p,
  */
 void PropertyManagerOwner::setProperties(
     const std::string &propertiesJson,
-    const std::set<std::string> &ignoreProperties) {
+    const std::unordered_set<std::string> &ignoreProperties) {
   m_properties->setProperties(propertiesJson, this, ignoreProperties);
 }
 
@@ -64,7 +64,7 @@ void PropertyManagerOwner::setProperties(
   */
 void PropertyManagerOwner::setProperties(
     const ::Json::Value &jsonValue,
-    const std::set<std::string> &ignoreProperties) {
+    const std::unordered_set<std::string> &ignoreProperties) {
   m_properties->setProperties(jsonValue, this, ignoreProperties);
 }
 
@@ -74,11 +74,10 @@ void PropertyManagerOwner::setProperties(
   @param ignoreProperties :: A set of names of any properties NOT to set
   from the propertiesArray
 */
-void PropertyManagerOwner::setPropertiesWithSimpleString(
+void PropertyManagerOwner::setPropertiesWithString(
     const std::string &propertiesString,
-    const std::set<std::string> &ignoreProperties) {
-  m_properties->setPropertiesWithSimpleString(propertiesString,
-                                              ignoreProperties);
+    const std::unordered_set<std::string> &ignoreProperties) {
+  m_properties->setPropertiesWithString(propertiesString, ignoreProperties);
 }
 
 /** Set the value of a property by string

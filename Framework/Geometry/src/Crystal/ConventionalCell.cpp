@@ -183,15 +183,10 @@ void ConventionalCell::init(const Kernel::DblMatrix &UB, ReducedCell &form_0,
  *            sides in increasing order.
  */
 void ConventionalCell::SetSidesIncreasing(Kernel::DblMatrix &UB) {
-  V3D a_dir;
-  V3D b_dir;
-  V3D c_dir;
-  OrientedLattice::GetABC(UB, a_dir, b_dir, c_dir);
 
-  std::vector<V3D> edges;
-  edges.push_back(a_dir);
-  edges.push_back(b_dir);
-  edges.push_back(c_dir);
+  std::vector<V3D> edges(3, V3D());
+  OrientedLattice::GetABC(UB, edges[0], edges[1], edges[2]);
+
   std::sort(edges.begin(), edges.end(), V3D::CompareMagnitude);
 
   V3D a = edges[0];

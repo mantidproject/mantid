@@ -84,7 +84,7 @@ public:
 
 private:
   std::vector<IPeakFunction_sptr>
-  getAllPeakFunctions(const std::set<std::string> &blackList) const {
+  getAllPeakFunctions(const std::unordered_set<std::string> &blackList) const {
     std::vector<IPeakFunction_sptr> peakFunctions;
 
     std::vector<std::string> registeredFunctions =
@@ -145,7 +145,7 @@ private:
 
   std::vector<IPeakFunction_sptr> m_peakFunctions;
   std::vector<ParameterSet> m_parameterSets;
-  std::set<std::string> m_blackList;
+  std::unordered_set<std::string> m_blackList;
 };
 
 #endif // IPEAKFUNCTIONINTENSITYTEST_H

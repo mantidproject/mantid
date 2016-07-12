@@ -23,15 +23,10 @@ DECLARE_ALGORITHM(ProcessDasNexusLog)
  */
 ProcessDasNexusLog::ProcessDasNexusLog() : Algorithm(), DeprecatedAlgorithm() {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ProcessDasNexusLog::~ProcessDasNexusLog() {}
-
 void ProcessDasNexusLog::init() {
   this->declareProperty(
-      new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "",
-                                                       Direction::InOut),
+      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::InOut),
       "The name of the [[EventWorkspace]] to filter events from.");
   this->declareProperty("LogToProcess", "",
                         boost::make_shared<MandatoryValidator<std::string>>(),
@@ -40,15 +35,16 @@ void ProcessDasNexusLog::init() {
       "ProcessedLog", "", boost::make_shared<MandatoryValidator<std::string>>(),
       "The name of the new sample log processed from DAS log.");
   this->declareProperty(
-      new API::FileProperty("OutputDirectory", "",
-                            API::FileProperty::Directory),
+      make_unique<API::FileProperty>("OutputDirectory", "",
+                                     API::FileProperty::Directory),
       "The directory for some other examination files to be written to.");
   this->declareProperty(
       "NumberOfOutputs", 4000,
       "Number of log entries to be written to a file for examination.");
-  this->declareProperty(new API::FileProperty("OutputLogFile", "",
-                                              API::FileProperty::OptionalSave),
-                        "The file name for the output data file. ");
+  this->declareProperty(
+      make_unique<API::FileProperty>("OutputLogFile", "",
+                                     API::FileProperty::OptionalSave),
+      "The file name for the output data file. ");
 
   return;
 }
@@ -63,21 +59,20 @@ void ProcessDasNexusLog::exec() {
 
   // 2. Check Input
   // 1. Get log
-  Kernel::Property *log(NULL);
+  Kernel::Property *log(nullptr);
   try {
     log = inWS->run().getProperty(inlogname);
   } catch (Exception::NotFoundError &) {
     // Will trigger non-existent log message below
   }
   if (!log) {
-    g_log.error() << "Log " << inlogname << " does not exist!" << std::endl;
+    g_log.error() << "Log " << inlogname << " does not exist!\n";
     throw std::invalid_argument("Non-existent log name");
   }
   Kernel::TimeSeriesProperty<double> *tslog =
       dynamic_cast<Kernel::TimeSeriesProperty<double> *>(log);
   if (!tslog) {
-    g_log.error() << "Log " << inlogname << " is not time series log"
-                  << std::endl;
+    g_log.error() << "Log " << inlogname << " is not time series log\n";
     throw std::invalid_argument("Log type error!");
   }
 
@@ -109,7 +104,7 @@ void ProcessDasNexusLog::addLog(API::MatrixWorkspace_sptr ws,
                                 std::vector<Kernel::DateAndTime> pulsetimes,
                                 std::vector<double> orderedtofs, bool docheck) {
   // 1. Do some static
-  g_log.notice() << "Vector size = " << timevec.size() << std::endl;
+  g_log.notice() << "Vector size = " << timevec.size() << '\n';
   double sum1dtms = 0.0; // sum(dt^2)
   double sum2dtms = 0.0; // sum(dt^2)
   size_t numinvert = 0;
@@ -154,21 +149,21 @@ void ProcessDasNexusLog::addLog(API::MatrixWorkspace_sptr ws,
   double stddt =
       sqrt(sum2dtms / static_cast<double>(timevec.size()) * 1.0E-12 - dt * dt);
 
-  g_log.notice() << "Normal   dt = " << numnormal << std::endl;
-  g_log.notice() << "Zero     dt = " << numsame << std::endl;
-  g_log.notice() << "Negative dt = " << numinvert << std::endl;
+  g_log.notice() << "Normal   dt = " << numnormal << '\n';
+  g_log.notice() << "Zero     dt = " << numsame << '\n';
+  g_log.notice() << "Negative dt = " << numinvert << '\n';
   g_log.notice() << "Avg d(T) = " << dt << " seconds +/- " << stddt
-                 << ",  Frequency = " << 1.0 / dt << std::endl;
+                 << ",  Frequency = " << 1.0 / dt << '\n';
   g_log.notice() << "d(T) (unit ms) is in range [" << mindtms << ", " << maxdtms
-                 << "]" << std::endl;
+                 << "]\n";
   g_log.notice() << "Number of d(T) 10% larger than average  = "
-                 << numdtabove10p << std::endl;
+                 << numdtabove10p << '\n';
   g_log.notice() << "Number of d(T) 10% smaller than average = "
-                 << numdtbelow10p << std::endl;
+                 << numdtbelow10p << '\n';
 
   g_log.notice() << "Size of timevec, pulsestimes, orderedtofs = "
                  << timevec.size() << ", " << pulsetimes.size() << ", "
-                 << orderedtofs.size() << std::endl;
+                 << orderedtofs.size() << '\n';
 
   if (docheck) {
     exportErrorLog(ws, timevec, pulsetimes, orderedtofs, 1 / (0.5 * 240.1));
@@ -177,8 +172,8 @@ void ProcessDasNexusLog::addLog(API::MatrixWorkspace_sptr ws,
 
   // 2. Add log
   auto newlog = new Kernel::TimeSeriesProperty<double>(logname);
-  for (size_t i = 0; i < timevec.size(); i++) {
-    newlog->addValue(timevec[i], unifylogvalue);
+  for (auto &time : timevec) {
+    newlog->addValue(time, unifylogvalue);
   }
   ws->mutableRun().addProperty(newlog, true);
 
@@ -193,11 +188,11 @@ void ProcessDasNexusLog::exportErrorLog(
     std::vector<Kernel::DateAndTime> pulsetimes,
     std::vector<double> orderedtofs, double dts) {
   std::string outputdir = getProperty("OutputDirectory");
-  if (outputdir[outputdir.size() - 1] != '/')
+  if (outputdir.back() != '/')
     outputdir += "/";
 
   std::string ofilename = outputdir + "errordeltatime.txt";
-  g_log.notice() << ofilename << std::endl;
+  g_log.notice() << ofilename << '\n';
   std::ofstream ofs;
   ofs.open(ofilename.c_str(), std::ios::out);
 
@@ -227,11 +222,11 @@ void ProcessDasNexusLog::exportErrorLog(
       int index2 = static_cast<int>(deltapulsetimeSec2 * 60);
 
       ofs << "Error d(T) = " << tempdts << "   vs   Correct d(T) = " << dts
-          << std::endl;
+          << '\n';
       ofs << index1 << "\t\t" << pulsetimes[i - 1].totalNanoseconds() << "\t\t"
-          << orderedtofs[i - 1] << std::endl;
+          << orderedtofs[i - 1] << '\n';
       ofs << index2 << "\t\t" << pulsetimes[i].totalNanoseconds() << "\t\t"
-          << orderedtofs[i] << std::endl;
+          << orderedtofs[i] << '\n';
     }
   }
 
@@ -265,7 +260,7 @@ void ProcessDasNexusLog::calDistributions(
 
   /* Skip output */
   for (size_t i = 0; i < x1.size(); i++)
-    g_log.notice() << i << "\t\t" << x1[i] << "\t\t" << y1[i] << std::endl;
+    g_log.notice() << i << "\t\t" << x1[i] << "\t\t" << y1[i] << '\n';
   /**/
 
   // 2. Calculate space distribution on error cases
@@ -273,8 +268,8 @@ void ProcessDasNexusLog::calDistributions(
   std::vector<size_t> y2;
 
   size_t numperiods = 100;
-  int64_t spanns = timevec[timevec.size() - 1].totalNanoseconds() -
-                   timevec[0].totalNanoseconds();
+  int64_t spanns =
+      timevec.back().totalNanoseconds() - timevec.front().totalNanoseconds();
   double timestepsec =
       static_cast<double>(spanns) * 1.0E-9 / static_cast<double>(numperiods);
 
@@ -302,7 +297,7 @@ void ProcessDasNexusLog::calDistributions(
       if (index < 0)
         throw std::runtime_error("Impossible to have index less than 0");
       if (index >= static_cast<int>(numperiods)) {
-        g_log.error() << "Logic error X" << std::endl;
+        g_log.error() << "Logic error X\n";
         index = static_cast<int>(numperiods) - 1;
       }
       y2[static_cast<size_t>(index)]++;
@@ -311,9 +306,9 @@ void ProcessDasNexusLog::calDistributions(
 
   /* Skip
   for (size_t i = 0; i < x2s.size(); i ++)
-    g_log.notice() << i << "\t\t" << x2s[i] << "\t\t" << y2[i] << std::endl;
+    g_log.notice() << i << "\t\t" << x2s[i] << "\t\t" << y2[i] << '\n';
     */
-  g_log.notice() << "total number of wrong dt = " << numbaddt << std::endl;
+  g_log.notice() << "total number of wrong dt = " << numbaddt << '\n';
 
   return;
 }
@@ -326,20 +321,19 @@ void ProcessDasNexusLog::checkLog(API::MatrixWorkspace_sptr ws,
   // 1. Get log
   Kernel::Property *log = ws->run().getProperty(logname);
   if (!log) {
-    g_log.error() << "Log " << logname << " does not exist!" << std::endl;
+    g_log.error() << "Log " << logname << " does not exist!\n";
     throw std::invalid_argument("Non-exising log name");
   }
   Kernel::TimeSeriesProperty<double> *tslog =
       dynamic_cast<Kernel::TimeSeriesProperty<double> *>(log);
   if (!tslog) {
-    g_log.error() << "Log " << logname << " is not time series log"
-                  << std::endl;
+    g_log.error() << "Log " << logname << " is not time series log\n";
     throw std::invalid_argument("Log type error!");
   }
 
   // 2. Survey
   std::vector<Kernel::DateAndTime> times = tslog->timesAsVector();
-  g_log.information() << "Entries of times = " << times.size() << std::endl;
+  g_log.information() << "Entries of times = " << times.size() << '\n';
   size_t countsame = 0;
   size_t countinverse = 0;
   for (size_t i = 1; i < times.size(); i++) {
@@ -353,23 +347,23 @@ void ProcessDasNexusLog::checkLog(API::MatrixWorkspace_sptr ws,
 
   // 3. Output
   Kernel::DateAndTime t0(ws->run().getProperty("run_start")->value());
-  Kernel::time_duration dts = times[0] - t0;
-  Kernel::time_duration dtf = times[times.size() - 1] - t0;
+  Kernel::time_duration dts = times.front() - t0;
+  Kernel::time_duration dtf = times.back() - t0;
   size_t f = times.size() - 1;
 
   g_log.information() << "Number of Equal Time Stamps    = " << countsame
-                      << std::endl;
+                      << '\n';
   g_log.information() << "Number of Inverted Time Stamps = " << countinverse
-                      << std::endl;
-  g_log.information() << "Run Start = " << t0.totalNanoseconds() << std::endl;
+                      << '\n';
+  g_log.information() << "Run Start = " << t0.totalNanoseconds() << '\n';
   g_log.information() << "First Log (Absolute Time, Relative Time): "
                       << times[0].totalNanoseconds() << ", "
                       << Kernel::DateAndTime::nanosecondsFromDuration(dts)
-                      << std::endl;
+                      << '\n';
   g_log.information() << "Last  Log (Absolute Time, Relative Time): "
                       << times[f].totalNanoseconds() << ", "
                       << Kernel::DateAndTime::nanosecondsFromDuration(dtf)
-                      << std::endl;
+                      << '\n';
 
   return;
 }
@@ -402,11 +396,11 @@ void ProcessDasNexusLog::convertToAbsoluteTime(
     if (tnow > prevtime) {
       // (a) Process previous logs
       std::sort(tofs.begin(), tofs.end());
-      for (size_t j = 0; j < tofs.size(); j++) {
+      for (double tof : tofs) {
         Kernel::DateAndTime temptime =
-            prevtime + static_cast<int64_t>(tofs[j] * 100);
+            prevtime + static_cast<int64_t>(tof * 100);
         abstimevec.push_back(temptime);
-        orderedtofs.push_back(tofs[j]);
+        orderedtofs.push_back(tof);
       }
       // (b) Clear
       tofs.clear();
@@ -422,11 +416,10 @@ void ProcessDasNexusLog::convertToAbsoluteTime(
   if (!tofs.empty()) {
     // (a) Process previous logs: note value is in unit of 100 nano-second
     std::sort(tofs.begin(), tofs.end());
-    for (size_t j = 0; j < tofs.size(); j++) {
-      Kernel::DateAndTime temptime =
-          prevtime + static_cast<int64_t>(tofs[j] * 100);
+    for (double tof : tofs) {
+      Kernel::DateAndTime temptime = prevtime + static_cast<int64_t>(tof * 100);
       abstimevec.push_back(temptime);
-      orderedtofs.push_back(tofs[j]);
+      orderedtofs.push_back(tof);
     }
   } else {
     throw std::runtime_error("Impossible for this to happen!");
@@ -455,8 +448,7 @@ void ProcessDasNexusLog::writeLogtoFile(API::MatrixWorkspace_sptr ws,
   // 2. Write out
   std::ofstream ofs;
   ofs.open(outputfilename.c_str(), std::ios::out);
-  ofs << "# Absolute Time (nanosecond)\tPulse Time (nanosecond)\tTOF (ms)"
-      << std::endl;
+  ofs << "# Absolute Time (nanosecond)\tPulse Time (nanosecond)\tTOF (ms)\n";
 
   Kernel::DateAndTime prevtime(0);
   std::vector<double> tofs;
@@ -467,11 +459,11 @@ void ProcessDasNexusLog::writeLogtoFile(API::MatrixWorkspace_sptr ws,
     if (tnow > prevtime) {
       // (a) Process previous logs
       std::sort(tofs.begin(), tofs.end());
-      for (size_t j = 0; j < tofs.size(); j++) {
+      for (double tof : tofs) {
         Kernel::DateAndTime temptime =
-            prevtime + static_cast<int64_t>(tofs[j] * 100);
+            prevtime + static_cast<int64_t>(tof * 100);
         ofs << temptime.totalNanoseconds() << "\t" << tnow.totalNanoseconds()
-            << "\t" << tofs[j] * 0.1 << std::endl;
+            << "\t" << tof * 0.1 << '\n';
       }
       // (b) Clear
       tofs.clear();
@@ -486,11 +478,10 @@ void ProcessDasNexusLog::writeLogtoFile(API::MatrixWorkspace_sptr ws,
   if (!tofs.empty()) {
     // (a) Process previous logs: note value is in unit of 100 nano-second
     std::sort(tofs.begin(), tofs.end());
-    for (size_t j = 0; j < tofs.size(); j++) {
-      Kernel::DateAndTime temptime =
-          prevtime + static_cast<int64_t>(tofs[j] * 100);
+    for (double tof : tofs) {
+      Kernel::DateAndTime temptime = prevtime + static_cast<int64_t>(tof * 100);
       ofs << temptime.totalNanoseconds() << "\t" << prevtime.totalNanoseconds()
-          << "\t" << tofs[j] * 0.1 << std::endl;
+          << "\t" << tof * 0.1 << '\n';
     }
   } else {
     throw std::runtime_error("Impossible for this to happen!");

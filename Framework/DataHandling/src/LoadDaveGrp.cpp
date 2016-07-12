@@ -4,6 +4,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
@@ -50,9 +51,7 @@ int LoadDaveGrp::confidence(Kernel::FileDescriptor &descriptor) const {
 
   // Third line is a comment: #
   std::getline(descriptor.data(), curline);
-  if (curline.substr(0, 1) == "#") {
-    daveGrp = daveGrp && true;
-  } else
+  if (curline.substr(0, 1) != "#")
     return 0;
 
   // Fourth line is an integer
@@ -70,17 +69,13 @@ int LoadDaveGrp::confidence(Kernel::FileDescriptor &descriptor) const {
 }
 
 void LoadDaveGrp::init() {
-  std::vector<std::string> exts;
-  exts.push_back(".grp");
-  exts.push_back(".sqe");
-  exts.push_back(".txt");
-  exts.push_back(".dat");
+  std::vector<std::string> exts{".grp", ".sqe", ".txt", ".dat"};
 
-  this->declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
-      "A DAVE grouped ASCII file");
-  this->declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
-                                                     Kernel::Direction::Output),
+  this->declareProperty(Kernel::make_unique<API::FileProperty>(
+                            "Filename", "", API::FileProperty::Load, exts),
+                        "A DAVE grouped ASCII file");
+  this->declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                            "OutputWorkspace", "", Kernel::Direction::Output),
                         "The name of the workspace that will be created.");
 
   // Extract the current contents of the UnitFactory to be the allowed values
@@ -97,19 +92,17 @@ void LoadDaveGrp::init() {
                         "The name of the units for the Y-Axis (must be one of "
                         "those registered in "
                         "the Unit Factory)");
-  this->declareProperty(new Kernel::PropertyWithValue<bool>(
+  this->declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
                             "IsMicroEV", false, Kernel::Direction::Input),
                         "Original file is in units of micro-eV for DeltaE");
   this->declareProperty(
-      new Kernel::PropertyWithValue<bool>("ConvertToHistogram", false,
-                                          Kernel::Direction::Input),
+      Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+          "ConvertToHistogram", false, Kernel::Direction::Input),
       "Convert output workspace to histogram data.");
 }
 
 void LoadDaveGrp::exec() {
   const std::string filename = this->getProperty("Filename");
-
-  int yLength = 0;
 
   auto xAxis = new MantidVec();
   auto yAxis = new MantidVec();
@@ -123,18 +116,16 @@ void LoadDaveGrp::exec() {
       // Size of x axis
       this->getAxisLength(this->xLength);
       // Size of y axis
-      this->getAxisLength(yLength);
+      this->getAxisLength(this->nGroups);
     } catch (boost::bad_lexical_cast &) {
       throw std::runtime_error(
           "LoadDaveGrp: Failed to parse axis length from file.");
     }
 
-    // This is also the number of groups (spectra)
-    this->nGroups = yLength;
     // Read in the x axis values
     this->getAxisValues(xAxis, static_cast<std::size_t>(this->xLength));
     // Read in the y axis values
-    this->getAxisValues(yAxis, static_cast<std::size_t>(yLength));
+    this->getAxisValues(yAxis, static_cast<std::size_t>(this->nGroups));
     // Read in the data
     this->getData(data, errors);
   }
@@ -152,16 +143,16 @@ void LoadDaveGrp::exec() {
   // Create workspace
   API::MatrixWorkspace_sptr outputWorkspace =
       boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-          API::WorkspaceFactory::Instance().create("Workspace2D", this->nGroups,
-                                                   this->xLength, yLength));
+          API::WorkspaceFactory::Instance().create(
+              "Workspace2D", this->nGroups, this->xLength, this->xLength));
   // Force the workspace to be a distribution
-  outputWorkspace->isDistribution(true);
+  outputWorkspace->setDistribution(true);
 
   // Set the x-axis units
   outputWorkspace->getAxis(0)->unit() =
       Kernel::UnitFactory::Instance().create(this->getProperty("XAxisUnits"));
 
-  API::Axis *const verticalAxis = new API::NumericAxis(yLength);
+  API::Axis *const verticalAxis = new API::NumericAxis(this->nGroups);
   // Set the y-axis units
   verticalAxis->unit() =
       Kernel::UnitFactory::Instance().create(this->getProperty("YAxisUnits"));

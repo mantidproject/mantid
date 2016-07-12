@@ -136,10 +136,10 @@ public:
   //  CompAssembly * createTestParAssembly()
   //  {
   //    boost::shared_ptr<CompAssembly> bank =
-  //    boost::shared_ptr<CompAssembly>(new CompAssembly("Bank"));
-  //    m_det1 = boost::shared_ptr<Component>(new Component("Det1Name"));
-  //    m_det2 = boost::shared_ptr<Component>(new Component("Det2Name"));
-  //    m_det3 = boost::shared_ptr<Component>(new Component("Det3Name"));
+  //    boost::make_shared<CompAssembly>("Bank");
+  //    m_det1 = boost::make_shared<Component>("Det1Name");
+  //    m_det2 = boost::make_shared<Component>("Det2Name");
+  //    m_det3 = boost::make_shared<Component>("Det3Name");
   //    bank->add(det1.get());
   //    bank->add(det2.get());
   //    bank->add(det3.get());

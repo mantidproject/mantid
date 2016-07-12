@@ -43,16 +43,18 @@ public:
   ReflSearchModel(const ReflTransferStrategy &transferMethod,
                   Mantid::API::ITableWorkspace_sptr tableWorkspace,
                   const std::string &instrument);
-  virtual ~ReflSearchModel();
+  ~ReflSearchModel() override;
   // row and column counts
-  int rowCount(const QModelIndex &parent = QModelIndex()) const;
-  int columnCount(const QModelIndex &parent = QModelIndex()) const;
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   // get data from a cell
-  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+  QVariant data(const QModelIndex &index,
+                int role = Qt::DisplayRole) const override;
   // get header data for the table
-  QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+  QVariant headerData(int section, Qt::Orientation orientation,
+                      int role) const override;
   // get flags for a cell
-  Qt::ItemFlags flags(const QModelIndex &index) const;
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
   /// maps each run number to why it was unusable in the process table
   std::vector<std::map<std::string, std::string>> m_errors;
 

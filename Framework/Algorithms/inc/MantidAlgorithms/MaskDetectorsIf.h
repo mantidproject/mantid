@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/System.h"
 #include <boost/function.hpp>
 
@@ -46,28 +47,24 @@ National Laboratory & European Spallation Source
  */
 class DLLExport MaskDetectorsIf : public API::Algorithm {
 public:
-  /// Default constructor
-  MaskDetectorsIf();
-  /// Destructor
-  virtual ~MaskDetectorsIf();
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "MaskDetectorsIf"; }
+  const std::string name() const override { return "MaskDetectorsIf"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Adjusts the selected field for a CalFile depending on the values "
            "in the input workspace.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\Masking;Transforms\\Masking";
   }
 
 private:
   /// Returns an allowed values statement to insert into decumentation
-  std::string allowedValuesStatement(std::vector<std::string> vals);
+  std::string allowedValuesStatement(const std::vector<std::string> &vals);
   // Typedef for det to value map
   typedef std::unordered_map<detid_t, bool> udet2valuem;
   /// A map of detector numbers to mask boolean
@@ -79,15 +76,15 @@ private:
   /// The input workspace
   API::MatrixWorkspace_const_sptr inputW;
   /// The Value parameter
-  double value;
+  double value = 0.0;
   /// A comparator function
   boost::function<bool(double, double)> compar_f;
   /// Whether select is on or off
-  bool select_on;
+  bool select_on = false;
   /// Overidden init
-  void init();
+  void init() override;
   /// Overidden exec
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithm

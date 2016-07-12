@@ -35,43 +35,37 @@ namespace DataObjects {
 class DLLExport PeakShapeEllipsoid : public PeakShapeBase {
 public:
   /// Constructor
-  PeakShapeEllipsoid(std::vector<Mantid::Kernel::V3D> directions,
-                     std::vector<double> abcRadius,
-                     std::vector<double> abcBackgroundInnerRadius,
-                     std::vector<double> abcBackgroundOuterRadius,
+  PeakShapeEllipsoid(const std::vector<Mantid::Kernel::V3D> &directions,
+                     const std::vector<double> &abcRadii,
+                     const std::vector<double> &abcRadiiBackgroundInner,
+                     const std::vector<double> &abcRadiiBackgroundOuter,
                      Kernel::SpecialCoordinateSystem frame,
                      std::string algorithmName = std::string(),
                      int algorithmVersion = -1);
-  /// Copy constructor
-  PeakShapeEllipsoid(const PeakShapeEllipsoid &other);
-  /// Assignment operator
-  PeakShapeEllipsoid &operator=(const PeakShapeEllipsoid &other);
   /// Equals operator
   bool operator==(const PeakShapeEllipsoid &other) const;
-  /// Destructor
-  virtual ~PeakShapeEllipsoid();
   /// Get radii
-  std::vector<double> abcRadii() const;
+  const std::vector<double> &abcRadii() const;
   /// Get background inner radii
-  std::vector<double> abcRadiiBackgroundInner() const;
+  const std::vector<double> &abcRadiiBackgroundInner() const;
   /// Get background outer radii
-  std::vector<double> abcRadiiBackgroundOuter() const;
+  const std::vector<double> &abcRadiiBackgroundOuter() const;
   /// Get ellipsoid directions
-  std::vector<Mantid::Kernel::V3D> directions() const;
+  const std::vector<Mantid::Kernel::V3D> &directions() const;
   /// Get ellipsoid directions in a specified frame
   std::vector<Kernel::V3D> getDirectionInSpecificFrame(
       Kernel::Matrix<double> &invertedGoniometerMatrix) const;
 
   /// PeakShape interface
-  std::string toJSON() const;
+  std::string toJSON() const override;
   /// Clone ellipsoid
-  PeakShapeEllipsoid *clone() const;
+  PeakShapeEllipsoid *clone() const override;
   /// Get the peak shape
-  std::string shapeName() const;
+  std::string shapeName() const override;
 
   /// PeakBase interface
-  double radius() const;
-
+  boost::optional<double>
+  radius(RadiusType type = RadiusType::Radius) const override;
   static const std::string ellipsoidShapeName();
 
 private:

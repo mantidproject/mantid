@@ -22,22 +22,22 @@ public:
   ProxyCompositePeaksPresenter(
       boost::shared_ptr<CompositePeaksPresenter> compositePresenter);
   ProxyCompositePeaksPresenter();
-  ~ProxyCompositePeaksPresenter();
+  ~ProxyCompositePeaksPresenter() override;
   size_t size() const;
   void update();
 
   void
-  setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-                      QColor);
+  setForegroundColor(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
+                     PeakViewColor);
   /// Change the background representation for the peaks of this workspace
   void
-  setBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-                      QColor);
+  setBackgroundColor(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
+                     PeakViewColor);
   /// Get the foreground colour corresponding to the workspace
-  QColor getForegroundColour(
+  PeakViewColor getForegroundPeakViewColor(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
   /// Get the background colour corresponding to the workspace
-  QColor getBackgroundColour(
+  PeakViewColor getBackgroundPeakViewColor(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
   /// Determine wheter the background is shown or not.
   bool getShowBackground(
@@ -68,11 +68,12 @@ public:
   bool getIsHidden(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) const;
   /// Perform a requested update.
-  void performUpdate();
+  void performUpdate() override;
   /// Perform a peaks workspace replacement
-  void updatePeaksWorkspace(
-      const std::string &toName,
-      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace);
+  void
+  updatePeaksWorkspace(const std::string &toName,
+                       boost::shared_ptr<const Mantid::API::IPeaksWorkspace>
+                           toWorkspace) override;
   /// Register an updateable view
   void registerView(UpdateableOnDemand *view);
   /// Get optional zoomed peak presenter.
@@ -80,9 +81,11 @@ public:
   /// Get optional zoomed peak index.
   int getZoomedPeakIndex() const;
   /// Set the edit mode.
-  void editCommand(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
+  void editCommand(EditMode editMode,
+                   boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
   /// Can we add HKL peaks to this workspace.
-  bool hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
+  bool
+  hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
 
 private:
   /// Wrapped composite to delegate to.

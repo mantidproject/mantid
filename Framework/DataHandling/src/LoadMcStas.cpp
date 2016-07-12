@@ -27,16 +27,6 @@ using namespace DataObjects;
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStas)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadMcStas::LoadMcStas() : m_countNumWorkspaceAdded(1) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadMcStas::~LoadMcStas() {}
-
-//----------------------------------------------------------------------------------------------
 // Algorithm's name for identification. @see Algorithm::name
 const std::string LoadMcStas::name() const { return "LoadMcStas"; }
 
@@ -52,12 +42,13 @@ const std::string LoadMcStas::category() const { return "DataHandling\\Nexus"; }
 /** Initialize the algorithm's properties.
  */
 void LoadMcStas::init() {
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".h5", ".nxs"}),
-      "The name of the Nexus file to load");
+  const std::vector<std::string> exts{".h5", ".nxs"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
+                  "The name of the Nexus file to load");
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
   // added to allow control of errorbars
   declareProperty(
@@ -73,7 +64,7 @@ void LoadMcStas::init() {
 void LoadMcStas::exec() {
 
   std::string filename = getPropertyValue("Filename");
-  g_log.debug() << "Opening file " << filename << std::endl;
+  g_log.debug() << "Opening file " << filename << '\n';
 
   ::NeXus::File nxFile(filename);
   auto entries = nxFile.getEntries();
@@ -97,13 +88,13 @@ void LoadMcStas::exec() {
     std::map<std::string, std::string> histogramEntries;
 
     // populate eventEntries and histogramEntries
-    for (auto eit = dataEntries.begin(); eit != dataEntries.end(); ++eit) {
-      std::string dataName = eit->first;
-      std::string dataType = eit->second;
+    for (auto &dataEntry : dataEntries) {
+      std::string dataName = dataEntry.first;
+      std::string dataType = dataEntry.second;
       if (dataName == "content_nxs" || dataType != "NXdata")
         continue; // can be removed if sure no Nexus files contains
                   // "content_nxs"
-      g_log.debug() << "Opening " << dataName << "   " << dataType << std::endl;
+      g_log.debug() << "Opening " << dataName << "   " << dataType << '\n';
 
       // open second level entry
       nxFile.openGroup(dataName, dataType);
@@ -116,19 +107,18 @@ void LoadMcStas::exec() {
 
       auto nxdataEntries = nxFile.getEntries();
 
-      for (auto nit = nxdataEntries.begin(); nit != nxdataEntries.end();
-           ++nit) {
-        if (nit->second == "NXparameters")
+      for (auto &nxdataEntry : nxdataEntries) {
+        if (nxdataEntry.second == "NXparameters")
           continue;
-        nxFile.openData(nit->first);
+        nxFile.openData(nxdataEntry.first);
         if (nxFile.hasAttr("long_name")) {
           std::string nameAttrValue;
           nxFile.getAttr("long_name", nameAttrValue);
 
           if (nameAttrValue.find("Neutron_ID") != std::string::npos) {
-            eventEntries[eit->first] = eit->second;
+            eventEntries[dataEntry.first] = dataEntry.second;
           } else {
-            histogramEntries[eit->first] = eit->second;
+            histogramEntries[dataEntry.first] = dataEntry.second;
           }
         }
         nxFile.closeData();
@@ -153,7 +143,7 @@ void LoadMcStas::exec() {
 } // LoadMcStas::exec()
 
 /**
- * Return the confidence with with this algorithm can load the file
+ * Read Event Data
  * @param eventEntries map of the file entries that have events
  * @param outputGroup pointer to the workspace group
  * @param nxFile Reads data from inside first first top entry
@@ -161,6 +151,7 @@ void LoadMcStas::exec() {
 void LoadMcStas::readEventData(
     const std::map<std::string, std::string> &eventEntries,
     WorkspaceGroup_sptr &outputGroup, ::NeXus::File &nxFile) {
+
   std::string filename = getPropertyValue("Filename");
   auto entries = nxFile.getEntries();
   bool errorBarsSetTo1 = getProperty("ErrorBarsSetTo1");
@@ -203,7 +194,7 @@ void LoadMcStas::readEventData(
           InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
       // Really create the instrument
-      instrument = parser.parseXML(NULL);
+      instrument = parser.parseXML(nullptr);
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
@@ -211,7 +202,7 @@ void LoadMcStas::readEventData(
     // Loader should not stop if there is no IDF.xml
     g_log.warning()
         << "\nCould not find the instrument description in the Nexus file:"
-        << filename << " Ignore evntdata from data file" << std::endl;
+        << filename << " Ignore evntdata from data file\n";
     return;
   }
   // Finished reading Instrument. Then open new data folder again
@@ -233,9 +224,9 @@ void LoadMcStas::readEventData(
   std::vector<detid_t> detIDs = instrument->getDetectorIDs();
 
   for (size_t i = 0; i < instrument->getNumberDetectors(); i++) {
-    eventWS->getEventList(i).addDetectorID(detIDs[i]);
+    eventWS->getSpectrum(i).addDetectorID(detIDs[i]);
     // spectrum number are treated as equal to detector IDs for McStas data
-    eventWS->getEventList(i).setSpectrumNo(detIDs[i]);
+    eventWS->getSpectrum(i).setSpectrumNo(detIDs[i]);
   }
   // the one is here for the moment for backward compatibility
   eventWS->rebuildSpectraMapping(true);
@@ -247,9 +238,9 @@ void LoadMcStas::readEventData(
 
   const size_t numEventEntries = eventEntries.size();
   Progress progEntries(this, progressFractionInitial, 1.0, numEventEntries * 2);
-  for (auto eit = eventEntries.begin(); eit != eventEntries.end(); ++eit) {
-    std::string dataName = eit->first;
-    std::string dataType = eit->second;
+  for (const auto &eventEntry : eventEntries) {
+    const std::string &dataName = eventEntry.first;
+    const std::string &dataType = eventEntry.second;
 
     // open second level entry
     nxFile.openGroup(dataName, dataType);
@@ -274,17 +265,16 @@ void LoadMcStas::readEventData(
     ::NeXus::Info id_info = nxFile.getInfo();
     if (id_info.dims.size() != 2) {
       g_log.error() << "Event data in McStas nexus file not loaded. Expected "
-                       "event data block to be two dimensional" << std::endl;
+                       "event data block to be two dimensional\n";
       return;
     }
     int64_t nNeutrons = id_info.dims[0];
     int64_t numberOfDataColumn = id_info.dims[1];
     if (nNeutrons && numberOfDataColumn != 6) {
-      g_log.error() << "Event data in McStas nexus file expecting 6 columns"
-                    << std::endl;
+      g_log.error() << "Event data in McStas nexus file expecting 6 columns\n";
       return;
     }
-    if (isAnyNeutrons == false && nNeutrons > 0)
+    if (!isAnyNeutrons && nNeutrons > 0)
       isAnyNeutrons = true;
 
     std::vector<int64_t> start(2);
@@ -347,18 +337,18 @@ void LoadMcStas::readEventData(
             detIDtoWSindex_map.find(detectorID)->second;
 
         int64_t pulse_time = 0;
-        // eventWS->getEventList(workspaceIndex) +=
+        // eventWS->getSpectrum(workspaceIndex) +=
         // TofEvent(detector_time,pulse_time);
-        // eventWS->getEventList(workspaceIndex) += TofEvent(detector_time);
+        // eventWS->getSpectrum(workspaceIndex) += TofEvent(detector_time);
         // The following line puts the events into the weighted event instance
         // Originally this was coded so the error squared is 1 it should be
         // data[numberOfDataColumn * in]*data[numberOfDataColumn * in]
         // introduced flag to allow old usage
         if (errorBarsSetTo1) {
-          eventWS->getEventList(workspaceIndex) += WeightedEvent(
+          eventWS->getSpectrum(workspaceIndex) += WeightedEvent(
               detector_time, pulse_time, data[numberOfDataColumn * in], 1.0);
         } else {
-          eventWS->getEventList(workspaceIndex) += WeightedEvent(
+          eventWS->getSpectrum(workspaceIndex) += WeightedEvent(
               detector_time, pulse_time, data[numberOfDataColumn * in],
               data[numberOfDataColumn * in] * data[numberOfDataColumn * in]);
         }
@@ -375,15 +365,7 @@ void LoadMcStas::readEventData(
   // 2 bins is the standard. However for McStas simulation data it may make
   // sense to
   // increase this number for better initial visual effect
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &xRef = axis.access();
-  xRef.resize(2, 0.0);
-  // if ( nNeutrons > 0)
-  if (isAnyNeutrons) {
-    xRef[0] = shortestTOF - 1; // Just to make sure the bins hold it all
-    xRef[1] = longestTOF + 1;
-  }
-  // Set the binning axis
+  auto axis = HistogramData::BinEdges{shortestTOF - 1, longestTOF + 1};
   eventWS->setAllX(axis);
 
   // ensure that specified name is given to workspace (eventWS) when added to
@@ -391,10 +373,9 @@ void LoadMcStas::readEventData(
   std::string nameOfGroupWS = getProperty("OutputWorkspace");
   std::string nameUserSee = std::string("EventData_") + nameOfGroupWS;
   std::string extraProperty =
-      "Outputworkspace_dummy_" +
-      boost::lexical_cast<std::string>(m_countNumWorkspaceAdded);
-  declareProperty(new WorkspaceProperty<Workspace>(extraProperty, nameUserSee,
-                                                   Direction::Output));
+      "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+      extraProperty, nameUserSee, Direction::Output));
   setProperty(extraProperty, boost::static_pointer_cast<Workspace>(eventWS));
   m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
                               // unique
@@ -403,12 +384,10 @@ void LoadMcStas::readEventData(
 }
 
 /**
- * Return the confidence with with this algorithm can load the file
+ * Read histogram data
  * @param histogramEntries map of the file entries that have histogram
  * @param outputGroup pointer to the workspace group
  * @param nxFile Reads data from inside first first top entry
- * @returns An integer specifying the confidence level. 0 indicates it will not
- * be used
  */
 void LoadMcStas::readHistogramData(
     const std::map<std::string, std::string> &histogramEntries,
@@ -416,10 +395,9 @@ void LoadMcStas::readHistogramData(
 
   std::string nameAttrValueYLABEL;
 
-  for (auto eit = histogramEntries.begin(); eit != histogramEntries.end();
-       ++eit) {
-    std::string dataName = eit->first;
-    std::string dataType = eit->second;
+  for (const auto &histogramEntry : histogramEntries) {
+    const std::string &dataName = histogramEntry.first;
+    const std::string &dataType = histogramEntry.second;
 
     // open second level entry
     nxFile.openGroup(dataName, dataType);
@@ -435,20 +413,20 @@ void LoadMcStas::readHistogramData(
     // Find the axis names
     auto nxdataEntries = nxFile.getEntries();
     std::string axis1Name, axis2Name;
-    for (auto nit = nxdataEntries.begin(); nit != nxdataEntries.end(); ++nit) {
-      if (nit->second == "NXparameters")
+    for (auto &nxdataEntry : nxdataEntries) {
+      if (nxdataEntry.second == "NXparameters")
         continue;
-      if (nit->first == "ncount")
+      if (nxdataEntry.first == "ncount")
         continue;
-      nxFile.openData(nit->first);
+      nxFile.openData(nxdataEntry.first);
 
       if (nxFile.hasAttr("axis")) {
         int axisNo(0);
         nxFile.getAttr("axis", axisNo);
         if (axisNo == 1)
-          axis1Name = nit->first;
+          axis1Name = nxdataEntry.first;
         else if (axisNo == 2)
-          axis2Name = nit->first;
+          axis2Name = nxdataEntry.first;
         else
           throw std::invalid_argument("Unknown axis number");
       }
@@ -467,7 +445,7 @@ void LoadMcStas::readHistogramData(
     const size_t axis1Length = axis1Values.size();
     const size_t axis2Length = axis2Values.size();
     g_log.debug() << "Axis lengths=" << axis1Length << " " << axis2Length
-                  << std::endl;
+                  << '\n';
 
     // Require "data" field
     std::vector<double> data;
@@ -479,7 +457,7 @@ void LoadMcStas::readHistogramData(
       nxFile.readData<double>("errors", errors);
     } catch (::NeXus::Exception &) {
       g_log.information() << "Field " << dataName
-                          << " contains no error information." << std::endl;
+                          << " contains no error information.\n";
     }
 
     // close second level entry
@@ -490,14 +468,14 @@ void LoadMcStas::readHistogramData(
     Axis *axis1 = ws->getAxis(0);
     axis1->title() = axis1Name;
     // Set caption
-    boost::shared_ptr<Units::Label> lblUnit(new Units::Label);
+    auto lblUnit = boost::make_shared<Units::Label>();
     lblUnit->setLabel(axis1Name, "");
     axis1->unit() = lblUnit;
 
     Axis *axis2 = new NumericAxis(axis2Length);
     axis2->title() = axis2Name;
     // Set caption
-    lblUnit = boost::shared_ptr<Units::Label>(new Units::Label);
+    lblUnit = boost::make_shared<Units::Label>();
     lblUnit->setLabel(axis2Name, "");
     axis2->unit() = lblUnit;
 
@@ -534,10 +512,9 @@ void LoadMcStas::readHistogramData(
     std::string nameOfGroupWS = getProperty("OutputWorkspace");
     std::string nameUserSee = nameAttrValueTITLE + "_" + nameOfGroupWS;
     std::string extraProperty =
-        "Outputworkspace_dummy_" +
-        boost::lexical_cast<std::string>(m_countNumWorkspaceAdded);
-    declareProperty(new WorkspaceProperty<Workspace>(extraProperty, nameUserSee,
-                                                     Direction::Output));
+        "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
+    declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+        extraProperty, nameUserSee, Direction::Output));
     setProperty(extraProperty, boost::static_pointer_cast<Workspace>(ws));
     m_countNumWorkspaceAdded++; // need to increment to ensure extraProperty are
                                 // unique

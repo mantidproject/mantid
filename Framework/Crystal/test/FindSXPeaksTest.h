@@ -297,7 +297,7 @@ public:
 
   FindSXPeaksTestPerformance() : m_nHistograms(5000) {}
 
-  void setUp() {
+  void setUp() override {
     m_workspace2D =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             m_nHistograms, 10);
@@ -317,7 +317,7 @@ public:
 
     IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
-    std::cout << "Number of Peaks Found: " << result->rowCount() << std::endl;
+    std::cout << "Number of Peaks Found: " << result->rowCount() << '\n';
     TSM_ASSERT("Should have found many peaks!", 0 < result->rowCount());
   }
 };

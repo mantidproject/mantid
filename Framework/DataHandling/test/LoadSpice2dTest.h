@@ -9,6 +9,7 @@
 
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -104,9 +105,6 @@ public:
     // check timer
     TS_ASSERT_DELTA(ws2d->dataY(1)[0], 3600.0, tolerance);
     TS_ASSERT_DELTA(ws2d->dataE(1)[0], 0.0, tolerance);
-
-    // First non-monitor spectrum is detector ID 1 million
-    TS_ASSERT_EQUALS(ws2d->getDetector(0 + nmon)->getID(), 1000000);
 
     // Check instrument
     //----------------------------------------------------------------------

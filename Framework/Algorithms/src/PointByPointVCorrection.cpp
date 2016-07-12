@@ -2,7 +2,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/PointByPointVCorrection.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/VectorHelper.h"
+
 #include <cfloat>
 #include <cmath>
 #include <numeric>
@@ -20,16 +25,18 @@ using namespace API;
 PointByPointVCorrection::PointByPointVCorrection() : Algorithm() {}
 
 // Destructor
-PointByPointVCorrection::~PointByPointVCorrection() {}
+PointByPointVCorrection::~PointByPointVCorrection() = default;
 
 void PointByPointVCorrection::init() {
-  declareProperty(new WorkspaceProperty<>("InputW1", "", Direction::Input),
-                  "Name of the Sample workspace.");
-  declareProperty(new WorkspaceProperty<>("InputW2", "", Direction::Input),
-                  "Name of the Vanadium workspace.");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Name of the output workspace.");
+      make_unique<WorkspaceProperty<>>("InputW1", "", Direction::Input),
+      "Name of the Sample workspace.");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("InputW2", "", Direction::Input),
+      "Name of the Vanadium workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Name of the output workspace.");
 }
 
 void PointByPointVCorrection::exec() {
@@ -110,9 +117,9 @@ void PointByPointVCorrection::exec() {
     //       builds which caused the unit tests
     //       to sometimes fail.  Maybe this is some compiler bug to do with
     //       using bind2nd within the parrallel macros.
-    for (auto rY = resultY.begin(); rY != resultY.end(); ++rY) {
-      *rY *= factor; // Now result is s_i/v_i*Dlam_i*(sum_i s_i)/(sum_i
-                     // S_i/v_i*Dlam_i)
+    for (double &rY : resultY) {
+      rY *= factor; // Now result is s_i/v_i*Dlam_i*(sum_i s_i)/(sum_i
+                    // S_i/v_i*Dlam_i)
     }
 
     // Finally get the normalized errors
@@ -128,7 +135,7 @@ void PointByPointVCorrection::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   outputWS->setYUnitLabel("Counts normalised to a vanadium");
-  outputWS->isDistribution(false);
+  outputWS->setDistribution(false);
 }
 
 /** Checks that the axes of the input workspaces match and creates the output

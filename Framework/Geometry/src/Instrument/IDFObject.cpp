@@ -23,11 +23,6 @@ IDFObject::IDFObject(const std::string &fileName)
 
 {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-IDFObject::~IDFObject() {}
-
 /**
 Gets the parent directory of the file.
 @return Parent directory path.

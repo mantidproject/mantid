@@ -1,4 +1,7 @@
 #pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
+import os
+import numpy as np
+
 from IndirectImport import *
 
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode,
@@ -6,8 +9,7 @@ from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProper
 from mantid.kernel import StringListValidator, Direction
 from mantid.simpleapi import *
 from mantid import config, logger
-import os
-import numpy as np
+
 
 if is_supported_f2py_platform():
     QLr     = import_f2py("QLres")
@@ -56,7 +58,8 @@ class BayesQuasi(PythonAlgorithm):
                              doc='Name of the resolution input Workspace')
 
         self.declareProperty(WorkspaceGroupProperty('ResNormWorkspace', '',
-                             optional=PropertyMode.Optional, direction=Direction.Input),
+                                                    optional=PropertyMode.Optional,
+                                                    direction=Direction.Input),
                              doc='Name of the ResNorm input Workspace')
 
         self.declareProperty(name='MinRange', defaultValue=-0.2,
@@ -98,8 +101,9 @@ class BayesQuasi(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceResult', '', direction=Direction.Output),
                              doc='The name of the result output workspaces')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceProb', '', optional=PropertyMode.Optional,
-                             direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceProb', '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The name of the probability output workspaces')
 
 
@@ -134,15 +138,19 @@ class BayesQuasi(PythonAlgorithm):
 
     #pylint: disable=too-many-locals,too-many-statements
     def PyExec(self):
-        #from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
 
-        run_f2py_compatibility_test()
+        # Check for platform support
+        if not is_supported_f2py_platform():
+            unsupported_msg = "This algorithm can only be run on valid platforms." \
+                              + " please view the algorithm documentation to see" \
+                              + " what platforms are currently supported"
+            raise RuntimeError(unsupported_msg)
 
         from IndirectBayes import (CalcErange, GetXYE, ReadNormFile,
                                    ReadWidthFile, QLAddSampleLogs, C2Fw,
                                    C2Se, QuasiPlot)
         from IndirectCommon import (CheckXrange, CheckAnalysers, getEfixed, GetThetaQ,
-                                    CheckHistZero, CheckHistSame)
+                                    CheckHistZero, CheckHistSame, IndentifyDataBoundaries)
         setup_prog = Progress(self, start=0.0, end=0.3, nreports = 5)
         self.log().information('BayesQuasi input')
 
@@ -179,6 +187,21 @@ class BayesQuasi(PythonAlgorithm):
 
         logger.information('Sample is ' + self._samWS)
         logger.information('Resolution is ' + self._resWS)
+
+        # Check for trailing and leading zeros in data
+        setup_prog.report('Checking for leading and trailing zeros in the data')
+        first_data_point, last_data_point = IndentifyDataBoundaries(self._samWS)
+        if first_data_point > self._e_min:
+            logger.warning("Sample workspace contains leading zeros within the energy range.")
+            logger.warning("Updating eMin: eMin = " + str(first_data_point))
+            self._e_min = first_data_point
+        if last_data_point < self._e_max:
+            logger.warning("Sample workspace contains trailing zeros within the energy range.")
+            logger.warning("Updating eMax: eMax = " + str(last_data_point))
+            self._e_max = last_data_point
+
+        # update erange with new values
+        erange = [self._e_min, self._e_max]
 
         setup_prog.report('Checking Analysers')
         CheckAnalysers(self._samWS,self._resWS)
@@ -343,7 +366,7 @@ class BayesQuasi(PythonAlgorithm):
             yProb = yPr0
             yProb = np.append(yProb,yPr1)
             yProb = np.append(yProb,yPr2)
-            probWs = CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,\
+            CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,\
                 Nspec=3, UnitX='MomentumTransfer')
             outWS = C2Fw(self._samWS[:-4],fname)
             if self._plot != 'None':
@@ -385,6 +408,6 @@ class BayesQuasi(PythonAlgorithm):
             self.setProperty('OutputWorkspaceProb', probWS)
 
 
-if is_supported_f2py_platform():
-    # Register algorithm with Mantid
-    AlgorithmFactory.subscribe(BayesQuasi)
+
+# Register algorithm with Mantid
+AlgorithmFactory.subscribe(BayesQuasi)

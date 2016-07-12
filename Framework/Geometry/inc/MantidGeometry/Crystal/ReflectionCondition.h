@@ -22,8 +22,7 @@ namespace Geometry {
  */
 class MANTID_GEOMETRY_DLL ReflectionCondition {
 public:
-  ReflectionCondition() {}
-  virtual ~ReflectionCondition() {}
+  virtual ~ReflectionCondition() = default;
   /// Name of the reflection condition
   virtual std::string getName() = 0;
   /// Symbol of the associated lattice centering.
@@ -38,11 +37,11 @@ class MANTID_GEOMETRY_DLL ReflectionConditionPrimitive
     : public ReflectionCondition {
 public:
   /// Name of the reflection condition
-  virtual std::string getName() { return "Primitive"; }
+  std::string getName() override { return "Primitive"; }
   /// Symbol of the associated lattice centering.
-  virtual std::string getSymbol() { return "P"; }
+  std::string getSymbol() override { return "P"; }
   /// Return true if the hkl is allowed.
-  virtual bool isAllowed(int /*h*/, int /*k*/, int /*l*/) { return true; }
+  bool isAllowed(int /*h*/, int /*k*/, int /*l*/) override { return true; }
 };
 
 //------------------------------------------------------------------------
@@ -51,11 +50,11 @@ class MANTID_GEOMETRY_DLL ReflectionConditionCFaceCentred
     : public ReflectionCondition {
 public:
   /// Name of the reflection condition
-  virtual std::string getName() { return "C-face centred"; }
+  std::string getName() override { return "C-face centred"; }
   /// Symbol of the associated lattice centering.
-  virtual std::string getSymbol() { return "C"; }
+  std::string getSymbol() override { return "C"; }
   /// Return true if the hkl is allowed.
-  virtual bool isAllowed(int h, int k, int /*l*/) {
+  bool isAllowed(int h, int k, int /*l*/) override {
     return (((h + k) % 2) == 0);
   }
 };
@@ -66,11 +65,11 @@ class MANTID_GEOMETRY_DLL ReflectionConditionAFaceCentred
     : public ReflectionCondition {
 public:
   /// Name of the reflection condition
-  virtual std::string getName() { return "A-face centred"; }
+  std::string getName() override { return "A-face centred"; }
   /// Symbol of the associated lattice centering.
-  virtual std::string getSymbol() { return "A"; }
+  std::string getSymbol() override { return "A"; }
   /// Return true if the hkl is allowed.
-  virtual bool isAllowed(int /*h*/, int k, int l) {
+  bool isAllowed(int /*h*/, int k, int l) override {
     return (((k + l) % 2) == 0);
   }
 };
@@ -81,11 +80,11 @@ class MANTID_GEOMETRY_DLL ReflectionConditionBFaceCentred
     : public ReflectionCondition {
 public:
   /// Name of the reflection condition
-  virtual std::string getName() { return "B-face centred"; }
+  std::string getName() override { return "B-face centred"; }
   /// Symbol of the associated lattice centering.
-  virtual std::string getSymbol() { return "B"; }
+  std::string getSymbol() override { return "B"; }
   /// Return true if the hkl is allowed.
-  virtual bool isAllowed(int h, int /*k*/, int l) {
+  bool isAllowed(int h, int /*k*/, int l) override {
     return (((h + l) % 2) == 0);
   }
 };
@@ -96,11 +95,13 @@ class MANTID_GEOMETRY_DLL ReflectionConditionBodyCentred
     : public ReflectionCondition {
 public:
   /// Name of the reflection condition
-  virtual std::string getName() { return "Body centred"; }
+  std::string getName() override { return "Body centred"; }
   /// Symbol of the associated lattice centering.
-  virtual std::string getSymbol() { return "I"; }
+  std::string getSymbol() override { return "I"; }
   /// Return true if the hkl is allowed.
-  virtual bool isAllowed(int h, int k, int l) { return ((h + k + l) % 2) == 0; }
+  bool isAllowed(int h, int k, int l) override {
+    return ((h + k + l) % 2) == 0;
+  }
 };
 
 //------------------------------------------------------------------------
@@ -109,11 +110,11 @@ class MANTID_GEOMETRY_DLL ReflectionConditionAllFaceCentred
     : public ReflectionCondition {
 public:
   /// Name of the reflection condition
-  virtual std::string getName() { return "All-face centred"; }
+  std::string getName() override { return "All-face centred"; }
   /// Symbol of the associated lattice centering.
-  virtual std::string getSymbol() { return "F"; }
+  std::string getSymbol() override { return "F"; }
   /// Return true if the hkl is allowed.
-  virtual bool isAllowed(int h, int k, int l) {
+  bool isAllowed(int h, int k, int l) override {
     return (
         ((((h + k) % 2) == 0) && (((h + l) % 2) == 0) && (((k + l) % 2) == 0)) |
             ((h % 2 == 0) && (k % 2 == 0) && (l % 2 == 0)) ||
@@ -127,11 +128,11 @@ class MANTID_GEOMETRY_DLL ReflectionConditionRhombohedrallyObverse
     : public ReflectionCondition {
 public:
   /// Name of the reflection condition
-  virtual std::string getName() { return "Rhombohedrally centred, obverse"; }
+  std::string getName() override { return "Rhombohedrally centred, obverse"; }
   /// Symbol of the associated lattice centering.
-  virtual std::string getSymbol() { return "Robv"; }
+  std::string getSymbol() override { return "Robv"; }
   /// Return true if the hkl is allowed.
-  virtual bool isAllowed(int h, int k, int l) {
+  bool isAllowed(int h, int k, int l) override {
     return (((-h + k + l) % 3) == 0);
   }
 };
@@ -142,11 +143,11 @@ class MANTID_GEOMETRY_DLL ReflectionConditionRhombohedrallyReverse
     : public ReflectionCondition {
 public:
   /// Name of the reflection condition
-  virtual std::string getName() { return "Rhombohedrally centred, reverse"; }
+  std::string getName() override { return "Rhombohedrally centred, reverse"; }
   /// Symbol of the associated lattice centering.
-  virtual std::string getSymbol() { return "Rrev"; }
+  std::string getSymbol() override { return "Rrev"; }
   /// Return true if the hkl is allowed.
-  virtual bool isAllowed(int h, int k, int l) {
+  bool isAllowed(int h, int k, int l) override {
     return (((h - k + l) % 3) == 0);
   }
 };
@@ -157,11 +158,11 @@ class MANTID_GEOMETRY_DLL ReflectionConditionHexagonallyReverse
     : public ReflectionCondition {
 public:
   /// Name of the reflection condition
-  virtual std::string getName() { return "Hexagonally centred, reverse"; }
+  std::string getName() override { return "Hexagonally centred, reverse"; }
   /// Symbol of the associated lattice centering.
-  virtual std::string getSymbol() { return "H"; }
+  std::string getSymbol() override { return "H"; }
   /// Return true if the hkl is allowed.
-  virtual bool isAllowed(int h, int k, int /*l*/) {
+  bool isAllowed(int h, int k, int /*l*/) override {
     return (((h - k) % 3) == 0);
   }
 };

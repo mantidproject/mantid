@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ExtractSingleSpectrum.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/BoundedValidator.h"
 
@@ -16,11 +17,11 @@ using namespace API;
 
 void ExtractSingleSpectrum::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The name of the input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name under which to store the output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name under which to store the output workspace.");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);

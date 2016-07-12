@@ -43,8 +43,10 @@ void PoissonErrors::performBinaryOperation(const MantidVec &lhsX,
   // Now make the fractional error the same as it was on the rhs
   const int bins = static_cast<int>(lhsE.size());
   for (int j = 0; j < bins; ++j) {
-    const double fractional = rhsY[j] ? rhsE[j] / rhsY[j] : 0.0;
-    EOut[j] = fractional * lhsY[j];
+    if (rhsY[j] != 0.0)
+      EOut[j] = rhsE[j] / rhsY[j] * lhsY[j];
+    else
+      EOut[j] = 0.0;
   }
 }
 
@@ -60,8 +62,10 @@ void PoissonErrors::performBinaryOperation(const MantidVec &lhsX,
   // If we get here we've got two single column workspaces so it's easy.
   YOut[0] = lhsY[0];
 
-  const double fractional = rhsY ? rhsE / rhsY : 0.0;
-  EOut[0] = fractional * lhsY[0];
+  if (rhsY != 0.0)
+    EOut[0] = rhsE / rhsY * lhsY[0];
+  else
+    EOut[0] = 0.0;
 }
 }
 }

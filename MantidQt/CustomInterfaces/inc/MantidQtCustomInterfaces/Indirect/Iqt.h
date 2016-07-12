@@ -14,10 +14,10 @@ public:
   Iqt(QWidget *parent = 0);
 
 private:
-  virtual void setup();
-  virtual void run();
-  virtual bool validate();
-  virtual void loadSettings(const QSettings &settings);
+  void setup() override;
+  void run() override;
+  bool validate() override;
+  void loadSettings(const QSettings &settings) override;
 
 private slots:
   void algorithmComplete(bool error);
@@ -31,8 +31,8 @@ private:
   void PlotTiled();
 
   Ui::Iqt m_uiForm;
-  QtTreePropertyBrowser *m_furTree;
-  bool m_furyResFileType;
+  QtTreePropertyBrowser *m_iqtTree;
+  bool m_iqtResFileType;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

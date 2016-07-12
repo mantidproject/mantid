@@ -36,7 +36,7 @@ public:
   /// Constructor
   DisjointElement(const int id);
   /// Destructor
-  virtual ~DisjointElement();
+  virtual ~DisjointElement() = default;
   /// Get Id
   int getId() const;
   /// Set the id

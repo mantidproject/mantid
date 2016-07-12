@@ -45,36 +45,6 @@ PeakShapeSpherical::PeakShapeSpherical(const double &peakRadius,
   }
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeakShapeSpherical::~PeakShapeSpherical() {}
-
-/**
- * @brief Copy constructor from other PeakShapeSpherical
- * @param other : source of the copy
- */
-PeakShapeSpherical::PeakShapeSpherical(const PeakShapeSpherical &other)
-    : PeakShapeBase(other), m_radius(other.radius()),
-      m_backgroundInnerRadius(other.backgroundInnerRadius()),
-      m_backgroundOuterRadius(other.backgroundOuterRadius()) {}
-
-/**
- * @brief Assignment operator
- * @param other : source of the assignment
- * @return Ref to assigned object.
- */
-PeakShapeSpherical &PeakShapeSpherical::
-operator=(const PeakShapeSpherical &other) {
-  if (this != &other) {
-    PeakShapeBase::operator=(other);
-    m_radius = other.radius();
-    m_backgroundOuterRadius = other.backgroundOuterRadius();
-    m_backgroundInnerRadius = other.backgroundInnerRadius();
-  }
-  return *this;
-}
-
 /**
  * @brief Serialize to JSON object
  * @return JSON object as std::string
@@ -116,9 +86,25 @@ bool PeakShapeSpherical::operator==(const PeakShapeSpherical &other) const {
 
 /**
  * @brief Get radius of sphere
+ * @param type Which radius to get.
  * @return radius
  */
-double PeakShapeSpherical::radius() const { return m_radius; }
+boost::optional<double> PeakShapeSpherical::radius(RadiusType type) const {
+
+  boost::optional<double> value;
+  switch (type) {
+  case (RadiusType::Radius):
+    value = boost::optional<double>{m_radius};
+    break;
+  case (RadiusType::OuterRadius):
+    value = m_backgroundOuterRadius;
+    break;
+  case (RadiusType::InnerRadius):
+    value = m_backgroundInnerRadius;
+    break;
+  }
+  return value;
+}
 
 /**
  * @brief Get the background outer radius. The outer radius may not be set, so

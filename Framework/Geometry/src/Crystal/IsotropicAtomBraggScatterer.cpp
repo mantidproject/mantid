@@ -4,12 +4,11 @@
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
 
-#include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/assign.hpp>
 
 #include <json/json.h>
 
@@ -98,15 +97,17 @@ void IsotropicAtomBraggScatterer::declareScattererProperties() {
       boost::make_shared<BoundedValidator<double>>();
   uValidator->setLower(0.0);
 
-  declareProperty(new PropertyWithValue<double>("U", 0.0, uValidator),
-                  "Isotropic atomic displacement in Angstrom^2");
+  declareProperty(
+      Kernel::make_unique<PropertyWithValue<double>>("U", 0.0, uValidator),
+      "Isotropic atomic displacement in Angstrom^2");
 
   IValidator_sptr occValidator =
       boost::make_shared<BoundedValidator<double>>(0.0, 1.0);
-  declareProperty(new PropertyWithValue<double>("Occupancy", 1.0, occValidator),
+  declareProperty(Kernel::make_unique<PropertyWithValue<double>>(
+                      "Occupancy", 1.0, occValidator),
                   "Site occupancy, values on interval [0,1].");
 
-  declareProperty(new PropertyWithValue<std::string>(
+  declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
       "Element", "H", boost::make_shared<MandatoryValidator<std::string>>()));
 }
 
@@ -151,13 +152,11 @@ IsotropicAtomBraggScattererParser::IsotropicAtomBraggScattererParser(
 /// Operator that returns vector of IsotropicAtomBraggScatterers.
 std::vector<BraggScatterer_sptr> IsotropicAtomBraggScattererParser::
 operator()() const {
-  boost::char_separator<char> atomSep(";");
-  boost::tokenizer<boost::char_separator<char>> tokens(m_scattererString,
-                                                       atomSep);
+  Mantid::Kernel::StringTokenizer tokens(
+      m_scattererString, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   std::vector<BraggScatterer_sptr> scatterers;
-
-  for (auto it = tokens.begin(); it != tokens.end(); ++it) {
-    scatterers.push_back(getScatterer(boost::trim_copy(*it)));
+  for (const auto &token : tokens) {
+    scatterers.push_back(getScatterer(token));
   }
 
   return scatterers;
@@ -177,9 +176,8 @@ BraggScatterer_sptr IsotropicAtomBraggScattererParser::getScatterer(
 
   std::vector<std::string> cleanScattererTokens =
       getCleanScattererTokens(tokens);
-  std::vector<std::string> properties =
-      boost::assign::list_of("Element")("Position")("Occupancy")("U")
-          .convert_to_container<std::vector<std::string>>();
+  std::vector<std::string> properties = {"Element", "Position", "Occupancy",
+                                         "U"};
 
   ::Json::Value root;
   for (size_t i = 0; i < cleanScattererTokens.size(); ++i) {
@@ -203,8 +201,8 @@ IsotropicAtomBraggScattererParser::getCleanScattererTokens(
   cleanTokens.push_back(tokens[0]);
 
   // X, Y, Z
-  cleanTokens.push_back("[" + tokens[1] + "," + tokens[2] + "," + tokens[3] +
-                        "]");
+  cleanTokens.emplace_back("[" + tokens[1] + "," + tokens[2] + "," + tokens[3] +
+                           "]");
 
   for (size_t i = 4; i < tokens.size(); ++i) {
     cleanTokens.push_back(tokens[i]);

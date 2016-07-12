@@ -61,8 +61,7 @@ public:
 
   /**
    * @param searchResults : A map where the keys are the runs and the values
-   * the
-   * descriptions, location etc.
+   * the descriptions, location etc.
    * @param progress : Progress object to notify.
    * @returns A vector of maps where each map represents a row,
    * with Keys matching Column headings and Values matching the row entries

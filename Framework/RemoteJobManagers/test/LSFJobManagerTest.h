@@ -12,9 +12,9 @@
 class MockedLSFJobManager : public Mantid::RemoteJobManagers::LSFJobManager {
   /// needs to define this pure virtual method
   void authenticate(const std::string & /*username*/,
-                    const std::string & /*password*/) {}
+                    const std::string & /*password*/) override {}
 
-  void logout(const std::string & /* username */) {}
+  void logout(const std::string & /* username */) override {}
 };
 
 /// This just checks basic cast/interface properties of a virtual

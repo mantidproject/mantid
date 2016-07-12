@@ -37,7 +37,7 @@ public:
   DateAndTime(const double seconds, const double nanoseconds);
   DateAndTime(const int32_t seconds, const int32_t nanoseconds);
   DateAndTime(const int64_t seconds, const int64_t nanoseconds);
-  DateAndTime(const std::string ISO8601_string, bool displayLogs = true);
+  DateAndTime(const std::string &ISO8601_string, bool displayLogs = true);
   DateAndTime(const boost::posix_time::ptime _ptime);
 
   void set_from_ptime(boost::posix_time::ptime _ptime);
@@ -49,7 +49,7 @@ public:
   std::time_t to_localtime_t() const;
   std::tm to_tm() const;
 
-  void setFromISO8601(const std::string str, bool displayLogs = true);
+  void setFromISO8601(const std::string &str, bool displayLogs = true);
   std::string toSimpleString() const;
   std::string
   toFormattedString(const std::string format = "%Y-%b-%d %H:%M:%S") const;
@@ -90,10 +90,10 @@ public:
   DateAndTime operator-(const time_duration &td) const;
   DateAndTime &operator-=(const time_duration &td);
 
-  DateAndTime operator+(const double seconds) const;
-  DateAndTime &operator+=(const double seconds);
-  DateAndTime operator-(const double seconds) const;
-  DateAndTime &operator-=(const double seconds);
+  DateAndTime operator+(const double sec) const;
+  DateAndTime &operator+=(const double sec);
+  DateAndTime operator-(const double sec) const;
+  DateAndTime &operator-=(const double sec);
 
   time_duration operator-(const DateAndTime &rhs) const;
 
@@ -101,12 +101,12 @@ public:
   static DateAndTime getCurrentTime();
   static DateAndTime maximum();
   static DateAndTime minimum();
-  static double secondsFromDuration(time_duration td);
-  static time_duration durationFromSeconds(double seconds);
+  static double secondsFromDuration(time_duration duration);
+  static time_duration durationFromSeconds(double duration);
   static int64_t nanosecondsFromDuration(const time_duration &td);
   static int64_t nanosecondsFromSeconds(double sec);
   static time_duration durationFromNanoseconds(int64_t dur);
-  static const DateAndTime defaultTime();
+  static const DateAndTime &defaultTime();
   static void createVector(const DateAndTime start,
                            const std::vector<double> &seconds,
                            std::vector<DateAndTime> &out);

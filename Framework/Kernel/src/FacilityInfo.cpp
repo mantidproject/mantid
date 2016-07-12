@@ -10,10 +10,11 @@
 #include "MantidKernel/Strings.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 using Poco::XML::Element;
 
@@ -32,7 +33,7 @@ Logger g_log("FacilityInfo");
 FacilityInfo::FacilityInfo(const Poco::XML::Element *elem)
     : m_catalogs(elem), m_name(elem->getAttribute("name")), m_zeroPadding(0),
       m_delimiter(), m_extensions(), m_archiveSearch(), m_instruments(),
-      m_liveListener(), m_computeResources() {
+      m_liveListener(), m_noFilePrefix(), m_computeResources() {
   if (m_name.empty()) {
     g_log.error("Facility name is not defined");
     throw std::runtime_error("Facility name is not defined");
@@ -45,6 +46,7 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element *elem)
   fillArchiveNames(elem);
   fillLiveListener(elem);
   fillComputeResources(elem);
+  fillNoFilePrefix(elem);
   fillInstruments(elem); // Make sure this is last as it picks up some defaults
                          // that are set above
 }
@@ -56,6 +58,12 @@ void FacilityInfo::fillZeroPadding(const Poco::XML::Element *elem) {
       !Mantid::Kernel::Strings::convert(paddingStr, m_zeroPadding)) {
     m_zeroPadding = 0;
   }
+}
+
+/// Called from constructor to fill the noFilePrefix flag
+void FacilityInfo::fillNoFilePrefix(const Poco::XML::Element *elem) {
+  std::string noFilePrefixStr = elem->getAttribute("nofileprefix");
+  m_noFilePrefix = (noFilePrefixStr == "True");
 }
 
 /// Called from constructor to fill default delimiter
@@ -71,11 +79,11 @@ void FacilityInfo::fillExtensions(const Poco::XML::Element *elem) {
     g_log.error("No file extensions defined");
     throw std::runtime_error("No file extensions defined");
   }
-  typedef Poco::StringTokenizer tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
   tokenizer exts(extsStr, ",",
                  tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-  for (auto it = exts.begin(); it != exts.end(); ++it) {
-    addExtension(*it);
+  for (const auto &ext : exts) {
+    addExtension(ext);
   }
 }
 
@@ -159,7 +167,7 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
         ComputeResourceInfo cr(this, elem);
         m_computeResInfos.push_back(cr);
 
-        g_log.debug() << "Compute resource found: " << cr << std::endl;
+        g_log.debug() << "Compute resource found: " << cr << '\n';
       } catch (...) { // next resource...
       }
 
@@ -167,9 +175,8 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
       // TODO: this is a bit of duplicate effort at the moment, until
       // RemoteJobManager goes away from here (then this would be
       // removed), see header for details.
-      m_computeResources.insert(std::make_pair(
-          name,
-          boost::shared_ptr<RemoteJobManager>(new RemoteJobManager(elem))));
+      m_computeResources.emplace(name,
+                                 boost::make_shared<RemoteJobManager>(elem));
     }
   }
 }
@@ -184,28 +191,29 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
   if (iName.empty()) {
     iName = ConfigService::Instance().getString("default.instrument");
     g_log.debug() << "Blank instrument specified, using default instrument of "
-                  << iName << "." << std::endl;
+                  << iName << ".\n";
     if (iName.empty()) {
       return m_instruments.front();
     }
   }
 
-  for (auto it = m_instruments.cbegin(); it != m_instruments.cend(); ++it) {
-    if (boost::iequals(it->name(), iName)) // Case-insensitive search
+  for (const auto &instrument : m_instruments) {
+    if (boost::iequals(instrument.name(), iName)) // Case-insensitive search
     {
-      g_log.debug() << "Instrument '" << iName << "' found as " << it->name()
-                    << " at " << name() << "." << std::endl;
-      return *it;
+      g_log.debug() << "Instrument '" << iName << "' found as "
+                    << instrument.name() << " at " << name() << ".\n";
+      return instrument;
     }
   }
 
   // if unsuccessful try shortname
-  for (auto it = m_instruments.begin(); it != m_instruments.end(); ++it) {
-    if (boost::iequals(it->shortName(), iName)) // Case-insensitive search
+  for (const auto &instrument : m_instruments) {
+    if (boost::iequals(instrument.shortName(),
+                       iName)) // Case-insensitive search
     {
-      g_log.debug() << "Instrument '" << iName << "' found as " << it->name()
-                    << " at " << name() << "." << std::endl;
-      return *it;
+      g_log.debug() << "Instrument '" << iName << "' found as "
+                    << instrument.name() << " at " << name() << ".\n";
+      return instrument;
     }
   }
 
@@ -275,13 +283,13 @@ FacilityInfo::computeResource(const std::string &name) const {
   for (; it != m_computeResInfos.end(); ++it) {
     if (it->name() == name) {
       g_log.debug() << "Compute resource '" << name << "' found at facility "
-                    << this->name() << "." << std::endl;
+                    << this->name() << ".\n";
       return *it;
     }
   }
 
   g_log.debug() << "Could not find requested compute resource: " << name
-                << " in facility " << this->name() << "." << std::endl;
+                << " in facility " << this->name() << ".\n";
   throw Exception::NotFoundError(
       "FacilityInfo, missing compute resource, it does not seem to be defined "
       "in the facility '" +

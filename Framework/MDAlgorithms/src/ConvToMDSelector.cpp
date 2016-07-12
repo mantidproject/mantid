@@ -53,9 +53,9 @@ boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
       (existingWsConvType != inputWSType)) {
     switch (inputWSType) {
     case (EventWS):
-      return boost::shared_ptr<ConvToMDBase>(new ConvToMDEventsWS());
+      return boost::make_shared<ConvToMDEventsWS>();
     case (Matrix2DWS):
-      return boost::shared_ptr<ConvToMDBase>(new ConvToMDHistoWS());
+      return boost::make_shared<ConvToMDHistoWS>();
     default:
       throw(std::logic_error("ConvToDataObjectsSelector: requested converter "
                              "for unknown ws type"));

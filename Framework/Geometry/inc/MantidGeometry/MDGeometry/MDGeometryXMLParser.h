@@ -66,7 +66,7 @@ protected:
 public:
   explicit MDGeometryXMLParser(const std::string &xmlToProcess);
 
-  virtual ~MDGeometryXMLParser();
+  virtual ~MDGeometryXMLParser() = default;
 
   virtual void execute();
 

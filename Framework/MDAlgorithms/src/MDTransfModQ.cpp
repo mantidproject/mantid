@@ -97,12 +97,10 @@ bool MDTransfModQ::calcGenericVariables(std::vector<coord_t> &Coord,
   // sanity check. If fails, something went fundamentally wrong
   if (m_NMatrixDim + m_AddDimCoordinates.size() != nd) {
     std::string ERR =
-        "Number of matrix dimensions: " +
-        boost::lexical_cast<std::string>(m_NMatrixDim) +
+        "Number of matrix dimensions: " + std::to_string(m_NMatrixDim) +
         " plus number of additional dimensions: " +
-        boost::lexical_cast<std::string>(m_AddDimCoordinates.size()) +
-        " not equal to number of workspace dimensions: " +
-        boost::lexical_cast<std::string>(nd);
+        std::to_string(m_AddDimCoordinates.size()) +
+        " not equal to number of workspace dimensions: " + std::to_string(nd);
     throw(std::invalid_argument(ERR));
   }
 
@@ -278,7 +276,7 @@ void MDTransfModQ::initialize(const MDWSDescription &ConvParams) {
   //   pHost      = &Conv;
   // get transformation matrix (needed for CrystalAsPoder mode)
   m_RotMat = ConvParams.getTransfMatrix();
-  m_pEfixedArray = NULL;
+  m_pEfixedArray = nullptr;
   if (!ConvParams.m_PreprDetTable)
     throw(std::runtime_error("The detectors have not been preprocessed but "
                              "they have to before running initialize"));
@@ -332,8 +330,7 @@ void MDTransfModQ::initialize(const MDWSDescription &ConvParams) {
 
     // the wave vector of incident neutrons;
     m_Ki = sqrt(m_Ei / PhysicalConstants::E_mev_toNeutronWavenumberSq);
-
-    m_pEfixedArray = NULL;
+    m_pEfixedArray = nullptr;
     if (m_Emode == static_cast<int>(Kernel::DeltaEMode::Indirect))
       m_pEfixedArray =
           ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");
@@ -402,10 +399,10 @@ MDTransfModQ::outputUnitID(Kernel::DeltaEMode::Type dEmode,
 
 /// constructor;
 MDTransfModQ::MDTransfModQ()
-    : m_ex(0), m_ey(0), m_ez(1), m_DetDirecton(NULL), //,m_NMatrixDim(-1)
-      m_NMatrixDim(0),                                // uninitialized
-      m_Emode(Kernel::DeltaEMode::Undefined),         // uninitialized
-      m_Ki(1.), m_Ei(1.), m_pEfixedArray(NULL), m_pDetMasks(NULL) {}
+    : m_ex(0), m_ey(0), m_ez(1), m_DetDirecton(nullptr), //,m_NMatrixDim(-1)
+      m_NMatrixDim(0),                                   // uninitialized
+      m_Emode(Kernel::DeltaEMode::Undefined),            // uninitialized
+      m_Ki(1.), m_Ei(1.), m_pEfixedArray(nullptr), m_pDetMasks(nullptr) {}
 
 std::vector<std::string> MDTransfModQ::getEmodes() const {
   return Kernel::DeltaEMode::availableTypes();

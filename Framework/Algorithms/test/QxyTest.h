@@ -3,8 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/Qxy.h"
-#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAPI/Axis.h"
+#include "MantidDataHandling/LoadRaw3.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -134,7 +135,7 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
     /*    for (int i = 0 ; i < 30; i ++)
         {
-        std::cout << i << std::endl;
+        std::cout << i << '\n';
         for (int j = 0 ; j < 30; j ++)
         {
         std::cout << result->readY(i)[j] << " ";

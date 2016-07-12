@@ -1,10 +1,12 @@
-#include "MantidKernel/OptionalBool.h"
+#include "MantidCrystal/LoadIsawPeaks.h"
+#include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidCrystal/LoadIsawPeaks.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidCrystal/SCDCalibratePanels.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Unit.h"
 
 using Mantid::Kernel::Strings::readToEndOfLine;
 using Mantid::Kernel::Strings::getWord;
@@ -19,16 +21,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadIsawPeaks::LoadIsawPeaks() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadIsawPeaks::~LoadIsawPeaks() {}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -88,12 +80,12 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadIsawPeaks::init() {
-
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
-                                   {".peaks", ".integrate"}),
+  const std::vector<std::string> exts{".peaks", ".integrate"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
                   "Path to an ISAW-style .peaks filename.");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
 }
 
@@ -133,7 +125,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
   std::string L1s = getWord(in, false);
   std::string T0s = getWord(in, false);
   if (L1s.length() < 1 || T0s.length() < 1) {
-    g_log.error() << "Missing L1 or Time offset" << std::endl;
+    g_log.error() << "Missing L1 or Time offset\n";
     throw std::invalid_argument("Missing L1 or Time offset");
   }
 
@@ -146,7 +138,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
     SCDCalibratePanels::FixUpSourceParameterMap(instr, L1 / 100, sampPos,
                                                 parMap1);
   } catch (...) {
-    g_log.error() << "Invalid L1 or Time offset" << std::endl;
+    g_log.error() << "Invalid L1 or Time offset\n";
     throw std::invalid_argument("Invalid L1 or Time offset");
   }
 
@@ -158,7 +150,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
   }
 
   if (!(in.good())) {
-    g_log.error() << "Peaks file has no detector panel info" << std::endl;
+    g_log.error() << "Peaks file has no detector panel info\n";
     throw std::invalid_argument("Peaks file has no detector panel info");
   }
 
@@ -168,7 +160,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
     for (int i = 0; i < 16; i++) {
       std::string s = getWord(in, false);
       if (s.size() < 1) {
-        g_log.error() << "Not enough info to describe panel " << std::endl;
+        g_log.error() << "Not enough info to describe panel \n";
         throw std::length_error("Not enough info to describe panel ");
       }
       line += " " + s;
@@ -190,11 +182,11 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
           Upz;
     } catch (...) {
 
-      g_log.error() << "incorrect type of data for panel " << std::endl;
+      g_log.error() << "incorrect type of data for panel \n";
       throw std::length_error("incorrect type of data for panel ");
     }
 
-    std::string SbankNum = boost::lexical_cast<std::string>(bankNum);
+    std::string SbankNum = std::to_string(bankNum);
     std::string bankName = "bank";
     if (instr->getName() == "WISH") {
       if (bankNum < 10)
@@ -207,8 +199,8 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
         getCachedBankByName(bankName, instr_old);
 
     if (!bank) {
-      g_log.error() << "There is no bank " << bankName << " in the instrument"
-                    << std::endl;
+      g_log.error() << "There is no bank " << bankName
+                    << " in the instrument\n";
       throw std::length_error("There is no bank " + bankName +
                               " in the instrument");
     }
@@ -303,9 +295,9 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   // bug
   tempWS->populateInstrumentParameters();
   Geometry::Instrument_const_sptr instr_old = tempWS->getInstrument();
-  boost::shared_ptr<ParameterMap> map(new ParameterMap());
-  Geometry::Instrument_const_sptr instr(
-      new Geometry::Instrument(instr_old->baseInstrument(), map));
+  auto map = boost::make_shared<ParameterMap>();
+  auto instr = boost::make_shared<const Geometry::Instrument>(
+      instr_old->baseInstrument(), map);
 
   std::string s = ApplyCalibInfo(in, "", instr_old, instr, T0);
   outWS->setInstrument(instr);
@@ -374,23 +366,23 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
 
   seqNum = atoi(getWord(in, false).c_str());
 
-  h = strtod(getWord(in, false).c_str(), 0);
-  k = strtod(getWord(in, false).c_str(), 0);
-  l = strtod(getWord(in, false).c_str(), 0);
+  h = strtod(getWord(in, false).c_str(), nullptr);
+  k = strtod(getWord(in, false).c_str(), nullptr);
+  l = strtod(getWord(in, false).c_str(), nullptr);
 
-  col = strtod(getWord(in, false).c_str(), 0);
-  row = strtod(getWord(in, false).c_str(), 0);
-  strtod(getWord(in, false).c_str(), 0); // chan
-  strtod(getWord(in, false).c_str(), 0); // L2
-  strtod(getWord(in, false).c_str(), 0); // ScatAng
+  col = strtod(getWord(in, false).c_str(), nullptr);
+  row = strtod(getWord(in, false).c_str(), nullptr);
+  strtod(getWord(in, false).c_str(), nullptr); // chan
+  strtod(getWord(in, false).c_str(), nullptr); // L2
+  strtod(getWord(in, false).c_str(), nullptr); // ScatAng
 
-  strtod(getWord(in, false).c_str(), 0); // Az
-  wl = strtod(getWord(in, false).c_str(), 0);
-  strtod(getWord(in, false).c_str(), 0); // D
-  IPK = strtod(getWord(in, false).c_str(), 0);
+  strtod(getWord(in, false).c_str(), nullptr); // Az
+  wl = strtod(getWord(in, false).c_str(), nullptr);
+  strtod(getWord(in, false).c_str(), nullptr); // D
+  IPK = strtod(getWord(in, false).c_str(), nullptr);
 
-  Inti = strtod(getWord(in, false).c_str(), 0);
-  SigI = strtod(getWord(in, false).c_str(), 0);
+  Inti = strtod(getWord(in, false).c_str(), nullptr);
+  SigI = strtod(getWord(in, false).c_str(), nullptr);
   static_cast<void>(atoi(getWord(in, false).c_str())); // iReflag
 
   // Finish the line and get the first word of next line
@@ -486,11 +478,11 @@ std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
 
   run = atoi(getWord(in, false).c_str());
   detName = atoi(getWord(in, false).c_str());
-  chi = strtod(getWord(in, false).c_str(), 0);
-  phi = strtod(getWord(in, false).c_str(), 0);
+  chi = strtod(getWord(in, false).c_str(), nullptr);
+  phi = strtod(getWord(in, false).c_str(), nullptr);
 
-  omega = strtod(getWord(in, false).c_str(), 0);
-  monCount = strtod(getWord(in, false).c_str(), 0);
+  omega = strtod(getWord(in, false).c_str(), nullptr);
+  monCount = strtod(getWord(in, false).c_str(), nullptr);
   readToEndOfLine(in, true);
 
   return getWord(in, false);
@@ -589,7 +581,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
       outWS->addPeak(peak);
     } catch (std::runtime_error &e) {
       g_log.warning() << "Error reading peak SEQN " << seqNum << " : "
-                      << e.what() << std::endl;
+                      << e.what() << '\n';
     }
 
     prog.report(in.tellg());
@@ -614,7 +606,7 @@ void LoadIsawPeaks::checkNumberPeaks(PeaksWorkspace_sptr outWS,
   }
   if (NumberPeaks != outWS->getNumberPeaks()) {
     g_log.error() << "Number of peaks in file is " << NumberPeaks
-                  << " but only read " << outWS->getNumberPeaks() << std::endl;
+                  << " but only read " << outWS->getNumberPeaks() << '\n';
     throw std::length_error("Wrong number of peaks read");
   }
 }

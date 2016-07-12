@@ -23,16 +23,6 @@ std::string LessThan() { return "Less Than"; }
 std::string GreaterThan() { return "Greater Than"; }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ThresholdMD::ThresholdMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ThresholdMD::~ThresholdMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ThresholdMD::name() const { return "ThresholdMD"; }
 
@@ -50,8 +40,8 @@ const std::string ThresholdMD::category() const {
 /** Initialize the algorithm's properties.
  */
 void ThresholdMD::init() {
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
   std::vector<std::string> propOptions;
@@ -75,9 +65,9 @@ void ThresholdMD::init() {
                   "Custom overwrite value for the signal. Defaults to zero.");
   setPropertySettings(
       "CustomOverwriteValue",
-      new EnabledWhenProperty("OverwriteWithZero", IS_NOT_DEFAULT));
+      make_unique<EnabledWhenProperty>("OverwriteWithZero", IS_NOT_DEFAULT));
 
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output thresholded workspace.");
 }

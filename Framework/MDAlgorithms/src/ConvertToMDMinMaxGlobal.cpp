@@ -9,6 +9,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
@@ -23,16 +24,6 @@ namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToMDMinMaxGlobal)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertToMDMinMaxGlobal::ConvertToMDMinMaxGlobal() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertToMDMinMaxGlobal::~ConvertToMDMinMaxGlobal() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -62,8 +53,8 @@ void ConvertToMDMinMaxGlobal::init() {
   // histogram needed by ConvertUnits
   ws_valid->add<HistogramValidator>();
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                             Direction::Input, ws_valid),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input, ws_valid),
       "An input Matrix Workspace (Workspace2D or Event workspace) ");
 
   std::vector<std::string> Q_modes =
@@ -94,14 +85,11 @@ void ConvertToMDMinMaxGlobal::init() {
                   "*MD Transformation factory* for further details.",
                   Direction::InOut);
 
-  setPropertySettings(
-      "dEAnalysisMode",
-      new VisibleWhenProperty("QDimensions", IS_NOT_EQUAL_TO, "CopyToMD"));
+  setPropertySettings("dEAnalysisMode",
+                      make_unique<VisibleWhenProperty>(
+                          "QDimensions", IS_NOT_EQUAL_TO, "CopyToMD"));
 
-  std::vector<std::string> TargFrames;
-  TargFrames.push_back("AutoSelect");
-  TargFrames.push_back("Q");
-  TargFrames.push_back("HKL");
+  std::vector<std::string> TargFrames{"AutoSelect", "Q", "HKL"};
   declareProperty(
       "Q3DFrames", "AutoSelect",
       boost::make_shared<StringListValidator>(TargFrames),
@@ -111,11 +99,12 @@ void ConvertToMDMinMaxGlobal::init() {
       "laboratory or sample frame."
       "  **HKL** - reciprocal lattice units");
 
-  setPropertySettings(
-      "Q3DFrames", new VisibleWhenProperty("QDimensions", IS_EQUAL_TO, "Q3D"));
+  setPropertySettings("Q3DFrames", make_unique<VisibleWhenProperty>(
+                                       "QDimensions", IS_EQUAL_TO, "Q3D"));
 
   declareProperty(
-      new ArrayProperty<std::string>("OtherDimensions", Direction::Input),
+      make_unique<ArrayProperty<std::string>>("OtherDimensions",
+                                              Direction::Input),
       "List(comma separated) of additional to **Q** and **DeltaE** variables "
       "which form additional "
       "(orthogonal) to **Q** dimensions in the target workspace (e.g. "
@@ -125,8 +114,10 @@ void ConvertToMDMinMaxGlobal::init() {
       "with the log names for the records of these variables in the source "
       "workspace.");
 
-  declareProperty(new ArrayProperty<double>("MinValues", Direction::Output));
-  declareProperty(new ArrayProperty<double>("MaxValues", Direction::Output));
+  declareProperty(
+      make_unique<ArrayProperty<double>>("MinValues", Direction::Output));
+  declareProperty(
+      make_unique<ArrayProperty<double>>("MaxValues", Direction::Output));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -244,7 +235,7 @@ void ConvertToMDMinMaxGlobal::exec() {
       } else // HKL
       {
         if (!ws->sample().hasOrientedLattice()) {
-          g_log.error() << "Sample has no oriented lattice" << std::endl;
+          g_log.error() << "Sample has no oriented lattice\n";
           throw std::invalid_argument("No UB set");
         }
         Mantid::Geometry::OrientedLattice ol =
@@ -266,13 +257,13 @@ void ConvertToMDMinMaxGlobal::exec() {
     }
   }
 
-  for (size_t i = 0; i < OtherDimensions.size(); ++i) {
-    if (!ws->run().hasProperty(OtherDimensions[i])) {
+  for (auto &OtherDimension : OtherDimensions) {
+    if (!ws->run().hasProperty(OtherDimension)) {
       g_log.error() << "The workspace does not have a property "
-                    << OtherDimensions[i] << std::endl;
+                    << OtherDimension << '\n';
       throw std::invalid_argument("Property not found. Please see error log.");
     }
-    Kernel::Property *pProperty = (ws->run().getProperty(OtherDimensions[i]));
+    Kernel::Property *pProperty = (ws->run().getProperty(OtherDimension));
     TimeSeriesProperty<double> *p =
         dynamic_cast<TimeSeriesProperty<double> *>(pProperty);
     if (p) {
@@ -285,8 +276,8 @@ void ConvertToMDMinMaxGlobal::exec() {
       if (!p) {
         std::string ERR =
             " Can not interpret property, used as dimension.\n Property: " +
-            OtherDimensions[i] + " is neither a time series (run) property nor "
-                                 "a property with value<double>";
+            OtherDimension + " is neither a time series (run) property nor "
+                             "a property with value<double>";
         throw(std::invalid_argument(ERR));
       }
       double val = *p;

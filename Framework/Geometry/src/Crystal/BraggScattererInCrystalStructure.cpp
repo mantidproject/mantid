@@ -50,14 +50,14 @@ void BraggScattererInCrystalStructure::setCell(const UnitCell &cell) {
 /// Declares basic properties, should not be overridden by subclasses, use
 /// declareScattererProperties instead.
 void BraggScattererInCrystalStructure::declareProperties() {
-  declareProperty(
-      new Kernel::PropertyWithValue<std::string>("Position", "[0, 0, 0]"),
-      "Position of the scatterer");
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(
+                      "Position", "[0, 0, 0]"),
+                  "Position of the scatterer");
 
   IValidator_sptr unitCellStringValidator =
       boost::make_shared<UnitCellStringValidator>();
   declareProperty(
-      new Kernel::PropertyWithValue<std::string>(
+      Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(
           "UnitCell", "1.0 1.0 1.0 90.0 90.0 90.0", unitCellStringValidator),
       "Unit cell.");
   exposePropertyToComposite("UnitCell");

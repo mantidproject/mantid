@@ -18,27 +18,27 @@ class SimplexTestCostFunction : public ICostFunction {
 
 public:
   SimplexTestCostFunction() : a(1), b(1) {}
-  virtual std::string name() const { return "SimplexTestCostFunction"; }
-  virtual double getParameter(size_t i) const {
+  std::string name() const override { return "SimplexTestCostFunction"; }
+  double getParameter(size_t i) const override {
     if (i == 0)
       return a;
     return b;
   }
-  virtual void setParameter(size_t i, const double &value) {
+  void setParameter(size_t i, const double &value) override {
     if (i == 0) {
       a = value;
     } else {
       b = value;
     }
   }
-  virtual size_t nParams() const { return 2; }
-  virtual double val() const {
+  size_t nParams() const override { return 2; }
+  double val() const override {
     double x = a - 1.1;
     double y = b - 2.2;
     return 3.1 + x * x + y * y;
   }
-  virtual void deriv(std::vector<double> &) const {}
-  virtual double valAndDeriv(std::vector<double> &) const { return 0.0; }
+  void deriv(std::vector<double> &) const override {}
+  double valAndDeriv(std::vector<double> &) const override { return 0.0; }
 };
 
 class SimplexTest : public CxxTest::TestSuite {

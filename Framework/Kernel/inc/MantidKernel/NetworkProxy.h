@@ -40,7 +40,7 @@ public:
   ProxyInfo getHttpProxy(const std::string &targetURLString);
 
   /// Destructor
-  virtual ~NetworkProxy();
+  virtual ~NetworkProxy() = default;
 
 private:
   /// Logger object

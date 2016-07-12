@@ -2,12 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Rebunch.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace_fwd.h"
-
-#include <sstream>
-#include <numeric>
-#include <cmath>
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
+
+#include <cmath>
+#include <numeric>
+#include <sstream>
 
 namespace Mantid {
 namespace Algorithms {
@@ -24,11 +27,11 @@ using API::MatrixWorkspace;
  *
  */
 void Rebunch::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "The input workspace");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The result of rebinning");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
@@ -106,7 +109,7 @@ void Rebunch::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  outputW->isDistribution(dist);
+  outputW->setDistribution(dist);
 
   // Copy units
   if (outputW->getAxis(0)->unit().get())

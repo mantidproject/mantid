@@ -36,61 +36,48 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IntegratePeaksMD::IntegratePeaksMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IntegratePeaksMD::~IntegratePeaksMD() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksMD::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Q (lab frame)");
-  propOptions.push_back("Q (sample frame)");
-  propOptions.push_back("HKL");
+  std::vector<std::string> propOptions{"Q (lab frame)", "Q (sample frame)",
+                                       "HKL"};
   declareProperty("CoordinatesToUse", "Q (lab frame)",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Ignored:  algorithm uses the InputWorkspace's coordinates.");
 
   declareProperty(
-      new PropertyWithValue<double>("PeakRadius", 1.0, Direction::Input),
+      make_unique<PropertyWithValue<double>>("PeakRadius", 1.0,
+                                             Direction::Input),
       "Fixed radius around each peak position in which to integrate (in the "
       "same units as the workspace).");
 
   declareProperty(
-      new PropertyWithValue<double>("BackgroundInnerRadius", 0.0,
-                                    Direction::Input),
+      make_unique<PropertyWithValue<double>>("BackgroundInnerRadius", 0.0,
+                                             Direction::Input),
       "Inner radius to use to evaluate the background of the peak.\n"
       "If smaller than PeakRadius, then we assume BackgroundInnerRadius = "
       "PeakRadius.");
 
   declareProperty(
-      new PropertyWithValue<double>("BackgroundOuterRadius", 0.0,
-                                    Direction::Input),
+      make_unique<PropertyWithValue<double>>("BackgroundOuterRadius", 0.0,
+                                             Direction::Input),
       "Outer radius to use to evaluate the background of the peak.\n"
       "The signal density around the peak (BackgroundInnerRadius < r < "
       "BackgroundOuterRadius) is used to estimate the background under the "
       "peak.\n"
       "If smaller than PeakRadius, no background measurement is done.");
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
   declareProperty(
-      new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                            Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
+                                                     Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
 
@@ -113,17 +100,18 @@ void IntegratePeaksMD::init() {
                   "Default is sphere.  Use next five parameters for cylinder.");
 
   declareProperty(
-      new PropertyWithValue<double>("CylinderLength", 0.0, Direction::Input),
+      make_unique<PropertyWithValue<double>>("CylinderLength", 0.0,
+                                             Direction::Input),
       "Length of cylinder in which to integrate (in the same units as the "
       "workspace).");
 
-  declareProperty(
-      new PropertyWithValue<double>("PercentBackground", 0.0, Direction::Input),
-      "Percent of CylinderLength that is background (20 is 20%)");
+  declareProperty(make_unique<PropertyWithValue<double>>("PercentBackground",
+                                                         0.0, Direction::Input),
+                  "Percent of CylinderLength that is background (20 is 20%)");
 
   std::vector<std::string> peakNames =
       FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
-  peakNames.push_back("NoFit");
+  peakNames.emplace_back("NoFit");
   declareProperty("ProfileFunction", "Gaussian",
                   boost::make_shared<StringListValidator>(peakNames),
                   "Fitting function for profile that is used only with "
@@ -140,8 +128,9 @@ void IntegratePeaksMD::init() {
                   "used only with Cylinder integration.");
 
   declareProperty(
-      new FileProperty("ProfilesFile", "", FileProperty::OptionalSave,
-                       std::vector<std::string>(1, "profiles")),
+      Kernel::make_unique<FileProperty>(
+          "ProfilesFile", "", FileProperty::OptionalSave,
+          std::vector<std::string>(1, "profiles")),
       "Save (Optionally) as Isaw peaks file with profiles included");
 }
 
@@ -164,26 +153,24 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
       getProperty("OutputWorkspace");
   if (peakWS != inPeakWS)
-    peakWS.reset(inPeakWS->clone().release());
+    peakWS = inPeakWS->clone();
 
   /// Value of the CoordinatesToUse property.
   std::string CoordinatesToUseStr = getPropertyValue("CoordinatesToUse");
   Kernel::SpecialCoordinateSystem CoordinatesToUse =
       ws->getSpecialCoordinateSystem();
-  g_log.warning() << " Warning" << CoordinatesToUse << std::endl;
+  g_log.warning() << " Warning" << CoordinatesToUse << '\n';
   if (CoordinatesToUse == Kernel::QLab &&
       CoordinatesToUseStr != "Q (lab frame)")
     g_log.warning() << "Warning: used Q (lab frame) coordinates for MD "
-                       "workspace, not CoordinatesToUse from input "
-                    << std::endl;
+                       "workspace, not CoordinatesToUse from input \n";
   else if (CoordinatesToUse == Kernel::QSample &&
            CoordinatesToUseStr != "Q (sample frame)")
     g_log.warning() << "Warning: used Q (sample frame) coordinates for MD "
-                       "workspace, not CoordinatesToUse from input "
-                    << std::endl;
+                       "workspace, not CoordinatesToUse from input \n";
   else if (CoordinatesToUse == Kernel::HKL && CoordinatesToUseStr != "HKL")
     g_log.warning() << "Warning: used HKL coordinates for MD workspace, not "
-                       "CoordinatesToUse from input " << std::endl;
+                       "CoordinatesToUse from input \n";
 
   /// Radius to use around peaks
   double PeakRadius = getProperty("PeakRadius");
@@ -293,14 +280,14 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     if (BackgroundOuterRadius > PeakRadius) {
       if (!detectorQ(p.getQLabFrame(), BackgroundOuterRadius)) {
         g_log.warning() << "Warning: sphere/cylinder for integration is off "
-                           "edge of detector for peak " << i << std::endl;
+                           "edge of detector for peak " << i << '\n';
         if (!integrateEdge)
           continue;
       }
     } else {
       if (!detectorQ(p.getQLabFrame(), PeakRadius)) {
         g_log.warning() << "Warning: sphere/cylinder for integration is off "
-                           "edge of detector for peak " << i << std::endl;
+                           "edge of detector for peak " << i << '\n';
         if (!integrateEdge)
           continue;
       }
@@ -610,7 +597,7 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                         << bgSignal + ratio * background_total << " (sig^2 "
                         << bgErrorSquared +
                                ratio * ratio * std::fabs(background_total)
-                        << ") subtracted." << std::endl;
+                        << ") subtracted.\n";
   }
   // This flag is used by the PeaksWorkspace to evaluate whether it has been
   // integrated.

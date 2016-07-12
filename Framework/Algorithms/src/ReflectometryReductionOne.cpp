@@ -1,4 +1,6 @@
+#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAlgorithms/ReflectometryReductionOne.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -7,7 +9,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include <boost/make_shared.hpp>
-#include <boost/assign/list_of.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -28,10 +29,10 @@ namespace {
 *on the host end-point workspace.
 *
 * @param originWS : Origin workspace, which provides the original workspace
-*index to spectrum id mapping.
+*index to spectrum number mapping.
 * @param hostWS : Workspace onto which the resulting workspace indexes will be
 *hosted
-* @return Remapped wokspace indexes applicable for the host workspace. results
+* @return Remapped workspace indexes applicable for the host workspace. results
 *as comma separated string.
 */
 std::string createWorkspaceIndexListFromDetectorWorkspace(
@@ -39,7 +40,7 @@ std::string createWorkspaceIndexListFromDetectorWorkspace(
   auto spectrumMap = originWS->getSpectrumToWorkspaceIndexMap();
   auto it = spectrumMap.begin();
   std::stringstream result;
-  specid_t specId = (*it).first;
+  specnum_t specId = (*it).first;
   result << static_cast<int>(hostWS->getIndexFromSpectrumNumber(specId));
   ++it;
   for (; it != spectrumMap.end(); ++it) {
@@ -74,21 +75,26 @@ std::vector<int> getSpectrumNumbers(MatrixWorkspace_sptr &ws) {
 
   return keys;
 }
+
+/**
+* Helper free function to calculate MomentumTransfer from lambda and theta
+* @param lambda : Value in wavelength
+* @param theta  : Value in Degrees
+* @return MomentumTransfer
+* @
+*/
+double calculateQ(double lambda, double theta) {
+  if (lambda == 0.0)
+    throw std::runtime_error("Minimum/Maximum value of the IvsLambda Workspace "
+                             "is 0. Cannot calculate Q");
+  double thetaInRad = theta * M_PI / 180;
+  return (4 * M_PI * sin(thetaInRad)) / lambda;
+}
 }
 /* End of ananomous namespace */
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReflectometryReductionOne)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-ReflectometryReductionOne::ReflectometryReductionOne() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ReflectometryReductionOne::~ReflectometryReductionOne() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -111,8 +117,8 @@ const std::string ReflectometryReductionOne::category() const {
 */
 void ReflectometryReductionOne::init() {
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Run to reduce.");
 
   std::vector<std::string> propOptions;
@@ -124,11 +130,11 @@ void ReflectometryReductionOne::init() {
       boost::make_shared<StringListValidator>(propOptions),
       "The type of analysis to perform. Point detector or multi detector.");
 
-  declareProperty(new ArrayProperty<int>("RegionOfInterest"),
+  declareProperty(make_unique<ArrayProperty<int>>("RegionOfInterest"),
                   "Indices of the spectra a pair (lower, upper) that mark the "
                   "ranges that correspond to the region of interest (reflected "
                   "beam) in multi-detector mode.");
-  declareProperty(new ArrayProperty<int>("RegionOfDirectBeam"),
+  declareProperty(make_unique<ArrayProperty<int>>("RegionOfDirectBeam"),
                   "Indices of the spectra a pair (lower, upper) that mark the "
                   "ranges that correspond to the direct beam in multi-detector "
                   "mode.");
@@ -136,52 +142,52 @@ void ReflectometryReductionOne::init() {
   this->initIndexInputs();
   this->initWavelengthInputs();
 
-  declareProperty(new PropertyWithValue<std::string>("DetectorComponentName",
-                                                     "", Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "DetectorComponentName", "", Direction::Input),
                   "Name of the detector component i.e. point-detector. If "
                   "these are not specified, the algorithm will attempt lookup "
                   "using a standard naming convention.");
 
-  declareProperty(new PropertyWithValue<std::string>("SampleComponentName", "",
-                                                     Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "SampleComponentName", "", Direction::Input),
                   "Name of the sample component i.e. some-surface-holder. If "
                   "these are not specified, the algorithm will attempt lookup "
                   "using a standard naming convention.");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Output Workspace IvsQ.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Output Workspace IvsQ.");
 
-  declareProperty(new WorkspaceProperty<>("OutputWorkspaceWavelength", "",
-                                          Direction::Output,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspaceWavelength",
+                                                   "", Direction::Output,
+                                                   PropertyMode::Optional),
                   "Output Workspace IvsLam. Intermediate workspace.");
 
-  declareProperty(new PropertyWithValue<double>("ThetaIn", Mantid::EMPTY_DBL(),
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "ThetaIn", Mantid::EMPTY_DBL(), Direction::Input),
                   "Final theta value in degrees. Optional, this value will be "
                   "calculated internally and provided as ThetaOut if not "
                   "provided.");
 
-  declareProperty(new PropertyWithValue<double>("ThetaOut", Mantid::EMPTY_DBL(),
-                                                Direction::Output),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "ThetaOut", Mantid::EMPTY_DBL(), Direction::Output),
                   "Calculated final theta in degrees.");
 
   declareProperty("NormalizeByIntegratedMonitors", true,
                   "Normalize by dividing by the integrated monitors.");
 
-  declareProperty(new PropertyWithValue<bool>("CorrectDetectorPositions", true,
-                                              Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>(
+                      "CorrectDetectorPositions", true, Direction::Input),
                   "Correct detector positions using ThetaIn (if given)");
 
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "FirstTransmissionRun", "", Direction::Input, PropertyMode::Optional),
       "First transmission run, or the low wavelength transmission run if "
       "SecondTransmissionRun is also provided.");
 
   auto inputValidator = boost::make_shared<WorkspaceUnitValidator>(tofUnitId);
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "SecondTransmissionRun", "", Direction::Input,
                       PropertyMode::Optional, inputValidator),
                   "Second, high wavelength transmission run. Optional. Causes "
@@ -190,26 +196,26 @@ void ReflectometryReductionOne::init() {
 
   this->initStitchingInputs();
 
-  declareProperty(new PropertyWithValue<bool>("StrictSpectrumChecking", true,
-                                              Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>("StrictSpectrumChecking",
+                                                       true, Direction::Input),
                   "Enforces spectrum number checking prior to normalization");
 
-  std::vector<std::string> correctionAlgorithms = boost::assign::list_of(
-      "None")("PolynomialCorrection")("ExponentialCorrection");
+  std::vector<std::string> correctionAlgorithms = {
+      "None", "PolynomialCorrection", "ExponentialCorrection"};
   declareProperty("CorrectionAlgorithm", "None",
                   boost::make_shared<StringListValidator>(correctionAlgorithms),
                   "The type of correction to perform.");
 
-  declareProperty(new ArrayProperty<double>("Polynomial"),
+  declareProperty(make_unique<ArrayProperty<double>>("Polynomial"),
                   "Coefficients to be passed to the PolynomialCorrection"
                   " algorithm.");
 
   declareProperty(
-      new PropertyWithValue<double>("C0", 0.0, Direction::Input),
+      make_unique<PropertyWithValue<double>>("C0", 0.0, Direction::Input),
       "C0 value to be passed to the ExponentialCorrection algorithm.");
 
   declareProperty(
-      new PropertyWithValue<double>("C1", 0.0, Direction::Input),
+      make_unique<PropertyWithValue<double>>("C1", 0.0, Direction::Input),
       "C1 value to be passed to the ExponentialCorrection algorithm.");
 
   setPropertyGroup("CorrectionAlgorithm", "Polynomial Corrections");
@@ -217,15 +223,16 @@ void ReflectometryReductionOne::init() {
   setPropertyGroup("C0", "Polynomial Corrections");
   setPropertyGroup("C1", "Polynomial Corrections");
 
-  setPropertySettings("Polynomial", new Kernel::EnabledWhenProperty(
-                                        "CorrectionAlgorithm", IS_EQUAL_TO,
-                                        "PolynomialCorrection"));
   setPropertySettings(
-      "C0", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
-                                            "ExponentialCorrection"));
+      "Polynomial",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+          "CorrectionAlgorithm", IS_EQUAL_TO, "PolynomialCorrection"));
   setPropertySettings(
-      "C1", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
-                                            "ExponentialCorrection"));
+      "C0", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                "CorrectionAlgorithm", IS_EQUAL_TO, "ExponentialCorrection"));
+  setPropertySettings(
+      "C1", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                "CorrectionAlgorithm", IS_EQUAL_TO, "ExponentialCorrection"));
 
   setPropertyGroup("FirstTransmissionRun", "Transmission");
   setPropertyGroup("SecondTransmissionRun", "Transmission");
@@ -233,27 +240,44 @@ void ReflectometryReductionOne::init() {
   setPropertyGroup("StartOverlap", "Transmission");
   setPropertyGroup("EndOverlap", "Transmission");
 
-  // Only do transmission corrections when point detector.
-  setPropertySettings("FirstTransmissionRun", new Kernel::EnabledWhenProperty(
-                                                  "AnalysisMode", IS_EQUAL_TO,
-                                                  "PointDetectorAnalysis"));
-  setPropertySettings("SecondTransmissionRun", new Kernel::EnabledWhenProperty(
-                                                   "AnalysisMode", IS_EQUAL_TO,
-                                                   "PointDetectorAnalysis"));
-  setPropertySettings(
-      "Params", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO,
-                                                "PointDetectorAnalysis"));
-  setPropertySettings("StartOverlap", new Kernel::EnabledWhenProperty(
-                                          "AnalysisMode", IS_EQUAL_TO,
-                                          "PointDetectorAnalysis"));
-  setPropertySettings(
-      "EndOverlap", new Kernel::EnabledWhenProperty("AnalysisMode", IS_EQUAL_TO,
-                                                    "PointDetectorAnalysis"));
+  // Only ask for transmission parameters when a FirstTranmissionRun has been
+  // provided
+  setPropertySettings("SecondTransmissionRun",
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "FirstTransmissionRun", IS_NOT_DEFAULT));
+  setPropertySettings("Params",
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "FirstTransmissionRun", IS_NOT_DEFAULT));
+  setPropertySettings("StartOverlap",
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "FirstTransmissionRun", IS_NOT_DEFAULT));
+  setPropertySettings("EndOverlap",
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "FirstTransmissionRun", IS_NOT_DEFAULT));
 
   // Only use region of direct beam when in multi-detector analysis mode.
-  setPropertySettings("RegionOfDirectBeam", new Kernel::EnabledWhenProperty(
-                                                "AnalysisMode", IS_EQUAL_TO,
-                                                "MultiDetectorAnalysis"));
+  setPropertySettings(
+      "RegionOfDirectBeam",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+          "AnalysisMode", IS_EQUAL_TO, "MultiDetectorAnalysis"));
+  declareProperty("ScaleFactor", Mantid::EMPTY_DBL(),
+                  "Factor you wish to scale Q workspace by.", Direction::Input);
+  declareProperty("MomentumTransferMinimum", Mantid::EMPTY_DBL(),
+                  "Minimum Q value in IvsQ "
+                  "Workspace. Used for Rebinning "
+                  "the IvsQ Workspace",
+                  Direction::Input);
+  declareProperty("MomentumTransferStep", Mantid::EMPTY_DBL(),
+                  "Resolution value in IvsQ Workspace. Used for Rebinning the "
+                  "IvsQ Workspace. This value will be made minus to apply "
+                  "logarithmic rebinning. If you wish to have linear "
+                  "bin-widths then please provide a negative DQQ",
+                  Direction::Input);
+  declareProperty("MomentumTransferMaximum", Mantid::EMPTY_DBL(),
+                  "Maximum Q value in IvsQ "
+                  "Workspace. Used for Rebinning "
+                  "the IvsQ Workspace",
+                  Direction::Input);
 }
 
 /**
@@ -288,9 +312,9 @@ ReflectometryReductionOne::correctPosition(API::MatrixWorkspace_sptr &toCorrect,
   } else {
     auto specNumbers = getSpectrumNumbers(toCorrect);
     correctPosAlg->setProperty("SpectrumNumbersOfDetectors", specNumbers);
-    for (size_t t = 0; t < specNumbers.size(); ++t) {
+    for (auto specNumber : specNumbers) {
       std::stringstream buffer;
-      buffer << "Writing out: " << specNumbers[t];
+      buffer << "Writing out: " << specNumber;
       g_log.notice(buffer.str());
     }
   }
@@ -372,6 +396,8 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
   } else if (bCorrectPosition) {
     toConvert = correctPosition(toConvert, thetaInDeg.get(), isPointDetector);
   }
+
+  // Rotate the source (needed before ConvertUnits)
   double rotationTheta = getAngleForSourceRotation(toConvert, thetaInDeg.get());
   if (rotationTheta != 0.0) {
     auto rotateSource = this->createChildAlgorithm("RotateSource");
@@ -389,6 +415,22 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
   convertUnits->setProperty("Target", "MomentumTransfer");
   convertUnits->execute();
   MatrixWorkspace_sptr inQ = convertUnits->getProperty("OutputWorkspace");
+
+  // Rotate the source back to its original position
+  if (rotationTheta != 0.0) {
+    // for IvsLam Workspace
+    auto rotateSource = this->createChildAlgorithm("RotateSource");
+    rotateSource->setChild(true);
+    rotateSource->initialize();
+    rotateSource->setProperty("Workspace", toConvert);
+    rotateSource->setProperty("Angle", -rotationTheta);
+    rotateSource->execute();
+    // for IvsQ Workspace
+    rotateSource->setProperty("Workspace", inQ);
+    rotateSource->setProperty("Angle", -rotationTheta);
+    rotateSource->execute();
+  }
+
   return inQ;
 }
 
@@ -408,7 +450,7 @@ ReflectometryReductionOne::getSurfaceSampleComponent(
     sampleComponent = this->getPropertyValue("SampleComponentName");
   }
   auto searchResult = inst->getComponentByName(sampleComponent);
-  if (searchResult == NULL) {
+  if (searchResult == nullptr) {
     throw std::invalid_argument(sampleComponent +
                                 " does not exist. Check input properties.");
   }
@@ -435,7 +477,7 @@ ReflectometryReductionOne::getDetectorComponent(
   }
   boost::shared_ptr<const IComponent> searchResult =
       inst->getComponentByName(componentToCorrect);
-  if (searchResult == NULL) {
+  if (searchResult == nullptr) {
     throw std::invalid_argument(componentToCorrect +
                                 " does not exist. Check input properties.");
   }
@@ -484,7 +526,6 @@ void ReflectometryReductionOne::exec() {
     double temp = this->getProperty("ThetaIn");
     theta = temp;
   }
-
   const std::string strAnalysisMode = getProperty("AnalysisMode");
   const bool isPointDetector =
       (pointDetectorAnalysis.compare(strAnalysisMode) == 0);
@@ -494,10 +535,6 @@ void ReflectometryReductionOne::exec() {
   const MinMax wavelengthInterval =
       this->getMinMax("WavelengthMin", "WavelengthMax");
   const double wavelengthStep = getProperty("WavelengthStep");
-  const MinMax monitorBackgroundWavelengthInterval = getMinMax(
-      "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax");
-  const MinMax monitorIntegrationWavelengthInterval = getMinMax(
-      "MonitorIntegrationWavelengthMin", "MonitorIntegrationWavelengthMax");
 
   const std::string processingCommands = getWorkspaceIndexList();
 
@@ -505,7 +542,19 @@ void ReflectometryReductionOne::exec() {
   fetchOptionalLowerUpperPropertyValue("RegionOfDirectBeam", isPointDetector,
                                        directBeam);
 
-  const int i0MonitorIndex = getProperty("I0MonitorIndex");
+  auto instrument = runWS->getInstrument();
+
+  const OptionalInteger i0MonitorIndex = checkForOptionalInstrumentDefault<int>(
+      this, "I0MonitorIndex", instrument, "I0MonitorIndex");
+
+  const OptionalMinMax monitorBackgroundWavelengthInterval = getOptionalMinMax(
+      this, "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax",
+      instrument, "MonitorBackgroundWavelengthMin",
+      "MonitorBackgroundWavelengthMax");
+  const OptionalMinMax monitorIntegrationWavelengthInterval = getOptionalMinMax(
+      this, "MonitorIntegrationWavelengthMin",
+      "MonitorIntegrationWavelengthMax", instrument,
+      "MonitorIntegrationWavelengthMin", "MonitorIntegrationWavelengthMax");
 
   const bool correctDetectorPositions = getProperty("CorrectDetectorPositions");
 
@@ -559,10 +608,12 @@ void ReflectometryReductionOne::exec() {
       auto integrationAlg = this->createChildAlgorithm("Integration");
       integrationAlg->initialize();
       integrationAlg->setProperty("InputWorkspace", monitorWS);
-      integrationAlg->setProperty(
-          "RangeLower", monitorIntegrationWavelengthInterval.get<0>());
-      integrationAlg->setProperty(
-          "RangeUpper", monitorIntegrationWavelengthInterval.get<1>());
+      if (monitorIntegrationWavelengthInterval.is_initialized()) {
+        integrationAlg->setProperty(
+            "RangeLower", monitorIntegrationWavelengthInterval.get().get<0>());
+        integrationAlg->setProperty(
+            "RangeUpper", monitorIntegrationWavelengthInterval.get().get<1>());
+      }
       integrationAlg->execute();
       MatrixWorkspace_sptr integratedMonitor =
           integrationAlg->getProperty("OutputWorkspace");
@@ -594,10 +645,64 @@ void ReflectometryReductionOne::exec() {
   }
 
   IvsQ = this->toIvsQ(IvsLam, correctDetectorPositions, theta, isPointDetector);
-
+  double momentumTransferMinimum = getProperty("MomentumTransferMinimum");
+  double momentumTransferStep = getProperty("MomentumTransferStep");
+  double momentumTransferMaximum = getProperty("MomentumTransferMaximum");
+  MantidVec QParams;
+  if (isDefault("MomentumTransferMinimum"))
+    momentumTransferMinimum = calculateQ(IvsLam->readX(0).back(), theta.get());
+  if (isDefault("MomentumTransferMaximum"))
+    momentumTransferMaximum = calculateQ(IvsLam->readX(0).front(), theta.get());
+  if (isDefault("MomentumTransferStep")) {
+    // if the DQQ is not given for this run.
+    // we will use CalculateResoltion to produce this value
+    // for us.
+    IAlgorithm_sptr calcResAlg =
+        AlgorithmManager::Instance().create("CalculateResolution");
+    calcResAlg->setProperty("Workspace", runWS);
+    calcResAlg->setProperty("TwoTheta", theta.get());
+    calcResAlg->execute();
+    if (!calcResAlg->isExecuted())
+      throw std::runtime_error("CalculateResolution failed. Please manually "
+                               "enter a value for MomentumTransferStep.");
+    momentumTransferStep = calcResAlg->getProperty("Resolution");
+  }
+  if (momentumTransferMinimum > momentumTransferMaximum)
+    throw std::invalid_argument("MomentumTransferMinimum must be less than "
+                                "MomentumTransferMaximum. Please check your "
+                                "inputs for these Properties.");
+  QParams.push_back(momentumTransferMinimum);
+  QParams.push_back(-momentumTransferStep);
+  QParams.push_back(momentumTransferMaximum);
+  IAlgorithm_sptr algRebin = this->createChildAlgorithm("Rebin");
+  algRebin->initialize();
+  algRebin->setProperty("InputWorkspace", IvsQ);
+  algRebin->setProperty("OutputWorkspace", IvsQ);
+  algRebin->setProperty("Params", QParams);
+  algRebin->execute();
+  if (!algRebin->isExecuted())
+    throw std::runtime_error("Failed to run Rebin algorithm");
+  IvsQ = algRebin->getProperty("OutputWorkspace");
+  double scaleFactor = getProperty("ScaleFactor");
+  if (!isDefault("ScaleFactor")) {
+    IAlgorithm_sptr algScale = this->createChildAlgorithm("Scale");
+    algScale->initialize();
+    algScale->setProperty("InputWorkspace", IvsQ);
+    algScale->setProperty("OutputWorkspace", IvsQ);
+    algScale->setProperty("Factor", 1.0 / scaleFactor);
+    algScale->execute();
+    if (!algScale->isExecuted())
+      throw std::runtime_error("Failed to run Scale algorithm");
+    IvsQ = algScale->getProperty("OutputWorkspace");
+  }
   setProperty("ThetaOut", theta.get());
   setProperty("OutputWorkspaceWavelength", IvsLam);
   setProperty("OutputWorkspace", IvsQ);
+  // setting these values so the Interface can retrieve them from
+  // ReflectometryReductionOneAuto.
+  setProperty("MomentumTransferMinimum", momentumTransferMinimum);
+  setProperty("MomentumTransferStep", momentumTransferStep);
+  setProperty("MomentumTransferMaximum", momentumTransferMaximum);
 }
 
 /**
@@ -632,9 +737,10 @@ void ReflectometryReductionOne::exec() {
 */
 MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
     MatrixWorkspace_sptr IvsLam, const MinMax &wavelengthInterval,
-    const MinMax &wavelengthMonitorBackgroundInterval,
-    const MinMax &wavelengthMonitorIntegrationInterval,
-    const int &i0MonitorIndex, MatrixWorkspace_sptr firstTransmissionRun,
+    const OptionalMinMax &wavelengthMonitorBackgroundInterval,
+    const OptionalMinMax &wavelengthMonitorIntegrationInterval,
+    const OptionalInteger &i0MonitorIndex,
+    MatrixWorkspace_sptr firstTransmissionRun,
     OptionalMatrixWorkspace_sptr secondTransmissionRun,
     const OptionalDouble &stitchingStart, const OptionalDouble &stitchingDelta,
     const OptionalDouble &stitchingEnd,
@@ -671,9 +777,8 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
 
       if (stitchingStart.is_initialized() && stitchingEnd.is_initialized() &&
           stitchingDelta.is_initialized()) {
-        const std::vector<double> params =
-            boost::assign::list_of(stitchingStart.get())(stitchingDelta.get())(
-                stitchingEnd.get()).convert_to_container<std::vector<double>>();
+        const std::vector<double> params = {
+            stitchingStart.get(), stitchingDelta.get(), stitchingEnd.get()};
         alg->setProperty("Params", params);
       } else if (stitchingDelta.is_initialized()) {
         alg->setProperty("Params",
@@ -687,18 +792,24 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
       }
     }
     alg->setProperty("ProcessingInstructions", spectrumProcessingCommands);
-    alg->setProperty("I0MonitorIndex", i0MonitorIndex);
+    if (i0MonitorIndex.is_initialized()) {
+      alg->setProperty("I0MonitorIndex", i0MonitorIndex.get());
+    }
     alg->setProperty("WavelengthMin", wavelengthInterval.get<0>());
     alg->setProperty("WavelengthMax", wavelengthInterval.get<1>());
     alg->setProperty("WavelengthStep", wavelengthStep);
-    alg->setProperty("MonitorBackgroundWavelengthMin",
-                     wavelengthMonitorBackgroundInterval.get<0>());
-    alg->setProperty("MonitorBackgroundWavelengthMax",
-                     wavelengthMonitorBackgroundInterval.get<1>());
-    alg->setProperty("MonitorIntegrationWavelengthMin",
-                     wavelengthMonitorIntegrationInterval.get<0>());
-    alg->setProperty("MonitorIntegrationWavelengthMax",
-                     wavelengthMonitorIntegrationInterval.get<1>());
+    if (wavelengthMonitorBackgroundInterval.is_initialized()) {
+      alg->setProperty("MonitorBackgroundWavelengthMin",
+                       wavelengthMonitorBackgroundInterval.get().get<0>());
+      alg->setProperty("MonitorBackgroundWavelengthMax",
+                       wavelengthMonitorBackgroundInterval.get().get<1>());
+    }
+    if (wavelengthMonitorIntegrationInterval.is_initialized()) {
+      alg->setProperty("MonitorIntegrationWavelengthMin",
+                       wavelengthMonitorIntegrationInterval.get().get<0>());
+      alg->setProperty("MonitorIntegrationWavelengthMax",
+                       wavelengthMonitorIntegrationInterval.get().get<1>());
+    }
     alg->execute();
     denominator = alg->getProperty("OutputWorkspace");
   }

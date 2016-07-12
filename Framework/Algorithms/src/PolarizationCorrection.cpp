@@ -1,13 +1,16 @@
 #include "MantidAlgorithms/PolarizationCorrection.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ListValidator.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include <algorithm>
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
+#include "MantidGeometry/Instrument.h"
+
 #include <boost/shared_ptr.hpp>
+
+#include <algorithm>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -106,16 +109,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(PolarizationCorrection)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PolarizationCorrection::PolarizationCorrection() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PolarizationCorrection::~PolarizationCorrection() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PolarizationCorrection::name() const {
   return "PolarizationCorrection";
@@ -184,7 +177,7 @@ MatrixWorkspace_sptr PolarizationCorrection::add(MatrixWorkspace_sptr &lhsWS,
 /** Initialize the algorithm's properties.
  */
 void PolarizationCorrection::init() {
-  declareProperty(new WorkspaceProperty<Mantid::API::WorkspaceGroup>(
+  declareProperty(make_unique<WorkspaceProperty<Mantid::API::WorkspaceGroup>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace to process.");
 
@@ -195,27 +188,31 @@ void PolarizationCorrection::init() {
                   "PNR: Polarized Neutron Reflectivity mode\n"
                   "PA: Full Polarization Analysis PNR-PA");
 
-  declareProperty(new ArrayProperty<double>(cppLabel(), Direction::Input),
-                  "Effective polarizing power of the polarizing system. "
-                  "Expressed as a ratio 0 < Pp < 1");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(cppLabel(), Direction::Input),
+      "Effective polarizing power of the polarizing system. "
+      "Expressed as a ratio 0 < Pp < 1");
 
-  declareProperty(new ArrayProperty<double>(cApLabel(), Direction::Input),
-                  "Effective polarizing power of the analyzing system. "
-                  "Expressed as a ratio 0 < Ap < 1");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(cApLabel(), Direction::Input),
+      "Effective polarizing power of the analyzing system. "
+      "Expressed as a ratio 0 < Ap < 1");
 
-  declareProperty(new ArrayProperty<double>(crhoLabel(), Direction::Input),
-                  "Ratio of efficiencies of polarizer spin-down to polarizer "
-                  "spin-up. This is characteristic of the polarizer flipper. "
-                  "Values are constants for each term in a polynomial "
-                  "expression.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(crhoLabel(), Direction::Input),
+      "Ratio of efficiencies of polarizer spin-down to polarizer "
+      "spin-up. This is characteristic of the polarizer flipper. "
+      "Values are constants for each term in a polynomial "
+      "expression.");
 
-  declareProperty(new ArrayProperty<double>(cAlphaLabel(), Direction::Input),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(cAlphaLabel(),
+                                                             Direction::Input),
                   "Ratio of efficiencies of analyzer spin-down to analyzer "
                   "spin-up. This is characteristic of the analyzer flipper. "
                   "Values are factors for each term in a polynomial "
                   "expression.");
 
-  declareProperty(new WorkspaceProperty<Mantid::API::WorkspaceGroup>(
+  declareProperty(make_unique<WorkspaceProperty<Mantid::API::WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -237,7 +234,7 @@ PolarizationCorrection::copyShapeAndFill(MatrixWorkspace_sptr &base,
   MatrixWorkspace_sptr wsTemplate = WorkspaceFactory::Instance().create(base);
   // Copy the x-array across to the new workspace.
   for (size_t i = 0; i < wsTemplate->getNumberHistograms(); ++i) {
-    wsTemplate->setX(i, base->readX(i));
+    wsTemplate->setX(i, base->refX(i));
   }
   auto zeroed = this->multiply(wsTemplate, 0);
   auto filled = this->add(zeroed, value);
@@ -325,8 +322,7 @@ WorkspaceGroup_sptr PolarizationCorrection::execPA(WorkspaceGroup_sptr inWS) {
   for (size_t i = 1; i < totalGroupEntries; i++) {
     auto alg = this->createChildAlgorithm("ReplaceSpecialValues");
     alg->setProperty("InputWorkspace", dataOut->getItem(i));
-    alg->setProperty("OutputWorkspace",
-                     "dataOut_" + boost::lexical_cast<std::string>(i));
+    alg->setProperty("OutputWorkspace", "dataOut_" + std::to_string(i));
     alg->setProperty("NaNValue", 0.0);
     alg->setProperty("NaNError", 0.0);
     alg->setProperty("InfinityValue", 0.0);
@@ -399,18 +395,17 @@ void PolarizationCorrection::exec() {
     loadableProperties[cAlphaLabel()] = "calpha";
   }
 
-  for (auto propName = loadableProperties.begin();
-       propName != loadableProperties.end(); ++propName) {
-    Property *prop = getProperty(propName->first);
+  for (auto &loadableProperty : loadableProperties) {
+    Property *prop = getProperty(loadableProperty.first);
 
     if (!prop)
       continue;
 
     if (prop->isDefault()) {
-      auto vals = instrument->getStringParameter(propName->second);
+      auto vals = instrument->getStringParameter(loadableProperty.second);
       if (vals.empty())
         throw std::runtime_error(
-            "Cannot find value for " + propName->first +
+            "Cannot find value for " + loadableProperty.first +
             " in parameter file. Please specify this property manually.");
       prop->setValue(vals[0]);
     }

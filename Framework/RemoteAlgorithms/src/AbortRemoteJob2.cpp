@@ -13,7 +13,6 @@ DECLARE_ALGORITHM(AbortRemoteJob2)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 
@@ -45,7 +44,7 @@ void AbortRemoteJob2::exec() {
   std::string jid = getPropertyValue("JobID");
   jobManager->abortRemoteJob(jid);
   g_log.information() << "Aborted job with ID " << jid
-                      << " on the compute resource" << comp << std::endl;
+                      << " on the compute resource" << comp << '\n';
 }
 
 } // namespace RemoteAlgorithms

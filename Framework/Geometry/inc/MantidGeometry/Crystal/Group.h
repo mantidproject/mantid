@@ -158,10 +158,7 @@ public:
   Group();
   Group(const std::string &symmetryOperationString);
   Group(const std::vector<SymmetryOperation> &symmetryOperations);
-  Group(const Group &other);
-  Group &operator=(const Group &other);
-
-  virtual ~Group() {}
+  virtual ~Group() = default;
 
   size_t order() const;
   CoordinateSystem getCoordinateSystem() const;
@@ -171,6 +168,9 @@ public:
   Group operator*(const Group &other) const;
 
   std::vector<Kernel::V3D> operator*(const Kernel::V3D &vector) const;
+
+  bool isInvariant(const Kernel::DblMatrix &tensor,
+                   double tolerance = 1e-8) const;
 
   bool operator==(const Group &other) const;
   bool operator!=(const Group &other) const;

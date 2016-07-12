@@ -35,22 +35,16 @@ using namespace Mantid::DataObjects;
 /** Constructor
  */
 BinMD::BinMD()
-    : outWS(), prog(NULL), implicitFunction(NULL), indexMultiplier(NULL),
-      signals(NULL), errors(NULL), numEvents(NULL) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-BinMD::~BinMD() {}
-
-//----------------------------------------------------------------------------------------------
+    : outWS(), prog(nullptr), implicitFunction(nullptr),
+      indexMultiplier(nullptr), signals(nullptr), errors(nullptr),
+      numEvents(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void BinMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDWorkspace.");
 
   // Properties for specifying the slice to perform.
@@ -59,14 +53,15 @@ void BinMD::init() {
   // --------------- Processing methods and options
   // ---------------------------------------
   std::string grp = "Methods";
-  declareProperty(new PropertyWithValue<std::string>("ImplicitFunctionXML", "",
-                                                     Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "ImplicitFunctionXML", "", Direction::Input),
                   "XML string describing the implicit function determining "
                   "which bins to use.");
   setPropertyGroup("ImplicitFunctionXML", grp);
 
   declareProperty(
-      new PropertyWithValue<bool>("IterateEvents", true, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("IterateEvents", true,
+                                           Direction::Input),
       "Alternative binning method where you iterate through every event, "
       "placing them in the proper bin.\n"
       "This may be faster for workspaces with few events and lots of output "
@@ -74,14 +69,14 @@ void BinMD::init() {
   setPropertyGroup("IterateEvents", grp);
 
   declareProperty(
-      new PropertyWithValue<bool>("Parallel", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("Parallel", false, Direction::Input),
       "Temporary parameter: true to run in parallel. This is ignored for "
       "file-backed workspaces, where running in parallel makes things slower "
       "due to disk thrashing.");
   setPropertyGroup("Parallel", grp);
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "A name for the output MDHistoWorkspace.");
 }
 
@@ -118,7 +113,7 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
       // Now transform to the output dimensions
       m_transform->apply(inCenter, outCenter);
       // std::cout << "Input coord " << VMD(nd,inCenter) << " transformed to "
-      // <<  VMD(nd,outCenter) << std::endl;
+      // <<  VMD(nd,outCenter) << '\n';
 
       // To build up the linear index
       size_t linearIndex = 0;
@@ -179,7 +174,6 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
   // If you get here, you could not determine that the entire box was in the
   // same bin.
   // So you need to iterate through events.
-
   const std::vector<MDE> &events = box->getConstEvents();
   for (auto it = events.begin(); it != events.end(); ++it) {
     // Cache the center of the event (again for speed)
@@ -282,8 +276,7 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     prog->resetNumSteps(100, 0.00, 1.0);
 
   // Run the chunks in parallel. There is no overlap in the output workspace so
-  // it is
-  // thread safe to write to it..
+  // it is thread safe to write to it..
   // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for schedule(dynamic,1) if (doParallel) )
     for (int chunk = 0;
@@ -325,17 +318,17 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       if (prog) {
         PARALLEL_CRITICAL(BinMD_progress) {
           g_log.debug() << "Chunk " << chunk << ": found " << boxes.size()
-                        << " boxes within the implicit function." << std::endl;
+                        << " boxes within the implicit function.\n";
           progNumSteps += boxes.size();
           prog->setNumSteps(progNumSteps);
         }
       }
 
       // Go through every box for this chunk.
-      for (size_t i = 0; i < boxes.size(); i++) {
-        MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
+      for (auto &boxe : boxes) {
+        MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxe);
         // Perform the binning in this separate method.
-        if (box)
+        if (box && !box->getIsMasked())
           this->binMDBox(box, chunkMin.data(), chunkMax.data());
 
         // Progress reporting
@@ -373,15 +366,14 @@ void BinMD::exec() {
 
   // De serialize the implicit function
   std::string ImplicitFunctionXML = getPropertyValue("ImplicitFunctionXML");
-  implicitFunction = NULL;
+  implicitFunction = nullptr;
   if (!ImplicitFunctionXML.empty())
     implicitFunction =
         Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(
             ImplicitFunctionXML);
 
-  prog = new Progress(
-      this, 0, 1.0,
-      1); // This gets deleted by the thread pool; don't delete it in here.
+  // This gets deleted by the thread pool; don't delete it in here.
+  prog = new Progress(this, 0, 1.0, 1);
 
   // Create the dense histogram. This allocates the memory
   outWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(m_binDimensions));
@@ -405,7 +397,7 @@ void BinMD::exec() {
   bool IterateEvents = getProperty("IterateEvents");
   if (!IterateEvents) {
     g_log.warning() << "IterateEvents=False is no longer supported. Setting "
-                       "IterateEvents=True." << std::endl;
+                       "IterateEvents=True.\n";
     IterateEvents = true;
   }
 
@@ -425,17 +417,22 @@ void BinMD::exec() {
 
   CALL_MDEVENT_FUNCTION(this->binByIterating, m_inWS);
 
-  // Copy the
-
   // Copy the coordinate system & experiment infos to the output
   IMDEventWorkspace_sptr inEWS =
       boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inWS);
   if (inEWS) {
     outWS->setCoordinateSystem(inEWS->getSpecialCoordinateSystem());
-    outWS->copyExperimentInfos(*inEWS);
+    try {
+      outWS->copyExperimentInfos(*inEWS);
+    } catch (std::runtime_error &) {
+      g_log.warning()
+          << this->name()
+          << " was not able to copy experiment info to output workspace "
+          << outWS->getName() << '\n';
+    }
   }
 
-  //  Pass on the display normalization from the input workspace
+  // Pass on the display normalization from the input workspace
   outWS->setDisplayNormalization(m_inWS->displayNormalizationHisto());
 
   outWS->updateSum();

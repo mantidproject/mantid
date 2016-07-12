@@ -38,19 +38,19 @@ namespace Algorithms {
 class DLLExport CreateSampleWorkspace : public API::Algorithm {
 public:
   CreateSampleWorkspace();
-  virtual ~CreateSampleWorkspace();
+  ~CreateSampleWorkspace() override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
   /// Algorithm's summary
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Creates sample workspaces for usage examples and other situations.";
   }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   DataObjects::EventWorkspace_sptr
   createEventWorkspace(int numPixels, int numBins, int numEvents, double x0,

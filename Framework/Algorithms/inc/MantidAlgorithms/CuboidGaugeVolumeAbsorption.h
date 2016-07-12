@@ -43,16 +43,12 @@ namespace Algorithms {
 */
 class DLLExport CuboidGaugeVolumeAbsorption : public FlatPlateAbsorption {
 public:
-  /// (Empty) Constructor
-  CuboidGaugeVolumeAbsorption();
-  /// Virtual destructor
-  virtual ~CuboidGaugeVolumeAbsorption() {}
   /// Algorithm's name
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "CuboidGaugeVolumeAbsorption";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Calculates bin-by-bin correction factors for attenuation due to "
            "absorption and (single) scattering within a cuboid shaped 'gauge "
            "volume' of a generic sample. The sample shape can be defined by, "
@@ -60,11 +56,11 @@ public:
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
 private:
-  std::string sampleXML();
-  void initialiseCachedDistances();
+  std::string sampleXML() override;
+  void initialiseCachedDistances() override;
 };
 
 } // namespace Algorithms

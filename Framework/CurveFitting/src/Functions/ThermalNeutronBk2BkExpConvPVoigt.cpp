@@ -41,11 +41,6 @@ ThermalNeutronBk2BkExpConvPVoigt::ThermalNeutronBk2BkExpConvPVoigt()
   mHKLSet = false;
 }
 
-//------------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ThermalNeutronBk2BkExpConvPVoigt::~ThermalNeutronBk2BkExpConvPVoigt() {}
-
 //----------------------------------------------------------------------------------------------
 /** Define the fittable parameters
  * Notice that Sig0, Sig1 and Sig2 are NOT the squared value recorded in
@@ -362,7 +357,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double *out,
 
   double peakrange = m_fwhm * PEAKRANGE;
 
-  // cout << "DBx212:  eta = " << eta << ", gamma = " << gamma << endl;
+  // cout << "DBx212:  eta = " << eta << ", gamma = " << gamma << '\n';
 
   double invert_sqrt2sigma = 1.0 / sqrt(2.0 * m_Sigma2);
 
@@ -519,7 +514,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::calHandEta(double sigma2, double gamma,
                                                   double &H,
                                                   double &eta) const {
   // 1. Calculate H
-  double H_G = sqrt(8.0 * sigma2 * log(2.0));
+  double H_G = sqrt(8.0 * sigma2 * M_LN2);
   double H_L = gamma;
 
   double temp1 = std::pow(H_L, 5) + 0.07842 * H_G * std::pow(H_L, 4) +
@@ -594,7 +589,7 @@ double ThermalNeutronBk2BkExpConvPVoigt::calOmega(
     }
   }
 
-  // cout << "[DB] Final Value = " << omega << endl;
+  // cout << "[DB] Final Value = " << omega << '\n';
   return omega;
 }
 

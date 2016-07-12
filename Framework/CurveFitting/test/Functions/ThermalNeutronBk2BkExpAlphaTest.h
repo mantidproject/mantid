@@ -21,19 +21,7 @@ public:
 
   void test_Calculation() {
     // 1. Input data for test
-    std::vector<double> vec_d;
-    std::vector<double> vec_tof;
-
-    vec_d.push_back(2.72452);
-    vec_tof.push_back(62070.4);
-    vec_d.push_back(2.84566);
-    vec_tof.push_back(64834.9);
-    vec_d.push_back(3.33684);
-    vec_tof.push_back(76039.6);
-    vec_d.push_back(4.719);
-    vec_tof.push_back(107542);
-    vec_d.push_back(5.44903);
-    vec_tof.push_back(124187);
+    std::vector<double> vec_d = {2.72452, 2.84566, 3.33684, 4.719, 5.44903};
 
     // 2. Initialize the method
     ThermalNeutronBk2BkExpAlpha function;

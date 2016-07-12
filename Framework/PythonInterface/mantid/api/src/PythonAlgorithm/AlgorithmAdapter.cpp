@@ -22,7 +22,8 @@ using Environment::CallMethod0;
  */
 template <typename BaseAlgorithm>
 AlgorithmAdapter<BaseAlgorithm>::AlgorithmAdapter(PyObject *self)
-    : BaseAlgorithm(), m_self(self), m_isRunningObj(NULL), m_wikiSummary("") {
+    : BaseAlgorithm(), m_self(self), m_isRunningObj(nullptr),
+      m_wikiSummary("") {
   // Cache the isRunning call to save the lookup each time it is called
   // as it is most likely called in a loop
 
@@ -98,8 +99,7 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::category() const {
     this->getLogger().warning()
         << "Python Algorithm " << name << " v" << version
         << " does not have a category defined. See "
-           "http://www.mantidproject.org/Basic_PythonAlgorithm_Structure"
-        << std::endl;
+           "http://www.mantidproject.org/Basic_PythonAlgorithm_Structure\n";
   }
   return algCategory;
 }
@@ -141,12 +141,16 @@ bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
     return SuperClass::isRunning();
   } else {
     Environment::GlobalInterpreterLock gil;
-    PyObject *result = PyObject_CallObject(m_isRunningObj, NULL);
+    PyObject *result = PyObject_CallObject(m_isRunningObj, nullptr);
     if (PyErr_Occurred())
       Environment::throwRuntimeError(true);
-    if (PyBool_Check(result))
-      return PyInt_AsLong(result);
-    else
+    if (PyBool_Check(result)) {
+#if PY_MAJOR_VERSION >= 3
+      return static_cast<bool>(PyLong_AsLong(result));
+#else
+      return static_cast<bool>(PyInt_AsLong(result));
+#endif
+    } else
       throw std::runtime_error(
           "AlgorithmAdapter.isRunning - Expected bool return type.");
   }
@@ -170,13 +174,12 @@ void AlgorithmAdapter<BaseAlgorithm>::cancel() {
 template <typename BaseAlgorithm>
 std::map<std::string, std::string>
 AlgorithmAdapter<BaseAlgorithm>::validateInputs() {
-  // variables that are needed further down
-  boost::python::dict resultDict;
   std::map<std::string, std::string> resultMap;
 
   // this is a modified version of CallMethod0::dispatchWithDefaultReturn
   Environment::GlobalInterpreterLock gil;
   if (Environment::typeHasAttribute(getSelf(), "validateInputs")) {
+    boost::python::dict resultDict;
     try {
       resultDict = boost::python::call_method<boost::python::dict>(
           getSelf(), "validateInputs");
@@ -186,24 +189,23 @@ AlgorithmAdapter<BaseAlgorithm>::validateInputs() {
     } catch (boost::python::error_already_set &) {
       Environment::throwRuntimeError();
     }
-  }
-
-  // convert to a map<string,string>
-  boost::python::list keys = resultDict.keys();
-  size_t numItems = boost::python::len(keys);
-  for (size_t i = 0; i < numItems; ++i) {
-    boost::python::object value = resultDict[keys[i]];
-    if (value) {
-      try {
-        std::string key = boost::python::extract<std::string>(keys[i]);
-        std::string value =
-            boost::python::extract<std::string>(resultDict[keys[i]]);
-        resultMap[key] = value;
-      } catch (boost::python::error_already_set &) {
-        this->getLogger().error()
-            << "In validateInputs(self): Invalid type for key/value pair "
-            << "detected in dict.\n"
-            << "All keys and values must be strings\n";
+    // convert to a map<string,string>
+    boost::python::list keys = resultDict.keys();
+    size_t numItems = boost::python::len(keys);
+    for (size_t i = 0; i < numItems; ++i) {
+      boost::python::object value = resultDict[keys[i]];
+      if (value) {
+        try {
+          std::string key = boost::python::extract<std::string>(keys[i]);
+          std::string value =
+              boost::python::extract<std::string>(resultDict[keys[i]]);
+          resultMap[key] = value;
+        } catch (boost::python::error_already_set &) {
+          this->getLogger().error()
+              << "In validateInputs(self): Invalid type for key/value pair "
+              << "detected in dict.\n"
+              << "All keys and values must be strings\n";
+        }
       }
     }
   }
@@ -243,7 +245,7 @@ void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
   // We need to clone the property so that python doesn't own the object that
   // gets inserted
   // into the manager
-  caller.declareProperty(prop->clone(), doc);
+  caller.declareProperty(std::unique_ptr<Kernel::Property>(prop->clone()), doc);
 }
 
 /**
@@ -264,9 +266,10 @@ void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
     const boost::python::object &validator, const std::string &doc,
     const int direction) {
   BaseAlgorithm &caller = extract<BaseAlgorithm &>(self);
-  caller.declareProperty(Registry::PropertyWithValueFactory::create(
-                             name, defaultValue, validator, direction),
-                         doc);
+  auto prop = std::unique_ptr<Kernel::Property>(
+      Registry::PropertyWithValueFactory::create(name, defaultValue, validator,
+                                                 direction));
+  caller.declareProperty(std::move(prop), doc);
 }
 
 /**
@@ -285,9 +288,10 @@ void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
     const boost::python::object &defaultValue, const std::string &doc,
     const int direction) {
   BaseAlgorithm &caller = extract<BaseAlgorithm &>(self);
-  caller.declareProperty(
-      Registry::PropertyWithValueFactory::create(name, defaultValue, direction),
-      doc);
+  auto prop = std::unique_ptr<Kernel::Property>(
+      Registry::PropertyWithValueFactory::create(name, defaultValue,
+                                                 direction));
+  caller.declareProperty(std::move(prop), doc);
 }
 
 /**

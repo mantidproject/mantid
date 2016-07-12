@@ -273,22 +273,12 @@ public:
 
     // Find out mapping between spectra/workspace indexes and detectors IDs
     for (size_t i = 0; i < 5; ++i) {
-      ISpectrum *spec = dataws->getSpectrum(i);
-      if (!spec) {
-        cout << "There is no spectrum mapping to workspace index " << i
-             << ".\n";
-        return;
-      } else {
-        std::set<detid_t> detidset = spec->getDetectorIDs();
-        set<detid_t>::iterator setiter;
-        for (setiter = detidset.begin(); setiter != detidset.end(); ++setiter)
-          cout << "WorkspaceIndex = " << i << ":  Detector ID = " << *setiter
-               << ".\n";
-      }
+      for (const auto &id : dataws->getSpectrum(i).getDetectorIDs())
+        cout << "WorkspaceIndex = " << i << ":  Detector ID = " << id << ".\n";
     }
 
     // Generate a TableWorksapce
-    TableWorkspace_sptr tablews(new TableWorkspace());
+    auto tablews = boost::make_shared<TableWorkspace>();
     tablews->addColumn("str", "DetectorIDsList");
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");

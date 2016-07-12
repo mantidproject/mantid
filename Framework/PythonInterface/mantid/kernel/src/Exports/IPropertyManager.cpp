@@ -1,4 +1,5 @@
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
@@ -14,6 +15,8 @@ using namespace Mantid::Kernel;
 namespace Registry = Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
+GET_POINTER_SPECIALIZATION(IPropertyManager)
+
 namespace {
 /**
  * Set the value of a property from the value within the
@@ -25,12 +28,14 @@ namespace {
  */
 void setProperty(IPropertyManager &self, const std::string &name,
                  const boost::python::object &value) {
-  if (PyString_Check(value.ptr())) // String values can be set directly
-  {
-    self.setPropertyValue(name, boost::python::extract<std::string>(value));
+  typedef extract<std::string> from_pystr;
+  // String values can be set directly
+  from_pystr cppstr(value);
+  if (cppstr.check()) {
+    self.setPropertyValue(name, cppstr());
   } else {
     try {
-      Mantid::Kernel::Property *p = self.getProperty(name);
+      Property *p = self.getProperty(name);
       const auto &entry = Registry::TypeRegistry::retrieve(*(p->type_info()));
       entry.set(&self, name, value);
     } catch (std::invalid_argument &e) {
@@ -49,9 +54,9 @@ void setProperty(IPropertyManager &self, const std::string &name,
  */
 void declareProperty(IPropertyManager &self, const std::string &name,
                      boost::python::object value) {
-  Mantid::Kernel::Property *p =
-      Registry::PropertyWithValueFactory::create(name, value, 0);
-  self.declareProperty(p);
+  auto p = std::unique_ptr<Property>(
+      Registry::PropertyWithValueFactory::create(name, value, 0));
+  self.declareProperty(std::move(p));
 }
 
 /**
@@ -82,7 +87,8 @@ void declareOrSetProperty(IPropertyManager &self, const std::string &name,
  */
 void setPropertySettings(IPropertyManager &self, const std::string &propName,
                          IPropertySettings *settingsManager) {
-  self.setPropertySettings(propName, settingsManager->clone());
+  self.setPropertySettings(
+      propName, std::unique_ptr<IPropertySettings>(settingsManager->clone()));
 }
 
 void deleteProperty(IPropertyManager &self, const std::string &propName) {

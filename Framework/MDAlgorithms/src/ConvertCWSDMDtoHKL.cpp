@@ -34,47 +34,35 @@ using namespace Mantid::Geometry;
 DECLARE_ALGORITHM(ConvertCWSDMDtoHKL)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertCWSDMDtoHKL::ConvertCWSDMDtoHKL() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertCWSDMDtoHKL::~ConvertCWSDMDtoHKL() {}
-
-//----------------------------------------------------------------------------------------------
 /** Init
  */
 void ConvertCWSDMDtoHKL::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the input MDEventWorkspace that stores detectors "
                   "counts from a constant-wave powder diffraction experiment.");
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace", "",
-                                                        Direction::Input,
-                                                        PropertyMode::Optional),
-                  "Input Peaks Workspace");
+  declareProperty(
+      make_unique<WorkspaceProperty<PeaksWorkspace>>(
+          "PeaksWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "Input Peaks Workspace");
 
   declareProperty(
-      new ArrayProperty<double>("UBMatrix"),
+      make_unique<ArrayProperty<double>>("UBMatrix"),
       "A comma seperated list of doubles for UB matrix from (0,0), (0,1)"
       "... (2,1),(2,2)");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace in HKL-space.");
 
-  std::vector<std::string> exts;
-  exts.push_back(".dat");
-  declareProperty(
-      new FileProperty("QSampleFileName", "", API::FileProperty::OptionalSave),
-      "Name of file for sample sample.");
+  declareProperty(make_unique<FileProperty>("QSampleFileName", "",
+                                            API::FileProperty::OptionalSave),
+                  "Name of file for sample sample.");
 
-  declareProperty(
-      new FileProperty("HKLFileName", "", API::FileProperty::OptionalSave),
-      "Name of file for HKL.");
+  declareProperty(make_unique<FileProperty>("HKLFileName", "",
+                                            API::FileProperty::OptionalSave),
+                  "Name of file for HKL.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -93,7 +81,7 @@ void ConvertCWSDMDtoHKL::exec() {
   getUBMatrix();
 
   // Test indexing.  Will be delete soon
-  if (true) {
+  if (false) {
     Kernel::V3D qsample; // [1.36639,-2.52888,-4.77349]
     qsample.setX(1.36639);
     qsample.setY(-2.52888);
@@ -135,6 +123,13 @@ void ConvertCWSDMDtoHKL::exec() {
   // Create output workspace
   m_outputWS =
       createHKLMDWorkspace(vec_event_hkl, vec_event_signal, vec_event_det);
+  // Experiment info
+  ExperimentInfo_sptr expinfo = boost::make_shared<ExperimentInfo>();
+  expinfo->setInstrument(inputWS->getExperimentInfo(0)->getInstrument());
+  expinfo->mutableRun().setGoniometer(
+      inputWS->getExperimentInfo(0)->run().getGoniometer(), false);
+  expinfo->mutableRun().addProperty("run_number", 1);
+  m_outputWS->addExperimentInfo(expinfo);
 
   setProperty("OutputWorkspace", m_outputWS);
 }

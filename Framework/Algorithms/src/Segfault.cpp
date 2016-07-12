@@ -7,16 +7,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(Segfault)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-Segfault::Segfault() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-Segfault::~Segfault() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string Segfault::name() const { return "Segfault"; }
@@ -49,7 +39,8 @@ void Segfault::exec() {
 
   if (!dryrun) {
     // NULL pointer dereference
-    int *ptr = NULL;
+    int *ptr = nullptr;
+    // cppcheck-suppress nullPointer
     *ptr = 1;
   }
 }

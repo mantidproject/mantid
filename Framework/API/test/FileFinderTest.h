@@ -100,7 +100,7 @@ public:
     ConfigService::Instance().updateFacilities(m_facFile.path());
   }
 
-  ~FileFinderTest() { m_facFile.remove(); }
+  ~FileFinderTest() override { m_facFile.remove(); }
 
   void testGetFullPathWithFilename() {
     std::string path = FileFinder::Instance().getFullPath("CSP78173.raw");
@@ -244,10 +244,7 @@ public:
   }
 
   void testGetExtension() {
-    std::vector<std::string> exts;
-    exts.push_back("_event.nxs");
-    exts.push_back(".nxs.h5");
-    exts.push_back(".n*");
+    std::vector<std::string> exts{"_event.nxs", ".nxs.h5", ".n*"};
 
     TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("", exts), "");
     TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("PG31234", exts), "");
@@ -493,7 +490,7 @@ public:
         "datasearch.directories", path.toString());
   }
 
-  ~FileFinderTestPerformance() {
+  ~FileFinderTestPerformance() override {
     // Put back the old search paths.
     Mantid::Kernel::ConfigService::Instance().setString(
         "datasearch.directories", m_oldDataSearchDirectories);

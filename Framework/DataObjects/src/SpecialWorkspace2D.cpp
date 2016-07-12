@@ -20,11 +20,6 @@ Kernel::Logger g_log("SpecialWorkspace2D");
 DECLARE_WORKSPACE(SpecialWorkspace2D)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SpecialWorkspace2D::SpecialWorkspace2D() {}
-
-//----------------------------------------------------------------------------------------------
 /** Constructor, building from an instrument
  *
  * @param inst :: input instrument that is the base for this workspace
@@ -45,9 +40,9 @@ SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
   // Make the mapping, which will be used for speed later.
   detID_to_WI.clear();
   for (size_t wi = 0; wi < m_noVectors; wi++) {
-    set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
-    for (auto det = dets.begin(); det != dets.end(); ++det) {
-      detID_to_WI[*det] = wi;
+    auto &dets = getSpectrum(wi).getDetectorIDs();
+    for (auto det : dets) {
+      detID_to_WI[det] = wi;
     }
   }
 }
@@ -65,20 +60,12 @@ SpecialWorkspace2D::SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent) {
   // Make the mapping, which will be used for speed later.
   detID_to_WI.clear();
   for (size_t wi = 0; wi < m_noVectors; wi++) {
-    set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
-    for (auto det = dets.begin(); det != dets.end(); ++det) {
-      detID_to_WI[*det] = wi;
+    auto &dets = getSpectrum(wi).getDetectorIDs();
+    for (auto det : dets) {
+      detID_to_WI[det] = wi;
     }
   }
 }
-
-SpecialWorkspace2D::SpecialWorkspace2D(const SpecialWorkspace2D &other)
-    : Workspace2D(other), detID_to_WI(other.detID_to_WI) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SpecialWorkspace2D::~SpecialWorkspace2D() {}
 
 //----------------------------------------------------------------------------------------------
 /** Sets the size of the workspace and initializes arrays to zero
@@ -120,7 +107,7 @@ double SpecialWorkspace2D::getValue(const detid_t detectorID) const {
     std::ostringstream os;
     os << "SpecialWorkspace2D: " << this->getName()
        << "  Detector ID = " << detectorID
-       << "  Size(Map) = " << this->detID_to_WI.size() << std::endl;
+       << "  Size(Map) = " << this->detID_to_WI.size() << '\n';
     throw std::invalid_argument(os.str());
   } else {
     return this->dataY(it->second)[0];
@@ -186,8 +173,8 @@ void SpecialWorkspace2D::setValue(const detid_t detectorID, const double value,
  */
 void SpecialWorkspace2D::setValue(const set<detid_t> &detectorIDs,
                                   const double value, const double error) {
-  for (auto detID = detectorIDs.begin(); detID != detectorIDs.end(); ++detID) {
-    this->setValue(*detID, value, error);
+  for (auto detectorID : detectorIDs) {
+    this->setValue(detectorID, value, error);
   }
 }
 
@@ -203,7 +190,7 @@ SpecialWorkspace2D::getDetectorIDs(const std::size_t workspaceIndex) const {
   if (size_t(workspaceIndex) > this->getNumberHistograms())
     throw std::invalid_argument(
         "SpecialWorkspace2D::getDetectorID(): Invalid workspaceIndex given.");
-  return this->getSpectrum(workspaceIndex)->getDetectorIDs();
+  return this->getSpectrum(workspaceIndex).getDetectorIDs();
 }
 
 //--------------------------------------------------------------------------------------------
@@ -252,8 +239,7 @@ void SpecialWorkspace2D::binaryOperation(const unsigned int operatortype) {
     break;
   default:
     g_log.error() << "Operator " << operatortype
-                  << " Is Not Valid In BinaryOperation(operatortype)"
-                  << std::endl;
+                  << " Is Not Valid In BinaryOperation(operatortype)\n";
     throw std::invalid_argument("Invalid Operator");
     break;
   }
@@ -360,28 +346,28 @@ bool SpecialWorkspace2D::isCompatible(
   size_t numhist2 = ws->getNumberHistograms();
   if (numhist1 != numhist2) {
     g_log.debug() << "2 Workspaces have different number of histograms:  "
-                  << numhist1 << "  vs. " << numhist2 << std::endl;
+                  << numhist1 << "  vs. " << numhist2 << '\n';
     return false;
   }
 
   // 2. Check detector ID
   for (size_t ispec = 0; ispec < numhist1; ispec++) {
-    set<detid_t> ids1 = this->getSpectrum(ispec)->getDetectorIDs();
-    set<detid_t> ids2 = ws->getSpectrum(ispec)->getDetectorIDs();
+    set<detid_t> ids1 = this->getSpectrum(ispec).getDetectorIDs();
+    set<detid_t> ids2 = ws->getSpectrum(ispec).getDetectorIDs();
 
     if (ids1.size() != ids2.size()) {
       g_log.debug() << "Spectra " << ispec
                     << ": 2 Workspaces have different number of detectors "
-                    << ids1.size() << " vs. " << ids2.size() << std::endl;
+                    << ids1.size() << " vs. " << ids2.size() << '\n';
       return false;
     } else if (ids1.empty()) {
       g_log.debug() << "Spectra " << ispec
-                    << ": 2 Workspaces both have 0 detectors. " << std::endl;
+                    << ": 2 Workspaces both have 0 detectors. \n";
       return false;
     } else if (*ids1.begin() != *ids2.begin()) {
       g_log.debug() << "Spectra " << ispec
                     << ": 2 Workspaces have different Detector ID "
-                    << *ids1.begin() << " vs. " << *ids2.begin() << std::endl;
+                    << *ids1.begin() << " vs. " << *ids2.begin() << '\n';
       return false;
     }
   } // false

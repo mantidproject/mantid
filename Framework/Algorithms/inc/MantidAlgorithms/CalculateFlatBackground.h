@@ -54,39 +54,39 @@ public:
   /// (Empty) Constructor
   CalculateFlatBackground()
       : API::Algorithm(), m_convertedFromRawCounts(false),
-        m_skipMonitors(false), m_nullifyNegative(true), m_progress(NULL) {}
+        m_skipMonitors(false), m_nullifyNegative(true), m_progress(nullptr) {}
   /// Virtual destructor
-  virtual ~CalculateFlatBackground() {
+  ~CalculateFlatBackground() override {
     if (m_progress)
       delete m_progress;
-    m_progress = NULL;
+    m_progress = nullptr;
   }
   /// Algorithm's name
-  virtual const std::string name() const { return "CalculateFlatBackground"; }
+  const std::string name() const override { return "CalculateFlatBackground"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Finds a constant value fit to an appropriate range of each desired "
            "spectrum and subtracts that value from the entire spectrum.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "SANS;CorrectionFunctions\\BackgroundCorrections";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   void convertToDistribution(API::MatrixWorkspace_sptr workspace);
   void restoreDistributionState(API::MatrixWorkspace_sptr workspace);
   void checkRange(double &startX, double &endX);
-  void getSpecInds(std::vector<int> &output, const int workspaceTotal);
-  double Mean(const API::MatrixWorkspace_const_sptr WS, const int specInd,
+  void getWsInds(std::vector<int> &output, const int workspaceTotal);
+  double Mean(const API::MatrixWorkspace_const_sptr WS, const int wsInd,
               const double startX, const double endX, double &variance) const;
   double LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX,
                    double endX);

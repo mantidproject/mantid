@@ -1,5 +1,6 @@
-#include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/StatisticsOfPeaksWorkspace.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -7,14 +8,12 @@
 #include "MantidKernel/ListValidator.h"
 
 #include <fstream>
-#include "boost/assign.hpp"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::PhysicalConstants;
-using namespace boost::assign;
 
 namespace Mantid {
 namespace Crystal {
@@ -30,22 +29,16 @@ StatisticsOfPeaksWorkspace::StatisticsOfPeaksWorkspace() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-StatisticsOfPeaksWorkspace::~StatisticsOfPeaksWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void StatisticsOfPeaksWorkspace::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> propOptions;
-  for (size_t i = 0; i < m_pointGroups.size(); ++i)
-    propOptions.push_back(m_pointGroups[i]->getName());
+  propOptions.reserve(m_pointGroups.size());
+  for (auto &pointGroup : m_pointGroups)
+    propOptions.push_back(pointGroup->getName());
   declareProperty("PointGroup", propOptions[0],
                   boost::make_shared<StringListValidator>(propOptions),
                   "Which point group applies to this crystal?");
@@ -53,27 +46,25 @@ void StatisticsOfPeaksWorkspace::init() {
   std::vector<std::string> centeringOptions;
   std::vector<ReflectionCondition_sptr> reflectionConditions =
       getAllReflectionConditions();
-  for (size_t i = 0; i < reflectionConditions.size(); ++i)
-    centeringOptions.push_back(reflectionConditions[i]->getName());
+  centeringOptions.reserve(reflectionConditions.size());
+  for (auto &reflectionCondition : reflectionConditions)
+    centeringOptions.push_back(reflectionCondition->getName());
   declareProperty("LatticeCentering", centeringOptions[0],
                   boost::make_shared<StringListValidator>(centeringOptions),
                   "Appropriate lattice centering for the peaks.");
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output PeaksWorkspace");
-  declareProperty(new WorkspaceProperty<ITableWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "StatisticsTable", "StatisticsTable", Direction::Output),
                   "An output table workspace for the statistics of the peaks.");
-  std::vector<std::string> sortTypes;
-  sortTypes.push_back("ResolutionShell");
-  sortTypes.push_back("Bank");
-  sortTypes.push_back("RunNumber");
-  sortTypes.push_back("Overall");
+  std::vector<std::string> sortTypes{"ResolutionShell", "Bank", "RunNumber",
+                                     "Overall"};
   declareProperty("SortBy", sortTypes[0],
                   boost::make_shared<StringListValidator>(sortTypes),
-                  "Sort the peaks by bank, run number(default) or only overall "
-                  "statistics.");
+                  "Sort the peaks by resolution shell in d-Spacing(default), "
+                  "bank, run number, or only overall statistics.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -90,7 +81,7 @@ void StatisticsOfPeaksWorkspace::exec() {
   // We must sort the peaks
   std::vector<std::pair<std::string, bool>> criteria;
   if (sortType.compare(0, 2, "Re") == 0)
-    criteria.push_back(std::pair<std::string, bool>("wavelength", false));
+    criteria.push_back(std::pair<std::string, bool>("DSpacing", false));
   else if (sortType.compare(0, 2, "Ru") == 0)
     criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
   criteria.push_back(std::pair<std::string, bool>("BankName", true));
@@ -107,23 +98,23 @@ void StatisticsOfPeaksWorkspace::exec() {
   // run number
   std::string oldSequence;
   if (sortType.compare(0, 2, "Re") == 0) {
-    double wavelength = peaks[0].getWavelength();
-    if (wavelength > 3.0)
-      oldSequence = "first";
-    else if (wavelength > 2.5)
-      oldSequence = "second";
-    else if (wavelength > 2.0)
-      oldSequence = "third";
-    else if (wavelength > 1.5)
-      oldSequence = "fourth";
-    else if (wavelength > 1.0)
-      oldSequence = "fifth";
-    else if (wavelength > 0.5)
-      oldSequence = "sixth";
+    double dspacing = peaks[0].getDSpacing();
+    if (dspacing > 3.0)
+      oldSequence = "Inf - 3.0";
+    else if (dspacing > 2.5)
+      oldSequence = "3.0 - 2.5";
+    else if (dspacing > 2.0)
+      oldSequence = "2.5 - 2.0";
+    else if (dspacing > 1.5)
+      oldSequence = "2.0 - 1.5";
+    else if (dspacing > 1.0)
+      oldSequence = "1.5 - 1.0";
+    else if (dspacing > 0.5)
+      oldSequence = "1.0 - 0.5";
     else
-      oldSequence = "seventh";
+      oldSequence = "0.5 - 0.0";
   } else if (sortType.compare(0, 2, "Ru") == 0)
-    oldSequence = boost::lexical_cast<std::string>(peaks[0].getRunNumber());
+    oldSequence = std::to_string(peaks[0].getRunNumber());
   else
     oldSequence = peaks[0].getBankName();
   // Go through each peak at this run / bank
@@ -132,28 +123,29 @@ void StatisticsOfPeaksWorkspace::exec() {
     Peak &p = peaks[wi];
     std::string sequence;
     if (sortType.compare(0, 2, "Re") == 0) {
-      double wavelength = p.getWavelength();
-      if (wavelength > 3.0)
-        sequence = "first";
-      else if (wavelength > 2.5)
-        sequence = "second";
-      else if (wavelength > 2.0)
-        sequence = "third";
-      else if (wavelength > 1.5)
-        sequence = "fourth";
-      else if (wavelength > 1.0)
-        sequence = "fifth";
-      else if (wavelength > 0.5)
-        sequence = "sixth";
+      double dspacing = p.getDSpacing();
+      if (dspacing > 3.0)
+        sequence = "Inf - 3.0";
+      else if (dspacing > 2.5)
+        sequence = "3.0 - 2.5";
+      else if (dspacing > 2.0)
+        sequence = "2.5 - 2.0";
+      else if (dspacing > 1.5)
+        sequence = "2.0 - 1.5";
+      else if (dspacing > 1.0)
+        sequence = "1.5 - 1.0";
+      else if (dspacing > 0.5)
+        sequence = "1.0 - 0.5";
       else
-        sequence = "seventh";
+        sequence = "0.5 - 0.0";
     } else if (sortType.compare(0, 2, "Ru") == 0)
-      sequence = boost::lexical_cast<std::string>(p.getRunNumber());
+      sequence = std::to_string(p.getRunNumber());
     else
       sequence = p.getBankName();
 
     if (sequence.compare(oldSequence) != 0 && tempWS->getNumberPeaks() > 0) {
-      doSortHKL(tempWS, oldSequence);
+      if (tempWS->getNumberPeaks() > 1)
+        doSortHKL(tempWS, oldSequence);
       tempWS = WorkspaceFactory::Instance().createPeaks();
       // Copy over ExperimentInfo from input workspace
       tempWS->copyExperimentInfoFrom(ws.get());

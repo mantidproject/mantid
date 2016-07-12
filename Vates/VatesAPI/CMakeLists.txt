@@ -1,4 +1,4 @@
-# This is mainly here so you don't get a complaint when running cmake
+#This is mainly here so you don't get a complaint when running cmake
 cmake_minimum_required( VERSION 2.8.12 )
 
 project( VatesAPI )
@@ -20,6 +20,7 @@ src/MDEWInMemoryLoadingPresenter.cpp
 src/MDHWInMemoryLoadingPresenter.cpp
 src/MDHWLoadingPresenter.cpp
 src/MDHWNexusLoadingPresenter.cpp
+src/MDLoadingViewSimple.cpp
 src/MedianAndBelowThresholdRange.cpp
 src/MetadataToFieldData.cpp
 src/MetadataToFieldData.cpp
@@ -29,6 +30,10 @@ src/MDLoadingPresenter.cpp
 src/Normalization.cpp
 src/NoThresholdRange.cpp
 src/ProgressAction.cpp
+src/PresenterUtilities.cpp
+src/SaveMDWorkspaceToVTK.cpp
+src/SaveMDWorkspaceToVTKImpl.cpp
+src/SingleWorkspaceProvider.cpp
 src/TimeStepToTimeStep.cpp
 src/TimeToTimeStep.cpp
 src/UserDefinedThresholdRange.cpp
@@ -44,7 +49,6 @@ src/vtkDataSetToPeaksFilteredDataSet.cpp
 src/vtkDataSetToScaledDataSet.cpp
 src/vtkDataSetToWsName.cpp
 src/vtkDataSetToWsLocation.cpp
-src/vtkEllipsoidTransformer.cpp
 src/vtkMDLineFactory.cpp
 src/vtkMDQuadFactory.cpp
 src/vtkMD0DFactory.cpp
@@ -70,6 +74,7 @@ inc/MantidVatesAPI/ConcretePeaksPresenterVsi.h
 inc/MantidVatesAPI/ColorScaleGuard.h
 inc/MantidVatesAPI/DimensionViewFactory.h
 inc/MantidVatesAPI/EventNexusLoadingPresenter.h
+inc/MantidVatesAPI/FactoryChains.h
 inc/MantidVatesAPI/FieldDataToMetadata.h
 inc/MantidVatesAPI/FilteringUpdateProgressAction.h
 inc/MantidVatesAPI/GeometryView.h
@@ -82,6 +87,7 @@ inc/MantidVatesAPI/MDHWLoadingPresenter.h
 inc/MantidVatesAPI/MDHWNexusLoadingPresenter.h
 inc/MantidVatesAPI/MDLoadingPresenter.h
 inc/MantidVatesAPI/MDLoadingView.h
+inc/MantidVatesAPI/MDLoadingViewSimple.h
 inc/MantidVatesAPI/MDLoadingViewAdapter.h
 inc/MantidVatesAPI/MedianAndBelowThresholdRange.h
 inc/MantidVatesAPI/MetaDataExtractorUtils.h
@@ -93,7 +99,11 @@ inc/MantidVatesAPI/MetadataToFieldData.h
 inc/MantidVatesAPI/NoThresholdRange.h
 inc/MantidVatesAPI/NullPeaksPresenterVsi.h
 inc/MantidVatesAPI/PeaksPresenterVsi.h
+inc/MantidVatesAPI/PresenterFactories.h
 inc/MantidVatesAPI/ProgressAction.h
+inc/MantidVatesAPI/SaveMDWorkspaceToVTK.h
+inc/MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h
+inc/MantidVatesAPI/SingleWorkspaceProvider.h
 inc/MantidVatesAPI/SQWLoadingPresenter.h
 inc/MantidVatesAPI/ThresholdRange.h
 inc/MantidVatesAPI/TimeStepToTimeStep.h
@@ -111,7 +121,6 @@ inc/MantidVatesAPI/vtkDataSetToPeaksFilteredDataSet.h
 inc/MantidVatesAPI/vtkDataSetToScaledDataSet.h
 inc/MantidVatesAPI/vtkDataSetToWsName.h
 inc/MantidVatesAPI/vtkDataSetToWsLocation.h
-inc/MantidVatesAPI/vtkEllipsoidTransformer.h
 inc/MantidVatesAPI/vtkMDLineFactory.h
 inc/MantidVatesAPI/vtkMDQuadFactory.h
 inc/MantidVatesAPI/vtkMDHexFactory.h
@@ -159,10 +168,15 @@ test/MDHWInMemoryLoadingPresenterTest.h
 test/MDHWLoadingPresenterTest.h
 test/MDHWNexusLoadingPresenterTest.h
 test/MDLoadingPresenterTest.h
+test/MDLoadingViewSimpleTest.h
 test/MetaDataExtractorUtilsTest.h
 test/MetadataJsonManagerTest.h
 test/MetadataToFieldDataTest.h
 test/NormalizationTest.h
+test/PresenterUtilitiesTest.h
+test/SaveMDWorkspaceToVTKTest.h
+test/SaveMDWorkspaceToVTKImplTest.h
+test/SingleWorkspaceProviderTest.h
 test/SQWLoadingPresenterTest.h
 test/TimeStepToTimeStepTest.h
 test/TimeToTimeStepTest.h
@@ -178,7 +192,6 @@ test/vtkDataSetToNonOrthogonalDataSetTest.h
 test/vtkNullUnstructuredGridTest.h
 test/vtkNullStructuredGridTest.h
 test/vtkMDHWSignalArrayTest.h
-test/vtkEllipsoidTransformerTest.h
 test/NullPeaksPresenterVsiTest.h
 test/ConcretePeaksPresenterVsiTest.h
 test/CompositePeaksPresenterVsiTest.h
@@ -246,6 +259,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
 
   include_directories( inc ../../Framework/TestHelpers/inc ../../Framework/DataHandling/inc ../../Framework/DataObjects/inc ../../Framework/MDAlgorithms/inc)
   set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
+                        ../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 
                         ../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
@@ -261,6 +275,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   vtkIOLegacy
   vtkFiltersExtraction
   vtkFiltersSources
+  vtkPVVTKExtensionsDefault
   ${vtkjsoncpp_LIBRARIES}
   ${POCO_LIBRARIES}
   ${Boost_LIBRARIES}

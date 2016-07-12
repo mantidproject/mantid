@@ -4,8 +4,10 @@
 #include "MantidAlgorithms/CalculateTransmissionBeamSpreader.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -20,32 +22,31 @@ using namespace Kernel;
 using namespace API;
 using std::size_t;
 
-CalculateTransmissionBeamSpreader::CalculateTransmissionBeamSpreader()
-    : API::Algorithm(), logFit(false) {}
-
-CalculateTransmissionBeamSpreader::~CalculateTransmissionBeamSpreader() {}
-
 void CalculateTransmissionBeamSpreader::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<CommonBinsValidator>();
   wsValidator->add<HistogramValidator>();
 
-  declareProperty(new WorkspaceProperty<>("SampleSpreaderRunWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>("SampleSpreaderRunWorkspace",
+                                                   "", Direction::Input,
+                                                   wsValidator),
                   "The workspace containing the sample beam-spreader run");
-  declareProperty(new WorkspaceProperty<>("DirectSpreaderRunWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>("DirectSpreaderRunWorkspace",
+                                                   "", Direction::Input,
+                                                   wsValidator),
                   "The workspace containing the direct beam-spreader run");
-  declareProperty(new WorkspaceProperty<>("SampleScatterRunWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>("SampleScatterRunWorkspace",
+                                                   "", Direction::Input,
+                                                   wsValidator),
                   "The workspace containing the sample scattering run");
-  declareProperty(new WorkspaceProperty<>("DirectScatterRunWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>("DirectScatterRunWorkspace",
+                                                   "", Direction::Input,
+                                                   wsValidator),
                   "The workspace containing the direct beam scattering run");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The fitted transmission correction");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The fitted transmission correction");
 
   auto zeroOrMore = boost::make_shared<BoundedValidator<int>>();
   zeroOrMore->setLower(0);
@@ -109,14 +110,13 @@ void CalculateTransmissionBeamSpreader::exec() {
   }
 
   // Extract the required spectra into separate workspaces
-  std::vector<detid_t> udets;
-  std::vector<size_t> indices;
-  udets.push_back(getProperty("IncidentBeamMonitor"));
+  std::vector<detid_t> udets{getProperty("IncidentBeamMonitor")};
 
   // Convert UDETs to workspace indices
   // Get monitors (assume that the detector mapping is the same for all data
   // sets)
-  sample_scatterWS->getIndicesFromDetectorIDs(udets, indices);
+  std::vector<size_t> indices =
+      sample_scatterWS->getIndicesFromDetectorIDs(udets);
   if (indices.size() != 1) {
     g_log.error() << "Could not find the incident monitor spectra\n";
     throw std::invalid_argument(
@@ -140,11 +140,10 @@ void CalculateTransmissionBeamSpreader::exec() {
 
   // Note: Replaced PARALLEL_SECTION with this OMP for loop, due to occasional
   // unexplained segfault.
-  std::vector<MatrixWorkspace_sptr> in_ws, out_ws(4);
-  in_ws.push_back(sample_scatterWS);
-  in_ws.push_back(direct_scatterWS);
-  in_ws.push_back(sample_spreaderWS);
-  in_ws.push_back(direct_spreaderWS);
+  std::vector<MatrixWorkspace_sptr> in_ws{sample_scatterWS, direct_scatterWS,
+                                          sample_spreaderWS, direct_spreaderWS};
+
+  std::vector<MatrixWorkspace_sptr> out_ws(4);
 
   PARALLEL_FOR_IF(true)
   for (int i = 0; i < 4; i++) {
@@ -159,7 +158,7 @@ void CalculateTransmissionBeamSpreader::exec() {
   MatrixWorkspace_sptr spreader_trans =
       WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
   spreader_trans->setYUnit("");
-  spreader_trans->isDistribution(true);
+  spreader_trans->setDistribution(true);
   spreader_trans->dataX(0)[0] = 0.0;
   spreader_trans->dataY(0)[0] = getProperty("SpreaderTransmissionValue");
   spreader_trans->dataE(0)[0] = getProperty("SpreaderTransmissionError");
@@ -180,8 +179,8 @@ void CalculateTransmissionBeamSpreader::exec() {
   if (outputRaw) {
     std::string outputWSName = getPropertyValue("OutputWorkspace");
     outputWSName += "_unfitted";
-    declareProperty(new WorkspaceProperty<>("UnfittedData", outputWSName,
-                                            Direction::Output));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "UnfittedData", outputWSName, Direction::Output));
     setProperty("UnfittedData", transmission);
   }
 

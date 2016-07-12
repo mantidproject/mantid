@@ -16,16 +16,6 @@ using namespace Mantid::API;
 DECLARE_ALGORITHM(AddPeakHKL)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-AddPeakHKL::AddPeakHKL() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-AddPeakHKL::~AddPeakHKL() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string AddPeakHKL::name() const { return "AddPeakHKL"; }
@@ -45,11 +35,11 @@ const std::string AddPeakHKL::summary() const {
 /** Initialize the algorithm's properties.
  */
 void AddPeakHKL::init() {
-  declareProperty(new WorkspaceProperty<Mantid::API::IPeaksWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<Mantid::API::IPeaksWorkspace>>(
                       "Workspace", "", Direction::InOut),
                   "An input workspace.");
   // clang-format off
-    declareProperty(new ArrayProperty<double>("HKL", boost::make_shared<ArrayLengthValidator<double> > (3)), "HKL point to add");
+    declareProperty(make_unique<ArrayProperty<double>>("HKL", boost::make_shared<ArrayLengthValidator<double> > (3)), "HKL point to add");
   // clang-format on
 }
 

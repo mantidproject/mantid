@@ -17,7 +17,7 @@ public:
   virtual PeakTransform_sptr
   createTransform(const std::string &xPlotLabel,
                   const std::string &yPlotLabel) const = 0;
-  virtual ~PeakTransformFactory() {}
+  virtual ~PeakTransformFactory() = default;
 };
 
 /// Factory Shared Pointer typedef.

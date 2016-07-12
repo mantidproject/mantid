@@ -2,10 +2,11 @@
     File                 : Bar.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : 3D bars (modifed enrichment from QwtPlot3D)
-                           
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -32,23 +33,21 @@
 #include <qwt3d_plot.h>
 
 //! 3D bars (modifed enrichment from QwtPlot3D)
-class Bar : public Qwt3D::VertexEnrichment
-{
+class Bar : public Qwt3D::VertexEnrichment {
 public:
   Bar();
   explicit Bar(double rad);
 
-  Qwt3D::Enrichment* clone() const {return new Bar(*this);}
-  
+  Qwt3D::Enrichment *clone() const override { return new Bar(*this); }
+
   void configure(double rad);
-  void drawBegin();
-  void drawEnd();
-  void draw(Qwt3D::Triple const&);
+  void drawBegin() override;
+  void drawEnd() override;
+  void draw(Qwt3D::Triple const &) override;
 
 private:
   double radius_;
   double diag_;
 };
-
 
 #endif

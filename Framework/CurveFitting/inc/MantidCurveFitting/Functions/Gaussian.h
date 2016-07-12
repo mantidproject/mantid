@@ -50,34 +50,37 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport Gaussian : public API::IPeakFunction {
 public:
-  /// Destructor
-  virtual ~Gaussian(){};
-
+  Gaussian();
   /// overwrite IPeakFunction base class methods
-  virtual double centre() const { return getParameter("PeakCentre"); }
-  virtual double height() const { return getParameter("Height"); }
-  virtual double fwhm() const {
-    return 2.0 * sqrt(2.0 * std::log(2.0)) * getParameter("Sigma");
-  }
-  virtual void setCentre(const double c) { setParameter("PeakCentre", c); }
-  virtual void setHeight(const double h) { setParameter("Height", h); }
-  virtual void setFwhm(const double w) {
-    setParameter("Sigma", w / (2.0 * sqrt(2.0 * std::log(2.0))));
-  }
+  double centre() const override;
+  double height() const override;
+  double fwhm() const override;
+  double intensity() const override;
+  void setCentre(const double c) override;
+  void setHeight(const double h) override;
+  void setFwhm(const double w) override;
+  void setIntensity(const double i) override;
+
+  void fixCentre() override;
+  void unfixCentre() override;
+  void fixIntensity() override;
+  void unfixIntensity() override;
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "Gaussian"; }
-  virtual const std::string category() const { return "Peak"; }
-  virtual void setActiveParameter(size_t i, double value);
-  virtual double activeParameter(size_t i) const;
+  std::string name() const override { return "Gaussian"; }
+  const std::string category() const override { return "Peak"; }
+  void setActiveParameter(size_t i, double value) override;
+  double activeParameter(size_t i) const override;
 
 protected:
-  virtual void functionLocal(double *out, const double *xValues,
-                             const size_t nData) const;
-  virtual void functionDerivLocal(API::Jacobian *out, const double *xValues,
-                                  const size_t nData);
+  void functionLocal(double *out, const double *xValues,
+                     const size_t nData) const override;
+  void functionDerivLocal(API::Jacobian *out, const double *xValues,
+                          const size_t nData) override;
   /// overwrite IFunction base class method, which declare function parameters
-  virtual void init();
+  void init() override;
+  /// Intensity cache to help recover form Sigma==0 situation
+  mutable double m_intensityCache;
 };
 
 } // namespace Functions

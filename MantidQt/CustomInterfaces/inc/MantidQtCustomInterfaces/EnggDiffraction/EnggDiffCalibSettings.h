@@ -44,4 +44,3 @@ struct EnggDiffCalibSettings {
 } // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFCALIBSETTINGS_H_
-

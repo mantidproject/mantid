@@ -52,30 +52,26 @@ namespace Algorithms {
 */
 class DLLExport ConjoinWorkspaces : public WorkspaceJoiners {
 public:
-  /// Empty constructor
-  ConjoinWorkspaces();
-  /// Destructor
-  virtual ~ConjoinWorkspaces();
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "ConjoinWorkspaces"; }
+  const std::string name() const override { return "ConjoinWorkspaces"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   void checkForOverlap(API::MatrixWorkspace_const_sptr ws1,
                        API::MatrixWorkspace_const_sptr ws2,
                        bool checkSpectra) const;
-  virtual void fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
-                                  API::MatrixWorkspace_const_sptr ws2,
-                                  API::MatrixWorkspace_sptr output);
-  bool processGroups();
+  void fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
+                          API::MatrixWorkspace_const_sptr ws2,
+                          API::MatrixWorkspace_sptr output) override;
+  bool processGroups() override;
 
   /// True if spectra overlap
-  bool m_overlapChecked;
+  bool m_overlapChecked = false;
 };
 
 } // namespace Algorithm

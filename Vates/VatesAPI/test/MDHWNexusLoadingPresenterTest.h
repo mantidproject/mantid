@@ -7,6 +7,7 @@
 #include <vtkMatrix4x4.h>
 #include <vtkPVChangeOfBasisHelper.h>
 #include <vtkDataArray.h>
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidVatesAPI/vtkMDHistoLineFactory.h"
 #include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
@@ -77,7 +78,7 @@ private:
     MDHWNexusLoadingPresenter presenter(std::move(view), filename);
     presenter.executeLoadMetadata();
     auto product = presenter.execute(&factory, mockLoadingProgressAction,
-                                            mockDrawingProgressAction);
+                                     mockDrawingProgressAction);
 
     TSM_ASSERT("Should have generated a vtkDataSet", NULL != product);
     if (performAsserts) {
@@ -178,7 +179,9 @@ public:
 
     // Set the COB
     try {
-      presenter.makeNonOrthogonal(product);
+      auto workspaceProvider = Mantid::Kernel::make_unique<
+          ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+      presenter.makeNonOrthogonal(product, std::move(workspaceProvider));
     } catch (...) {
       // Add the standard change of basis matrix and set the boundaries
       presenter.setDefaultCOBandBoundaries(product);

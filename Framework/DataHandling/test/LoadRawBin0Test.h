@@ -4,9 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadRawBin0.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"

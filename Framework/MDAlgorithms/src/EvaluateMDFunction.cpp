@@ -21,11 +21,6 @@ DECLARE_ALGORITHM(EvaluateMDFunction)
 EvaluateMDFunction::EvaluateMDFunction() { useAlgorithm("EvaluateFunction"); }
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-EvaluateMDFunction::~EvaluateMDFunction() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's version for identification. @see Algorithm::version
 int EvaluateMDFunction::version() const { return 1; }
@@ -45,15 +40,16 @@ const std::string EvaluateMDFunction::summary() const {
  */
 void EvaluateMDFunction::init() {
   declareProperty(
-      new WorkspaceProperty<API::IMDHistoWorkspace>("InputWorkspace", "",
-                                                    Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
       "An input workspace that provides dimensions for the output.");
   declareProperty(
-      new API::FunctionProperty("Function"),
+      Kernel::make_unique<API::FunctionProperty>("Function"),
       "Parameters defining the fitting function and its initial values");
-  declareProperty(new WorkspaceProperty<API::IMDHistoWorkspace>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "An output workspace.");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
+      "An output workspace.");
 }
 
 //----------------------------------------------------------------------------------------------

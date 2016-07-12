@@ -7,6 +7,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -92,7 +93,7 @@ void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results,
   GSLMatrix J = makeJacobian(peak, centre, height, fwhm, intensity);
   // CHECK_OUT_GSL_MATRIX("J=", J);
 
-  GSLMatrix JCJ = J * covariance * Tr(J);
+  GSLMatrix JCJ = J * covariance * J.tr();
   // CHECK_OUT_GSL_MATRIX("JCJ=", JCJ);
 
   TableRow row = results.appendRow();
@@ -109,12 +110,12 @@ void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results,
 /// Initialize
 void EstimatePeakErrors::init() {
 
-  declareProperty(new FunctionProperty("Function"),
+  declareProperty(make_unique<FunctionProperty>("Function"),
                   "Fitting function containing peaks. Must have a covariance "
                   "matrix attached.");
 
   declareProperty(
-      new API::WorkspaceProperty<API::ITableWorkspace>(
+      make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the TableWorkspace with the output values and errors.");
 }
@@ -132,7 +133,7 @@ void EstimatePeakErrors::exec() {
 
   auto matrix = function->getCovarianceMatrix();
   if (!matrix) {
-    g_log.warning() << "Function doesn't have covariance matrix." << std::endl;
+    g_log.warning() << "Function doesn't have covariance matrix.\n";
     setProperty("OutputWorkspace", results);
     return;
   }
@@ -151,14 +152,14 @@ void EstimatePeakErrors::exec() {
         size_t np = fun->nParams();
         IPeakFunction *peak = dynamic_cast<IPeakFunction *>(fun);
         if (peak) {
-          std::string prefix = "f" + boost::lexical_cast<std::string>(i) + ".";
+          std::string prefix = "f" + std::to_string(i) + ".";
           GSLMatrix covariance(*matrix, ip, ip, np, np);
           calculatePeakValues(*peak, *results, covariance, prefix);
         }
         ip += np;
       }
     } else {
-      g_log.warning() << "Function has no peaks." << std::endl;
+      g_log.warning() << "Function has no peaks.\n";
     }
   }
 

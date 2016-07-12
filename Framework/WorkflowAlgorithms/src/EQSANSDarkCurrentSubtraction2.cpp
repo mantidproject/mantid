@@ -3,14 +3,16 @@
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction2.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+
 #include "Poco/Path.h"
 #include "Poco/String.h"
-#include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
-#include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -25,22 +27,22 @@ using namespace DataObjects;
 
 void EQSANSDarkCurrentSubtraction2::init() {
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator));
+  declareProperty(make_unique<WorkspaceProperty<>>(
+      "InputWorkspace", "", Direction::Input, wsValidator));
 
   declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load,
-                            "_event.nxs"),
+      make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load,
+                                     "_event.nxs"),
       "The name of the input event Nexus file to load as dark current.");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output));
   declareProperty("PersistentCorrection", true,
                   "If true, the algorithm will be persistent and re-used when "
                   "other data sets are processed");
   declareProperty("ReductionProperties", "__sans_reduction_properties",
                   Direction::Input);
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
       "OutputDarkCurrentWorkspace", "", Direction::Output,
       PropertyMode::Optional));
   declareProperty("OutputMessage", "", Direction::Output);
@@ -63,9 +65,9 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   // If the load algorithm isn't in the reduction properties, add it
   const bool persistent = getProperty("PersistentCorrection");
   if (!reductionManager->existsProperty("DarkCurrentAlgorithm") && persistent) {
-    AlgorithmProperty *algProp = new AlgorithmProperty("DarkCurrentAlgorithm");
+    auto algProp = make_unique<AlgorithmProperty>("DarkCurrentAlgorithm");
     algProp->setValue(toString());
-    reductionManager->declareProperty(algProp);
+    reductionManager->declareProperty(std::move(algProp));
   }
 
   Progress progress(this, 0.0, 1.0, 10);
@@ -80,8 +82,7 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   if (inputEventWS) {
     g_log.error() << "To use this version of EQSANSDarkCurrentSubtraction, "
                   << "you need to make sure EQSANSLoad produces histograms. "
-                  << "You can also turn the dark current subtraction off."
-                  << std::endl;
+                  << "You can also turn the dark current subtraction off.\n";
     throw std::invalid_argument(
         "EQSANSDarkCurrentSubtraction-v2 only works on histograms.");
   }
@@ -136,8 +137,8 @@ void EQSANSDarkCurrentSubtraction2::exec() {
     if (!(darkWSOutputName.size() == 0))
       setProperty("OutputDarkCurrentWorkspace", darkWS);
     AnalysisDataService::Instance().addOrReplace(darkWSName, darkWS);
-    reductionManager->declareProperty(
-        new WorkspaceProperty<>(entryName, "", Direction::Output));
+    reductionManager->declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        entryName, "", Direction::Output));
     reductionManager->setPropertyValue(entryName, darkWSName);
     reductionManager->setProperty(entryName, darkWS);
   }
@@ -168,8 +169,7 @@ void EQSANSDarkCurrentSubtraction2::exec() {
     output_message +=
         "\n   Could not find proton charge or duration in sample logs";
     g_log.error()
-        << "ERROR: Could not find proton charge or duration in sample logs"
-        << std::endl;
+        << "ERROR: Could not find proton charge or duration in sample logs\n";
   };
   // The scaling factor should account for the TOF cuts on each side of a frame
   // The EQSANSLoad algorithm cuts the beginning and end of the TOF distribution
@@ -200,15 +200,13 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   const int numberOfDarkSpectra =
       static_cast<int>(scaledDarkWS->getNumberHistograms());
   if (numberOfSpectra != numberOfDarkSpectra) {
-    g_log.error()
-        << "Incompatible number of pixels between sample run and dark current"
-        << std::endl;
+    g_log.error() << "Incompatible number of pixels between sample run and "
+                     "dark current\n";
   }
   const int nBins = static_cast<int>(inputWS->readY(0).size());
   const int xLength = static_cast<int>(inputWS->readX(0).size());
   if (xLength != nBins + 1) {
-    g_log.error() << "The input workspaces are expected to be histograms"
-                  << std::endl;
+    g_log.error() << "The input workspaces are expected to be histograms\n";
   }
 
   progress.report("Subtracting dark current");

@@ -1,5 +1,7 @@
 #include "MantidMDAlgorithms/CreateMD.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include <Poco/Path.h>
@@ -13,6 +15,11 @@ namespace MDAlgorithms {
 
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+
+// Box manager parameters for child algorithms
+static const std::string SPLITINTO("2");
+static const std::string SPLITTHRESHOLD("500");
+static const std::string MAXRECURSIONDEPTH("20");
 
 /*
  * Pad the vector of parameter values to the same size as data sources
@@ -40,8 +47,8 @@ void padParameterVector(std::vector<double> &param_vector,
  */
 bool any_given(const std::vector<std::vector<double>> &params) {
   std::vector<double> param;
-  for (auto iter = params.begin(); iter != params.end(); ++iter) {
-    param = *iter;
+  for (const auto &iter : params) {
+    param = iter;
     if (!param.empty()) {
       return true;
     }
@@ -57,8 +64,8 @@ bool any_given(const std::vector<std::vector<double>> &params) {
  */
 bool all_given(const std::vector<std::vector<double>> &params) {
   std::vector<double> param;
-  for (auto iter = params.begin(); iter != params.end(); ++iter) {
-    param = *iter;
+  for (const auto &iter : params) {
+    param = iter;
     if (param.empty()) {
       return false;
     }
@@ -68,16 +75,6 @@ bool all_given(const std::vector<std::vector<double>> &params) {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateMD)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateMD::CreateMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateMD::~CreateMD() {}
 
 //----------------------------------------------------------------------------------------------
 
@@ -100,68 +97,79 @@ const std::string CreateMD::summary() const {
  */
 void CreateMD::init() {
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "MDEventWorkspace with new data appended.");
 
   declareProperty(
-      new ArrayProperty<std::string>(
+      Kernel::make_unique<ArrayProperty<std::string>>(
           "DataSources",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>(),
           Direction::Input),
       "Input workspaces to process, or filenames to load and process");
 
-  declareProperty(new ArrayProperty<double>("EFix", Direction::Input),
+  declareProperty(make_unique<ArrayProperty<double>>("EFix", Direction::Input),
                   "datasource energy values in meV");
 
-  std::vector<std::string> e_mode_options;
-  e_mode_options.push_back("Elastic");
-  e_mode_options.push_back("Direct");
-  e_mode_options.push_back("Indirect");
+  std::vector<std::string> e_mode_options{"Elastic", "Direct", "Indirect"};
 
   declareProperty("Emode", "Direct",
                   boost::make_shared<StringListValidator>(e_mode_options),
                   "Analysis mode ['Elastic', 'Direct', 'Indirect'].");
 
   declareProperty(
-      new ArrayProperty<double>(
+      Kernel::make_unique<ArrayProperty<double>>(
           "Alatt",
           boost::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice parameters");
 
   declareProperty(
-      new ArrayProperty<double>(
+      Kernel::make_unique<ArrayProperty<double>>(
           "Angdeg",
           boost::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice angles");
 
   declareProperty(
-      new ArrayProperty<double>(
+      Kernel::make_unique<ArrayProperty<double>>(
           "u", boost::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice vector parallel to neutron beam");
 
   declareProperty(
-      new ArrayProperty<double>(
+      Kernel::make_unique<ArrayProperty<double>>(
           "v", boost::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice vector perpendicular to neutron beam in the horizontal plane");
 
-  declareProperty(new ArrayProperty<double>("Psi", Direction::Input),
+  declareProperty(make_unique<ArrayProperty<double>>("Psi", Direction::Input),
                   "Psi rotation in degrees. Optional or one entry per run.");
 
-  declareProperty(new ArrayProperty<double>("Gl", Direction::Input),
+  declareProperty(make_unique<ArrayProperty<double>>("Gl", Direction::Input),
                   "gl rotation in degrees. Optional or one entry per run.");
 
-  declareProperty(new ArrayProperty<double>("Gs", Direction::Input),
+  declareProperty(make_unique<ArrayProperty<double>>("Gs", Direction::Input),
                   "gs rotation in degrees. Optional or one entry per run.");
 
   declareProperty(
-      new PropertyWithValue<bool>("InPlace", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("InPlace", true, Direction::Input),
       "Execute conversions to MD and Merge in one-step. Less "
       "memory overhead.");
+
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                ".nxs"),
+      "The name of the Nexus file to write, as a full or relative path.\n"
+      "Only used if FileBackEnd is true.");
+  setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
+                                      "CreateFileBackEnd", IS_EQUAL_TO, "1"));
+
+  declareProperty("FileBackEnd", false,
+                  "If true, Filename must also be specified. The algorithm "
+                  "will create the specified file in addition to an output "
+                  "workspace. The workspace will load data from the file on "
+                  "demand in order to reduce memory use.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -181,6 +189,8 @@ void CreateMD::exec() {
   bool in_place = this->getProperty("InPlace");
   const std::vector<std::string> data_sources =
       this->getProperty("DataSources");
+  const std::string out_filename = this->getProperty("Filename");
+  const bool fileBackEnd = this->getProperty("FileBackEnd");
 
   const size_t entries = data_sources.size();
 
@@ -198,6 +208,7 @@ void CreateMD::exec() {
   MatrixWorkspace_sptr workspace;
   std::stringstream ws_name;
   IMDEventWorkspace_sptr run_md;
+  Progress progress(this, 0.0, 1.0, entries + 1);
   for (unsigned long entry_number = 0; entry_number < entries;
        ++entry_number, ++counter) {
     ws_name.str(std::string());
@@ -227,26 +238,33 @@ void CreateMD::exec() {
     bool do_in_place = in_place && (counter > 0);
     run_md = single_run(workspace, emode, efix[entry_number], psi[entry_number],
                         gl[entry_number], gs[entry_number], do_in_place, alatt,
-                        angdeg, u, v, run_md);
+                        angdeg, u, v, out_filename, fileBackEnd, run_md);
+
     to_merge_names.push_back(to_merge_name);
 
     // We are stuck using ADS as we can't pass workspace pointers to MergeMD
     // There is currently no way to pass a list of workspace pointers
-    AnalysisDataService::Instance().addOrReplace(to_merge_name, run_md);
+    if (!do_in_place) {
+      AnalysisDataService::Instance().addOrReplace(to_merge_name, run_md);
+    }
+
+    progress.report();
   }
 
   Workspace_sptr output_workspace;
   if (to_merge_names.size() > 1 && !in_place) {
+    progress.doReport("Merging loaded data into single workspace");
     output_workspace = merge_runs(to_merge_names);
   } else {
     output_workspace =
         AnalysisDataService::Instance().retrieve(to_merge_names[0]);
   }
 
+  progress.report();
+
   // Clean up temporary workspaces
-  for (auto ws_iter = to_merge_names.begin(); ws_iter != to_merge_names.end();
-       ++ws_iter) {
-    AnalysisDataService::Instance().remove(*ws_iter);
+  for (auto &to_merge_name : to_merge_names) {
+    AnalysisDataService::Instance().remove(to_merge_name);
   }
 
   this->setProperty("OutputWorkspace", output_workspace);
@@ -352,10 +370,10 @@ void CreateMD::setUB(Mantid::API::MatrixWorkspace_sptr workspace, double a,
  * @out_mdws :: output workspace to use if merge step is carried out
  * @returns the output converted workspace
  */
-Mantid::API::IMDEventWorkspace_sptr
-CreateMD::convertToMD(Mantid::API::Workspace_sptr workspace,
-                      const std::string &analysis_mode, bool in_place,
-                      Mantid::API::IMDEventWorkspace_sptr out_mdws) {
+Mantid::API::IMDEventWorkspace_sptr CreateMD::convertToMD(
+    Mantid::API::Workspace_sptr workspace, const std::string &analysis_mode,
+    bool in_place, const std::string &filebackend_filename,
+    const bool filebackend, Mantid::API::IMDEventWorkspace_sptr out_mdws) {
   Algorithm_sptr min_max_alg = createChildAlgorithm("ConvertToMDMinMaxGlobal");
   min_max_alg->setProperty("InputWorkspace", workspace);
   min_max_alg->setProperty("QDimensions", "Q3D");
@@ -371,6 +389,15 @@ CreateMD::convertToMD(Mantid::API::Workspace_sptr workspace,
   convert_alg->setProperty("dEAnalysisMode", analysis_mode);
   convert_alg->setPropertyValue("MinValues", min_values);
   convert_alg->setPropertyValue("MaxValues", max_values);
+  // Use same box split settings in ConvertToMD and MergeMD
+  // Otherwise InPlace=True or False will give different results
+  convert_alg->setProperty("SplitInto", SPLITINTO);
+  convert_alg->setProperty("SplitThreshold", SPLITTHRESHOLD);
+  convert_alg->setProperty("MaxRecursionDepth", MAXRECURSIONDEPTH);
+  convert_alg->setProperty("Filename", filebackend_filename);
+  convert_alg->setProperty("FileBackEnd", filebackend);
+  // OverwriteExisting=false means events are added to the existing workspace,
+  // effectively doing the merge in place  (without using MergeMD)
   convert_alg->setProperty("OverwriteExisting", !in_place);
   if (in_place) {
     convert_alg->setProperty("OutputWorkspace", out_mdws);
@@ -394,6 +421,11 @@ CreateMD::merge_runs(const std::vector<std::string> &to_merge) {
 
   merge_alg->setProperty("InputWorkspaces", to_merge);
   merge_alg->setPropertyValue("OutputWorkspace", "dummy");
+  // Use same box split settings in ConvertToMD and MergeMD
+  // Otherwise InPlace=True or False will give different results
+  merge_alg->setProperty("SplitInto", SPLITINTO);
+  merge_alg->setProperty("SplitThreshold", SPLITTHRESHOLD);
+  merge_alg->setProperty("MaxRecursionDepth", MAXRECURSIONDEPTH);
   merge_alg->executeAsChildAlg();
 
   return merge_alg->getProperty("OutputWorkspace");
@@ -421,18 +453,10 @@ Mantid::API::IMDEventWorkspace_sptr CreateMD::single_run(
     double efix, double psi, double gl, double gs, bool in_place,
     const std::vector<double> &alatt, const std::vector<double> &angdeg,
     const std::vector<double> &u, const std::vector<double> &v,
+    const std::string &filebackend_filename, const bool filebackend,
     Mantid::API::IMDEventWorkspace_sptr out_mdws) {
 
-  std::vector<std::vector<double>> ub_params;
-  ub_params.push_back(alatt);
-  ub_params.push_back(angdeg);
-  ub_params.push_back(u);
-  ub_params.push_back(v);
-
-  std::vector<double> goniometer_params;
-  goniometer_params.push_back(psi);
-  goniometer_params.push_back(gl);
-  goniometer_params.push_back(gs);
+  std::vector<std::vector<double>> ub_params{alatt, angdeg, u, v};
 
   if (any_given(ub_params) && !all_given(ub_params)) {
     throw std::invalid_argument(
@@ -440,7 +464,7 @@ Mantid::API::IMDEventWorkspace_sptr CreateMD::single_run(
   } else {
     if (input_workspace->sample().hasOrientedLattice()) {
       g_log.warning() << "Sample already has a UB. This will not be "
-                         "overwritten. Use ClearUB and re-run." << std::endl;
+                         "overwritten. Use ClearUB and re-run.\n";
     } else {
       setUB(input_workspace, alatt[0], alatt[1], alatt[2], angdeg[0], angdeg[1],
             angdeg[2], u, v);
@@ -455,7 +479,8 @@ Mantid::API::IMDEventWorkspace_sptr CreateMD::single_run(
     addSampleLog(input_workspace, "psi", psi);
     setGoniometer(input_workspace);
 
-    return convertToMD(input_workspace, emode, in_place, out_mdws);
+    return convertToMD(input_workspace, emode, in_place, filebackend_filename,
+                       filebackend, out_mdws);
   }
 }
 
@@ -480,6 +505,13 @@ std::map<std::string, std::string> CreateMD::validateInputs() {
   const std::vector<double> gl = this->getProperty("Gl");
   const std::vector<double> gs = this->getProperty("Gs");
   const std::vector<double> efix = this->getProperty("Efix");
+  const std::string filename = this->getProperty("Filename");
+  const bool fileBackEnd = this->getProperty("FileBackEnd");
+
+  if (fileBackEnd && filename.empty()) {
+    validation_output["Filename"] =
+        "Filename must be given if FileBackEnd is required.";
+  }
 
   const size_t ws_entries = data_sources.size();
   for (const auto &source : data_sources) {

@@ -50,14 +50,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SofQWCentre : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  SofQWCentre() : API::Algorithm() {}
-  /// Virtual destructor
-  virtual ~SofQWCentre() {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SofQWCentre"; }
+  const std::string name() const override { return "SofQWCentre"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Converts a 2D workspace that has axes in *units* of **DeltaE** "
            "(energy transfer) against spectrum number to one "
            "that gives intensity as a function of **DeltaE** against "
@@ -65,9 +61,9 @@ public:
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Inelastic\\SofQW"; }
+  const std::string category() const override { return "Inelastic\\SofQW"; }
   /// Create the output workspace
   static API::MatrixWorkspace_sptr
   setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
@@ -83,9 +79,9 @@ public:
 
 private:
   /// Initialization code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   SofQCommon m_EmodeProperties;
 };

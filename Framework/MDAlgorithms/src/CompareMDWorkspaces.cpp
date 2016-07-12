@@ -20,7 +20,6 @@ class CompareFailsException : public std::runtime_error {
 public:
   explicit CompareFailsException(const std::string &msg)
       : std::runtime_error(msg) {}
-  ~CompareFailsException() throw() {}
   std::string getMessage() const { return this->what(); }
 };
 
@@ -29,18 +28,6 @@ namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CompareMDWorkspaces)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-CompareMDWorkspaces::CompareMDWorkspaces()
-    : inWS2(), m_result(), m_tolerance(0.0), m_CheckEvents(true),
-      m_CompareBoxID(true) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-CompareMDWorkspaces::~CompareMDWorkspaces() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -62,12 +49,12 @@ const std::string CompareMDWorkspaces::category() const {
 /** Initialize the algorithm's properties.
 */
 void CompareMDWorkspaces::init() {
-  declareProperty(
-      new WorkspaceProperty<IMDWorkspace>("Workspace1", "", Direction::Input),
-      "First MDWorkspace to compare.");
-  declareProperty(
-      new WorkspaceProperty<IMDWorkspace>("Workspace2", "", Direction::Input),
-      "Second MDWorkspace to compare.");
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "Workspace1", "", Direction::Input),
+                  "First MDWorkspace to compare.");
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "Workspace2", "", Direction::Input),
+                  "Second MDWorkspace to compare.");
 
   declareProperty(
       "Tolerance", 0.0,
@@ -77,10 +64,11 @@ void CompareMDWorkspaces::init() {
                                        "structure.");
 
   declareProperty(
-      new PropertyWithValue<bool>("Equals", false, Direction::Output),
+      make_unique<PropertyWithValue<bool>>("Equals", false, Direction::Output),
       "Boolean set to true if the workspaces match.");
   declareProperty(
-      new PropertyWithValue<std::string>("Result", "", Direction::Output),
+      make_unique<PropertyWithValue<std::string>>("Result", "",
+                                                  Direction::Output),
       "String describing the difference found between the workspaces");
   declareProperty("IgnoreBoxID", false, "To ignore box ID-s when comparing MD "
                                         "boxes as Multithreaded splitting "
@@ -355,7 +343,7 @@ void CompareMDWorkspaces::exec() {
   this->doComparison();
 
   if (m_result != "") {
-    g_log.notice() << "The workspaces did not match: " << m_result << std::endl;
+    g_log.notice() << "The workspaces did not match: " << m_result << '\n';
     this->setProperty("Equals", false);
   } else {
     m_result = "Success!";

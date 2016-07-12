@@ -6,6 +6,7 @@
 
 #include "MantidAlgorithms/MultipleScatteringCylinderAbsorption.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -108,27 +109,15 @@ public:
     TS_ASSERT(test_output_WS);
 
     // setup expected values
-    std::vector<double> y_expected;
-    y_expected.push_back(2.22389);
-    y_expected.push_back(2.2924);
-    y_expected.push_back(2.36292);
-    y_expected.push_back(2.43552);
-    y_expected.push_back(2.51024);
-    y_expected.push_back(2.58716);
-    y_expected.push_back(2.66632);
-    y_expected.push_back(2.7478);
-    y_expected.push_back(2.83166);
-    y_expected.push_back(2.91796);
-    y_expected.push_back(3.00678);
-    y_expected.push_back(3.0982);
-    y_expected.push_back(3.19228);
-    y_expected.push_back(3.28912);
-    y_expected.push_back(3.38879);
-    y_expected.push_back(3.49139);
+    const size_t size = 16;
+    std::array<double, size> y_expected = {
+        {2.22389, 2.2924, 2.36292, 2.43552, 2.51024, 2.58716, 2.66632, 2.7478,
+         2.83166, 2.91796, 3.00678, 3.0982, 3.19228, 3.28912, 3.38879,
+         3.49139}};
 
     // do the final comparison
     const MantidVec &y_actual = test_output_WS->readY(0);
-    for (size_t i = 0; i < y_expected.size(); i++)
+    for (size_t i = 0; i < size; i++)
       TS_ASSERT_DELTA(y_actual[i], y_expected[i], 0.00001);
 
     // cleanup
@@ -148,7 +137,7 @@ public:
                                                                         false);
     wksp->getAxis(0)
         ->setUnit("Wavelength"); // cheat and set the units to Wavelength
-    wksp->getEventList(0)
+    wksp->getSpectrum(0)
         .convertTof(.09, 1.); // convert to be from 1->10 (about)
     const std::size_t NUM_EVENTS = wksp->getNumberEvents();
     AnalysisDataService::Instance().add(outName, wksp);
@@ -176,7 +165,7 @@ public:
 
     // do the final comparison - this is done by bounding
     std::vector<double> y_actual;
-    wksp->getEventList(0).getWeights(y_actual);
+    wksp->getSpectrum(0).getWeights(y_actual);
     for (size_t i = 0; i < y_actual.size(); ++i) {
       TS_ASSERT_LESS_THAN(1.19811, y_actual[i]);
       TS_ASSERT_LESS_THAN(y_actual[i], 3.3324);

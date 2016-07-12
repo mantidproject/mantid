@@ -9,7 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 
 #include <Poco/NObserver.h>
-#include <Poco/Mutex.h>
+#include <mutex>
 
 namespace Mantid {
 
@@ -54,14 +54,16 @@ public:
   /// Default constructor.
   WorkspaceGroup();
   /// Destructor
-  ~WorkspaceGroup();
+  ~WorkspaceGroup() override;
   /// Return a string ID of the class
-  virtual const std::string id() const { return "WorkspaceGroup"; }
+  const std::string id() const override { return "WorkspaceGroup"; }
   /// Returns a formatted string detailing the contents of the group
-  virtual const std::string toString() const;
+  const std::string toString() const override;
 
   /// The collection itself is considered to take up no space
-  virtual size_t getMemorySize() const { return 0; }
+  size_t getMemorySize() const override { return 0; }
+  /// Sort the internal data structure according to member name
+  void sortMembersByName();
   /// Adds a workspace to the group.
   void addWorkspace(Workspace_sptr workspace);
   /// Return the number of entries within the group
@@ -82,12 +84,17 @@ public:
   /// Inidicates that the workspace group can be treated as multiperiod.
   bool isMultiperiod() const;
   /// Check if a workspace is included in this group or any nested groups.
-  bool isInGroup(const Workspace &workspace, size_t level = 0) const;
+  bool isInGroup(const Workspace &workspaceToCheck, size_t level = 0) const;
   /// Prints the group to the screen using the logger at debug
   void print() const;
 
   /// @name Wrapped ADS calls
   //@{
+
+  /// Invokes the ADS to sort group members by orkspace name
+  void sortByName() {
+    AnalysisDataService::Instance().sortGroupByName(this->name());
+  }
 
   /// Adds a workspace to the group.
   void add(const std::string &wsName) {
@@ -100,7 +107,7 @@ public:
   /// Does a workspace exist within the group
   bool contains(const std::string &wsName) const;
   /// Does a workspace exist within the group
-  bool contains(const Workspace_sptr &wsName) const;
+  bool contains(const Workspace_sptr &workspace) const;
   /// Add the members of the group to the given list
   void reportMembers(std::set<Workspace_sptr> &memberList) const;
   /// Returns the names of workspaces that make up this group. Note that this
@@ -110,23 +117,20 @@ public:
 
   //@}
 
-protected:
-  /// Protected, unimplemented copy constructor
-  WorkspaceGroup(const WorkspaceGroup &ref);
-  /// Protected, unimplemented copy assignment operator
-  const WorkspaceGroup &operator=(const WorkspaceGroup &);
+  WorkspaceGroup(const WorkspaceGroup &ref) = delete;
+  WorkspaceGroup &operator=(const WorkspaceGroup &) = delete;
 
 private:
-  virtual WorkspaceGroup *doClone() const {
+  WorkspaceGroup *doClone() const override {
     throw std::runtime_error("Cloning of WorkspaceGroup is not implemented.");
   }
   /// ADS removes a member of this group using this method. It doesn't send
   /// notifications in contrast to remove(name).
-  void removeByADS(const std::string &name);
+  void removeByADS(const std::string &wsName);
   /// Turn ADS observations on/off
   void observeADSNotifications(const bool observeADS);
   /// Check if a workspace is included in any child groups and groups in them.
-  bool isInChildGroup(const Workspace &workspace) const;
+  bool isInChildGroup(const Workspace &workspaceToCheck) const;
   /// Callback when a delete notification is received
   void workspaceDeleteHandle(
       Mantid::API::WorkspacePostDeleteNotification_ptr notice);
@@ -145,7 +149,7 @@ private:
   /// Flag as to whether the observers have been added to the ADS
   bool m_observingADS;
   /// Recursive mutex to avoid simultaneous access
-  mutable Poco::Mutex m_mutex;
+  mutable std::recursive_mutex m_mutex;
 
   friend class AnalysisDataServiceImpl;
   friend class Algorithm;

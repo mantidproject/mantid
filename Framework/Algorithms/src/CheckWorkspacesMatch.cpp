@@ -30,9 +30,6 @@ CheckWorkspacesMatch::CheckWorkspacesMatch()
   deprecatedDate("2015-10-27");
 }
 
-/// Virtual destructor
-CheckWorkspacesMatch::~CheckWorkspacesMatch() {}
-
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -40,12 +37,12 @@ using namespace Geometry;
 
 //----------------------------------------------------------------------------------------------
 void CheckWorkspacesMatch::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("Workspace1", "", Direction::Input),
-      "The name of the first input workspace.");
-  declareProperty(
-      new WorkspaceProperty<Workspace>("Workspace2", "", Direction::Input),
-      "The name of the second input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>("Workspace1", "",
+                                                            Direction::Input),
+                  "The name of the first input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>("Workspace2", "",
+                                                            Direction::Input),
+                  "The name of the second input workspace.");
 
   declareProperty(
       "Tolerance", 0.0,
@@ -94,7 +91,7 @@ void CheckWorkspacesMatch::exec() {
 
   // Output as per previous behaviour
   if (result != successString()) {
-    g_log.notice() << "The workspaces did not match: " << result << std::endl;
+    g_log.notice() << "The workspaces did not match: " << result << '\n';
   }
 
   setProperty("Result", result);

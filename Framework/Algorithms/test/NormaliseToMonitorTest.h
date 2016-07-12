@@ -5,8 +5,10 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/NormaliseToMonitor.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -36,10 +38,10 @@ public:
     input->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     // Now need to set up a minimal instrument
-    input->getSpectrum(0)->setSpectrumNo(0);
-    input->getSpectrum(1)->setSpectrumNo(1);
-    input->getSpectrum(2)->setSpectrumNo(2);
-    boost::shared_ptr<Instrument> instr(new Instrument);
+    input->getSpectrum(0).setSpectrumNo(0);
+    input->getSpectrum(1).setSpectrumNo(1);
+    input->getSpectrum(2).setSpectrumNo(2);
+    boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
     input->setInstrument(instr);
     Mantid::Geometry::Detector *mon =
         new Mantid::Geometry::Detector("monitor", 0, NULL);
@@ -58,7 +60,7 @@ public:
     monWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     // Now need to set up a minimal instrument and spectra-detector map
-    input->getSpectrum(0)->setSpectrumNo(0);
+    input->getSpectrum(0).setSpectrumNo(0);
     monWS->setInstrument(input->getInstrument());
 
     AnalysisDataService::Instance().addOrReplace("monWS", monWS);
@@ -355,7 +357,7 @@ public:
     // create ws without monitors.
     MatrixWorkspace_sptr input =
         WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
-    boost::shared_ptr<Instrument> instr(new Instrument);
+    boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
     input->setInstrument(instr);
     AnalysisDataService::Instance().add("someWS", input);
 

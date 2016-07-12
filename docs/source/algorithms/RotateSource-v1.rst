@@ -29,8 +29,24 @@ Usage
    # Original positions
    samplePos = ws.getInstrument().getSample().getPos()
    sourcePos = ws.getInstrument().getSource().getPos()
-   print "Original position of the sample: [%.1f, %.1f, %.1f]" % (samplePos.X(), samplePos.Y(), samplePos.Z())
-   print "Original position of the source: [%.1f, %.1f, %.1f]" % (sourcePos.X(), sourcePos.Y(), sourcePos.Z())
+
+   def pos3D_as_str(pos, digits=1, tolerance=1e-7):
+     """
+     Produce a string with a human readable version of a V3D position (x, y, z),
+     from a V3D object, using a fixed limited number of digits (for robust string
+     comparisons).
+     """
+     def nz(value):
+        """ Handles potential issues with +-0 (tiny values) """
+        return 0.0 if abs(value) < tolerance else value
+
+     precision = str(digits)
+     format_str = '[{0:.'+precision+'f}, {1:.'+precision+'f}, {2:.'+precision+'f}]'
+     result = format_str.format(nz(pos.getX()), nz(pos.getY()), nz(pos.getZ()))
+     return result
+
+   print "Original position of the sample: {0}".format(pos3D_as_str(samplePos))
+   print "Original position of the source: {0}".format(pos3D_as_str(sourcePos))
 
    # Move (rotate) the source around X axis
    RotateSource(ws, -90)
@@ -38,8 +54,8 @@ Usage
    # New positions
    samplePos = ws.getInstrument().getSample().getPos()
    sourcePos = ws.getInstrument().getSource().getPos()
-   print "New position of the sample: [%.1f, %.1f, %.1f]" % (samplePos.X(), samplePos.Y(), samplePos.Z())
-   print "New position of the source: [%.1f, %.1f, %.1f]" % (sourcePos.X(), sourcePos.Y(), sourcePos.Z())
+   print "New position of the sample: {0}".format(pos3D_as_str(samplePos))
+   print "New position of the source: {0}".format(pos3D_as_str(sourcePos))
 
 Output:
 
@@ -48,7 +64,7 @@ Output:
    Original position of the sample: [0.0, 0.0, 0.0]
    Original position of the source: [0.0, 0.0, -10.0]
    New position of the sample: [0.0, 0.0, 0.0]
-   New position of the source: [0.0, 10.0, -0.0]
+   New position of the source: [0.0, 10.0, 0.0]
 
 .. categories::
 

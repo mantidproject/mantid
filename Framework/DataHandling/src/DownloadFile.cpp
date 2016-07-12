@@ -57,8 +57,9 @@ void DownloadFile::init() {
   declareProperty(
       "Address", "", boost::make_shared<MandatoryValidator<std::string>>(),
       "The address of the network resource to download.", Direction::InOut);
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save),
-                  "The filename to save the download to.");
+  declareProperty(
+      Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Save),
+      "The filename to save the download to.");
 }
 
 //----------------------------------------------------------------------------------------------

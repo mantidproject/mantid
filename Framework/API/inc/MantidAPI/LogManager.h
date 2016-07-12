@@ -50,15 +50,9 @@ namespace API {
 */
 class MANTID_API_DLL LogManager {
 public:
-  /// Default constructor
-  LogManager();
   /// Destructor. Doesn't need to be virtual as long as nothing inherits from
   /// this class.
-  virtual ~LogManager();
-  /// Copy constructor
-  LogManager(const LogManager &copy);
-  /// Assignment operator
-  const LogManager &operator=(const LogManager &rhs);
+  virtual ~LogManager() = default;
 
   //-------------------------------------------------------------
   /// Set the run start and end
@@ -102,7 +96,7 @@ public:
   /// Does the property exist on the object
   bool hasProperty(const std::string &name) const;
   /// Remove a named property
-  void removeProperty(const std::string &name, bool delproperty = true);
+  void removeProperty(const std::string &name, bool delProperty = true);
   /**
    * Return all of the current properties
    * @returns A vector of the current list of properties

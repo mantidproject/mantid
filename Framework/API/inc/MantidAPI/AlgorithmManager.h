@@ -4,12 +4,14 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <deque>
-#include <string>
 #include <Poco/NotificationCenter.h>
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/Algorithm.h"
+
+#include <deque>
+#include <mutex>
+#include <string>
 
 namespace Mantid {
 namespace API {
@@ -97,7 +99,7 @@ private:
   std::deque<IAlgorithm_sptr>
       m_managed_algs; ///<  pointers to managed algorithms [policy???]
   /// Mutex for modifying/accessing the m_managed_algs member.
-  mutable Kernel::Mutex m_managedMutex;
+  mutable std::mutex m_managedMutex;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

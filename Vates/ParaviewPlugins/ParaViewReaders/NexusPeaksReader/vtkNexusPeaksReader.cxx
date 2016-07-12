@@ -34,20 +34,14 @@ using Mantid::Geometry::IMDDimension_sptr;
 using Mantid::API::Workspace_sptr;
 using Mantid::API::AnalysisDataService;
 
-vtkNexusPeaksReader::vtkNexusPeaksReader() :
-  m_isSetup(false), m_wsTypeName(""),
-  m_uintPeakMarkerSize(0.3), m_dimensions(1)
-{
-  this->FileName = NULL;
+vtkNexusPeaksReader::vtkNexusPeaksReader()
+    : FileName{nullptr}, m_isSetup{false}, m_uintPeakMarkerSize{0.3},
+      m_dimensions{1} {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
 }
 
-vtkNexusPeaksReader::~vtkNexusPeaksReader()
-{
-  this->SetFileName(0);
-}
-
+vtkNexusPeaksReader::~vtkNexusPeaksReader() { this->SetFileName(nullptr); }
 
 void vtkNexusPeaksReader::SetDimensions(int dimensions)
 {
@@ -88,8 +82,7 @@ int vtkNexusPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   p_peakFactory->initialize(m_PeakWS);
 
   FilterUpdateProgressAction<vtkNexusPeaksReader> drawingProgressUpdate(this, "Drawing...");
-  auto structuredMesh = vtkSmartPointer<vtkDataSet>::Take(
-      p_peakFactory->create(drawingProgressUpdate));
+  auto structuredMesh = p_peakFactory->create(drawingProgressUpdate);
 
   vtkSmartPointer<vtkPolyDataAlgorithm> shapeMarker;
   if(p_peakFactory->isPeaksWorkspaceIntegrated())
@@ -185,8 +178,7 @@ int vtkNexusPeaksReader::CanReadFile(const char* fname)
     return 0; 
   }
 
-  ::NeXus::File * file = NULL;
-  file = new ::NeXus::File(fileString);
+  auto file = Mantid::Kernel::make_unique<::NeXus::File>(fileString);
   try
   {
     try
@@ -212,7 +204,9 @@ int vtkNexusPeaksReader::CanReadFile(const char* fname)
   }
   catch(std::exception& ex)
   {
-    std::cerr << "Could not open " << fileString << " as an PeaksWorkspace nexus file because of exception: " << ex.what() << std::endl;
+    std::cerr << "Could not open " << fileString
+              << " as an PeaksWorkspace nexus file because of exception: "
+              << ex.what() << '\n';
     // Clean up, if possible
     if (file)
       file->close();
@@ -241,8 +235,7 @@ void vtkNexusPeaksReader::updateAlgorithmProgress(double progress, const std::st
 /*
 Getter for the workspace type name.
 */
-char* vtkNexusPeaksReader::GetWorkspaceTypeName()
-{
+const std::string &vtkNexusPeaksReader::GetWorkspaceTypeName() {
   //Preload the Workspace and then cache it to avoid reloading later.
-  return const_cast<char*>(m_wsTypeName.c_str());
+  return m_wsTypeName;
 }

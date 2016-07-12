@@ -3,6 +3,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
@@ -14,6 +15,7 @@
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/StartsWithValidator.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -24,7 +26,7 @@ namespace Mantid {
 namespace Algorithms {
 namespace {
 /// Factor to convert full width half max to sigma for calculations of I/sigma.
-const double FWHM_TO_SIGMA = 2.0 * sqrt(2.0 * std::log(2.0));
+const double FWHM_TO_SIGMA = 2.0 * sqrt(2.0 * M_LN2);
 const double BAD_OFFSET(1000.); // mark things that didn't work with this
 
 //--------------------------------------------------------------------------------------------
@@ -123,54 +125,44 @@ DECLARE_ALGORITHM(GetDetOffsetsMultiPeaks)
   */
 GetDetOffsetsMultiPeaks::GetDetOffsetsMultiPeaks()
     : API::Algorithm(), m_inputWS(), m_eventW(), m_isEvent(false), m_backType(),
-      m_peakType(), m_maxChiSq(0.), m_minPeakHeight(0.), m_leastMaxObsY(0.),
-      m_maxOffset(0.), m_peakPositions(), m_fitWindows(), m_inputResolutionWS(),
-      m_hasInputResolution(false), m_minResFactor(0.), m_maxResFactor(0.),
-      m_outputW(), m_outputNP(), m_maskWS(), m_infoTableWS(),
-      m_peakOffsetTableWS(), m_resolutionWS(), m_useFitWindowTable(false),
-      m_vecFitWindow() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-  */
-GetDetOffsetsMultiPeaks::~GetDetOffsetsMultiPeaks() {}
+      m_peakType(), m_minimizer(), m_maxChiSq(0.), m_minPeakHeight(0.),
+      m_leastMaxObsY(0.), m_maxOffset(0.), m_peakPositions(), m_fitWindows(),
+      m_inputResolutionWS(), m_hasInputResolution(false), m_minResFactor(0.),
+      m_maxResFactor(0.), m_outputW(), m_outputNP(), m_maskWS(),
+      m_infoTableWS(), m_peakOffsetTableWS(), m_resolutionWS(),
+      m_useFitWindowTable(false), m_vecFitWindow() {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialisation method. Declares properties to be used in algorithm.
    */
 void GetDetOffsetsMultiPeaks::init() {
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("dSpacing")),
                   "A 2D matrix workspace with X values of d-spacing");
 
-  declareProperty(new ArrayProperty<double>("DReference"),
+  declareProperty(make_unique<ArrayProperty<double>>("DReference"),
                   "Enter a comma-separated list of the expected X-position of "
                   "the centre of the peaks. Only peaks near these positions "
                   "will be fitted.");
 
   declareProperty("FitWindowMaxWidth", 0.,
                   "Optional: The maximum width of the fitting window. If this "
-                  "is <=0 the windows is not specified to FindPeaks");
+                  "is <=0 the window is not specified to FindPeaks");
 
-  declareProperty(new WorkspaceProperty<TableWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
                       "FitwindowTableWorkspace", "", Direction::Input,
                       PropertyMode::Optional),
                   "Name of the input Tableworkspace containing peak fit window "
                   "information for each spectrum. ");
 
-  std::vector<std::string> peaktypes;
-  peaktypes.push_back("BackToBackExponential");
-  peaktypes.push_back("Gaussian");
-  peaktypes.push_back("Lorentzian");
+  std::vector<std::string> peaktypes =
+      FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>();
   declareProperty("PeakFunction", "Gaussian",
                   boost::make_shared<StringListValidator>(peaktypes),
                   "Type of peak to fit");
 
-  std::vector<std::string> bkgdtypes;
-  bkgdtypes.push_back("Flat");
-  bkgdtypes.push_back("Linear");
-  bkgdtypes.push_back("Quadratic");
+  std::vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty(
       "BackgroundType", "Linear",
       boost::make_shared<StringListValidator>(bkgdtypes),
@@ -178,20 +170,20 @@ void GetDetOffsetsMultiPeaks::init() {
 
   declareProperty("HighBackground", true,
                   "Relatively weak peak in high background");
-  declareProperty(new FileProperty("GroupingFileName", "",
-                                   FileProperty::OptionalSave, ".cal"),
+  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
+                                            FileProperty::OptionalSave, ".cal"),
                   "Optional: The name of the output CalFile to save the "
                   "generated OffsetsWorkspace.");
-  declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputWorkspace", "",
-                                                          Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace containing the offsets.");
   declareProperty(
-      new WorkspaceProperty<OffsetsWorkspace>(
+      make_unique<WorkspaceProperty<OffsetsWorkspace>>(
           "NumberPeaksWorkspace", "NumberPeaksFitted", Direction::Output),
       "An output workspace containing the offsets.");
-  declareProperty(
-      new WorkspaceProperty<>("MaskWorkspace", "Mask", Direction::Output),
-      "An output workspace containing the mask.");
+  declareProperty(make_unique<WorkspaceProperty<>>("MaskWorkspace", "Mask",
+                                                   Direction::Output),
+                  "An output workspace containing the mask.");
   declareProperty("MaxOffset", 1.0,
                   "Maximum absolute value of offsets; default is 1");
   declareProperty(
@@ -209,30 +201,38 @@ void GetDetOffsetsMultiPeaks::init() {
       "this peak will not be fit.  It is designed for EventWorkspace with "
       "integer counts.");
 
+  std::vector<std::string> minimizerOptions =
+      API::FuncMinimizerFactory::Instance().getKeys();
+  declareProperty("Minimizer", "Levenberg-MarquardtMD",
+                  Kernel::IValidator_sptr(
+                      new Kernel::StartsWithValidator(minimizerOptions)),
+                  "Minimizer to use for fitting peaks.");
+
   // Disable default gsl error handler (which is to call abort!)
   gsl_set_error_handler_off();
 
-  auto inpreswsprop = new WorkspaceProperty<MatrixWorkspace>(
-      "InputResolutionWorkspace", "", Direction::Input, PropertyMode::Optional);
   declareProperty(
-      inpreswsprop,
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputResolutionWorkspace", "", Direction::Input,
+          PropertyMode::Optional),
       "Name of the optional input resolution (delta(d)/d) workspace. ");
 
-  auto tablewsprop = new WorkspaceProperty<TableWorkspace>(
-      "SpectraFitInfoTableWorkspace", "FitInfoTable", Direction::Output);
-  declareProperty(tablewsprop, "Name of the output table workspace containing "
-                               "spectra peak fit information.");
-
-  auto offsetwsprop = new WorkspaceProperty<TableWorkspace>(
-      "PeaksOffsetTableWorkspace", "PeakOffsetTable", Direction::Output);
   declareProperty(
-      offsetwsprop,
+      make_unique<WorkspaceProperty<TableWorkspace>>(
+          "SpectraFitInfoTableWorkspace", "FitInfoTable", Direction::Output),
+      "Name of the output table workspace containing "
+      "spectra peak fit information.");
+
+  declareProperty(
+      make_unique<WorkspaceProperty<TableWorkspace>>(
+          "PeaksOffsetTableWorkspace", "PeakOffsetTable", Direction::Output),
       "Name of an output table workspace containing peaks' offset data.");
 
-  auto ddodwsprop = new WorkspaceProperty<MatrixWorkspace>(
-      "FittedResolutionWorkspace", "ResolutionWS", Direction::Output);
-  declareProperty(ddodwsprop, "Name of the resolution workspace containing "
-                              "delta(d)/d for each unmasked spectrum. ");
+  declareProperty(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "FittedResolutionWorkspace", "ResolutionWS", Direction::Output),
+      "Name of the resolution workspace containing "
+      "delta(d)/d for each unmasked spectrum. ");
 
   declareProperty("MinimumResolutionFactor", 0.1,
                   "Factor of the minimum allowed Delta(d)/d of any peak to its "
@@ -297,7 +297,7 @@ void GetDetOffsetsMultiPeaks::processProperties() {
 
   // the peak positions and where to fit
   m_peakPositions = getProperty("DReference");
-  if (m_peakPositions.size() == 0)
+  if (m_peakPositions.empty())
     throw std::runtime_error("There is no input referenced peak position.");
   std::sort(m_peakPositions.begin(), m_peakPositions.end());
 
@@ -328,7 +328,7 @@ void GetDetOffsetsMultiPeaks::processProperties() {
 
     g_log.information(infoss.str());
 
-    if (m_fitWindows.size() == 0)
+    if (m_fitWindows.empty())
       g_log.warning() << "Input FitWindowMaxWidth = " << maxwidth
                       << "  No FitWidows will be generated."
                       << "\n";
@@ -348,14 +348,15 @@ void GetDetOffsetsMultiPeaks::processProperties() {
   // The maximum allowable chisq value for an individual peak fit
   m_maxChiSq = this->getProperty("MaxChiSq");
   m_minPeakHeight = this->getProperty("MinimumPeakHeight");
+  m_minimizer = getPropertyValue("Minimizer");
   m_maxOffset = getProperty("MaxOffset");
   m_leastMaxObsY = getProperty("MinimumPeakHeightObs");
 
   // Create output workspaces
   m_outputW = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
   m_outputNP = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
-  MatrixWorkspace_sptr tempmaskws(
-      new MaskWorkspace(m_inputWS->getInstrument()));
+  MatrixWorkspace_sptr tempmaskws =
+      boost::make_shared<MaskWorkspace>(m_inputWS->getInstrument());
   m_maskWS = tempmaskws;
 
   // Input resolution
@@ -427,7 +428,7 @@ void GetDetOffsetsMultiPeaks::importFitWindowTableWorkspace(
     if (spec < 0 && founduniversal) {
       throw std::runtime_error("There are more than 1 universal spectrum (spec "
                                "< 0) in TableWorkspace.");
-    } else if (spec >= 0 && m_vecFitWindow[spec].size() != 0) {
+    } else if (spec >= 0 && !m_vecFitWindow[spec].empty()) {
       std::stringstream ess;
       ess << "Peak fit windows at row " << i << " has spectrum " << spec
           << ", which appears before in fit window table workspace. ";
@@ -459,7 +460,7 @@ void GetDetOffsetsMultiPeaks::importFitWindowTableWorkspace(
   } else if (founduniversal) {
     // Fill the universal
     for (size_t i = 0; i < m_inputWS->getNumberHistograms(); ++i)
-      if (m_vecFitWindow[i].size() == 0)
+      if (m_vecFitWindow[i].empty())
         m_vecFitWindow[i] = vec_univFitWindow;
   }
 
@@ -489,8 +490,7 @@ void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
           calculatePeakOffset(wi, fittedpeakpositions, tofitpeakpositions);
 
       // Get the list of detectors in this pixel
-      const std::set<detid_t> &dets =
-          m_inputWS->getSpectrum(wi)->getDetectorIDs();
+      const auto &dets = m_inputWS->getSpectrum(wi).getDetectorIDs();
 
       // Most of the exec time is in FitSpectra, so this critical block should
       // not be a problem.
@@ -578,7 +578,7 @@ FitPeakOffsetResult GetDetOffsetsMultiPeaks::calculatePeakOffset(
   fr.dev_resolution = 0.0;
 
   // Checks for empty and dead detectors
-  if ((m_isEvent) && (m_eventW->getEventList(wi).empty())) {
+  if ((m_isEvent) && (m_eventW->getSpectrum(wi).empty())) {
     // empty detector will be masked
     fr.offset = BAD_OFFSET;
     fr.fitoffsetstatus = "empty det";
@@ -714,7 +714,7 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
 
   // Set up GSL minimzer
   const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
-  gsl_multimin_fminimizer *s = NULL;
+  gsl_multimin_fminimizer *s = nullptr;
   gsl_vector *ss, *x;
   gsl_multimin_function minex_func;
 
@@ -852,7 +852,7 @@ int GetDetOffsetsMultiPeaks::fitSpectra(
     // throw if minD >= maxD
     std::stringstream ess;
     ess << "Stuff went wrong with wkspIndex=" << wi
-        << " specIndex=" << inputW->getSpectrum(wi)->getSpectrumNo();
+        << " specNum=" << inputW->getSpectrum(wi).getSpectrumNo();
     throw std::runtime_error(ess.str());
   }
 
@@ -864,8 +864,8 @@ int GetDetOffsetsMultiPeaks::fitSpectra(
     }
   }
   std::stringstream dbss;
-  dbss << "D-RANGE[" << inputW->getSpectrum(wi)->getSpectrumNo()
-       << "]: " << minD << " -> " << maxD;
+  dbss << "D-RANGE[" << inputW->getSpectrum(wi).getSpectrumNo() << "]: " << minD
+       << " -> " << maxD;
   g_log.debug(dbss.str());
 
   // Setup the fit windows
@@ -913,6 +913,7 @@ int GetDetOffsetsMultiPeaks::fitSpectra(
   findpeaks->setProperty<int>("MinGuessedPeakWidth", 4);
   findpeaks->setProperty<int>("MaxGuessedPeakWidth", 4);
   findpeaks->setProperty<double>("MinimumPeakHeight", m_minPeakHeight);
+  findpeaks->setProperty<std::string>("Minimizer", m_minimizer);
   findpeaks->setProperty("StartFromObservedPeakCentre", true);
   findpeaks->executeAsChildAlg();
 
@@ -1080,7 +1081,7 @@ void GetDetOffsetsMultiPeaks::generatePeaksList(
     vec_widthDivPos.push_back(widthdevpos);
 
     // g_log.debug() << " h:" << height << " c:" << centre << " w:" <<
-    // (width/(2.*std::sqrt(2.*std::log(2.))))
+    // (width/(2.*std::sqrt(2.*M_LN2)))
     //               << " b:" << background << " chisq:" << chi2 << "\n";
 
     // Add peak to vectors
@@ -1153,9 +1154,9 @@ void GetDetOffsetsMultiPeaks::createInformationWorkspaces() {
 
   // set up columns
   m_peakOffsetTableWS->addColumn("int", "WorkspaceIndex");
-  for (size_t i = 0; i < m_peakPositions.size(); ++i) {
+  for (double m_peakPosition : m_peakPositions) {
     std::stringstream namess;
-    namess << "@" << std::setprecision(5) << m_peakPositions[i];
+    namess << "@" << std::setprecision(5) << m_peakPosition;
     m_peakOffsetTableWS->addColumn("str", namess.str());
   }
   m_peakOffsetTableWS->addColumn("double", "OffsetDeviation");
@@ -1321,17 +1322,16 @@ void GetDetOffsetsMultiPeaks::makeFitSummary() {
   if (0 == numunmasked) {
     g_log.warning()
         << "Found 0 unmasked rows in the spectra info table. "
-           "Cannot calculate Chi-sq sensibly. it's value will be NaN"
-        << std::endl;
+           "Cannot calculate Chi-sq sensibly. it's value will be NaN\n";
     avgchi2 = NAN;
   } else {
     avgchi2 = sumchi2 / static_cast<double>(numunmasked);
   }
 
   if (0 == weight_numfittedpeaks) {
-    g_log.warning() << "Found 0 fitted peaks in the spectra info table. "
-                       "Cannot calculate the weighted average Chi-sq sensibly"
-                    << std::endl;
+    g_log.warning()
+        << "Found 0 fitted peaks in the spectra info table. "
+           "Cannot calculate the weighted average Chi-sq sensibly\n";
     wtavgchi2 = NAN;
   } else {
     wtavgchi2 = weight_sumchi2 / static_cast<double>(weight_numfittedpeaks);

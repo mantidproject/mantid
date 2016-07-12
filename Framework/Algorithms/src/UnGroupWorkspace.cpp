@@ -13,18 +13,17 @@ using namespace API;
 void UnGroupWorkspace::init() {
   const AnalysisDataServiceImpl &data_store = AnalysisDataService::Instance();
   // Get the list of workspaces in the ADS
-  std::set<std::string> workspaceList = data_store.getObjectNames();
-  std::set<std::string> groupWorkspaceList;
+  auto workspaceList = data_store.getObjectNames();
+  std::unordered_set<std::string> groupWorkspaceList;
   // Not iterate over, removing all those which are not group workspaces
-  std::set<std::string>::iterator it;
-  for (it = workspaceList.begin(); it != workspaceList.end(); ++it) {
+  for (const auto &name : workspaceList) {
     WorkspaceGroup_const_sptr group =
         boost::dynamic_pointer_cast<const WorkspaceGroup>(
-            data_store.retrieve(*it));
+            data_store.retrieve(name));
     // RNT: VC returns bad pointer after erase
     // if ( !group ) workspaceList.erase(it);
     if (group) {
-      groupWorkspaceList.insert(*it);
+      groupWorkspaceList.insert(name);
     }
   }
   // Declare a text property with the list of group workspaces as its allowed

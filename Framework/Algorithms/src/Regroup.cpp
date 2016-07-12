@@ -2,16 +2,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Regroup.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 
-#include <numeric>
 #include <algorithm>
-#include <functional>
 #include <cmath>
+#include <functional>
+#include <numeric>
 
 namespace Mantid {
 namespace Algorithms {
@@ -30,16 +32,16 @@ void Regroup::init() {
   auto wsVal = boost::make_shared<CompositeValidator>();
   wsVal->add<API::HistogramValidator>();
   wsVal->add<API::CommonBinsValidator>();
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsVal),
                   "The input workspace.");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The result of regrouping.");
 
   declareProperty(
-      new ArrayProperty<double>("Params",
-                                boost::make_shared<RebinParamsValidator>()),
+      make_unique<ArrayProperty<double>>(
+          "Params", boost::make_shared<RebinParamsValidator>()),
       "The new approximate bin boundaries in the form: x1,dx1,x2,dx2,...,xn");
 }
 
@@ -63,11 +65,12 @@ void Regroup::exec() {
   bool dist = inputW->isDistribution();
 
   int histnumber = static_cast<int>(inputW->getNumberHistograms());
-  MantidVecPtr XValues_new;
+  HistogramData::BinEdges XValues_new(0);
   const MantidVec &XValues_old = inputW->readX(0);
   std::vector<int> xoldIndex; // indeces of new x in XValues_old
   // create new output X axis
-  int ntcnew = newAxis(rb_params, XValues_old, XValues_new.access(), xoldIndex);
+  int ntcnew =
+      newAxis(rb_params, XValues_old, XValues_new.mutableRawData(), xoldIndex);
 
   // make output Workspace the same type is the input, but with new length of
   // signal array
@@ -90,7 +93,7 @@ void Regroup::exec() {
     // output data arrays are implicitly filled by function
     rebin(XValues, YValues, YErrors, xoldIndex, YValues_new, YErrors_new, dist);
 
-    outputW->setX(hist, XValues_new);
+    outputW->setBinEdges(hist, XValues_new);
 
     if (hist % progress_step == 0) {
       progress(double(hist) / histnumber);
@@ -98,7 +101,7 @@ void Regroup::exec() {
     }
   }
 
-  outputW->isDistribution(dist);
+  outputW->setDistribution(dist);
 
   // Copy units
   if (outputW->getAxis(0)->unit().get())

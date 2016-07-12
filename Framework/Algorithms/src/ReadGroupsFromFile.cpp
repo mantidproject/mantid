@@ -6,6 +6,7 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ListValidator.h"
@@ -44,7 +45,7 @@ ReadGroupsFromFile::ReadGroupsFromFile() : API::Algorithm(), calibration() {}
 void ReadGroupsFromFile::init() {
 
   // The name of the instrument
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InstrumentWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "A workspace that refers to the instrument of interest. You "
@@ -52,20 +53,19 @@ void ReadGroupsFromFile::init() {
                   "workspace.");
 
   // The calibration file that contains the grouping information
+  const std::vector<std::string> exts{".cal", ".xml"};
   declareProperty(
-      new FileProperty("GroupingFileName", "", FileProperty::Load,
-                       {".cal", ".xml"}),
+      Kernel::make_unique<FileProperty>("GroupingFileName", "",
+                                        FileProperty::Load, exts),
       "Either as a XML grouping file (see [[GroupDetectors]]) or as a "
       "[[CalFile]] (.cal extension).");
   // Flag to consider unselected detectors in the cal file
-  std::vector<std::string> select;
-  select.push_back("True");
-  select.push_back("False");
+  std::vector<std::string> select{"True", "False"};
   declareProperty("ShowUnselected", "True",
                   boost::make_shared<StringListValidator>(select),
                   "Whether to show detectors that are not in any group");
   // The output workspace (2D) that will contain the group information
-  declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>(
+  declareProperty(make_unique<API::WorkspaceProperty<DataObjects::Workspace2D>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace");
 }
@@ -112,27 +112,27 @@ void ReadGroupsFromFile::exec() {
   bool success = false;
 
   for (int64_t i = 0; i < nHist; i++) {
-    ISpectrum *spec = localWorkspace->getSpectrum(i);
-    const std::set<detid_t> &dets = spec->getDetectorIDs();
+    auto &spec = localWorkspace->getSpectrum(i);
+    const auto &dets = spec.getDetectorIDs();
     if (dets.empty()) // Nothing
     {
-      spec->dataY()[0] = 0.0;
+      spec.dataY()[0] = 0.0;
       continue;
     }
     // Find the first detector ID in the list
     calmap::const_iterator it = calibration.find(*dets.begin());
     if (it == calibration.end()) // Could not find the detector
     {
-      spec->dataY()[0] = 0.0;
+      spec.dataY()[0] = 0.0;
       continue;
     }
     if (showunselected) {
       if (((*it).second).second == 0)
-        spec->dataY()[0] = 0.0;
+        spec.dataY()[0] = 0.0;
       else
-        spec->dataY()[0] = static_cast<double>(((*it).second).first);
+        spec.dataY()[0] = static_cast<double>(((*it).second).first);
     } else
-      spec->dataY()[0] = static_cast<double>(((*it).second).first);
+      spec.dataY()[0] = static_cast<double>(((*it).second).first);
     if (!success)
       success = true; // At least one detector is found in the cal file
   }
@@ -157,7 +157,7 @@ void ReadGroupsFromFile::exec() {
 void ReadGroupsFromFile::readGroupingFile(const std::string &filename) {
   std::ifstream grFile(filename.c_str());
   if (!grFile.is_open()) {
-    g_log.error() << "Unable to open grouping file " << filename << std::endl;
+    g_log.error() << "Unable to open grouping file " << filename << '\n';
     throw Exception::FileError("Error reading .cal file", filename);
   }
   calibration.clear();
@@ -222,14 +222,15 @@ void ReadGroupsFromFile::readXMLGroupingFile(const std::string &filename) {
 
     std::string ids = group->getAttribute("val");
 
-    Poco::StringTokenizer data(ids, ",", Poco::StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer data(
+        ids, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
 
     if (data.begin() != data.end()) {
-      for (auto it = data.begin(); it != data.end(); ++it) {
+      for (const auto &value : data) {
         // cast the string to an int
         int detID;
         try {
-          detID = boost::lexical_cast<int>(*it);
+          detID = boost::lexical_cast<int>(value);
         } catch (boost::bad_lexical_cast &) {
           throw Mantid::Kernel::Exception::FileError(
               "Could cast string to integer in input XML file", filename);

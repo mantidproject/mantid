@@ -1,41 +1,41 @@
 #include "MantidDataHandling/FilterEventsByLogValuePreNexus.h"
-#include <algorithm>
-#include <sstream>
-#include <stdexcept>
-#include <functional>
-#include <set>
-#include <vector>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include <boost/timer.hpp>
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FileValidator.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Glob.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BinaryFile.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/Glob.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
+
+#include <boost/timer.hpp>
+
+#include <Poco/File.h>
+#include <Poco/Path.h>
 
 #include <algorithm>
+#include <functional>
+#include <set>
 #include <sstream>
-#include "MantidAPI/MemoryManager.h"
+#include <stdexcept>
+#include <vector>
 
 // #define DBOUT
 
@@ -55,7 +55,6 @@ using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
 using DataObjects::TofEvent;
 using std::cout;
-using std::endl;
 using std::ifstream;
 using std::runtime_error;
 using std::stringstream;
@@ -105,8 +104,8 @@ static string getRunnumber(const string &filename) {
   if (runnumber.find("neutron") >= string::npos)
     return "0";
 
-  std::size_t left = runnumber.find("_");
-  std::size_t right = runnumber.find("_", left + 1);
+  std::size_t left = runnumber.find('_');
+  std::size_t right = runnumber.find('_', left + 1);
 
   return runnumber.substr(left + 1, right - left - 1);
 }
@@ -173,14 +172,12 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
   const string CAL("_CAL");
   const size_t CAL_LEN = CAL.length(); // cache to make life easier
   vector<string> files;
-  for (size_t i = 0; i < dirs.size(); ++i) {
-    if ((dirs[i].length() > CAL_LEN) &&
-        (dirs[i].compare(dirs[i].length() - CAL.length(), CAL.length(), CAL) ==
-         0)) {
-      if (Poco::File(base.path() + "/" + dirs[i] + "/calibrations/" + mapping)
+  for (auto &dir : dirs) {
+    if ((dir.length() > CAL_LEN) &&
+        (dir.compare(dir.length() - CAL.length(), CAL.length(), CAL) == 0)) {
+      if (Poco::File(base.path() + "/" + dir + "/calibrations/" + mapping)
               .exists())
-        files.push_back(base.path() + "/" + dirs[i] + "/calibrations/" +
-                        mapping);
+        files.push_back(base.path() + "/" + dir + "/calibrations/" + mapping);
     }
   }
 
@@ -201,16 +198,16 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
 /** Constructor
 */
 FilterEventsByLogValuePreNexus::FilterEventsByLogValuePreNexus()
-    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), m_prog(NULL),
-      m_protonChargeTot(0), m_detid_max(0), m_eventFile(NULL), m_numEvents(0),
-      m_numPulses(0), m_numPixel(0), m_numGoodEvents(0), m_numErrorEvents(0),
-      m_numBadEvents(0), m_numWrongdetidEvents(0), m_numIgnoredEvents(0),
-      m_firstEvent(0), m_maxNumEvents(0), m_usingMappingFile(false),
-      m_loadOnlySomeSpectra(false), m_longestTof(0.0), m_shortestTof(0.0),
-      m_parallelProcessing(false), m_pulseTimesIncreasing(false),
-      m_throwError(true), m_examEventLog(false), m_pixelid2exam(0),
-      m_numevents2write(0), m_freqHz(0), m_istep(0), m_dbPixelID(0),
-      m_useDBOutput(false), m_corretctTOF(false) {}
+    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), m_prog(nullptr),
+      m_protonChargeTot(0), m_detid_max(0), m_eventFile(nullptr),
+      m_numEvents(0), m_numPulses(0), m_numPixel(0), m_numGoodEvents(0),
+      m_numErrorEvents(0), m_numBadEvents(0), m_numWrongdetidEvents(0),
+      m_numIgnoredEvents(0), m_firstEvent(0), m_maxNumEvents(0),
+      m_usingMappingFile(false), m_loadOnlySomeSpectra(false),
+      m_longestTof(0.0), m_shortestTof(0.0), m_parallelProcessing(false),
+      m_pulseTimesIncreasing(false), m_throwError(true), m_examEventLog(false),
+      m_pixelid2exam(0), m_numevents2write(0), m_freqHz(0), m_istep(0),
+      m_dbPixelID(0), m_useDBOutput(false), m_corretctTOF(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Desctructor
@@ -256,23 +253,25 @@ void FilterEventsByLogValuePreNexus::init() {
   // File files to use
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
   declareProperty(
-      new FileProperty(EVENT_PARAM, "", FileProperty::Load, eventExts),
+      Kernel::make_unique<FileProperty>(EVENT_PARAM, "", FileProperty::Load,
+                                        eventExts),
       "The name of the neutron event file to read, including its full or "
       "relative path. In most cases, the file typically ends in "
       "neutron_event.dat (N.B. case sensitive if running on Linux).");
   vector<string> pulseExts(PULSE_EXTS, PULSE_EXTS + NUM_EXT);
-  declareProperty(new FileProperty(PULSEID_PARAM, "",
-                                   FileProperty::OptionalLoad, pulseExts),
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      PULSEID_PARAM, "", FileProperty::OptionalLoad, pulseExts),
                   "File containing the accelerator pulse information; the "
                   "filename will be found automatically if not specified.");
   declareProperty(
-      new FileProperty(MAP_PARAM, "", FileProperty::OptionalLoad, ".dat"),
+      Kernel::make_unique<FileProperty>(MAP_PARAM, "",
+                                        FileProperty::OptionalLoad, ".dat"),
       "File containing the pixel mapping (DAS pixels to pixel IDs) file "
       "(typically INSTRUMENT_TS_YYYY_MM_DD.dat). The filename will be found "
       "automatically if not specified.");
 
   // Pixels to load
-  declareProperty(new ArrayProperty<int64_t>(PID_PARAM),
+  declareProperty(Kernel::make_unique<ArrayProperty<int64_t>>(PID_PARAM),
                   "A list of individual spectra (pixel IDs) to read, specified "
                   "as e.g. 10:20. Only used if set.");
 
@@ -287,14 +286,11 @@ void FilterEventsByLogValuePreNexus::init() {
   // TotalChunks is only meaningful if ChunkNumber is set
   // Would be nice to be able to restrict ChunkNumber to be <= TotalChunks at
   // validation
-  setPropertySettings("TotalChunks",
-                      new VisibleWhenProperty("ChunkNumber", IS_NOT_DEFAULT));
+  setPropertySettings("TotalChunks", make_unique<VisibleWhenProperty>(
+                                         "ChunkNumber", IS_NOT_DEFAULT));
 
   // Loading option
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Auto");
-  propOptions.push_back("Serial");
-  propOptions.push_back("Parallel");
+  std::vector<std::string> propOptions{"Auto", "Serial", "Parallel"};
   declareProperty("UseParallelProcessing", "Auto",
                   boost::make_shared<StringListValidator>(propOptions),
                   "Use multiple cores for loading the data?\n"
@@ -305,21 +301,19 @@ void FilterEventsByLogValuePreNexus::init() {
 
   // the output workspace name
   declareProperty(
-      new WorkspaceProperty<IEventWorkspace>(OUT_PARAM, "", Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<IEventWorkspace>>(
+          OUT_PARAM, "", Direction::Output),
       "The name of the workspace that will be created, filled with the read-in "
       "data and stored in the [[Analysis Data Service]].");
 
   // Optional output table workspace
-  declareProperty(new WorkspaceProperty<ITableWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "EventLogTableWorkspace", "", PropertyMode::Optional),
                   "Optional output table workspace containing the event log "
                   "(pixel) information. ");
 
   //
-  std::vector<std::string> vecfunmode;
-  vecfunmode.push_back("LoadData");
-  vecfunmode.push_back("Filter");
-  vecfunmode.push_back("ExamineEventLog");
+  std::vector<std::string> vecfunmode{"LoadData", "Filter", "ExamineEventLog"};
   declareProperty("FunctionMode", "LoadData",
                   boost::make_shared<StringListValidator>(vecfunmode),
                   "Function mode for different purpose. ");
@@ -330,11 +324,11 @@ void FilterEventsByLogValuePreNexus::init() {
   declareProperty("NumberOfEventsToExamine", EMPTY_INT(),
                   "Number of events on the pixel ID to get examined. ");
 
-  declareProperty(new ArrayProperty<int>("LogPixelIDs"),
+  declareProperty(Kernel::make_unique<ArrayProperty<int>>("LogPixelIDs"),
                   "Pixel IDs for event log. Must have 2 (or more) entries. ");
 
   declareProperty(
-      new ArrayProperty<std::string>("LogPIxelTags"),
+      Kernel::make_unique<ArrayProperty<std::string>>("LogPIxelTags"),
       "Pixel ID tags for event log. Must have same items as 'LogPixelIDs'. ");
 
   declareProperty("AcceleratorFrequency", 60, "Freuqency of the accelerator at "
@@ -407,8 +401,8 @@ void FilterEventsByLogValuePreNexus::exec() {
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t i = 0; i < numberOfSpectra; i++) {
       PARALLEL_START_INTERUPT_REGION
-      m_localWorkspace->getEventListPtr(i)
-          ->setSortOrder(DataObjects::PULSETIME_SORT);
+      m_localWorkspace->getSpectrum(i)
+          .setSortOrder(DataObjects::PULSETIME_SORT);
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
@@ -417,7 +411,7 @@ void FilterEventsByLogValuePreNexus::exec() {
   // Save output
   setProperty<IEventWorkspace_sptr>(OUT_PARAM, m_localWorkspace);
   if (m_functionMode == "Filter") {
-    declareProperty(new WorkspaceProperty<IEventWorkspace>(
+    declareProperty(Kernel::make_unique<WorkspaceProperty<IEventWorkspace>>(
                         "OutputFilteredWorkspace", "WS_A", Direction::Output),
                     "");
     setProperty<IEventWorkspace_sptr>("OutputFilteredWorkspace",
@@ -512,11 +506,11 @@ void FilterEventsByLogValuePreNexus::processProperties() {
   // Load partial spectra
   //---------------------------------------------------------------------------
   // For slight speed up
-  m_loadOnlySomeSpectra = (this->m_spectraList.size() > 0);
+  m_loadOnlySomeSpectra = (!this->m_spectraList.empty());
 
   // Turn the spectra list into a map, for speed of access
-  for (auto it = m_spectraList.begin(); it != m_spectraList.end(); it++)
-    spectraLoadMap[*it] = true;
+  for (auto spectra : m_spectraList)
+    spectraLoadMap[spectra] = true;
 
   //---------------------------------------------------------------------------
   // Other features
@@ -605,22 +599,18 @@ FilterEventsByLogValuePreNexus::setupOutputEventWorkspace() {
   * (3) (Optionally) write out information
   */
 void FilterEventsByLogValuePreNexus::processEventLogs() {
-  std::set<PixelType>::iterator pit;
   std::map<PixelType, size_t>::iterator mit;
-  for (pit = this->wrongdetids.begin(); pit != this->wrongdetids.end(); ++pit) {
+  for (const auto pid : this->wrongdetids) {
     // Convert Pixel ID to 'wrong detectors ID' map's index
-    PixelType pid = *pit;
     mit = this->wrongdetidmap.find(pid);
     size_t mindex = mit->second;
     if (mindex > this->wrongdetid_pulsetimes.size()) {
-      g_log.error() << "Wrong Index " << mindex << " for Pixel " << pid
-                    << std::endl;
+      g_log.error() << "Wrong Index " << mindex << " for Pixel " << pid << '\n';
       throw std::invalid_argument("Wrong array index for pixel from map");
     } else {
       g_log.information() << "Processing imbed log marked by Pixel " << pid
                           << " with size = "
-                          << this->wrongdetid_pulsetimes[mindex].size()
-                          << std::endl;
+                          << this->wrongdetid_pulsetimes[mindex].size() << '\n';
     }
 
     // Generate the log name
@@ -783,8 +773,8 @@ void FilterEventsByLogValuePreNexus::runLoadInstrument(
   vector<string> eventExts(EVENT_EXTS, EVENT_EXTS + NUM_EXT);
   std::reverse(eventExts.begin(), eventExts.end());
 
-  for (size_t i = 0; i < eventExts.size(); ++i) {
-    size_t pos = instrument.find(eventExts[i]);
+  for (auto &eventExt : eventExts) {
+    size_t pos = instrument.find(eventExt);
     if (pos != string::npos) {
       instrument = instrument.substr(0, pos);
       break;
@@ -792,7 +782,7 @@ void FilterEventsByLogValuePreNexus::runLoadInstrument(
   }
 
   // determine the instrument parameter file
-  size_t pos = instrument.rfind("_"); // get rid of the run number
+  size_t pos = instrument.rfind('_'); // get rid of the run number
   instrument = instrument.substr(0, pos);
 
   // do the actual work
@@ -854,7 +844,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
       EventList &spec = workspace->getOrAddEventList(workspaceIndex);
       spec.addDetectorID(it->first);
       // Start the spectrum number at 1
-      spec.setSpectrumNo(specid_t(workspaceIndex + 1));
+      spec.setSpectrumNo(specnum_t(workspaceIndex + 1));
       workspaceIndex += 1;
     }
   }
@@ -959,7 +949,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
       for (detid_t j = 0; j < m_detid_max + 1; j++) {
         size_t wi = m_pixelToWkspindex[j];
         // Save a POINTER to the vector<tofEvent>
-        theseEventVectors[j] = &partWS->getEventList(wi).getEvents();
+        theseEventVectors[j] = &partWS->getSpectrum(wi).getEvents();
       }
     } // END FOR [Threads]
 
@@ -1016,7 +1006,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
-    g_log.information() << tim << " to load the data." << std::endl;
+    g_log.information() << tim << " to load the data.\n";
 
     // -------------------------------------------------------------------
     // MERGE WORKSPACES BACK TOGETHER
@@ -1025,49 +1015,33 @@ void FilterEventsByLogValuePreNexus::procEvents(
       PARALLEL_START_INTERUPT_REGION
       m_prog->resetNumSteps(workspace->getNumberHistograms(), 0.8, 0.95);
 
-      size_t memoryCleared = 0;
-      MemoryManager::Instance().releaseFreeMemory();
-
       // Merge all workspaces, index by index.
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int iwi = 0; iwi < int(workspace->getNumberHistograms()); iwi++) {
         size_t wi = size_t(iwi);
 
         // The output event list.
-        EventList &el = workspace->getEventList(wi);
+        EventList &el = workspace->getSpectrum(wi);
         el.clear(false);
 
         // How many events will it have?
         size_t numEvents = 0;
         for (size_t i = 0; i < numThreads; i++)
-          numEvents += partWorkspaces[i]->getEventList(wi).getNumberEvents();
+          numEvents += partWorkspaces[i]->getSpectrum(wi).getNumberEvents();
         // This will avoid too much copying.
         el.reserve(numEvents);
 
         // Now merge the event lists
         for (size_t i = 0; i < numThreads; i++) {
-          EventList &partEl = partWorkspaces[i]->getEventList(wi);
+          EventList &partEl = partWorkspaces[i]->getSpectrum(wi);
           el += partEl.getEvents();
           // Free up memory as you go along.
           partEl.clear(false);
         }
-
-        // With TCMalloc, release memory when you accumulate enough to make
-        // sense
-        PARALLEL_CRITICAL(FilterEventsByLogValuePreNexus_trackMemory) {
-          memoryCleared += numEvents;
-          if (memoryCleared > 10000000) // ten million events = about 160 MB
-          {
-            MemoryManager::Instance().releaseFreeMemory();
-            memoryCleared = 0;
-          }
-        }
         m_prog->report("Merging Workspaces");
       }
 
-      // Final memory release
-      MemoryManager::Instance().releaseFreeMemory();
-      g_log.debug() << tim << " to merge workspaces together." << std::endl;
+      g_log.debug() << tim << " to merge workspaces together.\n";
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
@@ -1078,7 +1052,6 @@ void FilterEventsByLogValuePreNexus::procEvents(
       delete[] eventVectors[i];
     }
     delete[] eventVectors;
-    // delete [] pulsetimes;
 
     m_prog->resetNumSteps(3, 0.94, 1.00);
 
@@ -1089,17 +1062,13 @@ void FilterEventsByLogValuePreNexus::procEvents(
 
     m_prog->report("Setting proton charge");
     this->setProtonCharge(workspace);
-    g_log.debug() << tim << " to set the proton charge log." << std::endl;
+    g_log.debug() << tim << " to set the proton charge log.\n";
 
     // Make sure the MRU is cleared
     workspace->clearMRU();
 
     // Now, create a default X-vector for histogramming, with just 2 bins.
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec &xRef = axis.access();
-    xRef.resize(2);
-    xRef[0] = m_shortestTof - 1; // Just to make sure the bins hold it all
-    xRef[1] = m_longestTof + 1;
+    auto axis = HistogramData::BinEdges{m_shortestTof - 1, m_longestTof + 1};
     workspace->setAllX(axis);
     this->m_pixelToWkspindex.clear();
 
@@ -1117,18 +1086,14 @@ void FilterEventsByLogValuePreNexus::procEvents(
                    << "Number of Wrong Detector IDs = " << wrongdetids.size()
                    << "\n";
 
-    std::set<PixelType>::iterator wit;
-    for (wit = this->wrongdetids.begin(); wit != this->wrongdetids.end();
-         ++wit) {
-      g_log.notice() << "Wrong Detector ID : " << *wit << std::endl;
+    for (const auto pid : this->wrongdetids) {
+      g_log.notice() << "Wrong Detector ID : " << pid << '\n';
     }
-    std::map<PixelType, size_t>::iterator git;
-    for (git = this->wrongdetidmap.begin(); git != this->wrongdetidmap.end();
-         ++git) {
-      PixelType tmpid = git->first;
-      size_t vindex = git->second;
+    for (const auto &detidPair : wrongdetidmap) {
+      PixelType tmpid = detidPair.first;
+      size_t vindex = detidPair.second;
       g_log.notice() << "Pixel " << tmpid << ":  Total number of events = "
-                     << this->wrongdetid_pulsetimes[vindex].size() << std::endl;
+                     << this->wrongdetid_pulsetimes[vindex].size() << '\n';
     }
 
     return;
@@ -1297,11 +1262,11 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
 
 // The addEventQuickly method does not clear the cache, making things slightly
 // faster.
-// workspace->getEventList(this->m_pixelToWkspindex[pid]).addEventQuickly(event);
+// workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event);
 
 // - Add event to data structure
 // (This is equivalent to
-// workspace->getEventList(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
+// workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
 // (But should be faster as a bunch of these calls were cached.)
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
         // This avoids a copy constructor call but is only available with GCC
@@ -1367,10 +1332,8 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
     this->m_numBadEvents += local_numBadEvents;
     this->m_numWrongdetidEvents += local_numWrongdetidEvents;
 
-    std::set<PixelType>::iterator it;
-    for (it = local_wrongdetids.begin(); it != local_wrongdetids.end(); ++it) {
-      PixelType tmpid = *it;
-      this->wrongdetids.insert(*it);
+    for (auto tmpid : local_wrongdetids) {
+      this->wrongdetids.insert(tmpid);
 
       // Obtain the global map index for this wrong detector ID events entry in
       // local map
@@ -1428,7 +1391,8 @@ void FilterEventsByLogValuePreNexus::unmaskVetoEventIndexes() {
   size_t numerror = 0;
 
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-    for (int i = 0; i < static_cast<int>(m_vecEventIndex.size()); ++i) {
+    for (int i = 0; i < static_cast<int>(m_vecEventIndex.size()); // NOLINT
+         ++i) {
       PARALLEL_START_INTERUPT_REGION
 
       uint64_t eventindex = m_vecEventIndex[i];
@@ -1610,7 +1574,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       for (detid_t j = 0; j < m_detid_max + 1; j++) {
         size_t wi = m_pixelToWkspindex[j];
         // Save a POINTER to the vector<tofEvent>
-        theseEventVectors[j] = &partWS->getEventList(wi).getEvents();
+        theseEventVectors[j] = &partWS->getSpectrum(wi).getEvents();
       }
     } // END FOR [Threads]
 
@@ -1667,7 +1631,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
-    g_log.information() << tim << " to load the data." << std::endl;
+    g_log.information() << tim << " to load the data.\n";
 
     // -------------------------------------------------------------------
     // MERGE WORKSPACES BACK TOGETHER
@@ -1676,9 +1640,6 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       PARALLEL_START_INTERUPT_REGION
       m_prog->resetNumSteps(m_localWorkspace->getNumberHistograms(), 0.8, 0.95);
 
-      size_t memoryCleared = 0;
-      MemoryManager::Instance().releaseFreeMemory();
-
       // Merge all workspaces, index by index.
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int iwi = 0; iwi < int(m_localWorkspace->getNumberHistograms());
@@ -1686,40 +1647,27 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
         size_t wi = size_t(iwi);
 
         // The output event list.
-        EventList &el = m_localWorkspace->getEventList(wi);
+        EventList &el = m_localWorkspace->getSpectrum(wi);
         el.clear(false);
 
         // How many events will it have?
         size_t numEvents = 0;
         for (size_t i = 0; i < numThreads; i++)
-          numEvents += partWorkspaces[i]->getEventList(wi).getNumberEvents();
+          numEvents += partWorkspaces[i]->getSpectrum(wi).getNumberEvents();
         // This will avoid too much copying.
         el.reserve(numEvents);
 
         // Now merge the event lists
         for (size_t i = 0; i < numThreads; i++) {
-          EventList &partEl = partWorkspaces[i]->getEventList(wi);
+          EventList &partEl = partWorkspaces[i]->getSpectrum(wi);
           el += partEl.getEvents();
           // Free up memory as you go along.
           partEl.clear(false);
         }
-
-        // With TCMalloc, release memory when you accumulate enough to make
-        // sense
-        PARALLEL_CRITICAL(FilterEventsByLogValuePreNexus_trackMemory) {
-          memoryCleared += numEvents;
-          if (memoryCleared > 10000000) // ten million events = about 160 MB
-          {
-            MemoryManager::Instance().releaseFreeMemory();
-            memoryCleared = 0;
-          }
-        }
         m_prog->report("Merging Workspaces");
       }
 
-      // Final memory release
-      MemoryManager::Instance().releaseFreeMemory();
-      g_log.debug() << tim << " to merge workspaces together." << std::endl;
+      g_log.debug() << tim << " to merge workspaces together.\n";
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
@@ -1730,7 +1678,6 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       delete[] eventVectors[i];
     }
     delete[] eventVectors;
-    // delete [] pulsetimes;
 
     m_prog->resetNumSteps(3, 0.94, 1.00);
 
@@ -1741,17 +1688,13 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
 
     m_prog->report("Setting proton charge");
     this->setProtonCharge(m_localWorkspace);
-    g_log.debug() << tim << " to set the proton charge log." << std::endl;
+    g_log.debug() << tim << " to set the proton charge log.\n";
 
     // Make sure the MRU is cleared
     m_localWorkspace->clearMRU();
 
     // Now, create a default X-vector for histogramming, with just 2 bins.
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec &xRef = axis.access();
-    xRef.resize(2);
-    xRef[0] = m_shortestTof - 1; // Just to make sure the bins hold it all
-    xRef[1] = m_longestTof + 1;
+    auto axis = HistogramData::BinEdges{m_shortestTof - 1, m_longestTof + 1};
     m_localWorkspace->setAllX(axis);
     this->m_pixelToWkspindex.clear();
 
@@ -1764,18 +1707,14 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
                    << " microsec; longest TOF: " << m_longestTof << " microsec."
                    << "\n";
 
-    std::set<PixelType>::iterator wit;
-    for (wit = this->wrongdetids.begin(); wit != this->wrongdetids.end();
-         ++wit) {
-      g_log.notice() << "Wrong Detector ID : " << *wit << std::endl;
+    for (const auto wrongdetid : this->wrongdetids) {
+      g_log.notice() << "Wrong Detector ID : " << wrongdetid << '\n';
     }
-    std::map<PixelType, size_t>::iterator git;
-    for (git = this->wrongdetidmap.begin(); git != this->wrongdetidmap.end();
-         ++git) {
-      PixelType tmpid = git->first;
-      size_t vindex = git->second;
+    for (const auto &detidPair : this->wrongdetidmap) {
+      PixelType tmpid = detidPair.first;
+      size_t vindex = detidPair.second;
       g_log.notice() << "Pixel " << tmpid << ":  Total number of events = "
-                     << this->wrongdetid_pulsetimes[vindex].size() << std::endl;
+                     << this->wrongdetid_pulsetimes[vindex].size() << '\n';
     }
 
     return;
@@ -2088,7 +2027,7 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
 
 // Add event to vector of events
 // (This is equivalent to
-// workspace->getEventList(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
+// workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
 // (But should be faster as a bunch of these calls were cached.)
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
         // This avoids a copy constructor call but is only available with GCC
@@ -2230,7 +2169,7 @@ size_t FilterEventsByLogValuePreNexus::padOutEmptyPixels(
       // EventList & spec = workspace->getOrAddEventList(workspaceIndex);
       // spec.addDetectorID(it->first);
       // Start the spectrum number at 1
-      // spec.setSpectrumNo(specid_t(workspaceIndex+1));
+      // spec.setSpectrumNo(specnum_t(workspaceIndex+1));
       workspaceIndex += 1;
     }
   }
@@ -2250,15 +2189,15 @@ void FilterEventsByLogValuePreNexus::setupPixelSpectrumMap(
   eventws->getInstrument()->getDetectors(detector_map);
 
   // Set up
-  for (auto it = detector_map.begin(); it != detector_map.end(); it++) {
-    if (!it->second->isMonitor()) {
+  for (auto &det : detector_map) {
+    if (!det.second->isMonitor()) {
       // Add non-monitor detector ID
-      size_t workspaceIndex = m_pixelToWkspindex[it->first];
+      size_t workspaceIndex = m_pixelToWkspindex[det.first];
       // this->m_pixelToWkspindex[it->first] = workspaceIndex;
       EventList &spec = eventws->getOrAddEventList(workspaceIndex);
-      spec.addDetectorID(it->first);
+      spec.addDetectorID(det.first);
       // Start the spectrum number at 1
-      spec.setSpectrumNo(specid_t(workspaceIndex + 1));
+      spec.setSpectrumNo(specnum_t(workspaceIndex + 1));
     }
   }
 
@@ -2346,7 +2285,6 @@ void FilterEventsByLogValuePreNexus::setProtonCharge(
  */
 void FilterEventsByLogValuePreNexus::loadPixelMap(const std::string &filename) {
   this->m_usingMappingFile = false;
-  this->m_pixelmap.clear();
 
   // check that there is a mapping file
   if (filename.empty()) {
@@ -2362,7 +2300,7 @@ void FilterEventsByLogValuePreNexus::loadPixelMap(const std::string &filename) {
   BinaryFile<PixelType> pixelmapFile(filename);
   PixelType max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
   // Load all the data
-  pixelmapFile.loadAllInto(this->m_pixelmap);
+  this->m_pixelmap = pixelmapFile.loadAllIntoVector();
 
   // Check for funky file
   if (std::find_if(m_pixelmap.begin(), m_pixelmap.end(),
@@ -2432,7 +2370,7 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
     return;
   }
 
-  std::vector<Pulse> *pulses;
+  std::vector<Pulse> pulses;
 
   // set up for reading
   // Open the file; will throw if there is any problem
@@ -2462,19 +2400,18 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
   if (m_numPulses > 0) {
     DateAndTime lastPulseDateTime(0, 0);
     this->pulsetimes.reserve(m_numPulses);
-    for (size_t i = 0; i < m_numPulses; i++) {
-      Pulse &it = (*pulses)[i];
-      DateAndTime pulseDateTime(static_cast<int64_t>(it.seconds),
-                                static_cast<int64_t>(it.nanoseconds));
+    for (const auto &pulse : pulses) {
+      DateAndTime pulseDateTime(static_cast<int64_t>(pulse.seconds),
+                                static_cast<int64_t>(pulse.nanoseconds));
       this->pulsetimes.push_back(pulseDateTime);
-      this->m_vecEventIndex.push_back(it.event_index);
+      this->m_vecEventIndex.push_back(pulse.event_index);
 
       if (pulseDateTime < lastPulseDateTime)
         this->m_pulseTimesIncreasing = false;
       else
         lastPulseDateTime = pulseDateTime;
 
-      temp = it.pCurrent;
+      temp = pulse.pCurrent;
       this->m_protonCharge.push_back(temp);
       if (temp < 0.)
         this->g_log.warning("Individual proton charge < 0 being ignored");
@@ -2484,9 +2421,6 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
   }
 
   this->m_protonChargeTot = this->m_protonChargeTot * CURRENT_CONVERSION;
-
-  // Clear the vector
-  delete pulses;
 }
 
 } // namespace DataHandling

@@ -8,7 +8,6 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
-#include <boost/assign/list_of.hpp>
 #include <cxxtest/TestSuite.h>
 
 class FakeMDTest : public CxxTest::TestSuite {
@@ -41,15 +40,14 @@ public:
   void test_no_randomize() {
     using Mantid::DataObjects::FakeMD;
     using Mantid::DataObjects::MDEventsTestHelper::makeMDEW;
-    using namespace boost::assign;
 
     // Destination workspace
     auto fakeData = makeMDEW<3>(10, 0.0, 10.0, 1);
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS(fakeData->getNPoints(), 1000);
 
-    const std::vector<double> peakParams = list_of(1000.0)(5.0)(5.0)(5.0)(1.0);
-    const std::vector<double> uniformParams = list_of(10000.0);
+    const std::vector<double> peakParams = {1000.0, 5.0, 5.0, 5.0, 1.0};
+    const std::vector<double> uniformParams = {10000.0};
     const int randomSeed(0);
     const bool randomizeSignal(false);
 
@@ -62,14 +60,13 @@ public:
   void test_exec_randomizeSignal() {
     using Mantid::DataObjects::FakeMD;
     using Mantid::DataObjects::MDEventsTestHelper::makeMDEW;
-    using namespace boost::assign;
 
     auto fakeData = makeMDEW<3>(10, 0.0, 10.0, 0);
     TS_ASSERT_EQUALS(fakeData->getNPoints(), 0);
     TS_ASSERT_DELTA(fakeData->getBox()->getSignal(), 0.0, 1e-5);
 
-    const std::vector<double> peakParams = list_of(100.0)(5.0)(5.0)(5.0)(1.0);
-    const std::vector<double> uniformParams = list_of(100.0);
+    const std::vector<double> peakParams = {100.0, 5.0, 5.0, 5.0, 1.0};
+    const std::vector<double> uniformParams = {100.0};
     const int randomSeed(0);
     const bool randomizeSignal(true);
 
@@ -92,7 +89,6 @@ public:
   void testExecRegularSignal() {
     using Mantid::DataObjects::FakeMD;
     using Mantid::DataObjects::MDEventsTestHelper::makeMDEW;
-    using namespace boost::assign;
 
     auto fakeData = makeMDEW<3>(10, 0.0, 10.0, 0);
 
@@ -101,7 +97,7 @@ public:
     TS_ASSERT_DELTA(fakeData->getBox()->getSignal(), 0.0, 1e-5);
 
     const std::vector<double> peakParams;
-    const std::vector<double> uniformParams = list_of(-1000.0);
+    const std::vector<double> uniformParams = {-1000.0};
     const int randomSeed(0);
     const bool randomizeSignal(false);
 
@@ -122,7 +118,6 @@ public:
     using Mantid::DataObjects::MDEvent;
     using Mantid::DataObjects::MDEventsTestHelper::makeAnyMDEW;
     using Mantid::Kernel::PropertyWithValue;
-    using namespace boost::assign;
 
     auto fakeData = makeAnyMDEW<MDEvent<3>, 3>(10, 0.0, 10.0, 0);
     // Give it an instrument
@@ -135,7 +130,7 @@ public:
         new PropertyWithValue<std::string>("run_number", "12345"), true);
 
     const std::vector<double> peakParams;
-    const std::vector<double> uniformParams = list_of(-1000.0);
+    const std::vector<double> uniformParams = {-1000.0};
     const int randomSeed(0);
     const bool randomizeSignal(false);
 

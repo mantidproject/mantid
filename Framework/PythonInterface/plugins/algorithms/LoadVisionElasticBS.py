@@ -22,7 +22,7 @@ class LoadVisionElasticBS(PythonAlgorithm):
         return "This algorithm loads only the backscattering elastic detectors on VISION."
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "", action=FileAction.Load, extensions=["*.nxs.h5"]))
+        self.declareProperty(FileProperty("Filename", "", action=FileAction.Load, extensions=[".nxs.h5"]))
         self.declareProperty("Banks", "all")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output))
 
@@ -60,8 +60,8 @@ class LoadVisionElasticBS(PythonAlgorithm):
             # Now lets try histograms.
             for bank in banks_list:
                 mantid.simpleapi.LoadFlexiNexus(Filename=filename,
-                               Dictionary=os.path.join(dictionary_path, 'vision-'+bank+'.dic'),
-                               OutputWorkspace=bank)
+                                                Dictionary=os.path.join(dictionary_path, 'vision-'+bank+'.dic'),
+                                                OutputWorkspace=bank)
                 mantid.simpleapi.LoadInstrument(Workspace=bank,
                                                 Filename=ExperimentInfo.getInstrumentFilename('VISION'),
                                                 RewriteSpectraMap=False)

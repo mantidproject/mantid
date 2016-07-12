@@ -5,8 +5,11 @@
 
 #include "MantidAlgorithms/ClearInstrumentParameters.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;

@@ -223,7 +223,7 @@ private:
   class EmptyLatticeFunction : public LatticeFunction {
   public:
     void functionLattice(const LatticeDomain &latticeDomain,
-                         FunctionValues &values) const {
+                         FunctionValues &values) const override {
       UNUSED_ARG(latticeDomain);
       UNUSED_ARG(values);
     }

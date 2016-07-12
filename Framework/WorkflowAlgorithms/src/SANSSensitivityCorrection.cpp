@@ -17,7 +17,7 @@
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -31,18 +31,19 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void SANSSensitivityCorrection::init() {
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
-                                        {"_event.nxs", ".xml"}),
+  const std::vector<std::string> fileExts{"_event.nxs", ".xml"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, fileExts),
                   "Flood field or sensitivity file.");
   declareProperty("UseSampleDC", true, "If true, the dark current subtracted "
                                        "from the sample data will also be "
                                        "subtracted from the flood field.");
-  declareProperty(new API::FileProperty("DarkCurrentFile", "",
-                                        API::FileProperty::OptionalLoad,
-                                        {"_event.nxs", ".xml"}),
-                  "The name of the input file to load as dark current.");
+  declareProperty(
+      Kernel::make_unique<API::FileProperty>(
+          "DarkCurrentFile", "", API::FileProperty::OptionalLoad, fileExts),
+      "The name of the input file to load as dark current.");
 
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
@@ -59,11 +60,13 @@ void SANSSensitivityCorrection::init() {
   declareProperty("BeamCenterY", EMPTY_DBL(),
                   "Beam position in Y pixel coordinates (optional: otherwise "
                   "sample beam center is used)");
+  declareProperty("MaskedFullComponent", "",
+                  "Component Name to fully mask according to the IDF file.");
 
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
       "OutputWorkspace", "", Direction::Output, PropertyMode::Optional));
   declareProperty("ReductionProperties", "__sans_reduction_properties");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
       "OutputSensitivityWorkspace", "", Direction::Output,
       PropertyMode::Optional));
   declareProperty("OutputMessage", "", Direction::Output);
@@ -93,9 +96,7 @@ bool SANSSensitivityCorrection::fileCheck(const std::string &filePath) {
     return false;
   }
 
-  if (entryName[0] == "mantid_workspace_1")
-    return true;
-  return false;
+  return entryName[0] == "mantid_workspace_1";
 }
 
 void SANSSensitivityCorrection::exec() {
@@ -117,9 +118,9 @@ void SANSSensitivityCorrection::exec() {
   }
 
   if (!reductionManager->existsProperty("SensitivityAlgorithm")) {
-    AlgorithmProperty *algProp = new AlgorithmProperty("SensitivityAlgorithm");
+    auto algProp = make_unique<AlgorithmProperty>("SensitivityAlgorithm");
     algProp->setValue(toString());
-    reductionManager->declareProperty(algProp);
+    reductionManager->declareProperty(std::move(algProp));
   }
 
   progress.report("Loading sensitivity file");
@@ -136,6 +137,7 @@ void SANSSensitivityCorrection::exec() {
     floodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
     m_output_message += "   |Using " + wsName + "\n";
+    g_log.debug() << "Using sensitivity worspace " << wsName << "\n";
   } else {
     // Load the flood field if we don't have it already
     // First, try to determine whether we need to load data or a sensitivity
@@ -152,7 +154,7 @@ void SANSSensitivityCorrection::exec() {
         // Reset pointer
         floodWS.reset();
         g_log.error() << "A processed Mantid workspace was loaded but it "
-                         "wasn't a sensitivity file!" << std::endl;
+                         "wasn't a sensitivity file!\n";
       }
     }
 
@@ -183,6 +185,7 @@ void SANSSensitivityCorrection::exec() {
           loadAlg->setProperty("BeamCenterX", center_x);
         if (!isEmpty(center_y) && loadAlg->existsProperty("BeamCenterY"))
           loadAlg->setProperty("BeamCenterY", center_y);
+        loadAlg->setPropertyValue("OutputWorkspace", rawFloodWSName);
         loadAlg->executeAsChildAlg();
         Workspace_sptr tmpWS = loadAlg->getProperty("OutputWorkspace");
         rawFloodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tmpWS);
@@ -261,7 +264,7 @@ void SANSSensitivityCorrection::exec() {
             // We are running out of options
             g_log.error() << "No dark current algorithm provided to load ["
                           << getPropertyValue("DarkCurrentFile")
-                          << "]: skipped!" << std::endl;
+                          << "]: skipped!\n";
             dark_result = "   No dark current algorithm provided: skipped\n";
           }
         }
@@ -289,8 +292,11 @@ void SANSSensitivityCorrection::exec() {
 
         const double minEff = getProperty("MinEfficiency");
         const double maxEff = getProperty("MaxEfficiency");
+        const std::string maskComponent =
+            getPropertyValue("MaskedFullComponent");
         effAlg->setProperty("MinEfficiency", minEff);
         effAlg->setProperty("MaxEfficiency", maxEff);
+        effAlg->setProperty("MaskedFullComponent", maskComponent);
         effAlg->execute();
         floodWS = effAlg->getProperty("OutputWorkspace");
       } else {
@@ -314,7 +320,8 @@ void SANSSensitivityCorrection::exec() {
       setPropertyValue("OutputSensitivityWorkspace", floodWSName);
       AnalysisDataService::Instance().addOrReplace(floodWSName, floodWS);
       reductionManager->declareProperty(
-          new WorkspaceProperty<>(entryName, floodWSName, Direction::InOut));
+          Kernel::make_unique<WorkspaceProperty<>>(entryName, floodWSName,
+                                                   Direction::InOut));
       reductionManager->setPropertyValue(entryName, floodWSName);
       reductionManager->setProperty(entryName, floodWS);
     }

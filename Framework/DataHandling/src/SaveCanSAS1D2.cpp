@@ -1,14 +1,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/SaveCanSAS1D2.h"
-
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-
+#include "MantidDataHandling/SaveCanSAS1D2.h"
 #include "MantidGeometry/IComponent.h"
-
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MantidVersion.h"
 
@@ -23,25 +22,19 @@ namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveCanSAS1D2)
 
-/// constructor
-SaveCanSAS1D2::SaveCanSAS1D2() {}
-
-/// destructor
-SaveCanSAS1D2::~SaveCanSAS1D2() {}
-
 /// Overwrites Algorithm method.
 void SaveCanSAS1D2::init() {
   SaveCanSAS1D::init();
 
   declareProperty(
-      new API::WorkspaceProperty<>(
+      make_unique<API::WorkspaceProperty<>>(
           "Transmission", "", Kernel::Direction::Input, PropertyMode::Optional,
           boost::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
       "The transmission workspace. Optional. If given, will be saved at "
       "TransmissionSpectrum");
 
   declareProperty(
-      new API::WorkspaceProperty<>(
+      make_unique<API::WorkspaceProperty<>>(
           "TransmissionCan", "", Kernel::Direction::Input,
           PropertyMode::Optional,
           boost::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
@@ -147,9 +140,9 @@ void SaveCanSAS1D2::exec() {
   // Reduction process, if available
   const std::string process_xml = getProperty("Process");
   if (process_xml.size() > 0) {
-    m_outFile << "\n\t\t<SASProcess>\n";
+    m_outFile << "\n\t\t<SASprocess>\n";
     m_outFile << process_xml;
-    m_outFile << "\n\t\t</SASProcess>\n";
+    m_outFile << "\n\t\t</SASprocess>\n";
   }
 
   std::string sasNote = "\n\t\t<SASnote>";

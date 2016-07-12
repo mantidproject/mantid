@@ -47,7 +47,7 @@ public:
     refAxis->unit() = UnitFactory::Instance().create("TOF");
   }
 
-  ~RefAxisTest() {
+  ~RefAxisTest() override {
     delete refAxis;
     delete space;
     delete space2;

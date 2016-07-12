@@ -19,34 +19,25 @@ namespace DataHandling {
 DECLARE_ALGORITHM(ModifyDetectorDotDatFile)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ModifyDetectorDotDatFile::ModifyDetectorDotDatFile() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ModifyDetectorDotDatFile::~ModifyDetectorDotDatFile() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ModifyDetectorDotDatFile::init() {
   declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<Workspace>>("InputWorkspace", "",
+                                                Direction::Input),
       "Workspace with detectors in the positions to be put into the detector "
       "dot dat file");
 
   std::initializer_list<std::string> exts = {".dat", ".txt"};
 
   declareProperty(
-      new FileProperty("InputFilename", "", FileProperty::Load, exts),
+      Kernel::make_unique<FileProperty>("InputFilename", "", FileProperty::Load,
+                                        exts),
       "Path to a detector dot dat file. Must be of type .dat or .txt");
 
   declareProperty(
-      new FileProperty("OutputFilename", "", FileProperty::Save, exts),
+      Kernel::make_unique<FileProperty>("OutputFilename", "",
+                                        FileProperty::Save, exts),
       "Path to the modified detector dot dat file. Must be of type .dat or "
       ".txt");
 }

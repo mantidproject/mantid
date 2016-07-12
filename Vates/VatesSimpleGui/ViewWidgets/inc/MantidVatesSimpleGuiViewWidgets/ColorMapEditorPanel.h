@@ -43,11 +43,11 @@ public:
   /// Default constructor.
   ColorMapEditorPanel(QWidget *parent = 0);
   /// Default destructor.
-  ~ColorMapEditorPanel();
+  ~ColorMapEditorPanel() override;
   /// Connect the panel to ParaView
   void setUpPanel();
   /// Filter events to check for show events.
-  bool eventFilter(QObject *obj, QEvent *ev);
+  bool eventFilter(QObject *obj, QEvent *ev) override;
 
 signals:
   void showPopUpWindow();

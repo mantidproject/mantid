@@ -18,7 +18,7 @@ public:
   PeakTransform(const std::string &xPlotLabel, const std::string &yPlotLabel,
                 const boost::regex &regexOne, const boost::regex &regexTwo,
                 const boost::regex &regexThree);
-  virtual ~PeakTransform();
+  virtual ~PeakTransform() = default;
   /// Perform Transform
   virtual Mantid::Kernel::V3D
   transform(const Mantid::Kernel::V3D &original) const;
@@ -39,7 +39,7 @@ public:
   getCoordinateSystem() const = 0;
 
 protected:
-  PeakTransform(const PeakTransform &other);
+  PeakTransform(const PeakTransform &) = default;
   std::string m_xPlotLabel;
   std::string m_yPlotLabel;
   // For mapping/orientation from peak coordinates to plot coordinate

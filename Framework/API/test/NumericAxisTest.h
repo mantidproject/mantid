@@ -32,7 +32,7 @@ public:
     numericAxis->title() = "A numeric axis";
   }
 
-  ~NumericAxisTest() { delete numericAxis; }
+  ~NumericAxisTest() override { delete numericAxis; }
 
   void testConstructor() {
     TS_ASSERT_EQUALS(numericAxis->title(), "A numeric axis");

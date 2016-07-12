@@ -129,8 +129,10 @@ public:
     func->iterationStarting();
     TS_ASSERT_DELTA(func->getParameter(0), 5.0, 1e-10);
     TS_ASSERT_DELTA(func->getParameter(1), 0.5, 1e-10);
-    TS_ASSERT_DELTA(func->getParameter(2), 10.0, 1e-10);
-    TS_ASSERT_DELTA(func->getParameter(3), 0.5, 1e-10);
+    TS_ASSERT_DELTA(func->getParameter(2), 1.0, 1e-10);
+    TS_ASSERT_DELTA(func->getParameter(3), 10.0, 1e-10);
+    TS_ASSERT_DELTA(func->getParameter(4), 0.5, 1e-10);
+    TS_ASSERT_DELTA(func->getParameter(5), 1.0, 1e-10);
   }
 
   void
@@ -151,8 +153,10 @@ public:
     func->iterationStarting();
     TS_ASSERT_DELTA(func->getParameter(0), 5.0, 1e-10);          // width_1
     TS_ASSERT_DELTA(func->getParameter(1), 0.6666666633, 1e-10); // I_1
-    TS_ASSERT_DELTA(func->getParameter(2), 10.0, 1e-10);         // width_2
-    TS_ASSERT_DELTA(func->getParameter(3), 0.3333333317, 1e-10); // I_2
+    TS_ASSERT_DELTA(func->getParameter(2), 1.0, 1e-10);
+    TS_ASSERT_DELTA(func->getParameter(3), 10.0, 1e-10);         // width_2
+    TS_ASSERT_DELTA(func->getParameter(4), 0.3333333317, 1e-10); // I_2
+    TS_ASSERT_DELTA(func->getParameter(5), 1.0, 1e-10);
   }
 
   void
@@ -177,9 +181,11 @@ public:
                     1e-8); // first mass intensity 1
     TS_ASSERT_DELTA(func->getParameter(2), 0.33333333,
                     1e-8); // first mass intensity 2
-    TS_ASSERT_DELTA(func->getParameter(3), 10.0, 1e-10); // width_2
-    TS_ASSERT_DELTA(func->getParameter(4), 0.33333333,
+    TS_ASSERT_DELTA(func->getParameter(3), 1.0, 1e-10);
+    TS_ASSERT_DELTA(func->getParameter(4), 10.0, 1e-10); // width_2
+    TS_ASSERT_DELTA(func->getParameter(5), 0.33333333,
                     1e-8); // second mass intensity
+    TS_ASSERT_DELTA(func->getParameter(6), 1.0, 1e-10);
   }
 
   void
@@ -218,21 +224,21 @@ private:
       declareParameter("Width", 1.0);
       declareParameter("Intensity", 1.0);
     }
-    std::string name() const { return "ComptonProfileStub"; }
-    std::vector<size_t> intensityParameterIndices() const {
+    std::string name() const override { return "ComptonProfileStub"; }
+    std::vector<size_t> intensityParameterIndices() const override {
       return std::vector<size_t>(1, 1);
     }
 
     size_t fillConstraintMatrix(Mantid::Kernel::DblMatrix &cmatrix,
                                 const size_t start,
-                                const std::vector<double> &) const {
+                                const std::vector<double> &) const override {
       for (size_t i = 0; i < cmatrix.numRows(); ++i) {
         cmatrix[i][start] = 1.0;
       }
       return 1;
     }
 
-    void massProfile(double *result, const size_t nData) const {
+    void massProfile(double *result, const size_t nData) const override {
       for (size_t i = 0; i < nData; ++i)
         result[i] = 1;
     }
@@ -246,15 +252,17 @@ private:
     TwoIntensitiesComptonProfileStub() : ComptonProfileStub() {
       declareParameter("Intensity_2", 1.0);
     }
-    std::string name() const { return "TwoIntensitiesComptonProfileStub"; }
-    std::vector<size_t> intensityParameterIndices() const {
+    std::string name() const override {
+      return "TwoIntensitiesComptonProfileStub";
+    }
+    std::vector<size_t> intensityParameterIndices() const override {
       std::vector<size_t> indices(2, 1); // index 1
       indices[1] = 2;                    // index 2
       return indices;
     }
     size_t fillConstraintMatrix(Mantid::Kernel::DblMatrix &cmatrix,
                                 const size_t start,
-                                const std::vector<double> &) const {
+                                const std::vector<double> &) const override {
       for (size_t i = 0; i < cmatrix.numRows(); ++i) {
         for (size_t j = start; j < start + 2; ++j) {
           cmatrix[i][j] = 1.0;
@@ -274,8 +282,9 @@ private:
       declareParameter("A0", 1.0);
       declareParameter("A1", 1.0);
     }
-    std::string name() const { return "LinearStub"; }
-    void function1D(double *out, const double *, const size_t nData) const {
+    std::string name() const override { return "LinearStub"; }
+    void function1D(double *out, const double *,
+                    const size_t nData) const override {
       for (size_t i = 0; i < nData; ++i)
         out[i] = 0.25;
     }
@@ -303,15 +312,17 @@ private:
       func1 = boost::make_shared<ComptonProfileStub>();
       func1->initialize();
     }
-    func1->setAttributeValue("Mass", 1.0);
+    func1->setParameter("Mass", 1.0);
     func1->setParameter("Width", 5.0);
     func1->setParameter("Intensity", 2.0);
+    func1->addTies("Mass=1.0");
 
     auto func2 = boost::make_shared<ComptonProfileStub>();
     func2->initialize();
-    func2->setAttributeValue("Mass", 1.0);
+    func2->setParameter("Mass", 1.0);
     func2->setParameter("Width", 10.0);
     func2->setParameter("Intensity", 3.0);
+    func2->addTies("Mass=1.0");
 
     auto profile = boost::make_shared<ComptonScatteringCountRate>();
     profile->initialize();

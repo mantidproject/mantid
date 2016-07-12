@@ -38,10 +38,8 @@ private:
   bool m_isEmptyProxy;
 
 public:
-  virtual ~ProxyInfo();
+  virtual ~ProxyInfo() = default;
   ProxyInfo();
-  ProxyInfo(const ProxyInfo &other);
-  ProxyInfo &operator=(const ProxyInfo &other);
   ProxyInfo(const std::string &host, const int port, const bool isHttpProxy);
   std::string host() const;
   int port() const;

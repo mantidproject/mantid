@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm will copy the spectra to detector ID mapping form one workspace
-to the other, either on a spectrum index or spectrum number basis.
+to the other, either on a workspace index or spectrum number basis.
 
 Typically if both the workspace to be remapped and the workspace being matched
 both have their vertical axes in spectrum number then the IndexBySpectrumNumber

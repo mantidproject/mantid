@@ -7,7 +7,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IFunctionMW.h"
-#include "MantidKernel/Exception.h"
 
 #ifdef _WIN32
 #pragma warning(disable : 4250)

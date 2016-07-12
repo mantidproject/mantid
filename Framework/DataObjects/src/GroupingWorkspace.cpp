@@ -13,11 +13,6 @@ namespace DataObjects {
 // Register the workspace
 DECLARE_WORKSPACE(GroupingWorkspace)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-GroupingWorkspace::GroupingWorkspace() {}
-
 /** Constructor, buiding with give dimensions
  * @param numvectors: input size of the vector/histogram number for this
  * workspace
@@ -37,11 +32,6 @@ GroupingWorkspace::GroupingWorkspace(Geometry::Instrument_const_sptr inst)
     : SpecialWorkspace2D(inst) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-GroupingWorkspace::~GroupingWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 /** Fill a map with key = detector ID, value = group number
  * by using the values in Y.
  * Group values of 0 are converted to -1.
@@ -58,9 +48,9 @@ void GroupingWorkspace::makeDetectorIDToGroupMap(
     int group = static_cast<int>(this->readY(wi)[0]);
     if (group == 0)
       group = -1;
-    std::set<detid_t> detIDs = this->getDetectorIDs(wi);
-    for (auto detID = detIDs.begin(); detID != detIDs.end(); ++detID) {
-      detIDToGroup[*detID] = group;
+    auto detIDs = this->getDetectorIDs(wi);
+    for (auto detID : detIDs) {
+      detIDToGroup[detID] = group;
       if (group > ngroups)
         ngroups = group;
     }
@@ -84,14 +74,14 @@ void GroupingWorkspace::makeDetectorIDToGroupVector(
     int group = static_cast<int>(this->readY(wi)[0]);
     if (group == 0)
       group = -1;
-    std::set<detid_t> detIDs = this->getDetectorIDs(wi);
-    for (auto detID = detIDs.begin(); detID != detIDs.end(); ++detID) {
-      if ((*detID) <
+    auto detIDs = this->getDetectorIDs(wi);
+    for (auto detID : detIDs) {
+      if (detID <
           0) // if you need negative detector ids, use the other function
         continue;
-      if (detIDToGroup.size() < static_cast<size_t>((*detID) + 1))
-        detIDToGroup.resize((*detID) + 1);
-      detIDToGroup[*detID] = group;
+      if (detIDToGroup.size() < static_cast<size_t>(detID + 1))
+        detIDToGroup.resize(detID + 1);
+      detIDToGroup[detID] = group;
       if (group > ngroups)
         ngroups = group;
     }

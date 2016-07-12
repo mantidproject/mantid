@@ -71,41 +71,6 @@ class MyPopErrorMsg(QWidget):
 
 class MainWindow(QtGui.QMainWindow):
     """ Class of Main Window (top)
-
-    Copy to ui.setupUI
-
-    # Version 3.0 + Import for ui_MainWindow.py
-        from MplFigureCanvas import Qt4MplCanvas
-
-        # Replace 'self.graphicsView = QtGui.QtGraphicsView' with the following
-        self.graphicsView = Qt4MplCanvas(self.centralwidget)
-        self.mainplot = self.graphicsView.getPlot()
-
-
-    # Version 2.0 + Import
-        import matplotlib
-        from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-        from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-        from matplotlib.figure import Figure
-
-        self.figure = Figure((4.0, 3.0), dpi=100)
-        self.mainplot = self.figure.add_subplot(111)
-        self.graphicsView = FigureCanvas(self.figure)
-        self.graphicsView.setParent(self.centralwidget)
-        self.graphicsView.setGeometry(QtCore.QRect(20, 150, 741, 411))
-        self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
-
-    # Version 1.0
-        Replacement is not a valid approach as the UI is setup at the end of self.ui.setupUI
-        self.dpi = 100
-        self.fig = Figure((5.0, 4.0), dpi=self.dpi)
-        self.figure = Figure((4.0, 3.0), dpi=100)
-        self.mainplot = self.figure.add_subplot(111)
-        self.ui.graphicsView = FigureCanvas(self.figure)
-        self.ui.graphicsView.setParent(self.centralwidget)
-        self.ui.graphicsView.setGeometry(QtCore.QRect(40, 230, 821, 411))
-        self.ui.graphicsView.setObjectName(_fromUtf8("graphicsView"))
-
     """
 
     _errMsgWindow = None
@@ -279,6 +244,9 @@ class MainWindow(QtGui.QMainWindow):
         # self.setInstrumentInputs()
 
         ##defaults
+
+        #register startup
+        mantid.UsageService.registerFeatureUsage("Interface","EventFilter",False)
 
         return
 

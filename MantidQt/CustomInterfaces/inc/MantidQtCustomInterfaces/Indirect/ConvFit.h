@@ -16,10 +16,10 @@ public:
   ConvFit(QWidget *parent = 0);
 
 private:
-  virtual void setup();
-  virtual void run();
-  virtual bool validate();
-  virtual void loadSettings(const QSettings &settings);
+  void setup() override;
+  void run() override;
+  bool validate() override;
+  void loadSettings(const QSettings &settings) override;
 
 private slots:
   void typeSelection(int index);
@@ -45,7 +45,6 @@ private slots:
   void singleFitComplete(bool error);
   void fitFunctionSelected(const QString &);
   void algorithmComplete(bool error);
-
 
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
@@ -83,7 +82,6 @@ private:
 
   // Used in auto generating defaults for parameters
   QStringList m_defaultParams;
-
 };
 } // namespace IDA
 } // namespace CustomInterfaces

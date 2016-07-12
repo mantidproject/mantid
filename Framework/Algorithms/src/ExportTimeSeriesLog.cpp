@@ -1,8 +1,10 @@
 #include "MantidAlgorithms/ExportTimeSeriesLog.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IEventList.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/Events.h"
@@ -25,35 +27,24 @@ namespace Mantid {
 namespace Algorithms {
 
 DECLARE_ALGORITHM(ExportTimeSeriesLog)
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ExportTimeSeriesLog::ExportTimeSeriesLog() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ExportTimeSeriesLog::~ExportTimeSeriesLog() {}
 
 //----------------------------------------------------------------------------------------------
 /** Definition of all input arguments
  */
 void ExportTimeSeriesLog::init() {
   declareProperty(
-      new API::WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "Anonymous",
-                                                  Direction::InOut),
+      Kernel::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "Anonymous", Direction::InOut),
       "Name of input Matrix workspace containing the log to export. ");
 
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "Dummy",
-                                             Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "Dummy", Direction::Output),
       "Name of the workspace containing the log events in Export. ");
 
   declareProperty("LogName", "", "Log's name to filter events.");
 
-  std::vector<std::string> units;
-  units.push_back("Seconds");
-  units.push_back("Nano Seconds");
+  std::vector<std::string> units{"Seconds", "Nano Seconds"};
   declareProperty(
       "UnitOfTime", "Seconds",
       boost::make_shared<Kernel::StringListValidator>(units),
@@ -335,18 +326,12 @@ void ExportTimeSeriesLog::setupEventWorkspace(
                                               values[i + start_index]));
   }
   // Ensure thread-safety
-  outEventWS->sortAll(TOF_SORT, NULL);
+  outEventWS->sortAll(TOF_SORT, nullptr);
 
   // Now, create a default X-vector for histogramming, with just 2 bins.
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &xRef = axis.access();
-  xRef.resize(2);
   std::vector<WeightedEventNoTime> &events = outEL.getWeightedEventsNoTime();
-  xRef[0] = events.begin()->tof();
-  xRef[1] = events.rbegin()->tof();
-
-  // Set the binning axis using this.
-  outEventWS->setX(0, axis);
+  outEventWS->setBinEdges(0, HistogramData::BinEdges{events.begin()->tof(),
+                                                     events.rbegin()->tof()});
 
   return;
 }
@@ -371,10 +356,16 @@ bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(
 
   // Check existence of proton_charge as run start
   Kernel::DateAndTime run_start(0);
-  if (m_inputWS->run().hasProperty("proton_charge"))
-    run_start = dynamic_cast<TimeSeriesProperty<double> *>(
-                    m_inputWS->run().getProperty("proton_charge"))->nthTime(0);
-  else {
+  if (m_inputWS->run().hasProperty("proton_charge")) {
+    auto ts = dynamic_cast<TimeSeriesProperty<double> *>(
+        m_inputWS->run().getProperty("proton_charge"));
+    if (nullptr == ts) {
+      throw std::runtime_error(
+          "Found the run property proton_charge but failed to interpret it "
+          "as a time series property of double values (failed dynamic cast).");
+    }
+    run_start = ts->nthTime(0);
+  } else {
     g_log.warning("Property proton_charge does not exist so it is unable to "
                   "determine run start time. "
                   "StartTime and StopTime are ignored.  TimeSeriesProperty is "

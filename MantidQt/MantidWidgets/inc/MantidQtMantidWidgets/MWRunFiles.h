@@ -21,7 +21,7 @@ class IAlgorithm;
 namespace MantidQt {
 namespace MantidWidgets {
 /**
- * A class to allow the asyncronous finding of files.
+ * A class to allow the asynchronous finding of files.
  */
 class FindFilesThread : public QThread {
   Q_OBJECT
@@ -44,7 +44,7 @@ public:
 
 protected:
   /// Override parent class run().
-  virtual void run();
+  void run() override;
 
 private:
   /// Use the specified algorithm and property to find files instead of using
@@ -137,9 +137,9 @@ public:
   };
   /// Options for the live button
   enum LiveButtonOpts {
-    Hide,            ///< Don't use the live button
-    AlwaysShow,      ///< Show whether a connection is possible or not (will be
-                     ///disabled)
+    Hide,       ///< Don't use the live button
+    AlwaysShow, ///< Show whether a connection is possible or not (will be
+    /// disabled)
     ShowIfCanConnect ///< Only show if able to connect to the live data server
   };
 
@@ -147,7 +147,7 @@ public:
   MWRunFiles(QWidget *parent = NULL);
 
   /// Destructor
-  ~MWRunFiles();
+  ~MWRunFiles() override;
 
   // property accessors/modifiers
   bool isForRunFiles() const;
@@ -189,9 +189,9 @@ public:
   void setEntryNum(const int num);
   /// Overridden from base class to retrieve user input through a common
   /// interface
-  QVariant getUserInput() const;
+  QVariant getUserInput() const override;
   /// Sets a value on the widget through a common interface
-  void setUserInput(const QVariant &value);
+  void setUserInput(const QVariant &value) override;
   /// Sets a value on the widget but doesn't emit a signal to say it has changed
   void setText(const QString &value);
   /// flag a problem with the file the user entered, an empty string means no
@@ -216,6 +216,10 @@ public:
   void setInstrumentOverride(const QString &instName);
   /// Set the input read-only or not
   void setReadOnly(bool readOnly);
+  /// Get the last directory
+  QString getLastDirectory() { return m_lastDir; }
+  /// Set the last directory
+  void setLastDirectory(const QString &lastDir) { m_lastDir = lastDir; }
 
 signals:
   /// Emitted when the file text changes
@@ -236,6 +240,8 @@ signals:
   void liveButtonPressed(bool);
   /// Signal emitted after asynchronous checking of live stream availability
   void liveButtonSetEnabledSignal(bool);
+  /// Emitted when inspection of any found files is completed
+  void fileInspectionFinished();
 
 public slots:
   /// Set the file text and try and find it
@@ -250,9 +256,9 @@ public slots:
 
 protected:
   // Method for handling drop events
-  void dropEvent(QDropEvent *);
+  void dropEvent(QDropEvent *) override;
   // called when a drag event enters the class
-  void dragEnterEvent(QDragEnterEvent *);
+  void dragEnterEvent(QDragEnterEvent *) override;
 
 private:
   /// Create a file filter from a list of extensions

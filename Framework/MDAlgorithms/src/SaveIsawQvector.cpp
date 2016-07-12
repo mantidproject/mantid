@@ -30,16 +30,6 @@ const std::size_t DIMS(3);
 const std::size_t BUFF_SIZE(DIMS * sizeof(float));
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveIsawQvector::SaveIsawQvector() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveIsawQvector::~SaveIsawQvector() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SaveIsawQvector::name() const { return "SaveIsawQvector"; }
 
@@ -61,12 +51,13 @@ void SaveIsawQvector::init() {
   // the validator which checks if the workspace has axis and any units
   ws_valid->add<WorkspaceUnitValidator>("TOF");
 
-  declareProperty(new WorkspaceProperty<EventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input, ws_valid),
                   "An input EventWorkspace with units along X-axis and defined "
                   "instrument with defined sample");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::OptionalSave, {".bin"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalSave,
+                                ".bin"),
       "Optional path to an hkl file to save.  Vectors returned if no file "
       "requested.");
   declareProperty("RightHanded", true, "Save the Q-vector as k_f - k_i");
@@ -126,8 +117,8 @@ void SaveIsawQvector::exec() {
     coord_map[2] = 1;
   }
   if (this->getProperty("RightHanded")) {
-    for (size_t dim = 0; dim < DIMS; ++dim)
-      coord_signs[dim] *= -1.; // everything changes sign
+    for (double &coord_sign : coord_signs)
+      coord_sign *= -1.; // everything changes sign
   }
 
   // units conersion helper
@@ -148,7 +139,7 @@ void SaveIsawQvector::exec() {
   std::vector<double> Qx_save, Qy_save, Qz_save;
   for (std::size_t i = 0; i < numSpectra; ++i) {
     // get a reference to the event list
-    const EventList &events = wksp->getEventList(i);
+    const EventList &events = wksp->getSpectrum(i);
 
     // check to see if the event list is empty
     if (events.empty()) {
@@ -165,8 +156,8 @@ void SaveIsawQvector::exec() {
     double signal(1.);  // ignorable garbage
     double errorSq(1.); // ignorable garbage
     const std::vector<TofEvent> &raw_events = events.getEvents();
-    for (auto event = raw_events.begin(); event != raw_events.end(); ++event) {
-      double val = unitConv.convertUnits(event->tof());
+    for (const auto &raw_event : raw_events) {
+      double val = unitConv.convertUnits(raw_event.tof());
       q_converter->calcMatrixCoord(val, locCoord, signal, errorSq);
       for (size_t dim = 0; dim < DIMS; ++dim) {
         buffer[dim] =

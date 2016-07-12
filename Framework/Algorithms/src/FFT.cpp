@@ -2,9 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FFT.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/EqualBinsChecker.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidAPI/TextAxis.h"
 
 #include <boost/shared_array.hpp>
 #include <gsl/gsl_errno.h>
@@ -18,8 +24,6 @@
 #include <algorithm>
 #include <functional>
 #include <cmath>
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -33,15 +37,15 @@ using namespace API;
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFT::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The name of the input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name of the output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name of the output workspace.");
   // if desired, provide the imaginary part in a separate workspace.
-  declareProperty(new WorkspaceProperty<>("InputImagWorkspace", "",
-                                          Direction::Input,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>("InputImagWorkspace", "",
+                                                   Direction::Input,
+                                                   PropertyMode::Optional),
                   "The name of the input workspace for the imaginary part. "
                   "Leave blank if same as InputWorkspace");
 
@@ -52,21 +56,30 @@ void FFT::init() {
   declareProperty("Imaginary", EMPTY_INT(), mustBePositive,
                   "Spectrum number to use as imaginary part for transform");
 
-  std::vector<std::string> fft_dir;
-  fft_dir.push_back("Forward");
-  fft_dir.push_back("Backward");
+  std::vector<std::string> fft_dir{"Forward", "Backward"};
   declareProperty("Transform", "Forward",
                   boost::make_shared<StringListValidator>(fft_dir),
                   "Direction of the transform: forward or backward");
   declareProperty("Shift", 0.0, "Apply an extra phase equal to this quantity "
                                 "times 2*pi to the transform");
+  declareProperty("AutoShift", false,
+                  "Automatically calculate and apply phase shift. Zero on the "
+                  "X axis is assumed to be in the centre - if it is not, "
+                  "setting this property will automatically correct for this.");
+  declareProperty(
+      "AcceptXRoundingErrors", false,
+      "Continue to process the data even if X values are not evenly spaced",
+      Direction::Input);
+
+  // "Shift" should only be enabled if "AutoShift" is turned off
+  setPropertySettings(
+      "Shift", make_unique<EnabledWhenProperty>("AutoShift", IS_DEFAULT));
 }
 
 /** Executes the algorithm
  *
- *  @throw std::invalid_argument if the input properties are invalid
-                                 or the bins of the spectrum being transformed
- do not have constant width
+ *  The bins of the spectrum being transformed must have constant width
+ *  (unless AcceptXRoundingErrors is set to true)
  */
 void FFT::exec() {
   MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
@@ -81,34 +94,6 @@ void FFT::exec() {
   const MantidVec &X = inWS->readX(iReal);
   const int ySize = static_cast<int>(inWS->blocksize());
   const int xSize = static_cast<int>(X.size());
-
-  int nHist = static_cast<int>(inWS->getNumberHistograms());
-  if (iReal >= nHist)
-    throw std::invalid_argument("Property Real is out of range");
-  if (isComplex) {
-    const int yImagSize = static_cast<int>(inImagWS->blocksize());
-    if (ySize != yImagSize)
-      throw std::length_error("Real and Imaginary sizes do not match");
-    nHist = static_cast<int>(inImagWS->getNumberHistograms());
-    if (iImag >= nHist)
-      throw std::invalid_argument("Property Imaginary is out of range");
-  }
-
-  // check that the workspace isn't empty
-  if (X.size() < 2) {
-    throw std::invalid_argument(
-        "Input workspace must have at least two values");
-  }
-
-  // Check that the x values are evenly spaced
-  const double dx = X[1] - X[0];
-  for (size_t i = 1; i < X.size() - 2; i++)
-    if (std::abs(dx - X[i + 1] + X[i]) / dx > 1e-7) {
-      g_log.error() << "dx=" << X[i + 1] - X[i] << ' ' << dx << ' ' << i
-                    << std::endl;
-      throw std::invalid_argument(
-          "X axis must be linear (all bins have same width)");
-    }
 
   gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(ySize);
   gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(ySize);
@@ -128,6 +113,7 @@ void FFT::exec() {
   MatrixWorkspace_sptr outWS =
       WorkspaceFactory::Instance().create(inWS, nOut, xSize, ySize);
 
+  const double dx = X[1] - X[0];
   double df = 1.0 / (dx * ySize);
 
   // Output label
@@ -169,10 +155,10 @@ void FFT::exec() {
     }
   }
 
-  // centerShift == true means that the zero on the x axis is assumed to be in
-  // the data centre
-  // at point with index i = ySize/2. If shift == false the zero is at i = 0
-  const bool centerShift = true;
+  // Hardcoded "centerShift == true" means that the zero on the x axis is
+  // assumed to be in the centre, at point with index i = ySize/2.
+  // Set to false to make zero at i = 0.
+  constexpr bool centerShift = true;
 
   auto tAxis = new API::TextAxis(nOut);
   int iRe = 0;
@@ -216,8 +202,7 @@ void FFT::exec() {
     }
 
     double shift =
-        getProperty("Shift"); // extra phase to be applied to the transform
-    shift *= 2 * M_PI;
+        getPhaseShift(X); // extra phase to be applied to the transform
 
     gsl_fft_complex_forward(data.get(), 1, ySize, wavetable, workspace);
     /* The Fourier transform overwrites array 'data'. Recall that the Fourier
@@ -277,8 +262,9 @@ void FFT::exec() {
     gsl_fft_complex_inverse(data.get(), 1, ySize, wavetable, workspace);
     for (int i = 0; i < ySize; i++) {
       double x = df * i;
-      if (centerShift)
+      if (centerShift) {
         x -= df * (ySize / 2);
+      }
       outWS->dataX(0)[i] = x;
       int j = centerShift ? (ySize / 2 + i + dys) % ySize : i;
       double re = data[2 * j] / df;
@@ -303,6 +289,106 @@ void FFT::exec() {
   }
 
   setProperty("OutputWorkspace", outWS);
+}
+
+/**
+ * Perform validation of input properties:
+ * - input workspace must not be empty
+ * - X values must be evenly spaced (unless accepting rounding errors)
+ * - Real and Imaginary spectra must be in range of input workspace
+ * - If complex, real and imaginary workspaces must be the same size
+ * @returns :: map of property names to errors (empty map if no errors)
+ */
+std::map<std::string, std::string> FFT::validateInputs() {
+  std::map<std::string, std::string> errors;
+
+  MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
+  if (inWS) {
+    const int iReal = getProperty("Real");
+    const int iImag = getProperty("Imaginary");
+    const MantidVec &X = inWS->readX(iReal);
+
+    // check that the workspace isn't empty
+    if (X.size() < 2) {
+      errors["InputWorkspace"] =
+          "Input workspace must have at least two values";
+    } else {
+      // Check that the x values are evenly spaced
+      // If accepting rounding errors, just give a warning if bins are
+      // different.
+      if (areBinWidthsUneven(X)) {
+        errors["InputWorkspace"] =
+            "X axis must be linear (all bins have same width)";
+      }
+    }
+
+    // check real, imaginary spectrum numbers and workspace sizes
+    int nHist = static_cast<int>(inWS->getNumberHistograms());
+    if (iReal >= nHist) {
+      errors["Real"] = "Real out of range";
+    }
+    if (iImag != EMPTY_INT()) {
+      MatrixWorkspace_const_sptr inImagWS = getProperty("InputImagWorkspace");
+      if (inImagWS) {
+        if (inWS->blocksize() != inImagWS->blocksize()) {
+          errors["Imaginary"] = "Real and Imaginary sizes do not match";
+        }
+        nHist = static_cast<int>(inImagWS->getNumberHistograms());
+      }
+      if (iImag >= nHist) {
+        errors["Imaginary"] = "Imaginary out of range";
+      }
+    }
+  }
+
+  return errors;
+}
+
+/**
+ * Test input X vector for spacing of values.
+ * In normal use, return true if not evenly spaced (error).
+ * If accepting rounding errors, threshold is more lenient, and don't return an
+ * error but just warn the user.
+ * @param xValues :: [input] Values to check
+ * @returns :: True if unevenly spaced, False if not (or accepting errors)
+ */
+bool FFT::areBinWidthsUneven(const MantidVec &xValues) const {
+  const bool acceptXRoundingErrors = getProperty("AcceptXRoundingErrors");
+  const double tolerance = acceptXRoundingErrors ? 0.5 : 1e-7;
+  const double warnValue = acceptXRoundingErrors ? 0.1 : -1;
+
+  Kernel::EqualBinsChecker binChecker(xValues, tolerance, warnValue);
+
+  // Compatibility with previous behaviour
+  if (!acceptXRoundingErrors) {
+    // Compare each bin width to the first (not the average)
+    binChecker.setReferenceBin(EqualBinsChecker::ReferenceBin::First);
+    // Use individual errors (not cumulative)
+    binChecker.setErrorType(EqualBinsChecker::ErrorType::Individual);
+  }
+
+  const std::string binError = binChecker.validate();
+  return !binError.empty();
+}
+
+/**
+ * Returns the phase shift to apply
+ * If "AutoShift" is set, calculates this automatically as -X[N/2]
+ * Otherwise, returns user-supplied "Shift" (or zero if none set)
+ * @param xValues :: [input] Reference to X values of input workspace
+ * @returns :: Phase shift
+ */
+double FFT::getPhaseShift(const MantidVec &xValues) {
+  double shift = 0.0;
+  const bool autoshift = getProperty("AutoShift");
+  if (autoshift) {
+    const size_t mid = xValues.size() / 2;
+    shift = -xValues[mid];
+  } else {
+    shift = getProperty("Shift");
+  }
+  shift *= 2 * M_PI;
+  return shift;
 }
 
 } // namespace Algorithm

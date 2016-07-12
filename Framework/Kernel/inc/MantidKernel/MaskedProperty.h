@@ -52,10 +52,10 @@ public:
   MaskedProperty(const std::string &name, const TYPE &defaultvalue,
                  const unsigned int direction);
   /// "virtual" copy constructor
-  MaskedProperty *clone() const;
+  MaskedProperty *clone() const override;
 
   /// Mask out the out the value in the history
-  virtual const Kernel::PropertyHistory createHistory() const;
+  const Kernel::PropertyHistory createHistory() const override;
 
   /** This method returns the masked property value
    */

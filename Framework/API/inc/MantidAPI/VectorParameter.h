@@ -43,13 +43,13 @@ public:
   VectorParameter();
   VectorParameter(size_t size);
   VectorParameter(const VectorParameter<Derived, ElemType> &other);
-  virtual ~VectorParameter();
+  ~VectorParameter() override;
   void addValue(const size_t index, const ElemType &value);
-  std::string toXMLString() const;
+  std::string toXMLString() const override;
   Derived &assignFrom(const Derived &other);
   bool operator==(const Derived &other) const;
   bool operator!=(const Derived &other) const;
-  virtual bool isValid() const;
+  bool isValid() const override;
   ElemType &operator[](int index);
   const ElemType *getPointerToStart();
   size_t getSize() const;
@@ -143,7 +143,7 @@ VectorParameter<Derived, ElemType>::VectorParameter(
 /// Default constructor
 template <typename Derived, typename ElemType>
 VectorParameter<Derived, ElemType>::VectorParameter()
-    : m_arry(NULL), m_size(0) {
+    : m_arry(nullptr), m_size(0) {
   m_isValid = false;
 }
 
@@ -249,8 +249,8 @@ ElemType &VectorParameter<Derived, ElemType>::at(size_t index) {
     static std::string parameterName() { return #classname; }                  \
     classname() : SuperType() {}                                               \
     classname(size_t index) : SuperType(index) {}                              \
-    std::string getName() const { return #classname; }                         \
-    classname *clone() const { return new classname(*this); }                  \
+    std::string getName() const override { return #classname; }                \
+    classname *clone() const override { return new classname(*this); }         \
   };
 }
 }

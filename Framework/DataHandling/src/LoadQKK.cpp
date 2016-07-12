@@ -3,19 +3,21 @@
 //---------------------------------------------------
 #include "MantidDataHandling/LoadQKK.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
-
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-
 #include "MantidKernel/UnitFactory.h"
-
 #include "MantidNexus/NexusClasses.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
+
 #include <Poco/File.h>
+
 #include <fstream>
 
 using namespace Mantid::DataHandling;
@@ -50,14 +52,14 @@ int LoadQKK::confidence(Kernel::NexusDescriptor &descriptor) const {
 void LoadQKK::init() {
   // Declare the Filename algorithm property. Mandatory. Sets the path to the
   // file to load.
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
-                                        {".nx.hdf"}),
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, ".nx.hdf"),
                   "The input filename of the stored data");
   // Declare the OutputWorkspace property. This sets the name of the workspace
   // to be filled with the data
   // from the file.
-  declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
-                                               Kernel::Direction::Output));
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+      "OutputWorkspace", "", Kernel::Direction::Output));
 }
 
 /**
@@ -93,9 +95,8 @@ void LoadQKK::exec() {
   size_t nx = hmm.dim2(); // third dimension
   size_t nHist = ny * nx; // number of spectra in the dataset
   if (nHist == 0) {
-    throw std::runtime_error("Error in data dimensions: " +
-                             boost::lexical_cast<std::string>(ny) + " X " +
-                             boost::lexical_cast<std::string>(nx));
+    throw std::runtime_error("Error in data dimensions: " + std::to_string(ny) +
+                             " X " + std::to_string(nx));
   }
 
   // Set the workspace structure. The workspace will contain nHist spectra each

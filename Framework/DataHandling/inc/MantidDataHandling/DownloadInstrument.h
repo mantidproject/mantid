@@ -38,18 +38,18 @@ class DLLExport DownloadInstrument : public API::Algorithm {
 public:
   DownloadInstrument();
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 protected:
   // Convenience typedef
   typedef std::map<std::string, std::string> StringToStringMap;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   virtual int
   doDownloadFile(const std::string &urlFile,
                  const std::string &localFilePath = "",
@@ -61,9 +61,9 @@ private:
                                 const std::string &key,
                                 const std::string &defaultValue) const;
 
-  size_t
-  removeOrphanedFiles(const std::string &directoryPath,
-                      const std::set<std::string> &filenamesToKeep) const;
+  size_t removeOrphanedFiles(
+      const std::string &directoryPath,
+      const std::unordered_set<std::string> &filenamesToKeep) const;
 
   Kernel::ProxyInfo m_proxyInfo;
 };

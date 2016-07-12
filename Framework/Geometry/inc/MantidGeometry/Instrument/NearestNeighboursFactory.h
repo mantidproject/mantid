@@ -36,19 +36,15 @@ namespace Geometry {
 class MANTID_GEOMETRY_DLL NearestNeighboursFactory
     : public INearestNeighboursFactory {
 public:
-  /// Constructor
-  NearestNeighboursFactory();
   /// Factory Method
   NearestNeighbours *create(boost::shared_ptr<const Instrument> instrument,
                             const ISpectrumDetectorMapping &spectraMap,
-                            bool ignoreMasked = false);
+                            bool ignoreMasked = false) override;
   /// Factory Method
   NearestNeighbours *create(int numberOfNeighbours,
                             boost::shared_ptr<const Instrument> instrument,
                             const ISpectrumDetectorMapping &spectraMap,
-                            bool ignoreMasked = false);
-  /// Destructor
-  virtual ~NearestNeighboursFactory();
+                            bool ignoreMasked = false) override;
 };
 
 } // namespace Geometry

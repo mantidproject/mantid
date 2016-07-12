@@ -1,5 +1,8 @@
 #include "MantidGroupPlotGenerator.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+
 using Mantid::API::WorkspaceGroup_const_sptr;
 using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::API::MatrixWorkspace_const_sptr;
@@ -113,7 +116,6 @@ MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
       matrixWS->setYUnitLabel(firstWS->YUnitLabel());
       xAxisLabel = firstWS->getXDimension()->getName();
       xAxisUnits = firstWS->getXDimension()->getUnits();
-
 
       // For each workspace in group, add data and log values
       std::vector<double> logValues;

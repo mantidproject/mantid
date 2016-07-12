@@ -1,16 +1,12 @@
 #pylint: disable=no-init,invalid-name
-import math
-import time
-import numpy as np
 import mantid
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
-import logging
 
 class CompareTwoNXSDataForSFcalculator(object):
     """
-        will return -1, 0 or 1 according to the position of the nexusToPosition in relation to the 
+        will return -1, 0 or 1 according to the position of the nexusToPosition in relation to the
         nexusToCompareWith based on the following criteria
         #1: number of attenuators (ascending order)
         #2: lambda requested (descending order)
@@ -26,14 +22,19 @@ class CompareTwoNXSDataForSFcalculator(object):
         self.nexusToCompareWithRun = nxsdataToCompareWith.getRun()
         self.nexusToPositionRun = nxsdataToPosition.getRun()
 
-        compare1 = self.compareParameter('LambdaRequest', 'descending')
-        if compare1 != 0:
-            self.resultComparison = compare1
+        compare = self.compareParameter('LambdaRequest', 'descending')
+        if compare != 0:
+            self.resultComparison = compare
             return
 
-        compare2 = self.compareParameter('vATT', 'ascending')
-        if compare2 != 0:
-            self.resultComparison = compare2
+        compare = self.compareParameter('thi', 'descending')
+        if compare != 0:
+            self.resultComparison = compare
+            return
+
+        compare = self.compareParameter('vAtt', 'ascending')
+        if compare != 0:
+            self.resultComparison = compare
             return
 
         pcharge1 = self.nexusToCompareWithRun.getProperty('gd_prtn_chrg').value/nxsdataToCompareWith.getNEvents()
@@ -58,9 +59,9 @@ class CompareTwoNXSDataForSFcalculator(object):
             resultLessThan = 1
             resultMoreThan = -1
 
-        if (_paramNexusToPosition < _paramNexusToCompareWith):
+        if _paramNexusToPosition < _paramNexusToCompareWith:
             return resultLessThan
-        elif (_paramNexusToPosition > _paramNexusToCompareWith):
+        elif _paramNexusToPosition > _paramNexusToCompareWith:
             return resultMoreThan
         else:
             return 0
@@ -74,7 +75,7 @@ def sorter_function(r1, r2):
     """
     return CompareTwoNXSDataForSFcalculator(r2, r1).result()
 
-     
+
 class LRDirectBeamSort(PythonAlgorithm):
 
     def category(self):
@@ -99,6 +100,7 @@ class LRDirectBeamSort(PythonAlgorithm):
         self.declareProperty("ComputeScalingFactors", True, direction=Direction.Input,
                              doc="If True, the scaling factors will be computed")
         self.declareProperty("TOFSteps", 200.0, doc="TOF bin width")
+        self.declareProperty("WavelengthOffset", 0.0, doc="Wavelength offset used for TOF range determination")
         self.declareProperty("IncidentMedium", "Air", doc="Name of the incident medium")
         self.declareProperty(FileProperty("ScalingFactorFile","",
                                           action=FileAction.OptionalSave,
@@ -108,6 +110,7 @@ class LRDirectBeamSort(PythonAlgorithm):
                              "Ordered list of run numbers")
         self.declareProperty(StringArrayProperty("OrderedNameList", [], direction=Direction.Output),
                              "Ordered list of workspace names corresponding to the run list")
+        self.declareProperty("SlitTolerance", 0.02, doc="Tolerance for matching slit positions")
 
     def PyExec(self):
         compute = self.getProperty("ComputeScalingFactors").value
@@ -140,14 +143,16 @@ class LRDirectBeamSort(PythonAlgorithm):
 
     def _compute_scaling_factors(self, lr_data_sorted):
         """
-            If we need to compute the scaling factors, group the runs by their wavelength request 
+            If we need to compute the scaling factors, group the runs by their wavelength request
             @param lr_data_sorted: ordered list of workspaces
         """
         group_list = []
         current_group = []
         group_wl = None
         for r in lr_data_sorted:
-            wl = r.getRun().getProperty('LambdaRequest').value[0]
+            wl_ = r.getRun().getProperty('LambdaRequest').value[0]
+            thi = r.getRun().getProperty('thi').value[0]
+            wl = "%g%-5.2g" % (wl_, thi)
 
             if not group_wl == wl:
                 # New group
@@ -155,7 +160,7 @@ class LRDirectBeamSort(PythonAlgorithm):
                 if len(current_group)>0:
                     group_list.append(current_group)
                 current_group = []
-    
+
             current_group.append(r)
 
         # Add in the last group
@@ -169,8 +174,6 @@ class LRDirectBeamSort(PythonAlgorithm):
         for g in group_list:
             if len(g) == 0:
                 continue
-            runs = [r.getRunNumber() for r in g]
-            logger.notice(str(runs))
 
             direct_beam_runs = []
             peak_ranges = []
@@ -203,7 +206,9 @@ class LRDirectBeamSort(PythonAlgorithm):
                 else:
                     low_res = [0, number_of_pixels_x]
 
-                att = run.getRun().getProperty('vATT').value[0]-1
+                att = run.getRun().getProperty('vAtt').value[0]-1
+                wl = run.getRun().getProperty('LambdaRequest').value[0]
+                thi = run.getRun().getProperty('thi').value[0]
                 direct_beam_runs.append(run.getRunNumber())
                 peak_ranges.append(int(peak[0]))
                 peak_ranges.append(int(peak[1]))
@@ -212,7 +217,8 @@ class LRDirectBeamSort(PythonAlgorithm):
                 bck_ranges.append(int(peak[0])-3)
                 bck_ranges.append(int(peak[1])+3)
 
-                summary += "%10s %s %5s,%5s %5s,%5s\n" % (run.getRunNumber(), att, peak[0], peak[1], low_res[0], low_res[1])
+                summary += "%10s wl=%5s thi=%5s att=%s %5s,%5s %5s,%5s\n" % \
+                    (run.getRunNumber(), wl, thi, att, peak[0], peak[1], low_res[0], low_res[1])
 
             # Determine TOF range from first file
             sample = g[0].getInstrument().getSample()
@@ -225,19 +231,23 @@ class LRDirectBeamSort(PythonAlgorithm):
             m = 1.675e-27  # kg
             wl = g[0].getRun().getProperty('LambdaRequest').value[0]
             chopper_speed = g[0].getRun().getProperty('SpeedRequest1').value[0]
-            tof_min = source_detector_distance / h * m * (wl + 0.5*60.0/chopper_speed - 1.7*60.0/chopper_speed) * 1e-4
-            tof_max = source_detector_distance / h * m * (wl + 0.5*60.0/chopper_speed + 1.7*60.0/chopper_speed) * 1e-4
+            wl_offset = self.getProperty("WavelengthOffset").value
+            tof_min = source_detector_distance / h * m * (wl + wl_offset*60.0/chopper_speed - 1.7*60.0/chopper_speed) * 1e-4
+            tof_max = source_detector_distance / h * m * (wl + wl_offset*60.0/chopper_speed + 1.7*60.0/chopper_speed) * 1e-4
             tof_range = [tof_min, tof_max]
 
-            summary += "TOF: %s\n\n" % tof_range
+            summary += "      TOF: %s\n\n" % tof_range
 
             # Compute the scaling factors
+            logger.notice("Computing scaling factors for %s" % str(direct_beam_runs))
+            slit_tolerance = self.getProperty("SlitTolerance").value
             LRScalingFactors(DirectBeamRuns=direct_beam_runs,
                              TOFRange=tof_range, TOFSteps=tof_steps,
                              SignalPeakPixelRange=peak_ranges,
                              SignalBackgroundPixelRange=bck_ranges,
                              LowResolutionPixelRange=x_ranges,
                              IncidentMedium=incident_medium,
+                             SlitTolerance=slit_tolerance,
                              ScalingFactorFile=scaling_file)
         logger.notice(summary)
 

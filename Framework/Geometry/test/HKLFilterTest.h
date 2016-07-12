@@ -7,6 +7,7 @@
 
 #include "MantidGeometry/Crystal/HKLFilter.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <boost/make_shared.hpp>
 
@@ -72,7 +73,8 @@ public:
   }
 
   void testHKLFilterNot() {
-    boost::shared_ptr<const MockHKLFilter> filter(new MockHKLFilter);
+    boost::shared_ptr<const MockHKLFilter> filter =
+        boost::make_shared<MockHKLFilter>();
 
     EXPECT_CALL(*filter, isAllowed(_))
         .WillOnce(Return(true))
@@ -100,13 +102,15 @@ public:
   }
 
   void testHKLFilterAnd() {
-    boost::shared_ptr<const MockHKLFilter> lhs(new MockHKLFilter);
+    boost::shared_ptr<const MockHKLFilter> lhs =
+        boost::make_shared<MockHKLFilter>();
     EXPECT_CALL(*lhs, isAllowed(_))
         .WillOnce(Return(true))
         .WillOnce(Return(false))
         .WillOnce(Return(true));
 
-    boost::shared_ptr<const MockHKLFilter> rhs(new MockHKLFilter);
+    boost::shared_ptr<const MockHKLFilter> rhs =
+        boost::make_shared<MockHKLFilter>();
     EXPECT_CALL(*rhs, isAllowed(_))
         .WillOnce(Return(true))
         .WillOnce(Return(false));
@@ -139,14 +143,16 @@ public:
   }
 
   void testHKLFilterOr() {
-    boost::shared_ptr<const MockHKLFilter> lhs(new MockHKLFilter);
+    boost::shared_ptr<const MockHKLFilter> lhs =
+        boost::make_shared<MockHKLFilter>();
     EXPECT_CALL(*lhs, isAllowed(_))
         .WillOnce(Return(true))
         .WillOnce(Return(false))
         .WillOnce(Return(true))
         .WillOnce(Return(false));
 
-    boost::shared_ptr<const MockHKLFilter> rhs(new MockHKLFilter);
+    boost::shared_ptr<const MockHKLFilter> rhs =
+        boost::make_shared<MockHKLFilter>();
     EXPECT_CALL(*rhs, isAllowed(_))
         .WillOnce(Return(false))
         .WillOnce(Return(true));
@@ -178,7 +184,7 @@ public:
     TS_ASSERT_EQUALS(orFilterCasted->getLHS(), lhs);
     TS_ASSERT_EQUALS(orFilterCasted->getRHS(), rhs);
   }
-
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
 private:
   class MockHKLFilter : public HKLFilter {
   public:
@@ -206,4 +212,5 @@ private:
     MOCK_CONST_METHOD1(isAllowed, bool(const V3D &));
   };
 };
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 #endif /* MANTID_GEOMETRY_HKLFILTERTEST_H_ */

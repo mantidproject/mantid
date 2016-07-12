@@ -1,8 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/IConstraint.h"
@@ -10,21 +9,24 @@
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionFactory.h"
-
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/IFunctionWithLocation.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/muParser_Silent.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidGeometry/muParser_Silent.h"
 
 #include <boost/lexical_cast.hpp>
 
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 #include <limits>
 #include <sstream>
@@ -46,7 +48,7 @@ IFunction::~IFunction() {
   m_attrs.clear();
   if (m_handler) {
     delete m_handler;
-    m_handler = NULL;
+    m_handler = nullptr;
   }
 }
 
@@ -128,13 +130,13 @@ void IFunction::addTies(const std::string &ties, bool isDefault) {
   Expression list;
   list.parse(ties);
   list.toList();
-  for (auto t = list.begin(); t != list.end(); ++t) {
-    if (t->name() == "=" && t->size() >= 2) {
-      size_t n = t->size() - 1;
-      const std::string value = (*t)[n].str();
+  for (const auto &t : list) {
+    if (t.name() == "=" && t.size() >= 2) {
+      size_t n = t.size() - 1;
+      const std::string value = t[n].str();
       for (size_t i = n; i != 0;) {
         --i;
-        this->tie((*t)[i].name(), value, isDefault);
+        this->tie(t[i].name(), value, isDefault);
       }
     }
   }
@@ -159,9 +161,8 @@ std::string IFunction::asString() const {
   ostr << "name=" << this->name();
   // print the attributes
   std::vector<std::string> attr = this->getAttributeNames();
-  for (size_t i = 0; i < attr.size(); i++) {
-    std::string attName = attr[i];
-    std::string attValue = this->getAttribute(attr[i]).value();
+  for (const auto &attName : attr) {
+    std::string attValue = this->getAttribute(attName).value();
     if (!attValue.empty() && attValue != "\"\"") {
       ostr << ',' << attName << '=' << attValue;
     }
@@ -222,9 +223,9 @@ void IFunction::addConstraints(const std::string &str, bool isDefault) {
   Expression list;
   list.parse(str);
   list.toList();
-  for (auto expr = list.begin(); expr != list.end(); ++expr) {
+  for (const auto &expr : list) {
     IConstraint *c =
-        ConstraintFactory::Instance().createInitialized(this, *expr, isDefault);
+        ConstraintFactory::Instance().createInitialized(this, expr, isDefault);
     this->addConstraint(c);
   }
 }
@@ -253,10 +254,11 @@ void IFunction::setHandler(FunctionHandler *handler) {
 
 /// Function to return all of the categories that contain this function
 const std::vector<std::string> IFunction::categories() const {
-  Poco::StringTokenizer tokenizer(category(), categorySeparator(),
-                                  Poco::StringTokenizer::TOK_TRIM |
-                                      Poco::StringTokenizer::TOK_IGNORE_EMPTY);
-  return std::vector<std::string>(tokenizer.begin(), tokenizer.end());
+  Mantid::Kernel::StringTokenizer tokenizer(
+      category(), categorySeparator(),
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  return tokenizer.asVector();
 }
 
 /**
@@ -276,15 +278,17 @@ namespace {
 class AttType : public IFunction::ConstAttributeVisitor<std::string> {
 protected:
   /// Apply if string
-  std::string apply(const std::string &) const { return "std::string"; }
+  std::string apply(const std::string &) const override {
+    return "std::string";
+  }
   /// Apply if int
-  std::string apply(const int &) const { return "int"; }
+  std::string apply(const int &) const override { return "int"; }
   /// Apply if double
-  std::string apply(const double &) const { return "double"; }
+  std::string apply(const double &) const override { return "double"; }
   /// Apply if bool
-  std::string apply(const bool &) const { return "bool"; }
+  std::string apply(const bool &) const override { return "bool"; }
   /// Apply if vector
-  std::string apply(const std::vector<double> &) const {
+  std::string apply(const std::vector<double> &) const override {
     return "std::vector<double>";
   }
 };
@@ -307,23 +311,23 @@ public:
 
 protected:
   /// Apply if string
-  std::string apply(const std::string &str) const {
+  std::string apply(const std::string &str) const override {
     return (m_quoteString) ? std::string("\"" + str + "\"") : str;
   }
   /// Apply if int
-  std::string apply(const int &i) const {
-    return boost::lexical_cast<std::string>(i);
-  }
+  std::string apply(const int &i) const override { return std::to_string(i); }
   /// Apply if double
-  std::string apply(const double &d) const {
+  std::string apply(const double &d) const override {
     return boost::lexical_cast<std::string>(d);
   }
   /// Apply if bool
-  std::string apply(const bool &b) const { return b ? "true" : "false"; }
+  std::string apply(const bool &b) const override {
+    return b ? "true" : "false";
+  }
   /// Apply if vector
-  std::string apply(const std::vector<double> &v) const {
+  std::string apply(const std::vector<double> &v) const override {
     std::string res = "(";
-    if (v.size() > 0) {
+    if (!v.empty()) {
       for (size_t i = 0; i < v.size() - 1; ++i) {
         res += boost::lexical_cast<std::string>(v[i]) + ",";
       }
@@ -536,9 +540,9 @@ public:
 
 protected:
   /// Apply if string
-  void apply(std::string &str) const { str = m_value; }
+  void apply(std::string &str) const override { str = m_value; }
   /// Apply if int
-  void apply(int &i) const {
+  void apply(int &i) const override {
     std::istringstream istr(m_value + " ");
     istr >> i;
     if (!istr.good())
@@ -547,7 +551,7 @@ protected:
                                   m_value);
   }
   /// Apply if double
-  void apply(double &d) const {
+  void apply(double &d) const override {
     std::istringstream istr(m_value + " ");
     istr >> d;
     if (!istr.good())
@@ -556,24 +560,24 @@ protected:
                                   m_value);
   }
   /// Apply if bool
-  void apply(bool &b) const {
+  void apply(bool &b) const override {
     b = (m_value == "true" || m_value == "TRUE" || m_value == "1");
   }
   /// Apply if vector
-  void apply(std::vector<double> &v) const {
+  void apply(std::vector<double> &v) const override {
     if (m_value.empty()) {
       v.clear();
       return;
     }
     if (m_value.size() > 2) {
       // check if the value is in barckets (...)
-      if (m_value[0] == '(' && m_value[m_value.size() - 1] == ')') {
+      if (m_value.front() == '(' && m_value.back() == ')') {
         m_value.erase(0, 1);
         m_value.erase(m_value.size() - 1);
       }
     }
-    Poco::StringTokenizer tokenizer(m_value, ",",
-                                    Poco::StringTokenizer::TOK_TRIM);
+    Mantid::Kernel::StringTokenizer tokenizer(
+        m_value, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
     v.resize(tokenizer.count());
     for (size_t i = 0; i < v.size(); ++i) {
       v[i] = boost::lexical_cast<double>(tokenizer[i]);
@@ -646,15 +650,19 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain,
   double step;                   // real step
   double cutoff = 100.0 * minDouble / stepPercentage;
   size_t nParam = nParams();
-  size_t nData = domain.size();
+  size_t nData = getValuesSize(domain);
 
-  FunctionValues minusStep(domain);
-  FunctionValues plusStep(domain);
+  FunctionValues minusStep(nData);
+  FunctionValues plusStep(nData);
 
   // PARALLEL_CRITICAL(numeric_deriv)
   {
     applyTies(); // just in case
     function(domain, minusStep);
+  }
+
+  if (nData == 0) {
+    nData = minusStep.size();
   }
 
   for (size_t iP = 0; iP < nParam; iP++) {
@@ -708,7 +716,7 @@ void IFunction::setMatrixWorkspace(
     const Geometry::ParameterMap &paramMap = workspace->instrumentParameters();
 
     Geometry::IDetector_const_sptr det;
-    size_t numDetectors = workspace->getSpectrum(wi)->getDetectorIDs().size();
+    size_t numDetectors = workspace->getSpectrum(wi).getDetectorIDs().size();
     if (numDetectors > 1) {
       // If several detectors are on this workspace index, just use the ID of
       // the first detector
@@ -716,7 +724,7 @@ void IFunction::setMatrixWorkspace(
       // and not the group. Ask Roman.
       Instrument_const_sptr inst = workspace->getInstrument();
       det = inst->getDetector(
-          *workspace->getSpectrum(wi)->getDetectorIDs().begin());
+          *workspace->getSpectrum(wi).getDetectorIDs().begin());
     } else
       // Get the detector (single) at this workspace index
       det = workspace->getDetector(wi);
@@ -737,8 +745,8 @@ void IFunction::setMatrixWorkspace(
             // update value
             IFunctionWithLocation *testWithLocation =
                 dynamic_cast<IFunctionWithLocation *>(this);
-            if (testWithLocation == NULL ||
-                (fitParam.getLookUpTable().containData() == false &&
+            if (testWithLocation == nullptr ||
+                (!fitParam.getLookUpTable().containData() &&
                  fitParam.getFormula().compare("") == 0)) {
               setParameter(i, fitParam.getValue());
             } else {
@@ -767,12 +775,12 @@ void IFunction::setMatrixWorkspace(
                 g_log.debug()
                     << "For FitParameter " << parameterName(i)
                     << " centre of peak before any unit convertion is "
-                    << centreValue << std::endl;
+                    << centreValue << '\n';
                 centreValue =
                     convertValue(centreValue, centreUnit, workspace, wi);
                 g_log.debug() << "For FitParameter " << parameterName(i)
                               << " centre of peak after any unit convertion is "
-                              << centreValue << std::endl;
+                              << centreValue << '\n';
               }
 
               double paramValue = fitParam.getValue(centreValue);
@@ -788,11 +796,11 @@ void IFunction::setMatrixWorkspace(
                     fitParam.getLookUpTable().getYUnit(); // from table
                 g_log.debug() << "The FitParameter " << parameterName(i)
                               << " = " << paramValue
-                              << " before y-unit convertion" << std::endl;
+                              << " before y-unit convertion\n";
                 paramValue /= convertValue(1.0, resultUnit, workspace, wi);
                 g_log.debug() << "The FitParameter " << parameterName(i)
                               << " = " << paramValue
-                              << " after y-unit convertion" << std::endl;
+                              << " after y-unit convertion\n";
               } else {
                 // so from formula
 
@@ -801,14 +809,13 @@ void IFunction::setMatrixWorkspace(
                 if (!resultUnitStr.empty()) {
                   std::vector<std::string> allUnitStr =
                       Kernel::UnitFactory::Instance().getKeys();
-                  for (unsigned iUnit = 0; iUnit < allUnitStr.size(); iUnit++) {
-                    size_t found = resultUnitStr.find(allUnitStr[iUnit]);
+                  for (auto &iUnit : allUnitStr) {
+                    size_t found = resultUnitStr.find(iUnit);
                     if (found != std::string::npos) {
-                      size_t len = allUnitStr[iUnit].size();
+                      size_t len = iUnit.size();
                       std::stringstream readDouble;
                       Kernel::Unit_sptr unt =
-                          Kernel::UnitFactory::Instance().create(
-                              allUnitStr[iUnit]);
+                          Kernel::UnitFactory::Instance().create(iUnit);
                       readDouble << 1.0 / convertValue(1.0, unt, workspace, wi);
                       resultUnitStr.replace(found, len, readDouble.str());
                     }
@@ -820,19 +827,18 @@ void IFunction::setMatrixWorkspace(
                     g_log.debug() << "The FitParameter " << parameterName(i)
                                   << " = " << paramValue
                                   << " before result-unit convertion (using "
-                                  << resultUnitStr << ")" << std::endl;
+                                  << resultUnitStr << ")\n";
                     paramValue *= p.Eval();
                     g_log.debug() << "The FitParameter " << parameterName(i)
                                   << " = " << paramValue
-                                  << " after result-unit convertion"
-                                  << std::endl;
+                                  << " after result-unit convertion\n";
                   } catch (mu::Parser::exception_type &e) {
                     g_log.error()
                         << "Cannot convert formula unit to workspace unit"
                         << " Formula unit which cannot be passed is "
                         << resultUnitStr
                         << ". Muparser error message is: " << e.GetMsg()
-                        << std::endl;
+                        << '\n';
                   }
                 } // end if
               } // end trying to convert result-unit from formula or y-unit for
@@ -930,7 +936,7 @@ void IFunction::convertValue(std::vector<double> &values,
     // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
     Instrument_const_sptr instrument = ws->getInstrument();
     Geometry::IComponent_const_sptr sample = instrument->getSample();
-    if (sample == NULL) {
+    if (sample == nullptr) {
       g_log.error()
           << "No sample defined instrument. Cannot convert units for function\n"
           << "Ignore convertion.";
@@ -941,7 +947,7 @@ void IFunction::convertValue(std::vector<double> &values,
     double l2(-1.0), twoTheta(0.0);
     if (!det->isMonitor()) {
       l2 = det->getDistance(*sample);
-      twoTheta = ws->detectorTwoTheta(det);
+      twoTheta = ws->detectorTwoTheta(*det);
     } else // If this is a monitor then make l1+l2 = source-detector distance
            // and twoTheta=0
     {
@@ -1000,11 +1006,10 @@ void IFunction::setAttributeValue(const std::string &attName,
 
 /// Returns a list of attribute names
 std::vector<std::string> IFunction::getAttributeNames() const {
-  std::vector<std::string> names(nAttributes(), "");
-  size_t index(0);
-  for (auto iter = m_attrs.begin(); iter != m_attrs.end(); ++iter) {
-    names[index] = iter->first;
-    ++index;
+  std::vector<std::string> names;
+  names.reserve(m_attrs.size());
+  for (const auto &attr : m_attrs) {
+    names.push_back(attr.first);
   }
   return names;
 }
@@ -1043,7 +1048,7 @@ void IFunction::setAttribute(const std::string &name,
 */
 void IFunction::declareAttribute(
     const std::string &name, const API::IFunction::Attribute &defaultValue) {
-  m_attrs.insert(std::make_pair(name, defaultValue));
+  m_attrs.emplace(name, defaultValue);
 }
 
 /// Initialize the function. Calls declareAttributes & declareParameters
@@ -1090,6 +1095,56 @@ void IFunction::setCovarianceMatrix(
         "IFunction: Covariance matrix has a wrong size");
   }
   m_covar = covar;
+}
+
+/// Get number of values for a given domain.
+/// @param domain :: A domain.
+size_t IFunction::getValuesSize(const FunctionDomain &domain) const {
+  return domain.size();
+}
+
+/// Fix a parameter
+/// @param name :: A name of a parameter to fix
+void IFunction::fixParameter(const std::string &name) {
+  auto i = parameterIndex(name);
+  fix(i);
+}
+
+/// Free a parameter
+/// @param name :: A name of a parameter to free
+void IFunction::unfixParameter(const std::string &name) {
+  auto i = parameterIndex(name);
+  unfix(i);
+}
+
+/// Fix all parameters
+void IFunction::fixAll() {
+  for (size_t i = 0; i < nParams(); ++i) {
+    fix(i);
+  }
+}
+
+/// Free all parameters
+void IFunction::unfixAll() {
+  for (size_t i = 0; i < nParams(); ++i) {
+    fix(i);
+  }
+}
+
+/// Get number of domains required by this function.
+/// If it returns a number greater than 1 then the domain
+/// passed to function(domain, values) method must have a
+/// CompositeDomain type with the same number of parts.
+size_t IFunction::getNumberDomains() const { return 1; }
+
+/// Split this function (if needed) into a list of independent functions.
+/// The number of functions must be the number of domains this function is
+/// working on (== getNumberDomains()). The result of evaluation of the
+/// created functions on their domains must be the same as if this function
+/// was evaluated on the composition of those domains.
+std::vector<IFunction_sptr> IFunction::createEquivalentFunctions() const {
+  return std::vector<IFunction_sptr>(
+      1, FunctionFactory::Instance().createInitialized(asString()));
 }
 
 } // namespace API

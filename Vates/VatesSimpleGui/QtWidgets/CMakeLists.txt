@@ -36,7 +36,6 @@ qt4_wrap_ui( UI_BUILT_SOURCES
 include_directories(
   inc
   ${CMAKE_CURRENT_BINARY_DIR}
-  ${QWT_INCLUDE_DIR}
   ${CMAKE_SOURCE_DIR}/MantidQt/API/inc
 )
 
@@ -56,6 +55,8 @@ add_library( VatesSimpleGuiQtWidgets ${ALL_FILES} )
 set_target_properties( VatesSimpleGuiQtWidgets PROPERTIES OUTPUT_NAME MantidVatesSimpleGuiQtWidgets )
 # Add to the 'VatesSimpleGui' group in VS
 set_property( TARGET VatesSimpleGuiQtWidgets PROPERTY FOLDER MantidVatesSimpleGui )
+
+target_include_directories( VatesSimpleGuiQtWidgets SYSTEM PRIVATE ${QWT_INCLUDE_DIR})
 
 target_link_libraries( VatesSimpleGuiQtWidgets  LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 ${POCO_LIBRARIES}

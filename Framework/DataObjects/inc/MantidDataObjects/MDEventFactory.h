@@ -44,9 +44,6 @@ public:
     NumBoxTypes =
         4 //< Number of different types of the events, used as metaloop splitter
   };
-  MDEventFactory() {}
-  ~MDEventFactory() {}
-
   // create MD workspace factory call
   static API::IMDEventWorkspace_sptr CreateMDWorkspace(
       size_t nd, const std::string &eventType = "MDLeanEvent",

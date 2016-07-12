@@ -59,22 +59,21 @@ public:
   FitMW(DomainType domainType = Simple);
   /// declare properties that specify the dataset within the workspace to fit
   /// to.
-  virtual void declareDatasetProperties(const std::string &suffix = "",
-                                        bool addProp = true);
+  void declareDatasetProperties(const std::string &suffix = "",
+                                bool addProp = true) override;
   /// Create a domain from the input workspace
-  virtual void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                            boost::shared_ptr<API::FunctionValues> &values,
-                            size_t i0 = 0);
-  boost::shared_ptr<API::Workspace>
-  createOutputWorkspace(const std::string &baseName,
-                        API::IFunction_sptr function,
-                        boost::shared_ptr<API::FunctionDomain> domain,
-                        boost::shared_ptr<API::FunctionValues> values,
-                        const std::string &outputWorkspacePropertyName);
+  void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
+                    boost::shared_ptr<API::FunctionValues> &values,
+                    size_t i0 = 0) override;
+  boost::shared_ptr<API::Workspace> createOutputWorkspace(
+      const std::string &baseName, API::IFunction_sptr function,
+      boost::shared_ptr<API::FunctionDomain> domain,
+      boost::shared_ptr<API::FunctionValues> values,
+      const std::string &outputWorkspacePropertyName) override;
   /// Return the size of the domain to be created.
-  virtual size_t getDomainSize() const;
+  size_t getDomainSize() const override;
   /// Initialize the function
-  virtual void initFunction(API::IFunction_sptr function);
+  void initFunction(API::IFunction_sptr function) override;
   /// Set the workspace
   /// @param ws :: workspace to set.
   void setWorkspace(boost::shared_ptr<API::MatrixWorkspace> ws) {

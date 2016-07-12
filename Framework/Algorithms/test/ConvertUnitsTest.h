@@ -4,11 +4,13 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include "MantidAlgorithms/ConvertToDistribution.h"
 #include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -22,36 +24,33 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountVariances;
+using Mantid::HistogramData::CountStandardDeviations;
 
 class ConvertUnitsTest : public CxxTest::TestSuite {
 public:
   void setup_WS() {
     // Set up a small workspace for testing
-    Workspace_sptr space =
-        WorkspaceFactory::Instance().create("Workspace2D", 256, 11, 10);
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    boost::shared_ptr<Mantid::MantidVec> x(new Mantid::MantidVec(11));
-    for (int i = 0; i < 11; ++i) {
-      (*x)[i] = i * 1000;
-    }
-    boost::shared_ptr<Mantid::MantidVec> a(new Mantid::MantidVec(10));
-    boost::shared_ptr<Mantid::MantidVec> e(new Mantid::MantidVec(10));
-    for (int i = 0; i < 10; ++i) {
-      (*a)[i] = i;
-      (*e)[i] = sqrt(double(i));
-    }
+    auto space2D = createWorkspace<Workspace2D>(256, 11, 10);
+    BinEdges x{0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
+    Counts a{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    CountVariances variances{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    CountStandardDeviations e(variances);
     for (int j = 0; j < 256; ++j) {
-      space2D->setX(j, x);
-      space2D->setData(j, a, e);
+      space2D->setBinEdges(j, x);
+      space2D->setCounts(j, a);
+      space2D->setCountStandardDeviations(j, e);
       // Just set the spectrum number to match the index
-      space2D->getSpectrum(j)->setSpectrumNo(j);
-      space2D->getSpectrum(j)->setDetectorID(j);
+      space2D->getSpectrum(j).setSpectrumNo(j);
+      space2D->getSpectrum(j).setDetectorID(j);
     }
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     // Register the workspace in the data service
     this->inputSpace = "testWorkspace";
-    AnalysisDataService::Instance().addOrReplace(inputSpace, space);
+    AnalysisDataService::Instance().addOrReplace(inputSpace, space2D);
 
     // Load the instrument data
     Mantid::DataHandling::LoadInstrument loader;
@@ -183,9 +182,10 @@ public:
     // same
     //    vector in both workspaces)
     double test[10] = {11, 22, 33, 44, 55, 66, 77, 88, 99, 1010};
-    boost::shared_ptr<Mantid::MantidVec> tester(
-        new Mantid::MantidVec(test, test + 10));
-    output2D->setData(111, tester, tester);
+    Counts testY(test, test + 10);
+    CountStandardDeviations testE(test, test + 10);
+    output2D->setCounts(111, testY);
+    output2D->setCountStandardDeviations(111, testE);
     y = output2D->dataY(111);
     TS_ASSERT_EQUALS(y[3], 44.0);
     yIn = input2D->dataY(111);
@@ -218,6 +218,8 @@ public:
             "quickOut2"));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Energy");
     TS_ASSERT_DELTA(output->dataX(1)[1], 10.10, 0.01);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Elastic, output->getEMode());
 
     AnalysisDataService::Instance().remove("quickOut2");
   }
@@ -255,6 +257,86 @@ public:
     AnalysisDataService::Instance().remove("quickOut");
   }
 
+  void convertBackAndForth(bool inplace) {
+    std::string tmp_ws_name = "tmp";
+    if (inplace)
+      tmp_ws_name = "output";
+
+    double x0 = 0.1;
+    // We have to make sure that bin width is non-zero and not 1.0, otherwise
+    // the scaling of Y and E for the distribution case is not testable.
+    double deltax = 0.123;
+    Workspace2D_sptr input =
+        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 10, x0, deltax);
+    input->getAxis(0)->unit() =
+        UnitFactory::Instance().create("MomentumTransfer");
+    // Y must have units, otherwise ConvertUnits does not treat data as
+    // distribution.
+    input->setYUnit("Counts");
+    AnalysisDataService::Instance().add("input", input);
+
+    ConvertToDistribution makeDist;
+    makeDist.initialize();
+    TS_ASSERT(makeDist.isInitialized());
+    makeDist.setPropertyValue("Workspace", "input");
+    TS_ASSERT_THROWS_NOTHING(makeDist.execute());
+    TS_ASSERT(makeDist.isExecuted());
+    TS_ASSERT(input->isDistribution());
+
+    ConvertUnits convert1;
+    convert1.initialize();
+    TS_ASSERT(convert1.isInitialized());
+    convert1.setPropertyValue("InputWorkspace", "input");
+    convert1.setPropertyValue("OutputWorkspace", tmp_ws_name);
+    convert1.setPropertyValue("Target", "dSpacing");
+    TS_ASSERT_THROWS_NOTHING(convert1.execute());
+    TS_ASSERT(convert1.isExecuted());
+
+    ConvertUnits convert2;
+    convert2.initialize();
+    TS_ASSERT(convert2.isInitialized());
+    convert2.setProperty("InputWorkspace", tmp_ws_name);
+    convert2.setPropertyValue("OutputWorkspace", "output");
+    convert2.setPropertyValue("Target", "MomentumTransfer");
+    TS_ASSERT_THROWS_NOTHING(convert2.execute());
+    TS_ASSERT(convert2.isExecuted());
+
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "output"));
+    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "MomentumTransfer");
+    // What is this testing? Does it have to do with copy-on-write dataX?
+    TS_ASSERT_EQUALS(&(output->dataX(0)[0]), &(output->dataX(0)[0]));
+    const size_t xsize = output->blocksize();
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      const auto &inX = input->readX(i);
+      const auto &inY = input->readY(i);
+      const auto &outX = output->readX(i);
+      const auto &outY = output->readY(i);
+      for (size_t j = 0; j <= xsize; ++j) {
+        TS_ASSERT_DELTA(outX[j], inX[j], 1e-9);
+      }
+      for (size_t j = 0; j < xsize; ++j) {
+        TS_ASSERT_DELTA(outY[j], inY[j], 1e-9);
+      }
+    }
+
+    AnalysisDataService::Instance().remove("input");
+    AnalysisDataService::Instance().remove(tmp_ws_name);
+    AnalysisDataService::Instance().remove("output");
+  }
+
+  void testConvertBackAndForth() {
+    bool inplace = false;
+    convertBackAndForth(inplace);
+  }
+
+  void testConvertBackAndForthInPlace() {
+    bool inplace = true;
+    convertBackAndForth(inplace);
+  }
+
   void testDeltaE() {
     MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 2663, 5, 7.5);
@@ -281,7 +363,7 @@ public:
     physicalPixel->setPos(-0.34732, -3.28797, -2.29022);
     testInst->add(physicalPixel);
     testInst->markAsDetector(physicalPixel);
-    ws->getSpectrum(0)->addDetectorID(physicalPixel->getID());
+    ws->getSpectrum(0).addDetectorID(physicalPixel->getID());
 
     ConvertUnits conv;
     conv.initialize();
@@ -299,6 +381,8 @@ public:
             outputSpace));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "DeltaE");
     TS_ASSERT_EQUALS(output->blocksize(), 1669);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());
 
     ConvertUnits conv2;
     conv2.initialize();
@@ -315,6 +399,8 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(),
                      "DeltaE_inWavenumber");
     TS_ASSERT_EQUALS(output->blocksize(), 2275);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Indirect, output->getEMode());
 
     AnalysisDataService::Instance().remove(outputSpace);
   }
@@ -337,7 +423,7 @@ public:
     TS_ASSERT(WS); // workspace is loaded
     size_t start_blocksize = WS->blocksize();
     size_t num_events = WS->getNumberEvents();
-    EventList el = WS->getEventList(wkspIndex);
+    EventList el = WS->getSpectrum(wkspIndex);
     double a_tof = el.getEvents()[0].tof();
     double a_x = el.dataX()[1];
 
@@ -360,9 +446,11 @@ public:
     TS_ASSERT_EQUALS(start_blocksize, WS->blocksize());
     TS_ASSERT_EQUALS(num_events, WS->getNumberEvents());
     // But a TOF changed.
-    TS_ASSERT_DIFFERS(a_tof, WS->getEventList(wkspIndex).getEvents()[0].tof());
+    TS_ASSERT_DIFFERS(a_tof, WS->getSpectrum(wkspIndex).getEvents()[0].tof());
     // and a X changed
-    TS_ASSERT_DIFFERS(a_x, WS->getEventList(wkspIndex).dataX()[1]);
+    TS_ASSERT_DIFFERS(a_x, WS->getSpectrum(wkspIndex).dataX()[1]);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, WS->getEMode());
   }
 
   void testExecEvent_TwoStepConversionWithDeltaE() {
@@ -424,7 +512,7 @@ public:
       return;
     TS_ASSERT_EQUALS(out->getNumberEvents(), 100 * 200);
 
-    EventList &el = out->getEventList(0);
+    EventList &el = out->getSpectrum(0);
     TS_ASSERT(el.getSortType() == sortType);
 
     if (sortType == TOF_SORT) {

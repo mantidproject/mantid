@@ -126,10 +126,5 @@ PeakClusterProjection::signalAtPeakCenter(const IPeak &peak,
   return m_mdWS->getSignalAtVMD(center, normalization);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeakClusterProjection::~PeakClusterProjection() {}
-
 } // namespace Crystal
 } // namespace Mantid

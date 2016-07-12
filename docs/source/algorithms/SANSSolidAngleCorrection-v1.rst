@@ -19,9 +19,11 @@ The solid angle correction is applied as follows:
 
 :math:`\sigma_{I'(x,y)}=\frac{\sigma_{I(x,y)}}{\vert\cos^3(2\theta)\vert}`
 
-If *DetectorTubes* is set to True, the angle :math:`2\theta` will be replaced
-by the angle between the Z-axis and the projection of the sample-to-pixel vector on
-the plane defined by the beam (Z) axis and the Y-axis.
+If *DetectorTubes* is set to True, the correction is calculated according to a tube geometry. The cosine term above then becomes:
+    
+:math:`\cos^3(2\theta) \rightarrow \cos^2(2\theta) \cos(\alpha)`
+
+where :math:`\alpha`: is the angle between the sample-to-pixel vector and its projection on the X-Z plane.
 
 
 .. categories::

@@ -1,14 +1,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <cmath>
-#include <vector>
-
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/CalMuonDeadTime.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+
+#include <cmath>
+#include <vector>
 
 namespace Mantid {
 namespace Algorithms {
@@ -24,11 +26,11 @@ DECLARE_ALGORITHM(CalMuonDeadTime)
  */
 void CalMuonDeadTime::init() {
 
-  declareProperty(
-      new API::WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
-      "Name of the input workspace");
+  declareProperty(make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "Name of the input workspace");
 
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
                       "DeadTimeTable", "", Direction::Output),
                   "The name of the TableWorkspace in which to store the list "
                   "of deadtimes for each spectrum");
@@ -43,8 +45,8 @@ void CalMuonDeadTime::init() {
                                        "zero (default to 5.0)",
                   Direction::Input);
 
-  declareProperty(new API::WorkspaceProperty<API::Workspace>("DataFitted", "",
-                                                             Direction::Output),
+  declareProperty(make_unique<API::WorkspaceProperty<API::Workspace>>(
+                      "DataFitted", "", Direction::Output),
                   "The data which the deadtime equation is fitted to");
 }
 
@@ -186,13 +188,13 @@ void CalMuonDeadTime::exec() {
     // Check order of names
     if (result->parameterName(0).compare("A0") != 0) {
       g_log.error() << "Parameter 0 should be A0, but is "
-                    << result->parameterName(0) << std::endl;
+                    << result->parameterName(0) << '\n';
       throw std::invalid_argument(
           "Parameters are out of order @ 0, should be A0");
     }
     if (result->parameterName(1).compare("A1") != 0) {
       g_log.error() << "Parameter 1 should be A1, but is "
-                    << result->parameterName(1) << std::endl;
+                    << result->parameterName(1) << '\n';
       throw std::invalid_argument(
           "Parameters are out of order @ 0, should be A1");
     }
@@ -208,8 +210,8 @@ void CalMuonDeadTime::exec() {
       API::TableRow t = outTable->appendRow();
       t << wsindex + 1 << -(A1 / A0) * time_bin * numGoodFrames;
     } else {
-      g_log.warning() << "Fit falled. Status = " << fitStatus << std::endl
-                      << "For workspace index " << i << std::endl;
+      g_log.warning() << "Fit falled. Status = " << fitStatus
+                      << "\nFor workspace index " << i << '\n';
     }
   }
 

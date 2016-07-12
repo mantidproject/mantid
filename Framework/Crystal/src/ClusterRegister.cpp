@@ -4,7 +4,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/functional/hash.hpp>
 #include <list>
-#include <set>
+#include <unordered_set>
 
 namespace {
 template <typename T> std::pair<T, T> ordered_pair(const T &a, const T &b) {
@@ -26,13 +26,13 @@ public:
   ClusterRegister::MapCluster m_unique;
 
   /// Type for identifying label groups
-  typedef std::list<std::set<size_t>> GroupType;
+  typedef std::list<std::unordered_set<size_t>> GroupType;
 
   /// Groups of labels to maintain
   GroupType m_groups;
 
   /// Type for identifying labels already seen
-  typedef std::set<size_t> LabelHash;
+  typedef std::unordered_set<size_t> LabelHash;
 
   /// Hash of labels merged
   LabelHash m_labelHash;
@@ -55,8 +55,7 @@ public:
     GroupType containingAny;
     GroupType containingNone;
     // ------------- Find equivalent sets
-    for (auto i = m_groups.begin(); i != m_groups.end(); ++i) {
-      GroupType::value_type &cluster = *i;
+    for (auto &cluster : m_groups) {
       if (cluster.find(aLabel) != cluster.end()) {
         containingAny.push_back(cluster);
       } else if (cluster.find(bLabel) != cluster.end()) {
@@ -83,8 +82,7 @@ public:
       GroupType::value_type masterSet;
       masterSet.insert(aLabel); // Incase it doesn't already contain a
       masterSet.insert(bLabel); // Incase it doesn't already contain b
-      for (auto i = containingAny.begin(); i != containingAny.end(); ++i) {
-        GroupType::value_type &childSet = *i;
+      for (auto &childSet : containingAny) {
         masterSet.insert(childSet.begin(),
                          childSet.end()); // Build the master set.
       }
@@ -101,11 +99,10 @@ public:
    */
   std::list<boost::shared_ptr<CompositeCluster>> makeCompositeClusters() {
     std::list<boost::shared_ptr<CompositeCluster>> composites;
-    for (auto i = m_groups.begin(); i != m_groups.end(); ++i) {
-      GroupType::value_type &labelSet = *i;
+    for (auto &labelSet : m_groups) {
       auto composite = boost::make_shared<CompositeCluster>();
-      for (auto j = labelSet.begin(); j != labelSet.end(); ++j) {
-        boost::shared_ptr<ICluster> &cluster = m_register[(*j)];
+      for (auto j : labelSet) {
+        boost::shared_ptr<ICluster> &cluster = m_register[j];
         composite->add(cluster);
       }
       composites.push_back(composite);
@@ -119,10 +116,9 @@ public:
 */
 ClusterRegister::ClusterRegister() : m_Impl(new ImplClusterRegister) {}
 
-//----------------------------------------------------------------------------------------------
 /** Destructor
 */
-ClusterRegister::~ClusterRegister() {}
+ClusterRegister::~ClusterRegister() = default;
 
 /**
  * Add/register a cluster.
@@ -131,8 +127,8 @@ ClusterRegister::~ClusterRegister() {}
  */
 void ClusterRegister::add(const size_t &label,
                           const boost::shared_ptr<ICluster> &cluster) {
-  m_Impl->m_register.insert(std::make_pair(label, cluster));
-  m_Impl->m_unique.insert(std::make_pair(label, cluster));
+  m_Impl->m_register.emplace(label, cluster);
+  m_Impl->m_unique.emplace(label, cluster);
 }
 
 /**
@@ -168,9 +164,8 @@ ClusterRegister::MapCluster ClusterRegister::clusters() const {
   MapCluster temp;
   temp.insert(m_Impl->m_unique.begin(), m_Impl->m_unique.end());
   auto mergedClusters = m_Impl->makeCompositeClusters();
-  for (auto i = mergedClusters.begin(); i != mergedClusters.end(); ++i) {
-    const auto &merged = *i;
-    temp.insert(std::make_pair(merged->getLabel(), merged));
+  for (const auto &merged : mergedClusters) {
+    temp.emplace(merged->getLabel(), merged);
   }
   return temp;
 }
@@ -186,10 +181,9 @@ ClusterRegister::clusters(std::vector<DisjointElement> &elements) const {
   MapCluster temp;
   temp.insert(m_Impl->m_unique.begin(), m_Impl->m_unique.end());
   auto mergedClusters = m_Impl->makeCompositeClusters();
-  for (auto i = mergedClusters.begin(); i != mergedClusters.end(); ++i) {
-    const auto &merged = *i;
+  for (auto &merged : mergedClusters) {
     merged->toUniformMinimum(elements);
-    temp.insert(std::make_pair(merged->getLabel(), merged));
+    temp.emplace(merged->getLabel(), merged);
   }
   return temp;
 }

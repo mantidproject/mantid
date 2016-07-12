@@ -42,8 +42,7 @@ public:
    */
   void Passed_test_FitZero() {
     // 1. Generate testing workspace
-    std::map<std::string, double> newparamvalues;
-    newparamvalues.insert(std::make_pair("Tcross", 0.5));
+    std::map<std::string, double> newparamvalues{{"Tcross", 0.5}};
 
     // This is the output from FitPowderDiffPeaks()
     std::string peakfilename("/home/wzz/Mantid/Code/debug/MyTestData/"
@@ -184,9 +183,9 @@ public:
     TS_ASSERT(dataws);
     TS_ASSERT_EQUALS(dataws->getNumberHistograms(), 21);
     /*
-    cout << "Number of peak positions = " << dataws->readX(0).size() << endl;
+    cout << "Number of peak positions = " << dataws->readX(0).size() << '\n';
     for (size_t i = 0; i < dataws->readX(0).size(); ++i)
-      cout << i << "\t\t" << dataws->readX(0)[i] << endl;
+      cout << i << "\t\t" << dataws->readX(0)[i] << '\n';
       */
 
     DataObjects::TableWorkspace_sptr mcresultws =
@@ -311,11 +310,11 @@ public:
         hkl << peakparams[ipk][ipm];
         cout << peakparams[ipk][ipm];
       }
-      cout << endl;
+      cout << '\n';
     }
 
     std::cout << "Created Table Workspace with " << hkls.size()
-              << " entries of peaks." << std::endl;
+              << " entries of peaks.\n";
 
     return hklws;
   }
@@ -333,10 +332,10 @@ public:
     std::ifstream ins;
     ins.open(filename.c_str());
     if (!ins.is_open()) {
-      std::cout << "File " << filename << " cannot be opened. " << std::endl;
+      std::cout << "File " << filename << " cannot be opened. \n";
       throw std::invalid_argument("Cannot open Reflection-Text-File.");
     } else {
-      std::cout << "Parsing peak parameters file " << filename << std::endl;
+      std::cout << "Parsing peak parameters file " << filename << '\n';
     }
 
     // 2. Parse
@@ -385,7 +384,7 @@ public:
     // 1. Combine 2 inputs
     std::map<std::string, double>::iterator nvit;
     std::stringstream infoss;
-    infoss << "Importing instrument related parameters: " << std::endl;
+    infoss << "Importing instrument related parameters: \n";
     for (nvit = newvalueparameters.begin(); nvit != newvalueparameters.end();
          ++nvit) {
       std::map<std::string, double>::iterator fdit;
@@ -393,7 +392,7 @@ public:
       if (fdit != parameters.end()) {
         fdit->second = nvit->second;
         infoss << "Name: " << std::setw(15) << fdit->first
-               << ", Value: " << fdit->second << std::endl;
+               << ", Value: " << fdit->second << '\n';
       }
     }
     std::cout << infoss.str();
@@ -403,15 +402,9 @@ public:
     DataObjects::TableWorkspace_sptr geomws =
         DataObjects::TableWorkspace_sptr(tablews);
 
-    std::vector<std::string> paramnames;
-    paramnames.push_back("Zero");
-    paramnames.push_back("Zerot");
-    paramnames.push_back("Dtt1");
-    paramnames.push_back("Dtt1t");
-    paramnames.push_back("Dtt2t");
-    paramnames.push_back("Tcross");
-    paramnames.push_back("Width");
-    paramnames.push_back("LatticeConstant");
+    std::vector<std::string> paramnames{"Zero",  "Zerot",          "Dtt1",
+                                        "Dtt1t", "Dtt2t",          "Tcross",
+                                        "Width", "LatticeConstant"};
 
     tablews->addColumn("str", "Name");
     tablews->addColumn("double", "Value");
@@ -453,11 +446,10 @@ public:
     std::ifstream ins;
     ins.open(filename.c_str());
     if (!ins.is_open()) {
-      std::cout << "File " << filename << " cannot be opened. " << std::endl;
+      std::cout << "File " << filename << " cannot be opened. \n";
       throw std::invalid_argument("Cannot open Reflection-Text-File.");
     } else {
-      std::cout << "Importing instrument parameter file " << filename
-                << std::endl;
+      std::cout << "Importing instrument parameter file " << filename << '\n';
     }
 
     // 2. Parse
@@ -473,7 +465,7 @@ public:
         std::stringstream ss;
         ss.str(line);
         ss >> parname >> parvalue;
-        parameters.insert(std::make_pair(parname, parvalue));
+        parameters.emplace(parname, parvalue);
 
         try {
           ss >> parmin >> parmax >> parstepsize;
@@ -481,7 +473,7 @@ public:
           mcpars.push_back(parmin);
           mcpars.push_back(parmax);
           mcpars.push_back(parstepsize);
-          parametermcs.insert(make_pair(parname, mcpars));
+          parametermcs.emplace(parname, mcpars);
         } catch (runtime_error err) {
           ;
         }
@@ -504,7 +496,7 @@ public:
       double parvalue;
       row >> parname >> parvalue;
 
-      paramvalues.insert(std::make_pair(parname, parvalue));
+      paramvalues.emplace(parname, parvalue);
     }
 
     return;

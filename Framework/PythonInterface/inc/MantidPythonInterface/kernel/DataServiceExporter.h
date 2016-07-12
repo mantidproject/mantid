@@ -95,7 +95,8 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
                  (arg("self"), arg("name")))
             .def("__setitem__", &DataServiceExporter::addOrReplaceItem,
                  (arg("self"), arg("name"), arg("item")))
-            .def("__contains__", &SvcType::doesExist, arg("self"))
+            .def("__contains__", &SvcType::doesExist,
+                 (arg("self"), arg("name")))
             .def("__delitem__", &SvcType::remove, (arg("self"), arg("name")));
 
     return classType;
@@ -176,10 +177,8 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    */
   static boost::python::object getObjectNamesAsList(SvcType &self) {
     boost::python::list names;
-    const std::set<std::string> keys = self.getObjectNames();
-    std::set<std::string>::const_iterator iend = keys.end();
-    for (std::set<std::string>::const_iterator itr = keys.begin(); itr != iend;
-         ++itr) {
+    const auto keys = self.getObjectNames();
+    for (auto itr = keys.begin(); itr != keys.end(); ++itr) {
       names.append(*itr);
     }
     assert(names.attr("__len__")() == keys.size());

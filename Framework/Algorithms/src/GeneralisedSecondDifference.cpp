@@ -1,12 +1,15 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <sstream>
-#include <numeric>
+#include "MantidAlgorithms/GeneralisedSecondDifference.h"
+
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include "MantidAlgorithms/GeneralisedSecondDifference.h"
-#include "MantidKernel/BoundedValidator.h"
+#include <numeric>
+#include <sstream>
 
 namespace Mantid {
 namespace Algorithms {
@@ -17,23 +20,16 @@ DECLARE_ALGORITHM(GeneralisedSecondDifference)
 using namespace Kernel;
 using namespace API;
 
-/// Constructor
-GeneralisedSecondDifference::GeneralisedSecondDifference()
-    : Algorithm(), m_Cij(0), m_Cij2(0), m_z(0), m_m(0) {}
-
-/// Destructor
-GeneralisedSecondDifference::~GeneralisedSecondDifference() {}
-
 /// Initialisation method.
 void GeneralisedSecondDifference::init() {
 
   // Input and output workspaces
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
+                                                      Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
@@ -103,7 +99,7 @@ void GeneralisedSecondDifference::exec() {
   for (int i = spec_min; i <= spec_max; i++) {
     int out_index = i - spec_min;
     out->getSpectrum(out_index)
-        ->setSpectrumNo(inputWS->getSpectrum(i)->getSpectrumNo());
+        .setSpectrumNo(inputWS->getSpectrum(i).getSpectrumNo());
     const MantidVec &refX = inputWS->readX(i);
     const MantidVec &refY = inputWS->readY(i);
     const MantidVec &refE = inputWS->readE(i);

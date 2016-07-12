@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CopyInstrumentParameters.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 
 #include <iostream>
@@ -19,19 +20,12 @@ using namespace API;
 using namespace Geometry;
 /// using namespace DataObjects;
 
-/// Default constructor
-CopyInstrumentParameters::CopyInstrumentParameters()
-    : Algorithm(), m_different_instrument_sp(false) {}
-
-/// Destructor
-CopyInstrumentParameters::~CopyInstrumentParameters() {}
-
 void CopyInstrumentParameters::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Name of the workspace giving the instrument");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::InOut),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "", Direction::InOut),
       "Name of the workspace receiving the instrument");
 }
 
@@ -65,7 +59,7 @@ void CopyInstrumentParameters::exec() {
     for (; it != givParams.end(); it++) {
       IComponent *oldComponent = it->first;
 
-      const Geometry::IComponent *targComp = 0;
+      const Geometry::IComponent *targComp = nullptr;
 
       IDetector *pOldDet = dynamic_cast<IDetector *>(oldComponent);
       if (pOldDet) {
@@ -132,8 +126,7 @@ void CopyInstrumentParameters::checkProperties() {
   if (baseInstRec != baseInstGiv) {
     m_different_instrument_sp = true;
     g_log.warning() << "The base instrument in the output workspace is not the "
-                       "same as the base instrument in the input workspace."
-                    << std::endl;
+                       "same as the base instrument in the input workspace.\n";
   }
 }
 

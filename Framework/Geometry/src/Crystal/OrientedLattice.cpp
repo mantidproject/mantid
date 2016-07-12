@@ -14,18 +14,12 @@ const double TWO_PI = 2. * M_PI;
 @param Umatrix :: orientation matrix U. By default this will be identity matrix
 */
 OrientedLattice::OrientedLattice(const DblMatrix &Umatrix) : UnitCell() {
-  if (Umatrix.isRotation() == true) {
+  if (Umatrix.isRotation()) {
     U = Umatrix;
     UB = U * getB();
   } else
     throw std::invalid_argument("U is not a proper rotation");
 }
-
-/** Copy constructor
-@param other :: The OrientedLattice from which to copy information
-*/
-OrientedLattice::OrientedLattice(const OrientedLattice &other)
-    : UnitCell(other), U(other.U), UB(other.UB) {}
 
 /** Constructor
 @param _a :: lattice parameter \f$ a \f$ with \f$\alpha = \beta = \gamma =
@@ -39,7 +33,7 @@ OrientedLattice::OrientedLattice(const OrientedLattice &other)
 OrientedLattice::OrientedLattice(const double _a, const double _b,
                                  const double _c, const DblMatrix &Umatrix)
     : UnitCell(_a, _b, _c) {
-  if (Umatrix.isRotation() == true) {
+  if (Umatrix.isRotation()) {
     U = Umatrix;
     UB = U * getB();
   } else
@@ -61,7 +55,7 @@ OrientedLattice::OrientedLattice(const double _a, const double _b,
                                  const double _beta, const double _gamma,
                                  const DblMatrix &Umatrix, const int angleunit)
     : UnitCell(_a, _b, _c, _alpha, _beta, _gamma, angleunit) {
-  if (Umatrix.isRotation() == true) {
+  if (Umatrix.isRotation()) {
     U = Umatrix;
     UB = U * getB();
   } else
@@ -74,24 +68,12 @@ OrientedLattice::OrientedLattice(const double _a, const double _b,
 */
 OrientedLattice::OrientedLattice(const UnitCell &uc, const DblMatrix &Umatrix)
     : UnitCell(uc), U(Umatrix) {
-  if (Umatrix.isRotation() == true) {
+  if (Umatrix.isRotation()) {
     U = Umatrix;
     UB = U * getB();
   } else
     throw std::invalid_argument("U is not a proper rotation");
 }
-
-OrientedLattice::OrientedLattice(const UnitCell *uc, const DblMatrix &Umatrix)
-    : UnitCell(uc), U(Umatrix) {
-  if (Umatrix.isRotation() == true) {
-    U = Umatrix;
-    UB = U * getB();
-  } else
-    throw std::invalid_argument("U is not a proper rotation");
-}
-
-/// Destructor
-OrientedLattice::~OrientedLattice() {}
 
 /// Get the U matrix
 /// @return U :: U orientation matrix
@@ -157,7 +139,7 @@ V3D OrientedLattice::qFromHKL(const V3D &hkl) const {
   vector is not unique, but
   all vectors can be obtaineb by multiplying with a scalar
   @return u :: V3D vector along beam direction*/
-Kernel::V3D OrientedLattice::getuVector() {
+Kernel::V3D OrientedLattice::getuVector() const {
   V3D z(0, 0, 1);
   DblMatrix UBinv = UB;
   UBinv.Invert();
@@ -170,7 +152,7 @@ Kernel::V3D OrientedLattice::getuVector() {
   obtaineb by multiplying with a scalar
   @return v :: V3D vector perpendicular to the beam direction, in the horizontal
   plane*/
-Kernel::V3D OrientedLattice::getvVector() {
+Kernel::V3D OrientedLattice::getvVector() const {
   V3D x(1, 0, 0);
   DblMatrix UBinv = UB;
   UBinv.Invert();

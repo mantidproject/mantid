@@ -6,7 +6,9 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 
@@ -24,11 +26,6 @@ DECLARE_ALGORITHM(FindDetectorsPar)
 
 using namespace Kernel;
 using namespace API;
-// nothing here according to mantid
-FindDetectorsPar::FindDetectorsPar()
-    : m_SizesAreLinear(false), m_nDetectors(0) {}
-
-FindDetectorsPar::~FindDetectorsPar() {}
 
 void FindDetectorsPar::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
@@ -36,8 +33,8 @@ void FindDetectorsPar::init() {
   wsValidator->add<API::CommonBinsValidator>();
   // input workspace
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              wsValidator),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                       wsValidator),
       "The name of the workspace that will be used as input for the algorithm");
   //
   declareProperty("ReturnLinearRanges", false,
@@ -45,12 +42,11 @@ void FindDetectorsPar::init() {
                   "detector's ranges (dx,dy) rather then angular ranges "
                   "(dAzimuthal,dPolar)");
   // optional par or phx file
-  std::vector<std::string> fileExts(2);
-  fileExts[0] = ".par";
-  fileExts[1] = ".phx";
+  const std::vector<std::string> fileExts{".par", ".phx"};
 
-  declareProperty(new FileProperty("ParFile", "not_used.par",
-                                   FileProperty::OptionalLoad, fileExts),
+  declareProperty(Kernel::make_unique<FileProperty>("ParFile", "not_used.par",
+                                                    FileProperty::OptionalLoad,
+                                                    fileExts),
                   "An optional file that contains of the list of angular "
                   "parameters for the detectors and detectors groups;\n"
                   "If specified, will use data from file instead of the data, "
@@ -67,7 +63,7 @@ void FindDetectorsPar::exec() {
 
   // Get the input workspace
   const MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-  if (inputWS.get() == NULL) {
+  if (inputWS.get() == nullptr) {
     throw(Kernel::Exception::NotFoundError(
         "can not obtain InoputWorkspace for the algorithm to work", ""));
   }
@@ -91,7 +87,7 @@ void FindDetectorsPar::exec() {
       g_log.warning()
           << " number of parameters in the file: " << fileName
           << "  not equal to the number of histograms in the workspace"
-          << inputWS->getName() << std::endl;
+          << inputWS->getName() << '\n';
       g_log.warning() << " calculating detector parameters algorithmically\n";
     }
   }
@@ -155,13 +151,13 @@ void FindDetectorsPar::setOutputTable() {
     return;
   // Store the result in a table workspace
   try {
-    declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+    declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
         "OutputParTableWS", "", Direction::Output));
   } catch (std::exception &err) {
     g_log.information() << " findDetecotorsPar: unsuccessfully declaring "
                            "property: OutputParTableWS\n";
     g_log.information() << " findDetecotorsPar: the reason is: " << err.what()
-                        << std::endl;
+                        << '\n';
   }
 
   // Set the name of the new workspace
@@ -191,7 +187,7 @@ void FindDetectorsPar::setOutputTable() {
 }
 
 // Constant for converting Radians to Degrees
-const double rad2deg = 180.0 / M_PI;
+constexpr double rad2deg = 180.0 / M_PI;
 
 /** method calculates an angle closest to the initial one taken on a ring
   * e.g. given inital angle 179 deg and another one -179 closest one to 179 is
@@ -252,7 +248,7 @@ void AvrgDetector::addDetInfo(const Geometry::IDetector_const_sptr &spDet,
 
   Kernel::V3D er(0, 1, 0), e_th,
       ez(0, 0, 1); // ez along beamline, which is always oz;
-  if (dist2Det)
+  if (dist2Det != 0.0)
     er = toDet / dist2Det; // direction to the detector
   Kernel::V3D e_tg =
       er.cross_prod(ez); // tangential to the ring and anticloakwise;
@@ -346,8 +342,7 @@ void FindDetectorsPar::calcDetPar(const Geometry::IDetector_const_sptr &spDet,
         boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(spDet);
     if (!spDetGroup) {
       g_log.error() << "calc_cylDetPar: can not downcast IDetector_sptr to "
-                       "detector group for det->ID: " << spDet->getID()
-                    << std::endl;
+                       "detector group for det->ID: " << spDet->getID() << '\n';
       throw(std::bad_cast());
     }
     auto detectors = spDetGroup->getDetectors();
@@ -378,16 +373,16 @@ void FindDetectorsPar::extractAndLinearize(
   this->detID.resize(nDetectors);
 
   nDetectors = 0;
-  for (size_t i = 0; i < detPar.size(); i++) {
-    if (detPar[i].detID < 0)
+  for (const auto &parameter : detPar) {
+    if (parameter.detID < 0)
       continue;
 
-    azimuthal[nDetectors] = detPar[i].azimutAngle;
-    polar[nDetectors] = detPar[i].polarAngle;
-    azimuthalWidth[nDetectors] = detPar[i].azimWidth;
-    polarWidth[nDetectors] = detPar[i].polarWidth;
-    secondaryFlightpath[nDetectors] = detPar[i].secondaryFlightPath;
-    detID[nDetectors] = static_cast<size_t>(detPar[i].detID);
+    azimuthal[nDetectors] = parameter.azimutAngle;
+    polar[nDetectors] = parameter.polarAngle;
+    azimuthalWidth[nDetectors] = parameter.azimWidth;
+    polarWidth[nDetectors] = parameter.polarWidth;
+    secondaryFlightpath[nDetectors] = parameter.secondaryFlightPath;
+    detID[nDetectors] = static_cast<size_t>(parameter.detID);
     nDetectors++;
   }
   // store caluclated value
@@ -453,7 +448,7 @@ size_t FindDetectorsPar::loadParFile(const std::string &fileName) {
     }
   } else {
     g_log.error() << " unsupported type of ASCII parameter file: " << fileName
-                  << std::endl;
+                  << '\n';
     throw(std::invalid_argument("unsupported ASCII file type"));
   }
 
@@ -574,7 +569,7 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
   data_stream.open(fileName.c_str(), std::ios_base::in | std::ios_base::binary);
   if (!data_stream.is_open()) {
     g_log.error() << " can not open existing ASCII data file: " << fileName
-                  << std::endl;
+                  << '\n';
     throw(Kernel::Exception::FileError(" Can not open existing input data file",
                                        fileName));
   }
@@ -625,7 +620,7 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
   if (space_to_symbol_change >
       1) { // more then one group of symbols in the string, spe file
     int nData_records(0), nData_blocks(0);
-    // cppcheck-suppress invalidscanf
+
     int nDatas = sscanf(&BUF[0], " %d %d ", &nData_records, &nData_blocks);
     file_descriptor.nData_records = static_cast<size_t>(nData_records);
     file_descriptor.nData_blocks = static_cast<size_t>(nData_blocks);
@@ -670,7 +665,7 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
       file_descriptor.nData_blocks = space_to_symbol_change;
     } else { // something unclear or damaged
       g_log.error() << " can not identify format of the input data file "
-                    << fileName << std::endl;
+                    << fileName << '\n';
       throw(Kernel::Exception::FileError(
           " can not identify format of the input data file", fileName));
     }
@@ -745,7 +740,7 @@ void FindDetectorsPar::load_plain(std::ifstream &stream,
     }
     default: {
       g_log.error() << " unsupported value of FILE_TYPE.Type: "
-                    << FILE_TYPE.Type << std::endl;
+                    << FILE_TYPE.Type << '\n';
       throw(std::invalid_argument(" unsupported value of FILE_TYPE.Type"));
     }
     }

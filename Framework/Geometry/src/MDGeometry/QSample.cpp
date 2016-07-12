@@ -11,16 +11,13 @@ const std::string QSample::QSampleName = "QSample";
  */
 QSample::QSample() : m_unit(new Mantid::Kernel::InverseAngstromsUnit) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-QSample::~QSample() {}
-
 Kernel::UnitLabel QSample::getUnitLabel() const {
   return m_unit->getUnitLabel();
 }
 
 const Kernel::MDUnit &QSample::getMDUnit() const { return *m_unit; }
+
+bool QSample::setMDUnit(const Mantid::Kernel::MDUnit &) { return false; }
 
 bool QSample::canConvertTo(const Kernel::MDUnit &otherUnit) const {
   return this->getMDUnit() == otherUnit;

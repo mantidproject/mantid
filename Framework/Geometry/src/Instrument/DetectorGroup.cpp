@@ -41,9 +41,6 @@ DetectorGroup::DetectorGroup(const std::vector<IDetector_const_sptr> &dets,
   }
 }
 
-/// Destructor
-DetectorGroup::~DetectorGroup() {}
-
 /** Add a detector to the collection
 *  @param det ::  A pointer to the detector to add
 *  @param warn :: Whether to issue warnings to the log
@@ -55,7 +52,7 @@ void DetectorGroup::addDetector(IDetector_const_sptr det, bool &warn) {
   // Warn if adding a masked detector
   if (warn && det->isMasked()) {
     g_log.warning() << "Adding a detector (ID:" << det->getID()
-                    << ") that is flagged as masked." << std::endl;
+                    << ") that is flagged as masked.\n";
     warn = false;
   }
 
@@ -67,7 +64,7 @@ void DetectorGroup::addDetector(IDetector_const_sptr det, bool &warn) {
             .second) &&
       warn) {
     g_log.warning() << "Detector with ID " << det->getID()
-                    << " is already in group." << std::endl;
+                    << " is already in group.\n";
     warn = false;
   }
 }
@@ -353,15 +350,14 @@ std::string DetectorGroup::getParameterAsString(const std::string &pname,
 void DetectorGroup::getBoundingBox(BoundingBox &boundingBox) const {
   // boundingBox = BoundingBox(); // this change may modify a lot of behaviour
   // -> verify
-  for (auto cit = m_detectors.cbegin(); cit != m_detectors.cend(); ++cit) {
+  for (const auto &detector : m_detectors) {
     BoundingBox memberBox;
     if (!boundingBox.isAxisAligned()) {
       // coordinate system
       const std::vector<V3D> *cs = &(boundingBox.getCoordSystem());
       memberBox.realign(cs);
     }
-    IComponent_const_sptr det = cit->second;
-    det->getBoundingBox(memberBox);
+    detector.second->getBoundingBox(memberBox);
     boundingBox.grow(memberBox);
   }
 }

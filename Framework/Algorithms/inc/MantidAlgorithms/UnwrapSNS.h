@@ -49,22 +49,22 @@ namespace Algorithms {
 class DLLExport UnwrapSNS : public API::Algorithm {
 public:
   UnwrapSNS();
-  virtual ~UnwrapSNS();
-  virtual const std::string name() const;
+  ~UnwrapSNS() override;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Takes an input workspace that contains 'raw' data, unwraps the "
            "data according to the reference flightpath provided and converts "
            "the units to wavelength. The output workspace will have common "
            "bins in the maximum theoretical wavelength range.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void execEvent();
   void runMaskDetectors();
 

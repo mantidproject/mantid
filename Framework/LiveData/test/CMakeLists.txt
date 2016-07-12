@@ -8,6 +8,7 @@ if ( CXXTEST_FOUND )
                         TestGroupDataListener.cpp
                         ../../TestHelpers/src/TearDownWorld.cpp
                         ../../TestHelpers/src/ComponentCreationHelper.cpp
+                        ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/StartFrameworkManager.cpp
       )
@@ -17,6 +18,7 @@ if ( CXXTEST_FOUND )
             API
             DataObjects
             Geometry
+            HistogramData
             Kernel
             LiveData
             ${Boost_LIBRARIES}

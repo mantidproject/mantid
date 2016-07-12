@@ -6,7 +6,6 @@
 #include "MantidKernel/VectorHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <cstdlib>
-#include <boost/assign/list_of.hpp>
 
 using namespace Mantid::Kernel;
 
@@ -55,56 +54,52 @@ public:
   }
 
   void test_CreateAxisFromRebinParams_SingleStep() {
-    std::vector<double> rbParams = boost::assign::list_of(0)(2)(5);
+    std::vector<double> rbParams = {0, 2, 5};
 
     std::vector<double> axis;
     VectorHelper::createAxisFromRebinParams(rbParams, axis, true);
 
-    std::vector<double> expectedAxis = boost::assign::list_of(0)(2)(4)(5);
+    std::vector<double> expectedAxis = {0, 2, 4, 5};
     TS_ASSERT_EQUALS(axis, expectedAxis);
   }
 
   void test_CreateAxisFromRebinParams_SingleStep_LastBinTooSmall() {
-    std::vector<double> rbParams = boost::assign::list_of(0.0)(2.0)(4.1);
+    std::vector<double> rbParams = {0.0, 2.0, 4.1};
 
     std::vector<double> axis;
     VectorHelper::createAxisFromRebinParams(rbParams, axis, true);
 
-    std::vector<double> expectedAxis = boost::assign::list_of(0.0)(2.0)(4.1);
+    std::vector<double> expectedAxis = {0.0, 2.0, 4.1};
     TS_ASSERT_EQUALS(axis, expectedAxis);
   }
 
   void test_CreateAxisFromRebinParams_MultipleSteps() {
-    std::vector<double> rbParams =
-        boost::assign::list_of(0)(2)(5)(3)(10)(1)(12);
+    std::vector<double> rbParams = {0, 2, 5, 3, 10, 1, 12};
 
     std::vector<double> axis;
     VectorHelper::createAxisFromRebinParams(rbParams, axis, true);
 
-    std::vector<double> expectedAxis =
-        boost::assign::list_of(0)(2)(4)(5)(8)(10)(11)(12);
+    std::vector<double> expectedAxis = {0, 2, 4, 5, 8, 10, 11, 12};
     TS_ASSERT_EQUALS(axis, expectedAxis);
   }
 
   void test_CreateAxisFromRebinParams_FullBinsOnly_SingleStep() {
-    std::vector<double> rbParams = boost::assign::list_of(0)(2)(5);
+    std::vector<double> rbParams = {0, 2, 5};
 
     std::vector<double> axis;
     VectorHelper::createAxisFromRebinParams(rbParams, axis, true, true);
 
-    std::vector<double> expectedAxis = boost::assign::list_of(0)(2)(4);
+    std::vector<double> expectedAxis = {0, 2, 4};
     TS_ASSERT_EQUALS(axis, expectedAxis);
   }
 
   void test_CreateAxisFromRebinParams_FullBinsOnly_MultipleSteps() {
-    std::vector<double> rbParams =
-        boost::assign::list_of(0)(2)(5)(3)(10)(1)(12);
+    std::vector<double> rbParams = {0, 2, 5, 3, 10, 1, 12};
 
     std::vector<double> axis;
     VectorHelper::createAxisFromRebinParams(rbParams, axis, true, true);
 
-    std::vector<double> expectedAxis =
-        boost::assign::list_of(0)(2)(4)(7)(10)(11)(12);
+    std::vector<double> expectedAxis = {0, 2, 4, 7, 10, 11, 12};
     TS_ASSERT_EQUALS(axis, expectedAxis);
   }
 
@@ -117,7 +112,7 @@ public:
   }
 
   void test_ConvertToBinBoundary_Size1InputVector() {
-    std::vector<double> bin_centers = boost::assign::list_of(0.4);
+    std::vector<double> bin_centers = {0.4};
     std::vector<double> bin_edges;
     VectorHelper::convertToBinBoundary(bin_centers, bin_edges);
 
@@ -128,7 +123,7 @@ public:
   }
 
   void test_ConvertToBinBoundary_Size2InputVector() {
-    std::vector<double> bin_centers = boost::assign::list_of(0.5)(1.5);
+    std::vector<double> bin_centers = {0.5, 1.5};
     std::vector<double> bin_edges;
 
     VectorHelper::convertToBinBoundary(bin_centers, bin_edges);

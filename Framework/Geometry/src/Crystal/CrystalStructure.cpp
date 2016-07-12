@@ -42,25 +42,6 @@ CrystalStructure::CrystalStructure(const std::string &unitCellString,
       SpaceGroupFactory::Instance().createSpaceGroup(spaceGroupString));
 }
 
-/// Copy constructor
-CrystalStructure::CrystalStructure(const CrystalStructure &other) {
-  initializeScatterers();
-  setScatterers(other.getScatterers());
-  setCell(other.cell());
-  setSpaceGroup(other.spaceGroup());
-}
-
-/// Assignment operator
-CrystalStructure &CrystalStructure::operator=(const CrystalStructure &other) {
-  if (&other != this) {
-    setScatterers(other.getScatterers());
-    setCell(other.cell());
-    setSpaceGroup(other.spaceGroup());
-  }
-
-  return *this;
-}
-
 /// Returns the unit cell of the structure
 UnitCell CrystalStructure::cell() const { return m_cell; }
 
@@ -130,10 +111,9 @@ void CrystalStructure::setReflectionConditionFromSpaceGroup(
 
   std::vector<ReflectionCondition_sptr> reflectionConditions =
       getAllReflectionConditions();
-  for (auto it = reflectionConditions.begin(); it != reflectionConditions.end();
-       ++it) {
-    if ((*it)->getSymbol() == centering) {
-      m_centering = *it;
+  for (auto &reflectionCondition : reflectionConditions) {
+    if (reflectionCondition->getSymbol() == centering) {
+      m_centering = reflectionCondition;
       break;
     }
   }

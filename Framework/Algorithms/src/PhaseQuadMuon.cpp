@@ -2,10 +2,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/PhaseQuadMuon.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/PhysicalConstants.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspaceValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -19,16 +20,16 @@ DECLARE_ALGORITHM(PhaseQuadMuon)
  *
  */
 void PhaseQuadMuon::init() {
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace containing the spectra");
 
   declareProperty(
-      new API::WorkspaceProperty<API::ITableWorkspace>("PhaseTable", "",
-                                                       Direction::Input),
+      make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "PhaseTable", "", Direction::Input),
       "Name of the table containing the detector phases and asymmetries");
 
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
 }
@@ -89,7 +90,7 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
     result["PhaseTable"] = "PhaseTable must have one row per spectrum";
   }
 
-  // PhaseTable should have two columns: (detector, phase)
+  // PhaseTable should have three columns: (detector, asymmetry, phase)
   if (tabWS->columnCount() != 3) {
     result["PhaseTable"] = "PhaseTable must have three columns";
   }
@@ -122,9 +123,9 @@ PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
 
   for (size_t h = 0; h < ws->getNumberHistograms(); h++) {
 
-    MantidVec X = ws->getSpectrum(h)->readX();
-    MantidVec Y = ws->getSpectrum(h)->readY();
-    MantidVec E = ws->getSpectrum(h)->readE();
+    const auto &X = ws->getSpectrum(h).readX();
+    const auto &Y = ws->getSpectrum(h).readY();
+    const auto &E = ws->getSpectrum(h).readE();
 
     double s, sx, sy;
     s = sx = sy = 0;
@@ -178,7 +179,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
       maxAsym = phase->Double(h, 1);
     }
   }
-  if (!maxAsym) {
+  if (maxAsym == 0.0) {
     throw std::invalid_argument("Invalid detector asymmetries");
   }
 
@@ -239,7 +240,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     imagE[i] = sqrt(imagE[i]);
 
     // Regain exponential decay
-    double X = ws->getSpectrum(0)->readX()[i];
+    double X = ws->getSpectrum(0).readX()[i];
     double e = exp(-(X - X0) / muLife);
     realY[i] /= e;
     imagY[i] /= e;

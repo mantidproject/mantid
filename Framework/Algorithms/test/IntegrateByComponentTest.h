@@ -246,7 +246,7 @@ private:
 
     Mantid::Geometry::ParameterMap &pmap = ws2D->instrumentParameters();
     for (int i = 0; i < nSpectra; i++) {
-      ws2D->getSpectrum(i)->setDetectorID(i + 4);
+      ws2D->getSpectrum(i).setDetectorID(i + 4);
       if (mask && (i % 4 == 0)) {
         Mantid::Geometry::IDetector_const_sptr det = ws2D->getDetector(i);
         pmap.addBool(det.get(), "masked", true);

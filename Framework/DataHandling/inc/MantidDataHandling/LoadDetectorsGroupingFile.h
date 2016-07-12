@@ -50,31 +50,28 @@ namespace DataHandling {
 */
 class DLLExport LoadDetectorsGroupingFile : public API::Algorithm {
 public:
-  LoadDetectorsGroupingFile();
-  virtual ~LoadDetectorsGroupingFile();
-
   ///
-  virtual const std::string name() const {
+  const std::string name() const override {
     return "LoadDetectorsGroupingFile";
   };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load an XML or Map file, which contains definition of detectors "
            "grouping, to a GroupingWorkspace.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Grouping;Transforms\\Grouping";
   }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
   /// Initialize XML parser
   void initializeXMLParser(const std::string &filename);
   /// Parse XML
@@ -85,12 +82,12 @@ private:
   void setByComponents();
   /// Set workspace->group ID map by detectors (range)
   void setByDetectors();
-  /// Set workspace index/group ID by spectraum ID
-  void setBySpectrumIDs();
+  /// Set workspace index/group ID by spectrum Number
+  void setBySpectrumNos();
   /// Convert detector ID combination string to vector of detectors
   void parseDetectorIDs(std::string inputstring, std::vector<detid_t> &detids);
-  /// Convert spectrum IDs combintation string to vector of spectrum ids
-  void parseSpectrumIDs(std::string inputstring, std::vector<int> &specids);
+  /// Convert spectrum Nos combination string to vector of spectrum Nos
+  void parseSpectrumNos(std::string inputstring, std::vector<int> &specids);
   /// Get attribute value from an XML node
   static std::string getAttributeValueByName(Poco::XML::Node *pNode,
                                              std::string attributename,
@@ -108,9 +105,9 @@ private:
   Geometry::Instrument_const_sptr m_instrument;
 
   /// XML document loaded
-  Poco::XML::Document *m_pDoc;
+  Poco::XML::Document *m_pDoc{nullptr};
   /// Root element of the parsed XML
-  Poco::XML::Element *m_pRootElem;
+  Poco::XML::Element *m_pRootElem{nullptr};
 
   /// Data structures to store XML to Group/Detector conversion map
   std::map<int, std::vector<std::string>> m_groupComponentsMap;
@@ -121,7 +118,6 @@ private:
 class DLLExport LoadGroupXMLFile {
 public:
   LoadGroupXMLFile();
-  ~LoadGroupXMLFile();
 
   void loadXMLFile(std::string xmlfilename);
   void setDefaultStartingGroupID(int startgroupid) {

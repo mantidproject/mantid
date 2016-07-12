@@ -38,21 +38,13 @@ struct DLLExport SequenceTypeHandler
 
   /// Call to set a named property where the value is some container type
   void set(Kernel::IPropertyManager *alg, const std::string &name,
-           const boost::python::object &value) const;
+           const boost::python::object &value) const override;
 
   /// Call to create a name property where the value is some container type
-  Kernel::Property *create(const std::string &name,
-                           const boost::python::object &defaultValue,
-                           const boost::python::object &validator,
-                           const unsigned int direction) const;
-  //        /**
-  //         * Return the PyTypeObject of the DerivedType
-  //         * @returns A PyTypeObject for the given DerivedType
-  //         */
-  //        const PyTypeObject * pythonType() const
-  //        {
-  //          return &PyList_Type;
-  //        }
+  std::unique_ptr<Kernel::Property>
+  create(const std::string &name, const boost::python::object &defaultValue,
+         const boost::python::object &validator,
+         const unsigned int direction) const override;
 };
 }
 }

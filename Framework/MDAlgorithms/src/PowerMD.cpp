@@ -11,16 +11,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(PowerMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PowerMD::PowerMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PowerMD::~PowerMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PowerMD::name() const { return "PowerMD"; }
 

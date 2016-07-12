@@ -43,8 +43,6 @@ private:
   void RenderTopoDS(TopoDS_Shape *ObjSurf);
 
 public:
-  OCGeometryRenderer();  ///< Constructor
-  ~OCGeometryRenderer(); ///< Destructor
   void Render(TopoDS_Shape *ObjSurf);
   void Render(IObjComponent *ObjComp);
   void Initialize(TopoDS_Shape *ObjSurf);

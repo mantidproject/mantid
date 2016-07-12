@@ -7,14 +7,13 @@
 #include "vtkUnstructuredGrid.h"
 #include "MantidVatesAPI/ThresholdRange.h"
 
-namespace Mantid
-{
-  namespace VATES
-  {
+namespace Mantid {
+namespace VATES {
 
 /** 0D Factory. This type is responsible for rendering IMDWorkspaces with 0D.
 
- Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -34,32 +33,25 @@ namespace Mantid
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-    class DLLExport vtkMD0DFactory : public vtkDataSetFactory
-    {
-    public:
+class DLLExport vtkMD0DFactory : public vtkDataSetFactory {
+public:
+  /// Constructor
+  vtkMD0DFactory();
 
-      /// Constructor
-      vtkMD0DFactory();
+  /// Destructor
+  ~vtkMD0DFactory() override;
 
-      /// Destructor
-      virtual ~vtkMD0DFactory();
+  /// Factory Method.
+  vtkSmartPointer<vtkDataSet>
+  create(ProgressAction &progressUpdating) const override;
 
-      /// Factory Method.
-      virtual vtkSmartPointer<vtkDataSet>
-      create(ProgressAction &progressUpdating) const;
+  void initialize(Mantid::API::Workspace_sptr) override;
 
-      virtual void initialize(Mantid::API::Workspace_sptr);
+  std::string getFactoryTypeName() const override { return "vtkMD0DFactory"; }
 
-      virtual std::string getFactoryTypeName() const
-      {
-        return "vtkMD0DFactory";
-      }
-
-    protected:
-        virtual void validate() const;
-
-    };
-    
-  }
+protected:
+  void validate() const override;
+};
+}
 }
 #endif

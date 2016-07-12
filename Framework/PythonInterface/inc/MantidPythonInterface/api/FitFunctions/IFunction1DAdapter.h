@@ -60,13 +60,14 @@ public:
   /** @name Virtual methods */
   ///@{
   /// Base-class method
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
   /// Python-type signature
   boost::python::object function1D(const boost::python::object &xvals) const;
 
   /// Derivatives of function with respect to active parameters (C++ override)
   void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData);
+                       const size_t nData) override;
   ///@}
 
 private:

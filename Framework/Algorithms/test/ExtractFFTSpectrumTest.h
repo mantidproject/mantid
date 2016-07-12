@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/ExtractFFTSpectrum.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidAlgorithms/Rebin.h"
 

@@ -64,27 +64,8 @@ public:
   /** Generate a workspace for test
     */
   MatrixWorkspace_sptr generateTestWorkspace() {
-    vector<double> data;
-    data.push_back(12);
-    data.push_back(13);
-    data.push_back(9);
-    data.push_back(18);
-    data.push_back(7);
-    data.push_back(9);
-    data.push_back(14);
-    data.push_back(16);
-    data.push_back(10);
-    data.push_back(12);
-    data.push_back(7);
-    data.push_back(13);
-    data.push_back(14);
-    data.push_back(19);
-    data.push_back(10);
-    data.push_back(16);
-    data.push_back(12);
-    data.push_back(16);
-    data.push_back(19);
-    data.push_back(11);
+    vector<double> data{12, 13, 9,  18, 7,  9,  14, 16, 10, 12,
+                        7,  13, 14, 19, 10, 16, 12, 16, 19, 11};
 
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, data.size(),

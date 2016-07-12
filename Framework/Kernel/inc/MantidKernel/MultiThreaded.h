@@ -1,20 +1,10 @@
 #ifndef MANTID_KERNEL_MULTITHREADED_H_
 #define MANTID_KERNEL_MULTITHREADED_H_
 
-#include <Poco/Mutex.h>
+#include <mutex>
 
 namespace Mantid {
-namespace Kernel {
-
-//==============================================================================================
-// Typedefs for ThreadPool
-
-/// General mutex (typedef'd to Poco::FastMutex). Not recursive in general;
-/// don't assume it is!
-typedef Poco::FastMutex Mutex;
-typedef Poco::Mutex RecursiveMutex;
-
-} // namespace
+namespace Kernel {} // namespace
 } // namespace
 
 // The syntax used to define a pragma within a macro is different on windows and

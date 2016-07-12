@@ -22,10 +22,11 @@ public:
 
     // Make a property with its validator. Will be enabled when that other one
     // is NOT the default
-    EnabledWhenProperty *val =
-        new EnabledWhenProperty("MyIntProp", IS_NOT_DEFAULT);
+    auto val = [] {
+      return make_unique<EnabledWhenProperty>("MyIntProp", IS_NOT_DEFAULT);
+    };
     alg.declareProperty("MyValidatorProp", 456);
-    alg.setPropertySettings("MyValidatorProp", val);
+    alg.setPropertySettings("MyValidatorProp", val());
 
     Property *prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop);
@@ -40,9 +41,8 @@ public:
     TSM_ASSERT("Becomes enabled when another property has been changed",
                prop->getSettings()->isEnabled(&alg));
 
-    IPropertySettings *val2 = val->clone();
     alg.declareProperty("MySecondValidatorProp", 456);
-    alg.setPropertySettings("MySecondValidatorProp", val2);
+    alg.setPropertySettings("MySecondValidatorProp", val());
     prop = alg.getPointerToProperty("MySecondValidatorProp");
     TSM_ASSERT("Starts off enabled", prop->getSettings()->isEnabled(&alg));
     alg.setProperty("MyIntProp", 123);
@@ -54,9 +54,9 @@ public:
     alg.declareProperty("MyIntProp", 123);
     // Make a property with its validator. Will be enabled when that other one
     // is the default
-    EnabledWhenProperty *val = new EnabledWhenProperty("MyIntProp", IS_DEFAULT);
     alg.declareProperty("MyValidatorProp", 456);
-    alg.setPropertySettings("MyValidatorProp", val);
+    alg.setPropertySettings("MyValidatorProp", make_unique<EnabledWhenProperty>(
+                                                   "MyIntProp", IS_DEFAULT));
     Property *prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop);
     if (!prop)
@@ -70,10 +70,10 @@ public:
   void test_when_IS_EQUAL_TO() {
     PropertyManagerOwner alg;
     alg.declareProperty("MyIntProp", 123);
-    EnabledWhenProperty *val =
-        new EnabledWhenProperty("MyIntProp", IS_EQUAL_TO, "234");
     alg.declareProperty("MyValidatorProp", 456);
-    alg.setPropertySettings("MyValidatorProp", val);
+    alg.setPropertySettings(
+        "MyValidatorProp",
+        make_unique<EnabledWhenProperty>("MyIntProp", IS_EQUAL_TO, "234"));
     Property *prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop);
     if (!prop)
@@ -88,10 +88,10 @@ public:
   void test_when_IS_NOT_EQUAL_TO() {
     PropertyManagerOwner alg;
     alg.declareProperty("MyIntProp", 123);
-    EnabledWhenProperty *val =
-        new EnabledWhenProperty("MyIntProp", IS_NOT_EQUAL_TO, "234");
     alg.declareProperty("MyValidatorProp", 456);
-    alg.setPropertySettings("MyValidatorProp", val);
+    alg.setPropertySettings(
+        "MyValidatorProp",
+        make_unique<EnabledWhenProperty>("MyIntProp", IS_NOT_EQUAL_TO, "234"));
     Property *prop = alg.getPointerToProperty("MyValidatorProp");
     TS_ASSERT(prop);
     if (!prop)

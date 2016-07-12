@@ -37,18 +37,15 @@ namespace MDAlgorithms {
 */
 class DLLExport ImportMDEventWorkspace : public API::Algorithm {
 public:
-  ImportMDEventWorkspace();
-  virtual ~ImportMDEventWorkspace();
-
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Reads an ASCII file containing MDEvent data and constructs an "
            "MDEventWorkspace.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
   /// Flag used to indicate the dimension block in the file
   static const std::string DimensionBlockFlag();
@@ -69,11 +66,11 @@ private:
   /// Possible Event Types
   enum MDEventType { Lean, Full, NotSpecified };
   /// Flag indicating whether full md events for lean events will be generated.
-  bool m_IsFullDataObjects;
+  bool m_IsFullDataObjects = false;
   /// Actual number of dimensions specified
-  size_t m_nDimensions;
+  size_t m_nDimensions = 0;
   /// Actual number of md events provided.
-  size_t m_nDataObjects;
+  size_t m_nDataObjects = 0;
   /// call back to add event data
   template <typename MDE, size_t nd>
   void addEventsData(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
@@ -82,8 +79,8 @@ private:
   ///  Check that the a flag exists in the file.
   bool fileDoesContain(const std::string &flag);
 
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace MDAlgorithms

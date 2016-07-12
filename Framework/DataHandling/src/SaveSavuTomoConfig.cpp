@@ -24,13 +24,14 @@ SaveSavuTomoConfig::SaveSavuTomoConfig()
 void SaveSavuTomoConfig::init() {
   // Get a list of table workspaces which contain the plugin information
   declareProperty(
-      new ArrayProperty<std::string>(
+      Kernel::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "The names of the table workspaces containing plugin information.");
 
-  declareProperty(new API::FileProperty("Filename", "", FileProperty::Save,
-                                        std::vector<std::string>(1, ".nxs")),
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", FileProperty::Save,
+                      std::vector<std::string>(1, ".nxs")),
                   "The name of the tomographic config file to write, as a full "
                   "or relative path. This will overwrite existing files.");
 }
@@ -52,7 +53,7 @@ void SaveSavuTomoConfig::exec() {
   } catch (std::exception &e) {
     g_log.error()
         << "Failed to save savu tomography reconstruction parameterization "
-           "file, error description: " << e.what() << std::endl;
+           "file, error description: " << e.what() << '\n';
     return;
   }
 
@@ -92,15 +93,16 @@ bool SaveSavuTomoConfig::tableLooksGenuine(const ITableWorkspace_sptr &tws) {
 std::vector<ITableWorkspace_sptr>
 SaveSavuTomoConfig::checkTables(const std::vector<std::string> &workspaces) {
   std::vector<ITableWorkspace_sptr> wss;
-  for (auto it = workspaces.begin(); it != workspaces.end(); ++it) {
-    if (AnalysisDataService::Instance().doesExist(*it)) {
+  for (const auto &workspace : workspaces) {
+    if (AnalysisDataService::Instance().doesExist(workspace)) {
       ITableWorkspace_sptr table =
-          AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(*it);
+          AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+              workspace);
       // Check it's valid. Very permissive check for the time being
       if (table && tableLooksGenuine(table)) {
         wss.push_back(table);
       } else {
-        throw std::runtime_error("Invalid workspace provided: " + *it +
+        throw std::runtime_error("Invalid workspace provided: " + workspace +
                                  ". This algorithm requires a table "
                                  "workspace with correct savu plugin/ "
                                  "pipeline process information.");
@@ -109,7 +111,7 @@ SaveSavuTomoConfig::checkTables(const std::vector<std::string> &workspaces) {
       throw std::runtime_error(
           "One or more specified table workspaces don't exist. I could not "
           "find this one: " +
-          *it);
+          workspace);
     }
   }
   return wss;
@@ -133,18 +135,17 @@ void SaveSavuTomoConfig::saveFile(
     const std::string ext = ".nxs";
     g_log.notice() << "Adding extension '" << ext
                    << "' to the output "
-                      "file name given (it is a NeXus file). " << std::endl;
+                      "file name given (it is a NeXus file). \n";
     fileName = fileName + ".nxs";
   }
 
   // If file exists, delete it.
   Poco::File f(fileName);
   if (f.exists()) {
-    g_log.notice() << "Overwriting existing file: '" << fileName << "'"
-                   << std::endl;
+    g_log.notice() << "Overwriting existing file: '" << fileName << "'\n";
     f.remove();
   } else {
-    g_log.notice() << "Creating file: '" << fileName << ";" << std::endl;
+    g_log.notice() << "Creating file: '" << fileName << ";\n";
   }
 
   // Create the file handle
@@ -164,11 +165,10 @@ void SaveSavuTomoConfig::saveFile(
 
   // Iterate through all plugin entries (number sub groups 0....n-1)
   size_t procCount = 0;
-  for (size_t i = 0; i < wss.size(); ++i) {
+  for (const auto &w : wss) {
     // Concatenate table contents, putting pipeline processing steps in the same
     // sequence
     // as they come in the seq of table workspaces
-    ITableWorkspace_sptr w = wss[i];
     for (size_t ti = 0; ti < w->rowCount(); ++ti) {
       // Column info order is [ID / Params {as json string} / name {description}
       // /
@@ -180,8 +180,7 @@ void SaveSavuTomoConfig::saveFile(
       // std::string cite = w->cell<std::string>(ti, 3);
 
       // but in the file it goes as: data (params), id, name
-      nxFile.makeGroup(boost::lexical_cast<std::string>(procCount++), "NXnote",
-                       true);
+      nxFile.makeGroup(std::to_string(procCount++), "NXnote", true);
       nxFile.writeData("data", params);
       nxFile.writeData("id", id);
       nxFile.writeData("name", name);

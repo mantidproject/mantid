@@ -13,8 +13,8 @@ boost::python::list createSymOps(SymmetryOperationFactoryImpl &self,
   std::vector<SymmetryOperation> symOps = self.createSymOps(identifiers);
 
   boost::python::list pythonOperations;
-  for (auto it = symOps.begin(); it != symOps.end(); ++it) {
-    pythonOperations.append(*it);
+  for (auto &symOp : symOps) {
+    pythonOperations.append(symOp);
   }
 
   return pythonOperations;

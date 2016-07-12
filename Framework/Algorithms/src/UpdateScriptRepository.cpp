@@ -9,16 +9,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(UpdateScriptRepository)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-UpdateScriptRepository::UpdateScriptRepository() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-UpdateScriptRepository::~UpdateScriptRepository() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string UpdateScriptRepository::name() const {
   return "UpdateScriptRepository";
@@ -54,16 +44,16 @@ void UpdateScriptRepository::exec() {
     return; // it means that the ScriptRepository was not installed.
 
   std::vector<std::string> f_list = repo_ptr->check4Update();
-  if (f_list.size() > 0) {
+  if (!f_list.empty()) {
     std::stringstream info;
     info << "Information about ScriptRepository:\n"
          << " A more recent version of the following files was installed:\n";
-    for (unsigned short i = 0; i < f_list.size(); i++) {
-      info << "  * " << f_list[i] << "\n";
+    for (auto &file : f_list) {
+      info << "  * " << file << "\n";
     }
     info << "Please check these files before using them. "
          << "Note: These files were configured for AutoUpdate.";
-    g_log.warning() << info.str() << std::endl;
+    g_log.warning() << info.str() << '\n';
   }
 }
 

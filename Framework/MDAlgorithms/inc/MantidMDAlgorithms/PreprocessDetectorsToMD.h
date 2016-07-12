@@ -42,9 +42,9 @@ public:
   PreprocessDetectorsToMD();
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "PreprocessDetectorsToMD"; };
+  const std::string name() const override { return "PreprocessDetectorsToMD"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Its a helper algorithm, used to make common part of transformation "
            "from real to reciprocal space. "
            "It is used by :ref:`algm-ConvertToMD` and "
@@ -55,13 +55,15 @@ public:
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "MDAlgorithms\\Utility"; }
+  const std::string category() const override {
+    return "MDAlgorithms\\Utility";
+  }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   /// the variable specifies if one needs to calculate efixed for detectors
   /// (make sense for indirect instruments)
   bool m_getEFixed;

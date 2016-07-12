@@ -7,6 +7,7 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <Poco/File.h>

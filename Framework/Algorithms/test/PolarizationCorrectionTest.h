@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/PolarizationCorrection.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include <boost/make_shared.hpp>
@@ -166,8 +167,7 @@ public:
                       groupWS->size());
 
     for (size_t i = 0; i < outWS->size(); ++i) {
-      std::cout << "Checking equivalent workspaces at index : " << i
-                << std::endl;
+      std::cout << "Checking equivalent workspaces at index : " << i << '\n';
       auto checkAlg =
           AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
       checkAlg->initialize();
@@ -202,8 +202,7 @@ public:
                       groupWS->size());
 
     for (size_t i = 0; i < outWS->size(); ++i) {
-      std::cout << "Checking equivalent workspaces at index : " << i
-                << std::endl;
+      std::cout << "Checking equivalent workspaces at index : " << i << '\n';
       auto checkAlg =
           AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
       checkAlg->initialize();

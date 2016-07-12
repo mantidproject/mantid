@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/ConvertAxesToRealSpace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -15,16 +17,6 @@ using namespace Mantid::DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertAxesToRealSpace)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertAxesToRealSpace::ConvertAxesToRealSpace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertAxesToRealSpace::~ConvertAxesToRealSpace() {}
 
 //----------------------------------------------------------------------------------------------
 
@@ -51,11 +43,11 @@ const std::string ConvertAxesToRealSpace::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ConvertAxesToRealSpace::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace", "",
-                                                     Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace2D>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
   std::vector<std::string> propOptions;
@@ -75,10 +67,11 @@ void ConvertAxesToRealSpace::init() {
                   boost::make_shared<StringListValidator>(propOptions),
                   "What will be the horizontal axis?\n");
 
-  declareProperty(new Kernel::PropertyWithValue<int>("NumberVerticalBins", 100),
-                  "The number of bins along the vertical axis.");
   declareProperty(
-      new Kernel::PropertyWithValue<int>("NumberHorizontalBins", 100),
+      make_unique<Kernel::PropertyWithValue<int>>("NumberVerticalBins", 100),
+      "The number of bins along the vertical axis.");
+  declareProperty(
+      make_unique<Kernel::PropertyWithValue<int>>("NumberHorizontalBins", 100),
       "The number of bins along the horizontal axis.");
 }
 
@@ -149,9 +142,9 @@ void ConvertAxesToRealSpace::exec() {
         } else if (axisSelection == "phi") {
           axisValue = phi;
         } else if (axisSelection == "2theta") {
-          axisValue = inputWs->detectorTwoTheta(det);
+          axisValue = inputWs->detectorTwoTheta(*det);
         } else if (axisSelection == "signed2theta") {
-          axisValue = inputWs->detectorSignedTwoTheta(det);
+          axisValue = inputWs->detectorSignedTwoTheta(*det);
         }
 
         if (axisIndex == 0) {
@@ -168,7 +161,7 @@ void ConvertAxesToRealSpace::exec() {
       }
     } catch (Exception::NotFoundError) {
       g_log.debug() << "Could not find detector for workspace index " << i
-                    << std::endl;
+                    << '\n';
       failedCount++;
       // flag this is the datavector
       dataVector[i].horizontalValue = std::numeric_limits<double>::min();
@@ -183,14 +176,12 @@ void ConvertAxesToRealSpace::exec() {
   }
 
   g_log.warning() << "Could not find detector for " << failedCount
-                  << " spectra, see the debug log for more details."
-                  << std::endl;
+                  << " spectra, see the debug log for more details.\n";
 
   // set up the axes on the output workspace
-  MantidVecPtr x, y;
-  MantidVec &xRef = x.access();
-  xRef.resize(axisVector[0].bins);
-  fillAxisValues(xRef, axisVector[0], false);
+  HistogramData::Points x(axisVector[0].bins);
+  MantidVecPtr y;
+  fillAxisValues(x.mutableRawData(), axisVector[0], false);
 
   outputWs->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
   Unit_sptr xUnit = outputWs->getAxis(0)->unit();
@@ -220,7 +211,7 @@ void ConvertAxesToRealSpace::exec() {
       dataVector[i].verticalIndex = -1;
     } else {
       int xIndex = static_cast<int>(std::distance(
-          x->begin(), std::lower_bound(x->begin(), x->end(),
+          x.cbegin(), std::lower_bound(x.cbegin(), x.cend(),
                                        dataVector[i].horizontalValue)));
       if (xIndex > 0)
         --xIndex;
@@ -240,7 +231,7 @@ void ConvertAxesToRealSpace::exec() {
   int nOutputHist = static_cast<int>(outputWs->getNumberHistograms());
   PARALLEL_FOR1(outputWs)
   for (int i = 0; i < nOutputHist; ++i) {
-    outputWs->setX(i, x);
+    outputWs->setPoints(i, x);
   }
 
   // insert the data into the new workspace
@@ -252,7 +243,7 @@ void ConvertAxesToRealSpace::exec() {
     // using -1 as a flag for could not find detector
     if ((xIndex == -1) || (yIndex == -1)) {
       // do nothing the detector could not be found
-      g_log.warning() << "here " << i << std::endl;
+      g_log.warning() << "here " << i << '\n';
     } else {
       // update the data
       MantidVec &yVec = outputWs->dataY(yIndex);
@@ -269,7 +260,7 @@ void ConvertAxesToRealSpace::exec() {
   for (int i = 0; i < nOutputHist; ++i) {
     MantidVec &errorVec = outputWs->dataE(i);
     std::transform(errorVec.begin(), errorVec.end(), errorVec.begin(),
-                   (double (*)(double))sqrt);
+                   static_cast<double (*)(double)>(sqrt));
     progress.report("Completing Error Calculation");
   }
 
@@ -309,7 +300,7 @@ void ConvertAxesToRealSpace::fillUnitMap(
     std::vector<std::string> &orderedVector,
     std::map<std::string, std::string> &unitMap, const std::string &caption,
     const std::string &unit) {
-  unitMap.insert(std::make_pair(caption, unit));
+  unitMap.emplace(caption, unit);
   orderedVector.push_back(caption);
 }
 

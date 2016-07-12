@@ -1,8 +1,5 @@
 #include "MantidMDAlgorithms/MergeMD.h"
-#include "MantidKernel/Strings.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidKernel/CPUTimer.h"
@@ -18,16 +15,6 @@ namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MergeMD)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MergeMD::MergeMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MergeMD::~MergeMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -48,12 +35,12 @@ void MergeMD::init() {
   // declare arbitrary number of input m_workspaces as a list of strings at the
   // moment
   declareProperty(
-      new ArrayProperty<std::string>(
+      Kernel::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "The names of the input MDWorkspaces as a comma-separated list");
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDWorkspace.");
 
@@ -91,8 +78,7 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
   std::vector<coord_t> dimMax(numDims, -1e30f);
 
   // Validate each workspace
-  for (size_t i = 0; i < m_workspaces.size(); i++) {
-    IMDEventWorkspace_const_sptr ws = m_workspaces[i];
+  for (auto &ws : m_workspaces) {
     if (ws->getNumDims() != numDims)
       throw std::invalid_argument(
           "Workspace " + ws->name() +
@@ -203,7 +189,7 @@ void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     for (int i = 0; i < numBoxes; i++) {
       PARALLEL_START_INTERUPT_REGION
       MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
-      if (box) {
+      if (box && !box->getIsMasked()) {
         // Copy the events from WS2 and add them into WS1
         const std::vector<MDE> &events = box->getConstEvents();
         // Add events, with bounds checking
@@ -218,7 +204,7 @@ void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     PARALLEL_CHECK_INTERUPT_REGION
 
     // Progress * prog2 = new Progress(this, 0.4, 0.9, 100);
-    Progress *prog2 = NULL;
+    Progress *prog2 = nullptr;
     ThreadScheduler *ts = new ThreadSchedulerFIFO();
     ThreadPool tp(ts, 0, prog2);
     ws1->splitAllIfNeeded(ts);
@@ -230,7 +216,7 @@ void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     if (ws1->getNPoints() != initial_numEvents)
       ws1->setFileNeedsUpdating(true);
     //
-    // std::cout << tim << " to add workspace " << ws2->name() << std::endl;
+    // std::cout << tim << " to add workspace " << ws2->name() << '\n';
 }
 
 //----------------------------------------------------------------------------------------------
@@ -243,16 +229,15 @@ void MergeMD::exec() {
 
   // This will hold the inputs, with the groups separated off
   std::vector<std::string> inputs;
-  for (size_t i = 0; i < inputs_orig.size(); i++) {
+  for (const auto &input : inputs_orig) {
     WorkspaceGroup_sptr wsgroup =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            inputs_orig[i]);
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(input);
     if (wsgroup) { // Workspace group
       std::vector<std::string> group = wsgroup->getNames();
       inputs.insert(inputs.end(), group.begin(), group.end());
     } else {
       // Single workspace
-      inputs.push_back(inputs_orig[i]);
+      inputs.push_back(input);
     }
   }
 
@@ -268,7 +253,7 @@ void MergeMD::exec() {
   double progStep = 1.0 / double(m_workspaces.size());
   for (size_t i = 0; i < m_workspaces.size(); i++) {
     g_log.information() << "Adding workspace " << m_workspaces[i]->name()
-                        << std::endl;
+                        << '\n';
     progress(double(i) * progStep, m_workspaces[i]->name());
     CALL_MDEVENT_FUNCTION(doPlus, m_workspaces[i]);
   }
@@ -278,7 +263,7 @@ void MergeMD::exec() {
 
   this->setProperty("OutputWorkspace", out);
 
-  g_log.debug() << tim << " to merge all workspaces." << std::endl;
+  g_log.debug() << tim << " to merge all workspaces.\n";
 }
 
 } // namespace Mantid

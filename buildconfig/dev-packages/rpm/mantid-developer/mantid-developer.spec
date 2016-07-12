@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        1.14
+Version:        1.16
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -8,11 +8,15 @@ License:        GPL
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-%{?fc20:Requires: rpmfusion-nonfree-release}
+%{?fedora:Requires: rpmfusion-nonfree-release}
 Requires: clang
 Requires: cmake-gui >= 2.8.12
+%{?rhel:Requires: epel-release}
+%if 0%{?el6}
+Requires: boost157-devel
+%else
 Requires: boost-devel
-%{?el6:Requires: epel-release}
+%endif
 Requires: doxygen
 Requires: gperftools-devel
 Requires: gperftools-libs
@@ -21,6 +25,7 @@ Requires: git-all
 Requires: gsl-devel
 Requires: hdf-devel
 Requires: hdf5-devel
+Requires: h5py >= 2.3.1
 Requires: jsoncpp-devel >= 0.7.0
 Requires: muParser-devel
 Requires: mxml-devel
@@ -34,6 +39,8 @@ Requires: python-devel
 Requires: python-ipython >= 1.1
 %{?el6:Conflicts: python-ipython >= 2.0}
 Requires: python-matplotlib
+%{?fedora:Requires: python2-matplotlib-qt4}
+%{?rhel:Requires: python-matplotlib-qt4}
 Requires: python-pip
 Requires: python-sphinx
 Requires: qscintilla-devel
@@ -90,6 +97,12 @@ required for Mantid development.
 %files
 
 %changelog
+* Wed May 18 2016 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Require h5py >= 2.3.1
+
+* Tue May 03 2016 Pete Peterson <petersonpf@ornl.gov>
+- Require python-matplotlib-qt4 and h5py
+
 * Mon Nov 30 2015 Steven Hahn <hahnse@ornl.gov>
 - Require jsoncpp-devel >= 0.7.0
 

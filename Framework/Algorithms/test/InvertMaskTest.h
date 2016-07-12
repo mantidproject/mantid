@@ -36,7 +36,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("OriginalMask", ws1);
 
     std::cout << "Input MaskWorkspace Size = " << ws1->getNumberHistograms()
-              << std::endl;
+              << '\n';
 
     ws1->setValue(1, 0);
     ws1->setValue(3, 1);
@@ -67,7 +67,7 @@ public:
 
     // 4. Check output
     for (size_t ih = 0; ih < ws4->getNumberHistograms(); ih++) {
-      std::set<detid_t> tempdetids = ws4->getDetectorIDs(ih);
+      auto tempdetids = ws4->getDetectorIDs(ih);
       detid_t tempdetid = *(tempdetids.begin());
       TS_ASSERT_EQUALS(tempdetids.size(), 1);
       TS_ASSERT_DELTA(ws4->getValue(tempdetid), ws1->getValue(tempdetid), 1);

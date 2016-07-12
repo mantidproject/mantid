@@ -9,6 +9,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/SaveNexus.h"

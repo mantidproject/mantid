@@ -36,7 +36,8 @@ namespace API {
 */
 class DLLExport IMaskWorkspace {
 public:
-  IMaskWorkspace() {}
+  IMaskWorkspace() = default;
+  IMaskWorkspace &operator=(const IMaskWorkspace &) = delete;
   /// Return the workspace typeID
   virtual const std::string id() const { return "IMaskWorkspace"; }
   /// Total number of masked pixels
@@ -58,8 +59,7 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IMaskWorkspace(const IMaskWorkspace &other) { (void)other; }
-  /// Protected copy assignment operator. Assignment not implemented.
-  IMaskWorkspace &operator=(const IMaskWorkspace &other);
+
   /// returns a clone of the workspace as the interface
   virtual IMaskWorkspace *doInterfaceClone() const = 0;
 };

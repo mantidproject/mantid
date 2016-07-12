@@ -3,8 +3,13 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SolidAngle.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IDetector.h"
 
 #include <cfloat>
 
@@ -17,15 +22,9 @@ DECLARE_ALGORITHM(SolidAngle)
 using namespace Kernel;
 using namespace API;
 
-/// Default constructor
-SolidAngle::SolidAngle() : Algorithm() {}
-
-/// Destructor
-SolidAngle::~SolidAngle() {}
-
 /// Initialisation method
 void SolidAngle::init() {
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "This workspace is used to identify the instrument to use "
@@ -35,7 +34,7 @@ void SolidAngle::init() {
                   "not provided one solid angle will be created for each "
                   "spectra in the input\n"
                   "workspace");
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace to be created as the output of "
                   "the algorithm.  A workspace of this name will be created "
@@ -78,7 +77,7 @@ void SolidAngle::exec() {
   API::MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(
       inputWS, m_MaxSpec - m_MinSpec + 1, 2, 1);
   // The result of this will be a distribution
-  outputWS->isDistribution(true);
+  outputWS->setDistribution(true);
   outputWS->setYUnit("");
   outputWS->setYUnitLabel("Steradian");
   setProperty("OutputWorkspace", outputWS);
@@ -95,7 +94,7 @@ void SolidAngle::exec() {
         "Sample location not found, aborting algorithm SoildAngle");
   }
   Kernel::V3D samplePos = sample->getPos();
-  g_log.debug() << "Sample position is " << samplePos << std::endl;
+  g_log.debug() << "Sample position is " << samplePos << '\n';
 
   int loopIterations = m_MaxSpec - m_MinSpec;
   int failCount = 0;
@@ -108,7 +107,7 @@ void SolidAngle::exec() {
     int i = j + m_MinSpec;
     try {
       // Copy over the spectrum number & detector IDs
-      outputWS->getSpectrum(j)->copyInfoFrom(*inputWS->getSpectrum(i));
+      outputWS->getSpectrum(j).copyInfoFrom(inputWS->getSpectrum(i));
       // Now get the detector to which this relates
       Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
       // Solid angle should be zero if detector is masked ('dead')
@@ -133,7 +132,7 @@ void SolidAngle::exec() {
 
   if (failCount != 0) {
     g_log.information() << "Unable to calculate solid angle for " << failCount
-                        << " spectra. Zeroing spectrum." << std::endl;
+                        << " spectra. Zeroing spectrum.\n";
   }
 }
 

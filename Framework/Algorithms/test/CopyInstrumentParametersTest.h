@@ -79,7 +79,7 @@ public:
     // moved in the output workspace
     IDetector_const_sptr deto = ws2->getDetector(0);
     V3D newPos = deto->getPos();
-    TS_ASSERT_DELTA(newPos.X(), 5.0, 0.0001);
+    TS_ASSERT_DELTA(newPos.Z(), 5.0, 0.0001);
 
     // Execute Algorithm
     TS_ASSERT_THROWS_NOTHING(copyInstParam.execute());
@@ -103,7 +103,7 @@ public:
     TS_ASSERT_DELTA(newPos2.Y(), 0.1, 0.0001);
     TS_ASSERT_DELTA(newPos2.Z(), 0.7, 0.0001);
     auto instr2 = ws2->getInstrument();
-    std::set<std::string> param_names = instr2->getParameterNames();
+    auto param_names = instr2->getParameterNames();
     TS_ASSERT(param_names.find("Ei") != param_names.end());
     TS_ASSERT(param_names.find("some_param") != param_names.end());
 
@@ -164,7 +164,7 @@ public:
     TS_ASSERT(copyInstParam.isInstrumentDifferent());
 
     auto instr2 = ws2->getInstrument();
-    std::set<std::string> param_names = instr2->getParameterNames();
+    auto param_names = instr2->getParameterNames();
     TS_ASSERT(param_names.find("Ei") != param_names.end());
     TS_ASSERT(param_names.find("some_param") != param_names.end());
     TS_ASSERT(param_names.find("T") == param_names.end());
@@ -187,9 +187,9 @@ public:
     int id2 = deto2->getID();
     V3D newPos2 = deto2->getPos();
     TS_ASSERT_EQUALS(id2, 2);
-    TS_ASSERT_DELTA(newPos2.X(), -9.0, 0.0001);
+    TS_ASSERT_DELTA(newPos2.X(), 0.0, 0.0001);
     TS_ASSERT_DELTA(newPos2.Y(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(newPos2.Z(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(newPos2.Z(), -9.0, 0.0001);
 
     dataStore.remove(wsName1);
     dataStore.remove(wsName2);
@@ -279,10 +279,9 @@ public:
         dataStore.retrieveWS<API::MatrixWorkspace>(m_TargetWSName);
     auto instr2 = ws2->getInstrument();
 
-    std::set<std::string> param_names = instr2->getParameterNames();
+    auto param_names = instr2->getParameterNames();
 
-    for (auto it = param_names.begin(); it != param_names.end(); it++) {
-      auto name = *it;
+    for (auto const &name : param_names) {
       double num = boost::lexical_cast<double>(name.substr(6, name.size() - 6));
       double val = instr2->getNumberParameter(name)[0];
       TS_ASSERT_DELTA(num * 10, val, 1.e-8);

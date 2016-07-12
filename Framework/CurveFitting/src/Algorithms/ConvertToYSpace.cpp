@@ -1,11 +1,16 @@
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -65,7 +70,7 @@ DetectorParams ConvertToYSpace::getDetectorParameters(
   } catch (Kernel::Exception::NotFoundError &) {
     throw std::invalid_argument("ConvertToYSpace - Workspace has no detector "
                                 "attached to histogram at index " +
-                                boost::lexical_cast<std::string>(index));
+                                std::to_string(index));
   }
 
   DetectorParams detpar;
@@ -73,7 +78,7 @@ DetectorParams ConvertToYSpace::getDetectorParameters(
   detpar.l1 = sample->getDistance(*source);
   detpar.l2 = det->getDistance(*sample);
   detpar.pos = det->getPos();
-  detpar.theta = ws->detectorTwoTheta(det);
+  detpar.theta = ws->detectorTwoTheta(*det);
   detpar.t0 = ConvertToYSpace::getComponentParameter(det, pmap, "t0") *
               1e-6; // Convert to seconds
   detpar.efixed = ConvertToYSpace::getComponentParameter(det, pmap, "efixed");
@@ -101,8 +106,8 @@ double ConvertToYSpace::getComponentParameter(
           boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(comp)) {
     const auto dets = group->getDetectors();
     double avg(0.0);
-    for (auto it = dets.begin(); it != dets.end(); ++it) {
-      auto param = pmap.getRecursive((*it)->getComponentID(), name);
+    for (const auto &det : dets) {
+      auto param = pmap.getRecursive(det->getComponentID(), name);
       if (param)
         avg += param->value<double>();
       else
@@ -163,8 +168,8 @@ void ConvertToYSpace::init() {
   wsValidator->add<HistogramValidator>(false); // point data
   wsValidator->add<InstrumentValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "The input workspace in Time of Flight");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
@@ -173,12 +178,13 @@ void ConvertToYSpace::init() {
   declareProperty("Mass", -1.0, mustBePositive,
                   "The mass defining the recoil peak in AMU");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The output workspace in y-Space");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The output workspace in y-Space");
 
-  declareProperty(new WorkspaceProperty<>("QWorkspace", "", Direction::Output,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>("QWorkspace", "",
+                                                   Direction::Output,
+                                                   PropertyMode::Optional),
                   "The output workspace in q-Space");
 }
 
@@ -199,8 +205,7 @@ void ConvertToYSpace::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     if (!convert(i)) {
-      g_log.warning("No detector defined for index=" +
-                    boost::lexical_cast<std::string>(i) +
+      g_log.warning("No detector defined for index=" + std::to_string(i) +
                     ". Zeroing spectrum.");
       m_outputWS->maskWorkspaceIndex(i);
       if (m_qOutputWS)

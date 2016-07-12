@@ -16,10 +16,7 @@ public:
     TS_ASSERT_EQUALS(v1.allowedValues().size(), 0);
 
     // one with a vector of extensions
-    std::vector<std::string> vec;
-    vec.push_back("raw");
-    vec.push_back("RAW");
-    FileValidator v2(vec);
+    FileValidator v2({"raw", "RAW"});
 
     // File extensions are converted to lowercase so should have one unique
     // extension
@@ -85,16 +82,14 @@ public:
 
   void testFailsOnNonexistentFile() {
     std::string NoFile("myJunkFile_hgfvj.cpp");
-    std::vector<std::string> vec;
-    vec.push_back("cpp");
+    std::vector<std::string> vec{"cpp"};
     FileValidator v(vec);
     TS_ASSERT_EQUALS(v.isValid(NoFile), "File \"" + NoFile + "\" not found");
   }
 
   void testPassesOnNonexistentFile() {
     std::string NoFile("myJunkFile_hgfvj.cpp");
-    std::vector<std::string> vec;
-    vec.push_back("cpp");
+    std::vector<std::string> vec{"cpp"};
     FileValidator v(vec, false);
     TS_ASSERT_EQUALS(v.isValid(NoFile), "");
   }

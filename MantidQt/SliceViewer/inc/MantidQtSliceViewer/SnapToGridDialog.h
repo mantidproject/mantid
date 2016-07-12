@@ -11,13 +11,12 @@
  *
  * For use with the SliceViewer.
  */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER SnapToGridDialog : public QDialog
-{
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER SnapToGridDialog : public QDialog {
   Q_OBJECT
 
 public:
   SnapToGridDialog(QWidget *parent = 0);
-  ~SnapToGridDialog();
+  ~SnapToGridDialog() override;
 
   void setSnap(double x, double y);
   double getSnapX();

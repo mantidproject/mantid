@@ -238,7 +238,7 @@ void InstrumentInfo::fillLiveData(const Poco::XML::Element *elem) {
           << m_name << "\n";
     }
     // Check for a colon, which would suggest that a host & port are present
-    else if (m_liveDataAddress.find(":") == std::string::npos) {
+    else if (m_liveDataAddress.find(':') == std::string::npos) {
       g_log.warning() << "Live data address for " << m_name
                       << " appears not to have both host and port specified.\n";
     }

@@ -9,11 +9,6 @@ namespace Mantid {
 namespace API {
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MultipleExperimentInfos::MultipleExperimentInfos() {}
-
-//----------------------------------------------------------------------------------------------
 /** Copy constructor
  *
  * @param other :: other workspace to copy    */
@@ -21,11 +16,6 @@ MultipleExperimentInfos::MultipleExperimentInfos(
     const MultipleExperimentInfos &other) {
   this->copyExperimentInfos(other);
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MultipleExperimentInfos::~MultipleExperimentInfos() {}
 
 //-----------------------------------------------------------------------------------------------
 /** Get the ExperimentInfo for the given run Index
@@ -97,9 +87,10 @@ uint16_t MultipleExperimentInfos::getNumExperimentInfo() const {
 void MultipleExperimentInfos::copyExperimentInfos(
     const MultipleExperimentInfos &other) {
   m_expInfos.clear();
+  m_expInfos.reserve(other.m_expInfos.size());
   // Do a deep copy of ExperimentInfo's
-  for (size_t i = 0; i < other.m_expInfos.size(); i++) {
-    ExperimentInfo_sptr copy(new ExperimentInfo(*other.m_expInfos[i]));
+  for (const auto &expInfo : other.m_expInfos) {
+    auto copy(boost::make_shared<ExperimentInfo>(*expInfo));
     m_expInfos.push_back(copy);
   }
 }

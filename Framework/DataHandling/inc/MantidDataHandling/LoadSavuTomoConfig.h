@@ -39,31 +39,27 @@ namespace DataHandling {
 */
 class DLLExport LoadSavuTomoConfig : public API::Algorithm {
 public:
-  LoadSavuTomoConfig();
-
-  virtual ~LoadSavuTomoConfig();
-
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadSavuTomoConfig"; }
+  const std::string name() const override { return "LoadSavuTomoConfig"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load configuration parameters from a tomographic "
            "reconstruction parameter file.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
-    return "DataHandling\\Tomography";
+  const std::string category() const override {
+    return "DataHandling\\Imaging";
   }
 
 private:
   /// Implement abstract Algorithm methods
-  void init();
+  void init() override;
   /// Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
 
   // do the real loading
   Mantid::API::ITableWorkspace_sptr loadFile(std::string &fname,

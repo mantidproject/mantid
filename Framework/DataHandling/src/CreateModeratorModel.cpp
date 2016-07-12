@@ -1,6 +1,7 @@
 #include "MantidDataHandling/CreateModeratorModel.h"
 
 #include "MantidAPI/IkedaCarpenterModerator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -35,7 +36,8 @@ const std::string CreateModeratorModel::category() const {
 /** Initialize the algorithm's properties.
  */
 void CreateModeratorModel::init() {
-  declareProperty(new WorkspaceProperty<>("Workspace", "", Direction::InOut),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("Workspace", "",
+                                                           Direction::InOut),
                   "An input workspace.");
 
   std::vector<std::string> keys(1, "IkedaCarpenterModerator");

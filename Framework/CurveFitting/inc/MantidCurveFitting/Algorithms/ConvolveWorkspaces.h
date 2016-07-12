@@ -43,24 +43,24 @@ namespace Algorithms {
 class DLLExport ConvolveWorkspaces : public API::Algorithm {
 public:
   ConvolveWorkspaces();
-  virtual ~ConvolveWorkspaces();
+  ~ConvolveWorkspaces() override;
   /// Algorithm's name
-  virtual const std::string name() const { return "ConvolveWorkspaces"; }
+  const std::string name() const override { return "ConvolveWorkspaces"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Convolution of two workspaces.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Utility\\Workspaces"; }
+  const std::string category() const override { return "Utility\\Workspaces"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
   void convolve(MantidVec &xValues, const MantidVec &Y1, const MantidVec &Y2,
                 MantidVec &out) const;
   API::Progress *prog;

@@ -1,10 +1,10 @@
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 from xml.dom.minidom import getDOMImplementation
 from datetime import datetime
 import re
 
-class MantidGeom(object):
 
+class MantidGeom(object):
     def __init__(self, instname, valid_from=None):
         if valid_from is None:
             valid_from = datetime.now()
@@ -24,11 +24,11 @@ class MantidGeom(object):
             @param filename: Path of the file to write to
         """
         uglyxml = self._root.toprettyxml(indent='  ', newl='\n')
-        text_re = re.compile('>\n\s+([^<>\s].*?)\n\s+</', re.DOTALL)
-        prettierxml = text_re.sub('>\g<1></', uglyxml)
+        text_re = re.compile(r'>\n\s+([^<>\s].*?)\n\s+</', re.DOTALL)
+        prettierxml = text_re.sub(r'>\g<1></', uglyxml)
 
-        text_re = re.compile('((?:^)|(?:</[^<>\s].*?>)|(?:<[^<>\s].*?>)|(?:<[^<>\s].*?/>))\s*\n+', re.DOTALL)
-        output_str = text_re.sub('\g<1>\n', prettierxml)
+        text_re = re.compile(r'((?:^)|(?:</[^<>\s].*?>)|(?:<[^<>\s].*?>)|(?:<[^<>\s].*?/>))\s*\n+', re.DOTALL)
+        output_str = text_re.sub(r'\g<1>\n', prettierxml)
 
         fh = open(filename, "w")
         fh.write(output_str)
@@ -58,7 +58,8 @@ class MantidGeom(object):
             Add a global comment to the XML file
             @param comment: comment to be added to the XML file
         """
-        if comment is None: return
+        if comment is None:
+            return
 
         child = self._document.createComment(str(comment))
         self._root.appendChild(child)
@@ -81,7 +82,7 @@ class MantidGeom(object):
             if distance > 0:
                 distance *= -1.0
             self._append_child("location", source, z=distance)
-        except:
+        except (StandardError, StopIteration, Warning):
             print "PROBLEM with addModerator"
 
         child = self._append_child("type", self._root, name="moderator")
@@ -111,31 +112,37 @@ class MantidGeom(object):
         child = self._append_child("type", self._root, name="sample-position")
         child.setAttribute("is", "SamplePos")
 
-    def addDetectorPixels(self, name, r=[], theta=[], phi=[], names=[], energy=[]):
+    def addDetectorPixels(self, name, r=None, theta=None, phi=None, names=None, energy=None):
+        self.list_func(r)
+        self.list_func(theta)
+        self.list_func(phi)
+        self.list_func(names)
+        self.list_func(energy)
         type_element = self._append_child("type", self._root, name=name)
-
         for i in range(len(r)):
             for j in range(len(r[i])):
                 if str(r[i][j]) != "nan":
                     basecomponent = self._append_child("component", type_element, type="pixel")
-                    location_element = self._append_child("location", basecomponent,r=str(r[i][j]),\
-                          t=str(theta[i][j]), p=str(phi[i][j]), name=str(names[i][j]))
+                    location_element = self._append_child("location", basecomponent, r=str(r[i][j]), \
+                                                          t=str(theta[i][j]), p=str(phi[i][j]), name=str(names[i][j]))
                     self._append_child("facing", location_element, x="0.0", y="0.0", z="0.0")
 
                     efixed_comp = self._append_child("parameter", basecomponent, name="Efixed")
                     self._append_child("value", efixed_comp, val=str(energy[i][j]))
 
-    def addDetectorPixelsIdList(self, name, r=[], names=[]):
+    def addDetectorPixelsIdList(self, name, r=None, names=None):
+        self.list_func(r)
+        self.list_func(names)
         component = self._append_child("idlist", self._root, idname=name)
         for i in range(len(r)):
             for j in range(len(r[i])):
                 if str(r[i][j]) != "nan":
                     self._append_child("id", component, val=str(names[i][j]))
 
-    def addMonitors(self, distance=[], names=[]):
-        """
-            Add a list of monitors to the geometry.
-        """
+    def addMonitors(self, distance=None, names=None):
+        self.list_func(distance)
+        self.list_func(names)
+        # Add a list of monitors to the geometry.
         if len(distance) != len(names):
             raise IndexError("Distance and name list must be same size!")
 
@@ -147,7 +154,7 @@ class MantidGeom(object):
         basecomponent.setAttribute("mark-as", "monitor")
 
         for i in range(len(distance)):
-            zi=float(distance[i])
+            dummy_zi = float(distance[i])
             self._append_child("location", basecomponent, z=distance[i], name=names[i])
 
     def addComponent(self, type_name, idlist=None, root=None, blank_location=True):
@@ -161,7 +168,7 @@ class MantidGeom(object):
             comp = self._append_child("component", root, type=type_name, idlist=idlist)
         else:
             comp = self._append_child("component", root, type=type_name)
-        l=comp
+        l = comp
         if blank_location:
             l = self._append_child("location", comp)
         return l
@@ -202,7 +209,7 @@ class MantidGeom(object):
             self.addLocation(comp_element, x, y, z, rot_x, rot_y, rot_z)
 
     def addSingleDetector(self, root, x, y, z, rot_x, rot_y, rot_z, name=None,
-                          id=None, usepolar=None):
+                          _id=None, usepolar=None):
         """
         Add a single detector by explicit declaration. The rotation order is
         performed as follows: y, x, z.
@@ -225,52 +232,52 @@ class MantidGeom(object):
             pos_loc = self._append_child("location", root, x=str(x), y=str(y), z=str(z))
 
         if rot_y is not None:
-            r1 = self._append_child("rot", pos_loc, **{"val":str(rot_y), "axis-x":"0",
-                                                       "axis-y":"1", "axis-z":"0"})
+            r1 = self._append_child("rot", pos_loc, **{"val": str(rot_y), "axis-x": "0",
+                                                       "axis-y": "1", "axis-z": "0"})
         else:
             r1 = pos_loc
 
         if rot_x is not None:
-            r2 = self._append_child("rot", r1, **{"val":str(rot_x), "axis-x":"1",
-                                                  "axis-y":"0", "axis-z":"0"})
+            r2 = self._append_child("rot", r1, **{"val": str(rot_x), "axis-x": "1",
+                                                  "axis-y": "0", "axis-z": "0"})
         else:
             r2 = r1
 
         if rot_z is not None:
-            self._append_child("rot", r2, **{"val":str(rot_z), "axis-x":"0",
-                                             "axis-y":"0", "axis-z":"1"})
+            self._append_child("rot", r2, **{"val": str(rot_z), "axis-x": "0",
+                                             "axis-y": "0", "axis-z": "1"})
 
     def addLocationPolar(self, root, r, theta, phi, name=None):
         if name is not None:
-            pos_loc = self._append_child("location", root, r=r, t=theta, p=phi, name=name)
+            _pos_loc = self._append_child("location", root, r=r, t=theta, p=phi, name=name)
         else:
-            pos_loc = self._append_child("location", root, r=r, t=theta, p=phi)
+            _pos_loc = self._append_child("location", root, r=r, t=theta, p=phi)
 
     def addLocationRTP(self, root, r, t, p, rot_x, rot_y, rot_z, name=None):
         """
         Add a location element to a specific parent node given by root, using r, theta, phi coordinates.
         """
-        rf=float(r)
-        tf=float(f)
-        pf=float(p)
+        dummy_rf = float(r)
+        dummy_tf = float(f)
+        dummy_pf = float(p)
         if name is not None:
             pos_loc = self._append_child("location", root, r=r, t=t, p=p, name=name)
         else:
             pos_loc = self._append_child("location", root, r=r, t=t, p=p)
-        #add rotx, roty, rotz
-        #Regardless of what order rotx, roty and rotz is specified in the IDF,
-        #the combined rotation is equals that obtained by applying rotx, then roty and finally rotz.
+        # add rotx, roty, rotz
+        # Regardless of what order rotx, roty and rotz is specified in the IDF,
+        # the combined rotation is equals that obtained by applying rotx, then roty and finally rotz.
         if rot_x is not None:
             log = self._append_child("parameter", pos_loc, name="rotx")
-            rotxf=float(rot_x)
+            _rotxf = float(rot_x)
             self._append_child("value", log, val=rot_x)
         if rot_y is not None:
             log = self._append_child("parameter", pos_loc, name="roty")
-            rotyf=float(rot_y)
+            _rotyf = float(rot_y)
             self._append_child("value", log, val=rot_y)
         if rot_z is not None:
             log = self._append_child("parameter", pos_loc, name="rotz")
-            rotzf=float(rot_z)
+            _rotzf = float(rot_z)
             self._append_child("value", log, val=rot_z)
 
     def addNPack(self, name, num_tubes, tube_width, air_gap, type_name="tube"):
@@ -320,7 +327,7 @@ class MantidGeom(object):
         Add a cylindrical pixel. The center_bottom_base is a 3-tuple of radius,
         theta, phi. The axis is a 3-tuple of x, y, z.
         """
-        type_element = self._append_child("type", self._root, **{"name":name, "is":is_type})
+        type_element = self._append_child("type", self._root, **{"name": name, "is": is_type})
         cylinder = self._append_child("cylinder", type_element, id="cyl-approx")
         self._append_child("centre-of-bottom-base", cylinder,
                            r=str(center_bottom_base[0]),
@@ -333,30 +340,30 @@ class MantidGeom(object):
         self._append_child("height", cylinder, val=str(pixel_height))
         self._append_child("algebra", type_element, val="cyl-approx")
 
-    def addCuboidPixel(self, name, lfb_pt, lft_pt, lbb_pt, rfb_pt,\
-                      is_type="detector"):
+    def addCuboidPixel(self, name, lfb_pt, lft_pt, lbb_pt, rfb_pt, \
+                       is_type="detector"):
         """
         Add a cuboid pixel. The origin of the cuboid is assumed to be the
         center of the front face of the cuboid. The parameters lfb_pt, lft_pt,
         lbb_pt, rfb_pt are 3-tuple of x, y, z.
         """
-        type_element = self._append_child("type", self._root, **{"name":name, "is":is_type})
+        type_element = self._append_child("type", self._root, **{"name": name, "is": is_type})
         cuboid = self._append_child("cuboid", type_element, id="shape")
-        self._append_child("left-front-bottom-point", cuboid, x=str(lfb_pt[0]),\
-                      y=str(lfb_pt[1]), z=str(lfb_pt[2]))
-        self._append_child("left-front-top-point", cuboid, x=str(lft_pt[0]),\
-                      y=str(lft_pt[1]), z=str(lft_pt[2]))
-        self._append_child("left-back-bottom-point", cuboid, x=str(lbb_pt[0]),\
-                      y=str(lbb_pt[1]), z=str(lbb_pt[2]))
-        self._append_child("right-front-bottom-point", cuboid, x=str(rfb_pt[0]),\
-                      y=str(rfb_pt[1]), z=str(rfb_pt[2]))
+        self._append_child("left-front-bottom-point", cuboid, x=str(lfb_pt[0]), \
+                           y=str(lfb_pt[1]), z=str(lfb_pt[2]))
+        self._append_child("left-front-top-point", cuboid, x=str(lft_pt[0]), \
+                           y=str(lft_pt[1]), z=str(lft_pt[2]))
+        self._append_child("left-back-bottom-point", cuboid, x=str(lbb_pt[0]), \
+                           y=str(lbb_pt[1]), z=str(lbb_pt[2]))
+        self._append_child("right-front-bottom-point", cuboid, x=str(rfb_pt[0]), \
+                           y=str(rfb_pt[1]), z=str(rfb_pt[2]))
         self._append_child("algebra", type_element, val="shape")
 
     def addDummyMonitor(self, radius, height):
         """
         Add a dummy monitor with some-shape.
         """
-        type_element = self._append_child("type", self._root, **{"name":"monitor", "is":"detector"})
+        type_element = self._append_child("type", self._root, **{"name": "monitor", "is": "detector"})
         cylinder = self._append_child("cylinder", type_element, id="cyl-approx")
         self._append_child("centre-of-bottom-base", cylinder, x="0.0", y="0.0", z="0.0")
         self._append_child("axis", cylinder, x="0.0", y="0.0", z="1.0")
@@ -364,16 +371,16 @@ class MantidGeom(object):
         self._append_child("height", cylinder, height=str(height))
         self._append_child("algebra", type_element, val="cyl-approx")
 
-    def addCuboidMonitor(self,width,height,depth):
+    def addCuboidMonitor(self, width, height, depth):
         """
         Add a cuboid monitor
         """
-        type_element = self._append_child("type", self._root, **{"name":"monitor", "is":"detector"})
+        type_element = self._append_child("type", self._root, **{"name": "monitor", "is": "detector"})
         cuboid = self._append_child("cuboid", type_element, id="shape")
-        self._append_child("left-front-bottom-point", cuboid, x=str(-width/2), y=str(-height/2),z=str(-depth/2))
-        self._append_child("left-front-top-point", cuboid, x=str(-width/2), y=str(height/2),z=str(-depth/2))
-        self._append_child("left-back-bottom-point", cuboid, x=str(-width/2), y=str(-height/2),z=str(depth/2))
-        self._append_child("right-front-bottom-point", cuboid, x=str(width/2), y=str(-height/2),z=str(-depth/2))
+        self._append_child("left-front-bottom-point", cuboid, x=str(-width / 2), y=str(-height / 2), z=str(-depth / 2))
+        self._append_child("left-front-top-point", cuboid, x=str(-width / 2), y=str(height / 2), z=str(-depth / 2))
+        self._append_child("left-back-bottom-point", cuboid, x=str(-width / 2), y=str(-height / 2), z=str(depth / 2))
+        self._append_child("right-front-bottom-point", cuboid, x=str(width / 2), y=str(-height / 2), z=str(-depth / 2))
         self._append_child("algebra", type_element, val="shape")
 
     def addDetectorIds(self, idname, idlist):
@@ -383,24 +390,24 @@ class MantidGeom(object):
         step2, ...]. If no step is required, use None.
         """
         if len(idlist) % 3 != 0:
-            raise IndexError("Please specifiy list as [start1, end1, step1, "\
-                             +"start2, end2, step2, ...]. If no step is"\
-                             +"required, use None.")
+            raise IndexError("Please specifiy list as [start1, end1, step1, " \
+                             + "start2, end2, step2, ...]. If no step is" \
+                             + "required, use None.")
         num_ids = len(idlist) / 3
         id_element = self._append_child("idlist", self._root, idname=idname)
         for i in range(num_ids):
-            if idlist[(i*3)+2] is None:
-                self._append_child("id", id_element, start=str(idlist[(i*3)]),\
-                              end=str(idlist[(i*3)+1]))
+            if idlist[(i * 3) + 2] is None:
+                self._append_child("id", id_element, start=str(idlist[(i * 3)]), \
+                                   end=str(idlist[(i * 3) + 1]))
             else:
-                self._append_child("id", id_element, start=str(idlist[(i*3)]),\
-                              step=str(idlist[(i*3)+2]),\
-                              end=str(idlist[(i*3)+1]))
+                self._append_child("id", id_element, start=str(idlist[(i * 3)]), \
+                                   step=str(idlist[(i * 3) + 2]), \
+                                   end=str(idlist[(i * 3) + 1]))
 
-    def addMonitorIds(self, ids=[]):
-        """
-        Add the monitor IDs.
-        """
+    def addMonitorIds(self, ids=None):
+        self.list_func(ids)
+
+        # Add the monitor IDs.
         idElt = self._append_child("idlist", self._root, idname="monitors")
         for i in range(len(ids)):
             self._append_child("id", idElt, val=ids[i])
@@ -418,3 +425,8 @@ class MantidGeom(object):
 
             par = self._append_child("parameter", complink, name=arg[0])
             self._append_child("value", par, val=str(arg[1]), units=str(arg[2]))
+
+    def list_func(self, items=None):
+        if items is None:
+            items = []
+        return items

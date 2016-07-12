@@ -6,17 +6,17 @@
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 /**
-    @class ColorMaps 
-  
-       This class has static methods to construct some useful color scales
-    and to build a lookup table to brighten an image, so low-level 
-    intensities become more visible 
+    @class ColorMaps
 
-    @author Dennis Mikkelson 
-    @date   2012-04-03 
-     
+       This class has static methods to construct some useful color scales
+    and to build a lookup table to brighten an image, so low-level
+    intensities become more visible
+
+    @author Dennis Mikkelson
+    @date   2012-04-03
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -31,56 +31,45 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
-namespace MantidQt
-{
-namespace SpectrumView
-{
+namespace MantidQt {
+namespace SpectrumView {
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ColorMaps
-{
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ColorMaps {
 
 public:
-
-  enum ColorScale
-       {
-         HEAT,
-         GRAY,
-         NEGATIVE_GRAY,
-         GREEN_YELLOW,
-         RAINBOW,
-         OPTIMAL,
-         MULTI,
-         SPECTRUM
-       };
+  enum ColorScale {
+    HEAT,
+    GRAY,
+    NEGATIVE_GRAY,
+    GREEN_YELLOW,
+    RAINBOW,
+    OPTIMAL,
+    MULTI,
+    SPECTRUM
+  };
 
   /// Get the specified color scale
-  static void GetColorMap( ColorScale          name, 
-                           size_t              n_colors,
-                           std::vector<QRgb> & color_table );
+  static std::vector<QRgb> GetColorMap(ColorScale name, size_t n_colors);
 
   /// Get look up table to brighten image
-  static void GetIntensityMap( double                 control_s,
-                               size_t                 n_entries,
-                               std::vector<double>  & intensity_table );
+  static std::vector<double> GetIntensityMap(double control_s,
+                                             size_t n_entries);
 
-  private:
-
-    /// Fill out a color table by interpolating the given base RGB components
-    static void InterpolateColorScale( double              base_red[],
-                                       double              base_green[], 
-                                       double              base_blue[], 
-                                       size_t              n_base_colors,
-                                       size_t              n_colors,
-                                       std::vector<QRgb> & color_table );
-
+private:
+  /// Fill out a color table by interpolating the given base RGB components
+  static std::vector<QRgb> InterpolateColorScale(double base_red[],
+                                                 double base_green[],
+                                                 double base_blue[],
+                                                 size_t n_base_colors,
+                                                 size_t n_colors);
 };
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
 
-#endif  // COLOR_MAPS_H
+#endif // COLOR_MAPS_H

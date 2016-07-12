@@ -12,7 +12,6 @@ DECLARE_ALGORITHM(UploadRemoteFile2)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 
@@ -61,7 +60,7 @@ void UploadRemoteFile2::exec() {
 
   g_log.information() << "Uploaded '" << getPropertyValue("RemoteFileName")
                       << "' to '" << getPropertyValue("LocalFileName") << "'"
-                      << " on the compute resource " << comp << std::endl;
+                      << " on the compute resource " << comp << '\n';
 }
 
 } // end namespace RemoteAlgorithms

@@ -5,6 +5,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 
+#include "MantidKernel/UsageService.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -34,11 +35,10 @@
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtSliceViewer/CompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
-#include "MantidQtSliceViewer/PeakOverlayMultiCrossFactory.h"
-#include "MantidQtSliceViewer/PeakOverlayMultiSphereFactory.h"
+#include "MantidQtSliceViewer/PeakViewFactory.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
-#include "MantidQtSliceViewer/PeakOverlayViewFactorySelector.h"
+#include "MantidQtSliceViewer/SliceViewerFunctions.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 
 #include <qwt_plot_panner.h>
@@ -171,6 +171,9 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // --------- Rescaler --------------------
   m_rescaler = new QwtPlotRescaler(m_plot->canvas());
+
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Interface", "SliceViewer", false);
 }
 
 void SliceViewer::updateAspectRatios() {
@@ -311,7 +314,8 @@ void SliceViewer::initMenus() {
     bar = parentWindow->menuBar();
   else {
     // Widget is not in a QMainWindow. Make a menu bar
-    bar = new QMenuBar(this, "Main Menu Bar");
+    bar = new QMenuBar(this);
+    bar->setObjectName("Main Menu Bar");
     ui.verticalLayout->insertWidget(0, bar);
   }
 
@@ -622,6 +626,25 @@ void SliceViewer::updateDimensionSliceWidgets() {
     widget->hide();
   }
 
+  bool dimXset = false;
+  bool dimYset = false;
+  // put non integrated dimensions first
+  for (size_t d = 0; d < m_dimensions.size(); d++) {
+    if ((dimXset == false) &&
+        (m_ws->getDimension(d)->getIsIntegrated() == false)) {
+      m_dimX = d;
+      dimXset = true;
+    }
+    if ((dimYset == false) &&
+        (m_ws->getDimension(d)->getIsIntegrated() == false) && (d != m_dimX)) {
+      m_dimY = d;
+      dimYset = true;
+    }
+    if ((dimXset == true) && (dimYset == true)) {
+      break;
+    }
+  }
+
   int maxLabelWidth = 10;
   int maxUnitsWidth = 10;
   // Set each dimension
@@ -701,8 +724,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
     // MDEWs)
     coord_t min = m_ws->getDimension(d)->getMinimum();
     coord_t max = m_ws->getDimension(d)->getMaximum();
-    if (max < min)
-    {
+    if (max < min) {
       coord_t tmp = max;
       max = min;
       min = tmp;
@@ -711,7 +733,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
         boost::math::isnan(max) || boost::math::isinf(max)) {
       mess << "Dimension " << m_ws->getDimension(d)->getName()
            << " has a bad range: (";
-      mess << min << ", " << max << ")" << std::endl;
+      mess << min << ", " << max << ")\n";
     }
     size_t numBins = static_cast<size_t>((max - min) / binSizes[d]);
     MDHistoDimension_sptr dim(
@@ -722,9 +744,8 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
 
   if (!mess.str().empty()) {
     mess << "Bad ranges could cause memory allocation errors. Please fix the "
-            "workspace.";
-    mess << std::endl
-         << "You can continue using Mantid.";
+            "workspace.\n"
+            "You can continue using Mantid.";
     throw std::out_of_range(mess.str());
   }
 
@@ -742,13 +763,18 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   // Build up the widgets
   this->updateDimensionSliceWidgets();
 
-  // Only autoscale color bar if box is checked
-  if (m_colorBar->getAutoScale()) {
-    // Find the full range. And use it
+  // This will auto scale the color bar to the current slice when the workspace
+  // is
+  // loaded. This always happens when a workspace is loaded for the first time.
+  // For live event data workspaces subsequent updates might not lead to an auto
+  // scaling of the color scale range (if this is explicitly turned off).
+  if (shouldAutoScaleForNewlySetWorkspace(m_firstWorkspaceOpen,
+                                          m_colorBar->getAutoScale())) {
     findRangeFull();
     m_colorBar->setViewRange(m_colorRangeFull);
     m_colorBar->updateColorMap();
   }
+
   // Initial display update
   this->updateDisplay(
       !m_firstWorkspaceOpen /*Force resetting the axes, the first time*/);
@@ -947,7 +973,7 @@ void SliceViewer::setNormalization(Mantid::API::MDNormalization norm,
     if (norm == Mantid::API::NoNormalization) {
       comboNormalization->setCurrentIndex(0);
     } else if (norm == Mantid::API::VolumeNormalization) {
-      comboNormalization->setCurrentItem(1);
+      comboNormalization->setCurrentIndex(1);
     } else {
       comboNormalization->setCurrentIndex(2);
     }
@@ -1192,8 +1218,11 @@ void SliceViewer::updateDisplaySlot(int index, double value) {
   UNUSED_ARG(value)
   this->updateDisplay();
   // Trigger a rebin on each movement of the slice point
-  if (m_rebinMode && ui.btnAutoRebin->isOn())
+  if (m_rebinMode && ui.btnAutoRebin->isChecked())
     this->rebinParamsChanged();
+
+  // Update the colors scale if required
+  applyColorScalingForCurrentSliceIfRequired();
 }
 
 //------------------------------------------------------------------------------
@@ -1237,7 +1266,7 @@ void SliceViewer::copyImageToClipboard() {
   // Create the image
   QPixmap pix = this->getImage();
   // Set the clipboard
-  QApplication::clipboard()->setImage(pix, QClipboard::Clipboard);
+  QApplication::clipboard()->setImage(pix.toImage(), QClipboard::Clipboard);
 }
 
 /**
@@ -1378,14 +1407,26 @@ part of the workspace */
 void SliceViewer::findRangeSlice() {
   IMDWorkspace_sptr workspace_used = m_ws;
   if (m_rebinMode) {
-    workspace_used = this->m_overlayWS;
+    // If the rebinned state is inconsistent, then we turn off
+    // the rebin selection and continue to use the original WS
+    if (!isRebinInConsistentState(m_overlayWS.get(), m_rebinMode)) {
+      setRebinMode(false);
+    } else {
+      workspace_used = this->m_overlayWS;
+    }
   }
 
   if (!workspace_used)
     return;
+
+  // Set the full color range if it has not been set yet
+  // We need to do this before aquiring the dead lock
+  if (m_colorRangeFull == QwtDoubleInterval(0.0, -1.0)) {
+    findRangeFull();
+  }
+
   // Acquire a scoped read-only lock on the workspace, preventing it from being
-  // written
-  // while we iterate through.
+  // written while we iterate through.
   ReadLock lock(*workspace_used);
 
   m_colorRangeSlice = QwtDoubleInterval(0., 1.0);
@@ -1412,16 +1453,25 @@ void SliceViewer::findRangeSlice() {
       max[d] = min[d] + dim->getBinWidth();
     }
   }
-  // This builds the implicit function for just this slice
-  MDBoxImplicitFunction *function = new MDBoxImplicitFunction(min, max);
 
-  // Iterate through the slice
-  m_colorRangeSlice = API::SignalRange(*workspace_used, *function,
-                                       this->getNormalization()).interval();
-  delete function;
-  // In case of failure, use the full range instead
-  if (m_colorRangeSlice == QwtDoubleInterval(0.0, 1.0))
+  if (doesSliceCutThroughWorkspace(min, max, m_dimensions)) {
+    // This builds the implicit function for just this slice
+    MDBoxImplicitFunction *function = new MDBoxImplicitFunction(min, max);
+
+    // Iterate through the slice
+    m_colorRangeSlice = API::SignalRange(*workspace_used, *function,
+                                         this->getNormalization()).interval();
+    delete function;
+
+    // In case of failure, use the full range instead
+    if (m_colorRangeSlice == QwtDoubleInterval(0.0, 1.0)) {
+      m_colorRangeSlice = m_colorRangeFull;
+    }
+  } else {
+    // If the slice does not cut through the workspace we make use fo the full
+    // workspace
     m_colorRangeSlice = m_colorRangeFull;
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -2214,6 +2264,8 @@ Event handler for plot panning.
 void SliceViewer::panned(int, int) {
   autoRebinIfRequired();
 
+  applyColorScalingForCurrentSliceIfRequired();
+
   this->updatePeaksOverlay();
 }
 
@@ -2316,24 +2368,15 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
             workspaceName);
     const size_t numberOfChildPresenters = m_peaksPresenter->size();
 
-    PeakOverlayViewFactorySelector_sptr viewFactorySelector =
-        boost::make_shared<PeakOverlayViewFactorySelector>();
-    // Candidate for overplotting as spherical peaks
-    viewFactorySelector->registerCandidate(
-        boost::make_shared<PeakOverlayMultiSphereFactory>(
-            peaksWS, m_plot, m_plot->canvas(), m_spect->xAxis(),
-            m_spect->yAxis(), numberOfChildPresenters));
-    // Candiate for plotting as a markers of peak positions
-    viewFactorySelector->registerCandidate(
-        boost::make_shared<PeakOverlayMultiCrossFactory>(
-            m_ws, transformFactory->createDefaultTransform(), peaksWS, m_plot,
-            m_plot->canvas(), m_spect->xAxis(), m_spect->yAxis(),
-            numberOfChildPresenters));
+    // Peak View factory, displays peaks on a peak by peak basis
+    auto peakViewFactory = boost::make_shared<PeakViewFactory>(
+        m_ws, peaksWS, m_plot, m_plot->canvas(), m_spect->xAxis(),
+        m_spect->yAxis(), numberOfChildPresenters);
+
     try {
       m_peaksPresenter->addPeaksPresenter(
-          boost::make_shared<ConcretePeaksPresenter>(
-              viewFactorySelector->makeSelection(), peaksWS, m_ws,
-              transformFactory));
+          boost::make_shared<ConcretePeaksPresenter>(peakViewFactory, peaksWS,
+                                                     m_ws, transformFactory));
     } catch (std::logic_error &ex) {
       // Incompatible PeaksWorkspace.
       disablePeakOverlays();
@@ -2470,6 +2513,9 @@ void SliceViewer::zoomToRectangle(const PeakBoundingBox &boundingBox) {
       QString::fromStdString(m_peaksSliderWidget->getDimName());
   this->setSlicePoint(dimensionName, boundingBox.slicePoint());
 
+  // Set the color scale range for the current slice if required
+  applyColorScalingForCurrentSliceIfRequired();
+
   // Make sure the view updates
   m_plot->replot();
 }
@@ -2537,6 +2583,18 @@ void SliceViewer::dropEvent(QDropEvent *e) {
  */
 void SliceViewer::setColorBarAutoScale(bool autoscale) {
   m_colorBar->setAutoScale(autoscale);
+}
+
+/**
+* Apply the color scaling for the current slice. This will
+* be applied only if it is explicitly requested
+*/
+void SliceViewer::applyColorScalingForCurrentSliceIfRequired() {
+  auto useAutoColorScaleforCurrentSlice =
+      m_colorBar->getAutoColorScaleforCurrentSlice();
+  if (useAutoColorScaleforCurrentSlice) {
+    setColorScaleAutoSlice();
+  }
 }
 
 } // namespace

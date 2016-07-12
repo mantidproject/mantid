@@ -16,15 +16,10 @@ DECLARE_FUNCTION(FullprofPolynomial)
 FullprofPolynomial::FullprofPolynomial() : m_n(6), m_bkpos(1.) {
   // Declare first 6th order polynomial as default
   for (int i = 0; i < m_n; ++i) {
-    std::string parName = "A" + boost::lexical_cast<std::string>(i);
+    std::string parName = "A" + std::to_string(i);
     declareParameter(parName);
   }
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FullprofPolynomial::~FullprofPolynomial() {}
 
 //----------------------------------------------------------------------------------------------
 /** Function to calcualteFullprofPolynomial
@@ -92,11 +87,7 @@ void FullprofPolynomial::functionDeriv1D(API::Jacobian *out,
  * @return A list of attribute names (identical toFullprofPolynomial)
 */
 std::vector<std::string> FullprofPolynomial::getAttributeNames() const {
-  std::vector<std::string> res;
-  res.push_back("n");
-  res.push_back("Bkpos");
-
-  return res;
+  return {"n", "Bkpos"};
 }
 
 //----------------------------------------------------------------------------------------------
@@ -139,7 +130,7 @@ void FullprofPolynomial::setAttribute(const std::string &attName,
 
       m_n = attint;
       for (int i = 0; i < m_n; ++i) {
-        std::string parName = "A" + boost::lexical_cast<std::string>(i);
+        std::string parName = "A" + std::to_string(i);
         declareParameter(parName);
       }
     }

@@ -71,7 +71,7 @@ public:
                   size_t totalReflectionCount)
       : m_measuredReflections(0), m_uniqueReflections(0), m_completeness(0.0),
         m_redundancy(0.0), m_rMerge(0.0), m_rPim(0.0), m_meanIOverSigma(0.0),
-        m_lambdaMin(0.0), m_lambdaMax(0.0), m_chiSquared(0.0), m_peaks() {
+        m_dspacingMin(0.0), m_dspacingMax(0.0), m_chiSquared(0.0), m_peaks() {
     m_peaks.reserve(totalReflectionCount);
     calculatePeaksStatistics(uniqueReflections);
   }
@@ -83,8 +83,8 @@ public:
   double m_rMerge;
   double m_rPim;
   double m_meanIOverSigma;
-  double m_lambdaMin;
-  double m_lambdaMax;
+  double m_dspacingMin;
+  double m_dspacingMax;
   double m_chiSquared;
 
   std::vector<DataObjects::Peak> m_peaks;
@@ -98,7 +98,7 @@ private:
   double getRMS(const std::vector<double> &data) const;
 
   std::pair<double, double>
-  getLambdaLimits(const std::vector<DataObjects::Peak> &peaks) const;
+  getDSpacingLimits(const std::vector<DataObjects::Peak> &peaks) const;
 };
 
 /** Save a PeaksWorkspace to a Gsas-style ASCII .hkl file.
@@ -109,26 +109,26 @@ private:
 class DLLExport SortHKL : public API::Algorithm {
 public:
   SortHKL();
-  ~SortHKL();
+  ~SortHKL() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "SortHKL"; };
+  const std::string name() const override { return "SortHKL"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Sorts a PeaksWorkspace by HKL. Averages intensities using point "
            "group.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Crystal\\Peaks;DataHandling\\Text;Utility\\Sorting";
   }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   std::vector<DataObjects::Peak>
   getNonZeroPeaks(const std::vector<DataObjects::Peak> &inputPeaks) const;

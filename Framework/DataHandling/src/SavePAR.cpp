@@ -1,10 +1,10 @@
 #include "MantidDataHandling/SavePAR.h"
+#include "MantidDataHandling/FindDetectorsPar.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
-
-#include "MantidDataHandling/FindDetectorsPar.h"
-
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Objects/Object.h"
@@ -26,11 +26,11 @@ using namespace Mantid::Geometry;
 // It is used to print out information,
 
 void SavePAR::init() {
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<InstrumentValidator>()),
-      "The name of the workspace to save.");
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<InstrumentValidator>()),
+                  "The name of the workspace to save.");
+  declareProperty(make_unique<FileProperty>("Filename", "", FileProperty::Save),
                   "The name to give to the saved file.");
 }
 
@@ -38,10 +38,6 @@ void SavePAR::exec() {
 
   // Get the input workspace
   MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
-
-  // Get the sample position
-  const Kernel::V3D samplePos =
-      inputWorkspace->getInstrument()->getSample()->getPos();
 
   // Retrieve the filename from the properties
   const std::string filename = getProperty("Filename");
@@ -92,7 +88,7 @@ void SavePAR::exec() {
   size_t nDetectors = pCalcDetPar->getNDetectors();
 
   // Write the number of detectors to the file.
-  outPAR_file << " " << nDetectors << std::endl;
+  outPAR_file << " " << nDetectors << '\n';
 
   for (size_t i = 0; i < nDetectors; ++i) {
     // verify if no detector defined;
@@ -113,7 +109,7 @@ void SavePAR::exec() {
     outPAR_file.width(10);
     outPAR_file << azimuthal_width[i];
     outPAR_file.width(10);
-    outPAR_file << det_ID[i] << std::endl;
+    outPAR_file << det_ID[i] << '\n';
   }
 
   // Close the file

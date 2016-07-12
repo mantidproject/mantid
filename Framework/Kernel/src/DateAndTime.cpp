@@ -43,6 +43,7 @@ std::tm *gmtime_r_portable(const std::time_t *clock, struct std::tm *result) {
 #ifdef _WIN32
   // Windows implementation
   if (!gmtime_s(result, clock)) { // Returns zero if successful
+    // cppcheck-suppress CastIntegerToAddressAtReturn
     return result;
   } else { // Returned some non-zero error code
     return NULL;
@@ -90,7 +91,7 @@ time_t utc_mktime(struct tm *utctime) {
   result = mktime(&tmp);
   if (result == static_cast<time_t>(-1))
     return static_cast<time_t>(-1);
-  if (gmtime_r_portable(&result, &check) == NULL)
+  if (gmtime_r_portable(&result, &check) == nullptr)
     return static_cast<time_t>(-1);
 
   // loop until match
@@ -111,7 +112,7 @@ time_t utc_mktime(struct tm *utctime) {
     if (result == static_cast<time_t>(-1))
       return static_cast<time_t>(-1);
     gmtime_r_portable(&result, &check);
-    if (gmtime_r_portable(&result, &check) == NULL)
+    if (gmtime_r_portable(&result, &check) == nullptr)
       return static_cast<time_t>(-1);
     // Seems like there can be endless loops at the end of a month? E.g. sep 30,
     // 2010 at 4:40 pm. This is to avoid it.
@@ -150,7 +151,7 @@ DateAndTime::DateAndTime(const int64_t total_nanoseconds) {
  *@param displayLogs :: if the logs should be dsiplayed during the execution of
  *the constructor
  */
-DateAndTime::DateAndTime(const std::string ISO8601_string, bool displayLogs)
+DateAndTime::DateAndTime(const std::string &ISO8601_string, bool displayLogs)
     : _nanoseconds(0) {
   this->setFromISO8601(ISO8601_string, displayLogs);
 }
@@ -357,8 +358,9 @@ DateAndTime DateAndTime::maximum() { return DateAndTime(MAX_NANOSECONDS); }
 DateAndTime DateAndTime::minimum() { return DateAndTime(MIN_NANOSECONDS); }
 
 /// A default date and time to use when time is not specified
-const DateAndTime DateAndTime::defaultTime() {
-  return DateAndTime("1970-01-01T00:00:00");
+const DateAndTime &DateAndTime::defaultTime() {
+  static DateAndTime time("1970-01-01T00:00:00");
+  return time;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -367,10 +369,9 @@ const DateAndTime DateAndTime::defaultTime() {
  * @param str :: ISO8601 format string: "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"
  * @param displayLogs :: flag to indiciate if the logs should be displayed
  */
-void DateAndTime::setFromISO8601(const std::string str, bool displayLogs) {
+void DateAndTime::setFromISO8601(const std::string &str, bool displayLogs) {
   // Make a copy
   std::string time = str;
-
   // Some ARGUS files have an invalid date with a space instead of zero.
   // To enable such files to be loaded we correct the date and issue a warning
   // (ticket #4017).
@@ -389,7 +390,7 @@ void DateAndTime::setFromISO8601(const std::string str, bool displayLogs) {
     if (nSecondSpace != std::string::npos)
       time[nSecondSpace] = '0';
     if (displayLogs) {
-      g_log.warning() << " corrected to " << time << std::endl;
+      g_log.warning() << " corrected to " << time << '\n';
     }
   }
 
@@ -460,7 +461,7 @@ void DateAndTime::setFromISO8601(const std::string str, bool displayLogs) {
   // the
   // string to always denote the full timestamp so we check for a colon and if
   // it is not present then throw an exception.
-  if (time.find(":") == std::string::npos)
+  if (time.find(':') == std::string::npos)
     throw std::invalid_argument("Error interpreting string '" + str +
                                 "' as a date/time.");
   try {
@@ -863,9 +864,9 @@ void DateAndTime::createVector(const DateAndTime start,
   size_t num = seconds.size();
   out.resize(num);
   size_t i = 0;
-  for (auto it = seconds.begin(); it != seconds.end(); ++it) {
+  for (double second : seconds) {
     out[i]._nanoseconds =
-        startnano + static_cast<int64_t>((*it) * 1000000000.0);
+        startnano + static_cast<int64_t>(second * 1000000000.0);
     i++;
   }
 }

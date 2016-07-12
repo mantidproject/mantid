@@ -4,6 +4,9 @@
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+
 #include <gsl/gsl_poly.h>
 
 namespace Mantid {
@@ -41,7 +44,7 @@ ResolutionParams VesuvioResolution::getResolutionParameters(
   } catch (Kernel::Exception::NotFoundError &) {
     throw std::invalid_argument("VesuvioResolution - Workspace has no detector "
                                 "attached to histogram at index " +
-                                boost::lexical_cast<std::string>(index));
+                                std::to_string(index));
   }
 
   ResolutionParams respar;
@@ -179,12 +182,12 @@ void VesuvioResolution::cacheResolutionComponents(
                                 std::pow(wl1, 2) + std::pow(wl2, 2));
 
   m_log.information() << "--------------------- Mass=" << m_mass
-                      << " -----------------------" << std::endl;
-  m_log.information() << "w_l1 (FWHM)=" << wl2 << std::endl;
-  m_log.information() << "w_l0 (FWHM)=" << wl1 << std::endl;
-  m_log.information() << "w_theta (FWHM)=" << wtheta << std::endl;
-  m_log.information() << "w_foil_lorentz (FWHM)=" << m_lorentzFWHM << std::endl;
-  m_log.information() << "w_foil_gauss (FWHM)=" << wgauss << std::endl;
+                      << " -----------------------\n";
+  m_log.information() << "w_l1 (FWHM)=" << wl2 << '\n';
+  m_log.information() << "w_l0 (FWHM)=" << wl1 << '\n';
+  m_log.information() << "w_theta (FWHM)=" << wtheta << '\n';
+  m_log.information() << "w_foil_lorentz (FWHM)=" << m_lorentzFWHM << '\n';
+  m_log.information() << "w_foil_gauss (FWHM)=" << wgauss << '\n';
 }
 
 void VesuvioResolution::function1D(double *out, const double *xValues,

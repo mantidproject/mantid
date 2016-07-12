@@ -49,9 +49,6 @@ private:
 
 public:
   Algebra();
-  Algebra(const Algebra &);
-  Algebra &operator=(const Algebra &);
-  ~Algebra();
 
   /// Accessor
   const Acomp &getComp() const { return F; }

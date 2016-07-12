@@ -1,14 +1,14 @@
 #include "MantidMDAlgorithms/ConvertToDetectorFaceMD.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Strings.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/System.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/ArrayProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -21,18 +21,6 @@ namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToDetectorFaceMD)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertToDetectorFaceMD::ConvertToDetectorFaceMD()
-    : in_ws(), m_numXPixels(0), m_numYPixels(0), m_detID_to_WI(),
-      m_detID_to_WI_offset(0) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertToDetectorFaceMD::~ConvertToDetectorFaceMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -54,17 +42,18 @@ const std::string ConvertToDetectorFaceMD::category() const {
 /** Initialize the algorithm's properties.
  */
 void ConvertToDetectorFaceMD::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MatrixWorkspace.");
-  declareProperty(new ArrayProperty<int>("BankNumbers", Direction::Input),
-                  "A list of the bank numbers to convert. If empty, will use "
-                  "all banksMust have at least one entry.");
+  declareProperty(
+      make_unique<ArrayProperty<int>>("BankNumbers", Direction::Input),
+      "A list of the bank numbers to convert. If empty, will use "
+      "all banksMust have at least one entry.");
 
   // Now the box controller settings
   this->initBoxControllerProps("2", 200, 20);
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace.");
 }
@@ -86,7 +75,7 @@ void ConvertToDetectorFaceMD::convertEventList(
     boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS,
     size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum,
     uint16_t runIndex, int32_t detectorID) {
-  EventList &el = in_ws->getEventList(workspaceIndex);
+  EventList &el = in_ws->getSpectrum(workspaceIndex);
 
   // The 3/4D DataObjects that will be added into the MDEventWorkspce
   std::vector<MDE> out_events;
@@ -106,12 +95,13 @@ void ConvertToDetectorFaceMD::convertEventList(
     coord_t tof = static_cast<coord_t>(it->tof());
     if (nd == 3) {
       coord_t center[3] = {x, y, tof};
-      out_events.push_back(MDE(float(it->weight()), float(it->errorSquared()),
-                               runIndex, detectorID, center));
+      out_events.emplace_back(float(it->weight()), float(it->errorSquared()),
+                              runIndex, detectorID, center);
     } else if (nd == 4) {
       coord_t center[4] = {x, y, tof, bankNum};
-      out_events.push_back(MDE(float(it->weight()), float(it->errorSquared()),
-                               runIndex, detectorID, center));
+      out_events.emplace_back(static_cast<float>(it->weight()),
+                              static_cast<float>(it->errorSquared()), runIndex,
+                              detectorID, center);
     }
   }
 
@@ -140,10 +130,10 @@ ConvertToDetectorFaceMD::getBanks() {
     std::vector<IComponent_const_sptr> comps;
     inst->getChildren(comps, true);
 
-    for (size_t i = 0; i < comps.size(); i++) {
+    for (auto &comp : comps) {
       // Retrieve it
       RectangularDetector_const_sptr det =
-          boost::dynamic_pointer_cast<const RectangularDetector>(comps[i]);
+          boost::dynamic_pointer_cast<const RectangularDetector>(comp);
       if (det) {
         std::string name = det->getName();
         if (name.size() < 5)
@@ -152,25 +142,24 @@ ConvertToDetectorFaceMD::getBanks() {
         int bankNum;
         if (Mantid::Kernel::Strings::convert(bank, bankNum))
           banks[bankNum] = det;
-        g_log.debug() << "Found bank " << bank << "." << std::endl;
+        g_log.debug() << "Found bank " << bank << ".\n";
       }
     }
   } else {
     // -- Find detectors using the numbers given ---
-    for (auto bankNum = bankNums.begin(); bankNum != bankNums.end();
-         bankNum++) {
+    for (auto &bankNum : bankNums) {
       std::string bankName =
-          "bank" + Mantid::Kernel::Strings::toString(*bankNum);
+          "bank" + Mantid::Kernel::Strings::toString(bankNum);
       IComponent_const_sptr comp = inst->getComponentByName(bankName);
       RectangularDetector_const_sptr det =
           boost::dynamic_pointer_cast<const RectangularDetector>(comp);
       if (det)
-        banks[*bankNum] = det;
+        banks[bankNum] = det;
     }
   }
 
-  for (auto bank = banks.begin(); bank != banks.end(); bank++) {
-    RectangularDetector_const_sptr det = bank->second;
+  for (auto &bank : banks) {
+    RectangularDetector_const_sptr det = bank.second;
     // Track the largest detector
     if (det->xpixels() > m_numXPixels)
       m_numXPixels = det->xpixels();
@@ -197,8 +186,8 @@ void ConvertToDetectorFaceMD::exec() {
     throw std::runtime_error("InputWorkspace is not an EventWorkspace");
 
   // Fill the map, throw if there are grouped pixels.
-  in_ws->getDetectorIDToWorkspaceIndexVector(m_detID_to_WI,
-                                             m_detID_to_WI_offset, true);
+  m_detID_to_WI =
+      in_ws->getDetectorIDToWorkspaceIndexVector(m_detID_to_WI_offset, true);
 
   // Get the map of the banks we'll display
   std::map<int, RectangularDetector_const_sptr> banks = this->getBanks();
@@ -232,10 +221,7 @@ void ConvertToDetectorFaceMD::exec() {
       TOFname, TOFname, frameTOF, static_cast<coord_t>(tof_min),
       static_cast<coord_t>(tof_max), ax0->length()));
 
-  std::vector<IMDDimension_sptr> dims;
-  dims.push_back(dimX);
-  dims.push_back(dimY);
-  dims.push_back(dimTOF);
+  std::vector<IMDDimension_sptr> dims{dimX, dimY, dimTOF};
 
   if (banks.size() > 1) {
     Mantid::Geometry::GeneralFrame frameNumber(
@@ -268,9 +254,9 @@ void ConvertToDetectorFaceMD::exec() {
   uint16_t runIndex = outWS->addExperimentInfo(ei);
 
   // ---------------- Convert each bank --------------------------------------
-  for (auto it = banks.begin(); it != banks.end(); it++) {
-    int bankNum = it->first;
-    RectangularDetector_const_sptr det = it->second;
+  for (auto &bank : banks) {
+    int bankNum = bank.first;
+    RectangularDetector_const_sptr det = bank.second;
     for (int x = 0; x < det->xpixels(); x++)
       for (int y = 0; y < det->ypixels(); y++) {
         // Find the workspace index for this pixel coordinate
@@ -284,7 +270,7 @@ void ConvertToDetectorFaceMD::exec() {
         coord_t yPos = static_cast<coord_t>(y);
         coord_t bankPos = static_cast<coord_t>(bankNum);
 
-        EventList &el = in_ws->getEventList(wi);
+        EventList &el = in_ws->getSpectrum(wi);
 
         // We want to bind to the right templated function, so we have to know
         // the type of TofEvent contained in the EventList.

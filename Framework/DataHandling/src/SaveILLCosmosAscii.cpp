@@ -3,7 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SaveILLCosmosAscii.h"
 #include "MantidDataHandling/AsciiPointBase.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
+
 #include <fstream>
 
 namespace Mantid {
@@ -15,7 +18,7 @@ using namespace API;
 
 /// virtual method to set the extra properties required for this algorithm
 void SaveILLCosmosAscii::extraProps() {
-  declareProperty(new ArrayProperty<std::string>("LogList"),
+  declareProperty(make_unique<ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to file.");
   declareProperty("UserContact", "",
                   "Text to be written to the User-local contact field");
@@ -56,28 +59,28 @@ void SaveILLCosmosAscii::extraHeaders(std::ofstream &file) {
     endDT = "";
   }
 
-  file << "MFT" << std::endl;
-  file << "Instrument: " << instrument << std::endl;
-  file << "User-local contact: " << user << std::endl; // add optional property
-  file << "Title: " << title << std::endl;
-  file << "Subtitle: " << subtitle << std::endl;
-  file << "Start date + time: " << startDT << std::endl;
-  file << "End date + time: " << endDT << std::endl;
+  file << "MFT\n";
+  file << "Instrument: " << instrument << '\n';
+  file << "User-local contact: " << user << '\n'; // add optional property
+  file << "Title: " << title << '\n';
+  file << "Subtitle: " << subtitle << '\n';
+  file << "Start date + time: " << startDT << '\n';
+  file << "End date + time: " << endDT << '\n';
 
   const std::vector<std::string> logList = getProperty("LogList");
   /// logs
-  for (auto log = logList.begin(); log != logList.end(); ++log) {
-    file << boost::lexical_cast<std::string>(*log) << ": "
-         << boost::lexical_cast<std::string>(samp.getLogData(*log)->value())
-         << std::endl;
+  for (const auto &log : logList) {
+    file << boost::lexical_cast<std::string>(log) << ": "
+         << boost::lexical_cast<std::string>(samp.getLogData(log)->value())
+         << '\n';
   }
 
-  file << "Number of file format: 2" << std::endl;
-  file << "Number of data points:" << sep() << m_xlength << std::endl;
-  file << std::endl;
+  file << "Number of file format: 2\n";
+  file << "Number of data points:" << sep() << m_xlength << '\n';
+  file << '\n';
 
   file << sep() << "q" << sep() << "refl" << sep() << "refl_err" << sep()
-       << "q_res" << std::endl;
+       << "q_res\n";
 }
 } // namespace DataHandling
 } // namespace Mantid

@@ -5,6 +5,8 @@
 
 #include "MantidAlgorithms/RemoveMaskedSpectra.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using Mantid::Algorithms::RemoveMaskedSpectra;
@@ -88,7 +90,7 @@ private:
       }
       space->dataY(j).assign(nBins, double(j));
       space->dataE(j).assign(nBins, sqrt(double(j)));
-      space->getSpectrum(j)->setDetectorID(detid_t(j + 1));
+      space->getSpectrum(j).setDetectorID(detid_t(j + 1));
     }
     return space;
   }

@@ -5,6 +5,8 @@
 
 #include "MantidMDAlgorithms/IntegrateFlux.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include <numeric>
@@ -208,7 +210,7 @@ private:
     for (size_t i = i0; i < n; ++i) {
       TS_ASSERT_DELTA(y[i] / fun(x[i]), 1.0, tolerance);
       // std::cerr << x[i] << ' ' << fun(x[i])  << ' ' <<  y[i] << ' ' <<
-      // std::endl;
+      // '\n';
     }
 
     // Remove workspace from the data service.
@@ -354,7 +356,7 @@ private:
       *i = *(i - 1) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
-      ws->setX(spec, x);
+      ws->setBinEdges(spec, x);
       auto &y = ws->dataY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);
@@ -374,7 +376,7 @@ private:
       *i = tmp *(1.0 + 0.0001 * tmp) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
-      ws->setX(spec, x);
+      ws->setBinEdges(spec, x);
       auto &y = ws->dataY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);
@@ -393,15 +395,15 @@ private:
       *i = *(i - 1) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
-      ws->setX(spec, x);
+      ws->setBinEdges(spec, x);
       auto &y = ws->dataY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);
         *j = double(2 * i) + 1.0;
       }
-      // std::cerr << std::accumulate( y.begin(), y.end(), 0.0 ) << std::endl;
+      // std::cerr << std::accumulate( y.begin(), y.end(), 0.0 ) << '\n';
     }
-    ws->isDistribution(true);
+    ws->setDistribution(true);
     Mantid::API::AnalysisDataService::Instance().addOrReplace(wsName, ws);
   }
 
@@ -414,7 +416,7 @@ private:
       *i = *(i - 1) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
-      ws->setX(spec, x);
+      ws->setPoints(spec, x);
       auto &y = ws->dataY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);
@@ -434,7 +436,7 @@ private:
       *i = tmp *(1.0 + 0.0001 * tmp) + 0.3;
     }
     for (size_t spec = 0; spec != ws->getNumberHistograms(); ++spec) {
-      ws->setX(spec, x);
+      ws->setPoints(spec, x);
       auto &y = ws->dataY(spec);
       for (auto j = y.begin(); j != y.end(); ++j) {
         auto i = std::distance(y.begin(), j);

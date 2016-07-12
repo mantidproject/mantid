@@ -55,7 +55,7 @@ class FreeBlockTestPerformance : public CxxTest::TestSuite {
 public:
   std::vector<FreeBlock> blocks;
   size_t num;
-  void setUp() {
+  void setUp() override {
     num = 1000000;
     // Make a list where 1/3 of the blocks are adjacent
     for (size_t i = 0; i < num; i++)

@@ -22,8 +22,9 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include <boost/python/object.hpp> //Safer way to include Python.h
 #include <vector>
+
+#include <boost/python/object.hpp> //Safer way to include Python.h
 
 namespace Mantid {
 namespace API {

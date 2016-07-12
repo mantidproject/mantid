@@ -44,10 +44,10 @@ public:
     declareParameter("s", 1.);
   }
 
-  std::string name() const { return "CurveFittingGauss"; }
+  std::string name() const override { return "CurveFittingGauss"; }
 
   void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const {
+                     const size_t nData) const override {
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
@@ -57,7 +57,7 @@ public:
     }
   }
   void functionDerivLocal(Jacobian *out, const double *xValues,
-                          const size_t nData) {
+                          const size_t nData) override {
     // throw Mantid::Kernel::Exception::NotImplementedError("");
     double c = getParameter("c");
     double h = getParameter("h");
@@ -71,16 +71,16 @@ public:
     }
   }
 
-  double centre() const { return getParameter(0); }
+  double centre() const override { return getParameter(0); }
 
-  double height() const { return getParameter(1); }
+  double height() const override { return getParameter(1); }
 
-  double fwhm() const { return getParameter(2); }
+  double fwhm() const override { return getParameter(2); }
 
-  void setCentre(const double c) { setParameter(0, c); }
-  void setHeight(const double h) { setParameter(1, h); }
+  void setCentre(const double c) override { setParameter(0, c); }
+  void setHeight(const double h) override { setParameter(1, h); }
 
-  void setFwhm(const double w) { setParameter(2, w); }
+  void setFwhm(const double w) override { setParameter(2, w); }
 };
 
 class CurveFittingLinear : public ParamFunction, public IFunction1D {
@@ -90,10 +90,10 @@ public:
     declareParameter("b");
   }
 
-  std::string name() const { return "CurveFittingLinear"; }
+  std::string name() const override { return "CurveFittingLinear"; }
 
   void function1D(double *out, const double *xValues,
-                  const size_t nData) const {
+                  const size_t nData) const override {
     double a = getParameter("a");
     double b = getParameter("b");
     for (size_t i = 0; i < nData; i++) {
@@ -101,7 +101,7 @@ public:
     }
   }
   void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) {
+                       const size_t nData) override {
     // throw Mantid::Kernel::Exception::NotImplementedError("");
     for (size_t i = 0; i < nData; i++) {
       out->set(i, 0, 1.);
@@ -142,16 +142,20 @@ public:
     FrameworkManager::Instance();
   }
 
-  ~CompositeFunctionTest() {
+  ~CompositeFunctionTest() override {
     Mantid::Kernel::ConfigService::Instance().setString(
         "curvefitting.peakRadius", m_preSetupPeakRadius);
   }
 
   void testFit() {
-    boost::shared_ptr<CompositeFunction> mfun(new CompositeFunction());
-    boost::shared_ptr<CurveFittingGauss> g1(new CurveFittingGauss());
-    boost::shared_ptr<CurveFittingGauss> g2(new CurveFittingGauss());
-    boost::shared_ptr<CurveFittingLinear> bk(new CurveFittingLinear());
+    boost::shared_ptr<CompositeFunction> mfun =
+        boost::make_shared<CompositeFunction>();
+    boost::shared_ptr<CurveFittingGauss> g1 =
+        boost::make_shared<CurveFittingGauss>();
+    boost::shared_ptr<CurveFittingGauss> g2 =
+        boost::make_shared<CurveFittingGauss>();
+    boost::shared_ptr<CurveFittingLinear> bk =
+        boost::make_shared<CurveFittingLinear>();
 
     mfun->addFunction(bk);
     mfun->addFunction(g1);
@@ -290,20 +294,22 @@ public:
     values->setFitData(y);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<CompositeFunction> mfun(new CompositeFunction);
+    boost::shared_ptr<CompositeFunction> mfun =
+        boost::make_shared<CompositeFunction>();
 
-    boost::shared_ptr<UserFunction> fun1(new UserFunction);
+    boost::shared_ptr<UserFunction> fun1 = boost::make_shared<UserFunction>();
     fun1->setAttributeValue("Formula", "a*x");
     fun1->setParameter("a", 1.1);
 
-    boost::shared_ptr<UserFunction> fun2(new UserFunction);
+    boost::shared_ptr<UserFunction> fun2 = boost::make_shared<UserFunction>();
     fun2->setAttributeValue("Formula", "0*x + b");
     fun2->setParameter("b", 2.2);
 
     mfun->addFunction(fun1);
     mfun->addFunction(fun2);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(mfun, domain, values);
 
     SimplexMinimizer s;
@@ -327,13 +333,14 @@ public:
     values->setFitData(y);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<CompositeFunction> mfun(new CompositeFunction);
+    boost::shared_ptr<CompositeFunction> mfun =
+        boost::make_shared<CompositeFunction>();
 
-    boost::shared_ptr<UserFunction> fun1(new UserFunction);
+    boost::shared_ptr<UserFunction> fun1 = boost::make_shared<UserFunction>();
     fun1->setAttributeValue("Formula", "a*x");
     fun1->setParameter("a", 1.1);
 
-    boost::shared_ptr<UserFunction> fun2(new UserFunction);
+    boost::shared_ptr<UserFunction> fun2 = boost::make_shared<UserFunction>();
     fun2->setAttributeValue("Formula", "c*x^2 + b");
     fun2->setParameter("c", 0.00);
     fun2->setParameter("b", 2.2);
@@ -341,7 +348,8 @@ public:
     mfun->addFunction(fun1);
     mfun->addFunction(fun2);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(mfun, domain, values);
 
     BFGS_Minimizer s;
@@ -368,13 +376,14 @@ public:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    boost::shared_ptr<CompositeFunction> mfun(new CompositeFunction);
+    boost::shared_ptr<CompositeFunction> mfun =
+        boost::make_shared<CompositeFunction>();
 
-    boost::shared_ptr<UserFunction> fun1(new UserFunction);
+    boost::shared_ptr<UserFunction> fun1 = boost::make_shared<UserFunction>();
     fun1->setAttributeValue("Formula", "a*x");
     fun1->setParameter("a", 1.1);
 
-    boost::shared_ptr<UserFunction> fun2(new UserFunction);
+    boost::shared_ptr<UserFunction> fun2 = boost::make_shared<UserFunction>();
     fun2->setAttributeValue("Formula", "c*x^2 + b");
     fun2->setParameter("c", 0.00);
     fun2->setParameter("b", 2.2);
@@ -382,7 +391,8 @@ public:
     mfun->addFunction(fun1);
     mfun->addFunction(fun2);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(mfun, domain, values);
 
     LevenbergMarquardtMDMinimizer s;

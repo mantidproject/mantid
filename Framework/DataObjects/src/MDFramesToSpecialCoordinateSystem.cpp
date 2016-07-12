@@ -6,10 +6,6 @@
 namespace Mantid {
 namespace DataObjects {
 
-MDFramesToSpecialCoordinateSystem::MDFramesToSpecialCoordinateSystem() {}
-
-MDFramesToSpecialCoordinateSystem::~MDFramesToSpecialCoordinateSystem() {}
-
 /**
  * Get the Special Coordinate System based on the MDFrame information.
  * @param workspace: the workspace which is being queried

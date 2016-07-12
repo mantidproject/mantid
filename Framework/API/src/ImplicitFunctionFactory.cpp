@@ -12,9 +12,6 @@
 
 namespace Mantid {
 namespace API {
-ImplicitFunctionFactoryImpl::ImplicitFunctionFactoryImpl() {}
-
-ImplicitFunctionFactoryImpl::~ImplicitFunctionFactoryImpl() {}
 
 Mantid::Geometry::MDImplicitFunction_sptr
 ImplicitFunctionFactoryImpl::create(const std::string &className) const {

@@ -1,8 +1,9 @@
-#include "MantidKernel/Material.h"
-#include "MantidKernel/Unit.h"
-
 #include "MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
+
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Material.h"
+#include "MantidKernel/Unit.h"
 
 #include <QRegExpValidator>
 

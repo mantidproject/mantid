@@ -1,5 +1,5 @@
-#pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
+# pylint: disable=invalid-name, protected-access, super-on-old-class
+from PyQt4 import QtGui, QtCore
 import os
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
@@ -12,9 +12,12 @@ from mantid.api import AnalysisDataService
 from LargeScaleStructures.data_stitching import DataSet, Stitcher, RangeSelector
 
 from reduction_gui.reduction.scripter import BaseScriptElement
+
+
 class StitcherState(BaseScriptElement):
     def __init__(self):
         pass
+
 
 class StitcherWidget(BaseWidget):
     """
@@ -108,38 +111,38 @@ class StitcherWidget(BaseWidget):
         g.setExclusive(True)
         self._content.low_radio.setChecked(True)
 
-        self._content.low_q_combo.insertItem(0,"")
+        self._content.low_q_combo.insertItem(0, "")
         self.populate_combobox(self._content.low_q_combo)
         self._content.low_q_combo.setEditable(True)
 
-        self._content.medium_q_combo.insertItem(0,"")
+        self._content.medium_q_combo.insertItem(0, "")
         self.populate_combobox(self._content.medium_q_combo)
         self._content.medium_q_combo.setEditable(True)
 
-        self._content.high_q_combo.insertItem(0,"")
+        self._content.high_q_combo.insertItem(0, "")
         self.populate_combobox(self._content.high_q_combo)
         self._content.high_q_combo.setEditable(True)
-
+        # pylint: disable = no-self-argument
         class ShowEventFilter(QtCore.QObject):
             def eventFilter(obj_self, filteredObj, event):
                 if event.type() == QtCore.QEvent.HoverEnter:
                     self.populate_combobox(filteredObj)
                     filteredObj.update()
                 elif event.type() == QtCore.QEvent.KeyPress:
-                    if filteredObj==self._content.low_q_combo:
+                    if filteredObj == self._content.low_q_combo:
                         self._low_q_modified = True
-                    elif filteredObj==self._content.medium_q_combo:
+                    elif filteredObj == self._content.medium_q_combo:
                         self._medium_q_modified = True
-                    elif filteredObj==self._content.high_q_combo:
+                    elif filteredObj == self._content.high_q_combo:
                         self._high_q_modified = True
 
                     if event.key() == QtCore.Qt.Key_Return or event.key() == QtCore.Qt.Key_Enter:
                         filteredObj.setItemText(0, filteredObj.lineEdit().text())
-                        if filteredObj==self._content.low_q_combo:
+                        if filteredObj == self._content.low_q_combo:
                             self._update_low_q()
-                        elif filteredObj==self._content.medium_q_combo:
+                        elif filteredObj == self._content.medium_q_combo:
                             self._update_medium_q()
-                        elif filteredObj==self._content.high_q_combo:
+                        elif filteredObj == self._content.high_q_combo:
                             self._update_high_q()
                         return True
 
@@ -152,12 +155,12 @@ class StitcherWidget(BaseWidget):
 
     def populate_combobox(self, combo):
         ws_list = AnalysisDataService.getObjectNames()
-        for ws in ws_list:
-            ws_object = AnalysisDataService.retrieve(ws)
-            if not ws.startswith("__") and combo.findText(ws)<0\
-             and hasattr(ws_object, "getNumberHistograms")\
-             and  ws_object.getNumberHistograms()==1:
-                combo.addItem(ws)
+        for _ws in ws_list:
+            ws_object = AnalysisDataService.retrieve(_ws)
+            if not _ws.startswith("__") and combo.findText(_ws) < 0 \
+                    and hasattr(ws_object, "getNumberHistograms") \
+                    and ws_object.getNumberHistograms() == 1:
+                combo.addItem(_ws)
 
     def _update_low_scale(self):
         """
@@ -188,6 +191,7 @@ class StitcherWidget(BaseWidget):
             def call_back(xmin, xmax):
                 self._content.low_min_edit.setText("%-6.3g" % xmin)
                 self._content.low_max_edit.setText("%-6.3g" % xmax)
+
             ws_list = []
             if self._low_q_data is not None:
                 ws_list.append(str(self._low_q_data))
@@ -203,6 +207,7 @@ class StitcherWidget(BaseWidget):
             def call_back(xmin, xmax):
                 self._content.medium_min_edit.setText("%-6.3g" % xmin)
                 self._content.medium_max_edit.setText("%-6.3g" % xmax)
+
             ws_list = []
             if self._medium_q_data is not None:
                 ws_list.append(str(self._medium_q_data))
@@ -243,32 +248,33 @@ class StitcherWidget(BaseWidget):
         """
         data_object = None
 
-        file = str(dataset_control.lineEdit().text())
-        if len(file.strip())==0:
+        file_in = str(dataset_control.lineEdit().text())
+        if len(file_in.strip()) == 0:
             data_object = None
-        elif os.path.isfile(file) or AnalysisDataService.doesExist(file):
-            data_object = DataSet(file)
+        elif os.path.isfile(file_in) or AnalysisDataService.doesExist(file_in):
+            data_object = DataSet(file_in)
             try:
                 data_object.load(True)
-            except:
+            except (StandardError, Warning):
                 data_object = None
                 util.set_valid(dataset_control.lineEdit(), False)
-                QtGui.QMessageBox.warning(self, "Error loading file", "Could not load %s.\nMake sure you pick the XML output from the reduction." % file)
+                QtGui.QMessageBox.warning(self, "Error loading file",
+                                          "Could not load %s.\nMake sure you pick the XML output from the reduction." % file_in)
                 return
             if min_control is not None and max_control is not None \
-                and (len(min_control.text())==0 or len(max_control.text())==0):
+                    and (len(min_control.text()) == 0 or len(max_control.text()) == 0):
                 minx, maxx = data_object.get_range()
                 min_control.setText("%-6.3g" % minx)
                 max_control.setText("%-6.3g" % maxx)
 
             # Set the reference scale, unless we just loaded the data
-            if len(scale_control.text())==0:
+            if len(scale_control.text()) == 0:
                 scale_control.setText("1.0")
             else:
                 scale = util._check_and_get_float_line_edit(scale_control)
                 data_object.set_scale(scale)
 
-            npts = data_object.get_number_of_points()
+            _npts = data_object.get_number_of_points()
             util.set_valid(dataset_control.lineEdit(), True)
         else:
             data_object = None
@@ -277,7 +283,7 @@ class StitcherWidget(BaseWidget):
 
         return data_object
 
-    def _update_low_q(self, ws=None):
+    def _update_low_q(self, _ws=None):
         """
             Update Low-Q data set
         """
@@ -287,7 +293,7 @@ class StitcherWidget(BaseWidget):
                                             self._content.low_scale_edit)
         self._low_q_modified = False
 
-    def _update_medium_q(self, ws=None):
+    def _update_medium_q(self, _ws=None):
         """
             Update Medium-Q data set
         """
@@ -297,7 +303,7 @@ class StitcherWidget(BaseWidget):
                                                self._content.medium_scale_edit)
         self._medium_q_modified = False
 
-    def _update_high_q(self, ws=None):
+    def _update_high_q(self, _ws=None):
         """
             Update High-Q data set
         """
@@ -307,20 +313,21 @@ class StitcherWidget(BaseWidget):
                                              self._content.high_scale_edit)
         self._high_q_modified = False
 
-        file = str(self._content.high_q_combo.lineEdit().text())
-        if len(file.strip())==0:
+        file_in = str(self._content.high_q_combo.lineEdit().text())
+        if len(file_in.strip()) == 0:
             self._high_q_data = None
-        elif os.path.isfile(file) or AnalysisDataService.doesExist(file):
-            self._high_q_data = DataSet(file)
+        elif os.path.isfile(file_in) or AnalysisDataService.doesExist(file_in):
+            self._high_q_data = DataSet(file_in)
             try:
                 self._high_q_data.load(True)
-            except:
+            except (StandardError, Warning):
                 self._high_q_data = None
                 util.set_valid(self._content.high_q_combo.lineEdit(), False)
-                QtGui.QMessageBox.warning(self, "Error loading file", "Could not load %s.\nMake sure you pick the XML output from the reduction." % file)
+                QtGui.QMessageBox.warning(self, "Error loading file",
+                                          "Could not load %s.\nMake sure you pick the XML output from the reduction." % file_in)
                 return
             self._content.high_scale_edit.setText("1.0")
-            npts = self._high_q_data.get_number_of_points()
+            _npts = self._high_q_data.get_number_of_points()
             util.set_valid(self._content.high_q_combo.lineEdit(), True)
         else:
             self._high_q_data = None
@@ -335,7 +342,8 @@ class StitcherWidget(BaseWidget):
             self._output_dir = os.path.expanduser("~")
         fname = QtCore.QFileInfo(QtGui.QFileDialog.getOpenFileName(self, title,
                                                                    self._output_dir,
-                                                                   "Reduced XML files (*.xml);; Reduced Nexus files (*.nxs);; All files (*.*)")).filePath()
+                                                                   "Reduced XML files (*.xml);; Reduced Nexus files"
+                                                                   " (*.nxs);; All files (*.*)")).filePath()
         if fname:
             # Store the location of the loaded file
             self._output_dir = str(QtCore.QFileInfo(fname).path())
@@ -347,7 +355,7 @@ class StitcherWidget(BaseWidget):
         """
         fname = self.data_browse_dialog()
         if fname:
-            self._content.low_q_combo.setItemText(0,fname)
+            self._content.low_q_combo.setItemText(0, fname)
             self._content.low_q_combo.setCurrentIndex(0)
             self._update_low_q()
 
@@ -357,7 +365,7 @@ class StitcherWidget(BaseWidget):
         """
         fname = self.data_browse_dialog()
         if fname:
-            self._content.medium_q_combo.setItemText(0,fname)
+            self._content.medium_q_combo.setItemText(0, fname)
             self._content.medium_q_combo.setCurrentIndex(0)
             self._update_medium_q()
 
@@ -367,7 +375,7 @@ class StitcherWidget(BaseWidget):
         """
         fname = self.data_browse_dialog()
         if fname:
-            self._content.high_q_combo.setItemText(0,fname)
+            self._content.high_q_combo.setItemText(0, fname)
             self._content.high_q_combo.setCurrentIndex(0)
             self._update_high_q()
 
@@ -386,7 +394,7 @@ class StitcherWidget(BaseWidget):
             @param key: key string
             @param value: value string
         """
-        if key=="OUTPUT_DIR":
+        if key == "OUTPUT_DIR":
             self._output_dir = value
 
     def _apply(self):
@@ -405,28 +413,28 @@ class StitcherWidget(BaseWidget):
         if self._low_q_data is not None:
             xmin = util._check_and_get_float_line_edit(self._content.low_min_edit)
             xmax = util._check_and_get_float_line_edit(self._content.low_max_edit)
-            self._low_q_data.set_range(xmin,xmax)
+            self._low_q_data.set_range(xmin, xmax)
             s.append(self._low_q_data)
-            if self._referenceID==0:
+            if self._referenceID == 0:
                 scale = util._check_and_get_float_line_edit(self._content.low_scale_edit)
                 self._low_q_data.set_scale(scale)
 
         if self._medium_q_data is not None:
             s.append(self._medium_q_data)
-            if self._referenceID==1:
+            if self._referenceID == 1:
                 scale = util._check_and_get_float_line_edit(self._content.medium_scale_edit)
                 self._medium_q_data.set_scale(scale)
 
         if self._high_q_data is not None:
             xmin = util._check_and_get_float_line_edit(self._content.medium_min_edit)
             xmax = util._check_and_get_float_line_edit(self._content.medium_max_edit)
-            self._high_q_data.set_range(xmin,xmax)
+            self._high_q_data.set_range(xmin, xmax)
             s.append(self._high_q_data)
-            if self._referenceID==2:
+            if self._referenceID == 2:
                 scale = util._check_and_get_float_line_edit(self._content.high_scale_edit)
                 self._high_q_data.set_scale(scale)
 
-        if s.size()==0:
+        if s.size() == 0:
             return
 
         s.set_reference(self._referenceID)
@@ -455,23 +463,23 @@ class StitcherWidget(BaseWidget):
 
         ws_list = []
         if self._low_q_data is not None:
-            xmin,_ = self._low_q_data.get_skipped_range()
+            xmin, _ = self._low_q_data.get_skipped_range()
             self._low_q_data.apply_scale(xmin, low_xmax)
             ws_list.append(self._low_q_data.get_scaled_ws())
 
         if self._medium_q_data is not None:
-            _,xmax = self._medium_q_data.get_skipped_range()
+            _, xmax = self._medium_q_data.get_skipped_range()
             if self._high_q_data is not None:
                 xmax = med_xmax
             self._medium_q_data.apply_scale(low_xmin, xmax)
             ws_list.append(self._medium_q_data.get_scaled_ws())
 
         if self._high_q_data is not None:
-            _,xmax = self._high_q_data.get_skipped_range()
+            _, xmax = self._high_q_data.get_skipped_range()
             self._high_q_data.apply_scale(med_xmin, xmax)
             ws_list.append(self._high_q_data.get_scaled_ws())
 
-        if len(ws_list)>0:
+        if len(ws_list) > 0:
             g = mantidplot.graph(self._graph)
             if g is None or not self._plotted:
                 g = mantidplot.plotSpectrum(ws_list, [0], True)
@@ -489,7 +497,7 @@ class StitcherWidget(BaseWidget):
                                                            self._output_dir,
                                                            "Data Files (*.xml)")
             fname = str(QtCore.QFileInfo(fname_qstr).filePath())
-            if len(fname)>0:
+            if len(fname) > 0:
                 if fname.endswith('.xml'):
                     self._stitcher.save_combined(fname, as_canSAS=True)
                 elif fname.endswith('.txt'):

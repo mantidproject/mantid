@@ -24,7 +24,7 @@ public:
     factory.subscribe<MockILiveListener>("MockILiveListener");
   }
 
-  void setUp() {
+  void setUp() override {
     auto &config = Kernel::ConfigService::Instance();
     Poco::Path testFile =
         Poco::Path(config.getInstrumentDirectory())
@@ -33,7 +33,7 @@ public:
     config.updateFacilities(testFile.toString());
   }
 
-  void tearDown() {
+  void tearDown() override {
     // Restore the main facilities file
     Kernel::ConfigService::Instance()
         .updateFacilities(); // no file loads the default

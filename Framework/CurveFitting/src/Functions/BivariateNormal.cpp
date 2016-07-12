@@ -1,17 +1,17 @@
 #include "MantidCurveFitting/Functions/BivariateNormal.h"
-#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ParameterTie.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
-#include <fstream>
 #include <algorithm>
-#include <math.h>
+#include <boost/shared_ptr.hpp>
+#include <cmath>
+#include <cstdio>
+#include <fstream>
 #include <sstream>
 #include <string>
-#include <cstdio>
 
 using namespace Mantid::API;
 
@@ -56,7 +56,7 @@ BivariateNormal::BivariateNormal()
     : API::ParamFunction(), CalcVxx(false), CalcVyy(false), CalcVxy(false),
       NCells(0), CalcVariances(false), mIx(0.0), mx(0.0), mIy(0.0), my(0.0),
       SIxx(0.0), SIyy(0.0), SIxy(0.0), Sxx(0.0), Syy(0.0), Sxy(0.0), TotI(0.0),
-      TotN(0.0), Varx0(-1.0), Vary0(-1.0), expVals(NULL), uu(0.0),
+      TotN(0.0), Varx0(-1.0), Vary0(-1.0), expVals(nullptr), uu(0.0),
       coefNorm(0.0), expCoeffx2(0.0), expCoeffy2(0.0), expCoeffxy(0.0) {
   LastParams[IVXX] = -1;
   Varx0 = -1;
@@ -104,7 +104,7 @@ void BivariateNormal::function1D(double *out, const double *xValues,
     inf << "," << getParameter(k);
   if (nParams() < 6)
     inf << "," << Varxx << "," << Varyy << "," << Varxy;
-  inf << std::endl;
+  inf << '\n';
 
   NCells = std::min<int>(static_cast<int>(nData), NCells);
 
@@ -153,9 +153,7 @@ void BivariateNormal::function1D(double *out, const double *xValues,
     if (constr)
       inf << i << "=" << constr->check() << ";";
   }
-  inf << std::endl;
-  inf << std::endl
-      << "    chiSq =" << chiSq << "     nData " << nData << std::endl;
+  inf << "\n\n    chiSq =" << chiSq << "     nData " << nData << '\n';
   g_log.debug(inf.str());
 }
 
@@ -171,7 +169,7 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
   inf << "***penalty(" << penDeriv << "),Parameters=";
   for (size_t k = 0; k < 7; k++)
     inf << "," << LastParams[k];
-  inf << std::endl;
+  inf << '\n';
   g_log.debug(inf.str());
 
   std::vector<double> outf(nData, 0.0);
@@ -471,7 +469,7 @@ double BivariateNormal::initCommon() {
 
     // CommonsOK = false;
 
-    if (getConstraint(0) == NULL) {
+    if (getConstraint(0) == nullptr) {
 
       addConstraint((new BoundaryConstraint(this, "Background", 0,
                                             Attrib[S_int] / Attrib[S_1])));
@@ -482,20 +480,20 @@ double BivariateNormal::initCommon() {
     if (maxIntensity < 100)
       maxIntensity = 100;
 
-    if (getConstraint(1) == NULL) {
+    if (getConstraint(1) == nullptr) {
       addConstraint(new BoundaryConstraint(this, "Intensity", 0, maxIntensity));
     }
 
     double minMeany = MinY * .9 + .1 * MaxY;
     double maxMeany = MinY * .1 + .9 * MaxY;
 
-    if (getConstraint(3) == NULL) {
+    if (getConstraint(3) == nullptr) {
       addConstraint(new BoundaryConstraint(this, "Mrow", minMeany, maxMeany));
     }
 
     double minMeanx = MinX * .9 + .1 * MaxX;
     double maxMeanx = MinX * .1 + .9 * MaxX;
-    if (getConstraint(2) == NULL) {
+    if (getConstraint(2) == nullptr) {
       addConstraint(new BoundaryConstraint(this, "Mcol", minMeanx, maxMeanx));
     }
 
@@ -508,7 +506,7 @@ double BivariateNormal::initCommon() {
            << Attrib[S_1] << ")/(" << (Attrib[S_int]) << "-Background*"
            << (Attrib[S_1]) << ")";
 
-      if (getTie(IVYY) == NULL) {
+      if (getTie(IVYY) == nullptr) {
         tie("SSrow", ssyy.str());
         CalcVxx = true;
       }
@@ -519,7 +517,7 @@ double BivariateNormal::initCommon() {
            << Attrib[S_1] << ")/(" << (Attrib[S_int]) << "-Background*"
            << (Attrib[S_1]) << ")";
 
-      if (getTie(IVXX) == NULL) {
+      if (getTie(IVXX) == nullptr) {
         tie("SScol", ssxx.str());
         CalcVyy = true;
       }
@@ -530,7 +528,7 @@ double BivariateNormal::initCommon() {
            << Attrib[S_1] << ")/(" << (Attrib[S_int]) << "-Background*"
            << (Attrib[S_1]) << ")";
 
-      if (getTie(IVXY) == NULL) {
+      if (getTie(IVXY) == nullptr) {
         tie("SSrc", ssxy.str());
         CalcVxy = true;
       }

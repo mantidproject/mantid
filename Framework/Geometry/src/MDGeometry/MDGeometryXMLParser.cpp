@@ -51,11 +51,11 @@ void MDGeometryXMLParser::execute() {
   Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(m_xmlToProcess);
   Poco::XML::Element *pRootElem = pDoc->documentElement();
   // Apply root node checking if supplied.
-  Poco::XML::Element *geometryXMLElement = NULL;
+  Poco::XML::Element *geometryXMLElement = nullptr;
   if (!m_rootNodeName.empty()) {
     Poco::XML::Element *temp = pRootElem->getChildElement(m_rootNodeName);
     geometryXMLElement = temp;
-    if (geometryXMLElement == NULL) {
+    if (geometryXMLElement == nullptr) {
       std::string message =
           "Root node was not found to be the expected value of " +
           m_rootNodeName;
@@ -173,11 +173,6 @@ MDGeometryXMLParser::MDGeometryXMLParser()
     : m_executed(false), m_xmlToProcess("") {}
 
 /**
-Destructor
-*/
-MDGeometryXMLParser::~MDGeometryXMLParser() {}
-
-/**
 Getter for x dimension
 @return x dimension.
 */
@@ -266,7 +261,7 @@ MDGeometryXMLParser::getAllDimensions() const {
 */
 bool MDGeometryXMLParser::hasXDimension() const {
   validate();
-  return NULL != m_xDimension.get();
+  return nullptr != m_xDimension.get();
 }
 
 /**
@@ -275,7 +270,7 @@ bool MDGeometryXMLParser::hasXDimension() const {
 */
 bool MDGeometryXMLParser::hasYDimension() const {
   validate();
-  return NULL != m_yDimension.get();
+  return nullptr != m_yDimension.get();
 }
 
 /**
@@ -284,7 +279,7 @@ bool MDGeometryXMLParser::hasYDimension() const {
 */
 bool MDGeometryXMLParser::hasZDimension() const {
   validate();
-  return NULL != m_zDimension.get();
+  return nullptr != m_zDimension.get();
 }
 
 /**
@@ -293,7 +288,7 @@ bool MDGeometryXMLParser::hasZDimension() const {
 */
 bool MDGeometryXMLParser::hasTDimension() const {
   validate();
-  return NULL != m_tDimension.get();
+  return nullptr != m_tDimension.get();
 }
 
 /**

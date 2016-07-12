@@ -8,7 +8,8 @@
  @author Owen Arnold, Tessella plc
  @date 07/07/2011
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -29,37 +30,32 @@
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-namespace Mantid
-{
-namespace VATES
-{
-class DLLExport NoThresholdRange : public ThresholdRange
-{
+namespace Mantid {
+namespace VATES {
+class DLLExport NoThresholdRange : public ThresholdRange {
 
 public:
-
   NoThresholdRange();
 
-  virtual void calculate();
+  void calculate() override;
 
-  virtual signal_t getMinimum() const;
+  signal_t getMinimum() const override;
 
-  virtual signal_t getMaximum() const;
+  signal_t getMaximum() const override;
 
-  ~NoThresholdRange();
+  ~NoThresholdRange() override;
 
-  virtual bool hasCalculated() const;
+  bool hasCalculated() const override;
 
-  virtual NoThresholdRange* clone() const;
+  NoThresholdRange *clone() const override;
 
-  virtual bool inRange(const signal_t& signal);
+  bool inRange(const signal_t &signal) override;
 
 private:
-  
   NoThresholdRange(signal_t min, signal_t max);
 
   signal_t m_min;
-  
+
   signal_t m_max;
 };
 }

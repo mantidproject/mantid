@@ -58,9 +58,5 @@ StringContainsValidator::checkValidity(const std::string &value) const {
   return error;
 }
 
-/** Destructor
- */
-StringContainsValidator::~StringContainsValidator() {}
-
 } // namespace Kernel
 } // namespace Mantid

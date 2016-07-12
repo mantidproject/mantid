@@ -82,16 +82,6 @@ using namespace ConnectedComponentMappingTypes;
 DECLARE_ALGORITHM(IntegratePeaksHybrid)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IntegratePeaksHybrid::IntegratePeaksHybrid() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IntegratePeaksHybrid::~IntegratePeaksHybrid() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string IntegratePeaksHybrid::name() const {
   return "IntegratePeaksHybrid";
@@ -109,20 +99,20 @@ const std::string IntegratePeaksHybrid::category() const {
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksHybrid::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Input md workspace.");
-  declareProperty(new WorkspaceProperty<IPeaksWorkspace>("PeaksWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+                      "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
   auto positiveIntValidator = boost::make_shared<BoundedValidator<int>>();
   positiveIntValidator->setExclusive(true);
   positiveIntValidator->setLower(0);
 
-  declareProperty(new PropertyWithValue<int>("NumberOfBins", 20,
-                                             positiveIntValidator,
-                                             Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<int>>("NumberOfBins", 20,
+                                                      positiveIntValidator,
+                                                      Direction::Input),
                   "Number of bins to use while creating each local image. "
                   "Defaults to 20. Increase to reduce pixelation");
 
@@ -133,17 +123,17 @@ void IntegratePeaksHybrid::init() {
   compositeValidator->add(positiveDoubleValidator);
   compositeValidator->add(boost::make_shared<MandatoryValidator<double>>());
 
-  declareProperty(new PropertyWithValue<double>("BackgroundOuterRadius", 0.0,
-                                                compositeValidator,
-                                                Direction::Input),
-                  "Background outer radius estimate. Choose liberal value.");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>(
+          "BackgroundOuterRadius", 0.0, compositeValidator, Direction::Input),
+      "Background outer radius estimate. Choose liberal value.");
 
-  declareProperty(new WorkspaceProperty<IPeaksWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output integrated peaks workspace.");
 
-  declareProperty(new WorkspaceProperty<WorkspaceGroup>("OutputWorkspaces", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "OutputWorkspaces", "", Direction::Output),
                   "MDHistoWorkspaces containing the labeled clusters used by "
                   "the algorithm.");
 }
@@ -164,7 +154,7 @@ void IntegratePeaksHybrid::exec() {
   const double peakOuterRadius = getProperty("BackgroundOuterRadius");
   const double halfPeakOuterRadius = peakOuterRadius / 2;
   if (peakWS != inPeakWS) {
-    peakWS = IPeaksWorkspace_sptr(inPeakWS->clone().release());
+    peakWS = inPeakWS->clone();
   }
 
   {
@@ -245,13 +235,13 @@ void IntegratePeaksHybrid::exec() {
     if (boost::math::isnan(signalValue)) {
       g_log.warning()
           << "Warning: image for integration is off edge of detector for peak "
-          << i << std::endl;
+          << i << '\n';
     } else if (signalValue <
                static_cast<Mantid::signal_t>(analysis.getStartLabelId())) {
       g_log.information() << "Peak: " << i
                           << " Has no corresponding cluster/blob detected on "
                              "the image. This could be down to your Threshold "
-                             "settings." << std::endl;
+                             "settings.\n";
     } else {
       const size_t labelIdAtPeak = static_cast<size_t>(signalValue);
       ICluster *const cluster = clusterMap[labelIdAtPeak].get();

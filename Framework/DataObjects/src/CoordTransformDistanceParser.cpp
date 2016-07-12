@@ -80,8 +80,5 @@ Mantid::API::CoordTransform *CoordTransformDistanceParser::createTransform(
 
   return transform;
 }
-
-/// Destructor
-CoordTransformDistanceParser::~CoordTransformDistanceParser() {}
 }
 }

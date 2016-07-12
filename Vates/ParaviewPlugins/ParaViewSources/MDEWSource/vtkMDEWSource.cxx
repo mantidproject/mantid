@@ -13,6 +13,7 @@
 
 #include "MantidVatesAPI/BoxInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
@@ -32,7 +33,7 @@ vtkStandardNewMacro(vtkMDEWSource)
 
     /// Constructor
     vtkMDEWSource::vtkMDEWSource()
-    : m_wsName(""), m_depth(1000), m_time(0), m_normalization(AutoSelect) {
+    : m_depth(1000), m_time(0), m_normalization(AutoSelect) {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
 }
@@ -72,14 +73,14 @@ void vtkMDEWSource::SetWsName(std::string name)
   themeselves.
   @return geometry xml const * char reference.
 */
-const char *vtkMDEWSource::GetInputGeometryXML() {
+std::string vtkMDEWSource::GetInputGeometryXML() {
   if (m_presenter == nullptr) {
-    return "";
+    return std::string();
   }
   try {
-    return m_presenter->getGeometryXML().c_str();
+    return m_presenter->getGeometryXML();
   } catch (std::runtime_error &) {
-    return "";
+    return std::string();
   }
 }
 
@@ -135,14 +136,14 @@ double vtkMDEWSource::GetMaxValue() {
  * Gets the (first) instrument which is associated with the workspace.
  * @return The name of the instrument.
  */
-const char *vtkMDEWSource::GetInstrument() {
+std::string vtkMDEWSource::GetInstrument() {
   if (nullptr == m_presenter) {
-    return "";
+    return std::string();
   }
   try {
-    return m_presenter->getInstrument().c_str();
+    return m_presenter->getInstrument();
   } catch (std::runtime_error &) {
-    return "";
+    return std::string();
   }
 }
 
@@ -208,7 +209,8 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
 
     try
     {
-      m_presenter->makeNonOrthogonal(output);
+      auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+      m_presenter->makeNonOrthogonal(output, std::move(workspaceProvider));
     }
     catch (std::invalid_argument &e)
     {
@@ -240,9 +242,10 @@ int vtkMDEWSource::RequestInformation(
       vtkErrorMacro(<< "Cannot fetch the specified workspace from Mantid ADS.");
     } else {
       // If the MDEvent workspace has had top level splitting applied to it,
-      // then use the a depth of 1
+      // then use the a deptgit stah of 1
+      auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
       if (auto split =
-              Mantid::VATES::findRecursionDepthForTopLevelSplitting(m_wsName)) {
+              Mantid::VATES::findRecursionDepthForTopLevelSplitting(m_wsName, std::move(workspaceProvider))) {
         SetDepth(split.get());
       }
 
@@ -319,21 +322,16 @@ void vtkMDEWSource::updateAlgorithmProgress(double progress, const std::string& 
 /*
 Getter for the workspace type name.
 */
-char *vtkMDEWSource::GetWorkspaceTypeName() {
+std::string vtkMDEWSource::GetWorkspaceTypeName() {
   if (m_presenter == nullptr) {
-    return const_cast<char *>("");
+    return std::string();
   }
   try {
     // Forward request on to MVP presenter
-    typeName = m_presenter->getWorkspaceTypeName();
-    return const_cast<char *>(typeName.c_str());
+    return m_presenter->getWorkspaceTypeName();
   } catch (std::runtime_error &) {
-    return const_cast<char *>("");
+    return std::string();
   }
 }
 
-const char* vtkMDEWSource::GetWorkspaceName()
-{
-  return m_wsName.c_str();
-}
-
+const std::string &vtkMDEWSource::GetWorkspaceName() { return m_wsName; }

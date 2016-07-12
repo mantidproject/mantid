@@ -25,20 +25,6 @@ Group::Group(const std::vector<SymmetryOperation> &symmetryOperations)
   setSymmetryOperations(symmetryOperations);
 }
 
-/// Copy constructor.
-Group::Group(const Group &other)
-    : m_allOperations(other.m_allOperations),
-      m_operationSet(other.m_operationSet), m_axisSystem(other.m_axisSystem) {}
-
-/// Assignment operator.
-Group &Group::operator=(const Group &other) {
-  m_allOperations = other.m_allOperations;
-  m_operationSet = other.m_operationSet;
-  m_axisSystem = other.m_axisSystem;
-
-  return *this;
-}
-
 /// Returns the order of the group, which is the number of symmetry operations.
 size_t Group::order() const { return m_allOperations.size(); }
 
@@ -71,11 +57,9 @@ Group Group::operator*(const Group &other) const {
   std::vector<SymmetryOperation> result;
   result.reserve(order() * other.order());
 
-  for (auto selfOp = m_allOperations.begin(); selfOp != m_allOperations.end();
-       ++selfOp) {
-    for (auto otherOp = other.m_allOperations.begin();
-         otherOp != other.m_allOperations.end(); ++otherOp) {
-      result.push_back((*selfOp) * (*otherOp));
+  for (const auto &operation : m_allOperations) {
+    for (const auto &otherOp : other.m_allOperations) {
+      result.push_back(operation * otherOp);
     }
   }
 
@@ -86,15 +70,63 @@ Group Group::operator*(const Group &other) const {
 /// operations, vectors are wrapped to [0, 1).
 std::vector<Kernel::V3D> Group::operator*(const Kernel::V3D &vector) const {
   std::vector<Kernel::V3D> result;
-
-  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
-    result.push_back(Geometry::getWrappedVector((*op) * vector));
+  result.reserve(m_allOperations.size());
+  for (const auto &operation : m_allOperations) {
+    result.push_back(Geometry::getWrappedVector(operation * vector));
   }
 
   std::sort(result.begin(), result.end(), AtomPositionsLessThan());
   result.erase(std::unique(result.begin(), result.end()), result.end());
 
   return result;
+}
+
+/**
+ * Returns true if the tensor is invariant under the group operations
+ *
+ * This method returns true if the supplied tensor is not changed by the
+ * group's symmetry operations. This is done by applying eq. 10 from [1],
+ *
+ *   G_i = W_i' * G * W_i
+ *
+ * where G is the tensor and W_i is the matrix of the i-th symmetry operation.
+ * If G_i == G holds for all i, the tensor is invariant with respect to the
+ * groups symmetry operations. To allow for floating point errors, a tolerance
+ * can be specified.
+ *
+ * One application of this method is to check whether a unit cell is compatible
+ * with the symmetry operations of a space group:
+ *
+ *   UnitCell cell(5, 5, 10);
+ *   SpaceGroup_const_sptr sg = SpaceGroupFactory::Instance()
+ *                                        .createSpaceGroup("F m -3 m");
+ *
+ *   // returns false:
+ *   sg->isTensorInvariant(cell.getG());
+ *
+ * This is expected, because the cell with a different length for c is not
+ * compatible with the restrictions imposed by cubic symmetry.
+ *
+ * [1] G. Rigault, Metric tensor and symmetry operations in crystallography,
+ *     http://www.iucr.org/education/pamphlets/10
+ *
+ * @param tensor :: Tensor to check.
+ * @param tolerance :: Tolerance for comparison of tensor equality.
+ * @return :: True if tensor is invariant.
+ */
+bool Group::isInvariant(const Kernel::DblMatrix &tensor,
+                        double tolerance) const {
+  auto transformTensor =
+      [](const Kernel::DblMatrix &opMatrix, const Kernel::DblMatrix &tensor) {
+        return opMatrix.Tprime() * tensor * opMatrix;
+      };
+
+  return std::all_of(m_allOperations.cbegin(), m_allOperations.cend(),
+                     [&](const SymmetryOperation &op) {
+                       return transformTensor(
+                                  convertMatrix<double>(op.matrix()), tensor)
+                           .equals(tensor, tolerance);
+                     });
 }
 
 /// Returns true if both groups contain the same set of symmetry operations.
@@ -144,12 +176,15 @@ bool Group::isGroup() const {
 /// empty.
 void Group::setSymmetryOperations(
     const std::vector<SymmetryOperation> &symmetryOperations) {
-  if (symmetryOperations.size() < 1) {
+  if (symmetryOperations.empty()) {
     throw std::invalid_argument("Group needs at least one element.");
   }
 
-  m_operationSet = std::set<SymmetryOperation>(symmetryOperations.begin(),
-                                               symmetryOperations.end());
+  m_operationSet.clear();
+  std::transform(symmetryOperations.cbegin(), symmetryOperations.cend(),
+                 std::inserter(m_operationSet, m_operationSet.begin()),
+                 &getUnitCellIntervalOperation);
+
   m_allOperations = std::vector<SymmetryOperation>(m_operationSet.begin(),
                                                    m_operationSet.end());
   m_axisSystem = getCoordinateSystemFromOperations(m_allOperations);
@@ -159,9 +194,8 @@ void Group::setSymmetryOperations(
 /// systems have 4 non-zero elements in the matrix, orthogonal have 6.
 Group::CoordinateSystem Group::getCoordinateSystemFromOperations(
     const std::vector<SymmetryOperation> &symmetryOperations) const {
-  for (auto op = symmetryOperations.begin(); op != symmetryOperations.end();
-       ++op) {
-    std::vector<int> matrix = (*op).matrix();
+  for (const auto &symmetryOperation : symmetryOperations) {
+    std::vector<int> matrix = symmetryOperation.matrix();
     if (std::count(matrix.begin(), matrix.end(), 0) == 5) {
       return Group::Hexagonal;
     }
@@ -199,8 +233,8 @@ bool Group::hasIdentity() const {
 /// Returns true if the inverse of each element is in the group
 bool Group::eachElementHasInverse() const {
   // Iterate through all operations, check that the inverse is in the group.
-  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
-    if (!containsOperation((*op).inverse())) {
+  for (const auto &operation : m_allOperations) {
+    if (!containsOperation(getUnitCellIntervalOperation(operation.inverse()))) {
       return false;
     }
   }

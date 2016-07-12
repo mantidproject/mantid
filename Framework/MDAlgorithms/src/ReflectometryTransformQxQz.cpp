@@ -5,11 +5,6 @@ using namespace Mantid::DataObjects;
 namespace Mantid {
 namespace MDAlgorithms {
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ReflectometryTransformQxQz::~ReflectometryTransformQxQz() {}
-
 /*
  Constructor
  @param qxMin: min qx value (extent)

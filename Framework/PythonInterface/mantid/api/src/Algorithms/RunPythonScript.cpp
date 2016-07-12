@@ -45,15 +45,15 @@ bool RunPythonScript::checkGroups() { return false; }
  */
 void RunPythonScript::init() {
   declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input,
-                                       PropertyMode::Optional),
+      Kernel::make_unique<WorkspaceProperty<Workspace>>(
+          "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "An input workspace that the python code will modify."
       "The workspace will be in the python variable named 'input'.");
   declareProperty("Code", "", "Python code (can be on multiple lines).",
                   boost::make_shared<MandatoryValidator<std::string>>());
   declareProperty(
-      new WorkspaceProperty<Workspace>("OutputWorkspace", "", Direction::Output,
-                                       PropertyMode::Optional),
+      Kernel::make_unique<WorkspaceProperty<Workspace>>(
+          "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
       "An output workspace to be produced by the python code."
       "The workspace will be in the python variable named 'output'.");
 }

@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMORECTOOLCONFIG_H_
 
 #include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -61,7 +62,7 @@ public:
    * present it is used in its simplest form: platform and machine
    * dependent full path to an execuatable or script.
    */
-  TomoRecToolConfig(const std::string &runnable="") : m_runnable(runnable) {}
+  TomoRecToolConfig(const std::string &runnable = "") : m_runnable(runnable) {}
 
   virtual ~TomoRecToolConfig() {}
 
@@ -73,6 +74,16 @@ public:
    * like it should be possible to run it.
    */
   virtual bool valid() const { return true; }
+
+  /// A vector of tomographic reconstruction algorithms described by a
+  /// name-in-tool and a human-readable-name
+  typedef std::vector<std::pair<std::string, std::string>> TomoReconAlgs;
+
+  virtual TomoReconAlgs algorithmsAvailable() const { return m_algs; };
+
+  virtual void appendOptions(std::string &opts) {
+    m_appendix = m_appendix + " " + opts;
+  };
 
   /**
    * Produce a command line to run this tool with this configuration.
@@ -100,6 +111,8 @@ public:
 
 protected:
   std::string m_runnable;
+  std::string m_appendix;
+  TomoReconAlgs m_algs;
 };
 
 } // namespace CustomInterfaces

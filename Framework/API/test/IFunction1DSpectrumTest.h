@@ -62,10 +62,10 @@ private:
     friend class IFunction1DSpectrumTest;
 
   public:
-    std::string name() const { return "ConcreteFunction1DSpectrum"; }
+    std::string name() const override { return "ConcreteFunction1DSpectrum"; }
 
     void function1DSpectrum(const FunctionDomain1DSpectrum &domain,
-                            FunctionValues &values) const {
+                            FunctionValues &values) const override {
       for (size_t i = 0; i < domain.size(); ++i) {
         values.addToCalculated(i, domain[i]);
       }

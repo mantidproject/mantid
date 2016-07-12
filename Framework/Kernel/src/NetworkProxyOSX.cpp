@@ -14,20 +14,20 @@ namespace Kernel {
 
 /**
  * Helper function to convert CFStringRefs to std::string
- * @param stringRef : CRFStringRef variable
- * @return std::string
+ * @param str : CRFStringRef variable
+ * @return std::string containing the contents of the input string
  */
-std::string toString(CFStringRef stringRef) {
-  std::string buffer;
-  const int max_size = 1000;
-  buffer.resize(max_size);
-  CFStringGetCString(stringRef, &buffer[0], max_size, kCFStringEncodingUTF8);
-  // Strip out whitespace
-  std::stringstream trimmer;
-  trimmer << buffer;
-  buffer.clear();
-  trimmer >> buffer;
-  return buffer;
+std::string toString(CFStringRef str) {
+  if (!str)
+    return std::string();
+  CFIndex length = CFStringGetLength(str);
+  const UniChar *chars = CFStringGetCharactersPtr(str);
+  if (chars)
+    return std::string(reinterpret_cast<const char *>(chars), length);
+
+  std::vector<UniChar> buffer(length);
+  CFStringGetCharacters(str, CFRangeMake(0, length), buffer.data());
+  return std::string(reinterpret_cast<const char *>(buffer.data()), length);
 }
 
 /**
@@ -109,13 +109,14 @@ ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict,
               dict, kSCPropNetProxiesProxyAutoConfigURLString));
       CFDataRef pacData;
       CFURLRef pacURL =
-          CFURLCreateWithString(kCFAllocatorDefault, cfPacLocation, NULL);
+          CFURLCreateWithString(kCFAllocatorDefault, cfPacLocation, nullptr);
       SInt32 errorCode;
-      if (!CFURLCreateDataAndPropertiesFromResource(
-              kCFAllocatorDefault, pacURL, &pacData, NULL, NULL, &errorCode)) {
+      if (!CFURLCreateDataAndPropertiesFromResource(kCFAllocatorDefault, pacURL,
+                                                    &pacData, nullptr, nullptr,
+                                                    &errorCode)) {
         logger.debug() << "Unable to get the PAC script at "
                        << toString(cfPacLocation) << "Error code: " << errorCode
-                       << std::endl;
+                       << '\n';
         return proxyInfoVec;
       }
 
@@ -123,8 +124,9 @@ ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict,
           kCFAllocatorDefault, pacData, kCFStringEncodingISOLatin1);
 
       CFURLRef targetURL = CFURLCreateWithBytes(
-          kCFAllocatorDefault, (UInt8 *)targetURLString.c_str(),
-          targetURLString.size(), kCFStringEncodingUTF8, NULL);
+          kCFAllocatorDefault, reinterpret_cast<UInt8 *>(
+                                   const_cast<char *>(targetURLString.c_str())),
+          targetURLString.size(), kCFStringEncodingUTF8, nullptr);
       if (!targetURL) {
         logger.debug("Problem with Target URI for proxy script");
         return proxyInfoVec;
@@ -138,8 +140,7 @@ ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict,
         std::string pacLocation = toString(cfPacLocation);
         CFStringRef pacErrorDescription = CFErrorCopyDescription(pacError);
         logger.debug() << "Execution of PAC script at \"%s\" failed: %s"
-                       << pacLocation << toString(pacErrorDescription)
-                       << std::endl;
+                       << pacLocation << toString(pacErrorDescription) << '\n';
       }
 
       CFIndex size = CFArrayGetCount(proxies);
@@ -210,7 +211,7 @@ ProxyInfo httpProxyFromSystem(CFDictionaryRef dict) {
 ProxyInfo findHttpProxy(const std::string &targetURLString,
                         Mantid::Kernel::Logger &logger) {
   ProxyInfo httpProxy;
-  CFDictionaryRef dict = SCDynamicStoreCopyProxies(NULL);
+  CFDictionaryRef dict = SCDynamicStoreCopyProxies(nullptr);
   if (!dict) {
     logger.debug("NetworkProxyOSX SCDynamicStoreCopyProxies returned NULL");
   }
@@ -219,11 +220,10 @@ ProxyInfo findHttpProxy(const std::string &targetURLString,
   ProxyInfoVec info = proxyInformationFromPac(dict, targetURLString, logger);
 
   bool foundHttpProxy = false;
-  for (auto it = info.begin(); it != info.end(); ++it) {
-    ProxyInfo proxyInfo = *it;
+  for (const auto &proxyInfo : info) {
     if (proxyInfo.isHttpProxy()) {
       foundHttpProxy = true;
-      httpProxy = *it;
+      httpProxy = proxyInfo;
       break;
     }
   }
@@ -247,11 +247,6 @@ ProxyInfo findHttpProxy(const std::string &targetURLString,
 /** Constructor
  */
 NetworkProxy::NetworkProxy() : m_logger("network_proxy_logger_osx") {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-NetworkProxy::~NetworkProxy() {}
 
 ProxyInfo NetworkProxy::getHttpProxy(const std::string &targetURLString) {
   return findHttpProxy(targetURLString, m_logger);

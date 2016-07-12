@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include <Poco/Mutex.h>
+#include <mutex>
 
 namespace Mantid {
 namespace DataHandling {
@@ -42,22 +42,22 @@ public:
   /// Default constructor
   Load();
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "Load"; }
+  const std::string name() const override { return "Load"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Attempts to load a given file by finding an appropriate Load "
            "algorithm.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Category
-  virtual const std::string category() const { return "DataHandling"; }
+  const std::string category() const override { return "DataHandling"; }
   /// Aliases
-  virtual const std::string alias() const { return "load"; }
+  const std::string alias() const override { return "load"; }
   /// Override setPropertyValue
-  virtual void setPropertyValue(const std::string &name,
-                                const std::string &value);
+  void setPropertyValue(const std::string &name,
+                        const std::string &value) override;
 
 private:
   /// This method returns shared pointer to a load algorithm which got
@@ -68,9 +68,9 @@ private:
   void declareLoaderProperties(const API::IAlgorithm_sptr &loader);
 
   /// Initialize the static base properties
-  void init();
+  void init() override;
   /// Execute
-  void exec();
+  void exec() override;
 
   /// Called when there is only one file to load.
   void loadSingleFile();
@@ -78,7 +78,7 @@ private:
   void loadMultipleFiles();
 
   /// Overrides the cancel() method to call m_loader->cancel()
-  void cancel();
+  void cancel() override;
   /// Create the concrete instance use for the actual loading.
   API::IAlgorithm_sptr createLoader(const double startProgress = -1.0,
                                     const double endProgress = -1.0,
@@ -105,14 +105,14 @@ private:
   groupWsList(const std::vector<API::Workspace_sptr> &wsList);
 
   /// The base properties
-  std::set<std::string> m_baseProps;
+  std::unordered_set<std::string> m_baseProps;
   /// The actual loader
   API::IAlgorithm_sptr m_loader;
   /// The name of the property that will be passed the property from our
   /// Filename
   std::string m_filenamePropName;
   /// Mutex for temporary fix for #5963
-  static Poco::Mutex m_mutex;
+  static std::recursive_mutex m_mutex;
 };
 
 } // namespace DataHandling

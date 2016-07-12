@@ -66,9 +66,6 @@ public:
       const std::string &eq, const Geometry::IComponent *comp,
       double angleConvertConst, const std::string &description);
 
-  /// Destructor
-  ~XMLInstrumentParameter() {}
-
   // XML attributes from instrument definition file or instrument parameter file
   const std::string m_logfileID; ///< logfile id
   const std::string m_value;     ///< rather then extracting value from logfile,

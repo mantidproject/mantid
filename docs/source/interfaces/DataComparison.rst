@@ -45,15 +45,15 @@ Data Table
   :align: right
 
 The data table shows a list of the current data shown on the plot including the
-workspace name and currently plotted spectrum index. This also allows the curve
+workspace name and currently plotted workspace index. This also allows the curve
 colour to be changed manually.
 
-This also allows a spectrum index offset to be set on a per workspace basis,
+This also allows a workspace index offset to be set on a per workspace basis,
 this allows workspaces to be aligned relative to each other in the venet that
-the spectra that you want to compare do not have the same spectrum index in each
+the spectra that you want to compare do not have the same workspace index in each
 workspace.
 
-The value of the offset for a workspace defines the spectrum index that the
+The value of the offset for a workspace defines the workspace index that the
 first spectum will line up to relative to the spectrum selection spin box. At
 least one offset value must be zero (this is set check for automatically after
 an offset value has been changed).
@@ -67,7 +67,7 @@ View
 
 The view section contains a set of tools for manipulating the plot and selecting
 spectra to plot via the *Spectrum* spin box, this is shown as the current
-spectra index out of the maximum spectra index after the offsets are applied.
+workspace index out of the maximum workspace index after the offsets are applied.
 
 The *Pan* and *Zoom* buttons are usd to enable and disable the pan and zoom
 tools; pan allows you to drag the plot area to show a specific section of the

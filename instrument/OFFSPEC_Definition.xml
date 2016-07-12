@@ -5,7 +5,7 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  name="OFFSPEC" valid-from   ="2012-01-02 00:00:00"
-                           valid-to     ="2100-01-31 23:59:59"
+                           valid-to     ="2012-01-02 23:59:59"
 		           last-modified="2015-10-10 15:00:00">
 
   <defaults>
@@ -109,7 +109,7 @@
      <location  z=" 3.52 " />
    </component>
    <component type="WLSFDetector">
-     <location  z=" 3.63 " />
+     <location  z=" 3.46 " />
    </component>
   </type>
 
@@ -687,10 +687,11 @@
   <!--  <type name="WLSFDetector">
    <locations y="-0.19975" y-end="0.18425" n-elements="768" />
    <locations y="-0.200" y-end="0.184" n-elements="768" />
+   <locations y="-0.19775" y-end="0.18225" n-elements="768" />
 -->
   <type name="WLSFDetector">
  <component type="wlsfpixel">
-   <locations y="-0.19775" y-end="0.18225" n-elements="768" />
+   <locations y="-0.200" y-end="0.184" n-elements="768" />
  </component>
  </type>
  

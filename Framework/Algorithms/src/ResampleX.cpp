@@ -1,10 +1,13 @@
 #include "MantidAlgorithms/ResampleX.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
+
 #include <sstream>
 
 namespace Mantid {
@@ -20,16 +23,6 @@ using std::vector;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ResampleX)
-
-//----------------------------------------------------------------------------------------------
-/// Constructor
-ResampleX::ResampleX()
-    : m_useLogBinning(true), m_preserveEvents(true), m_numBins(0),
-      m_isDistribution(false), m_isHistogram(true) {}
-
-//----------------------------------------------------------------------------------------------
-/// Destructor
-ResampleX::~ResampleX() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -48,17 +41,17 @@ const std::string ResampleX::alias() const { return ""; }
  */
 void ResampleX::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output workspace.");
 
   declareProperty(
-      new ArrayProperty<double>("XMin"),
+      make_unique<ArrayProperty<double>>("XMin"),
       "A comma separated list of the XMin for every spectrum. (Optional)");
   declareProperty(
-      new ArrayProperty<double>("XMax"),
+      make_unique<ArrayProperty<double>>("XMax"),
       "A comma separated list of the XMax for every spectrum. (Optional)");
 
   auto min = boost::make_shared<BoundedValidator<int>>();
@@ -66,7 +59,7 @@ void ResampleX::init() {
   declareProperty("NumberBins", 0, min,
                   "Number of bins to split up each spectrum into.");
   declareProperty("LogBinning", false,
-                  "Use logorithmic binning. If false use constant step sizes.");
+                  "Use logarithmic binning. If false use constant step sizes.");
 
   declareProperty("PreserveEvents", true,
                   "Keep the output workspace as an EventWorkspace, if the "
@@ -89,7 +82,7 @@ map<string, string> ResampleX::validateInputs() {
       stringstream msg;
       msg << "XMin and XMax do not define same number of spectra ("
           << xmins.size() << " != " << xmaxs.size() << ")";
-      errors.insert(pair<string, string>("XMax", msg.str()));
+      errors.emplace("XMax", msg.str());
     } else {
       size_t size = xmins.size();
       for (size_t i = 0; i < size; ++i) {
@@ -97,7 +90,7 @@ map<string, string> ResampleX::validateInputs() {
           stringstream msg;
           msg << "XMin (" << xmins[i] << ") cannot be greater than XMax ("
               << xmaxs[i] << ")";
-          errors.insert(pair<string, string>("XMax", msg.str()));
+          errors.emplace("XMax", msg.str());
         }
       }
     }
@@ -130,7 +123,7 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
   double xmax_wksp = inputWS->getXMax();
   EventWorkspace_const_sptr inputEventWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (inputEventWS != NULL) {
+  if (inputEventWS != nullptr && inputEventWS->getNumberEvents() > 0) {
     xmin_wksp = inputEventWS->getTofMin();
     xmax_wksp = inputEventWS->getTofMax();
   }
@@ -139,7 +132,7 @@ string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
   for (size_t i = 0; i < numSpectra; ++i) {
     // determine ranges if necessary
     if (updateXMins || updateXMaxs) {
-      const MantidVec &xvalues = inputWS->getSpectrum(i)->dataX();
+      const MantidVec &xvalues = inputWS->getSpectrum(i).dataX();
       if (updateXMins) {
         if (boost::math::isnan(xvalues.front())) {
           xmins.push_back(xmin_wksp);
@@ -215,6 +208,12 @@ double ResampleX::determineBinning(MantidVec &xValues, const double xmin,
       throw std::invalid_argument("Cannot calculate log of xmin=0");
     if (xmax == 0)
       throw std::invalid_argument("Cannot calculate log of xmax=0");
+    if (xmin < 0. && xmax > 0.) {
+      std::stringstream msg;
+      msg << "Cannot calculate logorithmic binning that changes sign (xmin="
+          << xmin << ", xmax=" << xmax << ")";
+      throw std::invalid_argument(msg.str());
+    }
 
     const int MAX_ITER(100); // things went wrong if we get this far
 
@@ -263,7 +262,8 @@ double ResampleX::determineBinning(MantidVec &xValues, const double xmin,
   if (numBoundaries != expNumBoundaries) {
     g_log.warning()
         << "Did not generate the requested number of bins: generated "
-        << numBoundaries << " requested " << expNumBoundaries << "\n";
+        << numBoundaries << " requested " << expNumBoundaries
+        << "(xmin=" << xmin << ", xmax=" << xmax << ")\n";
   }
 
   // return the delta value so the caller can do debug printing
@@ -318,31 +318,22 @@ void ResampleX::exec() {
   // start doing actual work
   EventWorkspace_const_sptr inputEventWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (inputEventWS != NULL) {
+  if (inputEventWS != nullptr) {
     if (m_preserveEvents) {
-      EventWorkspace_sptr outputEventWS =
-          boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
       if (inPlace) {
         g_log.debug() << "Rebinning event workspace in place\n";
       } else {
         g_log.debug() << "Rebinning event workspace out of place\n";
-
-        // copy the event workspace to a new EventWorkspace
-        outputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(
-            API::WorkspaceFactory::Instance().create(
-                "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-        // copy geometry over.
-        API::WorkspaceFactory::Instance().initializeFromParent(
-            inputEventWS, outputEventWS, false);
-        // copy over the data as well.
-        outputEventWS->copyDataFrom((*inputEventWS));
+        outputWS = inputWS->clone();
       }
+      auto outputEventWS =
+          boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
       if (common_limits) {
         // get the delta from the first since they are all the same
-        MantidVecPtr xValues;
-        double delta =
-            this->determineBinning(xValues.access(), xmins[0], xmaxs[0]);
+        HistogramData::BinEdges xValues(0);
+        double delta = this->determineBinning(xValues.mutableRawData(),
+                                              xmins[0], xmaxs[0]);
         g_log.debug() << "delta = " << delta << "\n";
         outputEventWS->setAllX(xValues);
       } else {
@@ -359,16 +350,12 @@ void ResampleX::exec() {
           g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta
                         << " xmin=" << xmins[wkspIndex]
                         << " xmax=" << xmaxs[wkspIndex] << "\n";
-          outputEventWS->getSpectrum(wkspIndex)->setX(xValues);
+          outputEventWS->setBinEdges(wkspIndex, xValues);
           prog.report(name()); // Report progress
           PARALLEL_END_INTERUPT_REGION
         }
         PARALLEL_CHECK_INTERUPT_REGION
       }
-
-      this->setProperty(
-          "OutputWorkspace",
-          boost::dynamic_pointer_cast<MatrixWorkspace>(outputEventWS));
     }    // end if (m_preserveEvents)
     else // event workspace -> matrix workspace
     {
@@ -399,10 +386,10 @@ void ResampleX::exec() {
             this->determineBinning(xValues, xmins[wkspIndex], xmaxs[wkspIndex]);
         g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta
                       << "\n";
-        outputWS->setX(wkspIndex, xValues);
+        outputWS->setBinEdges(wkspIndex, xValues);
 
         // Get a const event list reference. inputEventWS->dataY() doesn't work.
-        const EventList &el = inputEventWS->getEventList(wkspIndex);
+        const EventList &el = inputEventWS->getSpectrum(wkspIndex);
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
         el.generateHistogram(xValues, y_data, e_data);
@@ -428,10 +415,9 @@ void ResampleX::exec() {
         outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
       outputWS->setYUnit(inputEventWS->YUnit());
       outputWS->setYUnitLabel(inputEventWS->YUnitLabel());
-
-      // Assign it to the output workspace property
-      setProperty("OutputWorkspace", outputWS);
     }
+    // Assign it to the output workspace property
+    setProperty("OutputWorkspace", outputWS);
     return;
   } else // (inputeventWS != NULL)
   {
@@ -487,18 +473,18 @@ void ResampleX::exec() {
         VectorHelper::rebin(XValues, YValues, YErrors, XValues_new, YValues_new,
                             YErrors_new, m_isDistribution);
       } catch (std::exception &ex) {
-        g_log.error() << "Error in rebin function: " << ex.what() << std::endl;
+        g_log.error() << "Error in rebin function: " << ex.what() << '\n';
         throw;
       }
 
       // Populate the output workspace X values
-      outputWS->setX(wkspIndex, XValues_new);
+      outputWS->setBinEdges(wkspIndex, XValues_new);
 
       prog.report(name());
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
-    outputWS->isDistribution(m_isDistribution);
+    outputWS->setDistribution(m_isDistribution);
 
     // Now propagate any masking correctly to the output workspace
     // More efficient to have this in a separate loop because

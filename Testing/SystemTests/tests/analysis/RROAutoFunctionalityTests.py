@@ -30,8 +30,8 @@ class RROAutoFunctionalityTest(stresstesting.MantidStressTest):
 
     def construct_standard_algorithm(self):
         alg = make_decorator(ReflectometryReductionOneAuto)
-        alg.set_WavelengthMin(0.0)
-        alg.set_WavelengthMax(1.0)
+        alg.set_WavelengthMin(1.0)
+        alg.set_WavelengthMax(2.0)
         alg.set_I0MonitorIndex(0)
         alg.set_ProcessingInstructions("0, 1")
         alg.set_MonitorBackgroundWavelengthMin(0.0)

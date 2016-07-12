@@ -25,12 +25,12 @@ using Geometry::IDetector_const_sptr;
 
 /// Initialisation method.
 void FindDetectorsOutsideLimits::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace2D");
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
+                                                      Direction::Output),
       "Each histogram from the input workspace maps to a histogram in this\n"
       "workspace with one value that indicates if there was a dead detector");
   declareProperty(
@@ -117,9 +117,9 @@ void FindDetectorsOutsideLimits::exec() {
 
   bool checkForMask = false;
   Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
-  if (instrument != NULL) {
-    checkForMask = ((instrument->getSource() != NULL) &&
-                    (instrument->getSample() != NULL));
+  if (instrument != nullptr) {
+    checkForMask = ((instrument->getSource() != nullptr) &&
+                    (instrument->getSample() != nullptr));
   }
 
   int numFailed(0);
@@ -133,7 +133,7 @@ void FindDetectorsOutsideLimits::exec() {
 
     if (checkForMask) {
       const std::set<detid_t> &detids =
-          countsWS->getSpectrum(i)->getDetectorIDs();
+          countsWS->getSpectrum(i).getDetectorIDs();
       if (instrument->isMonitor(detids)) {
         continue; // do include or exclude from mask
       }

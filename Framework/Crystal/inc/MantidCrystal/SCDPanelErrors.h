@@ -46,17 +46,18 @@ public:
   /**
      * Constructor
      * @param pwk       - The PeaksWorkspace
-     * @param BankNames - The comma separated list of bank names for which this
+     * @param Component_name - The comma separated list of bank names for which
+    *this
     *Function
      *                     this Function calculates the associated errors in
     *qx,qy,qz
-     * @param a         - The a lattice parameter
-     * @param b         - The b lattice parameter
-     * @param c         - The c lattice parameter
-     * @param alpha     - The alpha lattice parameter in degrees
-     * @param beta      - The beta lattice parameter in degrees
-     * @param gamma     - The gamma lattice parameter in degrees
-     * @param tolerance - The maximum distance a peak's h value, k value and
+     * @param ax         - The a lattice parameter
+     * @param bx         - The b lattice parameter
+     * @param cx         - The c lattice parameter
+     * @param alphax     - The alpha lattice parameter in degrees
+     * @param betax      - The beta lattice parameter in degrees
+     * @param gammax     - The gamma lattice parameter in degrees
+     * @param tolerance1 - The maximum distance a peak's h value, k value and
     *lvalue are
      *                    from an integer to be considered indexed. Outside of
     *this
@@ -64,37 +65,30 @@ public:
      *
      *
      */
-  SCDPanelErrors(DataObjects::PeaksWorkspace_sptr &pwk, std::string &BankNames,
-                 double a, double b, double c, double alpha, double beta,
-                 double gamma, double tolerance);
+  SCDPanelErrors(DataObjects::PeaksWorkspace_sptr &pwk,
+                 std::string &Component_name, double ax, double bx, double cx,
+                 double alphax, double betax, double gammax, double tolerance1);
 
-  virtual ~SCDPanelErrors();
+  std::string name() const override { return "SCDPanelErrors"; }
 
-  std::string name() const { return "SCDPanelErrors"; }
+  const std::string category() const override { return "Calibrate"; }
 
-  virtual const std::string category() const { return "Calibrate"; }
-
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
   void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                       const size_t nData);
+                       const size_t nData) override;
 
-  Kernel::Matrix<double>
-  CalcDiffDerivFromdQ(Kernel::Matrix<double> const &DerivQ,
-                      Kernel::Matrix<double> const &Mhkl,
-                      Kernel::Matrix<double> const &MhklT,
-                      Kernel::Matrix<double> const &InvhklThkl,
-                      Kernel::Matrix<double> const &UB) const;
+  size_t nAttributes() const override;
 
-  size_t nAttributes() const;
+  std::vector<std::string> getAttributeNames() const override;
 
-  std::vector<std::string> getAttributeNames() const;
+  Attribute getAttribute(const std::string &attName) const override;
 
-  Attribute getAttribute(const std::string &attName) const;
+  void setAttribute(const std::string &attName,
+                    const Attribute &value) override;
 
-  void setAttribute(const std::string &attName, const Attribute &value);
-
-  bool hasAttribute(const std::string &attName) const;
+  bool hasAttribute(const std::string &attName) const override;
 
   /**
  * A utility method that will set up the Workspace needed by this function.
@@ -139,7 +133,7 @@ public:
                                          double T0, double L0);
 
 protected:
-  void init();
+  void init() override;
 
   /**
      *  Checks for out of bounds values ,  peaksWorkspace status
@@ -200,6 +194,9 @@ private:
   int m_endX;   ///<end index in xValues array in functionMW. -1 use all.
 
   std::vector<std::string> m_attrNames;
+
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string convention;
 };
 }
 }

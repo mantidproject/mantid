@@ -3,6 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -36,22 +38,18 @@ namespace Algorithms {
 */
 class DLLExport ProcessIndirectFitParameters : public API::Algorithm {
 public:
-  ProcessIndirectFitParameters();
-  virtual ~ProcessIndirectFitParameters();
-
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  void init();
-  void exec();
-  std::vector<std::string> listToVector(std::string &);
+  void init() override;
+  void exec() override;
   std::vector<std::string> searchForFitParams(const std::string &,
                                               const std::vector<std::string> &);
-  std::vector<std::vector<std::string>>
-  reorder2DVector(const std::vector<std::vector<std::string>> &);
+  std::vector<std::vector<API::MatrixWorkspace_sptr>>
+  reorder2DVector(std::vector<std::vector<API::MatrixWorkspace_sptr>> &);
 };
 } // namespace Algorithms
 } // namespace Mantid

@@ -32,15 +32,15 @@ public:
   // this is testing/special routine
   void setSaved(bool On = true) { this->m_wasSaved = On; }
 
-  virtual ~SaveableTesterWithFile() {}
+  ~SaveableTesterWithFile() override {}
 
-  virtual void clearDataFromMemory() {
+  void clearDataFromMemory() override {
     this->setLoaded(false);
     m_memory = 0;
   }
 
   uint64_t m_memory;
-  virtual uint64_t getTotalDataSize() const {
+  uint64_t getTotalDataSize() const override {
     if (this->wasSaved()) {
       if (this->isLoaded())
         return m_memory;
@@ -49,7 +49,7 @@ public:
     } else
       return m_memory;
   };
-  virtual size_t getDataMemorySize() const { return size_t(m_memory); }
+  size_t getDataMemorySize() const override { return size_t(m_memory); }
 
   void AddNewObjects(uint64_t nNewObj) {
     if (this->wasSaved()) {
@@ -63,7 +63,7 @@ public:
   }
 
   char m_ch;
-  virtual void save() const {
+  void save() const override {
     // Fake writing to a file
     streamMutex.lock();
     uint64_t mPos = this->getFilePosition();
@@ -80,7 +80,7 @@ public:
     this->m_wasSaved = true;
   }
 
-  virtual void load() {
+  void load() override {
     if (this->wasSaved() && !this->isLoaded()) {
       m_memory += this->getFileSize();
     }
@@ -88,15 +88,15 @@ public:
     // function
     this->setLoaded(true);
   }
-  virtual void flushData() const {}
+  void flushData() const override {}
 
   static std::string fakeFile;
-  static Kernel::Mutex streamMutex;
+  static std::mutex streamMutex;
 };
 
 // Declare the static members here.
 std::string SaveableTesterWithFile::fakeFile;
-Kernel::Mutex SaveableTesterWithFile::streamMutex;
+std::mutex SaveableTesterWithFile::streamMutex;
 
 //====================================================================================
 class DiskBufferTest : public CxxTest::TestSuite {
@@ -104,7 +104,7 @@ public:
   std::vector<SaveableTesterWithFile *> data;
   size_t num;
 
-  void setUp() {
+  void setUp() override {
     // Create the ISaveables
     num = 10;
     SaveableTesterWithFile::fakeFile = "";
@@ -114,7 +114,7 @@ public:
           new SaveableTesterWithFile(uint64_t(2 * i), 2, char(i + 0x41)));
   }
 
-  void tearDown() {
+  void tearDown() override {
     for (size_t i = 0; i < data.size(); i++) {
       delete data[i];
       data[i] = NULL;
@@ -262,7 +262,7 @@ public:
     for (int i = 0; i < int(bigNum); i++) {
       dbuf.toWrite(bigData[i]);
     }
-    // std::cout << ISaveableTester::fakeFile << std::endl;
+    // std::cout << ISaveableTester::fakeFile << '\n';
     for (size_t i = 0; i < size_t(bigNum); i++)
       delete bigData[i];
   }
@@ -588,7 +588,7 @@ public:
     delete blockB;
     delete blockC;
     delete blockD;
-    // std::cout <<  SaveableTesterWithFile::fakeFile << "!" << std::endl;
+    // std::cout <<  SaveableTesterWithFile::fakeFile << "!\n";
   }
 
   void test_allocate_with_file() {
@@ -666,7 +666,7 @@ public:
     delete blockB;
     delete blockC;
     delete blockD;
-    // std::cout <<  ISaveableTesterWithFile::fakeFile << "!" << std::endl;
+    // std::cout <<  ISaveableTesterWithFile::fakeFile << "!\n";
   }
 };
 //====================================================================================
@@ -684,7 +684,7 @@ public:
   }
 
   /// Method to flush the data to disk and ensure it is written.
-  virtual void flushData() const {};
+  void flushData() const override{};
   /** @return the amount of memory that the object takes as a whole.
       For filebased objects it should be the amount the object occupies in
      memory plus the size it occupies in file if the object has not been fully
@@ -693,26 +693,26 @@ public:
      * If the object has never been loaded, this should be equal to number of
      data points in the file
      */
-  virtual uint64_t getTotalDataSize() const { return m_memory; }
+  uint64_t getTotalDataSize() const override { return m_memory; }
   /// the data size kept in memory
-  virtual size_t getDataMemorySize() const { return m_memory; };
+  size_t getDataMemorySize() const override { return m_memory; };
 
   virtual void load(DiskBuffer & /*dbuf*/) {
     uint64_t myFilePos = this->getFilePosition();
     // std::cout << "Block " << getFileId() << " loading at " << myFilePos <<
-    // std::endl;
+    // '\n';
     SaveableTesterWithSeek::fakeSeekAndWrite(myFilePos);
     this->setLoaded(true);
   }
 
-  virtual void save() const {
+  void save() const override {
     // Pretend to seek to the point and write
     uint64_t myFilePos = this->getFilePosition();
     // std::cout << "Block " << getFileId() << " saving at " << myFilePos <<
-    // std::endl;
+    // '\n';
     fakeSeekAndWrite(myFilePos);
   }
-  virtual void clearDataFromMemory() {
+  void clearDataFromMemory() override {
     m_memory = 0;
     this->setLoaded(false);
   }
@@ -721,12 +721,12 @@ public:
     // OK first you seek to where the OLD data was and load it.
     uint64_t myFilePos = this->getFilePosition();
     // std::cout << "Block " << getFileId() << " loading at " << myFilePos <<
-    // std::endl;
+    // '\n';
     SaveableTesterWithSeek::fakeSeekAndWrite(myFilePos);
     // Simulate that the data is growing and so needs to be written out
     size_t newfilePos = dbuf.relocate(myFilePos, m_memory, m_memory + 1);
     // std::cout << "Block " << getFileId() << " has moved from " << myFilePos
-    // << " to " << newfilePos << std::endl;
+    // << " to " << newfilePos << '\n';
     myFilePos = newfilePos;
     // Grow the size by 1
     m_memory++;
@@ -736,7 +736,7 @@ public:
 
   /// Fake a seek followed by a write
   static void fakeSeekAndWrite(uint64_t newPos) {
-    streamMutex.lock();
+    std::lock_guard<std::mutex> lock(streamMutex);
     int64_t seek = int64_t(filePos) - int64_t(newPos);
     if (seek < 0)
       seek = -seek;
@@ -748,9 +748,8 @@ public:
     while (tim.elapsed_no_reset() < seekTime) { /*Wait*/
     }
     filePos = newPos;
-    streamMutex.unlock();
   }
-  virtual void load() {
+  void load() override {
     if (this->wasSaved() && !this->isLoaded()) {
       m_memory += this->getFileSize();
     }
@@ -759,12 +758,12 @@ public:
 
   static uint64_t filePos;
   static std::string fakeFile;
-  static Kernel::Mutex streamMutex;
+  static std::mutex streamMutex;
 };
 uint64_t SaveableTesterWithSeek::filePos;
 // Declare the static members here.
 std::string SaveableTesterWithSeek::fakeFile;
-Kernel::Mutex SaveableTesterWithSeek::streamMutex;
+std::mutex SaveableTesterWithSeek::streamMutex;
 
 //====================================================================================
 class DiskBufferTestPerformance : public CxxTest::TestSuite {
@@ -786,7 +785,7 @@ public:
     for (size_t i = 0; i < 200; i++)
       dataSeek.push_back(new SaveableTesterWithSeek(i));
   }
-  void setUp() { SaveableTesterWithSeek::fakeFile = ""; }
+  void setUp() override { SaveableTesterWithSeek::fakeFile = ""; }
 
   void xest_nothing() {
     TS_WARN("Tests here were disabled for the time being");
@@ -802,7 +801,7 @@ public:
       dataSeek[i]->load(dbuf);
     }
     std::cout << tim << " to load " << dataSeek.size()
-              << " into MRU with fake seeking. " << std::endl;
+              << " into MRU with fake seeking. \n";
   }
 
   /** Use a 0-sized write buffer so that it constantly needs to seek and write
@@ -815,7 +814,7 @@ public:
       dataSeek[i]->load(dbuf);
     }
     std::cout << tim << " to load " << dataSeek.size()
-              << " into MRU with fake seeking. " << std::endl;
+              << " into MRU with fake seeking. \n";
   }
 
   /** Example of a situation where vectors grew, meaning that they need to be
@@ -829,10 +828,10 @@ public:
       dataSeek[i]->grow(dbuf, true);
       dbuf.toWrite(dataSeek[i]);
     }
-    std::cout << "About to flush the cache to finish writes." << std::endl;
+    std::cout << "About to flush the cache to finish writes.\n";
     dbuf.flushCache();
     std::cout << tim << " to grow " << dataSeek.size()
-              << " into MRU with fake seeking. " << std::endl;
+              << " into MRU with fake seeking. \n";
   }
 
   /** Demonstrate that calling "save" manually without using the MRU write
@@ -847,7 +846,7 @@ public:
       dataSeek[i]->save();
     }
     std::cout << tim << " to grow " << dataSeek.size()
-              << " into MRU with fake seeking. " << std::endl;
+              << " into MRU with fake seeking. \n";
   }
 
   /** Speed of freeing a lot of blocks and putting them in the free space map */
@@ -860,7 +859,7 @@ public:
     // dbuf.defragFreeBlocks();
     TS_ASSERT_EQUALS(dbuf.getFreeSpaceMap().size(), 66667);
     std::cout << tim << " to add " << 100000
-              << " blocks in the free space list." << std::endl;
+              << " blocks in the free space list.\n";
   }
 };
 

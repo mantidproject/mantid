@@ -1,13 +1,17 @@
 #include "MantidSINQ/LoadFlexiNexus.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Utils.h"
+
+#include <boost/algorithm/string.hpp>
+
 #include <fstream>
 #include <sstream>
-#include <boost/algorithm/string.hpp>
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadFlexiNexus)
@@ -24,14 +28,16 @@ using namespace ::NeXus;
 
 void LoadFlexiNexus::init() {
 
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".hdf", ".h5", ""}),
-      "A NeXus file");
-  declareProperty(new FileProperty("Dictionary", "", FileProperty::Load,
-                                   {".txt", ".dic", ""}),
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Load,
+                      std::vector<std::string>{".hdf", ".h5", ""}),
+                  "A NeXus file");
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "Dictionary", "", FileProperty::Load,
+                      std::vector<std::string>{".txt", ".dic", ""}),
                   "A Dictionary for controlling NeXus loading");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+      "OutputWorkspace", "", Direction::Output));
 }
 
 void LoadFlexiNexus::exec() {
@@ -39,7 +45,7 @@ void LoadFlexiNexus::exec() {
   std::string filename = getProperty("Filename");
   std::string dictname = getProperty("Dictionary");
   g_log.information() << "Running FlexiNexus for " << filename << " with  "
-                      << dictname << std::endl;
+                      << dictname << '\n';
 
   loadDictionary(getProperty("Dictionary"));
 
@@ -47,7 +53,7 @@ void LoadFlexiNexus::exec() {
   for(std::map<std::string, std::string>::const_iterator it =
   dictionary.begin();
   it!= dictionary.end(); it++){
-  std::cout << it->first << "\t" << it->second << std::endl;
+  std::cout << it->first << "\t" << it->second << '\n';
   }
   */
 
@@ -120,7 +126,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
   }
 
   g_log.debug() << "Reading " << nSpectra << " spectra of length "
-                << spectraLength << "." << std::endl;
+                << spectraLength << ".\n";
 
   // need to locate x-axis data too.....
   std::map<std::string, std::string>::const_iterator it;
@@ -151,8 +157,11 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
 
   // fill the data.......
   ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-      WorkspaceFactory::Instance().create("Workspace2D", nSpectra,
-                                          spectraLength, spectraLength));
+      WorkspaceFactory::Instance().create("Workspace2D", nSpectra, xData.size(),
+                                          spectraLength));
+
+  // x can be bin edges or points, depending on branching above
+  auto x = Kernel::make_cow<HistogramData::HistogramX>(xData);
   for (int wsIndex = 0; wsIndex < nSpectra; wsIndex++) {
     Mantid::MantidVec &Y = ws->dataY(wsIndex);
     for (int j = 0; j < spectraLength; j++) {
@@ -161,12 +170,12 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
     // Create and fill another vector for the errors, containing sqrt(count)
     Mantid::MantidVec &E = ws->dataE(wsIndex);
     std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
-    ws->setX(wsIndex, xData);
+    ws->setX(wsIndex, x);
     // Xtof		ws->getAxis(1)->spectraNo(i)= i;
     ws->getSpectrum(wsIndex)
-        ->setSpectrumNo(static_cast<specid_t>(yData[wsIndex]));
+        .setSpectrumNo(static_cast<specnum_t>(yData[wsIndex]));
     ws->getSpectrum(wsIndex)
-        ->setDetectorID(static_cast<detid_t>(yData[wsIndex]));
+        .setDetectorID(static_cast<detid_t>(yData[wsIndex]));
   }
 
   ws->setYUnit("Counts");
@@ -179,7 +188,7 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
     const std::string xname(it->second);
     ws->getAxis(0)->title() = xname;
     if (xname.compare("TOF") == 0) {
-      g_log.debug() << "Setting X-unit to be TOF" << std::endl;
+      g_log.debug() << "Setting X-unit to be TOF\n";
       ws->getAxis(0)->setUnit("TOF");
     }
   }
@@ -203,7 +212,7 @@ void LoadFlexiNexus::loadMD(NeXus::File *fin) {
     dimensions.push_back(makeDimension(fin, k, static_cast<int>(inf.dims[k])));
   }
 
-  MDHistoWorkspace_sptr ws(new MDHistoWorkspace(dimensions));
+  auto ws = boost::make_shared<MDHistoWorkspace>(dimensions);
 
   signal_t *dd = ws->getSignalArray();
   signal_t *ddE = ws->getErrorSquaredArray();
@@ -335,7 +344,7 @@ void LoadFlexiNexus::addMetaData(NeXus::File *fin, Workspace_sptr ws,
   * load all the extras into the Run information
   */
   Run &r = info->mutableRun();
-  std::set<std::string> specialMap = populateSpecialMap();
+  auto specialMap = populateSpecialMap();
   for (it = dictionary.begin(); it != dictionary.end(); ++it) {
     if (specialMap.find(it->first) == specialMap.end()) {
       // not in specials!
@@ -362,8 +371,8 @@ void LoadFlexiNexus::addMetaData(NeXus::File *fin, Workspace_sptr ws,
     }
   }
 }
-std::set<std::string> LoadFlexiNexus::populateSpecialMap() {
-  std::set<std::string> specialMap;
+std::unordered_set<std::string> LoadFlexiNexus::populateSpecialMap() {
+  std::unordered_set<std::string> specialMap;
 
   specialMap.insert("title");
   specialMap.insert("data");

@@ -5,6 +5,7 @@
 
 #include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/UnitLabelTypes.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 
 using Mantid::Geometry::GeneralFrame;
@@ -27,7 +28,7 @@ public:
   }
 
   void test_string_unit_construction() {
-    std::unique_ptr<LabelUnit> unit(new LabelUnit(Units::Symbol::Metre));
+    auto unit = make_unique<LabelUnit>(Units::Symbol::Metre);
     GeneralFrame frame("Distance", std::move(unit) /*sink transfer ownership*/);
     TS_ASSERT(unit.get() == NULL);
     TS_ASSERT_EQUALS(Units::Symbol::Metre, frame.getUnitLabel());

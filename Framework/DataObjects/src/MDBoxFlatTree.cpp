@@ -1,8 +1,9 @@
-#include "MantidKernel/Strings.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/FileBackedExperimentInfo.h"
-#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Strings.h"
 #include <Poco/File.h>
 
 typedef std::unique_ptr<::NeXus::File> file_holder_type;
@@ -138,8 +139,7 @@ void MDBoxFlatTree::setBoxesFilePositions(bool setFileBacked) {
   // Kernel::ISaveable::sortObjByFilePos(m_Boxes);
   // calculate the box positions in the resulting file and save it on place
   uint64_t eventsStart = 0;
-  for (size_t i = 0; i < m_Boxes.size(); i++) {
-    API::IMDNode *mdBox = m_Boxes[i];
+  for (auto mdBox : m_Boxes) {
     size_t ID = mdBox->getID();
 
     // avoid grid boxes;
@@ -376,9 +376,9 @@ void MDBoxFlatTree::saveExperimentInfos(::NeXus::File *const file,
         g_log.warning() << "This instrument (" << ei->getInstrument()->getName()
                         << ") has detector IDs that are higher than can be "
                            "saved in the .NXS file as single-precision floats."
-                        << std::endl;
+                        << '\n';
         g_log.warning() << "Detector IDs above 16777216 will not be precise. "
-                           "Please contact the developers." << std::endl;
+                           "Please contact the developers.\n";
       }
     }
   }
@@ -403,8 +403,8 @@ void MDBoxFlatTree::loadExperimentInfos(
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
   std::list<uint16_t> ExperimentBlockNum;
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    std::string name = it->first;
+  for (auto &entry : entries) {
+    const std::string &name = entry.first;
     if (boost::starts_with(name, "experiment")) {
       try {
         uint16_t num =
@@ -430,8 +430,7 @@ void MDBoxFlatTree::loadExperimentInfos(
         std::string groupName = "experiment" + Kernel::Strings::toString(i);
         g_log.warning() << "NXS file is missing a ExperimentInfo block "
                         << groupName
-                        << ". Workspace will be missing ExperimentInfo."
-                        << std::endl;
+                        << ". Workspace will be missing ExperimentInfo.\n";
       }
     }
     ic++;
@@ -499,7 +498,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
                                        bool BoxStructureOnly) {
 
   size_t numBoxes = this->getNBoxes();
-  Boxes.assign(numBoxes, NULL);
+  Boxes.assign(numBoxes, nullptr);
 
   uint64_t totalNumEvents(0);
   m_nDim = static_cast<int>(bc->getNDims());
@@ -523,7 +522,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
     if (box_type == 0)
       continue;
 
-    API::IMDNode *ibox = NULL;
+    API::IMDNode *ibox = nullptr;
 
     // Extents of the box, as a vector
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> extentsVector(
@@ -580,7 +579,7 @@ uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
       g_log.debug() << " Accuracy warning for box N " << i
                     << " as stored inverse volume is : " << m_InverseVolume[i]
                     << " and calculated from extents: "
-                    << ibox->getInverseVolume() << std::endl;
+                    << ibox->getInverseVolume() << '\n';
       ibox->setInverseVolume(coord_t(m_InverseVolume[i]));
     }
 
@@ -809,7 +808,7 @@ void MDBoxFlatTree::saveAffineTransformMatrix(
   if (!transform)
     return;
   Kernel::Matrix<coord_t> matrix = transform->makeAffineMatrix();
-  g_log.debug() << "TRFM: " << matrix.str() << std::endl;
+  g_log.debug() << "TRFM: " << matrix.str() << '\n';
   saveMatrix<coord_t>(file, entry_name, matrix, ::NeXus::FLOAT32,
                       transform->id());
 }

@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/ClearInstrumentParameters.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -14,16 +15,6 @@ DECLARE_ALGORITHM(ClearInstrumentParameters)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ClearInstrumentParameters::ClearInstrumentParameters() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ClearInstrumentParameters::~ClearInstrumentParameters() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -50,10 +41,10 @@ const std::string ClearInstrumentParameters::category() const {
 /** Initialize the algorithm's properties.
  */
 void ClearInstrumentParameters::init() {
-  declareProperty(
-      new WorkspaceProperty<>("Workspace", "", Direction::InOut,
-                              boost::make_shared<InstrumentValidator>()),
-      "Workspace whose instrument parameters are to be cleared.");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "Workspace", "", Direction::InOut,
+                      boost::make_shared<InstrumentValidator>()),
+                  "Workspace whose instrument parameters are to be cleared.");
 
   declareProperty(
       "LocationParameters", true,
@@ -74,15 +65,15 @@ void ClearInstrumentParameters::exec() {
   ParameterMap::pmap paramsToKeep;
 
   // Go through all the parameters, keep a hold of any we don't want to clear.
-  for (auto paramIt = params->begin(); paramIt != params->end(); ++paramIt) {
+  for (auto &paramIt : *params) {
     // Are we keeping the location parameters?
-    const std::string pName = (*paramIt).second->name();
+    const std::string pName = paramIt.second->name();
     if (!clearLocationParams &&
         (pName == "x" || pName == "y" || pName == "z" ||
          pName == "r-position" || pName == "t-position" ||
          pName == "p-position" || pName == "rotx" || pName == "roty" ||
          pName == "rotz")) {
-      paramsToKeep.insert(*paramIt);
+      paramsToKeep.insert(paramIt);
     }
   }
 
@@ -90,9 +81,8 @@ void ClearInstrumentParameters::exec() {
   params->clear();
 
   // Add any parameters we're keeping back into the parameter map.
-  for (auto paramIt = paramsToKeep.begin(); paramIt != paramsToKeep.end();
-       ++paramIt) {
-    params->add((*paramIt).first, (*paramIt).second);
+  for (auto &paramIt : paramsToKeep) {
+    params->add(paramIt.first, paramIt.second);
   }
 }
 

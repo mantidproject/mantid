@@ -28,9 +28,9 @@ public:
     declareAttribute("VAttr1", Attribute(v));
   }
 
-  std::string name() const { return "IFT_Funct"; }
-  void function1D(double *, const double *, const size_t) const {}
-  void functionDeriv1D(Jacobian *, const double *, const size_t) {}
+  std::string name() const override { return "IFT_Funct"; }
+  void function1D(double *, const double *, const size_t) const override {}
+  void functionDeriv1D(Jacobian *, const double *, const size_t) override {}
 };
 
 DECLARE_FUNCTION(IFT_Funct)

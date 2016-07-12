@@ -135,32 +135,32 @@ public:
 
 protected:
   /// Create string property
-  QtProperty *apply(const std::string &str) const {
+  QtProperty *apply(const std::string &str) const override {
     QtProperty *prop = NULL;
     prop = m_browser->addStringProperty(m_name);
     m_browser->setStringPropertyValue(prop, QString::fromStdString(str));
     return prop;
   }
   /// Create double property
-  QtProperty *apply(const double &d) const {
+  QtProperty *apply(const double &d) const override {
     QtProperty *prop = m_browser->addDoubleProperty(m_name);
     m_browser->m_doubleManager->setValue(prop, d);
     return prop;
   }
   /// Create int property
-  QtProperty *apply(const int &i) const {
+  QtProperty *apply(const int &i) const override {
     QtProperty *prop = m_browser->m_intManager->addProperty(m_name);
     m_browser->m_intManager->setValue(prop, i);
     return prop;
   }
   /// Create bool property
-  QtProperty *apply(const bool &b) const {
+  QtProperty *apply(const bool &b) const override {
     QtProperty *prop = m_browser->m_boolManager->addProperty(m_name);
     m_browser->m_boolManager->setValue(prop, b);
     return prop;
   }
   /// Create vector property
-  QtProperty *apply(const std::vector<double> &b) const {
+  QtProperty *apply(const std::vector<double> &b) const override {
     // throw std::runtime_error("Vector attribute property not implememted.");
     QtProperty *prop = m_browser->m_vectorManager->addProperty(m_name);
     m_browser->m_vectorSizeManager->blockSignals(true);
@@ -656,18 +656,24 @@ public:
 
 protected:
   /// Create string property
-  void apply(std::string &str) const {
+  void apply(std::string &str) const override {
     QString attName = m_prop->propertyName();
     str = m_browser->getStringPropertyValue(m_prop).toStdString();
   }
   /// Create double property
-  void apply(double &d) const { d = m_browser->m_doubleManager->value(m_prop); }
+  void apply(double &d) const override {
+    d = m_browser->m_doubleManager->value(m_prop);
+  }
   /// Create int property
-  void apply(int &i) const { i = m_browser->m_intManager->value(m_prop); }
+  void apply(int &i) const override {
+    i = m_browser->m_intManager->value(m_prop);
+  }
   /// Create bool property
-  void apply(bool &b) const { b = m_browser->m_boolManager->value(m_prop); }
+  void apply(bool &b) const override {
+    b = m_browser->m_boolManager->value(m_prop);
+  }
   /// Create vector property
-  void apply(std::vector<double> &v) const {
+  void apply(std::vector<double> &v) const override {
     QList<QtProperty *> members = m_prop->subProperties();
     if (members.size() <= 1) {
       v.clear();
@@ -696,32 +702,32 @@ public:
 
 protected:
   /// Set string property
-  void apply(const std::string &str) const {
+  void apply(const std::string &str) const override {
     m_browser->m_changeSlotsEnabled = false;
     QString attName = m_prop->propertyName();
     m_browser->setStringPropertyValue(m_prop, QString::fromStdString(str));
     m_browser->m_changeSlotsEnabled = true;
   }
   /// Set double property
-  void apply(const double &d) const {
+  void apply(const double &d) const override {
     m_browser->m_changeSlotsEnabled = false;
     m_browser->m_doubleManager->setValue(m_prop, d);
     m_browser->m_changeSlotsEnabled = true;
   }
   /// Set int property
-  void apply(const int &i) const {
+  void apply(const int &i) const override {
     m_browser->m_changeSlotsEnabled = false;
     m_browser->m_intManager->setValue(m_prop, i);
     m_browser->m_changeSlotsEnabled = true;
   }
   /// Set bool property
-  void apply(const bool &b) const {
+  void apply(const bool &b) const override {
     m_browser->m_changeSlotsEnabled = false;
     m_browser->m_boolManager->setValue(m_prop, b);
     m_browser->m_changeSlotsEnabled = true;
   }
   /// Set vector property
-  void apply(const std::vector<double> &) const {
+  void apply(const std::vector<double> &) const override {
     // this method is supposed to be called when corresponding
     // property value changes but it doesn't have a value because
     // it's a group property
@@ -1087,6 +1093,51 @@ void PropertyHandler::removeTie(const QString &parName) {
     removeTie(prop);
 }
 
+/**
+ Create a simple estimate of the full width half maximum
+ @returns and estimate of the peak width, or 0 if an error occurs
+*/
+double PropertyHandler::EstimateFwhm() const {
+  double fwhm = 0.;
+  auto ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+      m_browser->getWorkspace());
+  if (ws) {
+    size_t wi = m_browser->workspaceIndex();
+    const Mantid::MantidVec &X = ws->readX(wi);
+    const Mantid::MantidVec &Y = ws->readY(wi);
+    size_t n = Y.size() - 1;
+    if (m_ci < 0 || m_ci > static_cast<int>(n)) {
+      fwhm = 0.;
+    } else {
+      double halfHeight = ((Y[m_ci] - m_base) / 2.) + m_base;
+      // walk to the right
+      size_t rightHwhmIndex = m_ci;
+      while (rightHwhmIndex < n) {
+        if (Y[rightHwhmIndex++] <= halfHeight) {
+          break;
+        }
+      }
+
+      // walk to the left
+      size_t leftHwhmIndex = m_ci;
+      while (leftHwhmIndex > 0) {
+        if (Y[leftHwhmIndex--] <= halfHeight) {
+          break;
+        }
+      }
+
+      fwhm = fabs(X[rightHwhmIndex] - X[leftHwhmIndex]);
+
+      // apply a maximum limitation if larger than the fitting region
+      double fitRange = m_browser->endX() - m_browser->startX();
+      if (fwhm > fitRange) {
+        // set to 10% of fitting region
+        fwhm = fitRange * 0.1;
+      }
+    }
+  }
+  return fwhm;
+}
 /**
  * Calculate m_base: the baseline level under the peak (if this function is a
  * peak and auto background is on)

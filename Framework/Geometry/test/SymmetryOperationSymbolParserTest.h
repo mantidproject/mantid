@@ -44,18 +44,26 @@ public:
   }
 
   void testGetNormalizedIdentifier() {
-    std::pair<Mantid::Kernel::IntMatrix, V3R> param1 =
+    MatrixVectorPair<int, V3R> param1 =
         SymmetryOperationSymbolParser::parseIdentifier("x+1/2, y, -z-1/2");
     TS_ASSERT_EQUALS(
         SymmetryOperationSymbolParser::getNormalizedIdentifier(param1),
         "x+1/2,y,-z-1/2");
 
-    std::pair<Mantid::Kernel::IntMatrix, V3R> param2 =
+    MatrixVectorPair<int, V3R> param2 =
         TestableSymmetryOperationSymbolParser::parseIdentifier(
             "1/2+x, y, -1/2-z");
     TS_ASSERT_EQUALS(
         SymmetryOperationSymbolParser::getNormalizedIdentifier(param2),
         "x+1/2,y,-z-1/2");
+  }
+
+  void testGetNormalizedIdentifierDenominatorOne() {
+    MatrixVectorPair<int, V3R> param1 =
+        SymmetryOperationSymbolParser::parseIdentifier("2+x, y, -z-1");
+    TS_ASSERT_EQUALS(
+        SymmetryOperationSymbolParser::getNormalizedIdentifier(param1),
+        "x+2,y,-z-1");
   }
 
 private:

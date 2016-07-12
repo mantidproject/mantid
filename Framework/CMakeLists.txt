@@ -68,6 +68,12 @@ add_dependencies ( check FrameworkTests )
 
 include_directories (Kernel/inc)
 add_subdirectory (Kernel)
+
+include_directories (HistogramData/inc)
+add_subdirectory (HistogramData)
+
+# HistogramData has header-only dependency on Kernel, so Kernel comes after.
+set ( MANTIDLIBS ${MANTIDLIBS} HistogramData )
 set ( MANTIDLIBS ${MANTIDLIBS} Kernel )
 
 include_directories (Geometry/inc)
@@ -119,7 +125,6 @@ endif ()
 
 # Unit test helper packages
 if ( CXXTEST_FOUND )
-  add_subdirectory ( UserAlgorithms )
   add_subdirectory ( ../Testing/Tools ${${CMAKE_PROJECT_NAME}_BINARY_DIR}/Testing/Tools )
 endif ()
 
@@ -132,7 +137,7 @@ add_subdirectory (ISISLiveData)
 # Add a custom target to build all of the Framework
 ###########################################################################
 
-set ( FRAMEWORK_LIBS Kernel Geometry API DataObjects
+set ( FRAMEWORK_LIBS Kernel HistogramData Geometry API DataObjects
                      PythonKernelModule PythonGeometryModule PythonAPIModule
                      PythonDataObjectsModule
                      DataHandling Nexus Algorithms CurveFitting ICat
@@ -168,7 +173,7 @@ if ( WIN32 ) # General windows environment
               PATTERN ".svn" EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win64.pyd" EXCLUDE PATTERN "CMakeLists.txt" EXCLUDE )
   endif ()
     # Also ship mingw libraries for Inelastic fortran code. We need to do a better job here and build things
-    file ( GLOB MINGW_DLLS "${CMAKE_LIBRARY_PATH}/mingw/*.dll" )
+    file ( GLOB MINGW_DLLS "${THIRD_PARTY_DIR}/bin/mingw/*.dll" )
     install ( FILES ${MINGW_DLLS} DESTINATION ${INBUNDLE}scripts/Inelastic )
   else ()
   # These don't work correctly and the linux ones are in no way general. They really need to be part of the build

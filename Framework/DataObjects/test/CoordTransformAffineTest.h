@@ -170,9 +170,8 @@ public:
 
     double angle = 0.1;
     // Build the basis vectors, a 0.1 rad rotation along +Z
-    std::vector<VMD> bases;
-    bases.push_back(VMD(cos(angle), sin(angle), 0.0));
-    bases.push_back(VMD(-sin(angle), cos(angle), 0.0));
+    std::vector<VMD> bases{{cos(angle), sin(angle), 0.0},
+                           {-sin(angle), cos(angle), 0.0}};
     // Scaling is 1.0
     VMD scale(1.0, 1.0);
     // Build it
@@ -199,7 +198,7 @@ public:
     // Checks for failure to build
     // //-----------------------------------------------------------------------------------------------
 
-    bases.push_back(VMD(1, 2, 3));
+    bases.emplace_back(1, 2, 3);
     TSM_ASSERT_THROWS_ANYTHING("Too many bases throws",
                                ct.buildOrthogonal(origin, bases, scale));
     bases.resize(2);
@@ -220,9 +219,8 @@ public:
 
     double angle = 0.1;
     // Build the basis vectors, a 0.1 rad rotation along +Z
-    std::vector<VMD> bases;
-    bases.push_back(VMD(cos(angle), sin(angle), 0.0));
-    bases.push_back(VMD(-sin(angle), cos(angle), 0.0));
+    std::vector<VMD> bases{{cos(angle), sin(angle), 0.0},
+                           {-sin(angle), cos(angle), 0.0}};
     // Scaling
     VMD scale(2.0, 3.0);
     // Build it
@@ -328,16 +326,14 @@ public:
   void test_combineTransformations_affine_affine() {
     CoordTransformAffine ct1(2, 2);
     double angle = 0.1;
-    std::vector<VMD> bases1;
-    bases1.push_back(VMD(cos(angle), sin(angle)));
-    bases1.push_back(VMD(-sin(angle), cos(angle)));
+    std::vector<VMD> bases1{{cos(angle), sin(angle)},
+                            {-sin(angle), cos(angle)}};
     ct1.buildOrthogonal(VMD(3.0, 4.0), bases1, VMD(5.5, -6.7));
 
     CoordTransformAffine ct2(2, 2);
     angle = +0.34;
-    std::vector<VMD> bases2;
-    bases2.push_back(VMD(cos(angle), sin(angle)));
-    bases2.push_back(VMD(-sin(angle), cos(angle)));
+    std::vector<VMD> bases2{{cos(angle), sin(angle)},
+                            {-sin(angle), cos(angle)}};
     ct2.buildOrthogonal(VMD(8.0, -9.0), bases2, VMD(0.34, 12.5));
     // And test
     do_test_combined(&ct1, &ct2);
@@ -348,9 +344,8 @@ public:
   void test_combineTransformations_affine_aligned() {
     CoordTransformAffine ct1(2, 2);
     double angle = 0.1;
-    std::vector<VMD> bases1;
-    bases1.push_back(VMD(cos(angle), sin(angle)));
-    bases1.push_back(VMD(-sin(angle), cos(angle)));
+    std::vector<VMD> bases1{{cos(angle), sin(angle)},
+                            {-sin(angle), cos(angle)}};
     ct1.buildOrthogonal(VMD(3.0, 4.0), bases1, VMD(5.5, -6.7));
 
     size_t dimensionToBinFrom[2] = {1, 0};

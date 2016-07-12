@@ -10,7 +10,7 @@ namespace API {
 /**
  * Default constructor
  */
-Progress::Progress() : ProgressBase(0.0, 0.0, 0), m_alg(NULL) {}
+Progress::Progress() : ProgressBase(0.0, 0.0, 0), m_alg(nullptr) {}
 
 /** Creates a Progress instance
     @param alg :: Algorithm reporting its progress
@@ -38,9 +38,6 @@ Progress::Progress(Algorithm *alg, double start, double end, int64_t numSteps)
 */
 Progress::Progress(Algorithm *alg, double start, double end, size_t numSteps)
     : ProgressBase(start, end, int64_t(numSteps)), m_alg(alg) {}
-
-/** Destructor */
-Progress::~Progress() {}
 
 /** Actually do the reporting, without changing the loop counter.
  * This is called by report(), and can be called directly in

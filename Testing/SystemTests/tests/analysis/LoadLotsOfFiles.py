@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,no-init
+﻿#pylint: disable=invalid-name,no-init
 from mantid.simpleapi import *
 from mantid.api import FrameworkManager
 import copy
@@ -6,7 +6,9 @@ import os
 import re
 import stresstesting
 
-BANNED_FILES = ['992 Descriptions.txt',
+BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
+                '80tube_DIRECT_3146_M1_30April15_r3146.dat',
+                '992 Descriptions.txt',
                 'directBeamDatabaseFall2014_IPTS_11601_2.cfg',
                 'BASIS_AutoReduction_Mask.xml',
                 'BioSANS_dark_current.xml',
@@ -33,6 +35,7 @@ BANNED_FILES = ['992 Descriptions.txt',
                 'MASKSANS2D_094i_RKH.txt',
                 'MASKSANS2D.091A',
                 'MASKSANS2Doptions.091A',
+                'MASK_squareBeamstop_20-June-2015.xml',
                 'MaskSANS2DReductionGUI.txt',
                 'MaskSANS2DReductionGUI_MaskFiles.txt',
                 'MaskSANS2DReductionGUI_LimitEventsTime.txt',
@@ -55,6 +58,7 @@ BANNED_FILES = ['992 Descriptions.txt',
                 'squaricn.phonon',
                 'squaricn.castep',
                 'target_circles_mask.xml',
+                'tube10_mask.xml',
                 'linked_circles_mask.xml',
                 'testCansas1DMultiEntry.xml',
                 'Wish_Diffuse_Scattering_ISAW_UB.mat',
@@ -65,7 +69,7 @@ BANNED_FILES = ['992 Descriptions.txt',
                 'SANS2DTUBES_ZeroErrorFree_batch.csv',
                 'DIRECTM1_15785_12m_31Oct12_v12.dat',
                 'MaskSANS2DReductionGUI.txt',
-                'sans2d_reduction_gui_batch.csv'
+                'sans2d_reduction_gui_batch.csv',
                 'MANTID_FLAT_CELL.115',
                 'MaskLOQData.txt',
                 'DIRECTHAB.983',
@@ -76,7 +80,10 @@ BANNED_FILES = ['992 Descriptions.txt',
                 'poldi2014n019874.hdf',
                 'poldi2014n019881.hdf',
                 'poldi2015n000977.hdf',
-                'USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt'
+                'USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt',
+                'USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt',
+                'Vesuvio_IP_file_test.par',
+                'IP0004_10.par'
                ]
 
 EXPECTED_EXT = '.expected'

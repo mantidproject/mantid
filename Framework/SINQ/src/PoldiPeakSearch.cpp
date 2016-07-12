@@ -1,5 +1,6 @@
 #include "MantidSINQ/PoldiPeakSearch.h"
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -525,8 +526,8 @@ bool PoldiPeakSearch::isLessThanMinimum(PoldiPeak_sptr peak) {
 }
 
 void PoldiPeakSearch::init() {
-  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace", "",
-                                                     Direction::InOut),
+  declareProperty(make_unique<WorkspaceProperty<Workspace2D>>(
+                      "InputWorkspace", "", Direction::InOut),
                   "Workspace containing a POLDI auto-correlation spectrum.");
 
   boost::shared_ptr<BoundedValidator<int>> minPeakSeparationValidator =
@@ -546,30 +547,29 @@ void PoldiPeakSearch::init() {
   declareProperty("MinimumPeakHeight", 0.0, "Minimum peak height.",
                   Direction::Input);
 
-  declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Workspace containing detected peaks.");
 }
 
 void PoldiPeakSearch::exec() {
-  g_log.information() << "PoldiPeakSearch:" << std::endl;
+  g_log.information() << "PoldiPeakSearch:\n";
 
   Workspace2D_sptr correlationWorkspace = getProperty("InputWorkspace");
   MantidVec correlationQValues = correlationWorkspace->readX(0);
   MantidVec correlatedCounts = correlationWorkspace->readY(0);
-  g_log.information() << "   Auto-correlation data read." << std::endl;
+  g_log.information() << "   Auto-correlation data read.\n";
 
   Unit_sptr xUnit = correlationWorkspace->getAxis(0)->unit();
 
   if (xUnit->caption() == "") {
     g_log.information()
-        << "   Workspace does not have unit, defaulting to MomentumTransfer."
-        << std::endl;
+        << "   Workspace does not have unit, defaulting to MomentumTransfer.\n";
 
     xUnit = UnitFactory::Instance().create("MomentumTransfer");
   } else {
-    g_log.information() << "   Unit of workspace is " << xUnit->caption() << "."
-                        << std::endl;
+    g_log.information() << "   Unit of workspace is " << xUnit->caption()
+                        << ".\n";
   }
 
   setMinimumDistance(getProperty("MinimumPeakSeparation"));
@@ -581,17 +581,16 @@ void PoldiPeakSearch::exec() {
                              "spectrum points - no peaks possible."));
   }
 
-  g_log.information() << "   Parameters set." << std::endl;
+  g_log.information() << "   Parameters set.\n";
 
   MantidVec summedNeighborCounts = getNeighborSums(correlatedCounts);
   g_log.information() << "   Neighboring counts summed, contains "
-                      << summedNeighborCounts.size() << " data points."
-                      << std::endl;
+                      << summedNeighborCounts.size() << " data points.\n";
 
   std::list<MantidVec::const_iterator> peakPositionsSummed =
       findPeaks(summedNeighborCounts.begin(), summedNeighborCounts.end());
   g_log.information() << "   Peaks detected in summed spectrum: "
-                      << peakPositionsSummed.size() << std::endl;
+                      << peakPositionsSummed.size() << '\n';
 
   /* This step is required because peaks are actually searched in the
    * "sum-of-neighbors"-spectrum.
@@ -603,8 +602,8 @@ void PoldiPeakSearch::exec() {
       mapPeakPositionsToCorrelationData(peakPositionsSummed,
                                         summedNeighborCounts.begin(),
                                         correlatedCounts.begin());
-  g_log.information() << "   Peak positions transformed to original spectrum."
-                      << std::endl;
+  g_log.information()
+      << "   Peak positions transformed to original spectrum.\n";
 
   /* Since intensities are required for filtering, they are extracted from the
    * original count data,
@@ -614,13 +613,13 @@ void PoldiPeakSearch::exec() {
       getPeaks(correlatedCounts.begin(), correlatedCounts.end(),
                peakPositionsCorrelation, correlationQValues, xUnit);
   g_log.information()
-      << "   Extracted peak positions in Q and intensity guesses." << std::endl;
+      << "   Extracted peak positions in Q and intensity guesses.\n";
 
   UncertainValue backgroundWithSigma =
       getBackgroundWithSigma(peakPositionsCorrelation, correlatedCounts);
   g_log.information() << "   Calculated average background and deviation: "
                       << UncertainValueIO::toString(backgroundWithSigma)
-                      << std::endl;
+                      << '\n';
 
   if ((*getProperty("MinimumPeakHeight")).isDefault()) {
     setMinimumPeakHeight(minimumPeakHeightFromBackground(backgroundWithSigma));
@@ -636,7 +635,7 @@ void PoldiPeakSearch::exec() {
 
   g_log.information() << "   Peaks above minimum intensity ("
                       << m_minimumPeakHeight
-                      << "): " << intensityFilteredPeaks.size() << std::endl;
+                      << "): " << intensityFilteredPeaks.size() << '\n';
 
   std::sort(intensityFilteredPeaks.begin(), intensityFilteredPeaks.end(),
             boost::bind<bool>(&PoldiPeak::greaterThan, _1, _2,

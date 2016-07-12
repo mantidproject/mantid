@@ -6,6 +6,7 @@
 // test case.
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
@@ -34,6 +35,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::NeXus;
+using Mantid::HistogramData::HistogramDx;
 
 class SaveNexusProcessedTest : public CxxTest::TestSuite {
 public:
@@ -51,9 +53,9 @@ public:
     clearfiles = !file.exists();
   }
 
-  void setUp() {}
+  void setUp() override {}
 
-  void tearDown() {}
+  void tearDown() override {}
 
   void testInit() {
     SaveNexusProcessed algToBeTested;
@@ -244,17 +246,18 @@ public:
     groups[4].push_back(50);
 
     EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100, 1.0);
-    WS->getEventList(3).clear(false);
+        WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100, 1.0,
+                                                             1.0);
+    WS->getSpectrum(3).clear(false);
     // Switch the event type
     if (makeDifferentTypes) {
-      WS->getEventList(0).switchTo(TOF);
-      WS->getEventList(1).switchTo(WEIGHTED);
-      WS->getEventList(2).switchTo(WEIGHTED_NOTIME);
-      WS->getEventList(4).switchTo(WEIGHTED);
+      WS->getSpectrum(0).switchTo(TOF);
+      WS->getSpectrum(1).switchTo(WEIGHTED);
+      WS->getSpectrum(2).switchTo(WEIGHTED_NOTIME);
+      WS->getSpectrum(4).switchTo(WEIGHTED);
     } else {
       for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++)
-        WS->getEventList(wi).switchTo(type);
+        WS->getSpectrum(wi).switchTo(type);
     }
 
     SaveNexusProcessed alg;
@@ -808,12 +811,15 @@ private:
     localWorkspace2D->getAxis(0)->unit() =
         UnitFactory::Instance().create("TOF");
     double d = 0.0;
+    if (useXErrors) {
+      localWorkspace2D->setPointStandardDeviations(0, 10);
+    }
     for (int i = 0; i < 10; ++i, d += 0.1) {
       localWorkspace2D->dataX(0)[i] = d;
       localWorkspace2D->dataY(0)[i] = d;
       localWorkspace2D->dataE(0)[i] = d;
       if (useXErrors) {
-        localWorkspace2D->dataDx(0)[i] = d;
+        localWorkspace2D->mutableDx(0)[i] = d;
       }
     }
 

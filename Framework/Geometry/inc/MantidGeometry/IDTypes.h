@@ -7,8 +7,8 @@
 
 namespace Mantid {
 
-/// Typedef for a spectrum ID
-typedef int32_t specid_t;
+/// Typedef for a spectrum Number
+typedef int32_t specnum_t;
 
 /// Typedef for a detector ID
 typedef int32_t detid_t;

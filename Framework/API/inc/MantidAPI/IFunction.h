@@ -10,7 +10,6 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
 
 #ifndef Q_MOC_RUN
@@ -179,7 +178,7 @@ public:
   class DLLExport AttributeVisitor : public boost::static_visitor<T> {
   public:
     /// Virtual destructor
-    virtual ~AttributeVisitor() {}
+    virtual ~AttributeVisitor() = default;
     /// implements static_visitor's operator() for std::string
     T operator()(std::string &str) const { return apply(str); }
     /// implements static_visitor's operator() for double
@@ -211,7 +210,7 @@ public:
   class DLLExport ConstAttributeVisitor : public boost::static_visitor<T> {
   public:
     /// Virtual destructor
-    virtual ~ConstAttributeVisitor() {}
+    virtual ~ConstAttributeVisitor() = default;
     /// implements static_visitor's operator() for std::string
     T operator()(std::string &str) const { return apply(str); }
     /// implements static_visitor's operator() for double
@@ -315,7 +314,7 @@ public:
 
   /// Constructor
   IFunction()
-      : m_isParallel(false), m_handler(NULL), m_progReporter(NULL),
+      : m_isParallel(false), m_handler(nullptr), m_progReporter(nullptr),
         m_chiSquared(0.0) {}
   /// Virtual destructor
   virtual ~IFunction();
@@ -416,6 +415,14 @@ public:
   virtual void fix(size_t i) = 0;
   /// Restores a declared parameter i to the active status
   virtual void unfix(size_t i) = 0;
+  /// Fix a parameter
+  void fixParameter(const std::string &name);
+  /// Free a parameter
+  void unfixParameter(const std::string &name);
+  /// Fix all parameters
+  void fixAll();
+  /// Free all parameters
+  void unfixAll();
 
   /// Return parameter index from a parameter reference. Usefull for constraints
   /// and ties in composite functions
@@ -457,6 +464,8 @@ public:
   virtual bool removeTie(size_t i) = 0;
   /// Get the tie of i-th parameter
   virtual ParameterTie *getTie(size_t i) const = 0;
+  /// Add a new tie. Derived classes must provide storage for ties
+  virtual void addTie(ParameterTie *tie) = 0;
   //@}
 
   /** @name Constraints */
@@ -478,11 +487,11 @@ public:
   /// Returns a list of attribute names
   virtual std::vector<std::string> getAttributeNames() const;
   /// Return a value of attribute attName
-  virtual Attribute getAttribute(const std::string &attName) const;
+  virtual Attribute getAttribute(const std::string &name) const;
   /// Set a value to attribute attName
-  virtual void setAttribute(const std::string &attName, const Attribute &);
+  virtual void setAttribute(const std::string &name, const Attribute &);
   /// Check if attribute attName exists
-  virtual bool hasAttribute(const std::string &attName) const;
+  virtual bool hasAttribute(const std::string &name) const;
   /// Set an attribute value
   template <typename T>
   void setAttributeValue(const std::string &attName, const T &value) {
@@ -494,9 +503,15 @@ public:
 
   /// Set up the function for a fit.
   virtual void setUpForFit() = 0;
-
+  /// Get number of values for a given domain.
+  virtual size_t getValuesSize(const FunctionDomain &domain) const;
+  /// Get number of domains required by this function
+  virtual size_t getNumberDomains() const;
+  /// Split this function (if needed) into a list of independent functions.
+  virtual std::vector<boost::shared_ptr<IFunction>>
+  createEquivalentFunctions() const;
   /// Calculate numerical derivatives
-  void calNumericalDeriv(const FunctionDomain &domain, Jacobian &out);
+  void calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobian);
   /// Set the covariance matrix
   void setCovarianceMatrix(boost::shared_ptr<Kernel::Matrix<double>> covar);
   /// Get the covariance matrix
@@ -526,16 +541,13 @@ protected:
                                 const std::string &description = "") = 0;
 
   /// Convert a value from one unit (inUnit) to unit defined in workspace (ws)
-  double convertValue(double value, Kernel::Unit_sptr &inUnit,
+  double convertValue(double value, Kernel::Unit_sptr &outUnit,
                       boost::shared_ptr<const MatrixWorkspace> ws,
                       size_t wsIndex) const;
 
   void convertValue(std::vector<double> &values, Kernel::Unit_sptr &outUnit,
                     boost::shared_ptr<const MatrixWorkspace> ws,
                     size_t wsIndex) const;
-
-  /// Add a new tie. Derived classes must provide storage for ties
-  virtual void addTie(ParameterTie *tie) = 0;
 
   /// Override to declare function attributes
   virtual void declareAttributes() {}
@@ -588,7 +600,7 @@ public:
   /// Constructor
   FunctionHandler(IFunction_sptr fun) : m_fun(fun) {}
   /// Virtual destructor
-  virtual ~FunctionHandler() {}
+  virtual ~FunctionHandler() = default;
   /// abstract init method. It is called after setting handler to the function
   virtual void init() = 0;
   /// Return the handled function

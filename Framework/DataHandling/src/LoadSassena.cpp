@@ -1,10 +1,11 @@
 #include "MantidDataHandling/LoadSassena.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
@@ -59,9 +60,8 @@ herr_t LoadSassena::dataSetInfo(const hid_t &h5file, const std::string setName,
                                 hsize_t *dims) const {
   H5T_class_t class_id;
   size_t type_size;
-  herr_t errorcode;
-  errorcode = H5LTget_dataset_info(h5file, setName.c_str(), dims, &class_id,
-                                   &type_size);
+  herr_t errorcode = H5LTget_dataset_info(h5file, setName.c_str(), dims,
+                                          &class_id, &type_size);
   if (errorcode < 0) {
     g_log.error("Unable to read " + setName + " dataset info");
   }
@@ -75,9 +75,10 @@ herr_t LoadSassena::dataSetInfo(const hid_t &h5file, const std::string setName,
  * @param buf storing dataset
  */
 herr_t LoadSassena::dataSetDouble(const hid_t &h5file,
-                                  const std::string setName, double *buf) {
-  herr_t errorcode;
-  errorcode = H5LTread_dataset_double(h5file, setName.c_str(), buf);
+                                  const std::string setName,
+                                  std::vector<double> &buf) {
+  herr_t errorcode =
+      H5LTread_dataset_double(h5file, setName.c_str(), buf.data());
   if (errorcode < 0) {
     this->g_log.error("Cannot read " + setName + " dataset");
   }
@@ -101,9 +102,9 @@ bool compare(const mypair &left, const mypair &right) {
  * @param sorting_indexes permutation of qvmod indexes to render it in
  * increasing order of momemtum transfer
  */
-const MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
-                                          API::WorkspaceGroup_sptr gws,
-                                          std::vector<int> &sorting_indexes) {
+MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
+                                    API::WorkspaceGroup_sptr gws,
+                                    std::vector<int> &sorting_indexes) {
 
   MantidVec qvmod; // store the modulus of the vector
 
@@ -116,7 +117,7 @@ const MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
         "Unable to read " + setName + " dataset info:", m_filename);
   }
   int nq = static_cast<int>(dims[0]); // number of q-vectors
-  auto buf = new double[nq * 3];
+  std::vector<double> buf(nq * 3);
 
   herr_t errorcode = this->dataSetDouble(h5file, "qvectors", buf);
   if (errorcode < 0) {
@@ -125,11 +126,12 @@ const MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
     return qvmod;
   }
 
-  double *curr = buf;
+  qvmod.reserve(nq);
+  auto curr = buf.cbegin();
   for (int iq = 0; iq < nq; iq++) {
     qvmod.push_back(
         sqrt(curr[0] * curr[0] + curr[1] * curr[1] + curr[2] * curr[2]));
-    curr += 3;
+    std::next(curr, 3);
   }
 
   if (getProperty("SortByQVectors")) {
@@ -152,11 +154,9 @@ const MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
 
   for (int iq = 0; iq < nq; iq++) {
     MantidVec &Y = ws->dataY(iq);
-    const int index = sorting_indexes[iq];
-    curr = buf + 3 * index;
-    Y.assign(curr, curr + 3);
+    curr = std::next(buf.cbegin(), 3 * sorting_indexes[iq]);
+    Y.assign(curr, std::next(curr, 3));
   }
-  delete[] buf;
 
   ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create(
       "MomentumTransfer"); // Set the Units
@@ -182,7 +182,7 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
                          const std::vector<int> &sorting_indexes) {
 
   int nq = static_cast<int>(qvmod.size()); // number of q-vectors
-  auto buf = new double[nq * 2];
+  std::vector<double> buf(nq * 2);
   herr_t errorcode = this->dataSetDouble(h5file, setName, buf);
   if (errorcode < 0) {
     this->g_log.error("LoadSassena::loadFQ cannot proceed");
@@ -202,14 +202,11 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   MantidVec &im = ws->dataY(1); // store the imaginary part
   ws->dataX(1) = qvmod;
 
-  double *curr;
-  for (int iq = 0; iq < nq; iq++) {
-    const int index = sorting_indexes[iq];
-    curr = buf + 2 * index;
-    re[iq] = curr[0];
-    im[iq] = curr[1];
+  for (int iq = 0; iq < nq; ++iq) {
+    auto curr = std::next(buf.cbegin(), 2 * sorting_indexes[iq]);
+    re[iq] = *curr;
+    im[iq] = *std::next(curr);
   }
-  delete[] buf;
 
   // Set the Units
   ws->getAxis(0)->unit() =
@@ -247,7 +244,7 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   int nt = 2 * nnt - 1;                // number of time points
 
   int nq = static_cast<int>(qvmod.size()); // number of q-vectors
-  auto buf = new double[nq * nnt * 2];
+  std::vector<double> buf(nq * nnt * 2);
   herr_t errorcode = this->dataSetDouble(h5file, setName, buf);
   if (errorcode < 0) {
     this->g_log.error("LoadSassena::loadFQT cannot proceed");
@@ -278,22 +275,21 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
     MantidVec &reY = wsRe->dataY(iq);
     MantidVec &imY = wsIm->dataY(iq);
     const int index = sorting_indexes[iq];
-    double *curr = buf + index * nnt * 2;
+    auto curr = std::next(buf.cbegin(), index * nnt * 2);
     for (int it = 0; it < nnt; it++) {
       reX[origin + it] = it * dt; // time point for the real part
       reY[origin + it] =
           *curr; // real part of the intermediate structure factor
       reX[origin - it] = -it * dt; // symmetric negative time
       reY[origin - it] = *curr;    // symmetric value for the negative time
-      curr++;
+      ++curr;
       imX[origin + it] = it * dt;
       imY[origin + it] = *curr;
       imX[origin - it] = -it * dt;
       imY[origin - it] = -(*curr); // antisymmetric value for negative times
-      curr++;
+      ++curr;
     }
   }
-  delete[] buf;
 
   // Set the Time unit for the X-axis
   wsRe->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("Label");
@@ -348,19 +344,20 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
 void LoadSassena::init() {
   // Declare the Filename algorithm property. Mandatory. Sets the path to the
   // file to load.
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
-                                        {".h5", ".hd5"}),
+  const std::vector<std::string> exts{".h5", ".hd5"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, exts),
                   "A Sassena file");
   // Declare the OutputWorkspace property
-  declareProperty(new API::WorkspaceProperty<API::Workspace>(
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<API::Workspace>>(
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name of the group workspace to be created.");
-  declareProperty(new Kernel::PropertyWithValue<double>(
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
                       "TimeUnit", 1.0, Kernel::Direction::Input),
                   "The Time unit in between data points, in picoseconds. "
                   "Default is 1.0 picosec.");
-  declareProperty(new Kernel::PropertyWithValue<bool>("SortByQVectors", true,
-                                                      Kernel::Direction::Input),
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "SortByQVectors", true, Kernel::Direction::Input),
                   "Sort structure factors by increasing momentum transfer?");
 }
 
@@ -410,7 +407,7 @@ void LoadSassena::exec() {
   // Block to read the Q-vectors
   std::vector<int> sorting_indexes;
   const MantidVec qvmod = this->loadQvectors(h5file, gws, sorting_indexes);
-  if (qvmod.size() == 0) {
+  if (qvmod.empty()) {
     this->g_log.error("No Q-vectors read. Unable to proceed");
     H5Fclose(h5file);
     return;

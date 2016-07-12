@@ -1,9 +1,9 @@
 #include "MantidMDAlgorithms/SetMDUsingMask.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include <float.h>
+#include "MantidKernel/System.h"
+#include <cfloat>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -14,16 +14,6 @@ namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetMDUsingMask)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SetMDUsingMask::SetMDUsingMask() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SetMDUsingMask::~SetMDUsingMask() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -43,16 +33,16 @@ const std::string SetMDUsingMask::category() const {
 /** Initialize the algorithm's properties.
  */
 void SetMDUsingMask::init() {
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDHistoWorkspace.");
   declareProperty(
-      new WorkspaceProperty<IMDHistoWorkspace>("MaskWorkspace", "",
-                                               Direction::Input),
+      make_unique<WorkspaceProperty<IMDHistoWorkspace>>("MaskWorkspace", "",
+                                                        Direction::Input),
       "A mask MDHistoWorkspace, where true indicates where to set the value.");
 
   declareProperty(
-      new WorkspaceProperty<IMDHistoWorkspace>(
+      make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
           "ValueWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Workspace to copy to the output workspace over the input. Optional - "
       "specify this or Value.");
@@ -61,7 +51,7 @@ void SetMDUsingMask::init() {
                                     "workspace. Optional - specify this or "
                                     "ValueWorkspace");
 
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output MDHistoWorkspace.");
 }

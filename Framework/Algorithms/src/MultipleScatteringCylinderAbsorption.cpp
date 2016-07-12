@@ -3,8 +3,11 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MultipleScatteringCylinderAbsorption.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -61,11 +64,6 @@ static const double COEFF4 = 1.1967;
 static const double COEFF5 = -0.8667;
 } // end of anonymous
 
-MultipleScatteringCylinderAbsorption::MultipleScatteringCylinderAbsorption()
-    : API::Algorithm() {}
-
-MultipleScatteringCylinderAbsorption::~MultipleScatteringCylinderAbsorption() {}
-
 const std::string MultipleScatteringCylinderAbsorption::name() const {
   return "MultipleScatteringCylinderAbsorption";
 }
@@ -85,10 +83,10 @@ void MultipleScatteringCylinderAbsorption::init() {
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.");
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
 
@@ -139,15 +137,15 @@ void MultipleScatteringCylinderAbsorption::exec() {
   // geometry stuff
   const int64_t NUM_HIST = static_cast<int64_t>(in_WS->getNumberHistograms());
   Instrument_const_sptr instrument = in_WS->getInstrument();
-  if (instrument == NULL)
+  if (instrument == nullptr)
     throw std::runtime_error(
         "Failed to find instrument attached to InputWorkspace");
   IComponent_const_sptr source = instrument->getSource();
   IComponent_const_sptr sample = instrument->getSample();
-  if (source == NULL)
+  if (source == nullptr)
     throw std::runtime_error(
         "Failed to find source in the instrument for InputWorkspace");
-  if (sample == NULL)
+  if (sample == nullptr)
     throw std::runtime_error(
         "Failed to find sample in the instrument for InputWorkspace");
 
@@ -157,21 +155,12 @@ void MultipleScatteringCylinderAbsorption::exec() {
   EventWorkspace_sptr in_WSevent =
       boost::dynamic_pointer_cast<EventWorkspace>(in_WS);
   if (in_WSevent) {
-    MatrixWorkspace_sptr out_WS = getProperty("OutputWorkspace");
-    EventWorkspace_sptr out_WSevent =
-        boost::dynamic_pointer_cast<EventWorkspace>(out_WS);
-
     // not in-place so create a new copy
-    if (in_WSevent != out_WSevent) {
-      out_WSevent = boost::dynamic_pointer_cast<EventWorkspace>(
-          API::WorkspaceFactory::Instance().create(
-              "EventWorkspace", in_WSevent->getNumberHistograms(), 2, 1));
-      // Copy geometry over.
-      API::WorkspaceFactory::Instance().initializeFromParent(
-          in_WSevent, out_WSevent, false);
-      // You need to copy over the data as well.
-      out_WSevent->copyDataFrom((*in_WSevent));
+    MatrixWorkspace_sptr out_WS = getProperty("OutputWorkspace");
+    if (in_WS != out_WS) {
+      out_WS = in_WS->clone();
     }
+    auto out_WSevent = boost::dynamic_pointer_cast<EventWorkspace>(out_WS);
 
     // convert to weighted events
     out_WSevent->switchEventType(API::WEIGHTED_NOTIME);
@@ -181,13 +170,13 @@ void MultipleScatteringCylinderAbsorption::exec() {
     for (int64_t index = 0; index < NUM_HIST; ++index) {
       PARALLEL_START_INTERUPT_REGION
       IDetector_const_sptr det = out_WSevent->getDetector(index);
-      if (det == NULL)
+      if (det == nullptr)
         throw std::runtime_error("Failed to find detector");
       if (det->isMasked())
         continue;
-      const double tth_rad = out_WSevent->detectorTwoTheta(det);
+      const double tth_rad = out_WSevent->detectorTwoTheta(*det);
 
-      EventList &eventList = out_WSevent->getEventList(index);
+      EventList &eventList = out_WSevent->getSpectrum(index);
       vector<double> tof_vec, y_vec, err_vec;
       eventList.getTofs(tof_vec);
       eventList.getWeights(y_vec);
@@ -207,9 +196,7 @@ void MultipleScatteringCylinderAbsorption::exec() {
     PARALLEL_CHECK_INTERUPT_REGION
 
     // set the output workspace
-    this->setProperty(
-        "OutputWorkspace",
-        boost::dynamic_pointer_cast<MatrixWorkspace>(out_WSevent));
+    setProperty("OutputWorkspace", out_WS);
   } else // histogram case
   {
     // Create the new workspace
@@ -218,11 +205,11 @@ void MultipleScatteringCylinderAbsorption::exec() {
 
     for (int64_t index = 0; index < NUM_HIST; ++index) {
       IDetector_const_sptr det = in_WS->getDetector(index);
-      if (det == NULL)
+      if (det == nullptr)
         throw std::runtime_error("Failed to find detector");
       if (det->isMasked())
         continue;
-      const double tth_rad = in_WS->detectorTwoTheta(det);
+      const double tth_rad = in_WS->detectorTwoTheta(*det);
 
       MantidVec tof_vec = in_WS->readX(index);
       MantidVec y_vec = in_WS->readY(index);

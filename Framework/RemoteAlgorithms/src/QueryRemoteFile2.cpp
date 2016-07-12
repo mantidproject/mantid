@@ -13,7 +13,6 @@ DECLARE_ALGORITHM(QueryRemoteFile2)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 
@@ -36,7 +35,7 @@ void QueryRemoteFile2::init() {
                   Direction::Input);
 
   declareProperty(
-      new ArrayProperty<std::string>("FileNames", Direction::Output),
+      make_unique<ArrayProperty<std::string>>("FileNames", Direction::Output),
       "The names of all the files that were found");
 }
 

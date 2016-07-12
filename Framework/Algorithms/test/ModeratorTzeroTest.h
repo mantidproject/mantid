@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/Events.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -15,6 +16,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Algorithms;
+using Mantid::HistogramData::BinEdges;
 
 class ModeratorTzeroTest : public CxxTest::TestSuite {
 public:
@@ -149,7 +151,7 @@ public:
     double tofs_a[11] = {-37.5547, 1562.45, 3162.45, 4762.45, 6362.45, 7962.45,
                          9550.18,  11150,   12750,   14350,   15950};
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-      EventList &evlist = testWS->getEventList(ihist);
+      EventList &evlist = testWS->getSpectrum(ihist);
       MantidVec tofs_b = evlist.getTofs();
       MantidVec xarray = evlist.readX();
       for (size_t ibin = 0; ibin < xarray.size(); ibin += jump) {
@@ -181,7 +183,7 @@ public:
     double tofs_a[11] = {0.0,     1598.38, 3190.3,  4783.04, 6376.76, 7971.06,
                          9565.72, 11160.6, 12755.7, 14351,   15946.3};
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-      EventList &evlist = testWS->getEventList(ihist);
+      EventList &evlist = testWS->getSpectrum(ihist);
       MantidVec tofs_b = evlist.getTofs();
       MantidVec xarray = evlist.readX();
       for (size_t ibin = 0; ibin < xarray.size(); ibin += jump) {
@@ -214,7 +216,7 @@ public:
     double tofs_a[11] = {-10.8185, 1589.18, 3189.18, 4789.18, 6389.18, 7989.18,
                          9589.18,  11189.2, 12789.2, 14389.2, 15989.2};
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-      EventList &evlist = testWS->getEventList(ihist);
+      EventList &evlist = testWS->getSpectrum(ihist);
       MantidVec tofs_b = evlist.getTofs();
       MantidVec xarray = evlist.readX();
       for (size_t ibin = 0; ibin < xarray.size(); ibin += jump) {
@@ -238,8 +240,7 @@ private:
             numHists, numBins, true);
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    MantidVecPtr xdata;
-    xdata.access().resize(numBins + 1);
+    BinEdges xdata(numBins + 1);
     const double peakHeight(1000.), peakCentre(7000.), sigmaSq(1000 * 1000.);
     // tof ranges from 0 to 16000 (units assumed micro-seconds
     const double rescaling_factor(4.0);
@@ -247,11 +248,11 @@ private:
       const double xValue = rescaling_factor * ibin;
       testWS->dataY(0)[ibin] =
           peakHeight * exp(-0.5 * pow(xValue - peakCentre, 2.) / sigmaSq);
-      xdata.access()[ibin] = xValue;
+      xdata.mutableData()[ibin] = xValue;
     }
-    xdata.access()[numBins] = rescaling_factor * numBins;
+    xdata.mutableData()[numBins] = rescaling_factor * numBins;
     for (int ihist = 0; ihist < numHists; ihist++)
-      testWS->setX(ihist, xdata);
+      testWS->setBinEdges(ihist, xdata);
     return testWS;
   }
 
@@ -266,16 +267,15 @@ private:
     const double rescaling_factor(4.0);
     const size_t numHists = testWS->getNumberHistograms();
     for (size_t ihist = 0; ihist < numHists; ++ihist) {
-      EventList &evlist = testWS->getEventList(ihist);
-      MantidVecPtr xdata;
-      xdata.access().resize(numBins + 1);
+      EventList &evlist = testWS->getSpectrum(ihist);
+      BinEdges xdata(numBins + 1);
       for (int ibin = 0; ibin <= numBins; ++ibin) {
         double tof = rescaling_factor * ibin;
         TofEvent tofevent(tof);
-        xdata.access()[ibin] = tof;
+        xdata.mutableData()[ibin] = tof;
         evlist.addEventQuickly(tofevent); // insert event
       }
-      evlist.setX(xdata); // set the bins for the associated histogram
+      evlist.setX(xdata.cowData()); // set the bins for the associated histogram
     }
     return testWS;
   }

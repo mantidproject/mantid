@@ -111,20 +111,20 @@ public:
     return tmp;
   }
   //
-  void setColumn(const size_t nCol, const std::vector<T> &newColumn);
+  void setColumn(const size_t nCol, const std::vector<T> &newCol);
   void setRow(const size_t nRow, const std::vector<T> &newRow);
   void zeroMatrix(); ///< Set the matrix to zero
   void identityMatrix();
-  void setRandom(size_t seedValue = 0, double rMin = -1,
+  void setRandom(size_t seed = 0, double rMin = -1,
                  double rMax = 1); ///< initialize random matrix;
   void normVert();                 ///< Vertical normalisation
   T Trace() const;                 ///< Trace of the matrix
 
   std::vector<T> Diagonal() const; ///< Returns a vector of the diagonal
   Matrix<T>
-  fDiagonal(const std::vector<T> &) const; ///< Forward multiply  D*this
-  Matrix<T>
-  bDiagonal(const std::vector<T> &) const; ///< Backward multiply this*D
+  preMultiplyByDiagonal(const std::vector<T> &) const; ///< pre-multiply D*this
+  Matrix<T> postMultiplyByDiagonal(
+      const std::vector<T> &) const; ///< post-multiply this*D
 
   void setMem(const size_t, const size_t);
 
@@ -139,16 +139,14 @@ public:
   /// Return the number of columns in the matrix
   size_t numCols() const { return ny; }
 
-  /// Return the largest matrix size
+  /// Return the smallest matrix size
   size_t Ssize() const { return (nx > ny) ? ny : nx; }
 
   void swapRows(const size_t, const size_t); ///< Swap rows (first V index)
   void swapCols(const size_t, const size_t); ///< Swap cols (second V index)
 
-  T Invert(); ///< LU inversion routine
-  std::vector<T>
-  Faddeev(Matrix<T> &); ///< Polynomanal and inversion by Faddeev method.
-  void averSymmetric(); ///< make Matrix symmetric
+  T Invert();                                      ///< LU inversion routine
+  void averSymmetric();                            ///< make Matrix symmetric
   int Diagonalise(Matrix<T> &, Matrix<T> &) const; ///< (only Symmetric matrix)
   void sortEigen(Matrix<T> &);                     ///< Sort eigenvectors
   Matrix<T> Tprime() const;                        ///< Transpose the matrix
@@ -157,7 +155,7 @@ public:
   T factor();            ///< Calculate the factor
   T determinant() const; ///< Calculate the determinant
 
-  int GaussJordan(Matrix<T> &); ///< Create a Gauss-Jordan Invertion
+  void GaussJordan(Matrix<T> &); ///< Create a Gauss-Jordan Inversion
   T compSum() const;
 
   // Check if a rotation matrix

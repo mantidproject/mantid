@@ -148,7 +148,7 @@ public:
     // add workspace energy
     ws2D->mutableRun().addProperty("Ei", 13., "meV", true);
     // ADD time series property
-    ws2D->mutableRun().addProperty("H", 10., "Gs");
+    ws2D->mutableRun().addProperty(std::string("H"), 10., std::string("Gs"));
   }
 };
 

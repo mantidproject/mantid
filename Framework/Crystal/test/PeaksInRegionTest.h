@@ -7,7 +7,6 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidCrystal/PeaksInRegion.h"
 #include <boost/tuple/tuple.hpp>
-#include <boost/assign/list_of.hpp>
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
@@ -395,8 +394,8 @@ public:
   }
 
   void test_false_intersection_when_check_peak_extents() {
-    std::vector<double> extents = boost::assign::list_of(0)(1)(0)(1)(0)(
-        1); // Extents go from 0, 1 in each dimension.
+    std::vector<double> extents = {
+        0, 1, 0, 1, 0, 1}; // Extents go from 0, 1 in each dimension.
 
     PeaksWorkspace_sptr ws = WorkspaceCreationHelper::createPeaksWorkspace(1);
     auto detectorIds = ws->getInstrument()->getDetectorIDs();

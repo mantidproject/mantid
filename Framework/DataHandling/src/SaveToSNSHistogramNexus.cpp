@@ -2,17 +2,14 @@
 // @author Freddie Akeroyd, STFC ISIS Faility
 // @author Ronald Fowler, STFC eScience. Modified to fit with
 // SaveToSNSHistogramNexusProcessed
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/SaveToSNSHistogramNexus.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Memory.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/FileProperty.h"
 
@@ -23,9 +20,9 @@
 #include <Poco/File.h>
 //#include <hdf5.h> //This is troublesome on multiple platforms.
 
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 
 namespace Mantid {
 namespace DataHandling {
@@ -50,22 +47,22 @@ void SaveToSNSHistogramNexus::init() {
   // workspac
   std::initializer_list<std::string> exts = {".nxs"};
 
-  declareProperty(
-      new FileProperty("InputFilename", "", FileProperty::Load, exts),
-      "The name of the original Nexus file for this data,\n"
-      "as a full or relative path");
+  declareProperty(Kernel::make_unique<FileProperty>("InputFilename", "",
+                                                    FileProperty::Load, exts),
+                  "The name of the original Nexus file for this data,\n"
+                  "as a full or relative path");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the workspace to be saved");
 
-  declareProperty(
-      new FileProperty("OutputFilename", "", FileProperty::Save, exts),
-      "The name of the Nexus file to write, as a full or relative\n"
-      "path");
+  declareProperty(Kernel::make_unique<FileProperty>("OutputFilename", "",
+                                                    FileProperty::Save, exts),
+                  "The name of the Nexus file to write, as a full or relative\n"
+                  "path");
 
   declareProperty(
-      new PropertyWithValue<bool>("Compress", false, Direction::Input),
+      make_unique<PropertyWithValue<bool>>("Compress", false, Direction::Input),
       "Will the output NXS file data be compressed?");
 }
 
@@ -93,7 +90,7 @@ int SaveToSNSHistogramNexus::add_path(const char *path) {
 int SaveToSNSHistogramNexus::remove_path(const char *path) {
   char *tstr;
   tstr = strrchr(current_path, '/');
-  if (tstr != NULL && !strcmp(path, tstr + 1)) {
+  if (tstr != nullptr && !strcmp(path, tstr + 1)) {
     *tstr = '\0';
   } else {
     printf("path error\n");
@@ -231,8 +228,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
     // field.
     NXname attrName = "errors";
     std::string attrBuffer = errors_field_name;
-    if (NXputattr(outId, attrName,
-                  static_cast<void *>(const_cast<char *>(attrBuffer.c_str())),
+    if (NXputattr(outId, attrName, attrBuffer.c_str(),
                   static_cast<int>(attrBuffer.size()), NX_CHAR) != NX_OK)
       return NX_ERROR;
   }
@@ -261,7 +257,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
     //      strcpy(link->targetPath, targetPath.c_str());
     //      if (NXmakelink(outId,link) != NX_OK)
     //        g_log.debug() << "Error while making link to " << targetPath <<
-    //        std::endl;
+    //        '\n';
 
     if (WriteAttributes(is_definition) != NX_OK)
       return NX_ERROR;
@@ -277,7 +273,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
       new float[slabDimensions[0] * slabDimensions[1] * slabDimensions[2]];
 
   // Only allocate an array for errors if it is needed
-  float *errors = NULL;
+  float *errors = nullptr;
   if (doBoth)
     errors =
         new float[slabDimensions[0] * slabDimensions[1] * slabDimensions[2]];
@@ -452,10 +448,6 @@ int SaveToSNSHistogramNexus::WriteDataGroup(std::string bank,
     size_t memory_required = size_t(det->xpixels() * det->ypixels()) *
                              size_t(inputWorkspace->blocksize()) * 2 *
                              sizeof(float);
-    // Make sure you free as much memory as possible if you need a huge block.
-    if (memory_required > 1000000000)
-      API::MemoryManager::Instance().releaseFreeMemory();
-
     Kernel::MemoryStats mem;
     mem.update();
     size_t memory_available = mem.availMem() * 1024;

@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.simpleapi import FitGaussian, CreateSampleWorkspace, DeleteWorkspace
 import logging
@@ -29,20 +31,20 @@ class FitGaussianTest(unittest.TestCase):
         """Conditions that raise RuntimeError.
         """
         self._linearWorkspace(0)
-        with self.assertRaises(RuntimeError):
-            # bad index
-            fitResult = FitGaussian(self.ws,1)
+        self.assertRaises(RuntimeError, FitGaussian, Workspace=self.ws, Index=1)
 
     def test_noFit(self):
         """Cases where fit is not possible.
         """
         self._linearWorkspace(0)
         fitResult = FitGaussian(self.ws,0)
-        self.assertTupleEqual((0.0,0.0), fitResult)
+        self.assertEqual(0.0, fitResult[0])
+        self.assertEqual(0.0, fitResult[1])
 
         self._veryNarrowPeakWorkspace()
         fitResult = FitGaussian(self.ws,0)
-        self.assertTupleEqual((0.0,0.0), fitResult)
+        self.assertEqual(0.0, fitResult[0])
+        self.assertEqual(0.0, fitResult[1])
 
     def _guessPeak(self,peakCentre,height,sigma):
         """Test-fitting one generated Gaussian peak.
@@ -54,8 +56,8 @@ class FitGaussianTest(unittest.TestCase):
         diffPeakCentre = abs((fitPeakCentre - peakCentre) / peakCentre)
         diffSigma      = abs((fitSigma      - sigma)      / sigma)
 
-        self.assertLess(diffPeakCentre,.03)
-        self.assertLess(diffSigma,     1e-6)
+        self.assertTrue(diffPeakCentre < 0.03)
+        self.assertTrue(diffSigma < 1e-6)
 
     def test_guessedPeaks(self):
         """Test that generated Gaussian peaks are reasonably well guessed.

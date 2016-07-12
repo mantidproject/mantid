@@ -32,9 +32,9 @@ std::vector<Group_const_sptr> ProductOfCyclicGroups::getFactorGroups(
     const std::vector<SymmetryOperation> &symmetryOperations) const {
   std::vector<Group_const_sptr> groups;
 
-  for (auto it = symmetryOperations.begin(); it != symmetryOperations.end();
-       ++it) {
-    groups.push_back(GroupFactory::create<CyclicGroup>((*it).identifier()));
+  for (const auto &symmetryOperation : symmetryOperations) {
+    groups.push_back(
+        GroupFactory::create<CyclicGroup>(symmetryOperation.identifier()));
   }
 
   return groups;

@@ -58,16 +58,11 @@ public:
         workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve("inputWS")));
 
-    API::ISpectrum *spectrum1 = workspace->getSpectrum(0);
     Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
 
-    std::set<detid_t> detids = spectrum1->getDetectorIDs();
+    auto detids = workspace->getSpectrum(0).getDetectorIDs();
     TS_ASSERT_EQUALS(detids.size(), 1);
-    detid_t detid = 0;
-    std::set<detid_t>::iterator it;
-    for (it = detids.begin(); it != detids.end(); ++it) {
-      detid = *it;
-    }
+    detid_t detid = *detids.rbegin();
     Geometry::IDetector_const_sptr detector = instrument->getDetector(detid);
     double r, tth, phi;
     detector->getPos().getSpherical(r, tth, phi);
@@ -169,16 +164,11 @@ public:
   void checkDetectorParameters(API::MatrixWorkspace_sptr workspace,
                                size_t wsindex, double realr, double realtth,
                                double realphi) {
-    API::ISpectrum *spectrum1 = workspace->getSpectrum(wsindex);
     Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
 
-    std::set<detid_t> detids = spectrum1->getDetectorIDs();
+    auto detids = workspace->getSpectrum(wsindex).getDetectorIDs();
     TS_ASSERT_EQUALS(detids.size(), 1);
-    detid_t detid = 0;
-    std::set<detid_t>::iterator it;
-    for (it = detids.begin(); it != detids.end(); ++it) {
-      detid = *it;
-    }
+    detid_t detid = *detids.rbegin();
     Geometry::IDetector_const_sptr detector = instrument->getDetector(detid);
     double r, tth, phi;
     detector->getPos().getSpherical(r, tth, phi);
@@ -192,16 +182,11 @@ public:
     */
   void checkDetectorID(API::MatrixWorkspace_sptr workspace, size_t wsindex,
                        detid_t detid) {
-    API::ISpectrum *spectrum1 = workspace->getSpectrum(wsindex);
     Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
 
-    std::set<detid_t> detids = spectrum1->getDetectorIDs();
+    auto detids = workspace->getSpectrum(wsindex).getDetectorIDs();
     TS_ASSERT_EQUALS(detids.size(), 1);
-    detid_t thisdetid = 0;
-    std::set<detid_t>::iterator it;
-    for (it = detids.begin(); it != detids.end(); ++it) {
-      thisdetid = *it;
-    }
+    detid_t thisdetid = *detids.rbegin();
 
     TS_ASSERT_EQUALS(detid, thisdetid);
 

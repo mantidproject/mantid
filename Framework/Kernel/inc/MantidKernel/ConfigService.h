@@ -73,7 +73,7 @@ class InstrumentInfo;
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_KERNEL_DLL ConfigServiceImpl {
+class MANTID_KERNEL_DLL ConfigServiceImpl final {
 public:
   /**
   * This is the base class for POCO Notifications sent out from the Config
@@ -145,7 +145,7 @@ public:
   void launchProcess(const std::string &programFilePath,
                      const std::vector<std::string> &programArguments) const;
   /// Sets a configuration property
-  void setString(const std::string &keyName, const std::string &keyValue);
+  void setString(const std::string &key, const std::string &value);
   // Searches for a configuration property and returns its value
   template <typename T> int getValue(const std::string &keyName, T &out);
   /// Return the local properties filename.
@@ -201,6 +201,8 @@ public:
   void setDataSearchDirs(const std::string &searchDirs);
   /// Adds the passed path to the end of the list of data search paths
   void appendDataSearchDir(const std::string &path);
+  /// Appends subdirectory to each of the specified data search directories
+  void appendDataSearchSubDir(const std::string &subdir);
   /// Get the list of user search paths
   const std::vector<std::string> &getUserSearchDirs() const;
   /// Get instrument search directory
@@ -212,7 +214,7 @@ public:
   //@}
 
   /// Load facility information from instrumentDir/Facilities.xml file
-  void updateFacilities(const std::string &facilityName = "");
+  void updateFacilities(const std::string &fName = "");
   /// Get the list of facilities
   const std::vector<FacilityInfo *> getFacilities() const;
   /// Get the list of facility names
@@ -224,6 +226,9 @@ public:
   /// Set the default facility
   void setFacility(const std::string &facilityName);
 
+  /// registers additional logging filter channels
+  void registerLoggingFilterChannel(const std::string &filterChannelName,
+                                    Poco::Channel *pChannel);
   /// Sets the log level priority for the File log channel
   void setFileLogLevel(int logLevel);
   /// Sets the log level priority for the Console log channel
@@ -270,6 +275,7 @@ private:
   void loadConfig(const std::string &filename, const bool append = false);
   /// Read a file and place its contents into the given string
   bool readFile(const std::string &filename, std::string &contents) const;
+
   /// Provides a string of a default configuration
   std::string defaultConfig() const;
   /// Writes out a fresh user properties file
@@ -298,6 +304,8 @@ private:
   /// Returns a list of all keys under a given root key
   void getKeysRecursive(const std::string &root,
                         std::vector<std::string> &allKeys) const;
+  /// Finds the lowest registered logging filter level
+  int FindLowestFilterLevel() const;
 
   // Forward declaration of inner class
   template <class T> class WrappedObject;
@@ -341,6 +349,9 @@ private:
   Kernel::ProxyInfo m_proxyInfo;
   /// whether the proxy has been populated yet
   bool m_isProxySet;
+
+  /// store a list of logging FilterChannels
+  std::vector<std::string> m_filterChannels;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

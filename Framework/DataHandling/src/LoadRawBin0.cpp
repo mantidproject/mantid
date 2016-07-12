@@ -1,9 +1,5 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRawBin0.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -33,8 +29,6 @@ LoadRawBin0::LoadRawBin0()
       m_cache_options(), m_specTimeRegimes(), m_prog(0.0), m_lengthIn(0),
       m_perioids(), m_total_specs(0), m_timeChannelsVec() {}
 
-LoadRawBin0::~LoadRawBin0() {}
-
 /// Initialisation method.
 void LoadRawBin0::init() {
   LoadRawHelper::init();
@@ -45,7 +39,7 @@ void LoadRawBin0::init() {
   declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive,
                   "The number of the last spectrum to read.");
   declareProperty(
-      new ArrayProperty<specid_t>("SpectrumList"),
+      make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
       "A comma-separated list of individual spectra to read.  Only used if "
       "explicitly set.");
 }
@@ -90,7 +84,7 @@ void LoadRawBin0::exec() {
   m_total_specs = calculateWorkspaceSize();
 
   // no real X values for bin 0,so initialize this to zero
-  boost::shared_ptr<MantidVec> channelsVec(new MantidVec(1, 0));
+  auto channelsVec = boost::make_shared<HistogramData::HistogramX>(1, 0);
   m_timeChannelsVec.push_back(channelsVec);
 
   double histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
@@ -135,7 +129,7 @@ void LoadRawBin0::exec() {
         period * (static_cast<int64_t>(m_numberOfSpectra) + 1);
     skipData(file, periodTimesNSpectraP1);
     int64_t wsIndex = 0;
-    for (specid_t i = 1; i <= m_numberOfSpectra; ++i) {
+    for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
       int64_t histToRead = i + periodTimesNSpectraP1;
       if ((i >= m_spec_min && i < m_spec_max) ||
           (m_list &&

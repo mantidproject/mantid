@@ -32,9 +32,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(CompositeBraggScatterer_sptr scatterer =
                                  CompositeBraggScatterer::create());
 
-    std::vector<BraggScatterer_sptr> scatterers;
-    scatterers.push_back(getInitializedScatterer("Si", "0.35, 0, 0"));
-    scatterers.push_back(getInitializedScatterer("Si", "1/4, 1/4, 1/4"));
+    std::vector<BraggScatterer_sptr> scatterers{
+        getInitializedScatterer("Si", "0.35, 0, 0"),
+        getInitializedScatterer("Si", "1/4, 1/4, 1/4")};
 
     CompositeBraggScatterer_sptr scatterer =
         CompositeBraggScatterer::create(scatterers);
@@ -168,70 +168,66 @@ private:
   }
 
   CompositeBraggScatterer_sptr getCompositeScatterer() {
-    std::vector<BraggScatterer_sptr> scatterers;
-    scatterers.push_back(getInitializedScatterer("Si", "[0.35, 0, 0]"));
-    scatterers.push_back(getInitializedScatterer("Si", "1/4, 1/4, 1/4"));
-
-    return CompositeBraggScatterer::create(scatterers);
+    return CompositeBraggScatterer::create(
+        {getInitializedScatterer("Si", "[0.35, 0, 0]"),
+         getInitializedScatterer("Si", "1/4, 1/4, 1/4")});
   }
 
   std::map<V3D, double> getCalculatedStructureFactors() {
-    std::map<V3D, double> fSquaredCalc;
-    fSquaredCalc.insert(std::make_pair(V3D(2, 0, 0), 167.84));
-    fSquaredCalc.insert(std::make_pair(V3D(3, 0, 0), 153.50));
-    fSquaredCalc.insert(std::make_pair(V3D(4, 0, 0), 19.76));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 0, 0), 176.21));
-    fSquaredCalc.insert(std::make_pair(V3D(1, 1, 0), 2.44));
-    fSquaredCalc.insert(std::make_pair(V3D(2, 1, 0), 15.83));
-    fSquaredCalc.insert(std::make_pair(V3D(3, 1, 0), 14.48));
-    fSquaredCalc.insert(std::make_pair(V3D(4, 1, 0), 1.86));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 1, 0), 16.62));
-    fSquaredCalc.insert(std::make_pair(V3D(2, 2, 0), 104.66));
-    fSquaredCalc.insert(std::make_pair(V3D(3, 2, 0), 95.72));
-    fSquaredCalc.insert(std::make_pair(V3D(4, 2, 0), 12.32));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 2, 0), 109.88));
-    fSquaredCalc.insert(std::make_pair(V3D(3, 3, 0), 90.10));
-    fSquaredCalc.insert(std::make_pair(V3D(4, 3, 0), 11.60));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 3, 0), 103.43));
-    fSquaredCalc.insert(std::make_pair(V3D(4, 4, 0), 1.55));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 4, 0), 13.86));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 5, 0), 130.22));
-    fSquaredCalc.insert(std::make_pair(V3D(1, 1, 1), 16.45));
-    fSquaredCalc.insert(std::make_pair(V3D(2, 1, 1), 2.26));
-    fSquaredCalc.insert(std::make_pair(V3D(3, 1, 1), 21.53));
-    fSquaredCalc.insert(std::make_pair(V3D(4, 1, 1), 1.80));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 1, 1), 10.47));
-    fSquaredCalc.insert(std::make_pair(V3D(2, 2, 1), 14.95));
-    fSquaredCalc.insert(std::make_pair(V3D(3, 2, 1), 142.33));
-    fSquaredCalc.insert(std::make_pair(V3D(4, 2, 1), 11.92));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 2, 1), 69.17));
-    fSquaredCalc.insert(std::make_pair(V3D(3, 3, 1), 133.97));
-    fSquaredCalc.insert(std::make_pair(V3D(4, 3, 1), 11.22));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 3, 1), 65.11));
-    fSquaredCalc.insert(std::make_pair(V3D(4, 4, 1), 1.50));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 4, 1), 8.73));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 5, 1), 81.98));
-    fSquaredCalc.insert(std::make_pair(V3D(2, 2, 2), 14.36));
-    fSquaredCalc.insert(std::make_pair(V3D(3, 2, 2), 88.94));
-    fSquaredCalc.insert(std::make_pair(V3D(4, 2, 2), 77.57));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 2, 2), 9.52));
-    fSquaredCalc.insert(std::make_pair(V3D(3, 3, 2), 83.72));
-    fSquaredCalc.insert(std::make_pair(V3D(4, 3, 2), 73.02));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 3, 2), 8.96));
-    fSquaredCalc.insert(std::make_pair(V3D(4, 4, 2), 9.79));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 4, 2), 1.20));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 5, 2), 11.29));
-    fSquaredCalc.insert(std::make_pair(V3D(3, 3, 3), 11.44));
-    fSquaredCalc.insert(std::make_pair(V3D(4, 3, 3), 103.89));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 3, 3), 8.30));
-    fSquaredCalc.insert(std::make_pair(V3D(4, 4, 3), 13.93));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 4, 3), 1.11));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 5, 3), 10.45));
-    fSquaredCalc.insert(std::make_pair(V3D(4, 4, 4), 8.33));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 4, 4), 6.93));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 5, 4), 65.05));
-    fSquaredCalc.insert(std::make_pair(V3D(5, 5, 5), 88.57));
-    return fSquaredCalc;
+    return {{{2, 0, 0}, 167.84},
+            {{3, 0, 0}, 153.50},
+            {{4, 0, 0}, 19.76},
+            {{5, 0, 0}, 176.21},
+            {{1, 1, 0}, 2.44},
+            {{2, 1, 0}, 15.83},
+            {{3, 1, 0}, 14.48},
+            {{4, 1, 0}, 1.86},
+            {{5, 1, 0}, 16.62},
+            {{2, 2, 0}, 104.66},
+            {{3, 2, 0}, 95.72},
+            {{4, 2, 0}, 12.32},
+            {{5, 2, 0}, 109.88},
+            {{3, 3, 0}, 90.10},
+            {{4, 3, 0}, 11.60},
+            {{5, 3, 0}, 103.43},
+            {{4, 4, 0}, 1.55},
+            {{5, 4, 0}, 13.86},
+            {{5, 5, 0}, 130.22},
+            {{1, 1, 1}, 16.45},
+            {{2, 1, 1}, 2.26},
+            {{3, 1, 1}, 21.53},
+            {{4, 1, 1}, 1.80},
+            {{5, 1, 1}, 10.47},
+            {{2, 2, 1}, 14.95},
+            {{3, 2, 1}, 142.33},
+            {{4, 2, 1}, 11.92},
+            {{5, 2, 1}, 69.17},
+            {{3, 3, 1}, 133.97},
+            {{4, 3, 1}, 11.22},
+            {{5, 3, 1}, 65.11},
+            {{4, 4, 1}, 1.50},
+            {{5, 4, 1}, 8.73},
+            {{5, 5, 1}, 81.98},
+            {{2, 2, 2}, 14.36},
+            {{3, 2, 2}, 88.94},
+            {{4, 2, 2}, 77.57},
+            {{5, 2, 2}, 9.52},
+            {{3, 3, 2}, 83.72},
+            {{4, 3, 2}, 73.02},
+            {{5, 3, 2}, 8.96},
+            {{4, 4, 2}, 9.79},
+            {{5, 4, 2}, 1.20},
+            {{5, 5, 2}, 11.29},
+            {{3, 3, 3}, 11.44},
+            {{4, 3, 3}, 103.89},
+            {{5, 3, 3}, 8.30},
+            {{4, 4, 3}, 13.93},
+            {{5, 4, 3}, 1.11},
+            {{5, 5, 3}, 10.45},
+            {{4, 4, 4}, 8.33},
+            {{5, 4, 4}, 6.93},
+            {{5, 5, 4}, 65.05},
+            {{5, 5, 5}, 88.57}};
   }
 };
 

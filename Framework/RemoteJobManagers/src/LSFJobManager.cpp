@@ -88,14 +88,14 @@ void LSFJobManager::abortRemoteJob(const std::string &jobID) {
       g_log.warning() << "Killed job with Id " << jobID
                       << " but got what looks like an "
                          "error message as response: " << extractPACErrMsg(resp)
-                      << std::endl;
+                      << '\n';
     } else if (std::string::npos != resp.find("<actionMsg>")) {
-      g_log.notice() << "Killed job with Id" << jobID << "." << std::endl;
-      g_log.debug() << "Response from server: " << resp << std::endl;
+      g_log.notice() << "Killed job with Id" << jobID << ".\n";
+      g_log.debug() << "Response from server: " << resp << '\n';
     } else {
       g_log.warning() << "Killed job with Id" << jobID
                       << " but got what a response "
-                         "that I do not recognize: " << resp << std::endl;
+                         "that I do not recognize: " << resp << '\n';
     }
   } else {
     throw std::runtime_error(
@@ -198,14 +198,13 @@ LSFJobManager::queryAllRemoteJobs() const {
         std::string::npos != resp.find("<extStatus>")) {
       info = genOutputStatusInfo(resp);
       g_log.notice() << "Queried the status of jobs and stored the "
-                        "information in output properties." << std::endl;
+                        "information in output properties.\n";
     } else {
       g_log.warning() << "Queried the status of jobs but got what looks "
-                         "like an error message as response: " << resp
-                      << std::endl;
+                         "like an error message as response: " << resp << '\n';
     }
-    g_log.notice() << "Queried job status successfully." << std::endl;
-    g_log.debug() << "Response from server: " << resp << std::endl;
+    g_log.notice() << "Queried job status successfully.\n";
+    g_log.debug() << "Response from server: " << resp << '\n';
   } else {
     throw std::runtime_error(
         "Failed to obtain job status information through the "
@@ -354,13 +353,13 @@ LSFJobManager::queryRemoteJob(const std::string &jobID) const {
       info = genOutputStatusInfo(resp, jobID);
       g_log.notice() << "Queried job status (Id " << jobID
                      << ") and stored "
-                        "information into output properties." << std::endl;
-      g_log.debug() << "Response from server: " << resp << std::endl;
+                        "information into output properties.\n";
+      g_log.debug() << "Response from server: " << resp << '\n';
     } else {
       g_log.warning() << "Queried job status (Id " << jobID
                       << " ) but got what "
                          "looks like an error message as response: " << resp
-                      << std::endl;
+                      << '\n';
     }
   } else {
     throw std::runtime_error("Failed to obtain job (Id:" + jobID +
@@ -416,8 +415,7 @@ std::string LSFJobManager::startRemoteTransaction() {
   }
 
   size_t idx = g_transactions.size();
-  std::string tid =
-      std::string("LSFTrans_") + boost::lexical_cast<std::string>(idx + 1);
+  std::string tid = std::string("LSFTrans_") + std::to_string(idx + 1);
 
   auto ret = g_transactions.insert(
       std::pair<std::string, Transaction>(tid, LSFJobManager::Transaction()));
@@ -460,8 +458,8 @@ void LSFJobManager::stopRemoteTransaction(const std::string &transactionID) {
   it->second.stopped = true;
 
   std::vector<std::string> jobs = it->second.jobIDs;
-  for (size_t i = 0; i < jobs.size(); i++) {
-    abortRemoteJob(jobs[i]);
+  for (auto &job : jobs) {
+    abortRemoteJob(job);
   }
   g_transactions.erase(it);
 }
@@ -543,7 +541,7 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
     if (std::string::npos != resp.find("<errMsg>")) {
       g_log.warning()
           << "Submitted job but got a a response that seems to contain "
-             "an error message : " << extractPACErrMsg(ss.str()) << std::endl;
+             "an error message : " << extractPACErrMsg(ss.str()) << '\n';
     } else {
       // get job id number
       const std::string idTag = "<id>";
@@ -556,9 +554,9 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
         jobID = "0";
       }
       g_log.notice() << "Submitted job successfully. It got ID: " << jobID
-                     << std::endl;
+                     << '\n';
       g_log.debug() << "Response from server after submission: " << resp
-                    << std::endl;
+                    << '\n';
     }
   } else {
     throw std::runtime_error(
@@ -571,12 +569,14 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
   try {
     int iid = boost::lexical_cast<int>(jobID);
     addJobInTransaction(jobID);
-    g_log.debug() << "Submitted job, got ID: " << iid << std::endl;
+    g_log.debug() << "Submitted job, got ID: " << iid << '\n';
   } catch (std::exception &e) {
-    g_log.warning() << "The job has been submitted but the code returned does "
-                       "not seem well formed: '" +
-                           jobID + "'. Detailed error: " +
-                           e.what() << std::endl;
+    g_log.warning()
+        << "The job has been submitted but the job ID  returned does "
+           "not seem well formed. Job ID string from server: '" +
+               jobID + "'. Detailed error when tryint to interpret the code "
+                       "returned as an integer: " +
+               e.what() << '\n';
   }
 
   return jobID;
@@ -637,8 +637,7 @@ void LSFJobManager::uploadRemoteFile(const std::string &transactionID,
   }
   if (Mantid::Kernel::InternetHelper::HTTP_OK == code) {
     std::string resp = ss.str();
-    g_log.notice() << "Uploaded file, response from server: " << resp
-                   << std::endl;
+    g_log.notice() << "Uploaded file, response from server: " << resp << '\n';
   } else {
     throw std::runtime_error(
         "Failed to upload file through the web service at:" +
@@ -791,7 +790,7 @@ LSFJobManager::genOutputStatusInfo(const std::string &resp,
         jobs->item(static_cast<unsigned long>(i)));
     if (!el)
       throw std::runtime_error("Error while trying to parse job with index " +
-                               boost::lexical_cast<std::string>(i) +
+                               std::to_string(i) +
                                "could not produce a complete table workspace.");
 
     info.push_back(RemoteJobInfo());
@@ -947,7 +946,7 @@ std::string LSFJobManager::buildSubmitBody(
     // <AppParam><id>JOB_NAME</id><value>foo</value><type></type></AppParam>
     std::string name;
     if (jobName.empty()) {
-      name = "Mantid_job_" + boost::lexical_cast<std::string>(seqNo());
+      name = "Mantid_job_" + std::to_string(seqNo());
     } else {
       name = jobName;
     }
@@ -974,12 +973,11 @@ std::string LSFJobManager::buildSubmitBody(
     // <AppParam><id>MIN_NUM_CPU</id><value>1</value><type></type></AppParam>
     if (0 != numNodes) {
       encodeParam(body, boundaryInner, "MIN_NUM_CPU", "1");
-      encodeParam(body, boundaryInner, "MAX_NUM_CPU",
-                  boost::lexical_cast<std::string>(numNodes));
+      encodeParam(body, boundaryInner, "MAX_NUM_CPU", std::to_string(numNodes));
     }
     if (0 != coresPerNode) {
       encodeParam(body, boundaryInner, "PROC_PRE_HOST",
-                  boost::lexical_cast<std::string>(coresPerNode));
+                  std::to_string(coresPerNode));
     }
   }
 
@@ -1067,11 +1065,11 @@ LSFJobManager::checkDownloadOutputFile(const std::string &localPath,
   if (f.exists()) {
     std::string outName = path.toString();
     if (f.canWrite()) {
-      g_log.notice() << "Overwriting output file: " << outName << std::endl;
+      g_log.notice() << "Overwriting output file: " << outName << '\n';
     } else {
       g_log.warning() << "It is not possible to write into the output file: "
                       << outName << ", you may not have the required "
-                                    "permissions. Please check." << std::endl;
+                                    "permissions. Please check.\n";
     }
   }
   return f.path();
@@ -1094,9 +1092,9 @@ LSFJobManager::checkDownloadOutputFile(const std::string &localPath,
 const std::string
 LSFJobManager::filterPACFilename(const std::string &PACName) const {
   // discard up to last / (path)
-  std::string name = PACName.substr(PACName.rfind("/") + 1);
+  std::string name = PACName.substr(PACName.rfind('/') + 1);
   // remove trailing parameters
-  size_t ast = name.find("*");
+  size_t ast = name.find('*');
   if (std::string::npos != ast)
     name.replace(ast, std::string::npos, "");
   return name;
@@ -1147,21 +1145,21 @@ void LSFJobManager::getOneJobFile(const std::string &jobId,
       if (name.empty()) {
         g_log.notice() << "Could not download remote file " << remotePath
                        << " into " << localPath
-                       << ", a problem with its name was found" << std::endl;
+                       << ", a problem with its name was found\n";
       }
       std::string outName = checkDownloadOutputFile(localPath, name);
       std::ofstream file(outName.c_str(),
                          std::ios_base::binary | std::ios_base::out);
       Poco::StreamCopier::copyStream(ss, file);
       g_log.notice() << "Downloaded remote file " << outName << " into "
-                     << localPath << "." << std::endl;
+                     << localPath << ".\n";
       // do this only if you want to log the file contents!
-      // g_log.debug() << "Response from server: " << ss.str() << std::endl;
+      // g_log.debug() << "Response from server: " << ss.str() << '\n';
     } else {
       // log an error but potentially continue with other files
       g_log.error()
           << "Download failed. You may not have the required permissions "
-             "or the file may not be available: " << remotePath << std::endl;
+             "or the file may not be available: " << remotePath << '\n';
     }
   } else {
     throw std::runtime_error(
@@ -1223,8 +1221,8 @@ void LSFJobManager::getAllJobFiles(const std::string &jobId,
       while (std::getline(ss, PACname, ';')) {
         filePACNames.push_back(PACname);
       }
-      for (size_t i = 0; i < filePACNames.size(); i++) {
-        getOneJobFile(jobId, filePACNames[i], localDir, t);
+      for (auto &filePACName : filePACNames) {
+        getOneJobFile(jobId, filePACName, localDir, t);
       }
     }
   } else {
@@ -1322,10 +1320,10 @@ LSFJobManager::makeHeaders(const std::string &contentType,
         std::pair<std::string, std::string>("Content-Type", contentType));
   }
   if (!token.empty()) {
-    headers.insert(std::make_pair("Cookie", token));
+    headers.emplace("Cookie", token);
   }
   if (!acceptType.empty()) {
-    headers.insert(std::make_pair("Accept", acceptType));
+    headers.emplace("Accept", acceptType);
   }
 
   return headers;
@@ -1352,7 +1350,7 @@ bool LSFJobManager::findTransaction(const std::string &id) const {
 *
 */
 void LSFJobManager::addJobInTransaction(const std::string &jobID) {
-  if (g_transactions.size() <= 0)
+  if (g_transactions.empty())
     return;
   auto &jobs = g_transactions.rbegin()->second.jobIDs;
   auto it = std::find(jobs.begin(), jobs.end(), jobID);

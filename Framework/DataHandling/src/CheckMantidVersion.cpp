@@ -6,7 +6,7 @@
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeParser.h>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 // jsoncpp
 #include <json/json.h>
@@ -21,16 +21,6 @@ using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CheckMantidVersion)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CheckMantidVersion::CheckMantidVersion() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CheckMantidVersion::~CheckMantidVersion() {}
 
 //----------------------------------------------------------------------------------------------
 
@@ -114,9 +104,8 @@ void CheckMantidVersion::exec() {
       g_log.warning() << "Error found when parsing version information "
                          "retrieved from GitHub as a JSON string. "
                          "Error trying to parse this JSON string: " << json
-                      << std::endl
-                      << ". Parsing error details: "
-                      << r.getFormattedErrorMessages() << std::endl;
+                      << "\n. Parsing error details: "
+                      << r.getFormattedErrorMessages() << '\n';
     }
 
     std::string gitHubVersionTag;
@@ -127,7 +116,7 @@ void CheckMantidVersion::exec() {
           << "Error while trying to get the field 'tag_name' from "
              "the version information retrieved from GitHub. This "
              "algorithm cannot continue and will stop now. Error details: "
-          << re.what() << std::endl;
+          << re.what() << '\n';
 
       mostRecentVersion = "Could not get information from GitHub";
       setProperty("MostRecentVersion", mostRecentVersion);
@@ -175,9 +164,10 @@ CheckMantidVersion::cleanVersionTag(const std::string &versionTag) const {
 std::vector<int>
 CheckMantidVersion::splitVersionString(const std::string &versionString) const {
   std::vector<int> retVal;
-  Poco::StringTokenizer tokenizer(versionString, ".",
-                                  Poco::StringTokenizer::TOK_TRIM |
-                                      Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+  Mantid::Kernel::StringTokenizer tokenizer(
+      versionString, ".",
+      Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   auto h = tokenizer.begin();
 
   for (; h != tokenizer.end(); ++h) {
@@ -240,11 +230,11 @@ std::string CheckMantidVersion::getVersionsFromGitHub(const std::string &url) {
   std::ostringstream os;
   int tzd = 0;
 
-  inetHelper.headers().insert(std::make_pair(
+  inetHelper.headers().emplace(
       "if-modified-since",
       Poco::DateTimeFormatter::format(
           Poco::DateTimeParser::parse(MantidVersion::releaseDate(), tzd),
-          Poco::DateTimeFormat::HTTP_FORMAT)));
+          Poco::DateTimeFormat::HTTP_FORMAT));
   inetHelper.sendRequest(url, os);
   std::string retVal = os.str();
 

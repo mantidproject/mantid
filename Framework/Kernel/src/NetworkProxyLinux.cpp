@@ -9,11 +9,6 @@ namespace Kernel {
  */
 NetworkProxy::NetworkProxy() : m_logger("network_proxy_logger_generic") {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-NetworkProxy::~NetworkProxy() {}
-
 ProxyInfo NetworkProxy::getHttpProxy(const std::string &) {
   ProxyInfo proxyInfo; // NoProxy.
   char *proxy_var = getenv("http_proxy");

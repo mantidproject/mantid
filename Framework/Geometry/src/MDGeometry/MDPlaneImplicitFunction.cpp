@@ -52,8 +52,6 @@ MDPlaneImplicitFunction::MDPlaneImplicitFunction(const size_t nd,
   this->addPlane(MDPlane(nd, normal, point));
 }
 
-MDPlaneImplicitFunction::~MDPlaneImplicitFunction() {}
-
 /**
  * This function overrides the inherited one in order to make sure that
  * only one plane is set on the implicit function.

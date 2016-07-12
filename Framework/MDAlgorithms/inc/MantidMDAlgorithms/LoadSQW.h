@@ -62,19 +62,19 @@ struct dataPositions {
   // the helper methods
   /// Block 1:  Main_header: Parse SQW main data header
   void parse_sqw_main_header(
-      std::ifstream &stream); // Legacy - candidate for removal
+      std::ifstream &dataStream); // Legacy - candidate for removal
   /// Block 2: Header: Parse header of single SPE file
   std::streamoff parse_component_header(
-      std::ifstream &stream,
+      std::ifstream &dataStream,
       std::streamoff start_location); // Legacy -candidate for removal
   /// Block 3: Detpar: parse positions of the contributed detectors. These
   /// detectors have to be the same for all contributing spe files
   std::streamoff parse_sqw_detpar(
-      std::ifstream &stream,
+      std::ifstream &dataStream,
       std::streamoff start_location); // Legacy - candidate for removal
   /// Block 4: Data: parse positions of the data fields
   void
-  parse_data_locations(std::ifstream &stream, std::streamoff data_start,
+  parse_data_locations(std::ifstream &dataStream, std::streamoff data_start,
                        std::vector<size_t> &nBins,
                        uint64_t &nDataPoints); // Legacy - candidate for removal
 };
@@ -83,29 +83,29 @@ struct dataPositions {
 class DLLExport LoadSQW : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadSQW();
-  ~LoadSQW();
+  ~LoadSQW() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "LoadSQW"; };
+  const std::string name() const override { return "LoadSQW"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, "
            "Qz, Energy) from a SQW file.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\SQW;MDAlgorithms\\DataHandling";
   }
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
 protected: // for testing
   /// Read events onto the workspace.

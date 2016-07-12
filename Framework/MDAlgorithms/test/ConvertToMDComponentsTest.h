@@ -58,7 +58,7 @@ public:
 
   API::IMDEventWorkspace_sptr createNewMDWorkspace(
       const MDAlgorithms::MDWSDescription &NewMDWSDescription) {
-    return ConvertToMD::createNewMDWorkspace(NewMDWSDescription);
+    return ConvertToMD::createNewMDWorkspace(NewMDWSDescription, false, "");
   }
 };
 
@@ -311,7 +311,7 @@ public:
 
     Mantid::API::FrameworkManager::Instance();
   }
-  ~ConvertToMDComponentsTest() {
+  ~ConvertToMDComponentsTest() override {
     AnalysisDataService::Instance().remove("testWSProcessed");
   }
 

@@ -4,18 +4,18 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/Stitch1D.h"
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+
 #include <algorithm>
 #include <math.h>
-#include <boost/assign/list_of.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/math/special_functions.hpp>
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace boost::assign;
 using Mantid::Algorithms::Stitch1D;
 using Mantid::MantidVec;
 using namespace Mantid::DataObjects;
@@ -141,14 +141,12 @@ public:
     LinearSequence<MantidVec::value_type> sequence(xstart, xstep);
     std::generate(x.begin(), x.end(), sequence);
 
-    MantidVec y = boost::assign::list_of(0)(0)(0)(3)(3)(3)(3)(3)(3)(3)
-                      .convert_to_container<MantidVec>();
+    MantidVec y = {0, 0, 0, 3, 3, 3, 3, 3, 3, 3};
 
     // Pre-canned workspace to stitch
     a = createWorkspace(x, y, e);
 
-    y = boost::assign::list_of(2)(2)(2)(2)(2)(2)(2)(0)(0)(0)
-            .convert_to_container<MantidVec>();
+    y = {2, 2, 2, 2, 2, 2, 2, 0, 0, 0};
     // Another pre-canned workspace to stitch
     b = createWorkspace(x, y, e);
   }
@@ -279,8 +277,7 @@ public:
   }
 
   void test_stitching_uses_suppiled_params() {
-    MantidVec params = boost::assign::list_of<double>(-0.8)(0.2)(1.0)
-                           .convert_to_container<MantidVec>();
+    MantidVec params = {-0.8, 0.2, 1.0};
     auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4, params);
 
     MantidVec xValues = ret.get<0>()->readX(
@@ -294,21 +291,15 @@ public:
   }
 
   void test_stitching_determines_params() {
-    MantidVec x1 = boost::assign::list_of(-1.0)(-0.8)(-0.6)(-0.4)(-0.2)(0.0)(
-                       0.2)(0.4)(0.6)(0.8).convert_to_container<MantidVec>();
-    MantidVec x2 = boost::assign::list_of(0.4)(0.6)(0.8)(1.0)(1.2)(1.4)(1.6)
-                       .convert_to_container<MantidVec>();
-    MantidVec y1 = boost::assign::list_of(1)(1)(1)(1)(1)(1)(1)(1)(1)
-                       .convert_to_container<MantidVec>();
-    MantidVec y2 = boost::assign::list_of(1)(1)(1)(1)(1)(1)
-                       .convert_to_container<MantidVec>();
+    MantidVec x1 = {-1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8};
+    MantidVec x2 = {0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6};
+    MantidVec y1 = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+    MantidVec y2 = {1, 1, 1, 1, 1, 1};
 
     MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
     MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
     double demanded_step_size = 0.2;
-    auto ret = do_stitch1D(ws1, ws2, 0.4, 1.0,
-                           boost::assign::list_of(demanded_step_size)
-                               .convert_to_container<MantidVec>());
+    auto ret = do_stitch1D(ws1, ws2, 0.4, 1.0, {demanded_step_size});
 
     // Check the ranges on the output workspace against the param inputs.
     MantidVec out_x_values = ret.get<0>()->readX(0);
@@ -322,20 +313,15 @@ public:
   }
 
   void test_stitching_determines_start_and_end_overlap() {
-    MantidVec x1 = boost::assign::list_of(-1.0)(-0.8)(-0.6)(-0.4)(-0.2)(0.0)(
-                       0.2)(0.4).convert_to_container<MantidVec>();
-    MantidVec x2 = boost::assign::list_of(-0.4)(-0.2)(0.0)(0.2)(0.4)(0.6)(0.8)(
-                       1.0).convert_to_container<MantidVec>();
+    MantidVec x1 = {-1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4};
+    MantidVec x2 = {-0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0};
 
-    MantidVec y1 = boost::assign::list_of(1)(1)(1)(3)(3)(3)(3)
-                       .convert_to_container<MantidVec>();
-    MantidVec y2 = boost::assign::list_of(1)(1)(1)(1)(3)(3)(3)
-                       .convert_to_container<MantidVec>();
+    MantidVec y1 = {1, 1, 1, 3, 3, 3, 3};
+    MantidVec y2 = {1, 1, 1, 1, 3, 3, 3};
 
     MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
     MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
-    MantidVec params = boost::assign::list_of(-1.0)(0.2)(1.0)
-                           .convert_to_container<MantidVec>();
+    MantidVec params = {-1.0, 0.2, 1.0};
     auto ret = do_stitch1D(ws1, ws2, params);
 
     MantidVec stitched_y = ret.get<0>()->readY(0);
@@ -348,28 +334,22 @@ public:
       }
     }
 
-    double start_overlap_determined = stitched_x[overlap_indexes[0]];
-    double end_overlap_determined =
-        stitched_x[overlap_indexes[overlap_indexes.size() - 1]];
+    double start_overlap_determined = stitched_x[overlap_indexes.front()];
+    double end_overlap_determined = stitched_x[overlap_indexes.back()];
     TS_ASSERT_DELTA(start_overlap_determined, -0.4, 0.000000001);
     TS_ASSERT_DELTA(end_overlap_determined, 0.2, 0.000000001);
   }
 
   void test_stitching_forces_start_overlap() {
-    MantidVec x1 = boost::assign::list_of(-1.0)(-0.8)(-0.6)(-0.4)(-0.2)(0.0)(
-                       0.2)(0.4).convert_to_container<MantidVec>();
-    MantidVec x2 = boost::assign::list_of(-0.4)(-0.2)(0.0)(0.2)(0.4)(0.6)(0.8)(
-                       1.0).convert_to_container<MantidVec>();
+    MantidVec x1 = {-1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4};
+    MantidVec x2 = {-0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0};
 
-    MantidVec y1 = boost::assign::list_of(1)(1)(1)(3)(3)(3)(3)
-                       .convert_to_container<MantidVec>();
-    MantidVec y2 = boost::assign::list_of(1)(1)(1)(1)(3)(3)(3)
-                       .convert_to_container<MantidVec>();
+    MantidVec y1 = {1, 1, 1, 3, 3, 3, 3};
+    MantidVec y2 = {1, 1, 1, 1, 3, 3, 3};
 
     MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
     MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
-    MantidVec params = boost::assign::list_of(-1.0)(0.2)(1.0)
-                           .convert_to_container<MantidVec>();
+    MantidVec params = {(-1.0), (0.2), (1.0)};
     auto ret = do_stitch1D(ws1, ws2, -0.5, params, true);
 
     MantidVec stitched_y = ret.get<0>()->readY(0);
@@ -382,28 +362,22 @@ public:
       }
     }
 
-    double start_overlap_determined = stitched_x[overlap_indexes[0]];
-    double end_overlap_determined =
-        stitched_x[overlap_indexes[overlap_indexes.size() - 1]];
+    double start_overlap_determined = stitched_x[overlap_indexes.front()];
+    double end_overlap_determined = stitched_x[overlap_indexes.back()];
     TS_ASSERT_DELTA(start_overlap_determined, -0.4, 0.000000001);
     TS_ASSERT_DELTA(end_overlap_determined, 0.2, 0.000000001);
   }
 
   void test_stitching_forces_end_overlap() {
-    MantidVec x1 = boost::assign::list_of(-1.0)(-0.8)(-0.6)(-0.4)(-0.2)(0.0)(
-                       0.2)(0.4).convert_to_container<MantidVec>();
-    MantidVec x2 = boost::assign::list_of(-0.4)(-0.2)(0.0)(0.2)(0.4)(0.6)(0.8)(
-                       1.0).convert_to_container<MantidVec>();
+    MantidVec x1 = {-1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4};
+    MantidVec x2 = {-0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0};
 
-    MantidVec y1 = boost::assign::list_of(1)(1)(1)(3)(3)(3)(3)
-                       .convert_to_container<MantidVec>();
-    MantidVec y2 = boost::assign::list_of(1)(1)(1)(1)(3)(3)(3)
-                       .convert_to_container<MantidVec>();
+    MantidVec y1 = {1, 1, 1, 3, 3, 3, 3};
+    MantidVec y2 = {1, 1, 1, 1, 3, 3, 3};
 
     MatrixWorkspace_sptr ws1 = create1DWorkspace(x1, y1);
     MatrixWorkspace_sptr ws2 = create1DWorkspace(x2, y2);
-    MantidVec params = boost::assign::list_of(-1.0)(0.2)(1.0)
-                           .convert_to_container<MantidVec>();
+    MantidVec params = {-1.0, 0.2, 1.0};
     auto ret = do_stitch1D(ws1, ws2, 0.5, params, false);
 
     MantidVec stitched_y = ret.get<0>()->readY(0);
@@ -416,16 +390,14 @@ public:
       }
     }
 
-    double start_overlap_determined = stitched_x[overlap_indexes[0]];
-    double end_overlap_determined =
-        stitched_x[overlap_indexes[overlap_indexes.size() - 1]];
+    double start_overlap_determined = stitched_x[overlap_indexes.front()];
+    double end_overlap_determined = stitched_x[overlap_indexes.back()];
     TS_ASSERT_DELTA(start_overlap_determined, -0.4, 0.000000001);
     TS_ASSERT_DELTA(end_overlap_determined, 0.2, 0.000000001);
   }
 
   void test_stitching_scale_right() {
-    MantidVec params =
-        boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>();
+    MantidVec params = {0.2};
     auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4, params);
 
     double scale = ret.get<1>();
@@ -457,8 +429,7 @@ public:
   }
 
   void test_stitching_scale_left() {
-    MantidVec params =
-        boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>();
+    MantidVec params = {0.2};
     auto ret = do_stitch1D(this->b, this->a, -0.4, 0.4, params, false);
 
     double scale = ret.get<1>();
@@ -490,8 +461,7 @@ public:
   }
 
   void test_stitching_manual_scale_factor_scale_right() {
-    MantidVec params =
-        boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>();
+    MantidVec params = {0.2};
     auto ret =
         do_stitch1D(this->b, this->a, true, true, -0.4, 0.4, params, 2.0 / 3.0);
 
@@ -524,8 +494,7 @@ public:
   }
 
   void test_stitching_manual_scale_factor_scale_left() {
-    MantidVec params =
-        boost::assign::list_of<double>(0.2).convert_to_container<MantidVec>();
+    MantidVec params = {0.2};
     auto ret = do_stitch1D(this->b, this->a, false, true, -0.4, 0.4, params,
                            3.0 / 2.0);
 
@@ -597,7 +566,7 @@ public:
     TSM_ASSERT("All error values are non-zero", !alg.hasNonzeroErrors(ws));
 
     // Run it again with some zeros
-    e[e.size() - 1] = 1;
+    e.back() = 1;
     ws = createWorkspace(x, y, e, 1);
     TSM_ASSERT("NOT all error values are non-zero", alg.hasNonzeroErrors(ws));
   }
@@ -611,8 +580,10 @@ public:
     LinearSequence<MantidVec::value_type> sequenceX(xstart, xstep);
     std::generate(x.begin(), x.end(), sequenceX);
 
-    auto y = MantidVec(nspectrum * (x.size() - 1), 1);
-    auto e = MantidVec(nspectrum * (x.size() - 1), 1); // Non zero errors
+    // Note: The size for y and e previously contained a factor nspectrum, but
+    // it is unclear why, so I removed it.
+    auto y = MantidVec(x.size() - 1, 1);
+    auto e = MantidVec(x.size() - 1, 1); // Non zero errors
 
     MatrixWorkspace_sptr ws =
         createWorkspace(x, y, e, static_cast<int>(nspectrum));
@@ -625,7 +596,7 @@ public:
     TSM_ASSERT("All error values are non-zero", !alg.hasNonzeroErrors(ws));
 
     // Run it again with some zeros
-    e[e.size() - 1] = 1;
+    e.back() = 1;
     ws = createWorkspace(x, y, e, nspectrum);
     TSM_ASSERT("NOT all error values are non-zero", alg.hasNonzeroErrors(ws));
   }

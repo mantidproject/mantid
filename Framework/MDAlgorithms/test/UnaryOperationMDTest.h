@@ -4,8 +4,9 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidMDAlgorithms/UnaryOperationMD.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
+#include "MantidMDAlgorithms/UnaryOperationMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -22,10 +23,12 @@ using namespace testing;
 
 class MockUnaryOperationMD : public UnaryOperationMD {
 public:
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD1(execEvent, void(Mantid::API::IMDEventWorkspace_sptr));
   MOCK_METHOD0(checkInputs, void());
   MOCK_METHOD1(execHisto, void(Mantid::DataObjects::MDHistoWorkspace_sptr));
-  void exec() { UnaryOperationMD::exec(); }
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
+  void exec() override { UnaryOperationMD::exec(); }
 };
 
 class UnaryOperationMDTest : public CxxTest::TestSuite {
@@ -42,7 +45,7 @@ public:
   WorkspaceSingleValue_sptr scalar;
   IMDWorkspace_sptr out;
 
-  void setUp() {
+  void setUp() override {
     histo = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 5, 10.0, 1.0);
     event = MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
     scalar = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.5);

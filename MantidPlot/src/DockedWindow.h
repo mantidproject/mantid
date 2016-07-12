@@ -11,13 +11,12 @@ class QSize;
 /**
  * Docked (MDI) wrapper window for a MdiSubWindow.
  */
-class DockedWindow: public QMdiSubWindow
-{
+class DockedWindow : public QMdiSubWindow {
   Q_OBJECT
 public:
   explicit DockedWindow(ApplicationWindow *appWindow);
-  MdiSubWindow* mdiSubWindow() const;
-  void setMdiSubWindow(MdiSubWindow* sw);
+  MdiSubWindow *mdiSubWindow() const;
+  void setMdiSubWindow(MdiSubWindow *sw);
 
 public slots:
   void dragMousePress(QPoint);
@@ -25,13 +24,11 @@ public slots:
   void dragMouseMove(QPoint);
 
 protected:
-
-  bool event(QEvent *ev);
-  void moveEvent(QMoveEvent *ev);
+  bool event(QEvent *ev) override;
+  void moveEvent(QMoveEvent *ev) override;
 
 private:
-
-  ApplicationWindow* d_app; ///< Pointer to the main window
+  ApplicationWindow *d_app; ///< Pointer to the main window
   bool m_draggingToTiledWindow;
   bool m_isInsideTiledWindow;
 

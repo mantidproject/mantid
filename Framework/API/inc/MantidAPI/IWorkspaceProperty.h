@@ -51,7 +51,7 @@ public:
   /// Returns the direction of the workspace property
   //-virtual const unsigned int direction() const = 0;
   /// Virtual destructor
-  virtual ~IWorkspaceProperty() {}
+  virtual ~IWorkspaceProperty() = default;
 };
 
 } // namespace API

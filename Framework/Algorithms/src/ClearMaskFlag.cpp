@@ -1,5 +1,8 @@
 #include "MantidAlgorithms/ClearMaskFlag.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -8,16 +11,6 @@ using Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ClearMaskFlag)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ClearMaskFlag::ClearMaskFlag() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ClearMaskFlag::~ClearMaskFlag() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -35,7 +28,8 @@ const std::string ClearMaskFlag::category() const {
 /** Initialize the algorithm's properties.
  */
 void ClearMaskFlag::init() {
-  declareProperty(new WorkspaceProperty<>("Workspace", "", Direction::InOut),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("Workspace", "",
+                                                           Direction::InOut),
                   "Workspace to clear the mask flag of.");
 }
 

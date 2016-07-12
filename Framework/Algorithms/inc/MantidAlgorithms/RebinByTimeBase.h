@@ -37,16 +37,11 @@ namespace Algorithms {
  */
 class DLLExport RebinByTimeBase : public API::Algorithm {
 public:
-  /// Constructor
-  RebinByTimeBase();
-  /// Virtual destructor
-  virtual ~RebinByTimeBase() = 0;
-
 private:
   /// Initialization method
-  void init();
+  void init() override;
   /// execute.
-  void exec();
+  void exec() override;
   /// Do the algorithm specific histogramming.
   virtual void doHistogramming(Mantid::API::IEventWorkspace_sptr inWS,
                                Mantid::API::MatrixWorkspace_sptr outputWS,

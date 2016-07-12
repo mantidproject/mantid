@@ -19,12 +19,12 @@ public:
     TaskDoNothing() : Task() {}
     TaskDoNothing(double cost) : Task() { m_cost = cost; }
 
-    ~TaskDoNothing() {
+    ~TaskDoNothing() override {
       // To keep track of proper deleting of Task pointers
       ThreadSchedulerTest_numDestructed++;
     }
 
-    void run() {}
+    void run() override {}
   };
 
   void do_basic_test(ThreadScheduler *sc) {

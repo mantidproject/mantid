@@ -2,10 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/UnwrapMonitor.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/RawCountValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -22,13 +26,13 @@ using namespace API;
 /// Default constructor
 UnwrapMonitor::UnwrapMonitor()
     : m_conversionConstant(0.), m_inputWS(), m_LRef(0.), m_Tmin(0.), m_Tmax(0.),
-      m_XSize(0), m_progress(NULL) {}
+      m_XSize(0), m_progress(nullptr) {}
 
 /// Destructor
 UnwrapMonitor::~UnwrapMonitor() {
   if (m_progress)
     delete m_progress;
-  m_progress = NULL;
+  m_progress = nullptr;
 }
 
 /// Initialisation method
@@ -39,12 +43,12 @@ void UnwrapMonitor::init() {
   wsValidator->add<RawCountValidator>();
   wsValidator->add<InstrumentValidator>();
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                             Direction::Input, wsValidator),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input, wsValidator),
       "A workspace with x values in units of TOF and y values in counts");
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                             Direction::Output),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
+                                                      Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
   auto validator = boost::make_shared<BoundedValidator<double>>();
@@ -75,7 +79,7 @@ void UnwrapMonitor::exec() {
   const int numberOfSpectra =
       static_cast<int>(m_inputWS->getNumberHistograms());
   g_log.debug() << "Number of spectra in input workspace: " << numberOfSpectra
-                << std::endl;
+                << '\n';
 
   // Get the "reference" flightpath (currently passed in as a property)
   m_LRef = getProperty("LRef");
@@ -83,7 +87,7 @@ void UnwrapMonitor::exec() {
   m_Tmin = m_inputWS->readX(0).front();
   m_Tmax = m_inputWS->readX(0).back();
   g_log.debug() << "Frame range in microseconds is: " << m_Tmin << " - "
-                << m_Tmax << std::endl;
+                << m_Tmax << '\n';
   m_XSize = m_inputWS->readX(0).size();
 
   // Retrieve the source-sample distance
@@ -109,7 +113,7 @@ void UnwrapMonitor::exec() {
     if (Ld < 0.0) {
       // If the detector flightpath is missing, zero the data
       g_log.debug() << "Detector information for workspace index " << i
-                    << " is not available." << std::endl;
+                    << " is not available.\n";
       tempWS->dataX(i).assign(tempWS->dataX(i).size(), 0.0);
       tempWS->dataY(i).assign(tempWS->dataY(i).size(), 0.0);
       tempWS->dataE(i).assign(tempWS->dataE(i).size(), 0.0);
@@ -143,7 +147,7 @@ void UnwrapMonitor::exec() {
 
     g_log.debug() << "Rebinned workspace has "
                   << outputWS->getNumberHistograms() << " histograms of "
-                  << outputWS->blocksize() << " bins each" << std::endl;
+                  << outputWS->blocksize() << " bins each\n";
     setProperty("OutputWorkspace", outputWS);
   } else
     setProperty("OutputWorkspace", tempWS);
@@ -163,7 +167,7 @@ double UnwrapMonitor::getPrimaryFlightpath() const {
   double L1;
   try {
     L1 = instrument->getSource()->getDistance(*sample);
-    g_log.debug() << "Source-sample distance (in metres): " << L1 << std::endl;
+    g_log.debug() << "Source-sample distance (in metres): " << L1 << '\n';
   } catch (Exception::NotFoundError &) {
     g_log.error("Unable to calculate source-sample distance");
     throw Exception::InstrumentDefinitionError(
@@ -378,11 +382,11 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
     if (m_inputWS->hasMaskedBins(spectrum)) {
       const MatrixWorkspace::MaskList &inputMasks =
           m_inputWS->maskedBins(spectrum);
-      for (auto it = inputMasks.cbegin(); it != inputMasks.cend(); ++it) {
-        const int maskIndex = static_cast<int>((*it).first);
+      for (const auto &inputMask : inputMasks) {
+        const int maskIndex = static_cast<int>(inputMask.first);
         if (maskIndex >= rangeBounds[0] && maskIndex < rangeBounds[1])
           tempWS->flagMasked(spectrum, maskIndex - rangeBounds[0],
-                             (*it).second);
+                             inputMask.second);
       }
     }
   }
@@ -415,7 +419,7 @@ UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &workspace,
   childAlg->setProperty<std::vector<double>>("Params", paramArray);
   g_log.debug() << "Rebinning unwrapped data into " << numBins
                 << " bins of width " << step << " Angstroms, running from "
-                << min << " to " << max << std::endl;
+                << min << " to " << max << '\n';
 
   childAlg->executeAsChildAlg();
   return childAlg->getProperty("OutputWorkspace");

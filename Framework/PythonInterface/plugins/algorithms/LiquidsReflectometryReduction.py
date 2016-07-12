@@ -75,6 +75,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         self.declareProperty("AngleOffsetError", 0.0, doc="Angle offset error (degrees)")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output workspace")
         self.declareProperty("ScalingFactorFile", "", doc="Scaling factor configuration file")
+        self.declareProperty("SlitTolerance", 0.02, doc="Tolerance for matching slit positions")
         self.declareProperty("SlitsWidthFlag", True,
                              doc="Looking for perfect match of slits width when using Scaling Factor file")
         self.declareProperty("IncidentMediumSelected", "", doc="Incident medium used for those runs")
@@ -92,7 +93,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
     def PyExec(self):
         # The old reduction code had a tolerance value for matching the
         # slit parameters to get the scaling factors
-        self.TOLERANCE = 0.020
+        self.TOLERANCE = self.getProperty("SlitTolerance").value
 
         # DATA
         dataRunNumbers = self.getProperty("RunNumbers").value
@@ -334,9 +335,9 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         tthd_units = run_object.getProperty('tthd').units
 
         # Make sure we have radians
-        if thi_units == 'degree':
+        if thi_units.lower().startswith('deg'):
             thi_value *= math.pi / 180.0
-        if tthd_units == 'degree':
+        if tthd_units.lower().startswith('deg'):
             tthd_value *= math.pi / 180.0
 
         theta = math.fabs(tthd_value - thi_value) / 2.
@@ -367,7 +368,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
         tof_step = self.getProperty("TOFSteps").value
         workspace = Rebin(InputWorkspace=workspace, Params=[0, tof_step, tof_max],
-                          PreserveEvents=False, OutputWorkspace="%s_histo" % str(workspace))
+                          PreserveEvents=True, OutputWorkspace="%s_histo" % str(workspace))
 
         # Crop TOF range
         workspace = CropWorkspace(InputWorkspace=workspace,
@@ -524,7 +525,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             s2h_key = keys[3]
             s2w_key = keys[5]
             if 'IncidentMedium' in data_dict \
-                and data_dict['IncidentMedium'] == incident_medium.strip() \
+                and data_dict['IncidentMedium'].lower() == incident_medium.strip().lower() \
                 and _value_check('LambdaRequested', data_dict, lr_value) \
                 and _value_check('S1H', data_dict, s1h) \
                 and _value_check(s2h_key, data_dict, s2h):
@@ -563,7 +564,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             # Avoid leaving trash behind
             AnalysisDataService.remove(str(normalization))
         else:
-            logger.error("Could not find scaling factor for %s" % str(workspace))
+            logger.error("Could not find scaling factor for %s" % str(incident_medium))
         return workspace
 
 AlgorithmFactory.subscribe(LiquidsReflectometryReduction)

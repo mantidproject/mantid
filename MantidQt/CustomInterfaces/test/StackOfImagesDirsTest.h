@@ -26,12 +26,12 @@ public:
                                                // initialized
   }
 
-  void setUp() {
+  void setUp() override {
     // just to test more dynamic allocation
     m_soid.reset(new StackOfImagesDirs(""));
   }
 
-  void tearDown() {}
+  void tearDown() override {}
 
   void test_construct() {
     StackOfImagesDirs obj("");

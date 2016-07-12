@@ -17,30 +17,36 @@ using namespace Mantid::Kernel;
 class ToyAlgorithmProxy : public Algorithm {
 public:
   ToyAlgorithmProxy() : Algorithm() {}
-  virtual ~ToyAlgorithmProxy() {}
-  const std::string name() const {
+  ~ToyAlgorithmProxy() override {}
+  const std::string name() const override {
     return "ToyAlgorithmProxy";
-  }                                 ///< Algorithm's name for identification
-  int version() const { return 1; } ///< Algorithm's version for identification
-  const std::string category() const {
+  } ///< Algorithm's name for identification
+  int version() const override {
+    return 1;
+  } ///< Algorithm's version for identification
+  const std::string category() const override {
     return "ProxyCat";
   } ///< Algorithm's category for identification
-  const std::string alias() const { return "Dog"; } ///< Algorithm's alias
-  const std::string summary() const { return "Test summary"; }
-  const std::string workspaceMethodName() const { return "toyalgorithm"; }
-  const std::string workspaceMethodOnTypes() const {
+  const std::string alias() const override {
+    return "Dog";
+  } ///< Algorithm's alias
+  const std::string summary() const override { return "Test summary"; }
+  const std::string workspaceMethodName() const override {
+    return "toyalgorithm";
+  }
+  const std::string workspaceMethodOnTypes() const override {
     return "MatrixWorkspace;ITableWorkspace";
   }
-  const std::string workspaceMethodInputProperty() const {
+  const std::string workspaceMethodInputProperty() const override {
     return "InputWorkspace";
   }
 
-  void init() {
+  void init() override {
     declareProperty("prop1", "value");
     declareProperty("prop2", 1);
     declareProperty("out", 8, Direction::Output);
   }
-  void exec() {
+  void exec() override {
     std::string p1 = getProperty("prop1");
     int p2 = getProperty("prop2");
 
@@ -60,22 +66,26 @@ public:
 class ToyAlgorithmProxyMultipleCategory : public Algorithm {
 public:
   ToyAlgorithmProxyMultipleCategory() : Algorithm() {}
-  virtual ~ToyAlgorithmProxyMultipleCategory() {}
-  const std::string name() const {
+  ~ToyAlgorithmProxyMultipleCategory() override {}
+  const std::string name() const override {
     return "ToyAlgorithmProxyMultipleCategory";
-  }                                 ///< Algorithm's name for identification
-  int version() const { return 1; } ///< Algorithm's version for identification
-  const std::string category() const {
+  } ///< Algorithm's name for identification
+  int version() const override {
+    return 1;
+  } ///< Algorithm's version for identification
+  const std::string category() const override {
     return "ProxyCat;ProxyLeopard";
   } ///< Algorithm's category for identification
-  const std::string alias() const { return "Dog"; } ///< Algorithm's alias
-  const std::string summary() const { return "Test summary"; }
-  void init() {
+  const std::string alias() const override {
+    return "Dog";
+  } ///< Algorithm's alias
+  const std::string summary() const override { return "Test summary"; }
+  void init() override {
     declareProperty("prop1", "value");
     declareProperty("prop2", 1);
     declareProperty("out", 8, Direction::Output);
   }
-  void exec() {
+  void exec() override {
     std::string p1 = getProperty("prop1");
     int p2 = getProperty("prop2");
 
@@ -102,13 +112,14 @@ public:
       : AlgorithmObserver(), start(false), progress(false), finish(false) {}
   TestProxyObserver(IAlgorithm_const_sptr alg)
       : AlgorithmObserver(alg), start(false), progress(false), finish(false) {}
-  void startHandle(const IAlgorithm *) { start = true; }
-  void progressHandle(const IAlgorithm *, double p, const std::string &msg) {
+  void startHandle(const IAlgorithm *) override { start = true; }
+  void progressHandle(const IAlgorithm *, double p,
+                      const std::string &msg) override {
     progress = true;
     TS_ASSERT_EQUALS(p, 0.333);
     TS_ASSERT_EQUALS(msg, "Running");
   }
-  void finishHandle(const IAlgorithm *) { finish = true; }
+  void finishHandle(const IAlgorithm *) override { finish = true; }
 };
 
 class AlgorithmProxyTest : public CxxTest::TestSuite {
@@ -140,9 +151,7 @@ public:
     TS_ASSERT_EQUALS(alg->name(), "ToyAlgorithmProxyMultipleCategory");
     TS_ASSERT_EQUALS(alg->version(), 1);
     TS_ASSERT_EQUALS(alg->category(), "ProxyCat;ProxyLeopard");
-    std::vector<std::string> result;
-    result.push_back("ProxyCat");
-    result.push_back("ProxyLeopard");
+    std::vector<std::string> result{"ProxyCat", "ProxyLeopard"};
     TS_ASSERT_EQUALS(alg->categories(), result);
     TS_ASSERT_EQUALS(alg->alias(), "Dog");
     TS_ASSERT(alg->isInitialized());

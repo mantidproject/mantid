@@ -2,9 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSQ2D.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
-#include "Poco/NumberFormatter.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
+#include "Poco/NumberFormatter.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -18,8 +19,8 @@ using namespace Geometry;
 
 void EQSANSQ2D::init() {
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "Workspace to calculate I(qx,qy) from");
   declareProperty("OutputWorkspace", "", Direction::Input);
   declareProperty("NumberOfBins", 100,
@@ -57,12 +58,12 @@ void EQSANSQ2D::exec() {
   if (run.hasProperty("is_frame_skipping")) {
     auto prop = run.getProperty("is_frame_skipping");
     const auto &typeInfo = *(prop->type_info());
-    if (typeInfo == typeid(long)) {
+    if (typeInfo == typeid(int64_t)) {
       frame_skipping =
-          (run.getPropertyValueAsType<long>("is_frame_skipping") == 1);
-    } else if (typeInfo == typeid(int)) {
+          (run.getPropertyValueAsType<int64_t>("is_frame_skipping") == 1);
+    } else if (typeInfo == typeid(int32_t)) {
       frame_skipping =
-          (run.getPropertyValueAsType<int>("is_frame_skipping") == 1);
+          (run.getPropertyValueAsType<int32_t>("is_frame_skipping") == 1);
     } else
       g_log.warning() << "Unknown property type for is_frame_skipping\n";
   }
@@ -86,6 +87,7 @@ void EQSANSQ2D::exec() {
   double qmax = 0;
   if (inputWS->run().hasProperty("qmax")) {
     qmax = getRunProperty(inputWS, "qmax");
+    g_log.debug() << "Using Qmax from run properties = " << qmax << std::endl;
   } else {
     const double sample_detector_distance =
         getRunProperty(inputWS, "sample_detector_distance");
@@ -108,6 +110,7 @@ void EQSANSQ2D::exec() {
 
     qmax = 4 * M_PI / wavelength_min *
            std::sin(0.5 * std::atan(maxdist / sample_detector_distance));
+    g_log.debug() << "Using calculated Qmax = " << qmax << std::endl;
   };
 
   if (frame_skipping) {
@@ -145,7 +148,7 @@ void EQSANSQ2D::exec() {
     replaceAlg->executeAsChildAlg();
 
     std::string outputWSName_frame = outputWSName + "_frame1_Iqxy";
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
         "OutputWorkspaceFrame1", outputWSName_frame, Direction::Output));
     MatrixWorkspace_sptr result = replaceAlg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspaceFrame1", result);
@@ -175,7 +178,7 @@ void EQSANSQ2D::exec() {
     replaceAlg->executeAsChildAlg();
 
     outputWSName_frame = outputWSName + "_frame2_Iqxy";
-    declareProperty(new WorkspaceProperty<>(
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
         "OutputWorkspaceFrame2", outputWSName_frame, Direction::Output));
     result = replaceAlg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspaceFrame2", result);
@@ -198,8 +201,8 @@ void EQSANSQ2D::exec() {
     replaceAlg->executeAsChildAlg();
 
     outputWSName += "_Iqxy";
-    declareProperty(new WorkspaceProperty<>("OutputWorkspaceFrame1",
-                                            outputWSName, Direction::Output));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "OutputWorkspaceFrame1", outputWSName, Direction::Output));
     MatrixWorkspace_sptr result = replaceAlg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspaceFrame1", result);
     setProperty("OutputMessage", "I(Qx,Qy) computed for each frame");

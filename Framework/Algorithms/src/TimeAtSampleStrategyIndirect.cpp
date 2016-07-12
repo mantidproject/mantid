@@ -31,11 +31,6 @@ TimeAtSampleStrategyIndirect::TimeAtSampleStrategyIndirect(
     MatrixWorkspace_const_sptr ws)
     : m_ws(ws) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-TimeAtSampleStrategyIndirect::~TimeAtSampleStrategyIndirect() {}
-
 Correction
 TimeAtSampleStrategyIndirect::calculate(const size_t &workspace_index) const {
 

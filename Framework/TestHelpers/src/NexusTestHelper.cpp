@@ -12,7 +12,7 @@
 /** Constructor.
    * */
 NexusTestHelper::NexusTestHelper(bool deleteFile)
-    : file(NULL), deleteFile(deleteFile) {}
+    : file(nullptr), deleteFile(deleteFile) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor.

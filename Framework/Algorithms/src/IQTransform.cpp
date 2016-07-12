@@ -2,13 +2,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/IQTransform.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/IncreasingAxisValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RawCountValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -21,7 +25,8 @@ DECLARE_ALGORITHM(IQTransform)
 using namespace Kernel;
 using namespace API;
 
-IQTransform::IQTransform() : API::Algorithm(), m_label(new Units::Label) {
+IQTransform::IQTransform()
+    : API::Algorithm(), m_label(boost::make_shared<Units::Label>()) {
   /* Just for fun, this is implemented as follows....
    * We fill a map below with the transformation name as the key and
    * a function pointer to the method that does the transformation as
@@ -40,8 +45,6 @@ IQTransform::IQTransform() : API::Algorithm(), m_label(new Units::Label) {
   m_transforms["General"] = &IQTransform::general;
 }
 
-IQTransform::~IQTransform() {}
-
 void IQTransform::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   // Require the input to be in units of Q and to be a distribution
@@ -51,12 +54,12 @@ void IQTransform::init() {
   // Require X data to be increasing from left to right
   wsValidator->add<IncreasingAxisValidator>();
 
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "The input workspace must be a distribution with units of Q");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name of the output workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name of the output workspace");
 
   // Extract the keys from the transformations map to pass to the property
   std::set<std::string> plottype;
@@ -76,15 +79,16 @@ void IQTransform::init() {
       "BackgroundValue", 0.0, mustBePositive,
       "A constant value to subtract from the data prior to its transformation");
   declareProperty(
-      new WorkspaceProperty<>("BackgroundWorkspace", "", Direction::Input,
-                              PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>(
+          "BackgroundWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A workspace to subtract from the input workspace prior to its "
       "transformation."
       "Must be compatible with the input (as for the Minus algorithm).");
 
-  declareProperty(new ArrayProperty<double>("GeneralFunctionConstants"),
-                  "A set of 10 constants to be used (only) with the 'General' "
-                  "transformation");
+  declareProperty(
+      make_unique<ArrayProperty<double>>("GeneralFunctionConstants"),
+      "A set of 10 constants to be used (only) with the 'General' "
+      "transformation");
 }
 
 void IQTransform::exec() {
@@ -113,12 +117,7 @@ void IQTransform::exec() {
   m_label->setLabel("");
   outputWS->setYUnit("");
   // Copy the data over. Assume single spectrum input (output will be).
-  // Take the mid-point of histogram bins
-  if (tmpWS->isHistogramData()) {
-    VectorHelper::convertToBinCentre(tmpWS->readX(0), outputWS->dataX(0));
-  } else {
-    outputWS->setX(0, tmpWS->refX(0));
-  }
+  outputWS->setPoints(0, tmpWS->points(0));
   MantidVec &Y = outputWS->dataY(0) = tmpWS->dataY(0);
   outputWS->dataE(0) = tmpWS->dataE(0);
 

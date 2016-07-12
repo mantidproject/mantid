@@ -12,16 +12,18 @@ using namespace Mantid::Kernel;
 class PropertyHelper : public Property {
 public:
   PropertyHelper() : Property("Test", typeid(int)) {}
-  PropertyHelper *clone() const { return new PropertyHelper(*this); }
-  std::string value() const { return "Nothing"; }
-  std::string setValue(const std::string &) { return ""; }
-  std::string setValueFromProperty(const Property &) { return ""; }
-  std::string setDataItem(const boost::shared_ptr<DataItem>) { return ""; }
-  bool isDefault() const { return true; }
-  std::string getDefault() const {
+  PropertyHelper *clone() const override { return new PropertyHelper(*this); }
+  std::string value() const override { return "Nothing"; }
+  std::string setValue(const std::string &) override { return ""; }
+  std::string setValueFromProperty(const Property &) override { return ""; }
+  std::string setDataItem(const boost::shared_ptr<DataItem>) override {
+    return "";
+  }
+  bool isDefault() const override { return true; }
+  std::string getDefault() const override {
     return "Is not implemented in this class, should be overriden";
   }
-  Property &operator+=(Property const *) { return *this; }
+  Property &operator+=(Property const *) override { return *this; }
 };
 
 class PropertyTest : public CxxTest::TestSuite {
@@ -31,7 +33,7 @@ public:
 
   PropertyTest() { p = new PropertyHelper; }
 
-  ~PropertyTest() { delete p; }
+  ~PropertyTest() override { delete p; }
 
   void testName() { TS_ASSERT(!p->name().compare("Test")); }
 

@@ -5,12 +5,14 @@
 #include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidAPI/IMDWorkspace.h"
 
-/** Set range selection to cut-out zeros and provide an upper limit equal to the median value in the workspace.
+/** Set range selection to cut-out zeros and provide an upper limit equal to the
+ median value in the workspace.
 
  @author Owen Arnold, Tessella plc
  @date 07/07/2011
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -31,39 +33,35 @@
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-namespace Mantid
-{
-namespace VATES
-{
-class DLLExport MedianAndBelowThresholdRange : public ThresholdRange
-{
+namespace Mantid {
+namespace VATES {
+class DLLExport MedianAndBelowThresholdRange : public ThresholdRange {
 
 public:
-
   MedianAndBelowThresholdRange();
 
-  virtual void calculate();
+  void calculate() override;
 
-  virtual signal_t getMinimum() const;
+  signal_t getMinimum() const override;
 
-  virtual signal_t getMaximum() const;
+  signal_t getMaximum() const override;
 
-  ~MedianAndBelowThresholdRange();
+  ~MedianAndBelowThresholdRange() override;
 
-  virtual bool hasCalculated() const;
+  bool hasCalculated() const override;
 
-  virtual MedianAndBelowThresholdRange* clone() const;
+  MedianAndBelowThresholdRange *clone() const override;
 
-  virtual bool inRange(const signal_t& signal);
+  bool inRange(const signal_t &signal) override;
 
-  virtual void setWorkspace(Mantid::API::Workspace_sptr workspace);
+  void setWorkspace(Mantid::API::Workspace_sptr workspace) override;
 
 private:
-  
-  MedianAndBelowThresholdRange(signal_t min, signal_t max, bool isCalculated, Mantid::API::IMDWorkspace_sptr m_workspace);
+  MedianAndBelowThresholdRange(signal_t min, signal_t max, bool isCalculated,
+                               Mantid::API::IMDWorkspace_sptr m_workspace);
 
   signal_t m_min;
-  
+
   signal_t m_max;
 
   bool m_isCalculated;

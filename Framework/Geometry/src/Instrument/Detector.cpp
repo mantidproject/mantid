@@ -38,9 +38,6 @@ Detector::Detector(const std::string &name, int id,
     : IDetector(), ObjComponent(name, shape, parent), m_id(id),
       m_isMonitor(false) {}
 
-/// Destructor
-Detector::~Detector() {}
-
 /** Gets the detector id
  *  @returns the detector id
  */

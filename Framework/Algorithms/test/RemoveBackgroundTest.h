@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 
 #include "MantidAlgorithms/RemoveBackground.h"
 #include "MantidAlgorithms/Rebin.h"
@@ -77,7 +78,7 @@ public:
 
   RemoveBackgroundTest() { init_workspaces(1, 15000, BgWS, SourceWS); }
 
-  ~RemoveBackgroundTest() {
+  ~RemoveBackgroundTest() override {
     BgWS.reset();
     SourceWS.reset();
   }
@@ -95,16 +96,6 @@ public:
     TSM_ASSERT_THROWS("Should throw if background is not 1 or equal to source",
                       bgRemoval.initialize(bkgWS, SourceWS, 0),
                       std::invalid_argument);
-
-    auto sourceWS = WorkspaceCreationHelper::Create2DWorkspace(5, 10);
-    TSM_ASSERT_THROWS("Should throw if source workspace does not have units",
-                      bgRemoval.initialize(BgWS, sourceWS, 0),
-                      std::invalid_argument);
-
-    sourceWS->getAxis(0)->setUnit("TOF");
-    TSM_ASSERT_THROWS(
-        "Should throw if source workspace does not have proper instrument",
-        bgRemoval.initialize(BgWS, sourceWS, 0), std::invalid_argument);
   }
 
   void testBackgroundHelper() {
@@ -211,10 +202,8 @@ public:
     // Create the workspace
     auto bgWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1));
-    MantidVec &X = bgWS->dataX(0);
-    X[0] = 0;
-    X[1] = 1;
-    bgWS->setX(0, X);
+    auto binEdges = {0.0, 1.0};
+    bgWS->setBinEdges(0, binEdges);
     bgWS->getAxis(0)->setUnit("TOF");
     MantidVec &Ybg = bgWS->dataY(0);
     Ybg[0] = 0;
@@ -251,11 +240,10 @@ private:
   API::MatrixWorkspace_sptr cloneSourceWS() {
     auto cloneWS = API::WorkspaceFactory::Instance().create(SourceWS);
 
-    const MantidVec &X = SourceWS->readX(0);
-    const MantidVec &Y = SourceWS->readY(0);
-    const MantidVec &E = SourceWS->readE(0);
+    auto X = SourceWS->refX(0);
     cloneWS->setX(0, X);
-    cloneWS->getSpectrum(0)->setData(Y, E);
+    cloneWS->dataY(0) = SourceWS->readY(0);
+    cloneWS->dataE(0) = SourceWS->readE(0);
 
     return cloneWS;
   }

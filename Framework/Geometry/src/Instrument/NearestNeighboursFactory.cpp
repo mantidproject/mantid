@@ -6,16 +6,6 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace Geometry {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-NearestNeighboursFactory::NearestNeighboursFactory() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-NearestNeighboursFactory::~NearestNeighboursFactory() {}
-
 /*
 Factory Method
 @param instrument : Instrument containing detectors

@@ -3,13 +3,14 @@
 
 #include <QDesignerCustomWidgetInterface>
 
-/** 
+/**
 The DesignerPlugin creates a Qt designer plugin of the AlgorithmSelectorWidget.
 
 @author Martyn Gigg, Tessella plc
 @date 03/08/2009
 
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -26,10 +27,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-File change history is stored at: <https://github.com/mantidproject/mantid>    
+File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class DesignerPlugin : public QObject, public QDesignerCustomWidgetInterface
-{
+class DesignerPlugin : public QObject, public QDesignerCustomWidgetInterface {
   Q_OBJECT
   Q_INTERFACES(QDesignerCustomWidgetInterface)
 
@@ -37,39 +37,38 @@ public:
   // ==== Methods you must overridde ==========
 
   /// Returns a pointer to a newly constructed widget for this plugin wraps
-  virtual QWidget *createWidget(QWidget *parent) = 0;
+  QWidget *createWidget(QWidget *parent) override = 0;
   /// Returns the fully-qualified class name
-  virtual QString name() const = 0;
+  QString name() const override = 0;
 
   // ==== Optionally overridden methods ==========
 
   /// Returns a tool tip for the widget
-  virtual QString toolTip() const;
+  QString toolTip() const override;
   /// Returns the include file that appears at the top of the generated .h file
-  virtual QString includeFile() const;
+  QString includeFile() const override;
   /// Returns the XML that defines the widget and its properties
-  virtual QString domXml() const;
-
+  QString domXml() const override;
 
   /// Default constructor
   DesignerPlugin(QObject *parent = 0);
   /// Initialize the plugin
-  void initialize(QDesignerFormEditorInterface *core);
+  void initialize(QDesignerFormEditorInterface *core) override;
   /// Returns if the plugin is initliaized
-  bool isInitialized() const;
+  bool isInitialized() const override;
   /// Returns if this plugins is able to contain other widgets
-  bool isContainer() const;
+  bool isContainer() const override;
   /// Returns the group name within the designer
-  QString group() const;
+  QString group() const override;
   /// Returns the icon to use
-  QIcon icon() const;
+  QIcon icon() const override;
   /// Returns a short description of the widget
-  QString whatsThis() const;
+  QString whatsThis() const override;
 
 private:
   std::string getShortName() const;
 
-  /// Are we initialized? 
+  /// Are we initialized?
   bool m_initialized;
 };
 

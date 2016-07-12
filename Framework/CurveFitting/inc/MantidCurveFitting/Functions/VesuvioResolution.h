@@ -69,19 +69,20 @@ public:
   /** @name Function evaluation */
   ///@{
   /// A string identifier for this function
-  std::string name() const;
+  std::string name() const override;
   /// Access total resolution width
   inline double resolutionFWHM() const { return m_resolutionSigma; }
   /// Access lorentz FWHM
   inline double lorentzFWHM() const { return m_lorentzFWHM; }
   /// Calculate the function
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
   /// Ensure the object is ready to be fitted
-  void setUpForFit();
+  void setUpForFit() override;
   /// Cache a copy of the workspace pointer and pull out the parameters
   void
   setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX);
+                     size_t wsIndex, double startX, double endX) override;
   /// Pre-calculate the resolution components values
   void cacheResolutionComponents(const Algorithms::DetectorParams &detpar,
                                  const ResolutionParams &respar);
@@ -89,7 +90,7 @@ public:
   void disableLogging() { m_log.setEnabled(false); }
   /// Compute Voigt function
   void voigtApprox(std::vector<double> &voigt,
-                   const std::vector<double> &yspace, const double lorentzPos,
+                   const std::vector<double> &xValues, const double lorentzPos,
                    const double lorentzAmp, const double lorentzWidth,
                    const double gaussWidth) const;
   /// Compute Voigt function with cached values
@@ -101,9 +102,9 @@ public:
 
 private:
   /// Declare parameters that will never participate in the fit
-  void declareAttributes();
+  void declareAttributes() override;
   /// Set an attribute value (and possibly cache its value)
-  void setAttribute(const std::string &name, const Attribute &value);
+  void setAttribute(const std::string &name, const Attribute &value) override;
 
   /// Logger
   mutable Kernel::Logger m_log;

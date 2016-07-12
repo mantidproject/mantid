@@ -1,13 +1,6 @@
 #ifndef MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_IREFLPRESENTER_H
 
-#include <map>
-#include <string>
-
-#include "MantidKernel/System.h"
-
-#include <QVariant>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 /** @class IReflPresenter
@@ -40,36 +33,10 @@ class IReflPresenter {
 public:
   virtual ~IReflPresenter(){};
 
-  enum Flag {
-    SaveFlag,
-    SaveAsFlag,
-    AppendRowFlag,
-    PrependRowFlag,
-    DeleteRowFlag,
-    ProcessFlag,
-    GroupRowsFlag,
-    OpenTableFlag,
-    NewTableFlag,
-    TableUpdatedFlag,
-    ExpandSelectionFlag,
-    OptionsDialogFlag,
-    ClearSelectedFlag,
-    CopySelectedFlag,
-    CutSelectedFlag,
-    PasteSelectedFlag,
-    SearchFlag,
-    ICATSearchCompleteFlag,
-    TransferFlag,
-    ImportTableFlag,
-    ExportTableFlag,
-    PlotRowFlag,
-    PlotGroupFlag
-  };
+  enum Flag { SearchFlag, ICATSearchCompleteFlag, TransferFlag };
 
   // Tell the presenter something happened
   virtual void notify(IReflPresenter::Flag flag) = 0;
-  virtual const std::map<std::string, QVariant> &options() const = 0;
-  virtual void setOptions(const std::map<std::string, QVariant> &options) = 0;
 };
 }
 }

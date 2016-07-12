@@ -2,10 +2,9 @@
 #define DELTAFUNCTIONTEST_H
 
 #include <cxxtest/TestSuite.h>
-#include "MantidCurveFitting/Algorithms/Fit.h"
 
-#include "MantidCurveFitting/Functions/DeltaFunction.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
+#include "MantidCurveFitting/Functions/DeltaFunction.h"
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
@@ -25,10 +24,10 @@ public:
     declareParameter("s", 1.); // 1/(2*sigma^2)
   }
 
-  std::string name() const { return "DeltaFunctionTest_Gauss"; }
+  std::string name() const override { return "DeltaFunctionTest_Gauss"; }
 
   void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const {
+                     const size_t nData) const override {
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
@@ -38,7 +37,7 @@ public:
     }
   }
   void functionDerivLocal(Jacobian *out, const double *xValues,
-                          const size_t nData) {
+                          const size_t nData) override {
     // throw Mantid::Kernel::Exception::NotImplementedError("");
     double c = getParameter("c");
     double h = getParameter("h");
@@ -52,16 +51,16 @@ public:
     }
   }
 
-  double centre() const { return getParameter(0); }
+  double centre() const override { return getParameter(0); }
 
-  double height() const { return getParameter(1); }
+  double height() const override { return getParameter(1); }
 
-  double fwhm() const { return getParameter(2); }
+  double fwhm() const override { return getParameter(2); }
 
-  void setCentre(const double c) { setParameter(0, c); }
-  void setHeight(const double h) { setParameter(1, h); }
+  void setCentre(const double c) override { setParameter(0, c); }
+  void setHeight(const double h) override { setParameter(1, h); }
 
-  void setFwhm(const double w) { setParameter(2, w); }
+  void setFwhm(const double w) override { setParameter(2, w); }
 
 }; // end of DeltaFunctionTest_Gauss
 
@@ -73,18 +72,23 @@ public:
     declareParameter("p2");
   }
 
-  double HeightPrefactor() const {
+  double HeightPrefactor() const override {
     const double &p1 = getParameter("p1");
     const double &p2 = getParameter("p2");
     return p1 * p2; // simple operation
   }
 
-  std::string name() const { return "DeltaFunctionTest_Delta"; }
+  std::string name() const override { return "DeltaFunctionTest_Delta"; }
 
 }; // end of DeltaFunctionTest_Delta
 
 class DeltaFunctionTest : public CxxTest::TestSuite {
 public:
+  void test_category() {
+    DeltaFunction fn;
+    TS_ASSERT_EQUALS(fn.category(), "Peak");
+  }
+
   void testDeltaFunction() {
     Convolution conv;
     // set the resolution function

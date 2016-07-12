@@ -13,13 +13,8 @@ Kernel::Logger g_log("RemoteJobManagerFactory");
 /// Private constructor, singleton class
 RemoteJobManagerFactoryImpl::RemoteJobManagerFactoryImpl()
     : Mantid::Kernel::DynamicFactory<IRemoteJobManager>() {
-  g_log.debug() << "RemoteJobManager factory created." << std::endl;
+  g_log.debug() << "RemoteJobManager factory created.\n";
 }
-
-/**
- * Private destructor, prevent client code from using this.
- */
-RemoteJobManagerFactoryImpl::~RemoteJobManagerFactoryImpl() {}
 
 /**
  * Create a remote algorithm with the underlying mechanism that suits

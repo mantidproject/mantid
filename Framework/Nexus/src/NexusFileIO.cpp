@@ -8,6 +8,9 @@
 
 #ifdef _WIN32
 #include <io.h>
+// Define the MAX_NAME macro for Windows
+// Maximum base file name size on modern windows systems is 260 characters
+#define NAME_MAX 260
 #endif /* _WIN32 */
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -22,6 +25,7 @@
 #include "MantidDataObjects/RebinnedOutput.h"
 
 #include <Poco/File.h>
+#include <Poco/Path.h>
 
 namespace Mantid {
 namespace NeXus {
@@ -36,8 +40,8 @@ Logger g_log("NexusFileIO");
 
 /// Empty default constructor
 NexusFileIO::NexusFileIO()
-    : fileID(), m_filehandle(), m_nexuscompression(NX_COMP_LZW), m_progress(0),
-      m_filename() {}
+    : fileID(), m_filehandle(), m_nexuscompression(NX_COMP_LZW),
+      m_progress(nullptr), m_filename() {}
 
 /// Constructor that supplies a progress object
 NexusFileIO::NexusFileIO(Progress *prog)
@@ -99,6 +103,15 @@ void NexusFileIO::openNexusWrite(const std::string &fileName,
 
   /*Only create the file handle if needed.*/
   if (!m_filehandle) {
+    // The nexus or HDF5 libraries crash when the filename is greater than 255
+    // on OSX and Ubuntu.
+    Poco::Path path(fileName);
+    std::string baseName = path.getBaseName();
+    if (baseName.size() > NAME_MAX) {
+      std::string message = "Filename is too long. Unable to open file: ";
+      throw Exception::FileError(message, fileName);
+    }
+
     // open the file and copy the handle into the NeXus::File object
     NXstatus status = NXopen(fileName.c_str(), mode, &fileID);
     if (status == NX_ERROR) {
@@ -175,18 +188,18 @@ int NexusFileIO::writeNexusProcessedHeader(const std::string &title,
       return (3);
   }
 
-  attributes.push_back("URL");
+  attributes.emplace_back("URL");
   avalues.push_back(
       "http://www.nexusformat.org/instruments/xml/NXprocessed.xml");
-  attributes.push_back("Version");
-  avalues.push_back("1.0");
+  attributes.emplace_back("Version");
+  avalues.emplace_back("1.0");
   // this may not be the "correct" long term path, but it is valid at present
   if (!writeNxValue<std::string>("definition", className, NX_CHAR, attributes,
                                  avalues))
     return (3);
   avalues.clear();
-  avalues.push_back("http://www.isis.rl.ac.uk/xml/IXmantid.xml");
-  avalues.push_back("1.0");
+  avalues.emplace_back("http://www.isis.rl.ac.uk/xml/IXmantid.xml");
+  avalues.emplace_back("1.0");
   if (!writeNxValue<std::string>("definition_local", className, NX_CHAR,
                                  attributes, avalues))
     return (3);
@@ -219,23 +232,22 @@ bool NexusFileIO::writeNxStringArray(
   int dimensions[2];
   size_t maxlen = 0;
   dimensions[0] = static_cast<int>(values.size());
-  for (size_t i = 0; i < values.size(); i++)
-    if (values[i].size() > maxlen)
-      maxlen = values[i].size();
+  for (const auto &value : values)
+    if (value.size() > maxlen)
+      maxlen = value.size();
   dimensions[1] = static_cast<int>(maxlen);
   NXstatus status = NXmakedata(fileID, name.c_str(), NX_CHAR, 2, dimensions);
   if (status == NX_ERROR)
     return (false);
   NXopendata(fileID, name.c_str());
   for (size_t it = 0; it < attributes.size(); ++it)
-    NXputattr(fileID, attributes[it].c_str(),
-              reinterpret_cast<void *>(const_cast<char *>(avalues[it].c_str())),
+    NXputattr(fileID, attributes[it].c_str(), avalues[it].c_str(),
               static_cast<int>(avalues[it].size() + 1), NX_CHAR);
   auto strs = new char[values.size() * maxlen];
   for (size_t i = 0; i < values.size(); i++) {
     strncpy(&strs[i * maxlen], values[i].c_str(), maxlen);
   }
-  NXputdata(fileID, (void *)strs);
+  NXputdata(fileID, strs);
   NXclosedata(fileID);
   delete[] strs;
   return (true);
@@ -255,7 +267,7 @@ bool NexusFileIO::writeNxNote(const std::string &noteName,
 
   std::vector<std::string> attributes, avalues;
   if (date != "") {
-    attributes.push_back("date");
+    attributes.emplace_back("date");
     avalues.push_back(date);
   }
   if (!writeNxValue<std::string>("author", author, NX_CHAR, attributes,
@@ -338,27 +350,22 @@ int NexusFileIO::writeNexusProcessedData2D(
     NXopendata(fileID, name.c_str());
     for (size_t i = 0; i < nSpect; i++) {
       int s = spec[i];
-      NXputslab(fileID, reinterpret_cast<void *>(const_cast<double *>(
-                            &(localworkspace->readY(s)[0]))),
-                start, asize);
+      NXputslab(fileID, localworkspace->readY(s).data(), start, asize);
       start[0]++;
     }
-    if (m_progress != 0)
+    if (m_progress != nullptr)
       m_progress->reportIncrement(1, "Writing data");
     int signal = 1;
     NXputattr(fileID, "signal", &signal, 1, NX_INT32);
     // More properties
     const std::string axesNames = "axis2,axis1";
-    NXputattr(fileID, "axes",
-              reinterpret_cast<void *>(const_cast<char *>(axesNames.c_str())),
+    NXputattr(fileID, "axes", axesNames.c_str(),
               static_cast<int>(axesNames.size()), NX_CHAR);
     std::string yUnits = localworkspace->YUnit();
     std::string yUnitLabel = localworkspace->YUnitLabel();
-    NXputattr(fileID, "units",
-              reinterpret_cast<void *>(const_cast<char *>(yUnits.c_str())),
-              static_cast<int>(yUnits.size()), NX_CHAR);
-    NXputattr(fileID, "unit_label",
-              reinterpret_cast<void *>(const_cast<char *>(yUnitLabel.c_str())),
+    NXputattr(fileID, "units", yUnits.c_str(), static_cast<int>(yUnits.size()),
+              NX_CHAR);
+    NXputattr(fileID, "unit_label", yUnitLabel.c_str(),
               static_cast<int>(yUnitLabel.size()), NX_CHAR);
     NXclosedata(fileID);
 
@@ -370,13 +377,11 @@ int NexusFileIO::writeNexusProcessedData2D(
     start[0] = 0;
     for (size_t i = 0; i < nSpect; i++) {
       int s = spec[i];
-      NXputslab(fileID, reinterpret_cast<void *>(const_cast<double *>(
-                            &(localworkspace->readE(s)[0]))),
-                start, asize);
+      NXputslab(fileID, localworkspace->readE(s).data(), start, asize);
       start[0]++;
     }
 
-    if (m_progress != 0)
+    if (m_progress != nullptr)
       m_progress->reportIncrement(1, "Writing data");
 
     // Fractional area for RebinnedOutput
@@ -390,12 +395,10 @@ int NexusFileIO::writeNexusProcessedData2D(
       start[0] = 0;
       for (size_t i = 0; i < nSpect; i++) {
         int s = spec[i];
-        NXputslab(fileID, reinterpret_cast<void *>(const_cast<double *>(
-                              &(rebin_workspace->readF(s)[0]))),
-                  start, asize);
+        NXputslab(fileID, rebin_workspace->readF(s).data(), start, asize);
         start[0]++;
       }
-      if (m_progress != 0)
+      if (m_progress != nullptr)
         m_progress->reportIncrement(1, "Writing data");
     }
 
@@ -411,9 +414,7 @@ int NexusFileIO::writeNexusProcessedData2D(
       asize[1] = dims_array[1];
       for (size_t i = 0; i < nSpect; i++) {
         int s = spec[i];
-        NXputslab(fileID, reinterpret_cast<void *>(const_cast<double *>(
-                              &(localworkspace->readDx(s)[0]))),
-                  start, asize);
+        NXputslab(fileID, localworkspace->dx(s).rawData().data(), start, asize);
         start[0]++;
       }
     }
@@ -426,8 +427,7 @@ int NexusFileIO::writeNexusProcessedData2D(
     dims_array[0] = static_cast<int>(localworkspace->readX(0).size());
     NXmakedata(fileID, "axis1", NX_FLOAT64, 1, dims_array);
     NXopendata(fileID, "axis1");
-    NXputdata(fileID, reinterpret_cast<void *>(const_cast<double *>(
-                          &(localworkspace->readX(0)[0]))));
+    NXputdata(fileID, localworkspace->readX(0).data());
 
   } else {
     dims_array[0] = static_cast<int>(nSpect);
@@ -437,30 +437,23 @@ int NexusFileIO::writeNexusProcessedData2D(
     start[0] = 0;
     asize[1] = dims_array[1];
     for (size_t i = 0; i < nSpect; i++) {
-      NXputslab(fileID, reinterpret_cast<void *>(const_cast<double *>(
-                            &(localworkspace->readX(i)[0]))),
-                start, asize);
+      NXputslab(fileID, localworkspace->readX(i).data(), start, asize);
       start[0]++;
     }
   }
 
   std::string dist = (localworkspace->isDistribution()) ? "1" : "0";
-  NXputattr(fileID, "distribution",
-            reinterpret_cast<void *>(const_cast<char *>(dist.c_str())), 2,
+  NXputattr(fileID, "distribution", dist.c_str(), 2, NX_CHAR);
+  NXputattr(fileID, "units", xLabel.c_str(), static_cast<int>(xLabel.size()),
             NX_CHAR);
-  NXputattr(fileID, "units",
-            reinterpret_cast<void *>(const_cast<char *>(xLabel.c_str())),
-            static_cast<int>(xLabel.size()), NX_CHAR);
 
   auto label =
       boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(xAxis->unit());
   if (label) {
-    NXputattr(fileID, "caption", reinterpret_cast<void *>(const_cast<char *>(
-                                     label->caption().c_str())),
+    NXputattr(fileID, "caption", label->caption().c_str(),
               static_cast<int>(label->caption().size()), NX_CHAR);
     auto unitLbl = label->label();
-    NXputattr(fileID, "label", reinterpret_cast<void *>(
-                                   const_cast<char *>(unitLbl.ascii().c_str())),
+    NXputattr(fileID, "label", unitLbl.ascii().c_str(),
               static_cast<int>(unitLbl.ascii().size()), NX_CHAR);
   }
 
@@ -471,20 +464,17 @@ int NexusFileIO::writeNexusProcessedData2D(
     dims_array[0] = static_cast<int>(axis2.size());
     NXmakedata(fileID, "axis2", NX_FLOAT64, 1, dims_array);
     NXopendata(fileID, "axis2");
-    NXputdata(fileID, (void *)&(axis2[0]));
-    NXputattr(fileID, "units",
-              reinterpret_cast<void *>(const_cast<char *>(sLabel.c_str())),
-              static_cast<int>(sLabel.size()), NX_CHAR);
+    NXputdata(fileID, axis2.data());
+    NXputattr(fileID, "units", sLabel.c_str(), static_cast<int>(sLabel.size()),
+              NX_CHAR);
 
     auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
         sAxis->unit());
     if (label) {
-      NXputattr(fileID, "caption", reinterpret_cast<void *>(const_cast<char *>(
-                                       label->caption().c_str())),
+      NXputattr(fileID, "caption", label->caption().c_str(),
                 static_cast<int>(label->caption().size()), NX_CHAR);
       auto unitLbl = label->label();
-      NXputattr(fileID, "label", reinterpret_cast<void *>(const_cast<char *>(
-                                     unitLbl.ascii().c_str())),
+      NXputattr(fileID, "label", unitLbl.ascii().c_str(),
                 static_cast<int>(unitLbl.ascii().size()), NX_CHAR);
     }
 
@@ -498,21 +488,16 @@ int NexusFileIO::writeNexusProcessedData2D(
     dims_array[0] = static_cast<int>(textAxis.size());
     NXmakedata(fileID, "axis2", NX_CHAR, 1, dims_array);
     NXopendata(fileID, "axis2");
-    NXputdata(fileID,
-              reinterpret_cast<void *>(const_cast<char *>(textAxis.c_str())));
-    NXputattr(fileID, "units",
-              reinterpret_cast<void *>(const_cast<char *>("TextAxis")), 8,
-              NX_CHAR);
+    NXputdata(fileID, textAxis.c_str());
+    NXputattr(fileID, "units", "TextAxis", 8, NX_CHAR);
 
     auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
         sAxis->unit());
     if (label) {
-      NXputattr(fileID, "caption", reinterpret_cast<void *>(const_cast<char *>(
-                                       label->caption().c_str())),
+      NXputattr(fileID, "caption", label->caption().c_str(),
                 static_cast<int>(label->caption().size()), NX_CHAR);
       auto unitLbl = label->label();
-      NXputattr(fileID, "label", reinterpret_cast<void *>(const_cast<char *>(
-                                     unitLbl.ascii().c_str())),
+      NXputattr(fileID, "label", unitLbl.ascii().c_str(),
                 static_cast<int>(unitLbl.ascii().size()), NX_CHAR);
     }
 
@@ -544,18 +529,15 @@ void NexusFileIO::writeTableColumn(int type, const std::string &interpret_as,
   auto toNexus = new NexusT[nRows];
   for (int ii = 0; ii < nRows; ii++)
     toNexus[ii] = static_cast<NexusT>(col.cell<ColumnT>(ii));
-  NXwritedata(columnName.c_str(), type, 1, dims_array, (void *)(toNexus),
-              false);
+  NXwritedata(columnName.c_str(), type, 1, dims_array, toNexus, false);
   delete[] toNexus;
 
   // attributes
   NXopendata(fileID, columnName.c_str());
   std::string units = "Not known";
-  NXputattr(fileID, "units",
-            reinterpret_cast<void *>(const_cast<char *>(units.c_str())),
-            static_cast<int>(units.size()), NX_CHAR);
-  NXputattr(fileID, "interpret_as",
-            reinterpret_cast<void *>(const_cast<char *>(interpret_as.c_str())),
+  NXputattr(fileID, "units", units.c_str(), static_cast<int>(units.size()),
+            NX_CHAR);
+  NXputattr(fileID, "interpret_as", interpret_as.c_str(),
             static_cast<int>(interpret_as.size()), NX_CHAR);
   NXclosedata(fileID);
 }
@@ -574,7 +556,7 @@ size_t getSizeOf(const Kernel::V3D &) { return 3; }
 
 /**
  * Writes given vector column to the currently open Nexus file.
- * @param column     :: Column to write
+ * @param col     :: Column to write
  * @param columnName :: Name of NXdata to write to
  * @param nexusType  :: Nexus type to use to store data
  * @param interpret_as   :: Name of the type to use for "interpret_as" attribute
@@ -596,9 +578,7 @@ void NexusFileIO::writeNexusVectorColumn(
   }
 
   // Set-up dimensions
-  int dims[2];
-  dims[0] = static_cast<int>(rowCount);
-  dims[1] = static_cast<int>(maxSize);
+  int dims[2]{static_cast<int>(rowCount), static_cast<int>(maxSize)};
 
   // Create data array
   boost::scoped_array<ElemType> data(new ElemType[rowCount * maxSize]);
@@ -616,8 +596,7 @@ void NexusFileIO::writeNexusVectorColumn(
   }
 
   // Write data
-  NXwritedata(columnName.c_str(), nexusType, 2, dims,
-              reinterpret_cast<void *>(data.get()), false);
+  NXwritedata(columnName.c_str(), nexusType, 2, dims, data.get(), false);
 
   NXopendata(fileID, columnName.c_str());
 
@@ -670,7 +649,7 @@ int NexusFileIO::writeNexusTableWorkspace(
   for (size_t i = 0; i < itableworkspace->columnCount(); i++) {
     Column_const_sptr col = itableworkspace->getColumn(i);
 
-    std::string str = "column_" + boost::lexical_cast<std::string>(i + 1);
+    std::string str = "column_" + std::to_string(i + 1);
 
     if (col->isType<double>()) {
       writeTableColumn<double, double>(NX_FLOAT64, "", *col, str);
@@ -707,19 +686,16 @@ int NexusFileIO::writeNexusTableWorkspace(
           toNexus[ii * maxStr + ic] = ' ';
       }
 
-      NXputdata(fileID, (void *)(toNexus));
+      NXputdata(fileID, toNexus);
       delete[] toNexus;
 
       // attributes
       std::string units = "N/A";
       std::string interpret_as = "A string";
-      NXputattr(fileID, "units",
-                reinterpret_cast<void *>(const_cast<char *>(units.c_str())),
-                static_cast<int>(units.size()), NX_CHAR);
-      NXputattr(
-          fileID, "interpret_as",
-          reinterpret_cast<void *>(const_cast<char *>(interpret_as.c_str())),
-          static_cast<int>(interpret_as.size()), NX_CHAR);
+      NXputattr(fileID, "units", units.c_str(), static_cast<int>(units.size()),
+                NX_CHAR);
+      NXputattr(fileID, "interpret_as", interpret_as.c_str(),
+                static_cast<int>(interpret_as.size()), NX_CHAR);
 
       NXclosedata(fileID);
     } else if (col->isType<std::vector<int>>()) {
@@ -733,8 +709,7 @@ int NexusFileIO::writeNexusTableWorkspace(
 
     // write out title
     NXopendata(fileID, str.c_str());
-    NXputattr(fileID, "name",
-              reinterpret_cast<void *>(const_cast<char *>(col->name().c_str())),
+    NXputattr(fileID, "name", col->name().c_str(),
               static_cast<int>(col->name().size()), NX_CHAR);
     NXclosedata(fileID);
   }
@@ -762,21 +737,19 @@ int NexusFileIO::writeNexusProcessedDataEventCombined(
 
   // The array of indices for each event list #
   int dims_array[1] = {static_cast<int>(indices.size())};
-  if (indices.size() > 0) {
+  if (!indices.empty()) {
     if (compress)
       NXcompmakedata(fileID, "indices", NX_INT64, 1, dims_array,
                      m_nexuscompression, dims_array);
     else
       NXmakedata(fileID, "indices", NX_INT64, 1, dims_array);
     NXopendata(fileID, "indices");
-    NXputdata(fileID, (void *)(indices.data()));
+    NXputdata(fileID, indices.data());
     std::string yUnits = ws->YUnit();
     std::string yUnitLabel = ws->YUnitLabel();
-    NXputattr(fileID, "units",
-              reinterpret_cast<void *>(const_cast<char *>(yUnits.c_str())),
-              static_cast<int>(yUnits.size()), NX_CHAR);
-    NXputattr(fileID, "unit_label",
-              reinterpret_cast<void *>(const_cast<char *>(yUnitLabel.c_str())),
+    NXputattr(fileID, "units", yUnits.c_str(), static_cast<int>(yUnits.size()),
+              NX_CHAR);
+    NXputattr(fileID, "unit_label", yUnitLabel.c_str(),
               static_cast<int>(yUnitLabel.size()), NX_CHAR);
     NXclosedata(fileID);
   }
@@ -785,16 +758,14 @@ int NexusFileIO::writeNexusProcessedDataEventCombined(
   dims_array[0] = static_cast<int>(
       indices.back()); // TODO big truncation error! This is the # of events
   if (tofs)
-    NXwritedata("tof", NX_FLOAT64, 1, dims_array, (void *)(tofs), compress);
+    NXwritedata("tof", NX_FLOAT64, 1, dims_array, tofs, compress);
   if (pulsetimes)
-    NXwritedata("pulsetime", NX_INT64, 1, dims_array, (void *)(pulsetimes),
-                compress);
+    NXwritedata("pulsetime", NX_INT64, 1, dims_array, pulsetimes, compress);
   if (weights)
-    NXwritedata("weight", NX_FLOAT32, 1, dims_array, (void *)(weights),
-                compress);
+    NXwritedata("weight", NX_FLOAT32, 1, dims_array, weights, compress);
   if (errorSquareds)
-    NXwritedata("error_squared", NX_FLOAT32, 1, dims_array,
-                (void *)(errorSquareds), compress);
+    NXwritedata("error_squared", NX_FLOAT32, 1, dims_array, errorSquareds,
+                compress);
 
   // Close up the overall group
   NXstatus status = NXclosegroup(fileID);
@@ -815,7 +786,7 @@ int NexusFileIO::writeNexusProcessedDataEvent(
   for (size_t wi = 0; wi < ws->getNumberHistograms(); wi++) {
     std::ostringstream group_name;
     group_name << "event_list_" << wi;
-    this->writeEventList(ws->getEventList(wi), group_name.str());
+    this->writeEventList(ws->getSpectrum(wi), group_name.str());
   }
 
   // Close up the overall group
@@ -887,16 +858,14 @@ void NexusFileIO::writeEventListData(std::vector<T> events, bool writeTOF,
   // managed event workspaces.
   bool compress = true; //(num > 100);
   if (writeTOF)
-    NXwritedata("tof", NX_FLOAT64, 1, dims_array, (void *)(tofs), compress);
+    NXwritedata("tof", NX_FLOAT64, 1, dims_array, tofs, compress);
   if (writePulsetime)
-    NXwritedata("pulsetime", NX_INT64, 1, dims_array, (void *)(pulsetimes),
-                compress);
+    NXwritedata("pulsetime", NX_INT64, 1, dims_array, pulsetimes, compress);
   if (writeWeight)
-    NXwritedata("weight", NX_FLOAT32, 1, dims_array, (void *)(weights),
-                compress);
+    NXwritedata("weight", NX_FLOAT32, 1, dims_array, weights, compress);
   if (writeError)
-    NXwritedata("error_squared", NX_FLOAT32, 1, dims_array,
-                (void *)(errorSquareds), compress);
+    NXwritedata("error_squared", NX_FLOAT32, 1, dims_array, errorSquareds,
+                compress);
 
   // Free mem.
   delete[] tofs;
@@ -919,14 +888,14 @@ int NexusFileIO::writeEventList(const DataObjects::EventList &el,
   NXopengroup(fileID, group_name.c_str(), "NXdata");
 
   // Copy the detector IDs to an array.
-  const std::set<detid_t> &dets = el.getDetectorIDs();
+  const auto &dets = el.getDetectorIDs();
 
   // Write out the detector IDs
   if (!dets.empty()) {
     std::vector<detid_t> detectorIDs(dets.begin(), dets.end());
     int dims_array[1];
-    NXwritedata("detector_IDs", NX_INT64, 1, dims_array,
-                (void *)(detectorIDs.data()), false);
+    NXwritedata("detector_IDs", NX_INT64, 1, dims_array, detectorIDs.data(),
+                false);
   }
 
   std::string eventType("UNKNOWN");
@@ -960,16 +929,14 @@ int NexusFileIO::writeEventList(const DataObjects::EventList &el,
     sortType = "UNSORTED";
     break;
   }
-  NXputattr(fileID, "sort_type",
-            reinterpret_cast<void *>(const_cast<char *>(sortType.c_str())),
+  NXputattr(fileID, "sort_type", sortType.c_str(),
             static_cast<int>(sortType.size()), NX_CHAR);
 
   // Save an attribute with the type of each event.
-  NXputattr(fileID, "event_type",
-            reinterpret_cast<void *>(const_cast<char *>(eventType.c_str())),
+  NXputattr(fileID, "event_type", eventType.c_str(),
             static_cast<int>(eventType.size()), NX_CHAR);
   // Save an attribute with the number of events
-  NXputattr(fileID, "num_events", (void *)(&num), 1, NX_INT64);
+  NXputattr(fileID, "num_events", &num, 1, NX_INT64);
 
   // Close it up!
   status = NXclosegroup(fileID);
@@ -1016,8 +983,7 @@ int NexusFileIO::getWorkspaceSize(int &numberOfSpectra, int &numberOfChannels,
   type = NX_CHAR;
 
   if (checkAttributeName("units")) {
-    status = NXgetattr(fileID, const_cast<char *>("units"), (void *)sbuf, &len,
-                       &type);
+    status = NXgetattr(fileID, "units", sbuf, &len, &type);
     if (status != NX_ERROR)
       yUnits = sbuf;
     NXclosedata(fileID);
@@ -1029,7 +995,7 @@ int NexusFileIO::getWorkspaceSize(int &numberOfSpectra, int &numberOfChannels,
     return (4);
   len = NX_MAXNAMELEN;
   type = NX_CHAR;
-  NXgetattr(fileID, const_cast<char *>("units"), (void *)sbuf, &len, &type);
+  NXgetattr(fileID, "units", sbuf, &len, &type);
   axesUnits = std::string(sbuf, len);
   NXgetinfo(fileID, &rank, dim, &type);
   // non-uniform X has 2D axis1 data
@@ -1044,7 +1010,7 @@ int NexusFileIO::getWorkspaceSize(int &numberOfSpectra, int &numberOfChannels,
   NXopendata(fileID, "axis2");
   len = NX_MAXNAMELEN;
   type = NX_CHAR;
-  NXgetattr(fileID, const_cast<char *>("units"), (void *)sbuf, &len, &type);
+  NXgetattr(fileID, "units", sbuf, &len, &type);
   axesUnits += std::string(":") + std::string(sbuf, len);
   NXclosedata(fileID);
   NXclosegroup(fileID);
@@ -1057,8 +1023,8 @@ bool NexusFileIO::checkAttributeName(const std::string &target) const {
   // clang-format off
   const std::vector< ::NeXus::AttrInfo> infos = m_filehandle->getAttrInfos();
   // clang-format on
-  for (auto it = infos.begin(); it != infos.end(); ++it) {
-    if (target.compare(it->name) == 0)
+  for (const auto &info : infos) {
+    if (target.compare(info.name) == 0)
       return true;
   }
 
@@ -1081,11 +1047,11 @@ int NexusFileIO::getXValues(MantidVec &xValues, const int &spectra) const {
     return (2);
   NXgetinfo(fileID, &rank, dim, &type);
   if (rank == 1) {
-    NXgetdata(fileID, &xValues[0]);
+    NXgetdata(fileID, xValues.data());
   } else {
     int start[2] = {spectra, 0};
     int size[2] = {1, dim[1]};
-    NXgetslab(fileID, &xValues[0], start, size);
+    NXgetslab(fileID, xValues.data(), start, size);
   }
   NXclosedata(fileID);
   NXclosegroup(fileID);
@@ -1118,7 +1084,7 @@ int NexusFileIO::getSpectra(MantidVec &values, MantidVec &errors,
   // get buffer and block size
   int start[2] = {spectra - 1, 0};
   int size[2] = {1, dim[1]};
-  NXgetslab(fileID, &values[0], start, size);
+  NXgetslab(fileID, values.data(), start, size);
   NXclosedata(fileID);
 
   // read errors
@@ -1128,7 +1094,7 @@ int NexusFileIO::getSpectra(MantidVec &values, MantidVec &errors,
   NXgetinfo(fileID, &rank, dim, &type);
   // set block size;
   size[1] = dim[1];
-  NXgetslab(fileID, &errors[0], start, size);
+  NXgetslab(fileID, errors.data(), start, size);
   NXclosedata(fileID);
 
   NXclosegroup(fileID);
@@ -1141,9 +1107,9 @@ int NexusFileIO::findMantidWSEntries() const {
   // count
   int count = 0;
   std::map<std::string, std::string> entries = m_filehandle->getEntries();
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    if (it->second == "NXentry") {
-      if (it->first.find("mantid_workspace_") == 0)
+  for (auto &entrie : entries) {
+    if (entrie.second == "NXentry") {
+      if (entrie.first.find("mantid_workspace_") == 0)
         count++;
     }
   }
@@ -1154,8 +1120,8 @@ int NexusFileIO::findMantidWSEntries() const {
 bool NexusFileIO::checkEntryAtLevel(const std::string &item) const {
   // Search the currently open level for name "item"
   std::map<std::string, std::string> entries = m_filehandle->getEntries();
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    if (it->first == item)
+  for (auto &entrie : entries) {
+    if (entrie.first == item)
       return true;
   }
 
@@ -1167,13 +1133,13 @@ bool NexusFileIO::checkEntryAtLevelByAttribute(const std::string &attribute,
   // Search the currently open level for a section with "attribute" and return
   // entry name
   std::map<std::string, std::string> entries = m_filehandle->getEntries();
-  for (auto it = entries.begin(); it != entries.end(); ++it) {
-    if (it->second == "SDS") {
-      m_filehandle->openData(it->first);
+  for (auto &entrie : entries) {
+    if (entrie.second == "SDS") {
+      m_filehandle->openData(entrie.first);
       bool result = checkAttributeName(attribute);
       m_filehandle->closeData();
       if (result) {
-        entry = it->first;
+        entry = entrie.first;
         return true;
       }
     }
@@ -1199,9 +1165,9 @@ bool NexusFileIO::writeNexusBinMasking(
       const API::MatrixWorkspace::MaskList &mList = ws->maskedBins(i);
       spectra.push_back(spectra_count);
       spectra.push_back(offset);
-      for (auto it = mList.cbegin(); it != mList.cend(); ++it) {
-        bins.push_back(it->first);
-        weights.push_back(it->second);
+      for (const auto &mask : mList) {
+        bins.push_back(mask.first);
+        weights.push_back(mask.second);
       }
       ++spectra_count;
       offset += static_cast<int>(mList.size());
@@ -1214,19 +1180,16 @@ bool NexusFileIO::writeNexusBinMasking(
   NXstatus status;
 
   // save spectra offsets as a 2d array of ints
-  int dimensions[2];
-  dimensions[0] = spectra_count;
-  dimensions[1] = 2;
+  int dimensions[2]{spectra_count, 2};
   status = NXmakedata(fileID, "masked_spectra", NX_INT32, 2, dimensions);
   if (status == NX_ERROR)
     return false;
   NXopendata(fileID, "masked_spectra");
   const std::string description =
       "spectra index,offset in masked_bins and mask_weights";
-  NXputattr(fileID, "description",
-            reinterpret_cast<void *>(const_cast<char *>(description.c_str())),
+  NXputattr(fileID, "description", description.c_str(),
             static_cast<int>(description.size() + 1), NX_CHAR);
-  NXputdata(fileID, (void *)&spectra[0]);
+  NXputdata(fileID, spectra.data());
   NXclosedata(fileID);
 
   // save masked bin indices
@@ -1235,7 +1198,7 @@ bool NexusFileIO::writeNexusBinMasking(
   if (status == NX_ERROR)
     return false;
   NXopendata(fileID, "masked_bins");
-  NXputdata(fileID, (void *)&bins[0]);
+  NXputdata(fileID, bins.data());
   NXclosedata(fileID);
 
   // save masked bin weights
@@ -1244,7 +1207,7 @@ bool NexusFileIO::writeNexusBinMasking(
   if (status == NX_ERROR)
     return false;
   NXopendata(fileID, "mask_weights");
-  NXputdata(fileID, (void *)&weights[0]);
+  NXputdata(fileID, weights.data());
   NXclosedata(fileID);
 
   return true;
@@ -1304,9 +1267,9 @@ int getNexusEntryTypes(const std::string &fileName,
   }
   // for each entry found, look for "analysis" or "definition" text data fields
   // and return value plus entry name
-  for (size_t i = 0; i < entryList.size(); i++) {
+  for (auto &entry : entryList) {
     //
-    stat = NXopengroup(fileH, entryList[i].c_str(), "NXentry");
+    stat = NXopengroup(fileH, entry.c_str(), "NXentry");
     // loop through field names in this entry
     while ((stat = NXgetnextentry(fileH, nxname, nxclass, &nxdatatype)) ==
            NX_OK) {
@@ -1326,7 +1289,7 @@ int getNexusEntryTypes(const std::string &fileName,
           value[dims[0]] = '\0';
           // return e.g entryName "analysis"/definition "muonTD"
           definition.push_back(value);
-          entryName.push_back(entryList[i]);
+          entryName.push_back(entry);
           delete[] value;
           NXclosegroup(fileH); // close data group, then entry
           stat = NXclosegroup(fileH);

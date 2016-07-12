@@ -18,8 +18,8 @@ public:
     this->declareParameter("A", 1.0);
     this->declareParameter("B", 2.0);
   }
-  virtual std::string name() const { return "FunctionPropertyTest_Function"; }
-  virtual void function(const FunctionDomain &, FunctionValues &) const {}
+  std::string name() const override { return "FunctionPropertyTest_Function"; }
+  void function(const FunctionDomain &, FunctionValues &) const override {}
 };
 
 DECLARE_FUNCTION(FunctionPropertyTest_Function)

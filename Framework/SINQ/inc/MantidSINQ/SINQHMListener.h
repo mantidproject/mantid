@@ -42,21 +42,20 @@
 class MANTID_SINQ_DLL SINQHMListener : public Mantid::API::ILiveListener {
 public:
   SINQHMListener();
-  ~SINQHMListener();
 
-  std::string name() const { return "SINQHMListener"; }
-  bool supportsHistory() const { return false; }
-  bool buffersEvents() const { return false; }
+  std::string name() const override { return "SINQHMListener"; }
+  bool supportsHistory() const override { return false; }
+  bool buffersEvents() const override { return false; }
 
-  bool connect(const Poco::Net::SocketAddress &address);
-  void
-  start(Mantid::Kernel::DateAndTime startTime = Mantid::Kernel::DateAndTime());
-  boost::shared_ptr<Mantid::API::Workspace> extractData();
-  bool isConnected();
-  ILiveListener::RunStatus runStatus();
-  int runNumber() const { return 0; }
+  bool connect(const Poco::Net::SocketAddress &address) override;
+  void start(Mantid::Kernel::DateAndTime startTime =
+                 Mantid::Kernel::DateAndTime()) override;
+  boost::shared_ptr<Mantid::API::Workspace> extractData() override;
+  bool isConnected() override;
+  ILiveListener::RunStatus runStatus() override;
+  int runNumber() const override { return 0; }
 
-  void setSpectra(const std::vector<Mantid::specid_t> &specList);
+  void setSpectra(const std::vector<Mantid::specnum_t> &specList) override;
 
 private:
   Poco::Net::HTTPClientSession httpcon;

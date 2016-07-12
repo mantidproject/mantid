@@ -31,7 +31,7 @@ Description of MDWorkspace
 -  The class is named MDEventWorkspace.
 
 Structure
-~~~~~~~~~
+#########
 
 The MDWorkspace is a container that can hold a large number of MDEvents.
 The events are organized into "boxes": types are MDBox and MDGridBox. At

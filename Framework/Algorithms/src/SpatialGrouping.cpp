@@ -45,11 +45,11 @@ DECLARE_ALGORITHM(SpatialGrouping)
 * init() method implemented from Algorithm base class
 */
 void SpatialGrouping::init() {
-  declareProperty(new Mantid::API::WorkspaceProperty<>(
+  declareProperty(Kernel::make_unique<Mantid::API::WorkspaceProperty<>>(
                       "InputWorkspace", "", Mantid::Kernel::Direction::Input),
                   "Name of the input workspace, which is used only as a means "
                   "of retrieving the instrument geometry.");
-  declareProperty(new Mantid::API::FileProperty(
+  declareProperty(Kernel::make_unique<Mantid::API::FileProperty>(
                       "Filename", "", Mantid::API::FileProperty::Save, ".xml"),
                   "Name (and location) in which to save the file. Having a "
                   "suffix of ''.xml'' is recommended.");
@@ -73,8 +73,8 @@ void SpatialGrouping::exec() {
   // Make a map key = spectrum number, value = detector at that spectrum
   m_detectors.clear();
   for (size_t i = 0; i < inputWorkspace->getNumberHistograms(); i++) {
-    const ISpectrum *spec = inputWorkspace->getSpectrum(i);
-    m_detectors[spec->getSpectrumNo()] = inputWorkspace->getDetector(i);
+    const auto &spec = inputWorkspace->getSpectrum(i);
+    m_detectors[spec.getSpectrumNo()] = inputWorkspace->getDetector(i);
   }
 
   // TODO: There is a confusion in this algorithm between detector IDs and
@@ -82,13 +82,13 @@ void SpatialGrouping::exec() {
 
   Mantid::API::Progress prog(this, 0.0, 1.0, m_detectors.size());
 
-  for (auto detIt = m_detectors.begin(); detIt != m_detectors.end(); ++detIt) {
+  for (auto &detector : m_detectors) {
     prog.report();
 
     // The detector
-    Mantid::Geometry::IDetector_const_sptr det = detIt->second;
+    Mantid::Geometry::IDetector_const_sptr &det = detector.second;
     // The spectrum number of the detector
-    specid_t specNo = detIt->first;
+    specnum_t specNo = detector.first;
 
     // We are not interested in Monitors and we don't want them to be included
     // in
@@ -127,7 +127,7 @@ void SpatialGrouping::exec() {
     group.push_back(specNo);
 
     // Add all the nearest neighbors
-    std::map<specid_t, Mantid::Kernel::V3D>::iterator nrsIt;
+    std::map<specnum_t, Mantid::Kernel::V3D>::iterator nrsIt;
     for (nrsIt = nearest.begin(); nrsIt != nearest.end(); ++nrsIt) {
       m_included.insert(nrsIt->first);
       group.push_back(nrsIt->first);
@@ -135,13 +135,13 @@ void SpatialGrouping::exec() {
     m_groups.push_back(group);
   }
 
-  if (m_groups.size() == 0) {
-    g_log.warning() << "No groups generated." << std::endl;
+  if (m_groups.empty()) {
+    g_log.warning() << "No groups generated.\n";
     return;
   }
 
   // Create grouping XML file
-  g_log.information() << "Creating XML Grouping File." << std::endl;
+  g_log.information() << "Creating XML Grouping File.\n";
   std::vector<std::vector<detid_t>>::iterator grpIt;
   std::ofstream xml;
   std::string fname = getPropertyValue("Filename");
@@ -172,10 +172,10 @@ void SpatialGrouping::exec() {
       // smap.getDetectors((*grpIt)[i]);
       size_t workspaceIndex =
           inputWorkspace->getIndexFromSpectrumNumber((*grpIt)[i]);
-      const std::set<detid_t> &detIds =
-          inputWorkspace->getSpectrum(workspaceIndex)->getDetectorIDs();
-      for (auto it = detIds.cbegin(); it != detIds.cend(); ++it) {
-        xml << "," << (*it);
+      const auto &detIds =
+          inputWorkspace->getSpectrum(workspaceIndex).getDetectorIDs();
+      for (auto detId : detIds) {
+        xml << "," << detId;
       }
     }
     xml << "\"/></group>\n";
@@ -185,7 +185,7 @@ void SpatialGrouping::exec() {
 
   xml.close();
 
-  g_log.information() << "Finished creating XML Grouping File." << std::endl;
+  g_log.information() << "Finished creating XML Grouping File.\n";
 }
 
 /**
@@ -200,57 +200,57 @@ void SpatialGrouping::exec() {
 * @return true if neighbours were found matching the parameters, false otherwise
 */
 bool SpatialGrouping::expandNet(
-    std::map<specid_t, Mantid::Kernel::V3D> &nearest, specid_t spec,
+    std::map<specnum_t, Mantid::Kernel::V3D> &nearest, specnum_t spec,
     const size_t &noNeighbours, const Mantid::Geometry::BoundingBox &bbox) {
   const size_t incoming = nearest.size();
 
   Mantid::Geometry::IDetector_const_sptr det = m_detectors[spec];
 
-  std::map<specid_t, Mantid::Kernel::V3D> potentials;
+  std::map<specnum_t, Mantid::Kernel::V3D> potentials;
 
   // Special case for first run for this detector
   if (incoming == 0) {
     potentials = inputWorkspace->getNeighbours(det.get());
   } else {
-    for (auto nrsIt = nearest.begin(); nrsIt != nearest.end(); ++nrsIt) {
-      std::map<specid_t, Mantid::Kernel::V3D> results;
-      results = inputWorkspace->getNeighbours(m_detectors[nrsIt->first].get());
-      for (auto resIt = results.begin(); resIt != results.end(); ++resIt) {
-        potentials[resIt->first] = resIt->second;
+    for (auto &nrsIt : nearest) {
+      std::map<specnum_t, Mantid::Kernel::V3D> results;
+      results = inputWorkspace->getNeighbours(m_detectors[nrsIt.first].get());
+      for (auto &result : results) {
+        potentials[result.first] = result.second;
       }
     }
   }
 
-  for (auto potIt = potentials.begin(); potIt != potentials.end(); ++potIt) {
+  for (auto &potential : potentials) {
     // We do not want to include the detector in it's own list of nearest
     // neighbours
-    if (potIt->first == spec) {
+    if (potential.first == spec) {
       continue;
     }
 
     // Or detectors that are already in the nearest list passed into this
     // function
-    auto nrsIt = nearest.find(potIt->first);
+    auto nrsIt = nearest.find(potential.first);
     if (nrsIt != nearest.end()) {
       continue;
     }
 
     // We should not include detectors already included in a group (or monitors
     // for that matter)
-    auto inclIt = m_included.find(potIt->first);
+    auto inclIt = m_included.find(potential.first);
     if (inclIt != m_included.end()) {
       continue;
     }
 
     // If we get this far, we need to determine if the detector is of a suitable
     // distance
-    Mantid::Kernel::V3D pos = m_detectors[potIt->first]->getPos();
+    Mantid::Kernel::V3D pos = m_detectors[potential.first]->getPos();
     if (!bbox.isPointInside(pos)) {
       continue;
     }
 
     // Elsewise, it's all good.
-    nearest[potIt->first] = potIt->second;
+    nearest[potential.first] = potential.second;
   }
 
   if (nearest.size() == incoming) {

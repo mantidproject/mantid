@@ -54,7 +54,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_API_DLL IArchiveSearch {
 public:
   /// Virtual destructor
-  virtual ~IArchiveSearch() {}
+  virtual ~IArchiveSearch() = default;
   /**
     * Return the full path to a data file in an archive. The first match is
    * returned

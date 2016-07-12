@@ -56,7 +56,7 @@ public:
   /// @param iP :: the index of the parameter
   ///  @throw runtime_error Thrown if column of Jacobian to add number to does
   ///  not exist
-  void addNumberToColumn(const double &value, const size_t &iP) {
+  void addNumberToColumn(const double &value, const size_t &iP) override {
     if (iP < m_np) {
       // add penalty to first and last point and every 10th point in between
       m_data[iP] += value;
@@ -69,7 +69,7 @@ public:
     }
   }
   /// overwrite base method
-  void set(size_t iY, size_t iP, double value) {
+  void set(size_t iY, size_t iP, double value) override {
     if (iY >= m_ny) {
       throw std::out_of_range("Data index in Jacobian is out of range");
     }
@@ -79,7 +79,7 @@ public:
     m_data[iY * m_np + iP] = value;
   }
   /// overwrite base method
-  double get(size_t iY, size_t iP) {
+  double get(size_t iY, size_t iP) override {
     if (iY >= m_ny) {
       throw std::out_of_range("Data index in Jacobian is out of range");
     }

@@ -15,11 +15,6 @@ DisjointElement::DisjointElement() : m_parent(this), m_rank(0), m_id(-1) {}
 DisjointElement::DisjointElement(const int id)
     : m_parent(this), m_rank(0), m_id(id) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DisjointElement::~DisjointElement() {}
-
 /**
  * Copy constructor
  * @param other : Other disjoint element to copy.
@@ -40,7 +35,6 @@ DisjointElement::DisjointElement(const DisjointElement &other)
  */
 DisjointElement &DisjointElement::operator=(const DisjointElement &other) {
   if (this != &other) {
-
     m_parent = other.m_parent;
     m_rank = other.m_rank;
     m_id = other.m_id;

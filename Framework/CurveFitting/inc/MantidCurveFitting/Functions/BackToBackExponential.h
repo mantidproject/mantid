@@ -56,33 +56,33 @@ public:
   BackToBackExponential() : API::IPeakFunction() {}
 
   /// overwrite IPeakFunction base class methods
-  virtual double centre() const { return getParameter("X0"); }
-  virtual void setCentre(const double c) { setParameter("X0", c); }
-  virtual double height() const;
-  virtual void setHeight(const double h);
-  virtual double fwhm() const;
-  virtual void setFwhm(const double w);
-  virtual double intensity() const { return getParameter("I"); }
-  virtual void setIntensity(const double newIntensity) {
+  double centre() const override { return getParameter("X0"); }
+  void setCentre(const double c) override { setParameter("X0", c); }
+  double height() const override;
+  void setHeight(const double h) override;
+  double fwhm() const override;
+  void setFwhm(const double w) override;
+  double intensity() const override { return getParameter("I"); }
+  void setIntensity(const double newIntensity) override {
     setParameter("I", newIntensity);
   }
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "BackToBackExponential"; }
-  virtual const std::string category() const { return "Peak"; }
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
-  virtual void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                               const size_t nData);
+  std::string name() const override { return "BackToBackExponential"; }
+  const std::string category() const override { return "Peak"; }
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *jacobian, const double *xValues,
+                       const size_t nData) override;
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters
-  virtual void init();
+  void init() override;
   /// Function evaluation method to be implemented in the inherited classes
-  virtual void functionLocal(double *, const double *, const size_t) const {}
+  void functionLocal(double *, const double *, const size_t) const override {}
   /// Derivative evaluation method to be implemented in the inherited classes
-  virtual void functionDerivLocal(API::Jacobian *, const double *,
-                                  const size_t) {}
+  void functionDerivLocal(API::Jacobian *, const double *,
+                          const size_t) override {}
   double expWidth() const;
 };
 

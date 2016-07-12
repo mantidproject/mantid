@@ -1,7 +1,9 @@
 #include "MantidAlgorithms/DetectorEfficiencyCorUser.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidGeometry/muParser_Silent.h"
@@ -15,17 +17,6 @@ using namespace Geometry;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DetectorEfficiencyCorUser)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DetectorEfficiencyCorUser::DetectorEfficiencyCorUser()
-    : API::Algorithm(), m_inputWS(), m_outputWS(), m_Ei(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DetectorEfficiencyCorUser::~DetectorEfficiencyCorUser() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -52,12 +43,12 @@ void DetectorEfficiencyCorUser::init() {
   val->add<WorkspaceUnitValidator>("DeltaE");
   val->add<HistogramValidator>();
   val->add<InstrumentValidator>();
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, val),
-      "The workspace to correct for detector efficiency");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name of the workspace in which to store the result.");
+  declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                   Direction::Input, val),
+                  "The workspace to correct for detector efficiency");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name of the workspace in which to store the result.");
   auto checkEi = boost::make_shared<BoundedValidator<double>>();
   checkEi->setLower(0.0);
   declareProperty("IncidentEnergy", EMPTY_DBL(), checkEi,
@@ -146,7 +137,7 @@ DetectorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
     p.SetExpr(formula);
     double eff = p.Eval();
     g_log.debug() << "Formula: " << formula << " with: " << energy
-                  << "evaluated to: " << eff << std::endl;
+                  << "evaluated to: " << eff << '\n';
     return eff;
 
   } catch (mu::Parser::exception_type &e) {

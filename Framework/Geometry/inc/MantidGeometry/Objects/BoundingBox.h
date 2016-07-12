@@ -2,7 +2,6 @@
 #define MANTIDGEOMETRY_BOUNDINGBOX_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
@@ -191,7 +190,7 @@ public:
   void nullify();
   /// reallign the BB according to new coordinate system, provided earlier or
   /// specified as parameter;
-  void realign(std::vector<Kernel::V3D> const *const pCS = NULL);
+  void realign(std::vector<Kernel::V3D> const *const pCS = nullptr);
   /// move the BB by a vector
   void moveBy(const Kernel::V3D &v) {
     m_minPoint += v;

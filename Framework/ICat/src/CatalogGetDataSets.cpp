@@ -2,6 +2,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
 namespace Mantid {
@@ -15,9 +16,10 @@ void CatalogGetDataSets::init() {
                   "ID of the selected investigation");
   declareProperty("Session", "",
                   "The session information of the catalog to use.");
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
-                      "OutputWorkspace", "", Kernel::Direction::Output),
-                  "The name of the workspace to store the results.");
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "OutputWorkspace", "", Kernel::Direction::Output),
+      "The name of the workspace to store the results.");
 }
 
 /// exec methods

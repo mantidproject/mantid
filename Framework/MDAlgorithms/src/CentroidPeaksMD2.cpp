@@ -22,42 +22,26 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CentroidPeaksMD2::CentroidPeaksMD2() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CentroidPeaksMD2::~CentroidPeaksMD2() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CentroidPeaksMD2::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace.");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Q (lab frame)");
-  propOptions.push_back("Q (sample frame)");
-  propOptions.push_back("HKL");
-
   declareProperty(
-      new PropertyWithValue<double>("PeakRadius", 1.0, Direction::Input),
+      make_unique<PropertyWithValue<double>>("PeakRadius", 1.0,
+                                             Direction::Input),
       "Fixed radius around each peak position in which to calculate the "
       "centroid.");
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to centroid.");
 
   declareProperty(
-      new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                            Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
+                                                     Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' positions modified by the new found centroids.");
 }
@@ -81,7 +65,7 @@ void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
       getProperty("OutputWorkspace");
   if (peakWS != inPeakWS)
-    peakWS.reset(inPeakWS->clone().release());
+    peakWS = inPeakWS->clone();
 
   int CoordinatesToUse = ws->getSpecialCoordinateSystem();
 
@@ -146,17 +130,16 @@ void CentroidPeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             p.setHKL(vecCentroid);
           }
         } catch (std::exception &e) {
-          g_log.warning() << "Error setting Q or HKL" << std::endl;
-          g_log.warning() << e.what() << std::endl;
+          g_log.warning() << "Error setting Q or HKL\n";
+          g_log.warning() << e.what() << '\n';
         }
 
         g_log.information() << "Peak " << i << " at " << pos << ": signal "
                             << signal << ", centroid " << vecCentroid << " in "
-                            << CoordinatesToUse << std::endl;
+                            << CoordinatesToUse << '\n';
       } else {
         g_log.information() << "Peak " << i << " at " << pos
-                            << " had no signal, and could not be centroided."
-                            << std::endl;
+                            << " had no signal, and could not be centroided.\n";
       }
     }
 

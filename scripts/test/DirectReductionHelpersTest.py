@@ -240,6 +240,11 @@ class DirectReductionHelpersTest(unittest.TestCase):
         self.assertEqual(kkdict['B'],1)
         self.assertEqual(kkdict['C'],10)
 
+        helpers.gen_setter(kkdict,'A',(2,20))
+        self.assertEqual(kkdict['B'],2)
+        self.assertEqual(kkdict['C'],20)
+
+
     def test_class_property_setter(self):
 
 

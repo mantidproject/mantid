@@ -124,42 +124,42 @@
        <layout class="QGridLayout" name="gridLayout_4">
         <item row="0" column="0">
          <layout class="QFormLayout" name="formLayout">
-          <item row="0" column="0">
+          <item row="1" column="0">
            <widget class="QLabel" name="X_Min_label">
             <property name="text">
              <string>X Min</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="1" column="1">
            <widget class="QLineEdit" name="x_min_input">
             <property name="acceptDrops">
              <bool>false</bool>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
+          <item row="2" column="0">
            <widget class="QLabel" name="X_Max_label">
             <property name="text">
              <string>X Max</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="2" column="1">
            <widget class="QLineEdit" name="x_max_input">
             <property name="acceptDrops">
              <bool>false</bool>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="3" column="0">
            <widget class="QLabel" name="Step_Label">
             <property name="text">
              <string>Step(-if Log)</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="3" column="1">
            <widget class="QLineEdit" name="step_input">
             <property name="acceptDrops">
              <bool>false</bool>
@@ -211,10 +211,10 @@
           </property>
          </widget>
         </item>
-        <item row="4" column="0">
+        <item row="5" column="0">
          <widget class="QLabel" name="color_scale"/>
         </item>
-        <item row="7" column="0">
+        <item row="9" column="0">
          <widget class="QLabel" name="table_label">
           <property name="enabled">
            <bool>true</bool>
@@ -224,14 +224,14 @@
           </property>
          </widget>
         </item>
-        <item row="8" column="0">
+        <item row="10" column="0">
          <widget class="QTableWidget" name="image_table">
           <property name="enabled">
            <bool>true</bool>
           </property>
          </widget>
         </item>
-        <item row="9" column="0">
+        <item row="11" column="0">
          <widget class="QLabel" name="label">
           <property name="enabled">
            <bool>true</bool>
@@ -241,14 +241,14 @@
           </property>
          </widget>
         </item>
-        <item row="10" column="0">
+        <item row="12" column="0">
          <widget class="QTableWidget" name="h_graph_table">
           <property name="enabled">
            <bool>true</bool>
           </property>
          </widget>
         </item>
-        <item row="5" column="0">
+        <item row="7" column="0">
          <widget class="QComboBox" name="emode_combo_box">
           <item>
            <property name="text">
@@ -267,7 +267,7 @@
           </item>
          </widget>
         </item>
-        <item row="6" column="0">
+        <item row="8" column="0">
          <layout class="QFormLayout" name="formLayout_2">
           <item row="0" column="0">
            <widget class="QLabel" name="efixed_label">
@@ -287,6 +287,16 @@
            </widget>
           </item>
          </layout>
+        </item>
+        <item row="6" column="0">
+         <widget class="QCheckBox" name="tracking_always_on">
+          <property name="text">
+           <string>Cursor tracking</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>

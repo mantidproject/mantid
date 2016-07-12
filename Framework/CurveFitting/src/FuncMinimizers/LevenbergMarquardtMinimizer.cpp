@@ -13,6 +13,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <gsl/gsl_blas.h>
+#include <gsl/gsl_version.h>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -27,7 +28,7 @@ DECLARE_FUNCMINIMIZER(LevenbergMarquardtMinimizer, Levenberg-Marquardt)
 // clang-format on
 
 LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer()
-    : m_data(NULL), gslContainer(), m_gslSolver(NULL), m_function(),
+    : m_data(nullptr), gslContainer(), m_gslSolver(nullptr), m_function(),
       m_absError(1e-4), m_relError(1e-4) {
   declareProperty("AbsError", m_absError, "Absolute error allowed for "
                                           "parameters - a stopping parameter "
@@ -66,8 +67,8 @@ void LevenbergMarquardtMinimizer::initialize(
   if (!m_gslSolver) {
     throw std::runtime_error(
         "Levenberg-Marquardt minimizer failed to initialize. \n" +
-        boost::lexical_cast<std::string>(m_data->n) + " data points, " +
-        boost::lexical_cast<std::string>(m_data->p) + " fitting parameters. ");
+        std::to_string(m_data->n) + " data points, " +
+        std::to_string(m_data->p) + " fitting parameters. ");
   }
   gsl_multifit_fdfsolver_set(m_gslSolver, &gslContainer,
                              m_data->initFuncParams);
@@ -139,7 +140,14 @@ double LevenbergMarquardtMinimizer::costFunctionVal() {
  */
 void LevenbergMarquardtMinimizer::calCovarianceMatrix(double epsrel,
                                                       gsl_matrix *covar) {
+#if GSL_MAJOR_VERSION < 2
   gsl_multifit_covar(m_gslSolver->J, epsrel, covar);
+#else
+  gsl_matrix *J = gsl_matrix_alloc(gslContainer.n, gslContainer.p);
+  gsl_multifit_fdfsolver_jac(m_gslSolver, J);
+  gsl_multifit_covar(J, epsrel, covar);
+  gsl_matrix_free(J);
+#endif
 }
 
 } // namespace FuncMinimisers

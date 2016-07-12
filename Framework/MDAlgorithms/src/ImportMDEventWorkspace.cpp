@@ -71,18 +71,6 @@ this class.
 const std::string ImportMDEventWorkspace::CommentLineStartFlag() { return "#"; }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ImportMDEventWorkspace::ImportMDEventWorkspace()
-    : API::Algorithm(), m_file_data(), m_posDimStart(), m_posMDEventStart(),
-      m_IsFullDataObjects(false), m_nDimensions(0), m_nDataObjects(0) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ImportMDEventWorkspace::~ImportMDEventWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ImportMDEventWorkspace::name() const {
   return "ImportMDEventWorkspace";
@@ -102,12 +90,11 @@ const std::string ImportMDEventWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void ImportMDEventWorkspace::init() {
-  std::vector<std::string> fileExtensions(1);
-  fileExtensions[0] = ".txt";
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
-                                        fileExtensions),
+  std::vector<std::string> fileExtensions{".txt"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, fileExtensions),
                   "File of type txt");
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -270,7 +257,7 @@ void ImportMDEventWorkspace::exec() {
   if (0 == nActualColumns) {
     m_nDataObjects = 0;
     g_log.warning() << "The number of actual columns found in the file "
-                       "(exlcuding comments) is zero" << std::endl;
+                       "(exlcuding comments) is zero\n";
   } else {
     m_nDataObjects = posDiffMDEvent / nActualColumns;
   }

@@ -15,7 +15,7 @@ public:
 
   FindDetectorsInShapeTest() { loadTestWS(); }
 
-  ~FindDetectorsInShapeTest() {
+  ~FindDetectorsInShapeTest() override {
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 

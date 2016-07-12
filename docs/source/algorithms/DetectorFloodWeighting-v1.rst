@@ -15,7 +15,7 @@ This algorithm crops the data over the specified wavelength region, and sums it.
 Usage
 -----
 
-**Example - Simple Generation **
+**Example - Simple Generation**
 
 .. testcode:: DetectorFloodWeightingExample
 
@@ -37,7 +37,7 @@ Output:
    Number Histograms 2
    Min X: 0.0 Max X: 10.0
 
-**Example - With Solid Angle Correction **
+**Example - With Solid Angle Correction**
 
 .. testcode:: DetectorFloodWeightingExampleWithCorrection
 

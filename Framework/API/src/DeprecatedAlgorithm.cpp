@@ -16,7 +16,7 @@ DeprecatedAlgorithm::DeprecatedAlgorithm()
     : m_replacementAlgorithm(), m_replacementVersion(-1), m_deprecatedDate() {}
 
 /// Does nothing other than make the compiler happy.
-DeprecatedAlgorithm::~DeprecatedAlgorithm() {}
+DeprecatedAlgorithm::~DeprecatedAlgorithm() = default;
 
 /// The algorithm to use instead of this one.
 /// @param replacement Name of the algorithm that replaces the deprecated one
@@ -52,7 +52,7 @@ void DeprecatedAlgorithm::deprecatedDate(const std::string &date) {
 /// This merely prints the deprecation error for people to see.
 const std::string DeprecatedAlgorithm::deprecationMsg(const IAlgorithm *algo) {
   std::stringstream msg;
-  if (algo != NULL)
+  if (algo != nullptr)
     msg << algo->name() << " is ";
 
   msg << "deprecated";

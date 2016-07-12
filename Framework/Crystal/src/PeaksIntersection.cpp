@@ -20,21 +20,11 @@ std::string PeaksIntersection::qSampleFrame() { return "Q (sample frame)"; }
 std::string PeaksIntersection::hklFrame() { return "HKL"; }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PeaksIntersection::PeaksIntersection() : m_peakRadius(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeaksIntersection::~PeaksIntersection() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void PeaksIntersection::initBaseProperties() {
-  declareProperty(new WorkspaceProperty<IPeaksWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input peaks workspace.");
 
   std::vector<std::string> propOptions;
@@ -55,8 +45,8 @@ void PeaksIntersection::initBaseProperties() {
   declareProperty("PeakRadius", 0.0,
                   "Effective peak radius in CoordinateFrame");
 
-  declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output table workspace. Two columns. Peak index into "
                   "input workspace, and boolean, where true is for positive "
                   "intersection.");

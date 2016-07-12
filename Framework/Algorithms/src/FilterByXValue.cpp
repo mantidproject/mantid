@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/FilterByXValue.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -10,12 +11,6 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-/// Constructor
-FilterByXValue::FilterByXValue() {}
-
-/// Destructor
-FilterByXValue::~FilterByXValue() {}
-
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string FilterByXValue::name() const { return "FilterByXValue"; }
 /// Algorithm's version for identification. @see Algorithm::version
@@ -26,11 +21,11 @@ const std::string FilterByXValue::category() const {
 }
 
 void FilterByXValue::init() {
-  declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "The input workspace.");
-  declareProperty(new WorkspaceProperty<EventWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
   declareProperty("XMin", EMPTY_DBL(), "The minimum X value (in the units of "
                                        "the input workspace) for which events "
@@ -78,22 +73,13 @@ void FilterByXValue::exec() {
 
   // Check if we're doing thing in-place.
   if (inputWS != outputWS) {
-    // Create a new output workspace if not doing things in place. Preserve
-    // event-ness.
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        WorkspaceFactory::Instance().create("EventWorkspace", numSpec,
-                                            inputWS->blocksize() +
-                                                inputWS->isHistogramData(),
-                                            inputWS->blocksize()));
-    WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
-    // Copy over the data.
     // TODO: Make this more efficient by only copying over the events that pass
     // the
     // filter rather than copying everything and then removing some. This should
     // entail new methods (e.g. iterators) on EventList as this algorithm
     // shouldn't
     // need to know about the type of the events (e.g. weighted).
-    outputWS->copyDataFrom(*inputWS);
+    outputWS = inputWS->clone();
     setProperty("OutputWorkspace", outputWS);
   }
 
@@ -103,7 +89,7 @@ void FilterByXValue::exec() {
   for (int spec = 0; spec < numSpec; ++spec) {
     PARALLEL_START_INTERUPT_REGION
 
-    EventList &events = outputWS->getEventList(spec);
+    EventList &events = outputWS->getSpectrum(spec);
     // Sort to make getting the tof min/max faster (& since maskTof will sort
     // anyway)
     events.sortTof();

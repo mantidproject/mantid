@@ -55,13 +55,14 @@ public:
 
   /// Determine which histogram an index in a 1D array relates to given the
   /// known blockSize
-  HistogramIndex getHistogramIndex(Index index) const;
+  HistogramIndex getHistogramIndex(Index oneDimIndex) const;
 
   /// Get the bin index.
-  BinIndex getBinIndex(Index index, HistogramIndex histogram) const;
+  BinIndex getBinIndex(Index oneDimIndex,
+                       HistogramIndex histogramDimIndex) const;
 
   /// Get the one dimensional index given a histogram and bin index.
-  Index getOneDimIndex(HistogramIndex histogram, BinIndex binIndex) const;
+  Index getOneDimIndex(HistogramIndex histogramIndex, BinIndex binIndex) const;
 
   ////Assignment operator
   MatrixWSIndexCalculator &operator=(const MatrixWSIndexCalculator &other);

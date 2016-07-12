@@ -1,7 +1,7 @@
 #include "MantidKernel/Interpolation.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 namespace Mantid {
 namespace Kernel {
@@ -170,7 +170,7 @@ std::ostream &operator<<(std::ostream &os, const Interpolation &f) {
 */
 std::istream &operator>>(std::istream &in, Interpolation &f) {
 
-  typedef Poco::StringTokenizer tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
   std::string str;
   getline(in, str);
   tokenizer values(str, ";", tokenizer::TOK_TRIM);

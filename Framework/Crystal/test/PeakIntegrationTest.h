@@ -11,12 +11,16 @@
 #include "MantidTestHelpers/FacilityHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Axis.h"
+
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
+
 #include <math.h>
+
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -26,6 +30,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
+using Mantid::HistogramData::BinEdges;
 
 class PeakIntegrationTest : public CxxTest::TestSuite {
 public:
@@ -83,7 +88,7 @@ public:
     DateAndTime run_start("2010-01-01T00:00:00");
 
     for (int pix = 0; pix < numPixels; pix++) {
-      EventList &el = retVal->getEventList(pix);
+      EventList &el = retVal->getSpectrum(pix);
       el.setSpectrumNo(pix);
       el.setDetectorID(pix);
       // Background
@@ -110,12 +115,9 @@ public:
       delete gens[d];
 
     // Create the x-axis for histogramming.
-    MantidVecPtr x1;
-    MantidVec &xRef = x1.access();
-    xRef.resize(numBins);
-    for (int i = 0; i < numBins; ++i) {
-      xRef[i] = i * binDelta;
-    }
+    BinEdges x1(numBins);
+    int i = 0;
+    std::generate(begin(x1), end(x1), [&] { return i++ * binDelta; });
 
     // Set all the histograms at once.
     retVal->setAllX(x1);
@@ -147,7 +149,7 @@ public:
     {
       for (size_t i =0; i<in_ws->getNumberHistograms(); i++)
       {
-        EventList & el = in_ws->getEventList(i);
+        EventList & el = in_ws->getSpectrum(i);
         el.compressEvents(0.0, &el);
       }
     }*/
@@ -206,7 +208,7 @@ public:
     double intensity = peak.getIntensity();
     double sigIntensity = peak.getSigmaIntensity();
     // std::cout<<"Peak Intens,sig,slice="<<intensity;
-    // std::cout<<","<<sigIntensity<<","<<IC<<std::endl;
+    // std::cout<<","<<sigIntensity<<","<<IC<<'\n';
     double intensity0 = 3100;
     TS_ASSERT_DELTA(intensity, intensity0, 400.0);
 

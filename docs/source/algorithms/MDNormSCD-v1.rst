@@ -45,7 +45,7 @@ Usage
     flux=CompressEvents(InputWorkspace=flux,Tolerance=1e-4)
     flux=Rebin(InputWorkspace=flux,Params='1.85,10,10')
     for i in range(flux.getNumberHistograms()):
-        el=flux.getEventList(i)
+        el=flux.getSpectrum(i)
         el.divide(flux.readY(i)[0],0)
     flux=Rebin(InputWorkspace=flux,Params='1.85,10,10')
     flux=IntegrateFlux(flux)
@@ -85,7 +85,15 @@ Usage
 
     
     
-    
+
+References
+----------
+
+The source for how this calculation is done is
+
+#. T.M. Michels-Clark, A.T. Savici, V.E. Lynch, X.P. Wang and C.M. Hoffmann *Expanding Lorentz and spectrum corrections to large volumes of reciprocal space for single-crystal time-of-flight neutron diffraction.* J Appl Crystallogr **49.2** (2016) doi: `10.1107/S1600576716001369 <http://dx.doi.org/10.1107/S1600576716001369>`_
+
+
 .. categories::
 
 .. sourcelink::

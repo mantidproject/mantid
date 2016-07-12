@@ -37,13 +37,14 @@ public:
 
     Algebra A, B;
     std::vector<std::string> Func;
-    Func.push_back("(a'b'c'd')+(a'b'c'd)+(a'b'cd')+(a'bc'd)+(a'bcd')+(a'bcd)+("
-                   "ab'c'd')+(ab'c'd)+(ab'cd')+(abcd')");
-    Func.push_back("(a'b'c')+(a'b'c)+(a'bc')+(ab'c)+(abc')+(abc)");
-    Func.push_back("a'b'c'+d'e'");
+    Func.emplace_back(
+        "(a'b'c'd')+(a'b'c'd)+(a'b'cd')+(a'bc'd)+(a'bcd')+(a'bcd)+("
+        "ab'c'd')+(ab'c'd)+(ab'cd')+(abcd')");
+    Func.emplace_back("(a'b'c')+(a'b'c)+(a'bc')+(ab'c)+(abc')+(abc)");
+    Func.emplace_back("a'b'c'+d'e'");
     // This test takes about 20 second on an old PC. [Note: the g' : g  cyclic
     // problem]
-    // Func.push_back("ab((c'(d+e+f')g'h'i')+(gj'(k+l')(m+n)))");
+    // Func.emplace_back("ab((c'(d+e+f')g'h'i')+(gj'(k+l')(m+n)))");
 
     std::vector<std::string>::const_iterator sv;
     for (sv = Func.begin(); sv != Func.end(); sv++) {

@@ -17,19 +17,23 @@ private slots:
   /// Handles the geometry being changed
   void handleGeometryChange(int index);
   /// Handles a new sample being loaded
-  void newData(const QString &dataName);
+  void newSample(const QString &dataName);
+  /// Handles a new container being loaded
+  void newContainer(const QString &dataName);
+  /// Updates the container
+  void updateContainer();
   /// Updates the preview mini plot
-  void plotPreview(int specIndex);
+  void plotPreview(int wsIndex);
   /// Handle abs. correction algorithm completion
   void absCorComplete(bool error);
   /// Handle convert units and save algorithm completion
   void postProcessComplete(bool error);
 
 private:
-  virtual void setup();
-  virtual void run();
-  virtual bool validate();
-  virtual void loadSettings(const QSettings &settings);
+  void setup() override;
+  void run() override;
+  bool validate() override;
+  void loadSettings(const QSettings &settings) override;
 
   void addRebinStep(QString toRebin, QString toMatch);
   void addInterpolationStep(Mantid::API::MatrixWorkspace_sptr toInterpolate,
@@ -38,6 +42,9 @@ private:
   Ui::ApplyPaalmanPings m_uiForm;
 
   std::string m_originalSampleUnits;
+
+  std::string m_sampleWorkspaceName;
+  std::string m_containerWorkspaceName;
 };
 
 } // namespace CustomInterfaces

@@ -5,6 +5,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -23,16 +24,10 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
-/// (Empty) Constructor
-FindDetectorsInShape::FindDetectorsInShape() {}
-
-/// Destructor
-FindDetectorsInShape::~FindDetectorsInShape() {}
-
 void FindDetectorsInShape::init() {
-  declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("Workspace", "", Direction::Input),
-      "Name of the input workspace");
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "Workspace", "", Direction::Input),
+                  "Name of the input workspace");
   declareProperty("ShapeXML", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The XML definition of the shape");
@@ -90,7 +85,7 @@ void FindDetectorsInShape::exec() {
         if (shape_sptr->isValid(detector_sptr->getPos())) {
           // shape encloses this objectComponent
           g_log.debug() << "Detector contained in shape "
-                        << detector_sptr->getID() << std::endl;
+                        << detector_sptr->getID() << '\n';
           foundDets.push_back(detector_sptr->getID());
         }
       }

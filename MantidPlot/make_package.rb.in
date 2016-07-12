@@ -11,6 +11,13 @@ def copyFile(file)
   end
 end
 
+def copyOptionalFile(file)
+  if File.exist?(file)
+    p "copying optional file #{file}"
+    output = system("cp #{file} Contents/MacOS/")
+  end
+end
+
 def addPythonLibrary(directory)
   p "copying directory #{directory}"
   output = system("rsync -a --exclude=.pyc #{directory} Contents/MacOS/")
@@ -65,6 +72,11 @@ library_filenames = ["libboost_regex-mt.dylib",
                      "libjpeg.dylib",
                      "libssl.dylib",
                      "libcrypto.dylib"]
+
+poco_version = "@POCO_VERSION@".split(".").map(&:to_i)
+if(poco_version[0] > 1 || (poco_version[0] == 1 && poco_version[1] >= 6))
+  library_filenames << "libPocoJSON.dylib"
+end
 
 #This copies the libraries over, then changes permissions and the id from /usr/local/lib to @rpath
 library_filenames.each do |filename|
@@ -133,7 +145,7 @@ if( "@MAKE_VATES@" == "ON" )
   `install_name_tool -id @rpath/libNonOrthogonalSource.dylib pvplugins/pvplugins/libNonOrthogonalSource.dylib`
 end
 
-#use install_name_tool to change dependencies form /usr/local to libraries in the package.
+#use install_name_tool to change dependencies from /usr/local to libraries in the package.
 search_patterns = ["**/*.dylib","**/*.so","**/MantidPlot","**/VatesSimpleGui"]
 search_patterns.each do |pattern|
   Dir[pattern].each do |library|
@@ -182,39 +194,63 @@ pyqt4_patterns.each do |pattern|
   end
 end
 
+#Homebrew recently switched the linking from /usr/local/lib/* to /usr/local/opt/qt/lib/*
+#This attempts to determine the correct path to pass to install_name_tool.
+QtLinkingDir = []
+Dir[pyqt4_patterns[0]].each do |library|
+  dependencies = `otool -L #{library}`
+  dependencies.split("\n").each do |dependency|
+    if dependency.match('Qt.*.framework/Versions/\d/Qt.*')
+       if dependency.match('/usr/local/opt/qt/lib')
+         QtLinkingDir << '/usr/local/opt/qt/lib'
+       else
+         QtLinkingDir << '/usr/local/lib'
+       end
+    end
+  end
+end
+
+if QtLinkingDir.uniq != [QtLinkingDir[0]]
+  p "Error updating PyQt4 dynamic linking!"
+  exit 1
+end
+
 #fix PyQt4 and Qt4 linking issues
-`install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtCore.so`
+`install_name_tool -change #{QtLinkingDir[0]}/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtCore.so`
 
-`install_name_tool -change /usr/local/lib/QtGui.framework/Versions/4/QtGui @loader_path/../../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/PyQt4/QtGui.so`
-`install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtGui.so`
+`install_name_tool -change #{QtLinkingDir[0]}/QtGui.framework/Versions/4/QtGui @loader_path/../../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/PyQt4/QtGui.so`
+`install_name_tool -change #{QtLinkingDir[0]}/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtGui.so`
 
-`install_name_tool -change /usr/local/lib/QtOpenGL.framework/Versions/4/QtOpenGL @loader_path/../../Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL Contents/MacOS/PyQt4/QtOpenGL.so`
-`install_name_tool -change /usr/local/lib/QtGui.framework/Versions/4/QtGui @loader_path/../../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/PyQt4/QtOpenGL.so`
-`install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtOpenGL.so`
+`install_name_tool -change #{QtLinkingDir[0]}/QtOpenGL.framework/Versions/4/QtOpenGL @loader_path/../../Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL Contents/MacOS/PyQt4/QtOpenGL.so`
+`install_name_tool -change #{QtLinkingDir[0]}/QtGui.framework/Versions/4/QtGui @loader_path/../../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/PyQt4/QtOpenGL.so`
+`install_name_tool -change #{QtLinkingDir[0]}/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtOpenGL.so`
 
-`install_name_tool -change /usr/local/lib/QtSql.framework/Versions/4/QtSql @loader_path/../../Frameworks/QtSql.framework/Versions/4/QtSql Contents/MacOS/PyQt4/QtSql.so`
-`install_name_tool -change /usr/local/lib/QtGui.framework/Versions/4/QtGui @loader_path/../../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/PyQt4/QtSql.so`
-`install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtSql.so`
+`install_name_tool -change #{QtLinkingDir[0]}/QtSql.framework/Versions/4/QtSql @loader_path/../../Frameworks/QtSql.framework/Versions/4/QtSql Contents/MacOS/PyQt4/QtSql.so`
+`install_name_tool -change #{QtLinkingDir[0]}/QtGui.framework/Versions/4/QtGui @loader_path/../../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/PyQt4/QtSql.so`
+`install_name_tool -change #{QtLinkingDir[0]}/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtSql.so`
 
-`install_name_tool -change /usr/local/lib/QtSvg.framework/Versions/4/QtSvg @loader_path/../../Frameworks/QtSvg.framework/Versions/4/QtSvg Contents/MacOS/PyQt4/QtSvg.so`
-`install_name_tool -change /usr/local/lib/QtGui.framework/Versions/4/QtGui @loader_path/../../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/PyQt4/QtSvg.so`
-`install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtSvg.so`
+`install_name_tool -change #{QtLinkingDir[0]}/QtSvg.framework/Versions/4/QtSvg @loader_path/../../Frameworks/QtSvg.framework/Versions/4/QtSvg Contents/MacOS/PyQt4/QtSvg.so`
+`install_name_tool -change #{QtLinkingDir[0]}/QtGui.framework/Versions/4/QtGui @loader_path/../../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/PyQt4/QtSvg.so`
+`install_name_tool -change #{QtLinkingDir[0]}/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtSvg.so`
 
-`install_name_tool -change /usr/local/lib/QtXml.framework/Versions/4/QtXml @loader_path/../../Frameworks/QtXml.framework/Versions/4/QtXml Contents/MacOS/PyQt4/QtXml.so`
-`install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtXml.so`
+`install_name_tool -change #{QtLinkingDir[0]}/QtXml.framework/Versions/4/QtXml @loader_path/../../Frameworks/QtXml.framework/Versions/4/QtXml Contents/MacOS/PyQt4/QtXml.so`
+`install_name_tool -change #{QtLinkingDir[0]}/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtXml.so`
 
 #Copy over python libraries not included with OSX. 
 #currently missing epics
 path = "/Library/Python/2.7/site-packages"
-directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports","certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess"]
+directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports","certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess","CifFile"]
 directories.each do |directory|
   addPythonLibrary("#{path}/#{directory}")
 end
 
-files = ["gnureadline.so","readline.py","pyparsing.py","mistune.py","mistune.so"]
+files = ["gnureadline.so","readline.py","pyparsing.py","mistune.py"]
 files.each do |file|
   copyFile("#{path}/#{file}")
 end
+
+#mistune.so isn't present in v0.7
+copyOptionalFile("#{path}/mistune.so")
 
 `mkdir Contents/MacOS/bin`
 `cp /usr/local/bin/ipython Contents/MacOS/bin/`

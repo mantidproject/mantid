@@ -10,7 +10,7 @@ template <class T>
 size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
 
   const Mantid::DataObjects::EventList &el =
-      m_EventWS->getEventList(workspaceIndex);
+      m_EventWS->getSpectrum(workspaceIndex);
   size_t numEvents = el.getNumberEvents();
   if (numEvents == 0)
     return 0;
@@ -54,8 +54,8 @@ size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
     if (!m_QConverter->calcMatrixCoord(val, locCoord, signal, errorSq))
       continue; // skip ND outside the range
 
-    sig_err.push_back(float(signal));
-    sig_err.push_back(float(errorSq));
+    sig_err.push_back(static_cast<float>(signal));
+    sig_err.push_back(static_cast<float>(errorSq));
     run_index.push_back(runIndexLoc);
     det_ids.push_back(detID);
     allCoord.insert(allCoord.end(), locCoord.begin(), locCoord.end());
@@ -72,7 +72,7 @@ size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
  * particular workspace index */
 size_t ConvToMDEventsWS::conversionChunk(size_t workspaceIndex) {
 
-  switch (m_EventWS->getEventList(workspaceIndex).getEventType()) {
+  switch (m_EventWS->getSpectrum(workspaceIndex).getEventType()) {
   case Mantid::API::TOF:
     return this->convertEventList<Mantid::DataObjects::TofEvent>(
         workspaceIndex);
@@ -125,7 +125,7 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
   size_t nValidSpectra = m_NSpectra;
 
   //--->>> Thread control stuff
-  Kernel::ThreadSchedulerFIFO *ts(NULL);
+  Kernel::ThreadSchedulerFIFO *ts(nullptr);
 
   int nThreads(m_NumThreads);
   if (nThreads < 0)
@@ -170,8 +170,9 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
           tp.joinAll();
       } else {
         m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(
-            NULL); // it is done this way as it is possible trying to do single
-                   // threaded split more efficiently
+            nullptr); // it is done this way as it is possible trying to do
+                      // single
+                      // threaded split more efficiently
       }
       // Count the new # of boxes.
       lastNumBoxes = m_OutWSWrapper->pWorkspace()
@@ -187,7 +188,7 @@ void ConvToMDEventsWS::runConversion(API::Progress *pProgress) {
     m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(ts);
     tp.joinAll();
   } else {
-    m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(NULL);
+    m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(nullptr);
   }
 
   // Recount totals at the end.

@@ -53,7 +53,7 @@ class MANTID_API_DLL FuncMinimizerFactoryImpl
 public:
   /// Creates an instance of a minimizer
   boost::shared_ptr<IFuncMinimizer>
-  createMinimizer(const std::string &type) const;
+  createMinimizer(const std::string &str) const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<FuncMinimizerFactoryImpl>;

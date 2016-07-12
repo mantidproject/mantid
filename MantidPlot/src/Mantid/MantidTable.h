@@ -5,37 +5,36 @@
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 
-
 /** A MantidTable appears to be a MantidPlot "Table" object
  * that shows the data from an ITableWorkspace.
  *
  */
-class MantidTable: public Table, public MantidQt::API::WorkspaceObserver
-{
+class MantidTable : public Table, public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 public:
-  MantidTable(ScriptingEnv *env, Mantid::API::ITableWorkspace_sptr ws, const QString &label, 
-    ApplicationWindow* parent, bool transpose = false);
+  MantidTable(ScriptingEnv *env, Mantid::API::ITableWorkspace_sptr ws,
+              const QString &label, ApplicationWindow *parent,
+              bool transpose = false);
 
   /// returns the workspace name
-  const std::string & getWorkspaceName() {return m_wsName; }
+  const std::string &getWorkspaceName() { return m_wsName; }
 
   //! is this table editable
-  virtual bool isEditable();
+  bool isEditable() override;
   //! is this table sortable
-  virtual bool isSortable();
+  bool isSortable() override;
   //! are the columns fixed - not editable by the GUI
-  virtual bool isFixedColumns() {return true;}
+  bool isFixedColumns() override { return true; }
 
-  virtual void sortTableDialog();
+  void sortTableDialog() override;
 
 signals:
   void needToClose();
   void needToUpdate();
 
 public slots:
-  void deleteRows(int startRow, int endRow);
-  void cellEdited(int,int col);
+  void deleteRows(int startRow, int endRow) override;
+  void cellEdited(int, int col) override;
 
 protected slots:
   void closeTable();
@@ -45,12 +44,17 @@ protected slots:
   void dealWithUnwantedResize();
 
 protected:
-  void preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
-  void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void
+  preDeleteHandle(const std::string &wsName,
+                  const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+  void afterReplaceHandle(
+      const std::string &wsName,
+      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
 
   // Reimplemented methods for custom sorting of TableWorkspaces
-  virtual void sortColumn(int col, int order);
-  virtual void sortColumns(const QStringList& cols, int type = 0, int order = 0, const QString& leadCol = QString());
+  void sortColumn(int col, int order) override;
+  void sortColumns(const QStringList &cols, int type = 0, int order = 0,
+                   const QString &leadCol = QString()) override;
 
 private:
   /// ITableWorkspace being displayed
@@ -59,7 +63,6 @@ private:
   const std::string m_wsName;
   /// Show the table workspace transposed
   bool m_transposed;
-
 };
 
 #endif /* MANTIDTABLE_H */

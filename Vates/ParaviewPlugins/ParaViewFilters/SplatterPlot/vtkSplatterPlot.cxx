@@ -113,7 +113,8 @@ int vtkSplatterPlot::RequestData(vtkInformation *,
 
     try
     {
-      vtkDataSetToNonOrthogonalDataSet converter(output, m_wsName);
+      auto workspaceProvider = Mantid::Kernel::make_unique<ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
+      vtkDataSetToNonOrthogonalDataSet converter(output, m_wsName, std::move(workspaceProvider));
       converter.execute();
     }
     catch (std::invalid_argument &e)

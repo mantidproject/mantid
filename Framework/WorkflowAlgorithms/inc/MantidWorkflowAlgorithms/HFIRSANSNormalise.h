@@ -11,26 +11,22 @@ namespace WorkflowAlgorithms {
 
 class DLLExport HFIRSANSNormalise : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  HFIRSANSNormalise() : API::Algorithm() {}
-  /// Virtual destructor
-  virtual ~HFIRSANSNormalise() {}
   /// Algorithm's name
-  virtual const std::string name() const { return "HFIRSANSNormalise"; }
+  const std::string name() const override { return "HFIRSANSNormalise"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Apply normalisation correction to HFIR SANS data.";
   }
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Workflow\\SANS"; }
+  const std::string category() const override { return "Workflow\\SANS"; }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 };
 
 } // namespace Algorithms

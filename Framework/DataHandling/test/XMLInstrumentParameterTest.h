@@ -4,10 +4,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
-#include "MantidDataHandling/LoadRaw3.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadRaw3.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -57,7 +58,7 @@ public:
     TS_ASSERT_DELTA(ret2[0].Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA(ret2[0].X(), 0.0, 0.0001);
     TS_ASSERT_DELTA(ret2[0].Z(), 0.1499, 0.0001);
-    std::vector<double> ret3 = paramMap.getDouble("slit1", "opening height");
+    std::vector<double> ret3 = paramMap.getDouble("slit1", "vertical gap");
     TS_ASSERT_EQUALS(static_cast<int>(ret3.size()), 1);
     TS_ASSERT_DELTA(ret3[0], 0.5005, 0.0001);
   }
@@ -67,7 +68,8 @@ public:
   // checks that this is done ok
   void testParsing() {
     IComponent *comp(NULL);
-    boost::shared_ptr<Interpolation> interpolation(new Interpolation);
+    boost::shared_ptr<Interpolation> interpolation =
+        boost::make_shared<Interpolation>();
     std::vector<std::string> constraint;
     std::string penaltyFactor;
     std::string fitFunc;

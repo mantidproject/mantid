@@ -95,10 +95,9 @@ class MANTID_GEOMETRY_DLL IsotropicAtomBraggScatterer
     : public BraggScattererInCrystalStructure {
 public:
   IsotropicAtomBraggScatterer();
-  virtual ~IsotropicAtomBraggScatterer() {}
 
-  std::string name() const { return "IsotropicAtomBraggScatterer"; }
-  BraggScatterer_sptr clone() const;
+  std::string name() const override { return "IsotropicAtomBraggScatterer"; }
+  BraggScatterer_sptr clone() const override;
 
   std::string getElement() const;
   PhysicalConstants::NeutronAtom getNeutronAtom() const;
@@ -106,13 +105,14 @@ public:
   double getOccupancy() const;
   double getU() const;
 
-  StructureFactor calculateStructureFactor(const Kernel::V3D &hkl) const;
+  StructureFactor
+  calculateStructureFactor(const Kernel::V3D &hkl) const override;
 
 protected:
   void setElement(const std::string &element);
 
-  void declareScattererProperties();
-  void afterScattererPropertySet(const std::string &propertyName);
+  void declareScattererProperties() override;
+  void afterScattererPropertySet(const std::string &propertyName) override;
 
   double getDebyeWallerFactor(const Kernel::V3D &hkl) const;
   double getScatteringLength() const;

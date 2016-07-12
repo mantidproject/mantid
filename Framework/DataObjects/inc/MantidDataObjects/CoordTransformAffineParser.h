@@ -30,7 +30,7 @@ public:
   virtual Mantid::API::CoordTransform *
   createTransform(Poco::XML::Element *coordTransElement) const;
   virtual void setSuccessor(CoordTransformAffineParser *other);
-  virtual ~CoordTransformAffineParser();
+  virtual ~CoordTransformAffineParser() = default;
   typedef boost::shared_ptr<CoordTransformAffineParser>
       SuccessorType_sptr; ///< successor parser shared ptr typedef
 protected:

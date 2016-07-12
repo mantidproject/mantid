@@ -29,12 +29,12 @@ class DLLExport PawleyParameterFunction : virtual public API::IFunction,
                                           virtual public API::ParamFunction {
 public:
   PawleyParameterFunction();
-  virtual ~PawleyParameterFunction() {}
 
   /// Returns the function name
-  std::string name() const { return "PawleyParameterFunction"; }
+  std::string name() const override { return "PawleyParameterFunction"; }
 
-  void setAttribute(const std::string &attName, const Attribute &attValue);
+  void setAttribute(const std::string &attName,
+                    const Attribute &attValue) override;
 
   Geometry::PointGroup::LatticeSystem getLatticeSystem() const;
   Geometry::UnitCell getUnitCellFromParameters() const;
@@ -51,12 +51,12 @@ public:
   }
 
   void function(const API::FunctionDomain &domain,
-                API::FunctionValues &values) const;
+                API::FunctionValues &values) const override;
   void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian);
+                     API::Jacobian &jacobian) override;
 
 protected:
-  void init();
+  void init() override;
 
   void setProfileFunction(const std::string &profileFunction);
   void setLatticeSystem(const std::string &latticeSystem);
@@ -114,36 +114,35 @@ typedef boost::shared_ptr<PawleyParameterFunction> PawleyParameterFunction_sptr;
 class DLLExport PawleyFunction : public API::IPawleyFunction {
 public:
   PawleyFunction();
-  virtual ~PawleyFunction() {}
 
   /// Returns the name of the function.
-  std::string name() const { return "PawleyFunction"; }
+  std::string name() const override { return "PawleyFunction"; }
 
   void
   setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX);
+                     size_t wi, double startX, double endX) override;
 
-  void setLatticeSystem(const std::string &latticeSystem);
-  void setProfileFunction(const std::string &profileFunction);
-  void setUnitCell(const std::string &unitCellString);
+  void setLatticeSystem(const std::string &latticeSystem) override;
+  void setProfileFunction(const std::string &profileFunction) override;
+  void setUnitCell(const std::string &unitCellString) override;
 
   void function(const API::FunctionDomain &domain,
-                API::FunctionValues &values) const;
+                API::FunctionValues &values) const override;
 
   /// Derivates are calculated numerically.
   void functionDeriv(const API::FunctionDomain &domain,
-                     API::Jacobian &jacobian) {
+                     API::Jacobian &jacobian) override {
     calNumericalDeriv(domain, jacobian);
   }
 
   void setPeaks(const std::vector<Kernel::V3D> &hkls, double fwhm,
-                double height);
-  void clearPeaks();
+                double height) override;
+  void clearPeaks() override;
 
-  void addPeak(const Kernel::V3D &hkl, double fwhm, double height);
-  size_t getPeakCount() const;
-  API::IPeakFunction_sptr getPeakFunction(size_t i) const;
-  Kernel::V3D getPeakHKL(size_t i) const;
+  void addPeak(const Kernel::V3D &hkl, double fwhm, double height) override;
+  size_t getPeakCount() const override;
+  API::IPeakFunction_sptr getPeakFunction(size_t i) const override;
+  Kernel::V3D getPeakHKL(size_t i) const override;
 
   PawleyParameterFunction_sptr getPawleyParameterFunction() const;
 
@@ -157,8 +156,8 @@ protected:
 
   double getTransformedCenter(double d) const;
 
-  void init();
-  void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn);
+  void init() override;
+  void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn) override;
 
   API::CompositeFunction_sptr m_compositeFunction;
   PawleyParameterFunction_sptr m_pawleyParameterFunction;

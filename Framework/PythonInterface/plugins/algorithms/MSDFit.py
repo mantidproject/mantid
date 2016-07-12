@@ -78,10 +78,10 @@ class MSDFit(DataProcessorAlgorithm):
         spec_max = self.getProperty('SpecMax').value
 
         if spec_min < 0:
-            issues['SpecMin'] = 'Minimum spectrum index must be greater than or equal to 0'
+            issues['SpecMin'] = 'Minimum spectrum number must be greater than or equal to 0'
 
         if spec_max > workspace.getNumberHistograms():
-            issues['SpecMax'] = 'Maximum spectrum index must be less than number of spectra in workspace'
+            issues['SpecMax'] = 'Maximum spectrum number must be less than number of spectra in workspace'
 
         if spec_min > spec_max:
             msg = 'SpecMin must be less then SpecMax'

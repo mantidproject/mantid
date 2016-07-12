@@ -2,6 +2,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtAPI/BatchAlgorithmRunner.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/IImageROIView.h"
@@ -11,13 +12,29 @@ using namespace MantidQt::CustomInterfaces;
 namespace MantidQt {
 namespace CustomInterfaces {
 
+namespace {
+Mantid::Kernel::Logger g_log("ImageROI");
+}
+
+const std::string ImageROIPresenter::g_wsgName =
+    "__tomography_gui_stack_fits_viewer_sample_images";
+const std::string ImageROIPresenter::g_wsgFlatsName =
+    "__tomography_gui_stack_fits_viewer_flat_images";
+const std::string ImageROIPresenter::g_wsgDarksName =
+    "__tomography_gui_stack_fits_viewer_dark_images";
+
+bool ImageROIPresenter::g_warnIfUnexpectedFileExtensions = false;
+
 ImageROIPresenter::ImageROIPresenter(IImageROIView *view)
-    : m_view(view), m_model(new ImageStackPreParams()) {
+    : m_playStatus(false), m_stackPath(), m_view(view),
+      m_model(new ImageStackPreParams()) {
   if (!m_view) {
     throw std::runtime_error("Severe inconsistency found. Presenter created "
                              "with an empty/null view (tomography interface). "
                              "Cannot continue.");
   }
+  m_algRunner =
+      Mantid::Kernel::make_unique<MantidQt::API::BatchAlgorithmRunner>();
 }
 
 ImageROIPresenter::~ImageROIPresenter() { cleanup(); }
@@ -32,16 +49,36 @@ void ImageROIPresenter::notify(Notification notif) {
     processInit();
     break;
 
-  case IImageROIPresenter::BrowseImgOrStack:
-    processBrowseImg();
+  case IImageROIPresenter::BrowseImage:
+    processBrowseImage();
     break;
 
-  case IImageROIPresenter::NewImgOrStack:
-    processNewStack();
+  case IImageROIPresenter::BrowseStack:
+    processBrowseStack();
+    break;
+
+  case IImageROIPresenter::ChangeImageType:
+    processChangeImageType();
+    break;
+
+  case IImageROIPresenter::ChangeRotation:
+    processChangeRotation();
     break;
 
   case IImageROIPresenter::UpdateImgIndex:
     processUpdateImgIndex();
+    break;
+
+  case IImageROIPresenter::PlayStartStop:
+    processPlayStartStop();
+    break;
+
+  case IImageROIPresenter::UpdateColorMap:
+    processUpdateColorMap();
+    break;
+
+  case IImageROIPresenter::ColorRangeUpdated:
+    processColorRangeUpdated();
     break;
 
   case IImageROIPresenter::SelectCoR:
@@ -91,14 +128,24 @@ void ImageROIPresenter::processInit() {
   m_view->setParams(p);
 }
 
-void ImageROIPresenter::processBrowseImg() {
+void ImageROIPresenter::processBrowseImage() {
+  const std::string path = m_view->askSingleImagePath();
+
+  if (path.empty())
+    return;
+
+  m_stackPath = path;
+  processNewStack(true);
+}
+
+void ImageROIPresenter::processBrowseStack() {
   const std::string path = m_view->askImgOrStackPath();
 
   if (path.empty())
     return;
 
   m_stackPath = path;
-  processNewStack();
+  processNewStack(false);
 }
 
 /**
@@ -113,7 +160,7 @@ void ImageROIPresenter::processBrowseImg() {
  * necessarily correct (check with isValid())
  */
 StackOfImagesDirs ImageROIPresenter::checkInputStack(const std::string &path) {
-  StackOfImagesDirs soid(path);
+  StackOfImagesDirs soid(path, true);
 
   const std::string soiPath = soid.sampleImagesDir();
   if (soiPath.empty()) {
@@ -130,38 +177,122 @@ StackOfImagesDirs ImageROIPresenter::checkInputStack(const std::string &path) {
   return soid;
 }
 
-void ImageROIPresenter::processNewStack() {
+void ImageROIPresenter::processNewStack(bool singleImg) {
+  if (!singleImg) {
 
-  StackOfImagesDirs soid("");
+    StackOfImagesDirs soid("");
+    try {
+      soid = checkInputStack(m_stackPath);
+    } catch (std::exception &e) {
+      // Poco::FileNotFoundException: this should never happen, unless
+      // the open dir dialog misbehaves unexpectedly, or in tests
+      m_view->userWarning(
+          "Error trying to open directories/files",
+          "The path selected via the dialog cannot be openend or "
+          "there was a problem while trying to access it. This "
+          "is an unexpected inconsistency. Error details: " +
+              std::string(e.what()));
+    }
+
+    if (!soid.isValid())
+      return;
+
+    std::vector<std::string> imgs = soid.sampleFiles();
+    if (0 >= imgs.size()) {
+      m_view->userWarning(
+          "Error while trying to find image/projection files in the stack "
+          "directories",
+          "Could not find any (image) file in the samples subdirectory: " +
+              soid.sampleImagesDir());
+      return;
+    }
+
+    loadFITSStack(soid, g_wsgName, g_wsgFlatsName, g_wsgDarksName);
+    m_stackFlats = nullptr;
+    m_stackDarks = nullptr;
+
+  } else {
+    // TODO: find a better place for this
+    try {
+      auto &ads = Mantid::API::AnalysisDataService::Instance();
+      if (ads.doesExist(g_wsgName)) {
+        ads.remove(g_wsgName);
+      }
+      if (ads.doesExist(g_wsgFlatsName)) {
+        ads.remove(g_wsgFlatsName);
+      }
+      if (ads.doesExist(g_wsgDarksName)) {
+        ads.remove(g_wsgDarksName);
+      }
+    } catch (std::runtime_error &rexc) {
+      g_log.warning("There was a problem while trying to remove apparently "
+                    "existing workspaces. Error details: " +
+                    std::string(rexc.what()));
+    }
+
+    loadFITSImage(m_stackPath, g_wsgName);
+  }
+
+  connect(m_algRunner.get(), SIGNAL(batchComplete(bool)), this,
+          SLOT(finishedLoadStack(bool)), Qt::QueuedConnection);
+
+  m_view->enableActions(false);
+  m_algRunner->executeBatchAsync();
+}
+
+void ImageROIPresenter::finishedLoadStack(bool error) {
+  if (error) {
+    m_view->userWarning("Could not load the stack of images",
+
+                        "There was a failure while running the Mantid "
+                        "algorithms that tried to load the stack of images. "
+                        "Please check the error logs for details.");
+    m_view->enableActions(true);
+    return;
+  }
+
+  const auto &ads = Mantid::API::AnalysisDataService::Instance();
   try {
-    soid = checkInputStack(m_stackPath);
+    m_stackSamples = ads.retrieveWS<Mantid::API::WorkspaceGroup>(g_wsgName);
   } catch (std::exception &e) {
-    // Poco::FileNotFoundException: this should never happen, unless
-    // the open dir dialog misbehaves unexpectedly, or in tests
-    m_view->userWarning("Error trying to open directories/files",
-                        "The path selected via the dialog cannot be openend or "
-                        "there was a problem while trying to access it. This "
-                        "is an unexpected inconsistency. Error details: " +
+    m_view->userWarning("Could not load the stack of sample images",
+
+                        "Could not produce a workspace group for the "
+                        "stack of sample images. Cannot "
+                        "display this stack. Please check the error log "
+                        "for further details. Error when trying to "
+                        "retrieve the sample images workspace: " +
                             std::string(e.what()));
+    m_view->enableActions(true);
+    return;
   }
 
-  if (!soid.isValid())
-    return;
+  // TODO: could be useful to do a check like this on wsg->size()?
+  // if (wsg &&
+  //     Mantid::API::AnalysisDataService::Instance().doesExist(wsg->name()) &&
+  //     wsg->size() > 0 && imgs.size() >= wsg->size()) {
+  //   return wsg;
+  // } else {
+  //   return Mantid::API::WorkspaceGroup_sptr();
+  // }
 
-  std::vector<std::string> imgs = soid.sampleFiles();
-  if (0 >= imgs.size()) {
+  try {
+    m_stackSamples = ads.retrieveWS<Mantid::API::WorkspaceGroup>(g_wsgName);
+    Mantid::API::MatrixWorkspace_sptr ws =
+        ads.retrieveWS<Mantid::API::MatrixWorkspace>(
+            m_stackSamples->getNames()[0]);
+  } catch (std::exception &exc) {
     m_view->userWarning(
-        "Error trying to find image/projection files in the stack directories",
-        "Could not find any image file in the samples subdirectory: " +
-            soid.sampleImagesDir());
+        "Failed to load contents for at least the first sample image",
+        "Could not load image contents for the first image file. "
+        "An unrecoverable error happened when trying to load the "
+        "image contents. Cannot display it. Error details: " +
+            std::string(exc.what()));
+    m_view->enableActions(true);
     return;
   }
 
-  Mantid::API::WorkspaceGroup_sptr wsg = loadFITSStack(imgs);
-  if (!wsg)
-    return;
-
-  size_t imgCount = wsg->size();
+  size_t imgCount = m_stackSamples->size();
   if (0 == imgCount) {
     m_view->userWarning(
         "Failed to load any FITS images - directory structure issue",
@@ -169,17 +300,91 @@ void ImageROIPresenter::processNewStack() {
         "found, "
         "it was not possible to load any image file correctly from: " +
             m_stackPath);
+    m_view->enableActions(true);
     return;
   }
 
-  m_view->showStack(wsg);
+  // check flats and darks
+  try {
+    if (ads.doesExist(g_wsgFlatsName)) {
+      m_stackFlats =
+          ads.retrieveWS<Mantid::API::WorkspaceGroup>(g_wsgFlatsName);
+    }
+  } catch (std::runtime_error &exc) {
+    m_view->userWarning("Failed to load the stack of flat (open beam) images",
+                        "Could not produce a workspace group for the "
+                        "stack of flat images. Cannot "
+                        "display the flat images of this stack. "
+                        "Please check the error log "
+                        "for further details. Error when trying to "
+                        "retrieve the flat images workspace:" +
+                            std::string(exc.what()));
+  }
 
-  // clean-up container group workspace? Not for now
-  if (false && wsg)
-    Mantid::API::AnalysisDataService::Instance().remove(wsg->getName());
+  try {
+    if (ads.doesExist(g_wsgDarksName)) {
+      m_stackDarks =
+          ads.retrieveWS<Mantid::API::WorkspaceGroup>(g_wsgDarksName);
+    }
+  } catch (std::runtime_error &exc) {
+    m_view->userWarning(
+        "Failed to load the stack of dark images",
+        "Could not produce a workspace group for the "
+        "stack of dark images. Cannot "
+        "display the dark images of this stack. Please check the error log "
+        "for further details. Error when trying to "
+        "retrieve the dark images workspace:" +
+            std::string(exc.what()));
+  }
+
+  m_view->showStack(m_stackSamples, m_stackFlats, m_stackDarks);
+  m_view->enableActions(true);
+}
+
+void ImageROIPresenter::processChangeImageType() {
+  m_view->updateImageType(m_view->currentImageTypeStack());
+}
+
+void ImageROIPresenter::processChangeRotation() {
+  m_view->updateRotationAngle(m_view->currentRotationAngle());
 }
 
 void ImageROIPresenter::processUpdateImgIndex() {
+  m_view->updateImgWithIndex(m_view->currentImgIndex());
+}
+
+void ImageROIPresenter::processPlayStartStop() {
+  auto wsg = m_view->currentImageTypeStack();
+  if (!wsg)
+    return;
+
+  if (wsg->size() <= 1) {
+    m_view->userWarning(
+        "Cannot \"play\" a single image",
+        "The stack currently loaded has a single image. Cannot play it.");
+    return;
+  }
+
+  if (m_playStatus) {
+    m_view->playStop();
+    m_playStatus = false;
+    m_view->enableActions(true);
+  } else {
+    m_view->enableActions(false);
+    m_playStatus = true;
+    m_view->playStart();
+  }
+}
+
+void ImageROIPresenter::processUpdateColorMap() {
+  std::string filename = m_view->askColorMapFile();
+  if (filename.empty())
+    return;
+
+  m_view->updateColorMap(filename);
+}
+
+void ImageROIPresenter::processColorRangeUpdated() {
   m_view->updateImgWithIndex(m_view->currentImgIndex());
 }
 
@@ -224,34 +429,145 @@ void ImageROIPresenter::processResetNormalization() {
 
 void ImageROIPresenter::processShutDown() { m_view->saveSettings(); }
 
-Mantid::API::WorkspaceGroup_sptr
-ImageROIPresenter::loadFITSStack(const std::vector<std::string> &imgs) {
-  const std::string wsName = "__stack_fits_viewer_tomography_gui";
+void ImageROIPresenter::loadFITSStack(const StackOfImagesDirs &soid,
+                                      const std::string &wsgName,
+                                      const std::string &wsgFlatsName,
+                                      const std::string &wsgDarksName) {
+  const std::vector<std::string> &imgs = soid.sampleFiles();
+  if (imgs.empty())
+    return;
+
+  loadFITSList(imgs, wsgName);
+
+  auto flats = soid.flatFiles();
+  m_stackFlats = nullptr;
+  loadFITSList(flats, wsgFlatsName);
+
+  auto darks = soid.darkFiles();
+  m_stackDarks = nullptr;
+  loadFITSList(darks, wsgDarksName);
+}
+
+void ImageROIPresenter::loadFITSList(const std::vector<std::string> &imgs,
+                                     const std::string &wsName) {
+
   auto &ads = Mantid::API::AnalysisDataService::Instance();
-  if (ads.doesExist(wsName)) {
-    ads.remove(wsName);
-  }
-  for (size_t i = 0; i < imgs.size(); ++i) {
-    loadFITSImage(imgs[i], wsName);
-  }
-
-  Mantid::API::WorkspaceGroup_sptr wsg;
   try {
-    wsg = ads.retrieveWS<Mantid::API::WorkspaceGroup>(wsName);
-  } catch (std::exception &e) {
-    throw std::runtime_error(
-        "Could not produce a workspace group for the stack images. Cannot "
-        "display it. Error details: " +
-        std::string(e.what()));
+    if (ads.doesExist(wsName)) {
+      ads.remove(wsName);
+    }
+  } catch (std::runtime_error &exc) {
+    m_view->userError(
+        "Error accessing the analysis data service",
+        "There was an error while accessing the Mantid analysis data service "
+        "to check for the presence of (and remove if present) workspace '" +
+            wsName + "'. This is a severe inconsistency . Error details:: " +
+            std::string(exc.what()));
   }
 
-  if (wsg &&
-      Mantid::API::AnalysisDataService::Instance().doesExist(wsg->name()) &&
-      imgs.size() == wsg->size()) {
-    return wsg;
-  } else {
-    return Mantid::API::WorkspaceGroup_sptr();
+  // This would be the alternative that loads images one by one (one
+  // algorithm run per image file)
+  // for (size_t i = 0; i < imgs.size(); ++i) {
+  //  loadFITSImage(imgs[i], wsName);
+  // }
+
+  // Load all requested/supported image files using a list with their names
+  try {
+    const std::string allPaths = filterImagePathsForFITSStack(imgs);
+    if (allPaths.empty()) {
+      return;
+    }
+    loadFITSImage(allPaths, wsName);
+  } catch (std::runtime_error &exc) {
+    m_view->userWarning("Error trying to start the loading of FITS file(s)",
+                        "There was an error which prevented the file(s) from "
+                        "being loaded. Details: " +
+                            std::string(exc.what()));
   }
+}
+
+/**
+ * Produces a string with paths separated by commas. Takes the patsh from the
+ * input paths string but selects only the ones that look consistent with the
+ * supported format / extension.
+ *
+ * @param paths of the supposedly image files
+ *
+ * @return string with comma separated value (paths) ready to be passed as
+ *input
+ * to LoadFITS or similar algorithms
+ */
+std::string ImageROIPresenter::filterImagePathsForFITSStack(
+    const std::vector<std::string> &paths) {
+  std::string allPaths = "";
+
+  // Let's take only the ones that we can effectively load
+  const std::string expectedShort = "fit";
+  const std::string expectedLong = "fits";
+  const std::string summedSkipStr = "_SummedImg.";
+  std::vector<std::string> unexpectedFiles, summedFiles;
+  for (const auto &pathStr : paths) {
+    const std::string extShort = pathStr.substr(pathStr.size() - 3);
+    const std::string extLong = pathStr.substr(pathStr.size() - 4);
+    // exception / sum images generated by some detectors
+    if (std::string::npos != pathStr.find(summedSkipStr)) {
+      summedFiles.push_back(pathStr);
+    } else if (extShort != expectedShort && extLong != expectedLong) {
+      unexpectedFiles.push_back(pathStr);
+    } else {
+      if (allPaths.empty()) {
+        allPaths = pathStr;
+      } else {
+        allPaths.append(", " + pathStr);
+      }
+    }
+  }
+
+  // If needed, give a warning once, at the end
+  if (!unexpectedFiles.empty()) {
+    std::string filesStrMsg = "";
+    for (auto path : unexpectedFiles) {
+      filesStrMsg += path + "\n";
+    }
+
+    const std::string msg =
+        "Found files with unrecognized or unsupported extension in this "
+        "stack ( " +
+        m_stackPath + "). Expected files with extension '" + expectedShort +
+        "' or '" + expectedLong +
+        "' the following file(s) were found (and not loaded):" + filesStrMsg;
+
+    if (g_warnIfUnexpectedFileExtensions) {
+      m_view->userWarning("Files with invalid/unrecognized extension found in "
+                          "the stack of images",
+                          msg);
+    }
+    g_log.warning(msg);
+  }
+  if (!summedFiles.empty()) {
+    std::string filesStrMsg = "";
+    for (auto path : summedFiles) {
+      filesStrMsg += path + "\n";
+    }
+
+    const std::string msg =
+        "Found file(s) that look like summed images (have '" + summedSkipStr +
+        "' in their name) in this "
+        "stack ( " +
+        m_stackPath + "). Ignoring them under the assumption that these are "
+                      "note original images. Please make sure that this is "
+                      "correct. The files ignored are: " +
+        filesStrMsg;
+
+    if (g_warnIfUnexpectedFileExtensions) {
+      m_view->userWarning("Files that presumably are summed images have been "
+                          "found in the stack of images",
+                          msg);
+    }
+    g_log.warning(msg);
+  }
+
+  return allPaths;
 }
 
 void ImageROIPresenter::loadFITSImage(const std::string &path,
@@ -270,35 +586,7 @@ void ImageROIPresenter::loadFITSImage(const std::string &path,
                              std::string(e.what()));
   }
 
-  try {
-    alg->execute();
-  } catch (std::exception &e) {
-    throw std::runtime_error(
-        "Failed to load image. Could not load this file as a "
-        "FITS image: " +
-        std::string(e.what()));
-  }
-
-  if (!alg->isExecuted()) {
-    throw std::runtime_error(
-        "Failed to load image correctly. Note that even though "
-        "the image file has been loaded it seems to contain errors.");
-  }
-
-  try {
-    Mantid::API::WorkspaceGroup_sptr wsg;
-    Mantid::API::MatrixWorkspace_sptr ws;
-    const auto &ads = Mantid::API::AnalysisDataService::Instance();
-    wsg = ads.retrieveWS<Mantid::API::WorkspaceGroup>(wsName);
-    ws = ads.retrieveWS<Mantid::API::MatrixWorkspace>(wsg->getNames()[0]);
-  } catch (std::exception &e) {
-    throw std::runtime_error(
-        "Could not load image contents for file '" + path +
-        "'. An unrecoverable error "
-        "happened when trying to load the image contents. Cannot "
-        "display it. Error details: " +
-        std::string(e.what()));
-  }
+  m_algRunner->addAlgorithm(alg);
 }
 
 } // namespace CustomInterfaces

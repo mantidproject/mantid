@@ -58,7 +58,7 @@ public:
   StartsWithValidator(const std::set<std::string> &values)
       : Kernel::StringListValidator(values) {}
   /// Clone the validator
-  IValidator_sptr clone() const {
+  IValidator_sptr clone() const override {
     return boost::make_shared<StartsWithValidator>(*this);
   }
 
@@ -68,7 +68,7 @@ protected:
    *  @return "" if the value is on the list, or "The value does not start with
    * any of the allowed values"
    */
-  std::string checkValidity(const std::string &value) const;
+  std::string checkValidity(const std::string &value) const override;
 };
 
 } // namespace Kernel

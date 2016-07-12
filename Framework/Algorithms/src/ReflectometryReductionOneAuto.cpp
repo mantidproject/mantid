@@ -1,3 +1,4 @@
+#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAlgorithms/ReflectometryReductionOneAuto.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -6,8 +7,25 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include <boost/optional.hpp>
-#include <boost/assign/list_of.hpp>
 
+/*Anonymous namespace*/
+namespace {
+/**
+* Helper free function to calculate MomentumTransfer from lambda and theta
+* @param lambda : Value in wavelength
+* @param theta  : Value in Degrees
+* @return MomentumTransfer
+* @
+*/
+double calculateQ(double lambda, double theta) {
+  if (lambda == 0.0)
+    throw std::runtime_error("Minimum/Maximum value of the IvsLambda Workspace "
+                             "is 0. Cannot calculate Q");
+  double thetaInRad = theta * M_PI / 180;
+  return (4 * M_PI * sin(thetaInRad)) / lambda;
+}
+}
+/*end of Anonymous namespace*/
 namespace Mantid {
 namespace Algorithms {
 
@@ -16,16 +34,6 @@ using namespace Mantid::API;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReflectometryReductionOneAuto)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-ReflectometryReductionOneAuto::ReflectometryReductionOneAuto() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ReflectometryReductionOneAuto::~ReflectometryReductionOneAuto() {}
 
 //----------------------------------------------------------------------------------------------
 
@@ -53,18 +61,17 @@ const std::string ReflectometryReductionOneAuto::summary() const {
 */
 void ReflectometryReductionOneAuto::init() {
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
       "Input run in TOF or Lambda");
 
-  std::vector<std::string> analysis_modes;
-  analysis_modes.push_back("PointDetectorAnalysis");
-  analysis_modes.push_back("MultiDetectorAnalysis");
+  std::vector<std::string> analysis_modes{"PointDetectorAnalysis",
+                                          "MultiDetectorAnalysis"};
   auto analysis_mode_validator =
       boost::make_shared<StringListValidator>(analysis_modes);
 
   declareProperty(
-      new ArrayProperty<int>("RegionOfDirectBeam", Direction::Input),
+      make_unique<ArrayProperty<int>>("RegionOfDirectBeam", Direction::Input),
       "Indices of the spectra a pair (lower, upper) that mark the ranges that "
       "correspond to the direct beam in multi-detector mode.");
 
@@ -72,25 +79,25 @@ void ReflectometryReductionOneAuto::init() {
                   "Analysis Mode to Choose", Direction::Input);
 
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
+      make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "FirstTransmissionRun", "", Direction::Input, PropertyMode::Optional),
       "First transmission run workspace in TOF or Wavelength");
 
   auto tof_validator = boost::make_shared<WorkspaceUnitValidator>("TOF");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "SecondTransmissionRun", "", Direction::Input,
                       PropertyMode::Optional, tof_validator),
                   "Second transmission run workspace in TOF");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Output workspace in wavelength q");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspaceWavelength", "", Direction::Output),
                   "Output workspace in wavelength");
 
   declareProperty(
-      new ArrayProperty<double>("Params",
-                                boost::make_shared<RebinParamsValidator>(true)),
+      make_unique<ArrayProperty<double>>(
+          "Params", boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "These parameters are used for stitching together transmission runs. "
       "Values are in wavelength (angstroms). This input is only needed if a "
@@ -101,15 +108,16 @@ void ReflectometryReductionOneAuto::init() {
 
   declareProperty("EndOverlap", Mantid::EMPTY_DBL(), "End overlap in Q.",
                   Direction::Input);
-
+  declareProperty("ScaleFactor", 1.0,
+                  "Factor you wish to scale Q workspace by.", Direction::Input);
   auto index_bounds = boost::make_shared<BoundedValidator<int>>();
   index_bounds->setLower(0);
 
-  declareProperty(new PropertyWithValue<int>("I0MonitorIndex",
-                                             Mantid::EMPTY_INT(), index_bounds),
-                  "I0 monitor workspace index");
-  declareProperty(new PropertyWithValue<std::string>("ProcessingInstructions",
-                                                     "", Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<int>>(
+                      "I0MonitorIndex", Mantid::EMPTY_INT(), Direction::Input),
+                  "I0 monitor workspace index. Optional.");
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "ProcessingInstructions", "", Direction::Input),
                   "Grouping pattern of workspace indices to yield only the"
                   " detectors of interest. See GroupDetectors for syntax.");
   declareProperty("WavelengthMin", Mantid::EMPTY_DBL(),
@@ -118,6 +126,22 @@ void ReflectometryReductionOneAuto::init() {
                   "Wavelength Max in angstroms", Direction::Input);
   declareProperty("WavelengthStep", Mantid::EMPTY_DBL(),
                   "Wavelength step in angstroms", Direction::Input);
+  declareProperty("MomentumTransferMinimum", Mantid::EMPTY_DBL(),
+                  "Minimum Q value in IvsQ "
+                  "Workspace. Used for Rebinning "
+                  "the IvsQ Workspace",
+                  Direction::Input);
+  declareProperty("MomentumTransferStep", Mantid::EMPTY_DBL(),
+                  "Resolution value in IvsQ Workspace. Used for Rebinning the "
+                  "IvsQ Workspace. This value will be made minus to apply "
+                  "logarithmic rebinning. If you wish to have linear "
+                  "bin-widths then please provide a negative DQQ",
+                  Direction::Input);
+  declareProperty("MomentumTransferMaximum", Mantid::EMPTY_DBL(),
+                  "Maximum Q value in IvsQ "
+                  "Workspace. Used for Rebinning "
+                  "the IvsQ Workspace",
+                  Direction::Input);
   declareProperty("MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
                   "Monitor wavelength background min in angstroms",
                   Direction::Input);
@@ -128,14 +152,13 @@ void ReflectometryReductionOneAuto::init() {
                   "Monitor integral min in angstroms", Direction::Input);
   declareProperty("MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
                   "Monitor integral max in angstroms", Direction::Input);
-
-  declareProperty(new PropertyWithValue<std::string>("DetectorComponentName",
-                                                     "", Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "DetectorComponentName", "", Direction::Input),
                   "Name of the detector component i.e. point-detector. If "
                   "these are not specified, the algorithm will attempt lookup "
                   "using a standard naming convention.");
-  declareProperty(new PropertyWithValue<std::string>("SampleComponentName", "",
-                                                     Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
+                      "SampleComponentName", "", Direction::Input),
                   "Name of the sample component i.e. some-surface-holder. If "
                   "these are not specified, the algorithm will attempt lookup "
                   "using a standard naming convention.");
@@ -154,22 +177,22 @@ void ReflectometryReductionOneAuto::init() {
   declareProperty("StrictSpectrumChecking", true,
                   "Strict checking between spectrum numbers in input "
                   "workspaces and transmission workspaces.");
-  std::vector<std::string> correctionAlgorithms = boost::assign::list_of(
-      "None")("AutoDetect")("PolynomialCorrection")("ExponentialCorrection");
+  std::vector<std::string> correctionAlgorithms = {
+      "None", "AutoDetect", "PolynomialCorrection", "ExponentialCorrection"};
   declareProperty("CorrectionAlgorithm", "AutoDetect",
                   boost::make_shared<StringListValidator>(correctionAlgorithms),
                   "The type of correction to perform.");
 
-  declareProperty(new ArrayProperty<double>("Polynomial"),
+  declareProperty(make_unique<ArrayProperty<double>>("Polynomial"),
                   "Coefficients to be passed to the PolynomialCorrection"
                   " algorithm.");
 
   declareProperty(
-      new PropertyWithValue<double>("C0", 0.0, Direction::Input),
+      make_unique<PropertyWithValue<double>>("C0", 0.0, Direction::Input),
       "C0 value to be passed to the ExponentialCorrection algorithm.");
 
   declareProperty(
-      new PropertyWithValue<double>("C1", 0.0, Direction::Input),
+      make_unique<PropertyWithValue<double>>("C1", 0.0, Direction::Input),
       "C1 value to be passed to the ExponentialCorrection algorithm.");
 
   setPropertyGroup("CorrectionAlgorithm", "Polynomial Corrections");
@@ -177,15 +200,16 @@ void ReflectometryReductionOneAuto::init() {
   setPropertyGroup("C0", "Polynomial Corrections");
   setPropertyGroup("C1", "Polynomial Corrections");
 
-  setPropertySettings("Polynomial", new Kernel::EnabledWhenProperty(
-                                        "CorrectionAlgorithm", IS_EQUAL_TO,
-                                        "PolynomialCorrection"));
   setPropertySettings(
-      "C0", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
-                                            "ExponentialCorrection"));
+      "Polynomial",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+          "CorrectionAlgorithm", IS_EQUAL_TO, "PolynomialCorrection"));
   setPropertySettings(
-      "C1", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
-                                            "ExponentialCorrection"));
+      "C0", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                "CorrectionAlgorithm", IS_EQUAL_TO, "ExponentialCorrection"));
+  setPropertySettings(
+      "C1", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                "CorrectionAlgorithm", IS_EQUAL_TO, "ExponentialCorrection"));
 
   // Polarization correction inputs --------------
   std::vector<std::string> propOptions;
@@ -199,18 +223,22 @@ void ReflectometryReductionOneAuto::init() {
                   "None: No correction\n"
                   "PNR: Polarized Neutron Reflectivity mode\n"
                   "PA: Full Polarization Analysis PNR-PA");
-  declareProperty(new ArrayProperty<double>(cppLabel(), Direction::Input),
-                  "Effective polarizing power of the polarizing system. "
-                  "Expressed as a ratio 0 < Pp < 1");
-  declareProperty(new ArrayProperty<double>(cApLabel(), Direction::Input),
-                  "Effective polarizing power of the analyzing system. "
-                  "Expressed as a ratio 0 < Ap < 1");
-  declareProperty(new ArrayProperty<double>(crhoLabel(), Direction::Input),
-                  "Ratio of efficiencies of polarizer spin-down to polarizer "
-                  "spin-up. This is characteristic of the polarizer flipper. "
-                  "Values are constants for each term in a polynomial "
-                  "expression.");
-  declareProperty(new ArrayProperty<double>(cAlphaLabel(), Direction::Input),
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(cppLabel(), Direction::Input),
+      "Effective polarizing power of the polarizing system. "
+      "Expressed as a ratio 0 < Pp < 1");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(cApLabel(), Direction::Input),
+      "Effective polarizing power of the analyzing system. "
+      "Expressed as a ratio 0 < Ap < 1");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>(crhoLabel(), Direction::Input),
+      "Ratio of efficiencies of polarizer spin-down to polarizer "
+      "spin-up. This is characteristic of the polarizer flipper. "
+      "Values are constants for each term in a polynomial "
+      "expression.");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(cAlphaLabel(),
+                                                             Direction::Input),
                   "Ratio of efficiencies of analyzer spin-down to analyzer "
                   "spin-up. This is characteristic of the analyzer flipper. "
                   "Values are factors for each term in a polynomial "
@@ -220,19 +248,22 @@ void ReflectometryReductionOneAuto::init() {
   setPropertyGroup(cApLabel(), "Polarization Corrections");
   setPropertyGroup(crhoLabel(), "Polarization Corrections");
   setPropertyGroup(cAlphaLabel(), "Polarization Corrections");
-  setPropertySettings(cppLabel(), new Kernel::EnabledWhenProperty(
-                                      "PolarizationAnalysis", IS_NOT_EQUAL_TO,
-                                      noPolarizationCorrectionMode()));
-  setPropertySettings(cApLabel(), new Kernel::EnabledWhenProperty(
-                                      "PolarizationAnalysis", IS_NOT_EQUAL_TO,
-                                      noPolarizationCorrectionMode()));
-  setPropertySettings(crhoLabel(), new Kernel::EnabledWhenProperty(
-                                       "PolarizationAnalysis", IS_NOT_EQUAL_TO,
-                                       noPolarizationCorrectionMode()));
-  setPropertySettings(
-      cAlphaLabel(),
-      new Kernel::EnabledWhenProperty("PolarizationAnalysis", IS_NOT_EQUAL_TO,
-                                      noPolarizationCorrectionMode()));
+  setPropertySettings(cppLabel(),
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "PolarizationAnalysis", IS_NOT_EQUAL_TO,
+                          noPolarizationCorrectionMode()));
+  setPropertySettings(cApLabel(),
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "PolarizationAnalysis", IS_NOT_EQUAL_TO,
+                          noPolarizationCorrectionMode()));
+  setPropertySettings(crhoLabel(),
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "PolarizationAnalysis", IS_NOT_EQUAL_TO,
+                          noPolarizationCorrectionMode()));
+  setPropertySettings(cAlphaLabel(),
+                      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+                          "PolarizationAnalysis", IS_NOT_EQUAL_TO,
+                          noPolarizationCorrectionMode()));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -253,8 +284,8 @@ void ReflectometryReductionOneAuto::exec() {
   auto start_overlap = isSet<double>("StartOverlap");
   auto end_overlap = isSet<double>("EndOverlap");
   auto params = isSet<MantidVec>("Params");
-  auto i0_monitor_index = static_cast<int>(
-      checkForDefault("I0MonitorIndex", instrument, "I0MonitorIndex"));
+  auto i0_monitor_index = checkForOptionalInstrumentDefault<int>(
+      this, "I0MonitorIndex", instrument, "I0MonitorIndex");
 
   std::string processing_commands;
   if (this->getPointerToProperty("ProcessingInstructions")->isDefault()) {
@@ -278,11 +309,11 @@ void ReflectometryReductionOneAuto::exec() {
       if (detStart == detStop) {
         // If the range given only specifies one detector, we pass along just
         // that one detector
-        processing_commands = boost::lexical_cast<std::string>(detStart);
+        processing_commands = std::to_string(detStart);
       } else {
         // Otherwise, we create a range.
-        processing_commands = boost::lexical_cast<std::string>(detStart) + ":" +
-                              boost::lexical_cast<std::string>(detStop);
+        processing_commands =
+            std::to_string(detStart) + ":" + std::to_string(detStop);
       }
     } else {
       std::vector<double> multiStart =
@@ -293,10 +324,9 @@ void ReflectometryReductionOneAuto::exec() {
             "must exist as an instrument parameter.\n"
             "Please check if you meant to enter ProcessingInstructions or "
             "if your instrument parameter file is correct.");
-      processing_commands =
-          boost::lexical_cast<std::string>(static_cast<int>(multiStart[0])) +
-          ":" +
-          boost::lexical_cast<std::string>(in_ws->getNumberHistograms() - 1);
+      processing_commands = std::to_string(static_cast<int>(multiStart[0])) +
+                            ":" +
+                            std::to_string(in_ws->getNumberHistograms() - 1);
     }
   } else {
     std::string processing_commands_temp =
@@ -304,19 +334,23 @@ void ReflectometryReductionOneAuto::exec() {
     processing_commands = processing_commands_temp;
   }
 
-  double wavelength_min =
-      checkForDefault("WavelengthMin", instrument, "LambdaMin");
-  double wavelength_max =
-      checkForDefault("WavelengthMax", instrument, "LambdaMax");
+  double wavelength_min = checkForMandatoryInstrumentDefault<double>(
+      this, "WavelengthMin", instrument, "LambdaMin");
+  double wavelength_max = checkForMandatoryInstrumentDefault<double>(
+      this, "WavelengthMax", instrument, "LambdaMax");
   auto wavelength_step = isSet<double>("WavelengthStep");
-  double wavelength_back_min = checkForDefault(
-      "MonitorBackgroundWavelengthMin", instrument, "MonitorBackgroundMin");
-  double wavelength_back_max = checkForDefault(
-      "MonitorBackgroundWavelengthMax", instrument, "MonitorBackgroundMax");
-  double wavelength_integration_min = checkForDefault(
-      "MonitorIntegrationWavelengthMin", instrument, "MonitorIntegralMin");
-  double wavelength_integration_max = checkForDefault(
-      "MonitorIntegrationWavelengthMax", instrument, "MonitorIntegralMax");
+  auto wavelength_back_min = checkForOptionalInstrumentDefault<double>(
+      this, "MonitorBackgroundWavelengthMin", instrument,
+      "MonitorBackgroundMin");
+  auto wavelength_back_max = checkForOptionalInstrumentDefault<double>(
+      this, "MonitorBackgroundWavelengthMax", instrument,
+      "MonitorBackgroundMax");
+  auto wavelength_integration_min = checkForOptionalInstrumentDefault<double>(
+      this, "MonitorIntegrationWavelengthMin", instrument,
+      "MonitorIntegralMin");
+  auto wavelength_integration_max = checkForOptionalInstrumentDefault<double>(
+      this, "MonitorIntegrationWavelengthMax", instrument,
+      "MonitorIntegralMax");
 
   auto detector_component_name = isSet<std::string>("DetectorComponentName");
   auto sample_component_name = isSet<std::string>("SampleComponentName");
@@ -339,18 +373,29 @@ void ReflectometryReductionOneAuto::exec() {
     refRedOne->setProperty("OutputWorkspaceWavelength",
                            output_workspace_lam_name);
     refRedOne->setProperty("NormalizeByIntegratedMonitors", norm_by_int_mons);
-    refRedOne->setProperty("I0MonitorIndex", i0_monitor_index);
+
+    if (i0_monitor_index.is_initialized()) {
+      if (i0_monitor_index.get() >= 0)
+        refRedOne->setProperty("I0MonitorIndex", i0_monitor_index.get());
+      else
+        throw std::invalid_argument(
+            "I0MonitorIndex must be an integer greater than or equal to 0");
+    }
     refRedOne->setProperty("ProcessingInstructions", processing_commands);
     refRedOne->setProperty("WavelengthMin", wavelength_min);
     refRedOne->setProperty("WavelengthMax", wavelength_max);
-    refRedOne->setProperty("MonitorBackgroundWavelengthMin",
-                           wavelength_back_min);
-    refRedOne->setProperty("MonitorBackgroundWavelengthMax",
-                           wavelength_back_max);
-    refRedOne->setProperty("MonitorIntegrationWavelengthMin",
-                           wavelength_integration_min);
-    refRedOne->setProperty("MonitorIntegrationWavelengthMax",
-                           wavelength_integration_max);
+    if (wavelength_back_min.is_initialized())
+      refRedOne->setProperty("MonitorBackgroundWavelengthMin",
+                             wavelength_back_min.get());
+    if (wavelength_back_max.is_initialized())
+      refRedOne->setProperty("MonitorBackgroundWavelengthMax",
+                             wavelength_back_max.get());
+    if (wavelength_integration_min.is_initialized())
+      refRedOne->setProperty("MonitorIntegrationWavelengthMin",
+                             wavelength_integration_min.get());
+    if (wavelength_integration_max.is_initialized())
+      refRedOne->setProperty("MonitorIntegrationWavelengthMax",
+                             wavelength_integration_max.get());
     refRedOne->setProperty("CorrectDetectorPositions", correct_positions);
     refRedOne->setProperty("StrictSpectrumChecking", strict_spectrum_checking);
     if (correction_algorithm == "PolynomialCorrection") {
@@ -406,7 +451,7 @@ void ReflectometryReductionOneAuto::exec() {
       } catch (std::runtime_error &e) {
         g_log.warning() << "Could not autodetect polynomial correction method. "
                            "Polynomial correction will not be performed. "
-                           "Reason for failure: " << e.what() << std::endl;
+                           "Reason for failure: " << e.what() << '\n';
         refRedOne->setProperty("CorrectionAlgorithm", "None");
       }
 
@@ -456,21 +501,76 @@ void ReflectometryReductionOneAuto::exec() {
     if (theta_in.is_initialized()) {
       refRedOne->setProperty("ThetaIn", theta_in.get());
     }
+    double scaleFactor = getProperty("ScaleFactor");
+    if (scaleFactor != 1.0) {
+      refRedOne->setProperty("ScaleFactor", scaleFactor);
+    }
+    auto momentumTransferMinimum = isSet<double>("MomentumTransferMinimum");
+    auto momentumTransferStep = isSet<double>("MomentumTransferStep");
+    auto momentumTransferMaximum = isSet<double>("MomentumTransferMaximum");
 
+    if (momentumTransferStep.is_initialized()) {
+      refRedOne->setProperty("MomentumTransferStep",
+                             momentumTransferStep.get());
+    }
+    if (momentumTransferMinimum.is_initialized())
+      refRedOne->setProperty("MomentumTransferMinimum",
+                             momentumTransferMinimum.get());
+    if (momentumTransferMaximum.is_initialized())
+      refRedOne->setProperty("MomentumTransferMaximum",
+                             momentumTransferMaximum.get());
+    if (theta_in.is_initialized()) {
+      if (!momentumTransferMinimum.is_initialized())
+        momentumTransferMinimum = calculateQ(wavelength_max, theta_in.get());
+      if (!momentumTransferStep.is_initialized()) {
+        IAlgorithm_sptr calcResAlg =
+            AlgorithmManager::Instance().create("CalculateResolution");
+        calcResAlg->setProperty("Workspace", in_ws);
+        calcResAlg->setProperty("TwoTheta", theta_in.get());
+        calcResAlg->execute();
+        if (!calcResAlg->isExecuted())
+          throw std::runtime_error(
+              "CalculateResolution failed. Please manually "
+              "enter a value in the dQ/Q column.");
+        double resolution = calcResAlg->getProperty("Resolution");
+        momentumTransferStep = resolution;
+      }
+      if (!momentumTransferMaximum.is_initialized())
+        momentumTransferMaximum = calculateQ(wavelength_min, theta_in.get());
+      refRedOne->setProperty("MomentumTransferMinimum",
+                             momentumTransferMinimum.get());
+      refRedOne->setProperty("MomentumTransferStep",
+                             momentumTransferStep.get());
+      refRedOne->setProperty("MomentumTransferMaximum",
+                             momentumTransferMaximum.get());
+    }
     refRedOne->execute();
     if (!refRedOne->isExecuted()) {
       throw std::runtime_error(
           "ReflectometryReductionOne did not execute sucessfully");
-    } else {
-      MatrixWorkspace_sptr new_IvsQ1 =
-          refRedOne->getProperty("OutputWorkspace");
-      MatrixWorkspace_sptr new_IvsLam1 =
-          refRedOne->getProperty("OutputWorkspaceWavelength");
-      double thetaOut1 = refRedOne->getProperty("ThetaOut");
-      setProperty("OutputWorkspace", new_IvsQ1);
-      setProperty("OutputWorkspaceWavelength", new_IvsLam1);
-      setProperty("ThetaOut", thetaOut1);
     }
+
+    MatrixWorkspace_sptr new_IvsQ1 = refRedOne->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr new_IvsLam1 =
+        refRedOne->getProperty("OutputWorkspaceWavelength");
+    double thetaOut1 = refRedOne->getProperty("ThetaOut");
+    setProperty("OutputWorkspace", new_IvsQ1);
+    setProperty("OutputWorkspaceWavelength", new_IvsLam1);
+    setProperty("ThetaOut", thetaOut1);
+    // set properties so they can be retrieved by GenericDataProcesser if
+    // necessary.
+    setProperty("MomentumTransferMinimum",
+                boost::lexical_cast<double>(
+                    refRedOne->getPropertyValue("MomentumTransferMinimum")));
+    setProperty("MomentumTransferStep",
+                boost::lexical_cast<double>(
+                    refRedOne->getPropertyValue("MomentumTransferStep")));
+    setProperty("MomentumTransferMaximum",
+                boost::lexical_cast<double>(
+                    refRedOne->getPropertyValue("MomentumTransferMaximum")));
+    setProperty("ThetaIn", boost::lexical_cast<double>(
+                               refRedOne->getPropertyValue("ThetaIn")));
+
   } else {
     throw std::runtime_error(
         "ReflectometryReductionOne could not be initialised");
@@ -486,23 +586,6 @@ ReflectometryReductionOneAuto::isSet(std::string propName) const {
   } else {
     T value = this->getProperty(propName);
     return boost::optional<T>(value);
-  }
-}
-
-double ReflectometryReductionOneAuto::checkForDefault(
-    std::string propName, Mantid::Geometry::Instrument_const_sptr instrument,
-    std::string idf_name) const {
-  auto algProperty = this->getPointerToProperty(propName);
-  if (algProperty->isDefault()) {
-    auto defaults = instrument->getNumberParameter(idf_name);
-    if (defaults.size() == 0) {
-      throw std::runtime_error("No data could be retrieved from the parameters "
-                               "and argument wasn't provided: " +
-                               propName);
-    }
-    return defaults[0];
-  } else {
-    return boost::lexical_cast<double, std::string>(algProperty->value());
   }
 }
 
@@ -536,7 +619,7 @@ ReflectometryReductionOneAuto::sumOverTransmissionGroup(
   // We used .release because clone() will return a unique_ptr.
   // we need to release the ownership of the pointer so that it
   // can be cast into a shared_ptr of type Workspace.
-  Workspace_sptr transmissionRunSum(transGroup->getItem(0)->clone().release());
+  Workspace_sptr transmissionRunSum(transGroup->getItem(0)->clone());
 
   // make a variable to store the overall total of the summation
   MatrixWorkspace_sptr total;
@@ -583,11 +666,11 @@ bool ReflectometryReductionOneAuto::processGroups() {
 
   // Copy all the non-workspace properties over
   std::vector<Property *> props = this->getProperties();
-  for (auto prop = props.begin(); prop != props.end(); ++prop) {
-    if (*prop) {
-      IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(*prop);
+  for (auto &prop : props) {
+    if (prop) {
+      IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       if (!wsProp)
-        alg->setPropertyValue((*prop)->name(), (*prop)->value());
+        alg->setPropertyValue(prop->name(), prop->value());
     }
   }
 
@@ -639,10 +722,8 @@ bool ReflectometryReductionOneAuto::processGroups() {
   // multiperiod)
   size_t numMembers = group->size();
   for (size_t i = 0; i < numMembers; ++i) {
-    const std::string IvsQName =
-        outputIvsQ + "_" + boost::lexical_cast<std::string>(i + 1);
-    const std::string IvsLamName =
-        outputIvsLam + "_" + boost::lexical_cast<std::string>(i + 1);
+    const std::string IvsQName = outputIvsQ + "_" + std::to_string(i + 1);
+    const std::string IvsLamName = outputIvsLam + "_" + std::to_string(i + 1);
 
     // If our transmission run is a group and PolarizationCorrection is on
     // then we sum our transmission group members.
@@ -722,10 +803,9 @@ bool ReflectometryReductionOneAuto::processGroups() {
       alg->setProperty("FirstTransmissionRun", "");
       alg->setProperty("SecondTransmissionRun", "");
       for (size_t i = 0; i < numMembers; ++i) {
-        const std::string IvsQName =
-            outputIvsQ + "_" + boost::lexical_cast<std::string>(i + 1);
+        const std::string IvsQName = outputIvsQ + "_" + std::to_string(i + 1);
         const std::string IvsLamName =
-            outputIvsLam + "_" + boost::lexical_cast<std::string>(i + 1);
+            outputIvsLam + "_" + std::to_string(i + 1);
         alg->setProperty("InputWorkspace", IvsLamName);
         alg->setProperty("OutputWorkspace", IvsQName);
         alg->setProperty("CorrectionAlgorithm", "None");
@@ -739,6 +819,18 @@ bool ReflectometryReductionOneAuto::processGroups() {
   }
 
   // We finished successfully
+  // set the values of these properties so they can be retrieved by the
+  // Interface.
+  this->setProperty("MomentumTransferMinimum",
+                    boost::lexical_cast<double>(
+                        alg->getPropertyValue("MomentumTransferMinimum")));
+  this->setProperty("MomentumTransferStep",
+                    boost::lexical_cast<double>(
+                        alg->getPropertyValue("MomentumTransferStep")));
+  this->setProperty("MomentumTransferMaximum",
+                    boost::lexical_cast<double>(
+                        alg->getPropertyValue("MomentumTransferMaximum")));
+  // setting output properties.
   this->setPropertyValue("OutputWorkspace", outputIvsQ);
   this->setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
   setExecuted(true);

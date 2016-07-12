@@ -229,7 +229,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         if verbose:
             sanslog.notice(createColetteScript(run, format, reduced, centreit, plotresults, filename))
         # Rename the final workspace
-        final_name = run['output_as']
+        final_name = run['output_as'].strip()
         if final_name == '':
             final_name = reduced
 

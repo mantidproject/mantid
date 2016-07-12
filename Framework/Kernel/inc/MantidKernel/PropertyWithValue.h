@@ -13,11 +13,15 @@
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #endif
 
-#include <Poco/StringTokenizer.h>
-#include <vector>
+#include <nexus/NeXusFile.hpp>
+
 #include "MantidKernel/IPropertySettings.h"
+#include <MantidKernel/StringTokenizer.h>
+#include <type_traits>
+#include <vector>
 
 namespace Mantid {
 
@@ -146,41 +150,80 @@ void toValue(const std::string &, boost::shared_ptr<T> &) {
   throw boost::bad_lexical_cast();
 }
 
+namespace detail {
+// vector<int> specializations
 template <typename T>
-void toValue(const std::string &strvalue, std::vector<T> &value) {
+void toValue(const std::string &strvalue, std::vector<T> &value,
+             std::true_type) {
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  tokenizer values(strvalue, ",",
+                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+  value.clear();
+  value.reserve(values.count());
+  for (const auto &token : values) {
+    appendValue(token, value);
+  }
+}
+
+template <typename T>
+void toValue(const std::string &strvalue, std::vector<T> &value,
+             std::false_type) {
   // Split up comma-separated properties
-  typedef Poco::StringTokenizer tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
   tokenizer values(strvalue, ",",
                    tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
 
   value.clear();
   value.reserve(values.count());
+  std::transform(
+      values.cbegin(), values.cend(), std::back_inserter(value),
+      [](const std::string &str) { return boost::lexical_cast<T>(str); });
+}
 
-  for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it) {
-    value.push_back(boost::lexical_cast<T>(*it));
-  }
+// bool and char don't make sense as types to generate a range of values.
+// This is similar to std::is_integral<T>, but bool and char are std::false_type
+template <class T> struct is_range_type : public std::false_type {};
+template <class T> struct is_range_type<const T> : public is_range_type<T> {};
+template <class T>
+struct is_range_type<volatile const T> : public is_range_type<T> {};
+template <class T>
+struct is_range_type<volatile T> : public is_range_type<T> {};
+
+template <> struct is_range_type<unsigned short> : public std::true_type {};
+template <> struct is_range_type<unsigned int> : public std::true_type {};
+template <> struct is_range_type<unsigned long> : public std::true_type {};
+template <> struct is_range_type<unsigned long long> : public std::true_type {};
+
+template <> struct is_range_type<short> : public std::true_type {};
+template <> struct is_range_type<int> : public std::true_type {};
+template <> struct is_range_type<long> : public std::true_type {};
+template <> struct is_range_type<long long> : public std::true_type {};
+}
+template <typename T>
+void toValue(const std::string &strvalue, std::vector<T> &value) {
+  detail::toValue(strvalue, value, detail::is_range_type<T>());
 }
 
 template <typename T>
 void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value,
              const std::string &outerDelimiter = ",",
              const std::string &innerDelimiter = "+") {
-  typedef Poco::StringTokenizer tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
   tokenizer tokens(strvalue, outerDelimiter,
                    tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
 
   value.clear();
   value.reserve(tokens.count());
 
-  for (tokenizer::Iterator oIt = tokens.begin(); oIt != tokens.end(); ++oIt) {
-    tokenizer values(*oIt, innerDelimiter,
+  for (const auto &token : tokens) {
+    tokenizer values(token, innerDelimiter,
                      tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
     std::vector<T> vect;
-
-    for (tokenizer::Iterator iIt = values.begin(); iIt != values.end(); ++iIt)
-      vect.push_back(boost::lexical_cast<T>(*iIt));
-
-    value.push_back(vect);
+    vect.reserve(values.count());
+    std::transform(
+        values.begin(), values.end(), std::back_inserter(vect),
+        [](const std::string &str) { return boost::lexical_cast<T>(str); });
+    value.push_back(std::move(vect));
   }
 }
 
@@ -193,32 +236,6 @@ template <typename T> T extractToValueVector(const std::string &strvalue) {
   toValue(strvalue, valueVec);
   return valueVec;
 }
-
-/// Macro for the vector<int> specializations
-#define PROPERTYWITHVALUE_TOVALUE(type)                                        \
-  template <>                                                                  \
-  inline void toValue<type>(const std::string &strvalue,                       \
-                            std::vector<type> &value) {                        \
-    typedef Poco::StringTokenizer tokenizer;                                   \
-    tokenizer values(strvalue, ",",                                            \
-                     tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);       \
-    value.clear();                                                             \
-    value.reserve(values.count());                                             \
-    for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it) {  \
-      appendValue(*it, value);                                                 \
-    }                                                                          \
-  }
-
-PROPERTYWITHVALUE_TOVALUE(int)
-PROPERTYWITHVALUE_TOVALUE(long)
-PROPERTYWITHVALUE_TOVALUE(uint32_t)
-PROPERTYWITHVALUE_TOVALUE(uint64_t)
-#if defined(__APPLE__)
-PROPERTYWITHVALUE_TOVALUE(unsigned long);
-#endif
-
-// Clear up the namespace
-#undef PROPERTYWITHVALUE_TOVALUE
 
 //------------------------------------------------------------------------------------------------
 // Templated += operator functions for specific types
@@ -270,9 +287,11 @@ inline std::vector<std::string> determineAllowedValues(const OptionalBool &,
                                                        const IValidator &) {
   auto enumMap = OptionalBool::enumToStrMap();
   std::vector<std::string> values;
-  for (auto it = enumMap.begin(); it != enumMap.end(); ++it) {
-    values.push_back(it->second);
-  }
+  values.reserve(enumMap.size());
+  std::transform(enumMap.cbegin(), enumMap.cend(), std::back_inserter(values),
+                 [](const std::pair<OptionalBool::Value, std::string> &str) {
+                   return str.second;
+                 });
   return values;
 }
 }
@@ -342,17 +361,16 @@ public:
                                               // value of the original object
         m_validator(right.m_validator->clone()) {}
   /// 'Virtual copy constructor'
-  PropertyWithValue<TYPE> *clone() const {
+  PropertyWithValue<TYPE> *clone() const override {
     return new PropertyWithValue<TYPE>(*this);
   }
 
-  /// Virtual destructor
-  virtual ~PropertyWithValue() {}
+  void saveProperty(::NeXus::File *file) override;
 
   /** Get the value of the property as a string
    *  @return The property's value
    */
-  virtual std::string value() const { return toString(m_value); }
+  std::string value() const override { return toString(m_value); }
 
   /**
    * Deep comparison.
@@ -376,12 +394,12 @@ public:
 
   /** Get the size of the property.
   */
-  virtual int size() const { return findSize(m_value); }
+  int size() const override { return findSize(m_value); }
 
   /** Get the value the property was initialised with -its default value
    *  @return The default value
    */
-  virtual std::string getDefault() const { return toString(m_initialValue); }
+  std::string getDefault() const override { return toString(m_initialValue); }
 
   /** Set the value of the property from a string representation.
    *  Note that "1" & "0" must be used for bool properties rather than
@@ -390,10 +408,14 @@ public:
    *  @return Returns "" if the assignment was successful or a user level
    * description of the problem
    */
-  virtual std::string setValue(const std::string &value) {
+  std::string setValue(const std::string &value) override {
     try {
       TYPE result = m_value;
-      toValue(value, result);
+      std::string valueCopy = value;
+      if (autoTrim()) {
+        boost::trim(valueCopy);
+      }
+      toValue(valueCopy, result);
       // Uses the assignment operator defined below which runs isValid() and
       // throws based on the result
       *this = result;
@@ -416,7 +438,7 @@ public:
    * @return "" if the assignment was successful or a user level description of
    * the problem
    */
-  virtual std::string setDataItem(const boost::shared_ptr<DataItem> data) {
+  std::string setDataItem(const boost::shared_ptr<DataItem> data) override {
     // Pass of the helper function that is able to distinguish whether
     // the TYPE of the PropertyWithValue can be converted to a
     // shared_ptr<DataItem>
@@ -439,7 +461,7 @@ public:
   * @param right the property to add
   * @return the sum
   */
-  virtual PropertyWithValue &operator+=(Property const *right) {
+  PropertyWithValue &operator+=(Property const *right) override {
     PropertyWithValue const *rhs =
         dynamic_cast<PropertyWithValue const *>(right);
 
@@ -465,7 +487,15 @@ public:
    */
   virtual TYPE &operator=(const TYPE &value) {
     TYPE oldValue = m_value;
-    m_value = value;
+    if (std::is_same<TYPE, std::string>::value) {
+      std::string valueCopy = toString(value);
+      if (autoTrim()) {
+        boost::trim(valueCopy);
+      }
+      toValue(valueCopy, m_value);
+    } else {
+      m_value = value;
+    }
     std::string problem = this->isValid();
     if (problem == "") {
       return m_value;
@@ -497,7 +527,7 @@ public:
    * to do more logging
    *  @returns "" if the value is valid or a discription of the problem
    */
-  virtual std::string isValid() const { return m_validator->isValid(m_value); }
+  std::string isValid() const override { return m_validator->isValid(m_value); }
 
   /** Indicates if the property's value is the same as it was when it was set
   *  N.B. Uses an unsafe comparison in the case of doubles, consider overriding
@@ -505,15 +535,24 @@ public:
   *  @return true if the value is the same as the initial value or false
   * otherwise
   */
-  virtual bool isDefault() const { return m_initialValue == m_value; }
+  bool isDefault() const override { return m_initialValue == m_value; }
 
   /** Returns the set of valid values for this property, if such a set exists.
    *  If not, it returns an empty vector.
    *  @return Returns the set of valid values for this property, or it returns
    * an empty vector.
    */
-  virtual std::vector<std::string> allowedValues() const {
+  std::vector<std::string> allowedValues() const override {
     return determineAllowedValues(m_value, *m_validator);
+  }
+
+  /** Returns the set of valid values for this property, if such a set exists.
+  *  If not, it returns an empty vector.
+  *  @return Returns the set of valid values for this property, or it returns
+  * an empty vector.
+  */
+  bool isMultipleSelectionAllowed() override {
+    return m_validator->isMultipleSelectionAllowed();
   }
 
   /**
@@ -539,7 +578,7 @@ private:
    * The value is only accepted if the other property has the same type as this
    * @param right :: A reference to a property.
    */
-  virtual std::string setValueFromProperty(const Property &right) {
+  std::string setValueFromProperty(const Property &right) override {
     auto prop = dynamic_cast<const PropertyWithValue<TYPE> *>(&right);
     if (!prop) {
       return "Could not set value: properties have different type.";
@@ -610,6 +649,24 @@ private:
   /// Private default constructor
   PropertyWithValue();
 };
+
+template <> void PropertyWithValue<float>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<double>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<int32_t>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<uint32_t>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<int64_t>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<uint64_t>::saveProperty(::NeXus::File *file);
+template <>
+void PropertyWithValue<std::string>::saveProperty(::NeXus::File *file);
+template <>
+void PropertyWithValue<std::vector<double>>::saveProperty(::NeXus::File *file);
+template <>
+void PropertyWithValue<std::vector<int32_t>>::saveProperty(::NeXus::File *file);
+
+template <typename TYPE>
+void PropertyWithValue<TYPE>::saveProperty(::NeXus::File *file) {
+  this->saveProperty(file);
+}
 
 template <typename TYPE>
 Logger PropertyWithValue<TYPE>::g_logger("PropertyWithValue");

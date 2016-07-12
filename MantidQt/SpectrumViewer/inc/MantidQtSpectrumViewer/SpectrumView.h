@@ -1,5 +1,5 @@
-#ifndef  SPECTRUM_VIEW_H
-#define  SPECTRUM_VIEW_H
+#ifndef SPECTRUM_VIEW_H
+#define SPECTRUM_VIEW_H
 
 #include <QMainWindow>
 #include <QMdiSubWindow>
@@ -44,15 +44,12 @@
                  <http://doxygen.mantidproject.org>
  */
 
-namespace Ui
-{
+namespace Ui {
 class SpectrumViewer; // Forward declaration of UI file
 }
 
-namespace MantidQt
-{
-namespace SpectrumView
-{
+namespace MantidQt {
+namespace SpectrumView {
 
 // Forward declarations
 class EModeHandler;
@@ -62,37 +59,48 @@ class SpectrumDisplay;
 class SVConnections;
 class MatrixWSDataSource;
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumView : public QMainWindow, public MantidQt::API::WorkspaceObserver
-{
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumView
+    : public QMainWindow,
+      public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 
 public:
   /// Construct a SpectrumView to display data from the specified data source
-  SpectrumView( QWidget * parent = 0 );
+  SpectrumView(QWidget *parent = 0);
 
-  ~SpectrumView();
+  ~SpectrumView() override;
   void renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp);
-  QList<boost::shared_ptr<SpectrumDisplay>> getSpectrumDisplays() const { return m_spectrumDisplay; }
+  QList<boost::shared_ptr<SpectrumDisplay>> getSpectrumDisplays() const {
+    return m_spectrumDisplay;
+  }
+  bool isTrackingOn() const;
 
 signals:
-  void spectrumDisplayChanged(SpectrumDisplay*);
+  void spectrumDisplayChanged(SpectrumDisplay *);
 
 protected slots:
   void closeWindow();
   void changeSpectrumDisplay(int tab);
   void respondToTabCloseReqest(int tab);
+  void changeTracking(bool on);
 
 protected:
-  virtual void resizeEvent(QResizeEvent * event);
-  void preDeleteHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
-  void afterReplaceHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void resizeEvent(QResizeEvent *event) override;
+  void
+  preDeleteHandle(const std::string &wsName,
+                  const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+  void afterReplaceHandle(
+      const std::string &wsName,
+      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
 
-  void dragMoveEvent(QDragMoveEvent *de);
-  void dragEnterEvent(QDragEnterEvent *de);
-  void dropEvent(QDropEvent *de);
+  void dragMoveEvent(QDragMoveEvent *de) override;
+  void dragEnterEvent(QDragEnterEvent *de) override;
+  void dropEvent(QDropEvent *de) override;
 
 private:
   void updateHandlers();
+  void loadSettings();
+  void saveSettings() const;
 
   QList<MatrixWSDataSource_sptr> m_dataSource;
   QList<boost::shared_ptr<SpectrumDisplay>> m_spectrumDisplay;
@@ -100,11 +108,10 @@ private:
   boost::shared_ptr<GraphDisplay> m_vGraph;
   boost::shared_ptr<SVConnections> m_svConnections;
 
-
   Ui::SpectrumViewer *m_ui;
-  SliderHandler      *m_sliderHandler;
-  RangeHandler       *m_rangeHandler;
-  EModeHandler       *m_emodeHandler;
+  SliderHandler *m_sliderHandler;
+  RangeHandler *m_rangeHandler;
+  EModeHandler *m_emodeHandler;
 
 signals:
   void needToClose();
@@ -114,4 +121,4 @@ signals:
 } // namespace SpectrumView
 } // namespace MantidQt
 
-#endif   // SPECTRUM_VIEW_H
+#endif // SPECTRUM_VIEW_H

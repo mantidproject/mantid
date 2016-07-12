@@ -37,16 +37,33 @@ Example 1: Rotating a bank around the Y Axis
   # and use the first workspace in the workspace group
   ws = mtd['musr_1']
 
+  def pos3D_as_str(pos, digits=6):
+     """ Produces a string with a V3D position (x, y, z) from a V3D object,
+         using a fixed limited number of digits (for robust string comparisons).
+     """
+     def nz(value):
+        """ Handles potential issues with +-0 (for 6 digits text output) """
+        return 0.0 if abs(value) < 1e-7 else value
+
+     precision = str(digits)
+     format_str = '[{0:.'+precision+'f}, {1:.'+precision+'f}, {2:.'+precision+'f}]'
+     result = format_str.format(nz(pos.getX()), nz(pos.getY()), nz(pos.getZ()))
+     return result
+
   print 'Original positions of detectors 1 and 2'
-  print 'Det 1',ws.getInstrument().getDetector(1).getPos()
-  print 'Det 2',ws.getInstrument().getDetector(2).getPos()
+  opos1 = ws.getInstrument().getDetector(1).getPos()
+  opos2 = ws.getInstrument().getDetector(2).getPos()
+  print 'Det 1: {0}'.format(pos3D_as_str(opos1))
+  print 'Det 2: {0}'.format(pos3D_as_str(opos2))
 
   # Rotate bank 'back' around the Z axis by 90
   RotateInstrumentComponent( ws, ComponentName='back', X=0,Y=1,Z=0, Angle=90.0 )
 
   print 'Positions of detectors 1 and 2 after rotation'
-  print 'Det 1',ws.getInstrument().getDetector(1).getPos()
-  print 'Det 2',ws.getInstrument().getDetector(2).getPos()
+  pos1 = ws.getInstrument().getDetector(1).getPos()
+  pos2 = ws.getInstrument().getDetector(2).getPos()
+  print 'Det 1: {0}'.format(pos3D_as_str(pos1))
+  print 'Det 2: {0}'.format(pos3D_as_str(pos2))
 
 
 Output
@@ -55,11 +72,11 @@ Output
 .. testoutput:: ExBank
 
   Original positions of detectors 1 and 2
-  Det 1 [-0.0888151,-0.108221,0.145]
-  Det 2 [-0.0659955,-0.123469,0.145]
+  Det 1: [-0.088815, -0.108221, 0.145000]
+  Det 2: [-0.065996, -0.123469, 0.145000]
   Positions of detectors 1 and 2 after rotation
-  Det 1 [-1.38778e-17,-0.108221,0.233815]
-  Det 2 [0,-0.123469,0.210996]
+  Det 1: [0.000000, -0.108221, 0.233815]
+  Det 2: [0.000000, -0.123469, 0.210996]
 
 Example 2: Rotating a bank around the Z Axis
 ############################################
@@ -78,15 +95,31 @@ Example 2: Rotating a bank around the Z Axis
   # and use the first workspace in the workspace group
   ws = mtd['musr_1']
 
+  def pos3D_as_str(pos, digits=6):
+     """ Produces a string with a V3D position (x, y, z) from a V3D object,
+         using a fixed limited number of digits (for robust string comparisons).
+     """
+     def nz(value):
+        """ Handles potential issues with +-0 (for 6 digits text output) """
+        return 0.0 if abs(value) < 1e-7 else value
+
+     precision = str(digits)
+     format_str = '[{0:.'+precision+'f}, {1:.'+precision+'f}, {2:.'+precision+'f}]'
+     result = format_str.format(nz(pos.getX()), nz(pos.getY()), nz(pos.getZ()))
+     return result
+
   print 'Original positions of detectors 1 and 4'
-  print 'Det 1',ws.getInstrument().getDetector(1).getPos()
-  print 'Det 2',ws.getInstrument().getDetector(4).getPos()
+  opos1 = ws.getInstrument().getDetector(1).getPos()
+  opos4 = ws.getInstrument().getDetector(4).getPos()
+  print 'Det 1: {0}'.format(pos3D_as_str(opos1))
+  print 'Det 4: {0}'.format(pos3D_as_str(opos4))
 
   # Rotate bank 'back' around the Z axis by 3 detectors.
   RotateInstrumentComponent( ws, ComponentName='back', X=0,Y=0,Z=1, Angle=3*360.0 / 32 )
 
   print 'Positions of detector 1 after rotation'
-  print 'Det 1',ws.getInstrument().getDetector(1).getPos()
+  pos1 = ws.getInstrument().getDetector(1).getPos()
+  print 'Det 1: {0}'.format(pos3D_as_str(pos1))
   print 'Detector 1 took place of detector 4'
 
 Output
@@ -95,10 +128,10 @@ Output
 .. testoutput:: ExBank2
 
   Original positions of detectors 1 and 4
-  Det 1 [-0.0888151,-0.108221,0.145]
-  Det 2 [-0.0137224,-0.139326,0.145]
+  Det 1: [-0.088815, -0.108221, 0.145000]
+  Det 4: [-0.013722, -0.139326, 0.145000]
   Positions of detector 1 after rotation
-  Det 1 [-0.0137224,-0.139326,0.145]
+  Det 1: [-0.013722, -0.139326, 0.145000]
   Detector 1 took place of detector 4
 
 Example 3: Rotating a single detector

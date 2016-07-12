@@ -1,7 +1,11 @@
 #include "MantidDataHandling/LoadSINQFocus.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -23,18 +27,13 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQFocus)
 /** Constructor
  */
 LoadSINQFocus::LoadSINQFocus()
-    : m_instrumentName(""), m_instrumentPath(), m_localWorkspace(),
-      m_numberOfTubes(0), m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
-      m_numberOfHistograms(0), m_loader() {
-  m_supportedInstruments.push_back("FOCUS");
+    : m_supportedInstruments{"FOCUS"}, m_numberOfTubes{0},
+      m_numberOfPixelsPerTube{0}, m_numberOfChannels{0},
+      m_numberOfHistograms{0} {
+
   this->useAlgorithm("LoadSINQ");
   this->deprecatedDate("2013-10-28");
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadSINQFocus::~LoadSINQFocus() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -70,12 +69,13 @@ int LoadSINQFocus::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadSINQFocus::init() {
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".nxs", ".hdf"}),
-      "The name of the Nexus file to load");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace");
+  const std::vector<std::string> exts{".nxs", ".hdf"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
+                  "The name of the Nexus file to load");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -117,7 +117,7 @@ void LoadSINQFocus::setInstrumentName(NeXus::NXEntry &entry) {
   }
   m_instrumentName =
       m_loader.getStringFromNexusPath(entry, m_instrumentPath + "/name");
-  size_t pos = m_instrumentName.find(" ");
+  size_t pos = m_instrumentName.find(' ');
   m_instrumentName = m_instrumentName.substr(0, pos);
 }
 
@@ -134,10 +134,9 @@ void LoadSINQFocus::initWorkSpace(NeXus::NXEntry &entry) {
   // dim0 * m_numberOfPixelsPerTube is the total number of detectors
   m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
 
-  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << std::endl;
-  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube
-                << std::endl;
-  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << std::endl;
+  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << '\n';
+  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube << '\n';
+  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << '\n';
 
   // Now create the output workspace
   // Might need to get this value from the number of monitors in the Nexus file
@@ -183,7 +182,7 @@ void LoadSINQFocus::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
       progress.report();
     }
   }
-  g_log.debug() << "Data loading into WS done...." << std::endl;
+  g_log.debug() << "Data loading into WS done....\n";
 }
 
 void LoadSINQFocus::loadRunDetails(NXEntry &entry) {

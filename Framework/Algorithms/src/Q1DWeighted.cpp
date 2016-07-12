@@ -2,10 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Q1DWeighted.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -30,15 +33,15 @@ void Q1DWeighted::init() {
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
   wsValidator->add<InstrumentValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "Input workspace containing the SANS 2D data");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Workspace that will contain the I(Q) data");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Workspace that will contain the I(Q) data");
-  declareProperty(
-      new ArrayProperty<double>("OutputBinning",
-                                boost::make_shared<RebinParamsValidator>()),
+      make_unique<ArrayProperty<double>>(
+          "OutputBinning", boost::make_shared<RebinParamsValidator>()),
       "The new bin boundaries in the form: <math>x_1,\\Delta x_1,x_2,\\Delta "
       "x_2,\\dots,x_n</math>");
 
@@ -60,7 +63,7 @@ void Q1DWeighted::init() {
   declareProperty("WedgeOffset", 0.0, positiveDouble,
                   "Wedge offset relative to the horizontal axis, in degrees.");
   declareProperty(
-      new WorkspaceProperty<WorkspaceGroup>(
+      make_unique<WorkspaceProperty<WorkspaceGroup>>(
           "WedgeWorkspace", "", Direction::Output, PropertyMode::Optional),
       "Name for the WorkspaceGroup containing the wedge I(q) distributions.");
 
@@ -80,9 +83,9 @@ void Q1DWeighted::exec() {
   const std::vector<double> binParams = getProperty("OutputBinning");
   // XOut defines the output histogram, so its length is equal to the number of
   // bins + 1
-  MantidVecPtr XOut;
+  HistogramData::BinEdges XOut(0);
   const int sizeOut =
-      VectorHelper::createAxisFromRebinParams(binParams, XOut.access());
+      VectorHelper::createAxisFromRebinParams(binParams, XOut.mutableRawData());
 
   // Get pixel size and pixel sub-division
   double pixelSizeX = getProperty("PixelSizeX");
@@ -101,11 +104,11 @@ void Q1DWeighted::exec() {
   outputWS->getAxis(0)->unit() =
       UnitFactory::Instance().create("MomentumTransfer");
   outputWS->setYUnitLabel("1/cm");
-  outputWS->isDistribution(true);
+  outputWS->setDistribution(true);
   setProperty("OutputWorkspace", outputWS);
 
   // Set the X vector for the output workspace
-  outputWS->setX(0, XOut);
+  outputWS->setBinEdges(0, XOut);
   MantidVec &YOut = outputWS->dataY(0);
   MantidVec &EOut = outputWS->dataE(0);
 
@@ -115,7 +118,7 @@ void Q1DWeighted::exec() {
   const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
 
   const int xLength = static_cast<int>(inputWS->readX(0).size());
-  const double fmp = 4.0 * M_PI;
+  constexpr double fmp = 4.0 * M_PI;
 
   // Set up the progress reporting object
   Progress progress(this, 0.0, 1.0, numSpec * (xLength - 1));
@@ -145,8 +148,8 @@ void Q1DWeighted::exec() {
     wedge_ws->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
     wedge_ws->setYUnitLabel("1/cm");
-    wedge_ws->isDistribution(true);
-    wedge_ws->setX(0, XOut);
+    wedge_ws->setDistribution(true);
+    wedge_ws->setBinEdges(0, XOut);
     wedge_ws->mutableRun().addProperty("wedge_angle", center_angle, "degrees",
                                        true);
     wedgeWorkspaces.push_back(wedge_ws);
@@ -181,9 +184,8 @@ void Q1DWeighted::exec() {
       try {
         det = inputWS->getDetector(i);
       } catch (Exception::NotFoundError &) {
-        g_log.warning() << "Spectrum index " << i
-                        << " has no detector assigned to it - discarding"
-                        << std::endl;
+        g_log.warning() << "Workspace index " << i
+                        << " has no detector assigned to it - discarding\n";
         // Catch if no detector. Next line tests whether this happened - test
         // placed
         // outside here because Mac Intel compiler doesn't like 'continue' in a
@@ -209,15 +211,15 @@ void Q1DWeighted::exec() {
                        nSubPixels;
         double sub_x = pixelSizeX *
                        (floor(static_cast<double>(isub) / nSubPixels) -
-                        (nSubPixels - 1.0) / 2.0) /
+                        (nSubPixels - 1.0) * 0.5) /
                        nSubPixels;
 
         // Find the position of this sub-pixel in real space and compute Q
         // For reference - in the case where we don't use sub-pixels, simply
         // use:
-        //     double sinTheta = sin( inputWS->detectorTwoTheta(det)/2.0 );
+        //     double sinTheta = sin( inputWS->detectorTwoTheta(*det)/2.0 );
         V3D pos = det->getPos() - V3D(sub_x, sub_y, 0.0);
-        double sinTheta = sin(pos.angle(beamLine) / 2.0);
+        double sinTheta = sin(0.5 * pos.angle(beamLine));
         double factor = fmp * sinTheta;
         double q = factor * 2.0 / (XIn[j] + XIn[j + 1]);
         int iq = 0;
@@ -232,9 +234,9 @@ void Q1DWeighted::exec() {
           }
           // If we got a more complicated binning, find the q bin the slow way
         } else {
-          for (int i_qbin = 0;
-               i_qbin < static_cast<int>(XOut.access().size()) - 1; i_qbin++) {
-            if (q >= XOut.access()[i_qbin] && q < XOut.access()[(i_qbin + 1)]) {
+          for (int i_qbin = 0; i_qbin < static_cast<int>(XOut.size()) - 1;
+               i_qbin++) {
+            if (q >= XOut[i_qbin] && q < XOut[(i_qbin + 1)]) {
               iq = i_qbin;
               break;
             }
@@ -272,13 +274,13 @@ void Q1DWeighted::exec() {
               // only over a forward-going cone
               if (isCone)
                 center_angle *= 2.0;
-              center_angle += M_PI / 180.0 * wedgeOffset;
+              center_angle += deg2rad * wedgeOffset;
               V3D sub_pix = V3D(pos.X(), pos.Y(), 0.0);
               double angle = fabs(sub_pix.angle(
                   V3D(cos(center_angle), sin(center_angle), 0.0)));
-              if (angle < M_PI / 180.0 * wedgeAngle / 2.0 ||
+              if (angle < deg2rad * wedgeAngle * 0.5 ||
                   (!isCone &&
-                   fabs(M_PI - angle) < M_PI / 180.0 * wedgeAngle / 2.0)) {
+                   fabs(M_PI - angle) < deg2rad * wedgeAngle * 0.5)) {
                 wedge_lambda_iq[iWedge][iq] += YIn[j] * w;
                 wedge_lambda_iq_err[iWedge][iq] += w * w * EIn[j] * EIn[j];
                 wedge_XNorm[iWedge][iq] += w;
@@ -331,10 +333,10 @@ void Q1DWeighted::exec() {
   }
 
   // Create workspace group that holds output workspaces
-  WorkspaceGroup_sptr wsgroup = WorkspaceGroup_sptr(new WorkspaceGroup());
+  auto wsgroup = boost::make_shared<WorkspaceGroup>();
 
-  for (auto it = wedgeWorkspaces.begin(); it != wedgeWorkspaces.end(); ++it) {
-    wsgroup->addWorkspace(*it);
+  for (auto &wedgeWorkspace : wedgeWorkspaces) {
+    wsgroup->addWorkspace(wedgeWorkspace);
   }
   // set the output property
   std::string outputWSGroupName = getPropertyValue("WedgeWorkspace");

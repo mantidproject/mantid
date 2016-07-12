@@ -23,7 +23,7 @@ public:
   std::string GitHubVersion;
 
 private:
-  virtual std::string getVersionsFromGitHub(const std::string &url) {
+  std::string getVersionsFromGitHub(const std::string &url) override {
     // the initial assignment of the value to url is just to suppress a compiler
     // warning
     std::string outputString(url);
@@ -82,7 +82,7 @@ private:
 
     return outputString;
   }
-  virtual std::string getCurrentVersion() const { return CurrentVersion; }
+  std::string getCurrentVersion() const override { return CurrentVersion; }
 };
 }
 

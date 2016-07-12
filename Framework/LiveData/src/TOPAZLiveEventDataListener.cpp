@@ -1,6 +1,8 @@
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidLiveData/TOPAZLiveEventDataListener.h"
 #include "MantidLiveData/Exception.h"
 //#include "MantidDataObjects/Events.h"
@@ -158,7 +160,7 @@ TOPAZLiveEventDataListener::TOPAZLiveEventDataListener()
     : ILiveListener(), m_workspaceInitialized(false), m_eventBuffer(),
       m_monitorLogs(), m_wsName(), m_indexMap(), m_monitorIndexMap(),
       m_tcpSocket(), m_dataSocket(), m_dataAddr(), m_isConnected(false),
-      m_udpBuf(NULL), m_udpBufSize(32768), m_runNumber(0), m_mutex(),
+      m_udpBuf(nullptr), m_udpBufSize(32768), m_runNumber(0), m_mutex(),
       m_thread(), m_stopThread(false), m_backgroundException() {
 
   m_udpBuf = new unsigned char[m_udpBufSize];
@@ -190,7 +192,7 @@ TOPAZLiveEventDataListener::~TOPAZLiveEventDataListener() {
       g_log.fatal() << "TOPAZLiveEventDataListener failed to shut down "
                     << "its background thread! This should never happen and "
                     << "Mantid is pretty much guaranteed to crash shortly.  "
-                    << "Talk to the Mantid developer team." << std::endl;
+                    << "Talk to the Mantid developer team.\n";
     }
   }
 
@@ -215,8 +217,7 @@ bool TOPAZLiveEventDataListener::connect(
   try {
     m_tcpSocket.connect(address); // BLOCKING connect
   } catch (...) {
-    g_log.error() << "Connection to " << address.toString() << " failed."
-                  << std::endl;
+    g_log.error() << "Connection to " << address.toString() << " failed.\n";
     return false;
   }
 
@@ -225,7 +226,7 @@ bool TOPAZLiveEventDataListener::connect(
   m_tcpSocket.setReceiveTimeout(Poco::Timespan(RECV_TIMEOUT, 0));
   // POCO timespan is seconds, microseconds
 
-  g_log.debug() << "Connected to " << tcpAddress.toString() << std::endl;
+  g_log.debug() << "Connected to " << tcpAddress.toString() << '\n';
 
   // After connecting to the main port (either 9000 or 9100 depending on
   // whether or not we're in test mode), event_catcher will send us the port
@@ -235,12 +236,12 @@ bool TOPAZLiveEventDataListener::connect(
     if (m_tcpSocket.receiveBytes(&dataPort, sizeof(dataPort)) !=
         sizeof(dataPort)) {
       g_log.error() << "Failed to read entire data port num from "
-                    << tcpAddress.toString() << std::endl;
+                    << tcpAddress.toString() << '\n';
       return false;
     }
   } catch (...) {
     g_log.error() << "Error reading data port num from "
-                  << tcpAddress.toString() << std::endl;
+                  << tcpAddress.toString() << '\n';
     return false;
   }
 
@@ -298,7 +299,7 @@ void TOPAZLiveEventDataListener::start(Kernel::DateAndTime startTime) {
 void TOPAZLiveEventDataListener::run() {
   try {
 
-    if (m_isConnected == false) // sanity check
+    if (!m_isConnected) // sanity check
     {
       throw std::runtime_error(std::string("TOPAZLiveEventDataListener::run(): "
                                            "No connection to event_catcher."));
@@ -310,7 +311,7 @@ void TOPAZLiveEventDataListener::run() {
 
     Poco::Net::SocketAddress sendAddr; // address of the sender
     // loop until the foreground thread tells us to stop
-    while (m_stopThread == false) {
+    while (!m_stopThread) {
       // it's possible that a stop request came in while we were sleeping...
       if (m_stopThread) {
         break;
@@ -320,7 +321,7 @@ void TOPAZLiveEventDataListener::run() {
       try {
         bytesRead = m_dataSocket.receiveFrom(m_udpBuf, m_udpBufSize, sendAddr);
       } catch (Poco::TimeoutException &) {
-        if (m_stopThread == false) {
+        if (!m_stopThread) {
           // Don't need to stop processing or anything - just log a warning
           g_log.warning("Timeout reading from the network.  "
                         "Is event_catcher still sending?");
@@ -346,8 +347,8 @@ void TOPAZLiveEventDataListener::run() {
           (hdr->iTotalBytes - hdr->Spare1) / sizeof(NEUTRON_EVENT);
 
       g_log.debug() << "Received UDP Packet.  " << bytesRead << " bytes  "
-                    << num_pulse_ids << " pulses  " << num_events << " events"
-                    << std::endl;
+                    << num_pulse_ids << " pulses  " << num_events
+                    << " events\n";
 
       PULSE_ID_PTR pid =
           reinterpret_cast<PULSE_ID_PTR>(m_udpBuf + sizeof(COMMAND_HEADER));
@@ -357,9 +358,9 @@ void TOPAZLiveEventDataListener::run() {
 
       for (unsigned i = 0; i < num_pulse_ids; i++) {
         g_log.debug() << "Pulse ID: " << pid[i].pulseIDhigh << ", "
-                      << pid[i].pulseIDlow << std::endl;
-        g_log.debug() << "  Event ID: " << pid[i].eventID << std::endl;
-        g_log.debug() << "  Charge: " << pid[i].charge << std::endl;
+                      << pid[i].pulseIDlow << '\n';
+        g_log.debug() << "  Event ID: " << pid[i].eventID << '\n';
+        g_log.debug() << "  Charge: " << pid[i].charge << '\n';
 
         // Figure out the event indexes that belong to this pulse
         uint64_t firstEvent;
@@ -387,7 +388,7 @@ void TOPAZLiveEventDataListener::run() {
         // Timestamp for the events
         Mantid::Kernel::DateAndTime eventTime = timeFromPulse(&pid[i]);
 
-        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+        std::lock_guard<std::mutex> scopedLock(m_mutex);
         // Save the pulse charge in the logs
         // TODO:  We're not sure what the units are on the charge value
         // They *might* be picoCoulombs, or the might be units of 10pC
@@ -399,8 +400,8 @@ void TOPAZLiveEventDataListener::run() {
 
         if (firstEvent > lastEvent) {
           g_log.error() << "Invalid event indexes! firstEvent: " << firstEvent
-                        << "  lastEvent: " << lastEvent << std::endl;
-          g_log.error() << "No events will be processed!" << std::endl;
+                        << "  lastEvent: " << lastEvent << '\n';
+          g_log.error() << "No events will be processed!\n";
         }
 
         for (uint64_t j = firstEvent; j <= lastEvent; j++) {
@@ -427,25 +428,23 @@ void TOPAZLiveEventDataListener::run() {
     // exception handler for generic runtime exceptions
     g_log.fatal() << "Caught a runtime exception.\n"
                   << "Exception message: " << e.what() << ".\n"
-                  << "Thread will exit." << std::endl;
+                  << "Thread will exit.\n";
     m_isConnected = false;
 
-    m_backgroundException =
-        boost::shared_ptr<std::runtime_error>(new std::runtime_error(e));
+    m_backgroundException = boost::make_shared<std::runtime_error>(e);
 
   } catch (std::invalid_argument &e) {
     // TimeSeriesProperty (and possibly some other things) can throw
     // these errors
     g_log.fatal() << "Caught an invalid argument exception.\n"
                   << "Exception message: " << e.what() << ".\n"
-                  << "Thread will exit." << std::endl;
+                  << "Thread will exit.\n";
     m_isConnected = false;
 
     std::string newMsg(
         "Invalid argument exception thrown from the background thread: ");
     newMsg += e.what();
-    m_backgroundException =
-        boost::shared_ptr<std::runtime_error>(new std::runtime_error(newMsg));
+    m_backgroundException = boost::make_shared<std::runtime_error>(newMsg);
   } catch (Poco::Exception &e) { // Generic POCO exception handler
     g_log.fatal("Uncaught POCO exception in TOPAZLiveEventDataListener network "
                 "read thread.");
@@ -520,7 +519,7 @@ void TOPAZLiveEventDataListener::initMonitorWorkspace() {
                                                     monitorsBuffer, true);
   // Set the id numbers
   for (size_t i = 0; i < monitors.size(); ++i) {
-    monitorsBuffer->getSpectrum(i)->setDetectorID(monitors[i]);
+    monitorsBuffer->getSpectrum(i).setDetectorID(monitors[i]);
   }
 
   m_monitorIndexMap = monitorsBuffer->getDetectorIDToWorkspaceIndexMap(true);
@@ -540,13 +539,13 @@ void TOPAZLiveEventDataListener::appendEvent(
   if (it != m_indexMap.end()) {
     std::size_t workspaceIndex = it->second;
     Mantid::DataObjects::TofEvent event(tof, pulseTime);
-    m_eventBuffer->getEventList(workspaceIndex).addEventQuickly(event);
+    m_eventBuffer->getSpectrum(workspaceIndex).addEventQuickly(event);
   } else {
     // TODO: do we want to disable this warning?  Most of the time, we
     // shouldn't have any invalid ID's, but if we do, we'll probably
     // get a lot and flood the log with messages...
     // g_log.warning() << "Invalid pixel ID: " << pixelId << " (TofF: "
-    //                << tof << " microseconds)" << std::endl;
+    //                << tof << " microseconds)\n";
   }
 }
 
@@ -588,8 +587,8 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
   // TODO: At present, there's no way for monitor logs to be added
   // to m_monitorLogs.  Either implement this feature, or remove
   // m_monitorLogs!
-  for (unsigned i = 0; i < m_monitorLogs.size(); i++) {
-    temp->mutableRun().removeProperty(m_monitorLogs[i]);
+  for (auto &monitorLog : m_monitorLogs) {
+    temp->mutableRun().removeProperty(monitorLog);
   }
   m_monitorLogs.clear();
 
@@ -603,7 +602,7 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
 
   // Lock the mutex and swap the workspaces
   {
-    Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+    std::lock_guard<std::mutex> scopedLock(m_mutex);
     std::swap(m_eventBuffer, temp);
   } // mutex automatically unlocks here
 

@@ -103,23 +103,23 @@ class UnitTest : public CxxTest::TestSuite {
       addConversion("a", 1.1);
       addConversion("b", 2.2, 0.5);
     }
-    virtual ~UnitTester() {}
+    ~UnitTester() override {}
 
     // Empty overrides of virtual methods
-    const std::string unitID() const { return "aUnit"; }
-    const std::string caption() const { return ""; }
-    const UnitLabel label() const { return UnitLabel(""); }
-    void init() {}
-    virtual double singleToTOF(const double) const { return 0; }
-    virtual double singleFromTOF(const double) const { return 0; }
-    virtual double conversionTOFMax() const {
+    const std::string unitID() const override { return "aUnit"; }
+    const std::string caption() const override { return ""; }
+    const UnitLabel label() const override { return UnitLabel(""); }
+    void init() override {}
+    double singleToTOF(const double) const override { return 0; }
+    double singleFromTOF(const double) const override { return 0; }
+    double conversionTOFMax() const override {
       return std::numeric_limits<double>::quiet_NaN();
     }
-    virtual double conversionTOFMin() const {
+    double conversionTOFMin() const override {
       return std::numeric_limits<double>::quiet_NaN();
     }
 
-    virtual Unit *clone() const { return new UnitTester(); }
+    Unit *clone() const override { return new UnitTester(); }
   };
 
 public:

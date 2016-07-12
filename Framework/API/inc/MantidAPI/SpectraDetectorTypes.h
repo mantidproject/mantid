@@ -15,12 +15,12 @@ namespace Mantid {
 
 #ifndef HAS_UNORDERED_MAP_H
 /// Map with key = spectrum number, value = workspace index
-typedef std::map<specid_t, size_t> spec2index_map;
+typedef std::map<specnum_t, size_t> spec2index_map;
 /// Map with key = detector ID, value = workspace index
 typedef std::map<detid_t, size_t> detid2index_map;
 #else
 /// Map with key = spectrum number, value = workspace index
-typedef std::tr1::unordered_map<specid_t, size_t> spec2index_map;
+typedef std::tr1::unordered_map<specnum_t, size_t> spec2index_map;
 /// Map with key = detector ID, value = workspace index
 typedef std::tr1::unordered_map<detid_t, size_t> detid2index_map;
 #endif

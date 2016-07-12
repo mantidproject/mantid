@@ -1,7 +1,11 @@
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -65,7 +69,7 @@ const std::string THICKNESS_PARAM = "TubeThickness";
 // this default constructor calls default constructors and sets other member
 // data to impossible (flag) values
 DetectorEfficiencyCor::DetectorEfficiencyCor()
-    : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(NULL), m_Ei(-1.0),
+    : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(nullptr), m_Ei(-1.0),
       m_ki(-1.0), m_shapeCache(), m_samplePos(), m_spectraSkipped() {
   m_shapeCache.clear();
 }
@@ -78,11 +82,12 @@ void DetectorEfficiencyCor::init() {
   val->add<WorkspaceUnitValidator>("DeltaE");
   val->add<HistogramValidator>();
   val->add<InstrumentValidator>();
+  declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                   Direction::Input, val),
+                  "The workspace to correct for detector efficiency");
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, val),
-      "The workspace to correct for detector efficiency");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "The name of the workspace in which to store the result. Each histogram "
       "from the input workspace maps to a histogram in this workspace that has "
       "just one value which indicates if there was a bad detector.");
@@ -199,7 +204,7 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn) {
 
   // get a pointer to the detectors that created the spectrum
   const std::set<detid_t> &dets =
-      m_inputWS->getSpectrum(spectraIn)->getDetectorIDs();
+      m_inputWS->getSpectrum(spectraIn).getDetectorIDs();
   const double ndets(static_cast<double>(dets.size())); // We correct each pixel
                                                         // so make sure we
                                                         // average the
@@ -317,8 +322,8 @@ void DetectorEfficiencyCor::getDetectorGeometry(
       detAxis = V3D(0, 1, 0);
       // assume radi in z and x and the axis is in the y
       PARALLEL_CRITICAL(deteff_shapecachea) {
-        m_shapeCache.insert(std::pair<const Object *, std::pair<double, V3D>>(
-            shape_sptr.get(), std::pair<double, V3D>(detRadius, detAxis)));
+        m_shapeCache.emplace(shape_sptr.get(),
+                             std::make_pair(detRadius, detAxis));
       }
       return;
     }
@@ -330,8 +335,8 @@ void DetectorEfficiencyCor::getDetectorGeometry(
       // assume that y and z are radi of the cylinder's circular cross-section
       // and the axis is perpendicular, in the x direction
       PARALLEL_CRITICAL(deteff_shapecacheb) {
-        m_shapeCache.insert(std::pair<const Object *, std::pair<double, V3D>>(
-            shape_sptr.get(), std::pair<double, V3D>(detRadius, detAxis)));
+        m_shapeCache.emplace(shape_sptr.get(),
+                             std::make_pair(detRadius, detAxis));
       }
       return;
     }
@@ -340,8 +345,8 @@ void DetectorEfficiencyCor::getDetectorGeometry(
       detRadius = xDist / 2.0;
       detAxis = V3D(0, 0, 1);
       PARALLEL_CRITICAL(deteff_shapecachec) {
-        m_shapeCache.insert(std::pair<const Object *, std::pair<double, V3D>>(
-            shape_sptr.get(), std::pair<double, V3D>(detRadius, detAxis)));
+        m_shapeCache.emplace(shape_sptr.get(),
+                             std::make_pair(detRadius, detAxis));
       }
       return;
     }
@@ -442,7 +447,7 @@ void DetectorEfficiencyCor::logErrors(size_t totalNDetectors) const {
   if (!m_spectraSkipped.empty()) {
     g_log.warning() << "There were " << nspecs
                     << " spectra that could not be corrected out of total: "
-                    << totalNDetectors << std::endl;
+                    << totalNDetectors << '\n';
     g_log.warning() << "Their spectra were nullified\n";
     g_log.debug() << " Nullified spectra numbers: ";
     auto itend = m_spectraSkipped.end();

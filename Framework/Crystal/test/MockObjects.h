@@ -8,23 +8,26 @@
 #ifndef MOCKOBJECTS_H_
 #define MOCKOBJECTS_H_
 
-#include <gmock/gmock.h>
-#include <stdexcept>
 #include "MantidCrystal/BackgroundStrategy.h"
 #include "MantidCrystal/ICluster.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include <gmock/gmock.h>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Crystal {
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 // Mock Background strategy
 class MockBackgroundStrategy : public BackgroundStrategy {
 public:
   MOCK_CONST_METHOD1(configureIterator, void(Mantid::API::IMDIterator *const));
   MOCK_CONST_METHOD1(isBackground, bool(Mantid::API::IMDIterator *const));
-  MockBackgroundStrategy *clone() const {
+  MockBackgroundStrategy *clone() const override {
     throw std::runtime_error("Cannot clone the mock object");
   }
-  virtual ~MockBackgroundStrategy() {}
+  ~MockBackgroundStrategy() override {}
 };
 
 class MockICluster : public ICluster {
@@ -41,10 +44,12 @@ public:
                void(std::vector<DisjointElement> &disjointSet));
   MOCK_METHOD1(setRootCluster, void(ICluster const *));
   MOCK_CONST_METHOD0(getRepresentitiveIndex, size_t());
-  virtual bool containsLabel(const size_t &label) const {
+  bool containsLabel(const size_t &label) const override {
     return this->getLabel() == label;
   }
 };
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 }
 }
 

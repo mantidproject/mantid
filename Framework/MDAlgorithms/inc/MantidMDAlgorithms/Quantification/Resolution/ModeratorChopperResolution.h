@@ -50,9 +50,6 @@ public:
   /// Constructor
   ModeratorChopperResolution(const CachedExperimentInfo &observation);
 
-  /// Destructor
-  ~ModeratorChopperResolution();
-
   /// Return a width in energy for the model
   double energyWidth(const double deltaE) const;
 

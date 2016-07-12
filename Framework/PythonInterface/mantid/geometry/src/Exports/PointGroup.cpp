@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
@@ -13,6 +14,8 @@ using Mantid::Geometry::PointGroup;
 
 using namespace boost::python;
 
+GET_POINTER_SPECIALIZATION(PointGroup)
+
 namespace //<unnamed>
     {
 using namespace Mantid::PythonInterface;
@@ -27,8 +30,8 @@ boost::python::list getEquivalents(PointGroup &self, const object &hkl) {
       self.getEquivalents(Converters::PyObjectToV3D(hkl)());
 
   boost::python::list pythonEquivalents;
-  for (auto it = equivalents.begin(); it != equivalents.end(); ++it) {
-    pythonEquivalents.append(*it);
+  for (const auto &equivalent : equivalents) {
+    pythonEquivalents.append(equivalent);
   }
 
   return pythonEquivalents;

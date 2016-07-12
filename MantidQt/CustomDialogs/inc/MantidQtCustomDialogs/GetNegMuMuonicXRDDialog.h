@@ -50,12 +50,12 @@ private:
   void enableElementsForGetNegMuMuonicXRD();
 
 private slots:
-  virtual void parseInput();
+  void parseInput() override;
   void showLegend();
 
 protected:
   // create the initial layout
-  void initLayout();
+  void initLayout() override;
 signals:
   /// signal emitted when validateDialogInput passes
   void validInput();

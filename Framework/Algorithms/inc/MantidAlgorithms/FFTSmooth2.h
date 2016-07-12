@@ -37,28 +37,24 @@ namespace Algorithms {
  */
 class DLLExport FFTSmooth2 : public API::Algorithm {
 public:
-  /// Default constructor
-  FFTSmooth2() : API::Algorithm(){};
-  /// Destructor
-  virtual ~FFTSmooth2(){};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FFTSmooth"; }
+  const std::string name() const override { return "FFTSmooth"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Performs smoothing of a spectrum using various filters.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 2; }
+  int version() const override { return 2; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Arithmetic\\FFT;Transforms\\Smoothing";
   }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   // Smoothing by zeroing.
   void zero(int n, API::MatrixWorkspace_sptr &unfilteredWS,

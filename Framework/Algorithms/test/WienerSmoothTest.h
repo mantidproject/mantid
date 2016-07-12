@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/WienerSmooth.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include <algorithm>
@@ -535,7 +536,7 @@ private:
 
     for (size_t i = 0; i < outY.size(); ++i) {
       TS_ASSERT_DELTA(outY[i], ysmooth[i], 1e-5);
-      // std::cerr << outY[i] << std::endl;
+      // std::cerr << outY[i] << '\n';
     }
 
     AnalysisDataService::Instance().clear();

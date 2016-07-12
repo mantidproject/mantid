@@ -1,13 +1,6 @@
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name, too-many-instance-attributes, too-many-arguments
 # used to parse files more easily
 from __future__ import with_statement
-
-# numpy module
-import numpy as np
-
-# for command-line arguments
-import sys
-
 # Qt4 bindings for core Qt functionalities (non-GUI)
 from PyQt4 import QtCore
 # python Qt4 bindings for GUI objects
@@ -15,17 +8,17 @@ from PyQt4 import QtGui
 
 from mantid.simpleapi import *
 
-#blue
+# blue
 CSS_PEAK = """QLineEdit {
                    background-color: #54f3f5;
                 }"""
 
-#red
+# red
 CSS_BACK = """QLineEdit{
                    background-color: #f53535;
                 }"""
 
-#green
+# green
 CSS_LOWRES = """QLineEdit{
                    background-color: #a7f6a1;
                 }"""
@@ -44,7 +37,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
     _lowresToValue = 6.
     drs = []
     parent = None
-    dataType = 'data'  #'data' or 'norm'
+    dataType = 'data'  # 'data' or 'norm'
     x1=None
     x2=None
     y1=None
@@ -82,22 +75,23 @@ class DesignerMainWindow(QtGui.QMainWindow):
         self.y2 = mt2.readY(0)[:]
 
         self.dataType = type
+        _summary = parent._summary
         if type == 'data':
-            self._peakFromValue=float(parent._summary.data_peak_from_pixel.text())
-            self._peakToValue=float(parent._summary.data_peak_to_pixel.text())
-            self._backFromValue=float(parent._summary.data_background_from_pixel1.text())
-            self._backToValue=float(parent._summary.data_background_to_pixel1.text())
-            self._lowresFromValue=float(parent._summary.x_min_edit.text())
-            self._lowresToValue=float(parent._summary.x_max_edit.text())
+            self._peakFromValue = float(_summary.data_peak_from_pixel.text())
+            self._peakToValue = float(_summary.data_peak_to_pixel.text())
+            self._backFromValue = float(_summary.data_background_from_pixel1.text())
+            self._backToValue = float(_summary.data_background_to_pixel1.text())
+            self._lowresFromValue = float(_summary.x_min_edit.text())
+            self._lowresToValue = float(_summary.x_max_edit.text())
         else:
-            self._peakFromValue=float(parent._summary.norm_peak_from_pixel.text())
-            self._peakToValue=float(parent._summary.norm_peak_to_pixel.text())
-            self._backFromValue=float(parent._summary.norm_background_from_pixel1.text())
-            self._backToValue=float(parent._summary.norm_background_to_pixel1.text())
-            self._lowresFromValue=float(parent._summary.norm_x_min_edit.text())
-            self._lowresToValue=float(parent._summary.norm_x_max_edit.text())
+            self._peakFromValue = float(_summary.norm_peak_from_pixel.text())
+            self._peakToValue = float(_summary.norm_peak_to_pixel.text())
+            self._backFromValue = float(_summary.norm_background_from_pixel1.text())
+            self._backToValue = float(_summary.norm_background_to_pixel1.text())
+            self._lowresFromValue = float(_summary.norm_x_min_edit.text())
+            self._lowresToValue = float(_summary.norm_x_max_edit.text())
 
-        #initialization of the superclass
+        # initialization of the superclass
         super(DesignerMainWindow, self).__init__(parent)
         self.parent = parent
 
@@ -107,19 +101,19 @@ class DesignerMainWindow(QtGui.QMainWindow):
         self.create_menu()
         self.create_main_frame()
 
-        #peak text fields
+        # peak text fields
         QtCore.QObject.connect(self.peakFrom, QtCore.SIGNAL("returnPressed()"), self.update_plot)
         QtCore.QObject.connect(self.peakTo, QtCore.SIGNAL("returnPressed()"), self.update_plot)
 
-        #back text fields
+        # back text fields
         QtCore.QObject.connect(self.backFrom, QtCore.SIGNAL("returnPressed()"), self.update_plot)
         QtCore.QObject.connect(self.backTo, QtCore.SIGNAL("returnPressed()"), self.update_plot)
 
-        #lowres text fields
+        # lowres text fields
         QtCore.QObject.connect(self.lowresFrom, QtCore.SIGNAL("returnPressed()"), self.update_plot)
         QtCore.QObject.connect(self.lowresTo, QtCore.SIGNAL("returnPressed()"), self.update_plot)
 
-        #linear and log axis
+        # linear and log axis
         QtCore.QObject.connect(self.linear, QtCore.SIGNAL("clicked()"), self.update_linear_selection_mode)
         QtCore.QObject.connect(self.log, QtCore.SIGNAL("clicked()"), self.update_log_selection_mode)
 
@@ -318,11 +312,11 @@ class DesignerMainWindow(QtGui.QMainWindow):
     def select_file(self):
         """ opens a file select dialog """
         # open the dialog and get the selected file
-        file = QtGui.QFileDialog.getOpenFileName()
+        file_to_open = QtGui.QFileDialog.getOpenFileName()
         # if a file is selected
-        if file:
+        if file_to_open:
             # update the lineEdit text with the selected filename
-            self.mpllineEdit.setText(file)
+            self.mpllineEdit.setText(file_to_open)
 
     def parse_file(self, filename):
         """ parse a text file to extract letters frequencies """
@@ -334,7 +328,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
         with open(filename) as f:
             for line in f:
                 for char in line:
-                    #counts only letters
+                    # counts only letters
                     if ord(char.lower()) in range(97, 122+1):
                         letters[char.lower()] += 1
 
@@ -342,7 +336,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
         k = sorted(letters.keys())
         v = [letters[ki] for ki in k]
 
-        return k,v
+        return k, v
 
     def update_plot(self):
         """ retrieve the value of the peak/back/lowres and save it
@@ -358,7 +352,6 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
     def tmp_plot_data(self, refresh=False):
         """ just for testing, display random data """
-
         if refresh:
             for rect in self.drs:
                 rect._refresh()
@@ -369,7 +362,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
             def __init__(self, rect, type, super, parent):
                 self.rect = rect
                 self.xpress = None
-                self.type = type #peak_from, peak_to, back_from, back_to...
+                self.type = type  # peak_from, peak_to, back_from, back_to...
                 self.super = super
                 self.parent = parent
 
@@ -384,34 +377,38 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
             def on_press(self, event):
                 'on button press we will see if the mouse is over us and store some data'
-                if event.inaxes != self.rect.axes: return
+                if event.inaxes != self.rect.axes:
+                    return
 
-                contains, attrd = self.rect.contains(event)
-                if not contains: return
+                contains, _attrd = self.rect.contains(event)
+                if not contains:
+                    return
                 self.xpress = event.xdata
 
             def on_motion(self, event):
-                'on motion we will move the rect if the mouse is over us'
-                if self.xpress is None: return
-                if event.inaxes != self.rect.axes: return
+                """on motion we will move the rect if the mouse is over us"""
+                if self.xpress is None:
+                    return
+                if event.inaxes != self.rect.axes:
+                    return
                 x0 = event.xdata
                 _x0_format = '{0:.2f}'.format(x0)
                 _x0_parent_format = str(int(round(x0)))
-
+                _summary = self.parent._summary
                 if self.super.dataType == 'data':
-                    parent_data_peak_from = self.parent._summary.data_peak_from_pixel
-                    parent_data_peak_to = self.parent._summary.data_peak_to_pixel
-                    parent_back_peak_from = self.parent._summary.data_background_from_pixel1
-                    parent_back_peak_to = self.parent._summary.data_background_to_pixel1
-                    parent_x_min = self.parent._summary.x_min_edit
-                    parent_x_max = self.parent._summary.x_max_edit
+                    parent_data_peak_from = _summary.data_peak_from_pixel
+                    parent_data_peak_to = _summary.data_peak_to_pixel
+                    parent_back_peak_from = _summary.data_background_from_pixel1
+                    parent_back_peak_to = _summary.data_background_to_pixel1
+                    parent_x_min = _summary.x_min_edit
+                    parent_x_max = _summary.x_max_edit
                 else:
-                    parent_data_peak_from = self.parent._summary.norm_peak_from_pixel
-                    parent_data_peak_to = self.parent._summary.norm_peak_to_pixel
-                    parent_back_peak_from = self.parent._summary.norm_background_from_pixel1
-                    parent_back_peak_to = self.parent._summary.norm_background_to_pixel1
-                    parent_x_min = self.parent._summary.norm_x_min_edit
-                    parent_x_max = self.parent._summary.norm_x_max_edit
+                    parent_data_peak_from = _summary.norm_peak_from_pixel
+                    parent_data_peak_to = _summary.norm_peak_to_pixel
+                    parent_back_peak_from = _summary.norm_background_from_pixel1
+                    parent_back_peak_to = _summary.norm_background_to_pixel1
+                    parent_x_min = _summary.norm_x_min_edit
+                    parent_x_max = _summary.norm_x_max_edit
 
                 if self.type == 'peak_from':
                     self.super.peakFrom.setText(_x0_format)
@@ -452,7 +449,8 @@ class DesignerMainWindow(QtGui.QMainWindow):
                 self.rect.figure.canvas.draw()
 
             def on_release(self, event):
-                'on release we reset the press data'
+                """on release we reset the press data"""
+                _event = event
                 self.xpress = None
                 self.rect.figure.canvas.draw()
 
@@ -464,7 +462,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
         parent = self.parent
 
-        #top plot will be for peak and background selection
+        # top plot will be for peak and background selection
         axes = self.fig.add_subplot(211)
 
         x = self.x1
@@ -473,9 +471,9 @@ class DesignerMainWindow(QtGui.QMainWindow):
         bLinear = self.linear.isChecked()
 
         if bLinear:
-            line, = axes.plot(x,y,color='black')
+            _line, = axes.plot(x, y, color='black')
         else:
-            line, = axes.semilogy(x,y,color='black')
+            _line, = axes.semilogy(x, y, color='black')
 
         ymax=max(y)
 
@@ -484,7 +482,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
         else:
             ymin = 1
 
-        #peak cursor
+        # peak cursor
         peakx1 = self._peakFromValue
         self.peakFrom.setText(str(peakx1))
         peakx2 = self._peakToValue
@@ -509,7 +507,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
             dr.connect()
             self.drs.append(dr)
 
-        #back cursor
+        # back cursor
         backx1 = self._backFromValue
         self.backFrom.setText(str(backx1))
         backx2 = self._backToValue
@@ -541,9 +539,9 @@ class DesignerMainWindow(QtGui.QMainWindow):
         y = self.y2
 
         if bLinear:
-            line2, = axes2.plot(x,y,color='black')
+            _line2, = axes2.plot(x,y,color='black')
         else:
-            line2, = axes2.semilogy(x,y,color='black')
+            _line2, = axes2.semilogy(x,y,color='black')
 
         ymax=max(y)
         if bLinear:

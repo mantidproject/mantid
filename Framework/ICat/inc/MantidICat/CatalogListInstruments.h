@@ -38,24 +38,26 @@ public:
   /// constructor
   CatalogListInstruments() : API::Algorithm() {}
   /// destructor
-  ~CatalogListInstruments() {}
+  ~CatalogListInstruments() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "CatalogListInstruments"; }
+  const std::string name() const override { return "CatalogListInstruments"; }
   /// Summary of algorithms purpose.
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Lists the name of instruments from all catalogs or a specific "
            "catalog based on session information.";
   }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Catalog"; }
+  const std::string category() const override {
+    return "DataHandling\\Catalog";
+  }
 
 private:
   /// Overwrites Algorithm init method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm exec method
-  void exec();
+  void exec() override;
 };
 }
 }

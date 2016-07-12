@@ -87,6 +87,23 @@ void Stretch::run() {
   const auto sampleName = m_uiForm.dsSample->getCurrentDataName().toStdString();
   const auto resName = m_uiForm.dsResolution->getCurrentDataName().toStdString();
 
+  auto saveDirectory = Mantid::Kernel::ConfigService::Instance().getString(
+      "defaultsave.directory");
+  if (saveDirectory.compare("") == 0) {
+    const char *textMessage =
+        "BayesStretch requires a default save directory and "
+        "one is not currently set."
+        " If run, the algorithm will default to saving files "
+        "to the current working directory."
+        " Would you still like to run the algorithm?";
+    int result = QMessageBox::question(NULL, tr("Save Directory"),
+                                       tr(textMessage), QMessageBox::Yes,
+                                       QMessageBox::No, QMessageBox::NoButton);
+    if (result == QMessageBox::No) {
+      return;
+    }
+  }
+
   // Collect input from options section
   const auto background = m_uiForm.cbBackground->currentText().toStdString();
   const auto plot = m_uiForm.cbPlot->currentText().toStdString();
@@ -152,12 +169,16 @@ void Stretch::loadSettings(const QSettings &settings) {
  */
 void Stretch::handleSampleInputReady(const QString &filename) {
   m_uiForm.ppPlot->addSpectrum("Sample", filename, 0);
+  // update the maximum and minimum range bar positions
   QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("StretchERange");
   setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
                    range);
   setPlotPropertyRange(eRangeSelector, m_properties["EMin"],
                        m_properties["EMax"], range);
+  // update the current positions of the range bars
+  eRangeSelector->setMinimum(range.first);
+  eRangeSelector->setMaximum(range.second);
 }
 
 /**

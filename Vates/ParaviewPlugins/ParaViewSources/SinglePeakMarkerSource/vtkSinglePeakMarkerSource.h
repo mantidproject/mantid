@@ -7,7 +7,8 @@
 
     @date 23/02/2015
 
-    Copyright &copy; 2007-11 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2007-11 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -30,21 +31,24 @@
 */
 
 // cppcheck-suppress class_X_Y
-class VTK_EXPORT vtkSinglePeakMarkerSource : public vtkPolyDataAlgorithm
-{
+class VTK_EXPORT vtkSinglePeakMarkerSource : public vtkPolyDataAlgorithm {
 public:
-  static vtkSinglePeakMarkerSource*New();
-  vtkTypeMacro(vtkSinglePeakMarkerSource,vtkPolyDataAlgorithm)
-  void PrintSelf(ostream& os, vtkIndent indent);
+  static vtkSinglePeakMarkerSource *New();
+  vtkTypeMacro(vtkSinglePeakMarkerSource,
+               vtkPolyDataAlgorithm) void PrintSelf(ostream &os,
+                                                    vtkIndent indent) override;
   void SetRadiusMarker(double radius);
   void SetPosition1(double position1);
   void SetPosition2(double position2);
   void SetPosition3(double position3);
+
 protected:
   vtkSinglePeakMarkerSource();
-  ~vtkSinglePeakMarkerSource();
-  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  ~vtkSinglePeakMarkerSource() override;
+  int RequestInformation(vtkInformation *, vtkInformationVector **,
+                         vtkInformationVector *) override;
+  int RequestData(vtkInformation *, vtkInformationVector **,
+                  vtkInformationVector *) override;
 
 private:
   /// Position information
@@ -53,7 +57,7 @@ private:
   double m_position3;
   double m_radius;
 
-  vtkSinglePeakMarkerSource(const vtkSinglePeakMarkerSource&);
-  void operator = (const vtkSinglePeakMarkerSource&);
+  vtkSinglePeakMarkerSource(const vtkSinglePeakMarkerSource &);
+  void operator=(const vtkSinglePeakMarkerSource &);
 };
 #endif

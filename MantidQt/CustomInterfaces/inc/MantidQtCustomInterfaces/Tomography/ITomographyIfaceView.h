@@ -1,11 +1,14 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_ITOMOGRAPHYIFACEVIEW_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_ITOMOGRAPHYIFACEVIEW_H_
 
+#include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/IRemoteJobManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -16,7 +19,7 @@ Tomography GUI. Base class / interface for the view of the tomo GUI
 specific functionality/dependencies are added in a class derived from
 this.
 
-Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014-2016 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -101,6 +104,18 @@ public:
   virtual std::vector<std::string> logMsgs() const = 0;
 
   /**
+   * Reference or ID of the experiment entered/selected by the
+   * user. The ID is effectively the RBNumber (defined at ISIS as the
+   * "experiment reference number from the proposal"). The RBNumber
+   * identifies one experiment or a set of experiments from an
+   * approved experiment proposal. See for example:
+   * www.isis.stfc.ac.uk/groups/computing/data/problems-finding-your-data11691.html
+   *
+   * @return identifier as a string
+   */
+  virtual std::string experimentReference() const = 0;
+
+  /**
    * Username entered by the user
    *
    * @return username to log in to the compute resource
@@ -115,6 +130,16 @@ public:
   virtual std::string getPassword() const = 0;
 
   virtual std::vector<std::string> processingJobsIDs() const = 0;
+
+  /**
+   * Get the current system settings. This includes several
+   * parameters. Most of them are paths or path components them, but
+   * there are also some naming conventions and other parameters.
+   *
+   * @return Settings with current values (possibly modified by the
+   * user).
+   */
+  virtual TomoSystemSettings systemSettings() const = 0;
 
   /**
    * Get the current reconstruction tool settings set by the
@@ -149,6 +174,20 @@ public:
    * @return name of the tool as a human readable string
    */
   virtual std::string currentReconTool() const = 0;
+
+  /**
+   * Method/algorithm selected from the TomoPy list.
+   *
+   * @return name of the method as used in TomoPy
+   */
+  virtual std::string astraMethod() const = 0;
+
+  /**
+   * Method/algorithm selected from the Astra list.
+   *
+   * @return name of the method as used in Astra Toolbox
+   */
+  virtual std::string tomopyMethod() const = 0;
 
   /**
    * Updates buttons and banners related to the current login
@@ -230,6 +269,23 @@ public:
   virtual TomoPathsConfig currentPathsConfig() const = 0;
 
   /**
+   * Takes paths produces programmatically and displays them to the
+   * user. This can be used for example when modifying the paths based
+   * on some logic/consistency checks outside of this view.
+   *
+   * @param cfg configuration to use from now on
+   */
+  virtual void updatePathsConfig(const TomoPathsConfig &cfg) = 0;
+
+  /**
+   * Regions and center of rotation, normally defined by the user with
+   * a graphical rectangle selection tool.
+   *
+   * @return current user selection of regions
+   */
+  virtual ImageStackPreParams currentROIEtcParams() const = 0;
+
+  /**
    * Show a tool specific configuration dialog for the user to set it up
    *
    * @param name human readable name of the tool, as a string
@@ -242,9 +298,13 @@ public:
    *
    * @param status Job information, as produced for example by the
    * Mantid remote algorithms.
+   *
+   * @param localStatus similar information but for local runs
    */
-  virtual void updateJobsInfoDisplay(const std::vector<
-      Mantid::API::IRemoteJobManager::RemoteJobInfo> &status) = 0;
+  virtual void updateJobsInfoDisplay(
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status,
+      const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &
+          localStatus) = 0;
 
   /**
    * Save settings (normally when closing the interface). This refers
@@ -261,6 +321,25 @@ public:
    * using it; 0 otherwise.
    */
   virtual int keepAlivePeriod() { return 0; }
+
+  /**
+   * Get parameters for wavelength/energy bands aggregation. Provides
+   * all the parameters needed to run the aggregation algorithm.
+   *
+   * @return parameters for an algorithm, as key-value strings
+   * for every required parameter and optinal parameter set to
+   * non-default values.
+   */
+  virtual std::map<std::string, std::string>
+  currentAggregateBandsParams() const = 0;
+
+  /**
+   * Run the wavelength/energy bands aggregation algorithm in the
+   * background.
+   *
+   * @param alg algorithm initialized and ready to run.
+   */
+  virtual void runAggregateBands(Mantid::API::IAlgorithm_sptr alg) = 0;
 };
 
 } // namespace CustomInterfaces

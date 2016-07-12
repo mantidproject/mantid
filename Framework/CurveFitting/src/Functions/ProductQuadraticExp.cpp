@@ -23,11 +23,6 @@ ProductQuadraticExp::ProductQuadraticExp() {
   declareParameter("Lifetime", 1.0);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ProductQuadraticExp::~ProductQuadraticExp() {}
-
 /**
 Calculate the 1D function derivatives.
 @param out : Jacobian to set derivates on.

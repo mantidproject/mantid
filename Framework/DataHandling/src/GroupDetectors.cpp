@@ -16,29 +16,24 @@ DECLARE_ALGORITHM(GroupDetectors)
 using namespace Kernel;
 using namespace API;
 
-/// (Empty) Constructor
-GroupDetectors::GroupDetectors() {}
-
-/// Destructor
-GroupDetectors::~GroupDetectors() {}
-
 void GroupDetectors::init() {
   declareProperty(
-      new WorkspaceProperty<>("Workspace", "", Direction::InOut,
-                              boost::make_shared<CommonBinsValidator>()),
+      make_unique<WorkspaceProperty<>>(
+          "Workspace", "", Direction::InOut,
+          boost::make_shared<CommonBinsValidator>()),
       "The name of the workspace2D on which to perform the algorithm");
 
   declareProperty(
-      new ArrayProperty<specid_t>("SpectraList"),
+      make_unique<ArrayProperty<specnum_t>>("SpectraList"),
       "An array containing a list of the indexes of the spectra to combine\n"
       "(DetectorList and WorkspaceIndexList are ignored if this is set)");
 
   declareProperty(
-      new ArrayProperty<detid_t>("DetectorList"),
+      make_unique<ArrayProperty<detid_t>>("DetectorList"),
       "An array of detector ID's (WorkspaceIndexList is ignored if this is\n"
       "set)");
 
-  declareProperty(new ArrayProperty<size_t>("WorkspaceIndexList"),
+  declareProperty(make_unique<ArrayProperty<size_t>>("WorkspaceIndexList"),
                   "An array of workspace indices to combine");
 
   declareProperty("ResultIndex", -1,
@@ -51,7 +46,7 @@ void GroupDetectors::exec() {
   const MatrixWorkspace_sptr WS = getProperty("Workspace");
 
   std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
-  std::vector<specid_t> spectraList = getProperty("SpectraList");
+  std::vector<specnum_t> spectraList = getProperty("SpectraList");
   const std::vector<detid_t> detectorList = getProperty("DetectorList");
 
   // Could create a Validator to replace the below
@@ -74,12 +69,12 @@ void GroupDetectors::exec() {
   // appropriate spectra number and adding the indices they are linked to the
   // list to be processed
   if (!spectraList.empty()) {
-    WS->getIndicesFromSpectra(spectraList, indexList);
+    indexList = WS->getIndicesFromSpectra(spectraList);
   } // End dealing with spectraList
   else if (!detectorList.empty()) {
     // Dealing with DetectorList
     // convert from detectors to workspace indices
-    WS->getIndicesFromDetectorIDs(detectorList, indexList);
+    indexList = WS->getIndicesFromDetectorIDs(detectorList);
   }
 
   if (indexList.empty()) {
@@ -89,8 +84,8 @@ void GroupDetectors::exec() {
 
   const size_t vectorSize = WS->blocksize();
 
-  const specid_t firstIndex = static_cast<specid_t>(indexList[0]);
-  ISpectrum *firstSpectrum = WS->getSpectrum(firstIndex);
+  const specnum_t firstIndex = static_cast<specnum_t>(indexList[0]);
+  auto &firstSpectrum = WS->getSpectrum(firstIndex);
   MantidVec &firstY = WS->dataY(firstIndex);
 
   setProperty("ResultIndex", firstIndex);
@@ -100,15 +95,15 @@ void GroupDetectors::exec() {
   for (size_t i = 0; i < indexList.size() - 1; ++i) {
     // The current spectrum
     const size_t currentIndex = indexList[i + 1];
-    ISpectrum *spec = WS->getSpectrum(currentIndex);
+    auto &spec = WS->getSpectrum(currentIndex);
 
     // Add the current detector to belong to the first spectrum
-    firstSpectrum->addDetectorIDs(spec->getDetectorIDs());
+    firstSpectrum.addDetectorIDs(spec.getDetectorIDs());
 
     // Add up all the Y spectra and store the result in the first one
-    auto fEit = firstSpectrum->dataE().begin();
-    auto Yit = spec->dataY().begin();
-    auto Eit = spec->dataE().begin();
+    auto fEit = firstSpectrum.dataE().begin();
+    auto Yit = spec.dataY().begin();
+    auto Eit = spec.dataE().begin();
     for (auto fYit = firstY.begin(); fYit != firstY.end();
          ++fYit, ++fEit, ++Yit, ++Eit) {
       *fYit += *Yit;
@@ -118,10 +113,10 @@ void GroupDetectors::exec() {
 
     // Now zero the now redundant spectrum and set its spectraNo to indicate
     // this (using -1)
-    spec->dataY().assign(vectorSize, 0.0);
-    spec->dataE().assign(vectorSize, 0.0);
-    spec->setSpectrumNo(-1);
-    spec->clearDetectorIDs();
+    spec.dataY().assign(vectorSize, 0.0);
+    spec.dataE().assign(vectorSize, 0.0);
+    spec.setSpectrumNo(-1);
+    spec.clearDetectorIDs();
     progress.report();
   }
 }

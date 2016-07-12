@@ -31,13 +31,13 @@ namespace DataObjects {
 class DLLExport CoordTransformAffine : public Mantid::API::CoordTransform {
 public:
   CoordTransformAffine(const size_t inD, const size_t outD);
-  virtual CoordTransform *clone() const;
-  virtual ~CoordTransformAffine();
-  virtual std::string toXMLString() const;
-  virtual std::string id() const;
+  CoordTransform *clone() const override;
+  ~CoordTransformAffine() override;
+  std::string toXMLString() const override;
+  std::string id() const override;
   void addTranslation(const coord_t *translationVector);
   const Mantid::Kernel::Matrix<coord_t> &getMatrix() const;
-  Mantid::Kernel::Matrix<coord_t> makeAffineMatrix() const;
+  Mantid::Kernel::Matrix<coord_t> makeAffineMatrix() const override;
   void setMatrix(const Mantid::Kernel::Matrix<coord_t> &newMatrix);
   void buildOrthogonal(const Mantid::Kernel::VMD &origin,
                        const std::vector<Mantid::Kernel::VMD> &axes,
@@ -47,7 +47,7 @@ public:
                           const std::vector<Mantid::Kernel::VMD> &axes,
                           const Mantid::Kernel::VMD &scaling);
 
-  virtual void apply(const coord_t *inputVector, coord_t *outVector) const;
+  void apply(const coord_t *inputVector, coord_t *outVector) const override;
 
   static CoordTransformAffine *combineTransformations(CoordTransform *first,
                                                       CoordTransform *second);

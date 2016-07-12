@@ -10,11 +10,12 @@
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 
-#include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
-#include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/Interpolation.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
+#include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -47,20 +48,23 @@ public:
     }
   }
 
-  ~MockDetector() {}
+  ~MockDetector() override {}
 
-  void loadConfiguration(Instrument_const_sptr poldiInstrument) {
+  void loadConfiguration(Instrument_const_sptr poldiInstrument) override {
     UNUSED_ARG(poldiInstrument);
   }
-
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(efficiency, double());
   MOCK_METHOD1(twoTheta, double(int elementIndex));
   MOCK_METHOD1(distanceFromSample, double(int elementIndex));
   MOCK_METHOD0(elementCount, size_t());
   MOCK_METHOD0(centralElement, size_t());
   MOCK_METHOD2(qLimits, DoublePair(double lambdaMin, double lambdaMax));
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 
-  const std::vector<int> &availableElements() { return m_availableElements; }
+  const std::vector<int> &availableElements() override {
+    return m_availableElements;
+  }
 };
 
 class ConfiguredHeliumDetector : public PoldiHeliumDetector {
@@ -69,7 +73,7 @@ public:
     loadConfiguration(Instrument_const_sptr());
   }
 
-  void loadConfiguration(Instrument_const_sptr poldiInstrument) {
+  void loadConfiguration(Instrument_const_sptr poldiInstrument) override {
     UNUSED_ARG(poldiInstrument);
 
     initializeFixedParameters(3000.0, static_cast<size_t>(400), 2.5, 0.88);
@@ -96,23 +100,25 @@ public:
         std::vector<double>(times, times + sizeof(times) / sizeof(times[0]));
   }
 
-  ~MockChopper() {}
+  ~MockChopper() override {}
 
-  void loadConfiguration(Instrument_const_sptr poldiInstrument) {
+  void loadConfiguration(Instrument_const_sptr poldiInstrument) override {
     UNUSED_ARG(poldiInstrument)
   }
-
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(rotationSpeed, double());
   MOCK_METHOD0(cycleTime, double());
   MOCK_METHOD0(zeroOffset, double());
   MOCK_METHOD0(distanceFromSample, double());
 
   MOCK_METHOD1(setRotationSpeed, void(double rotationSpeed));
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 
-  const std::vector<double> &slitPositions() { return m_slitPositions; }
-  const std::vector<double> &slitTimes() { return m_slitTimes; }
+  const std::vector<double> &slitPositions() override {
+    return m_slitPositions;
+  }
+  const std::vector<double> &slitTimes() override { return m_slitTimes; }
 };
-
 class PoldiFakeSourceComponent : public ObjComponent {
 public:
   PoldiFakeSourceComponent() : ObjComponent("FakePoldiSource", 0) {}
@@ -122,8 +128,8 @@ class PoldiAbstractFakeInstrument : public Instrument {
 public:
   PoldiAbstractFakeInstrument() {}
 
-  virtual boost::shared_ptr<const IComponent>
-  getComponentByName(const std::string &cname, int nlevels = 0) const {
+  boost::shared_ptr<const IComponent>
+  getComponentByName(const std::string &cname, int nlevels = 0) const override {
     UNUSED_ARG(cname);
     UNUSED_ARG(nlevels);
 
@@ -138,8 +144,8 @@ class PoldiValidSourceFakeInstrument : public PoldiAbstractFakeInstrument {
 public:
   PoldiValidSourceFakeInstrument() : PoldiAbstractFakeInstrument() {}
 
-  boost::shared_ptr<const IComponent> getComponentByNameFake() const {
-    return boost::shared_ptr<const IComponent>(new PoldiFakeSourceComponent);
+  boost::shared_ptr<const IComponent> getComponentByNameFake() const override {
+    return boost::make_shared<PoldiFakeSourceComponent>();
   }
 };
 
@@ -147,7 +153,7 @@ class PoldiInvalidSourceFakeInstrument : public PoldiAbstractFakeInstrument {
 public:
   PoldiInvalidSourceFakeInstrument() : PoldiAbstractFakeInstrument() {}
 
-  boost::shared_ptr<const IComponent> getComponentByNameFake() const {
+  boost::shared_ptr<const IComponent> getComponentByNameFake() const override {
     return boost::shared_ptr<const IComponent>();
   }
 };

@@ -26,16 +26,6 @@ using Mantid::Geometry::Instrument_const_sptr;
 DECLARE_ALGORITHM(ConvertDiffCal)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertDiffCal::ConvertDiffCal() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertDiffCal::~ConvertDiffCal() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ConvertDiffCal::name() const { return "ConvertDiffCal"; }
@@ -57,11 +47,11 @@ const std::string ConvertDiffCal::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ConvertDiffCal::init() {
-  declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OffsetsWorkspace",
-                                                          "", Direction::Input),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+                      "OffsetsWorkspace", "", Direction::Input),
                   "OffsetsWorkspace containing the calibration offsets.");
-  declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -73,7 +63,7 @@ void ConvertDiffCal::init() {
  * @return The proper detector id.
  */
 detid_t getDetID(OffsetsWorkspace_const_sptr offsetsWS, const size_t index) {
-  auto detIDs = offsetsWS->getSpectrum(index)->getDetectorIDs();
+  auto detIDs = offsetsWS->getSpectrum(index).getDetectorIDs();
   if (detIDs.size() != 1) {
     std::stringstream msg;
     msg << "Encountered spectrum with multiple detector ids (size="

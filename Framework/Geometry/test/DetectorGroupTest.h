@@ -5,6 +5,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
@@ -94,7 +95,7 @@ public:
   void testAddDetector() {
     boost::shared_ptr<DetectorGroup> detg =
         ComponentCreationHelper::createDetectorGroupWith5CylindricalDetectors();
-    boost::shared_ptr<Detector> d(new Detector("d", 6, 0));
+    auto d = boost::make_shared<Detector>("d", 6, nullptr);
     d->setPos(6.0, 3.0, 2.0);
     TS_ASSERT(!detg->isMasked());
     bool warn = true;

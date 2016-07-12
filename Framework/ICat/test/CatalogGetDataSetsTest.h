@@ -14,7 +14,7 @@ using namespace Mantid::ICat;
 class CatalogGetDataSetsTest : public CxxTest::TestSuite {
 public:
   /// Skip all unit tests if ICat server is down
-  bool skipTests() { return ICatTestHelper::skipTests(); }
+  bool skipTests() override { return ICatTestHelper::skipTests(); }
 
   void testInit() {
     Mantid::Kernel::ConfigService::Instance().setString("default.facility",

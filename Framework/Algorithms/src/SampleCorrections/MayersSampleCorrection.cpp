@@ -6,6 +6,8 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SampleValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/CompositeValidator.h"
 
@@ -54,21 +56,21 @@ const std::string MayersSampleCorrection::summary() const {
 void MayersSampleCorrection::init() {
   using API::WorkspaceProperty;
   // Inputs
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input,
-                                          createInputWSValidator()),
-                  "Input workspace with X units in TOF. The workspace must "
-                  "also have a sample with a cylindrical shape and an "
-                  "instrument with a defined source and sample position.");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<>>(
+          "InputWorkspace", "", Direction::Input, createInputWSValidator()),
+      "Input workspace with X units in TOF. The workspace must "
+      "also have a sample with a cylindrical shape and an "
+      "instrument with a defined source and sample position.");
   declareProperty(
       "MultipleScattering", false,
       "If True then also correct for the effects of multiple scattering."
       "Please note that the MS correction assumes the scattering is elastic.",
       Direction::Input);
   // Outputs
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "An output workspace.");
 }
 
 /**

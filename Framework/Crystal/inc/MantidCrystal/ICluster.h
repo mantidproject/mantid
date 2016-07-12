@@ -65,7 +65,7 @@ public:
   virtual void toUniformMinimum(std::vector<DisjointElement> &disjointSet) = 0;
 
   /// Virtual destructor
-  virtual ~ICluster(){};
+  virtual ~ICluster() = default;
 
   /// Set the root cluster
   virtual void setRootCluster(ICluster const *root) = 0;

@@ -1,11 +1,14 @@
 #include "MantidAlgorithms/PDFFourierTransform.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
+
+#include <cmath>
 #include <sstream>
-#include <math.h>
 
 namespace Mantid {
 namespace Algorithms {
@@ -34,16 +37,6 @@ const string S_OF_Q_MINUS_ONE("S(Q)-1");
 const string Q_S_OF_Q_MINUS_ONE("Q[S(Q)-1]");
 }
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-PDFFourierTransform::PDFFourierTransform() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-PDFFourierTransform::~PDFFourierTransform() {}
-
 const std::string PDFFourierTransform::name() const {
   return "PDFFourierTransform";
 }
@@ -62,12 +55,13 @@ const std::string PDFFourierTransform::category() const {
 void PDFFourierTransform::init() {
   auto uv = boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer");
 
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, uv),
-      S_OF_Q + ", " + S_OF_Q_MINUS_ONE + ", or " + Q_S_OF_Q_MINUS_ONE);
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Result paired-distribution function");
+  declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                   Direction::Input, uv),
+                  S_OF_Q + ", " + S_OF_Q_MINUS_ONE + ", or " +
+                      Q_S_OF_Q_MINUS_ONE);
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Result paired-distribution function");
 
   // Set up input data type
   std::vector<std::string> inputTypes;
@@ -149,12 +143,12 @@ std::map<string, string> PDFFourierTransform::validateInputs() {
 void PDFFourierTransform::exec() {
   // get input data
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  MantidVec inputQ = inputWS->dataX(0);     //  x for input
-  MantidVec inputDQ = inputWS->dataDx(0);   // dx for input
+  MantidVec inputQ = inputWS->dataX(0);                   //  x for input
+  HistogramData::HistogramDx inputDQ(inputQ.size(), 0.0); // dx for input
+  if (inputWS->sharedDx(0))
+    inputDQ = inputWS->dx(0);
   MantidVec inputFOfQ = inputWS->dataY(0);  //  y for input
   MantidVec inputDfOfQ = inputWS->dataE(0); // dy for input
-  if (inputDQ.empty())
-    inputDQ.assign(inputQ.size(), 0.);
 
   // transform input data into Q/MomentumTransfer
   const std::string inputXunit = inputWS->getAxis(0)->unit()->unitID();
@@ -162,12 +156,11 @@ void PDFFourierTransform::exec() {
     // nothing to do
   } else if (inputXunit == "dSpacing") {
     // convert the x-units to Q/MomentumTransfer
+    const double PI_2(2. * M_PI);
+    std::for_each(inputQ.begin(), inputQ.end(),
+                  [&PI_2](double &Q) { Q /= PI_2; });
     std::transform(inputDQ.begin(), inputDQ.end(), inputQ.begin(),
                    inputDQ.begin(), std::divides<double>());
-    const double PI_2(2. * M_PI);
-    std::transform(inputQ.begin(), inputQ.end(), inputQ.begin(),
-                   std::bind1st(std::divides<double>(), PI_2));
-
     // reverse all of the arrays
     std::reverse(inputQ.begin(), inputQ.end());
     std::reverse(inputDQ.begin(), inputDQ.end());
@@ -205,8 +198,7 @@ void PDFFourierTransform::exec() {
   if (soqType == S_OF_Q) {
     g_log.information() << "Subtracting one from all values\n";
     // there is no error propagation for subtracting one
-    std::transform(inputFOfQ.begin(), inputFOfQ.end(), inputFOfQ.begin(),
-                   std::bind2nd(std::minus<double>(), 1.));
+    std::for_each(inputFOfQ.begin(), inputFOfQ.end(), [](double &F) { F--; });
     soqType = S_OF_Q_MINUS_ONE;
   }
   if (soqType == S_OF_Q_MINUS_ONE) {
@@ -312,16 +304,15 @@ void PDFFourierTransform::exec() {
         sinus *= sin(q * rdelta) / (q * rdelta);
       }
       fs += sinus * inputFOfQ[q_index];
-      error +=
-          q * q * (sinus * inputDfOfQ[q_index]) * (sinus * inputDfOfQ[q_index]);
+      error += (sinus * inputDfOfQ[q_index]) * (sinus * inputDfOfQ[q_index]);
       // g_log.debug() << "q[" << i << "] = " << q << "  dq = " << deltaq << "
       // S(q) =" << s;
-      // g_log.debug() << "  d(gr) = " << temp << "  gr = " << gr << std::endl;
+      // g_log.debug() << "  d(gr) = " << temp << "  gr = " << gr << '\n';
     }
 
     // put the information into the output
     outputY[r_index] = fs * 2 / M_PI;
-    outputE[r_index] = error * 2 / M_PI; // TODO: Wrong!
+    outputE[r_index] = sqrt(error) * 2 / M_PI;
   }
 
   // convert to the correct form of PDF
@@ -344,7 +335,7 @@ void PDFFourierTransform::exec() {
   } else if (pdfType == LITTLE_G_OF_R) {
     const double factor = 1. / (4. * M_PI * rho0);
     for (size_t i = 0; i < outputY.size(); ++i) {
-      // error propogation - assuming uncertainty in r = 0
+      // error propagation - assuming uncertainty in r = 0
       outputE[i] = outputE[i] / outputR[i];
       // transform the data
       outputY[i] = 1. + factor * outputY[i] / outputR[i];
@@ -352,7 +343,7 @@ void PDFFourierTransform::exec() {
   } else if (pdfType == RDF_OF_R) {
     const double factor = 4. * M_PI * rho0;
     for (size_t i = 0; i < outputY.size(); ++i) {
-      // error propogation - assuming uncertainty in r = 0
+      // error propagation - assuming uncertainty in r = 0
       outputE[i] = outputE[i] * outputR[i];
       // transform the data
       outputY[i] = outputR[i] * outputY[i] + factor * outputR[i] * outputR[i];

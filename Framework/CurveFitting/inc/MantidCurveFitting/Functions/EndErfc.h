@@ -40,22 +40,19 @@ National Laboratory & European Spallation Source
 
 class DLLExport EndErfc : public API::ParamFunction, public API::IFunction1D {
 public:
-  /// Destructor
-  virtual ~EndErfc() {}
+  /// overwrite IFunction base class methods
+  std::string name() const override { return "EndErfc"; }
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "EndErfc"; }
-
-  /// overwrite IFunction base class methods
-  virtual void setActiveParameter(size_t i, double value);
-  virtual const std::string category() const { return "Calibrate"; }
+  void setActiveParameter(size_t i, double value) override;
+  const std::string category() const override { return "Calibrate"; }
 
 protected:
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
   /// overwrite IFunction base class method that declares function parameters
-  virtual void init();
+  void init() override;
 };
 
 } // namespace Functions

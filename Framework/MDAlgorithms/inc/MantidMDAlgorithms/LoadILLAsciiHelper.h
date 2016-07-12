@@ -42,7 +42,7 @@ namespace MDAlgorithms {
 
 class ILLParser {
 public:
-  ILLParser(const std::string &filename);
+  ILLParser(const std::string &filepath);
   virtual ~ILLParser();
   void parse();
   void showHeader();

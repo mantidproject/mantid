@@ -134,95 +134,99 @@ std::string ICat4Catalog::buildSearchQuery(const CatalogSearchParam &inputs) {
 
   // Investigation startDate if endDate is not selected
   if (inputs.getStartDate() != 0 && inputs.getEndDate() == 0) {
-    whereClause.push_back("inves.startDate >= '" + startDate + "'");
+    whereClause.emplace_back("inves.startDate >= '" + startDate + "'");
   }
 
   // Investigation endDate if startdate is not selected
   if (inputs.getEndDate() != 0 && inputs.getStartDate() == 0) {
-    whereClause.push_back("inves.endDate <= '" + endDate + "'");
+    whereClause.emplace_back("inves.endDate <= '" + endDate + "'");
   }
 
   // Investigation Start and end date if both selected
   if (inputs.getStartDate() != 0 && inputs.getEndDate() != 0) {
-    whereClause.push_back("inves.startDate BETWEEN '" + startDate + "' AND '" +
-                          endDate + "'");
+    whereClause.emplace_back("inves.startDate BETWEEN '" + startDate +
+                             "' AND '" + endDate + "'");
   }
 
   // Investigation name (title)
   if (!inputs.getInvestigationName().empty()) {
-    whereClause.push_back("inves.title LIKE '%" +
-                          inputs.getInvestigationName() + "%'");
+    whereClause.emplace_back("inves.title LIKE '%" +
+                             inputs.getInvestigationName() + "%'");
   }
 
   // Investigation id
   if (!inputs.getInvestigationId().empty()) {
-    whereClause.push_back("inves.name = '" + inputs.getInvestigationId() + "'");
+    whereClause.emplace_back("inves.name = '" + inputs.getInvestigationId() +
+                             "'");
   }
 
   // Investigation type
   if (!inputs.getInvestigationType().empty()) {
-    joinClause.push_back("JOIN inves.type itype");
-    whereClause.push_back("itype.name = '" + inputs.getInvestigationType() +
-                          "'");
+    joinClause.emplace_back("JOIN inves.type itype");
+    whereClause.emplace_back("itype.name = '" + inputs.getInvestigationType() +
+                             "'");
   }
 
   // Instrument name
   if (!inputs.getInstrument().empty()) {
-    joinClause.push_back("JOIN inves.investigationInstruments invInst");
-    joinClause.push_back("JOIN invInst.instrument inst");
-    whereClause.push_back("inst.fullName = '" + inputs.getInstrument() + "'");
+    joinClause.emplace_back("JOIN inves.investigationInstruments invInst");
+    joinClause.emplace_back("JOIN invInst.instrument inst");
+    whereClause.emplace_back("inst.fullName = '" + inputs.getInstrument() +
+                             "'");
   }
 
   // Keywords
   if (!inputs.getKeywords().empty()) {
-    joinClause.push_back("JOIN inves.keywords keywords");
-    whereClause.push_back("keywords.name IN ('" + inputs.getKeywords() + "')");
+    joinClause.emplace_back("JOIN inves.keywords keywords");
+    whereClause.emplace_back("keywords.name IN ('" + inputs.getKeywords() +
+                             "')");
   }
 
   // Sample name
   if (!inputs.getSampleName().empty()) {
-    joinClause.push_back("JOIN inves.samples sample");
-    whereClause.push_back("sample.name LIKE '%" + inputs.getSampleName() +
-                          "%'");
+    joinClause.emplace_back("JOIN inves.samples sample");
+    whereClause.emplace_back("sample.name LIKE '%" + inputs.getSampleName() +
+                             "%'");
   }
 
   // If the user has selected the "My data only" button.
   // (E.g. they want to display or search through all the data they have access
   // to.
   if (inputs.getMyData()) {
-    joinClause.push_back("JOIN inves.investigationUsers users");
-    joinClause.push_back("JOIN users.user user");
-    whereClause.push_back("user.name = :user");
+    joinClause.emplace_back("JOIN inves.investigationUsers users");
+    joinClause.emplace_back("JOIN users.user user");
+    whereClause.emplace_back("user.name = :user");
   }
 
   // Investigators complete name.
   if (!inputs.getInvestigatorSurName().empty()) {
     // We join another investigationUsers & user tables as we need two aliases.
-    joinClause.push_back("JOIN inves.investigationUsers usrs");
-    joinClause.push_back("JOIN usrs.user usr");
-    whereClause.push_back("usr.fullName LIKE '%" +
-                          inputs.getInvestigatorSurName() + "%'");
+    joinClause.emplace_back("JOIN inves.investigationUsers usrs");
+    joinClause.emplace_back("JOIN usrs.user usr");
+    whereClause.emplace_back("usr.fullName LIKE '%" +
+                             inputs.getInvestigatorSurName() + "%'");
   }
 
   // Similar to above. We check if either has been input,
   // join the related table and add the specific WHERE clause.
   if (!inputs.getDatafileName().empty() ||
       (inputs.getRunStart() > 0 && inputs.getRunEnd() > 0)) {
-    joinClause.push_back("JOIN inves.datasets dataset");
-    joinClause.push_back("JOIN dataset.datafiles datafile");
+    joinClause.emplace_back("JOIN inves.datasets dataset");
+    joinClause.emplace_back("JOIN dataset.datafiles datafile");
 
     if (!inputs.getDatafileName().empty()) {
-      whereClause.push_back("datafile.name LIKE '%" + inputs.getDatafileName() +
-                            "%'");
+      whereClause.emplace_back("datafile.name LIKE '%" +
+                               inputs.getDatafileName() + "%'");
     }
 
     if (inputs.getRunStart() > 0 && inputs.getRunEnd() > 0) {
-      joinClause.push_back("JOIN datafile.parameters datafileparameters");
-      joinClause.push_back("JOIN datafileparameters.type dtype");
-      whereClause.push_back("dtype.name='run_number' AND "
-                            "datafileparameters.numericValue BETWEEN " +
-                            Strings::toString(inputs.getRunStart()) + " AND " +
-                            Strings::toString(inputs.getRunEnd()) + "");
+      joinClause.emplace_back("JOIN datafile.parameters datafileparameters");
+      joinClause.emplace_back("JOIN datafileparameters.type dtype");
+      whereClause.emplace_back("dtype.name='run_number' AND "
+                               "datafileparameters.numericValue BETWEEN " +
+                               Strings::toString(inputs.getRunStart()) +
+                               " AND " + Strings::toString(inputs.getRunEnd()) +
+                               "");
     }
   }
 
@@ -269,8 +273,8 @@ void ICat4Catalog::search(const CatalogSearchParam &inputs,
 
   // Modify the query to include correct SELECT and LIMIT clauses.
   query.insert(0, "SELECT DISTINCT inves");
-  query.append(" LIMIT " + boost::lexical_cast<std::string>(offset) + "," +
-               boost::lexical_cast<std::string>(limit));
+  query.append(" LIMIT " + std::to_string(offset) + "," +
+               std::to_string(limit));
 
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
@@ -439,8 +443,8 @@ void ICat4Catalog::saveDataSets(std::vector<xsd__anyType *> response,
   }
 
   std::string emptyCell = "";
-  for (auto iter = response.begin(); iter != response.end(); ++iter) {
-    ns1__dataset *dataset = dynamic_cast<ns1__dataset *>(*iter);
+  for (auto &iter : response) {
+    ns1__dataset *dataset = dynamic_cast<ns1__dataset *>(iter);
     if (dataset) {
       API::TableRow table = outputws->appendRow();
 
@@ -545,8 +549,8 @@ void ICat4Catalog::listInstruments(std::vector<std::string> &instruments) {
   auto searchResults =
       performSearch(icat, "Instrument.fullName ORDER BY fullName");
 
-  for (unsigned i = 0; i < searchResults.size(); ++i) {
-    auto instrument = dynamic_cast<xsd__string *>(searchResults.at(i));
+  for (auto &searchResult : searchResults) {
+    auto instrument = dynamic_cast<xsd__string *>(searchResult);
     if (instrument)
       instruments.push_back(instrument->__item);
   }
@@ -564,8 +568,8 @@ void ICat4Catalog::listInvestigationTypes(
   auto searchResults =
       performSearch(icat, "InvestigationType.name ORDER BY name");
 
-  for (size_t i = 0; i < searchResults.size(); ++i) {
-    auto investigationType = dynamic_cast<xsd__string *>(searchResults.at(i));
+  for (auto &searchResult : searchResults) {
+    auto investigationType = dynamic_cast<xsd__string *>(searchResult);
     if (investigationType)
       invstTypes.push_back(investigationType->__item);
   }
@@ -581,8 +585,7 @@ const std::string ICat4Catalog::getFileLocation(const long long &fileID) {
   setICATProxySettings(icat);
 
   auto searchResults =
-      performSearch(icat, "Datafile[id = '" +
-                              boost::lexical_cast<std::string>(fileID) + "']");
+      performSearch(icat, "Datafile[id = '" + std::to_string(fileID) + "']");
   auto datafile = dynamic_cast<ns1__datafile *>(searchResults.at(0));
 
   if (datafile && datafile->location)
@@ -605,14 +608,13 @@ const std::string ICat4Catalog::getDownloadURL(const long long &fileID) {
 
   // Set the REST features of the URL.
   std::string session = "sessionId=" + m_session->getSessionId();
-  std::string datafile =
-      "&datafileIds=" + boost::lexical_cast<std::string>(fileID);
-  std::string outname = "&outname=" + boost::lexical_cast<std::string>(fileID);
+  std::string datafile = "&datafileIds=" + std::to_string(fileID);
+  std::string outname = "&outname=" + std::to_string(fileID);
 
   // Add all the REST pieces to the URL.
   url += ("getData?" + session + datafile + outname + "&zip=false");
   g_log.debug() << "The download URL in ICat4Catalog::getDownloadURL is: "
-                << url << std::endl;
+                << url << '\n';
   return url;
 }
 
@@ -638,15 +640,14 @@ ICat4Catalog::getUploadURL(const std::string &investigationID,
   std::string session = "sessionId=" + m_session->getSessionId();
   std::string name = "&name=" + createFileName;
   std::string datasetId =
-      "&datasetId=" +
-      boost::lexical_cast<std::string>(getMantidDatasetId(investigationID));
+      "&datasetId=" + std::to_string(getMantidDatasetId(investigationID));
   std::string description = "&description=" + dataFileDescription;
 
   // Add pieces of URL together.
   url += ("put?" + session + name + datasetId + description +
           "&datafileFormatId=1");
   g_log.debug() << "The upload URL in ICat4Catalog::getUploadURL is: " << url
-                << std::endl;
+                << '\n';
   return url;
 }
 
@@ -713,12 +714,12 @@ void ICat4Catalog::keepAlive() {
 void ICat4Catalog::setSSLContext(ICATPortBindingProxy &icat) {
   if (soap_ssl_client_context(
           &icat, SOAP_SSL_CLIENT, /* use SOAP_SSL_DEFAULT in production code */
-          NULL, /* keyfile: required only when client must authenticate to
+          nullptr, /* keyfile: required only when client must authenticate to
         server (see SSL docs on how to obtain this file) */
-          NULL, /* password to read the keyfile */
-          NULL, /* optional cacert file to store trusted certificates */
-          NULL, /* optional capath to directory with trusted certificates */
-          NULL  /* if randfile!=NULL: use a file with random data to seed
+          nullptr, /* password to read the keyfile */
+          nullptr, /* optional cacert file to store trusted certificates */
+          nullptr, /* optional capath to directory with trusted certificates */
+          nullptr  /* if randfile!=NULL: use a file with random data to seed
                    randomness */
           )) {
     throwErrorMessage(icat);
@@ -768,7 +769,7 @@ std::string ICat4Catalog::bytesToString(int64_t &fileSize) {
     fileSize = fileSize / 1024;
   }
 
-  return boost::lexical_cast<std::string>(fileSize) + units.at(order);
+  return std::to_string(fileSize) + units.at(order);
 }
 
 /**
@@ -798,8 +799,8 @@ int64_t ICat4Catalog::getMantidDatasetId(const std::string &investigationID) {
       icat, "Dataset <-> Investigation[name = '" + investigationID + "']");
 
   int64_t datasetID = -1;
-  for (size_t i = 0; i < searchResults.size(); ++i) {
-    auto dataset = dynamic_cast<ns1__dataset *>(searchResults.at(i));
+  for (auto &searchResult : searchResults) {
+    auto dataset = dynamic_cast<ns1__dataset *>(searchResult);
     if (dataset && *(dataset->name) == "mantid")
       datasetID = *(dataset->id);
   }
@@ -904,8 +905,7 @@ ICat4Catalog::performSearch(ICATPortBindingProxy &icat, std::string query) {
   request.sessionId = &sessionID;
   request.query = &query;
 
-  g_log.debug() << "The search query sent to ICAT was: \n" << query
-                << std::endl;
+  g_log.debug() << "The search query sent to ICAT was: \n" << query << '\n';
 
   std::vector<xsd__anyType *> searchResults;
 

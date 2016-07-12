@@ -17,17 +17,6 @@ using namespace Geometry;
 DECLARE_ALGORITHM(ImportMDHistoWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ImportMDHistoWorkspace::ImportMDHistoWorkspace()
-    : ImportMDHistoWorkspaceBase() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ImportMDHistoWorkspace::~ImportMDHistoWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ImportMDHistoWorkspace::name() const {
   return "ImportMDHistoWorkspace";
@@ -47,10 +36,9 @@ const std::string ImportMDHistoWorkspace::category() const {
 /** Initialize the algorithm's properties.
  */
 void ImportMDHistoWorkspace::init() {
-  std::vector<std::string> fileExtensions(1);
-  fileExtensions[0] = ".txt";
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
-                                        fileExtensions),
+  std::vector<std::string> fileExtensions{".txt"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, fileExtensions),
                   "File of type txt");
 
   // Initialize generic dimension properties on the base class.

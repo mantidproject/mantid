@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RenameWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
 
 namespace Mantid {
@@ -18,10 +19,10 @@ using namespace API;
  *
  */
 void RenameWorkspace::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input));
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+      "InputWorkspace", "", Direction::Input));
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+      "OutputWorkspace", "", Direction::Output));
   declareProperty<bool>(
       "RenameMonitors", false,
       "If true, and monitor workspace found attached"
@@ -129,7 +130,7 @@ bool RenameWorkspace::processGroups() {
       } catch (Kernel::Exception::NotFoundError &ex) {
         // Will wind up here if group has somehow got messed up and a member
         // doesn't exist. Should't be possible!
-        g_log.error() << ex.what() << std::endl;
+        g_log.error() << ex.what() << '\n';
       }
     }
   }

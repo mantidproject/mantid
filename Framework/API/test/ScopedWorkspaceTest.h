@@ -14,12 +14,12 @@ using namespace Mantid::API;
 /// MockWorkspace copied from AnalysisDataServiceTest so I have something to add
 /// to the ADS
 class MockWorkspace : public Workspace {
-  virtual const std::string id() const { return "MockWorkspace"; }
-  virtual const std::string toString() const { return ""; }
-  virtual size_t getMemorySize() const { return 1; }
+  const std::string id() const override { return "MockWorkspace"; }
+  const std::string toString() const override { return ""; }
+  size_t getMemorySize() const override { return 1; }
 
 private:
-  virtual MockWorkspace *doClone() const {
+  MockWorkspace *doClone() const override {
     throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
   }
 };
@@ -38,7 +38,7 @@ public:
     m_ads.clear();
   }
 
-  ~ScopedWorkspaceTest() { m_ads.clear(); }
+  ~ScopedWorkspaceTest() override { m_ads.clear(); }
 
   void test_emptyConstructor() {
     ScopedWorkspace test;

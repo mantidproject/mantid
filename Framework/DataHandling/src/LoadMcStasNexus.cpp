@@ -1,6 +1,7 @@
 #include "MantidDataHandling/LoadMcStasNexus.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -16,16 +17,6 @@ using namespace Kernel;
 using namespace API;
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStasNexus)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadMcStasNexus::LoadMcStasNexus() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadMcStasNexus::~LoadMcStasNexus() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -58,12 +49,13 @@ int LoadMcStasNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadMcStasNexus::init() {
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".h5", ".nxs"}),
-      "The name of the Nexus file to load");
+  const std::vector<std::string> exts{".h5", ".nxs"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
+                  "The name of the Nexus file to load");
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
 
@@ -72,7 +64,7 @@ void LoadMcStasNexus::init() {
  */
 void LoadMcStasNexus::exec() {
   std::string filename = getPropertyValue("Filename");
-  g_log.debug() << "Opening file " << filename << std::endl;
+  g_log.debug() << "Opening file " << filename << '\n';
 
   ::NeXus::File nxFile(filename);
   auto entries = nxFile.getEntries();
@@ -85,30 +77,29 @@ void LoadMcStasNexus::exec() {
     nxFile.openGroup(name, type);
     auto dataEntries = nxFile.getEntries();
 
-    for (auto eit = dataEntries.begin(); eit != dataEntries.end(); ++eit) {
-      std::string dataName = eit->first;
-      std::string dataType = eit->second;
+    for (auto &dataEntry : dataEntries) {
+      const std::string &dataName = dataEntry.first;
+      const std::string &dataType = dataEntry.second;
       if (dataName == "content_nxs" || dataType != "NXdata")
         continue;
-      g_log.debug() << "Opening " << dataName << "   " << dataType << std::endl;
+      g_log.debug() << "Opening " << dataName << "   " << dataType << '\n';
 
       nxFile.openGroup(dataName, dataType);
 
       // Find the axis names
       auto nxdataEntries = nxFile.getEntries();
       std::string axis1Name, axis2Name;
-      for (auto nit = nxdataEntries.begin(); nit != nxdataEntries.end();
-           ++nit) {
-        if (nit->second == "NXparameters")
+      for (auto &nxdataEntry : nxdataEntries) {
+        if (nxdataEntry.second == "NXparameters")
           continue;
-        nxFile.openData(nit->first);
+        nxFile.openData(nxdataEntry.first);
         if (nxFile.hasAttr("axis")) {
           int axisNo(0);
           nxFile.getAttr("axis", axisNo);
           if (axisNo == 1)
-            axis1Name = nit->first;
+            axis1Name = nxdataEntry.first;
           else if (axisNo == 2)
-            axis2Name = nit->first;
+            axis2Name = nxdataEntry.first;
           else
             throw std::invalid_argument("Unknown axis number");
         }
@@ -122,7 +113,7 @@ void LoadMcStasNexus::exec() {
       const size_t axis1Length = axis1Values.size();
       const size_t axis2Length = axis2Values.size();
       g_log.debug() << "Axis lengths=" << axis1Length << " " << axis2Length
-                    << std::endl;
+                    << '\n';
 
       // Require "data" field
       std::vector<double> data;
@@ -134,7 +125,7 @@ void LoadMcStasNexus::exec() {
         nxFile.readData<double>("errors", errors);
       } catch (::NeXus::Exception &) {
         g_log.information() << "Field " << dataName
-                            << " contains no error information." << std::endl;
+                            << " contains no error information.\n";
       }
 
       MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(
@@ -142,14 +133,14 @@ void LoadMcStasNexus::exec() {
       Axis *axis1 = ws->getAxis(0);
       axis1->title() = axis1Name;
       // Set caption
-      boost::shared_ptr<Units::Label> lblUnit(new Units::Label);
+      auto lblUnit = boost::make_shared<Units::Label>();
       lblUnit->setLabel(axis1Name, "");
       axis1->unit() = lblUnit;
 
       Axis *axis2 = new NumericAxis(axis2Length);
       axis2->title() = axis2Name;
       // Set caption
-      lblUnit = boost::shared_ptr<Units::Label>(new Units::Label);
+      lblUnit = boost::make_shared<Units::Label>();
       lblUnit->setLabel(axis2Name, "");
       axis2->unit() = lblUnit;
 

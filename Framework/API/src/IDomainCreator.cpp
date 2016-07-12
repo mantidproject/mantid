@@ -50,7 +50,7 @@ void IDomainCreator::declareProperty(Kernel::Property *prop,
   if (!m_manager) {
     throw std::runtime_error("IDomainCreator: property manager isn't defined.");
   }
-  m_manager->declareProperty(prop, doc);
+  m_manager->declareProperty(std::unique_ptr<Kernel::Property>(prop), doc);
 }
 
 /**
@@ -65,12 +65,14 @@ void IDomainCreator::initFunction(API::IFunction_sptr function) {
   if (!m_manager) {
     throw std::runtime_error("IDomainCreator: property manager isn't defined.");
   }
-  API::Workspace_sptr workspace = m_manager->getProperty("InputWorkspace");
-  if (!workspace) {
-    throw std::runtime_error(
-        "IDomainCreator: cannot initialize function: workspace undefined.");
+  if (m_manager->existsProperty("InputWorkspace")) {
+    API::Workspace_sptr workspace = m_manager->getProperty("InputWorkspace");
+    if (!workspace) {
+      throw std::runtime_error(
+          "IDomainCreator: cannot initialize function: workspace undefined.");
+    }
+    function->setWorkspace(workspace);
   }
-  function->setWorkspace(workspace);
 }
 
 } // namespace Algorithm

@@ -142,11 +142,6 @@ public:
     tw.setRowCount(2);
     TS_ASSERT_EQUALS(tw.rowCount(), 2);
     TS_ASSERT_EQUALS(cNumb[1], 2);
-
-    // str[0] = "First"; str[1] = "Second";
-    // vector<string> names;
-    // names.push_back("Number");
-    // names.push_back("Name");
   }
 
   void testRow() {
@@ -310,7 +305,7 @@ public:
     tw.getColumn(1)->cell<std::string>(0) = "b";
     tw.getColumn(2)->cell<std::string>(0) = "c";
 
-    boost::scoped_ptr<TableWorkspace> cloned(tw.clone().release());
+    boost::scoped_ptr<ITableWorkspace> cloned(tw.clone().release());
 
     // Check clone is same as original.
     TS_ASSERT_EQUALS(tw.columnCount(), cloned->columnCount());
@@ -318,6 +313,27 @@ public:
     TS_ASSERT_EQUALS("a", cloned->getColumn(0)->cell<std::string>(0));
     TS_ASSERT_EQUALS("b", cloned->getColumn(1)->cell<std::string>(0));
     TS_ASSERT_EQUALS("c", cloned->getColumn(2)->cell<std::string>(0));
+  }
+
+  void testCloneColumns() {
+    TableWorkspace tw(1);
+    tw.addColumn("str", "X");
+    tw.addColumn("str", "Y");
+    tw.addColumn("str", "Z");
+
+    tw.getColumn(0)->cell<std::string>(0) = "a";
+    tw.getColumn(1)->cell<std::string>(0) = "b";
+    tw.getColumn(2)->cell<std::string>(0) = "c";
+
+    std::vector<std::string> colNames{"X", "Z"};
+
+    boost::scoped_ptr<ITableWorkspace> cloned(tw.clone(colNames).release());
+
+    // Check clone is same as original.
+    TS_ASSERT_EQUALS(colNames.size(), cloned->columnCount());
+    TS_ASSERT_EQUALS(tw.rowCount(), cloned->rowCount());
+    TS_ASSERT_EQUALS("a", cloned->getColumn(0)->cell<std::string>(0));
+    TS_ASSERT_EQUALS("c", cloned->getColumn(1)->cell<std::string>(0));
   }
 
   void test_toDouble() {
@@ -654,7 +670,7 @@ public:
   */
   void testGetProperty_const_sptr() {
     const std::string wsName = "InputWorkspace";
-    TableWorkspace_sptr wsInput(new TableWorkspace());
+    auto wsInput = boost::make_shared<TableWorkspace>();
     PropertyManagerHelper manager;
     manager.declareProperty(wsName, wsInput, Mantid::Kernel::Direction::Input);
 
@@ -686,7 +702,7 @@ public:
   */
   void testGetProperty_ITableWS_const_sptr() {
     const std::string wsName = "InputWorkspace";
-    ITableWorkspace_sptr wsInput(new TableWorkspace());
+    ITableWorkspace_sptr wsInput = boost::make_shared<TableWorkspace>();
     PropertyManagerHelper manager;
     manager.declareProperty(wsName, wsInput, Mantid::Kernel::Direction::Input);
 

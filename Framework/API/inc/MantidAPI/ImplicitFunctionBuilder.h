@@ -42,7 +42,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_API_DLL ImplicitFunctionBuilder {
 public:
   virtual Mantid::Geometry::MDImplicitFunction *create() const = 0;
-  virtual ~ImplicitFunctionBuilder() {}
+  virtual ~ImplicitFunctionBuilder() = default;
 };
 }
 }

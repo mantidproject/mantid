@@ -1,7 +1,8 @@
 #include "MantidQtCustomInterfaces/Indirect/Iqt.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include <QFileInfo>
@@ -21,13 +22,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 Iqt::Iqt(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_furTree(NULL), m_furyResFileType() {
+    : IndirectDataAnalysisTab(parent), m_iqtTree(NULL), m_iqtResFileType() {
   m_uiForm.setupUi(parent);
 }
 
 void Iqt::setup() {
-  m_furTree = new QtTreePropertyBrowser();
-  m_uiForm.properties->addWidget(m_furTree);
+  m_iqtTree = new QtTreePropertyBrowser();
+  m_uiForm.properties->addWidget(m_iqtTree);
 
   // Create and configure properties
   m_properties["ELow"] = m_dblManager->addProperty("ELow");
@@ -51,18 +52,18 @@ void Iqt::setup() {
   m_dblManager->setDecimals(m_properties["ResolutionBins"], 0);
   m_properties["ResolutionBins"]->setEnabled(false);
 
-  m_furTree->addProperty(m_properties["ELow"]);
-  m_furTree->addProperty(m_properties["EWidth"]);
-  m_furTree->addProperty(m_properties["EHigh"]);
-  m_furTree->addProperty(m_properties["SampleBinning"]);
-  m_furTree->addProperty(m_properties["SampleBins"]);
-  m_furTree->addProperty(m_properties["ResolutionBins"]);
+  m_iqtTree->addProperty(m_properties["ELow"]);
+  m_iqtTree->addProperty(m_properties["EWidth"]);
+  m_iqtTree->addProperty(m_properties["EHigh"]);
+  m_iqtTree->addProperty(m_properties["SampleBinning"]);
+  m_iqtTree->addProperty(m_properties["SampleBins"]);
+  m_iqtTree->addProperty(m_properties["ResolutionBins"]);
 
   m_dblManager->setValue(m_properties["SampleBinning"], 10);
 
-  m_furTree->setFactoryForManager(m_dblManager, m_dblEdFac);
+  m_iqtTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
-  auto xRangeSelector = m_uiForm.ppPlot->addRangeSelector("FuryRange");
+  auto xRangeSelector = m_uiForm.ppPlot->addRangeSelector("IqtRange");
 
   // signals / slots & validators
   connect(xRangeSelector, SIGNAL(selectionChangedLazy(double, double)), this,
@@ -96,21 +97,21 @@ void Iqt::run() {
   double energyMax = m_dblManager->value(m_properties["EHigh"]);
   double numBins = m_dblManager->value(m_properties["SampleBinning"]);
 
-  IAlgorithm_sptr furyAlg =
+  IAlgorithm_sptr IqtAlg =
       AlgorithmManager::Instance().create("TransformToIqt");
-  furyAlg->initialize();
+  IqtAlg->initialize();
 
-  furyAlg->setProperty("SampleWorkspace", wsName.toStdString());
-  furyAlg->setProperty("ResolutionWorkspace", resName.toStdString());
+  IqtAlg->setProperty("SampleWorkspace", wsName.toStdString());
+  IqtAlg->setProperty("ResolutionWorkspace", resName.toStdString());
 
-  furyAlg->setProperty("EnergyMin", energyMin);
-  furyAlg->setProperty("EnergyMax", energyMax);
-  furyAlg->setProperty("BinReductionFactor", numBins);
-  furyAlg->setProperty("OutputWorkspace", m_pythonExportWsName);
+  IqtAlg->setProperty("EnergyMin", energyMin);
+  IqtAlg->setProperty("EnergyMax", energyMax);
+  IqtAlg->setProperty("BinReductionFactor", numBins);
+  IqtAlg->setProperty("OutputWorkspace", m_pythonExportWsName);
 
-  furyAlg->setProperty("DryRun", false);
+  IqtAlg->setProperty("DryRun", false);
 
-  m_batchAlgoRunner->addAlgorithm(furyAlg);
+  m_batchAlgoRunner->addAlgorithm(IqtAlg);
 
   // Add save step
   if (m_uiForm.ckSave->isChecked())
@@ -204,6 +205,11 @@ bool Iqt::validate() {
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsInput);
   uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
+  const auto eLow = m_dblManager->value(m_properties["ELow"]);
+  const auto eHigh = m_dblManager->value(m_properties["EHigh"]);
+  if (eLow >= eHigh)
+    uiv.addErrorMessage("ELow must be strictly less than EHigh.\n");
+
   QString message = uiv.generateErrorMessage();
   showMessageBox(message);
 
@@ -251,9 +257,6 @@ void Iqt::updatePropertyValues(QtProperty *prop, double val) {
 void Iqt::calculateBinning() {
   using namespace Mantid::API;
 
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updatePropertyValues(QtProperty *, double)));
-
   QString wsName = m_uiForm.dsInput->getCurrentDataName();
   QString resName = m_uiForm.dsResolution->getCurrentDataName();
   if (wsName.isEmpty() || resName.isEmpty())
@@ -262,34 +265,42 @@ void Iqt::calculateBinning() {
   double energyMin = m_dblManager->value(m_properties["ELow"]);
   double energyMax = m_dblManager->value(m_properties["EHigh"]);
   double numBins = m_dblManager->value(m_properties["SampleBinning"]);
+
   if (numBins == 0)
     return;
+  if (energyMin == 0 && energyMax == 0)
+    return;
 
-  IAlgorithm_sptr furyAlg =
+  const auto paramTableName = "__IqtProperties_temp";
+
+  IAlgorithm_sptr IqtAlg =
       AlgorithmManager::Instance().create("TransformToIqt");
-  furyAlg->initialize();
+  IqtAlg->initialize();
+  IqtAlg->setChild(true);
+  IqtAlg->setProperty("SampleWorkspace", wsName.toStdString());
+  IqtAlg->setProperty("ResolutionWorkspace", resName.toStdString());
+  IqtAlg->setProperty("ParameterWorkspace", paramTableName);
 
-  furyAlg->setProperty("SampleWorkspace", wsName.toStdString());
-  furyAlg->setProperty("ResolutionWorkspace", resName.toStdString());
-  furyAlg->setProperty("ParameterWorkspace", "__FuryProperties_temp");
+  IqtAlg->setProperty("EnergyMin", energyMin);
+  IqtAlg->setProperty("EnergyMax", energyMax);
+  IqtAlg->setProperty("BinReductionFactor", numBins);
 
-  furyAlg->setProperty("EnergyMin", energyMin);
-  furyAlg->setProperty("EnergyMax", energyMax);
-  furyAlg->setProperty("BinReductionFactor", numBins);
+  IqtAlg->setProperty("DryRun", true);
 
-  furyAlg->setProperty("DryRun", true);
-
-  furyAlg->execute();
+  IqtAlg->execute();
 
   // Get property table from algorithm
-  ITableWorkspace_sptr propsTable =
-      AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-          "__FuryProperties_temp");
+  ITableWorkspace_sptr propsTable = IqtAlg->getProperty("ParameterWorkspace");
 
   // Get data from property table
-  double energyWidth = propsTable->getColumn("EnergyWidth")->cell<float>(0);
-  int sampleBins = propsTable->getColumn("SampleOutputBins")->cell<int>(0);
-  int resolutionBins = propsTable->getColumn("ResolutionBins")->cell<int>(0);
+  const auto energyWidth = propsTable->getColumn("EnergyWidth")->cell<float>(0);
+  const auto sampleBins =
+      propsTable->getColumn("SampleOutputBins")->cell<int>(0);
+  const auto resolutionBins =
+      propsTable->getColumn("ResolutionBins")->cell<int>(0);
+
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updatePropertyValues(QtProperty *, double)));
 
   // Update data in property editor
   m_dblManager->setValue(m_properties["EWidth"], energyWidth);
@@ -305,6 +316,13 @@ void Iqt::calculateBinning() {
   if (numResolutionBins < 5)
     showMessageBox("Number of resolution bins is less than 5.\nResults may be "
                    "inaccurate.");
+
+  IAlgorithm_sptr deleteAlg =
+      AlgorithmManager::Instance().create("DeleteWorkspace");
+  deleteAlg->initialize();
+  deleteAlg->setChild(true);
+  deleteAlg->setProperty("Workspace", paramTableName);
+  deleteAlg->execute();
 }
 
 void Iqt::loadSettings(const QSettings &settings) {
@@ -325,7 +343,7 @@ void Iqt::plotInput(const QString &wsname) {
   m_uiForm.ppPlot->clear();
   m_uiForm.ppPlot->addSpectrum("Sample", workspace, 0);
 
-  auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("FuryRange");
+  auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
   try {
     QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
@@ -389,7 +407,7 @@ void Iqt::rsRangeChangedLazy(double min, double max) {
 }
 
 void Iqt::updateRS(QtProperty *prop, double val) {
-  auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("FuryRange");
+  auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
   if (prop == m_properties["ELow"])
     xRangeSelector->setMinimum(val);

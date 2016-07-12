@@ -124,18 +124,16 @@ public:
       const std::string &name,
       const std::vector<std::string> &exts = std::vector<std::string>());
 
-  ~MultipleFileProperty();
-
   /// 'Virtual copy constructor
-  virtual MultipleFileProperty *clone() const {
+  MultipleFileProperty *clone() const override {
     return new MultipleFileProperty(*this);
   }
 
   /// Overridden functions to accomodate std::vector<std::vector<std::string>>>
   /// structure of this property.
-  virtual std::string setValue(const std::string &propValue);
-  virtual std::string value() const;
-  virtual std::string getDefault() const;
+  std::string setValue(const std::string &propValue) override;
+  std::string value() const override;
+  std::string getDefault() const override;
 
   /// @return the vector of suggested extensions. For use in GUIs showing files.
   std::vector<std::string> getExts() const { return m_exts; }

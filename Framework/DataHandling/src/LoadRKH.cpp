@@ -6,16 +6,18 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/date_parsing.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 
 #include <istream>
 
@@ -97,8 +99,8 @@ int LoadRKH::confidence(Kernel::FileDescriptor &descriptor) const {
                                    "-SEP-", "-OCT-", "-NOV-", "-DEC-"};
 
   bool foundMonth(false);
-  for (size_t i = 0; i < 12; ++i) {
-    if (!boost::ifind_first(fileline, MONTHS[i]).empty()) {
+  for (auto &month : MONTHS) {
+    if (!boost::ifind_first(fileline, month).empty()) {
       foundMonth = true;
       break;
     }
@@ -131,11 +133,12 @@ int LoadRKH::confidence(Kernel::FileDescriptor &descriptor) const {
  * Initialise the algorithm
  */
 void LoadRKH::init() {
-  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
-                                        {".txt", ".q", ".dat"}),
+  const std::vector<std::string> exts{".txt", ".q", ".dat"};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, exts),
                   "Name of the RKH file to load");
-  declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
-                                               Kernel::Direction::Output),
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Kernel::Direction::Output),
                   "The name to use for the output workspace");
   // Get the units registered with the UnitFactory
   std::vector<std::string> propOptions =
@@ -185,7 +188,7 @@ void LoadRKH::exec() {
   MatrixWorkspace_sptr result = is2D(line) ? read2D(line) : read1D();
 
   // all RKH files contain distribution data
-  result->isDistribution(true);
+  result->setDistribution(true);
   // Set the output workspace
   setProperty("OutputWorkspace", result);
 }
@@ -295,7 +298,7 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
     localworkspace->dataY(0) = ydata;
     localworkspace->dataE(0) = errdata;
     if (hasXError) {
-      localworkspace->dataDx(0) = xError;
+      localworkspace->setPointStandardDeviations(0, xError);
     }
     return localworkspace;
   } else {
@@ -304,14 +307,14 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
     // Set the appropriate values
     for (int index = 0; index < pointsToRead; ++index) {
       localworkspace->getSpectrum(index)
-          ->setSpectrumNo(static_cast<int>(columnOne[index]));
+          .setSpectrumNo(static_cast<int>(columnOne[index]));
       localworkspace->dataY(index)[0] = ydata[index];
       localworkspace->dataE(index)[0] = errdata[index];
     }
 
     if (hasXError) {
       for (int index = 0; index < pointsToRead; ++index) {
-        localworkspace->dataDx(index)[0] = xError[index];
+        localworkspace->setPointStandardDeviations(0, 1, xError[index]);
       }
     }
     return localworkspace;
@@ -334,16 +337,15 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
   Progress prog(read2DHeader(firstLine, outWrksp, axis0Data));
   const size_t nAxis1Values = outWrksp->getNumberHistograms();
 
+  // set the X-values to the common bin values we read above
+  auto toPass = Kernel::make_cow<HistogramData::HistogramX>(axis0Data);
   for (size_t i = 0; i < nAxis1Values; ++i) {
-    // set the X-values to the common bin values we read above
-    MantidVecPtr toPass;
-    toPass.access() = axis0Data;
     outWrksp->setX(i, toPass);
 
     // now read in the Y values
     MantidVec &YOut = outWrksp->dataY(i);
-    for (auto it = YOut.begin(), end = YOut.end(); it != end; ++it) {
-      m_fileIn >> *it;
+    for (double &value : YOut) {
+      m_fileIn >> value;
     }
     prog.report("Loading Y data");
   } // loop on to the next spectrum
@@ -351,8 +353,8 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
   // the error values form one big block after the Y-values
   for (size_t i = 0; i < nAxis1Values; ++i) {
     MantidVec &EOut = outWrksp->dataE(i);
-    for (auto it = EOut.begin(), end = EOut.end(); it != end; ++it) {
-      m_fileIn >> *it;
+    for (double &value : EOut) {
+      m_fileIn >> value;
     }
     prog.report("Loading error estimates");
   } // loop on to the next spectrum
@@ -411,8 +413,9 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
   if (fileLine.size() < 5) {
     std::getline(m_fileIn, fileLine);
   }
-  Poco::StringTokenizer wsDimensions(fileLine, " ",
-                                     Poco::StringTokenizer::TOK_TRIM);
+  Mantid::Kernel::StringTokenizer wsDimensions(
+      fileLine, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                         Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   if (wsDimensions.count() < 2) {
     throw Exception::NotFoundError("Input file", "dimensions");
   }
@@ -460,7 +463,9 @@ void LoadRKH::readNumEntrys(const int nEntries, MantidVec &output) {
 */
 const std::string LoadRKH::readUnit(const std::string &line) {
   // split the line into words
-  const Poco::StringTokenizer codes(line, " ", Poco::StringTokenizer::TOK_TRIM);
+  const Mantid::Kernel::StringTokenizer codes(
+      line, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
   if (codes.count() < 1) {
     return "C++ no unit found";
   }
@@ -468,14 +473,13 @@ const std::string LoadRKH::readUnit(const std::string &line) {
   // the symbol for the quantity q = MomentumTransfer, etc.
   const std::string symbol(codes[0]);
   // this is units used to measure the quantity e.g. angstroms, counts, ...
-  const std::string unit(*(codes.end() - 1));
+  auto itUnitsToken = codes.cend() - 1;
+  const std::string unit(*itUnitsToken);
 
   // theQuantity will contain the name of the unit, which can be many words long
   std::string theQuantity;
-  for (auto current = codes.begin() + 1; current != codes.end(); ++current) {
-    if (current != codes.end() - 1) {
-      theQuantity += *current;
-    }
+  for (auto current = codes.cbegin() + 1; current != itUnitsToken; ++current) {
+    theQuantity += *current;
   }
 
   // this is a syntax check the line before returning its data
@@ -487,7 +491,7 @@ const std::string LoadRKH::readUnit(const std::string &line) {
     // accepted.
     // cppcheck-suppress stlIfStrFind
     if (unit.find('(') != 0 || unit.find(')') != unit.size()) {
-      std::string qCode = boost::lexical_cast<std::string>(SaveRKH::Q_CODE);
+      std::string qCode = std::to_string(SaveRKH::Q_CODE);
       if (symbol == qCode && theQuantity == "q" &&
           unit == "(1/Angstrom)") { // 6 q (1/Angstrom) is the synatx for
                                     // MomentumTransfer

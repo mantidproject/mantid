@@ -1,15 +1,13 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidCrystal/AnvredCorrection.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/MemoryManager.h"
-#include "boost/assign.hpp"
+#include "MantidGeometry/Instrument.h"
 
 /*  Following A.J.Schultz's anvred, the weight factors should be:
  *
@@ -64,11 +62,19 @@ using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
 using namespace Mantid::PhysicalConstants;
-using namespace boost::assign;
-std::map<int, double> detScale = map_list_of(17, 1.092114823)(18, 0.869105443)(
-    22, 1.081377685)(26, 1.055199489)(27, 1.070308725)(28, 0.886157884)(
-    36, 1.112773972)(37, 1.012894506)(38, 1.049384146)(39, 0.890313805)(
-    47, 1.068553893)(48, 0.900566426)(58, 0.911249203);
+std::map<int, double> detScale = {{17, 1.092114823},
+                                  {18, 0.869105443},
+                                  {22, 1.081377685},
+                                  {26, 1.055199489},
+                                  {27, 1.070308725},
+                                  {28, 0.886157884},
+                                  {36, 1.112773972},
+                                  {37, 1.012894506},
+                                  {38, 1.049384146},
+                                  {39, 0.890313805},
+                                  {47, 1.068553893},
+                                  {48, 0.900566426},
+                                  {58, 0.911249203}};
 
 AnvredCorrection::AnvredCorrection()
     : API::Algorithm(), m_smu(0.), m_amu(0.), m_radius(0.), m_power_th(0.),
@@ -80,13 +86,13 @@ void AnvredCorrection::init() {
   // The input workspace must have an instrument and units of wavelength
   auto wsValidator = boost::make_shared<InstrumentValidator>();
 
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "The X values for the input workspace must be in units of "
                   "wavelength or TOF");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Output workspace name");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Output workspace name");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -132,7 +138,7 @@ void AnvredCorrection::exec() {
         m_onlySphericalAbsorption = true;
         g_log.warning() << "Lorentz Correction was already done for this "
                            "workspace.  OnlySphericalAbsorption was changed to "
-                           "true." << std::endl;
+                           "true.\n";
       }
     }
   }
@@ -146,8 +152,8 @@ void AnvredCorrection::exec() {
 
   eventW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputWS);
   if (eventW)
-    eventW->sortAll(TOF_SORT, NULL);
-  if ((getProperty("PreserveEvents")) && (eventW != NULL) &&
+    eventW->sortAll(TOF_SORT, nullptr);
+  if ((getProperty("PreserveEvents")) && (eventW != nullptr) &&
       !m_returnTransmissionOnly) {
     // Input workspace is an event workspace. Use the other exec method
     this->execEvent();
@@ -182,13 +188,12 @@ void AnvredCorrection::exec() {
     MantidVec &E = correctionFactors->dataE(i);
 
     // Copy over bin boundaries
-    const ISpectrum *inSpec = m_inputWS->getSpectrum(i);
-    inSpec->lockData(); // for MRU-related thread safety
+    const auto &inSpec = m_inputWS->getSpectrum(i);
 
-    const MantidVec &Xin = inSpec->readX();
+    const MantidVec &Xin = inSpec.readX();
     correctionFactors->dataX(i) = Xin;
-    const MantidVec &Yin = inSpec->readY();
-    const MantidVec &Ein = inSpec->readE();
+    const MantidVec &Yin = inSpec.readY();
+    const MantidVec &Ein = inSpec.readE();
 
     // Get detector position
     IDetector_const_sptr det;
@@ -241,8 +246,6 @@ void AnvredCorrection::exec() {
       }
     }
 
-    inSpec->unlockData();
-
     prog.report();
 
     PARALLEL_END_INTERUPT_REGION
@@ -272,7 +275,7 @@ void AnvredCorrection::execEvent() {
   correctionFactors = boost::dynamic_pointer_cast<EventWorkspace>(
       API::WorkspaceFactory::Instance().create("EventWorkspace", numHists, 2,
                                                1));
-  correctionFactors->sortAll(TOF_SORT, NULL);
+  correctionFactors->sortAll(TOF_SORT, nullptr);
   // Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(
       m_inputWS, correctionFactors, true);
@@ -319,7 +322,7 @@ void AnvredCorrection::execEvent() {
     // scattered beam
     double scattering = dir.angle(V3D(0.0, 0.0, 1.0));
 
-    EventList el = eventW->getEventList(i);
+    EventList el = eventW->getSpectrum(i);
     el.switchTo(WEIGHTED_NOTIME);
     std::vector<WeightedEventNoTime> events = el.getWeightedEventsNoTime();
 
@@ -350,14 +353,12 @@ void AnvredCorrection::execEvent() {
     }
     correctionFactors->getOrAddEventList(i) += events;
 
-    std::set<detid_t> &dets = eventW->getEventList(i).getDetectorIDs();
-    std::set<detid_t>::iterator j;
-    for (j = dets.begin(); j != dets.end(); ++j)
-      correctionFactors->getOrAddEventList(i).addDetectorID(*j);
+    auto &dets = eventW->getSpectrum(i).getDetectorIDs();
+    for (auto const &det : dets)
+      correctionFactors->getOrAddEventList(i).addDetectorID(det);
     // When focussing in place, you can clear out old memory from the input one!
     if (inPlace) {
-      eventW->getEventList(i).clear();
-      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+      eventW->getSpectrum(i).clear();
     }
 
     prog.report();
@@ -544,8 +545,8 @@ void AnvredCorrection::BuildLamdaWeights() {
 
   // GetSpectrumWeights( spectrum_file_name, m_lamda_weight);
 
-  if (m_lamda_weight.size() == 0) // loading spectrum failed so use
-  {                               // array of 1's
+  if (m_lamda_weight.empty()) // loading spectrum failed so use
+  {                           // array of 1's
     //    power = power_ns;                      // This is commented out, so we
     // don't override user specified
     // value.
@@ -570,8 +571,20 @@ void AnvredCorrection::scale_init(IDetector_const_sptr det,
                               not1(std::ptr_fun(::isdigit))),
                     bankNameStr.end());
   Strings::convert(bankNameStr, bank);
+  // Distance to center of detector
+  boost::shared_ptr<const IComponent> det0 = inst->getComponentByName(bankName);
+  if (inst->getName().compare("CORELLI") ==
+      0) // for Corelli with sixteenpack under bank
+  {
+    std::vector<Geometry::IComponent_const_sptr> children;
+    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
+        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+            inst->getComponentByName(bankName));
+    asmb->getChildren(children, false);
+    det0 = children[0];
+  }
   IComponent_const_sptr sample = inst->getSample();
-  double cosA = inst->getComponentByName(bankName)->getDistance(*sample) / L2;
+  double cosA = det0->getDistance(*sample) / L2;
   pathlength = depth / cosA;
 }
 void AnvredCorrection::scale_exec(int &bank, double &lambda, double &depth,

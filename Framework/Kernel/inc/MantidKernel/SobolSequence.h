@@ -45,16 +45,16 @@ public:
   /// Constructor taking the number of dimensions
   explicit SobolSequence(const unsigned int ndims);
   /// Destructor
-  ~SobolSequence();
+  ~SobolSequence() override;
   /// Generates the next value in the sequence
-  void generateNextPoint();
+  void generateNextPoint() override;
   /// Reset the sequence
-  void restart();
+  void restart() override;
   /// Saves the current state of the generator
-  void save();
+  void save() override;
   /// Restores the generator to the last saved point, or the beginning if
   /// nothing has been saved
-  void restore();
+  void restore() override;
 
 private:
   DISABLE_DEFAULT_CONSTRUCT(SobolSequence)

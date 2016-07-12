@@ -2,18 +2,20 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/RefReduction.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/UnitFactory.h"
-#include <MantidAPI/FileFinder.h>
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VisibleWhenProperty.h"
+
 #include "Poco/File.h"
-#include "Poco/String.h"
 #include "Poco/NumberFormatter.h"
+#include "Poco/String.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -38,33 +40,33 @@ using namespace DataObjects;
 
 void RefReduction::init() {
   declareProperty("DataRun", "", "Run number of the data set to be reduced");
-  declareProperty(new ArrayProperty<int>("SignalPeakPixelRange"),
+  declareProperty(make_unique<ArrayProperty<int>>("SignalPeakPixelRange"),
                   "Pixel range for the signal peak");
 
   declareProperty(
       "SubtractSignalBackground", false,
       "If true, the background will be subtracted from the signal peak");
-  declareProperty(new ArrayProperty<int>("SignalBackgroundPixelRange"),
+  declareProperty(make_unique<ArrayProperty<int>>("SignalBackgroundPixelRange"),
                   "Pixel range for background around the signal peak");
 
   declareProperty(
       "CropLowResDataAxis", false,
       "If true, the low-resolution pixel range will be limited to the"
       " range given by the LowResDataAxisPixelRange property");
-  declareProperty(new ArrayProperty<int>("LowResDataAxisPixelRange"),
+  declareProperty(make_unique<ArrayProperty<int>>("LowResDataAxisPixelRange"),
                   "Pixel range for the signal peak in the low-res direction");
 
   declareProperty("PerformNormalization", true,
                   "If true, the normalization will be performed");
   declareProperty("NormalizationRun", "",
                   "Run number of the normalization data set");
-  declareProperty(new ArrayProperty<int>("NormPeakPixelRange"),
+  declareProperty(make_unique<ArrayProperty<int>>("NormPeakPixelRange"),
                   "Pixel range for the normalization peak");
 
   declareProperty("SubtractNormBackground", false,
                   "It true, the background will be subtracted"
                   " from the normalization peak");
-  declareProperty(new ArrayProperty<int>("NormBackgroundPixelRange"),
+  declareProperty(make_unique<ArrayProperty<int>>("NormBackgroundPixelRange"),
                   "Pixel range for background around the normalization peak");
 
   declareProperty("CropLowResNormAxis", false,
@@ -72,7 +74,7 @@ void RefReduction::init() {
                   " will be limited to be the range given by the "
                   "LowResNormAxisPixelRange property");
   declareProperty(
-      new ArrayProperty<int>("LowResNormAxisPixelRange"),
+      make_unique<ArrayProperty<int>>("LowResNormAxisPixelRange"),
       "Pixel range for the normalization peak in the low-res direction");
 
   declareProperty("Theta", EMPTY_DBL(),
@@ -93,23 +95,21 @@ void RefReduction::init() {
                                          "polarization states in the data set");
   setPropertySettings(
       "ReflectivityPixel",
-      new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M"));
-  setPropertySettings("DetectorAngle", new VisibleWhenProperty(
+      make_unique<VisibleWhenProperty>("Instrument", IS_EQUAL_TO, "REF_M"));
+  setPropertySettings("DetectorAngle", make_unique<VisibleWhenProperty>(
                                            "Instrument", IS_EQUAL_TO, "REF_M"));
   setPropertySettings(
       "DetectorAngle0",
-      new VisibleWhenProperty("Instrument", IS_EQUAL_TO, "REF_M"));
-  setPropertySettings("DirectPixel", new VisibleWhenProperty(
+      make_unique<VisibleWhenProperty>("Instrument", IS_EQUAL_TO, "REF_M"));
+  setPropertySettings("DirectPixel", make_unique<VisibleWhenProperty>(
                                          "Instrument", IS_EQUAL_TO, "REF_M"));
 
   declareProperty("AngleOffset", EMPTY_DBL(),
                   "Scattering angle offset in degrees");
-  setPropertySettings("AngleOffset", new VisibleWhenProperty(
+  setPropertySettings("AngleOffset", make_unique<VisibleWhenProperty>(
                                          "Instrument", IS_EQUAL_TO, "REF_L"));
 
-  std::vector<std::string> instrOptions;
-  instrOptions.push_back("REF_L");
-  instrOptions.push_back("REF_M");
+  std::vector<std::string> instrOptions{"REF_L", "REF_M"};
   declareProperty("Instrument", "REF_M",
                   boost::make_shared<StringListValidator>(instrOptions),
                   "Instrument to reduce for");
@@ -139,6 +139,10 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   m_output_message += "Processing " + polarization + '\n';
   const std::string dataRun = getPropertyValue("DataRun");
   IEventWorkspace_sptr evtWS = loadData(dataRun, polarization);
+  // wrong entry name
+  if (!evtWS) {
+    return nullptr;
+  }
   MatrixWorkspace_sptr dataWS =
       boost::dynamic_pointer_cast<MatrixWorkspace>(evtWS);
   MatrixWorkspace_sptr dataWSTof =
@@ -156,7 +160,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   if (cropLowRes) {
     if (lowResRange.size() < 2) {
       g_log.error() << "LowResDataAxisPixelRange parameter should be a vector "
-                       "of two values" << std::endl;
+                       "of two values\n";
       throw std::invalid_argument("LowResDataAxisPixelRange parameter should "
                                   "be a vector of two values");
     }
@@ -171,8 +175,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   const std::vector<int> peakRange = getProperty("SignalPeakPixelRange");
   if (peakRange.size() < 2) {
     g_log.error()
-        << "SignalPeakPixelRange parameter should be a vector of two values"
-        << std::endl;
+        << "SignalPeakPixelRange parameter should be a vector of two values\n";
     throw std::invalid_argument(
         "SignalPeakPixelRange parameter should be a vector of two values");
   }
@@ -215,7 +218,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
     const std::vector<int> bckRange = getProperty("SignalBackgroundPixelRange");
     if (bckRange.size() < 2) {
       g_log.error() << "SignalBackgroundPixelRange parameter should be a "
-                       "vector of two values" << std::endl;
+                       "vector of two values\n";
       throw std::invalid_argument("SignalBackgroundPixelRange parameter should "
                                   "be a vector of two values");
     }
@@ -307,9 +310,9 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   refAlg1->setProperty("ScatteringAngle", theta);
   refAlg1->executeAsChildAlg();
   MatrixWorkspace_sptr outputWS2 = refAlg1->getProperty("OutputWorkspace");
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace_jc_" + polarization,
-                                          "Lambda_" + polarization,
-                                          Direction::Output));
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+      "OutputWorkspace_jc_" + polarization, "Lambda_" + polarization,
+      Direction::Output));
   setProperty("OutputWorkspace_jc_" + polarization, outputWS2);
 
   // Conversion to Q
@@ -341,20 +344,21 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
 
   const std::string prefix = getPropertyValue("OutputWorkspacePrefix");
   if (polarization.compare(PolStateNone) == 0) {
-    declareProperty(
-        new WorkspaceProperty<>("OutputWorkspace", prefix, Direction::Output));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "OutputWorkspace", prefix, Direction::Output));
     setProperty("OutputWorkspace", outputWS);
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace2D", "2D_" + prefix,
-                                            Direction::Output));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "OutputWorkspace2D", "2D_" + prefix, Direction::Output));
     setProperty("OutputWorkspace2D", output2DWS);
   } else {
     std::string wsName = prefix + polarization;
     Poco::replaceInPlace(wsName, "entry", "");
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace_" + polarization,
-                                            wsName, Direction::Output));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "OutputWorkspace_" + polarization, wsName, Direction::Output));
     setProperty("OutputWorkspace_" + polarization, outputWS);
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace2D_" + polarization,
-                                            "2D_" + wsName, Direction::Output));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "OutputWorkspace2D_" + polarization, "2D_" + wsName,
+        Direction::Output));
     setProperty("OutputWorkspace2D_" + polarization, output2DWS);
   }
   m_output_message += "Reflectivity calculation completed\n";
@@ -383,7 +387,7 @@ MatrixWorkspace_sptr RefReduction::processNormalization() {
   if (cropLowRes) {
     if (lowResRange.size() < 2) {
       g_log.error() << "LowResNormAxisPixelRange parameter should be a vector "
-                       "of two values" << std::endl;
+                       "of two values\n";
       throw std::invalid_argument("LowResNormAxisPixelRange parameter should "
                                   "be a vector of two values");
     }
@@ -417,7 +421,7 @@ MatrixWorkspace_sptr RefReduction::processNormalization() {
     const std::vector<int> bckRange = getProperty("NormBackgroundPixelRange");
     if (bckRange.size() < 2) {
       g_log.error() << "NormBackgroundPixelRange parameter should be a vector "
-                       "of two values" << std::endl;
+                       "of two values\n";
       throw std::invalid_argument("NormBackgroundPixelRange parameter should "
                                   "be a vector of two values");
     }
@@ -464,11 +468,11 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
   IEventWorkspace_sptr rawWS;
   if (AnalysisDataService::Instance().doesExist(dataRun)) {
     rawWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(dataRun);
-    g_log.notice() << "Found workspace: " << dataRun << std::endl;
+    g_log.notice() << "Found workspace: " << dataRun << '\n';
     m_output_message += "    |Input data run is a workspace: " + dataRun + "\n";
   } else if (AnalysisDataService::Instance().doesExist(ws_name)) {
     rawWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(ws_name);
-    g_log.notice() << "Using existing workspace: " << ws_name << std::endl;
+    g_log.notice() << "Using existing workspace: " << ws_name << '\n';
     m_output_message +=
         "    |Found workspace from previous reduction: " + ws_name + "\n";
   } else {
@@ -496,17 +500,23 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
     }
 
     if (Poco::File(path).exists()) {
-      g_log.notice() << "Found: " << path << std::endl;
+      g_log.notice() << "Found: " << path << '\n';
       m_output_message += "    |Loading from " + path + "\n";
       IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadEventNexus", 0, 0.2);
       loadAlg->setProperty("Filename", path);
       if (polarization.compare(PolStateNone) != 0)
         loadAlg->setProperty("NXentryName", polarization);
-      loadAlg->executeAsChildAlg();
+      try {
+        loadAlg->executeAsChildAlg();
+      } catch (...) {
+        g_log.notice() << "Could not load polarization " << polarization;
+        return nullptr;
+      }
+
       Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
       rawWS = boost::dynamic_pointer_cast<IEventWorkspace>(temp);
       if (rawWS->getNumberEvents() == 0) {
-        g_log.notice() << "No data in " << polarization << std::endl;
+        g_log.notice() << "No data in " << polarization << '\n';
         m_output_message += "    |No data for " + polarization + "\n";
         return rawWS;
       }
@@ -526,12 +536,11 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
         mvAlg->executeAsChildAlg();
         g_log.notice() << "Ensuring correct Z position: Correction = "
                        << Poco::NumberFormatter::format(sdd - det_distance)
-                       << " m" << std::endl;
+                       << " m\n";
       }
       AnalysisDataService::Instance().addOrReplace(ws_name, rawWS);
     } else {
-      g_log.error() << "Could not find a data file for " << dataRun
-                    << std::endl;
+      g_log.error() << "Could not find a data file for " << dataRun << '\n';
       throw std::invalid_argument(
           "Could not find a data file for the given input");
     }
@@ -661,9 +670,8 @@ double RefReduction::calculateAngleREFM(MatrixWorkspace_sptr workspace) {
   if (ref_pix == 0 || isEmpty(ref_pix)) {
     const std::vector<int> peakRange = getProperty("SignalPeakPixelRange");
     if (peakRange.size() < 2) {
-      g_log.error()
-          << "SignalPeakPixelRange parameter should be a vector of two values"
-          << std::endl;
+      g_log.error() << "SignalPeakPixelRange parameter should be a vector of "
+                       "two values\n";
       throw std::invalid_argument(
           "SignalPeakPixelRange parameter should be a vector of two values");
     }
@@ -768,11 +776,11 @@ MatrixWorkspace_sptr RefReduction::subtractBackground(
 
     // Check for overlaps
     if (bckMax > peakMin && bckMax < peakMax) {
-      g_log.notice() << "Background range overlaps with peak" << std::endl;
+      g_log.notice() << "Background range overlaps with peak\n";
       bckMax = peakMin - 1;
     }
     if (bckMin < peakMax && bckMin > peakMin) {
-      g_log.notice() << "Background range overlaps with peak" << std::endl;
+      g_log.notice() << "Background range overlaps with peak\n";
       bckMin = peakMax + 1;
     }
 

@@ -46,7 +46,7 @@ National Laboratory & European Spallation Source
  */
 class DLLExport AbstractIDFObject {
 public:
-  AbstractIDFObject() {}
+  AbstractIDFObject() = default;
   static const std::string expectedExtension();
   virtual const Poco::Path getParentDirectory() const = 0;
   virtual const Poco::Path &getFileFullPath() const = 0;
@@ -55,7 +55,7 @@ public:
   virtual std::string getExtension() const = 0;
   virtual std::string getMangledName() const = 0;
   virtual bool exists() const = 0;
-  virtual ~AbstractIDFObject(){};
+  virtual ~AbstractIDFObject() = default;
 
 private:
   AbstractIDFObject(const AbstractIDFObject &);
@@ -68,14 +68,13 @@ private:
 class DLLExport IDFObject : public AbstractIDFObject {
 public:
   IDFObject(const std::string &fileName);
-  virtual const Poco::Path getParentDirectory() const;
-  virtual const Poco::Path &getFileFullPath() const;
-  virtual const std::string &getFileFullPathStr() const;
-  virtual std::string getFileNameOnly() const;
-  virtual std::string getExtension() const;
-  virtual std::string getMangledName() const;
-  virtual bool exists() const;
-  virtual ~IDFObject();
+  const Poco::Path getParentDirectory() const override;
+  const Poco::Path &getFileFullPath() const override;
+  const std::string &getFileFullPathStr() const override;
+  std::string getFileNameOnly() const override;
+  std::string getExtension() const override;
+  std::string getMangledName() const override;
+  bool exists() const override;
 
 private:
   IDFObject(const IDFObject &);
@@ -96,22 +95,21 @@ private:
 
 public:
   NullIDFObject() : m_emptyResponse("") {}
-  virtual const Poco::Path getParentDirectory() const {
+  const Poco::Path getParentDirectory() const override {
     throw std::runtime_error("Not implemented on NullIDFObject");
   }
-  virtual const Poco::Path &getFileFullPath() const {
+  const Poco::Path &getFileFullPath() const override {
     throw std::runtime_error("Not implemented on NullIDFObject");
   }
-  virtual const std::string &getFileFullPathStr() const {
+  const std::string &getFileFullPathStr() const override {
     return m_emptyResponse;
   }
-  virtual std::string getFileNameOnly() const { return m_emptyResponse; }
-  virtual std::string getExtension() const { return m_emptyResponse; }
-  virtual std::string getMangledName() const {
+  std::string getFileNameOnly() const override { return m_emptyResponse; }
+  std::string getExtension() const override { return m_emptyResponse; }
+  std::string getMangledName() const override {
     throw std::runtime_error("Not implemented on NullIDFObject");
   }
-  virtual bool exists() const { return false; }
-  virtual ~NullIDFObject(){};
+  bool exists() const override { return false; }
 };
 
 typedef boost::shared_ptr<AbstractIDFObject> IDFObject_sptr;

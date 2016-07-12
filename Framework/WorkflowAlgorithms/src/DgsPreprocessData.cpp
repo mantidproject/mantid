@@ -4,7 +4,9 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/PropertyManager.h"
@@ -23,16 +25,6 @@ namespace WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsPreprocessData)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsPreprocessData::DgsPreprocessData() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsPreprocessData::~DgsPreprocessData() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -55,15 +47,16 @@ const std::string DgsPreprocessData::category() const {
  */
 void DgsPreprocessData::init() {
   this->declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
   this->declareProperty(
-      new WorkspaceProperty<>("InputMonitorWorkspace", "", Direction::Input,
-                              PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "",
+                                       Direction::Input,
+                                       PropertyMode::Optional),
       "A monitor workspace associated with the input workspace.");
-  this->declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name for the output workspace.");
+  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                         Direction::Output),
+                        "The name for the output workspace.");
   this->declareProperty("TofRangeOffset", 0.0,
                         "An addition to the TOF axis for monitor integration.");
   this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
@@ -74,7 +67,7 @@ void DgsPreprocessData::init() {
 /** Execute the algorithm.
  */
 void DgsPreprocessData::exec() {
-  g_log.notice() << "Starting DgsPreprocessData" << std::endl;
+  g_log.notice() << "Starting DgsPreprocessData\n";
   // Get the reduction property manager
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");
@@ -95,8 +88,7 @@ void DgsPreprocessData::exec() {
 
   std::string incidentBeamNorm =
       reductionManager->getProperty("IncidentBeamNormalisation");
-  g_log.notice() << "Incident beam norm method = " << incidentBeamNorm
-                 << std::endl;
+  g_log.notice() << "Incident beam norm method = " << incidentBeamNorm << '\n';
 
   // Check to see if preprocessing has already been done.
   bool normAlreadyDone = inputWS->run().hasProperty(doneLog);
@@ -122,7 +114,7 @@ void DgsPreprocessData::exec() {
           "MonitorIntRangeHigh", reductionManager, "norm-mon1-max", inputWS);
       rangeMax += rangeOffset;
 
-      specid_t monSpec = static_cast<specid_t>(
+      specnum_t monSpec = static_cast<specnum_t>(
           inputWS->getInstrument()->getNumberParameter("norm-mon1-spec")[0]);
       if ("ISIS" == facility) {
         norm->setProperty("MonitorSpectrum", monSpec);
@@ -155,7 +147,7 @@ void DgsPreprocessData::exec() {
   } else {
     if (normAlreadyDone) {
       g_log.information() << "Preprocessing already done on "
-                          << inputWS->getName() << std::endl;
+                          << inputWS->getName() << '\n';
     }
     outputWS = inputWS;
   }

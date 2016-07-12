@@ -1,7 +1,5 @@
 #pylint: disable=invalid-name
 """ Sample MAPS reduction scrip """
-import os
-os.environ["PATH"] = r"c:\Mantid\Code\builds\br_master\bin\Release;" + os.environ["PATH"]
 from Direct.ReductionWrapper import *
 try:
     import reduce_vars as web_var
@@ -97,6 +95,8 @@ class ReduceMAPS(ReductionWrapper):
 
 #----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
+    import os
+    os.environ["PATH"] = r"c:\Mantid\Code\builds\br_master\bin\Release;" + os.environ["PATH"]
 
     data_root = r'd:\Data\MantidDevArea\Datastore\DataCopies'
     data_dir  = os.path.join(data_root,r'Testing\Data\SystemTest')

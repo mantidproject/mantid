@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidMDAlgorithms/FitMD.h"
 
 #include "MantidAPI/Algorithm.h"
@@ -10,7 +7,6 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
@@ -33,7 +29,7 @@ using namespace Kernel;
  * Default Constructor
  */
 FitMD::FitMD()
-    : API::IDomainCreator(NULL, std::vector<std::string>(),
+    : API::IDomainCreator(nullptr, std::vector<std::string>(),
                           IDomainCreator::Simple),
       m_maxSize(0), m_startIndex(0), m_count(0) {}
 
@@ -79,8 +75,7 @@ void FitMD::declareDatasetProperties(const std::string &suffix, bool addProp) {
   if (m_domainType != Simple) {
     m_maxSizePropertyName = "MaxSize" + suffix;
     if (addProp && !m_manager->existsProperty(m_maxSizePropertyName)) {
-      auto mustBePositive =
-          boost::shared_ptr<BoundedValidator<int>>(new BoundedValidator<int>());
+      auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
       mustBePositive->setLower(1);
       declareProperty(
           new PropertyWithValue<int>(m_maxSizePropertyName, 1, mustBePositive),
@@ -240,15 +235,12 @@ boost::shared_ptr<API::Workspace> FitMD::createEventOutputWorkspace(
   } while (inputIter->next());
   delete inputIter;
 
-  API::MemoryManager::Instance().releaseFreeMemory();
   // This splits up all the boxes according to split thresholds and sizes.
   auto threadScheduler = new Kernel::ThreadSchedulerFIFO();
   Kernel::ThreadPool threadPool(threadScheduler);
   outputWS->splitAllIfNeeded(threadScheduler);
   threadPool.joinAll();
   outputWS->refreshCache();
-  // Flush memory
-  API::MemoryManager::Instance().releaseFreeMemory();
 
   // Store it
   if (!outputWorkspacePropertyName.empty()) {

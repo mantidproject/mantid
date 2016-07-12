@@ -42,25 +42,25 @@ public:
 
 private:
   /// A string identifier for this function
-  std::string name() const;
+  std::string name() const override;
   /// Declare the function parameters
-  void declareParameters();
+  void declareParameters() override;
   /// Declare non-parameter attributes
-  void declareAttributes();
+  void declareAttributes() override;
   /// Set an attribute value (and possibly cache its value)
-  void setAttribute(const std::string &name, const Attribute &value);
+  void setAttribute(const std::string &name, const Attribute &value) override;
   /// Parse the active hermite polynomial coefficents
   void setHermiteCoefficients(const std::string &coeffs);
   /// Declare the Gram-Charlier (Hermite) coefficients
   void declareGramCharlierParameters();
 
   /// Returns the indices of the intensity parameters
-  std::vector<size_t> intensityParameterIndices() const;
+  std::vector<size_t> intensityParameterIndices() const override;
   /// Fill in the columns of the matrix for this mass
-  size_t fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t index,
-                              const std::vector<double> &errors) const;
+  size_t fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t start,
+                              const std::vector<double> &errors) const override;
   /// Compute the sum for all Hermite polynomial coefficents
-  void massProfile(double *result, const size_t nData) const;
+  void massProfile(double *result, const size_t nData) const override;
   /// Compute the contribution to mass profile nth Hermite polynomial
   /// coefficient
   void addMassProfile(double *result, const unsigned int npoly) const;
@@ -73,11 +73,11 @@ private:
   /// Called by the framework when a workspace is set
   void
   setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX);
+                     size_t wi, double startX, double endX) override;
   /// Pre-calculate the Y-space values
   void cacheYSpaceValues(const std::vector<double> &tseconds,
                          const bool isHistogram,
-                         const Algorithms::DetectorParams &detpar);
+                         const Algorithms::DetectorParams &detpar) override;
 
   /// The active hermite coefficents
   std::vector<short> m_hermite;

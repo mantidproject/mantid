@@ -1,8 +1,6 @@
 #include "MantidGeometry/Crystal/CenteringGroup.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 
-#include <boost/assign.hpp>
-
 namespace Mantid {
 namespace Geometry {
 
@@ -114,17 +112,15 @@ CenteringGroupCreatorImpl::getRrevCentered() const {
 }
 
 CenteringGroupCreatorImpl::CenteringGroupCreatorImpl()
-    : m_centeringSymbolMap() {
-  m_centeringSymbolMap.insert(std::make_pair("P", CenteringGroup::P));
-  m_centeringSymbolMap.insert(std::make_pair("I", CenteringGroup::I));
-  m_centeringSymbolMap.insert(std::make_pair("A", CenteringGroup::A));
-  m_centeringSymbolMap.insert(std::make_pair("B", CenteringGroup::B));
-  m_centeringSymbolMap.insert(std::make_pair("C", CenteringGroup::C));
-  m_centeringSymbolMap.insert(std::make_pair("F", CenteringGroup::F));
-  m_centeringSymbolMap.insert(std::make_pair("R", CenteringGroup::Robv));
-  m_centeringSymbolMap.insert(std::make_pair("Robv", CenteringGroup::Robv));
-  m_centeringSymbolMap.insert(std::make_pair("Rrev", CenteringGroup::Rrev));
-}
+    : m_centeringSymbolMap({{"P", CenteringGroup::P},
+                            {"I", CenteringGroup::I},
+                            {"A", CenteringGroup::A},
+                            {"B", CenteringGroup::B},
+                            {"C", CenteringGroup::C},
+                            {"F", CenteringGroup::F},
+                            {"R", CenteringGroup::Robv},
+                            {"Robv", CenteringGroup::Robv},
+                            {"Rrev", CenteringGroup::Rrev}}) {}
 
 } // namespace Geometry
 } // namespace Mantid

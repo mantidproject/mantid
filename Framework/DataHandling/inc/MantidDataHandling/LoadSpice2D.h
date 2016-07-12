@@ -10,6 +10,8 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <utility>
+
 //----------------------------------------------------------------------
 
 namespace Poco {
@@ -53,36 +55,32 @@ namespace DataHandling {
  */
 class DLLExport LoadSpice2D : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
-  /// default constructor
-  LoadSpice2D();
-  /// destructor
-  ~LoadSpice2D();
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadSpice2D"; }
+  const std::string name() const override { return "LoadSpice2D"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads a SANS data file produce by the HFIR instruments at ORNL. "
            "The instrument geometry is also loaded. The center of the detector "
            "is placed at (0,0,D), where D is the sample-to-detector distance.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Text;SANS\\DataHandling";
   }
   /// Number of monitors
   static const int nMonitors = 2;
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   /// This method throws not found error if a element is not found in the xml
   /// file
@@ -91,14 +89,11 @@ private:
   /// Run LoadInstrument Child Algorithm
   void runLoadInstrument(const std::string &inst_name,
                          DataObjects::Workspace2D_sptr localWorkspace);
-  /// Run the LoadMappingTable Child Algorithm to fill the SpectraToDetectorMap
-  void runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace,
-                           int nxbins, int nybins);
 
   void setInputPropertiesAsMemberProperties();
 
   void addMetadataAsRunProperties(const std::map<std::string, std::string> &);
-  void parseDetectorDimensions(const std::string &);
+  std::pair<int, int> parseDetectorDimensions(const std::string &);
   void createWorkspace();
   std::vector<int> getData(const std::string &);
   void createWorkspace(const std::vector<int> &data, const std::string &title,
@@ -112,19 +107,19 @@ private:
   void addRunProperty(const std::string &name, const T &value,
                       const std::string &units = "");
   void setBeamTrapRunProperty(std::map<std::string, std::string> &metadata);
-  void moveDetector(double sample_detector_distance);
+  void moveDetector(double, double);
   double detectorDistance(std::map<std::string, std::string> &metadata);
+  double detectorTranslation(std::map<std::string, std::string> &metadata);
   void setMetadataAsRunProperties(std::map<std::string, std::string> &metadata);
+  void rotateDetector(const double &);
 
   // Member variables:
   DataObjects::Workspace2D_sptr m_workspace;
-  double m_wavelength_input;
-  double m_wavelength_spread_input;
+  double m_wavelength_input{0.0};
+  double m_wavelength_spread_input{0.0};
   Mantid::DataHandling::XmlHandler m_xmlHandler;
-  int m_numberXPixels;
-  int m_numberYPixels;
-  double m_wavelength;
-  double m_dwavelength;
+  double m_wavelength{0.0};
+  double m_dwavelength{0.0};
 };
 } // namespace DataHandling
 } // namespace Mantid

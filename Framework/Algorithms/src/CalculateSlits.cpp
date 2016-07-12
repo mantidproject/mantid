@@ -1,13 +1,12 @@
 #include "MantidAlgorithms/CalculateSlits.h"
 
 #include <boost/shared_ptr.hpp>
-#include <math.h>
+#include <cmath>
 
 namespace Mantid {
 namespace Algorithms {
 
 using namespace Mantid::API;
-using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 // Register the algorithm into the AlgorithmFactory
@@ -21,7 +20,7 @@ CalculateSlits::CalculateSlits() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-CalculateSlits::~CalculateSlits() {}
+CalculateSlits::~CalculateSlits() = default;
 
 //----------------------------------------------------------------------------------------------
 

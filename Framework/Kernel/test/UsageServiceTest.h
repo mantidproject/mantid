@@ -14,17 +14,17 @@ public:
   TestableUsageService() : UsageServiceImpl() {}
 
   /// generates the message body for a startup message
-  std::string generateStartupMessage() {
+  std::string generateStartupMessage() override {
     return UsageServiceImpl::generateStartupMessage();
   }
   /// generates the message body for a feature usage message
-  std::string generateFeatureUsageMessage() {
+  std::string generateFeatureUsageMessage() override {
     return UsageServiceImpl::generateFeatureUsageMessage();
   }
 
 protected:
   /// sends a report over the internet
-  int sendReport(const std::string &message, const std::string &url) {
+  int sendReport(const std::string &message, const std::string &url) override {
     UNUSED_ARG(message);
     UNUSED_ARG(url);
     // do nothing

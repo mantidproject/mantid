@@ -60,13 +60,13 @@ public:
                         const std::vector<size_t> dimensionToBinFrom,
                         const std::vector<coord_t> origin,
                         const std::vector<coord_t> scaling);
-  virtual CoordTransform *clone() const;
-  virtual ~CoordTransformAligned();
+  CoordTransform *clone() const override;
+  ~CoordTransformAligned() override;
 
-  std::string toXMLString() const;
-  std::string id() const;
-  void apply(const coord_t *inputVector, coord_t *outVector) const;
-  Mantid::Kernel::Matrix<coord_t> makeAffineMatrix() const;
+  std::string toXMLString() const override;
+  std::string id() const override;
+  void apply(const coord_t *inputVector, coord_t *outVector) const override;
+  Mantid::Kernel::Matrix<coord_t> makeAffineMatrix() const override;
 
 protected:
   /// For each dimension in the output, index in the input workspace of which

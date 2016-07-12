@@ -1,5 +1,4 @@
 #include "MantidKernel/BinFinder.h"
-#include "MantidKernel/Exception.h"
 
 using std::size_t;
 
@@ -94,15 +93,12 @@ BinFinder::BinFinder(const std::vector<double> &binParams) {
   numRegions = static_cast<int>(stepSizes.size());
 }
 
-/// Destructor
-BinFinder::~BinFinder() {}
-
 /** Returns the last bin boundary index,
  * which should be == to the size of the X axis.
  */
 int BinFinder::lastBinIndex() {
-  if (endBinIndex.size() > 0)
-    return endBinIndex[endBinIndex.size() - 1];
+  if (!endBinIndex.empty())
+    return endBinIndex.back();
   else
     return -1;
 }

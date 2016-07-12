@@ -1,8 +1,9 @@
 #ifndef MANTID_CRYSTAL_NormaliseVanadiumTEST_H_
 #define MANTID_CRYSTAL_NormaliseVanadiumTEST_H_
 
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidCrystal/NormaliseVanadium.h"
+#include "MantidAPI/Axis.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -24,10 +25,11 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
+using Mantid::HistogramData::BinEdges;
 
 class NormaliseVanadiumImpl : public NormaliseVanadium {
 public:
-  virtual void exec() { NormaliseVanadium::exec(); };
+  void exec() override { NormaliseVanadium::exec(); };
 };
 
 class NormaliseVanadiumTest : public CxxTest::TestSuite {
@@ -86,7 +88,7 @@ public:
     DateAndTime run_start("2010-01-01T00:00:00");
 
     for (int pix = 0; pix < numPixels; pix++) {
-      EventList &el = retVal->getEventList(pix);
+      EventList &el = retVal->getSpectrum(pix);
       el.setSpectrumNo(pix);
       el.addDetectorID(pix);
       // Background
@@ -114,12 +116,9 @@ public:
       delete gens[d];
 
     // Create the x-axis for histogramming.
-    MantidVecPtr x1;
-    MantidVec &xRef = x1.access();
-    xRef.resize(numBins);
-    for (int i = 0; i < numBins; ++i) {
-      xRef[i] = i * binDelta;
-    }
+    BinEdges x1(numBins);
+    int i = 0;
+    std::generate(begin(x1), end(x1), [&] { return i++ * binDelta; });
 
     // Set all the histograms at once.
     retVal->setAllX(x1);

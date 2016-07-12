@@ -1,11 +1,7 @@
 #ifndef MANTID_ALGORITHM_CHANGEBINOFFSET_H_
 #define MANTID_ALGORITHM_CHANGEBINOFFSET_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAlgorithms/SpectrumAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -43,47 +39,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ChangeBinOffset : public API::Algorithm {
+class DLLExport ChangeBinOffset : public SpectrumAlgorithm {
 public:
-  /// Default constructor
-  ChangeBinOffset();
-  /// Destructor
-  virtual ~ChangeBinOffset();
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "ChangeBinOffset"; }
+  const std::string name() const override { return "ChangeBinOffset"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Adjusts all the time bin values in a workspace by a specified "
            "amount.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Axes"; }
+  const std::string category() const override { return "Transforms\\Axes"; }
   /// Algorithm's Alternate Name
-  virtual const std::string alias() const { return "OffsetX"; }
+  const std::string alias() const override { return "OffsetX"; }
 
 private:
-  // Overridden Algorithm methods
-  void init();
-  void exec();
-
-  /// Execute algorithm for EventWorkspaces
-  void execEvent();
-
-  /// Create output workspace
-  API::MatrixWorkspace_sptr createOutputWS(API::MatrixWorkspace_sptr input);
-
-  /// The progress reporting object
-  API::Progress *m_progress;
-
-  /// Offset to shift by
-  double offset;
-  /// Start workspace index
-  int64_t wi_min;
-  /// Stop workspace index
-  int64_t wi_max;
+  /// Initialisation method. Declares properties to be used in algorithm.
+  void init() override;
+  /// Executes the algorithm
+  void exec() override;
 };
 
 } // namespace Algorithm

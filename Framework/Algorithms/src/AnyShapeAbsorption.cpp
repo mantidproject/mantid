@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/AnyShapeAbsorption.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 

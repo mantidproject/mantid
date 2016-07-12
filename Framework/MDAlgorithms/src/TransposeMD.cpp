@@ -29,16 +29,6 @@ using namespace Mantid::DataObjects;
 DECLARE_ALGORITHM(TransposeMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-TransposeMD::TransposeMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-TransposeMD::~TransposeMD() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string TransposeMD::name() const { return "TransposeMD"; }
@@ -61,20 +51,21 @@ const std::string TransposeMD::summary() const {
 /** Initialize the algorithm's properties.
  */
 void TransposeMD::init() {
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
 
   auto axisValidator = boost::make_shared<ArrayBoundedValidator<int>>();
   axisValidator->clearUpper();
   axisValidator->setLower(0);
 
-  declareProperty(new ArrayProperty<int>("Axes", std::vector<int>(0),
-                                         axisValidator, Direction::Input),
-                  "Permutes the axes according to the indexes given. Zero "
-                  "based indexing. Defaults to no transpose.");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<int>>("Axes", std::vector<int>(0),
+                                              axisValidator, Direction::Input),
+      "Permutes the axes according to the indexes given. Zero "
+      "based indexing. Defaults to no transpose.");
 
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 }
@@ -135,10 +126,10 @@ void TransposeMD::exec() {
   const int nThreads = Mantid::API::FrameworkManager::Instance()
                            .getNumOMPThreads(); // NThreads to Request
 
-  auto iterators = inWS->createIterators(nThreads, NULL);
+  auto iterators = inWS->createIterators(nThreads, nullptr);
 
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int it = 0; it < int(iterators.size()); ++it) {
+  for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
     PARALLEL_START_INTERUPT_REGION
     auto inIterator = std::unique_ptr<IMDIterator>(iterators[it]);

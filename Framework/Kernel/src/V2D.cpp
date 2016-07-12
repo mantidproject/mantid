@@ -6,8 +6,6 @@
 #include "MantidKernel/Exception.h"
 #include <limits>
 
-#include <ostream>
-
 namespace Mantid {
 namespace Kernel {
 

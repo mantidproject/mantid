@@ -54,14 +54,14 @@ public:
 
 private:
   /// Initialize the layout
-  virtual void initLayout();
+  void initLayout() override;
   /// Initialize Python-dependent sections
-  virtual void initLocalPython();
+  void initLocalPython() override;
   /// Load the settings of the interface (and child tabs).
   void loadSettings();
 
   /// Called upon a close event.
-  virtual void closeEvent(QCloseEvent *);
+  void closeEvent(QCloseEvent *) override;
   /// handle POCO event
   void
   handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);

@@ -51,20 +51,18 @@ class DLLExport UnaryOperation : public API::Algorithm {
 public:
   /// Default constructor
   UnaryOperation();
-  /// Destructor
-  virtual ~UnaryOperation();
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Arithmetic"; }
+  const std::string category() const override { return "Arithmetic"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Supports the implementation of a Unary operation on an input "
            "workspace.";
   }
 
 protected:
   // Overridden Algorithm methods
-  virtual void init();
-  virtual void exec();
+  void init() override;
+  void exec() override;
   virtual void execEvent();
   template <class T> void unaryOperationEventHelper(std::vector<T> &wevector);
   /// The name of the input workspace property

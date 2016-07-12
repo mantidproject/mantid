@@ -5,6 +5,7 @@
 
 #include <string>
 #include "MantidAlgorithms/SetInstrumentParameter.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::SetInstrumentParameter;

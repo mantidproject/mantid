@@ -12,7 +12,8 @@ class pqPVApplicationCore;
  @author Michael Reuter
  @date 04/08/2011
 
- Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -32,8 +33,7 @@ class pqPVApplicationCore;
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class SimpleGuiApp : public QApplication
-{
+class SimpleGuiApp : public QApplication {
   Q_OBJECT
 public:
   /**
@@ -48,10 +48,10 @@ public:
    * @param event the event to pass to the receiver
    * @return value from the receiver's event handler
    */
-  virtual bool notify(QObject *receiver, QEvent *event);
+  bool notify(QObject *receiver, QEvent *event) override;
+
 private:
   pqPVApplicationCore *pvApp; ///< ParaView application engine
-
 };
 
 #endif // SIMPLEGUIAPP_H

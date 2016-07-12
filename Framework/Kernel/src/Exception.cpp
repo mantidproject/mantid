@@ -23,7 +23,7 @@ FileError::FileError(const FileError &A)
 /** Writes out the range and limits
         @returns a char array of foramtted error information
 */
-const char *FileError::what() const throw() { return outMessage.c_str(); }
+const char *FileError::what() const noexcept { return outMessage.c_str(); }
 
 //-------------------------
 // ParseError
@@ -39,7 +39,7 @@ ParseError::ParseError(const std::string &desc, const std::string &fileName,
 ParseError::ParseError(const ParseError &A)
     : FileError(A), m_lineNumber(A.m_lineNumber) {}
 
-const char *ParseError::what() const throw() { return m_outMessage.c_str(); }
+const char *ParseError::what() const noexcept { return m_outMessage.c_str(); }
 
 //-------------------------
 // NotImplementedError
@@ -50,14 +50,10 @@ const char *ParseError::what() const throw() { return m_outMessage.c_str(); }
 NotImplementedError::NotImplementedError(const std::string &Desc)
     : std::logic_error(Desc) {}
 
-/// Copy constructor
-NotImplementedError::NotImplementedError(const NotImplementedError &A)
-    : std::logic_error(A) {}
-
 /** Writes out the range and limits
         @returns a char array of foramtted error information
 */
-const char *NotImplementedError::what() const throw() {
+const char *NotImplementedError::what() const noexcept {
   return std::logic_error::what();
 }
 
@@ -117,7 +113,7 @@ NotFoundError::NotFoundError(const NotFoundError &A)
 /** Writes out the range and limits
         @returns a char array of foramtted error information
 */
-const char *NotFoundError::what() const throw() { return outMessage.c_str(); }
+const char *NotFoundError::what() const noexcept { return outMessage.c_str(); }
 
 //-------------------------
 // ExistsError
@@ -139,7 +135,7 @@ ExistsError::ExistsError(const ExistsError &A)
 /** Writes out the range and limits
         @returns a char array of foramtted error information
 */
-const char *ExistsError::what() const throw() { return outMessage.c_str(); }
+const char *ExistsError::what() const noexcept { return outMessage.c_str(); }
 
 //-------------------------
 // AbsObjMethod
@@ -159,7 +155,7 @@ AbsObjMethod::AbsObjMethod(const AbsObjMethod &A)
 /** Writes out the range and limits
         @returns a char array of foramtted error information
 */
-const char *AbsObjMethod::what() const throw() { return outMessage.c_str(); }
+const char *AbsObjMethod::what() const noexcept { return outMessage.c_str(); }
 
 //-------------------------
 // InstrumentDefinitionError
@@ -192,7 +188,7 @@ InstrumentDefinitionError::InstrumentDefinitionError(
 /** Writes out the range and limits
         @returns a char array of foramtted error information
 */
-const char *InstrumentDefinitionError::what() const throw() {
+const char *InstrumentDefinitionError::what() const noexcept {
   return outMessage.c_str();
 }
 
@@ -223,7 +219,7 @@ OpenGLError::OpenGLError(const OpenGLError &A)
 /** Writes out the range and limits
         @returns a char array of foramtted error information
 */
-const char *OpenGLError::what() const throw() { return outMessage.c_str(); }
+const char *OpenGLError::what() const noexcept { return outMessage.c_str(); }
 
 //-------------------------
 // MisMatch
@@ -262,7 +258,7 @@ template <typename T> MisMatch<T> &MisMatch<T>::operator=(const MisMatch<T> &) {
 }
 
 template <typename T>
-const char *MisMatch<T>::what() const throw()
+const char *MisMatch<T>::what() const noexcept
 /**
   Writes out the two mismatched items
   @return String description of error
@@ -304,7 +300,7 @@ IndexError::IndexError(const IndexError &A)
   Writes out the range and limits
   @return the error string
 */
-const char *IndexError::what() const throw() { return m_message.c_str(); }
+const char *IndexError::what() const noexcept { return m_message.c_str(); }
 
 //-------------------------
 // NullPointerException class
@@ -320,13 +316,7 @@ NullPointerException::NullPointerException(const std::string &place,
       outMessage("Attempt to dereference zero pointer (" + objectName +
                  ") in function " + place) {}
 
-/** Copy Constructor
- *  @param rhs :: The NullPointerException to copy
- */
-NullPointerException::NullPointerException(const NullPointerException &rhs)
-    : std::runtime_error(rhs), outMessage(rhs.outMessage) {}
-
-const char *NullPointerException::what() const throw() {
+const char *NullPointerException::what() const noexcept {
   return outMessage.c_str();
 }
 
@@ -352,18 +342,10 @@ InternetError::InternetError(const std::string &message, const int &errorCode)
 }
 
 /**
-  Copy Constructor
-  @param A :: IndexError to copy
-*/
-InternetError::InternetError(const InternetError &A)
-    : std::runtime_error(A), outMessage(A.outMessage),
-      m_errorCode(A.m_errorCode) {}
-
-/**
   Writes out the range and limits
   @return the error string
 */
-const char *InternetError::what() const throw() { return outMessage.c_str(); }
+const char *InternetError::what() const noexcept { return outMessage.c_str(); }
 
 /**
   Writes out the range and limits

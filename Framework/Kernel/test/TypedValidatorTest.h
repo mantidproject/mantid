@@ -1,18 +1,19 @@
 #ifndef MANTID_KERNEL_TYPEDVALIDATORTEST_H_
 #define MANTID_KERNEL_TYPEDVALIDATORTEST_H_
 
-#include "MantidKernel/TypedValidator.h"
 #include "MantidKernel/DataItem.h"
+#include "MantidKernel/TypedValidator.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
 
 namespace {
 #define DECLARE_TEST_VALIDATOR(ClassName, HeldType)                            \
   class ClassName : public Mantid::Kernel::TypedValidator<HeldType> {          \
   public:                                                                      \
-    Mantid::Kernel::IValidator_sptr clone() const {                            \
+    Mantid::Kernel::IValidator_sptr clone() const override {                   \
       return boost::make_shared<ClassName>();                                  \
     }                                                                          \
-    std::string checkValidity(const HeldType &) const { return ""; }           \
+    std::string checkValidity(const HeldType &) const override { return ""; }  \
   };
 
 /// Dummy object to hold in a shared_ptr for test
@@ -21,10 +22,10 @@ DECLARE_TEST_VALIDATOR(SharedPtrTypedValidator, boost::shared_ptr<Holder>)
 DECLARE_TEST_VALIDATOR(PODTypedValidator, double)
 class FakeDataItem : public Mantid::Kernel::DataItem {
 public:
-  virtual const std::string id() const { return "FakeDataItem"; }
-  virtual const std::string name() const { return "Empty"; }
-  virtual bool threadSafe() const { return true; }
-  virtual const std::string toString() const { return "FakeDataItem{}"; }
+  const std::string id() const override { return "FakeDataItem"; }
+  const std::string name() const override { return "Empty"; }
+  bool threadSafe() const override { return true; }
+  const std::string toString() const override { return "FakeDataItem{}"; }
 };
 DECLARE_TEST_VALIDATOR(DataItemSptrTypedValidator,
                        boost::shared_ptr<FakeDataItem>)
@@ -35,7 +36,7 @@ public:
   void test_shared_ptr_is_passed_successfully_to_concrete_validator() {
     Mantid::Kernel::IValidator_sptr valueChecker =
         boost::make_shared<SharedPtrTypedValidator>();
-    const boost::shared_ptr<Holder> testPtr(new Holder);
+    const boost::shared_ptr<Holder> testPtr = boost::make_shared<Holder>();
 
     checkIsValidReturnsEmptyString<boost::shared_ptr<Holder>>(valueChecker,
                                                               testPtr);
@@ -52,7 +53,8 @@ public:
   test_DataItem_sptr_descendent_is_passed_successfully_to_concrete_validator() {
     Mantid::Kernel::IValidator_sptr valueChecker =
         boost::make_shared<DataItemSptrTypedValidator>();
-    boost::shared_ptr<FakeDataItem> fakeData(new FakeDataItem);
+    boost::shared_ptr<FakeDataItem> fakeData =
+        boost::make_shared<FakeDataItem>();
     checkIsValidReturnsEmptyString<boost::shared_ptr<FakeDataItem>>(
         valueChecker, fakeData);
   }

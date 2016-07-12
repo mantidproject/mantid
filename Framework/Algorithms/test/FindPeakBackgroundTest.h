@@ -67,31 +67,14 @@ public:
   /** Generate a workspace for test
    */
   MatrixWorkspace_sptr generateTestWorkspace() {
-    vector<double> data;
-    data.push_back(1);
-    data.push_back(2);
-    data.push_back(1);
-    data.push_back(1);
-    data.push_back(9);
-    data.push_back(11);
-    data.push_back(13);
-    data.push_back(20);
-    data.push_back(24);
-    data.push_back(32);
-    data.push_back(28);
-    data.push_back(48);
-    data.push_back(42);
-    data.push_back(77);
-    data.push_back(67);
-    data.push_back(33);
-    data.push_back(27);
-    data.push_back(20);
-    data.push_back(9);
-    data.push_back(2);
+
+    const size_t size = 20;
+
+    std::array<double, size> data = {{1, 2, 1, 1, 9, 11, 13, 20, 24, 32, 28, 48,
+                                      42, 77, 67, 33, 27, 20, 9, 2}};
 
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceFactory::Instance().create("Workspace2D", 1, data.size(),
-                                            data.size()));
+        WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
     MantidVec &vecX = ws->dataX(0);
     MantidVec &vecY = ws->dataY(0);

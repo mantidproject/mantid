@@ -8,15 +8,19 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/ScopedFileHelper.cpp
                         ../../TestHelpers/src/StartFrameworkManager.cpp
+                        ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
+                        NXcanSASTestHelper.cpp
       )
 
   cxxtest_add_test ( DataHandlingTest ${TEST_FILES} )
+  target_include_directories( DataHandlingTest SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} )
   target_link_libraries( DataHandlingTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             API
             DataHandling
             DataObjects
             Geometry
+            HistogramData
             Kernel
             Nexus
             ${NEXUS_LIBRARIES}

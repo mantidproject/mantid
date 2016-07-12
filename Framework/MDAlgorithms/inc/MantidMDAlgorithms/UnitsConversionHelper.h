@@ -74,7 +74,7 @@ class DLLExport UnitsConversionHelper {
 public:
   UnitsConversionHelper();
   void initialize(const MDWSDescription &targetWSDescr,
-                  const std::string &units_to, bool forceViaTOF = false);
+                  const std::string &unitsTo, bool forceViaTOF = false);
   void initialize(const std::string &unitsFrom, const std::string &unitsTo,
                   const DataObjects::TableWorkspace_const_sptr &DetWS,
                   int Emode, bool forceViaTOF = false);

@@ -47,7 +47,7 @@ class MANTID_API_DLL FunctionDomain //: public Kernel::PropertyManager
     {
 public:
   /// Virtual destructor
-  virtual ~FunctionDomain() {}
+  virtual ~FunctionDomain() = default;
   /// Return the number of points in the domain
   virtual size_t size() const = 0;
   /// Reset the the domain so it can be reused. Implement this method for

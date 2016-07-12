@@ -81,7 +81,7 @@ void AnalysisDataServiceImpl::add(
     std::string wsName = ws->name();
     // if anonymous make up a name and add
     if (wsName.empty()) {
-      wsName = name + "_" + boost::lexical_cast<std::string>(i + 1);
+      wsName = name + "_" + std::to_string(i + 1);
     } else if (doesExist(wsName)) { // if ws is already there do nothing
       wsName.clear();
     }
@@ -120,7 +120,7 @@ void AnalysisDataServiceImpl::addOrReplace(
     std::string wsName = ws->name();
     // make up a name for an anonymous workspace
     if (wsName.empty()) {
-      wsName = name + "_" + boost::lexical_cast<std::string>(i + 1);
+      wsName = name + "_" + std::to_string(i + 1);
     } else if (doesExist(wsName)) { // if ws is already there do nothing
       wsName.clear();
     }
@@ -161,6 +161,20 @@ void AnalysisDataServiceImpl::remove(const std::string &name) {
   if (ws) {
     ws->setName("");
   }
+}
+
+/**
+ * Sort members by Workspace name. The group must be in the ADS.
+ * @param groupName :: A group name.
+ */
+void AnalysisDataServiceImpl::sortGroupByName(const std::string &groupName) {
+  WorkspaceGroup_sptr group = retrieveWS<WorkspaceGroup>(groupName);
+  if (!group) {
+    throw std::runtime_error("Workspace " + groupName +
+                             " is not a workspace group.");
+  }
+  group->sortMembersByName();
+  notificationCenter.postNotification(new GroupUpdatedNotification(groupName));
 }
 
 /**
@@ -236,11 +250,11 @@ AnalysisDataServiceImpl::topLevelItems() const {
   auto topLevelNames = this->getObjectNames();
   std::set<Workspace_sptr> groupMembers;
 
-  for (auto it = topLevelNames.begin(); it != topLevelNames.end(); ++it) {
+  for (const auto &topLevelName : topLevelNames) {
     try {
-      const std::string &name = *it;
-      auto ws = this->retrieve(*it);
-      topLevel.insert(std::make_pair(name, ws));
+      const std::string &name = topLevelName;
+      auto ws = this->retrieve(topLevelName);
+      topLevel.emplace(name, ws);
       if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
         group->reportMembers(groupMembers);
       }
@@ -274,11 +288,6 @@ AnalysisDataServiceImpl::AnalysisDataServiceImpl()
     : Mantid::Kernel::DataService<Mantid::API::Workspace>(
           "AnalysisDataService"),
       m_illegalChars() {}
-
-/**
- * Destructor
- */
-AnalysisDataServiceImpl::~AnalysisDataServiceImpl() {}
 
 // The following is commented using /// rather than /** to stop the compiler
 // complaining

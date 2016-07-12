@@ -7,7 +7,6 @@
 #include "MantidLiveData/ADARA/ADARAParser.h"
 #include "MantidAPI/ILiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/MultiThreaded.h"
 
 #include <Poco/Timer.h>
 #include <Poco/Net/StreamSocket.h>
@@ -43,42 +42,42 @@ class SNSLiveEventDataListener : public API::ILiveListener,
                                  public ADARA::Parser {
 public:
   SNSLiveEventDataListener();
-  virtual ~SNSLiveEventDataListener();
+  ~SNSLiveEventDataListener() override;
 
-  std::string name() const { return "SNSLiveEventDataListener"; }
-  bool supportsHistory() const { return true; }
-  bool buffersEvents() const { return true; }
+  std::string name() const override { return "SNSLiveEventDataListener"; }
+  bool supportsHistory() const override { return true; }
+  bool buffersEvents() const override { return true; }
 
-  bool connect(const Poco::Net::SocketAddress &address);
-  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime());
-  boost::shared_ptr<API::Workspace> extractData();
+  bool connect(const Poco::Net::SocketAddress &address) override;
+  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
+  boost::shared_ptr<API::Workspace> extractData() override;
 
-  ILiveListener::RunStatus runStatus();
+  ILiveListener::RunStatus runStatus() override;
   // Note: runStatus() might actually update the value of m_status, so
   // it probably shouldn't be called by other member functions.  The
   // logic it uses for updating m_status is only valid if the function
   // is only called by the MonitorLiveData algorithm.
 
-  int runNumber() const { return m_runNumber; };
+  int runNumber() const override { return m_runNumber; };
 
-  bool isConnected();
+  bool isConnected() override;
 
-  virtual void run(); // the background thread.  What gets executed when we
-                      // call POCO::Thread::start()
+  void run() override; // the background thread.  What gets executed when we
+                       // call POCO::Thread::start()
 protected:
   using ADARA::Parser::rxPacket;
   // virtual bool rxPacket( const ADARA::Packet &pkt);
   // virtual bool rxPacket( const ADARA::RawDataPkt &pkt);
-  virtual bool rxPacket(const ADARA::BankedEventPkt &pkt);
-  virtual bool rxPacket(const ADARA::BeamMonitorPkt &pkt);
-  virtual bool rxPacket(const ADARA::GeometryPkt &pkt);
-  virtual bool rxPacket(const ADARA::BeamlineInfoPkt &pkt);
-  virtual bool rxPacket(const ADARA::RunStatusPkt &pkt);
-  virtual bool rxPacket(const ADARA::VariableU32Pkt &pkt);
-  virtual bool rxPacket(const ADARA::VariableDoublePkt &pkt);
-  virtual bool rxPacket(const ADARA::VariableStringPkt &pkt);
-  virtual bool rxPacket(const ADARA::DeviceDescriptorPkt &pkt);
-  virtual bool rxPacket(const ADARA::AnnotationPkt &pkt);
+  bool rxPacket(const ADARA::BankedEventPkt &pkt) override;
+  bool rxPacket(const ADARA::BeamMonitorPkt &pkt) override;
+  bool rxPacket(const ADARA::GeometryPkt &pkt) override;
+  bool rxPacket(const ADARA::BeamlineInfoPkt &pkt) override;
+  bool rxPacket(const ADARA::RunStatusPkt &pkt) override;
+  bool rxPacket(const ADARA::VariableU32Pkt &pkt) override;
+  bool rxPacket(const ADARA::VariableDoublePkt &pkt) override;
+  bool rxPacket(const ADARA::VariableStringPkt &pkt) override;
+  bool rxPacket(const ADARA::DeviceDescriptorPkt &pkt) override;
+  bool rxPacket(const ADARA::AnnotationPkt &pkt) override;
   // virtual bool rxPacket( const ADARA::RunInfoPkt &pkt);
 
 private:
@@ -125,8 +124,8 @@ private:
 
   ILiveListener::RunStatus m_status;
   int m_runNumber;
-  DataObjects::EventWorkspace_sptr
-      m_eventBuffer; ///< Used to buffer events between calls to extractData()
+  DataObjects::EventWorkspace_sptr m_eventBuffer;
+  ///< Used to buffer events between calls to extractData()
 
   bool m_workspaceInitialized;
   std::string m_wsName;
@@ -149,14 +148,13 @@ private:
   bool m_isConnected;
 
   Poco::Thread m_thread;
-  Poco::FastMutex m_mutex; // protects m_buffer & m_status
+  std::mutex m_mutex; // protects m_buffer & m_status
   bool m_pauseNetRead;
   bool m_stopThread; // background thread checks this periodically.
                      // If true, the thread exits
 
-  Kernel::DateAndTime
-      m_startTime; // The requested start time for the data stream
-                   // (needed by the run() function)
+  Kernel::DateAndTime m_startTime; // The requested start time for the data
+                                   // stream (needed by the run() function)
 
   // Used to initialize the scan_index property if we haven't received a packet
   // with the 'real' value by the time we call initWorkspacePart2.  (We can't

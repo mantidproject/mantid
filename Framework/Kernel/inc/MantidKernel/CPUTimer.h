@@ -17,8 +17,6 @@ namespace Kernel {
 class MANTID_KERNEL_DLL CPUTimer {
 public:
   CPUTimer();
-  ~CPUTimer();
-
   float elapsedCPU(bool doReset = true);
   float elapsedWallClock(bool doReset = true);
   void reset();

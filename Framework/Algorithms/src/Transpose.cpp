@@ -5,6 +5,7 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 
 namespace Mantid {
@@ -17,13 +18,13 @@ using namespace Kernel;
 using namespace API;
 
 void Transpose::init() {
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<CommonBinsValidator>()),
-      "The input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<CommonBinsValidator>()),
+                  "The input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The output workspace.");
 }
 
 void Transpose::exec() {
@@ -43,12 +44,12 @@ void Transpose::exec() {
 
   // Create a shareable X vector for the output workspace
   Axis *inputYAxis = getVerticalAxis(inputWorkspace);
-  MantidVecPtr newXVector;
-  newXVector.access() = MantidVec(newXsize);
-  MantidVec &newXValues = newXVector.access();
+  MantidVec newXValues(newXsize);
   for (size_t i = 0; i < newXsize; ++i) {
     newXValues[i] = (*inputYAxis)(i);
   }
+  auto newXVector =
+      Kernel::make_cow<HistogramData::HistogramX>(std::move(newXValues));
 
   Progress progress(this, 0.0, 1.0, newNhist * newYsize);
   PARALLEL_FOR2(inputWorkspace, outputWorkspace)
@@ -104,7 +105,7 @@ API::MatrixWorkspace_sptr Transpose::createOutputWorkspace(
 
   // Create a new numeric axis for Y the same length as the old X array
   // Values come from input X
-  API::NumericAxis *newYAxis(NULL);
+  API::NumericAxis *newYAxis(nullptr);
   if (inputWorkspace->isHistogramData()) {
     newYAxis = new API::BinEdgeAxis(inX);
   } else {

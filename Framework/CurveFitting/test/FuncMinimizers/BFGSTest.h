@@ -18,26 +18,26 @@ class BFGSTestCostFunction : public ICostFunction {
 
 public:
   BFGSTestCostFunction() : a(1), b(1) {}
-  virtual std::string name() const { return "BFGSTestCostFunction"; }
-  virtual double getParameter(size_t i) const {
+  std::string name() const override { return "BFGSTestCostFunction"; }
+  double getParameter(size_t i) const override {
     if (i == 0)
       return a;
     return b;
   }
-  virtual void setParameter(size_t i, const double &value) {
+  void setParameter(size_t i, const double &value) override {
     if (i == 0) {
       a = value;
     } else {
       b = value;
     }
   }
-  virtual size_t nParams() const { return 2; }
-  virtual double val() const {
+  size_t nParams() const override { return 2; }
+  double val() const override {
     double x = a - 1.1;
     double y = b - 2.2;
     return 3.1 + x * x + y * y;
   }
-  virtual void deriv(std::vector<double> &der) const {
+  void deriv(std::vector<double> &der) const override {
     if (der.size() != 2) {
       der.resize(2);
     }
@@ -46,7 +46,7 @@ public:
     der[0] = 2 * x;
     der[1] = 2 * y;
   }
-  virtual double valAndDeriv(std::vector<double> &der) const {
+  double valAndDeriv(std::vector<double> &der) const override {
     deriv(der);
     return val();
   }

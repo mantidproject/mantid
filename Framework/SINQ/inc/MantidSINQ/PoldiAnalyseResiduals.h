@@ -41,13 +41,10 @@ namespace Poldi {
   */
 class MANTID_SINQ_DLL PoldiAnalyseResiduals : public API::Algorithm {
 public:
-  PoldiAnalyseResiduals();
-  virtual ~PoldiAnalyseResiduals();
-
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 protected:
   double sumCounts(const DataObjects::Workspace2D_sptr &workspace,
@@ -75,8 +72,8 @@ protected:
   bool iterationLimitReached(int iterations);
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Poldi

@@ -18,8 +18,8 @@ public:
     declareParameter("b");
     declareParameter("c");
   }
-  std::string name() const { return "ParameterReferenceTest_Fun"; }
-  void function1D(double *, const double *, const size_t) const {}
+  std::string name() const override { return "ParameterReferenceTest_Fun"; }
+  void function1D(double *, const double *, const size_t) const override {}
 };
 
 class ParameterReferenceTest : public CxxTest::TestSuite {

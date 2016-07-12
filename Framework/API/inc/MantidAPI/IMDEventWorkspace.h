@@ -32,7 +32,6 @@ class MANTID_API_DLL IMDEventWorkspace : public API::IMDWorkspace,
                                          public API::MultipleExperimentInfos {
 public:
   IMDEventWorkspace();
-  virtual ~IMDEventWorkspace() {}
 
   /// Returns a clone of the workspace
   IMDEventWorkspace_uptr clone() const {
@@ -41,10 +40,11 @@ public:
 
   /// Perform initialization after dimensions (and others) have been set.
   virtual void initialize() = 0;
+  IMDEventWorkspace &operator=(const IMDEventWorkspace &) = delete;
 
   /// Get the minimum extents that hold the data
   virtual std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-  getMinimumExtents(size_t depth = 2) = 0;
+  getMinimumExtents(size_t depth = 2) const = 0;
 
   /// Returns some information about the box controller, to be displayed in the
   /// GUI, for example
@@ -58,6 +58,9 @@ public:
 
   /// @return true if the workspace is file-backed
   virtual bool isFileBacked() const = 0;
+
+  /// set filebacked on the contained box
+  virtual void setFileBacked() = 0;
 
   /// Split the top-level MDBox into a MDGridBox.
   virtual void splitBox() = 0;
@@ -80,7 +83,7 @@ public:
 
   void setFileNeedsUpdating(bool value);
 
-  virtual bool threadSafe() const;
+  bool threadSafe() const override;
 
   virtual void setCoordinateSystem(
       const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem) = 0;
@@ -89,26 +92,24 @@ public:
   /// from this.
   virtual void setDisplayNormalizationHisto(
       Mantid::API::MDNormalization preferredNormalizationHisto) = 0;
-  virtual Mantid::API::MDNormalization displayNormalizationHisto() const = 0;
+  Mantid::API::MDNormalization displayNormalizationHisto() const override = 0;
 
   /// Preferred visual normalization method.
   virtual void setDisplayNormalization(
       Mantid::API::MDNormalization preferredNormalization) = 0;
-  virtual Mantid::API::MDNormalization displayNormalization() const = 0;
+  Mantid::API::MDNormalization displayNormalization() const override = 0;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IMDEventWorkspace(const IMDEventWorkspace &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  IMDEventWorkspace &operator=(const IMDEventWorkspace &other);
+  IMDEventWorkspace(const IMDEventWorkspace &) = default;
 
-  virtual const std::string toString() const;
+  const std::string toString() const override;
   /// Marker set to true when a file-backed workspace needs its back-end file
   /// updated (by calling SaveMD(UpdateFileBackEnd=1) )
   bool m_fileNeedsUpdating;
 
 private:
-  virtual IMDEventWorkspace *doClone() const = 0;
+  IMDEventWorkspace *doClone() const override = 0;
 };
 
 } // namespace MDEvents

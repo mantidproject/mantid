@@ -2,7 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/RefRoi.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
 #include "Poco/String.h"
@@ -23,13 +25,13 @@ RefRoi::RefRoi()
       m_nXPixel(0), m_nYPixel(0) {}
 
 void RefRoi::init() {
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<CommonBinsValidator>()),
-      "Workspace to calculate the ROI from");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Workspace containing the summed up region of interest");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<CommonBinsValidator>()),
+                  "Workspace to calculate the ROI from");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Workspace containing the summed up region of interest");
   declareProperty("NXPixel", 304, "Number of pixels in the X direction",
                   Kernel::Direction::Input);
   declareProperty("NYPixel", 256, "Number of pixels in the Y direction",
@@ -141,8 +143,7 @@ void RefRoi::extract2D() {
     // Check that the X-axis is in wavelength units
     const std::string unit = inputWS->getAxis(0)->unit()->caption();
     if (Poco::icompare(unit, "Wavelength") != 0) {
-      g_log.error() << "RefRoi expects units of wavelength to convert to Q"
-                    << std::endl;
+      g_log.error() << "RefRoi expects units of wavelength to convert to Q\n";
       throw std::runtime_error(
           "RefRoi expects units of wavelength to convert to Q");
     }
@@ -154,7 +155,7 @@ void RefRoi::extract2D() {
     outputWS->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
     outputWS->setYUnitLabel("Reflectivity");
-    outputWS->isDistribution(true);
+    outputWS->setDistribution(true);
   } else {
     XOut0 = inputWS->readX(0);
   }

@@ -4,7 +4,7 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include "MantidGeometry/muParser_Silent.h"
 
 namespace Mantid {
@@ -96,8 +96,7 @@ double FitParameter::getValue(const double &at) const {
     } catch (mu::Parser::exception_type &e) {
       g_log.error() << "Cannot evaluate fitting parameter formula."
                     << " Formula which cannot be passed is " << m_formula
-                    << ". Muparser error message is: " << e.GetMsg()
-                    << std::endl;
+                    << ". Muparser error message is: " << e.GetMsg() << '\n';
     }
   }
 
@@ -162,88 +161,62 @@ std::ostream &operator<<(std::ostream &os, const FitParameter &f) {
 */
 std::istream &operator>>(std::istream &in, FitParameter &f) {
 
-  typedef Poco::StringTokenizer tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
   std::string str;
   getline(in, str);
-  tokenizer values(str, ",", tokenizer::TOK_TRIM);
 
-  if (values.count() <= 2) {
+  // allow a comma in the final position.
+  tokenizer tokens(str, ",", tokenizer::TOK_TRIM |
+                                 tokenizer::TOK_IGNORE_FINAL_EMPTY_TOKEN);
+  auto values = tokens.asVector();
+
+  if (values.size() < 3) {
     g_log.warning()
         << "Expecting a comma separated list of at each three entries"
         << " (any of which may be empty strings) to set information about a "
            "fitting parameter"
-        << " instead of: " << str << std::endl;
+        << " instead of: " << str << '\n';
     return in;
   }
 
   try {
-    f.setValue() = boost::lexical_cast<double>(values[0]);
+    f.setValue(boost::lexical_cast<double>(values[0]));
   } catch (boost::bad_lexical_cast &) {
-    f.setValue() = 0.0;
+    f.setValue(0.0);
 
-    if (!values[0].empty()) {
+    if (!values.at(0).empty()) {
       g_log.warning() << "Could not read " << values[0] << " as double for "
                       << " fitting parameter: " << values[1] << ":" << values[2]
-                      << std::endl;
+                      << '\n';
     }
   }
 
   // read remaining required entries
 
-  f.setFunction() = values[1];
-  f.setName() = values[2];
+  f.setFunction(values[1]);
+  f.setName(values[2]);
 
   // read optional entries
+  values.reserve(10);
+  while (values.size() < 10)
+    values.emplace_back("");
 
-  try {
-    f.setConstraintMin() = values[3];
-  } catch (...) {
-    f.setConstraintMin() = "";
-  }
+  f.setConstraintMin(values[3]);
+  f.setConstraintMax(values[4]);
+  f.setConstraintPenaltyFactor(values[5]);
+  f.setTie(values[6]);
+  f.setFormula(values[7]);
+  f.setFormulaUnit(values[8]);
+  f.setResultUnit(values[9]);
 
-  try {
-    f.setConstraintMax() = values[4];
-  } catch (...) {
-    f.setConstraintMax() = "";
-  }
-
-  try {
-    f.setConstraintPenaltyFactor() = values[5];
-  } catch (...) {
-    f.setConstraintPenaltyFactor() = "";
-  }
-
-  try {
-    f.setTie() = values[6];
-  } catch (...) {
-    f.setTie() = "";
-  }
-
-  try {
-    f.setFormula() = values[7];
-  } catch (...) {
-    f.setFormula() = "";
-  }
-
-  try {
-    f.setFormulaUnit() = values[8];
-  } catch (...) {
-    f.setFormulaUnit() = "";
-  }
-
-  try {
-    f.setResultUnit() = values[9];
-  } catch (...) {
-    f.setResultUnit() = "";
-  }
-
-  if (values.count() > 10) {
+  if (values.size() > 10) {
     std::stringstream str(values[10]);
-    str >> f.setLookUpTable();
+    Kernel::Interpolation lookupTable;
+    str >> lookupTable;
+    f.setLookUpTable(lookupTable);
   }
 
   return in;
 }
-
 } // namespace Geometry
 } // namespace Mantid

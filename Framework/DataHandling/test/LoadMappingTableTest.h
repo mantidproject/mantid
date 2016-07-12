@@ -3,9 +3,11 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadInstrumentFromRaw.h"
 #include "MantidDataHandling/LoadMappingTable.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <cxxtest/TestSuite.h>
@@ -60,17 +62,17 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Test one to one mapping, for example spectra 6 has only 1 pixel
-    TS_ASSERT_EQUALS(work1->getSpectrum(6)->getDetectorIDs().size(),
+    TS_ASSERT_EQUALS(work1->getSpectrum(6).getDetectorIDs().size(),
                      1); // rummap.ndet(6),1);
 
     // Test one to many mapping, for example 10 pixels contribute to spectra
     // 2084 (workspace index 2083)
-    TS_ASSERT_EQUALS(work1->getSpectrum(2083)->getDetectorIDs().size(),
+    TS_ASSERT_EQUALS(work1->getSpectrum(2083).getDetectorIDs().size(),
                      10); // map.ndet(2084),10);
 
     // Check the id number of all pixels contributing
     std::set<detid_t> detectorgroup;
-    detectorgroup = work1->getSpectrum(2083)->getDetectorIDs();
+    detectorgroup = work1->getSpectrum(2083).getDetectorIDs();
     std::set<detid_t>::const_iterator it;
     int pixnum = 101191;
     for (it = detectorgroup.begin(); it != detectorgroup.end(); it++)

@@ -100,7 +100,7 @@ class MANTID_SINQ_DLL PoldiTimeTransformer {
 public:
   PoldiTimeTransformer();
   PoldiTimeTransformer(const PoldiInstrumentAdapter_sptr &poldiInstrument);
-  virtual ~PoldiTimeTransformer() {}
+  virtual ~PoldiTimeTransformer() = default;
 
   void initializeFromPoldiInstrument(
       const PoldiInstrumentAdapter_sptr &poldiInstrument);

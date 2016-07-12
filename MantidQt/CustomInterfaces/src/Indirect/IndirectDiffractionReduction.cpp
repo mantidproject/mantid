@@ -3,11 +3,13 @@
 //----------------------
 #include "MantidQtCustomInterfaces/Indirect/IndirectDiffractionReduction.h"
 
-#include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileNameParser.h"
+#include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtAPI/ManageUserDirectories.h"
 
 #include <QDesktopServices>
 #include <QUrl>
@@ -80,6 +82,9 @@ void IndirectDiffractionReduction::initLayout() {
   m_uiForm.leRebinStart->setValidator(m_valDbl);
   m_uiForm.leRebinWidth->setValidator(m_valDbl);
   m_uiForm.leRebinEnd->setValidator(m_valDbl);
+  m_uiForm.leRebinStart_CalibOnly->setValidator(m_valDbl);
+  m_uiForm.leRebinWidth_CalibOnly->setValidator(m_valDbl);
+  m_uiForm.leRebinEnd_CalibOnly->setValidator(m_valDbl);
 
   // Update the list of plot options when individual grouping is toggled
   connect(m_uiForm.ckIndividualGrouping, SIGNAL(stateChanged(int)), this,
@@ -89,6 +94,9 @@ void IndirectDiffractionReduction::initLayout() {
 
   // Update invalid rebinning markers
   validateRebin();
+
+  // Update invalid markers
+  validateCalOnly();
 
   // Update instrument dependant widgets
   m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
@@ -100,24 +108,31 @@ void IndirectDiffractionReduction::initLayout() {
 void IndirectDiffractionReduction::run() {
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
-
-  if (instName == "OSIRIS" && mode == "diffonly") {
-    if (!m_uiForm.rfSampleFiles->isValid() || !validateVanCal()) {
-      showInformationBox(
-          "Invalid input.\nIncorrect entries marked with red star.");
-      return;
-    }
-
-    runOSIRISdiffonlyReduction();
-  } else {
-    if (!m_uiForm.rfSampleFiles->isValid() || !validateRebin()) {
-      showInformationBox(
-          "Invalid input.\nIncorrect entries marked with red star.");
-      return;
-    }
-
-    runGenericReduction(instName, mode);
+  if (!m_uiForm.rfSampleFiles->isValid()) {
+    showInformationBox("Sample files input is invalid.");
+    return;
   }
+  if (instName == "OSIRIS") {
+    if (mode == "diffonly") {
+      if (!validateVanCal()) {
+        showInformationBox("Vaniduium and Calibration input is invalid.");
+        return;
+      }
+      runOSIRISdiffonlyReduction();
+    } else {
+      if (!validateCalOnly()) {
+        showInformationBox(
+            "Calibration and rebinning parameters are incorrect.");
+        return;
+      }
+    }
+  } else {
+    if (!validateRebin()) {
+      showInformationBox("Rebinning parameters are incorrect.");
+      return;
+    }
+  }
+  runGenericReduction(instName, mode);
 }
 
 /**
@@ -259,15 +274,23 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
   // Get save formats
   std::vector<std::string> saveFormats;
   if (m_uiForm.ckGSS->isChecked())
-    saveFormats.push_back("gss");
+    saveFormats.emplace_back("gss");
   if (m_uiForm.ckNexus->isChecked())
-    saveFormats.push_back("nxs");
+    saveFormats.emplace_back("nxs");
   if (m_uiForm.ckAscii->isChecked())
-    saveFormats.push_back("ascii");
+    saveFormats.emplace_back("ascii");
 
   // Set algorithm properties
   msgDiffReduction->setProperty("Instrument", instName.toStdString());
   msgDiffReduction->setProperty("Mode", mode.toStdString());
+
+  // Check if Cal file is used
+  if (instName == "OSIRIS" && mode == "diffspec") {
+    if (m_uiForm.ckUseCalib->isChecked()) {
+      const auto calFile = m_uiForm.rfCalFile_only->getText().toStdString();
+      msgDiffReduction->setProperty("CalFile", calFile);
+    }
+  }
   msgDiffReduction->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
   msgDiffReduction->setProperty("LoadLogFiles",
                                 m_uiForm.ckLoadLogs->isChecked());
@@ -359,7 +382,8 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
 
   if (m_uiForm.ckUseCan->isChecked()) {
     osirisDiffReduction->setProperty(
-        "Container", m_uiForm.rfCanFiles->getFirstFilename().toStdString());
+        "Container",
+        m_uiForm.rfCanFiles->getFilenames().join(",").toStdString());
     if (m_uiForm.ckCanScale->isChecked())
       osirisDiffReduction->setProperty("ContainerScaleFactor",
                                        m_uiForm.spCanScale->value());
@@ -492,13 +516,18 @@ void IndirectDiffractionReduction::instrumentSelected(
   std::vector<std::string> correctionVector =
       instrument->getStringParameter("Workflow.Diffraction.Correction");
   bool vanadiumNeeded = false;
-  if (correctionVector.size() > 0)
+  bool calibNeeded = false;
+  if (correctionVector.size() > 0) {
     vanadiumNeeded = (correctionVector[0] == "Vanadium");
+    calibNeeded = (correctionVector[0] == "Calibration");
+  }
 
   if (vanadiumNeeded)
     m_uiForm.swVanadium->setCurrentIndex(0);
-  else
+  else if (calibNeeded)
     m_uiForm.swVanadium->setCurrentIndex(1);
+  else
+    m_uiForm.swVanadium->setCurrentIndex(2);
 
   // Hide options that the current instrument config cannot process
   if (instrumentName == "OSIRIS" && reflectionName == "diffonly") {
@@ -553,8 +582,7 @@ void IndirectDiffractionReduction::loadSettings() {
   QSettings settings;
   QString dataDir = QString::fromStdString(
                         Mantid::Kernel::ConfigService::Instance().getString(
-                            "datasearch.directories"))
-                        .split(";")[0];
+                            "datasearch.directories")).split(";")[0];
 
   settings.beginGroup(m_settingsGroup);
   settings.setValue("last_directory", dataDir);
@@ -594,11 +622,10 @@ bool IndirectDiffractionReduction::validateRebin() {
     m_uiForm.valRebinEnd->setText("");
   } else {
 #define CHECK_VALID(text, validator)                                           \
-  if (text.isEmpty()) {                                                        \
-    rebinValid = false;                                                        \
+  rebinValid = !text.isEmpty();                                                \
+  if (!rebinValid) {                                                           \
     validator->setText("*");                                                   \
   } else {                                                                     \
-    rebinValid = true;                                                         \
     validator->setText("");                                                    \
   }
 
@@ -629,6 +656,44 @@ bool IndirectDiffractionReduction::validateVanCal() {
     return false;
 
   return true;
+}
+
+/**
+* Checks to see if the cal file and optional rebin fields are valid.
+*
+* @returns True if calibration file and rebin values are valid, false otherwise
+*/
+bool IndirectDiffractionReduction::validateCalOnly() {
+  // Check Calib file valid
+  if (m_uiForm.ckUseCalib->isChecked() && !m_uiForm.rfCalFile_only->isValid())
+    return false;
+
+  // Check rebin values valid
+  QString rebStartTxt = m_uiForm.leRebinStart_CalibOnly->text();
+  QString rebStepTxt = m_uiForm.leRebinWidth_CalibOnly->text();
+  QString rebEndTxt = m_uiForm.leRebinEnd_CalibOnly->text();
+
+  bool rebinValid = true;
+  // Need all or none
+  if (rebStartTxt.isEmpty() && rebStepTxt.isEmpty() && rebEndTxt.isEmpty()) {
+    rebinValid = true;
+    m_uiForm.valRebinStart_CalibOnly->setText("");
+    m_uiForm.valRebinWidth_CalibOnly->setText("");
+    m_uiForm.valRebinEnd_CalibOnly->setText("");
+  } else {
+
+    CHECK_VALID(rebStartTxt, m_uiForm.valRebinStart_CalibOnly);
+    CHECK_VALID(rebStepTxt, m_uiForm.valRebinWidth_CalibOnly);
+    CHECK_VALID(rebEndTxt, m_uiForm.valRebinEnd_CalibOnly);
+
+    if (rebinValid && rebStartTxt.toDouble() >= rebEndTxt.toDouble()) {
+      rebinValid = false;
+      m_uiForm.valRebinStart_CalibOnly->setText("*");
+      m_uiForm.valRebinEnd_CalibOnly->setText("*");
+    }
+  }
+
+  return rebinValid;
 }
 
 /**

@@ -1,5 +1,8 @@
 #include "MantidAlgorithms/MonitorEfficiencyCorUser.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/MultiThreaded.h"
 
@@ -14,28 +17,17 @@ using namespace Geometry;
 DECLARE_ALGORITHM(MonitorEfficiencyCorUser)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MonitorEfficiencyCorUser::MonitorEfficiencyCorUser()
-    : m_inputWS(), m_outputWS(), m_Ei(.0), m_monitorCounts(0) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MonitorEfficiencyCorUser::~MonitorEfficiencyCorUser() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 
 void MonitorEfficiencyCorUser::init() {
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<InstrumentValidator>()),
-      "The workspace to correct for monitor efficiency");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name of the workspace in which to store the result.");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<InstrumentValidator>()),
+                  "The workspace to correct for monitor efficiency");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name of the workspace in which to store the result.");
 }
 
 void MonitorEfficiencyCorUser::exec() {
@@ -129,7 +121,7 @@ MonitorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
     p.SetExpr(formula);
     double eff = p.Eval();
     g_log.debug() << "Formula: " << formula << " with: " << energy
-                  << "evaluated to: " << eff << std::endl;
+                  << "evaluated to: " << eff << '\n';
     return eff;
 
   } catch (mu::Parser::exception_type &e) {

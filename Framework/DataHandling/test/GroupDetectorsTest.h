@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/GroupDetectors.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -19,7 +21,10 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using Mantid::detid_t;
-using Mantid::specid_t;
+using Mantid::specnum_t;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 class GroupDetectorsTest : public CxxTest::TestSuite {
 public:
@@ -28,28 +33,27 @@ public:
 
   GroupDetectorsTest() {
     // Set up a small workspace for testing
-    MatrixWorkspace_sptr space =
-        WorkspaceFactory::Instance().create("Workspace2D", 5, 6, 5);
-    space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    MantidVecPtr x, vec;
-    x.access().resize(6, 10.0);
-    vec.access().resize(5, 1.0);
+    auto space2D = createWorkspace<Workspace2D>(5, 6, 5);
+    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    BinEdges x(6, 10.0);
+    Counts y(5, 1.0);
+    CountStandardDeviations e(5, 1.0);
     for (int j = 0; j < 5; ++j) {
-      space2D->setX(j, x);
-      space2D->setData(j, vec, vec);
-      space2D->getSpectrum(j)->setSpectrumNo(j);
-      space2D->getSpectrum(j)->setDetectorID(j);
+      space2D->setBinEdges(j, x);
+      space2D->setCounts(j, y);
+      space2D->setCountStandardDeviations(j, e);
+      space2D->getSpectrum(j).setSpectrumNo(j);
+      space2D->getSpectrum(j).setDetectorID(j);
     }
     Instrument_sptr instr(new Instrument);
     for (detid_t i = 0; i < 5; i++) {
       Detector *d = new Detector("det", i, 0);
       instr->markAsDetector(d);
     }
-    space->setInstrument(instr);
+    space2D->setInstrument(instr);
 
     // Register the workspace in the data service
-    AnalysisDataService::Instance().add("GroupTestWS", space);
+    AnalysisDataService::Instance().add("GroupTestWS", space2D);
   }
 
   void testName() { TS_ASSERT_EQUALS(grouper.name(), "GroupDetectors") }
@@ -73,7 +77,7 @@ public:
 
     TS_ASSERT_EQUALS(props[1]->name(), "SpectraList")
     TS_ASSERT(props[1]->isDefault())
-    TS_ASSERT(dynamic_cast<ArrayProperty<specid_t> *>(props[1]))
+    TS_ASSERT(dynamic_cast<ArrayProperty<specnum_t> *>(props[1]))
 
     TS_ASSERT_EQUALS(props[2]->name(), "DetectorList")
     TS_ASSERT(props[2]->isDefault())
@@ -116,23 +120,23 @@ public:
     for (int i = 0; i < 5; ++i) {
       TS_ASSERT_DELTA(outputWS->dataE(0)[i], 1.7321, 0.0001);
     }
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(0)->getSpectrumNo(), 0);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(0).getSpectrumNo(), 0);
     TS_ASSERT_EQUALS(outputWS->dataX(1), tens);
     TS_ASSERT_EQUALS(outputWS->dataY(1), ones);
     TS_ASSERT_EQUALS(outputWS->dataE(1), ones);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(1)->getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(1).getSpectrumNo(), 1);
     TS_ASSERT_EQUALS(outputWS->dataX(2), tens);
     TS_ASSERT_EQUALS(outputWS->dataY(2), zeroes);
     TS_ASSERT_EQUALS(outputWS->dataE(2), zeroes);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(2)->getSpectrumNo(), -1);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(2).getSpectrumNo(), -1);
     TS_ASSERT_EQUALS(outputWS->dataX(3), tens);
     TS_ASSERT_EQUALS(outputWS->dataY(3), zeroes);
     TS_ASSERT_EQUALS(outputWS->dataE(3), zeroes);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(3)->getSpectrumNo(), -1);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(3).getSpectrumNo(), -1);
     TS_ASSERT_EQUALS(outputWS->dataX(4), tens);
     TS_ASSERT_EQUALS(outputWS->dataY(4), ones);
     TS_ASSERT_EQUALS(outputWS->dataE(4), ones);
-    TS_ASSERT_EQUALS(outputWS->getSpectrum(4)->getSpectrumNo(), 4);
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(4).getSpectrumNo(), 4);
 
     boost::shared_ptr<const IDetector> det;
     TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(0));

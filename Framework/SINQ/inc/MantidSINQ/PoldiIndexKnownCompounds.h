@@ -65,15 +65,12 @@ struct MANTID_SINQ_DLL IndexCandidatePair {
   */
 class MANTID_SINQ_DLL PoldiIndexKnownCompounds : public API::Algorithm {
 public:
-  PoldiIndexKnownCompounds();
-  virtual ~PoldiIndexKnownCompounds();
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
-
-  virtual std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
   void setMeasuredPeaks(const PoldiPeakCollection_sptr &measuredPeaks);
   void setExpectedPhases(
@@ -163,8 +160,8 @@ protected:
   std::vector<PoldiPeakCollection_sptr> m_indexedPeaks;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Poldi

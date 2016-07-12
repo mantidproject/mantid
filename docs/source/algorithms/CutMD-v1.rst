@@ -33,6 +33,35 @@ MDHistoWorkspaces
 
 If the input is an :ref:`MDHistoWorkspace <MDHistoWorkspace>` :ref:`algm-BinMD` and :ref:`algm-SliceMD` are not made available as they needto get hold of the original MDEvents associated with an :ref:`MDEventWorkspace <MDWorkspace>` in order to perform the rebinning. As this information is missing from the MDHistoWorkspace images, those operations are forbidden. Instead, a limited subset of the operations are allowed, and are performed via :ref:`algm-IntegrateMDHistoWorkspace`. In this case, the Projection and NoPix properties are ignored. See :ref:`algm-IntegrateMDHistoWorkspace` for how the binning parameters are used.
 
+Projection Binning
+~~~~~~~~~~~~~~~~~~
+
+The 'PnBin' property, where n is between 1 and 5, is used to specify the binning for the nth dimension of the output workspace.
+The dimension will be truncated to have extents 'minimum' and 'maximum', with 'stepsize' specifying the size of the bins inbetween.
+'(maximum - minimum)/stepsize' is rounded down to produce an integer number, greater than or equal to 1, of equally-sized bins between 'minimum' and 'maximum'.
+
+Note that if the output workspace is an MDEventWorkspace (NoPix=False), these properties define the top-level box structure of the workspace.
+If the MaxRecursionDepth property is set to higher than its default of 1 then if many events fall within a single box it may be split further,
+see the documentation for :ref:`MDEventWorkspace <MDWorkspace>`.
+
+The PnBin parameters must match one of these three formats:
+
++----------------------------------+-------------------------------------------------------+
+| Format                           |                                                       |
++==================================+=======================================================+
+| [minimum, stepsize, maximum]     | The dimension in the output workspace will extend     |
+|                                  | from 'minimum' to 'maximum' with bins of width        |
+|                                  | 'stepsize'.                                           |
++----------------------------------+-------------------------------------------------------+
+| [minimum, maximum]               | A single bin will be created between 'minimum' and    |
+|                                  | 'maximum'.                                            |
++----------------------------------+-------------------------------------------------------+
+| [stepsize]                       | The 'minimum' and 'maximum' are set to the dimension  |
+|                                  | limits; the workspace is not cut in this dimension.   |
++----------------------------------+-------------------------------------------------------+
+
+For ease of use, when using the python interface only, the 'PBins' keyword can be used in place of separate PnBins properties.
+PBins accepts a tuple, or list, of PnBins parameters. The position in the list determines the dimension it corresponds to. See the Usage_ examples below.
 
 Creating Projections
 ~~~~~~~~~~~~~~~~~~~~
@@ -99,8 +128,8 @@ Workflow
 
 .. diagram:: CutMD-v1_wkflw.dot
 
-Usage
------
+_`Usage`
+--------
 
 **Example - Contrived example using projections:**
 

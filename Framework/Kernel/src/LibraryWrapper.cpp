@@ -5,14 +5,14 @@ namespace Mantid {
 namespace Kernel {
 
 /// Constructor
-LibraryWrapper::LibraryWrapper() : module(0) {}
+LibraryWrapper::LibraryWrapper() : module(nullptr) {}
 
 /// Destructor
 LibraryWrapper::~LibraryWrapper() {
   // Close lib
   if (module) {
     DllOpen::CloseDll(module);
-    module = 0;
+    module = nullptr;
   }
 }
 

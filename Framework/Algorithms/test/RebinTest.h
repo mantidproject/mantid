@@ -14,13 +14,14 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/ScopedWorkspace.h"
 
-#include <boost/assign/list_of.hpp>
-
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 class RebinTest : public CxxTest::TestSuite {
 public:
@@ -40,7 +41,7 @@ public:
 
   void testworkspace1D_dist() {
     Workspace2D_sptr test_in1D = Create1DWorkspace(50);
-    test_in1D->isDistribution(true);
+    test_in1D->setDistribution(true);
     AnalysisDataService::Instance().add("test_in1D", test_in1D);
 
     Rebin rebin;
@@ -112,7 +113,7 @@ public:
 
   void testworkspace1D_logarithmic_binning() {
     Workspace2D_sptr test_in1D = Create1DWorkspace(50);
-    test_in1D->isDistribution(true);
+    test_in1D->setDistribution(true);
     AnalysisDataService::Instance().add("test_in1D", test_in1D);
 
     Rebin rebin;
@@ -146,7 +147,7 @@ public:
 
   void testworkspace2D_dist() {
     Workspace2D_sptr test_in2D = Create2DWorkspace(50, 20);
-    test_in2D->isDistribution(true);
+    test_in2D->setDistribution(true);
     AnalysisDataService::Instance().add("test_in2D", test_in2D);
 
     Rebin rebin;
@@ -343,7 +344,7 @@ public:
   void testMaskedBinsDist() {
     Workspace2D_sptr test_in1D = Create1DWorkspace(50);
     AnalysisDataService::Instance().add("test_Rebin_mask_dist", test_in1D);
-    test_in1D->isDistribution(true);
+    test_in1D->setDistribution(true);
     maskFirstBins("test_Rebin_mask_dist", "test_Rebin_masked_ws", 10.0);
 
     Rebin rebin;
@@ -397,7 +398,7 @@ public:
 
   void testMaskedBinsIntegratedCounts() {
     Workspace2D_sptr test_in1D = Create1DWorkspace(51);
-    test_in1D->isDistribution(false);
+    test_in1D->setDistribution(false);
     AnalysisDataService::Instance().add("test_Rebin_mask_raw", test_in1D);
 
     Rebin rebin;
@@ -456,57 +457,49 @@ public:
   }
 
   void test_FullBinsOnly_Fixed() {
-    std::vector<double> xExpected = boost::assign::list_of(0.5)(2.5)(4.5)(6.5);
+    std::vector<double> xExpected = {0.5, 2.5, 4.5, 6.5};
     std::vector<double> yExpected(3, 8.0);
     std::string params = "2.0";
     do_test_FullBinsOnly(params, yExpected, xExpected);
   }
 
   void test_FullBinsOnly_Variable() {
-    std::vector<double> xExpected =
-        boost::assign::list_of(0.5)(1.5)(2.5)(3.2)(3.9)(4.6)(6.6);
-    std::vector<double> yExpected =
-        boost::assign::list_of(4.0)(4.0)(2.8)(2.8)(2.8)(8.0);
+    std::vector<double> xExpected = {0.5, 1.5, 2.5, 3.2, 3.9, 4.6, 6.6};
+    std::vector<double> yExpected = {4.0, 4.0, 2.8, 2.8, 2.8, 8.0};
     std::string params = "0.5, 1.0, 3.1, 0.7, 5.0, 2.0, 7.25";
     do_test_FullBinsOnly(params, yExpected, xExpected);
   }
 
 private:
   Workspace2D_sptr Create1DWorkspace(int size) {
-    boost::shared_ptr<Mantid::MantidVec> y1(
-        new Mantid::MantidVec(size - 1, 3.0));
-    boost::shared_ptr<Mantid::MantidVec> e1(
-        new Mantid::MantidVec(size - 1, sqrt(3.0)));
-    Workspace2D_sptr retVal(new Workspace2D);
-    retVal->initialize(1, size, size - 1);
+    auto retVal = createWorkspace<Workspace2D>(1, size, size - 1);
     double j = 1.0;
     for (int i = 0; i < size; i++) {
       retVal->dataX(0)[i] = j * 0.5;
       j += 1.5;
     }
-    retVal->setData(0, y1, e1);
+    retVal->setCounts(0, size - 1, 3.0);
+    retVal->setCountVariances(0, size - 1, 3.0);
     return retVal;
   }
 
   Workspace2D_sptr Create2DWorkspace(int xlen, int ylen) {
-    boost::shared_ptr<Mantid::MantidVec> x1(new Mantid::MantidVec(xlen, 0.0));
-    boost::shared_ptr<Mantid::MantidVec> y1(
-        new Mantid::MantidVec(xlen - 1, 3.0));
-    boost::shared_ptr<Mantid::MantidVec> e1(
-        new Mantid::MantidVec(xlen - 1, sqrt(3.0)));
+    BinEdges x1(xlen, 0.0);
+    Counts y1(xlen - 1, 3.0);
+    CountStandardDeviations e1(xlen - 1, sqrt(3.0));
 
-    Workspace2D_sptr retVal(new Workspace2D);
-    retVal->initialize(ylen, xlen, xlen - 1);
+    auto retVal = createWorkspace<Workspace2D>(ylen, xlen, xlen - 1);
     double j = 1.0;
 
-    for (int i = 0; i < xlen; i++) {
-      (*x1)[i] = j * 0.5;
+    for (auto &x : x1) {
+      x = j * 0.5;
       j += 1.5;
     }
 
     for (int i = 0; i < ylen; i++) {
-      retVal->setX(i, x1);
-      retVal->setData(i, y1, e1);
+      retVal->setBinEdges(i, x1);
+      retVal->setCounts(i, y1);
+      retVal->setCountStandardDeviations(i, e1);
     }
 
     return retVal;

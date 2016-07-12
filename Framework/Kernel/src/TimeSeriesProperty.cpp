@@ -3,13 +3,10 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/make_unique.h"
+#include <nexus/NeXusFile.hpp>
 
-#if !(defined __APPLE__ && defined __INTEL_COMPILER)
-#else
-#include <boost/range/algorithm_ext/is_sorted.hpp>
-#endif
-
-using namespace std;
+#include <boost/regex.hpp>
 
 namespace Mantid {
 namespace Kernel {
@@ -80,8 +77,8 @@ TimeSeriesProperty<TYPE>::getDerivative() const {
   TYPE v0 = it->value();
 
   it++;
-  auto timeSeriesDeriv = std::unique_ptr<TimeSeriesProperty<double>>(
-      new TimeSeriesProperty<double>(this->name() + "_derivative"));
+  auto timeSeriesDeriv = Kernel::make_unique<TimeSeriesProperty<double>>(
+      this->name() + "_derivative");
   timeSeriesDeriv->reserve(this->m_values.size() - 1);
   for (; it != m_values.end(); it++) {
     TYPE v1 = it->value();
@@ -278,16 +275,11 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime &start,
     // "start time" is behind time-series's starting time
     iterhead = m_values.begin() + istart;
 
-    bool useprefiltertime;
-    if (m_values[istart].time() == start) {
-      // The filter time is on the mark.  Erase [begin(),  istart)
-      useprefiltertime = false;
-    } else {
-      // The filter time is larger than T[istart]. Erase[begin(), istart) ...
-      // filter start(time)
-      // and move istart to filter startime
-      useprefiltertime = true;
-    }
+    // False - The filter time is on the mark.  Erase [begin(),  istart)
+    // True - The filter time is larger than T[istart]. Erase[begin(), istart)
+    // ...
+    //       filter start(time) and move istart to filter startime
+    bool useprefiltertime = !(m_values[istart].time() == start);
 
     // Remove the series
     m_values.erase(m_values.begin(), iterhead);
@@ -343,8 +335,7 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
                 << "  Original MP Size = " << m_values.size() << "\n";
 
   // 4. Create new
-  for (size_t isp = 0; isp < splittervec.size(); ++isp) {
-    Kernel::SplittingInterval splitter = splittervec[isp];
+  for (const auto &splitter : splittervec) {
     Kernel::DateAndTime t_start = splitter.start();
     Kernel::DateAndTime t_stop = splitter.stop();
 
@@ -444,7 +435,7 @@ void TimeSeriesProperty<TYPE>::splitByTime(
         myOutput->m_size = 0;
       }
     } else {
-      outputs_tsp.push_back(NULL);
+      outputs_tsp.push_back(nullptr);
     }
   }
 
@@ -752,16 +743,16 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(
 
   double numerator(0.0), totalTime(0.0);
   // Loop through the filter ranges
-  for (auto it = filter.cbegin(); it != filter.cend(); ++it) {
+  for (const auto &time : filter) {
     // Calculate the total time duration (in seconds) within by the filter
-    totalTime += it->duration();
+    totalTime += time.duration();
 
     // Get the log value and index at the start time of the filter
     int index;
-    double value = getSingleValue(it->start(), index);
-    DateAndTime startTime = it->start();
+    double value = getSingleValue(time.start(), index);
+    DateAndTime startTime = time.start();
 
-    while (index < realSize() - 1 && m_values[index + 1].time() < it->stop()) {
+    while (index < realSize() - 1 && m_values[index + 1].time() < time.stop()) {
       ++index;
       numerator +=
           DateAndTime::secondsFromDuration(m_values[index].time() - startTime) *
@@ -772,7 +763,7 @@ double TimeSeriesProperty<TYPE>::averageValueInFilter(
 
     // Now close off with the end of the current filter range
     numerator +=
-        DateAndTime::secondsFromDuration(it->stop() - startTime) * value;
+        DateAndTime::secondsFromDuration(time.stop() - startTime) * value;
   }
 
   // 'Normalise' by the total time
@@ -788,7 +779,7 @@ double TimeSeriesProperty<TYPE>::timeAverageValue() const {
     TimeSplitterType filter;
     filter.push_back(SplittingInterval(this->firstTime(), this->lastTime()));
     retVal = this->averageValueInFilter(filter);
-  } catch (exception &) {
+  } catch (std::exception &) {
     // just return nan
     retVal = std::numeric_limits<double>::quiet_NaN();
   }
@@ -829,7 +820,7 @@ TimeSeriesProperty<TYPE>::valueAsCorrectMap() const {
   // 2. Data Strcture
   std::map<DateAndTime, TYPE> asMap;
 
-  if (m_values.size() > 0) {
+  if (!m_values.empty()) {
     for (size_t i = 0; i < m_values.size(); i++)
       asMap[m_values[i].time()] = m_values[i].value();
   }
@@ -865,7 +856,7 @@ std::multimap<DateAndTime, TYPE>
 TimeSeriesProperty<TYPE>::valueAsMultiMap() const {
   std::multimap<DateAndTime, TYPE> asMultiMap;
 
-  if (m_values.size() > 0) {
+  if (!m_values.empty()) {
     for (size_t i = 0; i < m_values.size(); i++)
       asMultiMap.insert(
           std::make_pair(m_values[i].time(), m_values[i].value()));
@@ -983,19 +974,14 @@ template <typename TYPE>
 void TimeSeriesProperty<TYPE>::addValues(
     const std::vector<Kernel::DateAndTime> &times,
     const std::vector<TYPE> &values) {
-  for (size_t i = 0; i < times.size(); i++) {
-    if (i >= values.size())
-      break;
-    else {
-      m_values.push_back(TimeValueUnit<TYPE>(times[i], values[i]));
-      m_size++;
-    }
+  size_t length = std::min(times.size(), values.size());
+  m_size += static_cast<int>(length);
+  for (size_t i = 0; i < length; ++i) {
+    m_values.emplace_back(times[i], values[i]);
   }
 
-  if (values.size() > 0)
+  if (!values.empty())
     m_propSortedFlag = TimeSeriesSortStatus::TSUNKNOWN;
-
-  return;
 }
 
 /** replace vectors of values to the map. First we clear the vectors
@@ -1017,7 +1003,7 @@ void TimeSeriesProperty<TYPE>::replaceValues(
  */
 template <typename TYPE>
 DateAndTime TimeSeriesProperty<TYPE>::lastTime() const {
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("lastTime(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1033,7 +1019,7 @@ DateAndTime TimeSeriesProperty<TYPE>::lastTime() const {
  *  @return Value
  */
 template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::firstValue() const {
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("firstValue(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1050,7 +1036,7 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::firstValue() const {
  */
 template <typename TYPE>
 DateAndTime TimeSeriesProperty<TYPE>::firstTime() const {
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("firstTime(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1067,7 +1053,7 @@ DateAndTime TimeSeriesProperty<TYPE>::firstTime() const {
  *  @return Value
  */
 template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::lastValue() const {
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("lastValue(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1161,7 +1147,7 @@ std::map<DateAndTime, TYPE> TimeSeriesProperty<TYPE>::valueAsMap() const {
   // 2. Build map
 
   std::map<DateAndTime, TYPE> asMap;
-  if (m_values.size() == 0)
+  if (m_values.empty())
     return asMap;
 
   TYPE d = m_values[0].value();
@@ -1293,7 +1279,7 @@ void TimeSeriesProperty<TYPE>::create(const std::vector<DateAndTime> &new_times,
  */
 template <typename TYPE>
 TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t) const {
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("getSingleValue(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1322,7 +1308,7 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t) const {
       // If query time "t" is later than the end time of the  series
       index = static_cast<int>(m_values.size()) - 1;
     } else if (index > int(m_values.size())) {
-      stringstream errss;
+      std::stringstream errss;
       errss << "TimeSeriesProperty.findIndex() returns index (" << index
             << " ) > maximum defined value " << m_values.size();
       throw std::logic_error(errss.str());
@@ -1342,7 +1328,7 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t) const {
 template <typename TYPE>
 TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t,
                                               int &index) const {
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("getSingleValue(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1373,7 +1359,7 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t,
       // If query time "t" is later than the end time of the  series
       index = static_cast<int>(m_values.size()) - 1;
     } else if (index > int(m_values.size())) {
-      stringstream errss;
+      std::stringstream errss;
       errss << "TimeSeriesProperty.findIndex() returns index (" << index
             << " ) > maximum defined value " << m_values.size();
       throw std::logic_error(errss.str());
@@ -1398,7 +1384,7 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t,
 template <typename TYPE>
 TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int n) const {
   // 0. Throw exception
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("nthInterval(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1412,7 +1398,7 @@ TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int n) const {
 
   Kernel::TimeInterval deltaT;
 
-  if (m_filter.size() == 0) {
+  if (m_filter.empty()) {
     // I. No filter
     if (n >= static_cast<int>(m_values.size()) ||
         (n == static_cast<int>(m_values.size()) - 1 && m_values.size() == 1)) {
@@ -1517,7 +1503,7 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
   TYPE value;
 
   // 1. Throw error if property is empty
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("nthValue(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1527,7 +1513,7 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
   // 2. Sort and apply filter
   sort();
 
-  if (m_filter.size() == 0) {
+  if (m_filter.empty()) {
     // 3. Situation 1:  No filter
     if (static_cast<size_t>(n) < m_values.size()) {
       TimeValueUnit<TYPE> entry = m_values[static_cast<std::size_t>(n)];
@@ -1573,7 +1559,7 @@ template <typename TYPE>
 Kernel::DateAndTime TimeSeriesProperty<TYPE>::nthTime(int n) const {
   sort();
 
-  if (m_values.size() == 0) {
+  if (m_values.empty()) {
     const std::string error("nthTime(): TimeSeriesProperty '" + name() +
                             "' is empty");
     g_log.debug(error);
@@ -1628,11 +1614,11 @@ void TimeSeriesProperty<TYPE>::filterWith(
   for (auto fit = filtertimes.begin(); fit != fend; ++fit) {
     if (*vit && !lastIsTrue) {
       // Get a true in filter but last recorded value is for false
-      m_filter.push_back(std::make_pair(*fit, true));
+      m_filter.emplace_back(*fit, true);
       lastIsTrue = true;
     } else if (!(*vit) && lastIsTrue) {
       // Get a False in filter but last recorded value is for TRUE
-      m_filter.push_back(std::make_pair(*fit, false));
+      m_filter.emplace_back(*fit, false);
       lastIsTrue = false;
     }
     ++vit; // move to next value
@@ -1664,7 +1650,7 @@ void TimeSeriesProperty<TYPE>::filterWith(
     }
 
     time_duration dtime = lastTime - nextLastT;
-    m_filter.push_back(std::make_pair(lastTime + dtime, false));
+    m_filter.emplace_back(lastTime + dtime, false);
   }
 
   // 3. Reset flag and do filter
@@ -1688,7 +1674,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::clearFilter() {
  * Updates size()
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::countSize() const {
-  if (m_filter.size() == 0) {
+  if (m_filter.empty()) {
     // 1. Not filter
     m_size = int(m_values.size());
   } else {
@@ -1710,37 +1696,8 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::countSize() const {
  */
 template <typename TYPE>
 bool TimeSeriesProperty<TYPE>::isTimeString(const std::string &str) {
-  if (str.size() < 19)
-    return false;
-  if (!isdigit(str[0]))
-    return false;
-  if (!isdigit(str[1]))
-    return false;
-  if (!isdigit(str[2]))
-    return false;
-  if (!isdigit(str[3]))
-    return false;
-  if (!isdigit(str[5]))
-    return false;
-  if (!isdigit(str[6]))
-    return false;
-  if (!isdigit(str[8]))
-    return false;
-  if (!isdigit(str[9]))
-    return false;
-  if (!isdigit(str[11]))
-    return false;
-  if (!isdigit(str[12]))
-    return false;
-  if (!isdigit(str[14]))
-    return false;
-  if (!isdigit(str[15]))
-    return false;
-  if (!isdigit(str[17]))
-    return false;
-  if (!isdigit(str[18]))
-    return false;
-  return true;
+  boost::regex re("^[0-9]{4}.[0-9]{2}.[0-9]{2}.[0-9]{2}.[0-9]{2}.[0-9]{2}");
+  return boost::regex_search(str.begin(), str.end(), re);
 }
 
 /**
@@ -1857,12 +1814,7 @@ std::string TimeSeriesProperty<TYPE>::toString() const {
  */
 template <typename TYPE> void TimeSeriesProperty<TYPE>::sort() const {
   if (m_propSortedFlag == TimeSeriesSortStatus::TSUNKNOWN) {
-// Check whether it is sorted or not
-#if !(defined __APPLE__ && defined __INTEL_COMPILER)
     bool sorted = is_sorted(m_values.begin(), m_values.end());
-#else
-    bool sorted = boost::is_sorted(m_values);
-#endif
     if (sorted)
       m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
     else
@@ -1888,7 +1840,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::sort() const {
 template <typename TYPE>
 int TimeSeriesProperty<TYPE>::findIndex(Kernel::DateAndTime t) const {
   // 0. Return with an empty container
-  if (m_values.size() == 0)
+  if (m_values.empty())
     return 0;
 
   // 1. Sort
@@ -1970,7 +1922,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
   // 1. Check and reset
   if (m_filterApplied)
     return;
-  if (m_filter.size() == 0)
+  if (m_filter.empty())
     return;
 
   m_filterQuickRef.clear();
@@ -1990,12 +1942,12 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
 
       if (icurlog < 0) {
         // i. If it is out of lower boundary, add filter time, add 0 time
-        if (m_filterQuickRef.size() > 0)
+        if (!m_filterQuickRef.empty())
           throw std::logic_error(
               "return log index < 0 only occurs with the first log entry");
 
-        m_filterQuickRef.push_back(std::make_pair(ift, 0));
-        m_filterQuickRef.push_back(std::make_pair(0, 0));
+        m_filterQuickRef.emplace_back(ift, 0);
+        m_filterQuickRef.emplace_back(0, 0);
 
         icurlog = 0;
       } else if (icurlog >= static_cast<int>(m_values.size())) {
@@ -2004,12 +1956,12 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
         size_t ip = 0;
         if (m_filterQuickRef.size() >= 4)
           ip = m_filterQuickRef.back().second;
-        m_filterQuickRef.push_back(std::make_pair(ift, ip));
-        m_filterQuickRef.push_back(std::make_pair(m_values.size() + 1, ip));
+        m_filterQuickRef.emplace_back(ift, ip);
+        m_filterQuickRef.emplace_back(m_values.size() + 1, ip);
       } else {
         // iii. The returned value is in the boundary.
         size_t numintervals = 0;
-        if (m_filterQuickRef.size() > 0) {
+        if (!m_filterQuickRef.empty()) {
           numintervals = m_filterQuickRef.back().second;
         }
         if (m_filter[ift].first <
@@ -2019,9 +1971,9 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
           }
           icurlog--;
         }
-        m_filterQuickRef.push_back(std::make_pair(ift, numintervals));
+        m_filterQuickRef.emplace_back(ift, numintervals);
         // Note: numintervals inherits from last filter
-        m_filterQuickRef.push_back(std::make_pair(icurlog, numintervals));
+        m_filterQuickRef.emplace_back(icurlog, numintervals);
       }
     } // Filter value is True
     else if (m_filterQuickRef.size() % 4 == 2) {
@@ -2054,15 +2006,14 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
           size_t new_numintervals = m_filterQuickRef.back().second +
                                     static_cast<size_t>(delta_numintervals);
 
-          m_filterQuickRef.push_back(std::make_pair(icurlog, new_numintervals));
-          m_filterQuickRef.push_back(std::make_pair(ift, new_numintervals));
+          m_filterQuickRef.emplace_back(icurlog, new_numintervals);
+          m_filterQuickRef.emplace_back(ift, new_numintervals);
         }
       } else {
         // B2. Last TRUE filter's time is already out side of log.
         size_t new_numintervals = m_filterQuickRef.back().second + 1;
-        m_filterQuickRef.push_back(
-            std::make_pair(icurlog - 1, new_numintervals));
-        m_filterQuickRef.push_back(std::make_pair(ift, new_numintervals));
+        m_filterQuickRef.emplace_back(icurlog - 1, new_numintervals);
+        m_filterQuickRef.emplace_back(ift, new_numintervals);
       }
     } // Filter value is FALSE
 
@@ -2090,7 +2041,7 @@ size_t TimeSeriesProperty<TYPE>::findNthIndexFromQuickRef(int n) const {
   // 1. Do check
   if (n < 0)
     throw std::invalid_argument("Unable to take into account negative index. ");
-  else if (m_filterQuickRef.size() == 0)
+  else if (m_filterQuickRef.empty())
     throw std::runtime_error("Quick reference is not established. ");
 
   // 2. Return...
@@ -2134,6 +2085,89 @@ TimeSeriesProperty<TYPE>::setValueFromProperty(const Property &right) {
   return "";
 }
 
+//----------------------------------------------------------------------------------------------
+/** Saves the time vector has time + start attribute */
+template <typename TYPE>
+void TimeSeriesProperty<TYPE>::saveTimeVector(::NeXus::File *file) {
+  std::vector<DateAndTime> times = this->timesAsVector();
+  const DateAndTime &start = times.front();
+  std::vector<double> timeSec(times.size());
+  for (size_t i = 0; i < times.size(); i++)
+    timeSec[i] = static_cast<double>(times[i].totalNanoseconds() -
+                                     start.totalNanoseconds()) *
+                 1e-9;
+  file->writeData("time", timeSec);
+  file->openData("time");
+  file->putAttr("start", start.toISO8601String());
+  file->closeData();
+}
+
+//----------------------------------------------------------------------------------------------
+/** Helper function to save a TimeSeriesProperty<> */
+template <>
+void TimeSeriesProperty<std::string>::saveProperty(::NeXus::File *file) {
+  std::vector<std::string> values = this->valuesAsVector();
+  if (values.empty())
+    return;
+  file->makeGroup(this->name(), "NXlog", 1);
+
+  // Find the max length of any string
+  auto max_it =
+      std::max_element(values.begin(), values.end(),
+                       [](const std::string &a, const std::string &b) {
+                         return a.size() < b.size();
+                       });
+  // Increment by 1 to have the 0 terminator
+  size_t maxlen = max_it->size() + 1;
+  // Copy into one array
+  std::vector<char> strs(values.size() * maxlen);
+  size_t index = 0;
+  for (const auto &prop : values) {
+    std::copy(prop.begin(), prop.end(), &strs[index]);
+    index += maxlen;
+  }
+
+  std::vector<int> dims{static_cast<int>(values.size()),
+                        static_cast<int>(maxlen)};
+  file->makeData("value", ::NeXus::CHAR, dims, true);
+  file->putData(strs.data());
+  file->closeData();
+  saveTimeVector(file);
+  file->closeGroup();
+}
+
+/**
+ * Helper function to save a TimeSeriesProperty<bool>
+ * At the time of writing NeXus does not support boolean directly. We will use a
+ * UINT8
+ * for the value and add an attribute boolean to inidcate it is actually a bool
+ */
+template <> void TimeSeriesProperty<bool>::saveProperty(::NeXus::File *file) {
+  std::vector<bool> value = this->valuesAsVector();
+  if (value.empty())
+    return;
+  std::vector<uint8_t> asUint(value.begin(), value.end());
+  file->makeGroup(this->name(), "NXlog", 1);
+  file->writeData("value", asUint);
+  file->putAttr("boolean", "1");
+  saveTimeVector(file);
+  file->closeGroup();
+}
+
+template <typename TYPE>
+void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
+  auto value = this->valuesAsVector();
+  if (value.empty())
+    return;
+  file->makeGroup(this->name(), "NXlog", 1);
+  file->writeData("value", value);
+  file->openData("value");
+  file->putAttr("units", this->units());
+  file->closeData();
+  saveTimeVector(file);
+  file->closeGroup();
+}
+
 /// @cond
 // -------------------------- Macro to instantiation concrete types
 // --------------------------------
@@ -2142,12 +2176,10 @@ TimeSeriesProperty<TYPE>::setValueFromProperty(const Property &right) {
 
 // -------------------------- Concrete instantiation
 // -----------------------------------------------
-INSTANTIATE(int)
-INSTANTIATE(long)
-INSTANTIATE(long long)
-INSTANTIATE(unsigned int)
-INSTANTIATE(unsigned long)
-INSTANTIATE(unsigned long long)
+INSTANTIATE(int32_t)
+INSTANTIATE(int64_t)
+INSTANTIATE(uint32_t)
+INSTANTIATE(uint64_t)
 INSTANTIATE(float)
 INSTANTIATE(double)
 INSTANTIATE(std::string)

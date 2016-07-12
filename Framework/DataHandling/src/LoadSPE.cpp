@@ -3,11 +3,14 @@
 //---------------------------------------------------
 #include "MantidDataHandling/LoadSPE.h"
 #include "MantidDataHandling/SaveSPE.h"
-#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidDataObjects/Histogram1D.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
+
 #include <cstdio>
 #include <limits>
 #include <fstream>
@@ -64,11 +67,12 @@ int LoadSPE::confidence(Kernel::FileDescriptor &descriptor) const {
  * Initialise the algorithm
  */
 void LoadSPE::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".spe"),
-                  "The name of the SPE file to load.");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace");
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".spe"),
+      "The name of the SPE file to load.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace");
 }
 
 /**
@@ -108,7 +112,7 @@ void LoadSPE::exec() {
   if (comment[4] == 'Q' || comment[4] == 'q') {
     phiAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
   } else {
-    phiAxis->unit() = boost::shared_ptr<Unit>(new Units::Phi);
+    phiAxis->unit() = boost::make_shared<Units::Phi>();
   }
 
   // Read in phi grid
@@ -131,9 +135,8 @@ void LoadSPE::exec() {
     reportFormatError(std::string(comment));
 
   // Now the X bin boundaries
-  MantidVecPtr XValues;
-  MantidVec &X = XValues.access();
-  X.resize(nbins + 1);
+  auto XValues = HistogramData::BinEdges(nbins + 1);
+  auto &X = XValues.mutableData();
 
   for (size_t i = 0; i <= nbins; ++i) {
     retval = fscanf(speFile, "%10le", &X[i]);
@@ -150,7 +153,7 @@ void LoadSPE::exec() {
   MatrixWorkspace_sptr workspace = WorkspaceFactory::Instance().create(
       "Workspace2D", nhist, nbins + 1, nbins);
   workspace->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
-  workspace->isDistribution(true); // It should be a distribution
+  workspace->setDistribution(true); // It should be a distribution
   workspace->setYUnitLabel("S(Phi,Energy)");
   // Replace the default spectrum axis with the phi values one
   workspace->replaceAxis(1, phiAxis);
@@ -159,7 +162,7 @@ void LoadSPE::exec() {
   Progress progress(this, 0, 1, nhist);
   for (size_t j = 0; j < nhist; ++j) {
     // Set the common X vector
-    workspace->setX(j, XValues);
+    workspace->setBinEdges(j, XValues);
     // Read in the Y & E data
     readHistogram(speFile, workspace, j);
 
@@ -192,7 +195,7 @@ void LoadSPE::readHistogram(FILE *speFile, API::MatrixWorkspace_sptr workspace,
   int retval;
   for (size_t i = 0; i < nbins; ++i) {
     retval = fscanf(speFile, "%10le", &Y[i]);
-    // g_log.error() << Y[i] << std::endl;
+    // g_log.error() << Y[i] << '\n';
     if (retval != 1) {
       std::stringstream ss;
       ss << "Reading data value" << i << " of histogram " << index;

@@ -46,16 +46,15 @@ namespace CurveFitting {
 class DLLExport FunctionDomain1DSpectrumCreator : public API::IDomainCreator {
 public:
   FunctionDomain1DSpectrumCreator();
-  virtual ~FunctionDomain1DSpectrumCreator() {}
 
   void setMatrixWorkspace(API::MatrixWorkspace_sptr matrixWorkspace);
   void setWorkspaceIndex(size_t workspaceIndex);
 
-  virtual void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                            boost::shared_ptr<API::FunctionValues> &values,
-                            size_t i0 = 0);
+  void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
+                    boost::shared_ptr<API::FunctionValues> &values,
+                    size_t i0 = 0) override;
 
-  virtual size_t getDomainSize() const;
+  size_t getDomainSize() const override;
 
 protected:
   void throwIfWorkspaceInvalid() const;

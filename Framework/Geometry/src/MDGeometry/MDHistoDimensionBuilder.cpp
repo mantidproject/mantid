@@ -11,39 +11,6 @@ MDHistoDimensionBuilder::MDHistoDimensionBuilder()
     : m_units(Kernel::Units::Symbol::EmptyLabel), m_min(0), m_max(0),
       m_nbins(0), m_minSet(false), m_maxSet(false), m_frameName("") {}
 
-/// Destructor
-MDHistoDimensionBuilder::~MDHistoDimensionBuilder() {}
-
-/*
-Copy constructor
-@param other : source of the copy
-*/
-MDHistoDimensionBuilder::MDHistoDimensionBuilder(
-    const MDHistoDimensionBuilder &other)
-    : m_name(other.m_name), m_id(other.m_id), m_units(other.m_units),
-      m_min(other.m_min), m_max(other.m_max), m_nbins(other.m_nbins),
-      m_minSet(other.m_minSet), m_maxSet(other.m_maxSet) {}
-
-/*
-Assignment
-@param other : source of the assignment
-*/
-MDHistoDimensionBuilder &MDHistoDimensionBuilder::
-operator=(const MDHistoDimensionBuilder &other) {
-  if (&other != this) {
-    m_name = other.m_name;
-    m_id = other.m_id;
-    m_units = other.m_units;
-    m_max = other.m_max;
-    m_min = other.m_min;
-    m_nbins = other.m_nbins;
-    m_maxSet = other.m_maxSet;
-    m_minSet = other.m_minSet;
-    m_frameName = other.m_frameName;
-  }
-  return *this;
-}
-
 /*
 Setter for the dimension name
 @param name : friendly name of dimension

@@ -23,20 +23,12 @@ using namespace API;
 using std::size_t;
 using namespace DataObjects;
 
-/// Constructor
-GetDetectorOffsets::GetDetectorOffsets()
-    : API::Algorithm(), m_Xmin(DBL_MAX), m_Xmax(-DBL_MIN), m_maxOffset(0.),
-      m_dreference(0.), m_dideal(0.), m_step(0.) {}
-
-/// Destructor
-GetDetectorOffsets::~GetDetectorOffsets() {}
-
 //-----------------------------------------------------------------------------------------
 /** Initialisation method. Declares properties to be used in algorithm.
  */
 void GetDetectorOffsets::init() {
 
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("dSpacing")),
                   "A 2D workspace with X values of d-spacing");
@@ -55,16 +47,16 @@ void GetDetectorOffsets::init() {
       "XMax", 0.0,
       "Maximum of CrossCorrelation data to search for peak, usually positive");
 
-  declareProperty(new FileProperty("GroupingFileName", "",
-                                   FileProperty::OptionalSave, ".cal"),
+  declareProperty(make_unique<FileProperty>("GroupingFileName", "",
+                                            FileProperty::OptionalSave, ".cal"),
                   "Optional: The name of the output CalFile to save the "
                   "generated OffsetsWorkspace.");
-  declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputWorkspace", "",
-                                                          Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<OffsetsWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output workspace containing the offsets.");
-  declareProperty(
-      new WorkspaceProperty<>("MaskWorkspace", "Mask", Direction::Output),
-      "An output workspace containing the mask.");
+  declareProperty(make_unique<WorkspaceProperty<>>("MaskWorkspace", "Mask",
+                                                   Direction::Output),
+                  "An output workspace containing the mask.");
   // Only keep peaks
   declareProperty(
       "PeakFunction", "Gaussian",
@@ -74,9 +66,7 @@ void GetDetectorOffsets::init() {
   declareProperty("MaxOffset", 1.0,
                   "Maximum absolute value of offsets; default is 1");
 
-  std::vector<std::string> modes;
-  modes.push_back("Relative");
-  modes.push_back("Absolute");
+  std::vector<std::string> modes{"Relative", "Absolute"};
 
   declareProperty("OffsetMode", "Relative",
                   boost::make_shared<StringListValidator>(modes),
@@ -112,9 +102,9 @@ void GetDetectorOffsets::exec() {
 
   int64_t nspec = inputW->getNumberHistograms();
   // Create the output OffsetsWorkspace
-  OffsetsWorkspace_sptr outputW(new OffsetsWorkspace(inputW->getInstrument()));
+  auto outputW = boost::make_shared<OffsetsWorkspace>(inputW->getInstrument());
   // Create the output MaskWorkspace
-  MaskWorkspace_sptr maskWS(new MaskWorkspace(inputW->getInstrument()));
+  auto maskWS = boost::make_shared<MaskWorkspace>(inputW->getInstrument());
   // To get the workspace index from the detector ID
   const detid2index_map pixel_to_wi =
       maskWS->getDetectorIDToWorkspaceIndexMap(true);
@@ -133,16 +123,15 @@ void GetDetectorOffsets::exec() {
     }
 
     // Get the list of detectors in this pixel
-    const std::set<detid_t> &dets = inputW->getSpectrum(wi)->getDetectorIDs();
+    const auto &dets = inputW->getSpectrum(wi).getDetectorIDs();
 
     // Most of the exec time is in FitSpectra, so this critical block should not
     // be a problem.
     PARALLEL_CRITICAL(GetDetectorOffsets_setValue) {
       // Use the same offset for all detectors from this pixel
-      std::set<detid_t>::iterator it;
-      for (it = dets.begin(); it != dets.end(); ++it) {
-        outputW->setValue(*it, offset);
-        const auto mapEntry = pixel_to_wi.find(*it);
+      for (const auto &det : dets) {
+        outputW->setValue(det, offset);
+        const auto mapEntry = pixel_to_wi.find(det);
         if (mapEntry == pixel_to_wi.end())
           continue;
         const size_t workspaceIndex = mapEntry->second;
@@ -252,7 +241,7 @@ IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
   peak->setHeight(peakHeight);
   peak->setCentre(peakLoc);
   const double sigma(10.0);
-  peak->setFwhm(2.0 * std::sqrt(2.0 * std::log(2.0)) * sigma);
+  peak->setFwhm(2.0 * std::sqrt(2.0 * M_LN2) * sigma);
 
   auto fitFunc = new CompositeFunction(); // Takes ownership of the functions
   fitFunc->addFunction(background);

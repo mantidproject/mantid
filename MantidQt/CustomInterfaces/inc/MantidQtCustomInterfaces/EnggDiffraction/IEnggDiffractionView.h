@@ -1,10 +1,12 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEW_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEW_H_
 
+#include <QStringList>
+#include <qwt_plot_curve.h>
 #include <string>
 #include <vector>
-#include <QStringList>
 
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h"
 
@@ -45,8 +47,31 @@ public:
   IEnggDiffractionView(){};
   virtual ~IEnggDiffractionView(){};
 
-  /// @name Direct (and usually modal) user interaction
+  /// @name Direct (and usually modal, or at least top/pop-up level) user
+  /// interaction
   //@{
+  /**
+   * To display important messages that need maximum visibility
+   * (normally a dialog on top of the interface). This can be used to
+   * control the visibility and content of the message. An example use
+   * case is to inform the user that certain inputs are absolutely
+   * needed to use the interface functionality.
+   *
+   * @param visible whether the "splash"/important message should be visible
+   * @param shortMsg short/one line message summary
+   * @param description message with full details
+   */
+  virtual void splashMessage(bool visible, const std::string &shortMsg,
+                             const std::string &description) = 0;
+
+  /**
+   * Display the current status (running some algorithms, finished,
+   * ready, etc.), in a status bar or similar.
+   *
+   * @param sts status message which should be concise
+   */
+  virtual void showStatus(const std::string &sts) = 0;
+
   /**
    * Display a warning to the user (for example as a pop-up window).
    *
@@ -120,17 +145,25 @@ public:
   * selected spec will be passed as a bank for the calibrartion
   * process to be carried out
   *
-  * @return which format should to applied for plotting data
+  * @return Bank selection index: spectrum-numbers / north / south
   */
   virtual int currentCropCalibBankName() const = 0;
 
   /**
-  * customised spec will be passed via specID text field for the
-  * calibrartion process to be carried out
+  * customised spec will be passed via specNo text field for the
+  * cropped calibrartion process to be carried out
   *
   * @return which format should to applied for plotting data
   */
   virtual std::string currentCalibSpecNos() const = 0;
+
+  /**
+  * customised bank name will be passed with SpectrumNos to
+  * save workspace and file with particular bank name
+  *
+  * @return string which will be used to generate bank name
+  */
+  virtual std::string currentCalibCustomisedBankName() const = 0;
 
   /**
   * Selected plot data representation will be applied, which will
@@ -203,16 +236,17 @@ public:
                               const std::string &fname) = 0;
 
   /**
-   * Write a GSAS file. Temporarily here until we have a more final
-   * way of generating these files.
+   * Run Python code received as a script string. This is used for
+   * example to write GSAS instrument parameters file, or other code
+   * included with the Engg scripts. Temporarily here until we have a
+   * more final way of generating these files. A SaveGSAS algorithm
+   * that can handle ENGIN-X files would be ideal.
    *
-   * @param outFilename output file name
-   * @param difc difc values (one per bank)
-   * @param tzero tzero values (one per bank)
+   * @param pyCode Python script as a string
+   *
+   * @return status string from running the code
    */
-  virtual void writeOutCalibFile(const std::string &outFilename,
-                                 const std::vector<double> &difc,
-                                 const std::vector<double> &tzero) = 0;
+  virtual std::string enggRunPythonCode(const std::string &pyCode) = 0;
 
   /**
    * Enable/disable all the sections or tabs of the interface. To be
@@ -270,12 +304,12 @@ public:
   virtual std::vector<bool> focusingBanks() const = 0;
 
   /**
-   * Specification of spectrum IDs for focus in "cropped" mode.
+   * Specification of spectrum Nos for focus in "cropped" mode.
    *
-   * @return spectrum IDs, expected as a comma separated list of
+   * @return spectrum Nos, expected as a comma separated list of
    * integers or ranges of integers.
    */
-  virtual std::string focusingCroppedSpectrumIDs() const = 0;
+  virtual std::string focusingCroppedSpectrumNos() const = 0;
 
   /**
    * Detector grouping file, used when focusing in "texture" mode.
@@ -291,6 +325,14 @@ public:
    * @return bool
    */
   virtual bool focusedOutWorkspace() const = 0;
+
+  /**
+  * Check box to consider when calibrating
+  * whether to plot focused workspace
+  *
+  * @return bool
+  */
+  virtual bool plotCalibWorkspace() const = 0;
 
   /**
    * Reset all focus inputs/options
@@ -328,6 +370,168 @@ public:
    * @return the time parameter (bin width) when rebinning by pulses.
    */
   virtual double rebinningPulsesTime() const = 0;
+
+  /**
+  * returns directory of the file name to preform fitting on
+  *
+  * @return directory as std::string
+  */
+  virtual std::string getFittingRunNo() const = 0;
+
+  /**
+  * A list of dSpacing values to be translated into TOF
+  * to find expected peaks.
+  *
+  * @return list of dSpacing values as std::string
+  */
+  virtual std::string fittingPeaksData() const = 0;
+
+  /**
+  * Sets the peak list according to the QString given
+  *
+  * @param peakList list of expected peaks to be fitted as std::string
+  */
+  virtual void setPeakList(std::string peakList) const = 0;
+
+  /**
+  * Splits the file name in to sections of '_' and 'ENGINX' text
+  * within the filename
+  *
+  * @param selectedfPath is the selected file's path
+  *
+  * @return std::vector<std::string> of splitted file name with run
+  * number & bank
+  */
+  virtual std::vector<std::string>
+  splitFittingDirectory(std::string &selectedfPath) = 0;
+
+  /**
+  * adds the number of banks to the combo-box widget on the interface
+  *
+  * @param bankID the bank number to add to combo-box
+  */
+  virtual void addBankItem(std::string bankID) = 0;
+
+  /**
+  * adds the run number to the list view widget on the interface
+  *
+  * @param runNo run number which needs to be added to
+  * the list widget
+  */
+  virtual void addRunNoItem(std::string runNo) = 0;
+
+  /**
+  * emits the signal within view when run number/bank changed
+  */
+  virtual void setBankEmit() = 0;
+
+  /**
+  * sets the bank combo-box according to given index
+  *
+  * @param idx as int of the bank to set
+  */
+  virtual void setBankIdComboBox(int idx) = 0;
+
+  /**
+  * deletes all items from the fitting combo-box widget
+  */
+  virtual void clearFittingComboBox() const = 0;
+
+  /**
+  * enables or disables the fitting combo-box
+  *
+  * @param enable or disable the fitting combo-box widget
+  */
+  virtual void enableFittingComboBox(bool enable) const = 0;
+
+  /**
+  * gets the index of the bank according to text found
+  *
+  * @param bank as a std::string to find in widget
+  *
+  * @returns int index of the combo-box where the
+  * string is found
+  */
+  virtual int getFittingComboIdx(std::string bank) const = 0;
+
+  /*
+  * deletes all items from the fitting list widget
+  */
+  virtual void clearFittingListWidget() const = 0;
+
+  /**
+  * enables or disables the fitting list widget
+  *
+  * @param enable or disable the fitting list widget
+  */
+  virtual void enableFittingListWidget(bool enable) const = 0;
+
+  /*
+  * @return idx of current selected row of list widget
+  */
+  virtual int getFittingListWidgetCurrentRow() const = 0;
+
+  /**
+  * sets the current row of the fitting list widget
+  *
+  * @param idx number to set as for the list widget
+  */
+  virtual void setFittingListWidgetCurrentRow(int idx) const = 0;
+
+  /**
+  * gets the set focus directory within the setting tab
+  *
+  * @return std::string of focus directory
+  */
+  virtual std::string getFocusDir() = 0;
+
+  /**
+  * sets the fitting run number according to path
+  *
+  * @param path of the selected focused run file
+  */
+  virtual void setFittingRunNo(QString path) = 0;
+
+  /**
+  * gets the global vector in view containing focused file directory
+  *
+  * @return std::vector<std::string> containing the focused bank files
+  */
+  virtual std::vector<std::string> getFittingRunNumVec() = 0;
+
+  /**
+  * sets the global vector in view containing focused file directory
+  *
+  * @param assignVec of the all the focused bank files
+  *  per run number
+  */
+  virtual void setFittingRunNumVec(std::vector<std::string> assignVec) = 0;
+
+  /**
+  * to determine whether the current loop is multi-run or single to avoid
+  * regenerating the list-view widget when not required
+  *
+  * @return bool whether given multi-run or singular file
+  */
+  virtual bool getFittingMultiRunMode() = 0;
+
+  /**
+  *  sets the fitting mode to multi-run or single to avoid
+  * regenerating the list-view widget when not required
+  *
+  * @param mode true if its multi-run
+  */
+  virtual void setFittingMultiRunMode(bool mode) = 0;
+
+  /**
+  * generates and sets the curves on the fitting tab
+  * @param data of the workspace to be passed as QwtData
+  * @param focused to check whether focused workspace
+  * @param plotSinglePeaks whether to plot single peak fitting ws
+  *
+  */
+  virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
+                             bool focused, bool plotSinglePeaks) = 0;
   //@}
 
   /**
@@ -343,31 +547,40 @@ public:
  *
  * @return bool
  */
-  virtual bool saveOutputFiles() const = 0;
+  virtual bool saveFocusedOutputFiles() const = 0;
 
   /**
-  * Produces a single spectrum graph for focused output. Runs
-  * plotSpectrum function via python.
+  * Produces vanadium curves graph with three spectrum and
+  * ceria peaks graph with two spectrum for calib output.
+  *
+  * @param pyCode string which is passed to Mantid via pyScript
+  */
+  virtual void plotCalibOutput(const std::string &pyCode) = 0;
+
+  /**
+  * Produces a single spectrum graph for focused output.
   *
   * @param wsName name of the workspace to plot (must be in the ADS)
   */
   virtual void plotFocusedSpectrum(const std::string &wsName) = 0;
 
   /**
- * Produces a waterfall spectrum graph for focused output. Runs
- * plotSpectrum function via python.
+ * Produces a waterfall spectrum graph for focused output.
  *
  * @param wsName name of the workspace to plot (must be in the ADS)
  */
   virtual void plotWaterfallSpectrum(const std::string &wsName) = 0;
 
   /**
-  * Produces a replaceable spectrum graph for focused output. Runs
-  * plotSpectrum function via python.
+  * Produces a replaceable spectrum graph for focused output.
   *
   * @param wsName name of the workspace to plot (must be in the ADS)
+  * @param spectrum number of the workspace to plot
+  * @param type of the workspace plot
   */
-  virtual void plotReplacingWindow(const std::string &wsName) = 0;
+  virtual void plotReplacingWindow(const std::string &wsName,
+                                   const std::string &spectrum,
+                                   const std::string &type) = 0;
 };
 
 } // namespace CustomInterfaces

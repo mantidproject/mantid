@@ -38,26 +38,26 @@ namespace Poldi {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-using namespace Kernel;
 
 class MANTID_SINQ_DLL PoldiHeliumDetector : public PoldiAbstractDetector {
 public:
   PoldiHeliumDetector();
-  ~PoldiHeliumDetector() {}
 
-  void loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument);
+  void
+  loadConfiguration(Geometry::Instrument_const_sptr poldiInstrument) override;
 
-  double efficiency();
+  double efficiency() override;
 
-  double twoTheta(int elementIndex);
-  double distanceFromSample(int elementIndex);
+  double twoTheta(int elementIndex) override;
+  double distanceFromSample(int elementIndex) override;
 
-  size_t elementCount();
-  size_t centralElement();
+  size_t elementCount() override;
+  size_t centralElement() override;
 
-  const std::vector<int> &availableElements();
+  const std::vector<int> &availableElements() override;
 
-  std::pair<double, double> qLimits(double lambdaMin, double lambdaMax);
+  std::pair<double, double> qLimits(double lambdaMin,
+                                    double lambdaMax) override;
 
 protected:
   double phi(int elementIndex);
@@ -80,7 +80,7 @@ protected:
   double m_efficiency;
 
   /* Parameters that are calibrated or depend on calibrated parameters */
-  V2D m_calibratedPosition;
+  Kernel::V2D m_calibratedPosition;
   double m_vectorAngle;
   double m_distanceFromSample;
 

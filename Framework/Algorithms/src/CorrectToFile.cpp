@@ -2,7 +2,10 @@
 // Includes
 //----------------------------
 #include "MantidAlgorithms/CorrectToFile.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -16,28 +19,27 @@ DECLARE_ALGORITHM(CorrectToFile)
 const double CorrectToFile::LOAD_TIME = 0.5;
 
 void CorrectToFile::init() {
-  declareProperty(new API::WorkspaceProperty<>("WorkspaceToCorrect", "",
-                                               Kernel::Direction::Input),
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "WorkspaceToCorrect", "", Kernel::Direction::Input),
                   "Name of the input workspace");
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load),
-      "The file containing the correction factors");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load),
+                  "The file containing the correction factors");
 
   std::vector<std::string> propOptions =
       Kernel::UnitFactory::Instance().getKeys();
-  propOptions.push_back("SpectrumNumber");
+  propOptions.emplace_back("SpectrumNumber");
   declareProperty("FirstColumnValue", "Wavelength",
                   boost::make_shared<Kernel::StringListValidator>(propOptions),
                   "The units of the first column of the correction file "
                   "(default wavelength)");
 
-  std::vector<std::string> operations(1, std::string("Divide"));
-  operations.push_back("Multiply");
+  std::vector<std::string> operations{"Divide", "Multiply"};
   declareProperty("WorkspaceOperation", "Divide",
                   boost::make_shared<Kernel::StringListValidator>(operations),
                   "Allowed values: Divide, Multiply (default is divide)");
-  declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
-                                               Kernel::Direction::Output),
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Kernel::Direction::Output),
                   "Name of the output workspace to store the results in");
 }
 
@@ -74,8 +76,7 @@ void CorrectToFile::exec() {
     const MantidVec &Ycor = rkhInput->readY(0);
     const MantidVec &Ecor = rkhInput->readE(0);
 
-    const bool histogramData = outputWS->isHistogramData();
-    const bool divide = (operation == "Divide") ? true : false;
+    const bool divide = operation == "Divide";
     double Yfactor, correctError;
 
     const int64_t nOutSpec =
@@ -85,17 +86,17 @@ void CorrectToFile::exec() {
     Progress prg(this, 0 /*LOAD_TIME*/, 1.0, nOutSpec);
 
     for (int64_t i = 0; i < nOutSpec; ++i) {
-      MantidVec &xOut = outputWS->dataX(i);
+      const auto xIn = toCorrect->points(i);
+      outputWS->setX(i, toCorrect->refX(i));
+
       MantidVec &yOut = outputWS->dataY(i);
       MantidVec &eOut = outputWS->dataE(i);
 
-      const MantidVec &xIn = toCorrect->readX(i);
       const MantidVec &yIn = toCorrect->readY(i);
       const MantidVec &eIn = toCorrect->readE(i);
 
       for (size_t j = 0; j < nbins; ++j) {
-        const double currentX =
-            histogramData ? (xIn[j] + xIn[j + 1]) / 2.0 : xIn[j];
+        const double currentX = xIn[j];
         // Find out the index of the first correction point after this value
         auto pos = std::lower_bound(Xcor.cbegin(), Xcor.cend(), currentX);
         const size_t index = pos - Xcor.begin();
@@ -147,12 +148,7 @@ void CorrectToFile::exec() {
           eOut[j] =
               sqrt(pow(eIn[j] * Yfactor, 2) + pow(correctError * yIn[j], 2));
         }
-
-        // Copy X value over
-        xOut[j] = xIn[j];
       }
-      if (histogramData)
-        xOut[nbins] = xIn[nbins];
       prg.report("CorrectToFile: applying " + operation);
     }
   }
@@ -166,7 +162,7 @@ void CorrectToFile::exec() {
 *  @throw runtime_error if load algorithm fails
 */
 MatrixWorkspace_sptr CorrectToFile::loadInFile(const std::string &corrFile) {
-  g_log.information() << "Loading file " << corrFile << std::endl;
+  g_log.information() << "Loading file " << corrFile << '\n';
   progress(0, "Loading file");
   IAlgorithm_sptr loadRKH =
       createChildAlgorithm("LoadRKH", 0, 1.0 /*LOAD_TIME*/);
@@ -192,7 +188,7 @@ void CorrectToFile::doWkspAlgebra(API::MatrixWorkspace_sptr lhs,
                                   API::MatrixWorkspace_sptr rhs,
                                   const std::string &algName,
                                   API::MatrixWorkspace_sptr &result) {
-  g_log.information() << "Initalising the algorithm " << algName << std::endl;
+  g_log.information() << "Initalising the algorithm " << algName << '\n';
   progress(LOAD_TIME, "Applying correction");
   IAlgorithm_sptr algebra = createChildAlgorithm(algName, LOAD_TIME, 1.0);
   algebra->setProperty("LHSWorkspace", lhs);
@@ -203,12 +199,12 @@ void CorrectToFile::doWkspAlgebra(API::MatrixWorkspace_sptr lhs,
     algebra->execute();
   } catch (std::runtime_error &) {
     g_log.warning() << "Error encountered while running algorithm " << algName
-                    << std::endl;
+                    << '\n';
     g_log.error() << "Correction file "
                   << getPropertyValue("Filename") +
                          " can't be used to correct workspace "
-                  << getPropertyValue("WorkspaceToCorrect") << std::endl;
-    g_log.error() << "Mismatched number of spectra?" << std::endl;
+                  << getPropertyValue("WorkspaceToCorrect") << '\n';
+    g_log.error() << "Mismatched number of spectra?\n";
     throw std::runtime_error("Correct to file failed, see log for details");
   }
 

@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/make_unique.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
@@ -38,7 +39,7 @@ template <typename T> class DLLExport BinaryFile {
 public:
   //------------------------------------------------------------------------------------
   /// Empty constructor
-  BinaryFile() : handle(NULL), num_elements(0), offset(0) {}
+  BinaryFile() : handle(nullptr), num_elements(0), offset(0) {}
 
   //------------------------------------------------------------------------------------
   /// Constructor - open a file
@@ -55,7 +56,7 @@ public:
    * @throw invalid_argument if the file does not exist
    * */
   void open(const std::string &filename) {
-    this->handle = NULL;
+    this->handle = nullptr;
     if (!Poco::File(filename).exists()) {
       std::stringstream msg;
       msg << "BinaryFile::open: File " << filename << " was not found.";
@@ -74,7 +75,7 @@ public:
    * */
   void close() {
     delete handle;
-    handle = NULL;
+    handle = nullptr;
   }
 
   //-----------------------------------------------------------------------------
@@ -102,17 +103,17 @@ public:
    * The file is closed once done.
    * @return file contents in a vector
    */
-  std::vector<T> *loadAll() {
+  std::vector<T> loadAll() {
     if (!handle) {
       throw std::runtime_error("BinaryFile: file is not open.");
     }
 
     // Initialize the pointer
-    std::vector<T> *data = new std::vector<T>;
+    std::vector<T> data;
 
     // A buffer to load from
     size_t buffer_size = getBufferSize(num_elements);
-    T *buffer = new T[buffer_size];
+    auto buffer = Mantid::Kernel::make_unique<T[]>(buffer_size);
 
     // Make sure we are at the beginning
     offset = 0;
@@ -121,15 +122,14 @@ public:
     size_t loaded_size;
     while (offset < num_elements) {
       // Load that block of data
-      loaded_size = loadBlock(buffer, buffer_size);
+      loaded_size = loadBlock(buffer.get(), buffer_size);
       // Insert into the data
-      data->insert(data->end(), buffer, (buffer + loaded_size));
+      data.insert(data.end(), buffer.get(),
+                  std::next(buffer.get(), loaded_size));
     }
 
     // Close the file, since we are done.
     this->close();
-    // Free memory
-    delete[] buffer;
 
     // Here's your vector!
     return data;
@@ -139,19 +139,17 @@ public:
   /**
    * Loads the entire contents of the file into a std::vector.
    * The file is closed once done.
-   * @param data :: The contents to load into the file
+   * @returns :: vector with contents of the file
    */
-  void loadAllInto(std::vector<T> &data) {
+  std::vector<T> loadAllIntoVector() {
     if (!handle) {
       throw std::runtime_error("BinaryFile: file is not open.");
     }
-
-    // Clear the vector
-    data.clear();
+    std::vector<T> data;
 
     // A buffer to load from
     size_t buffer_size = getBufferSize(num_elements);
-    T *buffer = new T[buffer_size];
+    auto buffer = new T[buffer_size];
 
     // Make sure we are at the beginning
     offset = 0;
@@ -169,6 +167,8 @@ public:
     this->close();
     // Free memory
     delete[] buffer;
+
+    return data;
   }
 
   //-----------------------------------------------------------------------------

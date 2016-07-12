@@ -5,10 +5,8 @@
 #include <string>
 #include "MantidKernel/System.h"
 class vtkFieldData;
-namespace Mantid
-{
-namespace VATES
-{
+namespace Mantid {
+namespace VATES {
 
 /**
  * Functor converts metadata (in std::string) to vtkFieldData.
@@ -16,7 +14,8 @@ namespace VATES
  @author Owen Arnold, Tessella plc
  @date 09/02/2011
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -37,16 +36,16 @@ namespace VATES
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class DLLExport MetadataToFieldData
-{
+class DLLExport MetadataToFieldData {
 public:
   /// Act as Functor.
-  void operator()(vtkFieldData* fieldData, std::string metaData, std::string id) const;
+  void operator()(vtkFieldData *fieldData, std::string metaData,
+                  std::string id) const;
 
   /// Explicit call to Functor execution.
-  void execute(vtkFieldData* fieldData, std::string metaData, std::string id) const;
+  void execute(vtkFieldData *fieldData, std::string metaData,
+               std::string id) const;
 };
-
 }
 }
 

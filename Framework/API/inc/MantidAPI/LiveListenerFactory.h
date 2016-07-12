@@ -52,26 +52,25 @@ class MANTID_API_DLL LiveListenerFactoryImpl
 public:
   boost::shared_ptr<ILiveListener>
   create(const std::string &instrumentName, bool connect,
-         const Kernel::IPropertyManager *props = NULL) const;
+         const Kernel::IPropertyManager *properties = nullptr) const;
+  LiveListenerFactoryImpl(const LiveListenerFactoryImpl &) = delete;
+  LiveListenerFactoryImpl &operator=(const LiveListenerFactoryImpl &) = delete;
   bool checkConnection(const std::string &instrumentName) const;
 
 private:
   friend struct Kernel::CreateUsingNew<LiveListenerFactoryImpl>;
 
   /// Private constructor for singleton class
-  LiveListenerFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  LiveListenerFactoryImpl(const LiveListenerFactoryImpl &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  LiveListenerFactoryImpl &operator=(const LiveListenerFactoryImpl &);
+  LiveListenerFactoryImpl() = default;
+
   /// Private destructor
-  virtual ~LiveListenerFactoryImpl();
+  ~LiveListenerFactoryImpl() override = default;
 
   // Unhide the base class method to avoid a warning, but make private.
   using Kernel::DynamicFactory<ILiveListener>::create;
   /// Override the DynamicFactory::createUnwrapped() method. We don't want it
   /// used here.
-  ILiveListener *createUnwrapped(const std::string &className) const;
+  ILiveListener *createUnwrapped(const std::string &className) const override;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder (needed for

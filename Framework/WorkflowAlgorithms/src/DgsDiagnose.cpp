@@ -1,11 +1,11 @@
 #include "MantidWorkflowAlgorithms/DgsDiagnose.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/pointer_cast.hpp>
-#include <boost/tokenizer.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -17,16 +17,6 @@ namespace WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsDiagnose)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsDiagnose::DgsDiagnose() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsDiagnose::~DgsDiagnose() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -47,36 +37,38 @@ const std::string DgsDiagnose::category() const {
  */
 void DgsDiagnose::init() {
   this->declareProperty(
-      new WorkspaceProperty<>("DetVanWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("DetVanWorkspace", "", Direction::Input),
       "The detector vanadium workspace.");
   this->declareProperty(
-      new WorkspaceProperty<>("DetVanMonitorWorkspace", "", Direction::Input,
-                              PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("DetVanMonitorWorkspace", "",
+                                       Direction::Input,
+                                       PropertyMode::Optional),
       "A monitor workspace associated with the detector vanadium workspace.");
   this->declareProperty(
-      new WorkspaceProperty<>("DetVanCompWorkspace", "", Direction::Input,
-                              PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>(
+          "DetVanCompWorkspace", "", Direction::Input, PropertyMode::Optional),
       "A detector vanadium workspace to compare against the primary one.");
-  this->declareProperty(new WorkspaceProperty<>("DetVanCompMonitorWorkspace",
-                                                "", Direction::Input,
-                                                PropertyMode::Optional),
+  this->declareProperty(make_unique<WorkspaceProperty<>>(
+                            "DetVanCompMonitorWorkspace", "", Direction::Input,
+                            PropertyMode::Optional),
                         "A monitor workspace associated with the comparison "
                         "detector vanadium workspace.");
-  this->declareProperty(new WorkspaceProperty<>("SampleWorkspace", "",
-                                                Direction::Input,
-                                                PropertyMode::Optional),
-                        "A sample workspace to run some diagnostics on.");
   this->declareProperty(
-      new WorkspaceProperty<>("SampleMonitorWorkspace", "", Direction::Input,
-                              PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("SampleWorkspace", "", Direction::Input,
+                                       PropertyMode::Optional),
+      "A sample workspace to run some diagnostics on.");
+  this->declareProperty(
+      make_unique<WorkspaceProperty<>>("SampleMonitorWorkspace", "",
+                                       Direction::Input,
+                                       PropertyMode::Optional),
       "A monitor workspace associated with the sample workspace.");
-  this->declareProperty(new WorkspaceProperty<>("HardMaskWorkspace", "",
-                                                Direction::Input,
-                                                PropertyMode::Optional),
-                        "A hard mask workspace to apply.");
   this->declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "This is the resulting mask workspace.");
+      make_unique<WorkspaceProperty<>>(
+          "HardMaskWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "A hard mask workspace to apply.");
+  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                         Direction::Output),
+                        "This is the resulting mask workspace.");
   this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
                         Direction::Input);
 }
@@ -85,7 +77,7 @@ void DgsDiagnose::init() {
 /** Execute the algorithm.
  */
 void DgsDiagnose::exec() {
-  g_log.notice() << "Starting DgsDiagnose" << std::endl;
+  g_log.notice() << "Starting DgsDiagnose\n";
   // Get the reduction property manager
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");
@@ -298,18 +290,17 @@ void DgsDiagnose::exec() {
     diag->execute();
     maskWS = diag->getProperty("OutputWorkspace");
   } else {
-    typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-    boost::char_separator<char> sep("(,);");
-    tokenizer tokens(diag_spectra[0], sep);
-    for (tokenizer::iterator tok_iter = tokens.begin();
-         tok_iter != tokens.end();) {
+    typedef Mantid::Kernel::StringTokenizer tokenizer;
+    tokenizer tokens(diag_spectra[0], "(,);",
+                     Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+    for (auto tok_iter = tokens.begin(); tok_iter != tokens.end();) {
       int startIndex = boost::lexical_cast<int>(*tok_iter);
       startIndex -= 1;
       ++tok_iter;
       int endIndex = boost::lexical_cast<int>(*tok_iter);
       endIndex -= 1;
       g_log.information() << "Pixel range: (" << startIndex << ", " << endIndex
-                          << ")" << std::endl;
+                          << ")\n";
       diag->setProperty("StartWorkspaceIndex", startIndex);
       diag->setProperty("EndWorkspaceIndex", endIndex);
       diag->execute();
@@ -349,7 +340,7 @@ void DgsDiagnose::exec() {
 
   MaskWorkspace_sptr m = boost::dynamic_pointer_cast<MaskWorkspace>(maskWS);
   g_log.information() << "Number of masked pixels = " << m->getNumberMasked()
-                      << std::endl;
+                      << '\n';
 
   this->setProperty("OutputWorkspace", maskWS);
 }

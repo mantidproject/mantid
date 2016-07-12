@@ -130,16 +130,6 @@ size_t linearIndexToLinearIndex(const size_t &nDimsShape,
 DECLARE_ALGORITHM(ReplicateMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ReplicateMD::ReplicateMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ReplicateMD::~ReplicateMD() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ReplicateMD::name() const { return "ReplicateMD"; }
@@ -187,12 +177,13 @@ std::map<std::string, std::string> ReplicateMD::validateInputs() {
   IMDHistoWorkspace_sptr dataWS = this->getProperty("DataWorkspace");
   if (shapeWS->getNonIntegratedDimensions().size() !=
       dataWS->getNonIntegratedDimensions().size() + 1) {
-    errorMap.insert(std::make_pair(
+    errorMap.emplace(
         "DataWorkspace",
-        "Expect to have n-1 non-interated dimensions of ShapeWorkspace"));
+        "Expect to have n-1 non-interated dimensions of ShapeWorkspace");
   }
 
   size_t nonMatchingCount = 0;
+  bool haveMatchingIntegratedDims = false;
   for (size_t i = 0; i < shapeWS->getNumDims(); ++i) {
     const auto shapeDim = shapeWS->getDimension(i);
 
@@ -200,16 +191,29 @@ std::map<std::string, std::string> ReplicateMD::validateInputs() {
     const auto dataDim = findMatchingDimension(*dataWS, *shapeDim);
     if (dataDim) {
       if (dataDim->getIsIntegrated()) {
-        // We count this as a non-matching dimension
-        ++nonMatchingCount;
+        if (!shapeDim->getIsIntegrated()) {
+          // We count this as a non-matching dimension
+          ++nonMatchingCount;
+        } else {
+          haveMatchingIntegratedDims = true;
+        }
       } else {
         // Check bin sizes match between the two dimensions
         if (shapeDim->getNBins() != dataDim->getNBins()) {
           std::stringstream stream;
           stream << "Dimension with id " << shapeDim->getDimensionId()
-                 << "in ShapeWorkspace has a different number of bins as the "
+                 << " in ShapeWorkspace has a different number of bins as the "
                     "same id dimension in the DataWorkspace";
-          errorMap.insert(std::make_pair("DataWorkspace", stream.str()));
+          errorMap.emplace("DataWorkspace", stream.str());
+        } else if (haveMatchingIntegratedDims) {
+          errorMap.emplace(
+              "ShapeWorkspace",
+              "Extra integrated dimensions must be only "
+              "the last dimensions, e.g.:\n\nThis is allowed:\n  "
+              "Shape: {10, 5, 1, 1}\n  Data:  { 1, 5, 1, 1}\n\nBut "
+              "this is not:\n  Shape: {10, 1, 5, 1}\n  Data:  { 1, 1, "
+              "5, 1}\n\nUse TransposeMD to re-arrange dimensions.");
+          break;
         }
       }
     } else {
@@ -219,10 +223,10 @@ std::map<std::string, std::string> ReplicateMD::validateInputs() {
 
   // Check number of missing/integrated dimensions
   if (nonMatchingCount != 1) {
-    errorMap.insert(std::make_pair("DataWorkspace",
-                                   "There should be ONLY 1 dimension present "
-                                   "in the ShapeWorkspace that is not present "
-                                   "(or integrated out) in the DataWorkspace"));
+    errorMap.emplace("DataWorkspace",
+                     "There should be ONLY 1 dimension present "
+                     "in the ShapeWorkspace that is not present "
+                     "(or integrated out) in the DataWorkspace");
   }
 
   return errorMap;
@@ -232,13 +236,13 @@ std::map<std::string, std::string> ReplicateMD::validateInputs() {
 /** Initialize the algorithm's properties.
  */
 void ReplicateMD::init() {
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("ShapeWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "ShapeWorkspace", "", Direction::Input),
                   "An input workspace defining the shape of the output.");
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("DataWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "DataWorkspace", "", Direction::Input),
                   "An input workspace containing the data to replicate.");
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace with replicated data.");
 }
@@ -318,7 +322,7 @@ void ReplicateMD::exec() {
       findReplicationDimension(*shapeWS, *transposedDataWS);
 
   // Create the output workspace from the shape.
-  MDHistoWorkspace_sptr outputWS(shapeWS->clone().release());
+  MDHistoWorkspace_sptr outputWS(shapeWS->clone());
   auto outIt = std::unique_ptr<MDHistoWorkspaceIterator>(
       dynamic_cast<MDHistoWorkspaceIterator *>(outputWS->createIterator()));
 
@@ -326,10 +330,10 @@ void ReplicateMD::exec() {
                            .getNumOMPThreads(); // NThreads to Request
 
   // collection of iterators
-  auto iterators = outputWS->createIterators(nThreads, NULL);
+  auto iterators = outputWS->createIterators(nThreads, nullptr);
 
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int it = 0; it < int(iterators.size()); ++it) {
+  for (int it = 0; it < int(iterators.size()); ++it) { // NOLINT
 
     PARALLEL_START_INTERUPT_REGION
     auto outIt = std::unique_ptr<MDHistoWorkspaceIterator>(

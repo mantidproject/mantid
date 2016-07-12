@@ -17,10 +17,11 @@ using namespace Mantid::RemoteAlgorithms;
  */
 class MockedSCARFTomo : public SCARFTomoReconstruction {
 protected:
-  virtual int doSendRequestGetResponse(
+  int doSendRequestGetResponse(
       const std::string &url, std::ostream &response,
       const StringToStringMap &headers = StringToStringMap(),
-      const std::string &method = std::string(), const std::string &body = "") {
+      const std::string &method = std::string(),
+      const std::string &body = "") override {
     UNUSED_ARG(url);
     UNUSED_ARG(headers);
     UNUSED_ARG(method);
@@ -39,10 +40,11 @@ protected:
  */
 class MockedErrorResponse_SCARFTomo : public SCARFTomoReconstruction {
 protected:
-  virtual int doSendRequestGetResponse(
+  int doSendRequestGetResponse(
       const std::string &url, std::ostream &response,
       const StringToStringMap &headers = StringToStringMap(),
-      const std::string &method = std::string(), const std::string &body = "") {
+      const std::string &method = std::string(),
+      const std::string &body = "") override {
     UNUSED_ARG(url);
     UNUSED_ARG(response);
     UNUSED_ARG(headers);
@@ -61,10 +63,11 @@ protected:
  */
 class MockedConnectionError_SCARFTomo : public SCARFTomoReconstruction {
 protected:
-  virtual int doSendRequestGetResponse(
+  int doSendRequestGetResponse(
       const std::string &url, std::ostream &response,
       const StringToStringMap &headers = StringToStringMap(),
-      const std::string &method = std::string(), const std::string &body = "") {
+      const std::string &method = std::string(),
+      const std::string &body = "") override {
     UNUSED_ARG(url);
     UNUSED_ARG(response);
     UNUSED_ARG(headers);
@@ -84,10 +87,11 @@ protected:
  */
 class MockedGoodLoginResponse_SCARFTomo : public SCARFTomoReconstruction {
 protected:
-  virtual int doSendRequestGetResponse(
+  int doSendRequestGetResponse(
       const std::string &url, std::ostream &response,
       const StringToStringMap &headers = StringToStringMap(),
-      const std::string &method = std::string(), const std::string &body = "") {
+      const std::string &method = std::string(),
+      const std::string &body = "") override {
     UNUSED_ARG(url);
     UNUSED_ARG(response);
     UNUSED_ARG(headers);
@@ -111,10 +115,11 @@ public:
       : SCARFTomoReconstruction(), jobID(id){};
 
 protected:
-  virtual int doSendRequestGetResponse(
+  int doSendRequestGetResponse(
       const std::string &url, std::ostream &response,
       const StringToStringMap &headers = StringToStringMap(),
-      const std::string &method = std::string(), const std::string &body = "") {
+      const std::string &method = std::string(),
+      const std::string &body = "") override {
     UNUSED_ARG(url);
     UNUSED_ARG(response);
     UNUSED_ARG(headers);
@@ -145,7 +150,7 @@ public:
 
   static void destroySuite(SCARFTomoReconstructionTest *suite) { delete suite; }
 
-  void setUp() {
+  void setUp() override {
     const Mantid::Kernel::FacilityInfo &fac =
         Mantid::Kernel::ConfigService::Instance().getFacility();
     m_facility = fac.name();

@@ -6,6 +6,7 @@
 //----------------------------------
 #include <QMainWindow>
 #include "Script.h"
+#include "Mantid/IProjectSerialisable.h"
 
 //----------------------------------------------------------
 // Forward declarations
@@ -24,7 +25,7 @@ class QHideEvent;
 /** @class ScriptingWindow
     This class displays a seperate window for editing and executing scripts
 */
-class ScriptingWindow : public QMainWindow {
+class ScriptingWindow : public QMainWindow, Mantid::IProjectSerialisable {
   /// Qt macro
   Q_OBJECT
 
@@ -33,11 +34,11 @@ public:
   ScriptingWindow(ScriptingEnv *env, bool capturePrint = true,
                   QWidget *parent = 0, Qt::WindowFlags flags = 0);
   /// Destructor
-  ~ScriptingWindow();
+  ~ScriptingWindow() override;
   /// Override the closeEvent
-  void closeEvent(QCloseEvent *event);
+  void closeEvent(QCloseEvent *event) override;
   /// Override the showEvent
-  void showEvent(QShowEvent *event);
+  void showEvent(QShowEvent *event) override;
   /// Is a script running?
   bool isExecuting() const;
   /// Save the current state of the script window for next time
@@ -51,13 +52,17 @@ public:
   /// automatically
   /// running a script loaded with open
   void executeCurrentTab(const Script::ExecutionMode mode);
-  /// saves scripts file names to a string
-  QString saveToString();
   /// Set whether to accept/reject close events
   void acceptCloseEvent(const bool value);
   /// Opens a script providing a copy is not already open
-  void openUnique(const QString &);
-
+  void openUnique(QString filename);
+  /// Saves the open script names to the current project
+  std::string saveToProject(ApplicationWindow *app) override;
+  /// Loads the open script names for the current project
+  void loadFromProject(const std::string &lines, ApplicationWindow *app,
+                       const int fileVersion) override;
+  // Loads the scripts from a list of filenames
+  void loadFromFileList(const QStringList &files);
 signals:
   /// Show the scripting language dialog
   void chooseScriptingLanguage();
@@ -68,10 +73,10 @@ signals:
 
 protected:
   /// Accept a custom defined event
-  void customEvent(QEvent *event);
-  void dragEnterEvent(QDragEnterEvent *de);
-  void dragMoveEvent(QDragMoveEvent *de);
-  void dropEvent(QDropEvent *de);
+  void customEvent(QEvent *event) override;
+  void dragEnterEvent(QDragEnterEvent *de) override;
+  void dragMoveEvent(QDragMoveEvent *de) override;
+  void dropEvent(QDropEvent *de) override;
 
 private slots:
   /// Populate file menu
@@ -172,8 +177,8 @@ private:
   QMenu *m_windowMenu;
   /// Window actions
   QAction *m_alwaysOnTop, *m_hide, *m_zoomIn, *m_zoomOut, *m_resetZoom,
-      *m_toggleProgress, *m_toggleFolding, *m_toggleWrapping, *m_toggleWhitespace,
-      *m_openConfigTabs, *m_selectFont;
+      *m_toggleProgress, *m_toggleFolding, *m_toggleWrapping,
+      *m_toggleWhitespace, *m_openConfigTabs, *m_selectFont;
   /// Help menu
   QMenu *m_helpMenu;
   /// Help actions

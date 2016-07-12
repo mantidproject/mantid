@@ -1,11 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/PeakIntegration.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -15,6 +12,7 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/math/special_functions/round.hpp>
 
 namespace Mantid {
 namespace Crystal {
@@ -27,27 +25,21 @@ using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
 
-/// Constructor
-PeakIntegration::PeakIntegration() : API::Algorithm(), m_IC(false) {}
-
-/// Destructor
-PeakIntegration::~PeakIntegration() {}
-
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */
 void PeakIntegration::init() {
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace", "",
-                                                        Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "InPeaksWorkspace", "", Direction::Input),
                   "Name of the peaks workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<InstrumentValidator>()),
+                  "A 2D workspace with X values of time of flight");
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              boost::make_shared<InstrumentValidator>()),
-      "A 2D workspace with X values of time of flight");
-  declareProperty(
-      new WorkspaceProperty<PeaksWorkspace>("OutPeaksWorkspace", "",
-                                            Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutPeaksWorkspace", "",
+                                                     Direction::Output),
       "Name of the output peaks workspace with integrated intensities.");
   declareProperty("IkedaCarpenterTOF", false,
                   "Integrate TOF using IkedaCarpenter fit.\n"
@@ -73,7 +65,7 @@ void PeakIntegration::exec() {
   /// Output peaks workspace, create if needed
   PeaksWorkspace_sptr peaksW = getProperty("OutPeaksWorkspace");
   if (peaksW != inPeaksW)
-    peaksW.reset(inPeaksW->clone().release());
+    peaksW = inPeaksW->clone();
 
   double qspan = 0.12;
   m_IC = getProperty("IkedaCarpenterTOF");
@@ -94,7 +86,7 @@ void PeakIntegration::exec() {
   EventWorkspace_const_sptr inWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
   if (inWS) {
-    inWS->sortAll(TOF_SORT, NULL);
+    inWS->sortAll(TOF_SORT, nullptr);
   }
 
   // Get some stuff from the input workspace
@@ -143,8 +135,8 @@ void PeakIntegration::exec() {
     double row = peak.getRow();
 
     // Average integer postion
-    int XPeak = int(col + 0.5);
-    int YPeak = int(row + 0.5);
+    int XPeak = boost::math::iround(col);
+    int YPeak = boost::math::iround(row);
 
     double TOFPeakd = peak.getTOF();
     std::string bankName = peak.getBankName();
@@ -326,7 +318,6 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0,
 
   slice_alg->setProperty("NBadEdgePixels", nPixels);
   slice_alg->executeAsChildAlg();
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 
   MantidVec &Xout = outputW->dataX(idet);
   MantidVec &Yout = outputW->dataY(idet);
@@ -351,7 +342,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0,
     }
   }
 
-  outputW->getSpectrum(idet)->clearDetectorIDs();
+  outputW->getSpectrum(idet).clearDetectorIDs();
   // Find the pixel ID at that XY position on the rectangular detector
   int pixelID = peak.getDetectorID(); // det->getAtXY(x0,y0)->getID();
 
@@ -361,7 +352,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0,
     size_t wi = wiEntry->second;
     // Set detectorIDs
     outputW->getSpectrum(idet)
-        ->addDetectorIDs(inputW->getSpectrum(wi)->getDetectorIDs());
+        .addDetectorIDs(inputW->getSpectrum(wi).getDetectorIDs());
   }
 
   return TOFmax - 1;

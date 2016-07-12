@@ -12,16 +12,6 @@ using Mantid::API::WorkspaceProperty;
 DECLARE_ALGORITHM(SortTableWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SortTableWorkspace::SortTableWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SortTableWorkspace::~SortTableWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's version for identification. @see Algorithm::version
 int SortTableWorkspace::version() const { return 1; }
@@ -40,15 +30,16 @@ const std::string SortTableWorkspace::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SortTableWorkspace::init() {
-  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "An input workspace.");
-  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
-  declareProperty(new Kernel::ArrayProperty<std::string>("Columns"),
-                  "Column names to sort by.");
-  declareProperty(new Kernel::ArrayProperty<int>("Ascending"),
+  declareProperty(
+      Kernel::make_unique<Kernel::ArrayProperty<std::string>>("Columns"),
+      "Column names to sort by.");
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<int>>("Ascending"),
                   "List of bools for each column: true for ascending order, "
                   "false for descending. "
                   "If contains a single value it applies to all columns.");
@@ -89,7 +80,7 @@ void SortTableWorkspace::exec() {
     crt->second = (*asc) != 0;
   }
 
-  API::ITableWorkspace_sptr outputWS(ws->clone().release());
+  API::ITableWorkspace_sptr outputWS(ws->clone());
   outputWS->sort(criteria);
   setProperty("OutputWorkspace", outputWS);
 }

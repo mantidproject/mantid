@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/ArrayProperty.cpp
 	src/Atom.cpp
 	src/BinFinder.cpp
+	src/BinaryStreamReader.cpp
 	src/CPUTimer.cpp
 	src/CatalogInfo.cpp
 	src/ChecksumHelper.cpp
@@ -22,6 +23,7 @@ set ( SRC_FILES
 	src/EmptyValues.cpp
 	src/EnabledWhenProperty.cpp
 	src/EnvironmentHistory.cpp
+	src/EqualBinsChecker.cpp
 	src/Exception.cpp
 	src/FacilityInfo.cpp
 	src/FileDescriptor.cpp
@@ -34,6 +36,7 @@ set ( SRC_FILES
 	src/ICatalogInfo.cpp
 	src/IPropertyManager.cpp
 	src/ISaveable.cpp
+	src/IndexSet.cpp
 	src/InstrumentInfo.cpp
 	src/InternetHelper.cpp
 	src/Interpolation.cpp
@@ -52,11 +55,12 @@ set ( SRC_FILES
 	src/MantidVersion.cpp
 	src/MaskedProperty.cpp
 	src/Material.cpp
+	src/MaterialBuilder.cpp
+	src/MaterialXMLParser.cpp
 	src/Math/ChebyshevPolyFit.cpp
 	src/Math/Distributions/BoseEinsteinDistribution.cpp
 	src/Math/Distributions/ChebyshevPolynomial.cpp
 	src/Math/Distributions/ChebyshevSeries.cpp
-	src/Math/Distributions/HermitePolynomials.cpp
 	src/Math/Optimization/SLSQPMinimizer.cpp
 	src/Matrix.cpp
 	src/MatrixProperty.cpp
@@ -74,7 +78,10 @@ set ( SRC_FILES
 	src/Property.cpp
 	src/PropertyHistory.cpp
 	src/PropertyManager.cpp
+	src/PropertyManagerDataService.cpp
 	src/PropertyManagerOwner.cpp
+    	src/PropertyManagerProperty.cpp
+    	src/PropertyNexus.cpp
 	src/PropertyWithValue.cpp
 	src/ProxyInfo.cpp
 	src/PseudoRandomNumberGenerator.cpp
@@ -89,6 +96,7 @@ set ( SRC_FILES
 	src/Statistics.cpp
 	src/StdoutChannel.cpp
 	src/StringContainsValidator.cpp
+	src/StringTokenizer.cpp
 	src/Strings.cpp
 	src/TestChannel.cpp
 	src/ThreadPool.cpp
@@ -99,7 +107,6 @@ set ( SRC_FILES
 	src/Timer.cpp
 	src/Unit.cpp
 	src/UnitConversion.cpp
-	src/UnitFactory.cpp
 	src/UnitLabel.cpp
 	src/UnitLabelTypes.cpp
 	src/UsageService.cpp
@@ -123,7 +130,7 @@ set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
         src/PropertyManager.cpp
         src/Unit.cpp
         src/System.cpp
-        )
+)
 
 set ( INC_FILES
 	inc/MantidKernel/ANN/ANN.h
@@ -135,6 +142,7 @@ set ( INC_FILES
 	inc/MantidKernel/Atom.h
 	inc/MantidKernel/BinFinder.h
 	inc/MantidKernel/BinaryFile.h
+	inc/MantidKernel/BinaryStreamReader.h
 	inc/MantidKernel/BoundedValidator.h
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
@@ -142,6 +150,7 @@ set ( INC_FILES
 	inc/MantidKernel/Chainable.h
 	inc/MantidKernel/ChainableFactory.h
 	inc/MantidKernel/ChecksumHelper.h
+	inc/MantidKernel/ClassMacros.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
@@ -160,6 +169,7 @@ set ( INC_FILES
 	inc/MantidKernel/EmptyValues.h
 	inc/MantidKernel/EnabledWhenProperty.h
 	inc/MantidKernel/EnvironmentHistory.h
+	inc/MantidKernel/EqualBinsChecker.h
 	inc/MantidKernel/Exception.h
 	inc/MantidKernel/FacilityInfo.h
 	inc/MantidKernel/Fast_Exponential.h
@@ -177,6 +187,7 @@ set ( INC_FILES
 	inc/MantidKernel/ISaveable.h
 	inc/MantidKernel/ITimeSeriesProperty.h
 	inc/MantidKernel/IValidator.h
+	inc/MantidKernel/IndexSet.h
 	inc/MantidKernel/Instantiator.h
 	inc/MantidKernel/InstrumentInfo.h
 	inc/MantidKernel/InternetHelper.h
@@ -197,11 +208,12 @@ set ( INC_FILES
 	inc/MantidKernel/MantidVersion.h
 	inc/MantidKernel/MaskedProperty.h
 	inc/MantidKernel/Material.h
+	inc/MantidKernel/MaterialBuilder.h
+	inc/MantidKernel/MaterialXMLParser.h
 	inc/MantidKernel/Math/ChebyshevPolyFit.h
 	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
 	inc/MantidKernel/Math/Distributions/ChebyshevPolynomial.h
 	inc/MantidKernel/Math/Distributions/ChebyshevSeries.h
-	inc/MantidKernel/Math/Distributions/HermitePolynomials.h
 	inc/MantidKernel/Math/Optimization/SLSQPMinimizer.h
 	inc/MantidKernel/Matrix.h
 	inc/MantidKernel/MatrixProperty.h
@@ -225,7 +237,11 @@ set ( INC_FILES
 	inc/MantidKernel/Property.h
 	inc/MantidKernel/PropertyHistory.h
 	inc/MantidKernel/PropertyManager.h
+	inc/MantidKernel/PropertyManagerDataService.h
 	inc/MantidKernel/PropertyManagerOwner.h
+	inc/MantidKernel/PropertyManagerProperty.h
+	inc/MantidKernel/PropertyManager_fwd.h
+    	inc/MantidKernel/PropertyNexus.h
 	inc/MantidKernel/PropertyWithValue.h
 	inc/MantidKernel/ProxyInfo.h
 	inc/MantidKernel/PseudoRandomNumberGenerator.h
@@ -243,6 +259,7 @@ set ( INC_FILES
 	inc/MantidKernel/Statistics.h
 	inc/MantidKernel/StdoutChannel.h
 	inc/MantidKernel/StringContainsValidator.h
+	inc/MantidKernel/StringTokenizer.h
 	inc/MantidKernel/Strings.h
 	inc/MantidKernel/System.h
 	inc/MantidKernel/Task.h
@@ -275,6 +292,7 @@ set ( INC_FILES
 	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/XMLInstantiator.h
 	inc/MantidKernel/cow_ptr.h
+	inc/MantidKernel/make_cow.h
 	inc/MantidKernel/make_unique.h
 )
 
@@ -285,6 +303,7 @@ set ( TEST_FILES
 	AtomTest.h
 	BinFinderTest.h
 	BinaryFileTest.h
+	BinaryStreamReaderTest.h
 	BoseEinsteinDistributionTest.h
 	BoundedValidatorTest.h
 	CPUTimerTest.h
@@ -297,6 +316,7 @@ set ( TEST_FILES
 	CompositeValidatorTest.h
 	ComputeResourceInfoTest.h
 	ConfigServiceTest.h
+	CowPtrTest.h
 	DataServiceTest.h
 	DateAndTimeTest.h
 	DateTimeValidatorTest.h
@@ -308,6 +328,7 @@ set ( TEST_FILES
 	DynamicFactoryTest.h
 	EnabledWhenPropertyTest.h
 	EnvironmentHistoryTest.h
+	EqualBinsCheckerTest.h
 	FacilitiesTest.h
 	FileDescriptorTest.h
 	FileValidatorTest.h
@@ -317,10 +338,10 @@ set ( TEST_FILES
 	FreeBlockTest.h
 	FunctionTaskTest.h
 	GlobTest.h
-	HermitePolynomialsTest.h
 	IPropertySettingsTest.h
 	ISaveableTest.h
 	IValidatorTest.h
+	IndexSetTest.h
 	InstrumentInfoTest.h
 	InternetHelperTest.h
 	InterpolationTest.h
@@ -334,10 +355,13 @@ set ( TEST_FILES
 	MRUListTest.h
 	MagneticFormFactorTableTest.h
 	MagneticIonTest.h
+	MakeCowTest.h
 	MakeUniqueTest.h
 	MandatoryValidatorTest.h
 	MaskedPropertyTest.h
+	MaterialBuilderTest.h
 	MaterialTest.h
+	MaterialXMLParserTest.h
 	MatrixPropertyTest.h
 	MatrixTest.h
 	MemoryTest.h
@@ -354,7 +378,10 @@ set ( TEST_FILES
 	ProgressBaseTest.h
 	ProgressTextTest.h
 	PropertyHistoryTest.h
+	PropertyManagerDataServiceTest.h
+	PropertyManagerPropertyTest.h
 	PropertyManagerTest.h
+    	PropertyNexusTest.h
 	PropertyTest.h
 	PropertyWithValueTest.h
 	ProxyInfoTest.h
@@ -363,6 +390,7 @@ set ( TEST_FILES
 	RebinHistogramTest.h
 	RebinParamsValidatorTest.h
 	RegexStringsTest.h
+	ShrinkToFitTest.h
 	SLSQPMinimizerTest.h
 	SobolSequenceTest.h
 	SpecialCoordinateSystemTest.h
@@ -370,6 +398,7 @@ set ( TEST_FILES
 	StatisticsTest.h
 	StdoutChannelTest.h
 	StringContainsValidatorTest.h
+	StringTokenizerTest.h
 	StringsTest.h
 	TaskTest.h
 	ThreadPoolRunnableTest.h
@@ -439,7 +468,7 @@ set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 if ( GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5" )
  target_link_libraries ( Kernel LINK_PRIVATE stdc++ )
 endif()
-target_link_libraries ( Kernel LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${NEXUS_LIBRARIES} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} )
+target_link_libraries ( Kernel LINK_PUBLIC ${NEXUS_LIBRARIES} LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} )
 
 if (WITH_ASAN)
   target_link_libraries ( Kernel LINK_PRIVATE -lasan )

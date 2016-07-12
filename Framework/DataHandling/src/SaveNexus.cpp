@@ -31,14 +31,15 @@ SaveNexus::SaveNexus() : Algorithm() {}
  *
  */
 void SaveNexus::init() {
-  // Declare required parameters, filename with ext {.nx,.nx5,xml} and input
-  // workspac
-  declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input),
-      "Name of the workspace to be saved");
+  // Declare required parameters, filename with ext {.nxs,.nx5,.xml} and input
+  // workspace
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "InputWorkspace", "", Direction::Input),
+                  "Name of the workspace to be saved");
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save,
-                                   {".nxs", ".nx5", ".xml"}),
+  const std::vector<std::string> fileExts{".nxs", ".nx5", ".xml"};
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Save, fileExts),
                   "The name of the Nexus file to write, as a full or relative\n"
                   "path");
   //
@@ -72,7 +73,7 @@ void SaveNexus::init() {
       "Number of last WorkspaceIndex to read, only for single period data.\n"
       "Not yet implemented.");
   declareProperty(
-      new ArrayProperty<int>("WorkspaceIndexList"),
+      make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
       "List of WorkspaceIndex numbers to read, only for single period data.\n"
       "Not yet implemented");
   declareProperty("Append", false, "Determines whether .nxs file needs to be\n"

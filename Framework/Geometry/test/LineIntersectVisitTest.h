@@ -31,11 +31,9 @@ public:
     TS_ASSERT_EQUALS(extractString(B), "-1 px 0\n");
     A.Accept(B);
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
-    std::list<Kernel::V3D> Pnts;
-    Pnts.push_back(V3D(0.0, -1.0, -1.0));
+    std::list<Kernel::V3D> Pnts{{0.0, -1.0, -1.0}};
     TS_ASSERT_EQUALS(A.getPoints(), Pnts);
-    std::list<double> Dist;
-    Dist.push_back(1.0);
+    std::list<double> Dist{1.0};
     TS_ASSERT_EQUALS(A.getDistance(), Dist);
   }
 
@@ -45,10 +43,10 @@ public:
     Sphere B;
     B.setSurface("s 0.0 0.0 0.0 2");
     A.Accept(B);
-    std::list<V3D> pntOut;
+
     // changed for forward going only intercepts on quadratice surfaces
-    // pntOut.push_back(V3D(-2.0,0.0,0.0));
-    pntOut.push_back(V3D(2.0, 0.0, 0.0));
+    // pntOut.emplace_back(-2.0,0.0,0.0);
+    std::list<V3D> pntOut{{2.0, 0.0, 0.0}};
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
     TS_ASSERT_EQUALS(A.getPoints(), pntOut);
     std::list<double> Dist;
@@ -85,10 +83,10 @@ public:
     TS_ASSERT_EQUALS(B.getNormal(), V3D(0, 1, 0));
 
     A.Accept(B);
-    std::list<V3D> pntOut;
+
     // forward only
-    // pntOut.push_back(V3D(-1.0,0.0,0.0));
-    pntOut.push_back(V3D(1.0, 0.0, 0.0));
+    // pntOut.emplace_back(-1.0,0.0,0.0);
+    std::list<V3D> pntOut{{1.0, 0.0, 0.0}};
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
     TS_ASSERT_EQUALS(A.getPoints(), pntOut);
     std::list<double> Dist;
@@ -99,9 +97,7 @@ public:
     LineIntersectVisit C(V3D(1.1, 0.0, 0.0), V3D(-1.0, 0.0, 0.0));
     C.Accept(B);
     TS_ASSERT_EQUALS(C.getNPoints(), 2);
-    std::list<V3D> pntOut2;
-    pntOut2.push_back(V3D(-1.0, 0.0, 0.0));
-    pntOut2.push_back(V3D(1.0, 0.0, 0.0));
+    std::list<V3D> pntOut2{{-1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}};
     TS_ASSERT_EQUALS(C.getPoints(), pntOut2);
   }
 

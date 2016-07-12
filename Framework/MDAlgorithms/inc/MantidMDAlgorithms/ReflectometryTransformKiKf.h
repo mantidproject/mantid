@@ -43,7 +43,6 @@ public:
                              double kfMax, double incidentTheta,
                              int numberOfBinsQx = 100,
                              int numberOfBinsQz = 100);
-  virtual ~ReflectometryTransformKiKf();
 
 private:
   DISABLE_DEFAULT_CONSTRUCT(ReflectometryTransformKiKf)

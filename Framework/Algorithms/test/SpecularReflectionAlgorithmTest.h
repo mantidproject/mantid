@@ -13,7 +13,9 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+
 #include <boost/tuple/tuple.hpp>
 #include <Poco/Path.h>
 

@@ -39,12 +39,13 @@ VMDBase<TYPE>::makeVectorsOrthogonal(std::vector<VMDBase> &vectors) {
         "VMDBase::makeVectorsOrthogonal(): Need 3D input vectors.");
   std::vector<V3D> in, out;
   for (size_t i = 0; i < vectors.size(); i++)
-    in.push_back(V3D(vectors[i][0], vectors[i][1], vectors[i][2]));
+    in.emplace_back(vectors[i][0], vectors[i][1], vectors[i][2]);
   out = V3D::makeVectorsOrthogonal(in);
 
   std::vector<VMDBase> retVal;
-  for (size_t i = 0; i < out.size(); i++)
-    retVal.push_back(VMDBase(out[i]));
+  retVal.reserve(out.size());
+  for (auto &vector : out)
+    retVal.emplace_back(vector);
   return retVal;
 }
 
@@ -80,7 +81,7 @@ VMDBase<TYPE>::makeVectorsOrthogonal(std::vector<VMDBase> &vectors) {
 template <typename TYPE>
 VMDBase<TYPE>
 VMDBase<TYPE>::getNormalVector(const std::vector<VMDBase<TYPE>> &vectors) {
-  if (vectors.size() <= 0)
+  if (vectors.empty())
     throw std::invalid_argument(
         "VMDBase::getNormalVector: Must give at least 1 vector");
   size_t nd = vectors[0].getNumDims();

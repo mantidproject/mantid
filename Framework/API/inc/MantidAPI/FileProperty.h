@@ -67,7 +67,7 @@ public:
                unsigned int direction = Kernel::Direction::Input);
 
   /// 'Virtual copy constructor
-  virtual FileProperty *clone() const { return new FileProperty(*this); }
+  FileProperty *clone() const override { return new FileProperty(*this); }
 
   /// Check if this is a load type property.
   bool isLoadProperty() const;
@@ -78,10 +78,10 @@ public:
   /// Check if this property is optional
   bool isOptional() const;
   /// Overridden setValue method
-  virtual std::string setValue(const std::string &propValue);
+  std::string setValue(const std::string &propValue) override;
   /// Returns an empty string if the property is valid, otherwise contains an
   /// error message
-  virtual std::string isValid() const;
+  std::string isValid() const override;
 
   /// Returns the main file extension that's used
   std::string getDefaultExt() const { return m_defaultExt; }

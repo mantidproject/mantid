@@ -11,7 +11,7 @@ namespace API {
 HistoryView::HistoryView(const WorkspaceHistory &wsHist)
     : m_wsHist(wsHist), m_historyItems() {
   // add all of the top level algorithms to the view by default
-  const auto algorithms = wsHist.getAlgorithmHistories();
+  const auto &algorithms = wsHist.getAlgorithmHistories();
   m_historyItems =
       std::vector<HistoryItem>(algorithms.begin(), algorithms.end());
 }
@@ -59,7 +59,7 @@ void HistoryView::unroll(std::vector<HistoryItem>::iterator &it) {
   const auto history = it->getAlgorithmHistory();
   const auto childHistories = history->getChildHistories();
 
-  if (!it->isUnrolled() && childHistories.size() > 0) {
+  if (!it->isUnrolled() && !childHistories.empty()) {
     // mark this record as being ignored by the script builder
     it->unrolled(true);
 
@@ -70,7 +70,7 @@ void HistoryView::unroll(std::vector<HistoryItem>::iterator &it) {
       tmpHistory.emplace_back(item);
     }
 // since we are using a std::vector, do all insertions at the same time.
-#if !defined(GCC_VERSION) || GCC_VERSION >= 409000
+#if !defined(GCC_VERSION) || GCC_VERSION >= 40900
     ++it; // move iterator forward to insertion position
     it = m_historyItems.insert(it, tmpHistory.begin(), tmpHistory.end());
 #else

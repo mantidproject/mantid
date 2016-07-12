@@ -1,6 +1,10 @@
 #include "MantidDataHandling/SavePDFGui.h"
+
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/MantidVersion.h"
+
 #include <fstream>
 
 namespace Mantid {
@@ -11,16 +15,6 @@ using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SavePDFGui)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SavePDFGui::SavePDFGui() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SavePDFGui::~SavePDFGui() {}
 
 //----------------------------------------------------------------------------------------------
 
@@ -42,12 +36,12 @@ const std::string SavePDFGui::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SavePDFGui::init() {
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Save, ".gr"),
-      "The filename to use for the saved data");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                           Direction::Input),
+                  "An input workspace.");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Save, ".gr"),
+                  "The filename to use for the saved data");
 }
 
 /// @copydoc Algorithm::validateInputs
@@ -111,7 +105,9 @@ void SavePDFGui::exec() {
 
   // --------- write the data
   auto x = inputWS->readX(0);
-  auto dx = inputWS->readDx(0);
+  HistogramData::HistogramDx dx(x.size(), 0.0);
+  if (inputWS->sharedDx(0))
+    dx = inputWS->dx(0);
   auto y = inputWS->readY(0);
   auto dy = inputWS->readE(0);
   const size_t length = x.size();

@@ -53,12 +53,12 @@ public: // public constructor, destructor and functions
   /// Default Constructor
   IndirectBayes(QWidget *parent = 0);
   /// Destructor
-  ~IndirectBayes();
+  ~IndirectBayes() override;
   /// Interface name
   static std::string name() { return "Bayes"; }
   // This interface's categories.
   static QString categoryInfo() { return "Indirect"; }
-  virtual void initLayout();
+  void initLayout() override;
 
 private slots:
   // Run the appropriate action depending based on the selected tab
@@ -74,7 +74,7 @@ private slots:
 
 private:
   /// Called upon a close event.
-  virtual void closeEvent(QCloseEvent *);
+  void closeEvent(QCloseEvent *) override;
   /// handle POCO event
   void
   handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);

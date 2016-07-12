@@ -3,9 +3,9 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include <nexus/NeXusFile.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <limits.h>
+#include <climits>
+#include <nexus/NeXusFile.hpp>
 
 // class MuonNexusReader - based on ISISRAW this class implements a simple
 // reader for Nexus Muon data files.
@@ -88,9 +88,9 @@ public:
 
   void readFromFile(const std::string &filename); ///< read histogram data
   void readLogData(const std::string &filename);  ///< read log data
-  void getTimeChannels(float *timechannels,
-                       const int &len) const; ///< get time bin boundaries
-                                              /// return sample name
+  void getTimeChannels(float *timebnds,
+                       const int &nbnds) const; ///< get time bin boundaries
+                                                /// return sample name
   std::string getSampleName() const { return nexus_samplename; };
   int numberOfLogs() const; ///< Number of NXlog sections read from file
   int getLogLength(const int i) const;       ///< Lenght of i'th log

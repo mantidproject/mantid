@@ -5,9 +5,10 @@
 
 namespace Mantid {
 namespace PythonInterface {
-using Mantid::PythonInterface::Environment::CallMethod0;
-using Mantid::PythonInterface::Environment::CallMethod1;
-using Mantid::PythonInterface::Environment::CallMethod2;
+using API::IFunction;
+using PythonInterface::Environment::CallMethod0;
+using PythonInterface::Environment::CallMethod1;
+using PythonInterface::Environment::CallMethod2;
 using namespace boost::python;
 
 namespace {
@@ -18,20 +19,30 @@ namespace {
  * float,int,str,bool.
  * @return :: The created attribute.
  */
-Mantid::API::IFunction::Attribute
-createAttributeFromPythonValue(const object &value) {
-  PyObject *rawptr = value.ptr();
-  Mantid::API::IFunction::Attribute attr;
+IFunction::Attribute createAttributeFromPythonValue(const object &value) {
 
-  if (PyBool_Check(rawptr) == 1)
-    attr = Mantid::API::IFunction::Attribute(extract<bool>(rawptr)());
-  else if (PyInt_Check(rawptr) == 1)
-    attr = Mantid::API::IFunction::Attribute(extract<int>(rawptr)());
-  else if (PyFloat_Check(rawptr) == 1)
-    attr = Mantid::API::IFunction::Attribute(extract<double>(rawptr)());
-  else if (PyString_Check(rawptr) == 1)
-    attr = Mantid::API::IFunction::Attribute(extract<std::string>(rawptr)());
-  else
+  PyObject *rawptr = value.ptr();
+  IFunction::Attribute attr;
+
+  if (PyBool_Check(rawptr) == 1) {
+    attr = IFunction::Attribute(extract<bool>(rawptr)());
+  }
+#if PY_MAJOR_VERSION >= 3
+  else if (PyLong_Check(rawptr) == 1) {
+#else
+  else if (PyInt_Check(rawptr) == 1) {
+#endif
+    attr = IFunction::Attribute(extract<int>(rawptr)());
+  } else if (PyFloat_Check(rawptr) == 1) {
+    attr = IFunction::Attribute(extract<double>(rawptr)());
+  }
+#if PY_MAJOR_VERSION >= 3
+  else if (PyUnicode_Check(rawptr) == 1) {
+#else
+  else if (PyBytes_Check(rawptr) == 1) {
+#endif
+    attr = IFunction::Attribute(extract<std::string>(rawptr)());
+  } else
     throw std::invalid_argument(
         "Invalid attribute type. Allowed types=float,int,str,bool");
 
@@ -99,7 +110,7 @@ PyObject *IFunctionAdapter::getAttributeValue(const std::string &name) {
 PyObject *
 IFunctionAdapter::getAttributeValue(const API::IFunction::Attribute &attr) {
   std::string type = attr.type();
-  PyObject *result(NULL);
+  PyObject *result(nullptr);
   if (type == "int")
     result = to_python_value<const int &>()(attr.asInt());
   else if (type == "double")

@@ -369,7 +369,7 @@ There are more examples how to `Extract and manipulate workspace data here <http
 Workspace algebra
 #################
 
-MatrixWorkspaces can have algebraic operations applied to them directly without the need to call a specific algorithm, e.g. :ref:`algm-Plus <Plus>`
+MatrixWorkspaces can have algebraic operations applied to them directly without the need to call a specific algorithm, e.g. :ref:`Plus <algm-Plus>`
 
 
 The expected operations of +,-,*,/ are supported with either a single number or another workspace as the second argument, e.g.

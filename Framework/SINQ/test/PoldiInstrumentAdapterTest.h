@@ -252,7 +252,7 @@ private:
 
   public:
     TestablePoldiInstrumentAdapter() : PoldiInstrumentAdapter() {}
-    ~TestablePoldiInstrumentAdapter() {}
+    ~TestablePoldiInstrumentAdapter() override {}
   };
 };
 

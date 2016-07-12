@@ -9,10 +9,13 @@ GUI
 //----------------------------------------------------------------------
 #include "MantidDataHandling/AsciiPointBase.h"
 #include "MantidAPI/FileProperty.h"
-#include <fstream>
+#include "MantidAPI/MatrixWorkspace.h"
+
 #include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
+
+#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -22,10 +25,11 @@ using namespace API;
 /// Initialisation method.
 void AsciiPointBase::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The name of the workspace containing the data you want to save.");
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, {ext()}),
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Save, ext()),
                   "The filename of the output file.");
   extraProps();
 }
@@ -88,14 +92,14 @@ void AsciiPointBase::data(std::ofstream &file, const std::vector<double> &XData,
       outputval(yData[i], file);
       outputval(eData[i], file);
       outputval(dq, file);
-      file << std::endl;
+      file << '\n';
     }
   } else {
     for (size_t i = 0; i < m_xlength; ++i) {
       outputval(XData[i], file, leadingSep());
       outputval(yData[i], file);
       outputval(eData[i], file);
-      file << std::endl;
+      file << '\n';
     }
   }
 }

@@ -17,7 +17,7 @@ namespace Mantid {
 namespace DataHandling {
 /** @class LoadMuonNexus LoadMuonNexus.h DataHandling/LoadMuonNexus.h
 
-It is a base class for loadres for versions 1 and 2 of the muon nexus file
+It is a base class for loaders for versions 1 and 2 of the muon nexus file
 format.
 It implements property initialization and some common for both versions methods.
 
@@ -67,12 +67,10 @@ class DLLExport LoadMuonNexus
 public:
   /// Default constructor
   LoadMuonNexus();
-  /// Destructor
-  virtual ~LoadMuonNexus() {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadMuonNexus"; }
+  const std::string name() const override { return "LoadMuonNexus"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "The LoadMuonNexus algorithm will read the given NeXus Muon data "
            "file Version 1 and use the results to populate the named "
            "workspace. LoadMuonNexus may be invoked by LoadNexus if it is "
@@ -80,14 +78,14 @@ public:
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Nexus;Muon\\DataHandling";
   }
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::NexusDescriptor &descriptor) const;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 protected:
   virtual void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr) {}
@@ -115,17 +113,17 @@ protected:
   /// Have the spectrum_min/max properties been set?
   bool m_interval;
   /// The value of the spectrum_list property
-  std::vector<specid_t> m_spec_list;
+  std::vector<specnum_t> m_spec_list;
   /// The value of the spectrum_min property
   int64_t m_spec_min;
   /// The value of the spectrum_max property
   int64_t m_spec_max;
   /// The group which each detector belongs to in order
-  std::vector<specid_t> m_groupings;
+  std::vector<specnum_t> m_groupings;
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
 };
 
 } // namespace DataHandling

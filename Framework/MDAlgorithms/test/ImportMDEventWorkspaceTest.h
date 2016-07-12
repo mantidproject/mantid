@@ -372,7 +372,7 @@ public:
 
   ImportMDEventWorkspaceTestPerformance() : nRows(10000) {}
 
-  void setUp() {
+  void setUp() override {
     // Create the file contents.
     FileContentsBuilder fileContents;
     std::string mdData;

@@ -43,7 +43,7 @@ double PoldiResidualCorrelationCore::reduceChopperSlitList(
 /// Calculates the average of the values in a vector.
 double PoldiResidualCorrelationCore::calculateAverage(
     const std::vector<double> &values) const {
-  if (values.size() == 0) {
+  if (values.empty()) {
     throw std::runtime_error("Cannot calculate average of 0 values.");
   }
 
@@ -85,9 +85,8 @@ void PoldiResidualCorrelationCore::distributeCorrelationCounts(
       double deltaForD =
           -dInt / m_weightsForD[i] / static_cast<double>(chopperSlits.size());
 
-      for (auto offset = chopperSlits.begin(); offset != chopperSlits.end();
-           ++offset) {
-        CountLocator locator = getCountLocator(d, *offset, m_indices[k]);
+      for (double chopperSlit : chopperSlits) {
+        CountLocator locator = getCountLocator(d, chopperSlit, m_indices[k]);
 
         int indexDifference = locator.icmax - locator.icmin;
 
@@ -103,9 +102,9 @@ void PoldiResidualCorrelationCore::distributeCorrelationCounts(
             m_logger.warning()
                 << "Inconsistency foun while calculating distribute "
                    "correlation counts for d-value with index "
-                << boost::lexical_cast<std::string>(k) << ", got middle index: "
-                << boost::lexical_cast<std::string>(middleIndex)
-                << ", ignoring it." << std::endl;
+                << std::to_string(k)
+                << ", got middle index: " << std::to_string(middleIndex)
+                << ", ignoring it.\n";
             break;
           }
           addToCountData(locator.detectorElement, middleIndex, deltaForD);
@@ -135,7 +134,8 @@ void PoldiResidualCorrelationCore::correctCountData() const {
   double ratio = sumOfResiduals / numberOfCells;
 
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int i = 0; i < static_cast<int>(m_detectorElements.size()); ++i) {
+  for (int i = 0; i < static_cast<int>(m_detectorElements.size()); // NOLINT
+       ++i) {
     int element = m_detectorElements[i];
     for (int j = 0; j < m_timeBinCount; ++j) {
       addToCountData(element, j, -ratio);

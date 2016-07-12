@@ -44,7 +44,7 @@ public:
   /// Default constructor required by the factory
   ChopperModel();
   /// Allow inheritance
-  virtual ~ChopperModel() {}
+  virtual ~ChopperModel() = default;
   /// Returns a clone of the current object
   virtual boost::shared_ptr<ChopperModel> clone() const = 0;
 
@@ -57,7 +57,7 @@ public:
   /// Set the rotation speed in rads/sec
   void setAngularVelocityInHz(const double value);
   /// Set the angular velocity log name
-  void setAngularVelocityLog(const std::string &name);
+  void setAngularVelocityLog(const std::string &logName);
   /// Returns the current angular velocity in rads/sec
   double getAngularVelocity() const;
   /// Sets the chopper jitter sigma value in microseconds. This is the FWHH

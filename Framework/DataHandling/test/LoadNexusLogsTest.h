@@ -7,8 +7,10 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/PhysicalConstants.h"
+
 using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -161,9 +163,44 @@ public:
     TSM_ASSERT("Period log should be an int time series property", periodLog);
 
     std::vector<int> periodValues = periodLog->valuesAsVector();
-    std::set<int> uniquePeriods(periodValues.begin(), periodValues.end());
+    std::unordered_set<int> uniquePeriods(periodValues.begin(),
+                                          periodValues.end());
     TSM_ASSERT_EQUALS("Should have 4 periods in total", 4,
                       uniquePeriods.size());
+  }
+
+  void test_log_non_default_entry() {
+    auto testWS = createTestWorkspace();
+    LoadNexusLogs loader;
+
+    // default entry Off-Off
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Workspace", testWS);
+    loader.setPropertyValue("Filename", "REF_M_9709_event.nxs");
+    loader.execute();
+    auto run = testWS->run();
+    TimeSeriesProperty<double> *pclog =
+        dynamic_cast<TimeSeriesProperty<double> *>(
+            run.getLogData("proton_charge"));
+    TS_ASSERT(pclog);
+    TS_ASSERT_EQUALS(pclog->size(), 23806);
+    TS_ASSERT(pclog->getStatistics().duration > 4e9);
+
+    // 3rd entry On-Off
+    testWS = createTestWorkspace();
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Workspace", testWS);
+    loader.setPropertyValue("Filename", "REF_M_9709_event.nxs");
+    loader.setProperty("NXentryName", "entry-On_Off");
+    loader.execute();
+    run = testWS->run();
+    pclog = dynamic_cast<TimeSeriesProperty<double> *>(
+        run.getLogData("proton_charge"));
+    TS_ASSERT(pclog);
+    TS_ASSERT_EQUALS(pclog->size(), 24150);
+    TS_ASSERT(pclog->getStatistics().duration < 3e9);
   }
 
 private:

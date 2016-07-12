@@ -27,10 +27,9 @@ public:
   MockedDownloadInstrument() : DownloadInstrument() {}
 
 private:
-  virtual int
-  doDownloadFile(const std::string &urlFile,
-                 const std::string &localFilePath = "",
-                 const StringToStringMap &headers = StringToStringMap()) {
+  int doDownloadFile(
+      const std::string &urlFile, const std::string &localFilePath = "",
+      const StringToStringMap &headers = StringToStringMap()) override {
     std::string dateTime;
     auto it = headers.find("if-modified-since");
     if (it != headers.end())

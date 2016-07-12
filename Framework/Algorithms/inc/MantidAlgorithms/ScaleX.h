@@ -51,26 +51,26 @@ public:
   /// Default constructor
   ScaleX();
   /// Destructor
-  virtual ~ScaleX();
+  ~ScaleX() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "ScaleX"; }
+  const std::string name() const override { return "ScaleX"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Scales the X-axis of an input workspace by the given factor, which "
            "can be either multiplicative or additive.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Arithmetic;CorrectionFunctions";
   }
 
 private:
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   /// Execute algorithm for EventWorkspaces
   void execEvent();
 

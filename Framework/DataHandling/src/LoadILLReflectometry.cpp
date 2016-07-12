@@ -4,8 +4,11 @@
  *WIKI*/
 
 #include "MantidDataHandling/LoadILLReflectometry.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 
@@ -27,20 +30,12 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadILLReflectometry::LoadILLReflectometry() {
-  m_wavelength = 0;
-  m_channelWidth = 0;
-  m_numberOfTubes = 0;         // number of tubes - X
-  m_numberOfPixelsPerTube = 0; // number of pixels per tube - Y
-  m_numberOfChannels = 0;      // time channels - Z
-  m_numberOfHistograms = 0;
-  m_supportedInstruments.push_back("D17");
-}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadILLReflectometry::~LoadILLReflectometry() {}
+LoadILLReflectometry::LoadILLReflectometry()
+    : m_numberOfTubes{0},         // number of tubes - X
+      m_numberOfPixelsPerTube{0}, // number of pixels per tube - Y
+      m_numberOfChannels{0},      // time channels - Z
+      m_numberOfHistograms{0}, m_wavelength{0}, m_channelWidth{0},
+      m_supportedInstruments{"D17"} {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -82,12 +77,13 @@ int LoadILLReflectometry::confidence(
 /** Initialize the algorithm's properties.
  */
 void LoadILLReflectometry::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
-                  "File path of the Data file to load");
-
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace");
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
+      "File path of the Data file to load");
+
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -110,7 +106,7 @@ void LoadILLReflectometry::runLoadInstrument() {
   } catch (std::runtime_error &e) {
     g_log.information()
         << "Unable to successfully run LoadInstrument Child Algorithm : "
-        << e.what() << std::endl;
+        << e.what() << '\n';
   }
 }
 
@@ -160,7 +156,7 @@ void LoadILLReflectometry::exec() {
 
   distance /= 1000.0; // convert to meter
   g_log.debug() << "Moving detector at angle " << angle << " and distance "
-                << distance << std::endl;
+                << distance << '\n';
   placeDetector(distance, angle);
 
   // Set the channel width property
@@ -187,7 +183,7 @@ void LoadILLReflectometry::setInstrumentName(
   m_instrumentName =
       m_loader.getStringFromNexusPath(firstEntry, instrumentNamePath + "/name");
   boost::to_upper(m_instrumentName); // "D17" in file, keep it upper case.
-  g_log.debug() << "Instrument name set to: " + m_instrumentName << std::endl;
+  g_log.debug() << "Instrument name set to: " + m_instrumentName << '\n';
 }
 
 /**
@@ -204,13 +200,12 @@ void LoadILLReflectometry::initWorkSpace(
   // dim0 * m_numberOfPixelsPerTube is the total number of detectors
   m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
 
-  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << std::endl;
-  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube
-                << std::endl;
-  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << std::endl;
-  g_log.debug() << "Monitors: " << monitorsData.size() << std::endl;
-  g_log.debug() << "Monitors[0]: " << monitorsData[0].size() << std::endl;
-  g_log.debug() << "Monitors[1]: " << monitorsData[1].size() << std::endl;
+  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << '\n';
+  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube << '\n';
+  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << '\n';
+  g_log.debug() << "Monitors: " << monitorsData.size() << '\n';
+  g_log.debug() << "Monitors[0]: " << monitorsData[0].size() << '\n';
+  g_log.debug() << "Monitors[1]: " << monitorsData[1].size() << '\n';
 
   // Now create the output workspace
 
@@ -352,18 +347,18 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(
     mean_chop_2_phase = entry.getFloat("instrument/Chopper2/phase");
   }
 
-  g_log.debug() << "m_numberOfChannels: " << m_numberOfChannels << std::endl;
-  g_log.debug() << "m_channelWidth: " << m_channelWidth << std::endl;
-  g_log.debug() << "tof_delay: " << tof_delay << std::endl;
-  g_log.debug() << "POFF: " << POFF << std::endl;
-  g_log.debug() << "open_offset: " << open_offset << std::endl;
-  g_log.debug() << "mean_chop_2_phase: " << mean_chop_2_phase << std::endl;
-  g_log.debug() << "mean_chop_1_phase: " << mean_chop_1_phase << std::endl;
-  g_log.debug() << "chop1_speed: " << chop1_speed << std::endl;
+  g_log.debug() << "m_numberOfChannels: " << m_numberOfChannels << '\n';
+  g_log.debug() << "m_channelWidth: " << m_channelWidth << '\n';
+  g_log.debug() << "tof_delay: " << tof_delay << '\n';
+  g_log.debug() << "POFF: " << POFF << '\n';
+  g_log.debug() << "open_offset: " << open_offset << '\n';
+  g_log.debug() << "mean_chop_2_phase: " << mean_chop_2_phase << '\n';
+  g_log.debug() << "mean_chop_1_phase: " << mean_chop_1_phase << '\n';
+  g_log.debug() << "chop1_speed: " << chop1_speed << '\n';
 
   double t_TOF2 = 0.0;
   if (chop1_speed == 0.0) {
-    g_log.debug() << "Warning: chop1_speed is null." << std::endl;
+    g_log.debug() << "Warning: chop1_speed is null.\n";
     // stay with t_TOF2 to O.0
   } else {
     // Thanks to Miguel Gonzales/ILL for this TOF formula
@@ -371,7 +366,7 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(
                              mean_chop_1_phase + open_offset) /
              (2.0 * 360 * chop1_speed);
   }
-  g_log.debug() << "t_TOF2: " << t_TOF2 << std::endl;
+  g_log.debug() << "t_TOF2: " << t_TOF2 << '\n';
 
   // 2) Compute tof values
   for (size_t timechannelnumber = 0; timechannelnumber <= m_numberOfChannels;

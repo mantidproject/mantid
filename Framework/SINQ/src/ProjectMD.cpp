@@ -17,13 +17,9 @@ using namespace Mantid::DataObjects;
 // It is used to print out information, warning and error messages
 
 void ProjectMD::init() {
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
-                                                           Direction::Input));
-  std::vector<std::string> projectOptions;
-  projectOptions.push_back("X");
-  projectOptions.push_back("Y");
-  projectOptions.push_back("Z");
-  projectOptions.push_back("K");
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+      "InputWorkspace", "", Direction::Input));
+  std::vector<std::string> projectOptions{"X", "Y", "Z", "K"};
   this->declareProperty("ProjectDirection", "Z",
                         boost::make_shared<StringListValidator>(projectOptions),
                         "The project direction");
@@ -31,8 +27,8 @@ void ProjectMD::init() {
   declareProperty("StartIndex", 0, Direction::Input);
   declareProperty("EndIndex", -1, Direction::Input);
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+      "OutputWorkspace", "", Direction::Output));
 }
 
 void ProjectMD::exec() {
@@ -74,7 +70,7 @@ void ProjectMD::exec() {
     }
   }
 
-  MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));
+  auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
   outWS->setTo(.0, .0, .0);
 
   memset(targetDim, 0, MAXDIM * sizeof(int));
@@ -134,13 +130,13 @@ double ProjectMD::getValue(IMDHistoWorkspace_sptr ws, int dim[]) {
   // double *a = ws->getSignalArray();
   // double val = a[idx];
   // std::cout << "index " << idx << " value " << val << " dims " << dim[0] <<",
-  // " << dim[1] << "," <<dim[2] <<std::endl;
+  // " << dim[1] << "," <<dim[2] <<'\n';
   return val;
 }
 void ProjectMD::putValue(IMDHistoWorkspace_sptr ws, int dim[], double value) {
   unsigned int idx = calcIndex(ws, dim);
   // std::cout << "Result index " << idx << " value " << value << " dim= " <<
-  // dim[0] << ", " << dim[1] <<", " << dim[2] <<std::endl;
+  // dim[0] << ", " << dim[1] <<", " << dim[2] <<'\n';
   ws->setSignalAt(idx, value);
   ws->setErrorSquaredAt(idx, value);
 }

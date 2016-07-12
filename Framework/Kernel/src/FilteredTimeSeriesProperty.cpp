@@ -17,7 +17,7 @@ template <typename HeldType>
 FilteredTimeSeriesProperty<HeldType>::FilteredTimeSeriesProperty(
     TimeSeriesProperty<HeldType> *seriesProp,
     const TimeSeriesProperty<bool> &filterProp, const bool transferOwnership)
-    : TimeSeriesProperty<HeldType>(*seriesProp), m_unfiltered(NULL) {
+    : TimeSeriesProperty<HeldType>(*seriesProp), m_unfiltered(nullptr) {
   if (transferOwnership)
     m_unfiltered = seriesProp;
   else
@@ -53,12 +53,10 @@ FilteredTimeSeriesProperty<HeldType>::unfiltered() const {
 
 // -------------------------- Concrete instantiation
 // -----------------------------------------------
-INSTANTIATE(int)
-INSTANTIATE(long)
-INSTANTIATE(long long)
-INSTANTIATE(unsigned int)
-INSTANTIATE(unsigned long)
-INSTANTIATE(unsigned long long)
+INSTANTIATE(int32_t)
+INSTANTIATE(int64_t)
+INSTANTIATE(uint32_t)
+INSTANTIATE(uint64_t)
 INSTANTIATE(float)
 INSTANTIATE(double)
 INSTANTIATE(std::string)

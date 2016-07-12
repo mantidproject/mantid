@@ -1,8 +1,5 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/CompressEvents.h"
-#include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -18,28 +15,22 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-/// (Empty) Constructor
-CompressEvents::CompressEvents() {}
-
-/// Destructor
-CompressEvents::~CompressEvents() {}
-
 void CompressEvents::init() {
   declareProperty(
-      new WorkspaceProperty<EventWorkspace>("InputWorkspace", "",
-                                            Direction::Input),
+      make_unique<WorkspaceProperty<EventWorkspace>>("InputWorkspace", "",
+                                                     Direction::Input),
       "The name of the EventWorkspace on which to perform the algorithm");
 
-  declareProperty(new WorkspaceProperty<EventWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the output EventWorkspace.");
 
   // Tolerance must be >= 0.0
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty(
-      new PropertyWithValue<double>("Tolerance", 1e-5, mustBePositive,
-                                    Direction::Input),
+      make_unique<PropertyWithValue<double>>("Tolerance", 1e-5, mustBePositive,
+                                             Direction::Input),
       "The tolerance on each event's X value (normally TOF, but may be a "
       "different unit if you have used ConvertUnits).\n"
       "Any events within Tolerance will be summed into a single event.");
@@ -86,7 +77,7 @@ void CompressEvents::exec() {
       // Linux. Using this signed type suppresses warnings below
       const size_t index = static_cast<size_t>(i);
       // The input event list
-      EventList &input_el = inputWS->getEventList(index);
+      EventList &input_el = inputWS->getSpectrum(index);
       // And on the output side
       EventList &output_el = outputWS->getOrAddEventList(index);
       // Copy other settings into output
@@ -109,12 +100,9 @@ void CompressEvents::exec() {
     for (int64_t i = 0; i < noSpectra; ++i) {
       PARALLEL_START_INTERUPT_REGION
       // The input (also output) event list
-      EventList *output_el = outputWS->getEventListPtr(static_cast<size_t>(i));
-      if (output_el) {
-        // The EventList method does the work.
-        output_el->compressEvents(tolerance, output_el);
-        Mantid::API::MemoryManager::Instance().releaseFreeMemory();
-      }
+      auto &output_el = outputWS->getSpectrum(static_cast<size_t>(i));
+      // The EventList method does the work.
+      output_el.compressEvents(tolerance, &output_el);
       prog.report("Compressing");
       PARALLEL_END_INTERUPT_REGION
     }

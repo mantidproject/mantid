@@ -1,6 +1,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCrystal/GoniometerAnglesFromPhiRotation.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
@@ -22,19 +23,13 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //--------------------------------------------------------------------------
-/** Constructor
- */
-GoniometerAnglesFromPhiRotation::GoniometerAnglesFromPhiRotation()
-    : Algorithm() {}
-
-GoniometerAnglesFromPhiRotation::~GoniometerAnglesFromPhiRotation() {}
 
 void GoniometerAnglesFromPhiRotation::init() {
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace1", "", Kernel::Direction::Input),
                   "Input Peaks Workspace for Run 1");
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace2", "", Kernel::Direction::InOut),
                   "Input Peaks Workspace for Run 2");
 
@@ -159,8 +154,8 @@ void GoniometerAnglesFromPhiRotation::exec() {
     findUB->initialize();
     findUB->setProperty<PeaksWorkspace_sptr>("PeaksWorkspace",
                                              getProperty("PeaksWorkspace1"));
-    findUB->setProperty("MIND", (double)getProperty("MIND"));
-    findUB->setProperty("MAXD", (double)getProperty("MAXD"));
+    findUB->setProperty("MIND", static_cast<double>(getProperty("MIND")));
+    findUB->setProperty("MAXD", static_cast<double>(getProperty("MAXD")));
     findUB->setProperty("Tolerance", Tolerance);
 
     findUB->executeAsChildAlg();
@@ -199,9 +194,10 @@ void GoniometerAnglesFromPhiRotation::exec() {
   PeaksWorkspace_sptr Peakss = getProperty("PeaksWorkspace2");
 
   if (!Run1HasOrientedLattice)
-    PeaksRun1->mutableSample().setOrientedLattice(NULL);
+    PeaksRun1->mutableSample().setOrientedLattice(nullptr);
 
-  double dphi = (double)getProperty("Phi2") - (double)getProperty("Run1Phi");
+  double dphi = static_cast<double>(getProperty("Phi2")) -
+                static_cast<double>(getProperty("Run1Phi"));
   Kernel::Matrix<double> Gon22(3, 3, true);
 
   for (int i = 0; i < PeaksRun2->getNumberPeaks(); i++) {
@@ -209,18 +205,18 @@ void GoniometerAnglesFromPhiRotation::exec() {
   }
 
   int RunNum = PeaksRun2->getPeak(0).getRunNumber();
-  std::string RunNumStr = boost::lexical_cast<std::string>(RunNum);
+  std::string RunNumStr = std::to_string(RunNum);
   int Npeaks = PeaksRun2->getNumberPeaks();
 
-  std::vector<double> MinData(5); // n indexed, av err, phi, chi,omega
+  // n indexed, av err, phi, chi,omega
+  std::array<double, 5> MinData = {{0., 0., 0., 0., 0.}};
   MinData[0] = 0.0;
   std::vector<V3D> directionList = IndexingUtils::MakeHemisphereDirections(50);
 
   API::FrameworkManager::Instance();
 
-  for (size_t d = 0; d < directionList.size(); d++)
+  for (auto dir : directionList)
     for (int sgn = 1; sgn > -2; sgn -= 2) {
-      V3D dir = directionList[d];
       dir.normalize();
       Quat Q(sgn * dphi, dir);
       Q.normalize();
@@ -244,28 +240,22 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
   g_log.debug() << "Best direction unOptimized is ("
                 << (MinData[1] * MinData[2]) << "," << (MinData[1] * MinData[3])
-                << "," << (MinData[1] * MinData[4]) << ")" << std::endl;
+                << "," << (MinData[1] * MinData[4]) << ")\n";
 
   //----------------------- Optimize around best
   //-------------------------------------------
 
-  //               --------Create Workspace -------------------
-  boost::shared_ptr<DataObjects::Workspace2D> ws =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * Npeaks,
-                                              3 * Npeaks));
-  MantidVecPtr Xvals, Yvals;
+  auto ws = createWorkspace<Workspace2D>(1, 3 * Npeaks, 3 * Npeaks);
+
+  MantidVec Xvals;
 
   for (int i = 0; i < Npeaks; ++i) {
-    Xvals.access().push_back(i);
-    Yvals.access().push_back(0.0);
-    Xvals.access().push_back(i);
-    Yvals.access().push_back(0.0);
-    Xvals.access().push_back(i);
-    Yvals.access().push_back(0.0);
+    Xvals.push_back(i);
+    Xvals.push_back(i);
+    Xvals.push_back(i);
   }
-  ws->setX(0, Xvals);
-  ws->setData(0, Yvals);
+
+  ws->setPoints(0, Xvals);
 
   //       -------------Set up other Fit function arguments------------------
   V3D dir(MinData[2], MinData[3], MinData[4]);
@@ -349,28 +339,26 @@ void GoniometerAnglesFromPhiRotation::exec() {
     ax3 = -ax3;
   }
 
-  double phi2 = (double)getProperty("Run1Phi") + dphi;
+  double phi2 = static_cast<double>(getProperty("Run1Phi")) + dphi;
   double chi2 = acos(ax2) / M_PI * 180;
   double omega2 = atan2(ax3, -ax1) / M_PI * 180;
 
   g_log.notice()
-      << "============================ Results ============================"
-      << std::endl;
+      << "============================ Results ============================\n";
   g_log.notice() << "     phi,chi, and omega= (" << phi2 << "," << chi2 << ","
-                 << omega2 << ")" << std::endl;
-  g_log.notice() << "     #indexed =" << Nindexed << std::endl;
+                 << omega2 << ")\n";
+  g_log.notice() << "     #indexed =" << Nindexed << '\n';
   g_log.notice()
-      << "              =============================================="
-      << std::endl;
+      << "              ==============================================\n";
 
   // std::cout << "============================ Results
-  // ============================" << std::endl;
+  // ============================\n";
   // std::cout << "     phi,chi, and omega= (" << phi2 << "," << chi2 << "," <<
   // omega2 << ")"
-  //     << std::endl;
-  // std::cout << "     #indexed =" << Nindexed << std::endl;
+  //     << '\n';
+  // std::cout << "     #indexed =" << Nindexed << '\n';
   // std::cout << "              =============================================="
-  // << std::endl;
+  // << '\n';
 
   setProperty("Phi2", phi2);
   setProperty("Chi2", chi2);

@@ -20,54 +20,55 @@ using namespace Mantid::ICat;
 class DummyCatalog : public ICatalog {
 public:
   CatalogSession_sptr login(const std::string &, const std::string &,
-                            const std::string &, const std::string &) {
+                            const std::string &, const std::string &) override {
     throw std::runtime_error(
         "You cannot log into multiple catalogs at the same time.");
   }
 
-  void logout() { m_counter++; }
+  void logout() override { m_counter++; }
 
   void search(const CatalogSearchParam &, ITableWorkspace_sptr &ws, const int &,
-              const int &) {
+              const int &) override {
     // Each implementation of the ICatalog methods should always append data to
     // the workspace.
     ws->appendRow();
     m_counter++;
   }
 
-  int64_t getNumberOfSearchResults(const CatalogSearchParam &) {
+  int64_t getNumberOfSearchResults(const CatalogSearchParam &) override {
     m_counter++;
     // Return 5 to verify that the NumberOfResults gets added together across
     // catalogs as expected.
     return 5;
   }
 
-  void myData(ITableWorkspace_sptr &ws) {
+  void myData(ITableWorkspace_sptr &ws) override {
     ws->appendRow();
     m_counter++;
   }
 
-  void getDataSets(const std::string &, ITableWorkspace_sptr &ws) {
+  void getDataSets(const std::string &, ITableWorkspace_sptr &ws) override {
     ws->appendRow();
     m_counter++;
   }
 
-  void getDataFiles(const std::string &, ITableWorkspace_sptr &ws) {
+  void getDataFiles(const std::string &, ITableWorkspace_sptr &ws) override {
     ws->appendRow();
     m_counter++;
   }
 
-  void listInstruments(std::vector<std::string> &instruments) {
-    instruments.push_back("");
+  void listInstruments(std::vector<std::string> &instruments) override {
+    instruments.emplace_back("");
     m_counter++;
   }
 
-  void listInvestigationTypes(std::vector<std::string> &investigations) {
-    investigations.push_back("");
+  void
+  listInvestigationTypes(std::vector<std::string> &investigations) override {
+    investigations.emplace_back("");
     m_counter++;
   }
 
-  void keepAlive() { m_counter++; }
+  void keepAlive() override { m_counter++; }
 
   /// The counter used to verify each method works when
   /// multiple counters perform the same operation on the catalog.

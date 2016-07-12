@@ -16,7 +16,8 @@ using namespace Mantid::Geometry;
 class MatrixWorkspaceMDIteratorTest : public CxxTest::TestSuite {
 public:
   boost::shared_ptr<MatrixWorkspace> makeFakeWS() {
-    boost::shared_ptr<MatrixWorkspace> ws(new WorkspaceTester());
+    boost::shared_ptr<MatrixWorkspace> ws =
+        boost::make_shared<WorkspaceTester>();
     // Matrix with 4 spectra, 5 bins each
     ws->initialize(4, 6, 5);
     NumericAxis *ax1 = new NumericAxis(4);
@@ -40,7 +41,7 @@ public:
           new Detector("pixel", static_cast<detid_t>(i), inst.get());
       inst->add(det);
       inst->markAsDetector(det);
-      ws->getSpectrum(i)->addDetectorID(static_cast<detid_t>(i));
+      ws->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
     }
     ws->replaceAxis(1, ax1);
 

@@ -1,8 +1,8 @@
 #ifndef MANTID_GEOMETRY_REFERENCEFRAME_H_
 #define MANTID_GEOMETRY_REFERENCEFRAME_H_
 
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
 #include <string>
 
 namespace Mantid {
@@ -45,7 +45,7 @@ public:
   ReferenceFrame();
   /// Constructor
   ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
-                 Handedness handedNess, std::string origin);
+                 Handedness handedness, std::string origin);
   /// Gets the pointing up direction
   PointingAlong pointingUp() const;
   /// Gets the beam pointing along direction
@@ -58,7 +58,7 @@ public:
   /// Gets the origin
   std::string origin() const;
   /// Destructor
-  virtual ~ReferenceFrame();
+  virtual ~ReferenceFrame() = default;
   /// Convert up axis into a 3D direction
   const Mantid::Kernel::V3D vecPointingUp() const;
   /// Convert along beam axis into a 3D direction
@@ -69,6 +69,8 @@ public:
   std::string pointingAlongBeamAxis() const;
   /// Pointing horizontal to beam as a string
   std::string pointingHorizontalAxis() const;
+  /// Test whether or not a vector is in the beam direction
+  bool isVectorPointingAlongBeam(const Mantid::Kernel::V3D &v) const;
 
 private:
   /// Common setup

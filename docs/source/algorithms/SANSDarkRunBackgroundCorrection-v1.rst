@@ -28,7 +28,7 @@ The background subtraction can be performed in several ways.
 Usage
 -----
 
-**Example - SANSDarkRunBackgroundCorrection for **
+**Example - SANSDarkRunBackgroundCorrection for**
 
 .. testcode:: SANSDarkRunBackgroundCorrection
 

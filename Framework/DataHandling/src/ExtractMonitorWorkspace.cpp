@@ -1,3 +1,4 @@
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/ExtractMonitorWorkspace.h"
 
 namespace Mantid {
@@ -7,10 +8,6 @@ DECLARE_ALGORITHM(ExtractMonitorWorkspace)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-
-ExtractMonitorWorkspace::ExtractMonitorWorkspace() {}
-
-ExtractMonitorWorkspace::~ExtractMonitorWorkspace() {}
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ExtractMonitorWorkspace::name() const {
@@ -35,10 +32,11 @@ const std::string ExtractMonitorWorkspace::summary() const {
  */
 void ExtractMonitorWorkspace::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "A data workspace that holds a monitor workspace within.");
   declareProperty(
-      new WorkspaceProperty<>("MonitorWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("MonitorWorkspace", "",
+                                       Direction::Output),
       "The workspace containing only monitor data relating to the main data in "
       "the InputWorkspace.");
   declareProperty(

@@ -1,7 +1,10 @@
 #include "MantidAlgorithms/WienerSmooth.h"
+
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 
 #include <numeric>
@@ -26,16 +29,6 @@ const double guessSignalToNoiseRatio = 1e15;
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-WienerSmooth::WienerSmooth() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-WienerSmooth::~WienerSmooth() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's version for identification. @see Algorithm::version
 int WienerSmooth::version() const { return 1; }
@@ -54,15 +47,16 @@ const std::string WienerSmooth::summary() const {
 /** Initialize the algorithm's properties.
  */
 void WienerSmooth::init() {
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                           Direction::Input),
+                  "An input workspace.");
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
-  declareProperty(new Kernel::ArrayProperty<int>("WorkspaceIndexList"),
-                  "Workspace indices for spectra to process. "
-                  "If empty smooth all spectra.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+      Kernel::make_unique<Kernel::ArrayProperty<int>>("WorkspaceIndexList"),
+      "Workspace indices for spectra to process. "
+      "If empty smooth all spectra.");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "An output workspace.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -132,10 +126,10 @@ void WienerSmooth::exec() {
 
     // set the axis value
     if (isSpectra) {
-      auto inSpectrum = inputWS->getSpectrum(inIndex);
-      auto outSpectrum = outputWS->getSpectrum(outIndex);
-      outSpectrum->setSpectrumNo(inSpectrum->getSpectrumNo());
-      outSpectrum->setDetectorIDs(inSpectrum->getDetectorIDs());
+      auto &inSpectrum = inputWS->getSpectrum(inIndex);
+      auto &outSpectrum = outputWS->getSpectrum(outIndex);
+      outSpectrum.setSpectrumNo(inSpectrum.getSpectrumNo());
+      outSpectrum.setDetectorIDs(inSpectrum.getDetectorIDs());
     } else if (isNumeric) {
       outAxis->setValue(outIndex, inAxis->getValue(inIndex));
     } else if (inTextAxis && outTextAxis) {
@@ -162,7 +156,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
 
   // it won't work for very small workspaces
   if (dataSize < 4) {
-    g_log.debug() << "No smoothing, spectrum copied." << std::endl;
+    g_log.debug() << "No smoothing, spectrum copied.\n";
     return copyInput(inputWS, wsIndex);
   }
 
@@ -206,7 +200,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
   // function will
   //       do a better job.
 
-  g_log.debug() << "Spline break points " << nbreak << std::endl;
+  g_log.debug() << "Spline break points " << nbreak << '\n';
 
   // define the spline
   API::IFunction_sptr spline =
@@ -269,8 +263,8 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     noise = powerSpec[imax] / guessSignalToNoiseRatio;
   }
 
-  g_log.debug() << "Maximum signal " << powerSpec[imax] << std::endl;
-  g_log.debug() << "Noise          " << noise << std::endl;
+  g_log.debug() << "Maximum signal " << powerSpec[imax] << '\n';
+  g_log.debug() << "Noise          " << noise << '\n';
 
   // storage for the Wiener filter, initialized with 0.0's
   std::vector<double> wf(n2);
@@ -307,7 +301,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
 
   // i0 should always be > 0 but in case something goes wrong make a check
   if (i0 > 0) {
-    g_log.debug() << "Noise start index " << i0 << std::endl;
+    g_log.debug() << "Noise start index " << i0 << '\n';
 
     // high frequency filter values: smooth decreasing function
     double ri0f = static_cast<double>(i0 + 1);
@@ -316,14 +310,13 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     double a1 = (xy - ri0f * xm * ym) / (xx - ri0f * xm * xm);
     double b1 = ym - a1 * xm;
 
-    g_log.debug() << "(a1,b1) = (" << a1 << ',' << b1 << ')' << std::endl;
+    g_log.debug() << "(a1,b1) = (" << a1 << ',' << b1 << ')' << '\n';
 
     const double dblev = -20.0;
     // cut-off index
     double ri1 = floor((dblev / 4 - b1) / a1);
     if (ri1 < static_cast<double>(i0)) {
-      g_log.warning() << "Failed to build Wiener filter: no smoothing."
-                      << std::endl;
+      g_log.warning() << "Failed to build Wiener filter: no smoothing.\n";
       ri1 = static_cast<double>(i0);
     }
     size_t i1 = static_cast<size_t>(ri1);
@@ -335,10 +328,9 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     }
     // wf[i] for i1 <= i < n2 are 0.0
 
-    g_log.debug() << "Cut-off index " << i1 << std::endl;
+    g_log.debug() << "Cut-off index " << i1 << '\n';
   } else {
-    g_log.warning() << "Power spectrum has an unexpected shape: no smoothing"
-                    << std::endl;
+    g_log.warning() << "Power spectrum has an unexpected shape: no smoothing\n";
     return copyInput(inputWS, wsIndex);
   }
 
@@ -378,7 +370,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     out->dataE(0).assign(E.begin(), E.end() - 1);
     out->dataY(0).resize(Y.size() - 1);
   } else {
-    out->setX(0, X);
+    out->mutableX(0) = X;
     out->dataE(0).assign(E.begin(), E.end());
   }
 

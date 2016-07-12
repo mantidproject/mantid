@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,no-init
+﻿#pylint: disable=invalid-name,no-init
 import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
@@ -173,6 +173,10 @@ class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(stresstesting.Mant
     """ It will repeat the test done at LOQCentreNoGrav but using
     loaded workspaces
     """
+    def __init__(self):
+        stresstesting.MantidStressTest.__init__(self)
+        self.tolerance = 1e-6
+
     def runTest(self):
         config["default.instrument"] = "LOQ"
         LOQ()
@@ -199,7 +203,7 @@ class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(stresstesting.Mant
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed_V2.nxs'
+        return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
 
 class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(stresstesting.MantidStressTest):
     """Before ticket #8461 test LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1 used

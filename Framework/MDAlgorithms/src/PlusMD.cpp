@@ -18,18 +18,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(PlusMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PlusMD::PlusMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PlusMD::~PlusMD() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Perform the adding.
  *
  * Will do m_out_event += m_operand_event
@@ -58,7 +46,7 @@ void PlusMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   MDBoxIterator<MDE, nd> it2(box2, 1000, true);
   do {
     MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(it2.getBox());
-    if (box) {
+    if (box && !box->getIsMasked()) {
       // Copy the events from WS2 and add them into WS1
       const std::vector<MDE> &events = box->getConstEvents();
       // Add events, with bounds checking
@@ -169,6 +157,9 @@ void PlusMD::execHistoScalar(
 void PlusMD::execEvent() {
   // Now we add m_operand_event into m_out_event.
   CALL_MDEVENT_FUNCTION(this->doPlus, m_out_event);
+
+  // Clear masking (box flags) from the output workspace
+  m_out_event->clearMDMasking();
 
   // Set to the output
   setProperty("OutputWorkspace", m_out_event);

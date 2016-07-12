@@ -49,14 +49,13 @@ private:
   std::vector<DataObjects::EventWorkspace_sptr> m_WsVec;
   /// Create Empty EventWorkspaces
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace() const;
-  /// private copy constructor. Not implemented.
-  EventWorkspaceCollection(const EventWorkspaceCollection &other);
-  /// Private copy assignment operator. Assignment not implemented.
-  EventWorkspaceCollection &operator=(const EventWorkspaceCollection &other);
 
 public:
   EventWorkspaceCollection();
-  virtual ~EventWorkspaceCollection();
+  EventWorkspaceCollection(const EventWorkspaceCollection &other) = delete;
+  EventWorkspaceCollection &
+  operator=(const EventWorkspaceCollection &other) = delete;
+  virtual ~EventWorkspaceCollection() = default;
 
   void setNPeriods(
       size_t nPeriods,
@@ -65,17 +64,17 @@ public:
   size_t nPeriods() const;
   DataObjects::EventWorkspace_sptr getSingleHeldWorkspace();
   API::Workspace_sptr combinedWorkspace();
-  const DataObjects::EventList &getEventList(const size_t workspace_index,
-                                             const size_t periodNumber) const;
-  DataObjects::EventList &getEventList(const size_t workspace_index,
-                                       const size_t periodNumber);
+  const DataObjects::EventList &getSpectrum(const size_t workspace_index,
+                                            const size_t periodNumber) const;
+  DataObjects::EventList &getSpectrum(const size_t workspace_index,
+                                      const size_t periodNumber);
   void setGeometryFlag(const int flag);
   void setThickness(const float flag);
   void setHeight(const float flag);
   void setWidth(const float flag);
   void setSpectrumNumbersFromUniqueSpectra(const std::set<int> uniqueSpectra);
   void setSpectrumNumberForAllPeriods(const size_t spectrumNumber,
-                                      const specid_t specid);
+                                      const specnum_t specid);
   void setDetectorIdsForAllPeriods(const size_t spectrumNumber,
                                    const detid_t id);
 
@@ -83,22 +82,19 @@ public:
   const API::Run &run() const;
   API::Run &mutableRun();
   API::Sample &mutableSample();
-  Mantid::API::ISpectrum *getSpectrum(const size_t index);
-  const Mantid::API::ISpectrum *getSpectrum(const size_t index) const;
+  DataObjects::EventList &getSpectrum(const size_t index);
+  const DataObjects::EventList &getSpectrum(const size_t index) const;
   Mantid::API::Axis *getAxis(const size_t &i) const;
   size_t getNumberHistograms() const;
-  const DataObjects::EventList &
-  getEventList(const size_t workspace_index) const;
 
-  DataObjects::EventList &getEventList(const std::size_t workspace_index);
-  void getSpectrumToWorkspaceIndexVector(std::vector<size_t> &out,
-                                         Mantid::specid_t &offset) const;
+  std::vector<size_t>
+  getSpectrumToWorkspaceIndexVector(Mantid::specnum_t &offset) const;
 
-  void getDetectorIDToWorkspaceIndexVector(std::vector<size_t> &out,
-                                           Mantid::specid_t &offset,
-                                           bool dothrow) const;
+  std::vector<size_t>
+  getDetectorIDToWorkspaceIndexVector(Mantid::specnum_t &offset,
+                                      bool dothrow) const;
   Kernel::DateAndTime getFirstPulseTime() const;
-  void setAllX(Kernel::cow_ptr<MantidVec> &x);
+  void setAllX(const HistogramData::BinEdges &x);
   size_t getNumberEvents() const;
   void resizeTo(const size_t size);
   void padSpectra(const std::vector<int32_t> &padding);
@@ -106,10 +102,9 @@ public:
   void
   setMonitorWorkspace(const boost::shared_ptr<API::MatrixWorkspace> &monitorWS);
   void updateSpectraUsing(const API::SpectrumDetectorMapping &map);
-  DataObjects::EventList *getEventListPtr(size_t i);
   void populateInstrumentParameters();
   void setTitle(std::string title);
-  void applyFilter(boost::function<void(API::MatrixWorkspace_sptr)> filter);
+  void applyFilter(boost::function<void(API::MatrixWorkspace_sptr)> func);
   virtual bool threadSafe() const;
 };
 

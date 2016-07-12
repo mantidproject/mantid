@@ -25,15 +25,15 @@ namespace {
  */
 class MockedInternetHelper : public InternetHelper {
 protected:
-  virtual int sendHTTPSRequest(const std::string &url,
-                               std::ostream &responseStream) {
+  int sendHTTPSRequest(const std::string &url,
+                       std::ostream &responseStream) override {
     UNUSED_ARG(url);
 
     responseStream << "HTTPS request succeeded";
     return 200;
   }
-  virtual int sendHTTPRequest(const std::string &url,
-                              std::ostream &responseStream) {
+  int sendHTTPRequest(const std::string &url,
+                      std::ostream &responseStream) override {
     UNUSED_ARG(url);
     responseStream << "HTTP request succeeded";
     return 200;

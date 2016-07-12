@@ -102,7 +102,7 @@ bool Quasi::validate() {
   const auto eMin = m_dblManager->value(m_properties["EMin"]);
   const auto eMax = m_dblManager->value(m_properties["EMax"]);
   if (eMin >= eMax)
-	  errors.append("EMin must be strictly less than EMax.\n");
+    errors.append("EMin must be strictly less than EMax.\n");
 
   // Create and show error messages
   errors.append(uiv.generateErrorMessage());
@@ -112,7 +112,7 @@ bool Quasi::validate() {
     return false;
   }
 
-  //Validate program
+  // Validate program
   QString program = m_uiForm.cbProgram->currentText();
   if (program == "Stretched Exponential") {
     QString resName = m_uiForm.dsResolution->getCurrentDataName();
@@ -127,22 +127,19 @@ bool Quasi::validate() {
 }
 
 /**
- * Collect the settings on the GUI and build a python
- * script that runs Quasi
+* Run the BayesQuasi algorithm
  */
 void Quasi::run() {
-  // Using 1/0 instead of True/False for compatibility with underlying Fortran
-  // code
-  // in some places
 
   auto saveDirectory = Mantid::Kernel::ConfigService::Instance().getString(
       "defaultsave.directory");
   if (saveDirectory.compare("") == 0) {
-    QString textMessage = "BayesQuasi requires a default save directory and "
-                          "one is not currently set."
-                          " If run, the algorithm will default to saving files "
-                          "to the current working directory."
-                          " Would you still like to run the algorithm?";
+    const char *textMessage =
+        "BayesQuasi requires a default save directory and "
+        "one is not currently set."
+        " If run, the algorithm will default to saving files "
+        "to the current working directory."
+        " Would you still like to run the algorithm?";
     int result = QMessageBox::question(NULL, tr("Save Directory"),
                                        tr(textMessage), QMessageBox::Yes,
                                        QMessageBox::No, QMessageBox::NoButton);
@@ -331,6 +328,8 @@ void Quasi::handleSampleInputReady(const QString &filename) {
                    range);
   setPlotPropertyRange(eRangeSelector, m_properties["EMin"],
                        m_properties["EMax"], range);
+  eRangeSelector->setMinimum(range.first);
+  eRangeSelector->setMaximum(range.second);
 }
 
 /**
@@ -404,7 +403,7 @@ void Quasi::handleProgramChange(int index) {
 /**
  * Handles setting a new preview spectrum on the preview plot.
  *
- * @param value Spectrum index
+ * @param value workspace index
  */
 void Quasi::previewSpecChanged(int value) {
   m_previewSpec = value;

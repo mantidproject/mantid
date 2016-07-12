@@ -29,7 +29,7 @@ ProgressText::ProgressText(double start, double end, int nsteps, bool newLines)
  */
 ProgressText::~ProgressText() {
   if (!m_newLines)
-    std::cout << std::endl;
+    std::cout << '\n';
 }
 
 //----------------------------------------------------------------------------------------------
@@ -45,7 +45,7 @@ void ProgressText::doReport(const std::string &msg) {
   // Print out
   int pct = static_cast<int>(p * 100.0);
 
-  coutMutex.lock();
+  std::lock_guard<std::mutex> lock(coutMutex);
 
   // Return at the start of the line if not doing new lines
   if (!m_newLines)
@@ -63,14 +63,12 @@ void ProgressText::doReport(const std::string &msg) {
     // Update the console
     std::cout.flush();
   } else
-    std::cout << std::endl;
+    std::cout << '\n';
 
   m_lastMsgLength = msg.size();
 
   // Save where we last reported to avoid notifying too often.
   this->m_last_reported = m_i;
-
-  coutMutex.unlock();
 }
 
 } // namespace Mantid

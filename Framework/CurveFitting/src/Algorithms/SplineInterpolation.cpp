@@ -1,6 +1,8 @@
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidCurveFitting/Algorithms/SplineInterpolation.h"
 
@@ -22,11 +24,6 @@ SplineInterpolation::SplineInterpolation()
     : m_cspline(boost::make_shared<CubicSpline>()) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SplineInterpolation::~SplineInterpolation() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SplineInterpolation::name() const {
   return "SplineInterpolation";
@@ -44,21 +41,23 @@ const std::string SplineInterpolation::category() const {
 /** Initialize the algorithm's properties.
  */
 void SplineInterpolation::init() {
-  declareProperty(
-      new WorkspaceProperty<>("WorkspaceToMatch", "", Direction::Input),
-      "The workspace which defines the points of the spline.");
+  declareProperty(make_unique<WorkspaceProperty<>>("WorkspaceToMatch", "",
+                                                   Direction::Input),
+                  "The workspace which defines the points of the spline.");
 
   declareProperty(
-      new WorkspaceProperty<>("WorkspaceToInterpolate", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("WorkspaceToInterpolate", "",
+                                       Direction::Input),
       "The workspace on which to perform the interpolation algorithm.");
 
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                       Direction::Output),
       "The workspace containing the calculated points and derivatives");
 
-  declareProperty(new WorkspaceProperty<WorkspaceGroup>("OutputWorkspaceDeriv",
-                                                        "", Direction::Output,
-                                                        PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "OutputWorkspaceDeriv", "", Direction::Output,
+                      PropertyMode::Optional),
                   "The workspace containing the calculated derivatives");
 
   auto validator = boost::make_shared<BoundedValidator<int>>(0, 2);
@@ -86,7 +85,7 @@ void SplineInterpolation::exec() {
   if (mws->getNumberHistograms() > 1) {
     g_log.warning()
         << "Algorithm can only interpolate against a single data set. "
-           "Only the first data set will be used." << std::endl;
+           "Only the first data set will be used.\n";
   }
 
   // convert data to binned data as required
@@ -106,7 +105,7 @@ void SplineInterpolation::exec() {
 
     // compare the data set against our spline
     calculateSpline(mwspt, outputWorkspace, i);
-    outputWorkspace->setX(i, mws->readX(0));
+    outputWorkspace->setX(i, mws->refX(0));
 
     // check if we want derivatives
     if (order > 0) {
@@ -116,7 +115,7 @@ void SplineInterpolation::exec() {
       // calculate the derivatives for each order chosen
       for (int j = 0; j < order; ++j) {
         vAxis->setValue(j, j + 1);
-        derivs[i]->setX(j, mws->readX(0));
+        derivs[i]->setX(j, mws->refX(0));
         calculateDerivatives(mwspt, derivs[i], j + 1);
       }
 

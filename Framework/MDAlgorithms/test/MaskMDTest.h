@@ -60,28 +60,6 @@ public:
   static MaskMDTest *createSuite() { return new MaskMDTest(); }
   static void destroySuite(MaskMDTest *suite) { delete suite; }
 
-  void test_split_by_commas() {
-    std::string test_string = "a, b,c ,d,e ";
-    std::vector<std::string> split_test_string = splitByCommas(test_string);
-
-    // String should be split on commas and whitespace trimmed off to result in:
-    TS_ASSERT_EQUALS(split_test_string[0], "a");
-    TS_ASSERT_EQUALS(split_test_string[1], "b");
-    TS_ASSERT_EQUALS(split_test_string[2], "c");
-    TS_ASSERT_EQUALS(split_test_string[3], "d");
-    TS_ASSERT_EQUALS(split_test_string[4], "e");
-  }
-
-  void test_find_names_in_brackets() {
-    std::string test_string = "[a,b,c], [d,e], f, g";
-    std::vector<std::string> names_in_brackets =
-        findNamesInBrackets(test_string);
-
-    TS_ASSERT_EQUALS(names_in_brackets[0], "[a,b,c]");
-    TS_ASSERT_EQUALS(names_in_brackets[1], "[d,e]");
-    TS_ASSERT_EQUALS(names_in_brackets.size(), 2);
-  }
-
   void test_parse_dimension_names() {
     // These are default dimension names from CreateMD
     std::string test_string = "[H,0,0],[0,K,0],[0,0,L],DeltaE";
@@ -91,16 +69,6 @@ public:
     TS_ASSERT_EQUALS(names_result[1], "[0,K,0]");
     TS_ASSERT_EQUALS(names_result[2], "[0,0,L]");
     TS_ASSERT_EQUALS(names_result[3], "DeltaE");
-  }
-
-  void test_remove_bracketed_names() {
-    std::string test_string = "[a,b] , c, [d,e], f";
-    std::vector<std::string> names_result = removeBracketedNames(test_string);
-
-    TS_ASSERT_EQUALS(names_result[0], "[]");
-    TS_ASSERT_EQUALS(names_result[1], "c");
-    TS_ASSERT_EQUALS(names_result[2], "[]");
-    TS_ASSERT_EQUALS(names_result[3], "f");
   }
 
   void test_parse_dimension_names_retains_order() {

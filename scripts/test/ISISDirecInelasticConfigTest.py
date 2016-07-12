@@ -1,9 +1,11 @@
 ﻿import os
+import sys
 import unittest
 import shutil
 import datetime
 import time
 import platform
+#sys.path.append(r'c:\Mantid\_builds\br_master\bin\Release')
 from mantid import config
 from Direct.ISISDirecInelasticConfig import UserProperties,MantidConfigDirectInelastic
 
@@ -69,21 +71,31 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
     def makeFakeSourceReductionFile(self,mcf,contents=None):
 
-        instr_name = mcf._user.instrument
+        all_instr_names = mcf._user.get_all_instruments()
+        all_files = []
+        for instr in all_instr_names:
+            instr_name = instr
 
-        file_path = os.path.join(self.UserScriptRepoDir,'direct_inelastic',instr_name.upper())
-        if not os.path.exists(file_path):
-            os.makedirs(file_path)
+            file_path = os.path.join(self.UserScriptRepoDir,'direct_inelastic',instr_name.upper())
+            if not os.path.exists(file_path):
+                os.makedirs(file_path)
         
-        file_name = mcf._sample_reduction_file(instr_name)
-        full_file = os.path.join(file_path,file_name)
-        if os.path.isfile(full_file):
-            os.remove(full_file)
-        fh=open(full_file,'w')
-        fh.write('#Test reduction file\n')
-        fh.write('Contents={0}'.format(contents))
-        fh.close()
-        return full_file
+            file_name = mcf._sample_reduction_file(instr_name)
+            all_files.append(file_name)
+            full_file = os.path.join(file_path,file_name)
+            if os.path.isfile(full_file):
+                os.remove(full_file)
+            fh=open(full_file,'w')
+            fh.write('#Test reduction file\n')
+            if contents is None:
+                fh.write('Contents=Fake_reduction_file_for_{0}'.format(instr_name))
+            else:
+                fh.write('Contents={0}'.format(contents))
+            fh.close()
+        if len(all_files) > 1:
+            return all_files
+        else:
+            return full_file
 
 
     def _tear_down(self):
@@ -240,7 +252,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
         mcf.init_user(user)
 
-        fake_source=self.makeFakeSourceReductionFile(mcf)
+        self.makeFakeSourceReductionFile(mcf)
         self.assertEqual(len(mcf._dynamic_configuration),6)
         self.assertEqual(mcf._dynamic_configuration[1],'default.instrument=MERLIN')
 
@@ -415,11 +427,117 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         rb_folder1 = user3.rb_dir
         self.assertEqual(rb_folder,rb_folder1)
 
+    def test_copy_multiplpe_ucf(self):
+        # script verifies the presence of a folder, not its contents.
+        # for the script to work, let's run it on default save directory
+        MantidDir = os.path.split(os.path.realpath(__file__))[0]
+        HomeRootDir = self.get_save_dir()
+        mcf = MantidConfigDirectInelastic(MantidDir,HomeRootDir,self.UserScriptRepoDir,self.MapMaskDir)
+
+        user = UserProperties(self.userID)
+        user.set_user_properties(self.instrument,self.rbdir,self.cycle,self.start_date)
+
+
+        rbnum2='RB1999000'
+
+        targetDir = self.get_save_dir()
+        rbdir2 = os.path.join(targetDir,self.userID,rbnum2)
+        if not os.path.exists(rbdir2):
+            os.makedirs(rbdir2)
+        user.set_user_properties('MARI',rbdir2,'CYCLE20001','20000124')
+
+        rbnum3='RB1204000'
+        rbdir3 = os.path.join(targetDir,self.userID,rbnum3)
+        if not os.path.exists(rbdir3):
+            os.makedirs(rbdir3)
+        user.set_user_properties('MAPS',rbdir3,'CYCLE20044','20041207')
+
+        # clear up the previous
+        if os.path.exists(os.path.join(self.userRootDir,'.mantid')):
+            shutil.rmtree(os.path.join(self.userRootDir,'.mantid'))
+
+
+        mcf.init_user(user)
+        # Generate fake test files to copy to test users
+        self.makeFakeSourceReductionFile(mcf)
+
+        mcf.generate_config()
+
+
+        #
+        # Check sample reduction files
+        #
+        # Sample file for MERLIN:
+        rbdir1 = self.rbdir
+        mer_file = os.path.join(rbdir1,'MERLINReduction_2015_1.py')
+        self.assertTrue(os.path.isfile(mer_file))
+        mar_file = os.path.join(rbdir2,'MARIReduction_2015_1.py')
+        self.assertTrue(os.path.isfile(mar_file))
+        maps_file = os.path.join(rbdir3,'MAPSReduction_2015_1.py')
+        self.assertTrue(os.path.isfile(maps_file))
+
+        #--------------------------------------------------------------------
+        # clean up
+        if os.path.exists(os.path.join(self.userRootDir,'.mantid')):
+            shutil.rmtree(os.path.join(self.userRootDir,'.mantid'),ignore_errors=True)
+        if os.path.exists(rbdir2):
+            shutil.rmtree(rbdir2,ignore_errors=True)
+        if os.path.exists(rbdir3):
+            shutil.rmtree(rbdir3,ignore_errors=True)
+        #
+
+    def test_copy_multiplpe_instr(self):
+        # script verifies the presence of a folder, not its contents.
+        # for the script to work, let's run it on default save directory
+        MantidDir = os.path.split(os.path.realpath(__file__))[0]
+        HomeRootDir = self.get_save_dir()
+        mcf = MantidConfigDirectInelastic(MantidDir,HomeRootDir,self.UserScriptRepoDir,self.MapMaskDir)
+
+        user = UserProperties(self.userID)
+        user.set_user_properties(self.instrument,self.rbdir,self.cycle,self.start_date)
+
+
+        rbnum2='RB1999000'
+
+        targetDir = self.get_save_dir()
+        rbdir2 = os.path.join(targetDir,self.userID,rbnum2)
+        if not os.path.exists(rbdir2):
+            os.makedirs(rbdir2)
+        user.set_user_properties('MERLIN',rbdir2,'CYCLE20151','20150508')
+
+    
+        # clear up the previous
+        if os.path.exists(os.path.join(self.userRootDir,'.mantid')):
+            shutil.rmtree(os.path.join(self.userRootDir,'.mantid'))
+
+
+        mcf.init_user(user)
+        # Generate fake test files to copy to test users
+        self.makeFakeSourceReductionFile(mcf)
+
+        mcf.generate_config()
+        #
+        # Check sample reduction files
+        #
+        # Sample file for MERLIN:
+        rbdir1 = self.rbdir
+        mer_file = os.path.join(rbdir1,'MERLINReduction_2015_1.py')
+        self.assertTrue(os.path.isfile(mer_file))
+        mar_file = os.path.join(rbdir2,'MERLINReduction_2015_1.py')
+        self.assertTrue(os.path.isfile(mar_file))
+
+        #--------------------------------------------------------------------
+        # clean up
+        if os.path.exists(os.path.join(self.userRootDir,'.mantid')):
+            shutil.rmtree(os.path.join(self.userRootDir,'.mantid'),ignore_errors=True)
+        if os.path.exists(rbdir2):
+            shutil.rmtree(rbdir2,ignore_errors=True)
+        #
 
 
 
 if __name__=="__main__":
-   #test = ISISDirectInelasticConfigTest('test_UserProperties')
+   #test = ISISDirectInelasticConfigTest('test_copy_multiplpe_ucf')
    #test._set_up()
    #test.run()
    #test._tear_down()

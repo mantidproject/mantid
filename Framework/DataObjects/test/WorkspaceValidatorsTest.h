@@ -2,6 +2,7 @@
 #define WORKSPACEVALIDATORSTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -52,10 +53,10 @@ public:
     ws2 = MatrixWorkspace_sptr(new Mantid::DataObjects::Workspace2D);
     ws2->initialize(2, 10, 10);
     ws2->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
-    ws2->isDistribution(true);
+    ws2->setDistribution(true);
   }
 
-  ~WorkspaceValidatorsTest() {
+  ~WorkspaceValidatorsTest() override {
     delete wavUnitVal;
     delete anyUnitVal;
     delete histVal;

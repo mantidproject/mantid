@@ -1,4 +1,8 @@
+#include <cmath>
+#include <cstdio>
+
 #include "MantidDataHandling/LoadBBY.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -9,9 +13,11 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
+#include <boost/math/special_functions/round.hpp>
+
+#include <Poco/AutoPtr.h>
 #include <Poco/TemporaryFile.h>
-#include <math.h>
-#include <stdio.h>
+#include <Poco/Util/PropertyFileConfiguration.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -31,12 +37,11 @@ static const size_t Progress_Total =
 static char const *const FilenameStr = "Filename";
 static char const *const MaskStr = "Mask";
 
-static char const *const PeriodMasterStr = "PeriodMaster";
-static char const *const PeriodSlaveStr = "PeriodSlave";
-static char const *const PhaseSlaveStr = "PhaseSlave";
-
 static char const *const FilterByTofMinStr = "FilterByTofMin";
 static char const *const FilterByTofMaxStr = "FilterByTofMax";
+
+static char const *const FilterByTimeStartStr = "FilterByTimeStart";
+static char const *const FilterByTimeStopStr = "FilterByTimeStop";
 
 using ANSTO::EventVector_pt;
 
@@ -52,29 +57,6 @@ void AddSinglePointTimeSeriesProperty(API::LogManager &logManager,
   // add to log manager
   logManager.addProperty(p);
 }
-
-class BbyDetectorBankFactory {
-private:
-  // fields
-  const Geometry::Instrument_sptr m_instrument;
-  const Geometry::Object_sptr m_pixelShape;
-  const size_t m_xPixelCount;
-  const size_t m_yPixelCount;
-  const double m_pixelWidth;
-  const double m_pixelHeight;
-  const Kernel::V3D m_center;
-
-public:
-  // construction
-  BbyDetectorBankFactory(Geometry::Instrument_sptr instrument,
-                         Geometry::Object_sptr pixelShape, size_t xPixelCount,
-                         size_t yPixelCount, double pixelWidth,
-                         double pixelHeight, const Kernel::V3D &center);
-
-  // methods
-  void createAndAssign(size_t startIndex, const Kernel::V3D &pos,
-                       const Kernel::Quat &rot) const;
-};
 
 /**
  * Return the confidence value that this algorithm can load the file
@@ -93,12 +75,14 @@ int LoadBBY::confidence(Kernel::FileDescriptor &descriptor) const {
   size_t hdfFiles = 0;
   size_t binFiles = 0;
   const std::vector<std::string> &subFiles = file.files();
-  for (auto itr = subFiles.begin(); itr != subFiles.end(); ++itr) {
-    auto len = itr->length();
-    if ((len > 4) && (itr->find_first_of("\\/", 0, 2) == std::string::npos)) {
-      if ((itr->rfind(".hdf") == len - 4) && (itr->compare(0, 3, "BBY") == 0))
+  for (const auto &subFile : subFiles) {
+    auto len = subFile.length();
+    if ((len > 4) &&
+        (subFile.find_first_of("\\/", 0, 2) == std::string::npos)) {
+      if ((subFile.rfind(".hdf") == len - 4) &&
+          (subFile.compare(0, 3, "BBY") == 0))
         hdfFiles++;
-      else if (itr->rfind(".bin") == len - 4)
+      else if (subFile.rfind(".bin") == len - 4)
         binFiles++;
     }
   }
@@ -117,24 +101,25 @@ void LoadBBY::init() {
   // Declare the Filename algorithm property. Mandatory. Sets the path to the
   // file to load.
   exts.clear();
-  exts.push_back(".tar");
-  declareProperty(
-      new API::FileProperty(FilenameStr, "", API::FileProperty::Load, exts),
-      "The input filename of the stored data");
+  exts.emplace_back(".tar");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      FilenameStr, "", API::FileProperty::Load, exts),
+                  "The input filename of the stored data");
 
   // mask
   exts.clear();
-  exts.push_back(".xml");
-  declareProperty(
-      new API::FileProperty(MaskStr, "", API::FileProperty::OptionalLoad, exts),
-      "The input filename of the mask data");
+  exts.emplace_back(".xml");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      MaskStr, "", API::FileProperty::OptionalLoad, exts),
+                  "The input filename of the mask data");
 
   // OutputWorkspace
-  declareProperty(new API::WorkspaceProperty<API::IEventWorkspace>(
-      "OutputWorkspace", "", Kernel::Direction::Output));
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::IEventWorkspace>>(
+          "OutputWorkspace", "", Kernel::Direction::Output));
 
   // FilterByTofMin
-  declareProperty(new Kernel::PropertyWithValue<double>(
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
                       FilterByTofMinStr, 0, Kernel::Direction::Input),
                   "Optional: To exclude events that do not fall within a range "
                   "of times-of-flight. "
@@ -142,7 +127,7 @@ void LoadBBY::init() {
                   "blank to load all events.");
 
   // FilterByTofMax
-  declareProperty(new Kernel::PropertyWithValue<double>(
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<double>>(
                       FilterByTofMaxStr, EMPTY_DBL(), Kernel::Direction::Input),
                   "Optional: To exclude events that do not fall within a range "
                   "of times-of-flight. "
@@ -151,39 +136,23 @@ void LoadBBY::init() {
 
   // FilterByTimeStart
   declareProperty(
-      new Kernel::PropertyWithValue<double>("FilterByTimeStart", EMPTY_DBL(),
-                                            Kernel::Direction::Input),
+      Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+          FilterByTimeStartStr, 0.0, Kernel::Direction::Input),
       "Optional: To only include events after the provided start time, in "
       "seconds (relative to the start of the run).");
 
   // FilterByTimeStop
   declareProperty(
-      new Kernel::PropertyWithValue<double>("FilterByTimeStop", EMPTY_DBL(),
-                                            Kernel::Direction::Input),
+      Kernel::make_unique<Kernel::PropertyWithValue<double>>(
+          FilterByTimeStopStr, EMPTY_DBL(), Kernel::Direction::Input),
       "Optional: To only include events before the provided stop time, in "
       "seconds (relative to the start of the run).");
-
-  // period and phase
-  declareProperty(new Kernel::PropertyWithValue<double>(
-                      PeriodMasterStr, EMPTY_DBL(), Kernel::Direction::Input),
-                  "Optional");
-  declareProperty(new Kernel::PropertyWithValue<double>(
-                      PeriodSlaveStr, EMPTY_DBL(), Kernel::Direction::Input),
-                  "Optional");
-  declareProperty(new Kernel::PropertyWithValue<double>(
-                      PhaseSlaveStr, EMPTY_DBL(), Kernel::Direction::Input),
-                  "Optional");
 
   std::string grpOptional = "Filters";
   setPropertyGroup(FilterByTofMinStr, grpOptional);
   setPropertyGroup(FilterByTofMaxStr, grpOptional);
-  setPropertyGroup("FilterByTimeStart", grpOptional);
-  setPropertyGroup("FilterByTimeStop", grpOptional);
-
-  std::string grpPhaseCorrection = "Phase Correction";
-  setPropertyGroup(PeriodMasterStr, grpPhaseCorrection);
-  setPropertyGroup(PeriodSlaveStr, grpPhaseCorrection);
-  setPropertyGroup(PhaseSlaveStr, grpPhaseCorrection);
+  setPropertyGroup(FilterByTimeStartStr, grpOptional);
+  setPropertyGroup(FilterByTimeStopStr, grpOptional);
 }
 /**
  * Execute the algorithm.
@@ -206,8 +175,21 @@ void LoadBBY::exec() {
   double tofMinBoundary = getProperty(FilterByTofMinStr);
   double tofMaxBoundary = getProperty(FilterByTofMaxStr);
 
+  double timeMinBoundary = getProperty(FilterByTimeStartStr);
+  double timeMaxBoundary = getProperty(FilterByTimeStopStr);
+
+  if (isEmpty(tofMaxBoundary))
+    tofMaxBoundary = std::numeric_limits<double>::infinity();
+  if (isEmpty(timeMaxBoundary))
+    timeMaxBoundary = std::numeric_limits<double>::infinity();
+
   API::Progress prog(this, 0.0, 1.0, Progress_Total);
   prog.doReport("creating instrument");
+
+  // create instrument
+  InstrumentInfo instrumentInfo;
+
+  createInstrument(tarFile, /* ref */ instrumentInfo);
 
   // create workspace
   DataObjects::EventWorkspace_sptr eventWS =
@@ -218,14 +200,19 @@ void LoadBBY::exec() {
                       1);
 
   // set the units
-  eventWS->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
+  if (instrumentInfo.is_tof)
+    eventWS->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
+  else
+    eventWS->getAxis(0)->unit() =
+        Kernel::UnitFactory::Instance().create("Wavelength");
+
   eventWS->setYUnit("Counts");
 
   // set title
   const std::vector<std::string> &subFiles = tarFile.files();
-  for (auto itr = subFiles.begin(); itr != subFiles.end(); ++itr)
-    if (itr->compare(0, 3, "BBY") == 0) {
-      std::string title = *itr;
+  for (const auto &subFile : subFiles)
+    if (subFile.compare(0, 3, "BBY") == 0) {
+      std::string title = subFile;
 
       if (title.rfind(".hdf") == title.length() - 4)
         title.resize(title.length() - 4);
@@ -237,58 +224,25 @@ void LoadBBY::exec() {
       break;
     }
 
-  // create instrument
-  InstrumentInfo instrumentInfo;
-
-  // Geometry::Instrument_sptr instrument =
-  createInstrument(tarFile, /* ref */ instrumentInfo);
-  // eventWS->setInstrument(instrument);
-
   // load events
   size_t numberHistograms = eventWS->getNumberHistograms();
 
-  std::vector<EventVector_pt> eventVectors(numberHistograms, NULL);
+  std::vector<EventVector_pt> eventVectors(numberHistograms, nullptr);
   std::vector<size_t> eventCounts(numberHistograms, 0);
 
   // phase correction
-  Kernel::Property *periodMasterProperty =
-      getPointerToProperty(PeriodMasterStr);
-  Kernel::Property *periodSlaveProperty = getPointerToProperty(PeriodSlaveStr);
-  Kernel::Property *phaseSlaveProperty = getPointerToProperty(PhaseSlaveStr);
 
-  double periodMaster;
-  double periodSlave;
-  double phaseSlave;
-
-  if (periodMasterProperty->isDefault() || periodSlaveProperty->isDefault() ||
-      phaseSlaveProperty->isDefault()) {
-
-    if (!periodMasterProperty->isDefault() ||
-        !periodSlaveProperty->isDefault() || !phaseSlaveProperty->isDefault()) {
-      throw std::invalid_argument("Please specify PeriodMaster, PeriodSlave "
-                                  "and PhaseSlave or none of them.");
-    }
-
-    // if values have not been specified in loader then use values from hdf file
-    periodMaster = instrumentInfo.period_master;
-    periodSlave = instrumentInfo.period_slave;
-    phaseSlave = instrumentInfo.phase_slave;
-  } else {
-    periodMaster = getProperty(PeriodMasterStr);
-    periodSlave = getProperty(PeriodSlaveStr);
-    phaseSlave = getProperty(PhaseSlaveStr);
-
-    if ((periodMaster < 0.0) || (periodSlave < 0.0))
-      throw std::invalid_argument(
-          "Please specify a positive value for PeriodMaster and PeriodSlave.");
-  }
+  double periodMaster = instrumentInfo.period_master;
+  double periodSlave = instrumentInfo.period_slave;
+  double phaseSlave = instrumentInfo.phase_slave;
 
   double period = periodSlave;
   double shift = -1.0 / 6.0 * periodMaster - periodSlave * phaseSlave / 360.0;
 
   // count total events per pixel to reserve necessary memory
-  ANSTO::EventCounter eventCounter(roi, HISTO_BINS_Y, period, shift,
-                                   tofMinBoundary, tofMaxBoundary, eventCounts);
+  ANSTO::EventCounter eventCounter(
+      roi, HISTO_BINS_Y, period, shift, tofMinBoundary, tofMaxBoundary,
+      timeMinBoundary, timeMaxBoundary, eventCounts);
 
   loadEvents(prog, "loading neutron counts", tarFile, eventCounter);
 
@@ -297,13 +251,13 @@ void LoadBBY::exec() {
                                      numberHistograms, Progress_ReserveMemory);
 
   for (size_t i = 0; i != numberHistograms; ++i) {
-    DataObjects::EventList &eventList = eventWS->getEventList(i);
+    DataObjects::EventList &eventList = eventWS->getSpectrum(i);
 
     eventList.setSortOrder(DataObjects::PULSETIME_SORT);
     eventList.reserve(eventCounts[i]);
 
-    eventList.setDetectorID(Mantid::detid_t(i));
-    eventList.setSpectrumNo(Mantid::detid_t(i));
+    eventList.setDetectorID(static_cast<detid_t>(i));
+    eventList.setSpectrumNo(static_cast<detid_t>(i));
 
     DataObjects::getEventsFrom(eventList, eventVectors[i]);
 
@@ -311,20 +265,32 @@ void LoadBBY::exec() {
   }
   progTracker.complete();
 
-  ANSTO::EventAssigner eventAssigner(roi, HISTO_BINS_Y, period, shift,
-                                     tofMinBoundary, tofMaxBoundary,
-                                     eventVectors);
+  if (instrumentInfo.is_tof) {
+    ANSTO::EventAssigner eventAssigner(
+        roi, HISTO_BINS_Y, period, shift, tofMinBoundary, tofMaxBoundary,
+        timeMinBoundary, timeMaxBoundary, eventVectors);
 
-  loadEvents(prog, "loading neutron events", tarFile, eventAssigner);
+    loadEvents(prog, "loading neutron events (TOF)", tarFile, eventAssigner);
+  } else {
+    ANSTO::EventAssignerFixedWavelength eventAssigner(
+        roi, HISTO_BINS_Y, instrumentInfo.wavelength, period, shift,
+        tofMinBoundary, tofMaxBoundary, timeMinBoundary, timeMaxBoundary,
+        eventVectors);
 
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &xRef = axis.access();
-  xRef.resize(2, 0.0);
-  xRef[0] = std::max(
-      0.0,
-      floor(eventCounter.tofMin())); // just to make sure the bins hold it all
-  xRef[1] = eventCounter.tofMax() + 1;
-  eventWS->setAllX(axis);
+    loadEvents(prog, "loading neutron events (Wavelength)", tarFile,
+               eventAssigner);
+  }
+
+  if (instrumentInfo.is_tof) {
+    // just to make sure the bins hold it all
+    eventWS->setAllX(
+        HistogramData::BinEdges{std::max(0.0, floor(eventCounter.tofMin())),
+                                eventCounter.tofMax() + 1});
+  } else {
+    // +/-10%
+    eventWS->setAllX(HistogramData::BinEdges{instrumentInfo.wavelength * 0.9,
+                                             instrumentInfo.wavelength * 1.1});
+  }
 
   // count total number of masked bins
   size_t maskedBins = 0;
@@ -350,32 +316,34 @@ void LoadBBY::exec() {
   // set log values
   API::LogManager &logManager = eventWS->mutableRun();
 
+  int frame_count = static_cast<int>(eventCounter.numFrames());
+
   logManager.addProperty("filename", filename);
   logManager.addProperty("att_pos", static_cast<int>(instrumentInfo.att_pos));
-  logManager.addProperty("frame_count",
-                         static_cast<int>(eventCounter.numFrames()));
+  logManager.addProperty("frame_count", frame_count);
   logManager.addProperty("period", period);
 
   // currently beam monitor counts are not available, instead number of frames
   // times period is used
   logManager.addProperty(
-      "bm_counts", static_cast<double>(eventCounter.numFrames()) * period /
+      "bm_counts", static_cast<double>(frame_count) * period /
                        1.0e6); // static_cast<double>(instrumentInfo.bm_counts)
 
-  // currently
-  Kernel::time_duration duration =
-      boost::posix_time::microseconds(static_cast<boost::int64_t>(
-          static_cast<double>(eventCounter.numFrames()) * period));
+  Kernel::time_duration duration = boost::posix_time::microseconds(
+      static_cast<boost::int64_t>(static_cast<double>(frame_count) * period));
 
   Kernel::DateAndTime start_time("2000-01-01T00:00:00");
   Kernel::DateAndTime end_time(start_time + duration);
 
   logManager.addProperty("start_time", start_time.toISO8601String());
   logManager.addProperty("end_time", end_time.toISO8601String());
+  logManager.addProperty("is_tof", instrumentInfo.is_tof);
 
   std::string time_str = start_time.toISO8601String();
   AddSinglePointTimeSeriesProperty(logManager, time_str, "L1_chopper_value",
                                    instrumentInfo.L1_chopper_value);
+  AddSinglePointTimeSeriesProperty(logManager, time_str, "L1",
+                                   instrumentInfo.L1_source_value);
   AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_det_value",
                                    instrumentInfo.L2_det_value);
   AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_curtainl_value",
@@ -386,8 +354,6 @@ void LoadBBY::exec() {
                                    instrumentInfo.L2_curtainu_value);
   AddSinglePointTimeSeriesProperty(logManager, time_str, "L2_curtaind_value",
                                    instrumentInfo.L2_curtaind_value);
-  AddSinglePointTimeSeriesProperty(logManager, time_str, "D_det_value",
-                                   instrumentInfo.D_det_value);
   AddSinglePointTimeSeriesProperty(logManager, time_str, "D_curtainl_value",
                                    instrumentInfo.D_curtainl_value);
   AddSinglePointTimeSeriesProperty(logManager, time_str, "D_curtainr_value",
@@ -462,17 +428,22 @@ std::vector<bool> LoadBBY::createRoiVector(const std::string &maskfile) {
 }
 
 // instrument creation
-Geometry::Instrument_sptr
-LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
-                          InstrumentInfo &instrumentInfo) {
+void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
+                               InstrumentInfo &instrumentInfo) {
+
+  const double toMeters = 1.0 / 1000;
+
   instrumentInfo.bm_counts = 0;
   instrumentInfo.att_pos = 0;
+  instrumentInfo.is_tof = true;
+  instrumentInfo.wavelength = 0.0;
 
   instrumentInfo.period_master = 0.0;
-  instrumentInfo.period_slave = 0.0;
+  instrumentInfo.period_slave = (1.0 / 50.0) * 1.0e6;
   instrumentInfo.phase_slave = 0.0;
 
   instrumentInfo.L1_chopper_value = 18.47258984375;
+  instrumentInfo.L1_source_value = 16.671;
   instrumentInfo.L2_det_value = 33.15616015625;
 
   instrumentInfo.L2_curtainl_value = 23.28446093750;
@@ -480,24 +451,19 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
   instrumentInfo.L2_curtainu_value = 24.28616015625;
   instrumentInfo.L2_curtaind_value = 24.28235937500;
 
-  instrumentInfo.D_det_value = (8.4 + 2.0) / (2 * 1000);
-
   instrumentInfo.D_curtainl_value = 0.3816;
   instrumentInfo.D_curtainr_value = 0.4024;
   instrumentInfo.D_curtainu_value = 0.3947;
   instrumentInfo.D_curtaind_value = 0.3978;
 
-  // extract hdf file
-  int64_t fileSize = 0;
+  // extract log and hdf file
   const std::vector<std::string> &files = tarFile.files();
-  for (auto itr = files.begin(); itr != files.end(); ++itr)
-    if (itr->rfind(".hdf") == itr->length() - 4) {
-      tarFile.select(itr->c_str());
-      fileSize = tarFile.selected_size();
-      break;
-    }
-
-  if (fileSize != 0) {
+  auto file_it =
+      std::find_if(files.cbegin(), files.cend(), [](const std::string &file) {
+        return file.rfind(".hdf") == file.length() - 4;
+      });
+  if (file_it != files.end()) {
+    tarFile.select(file_it->c_str());
     // extract hdf file into tmp file
     Poco::TemporaryFile hdfFile;
     boost::shared_ptr<FILE> handle(fopen(hdfFile.path().c_str(), "wb"), fclose);
@@ -512,19 +478,26 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
       NeXus::NXRoot root(hdfFile.path());
       NeXus::NXEntry entry = root.openFirstEntry();
 
-      float tmp_float;
+      float tmp_float = 0.0f;
       int32_t tmp_int32 = 0;
-      const double toMeters = 1.0 / 1000;
+      std::string tmp_str;
 
       if (loadNXDataSet(entry, "monitor/bm1_counts", tmp_int32))
         instrumentInfo.bm_counts = tmp_int32;
       if (loadNXDataSet(entry, "instrument/att_pos", tmp_float))
         instrumentInfo.att_pos =
-            static_cast<int32_t>(tmp_float + 0.5f); // [1.0, 2.0, ..., 5.0]
+            boost::math::iround(tmp_float); // [1.0, 2.0, ..., 5.0]
 
-      if (loadNXDataSet(entry, "instrument/master_chopper_freq", tmp_float))
+      if (loadNXString(entry, "instrument/detector/frame_source", tmp_str))
+        instrumentInfo.is_tof = tmp_str == "EXTERNAL";
+      if (loadNXDataSet(entry, "instrument/nvs067/lambda", tmp_float))
+        instrumentInfo.wavelength = tmp_float;
+
+      if (loadNXDataSet(entry, "instrument/master_chopper_freq", tmp_float) &&
+          (tmp_float > 0.0f))
         instrumentInfo.period_master = 1.0 / tmp_float * 1.0e6;
-      if (loadNXDataSet(entry, "instrument/t0_chopper_freq", tmp_float))
+      if (loadNXDataSet(entry, "instrument/t0_chopper_freq", tmp_float) &&
+          (tmp_float > 0.0f))
         instrumentInfo.period_slave = 1.0 / tmp_float * 1.0e6;
       if (loadNXDataSet(entry, "instrument/t0_chopper_phase", tmp_float))
         instrumentInfo.phase_slave = tmp_float < 999.0 ? tmp_float : 0.0;
@@ -534,8 +507,8 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
       if (loadNXDataSet(entry, "instrument/Ltof_det", tmp_float))
         instrumentInfo.L1_chopper_value =
             tmp_float * toMeters - instrumentInfo.L2_det_value;
-      // if (loadNXDataSet(entry, "instrument/L1", tmp_float))
-      //  instrumentInfo.L1_source_value = tmp_float * toMeters;
+      if (loadNXDataSet(entry, "instrument/L1", tmp_float))
+        instrumentInfo.L1_source_value = tmp_float * toMeters;
 
       if (loadNXDataSet(entry, "instrument/L2_curtainl", tmp_float))
         instrumentInfo.L2_curtainl_value = tmp_float * toMeters;
@@ -557,120 +530,72 @@ LoadBBY::createInstrument(ANSTO::Tar::File &tarFile,
     }
   }
 
-  return Geometry::Instrument_sptr();
+  // patching
+  file_it = std::find(files.cbegin(), files.cend(), "History.log");
+  if (file_it != files.cend()) {
+    tarFile.select(file_it->c_str());
+    std::string logContent;
+    logContent.resize(tarFile.selected_size());
+    tarFile.read(&logContent[0], logContent.size());
+    std::istringstream data(logContent);
+    Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> conf(
+        new Poco::Util::PropertyFileConfiguration(data));
 
-  /*
-  // instrument
-  Geometry::Instrument_sptr instrument =
-  boost::make_shared<Geometry::Instrument>("BILBY");
-  instrument->setDefaultViewAxis("Z-");
+    if (conf->hasProperty("Bm1Counts"))
+      instrumentInfo.bm_counts = conf->getInt("Bm1Counts");
+    if (conf->hasProperty("AttPos"))
+      instrumentInfo.att_pos = boost::math::iround(conf->getDouble("AttPos"));
 
-  // source
-  Geometry::ObjComponent *source = new Geometry::ObjComponent("Source",
-  instrument.get());
-  instrument->add(source);
-  instrument->markAsSource(source);
+    if (conf->hasProperty("MasterChopperFreq")) {
+      auto tmp = conf->getDouble("MasterChopperFreq");
+      if (tmp > 0.0f)
+        instrumentInfo.period_master = 1.0 / tmp * 1.0e6;
+    }
+    if (conf->hasProperty("T0ChopperFreq")) {
+      auto tmp = conf->getDouble("T0ChopperFreq");
+      if (tmp > 0.0f)
+        instrumentInfo.period_slave = 1.0 / tmp * 1.0e6;
+    }
+    if (conf->hasProperty("T0ChopperPhase")) {
+      auto tmp = conf->getDouble("T0ChopperPhase");
+      instrumentInfo.phase_slave = tmp < 999.0 ? tmp : 0.0;
+    }
 
-  // sample
-  Geometry::ObjComponent *samplePos = new Geometry::ObjComponent("Sample",
-  instrument.get());
-  instrument->add(samplePos);
-  instrument->markAsSamplePos(samplePos);
+    if (conf->hasProperty("FrameSource"))
+      instrumentInfo.is_tof = conf->getString("FrameSource") == "EXTERNAL";
+    if (conf->hasProperty("Wavelength"))
+      instrumentInfo.wavelength = conf->getDouble("Wavelength");
 
-  source->setPos(0.0, 0.0, -instrumentInfo.L1_chopper_value);
-  samplePos->setPos(0.0, 0.0, 0.0);
+    if (conf->hasProperty("L1"))
+      instrumentInfo.L1_source_value = conf->getDouble("L1") * toMeters;
+    if (conf->hasProperty("LTofDet"))
+      instrumentInfo.L1_chopper_value =
+          conf->getDouble("LTofDet") * toMeters - instrumentInfo.L2_det_value;
+    if (conf->hasProperty("L2Det"))
+      instrumentInfo.L2_det_value = conf->getDouble("L2Det") * toMeters;
 
-  // dimensions of the detector (height is in y direction, width is in x
-  // direction)
-  double width = 336.0 / 1000;  // meters
-  double height = 640.0 / 1000; // meters
-  double angle = 10.0;          // degree
+    if (conf->hasProperty("L2CurtainL"))
+      instrumentInfo.L2_curtainl_value =
+          conf->getDouble("L2CurtainL") * toMeters;
+    if (conf->hasProperty("L2CurtainR"))
+      instrumentInfo.L2_curtainr_value =
+          conf->getDouble("L2CurtainR") * toMeters;
+    if (conf->hasProperty("L2CurtainU"))
+      instrumentInfo.L2_curtainu_value =
+          conf->getDouble("L2CurtainU") * toMeters;
+    if (conf->hasProperty("L2CurtainD"))
+      instrumentInfo.L2_curtaind_value =
+          conf->getDouble("L2CurtainD") * toMeters;
 
-  // raw data format
-  size_t xPixelCount = HISTO_BINS_X / 6;
-  size_t yPixelCount = HISTO_BINS_Y;
-
-  // we assumed that individual pixels have the same size and shape of a cuboid:
-  double pixel_width = width / static_cast<double>(xPixelCount);
-  double pixel_height = height / static_cast<double>(yPixelCount);
-
-  // final number of pixels
-  size_t pixelCount = xPixelCount * yPixelCount;
-
-  // Create size strings for shape creation
-  std::string pixel_width_str =
-      boost::lexical_cast<std::string>(pixel_width / 2);
-  std::string pixel_height_str =
-      boost::lexical_cast<std::string>(pixel_height / 2);
-  std::string pixel_depth_str =
-      "0.00001"; // Set the depth of a pixel to a very small number
-
-  // Define shape of a pixel as an XML string. See
-  // http://www.mantidproject.org/HowToDefineGeometricShape for details on
-  // shapes in Mantid.
-  std::string detXML =
-    "<cuboid id=\"pixel\">"
-      "<left-front-bottom-point   x=\"+"+pixel_width_str+"\"
-  y=\"-"+pixel_height_str+"\" z=\"0\"  />"
-      "<left-front-top-point      x=\"+"+pixel_width_str+"\"
-  y=\"-"+pixel_height_str+"\" z=\""+pixel_depth_str+"\"  />"
-      "<left-back-bottom-point    x=\"-"+pixel_width_str+"\"
-  y=\"-"+pixel_height_str+"\" z=\"0\"  />"
-      "<right-front-bottom-point  x=\"+"+pixel_width_str+"\"
-  y=\"+"+pixel_height_str+"\" z=\"0\"  />"
-    "</cuboid>";
-
-  // Create a shape object which will be shared by all pixels.
-  Geometry::Object_sptr pixelShape =
-      Geometry::ShapeFactory().createShape(detXML);
-
-  // create detector banks
-  BbyDetectorBankFactory factory(
-      instrument, pixelShape, xPixelCount, yPixelCount, pixel_width,
-      pixel_height, Kernel::V3D(0, (height - pixel_height) / 2, 0));
-
-  // curtain l
-  factory.createAndAssign(0 * pixelCount,
-                          Kernel::V3D(+instrumentInfo.D_curtainl_value, 0,
-  instrumentInfo.L2_curtainl_value),
-                          Kernel::Quat(0, Kernel::V3D(0, 0, 1)) *
-                              Kernel::Quat(angle, Kernel::V3D(0, 1, 0)));
-
-  // curtain r
-  factory.createAndAssign(1 * pixelCount,
-                          Kernel::V3D(-instrumentInfo.D_curtainr_value, 0,
-  instrumentInfo.L2_curtainr_value),
-                          Kernel::Quat(180, Kernel::V3D(0, 0, 1)) *
-                              Kernel::Quat(angle, Kernel::V3D(0, 1, 0)));
-
-  // curtain u
-  factory.createAndAssign(2 * pixelCount,
-                          Kernel::V3D(0, +instrumentInfo.D_curtainu_value,
-  instrumentInfo.L2_curtainu_value),
-                          Kernel::Quat(90, Kernel::V3D(0, 0, 1)) *
-                              Kernel::Quat(angle, Kernel::V3D(0, 1, 0)));
-
-  // curtain d
-  factory.createAndAssign(3 * pixelCount,
-                          Kernel::V3D(0, -instrumentInfo.D_curtaind_value,
-  instrumentInfo.L2_curtaind_value),
-                          Kernel::Quat(-90, Kernel::V3D(0, 0, 1)) *
-                              Kernel::Quat(angle, Kernel::V3D(0, 1, 0)));
-
-  // back 1 (left)
-  factory.createAndAssign(4 * pixelCount,
-                          Kernel::V3D(+instrumentInfo.D_det_value, 0,
-  instrumentInfo.L2_det_value),
-                          Kernel::Quat(0, Kernel::V3D(0, 0, 1)));
-
-  // back 2 (right)
-  factory.createAndAssign(5 * pixelCount,
-                          Kernel::V3D(-instrumentInfo.D_det_value, 0,
-  instrumentInfo.L2_det_value),
-                          Kernel::Quat(180, Kernel::V3D(0, 0, 1)));
-
-  return instrument;
-  */
+    if (conf->hasProperty("CurtainL"))
+      instrumentInfo.D_curtainl_value = conf->getDouble("CurtainL") * toMeters;
+    if (conf->hasProperty("CurtainR"))
+      instrumentInfo.D_curtainr_value = conf->getDouble("CurtainR") * toMeters;
+    if (conf->hasProperty("CurtainU"))
+      instrumentInfo.D_curtainu_value = conf->getDouble("CurtainU") * toMeters;
+    if (conf->hasProperty("CurtainD"))
+      instrumentInfo.D_curtaind_value = conf->getDouble("CurtainD") * toMeters;
+  }
 }
 
 // load nx dataset
@@ -687,6 +612,18 @@ bool LoadBBY::loadNXDataSet(NeXus::NXEntry &entry, const std::string &path,
     return false;
   }
 }
+bool LoadBBY::loadNXString(NeXus::NXEntry &entry, const std::string &path,
+                           std::string &value) {
+  try {
+    NeXus::NXChar dataSet = entry.openNXChar(path);
+    dataSet.load();
+
+    value = std::string(dataSet(), dataSet.dim0());
+    return true;
+  } catch (std::runtime_error &) {
+    return false;
+  }
+}
 
 // read counts/events from binary file
 template <class EventProcessor>
@@ -695,14 +632,12 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
                          EventProcessor &eventProcessor) {
   prog.doReport(progMsg);
 
-  bool countsInFrame = false;
-
   // select bin file
   int64_t fileSize = 0;
   const std::vector<std::string> &files = tarFile.files();
-  for (auto itr = files.begin(); itr != files.end(); ++itr)
-    if (itr->rfind(".bin") == itr->length() - 4) {
-      tarFile.select(itr->c_str());
+  for (const auto &file : files)
+    if (file.rfind(".bin") == file.length() - 4) {
+      tarFile.select(file.c_str());
       fileSize = tarFile.selected_size();
       break;
     }
@@ -711,21 +646,21 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
   ANSTO::ProgressTracker progTracker(prog, progMsg, fileSize,
                                      Progress_LoadBinFile);
 
-  unsigned int x = 0; // 9 bits [0-239] tube number
-  unsigned int y = 0; // 8 bits [0-255] position along tube
+  uint32_t x = 0; // 9 bits [0-239] tube number
+  uint32_t y = 0; // 8 bits [0-255] position along tube
 
   // uint v = 0; // 0 bits [     ]
   // uint w = 0; // 0 bits [     ] energy
-  unsigned int dt = 0;
+  uint32_t dt = 0;
   double tof = 0.0;
 
   if ((fileSize == 0) || !tarFile.skip(128))
     return;
 
   int state = 0;
-  unsigned int c;
-  while ((c = static_cast<unsigned int>(tarFile.read_byte())) !=
-         static_cast<unsigned int>(-1)) {
+  uint32_t c;
+  while ((c = static_cast<uint32_t>(tarFile.read_byte())) !=
+         static_cast<uint32_t>(-1)) {
 
     bool event_ended = false;
     switch (state) {
@@ -767,65 +702,19 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
 
       if ((x == 0) && (y == 0) && (dt == 0xFFFFFFFF)) {
         tof = 0.0;
-
-        // only count frames that contain neutrons
-        if (countsInFrame) {
-          eventProcessor.endOfFrame();
-          countsInFrame = false;
-        }
+        eventProcessor.newFrame();
       } else if ((x >= HISTO_BINS_X) || (y >= HISTO_BINS_Y)) {
+        // ignore
       } else {
         // conversion from 100 nanoseconds to 1 microsecond
-        tof += (static_cast<int>(dt)) * 0.1;
+        tof += static_cast<int>(dt) * 0.1;
 
         eventProcessor.addEvent(x, y, tof);
-        countsInFrame = true;
       }
 
       progTracker.update(tarFile.selected_position());
     }
   }
-
-  if (countsInFrame)
-    eventProcessor.endOfFrame();
-}
-
-// DetectorBankFactory
-BbyDetectorBankFactory::BbyDetectorBankFactory(
-    Geometry::Instrument_sptr instrument, Geometry::Object_sptr pixelShape,
-    size_t xPixelCount, size_t yPixelCount, double pixelWidth,
-    double pixelHeight, const Kernel::V3D &center)
-    : m_instrument(instrument), m_pixelShape(pixelShape),
-      m_xPixelCount(xPixelCount), m_yPixelCount(yPixelCount),
-      m_pixelWidth(pixelWidth), m_pixelHeight(pixelHeight), m_center(center) {}
-void BbyDetectorBankFactory::createAndAssign(size_t startIndex,
-                                             const Kernel::V3D &pos,
-                                             const Kernel::Quat &rot) const {
-  // create a RectangularDetector which represents a rectangular array of pixels
-  Geometry::RectangularDetector *bank = new Geometry::RectangularDetector(
-      "bank",
-      m_instrument.get()); // Bank gets registered with instrument component.
-                           // instrument acts as sink and manages lifetime.
-
-  bank->initialize(m_pixelShape,
-                   // x
-                   static_cast<int>(m_xPixelCount), 0, m_pixelWidth,
-                   // y
-                   static_cast<int>(m_yPixelCount), 0, m_pixelHeight,
-                   // indices
-                   static_cast<int>(startIndex), true,
-                   static_cast<int>(m_yPixelCount));
-
-  for (size_t x = 0; x < m_xPixelCount; ++x)
-    for (size_t y = 0; y < m_yPixelCount; ++y)
-      m_instrument->markAsDetector(
-          bank->getAtXY(static_cast<int>(x), static_cast<int>(y)).get());
-
-  Kernel::V3D center(m_center);
-  rot.rotate(center);
-
-  bank->rotate(rot);
-  bank->translate(pos - center);
 }
 
 } // DataHandling

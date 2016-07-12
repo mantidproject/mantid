@@ -51,21 +51,21 @@ public:
   /// Copy constructor
   CatalogInfo(const CatalogInfo &other);
   /// Obtain catalog name from the facility file.
-  const std::string catalogName() const;
+  const std::string catalogName() const override;
   /// Obtain soap end point from the facility file.
-  const std::string soapEndPoint() const;
+  const std::string soapEndPoint() const override;
   /// Obtain the external download URL.
-  const std::string externalDownloadURL() const;
+  const std::string externalDownloadURL() const override;
   /// Obtain the regex prefix from the  facility file.
-  const std::string catalogPrefix() const;
+  const std::string catalogPrefix() const override;
   /// Obtain Windows prefix from the facility file.
-  const std::string windowsPrefix() const;
+  const std::string windowsPrefix() const override;
   /// Obtain Macintosh prefix from facility file.
-  virtual const std::string macPrefix() const;
+  const std::string macPrefix() const override;
   /// Obtain Linux prefix from facility file.
-  const std::string linuxPrefix() const;
+  const std::string linuxPrefix() const override;
   /// Clone
-  virtual CatalogInfo *clone() const;
+  CatalogInfo *clone() const override;
 
 private:
   /// Obtain the attribute from a given element tag and attribute name.

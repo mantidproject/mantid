@@ -15,9 +15,9 @@ DECLARE_ALGORITHM(CreateSingleValuedWorkspace)
 void CreateSingleValuedWorkspace::init() {
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Name to use for the output workspace");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Name to use for the output workspace");
   declareProperty("DataValue", 0.0, "The value to place in the workspace");
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);

@@ -1,7 +1,7 @@
 #include "MantidAPI/ScriptRepositoryFactory.h"
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidKernel/LibraryManager.h"
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 #include <sstream>
 
 namespace Mantid {
@@ -14,8 +14,6 @@ ScriptRepositoryFactoryImpl::ScriptRepositoryFactoryImpl()
   // not close any loaded DLLs with loaded algorithms in them
   Mantid::Kernel::LibraryManager::Instance();
 }
-
-ScriptRepositoryFactoryImpl::~ScriptRepositoryFactoryImpl() {}
 
 } // namespace API
 } // namespace Mantid

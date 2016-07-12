@@ -45,8 +45,8 @@ int CICatHelper::doSearch(ICATPortBindingProxy &icat,
   }
   clock_t end = clock();
   float diff = float(end - start) / CLOCKS_PER_SEC;
-  g_log.information() << " Time taken to do  search is " << diff << "  seconds "
-                      << std::endl;
+  g_log.information() << " Time taken to do  search is " << diff
+                      << "  seconds \n";
   return ret_advsearch;
 }
 
@@ -83,7 +83,7 @@ void CICatHelper::saveInvestigations(
     for (citr = investigations.begin(); citr != investigations.end(); ++citr) {
       API::TableRow t = outputws->appendRow();
 
-      std::string id = boost::lexical_cast<std::string>(*(*citr)->id);
+      std::string id = std::to_string(*(*citr)->id);
 
       savetoTableWorkspace(&id, t);
       savetoTableWorkspace((*citr)->facility, t);
@@ -91,12 +91,10 @@ void CICatHelper::saveInvestigations(
       savetoTableWorkspace((*citr)->instrument, t);
       savetoTableWorkspace((*citr)->invParamValue, t);
 
-      std::string startDate =
-          boost::lexical_cast<std::string>(*(*citr)->invStartDate);
+      std::string startDate = std::to_string(*(*citr)->invStartDate);
       savetoTableWorkspace(&startDate, t);
 
-      std::string endDate =
-          boost::lexical_cast<std::string>(*(*citr)->invEndDate);
+      std::string endDate = std::to_string(*(*citr)->invEndDate);
       savetoTableWorkspace(&endDate, t);
 
       std::string sessionID = m_session->getSessionId();
@@ -188,8 +186,8 @@ void CICatHelper::saveInvestigationIncludesResponse(
         savetoTableWorkspace((*datafile_citr)->location, t);
 
         // File creation Time.
-        std::string *creationtime = NULL;
-        if ((*datafile_citr)->datafileCreateTime != NULL) {
+        std::string *creationtime = nullptr;
+        if ((*datafile_citr)->datafileCreateTime != nullptr) {
           time_t crtime = *(*datafile_citr)->datafileCreateTime;
           char temp[25];
           strftime(temp, 25, "%Y-%b-%d %H:%M:%S", localtime(&crtime));
@@ -313,8 +311,8 @@ void CICatHelper::listInstruments(std::vector<std::string> &instruments) {
   int result = icat.listInstruments(&request, &response);
 
   if (result == 0) {
-    for (unsigned i = 0; i < response.return_.size(); ++i) {
-      instruments.push_back(response.return_[i]);
+    for (const auto &instrument : response.return_) {
+      instruments.push_back(instrument);
     }
   } else {
     CErrorHandling::throwErrorMessages(icat);
@@ -339,8 +337,8 @@ void CICatHelper::listInvestigationTypes(
   int result = icat.listInvestigationTypes(&request, &response);
 
   if (result == 0) {
-    for (unsigned i = 0; i < response.return_.size(); ++i) {
-      investTypes.push_back(response.return_[i]);
+    for (const auto &type : response.return_) {
+      investTypes.push_back(type);
     }
   } else {
     CErrorHandling::throwErrorMessages(icat);
@@ -395,8 +393,7 @@ void CICatHelper::doMyDataSearch(API::ITableWorkspace_sptr &ws_sptr) {
   }
   if (response.return_.empty()) {
     g_log.information()
-        << "ICat Mydata search is complete.There are no results to display"
-        << std::endl;
+        << "ICat Mydata search is complete.There are no results to display\n";
     return;
   }
   // save response to a table workspace
@@ -467,7 +464,7 @@ void CICatHelper::doAdvancedSearch(const CatalogSearchParam &inputs,
   }
   if (response.return_.empty()) {
     g_log.information() << "ICat investigations search is complete.There are "
-                           "no results to display" << std::endl;
+                           "no results to display\n";
     return;
   }
   // save response to a table workspace
@@ -589,7 +586,7 @@ CICatHelper::getNumberOfSearchResults(const CatalogSearchParam &inputs) {
   }
 
   g_log.debug() << "CICatHelper::getNumberOfSearchResults -> Number of results "
-                   "returned is: { " << numOfResults << " }" << std::endl;
+                   "returned is: { " << numOfResults << " }\n";
 
   return numOfResults;
 }
@@ -698,12 +695,12 @@ void CICatHelper::setICATProxySettings(ICat3::ICATPortBindingProxy &icat) {
 void CICatHelper::setSSLContext(ICat3::ICATPortBindingProxy &icat) {
   if (soap_ssl_client_context(
           &icat, SOAP_SSL_CLIENT, /* use SOAP_SSL_DEFAULT in production code */
-          NULL, /* keyfile: required only when client must authenticate to
+          nullptr, /* keyfile: required only when client must authenticate to
                 server (see SSL docs on how to obtain this file) */
-          NULL, /* password to read the keyfile */
-          NULL, /* optional cacert file to store trusted certificates */
-          NULL, /* optional capath to directory with trusted certificates */
-          NULL  /* if randfile!=NULL: use a file with random data to seed
+          nullptr, /* password to read the keyfile */
+          nullptr, /* optional cacert file to store trusted certificates */
+          nullptr, /* optional capath to directory with trusted certificates */
+          nullptr  /* if randfile!=NULL: use a file with random data to seed
                    randomness */
           )) {
     CErrorHandling::throwErrorMessages(icat);

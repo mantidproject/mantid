@@ -20,7 +20,9 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/Workspace_fwd.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace API {
@@ -29,6 +31,7 @@ namespace API {
 //----------------------------------------------------------------------
 class ITableWorkspace;
 class IPeaksWorkspace;
+class Workspace;
 
 /** The WorkspaceFactory class is in charge of the creation of all types
     of workspaces. It inherits most of its implementation from
@@ -64,6 +67,8 @@ class IPeaksWorkspace;
 class MANTID_API_DLL WorkspaceFactoryImpl
     : public Kernel::DynamicFactory<Workspace> {
 public:
+  WorkspaceFactoryImpl(const WorkspaceFactoryImpl &) = delete;
+  WorkspaceFactoryImpl &operator=(const WorkspaceFactoryImpl &) = delete;
   MatrixWorkspace_sptr create(const MatrixWorkspace_const_sptr &parent,
                               size_t NVectors = size_t(-1),
                               size_t XLength = size_t(-1),
@@ -75,7 +80,6 @@ public:
   void initializeFromParent(const MatrixWorkspace_const_sptr parent,
                             const MatrixWorkspace_sptr child,
                             const bool differentSize) const;
-
   /// Create a ITableWorkspace
   boost::shared_ptr<ITableWorkspace>
   createTable(const std::string &className = "TableWorkspace") const;
@@ -89,13 +93,8 @@ private:
 
   /// Private Constructor for singleton class
   WorkspaceFactoryImpl();
-  /// Private copy constructor - NO COPY ALLOWED
-  WorkspaceFactoryImpl(const WorkspaceFactoryImpl &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  WorkspaceFactoryImpl &operator=(const WorkspaceFactoryImpl &);
   /// Private Destructor
-  virtual ~WorkspaceFactoryImpl();
-
+  ~WorkspaceFactoryImpl() override = default;
   // Unhide the inherited create method but make it private
   using Kernel::DynamicFactory<Workspace>::create;
 };
@@ -109,6 +108,13 @@ template class MANTID_API_DLL
 #endif /* _WIN32 */
 typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>
     WorkspaceFactory;
+
+template <class T, class... InitArgs>
+boost::shared_ptr<T> createWorkspace(InitArgs... args) {
+  auto ws = boost::make_shared<T>();
+  ws->initialize(args...);
+  return ws;
+}
 
 } // namespace Kernel
 } // namespace Mantid

@@ -1,31 +1,31 @@
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/ColumnFactory.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include <nexus/NeXusException.hpp>
-#include <nexus/NeXusFile.hpp>
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataObjects/Peak.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/V3D.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Quat.h"
 #include "MantidKernel/Unit.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/V3D.h"
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <exception>
 #include <fstream>
-#include <math.h>
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 #include <ostream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string>
 
 using namespace Mantid::API;
@@ -77,9 +77,9 @@ public:
 
   /** Compare two peaks using the stored criteria */
   inline bool operator()(const Peak &a, const Peak &b) {
-    for (size_t i = 0; i < criteria.size(); i++) {
-      std::string &col = criteria[i].first;
-      bool ascending = criteria[i].second;
+    for (auto &name : criteria) {
+      std::string &col = name.first;
+      bool ascending = name.second;
       bool lessThan = false;
       if (col == "BankName") {
         // If this criterion is equal, move on to the next one
@@ -306,8 +306,8 @@ PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
     }
 
     if (hasOneRunNumber) {
-      std::pair<std::string, std::string> runn(
-          "RunNumber", "   " + boost::lexical_cast<std::string>(runNum));
+      std::pair<std::string, std::string> runn("RunNumber",
+                                               "   " + std::to_string(runNum));
       Result.push_back(runn);
     }
 
@@ -321,7 +321,7 @@ PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
     Result.push_back(GRead);
 
     std::pair<std::string, std::string> SeqNum(
-        "Seq Num,1st=1", "    " + boost::lexical_cast<std::string>(seqNum + 1));
+        "Seq Num,1st=1", "    " + std::to_string(seqNum + 1));
     Result.push_back(SeqNum);
 
     oss << std::setw(12) << std::fixed << std::setprecision(3)
@@ -332,7 +332,6 @@ PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
     oss.clear();
 
     if (peak->findDetector()) {
-      V3D detPos = peak->getDetPos();
       std::pair<std::string, std::string> detpos(
           "Position(x,y,z)",
           boost::lexical_cast<std::string>(peak->getDetPos()));
@@ -353,11 +352,11 @@ PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
       oss.clear();
 
       std::pair<std::string, std::string> row(
-          "Row", "    " + boost::lexical_cast<std::string>(peak->getRow()));
+          "Row", "    " + std::to_string(peak->getRow()));
       Result.push_back(row);
 
       std::pair<std::string, std::string> col(
-          "Col", "    " + boost::lexical_cast<std::string>(peak->getCol()));
+          "Col", "    " + std::to_string(peak->getCol()));
       Result.push_back(col);
 
       std::pair<std::string, std::string> bank("Bank",
@@ -517,10 +516,6 @@ API::ITableWorkspace_sptr PeaksWorkspace::createDetectorTable() const {
 
   return table;
 }
-
-//---------------------------------------------------------------------------------------------
-/** Destructor */
-PeaksWorkspace::~PeaksWorkspace() {}
 
 //---------------------------------------------------------------------------------------------
 /** Initialize all columns */
@@ -846,6 +841,12 @@ API::LogManager_sptr PeaksWorkspace::logs() {
 
   m_logCash = API::LogManager_sptr(&(this->mutableRun()), NullDeleter());
   return m_logCash;
+}
+
+ITableWorkspace *
+PeaksWorkspace::doCloneColumns(const std::vector<std::string> &) const {
+  throw Kernel::Exception::NotImplementedError(
+      "PeaksWorkspace cannot clone columns.");
 }
 }
 }

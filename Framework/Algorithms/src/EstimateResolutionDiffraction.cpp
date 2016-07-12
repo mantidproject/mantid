@@ -2,15 +2,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 
-#include <math.h>
+#include <cmath>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -34,17 +36,6 @@ const double WAVELENGTH_TO_VELOCITY =
 const double WAVELENGTH_MAX = 1000.;
 }
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-EstimateResolutionDiffraction::EstimateResolutionDiffraction()
-    : m_inputWS(), m_outputWS(), m_centreVelocity(0.), m_L1(0.), m_deltaT(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-EstimateResolutionDiffraction::~EstimateResolutionDiffraction() {}
-
 const std::string EstimateResolutionDiffraction::name() const {
   return "EstimateResolutionDiffraction";
 }
@@ -67,12 +58,12 @@ const std::string EstimateResolutionDiffraction::category() const {
 //----------------------------------------------------------------------------------------------
 void EstimateResolutionDiffraction::init() {
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                             Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
       "Name of the workspace to have detector resolution calculated. ");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace containing delta(d)/d of each "
                   "detector/spectrum.");
 
@@ -224,7 +215,7 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     double centraltof = (m_L1 + l2) / m_centreVelocity;
 
     // Angle
-    double twotheta = m_inputWS->detectorTwoTheta(det);
+    double twotheta = m_inputWS->detectorTwoTheta(*det);
     double theta = 0.5 * twotheta;
 
     // double solidangle = m_solidangleWS->readY(i)[0];

@@ -32,7 +32,6 @@
 // Poco
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <Poco/Mutex.h>
 #include <Poco/Notification.h>
 #include <Poco/Message.h>
 

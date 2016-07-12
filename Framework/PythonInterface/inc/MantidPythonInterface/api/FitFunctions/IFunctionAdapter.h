@@ -42,11 +42,11 @@ public:
   IFunctionAdapter(PyObject *self);
 
   /// Returns the name of the function
-  std::string name() const;
+  std::string name() const override;
   /// Specify a category for the function
-  const std::string category() const;
+  const std::string category() const override;
   /// Declare all attributes & parameters
-  void init();
+  void init() override;
 
   /// Declare an attribute with an initial value
   void declareAttribute(const std::string &name,
@@ -57,7 +57,7 @@ public:
   PyObject *getAttributeValue(const API::IFunction::Attribute &attr);
   /// Called by the framework when an attribute has been set
   void setAttribute(const std::string &attName,
-                    const API::IFunction::Attribute &attr);
+                    const API::IFunction::Attribute &attr) override;
   /// Store the attribute's value in the default IFunction's cache
   void storeAttributePythonValue(const std::string &name,
                                  const boost::python::object &value);
@@ -96,9 +96,9 @@ public:
 
   ///  Override this method to make fitted parameters different from the
   ///  declared
-  double activeParameter(size_t i) const;
+  double activeParameter(size_t i) const override;
   /// Override this method to make fitted parameters different from the declared
-  void setActiveParameter(size_t i, double value);
+  void setActiveParameter(size_t i, double value) override;
 
 protected:
   /**

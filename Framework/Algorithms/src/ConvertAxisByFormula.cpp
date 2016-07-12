@@ -19,16 +19,6 @@ using namespace API;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(ConvertAxisByFormula)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-ConvertAxisByFormula::ConvertAxisByFormula() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ConvertAxisByFormula::~ConvertAxisByFormula() {}
-
 const std::string ConvertAxisByFormula::name() const {
   return ("ConvertAxisByFormula");
 }
@@ -43,16 +33,16 @@ const std::string ConvertAxisByFormula::category() const {
 *
 */
 void ConvertAxisByFormula::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace");
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
 
   std::vector<std::string> axisOptions;
-  axisOptions.push_back("X");
-  axisOptions.push_back("Y");
+  axisOptions.emplace_back("X");
+  axisOptions.emplace_back("Y");
   declareProperty("Axis", "X",
                   boost::make_shared<StringListValidator>(axisOptions),
                   "The axis to modify");
@@ -107,7 +97,7 @@ void ConvertAxisByFormula::exec() {
 
   bool isRefAxis = false;
   RefAxis *refAxisPtr = dynamic_cast<RefAxis *>(axisPtr);
-  if (refAxisPtr != NULL) {
+  if (refAxisPtr != nullptr) {
     CommonBinsValidator sameBins;
     if (sameBins.isValid(outputWs) != "") {
       throw std::invalid_argument("Axes must have common bins for this "
@@ -139,8 +129,7 @@ void ConvertAxisByFormula::exec() {
           *iter = result;
         }
 
-        MantidVecPtr xVals;
-        xVals.access() = outputWs->dataX(0);
+        auto xVals = outputWs->refX(0);
         Progress prog(this, 0.6, 1.0, numberOfSpectra_i);
         PARALLEL_FOR1(outputWs)
         for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
@@ -189,8 +178,7 @@ void ConvertAxisByFormula::exec() {
     if (axisUnits == "") {
       axisUnits = axisPtr->unit()->label();
     }
-    axisPtr->unit() =
-        boost::shared_ptr<Unit>(new Units::Label(axisTitle, axisUnits));
+    axisPtr->unit() = boost::make_shared<Units::Label>(axisTitle, axisUnits);
   }
 }
 

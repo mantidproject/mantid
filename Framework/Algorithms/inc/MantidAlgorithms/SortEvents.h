@@ -44,28 +44,24 @@ namespace Algorithms {
  */
 class DLLExport SortEvents : public API::Algorithm {
 public:
-  /// Default constructor
-  SortEvents() : API::Algorithm(){};
-  /// Destructor
-  virtual ~SortEvents(){};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "SortEvents"; }
+  const std::string name() const override { return "SortEvents"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Sort the events in an EventWorkspace, for faster rebinning.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Events;Utility\\Sorting";
   }
 
 protected:
   // Overridden Algorithm methods
-  void init();
-  virtual void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Algorithms

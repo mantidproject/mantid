@@ -1,16 +1,18 @@
 #pylint: disable=no-init,too-many-instance-attributes
+import os
+
+from IndirectReductionCommon import load_files
 
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
 from mantid import config
 
-import os
-
 
 class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
     _workspace_names = None
+    _cal_file = None
     _chopped_data = None
     _output_ws = None
     _data_files = None
@@ -47,6 +49,10 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self.declareProperty('ContainerScaleFactor', 1.0,
                              doc='Factor by which to scale the container runs.')
 
+        self.declareProperty(FileProperty('CalFile', '', action=FileAction.OptionalLoad),
+                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+\
+                                 '[[DiffractionFocussing]] child algorithms.')
+
         self.declareProperty(name='SumFiles', defaultValue=False,
                              doc='Enabled to sum spectra from each input file.')
 
@@ -72,7 +78,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                              doc='Selects the type of detector grouping to be used.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
+                                                    direction=Direction.Output),
                              doc='Group name for the result workspaces.')
 
 #------------------------------------------------------------------------------
@@ -96,13 +102,25 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             if detector_range[0] > detector_range[1]:
                 issues['SpectraRange'] = 'SpectraRange must be in format [lower_index,upper_index]'
 
+        cal_file = self.getProperty('CalFile').value
+        inst = self.getProperty('Instrument').value
+        mode = self.getProperty('Mode').value
+        if cal_file != '':
+            if inst != 'OSIRIS':
+                logger.warning('NOT OSIRIS, inst = ' + str(inst))
+                logger.warning('type = ' + str(type(inst)))
+                issues['CalFile'] = 'Cal Files are currently only available for use in OSIRIS diffspec mode'
+            if mode != 'diffspec':
+                logger.warning('NOT DIFFSPEC, mode = ' + str(mode))
+                logger.warning('type = ' + str(type(mode)))
+                issues['CalFile'] = 'Cal Files are currently only available for use in OSIRIS diffspec mode'
+
         return issues
 
 #------------------------------------------------------------------------------
 
     def PyExec(self):
-        from IndirectReductionCommon import (load_files,
-                                             get_multi_frame_rebin,
+        from IndirectReductionCommon import (get_multi_frame_rebin,
                                              identify_bad_detectors,
                                              unwrap_monitor,
                                              process_monitor_efficiency,
@@ -120,30 +138,17 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             load_opts['Mode'] = 'FoilOut'
 
         self._workspace_names, self._chopped_data = load_files(self._data_files,
-                                                              self._ipf_filename,
-                                                              self._spectra_range[0],
-                                                              self._spectra_range[1],
-                                                              sum_files=self._sum_files,
-                                                              load_logs=self._load_logs,
-                                                              load_opts=load_opts)
+                                                               self._ipf_filename,
+                                                               self._spectra_range[0],
+                                                               self._spectra_range[1],
+                                                               sum_files=self._sum_files,
+                                                               load_logs=self._load_logs,
+                                                               load_opts=load_opts)
 
+        # applies the changes in the provided calibration file
+        self._apply_calibration()
         # Load container if run is given
-        if self._container_data_files is not None:
-            self._container_workspace, _ = load_files(self._container_data_files,
-                                                      self._ipf_filename,
-                                                      self._spectra_range[0],
-                                                      self._spectra_range[1],
-                                                      sum_files=True,
-                                                      load_logs=self._load_logs,
-                                                      load_opts=load_opts)
-            self._container_workspace = self._container_workspace[0]
-
-            # Scale container if factor is given
-            if self._container_scale_factor != 1.0:
-                Scale(InputWorkspace=self._container_workspace,
-                      OutputWorkspace=self._container_workspace,
-                      Factor=self._container_scale_factor,
-                      Operation='Multiply')
+        self._load_and_scale_container(self._container_scale_factor, load_opts)
 
         for c_ws_name in self._workspace_names:
             is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)
@@ -230,6 +235,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._data_files = self.getProperty('InputFiles').value
         self._container_data_files = self.getProperty('ContainerFiles').value
+        self._cal_file = self.getProperty('CalFile').value
         self._container_scale_factor = self.getProperty('ContainerScaleFactor').value
         self._load_logs = self.getProperty('LoadLogFiles').value
         self._instrument_name = self.getPropertyValue('Instrument')
@@ -262,6 +268,45 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 logger.information('Summing files enabled (have %d files)' % num_raw_files)
             else:
                 logger.information('SumFiles options is ignored when only one file is provided')
+
+
+    def _apply_calibration(self):
+        """
+        Checks to ensure a calibration file has been given
+        and if so performs AlignDetectors and DiffractionFocussing.
+        """
+        if self._cal_file is not '':
+            for ws_name in self._workspace_names:
+                AlignDetectors(InputWorkspace=ws_name,
+                               OutputWorkspace=ws_name,
+                               CalibrationFile=self._cal_file)
+                DiffractionFocussing(InputWorkspace=ws_name,
+                                     OutputWorkspace=ws_name,
+                                     GroupingFileName=self._cal_file)
+
+
+    def _load_and_scale_container(self, scale_factor, load_opts):
+        """
+        Loads the container file if given
+        Applies the scale factor to the container if not 1.
+        """
+        if self._container_data_files is not None:
+            self._container_workspace, _ = load_files(self._container_data_files,
+                                                      self._ipf_filename,
+                                                      self._spectra_range[0],
+                                                      self._spectra_range[1],
+                                                      sum_files=True,
+                                                      load_logs=self._load_logs,
+                                                      load_opts=load_opts)
+            self._container_workspace = self._container_workspace[0]
+
+            # Scale container if factor is given
+            if scale_factor != 1.0:
+                Scale(InputWorkspace=self._container_workspace,
+                      OutputWorkspace=self._container_workspace,
+                      Factor=scale_factor,
+                      Operation='Multiply')
+
 
 #------------------------------------------------------------------------------
 

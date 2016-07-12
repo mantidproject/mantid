@@ -62,7 +62,7 @@ public:
   /// Constructor
   MultiTabScriptInterpreter(ScriptingEnv *env, QWidget *parent);
   /// Destructor
-  ~MultiTabScriptInterpreter();
+  ~MultiTabScriptInterpreter() override;
 
   /// Current interpreter
   ScriptFileInterpreter *currentInterpreter();
@@ -208,9 +208,9 @@ private slots:
 
 private:
   /// A context menu event for the tab widget itself
-  void contextMenuEvent(QContextMenuEvent *event);
+  void contextMenuEvent(QContextMenuEvent *event) override;
   /// A custom defined event handler
-  void customEvent(QEvent *event);
+  void customEvent(QEvent *event) override;
   /// Open a script
   void open(bool newtab, const QString &filename = QString());
   /// Sets the tab title & tooltip from the filename

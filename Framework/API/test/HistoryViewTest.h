@@ -22,23 +22,23 @@ private:
   class testalg : public Algorithm {
   public:
     testalg() : Algorithm() {}
-    virtual ~testalg() {}
-    const std::string summary() const {
+    ~testalg() override {}
+    const std::string summary() const override {
       return "testalg";
     } ///< Algorithm's documentation summary
-    const std::string name() const {
+    const std::string name() const override {
       return "testalg";
     } ///< Algorithm's name for identification
-    int version() const {
+    int version() const override {
       return 1;
     } ///< Algorithm's version for identification
-    const std::string category() const {
+    const std::string category() const override {
       return "Cat";
     } ///< Algorithm's category for identification
 
-    void init() { declareProperty("name", "", Direction::Input); }
+    void init() override { declareProperty("name", "", Direction::Input); }
 
-    void exec() {}
+    void exec() override {}
   };
 
 private:

@@ -28,8 +28,8 @@ boost::python::object
 getChildrenAsList(boost::shared_ptr<AlgorithmHistory> self) {
   boost::python::list names;
   const auto histories = self->getChildHistories();
-  for (auto itr = histories.cbegin(); itr != histories.cend(); ++itr) {
-    names.append(*itr);
+  for (const auto &historie : histories) {
+    names.append(historie);
   }
   return names;
 }
@@ -43,8 +43,8 @@ getChildrenAsList(boost::shared_ptr<AlgorithmHistory> self) {
 boost::python::object getPropertiesAsList(AlgorithmHistory &self) {
   boost::python::list names;
   const auto histories = self.getProperties();
-  for (auto itr = histories.cbegin(); itr != histories.cend(); ++itr) {
-    names.append(*itr);
+  for (const auto &historie : histories) {
+    names.append(historie);
   }
   return names;
 }
@@ -86,6 +86,11 @@ void export_AlgorithmHistory() {
 
       .def("getProperties", &getPropertiesAsList, arg("self"),
            "Returns properties for this algorithm history.")
+
+      .def("getPropertyValue", &AlgorithmHistory::getPropertyValue,
+           (arg("self"), arg("index")),
+           return_value_policy<copy_const_reference>(),
+           "Returns the string representation of a specified property.")
 
       .def("getChildAlgorithm", &AlgorithmHistory::getChildAlgorithm,
            (arg("self"), arg("index")),

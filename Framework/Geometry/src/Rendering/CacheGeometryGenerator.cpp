@@ -19,8 +19,8 @@ namespace Geometry {
 CacheGeometryGenerator::CacheGeometryGenerator(Object *obj) : Obj(obj) {
   mNoOfVertices = 0;
   mNoOfTriangles = 0;
-  mFaces = NULL;
-  mPoints = NULL;
+  mFaces = nullptr;
+  mPoints = nullptr;
 }
 
 /**
@@ -45,9 +45,9 @@ void CacheGeometryGenerator::Generate() {
  * Destroy the surface generated for the object
  */
 CacheGeometryGenerator::~CacheGeometryGenerator() {
-  if (mFaces != NULL)
+  if (mFaces != nullptr)
     delete[] mFaces;
-  if (mPoints != NULL)
+  if (mPoints != nullptr)
     delete[] mPoints;
 }
 
@@ -68,9 +68,9 @@ int *CacheGeometryGenerator::getTriangleFaces() { return mFaces; }
 */
 void CacheGeometryGenerator::setGeometryCache(int noPts, int noFaces,
                                               double *pts, int *faces) {
-  if (mPoints != NULL)
+  if (mPoints != nullptr)
     delete[] mPoints;
-  if (mFaces != NULL)
+  if (mFaces != nullptr)
     delete[] mFaces;
   mNoOfVertices = noPts;
   mNoOfTriangles = noFaces;

@@ -41,67 +41,69 @@ class QLineEdit;
 class QMenu;
 class QToolBar;
 
-class CustomActionDialog : public QDialog
-{
-    Q_OBJECT
+class CustomActionDialog : public QDialog {
+  Q_OBJECT
 
 public:
-	//! Constructor
-	/**
-	 * @param parent :: parent widget (must be the application window!=
-	 * @param fl :: window flags
-	 */
-    CustomActionDialog( QWidget* parent, Qt::WFlags fl = 0 );
+  //! Constructor
+  /**
+   * @param parent :: parent widget (must be the application window!=
+   * @param fl :: window flags
+   */
+  CustomActionDialog(QWidget *parent, Qt::WFlags fl = 0);
 
 private slots:
-	void chooseIcon();
-	void chooseFile();
-	void chooseFolder();
-	QAction* addAction();
-	void removeAction();
-	void setCurrentAction(int);
-	void saveCurrentAction();
+  void chooseIcon();
+  void chooseFile();
+  void chooseFolder();
+  QAction *addAction();
+  void removeAction();
+  void setCurrentAction(int);
+  void saveCurrentAction();
 
 private:
-	void init();
-	void updateDisplayList();
-	QAction* actionAt(int row);
-	void saveAction(QAction *action);
-	void customizeAction(QAction *action);
-	bool validUserInput();
-	QStringList d_app_shortcut_keys;
+  void init();
+  void updateDisplayList();
+  QAction *actionAt(int row);
+  void saveAction(QAction *action);
+  void customizeAction(QAction *action);
+  bool validUserInput();
+  QStringList d_app_shortcut_keys;
 
-	QList<QMenu *> d_menus;
-	QList<QToolBar *> d_app_toolbars;
+  QList<QMenu *> d_menus;
+  QList<QToolBar *> d_app_toolbars;
 
-    QListWidget *itemsList;
-    QPushButton *buttonCancel, *buttonAdd, *buttonRemove, *buttonSave;
-    QPushButton *folderBtn, *fileBtn, *iconBtn;
-    QLineEdit *folderBox, *fileBox, *iconBox, *textBox, *toolTipBox, *shortcutBox;
-    QRadioButton *menuBtn, *toolBarBtn;
-    QComboBox *menuBox, *toolBarBox;
+  QListWidget *itemsList;
+  QPushButton *buttonCancel, *buttonAdd, *buttonRemove, *buttonSave;
+  QPushButton *folderBtn, *fileBtn, *iconBtn;
+  QLineEdit *folderBox, *fileBox, *iconBox, *textBox, *toolTipBox, *shortcutBox;
+  QRadioButton *menuBtn, *toolBarBtn;
+  QComboBox *menuBox, *toolBarBox;
 };
 
-class CustomActionHandler : public QXmlDefaultHandler
-{
+class CustomActionHandler : public QXmlDefaultHandler {
 public:
   explicit CustomActionHandler(QAction *action);
 
-    bool startElement(const QString &namespaceURI, const QString &localName,
-                       const QString &qName, const QXmlAttributes &attributes);
-    bool endElement(const QString &namespaceURI, const QString &localName,
-                     const QString &qName);
-    bool characters(const QString &str){currentText += str; return true;};
-    bool fatalError(const QXmlParseException &){return false;};
-    QString errorString() const {return errorStr;};
-	QString parentName(){return d_widget_name;};
+  bool startElement(const QString &namespaceURI, const QString &localName,
+                    const QString &qName,
+                    const QXmlAttributes &attributes) override;
+  bool endElement(const QString &namespaceURI, const QString &localName,
+                  const QString &qName) override;
+  bool characters(const QString &str) override {
+    currentText += str;
+    return true;
+  };
+  bool fatalError(const QXmlParseException &) override { return false; };
+  QString errorString() const override { return errorStr; };
+  QString parentName() { return d_widget_name; };
 
 private:
-    bool metFitTag;
-    QString currentText;
-    QString errorStr;
-    QString filePath;
-	QString d_widget_name;
-    QAction *d_action;
+  bool metFitTag;
+  QString currentText;
+  QString errorStr;
+  QString filePath;
+  QString d_widget_name;
+  QAction *d_action;
 };
 #endif

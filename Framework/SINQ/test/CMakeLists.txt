@@ -5,6 +5,7 @@ if ( CXXTEST_FOUND )
   
   set ( TESTHELPER_SRCS ../../TestHelpers/src/TearDownWorld.cpp 
                         ../../TestHelpers/src/ComponentCreationHelper.cpp
+                        ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp )
 
   cxxtest_add_test ( PSISINQTest ${TEST_FILES} ${GMOCK_TEST_FILES})

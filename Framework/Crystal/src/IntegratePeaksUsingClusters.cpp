@@ -27,16 +27,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(IntegratePeaksUsingClusters)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IntegratePeaksUsingClusters::IntegratePeaksUsingClusters() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IntegratePeaksUsingClusters::~IntegratePeaksUsingClusters() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string IntegratePeaksUsingClusters::name() const {
   return "IntegratePeaksUsingClusters";
@@ -56,11 +46,11 @@ const std::string IntegratePeaksUsingClusters::category() const {
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksUsingClusters::init() {
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "Input md workspace.");
-  declareProperty(new WorkspaceProperty<IPeaksWorkspace>("PeaksWorkspace", "",
-                                                         Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+                      "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
   auto positiveValidator = boost::make_shared<BoundedValidator<double>>();
@@ -71,7 +61,7 @@ void IntegratePeaksUsingClusters::init() {
   compositeValidator->add(positiveValidator);
   compositeValidator->add(boost::make_shared<MandatoryValidator<double>>());
 
-  declareProperty(new PropertyWithValue<double>(
+  declareProperty(make_unique<PropertyWithValue<double>>(
                       "Threshold", 0, compositeValidator, Direction::Input),
                   "Threshold signal above which to consider peaks");
 
@@ -86,10 +76,10 @@ void IntegratePeaksUsingClusters::init() {
                   "Normalization to use with Threshold. Defaults to "
                   "VolumeNormalization to account for different binning.");
 
-  declareProperty(new WorkspaceProperty<IPeaksWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<IPeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output integrated peaks workspace.");
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>(
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
                       "OutputWorkspaceMD", "", Direction::Output),
                   "MDHistoWorkspace containing the labeled clusters used by "
                   "the algorithm.");
@@ -120,7 +110,7 @@ void IntegratePeaksUsingClusters::exec() {
   IPeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
   IPeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
   if (peakWS != inPeakWS) {
-    peakWS = IPeaksWorkspace_sptr(inPeakWS->clone().release());
+    peakWS = inPeakWS->clone();
   }
 
   {
@@ -169,13 +159,13 @@ void IntegratePeaksUsingClusters::exec() {
     if (boost::math::isnan(signalValue)) {
       g_log.warning()
           << "Warning: image for integration is off edge of detector for peak "
-          << i << std::endl;
+          << i << '\n';
     } else if (signalValue <
                static_cast<Mantid::signal_t>(analysis.getStartLabelId())) {
       g_log.information() << "Peak: " << i
                           << " Has no corresponding cluster/blob detected on "
                              "the image. This could be down to your Threshold "
-                             "settings." << std::endl;
+                             "settings.\n";
     } else {
       const size_t labelIdAtPeak = static_cast<size_t>(signalValue);
       ICluster *const cluster = clusterMap[labelIdAtPeak].get();
@@ -189,9 +179,9 @@ void IntegratePeaksUsingClusters::exec() {
         if (it != labelsTakenByPeaks.end()) {
           g_log.warning() << "Overlapping Peaks. Peak: " << i
                           << " overlaps with another Peak: " << it->second
-                          << " and shares label id: " << it->first << std::endl;
+                          << " and shares label id: " << it->first << '\n';
         }
-        labelsTakenByPeaks.insert(std::make_pair(labelIdAtPeak, i));
+        labelsTakenByPeaks.emplace(labelIdAtPeak, i);
       }
       progress.report();
     }

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Test the interaction with the instrument view.
 Assertion that things work is difficult so mosts
 test will just that things don't crash.
@@ -36,7 +36,7 @@ class MantidPlotInstrumentViewTest(unittest.TestCase):
     def test_get_tab_can_use_title_index_or_enum(self):
         render_tab = INST_WIN.getTab("Render")
         self.assertTrue(render_tab is not None)
-        render_tab = INST_WIN.getTab(InstrumentWindow.RENDER)
+        render_tab = INST_WIN.getTab(InstrumentWidget.RENDER)
         self.assertTrue(render_tab is not None)
         render_tab = INST_WIN.getTab(0)
         self.assertTrue(render_tab is not None)
@@ -67,7 +67,7 @@ class MantidPlotInstrumentViewTest(unittest.TestCase):
 		
     def test_window_render_tab(self):
         render_tab = INST_WIN.getTab("Render")
-        render_tab.setSurfaceType(InstrumentWindowRenderTab.FULL3D)
+        render_tab.setSurfaceType(InstrumentWidgetRenderTab.FULL3D)
         self.assertTrue(render_tab is not None)
         current_scale = render_tab.getScaleType()
         self.assertTrue(isinstance(current_scale, GraphOptions.ScaleType))

@@ -5,6 +5,7 @@
 #include "MantidMatrix.h"
 
 #include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <QPointer>
 #include <vector>
@@ -13,55 +14,61 @@
 class MantidMatrixFunction;
 
 /**
- * A helper class listening to ADS notifications. Helps to avoid issues with multiple inheritance
+ * A helper class listening to ADS notifications. Helps to avoid issues with
+ *multiple inheritance
  * and QObject.
  *
  */
-class MantidMatrixFunctionWorkspaceObserver: public QObject, public MantidQt::API::WorkspaceObserver
-{
-    Q_OBJECT
+class MantidMatrixFunctionWorkspaceObserver
+    : public QObject,
+      public MantidQt::API::WorkspaceObserver {
+  Q_OBJECT
 public:
   explicit MantidMatrixFunctionWorkspaceObserver(MantidMatrixFunction *);
 
 signals:
-    void requestRedraw();
-    void requestClose();
+  void requestRedraw();
+  void requestClose();
 
 private:
-    /* Base class virtual methods */
+  /* Base class virtual methods */
 
-    void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
-    void preDeleteHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace>);
-    void clearADSHandle();
+  void afterReplaceHandle(
+      const std::string &wsName,
+      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+  void
+  preDeleteHandle(const std::string &wsName,
+                  const boost::shared_ptr<Mantid::API::Workspace>) override;
+  void clearADSHandle() override;
 
-    MantidMatrixFunction *m_function;
+  MantidMatrixFunction *m_function;
 };
 
 /**
  * This class helps displaying a MantidMatrix in a 2D or 3D graph.
  */
-class MantidMatrixFunction: public Function2D
-{
+class MantidMatrixFunction : public Function2D {
 public:
   explicit MantidMatrixFunction(MantidMatrix &matrix);
-    ~MantidMatrixFunction();
+  ~MantidMatrixFunction() override;
 
   /* Base class virtual methods */
 
-  double operator()(double x, double y);
-  double getMinPositiveValue()const;
-  QString saveToString() const;
-  void connectToViewer(QObject *viewer);
+  double operator()(double x, double y) override;
+  double getMinPositiveValue() const override;
+  QString saveToString() const override;
+  void connectToViewer(QObject *viewer) override;
 
   /* Public methods */
 
   /// Value at a mesh node
-  double value(size_t row, size_t col)const;
+  double value(size_t row, size_t col) const;
   /// Return in ymin and ymax the inetrval the row takes on the y axis
-  void getRowYRange(size_t row, double& ymin, double& ymax)const;
+  void getRowYRange(size_t row, double &ymin, double &ymax) const;
   /// Return in xmin and xmax the inetrval the cell takes on the x axis
-  void getRowXRange(int row,double& xmin, double& xmax)const;
-  const Mantid::MantidVec& getMantidVec(int row)const;
+  void getRowXRange(int row, double &xmin, double &xmax) const;
+  const Mantid::MantidVec &getMantidVec(int row) const;
+
 private:
   /* Private methods */
 

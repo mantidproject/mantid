@@ -1,5 +1,6 @@
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "LoadRaw/isisraw2.h"
@@ -36,13 +37,15 @@ LoadDetectorInfo::LoadDetectorInfo()
 
 void LoadDetectorInfo::init() {
 
-  declareProperty(new WorkspaceProperty<>("Workspace", "", Direction::InOut),
-                  "The name of the workspace to that the detector information "
-                  "will be loaded into.");
-
   declareProperty(
-      new FileProperty("DataFilename", "", FileProperty::Load,
-                       {".dat", ".raw", ".sca", ".nxs"}),
+      make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+      "The name of the workspace to that the detector information "
+      "will be loaded into.");
+
+  const std::vector<std::string> exts{".dat", ".raw", ".sca", ".nxs"};
+  declareProperty(
+      Kernel::make_unique<FileProperty>("DataFilename", "", FileProperty::Load,
+                                        exts),
       "A **raw, dat, nxs** or **sca** file that contains information about the "
       "detectors in the "
       "workspace. The description of **dat** and **nxs** file format is "
@@ -174,8 +177,7 @@ void LoadDetectorInfo::loadFromRAW(const std::string &filename) {
   } else {
     throw std::invalid_argument(
         "RAW file contains unexpected number of user tables=" +
-        boost::lexical_cast<std::string>(numUserTables) +
-        ". Expected 10 or 14.");
+        std::to_string(numUserTables) + ". Expected 10 or 14.");
   }
 
   // Is ut01 (=phi) present? Sometimes an array is present but has wrong values

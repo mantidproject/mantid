@@ -1,4 +1,6 @@
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 import numpy as np
 import mantid.simpleapi as api
@@ -15,7 +17,7 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         """ Test to Save one curve
         """
         datawsname = "constant energy cut"
-        E, I, err = self._createOneQCurve(datawsname)
+        E, I, err, dQ = self._createOneQCurve(datawsname)
 
         # Execute
         out_path = "tempout_curve.json"
@@ -28,7 +30,7 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         # Verify ....
         d = json.load(open(out_path))[datawsname]
         self.assertEqual(d['type'], 'point')
-        self._checkData(d, E, I, err)
+        self._checkData(d, E, I, err, dE=dQ)
         # Delete the output file
         os.remove(out_path)
         return
@@ -106,11 +108,13 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         return
 
 
-    def _checkData(self, s, E, I, err, ID="1"):
+    def _checkData(self, s, E, I, err, ID="1", dE=None):
         d0 = s["data"][ID]
         np.testing.assert_array_equal(d0[0], E)
         np.testing.assert_array_equal(d0[1], I)
         np.testing.assert_array_equal(d0[2], err)
+        if dE is not None:
+            np.testing.assert_array_equal(d0[3], dE)
         return
 
 
@@ -133,15 +137,17 @@ class SavePlot1DAsJsonTest(unittest.TestCase):
         """ Create data workspace
         """
         Q = np.arange(0, 13, 1.0)
+        dQ = 0.1*Q
         I = 1000 * np.exp(-Q**2/10**2)
         err = I ** .5
         # create workspace
         dataws = api.CreateWorkspace(
             DataX = Q, DataY = I, DataE = err, NSpec = 1,
             UnitX = "Momentum")
+        dataws.setDx(0, dQ)
         # Add to data service
         AnalysisDataService.addOrReplace(datawsname, dataws)
-        return Q, I, err
+        return Q, I, err, dQ
 
 
     def _createOneHistogram(self, datawsname):

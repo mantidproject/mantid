@@ -74,8 +74,10 @@ public:
 
   void test_clear_original_workspaces() {
     MDGeometry geometry;
-    boost::shared_ptr<WorkspaceTester> ws0(new WorkspaceTester());
-    boost::shared_ptr<WorkspaceTester> ws1(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> ws0 =
+        boost::make_shared<WorkspaceTester>();
+    boost::shared_ptr<WorkspaceTester> ws1 =
+        boost::make_shared<WorkspaceTester>();
     geometry.setOriginalWorkspace(ws0, 0);
     geometry.setOriginalWorkspace(ws1, 1);
     TS_ASSERT_EQUALS(2, geometry.numOriginalWorkspaces());
@@ -95,8 +97,10 @@ public:
     g.setBasisVector(0, VMD(1.2, 3.4));
     g.setBasisVector(1, VMD(1.2, 3.4));
     g.setOrigin(VMD(4, 5));
-    boost::shared_ptr<WorkspaceTester> ws0(new WorkspaceTester());
-    boost::shared_ptr<WorkspaceTester> ws1(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> ws0 =
+        boost::make_shared<WorkspaceTester>();
+    boost::shared_ptr<WorkspaceTester> ws1 =
+        boost::make_shared<WorkspaceTester>();
     g.setOriginalWorkspace(ws0, 0);
     g.setOriginalWorkspace(ws1, 1);
     g.setTransformFromOriginal(new NullCoordTransform(5), 0);
@@ -162,7 +166,8 @@ public:
         new MDHistoDimension("Qy", "Qy", frame, -2, +2, 0));
     TS_ASSERT_THROWS_NOTHING(g.addDimension(dim2);)
     TS_ASSERT_EQUALS(g.getNumDims(), 2);
-    boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> ws =
+        boost::make_shared<WorkspaceTester>();
     g.setOriginalWorkspace(ws);
     TS_ASSERT(g.hasOriginalWorkspace());
 
@@ -198,7 +203,8 @@ public:
   void test_OriginalWorkspace() {
     MDGeometry g;
     TS_ASSERT(!g.hasOriginalWorkspace());
-    boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> ws =
+        boost::make_shared<WorkspaceTester>();
     g.setOriginalWorkspace(ws);
     TS_ASSERT(g.hasOriginalWorkspace());
   }
@@ -206,8 +212,10 @@ public:
   void test_OriginalWorkspace_multiple() {
     MDGeometry g;
     TS_ASSERT(!g.hasOriginalWorkspace());
-    boost::shared_ptr<WorkspaceTester> ws0(new WorkspaceTester());
-    boost::shared_ptr<WorkspaceTester> ws1(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> ws0 =
+        boost::make_shared<WorkspaceTester>();
+    boost::shared_ptr<WorkspaceTester> ws1 =
+        boost::make_shared<WorkspaceTester>();
     g.setOriginalWorkspace(ws0);
     g.setOriginalWorkspace(ws1, 1);
     TS_ASSERT(g.hasOriginalWorkspace());
@@ -221,7 +229,8 @@ public:
   void test_OriginalWorkspace_gets_deleted() {
     MDGeometry g;
     {
-      boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+      boost::shared_ptr<WorkspaceTester> ws =
+          boost::make_shared<WorkspaceTester>();
       AnalysisDataService::Instance().addOrReplace("MDGeometryTest_originalWS",
                                                    ws);
       g.setOriginalWorkspace(ws);
@@ -231,7 +240,8 @@ public:
     TS_ASSERT(g.getOriginalWorkspace())
 
     // Create a different workspace and delete that
-    boost::shared_ptr<WorkspaceTester> ws2(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> ws2 =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("MDGeometryTest_some_other_ws",
                                                  ws2);
     AnalysisDataService::Instance().remove("MDGeometryTest_some_other_ws");

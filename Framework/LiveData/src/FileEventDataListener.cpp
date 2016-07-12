@@ -22,7 +22,7 @@ FileEventDataListener::FileEventDataListener()
     : ILiveListener(), m_filename(), m_runNumber(-1),
       m_tempWSname("__filelistenerchunk"), m_nextChunk(1),
       m_filePropName("Filename"), m_loaderName(""), m_canLoadMonitors(true),
-      m_chunkload(NULL) {
+      m_chunkload(nullptr) {
   std::string tfilename =
       ConfigService::Instance().getString("fileeventdatalistener.filename");
   if (tfilename.empty()) {
@@ -101,7 +101,7 @@ ILiveListener::RunStatus FileEventDataListener::runStatus() {
     return BeginRun;
   }
   // This means we've read the whole file
-  else if (m_chunkload == NULL) {
+  else if (m_chunkload == nullptr) {
     return EndRun;
   }
   // Otherwise we're in the run
@@ -125,7 +125,7 @@ boost::shared_ptr<Workspace> FileEventDataListener::extractData() {
   // algorithm.
   // This is equivalent to the end of the run - which we still need to figure
   // out how to handle.
-  if (m_chunkload == NULL) {
+  if (m_chunkload == nullptr) {
     throw std::runtime_error("The whole file has been read!");
   }
 
@@ -141,7 +141,7 @@ boost::shared_ptr<Workspace> FileEventDataListener::extractData() {
   AnalysisDataService::Instance().remove(m_tempWSname);
   // Delete the ActiveResult to signify that we're done with it.
   delete m_chunkload;
-  m_chunkload = NULL;
+  m_chunkload = nullptr;
   // Kick off the loading of the next chunk (unless we're at the end of the
   // file)
   if (m_nextChunk <= m_numChunks) {

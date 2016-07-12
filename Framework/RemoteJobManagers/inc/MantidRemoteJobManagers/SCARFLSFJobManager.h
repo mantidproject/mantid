@@ -36,17 +36,17 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport SCARFLSFJobManager
     : public Mantid::RemoteJobManagers::LSFJobManager {
 public:
-  virtual void authenticate(const std::string &username,
-                            const std::string &password);
+  void authenticate(const std::string &username,
+                    const std::string &password) override;
 
   /// Ping the server to see if it is alive and responding.
   virtual bool ping();
 
-  virtual void logout(const std::string &username = std::string());
+  void logout(const std::string &username = std::string()) override;
 
 private:
   std::string guessJobSubmissionAppName(const std::string &runnablePath,
-                                        const std::string &jobOptions);
+                                        const std::string &jobOptions) override;
 
   /// helper to encode uri components (SCARF username / passwords)
   static std::string urlComponentEncode(const std::string &in);

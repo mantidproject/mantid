@@ -32,34 +32,6 @@ RotaryCounter::RotaryCounter(const int S, const int N)
     RC[i] = i;
 }
 
-RotaryCounter::RotaryCounter(const RotaryCounter &A)
-    : Rmax(A.Rmax), RC(A.RC)
-/**
-  Standard copy constructor
-  @param A :: Object to copy
-*/
-{}
-
-RotaryCounter &RotaryCounter::operator=(const RotaryCounter &A)
-/**
-  Assignment operator
-  @param A :: Object to copy
-  @return *this
- */
-{
-  if (this != &A) {
-    Rmax = A.Rmax;
-    RC = A.RC;
-  }
-  return *this;
-}
-
-RotaryCounter::~RotaryCounter()
-/**
-  Standard Destructor
-*/
-{}
-
 int RotaryCounter::operator==(const RotaryCounter &A) const
 /**
   Chec to find if Counters identical in ALL respects

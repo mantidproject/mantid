@@ -4,16 +4,19 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Algorithms/CalculateChiSquared.h"
+#include "MantidAPI/Column.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/Column.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/EmptyValues.h"
 
-#include <algorithm>
 #include <boost/math/special_functions/fpclassify.hpp>
+
+#include <algorithm>
 #include <limits>
 
 using Mantid::CurveFitting::Algorithms::CalculateChiSquared;
@@ -475,7 +478,7 @@ private:
           function->function(x, y);
           double tmp = yValues[i] - y[0];
           // std::cerr << "test " << xValue << ' ' << yValues[i] << ' ' << y[0]
-          // << std::endl;
+          // << '\n';
           sum2 += tmp * tmp;
           tmp /= eValues[i];
           sum2w += tmp * tmp;

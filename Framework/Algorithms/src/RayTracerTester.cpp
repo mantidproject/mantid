@@ -21,29 +21,18 @@ namespace Algorithms {
 DECLARE_ALGORITHM(RayTracerTester)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-RayTracerTester::RayTracerTester() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RayTracerTester::~RayTracerTester() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void RayTracerTester::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".xml"),
-                  "The filename (including its full or relative path) of an "
-                  "instrument definition file");
+  declareProperty(
+      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".xml"),
+      "The filename (including its full or relative path) of an "
+      "instrument definition file");
   declareProperty("NumAzimuth", 100, "Steps in azimuthal angles");
   declareProperty("NumZenith", 50, "Steps in zenith angles");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output workspace.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -82,7 +71,7 @@ void RayTracerTester::exec() {
       IDetector_const_sptr det = tracker.getDetectorResult();
       if (det) {
         size_t wi = detTowi[det->getID()];
-        g_log.information() << "Found detector " << det->getID() << std::endl;
+        g_log.information() << "Found detector " << det->getID() << '\n';
         ws->dataY(wi)[0] = double(int(az * 57.3) * 1000 + int(iz));
       }
     }

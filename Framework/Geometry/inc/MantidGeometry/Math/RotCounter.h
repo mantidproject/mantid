@@ -27,9 +27,6 @@ private:
 
 public:
   RotaryCounter(const int S, const int N); ///<Size,Max
-  RotaryCounter(const RotaryCounter &);
-  RotaryCounter &operator=(const RotaryCounter &);
-  ~RotaryCounter();
 
   int operator==(const RotaryCounter &) const;
   int operator<(const RotaryCounter &) const;

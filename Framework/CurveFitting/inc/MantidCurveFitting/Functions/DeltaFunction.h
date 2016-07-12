@@ -43,36 +43,34 @@ class DLLExport DeltaFunction : public API::IPeakFunction {
 public:
   /// Constructor
   DeltaFunction();
-  /// Destructor
-  virtual ~DeltaFunction(){};
 
   /// overwrite IPeakFunction base class methods
-  virtual double centre() const { return 0; }
-  virtual double height() const { return getParameter("Height"); }
-  virtual double fwhm() const { return 0; }
-  virtual void setCentre(const double c) { UNUSED_ARG(c); }
-  virtual void setHeight(const double h) { setParameter("Height", h); }
-  virtual void setFwhm(const double w) { UNUSED_ARG(w); }
+  double centre() const override { return 0; }
+  double height() const override { return getParameter("Height"); }
+  double fwhm() const override { return 0; }
+  void setCentre(const double c) override { UNUSED_ARG(c); }
+  void setHeight(const double h) override { setParameter("Height", h); }
+  void setFwhm(const double w) override { UNUSED_ARG(w); }
   virtual double HeightPrefactor() const {
     return 1.0;
   } // modulates the Height of the Delta function
   /// overwrite IFunction base class methods
-  std::string name() const { return "DeltaFunction"; }
-  virtual const std::string category() const { return "Peak"; }
+  std::string name() const override { return "DeltaFunction"; }
+  const std::string category() const override { return "Peak"; }
 
 protected:
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
-  virtual void functionDeriv1D(API::Jacobian *out, const double *xValues,
-                               const size_t nData);
-  virtual void functionLocal(double *out, const double *xValues,
-                             const size_t nData) const {
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
+  void functionDeriv1D(API::Jacobian *out, const double *xValues,
+                       const size_t nData) override;
+  void functionLocal(double *out, const double *xValues,
+                     const size_t nData) const override {
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);
     UNUSED_ARG(nData);
   }
-  virtual void functionDerivLocal(API::Jacobian *out, const double *xValues,
-                                  const size_t nData) {
+  void functionDerivLocal(API::Jacobian *out, const double *xValues,
+                          const size_t nData) override {
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);
     UNUSED_ARG(nData);

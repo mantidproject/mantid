@@ -33,15 +33,15 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport RunPythonScript : public API::Algorithm {
 public:
-  const std::string name() const;
-  int version() const;
-  const std::string category() const;
-  const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  virtual bool checkGroups();
-  void init();
-  void exec();
+  bool checkGroups() override;
+  void init() override;
+  void exec() override;
 
   /// Return the code string to execute
   std::string scriptCode() const;

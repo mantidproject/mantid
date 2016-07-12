@@ -24,29 +24,29 @@ class LocalGaussian : public IPeakFunction {
 public:
   LocalGaussian() : IPeakFunction() {}
 
-  std::string name() const { return "LocalGaussian"; }
+  std::string name() const override { return "LocalGaussian"; }
 
-  double centre() const { return getParameter("Center"); }
-  void setCentre(const double c) { setParameter("Center", c); }
+  double centre() const override { return getParameter("Center"); }
+  void setCentre(const double c) override { setParameter("Center", c); }
 
-  double fwhm() const {
-    return getParameter("Sigma") * (2.0 * sqrt(2.0 * log(2.0)));
+  double fwhm() const override {
+    return getParameter("Sigma") * (2.0 * sqrt(2.0 * M_LN2));
   }
-  void setFwhm(const double w) {
-    setParameter("Sigma", w / (2.0 * sqrt(2.0 * log(2.0))));
+  void setFwhm(const double w) override {
+    setParameter("Sigma", w / (2.0 * sqrt(2.0 * M_LN2)));
   }
 
-  double height() const { return getParameter("Height"); }
-  void setHeight(const double h) { setParameter("Height", h); }
+  double height() const override { return getParameter("Height"); }
+  void setHeight(const double h) override { setParameter("Height", h); }
 
-  void init() {
+  void init() override {
     declareParameter("Center");
     declareParameter("Sigma");
     declareParameter("Height");
   }
 
   void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const {
+                     const size_t nData) const override {
     double h = getParameter("Height");
     double s = getParameter("Sigma");
     double c = getParameter("Center");
@@ -57,7 +57,7 @@ public:
   }
 
   void functionDerivLocal(Jacobian *out, const double *xValues,
-                          const size_t nData) {
+                          const size_t nData) override {
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);
     UNUSED_ARG(nData);
@@ -80,8 +80,8 @@ private:
   }
 
   double getGaussianAnalyticalInfiniteIntegral(IPeakFunction_sptr gaussian) {
-    return gaussian->height() * gaussian->fwhm() /
-           (2.0 * sqrt(2.0 * log(2.0))) * sqrt(2.0 * M_PI);
+    return gaussian->height() * gaussian->fwhm() / (2.0 * sqrt(M_LN2)) *
+           sqrt(M_PI);
   }
 
 public:
@@ -169,7 +169,7 @@ public:
      *  -integral from -3 to 3 should give approx. 0.997
      */
     IPeakFunction_sptr gaussian =
-        getGaussian(0.0, 2.0 * sqrt(2.0 * log(2.0)), 1.0 / sqrt(2.0 * M_PI));
+        getGaussian(0.0, 2.0 * sqrt(2.0 * M_LN2), 1.0 / sqrt(2.0 * M_PI));
     PeakFunctionIntegrator integrator(1e-10);
 
     IntegrationResult rOneSigma = integrator.integrate(*gaussian, -1.0, 1.0);

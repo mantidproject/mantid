@@ -1,15 +1,19 @@
 #ifndef MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO_H_
 #define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/System.h"
+
 #include <boost/optional.hpp>
 
 namespace Mantid {
 namespace Algorithms {
 
-/** ReflectometryReductionOneAuto : TODO: DESCRIPTION
+/** ReflectometryReductionOneAuto : Algorithm to run ReflectometryReductionOne,
+attempting to pick instrument parameters for
+ * missing properties.
 
 Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -35,26 +39,19 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport ReflectometryReductionOneAuto
     : public API::DataProcessorAlgorithm {
 public:
-  ReflectometryReductionOneAuto();
-  virtual ~ReflectometryReductionOneAuto();
-
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
   // For (multiperiod) workspace groups
-  virtual bool checkGroups();
-  virtual bool processGroups();
+  bool checkGroups() override;
+  bool processGroups() override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   template <typename T> boost::optional<T> isSet(std::string propName) const;
-
-  double checkForDefault(std::string propName,
-                         Mantid::Geometry::Instrument_const_sptr instrument,
-                         std::string idf_name = "") const;
   Mantid::API::Workspace_sptr
   sumOverTransmissionGroup(Mantid::API::WorkspaceGroup_sptr &transGroup);
 

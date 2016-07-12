@@ -38,11 +38,11 @@ public:
   /// Gets the type of the validator
   std::string getType() const { return "spectraaxis"; }
   /// Clone the current validator
-  Kernel::IValidator_sptr clone() const;
+  Kernel::IValidator_sptr clone() const override;
 
 private:
   /// Check for validity
-  std::string checkValidity(const MatrixWorkspace_sptr &value) const;
+  std::string checkValidity(const MatrixWorkspace_sptr &value) const override;
   /// Axis number to check on, defaults to 1
   const int m_axisNumber;
 };

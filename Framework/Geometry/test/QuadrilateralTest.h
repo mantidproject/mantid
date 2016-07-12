@@ -85,6 +85,46 @@ public:
     TS_ASSERT(!smallRectangle.contains(largeRectangle));
   }
 
+  void test_point_outside_quadrilateral() {
+    // Quadrilateral with vertexes at:
+    // Lower left: (5, 0)
+    // Upper left: (0, 10)
+    // Upper right: (10, 10)
+    // Lower right: (10, 0)
+    Quadrilateral quad(V2D(5, 0), V2D(10, 0), V2D(10, 10), V2D(0, 10));
+
+    // Single point at (2,2)
+    TS_ASSERT(!quad.contains(V2D(1, 1)));
+    // Single point at (5, -1)
+    TS_ASSERT(!quad.contains(V2D(5, -1)));
+    // Single point at (11, 5)
+    TS_ASSERT(!quad.contains(V2D(11, 5)));
+    // Single point at (5, 11)
+    TS_ASSERT(!quad.contains(V2D(5, 11)));
+  }
+
+  void test_polygon_outside_quadrilateral() {
+
+    // Quadrilateral with vertexes at:
+    // Lower left: (5, 0)
+    // Upper left: (0, 10)
+    // Upper right: (10, 10)
+    // Lower right: (10, 0)
+    Quadrilateral quad(V2D(5, 0), V2D(10, 0), V2D(10, 10), V2D(0, 10));
+
+    // Polygon with vertexes at:
+    // Lower left: (1, 1)
+    // Lower right: (2, 1)
+    // Upper right: (2, 2)
+    // Upper left: (1, 2)
+    Quadrilateral smallQuad(V2D(1, 1), V2D(2, 1), V2D(2, 2), V2D(1, 2));
+    // Create a polygon from smallQuad so we
+    // can test Quadrilateral::contains
+    ConvexPolygon poly = smallQuad.toPoly();
+    // poly should not be inside quad
+    TS_ASSERT(!quad.contains(poly));
+  }
+
   void test_clockwise_rotation() {
     Quadrilateral quad(V2D(0.0, 0.0), V2D(1.0, 3.0), V2D(4.0, 4.0),
                        V2D(4.0, 1.0));
@@ -112,12 +152,18 @@ private:
 //------------------------------------------------------------------------------
 class QuadrilateralTestPerformance : public CxxTest::TestSuite {
 public:
-  void test_Area_Calls() {
-    const size_t ntests(50000000);
-
-    double totalArea(0.0);
+  void test_update_values() {
+    const size_t ntests{50000000};
     for (size_t i = 0; i < ntests; ++i) {
       Quadrilateral test(V2D(), V2D(2.0, 0.0), V2D(2.0, 1.5), V2D(0.0, 1.5));
+    }
+  }
+
+  void test_Area_Calls() {
+    const size_t ntests{50000000};
+    double totalArea{0.0};
+    Quadrilateral test(V2D(), V2D(2.0, 0.0), V2D(2.0, 1.5), V2D(0.0, 1.5));
+    for (size_t i = 0; i < ntests; ++i) {
       totalArea += test.area();
     }
   }

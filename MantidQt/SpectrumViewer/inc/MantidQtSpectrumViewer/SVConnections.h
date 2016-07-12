@@ -11,7 +11,7 @@
 #include "MantidQtSpectrumViewer/SpectrumDisplay.h"
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
-
+#include "MantidQtSpectrumViewer/ColorMaps.h"
 
 /**
     @class SVConnections
@@ -46,30 +46,24 @@
                  <http://doxygen.mantidproject.org>
  */
 
-namespace MantidQt
-{
-namespace SpectrumView
-{
+namespace MantidQt {
+namespace SpectrumView {
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SVConnections: public QWidget
-{
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SVConnections : public QWidget {
   Q_OBJECT
 
 public:
-
   /// Construct the object that links the GUI components to the other specifed
   /// higher level objects.
-  SVConnections( Ui_SpectrumViewer* ui,
-                 SpectrumView*      spectrumView,
-                 SpectrumDisplay*   spectrumDisplay,
-                 GraphDisplay*      hGraphDisplay,
-                 GraphDisplay*      vGraphDisplay );
+  SVConnections(Ui_SpectrumViewer *ui, SpectrumView *spectrumView,
+                SpectrumDisplay *spectrumDisplay, GraphDisplay *hGraphDisplay,
+                GraphDisplay *vGraphDisplay);
 
-  ~SVConnections();
+  ~SVConnections() override;
 
   /// Set the pix map that shows the color scale from the specified color maps
-  void showColorScale( std::vector<QRgb> & positiveColorTable,
-                       std::vector<QRgb> & negativeColorTable );
+  void showColorScale(std::vector<QRgb> &positiveColorTable,
+                      std::vector<QRgb> &negativeColorTable);
 
 public slots:
   void closeViewer();
@@ -95,33 +89,34 @@ public slots:
   void multiColorScale();
   void spectrumColorScale();
 
-  void setSpectrumDisplay(SpectrumDisplay* spectrumDisplay);
-  SpectrumDisplay* getCurrentSpectrumDisplay() const;
-  void removeSpectrumDisplay(SpectrumDisplay* spectrumDisplay);
+  void setSpectrumDisplay(SpectrumDisplay *spectrumDisplay);
+  SpectrumDisplay *getCurrentSpectrumDisplay() const;
+  void removeSpectrumDisplay(SpectrumDisplay *spectrumDisplay);
 
 private:
   /// Event filter for mouse wheel capture
-  bool eventFilter(QObject *object, QEvent *event);
+  bool eventFilter(QObject *object, QEvent *event) override;
+  void setColorScale(ColorMaps::ColorScale positive,
+                     ColorMaps::ColorScale negative);
 
-  Ui_SpectrumViewer*  m_svUI;
-  SpectrumView*       m_svMainWindow;
-  QList<SpectrumDisplay*>  m_spectrumDisplays;
-  SpectrumDisplay*  m_currentSpectrumDisplay;
-  GraphDisplay*       m_hGraphDisplay;
-  GraphDisplay*       m_vGraphDisplay;
-  TrackingPicker*     m_hGraphPicker;
-  TrackingPicker*     m_vGraphPicker;
-  QActionGroup*       m_colorGroup;
+  Ui_SpectrumViewer *m_svUI;
+  SpectrumView *m_svMainWindow;
+  QList<SpectrumDisplay *> m_spectrumDisplays;
+  SpectrumDisplay *m_currentSpectrumDisplay;
+  GraphDisplay *m_hGraphDisplay;
+  GraphDisplay *m_vGraphDisplay;
+  TrackingPicker *m_hGraphPicker;
+  TrackingPicker *m_vGraphPicker;
+  QActionGroup *m_colorGroup;
 
   /// Last known cursor position in the data (x-direction).
   int m_pickerX;
 
   /// Last known cursor position in the data (y-direction).
   int m_pickerY;
-
 };
 
 } // namespace SpectrumView
 } // namespace MantidQt
 
-#endif  // SV_CONNECTIONS_H
+#endif // SV_CONNECTIONS_H

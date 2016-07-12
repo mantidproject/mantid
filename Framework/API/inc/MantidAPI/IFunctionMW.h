@@ -48,7 +48,7 @@ public:
   /// Set MatrixWorkspace
   void
   setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX);
+                     size_t wi, double startX, double endX) override;
   /// Get shared pointer to the workspace
   boost::shared_ptr<const API::MatrixWorkspace> getMatrixWorkspace() const;
   /// Get the workspace index

@@ -39,7 +39,7 @@ namespace Poldi {
 class MANTID_SINQ_DLL PoldiDetectorFactory {
 public:
   PoldiDetectorFactory();
-  virtual ~PoldiDetectorFactory() {}
+  virtual ~PoldiDetectorFactory() = default;
 
   virtual PoldiAbstractDetector *createDetector(std::string detectorType);
   virtual PoldiAbstractDetector *

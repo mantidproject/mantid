@@ -12,8 +12,6 @@ UserCatalogInfo::UserCatalogInfo(
 UserCatalogInfo::UserCatalogInfo(const UserCatalogInfo &other)
     : m_catInfo(other.m_catInfo->clone()), m_mountPoint(other.m_mountPoint) {}
 
-UserCatalogInfo::~UserCatalogInfo() {}
-
 const std::string UserCatalogInfo::catalogName() const {
   return m_catInfo->catalogName();
 }

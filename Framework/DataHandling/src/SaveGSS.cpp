@@ -6,7 +6,7 @@
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -55,13 +55,13 @@ bool isConstantDelta(const MantidVec &xAxis) {
   */
 void SaveGSS::init() {
   // Data must be in TOF
-  declareProperty(new API::WorkspaceProperty<>(
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
                       "InputWorkspace", "", Kernel::Direction::Input,
                       boost::make_shared<API::WorkspaceUnitValidator>("TOF")),
                   "The input workspace, which must be in time-of-flight");
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Save),
-      "The filename to use for the saved data");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Save),
+                  "The filename to use for the saved data");
   declareProperty("SplitFiles", true,
                   "Whether to save each spectrum into a separate file ('true') "
                   "or not ('false'). "
@@ -99,7 +99,7 @@ void SaveGSS::init() {
 void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
                    double &l1, double &l2, double &tth, double &difc) {
   Geometry::Instrument_const_sptr instrument = wksp->getInstrument();
-  if (instrument == NULL) {
+  if (instrument == nullptr) {
     l1 = 0.;
     l2 = 0.;
     tth = 0.;
@@ -107,7 +107,7 @@ void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
   }
   Geometry::IComponent_const_sptr source = instrument->getSource();
   Geometry::IComponent_const_sptr sample = instrument->getSample();
-  if (source == NULL || sample == NULL) {
+  if (source == nullptr || sample == nullptr) {
     l1 = 0.;
     l2 = 0.;
     tth = 0.;
@@ -122,10 +122,10 @@ void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
     throw std::runtime_error(errss.str());
   }
   l2 = det->getDistance(*sample);
-  tth = wksp->detectorTwoTheta(det);
+  tth = wksp->detectorTwoTheta(*det);
 
-  difc = ((2.0 * PhysicalConstants::NeutronMass * sin(tth / 2.0) * (l1 + l2)) /
-          (PhysicalConstants::h * 1e4));
+  difc = ((2.0 * PhysicalConstants::NeutronMass * sin(tth * 0.5) * (l1 + l2)) /
+          (PhysicalConstants::h * 1.e4));
 
   return;
 }
@@ -206,7 +206,7 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
   Geometry::IComponent_const_sptr source;
   Geometry::IComponent_const_sptr sample;
   bool has_instrument = false;
-  if (instrument != NULL) {
+  if (instrument != nullptr) {
     source = instrument->getSource();
     sample = instrument->getSample();
     if (source && sample)
@@ -291,7 +291,7 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
     // Determine bank number into GSAS file
     int bankid;
     if (m_useSpecAsBank) {
-      bankid = static_cast<int>(inputWS->getSpectrum(iws)->getSpectrumNo());
+      bankid = static_cast<int>(inputWS->getSpectrum(iws).getSpectrumNo());
     } else {
       bankid = basebanknumber + iws;
     }
@@ -379,7 +379,7 @@ void writeLogValue(std::ostream &os, const Run &runinfo,
   Kernel::Property *prop = runinfo.getProperty(name);
 
   // Return without a valid pointer to property
-  if (prop == NULL) {
+  if (prop == nullptr) {
     os << defValue;
     return;
   }
@@ -430,7 +430,7 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
     // the instrument parameter file
     if (runinfo.hasProperty("iparm_file")) {
       Kernel::Property *prop = runinfo.getProperty("iparm_file");
-      if (prop != NULL && (!prop->value().empty())) {
+      if (prop != nullptr && (!prop->value().empty())) {
         std::stringstream line;
         line << "#Instrument parameter file: " << prop->value();
         os << std::setw(80) << std::left << line.str() << "\n";
@@ -472,10 +472,10 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
     bool norm_by_monitor = false;
     const Mantid::API::AlgorithmHistories &algohist =
         inputWS->getHistory().getAlgorithmHistories();
-    for (auto it = algohist.cbegin(); it != algohist.cend(); ++it) {
-      if ((*it)->name().compare("NormaliseByCurrent") == 0)
+    for (const auto &algo : algohist) {
+      if (algo->name().compare("NormaliseByCurrent") == 0)
         norm_by_current = true;
-      if ((*it)->name().compare("NormaliseToMonitor") == 0)
+      if (algo->name().compare("NormaliseToMonitor") == 0)
         norm_by_monitor = true;
     }
     os << "#";
@@ -535,7 +535,7 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
       << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc2
       << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc1
       << std::fixed << " " << std::setprecision(5) << std::setw(7) << bc4
-      << " FXYE" << std::endl;
+      << " FXYE\n";
 
   // Do each Y entry
   for (size_t j = 0; j < datasize; j++) {
@@ -587,13 +587,13 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
                       *(X.rbegin() + 1));      // maximum TOF (in microseconds?)
   double bc3 = (*(X.begin() + 1) - bc1) / bc1; // deltaT/T
 
-  g_log.debug() << "SaveGSS(): Min TOF = " << bc1 << std::endl;
+  g_log.debug() << "SaveGSS(): Min TOF = " << bc1 << '\n';
 
   writeBankLine(out, "SLOG", bank, datasize);
   out << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc1
       << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc2
       << std::fixed << " " << std::setprecision(7) << std::setw(10) << bc3
-      << std::fixed << " 0 FXYE" << std::endl;
+      << std::fixed << " 0 FXYE\n";
 
   for (size_t i = 0; i < datasize; i++) {
     double y = Y[i];

@@ -13,6 +13,9 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
+#include <unordered_set>
+
+#include <mutex>
 
 namespace Mantid {
 namespace Kernel {
@@ -205,7 +208,7 @@ public:
       m_mutex.unlock();
       throw std::runtime_error(error);
     } else {
-      g_log.debug() << "Add Data Object " << name << " successful" << std::endl;
+      g_log.debug() << "Add Data Object " << name << " successful\n";
       m_mutex.unlock();
 
       notificationCenter.postNotification(new AddNotification(name, Tobject));
@@ -230,7 +233,7 @@ public:
 
     // find if the Tobject already exists
     std::string foundName;
-    svc_it it = findNameWithCaseSearch(name, foundName);
+    auto it = findNameWithCaseSearch(name, foundName);
     if (it != datamap.end()) {
       g_log.debug("Data Object '" + foundName +
                   "' replaced in data service.\n");
@@ -261,7 +264,7 @@ public:
     m_mutex.lock();
 
     std::string foundName;
-    svc_it it = findNameWithCaseSearch(name, foundName);
+    auto it = findNameWithCaseSearch(name, foundName);
     if (it == datamap.end()) {
       g_log.debug(" remove '" + name + "' cannot be found");
       m_mutex.unlock();
@@ -302,7 +305,7 @@ public:
     m_mutex.lock();
 
     std::string foundName;
-    svc_it it = findNameWithCaseSearch(oldName, foundName);
+    auto it = findNameWithCaseSearch(oldName, foundName);
     if (it == datamap.end()) {
       g_log.warning(" rename '" + oldName + "' cannot be found");
       m_mutex.unlock();
@@ -359,10 +362,10 @@ public:
    * @param name :: name of the object */
   boost::shared_ptr<T> retrieve(const std::string &name) const {
     // Make DataService access thread-safe
-    Poco::Mutex::ScopedLock _lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
     std::string foundName;
-    svc_it it = findNameWithCaseSearch(name, foundName);
+    auto it = findNameWithCaseSearch(name, foundName);
     if (it != datamap.end()) {
       return it->second;
     } else {
@@ -376,25 +379,23 @@ public:
   /// Check to see if a data object exists in the store
   bool doesExist(const std::string &name) const {
     // Make DataService access thread-safe
-    Poco::Mutex::ScopedLock _lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
     std::string foundName;
-    svc_it it = findNameWithCaseSearch(name, foundName);
-    if (it != datamap.end())
-      return true;
-    return false;
+    auto it = findNameWithCaseSearch(name, foundName);
+    return it != datamap.end();
   }
 
   /// Return the number of objects stored by the data service
   size_t size() const {
-    Poco::Mutex::ScopedLock _lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
     if (showingHiddenObjects()) {
       return datamap.size();
     } else {
       size_t count = 0;
-      for (svc_constit it = datamap.begin(); it != datamap.end(); ++it) {
-        if (!isHiddenDataServiceObject(it->first))
+      for (auto &it : datamap) {
+        if (!isHiddenDataServiceObject(it.first))
           ++count;
       }
       return count;
@@ -402,35 +403,35 @@ public:
   }
 
   /// Get the names of the data objects stored by the service
-  std::set<std::string> getObjectNames() const {
+  std::unordered_set<std::string> getObjectNames() const {
     if (showingHiddenObjects())
       return getObjectNamesInclHidden();
 
-    Poco::Mutex::ScopedLock _lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
-    std::set<std::string> names;
-    for (svc_constit it = datamap.begin(); it != datamap.end(); ++it) {
-      if (!isHiddenDataServiceObject(it->first)) {
-        names.insert(it->first);
+    std::unordered_set<std::string> names;
+    for (const auto &item : datamap) {
+      if (!isHiddenDataServiceObject(item.first)) {
+        names.insert(item.first);
       }
     }
     return names;
   }
 
   /// Get the names of the data objects stored by the service
-  std::set<std::string> getObjectNamesInclHidden() const {
-    Poco::Mutex::ScopedLock _lock(m_mutex);
+  std::unordered_set<std::string> getObjectNamesInclHidden() const {
+    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
-    std::set<std::string> names;
-    for (svc_constit it = datamap.begin(); it != datamap.end(); ++it) {
-      names.insert(it->first);
+    std::unordered_set<std::string> names;
+    for (const auto &item : datamap) {
+      names.insert(item.first);
     }
     return names;
   }
 
   /// Get a vector of the pointers to the data objects stored by the service
   std::vector<boost::shared_ptr<T>> getObjects() const {
-    Poco::Mutex::ScopedLock _lock(m_mutex);
+    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
     const bool showingHidden = showingHiddenObjects();
     std::vector<boost::shared_ptr<T>> objects;
@@ -469,7 +470,7 @@ public:
 protected:
   /// Protected constructor (singleton)
   DataService(const std::string &name) : svcName(name), g_log(svcName) {}
-  virtual ~DataService() {}
+  virtual ~DataService() = default;
 
 private:
   /// Private, unimplemented copy constructor
@@ -480,7 +481,7 @@ private:
   void checkForEmptyName(const std::string &name) {
     if (name.empty()) {
       const std::string error = "Add Data Object with empty name";
-      g_log.debug() << error << std::endl;
+      g_log.debug() << error << '\n';
       throw std::runtime_error(error);
     }
   }
@@ -488,7 +489,7 @@ private:
   void checkForNullPointer(const boost::shared_ptr<T> &Tobject) {
     if (!Tobject) {
       const std::string error = "Attempt to add empty shared pointer";
-      g_log.debug() << error << std::endl;
+      g_log.debug() << error << '\n';
       throw std::runtime_error(error);
     }
   }
@@ -512,7 +513,7 @@ private:
 
     // Exact match
     foundName = name;
-    svc_it match = data.find(name);
+    auto match = data.find(name);
     if (match != data.end())
       return match;
 
@@ -547,7 +548,7 @@ private:
   /// Map of objects in the data service
   svcmap datamap;
   /// Recursive mutex to avoid simultaneous access or notifications
-  mutable Poco::Mutex m_mutex;
+  mutable std::recursive_mutex m_mutex;
   /// Logger for this DataService
   Logger g_log;
 }; // End Class Data service

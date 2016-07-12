@@ -56,11 +56,6 @@ public:
       const RationalNumber &z);
   V3R(const std::vector<int> &vector);
 
-  V3R(const V3R &other);
-  V3R &operator=(const V3R &other);
-
-  ~V3R();
-
   const RationalNumber &x() const;
   void setX(const RationalNumber &newX);
 

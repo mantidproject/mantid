@@ -1,4 +1,6 @@
-#pylint: disable=invalid-name
+# pylint: disable=protected-access, unused-variable, W0121
+
+# W0121 = Use raise ErrorClass(args) instead of raise ErrorClass, args.
 """
     Base reduction class. Hold a list of data and a list of reduction steps to apply to them.
 
@@ -22,27 +24,25 @@ import os
 import sys
 import time
 import types
-import inspect
 from reduction.instrument import Instrument
 import mantid
 from mantid import simpleapi
 import warnings
 import inspect
 import random
-import string
 from reduction.find_data import find_data
 
 
 ## Version number
 __version__ = '1.0'
 
-def validate_loader(f):
 
+def validate_loader(func):
     def validated_f(reducer, algorithm, *args, **kwargs):
         if issubclass(algorithm.__class__, ReductionStep) or algorithm is None:
             # If we have a ReductionStep object, just use it.
             # "None" is allowed as an algorithm (usually tells the reducer to skip a step)
-            return f(reducer, algorithm)
+            return func(reducer, algorithm)
 
         if isinstance(algorithm, types.FunctionType):
             # If we get a function, assume its name is an algorithm name
@@ -54,10 +54,13 @@ def validate_loader(f):
                 def __init__(self):
                     self.algorithm = None
                     self._data_file = None
+
                 def get_algorithm(self):
                     return self.algorithm
+
                 def setProperty(self, key, value):
-                    kwargs[key]=value
+                    kwargs[key] = value
+
                 def execute(self, reducer, inputworkspace=None, outputworkspace=None):
                     """
                         Create a new instance of the requested algorithm object,
@@ -82,7 +85,8 @@ def validate_loader(f):
 
                     alg = mantid.api.AlgorithmManager.create(algorithm)
                     if not isinstance(alg, mantid.api.AlgorithmProxy):
-                        raise RuntimeError, "Reducer expects an Algorithm object from FrameworkManager, found '%s'" % str(type(alg))
+                        raise RuntimeError, "Reducer expects an Algorithm object from FrameworkManager, found '%s'" % str(
+                            type(alg))
 
                     propertyOrder = alg.orderedProperties()
 
@@ -99,7 +103,7 @@ def validate_loader(f):
                         kwargs["Filename"] = data_file
 
                     if "AlternateName" in kwargs and \
-                        kwargs["AlternateName"] in propertyOrder:
+                                    kwargs["AlternateName"] in propertyOrder:
                         kwargs[kwargs["AlternateName"]] = data_file
 
                     self.algorithm = alg
@@ -108,18 +112,22 @@ def validate_loader(f):
                     if "OutputMessage" in propertyOrder:
                         return alg.getPropertyValue("OutputMessage")
                     return "%s applied" % alg.name()
-            return f(reducer, _AlgorithmStep())
+
+            return func(reducer, _AlgorithmStep())
 
         elif isinstance(algorithm, mantid.api.IAlgorithm) \
-            or type(algorithm).__name__=="IAlgorithm":
+                or type(algorithm).__name__ == "IAlgorithm":
             class _AlgorithmStep(ReductionStep):
                 def __init__(self):
                     self.algorithm = algorithm
                     self._data_file = None
+
                 def get_algorithm(self):
                     return self.algorithm
+
                 def setProperty(self, key, value):
-                    kwargs[key]=value
+                    kwargs[key] = value
+
                 def execute(self, reducer, inputworkspace=None, outputworkspace=None):
                     """
                         Create a new instance of the requested algorithm object,
@@ -153,18 +161,21 @@ def validate_loader(f):
                         algorithm.setPropertyValue("Filename", data_file)
 
                     if "AlternateName" in kwargs and \
-                        kwargs["AlternateName"] in propertyOrder:
+                                    kwargs["AlternateName"] in propertyOrder:
                         algorithm.setPropertyValue(kwargs["AlternateName"], data_file)
 
                     algorithm.execute()
                     return "%s applied" % algorithm.name()
-            return f(reducer, _AlgorithmStep())
+
+            return func(reducer, _AlgorithmStep())
 
         else:
-            raise RuntimeError, "%s expects a ReductionStep object, found %s" % (f.__name__, algorithm.__class__)
+            raise RuntimeError, "%s expects a ReductionStep object, found %s" % (func.__name__, algorithm.__class__)
+
     return validated_f
 
-def validate_step(f):
+
+def validate_step(func):
     """
         Decorator for Reducer methods that need a ReductionStep
         object as its first argument.
@@ -185,7 +196,7 @@ def validate_step(f):
 
     def validated_f(reducer, algorithm, *args, **kwargs):
         """
-            Wrapper function around the function f.
+            Wrapper function around the function func.
             The function ensures that the algorithm parameter
             is a sub-class of ReductionStep
             @param algorithm: algorithm name, ReductionStep object, or Mantid algorithm function
@@ -193,7 +204,7 @@ def validate_step(f):
         if issubclass(algorithm.__class__, ReductionStep) or algorithm is None:
             # If we have a ReductionStep object, just use it.
             # "None" is allowed as an algorithm (usually tells the reducer to skip a step)
-            return f(reducer, algorithm)
+            return func(reducer, algorithm)
 
         if isinstance(algorithm, types.FunctionType):
             # If we get a function, assume its name is an algorithm name
@@ -204,10 +215,13 @@ def validate_step(f):
             class _AlgorithmStep(ReductionStep):
                 def __init__(self):
                     self.algorithm = None
+
                 def get_algorithm(self):
                     return self.algorithm
+
                 def setProperty(self, key, value):
-                    kwargs[key]=value
+                    kwargs[key] = value
+
                 def execute(self, reducer, inputworkspace=None, outputworkspace=None):
                     """
                         Create a new instance of the requested algorithm object,
@@ -223,7 +237,8 @@ def validate_step(f):
                         outputworkspace = inputworkspace
                     alg = mantid.AlgorithmManager.create(algorithm)
                     if not isinstance(alg, mantid.api.AlgorithmProxy):
-                        raise RuntimeError, "Reducer expects an Algorithm object from FrameworkManager, found '%s'" % str(type(alg))
+                        raise RuntimeError, "Reducer expects an Algorithm object from FrameworkManager, found '%s'" % str(
+                            type(alg))
 
                     propertyOrder = alg.orderedProperties()
 
@@ -240,22 +255,26 @@ def validate_step(f):
                         kwargs["OutputWorkspace"] = outputworkspace
 
                     self.algorithm = alg
-                    simpleapi.set_properties(alg,*(),**kwargs)
+                    simpleapi.set_properties(alg, *(), **kwargs)
                     alg.execute()
                     if "OutputMessage" in propertyOrder:
                         return alg.getPropertyValue("OutputMessage")
                     return "%s applied" % alg.name()
-            return f(reducer, _AlgorithmStep())
+
+            return func(reducer, _AlgorithmStep())
 
         elif isinstance(algorithm, mantid.api.IAlgorithm) \
-            or type(algorithm).__name__=="IAlgorithm":
+                or type(algorithm).__name__ == "IAlgorithm":
             class _AlgorithmStep(ReductionStep):
                 def __init__(self):
                     self.algorithm = algorithm
+
                 def get_algorithm(self):
                     return self.algorithm
+
                 def setProperty(self, key, value):
-                    kwargs[key]=value
+                    kwargs[key] = value
+
                 def execute(self, reducer, inputworkspace=None, outputworkspace=None):
                     """
                         Create a new instance of the requested algorithm object,
@@ -283,11 +302,14 @@ def validate_step(f):
                     if "OutputMessage" in propertyOrder:
                         return algorithm.getPropertyValue("OutputMessage")
                     return "%s applied" % algorithm.name()
-            return f(reducer, _AlgorithmStep())
+
+            return func(reducer, _AlgorithmStep())
 
         else:
-            raise RuntimeError, "%s expects a ReductionStep object, found %s" % (f.__name__, algorithm.__class__)
+            raise RuntimeError, "%s expects a ReductionStep object, found %s" % (func.__name__, algorithm.__class__)
+
     return validated_f
+
 
 class Reducer(object):
     """
@@ -313,8 +335,9 @@ class Reducer(object):
     output_workspaces = []
 
     def __init__(self):
-        self.UID = ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(5))
-        self.property_manager = "__reduction_parameters_"+self.UID
+        self.UID = ''.join(
+            random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(5))
+        self.property_manager = "__reduction_parameters_" + self.UID
         self._data_files = {}
         self._reduction_steps = []
 
@@ -328,7 +351,8 @@ class Reducer(object):
         if issubclass(configuration.__class__, Instrument):
             self.instrument = configuration
         else:
-            raise RuntimeError, "Reducer.set_instrument expects an %s object, found %s" % (Instrument, configuration.__class__)
+            raise RuntimeError, "Reducer.set_instrument expects an %s object, found %s" % (
+                Instrument, configuration.__class__)
 
     def dirty(self, workspace):
         """
@@ -345,7 +369,7 @@ class Reducer(object):
             if bad_data in mtd:
                 simpleapi.DeleteWorkspace(Workspace=bad_data)
             else:
-                mantid.logger.notice('reducer: Could not access tainted workspace '+bad_data)
+                mantid.logger.notice('reducer: Could not access tainted workspace ' + bad_data)
 
     def clean(self, workspace):
         """
@@ -392,7 +416,8 @@ class Reducer(object):
             @param filename: name of the file to create the full path for
         """
         lineno = inspect.currentframe().f_code.co_firstlineno
-        warnings.warn_explicit("Reducer._full_file_path is deprecated: use find_data instead", DeprecationWarning, __file__, lineno)
+        warnings.warn_explicit("Reducer._full_file_path is deprecated: use find_data instead", DeprecationWarning,
+                               __file__, lineno)
 
         instrument_name = ''
         if self.instrument is not None:
@@ -419,6 +444,7 @@ class Reducer(object):
             other options the same.
         """
         self._data_files = {}
+
     def append_data_file(self, data_file, workspace=None):
         """
             Append a file to be processed.
@@ -433,7 +459,7 @@ class Reducer(object):
                 return
             else:
                 raise RuntimeError, "Trying to append a data set without a file name or an existing workspace."
-        if type(data_file)==list:
+        if type(data_file) == list:
             if workspace is None:
                 # Use the first file to determine the workspace name
                 workspace = extract_workspace_name(data_file[0])
@@ -481,13 +507,13 @@ class Reducer(object):
             for item in self._reduction_steps:
                 try:
                     result = item.execute(self, file_ws)
-                    if result is not None and len(str(result))>0:
+                    if result is not None and len(str(result)) > 0:
                         self.log_text += "%s\n" % str(result)
                 except:
                     self.log_text += "\n%s\n" % sys.exc_value
                     raise
 
-        #any clean up, possibly removing workspaces
+        # any clean up, possibly removing workspaces
         self.post_process()
 
         # Determine which directory to use
@@ -498,15 +524,15 @@ class Reducer(object):
             else:
                 output_dir = os.path.expanduser('~')
 
-        self.log_text += "Reduction completed in %g sec\n" % (time.time()-t_0)
-        log_path = os.path.join(output_dir,"%s_reduction.log" % instrument_name)
+        self.log_text += "Reduction completed in %g sec\n" % (time.time() - t_0)
+        log_path = os.path.join(output_dir, "%s_reduction.log" % instrument_name)
         self.log_text += "Log saved to %s" % log_path
 
         # Write the log to file
-        f = open(log_path, 'a')
-        f.write("\n-------------------------------------------\n")
-        f.write(self.log_text)
-        f.close()
+        file_dat = open(log_path, 'a')
+        file_dat.write("\n-------------------------------------------\n")
+        file_dat.write(self.log_text)
+        file_dat.close()
         return self.log_text
 
 
@@ -514,6 +540,7 @@ class ReductionStep(object):
     """
         Base class for reduction steps
     """
+
     @classmethod
     def delete_workspaces(cls, workspace):
         """
@@ -528,8 +555,9 @@ class ReductionStep(object):
         """
             Generate a unique name for an internal workspace
         """
-        random_str = ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(5))
-        return "__"+descriptor+"_"+extract_workspace_name(filepath)+"_"+random_str
+        random_str = ''.join(
+            random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(5))
+        return "__" + descriptor + "_" + extract_workspace_name(filepath) + "_" + random_str
 
     def execute(self, reducer, inputworkspace=None, outputworkspace=None):
         """
@@ -549,17 +577,16 @@ def extract_workspace_name(filepath, suffix=''):
         @param suffix: string to append to name
     """
     filepath_tmp = filepath
-    if type(filepath)==list:
+    if type(filepath) == list:
         filepath_tmp = filepath[0]
 
     (head, tail) = os.path.split(filepath_tmp)
     basename, extension = os.path.splitext(tail)
 
-    if type(filepath)==list:
+    if type(filepath) == list:
         basename += "_combined"
 
-    #TODO: check whether the workspace name is already in use
+    # TODO: check whether the workspace name is already in use
     #      and modify it if it is.
 
-    return basename+suffix
-
+    return basename + suffix

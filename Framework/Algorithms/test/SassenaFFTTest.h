@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include "MantidAlgorithms/SassenaFFT.h"
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/SaveAscii.h"
 #include "MantidAPI/FileProperty.h"

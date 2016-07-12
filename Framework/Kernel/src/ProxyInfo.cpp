@@ -5,11 +5,6 @@ namespace Mantid {
 namespace Kernel {
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ProxyInfo::~ProxyInfo() {}
-
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 ProxyInfo::ProxyInfo()
@@ -63,31 +58,6 @@ bool ProxyInfo::isHttpProxy() const { return m_isHttpProxy; }
  * @return True if an empty proxy.
  */
 bool ProxyInfo::emptyProxy() const { return m_isEmptyProxy; }
-
-/**
- * Copy constructor
- * @param other : to copy from
- */
-ProxyInfo::ProxyInfo(const ProxyInfo &other)
-    : m_host(other.m_host), m_port(other.m_port),
-      m_isHttpProxy(other.m_isHttpProxy), m_isEmptyProxy(other.m_isEmptyProxy) {
-
-}
-
-/**
- * Assignment operator
- * @param other : to assign from.
- * @return
- */
-ProxyInfo &ProxyInfo::operator=(const ProxyInfo &other) {
-  if (&other != this) {
-    m_host = other.m_host;
-    m_isEmptyProxy = other.m_isEmptyProxy;
-    m_isHttpProxy = other.m_isHttpProxy;
-    m_port = other.m_port;
-  }
-  return *this;
-}
 
 } // namespace Kernel
 } // namespace Mantid

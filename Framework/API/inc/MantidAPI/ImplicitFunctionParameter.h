@@ -61,7 +61,7 @@ public:
 
   virtual ImplicitFunctionParameter *clone() const = 0;
 
-  virtual ~ImplicitFunctionParameter() {}
+  virtual ~ImplicitFunctionParameter() = default;
 
 protected:
   bool m_isValid;

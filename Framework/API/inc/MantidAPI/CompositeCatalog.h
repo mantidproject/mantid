@@ -42,33 +42,33 @@ public:
   /// Adds a catalog to the list of catalogs (m_catalogs)
   void add(const ICatalog_sptr catalog);
   /// Log the user into the catalog system.
-  virtual CatalogSession_sptr login(const std::string &username,
-                                    const std::string &password,
-                                    const std::string &endpoint,
-                                    const std::string &facility);
+  CatalogSession_sptr login(const std::string &username,
+                            const std::string &password,
+                            const std::string &endpoint,
+                            const std::string &facility) override;
   /// Log the user out of the catalog system.
-  virtual void logout();
+  void logout() override;
   /// Search the catalog for data.
-  virtual void search(const ICat::CatalogSearchParam &inputs,
-                      ITableWorkspace_sptr &outputws, const int &offset,
-                      const int &limit);
+  void search(const ICat::CatalogSearchParam &inputs,
+              ITableWorkspace_sptr &outputws, const int &offset,
+              const int &limit) override;
   /// Obtain the number of results returned by the search method.
-  virtual int64_t
-  getNumberOfSearchResults(const ICat::CatalogSearchParam &inputs);
+  int64_t
+  getNumberOfSearchResults(const ICat::CatalogSearchParam &inputs) override;
   /// Show the logged in user's investigations search results.
-  virtual void myData(ITableWorkspace_sptr &outputws);
+  void myData(ITableWorkspace_sptr &outputws) override;
   /// Get datasets.
-  virtual void getDataSets(const std::string &investigationId,
-                           ITableWorkspace_sptr &outputws);
+  void getDataSets(const std::string &investigationId,
+                   ITableWorkspace_sptr &outputws) override;
   /// Get datafiles
-  virtual void getDataFiles(const std::string &investigationId,
-                            ITableWorkspace_sptr &outputws);
+  void getDataFiles(const std::string &investigationId,
+                    ITableWorkspace_sptr &outputws) override;
   /// Get instruments list
-  virtual void listInstruments(std::vector<std::string> &instruments);
+  void listInstruments(std::vector<std::string> &instruments) override;
   /// Get investigationtypes list
-  virtual void listInvestigationTypes(std::vector<std::string> &invstTypes);
+  void listInvestigationTypes(std::vector<std::string> &invstTypes) override;
   /// Keep current session alive
-  virtual void keepAlive();
+  void keepAlive() override;
 
 private:
   std::list<ICatalog_sptr> m_catalogs;

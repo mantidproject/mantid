@@ -1,12 +1,17 @@
-"""
+﻿"""
 Module containing classes that act as proxies to the various MantidPlot gui objects that are
 accessible from python. They listen for the QObject 'destroyed' signal and set the wrapped
 reference to None, thus ensuring that further attempts at access do not cause a crash.
 """
+from __future__ import (absolute_import, division,
+                        print_function)
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt, pyqtSlot
-import __builtin__
+try:
+    import builtins
+except ImportError:
+    import __builtin__ as builtins
 import mantid
 import mantidqtpython
 
@@ -60,7 +65,7 @@ class CrossThreadCall(QtCore.QObject):
         else:
             try:
                 self.__func_return = self.__callable(*self.__args, **self.__kwargs)
-            except Exception, exc:
+            except Exception as exc:
                 self.__exception = exc
 
         if self.__exception is not None:
@@ -74,11 +79,11 @@ class CrossThreadCall(QtCore.QObject):
 
             Most types pass okay, but enums don't so they have
             to be coerced to ints. An enum is currently detected
-            as a type that is not a bool and inherits from __builtin__.int
+            as a type that is not a bool and inherits from int
         """
         argtype = type(argument)
         return argtype
-        if isinstance(argument, __builtin__.int) and argtype != bool:
+        if isinstance(argument, builtins.int) and argtype != bool:
             argtype = int
         return argtype
 
@@ -179,7 +184,7 @@ class QtProxyObject(QtCore.QObject):
         """
         Return a string representation of the proxied object
         """
-        return `self._getHeldObject()`
+        return repr(self._getHeldObject())
 
     def _getHeldObject(self):
         """
@@ -563,7 +568,7 @@ class MantidMatrix(MDIWindow):
         return new_proxy(Graph, self._getHeldObject().plotGraph2D, type)
 
 #-----------------------------------------------------------------------------
-class InstrumentWindow(MDIWindow):
+class InstrumentView(MDIWindow):
     """Proxy for the instrument window
     """
 
@@ -592,7 +597,7 @@ class InstrumentWindow(MDIWindow):
     # ----- Deprecated functions -----
     def changeColormap(self, filename=None):
         import warnings
-        warnings.warn("InstrumentWindow.changeColormap has been deprecated. Use the render tab method instead.")
+        warnings.warn("InstrumentWidget.changeColormap has been deprecated. Use the render tab method instead.")
         callable = QtProxyObject.__getattr__(self, "changeColormap")
         if filename is None:
             callable()
@@ -601,32 +606,32 @@ class InstrumentWindow(MDIWindow):
 
     def setColorMapMinValue(self, value):
         import warnings
-        warnings.warn("InstrumentWindow.setColorMapMinValue has been deprecated. Use the render tab setMinValue method instead.")
+        warnings.warn("InstrumentWidget.setColorMapMinValue has been deprecated. Use the render tab setMinValue method instead.")
         QtProxyObject.__getattr__(self, "setColorMapMinValue")(value)
 
     def setColorMapMaxValue(self, value):
         import warnings
-        warnings.warn("InstrumentWindow.setColorMapMaxValue has been deprecated. Use the render tab setMaxValue method instead.")
+        warnings.warn("InstrumentWidget.setColorMapMaxValue has been deprecated. Use the render tab setMaxValue method instead.")
         QtProxyObject.__getattr__(self, "setColorMapMaxValue")(value)
 
     def setColorMapRange(self, minvalue, maxvalue):
         import warnings
-        warnings.warn("InstrumentWindow.setColorMapRange has been deprecated. Use the render tab setRange method instead.")
+        warnings.warn("InstrumentWidget.setColorMapRange has been deprecated. Use the render tab setRange method instead.")
         QtProxyObject.__getattr__(self, "setColorMapRange")(minvalue,maxvalue)
 
     def setScaleType(self, scale_type):
         import warnings
-        warnings.warn("InstrumentWindow.setScaleType has been deprecated. Use the render tab setScaleType method instead.")
+        warnings.warn("InstrumentWidget.setScaleType has been deprecated. Use the render tab setScaleType method instead.")
         QtProxyObject.__getattr__(self, "setScaleType")(scale_type)
 
     def setViewType(self, view_type):
         import warnings
-        warnings.warn("InstrumentWindow.setViewType has been deprecated. Use the render tab setSurfaceType method instead.")
+        warnings.warn("InstrumentWidget.setViewType has been deprecated. Use the render tab setSurfaceType method instead.")
         QtProxyObject.__getattr__(self, "setViewType")(view_type)
 
     def selectComponent(self, name):
         import warnings
-        warnings.warn("InstrumentWindow.selectComponent has been deprecated. Use the tree tab selectComponentByName method instead.")
+        warnings.warn("InstrumentWidget.selectComponent has been deprecated. Use the tree tab selectComponentByName method instead.")
         QtProxyObject.__getattr__(self, "selectComponent")(name)
 
 
@@ -669,7 +674,7 @@ class SliceViewerWindowProxy(QtProxyObject):
         """
         Return a string representation of the proxied object
         """
-        return `self._getHeldObject()`
+        return repr(self._getHeldObject())
 
     def __dir__(self):
         """
@@ -777,7 +782,7 @@ def getWorkspaceNames(source):
         try:
             # for non-existent names this raises a KeyError
             w = mantid.AnalysisDataService.Instance()[source]
-        except Exception, exc:
+        except Exception as exc:
             raise ValueError("Workspace '%s' not found!"%source)
 
         if w != None:

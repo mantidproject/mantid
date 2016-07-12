@@ -1,14 +1,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <cmath>
-#include <vector>
-
-#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAlgorithms/RemoveExpDecay.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAlgorithms/RemoveExpDecay.h"
+
+#include <cmath>
+#include <vector>
 
 namespace Mantid {
 namespace Algorithms {
@@ -24,15 +26,15 @@ DECLARE_ALGORITHM(MuonRemoveExpDecay)
  *
  */
 void MuonRemoveExpDecay::init() {
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input 2D workspace.");
-  declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
+  declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output 2D workspace.");
   std::vector<int> empty;
   declareProperty(
-      new Kernel::ArrayProperty<int>("Spectra", empty),
+      Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra", empty),
       "The workspace indices to remove the exponential decay from.");
 }
 
@@ -164,13 +166,12 @@ void MuonRemoveExpDecay::removeDecayError(const MantidVec &inX,
                                           MantidVec &outY) {
   // Do the removal
   for (size_t i = 0; i < inY.size(); ++i) {
-    if (inY[i])
+    if (inY[i] != 0.0)
       outY[i] =
           inY[i] *
           exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
     else
       outY[i] =
-          1.0 *
           exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
   }
 }
@@ -188,7 +189,7 @@ void MuonRemoveExpDecay::removeDecayData(const MantidVec &inX,
                                          MantidVec &outY) {
   // Do the removal
   for (size_t i = 0; i < inY.size(); ++i) {
-    if (inY[i])
+    if (inY[i] != 0.0)
       outY[i] =
           inY[i] *
           exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
@@ -232,13 +233,13 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws,
   // Check order of names
   if (paramnames[0].compare("A0") != 0) {
     g_log.error() << "Parameter 0 should be A0, but is " << paramnames[0]
-                  << std::endl;
+                  << '\n';
     throw std::invalid_argument(
         "Parameters are out of order @ 0, should be A0");
   }
   if (paramnames[1].compare("A1") != 0) {
     g_log.error() << "Parameter 1 should be A1, but is " << paramnames[1]
-                  << std::endl;
+                  << '\n';
     throw std::invalid_argument(
         "Parameters are out of order @ 0, should be A1");
   }
@@ -254,9 +255,9 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws,
       retVal = A0;
     }
   } else {
-    g_log.warning() << "Fit falled. Status = " << fitStatus << std::endl
-                    << "For workspace index " << wsIndex << std::endl
-                    << "Asym norm constant set to 1.0\n";
+    g_log.warning() << "Fit falled. Status = " << fitStatus
+                    << "\nFor workspace index " << wsIndex
+                    << "\nAsym norm constant set to 1.0\n";
   }
 
   return retVal;

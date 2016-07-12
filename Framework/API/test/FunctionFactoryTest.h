@@ -27,30 +27,31 @@ public:
     declareParameter("a0");
     declareParameter("a1");
   }
-  std::string name() const { return "FunctionFactoryTest_FunctA"; }
+  std::string name() const override { return "FunctionFactoryTest_FunctA"; }
   void function1D(double *out, const double *xValues,
-                  const size_t nData) const {
+                  const size_t nData) const override {
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);
     UNUSED_ARG(nData);
   }
   void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) {
+                       const size_t nData) override {
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);
     UNUSED_ARG(nData);
   }
-  bool hasAttribute(const std::string &attName) const {
+  bool hasAttribute(const std::string &attName) const override {
     if (attName == "attr")
       return true;
     return false;
   }
-  Attribute getAttribute(const std::string &attName) const {
+  Attribute getAttribute(const std::string &attName) const override {
     if (attName == "attr")
       return Attribute(m_attr);
     return getAttribute(attName);
   }
-  void setAttribute(const std::string &attName, const Attribute &value) {
+  void setAttribute(const std::string &attName,
+                    const Attribute &value) override {
     if (attName == "attr") {
       int n = value.asInt();
       if (n > 0) {
@@ -75,16 +76,16 @@ public:
     declareParameter("b1");
   }
 
-  std::string name() const { return "FunctionFactoryTest_FunctB"; }
+  std::string name() const override { return "FunctionFactoryTest_FunctB"; }
 
   void function1D(double *out, const double *xValues,
-                  const size_t nData) const {
+                  const size_t nData) const override {
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);
     UNUSED_ARG(nData);
   }
   void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) {
+                       const size_t nData) override {
     UNUSED_ARG(out);
     UNUSED_ARG(xValues);
     UNUSED_ARG(nData);
@@ -97,19 +98,20 @@ class FunctionFactoryTest_CompFunctA : public CompositeFunction {
 public:
   FunctionFactoryTest_CompFunctA() {}
 
-  std::string name() const { return "FunctionFactoryTest_CompFunctA"; }
+  std::string name() const override { return "FunctionFactoryTest_CompFunctA"; }
 
-  bool hasAttribute(const std::string &attName) const {
+  bool hasAttribute(const std::string &attName) const override {
     if (attName == "attr")
       return true;
     return false;
   }
-  Attribute getAttribute(const std::string &attName) const {
+  Attribute getAttribute(const std::string &attName) const override {
     if (attName == "attr")
       return Attribute(m_attr);
     return getAttribute(attName);
   }
-  void setAttribute(const std::string &attName, const Attribute &value) {
+  void setAttribute(const std::string &attName,
+                    const Attribute &value) override {
     UNUSED_ARG(attName);
     m_attr = value.asString();
   }
@@ -119,7 +121,7 @@ class FunctionFactoryTest_CompFunctB : public CompositeFunction {
 public:
   FunctionFactoryTest_CompFunctB() {}
 
-  std::string name() const { return "FunctionFactoryTest_CompFunctB"; }
+  std::string name() const override { return "FunctionFactoryTest_CompFunctB"; }
 };
 
 DECLARE_FUNCTION(FunctionFactoryTest_FunctA)

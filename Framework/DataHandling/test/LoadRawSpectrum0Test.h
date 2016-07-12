@@ -4,13 +4,15 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadRawSpectrum0.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
+
 #include <Poco/Path.h>
 
 using namespace Mantid::API;

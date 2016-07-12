@@ -20,16 +20,11 @@ public:
   CalculateReflectometryP() : m_sin_theta_i(0.0), m_sin_theta_f(0.0) {}
 
   /**
-   * Destructor
-   */
-  ~CalculateReflectometryP(){};
-
-  /**
    Setter for the incident theta value require for the calculation. Internally
    pre-calculates and caches to cos theta for speed.
    @param thetaIncident: incident theta value in degrees
    */
-  void setThetaIncident(double thetaIncident) {
+  void setThetaIncident(double thetaIncident) override {
     m_sin_theta_i = sin(to_radians_factor * thetaIncident);
   }
 
@@ -38,7 +33,7 @@ public:
    pre-calculates and caches to cos theta for speed.
    @param thetaFinal: final theta value in degrees
    */
-  void setThetaFinal(double thetaFinal) {
+  void setThetaFinal(double thetaFinal) override {
     m_sin_theta_f = sin(to_radians_factor * thetaFinal);
   }
 
@@ -46,8 +41,8 @@ public:
    Executes the calculation to determine PSum
    @param wavelength : wavelength in Angstroms
    */
-  double calculateDim0(double wavelength) const {
-    double wavenumber = 2 * M_PI / wavelength;
+  double calculateDim0(double wavelength) const override {
+    double wavenumber = 2.0 * M_PI / wavelength;
     double ki = wavenumber * m_sin_theta_i;
     double kf = wavenumber * m_sin_theta_f;
     return ki + kf;
@@ -57,15 +52,15 @@ public:
    Executes the calculation to determine PDiff
    @param wavelength : wavelength in Angstroms
    */
-  double calculateDim1(double wavelength) const {
-    double wavenumber = 2 * M_PI / wavelength;
+  double calculateDim1(double wavelength) const override {
+    double wavenumber = 2.0 * M_PI / wavelength;
     double ki = wavenumber * m_sin_theta_i;
     double kf = wavenumber * m_sin_theta_f;
     return ki - kf;
   }
   Mantid::Geometry::Quadrilateral createQuad(double lamUpper, double lamLower,
                                              double thetaUpper,
-                                             double thetaLower) {
+                                             double thetaLower) override {
     setThetaFinal(thetaLower);
     auto dim1UpperRightVertex = calculateDim1(lamLower);
     auto dim0LowerLeftVertex = calculateDim0(lamUpper);

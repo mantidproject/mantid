@@ -24,7 +24,7 @@ DataItem::DataItem(const DataItem & /*other*/) {
  */
 DataItem::~DataItem() {
   delete m_lock;
-  m_lock = NULL;
+  m_lock = nullptr;
 }
 
 /** Private method to access the RWLock object.

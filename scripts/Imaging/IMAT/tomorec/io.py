@@ -97,7 +97,7 @@ def write_image(img_data, min_pix, max_pix, filename, img_format=None, dtype=Non
     Returns:: name of the file saved
     """
     if not img_format:
-        img_format = 'tiff'
+        img_format = 'png'
     filename = filename + '.' + img_format
 
     # The special case dtype = 'uint8' could be handled with bytescale:
@@ -207,7 +207,7 @@ def _agg_img(acc, img_data, agg_method=None, index=1):
     Returns :: result from aggregating (sum, average, etc.) the new image
 
     """
-    if None == agg_method:
+    if agg_method is None:
         agg_method = 'sum'
 
     if 'sum' == agg_method:

@@ -2,12 +2,13 @@
 #define MANTID_ALGORITHMS_MODERATORTZEROLINEARTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/ModeratorTzeroLinear.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidAlgorithms/ModeratorTzeroLinear.h"
 #include "MantidDataObjects/Events.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -16,6 +17,7 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::BinEdges;
 
 class ModeratorTzeroLinearTest : public CxxTest::TestSuite {
 public:
@@ -106,7 +108,7 @@ public:
 
     // Check a few values
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-      const EventList &evlist = testWS->getEventList(ihist);
+      const EventList &evlist = testWS->getSpectrum(ihist);
       const MantidVec &tofs_b = evlist.getTofs();
       const MantidVec &xarray = evlist.readX();
       for (size_t ibin = 0; ibin < xarray.size(); ibin += 400) {
@@ -126,18 +128,17 @@ private:
             numHists, numBins, true);
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    MantidVecPtr xdata;
-    xdata.access().resize(numBins + 1);
+    BinEdges xdata(numBins + 1);
     const double peakHeight(1000), peakCentre(7000.), sigmaSq(1000 * 1000.);
     for (int ibin = 0; ibin < numBins; ++ibin) {
       const double xValue = 4 * ibin;
       testWS->dataY(0)[ibin] =
           peakHeight * exp(-0.5 * pow(xValue - peakCentre, 2.) / sigmaSq);
-      xdata.access()[ibin] = xValue;
+      xdata.mutableData()[ibin] = xValue;
     }
-    xdata.access()[numBins] = 4 * numBins;
+    xdata.mutableData()[numBins] = 4 * numBins;
     for (int ihist = 0; ihist < numHists; ihist++)
-      testWS->setX(ihist, xdata);
+      testWS->setBinEdges(ihist, xdata);
     return testWS;
   }
 
@@ -151,16 +152,15 @@ private:
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
     const size_t numHists = testWS->getNumberHistograms();
     for (size_t ihist = 0; ihist < numHists; ++ihist) {
-      EventList &evlist = testWS->getEventList(ihist);
-      MantidVecPtr xdata;
-      xdata.access().resize(numBins + 1);
+      EventList &evlist = testWS->getSpectrum(ihist);
+      BinEdges xdata(numBins + 1);
       for (int ibin = 0; ibin <= numBins; ++ibin) {
         double tof = 4 * ibin;
         TofEvent tofevent(tof);
-        xdata.access()[ibin] = tof;
+        xdata.mutableData()[ibin] = tof;
         evlist.addEventQuickly(tofevent); // insert event
       }
-      evlist.setX(xdata); // set the bins for the associated histogram
+      evlist.setX(xdata.cowData()); // set the bins for the associated histogram
     }
     return testWS;
   }

@@ -37,9 +37,9 @@ public:
   ArrayLengthValidator();
   ArrayLengthValidator(const size_t len);
   ArrayLengthValidator(const size_t lenmin, const size_t lenmax);
-  virtual ~ArrayLengthValidator();
+  ~ArrayLengthValidator() override;
 
-  IValidator_sptr clone() const;
+  IValidator_sptr clone() const override;
 
   /// Return if it has a length
   bool hasLength() const;
@@ -67,7 +67,7 @@ public:
   void clearLengthMax();
 
 private:
-  std::string checkValidity(const std::vector<TYPE> &value) const;
+  std::string checkValidity(const std::vector<TYPE> &value) const override;
   /// private variable containing the size of the array
   size_t m_arraySize;
   /// private variable, true if size is set, false if not

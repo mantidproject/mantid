@@ -5,7 +5,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
-#include <set>
+#include <unordered_set>
 
 using namespace Mantid::Geometry;
 
@@ -46,7 +46,7 @@ public:
   }
 
   void test_ReflectionConditionSymbols() {
-    std::set<std::string> centeringSymbols;
+    std::unordered_set<std::string> centeringSymbols;
     centeringSymbols.insert("P");
     centeringSymbols.insert("A");
     centeringSymbols.insert("B");

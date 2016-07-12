@@ -46,7 +46,7 @@ namespace Kernel {
 class MANTID_KERNEL_DLL Timer {
 public:
   Timer();
-  virtual ~Timer();
+  virtual ~Timer() = default;
 
   float elapsed(bool reset = true);
   float elapsed_no_reset() const;

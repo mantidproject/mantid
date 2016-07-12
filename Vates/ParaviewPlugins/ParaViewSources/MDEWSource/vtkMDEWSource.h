@@ -1,4 +1,4 @@
-#ifndef _vtkMDEWSource_h 
+#ifndef _vtkMDEWSource_h
 #define _vtkMDEWSource_h
 
 #include "vtkUnstructuredGridAlgorithm.h"
@@ -7,21 +7,21 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <string>
 
-namespace Mantid
-{
-  namespace VATES
-  {
-    class MDLoadingPresenter;
-  }
+namespace Mantid {
+namespace VATES {
+class MDLoadingPresenter;
+}
 }
 
-/*  Source for fetching Multidimensional Workspace out of the Mantid Analysis Data Service
+/*  Source for fetching Multidimensional Workspace out of the Mantid Analysis
+   Data Service
     and converting them into vtkDataSets as part of the pipeline source.
 
     @author Owen Arnold @ Tessella
     @date 08/09/2011
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -44,13 +44,12 @@ namespace Mantid
 */
 
 // cppcheck-suppress class_X_Y
-class VTK_EXPORT vtkMDEWSource : public vtkUnstructuredGridAlgorithm
-{
+class VTK_EXPORT vtkMDEWSource : public vtkUnstructuredGridAlgorithm {
 public:
   static vtkMDEWSource *New();
-  vtkTypeMacro(vtkMDEWSource, vtkUnstructuredGridAlgorithm)
-  void PrintSelf(ostream& os, vtkIndent indent);
-  
+  vtkTypeMacro(vtkMDEWSource, vtkUnstructuredGridAlgorithm) void PrintSelf(
+      ostream &os, vtkIndent indent) override;
+
   void SetWsName(std::string wsName);
   void SetDepth(int depth);
   void SetNormalization(int option);
@@ -62,30 +61,31 @@ public:
   //----------------------------------------------
 
   /// Update the algorithm progress.
-  void updateAlgorithmProgress(double, const std::string& message);
+  void updateAlgorithmProgress(double, const std::string &message);
   /// Getter for the input geometry xml
-  const char* GetInputGeometryXML();
+  std::string GetInputGeometryXML();
   /// Getter for the special coodinate value
   int GetSpecialCoordinates();
   /// Getter for the workspace name
-  const char* GetWorkspaceName();
+  const std::string &GetWorkspaceName();
   /// Getter for the workspace type
-  char* GetWorkspaceTypeName();
+  std::string GetWorkspaceTypeName();
   /// Getter for the minimum value of the workspace data.
   double GetMinValue();
   /// Getter for the maximum value of the workspace data.
   double GetMaxValue();
   /// Getter for the instrument associated with the workspace data.
-  const char* GetInstrument();
+  std::string GetInstrument();
 
 protected:
   vtkMDEWSource();
-  ~vtkMDEWSource();
-  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  ~vtkMDEWSource() override;
+  int RequestInformation(vtkInformation *, vtkInformationVector **,
+                         vtkInformationVector *) override;
+  int RequestData(vtkInformation *, vtkInformationVector **,
+                  vtkInformationVector *) override;
 
 private:
-  
   /// Name of the workspace.
   std::string m_wsName;
 
@@ -98,14 +98,11 @@ private:
   /// MVP presenter.
   std::unique_ptr<Mantid::VATES::MDLoadingPresenter> m_presenter;
 
-  /// Cached typename.
-  std::string typeName;
-
   /// Normalization option
   Mantid::VATES::VisualNormalization m_normalization;
 
-  vtkMDEWSource(const vtkMDEWSource&);
-  void operator = (const vtkMDEWSource&);
-  void setTimeRange(vtkInformationVector* outputVector);
+  vtkMDEWSource(const vtkMDEWSource &);
+  void operator=(const vtkMDEWSource &);
+  void setTimeRange(vtkInformationVector *outputVector);
 };
 #endif

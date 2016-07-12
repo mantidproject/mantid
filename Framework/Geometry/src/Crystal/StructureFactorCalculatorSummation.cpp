@@ -55,9 +55,9 @@ void StructureFactorCalculatorSummation::updateUnitCellScatterers(
         std::vector<V3D> positions =
             spaceGroup->getEquivalentPositions(current->getPosition());
 
-        for (auto pos = positions.begin(); pos != positions.end(); ++pos) {
+        for (auto &position : positions) {
           BraggScatterer_sptr clone = current->clone();
-          clone->setProperty("Position", getV3DasString(*pos));
+          clone->setProperty("Position", getV3DasString(position));
 
           braggScatterers.push_back(clone);
         }

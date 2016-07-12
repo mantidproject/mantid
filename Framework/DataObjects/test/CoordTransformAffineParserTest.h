@@ -16,8 +16,8 @@ using namespace Mantid::DataObjects;
 class CoordTransformAffineParserTest : public CxxTest::TestSuite {
 private:
   class MockCoordTransformAffineParser : public CoordTransformAffineParser {
-    virtual Mantid::API::CoordTransform *
-    createTransform(Poco::XML::Element *) const {
+    Mantid::API::CoordTransform *
+    createTransform(Poco::XML::Element *) const override {
       return new CoordTransformAffine(1, 1);
     }
   };

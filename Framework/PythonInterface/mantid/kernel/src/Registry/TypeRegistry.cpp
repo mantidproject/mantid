@@ -71,8 +71,8 @@ void TypeRegistry::subscribe(const std::type_info &typeObject,
   TypeIDMap &typeHandlers = typeRegistry();
   boost::python::type_info typeInfo(typeObject);
   if (typeHandlers.find(typeInfo) == typeHandlers.end()) {
-    typeHandlers.insert(std::make_pair(
-        typeInfo, boost::shared_ptr<PropertyValueHandler>(handler)));
+    typeHandlers.emplace(typeInfo,
+                         boost::shared_ptr<PropertyValueHandler>(handler));
   } else {
     throw std::invalid_argument(
         std::string("TypeRegistry::subscribe() - A handler has already "

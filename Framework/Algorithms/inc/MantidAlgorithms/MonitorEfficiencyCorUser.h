@@ -1,44 +1,40 @@
 #ifndef MANTID_ALGORITHMS_MONITOREFFICIENCYCORUSER_H_
 #define MANTID_ALGORITHMS_MONITOREFFICIENCYCORUSER_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 class DLLExport MonitorEfficiencyCorUser : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  MonitorEfficiencyCorUser(); // : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  virtual ~MonitorEfficiencyCorUser();
   /// Algorithm's name
-  virtual const std::string name() const { return "MonitorEfficiencyCorUser"; }
+  const std::string name() const override { return "MonitorEfficiencyCorUser"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "This algorithm normalises the counts by the monitor counts with "
            "additional efficiency correction according to the formula set in "
            "the instrument parameters file.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\NormalisationCorrections";
   }
 
 private:
   /// Initialisation code
-  void init();
+  void init() override;
   /// Execution code
-  void exec();
+  void exec() override;
 
   double calculateFormulaValue(const std::string &, double);
   std::string getValFromInstrumentDef(const std::string &);
   void applyMonEfficiency(const size_t numberOfChannels, const MantidVec &yIn,
-                          const MantidVec &eIn, const double coeff,
+                          const MantidVec &eIn, const double effVec,
                           MantidVec &yOut, MantidVec &eOut);
 
   /// The user selected (input) workspace
@@ -46,9 +42,9 @@ private:
   /// The output workspace, maybe the same as the input one
   API::MatrixWorkspace_sptr m_outputWS;
   /// stores the incident energy of the neutrons
-  double m_Ei;
+  double m_Ei = 0.0;
   /// stores the total count of neutrons from the monitor
-  int m_monitorCounts;
+  int m_monitorCounts = 0;
 };
 
 } // namespace Algorithms

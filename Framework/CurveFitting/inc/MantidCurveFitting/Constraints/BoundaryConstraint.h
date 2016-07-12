@@ -63,16 +63,13 @@ public:
   BoundaryConstraint(API::IFunction *fun, const std::string paramName,
                      const double lowerBound, bool isDefault = false);
 
-  /// Destructor
-  virtual ~BoundaryConstraint() {}
-
   /// Initialize the constraint from an expression
   void initialize(API::IFunction *fun, const API::Expression &expr,
-                  bool isDefault);
+                  bool isDefault) override;
 
   /// implement IConstraint virtual functions
-  void setPenaltyFactor(const double &c);
-  double getPenaltyFactor() const { return m_penaltyFactor; }
+  void setPenaltyFactor(const double &c) override;
+  double getPenaltyFactor() const override { return m_penaltyFactor; }
 
   /// Return if it has a lower bound
   bool hasLower() const { return m_hasLowerBound; }
@@ -120,11 +117,11 @@ public:
   std::string getParameterName() const { return m_parameterName; }
 
   /// overwrite IConstraint base class methods
-  virtual double check();
-  virtual double checkDeriv();
-  virtual double checkDeriv2();
-  virtual void setParamToSatisfyConstraint();
-  virtual std::string asString() const;
+  double check() override;
+  double checkDeriv() override;
+  double checkDeriv2() override;
+  void setParamToSatisfyConstraint() override;
+  std::string asString() const override;
 
 private:
   /// Penalty factor for the given boundary constraint

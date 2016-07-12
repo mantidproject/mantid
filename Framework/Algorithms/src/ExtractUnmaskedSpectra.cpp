@@ -12,16 +12,6 @@ using Mantid::API::WorkspaceProperty;
 DECLARE_ALGORITHM(ExtractUnmaskedSpectra)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ExtractUnmaskedSpectra::ExtractUnmaskedSpectra() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ExtractUnmaskedSpectra::~ExtractUnmaskedSpectra() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ExtractUnmaskedSpectra::name() const {
@@ -46,15 +36,16 @@ const std::string ExtractUnmaskedSpectra::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ExtractUnmaskedSpectra::init() {
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                           Direction::Input),
+                  "An input workspace.");
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
-  declareProperty(new WorkspaceProperty<>("MaskWorkspace", "", Direction::Input,
-                                          API::PropertyMode::Optional),
-                  "An optional mask workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+      Kernel::make_unique<WorkspaceProperty<>>(
+          "MaskWorkspace", "", Direction::Input, API::PropertyMode::Optional),
+      "An optional mask workspace.");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "An output workspace.");
 }
 
 //----------------------------------------------------------------------------------------------

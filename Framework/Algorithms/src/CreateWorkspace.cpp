@@ -4,9 +4,11 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -18,31 +20,25 @@ using namespace API;
 
 DECLARE_ALGORITHM(CreateWorkspace)
 
-/// Default (empty) constructor
-CreateWorkspace::CreateWorkspace() : Algorithm() {}
-
-/// Default (empty) destructor
-CreateWorkspace::~CreateWorkspace() {}
-
 /// Init function
 void CreateWorkspace::init() {
 
   std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
-  unitOptions.push_back("SpectraNumber");
-  unitOptions.push_back("Text");
+  unitOptions.emplace_back("SpectraNumber");
+  unitOptions.emplace_back("Text");
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Name to be given to the created workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Name to be given to the created workspace.");
 
   auto required = boost::make_shared<MandatoryValidator<std::vector<double>>>();
-  declareProperty(new ArrayProperty<double>("DataX", required),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("DataX", required),
                   "X-axis data values for workspace.");
-  declareProperty(new ArrayProperty<double>("DataY", required),
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("DataY", required),
                   "Y-axis data values for workspace (measures).");
-  declareProperty(new ArrayProperty<double>("DataE"),
+  declareProperty(make_unique<ArrayProperty<double>>("DataE"),
                   "Error values for workspace. Optional.");
-  declareProperty(new PropertyWithValue<int>("NSpec", 1),
+  declareProperty(make_unique<PropertyWithValue<int>>("NSpec", 1),
                   "Number of spectra to divide data into.");
   declareProperty("UnitX", "", "The unit to assign to the XAxis");
 
@@ -50,19 +46,19 @@ void CreateWorkspace::init() {
                   boost::make_shared<StringListValidator>(unitOptions),
                   "The unit to assign to the second Axis (leave blank for "
                   "default Spectra number)");
-  declareProperty(new ArrayProperty<std::string>("VerticalAxisValues"),
+  declareProperty(make_unique<ArrayProperty<std::string>>("VerticalAxisValues"),
                   "Values for the VerticalAxis.");
 
   declareProperty(
-      new PropertyWithValue<bool>("Distribution", false),
+      make_unique<PropertyWithValue<bool>>("Distribution", false),
       "Whether OutputWorkspace should be marked as a distribution.");
   declareProperty("YUnitLabel", "", "Label for Y Axis");
 
   declareProperty("WorkspaceTitle", "", "Title for Workspace");
 
-  declareProperty(new WorkspaceProperty<>("ParentWorkspace", "",
-                                          Direction::Input,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>("ParentWorkspace", "",
+                                                   Direction::Input,
+                                                   PropertyMode::Optional),
                   "Name of a parent workspace.");
 }
 
@@ -73,7 +69,7 @@ std::map<std::string, std::string> CreateWorkspace::validateInputs() {
   const std::string vUnit = getProperty("VerticalAxisUnit");
   const std::vector<std::string> vAxis = getProperty("VerticalAxisValues");
 
-  if (vUnit == "SpectraNumber" && vAxis.size() > 0)
+  if (vUnit == "SpectraNumber" && !vAxis.empty())
     issues["VerticalAxisValues"] =
         "Axis values cannot be provided when using a spectra axis";
 
@@ -87,7 +83,7 @@ void CreateWorkspace::exec() {
   const Property *const dataYprop = getProperty("DataY");
   const Property *const dataEprop = getProperty("DataE");
 
-  const ArrayProperty<double> *pCheck = NULL;
+  const ArrayProperty<double> *pCheck = nullptr;
 
   pCheck = dynamic_cast<const ArrayProperty<double> *>(dataXprop);
   if (!pCheck)
@@ -125,10 +121,10 @@ void CreateWorkspace::exec() {
   const bool commonX(dataX.size() == ySize || dataX.size() == ySize + 1);
 
   std::size_t xSize;
-  MantidVecPtr XValues;
+  Kernel::cow_ptr<HistogramData::HistogramX> XValues(nullptr);
   if (commonX) {
     xSize = dataX.size();
-    XValues.access() = dataX;
+    XValues = Kernel::make_cow<HistogramData::HistogramX>(dataX);
   } else {
     if (dataX.size() % nSpec != 0) {
       throw std::invalid_argument("Length of DataX must be divisible by NSpec");
@@ -210,7 +206,7 @@ void CreateWorkspace::exec() {
       }
     } else {
       const size_t vAxisLength = vAxis.size();
-      NumericAxis *newAxis(NULL);
+      NumericAxis *newAxis(nullptr);
       if (vAxisLength == static_cast<size_t>(nSpec))
         newAxis = new NumericAxis(vAxisLength); // treat as points
       else if (vAxisLength == static_cast<size_t>(nSpec + 1))
@@ -234,7 +230,7 @@ void CreateWorkspace::exec() {
   }
 
   // Set distribution flag
-  outputWS->isDistribution(getProperty("Distribution"));
+  outputWS->setDistribution(getProperty("Distribution"));
 
   // Set Y Unit label
   if (!parentWS || !getPropertyValue("YUnitLabel").empty()) {

@@ -46,12 +46,12 @@ public:
   ToolConfigCustom(const std::string &runnable, const std::string &cmdOptions)
       : TomoRecToolConfig(runnable), m_opts(cmdOptions) {}
 
-  ~ToolConfigCustom() {}
+  ~ToolConfigCustom() override {}
 
 protected:
-  virtual std::string makeCmdLineOptions() const { return m_opts; }
+  std::string makeCmdLineOptions() const override { return m_opts; }
 
-  virtual std::string makeExecutable() const { return m_runnable; };
+  std::string makeExecutable() const override { return m_runnable; };
 
 private:
   std::string m_opts;

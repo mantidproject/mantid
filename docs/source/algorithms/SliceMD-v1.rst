@@ -38,12 +38,17 @@ Splitting Parameters
 ####################
 
 The **OutputBins** parameter is interpreted as the "SplitInto" parameter
-for each dimension. For instance, if you want the output workspace to
+for the top split-level in each dimension. For instance, if you want the output workspace to
 split in 2x2x2, you would specify OutputBins="2,2,2".
 
 For 1D slices, it may make sense to specify a SplitInto parameter of 1
 in every other dimension - that way, boxes will only be split along the
 1D direction.
+
+To force the box structure to match that defined in OutputBins, the 
+MaxRecursionDepth property can be set to 1. If this is not the case then 
+boxes will split further if sufficient events fall in the same box. Further 
+splitting uses the value of "SplitInto" from the InputWorkspace.
 
 Slicing a MDHistoWorkspace
 ##########################

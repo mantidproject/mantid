@@ -11,10 +11,10 @@
 #include <boost/date_time/c_local_time_adjustor.hpp>
 #include <boost/scoped_array.hpp>
 
-#include <limits.h>
-#include <nexus/NeXusFile.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
+#include <climits>
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace NeXus {
@@ -86,11 +86,11 @@ public:
 
   /// write table workspace
   int writeNexusTableWorkspace(
-      const API::ITableWorkspace_const_sptr &localworkspace,
+      const API::ITableWorkspace_const_sptr &itableworkspace,
       const char *group_name) const;
 
   int writeNexusProcessedDataEvent(
-      const DataObjects::EventWorkspace_const_sptr &localworkspace);
+      const DataObjects::EventWorkspace_const_sptr &ws);
 
   int writeNexusProcessedDataEventCombined(
       const DataObjects::EventWorkspace_const_sptr &ws,
@@ -110,7 +110,7 @@ public:
   /// find size of open entry data section
   int getWorkspaceSize(int &numberOfSpectra, int &numberOfChannels,
                        int &numberOfXpoints, bool &uniformBounds,
-                       std::string &axesNames, std::string &yUnits) const;
+                       std::string &axesUnits, std::string &yUnits) const;
   /// read X values for one (or the generic if uniform) spectra
   int getXValues(MantidVec &xValues, const int &spectra) const;
   /// read values and errors for spectra
@@ -217,7 +217,7 @@ private:
 
   /// Writes given vector column to the currently open Nexus file
   template <typename VecType, typename ElemType>
-  void writeNexusVectorColumn(API::Column_const_sptr column,
+  void writeNexusVectorColumn(API::Column_const_sptr col,
                               const std::string &columnName, int nexusType,
                               const std::string &interpret_as) const;
 
@@ -286,8 +286,7 @@ NexusFileIO::writeNxValue(const std::string &name, const std::string &value,
   if (NXopendata(fileID, name.c_str()) == NX_ERROR)
     return false;
   for (unsigned int it = 0; it < attributes.size(); ++it) {
-    NXputattr(fileID, attributes[it].c_str(),
-              reinterpret_cast<void *>(const_cast<char *>(avalues[it].c_str())),
+    NXputattr(fileID, attributes[it].c_str(), avalues[it].c_str(),
               static_cast<int>(avalues[it].size() + 1), NX_CHAR);
   }
   NXputdata(fileID,
@@ -413,13 +412,13 @@ void NexusFileIO::writeNumericTimeLog(
   status = NXopengroup(fileID, logName.c_str(), "NXlog");
   // write log data
   std::vector<std::string> attributes, avalues;
-  attributes.push_back("type");
+  attributes.emplace_back("type");
   avalues.push_back(logValueType<T>());
   writeNxFloatArray("value", values, attributes, avalues);
   attributes.clear();
   avalues.clear();
   // get ISO time, and save it as an attribute
-  attributes.push_back("start");
+  attributes.emplace_back("start");
   avalues.push_back(t0.toISO8601String());
 
   writeNxFloatArray("time", times, attributes, avalues);

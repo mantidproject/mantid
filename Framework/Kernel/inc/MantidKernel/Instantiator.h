@@ -43,10 +43,10 @@ class DLLExport AbstractInstantiator
     {
 public:
   /// Creates the AbstractInstantiator.
-  AbstractInstantiator() {}
+  AbstractInstantiator() = default;
 
   /// Destroys the AbstractInstantiator.
-  virtual ~AbstractInstantiator() {}
+  virtual ~AbstractInstantiator() = default;
 
   /// Creates an instance of a concrete subclass of Base.
   virtual boost::shared_ptr<Base> createInstance() const = 0;
@@ -72,25 +72,21 @@ template <class C, class Base>
 class DLLExport Instantiator : public AbstractInstantiator<Base> {
 public:
   /// Creates the Instantiator.
-  Instantiator() {}
-
-  /// Destroys the Instantiator.
-  virtual ~Instantiator() {}
+  Instantiator() = default;
 
   /** Creates an instance of a concrete subclass of Base.
    *  @return A pointer to the base type
    */
-  boost::shared_ptr<Base> createInstance() const {
-    boost::shared_ptr<Base> ptr(new C);
-    return ptr;
+  boost::shared_ptr<Base> createInstance() const override {
+    return boost::shared_ptr<Base>(new C());
   }
 
   /** Creates an instance of a concrete subclass of Base that is not wrapped in
    * a boost shared_ptr.
    *  @return A bare pointer to the base type
    */
-  virtual Base *createUnwrappedInstance() const {
-    return static_cast<Base *>(new C);
+  Base *createUnwrappedInstance() const override {
+    return static_cast<Base *>(new C());
   }
 };
 

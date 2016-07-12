@@ -16,6 +16,7 @@ GCC_DIAG_ON(literal-suffix)
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include <boost/algorithm/string/regex.hpp>
 #include <limits>
@@ -74,10 +75,11 @@ void CatalogSearch::init() {
   declareProperty("Session", "",
                   "The session information of the catalog search in.");
 
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
-                      "OutputWorkspace", "", Kernel::Direction::Output),
-                  "The name of the workspace that will be created to store the "
-                  "search results.");
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+          "OutputWorkspace", "", Kernel::Direction::Output),
+      "The name of the workspace that will be created to store the "
+      "search results.");
   declareProperty<int64_t>("NumberOfSearchResults", 0,
                            "The number of search results returned for the "
                            "INPUT. Performs a COUNT query to determine this. "

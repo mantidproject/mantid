@@ -78,13 +78,13 @@ public:
     delete suite;
   }
 
-  void setUp() {
+  void setUp() override {
     Mantid::API::AnalysisDataService::Instance().add(
         "ToFilter", WorkspaceCreationHelper::CreateEventWorkspace(
                         5000, 1000, 8000, 0.0, 1.0, 3));
   }
 
-  void tearDown() {
+  void tearDown() override {
     Mantid::API::AnalysisDataService::Instance().remove("ToFilter");
   }
 

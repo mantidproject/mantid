@@ -21,9 +21,9 @@ namespace DataObjects {
 class DLLExport GroupingWorkspace : public SpecialWorkspace2D {
 public:
   GroupingWorkspace(Geometry::Instrument_const_sptr inst);
-  GroupingWorkspace();
+  GroupingWorkspace() = default;
   GroupingWorkspace(size_t numvectors);
-  ~GroupingWorkspace();
+  GroupingWorkspace &operator=(const GroupingWorkspace &) = delete;
 
   /// Returns a clone of the workspace
   std::unique_ptr<GroupingWorkspace> clone() const {
@@ -32,7 +32,7 @@ public:
 
   /** Gets the name of the workspace type
   @return Standard string name  */
-  virtual const std::string id() const { return "GroupingWorkspace"; }
+  const std::string id() const override { return "GroupingWorkspace"; }
 
   void makeDetectorIDToGroupMap(std::map<detid_t, int> &detIDToGroup,
                                 int64_t &ngroups) const;
@@ -41,13 +41,10 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  GroupingWorkspace(const GroupingWorkspace &other)
-      : SpecialWorkspace2D(other) {}
-  /// Protected copy assignment operator. Assignment not implemented.
-  GroupingWorkspace &operator=(const GroupingWorkspace &other);
+  GroupingWorkspace(const GroupingWorkspace &) = default;
 
 private:
-  virtual GroupingWorkspace *doClone() const {
+  GroupingWorkspace *doClone() const override {
     return new GroupingWorkspace(*this);
   }
 };

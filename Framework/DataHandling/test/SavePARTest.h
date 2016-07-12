@@ -5,19 +5,20 @@
 #include <fstream>
 
 #include "MantidDataHandling/SavePAR.h"
+
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ITableWorkspace.h"
 // to generate test workspaces
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/AnalysisDataService.h"
 
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidDataObjects/TableWorkspace.h"
-
-#include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -127,7 +128,7 @@ public:
   }
 
 private:
-  ~SavePARTest() {
+  ~SavePARTest() override {
     // delete test ws from ds after the test ends
     API::AnalysisDataService::Instance().remove(WSName);
     API::AnalysisDataService::Instance().remove(TestOutputParTableWSName);
@@ -151,7 +152,7 @@ private:
     // the following is largely about associating detectors with the workspace
     for (int j = 0; j < NHIST; ++j) {
       // Just set the spectrum number to match the index
-      inputWS->getSpectrum(j)->setSpectrumNo(j + 1);
+      inputWS->getSpectrum(j).setSpectrumNo(j + 1);
     }
     // we do not need to deal with analysisi data service here in test to avoid
     // holding the workspace there after the test
@@ -175,7 +176,7 @@ private:
     m_Pmap->addBool(toMask.get(), "masked", true);
 
     // required to get it passed the algorthms validator
-    inputWS->isDistribution(true);
+    inputWS->setDistribution(true);
 
     return inputWS;
   }

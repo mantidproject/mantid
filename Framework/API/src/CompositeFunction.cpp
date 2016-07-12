@@ -31,9 +31,6 @@ CompositeFunction::CompositeFunction()
   declareAttribute("NumDeriv", Attribute(false));
 }
 
-/// Destructor
-CompositeFunction::~CompositeFunction() {}
-
 /// Function initialization. Declare function parameters in this method.
 void CompositeFunction::init() {}
 
@@ -59,12 +56,11 @@ std::string CompositeFunction::asString() const {
   }
 
   if (name() != "CompositeFunction" || nAttributes() > 1 ||
-      getAttribute("NumDeriv").asBool() == true) {
+      getAttribute("NumDeriv").asBool()) {
     ostr << "composite=" << name();
     std::vector<std::string> attr = this->getAttributeNames();
-    for (size_t i = 0; i < attr.size(); i++) {
-      std::string attName = attr[i];
-      std::string attValue = this->getAttribute(attr[i]).value();
+    for (const auto &attName : attr) {
+      std::string attValue = this->getAttribute(attName).value();
       if (!attValue.empty()) {
         ostr << ',' << attName << '=' << attValue;
       }
@@ -73,7 +69,8 @@ std::string CompositeFunction::asString() const {
   }
   for (size_t i = 0; i < nFunctions(); i++) {
     IFunction_sptr fun = getFunction(i);
-    bool isComp = boost::dynamic_pointer_cast<CompositeFunction>(fun) != 0;
+    bool isComp =
+        boost::dynamic_pointer_cast<CompositeFunction>(fun) != nullptr;
     if (isComp)
       ostr << '(';
     ostr << fun->asString();
@@ -369,15 +366,23 @@ void CompositeFunction::checkFunction() {
   std::vector<IFunction_sptr> functions(m_functions.begin(), m_functions.end());
   m_functions.clear();
 
-  for (std::vector<IFunction_sptr>::size_type i = 0; i < functions.size();
-       i++) {
-    IFunction_sptr f = functions[i];
+  for (auto &f : functions) {
     CompositeFunction_sptr cf =
         boost::dynamic_pointer_cast<CompositeFunction>(f);
     if (cf)
       cf->checkFunction();
     addFunction(f);
   }
+}
+
+/**
+ * Remove all member functions
+ */
+void CompositeFunction::clear() {
+  m_nParams = 0;
+  m_paramOffsets.clear();
+  m_IFunction.clear();
+  m_functions.clear();
 }
 
 /** Add a function
@@ -388,7 +393,7 @@ size_t CompositeFunction::addFunction(IFunction_sptr f) {
   m_IFunction.insert(m_IFunction.end(), f->nParams(), m_functions.size());
   m_functions.push_back(f);
   //?f->init();
-  if (m_paramOffsets.size() == 0) {
+  if (m_paramOffsets.empty()) {
     m_paramOffsets.push_back(0);
     m_nParams = f->nParams();
   } else {
@@ -671,7 +676,7 @@ void CompositeFunction::setUpForFit() {
       ParameterTie *tie = getTie(i);
       if (tie && !tie->isConstant()) {
         g_log.warning() << "Numeric derivatives should be used when "
-                           "non-constant ties defined." << std::endl;
+                           "non-constant ties defined.\n";
         break;
       }
     }

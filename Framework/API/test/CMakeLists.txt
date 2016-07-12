@@ -7,12 +7,14 @@ if ( CXXTEST_FOUND )
   set ( TESTHELPER_SRCS ../../TestHelpers/src/TearDownWorld.cpp
                         ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/BoxControllerDummyIO.cpp
+                        ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/NexusTestHelper.cpp
       )
   cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries( APITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             API
             Geometry
+            HistogramData
             Kernel
             Nexus
             ${JSONCPP_LIBRARIES}

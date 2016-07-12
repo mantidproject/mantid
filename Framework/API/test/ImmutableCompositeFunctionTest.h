@@ -19,10 +19,10 @@ public:
     declareParameter("b");
   }
 
-  std::string name() const { return "Linear"; }
+  std::string name() const override { return "Linear"; }
 
   void function1D(double *out, const double *xValues,
-                  const size_t nData) const {
+                  const size_t nData) const override {
     double a = getParameter("a");
     double b = getParameter("b");
     for (size_t i = 0; i < nData; i++) {
@@ -30,7 +30,7 @@ public:
     }
   }
   void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) {
+                       const size_t nData) override {
     for (size_t i = 0; i < nData; i++) {
       out->set(static_cast<int>(i), 0, 1.);
       out->set(static_cast<int>(i), 1, xValues[i]);
@@ -58,7 +58,9 @@ public:
     setAlias("f1.a", "a2");
     setAlias("f1.b", "b2");
   }
-  std::string name() const { return "ImmutableCompositeFunctionTest_Function"; }
+  std::string name() const override {
+    return "ImmutableCompositeFunctionTest_Function";
+  }
 };
 
 DECLARE_FUNCTION(ImmutableCompositeFunctionTest_Function)
@@ -86,7 +88,7 @@ public:
 
     addDefaultTies("b2 = a1, a2 = a1/4");
   }
-  std::string name() const {
+  std::string name() const override {
     return "ImmutableCompositeFunctionTest_FunctionWithTies";
   }
 };

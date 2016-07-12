@@ -4,8 +4,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <cmath>
-
 namespace Mantid {
 namespace Kernel {
 /**
@@ -117,7 +115,7 @@ double UnitConversion::convertViaTOF(Unit &srcUnit, Unit &destUnit,
   default:
     throw std::invalid_argument(
         "UnitConversion::convertViaTOF - Unknown emode " +
-        boost::lexical_cast<std::string>(emode));
+        std::to_string(emode));
   };
 
   const double unused(0.0);

@@ -15,20 +15,16 @@ using namespace Mantid::DataObjects;
 // It is used to print out information, warning and error messages
 
 void SINQTranspose3D::init() {
-  declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
-                                                           Direction::Input));
-  std::vector<std::string> transposeOptions;
-  transposeOptions.push_back("Y,X,Z");
-  transposeOptions.push_back("X,Z,Y");
-  transposeOptions.push_back("TRICS");
-  transposeOptions.push_back("AMOR");
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+      "InputWorkspace", "", Direction::Input));
+  std::vector<std::string> transposeOptions{"Y,X,Z", "X,Z,Y", "TRICS", "AMOR"};
   this->declareProperty(
       "TransposeOption", "Y,X,Z",
       boost::make_shared<StringListValidator>(transposeOptions),
       "The transpose option");
 
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output));
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+      "OutputWorkspace", "", Direction::Output));
 }
 
 void SINQTranspose3D::exec() {
@@ -69,7 +65,7 @@ void SINQTranspose3D::doYXZ(IMDHistoWorkspace_sptr inWS) {
   dimensions.push_back(boost::const_pointer_cast<IMDDimension>(x));
   dimensions.push_back(boost::const_pointer_cast<IMDDimension>(z));
 
-  MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));
+  auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
 
   inVal = inWS->getSignalArray();
   inErr = inWS->getErrorSquaredArray();
@@ -106,7 +102,7 @@ void SINQTranspose3D::doXZY(IMDHistoWorkspace_sptr inWS) {
   dimensions.push_back(boost::const_pointer_cast<IMDDimension>(z));
   dimensions.push_back(boost::const_pointer_cast<IMDDimension>(y));
 
-  MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));
+  auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
 
   inVal = inWS->getSignalArray();
   inErr = inWS->getErrorSquaredArray();
@@ -145,7 +141,7 @@ void SINQTranspose3D::doTRICS(IMDHistoWorkspace_sptr inWS) {
   dimensions.push_back(boost::const_pointer_cast<IMDDimension>(z));
   dimensions.push_back(boost::const_pointer_cast<IMDDimension>(y));
 
-  MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));
+  auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
   outWS->setTo(.0, .0, .0);
 
   inVal = inWS->getSignalArray();
@@ -184,7 +180,7 @@ void SINQTranspose3D::doAMOR(IMDHistoWorkspace_sptr inWS) {
   dimensions.push_back(boost::const_pointer_cast<IMDDimension>(x));
   dimensions.push_back(boost::const_pointer_cast<IMDDimension>(z));
 
-  MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));
+  auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
   outWS->setTo(.0, .0, .0);
 
   xdim = static_cast<unsigned int>(x->getNBins());

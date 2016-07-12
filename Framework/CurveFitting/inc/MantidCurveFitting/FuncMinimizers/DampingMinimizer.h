@@ -46,15 +46,15 @@ public:
   /// Constructor
   DampingMinimizer(double relTol = 0.0001);
   /// Name of the minimizer.
-  std::string name() const { return "DampingMinimizer"; }
+  std::string name() const override { return "DampingMinimizer"; }
 
   /// Initialize minimizer, i.e. pass a function to minimize.
-  virtual void initialize(API::ICostFunction_sptr function,
-                          size_t maxIterations = 0);
+  void initialize(API::ICostFunction_sptr function,
+                  size_t maxIterations = 0) override;
   /// Do one iteration.
-  virtual bool iterate(size_t);
+  bool iterate(size_t) override;
   /// Return current value of the cost function
-  virtual double costFunctionVal();
+  double costFunctionVal() override;
 
 private:
   /// Pointer to the cost function. Must be the least squares.

@@ -39,18 +39,14 @@ namespace Crystal {
  */
 class DLLExport PeakIntegration : public API::Algorithm {
 public:
-  /// Default constructor
-  PeakIntegration();
-  /// Destructor
-  virtual ~PeakIntegration();
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "PeakIntegration"; }
+  const std::string name() const override { return "PeakIntegration"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Crystal\\Integration"; }
+  const std::string category() const override { return "Crystal\\Integration"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Integrate single crystal peaks using IkedaCarpenter fit TOF";
   }
 
@@ -58,8 +54,8 @@ private:
   API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace
   API::MatrixWorkspace_sptr outputW; ///< A pointer to the output workspace
   // Overridden Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
   void fitSpectra(const int s, double TOFPeakd, double &I, double &sigI);
   /// Read in all the input parameters
@@ -68,7 +64,7 @@ private:
                     double qspan, DataObjects::PeaksWorkspace_sptr &Peaks,
                     const detid2index_map &pixel_to_wi);
 
-  bool m_IC; ///< Ikeida Carpenter fit of TOF
+  bool m_IC = false; ///< Ikeida Carpenter fit of TOF
 };
 
 } // namespace Algorithm

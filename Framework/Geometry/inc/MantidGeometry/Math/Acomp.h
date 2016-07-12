@@ -93,8 +93,6 @@ private:
 
 public:
   Acomp(int const = 0);
-  Acomp(const Acomp &);
-  Acomp &operator=(const Acomp &);
   bool operator==(const Acomp &) const;
   bool operator!=(const Acomp &) const; ///< Complementary operator
   bool operator<(const Acomp &) const;
@@ -102,7 +100,6 @@ public:
   Acomp &operator+=(const Acomp &);
   Acomp &operator-=(const Acomp &);
   Acomp &operator*=(const Acomp &);
-  ~Acomp();
 
   const Acomp *itemC(int const) const; ///< returns a pointer to Comp (or zero)
   int itemN(int const) const; ///< returns an integer to Units (or zero)

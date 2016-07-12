@@ -1,10 +1,16 @@
 #ifndef MANTID_DATAHANDLING_LoadHelper_H_
 #define MANTID_DATAHANDLING_LoadHelper_H_
 
+#include "MantidAPI/Run.h"
 #include "MantidKernel/System.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
+
+namespace Kernel {
+class Quat;
+}
+
 namespace DataHandling {
 
 /** LoadHelper : Auxiliary File for Loading Files
@@ -32,8 +38,7 @@ namespace DataHandling {
  */
 class DLLExport LoadHelper {
 public:
-  LoadHelper();
-  virtual ~LoadHelper();
+  virtual ~LoadHelper() = default;
 
   std::string findInstrumentNexusPath(const Mantid::NeXus::NXEntry &);
   std::string getStringFromNexusPath(const Mantid::NeXus::NXEntry &,
@@ -68,7 +73,7 @@ public:
 private:
   void recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails,
                                        std::string &parent_name,
-                                       std::string &parent_class, int indent);
+                                       std::string &parent_class, int level);
 };
 }
 // namespace DataHandling

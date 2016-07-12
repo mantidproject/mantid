@@ -53,13 +53,11 @@ class DataItem;
 class MANTID_KERNEL_DLL ReadLock {
 public:
   ReadLock(const DataItem &item);
+  ReadLock(const ReadLock &) = delete;
+  ReadLock &operator=(const ReadLock &) = delete;
   virtual ~ReadLock();
 
 private:
-  /// Private copy constructor - NO COPY ALLOWED
-  ReadLock(const ReadLock &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  ReadLock &operator=(const ReadLock &);
   /// Disallow creating the object on the heap
   void *operator new(size_t);
   /// Disallow creating the object on the heap

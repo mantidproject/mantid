@@ -33,30 +33,24 @@ namespace Algorithms {
  */
 class DLLExport Stitch1DMany : public API::Algorithm {
 public:
-  /// Default constructor
-  Stitch1DMany()
-      : m_numWorkspaces(0), m_manualScaleFactor(1.0), m_scaleRHSWorkspace(true),
-        m_useManualScaleFactor(false){};
-  /// Destructor
-  virtual ~Stitch1DMany(){};
   /// Algorithm's name for identification. @see Algorithm::name
-  virtual const std::string name() const { return "Stitch1DMany"; }
+  const std::string name() const override { return "Stitch1DMany"; }
   /// Algorithm's version for identification. @see Algorithm::version
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification. @see Algorithm::category
-  virtual const std::string category() const { return "Reflectometry"; }
+  const std::string category() const override { return "Reflectometry"; }
   /// Summary of algorithm's purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Stitches histogram matrix workspaces together";
   }
   /// Validates algorithm inputs
-  virtual std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method.
-  void exec();
+  void exec() override;
 
   // Data
   std::vector<Mantid::API::Workspace_sptr> m_inputWorkspaces;
@@ -66,10 +60,10 @@ private:
   std::vector<double> m_scaleFactors;
   Mantid::API::Workspace_sptr m_outputWorkspace;
 
-  size_t m_numWorkspaces;
-  double m_manualScaleFactor;
-  bool m_scaleRHSWorkspace;
-  bool m_useManualScaleFactor;
+  size_t m_numWorkspaces = 0;
+  double m_manualScaleFactor = 1.0;
+  bool m_scaleRHSWorkspace = true;
+  bool m_useManualScaleFactor = false;
 };
 
 } // namespace Algorithms

@@ -186,7 +186,7 @@
           <string/>
          </property>
          <property name="icon">
-          <iconset resource="../../../../images/images.qrc">
+          <iconset resource="../../../../images/MantidWidgets.qrc">
            <normaloff>:/PickTools/selection-peaks.png</normaloff>:/PickTools/selection-peaks.png</iconset>
          </property>
          <property name="checkable">
@@ -203,7 +203,7 @@
           <string/>
          </property>
          <property name="icon">
-          <iconset resource="../../../../images/images.qrc">
+          <iconset resource="../../../../images/MantidWidgets.qrc">
            <normaloff>:/PickTools/eraser.png</normaloff>:/PickTools/eraser.png</iconset>
          </property>
          <property name="checkable">
@@ -237,7 +237,7 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>70</width>
+             <width>100</width>
              <height>0</height>
             </size>
            </property>
@@ -251,6 +251,19 @@
             <cstring>infoFrame</cstring>
            </property>
           </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
          <item>
           <widget class="QPushButton" name="btnPeakColor">
@@ -272,8 +285,79 @@
              <height>16777215</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Peak marker color for non-shape peaks.</string>
+           </property>
            <property name="text">
             <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../../icons/SliceViewerIcons.qrc">
+             <normaloff>:/SliceViewer/icons/peak_cross.png</normaloff>:/SliceViewer/icons/peak_cross.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnPeakColorSphere">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>20</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>20</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Peak marker color for spherical peaks.</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../../icons/SliceViewerIcons.qrc">
+             <normaloff>:/SliceViewer/icons/peak_sphere.png</normaloff>:/SliceViewer/icons/peak_sphere.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnPeakColorEllipsoid">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>20</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>20</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Peak marker color for ellipsoidal peaks.</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../../icons/SliceViewerIcons.qrc">
+             <normaloff>:/SliceViewer/icons/peak_ellipsoid.png</normaloff>:/SliceViewer/icons/peak_ellipsoid.png</iconset>
            </property>
           </widget>
          </item>
@@ -281,6 +365,9 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <property name="spacing">
+          <number>1</number>
+         </property>
          <item>
           <widget class="QLabel" name="lblShowBackgroundColour">
            <property name="sizePolicy">
@@ -291,7 +378,7 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>70</width>
+             <width>120</width>
              <height>0</height>
             </size>
            </property>
@@ -304,12 +391,31 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="btnBackgroundColor">
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnBackgroundColorSphere">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>20</width>
+             <height>0</height>
+            </size>
            </property>
            <property name="maximumSize">
             <size>
@@ -317,8 +423,47 @@
              <height>16777215</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Peak background color for spherical peaks.</string>
+           </property>
            <property name="text">
             <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../../icons/SliceViewerIcons.qrc">
+             <normaloff>:/SliceViewer/icons/peak_sphere.png</normaloff>:/SliceViewer/icons/peak_sphere.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnBackgroundColorEllipsoid">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>20</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>20</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Peak background color for ellipsoidal peaks.</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../../icons/SliceViewerIcons.qrc">
+             <normaloff>:/SliceViewer/icons/peak_ellipsoid.png</normaloff>:/SliceViewer/icons/peak_ellipsoid.png</iconset>
            </property>
           </widget>
          </item>
@@ -354,7 +499,8 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../../../images/images.qrc"/>
+  <include location="../../icons/SliceViewerIcons.qrc"/>
+  <include location="../../../../images/MantidWidgets.qrc"/>
  </resources>
  <connections/>
 </ui>

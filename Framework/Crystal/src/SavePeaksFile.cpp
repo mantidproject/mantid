@@ -13,27 +13,15 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SavePeaksFile::SavePeaksFile() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SavePeaksFile::~SavePeaksFile() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SavePeaksFile::init() {
-  declareProperty(
-      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input),
-      "An input PeaksWorkspace.");
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                      "InputWorkspace", "", Direction::Input),
+                  "An input PeaksWorkspace.");
 
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::Save, {".peaks"}),
+      make_unique<FileProperty>("Filename", "", FileProperty::Save, ".peaks"),
       "Path to an ISAW-style .peaks filename.");
 }
 

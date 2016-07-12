@@ -9,10 +9,6 @@
 
 namespace Mantid {
 namespace API {
-CatalogManagerImpl::CatalogManagerImpl() : m_activeCatalogs() {}
-
-CatalogManagerImpl::~CatalogManagerImpl() {}
-
 /**
  * Logs the user into the catalog if session details are valid.
  * This is used here as we need to obtain the session for a specific catalog
@@ -36,7 +32,7 @@ CatalogSession_sptr CatalogManagerImpl::login(const std::string &username,
       catalog->login(username, password, endpoint, facility);
   // Creates a new catalog and adds it to the compositeCatalog and activeCatalog
   // list.
-  m_activeCatalogs.insert(std::make_pair(session, catalog));
+  m_activeCatalogs.emplace(session, catalog);
   return session;
 }
 
@@ -55,17 +51,15 @@ ICatalog_sptr CatalogManagerImpl::getCatalog(const std::string &sessionID) {
 
   if (sessionID.empty()) {
     auto composite = boost::make_shared<CompositeCatalog>();
-    for (auto item = m_activeCatalogs.begin(); item != m_activeCatalogs.end();
-         ++item) {
-      composite->add(item->second);
+    for (auto &activeCatalog : m_activeCatalogs) {
+      composite->add(activeCatalog.second);
     }
     return composite;
   }
 
-  for (auto iter = m_activeCatalogs.begin(); iter != m_activeCatalogs.end();
-       ++iter) {
-    if (sessionID == iter->first->getSessionId())
-      return iter->second;
+  for (auto &activeCatalog : m_activeCatalogs) {
+    if (sessionID == activeCatalog.first->getSessionId())
+      return activeCatalog.second;
   }
 
   // If we reached this point then the session is corrupt/invalid.
@@ -81,9 +75,8 @@ ICatalog_sptr CatalogManagerImpl::getCatalog(const std::string &sessionID) {
  */
 void CatalogManagerImpl::destroyCatalog(const std::string &sessionID) {
   if (sessionID.empty()) {
-    for (auto item = m_activeCatalogs.begin(); item != m_activeCatalogs.end();
-         ++item) {
-      item->second->logout();
+    for (auto &activeCatalog : m_activeCatalogs) {
+      activeCatalog.second->logout();
     }
     m_activeCatalogs.clear();
   }
@@ -103,10 +96,9 @@ void CatalogManagerImpl::destroyCatalog(const std::string &sessionID) {
  */
 std::vector<CatalogSession_sptr> CatalogManagerImpl::getActiveSessions() {
   std::vector<CatalogSession_sptr> sessions;
-
-  for (auto item = m_activeCatalogs.begin(); item != m_activeCatalogs.end();
-       ++item) {
-    sessions.push_back(item->first);
+  sessions.reserve(m_activeCatalogs.size());
+  for (auto &activeCatalog : m_activeCatalogs) {
+    sessions.push_back(activeCatalog.first);
   }
 
   return sessions;

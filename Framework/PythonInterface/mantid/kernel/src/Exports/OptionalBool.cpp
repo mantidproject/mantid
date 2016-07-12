@@ -17,7 +17,11 @@ void export_OptionalBoolValue() {
   boost::python::enum_<OptionalBool::Value>("OptionalBoolValue")
       .value(OptionalBool::StrUnset.c_str(), OptionalBool::Unset)
       .value(OptionalBool::StrTrue.c_str(), OptionalBool::True)
-      .value(OptionalBool::StrFalse.c_str(), OptionalBool::False);
+      .value(OptionalBool::StrFalse.c_str(), OptionalBool::False)
+      // Python 3 does not allow .True/.False. It gives a syntax error
+      // so use an underscore after the name
+      .value((OptionalBool::StrTrue + "_").c_str(), OptionalBool::True)
+      .value((OptionalBool::StrFalse + "_").c_str(), OptionalBool::False);
 }
 
 namespace {
@@ -50,14 +54,11 @@ private:
 public:
   typedef OptionalBool HeldType;
 
-  virtual ~OptionalBoolPropertyValueHandler() {}
-
   /**
    * Set function to handle Python -> C++ calls and get the correct type
    */
-  virtual void set(Mantid::Kernel::IPropertyManager *alg,
-                   const std::string &name,
-                   const boost::python::object &value) const {
+  void set(Mantid::Kernel::IPropertyManager *alg, const std::string &name,
+           const boost::python::object &value) const override {
 
     alg->setProperty<OptionalBool>(name, fromPyObj(value));
   }
@@ -65,18 +66,19 @@ public:
   /**
    * Create a PropertyWithValue from the given python object value
    */
-  virtual Mantid::Kernel::Property *
+  std::unique_ptr<Mantid::Kernel::Property>
   create(const std::string &name, const boost::python::object &value,
          const boost::python::object &validator,
-         const unsigned int direction) const {
+         const unsigned int direction) const override {
     using boost::python::extract;
 
     auto optBool = fromPyObj(value);
     if (isNone(validator)) {
-      return new PropertyWithValue<OptionalBool>(name, optBool, direction);
+      return Mantid::Kernel::make_unique<PropertyWithValue<OptionalBool>>(
+          name, optBool, direction);
     } else {
       const IValidator *propValidator = extract<IValidator *>(validator);
-      return new PropertyWithValue<OptionalBool>(
+      return Mantid::Kernel::make_unique<PropertyWithValue<OptionalBool>>(
           name, optBool, propValidator->clone(), direction);
     }
   }
@@ -89,7 +91,7 @@ void export_OptionalBool() {
       .def("__init__",
            make_constructor(&createOptionalBool, default_call_policies(),
                             (arg("value"))))
-      .def("getValue", &OptionalBool::getValue);
+      .def("getValue", &OptionalBool::getValue, arg("self"));
 }
 
 void export_PropertyWithValueOptionalBool() {

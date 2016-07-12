@@ -20,20 +20,19 @@ public:
   {}
 
 protected:
-  void connectPropertyManager(DoubleManagerType *manager)
-  {
+  void connectPropertyManager(DoubleManagerType *manager) override {
     (void) manager; // Unused
     // Do nothing
   }
 
-  void disconnectPropertyManager(DoubleManagerType *manager)
-  {
+  void disconnectPropertyManager(DoubleManagerType *manager) override {
     (void) manager; // Unused
     // Do nothing
   }
 
-  QWidget *createEditorForManager(DoubleManagerType *manager, QtProperty *property, QWidget *parent)
-  {
+  QWidget *createEditorForManager(DoubleManagerType *manager,
+                                  QtProperty *property,
+                                  QWidget *parent) override {
     (void) manager; // Unused
 
     return new DoubleEditorType(property, parent);
@@ -48,7 +47,7 @@ class QT_QTPROPERTYBROWSER_EXPORT DoubleEditor: public QLineEdit
   Q_OBJECT
 public:
   DoubleEditor(QtProperty *property, QWidget *parent);
-  ~DoubleEditor();
+  ~DoubleEditor() override;
   void setValue(const double& d);
 protected slots:
   virtual void updateProperty();
@@ -69,7 +68,7 @@ class QT_QTPROPERTYBROWSER_EXPORT ParameterEditor : public DoubleEditor
 public:
   ParameterEditor(QtProperty *property, QWidget *parent) : DoubleEditor(property, parent) {}
 protected slots:
-  virtual void updateProperty();
+  void updateProperty() override;
 };
 
 /**

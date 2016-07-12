@@ -178,11 +178,17 @@ class InstrumentInterface(object):
         else:
             self._warning("Runtime error","You cannot send live data to cluster")
 
+    #pylint: disable=bare-except
     def reduce(self):
         """
             Pass the interface data to the scripter and reduce
         """
-        self.scripter.update()
+        try:
+            self.scripter.update()
+        except:
+            print "Error in the user interface\n  %s" % str(traceback.format_exc())
+            self.scripter.push_state()
+            return
 
         # Save the last reduction for later
         try:

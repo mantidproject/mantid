@@ -1,10 +1,10 @@
 #ifndef __ADARA_PACKETS_H
 #define __ADARA_PACKETS_H
 
-#include <stdint.h>
-#include <string>
+#include <cstdint>
+#include <cstring>
 #include <sstream>
-#include <string.h>
+#include <string>
 
 #include "ADARA.h"
 #include "MantidKernel/System.h"
@@ -14,38 +14,44 @@ namespace ADARA {
 class DLLExport PacketHeader {
 public:
   PacketHeader(const uint8_t *data) {
-    const uint32_t *field = (const uint32_t *)data;
+    const uint32_t *field = reinterpret_cast<const uint32_t *>(data);
 
     m_payload_len = field[0];
-    m_type = (PacketType::Enum)field[1];
+    m_type = field[1];
+    m_base_type = (PacketType::Type)ADARA_BASE_PKT_TYPE(m_type);
+    m_version = (PacketType::Version)ADARA_PKT_VERSION(m_type);
 
 #if 0
 // NOTE: Windows doesn't have struct timespec and Mantid doesn't really need this,
 // so for now we're just going to comment it out.
-		/* Convert EPICS epoch to Unix epoch,
-		 * Jan 1, 1990 ==> Jan 1, 1970
-		 */
-		m_timestamp.tv_sec = field[2] + EPICS_EPOCH_OFFSET;
-		m_timestamp.tv_nsec = field[3];
+      /* Convert EPICS epoch to Unix epoch,
+        * Jan 1, 1990 ==> Jan 1, 1970
+        */
+      m_timestamp.tv_sec = field[2] + EPICS_EPOCH_OFFSET;
+      m_timestamp.tv_nsec = field[3];
 #endif
 
     m_pulseId = ((uint64_t)field[2]) << 32;
     m_pulseId |= field[3];
   }
 
-  PacketType::Enum type(void) const { return m_type; }
-  uint32_t payload_length(void) const { return m_payload_len; }
+  uint32_t type() const { return m_type; }
+  PacketType::Type base_type() const { return m_base_type; }
+  PacketType::Version version() const { return m_version; }
+  uint32_t payload_length() const { return m_payload_len; }
 #if 0
 	const struct timespec &timestamp(void) const { return m_timestamp; }
 #endif
-  uint64_t pulseId(void) const { return m_pulseId; }
-  uint32_t packet_length(void) const { return m_payload_len + 16; }
+  uint64_t pulseId() const { return m_pulseId; }
+  uint32_t packet_length() const { return m_payload_len + 16; }
 
-  static uint32_t header_length(void) { return 16; }
+  static uint32_t header_length() { return 16; }
 
 protected:
   uint32_t m_payload_len;
-  PacketType::Enum m_type;
+  uint32_t m_type;
+  PacketType::Type m_base_type;
+  PacketType::Version m_version;
 
 #if 0
 	struct timespec m_timestamp;
@@ -63,8 +69,8 @@ public:
 
   virtual ~Packet();
 
-  const uint8_t *packet(void) const { return m_data; }
-  const uint8_t *payload(void) const { return m_data + header_length(); }
+  const uint8_t *packet() const { return m_data; }
+  const uint8_t *payload() const { return m_data + header_length(); }
 
 protected:
   const uint8_t *m_data;
@@ -81,26 +87,26 @@ class DLLExport RawDataPkt : public Packet {
 public:
   RawDataPkt(const RawDataPkt &pkt);
 
-  uint32_t sourceID(void) const { return m_fields[0]; }
-  bool endOfPulse(void) const { return !!(m_fields[1] & 0x80000000); }
-  uint16_t pktSeq(void) const { return (m_fields[1] >> 16) & 0x7fff; }
-  uint16_t dspSeq(void) const { return m_fields[1] & 0x7fff; }
-  PulseFlavor::Enum flavor(void) const {
+  uint32_t sourceID() const { return m_fields[0]; }
+  bool endOfPulse() const { return !!(m_fields[1] & 0x80000000); }
+  uint16_t pktSeq() const { return (m_fields[1] >> 16) & 0x7fff; }
+  uint16_t dspSeq() const { return m_fields[1] & 0x7fff; }
+  PulseFlavor::Enum flavor() const {
     return static_cast<PulseFlavor::Enum>((m_fields[2] >> 24) & 0x7);
   }
-  uint32_t pulseCharge(void) const { return m_fields[2] & 0x00ffffff; }
-  bool badVeto(void) const { return !!(m_fields[3] & 0x80000000); }
-  bool badCycle(void) const { return !!(m_fields[3] & 0x40000000); }
-  uint8_t timingStatus(void) const { return (uint8_t)(m_fields[3] >> 22); }
-  uint16_t vetoFlags(void) const { return (m_fields[3] >> 10) & 0xfff; }
-  uint16_t cycle(void) const { return m_fields[3] & 0x3ff; }
-  uint32_t intraPulseTime(void) const { return m_fields[4]; }
-  bool tofCorrected(void) const { return !!(m_fields[5] & 0x80000000); }
-  uint32_t tofOffset(void) const { return m_fields[5] & 0x7fffffff; }
-  uint32_t tofField(void) const { return m_fields[5]; }
+  uint32_t pulseCharge() const { return m_fields[2] & 0x00ffffff; }
+  bool badVeto() const { return !!(m_fields[3] & 0x80000000); }
+  bool badCycle() const { return !!(m_fields[3] & 0x40000000); }
+  uint8_t timingStatus() const { return (uint8_t)(m_fields[3] >> 22); }
+  uint16_t vetoFlags() const { return (m_fields[3] >> 10) & 0xfff; }
+  uint16_t cycle() const { return m_fields[3] & 0x3ff; }
+  uint32_t intraPulseTime() const { return m_fields[4]; }
+  bool tofCorrected() const { return !!(m_fields[5] & 0x80000000); }
+  uint32_t tofOffset() const { return m_fields[5] & 0x7fffffff; }
+  uint32_t tofField() const { return m_fields[5]; }
 
-  const Event *events(void) const { return (const Event *)&m_fields[6]; }
-  uint32_t num_events(void) const {
+  const Event *events() const { return (const Event *)&m_fields[6]; }
+  uint32_t num_events() const {
     return (m_payload_len - 24) / (uint32_t)(2 * sizeof(uint32_t));
   }
 
@@ -115,8 +121,6 @@ private:
 
 class DLLExport MappedDataPkt : public RawDataPkt {
 public:
-  MappedDataPkt(const MappedDataPkt &pkt);
-
 private:
   MappedDataPkt(const uint8_t *data, uint32_t len);
 
@@ -127,26 +131,39 @@ class DLLExport RTDLPkt : public Packet {
 public:
   RTDLPkt(const RTDLPkt &pkt);
 
-  PulseFlavor::Enum flavor(void) const {
+  PulseFlavor::Enum flavor() const {
     return static_cast<PulseFlavor::Enum>((m_fields[0] >> 24) & 0x7);
   }
-  uint32_t pulseCharge(void) const { return m_fields[0] & 0x00ffffff; }
-  bool badVeto(void) const { return !!(m_fields[1] & 0x80000000); }
-  bool badCycle(void) const { return !!(m_fields[1] & 0x40000000); }
-  uint8_t timingStatus(void) const { return (uint8_t)(m_fields[1] >> 22); }
-  uint16_t vetoFlags(void) const { return (m_fields[1] >> 10) & 0xfff; }
-  uint16_t cycle(void) const { return m_fields[1] & 0x3ff; }
-  uint32_t intraPulseTime(void) const { return m_fields[2]; }
-  bool tofCorrected(void) const { return !!(m_fields[3] & 0x80000000); }
-  uint32_t tofOffset(void) const { return m_fields[3] & 0x7fffffff; }
-  uint32_t ringPeriod(void) const { return m_fields[4] & 0xffffff; }
+
+  uint32_t pulseCharge() const { return m_fields[0] & 0x00ffffff; }
+
+  void setPulseCharge(uint32_t pulseCharge) {
+    m_fields[0] &= 0xff000000;
+    m_fields[0] |= pulseCharge & 0x00ffffff;
+  }
+
+  bool badVeto() const { return !!(m_fields[1] & 0x80000000); }
+  bool badCycle() const { return !!(m_fields[1] & 0x40000000); }
+  uint8_t timingStatus() const { return (uint8_t)(m_fields[1] >> 22); }
+  uint16_t vetoFlags() const { return (m_fields[1] >> 10) & 0xfff; }
+
+  void setVetoFlags(uint16_t vetoFlags) {
+    m_fields[1] &= 0xffc003ff;
+    m_fields[1] |= (vetoFlags & 0xfff) << 10;
+  }
+
+  uint16_t cycle() const { return m_fields[1] & 0x3ff; }
+  uint32_t intraPulseTime() const { return m_fields[2]; }
+  bool tofCorrected() const { return !!(m_fields[3] & 0x80000000); }
+  uint32_t tofOffset() const { return m_fields[3] & 0x7fffffff; }
+  uint32_t ringPeriod() const { return m_fields[4] & 0xffffff; }
 
   // accessor methods for optional FNA/Frame Data fields
 
   uint32_t FNA(uint32_t index) const {
     // If out of bounds, just return "0" for "Unused Frame"... ;-D
     if (index > 24)
-      return (0);
+      return 0;
     else
       return (m_fields[5 + index] >> 24) & 0xff;
   }
@@ -154,13 +171,14 @@ public:
   uint32_t frameData(uint32_t index) const {
     // Out of bounds, return "-1" (0xffffff) for Bogus "Frame Data" ;-b
     if (index > 24)
-      return (-1);
+      return -1;
     else
       return m_fields[5 + index] & 0xffffff;
   }
 
 private:
-  const uint32_t *m_fields;
+  // Note: RTDLPkt m_fields can't be "const", as we Modify Pulse Charge!
+  uint32_t *m_fields;
 
   RTDLPkt(const uint8_t *data, uint32_t len);
 
@@ -169,10 +187,10 @@ private:
 
 class DLLExport SourceListPkt : public Packet {
 public:
-  SourceListPkt(const SourceListPkt &pkt);
-
-  const uint32_t *ids(void) const { return (const uint32_t *)payload(); }
-  uint32_t num_ids(void) const {
+  const uint32_t *ids() const {
+    return reinterpret_cast<const uint32_t *>(payload());
+  }
+  uint32_t num_ids() const {
     return (uint32_t)payload_length() / (uint32_t)sizeof(uint32_t);
   }
 
@@ -187,19 +205,21 @@ public:
   BankedEventPkt(const BankedEventPkt &pkt);
 
   enum Flags {
-    ERROR_PIXELS = 0x0001,
-    PARTIAL_DATA = 0x0002,
-    PULSE_VETO = 0x0004,
-    MISSING_RTDL = 0x0008,
-    MAPPING_ERROR = 0x0010,
-    DUPLICATE_PULSE = 0x0020,
+    ERROR_PIXELS = 0x00001,
+    PARTIAL_DATA = 0x00002,
+    PULSE_VETO = 0x00004,
+    MISSING_RTDL = 0x00008,
+    MAPPING_ERROR = 0x00010,
+    DUPLICATE_PULSE = 0x00020,
+    PCHARGE_UNCORRECTED = 0x00040,
+    VETO_UNCORRECTED = 0x00080,
   };
 
-  uint32_t pulseCharge(void) const { return m_fields[0]; }
-  uint32_t pulseEnergy(void) const { return m_fields[1]; }
-  uint32_t cycle(void) const { return m_fields[2]; }
-  uint32_t vetoFlags(void) const { return (m_fields[3] >> 20) & 0xfff; }
-  uint32_t flags(void) const { return m_fields[3] & 0xfffff; }
+  uint32_t pulseCharge() const { return m_fields[0]; }
+  uint32_t pulseEnergy() const { return m_fields[1]; }
+  uint32_t cycle() const { return m_fields[2]; }
+  uint32_t vetoFlags() const { return (m_fields[3] >> 20) & 0xfff; }
+  uint32_t flags() const { return m_fields[3] & 0xfffff; }
 
   // The source, bank and event accessors all return NULL if we've
   // incremented past the end
@@ -227,8 +247,8 @@ private:
   mutable unsigned m_curFieldIndex;  // where we currently are in the packet
 
   // Data about the current source section
-  mutable unsigned
-      m_sourceStartIndex; // index into m_fields for the start of this source
+  mutable unsigned m_sourceStartIndex; // index into m_fields for the start of
+                                       // this source
   mutable uint32_t m_bankCount;
   mutable uint32_t m_TOFOffset;
   mutable bool m_isCorrected;
@@ -236,8 +256,8 @@ private:
                               // start of the section)
 
   // Data about the current bank
-  mutable unsigned
-      m_bankStartIndex; // index into m_fields for the start of this source
+  mutable unsigned m_bankStartIndex; // index into m_fields for the start of
+                                     // this source
   mutable uint32_t m_bankId;
   mutable uint32_t m_eventCount;
 
@@ -250,11 +270,11 @@ class DLLExport BeamMonitorPkt : public Packet {
 public:
   BeamMonitorPkt(const BeamMonitorPkt &pkt);
 
-  uint32_t pulseCharge(void) const { return m_fields[0]; }
-  uint32_t pulseEnergy(void) const { return m_fields[1]; }
-  uint32_t cycle(void) const { return m_fields[2]; }
-  uint32_t vetoFlags(void) const { return (m_fields[3] >> 20) & 0xfff; }
-  uint32_t flags(void) const { return m_fields[3] & 0xfffff; }
+  uint32_t pulseCharge() const { return m_fields[0]; }
+  uint32_t pulseEnergy() const { return m_fields[1]; }
+  uint32_t cycle() const { return m_fields[2]; }
+  uint32_t vetoFlags() const { return (m_fields[3] >> 20) & 0xfff; }
+  uint32_t flags() const { return m_fields[3] & 0xfffff; }
 
   // bool firstSection() const;
   bool nextSection() const; // iterate over the sections in the packet
@@ -273,8 +293,8 @@ private:
   const uint32_t *m_fields;
 
   // Data about the current monitor section
-  mutable uint32_t
-      m_sectionStartIndex; // index into m_fields for the start of this section
+  mutable uint32_t m_sectionStartIndex; // index into m_fields for the start of
+                                        // this section
 
   // used to keep nextEvent from running past the end of the section
   mutable uint32_t m_eventNum;
@@ -286,9 +306,7 @@ private:
 
 class DLLExport PixelMappingPkt : public Packet {
 public:
-  PixelMappingPkt(const PixelMappingPkt &pkt);
   // TODO implement accessors for fields
-
 private:
   PixelMappingPkt(const uint8_t *data, uint32_t len);
 
@@ -299,10 +317,10 @@ class DLLExport RunStatusPkt : public Packet {
 public:
   RunStatusPkt(const RunStatusPkt &pkt);
 
-  uint32_t runNumber(void) const { return m_fields[0]; }
-  uint32_t runStart(void) const { return m_fields[1]; }
-  uint32_t fileNumber(void) const { return m_fields[2] & 0xffffff; }
-  RunStatus::Enum status(void) const {
+  uint32_t runNumber() const { return m_fields[0]; }
+  uint32_t runStart() const { return m_fields[1]; }
+  uint32_t fileNumber() const { return m_fields[2] & 0xffffff; }
+  RunStatus::Enum status() const {
     return static_cast<RunStatus::Enum>(m_fields[2] >> 24);
   }
 
@@ -316,9 +334,7 @@ private:
 
 class DLLExport RunInfoPkt : public Packet {
 public:
-  RunInfoPkt(const RunInfoPkt &pkt);
-
-  const std::string &info(void) const { return m_xml; }
+  const std::string &info() const { return m_xml; }
 
 private:
   std::string m_xml;
@@ -332,8 +348,8 @@ class DLLExport TransCompletePkt : public Packet {
 public:
   TransCompletePkt(const TransCompletePkt &pkt);
 
-  uint16_t status(void) const { return m_status; }
-  const std::string &reason(void) const { return m_reason; }
+  uint16_t status() const { return m_status; }
+  const std::string &reason() const { return m_reason; }
 
 private:
   uint16_t m_status;
@@ -346,12 +362,18 @@ private:
 
 class DLLExport ClientHelloPkt : public Packet {
 public:
-  ClientHelloPkt(const ClientHelloPkt &pkt);
+  enum Flags {
+    PAUSE_AGNOSTIC = 0x0000,
+    NO_PAUSE_DATA = 0x0001,
+    SEND_PAUSE_DATA = 0x0002,
+  };
 
-  uint32_t requestedStartTime(void) const { return m_reqStart; }
+  uint32_t requestedStartTime() const { return m_reqStart; }
+  uint32_t clientFlags() const { return m_clientFlags; }
 
 private:
   uint32_t m_reqStart;
+  uint32_t m_clientFlags;
 
   ClientHelloPkt(const uint8_t *data, uint32_t len);
 
@@ -362,13 +384,13 @@ class DLLExport AnnotationPkt : public Packet {
 public:
   AnnotationPkt(const AnnotationPkt &pkt);
 
-  bool resetHint(void) const { return !!(m_fields[0] & 0x80000000); }
-  MarkerType::Enum marker_type(void) const {
+  bool resetHint() const { return !!(m_fields[0] & 0x80000000); }
+  MarkerType::Enum marker_type() const {
     uint16_t type = (m_fields[0] >> 16) & 0x7fff;
     return static_cast<MarkerType::Enum>(type);
   }
-  uint32_t scanIndex(void) const { return m_fields[1]; }
-  const std::string &comment(void) const {
+  uint32_t scanIndex() const { return m_fields[1]; }
+  const std::string &comment() const {
     if (!m_comment.length() && (m_fields[0] & 0xffff)) {
       m_comment.assign((const char *)&m_fields[2], m_fields[0] & 0xffff);
     }
@@ -387,9 +409,7 @@ private:
 
 class DLLExport SyncPkt : public Packet {
 public:
-  SyncPkt(const SyncPkt &pkt);
   // TODO implement accessors for fields
-
 private:
   SyncPkt(const uint8_t *data, uint32_t len);
 
@@ -398,8 +418,6 @@ private:
 
 class DLLExport HeartbeatPkt : public Packet {
 public:
-  HeartbeatPkt(const HeartbeatPkt &pkt);
-
 private:
   HeartbeatPkt(const uint8_t *data, uint32_t len);
 
@@ -408,9 +426,7 @@ private:
 
 class DLLExport GeometryPkt : public Packet {
 public:
-  GeometryPkt(const GeometryPkt &pkt);
-
-  const std::string &info(void) const { return m_xml; }
+  const std::string &info() const { return m_xml; }
 
 private:
   std::string m_xml;
@@ -422,16 +438,14 @@ private:
 
 class DLLExport BeamlineInfoPkt : public Packet {
 public:
-  BeamlineInfoPkt(const BeamlineInfoPkt &pkt);
+  const uint32_t &targetStationNumber() const { return m_targetStationNumber; }
 
-  const uint32_t &targetNumber(void) const { return m_targetNumber; }
-
-  const std::string &id(void) const { return m_id; }
-  const std::string &shortName(void) const { return m_shortName; }
-  const std::string &longName(void) const { return m_longName; }
+  const std::string &id() const { return m_id; }
+  const std::string &shortName() const { return m_shortName; }
+  const std::string &longName() const { return m_longName; }
 
 private:
-  uint32_t m_targetNumber;
+  uint32_t m_targetStationNumber;
 
   std::string m_id;
   std::string m_shortName;
@@ -446,7 +460,7 @@ class DLLExport BeamMonitorConfigPkt : public Packet {
 public:
   BeamMonitorConfigPkt(const BeamMonitorConfigPkt &pkt);
 
-  uint32_t beamMonCount(void) const { return m_fields[0]; }
+  uint32_t beamMonCount() const { return m_fields[0]; }
 
   uint32_t bmonId(uint32_t index) const {
     if (index < beamMonCount())
@@ -478,7 +492,7 @@ public:
 
   double distance(uint32_t index) const {
     if (index < beamMonCount())
-      return *(const double *)&m_fields[(index * 6) + 5];
+      return *reinterpret_cast<const double *>(&m_fields[(index * 6) + 5]);
     else
       return (0.0);
   }
@@ -495,7 +509,7 @@ class DLLExport DetectorBankSetsPkt : public Packet {
 public:
   DetectorBankSetsPkt(const DetectorBankSetsPkt &pkt);
 
-  virtual ~DetectorBankSetsPkt();
+  ~DetectorBankSetsPkt() override;
 
   // Detector Bank Set Name, alphanumeric characters...
   static const size_t SET_NAME_SIZE = 16;
@@ -508,7 +522,7 @@ public:
     HISTO_FORMAT = 0x0002,
   };
 
-  uint32_t detBankSetCount(void) const { return m_fields[0]; }
+  uint32_t detBankSetCount() const { return m_fields[0]; }
 
   uint32_t sectionOffset(uint32_t index) const {
     if (index < detBankSetCount())
@@ -549,7 +563,7 @@ public:
                                          m_name_offset + 2];
     } else {
       // Shouldn't be asking for this if bankCount() returned 0...!
-      return ((const uint32_t *)NULL);
+      return ((const uint32_t *)nullptr);
     }
   }
 
@@ -576,7 +590,8 @@ public:
 
   double throttle(uint32_t index) const {
     if (index < detBankSetCount()) {
-      return *(const double *)&m_fields[m_after_banks_offset[index] + 3];
+      return *reinterpret_cast<const double *>(
+                 &m_fields[m_after_banks_offset[index] + 3]);
     } else
       return (0.0);
   }
@@ -616,8 +631,6 @@ private:
 
 class DLLExport DataDonePkt : public Packet {
 public:
-  DataDonePkt(const DataDonePkt &pkt);
-
 private:
   DataDonePkt(const uint8_t *data, uint32_t len);
 
@@ -626,13 +639,12 @@ private:
 
 class DLLExport DeviceDescriptorPkt : public Packet {
 public:
-  DeviceDescriptorPkt(const DeviceDescriptorPkt &pkt);
-
-  uint32_t devId(void) const { return m_devId; }
-  const std::string &description(void) const { return m_desc; }
+  uint32_t devId() const { return m_devId; }
+  const std::string &description() const { return m_desc; }
 
   void remapDevice(uint32_t dev) {
-    uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+    uint32_t *fields =
+        reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
     fields[0] = dev;
     m_devId = dev;
   };
@@ -650,18 +662,19 @@ class DLLExport VariableU32Pkt : public Packet {
 public:
   VariableU32Pkt(const VariableU32Pkt &pkt);
 
-  uint32_t devId(void) const { return m_fields[0]; }
-  uint32_t varId(void) const { return m_fields[1]; }
-  VariableStatus::Enum status(void) const {
+  uint32_t devId() const { return m_fields[0]; }
+  uint32_t varId() const { return m_fields[1]; }
+  VariableStatus::Enum status() const {
     return static_cast<VariableStatus::Enum>(m_fields[2] >> 16);
   }
-  VariableSeverity::Enum severity(void) const {
+  VariableSeverity::Enum severity() const {
     return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff);
   }
-  uint32_t value(void) const { return m_fields[3]; }
+  uint32_t value() const { return m_fields[3]; }
 
-  void remapDevice(uint32_t dev) {
-    uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+  void remapDeviceId(uint32_t dev) {
+    uint32_t *fields =
+        reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
     fields[0] = dev;
   };
 
@@ -677,18 +690,21 @@ class DLLExport VariableDoublePkt : public Packet {
 public:
   VariableDoublePkt(const VariableDoublePkt &pkt);
 
-  uint32_t devId(void) const { return m_fields[0]; }
-  uint32_t varId(void) const { return m_fields[1]; }
-  VariableStatus::Enum status(void) const {
+  uint32_t devId() const { return m_fields[0]; }
+  uint32_t varId() const { return m_fields[1]; }
+  VariableStatus::Enum status() const {
     return static_cast<VariableStatus::Enum>(m_fields[2] >> 16);
   }
-  VariableSeverity::Enum severity(void) const {
+  VariableSeverity::Enum severity() const {
     return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff);
   }
-  double value(void) const { return *(const double *)&m_fields[3]; }
+  double value() const {
+    return *reinterpret_cast<const double *>(&m_fields[3]);
+  }
 
-  void remapDevice(uint32_t dev) {
-    uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+  void remapDeviceId(uint32_t dev) {
+    uint32_t *fields =
+        reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
     fields[0] = dev;
   };
 
@@ -704,18 +720,19 @@ class DLLExport VariableStringPkt : public Packet {
 public:
   VariableStringPkt(const VariableStringPkt &pkt);
 
-  uint32_t devId(void) const { return m_fields[0]; }
-  uint32_t varId(void) const { return m_fields[1]; }
-  VariableStatus::Enum status(void) const {
+  uint32_t devId() const { return m_fields[0]; }
+  uint32_t varId() const { return m_fields[1]; }
+  VariableStatus::Enum status() const {
     return static_cast<VariableStatus::Enum>(m_fields[2] >> 16);
   }
-  VariableSeverity::Enum severity(void) const {
+  VariableSeverity::Enum severity() const {
     return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff);
   }
-  const std::string &value(void) const { return m_val; }
+  const std::string &value() const { return m_val; }
 
-  void remapDevice(uint32_t dev) {
-    uint32_t *fields = (uint32_t *)const_cast<uint8_t *>(payload());
+  void remapDeviceId(uint32_t dev) {
+    uint32_t *fields =
+        reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
     fields[0] = dev;
   };
 

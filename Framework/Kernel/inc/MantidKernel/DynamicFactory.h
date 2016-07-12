@@ -22,6 +22,7 @@
 // std
 #include <cstring>
 #include <functional>
+#include <iterator>
 #include <map>
 #include <vector>
 
@@ -82,13 +83,13 @@ public:
   enum NotificationStatus { Enabled, Disabled };
   /// Defines replacement behaviour
   enum SubscribeAction { ErrorIfExists, OverwriteCurrent };
+  DynamicFactory(const DynamicFactory &) = delete;
+  DynamicFactory &operator=(const DynamicFactory &) = delete;
 
-public:
   /**
    * Base class for dynamic factory notifications
    */
   class DynamicFactoryNotification : public Poco::Notification {};
-
   /**
    * A notification that the factory has been updated. This is
    * blind to the details.
@@ -105,16 +106,13 @@ public:
    */
   void disableNotifications() { m_notifyStatus = Disabled; }
 
-public:
   /// A typedef for the instantiator
   typedef AbstractInstantiator<Base> AbstractFactory;
-
   /// Destroys the DynamicFactory and deletes the instantiators for
   /// all registered classes.
   virtual ~DynamicFactory() {
-    for (typename FactoryMap::iterator it = _map.begin(); it != _map.end();
-         ++it) {
-      delete it->second;
+    for (const auto &item : _map) {
+      delete item.second;
     }
   }
 
@@ -125,7 +123,7 @@ public:
   /// @param className :: the name of the class you wish to create
   /// @return a shared pointer ot the base class
   virtual boost::shared_ptr<Base> create(const std::string &className) const {
-    typename FactoryMap::const_iterator it = _map.find(className);
+    auto it = _map.find(className);
     if (it != _map.end())
       return it->second->createInstance();
     else
@@ -143,7 +141,7 @@ public:
   /// @param className :: the name of the class you wish to create
   /// @return a pointer to the base class
   virtual Base *createUnwrapped(const std::string &className) const {
-    typename FactoryMap::const_iterator it = _map.find(className);
+    auto it = _map.find(className);
     if (it != _map.end())
       return it->second->createUnwrappedInstance();
     else
@@ -180,7 +178,7 @@ public:
       throw std::invalid_argument("Cannot register empty class name");
     }
 
-    typename FactoryMap::iterator it = _map.find(className);
+    auto it = _map.find(className);
     if (it == _map.end() || replace == OverwriteCurrent) {
       if (it != _map.end() && it->second)
         delete it->second;
@@ -197,7 +195,7 @@ public:
   /// Throws a NotFoundException if the class has not been registered.
   /// @param className :: the name of the class you wish to unsubscribe
   void unsubscribe(const std::string &className) {
-    typename FactoryMap::iterator it = _map.find(className);
+    auto it = _map.find(className);
     if (!className.empty() && it != _map.end()) {
       delete it->second;
       _map.erase(it);
@@ -220,12 +218,11 @@ public:
   virtual const std::vector<std::string> getKeys() const {
     std::vector<std::string> names;
     names.reserve(_map.size());
-
-    typename FactoryMap::const_iterator iter = _map.begin();
-    for (; iter != _map.end(); ++iter) {
-      names.push_back(iter->first);
-    }
-
+    std::transform(
+        _map.cbegin(), _map.cend(), std::back_inserter(names),
+        [](const std::pair<std::string, AbstractFactory *> &mapPair) {
+          return mapPair.first;
+        });
     return names;
   }
 
@@ -240,11 +237,6 @@ protected:
   DynamicFactory() : notificationCenter(), _map(), m_notifyStatus(Disabled) {}
 
 private:
-  /// Private copy constructor - NO COPY ALLOWED
-  DynamicFactory(const DynamicFactory &);
-  /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  DynamicFactory &operator=(const DynamicFactory &);
-
   /// Send an update notification if they are enabled
   void sendUpdateNotificationIfEnabled() {
     if (m_notifyStatus == Enabled)

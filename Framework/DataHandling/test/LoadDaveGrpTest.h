@@ -4,6 +4,8 @@
 #include "cxxtest/TestSuite.h"
 #include "MantidDataHandling/LoadDaveGrp.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;

@@ -1,14 +1,17 @@
 #include "MantidDataHandling/LoadLLB.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/UnitFactory.h"
 
-#include <limits>
 #include <algorithm>
-#include <vector>
 #include <cmath>
+#include <limits>
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {
@@ -23,17 +26,9 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadLLB)
 /** Constructor
  */
 LoadLLB::LoadLLB()
-    : m_instrumentName(""), m_instrumentPath(""), m_localWorkspace(),
-      m_numberOfTubes(0), m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
-      m_numberOfHistograms(0), m_wavelength(0.0), m_channelWidth(0.0),
-      m_loader() {
-  m_supportedInstruments.push_back("MIBEMOL");
-}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadLLB::~LoadLLB() {}
+    : m_supportedInstruments{"MIBEMOL"}, m_numberOfTubes{0},
+      m_numberOfPixelsPerTube{0}, m_numberOfChannels{0},
+      m_numberOfHistograms{0}, m_wavelength{0.0}, m_channelWidth{0.0} {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -68,12 +63,13 @@ int LoadLLB::confidence(Kernel::NexusDescriptor &descriptor) const {
 /** Initialize the algorithm's properties.
  */
 void LoadLLB::init() {
-  declareProperty(
-      new FileProperty("Filename", "", FileProperty::Load, {".nxs", ".hdf"}),
-      "The name of the Nexus file to load");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace");
+  const std::vector<std::string> exts{".nxs", ".hdf"};
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, exts),
+                  "The name of the Nexus file to load");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -110,7 +106,7 @@ void LoadLLB::setInstrumentName(NeXus::NXEntry &entry) {
         "Cannot read the instrument name from the Nexus file!");
   }
   g_log.debug() << "Instrument Name: " << m_instrumentName
-                << " in NxPath: " << m_instrumentPath << std::endl;
+                << " in NxPath: " << m_instrumentPath << '\n';
 }
 
 void LoadLLB::initWorkSpace(NeXus::NXEntry &entry) {
@@ -126,10 +122,9 @@ void LoadLLB::initWorkSpace(NeXus::NXEntry &entry) {
   // dim0 * m_numberOfPixelsPerTube is the total number of detectors
   m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
 
-  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << std::endl;
-  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube
-                << std::endl;
-  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << std::endl;
+  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << '\n';
+  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube << '\n';
+  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << '\n';
 
   // Now create the output workspace
   // Might need to get this value from the number of monitors in the Nexus file
@@ -156,8 +151,8 @@ void LoadLLB::loadTimeDetails(NeXus::NXEntry &entry) {
   m_channelWidth = entry.getInt("nxmonitor/channel_width") * 0.1;
 
   g_log.debug("Nexus Data:");
-  g_log.debug() << " ChannelWidth: " << m_channelWidth << std::endl;
-  g_log.debug() << " Wavelength: " << m_wavelength << std::endl;
+  g_log.debug() << " ChannelWidth: " << m_channelWidth << '\n';
+  g_log.debug() << " Wavelength: " << m_wavelength << '\n';
 }
 
 void LoadLLB::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
@@ -199,7 +194,7 @@ void LoadLLB::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
     }
   }
 
-  g_log.debug() << "Data loading inti WS done...." << std::endl;
+  g_log.debug() << "Data loading inti WS done....\n";
 }
 
 int LoadLLB::getDetectorElasticPeakPosition(const NeXus::NXFloat &data) {
@@ -236,7 +231,7 @@ int LoadLLB::getDetectorElasticPeakPosition(const NeXus::NXFloat &data) {
                                "the data. Elastic peak position is ZERO!");
     } else {
       g_log.debug() << "Calculated Detector EPP: "
-                    << calculatedDetectorElasticPeakPosition << std::endl;
+                    << calculatedDetectorElasticPeakPosition << '\n';
     }
   }
   return calculatedDetectorElasticPeakPosition;
@@ -253,11 +248,10 @@ std::vector<double> LoadLLB::getTimeBinning(int elasticPeakPosition,
                                  1e6; // microsecs
 
   g_log.debug() << "elasticPeakPosition : "
-                << static_cast<float>(elasticPeakPosition) << std::endl;
-  g_log.debug() << "l1 : " << l1 << std::endl;
-  g_log.debug() << "l2 : " << l2 << std::endl;
-  g_log.debug() << "theoreticalElasticTOF : " << theoreticalElasticTOF
-                << std::endl;
+                << static_cast<float>(elasticPeakPosition) << '\n';
+  g_log.debug() << "l1 : " << l1 << '\n';
+  g_log.debug() << "l2 : " << l2 << '\n';
+  g_log.debug() << "theoreticalElasticTOF : " << theoreticalElasticTOF << '\n';
 
   std::vector<double> detectorTofBins(m_numberOfChannels + 1);
 

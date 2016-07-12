@@ -21,7 +21,7 @@ namespace Geometry {
 class Instrument;
 class IComponent;
 
-typedef std::unordered_map<specid_t, std::set<detid_t>>
+typedef std::unordered_map<specnum_t, std::set<detid_t>>
     ISpectrumDetectorMapping;
 
 /**
@@ -53,15 +53,15 @@ typedef std::unordered_map<specid_t, std::set<detid_t>>
 class MANTID_GEOMETRY_DLL INearestNeighbours {
 public:
   /// Default (empty) destructor
-  virtual ~INearestNeighbours(){};
+  virtual ~INearestNeighbours() = default;
 
   // Neighbouring spectra by radius
-  virtual std::map<specid_t, Mantid::Kernel::V3D>
-  neighboursInRadius(specid_t spectrum, double radius = 0.0) const = 0;
+  virtual std::map<specnum_t, Mantid::Kernel::V3D>
+  neighboursInRadius(specnum_t spectrum, double radius = 0.0) const = 0;
 
   // Neighbouring spectra by exact number of neighbours
-  virtual std::map<specid_t, Mantid::Kernel::V3D>
-  neighbours(specid_t spectrum) const = 0;
+  virtual std::map<specnum_t, Mantid::Kernel::V3D>
+  neighbours(specnum_t spectrum) const = 0;
 };
 }
 }

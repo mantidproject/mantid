@@ -16,24 +16,26 @@ class ScriptBuilderTest : public CxxTest::TestSuite {
   class SubAlgorithm : public Algorithm {
   public:
     SubAlgorithm() : Algorithm() {}
-    virtual ~SubAlgorithm() {}
-    const std::string name() const { return "SubAlgorithm"; }
-    int version() const { return 1; }
-    const std::string category() const { return "Cat;Leopard;Mink"; }
-    const std::string summary() const { return "SubAlgorithm"; }
-    const std::string workspaceMethodName() const { return "methodname"; }
-    const std::string workspaceMethodOnTypes() const {
+    ~SubAlgorithm() override {}
+    const std::string name() const override { return "SubAlgorithm"; }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Cat;Leopard;Mink"; }
+    const std::string summary() const override { return "SubAlgorithm"; }
+    const std::string workspaceMethodName() const override {
+      return "methodname";
+    }
+    const std::string workspaceMethodOnTypes() const override {
       return "MatrixWorkspace;ITableWorkspace";
     }
-    const std::string workspaceMethodInputProperty() const {
+    const std::string workspaceMethodInputProperty() const override {
       return "InputWorkspace";
     }
 
-    void init() {
+    void init() override {
       declareProperty("PropertyA", "Hello");
       declareProperty("PropertyB", "World");
     }
-    void exec() {
+    void exec() override {
       // nothing to do!
     }
   };
@@ -43,25 +45,27 @@ class ScriptBuilderTest : public CxxTest::TestSuite {
   class BasicAlgorithm : public Algorithm {
   public:
     BasicAlgorithm() : Algorithm() {}
-    virtual ~BasicAlgorithm() {}
-    const std::string name() const { return "BasicAlgorithm"; }
-    int version() const { return 1; }
-    const std::string category() const { return "Cat;Leopard;Mink"; }
-    const std::string summary() const { return "BasicAlgorithm"; }
-    const std::string workspaceMethodName() const { return "methodname"; }
-    const std::string workspaceMethodOnTypes() const {
+    ~BasicAlgorithm() override {}
+    const std::string name() const override { return "BasicAlgorithm"; }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Cat;Leopard;Mink"; }
+    const std::string summary() const override { return "BasicAlgorithm"; }
+    const std::string workspaceMethodName() const override {
+      return "methodname";
+    }
+    const std::string workspaceMethodOnTypes() const override {
       return "MatrixWorkspace;ITableWorkspace";
     }
-    const std::string workspaceMethodInputProperty() const {
+    const std::string workspaceMethodInputProperty() const override {
       return "InputWorkspace";
     }
 
-    void init() {
+    void init() override {
       declareProperty("PropertyA", "Hello");
       declareProperty("PropertyB", "World");
       declareProperty("PropertyC", "", Direction::Output);
     }
-    void exec() {
+    void exec() override {
       // the history from this should never be stored
       auto alg = createChildAlgorithm("SubAlgorithm");
       alg->initialize();
@@ -75,25 +79,27 @@ class ScriptBuilderTest : public CxxTest::TestSuite {
   class NestedAlgorithm : public DataProcessorAlgorithm {
   public:
     NestedAlgorithm() : DataProcessorAlgorithm() {}
-    virtual ~NestedAlgorithm() {}
-    const std::string name() const { return "NestedAlgorithm"; }
-    int version() const { return 1; }
-    const std::string category() const { return "Cat;Leopard;Mink"; }
-    const std::string summary() const { return "NestedAlgorithm"; }
-    const std::string workspaceMethodName() const { return "methodname"; }
-    const std::string workspaceMethodOnTypes() const {
+    ~NestedAlgorithm() override {}
+    const std::string name() const override { return "NestedAlgorithm"; }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Cat;Leopard;Mink"; }
+    const std::string summary() const override { return "NestedAlgorithm"; }
+    const std::string workspaceMethodName() const override {
+      return "methodname";
+    }
+    const std::string workspaceMethodOnTypes() const override {
       return "MatrixWorkspace;ITableWorkspace";
     }
-    const std::string workspaceMethodInputProperty() const {
+    const std::string workspaceMethodInputProperty() const override {
       return "InputWorkspace";
     }
 
-    void init() {
+    void init() override {
       declareProperty("PropertyA", 13);
       declareProperty("PropertyB", 42);
     }
 
-    void exec() {
+    void exec() override {
       auto alg = createChildAlgorithm("BasicAlgorithm");
       alg->initialize();
       alg->setProperty("PropertyA", "FirstOne");
@@ -111,26 +117,28 @@ class ScriptBuilderTest : public CxxTest::TestSuite {
   class TopLevelAlgorithm : public DataProcessorAlgorithm {
   public:
     TopLevelAlgorithm() : DataProcessorAlgorithm() {}
-    virtual ~TopLevelAlgorithm() {}
-    const std::string name() const { return "TopLevelAlgorithm"; }
-    int version() const { return 1; }
-    const std::string category() const { return "Cat;Leopard;Mink"; }
-    const std::string summary() const { return "TopLevelAlgorithm"; }
-    const std::string workspaceMethodName() const { return "methodname"; }
-    const std::string workspaceMethodOnTypes() const {
+    ~TopLevelAlgorithm() override {}
+    const std::string name() const override { return "TopLevelAlgorithm"; }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Cat;Leopard;Mink"; }
+    const std::string summary() const override { return "TopLevelAlgorithm"; }
+    const std::string workspaceMethodName() const override {
+      return "methodname";
+    }
+    const std::string workspaceMethodOnTypes() const override {
       return "Workspace;MatrixWorkspace;ITableWorkspace";
     }
-    const std::string workspaceMethodInputProperty() const {
+    const std::string workspaceMethodInputProperty() const override {
       return "InputWorkspace";
     }
 
-    void init() {
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+    void init() override {
+      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input));
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output));
     }
-    void exec() {
+    void exec() override {
       auto alg = createChildAlgorithm("NestedAlgorithm");
       alg->initialize();
       alg->execute();
@@ -139,26 +147,62 @@ class ScriptBuilderTest : public CxxTest::TestSuite {
       alg->initialize();
       alg->execute();
 
-      boost::shared_ptr<MatrixWorkspace> output(new WorkspaceTester());
+      boost::shared_ptr<MatrixWorkspace> output =
+          boost::make_shared<WorkspaceTester>();
+      setProperty("OutputWorkspace", output);
+    }
+  };
+
+  class AlgorithmWithDynamicProperty : public Algorithm {
+  public:
+    AlgorithmWithDynamicProperty() : Algorithm() {}
+    ~AlgorithmWithDynamicProperty() override {}
+    const std::string name() const override {
+      return "AlgorithmWithDynamicProperty";
+    }
+    int version() const override { return 1; }
+    const std::string category() const override { return "Cat;Leopard;Mink"; }
+    const std::string summary() const override {
+      return "AlgorithmWithDynamicProperty";
+    }
+
+    void init() override {
+      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input));
+      declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output));
+      declareProperty("PropertyA", "Hello");
+      declareProperty("PropertyB", "World");
+    }
+    void exec() override {
+      declareProperty("DynamicProperty1", "value", Direction::Output);
+      setPropertyValue("DynamicProperty1", "outputValue");
+
+      boost::shared_ptr<MatrixWorkspace> output =
+          boost::make_shared<WorkspaceTester>();
       setProperty("OutputWorkspace", output);
     }
   };
 
 private:
 public:
-  void setUp() {
+  void setUp() override {
     Mantid::API::AlgorithmFactory::Instance().subscribe<TopLevelAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance().subscribe<NestedAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance().subscribe<BasicAlgorithm>();
     Mantid::API::AlgorithmFactory::Instance().subscribe<SubAlgorithm>();
+    Mantid::API::AlgorithmFactory::Instance()
+        .subscribe<AlgorithmWithDynamicProperty>();
   }
 
-  void tearDown() {
+  void tearDown() override {
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("TopLevelAlgorithm",
                                                           1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("NestedAlgorithm", 1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("BasicAlgorithm", 1);
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("SubAlgorithm", 1);
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe(
+        "AlgorithmWithDynamicProperty", 1);
   }
 
   void test_Build_Simple() {
@@ -166,7 +210,8 @@ public:
                             "workspace', "
                             "OutputWorkspace='test_output_workspace')",
                             ""};
-    boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> input =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
     auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
@@ -209,7 +254,8 @@ public:
         "# End of child algorithms of TopLevelAlgorithm", "", "",
     };
 
-    boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> input =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
     auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
@@ -253,7 +299,8 @@ public:
         "", "",
     };
 
-    boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> input =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
     auto alg = AlgorithmFactory::Instance().create("TopLevelAlgorithm", 1);
@@ -300,7 +347,8 @@ public:
                             "workspace', "
                             "OutputWorkspace='test_output_workspace')",
                             ""};
-    boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
+    boost::shared_ptr<WorkspaceTester> input =
+        boost::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("test_inp\\ut_workspace",
                                                  input);
 
@@ -328,6 +376,51 @@ public:
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_inp\\ut_workspace");
+  }
+
+  void test_Build_Dynamic_Property() {
+    // importantly the Dynamic Property should not be written into the script
+    std::string result =
+        "AlgorithmWithDynamicProperty(InputWorkspace='test_input_workspace', "
+        "OutputWorkspace='test_output_workspace', PropertyA='A', "
+        "PropertyB='B')\n";
+    boost::shared_ptr<WorkspaceTester> input =
+        boost::make_shared<WorkspaceTester>();
+    AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
+
+    auto alg =
+        AlgorithmFactory::Instance().create("AlgorithmWithDynamicProperty", 1);
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setProperty("InputWorkspace", input);
+    alg->setProperty("PropertyA", "A");
+    alg->setProperty("PropertyB", "B");
+    alg->setPropertyValue("OutputWorkspace", "test_output_workspace");
+    alg->execute();
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "test_output_workspace");
+    auto wsHist = ws->getHistory();
+
+    // check the dynamic property is in the history records
+    const auto &hist_props = wsHist.getAlgorithmHistory(0)->getProperties();
+    bool foundDynamicProperty = false;
+    for (const auto &hist_prop : hist_props) {
+      if (hist_prop->name() == "DynamicProperty1") {
+        foundDynamicProperty = true;
+      }
+    }
+    TSM_ASSERT("Could not find the dynamic property in the algorithm history.",
+               foundDynamicProperty);
+
+    ScriptBuilder builder(wsHist.createView());
+    std::string scriptText = builder.build();
+
+    // The dynamic property should not be in the script.
+    TS_ASSERT_EQUALS(scriptText, result);
+
+    AnalysisDataService::Instance().remove("test_output_workspace");
+    AnalysisDataService::Instance().remove("test_input_workspace");
   }
 };
 

@@ -90,11 +90,6 @@ public:
                    const std::string &spaceGroupString,
                    const std::string &scattererString);
 
-  CrystalStructure(const CrystalStructure &other);
-  CrystalStructure &operator=(const CrystalStructure &other);
-
-  ~CrystalStructure() {}
-
   UnitCell cell() const;
   void setCell(const UnitCell &cell);
 

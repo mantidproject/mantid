@@ -10,16 +10,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(HasUB)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-HasUB::HasUB() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-HasUB::~HasUB() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string HasUB::name() const { return "HasUB"; }
 
@@ -35,11 +25,11 @@ const std::string HasUB::category() const { return "Crystal\\UBMatrix"; }
 /** Initialize the algorithm's properties.
  */
 void HasUB::init() {
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>("Workspace", "",
+                                                            Direction::Input),
+                  "Workspace to clear the UB from.");
   declareProperty(
-      new WorkspaceProperty<Workspace>("Workspace", "", Direction::Input),
-      "Workspace to clear the UB from.");
-  declareProperty(
-      new PropertyWithValue<bool>("HasUB", false, Direction::Output),
+      make_unique<PropertyWithValue<bool>>("HasUB", false, Direction::Output),
       "Indicates action performed, or predicted to perform if DryRun.");
 }
 

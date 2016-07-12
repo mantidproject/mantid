@@ -5,6 +5,7 @@
 #include "MantidDataHandling/SaveAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include <fstream>
 #include <Poco/File.h>
 
@@ -24,7 +25,7 @@ public:
   static void destroySuite(SaveAsciiTest *suite) { delete suite; }
 
   SaveAsciiTest() {}
-  ~SaveAsciiTest() {
+  ~SaveAsciiTest() override {
     FrameworkManager::Instance().deleteWorkspace("SaveAsciiWS");
   }
 
@@ -111,7 +112,8 @@ public:
       std::vector<double> &X = wsToSave->dataX(i);
       std::vector<double> &Y = wsToSave->dataY(i);
       std::vector<double> &E = wsToSave->dataE(i);
-      std::vector<double> &DX = wsToSave->dataDx(i);
+      wsToSave->setPointStandardDeviations(i, 3);
+      auto &DX = wsToSave->mutableDx(i);
       for (int j = 0; j < 3; j++) {
         X[j] = 1.5 * j / 0.9;
         Y[j] = (i + 1) * (2. + 4. * X[j]);

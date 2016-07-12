@@ -11,7 +11,6 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <string>
 #include <vector>
-#include <boost/assign/list_of.hpp>
 
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::DataObjects;
@@ -20,7 +19,8 @@ using namespace Mantid::API;
 namespace {
 
 MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
-                                         bool transpose = false) {
+                                         bool transpose = false,
+                                         double value = 0.0) {
 
   IAlgorithm *create =
       FrameworkManager::Instance().createAlgorithm("CreateMDHistoWorkspace");
@@ -42,7 +42,16 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
     extents.push_back(10);
   }
 
-  create->setProperty("SignalInput", std::vector<double>(flatSize, 1));
+  if (value == 0.0) {
+    std::vector<double> signalArray;
+    signalArray.reserve(flatSize);
+    for (size_t i = 0; i < flatSize; ++i) {
+      signalArray.push_back(static_cast<double>(i + 1));
+    }
+    create->setProperty("SignalInput", signalArray);
+  } else {
+    create->setProperty("SignalInput", std::vector<double>(flatSize, 1.0));
+  }
   create->setProperty("ErrorInput", std::vector<double>(flatSize, 1));
 
   create->setProperty("Dimensionality", int(shape.size()));
@@ -185,10 +194,10 @@ public:
 
   void test_replicate_1d_vertical() {
 
-    std::vector<int> shapeShape = boost::assign::list_of(10)(10);
+    std::vector<int> shapeShape = {10, 10};
     auto shapeWS = makeHistoWorkspace(shapeShape);
 
-    std::vector<int> dataShape = boost::assign::list_of(1)(10);
+    std::vector<int> dataShape = {1, 10};
     auto dataWS = makeHistoWorkspace(dataShape);
     for (int i = 0; i < dataShape[1]; ++i) {
       dataWS->setSignalAt(i, i); // Vertically increasing.
@@ -225,10 +234,10 @@ public:
 
   void test_replicate_1d_horizontal() {
 
-    std::vector<int> shapeShape = boost::assign::list_of(10)(10);
+    std::vector<int> shapeShape = {10, 10};
     auto shapeWS = makeHistoWorkspace(shapeShape);
 
-    std::vector<int> dataShape = boost::assign::list_of(10)(1);
+    std::vector<int> dataShape = {10, 1};
     auto dataWS = makeHistoWorkspace(dataShape);
     for (int i = 0; i < dataShape[0]; ++i) {
       dataWS->setSignalAt(i, i); // Horizontally increasing.
@@ -263,10 +272,10 @@ public:
 
   void test_auto_transpose_2d() {
 
-    std::vector<int> shapeShape = boost::assign::list_of(10)(20)(10);
+    std::vector<int> shapeShape = {10, 20, 10};
     auto shapeWS = makeHistoWorkspace(shapeShape);
 
-    std::vector<int> dataShapePreTranspose = boost::assign::list_of(10)(20);
+    std::vector<int> dataShapePreTranspose = {10, 20};
     auto dataWSTranspose = makeHistoWorkspace(
         dataShapePreTranspose, true /*transpose it to make it 20 by 10*/);
 
@@ -285,6 +294,116 @@ public:
     TS_ASSERT_EQUALS(shapeWS->getNumDims(), outWS->getNumDims());
     TS_ASSERT_EQUALS(shapeWS->getNPoints(), outWS->getNPoints());
   }
+
+  void test_extra_dimensions() {
+
+    std::vector<int> shapeShape = {5, 7, 1, 1};
+    auto shapeWS = makeHistoWorkspace(shapeShape, false, 1);
+
+    std::vector<int> dataShape = {1, 7, 1, 1};
+    auto dataWSTranspose = makeHistoWorkspace(dataShape);
+
+    ReplicateMD alg;
+    alg.setRethrows(true);
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("DataWorkspace", dataWSTranspose);
+    alg.setProperty("ShapeWorkspace", shapeWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    try {
+      alg.execute();
+    } catch (std::exception &e) {
+      TSM_ASSERT(e.what(), false);
+      return;
+    }
+    IMDHistoWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    // Very basic sanity checks
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(shapeWS->getNumDims(), outWS->getNumDims());
+    TS_ASSERT_EQUALS(shapeWS->getNPoints(), outWS->getNPoints());
+
+    size_t index = 0;
+    for (size_t i = 0; i < 7; ++i) {
+      for (size_t j = 0; j < 5; ++j, ++index) {
+        auto signal = outWS->signalAt(index);
+        TS_ASSERT_EQUALS(signal, static_cast<double>(i + 1));
+      }
+    }
+  }
+
+  void test_extra_dimensions_1() {
+
+    std::vector<int> shapeShape = {5, 7, 1, 1};
+    auto shapeWS = makeHistoWorkspace(shapeShape, false, 1);
+
+    std::vector<int> dataShape = {5, 1, 1, 1};
+    auto dataWSTranspose = makeHistoWorkspace(dataShape);
+
+    ReplicateMD alg;
+    alg.setRethrows(true);
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("DataWorkspace", dataWSTranspose);
+    alg.setProperty("ShapeWorkspace", shapeWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    try {
+      alg.execute();
+    } catch (std::exception &e) {
+      TSM_ASSERT(e.what(), false);
+      return;
+    }
+    IMDHistoWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    // Very basic sanity checks
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(shapeWS->getNumDims(), outWS->getNumDims());
+    TS_ASSERT_EQUALS(shapeWS->getNPoints(), outWS->getNPoints());
+
+    size_t index = 0;
+    for (size_t i = 0; i < 7; ++i) {
+      for (size_t j = 0; j < 5; ++j, ++index) {
+        auto signal = outWS->signalAt(index);
+        TS_ASSERT_EQUALS(signal, static_cast<double>(j + 1));
+      }
+    }
+  }
+
+  void test_extra_dimensions_in_wrong_order() {
+
+    std::vector<int> shapeShape = {5, 1, 7, 1};
+    auto shapeWS = makeHistoWorkspace(shapeShape, false, 1);
+
+    std::vector<int> dataShape = {1, 1, 7, 1};
+    auto dataWSTranspose = makeHistoWorkspace(dataShape);
+
+    ReplicateMD alg;
+    alg.setRethrows(true);
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("DataWorkspace", dataWSTranspose);
+    alg.setProperty("ShapeWorkspace", shapeWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+  }
+
+  void test_wrong_number_of_dimensions() {
+
+    std::vector<int> shapeShape = {5, 7, 1, 1};
+    auto shapeWS = makeHistoWorkspace(shapeShape, false, 1);
+
+    std::vector<int> dataShape = {5, 1};
+    auto dataWSTranspose = makeHistoWorkspace(dataShape);
+
+    ReplicateMD alg;
+    alg.setRethrows(true);
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("DataWorkspace", dataWSTranspose);
+    alg.setProperty("ShapeWorkspace", shapeWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+  }
 };
 
 //=====================================================================================
@@ -302,10 +421,10 @@ public:
 
   void test_performance() {
 
-    std::vector<int> shapeShape = boost::assign::list_of(1000)(1000);
+    std::vector<int> shapeShape = {1000, 1000};
     auto shapeWS = makeHistoWorkspace(shapeShape);
 
-    std::vector<int> dataShape = boost::assign::list_of(1000)(1);
+    std::vector<int> dataShape = {1000, 1};
     auto dataWS = makeHistoWorkspace(dataShape);
 
     ReplicateMD alg;

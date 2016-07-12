@@ -131,8 +131,7 @@ public:
 
       // Integral of gaussian is height * sigma * sqrt(2 * pi)
       peak->setIntensity(UncertainValue(oldIntensity * fwhm /
-                                        (2.0 * sqrt(2.0 * log(2.0))) *
-                                        sqrt(2.0 * M_PI)));
+                                        (2.0 * sqrt(M_LN2)) * sqrt(M_PI)));
       integratedReference->addPeak(peak);
     }
 
@@ -338,7 +337,7 @@ public:
                        referencePeak->fwhm().value());
       TS_ASSERT_DELTA(functionPeak->d().error(), sqrt(0.05), 1e-6);
       TS_ASSERT_DELTA(functionPeak->fwhm(PoldiPeak::AbsoluteD).error(),
-                      sqrt(0.05) * (2.0 * sqrt(2.0 * log(2.0))), 1e-6);
+                      sqrt(0.05) * (2.0 * sqrt(2.0 * M_LN2)), 1e-6);
     }
   }
 
@@ -377,7 +376,8 @@ public:
     TestablePoldiFitPeaks2D spectrumCalculator;
     spectrumCalculator.initialize();
 
-    boost::shared_ptr<Poldi2DFunction> funDefault(new Poldi2DFunction);
+    boost::shared_ptr<Poldi2DFunction> funDefault =
+        boost::make_shared<Poldi2DFunction>();
     TS_ASSERT_EQUALS(funDefault->nParams(), 0);
     TS_ASSERT_EQUALS(funDefault->nFunctions(), 0);
 
@@ -385,7 +385,8 @@ public:
     TS_ASSERT_EQUALS(funDefault->nParams(), 2);
     TS_ASSERT_EQUALS(funDefault->nFunctions(), 2);
 
-    boost::shared_ptr<Poldi2DFunction> funLinear(new Poldi2DFunction);
+    boost::shared_ptr<Poldi2DFunction> funLinear =
+        boost::make_shared<Poldi2DFunction>();
     spectrumCalculator.setProperty("FitConstantBackground", false);
     spectrumCalculator.addBackgroundTerms(funLinear);
 
@@ -394,7 +395,8 @@ public:
     TS_ASSERT_EQUALS(funLinear->parameterName(0), "f0.A1");
     TS_ASSERT_EQUALS(funLinear->nFunctions(), 1);
 
-    boost::shared_ptr<Poldi2DFunction> funConstant(new Poldi2DFunction);
+    boost::shared_ptr<Poldi2DFunction> funConstant =
+        boost::make_shared<Poldi2DFunction>();
     spectrumCalculator.setProperty("FitConstantBackground", true);
     spectrumCalculator.setProperty("FitLinearBackground", false);
     spectrumCalculator.addBackgroundTerms(funConstant);
@@ -497,7 +499,7 @@ private:
 
   public:
     TestablePoldiFitPeaks2D() : PoldiFitPeaks2D() {}
-    ~TestablePoldiFitPeaks2D() {}
+    ~TestablePoldiFitPeaks2D() override {}
   };
 };
 

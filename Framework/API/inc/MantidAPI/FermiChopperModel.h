@@ -34,7 +34,7 @@ public:
   /// Default constructor required by the factory
   FermiChopperModel();
   /// Returns a clone of the current object
-  virtual boost::shared_ptr<ChopperModel> clone() const;
+  boost::shared_ptr<ChopperModel> clone() const override;
 
   /// Set the radius of the chopper in metres
   void setChopperRadius(const double value);
@@ -56,16 +56,17 @@ public:
   double getIncidentEnergy() const;
 
   /// Returns a time sample from the distribution given a flat random number
-  double sampleTimeDistribution(const double randomNo) const;
+  double sampleTimeDistribution(const double randomNo) const override;
   /// Returns a time sampled from the jitter distribution
-  double sampleJitterDistribution(const double randomNo) const;
+  double sampleJitterDistribution(const double randomNo) const override;
 
 private:
   /// Set a parameter value from a string
-  void setParameterValue(const std::string &name, const std::string &value);
+  void setParameterValue(const std::string &name,
+                         const std::string &value) override;
 
   /// Returns the variance of a the time pulse through this chopper in seconds^2
-  double calculatePulseTimeVariance() const;
+  double calculatePulseTimeVariance() const override;
   /// Computes the value of the regime-dependent portion of the pulse variance
   double regimeFactor(const double gamma) const;
   /// Map a flat random number to a triangular distibution of unit area

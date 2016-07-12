@@ -84,18 +84,6 @@ PeakTransform::PeakTransform(const std::string &xPlotLabel,
   }
 }
 
-PeakTransform::~PeakTransform() {}
-
-PeakTransform::PeakTransform(const PeakTransform &other)
-    : m_xPlotLabel(other.m_xPlotLabel), m_yPlotLabel(other.m_yPlotLabel),
-      m_indexOfPlotX(other.m_indexOfPlotX),
-      m_indexOfPlotY(other.m_indexOfPlotY),
-      m_indexOfPlotZ(other.m_indexOfPlotZ),
-      m_indexOfPeakX(other.m_indexOfPeakX),
-      m_indexOfPeakY(other.m_indexOfPeakY),
-      m_indexOfPeakZ(other.m_indexOfPeakZ), m_FirstRegex(other.m_FirstRegex),
-      m_SecondRegex(other.m_SecondRegex), m_ThirdRegex(other.m_ThirdRegex) {}
-
 boost::regex PeakTransform::getFreePeakAxisRegex() const {
   switch (m_indexOfPlotZ) {
   case 0:

@@ -39,10 +39,6 @@ class MANTID_API_DLL IPeakFunction : public IFunctionWithLocation {
 public:
   /// Constructor
   IPeakFunction();
-  /// Virtual destructor
-  /// (avoids warnings about non-trivial move assignment in virtually inheriting
-  /// classes)
-  virtual ~IPeakFunction() {}
   /// Returns the peak FWHM
   virtual double fwhm() const = 0;
 
@@ -56,10 +52,11 @@ public:
   virtual void setIntensity(const double newIntensity);
 
   /// General implementation of the method for all peaks.
-  void function1D(double *out, const double *xValues, const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
   /// General implementation of the method for all peaks.
   void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData);
+                       const size_t nData) override;
   /// Set new peak radius
   static void setPeakRadius(const int &r = 5);
 
@@ -72,6 +69,19 @@ public:
 
   /// Get name of parameter that is associated to centre.
   std::string getCentreParameterName() const;
+
+  /// Fix a parameter or set up a tie such that value returned
+  /// by intensity() is constant during fitting.
+  virtual void fixIntensity() {
+    throw std::runtime_error(
+        "Generic intensity fixing isn't implemented for this function.");
+  }
+
+  /// Free the intensity parameter.
+  virtual void unfixIntensity() {
+    throw std::runtime_error(
+        "Generic intensity fixing isn't implemented for this function.");
+  }
 
 protected:
   /// Defines the area around the centre where the peak values are to be

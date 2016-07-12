@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include <mutex>
 
 namespace Poco {
 namespace Net {
@@ -50,29 +51,29 @@ namespace LiveData {
 class DLLExport FakeISISHistoDAE : public API::Algorithm {
 public:
   FakeISISHistoDAE();
-  virtual ~FakeISISHistoDAE();
+  ~FakeISISHistoDAE() override;
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "FakeISISHistoDAE"; };
+  const std::string name() const override { return "FakeISISHistoDAE"; };
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\DataAcquisition";
   }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Simulates ISIS histogram DAE.";
   }
 
 private:
   // Implement abstract Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   /// Poco TCP server
   Poco::Net::TCPServer *m_server;
   /// Mutex
-  Kernel::Mutex m_mutex;
+  std::mutex m_mutex;
 };
 
 } // namespace LiveData

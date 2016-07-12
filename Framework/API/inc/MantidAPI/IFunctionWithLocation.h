@@ -45,7 +45,7 @@ public:
   /// Virtual destructor
   /// (avoids warnings about non-trivial move assignment in virtually inheriting
   /// classes)
-  virtual ~IFunctionWithLocation() {}
+  ~IFunctionWithLocation() override {}
 
   /// Returns the centre of the function, which may be something as simple as
   /// the centre of
@@ -64,6 +64,19 @@ public:
 
   /// Sets the parameters such that height == h
   virtual void setHeight(const double h) = 0;
+
+  /// Fix a parameter or set up a tie such that value returned
+  /// by centre() is constant during fitting.
+  virtual void fixCentre() {
+    throw std::runtime_error(
+        "Generic centre fixing isn't implemented for this function.");
+  }
+
+  /// Free the centre parameter.
+  virtual void unfixCentre() {
+    throw std::runtime_error(
+        "Generic centre fixing isn't implemented for this function.");
+  }
 };
 
 } // namespace API

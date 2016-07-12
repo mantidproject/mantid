@@ -49,8 +49,8 @@ Example 2::
  385 387 446 448
  ... ...
 
-All the integers in file of this format are spectrum IDs to mask. Two
-spectrum IDs with "-" in between indicate a continuous range of spectra
+All the integers in file of this format are spectrum Numbers to mask. Two
+spectrum Numbers with "-" in between indicate a continuous range of spectra
 to mask. It does not matter if there is any space between integer number
 and "-". There is no restriction on how the line is structured. Be
 noticed that any line starting with a non-digit character, except space,
@@ -62,7 +62,7 @@ Supporting ::
 
  * Component ID --> Detector IDs --> Workspace Indexes
  * Detector ID --> Workspace Indexes
- * Spectrum ID --> Workspace Indexes
+ * Spectrum Number --> Workspace Indexes
 
 Usage
 -----

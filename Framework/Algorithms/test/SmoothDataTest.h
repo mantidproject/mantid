@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/CreateGroupingWorkspace.h"
 #include "MantidAlgorithms/SmoothData.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 
 using namespace Mantid::API;

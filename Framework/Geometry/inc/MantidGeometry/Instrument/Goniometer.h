@@ -72,12 +72,10 @@ class MANTID_GEOMETRY_DLL Goniometer {
 public:
   // Default constructor
   Goniometer();
-  // Copy constructor
-  Goniometer(const Goniometer &other);
   // Constructor from a rotation matrix
   Goniometer(Kernel::DblMatrix rot);
   // Default destructor
-  virtual ~Goniometer();
+  virtual ~Goniometer() = default;
   // Return rotation matrix
   const Kernel::DblMatrix &getR() const;
   // Set the rotation matrix

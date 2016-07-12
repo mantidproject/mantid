@@ -41,41 +41,38 @@ namespace API {
 */
 class MANTID_API_DLL ImmutableCompositeFunction : public CompositeFunction {
 public:
-  /// Default constructor
-  ImmutableCompositeFunction() : CompositeFunction() {}
-  // Destructor
-  ~ImmutableCompositeFunction() {}
-
   /* Overriden methods */
 
   /// Returns the function's name
-  virtual std::string name() const { return "ImmutableCompositeFunction"; }
+  std::string name() const override { return "ImmutableCompositeFunction"; }
   /// Writes itself into a string
-  std::string asString() const;
+  std::string asString() const override;
   /// Set i-th parameter
-  void setParameter(size_t i, const double &value, bool explicitlySet = true) {
+  void setParameter(size_t i, const double &value,
+                    bool explicitlySet = true) override {
     CompositeFunction::setParameter(i, value, explicitlySet);
   }
   /// Set i-th parameter description
-  void setParameterDescription(size_t i, const std::string &description) {
+  void setParameterDescription(size_t i,
+                               const std::string &description) override {
     CompositeFunction::setParameterDescription(i, description);
   }
   /// Set parameter by name.
   void setParameter(const std::string &name, const double &value,
-                    bool explicitlySet = true);
+                    bool explicitlySet = true) override;
   /// Set description of parameter by name.
   void setParameterDescription(const std::string &name,
-                               const std::string &description);
+                               const std::string &description) override;
   /// Get i-th parameter
-  double getParameter(size_t i) const {
+  double getParameter(size_t i) const override {
     return CompositeFunction::getParameter(i);
   }
   /// Get parameter by name.
-  double getParameter(const std::string &name) const;
+  double getParameter(const std::string &name) const override;
   /// Returns the index of parameter name
-  size_t parameterIndex(const std::string &name) const;
+  size_t parameterIndex(const std::string &name) const override;
   /// Returns the name of parameter i
-  std::string parameterName(size_t i) const;
+  std::string parameterName(size_t i) const override;
 
 protected:
   /// Make it protected
@@ -91,7 +88,7 @@ protected:
 
 private:
   /// Keep paramater aliases
-  std::map<std::string, size_t> m_alias;
+  std::map<std::string, size_t> m_aliases;
 };
 
 } // namespace API

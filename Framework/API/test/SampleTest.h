@@ -2,9 +2,10 @@
 #define TESTSAMPLE_H_
 
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Container.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
@@ -15,7 +16,6 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using Mantid::API::Sample;
-using Mantid::API::SampleEnvironment;
 
 class SampleTest : public CxxTest::TestSuite {
 public:
@@ -53,8 +53,9 @@ public:
   test_That_An_Environment_Can_Be_Set_And_The_Same_Environment_Is_Returned() {
     Sample sample;
     const std::string envName("TestKit");
-    SampleEnvironment *kit = new SampleEnvironment(envName);
-    kit->add(Object());
+    SampleEnvironment *kit =
+        new SampleEnvironment(envName, boost::make_shared<const Container>(""));
+    kit->add(boost::make_shared<const Object>());
 
     TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(kit));
 
@@ -62,7 +63,7 @@ public:
     // Test that this references the correct object
     TS_ASSERT_EQUALS(&sampleKit, kit);
     TS_ASSERT_EQUALS(sampleKit.name(), envName);
-    TS_ASSERT_EQUALS(sampleKit.nelements(), 1);
+    TS_ASSERT_EQUALS(sampleKit.nelements(), 2);
   }
 
   void test_OrientedLattice() {
@@ -286,7 +287,7 @@ public:
   void test_Multiple_Samples() {
     Sample sample;
     sample.setName("test name for test_Multiple_Sample");
-    boost::shared_ptr<Sample> sample2 = boost::shared_ptr<Sample>(new Sample());
+    auto sample2 = boost::make_shared<Sample>();
     sample2->setName("test name for test_Multiple_Sample - 2");
 
     TS_ASSERT_EQUALS(sample.size(), 1);
@@ -315,7 +316,7 @@ public:
     sample.setWidth(1.234);
     OrientedLattice latt(4, 5, 6, 90, 91, 92);
     sample.setOrientedLattice(&latt);
-    boost::shared_ptr<Sample> sample2 = boost::shared_ptr<Sample>(new Sample());
+    auto sample2 = boost::make_shared<Sample>();
     sample2->setName("test name for test_Multiple_Sample - 2");
     sample.addSample(sample2);
     TS_ASSERT(sample.getShape().getShapeXML() != "");

@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
@@ -81,9 +82,10 @@ bool ISISEnergyTransfer::validate() {
       double rebinWidth = m_uiForm.spRebinWidth->value();
       if (rebinWidth < 0) {
         // Ensure negative bin width is intentionally logarithmic
-        QString text = "The Binning width is currently negative, this suggests "
-                       "you wish to use logarithmic binning.\n"
-                       " Do you want to use Logarithmic Binning?";
+        const char *text =
+            "The Binning width is currently negative, this suggests "
+            "you wish to use logarithmic binning.\n"
+            " Do you want to use Logarithmic Binning?";
         int result = QMessageBox::question(
             NULL, tr("Logarithmic Binning"), tr(text), QMessageBox::Yes,
             QMessageBox::No, QMessageBox::NoButton);
@@ -341,7 +343,7 @@ void ISISEnergyTransfer::setInstrumentDefault() {
   m_uiForm.spSpectraMax->setValue(specMax);
 
   // Plot time spectra spinners
-  m_uiForm.spPlotTimeSpecMin->setMinimum(1);		// 1 to allow for monitors
+  m_uiForm.spPlotTimeSpecMin->setMinimum(1); // 1 to allow for monitors
   m_uiForm.spPlotTimeSpecMin->setMaximum(specMax);
   m_uiForm.spPlotTimeSpecMin->setValue(1);
 
@@ -469,17 +471,17 @@ std::vector<std::string> ISISEnergyTransfer::getSaveFormats() {
   std::vector<std::string> fileFormats;
 
   if (m_uiForm.ckSaveNexus->isChecked())
-    fileFormats.push_back("nxs");
+    fileFormats.emplace_back("nxs");
   if (m_uiForm.ckSaveSPE->isChecked())
-    fileFormats.push_back("spe");
+    fileFormats.emplace_back("spe");
   if (m_uiForm.ckSaveNXSPE->isChecked())
-    fileFormats.push_back("nxspe");
+    fileFormats.emplace_back("nxspe");
   if (m_uiForm.ckSaveASCII->isChecked())
-    fileFormats.push_back("ascii");
+    fileFormats.emplace_back("ascii");
   if (m_uiForm.ckSaveAclimax->isChecked())
-    fileFormats.push_back("aclimax");
+    fileFormats.emplace_back("aclimax");
   if (m_uiForm.ckSaveDaveGrp->isChecked())
-    fileFormats.push_back("davegrp");
+    fileFormats.emplace_back("davegrp");
 
   return fileFormats;
 }
@@ -489,7 +491,7 @@ std::vector<std::string> ISISEnergyTransfer::getSaveFormats() {
  * performed.
  */
 void ISISEnergyTransfer::plotRaw() {
-  using Mantid::specid_t;
+  using Mantid::specnum_t;
   using MantidQt::API::BatchAlgorithmRunner;
 
   if (!m_uiForm.dsRunFiles->isValid()) {
@@ -573,8 +575,8 @@ void ISISEnergyTransfer::plotRaw() {
   BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromRebin;
   inputFromRebin["InputWorkspace"] = name;
 
-  std::vector<specid_t> detectorList;
-  for (specid_t i = detectorMin; i <= detectorMax; i++)
+  std::vector<specnum_t> detectorList;
+  for (specnum_t i = detectorMin; i <= detectorMax; i++)
     detectorList.push_back(i);
 
   if (m_uiForm.ckBackgroundRemoval->isChecked()) {

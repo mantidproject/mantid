@@ -1,8 +1,10 @@
 #include "MantidAlgorithms/SpecularReflectionCalculateTheta.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+
 #include <cmath>
 
 using namespace Mantid::Kernel;
@@ -20,16 +22,6 @@ namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SpecularReflectionCalculateTheta)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SpecularReflectionCalculateTheta::SpecularReflectionCalculateTheta() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SpecularReflectionCalculateTheta::~SpecularReflectionCalculateTheta() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -52,12 +44,12 @@ const std::string SpecularReflectionCalculateTheta::category() const {
  */
 void SpecularReflectionCalculateTheta::init() {
   declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
-                                             Direction::Input),
+      make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
+                                                      Direction::Input),
       "An Input workspace to calculate the specular relection theta on.");
   this->initCommonProperties();
-  declareProperty(new PropertyWithValue<double>("TwoTheta", Mantid::EMPTY_DBL(),
-                                                Direction::Output),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "TwoTheta", Mantid::EMPTY_DBL(), Direction::Output),
                   "Calculated two theta scattering angle in degrees.");
 }
 

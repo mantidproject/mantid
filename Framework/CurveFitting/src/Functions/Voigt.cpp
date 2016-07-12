@@ -29,7 +29,7 @@ const char *LORENTZ_POS = "LorentzPos";
 const char *LORENTZ_FWHM = "LorentzFWHM";
 const char *GAUSSIAN_FWHM = "GaussianFWHM";
 
-const double SQRTLN2 = std::sqrt(std::log(2.0));
+const double SQRTLN2 = std::sqrt(M_LN2);
 const double SQRTPI = std::sqrt(M_PI);
 ///@endcond
 }
@@ -54,7 +54,7 @@ void Voigt::declareParameters() {
  */
 void Voigt::functionLocal(double *out, const double *xValues,
                           const size_t nData) const {
-  calculateFunctionAndDerivative(xValues, nData, out, NULL);
+  calculateFunctionAndDerivative(xValues, nData, out, nullptr);
 }
 
 /**
@@ -66,7 +66,7 @@ void Voigt::functionLocal(double *out, const double *xValues,
  */
 void Voigt::functionDerivLocal(API::Jacobian *out, const double *xValues,
                                const size_t nData) {
-  calculateFunctionAndDerivative(xValues, nData, NULL, out);
+  calculateFunctionAndDerivative(xValues, nData, nullptr, out);
 }
 
 /**

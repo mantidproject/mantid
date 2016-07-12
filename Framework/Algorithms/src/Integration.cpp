@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/Integration.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -27,11 +28,11 @@ using namespace DataObjects;
  */
 void Integration::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "The input workspace to integrate.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The output workspace with the results of the integration.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The output workspace with the results of the integration.");
 
   declareProperty("RangeLower", EMPTY_DBL(),
                   "The lower integration limit (an X value).");
@@ -83,7 +84,7 @@ void Integration::exec() {
   bool incPartBins = getProperty("IncludePartialBins");
 
   // Get the input workspace
-  MatrixWorkspace_const_sptr localworkspace = this->getInputWorkspace();
+  MatrixWorkspace_sptr localworkspace = this->getInputWorkspace();
 
   const int numberOfSpectra =
       static_cast<int>(localworkspace->getNumberHistograms());
@@ -105,12 +106,36 @@ void Integration::exec() {
     maxRange = 0.0;
   }
 
+  double progressStart = 0.0;
+  //---------------------------------------------------------------------------------
+  // Now, determine if the input workspace is actually an EventWorkspace
+  EventWorkspace_sptr eventInputWS =
+      boost::dynamic_pointer_cast<EventWorkspace>(localworkspace);
+
+  if (eventInputWS != nullptr) {
+    //------- EventWorkspace as input -------------------------------------
+    // Get the eventworkspace rebinned to apply the upper and lowerrange
+    double evntMinRange =
+        isEmpty(minRange) ? eventInputWS->getEventXMin() : minRange;
+    double evntMaxRange =
+        isEmpty(maxRange) ? eventInputWS->getEventXMax() : maxRange;
+    localworkspace =
+        rangeFilterEventWorkspace(eventInputWS, evntMinRange, evntMaxRange);
+
+    progressStart = 0.5;
+    if ((isEmpty(maxSpec)) && (isEmpty(maxSpec))) {
+      // Assign it to the output workspace property
+      setProperty("OutputWorkspace", localworkspace);
+      return;
+    }
+  }
+
   // Create the 2D workspace (with 1 bin) for the output
   MatrixWorkspace_sptr outputWorkspace =
       this->getOutputWorkspace(localworkspace, minSpec, maxSpec);
 
   bool is_distrib = outputWorkspace->isDistribution();
-  Progress progress(this, 0, 1, maxSpec - minSpec + 1);
+  Progress progress(this, progressStart, 1, maxSpec - minSpec + 1);
 
   const bool axisIsText = localworkspace->getAxis(1)->isText();
   const bool axisIsNumeric = localworkspace->getAxis(1)->isNumeric();
@@ -136,25 +161,25 @@ void Integration::exec() {
     }
 
     // This is the output
-    ISpectrum *outSpec = outputWorkspace->getSpectrum(outWI);
+    auto &outSpec = outputWorkspace->getSpectrum(outWI);
     // This is the input
-    const ISpectrum *inSpec = localworkspace->getSpectrum(i);
+    const auto &inSpec = localworkspace->getSpectrum(i);
 
     // Copy spectrum number, detector IDs
-    outSpec->copyInfoFrom(*inSpec);
+    outSpec.copyInfoFrom(inSpec);
 
     // Retrieve the spectrum into a vector
-    const MantidVec &X = inSpec->readX();
-    const MantidVec &Y = inSpec->readY();
-    const MantidVec &E = inSpec->readE();
+    const MantidVec &X = inSpec.readX();
+    const MantidVec &Y = inSpec.readY();
+    const MantidVec &E = inSpec.readE();
 
     // If doing partial bins, we want to set the bin boundaries to the specified
     // values
     // regardless of whether they're 'in range' for this spectrum
     // Have to do this here, ahead of the 'continue' a bit down from here.
     if (incPartBins) {
-      outSpec->dataX()[0] = minRange;
-      outSpec->dataX()[1] = maxRange;
+      outSpec.dataX()[0] = minRange;
+      outSpec.dataX()[1] = maxRange;
     }
 
     // Find the range [min,max]
@@ -234,12 +259,12 @@ void Integration::exec() {
         sumE += eval * eval * fraction * fraction;
       }
     } else {
-      outSpec->dataX()[0] = lowit == X.end() ? *(lowit - 1) : *(lowit);
-      outSpec->dataX()[1] = *highit;
+      outSpec.dataX()[0] = lowit == X.end() ? *(lowit - 1) : *(lowit);
+      outSpec.dataX()[1] = *highit;
     }
 
-    outSpec->dataY()[0] = sumY;
-    outSpec->dataE()[0] = sqrt(sumE); // Propagate Gaussian error
+    outSpec.dataY()[0] = sumY;
+    outSpec.dataE()[0] = sqrt(sumE); // Propagate Gaussian error
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION
@@ -253,12 +278,29 @@ void Integration::exec() {
 }
 
 /**
+* Uses rebin to reduce event workspaces to a single bin histogram
+*/
+API::MatrixWorkspace_sptr
+Integration::rangeFilterEventWorkspace(API::MatrixWorkspace_sptr workspace,
+                                       double minRange, double maxRange) {
+  bool childLog = g_log.is(Logger::Priority::PRIO_DEBUG);
+  auto childAlg = createChildAlgorithm("Rebin", 0, 0.5, childLog);
+  childAlg->setProperty("InputWorkspace", workspace);
+  std::ostringstream binParams;
+  binParams << minRange << "," << maxRange - minRange << "," << maxRange;
+  childAlg->setPropertyValue("Params", binParams.str());
+  childAlg->setProperty("PreserveEvents", false);
+  childAlg->executeAsChildAlg();
+  return childAlg->getProperty("OutputWorkspace");
+}
+
+/**
  * This function gets the input workspace. In the case for a RebinnedOutput
  * workspace, it must be cleaned before proceeding. Other workspaces are
  * untouched.
  * @return the input workspace, cleaned if necessary
  */
-MatrixWorkspace_const_sptr Integration::getInputWorkspace() {
+MatrixWorkspace_sptr Integration::getInputWorkspace() {
   MatrixWorkspace_sptr temp = getProperty("InputWorkspace");
 
   if (temp->id() == "RebinnedOutput") {
@@ -284,7 +326,7 @@ MatrixWorkspace_const_sptr Integration::getInputWorkspace() {
     alg->setProperty("OutputWorkspace", outName);
     alg->executeAsChildAlg();
     temp = alg->getProperty("OutputWorkspace");
-    temp->isDistribution(true);
+    temp->setDistribution(true);
   }
 
   return temp;
@@ -301,9 +343,9 @@ MatrixWorkspace_const_sptr Integration::getInputWorkspace() {
  *
  * @return the output workspace
  */
-MatrixWorkspace_sptr
-Integration::getOutputWorkspace(MatrixWorkspace_const_sptr inWS,
-                                const int minSpec, const int maxSpec) {
+MatrixWorkspace_sptr Integration::getOutputWorkspace(MatrixWorkspace_sptr inWS,
+                                                     const int minSpec,
+                                                     const int maxSpec) {
   if (inWS->id() == "RebinnedOutput") {
     MatrixWorkspace_sptr outWS = API::WorkspaceFactory::Instance().create(
         "Workspace2D", maxSpec - minSpec + 1, 2, 1);

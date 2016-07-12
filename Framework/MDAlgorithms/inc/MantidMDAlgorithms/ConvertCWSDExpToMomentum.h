@@ -37,34 +37,33 @@ namespace MDAlgorithms {
 class DLLExport ConvertCWSDExpToMomentum : public API::Algorithm {
 public:
   ConvertCWSDExpToMomentum();
-  virtual ~ConvertCWSDExpToMomentum();
 
   /// Algorithm's name
-  virtual const std::string name() const { return "ConvertCWSDExpToMomentum"; }
+  const std::string name() const override { return "ConvertCWSDExpToMomentum"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Load and convert a set of files in an HB3A experiment.";
   }
 
   /// Algorithm's version
-  virtual int version() const { return (1); }
+  int version() const override { return (1); }
 
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Diffraction\\ConstantWavelength;DataHandling\\Text";
   }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   void addMDEvents(bool usevirtual);
 
-  void convertSpiceMatrixToMomentumMDEvents(API::MatrixWorkspace_sptr dataws,
-                                            bool usevirtual,
-                                            const detid_t &startdetid,
-                                            const int runnumber);
+  void convertSpiceMatrixToMomentumMDEvents(
+      API::MatrixWorkspace_sptr dataws, bool usevirtual,
+      const detid_t &startdetid, const int scannumber, const int runnumber,
+      double measuretime, int monitor_counts);
 
   /// Convert |Q| with detector position to Q_sample
   Kernel::V3D convertToQSample(const Kernel::V3D &samplePos,
@@ -90,6 +89,9 @@ private:
 
   void updateQRange(const std::vector<Mantid::coord_t> &vec_q);
 
+  /// Remove background from
+  void removeBackground(API::MatrixWorkspace_sptr dataws);
+
   API::ITableWorkspace_sptr m_expDataTableWS;
   API::ITableWorkspace_sptr m_detectorListTableWS;
   API::IMDEventWorkspace_sptr m_outputWS;
@@ -98,8 +100,12 @@ private:
   Kernel::V3D m_samplePos;
   Kernel::V3D m_sourcePos;
 
+  size_t m_iColScan;
+  size_t m_iColPt;
   size_t m_iColFilename;
   size_t m_iColStartDetID;
+  size_t m_iMonitorCounts;
+  size_t m_iTime;
 
   std::vector<double> m_extentMins;
   std::vector<double> m_extentMaxs;
@@ -113,6 +119,9 @@ private:
   std::string m_dataDir;
   /// Flag to use m_dataDir
   bool m_isBaseName;
+  /// Background workspace
+  bool m_removeBackground;
+  API::MatrixWorkspace_const_sptr m_backgroundWS;
 };
 
 } // namespace MDAlgorithms

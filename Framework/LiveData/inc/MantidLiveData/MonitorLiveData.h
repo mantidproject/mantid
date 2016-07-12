@@ -37,27 +37,24 @@ namespace LiveData {
 */
 class DLLExport MonitorLiveData : public LiveDataAlgorithm {
 public:
-  MonitorLiveData();
-  virtual ~MonitorLiveData();
-
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Call LoadLiveData at a given update frequency. Do not call this "
            "algorithm directly; instead call StartLiveData.";
   }
 
-  virtual const std::string category() const;
-  virtual int version() const;
+  const std::string category() const override;
+  int version() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void doClone(const std::string &originalName, const std::string &newName);
 
 public:
   /// Latest chunk number loaded
-  size_t m_chunkNumber;
+  size_t m_chunkNumber{0};
 };
 
 } // namespace LiveData

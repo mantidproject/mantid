@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Interpolation.h"
@@ -31,14 +32,14 @@ TOFSANSResolutionByPixel::TOFSANSResolutionByPixel()
     : API::Algorithm(), m_wl_resolution(0.) {}
 
 void TOFSANSResolutionByPixel::init() {
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Name the workspace to calculate the resolution for, for "
                   "each pixel and wavelength");
   declareProperty(
-      new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                       Direction::Output),
+      make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
+                                                Direction::Output),
       "Name of the newly created workspace which contains the Q resolution.");
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
@@ -48,7 +49,7 @@ void TOFSANSResolutionByPixel::init() {
                   "Sample aperture radius, R2 (mm).");
   declareProperty("SourceApertureRadius", 0.0, positiveDouble,
                   "Source aperture radius, R1 (mm).");
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
                       "SigmaModerator", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Moderator time spread (microseconds) as a"
@@ -95,22 +96,17 @@ void TOFSANSResolutionByPixel::exec() {
   // create interpolation table from sigmaModeratorVSwavelength
   Kernel::Interpolation lookUpTable;
 
-  const MantidVec xInterpolate = sigmaModeratorVSwavelength->readX(0);
+  const auto xInterpolate = sigmaModeratorVSwavelength->points(0);
   const MantidVec yInterpolate = sigmaModeratorVSwavelength->readY(0);
 
   // prefer the input to be a pointworkspace and create interpolation function
   if (sigmaModeratorVSwavelength->isHistogramData()) {
     g_log.notice() << "mid-points of SigmaModerator histogram bins will be "
                       "used for interpolation.";
+  }
 
-    for (size_t i = 0; i < xInterpolate.size() - 1; ++i) {
-      const double midpoint = (xInterpolate[i + 1] + xInterpolate[i]) / 2.0;
-      lookUpTable.addPoint(midpoint, yInterpolate[i]);
-    }
-  } else {
-    for (size_t i = 0; i < xInterpolate.size(); ++i) {
-      lookUpTable.addPoint(xInterpolate[i], yInterpolate[i]);
-    }
+  for (size_t i = 0; i < xInterpolate.size(); ++i) {
+    lookUpTable.addPoint(xInterpolate[i], yInterpolate[i]);
   }
 
   // Calculate the L1 distance
@@ -127,10 +123,9 @@ void TOFSANSResolutionByPixel::exec() {
     LCollim = collimationLengthEstimator.provideCollimationLength(inWS);
     g_log.information() << "No collimation length was specified. A default "
                            "collimation length was estimated to be " << LCollim
-                        << std::endl;
+                        << '\n';
   } else {
-    g_log.information() << "The collimation length is  " << LCollim
-                        << std::endl;
+    g_log.information() << "The collimation length is  " << LCollim << '\n';
   }
 
   const int numberOfSpectra = static_cast<int>(inWS->getNumberHistograms());
@@ -141,9 +136,8 @@ void TOFSANSResolutionByPixel::exec() {
     try {
       det = inWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
-      g_log.information() << "Spectrum index " << i
-                          << " has no detector assigned to it - discarding"
-                          << std::endl;
+      g_log.information() << "Workspace index " << i
+                          << " has no detector assigned to it - discarding\n";
     }
     // If no detector found or if it's masked or a monitor, skip onto the next
     // spectrum
@@ -161,8 +155,8 @@ void TOFSANSResolutionByPixel::exec() {
 
     // Multiplicative factor to go from lambda to Q
     // Don't get fooled by the function name...
-    const double theta = inWS->detectorTwoTheta(det);
-    double sinTheta = sin(theta / 2.0);
+    const double theta = inWS->detectorTwoTheta(*det);
+    double sinTheta = sin(0.5 * theta);
     double factor = 4.0 * M_PI * sinTheta;
 
     const MantidVec &xIn = inWS->readX(i);

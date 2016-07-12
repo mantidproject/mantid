@@ -39,6 +39,7 @@ class DLLExport MDFrame {
 public:
   virtual Mantid::Kernel::UnitLabel getUnitLabel() const = 0;
   virtual const Mantid::Kernel::MDUnit &getMDUnit() const = 0;
+  virtual bool setMDUnit(const Mantid::Kernel::MDUnit &newUnit) = 0;
   virtual bool canConvertTo(const Mantid::Kernel::MDUnit &otherUnit) const = 0;
   virtual bool isQ() const = 0;
   virtual bool isSameType(const MDFrame &frame) const = 0;
@@ -46,7 +47,7 @@ public:
   virtual Mantid::Kernel::SpecialCoordinateSystem
   equivalientSpecialCoordinateSystem() const = 0;
   virtual MDFrame *clone() const = 0;
-  virtual ~MDFrame() {}
+  virtual ~MDFrame() = default;
 };
 
 typedef std::unique_ptr<MDFrame> MDFrame_uptr;

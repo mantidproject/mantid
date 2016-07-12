@@ -1,8 +1,10 @@
 #include "MantidWorkflowAlgorithms/DgsProcessDetectorVanadium.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -15,16 +17,6 @@ namespace WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsProcessDetectorVanadium)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsProcessDetectorVanadium::DgsProcessDetectorVanadium() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsProcessDetectorVanadium::~DgsProcessDetectorVanadium() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -49,19 +41,20 @@ void DgsProcessDetectorVanadium::init() {
   // auto wsValidator = boost::make_shared<CompositeValidator>();
   // wsValidator->add<WorkspaceUnitValidator>("TOF");
   this->declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "An input workspace containing the detector vanadium data in TOF units.");
   this->declareProperty(
-      new WorkspaceProperty<>("InputMonitorWorkspace", "", Direction::Input,
-                              PropertyMode::Optional),
+      make_unique<WorkspaceProperty<>>("InputMonitorWorkspace", "",
+                                       Direction::Input,
+                                       PropertyMode::Optional),
       "A monitor workspace associated with the input workspace.");
-  this->declareProperty(new WorkspaceProperty<>("MaskWorkspace", "",
-                                                Direction::Input,
-                                                PropertyMode::Optional),
-                        "A mask workspace");
   this->declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name for the output workspace.");
+      make_unique<WorkspaceProperty<>>("MaskWorkspace", "", Direction::Input,
+                                       PropertyMode::Optional),
+      "A mask workspace");
+  this->declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                         Direction::Output),
+                        "The name for the output workspace.");
   this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
                         Direction::Output);
 }
@@ -70,7 +63,7 @@ void DgsProcessDetectorVanadium::init() {
 /** Execute the algorithm.
  */
 void DgsProcessDetectorVanadium::exec() {
-  g_log.notice() << "Starting DgsProcessDetectorVanadium" << std::endl;
+  g_log.notice() << "Starting DgsProcessDetectorVanadium\n";
   // Get the reduction property manager
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");
@@ -117,10 +110,9 @@ void DgsProcessDetectorVanadium::exec() {
   }
 
   // Rebin the data (not Integration !?!?!?)
-  std::vector<double> binning;
-  binning.push_back(detVanIntRangeLow);
-  binning.push_back(detVanIntRangeHigh - detVanIntRangeLow);
-  binning.push_back(detVanIntRangeHigh);
+  std::vector<double> binning{detVanIntRangeLow,
+                              detVanIntRangeHigh - detVanIntRangeLow,
+                              detVanIntRangeHigh};
 
   IAlgorithm_sptr rebin = this->createChildAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", inputWS);

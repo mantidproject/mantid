@@ -4,6 +4,7 @@
 #include "MantidCurveFitting/Functions/ComptonPeakProfile.h"
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <cmath>
 

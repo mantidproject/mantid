@@ -19,7 +19,6 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 
-#include <boost/assign/list_of.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <set>
 
@@ -75,9 +74,7 @@ protected:
     mdworkspaceAlg->setChild(true);
     mdworkspaceAlg->initialize();
     mdworkspaceAlg->setProperty("Dimensions", 3);
-    std::vector<double> extents =
-        boost::assign::list_of(min)(max)(min)(max)(min)(max)
-            .convert_to_container<std::vector<double>>();
+    std::vector<double> extents = {min, max, min, max, min, max};
     mdworkspaceAlg->setProperty("Extents", extents);
     mdworkspaceAlg->setPropertyValue("Names", "H,K,L");
     std::string units = Mantid::Kernel::Units::Symbol::RLU.ascii() + "," +

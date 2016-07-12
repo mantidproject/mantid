@@ -7,6 +7,7 @@
 #include "MantidDataHandling/FindDetectorsPar.h"
 
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
 
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MantidVersion.h"
@@ -38,28 +39,32 @@ SaveNXTomo::SaveNXTomo() : API::Algorithm() {
  */
 void SaveNXTomo::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add<API::CommonBinsValidator>();
+  // Note: this would be better, but it is too restrictive in
+  // practice when saving image workspaces loaded from different
+  // formats than FITS or not so standard FITS.
+  // wsValidator->add<API::CommonBinsValidator>();
   wsValidator->add<API::HistogramValidator>();
 
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspaces", "", Direction::Input,
-                              wsValidator),
+      make_unique<WorkspaceProperty<>>("InputWorkspaces", "", Direction::Input,
+                                       wsValidator),
       "The name of the workspace(s) to save - this can be the name of a single "
       "Workspace2D or the name of a WorkspaceGroup in which case all the "
       "Workspace2Ds included in the group will be saved.");
 
   declareProperty(
-      new API::FileProperty("Filename", "", FileProperty::Save,
-                            std::vector<std::string>(1, ".nxs")),
+      Kernel::make_unique<API::FileProperty>(
+          "Filename", "", FileProperty::Save,
+          std::vector<std::string>(1, ".nxs")),
       "The name of the NXTomo file to write, as a full or relative path");
 
   declareProperty(
-      new PropertyWithValue<bool>("OverwriteFile", false,
-                                  Kernel::Direction::Input),
+      make_unique<PropertyWithValue<bool>>("OverwriteFile", false,
+                                           Kernel::Direction::Input),
       "Replace any existing file of the same name instead of appending data?");
 
-  declareProperty(new PropertyWithValue<bool>("IncludeError", false,
-                                              Kernel::Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<bool>>(
+                      "IncludeError", false, Kernel::Direction::Input),
                   "Write the error values to NXTomo file?");
 }
 
@@ -74,7 +79,7 @@ void SaveNXTomo::exec() {
   } catch (...) {
   }
 
-  if (m_workspaces.size() != 0)
+  if (!m_workspaces.empty())
     processAll();
 }
 
@@ -94,7 +99,7 @@ bool SaveNXTomo::processGroups() {
   } catch (...) {
   }
 
-  if (m_workspaces.size() != 0)
+  if (!m_workspaces.empty())
     processAll();
 
   return true;
@@ -110,19 +115,21 @@ void SaveNXTomo::processAll() {
   m_includeError = getProperty("IncludeError");
   m_overwriteFile = getProperty("OverwriteFile");
 
-  for (auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it) {
-    const std::string workspaceID = (*it)->id();
+  for (auto &workspace : m_workspaces) {
+    const std::string workspaceID = workspace->id();
 
     if ((workspaceID.find("Workspace2D") == std::string::npos) &&
         (workspaceID.find("RebinnedOutput") == std::string::npos))
       throw Exception::NotImplementedError(
           "SaveNXTomo passed invalid workspaces. Must be Workspace2D");
 
+    // Note: check disabled for the same reason as in the input properties
     // Do the full check for common binning
-    if (!WorkspaceHelpers::commonBoundaries(*it)) {
-      g_log.error("The input workspace must have common bins");
-      throw std::invalid_argument("The input workspace must have common bins");
-    }
+    // if (!WorkspaceHelpers::commonBoundaries(workspace)) {
+    //   g_log.error("The input workspace must have common bins");
+    //   throw std::invalid_argument("The input workspace must have common
+    //   bins");
+    // }
   }
 
   // Retrieve the filename from the properties
@@ -156,8 +163,8 @@ void SaveNXTomo::processAll() {
   // Create a progress reporting object
   Progress progress(this, 0, 1, m_workspaces.size());
 
-  for (auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it) {
-    writeSingleWorkspace(*it, nxFile);
+  for (auto &workspace : m_workspaces) {
+    writeSingleWorkspace(workspace, nxFile);
     progress.report();
   }
 
@@ -335,10 +342,16 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr workspace,
 
   auto dataArr = new double[m_spectraCount];
 
+  // images can be as one-spectrum-per-pixel, or one-spectrum-per-row
+  bool spectrumPerPixel = (1 == workspace->dataY(0).size());
   for (int64_t i = 0; i < m_dimensions[1]; ++i) {
     for (int64_t j = 0; j < m_dimensions[2]; ++j) {
-      dataArr[i * m_dimensions[1] + j] =
-          workspace->dataY(i * m_dimensions[1] + j)[0];
+      if (spectrumPerPixel) {
+        dataArr[i * m_dimensions[1] + j] =
+            workspace->dataY(i * m_dimensions[1] + j)[0];
+      } else {
+        dataArr[i * m_dimensions[1] + j] = workspace->dataY(i)[j];
+      }
     }
   }
 
@@ -405,8 +418,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr workspace,
   // value
   std::vector<Property *> logVals = workspace->run().getLogData();
 
-  for (auto it = logVals.begin(); it != logVals.end(); ++it) {
-    auto prop = *it;
+  for (auto prop : logVals) {
     if (prop->name() != "ImageKey" && prop->name() != "Rotation" &&
         prop->name() != "Intensity" && prop->name() != "Axis1" &&
         prop->name() != "Axis2") {

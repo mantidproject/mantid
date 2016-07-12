@@ -32,7 +32,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputController : public QObject {
   Q_OBJECT
 public:
   explicit InputController(QObject *parent, bool contextAllowed = true);
-  virtual ~InputController(){}
+  ~InputController() override {}
 
   virtual void mousePressEvent(QMouseEvent *) {}
   virtual void mouseMoveEvent(QMouseEvent *) {}
@@ -67,15 +67,16 @@ private:
     translation, rotation and zooming.
 
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputController3DMove : public InputController {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputController3DMove
+    : public InputController {
   Q_OBJECT
 
 public:
   InputController3DMove(QObject *parent);
-  virtual void mousePressEvent(QMouseEvent *);
-  virtual void mouseMoveEvent(QMouseEvent *);
-  virtual void mouseReleaseEvent(QMouseEvent *);
-  virtual void wheelEvent(QWheelEvent *);
+  void mousePressEvent(QMouseEvent *) override;
+  void mouseMoveEvent(QMouseEvent *) override;
+  void mouseReleaseEvent(QMouseEvent *) override;
+  void wheelEvent(QWheelEvent *) override;
 
 signals:
   /// Init zooming. x and y is the zoom starting point on the screen.
@@ -102,14 +103,15 @@ private:
 /**
     Controller for picking detectors.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerPick : public InputController {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerPick
+    : public InputController {
   Q_OBJECT
 
 public:
   InputControllerPick(QObject *parent);
-  virtual void mousePressEvent(QMouseEvent *);
-  virtual void mouseMoveEvent(QMouseEvent *);
-  virtual void mouseReleaseEvent(QMouseEvent *);
+  void mousePressEvent(QMouseEvent *) override;
+  void mouseMoveEvent(QMouseEvent *) override;
+  void mouseReleaseEvent(QMouseEvent *) override;
 
 signals:
   void pickPointAt(int, int);
@@ -125,16 +127,17 @@ private:
 /**
     Controller for drawing mask shapes.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerDrawShape : public InputController {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerDrawShape
+    : public InputController {
   Q_OBJECT
 
 public:
   InputControllerDrawShape(QObject *parent);
-  virtual void mousePressEvent(QMouseEvent *);
-  virtual void mouseMoveEvent(QMouseEvent *);
-  virtual void mouseReleaseEvent(QMouseEvent *);
-  virtual void keyPressEvent(QKeyEvent *);
-  virtual void leaveEvent(QEvent *);
+  void mousePressEvent(QMouseEvent *) override;
+  void mouseMoveEvent(QMouseEvent *) override;
+  void mouseReleaseEvent(QMouseEvent *) override;
+  void keyPressEvent(QKeyEvent *) override;
+  void leaveEvent(QEvent *) override;
 
 signals:
   /// Deselect all selected shapes
@@ -165,7 +168,7 @@ signals:
 public slots:
   void startCreatingShape2D(const QString &type, const QColor &borderColor,
                             const QColor &fillColor);
-  void onDisabled();
+  void onDisabled() override;
 
 private:
   bool m_creating; ///< a shape is being created with a mouse
@@ -179,14 +182,15 @@ private:
 /**
     Controller for moving the instrument on an unwrapped surface.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerMoveUnwrapped : public InputController {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerMoveUnwrapped
+    : public InputController {
   Q_OBJECT
 
 public:
   InputControllerMoveUnwrapped(QObject *parent);
-  virtual void mousePressEvent(QMouseEvent *);
-  virtual void mouseMoveEvent(QMouseEvent *);
-  virtual void mouseReleaseEvent(QMouseEvent *);
+  void mousePressEvent(QMouseEvent *) override;
+  void mouseMoveEvent(QMouseEvent *) override;
+  void mouseReleaseEvent(QMouseEvent *) override;
 
 signals:
   void setSelectionRect(const QRect &);
@@ -201,25 +205,26 @@ private:
 /**
     Controller for free drawing on an unwrapped surface.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerDraw : public InputController {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerDraw
+    : public InputController {
   Q_OBJECT
 
 public:
   InputControllerDraw(QObject *parent);
-  ~InputControllerDraw();
-  virtual void mousePressEvent(QMouseEvent *);
-  virtual void mouseMoveEvent(QMouseEvent *);
-  virtual void mouseReleaseEvent(QMouseEvent *);
-  virtual void wheelEvent(QWheelEvent *);
+  ~InputControllerDraw() override;
+  void mousePressEvent(QMouseEvent *) override;
+  void mouseMoveEvent(QMouseEvent *) override;
+  void mouseReleaseEvent(QMouseEvent *) override;
+  void wheelEvent(QWheelEvent *) override;
 
-  virtual void enterEvent(QEvent *);
-  virtual void leaveEvent(QEvent *);
+  void enterEvent(QEvent *) override;
+  void leaveEvent(QEvent *) override;
 
 protected:
-  int cursorSize() const {return m_size;}
-  bool isLeftButtonPressed() const {return m_isLeftButtonPressed;}
-  bool isRightButtonPressed() const {return m_isRightButtonPressed;}
-  bool isActive() const {return m_isActive;}
+  int cursorSize() const { return m_size; }
+  bool isLeftButtonPressed() const { return m_isLeftButtonPressed; }
+  bool isRightButtonPressed() const { return m_isRightButtonPressed; }
+  bool isActive() const { return m_isActive; }
 
 private:
   void redrawCursor();
@@ -240,22 +245,23 @@ private:
 /**
     Controller for erasing peaks on an unwrapped surface.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerErase : public InputControllerDraw {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerErase
+    : public InputControllerDraw {
   Q_OBJECT
 
 public:
   InputControllerErase(QObject *parent);
-  ~InputControllerErase();
-  void onPaint(QPainter &);
+  ~InputControllerErase() override;
+  void onPaint(QPainter &) override;
 
 signals:
   void erase(const QRect &);
 
 private:
-  void drawCursor(QPixmap *cursor);
-  void signalLeftClick();
-  void setPosition(const QPoint &pos);
-  void resize();
+  void drawCursor(QPixmap *cursor) override;
+  void signalLeftClick() override;
+  void setPosition(const QPoint &pos) override;
+  void resize() override;
 
   QRect m_rect;
   QPixmap *m_image;
@@ -264,7 +270,8 @@ private:
 /**
     Controller for drawing and erasing arbitrary shapes on an unwrapped surface.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerDrawAndErase : public InputControllerDraw {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerDrawAndErase
+    : public InputControllerDraw {
   Q_OBJECT
 
 public:
@@ -280,11 +287,11 @@ public slots:
   void startCreatingShape2D(const QColor &borderColor, const QColor &fillColor);
 
 private:
-  void drawCursor(QPixmap *cursor);
-  void signalLeftClick();
-  void signalRightClick();
-  void setPosition(const QPoint &pos);
-  void resize();
+  void drawCursor(QPixmap *cursor) override;
+  void signalLeftClick() override;
+  void signalRightClick() override;
+  void setPosition(const QPoint &pos) override;
+  void resize() override;
   void makePolygon();
 
   QPoint m_pos;
@@ -292,7 +299,6 @@ private:
   QColor m_borderColor, m_fillColor;
   bool m_creating;
 };
-
 }
 }
 

@@ -3,6 +3,7 @@
 
 #include "cxxtest/TestSuite.h"
 #include "MantidDataHandling/SaveGSS.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

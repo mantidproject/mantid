@@ -107,46 +107,39 @@ DECLARE_ALGORITHM(FindPeaksMD)
  */
 FindPeaksMD::FindPeaksMD()
     : peakWS(), peakRadiusSquared(), DensityThresholdFactor(0.0), m_maxPeaks(0),
-      m_addDetectors(true), m_densityScaleFactor(1e-6), prog(NULL), inst(),
+      m_addDetectors(true), m_densityScaleFactor(1e-6), prog(nullptr), inst(),
       m_runNumber(-1), dimType(), m_goniometer() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FindPeaksMD::~FindPeaksMD() {}
-
-//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void FindPeaksMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace or MDHistoWorkspace with at least "
                   "3 dimensions.");
 
   declareProperty(
-      new PropertyWithValue<double>("PeakDistanceThreshold", 0.1,
-                                    Direction::Input),
+      make_unique<PropertyWithValue<double>>("PeakDistanceThreshold", 0.1,
+                                             Direction::Input),
       "Threshold distance for rejecting peaks that are found to be too close "
       "from each other.\n"
       "This should be some multiple of the radius of a peak. Default: 0.1.");
 
-  declareProperty(
-      new PropertyWithValue<int64_t>("MaxPeaks", 500, Direction::Input),
-      "Maximum number of peaks to find. Default: 500.");
+  declareProperty(make_unique<PropertyWithValue<int64_t>>("MaxPeaks", 500,
+                                                          Direction::Input),
+                  "Maximum number of peaks to find. Default: 500.");
 
-  declareProperty(new PropertyWithValue<double>("DensityThresholdFactor", 10.0,
-                                                Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "DensityThresholdFactor", 10.0, Direction::Input),
                   "The overall signal density of the workspace will be "
                   "multiplied by this factor \n"
                   "to get a threshold signal density below which boxes are NOT "
                   "considered to be peaks. See the help.\n"
                   "Default: 10.0");
 
-  declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "",
-                                                        Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "An output PeaksWorkspace with the peaks' found positions.");
 
   declareProperty("AppendPeaks", false,
@@ -185,8 +178,8 @@ void FindPeaksMD::readExperimentInfo(const ExperimentInfo_sptr &ei,
     m_goniometer = ei->mutableRun().getGoniometerMatrix();
   } catch (std::exception &e) {
     g_log.warning() << "Error finding goniometer matrix. It will not be set in "
-                       "the peaks found." << std::endl;
-    g_log.warning() << e.what() << std::endl;
+                       "the peaks found.\n";
+    g_log.warning() << e.what() << '\n';
   }
 }
 
@@ -203,7 +196,7 @@ void FindPeaksMD::addPeak(const V3D &Q, const double binCount) {
       peakWS->addPeak(*p);
   } catch (std::exception &e) {
     g_log.notice() << "Error creating peak at " << Q << " because of '"
-                   << e.what() << "'. Peak will be skipped." << std::endl;
+                   << e.what() << "'. Peak will be skipped.\n";
   }
 }
 
@@ -281,11 +274,10 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         (thresholdDensity == -std::numeric_limits<double>::infinity())) {
       g_log.warning()
           << "Infinite or NaN overall density found. Your input data "
-             "may be invalid. Using a 0 threshold instead." << std::endl;
+             "may be invalid. Using a 0 threshold instead.\n";
       thresholdDensity = 0;
     }
-    g_log.notice() << "Threshold signal density: " << thresholdDensity
-                   << std::endl;
+    g_log.notice() << "Threshold signal density: " << thresholdDensity << '\n';
 
     typedef API::IMDNode *boxPtr;
     // We will fill this vector with pointers to all the boxes (up to a given
@@ -341,13 +333,13 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
       // Compare to all boxes already picked.
       bool badBox = false;
-      for (auto it3 = peakBoxes.begin(); it3 != peakBoxes.end(); it3++) {
+      for (auto &peakBoxe : peakBoxes) {
 
 #ifndef MDBOX_TRACK_CENTROID
         coord_t otherCenter[nd];
         (*it3)->calculateCentroid(otherCenter);
 #else
-        const coord_t *otherCenter = (*it3)->getCentroid();
+        const coord_t *otherCenter = peakBoxe->getCentroid();
 #endif
 
         // Distance between this box and a box we already put in.
@@ -368,8 +360,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       if (!badBox) {
         if (numBoxesFound++ >= m_maxPeaks) {
           g_log.notice() << "Number of peaks found exceeded the limit of "
-                         << m_maxPeaks << ". Stopping peak finding."
-                         << std::endl;
+                         << m_maxPeaks << ". Stopping peak finding.\n";
           break;
         }
 
@@ -377,7 +368,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         g_log.debug() << "Found box at ";
         for (size_t d = 0; d < nd; d++)
           g_log.debug() << (d > 0 ? "," : "") << boxCenter[d];
-        g_log.debug() << "; Density = " << density << std::endl;
+        g_log.debug() << "; Density = " << density << '\n';
         // Report progres for each box found.
         prog->report("Finding Peaks");
       }
@@ -386,9 +377,9 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     prog->resetNumSteps(numBoxesFound, 0.95, 1.0);
 
     // --- Convert the "boxes" to peaks ----
-    for (auto it3 = peakBoxes.begin(); it3 != peakBoxes.end(); it3++) {
-      // The center of the box = Q in the lab frame
-      boxPtr box = *it3;
+    for (auto box : peakBoxes) {
+// The center of the box = Q in the lab frame
+
 #ifndef MDBOX_TRACK_CENTROID
       coord_t boxCenter[nd];
       box->calculateCentroid(boxCenter);
@@ -421,7 +412,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         }
       } catch (std::exception &e) {
         g_log.notice() << "Error creating peak at " << Q << " because of '"
-                       << e.what() << "'. Peak will be skipped." << std::endl;
+                       << e.what() << "'. Peak will be skipped.\n";
       }
 
       // Report progress for each box found.
@@ -430,7 +421,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     } // for each box found
   }
   g_log.notice() << "Number of peaks found: " << peakWS->getNumberPeaks()
-                 << std::endl;
+                 << '\n';
 }
 
 //----------------------------------------------------------------------------------------------
@@ -481,11 +472,10 @@ void FindPeaksMD::findPeaksHisto(
         (thresholdDensity == -std::numeric_limits<double>::infinity())) {
       g_log.warning()
           << "Infinite or NaN overall density found. Your input data "
-             "may be invalid. Using a 0 threshold instead." << std::endl;
+             "may be invalid. Using a 0 threshold instead.\n";
       thresholdDensity = 0;
     }
-    g_log.notice() << "Threshold signal density: " << thresholdDensity
-                   << std::endl;
+    g_log.notice() << "Threshold signal density: " << thresholdDensity << '\n';
 
     // -------------- Sort and Filter by Density -----------------------------
     progress(0.20, "Sorting Boxes by Density");
@@ -515,8 +505,8 @@ void FindPeaksMD::findPeaksHisto(
 
       // Compare to all boxes already picked.
       bool badBox = false;
-      for (auto it3 = peakBoxes.begin(); it3 != peakBoxes.end(); ++it3) {
-        VMD otherCenter = ws->getCenter(*it3);
+      for (auto &peakBoxe : peakBoxes) {
+        VMD otherCenter = ws->getCenter(peakBoxe);
 
         // Distance between this box and a box we already put in.
         coord_t distSquared = 0.0;
@@ -536,21 +526,19 @@ void FindPeaksMD::findPeaksHisto(
       if (!badBox) {
         if (numBoxesFound++ >= m_maxPeaks) {
           g_log.notice() << "Number of peaks found exceeded the limit of "
-                         << m_maxPeaks << ". Stopping peak finding."
-                         << std::endl;
+                         << m_maxPeaks << ". Stopping peak finding.\n";
           break;
         }
 
         peakBoxes.push_back(index);
         g_log.debug() << "Found box at index " << index;
-        g_log.debug() << "; Density = " << density << std::endl;
+        g_log.debug() << "; Density = " << density << '\n';
         // Report progres for each box found.
         prog->report("Finding Peaks");
       }
     }
     // --- Convert the "boxes" to peaks ----
-    for (auto it3 = peakBoxes.begin(); it3 != peakBoxes.end(); ++it3) {
-      size_t index = *it3;
+    for (auto index : peakBoxes) {
       // The center of the box = Q in the lab frame
       VMD boxCenter = ws->getCenter(index);
 
@@ -569,7 +557,7 @@ void FindPeaksMD::findPeaksHisto(
     } // for each box found
   }
   g_log.notice() << "Number of peaks found: " << peakWS->getNumberPeaks()
-                 << std::endl;
+                 << '\n';
 }
 
 //----------------------------------------------------------------------------------------------

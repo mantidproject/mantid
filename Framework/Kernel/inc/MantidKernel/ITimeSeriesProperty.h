@@ -58,7 +58,7 @@ public:
   /// Deletes all but the 'last entry' in the property
   virtual void clearOutdated() = 0;
   /// Virtual destructor
-  virtual ~ITimeSeriesProperty() {}
+  virtual ~ITimeSeriesProperty() = default;
 };
 
 } // namespace Kernel

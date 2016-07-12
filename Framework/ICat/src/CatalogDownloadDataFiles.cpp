@@ -36,14 +36,14 @@ DECLARE_ALGORITHM(CatalogDownloadDataFiles)
 
 /// declaring algorithm properties
 void CatalogDownloadDataFiles::init() {
-  declareProperty(new ArrayProperty<int64_t>("FileIds"),
+  declareProperty(make_unique<ArrayProperty<int64_t>>("FileIds"),
                   "List of fileids to download from the data server");
-  declareProperty(new ArrayProperty<std::string>("FileNames"),
+  declareProperty(make_unique<ArrayProperty<std::string>>("FileNames"),
                   "List of filenames to download from the data server");
   declareProperty("DownloadPath", "", "The path to save the downloaded files.");
   declareProperty("Session", "",
                   "The session information of the catalog to use.");
-  declareProperty(new ArrayProperty<std::string>(
+  declareProperty(Kernel::make_unique<ArrayProperty<std::string>>(
                       "FileLocations", std::vector<std::string>(),
                       boost::make_shared<NullValidator>(), Direction::Output),
                   "A list of file locations to the catalog datafiles.");
@@ -91,25 +91,23 @@ void CatalogDownloadDataFiles::exec() {
 
     g_log.debug()
         << "CatalogDownloadDataFiles -> File location before transform is: "
-        << fileLocation << " mac path is : " << catalogInfo.macPrefix()
-        << std::endl;
+        << fileLocation << " mac path is : " << catalogInfo.macPrefix() << '\n';
     // Transform the archive path to the path of the user's operating system.
     fileLocation = catalogInfo.transformArchivePath(fileLocation);
     g_log.debug()
         << "CatalogDownloadDataFiles -> File location after transform is:  "
-        << fileLocation << std::endl;
+        << fileLocation << '\n';
 
     // Can we open the file (Hence, have access to the archives?)
     std::ifstream hasAccessToArchives(fileLocation.c_str());
     if (hasAccessToArchives) {
       g_log.information() << "File (" << *fileName << ") located in archives ("
-                          << fileLocation << ")." << std::endl;
+                          << fileLocation << ").\n";
       fileLocations.push_back(fileLocation);
     } else {
       g_log.information()
           << "Unable to open file (" << *fileName
-          << ") from archive. Beginning to download over Internet."
-          << std::endl;
+          << ") from archive. Beginning to download over Internet.\n";
       progress(prog / 2, "getting the url ....");
       // Obtain URL for related file to download from net.
       const std::string url = catalogInfoService->getDownloadURL(*fileID);
@@ -162,13 +160,14 @@ std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(
                                Poco::Net::Context::VERIFY_NONE);
     // Create a singleton for holding the default context. E.g. any future
     // requests to publish are made to this certificate and context.
-    Poco::Net::SSLManager::instance().initializeClient(NULL, certificateHandler,
-                                                       context);
+    Poco::Net::SSLManager::instance().initializeClient(
+        nullptr, certificateHandler, context);
 
     // Session takes ownership of socket
     Poco::Net::SecureStreamSocket *socket =
         new Poco::Net::SecureStreamSocket(context);
     Poco::Net::HTTPSClientSession session(*socket);
+    socket = nullptr;
     session.setHost(uri.getHost());
     session.setPort(uri.getPort());
 
@@ -204,7 +203,7 @@ std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(
     float diff = float(end - start) / CLOCKS_PER_SEC;
     g_log.information() << "Time taken to download file " << fileName << " is "
                         << std::fixed << std::setprecision(2) << diff
-                        << " seconds" << std::endl;
+                        << " seconds\n";
 
   } catch (Poco::Net::SSLException &error) {
     throw std::runtime_error(error.displayText());

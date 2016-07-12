@@ -21,10 +21,12 @@ using namespace Mantid::Kernel;
 using ::testing::_;
 using ::testing::Mock;
 
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
+
 class MockPawleyFunction : public IPawleyFunction {
 public:
   MockPawleyFunction() {}
-  ~MockPawleyFunction() {}
+  ~MockPawleyFunction() override {}
   // IFunction interface
   MOCK_CONST_METHOD0(name, std::string());
   MOCK_CONST_METHOD2(function, void(const FunctionDomain &, FunctionValues &));
@@ -43,9 +45,9 @@ public:
 
   MOCK_METHOD4(setMatrixWorkspace,
                void(MatrixWorkspace_const_sptr, size_t, double, double));
-
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 protected:
-  void init() { setDecoratedFunction("Gaussian"); }
+  void init() override { setDecoratedFunction("Gaussian"); }
 };
 
 DECLARE_FUNCTION(MockPawleyFunction)
@@ -64,7 +66,7 @@ public:
   PoldiSpectrumPawleyFunctionTest() {
     m_detector = boost::shared_ptr<ConfiguredHeliumDetector>(
         new ConfiguredHeliumDetector);
-    m_chopper = boost::shared_ptr<MockChopper>(new MockChopper);
+    m_chopper = boost::make_shared<MockChopper>();
 
     m_spectrum = PoldiSourceSpectrum_sptr(new ConfiguredSpectrum);
 

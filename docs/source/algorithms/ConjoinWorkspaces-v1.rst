@@ -23,21 +23,21 @@ of the first input workspace. Workspace data members other than the data
 (but if they're not identical anyway, then you probably shouldn't be
 using this algorithm!). Both input workspaces will be deleted.
 
-Conflict Spectrum IDs
-#####################
+Conflict Spectrum Numbers
+#########################
 
 The algorithm adds the spectra from the first workspace and then the
 second workspace.
 
--  The original spectrum IDs will be respected if there is no conflict
-   of spectrum IDs between the first workspace and thfiree second.
--  If there are conflict in spectrum IDs, such that some spectrum IDs
+-  The original spectrum Nos will be respected if there is no conflict
+   of spectrum Nos between the first workspace and the second.
+-  If there are conflict in spectrum Nos, such that some spectrum Nos
    appear in both workspace1 and workspace2, then it will be resolved
-   such that the spectrum IDs of spectra coming from workspace2 will be
-   reset to some integer numbers larger than the largest spectrum ID of
-   the spectra from workspace1. Assuming that the largest spectrum ID of
+   such that the spectrum Nos of spectra coming from workspace2 will be
+   reset to some integer numbers larger than the largest spectrum No of
+   the spectra from workspace1. Assuming that the largest spectrum No of
    workspace1 is S, then for any spectrum of workspace wi in workspace2,
-   its spectrum ID is equal to (S+1)+wi+offset, where offset is a
+   its spectrum No is equal to (S+1)+wi+offset, where offset is a
    non-negative integer.
 
 

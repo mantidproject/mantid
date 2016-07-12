@@ -9,12 +9,12 @@
 #include <gsl/gsl_fft_halfcomplex.h>
 #include <gsl/gsl_eigen.h>
 
-#include <cmath>
 #include <algorithm>
-#include <numeric>
-#include <limits>
+#include <cassert>
+#include <cmath>
 #include <functional>
-#include <assert.h>
+#include <limits>
+#include <numeric>
 #include <sstream>
 
 namespace Mantid {
@@ -59,15 +59,6 @@ ChebfunBase::ChebfunBase(size_t n, double start, double end, double tolerance)
   m_bw.back() /= 2.0;
   calcX();
 }
-
-/**
- * Copy constructor
- * @param other :: A base to copy from.
- */
-ChebfunBase::ChebfunBase(const ChebfunBase &other)
-    : m_tolerance(other.m_tolerance), m_n(other.m_n), m_start(other.m_start),
-      m_end(other.m_end), m_x(other.m_x), m_bw(other.m_bw),
-      m_integrationWeights(other.m_integrationWeights) {}
 
 /**
  * Return the integration weights that can be used in function manipulations
@@ -170,8 +161,8 @@ bool ChebfunBase::hasConverged(const std::vector<double> &a, double maxA,
   if (a.empty())
     return true;
   if (maxA == 0.0) {
-    for (auto it = a.begin(); it != a.end(); ++it) {
-      double tmp = fabs(*it);
+    for (double coeff : a) {
+      double tmp = fabs(coeff);
       if (tmp > maxA) {
         maxA = tmp;
       }
@@ -186,10 +177,7 @@ bool ChebfunBase::hasConverged(const std::vector<double> &a, double maxA,
   for (auto i = a.rbegin() + shift; i != a.rend() - 1; ++i) {
     if (*i == 0.0)
       continue;
-    if ((fabs(*i) + fabs(*(i + 1))) / maxA / 2 < tolerance)
-      return true;
-    else
-      return false;
+    return (fabs(*i) + fabs(*(i + 1))) / maxA / 2 < tolerance;
   }
   return false;
 }
@@ -400,8 +388,8 @@ ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
     a = base.calcA(p2);
     if (calcMaxA) {
       maxA = 0.0;
-      for (auto it = a.begin(); it != a.end(); ++it) {
-        double tmp = fabs(*it);
+      for (double coeff : a) {
+        double tmp = fabs(coeff);
         if (tmp > maxA) {
           maxA = tmp;
         }
@@ -492,8 +480,8 @@ std::vector<double> ChebfunBase::linspace(size_t n) const {
   std::vector<double> space(n);
   double x = m_start;
   const double dx = width() / double(n - 1);
-  for (auto s = space.begin(); s != space.end(); ++s) {
-    *s = x;
+  for (double &s : space) {
+    s = x;
     x += dx;
   }
   space.back() = m_end;
@@ -813,9 +801,9 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
     noise = powerSpec[imax] / guessSignalToNoiseRatio;
   }
 
-  // std::cerr << "Maximum signal " << powerSpec[imax] << std::endl;
-  // std::cerr << "Noise          " << noise << std::endl;
-  // std::cerr << noise / powerSpec[imax] << std::endl;
+  // std::cerr << "Maximum signal " << powerSpec[imax] << '\n';
+  // std::cerr << "Noise          " << noise << '\n';
+  // std::cerr << noise / powerSpec[imax] << '\n';
 
   // storage for the Wiener filter, initialized with 0.0's
   std::vector<double> wf(n);
@@ -844,7 +832,7 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
   double ym = 0.0;
   // low frequency filter values: the higher the power spectrum the closer the
   // filter to 1.0
-  // std::cerr << "i0=" << i0 << std::endl;
+  // std::cerr << "i0=" << i0 << '\n';
   for (size_t i = 0; i < i0; ++i) {
     double cd1 = powerSpec[i] / noise;
     double cd2 = log(cd1);
@@ -857,9 +845,9 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
 
   // i0 should always be > 0 but in case something goes wrong make a check
   if (i0 > 0) {
-    // std::cerr << "Noise start index " << i0 << ' ' << n << std::endl;
+    // std::cerr << "Noise start index " << i0 << ' ' << n << '\n';
     if (noise / powerSpec[imax] > 0.01 && i0 > n / 2) {
-      // std::cerr << "There is too much noise: no smoothing." << std::endl;
+      // std::cerr << "There is too much noise: no smoothing.\n";
       return y;
     }
 
@@ -870,7 +858,7 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
     double a1 = (xy - ri0f * xm * ym) / (xx - ri0f * xm * xm);
     double b1 = ym - a1 * xm;
 
-    // std::cerr << "(a1,b1) = (" << a1 << ',' << b1 << ')' << std::endl;
+    // std::cerr << "(a1,b1) = (" << a1 << ',' << b1 << ')' << '\n';
 
     // calculate coeffs of a cubic c3*i^3 + c2*i^2 + c1*i + c0
     // which will replace the linear a1*i + b1 in building the
@@ -909,7 +897,7 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
     }
 
     // std::cerr << "(c2,c1,c0) = (" << c2 << ',' << c1 << ',' << c0 << ')' <<
-    // std::endl;
+    // '\n';
 
     for (size_t i = i0; i < n; ++i) {
       // double s = exp(a1*static_cast<double>(i+1)+b1);

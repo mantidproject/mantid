@@ -7,6 +7,7 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
 #include <nexus/NeXusFile.hpp>
+#include <mutex>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -41,28 +42,28 @@ namespace MDAlgorithms {
 class DLLExport MergeMDFiles : public API::Algorithm {
 public:
   MergeMDFiles();
-  ~MergeMDFiles();
+  ~MergeMDFiles() override;
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "MergeMDFiles"; };
+  const std::string name() const override { return "MergeMDFiles"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Merge multiple MDEventWorkspaces from files that obey a common box "
            "format.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "MDAlgorithms\\Creation";
   }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 
   void loadBoxData();
 
@@ -102,10 +103,10 @@ protected:
   uint64_t totalLoaded;
 
   /// Mutex for file access
-  Kernel::Mutex fileMutex;
+  std::mutex fileMutex;
 
   /// Mutex for modifying stats
-  Kernel::Mutex statsMutex;
+  std::mutex statsMutex;
 
   /// Progress reporter
   Mantid::API::Progress *prog;

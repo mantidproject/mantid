@@ -40,44 +40,43 @@ using namespace Mantid;
 /** Helper class that implements ISpectrum */
 class SpectrumTester : public ISpectrum {
 public:
-  SpectrumTester() : ISpectrum() {}
-  SpectrumTester(const specid_t specNo) : ISpectrum(specNo) {}
-
-  virtual void setData(const MantidVec &Y) { data = Y; }
-  virtual void setData(const MantidVec &Y, const MantidVec &E) {
-    data = Y;
-    data_E = E;
+  SpectrumTester(HistogramData::Histogram::XMode mode)
+      : ISpectrum(), m_histogram(mode) {
+    m_histogram.setCounts(0);
+    m_histogram.setCountStandardDeviations(0);
+  }
+  SpectrumTester(const specnum_t specNo, HistogramData::Histogram::XMode mode)
+      : ISpectrum(specNo), m_histogram(mode) {
+    m_histogram.setCounts(0);
+    m_histogram.setCountStandardDeviations(0);
   }
 
-  virtual void setData(const MantidVecPtr &Y) {
-    data.assign(Y->begin(), Y->end());
+  void setX(const cow_ptr<HistogramData::HistogramX> &X) override {
+    m_histogram.setX(X);
   }
-  virtual void setData(const MantidVecPtr &Y, const MantidVecPtr &E) {
-    data.assign(Y->begin(), Y->end());
-    data_E.assign(E->begin(), E->end());
-  }
-
-  virtual void setData(const MantidVecPtr::ptr_type &Y) {
-    data.assign(Y->begin(), Y->end());
-  }
-  virtual void setData(const MantidVecPtr::ptr_type &Y,
-                       const MantidVecPtr::ptr_type &E) {
-    data.assign(Y->begin(), Y->end());
-    data_E.assign(E->begin(), E->end());
+  MantidVec &dataX() override { return m_histogram.dataX(); }
+  const MantidVec &dataX() const override { return m_histogram.dataX(); }
+  const MantidVec &readX() const override { return m_histogram.readX(); }
+  cow_ptr<HistogramData::HistogramX> ptrX() const override {
+    return m_histogram.ptrX();
   }
 
-  virtual MantidVec &dataY() { return data; }
-  virtual MantidVec &dataE() { return data_E; }
+  MantidVec &dataDx() override { return m_histogram.dataDx(); }
+  const MantidVec &dataDx() const override { return m_histogram.dataDx(); }
+  const MantidVec &readDx() const override { return m_histogram.readDx(); }
 
-  virtual const MantidVec &dataY() const { return data; }
-  virtual const MantidVec &dataE() const { return data_E; }
+  MantidVec &dataY() override { return m_histogram.dataY(); }
+  MantidVec &dataE() override { return m_histogram.dataE(); }
 
-  virtual size_t getMemorySize() const {
-    return data.size() * sizeof(double) * 2;
+  const MantidVec &dataY() const override { return m_histogram.dataY(); }
+  const MantidVec &dataE() const override { return m_histogram.dataE(); }
+
+  size_t getMemorySize() const override {
+    return readY().size() * sizeof(double) * 2;
   }
 
   /// Mask the spectrum to this value
-  virtual void clearData() {
+  void clearData() override {
     // Assign the value to the data and error arrays
     MantidVec &yValues = this->dataY();
     std::fill(yValues.begin(), yValues.end(), 0.0);
@@ -86,8 +85,15 @@ public:
   }
 
 protected:
-  MantidVec data;
-  MantidVec data_E;
+  HistogramData::Histogram m_histogram;
+
+private:
+  const HistogramData::Histogram &histogramRef() const override {
+    return m_histogram;
+  }
+  HistogramData::Histogram &mutableHistogramRef() override {
+    return m_histogram;
+  }
 };
 
 //===================================================================================================================
@@ -96,20 +102,20 @@ public:
   WorkspaceTester(Mantid::Geometry::INearestNeighboursFactory *nnFactory)
       : MatrixWorkspace(nnFactory), spec(0) {}
   WorkspaceTester() : MatrixWorkspace(), spec(0) {}
-  virtual ~WorkspaceTester() {}
+  ~WorkspaceTester() override {}
 
   // Empty overrides of virtual methods
-  virtual size_t getNumberHistograms() const { return spec; }
-  const std::string id() const { return "WorkspaceTester"; }
-  void init(const size_t &numspec, const size_t &j, const size_t &k) {
+  size_t getNumberHistograms() const override { return spec; }
+  const std::string id() const override { return "WorkspaceTester"; }
+  void init(const size_t &numspec, const size_t &j, const size_t &k) override {
     spec = numspec;
-    vec.resize(spec);
+    vec.resize(spec, HistogramData::getHistogramXMode(j, k));
     for (size_t i = 0; i < spec; i++) {
       vec[i].dataX().resize(j, 1.0);
       vec[i].dataY().resize(k, 1.0);
       vec[i].dataE().resize(k, 1.0);
       vec[i].addDetectorID(detid_t(i));
-      vec[i].setSpectrumNo(specid_t(i + 1));
+      vec[i].setSpectrumNo(specnum_t(i + 1));
     }
 
     // Put an 'empty' axis in to test the getAxis method
@@ -117,22 +123,23 @@ public:
     m_axes[0] = new Mantid::API::RefAxis(j, this);
     m_axes[1] = new Mantid::API::SpectraAxis(this);
   }
-  size_t size() const { return vec.size() * blocksize(); }
-  size_t blocksize() const { return vec.empty() ? 0 : vec[0].dataY().size(); }
-  ISpectrum *getSpectrum(const size_t index) { return &vec[index]; }
-  const ISpectrum *getSpectrum(const size_t index) const {
-    return &vec[index];
-    ;
+  size_t size() const override { return vec.size() * blocksize(); }
+  size_t blocksize() const override {
+    return vec.empty() ? 0 : vec[0].dataY().size();
+  }
+  ISpectrum &getSpectrum(const size_t index) override { return vec[index]; }
+  const ISpectrum &getSpectrum(const size_t index) const override {
+    return vec[index];
   }
   void generateHistogram(const std::size_t, const MantidVec &, MantidVec &,
-                         MantidVec &, bool) const {}
-  virtual Mantid::Kernel::SpecialCoordinateSystem
-  getSpecialCoordinateSystem() const {
+                         MantidVec &, bool) const override {}
+  Mantid::Kernel::SpecialCoordinateSystem
+  getSpecialCoordinateSystem() const override {
     return Mantid::Kernel::None;
   }
 
 private:
-  virtual WorkspaceTester *doClone() const {
+  WorkspaceTester *doClone() const override {
     throw std::runtime_error("Cloning of WorkspaceTester is not implemented.");
   }
   std::vector<SpectrumTester> vec;
@@ -143,25 +150,27 @@ private:
 class TableWorkspaceTester : public ITableWorkspace {
 public:
   TableWorkspaceTester() {}
-  ~TableWorkspaceTester() {}
+  ~TableWorkspaceTester() override {}
 
-  const std::string id() const { return "TableWorkspaceTester"; }
+  const std::string id() const override { return "TableWorkspaceTester"; }
 
-  size_t getMemorySize() const {
+  size_t getMemorySize() const override {
     throw std::runtime_error("getMemorySize not implemented");
   }
 
-  Column_sptr addColumn(const std::string &, const std::string &) {
+  Column_sptr addColumn(const std::string &, const std::string &) override {
     throw std::runtime_error("addColumn not implemented");
   }
 
-  LogManager_sptr logs() { throw std::runtime_error("logs not implemented"); }
+  LogManager_sptr logs() override {
+    throw std::runtime_error("logs not implemented");
+  }
 
-  LogManager_const_sptr getLogs() const {
+  LogManager_const_sptr getLogs() const override {
     throw std::runtime_error("getLogs not implemented");
   }
 
-  void removeColumn(const std::string &) {
+  void removeColumn(const std::string &) override {
     throw std::runtime_error("removeColumn not implemented");
   }
 
@@ -169,72 +178,77 @@ public:
     throw std::runtime_error("removeColumn not implemented");
   }
 
-  size_t columnCount() const {
+  size_t columnCount() const override {
     throw std::runtime_error("columnCount not implemented");
   }
 
-  Column_sptr getColumn(const std::string &) {
+  Column_sptr getColumn(const std::string &) override {
     throw std::runtime_error("getColumn(str) not implemented");
   }
 
-  Column_const_sptr getColumn(const std::string &) const {
+  Column_const_sptr getColumn(const std::string &) const override {
     throw std::runtime_error("getColumn(str) const not implemented");
   }
 
-  Column_sptr getColumn(size_t) {
+  Column_sptr getColumn(size_t) override {
     throw std::runtime_error("getColumn(size_t) not implemented");
   }
 
-  Column_const_sptr getColumn(size_t) const {
+  Column_const_sptr getColumn(size_t) const override {
     throw std::runtime_error("getColumn(size_t) const not implemented");
   }
 
-  std::vector<std::string> getColumnNames() const {
+  std::vector<std::string> getColumnNames() const override {
     throw std::runtime_error("getColumnNames not implemented");
   }
 
-  size_t rowCount() const {
+  size_t rowCount() const override {
     throw std::runtime_error("rowCount not implemented");
   }
 
-  void setRowCount(size_t) {
+  void setRowCount(size_t) override {
     throw std::runtime_error("setRowCount not implemented");
   }
 
-  size_t insertRow(size_t) {
+  size_t insertRow(size_t) override {
     throw std::runtime_error("insertRow not implemented");
   }
 
-  void removeRow(size_t) {
+  void removeRow(size_t) override {
     throw std::runtime_error("removeRow not implemented");
   }
 
-  void find(size_t, size_t &, const size_t &) {
+  void find(size_t, size_t &, const size_t &) override {
     throw std::runtime_error("find not implemented");
   }
 
-  void find(double, size_t &, const size_t &) {
+  void find(double, size_t &, const size_t &) override {
     throw std::runtime_error("find not implemented");
   }
 
-  void find(float, size_t &, const size_t &) {
+  void find(float, size_t &, const size_t &) override {
     throw std::runtime_error("find not implemented");
   }
 
-  void find(Boolean, size_t &, const size_t &) {
+  void find(Boolean, size_t &, const size_t &) override {
     throw std::runtime_error("find not implemented");
   }
 
-  void find(std::string, size_t &, const size_t &) {
+  void find(std::string, size_t &, const size_t &) override {
     throw std::runtime_error("find not implemented");
   }
 
-  void find(V3D, size_t &, const size_t &) {
+  void find(V3D, size_t &, const size_t &) override {
     throw std::runtime_error("find not implemented");
   }
 
 private:
-  virtual TableWorkspaceTester *doClone() const {
+  TableWorkspaceTester *doClone() const override {
+    throw std::runtime_error(
+        "Cloning of TableWorkspaceTester is not implemented.");
+  }
+  ITableWorkspace *
+  doCloneColumns(const std::vector<std::string> &) const override {
     throw std::runtime_error(
         "Cloning of TableWorkspaceTester is not implemented.");
   }
@@ -242,44 +256,56 @@ private:
 
 //===================================================================================================================
 class ColumnTester : public Column {
-  size_t size() const { throw std::runtime_error("size not implemented"); }
+  size_t size() const override {
+    throw std::runtime_error("size not implemented");
+  }
 
-  std::type_info &get_type_info() const {
+  std::type_info &get_type_info() const override {
     throw std::runtime_error("get_type_info not implemented");
   }
 
-  std::type_info &get_pointer_type_info() const {
+  std::type_info &get_pointer_type_info() const override {
     throw std::runtime_error("get_pointer_type_info not implemented");
   }
 
-  void print(size_t, std::ostream &) const {
+  void print(size_t, std::ostream &) const override {
     throw std::runtime_error("print not implemented");
   }
 
-  bool isBool() const { throw std::runtime_error("isBool not implemented"); }
+  bool isBool() const override {
+    throw std::runtime_error("isBool not implemented");
+  }
 
-  long int sizeOfData() const {
+  long int sizeOfData() const override {
     throw std::runtime_error("sizeOfData not implemented");
   }
 
-  Column *clone() const { throw std::runtime_error("clone not implemented"); }
+  Column *clone() const override {
+    throw std::runtime_error("clone not implemented");
+  }
 
-  double toDouble(size_t) const {
+  double toDouble(size_t) const override {
     throw std::runtime_error("toDouble not implemented");
   }
 
-  void fromDouble(size_t, double) {
+  void fromDouble(size_t, double) override {
     throw std::runtime_error("fromDouble not implemented");
   }
 
 protected:
-  void resize(size_t) { throw std::runtime_error("resize not implemented"); }
-  void insert(size_t) { throw std::runtime_error("insert not implemented"); }
-  void remove(size_t) { throw std::runtime_error("remove not implemented"); }
-  void *void_pointer(size_t) {
+  void resize(size_t) override {
+    throw std::runtime_error("resize not implemented");
+  }
+  void insert(size_t) override {
+    throw std::runtime_error("insert not implemented");
+  }
+  void remove(size_t) override {
+    throw std::runtime_error("remove not implemented");
+  }
+  void *void_pointer(size_t) override {
     throw std::runtime_error("void_pointer not implemented");
   }
-  const void *void_pointer(size_t) const {
+  const void *void_pointer(size_t) const override {
     throw std::runtime_error("void_pointer const not implemented");
   }
 };

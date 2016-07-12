@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -48,11 +49,11 @@ namespace Algorithms {
 class DLLExport UnwrapMonitor : public API::Algorithm {
 public:
   UnwrapMonitor();
-  virtual ~UnwrapMonitor();
+  ~UnwrapMonitor() override;
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "UnwrapMonitor"; }
+  const std::string name() const override { return "UnwrapMonitor"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Takes an input workspace that contains 'raw' data, unwraps the "
            "data "
            "according to the reference flightpath provided and converts the "
@@ -61,15 +62,15 @@ public:
            "theoretical wavelength range.";
   }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "CorrectionFunctions\\InstrumentCorrections";
   }
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   double getPrimaryFlightpath() const;
   double calculateFlightpath(const int &spectrum, const double &L1,

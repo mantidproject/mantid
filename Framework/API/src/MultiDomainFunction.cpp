@@ -44,9 +44,9 @@ void MultiDomainFunction::setDomainIndices(
  */
 void MultiDomainFunction::countNumberOfDomains() {
   std::set<size_t> dSet;
-  for (auto it = m_domains.begin(); it != m_domains.end(); ++it) {
-    if (it->second.size()) {
-      dSet.insert(it->second.begin(), it->second.end());
+  for (auto &domain : m_domains) {
+    if (!domain.second.empty()) {
+      dSet.insert(domain.second.begin(), domain.second.end());
     }
   }
   m_nDomains = dSet.size();
@@ -91,6 +91,11 @@ void MultiDomainFunction::getDomainIndices(size_t i, size_t nDomains,
   }
 }
 
+/// Get number of domains required by this function
+size_t MultiDomainFunction::getNumberDomains() const {
+  return getMaxIndex() + 1;
+}
+
 /// Function you want to fit to.
 /// @param domain :: The buffer for writing the calculated values. Must be big
 /// enough to accept dataSize() values
@@ -98,17 +103,21 @@ void MultiDomainFunction::function(const FunctionDomain &domain,
                                    FunctionValues &values) const {
   // works only on CompositeDomain
   if (!dynamic_cast<const CompositeDomain *>(&domain)) {
+    // make exception if a single member function is defined
+    if (m_maxIndex == 0 && nFunctions() == 1) {
+      getFunction(0)->function(domain, values);
+      return;
+    }
     throw std::invalid_argument(
         "Non-CompositeDomain passed to MultiDomainFunction.");
   }
   const CompositeDomain &cd = dynamic_cast<const CompositeDomain &>(domain);
   // domain must not have less parts than m_maxIndex
   if (cd.getNParts() <= m_maxIndex) {
-    throw std::invalid_argument(
-        "CompositeDomain has too few parts (" +
-        boost::lexical_cast<std::string>(cd.getNParts()) +
-        ") for MultiDomainFunction (max index " +
-        boost::lexical_cast<std::string>(m_maxIndex) + ").");
+    throw std::invalid_argument("CompositeDomain has too few parts (" +
+                                std::to_string(cd.getNParts()) +
+                                ") for MultiDomainFunction (max index " +
+                                std::to_string(m_maxIndex) + ").");
   }
   // domain and values must be consistent
   if (cd.size() != values.size()) {
@@ -124,11 +133,11 @@ void MultiDomainFunction::function(const FunctionDomain &domain,
     std::vector<size_t> domains;
     getDomainIndices(iFun, cd.getNParts(), domains);
 
-    for (auto i = domains.begin(); i != domains.end(); ++i) {
-      const FunctionDomain &d = cd.getDomain(*i);
+    for (auto &domain : domains) {
+      const FunctionDomain &d = cd.getDomain(domain);
       FunctionValues tmp(d);
       getFunction(iFun)->function(d, tmp);
-      values.addToCalculated(m_valueOffsets[*i], tmp);
+      values.addToCalculated(m_valueOffsets[domain], tmp);
     }
   }
 }
@@ -138,6 +147,11 @@ void MultiDomainFunction::functionDeriv(const FunctionDomain &domain,
                                         Jacobian &jacobian) {
   // works only on CompositeDomain
   if (!dynamic_cast<const CompositeDomain *>(&domain)) {
+    // make exception if a single member function is defined
+    if (m_maxIndex == 0 && nFunctions() == 1) {
+      getFunction(0)->functionDeriv(domain, jacobian);
+      return;
+    }
     throw std::invalid_argument(
         "Non-CompositeDomain passed to MultiDomainFunction.");
   }
@@ -148,11 +162,10 @@ void MultiDomainFunction::functionDeriv(const FunctionDomain &domain,
     const CompositeDomain &cd = dynamic_cast<const CompositeDomain &>(domain);
     // domain must not have less parts than m_maxIndex
     if (cd.getNParts() < m_maxIndex) {
-      throw std::invalid_argument(
-          "CompositeDomain has too few parts (" +
-          boost::lexical_cast<std::string>(cd.getNParts()) +
-          ") for MultiDomainFunction (max index " +
-          boost::lexical_cast<std::string>(m_maxIndex) + ").");
+      throw std::invalid_argument("CompositeDomain has too few parts (" +
+                                  std::to_string(cd.getNParts()) +
+                                  ") for MultiDomainFunction (max index " +
+                                  std::to_string(m_maxIndex) + ").");
     }
 
     countValueOffsets(cd);
@@ -162,9 +175,9 @@ void MultiDomainFunction::functionDeriv(const FunctionDomain &domain,
       std::vector<size_t> domains;
       getDomainIndices(iFun, cd.getNParts(), domains);
 
-      for (auto i = domains.begin(); i != domains.end(); ++i) {
-        const FunctionDomain &d = cd.getDomain(*i);
-        PartialJacobian J(&jacobian, m_valueOffsets[*i], paramOffset(iFun));
+      for (auto &domain : domains) {
+        const FunctionDomain &d = cd.getDomain(domain);
+        PartialJacobian J(&jacobian, m_valueOffsets[domain], paramOffset(iFun));
         getFunction(iFun)->functionDeriv(d, J);
       }
     }
@@ -201,17 +214,19 @@ MultiDomainFunction::getLocalAttribute(size_t i,
   if (i >= nFunctions()) {
     throw std::out_of_range("Function index is out of range.");
   }
-  auto it = m_domains.find(i);
-  if (it == m_domains.end()) {
-    return IFunction::Attribute("All");
-  } else if (it->second.size() == 1 && it->second.front() == i) {
-    return IFunction::Attribute("i");
-  } else if (!it->second.empty()) {
-    std::string out(boost::lexical_cast<std::string>(it->second.front()));
-    for (auto i = it->second.begin() + 1; i != it->second.end(); ++it) {
-      out += "," + boost::lexical_cast<std::string>(*i);
+  try {
+    auto it = m_domains.at(i);
+    if (it.size() == 1 && it.front() == i) {
+      return IFunction::Attribute("i");
+    } else if (!it.empty()) {
+      auto out = std::to_string(it.front());
+      for (auto i = it.begin() + 1; i != it.end(); ++i) {
+        out += "," + std::to_string(*i);
+      }
+      return IFunction::Attribute(out);
     }
-    return IFunction::Attribute(out);
+  } catch (const std::out_of_range &) {
+    return IFunction::Attribute("All");
   }
   return IFunction::Attribute("");
 }
@@ -295,8 +310,8 @@ void MultiDomainFunction::setLocalAttribute(size_t i,
   } else {
     // value must be either an int or a list of ints: "a,b,c,..."
     list.toList();
-    for (size_t k = 0; k < list.size(); ++k) {
-      indx.push_back(boost::lexical_cast<size_t>(list[k].name()));
+    for (const auto &k : list) {
+      indx.push_back(boost::lexical_cast<size_t>(k.name()));
     }
   }
   setDomainIndices(i, indx);
@@ -304,11 +319,9 @@ void MultiDomainFunction::setLocalAttribute(size_t i,
 
 /**
  * Split this function into independent functions. The number of functions in
- * the
- * returned vector must be equal to the number
+ * the returned vector must be equal to the number
  * of domains. The result of evaluation of the i-th function on the i-th domain
- * must be
- * the same as if this MultiDomainFunction was evaluated.
+ * must be the same as if this MultiDomainFunction was evaluated.
  */
 std::vector<IFunction_sptr>
 MultiDomainFunction::createEquivalentFunctions() const {
@@ -319,13 +332,12 @@ MultiDomainFunction::createEquivalentFunctions() const {
     std::vector<size_t> domains;
     getDomainIndices(iFun, nDomains, domains);
 
-    for (auto i = domains.begin(); i != domains.end(); ++i) {
-      size_t j = *i;
-      CompositeFunction_sptr cf = compositeFunctions[j];
+    for (auto domainIndex : domains) {
+      CompositeFunction_sptr cf = compositeFunctions[domainIndex];
       if (!cf) {
         // create a composite function for each domain
         cf = CompositeFunction_sptr(new CompositeFunction());
-        compositeFunctions[j] = cf;
+        compositeFunctions[domainIndex] = cf;
       }
       // add copies of all functions applied to j-th domain to a single
       // compositefunction
@@ -340,7 +352,7 @@ MultiDomainFunction::createEquivalentFunctions() const {
     auto fun = compositeFunctions[i];
     if (!fun || fun->nFunctions() == 0) {
       throw std::runtime_error("There is no function for domain " +
-                               boost::lexical_cast<std::string>(i));
+                               std::to_string(i));
     }
     if (fun->nFunctions() > 1) {
       outFunctions[i] = fun;

@@ -7,6 +7,8 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -26,8 +28,6 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
-ConvertSpectrumAxis2::ConvertSpectrumAxis2() : API::Algorithm(), m_indexMap() {}
-
 void ConvertSpectrumAxis2::init() {
   // Validator for Input Workspace
   auto wsVal = boost::make_shared<CompositeValidator>();
@@ -35,12 +35,12 @@ void ConvertSpectrumAxis2::init() {
   wsVal->add<SpectraAxisValidator>();
   wsVal->add<InstrumentValidator>();
 
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, wsVal),
-      "The name of the input workspace.");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to use for the output workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
+                                                   Direction::Input, wsVal),
+                  "The name of the input workspace.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The name to use for the output workspace.");
   std::vector<std::string> targetOptions(6);
   targetOptions[0] = "Theta";
   targetOptions[1] = "SignedTheta";
@@ -56,8 +56,8 @@ void ConvertSpectrumAxis2::init() {
       "Note that 'theta' and 'signed_theta' are there for compatibility "
       "purposes; they are the same as 'Theta' and 'SignedTheta' respectively");
   std::vector<std::string> eModeOptions;
-  eModeOptions.push_back("Direct");
-  eModeOptions.push_back("Indirect");
+  eModeOptions.emplace_back("Direct");
+  eModeOptions.emplace_back("Indirect");
   declareProperty("EMode", "Direct",
                   boost::make_shared<StringListValidator>(eModeOptions),
                   "Some unit conversions require this value to be set "
@@ -75,13 +75,6 @@ void ConvertSpectrumAxis2::exec() {
   // Assign value to the member variable storing the number of histograms.
   size_t nHist = inputWS->getNumberHistograms();
 
-  // Assign values to the member variables to store number of bins.
-  size_t nBins = inputWS->blocksize();
-
-  const bool isHist = inputWS->isHistogramData();
-
-  size_t nxBins = isHist ? nBins + 1 : nBins;
-
   // The unit to convert to.
   const std::string unitTarget = getProperty("Target");
 
@@ -96,8 +89,8 @@ void ConvertSpectrumAxis2::exec() {
   }
 
   // Create an output workspace and set the property for it.
-  MatrixWorkspace_sptr outputWS = createOutputWorkspace(
-      progress, unitTarget, inputWS, nHist, nBins, nxBins);
+  MatrixWorkspace_sptr outputWS =
+      createOutputWorkspace(progress, unitTarget, inputWS, nHist);
   setProperty("OutputWorkspace", outputWS);
 }
 
@@ -113,7 +106,7 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
                                           size_t nHist) {
   // Set up binding to member funtion. Avoids condition as part of loop over
   // nHistograms.
-  boost::function<double(IDetector_const_sptr)> thetaFunction;
+  boost::function<double(const IDetector &)> thetaFunction;
   if (targetUnit.compare("signed_theta") == 0 ||
       targetUnit.compare("SignedTheta") == 0) {
     thetaFunction =
@@ -129,7 +122,7 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
     try {
       IDetector_const_sptr det = inputWS->getDetector(i);
       // Invoke relevant member function.
-      m_indexMap.insert(std::make_pair(thetaFunction(det) * 180.0 / M_PI, i));
+      m_indexMap.emplace(thetaFunction(*det) * rad2deg, i);
     } catch (Exception::NotFoundError &) {
       if (!warningGiven)
         g_log.warning("The instrument definition is incomplete - spectra "
@@ -165,7 +158,7 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
     IDetector_const_sptr detector = inputWS->getDetector(i);
     double twoTheta(0.0), efixed(0.0);
     if (!detector->isMonitor()) {
-      twoTheta = inputWS->detectorTwoTheta(detector) / 2.0;
+      twoTheta = 0.5 * inputWS->detectorTwoTheta(*detector);
       efixed = getEfixed(detector, inputWS, emode); // get efixed
     } else {
       twoTheta = 0.0;
@@ -176,13 +169,13 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
     double elasticQInAngstroms = Kernel::UnitConversion::run(twoTheta, efixed);
 
     if (targetUnit == "ElasticQ") {
-      m_indexMap.insert(std::make_pair(elasticQInAngstroms, i));
+      m_indexMap.emplace(elasticQInAngstroms, i);
     } else if (targetUnit == "ElasticQSquared") {
       // The QSquared value.
       double elasticQSquaredInAngstroms =
           elasticQInAngstroms * elasticQInAngstroms;
 
-      m_indexMap.insert(std::make_pair(elasticQSquaredInAngstroms, i));
+      m_indexMap.emplace(elasticQSquaredInAngstroms, i);
     }
 
     progress.report("Converting to Elastic Q...");
@@ -196,17 +189,15 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
 * @param targetUnit :: Target conversion unit
 * @param inputWS :: Input workspace
 * @param nHist :: Stores the number of histograms
-* @param nBins :: Stores the number of bins
-* @param nxBins :: Stores the number of x bins
 */
 MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     API::Progress &progress, const std::string &targetUnit,
-    API::MatrixWorkspace_sptr &inputWS, size_t nHist, size_t nBins,
-    size_t nxBins) {
+    API::MatrixWorkspace_sptr &inputWS, size_t nHist) {
   // Create the output workspace. Can not re-use the input one because the
   // spectra are re-ordered.
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-      inputWS, m_indexMap.size(), nxBins, nBins);
+      inputWS, m_indexMap.size(), inputWS->readX(0).size(),
+      inputWS->readY(0).size());
 
   // Now set up a new numeric axis holding the theta values corresponding to
   // each spectrum.
@@ -218,7 +209,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
   // Set the units of the axis.
   if (targetUnit == "theta" || targetUnit == "Theta" ||
       targetUnit == "signed_theta" || targetUnit == "SignedTheta") {
-    newAxis->unit() = boost::shared_ptr<Unit>(new Units::Degrees);
+    newAxis->unit() = boost::make_shared<Units::Degrees>();
   } else if (targetUnit == "ElasticQ") {
     newAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
   } else if (targetUnit == "ElasticQSquared") {
@@ -236,7 +227,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     outputWorkspace->dataE(currentIndex) = inputWS->dataE(it->second);
     // We can keep the spectrum numbers etc.
     outputWorkspace->getSpectrum(currentIndex)
-        ->copyInfoFrom(*inputWS->getSpectrum(it->second));
+        .copyInfoFrom(inputWS->getSpectrum(it->second));
     ++currentIndex;
 
     progress.report("Creating output workspace...");

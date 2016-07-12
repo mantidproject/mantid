@@ -15,7 +15,7 @@ class DataNotCopiedValidator : public Mantid::Kernel::IValidator {
 public:
   DataNotCopiedValidator() : Mantid::Kernel::IValidator(), m_head(NULL) {}
 
-  Mantid::Kernel::IValidator_sptr clone() const {
+  Mantid::Kernel::IValidator_sptr clone() const override {
     return boost::make_shared<DataNotCopiedValidator>();
   }
 
@@ -23,7 +23,7 @@ public:
   const double *head() const { return m_head; }
 
 private:
-  virtual std::string check(const boost::any &value) const {
+  std::string check(const boost::any &value) const override {
     typedef std::vector<double> HeldType;
     const HeldType *dataPtr = boost::any_cast<const HeldType *>(value);
     m_head = dataPtr->data();

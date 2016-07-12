@@ -14,21 +14,23 @@ using namespace Mantid::Kernel;
 class testalg : public Algorithm {
 public:
   testalg() : Algorithm() {}
-  virtual ~testalg() {}
-  const std::string name() const {
+  ~testalg() override {}
+  const std::string name() const override {
     return "testalg";
-  }                                 ///< Algorithm's name for identification
-  int version() const { return 1; } ///< Algorithm's version for identification
-  const std::string category() const {
+  } ///< Algorithm's name for identification
+  int version() const override {
+    return 1;
+  } ///< Algorithm's version for identification
+  const std::string category() const override {
     return "Cat";
   } ///< Algorithm's category for identification
-  const std::string summary() const { return "Test summary"; }
+  const std::string summary() const override { return "Test summary"; }
 
-  void init() {
+  void init() override {
     declareProperty("arg1_param", "x", Direction::Input);
     declareProperty("arg2_param", 23);
   }
-  void exec() {}
+  void exec() override {}
 };
 
 class AlgorithmHistoryTest : public CxxTest::TestSuite {
@@ -50,6 +52,13 @@ public:
     AlgorithmHistory first = createTestHistory();
     AlgorithmHistory second = createTestHistory();
     TS_ASSERT_LESS_THAN(first, second);
+  }
+
+  void test_getPropertyValue() {
+    AlgorithmHistory alg = createTestHistory();
+    TS_ASSERT_EQUALS(alg.getPropertyValue("arg1_param"), "y");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("arg2_param"), "23");
+    TS_ASSERT_THROWS_ANYTHING(alg.getPropertyValue("none_existant"));
   }
 
   void test_Created_Algorithm_Matches_History() {

@@ -47,21 +47,19 @@ public:
   MultiDomainFunction() : m_nDomains(0), m_maxIndex(0) {}
 
   /// Returns the function's name
-  virtual std::string name() const { return "MultiDomainFunction"; }
+  std::string name() const override { return "MultiDomainFunction"; }
   /// Function you want to fit to.
   /// @param domain :: The input domain over which the function is to be
   /// calculated
   /// @param values :: A storage object for the calculated values
-  virtual void function(const FunctionDomain &domain,
-                        FunctionValues &values) const;
+  void function(const FunctionDomain &domain,
+                FunctionValues &values) const override;
   /// Derivatives of function with respect to active parameters
-  virtual void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian);
+  void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian) override;
   /// Called at the start of each iteration
-  virtual void iterationStarting();
+  void iterationStarting() override;
   /// Called at the end of an iteration
-  virtual void iterationFinished();
-  /// Create a list of equivalent functions
-  virtual std::vector<IFunction_sptr> createEquivalentFunctions() const;
+  void iterationFinished() override;
 
   /// Associate a function and a domain
   void setDomainIndex(size_t funIndex, size_t domainIndex);
@@ -75,24 +73,28 @@ public:
   /// Get domain indices for a member function
   void getDomainIndices(size_t i, size_t nDomains,
                         std::vector<size_t> &domains) const;
+  /// Get number of domains required by this function
+  size_t getNumberDomains() const override;
+  /// Create a list of equivalent functions
+  std::vector<IFunction_sptr> createEquivalentFunctions() const override;
 
   /// Returns the number of "local" attributes associated with the function.
   /// Local attributes are attributes of MultiDomainFunction but describe
   /// properties
   /// of individual member functions.
-  virtual size_t nLocalAttributes() const { return 1; }
+  size_t nLocalAttributes() const override { return 1; }
   /// Returns a list of attribute names
-  virtual std::vector<std::string> getLocalAttributeNames() const {
+  std::vector<std::string> getLocalAttributeNames() const override {
     return std::vector<std::string>(1, "domains");
   }
   /// Return a value of attribute attName
-  virtual Attribute getLocalAttribute(size_t i,
-                                      const std::string &attName) const;
+  Attribute getLocalAttribute(size_t i,
+                              const std::string &attName) const override;
   /// Set a value to attribute attName
-  virtual void setLocalAttribute(size_t i, const std::string &attName,
-                                 const Attribute &);
+  void setLocalAttribute(size_t i, const std::string &attName,
+                         const Attribute &) override;
   /// Check if attribute attName exists
-  virtual bool hasLocalAttribute(const std::string &attName) const {
+  bool hasLocalAttribute(const std::string &attName) const override {
     return attName == "domains";
   }
 

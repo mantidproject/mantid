@@ -5,28 +5,34 @@
 
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidAPI/FileFinder.h"
+#include "MantidKernel/UnitFactory.h"
+
+#include <boost/lexical_cast.hpp>
+#include <nexus/NeXusFile.hpp>
 #include <Poco/Path.h>
 #include <Poco/File.h>
-#include <boost/lexical_cast.hpp>
+
 #include <algorithm>
 #include <fstream>
 #include <vector>
-#include <boost/lexical_cast.hpp>
-#include <nexus/NeXusFile.hpp>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 /* choose an instrument to test, we could test all instruments
  * every time but I think a detailed test on the smallest workspace
@@ -60,19 +66,19 @@ std::string det_phi[] = {"-105", "-110", "-115", "-120", "-125", "-130"};
 void writeSmallDatFile(const std::string &filename) {
   std::ofstream file(filename.c_str());
   const int NOTUSED = -123456;
-  file << "DETECTOR.DAT writen by LoadDetectorInfoTest" << std::endl;
-  file << 165888 << " " << 14 << std::endl;
+  file << "DETECTOR.DAT writen by LoadDetectorInfoTest\n";
+  file << 165888 << " " << 14 << '\n';
   file << "det no.  offset    l2     code     theta        phi         w_x     "
           "    w_y         w_z         f_x         f_y         f_z         a_x "
           "        a_y         a_z        det_1       det_2       det_3       "
-          "det4" << std::endl;
+          "det4\n";
   for (int i = 0; i < SmallTestDatFile::NDETECTS; ++i) {
     file << i << "\t" << delta[i] << "\t" << det_l2[i] << "\t" << code[i]
          << "\t" << det_theta[i] << "\t" << det_phi[i] << "\t" << NOTUSED
          << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t"
          << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED
          << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << pressure[i] << "\t"
-         << wallThick[i] << "\t" << NOTUSED << std::endl;
+         << wallThick[i] << "\t" << NOTUSED << '\n';
   }
   file.close();
 }
@@ -180,19 +186,19 @@ void writeLargeTestDatFile(const std::string &filename, const int ndets) {
 
   std::ofstream file(filename.c_str());
   const int NOTUSED = -123456;
-  file << "DETECTOR.DAT writen by LoadDetectorInfoTest" << std::endl;
-  file << 165888 << " " << 14 << std::endl;
+  file << "DETECTOR.DAT writen by LoadDetectorInfoTest\n";
+  file << 165888 << " " << 14 << '\n';
   file << "det no.  offset    l2     code     theta        phi         w_x     "
           "    w_y         w_z         f_x         f_y         f_z         a_x "
           "        a_y         a_z        det_1       det_2       det_3       "
-          "det4" << std::endl;
+          "det4\n";
   for (int i = 0; i < ndets; ++i) {
     file << i << "\t" << delta[0] << "\t" << det_l2[0] << "\t" << code[0]
          << "\t" << det_theta[0] << "\t" << det_phi[0] << "\t" << NOTUSED
          << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t"
          << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << NOTUSED
          << "\t" << NOTUSED << "\t" << NOTUSED << "\t" << pressure[0] << "\t"
-         << wallThick[0] << "\t" << NOTUSED << std::endl;
+         << wallThick[0] << "\t" << NOTUSED << '\n';
   }
   file.close();
 }
@@ -200,27 +206,23 @@ void writeLargeTestDatFile(const std::string &filename, const int ndets) {
 // Set up a small workspace for testing
 void makeTestWorkspace(const int ndets, const int nbins,
                        const std::string &ads_name) {
-  MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create(
-      "Workspace2D", ndets, nbins + 1, nbins);
-  space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-  Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-  Mantid::MantidVecPtr xs, errors;
-  std::vector<Mantid::MantidVecPtr> data(ndets);
-  xs.access().resize(nbins + 1, 0.0);
-  errors.access().resize(nbins, 1.0);
+  auto space2D = createWorkspace<Workspace2D>(ndets, nbins + 1, nbins);
+  space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+  BinEdges xs(nbins + 1, 0.0);
+  CountStandardDeviations errors(nbins, 1.0);
   for (int j = 0; j < ndets; ++j) {
-    space2D->setX(j, xs);
-    data[j].access().resize(nbins, j + 1); // the y values will be different for
-                                           // each spectra (1+index_number) but
-                                           // the same for each bin
-    space2D->setData(j, data[j], errors);
-    ISpectrum *spec = space2D->getSpectrum(j);
-    spec->setSpectrumNo(j + 1);
-    spec->setDetectorID(j);
+    space2D->setBinEdges(j, xs);
+    // the y values will be different for each spectra (1+index_number) but the
+    // same for each bin
+    space2D->setCounts(j, nbins, j + 1);
+    space2D->setCountStandardDeviations(j, errors);
+    auto &spec = space2D->getSpectrum(j);
+    spec.setSpectrumNo(j + 1);
+    spec.setDetectorID(j);
   }
 
   Instrument_sptr instr(new Instrument);
-  space->setInstrument(instr);
+  space2D->setInstrument(instr);
   ObjComponent *samplePos = new ObjComponent("sample-pos", instr.get());
   instr->markAsSamplePos(samplePos);
 
@@ -232,7 +234,7 @@ void makeTestWorkspace(const int ndets, const int nbins,
   }
 
   // Register the workspace in the data service
-  AnalysisDataService::Instance().add(ads_name, space);
+  AnalysisDataService::Instance().add(ads_name, space2D);
 }
 }
 
@@ -254,7 +256,7 @@ public:
     m_rawFile = RAWFILE;
   }
 
-  ~LoadDetectorInfoTest() {
+  ~LoadDetectorInfoTest() override {
     Poco::File(m_DatFile).remove();
     Poco::File(m_NXSFile).remove();
   }
@@ -440,7 +442,7 @@ public:
       : m_testfile("LoadDetectorInfoTestPerformance_largefile.dat"),
         m_wsName("LoadDetectorInfoTestPerformance") {}
 
-  void setUp() {
+  void setUp() override {
     // 100,000 histograms
     const int ndets(100000);
     writeLargeTestDatFile(m_testfile, ndets);
@@ -448,7 +450,7 @@ public:
     makeTestWorkspace(100000, 1000, m_wsName); // Adds it to the ADS
   }
 
-  void tearDown() {
+  void tearDown() override {
     Poco::File(m_testfile).remove();
     AnalysisDataService::Instance().remove(m_wsName);
   }

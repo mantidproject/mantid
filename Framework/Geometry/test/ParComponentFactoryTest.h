@@ -20,7 +20,7 @@ public:
         boost::dynamic_pointer_cast<const Detector>(idet).get();
     ParameterMap *map = new ParameterMap();
 
-    boost::shared_ptr<Detector> pdet;
+    boost::shared_ptr<IDetector> pdet;
     TS_ASSERT_THROWS_NOTHING(pdet =
                                  ParComponentFactory::createDetector(det, map));
     TS_ASSERT(pdet);

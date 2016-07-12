@@ -1,5 +1,4 @@
 #include "MantidKernel/ICatalogInfo.h"
-#include <string>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -25,8 +24,6 @@ std::string ICatalogInfo::transformArchivePath(const std::string &path) const {
 #endif
   return ret;
 }
-
-ICatalogInfo::~ICatalogInfo() {}
 
 /**
  * Replace the content of a string using regex.

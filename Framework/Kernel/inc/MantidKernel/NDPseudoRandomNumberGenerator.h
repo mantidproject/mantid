@@ -55,14 +55,14 @@ public:
   /// Set the random number seed
   void setSeed(const size_t seedValue);
   /// Generates the next ND point
-  void generateNextPoint();
+  void generateNextPoint() override;
   /// Resets the generator
-  void restart();
+  void restart() override;
   /// Saves the current state of the generator
-  void save();
+  void save() override;
   /// Restores the generator to the last saved point, or the beginning if
   /// nothing has been saved
-  void restore();
+  void restore() override;
 
 private:
   DISABLE_DEFAULT_CONSTRUCT(NDPseudoRandomNumberGenerator)

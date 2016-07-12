@@ -43,11 +43,11 @@ public:
   /// Constructor.
   BFGS_Minimizer() : DerivMinimizer() {}
   /// Name of the minimizer.
-  std::string name() const { return "BFGS_Minimizer"; }
+  std::string name() const override { return "BFGS_Minimizer"; }
 
 protected:
   /// Return a concrete type to initialize m_gslSolver with
-  virtual const gsl_multimin_fdfminimizer_type *getGSLMinimizerType();
+  const gsl_multimin_fdfminimizer_type *getGSLMinimizerType() override;
 
   /// Static reference to the logger class
   static Kernel::Logger &g_log;

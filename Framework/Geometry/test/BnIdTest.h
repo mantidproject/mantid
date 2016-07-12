@@ -175,14 +175,7 @@ public:
     TS_ASSERT_EQUALS(A.PIstatus(), 1);
     TS_ASSERT_EQUALS(A.expressCount(), 8);
     TS_ASSERT_EQUALS(extractString(A), "11100001(4:0)");
-    std::vector<int> index;
-    index.push_back(3);
-    index.push_back(1);
-    index.push_back(4);
-    index.push_back(2);
-    index.push_back(5);
-    index.push_back(1);
-    index.push_back(7);
+    std::vector<int> index{3, 1, 4, 2, 5, 1, 7};
     std::map<int, int> result;
     A.mapState(index, result);
     TS_ASSERT_EQUALS(result[3], 1);

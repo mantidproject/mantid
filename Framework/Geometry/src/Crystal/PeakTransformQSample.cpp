@@ -15,26 +15,6 @@ PeakTransformQSample::PeakTransformQSample(const std::string &xPlotLabel,
     : PeakTransform(xPlotLabel, yPlotLabel, regex("^Q_sample_x.*$"),
                     regex("^Q_sample_y.*$"), regex("^Q_sample_z.*$")) {}
 
-PeakTransformQSample::PeakTransformQSample(const PeakTransformQSample &other)
-    : PeakTransform(other) {}
-
-PeakTransformQSample &PeakTransformQSample::
-operator=(const PeakTransformQSample &other) {
-  if (this != &other) {
-    m_xPlotLabel = other.m_xPlotLabel;
-    m_yPlotLabel = other.m_yPlotLabel;
-    m_indexOfPlotX = other.m_indexOfPlotX;
-    m_indexOfPlotY = other.m_indexOfPlotY;
-    m_indexOfPlotZ = other.m_indexOfPlotZ;
-    m_FirstRegex = other.m_FirstRegex;
-    m_SecondRegex = other.m_SecondRegex;
-    m_ThirdRegex = other.m_ThirdRegex;
-  }
-  return *this;
-}
-
-PeakTransformQSample::~PeakTransformQSample() {}
-
 /**
 Clone the PeakTransformQSample.
 */

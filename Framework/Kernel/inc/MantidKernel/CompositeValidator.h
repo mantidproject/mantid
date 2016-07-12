@@ -40,14 +40,14 @@ public:
   /// Default constructor
   CompositeValidator();
   /// Destructor
-  ~CompositeValidator();
+  ~CompositeValidator() override;
 
   /// Gets the type of the validator
   std::string getType() const { return "composite"; }
   /// Return the instersection of allowed values from children
-  std::vector<std::string> allowedValues() const;
+  std::vector<std::string> allowedValues() const override;
   /// Clones this and the children into a new Validator
-  IValidator_sptr clone() const;
+  IValidator_sptr clone() const override;
   /// Adds a validator to the group of validators to check
   void add(IValidator_sptr child);
   /// Add a validator based on a template type. Useful for validators that need
@@ -64,7 +64,7 @@ private:
   /// Private Copy constructor: NO DIRECT COPY ALLOWED
   CompositeValidator(const CompositeValidator &);
   /// Verify the value with the child validators
-  std::string check(const boost::any &value) const;
+  std::string check(const boost::any &value) const override;
   /// A container for the child validators
   std::list<IValidator_sptr> m_children;
 };

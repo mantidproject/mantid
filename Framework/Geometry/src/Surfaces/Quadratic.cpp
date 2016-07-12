@@ -3,16 +3,13 @@
 #include <iostream>
 #include <sstream>
 #include <complex>
-#include <cmath>
 #include <list>
 #include <vector>
 #include <set>
 #include <map>
 #include <stack>
-#include <string>
 #include <algorithm>
 #include <boost/multi_array.hpp>
-#include <gsl/gsl_poly.h>
 
 #include "MantidKernel/Tolerance.h"
 #include "MantidGeometry/Math/mathSupport.h"
@@ -37,28 +34,6 @@ Quadratic::Quadratic()
   Constructor
 */
 {}
-
-Quadratic::Quadratic(const Quadratic &A)
-    : Surface(A), BaseEqn(A.BaseEqn)
-/**
-  Copy constructor
-  @param A :: Quadratic to copy
-*/
-{}
-
-Quadratic &Quadratic::operator=(const Quadratic &A)
-/**
-  Assignment operator
-  @param A :: Quadratic to copy
-  @return *this
-*/
-{
-  if (this != &A) {
-    Surface::operator=(A);
-    BaseEqn = A.BaseEqn;
-  }
-  return *this;
-}
 
 double Quadratic::eqnValue(const Kernel::V3D &Pt) const
 /**
@@ -160,7 +135,7 @@ double Quadratic::distance(const Kernel::V3D &Pt) const
   Kernel::Matrix<double> D(3, 3);
   Kernel::Matrix<double> R(3, 3);
   if (!A.Diagonalise(R, D)) {
-    std::cerr << "Problem with matrix :: distance now guessed at" << std::endl;
+    std::cerr << "Problem with matrix :: distance now guessed at\n";
     return distance(Pt);
   }
 
@@ -358,7 +333,7 @@ void Quadratic::print() const
   Surface::print();
   for (int i = 0; i < 10; i++)
     std::cout << BaseEqn[i] << " ";
-  std::cout << std::endl;
+  std::cout << '\n';
   return;
 }
 

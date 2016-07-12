@@ -60,49 +60,49 @@ public:
 
   MDBox(const MDBox<MDE, nd> &other, Mantid::API::BoxController *const otherBC);
 
-  virtual ~MDBox();
+  ~MDBox() override;
 
   // ----------------------------- ISaveable Methods
   // ------------------------------------------------------
-  virtual Kernel::ISaveable *getISaveable();
-  virtual Kernel::ISaveable *getISaveable() const;
-  virtual void setFileBacked(const uint64_t /*fileLocation*/,
-                             const size_t /*fileSize*/,
-                             const bool /*markSaved*/);
-  virtual void setFileBacked();
-  virtual void clearFileBacked(bool loadDiskBackedData);
+  Kernel::ISaveable *getISaveable() override;
+  Kernel::ISaveable *getISaveable() const override;
+  void setFileBacked(const uint64_t /*fileLocation*/, const size_t /*fileSize*/,
+                     const bool /*markSaved*/) override;
+  void setFileBacked() override;
+  void clearFileBacked(bool loadDiskBackedData) override;
   //-----------------------------------------------------------------------------------------------
-  virtual void saveAt(API::IBoxControllerIO *const /* */,
-                      uint64_t /*position*/) const;
-  virtual void loadAndAddFrom(API::IBoxControllerIO *const /* */,
-                              uint64_t /*position*/, size_t /* Size */);
-  virtual void reserveMemoryForLoad(uint64_t /* Size */);
+  void saveAt(API::IBoxControllerIO *const /* */,
+              uint64_t /*position*/) const override;
+  void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/,
+                      size_t /* Size */) override;
+  void reserveMemoryForLoad(uint64_t /* Size */) override;
   /**drop events data from memory but keep averages (and file-backed info) */
-  void clearDataFromMemory();
+  void clearDataFromMemory() override;
   /** */
-  void clear();
+  void clear() override;
 
-  uint64_t getNPoints() const;
-  size_t getDataInMemorySize() const { return data.size(); }
-  uint64_t getTotalDataSize() const { return getNPoints(); }
+  uint64_t getNPoints() const override;
+  size_t getDataInMemorySize() const override { return data.size(); }
+  uint64_t getTotalDataSize() const override { return getNPoints(); }
 
-  size_t getNumDims() const;
-  size_t getNumMDBoxes() const;
+  size_t getNumDims() const override;
+  size_t getNumMDBoxes() const override;
 
   /// Get the # of children MDBoxBase'es (non-recursive)
-  size_t getNumChildren() const { return 0; }
+  size_t getNumChildren() const override { return 0; }
   // to avoid casting (which need also the number of dimensions) method say if
   // Node is a box. if not, it is gridbox
-  virtual bool isBox() const { return true; }
+  bool isBox() const override { return true; }
 
   /// Return the indexth child MDBoxBase.
-  API::IMDNode *getChild(size_t /*index*/) {
+  API::IMDNode *getChild(size_t /*index*/) override {
     throw std::runtime_error("MDBox does not have children.");
   }
 
   /// Sets the children from a vector of children
   void setChildren(const std::vector<API::IMDNode *> & /*boxes*/,
-                   const size_t /*indexStart*/, const size_t /*indexEnd*/) {
+                   const size_t /*indexStart*/,
+                   const size_t /*indexEnd*/) override {
     throw std::runtime_error("MDBox cannot have children.");
   }
 
@@ -128,82 +128,83 @@ public:
   const std::vector<MDE> &getEvents() const;
   void releaseEvents();
 
-  std::vector<MDE> *getEventsCopy();
+  std::vector<MDE> *getEventsCopy() override;
 
-  virtual void getEventsData(std::vector<coord_t> &coordTable,
-                             size_t &nColumns) const;
-  virtual void setEventsData(const std::vector<coord_t> &coordTable);
+  void getEventsData(std::vector<coord_t> &coordTable,
+                     size_t &nColumns) const override;
+  void setEventsData(const std::vector<coord_t> &coordTable) override;
 
-  virtual void addEvent(const MDE &Evnt);
-  virtual void addEventUnsafe(const MDE &Evnt);
+  size_t addEvent(const MDE &Evnt) override;
+  size_t addEventUnsafe(const MDE &Evnt) override;
 
   // add range of events
-  virtual size_t addEvents(const std::vector<MDE> &events);
+  size_t addEvents(const std::vector<MDE> &events) override;
   // unhide MDBoxBase methods
-  virtual size_t addEventsUnsafe(const std::vector<MDE> &events);
+  size_t addEventsUnsafe(const std::vector<MDE> &events) override;
 
   /*--------------->  EVENTS from event data
    * <-------------------------------------------------------------*/
-  virtual void buildAndAddEvent(const signal_t Signal, const signal_t errorSq,
-                                const std::vector<coord_t> &point,
-                                uint16_t runIndex, uint32_t detectorId);
-  virtual void buildAndAddEventUnsafe(const signal_t Signal,
-                                      const signal_t errorSq,
-                                      const std::vector<coord_t> &point,
-                                      uint16_t runIndex, uint32_t detectorId);
-  virtual size_t buildAndAddEvents(const std::vector<signal_t> &sigErrSq,
-                                   const std::vector<coord_t> &Coord,
-                                   const std::vector<uint16_t> &runIndex,
-                                   const std::vector<uint32_t> &detectorId);
+  void buildAndAddEvent(const signal_t Signal, const signal_t errorSq,
+                        const std::vector<coord_t> &point, uint16_t runIndex,
+                        uint32_t detectorId) override;
+  void buildAndAddEventUnsafe(const signal_t Signal, const signal_t errorSq,
+                              const std::vector<coord_t> &point,
+                              uint16_t runIndex, uint32_t detectorId) override;
+  size_t buildAndAddEvents(const std::vector<signal_t> &sigErrSq,
+                           const std::vector<coord_t> &Coord,
+                           const std::vector<uint16_t> &runIndex,
+                           const std::vector<uint32_t> &detectorId) override;
 
   //---------------------------------------------------------------------------------------------------------------------------------
-  void centerpointBin(MDBin<MDE, nd> &bin, bool *fullyContained) const;
-  void generalBin(MDBin<MDE, nd> &bin,
-                  Mantid::Geometry::MDImplicitFunction &function) const;
-  void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ =
-                            NULL) { /* Do nothing with a box default. */
+  void centerpointBin(MDBin<MDE, nd> &bin, bool *fullyContained) const override;
+  void
+  generalBin(MDBin<MDE, nd> &bin,
+             Mantid::Geometry::MDImplicitFunction &function) const override;
+  void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr)
+      override { /* Do nothing with a box default. */
   }
 
   //---------------------------------------------------------------------------------------------------------------------------------
   /** Recalculate signal and various averages dependent on signal and the signal
    * coordinates */
-  void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL);
-  void calculateCentroid(coord_t *centroid) const;
-  void calculateCentroid(coord_t *centroid, const int runindex) const;
-  coord_t *getCentroid() const;
+  void refreshCache(Kernel::ThreadScheduler * /*ts*/ = nullptr) override;
+  void calculateCentroid(coord_t *centroid) const override;
+  void calculateCentroid(coord_t *centroid, const int runindex) const override;
+  coord_t *getCentroid() const override;
   void calculateDimensionStats(MDDimensionStats *stats) const;
   void integrateSphere(Mantid::API::CoordTransform &radiusTransform,
                        const coord_t radiusSquared, signal_t &signal,
-                       signal_t &errorSquared) const;
+                       signal_t &errorSquared) const override;
   void centroidSphere(Mantid::API::CoordTransform &radiusTransform,
                       const coord_t radiusSquared, coord_t *centroid,
-                      signal_t &signal) const;
+                      signal_t &signal) const override;
   void integrateCylinder(Mantid::API::CoordTransform &radiusTransform,
                          const coord_t radius, const coord_t length,
                          signal_t &signal, signal_t &errorSquared,
-                         std::vector<signal_t> &signal_fit) const;
+                         std::vector<signal_t> &signal_fit) const override;
 
   //------------------------------------------------------------------------------------------------------------------------------------
   void getBoxes(std::vector<MDBoxBase<MDE, nd> *> &boxes, size_t /*maxDepth*/,
                 bool /*leafOnly*/);
   void getBoxes(std::vector<API::IMDNode *> &boxes, size_t /*maxDepth*/,
-                bool /*leafOnly*/);
+                bool /*leafOnly*/) override;
 
   void getBoxes(std::vector<MDBoxBase<MDE, nd> *> &boxes, size_t maxDepth,
                 bool leafOnly, Mantid::Geometry::MDImplicitFunction *function);
   void getBoxes(std::vector<API::IMDNode *> &boxes, size_t maxDepth,
-                bool leafOnly, Mantid::Geometry::MDImplicitFunction *function);
+                bool leafOnly,
+                Mantid::Geometry::MDImplicitFunction *function) override;
   //------------------------------------------------------------------------------------------------------------------------------------
   void transformDimensions(std::vector<double> &scaling,
-                           std::vector<double> &offset);
+                           std::vector<double> &offset) override;
   //------------------------------------------------------------------------------------------------------------------------------------
   /* Getter to determine if masking is applied.
   @return true if masking is applied.   */
-  virtual bool getIsMasked() const { return m_bIsMasked; }
+  bool getIsMasked() const override { return m_bIsMasked; }
   /// Setter for masking the box
-  void mask();
+  void mask() override;
   /// Setter for unmasking the box
-  void unmask();
+  void unmask() override;
 
 protected:
   // the pointer to the class, responsible for saving/restoring this class to
@@ -220,7 +221,7 @@ private:
   /// one with the boxController;
   MDBox(const MDBox &);
   /// common part of mdBox constructor
-  void initMDBox(const size_t numEvents);
+  void initMDBox(const size_t nBoxEvents);
 
 public:
   /// Typedef for a shared pointer to a MDBox

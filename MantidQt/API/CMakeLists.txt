@@ -10,6 +10,7 @@
 	src/HelpWindow.cpp
 	src/InterfaceFactory.cpp
 	src/InterfaceManager.cpp
+	src/ListPropertyWidget.cpp
 	src/ManageUserDirectories.cpp
 	src/MantidColorMap.cpp
 	src/MantidDialog.cpp
@@ -28,8 +29,9 @@
 	src/PropertyWidgetFactory.cpp
 	src/PythonRunner.cpp
 	src/PythonThreading.cpp
+        src/QScienceSpinBox.cpp
 	src/QtSignalChannel.cpp
-	src/QwtRasterDataMD.cpp
+        src/QwtRasterDataMD.cpp
 	src/QwtWorkspaceBinData.cpp
 	src/QwtWorkspaceSpectrumData.cpp
 	src/RepoModel.cpp
@@ -54,6 +56,7 @@ set ( MOC_FILES
   inc/MantidQtAPI/BoolPropertyWidget.h
   inc/MantidQtAPI/FilePropertyWidget.h
   inc/MantidQtAPI/GenericDialog.h
+  inc/MantidQtAPI/ListPropertyWidget.h
   inc/MantidQtAPI/ManageUserDirectories.h
   inc/MantidQtAPI/MantidDialog.h
   inc/MantidQtAPI/MantidHelpInterface.h
@@ -61,6 +64,7 @@ set ( MOC_FILES
   inc/MantidQtAPI/OptionsPropertyWidget.h
   inc/MantidQtAPI/PropertyWidget.h
   inc/MantidQtAPI/PythonRunner.h
+  inc/MantidQtAPI/QScienceSpinBox.h
   inc/MantidQtAPI/QtSignalChannel.h
   inc/MantidQtAPI/ScriptRepositoryView.h
   inc/MantidQtAPI/RepoTreeView.h
@@ -82,13 +86,14 @@ set ( INC_FILES
 	inc/MantidQtAPI/DllOption.h
 	inc/MantidQtAPI/FileDialogHandler.h
 	inc/MantidQtAPI/GraphOptions.h
-    inc/MantidQtAPI/DistributionOptions.h
+        inc/MantidQtAPI/DistributionOptions.h
 	inc/MantidQtAPI/HelpWindow.h
 	inc/MantidQtAPI/InterfaceFactory.h
 	inc/MantidQtAPI/InterfaceManager.h
 	inc/MantidQtAPI/MantidColorMap.h
 	inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
 	inc/MantidQtAPI/MantidQwtWorkspaceData.h
+	inc/MantidQtAPI/MantidAlgorithmMetatype.h
 	inc/MantidQtAPI/MdConstants.h
 	inc/MantidQtAPI/MdPlottingCmapsProvider.h
 	inc/MantidQtAPI/MdSettings.h
@@ -97,8 +102,9 @@ set ( INC_FILES
 	inc/MantidQtAPI/PropertyWidgetFactory.h
 	inc/MantidQtAPI/PythonSystemHeader.h
 	inc/MantidQtAPI/PythonThreading.h
-	inc/MantidQtAPI/QwtRasterDataMD.h
-	inc/MantidQtAPI/QwtWorkspaceBinData.h
+        inc/MantidQtAPI/QScienceSpinBox.h
+        inc/MantidQtAPI/QwtRasterDataMD.h
+        inc/MantidQtAPI/QwtWorkspaceBinData.h
 	inc/MantidQtAPI/QwtWorkspaceSpectrumData.h
 	inc/MantidQtAPI/ScaleEngine.h
 	inc/MantidQtAPI/ScriptRepositoryView.h

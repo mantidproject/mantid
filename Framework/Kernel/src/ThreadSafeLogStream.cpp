@@ -16,11 +16,6 @@ ThreadSafeLogStreamBuf::ThreadSafeLogStreamBuf(Poco::Logger &logger,
                                                Poco::Message::Priority priority)
     : Poco::LogStreamBuf(logger, priority), m_messages() {}
 
-/**
- * Destructor
- */
-ThreadSafeLogStreamBuf::~ThreadSafeLogStreamBuf() {}
-
 int ThreadSafeLogStreamBuf::overflow(char c) {
   return Poco::UnbufferedStreamBuf::overflow(c);
 }
@@ -39,7 +34,7 @@ int ThreadSafeLogStreamBuf::writeToDevice(char c) {
     m_messages[Poco::Thread::currentTid()] = "";
     logger().log(msg);
   } else {
-    Poco::FastMutex::ScopedLock lock(m_mutex);
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_messages[Poco::Thread::currentTid()] += c;
   }
   return static_cast<int>(c);
@@ -58,11 +53,6 @@ ThreadSafeLogIOS::ThreadSafeLogIOS(Poco::Logger &logger,
     : m_buf(logger, priority) {
   poco_ios_init(&m_buf);
 }
-
-/**
- * Destructor
- */
-ThreadSafeLogIOS::~ThreadSafeLogIOS() {}
 
 /**
  * Return the underlying buffer for this stream
@@ -91,11 +81,6 @@ ThreadSafeLogStream::ThreadSafeLogStream(const std::string &loggerName,
                                          Poco::Message::Priority priority)
     : ThreadSafeLogIOS(Poco::Logger::get(loggerName), priority),
       std::ostream(&m_buf) {}
-
-/**
- * Destructor
- */
-ThreadSafeLogStream::~ThreadSafeLogStream() {}
 
 /**
  * Return a reference to the log stream with the priority set to fatal

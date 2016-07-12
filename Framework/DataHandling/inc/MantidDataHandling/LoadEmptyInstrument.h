@@ -64,27 +64,27 @@ public:
   /// Default constructor
   LoadEmptyInstrument();
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadEmptyInstrument"; }
+  const std::string name() const override { return "LoadEmptyInstrument"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads an Instrument Definition File (IDF) into a workspace rather "
            "than a data file.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Instrument";
   }
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::FileDescriptor &descriptor) const;
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
 
   API::MatrixWorkspace_sptr runLoadInstrument();
 };

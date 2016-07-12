@@ -92,7 +92,7 @@ public:
   /// transformation types defined by the class
   void setQ3DDimensionsNames(MDAlgorithms::MDWSDescription &TargWSDescription,
                              CnvrtToMD::TargetFrame FrameID,
-                             CnvrtToMD::CoordScaling scaling) const;
+                             CnvrtToMD::CoordScaling ScaleID) const;
   /// construct meaningful dimension names for ModQ case and different
   /// transformation types defined by the class;
   void setModQDimensionsNames(MDAlgorithms::MDWSDescription &TargWSDescription,
@@ -128,7 +128,7 @@ protected: // for testing
   /// Q-conversion modes;
   Kernel::DblMatrix
   buildQTrahsf(MDAlgorithms::MDWSDescription &TargWSDescription,
-               CnvrtToMD::CoordScaling scaling, bool UnitUB = false) const;
+               CnvrtToMD::CoordScaling ScaleID, bool UnitUB = false) const;
   /// build orthogonal coordinate around two input vecotors u and v expressed in
   /// rlu;
   // std::vector<Kernel::V3D> buildOrtho3D(const Kernel::DblMatrix &BM,const
@@ -137,7 +137,7 @@ protected: // for testing
   std::vector<double>
   getTransfMatrix(MDAlgorithms::MDWSDescription &TargWSDescription,
                   CnvrtToMD::TargetFrame FrameID,
-                  CnvrtToMD::CoordScaling &scaling) const;
+                  CnvrtToMD::CoordScaling &ScaleID) const;
 
   CnvrtToMD::TargetFrame
   findTargetFrame(MDAlgorithms::MDWSDescription &TargWSDescription) const;

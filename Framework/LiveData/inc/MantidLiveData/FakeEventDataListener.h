@@ -8,8 +8,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include <Poco/Timer.h>
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/DateAndTime.h"
+#include <mutex>
 
 namespace Mantid {
 namespace LiveData {
@@ -37,19 +37,21 @@ namespace LiveData {
 class FakeEventDataListener : public API::ILiveListener {
 public:
   FakeEventDataListener();
-  ~FakeEventDataListener();
+  ~FakeEventDataListener() override;
 
-  std::string name() const { return "FakeEventDataListener"; }
-  bool supportsHistory() const { return false; } // For the time being at least
-  bool buffersEvents() const { return true; }
+  std::string name() const override { return "FakeEventDataListener"; }
+  bool supportsHistory() const override {
+    return false;
+  } // For the time being at least
+  bool buffersEvents() const override { return true; }
 
-  bool connect(const Poco::Net::SocketAddress &address);
-  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime());
-  boost::shared_ptr<API::Workspace> extractData();
+  bool connect(const Poco::Net::SocketAddress &address) override;
+  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
+  boost::shared_ptr<API::Workspace> extractData() override;
 
-  bool isConnected();
-  ILiveListener::RunStatus runStatus();
-  int runNumber() const;
+  bool isConnected() override;
+  ILiveListener::RunStatus runStatus() override;
+  int runNumber() const override;
 
 private:
   void generateEvents(Poco::Timer &);
@@ -75,7 +77,7 @@ private:
   int m_runNumber;
 
   /// Mutex to exclude generateEvents() and extractData().
-  Kernel::Mutex m_mutex;
+  std::mutex m_mutex;
 };
 
 } // namespace LiveData

@@ -1,8 +1,6 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
-#include "MantidKernel/Matrix.h"
-#include <cfloat>
 #include <iostream>
 
 #ifdef ENABLE_OPENCASCADE
@@ -52,15 +50,6 @@ Cylinder::Cylinder()
   Cylinder::setBaseEqn();
 }
 
-Cylinder::Cylinder(const Cylinder &A)
-    : Quadratic(A), Centre(A.Centre), Normal(A.Normal), Nvec(A.Nvec),
-      Radius(A.Radius)
-/**
- Standard Copy Constructor
- @param A :: Cyclinder to copy
- */
-{}
-
 Cylinder *Cylinder::doClone() const
 /**
  Makes a clone (implicit virtual copy constructor)
@@ -77,23 +66,6 @@ Makes a clone (implicit virtual copy constructor)
 */
 {
   return std::unique_ptr<Cylinder>(doClone());
-}
-
-Cylinder &Cylinder::operator=(const Cylinder &A)
-/**
- Standard Assignment operator
- @param A :: Cylinder object to copy
- @return *this
- */
-{
-  if (this != &A) {
-    Quadratic::operator=(A);
-    Centre = A.Centre;
-    Normal = A.Normal;
-    Nvec = A.Nvec;
-    Radius = A.Radius;
-  }
-  return *this;
 }
 
 int Cylinder::setSurface(const std::string &Pstr)
@@ -378,7 +350,7 @@ void Cylinder::print() const
   Quadratic::print();
   std::cout << "Axis ==" << Normal << " ";
   std::cout << "Centre == " << Centre << " ";
-  std::cout << "Radius == " << Radius << std::endl;
+  std::cout << "Radius == " << Radius << '\n';
   return;
 }
 
@@ -437,7 +409,7 @@ void Cylinder::getBoundingBox(double &xmax, double &ymax, double &zmax,
     xmax = ymax = zmax = DBL_MIN;
     for (std::vector<V3D>::const_iterator it = listOfPoints.begin();
          it != listOfPoints.end(); ++it) {
-      //			std::cout<<(*it)<<std::endl;
+      //			std::cout<<(*it)<<'\n';
       if ((*it)[0] < xmin)
         xmin = (*it)[0];
       if ((*it)[1] < ymin)

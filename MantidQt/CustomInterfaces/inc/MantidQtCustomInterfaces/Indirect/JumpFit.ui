@@ -31,8 +31,8 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="loadLabelText" stdset="0">
-        <string>Plot</string>
+       <property name="showLoad" stdset="0">
+         <bool>false</bool>
        </property>
        <property name="workspaceSuffixes" stdset="0">
         <stringlist>
@@ -96,6 +96,13 @@
        </property>
        <property name="text">
         <string>Fit Function: </string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QCheckBox" name="ckPlotGuess">
+       <property name="text">
+         <string>Plot Guess</string>
        </property>
       </widget>
      </item>

@@ -11,7 +11,7 @@ TableRow::TableRow(const TableRowHelper &trh)
     : m_row(trh.m_row), m_col(0), m_sep(",") {
   for (size_t i = 0; i < trh.m_workspace->columnCount(); i++)
     m_columns.push_back(trh.m_workspace->getColumn(i));
-  if (m_columns.size())
+  if (!m_columns.empty())
     m_nrows = int(m_columns[0]->size());
   else
     m_nrows = 0;
@@ -69,7 +69,7 @@ const TableRow &TableRow::operator>>(bool &t) const {
      @return stream representation of row
  */
 std::ostream &operator<<(std::ostream &s, const TableRow &row) {
-  if (row.m_columns.size() == 0)
+  if (row.m_columns.empty())
     return s;
   if (row.m_columns.size() == 1) {
     row.m_columns[0]->print(row.row(), s);

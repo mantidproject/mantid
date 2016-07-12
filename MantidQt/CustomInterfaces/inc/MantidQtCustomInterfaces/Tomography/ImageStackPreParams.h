@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGESTACKPREPARAMS_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGESTACKPREPARAMS_H_
 
-#include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidKernel/V2D.h"
 
 #include <utility>
@@ -19,9 +19,9 @@ etc.).
 The parameters include:
 - center of rotation
 - region of interest (clip from original or raw images)
-- region for normalization (where the beam is not blocked by any sample 
+- region for normalization (where the beam is not blocked by any sample
   object throughout the stack of images) other parameters describing
-  the stack of images: 
+  the stack of images:
 
 Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
@@ -44,17 +44,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ImageStackPreParams {
+class MANTIDQT_CUSTOMINTERFACES_DLL ImageStackPreParams {
 public:
-
   ImageStackPreParams();
 
   typedef std::pair<Mantid::Kernel::V2D, Mantid::Kernel::V2D> Box2D;
 
   Mantid::Kernel::V2D cor;
   Box2D roi;
-  Box2D normalizationRegion;  //< also known as 'air' region
-  bool medianFilter;
+  Box2D normalizationRegion; //< also known as 'air' region
+  float rotation;            //< rotation angle in degrees
 };
 
 } // namespace CustomInterfaces

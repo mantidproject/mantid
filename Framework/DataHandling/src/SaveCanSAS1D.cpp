@@ -7,6 +7,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 
 #include "MantidKernel/Exception.h"
@@ -26,35 +27,22 @@ namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveCanSAS1D)
 
-/// constructor
-SaveCanSAS1D::SaveCanSAS1D() {}
-
-/// destructor
-SaveCanSAS1D::~SaveCanSAS1D() {}
-
 /// Overwrites Algorithm method.
 void SaveCanSAS1D::init() {
   declareProperty(
-      new API::WorkspaceProperty<>(
+      make_unique<API::WorkspaceProperty<>>(
           "InputWorkspace", "", Kernel::Direction::Input,
           boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer")),
       "The input workspace, which must be in units of Q");
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Save, ".xml"),
-      "The name of the xml file to save");
+  declareProperty(make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Save, ".xml"),
+                  "The name of the xml file to save");
 
-  std::vector<std::string> radiation_source;
-  radiation_source.push_back("Spallation Neutron Source");
-  radiation_source.push_back("Pulsed Reactor Neutron Source");
-  radiation_source.push_back("Reactor Neutron Source");
-  radiation_source.push_back("Synchrotron X-ray Source");
-  radiation_source.push_back("Pulsed Muon Source");
-  radiation_source.push_back("Rotating Anode X-ray");
-  radiation_source.push_back("Fixed Tube X-ray");
-  radiation_source.push_back("neutron");
-  radiation_source.push_back("x-ray");
-  radiation_source.push_back("muon");
-  radiation_source.push_back("electron");
+  std::vector<std::string> radiation_source{
+      "Spallation Neutron Source", "Pulsed Reactor Neutron Source",
+      "Reactor Neutron Source", "Synchrotron X-ray Source",
+      "Pulsed Muon Source", "Rotating Anode X-ray", "Fixed Tube X-ray",
+      "neutron", "x-ray", "muon", "electron"};
   declareProperty(
       "RadiationSource", "Spallation Neutron Source",
       boost::make_shared<Kernel::StringListValidator>(radiation_source),
@@ -308,9 +296,9 @@ void SaveCanSAS1D::searchandreplaceSpecialChars(std::string &input) {
   std::string specialchars = "&<>'\"";
   std::string::size_type searchIndex = 0;
   std::string::size_type findIndex;
-  for (std::string::size_type i = 0; i < specialchars.size(); ++i) {
+  for (char specialchar : specialchars) {
     while (searchIndex < input.length()) {
-      findIndex = input.find(specialchars[i], searchIndex);
+      findIndex = input.find(specialchar, searchIndex);
       if (findIndex != std::string::npos) {
         searchIndex = findIndex + 1;
         // replace with xml entity refrence
@@ -421,19 +409,19 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
   std::string sasIBlockData;
   std::string sasIHistData;
   for (size_t i = 0; i < m_workspace->getNumberHistograms(); ++i) {
-    const MantidVec &xdata = m_workspace->readX(i);
+    auto intensities = m_workspace->points(i);
+    auto intensityDeltas = m_workspace->pointStandardDeviations(i);
+    if (!intensityDeltas)
+      intensityDeltas =
+          HistogramData::PointStandardDeviations(intensities.size(), 0.0);
     const MantidVec &ydata = m_workspace->readY(i);
     const MantidVec &edata = m_workspace->readE(i);
-    const MantidVec &dxdata = m_workspace->readDx(i);
-    const bool isHistogram = m_workspace->isHistogramData();
     for (size_t j = 0; j < m_workspace->blocksize(); ++j) {
       // x data is the QData in xml.If histogramdata take the mean
-      double intensity = isHistogram ? (xdata[j] + xdata[j + 1]) / 2 : xdata[j];
-      double dx = isHistogram ? (dxdata[j] + dxdata[j + 1]) / 2 : dxdata[j];
       std::stringstream x;
-      x << intensity;
+      x << intensities[j];
       std::stringstream dx_str;
-      dx_str << dx;
+      dx_str << intensityDeltas[j];
       sasIData = "\n\t\t\t<Idata><Q unit=\"1/A\">";
       sasIData += x.str();
       sasIData += "</Q>";
@@ -555,7 +543,7 @@ void SaveCanSAS1D::createSASDetectorElement(std::string &sasDet) {
     } else {
       g_log.notice() << "Detector with name " << detectorName
                      << " does not exist in the instrument of the workspace: "
-                     << m_workspace->name() << std::endl;
+                     << m_workspace->name() << '\n';
     }
   }
 }

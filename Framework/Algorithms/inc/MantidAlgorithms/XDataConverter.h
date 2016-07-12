@@ -5,8 +5,12 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramX;
+}
 namespace Algorithms {
 /**
   This is an abstract base class for sharing methods between algorithms that
@@ -44,9 +48,9 @@ public:
   /// Default constructor
   XDataConverter();
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "General"; }
+  const std::string category() const override { return "General"; }
 
 protected:
   /// Returns true if the algorithm needs to be run.
@@ -64,9 +68,9 @@ protected:
 
 private:
   /// Override init
-  virtual void init();
+  void init() override;
   /// Override exec
-  virtual void exec();
+  void exec() override;
 
   /// Set the X data on given spectra
   void setXData(API::MatrixWorkspace_sptr outputWS,
@@ -75,7 +79,7 @@ private:
   /// Flag if the X data is shared
   bool m_sharedX;
   /// Cached data for shared X values
-  MantidVecPtr m_cachedX;
+  Kernel::cow_ptr<HistogramData::HistogramX> m_cachedX{nullptr};
 };
 
 } // namespace Algorithm

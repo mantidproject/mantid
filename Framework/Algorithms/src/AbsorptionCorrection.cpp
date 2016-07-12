@@ -3,12 +3,16 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/AbsorptionCorrection.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -21,7 +25,7 @@ using namespace API;
 using namespace Mantid::PhysicalConstants;
 
 AbsorptionCorrection::AbsorptionCorrection()
-    : API::Algorithm(), m_inputWS(), m_sampleObject(NULL), m_L1s(),
+    : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr), m_L1s(),
       m_elementVolumes(), m_elementPositions(), m_numVolumeElements(0),
       m_sampleVolume(0.0), m_refAtten(0.0), m_scattering(0), n_lambda(0),
       m_xStep(0), m_emode(0), m_lambdaFixed(0.), EXPONENTIAL() {}
@@ -34,12 +38,12 @@ void AbsorptionCorrection::init() {
   wsValidator->add<InstrumentValidator>();
 
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
-                              wsValidator),
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
+                                       wsValidator),
       "The X values for the input workspace must be in units of wavelength");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Output workspace name");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Output workspace name");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -63,19 +67,14 @@ void AbsorptionCorrection::init() {
       "The number of wavelength points for which the numerical integral is\n"
       "calculated (default: all points)");
 
-  std::vector<std::string> exp_options;
-  exp_options.push_back("Normal");
-  exp_options.push_back("FastApprox");
+  std::vector<std::string> exp_options{"Normal", "FastApprox"};
   declareProperty(
       "ExpMethod", "Normal",
       boost::make_shared<StringListValidator>(exp_options),
       "Select the method to use to calculate exponentials, normal or a\n"
       "fast approximation (default: Normal)");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Elastic");
-  propOptions.push_back("Direct");
-  propOptions.push_back("Indirect");
+  std::vector<std::string> propOptions{"Elastic", "Direct", "Indirect"};
   declareProperty("EMode", "Elastic",
                   boost::make_shared<StringListValidator>(propOptions),
                   "The energy mode (default: elastic)");
@@ -103,7 +102,7 @@ void AbsorptionCorrection::exec() {
   // Create the output workspace
   MatrixWorkspace_sptr correctionFactors =
       WorkspaceFactory::Instance().create(m_inputWS);
-  correctionFactors->isDistribution(
+  correctionFactors->setDistribution(
       true);                       // The output of this is a distribution
   correctionFactors->setYUnit(""); // Need to explicitly set YUnit to nothing
   correctionFactors->setYUnitLabel("Attenuation factor");
@@ -124,20 +123,17 @@ void AbsorptionCorrection::exec() {
 
   std::ostringstream message;
   message << "Numerical integration performed every " << m_xStep
-          << " wavelength points" << std::endl;
+          << " wavelength points\n";
   g_log.information(message.str());
   message.str("");
-
-  const bool isHist = m_inputWS->isHistogramData();
 
   // Calculate the cached values of L1 and element volumes.
   initialiseCachedDistances();
   // If sample not at origin, shift cached positions.
   const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
   if (samplePos != V3D(0, 0, 0)) {
-    for (auto it = m_elementPositions.begin(); it != m_elementPositions.end();
-         ++it) {
-      (*it) += samplePos;
+    for (auto &elementPosition : m_elementPositions) {
+      elementPosition += samplePos;
     }
   }
 
@@ -190,8 +186,9 @@ void AbsorptionCorrection::exec() {
     MantidVec &Y = correctionFactors->dataY(i);
 
     // Loop through the bins in the current spectrum every m_xStep
+    const auto lambdas = m_inputWS->points(i);
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
-      const double lambda = (isHist ? (0.5 * (X[j] + X[j + 1])) : X[j]);
+      const double lambda = lambdas[j];
       if (m_emode == 0) // Elastic
       {
         Y[j] = this->doIntegration(lambda, L2s);
@@ -224,7 +221,7 @@ void AbsorptionCorrection::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   g_log.information() << "Total number of elements in the integration was "
-                      << m_L1s.size() << std::endl;
+                      << m_L1s.size() << '\n';
   setProperty("OutputWorkspace", correctionFactors);
 
   // Now do some cleaning-up since destructor may not be called immediately
@@ -359,7 +356,7 @@ void AbsorptionCorrection::calculateDistances(
 
       // std::ostringstream message;
       // message << "Problem with detector at " << detectorPos << " ID:" <<
-      // detector->getID() << std::endl;
+      // detector->getID() << '\n';
       // message << "This usually means that this detector is defined inside the
       // sample cylinder";
       // g_log.error(message.str());

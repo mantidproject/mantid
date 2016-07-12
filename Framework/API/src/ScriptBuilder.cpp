@@ -2,12 +2,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmHistory.h"
+#include "MantidKernel/PropertyHistory.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/HistoryItem.h"
 #include "MantidAPI/ScriptBuilder.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Logger.h"
 
 #include <boost/utility.hpp>
+#include <set>
 
 namespace Mantid {
 namespace API {
@@ -112,9 +117,9 @@ ScriptBuilder::buildCommentString(AlgorithmHistory_const_sptr algHistory) {
   const std::string name = algHistory->name();
   if (name == COMMENT_ALG) {
     auto props = algHistory->getProperties();
-    for (auto propIter = props.begin(); propIter != props.end(); ++propIter) {
-      if ((*propIter)->name() == "Note") {
-        comment << "# " << (*propIter)->value();
+    for (auto &prop : props) {
+      if (prop->name() == "Note") {
+        comment << "# " << prop->value();
       }
     }
   }
@@ -137,8 +142,38 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
     return buildCommentString(algHistory);
 
   auto props = algHistory->getProperties();
-  for (auto propIter = props.begin(); propIter != props.end(); ++propIter) {
-    prop = buildPropertyString(*propIter);
+
+  try {
+    // create a fresh version of the algorithm - unmanaged
+    IAlgorithm_sptr algFresh = AlgorithmManager::Instance().createUnmanaged(
+        name, algHistory->version());
+    algFresh->initialize();
+
+    const auto &propsFresh = algFresh->getProperties();
+    // just get the names out of the fresh alg properties
+    std::set<std::string> freshPropNames;
+    for (const auto &propFresh : propsFresh) {
+      freshPropNames.insert(propFresh->name());
+    }
+
+    // remove properties that are not present on a fresh algorithm
+    // i.e. remove dynamically added properties
+    for (auto prop_iter = props.begin(); prop_iter != props.end();) {
+      if (std::find(freshPropNames.begin(), freshPropNames.end(),
+                    (*prop_iter)->name()) == freshPropNames.end()) {
+        prop_iter = props.erase(prop_iter);
+      } else {
+        ++prop_iter;
+      }
+    }
+
+  } catch (std::exception &) {
+    g_log.error() << "Could not create a fresh version of " << name
+                  << " version " << algHistory->version() << "\n";
+  }
+
+  for (auto &propIter : props) {
+    prop = buildPropertyString(propIter);
     if (prop.length() > 0) {
       properties << prop << ", ";
     }
@@ -153,11 +188,11 @@ ScriptBuilder::buildAlgorithmString(AlgorithmHistory_const_sptr algHistory) {
 
     std::vector<Algorithm_descriptor> descriptors =
         AlgorithmFactory::Instance().getDescriptors();
-    for (auto dit = descriptors.begin(); dit != descriptors.end(); ++dit) {
+    for (auto &descriptor : descriptors) {
       // If a newer version of this algorithm exists, then this must be an old
       // version.
-      if ((*dit).name == algHistory->name() &&
-          (*dit).version > algHistory->version()) {
+      if (descriptor.name == algHistory->name() &&
+          descriptor.version > algHistory->version()) {
         oldVersion = true;
         break;
       }
@@ -190,10 +225,7 @@ ScriptBuilder::buildPropertyString(PropertyHistory_const_sptr propHistory) {
   using Mantid::Kernel::Direction;
 
   // Create a vector of all non workspace property type names
-  std::vector<std::string> nonWorkspaceTypes;
-  nonWorkspaceTypes.push_back("number");
-  nonWorkspaceTypes.push_back("boolean");
-  nonWorkspaceTypes.push_back("string");
+  std::vector<std::string> nonWorkspaceTypes{"number", "boolean", "string"};
 
   std::string prop = "";
   // No need to specify value for default properties
@@ -203,7 +235,7 @@ ScriptBuilder::buildPropertyString(PropertyHistory_const_sptr propHistory) {
              propHistory->type()) != nonWorkspaceTypes.end() &&
         propHistory->direction() == Direction::Output) {
       g_log.debug() << "Ignoring property " << propHistory->name()
-                    << " of type " << propHistory->type() << std::endl;
+                    << " of type " << propHistory->type() << '\n';
       // Handle numerical properties
     } else if (propHistory->type() == "number") {
       prop = propHistory->name() + "=" + propHistory->value();

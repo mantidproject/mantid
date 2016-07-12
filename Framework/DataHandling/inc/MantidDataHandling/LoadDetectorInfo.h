@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -36,18 +37,18 @@ public:
   LoadDetectorInfo();
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "LoadDetectorInfo"; }
+  const std::string name() const override { return "LoadDetectorInfo"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads delay times, tube pressures, tube wall thicknesses and, if "
            "necessary, the detectors positions from a given special format "
            "file";
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Raw"; }
+  const std::string category() const override { return "DataHandling\\Raw"; }
 
 private:
   /// Simple data holder for passing the detector info around when
@@ -60,8 +61,8 @@ private:
     std::vector<double> pressures, thicknesses;
   };
 
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Cache the user input that will be frequently accessed
   void cacheInputs();

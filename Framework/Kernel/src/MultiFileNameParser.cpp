@@ -153,8 +153,8 @@ std::string suggestWorkspaceName(const std::vector<std::string> &fileNames) {
 
   // For each file name, parse the run number out of it, and add it to a
   // RunRangeList.
-  for (size_t i = 0; i < fileNames.size(); ++i) {
-    parser.parse(fileNames[i]);
+  for (const auto &fileName : fileNames) {
+    parser.parse(fileName);
     runs.addRun(parser.runs()[0][0]);
   }
 
@@ -198,21 +198,15 @@ Parser::Parser()
   ConfigServiceImpl &config = ConfigService::Instance();
 
   auto facilities = config.getFacilities();
-  for (auto itFacility = facilities.begin(); itFacility != facilities.end();
-       ++itFacility) {
-    const std::vector<InstrumentInfo> instruments =
-        (**itFacility).instruments();
+  for (auto &facility : facilities) {
+    const std::vector<InstrumentInfo> instruments = (*facility).instruments();
 
-    for (auto instrument = instruments.begin(); instrument != instruments.end();
-         ++instrument) {
-      m_validInstNames.insert(instrument->name());
-      m_validInstNames.insert(instrument->shortName());
+    for (const auto &instrument : instruments) {
+      m_validInstNames.insert(instrument.name());
+      m_validInstNames.insert(instrument.shortName());
     }
   }
 }
-
-/// Destructor.
-Parser::~Parser() {}
 
 /**
  * Takes the given multiFileName string, and calls other parts of the parser
@@ -277,7 +271,7 @@ void Parser::split() {
   // combinations of special characters, for example double commas.)
 
   // Get the extension, if there is one.
-  size_t lastDot = m_multiFileName.find_last_of(".");
+  size_t lastDot = m_multiFileName.find_last_of('.');
   if (lastDot != std::string::npos)
     m_extString = m_multiFileName.substr(lastDot);
 
@@ -288,7 +282,7 @@ void Parser::split() {
 
   // If the directory contains an instance of a comma, then the string is
   // a comma separated list of single *full* file names to load.
-  if (std::string::npos != m_dirString.find(","))
+  if (std::string::npos != m_dirString.find(','))
     throw std::runtime_error("Unable to parse.");
 
   // Slice off the directory and extension.
@@ -300,11 +294,10 @@ void Parser::split() {
     throw std::runtime_error("There does not appear to be any runs present.");
 
   // See if the user has typed in one of the available instrument names.
-  for (auto instName = m_validInstNames.begin();
-       instName != m_validInstNames.end(); ++instName) {
+  for (const auto &validInstName : m_validInstNames) {
     // USE CASELESS MATCHES HERE.
-    if (matchesFully(base, *instName + ".*", true)) {
-      m_instString = getMatchingString("^" + *instName, base, true);
+    if (matchesFully(base, validInstName + ".*", true)) {
+      m_instString = getMatchingString("^" + validInstName, base, true);
       break;
     }
   }
@@ -419,7 +412,7 @@ void RunRangeList::addRun(unsigned int run) {
     return;
 
   // Else create a new range, containing a single run, and add it to the list.
-  m_rangeList.insert(std::make_pair(run, run));
+  m_rangeList.emplace(run, run);
 
   // Now merge any ranges that are adjacent.
   m_rangeList = std::accumulate(
@@ -488,7 +481,7 @@ parseToken(std::vector<std::vector<unsigned int>> &parsedRuns,
   }
 
   // We should always end up with at least 1 unsigned int here.
-  assert(1 <= rangeDetails.size());
+  assert(!rangeDetails.empty());
 
   std::vector<std::vector<unsigned int>> runs;
 
@@ -699,16 +692,18 @@ std::string getMatchingString(const std::string &regexString,
  */
 std::string pad(unsigned int run, const std::string &instString) {
   InstrumentInfo instInfo = ConfigService::Instance().getInstrument(instString);
-  std::string prefix = instInfo.filePrefix(run) + instInfo.delimiter();
+  std::string prefix;
+  if (!instInfo.facility().noFilePrefix())
+    prefix = instInfo.filePrefix(run) + instInfo.delimiter();
   unsigned int padLength = instInfo.zeroPadding(run);
-  std::string runStr = boost::lexical_cast<std::string>(run);
+  std::string runStr = std::to_string(run);
   if (runStr.size() < padLength)
     runStr.insert(0, padLength - runStr.size(), '0');
   else if (padLength > 0 && runStr.size() > padLength)
     throw std::runtime_error(
         "Could not parse run number \"" + runStr +
         "\" since the instrument run number length required is " +
-        boost::lexical_cast<std::string>(padLength));
+        std::to_string(padLength));
   runStr.insert(0, prefix);
   return runStr;
 }
@@ -780,10 +775,10 @@ std::string &accumulateString(std::string &output,
     output += "_and_";
 
   if (runRange.first == runRange.second)
-    output += boost::lexical_cast<std::string>(runRange.first);
+    output += std::to_string(runRange.first);
   else
-    output += boost::lexical_cast<std::string>(runRange.first) + "_to_" +
-              boost::lexical_cast<std::string>(runRange.second);
+    output += std::to_string(runRange.first) + "_to_" +
+              std::to_string(runRange.second);
 
   return output;
 }

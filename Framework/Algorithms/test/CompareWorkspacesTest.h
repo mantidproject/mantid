@@ -439,10 +439,7 @@ public:
     std::size_t numBins[dims] = {10, 10, 10};
     Mantid::coord_t min[dims] = {0.0, 0.0, 0.0};
     Mantid::coord_t max[dims] = {10.0, 10.0, 10.0};
-    std::vector<std::string> names;
-    names.push_back("h");
-    names.push_back("k");
-    names.push_back("l");
+    std::vector<std::string> names{"h", "k", "l"};
     MDHistoWorkspace_sptr mdhws2 =
         MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
             3, 5.0, 1.0, numBins, min, max, names);
@@ -568,7 +565,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
         WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
-    ws2->isDistribution(true);
+    ws2->setDistribution(true);
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
@@ -726,7 +723,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
         WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
-    ws2->getSpectrum(0)->setSpectrumNo(1234);
+    ws2->getSpectrum(0).setSpectrumNo(1234);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
 
@@ -740,8 +737,8 @@ public:
                      "Spectrum number mismatch");
 
     ws2 = WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
-    ws2->getSpectrum(0)->setDetectorID(99);
-    ws2->getSpectrum(1)->setDetectorID(98);
+    ws2->getSpectrum(0).setDetectorID(99);
+    ws2->getSpectrum(1).setDetectorID(98);
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
 
@@ -1007,11 +1004,8 @@ public:
     zero->mutableRun().addProperty(
         new PropertyWithValue<double>("ExtraLog", 10));
 
-    std::map<std::string, std::string> otherProps;
-    otherProps.insert(std::make_pair("CheckSample", "1"));
-
     doGroupTest(groupOneName, groupTwoName, "Different numbers of logs",
-                otherProps);
+                {{"CheckSample", "1"}});
 
     // Cleanup
     cleanupGroup(groupOne);

@@ -4,8 +4,6 @@
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/Property.h"
 
-#include <sstream>
-
 namespace Mantid {
 namespace Kernel {
 
@@ -24,33 +22,6 @@ PropertyHistory::PropertyHistory(Property const *const prop)
       m_value(prop->value()), m_type(prop->type()),
       m_isDefault(prop->isDefault()), m_direction(prop->direction()) {}
 
-/// Destructor
-PropertyHistory::~PropertyHistory() {}
-
-/**
- * Standard Copy Constructor
- * @param A :: PropertyHistory Item to copy
- */
-PropertyHistory::PropertyHistory(const PropertyHistory &A)
-    : m_name(A.m_name), m_value(A.m_value), m_type(A.m_type),
-      m_isDefault(A.m_isDefault), m_direction(A.m_direction) {}
-
-/**
- * Standard Assignment operator
- * @param A :: PropertyHistory Item to assign to 'this'
- * @return pointer to this
- */
-PropertyHistory &PropertyHistory::operator=(const PropertyHistory &A) {
-  if (this != &A) {
-    m_name = A.m_name;
-    m_value = A.m_value;
-    m_type = A.m_type;
-    m_isDefault = A.m_isDefault;
-    m_direction = A.m_direction;
-  }
-  return *this;
-}
-
 /** Prints a text representation of itself
  *  @param os :: The ouput stream to write to
  *  @param indent :: an indentation value to make pretty printing of object and
@@ -60,7 +31,7 @@ void PropertyHistory::printSelf(std::ostream &os, const int indent) const {
   os << std::string(indent, ' ') << "Name: " << m_name;
   os << ", Value: " << m_value;
   os << ", Default?: " << (m_isDefault ? "Yes" : "No");
-  os << ", Direction: " << Kernel::Direction::asText(m_direction) << std::endl;
+  os << ", Direction: " << Kernel::Direction::asText(m_direction) << '\n';
 }
 
 /** Prints a text representation
@@ -89,9 +60,9 @@ bool PropertyHistory::isEmptyDefault() const {
   }
   // Empty values
   if (emptyValues.empty()) {
-    emptyValues.push_back(boost::lexical_cast<std::string>(EMPTY_INT()));
+    emptyValues.push_back(std::to_string(EMPTY_INT()));
     emptyValues.push_back(boost::lexical_cast<std::string>(EMPTY_DBL()));
-    emptyValues.push_back(boost::lexical_cast<std::string>(EMPTY_LONG()));
+    emptyValues.push_back(std::to_string(EMPTY_LONG()));
   }
 
   // If default, input, number type and matches empty value then return true

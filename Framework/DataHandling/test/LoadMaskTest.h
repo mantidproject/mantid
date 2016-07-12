@@ -6,8 +6,6 @@
 #include "MantidKernel/System.h"
 #include <sstream>
 
-#include "boost/assign/list_of.hpp"
-
 #include "MantidDataHandling/LoadMask.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
@@ -106,7 +104,7 @@ public:
   /*
    * Test mask by detector ID
    * For VULCAN:
-   * workspaceindex:  detector ID  :  Spectrum ID
+   * workspaceindex:  detector ID  :  Spectrum No
    * 34           :   26284        :  35
    * 1000         :   27250        :  1001
    * 2000         :   28268        :  2001
@@ -115,11 +113,11 @@ public:
    */
   void test_ISISFormat() {
     // 1. Generate masking files
-    std::vector<specid_t> singlespectra;
+    std::vector<specnum_t> singlespectra;
     singlespectra.push_back(35);
     singlespectra.push_back(1001);
     singlespectra.push_back(2001);
-    std::vector<specid_t> pairspectra;
+    std::vector<specnum_t> pairspectra;
     pairspectra.push_back(1002);
     pairspectra.push_back(1005);
     pairspectra.push_back(37);
@@ -154,12 +152,12 @@ public:
         TS_ASSERT_DELTA(y, 0.0, 1.0E-5);
         if (fabs(y) > 1.0E-5) {
           errorcounts++;
-          std::cout << "Workspace Index " << iws << " has a wrong set on masks"
-                    << std::endl;
+          std::cout << "Workspace Index " << iws
+                    << " has a wrong set on masks\n";
         }
       }
     }
-    std::cout << "Total " << errorcounts << " errors " << std::endl;
+    std::cout << "Total " << errorcounts << " errors \n";
   }
 
   /*
@@ -246,7 +244,7 @@ public:
     const std::string oldEmuIdf = "EMU_Definition_32detectors.xml";
     const std::string newEmuIdf = "EMU_Definition_96detectors.xml";
 
-    const std::vector<int> detIDs = boost::assign::list_of(2)(10);
+    const std::vector<int> detIDs = {2, 10};
     auto maskFile = genMaskingFile("emu_mask.xml", detIDs, std::vector<int>());
 
     auto byInstName =
@@ -297,9 +295,9 @@ public:
     std::stringstream ss;
 
     // 1. Header
-    ss << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << std::endl;
-    ss << "  <detector-masking>" << std::endl;
-    ss << "    <group>" << std::endl;
+    ss << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
+    ss << "  <detector-masking>\n";
+    ss << "    <group>\n";
 
     // 2. "detids" & component
     if (detids.size() > 0) {
@@ -310,16 +308,15 @@ public:
         else
           ss << detids[i];
       }
-      ss << "</detids>" << std::endl;
+      ss << "</detids>\n";
     }
 
     for (size_t i = 0; i < banks.size(); i++) {
-      ss << "<component>bank" << banks[i] << "</component>" << std::endl;
+      ss << "<component>bank" << banks[i] << "</component>\n";
     }
 
     // 4. End of file
-    ss << "  </group>" << std::endl
-       << "</detector-masking>" << std::endl;
+    ss << "  </group>\n</detector-masking>\n";
 
     return ScopedFileHelper::ScopedFile(ss.str(), maskfilename);
   }
@@ -329,15 +326,15 @@ public:
    */
   ScopedFileHelper::ScopedFile
   genISISMaskingFile(std::string maskfilename,
-                     std::vector<specid_t> singlespectra,
-                     std::vector<specid_t> pairspectra) {
+                     std::vector<specnum_t> singlespectra,
+                     std::vector<specnum_t> pairspectra) {
     std::stringstream ss;
 
     // 1. Single spectra
     for (size_t i = 0; i < singlespectra.size(); i++) {
       ss << singlespectra[i] << " ";
     }
-    ss << std::endl;
+    ss << '\n';
 
     // 2. Spectra pair
     // a) Make the list really has complete pairs
@@ -347,7 +344,7 @@ public:
     for (size_t i = 0; i < pairspectra.size(); i += 2) {
       ss << pairspectra[i] << "-" << pairspectra[i + 1] << "  ";
     }
-    ss << std::endl;
+    ss << '\n';
 
     return ScopedFileHelper::ScopedFile(ss.str(), maskfilename);
   }

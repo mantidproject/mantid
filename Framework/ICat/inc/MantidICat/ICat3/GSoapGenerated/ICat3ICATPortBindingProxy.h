@@ -30,8 +30,6 @@ public:
   ICATPortBindingProxy(const char *url, soap_mode iomode);
   /// Constructor with engine input and output mode control
   ICATPortBindingProxy(soap_mode imode, soap_mode omode);
-  /// Destructor frees deserialized data
-  virtual ~ICATPortBindingProxy();
   /// Initializer used by constructors
   virtual void ICATPortBindingProxy_init(soap_mode imode, soap_mode omode);
   /// Delete all deserialized data (with soap_destroy and soap_end)

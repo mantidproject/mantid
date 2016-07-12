@@ -24,20 +24,5 @@ IDomainCreator *DomainCreatorFactoryImpl::createDomainCreator(
   return creator;
 }
 
-//----------------------------------------------------------------------------------------------
-// Private methods
-//----------------------------------------------------------------------------------------------
-
-/**
- * Constructor
- */
-DomainCreatorFactoryImpl::DomainCreatorFactoryImpl()
-    : Kernel::DynamicFactory<IDomainCreator>() {}
-
-/**
- * Destructor
- */
-DomainCreatorFactoryImpl::~DomainCreatorFactoryImpl() {}
-
 } // namespace API
 } // namespace Mantid

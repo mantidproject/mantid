@@ -6,7 +6,6 @@
 ########################################################
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry
-import mantid
 from mantid.kernel import time_duration, DateAndTime
 import inspect
 import math
@@ -16,11 +15,15 @@ import types
 import numpy as np
 
 sanslog = Logger("SANS")
+ADDED_TAG = '-add'
 ADDED_EVENT_DATA_TAG = '_added_event_data'
-REG_DATA_NAME = '-add' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
-REG_DATA_MONITORS_NAME = '-add_monitors' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
+ADD_TAG = '-add'
+ADD_MONITORS_TAG = '-add_monitors'
+REG_DATA_NAME = ADD_TAG  + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
+REG_DATA_MONITORS_NAME = ADD_MONITORS_TAG + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
 ZERO_ERROR_DEFAULT = 1e6
 INCIDENT_MONITOR_TAG = '_incident_monitor'
+MANTID_PROCESSED_WORKSPACE_TAG = 'Mantid Processed Workspace'
 
 # WORKAROUND FOR IMPORT ISSUE IN UBUNTU --- START
 CAN_IMPORT_NXS = True
@@ -139,7 +142,7 @@ def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
 
 # Work out the spectra IDs for block of detectors
 def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
-    '''Compile a list of spectrum IDs for rectangular block of size xdim by ydim'''
+    '''Compile a list of spectrum Nos for rectangular block of size xdim by ydim'''
     output = ''
     if orientation == Orientation.Horizontal:
         start_spec = base + ylow*det_dimension + xlow
@@ -197,7 +200,15 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
     xmlstring += InfinitePlaneXML(p1id, centre, plane1Axis)
     p2id = 'pl-b'
     xmlstring += InfinitePlaneXML(p2id, centre, plane2Axis)
-    xmlstring += '<algebra val="(#((#(' + cout_id + ':(#' + cin_id  + '))) ' + p1id + ' ' + p2id + '))"/>\n'
+    
+    # The composition of the shape is "(cyl-out (#cyl-in) (pl-a:pl-b))". The breakdown is:
+    # 1. Create an infinite hollow cylinder by performing "cyl-out (#cyl-in)". This is the intersection of the
+    #    outer radius cylinder with the inverse inner radius cylinder. We have a shell-like selection
+    # 2. Create a three-quarter wedge selection by performing (pl-a:pl-b). This selects everything except
+    #    for the slice region we don't want to be masked.
+    # 3. Create the intersection between 1 and 2. This will provide a three-quarter wedge of the hollow
+    #    cylinder.
+    xmlstring += '<algebra val="((' + cout_id + ' (#' + cin_id  + ')) (' + p1id + ':' + p2id + '))"/>\n'
     return xmlstring
 
 def getWorkspaceReference(ws_pointer):
@@ -233,6 +244,7 @@ def getFilePathFromWorkspace(ws):
             try:
                 if 'Load' in hist.name():
                     file_path = hist.getPropertyValue('Filename')
+            # pylint: disable=bare-except
             except:
                 pass
     except:
@@ -699,6 +711,7 @@ def get_masked_det_ids(ws):
             break
         if det.isMasked():
             yield det.getID()
+
 def create_zero_error_free_workspace(input_workspace_name, output_workspace_name):
     '''
     Creates a cloned workspace where all zero-error values have been replaced with a large value
@@ -969,7 +982,7 @@ def transfer_special_sample_logs(from_ws, to_ws):
     # Populate the time series
     for time_series_name in time_series_names:
         if (run_from.hasProperty(time_series_name) and
-            run_to.hasProperty(time_series_name)):
+                run_to.hasProperty(time_series_name)):
 
             times = run_from.getProperty(time_series_name).times
             values = run_from.getProperty(time_series_name).value
@@ -985,7 +998,7 @@ def transfer_special_sample_logs(from_ws, to_ws):
     alg_log.setChild(True)
     for single_valued_name in single_valued_names:
         if (run_from.hasProperty(single_valued_name) and
-            run_to.hasProperty(single_valued_name)):
+                run_to.hasProperty(single_valued_name)):
             value = run_from.getProperty(single_valued_name).value
             alg_log.setProperty("Workspace", to_ws)
             alg_log.setProperty("LogName", single_valued_name)
@@ -1029,7 +1042,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
         # Get the cummulative time s
         for element in self._time_series:
             if (run_lhs.hasProperty(element) and
-                run_rhs.hasProperty(element)):
+                    run_rhs.hasProperty(element)):
                 # Get values for lhs
                 property_lhs = run_lhs.getProperty(element)
                 self._original_times_lhs[element] = property_lhs.times
@@ -1042,7 +1055,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
 
         for element in self._single_valued:
             if (run_lhs.hasProperty(element) and
-                run_rhs.hasProperty(element)):
+                    run_rhs.hasProperty(element)):
                 # Get the values for lhs
                 property_lhs = run_lhs.getProperty(element)
                 self._original_single_valued_lhs[element] = property_lhs.value
@@ -1053,7 +1066,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
 
         log_name_start_time = "start_time"
         if (run_lhs.hasProperty(log_name_start_time) and
-            run_rhs.hasProperty(log_name_start_time)):
+                run_rhs.hasProperty(log_name_start_time)):
             convert_to_date = lambda val: DateAndTime(val) if isinstance(val, str) else val
             self._start_time_lhs = convert_to_date(run_lhs.getProperty(log_name_start_time).value)
             self._start_time_rhs = convert_to_date(run_rhs.getProperty(log_name_start_time).value)
@@ -1065,7 +1078,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
         '''
         for element in self._time_series:
             if (element in self._original_times_rhs and
-                element in self._original_values_rhs):
+                    element in self._original_values_rhs):
                 run = workspace.getRun()
                 prop = run.getProperty(element)
                 prop.clear()
@@ -1312,6 +1325,15 @@ def convert_to_string_list(to_convert):
     output_string = "[" + ','.join("'"+element+"'" for element in string_list) + "]"
     return output_string
 
+def convert_to_list_of_strings(to_convert):
+    '''
+    Converts a string of comma-separted values to a list of strings
+    @param to_convert: the string to convert
+    @returns a list of strings
+    '''
+    values = to_convert.split(",")
+    return [element.strip() for element in values]
+
 def can_load_as_event_workspace(filename):
     '''
     Check if an file can be loaded into an event workspace
@@ -1382,7 +1404,7 @@ def get_start_q_and_end_q_values(rear_data_name, front_data_name, rescale_shift)
 
     if  rear_q_max < front_q_min:
         raise RuntimeError("The min value of the FRONT detector data set is larger"
-                            "than the max value of the REAR detector data set")
+                           "than the max value of the REAR detector data set")
 
     # Get the min and max range
     min_q = max(rear_q_min, front_q_min)
@@ -1512,7 +1534,7 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
 
     # We need to make sure that the workspaces match in length
     if ((len(q_resolution_front) != len(q_resolution_rear)) or
-       (len(counts_front) != len(counts_rear))):
+            (len(counts_front) != len(counts_rear))):
         return
 
     # Get everything for the FRONT detector
@@ -1531,6 +1553,131 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
     # Set the dx error
     output_ws.setDx(0, q_resolution)
 
+
+class MeasurementTimeFromNexusFileExtractor(object):
+    '''
+    Extracts the measurement from a nexus file
+    '''
+    def __init__(self):
+        super(MeasurementTimeFromNexusFileExtractor, self).__init__()
+
+    def _get_measurement_time_processed_file(self, nxs_file):
+        nxs_file.opengroup('logs')
+        nxs_file.opengroup('end_time')
+        nxs_file.opendata('value')
+        data =  nxs_file.getdata()
+        return data
+
+    def _get_measurement_time_for_non_processed_file(self, nxs_file):
+        nxs_file.opendata('end_time')
+        return nxs_file.getdata()
+
+    def _check_if_processed_nexus_file(self, nxs_file):
+        nxs_file.opendata('definition')
+        mantid_definition = nxs_file.getdata()
+        nxs_file.closedata()
+
+        is_processed = True if MANTID_PROCESSED_WORKSPACE_TAG in mantid_definition else False
+        return is_processed
+
+    def get_measurement_time(self, filename_full):
+        measurement_time = ''
+        # Need to make sure that NXS module can be imported
+        if CAN_IMPORT_NXS:
+            try:
+                nxs_file = nxs.open(filename_full, 'r')
+            # pylint: disable=bare-except
+                try:
+                    rootKeys =  nxs_file.getentries().keys()
+                    nxs_file.opengroup(rootKeys[0])
+                    is_processed_file = self._check_if_processed_nexus_file(nxs_file)
+                    if is_processed_file:
+                        measurement_time = self._get_measurement_time_processed_file(nxs_file)
+                    else:
+                        measurement_time = self._get_measurement_time_for_non_processed_file(nxs_file)
+                except:
+                    sanslog.warning("Failed to retrieve the measurement time for " + str(filename_full))
+                finally:
+                    nxs_file.close()
+            except ValueError, NeXusError:
+                sanslog.warning("Failed to open the file: " + str(filename_full))
+        return measurement_time
+
+
+def get_measurement_time_from_file(filename):
+    '''
+    This function extracts the measurement time from either a Nexus or a
+    Raw file. In the case of a Nexus file it queries the "end_run" entry,
+    in the case of a raw file it uses the RawFileInfo algorithm to get
+    the relevant dateTime.
+    @param filename: the file to check
+    @returns the measurement time
+    '''
+    def get_month(month_string):
+        month_conversion ={"JAN":"01", "FEB":"02", "MAR":"03", "APR":"04",
+                           "MAY":"05", "JUN":"06", "JUL":"07", "AUG":"08",
+                           "SEP":"09", "OCT":"10", "NOV":"11", "DEC":"12"}
+        month_upper = month_string.upper()
+        if month_upper in month_conversion:
+            return month_conversion[month_upper]
+        else:
+            raise RuntimeError("Cannot get measurement time. Invalid month in Raw file: " + month_upper)
+
+    def get_raw_measurement_time(date, time):
+        '''
+        Takes the date and time from the raw workspace and creates the correct format
+        @param date: the date part
+        @param time: the time part
+        '''
+        year = date[7:(7+4)]
+        day = date[0:2]
+        month_string = date[3:6]
+        month = get_month(month_string)
+
+        date_and_time_string = year + "-" + month + "-" + day + "T" + time
+        date_and_time = DateAndTime(date_and_time_string)
+        return date_and_time.__str__().strip()
+
+    def get_file_path(run_string):
+        listOfFiles = FileFinder.findRuns(run_string)
+        firstFile = listOfFiles[0]
+        return firstFile
+
+    measurement_time = ""
+    filename_capital = filename.upper()
+
+    filename_full = get_file_path(filename)
+
+    if filename_capital.endswith(".RAW"):
+        RawFileInfo(Filename = filename_full, GetRunParameters = True)
+        time_id = "r_endtime"
+        date_id = "r_enddate"
+        file_info = mtd['Raw_RPB']
+        keys =  file_info.getColumnNames()
+        time = []
+        date = []
+        if time_id  in keys:
+            time = file_info.column(keys.index(time_id))
+        if date_id  in keys:
+            date = file_info.column(keys.index(date_id))
+        time = time[0]
+        date =date[0]
+        measurement_time = get_raw_measurement_time(date, time)
+        DeleteWorkspace(file_info)
+    else:
+        nxs_extractor = MeasurementTimeFromNexusFileExtractor()
+        measurement_time = nxs_extractor.get_measurement_time(filename_full)
+    return str(measurement_time).strip()
+
+def are_two_files_identical(file_path_1, file_path_2):
+    '''
+    We want to make sure that two files are binary identical.
+    @file_path_1: first file path
+    @file_path_2: second file path
+    @returns True if the files are identical else False
+    '''
+    import filecmp
+    return filecmp.cmp(file_path_1, file_path_2)
 
 def is_valid_user_file_extension(user_file):
     '''
@@ -1584,7 +1731,6 @@ def extract_fit_parameters(rAnds):
     else:
         fit_mode = "None"
     return scale_factor, shift_factor, fit_mode
-
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

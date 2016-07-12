@@ -3,8 +3,11 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CorrectKiKf.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -21,28 +24,20 @@ using namespace DataObjects;
 using namespace Geometry;
 using std::size_t;
 
-/// Default constructor
-CorrectKiKf::CorrectKiKf() : Algorithm() {}
-
-/// Destructor
-CorrectKiKf::~CorrectKiKf() {}
-
 /// Initialisation method
 void CorrectKiKf::init() {
   auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("DeltaE");
 
   this->declareProperty(
-      new WorkspaceProperty<API::MatrixWorkspace>(
+      make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input, wsValidator),
       "Name of the input workspace");
   this->declareProperty(
-      new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "",
-                                                  Direction::Output),
+      make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "Name of the output workspace, can be the same as the input");
 
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Direct");
-  propOptions.push_back("Indirect");
+  std::vector<std::string> propOptions{"Direct", "Indirect"};
   this->declareProperty("EMode", "Direct",
                         boost::make_shared<StringListValidator>(propOptions),
                         "The energy mode (default: Direct)");
@@ -55,28 +50,27 @@ void CorrectKiKf::init() {
 
 void CorrectKiKf::exec() {
   // Get the workspaces
-  this->inputWS = this->getProperty("InputWorkspace");
-  this->outputWS = this->getProperty("OutputWorkspace");
-
-  // If input and output workspaces are not the same, create a new workspace for
-  // the output
-  if (this->outputWS != this->inputWS) {
-    this->outputWS = API::WorkspaceFactory::Instance().create(this->inputWS);
-  }
+  MatrixWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
+  MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
 
   // Check if it is an event workspace
   EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (eventW != NULL) {
+  if (eventW != nullptr) {
     this->execEvent();
     return;
   }
 
-  const size_t size = this->inputWS->blocksize();
+  // If input and output workspaces are not the same, create a new workspace for
+  // the output
+  if (outputWS != inputWS) {
+    outputWS = API::WorkspaceFactory::Instance().create(inputWS);
+  }
+
+  const size_t size = inputWS->blocksize();
   // Calculate the number of spectra in this workspace
-  const int numberOfSpectra = static_cast<int>(this->inputWS->size() / size);
+  const int numberOfSpectra = static_cast<int>(inputWS->size() / size);
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
-  const bool histogram = this->inputWS->isHistogramData();
   bool negativeEnergyWarning = false;
 
   const std::string emodeStr = getProperty("EMode");
@@ -85,8 +79,8 @@ void CorrectKiKf::exec() {
   if (efixedProp == EMPTY_DBL()) {
     if (emodeStr == "Direct") {
       // Check if it has been store on the run object for this workspace
-      if (this->inputWS->run().hasProperty("Ei")) {
-        Kernel::Property *eiprop = this->inputWS->run().getProperty("Ei");
+      if (inputWS->run().hasProperty("Ei")) {
+        Kernel::Property *eiprop = inputWS->run().getProperty("Ei");
         efixedProp = boost::lexical_cast<double>(eiprop->value());
         g_log.debug() << "Using stored Ei value " << efixedProp << "\n";
       } else {
@@ -138,13 +132,13 @@ void CorrectKiKf::exec() {
 
     MantidVec &yOut = outputWS->dataY(i);
     MantidVec &eOut = outputWS->dataE(i);
-    const MantidVec &xIn = inputWS->readX(i);
+    const auto &xIn = inputWS->points(i);
     const MantidVec &yIn = inputWS->readY(i);
     const MantidVec &eIn = inputWS->readE(i);
     // Copy the energy transfer axis
     outputWS->setX(i, inputWS->refX(i));
     for (unsigned int j = 0; j < size; ++j) {
-      const double deltaE = histogram ? 0.5 * (xIn[j] + xIn[j + 1]) : xIn[j];
+      const double deltaE = xIn[j];
       double Ei = 0.;
       double Ef = 0.;
       double kioverkf = 1.;
@@ -176,11 +170,10 @@ void CorrectKiKf::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   if (negativeEnergyWarning)
-    g_log.information() << "Ef <= 0 or Ei <= 0 in at least one spectrum!!!!"
-                        << std::endl;
+    g_log.information() << "Ef <= 0 or Ei <= 0 in at least one spectrum!!!!\n";
   if ((negativeEnergyWarning) && (efixedProp == EMPTY_DBL()))
-    g_log.information() << "Try to set fixed energy" << std::endl;
-  this->setProperty("OutputWorkspace", this->outputWS);
+    g_log.information() << "Try to set fixed energy\n";
+  this->setProperty("OutputWorkspace", outputWS);
   return;
 }
 
@@ -193,31 +186,17 @@ void CorrectKiKf::execEvent() {
   g_log.information("Processing event workspace");
 
   const MatrixWorkspace_const_sptr matrixInputWS =
-      this->getProperty("InputWorkspace");
-  EventWorkspace_const_sptr inputWS =
+      getProperty("InputWorkspace");
+  auto inputWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
 
   // generate the output workspace pointer
-  API::MatrixWorkspace_sptr matrixOutputWS =
-      this->getProperty("OutputWorkspace");
-  EventWorkspace_sptr outputWS;
-  if (matrixOutputWS == matrixInputWS)
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
-  else {
-    // Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                           false);
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom((*inputWS));
-
-    // Cast to the matrixOutputWS and save it
-    matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
-    this->setProperty("OutputWorkspace", matrixOutputWS);
+  API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
+  if (matrixOutputWS != matrixInputWS) {
+    matrixOutputWS = matrixInputWS->clone();
+    setProperty("OutputWorkspace", matrixOutputWS);
   }
+  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   const std::string emodeStr = getProperty("EMode");
   double efixedProp = getProperty("EFixed"), efixed;
@@ -225,8 +204,8 @@ void CorrectKiKf::execEvent() {
   if (efixedProp == EMPTY_DBL()) {
     if (emodeStr == "Direct") {
       // Check if it has been store on the run object for this workspace
-      if (this->inputWS->run().hasProperty("Ei")) {
-        Kernel::Property *eiprop = this->inputWS->run().getProperty("Ei");
+      if (inputWS->run().hasProperty("Ei")) {
+        Kernel::Property *eiprop = inputWS->run().getProperty("Ei");
         efixedProp = boost::lexical_cast<double>(eiprop->value());
         g_log.debug() << "Using stored Ei value " << efixedProp << "\n";
       } else {
@@ -285,20 +264,20 @@ void CorrectKiKf::execEvent() {
       efixed = efixedProp;
 
     // Do the correction
-    EventList *evlist = outputWS->getEventListPtr(i);
-    switch (evlist->getEventType()) {
+    auto &evlist = outputWS->getSpectrum(i);
+    switch (evlist.getEventType()) {
     case TOF:
       // Switch to weights if needed.
-      evlist->switchTo(WEIGHTED);
+      evlist.switchTo(WEIGHTED);
     /* no break */
     // Fall through
 
     case WEIGHTED:
-      correctKiKfEventHelper(evlist->getWeightedEvents(), efixed, emodeStr);
+      correctKiKfEventHelper(evlist.getWeightedEvents(), efixed, emodeStr);
       break;
 
     case WEIGHTED_NOTIME:
-      correctKiKfEventHelper(evlist->getWeightedEventsNoTime(), efixed,
+      correctKiKfEventHelper(evlist.getWeightedEventsNoTime(), efixed,
                              emodeStr);
       break;
     }
@@ -313,9 +292,9 @@ void CorrectKiKf::execEvent() {
     g_log.information() << "Ef <= 0 or Ei <= 0 for "
                         << inputWS->getNumberEvents() -
                                outputWS->getNumberEvents() << " events, out of "
-                        << inputWS->getNumberEvents() << std::endl;
+                        << inputWS->getNumberEvents() << '\n';
     if (efixedProp == EMPTY_DBL())
-      g_log.information() << "Try to set fixed energy" << std::endl;
+      g_log.information() << "Try to set fixed energy\n";
   }
 }
 

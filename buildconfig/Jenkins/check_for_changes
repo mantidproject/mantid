@@ -1,0 +1,45 @@
+#!/bin/bash -ex
+# return 1 if have matches
+# return 0 if no matches
+FOUND=1
+NOTFOUND=0
+
+TYPE=${1}
+# Assume the current commit is the merged commit created by GitHub.
+# The first and second parents will be the PR target branch & PR branch
+# that is being merged, resepectively. We want the files changes between the 
+# base and tail commits of the branch
+BRANCH_TIP=$(git rev-parse HEAD^2)
+BRANCH_BASE=$(git merge-base HEAD^2 HEAD^1)
+echo "Looking for files changed between ${BRANCH_BASE} and ${BRANCH_TIP}"
+
+case "$TYPE" in
+    py)
+        exit $(git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.py)
+    ;;
+    cpp)
+        if $(! git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.h)
+        then
+            exit $FOUND
+        fi
+        if $(! git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cpp)
+        then
+            exit $FOUND
+        fi
+        if $(! git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cxx)
+        then
+            exit $FOUND
+        fi
+        if $(! git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.tcc)
+        then
+            exit $FOUND
+        fi
+        exit $NOTFOUND
+    ;;
+    *)
+        echo "do not have case for type \"$TYPE\""
+    ;;
+esac
+
+# fall-through behavior is that it matches
+exit $FOUND

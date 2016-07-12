@@ -47,24 +47,26 @@ public:
   /// constructor
   CatalogMyDataSearch() : API::Algorithm() {}
   /// destructor
-  ~CatalogMyDataSearch() {}
+  ~CatalogMyDataSearch() override {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "CatalogMyDataSearch"; }
+  const std::string name() const override { return "CatalogMyDataSearch"; }
   /// Summary of algorithms purpose.
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Obtains the user's investigations for all active catalogs and "
            "stores them into a workspace.";
   }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Catalog"; }
+  const std::string category() const override {
+    return "DataHandling\\Catalog";
+  }
 
 private:
   /// Overwrites Algorithm init method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm exec method
-  void exec();
+  void exec() override;
 };
 }
 }

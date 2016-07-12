@@ -631,7 +631,7 @@ private:
 
   public:
     TestablePoldiIndexKnownCompounds() : PoldiIndexKnownCompounds() {}
-    ~TestablePoldiIndexKnownCompounds() {}
+    ~TestablePoldiIndexKnownCompounds() override {}
   };
 
   void setupWorkspaceStructure() {

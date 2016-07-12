@@ -21,10 +21,9 @@ namespace {
 EventWorkspaceCollection_uptr
 makeEventWorkspaceCollection(unsigned int decoratorSize) {
 
-  EventWorkspaceCollection_uptr decorator(new EventWorkspaceCollection);
+  auto decorator = make_unique<EventWorkspaceCollection>();
 
-  std::unique_ptr<const TimeSeriesProperty<int>> periodLog(
-      new const TimeSeriesProperty<int>("period_log"));
+  auto periodLog = make_unique<const TimeSeriesProperty<int>>("period_log");
 
   decorator->setNPeriods(decoratorSize, periodLog);
 
@@ -58,8 +57,7 @@ public:
   void test_output_multiple_workspaces() {
     EventWorkspaceCollection decorator;
 
-    std::unique_ptr<const TimeSeriesProperty<int>> periodLog(
-        new const TimeSeriesProperty<int>("period_log"));
+    auto periodLog = make_unique<const TimeSeriesProperty<int>>("period_log");
     decorator.setNPeriods(3, periodLog);
 
     WorkspaceGroup_sptr outWS = boost::dynamic_pointer_cast<WorkspaceGroup>(

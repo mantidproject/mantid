@@ -26,6 +26,7 @@
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidDataObjects/MDEvent.h"
+#include <mutex>
 
 namespace Mantid {
 namespace API {
@@ -50,37 +51,39 @@ public:
   /// Constructor
   ResolutionConvolvedCrossSection();
   /// Destructor
-  ~ResolutionConvolvedCrossSection();
+  ~ResolutionConvolvedCrossSection() override;
   /// Name for the function
-  std::string name() const { return "ResolutionConvolvedCrossSection"; }
+  std::string name() const override {
+    return "ResolutionConvolvedCrossSection";
+  }
   /// Function category
-  virtual const std::string category() const { return "Quantification"; }
+  const std::string category() const override { return "Quantification"; }
 
   /// Declare the attributes associated with this function
-  void declareAttributes();
+  void declareAttributes() override;
   /// Declare model parameters.
-  void declareParameters();
+  void declareParameters() override;
 
   /// Evaluate the function across the domain
   void function(const API::FunctionDomain &domain,
-                API::FunctionValues &values) const;
+                API::FunctionValues &values) const override;
   /// Return the signal contribution for the given box
-  double functionMD(const API::IMDIterator &box) const;
+  double functionMD(const API::IMDIterator &box) const override;
   /// Store the simulated events in the given workspace
   void storeSimulatedEvents(const API::IMDEventWorkspace_sptr &resultWS);
 
 private:
   /// Override the call to set the workspace here
-  void setWorkspace(boost::shared_ptr<const API::Workspace> workspace);
+  void setWorkspace(boost::shared_ptr<const API::Workspace> workspace) override;
   /// Fit is about to start
-  void setUpForFit();
+  void setUpForFit() override;
   /// Returns an estimate of the number of progress reports a single evaluation
   /// of the function will have.
-  int64_t estimateNoProgressCalls() const;
+  int64_t estimateNoProgressCalls() const override;
   /// Set a value to a named attribute. Ensures additional parameters are set
   /// when foreground is set
   void setAttribute(const std::string &name,
-                    const API::IFunction::Attribute &value);
+                    const API::IFunction::Attribute &value) override;
   /// Set a pointer to the concrete convolution object
   void setupResolutionFunction(const std::string &name,
                                const std::string &fgModelName);
@@ -89,7 +92,7 @@ private:
                                 API::FunctionValues &functionValues) const;
 
   /// Mutex to protect storing the function values
-  mutable Poco::FastMutex m_valuesMutex;
+  mutable std::mutex m_valuesMutex;
   /// Flag that marks if this is a simulation store each event
   bool m_simulation;
   /// The meat of the calculation for each MD point

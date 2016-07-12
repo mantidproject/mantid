@@ -16,8 +16,6 @@
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidGeometry/MDGeometry/QLab.h"
 
-#include <boost/assign.hpp>
-
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
@@ -75,7 +73,7 @@ public:
   }
   static void destroySuite(ConvertToReflectometryQTest *suite) { delete suite; }
 
-  void setUp() { Mantid::API::FrameworkManager::Instance(); }
+  void setUp() override { Mantid::API::FrameworkManager::Instance(); }
 
   void test_name() {
     ConvertToReflectometryQ alg;
@@ -271,11 +269,10 @@ public:
 
     const int splitThreshold = 3;
     const int splitInto = 6;
+    const std::vector<int> splitIntoVec = {splitInto};
     const int maxDepth = 12;
     alg->setProperty("SplitThreshold", splitThreshold);
-    alg->setProperty("SplitInto",
-                     boost::assign::list_of(splitInto)
-                         .convert_to_container<std::vector<int>>());
+    alg->setProperty("SplitInto", splitIntoVec);
     alg->setProperty("MaxRecursionDepth", maxDepth);
 
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -299,7 +296,7 @@ private:
   WorkspaceGroup_sptr ws;
 
 public:
-  void setUp() {
+  void setUp() override {
     // Load some data
     IAlgorithm *loadalg = FrameworkManager::Instance().createAlgorithm("Load");
     loadalg->setRethrows(true);

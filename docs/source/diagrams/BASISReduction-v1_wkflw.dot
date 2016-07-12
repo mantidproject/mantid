@@ -1,0 +1,147 @@
+digraph BASISReduction {
+  label = "BASISReduction Flowchart"
+  $global_style
+
+  subgraph algorithms {
+    $algorithm_style
+    loadMaskFile                [label="load mask file"]
+    aggregateV                  [label="aggregate Vanadium runs"]
+    maskDetectors               [label="mask detectors"]
+    moderatorTzeroLinear        [label="remove emission delay from moderator"]
+    convertUnitsToWavelength    [label="convert units to wavelength"]
+    moderatorTzeroLinearM       [label="Monitor: remove emission delay from moderator"]
+    convertUnitsToWavelengthM   [label="Monitor: convert units to wavelength"]
+    OneMinusExponentialCorM     [label="Monitor: exponential correction"]
+    divideByMonitor             [label="divide by monitor"]
+    integrateWavelengthV        [label="integrate along wavelength axis"]
+    findDetectorsOutsideLimitsV [label="find detectors with low Vanadium signal"]
+    convertUnitsToEnergyV       [label="convert to energy transfer"]
+    correctKiKfV                [label="scale by k_i/k_f"]
+    RebinEnergy                 [label="rebin to specified energy parameters"]
+    groupingDetectorsV          [label="group the detectors"]
+    SofQW3V                     [label="transform to momentum and energy transfer"]
+    aggregateS                  [label="aggregate sample runs"]
+    maskDetectors2              [label="mask detectors"]
+    DivideByVanadiumDetectorID  [label="divide by Vanadium"]
+    DivideByVanadiumQslice      [label="divide by Vanadium"]
+    saveToDaveGroup             [label="save to Dave group file"]
+    saveToNexus                 [label="save to Nexus file"]
+    integrateVanadiumAroundElasticLine [label="integrate Vanadium\naround the elastic line"]
+
+}
+
+  subgraph params {
+    $param_style
+    maskFile            [label="MaskFile"]
+    defaultMaskFile     [label="DEFAULT_MASK_FILE"]
+    NormRunNumbers      [label="Vanadium run numbers"]
+    NormWavelengthRange [label="wavelength integration range"]
+    groupDetectors      [label="group detectors by tube or low-resolution"]
+    runNumbers          [label="sample run numbers"]
+  }
+
+  subgraph decisions {
+    $decision_style
+    checkMaskFile               [label="custom mask file?"]
+    checkDivideByVanadium       [label="divide by vanadium?"]
+    checkMonNorm                [label="do monitor normalization?"]
+    checkByQSlice               [label="normalization by Q slice?"]
+    checkNormalizeByDetectorID2 [label="normalize by detectorID?"]
+    checkgroupDetectors         [label="do we group detectors?"]
+    checkIsVanadium             [label="processing Vanadium or sample?"]
+    checkDivideByVanadium2      [label="divide by vanadium?"]
+    checkIsVanadium2            [label="processing Vanadium or sample?"]
+    checkNormalizeByDetectorID  [label="normalize by detectorID?"]
+    checkNormalizeByQslice      [label="normalize by Q slice"]
+    checkDivideByVanadium3      [label="divide by vanadium?"]
+    checkDivideByVanadium4      [label="divide by vanadium?"]
+  }
+
+  subgraph values {
+    $value_style
+    maskData                    [label="mask"]
+    basisNormMask               [label="low Vanadium mask"]
+    vanadiumStructureFactorL    [label="Sv(lambda)"]
+    vanadiumStructureFactorQE   [label="Sv(Q,E)"]
+    vanadiumStructureFactorQ    [label="Sv(Q)"]
+    sampleStructureFactor       [label="Ss(Q,E)"]
+    datFile                     [label="_sqw.dat file"]
+    dividedDatFile              [label="_divided_sqw.dat file"]
+    sqwFile                     [label="_sqw.nxs file"]
+    dividedSqwFile              [label="_divided_sqw.nxs file"]
+  }
+
+  checkMaskFile         -> maskFile         [label="Yes"]
+  checkMaskFile         -> defaultMaskFile  [label="No"]
+  maskFile              -> loadMaskFile
+  defaultMaskFile       -> loadMaskFile
+  loadMaskFile          -> maskData
+
+  checkDivideByVanadium -> aggregateV       [label="Yes"]
+  NormRunNumbers        -> aggregateV
+  runNumbers            -> aggregateS
+  aggregateS            -> maskDetectors
+  aggregateV            -> maskDetectors
+  maskData              -> maskDetectors
+  maskDetectors         -> moderatorTzeroLinear
+  moderatorTzeroLinear  -> convertUnitsToWavelength
+
+  convertUnitsToWavelength  -> checkMonNorm
+  checkMonNorm              -> moderatorTzeroLinearM [label="Yes"]
+  checkMonNorm              -> checkIsVanadium       [label="No"]
+  moderatorTzeroLinearM     -> convertUnitsToWavelengthM
+  convertUnitsToWavelengthM -> OneMinusExponentialCorM
+  OneMinusExponentialCorM   -> divideByMonitor
+  divideByMonitor           -> checkIsVanadium
+
+
+
+  checkIsVanadium               -> checkNormalizeByDetectorID2  [label="Vanadium"]
+  checkNormalizeByDetectorID2   -> integrateWavelengthV         [label="Yes"]
+  checkNormalizeByDetectorID2   -> findDetectorsOutsideLimitsV  [label="No"]
+  checkIsVanadium               -> checkDivideByVanadium2       [label="Sample"]
+  NormWavelengthRange           -> integrateWavelengthV
+  integrateWavelengthV          -> vanadiumStructureFactorL
+  vanadiumStructureFactorL      -> findDetectorsOutsideLimitsV
+  findDetectorsOutsideLimitsV   -> basisNormMask
+  findDetectorsOutsideLimitsV   -> checkByQSlice
+
+
+
+  checkDivideByVanadium2        -> maskDetectors2 [label="Yes"]
+  basisNormMask                 -> maskDetectors2
+  maskDetectors2                -> checkNormalizeByDetectorID
+  checkNormalizeByDetectorID    -> DivideByVanadiumDetectorID [label="Yes"]
+  vanadiumStructureFactorL      -> DivideByVanadiumDetectorID
+  checkNormalizeByDetectorID    -> convertUnitsToEnergyV [label="No"]
+  checkDivideByVanadium2        -> convertUnitsToEnergyV [label="No"]
+  DivideByVanadiumDetectorID    -> convertUnitsToEnergyV [label="Yes"]
+
+  checkByQSlice         -> convertUnitsToEnergyV    [label="Yes"]
+  convertUnitsToEnergyV -> correctKiKfV
+  correctKiKfV          -> RebinEnergy
+  RebinEnergy           -> checkgroupDetectors
+  groupDetectors        -> checkgroupDetectors
+  checkgroupDetectors   -> groupingDetectorsV       [label="Yes"]
+  groupingDetectorsV    -> SofQW3V
+  checkgroupDetectors   -> SofQW3V                  [label="No"]
+  SofQW3V               -> checkIsVanadium2
+  checkIsVanadium2      -> vanadiumStructureFactorQE [label="Vanadium"]
+  checkIsVanadium2      -> checkNormalizeByQslice   [label="Sample"]
+
+  checkNormalizeByQslice    -> integrateVanadiumAroundElasticLine [label="Yes"]
+  vanadiumStructureFactorQE -> integrateVanadiumAroundElasticLine
+  integrateVanadiumAroundElasticLine -> vanadiumStructureFactorQ
+  vanadiumStructureFactorQ  -> DivideByVanadiumQslice
+
+  DivideByVanadiumQslice    -> sampleStructureFactor
+  checkNormalizeByQslice    -> sampleStructureFactor    [label="No"]
+  sampleStructureFactor     -> saveToDaveGroup
+  saveToDaveGroup           -> checkDivideByVanadium3
+  checkDivideByVanadium3    -> datFile                  [label="No"]
+  checkDivideByVanadium3    -> dividedDatFile           [label="Yes"]
+  sampleStructureFactor     -> saveToNexus
+  saveToNexus               -> checkDivideByVanadium4
+  checkDivideByVanadium4    -> sqwFile                  [label="No"]
+  checkDivideByVanadium4    -> dividedSqwFile           [label="Yes"]
+}

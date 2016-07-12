@@ -4,11 +4,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 TomoPathsConfig::TomoPathsConfig()
-    : m_pathBase("/work/imat/phase_commissioning/"),      
-      m_pathFITS(m_pathBase + "data/sample"),
-      m_pathFlat(m_pathBase + "data/ob"),
-      m_pathDark(m_pathBase + "data/di"),
-      m_pathScriptsTools(m_pathBase + "runs_scripts"){}
+    : m_pathOpenBeamEnabled(true), m_pathDarkEnabled(true),
+      m_pathBase("/work/imat/phase_commissioning/"),
+      m_pathFITS(m_pathBase + "data"), m_pathFlat(m_pathBase + "flat"),
+      m_pathDark(m_pathBase + "dark") {}
 
 bool TomoPathsConfig::validate() const {
   // TODO: too simple for now

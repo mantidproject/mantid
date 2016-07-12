@@ -59,10 +59,6 @@ class MANTID_GEOMETRY_DLL UnitCell {
 public:
   // Default constructor. a = b = c = 1, alpha = beta = gamma = 90 degrees
   UnitCell();
-  // Copy constructor
-  UnitCell(const UnitCell &other);
-  // Copy constructor
-  UnitCell(const UnitCell *other);
   // a,b,c constructor
   UnitCell(const double _a, const double _b, const double _c);
   // a,b,c,alpha,beta,gamma constructor
@@ -70,7 +66,7 @@ public:
            const double _alpha, const double _beta, const double _gamma,
            const int angleunit = angDegrees);
   // Destructor
-  virtual ~UnitCell();
+  virtual ~UnitCell() = default;
 
   // Get and set lattice parameters
   // Direct lattice parameters, angle in radians.

@@ -82,13 +82,13 @@ public:
   static const std::string R_CENTERED() { return "R"; }
 
 private:
-  void init(size_t form_num, double a_a, double b_b, double c_c, double b_c,
+  void init(size_t f_num, double a_a, double b_b, double c_c, double b_c,
             double a_c, double a_b);
   void foot_note_b(double a_a, double a_c);
   void foot_note_c(double b_b, double b_c);
   void foot_note_d(double c_c, double b_c);
   void foot_note_e(double a_a, double c_c, double a_c);
-  void foot_note_f(double b_b, double c_c, double a_c);
+  void foot_note_f(double b_b, double c_c, double b_c);
   void premultiply(size_t index);
   std::vector<double> norm_vals(const ReducedCell &info) const;
 

@@ -21,10 +21,8 @@ class QLabel;
  * a widget that is to be displayed within the CreateSampleShapeDialog.
  * The base class exists so that they can be stored in a container.
  */
-namespace MantidQt
-{
-namespace CustomDialogs
-{
+namespace MantidQt {
+namespace CustomDialogs {
 
 // Forward declartion
 class ShapeDetails;
@@ -32,16 +30,15 @@ class ShapeDetails;
 /**
  * A custom group box for a 3D point
  */
-class PointGroupBox : public QGroupBox
-{
+class PointGroupBox : public QGroupBox {
   Q_OBJECT
 
 public:
-  //Default constructor
-  PointGroupBox(QWidget* parent = 0);
+  // Default constructor
+  PointGroupBox(QWidget *parent = 0);
 
-  ///Write the element tag for a 3D point
-  QString write3DElement(const QString & elem_name) const;
+  /// Write the element tag for a 3D point
+  QString write3DElement(const QString &elem_name) const;
 
 private slots:
   // Switch to cartesian coordinates
@@ -50,25 +47,24 @@ private slots:
   void changeToSpherical();
 
 private:
-  //Labels for fields
+  // Labels for fields
   QLabel *m_xlabel, *m_ylabel, *m_zlabel;
   // Edit fields (also used for r,theta,phi) if in spherical mode
   QLineEdit *m_midx, *m_midy, *m_midz;
-  //Unit choice boxes (x is used for r in spherical mode)
+  // Unit choice boxes (x is used for r in spherical mode)
   QComboBox *m_xunits, *m_yunits, *m_zunits;
-  //Radio button selection for coordinates
+  // Radio button selection for coordinates
   QRadioButton *m_cartesian, *m_spherical;
-  //The current coordinate system (0 = cartesian, 1 = spherical)
+  // The current coordinate system (0 = cartesian, 1 = spherical)
   int m_icoord;
 };
 
-
 /**
  * A struct describing a binary operation
- * Note: The constructor takes an integer where 0 = intersection, 1 = union and 2 = difference
+ * Note: The constructor takes an integer where 0 = intersection, 1 = union and
+ * 2 = difference
  */
-struct Operation
-{
+struct Operation {
   /// Default constructor
   Operation(int op = 0) : binaryop(op) {}
 
@@ -82,70 +78,64 @@ struct Operation
 /**
  * Base instantiator to store in a map
  */
-struct BaseInstantiator
-{
+struct BaseInstantiator {
   /// Default constructor
   BaseInstantiator() {}
   /// Virtual destructor
   virtual ~BaseInstantiator() {}
-  ///Create an instance
-virtual ShapeDetails* createInstance() const = 0;
+  /// Create an instance
+  virtual ShapeDetails *createInstance() const = 0;
+
 private:
   /// Private copy constructor
-  BaseInstantiator(const BaseInstantiator&);
+  BaseInstantiator(const BaseInstantiator &);
   /// Private assignment operator
-  BaseInstantiator& operator =(const BaseInstantiator&);
+  BaseInstantiator &operator=(const BaseInstantiator &);
 };
 
 /**
  * A structure used for holding the type of a details widget
  */
-template<class T>
-struct ShapeDetailsInstantiator : public BaseInstantiator
-{
+template <class T> struct ShapeDetailsInstantiator : public BaseInstantiator {
   /// Default constructor
   ShapeDetailsInstantiator() {}
-  ///Create an instance of this type
-  ShapeDetails* createInstance() const
-  {
-    return static_cast<ShapeDetails*>(new T);
+  /// Create an instance of this type
+  ShapeDetails *createInstance() const override {
+    return static_cast<ShapeDetails *>(new T);
   }
 
 private:
   /// Private copy constructor
-  ShapeDetailsInstantiator(const ShapeDetailsInstantiator&);
+  ShapeDetailsInstantiator(const ShapeDetailsInstantiator &);
   /// Private assignment operator
-  ShapeDetailsInstantiator& operator =(const ShapeDetailsInstantiator&);
+  ShapeDetailsInstantiator &operator=(const ShapeDetailsInstantiator &);
 };
 
 /**
  * The base class for the details widgets
  */
-class ShapeDetails : public QWidget
-{
+class ShapeDetails : public QWidget {
   Q_OBJECT
 
 public:
-  ///Constructor
-  ShapeDetails(QWidget *parent = 0) : QWidget(parent), m_idvalue(""), m_isComplement(false) {}
-  ///Constructor
-  virtual ~ShapeDetails() {}
+  /// Constructor
+  ShapeDetails(QWidget *parent = 0)
+      : QWidget(parent), m_idvalue(""), m_isComplement(false) {}
+  /// Constructor
+  ~ShapeDetails() override {}
 
-  ///Write out the XML definition for this shape
+  /// Write out the XML definition for this shape
   virtual QString writeXML() const = 0;
 
   /// Get the id string
-  QString getShapeID() const
-  {
-    return m_idvalue;
-  }
+  QString getShapeID() const { return m_idvalue; }
 
-  ///Create a new length units box
-  static  QComboBox* createLengthUnitsCombo();
+  /// Create a new length units box
+  static QComboBox *createLengthUnitsCombo();
   // Units enum
   enum Unit { millimetre = 0, centimetre = 1, metre = 2 };
   // Convert a string value from the given unit to metres
-  static QString convertToMetres(const QString & value, Unit start_unit);
+  static QString convertToMetres(const QString &value, Unit start_unit);
 
   /// Set the complement flag
   void setComplementFlag(bool flag);
@@ -159,14 +149,12 @@ protected:
 private:
   /// Take the complement of the shape
   bool m_isComplement;
-
 };
 
 /**
  * A widget to define a sphere
  */
-class SphereDetails : public ShapeDetails
-{
+class SphereDetails : public ShapeDetails {
   Q_OBJECT
 
 private:
@@ -174,14 +162,14 @@ private:
   static int g_nspheres;
 
 public:
-  ///Default constructor
+  /// Default constructor
   SphereDetails(QWidget *parent = 0);
 
-  ///Default destructor
-  ~SphereDetails() { --g_nspheres; }
+  /// Default destructor
+  ~SphereDetails() override { --g_nspheres; }
 
-  //Write the XML definition of a sphere
-  QString writeXML() const;
+  // Write the XML definition of a sphere
+  QString writeXML() const override;
 
 private:
   /// Line edit for radius value
@@ -195,8 +183,7 @@ private:
 /**
  * A widget to define a cylinder
  */
-class CylinderDetails : public ShapeDetails
-{
+class CylinderDetails : public ShapeDetails {
   Q_OBJECT
 
 private:
@@ -204,19 +191,19 @@ private:
   static int g_ncylinders;
 
 public:
-  ///Default constructor
+  /// Default constructor
   CylinderDetails(QWidget *parent = 0);
 
-  ///Default destructor
-  ~CylinderDetails() { --g_ncylinders; }
+  /// Default destructor
+  ~CylinderDetails() override { --g_ncylinders; }
 
-  //Write the XML definition of a sphere
-  QString writeXML() const;
+  // Write the XML definition of a sphere
+  QString writeXML() const override;
 
 private:
   /// Line edits to enter values
   QLineEdit *m_radius_box, *m_height_box;
-  //Unit choice boxes
+  // Unit choice boxes
   QComboBox *m_runits, *m_hunits;
   /// Centre and axis point boxes
   PointGroupBox *m_lower_centre, *m_axis;
@@ -225,8 +212,7 @@ private:
 /**
  * A widget to define an infinite cylinder
  */
-class InfiniteCylinderDetails : public ShapeDetails
-{
+class InfiniteCylinderDetails : public ShapeDetails {
   Q_OBJECT
 
 private:
@@ -234,19 +220,19 @@ private:
   static int g_ninfcyls;
 
 public:
-  ///Default constructor
+  /// Default constructor
   InfiniteCylinderDetails(QWidget *parent = 0);
 
-  ///Default destructor
-  ~InfiniteCylinderDetails() { --g_ninfcyls; }
+  /// Default destructor
+  ~InfiniteCylinderDetails() override { --g_ninfcyls; }
 
-  //Write the XML definition of a sphere
-  QString writeXML() const;
+  // Write the XML definition of a sphere
+  QString writeXML() const override;
 
 private:
   /// Line edits to enter values
   QLineEdit *m_radius_box;
-  //Unit choice boxes
+  // Unit choice boxes
   QComboBox *m_runits;
   /// Centre and axis point boxes
   PointGroupBox *m_centre, *m_axis;
@@ -255,8 +241,7 @@ private:
 /**
  * A widget to define an infinite cylinder
  */
-class SliceOfCylinderRingDetails : public ShapeDetails
-{
+class SliceOfCylinderRingDetails : public ShapeDetails {
   Q_OBJECT
 
 private:
@@ -264,27 +249,26 @@ private:
   static int g_ncylrings;
 
 public:
-  ///Default constructor
+  /// Default constructor
   SliceOfCylinderRingDetails(QWidget *parent = 0);
 
-  ///Default destructor
-  ~SliceOfCylinderRingDetails() { --g_ncylrings; }
+  /// Default destructor
+  ~SliceOfCylinderRingDetails() override { --g_ncylrings; }
 
   /// Write the XML definition of a sphere
-  QString writeXML() const;
+  QString writeXML() const override;
 
 private:
   /// Line edits to enter values
   QLineEdit *m_rinner_box, *m_router_box, *m_depth_box, *m_arc_box;
-  //Unit choice boxes
+  // Unit choice boxes
   QComboBox *m_iunits, *m_ounits, *m_dunits;
 };
 
 /**
  * A widget to define a cone
  */
-class ConeDetails : public ShapeDetails
-{
+class ConeDetails : public ShapeDetails {
   Q_OBJECT
 
 private:
@@ -292,19 +276,19 @@ private:
   static int g_ncones;
 
 public:
-  ///Default constructor
+  /// Default constructor
   ConeDetails(QWidget *parent = 0);
 
-  ///Default destructor
-  ~ConeDetails() { --g_ncones; }
+  /// Default destructor
+  ~ConeDetails() override { --g_ncones; }
 
   /// Write the XML definition of a sphere
-  QString writeXML() const;
+  QString writeXML() const override;
 
 private:
   /// Line edits to enter values
   QLineEdit *m_height_box, *m_angle_box;
-  //Unit choice boxes
+  // Unit choice boxes
   QComboBox *m_hunits;
   /// Centre and axis point boxes
   PointGroupBox *m_tippoint, *m_axis;
@@ -313,8 +297,7 @@ private:
 /**
  * A widget to define an infinite cone
  */
-class InfiniteConeDetails : public ShapeDetails
-{
+class InfiniteConeDetails : public ShapeDetails {
   Q_OBJECT
 
 private:
@@ -322,14 +305,14 @@ private:
   static int g_ninfcones;
 
 public:
-  ///Default constructor
+  /// Default constructor
   InfiniteConeDetails(QWidget *parent = 0);
 
-  ///Default destructor
-  ~InfiniteConeDetails() { --g_ninfcones; }
+  /// Default destructor
+  ~InfiniteConeDetails() override { --g_ninfcones; }
 
   /// Write the XML definition of a sphere
-  QString writeXML() const;
+  QString writeXML() const override;
 
 private:
   /// Line edits to enter values
@@ -341,8 +324,7 @@ private:
 /**
  * A widget to define an infinite plane
  */
-class InfinitePlaneDetails : public ShapeDetails
-{
+class InfinitePlaneDetails : public ShapeDetails {
   Q_OBJECT
 
 private:
@@ -350,14 +332,14 @@ private:
   static int g_ninfplanes;
 
 public:
-  ///Default constructor
+  /// Default constructor
   InfinitePlaneDetails(QWidget *parent = 0);
 
-  ///Default destructor
-  ~InfinitePlaneDetails() { --g_ninfplanes; }
+  /// Default destructor
+  ~InfinitePlaneDetails() override { --g_ninfplanes; }
 
   /// Write the XML definition of a sphere
-  QString writeXML() const;
+  QString writeXML() const override;
 
 private:
   /// Centre and axis point boxes
@@ -367,8 +349,7 @@ private:
 /**
  * A widget to define an infinite plane
  */
-class CuboidDetails : public ShapeDetails
-{
+class CuboidDetails : public ShapeDetails {
   Q_OBJECT
 
 private:
@@ -376,25 +357,25 @@ private:
   static int g_ncuboids;
 
 public:
-  ///Default constructor
+  /// Default constructor
   CuboidDetails(QWidget *parent = 0);
 
-  ///Default destructor
-  ~CuboidDetails() { --g_ncuboids; }
+  /// Default destructor
+  ~CuboidDetails() override { --g_ncuboids; }
 
   /// Write the XML definition of a sphere
-  QString writeXML() const;
+  QString writeXML() const override;
 
 private:
   /// Corner points
-  PointGroupBox *m_left_frt_bot, *m_left_frt_top, *m_left_bck_bot, *m_right_frt_bot;
+  PointGroupBox *m_left_frt_bot, *m_left_frt_top, *m_left_bck_bot,
+      *m_right_frt_bot;
 };
 
 /**
  * A widget to define a hexahedron
  */
-class HexahedronDetails : public ShapeDetails
-{
+class HexahedronDetails : public ShapeDetails {
   Q_OBJECT
 
 private:
@@ -402,19 +383,20 @@ private:
   static int g_nhexahedrons;
 
 public:
-  ///Default constructor
+  /// Default constructor
   HexahedronDetails(QWidget *parent = 0);
 
-  ///Default destructor
-  ~HexahedronDetails() { --g_nhexahedrons; }
+  /// Default destructor
+  ~HexahedronDetails() override { --g_nhexahedrons; }
 
   /// Write the XML definition of a sphere
-  QString writeXML() const;
+  QString writeXML() const override;
 
 private:
   /// Corner points
-  PointGroupBox *m_left_bck_bot, *m_left_frt_bot, *m_right_frt_bot, *m_right_bck_bot,
-    *m_left_bck_top, *m_left_frt_top, *m_right_frt_top, *m_right_bck_top;
+  PointGroupBox *m_left_bck_bot, *m_left_frt_bot, *m_right_frt_bot,
+      *m_right_bck_bot, *m_left_bck_top, *m_left_frt_top, *m_right_frt_top,
+      *m_right_bck_top;
 };
 
 // /**
@@ -446,9 +428,6 @@ private:
 //   /// Corner points
 //   PointGroupBox *m_centre, *m_axis;
 // };
-
-
-
 }
 }
 

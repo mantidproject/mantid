@@ -58,11 +58,11 @@ class DLLExport ISISDiagnostics : public IndirectDataReductionTab {
 
 public:
   ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent = 0);
-  virtual ~ISISDiagnostics();
+  ~ISISDiagnostics() override;
 
-  virtual void setup();
-  virtual void run();
-  virtual bool validate();
+  void setup() override;
+  void run() override;
+  bool validate() override;
 
 private slots:
   void algorithmComplete(bool error);
@@ -77,7 +77,7 @@ private slots:
   pbRunEditing(); //< Called when a user starts to type / edit the runs to load.
   void pbRunFinding();  //< Called when the FileFinder starts finding the files.
   void pbRunFinished(); //< Called when the FileFinder has finished finding the
-                        //files.
+  // files.
 
 private:
   Ui::ISISDiagnostics m_uiForm;

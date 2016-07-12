@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CropWorkspace.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidDataHandling/MaskDetectors.h"
@@ -440,7 +441,7 @@ public:
     // into this
     // bin. We make sure that there is at least one bin with a count
     // of sqrt(1 + 0.5^2/12) ~ 1.01036297108
-    auto &dataDX = result->dataDx(0);
+    auto &dataDX = result->dx(0);
     unsigned int counter = 0;
     for (auto it = dataDX.begin(); it != dataDX.end(); ++it) {
 
@@ -490,12 +491,7 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     // Make sure that the Q resolution is not calculated
-    auto &dataDX = result->dataDx(0);
-    for (auto it = dataDX.begin(); it != dataDX.end(); ++it) {
-      TSM_ASSERT(
-          "All Dx values should be 0, as we didn't use the QResolution ooption",
-          (*it == 0.0));
-    }
+    TS_ASSERT(!result->sharedDx(0));
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 
@@ -518,13 +514,13 @@ public:
   Mantid::API::MatrixWorkspace_sptr m_inputWS, m_wavNorm, m_pixel;
   std::string m_outputWS;
 
-  void setUp() {
+  void setUp() override {
     // load all the spectra from the LOQ workspace
     createInputWorkspaces(1, 17792, m_inputWS, m_wavNorm, m_pixel);
     m_outputWS = "Q1D2Test_result";
   }
 
-  void tearDown() {
+  void tearDown() override {
     Mantid::API::AnalysisDataService::Instance().remove(m_outputWS);
   }
 
@@ -625,8 +621,8 @@ void createQResolutionWorkspace(Mantid::API::MatrixWorkspace_sptr &qResolution,
                                 double value1, double value2) {
   // The q resolution workspace is almost the same to the input workspace,
   // except for the y value, we set all Y values to 1
-  qResolution = Mantid::API::MatrixWorkspace_sptr(input->clone().release());
-  alteredInput = Mantid::API::MatrixWorkspace_sptr(input->clone().release());
+  qResolution = input->clone();
+  alteredInput = input->clone();
 
   // Populate Y with Value1
   for (size_t i = 0; i < qResolution->getNumberHistograms(); ++i) {

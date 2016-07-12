@@ -45,20 +45,28 @@ public:
   /// These are user actions, triggered from the (passive) view, that need
   /// handling by the presenter
   enum Notification {
-    Init,                 ///< interface is initing (set, defaults, etc.)
-    BrowseImgOrStack,     ///< User browses for an image file or stack
-    NewImgOrStack,        ///< A new image or stack needs to be loaded
-    UpdateImgIndex,       ///< Sliding/scrolling through the stack
-    SelectCoR,            ///< Start picking of the center of rotation
-    SelectROI,            ///< Start selection of the region of interest
-    SelectNormalization,  ///< Start selection of the normalization region
-    FinishedCoR,          ///< A CoR has been picked
-    FinishedROI,          ///< The ROI is selected
-    FinishedNormalization,///< The normalization region is selected
-    ResetCoR,             ///< Reset CoR to default/none/middle
-    ResetROI,             ///< Reset ROI to default/empty
-    ResetNormalization,   ///< Reet the normalization region to default/empty
-    ShutDown              ///< The widget is being closed/destroyed
+    Init,                  ///< interface is initing (set, defaults, etc.)
+    BrowseImage,           ///< User browses for a single image file
+    BrowseStack,           ///< User browses for a stack (with
+                           ///< possibly many files)
+    ChangeImageType,       ///< Change between sample/flat/dark images
+    ChangeRotation,        ///< Modify the rotation in the images displayed
+    UpdateImgIndex,        ///< Sliding/scrolling through the stack
+    PlayStartStop,         ///< User starts or stops the "play images"
+    UpdateColorMap,        ///< When the user wants to change the
+                           ///< image colormap
+    ColorRangeUpdated,     ///< The uses changes the values or options of the
+                           ///< color range
+    SelectCoR,             ///< Start picking of the center of rotation
+    SelectROI,             ///< Start selection of the region of interest
+    SelectNormalization,   ///< Start selection of the normalization region
+    FinishedCoR,           ///< A CoR has been picked
+    FinishedROI,           ///< The ROI is selected
+    FinishedNormalization, ///< The normalization region is selected
+    ResetCoR,              ///< Reset CoR to default/none/middle
+    ResetROI,              ///< Reset ROI to default/empty
+    ResetNormalization,    ///< Reet the normalization region to default/empty
+    ShutDown               ///< The widget is being closed/destroyed
   };
 
   /**

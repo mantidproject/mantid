@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/SofQWCentre.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 
 #include "SofQWTest.h"

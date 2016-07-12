@@ -2,8 +2,19 @@
 #define MANTID_CURVEFITTING_CONVERTTOYSPACE_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
+
+namespace Kernel {
+class V3D;
+}
+
+namespace Geometry {
+class ParameterMap;
+}
+
 namespace CurveFitting {
 namespace Algorithms {
 
@@ -49,15 +60,15 @@ public:
   /// Constructor
   ConvertToYSpace();
 
-  const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Converts workspace in units of TOF to Y-space as defined in "
            "Compton scattering field";
   }
 
-  int version() const;
-  const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
   /// Creates a POD struct containing the required detector parameters for this
   /// spectrum
@@ -71,16 +82,15 @@ public:
                         const std::string &name);
   /// Convert single time value to Y,Q & Ei values
   static void calculateY(double &yspace, double &qspace, double &ei,
-                         const double mass, const double tmicro,
-                         const double k1, const double v1,
-                         const DetectorParams &detpar);
+                         const double mass, const double tsec, const double k1,
+                         const double v1, const DetectorParams &detpar);
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   /// Perform the conversion to Y-space
-  bool convert(const size_t i);
+  bool convert(const size_t index);
   /// Check and store appropriate input data
   void retrieveInputs();
   /// Create the output workspace

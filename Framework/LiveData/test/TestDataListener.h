@@ -17,19 +17,19 @@ namespace LiveData {
 class TestDataListener : public API::ILiveListener {
 public:
   TestDataListener();
-  ~TestDataListener();
+  ~TestDataListener() override;
 
-  std::string name() const { return "TestDataListener"; }
-  bool supportsHistory() const { return false; }
-  bool buffersEvents() const { return true; }
+  std::string name() const override { return "TestDataListener"; }
+  bool supportsHistory() const override { return false; }
+  bool buffersEvents() const override { return true; }
 
-  bool connect(const Poco::Net::SocketAddress &address);
-  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime());
-  boost::shared_ptr<API::Workspace> extractData();
+  bool connect(const Poco::Net::SocketAddress &address) override;
+  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
+  boost::shared_ptr<API::Workspace> extractData() override;
 
-  bool isConnected();
-  ILiveListener::RunStatus runStatus();
-  int runNumber() const;
+  bool isConnected() override;
+  ILiveListener::RunStatus runStatus() override;
+  int runNumber() const override;
 
 private:
   DataObjects::EventWorkspace_sptr m_buffer;

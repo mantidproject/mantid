@@ -144,14 +144,11 @@ public:
     TS_ASSERT_EQUALS(statistics.m_rMerge, 0.0);
     TS_ASSERT_EQUALS(statistics.m_rPim, 0.0);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 0.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 0.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 0.0);
   }
 
   void test_PeaksStatisticsOneObservation() {
-    std::map<V3D, UniqueReflection> uniques;
-    uniques.insert(std::make_pair(V3D(1, 1, 1),
-                                  getReflectionWithPeaks({56.0}, {4.5}, 1.0)));
+    std::map<V3D, UniqueReflection> uniques{
+        {{1, 1, 1}, getReflectionWithPeaks({56.0}, {4.5}, 1.0)}};
 
     PeaksStatistics statistics(uniques, 1);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 1);
@@ -161,16 +158,12 @@ public:
     TS_ASSERT_EQUALS(statistics.m_rMerge, 0.0);
     TS_ASSERT_EQUALS(statistics.m_rPim, 0.0);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 56.0 / 4.5);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 1.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 1.0);
   }
 
   void test_PeaksStatisticsOneObservationTwoUnique() {
-    std::map<V3D, UniqueReflection> uniques;
-    uniques.insert(std::make_pair(V3D(1, 1, 1),
-                                  getReflectionWithPeaks({56.0}, {4.5}, 1.0)));
-    uniques.insert(
-        std::make_pair(V3D(1, 1, 2), UniqueReflection(V3D(1, 1, 2))));
+    std::map<V3D, UniqueReflection> uniques{
+        {{1, 1, 1}, getReflectionWithPeaks({56.0}, {4.5}, 1.0)},
+        {{1, 1, 2}, UniqueReflection(V3D(1, 1, 2))}};
 
     PeaksStatistics statistics(uniques, 1);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 1);
@@ -180,17 +173,13 @@ public:
     TS_ASSERT_EQUALS(statistics.m_rMerge, 0.0);
     TS_ASSERT_EQUALS(statistics.m_rPim, 0.0);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 56.0 / 4.5);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 1.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 1.0);
   }
 
   void test_PeaksStatisticsTwoObservationTwoUnique() {
 
-    std::map<V3D, UniqueReflection> uniques;
-    uniques.insert(std::make_pair(V3D(1, 1, 1),
-                                  getReflectionWithPeaks({10.0}, {1.0}, 1.0)));
-    uniques.insert(std::make_pair(V3D(1, 1, 2),
-                                  getReflectionWithPeaks({20.0}, {1.0}, 2.0)));
+    std::map<V3D, UniqueReflection> uniques{
+        {{1, 1, 1}, getReflectionWithPeaks({10.0}, {1.0}, 1.0)},
+        {{1, 1, 2}, getReflectionWithPeaks({20.0}, {1.0}, 2.0)}};
 
     PeaksStatistics statistics(uniques, 2);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 2);
@@ -200,14 +189,11 @@ public:
     TS_ASSERT_EQUALS(statistics.m_rMerge, 0.0);
     TS_ASSERT_EQUALS(statistics.m_rPim, 0.0);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 15.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 1.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 2.0);
   }
 
   void test_PeaksStatisticsTwoObservationOneUnique() {
-    std::map<V3D, UniqueReflection> uniques;
-    uniques.insert(std::make_pair(
-        V3D(1, 1, 1), getReflectionWithPeaks({10.0, 20.0}, {0.1, 0.1}, 1.0)));
+    std::map<V3D, UniqueReflection> uniques{
+        {{1, 1, 1}, getReflectionWithPeaks({10.0, 20.0}, {0.1, 0.1}, 1.0)}};
 
     PeaksStatistics statistics(uniques, 2);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 2);
@@ -219,15 +205,12 @@ public:
     // For 2 observations this is the same since sqrt(1 / (2 - 1)) = 1
     TS_ASSERT_EQUALS(statistics.m_rPim, 1.0 / 3.0);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 150.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 1.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 1.0);
   }
 
   void test_PeaksStatisticsThreeObservationOneUnique() {
-    std::map<V3D, UniqueReflection> uniques;
-    uniques.insert(std::make_pair(
-        V3D(1, 1, 1),
-        getReflectionWithPeaks({10.0, 20.0, 15.0}, {0.1, 0.1, 0.1}, 1.0)));
+    std::map<V3D, UniqueReflection> uniques{
+        {{1, 1, 1},
+         getReflectionWithPeaks({10.0, 20.0, 15.0}, {0.1, 0.1, 0.1}, 1.0)}};
 
     PeaksStatistics statistics(uniques, 3);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 3);
@@ -239,8 +222,6 @@ public:
     // For rpim the factor is  sqrt(1 / (3 - 1)) = sqrt(0.5)
     TS_ASSERT_EQUALS(statistics.m_rPim, sqrt(0.5) / 4.5);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 150.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 1.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 1.0);
   }
 
   void test_Init() {

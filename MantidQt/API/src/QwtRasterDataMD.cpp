@@ -108,6 +108,8 @@ void QwtRasterDataMD::setFastMode(bool fast) { this->m_fast = fast; }
  */
 void QwtRasterDataMD::setZerosAsNan(bool val) { this->m_zerosAsNan = val; }
 
+bool QwtRasterDataMD::isZerosAsNan() const { return this->m_zerosAsNan; }
+
 //------------------------------------------------------------------------------------------------------
 /** Set how the signal is normalized
  *

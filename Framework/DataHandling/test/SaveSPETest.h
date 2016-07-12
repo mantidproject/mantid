@@ -4,13 +4,15 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/SaveSPE.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include <Poco/File.h>
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/UnitFactory.h"
+
 #include <boost/lexical_cast.hpp>
+#include <Poco/File.h>
 #include <fstream>
 #include <numeric>
 
@@ -100,7 +102,7 @@ public:
       TS_ASSERT_EQUALS(tmp2, value)
       getline(file, tmp);
 
-      double error = i + 1 != THEMASKED ? std::sqrt(2.0) : MASK_ERROR;
+      double error = i + 1 != THEMASKED ? M_SQRT2 : MASK_ERROR;
       getline(file, tmp);
       TS_ASSERT_EQUALS(tmp, "### Errors")
       file >> tmp2;
@@ -192,7 +194,7 @@ private:
     m_Pmap->addBool(toMask.get(), "masked", true);
 
     // required to get it passed the algorthms validator
-    inputWS->isDistribution(true);
+    inputWS->setDistribution(true);
 
     return inputWS;
   }

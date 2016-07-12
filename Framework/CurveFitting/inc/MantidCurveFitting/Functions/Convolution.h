@@ -115,28 +115,30 @@ public:
 
   /// Constructor
   Convolution();
-  /// Destructor
-  ~Convolution();
 
   /// overwrite IFunction base class methods
-  std::string name() const { return "Convolution"; }
-  virtual const std::string category() const { return "General"; }
+  std::string name() const override { return "Convolution"; }
+  const std::string category() const override { return "General"; }
   /// Function you want to fit to.
   /// @param domain :: The buffer for writing the calculated values. Must be big
   /// enough to accept dataSize() values
-  virtual void function(const API::FunctionDomain &domain,
-                        API::FunctionValues &values) const;
+  void function(const API::FunctionDomain &domain,
+                API::FunctionValues &values) const override;
+  void functionFFTMode(const API::FunctionDomain &domain,
+                       API::FunctionValues &values) const;
+  void functionDirectMode(const API::FunctionDomain &domain,
+                          API::FunctionValues &values) const;
   /// Derivatives of function with respect to active parameters
-  virtual void functionDeriv(const API::FunctionDomain &domain,
-                             API::Jacobian &jacobian);
+  void functionDeriv(const API::FunctionDomain &domain,
+                     API::Jacobian &jacobian) override;
 
   /// Set a value to attribute attName
-  virtual void setAttribute(const std::string &attName, const Attribute &);
+  void setAttribute(const std::string &attName, const Attribute &) override;
 
   /// Add a function.
-  size_t addFunction(API::IFunction_sptr f);
+  size_t addFunction(API::IFunction_sptr f) override;
   /// Set up the function for a fit.
-  void setUpForFit();
+  void setUpForFit() override;
 
   /// Deletes and zeroes pointer m_resolution forsing function(...) to
   /// recalculate the resolution function
@@ -144,11 +146,12 @@ public:
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters
-  virtual void init();
+  void init() override;
 
 private:
-  /// To keep the Fourier transform of the resolution function (divided by the
-  /// step in xValues)
+  /// Keep the Fourier transform of the resolution function (divided by the
+  /// step in xValues) when in FFT mode, and the inverted resolution if in
+  /// Direct mode
   mutable std::vector<double> m_resolution;
 };
 

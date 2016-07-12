@@ -12,7 +12,11 @@ Description
 This algorithm masks a :ref:`MDWorkspace <MDWorkspace>` in-situ.
 
 This algorithm will first clear-out any existing masking and then apply
-the new masking.
+the new masking, unless ClearExistingMasks is set to false. Note that
+masking removes data; clearing existing masks only removes the mask flag
+from boxes/bins. For MDEventWorkspaces masking deletes events from
+masked boxes. Similarly, for MDHistoWorkspaces the signal of masked bins
+is set to NaN.
 
 Simple Example
 --------------

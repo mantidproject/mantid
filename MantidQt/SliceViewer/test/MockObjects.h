@@ -3,18 +3,20 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"
-#include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
-#include "MantidQtSliceViewer/ZoomablePeaksView.h"
+#include "MantidQtSliceViewer/PeakViewColor.h"
+#include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
-#include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidKernel/UnitLabel.h"
+#include "MantidQtSliceViewer/ZoomablePeaksView.h"
+#include <QColor>
 #include <boost/regex.hpp>
 #include <gmock/gmock.h>
-#include <QColor>
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid::API;
@@ -22,8 +24,9 @@ using namespace Mantid::Geometry;
 using namespace Mantid;
 using boost::regex;
 
-namespace {
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
+namespace {
 /*------------------------------------------------------------
 Zoomable Peaks View
 ------------------------------------------------------------*/
@@ -32,7 +35,7 @@ public:
   MOCK_METHOD1(zoomToRectangle, void(const PeakBoundingBox &));
   MOCK_METHOD0(resetView, void());
   MOCK_METHOD0(detach, void());
-  virtual ~MockZoomablePeaksView() {}
+  ~MockZoomablePeaksView() override {}
 };
 
 /*------------------------------------------------------------
@@ -45,8 +48,10 @@ public:
   MOCK_METHOD0(changeShownDim, bool());
   MOCK_CONST_METHOD1(isLabelOfFreeAxis, bool(const std::string &));
   MOCK_CONST_METHOD0(presentedWorkspaces, SetPeaksWorkspaces());
-  MOCK_METHOD1(setForegroundColor, void(const QColor));
-  MOCK_METHOD1(setBackgroundColor, void(const QColor));
+  MOCK_METHOD1(setForegroundColor, void(const PeakViewColor));
+  MOCK_METHOD1(setBackgroundColor, void(const PeakViewColor));
+  MOCK_CONST_METHOD0(getBackgroundPeakViewColor, PeakViewColor());
+  MOCK_CONST_METHOD0(getForegroundPeakViewColor, PeakViewColor());
   MOCK_CONST_METHOD0(getTransformName, std::string());
   MOCK_METHOD1(showBackgroundRadius, void(const bool));
   MOCK_METHOD1(setShown, void(const bool));
@@ -67,7 +72,7 @@ public:
   MOCK_METHOD1(peakEditMode, void(EditMode));
   MOCK_METHOD2(addPeakAt, bool(double, double));
   MOCK_CONST_METHOD0(hasPeakAddMode, bool());
-  virtual ~MockPeaksPresenter() {}
+  ~MockPeaksPresenter() override {}
 };
 
 /*------------------------------------------------------------
@@ -76,7 +81,7 @@ Mock Peaks Presenter, with additional hooks for verifying destruction.
 class DyingMockPeaksPresenter : public MockPeaksPresenter {
 public:
   MOCK_METHOD0(die, void());
-  virtual ~DyingMockPeaksPresenter() { die(); }
+  ~DyingMockPeaksPresenter() override { die(); }
 };
 
 /*------------------------------------------------------------
@@ -87,7 +92,7 @@ public:
   MockPeakTransform()
       : PeakTransform("H (Lattice)", "K (Lattice)", regex("^H.*$"),
                       regex("^K.*$"), regex("^L.*$")) {}
-  ~MockPeakTransform() {}
+  ~MockPeakTransform() override {}
   MOCK_CONST_METHOD0(clone, PeakTransform_sptr());
   MOCK_CONST_METHOD1(transform,
                      Mantid::Kernel::V3D(const Mantid::Kernel::V3D &));
@@ -119,8 +124,6 @@ public:
   MOCK_METHOD0(hideView, void());
   MOCK_METHOD0(showView, void());
   MOCK_METHOD1(movePosition, void(PeakTransform_sptr));
-  MOCK_METHOD1(changeForegroundColour, void(const QColor));
-  MOCK_METHOD1(changeBackgroundColour, void(const QColor));
   MOCK_METHOD1(showBackgroundRadius, void(const bool));
   MOCK_CONST_METHOD1(getBoundingBox, PeakBoundingBox(const int));
   MOCK_METHOD1(changeOccupancyInView, void(const double));
@@ -130,13 +133,15 @@ public:
   MOCK_CONST_METHOD0(positionOnly, bool());
   MOCK_CONST_METHOD0(getRadius, double());
   MOCK_CONST_METHOD0(isBackgroundShown, bool());
-  MOCK_CONST_METHOD0(getForegroundColour, QColor());
-  MOCK_CONST_METHOD0(getBackgroundColour, QColor());
+  MOCK_METHOD1(changeForegroundColour, void(PeakViewColor));
+  MOCK_METHOD1(changeBackgroundColour, void(PeakViewColor));
+  MOCK_CONST_METHOD0(getBackgroundPeakViewColor, PeakViewColor());
+  MOCK_CONST_METHOD0(getForegroundPeakViewColor, PeakViewColor());
   MOCK_METHOD0(peakDeletionMode, void());
   MOCK_METHOD0(peakAdditionMode, void());
   MOCK_METHOD0(peakDisplayMode, void());
   MOCK_METHOD1(takeSettingsFrom, void(PeakOverlayView const *const));
-  virtual ~MockPeakOverlayView() {}
+  ~MockPeakOverlayView() override {}
 };
 
 /*------------------------------------------------------------
@@ -150,7 +155,6 @@ public:
   MOCK_CONST_METHOD0(getPlotXLabel, std::string());
   MOCK_CONST_METHOD0(getPlotYLabel, std::string());
   MOCK_METHOD0(updateView, void());
-  MOCK_CONST_METHOD0(FOM, int());
   MOCK_METHOD1(swapPeaksWorkspace,
                void(boost::shared_ptr<Mantid::API::IPeaksWorkspace> &));
 };
@@ -223,7 +227,7 @@ public:
   MOCK_CONST_METHOD1(
       getDimension,
       boost::shared_ptr<const Mantid::Geometry::IMDDimension>(size_t));
-  virtual ~MockMDGeometry() {}
+  ~MockMDGeometry() override {}
 };
 
 /*------------------------------------------------------------
@@ -245,5 +249,7 @@ public:
   MOCK_METHOD3(setRange, void(size_t nBins, coord_t min, coord_t max));
 };
 }
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif

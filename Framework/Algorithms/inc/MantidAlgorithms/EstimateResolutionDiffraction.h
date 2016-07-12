@@ -33,29 +33,26 @@ namespace Algorithms {
 */
 class DLLExport EstimateResolutionDiffraction : public API::Algorithm {
 public:
-  EstimateResolutionDiffraction();
-  virtual ~EstimateResolutionDiffraction();
-
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const;
+  const std::string name() const override;
 
   /// function to return any aliases to the algorithm
-  virtual const std::string alias() const;
+  const std::string alias() const override;
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const;
+  const std::string summary() const override;
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const;
+  int version() const override;
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const;
+  const std::string category() const override;
 
 private:
   /// Implement abstract Algorithm methods
-  void init();
+  void init() override;
   /// Implement abstract Algorithm methods
-  void exec();
+  void exec() override;
 
   /// Returns the wavelength from either the property or the input workspace
   double getWavelength();
@@ -81,13 +78,13 @@ private:
   API::MatrixWorkspace_sptr m_outputWS;
 
   /// Centre neutron velocity
-  double m_centreVelocity;
+  double m_centreVelocity = 0.0;
 
   /// L1, source to sample
-  double m_L1;
+  double m_L1 = 0.0;
 
   /// Delta T
-  double m_deltaT;
+  double m_deltaT = 0.0;
 };
 
 } // namespace Algorithms

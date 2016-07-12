@@ -56,35 +56,34 @@ public:
 
   /// Bring in the PropertyWithValue assignment operator explicitly (avoids
   /// VSC++ warning)
-  virtual boost::shared_ptr<IFunction> &
-  operator=(const boost::shared_ptr<IFunction> &value);
+  boost::shared_ptr<IFunction> &
+  operator=(const boost::shared_ptr<IFunction> &value) override;
 
   /// Add the value of another property
-  virtual FunctionProperty &operator+=(Kernel::Property const *);
+  FunctionProperty &operator+=(Kernel::Property const *) override;
 
   /// 'Virtual copy constructor'
-  FunctionProperty *clone() const { return new FunctionProperty(*this); }
-
-  /// Virtual destructor
-  virtual ~FunctionProperty();
+  FunctionProperty *clone() const override {
+    return new FunctionProperty(*this);
+  }
 
   /// Get the function definition string
-  virtual std::string value() const;
+  std::string value() const override;
 
   /// Get the value the property was initialised with -its default value
-  virtual std::string getDefault() const;
+  std::string getDefault() const override;
 
   /// Set the value of the property.
-  virtual std::string setValue(const std::string &value);
+  std::string setValue(const std::string &value) override;
 
   /// Checks whether the entered function is valid.
-  std::string isValid() const;
+  std::string isValid() const override;
 
   /// Is default
-  bool isDefault() const;
+  bool isDefault() const override;
 
   /// Create a history record
-  virtual const Kernel::PropertyHistory createHistory() const;
+  const Kernel::PropertyHistory createHistory() const override;
 
 private:
   /// The function definition string (as used by the FunctionFactory)

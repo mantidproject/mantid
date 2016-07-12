@@ -58,7 +58,7 @@ public:
   }
 
 private:
-  MillerIndicesIO() {}
+  MillerIndicesIO() = default;
 };
 }
 }

@@ -46,16 +46,9 @@ SCARFTomoReconstruction::SCARFTomoReconstruction()
 
 void SCARFTomoReconstruction::init() {
   // list of all actions
-  std::vector<std::string> actions;
-  actions.push_back("LogIn");
-  actions.push_back("LogOut");
-  actions.push_back("Ping");
-  actions.push_back("Upload");
-  actions.push_back("SubmitJob");
-  actions.push_back("JobStatus");
-  actions.push_back("JobStatusByID");
-  actions.push_back("Download");
-  actions.push_back("CancelJob");
+  std::vector<std::string> actions{"LogIn",         "LogOut",    "Ping",
+                                   "Upload",        "SubmitJob", "JobStatus",
+                                   "JobStatusByID", "Download",  "CancelJob"};
 
   auto listValue = boost::make_shared<StringListValidator>(actions);
   auto nullV = boost::make_shared<Kernel::NullValidator>();
@@ -74,30 +67,30 @@ void SCARFTomoReconstruction::init() {
                   Direction::Input);
 
   // - Action: login
-  declareProperty(
-      new MaskedProperty<std::string>("Password", "", Direction::Input),
-      "The password for the user");
-  setPropertySettings("Password",
-                      new VisibleWhenProperty("Action", IS_EQUAL_TO, "LogIn"));
+  declareProperty(make_unique<MaskedProperty<std::string>>("Password", "",
+                                                           Direction::Input),
+                  "The password for the user");
+  setPropertySettings("Password", make_unique<VisibleWhenProperty>(
+                                      "Action", IS_EQUAL_TO, "LogIn"));
 
   // - Action: submit
-  declareProperty(new PropertyWithValue<std::string>(
+  declareProperty(make_unique<PropertyWithValue<std::string>>(
                       "RunnablePath",
                       "/work/imat/webservice_test/tomopy/imat_recon_FBP.py",
                       Direction::Input),
                   "The path (on the remote compute resource) of a file to run "
                   "(example: shell or python script)");
-  setPropertySettings("RunnablePath", new VisibleWhenProperty(
+  setPropertySettings("RunnablePath", make_unique<VisibleWhenProperty>(
                                           "Action", IS_EQUAL_TO, "SubmitJob"));
 
   declareProperty(
-      new PropertyWithValue<std::string>(
+      make_unique<PropertyWithValue<std::string>>(
           "JobOptions", "/work/imat/webservice_test/remote_output/test_",
           Direction::Input),
       "Options for the job command line, application dependent. It "
       "can include for example the NXTomo input file when using savu "
       "for tomographic reconstruction.");
-  setPropertySettings("JobOptions", new VisibleWhenProperty(
+  setPropertySettings("JobOptions", make_unique<VisibleWhenProperty>(
                                         "Action", IS_EQUAL_TO, "SubmitJob"));
 
   declareProperty(
@@ -105,45 +98,48 @@ void SCARFTomoReconstruction::init() {
       "Optional name for the job, if not given then a "
       "name will be generated internally or at the compute resource",
       Direction::Input);
-  setPropertySettings(
-      "JobName", new VisibleWhenProperty("Action", IS_EQUAL_TO, "SubmitJob"));
+  setPropertySettings("JobName", make_unique<VisibleWhenProperty>(
+                                     "Action", IS_EQUAL_TO, "SubmitJob"));
 
   // - Action: upload file
   declareProperty(
-      new API::FileProperty("FileToUpload", "", API::FileProperty::OptionalLoad,
-                            "", Direction::Input),
+      make_unique<API::FileProperty>("FileToUpload", "",
+                                     API::FileProperty::OptionalLoad, "",
+                                     Direction::Input),
       "Name of the file (local, full path) to upload to the compute "
       "resource/server ");
-  setPropertySettings("FileToUpload",
-                      new VisibleWhenProperty("Action", IS_EQUAL_TO, "Upload"));
+  setPropertySettings("FileToUpload", make_unique<VisibleWhenProperty>(
+                                          "Action", IS_EQUAL_TO, "Upload"));
 
   declareProperty(
-      new PropertyWithValue<std::string>("DestinationDirectory", "/work/imat",
-                                         Direction::Input),
+      make_unique<PropertyWithValue<std::string>>(
+          "DestinationDirectory", "/work/imat", Direction::Input),
       "Path where to upload the file on the compute resource/server");
-  setPropertySettings("DestinationDirectory",
-                      new VisibleWhenProperty("Action", IS_EQUAL_TO, "Upload"));
+  setPropertySettings(
+      "DestinationDirectory",
+      make_unique<VisibleWhenProperty>("Action", IS_EQUAL_TO, "Upload"));
 
   // - Action: query status and info (of implicitly all jobs)
-  declareProperty(
-      new ArrayProperty<std::string>("RemoteJobsID", Direction::Output),
-      "ID strings for the jobs");
-  declareProperty(
-      new ArrayProperty<std::string>("RemoteJobsNames", Direction::Output),
-      "Names of the jobs");
-  declareProperty(
-      new ArrayProperty<std::string>("RemoteJobsStatus", Direction::Output),
-      "Strings describing the current status of the jobs");
-  declareProperty(
-      new ArrayProperty<std::string>("RemoteJobsCommands", Direction::Output),
-      "Strings with the command line run for the jobs");
+  declareProperty(make_unique<ArrayProperty<std::string>>("RemoteJobsID",
+                                                          Direction::Output),
+                  "ID strings for the jobs");
+  declareProperty(make_unique<ArrayProperty<std::string>>("RemoteJobsNames",
+                                                          Direction::Output),
+                  "Names of the jobs");
+  declareProperty(make_unique<ArrayProperty<std::string>>("RemoteJobsStatus",
+                                                          Direction::Output),
+                  "Strings describing the current status of the jobs");
+  declareProperty(make_unique<ArrayProperty<std::string>>("RemoteJobsCommands",
+                                                          Direction::Output),
+                  "Strings with the command line run for the jobs");
 
   // - Action: query status and info by ID
-  declareProperty(new PropertyWithValue<int>("JobID", 0, Direction::Input),
-                  "The ID of a job currently running or recently run on the "
-                  "compute resource");
-  setPropertySettings(
-      "JobID", new VisibleWhenProperty("Action", IS_EQUAL_TO, "JobStatusByID"));
+  declareProperty(
+      make_unique<PropertyWithValue<int>>("JobID", 0, Direction::Input),
+      "The ID of a job currently running or recently run on the "
+      "compute resource");
+  setPropertySettings("JobID", make_unique<VisibleWhenProperty>(
+                                   "Action", IS_EQUAL_TO, "JobStatusByID"));
 
   declareProperty("RemoteJobName", "", nullV, "Name of the remote job",
                   Direction::Output);
@@ -156,35 +152,35 @@ void SCARFTomoReconstruction::init() {
 
   // - Action: download file
   declareProperty(
-      new PropertyWithValue<std::string>("RemoteJobFilename", "",
-                                         Direction::Input),
+      make_unique<PropertyWithValue<std::string>>("RemoteJobFilename", "",
+                                                  Direction::Input),
       "Name of the job file to download - you can give an empty name "
-      "to download  all the files of this job.");
+      "to download all the files of this job.");
   setPropertySettings(
       "RemoteJobFilename",
-      new VisibleWhenProperty("Action", IS_EQUAL_TO, "Download"));
+      make_unique<VisibleWhenProperty>("Action", IS_EQUAL_TO, "Download"));
 
   declareProperty(
-      new API::FileProperty("LocalDirectory", "",
-                            API::FileProperty::OptionalDirectory, "",
-                            Direction::Input),
+      make_unique<API::FileProperty>("LocalDirectory", "",
+                                     API::FileProperty::OptionalDirectory, "",
+                                     Direction::Input),
       "Path to a local directory/folder where to download files from "
       "the compute resource/server");
-  setPropertySettings("LocalDirectory", new VisibleWhenProperty(
+  setPropertySettings("LocalDirectory", make_unique<VisibleWhenProperty>(
                                             "Action", IS_EQUAL_TO, "Download"));
 
   declareProperty(
-      new PropertyWithValue<int>("DownloadJobID", 0, Direction::Input),
+      make_unique<PropertyWithValue<int>>("DownloadJobID", 0, Direction::Input),
       "ID of the job for which to download files. A job with this ID "
       "must be running or have been run on the compute resource.");
-  setPropertySettings("DownloadJobID", new VisibleWhenProperty(
+  setPropertySettings("DownloadJobID", make_unique<VisibleWhenProperty>(
                                            "Action", IS_EQUAL_TO, "Download"));
 
   // - Action: cancel job by ID
   declareProperty(
-      new PropertyWithValue<int>("CancelJobID", 0, Direction::Input),
+      make_unique<PropertyWithValue<int>>("CancelJobID", 0, Direction::Input),
       "The ID for a currently running job on " + m_SCARFComputeResource);
-  setPropertySettings("CancelJobID", new VisibleWhenProperty(
+  setPropertySettings("CancelJobID", make_unique<VisibleWhenProperty>(
                                          "Action", IS_EQUAL_TO, "CancelJob"));
 }
 
@@ -215,7 +211,7 @@ void SCARFTomoReconstruction::exec() {
     g_log.error()
         << "To use this algorithm to perform the requested action "
            "you need to give a valid username on the compute resource" +
-               m_SCARFComputeResource << std::endl;
+               m_SCARFComputeResource << '\n';
     throw;
   }
   // all actions that require at least a username
@@ -226,7 +222,7 @@ void SCARFTomoReconstruction::exec() {
     } catch (std::runtime_error & /*e*/) {
       g_log.error() << "To log in using this algorithm you need to give a "
                        "valid username and password on the compute resource "
-                    << m_SCARFComputeResource << "." << std::endl;
+                    << m_SCARFComputeResource << ".\n";
       throw;
     }
     if (password.empty()) {
@@ -251,7 +247,7 @@ void SCARFTomoReconstruction::exec() {
     } catch (std::runtime_error & /*e*/) {
       g_log.error() << "To query the detailed status of a job by its ID you "
                        "need to give the ID of a job running on "
-                    << m_SCARFComputeResource << "." << std::endl;
+                    << m_SCARFComputeResource << ".\n";
       throw;
     }
     doQueryStatusById(username, jobId);
@@ -261,8 +257,7 @@ void SCARFTomoReconstruction::exec() {
       jobId = getPropertyValue("CancelJobID");
     } catch (std::runtime_error & /*e*/) {
       g_log.error() << "To cancel a job you need to give the ID of a job "
-                       "running on " << m_SCARFComputeResource << "."
-                    << std::endl;
+                       "running on " << m_SCARFComputeResource << ".\n";
       throw;
     }
     doCancel(username, jobId);
@@ -272,15 +267,14 @@ void SCARFTomoReconstruction::exec() {
       filename = getPropertyValue("FileToUpload");
     } catch (std::runtime_error & /*e*/) {
       g_log.error() << "To upload a file you need to provide an existing "
-                       "local file." << std::endl;
+                       "local file.\n";
       throw;
     }
     try {
       destDir = getPropertyValue("DestinationDirectory");
     } catch (std::runtime_error & /*e*/) {
       g_log.error() << "To upload a file you need to provide a destination "
-                       "directory on " << m_SCARFComputeResource << "."
-                    << std::endl;
+                       "directory on " << m_SCARFComputeResource << ".\n";
       throw;
     }
     doUploadFile(username, destDir, filename);
@@ -290,22 +284,21 @@ void SCARFTomoReconstruction::exec() {
       jobId = getPropertyValue("DownloadJobID");
     } catch (std::runtime_error & /*e*/) {
       g_log.error() << "To download a file you need to give the ID of a job "
-                       "running on " << m_SCARFComputeResource << "."
-                    << std::endl;
+                       "running on " << m_SCARFComputeResource << ".\n";
       throw;
     }
     try {
       fname = getPropertyValue("RemoteJobFilename");
     } catch (std::runtime_error & /*e*/) {
       g_log.error() << "To download a file you need to provide the name of a "
-                       "file from the remote job." << std::endl;
+                       "file from the remote job.\n";
       throw;
     }
     try {
       localDir = getPropertyValue("LocalDirectory");
     } catch (std::runtime_error & /*e*/) {
       g_log.error() << "To download a file you need to provide a destination "
-                       "(local) directory." << std::endl;
+                       "(local) directory.\n";
       throw;
     }
     doDownload(username, jobId, fname, localDir);
@@ -372,7 +365,7 @@ void SCARFTomoReconstruction::doLogin(const std::string &username,
     UsernameToken tok(username, Token(url, token_str));
     m_tokenStash.insert(tok); // the password is never stored
     g_log.notice() << "Got authentication token. You are now logged into "
-                   << m_SCARFComputeResource << std::endl;
+                   << m_SCARFComputeResource << '\n';
   } else {
     throw std::runtime_error("Login failed. Please check your username and "
                              "password. Got this response: " +
@@ -403,11 +396,9 @@ void SCARFTomoReconstruction::doLogout(const std::string &username) {
   const std::string token = it->second.m_token_str;
 
   std::string httpsURL = baseURL + logoutPath;
-  StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "text/plain"));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  std::map<std::string, std::string> headers{{"Content-Type", "text/plain"},
+                                             {"Cookie", token},
+                                             {"Accept", m_acceptType}};
   int code;
   std::stringstream ss;
   try {
@@ -417,8 +408,8 @@ void SCARFTomoReconstruction::doLogout(const std::string &username) {
                              std::string(ie.what()));
   }
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
-    g_log.notice() << "Logged out." << std::endl;
-    g_log.debug() << "Response from server: " << ss.str() << std::endl;
+    g_log.notice() << "Logged out.\n";
+    g_log.debug() << "Response from server: " << ss.str() << '\n';
   } else {
     throw std::runtime_error("Failed to logout from the web service at: " +
                              httpsURL + ". Please check your username.");
@@ -451,7 +442,7 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
     jobOptions = getPropertyValue("JobOptions");
   } catch (std::runtime_error & /*e*/) {
     g_log.warning() << "You did not specify any options for the job. Maybe you "
-                       "forgot to pass the options?" << std::endl;
+                       "forgot to pass the options?\n";
     m_jobOptions = "";
   }
 
@@ -462,8 +453,7 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
     g_log.error() << "You did not specify a the path to the parameter file "
                      "which is required to create a new reconstruction job. "
                      "Please provide "
-                     "a valid tomography reconstruction parameter file"
-                  << std::endl;
+                     "a valid tomography reconstruction parameter file\n";
     throw;
   }
 
@@ -484,13 +474,14 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
   // %J.error"
 
   // Two applications are for now registered on SCARF:
-  //  TOMOPY_0_0_3, PYASTRATOOLBOX_1_1
-  std::string appName = "TOMOPY_0_0_3";
+  //  TOMOPY_0_0_3, PYASTRATOOLBOX_1_1 - old versions
+  //  TOMOPY_0_1_9, PYASTRATOOLBOX_1_6 - newer versions (Dec 2015)
+  std::string appName = "TOMOPY_0_1_9";
   // Basic attempt at guessing the app that we might really need. This
   // is not fixed/unstable at the moment
-  if (runnablePath.find("astra-2d-FBP") != std::string::npos ||
-      runnablePath.find("astra-3d-SIRT3D") != std::string::npos) {
-    appName = "PYASTRATOOLBOX_1_1";
+  if (runnablePath.find("--tool astra") != std::string::npos ||
+      runnablePath.find("--tool=astra") != std::string::npos) {
+    appName = "PYASTRATOOLBOX_1_6";
   }
 
   // this gets executed (for example via 'exec' or 'python', depending on the
@@ -509,11 +500,10 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
   const std::string token = it->second.m_token_str;
 
   std::string httpsURL = baseURL + submitPath;
-  StringToStringMap headers;
-  headers.insert(std::pair<std::string, std::string>(
-      "Content-Type", "multipart/mixed; boundary=" + boundary));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  std::map<std::string, std::string> headers{
+      {"Content-Type", "multipart/mixed; boundary=" + boundary},
+      {"Accept", m_acceptType},
+      {"Cookie", token}};
   int code;
   std::stringstream ss;
   try {
@@ -530,10 +520,10 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
       g_log.warning()
           << "Submitted job but got a a response that seems to contain "
              "an error message from " << m_SCARFComputeResource << ": "
-          << extractPACErrMsg(ss.str()) << std::endl;
+          << extractPACErrMsg(ss.str()) << '\n';
     } else {
-      g_log.notice() << "Submitted job successfully." << std::endl;
-      g_log.debug() << "Response from server: " << resp << std::endl;
+      g_log.notice() << "Submitted job successfully.\n";
+      g_log.debug() << "Response from server: " << resp << '\n';
     }
   } else {
     throw std::runtime_error(
@@ -570,11 +560,10 @@ void SCARFTomoReconstruction::doQueryStatus(const std::string &username) {
   const std::string token = it->second.m_token_str;
 
   std::string httpsURL = baseURL + jobStatusPath;
-  StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  std::map<std::string, std::string> headers{
+      {"Content-Type", "application/xml"},
+      {"Accept", m_acceptType},
+      {"Cookie", token}};
   int code;
   std::stringstream ss;
   try {
@@ -591,14 +580,13 @@ void SCARFTomoReconstruction::doQueryStatus(const std::string &username) {
         std::string::npos != resp.find("<extStatus>")) {
       genOutputStatusInfo(resp);
       g_log.notice() << "Queried the status of jobs and stored the "
-                        "information in output properties." << std::endl;
+                        "information in output properties.\n";
     } else {
       g_log.warning() << "Queried the status of jobs but got what looks "
-                         "like an error message as response: " << resp
-                      << std::endl;
+                         "like an error message as response: " << resp << '\n';
     }
-    g_log.notice() << "Queried job status successfully." << std::endl;
-    g_log.debug() << "Response from server: " << resp << std::endl;
+    g_log.notice() << "Queried job status successfully.\n";
+    g_log.debug() << "Response from server: " << resp << '\n';
   } else {
     throw std::runtime_error(
         "Failed to obtain job status information through the "
@@ -638,11 +626,10 @@ void SCARFTomoReconstruction::doQueryStatusById(const std::string &username,
   const std::string token = it->second.m_token_str;
 
   std::string httpsURL = baseURL + jobIdStatusPath;
-  StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  std::map<std::string, std::string> headers{
+      {"Content-Type", "application/xml"},
+      {"Accept", m_acceptType},
+      {"Cookie", token}};
   int code;
   std::stringstream ss;
   try {
@@ -660,13 +647,13 @@ void SCARFTomoReconstruction::doQueryStatusById(const std::string &username,
       genOutputStatusInfo(resp, jobId);
       g_log.notice() << "Queried job status (Id " << jobId
                      << ") and stored "
-                        "information into output properties." << std::endl;
-      g_log.debug() << "Response from server: " << resp << std::endl;
+                        "information into output properties.\n";
+      g_log.debug() << "Response from server: " << resp << '\n';
     } else {
       g_log.warning() << "Queried job status (Id " << jobId
                       << " ) but got what "
                          "looks like an error message as response: " << resp
-                      << std::endl;
+                      << '\n';
     }
   } else {
     throw std::runtime_error("Failed to obtain job (Id:" + jobId +
@@ -697,10 +684,8 @@ bool SCARFTomoReconstruction::doPing() {
   const std::string baseURL = "https://portal.scarf.rl.ac.uk:8443/";
 
   std::string httpsURL = baseURL + pingPath;
-  StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  std::map<std::string, std::string> headers{
+      {"Content-Type", "application/xml"}, {"Accept", m_acceptType}};
   int code;
   std::stringstream ss;
   try {
@@ -716,11 +701,11 @@ bool SCARFTomoReconstruction::doPing() {
     if (std::string::npos != resp.find("Web Services are ready")) {
       g_log.notice()
           << "Pinged compute resource with apparently good response: " << resp
-          << std::endl;
+          << '\n';
       ok = true;
     } else {
       g_log.warning() << "Pinged compute resource but got what looks like an "
-                         "error message: " << resp << std::endl;
+                         "error message: " << resp << '\n';
     }
   } else {
     throw std::runtime_error(
@@ -762,11 +747,10 @@ void SCARFTomoReconstruction::doCancel(const std::string &username,
   const std::string token = it->second.m_token_str;
 
   std::string httpsURL = baseURL + killPath;
-  StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  std::map<std::string, std::string> headers{
+      {"Content-Type", "application/xml"},
+      {"Cookie", token},
+      {"Accept", m_acceptType}};
   int code;
   std::stringstream ss;
   try {
@@ -782,14 +766,14 @@ void SCARFTomoReconstruction::doCancel(const std::string &username,
       g_log.warning() << "Killed job with Id" << jobId
                       << " but got what looks like an "
                          "error message as response: " << extractPACErrMsg(resp)
-                      << std::endl;
+                      << '\n';
     } else if (std::string::npos != resp.find("<actionMsg>")) {
-      g_log.notice() << "Killed job with Id" << jobId << "." << std::endl;
-      g_log.debug() << "Response from server: " << resp << std::endl;
+      g_log.notice() << "Killed job with Id" << jobId << ".\n";
+      g_log.debug() << "Response from server: " << resp << '\n';
     } else {
       g_log.warning() << "Killed job with Id" << jobId
                       << " but got what a response "
-                         "that I do not recognize: " << resp << std::endl;
+                         "that I do not recognize: " << resp << '\n';
     }
   } else {
     throw std::runtime_error(
@@ -836,11 +820,10 @@ void SCARFTomoReconstruction::doUploadFile(const std::string &username,
 
   InternetHelper session;
   std::string httpsURL = baseURL + uploadPath;
-  StringToStringMap headers;
-  headers.insert(std::pair<std::string, std::string>(
-      "Content-Type", "multipart/mixed; boundary=" + boundary));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  std::map<std::string, std::string> headers{
+      {"Content-Type", "multipart/mixed; boundary=" + boundary},
+      {"Accept", m_acceptType},
+      {"Cookie", token}};
 
   const std::string &body = buildUploadBody(boundary, destDir, filename);
   int code;
@@ -855,8 +838,7 @@ void SCARFTomoReconstruction::doUploadFile(const std::string &username,
   }
   if (Poco::Net::HTTPResponse::HTTP_OK == code) {
     std::string resp = ss.str();
-    g_log.notice() << "Uploaded file, response from server: " << resp
-                   << std::endl;
+    g_log.notice() << "Uploaded file, response from server: " << resp << '\n';
   } else {
     throw std::runtime_error(
         "Failed to upload file through the web service at:" + httpsURL +
@@ -1052,8 +1034,7 @@ std::string SCARFTomoReconstruction::buildSubmitBody(
     // <AppParam><id>JOB_NAME</id><value>foo</value><type></type></AppParam>
     std::string name;
     if (jobName.empty()) {
-      name =
-          "Mantid_tomography_" + boost::lexical_cast<std::string>(jobSeqNo());
+      name = "Mantid_tomography_" + std::to_string(jobSeqNo());
     } else {
       name = jobName;
     }
@@ -1100,7 +1081,7 @@ SCARFTomoReconstruction::buildUploadBody(const std::string &boundary,
   std::string upName = filename;
   std::replace(upName.begin(), upName.end(), '\\', '/');
   // discard up to last / (path)
-  upName = upName.substr(upName.rfind("/") + 1);
+  upName = upName.substr(upName.rfind('/') + 1);
 
   // BLOCK: start and encode destination directory like this:
   // --4k89ogja023oh1-gkdfk903jf9wngmujfs95m
@@ -1195,7 +1176,7 @@ void SCARFTomoReconstruction::genOutputStatusInfo(
         jobs->item(static_cast<unsigned long>(i)));
     if (!el)
       throw std::runtime_error("Error while trying to parse job with index " +
-                               boost::lexical_cast<std::string>(i) +
+                               std::to_string(i) +
                                "could not produce a complete table workspace.");
 
     Poco::XML::Element *id = el->getChildElement("id");
@@ -1211,21 +1192,21 @@ void SCARFTomoReconstruction::genOutputStatusInfo(
     if (name) {
       jobNames.push_back(name->innerText().c_str());
     } else {
-      jobNames.push_back("Unknown!");
+      jobNames.emplace_back("Unknown!");
     }
 
     Poco::XML::Element *status = el->getChildElement("status");
     if (status) {
       jobStatus.push_back(status->innerText().c_str());
     } else {
-      jobStatus.push_back("Unknown!");
+      jobStatus.emplace_back("Unknown!");
     }
 
     Poco::XML::Element *cmd = el->getChildElement("cmd");
     if (cmd) {
       jobCommands.push_back(cmd->innerText().c_str());
     } else {
-      jobCommands.push_back("Unknown!");
+      jobCommands.emplace_back("Unknown!");
     }
   }
 
@@ -1244,7 +1225,7 @@ void SCARFTomoReconstruction::genOutputStatusInfo(
     setProperty("RemoteJobsCommands", jobCommands);
   } else {
     // Single job query. Here the job ID is an input
-    if (0 == jobIds.size()) {
+    if (jobIds.empty()) {
       setProperty("RemoteJobName", "Unknown!");
       setProperty("RemoteJobStatus", "Unknown!");
       setProperty("RemoteJobCommand", "Unknown!");
@@ -1306,11 +1287,11 @@ const std::string SCARFTomoReconstruction::checkDownloadOutputFile(
   Poco::File f(outName);
   if (f.exists()) {
     if (f.canWrite()) {
-      g_log.notice() << "Overwriting output file: " << outName << std::endl;
+      g_log.notice() << "Overwriting output file: " << outName << '\n';
     } else {
       g_log.warning() << "It is not possible to write into the output file: "
                       << outName << ", you may not have the required "
-                                    "permissions. Please check." << std::endl;
+                                    "permissions. Please check.\n";
     }
   }
   return f.path();
@@ -1333,9 +1314,9 @@ const std::string SCARFTomoReconstruction::checkDownloadOutputFile(
 const std::string
 SCARFTomoReconstruction::filterPACFilename(const std::string PACName) const {
   // discard up to last / (path)
-  std::string name = PACName.substr(PACName.rfind("/") + 1);
+  std::string name = PACName.substr(PACName.rfind('/') + 1);
   // remove trailing parameters
-  size_t ast = name.find("*");
+  size_t ast = name.find('*');
   name.replace(ast, std::string::npos, "");
   return name;
 }
@@ -1363,11 +1344,10 @@ void SCARFTomoReconstruction::getOneJobFile(const std::string &jobId,
 
   std::string httpsURL = baseURL + downloadOnePath;
 
-  StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  std::map<std::string, std::string> headers{
+      {"Content-Type", "application/xml"},
+      {"Cookie", token},
+      {"Accept", m_acceptType}};
   std::string body = remotePath;
   int code;
   std::stringstream ss;
@@ -1388,22 +1368,22 @@ void SCARFTomoReconstruction::getOneJobFile(const std::string &jobId,
       if (name.empty()) {
         g_log.notice() << "Could not download remote file " << remotePath
                        << " into " << localPath
-                       << ", a problem with its name was found" << std::endl;
+                       << ", a problem with its name was found\n";
       }
       std::string outName = checkDownloadOutputFile(localPath, name);
       std::ofstream file(outName.c_str(),
                          std::ios_base::binary | std::ios_base::out);
       Poco::StreamCopier::copyStream(ss, file);
       g_log.notice() << "Downloaded remote file " << outName << " into "
-                     << localPath << "." << std::endl;
+                     << localPath << ".\n";
       // do this only if you want to log the file contents!
-      // g_log.debug() << "Response from server: " << ss.str() << std::endl;
+      // g_log.debug() << "Response from server: " << ss.str() << '\n';
     } else {
       // log an error but potentially continue with other files
       g_log.error()
           << "Download failed. You may not have the required permissions "
              "or the file may not be available on " << m_SCARFComputeResource
-          << ": " << remotePath << std::endl;
+          << ": " << remotePath << '\n';
     }
   } else {
     throw std::runtime_error(
@@ -1433,11 +1413,10 @@ void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
   const std::string token = t.m_token_str;
 
   std::string httpsURL = baseURL + downloadPath;
-  StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  std::map<std::string, std::string> headers{
+      {"Content-Type", "application/xml"},
+      {"Cookie", token},
+      {"Accept", m_acceptType}};
   int code;
   std::stringstream ss;
   try {
@@ -1466,8 +1445,8 @@ void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
       while (std::getline(ss, PACname, ';')) {
         filePACNames.push_back(PACname);
       }
-      for (size_t i = 0; i < filePACNames.size(); i++) {
-        getOneJobFile(jobId, filePACNames[i], localDir, t);
+      for (auto &filePACName : filePACNames) {
+        getOneJobFile(jobId, filePACName, localDir, t);
       }
     }
   } else {
@@ -1478,8 +1457,7 @@ void SCARFTomoReconstruction::getAllJobFiles(const std::string &jobId,
                    "existing jobs, username, and parameters.");
   }
 
-  progress(1.0, "Download  of " +
-                    boost::lexical_cast<std::string>(filePACNames.size()) +
+  progress(1.0, "Download  of " + std::to_string(filePACNames.size()) +
                     " file(s) completed in " + localDir);
 }
 

@@ -377,18 +377,18 @@ private:
                                      const std::string &workspacePropertyName)
         : SeqDomainSpectrumCreator(manager, workspacePropertyName) {}
 
-    ~TestableSeqDomainSpectrumCreator() {}
+    ~TestableSeqDomainSpectrumCreator() override {}
   };
 
   class SeqDomainCreatorTestFunction : public IFunction1DSpectrum,
                                        public ParamFunction {
   public:
-    ~SeqDomainCreatorTestFunction() {}
+    ~SeqDomainCreatorTestFunction() override {}
 
-    std::string name() const { return "SeqDomainCreatorTestFunction"; }
+    std::string name() const override { return "SeqDomainCreatorTestFunction"; }
 
     void function1DSpectrum(const FunctionDomain1DSpectrum &domain,
-                            FunctionValues &values) const {
+                            FunctionValues &values) const override {
 
       double wsIndex = static_cast<double>(domain.getWorkspaceIndex());
       double slope = getParameter("Slope");
@@ -399,18 +399,20 @@ private:
     }
 
   protected:
-    void init() { declareParameter("Slope", 1.0); }
+    void init() override { declareParameter("Slope", 1.0); }
   };
 
   class SeqDomainCreatorTestFunctionComplex : public IFunction1DSpectrum,
                                               public ParamFunction {
   public:
-    ~SeqDomainCreatorTestFunctionComplex() {}
+    ~SeqDomainCreatorTestFunctionComplex() override {}
 
-    std::string name() const { return "SeqDomainCreatorTestFunctionComplex"; }
+    std::string name() const override {
+      return "SeqDomainCreatorTestFunctionComplex";
+    }
 
     void function1DSpectrum(const FunctionDomain1DSpectrum &domain,
-                            FunctionValues &values) const {
+                            FunctionValues &values) const override {
       double wsIndex = static_cast<double>(domain.getWorkspaceIndex());
       double slope = getParameter(domain.getWorkspaceIndex() % 40);
 
@@ -420,14 +422,14 @@ private:
     }
 
     void functionDeriv1DSpectrum(const FunctionDomain1DSpectrum &domain,
-                                 Jacobian &jacobian) {
+                                 Jacobian &jacobian) override {
       for (size_t j = 0; j < domain.size(); ++j) {
         jacobian.set(j, domain.getWorkspaceIndex() % 40, domain[j]);
       }
     }
 
   protected:
-    void init() {
+    void init() override {
       for (size_t i = 0; i < 40; ++i) {
         declareParameter("Slope" + boost::lexical_cast<std::string>(i), 4.0);
       }

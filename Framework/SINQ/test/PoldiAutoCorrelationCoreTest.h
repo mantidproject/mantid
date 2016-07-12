@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <boost/assign.hpp>
 
 #include "MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h"
 
@@ -43,7 +42,8 @@ private:
         new PoldiDeadWireDecorator(std::set<int>(deadWires, deadWires + 12),
                                    detector));
 
-    boost::shared_ptr<MockChopper> mockChopper(new MockChopper);
+    boost::shared_ptr<MockChopper> mockChopper =
+        boost::make_shared<MockChopper>();
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setInstrument(deadWireDecorator, mockChopper);
@@ -64,8 +64,10 @@ public:
   PoldiAutoCorrelationCoreTest() : m_log("PoldiAutoCorrelationCoreTest") {}
 
   void testsetInstrument() {
-    boost::shared_ptr<MockDetector> mockDetector(new MockDetector);
-    boost::shared_ptr<MockChopper> mockChopper(new MockChopper);
+    boost::shared_ptr<MockDetector> mockDetector =
+        boost::make_shared<MockDetector>();
+    boost::shared_ptr<MockChopper> mockChopper =
+        boost::make_shared<MockChopper>();
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setInstrument(mockDetector, mockChopper);
@@ -86,7 +88,8 @@ public:
     boost::shared_ptr<PoldiAbstractDetector> detector(
         new ConfiguredHeliumDetector);
 
-    boost::shared_ptr<MockChopper> mockChopper(new MockChopper);
+    boost::shared_ptr<MockChopper> mockChopper =
+        boost::make_shared<MockChopper>();
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setInstrument(detector, mockChopper);
@@ -106,7 +109,8 @@ public:
     boost::shared_ptr<PoldiAbstractDetector> detector(
         new ConfiguredHeliumDetector);
 
-    boost::shared_ptr<MockChopper> mockChopper(new MockChopper);
+    boost::shared_ptr<MockChopper> mockChopper =
+        boost::make_shared<MockChopper>();
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setInstrument(detector, mockChopper);
@@ -311,10 +315,8 @@ public:
   void testFinalizeCalculation() {
     TestablePoldiAutoCorrelationCore core(m_log);
 
-    MantidVec dValues = boost::assign::list_of(0.5)(0.6)(0.7)(0.8)
-                            .convert_to_container<MantidVec>();
-    MantidVec intensities = boost::assign::list_of(1.0)(2.0)(3.0)(4.0)
-                                .convert_to_container<MantidVec>();
+    MantidVec dValues = {0.5, 0.6, 0.7, 0.8};
+    MantidVec intensities = {1.0, 2.0, 3.0, 4.0};
 
     DataObjects::Workspace2D_sptr output =
         core.finalizeCalculation(intensities, dValues);

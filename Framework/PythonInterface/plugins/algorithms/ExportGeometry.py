@@ -1,7 +1,7 @@
 #pylint: disable=no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, \
     InstrumentValidator, FileProperty, FileAction
-from mantid.kernel import Direction, StringArrayProperty
+from mantid.kernel import Direction, StringArrayProperty, StringListValidator
 
 SOURCE_XML = """  <!--SOURCE-->
   <component type="moderator">
@@ -20,9 +20,9 @@ SAMPLE_XML = """  <!--SAMPLE-->
 """
 
 COMPONENT_XML_FULL = """      <location x="%(x)f" y="%(y)f" z="%(z)f" name="%(name)s">
-        <rot axis-x="0" axis-y="1" axis-z="0" val="%(Y1)f">
-          <rot axis-x="0" axis-y="0" axis-z="1" val="%(Z)f">
-            <rot axis-x="0" axis-y="1" axis-z="0" val="%(Y2)f"/>
+        <rot %(alpha_string)s">
+          <rot %(beta_string)s">
+            <rot %(gamma_string)s"/>
           </rot>
         </rot>
       </location>
@@ -37,6 +37,11 @@ COMPONENT_XML_MINIMAL = """      <location x="%(x)f" y="%(y)f" z="%(z)f" name="%
 
 
 class ExportGeometry(PythonAlgorithm):
+    _eulerCon = None
+    _eulerXML={"X":'axis-x="1" axis-y="0" axis-z="0" val="',
+               "Y":'axis-x="0" axis-y="1" axis-z="0" val="',
+               "Z":'axis-x="0" axis-y="0" axis-z="1" val="'}
+
     def category(self):
         return "Utility"
 
@@ -51,6 +56,11 @@ class ExportGeometry(PythonAlgorithm):
                                                validator=InstrumentValidator(),
                                                direction=Direction.Input),
                              doc="Workspace containing the instrument to be exported")
+        eulerConventions = ["ZXZ", "XYX", "YZY", "ZYZ", "XZX", "YXY",
+                            "XYZ", "YZX", "ZXY", "XZY", "ZYX", "YXZ"]
+        self.declareProperty(name="EulerConvention", defaultValue="YZY",
+                             validator=StringListValidator(eulerConventions),
+                             doc="Euler angles convention used when writing angles.")
         self.declareProperty(StringArrayProperty("Components",
                                                  direction=Direction.Input),
                              doc="Comma separated list of instrument components to export")
@@ -85,10 +95,13 @@ class ExportGeometry(PythonAlgorithm):
         info['y'] = pos.Y()
         info['z'] = pos.Z()
 
-        angles = component.getRotation().getEulerAngles('YZY')
-        info['Y1'] = angles[0]
-        info['Z'] = angles[1]
-        info['Y2'] = angles[2]
+        angles = component.getRotation().getEulerAngles(self._eulerCon)
+        info['alpha'] = angles[0]
+        info['beta']  = angles[1]
+        info['gamma'] = angles[2]
+        info['alpha_string'] = self._eulerXML[self._eulerCon[0]] + str(angles[0])
+        info['beta_string']  = self._eulerXML[self._eulerCon[1]] + str(angles[1])
+        info['gamma_string'] = self._eulerXML[self._eulerCon[2]] + str(angles[2])
 
     def __writexmlSource(self, handle, instrument):
         source = {}
@@ -103,7 +116,7 @@ class ExportGeometry(PythonAlgorithm):
         info = {'name': component.getName()}
         self.__updatePos(info, component)
 
-        if info['Y1'] == 0. and info['Z'] == 0. and info['Y2'] == 0.:
+        if info['alpha'] == 0. and info['beta'] == 0. and info['gamma'] == 0.:
             handle.write(COMPONENT_XML_MINIMAL % info)
         else:
             handle.write(COMPONENT_XML_FULL % info)
@@ -112,6 +125,7 @@ class ExportGeometry(PythonAlgorithm):
         wksp = self.getProperty("InputWorkspace").value
         components = self.getProperty("Components").value
         filename = self.getProperty("Filename").value
+        self._eulerCon = self.getProperty("EulerConvention").value
 
         instrument = wksp.getInstrument()
         with open(filename, 'w') as handle:

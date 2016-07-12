@@ -10,8 +10,8 @@ namespace Kernel {
  * Constructor taking the number of dimensions for the sequence
  */
 SobolSequence::SobolSequence(const unsigned int ndims)
-    : QuasiRandomNumberSequence(ndims), m_gslGenerator(NULL),
-      m_savedGenerator(NULL) {
+    : QuasiRandomNumberSequence(ndims), m_gslGenerator(nullptr),
+      m_savedGenerator(nullptr) {
   setNumberOfDimensions(ndims);
 }
 

@@ -20,9 +20,9 @@ void CatalogLogin::init() {
       boost::make_shared<Kernel::MandatoryValidator<std::string>>();
   declareProperty("Username", "", requireValue,
                   "The username to log into the catalog.");
-  declareProperty(
-      new Kernel::MaskedProperty<std::string>("Password", "", requireValue),
-      "The password of the related username to use.");
+  declareProperty(Kernel::make_unique<Kernel::MaskedProperty<std::string>>(
+                      "Password", "", requireValue),
+                  "The password of the related username to use.");
   declareProperty("FacilityName",
                   Kernel::ConfigService::Instance().getFacility().name(),
                   boost::make_shared<Kernel::StringListValidator>(
@@ -31,7 +31,7 @@ void CatalogLogin::init() {
   declareProperty(
       "KeepSessionAlive", true,
       "Keeps the session of the catalog alive if login was successful.");
-  declareProperty(new API::AlgorithmProperty(
+  declareProperty(Kernel::make_unique<API::AlgorithmProperty>(
                       "KeepAlive", boost::make_shared<Kernel::NullValidator>(),
                       Kernel::Direction::Output),
                   "A handle to the KeepAlive algorithm instance that continues "
@@ -48,7 +48,7 @@ void CatalogLogin::exec() {
         "There is no soap end-point for the facility you have selected.");
 
   g_log.notice() << "Attempting to verify user credentials against "
-                 << catalogInfo.catalogName() << std::endl;
+                 << catalogInfo.catalogName() << '\n';
   progress(0.5, "Verifying user credentials...");
 
   // Creates a new catalog and related session if the authentication is a

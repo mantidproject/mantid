@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from testhelpers import run_algorithm
 from mantid.api import mtd, WorkspaceGroup, MatrixWorkspace
@@ -27,7 +29,7 @@ class WorkspaceGroupTest(unittest.TestCase):
         try:
             grouped.getNames()
             self.fail("WorkspaceGroup handle is still usable after ADS has been cleared, it should be a weak reference and raise an error.")
-        except RuntimeError, exc:
+        except RuntimeError as exc:
             self.assertEquals(str(exc), 'Variable invalidated, data has been deleted.')
 
     def test_group_index_access_returns_correct_workspace(self):
@@ -48,7 +50,7 @@ class WorkspaceGroupTest(unittest.TestCase):
         try:
             member.name()
             self.fail("Handle for item extracted from WorkspaceGroup is still usable after ADS has been cleared, it should be a weak reference and raise an error.")
-        except RuntimeError, exc:
+        except RuntimeError as exc:
             self.assertEquals(str(exc), 'Variable invalidated, data has been deleted.')
 
     def test_SimpleAlgorithm_Accepts_Group_Handle(self):
@@ -63,7 +65,7 @@ class WorkspaceGroupTest(unittest.TestCase):
         try:
             w = Scale(group, 1.5)
             mtd.remove(str(w))
-        except Exception, exc:
+        except Exception as exc:
             self.fail("Algorithm raised an exception with input as WorkspaceGroup: '" + str(exc) + "'")
         mtd.remove(str(group))
 
@@ -86,6 +88,19 @@ class WorkspaceGroupTest(unittest.TestCase):
         mtd.remove('grouped')
         mtd.remove('grouped_1')
         mtd.remove('grouped_2')
+
+    def test_sortByName(self):
+        run_algorithm('CreateSingleValuedWorkspace', OutputWorkspace="w1")
+        run_algorithm('CreateSingleValuedWorkspace', OutputWorkspace="w4")
+        run_algorithm('GroupWorkspaces',InputWorkspaces='w4,w1',
+                      OutputWorkspace='group')
+        group = mtd['group']
+        names = ' '.join(list(group.getNames()))
+        self.assertTrue("w4 w1"==names)
+        group.sortByName()
+        names = ' '.join(list(group.getNames()))
+        self.assertTrue("w1 w4"==names)
+
 
 if __name__ == '__main__':
     unittest.main()

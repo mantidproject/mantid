@@ -26,41 +26,41 @@ class IMDWorkspaceTesterIterator : public IMDIterator {
 public:
   IMDWorkspaceTesterIterator(const IMDWorkspaceTester *ws)
       : m_ws(ws), ix(0), iy(0) {}
-  virtual size_t getDataSize() const;
-  virtual bool valid() const { return true; }
-  virtual void jumpTo(size_t index);
-  virtual bool next();
-  virtual bool next(size_t) { return false; }
-  virtual signal_t getNormalizedSignal() const;
-  virtual signal_t getNormalizedError() const;
-  virtual signal_t getSignal() const { return 0; }
-  virtual signal_t getError() const { return 0; }
-  virtual coord_t *getVertexesArray(size_t &) const { return NULL; }
-  virtual coord_t *getVertexesArray(size_t &, const size_t,
-                                    const bool *) const {
+  size_t getDataSize() const override;
+  bool valid() const override { return true; }
+  void jumpTo(size_t index) override;
+  bool next() override;
+  bool next(size_t) override { return false; }
+  signal_t getNormalizedSignal() const override;
+  signal_t getNormalizedError() const override;
+  signal_t getSignal() const override { return 0; }
+  signal_t getError() const override { return 0; }
+  coord_t *getVertexesArray(size_t &) const override { return NULL; }
+  coord_t *getVertexesArray(size_t &, const size_t,
+                            const bool *) const override {
     return NULL;
   }
-  virtual Mantid::Kernel::VMD getCenter() const;
-  virtual size_t getNumEvents() const { return 0; }
-  virtual uint16_t getInnerRunIndex(size_t) const { return 0; }
-  virtual int32_t getInnerDetectorID(size_t) const { return 0; }
-  virtual coord_t getInnerPosition(size_t, size_t) const { return 0; }
-  virtual signal_t getInnerSignal(size_t) const { return 0; }
-  virtual signal_t getInnerError(size_t) const { return 0; }
-  virtual bool getIsMasked() const { return false; }
-  virtual std::vector<size_t> findNeighbourIndexes() const {
+  Mantid::Kernel::VMD getCenter() const override;
+  size_t getNumEvents() const override { return 0; }
+  uint16_t getInnerRunIndex(size_t) const override { return 0; }
+  int32_t getInnerDetectorID(size_t) const override { return 0; }
+  coord_t getInnerPosition(size_t, size_t) const override { return 0; }
+  signal_t getInnerSignal(size_t) const override { return 0; }
+  signal_t getInnerError(size_t) const override { return 0; }
+  bool getIsMasked() const override { return false; }
+  std::vector<size_t> findNeighbourIndexes() const override {
     throw std::runtime_error(
         "findNeighbourIndexes not implemented on IMDWorkspaceTesterIterator");
   }
-  virtual std::vector<size_t> findNeighbourIndexesFaceTouching() const {
+  std::vector<size_t> findNeighbourIndexesFaceTouching() const override {
     throw std::runtime_error(
         "findNeighbourIndexes not implemented on IMDWorkspaceTesterIterator");
   }
-  virtual size_t getLinearIndex() const {
+  size_t getLinearIndex() const override {
     throw std::runtime_error(
         "getLinearIndex not implemented on IMDWorkspaceTesterIterator");
   }
-  virtual bool isWithinBounds(size_t) const {
+  bool isWithinBounds(size_t) const override {
     throw std::runtime_error(
         "isWithinBounds not implemented on IMDWorkspaceTestIterator");
   }
@@ -69,7 +69,8 @@ public:
 class IMDWorkspaceTester : public WorkspaceTester {
 public:
   std::vector<IMDIterator *>
-  createIterators(size_t, Mantid::Geometry::MDImplicitFunction *) const {
+  createIterators(size_t,
+                  Mantid::Geometry::MDImplicitFunction *) const override {
     return std::vector<IMDIterator *>(1, new IMDWorkspaceTesterIterator(this));
   }
 };

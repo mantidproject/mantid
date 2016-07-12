@@ -85,12 +85,12 @@ void SCARFLSFJobManager::authenticate(const std::string &username,
     UsernameToken tok(username, Token(url, token_str));
     g_tokenStash.insert(tok); // the password is never stored
     g_log.notice() << "Got authentication token for user '" + username +
-                          "'. You are now logged in " << std::endl;
+                          "'. You are now logged in \n";
   } else {
     throw std::runtime_error("Login failed. Please check your username and "
                              "password. Got status code " +
-                             boost::lexical_cast<std::string>(code) +
-                             ", with this response: " + resp);
+                             std::to_string(code) + ", with this response: " +
+                             resp);
   }
 }
 
@@ -125,11 +125,11 @@ bool SCARFLSFJobManager::ping() {
     if (std::string::npos != resp.find("Web Services are ready")) {
       g_log.notice()
           << "Pinged compute resource with apparently good response: " << resp
-          << std::endl;
+          << '\n';
       ok = true;
     } else {
       g_log.warning() << "Pinged compute resource but got what looks like an "
-                         "error message: " << resp << std::endl;
+                         "error message: " << resp << '\n';
     }
   } else {
     throw std::runtime_error(
@@ -154,7 +154,7 @@ bool SCARFLSFJobManager::ping() {
  * logged in with authenticate().
  */
 void SCARFLSFJobManager::logout(const std::string &username) {
-  if (0 == g_tokenStash.size()) {
+  if (g_tokenStash.empty()) {
     throw std::runtime_error("Logout failed. No one is currenlty logged in.");
   }
 
@@ -185,8 +185,8 @@ void SCARFLSFJobManager::logout(const std::string &username) {
                              std::string(ie.what()));
   }
   if (Mantid::Kernel::InternetHelper::HTTP_OK == code) {
-    g_log.notice() << "Logged out." << std::endl;
-    g_log.debug() << "Response from server: " << ss.str() << std::endl;
+    g_log.notice() << "Logged out.\n";
+    g_log.debug() << "Response from server: " << ss.str() << '\n';
   } else {
     throw std::runtime_error("Failed to logout from the web service at: " +
                              fullURL.toString() +
@@ -224,8 +224,7 @@ std::string SCARFLSFJobManager::urlComponentEncode(const std::string &in) {
   out.fill('0');
   out << std::hex;
 
-  for (std::string::const_iterator i = in.begin(), n = in.end(); i != n; ++i) {
-    std::string::value_type c = (*i);
+  for (char c : in) {
     // unreserved characters go through, where:
     // unreserved = ALPHA / DIGIT / "-" / "." / "_" / "~"
     if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
@@ -241,17 +240,21 @@ std::string SCARFLSFJobManager::urlComponentEncode(const std::string &in) {
 std::string
 SCARFLSFJobManager::guessJobSubmissionAppName(const std::string &runnablePath,
                                               const std::string &jobOptions) {
-  UNUSED_ARG(jobOptions);
+  UNUSED_ARG(runnablePath);
 
   // Two applications are for now registered and being used on SCARF:
-  //  TOMOPY_0_0_3, PYASTRATOOLBOX_1_1
-  std::string appName = "TOMOPY_0_0_3";
+  // tomopy and astra toolbox
+  // The first versions installed were: TOMOPY_0_0_3, PYASTRATOOLBOX_1_1
+  // The last versions installed as of this writing are:
+  // TOMOPY_0_1_9, PYASTRATOOLBOX_1_6
+  // Default: tomopy, as it loads the python module/environment
+  std::string appName = "TOMOPY_0_1_9";
 
   // Basic guess of the app that we might really need. Not
   // fixed/unstable at the moment
-  if (runnablePath.find("astra-2d-FBP") != std::string::npos ||
-      runnablePath.find("astra-3d-SIRT3D") != std::string::npos) {
-    appName = "PYASTRATOOLBOX_1_1";
+  if (jobOptions.find("--tool astra") != std::string::npos ||
+      jobOptions.find("--tool=astra") != std::string::npos) {
+    appName = "PYASTRATOOLBOX_1_6";
   }
 
   return appName;

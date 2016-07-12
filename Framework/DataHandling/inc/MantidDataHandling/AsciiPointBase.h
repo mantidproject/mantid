@@ -41,16 +41,12 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport AsciiPointBase : public API::Algorithm {
 public:
-  /// Default constructor
-  AsciiPointBase() : m_qres(0), m_xlength(0), m_ws() {}
-  /// Destructor
-  ~AsciiPointBase() {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const = 0;
+  const std::string name() const override = 0;
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const = 0;
+  int version() const override = 0;
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Text"; }
+  const std::string category() const override { return "DataHandling\\Text"; }
 
 private:
   /// Return the file extension this algorthm should output.
@@ -63,9 +59,9 @@ private:
   virtual void extraHeaders(std::ofstream &file) = 0;
 
   /// Overwrites Algorithm method.
-  void init();
+  void init() override;
   /// Overwrites Algorithm method
-  void exec();
+  void exec() override;
   /// returns true if the value is NaN
   bool checkIfNan(const double &value) const;
   /// returns true if the value if + or - infinity
@@ -81,8 +77,8 @@ protected:
   /// write the main content of the data
   virtual void data(std::ofstream &file, const std::vector<double> &XData,
                     bool exportDeltaQ = true);
-  double m_qres;
-  size_t m_xlength;
+  double m_qres = 0.0;
+  size_t m_xlength = 0;
 
   API::MatrixWorkspace_const_sptr m_ws;
 };

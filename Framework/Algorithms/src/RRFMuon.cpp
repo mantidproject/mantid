@@ -2,6 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RRFMuon.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -18,29 +21,27 @@ DECLARE_ALGORITHM(RRFMuon)
 void RRFMuon::init() {
 
   declareProperty(
-      new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "",
-                                                       Direction::Input),
+      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "InputWorkspace", "", Direction::Input),
       "Name of the input workspace containing the spectra in the lab frame");
 
   declareProperty(
-      new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "",
-                                                       Direction::Output),
+      make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+          "OutputWorkspace", "", Direction::Output),
       "Name of the output workspace containing the spectra in the RRF");
 
   declareProperty(
-      new PropertyWithValue<double>("Frequency", 0, Direction::Input),
+      make_unique<PropertyWithValue<double>>("Frequency", 0, Direction::Input),
       "Frequency of the oscillations");
 
-  std::vector<std::string> unitOptions;
-  unitOptions.push_back("MHz");
-  unitOptions.push_back("Gauss");
-  unitOptions.push_back("Mrad/s");
+  std::vector<std::string> unitOptions{"MHz", "Gauss", "Mrad/s"};
   declareProperty("FrequencyUnits", "MHz",
                   boost::make_shared<StringListValidator>(unitOptions),
                   "The frequency units");
 
-  declareProperty(new PropertyWithValue<double>("Phase", 0, Direction::Input),
-                  "Phase accounting for any misalignment of the counters");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("Phase", 0, Direction::Input),
+      "Phase accounting for any misalignment of the counters");
 }
 
 /** Executes the algorithm
@@ -90,11 +91,11 @@ void RRFMuon::exec() {
 
   // Put results into output workspace
   // Real RRF polarization
-  outputWs->getSpectrum(0)->setSpectrumNo(1);
+  outputWs->getSpectrum(0).setSpectrumNo(1);
   outputWs->dataX(0) = inputWs->readX(0);
   outputWs->dataY(0) = rrfRe;
   // Imaginary RRF polarization
-  outputWs->getSpectrum(1)->setSpectrumNo(2);
+  outputWs->getSpectrum(1).setSpectrumNo(2);
   outputWs->dataX(1) = inputWs->readX(1);
   outputWs->dataY(1) = rrfIm;
 

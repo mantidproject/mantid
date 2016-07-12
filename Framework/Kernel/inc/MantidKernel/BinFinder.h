@@ -5,12 +5,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include <vector>
-#include <functional>
 #include <cmath>
-#include <stdio.h>
-#include <math.h>
+#include <cmath>
+#include <cstdio>
+#include <functional>
 #include <numeric>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -31,9 +31,7 @@ class MANTID_KERNEL_DLL BinFinder {
 public:
   BinFinder(const std::vector<double> &binParams);
 
-  ~BinFinder();
-
-  int bin(double value);
+  int bin(double x);
 
   int lastBinIndex();
 

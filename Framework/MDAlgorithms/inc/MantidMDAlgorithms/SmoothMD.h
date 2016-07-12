@@ -12,6 +12,11 @@ class IMDHistoWorkspace;
 }
 namespace MDAlgorithms {
 
+DLLExport std::vector<double> gaussianKernel(const double fwhm);
+DLLExport std::vector<double> normaliseKernel(std::vector<double> kernel);
+DLLExport std::vector<double> renormaliseKernel(std::vector<double> kernel,
+                                                std::vector<bool> validity);
+
 /** SmoothMD : Algorithm for smoothing MDHistoWorkspaces
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -32,29 +37,33 @@ namespace MDAlgorithms {
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  File change history is stored at: <https://github.com/mantidproject/mantid>
+  File change history is stored at:
+  <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SmoothMD : public API::Algorithm {
 public:
-  SmoothMD();
-  virtual ~SmoothMD();
-
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string category() const;
-  virtual const std::string summary() const;
-  std::map<std::string, std::string> validateInputs();
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
+  std::map<std::string, std::string> validateInputs() override;
 
   boost::shared_ptr<Mantid::API::IMDHistoWorkspace> hatSmooth(
       boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> toSmooth,
-      const std::vector<int> &widthVector,
+      const std::vector<double> &widthVector,
+      boost::optional<boost::shared_ptr<const Mantid::API::IMDHistoWorkspace>>
+          weightingWS);
+
+  boost::shared_ptr<Mantid::API::IMDHistoWorkspace> gaussianSmooth(
+      boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> toSmooth,
+      const std::vector<double> &widthVector,
       boost::optional<boost::shared_ptr<const Mantid::API::IMDHistoWorkspace>>
           weightingWS);
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace MDAlgorithms

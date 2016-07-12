@@ -90,8 +90,8 @@ public:
   HKLFilterDRange(const UnitCell &cell, double dMin);
   HKLFilterDRange(const UnitCell &cell, double dMin, double dMax);
 
-  std::string getDescription() const;
-  bool isAllowed(const Kernel::V3D &hkl) const;
+  std::string getDescription() const override;
+  bool isAllowed(const Kernel::V3D &hkl) const override;
 
 private:
   void checkProperDRangeValues();
@@ -111,8 +111,8 @@ class MANTID_GEOMETRY_DLL HKLFilterSpaceGroup : public HKLFilter {
 public:
   HKLFilterSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
 
-  std::string getDescription() const;
-  bool isAllowed(const Kernel::V3D &hkl) const;
+  std::string getDescription() const override;
+  bool isAllowed(const Kernel::V3D &hkl) const override;
 
 protected:
   SpaceGroup_const_sptr m_spaceGroup;
@@ -131,8 +131,8 @@ public:
   HKLFilterStructureFactor(const StructureFactorCalculator_sptr &calculator,
                            double fSquaredMin = 1.0e-6);
 
-  std::string getDescription() const;
-  bool isAllowed(const Kernel::V3D &hkl) const;
+  std::string getDescription() const override;
+  bool isAllowed(const Kernel::V3D &hkl) const override;
 
 protected:
   StructureFactorCalculator_sptr m_calculator;
@@ -149,8 +149,8 @@ class MANTID_GEOMETRY_DLL HKLFilterCentering : public HKLFilter {
 public:
   HKLFilterCentering(const ReflectionCondition_sptr &centering);
 
-  std::string getDescription() const;
-  bool isAllowed(const Kernel::V3D &hkl) const;
+  std::string getDescription() const override;
+  bool isAllowed(const Kernel::V3D &hkl) const override;
 
 protected:
   ReflectionCondition_sptr m_centering;

@@ -40,18 +40,18 @@ class DLLExport ReflectivityMulf : public API::IFunction1D,
 public:
   ReflectivityMulf();
 
-  virtual void init();
+  void init() override;
 
   /// Overwrite IFunction base class
-  std::string name() const { return "ReflectivityMulf"; }
+  std::string name() const override { return "ReflectivityMulf"; }
 
-  virtual const std::string category() const { return "General"; }
+  const std::string category() const override { return "General"; }
 
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
   /// Set a value to attribute attName
-  void setAttribute(const std::string &attName, const Attribute &);
+  void setAttribute(const std::string &attName, const Attribute &) override;
 
 private:
   /// ReflectivityMulf layers

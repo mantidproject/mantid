@@ -1,4 +1,4 @@
-# pylint: disable=too-many-lines, invalid-name, bare-except
+﻿# pylint: disable=too-many-lines, invalid-name, bare-except
 import math
 import os
 import re
@@ -28,6 +28,9 @@ class BaseInstrument(object):
 
         inst_ws_name = self.load_empty()
         self.definition = AnalysisDataService.retrieve(inst_ws_name).getInstrument()
+
+    def get_idf_file_path(self):
+        return self._definition_file
 
     def get_default_beam_center(self):
         """
@@ -338,7 +341,7 @@ class DetectorBank(object):
 
     def spectrum_block(self, ylow, xlow, ydim, xdim):
         """
-            Compile a list of spectrum IDs for rectangular block of size xdim by ydim
+            Compile a list of spectrum Numbers for rectangular block of size xdim by ydim
         """
         if ydim == 'all':
             ydim = self._shape.height()
@@ -609,6 +612,9 @@ class ISISInstrument(BaseInstrument):
         elif self.cur_detector().isAlias(detName):
             return True
 
+    def get_detector_selection(self):
+        return self.det_selection
+
     def setDefaultDetector(self):
         self.lowAngDetSet = True
 
@@ -770,7 +776,7 @@ class ISISInstrument(BaseInstrument):
         """
         ws_ref = mtd[str(ws_name)]
         try:
-            run_num = ws_ref.getRun().getLogData('run_number').value
+            run_num = LARMOR.get_run_number_from_workspace_reference(ws_ref)
         except:
             run_num = int(re.findall(r'\d+', str(ws_name))[0])
 
@@ -882,12 +888,13 @@ class LOQ(ISISInstrument):
     # maximum wavelength of neutrons assumed to be measurable by this instrument
     WAV_RANGE_MAX = 10.0
 
-    def __init__(self):
+    def __init__(self, idf_path='LOQ_Definition_20020226-.xml'):
         """
             Reads LOQ's instrument definition xml file
+            @param idf_path: the idf file
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """
-        super(LOQ, self).__init__('LOQ_Definition_20020226-.xml')
+        super(LOQ, self).__init__(idf_path)
         # relates the numbers of the monitors to their names in the instrument definition file
         self.monitor_names = {1: 'monitor1',
                               2: 'monitor2'}
@@ -1385,9 +1392,8 @@ class LARMOR(ISISInstrument):
     _NAME = 'LARMOR'
     WAV_RANGE_MIN = 0.5
     WAV_RANGE_MAX = 13.5
-
-    def __init__(self):
-        super(LARMOR, self).__init__('LARMOR_Definition.xml')
+    def __init__(self, idf_path=None):
+        super(LARMOR,self).__init__(idf_path)
         self._marked_dets = []
         # set to true once the detector positions have been moved to the locations given in the sample logs
         self.corrections_applied = False
@@ -1719,13 +1725,24 @@ class LARMOR(ISISInstrument):
         @param workspace_ref:: A handle to the workspace
         '''
         try:
-            run_num = workspace_ref.getRun().getLogData('run_number').value
+            run_num = LARMOR.get_run_number_from_workspace_reference(workspace_ref)
         except:
+            ws_name = workspace_ref.name()
             run_num = int(re.findall(r'\d+', str(ws_name))[-1])
         if int(run_num) >= 2217:
             return True
         else:
             return False
+
+    @staticmethod
+    def get_run_number_from_workspace_reference(ws_ref):
+        # If we are dealing with a WorkspaceGroup then this will not contain any run number information,
+        # hence we need to access the first child workspace
+        if isinstance(ws_ref, WorkspaceGroup):
+            run_num = ws_ref[0].getRun().getLogData('run_number').value
+        else:
+            run_num = ws_ref.getRun().getLogData('run_number').value
+        return run_num
 
 
 if __name__ == '__main__':

@@ -79,8 +79,8 @@ public:
     TS_ASSERT_EQUALS(numEvents, eventsPerPixel);
     do_Spectrum_Tests(outputWS, 4, 4);
     TS_ASSERT_EQUALS(eventWS->blocksize(), 50);
-    TS_ASSERT_DELTA(outputWS->getEventList(0).getTofMin(), 4.5, 1e-08);
-    TS_ASSERT_DELTA(outputWS->getEventList(0).getTofMax(), 28.5, 1e-08);
+    TS_ASSERT_DELTA(outputWS->getSpectrum(0).getTofMin(), 4.5, 1e-08);
+    TS_ASSERT_DELTA(outputWS->getSpectrum(0).getTofMax(), 28.5, 1e-08);
   }
 
 private:
@@ -106,20 +106,16 @@ private:
     return extractor->getProperty("OutputWorkspace");
   }
 
-  void do_Spectrum_Tests(MatrixWorkspace_sptr outputWS, const specid_t specID,
+  void do_Spectrum_Tests(MatrixWorkspace_sptr outputWS, const specnum_t specID,
                          const detid_t detID) {
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
-    const Mantid::API::ISpectrum *spectrum(NULL);
-    TS_ASSERT_THROWS_NOTHING(spectrum = outputWS->getSpectrum(0));
-    if (spectrum) {
-      TS_ASSERT_EQUALS(spectrum->getSpectrumNo(), specID);
-      std::set<detid_t> detids = spectrum->getDetectorIDs();
-      TS_ASSERT_EQUALS(detids.size(), 1);
-      const detid_t id = *(detids.begin());
-      TS_ASSERT_EQUALS(id, detID);
-    } else {
-      TS_FAIL("No spectra/detectors associated with extracted histogram.");
-    }
+    TS_ASSERT_THROWS_NOTHING(outputWS->getSpectrum(0));
+    const auto &spectrum = outputWS->getSpectrum(0);
+    TS_ASSERT_EQUALS(spectrum.getSpectrumNo(), specID);
+    auto detids = spectrum.getDetectorIDs();
+    TS_ASSERT_EQUALS(detids.size(), 1);
+    const detid_t id = *(detids.begin());
+    TS_ASSERT_EQUALS(id, detID);
   }
 };
 

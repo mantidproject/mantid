@@ -3,24 +3,23 @@
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/MDEWEventNexusLoadingPresenter.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/make_unique.h"
+#include <mutex>
 
 class vtkImplicitFunction;
 // cppcheck-suppress class_X_Y
-class VTK_EXPORT vtkMDEWNexusReader : public vtkUnstructuredGridAlgorithm  
-{
+class VTK_EXPORT vtkMDEWNexusReader : public vtkUnstructuredGridAlgorithm {
 public:
-
   static vtkMDEWNexusReader *New();
-  vtkTypeMacro(vtkMDEWNexusReader, vtkUnstructuredGridAlgorithm)
-  void PrintSelf(ostream& os, vtkIndent indent);
+  vtkMDEWNexusReader(const vtkMDEWNexusReader &) = delete;
+  void operator=(const vtkMDEWNexusReader &) = delete;
+  vtkTypeMacro(vtkMDEWNexusReader, vtkUnstructuredGridAlgorithm) void PrintSelf(
+      ostream &os, vtkIndent indent) override;
   vtkSetStringMacro(FileName)
-  vtkGetStringMacro(FileName)
-  int CanReadFile(const char* fname);
+      vtkGetStringMacro(FileName) int CanReadFile(const char *fname);
   void SetInMemory(bool inMemory);
   void SetDepth(int depth);
-  
+
   //------- MDLoadingView methods ----------------
   virtual double getTime() const;
   virtual size_t getRecursionDepth() const;
@@ -28,31 +27,27 @@ public:
   //----------------------------------------------
 
   /// Called by presenter to force progress information updating.
-  void updateAlgorithmProgress(double progress, const std::string& message);
+  void updateAlgorithmProgress(double progress, const std::string &message);
 
   /// Getter for the workspace type
-  char* GetWorkspaceTypeName();
+  std::string GetWorkspaceTypeName();
   /// Getter for the input geometry
-  const char* GetInputGeometryXML();
+  std::string GetInputGeometryXML();
 
   void SetNormalization(int option);
 
 protected:
   vtkMDEWNexusReader();
-  ~vtkMDEWNexusReader();
-  int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-  int Canreadfile(const char *fname);
-  ///Handle time variation.
-  unsigned long GetMTime();
-  
+  ~vtkMDEWNexusReader() override;
+  int RequestInformation(vtkInformation *, vtkInformationVector **,
+                         vtkInformationVector *) override;
+  int RequestData(vtkInformation *, vtkInformationVector **,
+                  vtkInformationVector *) override;
+  /// Handle time variation.
+  unsigned long GetMTime() override;
+
 private:
-
-  void setTimeRange(vtkInformationVector* outputVector);
-
-  vtkMDEWNexusReader(const vtkMDEWNexusReader&);
-  
-  void operator = (const vtkMDEWNexusReader&);
+  void setTimeRange(vtkInformationVector *outputVector);
 
   /// File name from which to read.
   char *FileName;
@@ -60,20 +55,18 @@ private:
   /// Controller/Presenter.
   std::unique_ptr<Mantid::VATES::MDEWEventNexusLoadingPresenter> m_presenter;
 
-  /// Flag indicating that file loading algorithm should attempt to fully load the file into memory.
+  /// Flag indicating that file loading algorithm should attempt to fully load
+  /// the file into memory.
   bool m_loadInMemory;
 
   /// Mutex for thread-safe progress reporting.
-  Mantid::Kernel::Mutex progressMutex;
+  std::mutex progressMutex;
 
   /// Recursion depth.
   size_t m_depth;
 
   /// Time.
   double m_time;
-
-  //Cached workspace type name.
-  std::string typeName;
 
   Mantid::VATES::VisualNormalization m_normalization;
 };

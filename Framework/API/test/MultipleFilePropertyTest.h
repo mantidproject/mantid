@@ -12,8 +12,8 @@
 #include <Poco/Path.h>
 #include <Poco/File.h>
 
-#include <boost/assign/list_of.hpp>
 #include <boost/algorithm/string/join.hpp>
+#include <unordered_set>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -46,11 +46,10 @@ std::string createAbsoluteDirectory(const std::string &dirPath) {
  * @param filenames :: the names of the files to create.
  * @param dirPath   :: the directory in which to create the files.
  */
-void createFilesInDirectory(const std::set<std::string> &filenames,
+void createFilesInDirectory(const std::unordered_set<std::string> &filenames,
                             const std::string &dirPath) {
-  for (auto filename = filenames.begin(); filename != filenames.end();
-       ++filename) {
-    Poco::File file(dirPath + "/" + *filename);
+  for (const auto &filename : filenames) {
+    Poco::File file(dirPath + "/" + filename);
     file.createFile();
   }
 }
@@ -74,7 +73,7 @@ private:
   std::string m_oldDefaultInstrument;
   std::string m_dummyFilesDir;
   std::string m_dirWithWhitespace;
-  std::set<std::string> m_tempDirs;
+  std::unordered_set<std::string> m_tempDirs;
   std::vector<std::string> m_exts;
 
   Mantid::Kernel::ConfigServiceImpl &g_config;
@@ -95,7 +94,7 @@ public:
   MultipleFilePropertyTest()
       : m_multiFileLoadingSetting(), m_oldDataSearchDirectories(),
         m_oldDefaultFacility(), m_oldDefaultInstrument(), m_dummyFilesDir(),
-        m_dirWithWhitespace(), m_tempDirs(), m_exts(),
+        m_dirWithWhitespace(), m_tempDirs(), m_exts{".raw", ".nxs"},
         g_config(Mantid::Kernel::ConfigService::Instance()) {
     m_dummyFilesDir =
         createAbsoluteDirectory("_MultipleFilePropertyTestDummyFiles");
@@ -105,38 +104,35 @@ public:
     m_tempDirs.insert(m_dummyFilesDir);
     m_tempDirs.insert(m_dirWithWhitespace);
 
-    m_exts.push_back(".raw");
-    m_exts.push_back(".nxs");
-
-    std::set<std::string> dummyFilenames = boost::assign::list_of
+    std::unordered_set<std::string> dummyFilenames = {
         // Standard raw file runs.
-        ("TSC00001.raw")("TSC00002.raw")("TSC00003.raw")("TSC00004.raw")(
-            "TSC00005.raw")
+        "TSC00001.raw", "TSC00002.raw", "TSC00003.raw", "TSC00004.raw",
+        "TSC00005.raw",
         // Duplicates, but in NeXuS format.
-        ("TSC00001.nxs")("TSC00002.nxs")("TSC00003.nxs")("TSC00004.nxs")(
-            "TSC00005.nxs")
+        "TSC00001.nxs", "TSC00002.nxs", "TSC00003.nxs", "TSC00004.nxs",
+        "TSC00005.nxs",
         // Standard NeXuS runs for another instrument.
-        ("IRS00001.raw")("IRS00002.raw")("IRS00003.raw")("IRS00004.raw")(
-            "IRS00005.raw")
+        "IRS00001.raw", "IRS00002.raw", "IRS00003.raw", "IRS00004.raw",
+        "IRS00005.raw",
         // Duplicates, but in NeXuS format.
-        ("IRS00001.nxs")("IRS00002.nxs")("IRS00003.nxs")("IRS00004.nxs")(
-            "IRS00005.nxs")
+        "IRS00001.nxs", "IRS00002.nxs", "IRS00003.nxs", "IRS00004.nxs",
+        "IRS00005.nxs",
         // "Incorrect" zero padding file.
-        ("TSC9999999.raw")
+        "TSC9999999.raw",
         // "Non-run" files.
-        ("IRS10001_graphite002_info.nxs")("IRS10002_graphite002_info.nxs")(
-            "IRS10003_graphite002_info.nxs")("IRS10004_graphite002_info.nxs")(
-            "IRS10005_graphite002_info.nxs")
+        "IRS10001_graphite002_info.nxs", "IRS10002_graphite002_info.nxs",
+        "IRS10003_graphite002_info.nxs", "IRS10004_graphite002_info.nxs",
+        "IRS10005_graphite002_info.nxs",
         // File with no extension.
-        ("bl6_flux_at_sample")
+        "bl6_flux_at_sample",
         // A single "non-run" file, that we should be able to load.
-        ("IRS10001-10005_graphite002_info.nxs")
+        "IRS10001-10005_graphite002_info.nxs",
         // A file with a "+" and "," in the name, to see if it can be loaded
         // when multifileloading is turned off via the preferences file.
-        ("_test_multiFileLoadingSwitchedOff_tempFileWithA+AndA,InTheName.txt");
+        "_test_multiFileLoadingSwitchedOff_tempFileWithA+AndA,InTheName.txt"};
 
-    std::set<std::string> whiteSpaceDirFilenames =
-        boost::assign::list_of("file with whitespace.txt");
+    std::unordered_set<std::string> whiteSpaceDirFilenames = {
+        "file with whitespace.txt"};
 
     createFilesInDirectory(dummyFilenames, m_dummyFilesDir);
     createFilesInDirectory(whiteSpaceDirFilenames, m_dummyFilesDir);
@@ -147,16 +143,15 @@ public:
    *
    * Reset the user's data search directories.
    */
-  ~MultipleFilePropertyTest() {
+  ~MultipleFilePropertyTest() override {
     // Remove temp dirs.
-    for (auto tempDir = m_tempDirs.begin(); tempDir != m_tempDirs.end();
-         ++tempDir) {
-      Poco::File dir(*tempDir);
+    for (const auto &tempDir : m_tempDirs) {
+      Poco::File dir(tempDir);
       dir.remove(true);
     }
   }
 
-  void setUp() {
+  void setUp() override {
     m_oldDataSearchDirectories = g_config.getString("datasearch.directories");
     m_oldDefaultFacility = g_config.getString("default.facilities");
     m_oldDefaultInstrument = g_config.getString("default.instrument");
@@ -172,7 +167,7 @@ public:
     Kernel::ConfigService::Instance().setString("loading.multifile", "On");
   }
 
-  void tearDown() {
+  void tearDown() override {
     g_config.setString("datasearch.directories", m_oldDataSearchDirectories);
     g_config.setString("default.facility", m_oldDefaultFacility);
     g_config.setString("default.instrument", m_oldDefaultInstrument);

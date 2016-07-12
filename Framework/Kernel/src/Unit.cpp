@@ -7,7 +7,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include <cfloat>
-#include <limits>
 
 namespace Mantid {
 namespace Kernel {
@@ -19,35 +18,6 @@ namespace Kernel {
 Unit::Unit()
     : initialized(false), l1(0), l2(0), twoTheta(0), emode(0), efixed(0),
       delta(0) {}
-
-/**
- */
-Unit::~Unit() {}
-
-/**
- * @param other The unit that initializes this
- */
-Unit::Unit(const Unit &other) {
-  // call assignment operator for everything else
-  *this = other;
-}
-
-/**
- * @param rhs A unit object whose state is copied to this
- * @return A reference to this object
- */
-Unit &Unit::operator=(const Unit &rhs) {
-  if (this != &rhs) {
-    initialized = rhs.initialized;
-    l1 = rhs.l1;
-    l2 = rhs.l2;
-    twoTheta = rhs.twoTheta;
-    emode = rhs.emode;
-    efixed = rhs.efixed;
-    delta = rhs.delta;
-  }
-  return *this;
-}
 
 bool Unit::operator==(const Unit &u) const { return unitID() == u.unitID(); }
 
@@ -164,7 +134,8 @@ void Unit::initialize(const double &_l1, const double &_l2,
 }
 
 //---------------------------------------------------------------------------------------
-/** Perform the conversion to TOF on a vector of data */
+/** Perform the conversion to TOF on a vector of data
+*/
 void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                  const double &_l1, const double &_l2, const double &_twoTheta,
                  const int &_emode, const double &_efixed,
@@ -176,7 +147,15 @@ void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
     xdata[i] = this->singleToTOF(xdata[i]);
 }
 
-/** Convert a single value to TOF */
+/** Convert a single value to TOF
+@param xvalue
+@param l1
+@param l2
+@param twoTheta
+@param emode
+@param efixed
+@param delta
+*/
 double Unit::convertSingleToTOF(const double xvalue, const double &l1,
                                 const double &l2, const double &twoTheta,
                                 const int &emode, const double &efixed,
@@ -186,7 +165,8 @@ double Unit::convertSingleToTOF(const double xvalue, const double &l1,
 }
 
 //---------------------------------------------------------------------------------------
-/** Perform the conversion to TOF on a vector of data */
+/** Perform the conversion to TOF on a vector of data
+*/
 void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                    const double &_l1, const double &_l2,
                    const double &_twoTheta, const int &_emode,
@@ -198,7 +178,15 @@ void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
     xdata[i] = this->singleFromTOF(xdata[i]);
 }
 
-/** Convert a single value from TOF */
+/** Convert a single value from TOF
+@param xvalue
+@param l1
+@param l2
+@param twoTheta
+@param emode
+@param efixed
+@param delta
+*/
 double Unit::convertSingleFromTOF(const double xvalue, const double &l1,
                                   const double &l2, const double &twoTheta,
                                   const int &emode, const double &efixed,

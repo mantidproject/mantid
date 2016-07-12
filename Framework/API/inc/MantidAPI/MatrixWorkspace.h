@@ -7,17 +7,13 @@
 #ifndef Q_MOC_RUN
 #include <boost/scoped_ptr.hpp>
 #endif
+
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/Sample.h"
-#include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidKernel/EmptyValues.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 //----------------------------------------------------------------------------
@@ -28,7 +24,9 @@ class ParameterMap;
 class INearestNeighbours;
 class INearestNeighboursFactory;
 }
+
 namespace API {
+class Axis;
 class SpectrumDetectorMapping;
 
 /// typedef for the image type
@@ -79,25 +77,27 @@ public:
   /// Initialize
   void initialize(const std::size_t &NVectors, const std::size_t &XLength,
                   const std::size_t &YLength);
+
+  MatrixWorkspace &operator=(const MatrixWorkspace &other) = delete;
   /// Delete
-  virtual ~MatrixWorkspace();
+  ~MatrixWorkspace() override;
 
   /// Returns a clone of the workspace
   MatrixWorkspace_uptr clone() const { return MatrixWorkspace_uptr(doClone()); }
 
   using IMDWorkspace::toString;
   /// String description of state
-  const std::string toString() const;
+  const std::string toString() const override;
 
   /**@name Instrument queries */
   //@{
   Geometry::IDetector_const_sptr getDetector(const size_t workspaceIndex) const;
-  double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
-  double detectorSignedTwoTheta(Geometry::IDetector_const_sptr det) const;
+  double detectorTwoTheta(const Geometry::IDetector &det) const;
+  double detectorSignedTwoTheta(const Geometry::IDetector &det) const;
 
   //@}
 
-  virtual void populateInstrumentParameters();
+  void populateInstrumentParameters() override;
 
   /** @name Nearest neighbours */
   /// Build and populate the NearestNeighbours object
@@ -105,18 +105,18 @@ public:
   /// Causes the nearest neighbours map to be rebuilt
   void rebuildNearestNeighbours();
   /// Query the NearestNeighbours object for a detector
-  std::map<specid_t, Mantid::Kernel::V3D>
+  std::map<specnum_t, Mantid::Kernel::V3D>
   getNeighbours(const Geometry::IDetector *comp, const double radius = 0.0,
                 const bool ignoreMaskedDetectors = false) const;
-  /// Query the NearestNeighbours object for a given spectrum index using a
+  /// Query the NearestNeighbours object for a given spectrum number using a
   /// search radius
-  std::map<specid_t, Mantid::Kernel::V3D>
-  getNeighbours(specid_t spec, const double radius,
+  std::map<specnum_t, Mantid::Kernel::V3D>
+  getNeighbours(specnum_t spec, const double radius,
                 const bool ignoreMaskedDetectors = false) const;
-  /// Query the NearestNeighbours object for a given spectrum index using the
+  /// Query the NearestNeighbours object for a given spectrum number using the
   /// direct number of nearest neighbours
-  std::map<specid_t, Mantid::Kernel::V3D>
-  getNeighboursExact(specid_t spec, const int nNeighbours,
+  std::map<specnum_t, Mantid::Kernel::V3D>
+  getNeighboursExact(specnum_t spec, const int nNeighbours,
                      const bool ignoreMaskedDetectors = false) const;
   //@}
 
@@ -129,23 +129,24 @@ public:
   spec2index_map getSpectrumToWorkspaceIndexMap() const;
   detid2index_map
   getDetectorIDToWorkspaceIndexMap(bool throwIfMultipleDets = false) const;
-  virtual void
-  getDetectorIDToWorkspaceIndexVector(std::vector<size_t> &out, detid_t &offset,
+  virtual std::vector<size_t>
+  getDetectorIDToWorkspaceIndexVector(detid_t &offset,
                                       bool throwIfMultipleDets = false) const;
-  virtual void getSpectrumToWorkspaceIndexVector(std::vector<size_t> &out,
-                                                 specid_t &offset) const;
-  void getIndicesFromSpectra(const std::vector<specid_t> &spectraList,
-                             std::vector<size_t> &indexList) const;
-  size_t getIndexFromSpectrumNumber(const specid_t specNo) const;
-  void getIndicesFromDetectorIDs(const std::vector<detid_t> &detIdList,
-                                 std::vector<size_t> &indexList) const;
-  void getSpectraFromDetectorIDs(const std::vector<detid_t> &detIdList,
-                                 std::vector<specid_t> &spectraList) const;
+
+  virtual std::vector<size_t>
+  getSpectrumToWorkspaceIndexVector(specnum_t &offset) const;
+  std::vector<size_t>
+  getIndicesFromSpectra(const std::vector<specnum_t> &spectraList) const;
+  size_t getIndexFromSpectrumNumber(const specnum_t specNo) const;
+  std::vector<size_t>
+  getIndicesFromDetectorIDs(const std::vector<detid_t> &detIdList) const;
+  std::vector<specnum_t>
+  getSpectraFromDetectorIDs(const std::vector<detid_t> &detIdList) const;
 
   bool hasGroupedDetectors() const;
 
   /// Get the footprint in memory in bytes.
-  virtual size_t getMemorySize() const;
+  size_t getMemorySize() const override;
   virtual size_t getMemorySizeForXAxes() const;
 
   // Section required for iteration
@@ -157,9 +158,9 @@ public:
   virtual std::size_t getNumberHistograms() const = 0;
 
   /// Sets MatrixWorkspace title
-  virtual void setTitle(const std::string &);
+  void setTitle(const std::string &) override;
   /// Gets MatrixWorkspace title (same as Run object run_title property)
-  virtual const std::string getTitle() const;
+  const std::string getTitle() const override;
 
   virtual Kernel::DateAndTime getFirstPulseTime() const;
   Kernel::DateAndTime getLastPulseTime() const;
@@ -172,152 +173,248 @@ public:
   //----------------------------------------------------------------------
 
   /// Return the underlying ISpectrum ptr at the given workspace index.
-  virtual ISpectrum *getSpectrum(const size_t index) = 0;
+  virtual ISpectrum &getSpectrum(const size_t index) = 0;
 
   /// Return the underlying ISpectrum ptr (const version) at the given workspace
   /// index.
-  virtual const ISpectrum *getSpectrum(const size_t index) const = 0;
+  virtual const ISpectrum &getSpectrum(const size_t index) const = 0;
 
+  /// Returns the Histogram at the given workspace index.
+  HistogramData::Histogram histogram(const size_t index) const {
+    return getSpectrum(index).histogram();
+  }
+  template <typename... T>
+  void setHistogram(const size_t index, T &&... data) & {
+    getSpectrum(index).setHistogram(std::forward<T>(data)...);
+  }
+  HistogramData::BinEdges binEdges(const size_t index) const {
+    return getSpectrum(index).binEdges();
+  }
+  HistogramData::BinEdgeStandardDeviations
+  binEdgeStandardDeviations(const size_t index) const {
+    return getSpectrum(index).binEdgeStandardDeviations();
+  }
+  HistogramData::Points points(const size_t index) const {
+    return getSpectrum(index).points();
+  }
+  HistogramData::PointStandardDeviations
+  pointStandardDeviations(const size_t index) const {
+    return getSpectrum(index).pointStandardDeviations();
+  }
+  template <typename... T>
+  void setBinEdges(const size_t index, T &&... data) & {
+    getSpectrum(index).setBinEdges(std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setBinEdgeVariances(const size_t index, T &&... data) & {
+    getSpectrum(index).setBinEdgeVariances(std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setBinEdgeStandardDeviations(const size_t index, T &&... data) & {
+    getSpectrum(index).setBinEdgeStandardDeviations(std::forward<T>(data)...);
+  }
+  template <typename... T> void setPoints(const size_t index, T &&... data) & {
+    getSpectrum(index).setPoints(std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setPointVariances(const size_t index, T &&... data) & {
+    getSpectrum(index).setPointVariances(std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setPointStandardDeviations(const size_t index, T &&... data) & {
+    getSpectrum(index).setPointStandardDeviations(std::forward<T>(data)...);
+  }
+  HistogramData::Counts counts(const size_t index) const {
+    return getSpectrum(index).counts();
+  }
+  HistogramData::CountVariances countVariances(const size_t index) const {
+    return getSpectrum(index).countVariances();
+  }
+  HistogramData::CountStandardDeviations
+  countStandardDeviations(const size_t index) const {
+    return getSpectrum(index).countStandardDeviations();
+  }
+  HistogramData::Frequencies frequencies(const size_t index) const {
+    return getSpectrum(index).frequencies();
+  }
+  HistogramData::FrequencyVariances
+  frequencyVariances(const size_t index) const {
+    return getSpectrum(index).frequencyVariances();
+  }
+  HistogramData::FrequencyStandardDeviations
+  frequencyStandardDeviations(const size_t index) const {
+    return getSpectrum(index).frequencyStandardDeviations();
+  }
+  template <typename... T> void setCounts(const size_t index, T &&... data) & {
+    getSpectrum(index).setCounts(std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setCountVariances(const size_t index, T &&... data) & {
+    getSpectrum(index).setCountVariances(std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setCountStandardDeviations(const size_t index, T &&... data) & {
+    getSpectrum(index).setCountStandardDeviations(std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setFrequencies(const size_t index, T &&... data) & {
+    getSpectrum(index).setFrequencies(std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setFrequencyVariances(const size_t index, T &&... data) & {
+    getSpectrum(index).setFrequencyVariances(std::forward<T>(data)...);
+  }
+  template <typename... T>
+  void setFrequencyStandardDeviations(const size_t index, T &&... data) & {
+    getSpectrum(index).setFrequencyStandardDeviations(std::forward<T>(data)...);
+  }
+  const HistogramData::HistogramX &x(const size_t index) const {
+    return getSpectrum(index).x();
+  }
+  const HistogramData::HistogramY &y(const size_t index) const {
+    return getSpectrum(index).y();
+  }
+  const HistogramData::HistogramE &e(const size_t index) const {
+    return getSpectrum(index).e();
+  }
+  const HistogramData::HistogramDx &dx(const size_t index) const {
+    return getSpectrum(index).dx();
+  }
+  HistogramData::HistogramX &mutableX(const size_t index) & {
+    return getSpectrum(index).mutableX();
+  }
+  HistogramData::HistogramDx &mutableDx(const size_t index) & {
+    return getSpectrum(index).mutableDx();
+  }
+  HistogramData::HistogramY &mutableY(const size_t index) & {
+    return getSpectrum(index).mutableY();
+  }
+  HistogramData::HistogramE &mutableE(const size_t index) & {
+    return getSpectrum(index).mutableE();
+  }
+  Kernel::cow_ptr<HistogramData::HistogramX> sharedX(const size_t index) const {
+    return getSpectrum(index).sharedX();
+  }
+  Kernel::cow_ptr<HistogramData::HistogramY> sharedY(const size_t index) const {
+    return getSpectrum(index).sharedY();
+  }
+  Kernel::cow_ptr<HistogramData::HistogramE> sharedE(const size_t index) const {
+    return getSpectrum(index).sharedE();
+  }
+  Kernel::cow_ptr<HistogramData::HistogramDx>
+  sharedDx(const size_t index) const {
+    return getSpectrum(index).sharedDx();
+  }
+  void setSharedX(const size_t index,
+                  const Kernel::cow_ptr<HistogramData::HistogramX> &x) & {
+    getSpectrum(index).setSharedX(x);
+  }
+  void setSharedDx(const size_t index,
+                   const Kernel::cow_ptr<HistogramData::HistogramDx> &dx) & {
+    getSpectrum(index).setSharedDx(dx);
+  }
+  void setSharedY(const size_t index,
+                  const Kernel::cow_ptr<HistogramData::HistogramY> &y) & {
+    getSpectrum(index).setSharedY(y);
+  }
+  void setSharedE(const size_t index,
+                  const Kernel::cow_ptr<HistogramData::HistogramE> &e) & {
+    getSpectrum(index).setSharedE(e);
+  }
   // Methods for getting read-only access to the data.
   // Just passes through to the virtual dataX/Y/E function (const version)
-  /// Returns a read-only (i.e. const) reference to the specified X array
+  /// Deprecated, use x() instead. Returns a read-only (i.e. const) reference to
+  /// the specified X array
   /// @param index :: workspace index to retrieve.
   const MantidVec &readX(std::size_t const index) const {
-    return getSpectrum(index)->dataX();
+    return getSpectrum(index).dataX();
   }
-  /// Returns a read-only (i.e. const) reference to the specified Y array
+  /// Deprecated, use y() instead. Returns a read-only (i.e. const) reference to
+  /// the specified Y array
   /// @param index :: workspace index to retrieve.
   const MantidVec &readY(std::size_t const index) const {
-    return getSpectrum(index)->dataY();
+    return getSpectrum(index).dataY();
   }
-  /// Returns a read-only (i.e. const) reference to the specified E array
+  /// Deprecated, use e() instead. Returns a read-only (i.e. const) reference to
+  /// the specified E array
   /// @param index :: workspace index to retrieve.
   const MantidVec &readE(std::size_t const index) const {
-    return getSpectrum(index)->dataE();
+    return getSpectrum(index).dataE();
   }
-  /// Returns a read-only (i.e. const) reference to the specified X error array
+  /// Deprecated, use dx() instead. Returns a read-only (i.e. const) reference
+  /// to the specified X error array
   /// @param index :: workspace index to retrieve.
   const MantidVec &readDx(size_t const index) const {
-    return getSpectrum(index)->dataDx();
+    return getSpectrum(index).dataDx();
   }
 
-  /// Returns the x data
+  /// Deprecated, use mutableX() instead. Returns the x data
   virtual MantidVec &dataX(const std::size_t index) {
     invalidateCommonBinsFlag();
-    return getSpectrum(index)->dataX();
+    return getSpectrum(index).dataX();
   }
-  /// Returns the y data
+  /// Deprecated, use mutableY() instead. Returns the y data
   virtual MantidVec &dataY(const std::size_t index) {
-    return getSpectrum(index)->dataY();
+    return getSpectrum(index).dataY();
   }
-  /// Returns the error data
+  /// Deprecated, use mutableE() instead. Returns the error data
   virtual MantidVec &dataE(const std::size_t index) {
-    return getSpectrum(index)->dataE();
+    return getSpectrum(index).dataE();
   }
-  /// Returns the x error data
+  /// Deprecated, use mutableDx() instead. Returns the x error data
   virtual MantidVec &dataDx(const std::size_t index) {
-    return getSpectrum(index)->dataDx();
+    return getSpectrum(index).dataDx();
   }
 
-  /// Returns the x data const
+  /// Deprecated, use x() instead. Returns the x data const
   virtual const MantidVec &dataX(const std::size_t index) const {
-    return getSpectrum(index)->dataX();
+    return getSpectrum(index).dataX();
   }
-  /// Returns the y data const
+  /// Deprecated, use y() instead. Returns the y data const
   virtual const MantidVec &dataY(const std::size_t index) const {
-    return getSpectrum(index)->dataY();
+    return getSpectrum(index).dataY();
   }
-  /// Returns the error const
+  /// Deprecated, use e() instead. Returns the error const
   virtual const MantidVec &dataE(const std::size_t index) const {
-    return getSpectrum(index)->dataE();
+    return getSpectrum(index).dataE();
   }
-  /// Returns the error const
+  /// Deprecated, use dx() instead. Returns the error const
   virtual const MantidVec &dataDx(const std::size_t index) const {
-    return getSpectrum(index)->dataDx();
+    return getSpectrum(index).dataDx();
   }
 
   virtual double getXMin() const;
   virtual double getXMax() const;
   virtual void getXMinMax(double &xmin, double &xmax) const;
 
-  /// Returns a pointer to the x data
-  virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const {
-    return getSpectrum(index)->ptrX();
+  /// Deprecated, use sharedX() instead. Returns a pointer to the x data
+  virtual Kernel::cow_ptr<HistogramData::HistogramX>
+  refX(const std::size_t index) const {
+    return getSpectrum(index).ptrX();
   }
 
-  /// Returns a pointer to the dX  (X Error) data
-  virtual Kernel::cow_ptr<MantidVec> refDx(const std::size_t index) const {
-    return getSpectrum(index)->ptrDx();
-  }
-
-  /// Set the specified X array to point to the given existing array
-  virtual void setX(const std::size_t index, const MantidVec &X) {
-    getSpectrum(index)->setX(X);
+  /// Deprecated, use setSharedX() instead. Set the specified X array to point
+  /// to the given existing array
+  virtual void setX(const std::size_t index,
+                    const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
+    getSpectrum(index).setX(X);
     invalidateCommonBinsFlag();
   }
 
-  /// Set the specified X array to point to the given existing array
-  virtual void setX(const std::size_t index, const MantidVecPtr &X) {
-    getSpectrum(index)->setX(X);
+  /// Deprecated, use setSharedX() instead. Set the specified X array to point
+  /// to the given existing array
+  virtual void setX(const std::size_t index,
+                    const boost::shared_ptr<HistogramData::HistogramX> &X) {
+    getSpectrum(index).setX(X);
     invalidateCommonBinsFlag();
-  }
-
-  /// Set the specified X array to point to the given existing array
-  virtual void setX(const std::size_t index, const MantidVecPtr::ptr_type &X) {
-    getSpectrum(index)->setX(X);
-    invalidateCommonBinsFlag();
-  }
-
-  /// Set the specified Dx (X Error) array to point to the given existing array
-  virtual void setDx(const std::size_t index, const MantidVec &Dx) {
-    getSpectrum(index)->setDx(Dx);
-    invalidateCommonBinsFlag();
-  }
-
-  /// Set the specified Dx (X Error) array to point to the given existing array
-  virtual void setDx(const std::size_t index, const MantidVecPtr &Dx) {
-    getSpectrum(index)->setDx(Dx);
-    invalidateCommonBinsFlag();
-  }
-
-  /// Set the specified Dx (X Error) array to point to the given existing array
-  virtual void setDx(const std::size_t index,
-                     const MantidVecPtr::ptr_type &Dx) {
-    getSpectrum(index)->setX(Dx);
-    invalidateCommonBinsFlag();
-  }
-
-  /** Sets the data in the workspace
-  @param index :: the workspace index to set.
-  @param Y :: Y vector  */
-  virtual void setData(const std::size_t index, const MantidVecPtr &Y) {
-    getSpectrum(index)->setData(Y);
-  }
-
-  /** Sets the data in the workspace
-  @param index :: the workspace index to set.
-  @param Y :: Y vector
-  @param E :: Error vector   */
-  virtual void setData(const std::size_t index, const MantidVecPtr &Y,
-                       const MantidVecPtr &E) {
-    getSpectrum(index)->setData(Y, E);
-  }
-
-  /** Sets the data in the workspace
-  @param index :: the workspace index to set.
-  @param Y :: Y vector
-  @param E :: Error vector   */
-  virtual void setData(const std::size_t index, const MantidVecPtr::ptr_type &Y,
-                       const MantidVecPtr::ptr_type &E) {
-    getSpectrum(index)->setData(Y, E);
   }
 
   /**
    * Probes if DX (X Error) values were set on a particular spectrum
-   * @param index: the spectrum index
+   * @param index: the workspace index
    */
   virtual bool hasDx(const std::size_t index) const {
-    return getSpectrum(index)->hasDx();
+    return getSpectrum(index).hasDx();
   }
 
   /// Generate the histogram or rebin the existing histogram.
@@ -355,7 +452,7 @@ public:
 
   /// Are the Y-values dimensioned?
   const bool &isDistribution() const;
-  bool &isDistribution(bool newValue);
+  void setDistribution(bool newValue);
 
   /// Mask a given workspace index, setting the data and error values to zero
   void maskWorkspaceIndex(const std::size_t index);
@@ -363,13 +460,13 @@ public:
   // Methods to set and access masked bins
   void maskBin(const size_t &workspaceIndex, const size_t &binIndex,
                const double &weight = 1.0);
-  void flagMasked(const size_t &spectrumIndex, const size_t &binIndex,
+  void flagMasked(const size_t &index, const size_t &binIndex,
                   const double &weight = 1.0);
-  bool hasMaskedBins(const size_t &spectrumIndex) const;
+  bool hasMaskedBins(const size_t &workspaceIndex) const;
   /// Masked bins for each spectrum are stored as a set of pairs containing <bin
   /// index, weight>
   typedef std::map<size_t, double> MaskList;
-  const MaskList &maskedBins(const size_t &spectrumIndex) const;
+  const MaskList &maskedBins(const size_t &workspaceIndex) const;
 
   // Methods handling the internal monitor workspace
   virtual void
@@ -385,11 +482,11 @@ public:
   //=====================================================================================
   // MD Geometry methods
   //=====================================================================================
-  virtual size_t getNumDims() const;
-  virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>
-  getDimension(size_t index) const;
-  virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension>
-  getDimensionWithId(std::string id) const;
+  size_t getNumDims() const override;
+  boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+  getDimension(size_t index) const override;
+  boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+  getDimensionWithId(std::string id) const override;
   //=====================================================================================
   // End MD Geometry methods
   //=====================================================================================
@@ -399,41 +496,40 @@ public:
   //=====================================================================================
 
   /// Gets the number of points available on the workspace.
-  virtual uint64_t getNPoints() const;
+  uint64_t getNPoints() const override;
   /// Get the number of points available on the workspace.
-  virtual uint64_t getNEvents() const { return this->getNPoints(); }
+  uint64_t getNEvents() const override { return this->getNPoints(); }
   /// Dimension id for x-dimension.
   static const std::string xDimensionId;
   /// Dimensin id for y-dimension.
   static const std::string yDimensionId;
   /// Generate a line plot through the matrix workspace.
-  virtual void getLinePlot(const Mantid::Kernel::VMD &start,
-                           const Mantid::Kernel::VMD &end,
-                           Mantid::API::MDNormalization normalize,
-                           std::vector<coord_t> &x, std::vector<signal_t> &y,
-                           std::vector<signal_t> &e) const;
+  LinePlot getLinePlot(const Mantid::Kernel::VMD &start,
+                       const Mantid::Kernel::VMD &end,
+                       Mantid::API::MDNormalization normalize) const override;
   /// Get the signal at a coordinate in the workspace.
-  virtual signal_t
-  getSignalAtCoord(const coord_t *coords,
-                   const Mantid::API::MDNormalization &normalization) const;
-  /// Get the signal at a coordinate in the workspace
-  virtual signal_t getSignalWithMaskAtCoord(
+  signal_t getSignalAtCoord(
       const coord_t *coords,
-      const Mantid::API::MDNormalization &normalization) const;
+      const Mantid::API::MDNormalization &normalization) const override;
+  /// Get the signal at a coordinate in the workspace
+  signal_t getSignalWithMaskAtCoord(
+      const coord_t *coords,
+      const Mantid::API::MDNormalization &normalization) const override;
   /// Create iterators. Partitions the iterators according to the number of
   /// cores.
-  virtual std::vector<IMDIterator *>
-  createIterators(size_t suggestedNumCores = 1,
-                  Mantid::Geometry::MDImplicitFunction *function = NULL) const;
+  std::vector<IMDIterator *> createIterators(
+      size_t suggestedNumCores = 1,
+      Mantid::Geometry::MDImplicitFunction *function = nullptr) const override;
 
   /// Apply masking.
-  void setMDMasking(Mantid::Geometry::MDImplicitFunction *maskingRegion);
+  void
+  setMDMasking(Mantid::Geometry::MDImplicitFunction *maskingRegion) override;
   /// Clear exsting masking.
-  void clearMDMasking();
+  void clearMDMasking() override;
 
   /// @return the special coordinate system used if any.
-  virtual Mantid::Kernel::SpecialCoordinateSystem
-  getSpecialCoordinateSystem() const;
+  Mantid::Kernel::SpecialCoordinateSystem
+  getSpecialCoordinateSystem() const override;
 
   //=====================================================================================
   // End IMDWorkspace methods
@@ -468,10 +564,9 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MatrixWorkspace(const MatrixWorkspace &other);
-  /// Protected copy assignment operator. Assignment not implemented.
-  MatrixWorkspace &operator=(const MatrixWorkspace &other);
 
-  MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory *factory = NULL);
+  MatrixWorkspace(
+      Mantid::Geometry::INearestNeighboursFactory *nnFactory = nullptr);
 
   /// Initialises the workspace. Sets the size and lengths of the arrays. Must
   /// be overloaded.
@@ -486,7 +581,7 @@ protected:
   std::vector<Axis *> m_axes;
 
 private:
-  virtual MatrixWorkspace *doClone() const = 0;
+  MatrixWorkspace *doClone() const override = 0;
 
   /// Create an MantidImage instance.
   MantidImage_sptr
@@ -513,7 +608,7 @@ private:
   /// Flag indicating whether the data has common bins. False by default
   mutable bool m_isCommonBinsFlag;
 
-  /// The set of masked bins in a map keyed on spectrum index
+  /// The set of masked bins in a map keyed on workspace index
   std::map<int64_t, MaskList> m_masks;
 
   /// A workspace holding monitor data relating to the main data in the

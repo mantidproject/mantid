@@ -15,9 +15,6 @@ PoldiSpectrumConstantBackground::PoldiSpectrumConstantBackground()
     : IFunction1D(), IPoldiFunction1D(), m_timeBinCount(0), m_flatBackground() {
 }
 
-/// Destructor
-PoldiSpectrumConstantBackground::~PoldiSpectrumConstantBackground() {}
-
 void PoldiSpectrumConstantBackground::function1D(double *out,
                                                  const double *xValues,
                                                  const size_t nData) const {

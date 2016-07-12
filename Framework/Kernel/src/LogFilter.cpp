@@ -128,7 +128,7 @@ template <typename SrcType> struct ConvertToTimeSeriesDouble {
     auto srcTypeSeries =
         dynamic_cast<const TimeSeriesProperty<SrcType> *>(prop);
     if (!srcTypeSeries)
-      return NULL;
+      return nullptr;
     auto converted = new TimeSeriesProperty<double>(prop->name());
     auto pmap = srcTypeSeries->valueAsMap();
     for (auto it = pmap.begin(); it != pmap.end(); ++it) {
@@ -143,7 +143,7 @@ template <> struct ConvertToTimeSeriesDouble<double> {
   static TimeSeriesProperty<double> *apply(const Property *prop) {
     auto doubleSeries = dynamic_cast<const TimeSeriesProperty<double> *>(prop);
     if (!doubleSeries)
-      return NULL;
+      return nullptr;
     return doubleSeries->clone();
   }
 };

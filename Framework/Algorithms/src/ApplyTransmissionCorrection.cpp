@@ -3,8 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ApplyTransmissionCorrection.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 
@@ -22,16 +24,16 @@ void ApplyTransmissionCorrection::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<HistogramValidator>();
-  declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
-                                          Direction::Input, wsValidator),
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "InputWorkspace", "", Direction::Input, wsValidator),
                   "Workspace to apply the transmission correction to");
-  declareProperty(new WorkspaceProperty<>("TransmissionWorkspace", "",
-                                          Direction::Output,
-                                          PropertyMode::Optional),
+  declareProperty(make_unique<WorkspaceProperty<>>("TransmissionWorkspace", "",
+                                                   Direction::Output,
+                                                   PropertyMode::Optional),
                   "Workspace containing the transmission values [optional]");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Workspace to store the corrected data in");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Workspace to store the corrected data in");
 
   // Alternatively, the user can specify a transmission that will ba applied to
   // all wavelength bins
@@ -72,7 +74,7 @@ void ApplyTransmissionCorrection::exec() {
     // bins)
     if (transWS->readY(0).size() != inputWS->readY(0).size()) {
       g_log.error() << "Input and transmission workspaces have a different "
-                       "number of wavelength bins" << std::endl;
+                       "number of wavelength bins\n";
       throw std::invalid_argument("Input and transmission workspaces have a "
                                   "different number of wavelength bins");
     }
@@ -96,9 +98,8 @@ void ApplyTransmissionCorrection::exec() {
     try {
       det = inputWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
-      g_log.warning() << "Spectrum index " << i
-                      << " has no detector assigned to it - discarding"
-                      << std::endl;
+      g_log.warning() << "Workspace index " << i
+                      << " has no detector assigned to it - discarding'\n";
       // Catch if no detector. Next line tests whether this happened - test
       // placed
       // outside here because Mac Intel compiler doesn't like 'continue' in a
@@ -120,8 +121,7 @@ void ApplyTransmissionCorrection::exec() {
     MantidVec &YOut = corrWS->dataY(i);
     MantidVec &EOut = corrWS->dataE(i);
 
-    const double exp_term =
-        (1.0 / cos(inputWS->detectorTwoTheta(det)) + 1.0) / 2.0;
+    const double exp_term = 0.5 / cos(inputWS->detectorTwoTheta(*det)) + 0.5;
     for (int j = 0; j < static_cast<int>(inputWS->readY(0).size()); j++) {
       if (!thetaDependent) {
         YOut[j] = 1.0 / TrIn[j];

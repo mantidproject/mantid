@@ -63,7 +63,7 @@ public:
   ///@endcond
 
   /// Virtual destructor
-  virtual ~Jacobian(){};
+  virtual ~Jacobian() = default;
 
 protected:
 };

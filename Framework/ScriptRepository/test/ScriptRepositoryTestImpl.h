@@ -104,8 +104,6 @@ public:
     tofconv_tofconverter_content = TOFCONV_CONVERTER;
     fail = false;
   }
-  virtual ~ScriptRepositoryImplLocal() throw(){};
-
   std::string repository_json_content;
   std::string tofconv_readme_content;
   std::string tofconv_tofconverter_content;
@@ -130,7 +128,7 @@ public:
       It also make it public, in order to be able to test this method itself.
    */
   void doDownloadFile(const std::string &url_file,
-                      const std::string &local_file_path) {
+                      const std::string &local_file_path) override {
 
     // answer when the download it to 'forget' the downloaded file
     // request to ping the site
@@ -207,7 +205,7 @@ public:
                                  const std::string & /*file_path*/,
                                  const std::string & /*author*/,
                                  const std::string & /*email*/,
-                                 const std::string & /*comment*/) {
+                                 const std::string & /*comment*/) override {
     if (fail)
       return "{\n  \"message\": \"Invalid author: \"\n}";
     else
@@ -234,7 +232,7 @@ public:
   static void destroySuite(ScriptRepositoryTestImpl *suite) { delete suite; }
 
   // ensure that all tests will be perfomed in a fresh repository
-  void setUp() {
+  void setUp() override {
     ConfigServiceImpl &config = ConfigService::Instance();
     backup_local_repository_path = config.getString("ScriptLocalRepository");
     local_rep = std::string(Poco::Path::current()).append("mytemprepository/");
@@ -243,7 +241,7 @@ public:
   }
 
   // ensure that the local files are free from the test created.
-  void tearDown() {
+  void tearDown() override {
     delete repo;
     try {
       Poco::File f(local_rep);
@@ -484,7 +482,7 @@ public:
          it != list_of_files.end(); it++) {
       std::cout << *it << ", ";
     }
-    std::cout << std::endl;
+    std::cout << '\n';
     TS_ASSERT(list_of_files.size() == 1);
     TS_ASSERT(list_of_files[0] == "README.md");
   }
@@ -590,7 +588,7 @@ public:
     std::string file_name_conv = folder_name + "/TofConverter.py";
 
     // remove the folder
-    std::cout << "Removing children files" << std::endl;
+    std::cout << "Removing children files\n";
     {
 
       {
@@ -606,7 +604,7 @@ public:
         f.remove();
       }
     }
-    std::cout << "children files removed" << std::endl;
+    std::cout << "children files removed\n";
 
     // without internal files, the folder should lose the auto_update flag.
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());

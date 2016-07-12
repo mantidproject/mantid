@@ -1,13 +1,15 @@
 #ifndef MANTID_VATES_VTK_MD_HISTO_HEX4D_FACTORY_H_
 #define MANTID_VATES_VTK_MD_HISTO_HEX4D_FACTORY_H_
 
-/** Concrete implementation of vtkDataSetFactory. Creates a vtkUnStructuredGrid. Uses Thresholding technique
+/** Concrete implementation of vtkDataSetFactory. Creates a vtkUnStructuredGrid.
+ Uses Thresholding technique
  * to create sparse 4D representation of data.
 
  @author Owen Arnold, Tessella plc
  @date 24/01/2010
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -38,49 +40,45 @@
 #include <vtkHexahedron.h>
 #include <vtkUnstructuredGrid.h>
 
-namespace Mantid
-{
-namespace VATES
-{
+namespace Mantid {
+namespace VATES {
 
-template<typename TimeMapper>
-class DLLExport vtkMDHistoHex4DFactory: public vtkMDHistoHexFactory
-{
+template <typename TimeMapper>
+class DLLExport vtkMDHistoHex4DFactory : public vtkMDHistoHexFactory {
 public:
-
   /// Constructor
-  vtkMDHistoHex4DFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalizationOption,
-      const double timestep);
+  vtkMDHistoHex4DFactory(ThresholdRange_scptr thresholdRange,
+                         const VisualNormalization normalizationOption,
+                         const double timestep);
 
   /// Assignment operator
-  vtkMDHistoHex4DFactory& operator=(const vtkMDHistoHex4DFactory<TimeMapper>& other);
+  vtkMDHistoHex4DFactory &
+  operator=(const vtkMDHistoHex4DFactory<TimeMapper> &other);
 
   /// Copy constructor.
-  vtkMDHistoHex4DFactory(const vtkMDHistoHex4DFactory<TimeMapper>& other);
+  vtkMDHistoHex4DFactory(const vtkMDHistoHex4DFactory<TimeMapper> &other);
 
   /// Destructor
-  ~vtkMDHistoHex4DFactory();
+  ~vtkMDHistoHex4DFactory() override;
 
   /// Initialize the object with a workspace.
-  virtual void initialize(Mantid::API::Workspace_sptr workspace);
+  void initialize(Mantid::API::Workspace_sptr workspace) override;
 
   /// Factory method
-  vtkSmartPointer<vtkDataSet> create(ProgressAction &progressUpdating) const;
+  vtkSmartPointer<vtkDataSet>
+  create(ProgressAction &progressUpdating) const override;
 
-  virtual std::string getFactoryTypeName() const
-  {
+  std::string getFactoryTypeName() const override {
     return "vtkMDHistoHex4DFactory";
   }
 
 protected:
-
-  virtual void validate() const;
+  void validate() const override;
 
 private:
+  typedef std::vector<std::vector<std::vector<UnstructuredPoint>>> PointMap;
 
-  typedef std::vector<std::vector<std::vector<UnstructuredPoint> > > PointMap;
-
-  typedef std::vector<std::vector<UnstructuredPoint> > Plane;
+  typedef std::vector<std::vector<UnstructuredPoint>> Plane;
 
   typedef std::vector<UnstructuredPoint> Column;
 
@@ -89,9 +87,7 @@ private:
 
   /// Time mapper.
   TimeMapper m_timeMapper;
-
 };
-
 }
 }
 

@@ -2,138 +2,165 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
+using namespace Mantid::API;
 
-  ALCPeakFittingPresenter::ALCPeakFittingPresenter(IALCPeakFittingView* view, IALCPeakFittingModel* model)
-    : m_view(view), m_model(model)
-  {}
+namespace MantidQt {
+namespace CustomInterfaces {
 
-  void ALCPeakFittingPresenter::initialize()
-  {
-    m_view->initialize();
+ALCPeakFittingPresenter::ALCPeakFittingPresenter(IALCPeakFittingView *view,
+                                                 IALCPeakFittingModel *model)
+    : m_view(view), m_model(model), m_guessPlotted(false) {}
 
-    connect(m_view, SIGNAL(fitRequested()), SLOT(fit()));
-    connect(m_view, SIGNAL(currentFunctionChanged()), SLOT(onCurrentFunctionChanged()));
-    connect(m_view, SIGNAL(peakPickerChanged()), SLOT(onPeakPickerChanged()));
+void ALCPeakFittingPresenter::initialize() {
+  m_view->initialize();
 
-    // We are updating the whole function anyway, so paramName if left out
-    connect(m_view, SIGNAL(parameterChanged(QString,QString)), SLOT(onParameterChanged(QString)));
+  connect(m_view, SIGNAL(fitRequested()), SLOT(fit()));
+  connect(m_view, SIGNAL(currentFunctionChanged()),
+          SLOT(onCurrentFunctionChanged()));
+  connect(m_view, SIGNAL(peakPickerChanged()), SLOT(onPeakPickerChanged()));
 
-    connect(m_model, SIGNAL(fittedPeaksChanged()), SLOT(onFittedPeaksChanged()));
-    connect(m_model, SIGNAL(dataChanged()), SLOT(onDataChanged()));
-    connect(m_view, SIGNAL(plotGuessRequested()), SLOT(onPlotGuess()));
-    connect(m_view, SIGNAL(removeGuessRequested()), SLOT(removePlots()));
+  // We are updating the whole function anyway, so paramName if left out
+  connect(m_view, SIGNAL(parameterChanged(QString, QString)),
+          SLOT(onParameterChanged(QString)));
+
+  connect(m_model, SIGNAL(fittedPeaksChanged()), SLOT(onFittedPeaksChanged()));
+  connect(m_model, SIGNAL(dataChanged()), SLOT(onDataChanged()));
+  connect(m_view, SIGNAL(plotGuessClicked()), SLOT(onPlotGuessClicked()));
+  connect(m_model, SIGNAL(errorInModel(const QString &)), m_view,
+          SLOT(displayError(const QString &)));
+}
+
+void ALCPeakFittingPresenter::fit() {
+  IFunction_const_sptr func = m_view->function("");
+  auto dataWS = m_model->data();
+  if (func && dataWS) {
+    removePlots();
+    m_model->fitPeaks(func);
+  } else {
+    m_view->displayError("Couldn't fit with empty function/data");
   }
+}
 
-  void ALCPeakFittingPresenter::fit()
+void ALCPeakFittingPresenter::onCurrentFunctionChanged() {
+  if (auto index = m_view->currentFunctionIndex()) // If any function selected
   {
-    IFunction_const_sptr func = m_view->function("");
-    if ( func ) {
-      m_view->clearGuess();
-      m_model->fitPeaks(func);
-    } else {
-       m_view->displayError("Couldn't fit an empty function");
+    IFunction_const_sptr currentFunc = m_view->function(*index);
+
+    if (auto peakFunc =
+            boost::dynamic_pointer_cast<const IPeakFunction>(currentFunc)) {
+      // If peak function selected - update and enable
+      m_view->setPeakPicker(peakFunc);
+      m_view->setPeakPickerEnabled(true);
+      return;
     }
   }
 
-  void ALCPeakFittingPresenter::onCurrentFunctionChanged()
-  {
-    if(auto index = m_view->currentFunctionIndex()) // If any function selected
-    {
-      IFunction_const_sptr currentFunc = m_view->function(*index);
+  // Nothing or a non-peak function selected - disable Peak Picker
+  m_view->setPeakPickerEnabled(false);
+}
 
-      if (auto peakFunc = boost::dynamic_pointer_cast<const IPeakFunction>(currentFunc))
-      {
-        // If peak function selected - update and enable
-        m_view->setPeakPicker(peakFunc);
-        m_view->setPeakPickerEnabled(true);
-        return;
-      }
-    }
+void ALCPeakFittingPresenter::onPeakPickerChanged() {
+  auto index = m_view->currentFunctionIndex();
 
-    // Nothing or a non-peak function selected - disable Peak Picker
-    m_view->setPeakPickerEnabled(false);
+  // If PeakPicker is changed, it should be enabled, which means a peak function
+  // should be selected
+  // (See onCurrentFunctionChanged)
+  assert(index);
+
+  auto peakFunc = m_view->peakPicker();
+
+  // Update all the defined parameters of the peak function
+  for (size_t i = 0; i < peakFunc->nParams(); ++i) {
+    QString paramName = QString::fromStdString(peakFunc->parameterName(i));
+    m_view->setParameter(*index, paramName,
+                         peakFunc->getParameter(paramName.toStdString()));
   }
+}
 
-  void ALCPeakFittingPresenter::onPeakPickerChanged()
-  {
-    auto index = m_view->currentFunctionIndex();
+void ALCPeakFittingPresenter::onParameterChanged(const QString &funcIndex) {
+  auto currentIndex = m_view->currentFunctionIndex();
 
-    // If PeakPicker is changed, it should be enabled, which means a peak function should be selected
-    // (See onCurrentFunctionChanged)
-    assert(index);
-
-    auto peakFunc = m_view->peakPicker();
-
-    // Update all the defined parameters of the peak function
-    for (size_t i = 0; i < peakFunc->nParams(); ++i)
-    {
-      QString paramName = QString::fromStdString(peakFunc->parameterName(i));
-      m_view->setParameter(*index, paramName, peakFunc->getParameter(paramName.toStdString()));
+  // We are interested in parameter changed of the currently selected function
+  // only - that's what
+  // PeakPicker is showing
+  if (currentIndex && *currentIndex == funcIndex) {
+    if (auto peak = boost::dynamic_pointer_cast<const IPeakFunction>(
+            m_view->function(funcIndex))) {
+      m_view->setPeakPicker(peak);
     }
   }
+}
 
-  void ALCPeakFittingPresenter::onParameterChanged(const QString& funcIndex)
-  {
-    auto currentIndex = m_view->currentFunctionIndex();
-
-    // We are interested in parameter changed of the currently selected function only - that's what
-    // PeakPicker is showing
-    if (currentIndex && *currentIndex == funcIndex)
-    {
-      if(auto peak = boost::dynamic_pointer_cast<const IPeakFunction>(m_view->function(funcIndex)))
-      {
-        m_view->setPeakPicker(peak);
-      }
-    }
+void ALCPeakFittingPresenter::onFittedPeaksChanged() {
+  IFunction_const_sptr fittedPeaks = m_model->fittedPeaks();
+  auto dataWS = m_model->data();
+  if (fittedPeaks && dataWS) {
+    auto x = dataWS->readX(0);
+    m_view->setFittedCurve(*(ALCHelper::curveDataFromFunction(fittedPeaks, x)));
+    m_view->setFunction(fittedPeaks);
+  } else {
+    m_view->setFittedCurve(*(ALCHelper::emptyCurveData()));
+    m_view->setFunction(IFunction_const_sptr());
   }
+}
 
-  void ALCPeakFittingPresenter::onFittedPeaksChanged()
-  {
-    if(IFunction_const_sptr fittedPeaks = m_model->fittedPeaks())
-    {
-      auto x = m_model->data()->readX(0);
-      m_view->setFittedCurve(*(ALCHelper::curveDataFromFunction(fittedPeaks, x)));
-      m_view->setFunction(fittedPeaks);
-    }
-    else
-    {
-      m_view->setFittedCurve(*(ALCHelper::emptyCurveData()));
-      m_view->setFunction(IFunction_const_sptr());
-    }
-  }
-
-  void ALCPeakFittingPresenter::onDataChanged()
-  {
+void ALCPeakFittingPresenter::onDataChanged() {
+  auto dataWS = m_model->data();
+  if (dataWS) {
     m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_model->data(), 0)),
                          ALCHelper::curveErrorsFromWs(m_model->data(), 0));
+  } else {
+    m_view->setDataCurve(*(ALCHelper::emptyCurveData()), Mantid::MantidVec{});
   }
+}
 
-  /**
-   * Called when user clicks "Plot guess" on the view.
-   * Plots the current guess fit on the graph.
-   */
-  void ALCPeakFittingPresenter::onPlotGuess() {
-    if (auto func = m_view->function("")) {
-      auto xdata = m_model->data()->readX(0);
-      m_view->setFittedCurve(*(ALCHelper::curveDataFromFunction(func, xdata)));
+/**
+ * Called when user clicks "Plot/Remove guess" on the view.
+ * Plots the current guess fit on the graph, or removes it.
+ */
+void ALCPeakFittingPresenter::onPlotGuessClicked() {
+  if (m_guessPlotted) {
+    removePlots();
+  } else {
+    if (plotGuessOnGraph()) {
+      m_view->changePlotGuessState(true);
+      m_guessPlotted = true;
     } else {
+      m_view->displayError("Couldn't plot with empty function/data");
       removePlots();
     }
   }
+}
 
-  /**
-   * Removes any fit function from the graph.
-   */
-  void ALCPeakFittingPresenter::removePlots() {
-    m_view->setFittedCurve(*(ALCHelper::emptyCurveData()));
+/**
+ * Plots current guess on the graph, if possible
+ * Not possible if function or data are null
+ * @returns :: success or failure
+ */
+bool ALCPeakFittingPresenter::plotGuessOnGraph() {
+  bool plotted = false;
+  auto func = m_view->function("");
+  auto dataWS = m_model->data();
+  if (func && dataWS) {
+    auto xdata = dataWS->readX(0);
+    m_view->setFittedCurve(*(ALCHelper::curveDataFromFunction(func, xdata)));
+    plotted = true;
   }
+  return plotted;
+}
 
-  } // namespace CustomInterfaces
-  } // namespace MantidQt
+/**
+ * Removes any fit function from the graph.
+ */
+void ALCPeakFittingPresenter::removePlots() {
+  m_view->setFittedCurve(*(ALCHelper::emptyCurveData()));
+  m_view->changePlotGuessState(false);
+  m_guessPlotted = false;
+}
+
+} // namespace CustomInterfaces
+} // namespace MantidQt

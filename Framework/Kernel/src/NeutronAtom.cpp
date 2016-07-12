@@ -75,16 +75,6 @@ NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
       inc_scatt_length_img(inc_b_img), coh_scatt_xs(coh_xs),
       inc_scatt_xs(inc_xs), tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
 
-/// Copy constructor.
-NeutronAtom::NeutronAtom(const NeutronAtom &other)
-    : z_number(other.z_number), a_number(other.a_number),
-      coh_scatt_length_real(other.coh_scatt_length_real),
-      coh_scatt_length_img(other.coh_scatt_length_img),
-      inc_scatt_length_real(other.inc_scatt_length_real),
-      inc_scatt_length_img(other.inc_scatt_length_img),
-      coh_scatt_xs(other.coh_scatt_xs), inc_scatt_xs(other.inc_scatt_xs),
-      tot_scatt_xs(other.tot_scatt_xs), abs_scatt_xs(other.abs_scatt_xs) {}
-
 /**
  * DO NOT USE THIS! This constructor generates a complete garbage NeutronAtom
  * that is only available to allow for callers to declare variables then

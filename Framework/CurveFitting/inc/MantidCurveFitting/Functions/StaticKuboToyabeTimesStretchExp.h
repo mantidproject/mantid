@@ -41,15 +41,17 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport StaticKuboToyabeTimesStretchExp : public API::ParamFunction,
                                                   public API::IFunction1D {
 public:
-  std::string name() const { return "StaticKuboToyabeTimesStretchExp"; }
+  std::string name() const override {
+    return "StaticKuboToyabeTimesStretchExp";
+  }
 
-  virtual const std::string category() const { return "Muon"; }
+  const std::string category() const override { return "Muon"; }
 
 protected:
-  virtual void function1D(double *out, const double *xValues,
-                          const size_t nData) const;
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
 
-  virtual void init();
+  void init() override;
 };
 
 } // namespace Functions

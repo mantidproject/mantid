@@ -39,7 +39,7 @@ public:
       t.open(m_logFile.c_str());
       std::string line;
       std::getline(t, line);
-      std::cout << "LINE IS " << line << std::endl;
+      std::cout << "LINE IS " << line << '\n';
       TS_ASSERT_EQUALS(line, expected);
     } else {
       TSM_ASSERT("test.log file was not found", 0);
@@ -65,22 +65,20 @@ public:
   /** TODO: Figure out a way to read back the log.
    * I tried the checkContents() call above but with no luck.
    */
-  void test_basics() {
-    log.information() << "Information Message" << std::endl;
-  }
+  void test_basics() { log.information() << "Information Message\n"; }
 
   //---------------------------------------------------------------------------
   /** Log very quickly from a lot of OpenMP threads*/
   void test_OpenMP_ParallelLogging() {
     PRAGMA_OMP(parallel for)
     for (int i = 0; i < 1000; i++) {
-      log.information() << "Information Message " << i << std::endl;
+      log.information() << "Information Message " << i << '\n';
     }
   }
 
   /** This will be called from the ThreadPool */
   void doLogInParallel(int num) {
-    log.information() << "Information Message " << num << std::endl;
+    log.information() << "Information Message " << num << '\n';
   }
 
   //---------------------------------------------------------------------------
@@ -111,7 +109,7 @@ public:
     logger.setLevel(Logger::Priority::PRIO_INFORMATION);
 
     for (int i = 0; i < 100000; i++) {
-      logger.information() << "Information Message " << i << std::endl;
+      logger.information() << "Information Message " << i << '\n';
     }
   }
 
@@ -122,7 +120,7 @@ public:
 
     PRAGMA_OMP(parallel for)
     for (int i = 0; i < 100000; i++) {
-      logger.information() << "Information Message " << i << std::endl;
+      logger.information() << "Information Message " << i << '\n';
     }
   }
 
@@ -131,7 +129,7 @@ public:
     logger.setLevel(Logger::Priority::PRIO_INFORMATION);
 
     for (int i = 0; i < 100000; i++) {
-      logger.debug() << "Debug Message " << i << std::endl;
+      logger.debug() << "Debug Message " << i << '\n';
     }
   }
 
@@ -142,7 +140,7 @@ public:
 
     PRAGMA_OMP(parallel for)
     for (int i = 0; i < 100000; i++) {
-      logger.debug() << "Debug Message " << i << std::endl;
+      logger.debug() << "Debug Message " << i << '\n';
     }
   }
 };

@@ -100,7 +100,7 @@ public:
 
 class CacheTestPerformance : public CxxTest::TestSuite {
 public:
-  void setUp() {
+  void setUp() override {
     m_nelements = 250000;
     for (int i = 0; i < m_nelements; ++i) {
       m_cacheGet.setCache(i, 1.5);

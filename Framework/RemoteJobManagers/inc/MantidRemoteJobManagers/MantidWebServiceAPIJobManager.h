@@ -36,39 +36,38 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport MantidWebServiceAPIJobManager
     : public Mantid::API::IRemoteJobManager {
 public:
-  virtual ~MantidWebServiceAPIJobManager(){};
+  void authenticate(const std::string &username,
+                    const std::string &password) override;
 
-  void authenticate(const std::string &username, const std::string &password);
-
-  void logout(const std::string &username);
+  void logout(const std::string &username) override;
 
   std::string
   submitRemoteJob(const std::string &transactionID, const std::string &runnable,
                   const std::string &param, const std::string &taskName = "",
-                  const int numNodes = 1, const int coresPerNode = 1);
+                  const int numNodes = 1, const int coresPerNode = 1) override;
 
   void downloadRemoteFile(const std::string &transactionID,
                           const std::string &remoteFileName,
-                          const std::string &localFileName);
+                          const std::string &localFileName) override;
 
   std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
-  queryAllRemoteJobs() const;
+  queryAllRemoteJobs() const override;
 
   std::vector<std::string>
-  queryRemoteFile(const std::string &transactionID) const;
+  queryRemoteFile(const std::string &transactionID) const override;
 
   Mantid::API::IRemoteJobManager::RemoteJobInfo
-  queryRemoteJob(const std::string &jobID) const;
+  queryRemoteJob(const std::string &jobID) const override;
 
-  std::string startRemoteTransaction();
+  std::string startRemoteTransaction() override;
 
-  void stopRemoteTransaction(const std::string &transactionID);
+  void stopRemoteTransaction(const std::string &transactionID) override;
 
-  void abortRemoteJob(const std::string &jobID);
+  void abortRemoteJob(const std::string &jobID) override;
 
   void uploadRemoteFile(const std::string &transactionID,
                         const std::string &remoteFileName,
-                        const std::string &localFileName);
+                        const std::string &localFileName) override;
 
 protected:
   /// Use the helper for these operations

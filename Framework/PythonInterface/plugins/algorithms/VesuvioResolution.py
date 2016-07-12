@@ -11,7 +11,7 @@ class VesuvioResolution(PythonAlgorithm):
     _mass = None
 
     def category(self):
-        return 'Inelastic\\Utility'
+        return "Inelastic\\Indirect\\Vesuvio"
 
     def summary(self):
         return 'Calculates the resolution function for VESUVIO'

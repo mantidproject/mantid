@@ -1,6 +1,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 
 #include <boost/python/class.hpp>
@@ -14,8 +15,9 @@ using Mantid::API::WorkspaceHistory;
 using Mantid::API::AlgorithmHistory;
 using Mantid::API::IAlgorithm;
 using namespace boost::python;
-
 namespace Policies = Mantid::PythonInterface::Policies;
+
+GET_POINTER_SPECIALIZATION(WorkspaceHistory)
 
 /**
  * Return a Python list of history objects from the workspace history as this is
@@ -26,8 +28,8 @@ namespace Policies = Mantid::PythonInterface::Policies;
 boost::python::object getHistoriesAsList(WorkspaceHistory &self) {
   boost::python::list names;
   const auto histories = self.getAlgorithmHistories();
-  for (auto itr = histories.cbegin(); itr != histories.cend(); ++itr) {
-    names.append(*itr);
+  for (const auto &historie : histories) {
+    names.append(historie);
   }
   return names;
 }

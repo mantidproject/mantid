@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MaskDetectorsIf.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 
 #include <fstream>
@@ -15,21 +16,14 @@ DECLARE_ALGORITHM(MaskDetectorsIf)
 
 using namespace Kernel;
 
-/// Constructor
-MaskDetectorsIf::MaskDetectorsIf()
-    : API::Algorithm(), value(0.), select_on(false) {}
-
-/// Destructor
-MaskDetectorsIf::~MaskDetectorsIf() {}
-
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */
 void MaskDetectorsIf::init() {
   using namespace Mantid::Kernel;
-  declareProperty(
-      new API::WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
-      "A 1D Workspace that contains values to select against");
+  declareProperty(make_unique<API::WorkspaceProperty<>>("InputWorkspace", "",
+                                                        Direction::Input),
+                  "A 1D Workspace that contains values to select against");
   std::vector<std::string> select_mode(2);
   select_mode[0] = "SelectIf";
   select_mode[1] = "DeselectIf";
@@ -50,12 +44,12 @@ void MaskDetectorsIf::init() {
                       allowedValuesStatement(select_operator));
   declareProperty("Value", 0.0);
   declareProperty(
-      new API::FileProperty("InputCalFile", "", API::FileProperty::Load,
-                            ".cal"),
+      make_unique<API::FileProperty>("InputCalFile", "",
+                                     API::FileProperty::Load, ".cal"),
       "The name of the CalFile with grouping data. Allowed Values: .cal .");
   declareProperty(
-      new API::FileProperty("OutputCalFile", "",
-                            API::FileProperty::OptionalSave, ".cal"),
+      make_unique<API::FileProperty>("OutputCalFile", "",
+                                     API::FileProperty::OptionalSave, ".cal"),
       "The name of the CalFile with grouping data. Allowed Values: .cal .");
 }
 
@@ -71,15 +65,16 @@ void MaskDetectorsIf::exec() {
 
   for (size_t i = 0; i < nspec; ++i) {
     // Get the list of udets contributing to this spectra
-    const std::set<detid_t> &dets = inputW->getSpectrum(i)->getDetectorIDs();
+    const auto &dets = inputW->getSpectrum(i).getDetectorIDs();
 
     if (dets.empty())
       continue;
     else {
       double val = inputW->readY(i)[0];
       if (compar_f(val, value)) {
-        for (auto it = dets.cbegin(); it != dets.cend(); ++it)
-          umap.insert(std::make_pair(*it, select_on));
+        for (auto det : dets) {
+          umap.emplace(det, select_on);
+        }
       }
     }
     double p = static_cast<double>(i) / static_cast<double>(nspec);
@@ -144,19 +139,19 @@ void MaskDetectorsIf::createNewCalFile(const std::string &oldfile,
                                        const std::string &newfile) {
   std::ifstream oldf(oldfile.c_str());
   if (!oldf.is_open()) {
-    g_log.error() << "Unable to open grouping file " << oldfile << std::endl;
+    g_log.error() << "Unable to open grouping file " << oldfile << '\n';
     throw Exception::FileError("Error reading .cal file", oldfile);
   }
   std::ofstream newf(newfile.c_str());
   if (!newf.is_open()) {
-    g_log.error() << "Unable to open grouping file " << newfile << std::endl;
+    g_log.error() << "Unable to open grouping file " << newfile << '\n';
     throw Exception::FileError("Error reading .cal file", newfile);
   }
   std::string str;
   while (getline(oldf, str)) {
     // Comment or empty lines get copied into the new cal file
     if (str.empty() || str[0] == '#') {
-      newf << str << std::endl;
+      newf << str << '\n';
       continue;
     }
     std::istringstream istr(str);
@@ -167,14 +162,14 @@ void MaskDetectorsIf::createNewCalFile(const std::string &oldfile,
     bool selection;
 
     if (it == umap.end())
-      selection = (sel == 0) ? false : true;
+      selection = sel != 0;
     else
       selection = (*it).second;
 
     newf << std::fixed << std::setw(9) << n << std::fixed << std::setw(15)
          << udet << std::fixed << std::setprecision(7) << std::setw(15)
          << offset << std::fixed << std::setw(8) << selection << std::fixed
-         << std::setw(8) << group << std::endl;
+         << std::setw(8) << group << '\n';
   }
   oldf.close();
   newf.close();
@@ -182,13 +177,11 @@ void MaskDetectorsIf::createNewCalFile(const std::string &oldfile,
 }
 
 std::string
-MaskDetectorsIf::allowedValuesStatement(std::vector<std::string> vals) {
+MaskDetectorsIf::allowedValuesStatement(const std::vector<std::string> &vals) {
   std::ostringstream statement;
   statement << "Allowed Values: ";
-  for (size_t i = 0; i < vals.size(); ++i) {
-    statement << vals[i];
-    if (i < vals.size())
-      statement << ", ";
+  for (const auto &val : vals) {
+    statement << val << ", ";
   }
   return statement.str();
 }

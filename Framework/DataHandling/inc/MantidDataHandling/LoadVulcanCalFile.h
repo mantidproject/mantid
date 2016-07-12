@@ -26,21 +26,18 @@ enum VULCAN_OFFSET_LEVEL {
  */
 class DLLExport LoadVulcanCalFile : public API::Algorithm {
 public:
-  LoadVulcanCalFile();
-  ~LoadVulcanCalFile();
-
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "LoadVulcanCalFile"; }
+  const std::string name() const override { return "LoadVulcanCalFile"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Loads set of VULCAN's offset files into up to 3 workspaces: a "
            "GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "DataHandling\\Text;Diffraction\\DataHandling";
   }
 
@@ -55,9 +52,9 @@ public:
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 
   void processInOutProperites();
 
@@ -80,7 +77,7 @@ private:
   Geometry::Instrument_const_sptr m_instrument;
 
   /// Type of grouping
-  VULCAN_OFFSET_LEVEL m_groupingType;
+  VULCAN_OFFSET_LEVEL m_groupingType{VULCAN_OFFSET_BANK};
 
   std::string m_offsetFilename;
   std::string m_badPixFilename;
@@ -93,7 +90,7 @@ private:
   // Verification tool
   void alignEventWorkspace();
 
-  bool m_doAlignEventWS;
+  bool m_doAlignEventWS{false};
   DataObjects::EventWorkspace_sptr m_eventWS;
 
   // Map for bank: eff_L and theta (in degree)

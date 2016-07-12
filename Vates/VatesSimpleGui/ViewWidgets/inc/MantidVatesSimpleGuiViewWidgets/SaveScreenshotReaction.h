@@ -5,15 +5,12 @@
 
 #include <pqReaction.h>
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
 
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS SaveScreenshotReaction : public pqReaction
-{
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS SaveScreenshotReaction
+    : public pqReaction {
   /**
    *
    This class is a copy of the ParaView pqSaveScreenshotReaction class and is
@@ -21,7 +18,8 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS SaveScreenshotReaction : publ
 
    @date 14/06/2013
 
-   Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+   Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
    This file is part of Mantid.
 
@@ -44,35 +42,31 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS SaveScreenshotReaction : publ
 
   Q_OBJECT
   typedef pqReaction Superclass;
+
 public:
   /// Constructor. Parent cannot be NULL.
-  SaveScreenshotReaction(QAction* parent);
+  SaveScreenshotReaction(QAction *parent);
 
   /// Saves the screenshot.
   /// Note that this method is static. Applications can simply use this without
   /// having to create a reaction instance.
   static void saveScreenshot();
-  static void saveScreenshot(const QString& filename,
-                             const QSize& size,
+  static void saveScreenshot(const QString &filename, const QSize &size,
                              int quality);
 
 public slots:
   /// Updates the enabled state. Applications need not explicitly call this.
-  void updateEnableState();
+  void updateEnableState() override;
 
 protected:
   /// Called when the action is triggered.
-  virtual void onTriggered()
-  { SaveScreenshotReaction::saveScreenshot(); }
+  void onTriggered() override { SaveScreenshotReaction::saveScreenshot(); }
 
 private:
   Q_DISABLE_COPY(SaveScreenshotReaction)
 };
-
 }
 }
 }
 
 #endif // __SAVESCREENSHOTREACTION_H
-
-

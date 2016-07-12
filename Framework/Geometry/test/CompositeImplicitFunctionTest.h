@@ -8,6 +8,7 @@
 #include <typeinfo>
 
 #include "MantidGeometry/MDGeometry/CompositeImplicitFunction.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid::Geometry;
 
@@ -17,13 +18,17 @@ private:
   // composite.
   class MockImplicitFunction : public Mantid::Geometry::MDImplicitFunction {
   public:
+    GCC_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(toXMLString, std::string());
     MOCK_CONST_METHOD0(getName, std::string());
     MOCK_METHOD1(isPointContained, bool(const Mantid::coord_t *coords));
-    bool isPointContained(const std::vector<Mantid::coord_t> &) { return true; }
+    GCC_DIAG_ON_SUGGEST_OVERRIDE
+    bool isPointContained(const std::vector<Mantid::coord_t> &) override {
+      return true;
+    }
     // Unhide base class methods (avoids Intel compiler warning)
     using MDImplicitFunction::isPointContained;
-    ~MockImplicitFunction() {}
+    ~MockImplicitFunction() override {}
   };
 
 public:

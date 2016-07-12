@@ -48,7 +48,7 @@ class LRReflectivityOutput(PythonAlgorithm):
             Check that all the workspaces are on an absolute scale.
             @param workspace_list: list of workspaces to put together
         """
-        scaling_cutoff = self.getProperty("ScalingWavelengthCutoff")
+        scaling_cutoff = self.getProperty("ScalingWavelengthCutoff").value
 
         normalization_available = True
         for ws in workspace_list:
@@ -57,15 +57,18 @@ class LRReflectivityOutput(PythonAlgorithm):
                     try:
                         wl = mtd[ws].getRun().getProperty("LambdaRequest").value[0]
                         # Scaling factor above the wavelength cutoff are assumed to be 1
-                        normalization_available = wl > scaling_cutoff
-                        logger.notice("%s: no normalization for wl=%s" % (ws, str(wl)))
+                        if wl > scaling_cutoff:
+                            logger.notice("%s: no normalization needed for wl=%s" % (ws, str(wl)))
+                        else:
+                            logger.error("%s: normalization missing for wl=%s" % (ws, str(wl)))
+                            normalization_available = False
                     except:
-                        logger.notice("%s: could not find LambdaRequest" % ws)
+                        logger.error("%s: could not find LambdaRequest" % ws)
                         normalization_available = False
                 else:
                     logger.notice("%s: normalization found" % ws)
             else:
-                logger.notice("%s: no normalization info" % ws)
+                logger.error("%s: no normalization info" % ws)
                 normalization_available = False
         return normalization_available
 
@@ -82,7 +85,7 @@ class LRReflectivityOutput(PythonAlgorithm):
         # Get binning parameters
         binning_parameters = self.getProperty("OutputBinning").value
         header_list = ("DataRun", "NormRun", "TwoTheta(deg)", "LambdaMin(A)",
-                      "LambdaMax(A)", "Qmin(1/A)", "Qmax(1/A)", "SF_A", "SF_B", "PrimaryFrac")
+                       "LambdaMax(A)", "Qmin(1/A)", "Qmax(1/A)", "SF_A", "SF_B", "PrimaryFrac")
         header_info = "# %-9s %-9s %-14s %-14s %-12s %-12s %-12s %-12s %-12s %-12s\n" % header_list
         # Convert each histo to histograms and rebin to final binning
         for ws in scaled_ws_list:
@@ -138,8 +141,12 @@ class LRReflectivityOutput(PythonAlgorithm):
 
                 if data_y_i[j] > 0:
                     if data_y[j] > 0:
-                        data_y[j] = 0.5 * (data_y[j] + data_y_i[j])
-                        data_e[j] = 0.5 * math.sqrt(data_e[j] * data_e[j] + data_e_i[j] * data_e_i[j])
+                        denom = 1.0 / data_e[j]**2 + 1.0 / data_e_i[j]**2
+                        data_y[j] = (data_y[j]/data_e[j]**2 + data_y_i[j]/data_e_i[j]**2) / denom
+                        data_e[j] = math.sqrt(1.0 / denom)
+
+                        #data_y[j] = 0.5 * (data_y[j] + data_y_i[j])
+                        #data_e[j] = 0.5 * math.sqrt(data_e[j] * data_e[j] + data_e_i[j] * data_e_i[j])
                     else:
                         data_y[j] = data_y_i[j]
                         data_e[j] = data_e_i[j]
@@ -166,8 +173,9 @@ class LRReflectivityOutput(PythonAlgorithm):
             total = 0.0
             weights = 0.0
             for i in range(len(y_values)):
-                total += e_values[i] * y_values[i]
-                weights += e_values[i]
+                w = 1.0 / e_values[i]**2
+                total += w * y_values[i]
+                weights += w
             scaling_factor = total / weights
 
         Scale(InputWorkspace=scaled_ws_list[0] + '_histo', OutputWorkspace=scaled_ws_list[0] + '_scaled',
@@ -186,8 +194,10 @@ class LRReflectivityOutput(PythonAlgorithm):
         start_time = mtd[scaled_ws_list[0] + '_scaled'].getRun().getProperty("start_time").value
         experiment = mtd[scaled_ws_list[0] + '_scaled'].getRun().getProperty("experiment_identifier").value
         run_number = mtd[scaled_ws_list[0] + '_scaled'].getRun().getProperty("run_number").value
+        run_title = mtd[scaled_ws_list[0] + '_scaled'].getTitle()
 
         content = '# Experiment %s Run %s\n' % (experiment, run_number)
+        content += '# Run title: %s\n' % run_title
         content += '# Run start time: %s\n' % start_time
         content += '# Reduction time: %s\n' % time.ctime()
         content += '# Mantid version: %s\n' % mantid.__version__

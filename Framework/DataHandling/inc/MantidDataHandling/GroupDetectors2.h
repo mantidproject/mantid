@@ -109,13 +109,10 @@ namespace DataHandling {
 */
 class DLLExport GroupDetectors2 : public API::Algorithm {
 public:
-  GroupDetectors2();
-  virtual ~GroupDetectors2();
-
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "GroupDetectors"; };
+  const std::string name() const override { return "GroupDetectors"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Sums spectra bin-by-bin, equivalent to grouping the data from a "
            "set of detectors.  Individual groups can be specified by passing "
            "the algorithm a list of spectrum numbers, detector IDs or "
@@ -124,12 +121,12 @@ public:
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 2; };
+  int version() const override { return 2; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Grouping"; }
+  const std::string category() const override { return "Transforms\\Grouping"; }
 
   /// Validate inputs
-  virtual std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// provides a function that expands pairs of integers separated with a hyphen
@@ -141,29 +138,31 @@ private:
   private:
     /// this class can't be constructed it is just a holder for some static
     /// things
-    RangeHelper(){};
+    RangeHelper() = default;
     /// give an enum from poco a better name here
     enum {
-      IGNORE_SPACES = Poco::StringTokenizer::TOK_TRIM ///< equal to
-      /// Poco::StringTokenizer::TOK_TRIM but
+      IGNORE_SPACES =
+          Mantid::Kernel::StringTokenizer::TOK_TRIM |
+          Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY ///< equal to
+      /// Mantid::Kernel::StringTokenizer::TOK_TRIM but
       /// saves some typing
     };
   };
 
   /// used to store the lists of WORKSPACE INDICES that will be grouped, the
   /// keys are not used
-  typedef std::map<specid_t, std::vector<size_t>> storage_map;
+  typedef std::map<specnum_t, std::vector<size_t>> storage_map;
 
   /// An estimate of the percentage of the algorithm runtimes that has been
   /// completed
-  double m_FracCompl;
+  double m_FracCompl = 0.0;
   /// stores lists of spectra indexes to group, although we never do an index
   /// search on it
-  storage_map m_GroupSpecInds;
+  storage_map m_GroupWsInds;
 
   // Implement abstract Algorithm methods
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
   void execEvent();
 
   /// read in the input parameters and see what findout what will be to grouped
@@ -218,17 +217,10 @@ private:
                          DataObjects::EventWorkspace_sptr outputWS,
                          const double prog4Copy);
 
-  /// Copy the data data in ungrouped histograms from the input workspace to the
-  /// output
-  void moveOthers(const std::set<int64_t> &unGroupedSet,
-                  API::MatrixWorkspace_const_sptr inputWS,
-                  API::MatrixWorkspace_sptr outputWS, size_t outIndex);
-  /// Copy the data data in ungrouped event lists from the input workspace to
-  /// the output
-  void moveOthersEvent(const std::set<int64_t> &unGroupedSet,
-                       DataObjects::EventWorkspace_const_sptr inputWS,
-                       DataObjects::EventWorkspace_sptr outputWS,
-                       size_t outIndex);
+  /// Copy the ungrouped spectra from the input workspace to the output
+  template <class TIn, class TOut>
+  void moveOthers(const std::set<int64_t> &unGroupedSet, const TIn &inputWS,
+                  TOut &outputWS, size_t outIndex);
 
   /// flag values
   enum {
@@ -239,8 +231,8 @@ private:
     /// spectrum number to the this
     EMPTY_LINE = 1001 - INT_MAX, ///< when reading from the input file this
     /// value means that we found any empty line
-    IGNORE_SPACES = Poco::StringTokenizer::TOK_TRIM ///< equal to
-    /// Poco::StringTokenizer::TOK_TRIM but
+    IGNORE_SPACES = Mantid::Kernel::StringTokenizer::TOK_TRIM ///< equal to
+    /// Mantid::Kernel::StringTokenizer::TOK_TRIM but
     /// saves some typing
   };
 
@@ -257,6 +249,49 @@ private:
                                    /// for an algorithm notification and update
                                    /// the progress bar
 };
+
+/**
+*  Only to be used if the KeepUnGrouped property is true, moves the spectra that
+* were not selected
+*  to be in a group to the end of the output spectrum
+*  @param unGroupedSet :: list of WORKSPACE indexes that were included in a
+* group
+*  @param inputWS :: user selected input workspace for the algorithm
+*  @param outputWS :: user selected output workspace for the algorithm
+*  @param outIndex :: the next spectra index available after the grouped spectra
+*/
+template <class TIn, class TOut>
+void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet,
+                                 const TIn &inputWS, TOut &outputWS,
+                                 size_t outIndex) {
+  g_log.debug() << "Starting to copy the ungrouped spectra\n";
+  double prog4Copy = (1. - 1. * static_cast<double>(m_FracCompl)) /
+                     static_cast<double>(unGroupedSet.size());
+
+  // go thorugh all the spectra in the input workspace
+  for (auto copyFrIt : unGroupedSet) {
+    if (copyFrIt == USED)
+      continue; // Marked as not to be used
+    size_t sourceIndex = static_cast<size_t>(copyFrIt);
+
+    outputWS.getSpectrum(outIndex) = inputWS.getSpectrum(sourceIndex);
+
+    // go to the next free index in the output workspace
+    outIndex++;
+    // make regular progress reports and check for cancelling the algorithm
+    if (outIndex % INTERVAL == 0) {
+      m_FracCompl += INTERVAL * prog4Copy;
+      if (m_FracCompl > 1.0) {
+        m_FracCompl = 1.0;
+      }
+      progress(m_FracCompl);
+      interruption_point();
+    }
+  }
+
+  g_log.debug() << name() << " copied " << unGroupedSet.size() - 1
+                << " ungrouped spectra\n";
+}
 
 } // namespace DataHandling
 } // namespace Mantid

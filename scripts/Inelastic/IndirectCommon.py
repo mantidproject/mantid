@@ -270,11 +270,18 @@ def CheckAnalysers(in1WS, in2WS):
       @exception Valuerror - workspaces have different reflections
     """
     ws1 = mtd[in1WS]
-    analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
-    reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
+    try:
+        analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
+        reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
+    except IndexError:
+        raise RuntimeError('Could not find analyser or reflection for workspace %s' % in1WS)
     ws2 = mtd[in2WS]
-    analyser_2 = ws2.getInstrument().getStringParameter('analyser')[0]
-    reflection_2 = ws2.getInstrument().getStringParameter('reflection')[0]
+    try:
+        analyser_2 = ws2.getInstrument().getStringParameter('analyser')[0]
+        reflection_2 = ws2.getInstrument().getStringParameter('reflection')[0]
+    except:
+        raise RuntimeError('Could not find analyser or reflection for workspace %s' % in2WS)
+
     if analyser_1 != analyser_2:
         raise ValueError('Workspace %s and %s have different analysers' % (ws1, ws2))
     elif reflection_1 != reflection_2:
@@ -583,3 +590,38 @@ def convertParametersToWorkspace(params_table, x_column, param_names, output_nam
         axis.setLabel(i, name)
     mtd[output_name].replaceAxis(1, axis)
 
+def IndentifyDataBoundaries(sample_ws):
+    """
+    Indentifies and returns the first and last no zero data point in a workspace
+
+    For multiple workspace spectra, the data points that are closest to the centre
+    out of all the spectra in the workspace are returned
+    """
+
+    sample_ws = mtd[sample_ws]
+    nhists = sample_ws.getNumberHistograms()
+    start_data_idx, end_data_idx = 0,0
+    # For all spectra in the workspace
+    for spectra in range(0, nhists):
+        # Obtain first and last non zero values
+        y_data = sample_ws.readY(spectra)
+        spectra_start_data = firstNonZero(y_data)
+        spectra_end_data = firstNonZero(list(reversed(y_data)))
+        # Replace workspace start and end if data is closer to the center
+        if spectra_start_data > start_data_idx:
+            start_data_idx = spectra_start_data
+        if spectra_end_data > end_data_idx:
+            end_data_idx = spectra_end_data
+    # Convert Bin index to data value
+    x_data = sample_ws.readX(0)
+    first_data_point = x_data[start_data_idx]
+    last_data_point = x_data[len(x_data) - end_data_idx - 2]
+    return first_data_point, last_data_point
+
+def firstNonZero(data):
+    """
+    Returns the index of the first non zero value in the list
+    """
+    for i in range(len(data)):
+        if data[i] != 0:
+            return i

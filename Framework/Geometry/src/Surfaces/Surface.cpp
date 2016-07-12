@@ -3,12 +3,10 @@
 #include <iostream>
 #include <sstream>
 #include <complex>
-#include <cmath>
 #include <list>
 #include <vector>
 #include <map>
 #include <stack>
-#include <string>
 #include <algorithm>
 
 #include "MantidKernel/Exception.h"
@@ -16,7 +14,6 @@
 #include "MantidGeometry/Math/mathSupport.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Math/PolyBase.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 
@@ -54,33 +51,6 @@ Surface::Surface()
 */
 {}
 
-Surface::Surface(const Surface &A)
-    : Name(A.Name)
-/**
-  Copy constructor
-  @param A :: Surface to copy
-*/
-{}
-
-Surface &Surface::operator=(const Surface &A)
-/**
-  Assignment operator
-  @param A :: Surface to copy
-  @return *this
-*/
-{
-  if (this != &A) {
-    Name = A.Name;
-  }
-  return *this;
-}
-
-Surface::~Surface()
-/**
-  Destructor
-*/
-{}
-
 int Surface::side(const Kernel::V3D &) const
 /// Surface side : throw AbsObjMethod
 {
@@ -92,7 +62,7 @@ void Surface::print() const
   Simple print out function for surface header
 */
 {
-  std::cout << "Surf == " << Name << std::endl;
+  std::cout << "Surf == " << Name << '\n';
   return;
 }
 

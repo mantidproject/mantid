@@ -8,6 +8,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <QDoubleValidator>
 #include <QFileInfo>
@@ -40,23 +41,10 @@ void ConvFit::setup() {
   m_runMax = 0;
 
   // Initialise fitTypeStrings
-  m_fitStrings = QStringList() << ""
-                               << "1L"
-                               << "2L"
-                               << "IDS"
-                               << "IDC"
-                               << "EDS"
-                               << "EDC"
-                               << "SFT";
+  m_fitStrings = {"", "1L", "2L", "IDS", "IDC", "EDS", "EDC", "SFT"};
   // All Parameters in tree that should be defaulting to 1
-  m_defaultParams = QStringList() << "Amplitude"
-                                  << "Beta"
-                                  << "Decay"
-                                  << "Diffusion"
-                                  << "Height"
-                                  << "Intensity"
-                                  << "Radius"
-                                  << "Tau";
+  m_defaultParams = {"Amplitude", "Beta",      "Decay",  "Diffusion",
+                     "Height",    "Intensity", "Radius", "Tau"};
 
   // Create TreeProperty Widget
   m_cfTree = new QtTreePropertyBrowser();
@@ -299,6 +287,7 @@ void ConvFit::run() {
   cfs->setProperty("Minimizer",
                    minimizerString("$outputname_$wsindex").toStdString());
   cfs->setProperty("MaxIterations", maxIterations);
+  cfs->setProperty("OutputWorkspace", (m_baseName.toStdString() + "_Result"));
   m_batchAlgoRunner->addAlgorithm(cfs);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
@@ -476,18 +465,18 @@ void ConvFit::newDataLoaded(const QString wsName) {
   m_cfInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       m_cfInputWSName.toStdString());
 
-  int maxSpecIndex = static_cast<int>(m_cfInputWS->getNumberHistograms()) - 1;
+  int maxWsIndex = static_cast<int>(m_cfInputWS->getNumberHistograms()) - 1;
 
-  m_uiForm.spPlotSpectrum->setMaximum(maxSpecIndex);
+  m_uiForm.spPlotSpectrum->setMaximum(maxWsIndex);
   m_uiForm.spPlotSpectrum->setMinimum(0);
   m_uiForm.spPlotSpectrum->setValue(0);
 
-  m_uiForm.spSpectraMin->setMaximum(maxSpecIndex);
+  m_uiForm.spSpectraMin->setMaximum(maxWsIndex);
   m_uiForm.spSpectraMin->setMinimum(0);
 
-  m_uiForm.spSpectraMax->setMaximum(maxSpecIndex);
+  m_uiForm.spSpectraMax->setMaximum(maxWsIndex);
   m_uiForm.spSpectraMax->setMinimum(0);
-  m_uiForm.spSpectraMax->setValue(maxSpecIndex);
+  m_uiForm.spSpectraMax->setValue(maxWsIndex);
 
   updatePlot();
 }
@@ -877,7 +866,7 @@ void ConvFit::populateFunction(IFunction_sptr func, IFunction_sptr comp,
     } else {
       std::string propName = props[i]->propertyName().toStdString();
       double propValue = props[i]->valueText().toDouble();
-      if (propValue) {
+      if (propValue != 0.0) {
         if (func->hasAttribute(propName))
           func->setAttributeValue(propName, propValue);
         else
@@ -1133,6 +1122,10 @@ void ConvFit::plotGuess() {
  * Runs the single fit algorithm
  */
 void ConvFit::singleFit() {
+  // Validate tab before running a single fit
+  if (!validate()) {
+    return;
+  }
   // disconnect signal for single fit
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(singleFit(bool)));
@@ -1153,8 +1146,7 @@ void ConvFit::singleFit() {
       runPythonCode(
           QString(
               "from IndirectCommon import getWSprefix\nprint getWSprefix('") +
-          m_cfInputWSName + QString("')\n"))
-          .trimmed();
+          m_cfInputWSName + QString("')\n")).trimmed();
   m_singleFitOutputName +=
       QString("conv_") + fitType + bgType + m_uiForm.spPlotSpectrum->text();
   int maxIterations =
@@ -1218,7 +1210,7 @@ void ConvFit::singleFitComplete(bool error) {
   std::vector<double> parVals;
 
   QStringList params = getFunctionParameters(functionName);
-
+  params.reserve(static_cast<int>(parNames.size()));
   for (size_t i = 0; i < parNames.size(); ++i)
     parVals.push_back(outputFunc->getParameter(parNames[i]));
 
@@ -1385,7 +1377,7 @@ void ConvFit::checkBoxUpdate(QtProperty *prop, bool checked) {
 
   if (prop == m_properties["UseDeltaFunc"]) {
     updatePlotOptions();
-    if (checked == true) {
+    if (checked) {
       m_properties["DeltaFunction"]->addSubProperty(
           m_properties["DeltaHeight"]);
       m_dblManager->setValue(m_properties["DeltaHeight"], 1.0000);
@@ -1585,7 +1577,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         if (count == 3) {
           propName = "Lorentzian 2";
         }
-		const QString paramName = QString(*it);
+        const QString paramName = QString(*it);
         const QString fullPropName = propName + "." + *it;
         m_properties[fullPropName] = m_dblManager->addProperty(*it);
 
@@ -1621,9 +1613,11 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
 
         m_dblManager->setDecimals(m_properties[fullPropName], NUM_DECIMALS);
         if (count < 3) {
-          m_properties["FitFunction1"]->addSubProperty(m_properties[fullPropName]);
+          m_properties["FitFunction1"]->addSubProperty(
+              m_properties[fullPropName]);
         } else {
-          m_properties["FitFunction2"]->addSubProperty(m_properties[fullPropName]);
+          m_properties["FitFunction2"]->addSubProperty(
+              m_properties[fullPropName]);
         }
         count++;
       }
@@ -1655,7 +1649,8 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         }
 
         m_dblManager->setDecimals(m_properties[fullPropName], NUM_DECIMALS);
-        m_properties["FitFunction1"]->addSubProperty(m_properties[fullPropName]);
+        m_properties["FitFunction1"]->addSubProperty(
+            m_properties[fullPropName]);
       }
     }
   }
@@ -1677,7 +1672,7 @@ void ConvFit::updatePlotOptions() {
     plotOptions << "Height";
   }
 
-  QStringList params = QStringList();
+  QStringList params;
 
   if (fitFunctionType != 2) {
     params = getFunctionParameters(m_uiForm.cbFitType->currentText());
@@ -1713,7 +1708,7 @@ QString ConvFit::convertFuncToShort(const QString &original) {
     } else {
       return "SFT";
     }
-    auto pos = original.find("Circle");
+    auto pos = original.indexOf("Circle");
     if (pos != -1) {
       result += "DC";
     } else {

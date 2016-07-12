@@ -36,13 +36,13 @@ namespace Algorithms {
 */
 class DLLExport EvaluateFunction : public IFittingAlgorithm {
 public:
-  virtual const std::string name() const;
-  virtual int version() const;
-  virtual const std::string summary() const;
+  const std::string name() const override;
+  int version() const override;
+  const std::string summary() const override;
 
 private:
-  void initConcrete();
-  void execConcrete();
+  void initConcrete() override;
+  void execConcrete() override;
 };
 
 } // namespace Algorithms

@@ -18,31 +18,20 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(CloneMDWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CloneMDWorkspace::CloneMDWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CloneMDWorkspace::~CloneMDWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CloneMDWorkspace::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
                   "An input MDEventWorkspace/MDHistoWorkspace.");
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace", "",
-                                                      Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "Name of the output MDEventWorkspace/MDHistoWorkspace.");
 
   std::vector<std::string> exts(1, ".nxs");
   declareProperty(
-      new FileProperty("Filename", "", FileProperty::OptionalSave, exts),
+      Kernel::make_unique<FileProperty>("Filename", "",
+                                        FileProperty::OptionalSave, exts),
       "If the input workspace is file-backed, specify a file to which to save "
       "the cloned workspace.\n"
       "If the workspace is file-backed but this parameter is NOT specified, "
@@ -68,8 +57,7 @@ void CloneMDWorkspace::doClone(
   if (bc->isFileBacked()) {
     if (ws->fileNeedsUpdating()) {
       // Data was modified! You need to save first.
-      g_log.notice() << "InputWorkspace's file-backend being updated. "
-                     << std::endl;
+      g_log.notice() << "InputWorkspace's file-backend being updated. \n";
       IAlgorithm_sptr alg = createChildAlgorithm("SaveMD", 0.0, 0.4, false);
       alg->setProperty("InputWorkspace", ws);
       alg->setPropertyValue("UpdateFileBackEnd", "1");
@@ -91,9 +79,9 @@ void CloneMDWorkspace::doClone(
 
     // Perform the copying
     g_log.notice() << "Cloned workspace file being copied to: " << outFilename
-                   << std::endl;
+                   << '\n';
     Poco::File(originalFile).copyTo(outFilename);
-    g_log.information() << "File copied successfully." << std::endl;
+    g_log.information() << "File copied successfully.\n";
 
     // Now load it back
     IAlgorithm_sptr alg = createChildAlgorithm("LoadMD", 0.5, 1.0, false);
@@ -108,7 +96,7 @@ void CloneMDWorkspace::doClone(
                       boost::dynamic_pointer_cast<IMDWorkspace>(outWS));
   } else {
     // Perform the clone in memory.
-    IMDWorkspace_sptr outWS(ws->clone().release());
+    IMDWorkspace_sptr outWS(ws->clone());
     setProperty("OutputWorkspace", outWS);
   }
 }
@@ -127,7 +115,7 @@ void CloneMDWorkspace::exec() {
     CALL_MDEVENT_FUNCTION(this->doClone, inWS);
   } else if (inHistoWS) {
     // Polymorphic clone().
-    IMDWorkspace_sptr outWS(inHistoWS->clone().release());
+    IMDWorkspace_sptr outWS(inHistoWS->clone());
     // And set to the output. Easy.
     this->setProperty("OutputWorkspace", outWS);
   } else {

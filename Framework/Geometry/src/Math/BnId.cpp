@@ -50,37 +50,6 @@ BnId::BnId(const size_t A, const unsigned int X)
   Tnum = (sum + static_cast<int>(size)) / 2;
 }
 
-BnId::BnId(const BnId &A)
-    : size(A.size), PI(A.PI), Tnum(A.Tnum), Znum(A.Znum), Tval(A.Tval)
-/**
-  Standard Copy Constructor
-  @param A :: Object to copy
-*/
-{}
-
-BnId &BnId::operator=(const BnId &A)
-/**
-  Assignment operator
-  @param A :: object to copy
-  @return *this
-*/
-{
-  if (this != &A) {
-    size = A.size;
-    PI = A.PI;
-    Tnum = A.Tnum;
-    Znum = A.Znum;
-    Tval = A.Tval;
-  }
-  return *this;
-}
-
-BnId::~BnId()
-/**
-  Destructor
- */
-{}
-
 int BnId::operator==(const BnId &A) const
 /**
   Tri-state return of the equality

@@ -60,10 +60,10 @@ public:
   /// Default constructor
   BinaryOperation();
   /// Destructor
-  virtual ~BinaryOperation();
+  ~BinaryOperation() override;
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Arithmetic"; }
+  const std::string category() const override { return "Arithmetic"; }
 
   /** BinaryOperationTable: a list of ints.
    * Index into vector: workspace index in the lhs;
@@ -79,8 +79,8 @@ public:
 
 protected:
   // Overridden Algorithm methods
-  virtual void exec();
-  virtual void init();
+  void exec() override;
+  void init() override;
 
   bool handleSpecialDivideMinus();
 

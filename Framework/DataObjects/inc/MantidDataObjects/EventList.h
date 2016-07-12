@@ -6,20 +6,20 @@
 #endif
 #include "MantidAPI/IEventList.h"
 #include "MantidDataObjects/Events.h"
-#include "MantidDataObjects/EventWorkspaceMRU.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/cow_ptr.h"
 #include <cstddef>
 #include <iosfwd>
 #include <set>
 #include <vector>
-#include "MantidKernel/MultiThreaded.h"
 
 namespace Mantid {
 namespace DataObjects {
+class EventWorkspaceMRU;
 
 /// How the event list is sorted.
 enum EventSortType {
@@ -70,7 +70,7 @@ class DLLExport EventList : public Mantid::API::IEventList {
 public:
   EventList();
 
-  EventList(EventWorkspaceMRU *mru, specid_t specNo);
+  EventList(EventWorkspaceMRU *mru, specnum_t specNo);
 
   EventList(const EventList &rhs);
 
@@ -80,9 +80,9 @@ public:
 
   EventList(const std::vector<WeightedEventNoTime> &events);
 
-  virtual ~EventList();
+  ~EventList() override;
 
-  void createFromHistogram(const ISpectrum *spec, bool GenerateZeros,
+  void createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
                            bool GenerateMultipleEvents, int MaxEventsPerBin);
 
   EventList &operator=(const EventList &);
@@ -138,9 +138,9 @@ public:
     this->order = UNSORTED;
   }
 
-  Mantid::API::EventType getEventType() const;
+  Mantid::API::EventType getEventType() const override;
 
-  void switchTo(Mantid::API::EventType newType);
+  void switchTo(Mantid::API::EventType newType) override;
 
   WeightedEvent getEvent(size_t event_number);
 
@@ -153,19 +153,16 @@ public:
   std::vector<WeightedEventNoTime> &getWeightedEventsNoTime();
   const std::vector<WeightedEventNoTime> &getWeightedEventsNoTime() const;
 
-  void clear(const bool removeDetIDs = true);
+  void clear(const bool removeDetIDs = true) override;
   void clearUnused();
-
-  void lockData() const;
-  void unlockData() const;
 
   void setMRU(EventWorkspaceMRU *newMRU);
 
   EventWorkspaceMRU *getMRU();
 
-  void clearData();
+  void clearData() override;
 
-  void reserve(size_t num);
+  void reserve(size_t num) override;
 
   void sort(const EventSortType order) const;
 
@@ -180,78 +177,49 @@ public:
   void sortTimeAtSample(const double &tofFactor, const double &tofShift,
                         bool forceResort = false) const;
 
-  bool isSortedByTof() const;
+  bool isSortedByTof() const override;
 
   EventSortType getSortType() const;
 
   // X-vector accessors. These reset the MRU for this spectrum
-  void setX(const MantidVecPtr::ptr_type &X);
+  void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) override;
+  MantidVec &dataX() override;
+  const MantidVec &dataX() const override;
+  const MantidVec &readX() const override;
+  Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const override;
 
-  void setX(const MantidVecPtr &X);
+  MantidVec &dataDx() override;
+  const MantidVec &dataDx() const override;
+  const MantidVec &readDx() const override;
 
-  void setX(const MantidVec &X);
-
-  MantidVec &dataX();
-  const MantidVec &dataX() const;
-  const MantidVec &constDataX() const;
-
-  // TODO: This overload will probably be needed in a future to work with Event
-  // data properly
-  // std::pair<double,double> getXDataRange()const;
-
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVec & /*Y*/) {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVec & /*Y*/, const MantidVec & /*E*/) {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVecPtr & /*Y*/) {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVecPtr & /*Y*/, const MantidVecPtr & /*E*/) {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVecPtr::ptr_type & /*Y*/) {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVecPtr::ptr_type & /*Y*/,
-               const MantidVecPtr::ptr_type & /*E*/) {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
-
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  MantidVec &dataY() {
+  /// Deprecated, use mutableY() instead. Disallowed data accessors - can't
+  /// modify Y/E on a EventList
+  MantidVec &dataY() override {
     throw std::runtime_error(
         "EventList: non-const access to Y data is not possible.");
   }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  MantidVec &dataE() {
+  /// Deprecated, use mutableE() instead. Disallowed data accessors - can't
+  /// modify Y/E on a EventList
+  MantidVec &dataE() override {
     throw std::runtime_error(
         "EventList: non-const access to E data is not possible.");
   }
 
   // Allowed data accessors - read-only Y/E histogram VIEWS of an event list
-  /// Return a read-only Y histogram view of an event list
-  const MantidVec &dataY() const { return constDataY(); }
-  /// Return a read-only E histogram view of an event list
-  const MantidVec &dataE() const { return constDataE(); }
-
-  const MantidVec &constDataY() const;
-  const MantidVec &constDataE() const;
+  /// Deprecated, use y() instead. Return a read-only Y histogram view of an
+  /// event list
+  const MantidVec &dataY() const override;
+  /// Deprecated, use e() instead. Return a read-only E histogram view of an
+  /// event list
+  const MantidVec &dataE() const override;
 
   MantidVec *makeDataY() const;
   MantidVec *makeDataE() const;
 
-  std::size_t getNumberEvents() const;
+  std::size_t getNumberEvents() const override;
   bool empty() const;
 
-  size_t getMemorySize() const;
+  size_t getMemorySize() const override;
 
   virtual size_t histogram_size() const;
 
@@ -259,57 +227,61 @@ public:
                       bool parallel = false);
   // get EventType declaration
   void generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E,
-                         bool skipError = false) const;
+                         bool skipError = false) const override;
   void generateHistogramPulseTime(const MantidVec &X, MantidVec &Y,
-                                  MantidVec &E, bool skipError = false) const;
+                                  MantidVec &E,
+                                  bool skipError = false) const override;
   void generateHistogramTimeAtSample(const MantidVec &X, MantidVec &Y,
                                      MantidVec &E, const double &tofFactor,
                                      const double &tofOffset,
-                                     bool skipError = false) const;
+                                     bool skipError = false) const override;
 
   void integrate(const double minX, const double maxX, const bool entireRange,
                  double &sum, double &error) const;
 
   double integrate(const double minX, const double maxX,
-                   const bool entireRange) const;
+                   const bool entireRange) const override;
 
-  void convertTof(std::function<double(double)> func, const int sorting = 0);
+  void convertTof(std::function<double(double)> func,
+                  const int sorting = 0) override;
 
-  void convertTof(const double factor, const double offset = 0.);
+  void convertTof(const double factor, const double offset = 0.) override;
 
-  void scaleTof(const double factor);
+  void scaleTof(const double factor) override;
 
-  void addTof(const double offset);
+  void addTof(const double offset) override;
 
-  void addPulsetime(const double seconds);
+  void addPulsetime(const double seconds) override;
 
-  void maskTof(const double tofMin, const double tofMax);
+  void maskTof(const double tofMin, const double tofMax) override;
 
-  void getTofs(std::vector<double> &tofs) const;
-  double getTofMin() const;
-  double getTofMax() const;
-  Mantid::Kernel::DateAndTime getPulseTimeMax() const;
-  Mantid::Kernel::DateAndTime getPulseTimeMin() const;
-  Mantid::Kernel::DateAndTime getTimeAtSampleMax(const double &tofFactor,
-                                                 const double &tofOffset) const;
-  Mantid::Kernel::DateAndTime getTimeAtSampleMin(const double &tofFactor,
-                                                 const double &tofOffset) const;
+  void getTofs(std::vector<double> &tofs) const override;
+  double getTofMin() const override;
+  double getTofMax() const override;
+  Mantid::Kernel::DateAndTime getPulseTimeMax() const override;
+  Mantid::Kernel::DateAndTime getPulseTimeMin() const override;
+  Mantid::Kernel::DateAndTime
+  getTimeAtSampleMax(const double &tofFactor,
+                     const double &tofOffset) const override;
+  Mantid::Kernel::DateAndTime
+  getTimeAtSampleMin(const double &tofFactor,
+                     const double &tofOffset) const override;
 
-  std::vector<double> getTofs() const;
+  std::vector<double> getTofs() const override;
 
   /// Return the list of event weight  values
-  std::vector<double> getWeights() const;
+  std::vector<double> getWeights() const override;
   /// Return the list of event weight values
-  void getWeights(std::vector<double> &weights) const;
+  void getWeights(std::vector<double> &weights) const override;
 
   /// Return the list of event weight  error values
-  std::vector<double> getWeightErrors() const;
+  std::vector<double> getWeightErrors() const override;
   /// Return the list of event weight error values
-  void getWeightErrors(std::vector<double> &weightErrors) const;
+  void getWeightErrors(std::vector<double> &weightErrors) const override;
 
-  std::vector<Mantid::Kernel::DateAndTime> getPulseTimes() const;
+  std::vector<Mantid::Kernel::DateAndTime> getPulseTimes() const override;
 
-  void setTofs(const MantidVec &tofs);
+  void setTofs(const MantidVec &tofs) override;
 
   void reverse();
 
@@ -339,21 +311,52 @@ public:
   void splitByPulseTime(Kernel::TimeSplitterType &splitter,
                         std::map<int, EventList *> outputs) const;
 
-  void multiply(const double value, const double error = 0.0);
+  void multiply(const double value, const double error = 0.0) override;
   EventList &operator*=(const double value);
 
-  void multiply(const MantidVec &X, const MantidVec &Y, const MantidVec &E);
+  void multiply(const MantidVec &X, const MantidVec &Y,
+                const MantidVec &E) override;
 
-  void divide(const double value, const double error = 0.0);
+  void divide(const double value, const double error = 0.0) override;
   EventList &operator/=(const double value);
 
-  void divide(const MantidVec &X, const MantidVec &Y, const MantidVec &E);
+  void divide(const MantidVec &X, const MantidVec &Y,
+              const MantidVec &E) override;
 
   void convertUnitsViaTof(Mantid::Kernel::Unit *fromUnit,
                           Mantid::Kernel::Unit *toUnit);
   void convertUnitsQuickly(const double &factor, const double &power);
 
+  /// Returns the Histogram associated with this spectrum. Y and E data is
+  /// computed from the event list.
+  HistogramData::Histogram histogram() const override;
+  HistogramData::Counts counts() const override;
+  HistogramData::CountVariances countVariances() const override;
+  HistogramData::CountStandardDeviations
+  countStandardDeviations() const override;
+  HistogramData::Frequencies frequencies() const override;
+  HistogramData::FrequencyVariances frequencyVariances() const override;
+  HistogramData::FrequencyStandardDeviations
+  frequencyStandardDeviations() const override;
+  const HistogramData::HistogramY &y() const override;
+  const HistogramData::HistogramE &e() const override;
+  Kernel::cow_ptr<HistogramData::HistogramY> sharedY() const override;
+  Kernel::cow_ptr<HistogramData::HistogramE> sharedE() const override;
+
+protected:
+  void checkHistogram(const HistogramData::Histogram &histogram) const override;
+  void checkWorksWithPoints() const override;
+  void checkIsYAndEWritable() const override;
+
 private:
+  const HistogramData::Histogram &histogramRef() const override {
+    return m_histogram;
+  }
+  HistogramData::Histogram &mutableHistogramRef() override;
+
+  /// Histogram object holding the histogram data. Currently only X.
+  HistogramData::Histogram m_histogram;
+
   /// List of TofEvent (no weights).
   mutable std::vector<TofEvent> events;
 
@@ -373,10 +376,7 @@ private:
   mutable EventWorkspaceMRU *mru;
 
   /// Mutex that is locked while sorting an event list
-  mutable Mantid::Kernel::Mutex m_sortMutex;
-
-  /// Lock out deletion of items in the MRU
-  mutable bool m_lockedMRU;
+  mutable std::mutex m_sortMutex;
 
   template <class T>
   static typename std::vector<T>::const_iterator
@@ -384,7 +384,8 @@ private:
 
   template <class T>
   static typename std::vector<T>::const_iterator
-  findFirstPulseEvent(const std::vector<T> &events, const double seek_tof);
+  findFirstPulseEvent(const std::vector<T> &events,
+                      const double seek_pulsetime);
 
   template <class T>
   typename std::vector<T>::const_iterator
@@ -489,7 +490,7 @@ private:
   template <class T>
   std::string splitByFullTimeVectorSplitterHelper(
       const std::vector<int64_t> &vectimes, const std::vector<int> &vecgroups,
-      std::map<int, EventList *> outputs, typename std::vector<T> &events,
+      std::map<int, EventList *> outputs, typename std::vector<T> &vecEvents,
       bool docorrection, double toffactor, double tofshift) const;
   template <class T>
   static void multiplyHelper(std::vector<T> &events, const double value,

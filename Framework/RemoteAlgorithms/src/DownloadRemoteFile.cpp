@@ -18,7 +18,6 @@ DECLARE_ALGORITHM(DownloadRemoteFile)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::Geometry;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 
@@ -81,8 +80,7 @@ void DownloadRemoteFile::exec() {
       outfile.close();
       g_log.information() << "Downloaded '"
                           << getPropertyValue("RemoteFileName") << "' to '"
-                          << getPropertyValue("LocalFileName") << "'"
-                          << std::endl;
+                          << getPropertyValue("LocalFileName") << "'\n";
     } else {
       throw(std::runtime_error(
           std::string("Failed to open " + getPropertyValue("LocalFileName"))));

@@ -394,20 +394,20 @@ public:
 
   void test_get_parameter_correction_file() {
 
-    // We test the function the looks for a parameter correction file
+    // We test the function that looks for a parameter correction file
     // for a given instrument.
 
-    // TEST1 file exists
-    std::string testpath1 = loader.getParameterCorrectionFile("TEST1");
+    // LET parameter correction file exists
+    std::string testpath1 = loader.getParameterCorrectionFile("LET");
     Poco::Path iPath(true);               // Absolute path
     TS_ASSERT(iPath.tryParse(testpath1)); // Result has correct syntax
     TS_ASSERT(iPath.isFile());            // Result is a file
     TS_ASSERT(iPath.getFileName() ==
-              "TEST1_Parameter_Corrections.xml"); // Correct filename
+              "LET_Parameter_Corrections.xml"); // Correct filename
     TS_ASSERT(iPath.directory(iPath.depth() - 1) ==
               "embedded_instrument_corrections"); // Correct folder
 
-    // TEST0 file does not exist
+    // TEST0 parameter correction file does not exist
     std::string testpath0 = loader.getParameterCorrectionFile("TEST0");
     TS_ASSERT(testpath0 == ""); // Nothing should be found
   }

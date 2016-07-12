@@ -59,37 +59,58 @@ Config file (`config.json`)
         {
             "github_repo": "mantidproject/mantid",
             "jenkins_job_name": "pull_requests-rhel7",
-            "context": "RHEL7"
+            "context": "RHEL7 + System Tests",
+            "downstream": true
         },
         {
             "github_repo": "mantidproject/mantid",
             "jenkins_job_name": "pull_requests-rhel6",
-            "context": "RHEL6"
+            "context": "RHEL6",
+            "downstream": true
         },
         {
             "github_repo": "mantidproject/mantid",
             "jenkins_job_name": "pull_requests-ubuntu",
-            "context": "Ubuntu"
+            "context": "Ubuntu + Documentation Tests",
+            "downstream": true
         },
         {
             "github_repo": "mantidproject/mantid",
             "jenkins_job_name": "pull_requests-win7",
-            "context": "Windows"
+            "context": "Windows",
+            "downstream": true
         },
         {
             "github_repo": "mantidproject/mantid",
             "jenkins_job_name": "pull_requests-osx",
-            "context": "OSX"
+            "context": "OSX",
+            "downstream": true
         },
         {
             "github_repo": "mantidproject/mantid",
             "jenkins_job_name": "pull_requests-cppcheck",
-            "context": "cppcheck"
+            "context": "cppcheck",
+            "downstream": true,
+            "downstream_builds": ["Pylint"]
         },
         {
             "github_repo": "mantidproject/mantid",
             "jenkins_job_name": "pull_requests-doxygen",
-            "context": "Doxygen"
+            "context": "Doxygen",
+            "downstream": true
+        },
+        {
+            "github_repo": "mantidproject/mantid",
+            "jenkins_job_name": "pull_requests-pylint",
+            "context": "Pylint",
+            "downstream": true,
+            "downstream_builds": ["RHEL6", "Windows", "OSX", "Doxygen", "Ubuntu + Documentation Tests", "RHEL7 + System Tests"]
+        },
+        {
+            "github_repo": "mantidproject/mantid",
+            "jenkins_job_name": "pull_requests-clang-format",
+            "context": "ClangFormat",
+            "downstream_builds": ["cppcheck"]
         }
     ],
     "user": "USER",

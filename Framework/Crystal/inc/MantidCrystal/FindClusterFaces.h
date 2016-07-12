@@ -33,21 +33,18 @@ namespace Crystal {
 */
 class DLLExport FindClusterFaces : public API::Algorithm {
 public:
-  FindClusterFaces();
-  virtual ~FindClusterFaces();
-
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Find faces for clusters in a cluster image.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 };
 
 } // namespace Crystal

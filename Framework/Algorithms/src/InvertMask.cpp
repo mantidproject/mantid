@@ -11,27 +11,16 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(InvertMask)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-InvertMask::InvertMask() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-InvertMask::~InvertMask() {}
-
 void InvertMask::init() {
-  this->declareProperty(new API::WorkspaceProperty<DataObjects::MaskWorkspace>(
-                            "InputWorkspace", "Anonymous", Direction::Input),
-                        "MaskWorkspace to be inverted. ");
+  this->declareProperty(
+      make_unique<API::WorkspaceProperty<DataObjects::MaskWorkspace>>(
+          "InputWorkspace", "Anonymous", Direction::Input),
+      "MaskWorkspace to be inverted. ");
 
   this->declareProperty(
-      new API::WorkspaceProperty<DataObjects::MaskWorkspace>(
+      make_unique<API::WorkspaceProperty<DataObjects::MaskWorkspace>>(
           "OutputWorkspace", "AnonynmousOutput", Direction::Output),
       "MaskWorkspace has inverted bits from input MaskWorkspace.");
-
-  return;
 }
 
 void InvertMask::exec() {
@@ -52,8 +41,8 @@ void InvertMask::exec() {
   invert->execute();
 
   if (!invert->isExecuted()) {
-    g_log.error() << "ChildAlgorithm BinaryOperateMask() cannot be executed. "
-                  << std::endl;
+    g_log.error()
+        << "ChildAlgorithm BinaryOperateMask() cannot be executed. \n";
     throw std::runtime_error(
         "ChildAlgorithm BinaryOperateMask() cannot be executed. ");
   }

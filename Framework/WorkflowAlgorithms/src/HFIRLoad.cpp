@@ -8,7 +8,7 @@
 #include "Poco/NumberFormatter.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/PropertyManager.h"
 
@@ -24,12 +24,12 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void HFIRLoad::init() {
-  declareProperty(
-      new API::FileProperty("Filename", "", API::FileProperty::Load, ".xml"),
-      "The name of the input file to load");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Then name of the output workspace");
+  declareProperty(make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, ".xml"),
+                  "The name of the input file to load");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Then name of the output workspace");
   declareProperty(
       "NoBeamCenter", false,
       "If true, the detector will not be moved according to the beam center");
@@ -81,8 +81,7 @@ void HFIRLoad::moveToBeamCenter(API::MatrixWorkspace_sptr &dataWS,
     center_y = default_ctr_y_pix;
     g_log.information() << "Setting beam center to ["
                         << Poco::NumberFormatter::format(center_x, 1) << ", "
-                        << Poco::NumberFormatter::format(center_y, 1) << "]"
-                        << std::endl;
+                        << Poco::NumberFormatter::format(center_y, 1) << "]\n";
     return;
   }
 
@@ -100,9 +99,15 @@ void HFIRLoad::moveToBeamCenter(API::MatrixWorkspace_sptr &dataWS,
   mvAlg->setProperty("RelativePosition", true);
   mvAlg->executeAsChildAlg();
   g_log.information() << "Moving beam center to " << center_x << " " << center_y
-                      << std::endl;
+                      << '\n';
 }
 
+/**
+ * Here the property "sample_detector_distance" is set.
+ * This is the Sample - center of detector distance that all legacy algorithms
+ * use
+ * This was done by Mathieu before BioSANS had the wing detector
+ */
 void HFIRLoad::exec() {
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
@@ -122,9 +127,9 @@ void HFIRLoad::exec() {
 
   // If the load algorithm isn't in the reduction properties, add it
   if (!reductionManager->existsProperty("LoadAlgorithm")) {
-    AlgorithmProperty *algProp = new AlgorithmProperty("LoadAlgorithm");
+    auto algProp = make_unique<AlgorithmProperty>("LoadAlgorithm");
     algProp->setValue(toString());
-    reductionManager->declareProperty(algProp);
+    reductionManager->declareProperty(std::move(algProp));
   }
 
   const std::string fileName = getPropertyValue("Filename");
@@ -138,6 +143,8 @@ void HFIRLoad::exec() {
 
   IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadSpice2D", 0, 0.2);
   loadAlg->setProperty("Filename", fileName);
+  loadAlg->setPropertyValue("OutputWorkspace",
+                            getPropertyValue("OutputWorkspace"));
   if (!isEmpty(wavelength_input)) {
     loadAlg->setProperty("Wavelength", wavelength_input);
     loadAlg->setProperty("WavelengthSpread", wavelength_spread_input);
@@ -154,7 +161,7 @@ void HFIRLoad::exec() {
     // reduced data set
     // as a sensitivity data set.
     g_log.warning() << "Unable to load file as a SPICE file. Trying to load as "
-                       "a Nexus file." << std::endl;
+                       "a Nexus file.\n";
     loadAlg = createChildAlgorithm("Load", 0, 0.2);
     loadAlg->setProperty("Filename", fileName);
     loadAlg->executeAsChildAlg();
@@ -164,10 +171,14 @@ void HFIRLoad::exec() {
     dataWS->mutableRun().addProperty("is_sensitivity", 1, "", true);
     setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
     g_log.notice() << "Successfully loaded " << fileName
-                   << " and setting sensitivity flag to True" << std::endl;
+                   << " and setting sensitivity flag to True\n";
     return;
   }
   Workspace_sptr dataWS_tmp = loadAlg->getProperty("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace(
+      getPropertyValue("OutputWorkspace"), dataWS_tmp);
+  g_log.debug() << "Calling LoadSpice2D Done. OutputWorkspace name = "
+                << dataWS_tmp->name() << "\n";
   API::MatrixWorkspace_sptr dataWS =
       boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
 
@@ -178,6 +189,8 @@ void HFIRLoad::exec() {
   double sdd = 0.0;
   const double sample_det_dist = getProperty("SampleDetectorDistance");
   if (!isEmpty(sample_det_dist)) {
+    g_log.debug() << "Getting the SampleDetectorDistance = " << sample_det_dist
+                  << " from the Algorithm input property.\n";
     sdd = sample_det_dist;
   } else {
     const std::string sddName = "sample-detector-distance";
@@ -198,6 +211,8 @@ void HFIRLoad::exec() {
     }
   }
   dataWS->mutableRun().addProperty("sample_detector_distance", sdd, "mm", true);
+  g_log.debug() << "FINAL: Using Total Sample Detector Distance = " << sdd
+                << "\n";
 
   progress.report("MoveInstrumentComponent...");
 
@@ -209,7 +224,7 @@ void HFIRLoad::exec() {
   mvAlg->setProperty("Z", sdd / 1000.0);
   mvAlg->setProperty("RelativePosition", false);
   mvAlg->executeAsChildAlg();
-  g_log.information() << "Moving detector to " << sdd / 1000.0 << std::endl;
+  g_log.information() << "Moving detector to " << sdd / 1000.0 << '\n';
   output_message += "   Detector position: " +
                     Poco::NumberFormatter::format(sdd / 1000.0, 3) + " m\n";
 
@@ -285,13 +300,13 @@ void HFIRLoad::exec() {
     // that was used.
     // This will give us our default position next time.
     if (!reductionManager->existsProperty("LatestBeamCenterX"))
-      reductionManager->declareProperty(
-          new PropertyWithValue<double>("LatestBeamCenterX", center_x));
+      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
+          "LatestBeamCenterX", center_x));
     else
       reductionManager->setProperty("LatestBeamCenterX", center_x);
     if (!reductionManager->existsProperty("LatestBeamCenterY"))
-      reductionManager->declareProperty(
-          new PropertyWithValue<double>("LatestBeamCenterY", center_y));
+      reductionManager->declareProperty(make_unique<PropertyWithValue<double>>(
+          "LatestBeamCenterY", center_y));
     else
       reductionManager->setProperty("LatestBeamCenterY", center_y);
 

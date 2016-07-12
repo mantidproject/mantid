@@ -37,16 +37,16 @@ namespace Functions {
 class MANTID_CURVEFITTING_DLL Voigt : public API::IPeakFunction {
 private:
   /// Return a string identifier for the function
-  std::string name() const { return "Voigt"; }
+  std::string name() const override { return "Voigt"; }
   /// Declare parameters
-  void declareParameters();
+  void declareParameters() override;
 
   /// Fill out with function values at given x points
   void functionLocal(double *out, const double *xValues,
-                     const size_t nData) const;
+                     const size_t nData) const override;
   /// Derivatives of function with respect to active parameters
   void functionDerivLocal(API::Jacobian *out, const double *xValues,
-                          const size_t nData);
+                          const size_t nData) override;
 
   /// Calculate both function & derivative together
   void calculateFunctionAndDerivative(const double *xValues, const size_t nData,
@@ -54,17 +54,17 @@ private:
                                       API::Jacobian *derivatives) const;
 
   /// Return value of centre of peak
-  double centre() const;
+  double centre() const override;
   /// Return value of height of peak
-  double height() const;
+  double height() const override;
   /// Return value of FWHM of peak
-  double fwhm() const;
+  double fwhm() const override;
   /// Set the centre of the peak
-  void setCentre(const double value);
+  void setCentre(const double value) override;
   /// Set the height of the peak
-  void setHeight(const double value);
+  void setHeight(const double value) override;
   /// Set the FWHM of the peak
-  void setFwhm(const double value);
+  void setFwhm(const double value) override;
 };
 
 } // namespace Functions

@@ -3,6 +3,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
+#include "MantidVatesAPI/FactoryChains.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
@@ -60,7 +61,6 @@ bool MDHWInMemoryLoadingPresenter::canReadFile() const {
   return bCanReadIt;
 }
 
-
 /*
 Executes the underlying algorithm to create the MVP model.
 @param factory : visualisation factory to use.
@@ -101,10 +101,16 @@ MDHWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
     this->m_metadataJsonManager->setMaxValue(range[1]);
   }
 
-  this->extractMetadata(m_cachedVisualHistoWs);
+  this->extractMetadata(*m_cachedVisualHistoWs);
 
-  // Transposed workpace is temporary, outside the ADS, and does not have a name. so get it from pre-transposed.
-  this->appendMetadata(visualDataSet, histoWs->getName());
+  // Transposed workpace is temporary, outside the ADS, and does not have a
+  // name. so get it from pre-transposed.
+  // If this fails, create a default name with a time stamp
+  auto name = histoWs->getName();
+  if (name.empty()) {
+    name = createTimeStampedName("HistoWS");
+  }
+  this->appendMetadata(visualDataSet, name);
   return visualDataSet;
 }
 
@@ -136,7 +142,7 @@ void MDHWInMemoryLoadingPresenter::executeLoadMetadata() {
   m_metadataJsonManager->setSpecialCoordinates(m_specialCoords);
 
   // Call base-class extraction method.
-  this->extractMetadata(m_cachedVisualHistoWs);
+  this->extractMetadata(*m_cachedVisualHistoWs);
 }
 
 /// Destructor
@@ -165,9 +171,12 @@ std::vector<int> MDHWInMemoryLoadingPresenter::getExtents() {
       boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws);
   MDHWLoadingPresenter::transposeWs(histoWs, m_cachedVisualHistoWs);
   std::vector<int> extents(6, 0);
-  extents[1] = static_cast<int>(m_cachedVisualHistoWs->getXDimension()->getNBins());
-  extents[3] = static_cast<int>(m_cachedVisualHistoWs->getYDimension()->getNBins());
-  extents[5] = static_cast<int>(m_cachedVisualHistoWs->getZDimension()->getNBins());
+  extents[1] =
+      static_cast<int>(m_cachedVisualHistoWs->getXDimension()->getNBins());
+  extents[3] =
+      static_cast<int>(m_cachedVisualHistoWs->getYDimension()->getNBins());
+  extents[5] =
+      static_cast<int>(m_cachedVisualHistoWs->getZDimension()->getNBins());
   return extents;
 }
 }

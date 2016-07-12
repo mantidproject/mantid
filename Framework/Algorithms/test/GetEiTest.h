@@ -1,8 +1,10 @@
 #ifndef GETEITEST_H_
 #define GETEITEST_H_
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -11,6 +13,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::MantidVecPtr;
+using Mantid::HistogramData::BinEdges;
 
 class GetEiTest : public CxxTest::TestSuite {
 public:
@@ -224,8 +227,7 @@ private:
             numHists, numBins, true);
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    MantidVecPtr xdata;
-    xdata.access().resize(numBins + 1);
+    BinEdges xdata(numBins + 1);
     // Update X data  to a sensible values. Looks roughly like the MARI binning
     // Update the Y values. We don't care about errors here
 
@@ -246,10 +248,10 @@ private:
             peakTwoHeight *
             exp(-0.5 * pow(xValue - peakTwoCentre, 2.) / sigmaSqTwo);
       }
-      xdata.access()[i] = xValue;
+      xdata.mutableData()[i] = xValue;
     }
-    testWS->setX(0, xdata);
-    testWS->setX(1, xdata);
+    testWS->setBinEdges(0, xdata);
+    testWS->setBinEdges(1, xdata);
     return testWS;
   }
 

@@ -1,5 +1,6 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Strings.h"
 
 namespace Mantid {

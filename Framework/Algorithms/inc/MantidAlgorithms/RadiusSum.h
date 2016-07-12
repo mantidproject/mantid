@@ -38,18 +38,15 @@ namespace Algorithms {
 */
 class DLLExport RadiusSum : public API::Algorithm {
 public:
-  RadiusSum();
-  virtual ~RadiusSum();
-
-  virtual const std::string name() const;
+  const std::string name() const override;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Sum of all the counts inside a ring against the scattering angle "
            "for each Radius.";
   }
 
-  virtual int version() const;
-  virtual const std::string category() const;
+  int version() const override;
+  const std::string category() const override;
 
   static bool inputWorkspaceHasInstrumentAssociated(API::MatrixWorkspace_sptr);
 
@@ -63,8 +60,8 @@ public:
                                    const std::vector<double> &boundaries);
 
 private:
-  void init();
-  void exec();
+  void init() override;
+  void exec() override;
 
   std::vector<double> processInstrumentRadiusSum();
   std::vector<double> processNumericImageRadiusSum();
@@ -77,15 +74,15 @@ private:
   double getMaxDistance(const Kernel::V3D &centre,
                         const std::vector<double> &boundary_limits);
 
-  void setUpOutputWorkspace(std::vector<double> &output);
+  void setUpOutputWorkspace(std::vector<double> &values);
 
   int getBinForPixelPos(const Kernel::V3D &pos);
 
   Kernel::V3D centre;
-  int num_bins;
+  int num_bins = 0;
 
   API::MatrixWorkspace_sptr inputWS;
-  double min_radius, max_radius;
+  double min_radius = 0.0, max_radius = 0.0;
 
   double getMinBinSizeForInstrument(API::MatrixWorkspace_sptr);
   double getMinBinSizeForNumericImage(API::MatrixWorkspace_sptr);
@@ -118,7 +115,7 @@ private:
                             (max_radius - min_radius));
   }
 
-  void normalizeOutputByRadius(std::vector<double> &output, double exp_power);
+  void normalizeOutputByRadius(std::vector<double> &values, double exp_power);
 };
 
 } // namespace Algorithms

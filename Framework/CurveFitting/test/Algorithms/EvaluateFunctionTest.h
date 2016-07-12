@@ -13,6 +13,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/EmptyValues.h"
 
 using Mantid::CurveFitting::Algorithms::EvaluateFunction;

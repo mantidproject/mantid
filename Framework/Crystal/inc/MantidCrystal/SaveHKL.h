@@ -16,34 +16,31 @@ namespace Crystal {
 
 class DLLExport SaveHKL : public API::Algorithm {
 public:
-  SaveHKL();
-  ~SaveHKL();
-
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "SaveHKL"; };
+  const std::string name() const override { return "SaveHKL"; };
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Save a PeaksWorkspace to a ASCII .hkl file.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  int version() const override { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
+  const std::string category() const override {
     return "Crystal\\DataHandling;DataHandling\\Text";
   }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 
   double absor_sphere(double &twoth, double &wl, double &tbar);
-  double m_smu;    // in 1/cm
-  double m_amu;    // in 1/cm
-  double m_radius; // in cm
-  double m_power_th;
+  double m_smu = 0.0;    // in 1/cm
+  double m_amu = 0.0;    // in 1/cm
+  double m_radius = 0.0; // in cm
+  double m_power_th = 0.0;
   double spectrumCalc(double TOF, int iSpec,
                       std::vector<std::vector<double>> time,
                       std::vector<std::vector<double>> spectra, size_t id);

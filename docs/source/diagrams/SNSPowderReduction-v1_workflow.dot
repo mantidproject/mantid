@@ -4,53 +4,78 @@ digraph SNSPowderReduction {
 
   subgraph params {
     $param_style
-    RunNumber
-    Sum
+    SampleRunList
     TimeFilterWall
     CalibrationFile
+    OutputWorkspaces
   }
 
   subgraph algorithms {
     $algorithm_style
-    focusAndSum [label="FocusAndSum v1"]
+    focusAndSum [label="Focus and Sum"]
+    focusChunks [label="Focus chunks"]
+    getSampleRun [label="Get a sample run number"]
+    getProcessedSam [label="Get a processed sample run workspace"]
+    compressEvents [label="CompressEvents v1"]
+    processCanRun [label="Process Container Run\n(see workflow diagram 'Process Container Run'"]
+    processVanRun [label="Process Vanadium Run\n(see workflow diagram 'Process Vanadium Run'"]
+    resetNegatives [label="ResetNegatives v1"]
+    scale [label="Scale v1"]
+    convertUnits [label="ConvertUnits v1"]
   }
 
 
   subgraph decisions{
     $decision_style
-    haveMPI [label="Have MPI?"]
     isSum [label="Is Sum True?"]
-    isLastRunNumber [label="Is Last Run Number?"]
+    isLastSampleRun [label="Is Last Sample Run Number?"]
+    isCanRunDefined [label="Is container run specified?"]
+    isVanRunDefined [label="Is Vanadium run specified?"]
+    mustDataPositive [label="Does data have to be positive?"]
   }
   
 
-  Sum		    -> isSum
+  subgraph values {
+    $value_style
+    SamRun [label="Processed\nSample"]
+    SamRunList [label="Processed\nSample Runs List"]
+  }
+
+  SampleRunList	    -> isSum
 
   isSum		    -> focusAndSum  [label="Yes"]
-  RunNumber	    -> focusAndSum
   TimeFilterWall    -> focusAndSum
   CalibrationFile   -> focusAndSum
+  focusAndSum	    -> SamRunList
 
-  isSum		    -> isLastRunNumber [label="No"]
+  isSum		    -> getSampleRun [label="No"]
+  getSampleRun	    -> focusChunks
+  TimeFilterWall    -> focusChunks
+  CalibrationFile   -> focusChunks
+  focusChunks	    -> SamRun
+  SamRun	    -> isLastSampleRun
+
+  isLastSampleRun   -> getSampleRun [label="No"]
+  isLastSampleRun   -> SamRunList [label="Yes"]
+
+  SamRunList	    -> getProcessedSam
+  getProcessedSam   -> isCanRunDefined
+
+  isCanRunDefined   -> isVanRunDefined	[label="No"]
+  isCanRunDefined   -> processCanRun	[label="Yes"]
+  processCanRun	    -> isVanRunDefined
+
+  isVanRunDefined   -> compressEvents	[label="No"]
+  isVanRunDefined   -> processVanRun	[label="Yes"]
+  processVanRun	    -> compressEvents
+
+  compressEvents    -> mustDataPositive
+  mustDataPositive  -> resetNegatives [label="Yes"]
+  resetNegatives    -> scale
+  mustDataPositive  -> scale	      [label="No"]
+  scale		    -> convertUnits
+  convertUnits	    -> OutputWorkspaces
+
 
 
 }
-
-digraph FocusAndSum123 {
-  labe="FocusAndSum Flowchart"
-
-  subgraph params {
-    $param_style
-    RunNumber
-    OutputWorkspace
-  }
-
-  subgraph algorithms {
-    $algorithm_style
-    alignAndFocusPowder	[label="AlignAndFocusPowder v1"]
-  }
-
-  RunNumber	      -> alignAndFocusPowder
-  alignAndFocusPowder -> OutputWorkspace
-}
-

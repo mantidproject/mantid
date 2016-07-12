@@ -18,14 +18,14 @@ class CostFunctionFactoryTest_A : public ICostFunction {
 public:
   CostFunctionFactoryTest_A() {}
 
-  std::string name() const { return "fido"; }
-  double getParameter(size_t) const { return 0; }
-  void setParameter(size_t, const double &) {}
-  size_t nParams() const { return 0; }
+  std::string name() const override { return "fido"; }
+  double getParameter(size_t) const override { return 0; }
+  void setParameter(size_t, const double &) override {}
+  size_t nParams() const override { return 0; }
 
-  double val() const { return 0.0; }
-  void deriv(std::vector<double> &) const {}
-  double valAndDeriv(std::vector<double> &) const { return 0.0; }
+  double val() const override { return 0.0; }
+  void deriv(std::vector<double> &) const override {}
+  double valAndDeriv(std::vector<double> &) const override { return 0.0; }
 };
 
 DECLARE_COSTFUNCTION(CostFunctionFactoryTest_A, nedtur)

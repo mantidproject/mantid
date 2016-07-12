@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ElasticWindow.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -16,15 +17,16 @@ using namespace Kernel;
 using namespace API;
 
 void ElasticWindow::init() {
-  declareProperty(new WorkspaceProperty<>(
+  declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("DeltaE")),
                   "The input workspace.");
   declareProperty(
-      new WorkspaceProperty<>("OutputInQ", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputInQ", "", Direction::Output),
       "The name for output workspace with the X axis in units of Q");
   declareProperty(
-      new WorkspaceProperty<>("OutputInQSquared", "", Direction::Output),
+      make_unique<WorkspaceProperty<>>("OutputInQSquared", "",
+                                       Direction::Output),
       "The name for output workspace with the X axis in units of Q^2.");
   declareProperty("IntegrationRangeStart", EMPTY_DBL(),
                   boost::make_shared<MandatoryValidator<double>>(),
@@ -58,13 +60,13 @@ void ElasticWindow::exec() {
   // Determine if we are converting from spectra number (red) or Q (Sqw)
   const bool axisIsSpectrumNumber = inputWorkspace->getAxis(1)->isSpectra();
   g_log.information() << "Axis is spectrum number: " << axisIsSpectrumNumber
-                      << std::endl;
+                      << '\n';
 
   // Determine if we need to use the second time range...
   const bool backgroundSubtraction =
       !((bgRangeStart == bgRangeEnd) && (bgRangeStart == EMPTY_DBL()));
   g_log.information() << "Use background subtraction: " << backgroundSubtraction
-                      << std::endl;
+                      << '\n';
 
   // Calculate number of steps
   size_t numSteps = 4;

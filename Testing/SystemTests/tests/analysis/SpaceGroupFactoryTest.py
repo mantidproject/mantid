@@ -23,7 +23,8 @@ class SpaceGroupFactoryTest(stresstesting.MantidStressTest):
 
         # There are some space groups which have new names in the latest tables, they will be included in the
         # test when aliases are available.
-        self.assertLess(len(self.notChecked), 25,
+        # Note: avoiding assertLess() for now, not available in Python < 2.7 (rhel6)
+        self.assertTrue(len(self.notChecked) < 25,
                         'Some space groups were not checked: ' + str(self.notChecked))
 
     def checkSpaceGroup(self, symbol):
@@ -61,9 +62,9 @@ class SpaceGroupFactoryTest(stresstesting.MantidStressTest):
         pointGroup = spaceGroup.getPointGroup()
 
         self.assertFalse(
-                set(onlyMatrices.getSymmetryOperationStrings()).isdisjoint(pointGroup.getSymmetryOperationStrings()),
-                ("Point group of space group " + spaceGroup.getHMSymbol() + " does not match group obtained from"
-                                                                            " matrices of symmetry operations."))
+            set(onlyMatrices.getSymmetryOperationStrings()).isdisjoint(pointGroup.getSymmetryOperationStrings()),
+            ("Point group of space group " + spaceGroup.getHMSymbol() + " does not match group obtained from"
+                                                                        " matrices of symmetry operations."))
 
     def loadReferenceData(self):
         # Reference data, generated using sginfo (http://cci.lbl.gov/sginfo/)

@@ -28,20 +28,20 @@ Chemical Composition with Examples
 - ``(H2)2 O`` - Heavy water
 - ``D2 O`` - Another way to specify heavy water
 
-Enter a composition as a molecular formula of elements or isotopes. 
-For example, basic elements might be ``H``, ``Fe`` or ``Si``, etc. 
-A molecular formula of elements might be ``H4-N2-C3``, which 
-corresponds to a molecule with 4 Hydrogen atoms, 2 Nitrogen atoms and 
-3 Carbon atoms.  Each element in a molecular formula is followed by 
-the number of the atoms for that element, specified **without a hyphen**, 
+Enter a composition as a molecular formula of elements or isotopes.
+For example, basic elements might be ``H``, ``Fe`` or ``Si``, etc.
+A molecular formula of elements might be ``H4-N2-C3``, which
+corresponds to a molecule with 4 Hydrogen atoms, 2 Nitrogen atoms and
+3 Carbon atoms.  Each element in a molecular formula is followed by
+the number of the atoms for that element, specified **without a hyphen**,
 because each element is separated from other elements using a hyphen.
-The number of atoms can be integer or float, but must start with a 
-digit, e.g. 0.6 is fine but .6 is not. Isotopes may also be included 
-in a material composition, and can be specified alone (as in ``Li7``), 
-or in a molecular formula (as in ``(Li7)2-C-H4-N-Cl6``).  Note, however, 
+The number of atoms can be integer or float, but must start with a
+digit, e.g. 0.6 is fine but .6 is not. Isotopes may also be included
+in a material composition, and can be specified alone (as in ``Li7``),
+or in a molecular formula (as in ``(Li7)2-C-H4-N-Cl6``).  Note, however,
 that No Spaces or Hyphens are allowed in an isotope symbol specification.
-Also Note that for isotopes specified in a molecular expression, the 
-isotope must be enclosed by parenthesis, except for two special cases, 
+Also Note that for isotopes specified in a molecular expression, the
+isotope must be enclosed by parenthesis, except for two special cases,
 ``D`` and ``T``, which stand for ``H2`` and ``H3``, respectively.
 
 Cross Section Calculations
@@ -67,9 +67,9 @@ It can can be generated in one of two ways:
 
 1. Specifying it directly with ``SampleNumberDensity``
 2. Specifying the ``ZParameter`` and the ``UnitCellVolume`` (or letting
-   the algorithm calculate it from the OrientedLattice on the 
+   the algorithm calculate it from the OrientedLattice on the
    ``InputWorkspace``).
-   
+
 Linear Absorption Coefficients
 ##############################
 
@@ -78,7 +78,14 @@ Linear Absorption Coefficients
 .. math:: \mu_a = \rho_n \frac{1}{N_{atoms}}\sum_{i}a_{i}n_{i} \text{ units of 1/cm}
 .. math:: a = \sigma_{absorption} (\lambda=1.8)
 
-A detailed version of this is found in [2]. 
+A detailed version of this is found in [2].
+
+Normalized Laue
+###############
+
+.. math:: bAverage = <b> = \frac{1}{N_{atoms}}\sum_{i}b_{i}
+.. math:: bSquaredAverage = <b^2> = \frac{1}{N_{atoms}}\sum_{i}b_{i}^2
+.. math:: NormalizedLaue = \frac{<b^2>-<b>^2}{<b>^2}
 
 References
 ----------
@@ -88,7 +95,7 @@ The data used in this algorithm comes from the following paper.
 #. Varley F. Sears, *Neutron scattering lengths and cross sections*, Neutron News **3:3** (1992) 26
    `doi: 10.1080/10448639208218770 <http://dx.doi.org/10.1080/10448639208218770>`_
 #. J. A. K. Howard, O. Johnson, A. J. Schultz and A. M. Stringer, *Determination of the neutron
-   absorption cross section for hydrogen as a function of wavelength with a pulsed neutron 
+   absorption cross section for hydrogen as a function of wavelength with a pulsed neutron
    source*, J. Appl. Cryst. (1987). 20, 120-122
    `doi: 10.1107/S0021889887087028 <http://dx.doi.org/10.1107/S0021889887087028>`_
 

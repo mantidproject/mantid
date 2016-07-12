@@ -10,16 +10,6 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace DataObjects {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PeakShapeEllipsoidFactory::PeakShapeEllipsoidFactory() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeakShapeEllipsoidFactory::~PeakShapeEllipsoidFactory() {}
-
 /**
  * @brief Create the PeakShape
  * @param source : source JSON
@@ -29,7 +19,7 @@ Mantid::Geometry::PeakShape *
 PeakShapeEllipsoidFactory::create(const std::string &source) const {
   Json::Reader reader;
   Json::Value root;
-  Mantid::Geometry::PeakShape *product = NULL;
+  Mantid::Geometry::PeakShape *product = nullptr;
   if (reader.parse(source, root)) {
     const std::string shape = root["shape"].asString();
     if (shape == PeakShapeEllipsoid::ellipsoidShapeName()) {

@@ -1,20 +1,21 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Strings.h"
-#include <fstream>
-
-#include <boost/tokenizer.hpp>
-#include <Poco/StringTokenizer.h>
+#include <MantidKernel/StringTokenizer.h>
 // String utilities
 #include <boost/algorithm/string.hpp>
+
+#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -175,7 +176,9 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
   // potentially there
   // could be blank lines and comment lines
   int numBins(0), lineNo(0);
-  std::vector<DataObjects::Histogram1D> spectra(numSpectra);
+  std::vector<DataObjects::Histogram1D> spectra(
+      numSpectra, HistogramData::Histogram::XMode::Points);
+  std::vector<double> dx;
   std::vector<double> values(numCols, 0.);
   do {
     ++lineNo;
@@ -204,14 +207,20 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
       if (haveErrors) {
         spectra[i].dataE().push_back(values[i * 2 + 2]);
       }
-      if (haveXErrors) {
-        // Note: we only have X errors with 4-column files.
-        // We are only here when i=0.
-        spectra[i].dataDx().push_back(values[3]);
-      }
+    }
+    if (haveXErrors) {
+      // Note: we only have X errors with 4-column files.
+      // We are only here when i=0.
+      dx.push_back(values[3]);
     }
     ++numBins;
   } while (getline(file, line));
+  auto sharedDx = Kernel::make_cow<HistogramData::HistogramDx>(dx);
+  for (size_t i = 0; i < numSpectra; ++i) {
+    if (haveXErrors) {
+      spectra[i].setSharedDx(sharedDx);
+    }
+  }
 
   MatrixWorkspace_sptr localWorkspace =
       boost::dynamic_pointer_cast<MatrixWorkspace>(
@@ -234,9 +243,9 @@ API::Workspace_sptr LoadAscii::readData(std::ifstream &file) const {
     if (haveErrors)
       localWorkspace->dataE(i) = spectra[i].dataE();
     if (haveXErrors)
-      localWorkspace->dataDx(i) = spectra[i].dataDx();
+      localWorkspace->setSharedDx(i, spectra[i].sharedDx());
     // Just have spectrum number start at 1 and count up
-    localWorkspace->getSpectrum(i)->setSpectrumNo(static_cast<specid_t>(i) + 1);
+    localWorkspace->getSpectrum(i).setSpectrumNo(static_cast<specnum_t>(i) + 1);
   }
   return localWorkspace;
 }
@@ -279,8 +288,7 @@ void LoadAscii::fillInputValues(std::vector<double> &values,
                                 const std::list<std::string> &columns) const {
   values.resize(columns.size());
   int i = 0;
-  for (auto itr = columns.cbegin(); itr != columns.cend(); ++itr) {
-    std::string value = *itr;
+  for (auto value : columns) {
     boost::trim(value);
     boost::to_lower(value);
     if (value == "nan" || value == "1.#qnan") // ignores nans (not a number) and
@@ -300,13 +308,14 @@ void LoadAscii::fillInputValues(std::vector<double> &values,
 //--------------------------------------------------------------------------
 /// Initialisation method.
 void LoadAscii::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load,
-                                   {".dat", ".txt", ".csv", ""}),
+  const std::vector<std::string> extensions{".dat", ".txt", ".csv", ""};
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "Filename", "", FileProperty::Load, extensions),
                   "The name of the text file to read, including its full or "
-                  "relative path. The file extension must be .tst, .dat, or "
+                  "relative path. The file extension must be .txt, .dat, or "
                   ".csv");
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name of the workspace that will be created, filled with "
                   "the read-in data and stored in the [[Analysis Data "
                   "Service]].");

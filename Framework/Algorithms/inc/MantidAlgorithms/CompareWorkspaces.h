@@ -72,30 +72,30 @@ namespace Algorithms {
 class DLLExport CompareWorkspaces : public API::Algorithm {
 public:
   CompareWorkspaces();
-  virtual ~CompareWorkspaces();
+  ~CompareWorkspaces() override;
 
   /// Algorithm's name
-  virtual const std::string name() const;
+  const std::string name() const override;
 
   /// Algorithm's version
-  virtual int version() const;
+  int version() const override;
 
   /// Categories this algorithm belongs to
-  virtual const std::string category() const;
+  const std::string category() const override;
 
   /// Summary of algorithm's purpose
-  virtual const std::string summary() const;
+  const std::string summary() const override;
 
 private:
   /// Initialise algorithm
-  virtual void init();
+  void init() override;
 
   /// Execute algorithm
-  virtual void exec();
+  void exec() override;
 
   /// Process two groups and ensure the Result string is set properly on the
   /// final algorithm
-  virtual bool processGroups();
+  bool processGroups() override;
 
   /// Process the two groups
   void processGroups(boost::shared_ptr<const API::WorkspaceGroup> groupOne,
@@ -108,8 +108,8 @@ private:
   void doTableComparison(API::ITableWorkspace_const_sptr tws1,
                          API::ITableWorkspace_const_sptr tws2);
   void doMDComparison(API::Workspace_sptr w1, API::Workspace_sptr w2);
-  bool compareEventWorkspaces(DataObjects::EventWorkspace_const_sptr ews1,
-                              DataObjects::EventWorkspace_const_sptr ews2);
+  bool compareEventWorkspaces(const DataObjects::EventWorkspace &ews1,
+                              const DataObjects::EventWorkspace &ews2);
   bool checkData(API::MatrixWorkspace_const_sptr ws1,
                  API::MatrixWorkspace_const_sptr ws2);
   bool checkAxes(API::MatrixWorkspace_const_sptr ws1,

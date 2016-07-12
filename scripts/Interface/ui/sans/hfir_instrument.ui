@@ -123,7 +123,7 @@
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Bitstream Charter'; font-size:10pt; font-weight:400; font-style:italic;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;For more information, go to &lt;a style=&quot;text-decoration: none&quot; href=&quot;http://www.mantidproject.org/Reduction_for_HFIR_SANS&quot;&gt;&lt;span style=&quot; color:#5555ff;&quot;&gt;http://www.mantidproject.org/Reduction_for_HFIR_SANS&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;For more information, go to &lt;a style=&quot;text-decoration: none&quot; href=&quot;http://docs.mantidproject.org/nightly/concepts/ORNL_SANS_Reduction.html&quot;&gt;&lt;span style=&quot; color:#5555ff;&quot;&gt;http://docs.mantidproject.org/nightly/concepts/ORNL_SANS_Reduction.html&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="openExternalLinks">
                <bool>true</bool>

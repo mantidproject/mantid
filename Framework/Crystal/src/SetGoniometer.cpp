@@ -1,4 +1,5 @@
 #include "MantidCrystal/SetGoniometer.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -18,28 +19,15 @@ using namespace Mantid::API;
 const size_t NUM_AXES = 6;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SetGoniometer::SetGoniometer() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SetGoniometer::~SetGoniometer() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SetGoniometer::init() {
   declareProperty(
-      new WorkspaceProperty<>("Workspace", "", Direction::InOut),
+      make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
       "An workspace that will be modified with the new goniometer created.");
 
-  std::vector<std::string> gonOptions;
-  gonOptions.push_back("None, Specify Individually");
-  gonOptions.push_back("Universal");
+  std::vector<std::string> gonOptions{"None, Specify Individually",
+                                      "Universal"};
   declareProperty("Goniometers", gonOptions[0],
                   boost::make_shared<StringListValidator>(gonOptions),
                   "Set the axes and motor names according to goniometers that "
@@ -51,8 +39,8 @@ void SetGoniometer::init() {
   for (size_t i = 0; i < NUM_AXES; i++) {
     std::ostringstream propName;
     propName << "Axis" << i;
-    declareProperty(new PropertyWithValue<std::string>(propName.str(), "",
-                                                       Direction::Input),
+    declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
+                        propName.str(), "", Direction::Input),
                     propName.str() + axisHelp);
   }
 }
@@ -93,7 +81,7 @@ void SetGoniometer::exec() {
         if (Strings::convert(axisName, angle)) {
           g_log.information() << "Axis " << i
                               << " - create a new log value GoniometerAxis" << i
-                              << "_FixedValue" << std::endl;
+                              << "_FixedValue\n";
           axisName = "GoniometerAxis" + Strings::toString(i) + "_FixedValue";
           try {
             Kernel::DateAndTime now = Kernel::DateAndTime::getCurrentTime();
@@ -136,7 +124,7 @@ void SetGoniometer::exec() {
 
   if (gon.getNumberAxes() == 0)
     g_log.warning() << "Empty goniometer created; will always return an "
-                       "identity rotation matrix." << std::endl;
+                       "identity rotation matrix.\n";
 
   // All went well, copy the goniometer into it. It will throw if the log values
   // cannot be found
