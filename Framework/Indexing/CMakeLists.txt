@@ -3,6 +3,7 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
+	inc/MantidIndexing/DetectorID.h
 	inc/MantidIndexing/DllConfig.h
 	inc/MantidIndexing/IndexSet.h
 	inc/MantidIndexing/IndexType.h
@@ -15,6 +16,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+	DetectorIDTest.h
 	IndexSetTest.h
 	IndexTypeTest.h
 	PartitionIndexTest.h
