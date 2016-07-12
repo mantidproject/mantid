@@ -2,7 +2,4 @@
 
 using namespace Mantid::API;
 
-WindowFactoryImpl::WindowFactoryImpl()
-{
-
-}
+WindowFactoryImpl::WindowFactoryImpl() {}

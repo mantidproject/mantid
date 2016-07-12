@@ -87,8 +87,7 @@ private:
  * dependancy.
  * [ assigned to thzs ]
  */
-class Table : public MdiSubWindow,
-              public Scripted {
+class Table : public MdiSubWindow, public Scripted {
   Q_OBJECT
 
 public:
@@ -116,9 +115,8 @@ public:
     Overwrite   //!< replace content of table with the imported file
   };
 
-  Table(ScriptingEnv *env, int r, int c, const QString &label,
-        QWidget *parent, const QString &name = QString(),
-        Qt::WFlags f = 0);
+  Table(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent,
+        const QString &name = QString(), Qt::WFlags f = 0);
   Table();
 
   int topSelectedRow() const { return d_table->topSelectedRow(); }
@@ -305,8 +303,7 @@ public slots:
   //@}
 
   void init(ScriptingEnv *env, int r, int c, const QString &label,
-        QWidget *parent, const QString &name = QString(),
-        Qt::WFlags f = 0);
+            QWidget *parent, const QString &name = QString(), Qt::WFlags f = 0);
   QStringList selectedColumns();
   QStringList selectedYColumns();
   QStringList selectedXColumns();

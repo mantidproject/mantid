@@ -115,7 +115,6 @@ private:
   /// Load a single workspaces to the ADS
   void loadWsToMantidTree(const std::string &wsName);
 };
-
 }
 }
 

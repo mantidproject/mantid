@@ -54,12 +54,10 @@ Note::Note(const QString &label, QWidget *parent, const QString &name,
   init(label, parent, name, f);
 }
 
-Note::Note()
-    : MdiSubWindow() {
-}
+Note::Note() : MdiSubWindow() {}
 
 void Note::init(const QString &label, QWidget *parent, const QString &name,
-           Qt::WFlags f) {
+                Qt::WFlags f) {
   MdiSubWindow::init(parent, label, name, f);
   te = new QTextEdit(this);
   te->setObjectName(name);

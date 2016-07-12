@@ -8,9 +8,7 @@
  * Constructor
  * @param env :: A pointer to a scripting environment
  */
-Scripted::Scripted(ScriptingEnv *env) : m_scriptEnv(env) {
-    init(env);
-}
+Scripted::Scripted(ScriptingEnv *env) : m_scriptEnv(env) { init(env); }
 
 /**
  * Constructor for creating an uninitilised pointer to a scripting enviornment
@@ -22,8 +20,8 @@ Scripted::Scripted() : m_scriptEnv(nullptr) {}
  *  @param env
  */
 void Scripted::init(ScriptingEnv *env) {
-    m_scriptEnv = env;
-    m_scriptEnv->incref();
+  m_scriptEnv = env;
+  m_scriptEnv->incref();
 }
 
 /**

@@ -78,8 +78,7 @@ Table::Table(ScriptingEnv *env, int r, int c, const QString &label,
 Table::Table() : MdiSubWindow(), Scripted() {}
 
 void Table::init(ScriptingEnv *env, int rows, int cols, const QString &label,
-        QWidget *parent, const QString &name,
-        Qt::WFlags f) {
+                 QWidget *parent, const QString &name, Qt::WFlags f) {
   MdiSubWindow::init(parent, label, name, f);
   Scripted::init(env);
 

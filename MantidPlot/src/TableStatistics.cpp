@@ -47,23 +47,19 @@ DECLARE_WINDOW(TableStatistics)
 
 TableStatistics::TableStatistics(ScriptingEnv *env, QWidget *parent,
                                  Table *base, Type t, QList<int> targets)
-    : Table(), d_base(base), d_type(t),
-      d_targets(targets) {
-    init(env, parent, base, t, targets);
+    : Table(), d_base(base), d_type(t), d_targets(targets) {
+  init(env, parent, base, t, targets);
 }
 
 TableStatistics::TableStatistics()
-    : Table(), d_base(nullptr), d_type(), d_targets()
-{
+    : Table(), d_base(nullptr), d_type(), d_targets() {}
 
-}
-
-void TableStatistics::init(ScriptingEnv *env, QWidget *parent, Table *base, Type type, QList<int> targets)
-{
-    Table::init(env, 1, 1, "", parent, "");
-    d_base = base;
-    d_type = type;
-    d_targets = targets;
+void TableStatistics::init(ScriptingEnv *env, QWidget *parent, Table *base,
+                           Type type, QList<int> targets) {
+  Table::init(env, 1, 1, "", parent, "");
+  d_base = base;
+  d_type = type;
+  d_targets = targets;
 
   setCaptionPolicy(MdiSubWindow::Both);
   if (d_type == row) {
@@ -330,9 +326,8 @@ void TableStatistics::loadFromProject(const std::string &lines,
   // create instance
   int typeCode = type == "row" ? TableStatistics::row : TableStatistics::column;
 
-  init(app->scriptingEnv(), app,
-          app->table(QString::fromStdString(tableName)),
-          (TableStatistics::Type)typeCode, targets);
+  init(app->scriptingEnv(), app, app->table(QString::fromStdString(tableName)),
+       (TableStatistics::Type)typeCode, targets);
 
   if (tsv.selectLine("geometry"))
     app->restoreWindowGeometry(

@@ -72,8 +72,8 @@
 // Register the window into the WindowFactory
 DECLARE_WINDOW(Matrix)
 
-Matrix::Matrix(ScriptingEnv *env, const QString &label,
-               QWidget *parent, const QString &name, Qt::WFlags f)
+Matrix::Matrix(ScriptingEnv *env, const QString &label, QWidget *parent,
+               const QString &name, Qt::WFlags f)
     : MdiSubWindow(parent, label, name, f), Scripted(env), d_matrix_model(NULL),
       m_bk_color(), d_stack(NULL), d_table_view(NULL), imageLabel(NULL),
       formula_str(), txt_format(), num_precision(0), x_start(0.0), x_end(0.0),
@@ -114,20 +114,19 @@ Matrix::Matrix(ScriptingEnv *env, const QImage &image, const QString &label,
 }
 
 Matrix::Matrix()
-    : MdiSubWindow(), Scripted(), d_matrix_model(NULL),
-      m_bk_color(), d_stack(NULL), d_table_view(NULL), imageLabel(NULL),
-      formula_str(), txt_format(), num_precision(0), x_start(0.0), x_end(0.0),
-      y_start(0.0), y_end(0.0), d_view_type(ViewType::TableView),
+    : MdiSubWindow(), Scripted(), d_matrix_model(NULL), m_bk_color(),
+      d_stack(NULL), d_table_view(NULL), imageLabel(NULL), formula_str(),
+      txt_format(), num_precision(0), x_start(0.0), x_end(0.0), y_start(0.0),
+      y_end(0.0), d_view_type(ViewType::TableView),
       d_header_view_type(HeaderViewType::ColumnRow), d_color_map(),
       d_color_map_type(ColorMapType::Rainbow), d_column_width(0),
-      d_select_all_shortcut(NULL), d_undo_stack(NULL), d_workspace(NULL) {
-}
+      d_select_all_shortcut(NULL), d_undo_stack(NULL), d_workspace(NULL) {}
 
 void Matrix::init(ScriptingEnv *env, int r, int c, const QString &label,
-               QWidget *parent, const QString &name, Qt::WFlags f) {
-   MdiSubWindow::init(parent, label, name, f);
-   Scripted::init(env);
-   initTable(r, c);
+                  QWidget *parent, const QString &name, Qt::WFlags f) {
+  MdiSubWindow::init(parent, label, name, f);
+  Scripted::init(env);
+  initTable(r, c);
 }
 
 void Matrix::initGlobals() {
@@ -1649,8 +1648,8 @@ void Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
   showNormal();
   app->setListViewDate(caption, date);
   setBirthDate(date);
-  if(!gStr.empty()) {
-      app->restoreWindowGeometry(app, this, QString::fromStdString(gStr));
+  if (!gStr.empty()) {
+    app->restoreWindowGeometry(app, this, QString::fromStdString(gStr));
   }
 }
 

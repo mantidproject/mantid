@@ -45,9 +45,10 @@ namespace API {
     File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
-class MANTID_API_DLL WindowFactoryImpl final : public Kernel::DynamicFactory<MdiSubWindow> {
+class MANTID_API_DLL WindowFactoryImpl final
+    : public Kernel::DynamicFactory<MdiSubWindow> {
 public:
-    WindowFactoryImpl();
+  WindowFactoryImpl();
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for
@@ -60,7 +61,6 @@ template class MANTID_API_DLL
 
 typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<WindowFactoryImpl>
     WindowFactory;
-
 }
 }
 

@@ -122,7 +122,7 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
   // If this is the top level folder of the project, we'll need to load the
   // workspaces before anything else.
   if (isTopLevel) {
-      loadWorkspaces(tsv);
+    loadWorkspaces(tsv);
   }
 
   loadCurrentFolder(tsv);
@@ -141,8 +141,7 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
  *
  * @param tsv :: the TSVserialiser object for the project file
  */
-void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv)
-{
+void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv) {
   if (tsv.hasSection("mantidworkspaces")) {
     // There should only be one of these, so we only read the first.
     std::string workspaces = tsv.sections("mantidworkspaces").front();
@@ -158,15 +157,15 @@ void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv)
  * @param lines :: string of characters from a Mantid project file
  * @param fileVersion :: version of the project file loaded
  */
-void ProjectSerialiser::loadWindows(const TSVSerialiser &tsv, const int fileVersion)
-{
+void ProjectSerialiser::loadWindows(const TSVSerialiser &tsv,
+                                    const int fileVersion) {
   for (auto &classname : WindowFactory::Instance().getKeys()) {
-        if (tsv.hasSection(classname)) {
-            for (auto &section : tsv.sections(classname)) {
-                auto w = WindowFactory::Instance().createUnwrapped(classname);
-                w->loadFromProject(section, window, fileVersion);
-            }
-        }
+    if (tsv.hasSection(classname)) {
+      for (auto &section : tsv.sections(classname)) {
+        auto w = WindowFactory::Instance().createUnwrapped(classname);
+        w->loadFromProject(section, window, fileVersion);
+      }
+    }
   }
 }
 
@@ -176,8 +175,8 @@ void ProjectSerialiser::loadWindows(const TSVSerialiser &tsv, const int fileVers
  * @param tsv :: the TSVserialiser object for the project file
  * @param fileVersion :: the version of the project file
  */
-void ProjectSerialiser::loadSubFolders(const TSVSerialiser &tsv, const int fileVersion)
-{
+void ProjectSerialiser::loadSubFolders(const TSVSerialiser &tsv,
+                                       const int fileVersion) {
   if (tsv.hasSection("folder")) {
     auto folders = tsv.sections("folder");
     for (auto &it : folders) {
@@ -192,8 +191,8 @@ void ProjectSerialiser::loadSubFolders(const TSVSerialiser &tsv, const int fileV
  * @param tsv :: the TSVserialiser object for the project file
  * @param fileVersion :: the version of the project file
  */
-void ProjectSerialiser::loadScriptWindow(const TSVSerialiser &tsv, const int fileVersion)
-{
+void ProjectSerialiser::loadScriptWindow(const TSVSerialiser &tsv,
+                                         const int fileVersion) {
   if (tsv.hasSection("scriptwindow")) {
     auto scriptSections = tsv.sections("scriptwindow");
     for (auto &it : scriptSections) {
@@ -207,8 +206,7 @@ void ProjectSerialiser::loadScriptWindow(const TSVSerialiser &tsv, const int fil
  *
  * @param tsv :: the TSVserialiser object for the project file
  */
-void ProjectSerialiser::loadLogData(const TSVSerialiser &tsv)
-{
+void ProjectSerialiser::loadLogData(const TSVSerialiser &tsv) {
   if (tsv.hasSection("log")) {
     auto logSections = tsv.sections("log");
     for (auto &it : logSections) {
@@ -222,8 +220,7 @@ void ProjectSerialiser::loadLogData(const TSVSerialiser &tsv)
  *
  * @param tsv :: the TSVserialiser object for the project file
  */
-void ProjectSerialiser::loadCurrentFolder(const TSVSerialiser &tsv)
-{
+void ProjectSerialiser::loadCurrentFolder(const TSVSerialiser &tsv) {
   if (tsv.hasSection("open")) {
     std::string openStr = tsv.sections("open").front();
     int openValue = 0;

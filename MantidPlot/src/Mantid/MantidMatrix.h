@@ -82,20 +82,19 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 */
-class MantidMatrix : public MdiSubWindow,
-                     MantidQt::API::WorkspaceObserver {
+class MantidMatrix : public MdiSubWindow, MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 
 public:
-  MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
-               QWidget *parent, const QString &label,
-               const QString &name = QString(), int start = -1, int end = -1);
+  MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, QWidget *parent,
+               const QString &label, const QString &name = QString(),
+               int start = -1, int end = -1);
 
   MantidMatrix();
 
-  void init(Mantid::API::MatrixWorkspace_const_sptr ws,
-            QWidget *parent, const QString &label,
-            const QString &name = QString(), int start = -1, int end = -1);
+  void init(Mantid::API::MatrixWorkspace_const_sptr ws, QWidget *parent,
+            const QString &label, const QString &name = QString(),
+            int start = -1, int end = -1);
 
   void connectTableView(QTableView *, MantidMatrixModel *);
   MantidMatrixModel *model() { return m_modelY; }

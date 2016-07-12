@@ -52,7 +52,8 @@ public slots:
 
 private:
   MantidQt::MantidWidgets::InstrumentWidget *m_instrumentWidget;
-  void init(const QString &wsName, const QString &label, ApplicationWindow *parent, const QString &name);
+  void init(const QString &wsName, const QString &label,
+            ApplicationWindow *parent, const QString &name);
 };
 
 #endif // INSTRUMENTWINDOW_H

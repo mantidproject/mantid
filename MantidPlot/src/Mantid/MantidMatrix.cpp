@@ -87,11 +87,9 @@ int modelTypeToInt(MantidMatrixModel::Type type) {
 
 MantidMatrix::MantidMatrix()
     : MdiSubWindow(), WorkspaceObserver(), m_workspace(nullptr), y_start(0.0),
-      y_end(0.0), m_histogram(false), m_min(0),
-      m_max(0), m_are_min_max_set(false), m_boundingRect(),
-      m_strName(), m_selectedRows(), m_selectedCols() {
-
-}
+      y_end(0.0), m_histogram(false), m_min(0), m_max(0),
+      m_are_min_max_set(false), m_boundingRect(), m_strName(), m_selectedRows(),
+      m_selectedCols() {}
 
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
                            QWidget *parent, const QString &label,
@@ -100,12 +98,12 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
       m_workspace(ws), y_start(0.0), y_end(0.0), m_histogram(false), m_min(0),
       m_max(0), m_are_min_max_set(false), m_boundingRect(),
       m_strName(name.toStdString()), m_selectedRows(), m_selectedCols() {
-    init(ws, parent, label, name, start, end);
+  init(ws, parent, label, name, start, end);
 }
 
 void MantidMatrix::init(Mantid::API::MatrixWorkspace_const_sptr ws,
-                           QWidget *parent, const QString &label,
-                           const QString &name, int start, int end) {
+                        QWidget *parent, const QString &label,
+                        const QString &name, int start, int end) {
 
   MdiSubWindow::init(parent, label, name, 0);
   m_workspace = ws;
@@ -1101,7 +1099,7 @@ QChar MantidMatrix::numberFormat() { return activeModel()->format(); }
 int MantidMatrix::precision() { return activeModel()->precision(); }
 
 void MantidMatrix::setMatrixProperties() {
-  QWidget* parent = parentWidget();
+  QWidget *parent = parentWidget();
   MantidMatrixDialog dlg(parent);
   dlg.setMatrix(this);
   dlg.exec();
@@ -1208,16 +1206,16 @@ void MantidMatrix::loadFromProject(const std::string &lines,
   TSVSerialiser tsv(lines);
 
   if (tsv.selectLine("WorkspaceName")) {
-      const std::string wsName = tsv.asString(1);
-      MatrixWorkspace_sptr ws;
+    const std::string wsName = tsv.asString(1);
+    MatrixWorkspace_sptr ws;
 
-      if (AnalysisDataService::Instance().doesExist(wsName))
-          ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    if (AnalysisDataService::Instance().doesExist(wsName))
+      ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
-      if (!ws)
-          return;
+    if (!ws)
+      return;
 
-      init(ws, app, "Mantid", QString::fromStdString(wsName), -1, -1);
+    init(ws, app, "Mantid", QString::fromStdString(wsName), -1, -1);
   }
 
   // Append to the list of mantid matrix apps

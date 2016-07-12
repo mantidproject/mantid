@@ -47,6 +47,7 @@ public:
   ScriptingEnv *scriptingEnv() { return m_scriptEnv; }
   /// Initilise an uninilised scripting enviroment
   void init(ScriptingEnv *env);
+
 private:
   /// A pointer to the current environment
   ScriptingEnv *m_scriptEnv;

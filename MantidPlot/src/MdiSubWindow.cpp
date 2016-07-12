@@ -51,20 +51,23 @@ using std::string;
 MdiSubWindow::MdiSubWindow(QWidget *parent, const QString &label,
                            const QString &name, Qt::WFlags f)
     : MdiSubWindowParent_t(parent, f),
-      d_app(static_cast<ApplicationWindow *>(parent)), d_folder(d_app->currentFolder()), d_label(label),
-      d_status(Normal), d_caption_policy(Both), d_confirm_close(true),
+      d_app(static_cast<ApplicationWindow *>(parent)),
+      d_folder(d_app->currentFolder()), d_label(label), d_status(Normal),
+      d_caption_policy(Both), d_confirm_close(true),
       d_birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)),
       d_min_restore_size(QSize()) {
-    init(parent, label, name, f);
+  init(parent, label, name, f);
 }
 
-MdiSubWindow::MdiSubWindow() : MdiSubWindowParent_t(nullptr, 0), d_app(nullptr), d_folder(nullptr),
-    d_label(""), d_status(Normal), d_caption_policy(Both), d_confirm_close(true),
-    d_birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)), d_min_restore_size(QSize()) {
+MdiSubWindow::MdiSubWindow()
+    : MdiSubWindowParent_t(nullptr, 0), d_app(nullptr), d_folder(nullptr),
+      d_label(""), d_status(Normal), d_caption_policy(Both),
+      d_confirm_close(true),
+      d_birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)),
+      d_min_restore_size(QSize()) {}
 
-}
-
-void MdiSubWindow::init(QWidget *parent, const QString &label, const QString &name, Qt::WFlags flags) {
+void MdiSubWindow::init(QWidget *parent, const QString &label,
+                        const QString &name, Qt::WFlags flags) {
   setParent(parent);
   setObjectName(name);
   setName(name);
@@ -83,7 +86,7 @@ void MdiSubWindow::init(QWidget *parent, const QString &label, const QString &na
             SLOT(changeToDocked(MdiSubWindow *)));
     connect(this, SIGNAL(undockFromMDIArea(MdiSubWindow *)), parent,
             SLOT(changeToFloating(MdiSubWindow *)));
-    }
+  }
 }
 void MdiSubWindow::updateCaption() {
   switch (d_caption_policy) {
@@ -113,22 +116,22 @@ void MdiSubWindow::updateCaption() {
   emit captionChanged(objectName(), d_label);
 }
 
-void MdiSubWindow::setLabel(const QString &label) {
-    d_label = label;
+void MdiSubWindow::setLabel(const QString &label) { d_label = label; }
+
+void MdiSubWindow::loadFromProject(const std::string &lines,
+                                   ApplicationWindow *app,
+                                   const int fileVersion) {
+  Q_UNUSED(lines);
+  Q_UNUSED(app);
+  Q_UNUSED(fileVersion);
+  throw std::runtime_error(
+      "LoadToProject not implemented for raw MdiSubWindow");
 }
 
-void MdiSubWindow::loadFromProject(const std::string &lines, ApplicationWindow *app, const int fileVersion)
-{
-    Q_UNUSED(lines);
-    Q_UNUSED(app);
-    Q_UNUSED(fileVersion);
-   throw std::runtime_error("LoadToProject not implemented for raw MdiSubWindow");
-}
-
-std::string MdiSubWindow::saveToProject(ApplicationWindow *app)
-{
-   Q_UNUSED(app);
-   throw std::runtime_error("SaveToProject not implemented for raw MdiSubWindow");
+std::string MdiSubWindow::saveToProject(ApplicationWindow *app) {
+  Q_UNUSED(app);
+  throw std::runtime_error(
+      "SaveToProject not implemented for raw MdiSubWindow");
 }
 
 void MdiSubWindow::resizeEvent(QResizeEvent *e) {

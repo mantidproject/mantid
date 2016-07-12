@@ -50,8 +50,8 @@ public:
   Note();
   ~Note() override{};
 
-  void init(const QString &label, QWidget *parent, const QString &name = QString(),
-       Qt::WFlags f = 0);
+  void init(const QString &label, QWidget *parent,
+            const QString &name = QString(), Qt::WFlags f = 0);
   void loadFromProject(const std::string &lines, ApplicationWindow *app,
                        const int fileVersion) override;
   std::string saveToProject(ApplicationWindow *app) override;
@@ -71,7 +71,6 @@ public slots:
   QString exportASCII(const QString &filename = QString::null);
 
 private:
-
   QTextEdit *te;
 };
 

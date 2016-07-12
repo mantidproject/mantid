@@ -130,7 +130,8 @@ public:
   MdiSubWindow();
 
   /// Setup the window without constructor
-  void init(QWidget *parent, const QString &label, const QString &name, Qt::WFlags flags);
+  void init(QWidget *parent, const QString &label, const QString &name,
+            Qt::WFlags flags);
 
   //! Possible window captions.
   enum CaptionPolicy {
@@ -277,7 +278,7 @@ public: // non-slot methods
   void setLabel(const QString &label);
   /// Loads the given lines from the project file and applies them.
   void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                               const int fileVersion) override;
+                       const int fileVersion) override;
   /// Serialises to a string that can be saved to a project file.
   std::string saveToProject(ApplicationWindow *app) override;
 signals:
@@ -319,7 +320,7 @@ private:
   /// Store the pointer to the ApplicationWindow
   ApplicationWindow *d_app;
   /// Store the pointer to the Folder
-  Folder* d_folder;
+  Folder *d_folder;
 
   //! The window label
   /**
@@ -352,10 +353,10 @@ typedef QList<MdiSubWindow *> MDIWindowList;
  */
 #define DECLARE_WINDOW_WITH_NAME(classname, username)                          \
   namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_window_##username(               \
-      ((Mantid::API::WindowFactory::Instance().subscribe<classname>(           \
-           #username)),                                                        \
-       0));                                                                    \
+  Mantid::Kernel::RegistrationHelper                                           \
+      register_window_##username(((Mantid::API::WindowFactory::Instance()      \
+                                       .subscribe<classname>(#username)),      \
+                                  0));                                         \
   }
 
 // Helper macro to subscribe a class to the factory with the same name as the

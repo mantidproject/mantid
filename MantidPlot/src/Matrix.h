@@ -61,8 +61,7 @@ class QShortcut;
 class QUndoStack;
 
 //! Matrix worksheet class
-class Matrix : public MdiSubWindow,
-               public Scripted {
+class Matrix : public MdiSubWindow, public Scripted {
   Q_OBJECT
 
 protected:
@@ -82,17 +81,16 @@ public:
 ::    * @param name :: window name
    * @param f :: window flags
    */
-  Matrix(ScriptingEnv *env, int r, int c, const QString &label,
-         QWidget *parent, const QString &name = QString(),
-         Qt::WFlags f = 0);
+  Matrix(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent,
+         const QString &name = QString(), Qt::WFlags f = 0);
   Matrix(ScriptingEnv *env, const QImage &image, const QString &label,
-         QWidget *parent, const QString &name = QString(),
-         Qt::WFlags f = 0);
+         QWidget *parent, const QString &name = QString(), Qt::WFlags f = 0);
   Matrix();
   ~Matrix() override;
 
   /// Initilise and uninitilised instance of Matrix
-  void init(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent, const QString &name, Qt::WFlags f = 0);
+  void init(ScriptingEnv *env, int r, int c, const QString &label,
+            QWidget *parent, const QString &name, Qt::WFlags f = 0);
 
   enum Operation {
     Transpose,

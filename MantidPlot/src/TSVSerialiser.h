@@ -90,8 +90,10 @@ public:
   void writeInlineSection(const std::string &name, const std::string &body);
 
 private:
-  std::map<std::string, std::vector<std::string>, CaseInsensitiveStringComparator> m_sections;
-  std::map<std::string, std::vector<std::string>, CaseInsensitiveStringComparator> m_lines;
+  std::map<std::string, std::vector<std::string>,
+           CaseInsensitiveStringComparator> m_sections;
+  std::map<std::string, std::vector<std::string>,
+           CaseInsensitiveStringComparator> m_lines;
 
   std::vector<std::string> m_curValues;
   int m_curIndex;
