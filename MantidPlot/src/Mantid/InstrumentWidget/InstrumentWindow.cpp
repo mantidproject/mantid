@@ -13,7 +13,7 @@
 #include <MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h>
 
 // Register the window into the WindowFactory
-DECLARE_WINDOW(InstrumentWindow, InstrumentWindow)
+DECLARE_WINDOW(InstrumentWindow)
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;

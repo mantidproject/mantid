@@ -74,7 +74,7 @@
 #include "TSVSerialiser.h"
 
 // Register the window into the WindowFactory
-DECLARE_WINDOW(MultiLayer, MultiLayer)
+DECLARE_WINDOW(MultiLayer)
 
 namespace {
 /// static logger
@@ -1772,7 +1772,6 @@ void MultiLayer::loadFromProject(const std::string &lines,
   Mantid::Kernel::Strings::convert<int>(values[2], cols);
   QString birthDate = QString::fromStdString(values[3]);
 
-  // create instance
   QString label = caption;
 
   init(app, 0, rows, cols);

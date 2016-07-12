@@ -43,7 +43,7 @@
 #include <boost/algorithm/string.hpp>
 
 // Register the window into the WindowFactory
-DECLARE_WINDOW(TableStatistics, TableStatistics)
+DECLARE_WINDOW(TableStatistics)
 
 TableStatistics::TableStatistics(ScriptingEnv *env, QWidget *parent,
                                  Table *base, Type t, QList<int> targets)

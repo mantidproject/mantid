@@ -350,13 +350,16 @@ typedef QList<MdiSubWindow *> MDIWindowList;
  * is used in the call to its constructor to effect a call to the factory's
  * subscribe method.
  */
-#define DECLARE_WINDOW(classname, username)                                    \
+#define DECLARE_WINDOW_WITH_NAME(classname, username)                          \
   namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_window_##classname(              \
-      ((Mantid::API::WindowFactory::Instance().subscribe<classname>(     \
+  Mantid::Kernel::RegistrationHelper register_window_##username(               \
+      ((Mantid::API::WindowFactory::Instance().subscribe<classname>(           \
            #username)),                                                        \
        0));                                                                    \
   }
 
+// Helper macro to subscribe a class to the factory with the same name as the
+// class name
+#define DECLARE_WINDOW(classname) DECLARE_WINDOW_WITH_NAME(classname, classname)
 
 #endif

@@ -58,7 +58,9 @@
 #include <fstream>
 
 // Register the window into the WindowFactory
-DECLARE_WINDOW(Graph3D, SurfacePlot)
+DECLARE_WINDOW(Graph3D)
+// Mantid project file format expects a Graph3D to be called SurfacePlot
+DECLARE_WINDOW_WITH_NAME(Graph3D, SurfacePlot)
 
 using namespace Qwt3D;
 using namespace MantidQt::API;
