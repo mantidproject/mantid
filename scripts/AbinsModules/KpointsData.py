@@ -18,13 +18,15 @@ class KpointsData(GeneralData):
     Each entry in the dictionary corresponds to all k-points. Each item in the dictionary is a numpy array. The meaning
     of keys in the dictionary is as follows:
 
-    "weights" - weights of all k-points; weights.shape == (self._num_k,)
+    "weights" - weights of all k-points; weights.shape == (self._num_k,);
 
     "k_vectors"  - k_vectors of all k-points;  k_vectors.shape == (self._num_k, 3)
 
     "frequencies" - frequencies for all k-points; frequencies.shape == (self._num_k, self._num_freq)
 
-    "atomic_displacements - atomic displacements for all k-points; atomic_displacements.shape == (self._num_k, self._num_displacements, 3)
+    "atomic_displacements - atomic displacements for all k-points; atomic_displacements.shape == (self._num_k, self._num_atoms, self._num_freq, 3)
+
+
     """
 
     def __init__(self, num_k=None, num_atoms=None):
