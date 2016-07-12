@@ -61,6 +61,7 @@ set ( TEST_PY_FILES
       test/ABINSKpointsDataTest.py
       test/ABINSAtomsDataTest.py
       test/ABINSDwDataTest.py
+      test/ABINSCalculateDWTest.py
       )
 
 

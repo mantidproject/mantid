@@ -4,7 +4,6 @@ from os import path
 import simplejson as json
 import numpy as np
 
-from AbinsModules import IOmodule
 from AbinsModules import LoadCASTEP
 
 class ABINSLoadCASTEPTest(unittest.TestCase):

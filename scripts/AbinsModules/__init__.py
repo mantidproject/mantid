@@ -25,6 +25,7 @@ from IOmodule import  IOmodule
 from GeneralDFTProgram import GeneralDFTProgram
 from LoadCASTEP import LoadCASTEP
 from CalculateQ import CalculateQ
+from CalculateDW import CalculateDW
 
 # Data
 from GeneralData import GeneralData
