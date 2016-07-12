@@ -23,7 +23,8 @@ public:
   SpectrumNumberTranslator makeTranslator(int ranks, int rank) {
     auto numbers = {2, 1, 4, 5};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
-    return {spectrumNumbers, RoundRobinPartitioning(ranks), PartitionIndex(rank)};
+    return {spectrumNumbers, RoundRobinPartitioning(ranks),
+            PartitionIndex(rank)};
   }
 
   std::vector<SpectrumNumber>
@@ -34,8 +35,6 @@ public:
   template <class... T>
   std::vector<SpectrumNumber> makeSpectrumNumbers(T &&... args) {
     return std::vector<SpectrumNumber>(std::forward<T>(args)...);
-    // std::vector<int64_t> numbers(std::forward<T>(args)...);
-    // return std::vector<SpectrumNumber>(numbers.begin(), numbers.end());
   }
 
   void test_construct() {
