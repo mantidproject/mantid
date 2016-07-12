@@ -102,7 +102,8 @@ private:
                            std::vector<int32_t> &detectors,
                            std::vector<int32_t> &detectorpairslow,
                            std::vector<int32_t> &detectorpairsup);
-  void processMaskOnDetectors(bool tomask, std::vector<int32_t> singledetids,
+  void processMaskOnDetectors(const detid2index_map &indexmap, 
+                              bool tomask, std::vector<int32_t> singledetids,
                               std::vector<int32_t> pairdetids_low,
                               std::vector<int32_t> pairdetids_up);
   /// Convert spectrum to detector

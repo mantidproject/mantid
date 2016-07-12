@@ -153,12 +153,20 @@ void LoadMask::exec() {
 
   // 4. Apply
   this->initDetectors();
-  this->processMaskOnDetectors(true, maskdetids, maskdetidpairsL,
+  detid2index_map indexmap;
+  if (m_sourceMapWS) {
+      indexmap = m_sourceMapWS->getDetectorIDToWorkspaceIndexMap(false);
+  }
+  else {
+      indexmap = m_maskWS->getDetectorIDToWorkspaceIndexMap(true);
+  }
+
+  this->processMaskOnDetectors(indexmap,true, maskdetids, maskdetidpairsL,
                                maskdetidpairsU);
   this->processMaskOnWorkspaceIndex(true, mask_specid_pair_low,
                                     mask_specid_pair_up);
 
-  this->processMaskOnDetectors(false, unmaskdetids, unmaskdetidpairsL,
+  this->processMaskOnDetectors(indexmap,false, unmaskdetids, unmaskdetidpairsL,
                                unmaskdetidpairsU);
 
   return;
@@ -183,39 +191,37 @@ void LoadMask::initDetectors() {
  *   @param pairdetids_low: list of lower bound of det ids to mask
  *   @param pairdetids_up: list of upper bound of det ids to mask
  */
-void LoadMask::processMaskOnDetectors(bool tomask,
-                                      std::vector<int32_t> singledetids,
-                                      std::vector<int32_t> pairdetids_low,
-                                      std::vector<int32_t> pairdetids_up) {
-  // 1. Get index map
-  const detid2index_map indexmap =
-      m_maskWS->getDetectorIDToWorkspaceIndexMap(true);
+void LoadMask::processMaskOnDetectors(const detid2index_map &indexmap, bool tomask,
+    std::vector<int32_t> singledetids,
+    std::vector<int32_t> pairdetids_low,
+    std::vector<int32_t> pairdetids_up) {
+    // 1. Get index map
+    // 2. Mask
+    g_log.debug() << "Mask = " << tomask
+        << "  Final Single IDs Size = " << singledetids.size() << '\n';
 
-  // 2. Mask
-  g_log.debug() << "Mask = " << tomask
-                << "  Final Single IDs Size = " << singledetids.size() << '\n';
-
-  for (auto detid : singledetids) {
-    detid2index_map::const_iterator it;
-    it = indexmap.find(detid);
-    if (it != indexmap.end()) {
-      size_t index = it->second;
-      if (tomask)
-        m_maskWS->dataY(index)[0] = 1;
-      else
-        m_maskWS->dataY(index)[0] = 0;
-    } else {
-      g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located\n";
+    for (auto detid : singledetids) {
+        detid2index_map::const_iterator it;
+        it = indexmap.find(detid);
+        if (it != indexmap.end()) {
+            size_t index = it->second;
+            if (tomask)
+                m_maskWS->dataY(index)[0] = 1;
+            else
+                m_maskWS->dataY(index)[0] = 0;
+        }
+        else {
+            g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located\n";
+        }
     }
-  }
 
-  // 3. Mask pairs
-  for (size_t i = 0; i < pairdetids_low.size(); ++i) {
-    g_log.error() << "To Be Implemented Soon For Pair (" << pairdetids_low[i]
-                  << ", " << pairdetids_up[i] << "!\n";
-  }
+    // 3. Mask pairs
+    for (size_t i = 0; i < pairdetids_low.size(); ++i) {
+        g_log.error() << "To Be Implemented Soon For Pair (" << pairdetids_low[i]
+            << ", " << pairdetids_up[i] << "!\n";
+    }
 
-  return;
+    return;
 }
 
 //----------------------------------------------------------------------------------------------
