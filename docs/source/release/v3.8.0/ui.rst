@@ -31,6 +31,7 @@ Algorithms
 .. figure::  ../../images/GroupWorkspaces_multipleInput.png
    :width: 487
    :align: right
+
 - Algorithms can now use a multiple selection list box for property input, :ref:`MergeRuns <algm-MergeRuns>` and :ref:`GroupWorkspaces <algm-GroupWorkspaces>` use this so far. To select multiple rows use the Shift or Ctrl (Cmd) keys while clicking  with the mouse.
 
 
@@ -45,7 +46,8 @@ Progress Reporting
 
 Documentation
 #############
-* Added Ragged Workspace as a concept page
+
+- Added Ragged Workspace as a concept page
 
 
 Bugs Resolved
@@ -53,8 +55,9 @@ Bugs Resolved
 
 SliceViewer Improvements
 ------------------------
-* When opening the sliceviewer, it will default to showing the first two non-integrated dimensions
-|
+
+- When opening the sliceviewer, it will default to showing the first two non-integrated dimensions
+
 
 Full list of
 `GUI <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+GUI%22>`_
