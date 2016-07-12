@@ -18,29 +18,25 @@ public:
   static void destroySuite(RoundRobinPartitioningTest *suite) { delete suite; }
 
   void test_constructor_failures() {
-    TS_ASSERT_THROWS(RoundRobinPartitioning(-1, 0), std::logic_error);
-    TS_ASSERT_THROWS(RoundRobinPartitioning(0, 0), std::logic_error);
-    TS_ASSERT_THROWS(RoundRobinPartitioning(1, -1), std::logic_error);
-    TS_ASSERT_THROWS(RoundRobinPartitioning(1, 1), std::logic_error);
+    TS_ASSERT_THROWS(RoundRobinPartitioning(-1), std::logic_error);
+    TS_ASSERT_THROWS(RoundRobinPartitioning(0), std::logic_error);
   }
 
   void test_1_rank() {
-    RoundRobinPartitioning partitioning(1, 0);
+    RoundRobinPartitioning partitioning(1);
     TS_ASSERT_EQUALS(partitioning.numberOfPartitions(), 1);
-    TS_ASSERT_EQUALS(partitioning.partitionIndex(), 0);
-    TS_ASSERT_EQUALS(partitioning.partitionIndexOf(SpectrumNumber(0)), 0);
-    TS_ASSERT_EQUALS(partitioning.partitionIndexOf(SpectrumNumber(1)), 0);
-    TS_ASSERT_EQUALS(partitioning.partitionIndexOf(SpectrumNumber(2)), 0);
+    TS_ASSERT_EQUALS(partitioning.indexOf(SpectrumNumber(0)), 0);
+    TS_ASSERT_EQUALS(partitioning.indexOf(SpectrumNumber(1)), 0);
+    TS_ASSERT_EQUALS(partitioning.indexOf(SpectrumNumber(2)), 0);
   }
 
   void test_3_ranks() {
-    RoundRobinPartitioning partitioning(3, 1);
+    RoundRobinPartitioning partitioning(3);
     TS_ASSERT_EQUALS(partitioning.numberOfPartitions(), 3);
-    TS_ASSERT_EQUALS(partitioning.partitionIndex(), 1);
-    TS_ASSERT_EQUALS(partitioning.partitionIndexOf(SpectrumNumber(0)), 0);
-    TS_ASSERT_EQUALS(partitioning.partitionIndexOf(SpectrumNumber(1)), 1);
-    TS_ASSERT_EQUALS(partitioning.partitionIndexOf(SpectrumNumber(2)), 2);
-    TS_ASSERT_EQUALS(partitioning.partitionIndexOf(SpectrumNumber(3)), 0);
+    TS_ASSERT_EQUALS(partitioning.indexOf(SpectrumNumber(0)), 0);
+    TS_ASSERT_EQUALS(partitioning.indexOf(SpectrumNumber(1)), 1);
+    TS_ASSERT_EQUALS(partitioning.indexOf(SpectrumNumber(2)), 2);
+    TS_ASSERT_EQUALS(partitioning.indexOf(SpectrumNumber(3)), 0);
   }
 };
 

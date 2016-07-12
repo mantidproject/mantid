@@ -40,15 +40,18 @@ namespace Indexing {
 class MANTID_INDEXING_DLL SpectrumNumberTranslator {
 public:
   SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers,
-                           const Partitioning &partitioning)
-      : m_partition(partitioning.partitionIndex()) {
+                           const Partitioning &partitioning,
+                           const PartitionIndex &partition)
+      : m_partition(partition) {
+    partitioning.checkValid(m_partition);
+
     size_t currentIndex = 0;
     for (size_t i = 0; i < spectrumNumbers.size(); ++i) {
       auto number = spectrumNumbers[i];
-      auto partition = partitioning.partitionIndexOf(number);
-      m_partitions[number] = partition;
+      auto partition = partitioning.indexOf(number);
+      m_partitions.emplace(number, partition);
       if (partition == m_partition)
-        m_indices[number] = currentIndex++;
+        m_indices.emplace(number, currentIndex++);
     }
   }
 
@@ -80,8 +83,9 @@ private:
     }
   };
 
-  int m_partition;
-  std::unordered_map<SpectrumNumber, int, SpectrumNumberHash> m_partitions;
+  const PartitionIndex m_partition;
+  std::unordered_map<SpectrumNumber, PartitionIndex, SpectrumNumberHash>
+      m_partitions;
   std::unordered_map<SpectrumNumber, size_t, SpectrumNumberHash> m_indices;
 };
 

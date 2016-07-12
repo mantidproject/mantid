@@ -23,7 +23,7 @@ public:
   SpectrumNumberTranslator makeTranslator(int ranks, int rank) {
     auto numbers = {2, 1, 4, 5};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
-    return {spectrumNumbers, RoundRobinPartitioning(ranks, rank)};
+    return {spectrumNumbers, RoundRobinPartitioning(ranks), PartitionIndex(rank)};
   }
 
   std::vector<SpectrumNumber>
@@ -42,7 +42,7 @@ public:
     auto numbers = {1, 2, 3, 4};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(
-        spectrumNumbers, RoundRobinPartitioning(1, 0)));
+        spectrumNumbers, RoundRobinPartitioning(1), PartitionIndex(0)));
   }
 
   void test_makeIndexSet_full_1_rank() {

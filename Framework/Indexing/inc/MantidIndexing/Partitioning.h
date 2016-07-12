@@ -2,6 +2,7 @@
 #define MANTID_INDEXING_PARTITIONING_H_
 
 #include "MantidIndexing/DllConfig.h"
+#include "MantidIndexing/PartitionIndex.h"
 #include "MantidIndexing/SpectrumNumber.h"
 
 namespace Mantid {
@@ -38,8 +39,11 @@ public:
   virtual ~Partitioning() = default;
 
   virtual int numberOfPartitions() const = 0;
-  virtual int partitionIndex() const = 0;
-  virtual int partitionIndexOf(const SpectrumNumber &spectrumNumber) const = 0;
+  virtual PartitionIndex
+  indexOf(const SpectrumNumber &spectrumNumber) const = 0;
+
+  bool isValid(const PartitionIndex &index) const;
+  void checkValid(const PartitionIndex &index) const;
 };
 
 } // namespace Indexing

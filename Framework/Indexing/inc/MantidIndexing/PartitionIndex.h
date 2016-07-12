@@ -1,18 +1,12 @@
-#ifndef MANTID_INDEXING_ROUNDROBINPARTITIONING_H_
-#define MANTID_INDEXING_ROUNDROBINPARTITIONING_H_
+#ifndef MANTID_INDEXING_PARTITIONINDEX_H_
+#define MANTID_INDEXING_PARTITIONINDEX_H_
 
 #include "MantidIndexing/DllConfig.h"
-#include "MantidIndexing/Partitioning.h"
-
-#include <stdexcept>
 
 namespace Mantid {
 namespace Indexing {
 
-/** RoundRobinPartitioning : TODO: DESCRIPTION
-
-  @author Simon Heybrock
-  @date 2016
+/** PartitionIndex : TODO: DESCRIPTION
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -35,26 +29,23 @@ namespace Indexing {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_INDEXING_DLL RoundRobinPartitioning : public Partitioning {
+class MANTID_INDEXING_DLL PartitionIndex {
 public:
-  explicit RoundRobinPartitioning(int numberOfPartitions)
-      : m_partitions(numberOfPartitions) {
-    if (m_partitions < 1)
-      throw std::logic_error(
-          "RoundRobinPartitioning: There must be at least 1 partition");
+  explicit PartitionIndex(int index) noexcept : m_index(index) {}
+  operator int() const noexcept { return m_index; }
+  template <class T> bool operator==(const T &other) const noexcept {
+    return m_index == PartitionIndex(other).m_index;
   }
-
-  int numberOfPartitions() const override { return m_partitions; }
-  PartitionIndex indexOf(const SpectrumNumber &spectrumNumber) const override {
-    return PartitionIndex(
-        static_cast<int>(static_cast<int64_t>(spectrumNumber) % m_partitions));
+  template <class T> bool operator!=(const T &other) const noexcept {
+    return m_index != PartitionIndex(other).m_index;
   }
 
 private:
-  int m_partitions;
+  /// Partition index. This is an int since it is used as MPI rank.
+  int m_index;
 };
 
 } // namespace Indexing
 } // namespace Mantid
 
-#endif /* MANTID_INDEXING_ROUNDROBINPARTITIONING_H_ */
+#endif /* MANTID_INDEXING_PARTITIONINDEX_H_ */
