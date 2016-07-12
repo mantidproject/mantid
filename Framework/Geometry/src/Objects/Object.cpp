@@ -22,6 +22,7 @@
 
 #include <boost/make_shared.hpp>
 
+#include <array>
 #include <deque>
 #include <iostream>
 #include <stack>
@@ -1833,17 +1834,11 @@ int Object::searchForObject(Kernel::V3D &point) const {
   Kernel::V3D testPt;
   if (isValid(point))
     return 1;
-  std::vector<Kernel::V3D> axes;
-  axes.reserve(6);
-  axes.emplace_back(1, 0, 0);
-  axes.emplace_back(-1, 0, 0);
-  axes.emplace_back(0, 1, 0);
-  axes.emplace_back(0, -1, 0);
-  axes.emplace_back(0, 0, 1);
-  axes.emplace_back(0, 0, -1);
-  std::vector<Kernel::V3D>::const_iterator dir;
-  for (dir = axes.begin(); dir != axes.end(); ++dir) {
-    Geometry::Track tr(point, (*dir));
+  std::array<Kernel::V3D, 6> axes = {{V3D(1., 0., 0.), V3D(-1., 0., 0.),
+                                      V3D(0., 1., 0.), V3D(0., -1., 0.),
+                                      V3D(0., 0., 1.), V3D(0., 0., -1.)}};
+  for (const auto &dir : axes) {
+    Geometry::Track tr(point, dir);
     if (this->interceptSurface(tr) > 0) {
       point = tr.cbegin()->entryPoint;
       return 1;
