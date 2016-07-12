@@ -23,7 +23,7 @@ public:
 #pragma clang diagnostic ignored "-Wunused-value"
 #endif
     TS_ASSERT_THROWS_NOTHING(
-        (dynamic_cast<detail::IndexType<SpectrumNumber, int64_t> &>(data)));
+        (dynamic_cast<detail::IndexType<SpectrumNumber, int32_t> &>(data)));
 #if __clang__
 #pragma clang diagnostic pop
 #endif

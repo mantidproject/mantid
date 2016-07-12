@@ -34,9 +34,9 @@ namespace Indexing {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 struct MANTID_INDEXING_DLL SpectrumNumber
-    : public detail::IndexType<SpectrumNumber, int64_t> {
-  using detail::IndexType<SpectrumNumber, int64_t>::IndexType;
-  using detail::IndexType<SpectrumNumber, int64_t>::operator=;
+    : public detail::IndexType<SpectrumNumber, int32_t> {
+  using detail::IndexType<SpectrumNumber, int32_t>::IndexType;
+  using detail::IndexType<SpectrumNumber, int32_t>::operator=;
 };
 
 } // namespace Indexing

@@ -47,7 +47,7 @@ public:
   int numberOfPartitions() const override { return m_partitions; }
   PartitionIndex indexOf(const SpectrumNumber &spectrumNumber) const override {
     return PartitionIndex(
-        static_cast<int>(static_cast<int64_t>(spectrumNumber) % m_partitions));
+        static_cast<int>(static_cast<int32_t>(spectrumNumber) % m_partitions));
   }
 
 private:
