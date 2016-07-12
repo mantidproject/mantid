@@ -8,7 +8,7 @@ class InstrumentProducer(object):
     def produceInstrument(self, name=None):
 
         if not name in Constants.all_instruments:
-            raise ValueError("Inknown instrument: %s"%name)
+            raise ValueError("Unknown instrument: %s"%name)
         elif name == "TOSCA":
             return ToscaInstrument("TOSCA")
 

@@ -21,4 +21,5 @@ class ToscaInstrument(InstrumentInterface):
         @param frequencies:   frequencies for which resolution function should be calculated
 
        """
+
         return None
