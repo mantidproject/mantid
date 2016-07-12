@@ -317,10 +317,13 @@ public:
     TS_ASSERT(data);
     TS_ASSERT(image);
 
+    // Test number of histograms and bins
     TS_ASSERT_EQUALS(data->blocksize(), npoints * 3);
     TS_ASSERT_EQUALS(image->blocksize(), npoints * 3);
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(image->getNumberHistograms(), 2);
+    // Check that all X bins have been populated
+    TS_ASSERT_EQUALS(data->readX(0).size(), data->readY(0).size());
 
     // Test some values
     TS_ASSERT_DELTA(image->readY(0)[70], 6.3410, 0.0001);

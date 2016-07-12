@@ -759,14 +759,19 @@ void MaxEnt::populateDataWS(const MatrixWorkspace_sptr &inWS, size_t spec,
 
   int npoints = complex ? static_cast<int>(result.size() / 2)
                         : static_cast<int>(result.size());
-  int npointsX = static_cast<int>(inWS->readX(spec).size());
+  int npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
   MantidVec X(npointsX);
   MantidVec YR(npoints);
   MantidVec YI(npoints);
   MantidVec E(npoints, 0.);
 
+  double x0 = inWS->readX(spec)[0];
+  double dx = inWS->readX(spec)[1] - x0;
+
   // X values
-  X = inWS->readX(spec);
+  for (int i = 0; i < npointsX; i++) {
+    X[i] = x0 + i * dx;
+  }
 
   // Y values
   if (complex) {
