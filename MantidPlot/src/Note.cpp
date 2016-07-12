@@ -54,7 +54,7 @@ Note::Note(const QString &label, QWidget *parent, const QString &name,
   init(label, parent, name, f);
 }
 
-Note::Note() : MdiSubWindow() {}
+Note::Note() : MdiSubWindow(), te(nullptr) {}
 
 void Note::init(const QString &label, QWidget *parent, const QString &name,
                 Qt::WFlags f) {

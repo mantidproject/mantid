@@ -25,7 +25,7 @@ InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
   init(wsName, label, parent, name);
 }
 
-InstrumentWindow::InstrumentWindow() : MdiSubWindow() {}
+InstrumentWindow::InstrumentWindow() : MdiSubWindow(), m_instrumentWidget(nullptr) {}
 
 InstrumentWindow::~InstrumentWindow() {}
 

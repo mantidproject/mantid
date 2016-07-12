@@ -113,13 +113,15 @@ MultiLayer::MultiLayer(QWidget *parent, int layers, int rows, int cols,
 }
 
 MultiLayer::MultiLayer()
-    : MdiSubWindow(), active_graph(NULL), d_cols(0), d_rows(0),
+    : MdiSubWindow(),
+       active_graph(nullptr),d_cols(0), d_rows(0),
       graph_width(500), graph_height(400), colsSpace(5), rowsSpace(5),
       left_margin(5), right_margin(5), top_margin(5), bottom_margin(5),
       l_canvas_width(400), l_canvas_height(300), hor_align(HCenter),
       vert_align(VCenter), d_scale_on_print(true), d_print_cropmarks(false),
-      d_close_on_empty(false), d_is_waterfall_plot(false),
-      d_waterfall_fill_color(/*Invalid color*/) {}
+      layerButtonsBox(nullptr),waterfallBox(nullptr),
+      buttonsLine(nullptr),canvas(nullptr), d_close_on_empty(false),
+      d_is_waterfall_plot(false),d_waterfall_fill_color(/*Invalid color*/){}
 
 MultiLayer::~MultiLayer() {}
 
@@ -1755,7 +1757,6 @@ void MultiLayer::loadFromProject(const std::string &lines,
   std::string firstLine = lineVec.front();
   // Remove the first line
   lineVec.erase(lineVec.begin());
-  multiLayerLines = boost::algorithm::join(lineVec, "\n");
 
   // Split the line up into its values
   std::vector<std::string> values;

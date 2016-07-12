@@ -1550,7 +1550,7 @@ void Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
   TSVSerialiser tsv(newLines);
   std::string gStr;
   if (tsv.hasLine("geometry")) {
-    std::string gStr = tsv.lineAsString("geometry");
+    gStr = tsv.lineAsString("geometry");
   }
 
   init(app->scriptingEnv(), rows, cols, "", app, "");

@@ -75,7 +75,9 @@ Table::Table(ScriptingEnv *env, int r, int c, const QString &label,
   init(env, r, c, label, parent, name, f);
 }
 
-Table::Table() : MdiSubWindow(), Scripted() {}
+Table::Table() : MdiSubWindow(), Scripted(), d_table(nullptr),
+    d_show_comments(false), selectedCol(-1), d_numeric_precision(13),
+    d_saved_cells(nullptr) {}
 
 void Table::init(ScriptingEnv *env, int rows, int cols, const QString &label,
                  QWidget *parent, const QString &name, Qt::WFlags f) {
