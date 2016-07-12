@@ -150,25 +150,6 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
     }
   }
 
-  if (tsv.hasSection("instrumentwindow")) {
-    auto instrumentSections = tsv.sections("instrumentwindow");
-    for (auto &it : instrumentSections) {
-      TSVSerialiser iws(it);
-
-      if (iws.selectLine("WorkspaceName")) {
-        std::string wsName = iws.asString(1);
-        QString name = QString::fromStdString(wsName);
-
-        auto obj = window->mantidUI->getInstrumentView(name);
-        auto iw = dynamic_cast<InstrumentWindow *>(obj);
-
-        if (iw) {
-          iw->loadFromProject(it, window, fileVersion);
-        }
-      }
-    }
-  }
-
   // Deal with subfolders last.
   if (tsv.hasSection("folder")) {
     auto folders = tsv.sections("folder");

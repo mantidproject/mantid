@@ -1,11 +1,19 @@
 #include "ApplicationWindow.h"
+#include "Mantid/MantidUI.h"
 #include "InstrumentWindow.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "TSVSerialiser.h"
 
+#include <QApplication>
+#include <QMessageBox>
+
 #include <MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h>
 #include <MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h>
+
+// Register the window into the WindowFactory
+DECLARE_WINDOW(InstrumentWindow, InstrumentWindow)
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
@@ -13,7 +21,18 @@ using namespace MantidQt::MantidWidgets;
 InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
                                    ApplicationWindow *parent,
                                    const QString &name)
-    : MdiSubWindow(parent, label, name) {
+    : MdiSubWindow() {
+    init(wsName, label, parent, name);
+}
+
+InstrumentWindow::InstrumentWindow() : MdiSubWindow() {}
+
+InstrumentWindow::~InstrumentWindow() {}
+
+void InstrumentWindow::init(const QString &wsName, const QString &label,
+                                   ApplicationWindow *parent,
+                                   const QString &name) {
+   MdiSubWindow::init(parent, label, name, 0);
 
   m_instrumentWidget = new InstrumentWidget(wsName, this);
   this->setWidget(m_instrumentWidget);
@@ -26,7 +45,6 @@ InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
           SLOT(closeSafely()));
 }
 
-InstrumentWindow::~InstrumentWindow() {}
 
 void InstrumentWindow::loadFromProject(const std::string &lines,
                                        ApplicationWindow *app,
@@ -34,10 +52,48 @@ void InstrumentWindow::loadFromProject(const std::string &lines,
   Q_UNUSED(fileVersion);
 
   TSVSerialiser tsv(lines);
-  if (tsv.hasLine("geometry")) {
-    const QString geometry =
-        QString::fromStdString(tsv.lineAsString("geometry"));
-    app->restoreWindowGeometry(app, this, geometry);
+  if (tsv.selectLine("WorkspaceName")) {
+      std::string wsName = tsv.asString(1);
+      QString name = QString::fromStdString(wsName);
+
+      if (!Mantid::API::AnalysisDataService::Instance().doesExist(wsName))
+          return;
+      MatrixWorkspace_const_sptr ws =
+              boost::dynamic_pointer_cast<const MatrixWorkspace>(app->mantidUI->getWorkspace(QString::fromStdString(wsName)));
+      if (!ws)
+          return;
+
+      QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+      Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
+      if (!instr || instr->getName().empty()) {
+          QApplication::restoreOverrideCursor();
+          QMessageBox::critical(app, "MantidPlot - Error",
+                                "Instrument view cannot be opened");
+          return;
+      }
+
+      // Need a new window
+      const QString windowName(QString("InstrumentWindow:") + QString::fromStdString(wsName));
+      init(name, QString("Instrument"), app, windowName);
+
+      try {
+          selectTab(-1);
+
+          if (tsv.hasLine("geometry")) {
+              const QString geometry =
+                      QString::fromStdString(tsv.lineAsString("geometry"));
+              app->restoreWindowGeometry(app, this, geometry);
+          }
+
+          app->addMdiSubWindow(this);
+
+          QApplication::restoreOverrideCursor();
+      } catch (const std::exception &e) {
+          QApplication::restoreOverrideCursor();
+          QString errorMessage =
+                  "Instrument view cannot be created:\n\n" + QString(e.what());
+          QMessageBox::critical(app, "MantidPlot - Error", errorMessage);
+      }
   }
 }
 

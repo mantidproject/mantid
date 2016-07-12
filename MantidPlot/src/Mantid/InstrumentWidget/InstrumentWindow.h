@@ -10,6 +10,8 @@
 #include <boost/shared_ptr.hpp>
 
 class ApplicationWindow;
+class MantidUI;
+
 namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentWidget;
@@ -24,6 +26,7 @@ public:
                             const QString &label = QString(),
                             ApplicationWindow *parent = nullptr,
                             const QString &name = QString());
+  InstrumentWindow();
   ~InstrumentWindow() override;
 
   void loadFromProject(const std::string &lines, ApplicationWindow *app,
@@ -49,6 +52,7 @@ public slots:
 
 private:
   MantidQt::MantidWidgets::InstrumentWidget *m_instrumentWidget;
+  void init(const QString &wsName, const QString &label, ApplicationWindow *parent, const QString &name);
 };
 
 #endif // INSTRUMENTWINDOW_H
