@@ -24,7 +24,7 @@ void TransferResults::addTransferRow(const COLUMN_MAP_TYPE &row) {
 }
 void TransferResults::addErrorRow(COLUMN_NAME_TYPE id,
                                   COLUMN_VALUE_TYPE error) {
-  m_errorRuns.emplace_back(id, error);
+  m_errorRuns.push_back({{id, error}});
 }
 }
 }
