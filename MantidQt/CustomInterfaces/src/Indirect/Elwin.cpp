@@ -125,7 +125,7 @@ void Elwin::run() {
   QString eltWorkspace = workspaceBaseName + "elt";
 
   // Load input files
-  std::vector<std::string> inputWorkspaceNames;
+  std::string inputWorkspacesString;
 
   for (auto it = inputFilenames.begin(); it != inputFilenames.end(); ++it) {
     QFileInfo inputFileInfo(*it);
@@ -137,17 +137,18 @@ void Elwin::run() {
     loadAlg->setProperty("OutputWorkspace", workspaceName);
 
     m_batchAlgoRunner->addAlgorithm(loadAlg);
-    inputWorkspaceNames.push_back(workspaceName);
+    inputWorkspacesString += workspaceName + ",";
   }
 
   // Group input workspaces
   IAlgorithm_sptr groupWsAlg =
       AlgorithmManager::Instance().create("GroupWorkspaces");
   groupWsAlg->initialize();
-  groupWsAlg->setProperty("InputWorkspaces", inputWorkspaceNames);
+  API::BatchAlgorithmRunner::AlgorithmRuntimeProps runTimeProps;
+  runTimeProps["InputWorkspaces"] = inputWorkspacesString;
   groupWsAlg->setProperty("OutputWorkspace", inputGroupWsName);
 
-  m_batchAlgoRunner->addAlgorithm(groupWsAlg);
+  m_batchAlgoRunner->addAlgorithm(groupWsAlg, runTimeProps);
 
   // Configure ElasticWindowMultiple algorithm
   IAlgorithm_sptr elwinMultAlg =
