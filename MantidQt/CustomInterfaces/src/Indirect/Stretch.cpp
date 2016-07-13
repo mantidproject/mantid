@@ -131,8 +131,8 @@ void Stretch::run() {
   stretch->initialize();
   stretch->setProperty("SampleWorkspace", sampleName);
   stretch->setProperty("ResolutionWorkspace", resName);
-  stretch->setProperty("MinRange", eMin);
-  stretch->setProperty("MaxRange", eMax);
+  stretch->setProperty("EMin", eMin);
+  stretch->setProperty("EMax", eMax);
   stretch->setProperty("SampleBins", nBins);
   stretch->setProperty("Elastic", elasticPeak);
   stretch->setProperty("Background", background);

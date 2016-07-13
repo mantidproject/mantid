@@ -15,9 +15,9 @@ if is_supported_f2py_platform():
 class BayesStretch(PythonAlgorithm):
 
     _program = 'Que'
-    _samWS = None
-    _resWS = None
-    _resnormWS = None
+    _sam_ws = None
+    _res_ws = None
+    _resnorm_ws = None
     _e_min = None
     _e_max = None
     _sam_bins = None
@@ -44,10 +44,10 @@ class BayesStretch(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('ResolutionWorkspace', '', direction=Direction.Input),
                              doc='Name of the resolution input Workspace')
 
-        self.declareProperty(name='MinRange', defaultValue=-0.2,
+        self.declareProperty(name='EMin', defaultValue=-0.2,
                              doc='The start of the fit range. Default=-0.2')
 
-        self.declareProperty(name='MaxRange', defaultValue=0.2,
+        self.declareProperty(name='EMax', defaultValue=0.2,
                              doc='The end of the fit range. Default=0.2')
 
         self.declareProperty(name='SampleBins', defaultValue=1,
@@ -83,7 +83,15 @@ class BayesStretch(PythonAlgorithm):
 
         # Validate fitting range in energy
         if self._e_min > self._e_max:
-            issues['MaxRange'] = 'Must be less than EnergyMin'
+            issues['EMax'] = 'Must be less than EnergyMin'
+
+        # Validate fitting range within data range
+        data_min = self._sam_ws.readX(0)[0]
+        if self._e_min < data_min:
+            issues['EMin'] = 'EMin must be more than the minimum x range of the data.'
+        data_max = self._sam_ws.readX(0)[-1]
+        if self._e_max > data_max:
+            issues['EMax'] = 'EMax must be less than the maximum x range of the data'
 
         return issues
 
@@ -94,8 +102,8 @@ class BayesStretch(PythonAlgorithm):
         self._res_ws = self.getPropertyValue('ResolutionWorkspace')
         self._res_norm = False
         self._resnorm_ws = ''
-        self._e_min = self.getProperty('MinRange').value
-        self._e_max = self.getProperty('MaxRange').value
+        self._e_min = self.getProperty('EMin').value
+        self._e_max = self.getProperty('EMax').value
         self._sam_bins = self.getPropertyValue('SampleBins')
         self._res_bins = 1
         self._elastic = self.getProperty('Elastic').value
