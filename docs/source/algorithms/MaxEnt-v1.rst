@@ -167,11 +167,11 @@ Output:
 
 .. testoutput:: ExFourierCoeffs
 
-   First  reconstructed coefficient: 0.850
-   Second reconstructed coefficient: 0.849
-   Third  reconstructed coefficient: 0.848
-   Fourth reconstructed coefficient: 0.900
-   Fifth  reconstructed coefficient: 0.898
+   First  reconstructed coefficient: 0.847
+   Second reconstructed coefficient: 0.846
+   Third  reconstructed coefficient: 0.846
+   Fourth reconstructed coefficient: 0.896
+   Fifth  reconstructed coefficient: 0.896
 
 .. figure:: ../images/MaxEntFourierCoefficients.png
    :align: center
@@ -201,9 +201,9 @@ Output:
 
 .. testoutput:: ExMUSR00022725
 
-   Image at -1.359: 0.106
-   Image at 0.000: 0.011
-   Image at 1.359: 0.106
+   Image at -1.359: 0.100
+   Image at 0.000: 0.009
+   Image at 1.359: 0.100
 
 .. figure:: ../images/MaxEntMUSR00022725.png
    :align: center
@@ -233,12 +233,12 @@ Output:
 
 .. testoutput:: ExEMU00020884
 
-   Image (real part) at -1.389: -0.024
-   Image (real part) at  0.000:  0.086
-   Image (real part) at  1.389: -0.024
-   Image (imaginary part) at -1.389: -0.024
-   Image (imaginary part) at  0.000:  0.086
-   Image (imaginary part) at  1.389: -0.024
+   Image (real part) at -1.389: -0.079
+   Image (real part) at  0.000:  0.015
+   Image (real part) at  1.389: -0.079
+   Image (imaginary part) at -1.389: -0.079
+   Image (imaginary part) at  0.000:  0.015
+   Image (imaginary part) at  1.389: -0.079
 
 .. figure:: ../images/MaxEntMUSR00020884.png
    :align: center
@@ -277,7 +277,7 @@ Output:
 .. testoutput:: ExRealImage
 
    Image (real part) at 0.318: 0.000
-   Image (real part) at 0.477: 5.843
+   Image (real part) at 0.477: 5.842
    Image (real part) at 0.637: 0.000
 
 .. figure:: ../images/MaxEntComplexData.png
@@ -317,20 +317,20 @@ image in order to obtain smooth results).
        YIm.append(sin(w*x)+(random()-0.5)*0.3)
        E.append(0.1)
    CreateWorkspace(OutputWorkspace='ws',DataX=X+X,DataY=YRe+YIm,DataE=E+E,NSpec=2)
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=1, PositiveImage=False)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001, PositiveImage=False)
    evolChiP, evolAngleP, imageP, dataP = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001, PositiveImage=True)
 
    print "Image at %.3f: %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[102], image.readY(0)[102], imageP.readY(0)[102])
-   print "Image at %.3f:  %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[103], image.readY(0)[103], imageP.readY(0)[103])
+   print "Image at %.3f: %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[103], image.readY(0)[103], imageP.readY(0)[103])
    print "Image at %.3f: %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[104], image.readY(0)[104], imageP.readY(0)[102])
 
 Output:
 
 .. testoutput:: ExRealPosImage
 
-   Image at 0.318: -0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
-   Image at 0.477:  5.843 (PositiveImage=False), 5.842 (PositiveImage=True)
-   Image at 0.637: -0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
+   Image at 0.318: 0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
+   Image at 0.477: 5.842 (PositiveImage=False), 5.842 (PositiveImage=True)
+   Image at 0.637: 0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
 
 .. figure:: ../images/MaxEntPositiveImage.png
    :align: center
@@ -374,8 +374,8 @@ Output:
 
 .. testoutput:: ExResolutionFactor
 
-   Image at 0.000: 0.086 (ResolutionFactor=1)
-   Image at 0.000: 0.187 (ResolutionFactor=2)
+   Image at 0.000: 0.015 (ResolutionFactor=1)
+   Image at 0.000: 0.079 (ResolutionFactor=2)
 
 .. figure:: ../images/MaxEntResolutionFactor.png
    :align: center
