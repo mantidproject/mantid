@@ -153,9 +153,13 @@ public:
 
     // Test some values
     TS_ASSERT_EQUALS(data->readY(0).size(), 50);
-    TS_ASSERT_DELTA(data->readY(0)[25], 0.2550, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[26], 0.4304, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[27], 0.5881, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[25], 0.2774, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[26], 0.4541, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[27], 0.6121, 0.0001);
+
+    // Test that the algorithm converged
+    TS_ASSERT_EQUALS(chi->readY(0).back(), 0);
+    TS_ASSERT_EQUALS(angle->readY(0).back(), 0);
   }
 
   void test_sine() {
@@ -186,10 +190,13 @@ public:
     TS_ASSERT(angle);
 
     // Test some values
-    TS_ASSERT_DELTA(data->readY(0)[25], 0.8862, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[26], 0.8190, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[27], 0.7188, 0.0001);
-  }
+    TS_ASSERT_DELTA(data->readY(0)[25], 0.8936, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[26], 0.8237, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[27], 0.7205, 0.0001);
+		// Test that the algorithm converged
+		TS_ASSERT_EQUALS(chi->readY(0).back(), 0);
+		TS_ASSERT_EQUALS(angle->readY(0).back(), 0);
+	}
 
   void test_sine_cosine_neg() {
     // Complex signal: cos(w * x) + i sin(w * x)
@@ -202,7 +209,7 @@ public:
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("ComplexData", true);
-    alg->setProperty("A", 1.0);
+    alg->setProperty("A", 0.01);
     alg->setProperty("ChiTarget", 102.);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
@@ -215,12 +222,12 @@ public:
     TS_ASSERT(data);
 
     // Test some values
-    TS_ASSERT_DELTA(data->readY(0)[35], 0.8489, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[36], 0.6727, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[37], 0.4058, 0.0001);
-    TS_ASSERT_DELTA(data->readY(1)[35], 0.3288, 0.0001);
-    TS_ASSERT_DELTA(data->readY(1)[36], 0.6133, 0.0001);
-    TS_ASSERT_DELTA(data->readY(1)[37], 0.8149, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[35], 0.8315, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[36], 0.6707, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[37], 0.3977, 0.0001);
+    TS_ASSERT_DELTA(data->readY(1)[35], 0.3246, 0.0001);
+    TS_ASSERT_DELTA(data->readY(1)[36], 0.6098, 0.0001);
+    TS_ASSERT_DELTA(data->readY(1)[37], 0.8090, 0.0001);
   }
 
   void test_sine_cosine_pos() {
@@ -268,7 +275,7 @@ public:
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("ComplexData", true);
     alg->setProperty("ComplexImage", false);
-    alg->setProperty("A", 1.0);
+    alg->setProperty("A", 0.01);
     alg->setProperty("ChiTarget", 102.);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
@@ -282,12 +289,12 @@ public:
 
     // Test some values (should be close to those obtained in the previous two
     // tests)
-    TS_ASSERT_DELTA(data->readY(0)[35], 0.8071, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[36], 0.6858, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[37], 0.4156, 0.0001);
-    TS_ASSERT_DELTA(data->readY(1)[35], 0.3305, 0.0001);
-    TS_ASSERT_DELTA(data->readY(1)[36], 0.6008, 0.0001);
-    TS_ASSERT_DELTA(data->readY(1)[37], 0.7955, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[35], 0.8412, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[36], 0.6741, 0.0001);
+    TS_ASSERT_DELTA(data->readY(0)[37], 0.4062, 0.0001);
+    TS_ASSERT_DELTA(data->readY(1)[35], 0.3272, 0.0001);
+    TS_ASSERT_DELTA(data->readY(1)[36], 0.6102, 0.0001);
+    TS_ASSERT_DELTA(data->readY(1)[37], 0.8098, 0.0001);
   }
 
   void test_resolution_factor() {
@@ -301,7 +308,7 @@ public:
     alg->initialize();
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
-    alg->setProperty("A", 0.1);
+    alg->setProperty("A", 0.01);
     alg->setProperty("ChiTarget", 50.);
     alg->setProperty("ResolutionFactor", "3");
     alg->setPropertyValue("ReconstructedImage", "image");
@@ -326,12 +333,12 @@ public:
     TS_ASSERT_EQUALS(data->readX(0).size(), data->readY(0).size());
 
     // Test some values
-    TS_ASSERT_DELTA(image->readY(0)[70], 6.3410, 0.0001);
+    TS_ASSERT_DELTA(image->readY(0)[70], 6.8835, 0.0001);
     // Fails on RHEL and Ubuntu with delta 0.0001
-    TS_ASSERT_DELTA(image->readY(0)[71], 1.4128, 0.001);
-    TS_ASSERT_DELTA(image->readY(1)[78], 0.2096, 0.0001);
-    TS_ASSERT_DELTA(image->readY(1)[79], 0.6527, 0.0001);
-  }
+    TS_ASSERT_DELTA(image->readY(0)[71], 1.3045, 0.001);
+    TS_ASSERT_DELTA(image->readY(1)[78], 0.0999, 0.0001);
+    TS_ASSERT_DELTA(image->readY(1)[79], 0.4176, 0.0001);
+	}
 
   void test_output_label() {
     // Test the output label
@@ -444,7 +451,7 @@ public:
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("ComplexData", true);
     alg->setProperty("AutoShift", true);
-    alg->setProperty("A", 1.0);
+    alg->setProperty("A", 0.01);
     alg->setProperty("ChiTarget", 102.);
     alg->setPropertyValue("ReconstructedImage", "image");
     alg->setPropertyValue("ReconstructedData", "data");
@@ -634,6 +641,7 @@ public:
 
     return ws;
   }
+
 };
 
 #endif /* MANTID_ALGORITHMS_MAXENTTEST_H_ */
