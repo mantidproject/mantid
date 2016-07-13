@@ -36,7 +36,7 @@ template <> struct Validator<HistogramE> {
 };
 
 template <class T> bool Validator<HistogramX>::isValid(const T &data) {
-  auto start = std::find_if_not(data.cbegin(), data.cend(),
+  auto start = std::find_if_not(data.begin(), data.end(),
                                 static_cast<bool (*)(double)>(std::isnan));
   auto it = start + 1;
   for (; it < data.cend(); ++it) {
