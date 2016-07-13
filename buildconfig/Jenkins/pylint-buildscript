@@ -96,3 +96,11 @@ $SCL_ON_RHEL6 "cmake --build . --target Framework -- -j$BUILD_THREADS"
 # Run plint check
 ###############################################################################
 $SCL_ON_RHEL6 "cmake --build . --target pylintcheck"
+
+###############################################################################
+# Archive the results
+###############################################################################
+if [ -d $PYLINT_OUTPUT_DIR ]; then
+  cd $PYLINT_OUTPUT_DIR
+  zip ${JOB_NAME}-logs.zip PYLINT-*.log
+fi
