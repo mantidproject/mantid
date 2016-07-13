@@ -370,7 +370,7 @@ WienerSmooth::smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS,
     out->dataE(0).assign(E.begin(), E.end() - 1);
     out->dataY(0).resize(Y.size() - 1);
   } else {
-    out->setX(0, X);
+    out->mutableX(0) = X;
     out->dataE(0).assign(E.begin(), E.end());
   }
 

@@ -1,4 +1,6 @@
 #pylint: disable=no-init,too-many-locals,too-many-instance-attributes,too-many-arguments,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 import math
 import numpy as np
 from mantid.simpleapi import *

@@ -65,6 +65,8 @@ set ( SRC_FILES
 	src/Functions/DiffRotDiscreteCircle.cpp
 	src/Functions/DiffSphere.cpp
 	src/Functions/DynamicKuboToyabe.cpp
+	src/Functions/ElasticDiffRotDiscreteCircle.cpp
+	src/Functions/ElasticDiffSphere.cpp
 	src/Functions/EndErfc.cpp
 	src/Functions/ExpDecay.cpp
 	src/Functions/ExpDecayMuon.cpp
@@ -78,13 +80,15 @@ set ( SRC_FILES
 	src/Functions/GaussianComptonProfile.cpp
 	src/Functions/GramCharlierComptonProfile.cpp
 	src/Functions/IkedaCarpenterPV.cpp
+	src/Functions/InelasticDiffRotDiscreteCircle.cpp
+	src/Functions/InelasticDiffSphere.cpp
     src/Functions/Keren.cpp
 	src/Functions/LinearBackground.cpp
 	src/Functions/LogNormal.cpp
 	src/Functions/Lorentzian.cpp
 	src/Functions/Lorentzian1D.cpp
 	src/Functions/MuonFInteraction.cpp
-        src/Functions/MultivariateGaussianComptonProfile.cpp
+	src/Functions/MultivariateGaussianComptonProfile.cpp
 	src/Functions/NeutronBk2BkExpConvPVoigt.cpp
 	src/Functions/PawleyFunction.cpp
 	src/Functions/PeakParameterFunction.cpp
@@ -205,6 +209,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/DiffRotDiscreteCircle.h
 	inc/MantidCurveFitting/Functions/DiffSphere.h
 	inc/MantidCurveFitting/Functions/DynamicKuboToyabe.h
+	inc/MantidCurveFitting/Functions/ElasticDiffRotDiscreteCircle.h
+	inc/MantidCurveFitting/Functions/ElasticDiffSphere.h
 	inc/MantidCurveFitting/Functions/EndErfc.h
 	inc/MantidCurveFitting/Functions/ExpDecay.h
 	inc/MantidCurveFitting/Functions/ExpDecayMuon.h
@@ -218,13 +224,15 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/GaussianComptonProfile.h
 	inc/MantidCurveFitting/Functions/GramCharlierComptonProfile.h
 	inc/MantidCurveFitting/Functions/IkedaCarpenterPV.h
+	inc/MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h
+	inc/MantidCurveFitting/Functions/InelasticDiffSphere.h
     inc/MantidCurveFitting/Functions/Keren.h
 	inc/MantidCurveFitting/Functions/LinearBackground.h
 	inc/MantidCurveFitting/Functions/LogNormal.h
 	inc/MantidCurveFitting/Functions/Lorentzian.h
 	inc/MantidCurveFitting/Functions/Lorentzian1D.h
 	inc/MantidCurveFitting/Functions/MuonFInteraction.h
-        inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
+	inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
 	inc/MantidCurveFitting/Functions/NeutronBk2BkExpConvPVoigt.h
 	inc/MantidCurveFitting/Functions/PawleyFunction.h
 	inc/MantidCurveFitting/Functions/PeakParameterFunction.h
@@ -359,7 +367,7 @@ set ( TEST_FILES
 	Functions/Lorentzian1DTest.h
 	Functions/LorentzianTest.h
 	Functions/MuonFInteractionTest.h
-        Functions/MultivariateGaussianComptonProfileTest.h
+	Functions/MultivariateGaussianComptonProfileTest.h
 	Functions/NeutronBk2BkExpConvPVoigtTest.h
 	Functions/PawleyFunctionTest.h
 	Functions/PeakParameterFunctionTest.h

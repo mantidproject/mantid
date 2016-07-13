@@ -54,6 +54,13 @@ public:
     TS_ASSERT_LESS_THAN(first, second);
   }
 
+  void test_getPropertyValue() {
+    AlgorithmHistory alg = createTestHistory();
+    TS_ASSERT_EQUALS(alg.getPropertyValue("arg1_param"), "y");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("arg2_param"), "23");
+    TS_ASSERT_THROWS_ANYTHING(alg.getPropertyValue("none_existant"));
+  }
+
   void test_Created_Algorithm_Matches_History() {
     Mantid::API::AlgorithmFactory::Instance().subscribe<testalg>();
     Algorithm *testInput = new testalg;

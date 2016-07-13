@@ -53,6 +53,8 @@
 #include <gsl/gsl_vector.h>
 #include <fstream>
 
+using namespace Qwt3D;
+
 UserParametricSurface::UserParametricSurface(const QString &xFormula,
                                              const QString &yFormula,
                                              const QString &zFormula,

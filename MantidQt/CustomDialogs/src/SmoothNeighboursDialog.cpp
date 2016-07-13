@@ -5,6 +5,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace MantidQt::API;
 
 // Register the class with the factory
 DECLARE_DIALOG(SmoothNeighboursDialog)

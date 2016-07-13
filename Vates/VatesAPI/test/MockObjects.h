@@ -37,6 +37,11 @@ using Mantid::coord_t;
 #pragma clang diagnostic ignored "-Wunused-function"
 #endif
 
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#endif
+
 //=====================================================================================
 // Test Helper Types. These are shared by several tests in VatesAPI
 //=====================================================================================
@@ -452,6 +457,10 @@ std::string getStringFieldDataValue(vtkDataSet *ds, std::string fieldName) {
 
 #if __clang__
 #pragma clang diagnostic pop
+#endif
+
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
+#pragma GCC diagnostic pop
 #endif
 
 #endif

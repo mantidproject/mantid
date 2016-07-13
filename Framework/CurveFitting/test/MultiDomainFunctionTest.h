@@ -3,10 +3,6 @@
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/JointDomain.h"
-#include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
@@ -14,10 +10,12 @@
 #include "MantidCurveFitting/Algorithms/Fit.h"
 
 #include "MantidTestHelpers/FakeObjects.h"
+#include "MantidTestHelpers/MultiDomainFunctionHelper.h"
 
 #include <cxxtest/TestSuite.h>
-#include <boost/make_shared.hpp>
+
 #include <algorithm>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -25,37 +23,7 @@ using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::CostFunctions;
 using namespace Mantid::CurveFitting::Algorithms;
 
-class MultiDomainFunctionTest_Function : public IFunction1D,
-                                         public ParamFunction {
-public:
-  MultiDomainFunctionTest_Function() : IFunction1D(), ParamFunction() {
-    this->declareParameter("A", 0);
-    this->declareParameter("B", 0);
-  }
-  std::string name() const override {
-    return "MultiDomainFunctionTest_Function";
-  }
-
-protected:
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override {
-    const double A = getParameter(0);
-    const double B = getParameter(1);
-
-    for (size_t i = 0; i < nData; ++i) {
-      double x = xValues[i];
-      out[i] = A + B * x;
-    }
-  }
-  void functionDeriv1D(Jacobian *out, const double *xValues,
-                       const size_t nData) override {
-    for (size_t i = 0; i < nData; ++i) {
-      double x = xValues[i];
-      out->set(i, 1, x);
-      out->set(i, 0, 1.0);
-    }
-  }
-};
+using Mantid::TestHelpers::MultiDomainFunctionTest_Function;
 
 class MultiDomainFunctionTest : public CxxTest::TestSuite {
 public:
@@ -66,70 +34,13 @@ public:
   }
   static void destroySuite(MultiDomainFunctionTest *suite) { delete suite; }
 
-  MultiDomainFunctionTest() {
-    FrameworkManager::Instance();
-    multi = boost::make_shared<MultiDomainFunction>();
-    multi->addFunction(boost::make_shared<MultiDomainFunctionTest_Function>());
-    multi->addFunction(boost::make_shared<MultiDomainFunctionTest_Function>());
-    multi->addFunction(boost::make_shared<MultiDomainFunctionTest_Function>());
+  MultiDomainFunctionTest() { FrameworkManager::Instance(); }
 
-    multi->getFunction(0)->setParameter("A", 0);
-    multi->getFunction(0)->setParameter("B", 0);
+  void test_multidomain() {
+    boost::shared_ptr<JointDomain> domain;
+    TS_ASSERT_THROWS_NOTHING(domain =
+                                 Mantid::TestHelpers::makeMultiDomainDomain3());
 
-    multi->getFunction(1)->setParameter("A", 0);
-    multi->getFunction(1)->setParameter("B", 0);
-
-    multi->getFunction(2)->setParameter("A", 0);
-    multi->getFunction(2)->setParameter("B", 0);
-
-    domain = boost::make_shared<JointDomain>();
-    domain->addDomain(boost::make_shared<FunctionDomain1DVector>(0, 1, 9));
-    domain->addDomain(boost::make_shared<FunctionDomain1DVector>(1, 2, 10));
-    domain->addDomain(boost::make_shared<FunctionDomain1DVector>(2, 3, 11));
-
-    const double A0 = 0, A1 = 1, A2 = 2;
-    const double B0 = 1, B1 = 2, B2 = 3;
-
-    ws1.reset(new WorkspaceTester);
-    ws1->initialize(1, 10, 10);
-    {
-      Mantid::MantidVec &x = ws1->dataX(0);
-      Mantid::MantidVec &y = ws1->dataY(0);
-      // Mantid::MantidVec& e = ws1->dataE(0);
-      for (size_t i = 0; i < ws1->blocksize(); ++i) {
-        x[i] = 0.1 * double(i);
-        y[i] = A0 + A1 + A2 + (B0 + B1 + B2) * x[i];
-      }
-    }
-
-    ws2.reset(new WorkspaceTester);
-    ws2->initialize(1, 10, 10);
-    {
-      Mantid::MantidVec &x = ws2->dataX(0);
-      Mantid::MantidVec &y = ws2->dataY(0);
-      // Mantid::MantidVec& e = ws2->dataE(0);
-      for (size_t i = 0; i < ws2->blocksize(); ++i) {
-        x[i] = 1 + 0.1 * double(i);
-        y[i] = A0 + A1 + (B0 + B1) * x[i];
-      }
-    }
-
-    ws3.reset(new WorkspaceTester);
-    ws3->initialize(1, 10, 10);
-    {
-      Mantid::MantidVec &x = ws3->dataX(0);
-      Mantid::MantidVec &y = ws3->dataY(0);
-      // Mantid::MantidVec& e = ws3->dataE(0);
-      for (size_t i = 0; i < ws3->blocksize(); ++i) {
-        x[i] = 2 + 0.1 * double(i);
-        y[i] = A0 + A2 + (B0 + B2) * x[i];
-      }
-    }
-  }
-
-  void test_fit() {
-
-    // system("pause");
     auto values = boost::make_shared<FunctionValues>(*domain);
     const double A0 = 0, A1 = 1, A2 = 2;
     const double B0 = 1, B1 = 2, B2 = 3;
@@ -150,162 +61,10 @@ public:
     }
     values->setFitWeights(1);
 
-    multi->clearDomainIndices();
-    std::vector<size_t> ii(2);
-    ii[0] = 0;
-    ii[1] = 1;
-    multi->setDomainIndices(1, ii);
-    ii[0] = 0;
-    ii[1] = 2;
-    multi->setDomainIndices(2, ii);
-
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
-    costFun->setFittingFunction(multi, domain, values);
-    TS_ASSERT_EQUALS(costFun->nParams(), 6);
-
-    FuncMinimisers::LevenbergMarquardtMDMinimizer s;
-    s.initialize(costFun);
-    TS_ASSERT(s.minimize());
-
-    TS_ASSERT_EQUALS(s.getError(), "success");
-    TS_ASSERT_DELTA(s.costFunctionVal(), 0, 1e-4);
-
-    TS_ASSERT_DELTA(multi->getFunction(0)->getParameter("A"), 0, 1e-8);
-    TS_ASSERT_DELTA(multi->getFunction(0)->getParameter("B"), 1, 1e-8);
-    TS_ASSERT_DELTA(multi->getFunction(1)->getParameter("A"), 1, 1e-8);
-    TS_ASSERT_DELTA(multi->getFunction(1)->getParameter("B"), 2, 1e-8);
-    TS_ASSERT_DELTA(multi->getFunction(2)->getParameter("A"), 2, 1e-8);
-    TS_ASSERT_DELTA(multi->getFunction(2)->getParameter("B"), 3, 1e-8);
+    boost::shared_ptr<MultiDomainFunction> multi;
+    TS_ASSERT_THROWS_NOTHING(
+        multi = Mantid::TestHelpers::makeMultiDomainFunction3());
   }
-
-  void test_Fit_algorithm() {
-
-    multi->getFunction(0)->setParameter("A", 0);
-    multi->getFunction(0)->setParameter("B", 0);
-    multi->getFunction(1)->setParameter("A", 0);
-    multi->getFunction(1)->setParameter("B", 0);
-    multi->getFunction(2)->setParameter("A", 0);
-    multi->getFunction(2)->setParameter("B", 0);
-
-    Algorithms::Fit fit;
-    fit.initialize();
-    fit.setProperty("Function", boost::dynamic_pointer_cast<IFunction>(multi));
-    fit.setProperty("InputWorkspace", ws1);
-    fit.setProperty("WorkspaceIndex", 0);
-    fit.setProperty("InputWorkspace_1", ws2);
-    fit.setProperty("WorkspaceIndex_1", 0);
-    fit.setProperty("InputWorkspace_2", ws3);
-    fit.setProperty("WorkspaceIndex_2", 0);
-    fit.execute();
-
-    IFunction_sptr fun = fit.getProperty("Function");
-    TS_ASSERT_DELTA(fun->getParameter("f0.A"), 0, 1e-8);
-    TS_ASSERT_DELTA(fun->getParameter("f0.B"), 1, 1e-8);
-    TS_ASSERT_DELTA(fun->getParameter("f1.A"), 1, 1e-8);
-    TS_ASSERT_DELTA(fun->getParameter("f1.B"), 2, 1e-8);
-    TS_ASSERT_DELTA(fun->getParameter("f2.A"), 2, 1e-8);
-    TS_ASSERT_DELTA(fun->getParameter("f2.B"), 3, 1e-8);
-  }
-
-  void test_Fit_resetting_properties() {
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("Fit");
-    Mantid::API::IAlgorithm &fit = *alg;
-    fit.initialize();
-    fit.setProperty("Function", boost::dynamic_pointer_cast<IFunction>(multi));
-    fit.setProperty("InputWorkspace", ws1);
-    fit.setProperty("WorkspaceIndex", 0);
-    fit.setProperty("InputWorkspace", ws2);
-    fit.setProperty("WorkspaceIndex", 1);
-    fit.setProperty("InputWorkspace_1", ws2);
-    fit.setProperty("InputWorkspace_1", ws1);
-  }
-
-  void test_fit_one_function_to_two_parts_of_workspace() {
-
-    const double A0 = 1, A1 = 100;
-    const double B0 = 2;
-
-    // Set up a workspace which is divided into 3 parts: 0 <= x < 10, 10 <= x <
-    // 20, 20 <= x < 30
-    // The first and last parts have their data on line A0 + B0 * x, and the
-    // middle part has
-    // constant value A1
-
-    MatrixWorkspace_sptr ws = boost::make_shared<WorkspaceTester>();
-    ws->initialize(1, 30, 30);
-    {
-      const double dx = 1.0;
-      Mantid::MantidVec &x = ws->dataX(0);
-      Mantid::MantidVec &y = ws->dataY(0);
-      for (size_t i = 0; i < 10; ++i) {
-        x[i] = dx * double(i);
-        y[i] = A0 + B0 * x[i];
-      }
-      for (size_t i = 10; i < 20; ++i) {
-        x[i] = dx * double(i);
-        y[i] = A1;
-      }
-      for (size_t i = 20; i < 30; ++i) {
-        x[i] = dx * double(i);
-        y[i] = A0 + B0 * x[i];
-      }
-    }
-
-    // Set up a multi-domain function and Fit algorithm to fit a single function
-    // to two
-    // parts of the workspace
-
-    boost::shared_ptr<MultiDomainFunction> mf =
-        boost::make_shared<MultiDomainFunction>();
-    mf->addFunction(boost::make_shared<MultiDomainFunctionTest_Function>());
-    mf->setParameter(0, 0.0);
-    mf->setParameter(1, 0.0);
-    std::vector<size_t> ind(2);
-    ind[0] = 0;
-    ind[1] = 1;
-    mf->setDomainIndices(0, ind);
-    TS_ASSERT_EQUALS(mf->getMaxIndex(), 1);
-
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("Fit");
-    Mantid::API::IAlgorithm &fit = *alg;
-    fit.initialize();
-    fit.setProperty("Function", boost::dynamic_pointer_cast<IFunction>(mf));
-    // at this point Fit knows the number of domains and creates additional
-    // properties InputWorkspace_#
-    TS_ASSERT(fit.existsProperty("InputWorkspace_1"));
-
-    fit.setProperty("InputWorkspace", ws);
-    fit.setProperty("WorkspaceIndex", 0);
-    fit.setProperty("StartX", 0.0);
-    fit.setProperty("EndX", 9.9999);
-    fit.setProperty("InputWorkspace_1", ws);
-
-    // at this point Fit knows the type of InputWorkspace_1 (MatrixWorkspace)
-    // and creates additional
-    // properties for it
-    TS_ASSERT(fit.existsProperty("WorkspaceIndex_1"));
-    TS_ASSERT(fit.existsProperty("StartX_1"));
-    TS_ASSERT(fit.existsProperty("EndX_1"));
-
-    fit.setProperty("WorkspaceIndex_1", 0);
-    fit.setProperty("StartX_1", 20.0);
-    fit.setProperty("EndX_1", 30.0);
-
-    fit.execute();
-    TS_ASSERT(fit.isExecuted());
-
-    IFunction_sptr fun = fit.getProperty("Function");
-    TS_ASSERT_DELTA(fun->getParameter(0), 1.0, 1e-15); // == A0
-    TS_ASSERT_DELTA(fun->getParameter(1), 2.0, 1e-15); // == B0
-  }
-
-private:
-  boost::shared_ptr<MultiDomainFunction> multi;
-  boost::shared_ptr<JointDomain> domain;
-  MatrixWorkspace_sptr ws1, ws2, ws3;
 };
 
 #endif /*MULTIDOMAINFUNCTIONTEST_H_*/

@@ -191,8 +191,6 @@ void He3TubeEfficiency::correctForEfficiency(std::size_t spectraIndex) {
     ++einItr;
     ++xItr;
   }
-
-  return;
 }
 
 /**

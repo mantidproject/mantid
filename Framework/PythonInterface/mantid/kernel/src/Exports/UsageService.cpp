@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidKernel/UsageService.h"
 #include <boost/python/class.hpp>
 #include <boost/python/reference_existing_object.hpp>
@@ -5,6 +6,8 @@
 using Mantid::Kernel::UsageService;
 using Mantid::Kernel::UsageServiceImpl;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(UsageServiceImpl)
 
 void export_UsageService() {
 
