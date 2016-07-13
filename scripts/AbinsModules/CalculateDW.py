@@ -71,8 +71,14 @@ class CalculateDW(IOmodule, RearrangeData):
         for num in range(self._num_atoms):
             _item.fill(0.0) # erase stored information so that it can be filled with content for the next atom
             for k in range(self._num_k):
+
                 _coth_over_omega = (1.0 / np.tanh(_coth_factor * _frequencies_hartree[k, :])) /  _frequencies_hartree[k, :] # coth(...)/omega
-                for n_freq in range(self._num_freq):
+
+                # correction for acoustic modes at Gamma point
+                if np.linalg.norm(_data["k_points_data"]["k_vectors"][k]) < Constants.small_k: start = 2
+                else: start = 0
+
+                for n_freq in range(start, self._num_freq):
 
                     displacement = _atomic_displacements[k, num, n_freq, :]
                     tensor =  np.real(np.outer(displacement, displacement.conjugate())) # DW are real
