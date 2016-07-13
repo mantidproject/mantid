@@ -149,7 +149,7 @@ public:
     m_model = reflModel();
   }
 
-  void testGenerateNotebook() {
+  void testGenerateNotebookFirstLines() {
 
     auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
         m_wsName, m_model, m_instrument, reflWhitelist(),
@@ -710,6 +710,188 @@ public:
     // ints
     TS_ASSERT_EQUALS(stringOutput, "A, B, C")
     TS_ASSERT_EQUALS(intOutput, "1, 2, 3")
+  }
+
+  void testGenerateNotebookReflectometry() {
+    // A reflectometry case
+
+    auto whitelist = reflWhitelist();
+    auto model = reflModel();
+    auto preprocessMap = reflPreprocessMap();
+    auto processor = reflProcessor();
+    auto postProcessor = DataProcessorPostprocessingAlgorithm();
+    auto preprocessingOptions = std::map<std::string, std::string>{
+        {"Run(s)", "PlusProperty=PlusValue"},
+        {"Transmission Run(s)", "Property=Value"}};
+    auto processingOptions = "AnalysisMode=MultiDetectorAnalysis";
+    auto postprocessingOptions = "Params=0.04";
+
+    auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
+        "TableName", model, "INTER", whitelist, preprocessMap, processor,
+        postProcessor, preprocessingOptions, processingOptions,
+        postprocessingOptions);
+
+    // Both groups, both rows
+    std::set<int> groups;
+    groups.insert(0);
+    groups.insert(1);
+    std::map<int, std::set<int>> rows;
+    rows[0].insert(0);
+    rows[0].insert(1);
+    rows[1].insert(0);
+    rows[1].insert(1);
+
+    std::string generatedNotebook = notebook->generateNotebook(groups, rows);
+
+    std::vector<std::string> notebookLines;
+    boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));
+
+    const std::string loadAndReduceStringFirstGroup =
+        "               \"input\" : \"#Load and reduce\\n12345 = "
+        "Load(Filename = \'INTER12345\')\\nIvsQ_TOF_12345, "
+        "IvsLam_TOF_12345, _ = "
+        "ReflectometryReductionOneAuto(InputWorkspace = \'12345\', "
+        "ThetaIn = 0.5, MomentumTransferMinimum = 0.1, "
+        "MomentumTransferMaximum = 1.6, MomentumTransferStep = "
+        "0.04, ScaleFactor = 1, AnalysisMode = "
+        "MultiDetectorAnalysis)\\n#Load and reduce\\n12346 = "
+        "Load(Filename = \'INTER12346\')\\nIvsQ_TOF_12346, "
+        "IvsLam_TOF_12346, _ = "
+        "ReflectometryReductionOneAuto(InputWorkspace = \'12346\', "
+        "ThetaIn = 1.5, MomentumTransferMinimum = 1.4, "
+        "MomentumTransferMaximum = 2.9, MomentumTransferStep = "
+        "0.04, ScaleFactor = 1, AnalysisMode = "
+        "MultiDetectorAnalysis)\\n\",";
+    TS_ASSERT_EQUALS(notebookLines[48], loadAndReduceStringFirstGroup);
+
+    const std::string postProcessStringFirstGroup =
+        "               \"input\" : \"#Post-process "
+        "workspaces\\nIvsQ_TOF_12345_TOF_12346, _ = "
+        "Stitch1DMany(InputWorkspaces = \'IvsQ_TOF_12345, IvsQ_TOF_12346\', "
+        "Params=0.04)\",";
+    TS_ASSERT_EQUALS(notebookLines[56], postProcessStringFirstGroup);
+
+    const std::string groupWorkspacesStringFirstGroup =
+        "               \"input\" : \"#Group workspaces to be plotted on same "
+        "axes\\nIvsQ_groupWS = GroupWorkspaces(InputWorkspaces = "
+        "\'IvsQ_TOF_12345, IvsQ_TOF_12346\')\\nIvsLam_groupWS = "
+        "GroupWorkspaces(InputWorkspaces = \'IvsLam_TOF_12345, "
+        "IvsLam_TOF_12346\')\\n#Plot workspaces\\nfig = plots([IvsQ_groupWS, "
+        "IvsLam_groupWS, IvsQ_TOF_12345_TOF_12346], title=[\'IvsQ_groupWS\', "
+        "\'IvsLam_groupWS\', \'IvsQ_TOF_12345_TOF_12346\'], legendLocation="
+        "[1, 1, 4])\\n\",";
+    ;
+    TS_ASSERT_EQUALS(notebookLines[64], groupWorkspacesStringFirstGroup);
+
+    const std::string loadAndReduceStringSecondGroup =
+        "               \"input\" : \"#Load and reduce\\n24681 = "
+        "Load(Filename = \'INTER24681\')\\nIvsQ_TOF_24681, "
+        "IvsLam_TOF_24681, _ = "
+        "ReflectometryReductionOneAuto(InputWorkspace = \'24681\', "
+        "ThetaIn = 0.5, MomentumTransferMinimum = 0.1, "
+        "MomentumTransferMaximum = 1.6, MomentumTransferStep = "
+        "0.04, ScaleFactor = 1, AnalysisMode = "
+        "MultiDetectorAnalysis)\\n#Load and reduce\\n24682 = "
+        "Load(Filename = \'INTER24682\')\\nIvsQ_TOF_24682, "
+        "IvsLam_TOF_24682, _ = "
+        "ReflectometryReductionOneAuto(InputWorkspace = \'24682\', "
+        "ThetaIn = 1.5, MomentumTransferMinimum = 1.4, "
+        "MomentumTransferMaximum = 2.9, MomentumTransferStep = "
+        "0.04, ScaleFactor = 1, AnalysisMode = "
+        "MultiDetectorAnalysis)\\n\",";
+    TS_ASSERT_EQUALS(notebookLines[77], loadAndReduceStringSecondGroup);
+
+    const std::string postProcessStringSecondGroup =
+        "               \"input\" : \"#Post-process "
+        "workspaces\\nIvsQ_TOF_24681_TOF_24682, _ = "
+        "Stitch1DMany(InputWorkspaces = \'IvsQ_TOF_24681, IvsQ_TOF_24682\', "
+        "Params=0.04)\",";
+    TS_ASSERT_EQUALS(notebookLines[85], postProcessStringSecondGroup);
+
+    const std::string groupWorkspacesStringSecondGroup =
+        "               \"input\" : \"#Group workspaces to be plotted on same "
+        "axes\\nIvsQ_groupWS = GroupWorkspaces(InputWorkspaces = "
+        "\'IvsQ_TOF_24681, IvsQ_TOF_24682\')\\nIvsLam_groupWS = "
+        "GroupWorkspaces(InputWorkspaces = \'IvsLam_TOF_24681, "
+        "IvsLam_TOF_24682\')\\n#Plot workspaces\\nfig = plots([IvsQ_groupWS, "
+        "IvsLam_groupWS, IvsQ_TOF_24681_TOF_24682], title=[\'IvsQ_groupWS\', "
+        "\'IvsLam_groupWS\', \'IvsQ_TOF_24681_TOF_24682\'], legendLocation="
+        "[1, 1, 4])\\n\",";
+    ;
+    TS_ASSERT_EQUALS(notebookLines[93], groupWorkspacesStringSecondGroup);
+
+    // Total number of lines
+    TS_ASSERT_EQUALS(notebookLines.size(), 104);
+  }
+
+  void testGenerateNotebookReflectometryNoPostProcessing() {
+
+    auto whitelist = reflWhitelist();
+    auto model = reflModel();
+    auto preprocessMap = reflPreprocessMap();
+    auto processor = reflProcessor();
+    auto postProcessor = DataProcessorPostprocessingAlgorithm();
+    auto preprocessingOptions = std::map<std::string, std::string>{
+        {"Run(s)", "PlusProperty=PlusValue"},
+        {"Transmission Run(s)", "Property=Value"}};
+    auto processingOptions = "AnalysisMode=MultiDetectorAnalysis";
+    auto postprocessingOptions = "Params=0.04";
+
+    auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
+        "TableName", model, "INTER", whitelist, preprocessMap, processor,
+        postProcessor, preprocessingOptions, processingOptions,
+        postprocessingOptions);
+
+    // No groups, only first two runs
+    std::set<int> groups;
+    std::map<int, std::set<int>> rows;
+    rows[0].insert(0);
+    rows[0].insert(1);
+
+    std::string generatedNotebook = notebook->generateNotebook(groups, rows);
+
+    std::vector<std::string> notebookLines;
+    boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));
+
+    for (size_t i = 0; i < notebookLines.size(); i++)
+      std::cout << i << " " << notebookLines[i] << "\n";
+
+    // Only 75 lines because we only analyzed the first two runs
+    TS_ASSERT_EQUALS(notebookLines.size(), 75);
+
+    const std::string loadAndReduceString =
+        "               \"input\" : \"#Load and reduce\\n12345 = "
+        "Load(Filename = \'INTER12345\')\\nIvsQ_TOF_12345, "
+        "IvsLam_TOF_12345, _ = "
+        "ReflectometryReductionOneAuto(InputWorkspace = \'12345\', "
+        "ThetaIn = 0.5, MomentumTransferMinimum = 0.1, "
+        "MomentumTransferMaximum = 1.6, MomentumTransferStep = "
+        "0.04, ScaleFactor = 1, AnalysisMode = "
+        "MultiDetectorAnalysis)\\n#Load and reduce\\n12346 = "
+        "Load(Filename = \'INTER12346\')\\nIvsQ_TOF_12346, "
+        "IvsLam_TOF_12346, _ = "
+        "ReflectometryReductionOneAuto(InputWorkspace = \'12346\', "
+        "ThetaIn = 1.5, MomentumTransferMinimum = 1.4, "
+        "MomentumTransferMaximum = 2.9, MomentumTransferStep = "
+        "0.04, ScaleFactor = 1, AnalysisMode = "
+        "MultiDetectorAnalysis)\\n\",";
+    TS_ASSERT_EQUALS(notebookLines[48], loadAndReduceString);
+
+    const std::string postProcessString = "               \"input\" : \"\",";
+    TS_ASSERT_EQUALS(notebookLines[56], postProcessString);
+
+    const std::string groupWorkspacesString =
+        "               \"input\" : \"#Group workspaces to be "
+        "plotted on same "
+        "axes\\nIvsQ_groupWS = GroupWorkspaces(InputWorkspaces = "
+        "\'IvsQ_TOF_12345, IvsQ_TOF_12346\')\\nIvsLam_groupWS = "
+        "GroupWorkspaces(InputWorkspaces = \'IvsLam_TOF_12345, "
+        "IvsLam_TOF_12346\')\\n#Plot workspaces\\nfig = "
+        "plots([IvsQ_groupWS, "
+        "IvsLam_groupWS, ], title=[\'IvsQ_groupWS\', "
+        "\'IvsLam_groupWS\', \'\'], legendLocation=[1, 1, "
+        "4])\\n\",";
+    TS_ASSERT_EQUALS(notebookLines[64], groupWorkspacesString);
   }
 };
 
