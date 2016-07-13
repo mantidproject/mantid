@@ -33,6 +33,10 @@ Improved
 - :ref:`SavePlot1D <algm-SavePlot1D>` has options for writing out
   plotly html files.
 
+- :ref:`LoadNexus <algm-LoadNexus>` has been updated to give an
+  error when loading a processed Nexus file with SpectrumMin/SpectrumMax
+  and SpectrumList both set.
+
 Deprecated
 ##########
 

@@ -173,9 +173,7 @@ public:
 	  loadNexusAlg.setProperty("SpectrumMin", 1);
 	  TS_ASSERT_THROWS_NOTHING(loadNexusAlg.execute());
 	  TS_ASSERT_EQUALS(loadNexusAlg.isExecuted(), true);
-
   }
-
 
 private:
   LoadNexus algToBeTested, alg2;

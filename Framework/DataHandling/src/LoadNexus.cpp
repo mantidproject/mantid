@@ -180,12 +180,12 @@ void LoadNexus::runLoadNexusProcessed() {
  std::vector<int> specList = getProperty("SpectrumList");
    int specMin = getProperty("SpectrumMin");
    int specMax = getProperty("SpectrumMax");
-   if ( !specList.empty() && (specMax != Mantid::EMPTY_INT() || specMin != 1))
-  {
-	   //Cant use Min/Max with list on processed nexus files
-    throw std::invalid_argument("SpectrumList and SpectrumMin or SpectrumMax."
-		" cannot be used simultaneously. SpectrumList should be used to" 
-		" specify the maximum and minimum spectra" );
+   if (!specList.empty() && (specMax != Mantid::EMPTY_INT() || specMin != 1)) {
+     // Cant use Min/Max with list on processed nexus files
+     throw std::invalid_argument(
+         "SpectrumList and SpectrumMin or SpectrumMax."
+         " cannot be used simultaneously. SpectrumList should be used to"
+         " specify the maximum and minimum spectra");
   }
 
   loadNexusPro->setPropertyValue("EntryNumber",
