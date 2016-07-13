@@ -115,14 +115,15 @@ void Elwin::run() {
   std::string inputGroupWsName = "IDA_Elwin_Input";
 
   QFileInfo firstFileInfo(inputFilenames[0]);
-  QString filename = firstFileInfo.baseName();
-  QString workspaceBaseName =
+  const auto filename = firstFileInfo.baseName();
+
+  auto workspaceBaseName =
       filename.left(filename.lastIndexOf("_")) + "_elwin_";
 
-  QString qWorkspace = workspaceBaseName + "eq";
-  QString qSquaredWorkspace = workspaceBaseName + "eq2";
-  QString elfWorkspace = workspaceBaseName + "elf";
-  QString eltWorkspace = workspaceBaseName + "elt";
+  const auto qWorkspace = (workspaceBaseName + "eq").toStdString();
+  const auto qSquaredWorkspace = (workspaceBaseName + "eq2").toStdString();
+  const auto elfWorkspace = (workspaceBaseName + "elf").toStdString();
+  const auto eltWorkspace = (workspaceBaseName + "elt").toStdString();
 
   // Load input files
   std::string inputWorkspacesString;
@@ -157,10 +158,10 @@ void Elwin::run() {
 
   elwinMultAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
 
-  elwinMultAlg->setProperty("OutputInQ", qWorkspace.toStdString());
+  elwinMultAlg->setProperty("OutputInQ", qWorkspace);
   elwinMultAlg->setProperty("OutputInQSquared",
-                            qSquaredWorkspace.toStdString());
-  elwinMultAlg->setProperty("OutputELF", elfWorkspace.toStdString());
+                            qSquaredWorkspace);
+  elwinMultAlg->setProperty("OutputELF", elfWorkspace);
 
   elwinMultAlg->setProperty("SampleEnvironmentLogName",
                             m_uiForm.leLogName->text().toStdString());
@@ -184,7 +185,7 @@ void Elwin::run() {
   }
 
   if (m_blnManager->value(m_properties["Normalise"])) {
-    elwinMultAlg->setProperty("OutputELT", eltWorkspace.toStdString());
+    elwinMultAlg->setProperty("OutputELT", eltWorkspace);
   }
 
   BatchAlgorithmRunner::AlgorithmRuntimeProps elwinInputProps;
@@ -207,7 +208,7 @@ void Elwin::run() {
   m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
-  m_pythonExportWsName = qSquaredWorkspace.toStdString();
+  m_pythonExportWsName = qSquaredWorkspace;
 }
 
 /**
@@ -233,18 +234,18 @@ void Elwin::unGroupInput(bool error) {
  * @param workspaceName Name of the workspace to save
  * @param filename Name of the file to save it as
  */
-void Elwin::addSaveAlgorithm(QString workspaceName, QString filename) {
+void Elwin::addSaveAlgorithm(const std::string &workspaceName, std::string &filename) {
   // Set a default filename if none provided
-  if (filename.isEmpty())
+  if (filename.length() == 0)
     filename = workspaceName + ".nxs";
 
   // Configure the algorithm
   IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("SaveNexus");
   loadAlg->initialize();
-  loadAlg->setProperty("Filename", filename.toStdString());
+  loadAlg->setProperty("Filename", filename);
 
   BatchAlgorithmRunner::AlgorithmRuntimeProps saveAlgProps;
-  saveAlgProps["InputWorkspace"] = workspaceName.toStdString();
+  saveAlgProps["InputWorkspace"] = workspaceName;
 
   // Add it to the batch runner
   m_batchAlgoRunner->addAlgorithm(loadAlg, saveAlgProps);
