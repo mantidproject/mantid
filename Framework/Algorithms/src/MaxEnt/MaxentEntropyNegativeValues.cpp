@@ -40,7 +40,7 @@ MaxentEntropyNegativeValues::secondDerivative(const std::vector<double> &values,
 
   // Second derivative
   for (size_t i = 0; i < values.size(); i++) {
-    result[i] = std::sqrt(values[i] * values[i] * bkg2);
+    result[i] = std::sqrt(values[i] * values[i] + bkg2);
   }
   return result;
 }
