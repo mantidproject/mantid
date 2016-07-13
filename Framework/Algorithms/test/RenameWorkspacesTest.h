@@ -22,7 +22,7 @@ public:
     TS_ASSERT(alg2.isInitialized());
 
     const std::vector<Property *> props = alg2.getProperties();
-    TS_ASSERT_EQUALS(props.size(), 4);
+    TS_ASSERT_EQUALS(props.size(), 5);
 
     TS_ASSERT_EQUALS(props[0]->name(), "InputWorkspaces");
     TS_ASSERT(props[0]->isDefault());

@@ -34,7 +34,7 @@ Improved
   plotly html files.
 
 - :ref:`RenameWorkspace <algm-RenameWorkspace>` and `RenameWorkspaces <algm-RenameWorkspaces>`
-  now check if a Workspace with that name already exists in the ADS and give
+  now check if a Workspace with that name already exists in the ADS and gives
   the option to override it.
 
 Deprecated
