@@ -33,6 +33,9 @@ Improved
 - :ref:`SavePlot1D <algm-SavePlot1D>` has options for writing out
   plotly html files.
 
+- :ref:`RenameWorkspace <algm-RenameWorkspace>` and `RenameWorkspaces <algm-RenameWorkspaces>`
+  now check if a Workspace with that name already exists in the ADS.
+
 Deprecated
 ##########
 
