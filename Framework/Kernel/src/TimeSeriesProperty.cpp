@@ -308,8 +308,6 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime &start,
 
   // 4. Make size consistent
   m_size = static_cast<int>(m_values.size());
-
-  return;
 }
 
 /**
@@ -389,8 +387,6 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
   mp_copy.clear();
 
   m_size = static_cast<int>(m_values.size());
-
-  return;
 }
 
 /**
@@ -526,8 +522,6 @@ void TimeSeriesProperty<TYPE>::splitByTime(
       // "\n";
     }
   }
-
-  return;
 }
 
 // The makeFilterByValue & expandFilterToRange methods generate a bunch of
@@ -635,8 +629,6 @@ void TimeSeriesProperty<TYPE>::makeFilterByValue(
     stop = t + tol;
     split.push_back(SplittingInterval(start, stop, 0));
   }
-
-  return;
 }
 
 /** Function specialization for TimeSeriesProperty<std::string>
@@ -701,8 +693,6 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(
     // (which may be a null time interval; this'll be ignored)
     split = split | extraFilter;
   }
-
-  return;
 }
 
 /** Function specialization for TimeSeriesProperty<std::string>
@@ -935,8 +925,6 @@ void TimeSeriesProperty<TYPE>::addValue(const Kernel::DateAndTime &time,
   }
 
   m_filterApplied = false;
-
-  return;
 }
 
 /** Add a value to the map
@@ -1269,8 +1257,6 @@ void TimeSeriesProperty<TYPE>::create(const std::vector<DateAndTime> &new_times,
 
   // reset the size
   m_size = static_cast<int>(m_values.size());
-
-  return;
 }
 
 /** Returns the value at a particular time
@@ -1656,8 +1642,6 @@ void TimeSeriesProperty<TYPE>::filterWith(
   // 3. Reset flag and do filter
   m_filterApplied = false;
   applyFilter();
-
-  return;
 }
 
 /**
@@ -1666,8 +1650,6 @@ void TimeSeriesProperty<TYPE>::filterWith(
 template <typename TYPE> void TimeSeriesProperty<TYPE>::clearFilter() {
   m_filter.clear();
   m_filterQuickRef.clear();
-
-  return;
 }
 
 /**
@@ -1686,8 +1668,6 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::countSize() const {
                                               : m_filterQuickRef.back().second;
     m_size = static_cast<int>(nvalues);
   }
-
-  return;
 }
 
 /**  Check if str has the right time format
@@ -1788,8 +1768,6 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::eliminateDuplicates() {
   g_log.warning() << "Log " << this->name() << " has " << numremoved
                   << " entries removed due to duplicated time. "
                   << "\n";
-
-  return;
 }
 
 /*
@@ -1827,8 +1805,6 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::sort() const {
     std::stable_sort(m_values.begin(), m_values.end());
     m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
   }
-
-  return;
 }
 
 /** Find the index of the entry of time t in the mP vector (sorted)
@@ -2024,8 +2000,6 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
 
   // 6. Re-count size
   countSize();
-
-  return;
 }
 
 /*

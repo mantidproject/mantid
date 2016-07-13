@@ -154,8 +154,6 @@ void MaskBins::exec() {
 
     } // ENDFOR(i)
   }   // ENDIFELSE(eventworkspace?)
-
-  return;
 }
 
 /** Execution code for EventWorkspaces

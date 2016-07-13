@@ -31,6 +31,7 @@ Improvements
 - Physical positions were included to the 311 reflection of BASIS instrument for improved instrument view.
 - Algorithm :ref:`BASISReduction311 <algm-BASISReduction311>` has been included in algorithm :ref:`BASISReduction <algm-BASISReduction>`.
 - Range bars colours in the *ISIS Calibration* interface have been updated to match the convention in the fit wizard.
+- Vesuvio sigma_theta value updated for single and double differencing in both forward and back scattering. The new value is 0.016 for all.
 
 Bugfixes
 --------

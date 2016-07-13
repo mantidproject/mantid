@@ -114,7 +114,7 @@ ResultType performBinaryOp(const LHSType lhs, const RHSType rhs,
     algoName = op + "MD";
 
   ResultType result;
-  std::string error("");
+  std::string error;
   try {
     if (reverse) {
       result = API::OperatorOverloads::executeBinaryOperation<RHSType, LHSType,

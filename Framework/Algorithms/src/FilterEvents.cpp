@@ -141,8 +141,6 @@ void FilterEvents::init() {
   declareProperty(
       "FilterStartTime", "",
       "Start time for splitters that can be parsed to DateAndTime.");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -214,8 +212,6 @@ void FilterEvents::exec() {
 
   m_progress = 1.0;
   progress(m_progress, "Completed");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -328,8 +324,6 @@ void FilterEvents::processAlgorithmProperties() {
       }
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -391,8 +385,6 @@ void FilterEvents::examineEventWS() {
     }
 
   } // END-IF-ELSE
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -437,8 +429,6 @@ void FilterEvents::processSplittersWorkspace() {
                       << "  Information may not be accurate. \n";
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -482,8 +472,6 @@ void FilterEvents::processMatrixSplitterWorkspace() {
     m_vecSplitterGroup[i] = static_cast<int>(vecY[i]);
     m_workGroupIndexes.insert(m_vecSplitterGroup[i]);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -599,8 +587,6 @@ void FilterEvents::createOutputWorkspaces() {
   setProperty("NumberOutputWS", numoutputws);
 
   g_log.information("Output workspaces are created. ");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -649,8 +635,6 @@ void FilterEvents::setupDetectorTOFCalibration() {
       }
     }
   }
-
-  return;
 }
 
 TimeAtSampleStrategy *FilterEvents::setupElasticTOFCorrection() const {
@@ -828,8 +812,6 @@ void FilterEvents::setupCustomizedTOFCorrection() {
       }
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -926,8 +908,6 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
     progress(0.1 + progressamount + outwsindex / numws * 0.2, "Splitting logs");
     outwsindex += 1.;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -967,7 +947,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
 
       // Perform the filtering (using the splitting function and just one
       // output)
-      std::string logmessage("");
+      std::string logmessage;
       if (m_FilterByPulseTime) {
         throw runtime_error(
             "It is not a good practice to split fast event by pulse time. ");
@@ -994,8 +974,6 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
 
   g_log.notice("Splitters in format of Matrixworkspace are not recommended to "
                "split sample logs. ");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1046,8 +1024,6 @@ void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
     else
       int_prop->filterByTimes(splitters);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

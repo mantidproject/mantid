@@ -115,8 +115,6 @@ void Regroup::exec() {
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputW);
-
-  return;
 }
 
 /** Regroup the data according to new output X array
@@ -173,8 +171,6 @@ void Regroup::rebin(const std::vector<double> &xold,
       enew[i] = sqrt(enew[i]);
     }
   }
-
-  return; // without problems
 }
 
 /** Creates a new  output X array  according to specific boundary defnitions
