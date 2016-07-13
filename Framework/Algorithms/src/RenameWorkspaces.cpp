@@ -87,11 +87,11 @@ void RenameWorkspaces::exec() {
     }
   }
 
-  //Check all names are not used already before starting rename
+  // Check all names are not used already before starting rename
   for (size_t i = 0; i < nWs; ++i) {
-	  if (AnalysisDataService::Instance().doesExist(newWsName[i])) {
-		  throw std::invalid_argument("Name " + newWsName[i] + "is already used");
-	  }
+    if (AnalysisDataService::Instance().doesExist(newWsName[i])) {
+      throw std::invalid_argument("Name " + newWsName[i] + "is already used");
+    }
   }
 
   // loop over array and rename each workspace

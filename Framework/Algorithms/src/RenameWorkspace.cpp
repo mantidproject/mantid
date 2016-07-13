@@ -52,9 +52,9 @@ void RenameWorkspace::exec() {
         "The input and output workspace names must be different");
   }
 
-  if (AnalysisDataService::Instance().doesExist(getPropertyValue("OutputWorkspace"))) {
-	  throw std::invalid_argument(
-		  "The workspace output name already exists");
+  if (AnalysisDataService::Instance().doesExist(
+          getPropertyValue("OutputWorkspace"))) {
+    throw std::invalid_argument("The workspace output name already exists");
   }
 
   // Assign it to the output workspace property

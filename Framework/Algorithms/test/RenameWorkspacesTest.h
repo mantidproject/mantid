@@ -209,28 +209,25 @@ public:
     AnalysisDataService::Instance().remove("A_InputWSA_1");
   }
 
-  
   void testExecNameAlreadyExists() {
-	  //Tests renaming a workspace to a name which is already used
-	  AnalysisDataService::Instance().clear();
-	  MatrixWorkspace_sptr inputWs = createWorkspace();
-	  AnalysisDataService::Instance().add("ExistingWorkspace", inputWs);
-	  //Create a workspace to rename
-	  MatrixWorkspace_sptr toRename = createWorkspace();
-	  AnalysisDataService::Instance().add("WorkspaceToRename", toRename);
-	  //Create and setup algorithm for test
-	  Mantid::Algorithms::RenameWorkspaces renameAlgorithm;
-	  renameAlgorithm.initialize();
-	  TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue("InputWorkspaces",
-		  "WorkspaceToRename"));
-	  TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue("WorkspaceNames",
-		  "ExistingWorkspace"));
-	  //Try to rename it should throw exception
-	  renameAlgorithm.setRethrows(true);
-	  TS_ASSERT_THROWS(renameAlgorithm.execute(), std::invalid_argument);
-
+    // Tests renaming a workspace to a name which is already used
+    AnalysisDataService::Instance().clear();
+    MatrixWorkspace_sptr inputWs = createWorkspace();
+    AnalysisDataService::Instance().add("ExistingWorkspace", inputWs);
+    // Create a workspace to rename
+    MatrixWorkspace_sptr toRename = createWorkspace();
+    AnalysisDataService::Instance().add("WorkspaceToRename", toRename);
+    // Create and setup algorithm for test
+    Mantid::Algorithms::RenameWorkspaces renameAlgorithm;
+    renameAlgorithm.initialize();
+    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue(
+        "InputWorkspaces", "WorkspaceToRename"));
+    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue(
+        "WorkspaceNames", "ExistingWorkspace"));
+    // Try to rename it should throw exception
+    renameAlgorithm.setRethrows(true);
+    TS_ASSERT_THROWS(renameAlgorithm.execute(), std::invalid_argument);
   }
-  
 
   void TestGroupExec() {
     AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
