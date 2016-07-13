@@ -6,6 +6,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -84,6 +85,13 @@ void RenameWorkspaces::exec() {
     for (size_t i = 0; i < nWs; ++i) {
       newWsName.push_back(prefix + inputWsName[i] + suffix);
     }
+  }
+
+  //Check all names are not used already before starting rename
+  for (size_t i = 0; i < nWs; ++i) {
+	  if (AnalysisDataService::Instance().doesExist(newWsName[i])) {
+		  throw std::invalid_argument("Name " + newWsName[i] + "is already used");
+	  }
   }
 
   // loop over array and rename each workspace

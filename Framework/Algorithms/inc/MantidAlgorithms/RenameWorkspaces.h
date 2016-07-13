@@ -17,7 +17,7 @@ namespace Algorithms {
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - Comma sepatated list of names of the Workspace to take
+    <LI> InputWorkspace - Comma separated list of names of the Workspace to take
    as input </LI>
     <LI> OutputWorkspace - string to append or prefix of the names of the
    workspaces </LI>

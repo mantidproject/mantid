@@ -85,6 +85,27 @@ public:
     AnalysisDataService::Instance().remove("InputWS");
   }
 
+  void testExecNameAlreadyExists() {
+	  //Tests renaming a workspace to a name which is already used
+	  AnalysisDataService::Instance().clear();
+	  MatrixWorkspace_sptr inputWs = createWorkspace();
+	  AnalysisDataService::Instance().add("ExistingWorkspace", inputWs);
+	  //Create a workspace to rename
+	  MatrixWorkspace_sptr toRename = createWorkspace();
+	  AnalysisDataService::Instance().add("WorkspaceToRename", toRename);
+	 //Create and setup algorithm for test
+	  Mantid::Algorithms::RenameWorkspace renameAlgorithm;
+	  renameAlgorithm.initialize();
+	  TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue("InputWorkspace",
+		  "WorkspaceToRename"));
+	  TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue("OutputWorkspace",
+		  "ExistingWorkspace"));
+	  //Try to rename it should throw exception
+	  renameAlgorithm.setRethrows(true);
+	  TS_ASSERT_THROWS(renameAlgorithm.execute(), std::invalid_argument);
+
+  }
+
   void testGroup() {
     AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
     WorkspaceGroup_sptr group(new WorkspaceGroup);

@@ -5,6 +5,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -49,6 +50,11 @@ void RenameWorkspace::exec() {
       getPropertyValue("OutputWorkspace")) {
     throw std::invalid_argument(
         "The input and output workspace names must be different");
+  }
+
+  if (AnalysisDataService::Instance().doesExist(getPropertyValue("OutputWorkspace"))) {
+	  throw std::invalid_argument(
+		  "The workspace output name already exists");
   }
 
   // Assign it to the output workspace property
