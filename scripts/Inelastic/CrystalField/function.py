@@ -18,7 +18,8 @@ class Function(object):
         for param in kwargs:
             self._params[param] = kwargs[param]
 
-        self._ties = None
+        self._ties = {}
+        self._constraints = []
 
     @property
     def name(self):
@@ -33,13 +34,50 @@ class Function(object):
     def param(self):
         return self._params
 
+    def ties(self, **kwargs):
+        """Set ties on the parameters.
+
+        @param kwargs: Ties as name=value pairs: name is a parameter name,
+            the value is a tie string or a number. For example:
+                tie(A0 = 0.1, A1 = '2*A0')
+        """
+        for tie in kwargs:
+            self._ties[tie] = kwargs[tie]
+
+    def constraints(self, *args):
+        """
+        Set constraints for the parameters.
+
+        @param args: A list of constraints. For example:
+                constraints('A0 > 0', '0.1 < A1 < 0.9')
+        """
+        self._constraints += args
+
     def toString(self):
         """Create function initialisation string"""
-        attrib = ['%s=%s' % item for item in self._attrib.iteritems()] + \
-                 ['%s=%s' % item for item in self._params.iteritems()]
+        attrib = ['%s=%s' % item for item in self._attrib.items()] + \
+                 ['%s=%s' % item for item in self._params.items()]
         if len(attrib) > 0:
-            return 'name=%s,%s' % (self._name, ','.join(attrib))
-        return 'name=%s' % self._name
+            s = 'name=%s,%s' % (self._name, ','.join(attrib))
+        else:
+            s = 'name=%s' % self._name
+        ties = ','.join(['%s=%s' % item for item in self._ties.items()])
+        if len(ties) > 0:
+            s += ',ties=(%s)' % ties
+        constraints = ','.join(self._constraints)
+        if len(constraints) > 0:
+            s += ',constraints=(%s)' % constraints
+        return s
+
+    def update(self, func):
+        """
+        Update values of the fitting parameters.
+        @param func: A IFunction object containing new parameter values.
+        """
+        n = func.nParams()
+        for i in range(n):
+            par = func.parameterName(i)
+            self._params[par] = func.getParameterValue(i)
 
 
 class CompositeProperties(object):
@@ -81,7 +119,7 @@ class CompositeProperties(object):
         for i in range(self.getSize()):
             if i in self._properties:
                 props = self._properties[i]
-                prop_list.append(','.join(['%s=%s' % item for item in props.iteritems()]))
+                prop_list.append(','.join(['%s=%s' % item for item in props.items()]))
             else:
                 prop_list.append('')
         return prop_list
@@ -99,7 +137,7 @@ class CompositeProperties(object):
             props = self._properties[i]
             if len(s) > 0:
                 s += ','
-            s += ','.join(['%s%s=%s' % ((f,) + item) for item in props.iteritems()])
+            s += ','.join(['%s%s=%s' % ((f,) + item) for item in props.items()])
         return s[:]
 
 
@@ -237,7 +275,7 @@ class PeaksFunction(object):
 
     def tiesString(self):
         if len(self._ties) > 0:
-            return 'ties=(%s)' % ','.join(['%s=%s' % item for item in self._ties.iteritems()])
+            return 'ties=(%s)' % ','.join(['%s=%s' % item for item in self._ties.items()])
         return ''
 
     def constraintsString(self):
@@ -269,3 +307,20 @@ class Background(object):
             return self.peak.toString()
         return '%s;%s' % (self.peak.toString(), self.background.toString())
 
+    def update(self, func1, func2=None):
+        """
+        Update values of the fitting parameters. If both arguments are given
+            the first one updates the peak and the other updates the background.
+
+        @param func1: First IFunction object containing new parameter values.
+        @param func2: Second IFunction object containing new parameter values.
+        """
+        if func2 is not None:
+            if self.peak is None or self.background is None:
+                raise RuntimeError('Background has peak or background undefined.')
+            self.peak.update(func1)
+            self.background.update(func2)
+        elif self.peak is None:
+            self.background.update(func1)
+        else:
+            self.peak.update(func1)

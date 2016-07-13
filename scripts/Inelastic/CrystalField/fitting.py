@@ -1,8 +1,12 @@
 import numpy as np
+import re
 from mantid.kernel import ConfigService
 
 # This is to make sure that Lorentzians get evaluated properly
 ConfigService.setString('curvefitting.peakRadius', str(100))
+
+# RegEx pattern matching a composite function parameter name, eg f2.Sigma
+fn_pattern = re.compile('f(\\d+)\\.(.+)')
 
 
 def MakeWorkspace(x, y):
@@ -103,6 +107,7 @@ class CrystalField(object):
         self._toleranceIntensity = 1e-3
         self._fieldParameters = {}
         self._fieldTies = {}
+        self._fieldConstraints = []
         self._temperature = None
         self._FWHM = None
         self._intensityScaling = 1.0
@@ -197,7 +202,7 @@ class CrystalField(object):
         temperature = self._getTemperature(i)
         s = 'name=CrystalFieldPeaks,Ion=%s,Symmetry=%s,Temperature=%s' % (self._ion, self._symmetry, temperature)
         s += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
-        s += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.iteritems()])
+        s += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
         return s
 
     def makeSpectrumFunction(self, i=0):
@@ -210,7 +215,7 @@ class CrystalField(object):
         s += ',PeakShape=%s' % self.getPeak(i).name
         if self._FWHM is not None:
             s += ',FWHM=%s' % self._getFWHM(i)
-        s += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.iteritems()])
+        s += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
         peaks = self.getPeak(i)
         params = peaks.paramString()
         if len(params) > 0:
@@ -367,6 +372,30 @@ class CrystalField(object):
         self._FWHM = value
         self._dirty_spectra = True
 
+    @property
+    def param(self):
+        return self._fieldParameters
+
+    def ties(self, **kwargs):
+        """Set ties on the field parameters.
+
+        @param kwargs: Ties as name=value pairs: name is a parameter name,
+            the value is a tie string or a number. For example:
+                tie(B20 = 0.1, IB23 = '2*B23')
+        """
+        for tie in kwargs:
+            self._fieldTies[tie] = kwargs[tie]
+
+    def constraints(self, *args):
+        """
+        Set constraints for the field parameters.
+
+        @param args: A list of constraints. For example:
+                constraints('B00 > 0', '0.1 < B43 < 0.9')
+        """
+        self._fieldConstraints += args
+
+
     def setPeaks(self, name):
         from .function import PeaksFunction
         """Define the shape of the peaks and create PeakFunction instances."""
@@ -484,11 +513,57 @@ class CrystalField(object):
                 self._fieldTies[name] = '0'
 
     def getFieldTies(self):
-        ties = ['%s=%s' % item for item in self._fieldTies.iteritems()]
+        ties = ['%s=%s' % item for item in self._fieldTies.items()]
         return ','.join(ties)
+
+    def getFieldConstraints(self):
+        return ','.join(self._fieldConstraints)
+
+    def updateParameters(self, func):
+        """
+        Update values of the field and peaks parameters.
+        @param func: A IFunction object containing new parameter values.
+        """
+        n = func.nParams()
+        for i in range(n):
+            par = func.parameterName(i)
+            value = func.getParameterValue(i)
+            if par == 'IntensityScaling':
+                self._intensityScaling = value
+            else:
+                m = re.match(fn_pattern, par)
+                if m:
+                    i = int(m.group(1))
+                    par = m.group(2)
+                    self.peaks.param[i][par] = value
+                else:
+                    self._fieldParameters[par] = value
+
+
+    def update(self, func):
+        """
+        Update values of the fitting parameters.
+        @param func: A IFunction object containing new parameter values.
+        """
+        from mantid.api import CompositeFunction
+        if isinstance(func, CompositeFunction):
+            nf = len(func)
+            if nf == 3:
+                self.background.update(func[0], func[1])
+                self.updateParameters(func[2])
+            elif nf == 2:
+                self.background.update(func[0])
+                self.updateParameters(func[1])
+            else:
+                raise RuntimeError('CompositeFunuction cannot have more than 3 components.')
+        else:
+            self.updateParameters(func)
 
 
 class CrystalFieldFit(object):
+    """
+    Object that controls fitting.
+    """
 
     def __init__(self, Model=None, Temperature=None, FWHM=None, InputWorkspace=None):
         self.model = Model
@@ -500,9 +575,23 @@ class CrystalFieldFit(object):
         self._output_workspace_base_name = 'fit'
 
     def fit(self):
-        from mantid.simpleapi import Fit
+        """
+        Run Fit algorithm. Update function parameters.
+        """
+        from mantid.api import AlgorithmManager
         fun = self.model.makeSpectrumFunction()
         ties = self.model.getFieldTies()
         if len(ties) > 0:
             fun += ',ties=(%s,IntensityScaling=1)' % ties
-        return Fit(fun, self._input_workspace, Output=self._output_workspace_base_name)
+        constraints = self.model.getFieldConstraints()
+        if len(constraints) > 0:
+            fun += ',constraints=(%s)' % constraints
+
+        alg = AlgorithmManager.createUnmanaged('Fit')
+        alg.initialize()
+        alg.setProperty('Function', fun)
+        alg.setProperty('InputWorkspace', self._input_workspace)
+        alg.setProperty('Output', 'fit')
+        alg.execute()
+        f = alg.getProperty('Function').value
+        self.model.update(f)
