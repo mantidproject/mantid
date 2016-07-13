@@ -1217,8 +1217,6 @@ private:
     inputWs->dataY(0) = y1;
     inputWs->dataY(1) = y2;
     if (useXErrors) {
-      // TODO how do we test loading legacy files with dx.size == x.size?
-      // Use legacy interface to create "broken" histograms. Duplicate test.
       inputWs->setPointStandardDeviations(0, dx1);
       inputWs->setPointStandardDeviations(1, dx2);
       if (legacyXErrors) {
