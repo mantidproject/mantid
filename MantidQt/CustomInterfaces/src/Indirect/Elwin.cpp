@@ -184,8 +184,7 @@ void Elwin::run() {
   elwinMultAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
 
   elwinMultAlg->setProperty("OutputInQ", qWorkspace);
-  elwinMultAlg->setProperty("OutputInQSquared",
-                            qSquaredWorkspace);
+  elwinMultAlg->setProperty("OutputInQSquared", qSquaredWorkspace);
   elwinMultAlg->setProperty("OutputELF", elfWorkspace);
 
   elwinMultAlg->setProperty("SampleEnvironmentLogName",
@@ -259,7 +258,8 @@ void Elwin::unGroupInput(bool error) {
  * @param workspaceName Name of the workspace to save
  * @param filename Name of the file to save it as
  */
-void Elwin::addSaveAlgorithm(const std::string &workspaceName, std::string filename) {
+void Elwin::addSaveAlgorithm(const std::string &workspaceName,
+                             std::string filename) {
   // Set a default filename if none provided
   if (filename.length() == 0)
     filename = workspaceName + ".nxs";

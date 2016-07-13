@@ -33,7 +33,8 @@ private slots:
   void unGroupInput(bool error);
 
 private:
-  void addSaveAlgorithm(const std::string &workspaceName, std::string filename = "");
+  void addSaveAlgorithm(const std::string &workspaceName,
+                        std::string filename = "");
 
   Ui::Elwin m_uiForm;
   QtTreePropertyBrowser *m_elwTree;
