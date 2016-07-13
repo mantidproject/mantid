@@ -35,8 +35,6 @@ public:
     TS_ASSERT_EQUALS(dtt2, 2.0);
 
     TS_ASSERT_THROWS_ANYTHING(func.setParameter("Fake", 0.0));
-
-    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -134,14 +132,12 @@ public:
 
     double fwhm = func.fwhm();
     TS_ASSERT_DELTA(fwhm, 47.049, 0.001);
-
-    return;
   }
 
   //----------------------------------------------------------------------------------------------
   /** Calculate peak positions: data is from Fullprof's sample: arg_si
     */
-  void XcalculateVulcanPeakPositions() {
+  void calculateVulcanPeakPositions() {
     // TODO - This will be left to the ticket for VULCAN
     // (2, 2, 0)
     NeutronBk2BkExpConvPVoigt func;
@@ -157,7 +153,9 @@ public:
     double dh1 = func.getPeakParameter("d_h");
     double tofh1 = func.centre();
 
-    cout << "Peak [111]: d_h = " << dh1 << ", TOF_h = " << tofh1 << ".\n";
+    std::stringstream str;
+    str << "Peak [111]: d_h = " << dh1 << ", TOF_h = " << tofh1 << ".\n";
+    TS_TRACE(str.str());
 
     // TODO - Find out Vulcan's 220 peak centre's range.
     // TS_ASSERT_DELTA(tofh1, 23421.7207, 0.01);
@@ -204,14 +202,13 @@ public:
     double tofh4 = func222.centre();
     TS_ASSERT_DELTA(tofh4, 11710.0332, 0.01);
     */
-
-    return;
   }
 
   //----------------------------------------------------------------------------------------------
   /** Calculate peak positions: data is from Fullprof's sample: arg_si
+      NOTE: this test is currently disabled and needs fixing.
     */
-  void Xtest_calculateVulcanProfile() {
+  void XXXtest_calculateVulcanProfile() {
     NeutronBk2BkExpConvPVoigt func;
     func.initialize();
 
@@ -245,7 +242,9 @@ public:
     double fwhm = func.fwhm();
     TS_ASSERT_DELTA(fwhm, 47.049, 0.001);
 
-    cout << "Peak 220: TOF_h = " << tofh1 << ", FWHM = " << fwhm << ".\n";
+    std::stringstream str;
+    str << "Peak 220: TOF_h = " << tofh1 << ", FWHM = " << fwhm << ".\n";
+    TS_TRACE(str.str());
 
     vector<double> vecX;
     double tof = tofh1 - 10 * fwhm;
@@ -255,10 +254,11 @@ public:
     }
     vector<double> vecY(vecX.size(), 0.0);
     func.function(vecY, vecX);
-    for (size_t i = 0; i < vecX.size(); ++i)
-      cout << vecX[i] << "\t\t" << vecY[i] << "\n";
-
-    return;
+    for (size_t i = 0; i < vecX.size(); ++i) {
+      std::stringstream str;
+      str << vecX[i] << "\t\t" << vecY[i] << "\n";
+      TS_TRACE(str.str());
+    }
   }
 };
 

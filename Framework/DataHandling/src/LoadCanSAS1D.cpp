@@ -180,7 +180,7 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
   dataWS->setPointStandardDeviations(0, nBins);
   auto &Dx = dataWS->mutableDx(0);
   int vecindex = 0;
-  std::string yUnit = "";
+  std::string yUnit;
   bool isCommon = true;
   // iterate through each Idata element  and get the values of "Q",
   //"I" and "Idev" text nodes and fill X,Y,E vectors
