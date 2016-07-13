@@ -117,8 +117,33 @@ void Elwin::run() {
   QFileInfo firstFileInfo(inputFilenames[0]);
   const auto filename = firstFileInfo.baseName();
 
-  auto workspaceBaseName =
-      filename.left(filename.lastIndexOf("_")) + "_elwin_";
+  auto workspaceBaseName = filename.left(filename.lastIndexOf("_"));
+
+  if (inputFilenames.size() > 1) {
+    QFileInfo fileInfo(inputFilenames[inputFilenames.length() - 1]);
+    auto runNumber = fileInfo.baseName().toStdString();
+    runNumber = runNumber.substr(0, runNumber.find_first_of("_"));
+    size_t runNumberStart = 0;
+    const auto strLength = runNumber.length();
+    for (size_t i = 0; i < strLength; i++) {
+      if (std::isdigit(runNumber[i])) {
+        runNumberStart = i;
+        break;
+      }
+    }
+    // reassemble workspace base name with additional run number
+    runNumber = runNumber.substr(runNumberStart, strLength);
+    auto baseName = firstFileInfo.baseName();
+    const auto prefix = baseName.left(baseName.indexOf("_"));
+    auto testPre = prefix.toStdString();
+    const auto suffix =
+        baseName.right(baseName.length() - baseName.indexOf("_"));
+    auto testsuf = suffix.toStdString();
+    workspaceBaseName =
+        prefix + QString::fromStdString("-" + runNumber) + suffix;
+  }
+
+  workspaceBaseName += "_elwin_";
 
   const auto qWorkspace = (workspaceBaseName + "eq").toStdString();
   const auto qSquaredWorkspace = (workspaceBaseName + "eq2").toStdString();
