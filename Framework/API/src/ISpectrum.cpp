@@ -119,10 +119,7 @@ const std::set<detid_t> &ISpectrum::getDetectorIDs() const {
 // --------------------------------------------------------------------------
 /** Clear the detector IDs set.
  */
-void ISpectrum::clearDetectorIDs() {
-  this->detectorIDs.clear();
-  return;
-}
+void ISpectrum::clearDetectorIDs() { this->detectorIDs.clear(); }
 
 // --------------------------------------------------------------------------
 /** Get a mutable reference to the detector IDs set.

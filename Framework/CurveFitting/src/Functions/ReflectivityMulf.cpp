@@ -33,7 +33,6 @@ void ReflectivityMulf::init() {
   declareParameter("Roughness", 2.5);
   declareParameter("BackGround", 1.0e-6);
   declareParameter("Resolution", 5.0);
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -223,8 +222,6 @@ void ReflectivityMulf::function1D(double *out, const double *xValues,
     // g_log.information() << "cy[j]" << cy[j] << "\n";
   }
   // End of parallelized section
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

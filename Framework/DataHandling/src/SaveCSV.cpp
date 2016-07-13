@@ -198,8 +198,6 @@ void SaveCSV::exec() {
         "SaveCSV currently only works for 2D workspaces.");
   }
   outCSV_File.close();
-  // only gets here if everything happened normally
-  return;
 }
 
 void SaveCSV::saveXerrors(std::ofstream &stream,

@@ -1197,7 +1197,7 @@ void LoadFITS::mapHeaderKeys() {
  * and leading 0's
  */
 size_t LoadFITS::fetchNumber(const std::string &name) {
-  std::string tmpStr = "";
+  std::string tmpStr;
   for (auto it = name.end() - 1; isdigit(*it); --it) {
     tmpStr.insert(0, 1, *it);
   }

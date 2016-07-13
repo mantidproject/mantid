@@ -248,7 +248,6 @@ void CrossCorrelate::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   setProperty("OutputWorkspace", out);
-  return;
 }
 
 } // namespace Algorithm

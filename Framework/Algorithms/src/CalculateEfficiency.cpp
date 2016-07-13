@@ -117,8 +117,6 @@ void CalculateEfficiency::exec() {
     normalizeDetectors(rebinnedWS, outputWS, sum, err, npixels, EMPTY_DBL(),
                        EMPTY_DBL());
   }
-
-  return;
 }
 
 /*

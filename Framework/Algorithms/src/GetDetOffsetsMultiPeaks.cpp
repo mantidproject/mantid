@@ -281,8 +281,6 @@ void GetDetOffsetsMultiPeaks::exec() {
   // Make summary
   progress(0.92, "Making summary");
   makeFitSummary();
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -380,8 +378,6 @@ void GetDetOffsetsMultiPeaks::processProperties() {
       throw std::runtime_error(
           "Input workspace does not match resolution workspace. ");
   }
-
-  return;
 }
 
 //-----------------------------------------------------------------------------------------
@@ -463,8 +459,6 @@ void GetDetOffsetsMultiPeaks::importFitWindowTableWorkspace(
       if (m_vecFitWindow[i].empty())
         m_vecFitWindow[i] = vec_univFitWindow;
   }
-
-  return;
 }
 
 //-----------------------------------------------------------------------------------------
@@ -546,8 +540,6 @@ void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
-
-    return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -770,7 +762,6 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
   gsl_vector_free(x);
   gsl_vector_free(ss);
   gsl_multimin_fminimizer_free(s);
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -802,8 +793,6 @@ void deletePeaks(std::vector<size_t> &banned, std::vector<double> &peakPosToFit,
     vecDeltaDovD.erase(vecDeltaDovD.begin() + (*it));
   }
   banned.clear();
-
-  return;
 }
 }
 
@@ -1119,8 +1108,6 @@ void GetDetOffsetsMultiPeaks::generatePeaksList(
   Statistics widthDivPos = getStatistics(vec_widthDivPos);
   deltaDovD = widthDivPos.mean;
   dev_deltaDovD = widthDivPos.standard_deviation;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1170,8 +1157,6 @@ void GetDetOffsetsMultiPeaks::createInformationWorkspaces() {
   // Create resolution (delta(d)/d) workspace
   m_resolutionWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", numspec, 1, 1));
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1254,8 +1239,6 @@ void GetDetOffsetsMultiPeaks::addInfoToReportWS(
     size_t icol = m_peakOffsetTableWS->columnCount() - 1;
     m_peakOffsetTableWS->cell<double>(wi, icol) = stddev;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1288,8 +1271,6 @@ void GetDetOffsetsMultiPeaks::removeEmptyRowsFromPeakOffsetTable() {
       ++icurrow;
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

@@ -654,7 +654,7 @@ void addTransmission(H5::Group &group,
   // Add T with units + uncertainty definition
   const auto transmissionData = workspace->readY(0);
   std::map<std::string, std::string> transmissionAttributes;
-  std::string unit = "";
+  std::string unit;
   if (unit.empty()) {
     unit = sasNone;
   }
