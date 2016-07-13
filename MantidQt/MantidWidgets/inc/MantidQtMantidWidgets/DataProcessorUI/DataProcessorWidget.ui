@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>959</width>
+    <width>690</width>
     <height>346</height>
    </rect>
   </property>
@@ -27,6 +27,14 @@
                  <property name="styleSheet">
                    <string>QToolBar{border: none;}</string>
                  </property>
+                 <addaction name="menuOpenTable"/>
+                 <addaction name="actionNewTable"/>
+                 <addaction name="actionSaveTable"/>
+                 <addaction name="actionSaveTableAs"/>
+                 <addaction name="separator"/>
+                 <addaction name="actionImportTable"/>
+                 <addaction name="actionExportTable"/>
+                 <addaction name="separator"/>
                  <addaction name="actionProcess"/>
                  <addaction name="actionExpandSelection"/>
                  <addaction name="separator"/>
@@ -41,6 +49,8 @@
                  <addaction name="actionCutSelected"/>
                  <addaction name="actionPasteSelected"/>
                  <addaction name="actionClearSelected"/>
+                 <addaction name="separator"/>
+                 <addaction name="actionOptionsDialog"/>
                  <addaction name="actionHelp"/>
                </widget>
              </item>

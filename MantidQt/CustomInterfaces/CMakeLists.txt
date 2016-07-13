@@ -81,6 +81,9 @@ set ( SRC_FILES
 	src/Muon/MuonAnalysisHelper.cpp
 	src/Muon/MuonAnalysisOptionTab.cpp
 	src/Muon/MuonAnalysisResultTableTab.cpp
+	src/Poldi/PoldiGenericDataProcessorPresenterFactory.cpp
+	src/Poldi/PoldiPresenter.cpp
+	src/Poldi/QtPoldiView.cpp
 	src/Reflectometry/MeasurementItem.cpp
 	src/Reflectometry/QtReflMainView.cpp
 	src/Reflectometry/ReflCatalogSearcher.cpp
@@ -223,6 +226,10 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
+	inc/MantidQtCustomInterfaces/Poldi/IPoldiPresenter.h
+	inc/MantidQtCustomInterfaces/Poldi/IPoldiView.h
+	inc/MantidQtCustomInterfaces/Poldi/PoldiGenericDataProcessorPresenterFactory.h
+	inc/MantidQtCustomInterfaces/Poldi/PoldiPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h
 	inc/MantidQtCustomInterfaces/Reflectometry/MeasurementItem.h
@@ -363,6 +370,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
+                inc/MantidQtCustomInterfaces/Poldi/QtPoldiView.h
                 inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
                 inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainView.h
                 inc/MantidQtCustomInterfaces/SampleTransmission.h
@@ -437,6 +445,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Muon/ALCInterface.ui
                inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingView.ui
                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
+               inc/MantidQtCustomInterfaces/Poldi/QtPoldiView.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflMainWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflWindow.ui
                inc/MantidQtCustomInterfaces/SampleTransmission.ui

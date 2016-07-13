@@ -37,9 +37,6 @@ public:
     TS_ASSERT_THROWS(
         DataProcessorPostprocessingAlgorithm("PDDetermineCharacterizations"),
         std::invalid_argument);
-    // Algorithms with invalid output ws properties
-    TS_ASSERT_THROWS(DataProcessorPostprocessingAlgorithm("GroupWorkspaces"),
-                     std::invalid_argument);
   }
 
   void test_valid_algorithms() {
@@ -47,6 +44,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(DataProcessorPostprocessingAlgorithm("MergeRuns"));
     // Default: Stitch1DMany
     TS_ASSERT_THROWS_NOTHING(DataProcessorPostprocessingAlgorithm());
+    // GroupWorkspaces
+    TS_ASSERT_THROWS_NOTHING(
+        DataProcessorPostprocessingAlgorithm("GroupWorkspaces"));
   }
   void test_Stitch1DMany() {
 
