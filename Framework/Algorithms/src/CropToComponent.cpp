@@ -20,7 +20,7 @@ void getDetectors(
 void getDetectorIDs(
     std::vector<Mantid::Geometry::IDetector_const_sptr> &detectors,
     std::vector<Mantid::detid_t> &detectorIDs) {
-  auto numberOfDetectors = detectors.size();
+  auto numberOfDetectors = static_cast<int>(detectors.size());
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int index = 0; index < numberOfDetectors; ++index) {
     auto det = detectors[index];
