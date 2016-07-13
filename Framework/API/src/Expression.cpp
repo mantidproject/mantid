@@ -364,7 +364,7 @@ void Expression::logPrint(const std::string &pads) const {
 
 void Expression::setFunct(const std::string &name) {
   if (!op_prec(name)) {
-    std::string op = "";
+    std::string op;
     if (name.size() > 1 && is_op_symbol(name[0])) {
       op = name.substr(0, 1);
       if (name.size() > 2 && is_op_symbol(name[1])) {

@@ -104,8 +104,6 @@ void NormaliseToUnity::exec() {
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", result);
-
-  return;
 }
 
 } // namespace Algorithms

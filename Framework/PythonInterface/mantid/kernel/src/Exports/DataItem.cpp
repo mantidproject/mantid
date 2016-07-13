@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidKernel/DataItem.h"
 
 #include <boost/python/class.hpp>
@@ -5,6 +6,8 @@
 
 using Mantid::Kernel::DataItem;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(DataItem)
 
 void export_DataItem() {
   register_ptr_to_python<boost::shared_ptr<DataItem>>();

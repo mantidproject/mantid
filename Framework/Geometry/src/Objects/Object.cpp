@@ -146,7 +146,6 @@ void Object::convertComplement(const std::map<int, Object> &MList)
 
 {
   this->procString(this->cellStr(MList));
-  return;
 }
 
 /**
@@ -593,7 +592,6 @@ void Object::print() const {
     std::cout << (*mc) << " ";
   }
   std::cout << '\n';
-  return;
 }
 
 /**
@@ -602,7 +600,6 @@ void Object::print() const {
 void Object::makeComplement() {
   std::unique_ptr<Rule> NCG = procComp(std::move(TopRule));
   TopRule = std::move(NCG);
-  return;
 }
 
 /**
@@ -611,7 +608,6 @@ void Object::makeComplement() {
 void Object::printTree() const {
   std::cout << "Name == " << ObjNum << '\n';
   std::cout << TopRule->display() << '\n';
-  return;
 }
 
 /**
@@ -650,7 +646,6 @@ void Object::write(std::ostream &OX) const {
   cx.precision(10);
   cx << str();
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
-  return;
 }
 
 /**

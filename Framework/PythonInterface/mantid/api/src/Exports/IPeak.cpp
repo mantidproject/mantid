@@ -1,9 +1,12 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Geometry::IPeak;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IPeak)
 
 namespace {
 Mantid::Geometry::PeakShape_sptr getPeakShape(IPeak &peak) {

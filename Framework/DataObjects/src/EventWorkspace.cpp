@@ -4,6 +4,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Exception.h"
@@ -90,13 +91,10 @@ void EventWorkspace::init(const std::size_t &NVectors,
     data[i] = new EventList(mru, specnum_t(i));
 
   // Set each X vector to have one bin of 0 & extremely close to zero
-  MantidVecPtr xVals;
-  MantidVec &x = xVals.access();
-  x.resize(2, 0.0);
   // Move the rhs very,very slightly just incase something doesn't like them
   // being the same
-  x[1] = std::numeric_limits<double>::min();
-  this->setAllX(xVals);
+  HistogramData::BinEdges edges{0.0, std::numeric_limits<double>::min()};
+  this->setAllX(edges);
 
   // Create axes.
   m_axes.resize(2);
@@ -511,13 +509,8 @@ void EventWorkspace::resizeTo(const std::size_t numSpectra) {
 
   // Put on a default set of X vectors, with one bin of 0 & extremely close to
   // zero
-  MantidVecPtr xVals;
-  MantidVec &x = xVals.access();
-  x.resize(2, 0.0);
-  // Move the rhs very,very slightly just incase something doesn't like them
-  // being the same
-  x[1] = std::numeric_limits<double>::min();
-  this->setAllX(xVals);
+  HistogramData::BinEdges edges{0.0, std::numeric_limits<double>::min()};
+  this->setAllX(edges);
 
   // Clearing the MRU list is a good idea too.
   this->clearMRU();
@@ -587,26 +580,24 @@ void EventWorkspace::deleteEmptyLists() {
   this->clearMRU();
 }
 
-//-----------------------------------------------------------------------------
-/// Return the data X vector at a given workspace index
-/// Note: the MRUlist should be cleared before calling getters for the Y or E
-/// data
+/// Deprecated, use mutableX() instead. Return the data X vector at a given
+/// workspace index
 /// @param index :: the workspace index to return
 /// @returns A reference to the vector of binned X values
 MantidVec &EventWorkspace::dataX(const std::size_t index) {
   return getSpectrum(index).dataX();
 }
 
-/// Return the data X error vector at a given workspace index
-/// Note: the MRUlist should be cleared before calling getters for the Y or E
-/// data
+/// Deprecated, use mutableDx() instead. Return the data X error vector at a
+/// given workspace index
 /// @param index :: the workspace index to return
 /// @returns A reference to the vector of binned error values
 MantidVec &EventWorkspace::dataDx(const std::size_t index) {
   return getSpectrum(index).dataDx();
 }
 
-/// Return the data Y vector at a given workspace index
+/// Deprecated, use mutableY() instead. Return the data Y vector at a given
+/// workspace index
 /// Note: these non-const access methods will throw NotImplementedError
 MantidVec &EventWorkspace::dataY(const std::size_t) {
   throw NotImplementedError("EventWorkspace::dataY cannot return a non-const "
@@ -614,7 +605,8 @@ MantidVec &EventWorkspace::dataY(const std::size_t) {
                             "an EventWorkspace!");
 }
 
-/// Return the data E vector at a given workspace index
+/// Deprecated, use mutableE() instead. Return the data E vector at a given
+/// workspace index
 /// Note: these non-const access methods will throw NotImplementedError
 MantidVec &EventWorkspace::dataE(const std::size_t) {
   throw NotImplementedError("EventWorkspace::dataE cannot return a non-const "
@@ -622,41 +614,39 @@ MantidVec &EventWorkspace::dataE(const std::size_t) {
                             "an EventWorkspace!");
 }
 
-//-----------------------------------------------------------------------------
-// --- Const Data Access ----
-//-----------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-/** @return the const data X vector at a given workspace index
+/** Deprecated, use x() instead.
+ * @return the const data X vector at a given workspace index
  * @param index :: workspace index   */
 const MantidVec &EventWorkspace::dataX(const std::size_t index) const {
   return getSpectrum(index).readX();
 }
 
-/** @return the const data X error vector at a given workspace index
+/** Deprecated, use dx() instead.
+ * @return the const data X error vector at a given workspace index
  * @param index :: workspace index   */
 const MantidVec &EventWorkspace::dataDx(const std::size_t index) const {
   return getSpectrum(index).readDx();
 }
 
-//---------------------------------------------------------------------------
-/** @return the const data Y vector at a given workspace index
+/** Deprecated, use y() instead.
+ * @return the const data Y vector at a given workspace index
  * @param index :: workspace index   */
 const MantidVec &EventWorkspace::dataY(const std::size_t index) const {
   return getSpectrum(index).readY();
 }
 
-//---------------------------------------------------------------------------
-/** @return the const data E (error) vector at a given workspace index
+/** Deprecated, use e() instead.
+ * @return the const data E (error) vector at a given workspace index
  * @param index :: workspace index   */
 const MantidVec &EventWorkspace::dataE(const std::size_t index) const {
   return getSpectrum(index).readE();
 }
 
-//---------------------------------------------------------------------------
-/** @return a pointer to the X data vector at a given workspace index
+/** Deprecated, use sharedX() instead.
+ * @return a pointer to the X data vector at a given workspace index
  * @param index :: workspace index   */
-Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const std::size_t index) const {
+Kernel::cow_ptr<HistogramData::HistogramX>
+EventWorkspace::refX(const std::size_t index) const {
   return getSpectrum(index).ptrX();
 }
 
@@ -709,12 +699,12 @@ void EventWorkspace::generateHistogramPulseTime(const std::size_t index,
 /*** Set all histogram X vectors.
  * @param x :: The X vector of histogram bins to use.
  */
-void EventWorkspace::setAllX(Kernel::cow_ptr<MantidVec> &x) {
-  // int counter=0;
-  auto i = this->data.begin();
-  for (; i != this->data.end(); ++i) {
-    (*i)->setX(x);
-  }
+void EventWorkspace::setAllX(const HistogramData::BinEdges &x) {
+  // This is an EventWorkspace, so changing X size is ok as long as we clear
+  // the MRU below, i.e., we avoid the size check of Histogram::setBinEdges and
+  // just reset the whole Histogram.
+  for (auto &eventList : this->data)
+    eventList->setHistogram(x);
 
   // Clear MRU lists now, free up memory
   this->clearMRU();

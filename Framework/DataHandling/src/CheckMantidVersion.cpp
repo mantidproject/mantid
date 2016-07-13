@@ -60,7 +60,7 @@ void CheckMantidVersion::init() {
 void CheckMantidVersion::exec() {
   std::string currentVersion = getCurrentVersion();
   setProperty("CurrentVersion", currentVersion);
-  std::string mostRecentVersion = "";
+  std::string mostRecentVersion;
 
   std::string gitHubReleaseUrl = ConfigService::Instance().getString(
       "CheckMantidVersion.GitHubReleaseURL");
@@ -74,7 +74,7 @@ void CheckMantidVersion::exec() {
     downloadUrl = "http://download.mantidproject.org";
   }
 
-  std::string json = "";
+  std::string json;
   try {
     json = getVersionsFromGitHub(gitHubReleaseUrl);
   } catch (Exception::InternetError &ex) {

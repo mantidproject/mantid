@@ -47,6 +47,7 @@ using namespace Geometry;
 using namespace API;
 using namespace Mantid::Crystal;
 using namespace std;
+using Mantid::HistogramData::BinEdges;
 
 class IntegratePeakTimeSlicesTest : public CxxTest::TestSuite {
 public:
@@ -76,12 +77,13 @@ public:
     wsPtr->getAxis(0)->setUnit("TOF");
 
     // Set times;
-    MantidVecPtr x_vals;
-    for (int i = 0; i < NTimes; i++)
-      x_vals.access().push_back(18000.0 + i * 100);
+    BinEdges x_vals(NTimes + 1);
+    int i = 0;
+    std::generate(begin(x_vals), end(x_vals),
+                  [&i] { return 18000.0 + i++ * 100; });
 
     for (size_t k = 0; k < wsPtr->getNumberHistograms(); k++)
-      wsPtr->setX(k, x_vals);
+      wsPtr->setBinEdges(k, x_vals);
 
     Geometry::Instrument_const_sptr instP = wsPtr->getInstrument();
     IComponent_const_sptr bankC =
@@ -139,8 +141,8 @@ public:
             0.0, MaxPeakIntensity * (1 - abs(row - PeakRow) / MaxPeakRCSpan));
         double MaxRC =
             max<double>(0.0, MaxR * (1 - abs(col - PeakCol) / MaxPeakRCSpan));
-        MantidVecPtr dataY;
-        MantidVecPtr dataE;
+        MantidVec dataY;
+        MantidVec dataE;
 
         for (int chan = 0; chan < NTimes; chan++) {
           double val = max<double>(
@@ -149,15 +151,16 @@ public:
           T[chan] += val;
           val += 1.4;
 
-          dataY.access().push_back(val);
-          dataE.access().push_back(sqrt(val));
+          dataY.push_back(val);
+          dataE.push_back(sqrt(val));
           if ((val - 1.4) > MaxPeakIntensity * .1) {
             double Q = calcQ(bankR, instP, row, col, 1000.0 + chan * 50);
             dQ = max<double>(dQ, fabs(Q - Q0));
           }
         }
 
-        wsPtr->setData(wsIndex, dataY, dataE);
+        wsPtr->dataY(wsIndex) = dataY;
+        wsPtr->dataE(wsIndex) = dataE;
       }
 
     PeaksWorkspace_sptr pks(new PeaksWorkspace());

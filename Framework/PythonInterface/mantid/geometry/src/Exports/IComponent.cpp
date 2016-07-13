@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/Quat.h"
 
@@ -8,6 +9,8 @@
 
 using Mantid::Geometry::IComponent;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IComponent)
 
 namespace {
 /**

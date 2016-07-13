@@ -228,8 +228,6 @@ void FindPeakBackground::exec() {
 
   // 4. Set the output
   setProperty("OutputWorkspace", m_outPeakTableWS);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -385,8 +383,6 @@ void FindPeakBackground::estimateBackground(
 
   g_log.information() << "Estimated background: A0 = " << out_bg0
                       << ", A1 = " << out_bg1 << ", A2 = " << out_bg2 << "\n";
-
-  return;
 }
 //----------------------------------------------------------------------------------------------
 /** Calculate 4th moment
