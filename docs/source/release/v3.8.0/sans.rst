@@ -5,6 +5,12 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
+Algorithms
+----------
+
+- :ref:`CropToComponent <algm-CropToComponent>` allows for cropping a workspace to a list of detector names.
+
+
 Bug Fixes
 ---------
 
