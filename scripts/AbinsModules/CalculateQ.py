@@ -5,7 +5,7 @@ import Constants
 from IOmodule import IOmodule
 from QData import  QData
 from KpointsData import KpointsData
-from Instruments import InstrumentInterface
+from Instruments import Instrument
 
 
 class CalculateQ(IOmodule):
@@ -21,7 +21,7 @@ class CalculateQ(IOmodule):
         """
         super(CalculateQ, self).__init__(input_filename=filename, group_name=Constants.Q_data_group)
 
-        if isinstance(instrument, InstrumentInterface):
+        if isinstance(instrument, Instrument):
             self._instrument = instrument
         elif instrument is None:
             self._instrument = None
@@ -73,7 +73,7 @@ class CalculateQ(IOmodule):
         Calculates Q vectors and return them. Saves Q vectors to an hdf file.
         @return: Q vectors for the required instrument
         """
-        if isinstance(self._instrument, InstrumentInterface):
+        if isinstance(self._instrument, Instrument):
             self._calculate_qvectors_instrument()
         else:
             raise ValueError("General case of Q data not implemented yet.")

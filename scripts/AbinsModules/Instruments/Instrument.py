@@ -1,6 +1,6 @@
 from AbinsModules import Constants
 
-class InstrumentInterface(object):
+class Instrument(object):
 
     _name  = None
 

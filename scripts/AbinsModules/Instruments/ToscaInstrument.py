@@ -1,7 +1,7 @@
-from InstrumentInterface import  InstrumentInterface
+from Instrument import  Instrument
 from AbinsModules import Constants
 
-class ToscaInstrument(InstrumentInterface):
+class ToscaInstrument(Instrument):
     """
     Class for TOSCA and TOSCA-like instruments.
     """
