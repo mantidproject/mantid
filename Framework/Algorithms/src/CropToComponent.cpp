@@ -48,7 +48,7 @@ int CropToComponent::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CropToComponent::category() const {
-  return "TODO: FILL IN A CATEGORY";
+  return "Transforms\\Splitting";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
