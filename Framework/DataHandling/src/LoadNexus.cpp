@@ -170,9 +170,6 @@ void LoadNexus::runLoadNexusProcessed() {
  loadNexusPro->setPropertyValue("SpectrumList",
                                 getPropertyValue("SpectrumList"));
 
-  /* !!! The spectrum min/max/list properties are currently missing from
-     LoadNexus
-         so don't pass them through here, just print a warning !!! */
 
   // Get the array passed in the spectrum_list, if an empty array was passed use
   // the default
@@ -180,8 +177,9 @@ void LoadNexus::runLoadNexusProcessed() {
  std::vector<int> specList = getProperty("SpectrumList");
    int specMin = getProperty("SpectrumMin");
    int specMax = getProperty("SpectrumMax");
+
+   // Cant use Min/Max with list on processed nexus files so throw exception
    if (!specList.empty() && (specMax != Mantid::EMPTY_INT() || specMin != 1)) {
-     // Cant use Min/Max with list on processed nexus files
      throw std::invalid_argument(
          "SpectrumList and SpectrumMin or SpectrumMax."
          " cannot be used simultaneously. SpectrumList should be used to"
