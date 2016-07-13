@@ -13,8 +13,10 @@ class LinearGeneratorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LinearGeneratorTest *createSuite() { return new LinearGeneratorTest(); }
-  static void destroySuite( LinearGeneratorTest *suite ) { delete suite; }
+  static LinearGeneratorTest *createSuite() {
+    return new LinearGeneratorTest();
+  }
+  static void destroySuite(LinearGeneratorTest *suite) { delete suite; }
 
   void test_length0() {
     std::vector<double> x(0);
@@ -34,6 +36,5 @@ public:
     TS_ASSERT_DELTA(x, std::vector<double>({0.1, 0.3}), 1e-14);
   }
 };
-
 
 #endif /* MANTID_HISTOGRAMDATA_LINEARGENERATORTEST_H_ */

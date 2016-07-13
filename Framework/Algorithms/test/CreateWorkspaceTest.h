@@ -92,7 +92,8 @@ public:
 
     std::vector<double> values{1.0, 2.0, 3.0, 4.0};
 
-    alg.setProperty<std::vector<double>>("DataX", std::vector<double>{1.1, 2.2});
+    alg.setProperty<std::vector<double>>("DataX",
+                                         std::vector<double>{1.1, 2.2});
     alg.setProperty<std::vector<double>>("DataY", values);
     alg.setProperty<std::vector<double>>("DataE", values);
 
