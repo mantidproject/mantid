@@ -15,6 +15,7 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include <Poco/Path.h>
+#include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -130,6 +131,51 @@ public:
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS(output2->getAxis(0)->unit()->unitID(), "Label");
   }
+
+  
+  void testProcessedMinMaxAndListDefined() {
+
+	  //Tests that a processed spectrum cannot be loaded in with
+	  //The Minimum/Maximum spectrum and Spectrum List set
+	  //As this will fail to load
+
+	  LoadNexus loadNexusAlg;
+	  loadNexusAlg.initialize();
+
+	  //Setup algorithm
+	  inputFile = "GEM38370_Focussed_Legacy.nxs";
+	  loadNexusAlg.setPropertyValue("Filename", inputFile);
+	  outputSpace = "testProcessedData";
+	  loadNexusAlg.setPropertyValue("OutputWorkspace", outputSpace);
+	  loadNexusAlg.setRethrows(true);
+
+	  //Set min and max parameters
+	  loadNexusAlg.setProperty("SpectrumMin", 2);
+	  loadNexusAlg.setProperty("SpectrumMax", 5);
+	  
+	  //Set a spectrum list
+	  std::vector<int> spectrumList{ 2, 3, 5, 6 };
+	  loadNexusAlg.setProperty("SpectrumList", spectrumList);
+
+	  //Test it picks up all being set 
+	  TS_ASSERT_THROWS(loadNexusAlg.execute(), std::invalid_argument);
+
+	  //Test it detects with only min being set
+	  loadNexusAlg.setProperty("SpectrumMin", 1);
+	  TS_ASSERT_THROWS(loadNexusAlg.execute(), std::invalid_argument);
+
+	  //Test it detects with only max being set
+	  loadNexusAlg.setProperty("SpectrumMin", 3);
+	  loadNexusAlg.setProperty("SpectrumMax", Mantid::EMPTY_INT());
+	  TS_ASSERT_THROWS(loadNexusAlg.execute(), std::invalid_argument);
+
+	  //Finally reset to having just a list and test this still works
+	  loadNexusAlg.setProperty("SpectrumMin", 1);
+	  TS_ASSERT_THROWS_NOTHING(loadNexusAlg.execute());
+	  TS_ASSERT_EQUALS(loadNexusAlg.isExecuted(), true);
+
+  }
+
 
 private:
   LoadNexus algToBeTested, alg2;

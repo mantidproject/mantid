@@ -69,7 +69,7 @@ void LoadNexus::init() {
                   "0 indicates that every entry is loaded, into a separate "
                   "workspace within a group. "
                   "A positive number identifies one entry to be loaded, into "
-                  "one worskspace");
+                  "one workspace");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -163,12 +163,12 @@ void LoadNexus::runLoadNexusProcessed() {
   // Set the workspace property
   loadNexusPro->setPropertyValue("OutputWorkspace", m_workspace);
 
-  loadNexusPro->setPropertyValue("SpectrumMin",
-                                 getPropertyValue("SpectrumMin"));
-  loadNexusPro->setPropertyValue("SpectrumMax",
-                                 getPropertyValue("SpectrumMax"));
-  loadNexusPro->setPropertyValue("SpectrumList",
-                                 getPropertyValue("SpectrumList"));
+ loadNexusPro->setPropertyValue("SpectrumMin",
+                                getPropertyValue("SpectrumMin"));
+ loadNexusPro->setPropertyValue("SpectrumMax",
+                                getPropertyValue("SpectrumMax"));
+ loadNexusPro->setPropertyValue("SpectrumList",
+                                getPropertyValue("SpectrumList"));
 
   /* !!! The spectrum min/max/list properties are currently missing from
      LoadNexus
@@ -176,22 +176,17 @@ void LoadNexus::runLoadNexusProcessed() {
 
   // Get the array passed in the spectrum_list, if an empty array was passed use
   // the default
-  // std::vector<int> specList = getProperty("SpectrumList");
-  // if ( !specList.empty() )
-  //{
-  //  g_log.warning("SpectrumList property ignored - it is not implemented in
-  //  LoadNexusProcessed.");
-  //  //loadNexusPro->setProperty("SpectrumList",specList);
-  //}
-  // int specMin = getProperty("SpectrumMin");
-  // int specMax = getProperty("SpectrumMax");
-  // if ( specMax != Mantid::EMPTY_INT() || specMin != 0 )
-  //{
-  //  g_log.warning("SpectrumMin/Max properties ignored - they are not
-  //  implemented in LoadNexusProcessed.");
-  //  //loadNexusPro->setProperty("SpectrumMax",specMin);
-  //  //loadNexusPro->setProperty("SpectrumMin",specMax);
-  //}
+
+ std::vector<int> specList = getProperty("SpectrumList");
+   int specMin = getProperty("SpectrumMin");
+   int specMax = getProperty("SpectrumMax");
+   if ( !specList.empty() && (specMax != Mantid::EMPTY_INT() || specMin != 1))
+  {
+	   //Cant use Min/Max with list on processed nexus files
+    throw std::invalid_argument("SpectrumList and SpectrumMin or SpectrumMax."
+		" cannot be used simultaneously. SpectrumList should be used to" 
+		" specify the maximum and minimum spectra" );
+  }
 
   loadNexusPro->setPropertyValue("EntryNumber",
                                  getPropertyValue("EntryNumber"));
