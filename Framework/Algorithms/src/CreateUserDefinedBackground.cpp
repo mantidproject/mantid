@@ -147,26 +147,28 @@ CreateUserDefinedBackground::createBackgroundWorkspace(
     const API::MatrixWorkspace_const_sptr &data) const {
   auto outputWS = data->clone();
 
-  const auto &xData = outputWS->readX(0);
-  MantidVec yBackground;
-  MantidVec eBackground(outputWS->blocksize(), 0);
+  const auto &xPoints = outputWS->points(0);
+  std::vector<double> yBackground;
+  std::vector<double> eBackground(xPoints.size(), 0);
 
-  // Interpolate Y data in the table
+  // Interpolate Y data in the table to get y for each point
   const auto &lerp = getInterpolator(background, data);
-  const bool isHisto = outputWS->isHistogramData();
-  for (size_t i = 0; i < data->blocksize(); i++) {
-    const double x = isHisto ? (xData[i] + xData[i + 1]) * 0.5 : xData[i];
-    double y = lerp.value(x);
-    if (isHisto) {
-      y *= (xData[i + 1] - xData[i]); // bin width
-    }
+  for (const auto &x : xPoints) {
+    const double y = lerp.value(x);
     yBackground.push_back(y);
   }
 
   // Apply Y and E data to all spectra in the workspace
+  // If input was histogram, Y is frequencies
+  // If input was points, Y is counts
   for (size_t spec = 0; spec < outputWS->getNumberHistograms(); spec++) {
-    outputWS->dataY(spec) = yBackground;
-    outputWS->dataE(spec) = eBackground;
+    if (data->isHistogramData()) {
+      outputWS->setFrequencies(spec, yBackground);
+      outputWS->setFrequencyStandardDeviations(spec, eBackground);
+    } else {
+      outputWS->setCounts(spec, yBackground);
+      outputWS->setCountStandardDeviations(spec, eBackground);
+    }
   }
 
   return API::MatrixWorkspace_sptr(std::move(outputWS));
