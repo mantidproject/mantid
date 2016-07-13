@@ -1287,7 +1287,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
   // although in this case it would never be used.
   auto hasXErrors = wksp_cls.isValid("xerrors");
   auto xErrors = hasXErrors ? wksp_cls.openNXDouble("xerrors") : errors;
-  if(hasXErrors) {
+  if (hasXErrors) {
     if (xErrors.dim1() == nchannels + 1)
       g_log.warning() << "Legacy X uncertainty found in input file, i.e., "
                          "delta-Q for each BIN EDGE. Uncertainties will be "

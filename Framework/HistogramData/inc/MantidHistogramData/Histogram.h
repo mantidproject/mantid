@@ -274,7 +274,7 @@ template <typename... T> void Histogram::setPoints(T &&... data) & {
 /// Sets the Histogram's point variances.
 template <typename... T> void Histogram::setPointVariances(T &&... data) & {
   PointVariances points(std::forward<T>(data)...);
-  if(points)
+  if (points)
     checkSize(points);
   // No sensible self assignment is possible, we do not store variances, so if
   // anyone tries to set our current data as variances it must be an error.
