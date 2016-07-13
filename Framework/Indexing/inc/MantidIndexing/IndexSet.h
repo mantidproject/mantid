@@ -45,7 +45,7 @@ template <class T> class IndexSet {
 public:
   IndexSet(size_t fullRange);
   IndexSet(int64_t min, int64_t max, size_t fullRange);
-  IndexSet(const std::vector<size_t> indices, size_t fullRange);
+  IndexSet(const std::vector<size_t> &indices, size_t fullRange);
 
   /// Returns the size of the set.
   size_t size() const { return m_size; }
@@ -91,15 +91,12 @@ IndexSet<T>::IndexSet(int64_t min, int64_t max, size_t fullRange) {
 /// Constructor for a set containing all specified indices. Range is verified at
 /// construction time and duplicates are removed.
 template <class T>
-IndexSet<T>::IndexSet(const std::vector<size_t> indices, size_t fullRange)
+IndexSet<T>::IndexSet(const std::vector<size_t> &indices, size_t fullRange)
     : m_isRange(false) {
   // We use a set to create unique and ordered indices.
-  std::set<size_t> index_set;
-  for (const auto &index : indices) {
-    if (index >= fullRange)
-      throw std::out_of_range("IndexSet: specified index is out of range");
-    index_set.insert(index);
-  }
+  std::set<size_t> index_set(indices.cbegin(), indices.cend());
+  if (!index_set.empty() && *(index_set.rbegin()) >= fullRange)
+    throw std::out_of_range("IndexSet: specified index is out of range");
   m_indices = std::vector<size_t>(begin(index_set), end(index_set));
   m_size = m_indices.size();
 }
