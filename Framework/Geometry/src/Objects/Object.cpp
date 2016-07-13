@@ -1834,10 +1834,9 @@ int Object::searchForObject(Kernel::V3D &point) const {
   Kernel::V3D testPt;
   if (isValid(point))
     return 1;
-  std::array<Kernel::V3D, 6> axes = {{V3D(1., 0., 0.), V3D(-1., 0., 0.),
-                                      V3D(0., 1., 0.), V3D(0., -1., 0.),
-                                      V3D(0., 0., 1.), V3D(0., 0., -1.)}};
-  for (const auto &dir : axes) {
+  for (const auto &dir :
+       {V3D(1., 0., 0.), V3D(-1., 0., 0.), V3D(0., 1., 0.), V3D(0., -1., 0.),
+        V3D(0., 0., 1.), V3D(0., 0., -1.)}) {
     Geometry::Track tr(point, dir);
     if (this->interceptSurface(tr) > 0) {
       point = tr.cbegin()->entryPoint;
