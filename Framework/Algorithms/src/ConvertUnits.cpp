@@ -580,7 +580,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
     std::reverse(WS->dataE(0).begin(), WS->dataE(0).end());
 
     auto xVals = WS->refX(0);
-    for (size_t j = 1; j < m_numberOfSpectra; ++j) {
+    for (size_t j = 1; j < numberOfSpectra; ++j) {
       WS->setX(j, xVals);
       std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());
       std::reverse(WS->dataE(j).begin(), WS->dataE(j).end());
