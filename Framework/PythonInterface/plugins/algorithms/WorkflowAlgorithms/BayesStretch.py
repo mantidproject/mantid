@@ -14,22 +14,20 @@ if is_supported_f2py_platform():
 
 class BayesStretch(PythonAlgorithm):
 
-    _program = 'Que'
     _sam_ws = None
     _res_ws = None
-    _resnorm_ws = None
     _e_min = None
     _e_max = None
     _sam_bins = None
     _res_bins = 1
     _elastic = None
     _background = None
-    _width = False
-    _res_norm = None
-    _wfile = ''
+    _nbet = None
+    _nsig = None
     _loop = None
     _save = None
     _plot = None
+
 
     def category(self):
         return "Workflow\\MIDAS"
@@ -97,19 +95,13 @@ class BayesStretch(PythonAlgorithm):
 
 
     def _get_properties(self):
-        self._program = 'Quest'
         self._sam_ws = self.getPropertyValue('SampleWorkspace')
         self._res_ws = self.getPropertyValue('ResolutionWorkspace')
-        self._res_norm = False
-        self._resnorm_ws = ''
         self._e_min = self.getProperty('EMin').value
         self._e_max = self.getProperty('EMax').value
         self._sam_bins = self.getPropertyValue('SampleBins')
-        self._res_bins = 1
         self._elastic = self.getProperty('Elastic').value
         self._background = self.getPropertyValue('Background')
-        self._width = False
-        self._wfile = ''
         self._nbet = self.getProperty('NumberBeta').value
         self._nsig = self.getProperty('NumberSigma').value
         self._loop = self.getProperty('Loop').value
@@ -132,8 +124,8 @@ class BayesStretch(PythonAlgorithm):
         setup_prog.report('Converting to binary for Fortran')
         #convert true/false to 1/0 for fortran
         o_el = 1 if self._elastic else 0
-        o_w1 = 1 if self._width else 0
-        o_res = 1 if self._res_norm else 0
+        o_w1 = 0
+        o_res = 0
 
         #fortran code uses background choices defined using the following numbers
         setup_prog.report('Encoding input options')
@@ -312,13 +304,13 @@ class BayesStretch(PythonAlgorithm):
                  OutputWorkspace=fit_ws)
         log_prog.report('Adding Sample logs to Fit workspace')
         QLAddSampleLogs(fit_ws, self._res_ws, prog, self._background, self._elastic, erange,
-                        (nbin, nrbin), self._resnormWS, self._wfile)
+                        (nbin, nrbin), '', '')
         log_prog.report('Copying logs to Contour workspace')
         CopyLogs(InputWorkspace=self._sam_ws,
                  OutputWorkspace=contour_ws)
         log_prog.report('Adding sample logs to Contour workspace')
         QLAddSampleLogs(contour_ws, self._res_ws, prog, self._background, self._elastic, erange,
-                        (nbin, nrbin), self._resnormWS, self._wfile)
+                        (nbin, nrbin), '', '')
         log_prog.report('Finialising log copying')
 
         if self._save:
