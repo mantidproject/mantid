@@ -10,35 +10,39 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+This algorithm takes a list of detector names and an input workspaces and produces an output workspace which only contains the detectors which are part of the specified components. If no components are specified then the full workspace is returned.
 
+The workspace allows users to select a specific bank for exclusive investigation in subsequent operations. 
+
+Workflow
+########
+
+.. diagram:: AccumulateMD-v1_wkflw.dot
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - CropToComponent**
 
 .. testcode:: CropToComponentExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
+    # Create sample workspace with four banks where each bank has 3x3 detectors
+    sample_workspace = CreateSampleWorkspace(NumBanks=4, BankPixelWidth=3)
 
-   wsOut = CropToComponent()
+    # Crop to a component, we select bank2 here
+    cropped_workspace = CropToComponent(InputWorkspace=sample_workspace, ComponentNames="bank2")
 
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+    # Check the number of histograms
+    sample_number_of_histograms = sample_workspace.getNumberHistograms()
+    cropped_number_of_histograms = cropped_workspace.getNumberHistograms()
+
+    print("The original workspace has {0} histograms and the cropped workspace has {1} histograms.".format(sample_number_of_histograms, cropped_number_of_histograms))
 
 Output:
 
 .. testoutput:: CropToComponentExample
 
-  The output workspace has ?? spectra
+  The original workspace has 36 histograms and the cropped workspace has 9 histograms.
 
 .. categories::
 

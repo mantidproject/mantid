@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_CROPTOCOMPONENT_H_
 #define MANTID_ALGORITHMS_CROPTOCOMPONENT_H_
 
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 namespace Mantid {
 namespace Algorithms {
 
@@ -35,6 +35,9 @@ public:
   int version() const override final;
   const std::string category() const override final;
   const std::string summary() const override final;
+
+protected:
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   void init() override final;
