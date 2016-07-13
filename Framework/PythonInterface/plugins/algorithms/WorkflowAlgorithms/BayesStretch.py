@@ -14,8 +14,9 @@ if is_supported_f2py_platform():
 
 class BayesStretch(PythonAlgorithm):
 
+    _sam_name = None
     _sam_ws = None
-    _res_ws = None
+    _res_name = None
     _e_min = None
     _e_max = None
     _sam_bins = None
@@ -95,8 +96,9 @@ class BayesStretch(PythonAlgorithm):
 
 
     def _get_properties(self):
-        self._sam_ws = self.getPropertyValue('SampleWorkspace')
-        self._res_ws = self.getPropertyValue('ResolutionWorkspace')
+        self._sam_name = self.getPropertyValue('SampleWorkspace')
+        self._sam_ws = self.getProperty('SampleWorkspace').value
+        self._res_name = self.getPropertyValue('ResolutionWorkspace')
         self._e_min = self.getProperty('EMin').value
         self._e_max = self.getProperty('EMax').value
         self._sam_bins = self.getPropertyValue('SampleBins')
@@ -151,16 +153,16 @@ class BayesStretch(PythonAlgorithm):
 
         nbin,nrbin = nbins[0], nbins[1]
 
-        logger.information('Sample is %s' % self._sam_ws)
-        logger.information('Resolution is %s' % self._res_ws)
+        logger.information('Sample is %s' % self._sam_name)
+        logger.information('Resolution is %s' % self._res_name)
 
         setup_prog.report('Checking Analysers')
-        CheckAnalysers(self._sam_ws, self._res_ws)
+        CheckAnalysers(self._sam_name, self._res_name)
         setup_prog.report('Obtaining EFixed, theta and Q')
-        efix = getEfixed(self._sam_ws)
-        theta, Q = GetThetaQ(self._sam_ws)
+        efix = getEfixed(self._sam_name)
+        theta, Q = GetThetaQ(self._sam_name)
 
-        nsam,ntc = CheckHistZero(self._sam_ws)
+        nsam,ntc = CheckHistZero(self._sam_name)
 
         totalNoSam = nsam
 
@@ -168,7 +170,7 @@ class BayesStretch(PythonAlgorithm):
         if self._loop != True:
             nsam = 1
 
-        nres = CheckHistZero(self._res_ws)[0]
+        nres = CheckHistZero(self._res_name)[0]
 
         setup_prog.report('Checking Histograms')
         prog = 'Qst'
@@ -177,13 +179,13 @@ class BayesStretch(PythonAlgorithm):
         logger.information(' Erange : %f to %f ' % (erange[0], erange[1]))
 
         setup_prog.report('Establishing output workspace name')
-        fname = self._sam_ws[:-4] + '_'+ prog
+        fname = self._sam_name[:-4] + '_'+ prog
         fitWS = fname + '_Fit'
-        wrks=os.path.join(workdir, self._sam_ws[:-4])
+        wrks=os.path.join(workdir, self._sam_name[:-4])
         logger.information(' lptfile : %s_Qst.lpt' % wrks)
         lwrk=len(wrks)
         wrks.ljust(140, ' ')
-        wrkr=self._res_ws
+        wrkr=self._res_name
         wrkr.ljust(140, ' ')
         Nbet, Nsig = nbs[0], nbs[1]
         eBet0 = np.zeros(Nbet)                  # set errors to zero
@@ -196,7 +198,7 @@ class BayesStretch(PythonAlgorithm):
         for m in range(nsam):
             logger.information('Group %i at angle %f' % (m, theta[m]))
             nsp = m + 1
-            nout, bnorm, Xdat, Xv, Yv, Ev = CalcErange(self._sam_ws, m, erange, nbin)
+            nout, bnorm, Xdat, Xv, Yv, Ev = CalcErange(self._sam_name, m, erange, nbin)
             Ndat = nout[0]
             Imin = nout[1]
             Imax = nout[2]
@@ -204,7 +206,7 @@ class BayesStretch(PythonAlgorithm):
                 mm = m
             else:
                 mm = 0
-            Nb, Xb, Yb, Eb = GetXYE(self._res_ws, mm, array_len)     # get resolution data
+            Nb, Xb, Yb, Eb = GetXYE(self._res_name, mm, array_len)     # get resolution data
             numb = [nsam, nsp, ntc, Ndat, nbin, Imin, Imax, Nb, nrbin, Nbet, Nsig]
             rscl = 1.0
             reals = [efix, theta[m], rscl, bnorm]
@@ -300,16 +302,16 @@ class BayesStretch(PythonAlgorithm):
         log_prog = Progress(self, start=0.8, end =1.0, nreports=8)
         #Add some sample logs to the output workspaces
         log_prog.report('Copying Logs to Fit workspace')
-        CopyLogs(InputWorkspace=self._sam_ws,
+        CopyLogs(InputWorkspace=self._sam_name,
                  OutputWorkspace=fit_ws)
         log_prog.report('Adding Sample logs to Fit workspace')
-        QLAddSampleLogs(fit_ws, self._res_ws, prog, self._background, self._elastic, erange,
+        QLAddSampleLogs(fit_ws, self._res_name, prog, self._background, self._elastic, erange,
                         (nbin, nrbin), '', '')
         log_prog.report('Copying logs to Contour workspace')
-        CopyLogs(InputWorkspace=self._sam_ws,
+        CopyLogs(InputWorkspace=self._sam_name,
                  OutputWorkspace=contour_ws)
         log_prog.report('Adding sample logs to Contour workspace')
-        QLAddSampleLogs(contour_ws, self._res_ws, prog, self._background, self._elastic, erange,
+        QLAddSampleLogs(contour_ws, self._res_name, prog, self._background, self._elastic, erange,
                         (nbin, nrbin), '', '')
         log_prog.report('Finialising log copying')
 
