@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/CreateUserDefinedBackground.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -86,11 +88,8 @@ public:
     TS_ASSERT(outputWS);
 
     // The expected result
-    const auto expected =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-            background, 1, 0.0, 10.0, 0.1, false);
-    expected->dataE(0) = std::vector<double>(201, 0);
-    TS_ASSERT(Mantid::API::equals(expected, outputWS, 1e-4));
+    const auto expected = createExpectedResults(false);
+    TS_ASSERT(workspacesEqual(expected, outputWS, 1e-4));
   }
 
   void test_exec_HistoWS() {
@@ -114,14 +113,8 @@ public:
     TS_ASSERT(outputWS);
 
     // The expected result
-    auto expected = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        background, 1, 0.0, 10.0, 0.1, true);
-    expected->dataE(0) = std::vector<double>(201, 0);
-    constexpr double binWidth = 0.1;
-    for (auto &y : expected->dataY(0)) {
-      y *= binWidth;
-    }
-    TS_ASSERT(Mantid::API::equals(expected, outputWS, 5e-2));
+    const auto expected = createExpectedResults(true);
+    TS_ASSERT(workspacesEqual(expected, outputWS, 5e-2));
   }
 
 private:
@@ -142,6 +135,54 @@ private:
       row << x << background(x);
     }
     return table;
+  }
+
+  /// Create expected results
+  MatrixWorkspace_sptr createExpectedResults(bool isHisto) {
+    std::vector<double> xData, yData, eData;
+    constexpr double binWidth = 0.1;
+    for (size_t i = 0; i < 100; ++i) {
+      const double x = binWidth * static_cast<double>(i);
+      xData.push_back(x);
+      const double y = background(x);
+      yData.push_back(isHisto ? y * binWidth : y);
+      eData.push_back(0.0);
+    }
+    if (isHisto) {
+      // add last bin edge
+      xData.push_back(10.0);
+    } else {
+      // add extra point
+      xData.push_back(10.0);
+      yData.push_back(background(10.0));
+      eData.push_back(0.0);
+    }
+    auto alg =
+        Mantid::API::AlgorithmFactory::Instance().create("CreateWorkspace", 1);
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("OutputWorkspace", "__NotUsed");
+    alg->setProperty("DataX", xData);
+    alg->setProperty("DataY", yData);
+    alg->setProperty("DataE", eData);
+    alg->execute();
+    MatrixWorkspace_sptr output = alg->getProperty("OutputWorkspace");
+    return output;
+  }
+
+  /// Compare workspaces
+  bool workspacesEqual(const MatrixWorkspace_sptr lhs,
+                       const MatrixWorkspace_sptr rhs, double tolerance) {
+    auto alg = Mantid::API::AlgorithmFactory::Instance().create(
+        "CompareWorkspaces", 1);
+    alg->setChild(true);
+    alg->initialize();
+    alg->setProperty<MatrixWorkspace_sptr>("Workspace1", lhs);
+    alg->setProperty<MatrixWorkspace_sptr>("Workspace2", rhs);
+    alg->setProperty<double>("Tolerance", tolerance);
+    alg->setProperty<bool>("CheckAxes", false);
+    alg->execute();
+    return alg->getProperty("Result");
   }
 };
 
