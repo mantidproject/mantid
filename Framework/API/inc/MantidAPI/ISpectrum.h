@@ -123,11 +123,11 @@ public:
     mutableHistogramRef().setPoints(std::forward<T>(data)...);
   }
   template <typename... T> void setPointVariances(T &&... data) & {
-    checkWorksWithPoints();
+    // Note that we can set point variances even if storage mode is BinEdges, Dx
+    // is *always* one value *per bin*.
     mutableHistogramRef().setPointVariances(std::forward<T>(data)...);
   }
   template <typename... T> void setPointStandardDeviations(T &&... data) & {
-    checkWorksWithPoints();
     mutableHistogramRef().setPointStandardDeviations(std::forward<T>(data)...);
   }
   virtual HistogramData::Counts counts() const {
