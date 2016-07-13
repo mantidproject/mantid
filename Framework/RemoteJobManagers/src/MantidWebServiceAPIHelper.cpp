@@ -221,8 +221,6 @@ void MantidWebServiceAPIHelper::initHTTPRequest(Poco::Net::HTTPRequest &req,
 
   // Attach any cookies we've got from previous responses
   req.setCookies(getCookies());
-
-  return;
 }
 
 // Converts the vector of HTTPCookie objects into a NameValueCollection

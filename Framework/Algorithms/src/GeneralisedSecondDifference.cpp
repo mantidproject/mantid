@@ -123,8 +123,6 @@ void GeneralisedSecondDifference::exec() {
     progress->report();
   }
   setProperty("OutputWorkspace", out);
-
-  return;
 }
 /** Compute the Cij
  *
@@ -174,7 +172,6 @@ void GeneralisedSecondDifference::computePrefactors() {
   m_Cij2.resize(2 * m_z * m_m + 3);
   std::transform(m_Cij.begin(), m_Cij.end(), m_Cij2.begin(),
                  VectorHelper::Squares<double>());
-  return;
 }
 
 } // namespace Algorithm

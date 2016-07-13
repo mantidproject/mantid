@@ -253,7 +253,7 @@ public:
   */
   std::string isValid() const override {
     // start with the no error condition
-    std::string error = "";
+    std::string error;
 
     // If an output workspace it must have a name, although it might not exist
     // in the ADS yet
@@ -447,7 +447,7 @@ private:
   *  @returns A user level description of the problem or "" if it is valid.
   */
   std::string isValidOutputWs() const {
-    std::string error("");
+    std::string error;
     const std::string value = this->value();
     if (!value.empty()) {
       // Will the ADS accept it

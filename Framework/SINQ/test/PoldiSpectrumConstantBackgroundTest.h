@@ -35,6 +35,7 @@ public:
   void testFunction() {
     IFunction_sptr function = FunctionFactory::Instance().createFunction(
         "PoldiSpectrumConstantBackground");
+    TS_ASSERT(function);
     MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(20, 2);
 
@@ -53,6 +54,7 @@ public:
   void testPoldiFunction1D() {
     IFunction_sptr function = FunctionFactory::Instance().createFunction(
         "PoldiSpectrumConstantBackground");
+    TS_ASSERT(function);
     MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::Create2DWorkspace123(20, 2);
 

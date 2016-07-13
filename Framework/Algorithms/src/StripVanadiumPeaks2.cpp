@@ -62,8 +62,6 @@ void StripVanadiumPeaks2::init() {
   declareProperty("WorkspaceIndex", EMPTY_INT(), mustBePositive,
                   "If set, peaks will only be removed from this workspace "
                   "index (otherwise from all) ");
-
-  return;
 }
 
 void StripVanadiumPeaks2::exec() {
@@ -126,8 +124,6 @@ void StripVanadiumPeaks2::exec() {
       stripPeaks->getProperty("OutputWorkspace");
 
   this->setProperty("OutputWorkspace", outputWS);
-
-  return;
 }
 
 } // namespace Mantid
