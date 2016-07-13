@@ -32,6 +32,10 @@ void RenameWorkspace::init() {
       "name: NewWSName by adding the _monitors suffix"
       " (e.g.: NewWSName_monitors)",
       Direction::Input);
+  declareProperty<bool>(
+	  "OverrideExisting", false,
+	  "If true any existing workspaces with the output name will be"
+	  " overridden", Direction::Input);
 }
 
 /** Executes the algorithm
@@ -45,6 +49,8 @@ void RenameWorkspace::exec() {
   std::string inputwsName = inputWS->getName();
   // get the output workspace name
   std::string outputwsName = getPropertyValue("OutputWorkspace");
+  // check if we are overriding existing workspaces
+  bool overrideWorkspaces = getProperty("OverrideExisting");
 
   if (getPropertyValue("InputWorkspace") ==
       getPropertyValue("OutputWorkspace")) {
@@ -52,9 +58,17 @@ void RenameWorkspace::exec() {
         "The input and output workspace names must be different");
   }
 
-  if (AnalysisDataService::Instance().doesExist(
-          getPropertyValue("OutputWorkspace"))) {
-    throw std::invalid_argument("The workspace output name already exists");
+  //Test to see if the output already exists
+  if (AnalysisDataService::Instance().doesExist(outputwsName)) {
+	  //Output name already exists - either remove or error
+	  if (overrideWorkspaces) {
+		  //Delete existing workspace
+		  AnalysisDataService::Instance().remove(outputwsName);
+	  }
+	  else {
+		  throw std::invalid_argument("The workspace output" +
+			  outputwsName + "already exists");
+          }
   }
 
   // Assign it to the output workspace property
