@@ -87,9 +87,10 @@ void ILLEnergyTransfer::run() {
     reductionAlg->setProperty("MapFile", mapFilename.toStdString());
   }
 
-  // Set mirror mode option
-  bool mirrorMode = m_uiForm.ckMirrorMode->isChecked();
-  reductionAlg->setProperty("MirrorMode", mirrorMode);
+  // Set input options
+  reductionAlg->setProperty("SumRuns", m_uiForm.ckSum->isChecked());
+  reductionAlg->setProperty("MirrorSense", m_uiForm.ckMirrorSense->isChecked());
+  reductionAlg->setProperty("UnmirrorOption", m_uiForm.sbUnmirrorOption->value());
 
   // Get the name format for output files
   QFileInfo runFileInfo(runFilename);
@@ -98,13 +99,6 @@ void ILLEnergyTransfer::run() {
                                instDetails["reflection"];
   std::string outputFilenameBaseStd = outputFilenameBase.toStdString();
 
-  // Set left and right workspaces when using mirror mode
-  if (mirrorMode) {
-    reductionAlg->setProperty("LeftWorkspace", outputFilenameBaseStd + "_left");
-    reductionAlg->setProperty("RightWorkspace",
-                              outputFilenameBaseStd + "_right");
-  }
-
   // Set output workspace properties
   reductionAlg->setProperty("RawWorkspace", outputFilenameBaseStd + "_raw");
   reductionAlg->setProperty("ReducedWorkspace", outputFilenameBaseStd + "_red");
@@ -112,6 +106,7 @@ void ILLEnergyTransfer::run() {
   // Set output options
   reductionAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
   reductionAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
+  reductionAlg->setProperty("ControlMode", m_uiForm.ckControlMode->isChecked());
 
   m_batchAlgoRunner->addAlgorithm(reductionAlg);
   m_batchAlgoRunner->executeBatchAsync();
