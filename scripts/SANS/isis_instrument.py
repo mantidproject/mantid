@@ -1709,11 +1709,20 @@ class LARMOR(ISISInstrument):
                     logger.warning("Can logs could not be loaded, using sample values.")
 
             if isSample:
+                check_has_bench_rot(ws_ref, log)
                 self.apply_detector_logs(log)
             else:
+                check_has_bench_rot(ws_ref, log)
                 self.check_can_logs(log)
 
         ISISInstrument.on_load_sample(self, ws_name, beamcentre, isSample)
+
+    @staticmethod
+    def check_has_bench_rot(workspace, log=None):
+        if log:
+            run = workspace.run()
+            if not run.hasProperty("Bench_Rot"):
+                raise RuntimeError("LARMOR Instrument: Bench_Rot does not seem to be available on {0}".format(workspace.name()))
 
     @staticmethod
     def is_run_new_style_run(workspace_ref):
