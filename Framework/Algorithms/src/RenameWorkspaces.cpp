@@ -37,10 +37,12 @@ void RenameWorkspaces::init() {
   // Suffix
   declareProperty("Suffix", std::string(""),
                   "Suffix to add to input workspace names", Direction::Input);
-  //Override flag
-  declareProperty<bool>("OverrideExisting", false,
-	  "If true all existing workspaces with the output name will be"
-	  " overridden", Direction::Input);
+  // Override flag
+  declareProperty<bool>(
+      "OverrideExisting", false,
+      "If true all existing workspaces with the output name will be"
+      " overridden",
+      Direction::Input);
 }
 
 /** Executes the algorithm
@@ -96,12 +98,12 @@ void RenameWorkspaces::exec() {
   // Check all names are not used already before starting rename
   for (size_t i = 0; i < nWs; ++i) {
     if (AnalysisDataService::Instance().doesExist(newWsName[i])) {
-		//Name exists, stop if override if not set but let 
-		//RenameWorkspace handle deleting if we are overriding
-		if (!overrideWorkspace) {
-                  throw std::invalid_argument("Name " + newWsName[i] +
-                                              " is already used");
-                }
+      // Name exists, stop if override if not set but let
+      // RenameWorkspace handle deleting if we are overriding
+      if (!overrideWorkspace) {
+        throw std::invalid_argument("Name " + newWsName[i] +
+                                    " is already used");
+      }
     }
   }
 
@@ -114,7 +116,7 @@ void RenameWorkspaces::exec() {
     auto alg = createChildAlgorithm("RenameWorkspace");
     alg->setPropertyValue("InputWorkspace", inputWsName[i]);
     alg->setPropertyValue("OutputWorkspace", newWsName[i]);
-	alg->setProperty("OverrideExisting", overrideWorkspace);
+    alg->setProperty("OverrideExisting", overrideWorkspace);
 
     alg->executeAsChildAlg();
 

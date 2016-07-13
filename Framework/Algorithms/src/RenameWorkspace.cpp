@@ -33,9 +33,10 @@ void RenameWorkspace::init() {
       " (e.g.: NewWSName_monitors)",
       Direction::Input);
   declareProperty<bool>(
-	  "OverrideExisting", false,
-	  "If true any existing workspaces with the output name will be"
-	  " overridden", Direction::Input);
+      "OverrideExisting", false,
+      "If true any existing workspaces with the output name will be"
+      " overridden",
+      Direction::Input);
 }
 
 /** Executes the algorithm
@@ -58,17 +59,16 @@ void RenameWorkspace::exec() {
         "The input and output workspace names must be different");
   }
 
-  //Test to see if the output already exists
+  // Test to see if the output already exists
   if (AnalysisDataService::Instance().doesExist(outputwsName)) {
-	  //Output name already exists - either remove or error
-	  if (overrideWorkspaces) {
-		  //Delete existing workspace
-		  AnalysisDataService::Instance().remove(outputwsName);
-	  }
-	  else {
-		  throw std::invalid_argument("The workspace output" +
-			  outputwsName + "already exists");
-          }
+    // Output name already exists - either remove or error
+    if (overrideWorkspaces) {
+      // Delete existing workspace
+      AnalysisDataService::Instance().remove(outputwsName);
+    } else {
+      throw std::invalid_argument("The workspace output" + outputwsName +
+                                  "already exists");
+    }
   }
 
   // Assign it to the output workspace property

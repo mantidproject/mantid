@@ -224,20 +224,20 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue(
         "InputWorkspaces", "WorkspaceToRename"));
-	TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue(
-		"WorkspaceNames", "ExistingWorkspace"));
-	TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setProperty(
-		"OverrideExisting", false));
+    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue(
+        "WorkspaceNames", "ExistingWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(
+        renameAlgorithm.setProperty("OverrideExisting", false));
 
     // Try to rename it should throw exception
     renameAlgorithm.setRethrows(true);
     TS_ASSERT_THROWS(renameAlgorithm.execute(), std::invalid_argument);
-	TS_ASSERT_EQUALS(renameAlgorithm.isExecuted(), false);
+    TS_ASSERT_EQUALS(renameAlgorithm.isExecuted(), false);
 
-	TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setProperty(
-		"OverrideExisting", true));
-	TS_ASSERT_THROWS_NOTHING(renameAlgorithm.execute());
-	TS_ASSERT(renameAlgorithm.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(
+        renameAlgorithm.setProperty("OverrideExisting", true));
+    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.execute());
+    TS_ASSERT(renameAlgorithm.isExecuted());
   }
 
   void TestGroupExec() {

@@ -86,34 +86,34 @@ public:
   }
 
   void testExecNameAlreadyExists() {
-	  // Tests renaming a workspace to a name which is already used
-	  AnalysisDataService::Instance().clear();
-	  MatrixWorkspace_sptr inputWs = createWorkspace();
-	  AnalysisDataService::Instance().add("ExistingWorkspace", inputWs);
-	  // Create a workspace to rename
-	  MatrixWorkspace_sptr toRename = createWorkspace();
-	  AnalysisDataService::Instance().add("WorkspaceToRename", toRename);
+    // Tests renaming a workspace to a name which is already used
+    AnalysisDataService::Instance().clear();
+    MatrixWorkspace_sptr inputWs = createWorkspace();
+    AnalysisDataService::Instance().add("ExistingWorkspace", inputWs);
+    // Create a workspace to rename
+    MatrixWorkspace_sptr toRename = createWorkspace();
+    AnalysisDataService::Instance().add("WorkspaceToRename", toRename);
 
-	  // First test it fails with override existing set to false
-	  Mantid::Algorithms::RenameWorkspace renameAlgorithm;
-	  renameAlgorithm.initialize();
+    // First test it fails with override existing set to false
+    Mantid::Algorithms::RenameWorkspace renameAlgorithm;
+    renameAlgorithm.initialize();
 
-	  TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue(
-		  "InputWorkspace", "WorkspaceToRename"));
-	  TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue(
-		  "OutputWorkspace", "ExistingWorkspace"));
-	  TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setProperty(
-		  "OverrideExisting", false));
+    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue(
+        "InputWorkspace", "WorkspaceToRename"));
+    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue(
+        "OutputWorkspace", "ExistingWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(
+        renameAlgorithm.setProperty("OverrideExisting", false));
 
-	  // Try to rename it should throw exception
-	  renameAlgorithm.setRethrows(true);
-	  TS_ASSERT_THROWS(renameAlgorithm.execute(), std::invalid_argument);
-	  TS_ASSERT_EQUALS(renameAlgorithm.isExecuted(), false);
+    // Try to rename it should throw exception
+    renameAlgorithm.setRethrows(true);
+    TS_ASSERT_THROWS(renameAlgorithm.execute(), std::invalid_argument);
+    TS_ASSERT_EQUALS(renameAlgorithm.isExecuted(), false);
 
-	  TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setProperty(
-		  "OverrideExisting", true));
-          TS_ASSERT_THROWS_NOTHING(renameAlgorithm.execute());
-          TS_ASSERT(renameAlgorithm.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(
+        renameAlgorithm.setProperty("OverrideExisting", true));
+    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.execute());
+    TS_ASSERT(renameAlgorithm.isExecuted());
   }
 
   void testGroup() {
