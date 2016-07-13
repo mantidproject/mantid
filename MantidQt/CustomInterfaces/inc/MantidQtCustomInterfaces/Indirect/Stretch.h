@@ -18,7 +18,10 @@ public:
   void run() override;
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
-
+  /// Save the workspaces produces from the algorithm
+  void saveWorkspaces();
+  /// Plot the workspaces specified by the interface
+  void plotWorkspaces();
 
 private slots:
   /// Slot for when the min range on the range selector changes
@@ -29,12 +32,17 @@ private slots:
   void updateProperties(QtProperty *prop, double val) override;
   /// Slot to handle when a new sample file is available
   void handleSampleInputReady(const QString &filename);
+  /// Handle plotting and saving after algorithm completion
+  void algorithmComplete(const bool &error);
 
 private:
   // The ui form
   Ui::Stretch m_uiForm;
   // Algorithm
   Mantid::API::IAlgorithm_sptr m_StretchAlg;
+  // state of plot and save when algorithm is run
+  std::string m_plotType;
+  bool m_save;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

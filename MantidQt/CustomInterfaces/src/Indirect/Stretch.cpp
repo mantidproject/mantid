@@ -85,7 +85,8 @@ void Stretch::run() {
 
   // Workspace input
   const auto sampleName = m_uiForm.dsSample->getCurrentDataName().toStdString();
-  const auto resName = m_uiForm.dsResolution->getCurrentDataName().toStdString();
+  const auto resName =
+      m_uiForm.dsResolution->getCurrentDataName().toStdString();
 
   auto saveDirectory = Mantid::Kernel::ConfigService::Instance().getString(
       "defaultsave.directory");
@@ -104,22 +105,23 @@ void Stretch::run() {
     }
   }
 
+  // Obtain save and plot state
+  m_plotType = m_uiForm.cbPlot->currentText().toStdString();
+  m_save = m_uiForm.chkSave->isChecked();
+
   // Collect input from options section
   const auto background = m_uiForm.cbBackground->currentText().toStdString();
-  const auto plot = m_uiForm.cbPlot->currentText().toStdString();
 
   // Collect input from the properties browser
-  const auto eMin =  m_properties["EMin"]->valueText().toDouble();
-  const auto eMax =  m_properties["EMax"]->valueText().toDouble();
-  const auto beta =  m_properties["Beta"]->valueText().toLong();
+  const auto eMin = m_properties["EMin"]->valueText().toDouble();
+  const auto eMax = m_properties["EMax"]->valueText().toDouble();
+  const auto beta = m_properties["Beta"]->valueText().toLong();
   const auto sigma = m_properties["Sigma"]->valueText().toLong();
   const auto nBins = m_properties["SampleBinning"]->valueText().toLong();
 
   // Bool options
-  const auto save = m_uiForm.chkSave->isChecked();
   const auto elasticPeak = m_uiForm.chkElasticPeak->isChecked();
   const auto sequence = m_uiForm.chkSequentialFit->isChecked();
-
 
   // Construct OutputNames
   auto cutIndex = sampleName.find_last_of("_");
@@ -139,16 +141,28 @@ void Stretch::run() {
   stretch->setProperty("NumberSigma", sigma);
   stretch->setProperty("NumberBeta", beta);
   stretch->setProperty("Loop", sequence);
-  stretch->setProperty("Plot", plot);
-  stretch->setProperty("Save", save);
   stretch->setProperty("OutputWorkspaceFit", fitWsName);
   stretch->setProperty("OutputWorkspaceContour", contourWsName);
 
   m_StretchAlg = stretch;
   m_batchAlgoRunner->addAlgorithm(stretch);
   m_batchAlgoRunner->executeBatchAsync();
-
 }
+
+/**
+ * Handles the saving and plotting of workspaces after execution
+ */
+void Stretch::algorithmComplete(const bool &error) {
+  if (error)
+    return;
+  if (m_save)
+    saveWorkspaces();
+  if (!m_plotType.compare("None") == 0)
+    plotWorkspaces();
+}
+
+void Stretch::saveWorkspaces() {}
+void Stretch::plotWorkspaces() {}
 
 /**
  * Set the data selectors to use the default save directory
