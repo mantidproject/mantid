@@ -71,7 +71,7 @@ void CropToComponent::init() {
   declareProperty(
       Kernel::make_unique<Mantid::Kernel::ArrayProperty<std::string>>(
           "ComponentNames"),
-      "List of component names to which the workspace is goign to be cropped "
+      "List of component names which are used to crop the workspace."
       "to.");
 }
 
