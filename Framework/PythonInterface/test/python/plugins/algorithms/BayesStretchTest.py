@@ -35,14 +35,39 @@ if platform.system() == "Windows":
             Test Lorentzian fit for BayesStretch
             """
             fit_group, contour = BayesStretch(SampleWorkspace=self._sample_ws,
-                                              ResolutionWorkspace=self._res_ws,
-                                              Plot='None')
+                                              ResolutionWorkspace=self._res_ws)
             self._validate_shape(contour, fit_group)
             self._validate_value(contour, fit_group)
 
 
+#-------------------------------- Failure cases ------------------------------------------
 
-#--------------------------------Validate results------------------------------------------------
+        def test_invalid_e_min(self):
+            """
+            Test that an EMin of less than the data range is invalid
+            """
+            self.assertRaises(RuntimeError,
+                              BayesStretch,
+                              OutputWorkspaceFit='fit_group',
+                              OutputWorkspaceContour='contour',
+                              SampleWorkspace=self._sample_ws,
+                              ResolutionWorkspace=self._res_ws,
+                              EMin=-10)
+
+        def test_invalid_e_max(self):
+            """
+            Test that an EMin of less than the data range is invalid
+            """
+            self.assertRaises(RuntimeError,
+                              BayesStretch,
+                              OutputWorkspaceFit='fit_group',
+                              OutputWorkspaceContour='contour',
+                              SampleWorkspace=self._sample_ws,
+                              ResolutionWorkspace=self._res_ws,
+                              EMax=10)
+
+
+#--------------------------------Validate results-----------------------------------------
 
         def _validate_shape(self, contour, fit_group):
             """
