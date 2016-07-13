@@ -4,6 +4,7 @@ import re
 # ABINS modules
 from GeneralDFTProgram import GeneralDFTProgram
 from AbinsData import AbinsData
+import Constants
 
 class LoadCASTEP(GeneralDFTProgram):
     """
@@ -72,7 +73,7 @@ class LoadCASTEP(GeneralDFTProgram):
                     raise IOError("Failed to parse file. Invalid file header.")
 
                 # Extract the mode number for each of the ion in the data file
-                for _ in xrange(self._num_atoms):
+                for _ in range(self._num_atoms):
                     line = f_handle.readline()
                     line_data = line.strip().split()
 
@@ -99,7 +100,7 @@ class LoadCASTEP(GeneralDFTProgram):
         @param f_handle: handle to the file.
         """
 
-        # for _ in xrange(self._num_branches):
+        # for _ in range(self._num_branches):
         #     line = f_handle.readline()
             # line_data = line.strip().split()[1:]
             # line_data = [float(x) for x in line_data]
@@ -137,19 +138,24 @@ class LoadCASTEP(GeneralDFTProgram):
         @param f_handle: file object to read
         @return: eigenvectors (atomic displacements) for all k-points
         """
-        vectors = []
-        for _ in xrange(self._num_atoms * self._num_phonons):
-            line = f_handle.readline()
 
-            if not line:
-                raise IOError("Could not parse file. Invalid file format.")
+        dim = 3 # we have 3D space
+        vectors = np.zeros((self._num_atoms, self._num_phonons, dim), dtype=Constants.complex_type) # in general case eigenvectors are complex
+        for freq in range(self._num_phonons):
+            for atom in range(self._num_atoms):
 
-            line_data = line.strip().split()
-            vector_components = line_data[2::2]
-            vector_components = [float(x) for x in vector_components]
-            vectors.append(vector_components)
+                line = f_handle.readline()
+
+                if not line:
+                    raise IOError("Could not parse file. Invalid file format.")
+
+                line_data = line.split()
+                vector_components = line_data[2:]
+                for n in range(dim): # we have dimension 3, eigenvectors are complex, 3 * 2 = 6  number of all fields to parse
+                    vectors[atom , freq, n] = complex(float(vector_components[2 * n]), float(vector_components[2 * n + 1]))
 
         return np.asarray(vectors)
+
 
     def _check_acoustic_sum(self):
         """
@@ -223,22 +229,15 @@ class LoadCASTEP(GeneralDFTProgram):
                     k_vectors.append(k_vector)
 
                     # Parse block of frequencies
-                    frequencies.append(self._parse_phonon_freq_block(f_handle))
+                    frequencies.append(self._parse_phonon_freq_block(f_handle=f_handle))
 
                     block_count += 1
 
                 vector_match = eigenvectors_regex.match(line)
                 if vector_match and header_found:
                     header_found = False
-                    all_vectors = self._parse_phonon_eigenvectors(f_handle)
-                    rearranged_vectors = []
-                    for atom in range(self._num_atoms):
-                        temp_atoms = []
-                        for freq in range(self._num_phonons):
-                             temp_atoms.append(all_vectors[atom + freq * self._num_atoms])
-                        rearranged_vectors.append(temp_atoms)
-
-                    eigenvectors.append(rearranged_vectors)
+                    vectors = self._parse_phonon_eigenvectors(f_handle=f_handle)
+                    eigenvectors.append(vectors)
 
         file_data.update({"frequencies": np.asarray(frequencies),
                           "weights": np.asarray(weights),

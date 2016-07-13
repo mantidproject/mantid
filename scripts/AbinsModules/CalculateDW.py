@@ -66,7 +66,7 @@ class CalculateDW(IOmodule, RearrangeData):
         _atomic_displacements = _data["k_points_data"]["atomic_displacements"]
 
         _coth_factor = 1.0 / (2.0 * _temperature_hartree) # coth( _coth_factor * omega)
-        _item = np.zeros((3, 3), dtype=Constants.floats_type) # stores DW for one atom
+        _item = np.zeros((3, 3), dtype=Constants.float_type) # stores DW for one atom
 
         for num in range(self._num_atoms):
             _item.fill(0.0) # erase stored information so that it can be filled with content for the next atom
@@ -75,13 +75,12 @@ class CalculateDW(IOmodule, RearrangeData):
                 for n_freq in range(self._num_freq):
 
                     displacement = _atomic_displacements[k, num, n_freq, :]
-                    tensor =  np.outer(displacement, displacement.conjugate())
+                    tensor =  np.real(np.outer(displacement, displacement.conjugate())) # DW are real
                     _item[:, :] += tensor * _coth_over_omega[n_freq]
 
                 _item[:, :] += _item[:, :] * _weights[k]
             _item[:, :] /= 2.0 * _mass_hartree[num]
             _DW._append(item=_item, num_atom=num)
-
         return _DW
 
 

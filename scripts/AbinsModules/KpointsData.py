@@ -67,7 +67,7 @@ class KpointsData(GeneralData):
 
         if  (isinstance(weights, np.ndarray) and
             weights.shape == (self._num_k,) and
-            weights.dtype.num == Constants.floats_id and
+            weights.dtype.num == Constants.float_id and
             np.allclose(weights, weights[weights>=0])):
 
             self._data["weights"] = weights
@@ -79,7 +79,7 @@ class KpointsData(GeneralData):
 
         if  (isinstance(k_vectors, np.ndarray) and
              k_vectors.shape == (self._num_k, dim) and
-             k_vectors.dtype.num == Constants.floats_id):
+             k_vectors.dtype.num == Constants.float_id):
 
             self._data["k_vectors"] = k_vectors
         else:
@@ -91,7 +91,7 @@ class KpointsData(GeneralData):
 
         if  (isinstance(frequencies, np.ndarray) and
              frequencies.shape == (self._num_k, self._num_freq) and
-             frequencies.dtype.num == Constants.floats_id):
+             frequencies.dtype.num == Constants.float_id):
 
             self._data["frequencies"] = frequencies
         else:
@@ -102,7 +102,7 @@ class KpointsData(GeneralData):
 
         if  (isinstance(atomic_displacements, np.ndarray) and
              atomic_displacements.shape == (self._num_k, self._num_atoms, self._num_freq, dim) and
-             atomic_displacements.dtype.num == Constants.floats_id):
+             atomic_displacements.dtype.num == Constants.complex_id):
 
             self._data["atomic_displacements"] = atomic_displacements
         else:

@@ -29,7 +29,7 @@ class KpointsDataTest(unittest.TestCase):
                                                       [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0],
                                                       [1.0, 1.0, 1.0], [1.0, 1.0, 41.0], [1.0, 1.0, 1.0]]]
                                                      # 12 atomic displacements for each k-point
-                                                     ])}
+                                                     ]).astype(complex)}
 
 
 

@@ -26,7 +26,7 @@ class DwData(GeneralData):
         else:
             raise ValueError("Improper number of atoms.")
 
-        self._data = np.zeros((self._num_atoms, 3, 3), dtype=Constants.floats_type)
+        self._data = np.zeros((self._num_atoms, 3, 3), dtype=Constants.float_type)
 
 
     def _append(self, item=None, num_atom=None):
@@ -78,7 +78,7 @@ class DwData(GeneralData):
         if data.shape != (3,3):
             raise ValueError("Debye-Waller factor should have a form of 3x3 numpy array"
                              " (outer product of atomic displacements).")
-        if data.dtype.num != Constants.floats_id:
+        if data.dtype.num != Constants.float_id:
             raise ValueError("Invalid type of DW factors. Floating numbers are expected.")
 
 
@@ -94,5 +94,5 @@ class DwData(GeneralData):
         if items.shape != (self._num_atoms, 3, 3):
             raise ValueError("Debye-Waller factor should have a form of 3x3 numpy array"
                              " (outer product of atomic displacements).")
-        if items.dtype.num != Constants.floats_id:
+        if items.dtype.num != Constants.float_id:
             raise ValueError("Invalid type of DW factors. Floating numbers are expected.")

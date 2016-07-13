@@ -48,7 +48,7 @@ class ABINSCalculateQTest(unittest.TestCase):
                                                          [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0]],
 
                                                          [[1.0,1.0,1.0],[1.0,1.0,111.0],[1.0,1.0,1.0],
-                                                         [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0]]]]) }) # 12 atomic displacements
+                                                         [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0]]]]).astype(complex)}) # 12 atomic displacements
         extracted_raw_data = raw_data.extract()
         correct_q_data = extracted_raw_data["frequencies"][0] * extracted_raw_data["frequencies"][0] / 16.0
 
