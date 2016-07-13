@@ -660,6 +660,9 @@ NeutronAtom operator+(const NeutronAtom &left, const NeutronAtom &right) {
   result.inc_scatt_xs = left.inc_scatt_xs + right.inc_scatt_xs;
   result.tot_scatt_xs = left.tot_scatt_xs + right.tot_scatt_xs;
   result.abs_scatt_xs = left.abs_scatt_xs + right.abs_scatt_xs;
+  result.tot_scatt_length = left.tot_scatt_length + right.tot_scatt_length;
+  result.coh_scatt_length = left.coh_scatt_length + right.coh_scatt_length;
+  result.inc_scatt_length = left.inc_scatt_length + right.inc_scatt_length;
 
   return result;
 }
@@ -684,6 +687,9 @@ NeutronAtom operator*(const NeutronAtom &left, const double right) {
   result.inc_scatt_xs = left.inc_scatt_xs * right;
   result.tot_scatt_xs = left.tot_scatt_xs * right;
   result.abs_scatt_xs = left.abs_scatt_xs * right;
+  result.tot_scatt_length = left.tot_scatt_length * right;
+  result.coh_scatt_length = left.coh_scatt_length * right;
+  result.inc_scatt_length = left.inc_scatt_length * right;
 
   return result;
 }
