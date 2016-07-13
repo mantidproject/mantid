@@ -163,13 +163,12 @@ void LoadNexus::runLoadNexusProcessed() {
   // Set the workspace property
   loadNexusPro->setPropertyValue("OutputWorkspace", m_workspace);
 
- loadNexusPro->setPropertyValue("SpectrumMin",
-                                getPropertyValue("SpectrumMin"));
- loadNexusPro->setPropertyValue("SpectrumMax",
-                                getPropertyValue("SpectrumMax"));
- loadNexusPro->setPropertyValue("SpectrumList",
-                                getPropertyValue("SpectrumList"));
-
+  loadNexusPro->setPropertyValue("SpectrumMin",
+                                 getPropertyValue("SpectrumMin"));
+  loadNexusPro->setPropertyValue("SpectrumMax",
+                                 getPropertyValue("SpectrumMax"));
+  loadNexusPro->setPropertyValue("SpectrumList",
+                                 getPropertyValue("SpectrumList"));
 
   // Get the array passed in the spectrum_list, if an empty array was passed use
   // the default
