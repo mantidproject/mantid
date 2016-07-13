@@ -189,7 +189,7 @@ public:
         boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(corrected);
     TS_ASSERT(correctedGroup);
     TS_ASSERT_EQUALS(correctedGroup->size(), 2);
-    for (int i = 0; i < correctedGroup->size(); i++) {
+    for (size_t i = 0; i < correctedGroup->size(); i++) {
       auto matrixWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           correctedGroup->getItem(i));
       TS_ASSERT(matrixWS);

@@ -615,14 +615,6 @@ void MuonAnalysisFitDataPresenter::openSequentialFitDialog() {
     return;
   }
 
-  // Lambda to convert QStringList to std::vector<std::string>
-  const auto toVector = [](const QStringList &qsl) {
-    std::vector<std::string> vec;
-    std::transform(qsl.begin(), qsl.end(), std::back_inserter(vec),
-                   [](const QString &qs) { return qs.toStdString(); });
-    return vec;
-  };
-
   // Open the dialog
   fitBrowser->blockSignals(true);
   MuonSequentialFitDialog dialog(fitBrowser, this);
