@@ -193,10 +193,10 @@ public:
     TS_ASSERT_DELTA(data->readY(0)[25], 0.8936, 0.0001);
     TS_ASSERT_DELTA(data->readY(0)[26], 0.8237, 0.0001);
     TS_ASSERT_DELTA(data->readY(0)[27], 0.7205, 0.0001);
-		// Test that the algorithm converged
-		TS_ASSERT_EQUALS(chi->readY(0).back(), 0);
-		TS_ASSERT_EQUALS(angle->readY(0).back(), 0);
-	}
+    // Test that the algorithm converged
+    TS_ASSERT_EQUALS(chi->readY(0).back(), 0);
+    TS_ASSERT_EQUALS(angle->readY(0).back(), 0);
+  }
 
   void test_sine_cosine_neg() {
     // Complex signal: cos(w * x) + i sin(w * x)
@@ -338,7 +338,7 @@ public:
     TS_ASSERT_DELTA(image->readY(0)[71], 1.3045, 0.001);
     TS_ASSERT_DELTA(image->readY(1)[78], 0.0999, 0.0001);
     TS_ASSERT_DELTA(image->readY(1)[79], 0.4176, 0.0001);
-	}
+  }
 
   void test_output_label() {
     // Test the output label
@@ -641,7 +641,6 @@ public:
 
     return ws;
   }
-
 };
 
 #endif /* MANTID_ALGORITHMS_MAXENTTEST_H_ */
