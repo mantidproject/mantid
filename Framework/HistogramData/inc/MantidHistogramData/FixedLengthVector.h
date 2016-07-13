@@ -46,32 +46,25 @@ template <class T> class FixedLengthVector {
 public:
   FixedLengthVector() = default;
   FixedLengthVector(size_t count, const double &value) : m_data(count, value) {
-    Validator<T>::checkValidity(m_data);
   }
   explicit FixedLengthVector(size_t count) : m_data(count) {
-    Validator<T>::checkValidity(m_data);
   }
   FixedLengthVector(std::initializer_list<double> init) : m_data(init) {
     Validator<T>::checkValidity(m_data);
   }
   FixedLengthVector(const FixedLengthVector &other) : m_data(other.m_data) {
-    Validator<T>::checkValidity(m_data);
   }
   FixedLengthVector(FixedLengthVector &&other) {
-    Validator<T>::checkValidity(other.m_data);
     m_data = std::move(other.m_data);
   }
   FixedLengthVector(const std::vector<double> &other) : m_data(other) {
-    Validator<T>::checkValidity(m_data);
   }
   FixedLengthVector(std::vector<double> &&other) {
-    Validator<T>::checkValidity(other);
     m_data = std::move(other);
   }
   template <class InputIt>
   FixedLengthVector(InputIt first, InputIt last)
       : m_data(first, last) {
-    Validator<T>::checkValidity(m_data);
   }
   template <class Generator,
             class = typename std::enable_if<
@@ -79,7 +72,6 @@ public:
   FixedLengthVector(size_t count, Generator g)
       : m_data(count) {
     std::generate(m_data.begin(), m_data.end(), g);
-    Validator<T>::checkValidity(m_data);
   }
 
   template <class InputIt> void assign(InputIt first, InputIt last) & {
@@ -93,25 +85,21 @@ public:
 
   FixedLengthVector &operator=(const FixedLengthVector &rhs) {
     checkAssignmentSize(rhs);
-    Validator<T>::checkValidity(rhs);
     m_data = rhs.m_data;
     return *this;
   }
   FixedLengthVector &operator=(FixedLengthVector &&rhs) {
     checkAssignmentSize(rhs);
-    Validator<T>::checkValidity(rhs);
     m_data = std::move(rhs.m_data);
     return *this;
   }
   FixedLengthVector &operator=(const std::vector<double> &rhs) {
     checkAssignmentSize(rhs);
-    Validator<T>::checkValidity(rhs);
     m_data = rhs;
     return *this;
   }
   FixedLengthVector &operator=(std::vector<double> &&rhs) {
     checkAssignmentSize(rhs);
-    Validator<T>::checkValidity(rhs);
     m_data = std::move(rhs);
     return *this;
   }
