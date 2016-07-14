@@ -13,6 +13,7 @@
 #include "MantidKernel/UnitLabelTypes.h"
 
 #include <boost/shared_array.hpp>
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_fft_complex.h>
 
@@ -82,21 +83,19 @@ void FFT::init() {
  *  (unless AcceptXRoundingErrors is set to true)
  */
 void FFT::exec() {
-  MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
-  MatrixWorkspace_const_sptr inImagWS = getProperty("InputImagWorkspace");
-  if (!inImagWS)
-    inImagWS = inWS; // workspaces are one and the same
+  m_inWS = getProperty("InputWorkspace");
+  m_inImagWS = getProperty("InputImagWorkspace");
+
+  if (m_inImagWS == nullptr)
+    m_inImagWS = m_inWS; // workspaces are one and the same
 
   const int iReal = getProperty("Real");
   const int iImag = getProperty("Imaginary");
   const bool isComplex = iImag != EMPTY_INT();
 
-  auto &X = inWS->x(iReal);
-  const int ySize = static_cast<int>(inWS->blocksize());
+  auto &X = m_inWS->x(iReal);
+  const int ySize = static_cast<int>(m_inWS->blocksize());
   const int xSize = static_cast<int>(X.size());
-
-  gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(ySize);
-  gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(ySize);
 
   boost::shared_array<double> data(new double[2 * ySize]);
   const std::string transform = getProperty("Transform");
@@ -110,18 +109,201 @@ void FFT::exec() {
     addPositiveOnly = true;
   }
 
-  MatrixWorkspace_sptr outWS =
-      WorkspaceFactory::Instance().create(inWS, nOut, xSize, ySize);
+  m_outWS = WorkspaceFactory::Instance().create(m_inWS, nOut, xSize, ySize);
 
   const double dx = X[1] - X[0];
   double df = 1.0 / (dx * ySize);
 
   // Output label
-  outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
+  outputLabel(addPositiveOnly, df, nOut);
 
-  auto inputUnit = inWS->getAxis(0)->unit();
+  setupTAxis(nOut, addPositiveOnly);
+
+  if (transform == "Forward") {
+    transformForward(data, addPositiveOnly, isComplex, iReal, iImag, df, dx);
+  } else { // Backward
+    transformBackward(data, addPositiveOnly, isComplex, iReal, iImag, df, dx);
+  }
+
+  m_outWS->setSharedX(1, m_outWS->sharedX(0));
+  m_outWS->setSharedX(2, m_outWS->sharedX(0));
+
+  if (addPositiveOnly) {
+    m_outWS->setSharedX(m_iIm, m_outWS->sharedX(m_iRe));
+    m_outWS->setSharedX(m_iAbs, m_outWS->sharedX(m_iRe));
+  }
+
+  setProperty("OutputWorkspace", m_outWS);
+}
+
+void FFT::transformForward(boost::shared_array<double> &data,
+                           const bool addPositiveOnly, bool isComplex,
+                           const int iReal, const int iImag, const double df,
+                           const double dx) {
+  /* If we translate the X-axis by -dx*ySize/2 and assume that our function is
+  * periodic
+  * along the X-axis with period equal to ySize, then dataY values must be
+  * rearranged such that
+  * dataY[i] = dataY[(ySize/2 + i + dys) % ySize]. However, we do not
+  * overwrite dataY but
+  * store the rearranged values in array 'data'.
+  * When index 'i' runs from 0 to ySize/2, data[2*i] will store dataY[j] with
+  * j running from
+  * ySize/2 to ySize.  When index 'i' runs from ySize/2+1 to ySize, data[2*i]
+  * will store
+  * dataY[j] with j running from 0 to ySize.
+  */
+  const int ySize = static_cast<int>(m_inWS->blocksize());
+  const int xSize = static_cast<int>(m_inWS->x(iReal).size());
+
+  gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(ySize);
+  gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(ySize);
+
+  const int dys = ySize % 2;
+
+  // Hardcoded "centerShift == true" means that the zero on the x axis is
+  // assumed to be in the centre, at point with index i = ySize/2.
+  // Set to false to make zero at i = 0.
+  constexpr bool centerShift = true;
+
+  for (int i = 0; i < ySize; i++) {
+    int j = centerShift ? (ySize / 2 + i) % ySize : i;
+    data[2 * i] = m_inWS->y(iReal)[j]; // even indexes filled with the real part
+    data[2 * i + 1] = isComplex
+                          ? m_inImagWS->y(iImag)[j]
+                          : 0.; // odd indexes filled with the imaginary part
+  }
+
+  double shift = getPhaseShift(
+      m_inWS->x(iReal)); // extra phase to be applied to the transform
+
+  gsl_fft_complex_forward(data.get(), 1, ySize, wavetable, workspace);
+  /* The Fourier transform overwrites array 'data'. Recall that the Fourier
+  * transform is
+  * periodic along the frequency axis. Thus, 'data' takes the same values
+  * when index j runs
+  * from ySize/2 to ySize than if index j would run from -ySize/2 to 0. Thus,
+  * for negative
+  * frequencies running from -ySize/2 to 0, we use the values stored in array
+  * 'data'
+  * for index j running from ySize/2 to ySize.
+  */
+  for (int i = 0; i < ySize; i++) {
+    int j = (ySize / 2 + i + dys) % ySize;
+    m_outWS->mutableX(m_iRe)[i] =
+        df * (-ySize / 2 + i); // zero frequency at i = ySize/2
+    double re = data[2 * j] *
+                dx; // use j from ySize/2 to ySize for negative frequencies
+    double im = data[2 * j + 1] * dx;
+    // shift
+    {
+      double c = cos(m_outWS->x(m_iRe)[i] * shift);
+      double s = sin(m_outWS->x(m_iRe)[i] * shift);
+      double re1 = re * c - im * s;
+      double im1 = re * s + im * c;
+      re = re1;
+      im = im1;
+    }
+    m_outWS->mutableY(m_iRe)[i] = re;                       // real part
+    m_outWS->mutableY(m_iIm)[i] = im;                       // imaginary part
+    m_outWS->mutableY(m_iAbs)[i] = sqrt(re * re + im * im); // modulus
+    if (addPositiveOnly) {
+      m_outWS->dataX(0)[i] = df * i;
+      if (j < ySize / 2) {
+        m_outWS->mutableY(0)[j] = re;                      // real part
+        m_outWS->mutableY(1)[j] = im;                      // imaginary part
+        m_outWS->mutableY(2)[j] = sqrt(re * re + im * im); // modulus
+      } else {
+        m_outWS->mutableY(0)[j] = 0.; // real part
+        m_outWS->mutableY(1)[j] = 0.; // imaginary part
+        m_outWS->mutableY(2)[j] = 0.; // modulus
+      }
+    }
+  }
+  if (xSize == ySize + 1) {
+    m_outWS->mutableX(0)[ySize] = m_outWS->x(0)[ySize - 1] + df;
+    if (addPositiveOnly)
+      m_outWS->mutableX(m_iRe)[ySize] = m_outWS->x(m_iRe)[ySize - 1] + df;
+  }
+
+  gsl_fft_complex_wavetable_free(wavetable);
+  gsl_fft_complex_workspace_free(workspace);
+}
+
+void FFT::transformBackward(boost::shared_array<double> &data,
+                            const bool addPositiveOnly, bool isComplex,
+                            const int iReal, const int iImag, const double df,
+                            const double dx) {
+
+  const int ySize = static_cast<int>(m_inWS->blocksize());
+  const int xSize = static_cast<int>(m_inWS->x(iReal).size());
+
+  gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc(ySize);
+  gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(ySize);
+
+  const int dys = ySize % 2;
+
+  // Hardcoded "centerShift == true" means that the zero on the x axis is
+  // assumed to be in the centre, at point with index i = ySize/2.
+  // Set to false to make zero at i = 0.
+  constexpr bool centerShift = true;
+
+  auto inReY = m_inWS->y(iReal);
+  auto inImY = m_inImagWS->y(iImag);
+
+  for (int i = 0; i < ySize; i++) {
+    int j = (ySize / 2 + i) % ySize;
+    data[2 * i] = inReY[j];
+    data[2 * i + 1] = isComplex ? inImY[j] : 0.;
+  }
+
+  gsl_fft_complex_inverse(data.get(), 1, ySize, wavetable, workspace);
+
+  for (int i = 0; i < ySize; i++) {
+    double x = df * i;
+    if (centerShift) {
+      x -= df * (ySize / 2);
+    }
+    m_outWS->mutableX(0)[i] = x;
+    int j = centerShift ? (ySize / 2 + i + dys) % ySize : i;
+    double re = data[2 * j] / df;
+    double im = data[2 * j + 1] / df;
+    m_outWS->mutableY(0)[i] = re;                      // real part
+    m_outWS->mutableY(1)[i] = im;                      // imaginary part
+    m_outWS->mutableY(2)[i] = sqrt(re * re + im * im); // modulus
+  }
+  if (xSize == ySize + 1)
+    m_outWS->mutableX(0)[ySize] = m_outWS->x(0)[ySize - 1] + df;
+
+  gsl_fft_complex_wavetable_free(wavetable);
+  gsl_fft_complex_workspace_free(workspace);
+}
+
+void FFT::setupTAxis(const int nOut, const bool addPositiveOnly) {
+  auto tAxis = new API::TextAxis(nOut);
+
+  m_iRe = 0;
+  m_iIm = 1;
+  m_iAbs = 2;
+  if (addPositiveOnly) {
+    m_iRe = 3;
+    m_iIm = 4;
+    m_iAbs = 5;
+    tAxis->setLabel(0, "Real Positive");
+    tAxis->setLabel(1, "Imag Positive");
+    tAxis->setLabel(2, "Modulus Positive");
+  }
+  tAxis->setLabel(m_iRe, "Real");
+  tAxis->setLabel(m_iIm, "Imag");
+  tAxis->setLabel(m_iAbs, "Modulus");
+  m_outWS->replaceAxis(1, tAxis);
+}
+
+void FFT::outputLabel(const bool addPositiveOnly, double &df, const int nOut) {
+  m_outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
+
+  auto inputUnit = m_inWS->getAxis(0)->unit();
   if (inputUnit) {
-
     boost::shared_ptr<Kernel::Units::Label> lblUnit =
         boost::dynamic_pointer_cast<Kernel::Units::Label>(
             UnitFactory::Instance().create("Label"));
@@ -150,144 +332,9 @@ void FFT::exec() {
                  inputUnit->label() == "Angstrom^-1") {
         lblUnit->setLabel("d-Spacing", Units::Symbol::Angstrom);
       }
-
-      outWS->getAxis(0)->unit() = lblUnit;
+      m_outWS->getAxis(0)->unit() = lblUnit;
     }
   }
-
-  // Hardcoded "centerShift == true" means that the zero on the x axis is
-  // assumed to be in the centre, at point with index i = ySize/2.
-  // Set to false to make zero at i = 0.
-  constexpr bool centerShift = true;
-
-  auto tAxis = new API::TextAxis(nOut);
-  int iRe = 0;
-  int iIm = 1;
-  int iAbs = 2;
-  if (addPositiveOnly) {
-    iRe = 3;
-    iIm = 4;
-    iAbs = 5;
-    tAxis->setLabel(0, "Real Positive");
-    tAxis->setLabel(1, "Imag Positive");
-    tAxis->setLabel(2, "Modulus Positive");
-  }
-  tAxis->setLabel(iRe, "Real");
-  tAxis->setLabel(iIm, "Imag");
-  tAxis->setLabel(iAbs, "Modulus");
-  outWS->replaceAxis(1, tAxis);
-
-  const int dys = ySize % 2;
-  if (transform == "Forward") {
-    /* If we translate the X-axis by -dx*ySize/2 and assume that our function is
-     * periodic
-     * along the X-axis with period equal to ySize, then dataY values must be
-     * rearranged such that
-     * dataY[i] = dataY[(ySize/2 + i + dys) % ySize]. However, we do not
-     * overwrite dataY but
-     * store the rearranged values in array 'data'.
-     * When index 'i' runs from 0 to ySize/2, data[2*i] will store dataY[j] with
-     * j running from
-     * ySize/2 to ySize.  When index 'i' runs from ySize/2+1 to ySize, data[2*i]
-     * will store
-     * dataY[j] with j running from 0 to ySize.
-     */
-    for (int i = 0; i < ySize; i++) {
-      int j = centerShift ? (ySize / 2 + i) % ySize : i;
-      data[2 * i] = inWS->y(iReal)[j]; // even indexes filled with the real part
-      data[2 * i + 1] = isComplex
-                            ? inImagWS->y(iImag)[j]
-                            : 0.; // odd indexes filled with the imaginary part
-    }
-
-    double shift =
-        getPhaseShift(X); // extra phase to be applied to the transform
-
-    gsl_fft_complex_forward(data.get(), 1, ySize, wavetable, workspace);
-    /* The Fourier transform overwrites array 'data'. Recall that the Fourier
-     * transform is
-     * periodic along the frequency axis. Thus, 'data' takes the same values
-     * when index j runs
-     * from ySize/2 to ySize than if index j would run from -ySize/2 to 0. Thus,
-     * for negative
-     * frequencies running from -ySize/2 to 0, we use the values stored in array
-     * 'data'
-     * for index j running from ySize/2 to ySize.
-     */
-    for (int i = 0; i < ySize; i++) {
-      int j = (ySize / 2 + i + dys) % ySize;
-      outWS->mutableX(iRe)[i] =
-          df * (-ySize / 2 + i); // zero frequency at i = ySize/2
-      double re = data[2 * j] *
-                  dx; // use j from ySize/2 to ySize for negative frequencies
-      double im = data[2 * j + 1] * dx;
-      // shift
-      {
-        double c = cos(outWS->x(iRe)[i] * shift);
-        double s = sin(outWS->x(iRe)[i] * shift);
-        double re1 = re * c - im * s;
-        double im1 = re * s + im * c;
-        re = re1;
-        im = im1;
-      }
-      outWS->mutableY(iRe)[i] = re;                       // real part
-      outWS->mutableY(iIm)[i] = im;                       // imaginary part
-      outWS->mutableY(iAbs)[i] = sqrt(re * re + im * im); // modulus
-      if (addPositiveOnly) {
-        outWS->dataX(0)[i] = df * i;
-        if (j < ySize / 2) {
-          outWS->mutableY(0)[j] = re;                      // real part
-          outWS->mutableY(1)[j] = im;                      // imaginary part
-          outWS->mutableY(2)[j] = sqrt(re * re + im * im); // modulus
-        } else {
-          outWS->mutableY(0)[j] = 0.; // real part
-          outWS->mutableY(1)[j] = 0.; // imaginary part
-          outWS->mutableY(2)[j] = 0.; // modulus
-        }
-      }
-    }
-    if (xSize == ySize + 1) {
-      outWS->mutableX(0)[ySize] = outWS->x(0)[ySize - 1] + df;
-      if (addPositiveOnly)
-        outWS->mutableX(iRe)[ySize] = outWS->x(iRe)[ySize - 1] + df;
-    }
-  } else // Backward
-  {
-    for (int i = 0; i < ySize; i++) {
-      int j = (ySize / 2 + i) % ySize;
-      data[2 * i] = inWS->y(iReal)[j];
-      data[2 * i + 1] = isComplex ? inImagWS->y(iImag)[j] : 0.;
-    }
-    gsl_fft_complex_inverse(data.get(), 1, ySize, wavetable, workspace);
-    for (int i = 0; i < ySize; i++) {
-      double x = df * i;
-      if (centerShift) {
-        x -= df * (ySize / 2);
-      }
-      outWS->mutableX(0)[i] = x;
-      int j = centerShift ? (ySize / 2 + i + dys) % ySize : i;
-      double re = data[2 * j] / df;
-      double im = data[2 * j + 1] / df;
-      outWS->mutableY(0)[i] = re;                      // real part
-      outWS->mutableY(1)[i] = im;                      // imaginary part
-      outWS->mutableY(2)[i] = sqrt(re * re + im * im); // modulus
-    }
-    if (xSize == ySize + 1)
-      outWS->mutableX(0)[ySize] = outWS->x(0)[ySize - 1] + df;
-  }
-
-  gsl_fft_complex_wavetable_free(wavetable);
-  gsl_fft_complex_workspace_free(workspace);
-
-  outWS->mutableX(1) = outWS->x(0);
-  outWS->mutableX(2) = outWS->x(0);
-
-  if (addPositiveOnly) {
-    outWS->mutableX(iIm) = outWS->x(iRe);
-    outWS->mutableX(iAbs) = outWS->x(iRe);
-  }
-
-  setProperty("OutputWorkspace", outWS);
 }
 
 /**
