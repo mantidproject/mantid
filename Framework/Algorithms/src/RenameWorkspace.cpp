@@ -69,7 +69,7 @@ void RenameWorkspace::exec() {
       AnalysisDataService::Instance().remove(outputwsName);
     } else {
       throw std::runtime_error("The workspace " + outputwsName +
-                                  " already exists");
+                               " already exists");
     }
   }
 
