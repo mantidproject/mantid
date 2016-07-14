@@ -213,7 +213,10 @@ void MuonAnalysisFitFunctionPresenter::editLocalParameterClicked(
  * @param index :: [input] Selected dataset index
  */
 void MuonAnalysisFitFunctionPresenter::handleDatasetIndexChanged(int index) {
+  // Avoid signals being sent to fit browser while this changes
+  setParameterUpdates(false);
   m_funcBrowser->setCurrentDataset(index);
+  setParameterUpdates(true);
 }
 
 } // namespace CustomInterfaces
