@@ -22,7 +22,8 @@ public:
   // A sample file is in the repository
   LoadRKHTest()
       : dataFile(""), tempFile("LoadRKH_test_file_2D"),
-        tempFile2("LoadRKH_test_file_1D_with_DX"), tempFile3("LoadRKL_with_second_header"){
+        tempFile2("LoadRKH_test_file_1D_with_DX"),
+        tempFile3("LoadRKL_with_second_header") {
     dataFile = "DIRECT.041";
   }
 
@@ -187,7 +188,7 @@ public:
 
     TS_ASSERT(data->isHistogramData())
 
-    //remove(tempFile.c_str());
+    // remove(tempFile.c_str());
   }
 
   void test1DWithDx() {
@@ -251,56 +252,56 @@ public:
   }
 
   void test_LoadRKH_with_second_header() {
-      // Arrange
-      ConfigService::Instance().setString("default.facility", "ISIS");
-      writeTestFileWithSecondHeader();
-      std::string outputSpace = "rkh_with_second_header";
+    // Arrange
+    ConfigService::Instance().setString("default.facility", "ISIS");
+    writeTestFileWithSecondHeader();
+    std::string outputSpace = "rkh_with_second_header";
 
-      // Act
-      Mantid::DataHandling::LoadRKH rkhAlg;
-      rkhAlg.initialize();
-      rkhAlg.setPropertyValue("Filename", tempFile3);
-      rkhAlg.setPropertyValue("OutputWorkspace", outputSpace);
+    // Act
+    Mantid::DataHandling::LoadRKH rkhAlg;
+    rkhAlg.initialize();
+    rkhAlg.setPropertyValue("Filename", tempFile3);
+    rkhAlg.setPropertyValue("OutputWorkspace", outputSpace);
 
-      // Assert
-      std::string result;
-      TS_ASSERT_THROWS_NOTHING(result = rkhAlg.getPropertyValue("Filename"))
-        TS_ASSERT_THROWS_NOTHING(result =
-          rkhAlg.getPropertyValue("OutputWorkspace"))
-        TS_ASSERT(result == outputSpace);
-      TS_ASSERT_THROWS_NOTHING(rkhAlg.execute());
-      TS_ASSERT(rkhAlg.isExecuted());
+    // Assert
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING(result = rkhAlg.getPropertyValue("Filename"))
+    TS_ASSERT_THROWS_NOTHING(result =
+                                 rkhAlg.getPropertyValue("OutputWorkspace"))
+    TS_ASSERT(result == outputSpace);
+    TS_ASSERT_THROWS_NOTHING(rkhAlg.execute());
+    TS_ASSERT(rkhAlg.isExecuted());
 
-      using namespace Mantid::API;
-      using namespace Mantid::DataObjects;
-      // Now need to test the resultant workspace, first retrieve it
-      Workspace_sptr rkhspace;
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    // Now need to test the resultant workspace, first retrieve it
+    Workspace_sptr rkhspace;
 
-      TS_ASSERT_THROWS_NOTHING(
+    TS_ASSERT_THROWS_NOTHING(
         rkhspace = AnalysisDataService::Instance().retrieve(outputSpace));
-      Workspace2D_sptr data = boost::dynamic_pointer_cast<Workspace2D>(rkhspace);
+    Workspace2D_sptr data = boost::dynamic_pointer_cast<Workspace2D>(rkhspace);
 
-      TS_ASSERT_EQUALS(data->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(data->getNumberHistograms(), 1);
 
-      TS_ASSERT_EQUALS(static_cast<int>(data->dataX(0).size()), 4);
-      TS_ASSERT_EQUALS(static_cast<int>(data->dataY(0).size()), 4);
-      TS_ASSERT_EQUALS(static_cast<int>(data->dataE(0).size()), 4);
+    TS_ASSERT_EQUALS(static_cast<int>(data->dataX(0).size()), 4);
+    TS_ASSERT_EQUALS(static_cast<int>(data->dataY(0).size()), 4);
+    TS_ASSERT_EQUALS(static_cast<int>(data->dataE(0).size()), 4);
 
-      double tolerance(1e-06);
+    double tolerance(1e-06);
 
-      TS_ASSERT_DELTA(data->dataX(0)[0], 0.00520, tolerance);
-      TS_ASSERT_DELTA(data->dataX(0)[1], 0.00562, tolerance);
-      TS_ASSERT_DELTA(data->dataX(0)[2], 0.00607, tolerance);
+    TS_ASSERT_DELTA(data->dataX(0)[0], 0.00520, tolerance);
+    TS_ASSERT_DELTA(data->dataX(0)[1], 0.00562, tolerance);
+    TS_ASSERT_DELTA(data->dataX(0)[2], 0.00607, tolerance);
 
-      TS_ASSERT_DELTA(data->dataY(0)[0], 1.055855e+00, tolerance);
-      TS_ASSERT_DELTA(data->dataY(0)[1], 9.784999e-01, tolerance);
-      TS_ASSERT_DELTA(data->dataY(0)[2], 1.239836e+00, tolerance);
+    TS_ASSERT_DELTA(data->dataY(0)[0], 1.055855e+00, tolerance);
+    TS_ASSERT_DELTA(data->dataY(0)[1], 9.784999e-01, tolerance);
+    TS_ASSERT_DELTA(data->dataY(0)[2], 1.239836e+00, tolerance);
 
-      TS_ASSERT_DELTA(data->dataE(0)[0], 2.570181e-01, tolerance);
-      TS_ASSERT_DELTA(data->dataE(0)[1], 1.365013e-01, tolerance);
-      TS_ASSERT_DELTA(data->dataE(0)[2], 9.582824e-02, tolerance);
+    TS_ASSERT_DELTA(data->dataE(0)[0], 2.570181e-01, tolerance);
+    TS_ASSERT_DELTA(data->dataE(0)[1], 1.365013e-01, tolerance);
+    TS_ASSERT_DELTA(data->dataE(0)[2], 9.582824e-02, tolerance);
 
-      remove(tempFile3.c_str());
+    remove(tempFile3.c_str());
   }
 
 private:
@@ -352,7 +353,8 @@ private:
 
   void writeTestFileWithSecondHeader() {
     std::ofstream file(tempFile3.c_str());
-    file << " SANS2D Fri 08-JUL-2016 11:10 Workspace: M3_42_3rd-MT_rear_cloned_temp\n";
+    file << " SANS2D Fri 08-JUL-2016 11:10 Workspace: "
+            "M3_42_3rd-MT_rear_cloned_temp\n";
     file << " M3-42_third_SANS\n";
     file << "   4    0    0    0    1   4    0\n";
     file << "          0         0         0         0\n";
