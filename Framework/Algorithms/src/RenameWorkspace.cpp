@@ -32,8 +32,8 @@ void RenameWorkspace::init() {
       "name: NewWSName by adding the _monitors suffix"
       " (e.g.: NewWSName_monitors)",
       Direction::Input);
-  //Set to default true to maintain compatibility with existing scripts
-  //as this just allowed overriding by default
+  // Set to default true to maintain compatibility with existing scripts
+  // as this just allowed overriding by default
   declareProperty<bool>(
       "OverrideExisting", true,
       "If true any existing workspaces with the output name will be"

@@ -103,7 +103,7 @@ void RenameWorkspaces::exec() {
       // RenameWorkspace handle deleting if we are overriding
       if (!overrideWorkspace) {
         throw std::runtime_error("A workspace called " + newWsName[i] +
-                                    " already exists");
+                                 " already exists");
       }
     }
   }
