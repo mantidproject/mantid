@@ -111,20 +111,17 @@ public:
 
   void testExecNansReplaced() {
 	auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>();
-
 	bool noNansFound = true;
-	for (int i = 0; i < result->getNumberHistograms(); i++) {
-	  auto x = result->readX(i);
-	  auto y = result->readY(i);
-	  auto e = result->readE(i);
 
+	for (int i = 0; i < result->getNumberHistograms(); i++) {
 	  for (int j = 0; j < result->blocksize(); j++) {
-		if (isnan(x[j]) || isnan(y[j]) || isnan(e[j])) {
+		if (isnan(result->x(i)[j]) || 
+			isnan(result->y(i)[j]) || 
+			isnan(result->e(i)[j])) {
 		  noNansFound = false;
 		  break;
 		}
 	  }
-
 	  if (!noNansFound) { break; }
 	}
 
