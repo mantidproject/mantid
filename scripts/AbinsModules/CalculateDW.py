@@ -4,12 +4,11 @@ import numpy as np
 from DwData import DwData
 from AbinsData import AbinsData
 from IOmodule import  IOmodule
-from RearrangeData import  RearrangeData
 
 import Constants
 
 
-class CalculateDW(IOmodule, RearrangeData):
+class CalculateDW(IOmodule):
     """
     Class for calculating Debye-Waller factors.
     """
@@ -47,19 +46,15 @@ class CalculateDW(IOmodule, RearrangeData):
         """
         The Debye-Waller coefficients are calculated atom by atom.
         For each atom they consist in a 3X3 matrix. The Debye-Waller factors are given in atomic units.
-        Internally the routine takes temperature in Kelvin and converts it to Hartree, while the eigenvectors are
-        dimensionless, the frequencies are given in units of 1/cm and are converted also to Hartree.
         Working equation implemented according to:
         https://forge.epn-campus.eu/html/ab2tds/debye_waller.html
         """
         _DW = DwData(temperature=self._temperature, num_atoms=self._num_atoms)
 
         _data = self._abins_data.extract()
-
-        _rearranged_data = self._convert_to_hartree(abins_data=_data)
-        _mass_hartree = _rearranged_data["mass_hartree"]
-        _frequencies_hartree = _rearranged_data["frequencies_hartree"]
-        _temperature_hartree = _rearranged_data["temperature_hartree"]
+        _mass_hartree = np.asarray([ atom["mass"] for atom in _data["atoms_data"]])
+        _frequencies_hartree = _data["k_points_data"]["frequencies"]
+        _temperature_hartree = self._temperature * Constants.k_2_hartree
 
         _weights = _data["k_points_data"]["weights"]
         _atomic_displacements = _data["k_points_data"]["atomic_displacements"]
@@ -76,15 +71,19 @@ class CalculateDW(IOmodule, RearrangeData):
                 # correction for acoustic modes at Gamma point
                 if np.linalg.norm(_data["k_points_data"]["k_vectors"][k]) < Constants.small_k: start = 2
                 else: start = 0
-
+                add = None
                 for n_freq in range(start, self._num_freq):
 
                     displacement = _atomic_displacements[k, num, n_freq, :]
-                    tensor =  np.real(np.outer(displacement, displacement.conjugate())) # DW are real
-                    _item[:, :] += tensor * _coth_over_omega[n_freq]
 
-                _item[:, :] += _item[:, :] * _weights[k]
-            _item[:, :] /= 2.0 * _mass_hartree[num]
+                    # this part of code is based on TDS_Simmetry.py from ab2tds (lines 1775-1781 )
+                    displacement = np.reshape(displacement, [-1,3])
+                    add = ( displacement.conjugate()[:,:,None] * displacement[:,None,:]).real
+                    np.multiply(add,  _coth_over_omega[n_freq],  add)
+
+                np.add(_item, add[0,:,:] * _weights[k], _item)
+
+            np.multiply(_item, 1.0 / (2 * _mass_hartree[num]), _item)
             _DW._append(item=_item, num_atom=num)
         return _DW
 

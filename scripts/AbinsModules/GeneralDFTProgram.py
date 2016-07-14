@@ -174,7 +174,7 @@ class GeneralDFTProgram(IOmodule):
 
     def _rearrange_data(self, data=None):
         """
-        This method rearranges data read from phonon DFT file.
+        This method rearranges data read from phonon DFT file. It converts  masses and frequencies Hartree atomic units.
 
         @param k_data: dictionary with the data to rearrange
         @return: Returns an object of type AbinsData
@@ -183,11 +183,13 @@ class GeneralDFTProgram(IOmodule):
         k_points = KpointsData(num_atoms=self._num_atoms, num_k=self._num_k)
 
         atoms = AtomsDaTa(num_atoms=self._num_atoms)
+        for atom in data["atoms"]:
+            atom["mass"] = atom["mass"] * Constants.m_2_hartree
         atoms.set(data["atoms"])
 
         k_points.set({"weights": data["weights"],  # 1D [k] (one entry corresponds to weight of one k-point)
                       "k_vectors": data["k_vectors"], # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
-                      "frequencies": data["frequencies"], # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
+                      "frequencies": data["frequencies"] * Constants.cm1_2_hartree, # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
                       "atomic_displacements": data["atomic_displacements"]}) # 4D array [k][atom_n][freq][3] (one entry corresponds to one coordinate for atom atom_n, frequency  freq and k-point k )
 
         return AbinsData(k_points_data=k_points, atoms_data=atoms)
