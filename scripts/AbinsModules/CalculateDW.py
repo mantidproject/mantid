@@ -1,7 +1,6 @@
 import numpy as np
 
 # ABINS modules
-from QData import QData
 from DwData import DwData
 from AbinsData import AbinsData
 from IOmodule import  IOmodule
