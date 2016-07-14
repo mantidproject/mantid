@@ -9,7 +9,7 @@
 #include "MantidKernel/cow_ptr.h"
 
 namespace boost {
-	template< typename T> class shared_array;
+template <typename T> class shared_array;
 }
 
 namespace Mantid {

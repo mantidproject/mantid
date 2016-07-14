@@ -183,8 +183,7 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
   } else if (numentries <= 0) {
     stringstream errmsg;
     errmsg << "For Export Log, NumberEntriesExport must be greater than 0.  "
-              "Input = "
-           << numentries;
+              "Input = " << numentries;
     g_log.error(errmsg.str());
     throw std::runtime_error(errmsg.str());
   } else if (static_cast<size_t>(numentries) > times.size()) {

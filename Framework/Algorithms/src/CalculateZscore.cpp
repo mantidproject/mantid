@@ -94,7 +94,7 @@ void CalculateZscore::exec() {
     vector<double> yzscores = getZscore(inpY);
     vector<double> ezscores = getZscore(inpE);
 
-	outWS->setSharedX(i, inpWS->sharedX(wsindex));
+    outWS->setSharedX(i, inpWS->sharedX(wsindex));
     histY = yzscores;
     histE = ezscores;
 

@@ -124,8 +124,7 @@ void ConvertUnits::exec() {
   if (inputWS->x(0).size() < 2) {
     std::stringstream msg;
     msg << "Input workspace has invalid X axis binning parameters. Should have "
-           "at least 2 values. Found "
-        << inputWS->x(0).size() << ".";
+           "at least 2 values. Found " << inputWS->x(0).size() << ".";
     throw std::runtime_error(msg.str());
   }
   if (inputWS->x(0).front() > inputWS->x(0).back() ||
@@ -474,8 +473,8 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
 
       // EventWorkspace part, modifying the EventLists.
       if (m_inputEvents) {
-        eventWS->getSpectrum(i).convertUnitsViaTof(localFromUnit,
-                                                   localOutputUnit);
+        eventWS->getSpectrum(i)
+            .convertUnitsViaTof(localFromUnit, localOutputUnit);
 
         //        std::vector<double> tofs;
         //        eventWS->getSpectrum(i).getTofs(tofs);
@@ -686,8 +685,8 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
       std::copy(edges.cbegin(), edges.cbegin() + lastBins[j],
                 result->mutableX(j).begin());
 
-	  // If necessary, add on some fake values to the end of the X array (Y&E
-	  // will be zero)
+      // If necessary, add on some fake values to the end of the X array (Y&E
+      // will be zero)
       if (k < maxBins) {
         auto l = k;
         std::transform(resX.begin() + lastBins[j], resX.end(),
