@@ -227,8 +227,6 @@ bool CreatePSDBleedMask::performBleedTest(
     // count daya
     auto &topY = inputWS->frequencies(topIndex);
     auto &botY = inputWS->frequencies(botIndex);
-    auto &topX = inputWS->x(topIndex);
-    auto &botX = inputWS->x(botIndex);
     for (int j = 0; j < numBins; ++j) {
       double topRate(topY[j]), botRate(botY[j]);
       totalRate[j] += topRate + botRate;
