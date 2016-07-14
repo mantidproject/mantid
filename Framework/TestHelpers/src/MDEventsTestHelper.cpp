@@ -88,9 +88,8 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
   }
 
   // Create the x-axis for histogramming.
-  Mantid::MantidVecPtr x1;
-  Mantid::MantidVec &xRef = x1.access();
-  xRef.resize(numBins);
+  HistogramData::BinEdges x1(numBins);
+  auto &xRef = x1.mutableData();
   for (int i = 0; i < numBins; ++i) {
     xRef[i] = i * binDelta;
   }

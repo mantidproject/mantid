@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
@@ -6,6 +7,8 @@
 
 using namespace Mantid::Geometry;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(RectangularDetector)
 
 /**
  * Enables boost.python to automatically "cast" an object up to the

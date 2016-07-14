@@ -460,7 +460,7 @@ std::string getStringFieldDataValue(vtkDataSet *ds, std::string fieldName) {
 #endif
 
 #if defined(GCC_VERSION) && GCC_VERSION >= 50000
-#pragma gcc diagnostic pop
+#pragma GCC diagnostic pop
 #endif
 
 #endif

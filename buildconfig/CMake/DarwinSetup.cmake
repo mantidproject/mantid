@@ -121,6 +121,10 @@ if (NOT OPENSSL_ROOT_DIR)
   set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
 endif(NOT OPENSSL_ROOT_DIR)
 
+if (NOT HDF5_ROOT)
+  set ( HDF5_ROOT /usr/local/opt/hdf5 )
+endif()
+
 # Python packages
 
 install ( PROGRAMS ${SITEPACKAGES}/sip.so DESTINATION ${BIN_DIR} )

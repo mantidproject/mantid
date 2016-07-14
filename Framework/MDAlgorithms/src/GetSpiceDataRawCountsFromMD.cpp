@@ -92,7 +92,7 @@ void GetSpiceDataRawCountsFromMD::exec() {
   // Branch out by mode
   std::vector<double> vecX;
   std::vector<double> vecY;
-  std::string ylabel("");
+  std::string ylabel;
   if (mode.compare("Pt.") == 0) {
     // export detector counts for one specific Pt./run number
     int runnumber = getProperty("Pt");
@@ -124,8 +124,6 @@ void GetSpiceDataRawCountsFromMD::exec() {
   MatrixWorkspace_sptr outws =
       createOutputWorkspace(vecX, vecY, xlabel, ylabel);
   setProperty("OutputWorkspace", outws);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -333,8 +331,6 @@ void GetSpiceDataRawCountsFromMD::exportSampleLogValue(
     vecX[i] = vecPair[i].first;
     vecY[i] = vecPair[i].second;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -433,8 +429,6 @@ void GetSpiceDataRawCountsFromMD::getDetCounts(
   } // ENDOF(while)
 
   delete (mditer);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -480,8 +474,6 @@ void GetSpiceDataRawCountsFromMD::getSampleLogValues(
                   << " of " << iexp << "-th ExperimentInfo "
                   << "\n";
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

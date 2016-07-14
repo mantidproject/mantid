@@ -361,7 +361,7 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
       boost::split(categoryLayers, desc.category, boost::is_any_of("\\"));
 
       // Traverse each parent category, working our way from the top down.
-      std::string currentLayer = "";
+      std::string currentLayer;
       for (auto &categoryLayer : categoryLayers) {
         currentLayer.append(categoryLayer);
 

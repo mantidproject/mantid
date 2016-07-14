@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid.kernel import MemoryStats
+import sys
 
 class MemoryStatsTest(unittest.TestCase):
 
@@ -10,12 +11,15 @@ class MemoryStatsTest(unittest.TestCase):
         mem = MemoryStats()
 
         self.assertTrue(hasattr(mem, "update"))
-        self.assertTrue(mem.availMem > 0.0, "Value should be larger than 0.0")
-        self.assertTrue(mem.totalMem > 0.0, "Value should be larger than 0.0")
-        self.assertTrue(mem.residentMem > 0.0, "Value should be larger than 0.0")
-        self.assertTrue(mem.virtualMem > 0.0, "Value should be larger than 0.0")
-        self.assertTrue(mem.reservedMem > 0.0, "Value should be larger than 0.0")
-        self.assertTrue(mem.getFreeRatio > 0.0, "Value should be larger than 0.0")
+        self.assertTrue(mem.availMem() > 0.0, "Value should be larger than 0.0")
+        self.assertTrue(mem.totalMem() > 0.0, "Value should be larger than 0.0")
+        self.assertTrue(mem.residentMem() > 0.0, "Value should be larger than 0.0")
+        self.assertTrue(mem.virtualMem() > 0.0, "Value should be larger than 0.0")
+        self.assertTrue(mem.getFreeRatio() > 0.0, "Value should be larger than 0.0")
+        if sys.platform == 'win32':
+            self.assertTrue(mem.reservedMem() > 0.0, "Value should be larger than 0.0")
+        else:
+            self.assertTrue(mem.reservedMem() == 0.0, "Value should 0.0")
 
 if __name__ == '__main__':
     unittest.main()

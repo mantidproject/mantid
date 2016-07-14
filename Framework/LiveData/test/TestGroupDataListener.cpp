@@ -35,9 +35,7 @@ int TestGroupDataListener::runNumber() const { return 0; }
 
 void TestGroupDataListener::start(
     Kernel::DateAndTime /*startTime*/) // Ignore the start time
-{
-  return;
-}
+{}
 
 /** Create the default empty event workspace */
 void TestGroupDataListener::createWorkspace() {
