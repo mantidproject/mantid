@@ -192,7 +192,7 @@ void SetSampleMaterial::exec() {
     builder.setMassDensity(rho_m);
   double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
   if (isEmpty(rho)) {
-    double zParameter = getProperty("ZParameter");   // number of atoms
+    double zParameter = getProperty("ZParameter"); // number of atoms
     if (!isEmpty(zParameter)) {
       builder.setZParameter(zParameter);
       double unitCellVolume = getProperty("UnitCellVolume");
@@ -203,18 +203,20 @@ void SetSampleMaterial::exec() {
   }
 
   // get the scattering information - this will override table values
-  builder.setCoherentXSection(getProperty("CoherentXSection")); // in barns
-  builder.setIncoherentXSection(getProperty("IncoherentXSection"));       // in barns
+  builder.setCoherentXSection(getProperty("CoherentXSection"));      // in barns
+  builder.setIncoherentXSection(getProperty("IncoherentXSection"));  // in barns
   builder.setAbsorptionXSection(getProperty("AttenuationXSection")); // in barns
-  builder.setTotalScatterXSection(getProperty("ScatteringXSection"));      // in barns
+  builder.setTotalScatterXSection(
+      getProperty("ScatteringXSection")); // in barns
 
   // create the material
   mat.reset(new Material(builder.build()));
 
   // calculate derived values
-  double bcoh_avg = mat->cohScatterLength(); // <b>
+  double bcoh_avg = mat->cohScatterLength();          // <b>
   double btot_sq_avg = mat->totalScatterLengthSqrd(); // <b^2>
-  double normalizedLaue = (btot_sq_avg - bcoh_avg * bcoh_avg) / (bcoh_avg * bcoh_avg);
+  double normalizedLaue =
+      (btot_sq_avg - bcoh_avg * bcoh_avg) / (bcoh_avg * bcoh_avg);
   if (btot_sq_avg == bcoh_avg * bcoh_avg)
     normalizedLaue = 0.;
 

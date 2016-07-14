@@ -63,7 +63,7 @@ private:
   void overrideNeutronProperties(PhysicalConstants::NeutronAtom &neutron) const;
   PhysicalConstants::NeutronAtom generateCustomNeutron() const;
 
-  //Material::ChemicalFormula createCompositionFromFormula() const;
+  // Material::ChemicalFormula createCompositionFromFormula() const;
   Material::ChemicalFormula createCompositionFromAtomicNumber() const;
   double getOrCalculateRho(const Material::ChemicalFormula &formula) const;
 

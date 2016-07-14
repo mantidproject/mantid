@@ -77,8 +77,12 @@ public:
     TS_ASSERT_DELTA(
         m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda), 0.0925,
         0.0001);
-    TS_ASSERT_DELTA(m_sampleMaterial->cohScatterLength(NeutronAtom::ReferenceLambda), 4.8615, 0.0001);
-    TS_ASSERT_DELTA(m_sampleMaterial->totalScatterLengthSqrd(NeutronAtom::ReferenceLambda), 24.9905, 0.0001);
+    TS_ASSERT_DELTA(
+        m_sampleMaterial->cohScatterLength(NeutronAtom::ReferenceLambda),
+        4.8615, 0.0001);
+    TS_ASSERT_DELTA(
+        m_sampleMaterial->totalScatterLengthSqrd(NeutronAtom::ReferenceLambda),
+        24.9905, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -123,8 +127,12 @@ public:
     TS_ASSERT_DELTA(
         m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda), 0.0925,
         0.0001);
-    TS_ASSERT_DELTA(m_sampleMaterial->cohScatterLength(NeutronAtom::ReferenceLambda), 4.8615, 0.0001);
-    TS_ASSERT_DELTA(m_sampleMaterial->totalScatterLengthSqrd(NeutronAtom::ReferenceLambda), 23.6709, 0.0001); // TODO - should be zero?
+    TS_ASSERT_DELTA(
+        m_sampleMaterial->cohScatterLength(NeutronAtom::ReferenceLambda),
+        4.8615, 0.0001);
+    TS_ASSERT_DELTA(
+        m_sampleMaterial->totalScatterLengthSqrd(NeutronAtom::ReferenceLambda),
+        23.6709, 0.0001); // TODO - should be zero?
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -156,7 +164,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(setmat->execute());
     TS_ASSERT(setmat->isExecuted());
 
-
     // can get away with holding pointer as it is an inout ws property
     const Material *m_sampleMaterial = &(testWS->sample().getMaterial());
     TS_ASSERT_DELTA(m_sampleMaterial->numberDensity(), 0.1183245, 0.0001);
@@ -166,8 +173,12 @@ public:
     TS_ASSERT_DELTA(
         m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda), 1.4381,
         0.0001);
-    TS_ASSERT_DELTA(m_sampleMaterial->cohScatterLength(NeutronAtom::ReferenceLambda), 5.1834, 0.0001);
-    TS_ASSERT_DELTA(m_sampleMaterial->totalScatterLengthSqrd(NeutronAtom::ReferenceLambda), 32.5090, 0.0001);
+    TS_ASSERT_DELTA(
+        m_sampleMaterial->cohScatterLength(NeutronAtom::ReferenceLambda),
+        5.1834, 0.0001);
+    TS_ASSERT_DELTA(
+        m_sampleMaterial->totalScatterLengthSqrd(NeutronAtom::ReferenceLambda),
+        32.5090, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -209,8 +220,12 @@ public:
     TS_ASSERT_DELTA(
         m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda), 0.0925,
         0.0001);
-    TS_ASSERT_DELTA(m_sampleMaterial->cohScatterLength(NeutronAtom::ReferenceLambda), 4.8615, 0.0001);
-    TS_ASSERT_DELTA(m_sampleMaterial->totalScatterLengthSqrd(NeutronAtom::ReferenceLambda), 24.9905, 0.0001);
+    TS_ASSERT_DELTA(
+        m_sampleMaterial->cohScatterLength(NeutronAtom::ReferenceLambda),
+        4.8615, 0.0001);
+    TS_ASSERT_DELTA(
+        m_sampleMaterial->totalScatterLengthSqrd(NeutronAtom::ReferenceLambda),
+        24.9905, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -248,9 +263,14 @@ public:
     TS_ASSERT_DELTA(
         m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda), 4.49,
         0.0001);
-    TS_ASSERT_DELTA(m_sampleMaterial->cohScatterLength(NeutronAtom::ReferenceLambda), 10.2877, 0.0001);
-    const double totScattLength = m_sampleMaterial->totalScatterLength(NeutronAtom::ReferenceLambda);
-    TS_ASSERT_DELTA(m_sampleMaterial->totalScatterLengthSqrd(NeutronAtom::ReferenceLambda), totScattLength*totScattLength, 0.0001);
+    TS_ASSERT_DELTA(
+        m_sampleMaterial->cohScatterLength(NeutronAtom::ReferenceLambda),
+        10.2877, 0.0001);
+    const double totScattLength =
+        m_sampleMaterial->totalScatterLength(NeutronAtom::ReferenceLambda);
+    TS_ASSERT_DELTA(
+        m_sampleMaterial->totalScatterLengthSqrd(NeutronAtom::ReferenceLambda),
+        totScattLength * totScattLength, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }

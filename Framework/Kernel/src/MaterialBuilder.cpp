@@ -214,7 +214,6 @@ Material MaterialBuilder::build() const {
                              "number.");
   }
 
-
   density = getOrCalculateRho(formula);
   if (hasOverrideNeutronProperties()) {
     PhysicalConstants::NeutronAtom neutron = generateCustomNeutron();
@@ -230,8 +229,11 @@ Material MaterialBuilder::build() const {
  */
 Material::ChemicalFormula
 MaterialBuilder::createCompositionFromAtomicNumber() const {
-  Material::FormulaUnit unit {boost::make_shared<PhysicalConstants::Atom>(getAtom(static_cast<uint16_t>(m_atomicNo.get()),
-                      static_cast<uint16_t>(m_massNo))), 1.};
+  Material::FormulaUnit unit{
+      boost::make_shared<PhysicalConstants::Atom>(
+          getAtom(static_cast<uint16_t>(m_atomicNo.get()),
+                  static_cast<uint16_t>(m_massNo))),
+      1.};
   Material::ChemicalFormula formula;
   formula.push_back(unit);
 
@@ -244,7 +246,8 @@ MaterialBuilder::createCompositionFromAtomicNumber() const {
  * @param rmm The relative molecular mass
  * @return The number density
  */
-double MaterialBuilder::getOrCalculateRho(const Material::ChemicalFormula &formula) const {
+double MaterialBuilder::getOrCalculateRho(
+    const Material::ChemicalFormula &formula) const {
   // first calculate the total number of atoms
   double totalNumAtoms = 0.;
   for (const auto &formulaUnit : formula) {
@@ -257,11 +260,11 @@ double MaterialBuilder::getOrCalculateRho(const Material::ChemicalFormula &formu
     return totalNumAtoms * m_zParam.get() / m_cellVol.get();
   } else if (m_massDensity) {
     double rmm = 0.;
-    for ( const auto & formulaUnit : formula) {
+    for (const auto &formulaUnit : formula) {
       rmm += formulaUnit.atom->mass * formulaUnit.multiplicity;
     }
     return (m_massDensity.get() / rmm) * PhysicalConstants::N_A * 1e-24;
-  } else if(m_formula && m_formula->size() == 1) {
+  } else if (m_formula && m_formula->size() == 1) {
     return m_formula->at(0).atom->number_density;
   } else {
     return EMPTY_DBL();
@@ -290,8 +293,9 @@ PhysicalConstants::NeutronAtom MaterialBuilder::generateCustomNeutron() const {
     neutronAtom = atom.neutron;
   } else {
     double totalNumAtoms = 0.;
-    for (const auto & formulaUnit : *m_formula) {
-      neutronAtom = neutronAtom + formulaUnit.multiplicity * formulaUnit.atom->neutron;
+    for (const auto &formulaUnit : *m_formula) {
+      neutronAtom =
+          neutronAtom + formulaUnit.multiplicity * formulaUnit.atom->neutron;
       totalNumAtoms += formulaUnit.multiplicity;
     }
     neutronAtom = (1. / totalNumAtoms) * neutronAtom;
@@ -301,7 +305,6 @@ PhysicalConstants::NeutronAtom MaterialBuilder::generateCustomNeutron() const {
   overrideNeutronProperties(neutronAtom);
   return neutronAtom;
 }
-
 
 /**
  * Override default neutron properties with those supplied

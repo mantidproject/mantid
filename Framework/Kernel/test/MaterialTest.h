@@ -168,7 +168,7 @@ public:
 
     cf = Material::parseChemicalFormula("Y-Ba2-Cu3-O6.56");
     TS_ASSERT_EQUALS(cf.size(), 4);
-    for (const auto & formulaUnit : cf) {
+    for (const auto &formulaUnit : cf) {
       TS_ASSERT_EQUALS(formulaUnit.atom->a_number, 0);
     }
     TS_ASSERT_EQUALS(cf[0].atom->symbol, "Y");

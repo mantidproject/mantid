@@ -27,10 +27,9 @@ Atom::Atom(const Atom &other)
       neutron(getNeutronNoExceptions(other.z_number, other.a_number)) {}
 
 Atom::Atom(const NeutronAtom &neutron)
-  :symbol("user"), z_number(neutron.z_number), a_number(neutron.a_number), abundance(0),
-    mass(0.), mass_density(0.), number_density(0.),
-    neutron(neutron)
-{}
+    : symbol("user"), z_number(neutron.z_number), a_number(neutron.a_number),
+      abundance(0), mass(0.), mass_density(0.), number_density(0.),
+      neutron(neutron) {}
 
 // ---------- START DO NOT EDIT AREA----------
 /// \cond
