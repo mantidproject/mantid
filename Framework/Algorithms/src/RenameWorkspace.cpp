@@ -57,7 +57,7 @@ void RenameWorkspace::exec() {
 
   if (getPropertyValue("InputWorkspace") ==
       getPropertyValue("OutputWorkspace")) {
-    throw std::runtime_error(
+    throw std::invalid_argument(
         "The input and output workspace names must be different");
   }
 
@@ -68,7 +68,7 @@ void RenameWorkspace::exec() {
       // Delete existing workspace
       AnalysisDataService::Instance().remove(outputwsName);
     } else {
-      throw std::invalid_argument("The workspace " + outputwsName +
+      throw std::runtime_error("The workspace " + outputwsName +
                                   " already exists");
     }
   }
