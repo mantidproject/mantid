@@ -34,7 +34,7 @@ namespace {
     //  4. Several characters
     //  5. Close bracket  
     std::string input = std::accumulate(codes.begin(), codes.end(), std::string(""));
-    std::string reg("^[06][\\w]+\\([\\w\\^-]+\\)$");
+    std::string reg("^[06][\\w]+\\([/ \\w\\^-]+\\)$");
     boost::regex baseRegex(reg);
     return boost::regex_match(input, baseRegex);
   }
