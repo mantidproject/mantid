@@ -37,11 +37,12 @@ void RenameWorkspaces::init() {
   // Suffix
   declareProperty("Suffix", std::string(""),
                   "Suffix to add to input workspace names", Direction::Input);
-  // Override flag
+  // Set to default true to maintain compatibility with existing scripts
+  // as this just allowed overriding by default
   declareProperty<bool>(
-      "OverrideExisting", false,
+      "OverrideExisting", true,
       "If true all existing workspaces with the output name will be"
-      " overridden",
+      " overridden. Defaults to true to maintain backwards compatibility.",
       Direction::Input);
 }
 
@@ -101,8 +102,8 @@ void RenameWorkspaces::exec() {
       // Name exists, stop if override if not set but let
       // RenameWorkspace handle deleting if we are overriding
       if (!overrideWorkspace) {
-        throw std::invalid_argument("Name " + newWsName[i] +
-                                    " is already used");
+        throw std::runtime_error("A workspace called " + newWsName[i] +
+                                    " already exists");
       }
     }
   }

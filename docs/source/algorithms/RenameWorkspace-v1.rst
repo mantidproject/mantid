@@ -20,6 +20,15 @@ will be renamed to newName\_1, newname\_2, etc.). Otherwise, only the
 group itself will be renamed - the members will keep their previous
 names.
 
+The new name can be the same as any existing workspaces if the override flag
+is set to true. This will replace the existing workspace.
+If the override flag is set to false and any name is in use RenameWorkspace
+will not rename the workspace and log an error.
+
+.. warning::
+   RenameWorkspace is set to override by default to maintain backwards compatibility. 
+   Ensure the override flag is set to false to prevent any existing workspaces being 
+   replaced with the renamed workspace.
 
 
 Usage
@@ -81,6 +90,33 @@ Output:
     The name of the monitor workspace attached to workspace: NameB| Is:  NameB_monitors|
     *********************************************************************
     
+**Example - Setting override on and off:**
+
+.. testcode:: ExOverrideExisting
+	
+   #Clear the ADS before starting
+   AnalysisDataService.clear()
+	
+   #Create an existing workspace called 'wsOld'
+   CreateWorkspace([0], [0], OutputWorkspace="wsOld")
+	
+   #Next create a workspace we are going to rename
+   CreateWorkspace([0], [0], OutputWorkspace="wsNew")
+	
+   #This will fail telling us that 'wsOld' already exists
+   print 'Trying to rename with OverrideExisting set to false.'
+   RenameWorkspace(InputWorkspace="wsNew", OutputWorkspace="wsOld", OverrideExisting=False)
+
+   #This will succeed in renaming and 'wsOld' will be replaced with 'wsNew'
+   RenameWorkspace(InputWorkspace="wsNew", OutputWorkspace="wsOld", OverrideExisting=True) 
+   
+Output:
+	
+.. testoutput:: ExOverrideExisting
+	Trying to rename with OverrideExisting set to false.
+	RuntimeError: The workspace wsOld already exists
+	
+
 .. categories::
 
 .. sourcelink::
