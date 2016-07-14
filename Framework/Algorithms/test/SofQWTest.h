@@ -1,6 +1,7 @@
 #ifndef SOFQWTEST_H_
 #define SOFQWTEST_H_
 
+#include <iostream>
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/Axis.h"
@@ -106,6 +107,28 @@ public:
 
     TS_ASSERT(isAlgorithmInHistory(*result, "SofQWPolygon"));
     // results are checked in the dedicated algorithm test
+  }
+
+  void testExecNansReplaced() {
+	auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>();
+
+	bool noNansFound = true;
+	for (int i = 0; i < result->getNumberHistograms(); i++) {
+	  auto x = result->readX(i);
+	  auto y = result->readY(i);
+	  auto e = result->readE(i);
+
+	  for (int j = 0; j < result->blocksize(); j++) {
+		if (isnan(x[j]) || isnan(y[j]) || isnan(e[j])) {
+		  noNansFound = false;
+		  break;
+		}
+	  }
+
+	  if (!noNansFound) { break; }
+	}
+
+	TS_ASSERT(noNansFound);
   }
 
 private:
