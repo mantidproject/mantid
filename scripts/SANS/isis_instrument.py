@@ -9,6 +9,7 @@ from mantid.api import WorkspaceGroup, Workspace
 from mantid.kernel import Logger
 from mantid.kernel import V3D
 import SANSUtility as su
+from math import (acos, sqrt, degrees, copysign)
 
 sanslog = Logger("SANS")
 
@@ -1682,6 +1683,14 @@ class LARMOR(ISISInstrument):
         # now finally find the angle between the vector for the difference and the beam axis
         angle = posdiff.angle(a1) / deg2rad
 
+        # Get the angle of the rotation from the rotation quaternion
+        # At this point we also need to take the sign of the axis into account
+        instrument = ws.getInstrument()
+        detector_bench = instrument.getComponentByName("DetectorBench")
+        rot = detector_bench.getRotation()
+        angle, axis = LARMOR.quaternion_to_angle_and_axis(rot)
+        angle = copysign(angle, axis[1])
+
         # return the angle and the y displacement
         # logger.warning("Blah: angle=" + str(angle) + " Y displacement=" +str(-pos2.getY()) )
         return [-angle, -pos2.getY()]
@@ -1709,17 +1718,17 @@ class LARMOR(ISISInstrument):
                     logger.warning("Can logs could not be loaded, using sample values.")
 
             if isSample:
-                check_has_bench_rot(ws_ref, log)
+                LARMOR.check_has_bench_rot(ws_ref, log)
                 self.apply_detector_logs(log)
             else:
-                check_has_bench_rot(ws_ref, log)
+                LARMOR.check_has_bench_rot(ws_ref, log)
                 self.check_can_logs(log)
 
         ISISInstrument.on_load_sample(self, ws_name, beamcentre, isSample)
 
     @staticmethod
-    def check_has_bench_rot(workspace, log=None):
-        if log:
+    def check_has_bench_rot(workspace, log_dict=None):
+        if log_dict:
             run = workspace.run()
             if not run.hasProperty("Bench_Rot"):
                 raise RuntimeError("LARMOR Instrument: Bench_Rot does not seem to be available on {0}".format(workspace.name()))
@@ -1752,6 +1761,29 @@ class LARMOR(ISISInstrument):
         else:
             run_num = ws_ref.getRun().getLogData('run_number').value
         return run_num
+
+    @staticmethod
+    def quaternion_to_angle_and_axis(quaternion):
+        """
+        Converts a quaterion to an angle + an axis
+
+        The conversion from a quaternion to an angle + axis is explained here:
+        http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToAngle/
+        """
+        angle = 2*acos(quaternion[0])
+        s_parameter = sqrt(1 - quaternion[0]*quaternion[0])
+
+        axis = []
+        # If the the angle is zero, then it does not make sense to have an axis
+        if s_parameter < 1e-8:
+            axis.append(quaternion[1])
+            axis.append(quaternion[2])
+            axis.append(quaternion[3])
+        else:
+            axis.append(quaternion[1]/s_parameter)
+            axis.append(quaternion[2]/s_parameter)
+            axis.append(quaternion[3]/s_parameter)
+        return degrees(angle), axis
 
 
 if __name__ == '__main__':
