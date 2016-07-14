@@ -33,6 +33,8 @@ Improved
 - :ref:`SavePlot1D <algm-SavePlot1D>` has options for writing out
   plotly html files.
 
+- :ref:`ConvertUnits <algm-ConvertUnits>` will no longer corrupt an in place workspace if the algorithm fails.
+
 Deprecated
 ##########
 
