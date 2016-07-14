@@ -156,9 +156,10 @@ void LoadMask::exec() {
   this->initDetectors();
   const detid2index_map indexmap = m_maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
+  this->processMaskOnWorkspaceIndex(true, m_MaskSpecID,maskdetids);
+
   this->processMaskOnDetectors(indexmap,true, maskdetids, maskdetidpairsL,
                                maskdetidpairsU);
-  this->processMaskOnWorkspaceIndex(true, m_MaskSpecID);
 
   this->processMaskOnDetectors(indexmap,false, unmaskdetids, unmaskdetidpairsL,
                                unmaskdetidpairsU);
@@ -327,22 +328,28 @@ void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks,
 }
 
 //----------------------------------------------------------------------------------------------
-/** Set the mask on the spectrum Nos
+/** Set the mask on the spectrum numbers or convert them to detector-s id if
+ *  sample workspace is provided
+ *@param  mask           -- to mask or unmask appropriate spectra
+ *@param maskedSpecID    -- vector of the spectra numbers to process
+ *@param singleDetIds    -- vector of det-id-s to extend if workspace-
+ *                          source of spectra-detector map is provided
  */
 void LoadMask::processMaskOnWorkspaceIndex(bool mask,
-    std::vector<int32_t> &maskedSpecID) {
+    std::vector<int32_t> &maskedSpecID, std::vector<int32_t> &singleDetIds) {
     // 1. Check
     if (maskedSpecID.empty())
         return;
 
-    // 2. Get Map
-    spec2index_map s2imap;
+
     if (m_sourceMapWS) {
-        convertMaskToNewCoord(m_sourceMapWS,m_maskWS,s2imap, maskedSpecID);
+        // convert spectra masks into det-id mask using source workspace
+        convertSpMasksToDetIDs(m_sourceMapWS,maskedSpecID, singleDetIds);
+        maskedSpecID.clear(); // specrtra ID not neede any more as converted to det-ids
+        return;
     }
-    else {
-        s2imap = m_maskWS->getSpectrumToWorkspaceIndexMap();
-    }
+    // 2. Get Map
+    const spec2index_map s2imap = m_maskWS->getSpectrumToWorkspaceIndexMap();
 
     spec2index_map::const_iterator s2iter;
 
@@ -372,7 +379,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
                     << m_maskWS->getNumberHistograms() << '\n';
             }
             else {
-                // Finally set the group workspace.  only good branch
+                // Finally set the maskiing;
                 if (mask)
                     m_maskWS->dataY(wsindex)[0] = 1.0;
                 else
@@ -844,17 +851,17 @@ void LoadMask::parseISISStringToVector(const std::string &ins,
 
   return;
 }
-/* Extract spectra-detector map from source workspace and apply it to the target mask workspace
-@param sourceWS -- the workspace containing source spectra-detecot map to use on masks
-@param maskWS   -- the mask workspace to apply spectra detector map to.
+/* Convert spectra mask into det-id mask using workspace as source of spectra-detector maps
+*
+* @param sourceWS       -- the workspace containing source spectra-detecot map to use on masks
+* @param maskedSpecID   -- vector of spectra id to mask
+* @param singleDetIds   -- output vector of detectors id to mask
 */
-void LoadMask::convertMaskToNewCoord(const API::MatrixWorkspace_sptr &SourceWS,
-    const DataObjects::MaskWorkspace_sptr &maskWS, spec2index_map &s2imap,
-    std::vector<int32_t> &maskedSpecID){
+void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace_sptr &SourceWS,
+    const std::vector<int32_t> &maskedSpecID, std::vector<int32_t> &singleDetIds) {
 
     spec2index_map s2imap = SourceWS->getSpectrumToWorkspaceIndexMap();
     detid2index_map sourceDetMap = SourceWS->getDetectorIDToWorkspaceIndexMap(false);
-    detid2index_map targDetMap = maskWS->getDetectorIDToWorkspaceIndexMap(false);
 
     std::multimap<size_t, Mantid::detid_t> spectr2index_map;
     for (auto it = sourceDetMap.begin(); it != sourceDetMap.end(); it++) {
@@ -862,6 +869,7 @@ void LoadMask::convertMaskToNewCoord(const API::MatrixWorkspace_sptr &SourceWS,
     }
     spec2index_map new_map;
     for (size_t i = 0; i < maskedSpecID.size(); i++) {
+        // find spectra number from spectra ID for the source workspace
         const auto itSpec = s2imap.find(maskedSpecID[i]);
         if (itSpec == s2imap.end()) {
             throw std::runtime_error("Can not find spectra with ID: "+
@@ -869,42 +877,18 @@ void LoadMask::convertMaskToNewCoord(const API::MatrixWorkspace_sptr &SourceWS,
             SourceWS->getName());
         }
         size_t specN = itSpec->second;
+
+        // find detector range related to this spectra id in the source workspace
         const auto source_range = spectr2index_map.equal_range(specN);
         if (source_range.first == spectr2index_map.end()) {
             throw std::runtime_error("Can not find spectra N: " +
                 boost::lexical_cast<std::string>(specN) + " in the workspace" +
                 SourceWS->getName());
         }
+        // add detectors to the masked det-id list
         for (auto it = source_range.first; it != source_range.second; ++it) {
-
+            singleDetIds.push_back(it->second);
         }
-    }
-
-
-    if (indexmap.size() != sourceWS->getNumberHistograms()) {
-        // expand indexmap, which would contain 1:something mapping into 1:1 mapping
-        // MAKING ASSUMPTION, THAT SUBSEQUENT DETECTORS EXPAND TO SUBSEQUENT SPECTRA!
-        // multimap is always sorted by its key, so iterations whould be subsequent.
-        auto it = spectr2index_map.begin();
-        size_t spectra_num = it->first;
-        indexmap.at(it->second) = spectra_num;
-        ++it;
-        for (; it != spectr2index_map.end(); it++) {
-            auto detId = it->second;
-            indexmap.at(detId) = ++spectra_num;
-        }
-
-    }
-    else { // convert spectra id-s into spectra numbers
-        size_t spectra_num(0);
-        for (auto it = indexmap.begin(); it != indexmap.end(); it++) {
-            it->second = spectra_num++;
-        }
-    }
-    // modify mask workspace spectra/detector map
-    for (auto it = indexmap.begin(); it != indexmap.end(); it++) {
-        size_t spectra_num = it->second;
-        maskWS->getSpectrum(spectra_num).setDetectorID(it->first);
     }
 
 

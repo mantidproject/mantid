@@ -108,7 +108,8 @@ private:
                               std::vector<int32_t> pairdetids_low,
                               std::vector<int32_t> pairdetids_up);
   /// Convert spectrum to detector
-  void processMaskOnWorkspaceIndex(bool mask, std::vector<int32_t> &maskedSpecID);
+  void processMaskOnWorkspaceIndex(bool mask, std::vector<int32_t> &maskedSpecID,
+      std::vector<int32_t> &singleDetIds);
 
   void initDetectors();
 
@@ -118,9 +119,8 @@ private:
 
   std::map<std::string, std::string> validateInputs();
 
-  void convertMaskToNewCoord(const API::MatrixWorkspace_sptr &SourceWS,
-      const DataObjects::MaskWorkspace_sptr &maskWS, spec2index_map &s2imap,
-      std::vector<int32_t> &maskedSpecID);
+  void convertSpMasksToDetIDs(const API::MatrixWorkspace_sptr &SourceWS,
+      const std::vector<int32_t> &maskedSpecID, std::vector<int32_t> &singleDetIds);
   ;
 
   /// Mask Workspace
