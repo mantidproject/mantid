@@ -121,28 +121,13 @@ void CreateUserDefinedBackground::extendBackgroundToData(
   if (background->Double(0, 0) > xPoints[0]) {
     background->insertRow(0);
     API::TableRow firstRow = background->getFirstRow();
-    // First Y value: frequencies or counts depending on data type
-    const double firstY = [&data]() {
-      if (data->isHistogramData()) {
-        return data->frequencies(0).front();
-      } else {
-        return data->counts(0).front();
-      }
-    }();
-    firstRow << xPoints.front() << firstY;
+    firstRow << xPoints.front() << background->Double(0, 1);
   }
   // If last point < data maximum, append a new last point
-  if (background->Double(background->rowCount() - 1, 0) < xPoints.back()) {
+  const size_t endIndex = background->rowCount() - 1;
+  if (background->Double(endIndex, 0) < xPoints.back()) {
     API::TableRow lastRow = background->appendRow();
-    // Last Y value: frequencies or counts depending on data type
-    const double lastY = [&data]() {
-      if (data->isHistogramData()) {
-        return *(data->frequencies(0).end() - 2);
-      } else {
-        return data->counts(0).back();
-      }
-    }();
-    lastRow << xPoints.back() << lastY;
+    lastRow << xPoints.back() << background->Double(endIndex, 1);
   }
 }
 
