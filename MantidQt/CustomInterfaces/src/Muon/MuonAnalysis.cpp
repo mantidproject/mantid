@@ -145,14 +145,8 @@ void MuonAnalysis::initLayout() {
   const std::string userFacility =
       ConfigService::Instance().getFacility().name();
 
-  // Allow to load current run for ISIS only
-  if (userFacility != "ISIS")
-    m_uiForm.loadCurrent->setDisabled(true);
-
-// Load current run only works on Windows
-#ifndef _WIN32
-  m_uiForm.loadCurrent->setDisabled(true);
-#endif
+  // Allow loading current run, provided platform and facility support this
+  setLoadCurrentRunEnabled(true);
 
   // If facility if not supported by the interface - show a warning, but still
   // open it
@@ -2075,8 +2069,8 @@ void MuonAnalysis::loadFittings() {
 void MuonAnalysis::allowLoading(bool enabled) {
   m_uiForm.nextRun->setEnabled(enabled);
   m_uiForm.previousRun->setEnabled(enabled);
-  m_uiForm.loadCurrent->setEnabled(enabled);
   m_uiForm.mwRunFiles->setEnabled(enabled);
+  setLoadCurrentRunEnabled(enabled);
 }
 
 /**
@@ -2882,5 +2876,27 @@ void MuonAnalysis::updateRebinParams() {
   }
   m_fitDataPresenter->setRebinArgs(rebinParams);
 }
+
+/**
+ * Set the "load current run" button enabled/disabled.
+ * To be set enabled, the following must be true:
+ * 1) this is a Windows machine
+ * 2) facility is ISIS
+ * @param enabled :: [input] Whether to enable/disable button
+ */
+void MuonAnalysis::setLoadCurrentRunEnabled(bool enabled) {
+  if (enabled) {
+#ifdef _WIN32
+    // "Load current run" is only possible at ISIS
+    if (ConfigService::Instance().getFacility().name() != "ISIS") {
+      enabled = false;
+    }
+#else
+    enabled = false;
+#endif
+  }
+  m_uiForm.loadCurrent->setEnabled(enabled);
+}
+
 } // namespace MantidQt
 } // namespace CustomInterfaces

@@ -529,6 +529,9 @@ private:
 
   /// Get list of supported instruments
   QStringList getSupportedInstruments();
+
+  /// Enable/disable "load current run" - if allowed
+  void setLoadCurrentRunEnabled(bool enabled);
 };
 }
 }
