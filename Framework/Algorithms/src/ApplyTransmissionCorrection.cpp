@@ -62,10 +62,8 @@ void ApplyTransmissionCorrection::exec() {
   const double trans_error = getProperty("TransmissionError");
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
-  HistogramY trans(inputWS->y(0).size(), trans_value);
-  HistogramE dtrans(inputWS->y(0).size(), trans_error);
-  HistogramY &TrIn = trans;
-  HistogramE &ETrIn = dtrans;
+  HistogramY TrIn(inputWS->y(0).size(), trans_value);
+  HistogramE ETrIn(inputWS->y(0).size(), trans_error);
 
   if (isEmpty(trans_value)) {
     // Get the transmission workspace

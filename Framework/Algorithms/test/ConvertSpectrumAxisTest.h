@@ -10,7 +10,7 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
-using namespace Mantid::HistogramData::detail;
+using HistogramDataTestHelper::operator==;
 
 class ConvertSpectrumAxisTest : public CxxTest::TestSuite {
 private:

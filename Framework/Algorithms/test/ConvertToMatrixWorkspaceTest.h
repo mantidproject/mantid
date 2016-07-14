@@ -13,7 +13,7 @@
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
-using namespace Mantid::HistogramData::detail;
+using HistogramDataTestHelper::operator==;
 
 class ConvertToMatrixWorkspaceTest : public CxxTest::TestSuite {
 public:

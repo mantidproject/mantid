@@ -136,7 +136,7 @@ void CorrectKiKf::exec() {
     auto &yIn = inputWS->y(i);
     auto &eIn = inputWS->e(i);
     // Copy the energy transfer axis
-    outputWS->setX(i, inputWS->refX(i));
+    outputWS->setSharedX(i, inputWS->sharedX(i));
     for (unsigned int j = 0; j < size; ++j) {
       const double deltaE = xIn[j];
       double Ei = 0.;

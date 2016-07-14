@@ -128,7 +128,8 @@ void ConvertUnitsUsingDetectorTable::exec() {
   if (inputWS->x(0).size() < 2) {
     std::stringstream msg;
     msg << "Input workspace has invalid X axis binning parameters. Should have "
-           "at least 2 values. Found " << inputWS->x(0).size() << ".";
+           "at least 2 values. Found "
+        << inputWS->x(0).size() << ".";
     throw std::runtime_error(msg.str());
   }
   if (inputWS->x(0).front() > inputWS->x(0).back() ||
@@ -370,8 +371,8 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
 
         // EventWorkspace part, modifying the EventLists.
         if (m_inputEvents) {
-          eventWS->getSpectrum(wsid)
-              .convertUnitsViaTof(localFromUnit, localOutputUnit);
+          eventWS->getSpectrum(wsid).convertUnitsViaTof(localFromUnit,
+                                                        localOutputUnit);
         }
         // Clear unit memory
         delete localFromUnit;
@@ -429,9 +430,8 @@ void ConvertUnitsUsingDetectorTable::convertQuickly(
     // Only do the full check if the quick one passes
     if (commonBoundaries) {
       // Calculate the new (common) X values
-      for (auto iter = outputWS->mutableX(0).begin();
-           iter != outputWS->x(0).end(); ++iter) {
-        *iter = factor *std::pow(*iter, power);
+      for (auto &x : outputWS->mutableX(0)) {
+        x = factor * std::pow(x, power);
       }
 
       auto xVals = outputWS->refX(0);
@@ -459,9 +459,8 @@ void ConvertUnitsUsingDetectorTable::convertQuickly(
   for (int64_t k = 0; k < numberOfSpectra_i; ++k) {
     PARALLEL_START_INTERUPT_REGION
     if (!commonBoundaries) {
-      for (auto it = outputWS->mutableX(k).begin(); it != outputWS->x(k).end();
-           ++it) {
-        *it = factor *std::pow(*it, power);
+      for (auto &x : outputWS->mutableX(k)) {
+        x = factor * std::pow(x, power);
       }
     }
     // Convert the events themselves if necessary. Inefficiently.
@@ -618,9 +617,10 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::removeUnphysicalBins(
       auto &X = workspace->x(i);
       auto &Y = workspace->y(i);
       auto &E = workspace->e(i);
-      result->mutableX(i) = HistogramX(X.begin() + first, X.end());
-      result->mutableY(i) = HistogramY(Y.begin() + first, Y.end());
-      result->mutableE(i) = HistogramE(E.begin() + first, E.end());
+
+      result->mutableX(i) = std::move(HistogramX(X.begin() + first, X.end()));
+      result->mutableY(i) = std::move(HistogramY(Y.begin() + first, Y.end()));
+      result->mutableE(i) = std::move(HistogramE(E.begin() + first, E.end()));
     }
   } else if (emode == "Indirect") {
     // Now the indirect instruments. In this case we could want to keep a
@@ -645,21 +645,30 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::removeUnphysicalBins(
                                                  maxBins - 1);
     // Next, loop again copying in the correct range for each spectrum
     for (int64_t j = 0; j < int64_t(numSpec); ++j) {
-      int k;
-      for (k = 0; k < lastBins[j] - 1; ++k) {
-        result->mutableX(j)[k] = workspace->x(j)[k];
-        result->mutableY(j)[k] = workspace->y(j)[k];
-        result->mutableE(j)[k] = workspace->e(j)[k];
-      }
-      result->mutableX(j)[k] = workspace->x(j)[k];
-      ++k;
+      auto edges = workspace->binEdges(j);
+      auto &resX = result->mutableX(j);
+
+      auto k = lastBins[j];
+
+      std::copy(edges.cbegin(), edges.cbegin() + lastBins[j],
+                result->mutableX(j).begin());
+
       // If necessary, add on some fake values to the end of the X array (Y&E
       // will be zero)
       if (k < maxBins) {
-        for (int l = k; l < maxBins; ++l) {
-          result->mutableX(j)[l] = workspace->x(j)[k] + 1 + l - k;
-        }
+        auto l = k;
+        std::transform(resX.begin() + lastBins[j], resX.end(),
+                       resX.begin() + lastBins[j],
+                       [=](double &x) mutable { return x + 1 + (++l) - k; });
       }
+
+      std::copy(workspace->y(j).cbegin(),
+                workspace->y(j).cbegin() + lastBins[j] - 1,
+                result->mutableY(j).begin());
+
+      std::copy(workspace->e(j).cbegin(),
+                workspace->e(j).cbegin() + lastBins[j] - 1,
+                result->mutableE(j).begin());
     }
   }
 

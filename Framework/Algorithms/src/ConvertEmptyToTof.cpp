@@ -501,8 +501,6 @@ void ConvertEmptyToTof::setTofInWS(const std::vector<double> &tofAxis,
                                    API::MatrixWorkspace_sptr outputWS) {
 
   const size_t numberOfSpectra = m_inputWS->getNumberHistograms();
-  int64_t numberOfSpectraInt64 =
-      static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
   g_log.debug() << "Setting the TOF X Axis for numberOfSpectra="
                 << numberOfSpectra << '\n';
@@ -511,7 +509,7 @@ void ConvertEmptyToTof::setTofInWS(const std::vector<double> &tofAxis,
   HistogramData::BinEdges edges(tofAxis);
   Progress prog(this, 0.0, 0.2, numberOfSpectra);
 
-  for (int64_t i = 0; i < numberOfSpectraInt64; ++i) {
+  for (size_t i = 0; i < numberOfSpectra; ++i) {
     // Replace bin edges with tof axis
     outputWS->setBinEdges(i, edges);
 

@@ -129,9 +129,7 @@ void DetectorEfficiencyCor::exec() {
       correctForEfficiency(i);
     } catch (Exception::NotFoundError &) {
       // zero the Y data that can't be corrected
-      auto &outY = m_outputWS->mutableY(i);
-      std::transform(outY.begin(), outY.end(), outY.begin(),
-                     std::bind2nd(std::multiplies<double>(), 0));
+      m_outputWS->mutableY(i) *= 0.0;
       PARALLEL_CRITICAL(deteff_invalid) {
         m_spectraSkipped.insert(m_spectraSkipped.end(),
                                 m_inputWS->getAxis(1)->spectraNo(i));
@@ -199,8 +197,8 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn) {
   auto &yout = m_outputWS->mutableY(spectraIn);
   auto &eout = m_outputWS->mutableE(spectraIn);
   // Need the original values so this is not a reference
-  auto &yValues = m_inputWS->y(spectraIn);
-  auto &eValues = m_inputWS->e(spectraIn);
+  auto yValues = m_inputWS->y(spectraIn);
+  auto eValues = m_inputWS->e(spectraIn);
 
   // get a pointer to the detectors that created the spectrum
   const std::set<detid_t> &dets =

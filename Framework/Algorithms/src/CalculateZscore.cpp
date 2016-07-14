@@ -85,18 +85,16 @@ void CalculateZscore::exec() {
     }
 
     // b) Calculate Zscore
-    auto &inpX = inpWS->x(wsindex).rawData();
     auto &inpY = inpWS->y(wsindex).rawData();
     auto &inpE = inpWS->e(wsindex).rawData();
 
-    auto &histX = outWS->mutableX(i);
     auto &histY = outWS->mutableY(i);
     auto &histE = outWS->mutableE(i);
 
     vector<double> yzscores = getZscore(inpY);
     vector<double> ezscores = getZscore(inpE);
 
-    histX = inpX;
+	outWS->setSharedX(i, inpWS->sharedX(wsindex));
     histY = yzscores;
     histE = ezscores;
 

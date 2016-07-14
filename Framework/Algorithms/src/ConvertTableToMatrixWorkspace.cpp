@@ -59,12 +59,14 @@ void ConvertTableToMatrixWorkspace::exec() {
 
   MatrixWorkspace_sptr outputWorkspace =
       WorkspaceFactory::Instance().create("Workspace2D", 1, nrows, nrows);
-  outputWorkspace->mutableX(0) = HistogramX(X.begin(), X.end());
-  outputWorkspace->mutableY(0) = HistogramY(Y.begin(), Y.end());
+
+  outputWorkspace->mutableX(0) = std::move(X);
+  outputWorkspace->mutableY(0) = std::move(Y);
+
   if (!columnE.empty()) {
     std::vector<double> E(nrows);
     inputWorkspace->getColumn(columnE)->numeric_fill(E);
-    outputWorkspace->mutableE(0) = HistogramE(E.begin(), E.end());
+    outputWorkspace->mutableE(0) = std::move(E);
   }
 
   auto labelX = boost::dynamic_pointer_cast<Units::Label>(

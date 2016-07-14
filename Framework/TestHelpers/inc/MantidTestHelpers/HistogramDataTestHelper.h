@@ -9,18 +9,12 @@
 
 #include <MantidHistogramData/FixedLengthVector.h>
 
-namespace Mantid {
-namespace HistogramData {
-namespace detail {
-
-template <class T>
-bool
-operator==(const Mantid::HistogramData::detail::FixedLengthVector<T> &lhs,
-           const Mantid::HistogramData::detail::FixedLengthVector<T> &rhs) {
-  return lhs.rawData() == rhs.rawData();
-}
-
+namespace HistogramDataTestHelper {
+	template <class T>
+	bool operator==(
+		const Mantid::HistogramData::detail::FixedLengthVector<T> &lhs,
+		const Mantid::HistogramData::detail::FixedLengthVector<T> &rhs) {
+		return lhs.rawData() == rhs.rawData();
+	}
 } // namespace HistogramDataTestHelper
-} // namespace HistogramData
-} // namespace Mantid
 #endif // HISTGRAMDATATESTHELPER_H

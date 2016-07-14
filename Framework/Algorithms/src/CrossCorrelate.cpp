@@ -167,6 +167,7 @@ void CrossCorrelate::exec() {
   for (int i = 0; i < npoints; ++i)
     XX[i] = static_cast<double>(i - nY + 2);
   // Initialise the progress reporting object
+  out->mutableX(0) = XX;
   m_progress = new Progress(this, 0.0, 1.0, nspecs);
   PARALLEL_FOR2(inputWS, out)
   for (int i = 0; i < nspecs; ++i) // Now loop on all spectra
@@ -175,7 +176,10 @@ void CrossCorrelate::exec() {
     size_t wsIndex = indexes[i]; // Get the ws index from the table
     // Copy spectra info from input Workspace
     out->getSpectrum(i).copyInfoFrom(inputWS->getSpectrum(wsIndex));
-    out->mutableX(i) = XX;
+
+    if (i > 0) {
+      out->setSharedX(i, out->sharedX(0));
+    }
 
     // Get temp references
     auto &iX = inputWS->x(wsIndex);

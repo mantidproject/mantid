@@ -113,13 +113,11 @@ void CorrectFlightPaths::exec() {
     ComponentHelper::moveComponent(*det, pmap, newPos,
                                    ComponentHelper::Absolute);
 
-    unsigned int j = 0;
-    for (; j < numberOfChannels; ++j) {
-      m_outputWS->mutableX(i)[j] -= deltaTOF;
-    }
-    // last bin
-    m_outputWS->mutableX(i)[numberOfChannels] =
-        m_inputWS->x(i)[numberOfChannels] + deltaTOF;
+    auto &edges = m_outputWS->binEdges(i);
+    auto &X = m_outputWS->mutableX(i);
+
+    std::transform(edges.cbegin(), edges.cbegin() + numberOfChannels + 1,
+                   X.begin(), [=](const double &x) { return x - deltaTOF; });
 
     prog.report("Aligning elastic line...");
     PARALLEL_END_INTERUPT_REGION

@@ -3,10 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CreatePSDBleedMask.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/NullValidator.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 
 #include <cfloat>
 #include <iterator>
@@ -217,26 +217,20 @@ bool CreatePSDBleedMask::performBleedTest(
   const size_t topEnd(midIndex - numIgnoredPixels / 2);
   const size_t bottomBegin(midIndex + numIgnoredPixels / 2);
 
-  /// Is the input a distribution or raw counts. If true then bin width division
-  /// is necessary when calculating the rate
-  bool isRawCounts = !(inputWS->isDistribution());
-
   const int numBins = static_cast<int>(inputWS->blocksize());
   std::vector<double> totalRate(numBins, 0.0);
   size_t top = 0, bot = bottomBegin;
   for (; top < topEnd; ++top, ++bot) {
     const int topIndex = tubeIndices[top];
     const int botIndex = tubeIndices[bot];
-    auto &topY = inputWS->y(topIndex);
-    auto &botY = inputWS->y(botIndex);
+    // Provide frequencies as opposed to calculating frequencies on the fly for
+    // count daya
+    auto &topY = inputWS->frequencies(topIndex);
+    auto &botY = inputWS->frequencies(botIndex);
     auto &topX = inputWS->x(topIndex);
     auto &botX = inputWS->x(botIndex);
     for (int j = 0; j < numBins; ++j) {
       double topRate(topY[j]), botRate(botY[j]);
-      if (isRawCounts) {
-        topRate /= (topX[j + 1] - topX[j]);
-        botRate /= (botX[j + 1] - botX[j]);
-      }
       totalRate[j] += topRate + botRate;
       // If by now any have hit the allowed maximum then mark this to be masked
       if (totalRate[j] > maxRate) {

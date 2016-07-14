@@ -131,16 +131,22 @@ void ChopData::exec() {
     // Copy over X, Y and E data
     PARALLEL_FOR2(inputWS, workspace)
     for (int j = 0; j < nHist; j++) {
-      PARALLEL_START_INTERUPT_REGION;
-      for (size_t k = 0; k < nbins; k++) {
-        size_t oldbin = indexLow + k;
-        workspace->mutableY(j)[k] = inputWS->y(j)[oldbin];
-        workspace->mutableE(j)[k] = inputWS->e(j)[oldbin];
-        workspace->mutableX(j)[k] = inputWS->x(j)[oldbin] - stepDiff;
-      }
-      workspace->mutableX(j)[nbins] =
-          inputWS->x(j)[indexLow + nbins] - stepDiff;
 
+      auto edges = inputWS->binEdges(j);
+
+      PARALLEL_START_INTERUPT_REGION;
+      std::transform(edges.cbegin() + indexLow,
+                     edges.cbegin() + indexLow + nbins + 1,
+                     workspace->mutableX(j).begin(),
+                     [stepDiff](const double &a) { return a - stepDiff; });
+
+      std::copy(inputWS->y(j).cbegin() + indexLow,
+                inputWS->y(j).cbegin() + indexLow + nbins,
+                workspace->mutableY(j).begin());
+
+      std::copy(inputWS->e(j).cbegin() + indexLow,
+                inputWS->e(j).cbegin() + indexLow + nbins,
+                workspace->mutableE(j).begin());
       PARALLEL_END_INTERUPT_REGION;
     }
     PARALLEL_CHECK_INTERUPT_REGION;
