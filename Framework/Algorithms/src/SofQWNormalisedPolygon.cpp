@@ -187,6 +187,9 @@ void SofQWNormalisedPolygon::exec() {
   // Set the output spectrum-detector mapping
   SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
   outputWS->updateSpectraUsing(outputDetectorMap);
+
+  // Replace any NaNs in outputWorkspace with zeroes
+  m_EmodeProperties.replaceNans(*outputWorkspace);
 }
 
 /**

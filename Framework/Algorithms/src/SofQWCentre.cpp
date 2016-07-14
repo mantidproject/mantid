@@ -253,6 +253,9 @@ void SofQWCentre::exec() {
   // Set the output spectrum-detector mapping
   SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
   outputWorkspace->updateSpectraUsing(outputDetectorMap);
+
+  // Replace any NaNs in outputWorkspace with zeroes
+  m_EmodeProperties.replaceNans(*outputWorkspace);
 }
 
 /** Creates the output workspace, setting the axes according to the input

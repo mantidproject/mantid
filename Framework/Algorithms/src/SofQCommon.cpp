@@ -83,8 +83,11 @@ double SofQCommon::getEFixed(const Geometry::IDetector &det) const {
 }
 }
 
+/**
+ * Replaces all NaNs in the workspace with zeroes.
+ * @param workspace A pointer to a MatrixWorkspace object
+ */
 void replaceNans(API::MatrixWorkspace &workspace) {
-	// Replaces any NaNs in the output workspace with zeros
 	for (int i = 0; i < workspace.getNumberHistograms(); i++) {
 		for (int j = 0; j < workspace.blocksize(); j++)
 		{
