@@ -107,7 +107,7 @@ public:
 
     // Try to rename it should throw exception
     renameAlgorithm.setRethrows(true);
-    TS_ASSERT_THROWS(renameAlgorithm.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(renameAlgorithm.execute(), std::runtime_error);
     TS_ASSERT_EQUALS(renameAlgorithm.isExecuted(), false);
 
     TS_ASSERT_THROWS_NOTHING(
