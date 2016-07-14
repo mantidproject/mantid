@@ -82,4 +82,16 @@ double SofQCommon::getEFixed(const Geometry::IDetector &det) const {
   return efixed;
 }
 }
+
+void replaceNans(API::MatrixWorkspace &workspace) {
+	// Replaces any NaNs in the output workspace with zeros
+	for (int i = 0; i < workspace.getNumberHistograms(); i++) {
+		for (int j = 0; j < workspace.blocksize(); j++)
+		{
+			if (isnan(workspace.x(i)[j])) { workspace.mutableX(i)[j] = 0; }
+			if (isnan(workspace.y(i)[j])) { workspace.mutableY(i)[j] = 0; }
+			if (isnan(workspace.e(i)[j])) { workspace.mutableE(i)[j] = 0; }
+		}
+	}
+}
 }
