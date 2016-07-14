@@ -255,42 +255,95 @@ double Material::totalScatterLength(const double lambda) const {
 double Material::cohScatterLengthRealSqrd(const double lambda) const{
   UNUSED_ARG(lambda);
 
-  return 0.;
+  const double weightedTotal = std::accumulate(std::begin(m_chemicalFormula),
+                                         std::end(m_chemicalFormula),
+                                         0.,
+                                         [](double subtotal, const FormulaUnit &right) {
+    const double value = right.atom->neutron.coh_scatt_length_real;
+    return subtotal + value * value * right.multiplicity;
+  }) / m_atomTotal;
+
+  if (! std::isnormal(weightedTotal)) {
+    return 0.;
+  } else {
+    return weightedTotal;
+  }
 }
 
 double Material::incohScatterLengthRealSqrd(
     const double lambda) const{
   UNUSED_ARG(lambda);
 
-  return 0.;
-}
+  const double weightedTotal = std::accumulate(std::begin(m_chemicalFormula),
+                                         std::end(m_chemicalFormula),
+                                         0.,
+                                         [](double subtotal, const FormulaUnit &right) {
+    const double value = right.atom->neutron.inc_scatt_length_real;
+    return subtotal + value * value * right.multiplicity;
+  }) / m_atomTotal;
 
-double Material::totalScatterLengthRealSqrd(
-    const double lambda) const{
-  UNUSED_ARG(lambda);
-
-  return 0.;
+  if (! std::isnormal(weightedTotal)) {
+    return 0.;
+  } else {
+    return weightedTotal;
+  }
 }
 
 double
 Material::cohScatterLengthSqrd(const double lambda) const{
   UNUSED_ARG(lambda);
 
-  return 0.;
+  const double weightedTotal = std::accumulate(std::begin(m_chemicalFormula),
+                                         std::end(m_chemicalFormula),
+                                         0.,
+                                         [](double subtotal, const FormulaUnit &right) {
+    const double value = right.atom->neutron.coh_scatt_length;
+    return subtotal + value * value * right.multiplicity;
+  }) / m_atomTotal;
+
+  if (! std::isnormal(weightedTotal)) {
+    return 0.;
+  } else {
+    return weightedTotal;
+  }
 }
 
 double Material::incohScatterLengthSqrd(
     const double lambda) const{
   UNUSED_ARG(lambda);
 
-  return 0.;
+  const double weightedTotal = std::accumulate(std::begin(m_chemicalFormula),
+                                         std::end(m_chemicalFormula),
+                                         0.,
+                                         [](double subtotal, const FormulaUnit &right) {
+    const double value = right.atom->neutron.inc_scatt_length;
+    return subtotal + value * value * right.multiplicity;
+  }) / m_atomTotal;
+
+  if (! std::isnormal(weightedTotal)) {
+    return 0.;
+  } else {
+    return weightedTotal;
+  }
 }
 
 double Material::totalScatterLengthSqrd(
     const double lambda) const{
   UNUSED_ARG(lambda);
 
-  return 0.;
+  const double weightedTotal = std::accumulate(std::begin(m_chemicalFormula),
+                                         std::end(m_chemicalFormula),
+                                         0.,
+                                         [](double subtotal, const FormulaUnit &right) {
+    const double value = right.atom->neutron.tot_scatt_length;
+    return subtotal + value * value * right.multiplicity;
+  }) / m_atomTotal;
+
+  if (! std::isnormal(weightedTotal)) {
+    return 0.;
+  } else {
+    return weightedTotal;
+  }
 }
 
 /** Save the object to an open NeXus file.

@@ -129,11 +129,6 @@ public:
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
-  /// Return the total scattering length <b^2> for a given wavelength
-  double totalScatterLengthRealSqrd(
-      const double lambda =
-          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
-
   /// Get the coherent scattering length <b^2> for a given wavelength
   double cohScatterLengthSqrd(const double lambda =
                          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
