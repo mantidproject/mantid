@@ -82,6 +82,7 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
 
   // Check cache to see if we've loaded this set of files before
   const std::string fileString = toString(files);
+  updateCache();
   if (m_loadedDataCache.find(fileString) != m_loadedDataCache.end()) {
     return m_loadedDataCache[fileString];
   }
@@ -419,6 +420,30 @@ void MuonAnalysisDataLoader::setProcessAlgorithmProperties(
   } else {
     throw std::invalid_argument("Cannot create analysis workspace: Group/pair "
                                 "name not found in grouping");
+  }
+}
+
+/**
+ * Checks each entry in the loaded data cache.
+ * If the loaded workspace has since been deleted, or it is a workspace group
+ * whose members have been deleted, then remove the cache entry.
+ */
+void MuonAnalysisDataLoader::updateCache() const {
+  std::vector<std::string> invalidKeys;
+  for (const auto &entry : m_loadedDataCache) {
+    const auto &ws = entry.second.loadedWorkspace;
+    if (!ws) { // Workspace has been deleted
+      invalidKeys.push_back(entry.first);
+    } else if (const auto wsGroup =
+                   boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+      if (wsGroup->size() == 0) { // Group has been cleared
+        invalidKeys.push_back(entry.first);
+      }
+    }
+  }
+  // Remove the invalid cache entries
+  for (const auto &key : invalidKeys) {
+    m_loadedDataCache.erase(key);
   }
 }
 

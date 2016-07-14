@@ -99,6 +99,8 @@ protected:
   void
   setProcessAlgorithmProperties(Mantid::API::IAlgorithm_sptr alg,
                                 const Muon::AnalysisOptions &options) const;
+  /// Remove from cache any workspaces that have been deleted in the meantime
+  void updateCache() const;
 
 private:
   /// Get instrument name from workspace
