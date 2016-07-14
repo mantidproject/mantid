@@ -1,11 +1,6 @@
 #ifndef MANTID_CUSTOMINTERFACES_IREFLRUNSTABVIEW_H
 #define MANTID_CUSTOMINTERFACES_IREFLRUNSTABVIEW_H
 
-#include "MantidKernel/System.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
-
 #include <set>
 #include <string>
 
@@ -14,14 +9,21 @@ namespace MantidQt {
 namespace MantidWidgets {
 class DataProcessorCommand;
 }
+namespace API {
+class AlgorithmRunner;
+}
 
 namespace CustomInterfaces {
 
 using MantidWidgets::DataProcessorCommand;
+using API::AlgorithmRunner;
+class IReflRunsTabPresenter;
+class ReflSearchModel;
 
 /** @class IReflRunsTabView
 
-IReflRunsTabView is the base view class for the Reflectometry Interface. It contains
+IReflRunsTabView is the base view class for the Reflectometry Interface. It
+contains
 no QT specific functionality as that should be handled by a subclass.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -52,7 +54,7 @@ public:
   virtual ~IReflRunsTabView(){};
 
   // Connect the model
-  virtual void showSearch(ReflSearchModel_sptr model) = 0;
+  virtual void showSearch(boost::shared_ptr<ReflSearchModel> model) = 0;
 
   // Dialog/Prompt methods
   virtual std::string askUserString(const std::string &prompt,

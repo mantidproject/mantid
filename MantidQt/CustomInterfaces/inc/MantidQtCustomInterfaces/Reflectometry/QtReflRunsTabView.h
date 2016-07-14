@@ -16,6 +16,9 @@ class DataProcessorCommand;
 class DataProcessorCommandAdapter;
 class SlitCalculator;
 }
+namespace API {
+class AlgorithmRunner;
+}
 
 namespace CustomInterfaces {
 
@@ -64,7 +67,7 @@ public:
   // This interface's categories.
   static QString categoryInfo() { return "Reflectometry"; }
   // Connect the model
-  void showSearch(ReflSearchModel_sptr model) override;
+  void showSearch(boost::shared_ptr<ReflSearchModel> model) override;
 
   // Dialog/Prompt methods
   std::string askUserString(const std::string &prompt, const std::string &title,
@@ -109,7 +112,7 @@ private:
   // the presenter
   boost::shared_ptr<IReflRunsTabPresenter> m_presenter;
   // the search model
-  ReflSearchModel_sptr m_searchModel;
+  boost::shared_ptr<ReflSearchModel> m_searchModel;
   // the interface
   Ui::ReflRunsTabWidget ui;
   // the slit calculator
