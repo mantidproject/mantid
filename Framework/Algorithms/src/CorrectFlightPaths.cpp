@@ -113,7 +113,7 @@ void CorrectFlightPaths::exec() {
     ComponentHelper::moveComponent(*det, pmap, newPos,
                                    ComponentHelper::Absolute);
 
-    auto &edges = m_outputWS->binEdges(i);
+    auto edges = m_outputWS->binEdges(i);
     auto &X = m_outputWS->mutableX(i);
 
     std::transform(edges.cbegin(), edges.cbegin() + numberOfChannels + 1,

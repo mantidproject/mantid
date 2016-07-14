@@ -225,8 +225,8 @@ bool CreatePSDBleedMask::performBleedTest(
     const int botIndex = tubeIndices[bot];
     // Provide frequencies as opposed to calculating frequencies on the fly for
     // count daya
-    auto &topY = inputWS->frequencies(topIndex);
-    auto &botY = inputWS->frequencies(botIndex);
+    auto topY = inputWS->frequencies(topIndex);
+    auto botY = inputWS->frequencies(botIndex);
     for (int j = 0; j < numBins; ++j) {
       double topRate(topY[j]), botRate(botY[j]);
       totalRate[j] += topRate + botRate;
