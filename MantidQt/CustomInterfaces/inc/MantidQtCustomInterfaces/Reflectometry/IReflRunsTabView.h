@@ -1,9 +1,9 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEW_H
-#define MANTID_CUSTOMINTERFACES_REFLMAINVIEW_H
+#ifndef MANTID_CUSTOMINTERFACES_IREFLRUNSTABVIEW_H
+#define MANTID_CUSTOMINTERFACES_IREFLRUNSTABVIEW_H
 
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 
 #include <set>
@@ -19,9 +19,9 @@ namespace CustomInterfaces {
 
 using MantidWidgets::DataProcessorCommand;
 
-/** @class ReflMainView
+/** @class IReflRunsTabView
 
-ReflMainView is the base view class for the Reflectometry Interface. It contains
+IReflRunsTabView is the base view class for the Reflectometry Interface. It contains
 no QT specific functionality as that should be handled by a subclass.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -46,10 +46,10 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport ReflMainView {
+class DLLExport IReflRunsTabView {
 public:
-  ReflMainView(){};
-  virtual ~ReflMainView(){};
+  IReflRunsTabView(){};
+  virtual ~IReflRunsTabView(){};
 
   // Connect the model
   virtual void showSearch(ReflSearchModel_sptr model) = 0;
@@ -78,10 +78,10 @@ public:
   virtual std::string getSearchString() const = 0;
   virtual std::string getTransferMethod() const = 0;
 
-  virtual boost::shared_ptr<IReflPresenter> getPresenter() const = 0;
+  virtual boost::shared_ptr<IReflRunsTabPresenter> getPresenter() const = 0;
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const = 0;
 };
 }
 }
-#endif
+#endif /* MANTID_CUSTOMINTERFACES_IREFLRUNSTABVIEW_H */

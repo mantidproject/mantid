@@ -1,9 +1,9 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
+#ifndef MANTID_CUSTOMINTERFACES_REFLRUNSTABPRESENTER_H
+#define MANTID_CUSTOMINTERFACES_REFLRUNSTABPRESENTER_H
 
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/WorkspaceReceiver.h"
 #include <boost/shared_ptr.hpp>
 
@@ -18,7 +18,7 @@ class DataProcessorPresenter;
 namespace CustomInterfaces {
 
 // Forward decs
-class ReflMainView;
+class IReflRunsTabView;
 class ReflSearchModel;
 class IReflSearcher;
 class ReflTransferStrategy;
@@ -26,9 +26,9 @@ class ReflTransferStrategy;
 using MantidWidgets::DataProcessorPresenter;
 using MantidWidgets::ProgressableView;
 
-/** @class ReflMainViewPresenter
+/** @class ReflRunsTabPresenter
 
-ReflMainViewPresenter is a presenter class for the Reflectometry Interface. It
+ReflRunsTabPresenter is a presenter class for the Reflectometry Interface. It
 handles any interface functionality and model manipulation.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -52,24 +52,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL ReflMainViewPresenter
-    : public IReflPresenter,
+class MANTIDQT_CUSTOMINTERFACES_DLL ReflRunsTabPresenter
+    : public IReflRunsTabPresenter,
       public MantidQt::MantidWidgets::WorkspaceReceiver {
 public:
-  ReflMainViewPresenter(
-      ReflMainView *mainView, ProgressableView *progressView,
+  ReflRunsTabPresenter(
+      IReflRunsTabView *mainView, ProgressableView *progressView,
       boost::shared_ptr<DataProcessorPresenter> tablePresenter,
       boost::shared_ptr<IReflSearcher> searcher =
           boost::shared_ptr<IReflSearcher>());
-  ~ReflMainViewPresenter() override;
-  void notify(IReflPresenter::Flag flag) override;
+  ~ReflRunsTabPresenter() override;
+  void notify(IReflRunsTabPresenter::Flag flag) override;
   void notify(WorkspaceReceiver::Flag flag) override;
 
 protected:
   // the search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
   // the main view we're managing
-  ReflMainView *m_view;
+  IReflRunsTabView *m_view;
   // The table view's presenter
   boost::shared_ptr<DataProcessorPresenter> m_tablePresenter;
   // The progress view
@@ -90,4 +90,4 @@ private:
 };
 }
 }
-#endif
+#endif /* MANTID_CUSTOMINTERFACES_REFLRUNSTABPRESENTER_H */

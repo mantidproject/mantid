@@ -1,12 +1,12 @@
-#ifndef MANTID_CUSTOMINTERFACES_QTREFLMAINVIEW_H_
-#define MANTID_CUSTOMINTERFACES_QTREFLMAINVIEW_H_
+#ifndef MANTID_CUSTOMINTERFACES_QTREFLRUNSTABVIEW_H_
+#define MANTID_CUSTOMINTERFACES_QTREFLRUNSTABVIEW_H_
 
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
-#include "ui_ReflMainWidget.h"
+#include "ui_ReflRunsTabWidget.h"
 
 namespace MantidQt {
 
@@ -20,14 +20,15 @@ class SlitCalculator;
 namespace CustomInterfaces {
 
 // Forward decs
-class IReflPresenter;
+class IReflRunsTabPresenter;
 class ReflSearchModel;
 
 using MantidWidgets::DataProcessorCommand;
 using MantidWidgets::DataProcessorCommandAdapter;
 using MantidWidgets::SlitCalculator;
 
-/** QtReflMainView : Provides an interface for processing reflectometry data.
+/** QtReflRunsTabView : Provides an interface for the "Runs" tab in the
+Reflectometry (Polref) interface.
 
 Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -50,14 +51,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL QtReflMainView
+class MANTIDQT_CUSTOMINTERFACES_DLL QtReflRunsTabView
     : public MantidQt::API::UserSubWindow,
-      public ReflMainView,
+      public IReflRunsTabView,
       public MantidQt::MantidWidgets::ProgressableView {
   Q_OBJECT
 public:
-  QtReflMainView(QWidget *parent = 0);
-  ~QtReflMainView() override;
+  QtReflRunsTabView(QWidget *parent = 0);
+  ~QtReflRunsTabView() override;
   /// Name of the interface
   static std::string name() { return "ISIS Reflectometry (Polref)"; }
   // This interface's categories.
@@ -93,7 +94,7 @@ public:
   std::string getSearchString() const override;
   std::string getTransferMethod() const override;
 
-  boost::shared_ptr<IReflPresenter> getPresenter() const override;
+  boost::shared_ptr<IReflRunsTabPresenter> getPresenter() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
 
@@ -106,11 +107,11 @@ private:
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 
   // the presenter
-  boost::shared_ptr<IReflPresenter> m_presenter;
+  boost::shared_ptr<IReflRunsTabPresenter> m_presenter;
   // the search model
   ReflSearchModel_sptr m_searchModel;
   // the interface
-  Ui::reflMainWidget ui;
+  Ui::ReflRunsTabWidget ui;
   // the slit calculator
   SlitCalculator *m_calculator;
   // Command adapters
@@ -128,4 +129,4 @@ private slots:
 } // namespace Mantid
 } // namespace CustomInterfaces
 
-#endif /* MANTID_CUSTOMINTERFACES_QTREFLMAINVIEW_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_QTREFLRUNSTABVIEW_H_ */

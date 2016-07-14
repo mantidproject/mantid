@@ -1,10 +1,10 @@
-#include "MantidQtCustomInterfaces/Reflectometry/QtReflMainView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/QtReflRunsTabView.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflRunsTabPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
@@ -21,23 +21,23 @@ namespace CustomInterfaces {
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
-DECLARE_SUBWINDOW(QtReflMainView)
+DECLARE_SUBWINDOW(QtReflRunsTabView)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
 */
-QtReflMainView::QtReflMainView(QWidget *parent)
+QtReflRunsTabView::QtReflRunsTabView(QWidget *parent)
     : UserSubWindow(parent), m_calculator(new SlitCalculator(this)) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-QtReflMainView::~QtReflMainView() {}
+QtReflRunsTabView::~QtReflRunsTabView() {}
 
 /**
 Initialise the Interface
 */
-void QtReflMainView::initLayout() {
+void QtReflRunsTabView::initLayout() {
   ui.setupUi(this);
 
   ui.buttonTransfer->setDefaultAction(ui.actionTransfer);
@@ -77,7 +77,7 @@ void QtReflMainView::initLayout() {
           SIGNAL(runAsPythonScript(const QString &, bool)), this,
           SIGNAL(runAsPythonScript(const QString &, bool)));
 
-  m_presenter = boost::make_shared<ReflMainViewPresenter>(
+  m_presenter = boost::make_shared<ReflRunsTabPresenter>(
       this /*main view*/,
       this /*currently this concrete view is also responsibile for prog reporting*/,
       processorPresenter /*the table presenter*/);
@@ -89,7 +89,7 @@ void QtReflMainView::initLayout() {
 * @param menu : [input] The menu where actions will be added
 * @param command : [input] The command (action) to add
 */
-void QtReflMainView::addToMenu(QMenu *menu, DataProcessorCommand_uptr command) {
+void QtReflRunsTabView::addToMenu(QMenu *menu, DataProcessorCommand_uptr command) {
 
   m_commands.push_back(Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
       menu, std::move(command)));
@@ -100,7 +100,7 @@ void QtReflMainView::addToMenu(QMenu *menu, DataProcessorCommand_uptr command) {
 * @param tableCommands : [input] The list of commands to add to the
 * "Reflectometry" menu
 */
-void QtReflMainView::setTableCommands(
+void QtReflRunsTabView::setTableCommands(
     std::vector<DataProcessorCommand_uptr> tableCommands) {
 
   ui.menuTable->clear();
@@ -119,7 +119,7 @@ void QtReflMainView::setTableCommands(
 * Adds actions to the "Edit" menu
 * @param rowCommands : [input] The list of commands to add to the "Edit" menu
 */
-void QtReflMainView::setRowCommands(
+void QtReflRunsTabView::setRowCommands(
     std::vector<DataProcessorCommand_uptr> rowCommands) {
 
   ui.menuRows->clear();
@@ -131,13 +131,13 @@ void QtReflMainView::setRowCommands(
 /**
 * Clears all the actions (commands)
 */
-void QtReflMainView::clearCommands() { m_commands.clear(); }
+void QtReflRunsTabView::clearCommands() { m_commands.clear(); }
 
 /**
 * Set all possible tranfer methods
 * @param methods : All possible transfer methods.
 */
-void QtReflMainView::setTransferMethods(const std::set<std::string> &methods) {
+void QtReflRunsTabView::setTransferMethods(const std::set<std::string> &methods) {
   for (auto method = methods.begin(); method != methods.end(); ++method) {
     ui.comboTransferMethod->addItem((*method).c_str());
   }
@@ -149,7 +149,7 @@ available instruments in the table view
 @param instruments : The list of instruments available
 @param defaultInstrument : The instrument to have selected by default
 */
-void QtReflMainView::setInstrumentList(
+void QtReflRunsTabView::setInstrumentList(
     const std::vector<std::string> &instruments,
     const std::string &defaultInstrument) {
   ui.comboSearchInstrument->clear();
@@ -169,7 +169,7 @@ Set the range of the progress bar
 @param min : The minimum value of the bar
 @param max : The maxmimum value of the bar
 */
-void QtReflMainView::setProgressRange(int min, int max) {
+void QtReflRunsTabView::setProgressRange(int min, int max) {
   ui.progressBar->setRange(min, max);
 }
 
@@ -177,20 +177,20 @@ void QtReflMainView::setProgressRange(int min, int max) {
 Set the status of the progress bar
 @param progress : The current value of the bar
 */
-void QtReflMainView::setProgress(int progress) {
+void QtReflRunsTabView::setProgress(int progress) {
   ui.progressBar->setValue(progress);
 }
 
 /**
 * Clear the progress
 */
-void QtReflMainView::clearProgress() { ui.progressBar->reset(); }
+void QtReflRunsTabView::clearProgress() { ui.progressBar->reset(); }
 
 /**
 Set a new model for search results
 @param model : the model to be attached to the search results
 */
-void QtReflMainView::showSearch(ReflSearchModel_sptr model) {
+void QtReflRunsTabView::showSearch(ReflSearchModel_sptr model) {
   m_searchModel = model;
   ui.tableSearchResults->setModel(m_searchModel.get());
   ui.tableSearchResults->resizeColumnsToContents();
@@ -199,15 +199,15 @@ void QtReflMainView::showSearch(ReflSearchModel_sptr model) {
 /**
 This slot notifies the presenter that the ICAT search was completed
 */
-void QtReflMainView::icatSearchComplete() {
-  m_presenter->notify(IReflPresenter::ICATSearchCompleteFlag);
+void QtReflRunsTabView::icatSearchComplete() {
+  m_presenter->notify(IReflRunsTabPresenter::ICATSearchCompleteFlag);
 }
 
 /**
 This slot notifies the presenter that the "search" button has been pressed
 */
-void QtReflMainView::on_actionSearch_triggered() {
-  m_presenter->notify(IReflPresenter::SearchFlag);
+void QtReflRunsTabView::on_actionSearch_triggered() {
+  m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
   connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
           SLOT(icatSearchComplete()));
 }
@@ -215,14 +215,14 @@ void QtReflMainView::on_actionSearch_triggered() {
 /**
 This slot notifies the presenter that the "transfer" button has been pressed
 */
-void QtReflMainView::on_actionTransfer_triggered() {
-  m_presenter->notify(IReflPresenter::Flag::TransferFlag);
+void QtReflRunsTabView::on_actionTransfer_triggered() {
+  m_presenter->notify(IReflRunsTabPresenter::Flag::TransferFlag);
 }
 
 /**
 This slot shows the slit calculator
 */
-void QtReflMainView::slitCalculatorTriggered() {
+void QtReflRunsTabView::slitCalculatorTriggered() {
   m_calculator->setCurrentInstrumentName(
       ui.comboSearchInstrument->currentText().toStdString());
   m_calculator->show();
@@ -232,7 +232,7 @@ void QtReflMainView::slitCalculatorTriggered() {
 This slot is triggered when the user right clicks on the search results table
 @param pos : The position of the right click within the table
 */
-void QtReflMainView::showSearchContextMenu(const QPoint &pos) {
+void QtReflRunsTabView::showSearchContextMenu(const QPoint &pos) {
   if (!ui.tableSearchResults->indexAt(pos).isValid())
     return;
 
@@ -246,7 +246,7 @@ void QtReflMainView::showSearchContextMenu(const QPoint &pos) {
  * is used to update the Slit Calculator
  * @param index : The index of the combo box
  */
-void QtReflMainView::instrumentChanged(int index) {
+void QtReflRunsTabView::instrumentChanged(int index) {
   m_calculator->setCurrentInstrumentName(
       ui.comboSearchInstrument->itemText(index).toStdString());
   m_calculator->processInstrumentHasBeenChanged();
@@ -257,7 +257,7 @@ Show an information dialog
 @param prompt : The prompt to appear on the dialog
 @param title : The text for the title bar of the dialog
 */
-void QtReflMainView::giveUserInfo(std::string prompt, std::string title) {
+void QtReflRunsTabView::giveUserInfo(std::string prompt, std::string title) {
   QMessageBox::information(this, QString(title.c_str()),
                            QString(prompt.c_str()), QMessageBox::Ok,
                            QMessageBox::Ok);
@@ -268,7 +268,7 @@ Show an critical error dialog
 @param prompt : The prompt to appear on the dialog
 @param title : The text for the title bar of the dialog
 */
-void QtReflMainView::giveUserCritical(std::string prompt, std::string title) {
+void QtReflRunsTabView::giveUserCritical(std::string prompt, std::string title) {
   QMessageBox::critical(this, QString(title.c_str()), QString(prompt.c_str()),
                         QMessageBox::Ok, QMessageBox::Ok);
 }
@@ -280,7 +280,7 @@ Ask the user to enter a string.
 @param defaultValue : The default value entered.
 @returns The user's string if submitted, or an empty string
 */
-std::string QtReflMainView::askUserString(const std::string &prompt,
+std::string QtReflRunsTabView::askUserString(const std::string &prompt,
                                           const std::string &title,
                                           const std::string &defaultValue) {
   bool ok;
@@ -295,7 +295,7 @@ std::string QtReflMainView::askUserString(const std::string &prompt,
 /**
 Show the user the dialog for an algorithm
 */
-void QtReflMainView::showAlgorithmDialog(const std::string &algorithm) {
+void QtReflRunsTabView::showAlgorithmDialog(const std::string &algorithm) {
   std::stringstream pythonSrc;
   pythonSrc << "try:\n";
   pythonSrc << "  algm = " << algorithm << "Dialog()\n";
@@ -308,7 +308,7 @@ void QtReflMainView::showAlgorithmDialog(const std::string &algorithm) {
 Get the selected instrument for searching
 @returns the selected instrument to search for
 */
-std::string QtReflMainView::getSearchInstrument() const {
+std::string QtReflRunsTabView::getSearchInstrument() const {
   return ui.comboSearchInstrument->currentText().toStdString();
 }
 
@@ -316,7 +316,7 @@ std::string QtReflMainView::getSearchInstrument() const {
 Get the indices of the highlighted search result rows
 @returns a set of ints containing the selected row numbers
 */
-std::set<int> QtReflMainView::getSelectedSearchRows() const {
+std::set<int> QtReflRunsTabView::getSelectedSearchRows() const {
   std::set<int> rows;
   auto selectionModel = ui.tableSearchResults->selectionModel();
   if (selectionModel) {
@@ -331,12 +331,12 @@ std::set<int> QtReflMainView::getSelectedSearchRows() const {
 Get a pointer to the presenter that's currently controlling this view.
 @returns A pointer to the presenter
 */
-boost::shared_ptr<IReflPresenter> QtReflMainView::getPresenter() const {
+boost::shared_ptr<IReflRunsTabPresenter> QtReflRunsTabView::getPresenter() const {
   return m_presenter;
 }
 
 boost::shared_ptr<MantidQt::API::AlgorithmRunner>
-QtReflMainView::getAlgorithmRunner() const {
+QtReflRunsTabView::getAlgorithmRunner() const {
   return m_algoRunner;
 }
 
@@ -344,14 +344,14 @@ QtReflMainView::getAlgorithmRunner() const {
 Get the string the user wants to search for.
 @returns The search string
 */
-std::string QtReflMainView::getSearchString() const {
+std::string QtReflRunsTabView::getSearchString() const {
   return ui.textSearch->text().toStdString();
 }
 
 /**
 * @return the transfer method selected.
 */
-std::string QtReflMainView::getTransferMethod() const {
+std::string QtReflRunsTabView::getTransferMethod() const {
   return ui.comboTransferMethod->currentText().toStdString();
 }
 

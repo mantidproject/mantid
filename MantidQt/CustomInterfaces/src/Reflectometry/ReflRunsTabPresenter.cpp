@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflRunsTabPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -6,14 +6,14 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/UserCatalogInfo.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 
 #include <boost/regex.hpp>
@@ -28,8 +28,8 @@ using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-ReflMainViewPresenter::ReflMainViewPresenter(
-    ReflMainView *mainView, ProgressableView *progressView,
+ReflRunsTabPresenter::ReflRunsTabPresenter(
+    IReflRunsTabView *mainView, ProgressableView *progressView,
     boost::shared_ptr<DataProcessorPresenter> tablePresenter,
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_tablePresenter(tablePresenter),
@@ -80,22 +80,22 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   }
 }
 
-ReflMainViewPresenter::~ReflMainViewPresenter() {}
+ReflRunsTabPresenter::~ReflRunsTabPresenter() {}
 
 /**
 Used by the view to tell the presenter something has changed
 */
-void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
+void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   switch (flag) {
-  case IReflPresenter::SearchFlag:
+  case IReflRunsTabPresenter::SearchFlag:
     search();
     break;
-  case IReflPresenter::ICATSearchCompleteFlag: {
+  case IReflRunsTabPresenter::ICATSearchCompleteFlag: {
     auto algRunner = m_view->getAlgorithmRunner();
     IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
     populateSearch(searchAlg);
   } break;
-  case IReflPresenter::TransferFlag:
+  case IReflRunsTabPresenter::TransferFlag:
     transfer();
     break;
   }
@@ -104,7 +104,7 @@ void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
 }
 
 /** Pushes the list of commands (actions) */
-void ReflMainViewPresenter::pushCommands() {
+void ReflRunsTabPresenter::pushCommands() {
 
   m_view->clearCommands();
 
@@ -130,7 +130,7 @@ void ReflMainViewPresenter::pushCommands() {
 }
 
 /** Searches for runs that can be used */
-void ReflMainViewPresenter::search() {
+void ReflRunsTabPresenter::search() {
   const std::string searchString = m_view->getSearchString();
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
@@ -174,7 +174,7 @@ void ReflMainViewPresenter::search() {
 /** Populates the search results table
 * @param searchAlg : [input] The search algorithm
 */
-void ReflMainViewPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
+void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   if (searchAlg->isExecuted()) {
     ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
     m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
@@ -186,7 +186,7 @@ void ReflMainViewPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 /** Transfers the selected runs in the search results to the processing table
 * @return : The runs to transfer as a vector of maps
 */
-void ReflMainViewPresenter::transfer() {
+void ReflRunsTabPresenter::transfer() {
   // Build the input for the transfer strategy
   SearchResultMap runs;
   auto selectedRows = m_view->getSelectedSearchRows();
@@ -258,7 +258,7 @@ void ReflMainViewPresenter::transfer() {
 * @return new TransferStrategy
 */
 std::unique_ptr<ReflTransferStrategy>
-ReflMainViewPresenter::getTransferStrategy() {
+ReflRunsTabPresenter::getTransferStrategy() {
   const std::string currentMethod = m_view->getTransferMethod();
   std::unique_ptr<ReflTransferStrategy> rtnStrategy;
   if (currentMethod == MeasureTransferMethod) {
@@ -293,7 +293,7 @@ ReflMainViewPresenter::getTransferStrategy() {
 /**
 Used to tell the presenter something has changed in the ADS
 */
-void ReflMainViewPresenter::notify(WorkspaceReceiver::Flag flag) {
+void ReflRunsTabPresenter::notify(WorkspaceReceiver::Flag flag) {
 
   switch (flag) {
   case WorkspaceReceiver::ADSChangedFlag:
@@ -304,7 +304,7 @@ void ReflMainViewPresenter::notify(WorkspaceReceiver::Flag flag) {
   // a flag we aren't handling.
 }
 
-const std::string ReflMainViewPresenter::MeasureTransferMethod = "Measurement";
-const std::string ReflMainViewPresenter::LegacyTransferMethod = "Description";
+const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";
+const std::string ReflRunsTabPresenter::LegacyTransferMethod = "Description";
 }
 }
