@@ -117,8 +117,8 @@ Output:
 
    DIFA1: 0
    DIFC1: 18267
-   TZERO1: 277
+   TZERO1: 276
    The output table has 1 row(s)
-   Parameters from the table, DIFC1: 18267, ZERO1: 277
+   Parameters from the table, DIFC1: 18267, ZERO1: 276
    Output GSAS iparam file was written? True
    Number of lines of the GSAS iparam file: 36
