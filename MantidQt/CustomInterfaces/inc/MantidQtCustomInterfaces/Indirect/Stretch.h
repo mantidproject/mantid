@@ -3,6 +3,7 @@
 
 #include "ui_Stretch.h"
 #include "IndirectBayesTab.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -19,9 +20,11 @@ public:
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
   /// Save the workspaces produces from the algorithm
-  void saveWorkspaces();
+  void saveWorkspaces(const QString &fitWorkspace,
+                      const QString &contourWorkspace);
   /// Plot the workspaces specified by the interface
-  void plotWorkspaces();
+  void plotWorkspaces(const QString &fitWorkspace,
+                      const QString &contourWorkspace);
 
 private slots:
   /// Slot for when the min range on the range selector changes
@@ -38,8 +41,9 @@ private slots:
 private:
   // The ui form
   Ui::Stretch m_uiForm;
-  // Algorithm
-  Mantid::API::IAlgorithm_sptr m_StretchAlg;
+  // Output Names
+  std::string m_fitWorkspaceName;
+  std::string m_contourWorkspaceName;
   // state of plot and save when algorithm is run
   std::string m_plotType;
   bool m_save;

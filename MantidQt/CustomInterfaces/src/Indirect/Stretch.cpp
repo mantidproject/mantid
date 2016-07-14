@@ -1,6 +1,10 @@
 #include "MantidQtCustomInterfaces/Indirect/Stretch.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
+#include "MantidAPI/AlgorithmManager.h"
+
+using namespace Mantid::API;
+
 namespace {
 Mantid::Kernel::Logger g_log("Stretch");
 }
@@ -81,7 +85,6 @@ bool Stretch::validate() {
  * script that runs Stretch
  */
 void Stretch::run() {
-  using namespace Mantid::API;
 
   // Workspace input
   const auto sampleName = m_uiForm.dsSample->getCurrentDataName().toStdString();
@@ -126,8 +129,8 @@ void Stretch::run() {
   // Construct OutputNames
   auto cutIndex = sampleName.find_last_of("_");
   auto baseName = sampleName.substr(0, cutIndex);
-  auto fitWsName = baseName + "_Qst_Fit";
-  auto contourWsName = baseName + "_Qst_Contour";
+  m_fitWorkspaceName = baseName + "_Qst_Fit";
+  m_contourWorkspaceName = baseName + "_Qst_Contour";
 
   auto stretch = AlgorithmManager::Instance().create("BayesStretch");
   stretch->initialize();
@@ -141,11 +144,12 @@ void Stretch::run() {
   stretch->setProperty("NumberSigma", sigma);
   stretch->setProperty("NumberBeta", beta);
   stretch->setProperty("Loop", sequence);
-  stretch->setProperty("OutputWorkspaceFit", fitWsName);
-  stretch->setProperty("OutputWorkspaceContour", contourWsName);
+  stretch->setProperty("OutputWorkspaceFit", m_fitWorkspaceName);
+  stretch->setProperty("OutputWorkspaceContour", m_contourWorkspaceName);
 
-  m_StretchAlg = stretch;
   m_batchAlgoRunner->addAlgorithm(stretch);
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(algorithmComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -153,16 +157,80 @@ void Stretch::run() {
  * Handles the saving and plotting of workspaces after execution
  */
 void Stretch::algorithmComplete(const bool &error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(algorithmComplete(bool)));
+
   if (error)
     return;
+
+  // Obtain workspace pointers
+  WorkspaceGroup_sptr fitWorkspace;
+  WorkspaceGroup_sptr contourWorkspace;
+  try {
+    fitWorkspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        m_fitWorkspaceName);
+    contourWorkspace =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            m_contourWorkspaceName);
+  } catch (std::runtime_error) {
+    if (m_save || !m_plotType.compare("None")) {
+      g_log.error("Plotting and Saving could not be executed as the Output "
+                  "Workspaces could not be found.");
+    }
+  }
+
+  // Handle saving
   if (m_save)
-    saveWorkspaces();
-  if (!m_plotType.compare("None") == 0)
-    plotWorkspaces();
+    saveWorkspaces(QString::fromStdString(fitWorkspace->getName()),
+                   QString::fromStdString(contourWorkspace->getName()));
+
+  // Handle plotting
+  if (!m_plotType.compare("None") == 0) {
+    auto sigma = QString::fromStdString(fitWorkspace->getItem(0)->getName());
+    auto beta = QString::fromStdString(fitWorkspace->getItem(1)->getName());
+    if (sigma.right(5).compare("Sigma") == 0) {
+      if (beta.right(4).compare("Beta") == 0) {
+        plotWorkspaces(beta, sigma);
+      }
+    } else {
+		g_log.error("Beta and Sigma workspace were not found and could not be plotted.");
+    }
+  }
 }
 
-void Stretch::saveWorkspaces() {}
-void Stretch::plotWorkspaces() {}
+/**
+ * Handles the saving of workspaces post alogrithm completion
+ * @param fitWorkspace		:: The name of the fit workspace to save
+ * @param contourWorkspace	:: The name of the contour workspace to save
+ */
+void Stretch::saveWorkspaces(const QString &fitWorkspace,
+                             const QString &contourWorkspace) {
+  auto saveDir = QString::fromStdString(
+      Mantid::Kernel::ConfigService::Instance().getString(
+          "defaultsave.directory"));
+  // Check validity of save path
+  const auto fitFullPath = saveDir.append(fitWorkspace).append(".nxs");
+  const auto contourFullPath = saveDir.append(contourWorkspace).append(".nxs");
+  addSaveWorkspaceToQueue(fitWorkspace, fitFullPath);
+  addSaveWorkspaceToQueue(contourWorkspace, fitFullPath);
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+
+/**
+ * Handles the plotting of workspace post algorithm completion
+ * @param betaWorkspace		:: The name of the beta workspace to plot
+ * @param sigmaWorkspace	:: The name of the sigma workspace to plot
+ */
+void Stretch::plotWorkspaces(const QString &betaWorkspace,
+                             const QString &sigmaWorkspace) {
+  if (m_plotType.compare("All") == 0 || m_plotType.compare("Beta") == 0) {
+    plot2D(betaWorkspace);
+  }
+  if (m_plotType.compare("All") == 0 || m_plotType.compare("Sigma") == 0) {
+    plot2D(sigmaWorkspace);
+  }
+}
 
 /**
  * Set the data selectors to use the default save directory
