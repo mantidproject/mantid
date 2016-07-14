@@ -123,6 +123,17 @@ void SofQW::exec() {
   childAlg->execute();
 
   MatrixWorkspace_sptr outputWS = childAlg->getProperty("OutputWorkspace");
+  
+  // Replaces any NaNs in the output workspace with zeros
+  for (int i = 0; i < outputWS->getNumberHistograms(); i++) {
+	for (int j = 0; j < outputWS->blocksize(); j++)
+	{
+	  if (isnan(outputWS->x(i)[j])) { outputWS->mutableX(i)[j] = 0; }
+	  if (isnan(outputWS->y(i)[j])) { outputWS->mutableY(i)[j] = 0; }
+	  if (isnan(outputWS->e(i)[j])) { outputWS->mutableE(i)[j] = 0; }
+	}
+  }
+
   this->setProperty("OutputWorkspace", outputWS);
 }
 
