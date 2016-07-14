@@ -2061,6 +2061,8 @@ void MuonAnalysis::loadFittings() {
           SLOT(dataToFitChanged()));
   connect(m_dataSelector, SIGNAL(workspaceChanged()), this,
           SLOT(dataToFitChanged()));
+  // TEMPORARY - TEST
+  m_uiForm.fitBrowser->setCompatibilityMode(true);
 }
 
 /**
