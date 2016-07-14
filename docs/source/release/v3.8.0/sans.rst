@@ -8,7 +8,7 @@ SANS Changes
 Algorithms
 ----------
 
-- :ref:`CropToComponent <algm-CropToComponent>` allows for cropping a workspace to a list of detector names.
+- :ref:`CropToComponent <algm-CropToComponent>` allows for cropping a workspace to a list of component names.
 
 
 Bug Fixes
