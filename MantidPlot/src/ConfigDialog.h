@@ -151,6 +151,13 @@ private:
   void initMantidOptionsTab();
   void initSendToProgramTab();
   void refreshTreeCategories();
+  void
+  buildTreeCategoryStructure(const QStringList *splitCats, const bool isHidden,
+                             QMap<QString, QTreeWidgetItem *> *seenCategories);
+
+  QTreeWidgetItem * walkBackwardsThroughCategories(const QStringList *splitCats,
+	  int elementToCheck, QMap<QString, QTreeWidgetItem*>* seenCategories);
+
   void populateProgramTree();
   void updateProgramTree();
 
