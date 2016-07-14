@@ -111,21 +111,15 @@ public:
 
   void testExecNansReplaced() {
 	auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>();
-	bool noNansFound = true;
+	bool nanFound = false;
 
 	for (int i = 0; i < result->getNumberHistograms(); i++) {
-	  for (int j = 0; j < result->blocksize(); j++) {
-		if (isnan(result->x(i)[j]) || 
-			isnan(result->y(i)[j]) || 
-			isnan(result->e(i)[j])) {
-		  noNansFound = false;
-		  break;
-		}
+	  if (nanFound = isNanInHistogram(*result, i)) { 
+		  break; // NaN found in workspace, no need to keep searching
 	  }
-	  if (!noNansFound) { break; }
 	}
 
-	TS_ASSERT(noNansFound);
+	TS_ASSERT(!nanFound);
   }
 
 private:
@@ -136,6 +130,21 @@ private:
     const auto &lastAlg = wsHistory.getAlgorithmHistory(wsHistory.size() - 1);
     const auto child = lastAlg->getChildAlgorithmHistory(0);
     return (child->name() == name);
+  }
+
+  bool isNanInHistogram(const Mantid::API::MatrixWorkspace &result,
+						const size_t index) {
+	bool nanFound = false;
+	for (int i = 0; i < result.blocksize(); i++) {
+	  if (isnan(result.x(index)[i]) ||
+		  isnan(result.y(index)[i]) ||
+		  isnan(result.e(index)[i])) {
+			nanFound = true;
+			break; // NaN found in histogram, no need to keep searching
+	  }
+	}
+
+	return nanFound;
   }
 };
 
