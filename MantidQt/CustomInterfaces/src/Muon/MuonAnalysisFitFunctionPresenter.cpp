@@ -82,7 +82,12 @@ void MuonAnalysisFitFunctionPresenter::setParameterUpdates(bool on) {
  * Queries function browser and updates function in fit property browser.
  */
 void MuonAnalysisFitFunctionPresenter::updateFunction() {
-  m_fitBrowser->setFunction(m_funcBrowser->getGlobalFunction());
+  // Check there is still a function to update
+  const auto funcString = m_funcBrowser->getFunctionString();
+  const Mantid::API::IFunction_sptr function =
+      funcString.isEmpty() ? nullptr // last function has been removed
+                           : m_funcBrowser->getGlobalFunction();
+  m_fitBrowser->setFunction(function);
 }
 
 /**

@@ -23,7 +23,7 @@ public:
     m_func =
         Mantid::API::FunctionFactory::Instance().createFunction("Gaussian");
   }
-  QString getFunctionString() override { return QString("Test function"); }
+  MOCK_METHOD0(getFunctionString, QString());
   Mantid::API::IFunction_sptr getGlobalFunction() override { return m_func; }
   MOCK_METHOD0(functionStructureChanged, void());
   MOCK_METHOD1(updateParameters, void(const Mantid::API::IFunction &));
@@ -103,12 +103,27 @@ public:
   }
 
   void test_updateFunction() {
+    EXPECT_CALL(*m_funcBrowser, getFunctionString())
+        .Times(1)
+        .WillOnce(Return("Test Function"));
     EXPECT_CALL(*m_fitBrowser, setFunction(m_funcBrowser->getGlobalFunction()))
         .Times(1);
     m_presenter->updateFunction();
   }
 
+  void test_updateFunction_lastFunctionRemoved() {
+    EXPECT_CALL(*m_funcBrowser, getFunctionString())
+        .Times(1)
+        .WillOnce(Return("")); // empty string - last function removed
+    EXPECT_CALL(*m_fitBrowser, setFunction(Mantid::API::IFunction_sptr()))
+        .Times(1);
+    m_presenter->updateFunction();
+  }
+
   void test_updateFunctionAndFit_nonSequential() {
+    EXPECT_CALL(*m_funcBrowser, getFunctionString())
+        .Times(1)
+        .WillOnce(Return("Test Function"));
     EXPECT_CALL(*m_fitBrowser, setFunction(m_funcBrowser->getGlobalFunction()))
         .Times(1);
     EXPECT_CALL(*m_fitBrowser, runFit()).Times(1);
@@ -116,6 +131,9 @@ public:
   }
 
   void test_updateFunctionAndFit_sequential() {
+    EXPECT_CALL(*m_funcBrowser, getFunctionString())
+        .Times(1)
+        .WillOnce(Return("Test Function"));
     EXPECT_CALL(*m_fitBrowser, setFunction(m_funcBrowser->getGlobalFunction()))
         .Times(1);
     EXPECT_CALL(*m_fitBrowser, runSequentialFit()).Times(1);
