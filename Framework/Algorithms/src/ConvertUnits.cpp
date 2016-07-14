@@ -380,7 +380,6 @@ bool ConvertUnits::getDetectorValues(
     return false;
   }
   return true;
-
 }
 
 /** Convert the workspace units using TOF as an intermediate step in the
