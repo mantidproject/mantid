@@ -2322,15 +2322,6 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     // Say MantidPlot to use Muon Analysis fit prop. browser
     emit setFitPropertyBrowser(m_uiForm.fitBrowser);
 
-    // Show connected plot and attach PP tool to it (if has been assigned)
-    if (m_currentDataName != NOT_AVAILABLE)
-      selectMultiPeak(m_currentDataName);
-
-    // In future, when workspace gets changed, show its plot and attach PP tool
-    // to it
-    connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString &)),
-            this, SLOT(selectMultiPeak(const QString &)), Qt::QueuedConnection);
-
     // setFitPropertyBrowser() above changes the fitting range, so we have to
     // either initialise it to the correct values:
     if (xmin == 0.0 && xmax == 0.0) {
@@ -2348,6 +2339,15 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       m_dataSelector->setStartTime(xmin);
       m_dataSelector->setEndTime(xmax);
     }
+
+    // Show connected plot and attach PP tool to it (if has been assigned)
+    if (m_currentDataName != NOT_AVAILABLE)
+      selectMultiPeak(m_currentDataName);
+
+    // In future, when workspace gets changed, show its plot and attach PP tool
+    // to it
+    connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString &)),
+            this, SLOT(selectMultiPeak(const QString &)), Qt::QueuedConnection);
   } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();
   }
