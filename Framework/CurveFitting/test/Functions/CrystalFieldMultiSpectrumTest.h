@@ -118,6 +118,35 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_simple_background() {
+    auto funStr = "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(44, "
+                  "50),ToleranceIntensity=0.001,"
+                  "Background=FlatBackground,"
+                  "B20=0.37737,B22=3.9770,"
+                  "B40=-0.031787,B42=-0.11611,B44=-0.12544,"
+                  "f0.f0.A0=1.0,f1.f0.A0=2.0,"
+                  "f0.f1.FWHM=1.6,f0.f2.FWHM=2.0,f0.f3.FWHM=2.3,f1.f1.FWHM=1.6,"
+                  "f1.f2.FWHM=2.0,f1.f3.FWHM=2.3";
+    auto fun = FunctionFactory::Instance().createInitialized(funStr);
+    TS_ASSERT_EQUALS(fun->getParameter("f0.f0.A0"), 1.0);
+    TS_ASSERT_EQUALS(fun->getParameter("f1.f0.A0"), 2.0);
+  }
+
+  void test_composite_background() {
+    auto funStr = "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(44, "
+                  "50),ToleranceIntensity=0.001,"
+                  "Background=\"name=Gaussian;name=FlatBackground\","
+                  "B20=0.37737,B22=3.9770,"
+                  "B40=-0.031787,B42=-0.11611,B44=-0.12544,"
+                  "f0.f0.f0.Sigma=0.1,f1.f0.f0.Sigma=0.2,"
+                  "f0.f0.f1.A0=1.0,f1.f0.f1.A0=2.0,"
+                  "f0.f1.FWHM=1.6,f0.f2.FWHM=2.0,f0.f3.FWHM=2.3,f1.f1.FWHM=1.6,"
+                  "f1.f2.FWHM=2.0,f1.f3.FWHM=2.3";
+    auto fun = FunctionFactory::Instance().createInitialized(funStr);
+    TS_ASSERT_EQUALS(fun->getParameter("f0.f0.f0.Sigma"), 0.1);
+    TS_ASSERT_EQUALS(fun->getParameter("f1.f0.f0.Sigma"), 0.2);
+  }
+
 private:
   Workspace_sptr createWorkspace() {
     auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 100, 100);

@@ -50,7 +50,7 @@ public:
 CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()
     : FunctionGenerator(IFunction_sptr(new Peaks)) {
   declareAttribute("Temperatures", Attribute(std::vector<double>(1, 1.0)));
-  declareAttribute("Background", Attribute("FlatBackground"));
+  declareAttribute("Background", Attribute("FlatBackground", true));
   declareAttribute("PeakShape", Attribute("Lorentzian"));
   declareAttribute("FWHMs", Attribute(std::vector<double>(1, 0.0)));
   declareAttribute("FixAllPeakParameters", Attribute(false));
@@ -140,15 +140,18 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
   DoubleFortranVector iExcitations;
   calcExcitations(nre, en, wf, temperature, eExcitations, iExcitations);
   size_t nPeaks = eExcitations.size();
-  size_t maxNPeaks = nPeaks + nPeaks / 2 +
-                     1; // m_source->getAttribute("MaxPeakCount").asInt();
+  size_t maxNPeaks = nPeaks + nPeaks / 2 + 1;
   bool fixAll = getAttribute("FixAllPeakParameters").asBool();
 
   auto peakShape = IFunction::getAttribute("PeakShape").asString();
-  auto bkgdShape = IFunction::getAttribute("Background").asString();
+  auto bkgdShape = IFunction::getAttribute("Background").asUnquotedString();
+
+  if (!bkgdShape.empty() && bkgdShape.find("name=") != 0 && bkgdShape.front() != '(') {
+    bkgdShape = "name=" + bkgdShape;
+  }
 
   auto spectrum = new CompositeFunction;
-  auto background = API::FunctionFactory::Instance().createFunction(bkgdShape);
+  auto background = API::FunctionFactory::Instance().createInitialized(bkgdShape);
   spectrum->addFunction(background);
   for (size_t i = 0; i < maxNPeaks; ++i) {
     auto fun = API::FunctionFactory::Instance().createFunction(peakShape);
