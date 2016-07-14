@@ -227,8 +227,6 @@ void LoadSPE::readHistogram(FILE *speFile, API::MatrixWorkspace_sptr workspace,
   }
   // Read to EOL
   fgets(comment, 100, speFile);
-
-  return;
 }
 
 /** Called if the file is not formatted as expected

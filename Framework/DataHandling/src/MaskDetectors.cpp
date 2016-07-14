@@ -320,8 +320,6 @@ void MaskDetectors::appendToIndexListFromWS(
       indexList.push_back(i);
     }
   }
-
-  return;
 } // appendToIndexListFromWS
 
 /**
@@ -348,8 +346,6 @@ void MaskDetectors::appendToIndexListFromMaskWS(
       indexList.push_back(i);
     }
   }
-
-  return;
 } // appendToIndexListFromWS
 
 } // namespace DataHandling

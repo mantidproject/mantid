@@ -49,7 +49,7 @@ void EQSANSDarkCurrentSubtraction2::init() {
 }
 
 void EQSANSDarkCurrentSubtraction2::exec() {
-  std::string output_message = "";
+  std::string output_message;
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
   boost::shared_ptr<PropertyManager> reductionManager;

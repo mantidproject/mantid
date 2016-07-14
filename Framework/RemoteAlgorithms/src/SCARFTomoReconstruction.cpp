@@ -437,7 +437,7 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
 
   // Not sure at this point if there could be commands without options
   // For the time being it's possible.
-  std::string jobOptions = "";
+  std::string jobOptions;
   try {
     jobOptions = getPropertyValue("JobOptions");
   } catch (std::runtime_error & /*e*/) {
@@ -446,7 +446,7 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
     m_jobOptions = "";
   }
 
-  std::string runnablePath = "";
+  std::string runnablePath;
   try {
     runnablePath = getPropertyValue("RunnablePath");
   } catch (std::runtime_error & /*e*/) {
@@ -457,7 +457,7 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
     throw;
   }
 
-  std::string jobName = "";
+  std::string jobName;
   try {
     jobName = getPropertyValue("JobName");
   } catch (std::runtime_error & /*e*/) {
@@ -1181,7 +1181,7 @@ void SCARFTomoReconstruction::genOutputStatusInfo(
 
     Poco::XML::Element *id = el->getChildElement("id");
     if (id) {
-      const std::string &IdStr = id->innerText().c_str();
+      const std::string &IdStr = id->innerText();
       if (!jobIDFilter.empty() && IdStr != jobIDFilter)
         continue;
 
@@ -1190,21 +1190,21 @@ void SCARFTomoReconstruction::genOutputStatusInfo(
 
     Poco::XML::Element *name = el->getChildElement("name");
     if (name) {
-      jobNames.push_back(name->innerText().c_str());
+      jobNames.push_back(name->innerText());
     } else {
       jobNames.emplace_back("Unknown!");
     }
 
     Poco::XML::Element *status = el->getChildElement("status");
     if (status) {
-      jobStatus.push_back(status->innerText().c_str());
+      jobStatus.push_back(status->innerText());
     } else {
       jobStatus.emplace_back("Unknown!");
     }
 
     Poco::XML::Element *cmd = el->getChildElement("cmd");
     if (cmd) {
-      jobCommands.push_back(cmd->innerText().c_str());
+      jobCommands.push_back(cmd->innerText());
     } else {
       jobCommands.emplace_back("Unknown!");
     }

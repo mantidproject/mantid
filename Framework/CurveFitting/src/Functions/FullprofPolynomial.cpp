@@ -54,8 +54,6 @@ void FullprofPolynomial::function1D(double *out, const double *xValues,
 
     out[i] = y_b;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -78,8 +76,6 @@ void FullprofPolynomial::functionDeriv1D(API::Jacobian *out,
       out->set(i, j, pow_x);
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -138,8 +134,6 @@ void FullprofPolynomial::setAttribute(const std::string &attName,
     // Background original position
     m_bkpos = att.asDouble();
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

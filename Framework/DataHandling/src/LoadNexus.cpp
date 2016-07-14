@@ -114,7 +114,6 @@ void LoadNexus::exec() {
     }
     runLoadTOFRawNexus();
   }
-  return;
 }
 
 void LoadNexus::runLoadMuonNexus() {

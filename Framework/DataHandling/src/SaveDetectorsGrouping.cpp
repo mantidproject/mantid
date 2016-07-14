@@ -102,8 +102,6 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
     }
     it->second.insert(it->second.end(), detids.begin(), detids.end());
   }
-
-  return;
 }
 
 /*
@@ -148,8 +146,6 @@ void SaveDetectorsGrouping::convertToDetectorsRanges(
     groupdetidrangemap[groupid] = detranges;
 
   } // ENDFOR GroupID
-
-  return;
 }
 
 void SaveDetectorsGrouping::printToXML(

@@ -33,7 +33,7 @@ void readLinesForRKH1D(std::istream &stream, int readStart, int readEnd,
                        std::vector<double> &columnOne,
                        std::vector<double> &ydata, std::vector<double> &errdata,
                        Progress &prog) {
-  std::string fileline = "";
+  std::string fileline;
   for (int index = 1; index <= readEnd; ++index) {
     getline(stream, fileline);
     if (index < readStart)
@@ -53,7 +53,7 @@ void readLinesWithXErrorForRKH1D(std::istream &stream, int readStart,
                                  std::vector<double> &ydata,
                                  std::vector<double> &errdata,
                                  std::vector<double> &xError, Progress &prog) {
-  std::string fileline = "";
+  std::string fileline;
   for (int index = 1; index <= readEnd; ++index) {
     getline(stream, fileline);
     if (index < readStart)
@@ -81,7 +81,7 @@ int LoadRKH::confidence(Kernel::FileDescriptor &descriptor) const {
     return 0;
 
   auto &file = descriptor.data();
-  std::string fileline("");
+  std::string fileline;
 
   // Header looks something like this where the text inside [] could be anything
   //  LOQ Thu 28-OCT-2004 12:23 [W 26  INST_DIRECT_BEAM]
@@ -514,7 +514,7 @@ const std::string LoadRKH::readUnit(const std::string &line) {
  * @param nlines :: The number of lines to remove
  */
 void LoadRKH::skipLines(std::istream &strm, int nlines) {
-  std::string buried("");
+  std::string buried;
   for (int i = 0; i < nlines; ++i) {
     getline(strm, buried);
   }

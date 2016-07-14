@@ -176,12 +176,12 @@ void FindPeakBackground::exec() {
     // for loop can start > 1 for multiple peaks
     vector<cont_peak> peaks;
     if (mask[0] == 1) {
-      peaks.push_back(cont_peak());
+      peaks.emplace_back();
       peaks.back().start = l0;
     }
     for (size_t l = 1; l < n - l0; ++l) {
       if (mask[l] != mask[l - 1] && mask[l] == 1) {
-        peaks.push_back(cont_peak());
+        peaks.emplace_back();
         peaks.back().start = l + l0;
       } else if (!peaks.empty()) {
         size_t ipeak = peaks.size() - 1;
@@ -228,8 +228,6 @@ void FindPeakBackground::exec() {
 
   // 4. Set the output
   setProperty("OutputWorkspace", m_outPeakTableWS);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -385,8 +383,6 @@ void FindPeakBackground::estimateBackground(
 
   g_log.information() << "Estimated background: A0 = " << out_bg0
                       << ", A1 = " << out_bg1 << ", A2 = " << out_bg2 << "\n";
-
-  return;
 }
 //----------------------------------------------------------------------------------------------
 /** Calculate 4th moment
