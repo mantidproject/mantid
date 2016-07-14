@@ -21,6 +21,17 @@ class Function(object):
         self._ties = {}
         self._constraints = []
 
+    def clone(self):
+        """Make a copy of self."""
+        from copy import copy
+        f = Function(self._name)
+        # Make shallow copies of the member collections
+        f._attrib = copy(self._attrib)
+        f._params = copy(self._params)
+        f._ties = copy(self._ties)
+        f._constraints = copy(self._constraints)
+        return f
+
     @property
     def name(self):
         """Read only name of this function"""
@@ -68,6 +79,11 @@ class Function(object):
         if len(constraints) > 0:
             s += ',constraints=(%s)' % constraints
         return s
+
+    def paramString(self, prefix):
+        attrib = ['%s%s=%s' % ((prefix,) + item) for item in self._attrib.items()] + \
+                 ['%s%s=%s' % ((prefix,) + item) for item in self._params.items()]
+        return ','.join(attrib)
 
     def update(self, func):
         """
@@ -124,7 +140,7 @@ class CompositeProperties(object):
                 prop_list.append('')
         return prop_list
 
-    def toCompositeString(self):
+    def toCompositeString(self, prefix, shift=0):
         """Format all properties as a comma-separated list of name=value pairs where name is formatted
         in the CompositeFunction style.
 
@@ -133,7 +149,7 @@ class CompositeProperties(object):
         """
         s = ''
         for i in self._properties:
-            f = 'f%s.' % i
+            f = '%sf%s.' % (prefix, i + shift)
             props = self._properties[i]
             if len(s) > 0:
                 s += ','
@@ -258,7 +274,7 @@ class PeaksFunction(object):
             s += ';%s' % self.tiesString()
         return s
 
-    def paramString(self):
+    def paramString(self, prefix='', shift=0):
         """Format a comma-separated list of all peaks attributes and parameters in a CompositeFunction
         style.
         """
@@ -267,11 +283,12 @@ class PeaksFunction(object):
         if na == 0 and np == 0:
             return ''
         elif na == 0:
-            return self._params.toCompositeString()
+            return self._params.toCompositeString(prefix, shift)
         elif np == 0:
-            return self._attrib.toCompositeString()
+            return self._attrib.toCompositeString(prefix, shift)
         else:
-            return '%s,%s' % (self._attrib.toCompositeString(), self._params.toCompositeString())
+            return '%s,%s' % (self._attrib.toCompositeString(prefix, shift),
+                              self._params.toCompositeString(prefix, shift))
 
     def tiesString(self):
         if len(self._ties) > 0:
@@ -298,6 +315,23 @@ class Background(object):
         self.peak = peak
         self.background = background
 
+    def clone(self):
+        """Make a copy of self."""
+        b = Background()
+        if self.peak is not None:
+            b.peak = self.peak.clone()
+        if self.background is not None:
+            b.background = self.background.clone()
+        return b
+
+    def __mul__(self, n):
+        """Make expressions like Background(...) * 8 return a list of 8 identical backgrounds."""
+        return [self.clone() for i in range(n)]
+
+    def __rmul__(self, n):
+        """Make expressions like 2 * Background(...) return a list of 2 identical backgrounds."""
+        return self.__mul__(n)
+
     def toString(self):
         if self.peak is None and self.background is None:
             return ''
@@ -306,6 +340,24 @@ class Background(object):
         if self.background is None:
             return self.peak.toString()
         return '%s;%s' % (self.peak.toString(), self.background.toString())
+
+    def nameString(self):
+        if self.peak is None and self.background is None:
+            return ''
+        if self.peak is None:
+            return self.background.name
+        if self.background is None:
+            return self.peak.name
+        return '"name=%s;name=%s"' % (self.peak.name, self.background.name)
+
+    def paramString(self, prefix):
+        if self.peak is None and self.background is None:
+            return ''
+        if self.peak is None:
+            return self.background.paramString(prefix)
+        if self.background is None:
+            return self.peak.paramString(prefix)
+        return '%s,%s' % (self.peak.paramString(prefix + 'f0.'), self.background.paramString(prefix + 'f1.'))
 
     def update(self, func1, func2=None):
         """

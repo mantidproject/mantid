@@ -5,8 +5,11 @@ from mantid.kernel import ConfigService
 # This is to make sure that Lorentzians get evaluated properly
 ConfigService.setString('curvefitting.peakRadius', str(100))
 
-# RegEx pattern matching a composite function parameter name, eg f2.Sigma
+# RegEx pattern matching a composite function parameter name, eg f2.Sigma.
 fn_pattern = re.compile('f(\\d+)\\.(.+)')
+
+# RegEx pattern matching a composite function parameter name, eg f2.Sigma. Multi-spectrum case.
+fn_ms_pattern = re.compile('f(\\d+)\\.f(\\d+)\\.(.+)')
 
 
 def MakeWorkspace(x, y):
@@ -209,6 +212,7 @@ class CrystalField(object):
         """Form a definition string for the CrystalFieldSpectrum function
         @param i: Index of a spectrum.
         """
+        from .function import Background
         temperature = self._getTemperature(i)
         s = 'name=CrystalFieldSpectrum,Ion=%s,Symmetry=%s,Temperature=%s' % (self._ion, self._symmetry, temperature)
         s += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
@@ -217,7 +221,7 @@ class CrystalField(object):
             s += ',FWHM=%s' % self._getFWHM(i)
         s += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
         peaks = self.getPeak(i)
-        params = peaks.paramString()
+        params = peaks.paramString('', 0)
         if len(params) > 0:
             s += ',%s' % params
         ties = peaks.tiesString()
@@ -227,7 +231,38 @@ class CrystalField(object):
         if len(constraints) > 0:
             s += ',%s' % constraints
         if self.background is not None:
-            s = '%s;%s' % (self.background.toString(), s)
+            if isinstance(self.background, Background):
+                bs = self.background.toString()
+            else:
+                bs = self.background[i].toString()
+            s = '%s;%s' % (bs, s)
+        return s
+
+    def makeMultiSpectrumFunction(self):
+        """Form a definition string for the CrystalFieldMultiSpectrum function"""
+        s = 'name=CrystalFieldMultiSpectrum,Ion=%s,Symmetry=%s' % (self._ion, self._symmetry)
+        s += ',ToleranceEnergy=%s,ToleranceIntensity=%s' % (self._toleranceEnergy, self._toleranceIntensity)
+        s += ',PeakShape=%s' % self.getPeak().name
+        if self.background is not None:
+            s += ',Background=%s' % self.background[0].nameString()
+        s += ',Temperatures=(%s)' % ','.join(map(str, self._temperature))
+        if self._FWHM is not None:
+            s += ',FWHMs=(%s)' % ','.join(map(str, self._FWHM))
+        s += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
+
+        if self.background is not None:
+            i = 0
+            for background in self.background:
+                bs = background.paramString('f%s.f0.' % i)
+                if len(bs) > 0:
+                    s += ',%s' % bs
+                i += 1
+        i = 0
+        for peaks in self.peaks:
+            ps = peaks.paramString('f%s.' % i, 1)
+            if len(ps) > 0:
+                s += ',%s' % ps
+            i += 1
         return s
 
     def _calcPeaksList(self, i):
@@ -404,6 +439,15 @@ class CrystalField(object):
         else:
             self.peaks = [PeaksFunction(name) for t in self._temperature]
 
+    def setBackground(self, peak=None, background=None):
+        from .function import Function, Background
+        if isinstance(self._temperature, list):
+            n = len(self._temperature)
+            self.background = n * Background(peak=peak, background=background)
+        else:
+            self.background = Background(peak=peak, background=background)
+
+
     def getPeak(self, i=0):
         if isinstance(self.peaks, list):
             return self.peaks[i]
@@ -559,6 +603,42 @@ class CrystalField(object):
         else:
             self.updateParameters(func)
 
+    def update_multi(self, func):
+        """
+        Update values of the fitting parameters in case of a multi-spectrum function.
+        @param func: A IFunction object containing new parameter values.
+        """
+        n = func.nParams()
+        for i in range(n):
+            par = func.parameterName(i)
+            value = func.getParameterValue(i)
+            m = re.match(fn_ms_pattern, par)
+            if m:
+                ispec = int(m.group(1))
+                ipeak = int(m.group(2))
+                par = m.group(3)
+                if ipeak == 0:
+                    background = self.background[ispec]
+                    mb = re.match(fn_pattern, par)
+                    if mb:
+                        i = int(mb.group(1))
+                        par = mb.group(2)
+                        if i == 0:
+                            background.peak.param[par] = value
+                        else:
+                            background.background.param[par] = value
+                    else:
+                        if background.peak is not None:
+                            background.peak.param[par] = value
+                        elif background.background is not None:
+                            background.background.param[par] = value
+                        else:
+                            raise RuntimeError('Background is undefined in CrystalField instance.')
+                else:
+                    self.peaks[ispec].param[ipeak - 1][par] = value
+            else:
+                self._fieldParameters[par] = value
+
 
 class CrystalFieldFit(object):
     """
@@ -578,6 +658,15 @@ class CrystalFieldFit(object):
         """
         Run Fit algorithm. Update function parameters.
         """
+        if isinstance(self._input_workspace, list):
+            return self._fit_multi()
+        else:
+            return self._fit_single()
+
+    def _fit_single(self):
+        """
+        Fit when the model has a single spectrum.
+        """
         from mantid.api import AlgorithmManager
         fun = self.model.makeSpectrumFunction()
         ties = self.model.getFieldTies()
@@ -595,3 +684,29 @@ class CrystalFieldFit(object):
         alg.execute()
         f = alg.getProperty('Function').value
         self.model.update(f)
+
+    def _fit_multi(self):
+        """
+        Fit when the model has multiple spectra.
+        """
+        from mantid.api import AlgorithmManager
+        fun = self.model.makeMultiSpectrumFunction()
+        ties = self.model.getFieldTies()
+        if len(ties) > 0:
+            fun += ',ties=(%s)' % ties
+        constraints = self.model.getFieldConstraints()
+        if len(constraints) > 0:
+            fun += ',constraints=(%s)' % constraints
+
+        alg = AlgorithmManager.createUnmanaged('Fit')
+        alg.initialize()
+        alg.setProperty('Function', fun)
+        alg.setProperty('InputWorkspace', self._input_workspace[0])
+        i = 1
+        for ws in self._input_workspace[1:]:
+            alg.setProperty('InputWorkspace_%s' % i, ws)
+            i += 1
+        alg.setProperty('Output', 'fit')
+        alg.execute()
+        f = alg.getProperty('Function').value
+        self.model.update_multi(f)
