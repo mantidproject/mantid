@@ -120,11 +120,20 @@ public:
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
-  /// Get the coherent scattering length <b^2> for a given wavelength
+  /// Get the coherent scattering length for a given wavelength
+  double
+  cohScatterLengthReal(const double lambda =
+                         PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+  /// Get the incoherent length for a given wavelength
+  double incohScatterLengthReal(
+      const double lambda =
+          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+
+  /// Get the real part of the coherent scattering length <b^2> for a given wavelength
   double cohScatterLengthRealSqrd(const double lambda =
                          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
-  /// Get the incoherent length <b^2> for a given wavelength
+  /// Get the real part of the incoherent length <b^2> for a given wavelength
   double incohScatterLengthRealSqrd(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;

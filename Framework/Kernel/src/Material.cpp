@@ -235,6 +235,42 @@ double Material::incohScatterLength(const double lambda) const {
   }
 }
 
+double
+Material::cohScatterLengthReal(const double lambda) const {
+  UNUSED_ARG(lambda);
+
+  const double weightedTotal = std::accumulate(std::begin(m_chemicalFormula),
+                                         std::end(m_chemicalFormula),
+                                         0.,
+                                         [](double subtotal, const FormulaUnit &right) {
+    return subtotal + right.atom->neutron.coh_scatt_length_real * right.multiplicity;
+  }) / m_atomTotal;
+
+  if (! std::isnormal(weightedTotal)) {
+    return 0.;
+  } else {
+    return weightedTotal;
+  }
+}
+
+double Material::incohScatterLengthReal(
+    const double lambda) const {
+  UNUSED_ARG(lambda);
+
+  const double weightedTotal = std::accumulate(std::begin(m_chemicalFormula),
+                                         std::end(m_chemicalFormula),
+                                         0.,
+                                         [](double subtotal, const FormulaUnit &right) {
+    return subtotal + right.atom->neutron.inc_scatt_length_real * right.multiplicity;
+  }) / m_atomTotal;
+
+  if (! std::isnormal(weightedTotal)) {
+    return 0.;
+  } else {
+    return weightedTotal;
+  }
+}
+
 double Material::totalScatterLength(const double lambda) const {
   UNUSED_ARG(lambda);
 
