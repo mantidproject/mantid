@@ -14,6 +14,12 @@ if requested, saves these spectra as legacy *.msk* file in ISIS ASCII format.
 
 The format is described on :ref:`LoadMask <algm-LoadMask>` algorithm pages.
 
+**Note** It is recommended not use exported *.msk* files for masking workspaces during reduction as
+the result of applying such mask will be different depending on the stage of reduction of the source and target files.
+You need to make additional efforts (see :ref:`LoadMask <algm-LoadMask>` algorithm description) to avoid this effect.
+It is better to use :ref:`SaveMask <algm-SaveMask>` algorithm instead. This algorithm produces *.hml* files, 
+containing masked detectors lists, which will produce identical results regardless of the workspace grouping.
+
 Usage
 -----
 

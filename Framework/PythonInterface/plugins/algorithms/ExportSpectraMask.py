@@ -173,8 +173,8 @@ class ExportSpectraMask(PythonAlgorithm):
         return "ExportSpectraMask"
 
     def summary(self):
-        return "Returns list of spectra numbers which are masked"\
-            " and save these numbers into legacy .msk file."
+        return "Returns list of spectra numbers which are masked on a workspace"\
+            " and can save these numbers as legacy .msk file."
 
     def PyInit(self):
         """ Declare properties
