@@ -23,23 +23,22 @@
 #include <numeric>
 #include <boost/regex.hpp>
 
-
 namespace {
-  // Check if we are dealing with a unit line
-  bool isUnit(const Mantid::Kernel::StringTokenizer& codes) {
-    // The unit line needs to have the format of
-    //  1. Either 0 or 6 [06]
-    //  2. Then several characters [\w]
-    //  3. Open bracket
-    //  4. Several characters
-    //  5. Close bracket  
-    std::string input = std::accumulate(codes.begin(), codes.end(), std::string(""));
-    std::string reg("^[06][\\w]+\\([/ \\w\\^-]+\\)$");
-    boost::regex baseRegex(reg);
-    return boost::regex_match(input, baseRegex);
-  }
+// Check if we are dealing with a unit line
+bool isUnit(const Mantid::Kernel::StringTokenizer &codes) {
+  // The unit line needs to have the format of
+  //  1. Either 0 or 6 [06]
+  //  2. Then several characters [\w]
+  //  3. Open bracket
+  //  4. Several characters
+  //  5. Close bracket
+  std::string input =
+      std::accumulate(codes.begin(), codes.end(), std::string(""));
+  std::string reg("^[06][\\w]+\\([/ \\w\\^-]+\\)$");
+  boost::regex baseRegex(reg);
+  return boost::regex_match(input, baseRegex);
 }
-
+}
 
 namespace Mantid {
 namespace DataHandling {
@@ -523,8 +522,9 @@ const std::string LoadRKH::readUnit(const std::string &line) {
     if (unit.find('(') != 0 || unit.find(')') != unit.size()) {
       std::string qCode = std::to_string(SaveRKH::Q_CODE);
       if (symbol == qCode && theQuantity == "q" &&
-          (unit == "(1/Angstrom)" || unit == "(Angstrom^-1)")) { // 6 q (1/Angstrom) is the synatx for
-                                    // MomentumTransfer
+          (unit == "(1/Angstrom)" ||
+           unit == "(Angstrom^-1)")) { // 6 q (1/Angstrom) is the synatx for
+                                       // MomentumTransfer
         return "MomentumTransfer";
       }
 
