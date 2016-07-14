@@ -2,7 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_QTREFLRUNSTABVIEW_H_
 
 #include "MantidKernel/System.h"
-#include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
@@ -55,13 +55,17 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_CUSTOMINTERFACES_DLL QtReflRunsTabView
-    : public MantidQt::API::UserSubWindow,
+    : public MantidQt::API::MantidWidget,
       public IReflRunsTabView,
       public MantidQt::MantidWidgets::ProgressableView {
   Q_OBJECT
 public:
+	/// Constructor
   QtReflRunsTabView(QWidget *parent = 0);
+	/// Destructor
   ~QtReflRunsTabView() override;
+	/// initialise the interface
+	void initLayout();
   /// Name of the interface
   static std::string name() { return "ISIS Reflectometry (Polref)"; }
   // This interface's categories.
@@ -102,8 +106,6 @@ public:
   getAlgorithmRunner() const override;
 
 private:
-  // initialise the interface
-  void initLayout() override;
   // Adds an action (command) to a menu
   void addToMenu(QMenu *menu, std::unique_ptr<DataProcessorCommand> command);
 

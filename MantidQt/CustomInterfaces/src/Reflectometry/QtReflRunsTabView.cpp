@@ -15,22 +15,16 @@
 #include <qinputdialog.h>
 #include <qmessagebox.h>
 
-namespace {
-const QString ReflSettingsGroup = "Mantid/CustomInterfaces/ISISReflectometry";
-}
-
 namespace MantidQt {
 namespace CustomInterfaces {
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
-DECLARE_SUBWINDOW(QtReflRunsTabView)
-
 //----------------------------------------------------------------------------------------------
 /** Constructor
 */
 QtReflRunsTabView::QtReflRunsTabView(QWidget *parent)
-    : UserSubWindow(parent), m_calculator(new SlitCalculator(this)) {}
+    : m_calculator(new SlitCalculator(this)) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
