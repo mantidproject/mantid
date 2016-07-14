@@ -115,21 +115,34 @@ void CreateUserDefinedBackground::cleanUpTable(
 void CreateUserDefinedBackground::extendBackgroundToData(
     API::ITableWorkspace_sptr &background,
     const API::MatrixWorkspace_const_sptr &data) const {
-  const auto &xData = data->readX(0);
-  const auto &yData = data->readY(0);
-  const auto xMinMax = std::minmax_element(xData.begin(), xData.end());
+  const auto &xPoints = data->points(0);
+
   // If first point > data minimum, insert a new first point
-  if (background->Double(0, 0) > *xMinMax.first) {
+  if (background->Double(0, 0) > xPoints[0]) {
     background->insertRow(0);
     API::TableRow firstRow = background->getFirstRow();
-    const auto dataPosition = xMinMax.first - xData.begin();
-    firstRow << xData[dataPosition] << yData[dataPosition + 1];
+    // First Y value: frequencies or counts depending on data type
+    const double firstY = [&data]() {
+      if (data->isHistogramData()) {
+        return data->frequencies(0).front();
+      } else {
+        return data->counts(0).front();
+      }
+    }();
+    firstRow << xPoints.front() << firstY;
   }
   // If last point < data maximum, append a new last point
-  if (background->Double(background->rowCount() - 1, 0) < *xMinMax.second) {
+  if (background->Double(background->rowCount() - 1, 0) < xPoints.back()) {
     API::TableRow lastRow = background->appendRow();
-    const auto dataPosition = xMinMax.second - xData.begin();
-    lastRow << xData[dataPosition] << yData[dataPosition - 1];
+    // Last Y value: frequencies or counts depending on data type
+    const double lastY = [&data]() {
+      if (data->isHistogramData()) {
+        return *(data->frequencies(0).end() - 2);
+      } else {
+        return data->counts(0).back();
+      }
+    }();
+    lastRow << xPoints.back() << lastY;
   }
 }
 
