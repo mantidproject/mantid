@@ -191,6 +191,12 @@ class CrystalField(object):
             else:
                 bs = self.background[i].toString()
             s = '%s;%s' % (bs, s)
+        ties = self.getFieldTies()
+        if len(ties) > 0:
+            s += ',ties=(%s)' % ties
+        constraints = self.getFieldConstraints()
+        if len(constraints) > 0:
+            s += ',constraints=(%s)' % constraints
         return s
 
     def makeMultiSpectrumFunction(self):
@@ -218,6 +224,12 @@ class CrystalField(object):
             if len(ps) > 0:
                 s += ',%s' % ps
             i += 1
+        ties = self.getFieldTies()
+        if len(ties) > 0:
+            s += ',ties=(%s)' % ties
+        constraints = self.getFieldConstraints()
+        if len(constraints) > 0:
+            s += ',constraints=(%s)' % constraints
         return s
 
     @property
@@ -668,15 +680,23 @@ class CrystalFieldMulti(object):
             self.args = args
         else:
             self.args = (self.args,)
+        self._ties = {}
 
     def makeSpectrumFunction(self):
-        return ';'.join([a.makeSpectrumFunction() for a in self.args])
+        fun = ';'.join([a.makeSpectrumFunction() for a in self.args])
+        ties = self.getTies()
+        if len(ties) > 0:
+            fun += ',ties=(%s)' % ties
+        return fun
 
-    def getFieldTies(self):
-        return ''
+    def ties(self, **kwargs):
+        """Set ties on the parameters."""
+        for tie in kwargs:
+            self._ties[tie] = kwargs[tie]
 
-    def getFieldConstraints(self):
-        return ''
+    def getTies(self):
+        ties = ['%s=%s' % item for item in self._ties.items()]
+        return ','.join(ties)
 
     def getSpectrum(self, i=0, workspace=None, ws_index=0):
         if workspace is not None:
@@ -748,13 +768,6 @@ class CrystalFieldFit(object):
         """
         from mantid.api import AlgorithmManager
         fun = self.model.makeSpectrumFunction()
-        ties = self.model.getFieldTies()
-        if len(ties) > 0:
-            fun += ',ties=(%s,IntensityScaling=1)' % ties
-        constraints = self.model.getFieldConstraints()
-        if len(constraints) > 0:
-            fun += ',constraints=(%s)' % constraints
-
         alg = AlgorithmManager.createUnmanaged('Fit')
         alg.initialize()
         alg.setProperty('Function', fun)
@@ -770,13 +783,6 @@ class CrystalFieldFit(object):
         """
         from mantid.api import AlgorithmManager
         fun = self.model.makeMultiSpectrumFunction()
-        ties = self.model.getFieldTies()
-        if len(ties) > 0:
-            fun += ',ties=(%s)' % ties
-        constraints = self.model.getFieldConstraints()
-        if len(constraints) > 0:
-            fun += ',constraints=(%s)' % constraints
-
         alg = AlgorithmManager.createUnmanaged('Fit')
         alg.initialize()
         alg.setProperty('Function', fun)

@@ -345,7 +345,7 @@ class CrystalFieldFitTest(unittest.TestCase):
                       Temperature=44.0, FWHM=1.0)
         cf.background = Background(peak=Function('Gaussian', Height=10, Sigma=1),
                         background=Function('LinearBackground', A0=1.0, A1=0.01))
-        cf.ties(B20=0.37737, B60=0, B62=0, B64=0, B66=0)
+        cf.ties(B20=0.37737, B60=0, B62=0, B64=0, B66=0, IntensityScaling=1)
         fit = CrystalFieldFit(cf, InputWorkspace=ws)
         fit.fit()
         self.assertAlmostEqual(cf.background.peak.param['PeakCentre'], 7.62501442212e-10, 8)
@@ -591,17 +591,17 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit = CrystalFieldFit(Model=cf, InputWorkspace=ws)
         fit.fit()
 
-        self.assertAlmostEqual(cf[0].param['B20'], 0.3532417545751428, 8)
-        self.assertAlmostEqual(cf[0].param['B22'], 3.883404860667359, 8)
-        self.assertAlmostEqual(cf[0].param['B40'], -0.05874979737522736, 8)
-        self.assertAlmostEqual(cf[0].param['B42'], -0.06065191166286766, 8)
-        self.assertAlmostEqual(cf[0].param['B44'], -0.12601896096762422, 8)
+        self.assertAlmostEqual(cf[0].param['B20'], 0.48824387792806034, 8)
+        self.assertAlmostEqual(cf[0].param['B22'], 3.977892421652792, 8)
+        self.assertAlmostEqual(cf[0].param['B40'], -0.024294997727440197, 8)
+        self.assertAlmostEqual(cf[0].param['B42'], -0.14604639435112998, 8)
+        self.assertAlmostEqual(cf[0].param['B44'], -0.072762568202823, 8)
 
-        self.assertAlmostEqual(cf[1].param['B20'], 0.44620621279558786, 8)
-        self.assertAlmostEqual(cf[1].param['B22'], 3.7770576617048053, 8)
-        self.assertAlmostEqual(cf[1].param['B40'], -0.030163541656611222, 8)
-        self.assertAlmostEqual(cf[1].param['B42'], -0.11793848887388836, 8)
-        self.assertAlmostEqual(cf[1].param['B44'], -0.1327181338341836, 8)
+        self.assertAlmostEqual(cf[1].param['B20'], 0.43777220488713825, 8)
+        self.assertAlmostEqual(cf[1].param['B22'], 3.9635529299402585, 8)
+        self.assertAlmostEqual(cf[1].param['B40'], -0.03319808647891935, 8)
+        self.assertAlmostEqual(cf[1].param['B42'], -0.12160876404778258, 8)
+        self.assertAlmostEqual(cf[1].param['B44'], -0.11549947832481772, 8)
 
 if __name__ == "__main__":
     unittest.main()
