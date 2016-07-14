@@ -216,7 +216,7 @@ protected:
     if (index < m_data.size())
       m_data.insert(m_data.begin() + index, Type());
     else
-      m_data.push_back(Type());
+      m_data.emplace_back();
   }
   /// Removes an item at index.
   void remove(size_t index) override { m_data.erase(m_data.begin() + index); }

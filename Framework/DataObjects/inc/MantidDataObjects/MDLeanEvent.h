@@ -297,8 +297,8 @@ public:
       const coord_t *centers = &(coord[ii + 2]);
 
       // Create the event with signal, error squared, and the centers
-      events.push_back(MDLeanEvent<nd>(signal_t(coord[ii]),
-                                       signal_t(coord[ii + 1]), centers));
+      events.emplace_back(static_cast<signal_t>(coord[ii]),
+                          static_cast<signal_t>(coord[ii + 1]), centers);
     }
   }
 };
