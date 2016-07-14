@@ -26,6 +26,9 @@ New
 Improved
 ########
 
+- :ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>` & :ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
+  now accept 'Direct' as a possible ``EMode`` parameter.
+
 - :ref:`FilterEvents <algm-FilterEvents>` now produces output
   workspaces with the same workspace numbers as specified by the
   ``SplittersWorkspace``.
