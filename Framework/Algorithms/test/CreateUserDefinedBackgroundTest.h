@@ -105,7 +105,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundPoints", bgPoints))
-    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     MatrixWorkspace_sptr outputWS =
@@ -115,6 +115,64 @@ public:
     // The expected result
     const auto expected = createExpectedResults(true);
     TS_ASSERT(workspacesEqual(expected, outputWS, 5e-2));
+  }
+
+  void test_exec_PointsWS_extend() {
+    // Create test input
+    const auto inputWS = createTestData(false);
+    const auto bgPoints = createTable();
+
+    // Remove last row, to make it extend the background to the data
+    bgPoints->removeRow(bgPoints->rowCount() - 1);
+
+    CreateUserDefinedBackground alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundPoints", bgPoints))
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outputWS =
+        alg.getProperty("OutputBackgroundWorkspace");
+    TS_ASSERT(outputWS);
+
+    // The expected result
+    const auto expected = createExpectedResults(false);
+    TS_ASSERT_DELTA(expected->frequencies(0).back(),
+                    outputWS->frequencies(0).back(), 0.001);
+  }
+
+  void test_exec_HistoWS_extend() {
+    // Create test input
+    const auto inputWS = createTestData(true);
+    const auto bgPoints = createTable();
+
+    // Remove last row, to make it extend the background to the data
+    bgPoints->removeRow(bgPoints->rowCount() - 1);
+
+    CreateUserDefinedBackground alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundPoints", bgPoints))
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outputWS =
+        alg.getProperty("OutputBackgroundWorkspace");
+    TS_ASSERT(outputWS);
+
+    // The expected result
+    const auto expected = createExpectedResults(true);
+    TS_ASSERT_DELTA(expected->counts(0).back(), outputWS->counts(0).back(),
+                    0.001);
   }
 
 private:
