@@ -582,7 +582,7 @@ MuonAnalysisFitDataPresenter::generateParametersTable(
     double error;
     row >> key >> value >> error;
     const size_t fPos = key.find(fIndex);
-    if (fPos != std::string::npos) {
+    if (fPos == 0) {
       TableRow outputRow = fitTable->appendRow();
       outputRow << key.substr(fPos + fIndex.size()) << value << error;
     } else if (key == costFuncVal) {
