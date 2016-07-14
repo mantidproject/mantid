@@ -22,29 +22,69 @@ using PhysicalConstants::NeutronAtom;
  * Construct an "empty" material. Everything returns zero
  */
 Material::Material()
-    : m_name(), m_element(0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+  : m_name(), m_chemicalFormula(), m_atomTotal(0.0),
       m_numberDensity(0.0), m_temperature(0.0), m_pressure(0.0) {}
 
 /**
 * Construct a material object
 * @param name :: The name of the material
-* @param element :: The element it is composed from
+* @param formula :: The chemical formula
 * @param numberDensity :: Density in A^-3
 * @param temperature :: The temperature in Kelvin (Default = 300K)
 * @param pressure :: Pressure in kPa (Default: 101.325 kPa)
 */
 Material::Material(const std::string &name,
-                   const PhysicalConstants::NeutronAtom &element,
+                   const ChemicalFormula &formula,
                    const double numberDensity, const double temperature,
                    const double pressure)
-    : m_name(name), m_element(element), m_numberDensity(numberDensity),
-      m_temperature(temperature), m_pressure(pressure) {}
+    : m_name(name), m_atomTotal(0.0), m_numberDensity(numberDensity),
+      m_temperature(temperature), m_pressure(pressure) {
+  m_chemicalFormula.assign(formula.begin(), formula.end());
+  this->countAtoms();
+}
+
+/**
+* Construct a material object
+* @param name :: The name of the material
+* @param formula :: The chemical formula
+* @param numberDensity :: Density in A^-3
+* @param temperature :: The temperature in Kelvin (Default = 300K)
+* @param pressure :: Pressure in kPa (Default: 101.325 kPa)
+*/
+Material::Material(const std::string &name,
+                   const PhysicalConstants::NeutronAtom &atom,
+                   const double numberDensity, const double temperature,
+                   const double pressure)
+    : m_name(name), m_chemicalFormula(), m_atomTotal(1.0), m_numberDensity(numberDensity),
+      m_temperature(temperature), m_pressure(pressure) {
+  if (atom.a_number == 0) {       // user specified atom
+    FormulaUnit unit {boost::make_shared<Atom>(atom), 1.};
+    m_chemicalFormula.push_back(unit);
+  } else if (atom.z_number > 0) { // single isotope
+    FormulaUnit unit {boost::make_shared<Atom>(getAtom(atom.z_number, atom.a_number)), 1.};
+    m_chemicalFormula.push_back(unit);
+  } else {                        // isotopic average
+    FormulaUnit unit {boost::make_shared<Atom>(atom), 1.};
+    m_chemicalFormula.push_back(unit);
+  }
+}
+// update the total atom count
+void Material::countAtoms() {
+  m_atomTotal = std::accumulate(std::begin(m_chemicalFormula),
+                                std::end(m_chemicalFormula),
+                                0.,
+                                [](double subtotal, const FormulaUnit &right) {
+    return subtotal + right.multiplicity;
+  });
+}
 
 /**
  * Returns the name
  * @returns A string containing the name of the material
  */
 const std::string &Material::name() const { return m_name; }
+
+const Material::ChemicalFormula &Material::chemicalFormula() const { return m_chemicalFormula; }
 
 /**
  * Get the number density
@@ -72,8 +112,20 @@ double Material::pressure() const { return m_pressure; }
  * the given wavelength
  */
 double Material::cohScatterXSection(const double lambda) const {
-  (void)lambda;
-  return m_element.coh_scatt_xs;
+  UNUSED_ARG(lambda);
+
+  const double weightedTotal = std::accumulate(std::begin(m_chemicalFormula),
+                                         std::end(m_chemicalFormula),
+                                         0.,
+                                         [](double subtotal, const FormulaUnit &right) {
+    return subtotal + right.atom->neutron.coh_scatt_xs * right.multiplicity;
+  }) / m_atomTotal;
+
+  if (! std::isnormal(weightedTotal)) {
+    return 0.;
+  } else {
+    return weightedTotal;
+  }
 }
 
 /**
@@ -84,8 +136,20 @@ double Material::cohScatterXSection(const double lambda) const {
  * the given wavelength
  */
 double Material::incohScatterXSection(const double lambda) const {
-  (void)lambda;
-  return m_element.inc_scatt_xs;
+  UNUSED_ARG(lambda);
+
+  const double weightedTotal = std::accumulate(std::begin(m_chemicalFormula),
+                                         std::end(m_chemicalFormula),
+                                         0.,
+                                         [](double subtotal, const FormulaUnit &right) {
+    return subtotal + right.atom->neutron.inc_scatt_xs * right.multiplicity;
+  }) / m_atomTotal;
+
+  if (! std::isnormal(weightedTotal)) {
+    return 0.;
+  } else {
+    return weightedTotal;
+  }
 }
 
 /**
@@ -98,7 +162,19 @@ double Material::incohScatterXSection(const double lambda) const {
  */
 double Material::totalScatterXSection(const double lambda) const {
   UNUSED_ARG(lambda);
-  return m_element.tot_scatt_xs;
+
+  const double weightedTotal = std::accumulate(std::begin(m_chemicalFormula),
+                                         std::end(m_chemicalFormula),
+                                         0.,
+                                         [](double subtotal, const FormulaUnit &right) {
+    return subtotal + right.atom->neutron.tot_scatt_xs * right.multiplicity;
+  }) / m_atomTotal;
+
+  if (! std::isnormal(weightedTotal)) {
+    return 0.;
+  } else {
+    return weightedTotal;
+  }
 }
 
 /**
@@ -111,7 +187,110 @@ double Material::totalScatterXSection(const double lambda) const {
  * the given wavelength
  */
 double Material::absorbXSection(const double lambda) const {
-  return (m_element.abs_scatt_xs) * (lambda / NeutronAtom::ReferenceLambda);
+  const double weightedTotal = std::accumulate(std::begin(m_chemicalFormula),
+                                         std::end(m_chemicalFormula),
+                                         0.,
+                                         [](double subtotal, const FormulaUnit &right) {
+    return subtotal + right.atom->neutron.abs_scatt_xs * right.multiplicity;
+  }) / m_atomTotal;
+
+  if (! std::isnormal(weightedTotal)) {
+    return 0.;
+  } else {
+    return weightedTotal * (lambda / NeutronAtom::ReferenceLambda);
+  }
+}
+
+double Material::cohScatterLength(const double lambda) const {
+  UNUSED_ARG(lambda);
+
+  const double weightedTotal = std::accumulate(std::begin(m_chemicalFormula),
+                                         std::end(m_chemicalFormula),
+                                         0.,
+                                         [](double subtotal, const FormulaUnit &right) {
+    return subtotal + right.atom->neutron.coh_scatt_length * right.multiplicity;
+  }) / m_atomTotal;
+
+  if (! std::isnormal(weightedTotal)) {
+    return 0.;
+  } else {
+    return weightedTotal;
+  }
+}
+
+double Material::incohScatterLength(const double lambda) const {
+  UNUSED_ARG(lambda);
+
+  const double weightedTotal = std::accumulate(std::begin(m_chemicalFormula),
+                                         std::end(m_chemicalFormula),
+                                         0.,
+                                         [](double subtotal, const FormulaUnit &right) {
+    return subtotal + right.atom->neutron.inc_scatt_length * right.multiplicity;
+  }) / m_atomTotal;
+
+  if (! std::isnormal(weightedTotal)) {
+    return 0.;
+  } else {
+    return weightedTotal;
+  }
+}
+
+double Material::totalScatterLength(const double lambda) const {
+  UNUSED_ARG(lambda);
+
+  const double weightedTotal = std::accumulate(std::begin(m_chemicalFormula),
+                                         std::end(m_chemicalFormula),
+                                         0.,
+                                         [](double subtotal, const FormulaUnit &right) {
+    return subtotal + right.atom->neutron.tot_scatt_length * right.multiplicity;
+  }) / m_atomTotal;
+
+  if (! std::isnormal(weightedTotal)) {
+    return 0.;
+  } else {
+    return weightedTotal;
+  }
+}
+
+double Material::cohScatterLengthRealSqrd(const double lambda) const{
+  UNUSED_ARG(lambda);
+
+  return 0.;
+}
+
+double Material::incohScatterLengthRealSqrd(
+    const double lambda) const{
+  UNUSED_ARG(lambda);
+
+  return 0.;
+}
+
+double Material::totalScatterLengthRealSqrd(
+    const double lambda) const{
+  UNUSED_ARG(lambda);
+
+  return 0.;
+}
+
+double
+Material::cohScatterLengthSqrd(const double lambda) const{
+  UNUSED_ARG(lambda);
+
+  return 0.;
+}
+
+double Material::incohScatterLengthSqrd(
+    const double lambda) const{
+  UNUSED_ARG(lambda);
+
+  return 0.;
+}
+
+double Material::totalScatterLengthSqrd(
+    const double lambda) const{
+  UNUSED_ARG(lambda);
+
+  return 0.;
 }
 
 /** Save the object to an open NeXus file.
@@ -120,10 +299,49 @@ double Material::absorbXSection(const double lambda) const {
  */
 void Material::saveNexus(::NeXus::File *file, const std::string &group) const {
   file->makeGroup(group, "NXdata", 1);
-  file->putAttr("version", 1);
+  file->putAttr("version", 2);
   file->putAttr("name", m_name);
-  file->writeData("element_Z", m_element.z_number);
-  file->writeData("element_A", m_element.a_number);
+
+  // determine how the information will be stored
+  std::string style = "formula";  // default is a chemical formula
+  if (m_chemicalFormula.size() == 0) {
+    style = "empty";
+  } else if (m_chemicalFormula.size() == 1) {
+    if (m_chemicalFormula[0].atom->symbol == "user") {
+      style = "userdefined";
+    }
+  }
+  file->putAttr("formulaStyle", style);
+
+  // write the actual information out
+  if (style == "formula") {
+    std::stringstream formula;
+    for ( const auto &formulaUnit : m_chemicalFormula) {
+      if (formulaUnit.atom->a_number != 0) {
+        formula << "(";
+      }
+      formula << formulaUnit.atom->symbol;
+      if (formulaUnit.atom->a_number != 0) {
+        formula << formulaUnit.atom->a_number << ")";
+      }
+      formula << formulaUnit.multiplicity << " ";
+    }
+    file->writeData("chemical_formula", formula.str());
+  } else if (style == "userdefined") {
+    file->writeData("coh_scatt_length_real", m_chemicalFormula[0].atom->neutron.coh_scatt_length_real);
+    file->writeData("coh_scatt_length_img",  m_chemicalFormula[0].atom->neutron.coh_scatt_length_img);
+    file->writeData("inc_scatt_length_real", m_chemicalFormula[0].atom->neutron.inc_scatt_length_real);
+    file->writeData("inc_scatt_length_img",  m_chemicalFormula[0].atom->neutron.inc_scatt_length_img);
+    file->writeData("coh_scatt_xs",          m_chemicalFormula[0].atom->neutron.coh_scatt_xs);
+    file->writeData("inc_scatt_xs",          m_chemicalFormula[0].atom->neutron.inc_scatt_xs);
+    file->writeData("tot_scatt_xs",          m_chemicalFormula[0].atom->neutron.tot_scatt_xs);
+    file->writeData("abs_scatt_xs",          m_chemicalFormula[0].atom->neutron.abs_scatt_xs);
+    file->writeData("tot_scatt_length",      m_chemicalFormula[0].atom->neutron.tot_scatt_length);
+    file->writeData("coh_scatt_length",      m_chemicalFormula[0].atom->neutron.coh_scatt_length);
+    file->writeData("inc_scatt_length",      m_chemicalFormula[0].atom->neutron.inc_scatt_length);
+  }
+
+
   file->writeData("number_density", m_numberDensity);
   file->writeData("temperature", m_temperature);
   file->writeData("pressure", m_pressure);
@@ -137,15 +355,56 @@ void Material::saveNexus(::NeXus::File *file, const std::string &group) const {
 void Material::loadNexus(::NeXus::File *file, const std::string &group) {
   file->openGroup(group, "NXdata");
   file->getAttr("name", m_name);
+  int version;
+  file->getAttr("version", version);
 
-  // Find the element
-  uint16_t element_Z, element_A;
-  file->readData("element_Z", element_Z);
-  file->readData("element_A", element_A);
-  try {
-    m_element = Mantid::PhysicalConstants::getNeutronAtom(element_Z, element_A);
-  } catch (std::runtime_error &) { /* ignore and use the default */
+  if (version == 1) {
+    // Find the element
+    uint16_t element_Z, element_A;
+    file->readData("element_Z", element_Z);
+    file->readData("element_A", element_A);
+    try {
+      m_chemicalFormula.clear();
+      if (element_Z > 0) {
+        FormulaUnit formulaUnit {boost::make_shared<Atom>(Mantid::PhysicalConstants::getAtom(element_Z, element_A)), 1.};
+        m_chemicalFormula.push_back(formulaUnit);
+      } else {
+        FormulaUnit formulaUnit {boost::make_shared<Atom>(Mantid::PhysicalConstants::getNeutronAtom(element_Z, element_A)), 1.};
+        m_chemicalFormula.push_back(formulaUnit);
+      }
+    } catch (std::runtime_error &) { /* ignore and use the default */
+    }
+  } else if (version == 2) {
+    std::string style;
+    file->getAttr("formulaStyle", style);
+
+    if (style == "formula") {
+      std::string formula;
+      file->readData("chemical_formula", formula);
+      this->m_chemicalFormula = Material::parseChemicalFormula(formula);
+      this->countAtoms();
+    } else if (style == "userdefined") {
+      NeutronAtom neutron;
+      file->readData("coh_scatt_length_real", neutron.coh_scatt_length_real);
+      file->readData("coh_scatt_length_img",  neutron.coh_scatt_length_img);
+      file->readData("inc_scatt_length_real", neutron.inc_scatt_length_real);
+      file->readData("inc_scatt_length_img",  neutron.inc_scatt_length_img);
+      file->readData("coh_scatt_xs",          neutron.coh_scatt_xs);
+      file->readData("inc_scatt_xs",          neutron.inc_scatt_xs);
+      file->readData("tot_scatt_xs",          neutron.tot_scatt_xs);
+      file->readData("abs_scatt_xs",          neutron.abs_scatt_xs);
+      file->readData("tot_scatt_length",      neutron.tot_scatt_length);
+      file->readData("coh_scatt_length",      neutron.coh_scatt_length);
+      file->readData("inc_scatt_length",      neutron.inc_scatt_length);
+
+      FormulaUnit formulaUnit {boost::make_shared<Atom>(neutron), 1.};
+      m_chemicalFormula.push_back(formulaUnit);
+    }
+    // the other option is empty which does not need to be addressed
+  }else {
+    throw std::runtime_error("Only know how to read version 1 or 2 for Material");
   }
+  this->countAtoms();
 
   file->readData("number_density", m_numberDensity);
   file->readData("temperature", m_temperature);
@@ -212,8 +471,9 @@ Material::parseChemicalFormula(const std::string chemicalSymbol) {
           numberAtoms = boost::lexical_cast<float>(temp.second);
       }
 
-      CF.atoms.push_back(boost::make_shared<Atom>(getAtom(name, aNumber)));
-      CF.numberAtoms.push_back(numberAtoms);
+      Material::FormulaUnit formulaUnit {boost::make_shared<PhysicalConstants::Atom>(getAtom(name, aNumber)),
+            static_cast<double>(numberAtoms)};
+      CF.push_back(formulaUnit);
     } catch (boost::bad_lexical_cast &e) {
       std::stringstream msg;
       msg << "While trying to parse atom \"" << atom
