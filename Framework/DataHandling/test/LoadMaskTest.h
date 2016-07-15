@@ -190,17 +190,20 @@ public:
       MatrixWorkspace_sptr source = ws_creator->getProperty("OutputWorkspace");
       TS_ASSERT(source);
 
-      auto copier =
-          AlgorithmManager::Instance().create("CloneWorkspace");
-      copier->initialize();
-      copier->setChild(true);
-      copier->setProperty("InputWorkspace", source);
-      copier->setPropertyValue("OutputWorkspace","testWSClone");
-      copier->execute();
-      Workspace_sptr tsample = copier->getProperty("OutputWorkspace");
-      MatrixWorkspace_sptr sample = boost::dynamic_pointer_cast<MatrixWorkspace>(tsample);
-      TS_ASSERT(sample);
+      // modify spectra-detector map on the sample workspace to check masking
+      std::vector<detid_t> detIDs = source->getInstrument()->getDetectorIDs(true);
+      size_t index = 0;
+      auto it = --detIDs.end();
+      for (; it > detIDs.begin(); --it) {
+          const detid_t detId = *it;
+          auto &spec = source->getSpectrum(index);
+          Mantid::specnum_t specNo = static_cast<Mantid::specnum_t>(calc_spec_num(index));
+          spec.setSpectrumNo(specNo);
+          spec.setDetectorID(detId);
 
+          index++;
+      }
+      source->buildNearestNeighbours(true);
 
 
       auto masker =
@@ -208,19 +211,19 @@ public:
       masker->initialize();
       masker->setChild(true);
       masker->setProperty("Workspace", source);
-      std::vector<int> masked_spectra(10);
-      masked_spectra[0] = 10;  masked_spectra[1] = 11;  masked_spectra[2] = 13;
+      std::vector<int> masked_spectra(11);
+      masked_spectra[0] = 10;  masked_spectra[1] = 11;  masked_spectra[2] = 12;
       masked_spectra[3] = 100; masked_spectra[4] = 110; masked_spectra[5] = 120;
       masked_spectra[6] = 130; masked_spectra[7] = 140; masked_spectra[8] = 200;
-      masked_spectra[9] = 300;
+      masked_spectra[9] = 300; masked_spectra[10] = 4;
       masker->setProperty("SpectraList", masked_spectra);
       masker->execute();
       Workspace_sptr tsource = masker->getProperty("Workspace");
       source = boost::dynamic_pointer_cast<MatrixWorkspace>(tsource);
       TS_ASSERT(source);
 
-      /* That's proper way of doing this but does not work from subproject (yet)
-       and you have to delete it
+      /* This is proper way of extracting mask this but does not work from subproject (yet)
+       and you have to delete target file manually
       auto exporter =
           AlgorithmManager::Instance().create("ExportSpectraMask");
       exporter->initialize();
@@ -228,51 +231,44 @@ public:
       exporter->execute();
       */
       /*Fake export mask algorithm: */
-      std::string mask_contents("4 10-11 13 100 110 120 130 140 200 300");
+      std::string mask_contents("4 10-12 100 110 120 130 140 200 300");
       ScopedFileHelper::ScopedFile testFile(mask_contents,"test_mask_file.msk");
 
 
-
-    // modify spectra-detector map on the sample workspace to check masking
-      std::vector<detid_t> detIDs = sample->getInstrument()->getDetectorIDs(true);
-      size_t index = 0;
-      auto it = --detIDs.end();
-      for (; it > detIDs.begin(); --it) {
-         const detid_t detId = *it;
-         auto &spec = sample->getSpectrum(index);
-         Mantid::specnum_t specNo = static_cast<Mantid::specnum_t>(calc_spec_num(index));
-         spec.setSpectrumNo(specNo);
-         spec.setDetectorID(detId);
-
-         index++;
-      }
-      sample->buildNearestNeighbours(true);
-
-
-      //Load
 
       // 2. Run
       LoadMask loadMask;
       loadMask.initialize();
       loadMask.setChild(true);
 
-      loadMask.setProperty("Workspace", sample);
+      loadMask.setProperty("Workspace", source);
       loadMask.setProperty("InputFile", testFile.getFileName());
       loadMask.setProperty("OutputWorkspace", "MaskedWithSample");
 
       TS_ASSERT_EQUALS(loadMask.execute(), true); 
 
-      DataObjects::MaskWorkspace_sptr maskws = loadMask.getProperty("OutputWorkspace");
+      DataObjects::MaskWorkspace_sptr maskWs = loadMask.getProperty("OutputWorkspace");
 
-      // check that mask ws contains masked spectra with detectors, corresponding to the
-      // detectors of the source workspace
+      // check that mask ws contains different spectra but the same detectors masked
+      std::vector<detid_t> maskSourceDet,maskTargDet;
 
       size_t n_steps = source->getNumberHistograms();
-      auto  spectind = source->getSpectrumToWorkspaceIndexMap();
       for (size_t i = 0; i < n_steps; ++i) {
         bool source_masked = source->getDetector(i)->isMasked();
-        size_t targ_specN = calc_spec_num(index);
+        if (source_masked) {
+            maskSourceDet.push_back(source->getDetector(i)->getID());
+        }
+        bool targ_masked = (maskWs->getSpectrum(i).readY()[0]>0.5);
+        if (targ_masked) {
+            maskTargDet.push_back(maskWs->getDetector(i)->getID());
+        }
+      }
+      std::sort(maskSourceDet.begin(),maskSourceDet.end());
+      std::sort(maskTargDet.begin(), maskTargDet.end());
 
+      TS_ASSERT_EQUALS(maskSourceDet.size(),maskTargDet.size());
+      for (size_t i = 0; i < maskSourceDet.size(); i++) {
+          TS_ASSERT_EQUALS(maskSourceDet[i],maskTargDet[i]);
       }
 
   }
