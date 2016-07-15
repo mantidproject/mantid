@@ -293,7 +293,7 @@ CalculateTransmissionBeamSpreader::fitToData(API::MatrixWorkspace_sptr WS) {
     auto &Y = result->mutableY(0);
     auto &E = result->mutableE(0);
     for (size_t i = 0; i < Y.size(); ++i) {
-      Y[i] = b * (std::pow(m, 0.5 * X[i]));
+      Y[i] = b * (std::pow(m, X[i]));
       E[i] = std::abs(E[i] * Y[i]);
     }
   }
