@@ -11,7 +11,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::API;
-using HistogramDataTestHelper::operator==;
+using namespace Mantid::HistogramData::detail;
 
 class ConvertSpectrumAxis2Test : public CxxTest::TestSuite {
 private:
