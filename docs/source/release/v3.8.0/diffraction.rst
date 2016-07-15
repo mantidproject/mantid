@@ -24,6 +24,7 @@ Single Crystal Diffraction
   and peak data are separated.  The intensity and sigma of the intensity is found from the grid inside the peak and
   the background is subtracted.  The boxes are created and integrated in parallel and less memory is required than
   binning all HKL space at once. The figure shows the grid points within an HKL box that are in one peak from Si data.
+
 .. figure::  ../../images/peak3d.png
    :width: 487
    :align: center
