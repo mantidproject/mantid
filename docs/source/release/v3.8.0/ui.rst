@@ -52,6 +52,9 @@ Documentation
 Bugs Resolved
 -------------
 
+- Within Preferences->Mantid->Options unticking the first element of some subcategories cause the whole category to become unticked when loading the options window again. These categories will now remain on if a subcategory exists. 
+
+
 SliceViewer Improvements
 ------------------------
 * When opening the sliceviewer, it will default to showing the first two non-integrated dimensions
