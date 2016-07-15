@@ -52,7 +52,7 @@ class CalculateDW(IOmodule):
         _DW = DwData(temperature=self._temperature, num_atoms=self._num_atoms)
 
         _data = self._abins_data.extract()
-        _mass_hartree = np.asarray([ atom["mass"] for atom in _data["atoms_data"]])
+        _mass_hartree_factor = np.asarray([1.0 / ( atom["mass"] * 2)  for atom in _data["atoms_data"]])
         _frequencies_hartree = _data["k_points_data"]["frequencies"]
         _temperature_hartree = self._temperature * Constants.k_2_hartree
 
@@ -71,19 +71,17 @@ class CalculateDW(IOmodule):
                 # correction for acoustic modes at Gamma point
                 if np.linalg.norm(_data["k_points_data"]["k_vectors"][k]) < Constants.small_k: start = 2
                 else: start = 0
-                add = None
+
                 for n_freq in range(start, self._num_freq):
 
                     displacement = _atomic_displacements[k, num, n_freq, :]
+                    tensor = np.outer(displacement, displacement.conjugate()).real # DW factors are real
+                    np.multiply(tensor, _coth_over_omega[n_freq], tensor)
+                    np.add(_item, tensor, _item)
 
-                    # this part of code is based on TDS_Simmetry.py from ab2tds (lines 1775-1781 )
-                    displacement = np.reshape(displacement, [-1,3])
-                    add = ( displacement.conjugate()[:,:,None] * displacement[:,None,:]).real
-                    np.multiply(add,  _coth_over_omega[n_freq],  add)
+                np.add(_item, _item * _weights[k], _item)
 
-                np.add(_item, add[0,:,:] * _weights[k], _item)
-
-            np.multiply(_item, 1.0 / (2 * _mass_hartree[num]), _item)
+            np.multiply(_item, _mass_hartree_factor[num], _item)
             _DW._append(item=_item, num_atom=num)
         return _DW
 
