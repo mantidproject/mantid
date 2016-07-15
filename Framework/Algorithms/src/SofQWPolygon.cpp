@@ -134,6 +134,10 @@ void SofQWPolygon::exec() {
   // Set the output spectrum-detector mapping
   SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
   outputWS->updateSpectraUsing(outputDetectorMap);
+
+  // Replace any NaNs in outputWorkspace with zeroes
+  MatrixWorkspace_sptr outputWorkspace = getProperty("OutputWorkspace");
+  m_EmodeProperties.replaceNans(*outputWorkspace);
 }
 
 /**

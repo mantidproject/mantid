@@ -15,7 +15,7 @@ class SofQWTest : public CxxTest::TestSuite {
 public:
   template <typename SQWType>
   static Mantid::API::MatrixWorkspace_sptr
-  runSQW(const std::string &method = "") {
+  runSQW(const std::string &method = "", bool insertNans = false) {
     Mantid::DataHandling::LoadNexusProcessed loader;
     loader.initialize();
     loader.setChild(true);
@@ -50,6 +50,17 @@ public:
     auto result =
         dataStore.retrieveWS<Mantid::API::MatrixWorkspace>(wsname.str());
     dataStore.remove(wsname.str());
+
+    // Enables several NaNs to be inserted into the workspace 
+    if (insertNans) {
+      result->mutableX(5)[8] = NAN;
+      result->mutableX(3)[2] = NAN;
+      result->mutableY(5)[8] = NAN;
+      result->mutableY(3)[2] = NAN;
+      result->mutableE(5)[8] = NAN;
+      result->mutableE(3)[2] = NAN;
+    }
+
     return result;
   }
 
@@ -108,6 +119,19 @@ public:
     // results are checked in the dedicated algorithm test
   }
 
+  void testExecNansReplaced() {
+	  auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>("", true);
+	  bool nanFound = false;
+
+	  for (int i = 0; i < result->getNumberHistograms(); i++) {
+	    if (nanFound = isNanInHistogram(*result, i)) {
+		    break; // NaN found in workspace, no need to keep searching
+	    }
+	  }
+
+	  TS_ASSERT(!nanFound);
+  }
+
 private:
   bool isAlgorithmInHistory(const Mantid::API::MatrixWorkspace &result,
                             const std::string &name) {
@@ -116,6 +140,21 @@ private:
     const auto &lastAlg = wsHistory.getAlgorithmHistory(wsHistory.size() - 1);
     const auto child = lastAlg->getChildAlgorithmHistory(0);
     return (child->name() == name);
+  }
+
+  bool isNanInHistogram(const Mantid::API::MatrixWorkspace &result,
+						            const size_t index) {
+	  bool nanFound = false;
+	  for (int i = 0; i < result.blocksize(); i++) {
+	    if (isnan(result.x(index)[i]) ||
+		      isnan(result.y(index)[i]) ||
+		      isnan(result.e(index)[i])) {
+			  nanFound = true;
+			  break; // NaN found in histogram, no need to keep searching
+	    }
+	  }
+
+	  return nanFound;
   }
 };
 
