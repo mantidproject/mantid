@@ -160,30 +160,53 @@ public:
     }
     std::cout << "Total " << errorcounts << " errors \n";
   }
+  /*Calculate werid spectra number as function of index */
+  size_t calc_spec_num(size_t index) {
+    if ((index+3) % 3 == 0) {
+        return index+3;
+    }
+    if ((index + 2) % 3 == 0) {
+        return index + 1;
+    }
+    if ((index + 1) % 3 == 0) {
+        return index -1;
+    }
+    // suppress warinings
+    return index;
+  }
 
   void test_ISISWithRefWS() {
       auto ws_creator =
-          AlgorithmManager::Instance().create("CreateSimulationWorkspace");
+          AlgorithmManager::Instance().createUnmanaged("CreateSimulationWorkspace");
       ws_creator->initialize();
+      ws_creator->setChild(true);
+
       ws_creator->setPropertyValue("Instrument", "MARI");
       ws_creator->setPropertyValue("BinParams","100,100,300");
       ws_creator->setPropertyValue("OutputWorkspace","testWS");
       ws_creator->setPropertyValue("UnitX", "TOF");
 
       ws_creator->execute();
-      Workspace_sptr source = ws_creator->getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr source = ws_creator->getProperty("OutputWorkspace");
+      TS_ASSERT(source);
+
       auto copier =
           AlgorithmManager::Instance().create("CloneWorkspace");
       copier->initialize();
+      copier->setChild(true);
       copier->setProperty("InputWorkspace", source);
       copier->setPropertyValue("OutputWorkspace","testWSClone");
       copier->execute();
-      Workspace_sptr sample = copier->getProperty("OutputWorkspace");
+      Workspace_sptr tsample = copier->getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr sample = boost::dynamic_pointer_cast<MatrixWorkspace>(tsample);
+      TS_ASSERT(sample);
+
 
 
       auto masker =
           AlgorithmManager::Instance().create("MaskDetectors");
       masker->initialize();
+      masker->setChild(true);
       masker->setProperty("Workspace", source);
       std::vector<int> masked_spectra(10);
       masked_spectra[0] = 10;  masked_spectra[1] = 11;  masked_spectra[2] = 13;
@@ -192,55 +215,66 @@ public:
       masked_spectra[9] = 300;
       masker->setProperty("SpectraList", masked_spectra);
       masker->execute();
+      Workspace_sptr tsource = masker->getProperty("Workspace");
+      source = boost::dynamic_pointer_cast<MatrixWorkspace>(tsource);
+      TS_ASSERT(source);
 
- 
+      /* That's proper way of doing this but does not work from subproject (yet)
+       and you have to delete it
       auto exporter =
           AlgorithmManager::Instance().create("ExportSpectraMask");
       exporter->initialize();
       exporter->setProperty("Workspace", source);
       exporter->execute();
+      */
+      /*Fake export mask algorithm: */
+      std::string mask_contents("4 10-11 13 100 110 120 130 140 200 300");
+      ScopedFileHelper::ScopedFile testFile(mask_contents,"test_mask_file.msk");
 
-      // modify spectra-detector map on the workspace clone to check masking
 
 
-      //      auto isisMaskFile =
-      //    genISISMaskingFile("isismask.msk", singlespectra, pairspectra);
+    // modify spectra-detector map on the sample workspace to check masking
+      std::vector<detid_t> detIDs = sample->getInstrument()->getDetectorIDs(true);
+      size_t index = 0;
+      auto it = --detIDs.end();
+      for (; it > detIDs.begin(); --it) {
+         const detid_t detId = *it;
+         auto &spec = sample->getSpectrum(index);
+         Mantid::specnum_t specNo = static_cast<Mantid::specnum_t>(calc_spec_num(index));
+         spec.setSpectrumNo(specNo);
+         spec.setDetectorID(detId);
+
+         index++;
+      }
+      sample->buildNearestNeighbours(true);
+
 
       //Load
 
-      //// 2. Run
-      //LoadMask loadfile;
-      //loadfile.initialize();
+      // 2. Run
+      LoadMask loadMask;
+      loadMask.initialize();
+      loadMask.setChild(true);
 
-      //loadfile.setProperty("Instrument", "VULCAN");
-      //loadfile.setProperty("InputFile", isisMaskFile.getFileName());
-      //loadfile.setProperty("OutputWorkspace", "VULCAN_Mask_Detectors");
+      loadMask.setProperty("Workspace", sample);
+      loadMask.setProperty("InputFile", testFile.getFileName());
+      loadMask.setProperty("OutputWorkspace", "MaskedWithSample");
 
-      //TS_ASSERT_EQUALS(loadfile.execute(), true);
-      //DataObjects::MaskWorkspace_sptr maskws =
-      //    AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(
-      //        "VULCAN_Mask_Detectors");
+      TS_ASSERT_EQUALS(loadMask.execute(), true); 
 
-      //// 3. Check
-      //size_t errorcounts = 0;
-      //for (size_t iws = 0; iws < maskws->getNumberHistograms(); iws++) {
-      //    double y = maskws->dataY(iws)[0];
-      //    if (iws == 34 || iws == 1000 || iws == 2000 || (iws >= 36 && iws <= 39) ||
-      //        (iws >= 1001 && iws <= 1004)) {
-      //        // All these workspace index are masked
-      //        TS_ASSERT_DELTA(y, 1.0, 1.0E-5);
-      //    }
-      //    else {
-      //        // Unmasked
-      //        TS_ASSERT_DELTA(y, 0.0, 1.0E-5);
-      //        if (fabs(y) > 1.0E-5) {
-      //            errorcounts++;
-      //            std::cout << "Workspace Index " << iws
-      //                << " has a wrong set on masks\n";
-      //        }
-      //    }
-      //}
-      //std::cout << "Total " << errorcounts << " errors \n";
+      DataObjects::MaskWorkspace_sptr maskws = loadMask.getProperty("OutputWorkspace");
+
+      // check that mask ws contains masked spectra with detectors, corresponding to the
+      // detectors of the source workspace
+
+      size_t n_steps = source->getNumberHistograms();
+      auto  spectind = source->getSpectrumToWorkspaceIndexMap();
+      for (size_t i = 0; i < n_steps; ++i) {
+        bool source_masked = source->getDetector(i)->isMasked();
+        size_t targ_specN = calc_spec_num(index);
+
+      }
+
   }
 
 

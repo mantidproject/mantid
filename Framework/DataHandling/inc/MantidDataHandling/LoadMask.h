@@ -53,8 +53,7 @@ public:
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Load file containing masking information to a SpecialWorkspace2D "
-           "(masking workspace). This algorithm is renamed from "
-           "LoadMaskingFile.";
+           "(masking workspace).";
   }
 
   /// Algorithm's version for identification
