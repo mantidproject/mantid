@@ -22,8 +22,8 @@ public:
   VectorOfTester() = default;
   VectorOfTester(const VectorOfTester &) = default;
   VectorOfTester(VectorOfTester &&) = default;
-  VectorOfTester &operator=(const VectorOfTester &) & = default;
-  VectorOfTester &operator=(VectorOfTester &&) & = default;
+  VectorOfTester &operator=(const VectorOfTester &)& = default;
+  VectorOfTester &operator=(VectorOfTester &&)& = default;
 };
 
 class VectorOfTest : public CxxTest::TestSuite {
