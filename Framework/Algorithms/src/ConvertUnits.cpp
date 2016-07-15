@@ -245,9 +245,10 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
 
 /** Convert the workspace units according to a simple output = a * (input^b)
  * relationship
- *  @param outputWS :: the output workspace
+ *  @param inputWS :: the input workspace
  *  @param factor :: the conversion factor a to apply
  *  @param power :: the Power b to apply to the conversion
+ *  @returns A shared pointer to the output workspace
  */
 MatrixWorkspace_sptr
 ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
@@ -385,7 +386,8 @@ bool ConvertUnits::getDetectorValues(
 /** Convert the workspace units using TOF as an intermediate step in the
  * conversion
  * @param fromUnit :: The unit of the input workspace
- * @param outputWS :: The output workspace
+ * @param inputWS :: The input workspace
+ * @returns A shared pointer to the output workspace
  */
 MatrixWorkspace_sptr
 ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
