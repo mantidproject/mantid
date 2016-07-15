@@ -82,7 +82,7 @@ class ABINSCalculateDWTest(unittest.TestCase):
         correct_data = None
         with open(filename) as data_file:
             correct_data = json.loads(data_file.read().replace("\n"," "))
-        return correct_data
+        return np.asarray(correct_data)
 
 
 if __name__ == '__main__':
