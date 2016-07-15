@@ -4,7 +4,7 @@ from os import path
 import simplejson as json
 import numpy as np
 
-from AbinsModules import LoadCASTEP
+from AbinsModules import LoadCASTEP, Constants
 
 class ABINSLoadCASTEPTest(unittest.TestCase):
 
@@ -61,7 +61,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         _data = self._read_DFT(filename=input_filename)
 
         # get correct data
-        filename = path.relpath(core + name + "_data.txt")
+        filename = path.relpath(core + name)
         _correct_data = self._prepare_data(filename=filename)
 
         # check read data
@@ -93,15 +93,26 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
     def _prepare_data(self, filename=None):
         """Reads a correct values from ASCII file."""
         correct_data = None
-        with open(filename) as data_file:
-            correct_data = json.loads(data_file.read().replace("\n"," ").
-                                      replace("array","").
-                                      replace("([","[").
-                                      replace("])","]").
-                                      replace(".,",".0,").
-                                      replace(".]",".0]").
-                                      replace(". ",".0").
-                                      replace("'",'"'))
+        with open(filename + "_data.txt") as data_file:
+            correct_data = json.loads(data_file.read().replace("\n"," "))
+
+        array = np.loadtxt(filename + "_atomic_displacements_data.txt").view(complex).reshape(-1)
+        k = len(correct_data["rearranged_data"]["k_points_data"]["weights"])
+        atoms = len(correct_data["rearranged_data"]["atoms_data"])
+
+        array = array.reshape(k,atoms,atoms * 3,3)
+
+        correct_data["rearranged_data"]["k_points_data"]["weights"] = np.asarray(correct_data["rearranged_data"]["k_points_data"]["weights"])
+        correct_data["rearranged_data"]["k_points_data"]["frequencies"] = np.asarray(correct_data["rearranged_data"]["k_points_data"]["frequencies"]) * Constants.cm1_2_hartree
+        correct_data["rearranged_data"]["k_points_data"].update({"atomic_displacements": array})
+        correct_data["datasets"].update({"atomic_displacements": array})
+
+        for atom in correct_data["rearranged_data"]["atoms_data"]:
+            atom["mass"] = atom["mass"] * Constants.m_2_hartree
+        for atom in correct_data["structured_datasets"]["atoms"]:
+            atom["mass"] = atom["mass"] * Constants.m_2_hartree
+
+
 
         return correct_data
 
