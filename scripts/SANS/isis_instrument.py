@@ -1713,7 +1713,13 @@ class LARMOR(ISISInstrument):
                     raise "Invalid log"
             except:
                 if isSample:
-                    raise RuntimeError('Sample logs cannot be loaded, cannot continue')
+                    run = ws_ref.run()
+                    if not run.hasProperty("Bench_Rot"):
+                        additional_message = "The Bench_Rot entry seems to be missing."
+                    else:
+                        additional_message = ""
+
+                    raise RuntimeError('Sample logs cannot be loaded, cannot continue. {0}'.format(additional_message))
                 else:
                     logger.warning("Can logs could not be loaded, using sample values.")
 
