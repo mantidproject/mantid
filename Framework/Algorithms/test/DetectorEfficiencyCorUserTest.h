@@ -119,7 +119,8 @@ private:
     }
 
     for (size_t wi = 0; wi < dataws->getNumberHistograms(); wi++) {
-      dataws->setBinEdges(wi, HistogramData::BinEdges(HistogramData::Points(xs)));
+      dataws->setBinEdges(wi,
+                          HistogramData::BinEdges(HistogramData::Points(xs)));
     }
     dataws->getAxis(0)->setUnit("DeltaE");
     dataws->mutableRun().addProperty("Ei", double(m_Ei));

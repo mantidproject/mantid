@@ -43,10 +43,10 @@ public:
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Corrects for detector efficiency. The correction factor is calculated "
-           "using an instrument specific formula as a function of the final "
-           "neutron energy E_f=E_i-E. Note that the formula is implemented only "
-           "for a limited number of TOF instruments.";
+    return "Corrects for detector efficiency. The correction factor is "
+           "calculated using an instrument specific formula as a function "
+           "of the final neutron energy E_f=E_i-E. Note that the formula "
+           "is implemented only for a limited number of TOF instruments.";
   }
 
   int version() const override;
@@ -57,13 +57,17 @@ private:
   void exec() override;
   void retrieveProperties();
   double calculateFormulaValue(const std::string &, double);
-  MantidVec calculateEfficiency(double, const std::string &, const HistogramData::Points &);
+  MantidVec calculateEfficiency(double, const std::string &,
+                                const HistogramData::Points &);
 
   std::string getValFromInstrumentDef(const std::string &);
 
-  void applyDetEfficiency(const size_t numberOfChannels, const HistogramData::HistogramY &yIn,
-                          const HistogramData::HistogramE &eIn, const MantidVec &effVec,
-                          HistogramData::HistogramY &yOut, HistogramData::HistogramE &eOut);
+  void applyDetEfficiency(const size_t numberOfChannels,
+                          const HistogramData::HistogramY &yIn,
+                          const HistogramData::HistogramE &eIn,
+                          const MantidVec &effVec,
+                          HistogramData::HistogramY &yOut,
+                          HistogramData::HistogramE &eOut);
 
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr m_inputWS;
