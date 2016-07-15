@@ -189,7 +189,7 @@ void CreateSampleWorkspace::exec() {
                        "bin - it has been changed to " << binWidth << '\n';
   }
 
-  std::string functionString = "";
+  std::string functionString;
   if (m_preDefinedFunctionmap.find(preDefinedFunction) !=
       m_preDefinedFunctionmap.end()) {
     // extract pre-defined string

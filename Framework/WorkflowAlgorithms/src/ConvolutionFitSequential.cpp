@@ -178,7 +178,7 @@ void ConvolutionFitSequential::exec() {
 
   Progress plotPeakStringProg(this, 0.0, 0.05, specMax - specMin);
   // Construct plotpeak string
-  std::string plotPeakInput = "";
+  std::string plotPeakInput;
   for (int i = specMin; i < specMax + 1; i++) {
     std::string nextWs = tempFitWsName + ",i";
     nextWs += std::to_string(i);
@@ -258,7 +258,7 @@ void ConvolutionFitSequential::exec() {
   }
 
   // Construct comma separated list for ProcessIndirectFitParameters
-  std::string paramNamesList = "";
+  std::string paramNamesList;
   const size_t maxNames = paramNames.size();
   for (size_t i = 0; i < maxNames; i++) {
     paramNamesList += paramNames.at(i);
@@ -369,8 +369,8 @@ bool ConvolutionFitSequential::checkForTwoLorentz(
 std::vector<std::string>
 ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
   std::vector<std::string> result;
-  std::string fitType = "";
-  std::string functionName = "";
+  std::string fitType;
+  std::string functionName;
   auto startPos = function.rfind("name=");
   if (startPos != std::string::npos) {
     fitType = function.substr(startPos, function.size());
@@ -606,7 +606,7 @@ ConvolutionFitSequential::convertBackToShort(const std::string &original) {
  */
 std::string
 ConvolutionFitSequential::convertFuncToShort(const std::string &original) {
-  std::string result = "";
+  std::string result;
   if (original.compare("DeltaFunction") != 0) {
     if (original.at(0) == 'E') {
       result += "E";

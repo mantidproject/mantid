@@ -86,7 +86,7 @@ In its final form, we will be able to do things like the following (things not i
 .. code-block:: c++
   :linenos:
 
-  BinEdges edges{1.0, 2.0, 4.0};
+  BinEdges edges{1.0, 2.0, 4.0, 8.0};
   Counts counts1{4, 100, 4};
   Counts counts2{0, 100, 0};
   Histogram histogram1(edges, counts1);
@@ -111,7 +111,7 @@ In its final form, we will be able to do things like the following (things not i
   errors[1]; // sqrt(200.0)
   errors[2]; // 2.0
 
-  // Need bin centers (points data) instead of bin edges?
+  // Need bin centers (point data) instead of bin edges?
   auto points = histogram.points();
   // Need variance instead of standard deviation?
   auto variances = histogram.countVariances();
@@ -131,7 +131,7 @@ Further planned features:
 - Arithmetics will all sub-types (``BinEdges``, ``Points``, ``Counts``, and ``Frequencies``, and also their respective ``Variances`` and ``StandardDeviations``).
 - Generating bin edges (linear, logarithmic, ...).
 - Extend the ``Histogram`` interface with more common operations.
-- Non-member functions for more complex operations on histogram such as rebinning.
+- Non-member functions for more complex operations on histograms such as rebinning.
 - Validation of data, e.g., non-zero bin widths and positivity of uncertainties.
 
 **Any feedback on additional capabilities of the new data types is highly appreciated.
@@ -386,7 +386,7 @@ Working with bin edges and counts
   /////////////////////////////////////////////////////
   BinEdges edges = {1.0, 2.0, 4.0};
   if(edges.cbegin() != edges.cend())
-    *(edges.begin()) += 2.0;
+    *(edges.begin()) += 0.1;
   // Range-based for works thanks to iterators:
   for (auto &edge : edges)
     edge += 0.1;
@@ -400,7 +400,7 @@ Working with bin edges and counts
   edges[2]; // 4.0
 
   // Only const! This is not possible:
-  edges[0] += 2.0; // DOES NOT COMPILE
+  edges[0] += 0.1; // DOES NOT COMPILE
 
   // REASON: BinEdges contains a copy-on-write pointer to data, dereferencing in
   // tight loop is expensive, so interface prevents things like this:
@@ -509,7 +509,7 @@ Working with the new ``MatrixWorkspace`` interface
   // Preserve sharing
   outputWS->setSharedY(i, inputWS->sharedY(i));
   outputWS->setCounts(i, inputWS->counts(i)); // also shares, 'Counts' wraps a cow_ptr
-  outputWS->setBinEdges(i, inputWS->binEdges(i));
+  outputWS->setBinEdges(i, inputWS->binEdges(i)); // shares if input storage mode is 'XMode::BinEdges'
 
 
 
@@ -571,7 +571,7 @@ There are two issues you might encounter when implementing new algorithms or whe
    This happens rarely, typically by creating a workspace that contains histogram data (bin edges) and modifying the size via the legacy interface to store point data (or vice versa).
    These size modifications are only possible via the legacy interface.
    The best solution is to determine the storage mode at creation time of the workspace, by specifying the correct length of the X data.
-   If that is not possible, use the new setters such as `setBinEdges()`, they will trigger a conversion of the internal storage mode (not yet available in Python).
+   If that is not possible, use the new setters such as ``setBinEdges()``, they will trigger a conversion of the internal storage mode (not yet available in Python).
 
 
 

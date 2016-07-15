@@ -45,8 +45,6 @@ void ProcessDasNexusLog::init() {
       make_unique<API::FileProperty>("OutputLogFile", "",
                                      API::FileProperty::OptionalSave),
       "The file name for the output data file. ");
-
-  return;
 }
 
 void ProcessDasNexusLog::exec() {
@@ -176,8 +174,6 @@ void ProcessDasNexusLog::addLog(API::MatrixWorkspace_sptr ws,
     newlog->addValue(time, unifylogvalue);
   }
   ws->mutableRun().addProperty(newlog, true);
-
-  return;
 }
 
 /*
@@ -309,8 +305,6 @@ void ProcessDasNexusLog::calDistributions(
     g_log.notice() << i << "\t\t" << x2s[i] << "\t\t" << y2[i] << '\n';
     */
   g_log.notice() << "total number of wrong dt = " << numbaddt << '\n';
-
-  return;
 }
 
 /*
@@ -364,8 +358,6 @@ void ProcessDasNexusLog::checkLog(API::MatrixWorkspace_sptr ws,
                       << times[f].totalNanoseconds() << ", "
                       << Kernel::DateAndTime::nanosecondsFromDuration(dtf)
                       << '\n';
-
-  return;
 }
 
 /*
@@ -424,8 +416,6 @@ void ProcessDasNexusLog::convertToAbsoluteTime(
   } else {
     throw std::runtime_error("Impossible for this to happen!");
   }
-
-  return;
 } // END Function
 
 /*
@@ -488,8 +478,6 @@ void ProcessDasNexusLog::writeLogtoFile(API::MatrixWorkspace_sptr ws,
   }
 
   ofs.close();
-
-  return;
 } // END Function
 
 } // namespace Mantid

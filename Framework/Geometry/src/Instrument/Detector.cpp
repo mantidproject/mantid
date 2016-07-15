@@ -152,10 +152,7 @@ bool Detector::isMonitor() const {
  *  @param flag :: True to mark the detector a monitor (default), false
  * otherwise
  */
-void Detector::markAsMonitor(const bool flag) {
-  m_isMonitor = flag;
-  return;
-}
+void Detector::markAsMonitor(const bool flag) { m_isMonitor = flag; }
 
 } // Namespace Geometry
 } // Namespace Mantid

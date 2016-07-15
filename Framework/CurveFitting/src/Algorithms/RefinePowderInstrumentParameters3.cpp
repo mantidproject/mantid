@@ -100,8 +100,6 @@ void RefinePowderInstrumentParameters3::init() {
 
   // Output
   declareProperty("ChiSquare", DBL_MAX, Direction::Output);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -162,8 +160,6 @@ void RefinePowderInstrumentParameters3::exec() {
   setProperty("OutputPeakPositionWorkspace", outdataws);
 
   setProperty("ChiSquare", finalchi2);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -213,8 +209,6 @@ void RefinePowderInstrumentParameters3::processInputProperties() {
   m_randomSeed = getProperty("MonteCarloRandomSeed");
 
   m_dampingFactor = getProperty("Damping");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -289,8 +283,6 @@ void RefinePowderInstrumentParameters3::parseTableWorkspace(
 
     parammap.emplace(parname, newpar);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -607,8 +599,6 @@ void RefinePowderInstrumentParameters3::proposeNewValues(
                   << " (orig = " << param.curvalue << ",  step = " << stepsize
                   << "), totRwp = " << currchisq << '\n';
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -679,8 +669,6 @@ void RefinePowderInstrumentParameters3::bookKeepMCResult(
     sort(bestresults.begin(), bestresults.end());
   }
   */
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -749,8 +737,6 @@ void RefinePowderInstrumentParameters3::setupRandomWalkStrategy(
     mapiter->second.numnomove = 0;
     mapiter->second.maxabsstepsize = -0.0;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -777,8 +763,6 @@ void RefinePowderInstrumentParameters3::addParameterToMCMinimize(
 
   if (pariter->second.fit)
     parnamesforMC.push_back(parname);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1097,8 +1081,6 @@ void RefinePowderInstrumentParameters3::addOrReplace(
     newparameter.curvalue = parvalue;
     parameters.emplace(parname, newparameter);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1187,8 +1169,6 @@ void RefinePowderInstrumentParameters3::setFunctionParameterValues(
   } // ENDFOR parameter name
 
   g_log.information(msgss.str());
-
-  return;
 }
 
 /** Update parameter values to Parameter map from fuction map
@@ -1274,8 +1254,6 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(
   } // ENDFOR parameter name
 
   g_log.notice() << "Fit function:\n" << function->asString() << "\n";
-
-  return;
 }
 
 //================================= External Functions
@@ -1298,8 +1276,6 @@ void duplicateParameters(map<string, Parameter> source,
     newparam = param;
     target.emplace(parname, newparam);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1328,8 +1304,6 @@ void copyParametersValues(map<string, Parameter> source,
 
     titer->second.curvalue = paramvalue;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1340,8 +1314,6 @@ void convertToDict(vector<string> strvec, map<string, size_t> &lookupdict) {
 
   for (size_t i = 0; i < strvec.size(); ++i)
     lookupdict.emplace(strvec[i], i);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1378,8 +1350,6 @@ void storeFunctionParameterValue(
     double parerror = function->getError(i);
     parvaluemap.emplace(parname, make_pair(parvalue, parerror));
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1412,8 +1382,6 @@ void restoreFunctionParameterValue(
       }
     }
   }
-
-  return;
 }
 
 } // namespace Algorithms

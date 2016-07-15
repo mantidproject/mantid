@@ -163,8 +163,6 @@ void LoadMask::exec() {
 
   this->processMaskOnDetectors(indexmap,false, unmaskdetids, unmaskdetidpairsL,
                                unmaskdetidpairsU);
-
-  return;
 }
 
 void LoadMask::initDetectors() {
@@ -175,8 +173,6 @@ void LoadMask::initDetectors() {
       m_maskWS->setMaskedIndex(wkspIndex);
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -272,8 +268,6 @@ void LoadMask::componentToDetectors(const std::vector<std::string> &componentnam
     g_log.debug() << "Number of Detectors in Children = " << numdets
                   << "  Range = " << id_min << ", " << id_max << '\n';
   } // for component
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -323,8 +317,6 @@ void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks,
 
     } // if-else
   }   // ENDFOR
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -428,8 +420,6 @@ void LoadMask::detectorToDetectors(const std::vector<int32_t> &singles,
     detectorpairsup.push_back(pairsup[i]);
     */
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -550,8 +540,6 @@ void LoadMask::parseXML() {
 
     pNode = it.nextNode();
   } // ENDWHILE
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -587,8 +575,6 @@ void LoadMask::parseComponent(const std::string &valuetext, bool tomask) {
   '\n';
   }
   */
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -643,8 +629,6 @@ void LoadMask::parseDetectorIDs(const std::string &inputstr, bool tomask) {
       unmask_detid_pair_up.push_back(pairs[2 * i + 1]);
     }
   }
-
-  return;
 }
 
 /*
@@ -703,8 +687,6 @@ void LoadMask::parseRangeText(const std::string &inputstr,
     pairs.push_back(intstart);
     pairs.push_back(intend);
   }
-
-  return;
 }
 
 void LoadMask::splitString(const std::string &inputstr,
@@ -716,8 +698,6 @@ void LoadMask::splitString(const std::string &inputstr,
 
   // g_log.information() << "Inside... split size = " << strings.size() <<
   // '\n';
-
-  return;
 }
 
 /*
@@ -848,8 +828,6 @@ void LoadMask::parseISISStringToVector(const std::string &ins,
   } // END-WHILE
 
   splitstrings.clear();
-
-  return;
 }
 /* Convert spectra mask into det-id mask using workspace as source of spectra-detector maps
 *

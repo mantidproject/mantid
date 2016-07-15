@@ -295,8 +295,6 @@ void BinaryOperation::exec() {
 
   // Assign the result to the output workspace property
   setProperty(outputPropName(), m_out);
-
-  return;
 }
 
 //--------------------------------------------------------------------------------------------
