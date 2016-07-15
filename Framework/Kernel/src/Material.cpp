@@ -46,7 +46,7 @@ Material::Material(const std::string &name, const ChemicalFormula &formula,
 /**
 * Construct a material object
 * @param name :: The name of the material
-* @param formula :: The chemical formula
+* @param atom :: The neutron atom to take scattering infrmation from
 * @param numberDensity :: Density in A^-3
 * @param temperature :: The temperature in Kelvin (Default = 300K)
 * @param pressure :: Pressure in kPa (Default: 101.325 kPa)

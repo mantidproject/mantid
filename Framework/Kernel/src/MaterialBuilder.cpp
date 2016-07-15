@@ -242,8 +242,7 @@ MaterialBuilder::createCompositionFromAtomicNumber() const {
 
 /**
  * Return the manually set density or calculate it from other parameters
- * @param totalNumAtoms Total number of atoms
- * @param rmm The relative molecular mass
+ * @param formula The formula to calculate the number density from
  * @return The number density
  */
 double MaterialBuilder::getOrCalculateRho(
