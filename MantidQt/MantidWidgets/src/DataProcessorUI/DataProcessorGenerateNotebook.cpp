@@ -86,10 +86,10 @@ std::string DataProcessorGenerateNotebook::generateNotebook(
 
   notebook->markdownCell(tableString(m_model, m_whitelist, rows));
 
-  for (auto gIt = rows.begin(); gIt != rows.end(); ++gIt) {
+  for (const auto &item : rows) {
 
-    const int groupId = gIt->first;
-    const std::set<int> rowSet = gIt->second;
+    const int groupId = item.first;
+    const std::set<int> rowSet = item.second;
 
     /** Announce the stitch group in the notebook **/
 
@@ -106,11 +106,11 @@ std::string DataProcessorGenerateNotebook::generateNotebook(
     // workspaces
     std::vector<std::string> output_ws;
 
-    for (auto rIt = rowSet.begin(); rIt != rowSet.end(); ++rIt) {
+    for (const auto &row : rowSet) {
       code_string << "#Load and reduce\n";
 
       auto reduce_row_string = reduceRowString(
-          groupId, *rIt, m_instrument, m_model, m_whitelist, m_preprocessMap,
+          groupId, row, m_instrument, m_model, m_whitelist, m_preprocessMap,
           m_processor, m_preprocessingOptionsMap, m_processingOptions);
       // The reduction code
       code_string << boost::get<0>(reduce_row_string);
@@ -211,7 +211,7 @@ std::string plotsString(const std::vector<std::string> &output_ws,
     std::vector<std::string> wsNames;
 
     // Iterate through the elements of output_ws
-    for (auto &outws : output_ws) {
+    for (const auto &outws : output_ws) {
 
       auto workspaces = splitByCommas(outws);
 
@@ -259,24 +259,24 @@ std::string tableString(QDataProcessorTreeModel_sptr model,
   table_string << "---"
                << "\n";
 
-  for (auto groupIt = rows.begin(); groupIt != rows.end(); ++groupIt) {
+  for (const auto &item : rows) {
 
-    auto groupId = groupIt->first;
-    auto rowSet = groupIt->second;
+    auto groupId = item.first;
+    auto rowSet = item.second;
 
-    for (auto rowIt = rowSet.begin(); rowIt != rowSet.end(); ++rowIt) {
+    for (const auto &row : rowSet) {
 
       table_string
           << model->data(model->index(groupId, 0)).toString().toStdString();
       table_string << " | ";
 
       for (int col = 0; col < ncols - 1; col++)
-        table_string << model->data(model->index(*rowIt, col,
+        table_string << model->data(model->index(row, col,
                                                  model->index(groupId, 0)))
                             .toString()
                             .toStdString() << " | ";
 
-      table_string << model->data(model->index(*rowIt, ncols - 1,
+      table_string << model->data(model->index(row, ncols - 1,
                                                model->index(groupId, 0)))
                           .toString()
                           .toStdString() << "\n";
@@ -314,13 +314,13 @@ boost::tuple<std::string, std::string> postprocessGroupString(
   std::vector<std::string> outputName;
 
   // Go through each row and prepare the input and output properties
-  for (auto groupIt = groups.begin(); groupIt != groups.end(); ++groupIt) {
+  for (const auto &group : groups) {
 
-    int nrows = model->rowCount(model->index(*groupIt, 0));
+    int nrows = model->rowCount(model->index(group, 0));
 
     for (int row = 0; row < nrows; row++) {
       // The reduced ws name without prefix (for example 'TOF_13460_13462')
-      auto suffix = getReducedWorkspaceName(*groupIt, row, model, whitelist);
+      auto suffix = getReducedWorkspaceName(group, row, model, whitelist);
 
       // The reduced ws name: 'IvsQ_TOF_13460_13462'
       inputNames.emplace_back(processor.prefix(0) + suffix);
@@ -565,8 +565,8 @@ loadWorkspaceString(const std::string &runStr, const std::string &instrument,
   std::ostringstream load_strings;
 
   // Remove leading/trailing whitespace from each run
-  for (auto runIt = runs.begin(); runIt != runs.end(); ++runIt)
-    boost::trim(*runIt);
+  for (auto &run : runs)
+    boost::trim(run);
 
   const std::string prefix = preprocessor.prefix();
   const std::string outputName = prefix + boost::algorithm::join(runs, "_");
