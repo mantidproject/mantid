@@ -52,7 +52,8 @@ public:
   FixedLengthVector(const std::vector<double> &other) : m_data(other) {}
   FixedLengthVector(std::vector<double> &&other) : m_data(std::move(other)) {}
   template <class InputIt>
-  FixedLengthVector(InputIt first, InputIt last) : m_data(first, last) {}
+  FixedLengthVector(InputIt first, InputIt last)
+      : m_data(first, last) {}
   template <class InputIt> void assign(InputIt first, InputIt last) & {
     m_data.assign(first, last);
   }
