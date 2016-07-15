@@ -172,6 +172,14 @@ public:
 
       ws_creator->execute();
       Workspace_sptr source = ws_creator->getProperty("OutputWorkspace");
+      auto copier =
+          AlgorithmManager::Instance().create("CloneWorkspace");
+      copier->initialize();
+      copier->setProperty("InputWorkspace", source);
+      copier->setPropertyValue("OutputWorkspace","testWSClone");
+      copier->execute();
+      Workspace_sptr sample = copier->getProperty("OutputWorkspace");
+
 
       auto masker =
           AlgorithmManager::Instance().create("MaskDetectors");
@@ -185,49 +193,54 @@ public:
       masker->setProperty("SpectraList", masked_spectra);
       masker->execute();
 
+ 
       auto exporter =
           AlgorithmManager::Instance().create("ExportSpectraMask");
       exporter->initialize();
+      exporter->setProperty("Workspace", source);
+      exporter->execute();
+
+      // modify spectra-detector map on the workspace clone to check masking
 
 
-            auto isisMaskFile =
-          genISISMaskingFile("isismask.msk", singlespectra, pairspectra);
+      //      auto isisMaskFile =
+      //    genISISMaskingFile("isismask.msk", singlespectra, pairspectra);
 
-      Load
+      //Load
 
-      // 2. Run
-      LoadMask loadfile;
-      loadfile.initialize();
+      //// 2. Run
+      //LoadMask loadfile;
+      //loadfile.initialize();
 
-      loadfile.setProperty("Instrument", "VULCAN");
-      loadfile.setProperty("InputFile", isisMaskFile.getFileName());
-      loadfile.setProperty("OutputWorkspace", "VULCAN_Mask_Detectors");
+      //loadfile.setProperty("Instrument", "VULCAN");
+      //loadfile.setProperty("InputFile", isisMaskFile.getFileName());
+      //loadfile.setProperty("OutputWorkspace", "VULCAN_Mask_Detectors");
 
-      TS_ASSERT_EQUALS(loadfile.execute(), true);
-      DataObjects::MaskWorkspace_sptr maskws =
-          AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(
-              "VULCAN_Mask_Detectors");
+      //TS_ASSERT_EQUALS(loadfile.execute(), true);
+      //DataObjects::MaskWorkspace_sptr maskws =
+      //    AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(
+      //        "VULCAN_Mask_Detectors");
 
-      // 3. Check
-      size_t errorcounts = 0;
-      for (size_t iws = 0; iws < maskws->getNumberHistograms(); iws++) {
-          double y = maskws->dataY(iws)[0];
-          if (iws == 34 || iws == 1000 || iws == 2000 || (iws >= 36 && iws <= 39) ||
-              (iws >= 1001 && iws <= 1004)) {
-              // All these workspace index are masked
-              TS_ASSERT_DELTA(y, 1.0, 1.0E-5);
-          }
-          else {
-              // Unmasked
-              TS_ASSERT_DELTA(y, 0.0, 1.0E-5);
-              if (fabs(y) > 1.0E-5) {
-                  errorcounts++;
-                  std::cout << "Workspace Index " << iws
-                      << " has a wrong set on masks\n";
-              }
-          }
-      }
-      std::cout << "Total " << errorcounts << " errors \n";
+      //// 3. Check
+      //size_t errorcounts = 0;
+      //for (size_t iws = 0; iws < maskws->getNumberHistograms(); iws++) {
+      //    double y = maskws->dataY(iws)[0];
+      //    if (iws == 34 || iws == 1000 || iws == 2000 || (iws >= 36 && iws <= 39) ||
+      //        (iws >= 1001 && iws <= 1004)) {
+      //        // All these workspace index are masked
+      //        TS_ASSERT_DELTA(y, 1.0, 1.0E-5);
+      //    }
+      //    else {
+      //        // Unmasked
+      //        TS_ASSERT_DELTA(y, 0.0, 1.0E-5);
+      //        if (fabs(y) > 1.0E-5) {
+      //            errorcounts++;
+      //            std::cout << "Workspace Index " << iws
+      //                << " has a wrong set on masks\n";
+      //        }
+      //    }
+      //}
+      //std::cout << "Total " << errorcounts << " errors \n";
   }
 
 
