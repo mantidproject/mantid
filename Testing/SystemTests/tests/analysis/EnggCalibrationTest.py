@@ -195,7 +195,7 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
                                                              VanadiumWorkspace = van_ws,
                                                              Bank = '1',
                                                              ExpectedPeaks =
-                                                             '2.7057,1.9132,1.6316,1.5621,1.3528,0.9566',
+                                                             '2.7057,1.9132,1.6316,1.5621,1.3528,1.1046',
                                                              DetectorPositions = self.pos_table)
         self.peaks = tbl.column('dSpacing')
         self.peaks_fitted = tbl.column('X0')
@@ -205,7 +205,7 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
                                                                          VanadiumWorkspace = van_ws,
                                                                          Bank = '2',
                                                                          ExpectedPeaks =
-                                                                         '2.7057,1.9132,1.6316,1.5621,1.3528,0.9566',
+                                                                         '2.7057,1.9132,1.6316,1.5621,1.3528,1.1046',
                                                                          DetectorPositions = self.pos_table)
         self.peaks_b2 = tbl_b2.column('dSpacing')
         self.peaks_fitted_b2 = tbl_b2.column('X0')
@@ -258,39 +258,41 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
         # for assert-comparison purposes (comparisons are not that picky, by far)
 
         self.assertTrue(rel_err_less_delta(self.pos_table.cell(100, 3), 1.53041625023, exdelta))
-        #self.assertDelta(self.pos_table.cell(100, 3), 1.49010562897, delta)
         self.assertTrue(rel_err_less_delta(self.pos_table.cell(400, 4), 1.65264105797, exdelta))
         self.assertTrue(rel_err_less_delta(self.pos_table.cell(200, 5), -0.296705961227, exdelta))
-        self.assertEquals(self.pos_table.cell(133, 7), 0)   # DIFA
+        # DIFA column
+        self.assertEquals(self.pos_table.cell(133, 7), 0)
+        # DIFC column
         self.assertTrue(rel_err_less_delta(self.pos_table.cell(610, 8), 18603.7597656, exdelta))
+        # TZERO column
         self.assertTrue(rel_err_less_delta(self.pos_table.cell(1199, 9), -5.62454175949, exdelta_special))
 
         # === check difc, zero parameters for GSAS produced by EnggCalibrate
 
         # Bank 1
-        self.assertTrue(rel_err_less_delta(self.difc, 18403.4516907, exdelta_special),
+        self.assertTrue(rel_err_less_delta(self.difc, 18401.881659, exdelta_special),
                         "difc parameter for bank 1 is not what was expected, got: %f" % self.difc)
         if "darwin" != sys.platform:
-            self.assertTrue(rel_err_less_delta(self.zero, 5.246633173, exdelta_tzero),
+            self.assertTrue(rel_err_less_delta(self.zero, 8.362787, exdelta_tzero),
                             "zero parameter for bank 1 is not what was expected, got: %f" % self.zero)
 
         # Bank 2
-        self.assertTrue(rel_err_less_delta(self.difc_b2, 18388.8780161, exdelta_special),
+        self.assertTrue(rel_err_less_delta(self.difc_b2, 18389.841183, exdelta_special),
                         "difc parameter for bank 2 is not what was expected, got: %f" % self.difc_b2)
         if "darwin" != sys.platform:
-            self.assertTrue(rel_err_less_delta(self.zero_b2, -4.35630914816, exdelta_tzero),
+            self.assertTrue(rel_err_less_delta(self.zero_b2, -6.415655, exdelta_tzero),
                             "zero parameter for bank 2 is not what was expected, got: %f" % self.zero_b2)
 
         # === peaks used to fit the difc and zero parameters ===
-        expected_peaks = [0.9566, 1.3528, 1.5621, 1.6316, 1.9132, 2.7057]
-        # 0.9566 is not found for bank2 (after all, CalibrateFull is only applied on bank 1.
-        expected_peaks_b2 = expected_peaks[1:]
+        expected_peaks = [1.1046, 1.3528, 1.5621, 1.6316, 1.9132, 2.7057]
+        # Note that CalibrateFull is not applied on bank 2. These peaks are "easy" and
+        # fitted successfully though.
         self.assertEquals(len(self.peaks), len(expected_peaks))
-        self.assertEquals(len(self.peaks_b2), len(expected_peaks_b2))
+        self.assertEquals(len(self.peaks_b2), len(expected_peaks))
         self.assertEquals(self.peaks, expected_peaks)
-        self.assertEquals(self.peaks_b2, expected_peaks_b2)
+        self.assertEquals(self.peaks_b2, expected_peaks)
         self.assertEquals(len(self.peaks_fitted), len(expected_peaks))
-        self.assertEquals(len(self.peaks_fitted_b2), len(expected_peaks_b2))
+        self.assertEquals(len(self.peaks_fitted_b2), len(expected_peaks))
 
         # Check that the individual peaks do not deviate too much from the fitted
         # straight line
