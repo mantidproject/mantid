@@ -301,24 +301,27 @@ void GenericDataProcessorPresenter::process() {
   } else {
     // They may have selected a group, in this case we want to process and
     // post-process the whole group, so populate group with every row
-    for (auto idxGroup = groups.begin(); idxGroup != groups.end(); ++idxGroup) {
-      for (int row = 0; row < numRowsInGroup(*idxGroup); row++)
-        rows[*idxGroup].insert(row);
+    for (const auto &group : groups) {
+      for (int row = 0; row < numRowsInGroup(group); row++)
+        rows[group].insert(row);
     }
   }
 
   // Check each group and warn if we're only partially processing it
-  for (auto gIt = rows.begin(); gIt != rows.end(); ++gIt) {
+  for (const auto &item : rows) {
 
-    const int &groupId = gIt->first;
-    const std::set<int> &rowIds = gIt->second;
+    const int &groupId = item.first;
+    const std::set<int> &rowIds = item.second;
 
     // Are we only partially processing a group?
-    if (static_cast<int>(rowIds.size()) < numRowsInGroup(gIt->first) &&
+    if (static_cast<int>(rowIds.size()) < numRowsInGroup(groupId) &&
         m_options["WarnProcessPartialGroup"].toBool()) {
+      const std::string groupName = m_model->data(m_model->index(groupId, 0))
+	.toString()
+	.toStdString();
       std::stringstream err;
       err << "You have only selected " << rowIds.size() << " of the ";
-      err << numRowsInGroup(groupId) << " rows in group " << groupId << ".";
+      err << numRowsInGroup(groupId) << " rows in group '" << groupName << "'.";
       err << " Are you sure you want to continue?";
       if (!m_view->askUserYesNo(err.str(), "Continue Processing?"))
         return;
