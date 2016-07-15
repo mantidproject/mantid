@@ -11,16 +11,6 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(RenameLog)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-RenameLog::RenameLog() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RenameLog::~RenameLog() {}
-
 void RenameLog::init() {
 
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
@@ -32,8 +22,6 @@ void RenameLog::init() {
   declareProperty("NewLogName", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "Log's new name.");
-
-  return;
 }
 
 void RenameLog::exec() {
@@ -62,8 +50,6 @@ void RenameLog::exec() {
   // std::vector<Kernel::DateAndTime> newtimes = timeprop->timesAsVector();
   // std::cout << "Entries = " << newtimes.size() << '\n';
   matrixWS->mutableRun().addProperty(timeprop);
-
-  return;
 }
 
 } // namespace Mantid

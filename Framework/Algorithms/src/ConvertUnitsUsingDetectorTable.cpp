@@ -55,7 +55,7 @@ const std::string ConvertUnitsUsingDetectorTable::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ConvertUnitsUsingDetectorTable::summary() const {
-  return " *** Warning - This Routine is under development *** \n"
+  return "**Warning - This Routine is under development**\n"
          "Performs a unit change on the X values of a workspace";
 }
 
@@ -181,7 +181,6 @@ void ConvertUnitsUsingDetectorTable::exec() {
   // Do right at end (workspace could could change in removeUnphysicalBins or
   // alignBins methods)
   setProperty("OutputWorkspace", outputWS);
-  return;
 }
 
 /** Initialise the member variables
@@ -428,8 +427,7 @@ void ConvertUnitsUsingDetectorTable::convertQuickly(
         *iter = factor *std::pow(*iter, power);
       }
 
-      MantidVecPtr xVals;
-      xVals.access() = outputWS->dataX(0);
+      auto xVals = outputWS->refX(0);
 
       PARALLEL_FOR1(outputWS)
       for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
@@ -471,7 +469,6 @@ void ConvertUnitsUsingDetectorTable::convertQuickly(
 
   if (m_inputEvents)
     eventWS->clearMRU();
-  return;
 }
 
 /// Calls Rebin as a Child Algorithm to align the bins
@@ -528,8 +525,7 @@ void ConvertUnitsUsingDetectorTable::reverse(API::MatrixWorkspace_sptr WS) {
     std::reverse(WS->dataY(0).begin(), WS->dataY(0).end());
     std::reverse(WS->dataE(0).begin(), WS->dataE(0).end());
 
-    MantidVecPtr xVals;
-    xVals.access() = WS->dataX(0);
+    auto xVals = WS->refX(0);
     for (size_t j = 1; j < m_numberOfSpectra; ++j) {
       WS->setX(j, xVals);
       std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());

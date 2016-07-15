@@ -21,9 +21,6 @@ namespace DataHandling {
  */
 class DLLExport LoadCalFile : public API::Algorithm {
 public:
-  LoadCalFile();
-  ~LoadCalFile() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadCalFile"; };
   /// Summary of algorithms purpose

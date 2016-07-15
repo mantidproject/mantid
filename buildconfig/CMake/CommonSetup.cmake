@@ -247,7 +247,7 @@ endif ()
 ###########################################################################
 if ( CMAKE_COMPILER_IS_GNUCXX )
   include ( GNUSetup )
-elseif ( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
+elseif ( ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang" )
   include ( GNUSetup )
 endif ()
 

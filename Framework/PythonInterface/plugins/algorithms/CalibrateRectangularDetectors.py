@@ -1,4 +1,6 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -170,9 +172,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         """
         Logger("CalibrateRectangularDetector").warning("Loading PreNexus for run %s" % runnumber)
         mykwargs = {}
-        if kwargs.has_key("FilterByTimeStart"):
+        if "FilterByTimeStart" in kwargs:
             mykwargs["ChunkNumber"] = int(kwargs["FilterByTimeStart"])
-        if kwargs.has_key("FilterByTimeStop"):
+        if "FilterByTimeStop" in kwargs:
             mykwargs["TotalChunks"] = int(kwargs["FilterByTimeStop"])
 
         # generate the workspace name
@@ -265,7 +267,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         ymax = 0
         for s in range(0,wksp.getNumberHistograms()):
             y_s = wksp.readY(s)
-            midBin = wksp.blocksize()/2
+            midBin = int(wksp.blocksize()/2)
             if y_s[midBin] > ymax:
                 refpixel = s
                 ymax = y_s[midBin]
@@ -277,7 +279,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if self._lastpixel == 0:
             self._lastpixel = wksp.getNumberHistograms()-1
         else:
-            self._lastpixel = wksp.getNumberHistograms()*self._lastpixel/self._lastpixel3-1
+            self._lastpixel = int(wksp.getNumberHistograms()*self._lastpixel/self._lastpixel3) - 1
+        self.log().information("Last pixel=%s" % self._lastpixel)
         CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc",
                        ReferenceSpectra=refpixel, WorkspaceIndexMin=0,
                        WorkspaceIndexMax=self._lastpixel,
@@ -296,13 +299,13 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             ymax = 0
             for s in range(0,wksp.getNumberHistograms()):
                 y_s = wksp.readY(s)
-                midBin = wksp.blocksize()/2
+                midBin = int(wksp.blocksize()/2)
                 if y_s[midBin] > ymax:
                     refpixel = s
                     ymax = y_s[midBin]
             msg = "Reference spectra = %s, lastpixel_3 = %s" % (refpixel, self._lastpixel3)
             self.log().information(msg)
-            self._lastpixel2 = wksp.getNumberHistograms()*self._lastpixel2/self._lastpixel3-1
+            self._lastpixel2 = int(wksp.getNumberHistograms()*self._lastpixel2/self._lastpixel3) - 1
             CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc2",
                            ReferenceSpectra=refpixel, WorkspaceIndexMin=self._lastpixel+1,
                            WorkspaceIndexMax=self._lastpixel2,

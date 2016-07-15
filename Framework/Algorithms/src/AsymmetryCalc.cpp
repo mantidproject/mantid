@@ -125,14 +125,12 @@ void AsymmetryCalc::exec() {
 
   const size_t blocksize = inputWS->blocksize();
   assert(tmpWS->blocksize() == blocksize);
-  const bool isInputHistogram = inputWS->isHistogramData();
 
   // Create a point data workspace with only one spectra for forward
   API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(
       inputWS, 1, blocksize, blocksize);
 
-  // Get the reference to the input x values.
-  auto &tmpX = tmpWS->readX(forward);
+  outputWS->setPoints(0, tmpWS->points(forward));
 
   // Calculate asymmetry for each time bin
   // F-aB / F+aB
@@ -164,13 +162,6 @@ void AsymmetryCalc::exec() {
       error = sqrt(q1 * q2) / denominator;
     }
     outputWS->dataE(0)[j] = error;
-
-    // set the x values
-    if (isInputHistogram) {
-      outputWS->dataX(0)[j] = (tmpX[j] + tmpX[j + 1]) / 2;
-    } else {
-      outputWS->dataX(0)[j] = tmpX[j];
-    }
 
     prog.report();
   }

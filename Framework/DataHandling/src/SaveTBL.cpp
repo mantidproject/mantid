@@ -83,16 +83,29 @@ void SaveTBL::exec() {
         std::string groupHeading = columnHeadings[columnIndex];
         if (ws->getColumn(groupHeading)->type() != "int") {
           file.close();
-          remove(filename.c_str());
-          throw std::runtime_error(groupHeading +
-                                   " Column must be of type \"int\"");
+          int error = remove(filename.c_str());
+          if (error == 0)
+            throw std::runtime_error(groupHeading + " column must be of type "
+                                                    "\"int\". The TBL file "
+                                                    "will not be saved.");
+          else
+            throw std::runtime_error(
+                "Saving TBL was unsuccessful, " + groupHeading +
+                " column must be of type \"int\". Removal of " + filename +
+                " failed, please check that this file exists.");
         } else
           writeVal<int>(row.Int(columnIndex), file);
       } else if (ws->getColumn(columnIndex)->type() != "str") {
         file.close();
-        remove(filename.c_str());
-        throw std::runtime_error(columnHeadings[columnIndex] +
-                                 " columns must be of type \"str\"");
+        int error = remove(filename.c_str());
+        if (error == 0)
+          throw std::runtime_error(columnHeadings[columnIndex] +
+                                   " column must be of type \"str\". The TBL "
+                                   "file will not be saved");
+        else
+          throw std::runtime_error(
+              "Saving TBL unsuccessful, please check the " +
+              columnHeadings[columnIndex] + " column is of type \"str\".");
       } else {
         if (columnIndex == columnHeadings.size() - 1)
           writeVal<std::string>(row.String(columnIndex), file, false, true);

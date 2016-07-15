@@ -1,3 +1,5 @@
+from __future__ import print_function, absolute_import
+
 __all__ = ['main']
 
 import sys
@@ -9,13 +11,13 @@ import getopt
 import glob
 import string
 from optparse import OptionParser
-import cxxtest_parser
+from . import cxxtest_parser
 try:
-    import cxxtest_fog
+    from . import cxxtest_fog
     imported_fog=True
 except ImportError:
     imported_fog=False
-from cxxtest_misc import *
+from .cxxtest_misc import abort
 
 options = []
 suites = []
@@ -124,7 +126,7 @@ def parseCommandline(args):
     # the cxxtest builder relies on this behaviour! don't remove
     if options.runner == 'none':
         options.runner = None
-        
+
     if options.xunit_printer or options.runner == "XUnitPrinter":
         options.xunit_printer=True
         options.runner="XUnitPrinter"
@@ -141,7 +143,7 @@ def parseCommandline(args):
     if options.error_printer:
       options.runner= "ErrorPrinter"
       options.haveStandardLibrary = True
-    
+
 
     if options.noStaticInit and (options.root or options.part):
         abort( '--no-static-init cannot be used with --root/--part' )
@@ -151,7 +153,7 @@ def parseCommandline(args):
 
     files = setFiles(args)
     if len(files) is 0 and not options.root:
-        print parser.error("No input files found")
+        print(parser.error("No input files found"))
     return files
 
 
@@ -194,7 +196,7 @@ def writeSimpleOutput():
         writeMain( output )
 
     if len(suites) > 0:
-        print >>output, "bool "+suites[0]['object']+"_init = false;"
+        output.write("bool "+suites[0]['object']+"_init = false;\n")
 
     writeWorld( output )
     output.close()
@@ -270,7 +272,7 @@ def writeMain( output ):
     if not (options.gui or options.runner):
        return
     output.write( 'int main( int argc, char *argv[] ) {\n' )
-    
+
     # Build the filename to output, using the suitename if specified
     output.write( '    std::string output_filename = "%s";  \n' % (options.xunit_file))
     # output.write( '    std::cout << argc << " args\\n";  \n ' )
@@ -278,15 +280,15 @@ def writeMain( output ):
     output.write( '    if (argc > 1) { \n ')
     output.write( '        if (argv[1][0] != \'-\') { \n ')
     output.write( '           output_filename = "TEST-%s." + std::string(argv[1]) + ".xml"; \n        } } \n' %  options.world)
-    
+
     if options.noStaticInit:
         output.write( ' CxxTest::initialize();\n' )
-        
+
     if options.gui:
         tester_t = "CxxTest::GuiTuiRunner<CxxTest::%s, CxxTest::%s> " % (options.gui, options.runner)
     else:
         tester_t = "CxxTest::%s" % (options.runner)
-        
+
     if options.xunit_printer:
        output.write( '    // Create the output XML file \n' )
        output.write( '    std::ofstream ofstr( output_filename.c_str() );\n' )
@@ -331,7 +333,7 @@ def isGenerated(suite):
 
 def isDynamic(suite):
     '''Checks whether a suite is dynamic'''
-    return suite.has_key('create')
+    return 'create' in suite
 
 def writeInclude(output, file):
     '''Add #include "file" statement'''
@@ -396,11 +398,11 @@ def runBody( suite, test ):
 def dynamicRun( suite, test ):
     '''Body of TestDescription::run() for test in a dynamic suite'''
     return 'if ( ' + suite['object'] + ' ) ' + suite['object'] + '->' + test['name'] + '();'
-    
+
 def staticRun( suite, test ):
     '''Body of TestDescription::run() for test in a non-dynamic suite'''
     return suite['object'] + '.' + test['name'] + '();'
-    
+
 def writeSuiteDescription( output, suite ):
     '''Write SuiteDescription object'''
     if isDynamic( suite ):
@@ -458,4 +460,3 @@ def writeInitialize(output):
 # DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
 # retains certain rights in this software.
 #
-

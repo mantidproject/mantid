@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <exception>
+#include <numeric>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -32,6 +33,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
+using Mantid::HistogramData::Points;
 /**
  * Used for testing only
  */
@@ -90,7 +92,7 @@ public:
 
     bool CalcVariances = 0;
 
-    Mantid::MantidVecPtr xvals, yvals, data;
+    Mantid::MantidVec xvals, yvals, data;
     int sgn1 = 1;
     int sgn2 = 1;
     for (int i = 0; i < nCells; i++) {
@@ -109,26 +111,26 @@ public:
         sgn1 = -sgn1 + 1;
         sgn2 = sgn1;
       }
-      xvals.access().push_back(x);
-      yvals.access().push_back(y);
+      xvals.push_back(x);
+      yvals.push_back(y);
       double val =
           NormVal(background, intensity, Mcol, Mrow, Vx, Vy, Vxy, y, x);
 
-      data.access().push_back(val);
+      data.push_back(val);
     }
 
-    Mantid::MantidVecPtr x_vec_ptr;
+    Points x_vec_ptr(nCells);
+    std::iota(begin(x_vec_ptr), end(x_vec_ptr), 0.0);
     double xx[nCells];
     for (int i = 0; i < nCells; i++) {
       xx[i] = i;
-      x_vec_ptr.access().push_back(static_cast<double>(i));
     }
     NormalFit.setAttributeValue("CalcVariances", CalcVariances);
 
-    ws->setX(0, x_vec_ptr);
-    ws->setData(0, data);
-    ws->setData(1, xvals);
-    ws->setData(2, yvals);
+    ws->setPoints(0, x_vec_ptr);
+    ws->dataY(0) = data;
+    ws->dataY(1) = xvals;
+    ws->dataY(2) = yvals;
 
     NormalFit.setMatrixWorkspace(ws, 0, 0.0, 30.0);
 
@@ -154,8 +156,8 @@ public:
     //  std::cout<<"-------------------------------------"<<'\n';
     for (int i = 0; i < nCells; i++) {
 
-      double x = xvals.access()[i];
-      double y = yvals.access()[i];
+      double x = xvals[i];
+      double y = yvals[i];
       double d = NormVal(background, intensity, Mcol, Mrow, Vx, Vy, Vxy, y, x);
 
       TS_ASSERT_DELTA(d, out[i], .001);

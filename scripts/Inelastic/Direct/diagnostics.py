@@ -9,7 +9,7 @@ This workspace can be summed with other masked workspaces to accumulate
 masking and also passed to MaskDetectors to match masking there.
 """
 from mantid.simpleapi import *
-from mantid.kernel.funcreturns import lhs_info
+from mantid.kernel.funcinspect import lhs_info
 import os
 import Direct.RunDescriptor as RunDescriptor
 from Direct.PropertyManager import PropertyManager

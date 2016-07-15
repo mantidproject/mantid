@@ -1,9 +1,11 @@
+.. _QE Coverage:
+
 QE Coverage
 ===========
 
 .. contents:: Table of Contents
   :local:
-  
+
 .. figure:: /images/QECoverage.png
    :alt: QECoverage.png
    :align: right

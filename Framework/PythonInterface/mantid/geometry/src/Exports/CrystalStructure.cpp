@@ -32,7 +32,7 @@ void export_CrystalStructure() {
   class_<CrystalStructure>("CrystalStructure", no_init)
       .def(init<const std::string &, const std::string &, const std::string &>(
           (arg("unitCell"), arg("spaceGroup"), arg("scatterers"))))
-      .def("getUnitCell", &CrystalStructure::cell)
-      .def("getSpaceGroup", &getSpaceGroup)
-      .def("getScatterers", &getScatterers);
+      .def("getUnitCell", &CrystalStructure::cell, arg("self"))
+      .def("getSpaceGroup", &getSpaceGroup, arg("self"))
+      .def("getScatterers", &getScatterers, arg("self"));
 }

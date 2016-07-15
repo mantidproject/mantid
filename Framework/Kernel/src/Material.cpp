@@ -155,7 +155,7 @@ void Material::loadNexus(::NeXus::File *file, const std::string &group) {
 
 namespace { // anonymous namespace to hide the function
 str_pair
-getAtomName(std::string &text) // TODO change to get number after letters
+getAtomName(const std::string &text) // TODO change to get number after letters
 {
   // one character doesn't need
   if (text.size() <= 1)
@@ -177,36 +177,36 @@ Material::parseChemicalFormula(const std::string chemicalSymbol) {
 
   tokenizer tokens(chemicalSymbol, " -",
                    Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-  for (auto atom = tokens.begin(); atom != tokens.end(); ++atom) {
+  for (const auto &atom : tokens) {
     try {
-      std::string name(*atom);
+      std::string name;
       float numberAtoms = 1;
       uint16_t aNumber = 0;
 
       // split out the isotope bit
-      if (atom->find('(') != std::string::npos) {
+      if (atom.find('(') != std::string::npos) {
         // error check
-        size_t end = atom->find(')');
+        size_t end = atom.find(')');
         if (end == std::string::npos) {
           std::stringstream msg;
-          msg << "Failed to parse isotope \"" << name << "\"";
+          msg << "Failed to parse isotope \"" << atom << "\"";
           throw std::runtime_error(msg.str());
         }
 
         // get the number of atoms
-        std::string numberAtomsStr = name.substr(end + 1);
+        std::string numberAtomsStr = atom.substr(end + 1);
         if (!numberAtomsStr.empty())
           numberAtoms = boost::lexical_cast<float>(numberAtomsStr);
 
         // split up the atom and isotope number
-        name = name.substr(1, end - 1);
+        name = atom.substr(1, end - 1);
         str_pair temp = getAtomName(name);
 
         name = temp.first;
         aNumber = boost::lexical_cast<uint16_t>(temp.second);
       } else // for non-isotopes
       {
-        str_pair temp = getAtomName(name);
+        str_pair temp = getAtomName(atom);
         name = temp.first;
         if (!temp.second.empty())
           numberAtoms = boost::lexical_cast<float>(temp.second);
@@ -216,7 +216,7 @@ Material::parseChemicalFormula(const std::string chemicalSymbol) {
       CF.numberAtoms.push_back(numberAtoms);
     } catch (boost::bad_lexical_cast &e) {
       std::stringstream msg;
-      msg << "While trying to parse atom \"" << (*atom)
+      msg << "While trying to parse atom \"" << atom
           << "\" encountered bad_lexical_cast: " << e.what();
       throw std::runtime_error(msg.str());
     }

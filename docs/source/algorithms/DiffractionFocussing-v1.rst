@@ -29,9 +29,8 @@ included in the analysis.
 Since the new X boundaries depend on the group and not the entire
 workspace, this focusing algorithm does not create overestimated X
 ranges for multi-group instruments. However it is important to remember
-that this means that this algorithm outputs a `ragged
-workspace <http://www.mantidproject.org/Ragged_Workspace>`_. Some 2D and 3D plots will not display
-the data correctly.
+that this means that this algorithm outputs a :ref:`ragged workspace <Ragged_Workspace>`.
+Some 2D and 3D plots will not display the data correctly.
 
 The DiffractionFocussing algorithm uses GroupDetectors algorithm to
 combine data from several spectra according to GroupingFileName file

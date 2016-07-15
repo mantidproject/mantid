@@ -1,18 +1,19 @@
 #ifndef MANTID_KERNEL_TYPEDVALIDATORTEST_H_
 #define MANTID_KERNEL_TYPEDVALIDATORTEST_H_
 
-#include "MantidKernel/TypedValidator.h"
 #include "MantidKernel/DataItem.h"
+#include "MantidKernel/TypedValidator.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
 
 namespace {
 #define DECLARE_TEST_VALIDATOR(ClassName, HeldType)                            \
   class ClassName : public Mantid::Kernel::TypedValidator<HeldType> {          \
   public:                                                                      \
-    Mantid::Kernel::IValidator_sptr clone() const {                            \
+    Mantid::Kernel::IValidator_sptr clone() const override {                   \
       return boost::make_shared<ClassName>();                                  \
     }                                                                          \
-    std::string checkValidity(const HeldType &) const { return ""; }           \
+    std::string checkValidity(const HeldType &) const override { return ""; }  \
   };
 
 /// Dummy object to hold in a shared_ptr for test

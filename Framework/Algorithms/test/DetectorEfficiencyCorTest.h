@@ -10,6 +10,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using Mantid::HistogramData::BinEdges;
+
 class DetectorEfficiencyCorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -115,24 +117,14 @@ private:
     space->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
 
-    MantidVecPtr x, y, e;
-    x.access().resize(nbins + 1, 0.0);
-    y.access().resize(nbins, 0.0);
-    e.access().resize(nbins, 0.0);
-    for (int i = 0; i < nbins; ++i) {
-      x.access()[i] = static_cast<double>((1 + i) / 100);
-      y.access()[i] = 10 + i;
-      e.access()[i] = sqrt(5.0);
-    }
-    x.access()[nbins] = static_cast<double>(nbins);
+    BinEdges x{0.0, 0.0, 0.0, 0.0, 4.0};
     // Fill a couple of zeros just as a check that it doesn't get changed
-    y.access()[nbins - 1] = 0.0;
-    e.access()[nbins - 1] = 0.0;
+    std::vector<double> y{10, 11, 12, 0};
+    std::vector<double> e{sqrt(5.0), sqrt(5.0), sqrt(5.0), 0.0};
 
-    for (int i = 0; i < nspecs; i++) {
-      space2D->setX(i, x);
-      space2D->setData(i, y, e);
-    }
+    space2D->setBinEdges(0, x);
+    space2D->dataY(0) = y;
+    space2D->dataE(0) = e;
 
     std::string xmlShape = "<cylinder id=\"shape\"> ";
     xmlShape += "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";

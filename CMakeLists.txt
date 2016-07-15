@@ -1,21 +1,8 @@
 ###########################################################################
 # CMake version check.
-# Require >= 3.3 for Windows as previous versions contained a bug that
-# prevented external data from working correctly. Other systems require
-# 2.8.12 to avoid recompiling system packages
+# Require CMake 3.5, required by ParaView 5.1.0
 ###########################################################################
-if (CMAKE_HOST_WIN32)
-  cmake_minimum_required ( VERSION 3.3.0 )
-else()
-  cmake_minimum_required ( VERSION 2.8.12 )
-endif()
-
-if(POLICY CMP0053)
-  #Simplify variable reference and escape sequence evaluation.
-  #Claims to dramatically improve CMake configure and generate time
-  #requires CMake 3.1 or later
-  cmake_policy(SET CMP0053 NEW)
-endif()
+cmake_minimum_required ( VERSION 3.5 )
 
 if(POLICY CMP0063)
   # The OLD behavior for this policy is to ignore the visibility properties
@@ -150,10 +137,11 @@ endif()
 add_subdirectory ( Framework )
 
 include_directories ( Framework/Kernel/inc )
+include_directories ( Framework/HistogramData/inc )
 include_directories ( Framework/Geometry/inc )
 include_directories ( Framework/API/inc )
 
-set ( CORE_MANTIDLIBS Kernel Geometry API )
+set ( CORE_MANTIDLIBS Kernel HistogramData Geometry API )
 
 # Add a target for all GUI tests
 add_custom_target ( GUITests )
@@ -262,7 +250,7 @@ if ( ENABLE_CPACK )
       # OCE
       set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization")
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-ipython >= 1.1.0,python-ipython-notebook" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-six,python-ipython >= 1.1.0,python-ipython-notebook" )
       # scipy & matplotlib
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy,python-matplotlib" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5,jsoncpp >= 0.7.0" )
@@ -302,6 +290,7 @@ if ( ENABLE_CPACK )
                            "python-sip,"
                            "python-qt4,"
                            "python-nxs (>= 4.3),"
+                           "python-six,"
                            "libjsoncpp0 (>=0.7.0),"
                            "libqscintilla2-11,"
                            "liboce-foundation8,liboce-modeling8,"

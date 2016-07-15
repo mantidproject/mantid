@@ -22,17 +22,13 @@ Kernel::Logger g_log("LoadHelper");
 using namespace Kernel;
 using namespace API;
 
-LoadHelper::LoadHelper() {}
-
-LoadHelper::~LoadHelper() {}
-
 /**
  * Finds the path for the instrument name in the nexus file
  * Usually of the form: entry0/\<NXinstrument class\>/name
  */
 std::string
 LoadHelper::findInstrumentNexusPath(const Mantid::NeXus::NXEntry &firstEntry) {
-  std::string insNamePath = "";
+  std::string insNamePath;
   std::vector<Mantid::NeXus::NXClassInfo> v = firstEntry.groups();
   for (auto it = v.begin(); it < v.end(); it++) {
     if (it->nxclass == "NXinstrument") {

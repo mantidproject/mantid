@@ -18,16 +18,6 @@ namespace LiveData {
 DECLARE_ALGORITHM(MonitorLiveData)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MonitorLiveData::MonitorLiveData() : m_chunkNumber(0) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MonitorLiveData::~MonitorLiveData() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MonitorLiveData::name() const { return "MonitorLiveData"; }
 

@@ -43,9 +43,6 @@ namespace DataHandling {
 */
 class DLLExport LoadNXSPE : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
-  LoadNXSPE();
-  ~LoadNXSPE() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadNXSPE"; };
   /// Summary of algorithms purpose

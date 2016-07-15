@@ -112,7 +112,7 @@ private:
   ~FrameworkManagerImpl();
 
   /// Set up the global locale
-  void setGlobalLocaleToAscii();
+  void setGlobalNumericLocaleToC();
   /// Silence NeXus output
   void disableNexusOutput();
   /// Starts asynchronous tasks that are done as part of Start-up

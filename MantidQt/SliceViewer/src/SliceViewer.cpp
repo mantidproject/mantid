@@ -5,6 +5,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 
+#include "MantidKernel/UsageService.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -170,6 +171,9 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // --------- Rescaler --------------------
   m_rescaler = new QwtPlotRescaler(m_plot->canvas());
+
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Interface", "SliceViewer", false);
 }
 
 void SliceViewer::updateAspectRatios() {
@@ -620,6 +624,25 @@ void SliceViewer::updateDimensionSliceWidgets() {
   for (size_t d = m_ws->getNumDims(); d < m_dimWidgets.size(); d++) {
     DimensionSliceWidget *widget = m_dimWidgets[d];
     widget->hide();
+  }
+
+  bool dimXset = false;
+  bool dimYset = false;
+  // put non integrated dimensions first
+  for (size_t d = 0; d < m_dimensions.size(); d++) {
+    if ((dimXset == false) &&
+        (m_ws->getDimension(d)->getIsIntegrated() == false)) {
+      m_dimX = d;
+      dimXset = true;
+    }
+    if ((dimYset == false) &&
+        (m_ws->getDimension(d)->getIsIntegrated() == false) && (d != m_dimX)) {
+      m_dimY = d;
+      dimYset = true;
+    }
+    if ((dimXset == true) && (dimYset == true)) {
+      break;
+    }
   }
 
   int maxLabelWidth = 10;

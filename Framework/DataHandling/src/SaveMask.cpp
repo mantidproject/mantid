@@ -40,17 +40,6 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(SaveMask)
 
-//----------------------------------------------------------------------------------------------
-/**
- * Constructor
- */
-SaveMask::SaveMask() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveMask::~SaveMask() {}
-
 /// Define input parameters
 void SaveMask::init() {
 
@@ -195,8 +184,6 @@ void SaveMask::exec() {
   writer.writeNode(std::cout, pDoc);
   writer.writeNode(ofs, pDoc);
   ofs.close();
-
-  return;
 }
 
 } // namespace DataHandling

@@ -15,14 +15,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //--------------------------------------------------------------------------
-/** Constructor
- */
-FindUBUsingFFT::FindUBUsingFFT() {}
-
-//--------------------------------------------------------------------------
-/** Destructor
- */
-FindUBUsingFFT::~FindUBUsingFFT() {}
 
 const std::string FindUBUsingFFT::name() const { return "FindUBUsingFFT"; }
 

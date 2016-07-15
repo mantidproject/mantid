@@ -84,7 +84,6 @@ void MaskDetectorsIf::exec() {
   std::string newf = getProperty("OutputCalFile");
   progress(0.99, "Creating new cal file");
   createNewCalFile(oldf, newf);
-  return;
 }
 
 /**
@@ -126,8 +125,6 @@ void MaskDetectorsIf::retrieveProperties() {
   if (newf.empty()) {
     throw std::runtime_error("OutputCalFile is empty. Enter a filename");
   }
-
-  return;
 }
 
 /**
@@ -173,7 +170,6 @@ void MaskDetectorsIf::createNewCalFile(const std::string &oldfile,
   }
   oldf.close();
   newf.close();
-  return;
 }
 
 std::string

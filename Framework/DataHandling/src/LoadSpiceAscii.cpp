@@ -52,16 +52,6 @@ static bool checkIntersection(std::vector<std::string> v1,
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadSpiceAscii::LoadSpiceAscii() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadSpiceAscii::~LoadSpiceAscii() {}
-
-//----------------------------------------------------------------------------------------------
 /** Name
  * @brief LoadSpiceAscii::name
  * @return
@@ -143,8 +133,6 @@ void LoadSpiceAscii::init() {
       make_unique<WorkspaceProperty<MatrixWorkspace>>("RunInfoWorkspace", "",
                                                       Direction::Output),
       "Name of TableWorkspace containing experimental information.");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -264,7 +252,7 @@ void LoadSpiceAscii::parseSPICEAscii(
         g_log.debug() << "Title = " << terms[0]
                       << ", number of splitted terms = " << terms.size()
                       << "\n";
-        std::string infovalue("");
+        std::string infovalue;
         if (terms.size() == 2) {
           infovalue = terms[1];
           boost::trim(infovalue);
@@ -312,8 +300,6 @@ void LoadSpiceAscii::parseSPICEAscii(
   g_log.debug() << "Run info dictionary has " << runinfodict.size()
                 << " entries."
                 << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -499,7 +485,7 @@ void LoadSpiceAscii::setupRunStartTime(
 std::string LoadSpiceAscii::processDateString(const std::string &rawdate,
                                               const std::string &dateformat) {
   // Identify splitter
-  std::string splitter("");
+  std::string splitter;
   if (dateformat.find('/') != std::string::npos)
     splitter += "/";
   else if (dateformat.find('-') != std::string::npos)
@@ -518,9 +504,9 @@ std::string LoadSpiceAscii::processDateString(const std::string &rawdate,
 
   if (dateterms.size() != formatterms.size() || dateterms.size() != 3)
     throw std::runtime_error("Unsupported date string and format");
-  std::string year("");
-  std::string month("");
-  std::string day("");
+  std::string year;
+  std::string month;
+  std::string day;
   for (size_t i = 0; i < 3; ++i) {
     if (formatterms[i].find('Y') != std::string::npos)
       year = dateterms[i];
@@ -605,8 +591,6 @@ template <typename T>
 void LoadSpiceAscii::addProperty(API::MatrixWorkspace_sptr ws,
                                  const std::string &pname, T pvalue) {
   ws->mutableRun().addLogData(new PropertyWithValue<T>(pname, pvalue));
-
-  return;
 }
 
 } // namespace DataHandling

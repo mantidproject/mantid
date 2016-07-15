@@ -16,16 +16,6 @@ using namespace Mantid::API;
 namespace Mantid {
 namespace LiveData {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LiveDataAlgorithm::LiveDataAlgorithm() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LiveDataAlgorithm::~LiveDataAlgorithm() {}
-
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LiveDataAlgorithm::category() const {
   return "DataHandling\\LiveData";
@@ -220,7 +210,7 @@ Mantid::Kernel::DateAndTime LiveDataAlgorithm::getStartTime() const {
  *         Returns a NULL pointer if no algorithm was chosen.
  */
 IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
-  std::string prefix = "";
+  std::string prefix;
   if (postProcessing)
     prefix = "Post";
 

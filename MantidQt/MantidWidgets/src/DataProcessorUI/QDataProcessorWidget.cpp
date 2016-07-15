@@ -76,7 +76,7 @@ this method is intended to be called by the presenter
 */
 void QDataProcessorWidget::setModel(const std::string &name) {
   m_toOpen = name;
-  m_presenter->notify(DataProcessorPresenter::OpenTableFlag);
+  m_presenter->notify(DataProcessorPresenter::TableUpdatedFlag);
 }
 
 /**

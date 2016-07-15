@@ -1,11 +1,10 @@
 #pylint: disable=no-init,invalid-name
-#from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction
-#from mantid.kernel import Direction, StringListValidator, FloatBoundedValidator
+from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
-from mantid.api import AnalysisDataService
+from six.moves import range #pylint: disable=redefined-builtin
 
 _OUTPUTLEVEL = "NOOUTPUT"
 
@@ -28,9 +27,6 @@ class CreateLeBailFitInput(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        #instruments=["POWGEN", "NOMAD", "VULCAN"]
-        #self.declareProperty("Instrument", "POWGEN", StringListValidator(instruments), "Powder diffractometer's name")
-
         self.declareProperty(FileProperty("ReflectionsFile","", FileAction.OptionalLoad, ['.hkl']),\
                 "Name of [http://www.ill.eu/sites/fullprof/ Fullprof] .hkl file that contains the peaks.")
 
@@ -66,19 +62,16 @@ class CreateLeBailFitInput(PythonAlgorithm):
         paramWS = self.createPeakParameterWorkspace(irffilename)
         self.setProperty("InstrumentParameterWorkspace", paramWS)
 
-        # hklWS = WorkspaceFactory.createTable()
-
         # 2. Get Other Properties
-        # instrument = self.getPropertyValue("Instrument")
         reflectionfilename = self.getPropertyValue("ReflectionsFile")
 
         # 3. Import reflections list
         genhkl = self.getProperty("GenerateBraggReflections").value
-        print "GeneraateHKL? = ", genhkl
-        if genhkl is True:
+        print("GeneraateHKL? = ", genhkl)
+        if genhkl:
             hklmax = self.getProperty("MaxHKL").value
             if len(hklmax) != 3:
-                raise NotImplementedError("MaxHKL must have 3 integers")
+                raise RuntimeError("MaxHKL must have 3 integers")
             hklws = self.generateBraggReflections(hklmax)
         else:
             hklwsname = self.getProperty("BraggPeakParameterWorkspace").value
@@ -96,23 +89,6 @@ class CreateLeBailFitInput(PythonAlgorithm):
         dummywsname = "Foo%d" % (rand)
         hklwsname = self.getPropertyValue("BraggPeakParameterWorkspace")
 
-        # print hklwsname
-        # tempX = api.LoadFullprofFile(
-        #         Filename=hklfilename,
-        #         PeakParameterWorkspace = "TempXXX",
-        #         OutputWorkspace = dummywsname)
-
-        # hklws2 = AnalysisDataService.retrieve("TempXXX")
-        # print "HKL WS 2 = ", hklws2
-
-        # hklws = tempX[0]
-        # dummyws = tempX[1]
-
-        # print "TempXXX: ", hklws
-
-        # api.DeleteWorkspace(Workspace=dummyws)
-        # api.DeleteWorkspace(Workspace="TempXXX")
-
         api.LoadFullprofFile(\
                 Filename=hklfilename,\
                 PeakParameterWorkspace = hklwsname,\
@@ -120,7 +96,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
 
         hklws = AnalysisDataService.retrieve(hklwsname)
         if hklws is None:
-            raise NotImplementedError("Unable to retrieve LoadFullprofFile's output TempXXX from analysis data service.")
+            raise RuntimeError("Unable to retrieve LoadFullprofFile's output TempXXX from analysis data service.")
 
         api.DeleteWorkspace(Workspace=dummywsname)
 
@@ -155,11 +131,11 @@ class CreateLeBailFitInput(PythonAlgorithm):
         tablews.addColumn("double", "StepSize")
 
         numrows = irfws.rowCount()
-        for ir in xrange(numrows):
+        for ir in range(numrows):
             tablews.addRow(["Parameter", 0.0, "tie", -1.0E200, 1.0E200, 1.0])
 
         # 3. Copy between 2 workspace
-        for ir in xrange(numrows):
+        for ir in range(numrows):
             tablews.setCell(ir, 0, irfws.cell(ir, 0))
             tablews.setCell(ir, 1, irfws.cell(ir, 1))
 
@@ -186,12 +162,12 @@ class CreateLeBailFitInput(PythonAlgorithm):
         #       to avoid skipping some valid reflections
 
         hkldict = {}
-        for h in xrange(0, max_m):
-            for k in xrange(h, max_m):
-                for l in xrange(k, max_m):
+        for h in range(0, max_m):
+            for k in range(h, max_m):
+                for l in range(k, max_m):
                     dsq = h*h + k*k + l*l
                     if dsq <= max_hkl_sq:
-                        if hkldict.has_key(dsq) is False:
+                        if (dsq in hkldict) is False:
                             hkldict[dsq] = []
                         hkldict[dsq].append([h, k, l])
                     # ENDIF

@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from testhelpers import run_algorithm, WorkspaceCreationHelper
 from mantid.kernel import V3D

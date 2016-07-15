@@ -2,6 +2,8 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidKernel/Material.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
+
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -10,6 +12,10 @@ using Mantid::API::Sample;
 using Mantid::Geometry::OrientedLattice;
 using Mantid::Kernel::Material;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(Material)
+GET_POINTER_SPECIALIZATION(OrientedLattice)
+GET_POINTER_SPECIALIZATION(Sample)
 
 void export_Sample() {
   register_ptr_to_python<Sample *>();
@@ -32,8 +38,8 @@ void export_Sample() {
       .def("hasCrystalStructure", &Sample::hasCrystalStructure, arg("self"),
            "Returns True if this sample has a crystal structure, false "
            "otherwise")
-      .def("setCrystalStructure", &Sample::setCrystalStructure, arg("self"),
-           arg("crystalStructure"),
+      .def("setCrystalStructure", &Sample::setCrystalStructure,
+           (arg("self"), arg("newCrystalStructure")),
            "Assign a crystal structure object to the sample.")
       .def("clearCrystalStructure", &Sample::clearCrystalStructure, arg("self"),
            "Removes the internally stored crystal structure.")
@@ -64,5 +70,6 @@ void export_Sample() {
       // -------------------------------------
       .def("__len__", &Sample::size, arg("self"),
            "Gets the number of samples in this collection")
-      .def("__getitem__", &Sample::operator[], return_internal_reference<>());
+      .def("__getitem__", &Sample::operator[], (arg("self"), arg("index")),
+           return_internal_reference<>());
 }

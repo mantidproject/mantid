@@ -10,7 +10,7 @@ from collections import Iterable
 
 from mantid.simpleapi import *
 #pylint: disable=unused-import
-from mantid.kernel import funcreturns
+from mantid.kernel import funcinspect
 #pylint: disable=unused-import
 from mantid import api,geometry,config
 
