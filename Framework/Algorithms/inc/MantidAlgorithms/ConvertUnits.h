@@ -103,7 +103,7 @@ private:
   API::MatrixWorkspace_sptr
   convertQuickly(API::MatrixWorkspace_const_sptr inputWS, const double &factor,
                  const double &power);
-  
+
   /// Internal function to gather detector specific L2, theta and efixed values
   bool getDetectorValues(
       Kernel::Unit_const_sptr outputUnit,
