@@ -57,6 +57,10 @@ SliceViewer Improvements
 ------------------------
 * When opening the sliceviewer, it will default to showing the first two non-integrated dimensions
 
+VSI Improvements
+----------------
+* ParaView updated to version 5.1.0
+
 |
 
 Full list of
