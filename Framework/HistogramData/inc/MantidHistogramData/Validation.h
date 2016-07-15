@@ -36,17 +36,19 @@ template <> struct Validator<HistogramE> {
 };
 
 template <class T> bool Validator<HistogramX>::isValid(const T &data) {
-  auto start = std::find_if_not(data.begin(), data.end(),
-                                static_cast<bool (*)(double)>(std::isnan));
-  auto it = start + 1;
-  for (; it < data.end(); ++it) {
-    if (std::isnan(*it))
+  if (data.empty())
+    return true;
+  auto it = std::find_if_not(data.begin(), data.end(),
+                             static_cast<bool (*)(double)>(std::isnan));
+  for (; it < data.end() - 1; ++it) {
+    if (std::isnan(*(it + 1)))
       break;
-    double delta = *it - *(it - 1);
+    double delta = *(it + 1) - *it;
     // Not 0.0, not denormal
     if (delta < DBL_MIN)
       return false;
   }
+  ++it;
   // after first NAN everything must be NAN
   return std::find_if_not(it, data.end(), static_cast<bool (*)(double)>(
                                               std::isnan)) == data.end();

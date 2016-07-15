@@ -7,7 +7,6 @@
 #include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/XValidation.h"
 
-#include <cfloat>
 #include <numeric>
 
 using Mantid::HistogramData::BinEdges;
