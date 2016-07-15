@@ -39,7 +39,7 @@ template <class T> bool Validator<HistogramX>::isValid(const T &data) {
   auto start = std::find_if_not(data.begin(), data.end(),
                                 static_cast<bool (*)(double)>(std::isnan));
   auto it = start + 1;
-  for (; it < data.cend(); ++it) {
+  for (; it < data.end(); ++it) {
     if (std::isnan(*it))
       break;
     double delta = *it - *(it - 1);
@@ -48,8 +48,8 @@ template <class T> bool Validator<HistogramX>::isValid(const T &data) {
       return false;
   }
   // after first NAN everything must be NAN
-  return std::find_if_not(it, data.cend(), static_cast<bool (*)(double)>(
-                                               std::isnan)) == data.cend();
+  return std::find_if_not(it, data.end(), static_cast<bool (*)(double)>(
+                                              std::isnan)) == data.end();
 }
 
 template <class T> void Validator<HistogramX>::checkValidity(const T &data) {
