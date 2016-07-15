@@ -57,8 +57,9 @@ private:
   void exec() override;
   void retrieveProperties();
   double calculateFormulaValue(const std::string &, double);
-  MantidVec calculateEfficiency(double, const std::string &,
-                                const HistogramData::Points &);
+  MantidVec calculateEfficiency(double eff0,
+                                const std::string &formula,
+                                const HistogramData::Points &xIn);
 
   std::string getValFromInstrumentDef(const std::string &);
 
