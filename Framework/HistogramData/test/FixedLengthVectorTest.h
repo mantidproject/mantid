@@ -107,6 +107,30 @@ public:
     TS_ASSERT_EQUALS(testee[2], 1.0);
   }
 
+  void test_range_assignment() {
+    std::vector<double> src{3.6, 9.7, 8.5};
+    FixedLengthVectorTester dest;
+
+    dest.assign(src.cbegin(), src.cend());
+
+    TS_ASSERT_EQUALS(dest.size(), 3);
+    TS_ASSERT_EQUALS(dest[0], src[0]);
+    TS_ASSERT_EQUALS(dest[1], src[1]);
+    TS_ASSERT_EQUALS(dest[2], src[2]);
+  }
+
+  void test_value_assignment() {
+    FixedLengthVectorTester dest;
+
+    dest.assign(4, 3.9);
+
+    TS_ASSERT_EQUALS(dest.size(), 4);
+    TS_ASSERT_EQUALS(dest[0], 3.9);
+    TS_ASSERT_EQUALS(dest[1], 3.9);
+    TS_ASSERT_EQUALS(dest[2], 3.9);
+    TS_ASSERT_EQUALS(dest[3], 3.9);
+  }
+
   void test_copy_assignment() {
     const FixedLengthVectorTester src(2, 0.1);
     FixedLengthVectorTester dest(2);
