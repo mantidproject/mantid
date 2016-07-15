@@ -225,8 +225,8 @@ void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
         for (const auto &prop : props) {
           // assume in cm
           const double val = args->getProperty(prop->name());
-          shapeArgs.insert(std::make_pair(
-              boost::algorithm::to_lower_copy(prop->name()), val * 0.01));
+          shapeArgs.emplace(boost::algorithm::to_lower_copy(prop->name()),
+                            val * 0.01);
         }
       }
       auto shapeObject = can->createSampleShape(shapeArgs);
