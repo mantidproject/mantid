@@ -685,15 +685,6 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
       std::copy(edges.cbegin(), edges.cbegin() + lastBins[j],
                 result->mutableX(j).begin());
 
-      // If necessary, add on some fake values to the end of the X array (Y&E
-      // will be zero)
-      if (k < maxBins) {
-        auto l = k;
-        std::transform(resX.begin() + lastBins[j], resX.end(),
-                       resX.begin() + lastBins[j],
-                       [=](double &x) mutable { return x + 1 + (++l) - k; });
-      }
-
       std::copy(workspace->y(j).cbegin(),
                 workspace->y(j).cbegin() + (lastBins[j] - 1),
                 result->mutableY(j).begin());
