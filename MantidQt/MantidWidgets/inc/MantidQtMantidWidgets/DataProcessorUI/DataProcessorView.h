@@ -80,10 +80,6 @@ public:
   virtual void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) = 0;
-  virtual void setGlobalOptions(
-      const std::vector<std::string> &stages,
-      const std::vector<std::string> &algNames,
-      const std::vector<std::map<std::string, std::string>> &hints) = 0;
   virtual void setClipboard(const std::string &text) = 0;
   virtual void setModel(const std::string &name) = 0;
 
@@ -93,7 +89,6 @@ public:
   virtual std::string getWorkspaceToOpen() const = 0;
   virtual std::string getClipboard() const = 0;
   virtual std::string getProcessInstrument() const = 0;
-  virtual std::string getProcessingOptions(const std::string &name) const = 0;
   virtual boost::shared_ptr<DataProcessorPresenter>
   getTablePresenter() const = 0;
 };

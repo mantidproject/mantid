@@ -173,8 +173,6 @@ protected:
   // options
   void showOptionsDialog();
   void initOptions();
-  // algorithms' hints
-  void createProcessLayout();
 
   // List of workspaces the user can open
   std::set<std::string> m_workspaceList;

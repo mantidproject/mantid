@@ -86,16 +86,11 @@ public:
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) override;
   void setClipboard(const std::string &text) override;
-  void setGlobalOptions(
-      const std::vector<std::string> &stages,
-      const std::vector<std::string> &algNames,
-      const std::vector<std::map<std::string, std::string>> &hints) override;
 
   // Accessor methods
   std::map<int, std::set<int>> getSelectedRows() const override;
   std::set<int> getSelectedGroups() const override;
   std::string getProcessInstrument() const override;
-  std::string getProcessingOptions(const std::string &name) const override;
   std::string getWorkspaceToOpen() const override;
   std::string getClipboard() const override;
 

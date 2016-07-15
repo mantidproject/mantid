@@ -65,8 +65,8 @@ namespace MantidWidgets {
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-        preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+        &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
@@ -127,8 +127,6 @@ void GenericDataProcessorPresenter::acceptViews(
   // Initialise options
   // Load saved values from disk
   initOptions();
-  // Create the process layout
-  createProcessLayout();
 
   // Populate an initial list of valid tables to open, and subscribe to the ADS
   // to keep it up to date
@@ -158,53 +156,6 @@ void GenericDataProcessorPresenter::acceptViews(
 
   // Start with a blank table
   newTable();
-}
-
-/**
-Tells the view how to create the HintingLineEdits for pre-, post- and processing
-*/
-void GenericDataProcessorPresenter::createProcessLayout() {
-
-  std::vector<std::string> stages;
-  std::vector<std::string> algNames;
-  std::vector<std::map<std::string, std::string>> hints;
-
-  // Pre-process
-  // The number of items depends on the number of algorithms needed for
-  // pre-processing the data
-  for (auto it = m_preprocessMap.begin(); it != m_preprocessMap.end(); ++it) {
-
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create(it->second.name());
-    AlgorithmHintStrategy strategy(alg, it->second.blacklist());
-    stages.push_back("Pre-process");
-    algNames.push_back(alg->name());
-    hints.push_back(strategy.createHints());
-  }
-
-  // Process
-  // Only one algorithm
-  {
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create(m_processor.name());
-    AlgorithmHintStrategy strategy(alg, m_processor.blacklist());
-    stages.push_back("Process");
-    algNames.push_back(alg->name());
-    hints.push_back(strategy.createHints());
-  }
-
-  // Post-process
-  // Only one algorithm
-  {
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create(m_postprocessor.name());
-    AlgorithmHintStrategy strategy(alg, m_postprocessor.blacklist());
-    stages.push_back("Post-process");
-    algNames.push_back(alg->name());
-    hints.push_back(strategy.createHints());
-  }
-
-  m_view->setGlobalOptions(stages, algNames, hints);
 }
 
 /**
@@ -353,14 +304,14 @@ void GenericDataProcessorPresenter::saveNotebook(
   }
 
   // Get all the options used for the reduction from the view
-  std::map<std::string, std::string> preprocessingOptionsMap;
-  for (auto it = m_preprocessMap.begin(); it != m_preprocessMap.end(); ++it) {
-    preprocessingOptionsMap[it->first] =
-        m_view->getProcessingOptions(it->second.name());
-  }
-  auto processingOptions = m_view->getProcessingOptions(m_processor.name());
-  auto postprocessingOptions =
-      m_view->getProcessingOptions(m_postprocessor.name());
+
+  // TODO : get global pre-processing options as a map where keys are column
+  // name and values are pre-processing options as a string
+  const std::map<std::string, std::string> preprocessingOptionsMap;
+  // TODO : get global processing options as a string
+  const std::string processingOptions;
+  // TODO : get global post-processing options as a string
+  const std::string postprocessingOptions;
 
   auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
       m_wsName, m_model, m_view->getProcessInstrument(), m_whitelist,
@@ -419,9 +370,9 @@ void GenericDataProcessorPresenter::postProcessGroup(
   alg->setProperty(m_postprocessor.inputProperty(), inputWSNames);
   alg->setProperty(m_postprocessor.outputProperty(), outputWSName);
 
-  // Read the post-processing instructions from the view
-  const std::string options =
-      m_view->getProcessingOptions(m_postprocessor.name());
+  // TODO : get global post-processing options
+  const std::string options;
+
   auto optionsMap = parseKeyValueString(options);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
@@ -781,9 +732,10 @@ void GenericDataProcessorPresenter::reduceRow(int groupNo, int rowNo) {
 
         auto preprocessor = m_preprocessMap[columnName];
 
-        // Read the pre-processing options from the view
-        const std::string options =
-            m_view->getProcessingOptions(preprocessor.name());
+        // TODO : get global pre-processing options for this algorithm as a
+        // string
+        const std::string options;
+
         auto optionsMap = parseKeyValueString(options);
         auto runWS = prepareRunWorkspace(runStr, preprocessor, optionsMap);
         alg->setProperty(propertyName, runWS->name());
@@ -799,8 +751,9 @@ void GenericDataProcessorPresenter::reduceRow(int groupNo, int rowNo) {
     }
   }
 
-  /* Deal with processing instructions specified via the hinting line edit */
-  std::string options = m_view->getProcessingOptions(m_processor.name());
+  // TODO : get global processing options as a string
+  std::string options;
+
   // Parse and set any user-specified options
   auto optionsMap = parseKeyValueString(options);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
@@ -813,8 +766,9 @@ void GenericDataProcessorPresenter::reduceRow(int groupNo, int rowNo) {
   }
 
   /* Now deal with 'Options' column */
-  options = m_model->data(m_model->index(rowNo, m_model->columnCount() - 1,
-                                         m_model->index(groupNo, 0)))
+  options = m_model
+                ->data(m_model->index(rowNo, m_model->columnCount() - 1,
+                                      m_model->index(groupNo, 0)))
                 .toString()
                 .toStdString();
   // Parse and set any user-specified options

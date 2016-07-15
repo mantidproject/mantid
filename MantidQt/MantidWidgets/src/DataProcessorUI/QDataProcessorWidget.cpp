@@ -520,47 +520,6 @@ void QDataProcessorWidget::setOptionsHintStrategy(HintStrategy *hintStrategy,
 }
 
 /**
-* Adds the specified HintingLineEdit widgets to this view. A hinting line edit
-* comes with a label and an algorithm's name. Headings are also shown.
-* @param stages : The stages, pre-process, process or post-process, as a vector
-* @param algNames : The algorithm names as a vector
-* @param hints : The hints for each algorithm as a vector
-*/
-void QDataProcessorWidget::setGlobalOptions(
-    const std::vector<std::string> &stages,
-    const std::vector<std::string> &algNames,
-    const std::vector<std::map<std::string, std::string>> &hints) {
-  // Headers
-  QLabel *stageHeader = new QLabel(QString::fromStdString("<b>Stage</b>"));
-  QLabel *algorithmHeader =
-      new QLabel(QString::fromStdString("<b>Algorithm</b>"));
-  QLabel *optionsHeader =
-      new QLabel(QString::fromStdString("<b>Global Options</b>"));
-  stageHeader->setMinimumHeight(30);
-  ui.processLayout->addWidget(stageHeader, 0, 0);
-  ui.processLayout->addWidget(algorithmHeader, 0, 1);
-  ui.processLayout->addWidget(optionsHeader, 0, 2);
-
-  int rows = static_cast<int>(stages.size());
-
-  for (int row = 0; row < rows; row++) {
-
-    // The title
-    QLabel *stageLabel =
-        new QLabel(QString::fromStdString(stages.at(row)), this);
-    stageLabel->setMinimumSize(100, 10);
-    ui.processLayout->addWidget(stageLabel, row + 1, 0);
-    // The name
-    QLabel *nameLabel =
-        new QLabel(QString::fromStdString(algNames.at(row)), this);
-    ui.processLayout->addWidget(new HintingLineEdit(this, hints.at(row)),
-                                row + 1, 2);
-    // The content
-    ui.processLayout->addWidget(nameLabel, row + 1, 1);
-  }
-}
-
-/**
 Sets the contents of the system's clipboard
 @param text The contents of the clipboard
 */
@@ -652,30 +611,6 @@ std::string QDataProcessorWidget::getClipboard() const {
 * Clear the progress
 */
 void QDataProcessorWidget::clearProgress() { ui.progressBar->reset(); }
-
-/**
-* Returns the processing instructions for the specified algorithm
-* @param name : The name of the algorithm
-* @return : The processing instructions specified by the user
-*/
-std::string
-QDataProcessorWidget::getProcessingOptions(const std::string &name) const {
-
-  const int nrows = ui.processLayout->rowCount();
-  for (int r = 0; r < nrows; r++) {
-
-    auto widget = ui.processLayout->itemAtPosition(r + 1, 1)->widget();
-    auto text = static_cast<QLabel *>(widget)->text().toStdString();
-    if (text == name) {
-      // This is the algorithm for which we need the processing instructions
-      // (options)
-      auto widget = ui.processLayout->itemAtPosition(r + 1, 2)->widget();
-      auto text = static_cast<HintingLineEdit *>(widget)->text().toStdString();
-      return text;
-    }
-  }
-  return "";
-}
 
 } // namespace MantidWidgets
 } // namespace Mantid
