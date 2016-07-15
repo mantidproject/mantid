@@ -36,10 +36,10 @@ template <> struct Validator<HistogramE> {
 };
 
 template <class T> bool Validator<HistogramX>::isValid(const T &data) {
-  if (data.empty())
-    return true;
   auto it = std::find_if_not(data.begin(), data.end(),
                              static_cast<bool (*)(double)>(std::isnan));
+  if (it == data.end())
+    return true;
   for (; it < data.end() - 1; ++it) {
     if (std::isnan(*(it + 1)))
       break;
