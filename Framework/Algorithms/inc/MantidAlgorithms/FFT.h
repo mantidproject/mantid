@@ -7,6 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/cow_ptr.h"
+#include <gsl/gsl_fft_complex.h>
 
 namespace boost {
 template <typename T> class shared_array;
@@ -69,18 +70,19 @@ private:
   void init() override;
   void exec() override;
 
-  void outputLabel(const bool addPositiveOnly, double &df, const int nOut);
+  void outputLabel(double &df);
 
   // Perform forward transformation
-  void transformForward(boost::shared_array<double> &data,
-                        const bool addPositiveOnly, bool isComplex,
-                        const int iReal, const int iImag, const double df,
-                        const double dx);
+  void transformForward(boost::shared_array<double> &data, const int xSize,
+                        const int ySize, const int dys,
+                        const bool addPositiveOnly, const bool centerShift,
+                        const bool isComplex, const int iReal, const int iImag,
+                        const double df, const double dx);
   // Perform backward transformation
-  void transformBackward(boost::shared_array<double> &data,
-                         const bool addPositiveOnly, bool isComplex,
-                         const int iReal, const int iImag, const double df,
-                         const double dx);
+  void transformBackward(boost::shared_array<double> &data, const int xSize,
+                         const int ySize, const int dys, const bool centerShift,
+                         const bool isComplex, const int iReal, const int iImag,
+                         const double df);
 
   void setupTAxis(const int nOut, const bool addPositiveOnly);
   /// Check whether supplied values are evenly spaced
@@ -92,6 +94,8 @@ private:
   Mantid::API::MatrixWorkspace_const_sptr m_inWS;
   Mantid::API::MatrixWorkspace_const_sptr m_inImagWS;
   Mantid::API::MatrixWorkspace_sptr m_outWS;
+  gsl_fft_complex_wavetable *m_wavetable;
+  gsl_fft_complex_workspace *m_workspace;
   int m_iIm;
   int m_iRe;
   int m_iAbs;
