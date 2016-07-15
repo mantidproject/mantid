@@ -60,12 +60,12 @@ class MANTIDQT_CUSTOMINTERFACES_DLL QtReflRunsTabView
       public MantidQt::MantidWidgets::ProgressableView {
   Q_OBJECT
 public:
-	/// Constructor
+  /// Constructor
   QtReflRunsTabView(QWidget *parent = 0);
-	/// Destructor
+  /// Destructor
   ~QtReflRunsTabView() override;
-	/// initialise the interface
-	void initLayout();
+  /// initialise the interface
+  void initLayout();
   /// Name of the interface
   static std::string name() { return "ISIS Reflectometry (Polref)"; }
   // This interface's categories.

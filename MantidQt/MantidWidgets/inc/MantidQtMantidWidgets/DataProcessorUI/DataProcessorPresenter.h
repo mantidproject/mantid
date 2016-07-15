@@ -9,8 +9,8 @@
 namespace MantidQt {
 namespace MantidWidgets {
 // Forward decs
-class WorkspaceReceiver;
 class DataProcessorCommand;
+class DataProcessorMainPresenter;
 class DataProcessorView;
 class ProgressableView;
 
@@ -78,7 +78,7 @@ public:
                                  const std::string &defaultInstrument) = 0;
   virtual std::vector<std::unique_ptr<DataProcessorCommand>>
   publishCommands() = 0;
-  virtual void accept(WorkspaceReceiver *workspaceReceiver) = 0;
+  virtual void accept(DataProcessorMainPresenter *mainPresenter) = 0;
   virtual void acceptViews(DataProcessorView *tableView,
                            ProgressableView *progressView) = 0;
   virtual void setModel(std::string name) = 0;

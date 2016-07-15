@@ -5,8 +5,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 /** @class IReflRunsTabPresenter
 
-IReflRunsTabPresenter is an interface which defines the functions any reflectometry
-interface presenter needs to support.
+IReflRunsTabPresenter is an interface which defines the functions any
+reflectometry interface presenter needs to support.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source

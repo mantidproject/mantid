@@ -35,10 +35,10 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QtDataProcessorOptionsDialog.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/WorkspaceReceiver.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
 
@@ -72,7 +72,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_whitelist(whitelist), m_preprocessMap(preprocessMap),
       m_processor(processor), m_postprocessor(postprocessor),
-      m_workspaceReceiver(), m_tableDirty(false), m_colGroup(0) {
+      m_mainPresenter(), m_tableDirty(false), m_colGroup(0) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -1150,7 +1150,7 @@ void GenericDataProcessorPresenter::addHandle(
 
   m_workspaceList.insert(name);
   m_view->setTableList(m_workspaceList);
-  m_workspaceReceiver->notify(WorkspaceReceiver::ADSChangedFlag);
+  m_mainPresenter->notify(DataProcessorMainPresenter::ADSChangedFlag);
 }
 
 /**
@@ -1159,7 +1159,7 @@ Handle ADS remove events
 void GenericDataProcessorPresenter::postDeleteHandle(const std::string &name) {
   m_workspaceList.erase(name);
   m_view->setTableList(m_workspaceList);
-  m_workspaceReceiver->notify(WorkspaceReceiver::ADSChangedFlag);
+  m_mainPresenter->notify(DataProcessorMainPresenter::ADSChangedFlag);
 }
 
 /**
@@ -1168,7 +1168,7 @@ Handle ADS clear events
 void GenericDataProcessorPresenter::clearADSHandle() {
   m_workspaceList.clear();
   m_view->setTableList(m_workspaceList);
-  m_workspaceReceiver->notify(WorkspaceReceiver::ADSChangedFlag);
+  m_mainPresenter->notify(DataProcessorMainPresenter::ADSChangedFlag);
 }
 
 /**
@@ -1185,7 +1185,7 @@ void GenericDataProcessorPresenter::renameHandle(const std::string &oldName,
   m_workspaceList.erase(oldName);
   m_workspaceList.insert(newName);
   m_view->setTableList(m_workspaceList);
-  m_workspaceReceiver->notify(WorkspaceReceiver::ADSChangedFlag);
+  m_mainPresenter->notify(DataProcessorMainPresenter::ADSChangedFlag);
 }
 
 /**
@@ -1552,14 +1552,14 @@ GenericDataProcessorPresenter::publishCommands() {
 }
 
 /** Register a workspace receiver
-* @param workspaceReceiver : [input] The outer presenter
+* @param mainPresenter : [input] The outer presenter
 */
 void GenericDataProcessorPresenter::accept(
-    WorkspaceReceiver *workspaceReceiver) {
-  m_workspaceReceiver = workspaceReceiver;
+    DataProcessorMainPresenter *mainPresenter) {
+  m_mainPresenter = mainPresenter;
   // Notify workspace receiver with the list of valid workspaces as soon as it
   // is registered
-  m_workspaceReceiver->notify(WorkspaceReceiver::ADSChangedFlag);
+  m_mainPresenter->notify(DataProcessorMainPresenter::ADSChangedFlag);
 }
 
 /** Returs the list of valid workspaces currently in the ADS

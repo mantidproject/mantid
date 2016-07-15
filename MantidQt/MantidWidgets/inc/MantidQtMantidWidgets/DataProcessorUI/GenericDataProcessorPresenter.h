@@ -51,8 +51,8 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS GenericDataProcessorPresenter
 public:
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-          preprocessMap,
+      const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+          &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor);
   GenericDataProcessorPresenter(
@@ -105,7 +105,7 @@ protected:
   // The number of columns
   int m_columns;
   // A workspace receiver we want to notify
-  WorkspaceReceiver *m_workspaceReceiver;
+  DataProcessorMainPresenter *m_mainPresenter;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
   // Index for column 'Group'
@@ -186,7 +186,7 @@ protected:
   void afterReplaceHandle(const std::string &name,
                           Mantid::API::Workspace_sptr workspace) override;
   void saveNotebook(const std::map<int, std::set<int>> &rows);
-  void accept(WorkspaceReceiver *workspaceReceiver) override;
+  void accept(DataProcessorMainPresenter *mainPresenter) override;
   std::vector<std::unique_ptr<DataProcessorCommand>> getTableList();
 
   void validateModel(Mantid::API::ITableWorkspace_sptr model);

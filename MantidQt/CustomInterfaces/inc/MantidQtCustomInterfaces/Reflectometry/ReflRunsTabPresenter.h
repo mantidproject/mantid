@@ -4,7 +4,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/WorkspaceReceiver.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
@@ -54,16 +54,16 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTIDQT_CUSTOMINTERFACES_DLL ReflRunsTabPresenter
     : public IReflRunsTabPresenter,
-      public MantidQt::MantidWidgets::WorkspaceReceiver {
+      public MantidQt::MantidWidgets::DataProcessorMainPresenter {
 public:
-  ReflRunsTabPresenter(
-      IReflRunsTabView *mainView, ProgressableView *progressView,
-      boost::shared_ptr<DataProcessorPresenter> tablePresenter,
-      boost::shared_ptr<IReflSearcher> searcher =
-          boost::shared_ptr<IReflSearcher>());
+  ReflRunsTabPresenter(IReflRunsTabView *mainView,
+                       ProgressableView *progressView,
+                       boost::shared_ptr<DataProcessorPresenter> tablePresenter,
+                       boost::shared_ptr<IReflSearcher> searcher =
+                           boost::shared_ptr<IReflSearcher>());
   ~ReflRunsTabPresenter() override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
-  void notify(WorkspaceReceiver::Flag flag) override;
+  void notify(DataProcessorMainPresenter::Flag flag) override;
 
 protected:
   // the search model

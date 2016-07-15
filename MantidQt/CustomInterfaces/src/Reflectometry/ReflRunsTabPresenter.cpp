@@ -294,10 +294,10 @@ ReflRunsTabPresenter::getTransferStrategy() {
 /**
 Used to tell the presenter something has changed in the ADS
 */
-void ReflRunsTabPresenter::notify(WorkspaceReceiver::Flag flag) {
+void ReflRunsTabPresenter::notify(DataProcessorMainPresenter::Flag flag) {
 
   switch (flag) {
-  case WorkspaceReceiver::ADSChangedFlag:
+  case DataProcessorMainPresenter::ADSChangedFlag:
     pushCommands();
     break;
   }
