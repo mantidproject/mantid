@@ -1280,85 +1280,100 @@ void ConfigDialog::refreshTreeCategories() {
 
   // Loop over all categories loaded into Mantid
   for (auto i = categoryMap.cbegin(); i != categoryMap.cend(); ++i) {
+	  
 	  QString catNames = QString::fromStdString(i->first);
-
-	  // Split the categories whose name is delimited by '\\'
-	  QStringList splitCats = catNames.split('\\');
-
 	  // Start recursion down building tree from names
-	  buildTreeCategoryStructure(&splitCats, i->second, &categories);
+	  buildTreeCategoryStructure(&catNames, i->second, &categories);
   }
 }
 
-void ConfigDialog::buildTreeCategoryStructure(const QStringList *splitCats, const bool isHidden,
+void ConfigDialog::buildTreeCategoryStructure(const QString *catNames, const bool isHidden,
 	QMap<QString, QTreeWidgetItem *> *seenCategories) {
-
 	/* Some categories come as standalone and some are discovered
 	// via their subcategory. E.g. Arithmetic vs Crystal\\Cell
 	// If standalone it has its own isHidden attribute otherwise
 	// we have to assume it to be visible (or ticked) as that information
 	// is not stored. */
-	int splitCatIndex = splitCats->size();
+
+	// Split the categories whose name is delimited by '\\'
+	QStringList splitCats = catNames->split('\\');
+
+	//Create a unique key for storing into the mapping
+	QString catKey(*catNames);
+	//We need to remove delimiter as top level categories do not come with it
+	catKey.remove('\\');
+
+	int splitCatIndex = splitCats.size();
 	// We wont be using the last element (null) of the array so decrement 1
 	splitCatIndex--;
 
 	if (splitCatIndex == 0) {
 		//This is a top level category and standalone 
-		QTreeWidgetItem *catWidget = createCheckedTreeItem((*splitCats)[0], !isHidden);
+		QTreeWidgetItem *catWidget = createCheckedTreeItem(splitCats[0], !isHidden);
 		treeCategories->addTopLevelItem(catWidget);
-		seenCategories->insert((*splitCats)[0], catWidget);
+		seenCategories->insert(catKey, catWidget);
 	}
 	else {
 		// We need to determine if we have seen this category before
 		// and get any pointers to its parent(s)
 		int prevElement = splitCatIndex - 1;
 		QTreeWidgetItem *parentWidgetPtr = walkBackwardsThroughCategories(
-			splitCats, prevElement, seenCategories);
-
+			catNames, prevElement, seenCategories);
+		
 		// At this point we now all parent categories have been created
 		// So lets create the child
-		QTreeWidgetItem *newChildCat = createCheckedTreeItem((*splitCats)[splitCatIndex], isHidden);
+		QTreeWidgetItem *newChildCat = createCheckedTreeItem(splitCats[splitCatIndex], !isHidden);
 		parentWidgetPtr->addChild(newChildCat);
+		seenCategories->insert(catKey, newChildCat);
 	}
 
 }
 
-QTreeWidgetItem * ConfigDialog::walkBackwardsThroughCategories(const QStringList *splitCats,
+QTreeWidgetItem * ConfigDialog::walkBackwardsThroughCategories(const QString *catNames,
 	int elementToCheck, QMap<QString, QTreeWidgetItem*>* seenCategories) {
+
+	// Split the categories whose name is delimited by '\\'
+	QStringList splitCats = catNames->split('\\');
+	// Build a unique key only from the elements we should check
+	// Element to check is always 1 minus so check last element as well
+	QString catKey = "";
+	for (int i = 0; i <= elementToCheck; i++) {
+		catKey += splitCats[i];
+	}
 
 	QTreeWidgetItem *parentWidgetPtr = nullptr;
 
 	// Walk backwards through a string list discovering any missed categories
 	// If a parent category already exists we exit returning the most
 	// right category pointer
-	if (!seenCategories->contains((*splitCats)[elementToCheck])) {
+	if (!seenCategories->contains(catKey)) {
 		//We have not see this parent category check any other parents first
 		if (elementToCheck > 0) {
 			int prevElement = elementToCheck - 1;
-			parentWidgetPtr = walkBackwardsThroughCategories(splitCats, prevElement, 
+			parentWidgetPtr = walkBackwardsThroughCategories(catNames, prevElement, 
 				seenCategories);
 		}
 		// Now deal with this category 
 		if (!parentWidgetPtr) {
 			// We are the most top level category which is ticked or visible
-			QTreeWidgetItem *catWidget = createCheckedTreeItem((*splitCats)[elementToCheck], true);
+			QTreeWidgetItem *catWidget = createCheckedTreeItem(splitCats[elementToCheck], true);
 			treeCategories->addTopLevelItem(catWidget);
-			seenCategories->insert((*splitCats)[elementToCheck], catWidget);
+			seenCategories->insert(catKey, catWidget);
 			// Assign pointer to return for caller
 			parentWidgetPtr = catWidget;
 		}
 		else {
 			// We need to create a child which is ticked or visible 
-			QTreeWidgetItem *childWidget = createCheckedTreeItem((*splitCats)[elementToCheck], true);
+			QTreeWidgetItem *childWidget = createCheckedTreeItem(splitCats[elementToCheck], true);
 			parentWidgetPtr->addChild(childWidget);
-			seenCategories->insert((*splitCats)[elementToCheck], childWidget);
+			seenCategories->insert(catKey, childWidget);
 			// Make the child the parent for caller
 			parentWidgetPtr = childWidget;
 		}
 	}
 	else {
 		// The category has already been created - lets return it
-		parentWidgetPtr = seenCategories->value((*splitCats)[elementToCheck]);
+		parentWidgetPtr = seenCategories->value(catKey);
 	}
 
 	return parentWidgetPtr;
