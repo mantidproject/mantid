@@ -17,9 +17,8 @@ class InstrumentWidgetTab;
 }
 }
 
-using namespace Mantid;
-
-class InstrumentWindow : public MdiSubWindow, public IProjectSerialisable {
+class InstrumentWindow : public MdiSubWindow,
+                         public Mantid::IProjectSerialisable {
   Q_OBJECT
 public:
   explicit InstrumentWindow(const QString &wsName,

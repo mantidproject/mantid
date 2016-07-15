@@ -647,10 +647,8 @@ public:
         WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
     badIn->dataX(0) = std::vector<double>(11, 2.0);
     AnalysisDataService::Instance().add("badIn", badIn);
-    TS_ASSERT_THROWS_NOTHING(
+    TS_ASSERT_THROWS_ANYTHING(
         merge.setPropertyValue("InputWorkspaces", "ws1,badIn"));
-    TS_ASSERT_THROWS(merge2.execute(), std::runtime_error);
-    TS_ASSERT(!merge2.isExecuted());
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -746,7 +744,7 @@ public:
     alg.initialize();
     alg.setPropertyValue("InputWorkspaces", a->name() + "," + b->name());
     alg.setPropertyValue("OutputWorkspace", "out");
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
   void test_mixed_multiperiod_group_and_non_multiperiod_group_inputs_throws() {

@@ -61,7 +61,7 @@ std::string AlgorithmProperty::getDefault() const { return ""; }
  * contain the error
 */
 std::string AlgorithmProperty::setValue(const std::string &value) {
-  std::string message("");
+  std::string message;
   try {
     Kernel::PropertyWithValue<IAlgorithm_sptr>::m_value =
         Algorithm::fromString(value);

@@ -1,4 +1,6 @@
 #pylint: disable=no-init,invalid-name,bare-except,too-many-arguments,multiple-statements
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import *
 from mantid.kernel import *
 import os

@@ -1,10 +1,10 @@
 #include "MantidKernel/Statistics.h"
+#include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
-#include <boost/python/numeric.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/return_value_policy.hpp>
 #include <boost/python/scope.hpp>
@@ -80,7 +80,7 @@ public:
  * @param data Input data
  * @param sorted A boolean indicating whether the data is sorted
  */
-Statistics getStatisticsNumpy(const numeric::array &data,
+Statistics getStatisticsNumpy(const NumPy::NdArray &data,
                               const bool sorted = false) {
   using Mantid::Kernel::getStatistics;
   using Mantid::Kernel::StatOptions;
@@ -115,7 +115,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(getStatisticsOverloads, getStatisticsNumpy, 1,
  * @param zscoreFunc A function pointer to the required moments function
  * @param data Numpy array of data
  */
-std::vector<double> getZscoreNumpy(const numeric::array &data) {
+std::vector<double> getZscoreNumpy(const NumPy::NdArray &data) {
   using Converters::NDArrayToVector;
   using Mantid::Kernel::getZscore;
 
@@ -131,7 +131,7 @@ std::vector<double> getZscoreNumpy(const numeric::array &data) {
  * @param data The input array
  * @param sorted True if the data is sorted (deprecated)
  */
-std::vector<double> getZscoreNumpyDeprecated(const numeric::array &data,
+std::vector<double> getZscoreNumpyDeprecated(const NumPy::NdArray &data,
                                              const bool sorted) {
   UNUSED_ARG(sorted);
   PyErr_Warn(PyExc_DeprecationWarning,
@@ -143,7 +143,7 @@ std::vector<double> getZscoreNumpyDeprecated(const numeric::array &data,
  * Proxy for @see Mantid::Kernel::getModifiedZscore so that it can accept numpy
  * arrays,
  */
-std::vector<double> getModifiedZscoreNumpy(const numeric::array &data,
+std::vector<double> getModifiedZscoreNumpy(const NumPy::NdArray &data,
                                            const bool sorted = false) {
   using Mantid::Kernel::getModifiedZscore;
   using Converters::NDArrayToVector;
@@ -187,8 +187,8 @@ typedef std::vector<double>(*MomentsFunction)(const std::vector<double> &indep,
  * @param maxMoment Maximum number of moments to return
  */
 std::vector<double> getMomentsNumpyImpl(MomentsFunction momentsFunc,
-                                        const numeric::array &indep,
-                                        const numeric::array &depend,
+                                        const NumPy::NdArray &indep,
+                                        const NumPy::NdArray &depend,
                                         const int maxMoment) {
   using Converters::NDArrayToVector;
 
@@ -209,8 +209,8 @@ std::vector<double> getMomentsNumpyImpl(MomentsFunction momentsFunc,
  * Proxy for @see Mantid::Kernel::getMomentsAboutOrigin so that it can accept
  * numpy arrays
  */
-std::vector<double> getMomentsAboutOriginNumpy(const numeric::array &indep,
-                                               const numeric::array &depend,
+std::vector<double> getMomentsAboutOriginNumpy(const NumPy::NdArray &indep,
+                                               const NumPy::NdArray &depend,
                                                const int maxMoment = 3) {
   using Mantid::Kernel::getMomentsAboutOrigin;
   return getMomentsNumpyImpl(&getMomentsAboutOrigin, indep, depend, maxMoment);
@@ -231,8 +231,8 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutOriginOverloads,
  * Proxy for @see Mantid::Kernel::getMomentsAboutMean so that it can accept
  * numpy arrays
  */
-std::vector<double> getMomentsAboutMeanNumpy(const numeric::array &indep,
-                                             numeric::array &depend,
+std::vector<double> getMomentsAboutMeanNumpy(const NumPy::NdArray &indep,
+                                             NumPy::NdArray &depend,
                                              const int maxMoment = 3) {
   using Mantid::Kernel::getMomentsAboutMean;
   return getMomentsNumpyImpl(&getMomentsAboutMean, indep, depend, maxMoment);

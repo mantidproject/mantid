@@ -119,7 +119,7 @@ private:
     }
 
     for (size_t wi = 0; wi < dataws->getNumberHistograms(); wi++) {
-      dataws->setX(wi, vec);
+      dataws->setBinEdges(wi, vec);
     }
     dataws->getAxis(0)->setUnit("DeltaE");
     dataws->mutableRun().addProperty("Ei", double(m_Ei));

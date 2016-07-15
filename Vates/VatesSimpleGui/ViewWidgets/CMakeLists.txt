@@ -172,6 +172,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   ${vtkjsoncpp_LIBRARIES}
   DataHandling 
   Kernel 
+  HistogramData
   DataObjects 
   MantidQtAPI
   ${MANTID_SUBPROJECT_LIBS}

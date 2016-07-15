@@ -227,7 +227,6 @@ void SmoothNeighbours::findNeighboursRectangular() {
     setWeightingStrategy("Flat", Radius);
     nNeighbours = AdjX * AdjY - 1;
     findNeighboursUbiqutious();
-    return;
   }
 
   // Resize the vector we are setting
@@ -759,7 +758,6 @@ void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws) {
     }
   }
   this->setProperty("OutputWorkspace", outws2);
-  return;
 }
 //--------------------------------------------------------------------------------------------
 /** Execute the algorithm for a EventWorkspace input
@@ -818,8 +816,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws) {
   PARALLEL_CHECK_INTERUPT_REGION
 
   // Give the 0-th X bins to all the output spectra.
-  Kernel::cow_ptr<MantidVec> outX = inWS->refX(0);
-  outWS->setAllX(outX);
+  outWS->setAllX(HistogramData::BinEdges(inWS->refX(0)));
   if (expandSumAllPixels)
     spreadPixels(outWS);
 }

@@ -70,7 +70,6 @@ void UnaryOperation::exec() {
 
   const size_t numSpec = in_work->getNumberHistograms();
   const size_t specSize = in_work->blocksize();
-  const bool isHist = in_work->isHistogramData();
 
   // Initialise the progress reporting object
   Progress progress(this, 0.0, 1.0, numSpec);
@@ -87,22 +86,19 @@ void UnaryOperation::exec() {
     // if it's shared, which isn't thread-safe.
     MantidVec &YOut = out_work->dataY(i);
     MantidVec &EOut = out_work->dataE(i);
-    const MantidVec &X = in_work->readX(i);
+    const auto X = in_work->points(i);
     const MantidVec &Y = in_work->readY(i);
     const MantidVec &E = in_work->readE(i);
 
     for (size_t j = 0; j < specSize; ++j) {
-      // Use the bin centre for the X value if this is histogram data
-      const double XIn = isHist ? (X[j] + X[j + 1]) / 2.0 : X[j];
       // Call the abstract function, passing in the current values
-      performUnaryOperation(XIn, Y[j], E[j], YOut[j], EOut[j]);
+      performUnaryOperation(X[j], Y[j], E[j], YOut[j], EOut[j]);
     }
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  return;
 }
 
 /// Executes the algorithm for events

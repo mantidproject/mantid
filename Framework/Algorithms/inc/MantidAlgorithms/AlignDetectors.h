@@ -8,7 +8,15 @@
 
 namespace Mantid {
 
+namespace DataObjects {
+class EventWorkspace;
+}
+
 namespace Algorithms {
+
+namespace {
+class ConversionFactors;
+}
 
 /** Performs a unit change from TOF to dSpacing, correcting the X values to
    account for small
@@ -69,7 +77,10 @@ private:
   void init() override;
   void exec() override;
 
-  void execEvent();
+  void align(const ConversionFactors &converter, API::Progress &progress,
+             API::MatrixWorkspace &outputWS);
+  void align(const ConversionFactors &converter, API::Progress &progress,
+             DataObjects::EventWorkspace &outputWS);
 
   void loadCalFile(API::MatrixWorkspace_sptr inputWS,
                    const std::string &filename);

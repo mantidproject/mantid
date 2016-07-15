@@ -213,7 +213,6 @@ public:
 
       notificationCenter.postNotification(new AddNotification(name, Tobject));
     }
-    return;
   }
 
   //--------------------------------------------------------------------------
@@ -253,7 +252,6 @@ public:
       m_mutex.unlock();
       DataService::add(name, Tobject);
     }
-    return;
   }
 
   //--------------------------------------------------------------------------
@@ -290,7 +288,6 @@ public:
 
     m_mutex.unlock();
     notificationCenter.postNotification(new PostDeleteNotification(foundName));
-    return;
   }
 
   //--------------------------------------------------------------------------
@@ -338,8 +335,6 @@ public:
     m_mutex.unlock();
     notificationCenter.postNotification(
         new RenameNotification(oldName, newName));
-
-    return;
   }
 
   //--------------------------------------------------------------------------

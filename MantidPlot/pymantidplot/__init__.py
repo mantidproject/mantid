@@ -833,14 +833,47 @@ def closeAllSliceViewers():
 
 
 # -----------------------------------------------------------------------------
+def openProject(file_name, file_version=0):
+    """Open a mantid project file.
+
+    This will load all associated workspaces and plots.
+
+    Args:
+        file_name :: file path to a mantid project file
+        file_version :: file version to use when loading (default 0).
+    """
+    working_dir = os.path.dirname(os.path.abspath(file_name))
+    threadsafe_call(_qti.app.openProject, working_dir, file_name, file_version)
+
+
+# -----------------------------------------------------------------------------
+def saveProjectAs(file_name, compress=False):
+    """Save a mantid project
+
+    This will serialise all associated workspaces and windows
+
+    Args:
+        file_name :: file path to save to
+        compress :: whether to compress the project after saving
+    """
+    threadsafe_call(_qti.app.saveProjectAs, file_name, compress)
+
+
+# -----------------------------------------------------------------------------
+def newProject():
+    """Start a new mantid project
+
+    This will clear all existing unsaved projects
+    """
+    threadsafe_call(_qti.app.newProject)
+
+# -----------------------------------------------------------------------------
 # Legacy function
 plotTimeBin = plotBin
 
-# import 'safe' methods (i.e. no proxy required) of ApplicationWindow into the global namespace
-# Only 1 at the moment!
-appImports = [
-    'saveProjectAs'
-]
+# import 'safe' methods (i.e. no proxy required) of ApplicationWindow into
+# the global namespace. None at the moment!
+appImports = []
 for name in appImports:
     globals()[name] = getattr(_qti.app, name)
 

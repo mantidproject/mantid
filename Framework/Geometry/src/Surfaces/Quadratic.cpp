@@ -115,7 +115,6 @@ void Quadratic::matrixForm(Kernel::Matrix<double> &A, Kernel::V3D &B,
   for (int i = 0; i < 3; i++)
     B[i] = BaseEqn[6 + i];
   C = BaseEqn[9];
-  return;
 }
 
 double Quadratic::distance(const Kernel::V3D &Pt) const
@@ -277,7 +276,6 @@ void Quadratic::displace(const Kernel::V3D &Pt)
       -2 * BaseEqn[1] * Pt[1] - BaseEqn[3] * Pt[0] - BaseEqn[5] * Pt[2];
   BaseEqn[8] +=
       -2 * BaseEqn[2] * Pt[2] - BaseEqn[4] * Pt[0] - BaseEqn[5] * Pt[1];
-  return;
 }
 
 void Quadratic::rotate(const Kernel::Matrix<double> &MX)
@@ -321,7 +319,6 @@ void Quadratic::rotate(const Kernel::Matrix<double> &MX)
 
   for (int i = 0; i < 9; i++) // Item 9 left alone
     BaseEqn[i] = B[i];
-  return;
 }
 
 void Quadratic::print() const
@@ -334,7 +331,6 @@ void Quadratic::print() const
   for (int i = 0; i < 10; i++)
     std::cout << BaseEqn[i] << " ";
   std::cout << '\n';
-  return;
 }
 
 void Quadratic::write(std::ostream &OX) const
@@ -356,7 +352,6 @@ void Quadratic::write(std::ostream &OX) const
   for (int i = 6; i < 10; i++)
     cx << " " << BaseEqn[i] << " ";
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
-  return;
 }
 
 std::unique_ptr<Quadratic> Quadratic::clone() const {

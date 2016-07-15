@@ -6,6 +6,7 @@
 //----------------------------------
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
+#include "Mantid/IProjectSerialisable.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Algorithm.h"
@@ -502,7 +503,6 @@ public slots:
   void clearAllMemory(const bool prompt = true);
   // Ticket #672
   void saveNexusWorkspace();
-  QString saveToString(const std::string &workingDir);
 
 #ifdef _WIN32
 public:

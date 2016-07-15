@@ -33,7 +33,7 @@ class PythonPluginsTest(unittest.TestCase):
             pass # Already exists, maybe it was not removed when a test failed?
         filename = os.path.join(self._testdir, 'TestPyAlg.py')
         if not os.path.exists(filename):
-            plugin = file(filename, 'w')
+            plugin = open(filename, 'w')
             plugin.write(__TESTALG__)
             plugin.close()
 

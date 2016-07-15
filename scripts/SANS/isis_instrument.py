@@ -776,7 +776,7 @@ class ISISInstrument(BaseInstrument):
         """
         ws_ref = mtd[str(ws_name)]
         try:
-            run_num = ws_ref.getRun().getLogData('run_number').value
+            run_num = LARMOR.get_run_number_from_workspace_reference(ws_ref)
         except:
             run_num = int(re.findall(r'\d+', str(ws_name))[0])
 
@@ -1725,13 +1725,24 @@ class LARMOR(ISISInstrument):
         @param workspace_ref:: A handle to the workspace
         '''
         try:
-            run_num = workspace_ref.getRun().getLogData('run_number').value
+            run_num = LARMOR.get_run_number_from_workspace_reference(workspace_ref)
         except:
+            ws_name = workspace_ref.name()
             run_num = int(re.findall(r'\d+', str(ws_name))[-1])
         if int(run_num) >= 2217:
             return True
         else:
             return False
+
+    @staticmethod
+    def get_run_number_from_workspace_reference(ws_ref):
+        # If we are dealing with a WorkspaceGroup then this will not contain any run number information,
+        # hence we need to access the first child workspace
+        if isinstance(ws_ref, WorkspaceGroup):
+            run_num = ws_ref[0].getRun().getLogData('run_number').value
+        else:
+            run_num = ws_ref.getRun().getLogData('run_number').value
+        return run_num
 
 
 if __name__ == '__main__':

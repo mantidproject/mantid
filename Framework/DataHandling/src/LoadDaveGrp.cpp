@@ -104,8 +104,6 @@ void LoadDaveGrp::init() {
 void LoadDaveGrp::exec() {
   const std::string filename = this->getProperty("Filename");
 
-  int yLength = 0;
-
   auto xAxis = new MantidVec();
   auto yAxis = new MantidVec();
 
@@ -118,18 +116,16 @@ void LoadDaveGrp::exec() {
       // Size of x axis
       this->getAxisLength(this->xLength);
       // Size of y axis
-      this->getAxisLength(yLength);
+      this->getAxisLength(this->nGroups);
     } catch (boost::bad_lexical_cast &) {
       throw std::runtime_error(
           "LoadDaveGrp: Failed to parse axis length from file.");
     }
 
-    // This is also the number of groups (spectra)
-    this->nGroups = yLength;
     // Read in the x axis values
     this->getAxisValues(xAxis, static_cast<std::size_t>(this->xLength));
     // Read in the y axis values
-    this->getAxisValues(yAxis, static_cast<std::size_t>(yLength));
+    this->getAxisValues(yAxis, static_cast<std::size_t>(this->nGroups));
     // Read in the data
     this->getData(data, errors);
   }
@@ -147,8 +143,8 @@ void LoadDaveGrp::exec() {
   // Create workspace
   API::MatrixWorkspace_sptr outputWorkspace =
       boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-          API::WorkspaceFactory::Instance().create("Workspace2D", this->nGroups,
-                                                   this->xLength, yLength));
+          API::WorkspaceFactory::Instance().create(
+              "Workspace2D", this->nGroups, this->xLength, this->xLength));
   // Force the workspace to be a distribution
   outputWorkspace->setDistribution(true);
 
@@ -156,7 +152,7 @@ void LoadDaveGrp::exec() {
   outputWorkspace->getAxis(0)->unit() =
       Kernel::UnitFactory::Instance().create(this->getProperty("XAxisUnits"));
 
-  API::Axis *const verticalAxis = new API::NumericAxis(yLength);
+  API::Axis *const verticalAxis = new API::NumericAxis(this->nGroups);
   // Set the y-axis units
   verticalAxis->unit() =
       Kernel::UnitFactory::Instance().create(this->getProperty("YAxisUnits"));

@@ -123,8 +123,6 @@ void Rebunch::exec() {
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputW);
-
-  return;
 }
 
 /** Rebunches histogram data data according to n_bunch input

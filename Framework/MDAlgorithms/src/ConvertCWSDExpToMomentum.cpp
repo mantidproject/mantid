@@ -81,7 +81,7 @@ void ConvertCWSDExpToMomentum::init() {
  */
 void ConvertCWSDExpToMomentum::exec() {
   // Parse inputs
-  std::string errmsg("");
+  std::string errmsg;
   bool createvirtual = getProperty("CreateVirtualInstrument");
   bool inputvalid = getInputs(createvirtual, errmsg);
   if (!inputvalid) {
@@ -118,8 +118,6 @@ void ConvertCWSDExpToMomentum::exec() {
     g_log.notice() << "Q-sample at dimension " << i << ": " << m_minQVec[i]
                    << ", " << m_maxQVec[i] << "\n";
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -142,8 +140,6 @@ void ConvertCWSDExpToMomentum::createVirtualInstrument() {
   g_log.information() << "Virtual Instrument has "
                       << m_virtualInstrument->getDetectorIDs().size()
                       << "Detectors\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -218,7 +214,7 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
   MatrixWorkspace_sptr spicews;
 
   // Check whether to add / or \ to m_dataDir
-  std::string sep("");
+  std::string sep;
   if (m_dataDir.size() > 0) {
 // Determine system
 #if _WIN64
@@ -318,8 +314,6 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
       mdbox->refreshCache(nullptr);
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -356,8 +350,6 @@ void ConvertCWSDExpToMomentum::setupTransferMatrix(
     g_log.debug() << "Ratation matrix: " << rotationMatrix.str() << "\n";
   } else
     throw std::runtime_error("Unable to set Goniometer.");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -469,8 +461,6 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
   }
 
   m_outputWS->addExperimentInfo(expinfo);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -648,8 +638,6 @@ void ConvertCWSDExpToMomentum::parseDetectorTable(
     Kernel::V3D detpos(x, y, z);
     vec_detpos[i] = detpos;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -669,8 +657,6 @@ void ConvertCWSDExpToMomentum::updateQRange(
     else if (vec_q[i] > m_maxQVec[i])
       m_maxQVec[i] = vec_q[i];
   }
-
-  return;
 }
 
 /** Remove background per pixel
@@ -690,8 +676,6 @@ void ConvertCWSDExpToMomentum::removeBackground(
       dataws->dataE(i)[0] = std::sqrt(dataws->readY(i)[0]);
     }
   }
-
-  return;
 }
 
 } // namespace MDAlgorithms
