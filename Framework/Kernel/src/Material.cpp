@@ -7,6 +7,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
+#include <numeric>
 
 namespace Mantid {
 
