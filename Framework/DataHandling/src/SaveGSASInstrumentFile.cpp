@@ -218,8 +218,6 @@ void ChopperConfiguration::setParameter(unsigned int bankid,
       throw runtime_error(errss.str());
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -333,8 +331,6 @@ void SaveGSASInstrumentFile::init() {
   declareProperty("TwoTheta", EMPTY_DBL(), mustBePositive,
                   "Angle of the detector bank. "
                   "It must be given if L2 is not given. ");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -382,8 +378,6 @@ void SaveGSASInstrumentFile::exec() {
     g_log.error(errorstr);
     throw std::runtime_error(errorstr);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -496,8 +490,6 @@ void SaveGSASInstrumentFile::initConstants(
     throw runtime_error(errss.str());
   }
   */
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -551,8 +543,6 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
     unsigned int bankid = vecbankindex[i];
     profilemap.emplace(bankid, vec_maptemp[i]);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -731,8 +721,6 @@ void SaveGSASInstrumentFile::convertToGSAS(
       throw runtime_error(errss.str());
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -809,8 +797,6 @@ void SaveGSASInstrumentFile::buildGSASTabulatedProfile(
                   << "\t  " << setw(20) << setprecision(10) << instC << "\t "
                   << setw(20) << setprecision(10) << m_gdt[k] << ".\n";
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -835,8 +821,6 @@ void SaveGSASInstrumentFile::writePRMHeader(const vector<unsigned int> &banks,
   fprintf(pFile, "INS   FPATH1     %f \n", m_L1);
   fprintf(pFile, "INS   HTYPE   PNTR \n");
   fclose(pFile);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -976,8 +960,6 @@ void SaveGSASInstrumentFile::writePRMSingleBank(
   }
 
   fclose(pFile);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1116,8 +1098,6 @@ void SaveGSASInstrumentFile::loadFullprofResolutionFile(
   if (!m_inpWS)
     throw runtime_error("Failed to obtain a table workspace from "
                         "LoadFullprofResolution's output.");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

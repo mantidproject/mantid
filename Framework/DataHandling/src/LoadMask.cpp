@@ -143,8 +143,6 @@ void LoadMask::exec() {
 
   this->processMaskOnDetectors(false, unmaskdetids, unmaskdetidpairsL,
                                unmaskdetidpairsU);
-
-  return;
 }
 
 void LoadMask::initDetectors() {
@@ -155,8 +153,6 @@ void LoadMask::initDetectors() {
       m_maskWS->setMaskedIndex(wkspIndex);
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -197,8 +193,6 @@ void LoadMask::processMaskOnDetectors(bool tomask,
     g_log.error() << "To Be Implemented Soon For Pair (" << pairdetids_low[i]
                   << ", " << pairdetids_up[i] << "!\n";
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -254,8 +248,6 @@ void LoadMask::componentToDetectors(std::vector<std::string> componentnames,
     g_log.debug() << "Number of Detectors in Children = " << numdets
                   << "  Range = " << id_min << ", " << id_max << '\n';
   } // for component
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -305,8 +297,6 @@ void LoadMask::bankToDetectors(std::vector<std::string> singlebanks,
 
     } // if-else
   }   // ENDFOR
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -362,8 +352,6 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
       }   // IF-ELSE: spectrum No has an entry
     }     // FOR EACH SpecNo
   }       // FOR EACH Pair
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -398,8 +386,6 @@ void LoadMask::detectorToDetectors(std::vector<int32_t> singles,
     detectorpairsup.push_back(pairsup[i]);
     */
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -520,8 +506,6 @@ void LoadMask::parseXML() {
 
     pNode = it.nextNode();
   } // ENDWHILE
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -557,8 +541,6 @@ void LoadMask::parseComponent(std::string valuetext, bool tomask) {
   '\n';
   }
   */
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -588,8 +570,6 @@ void LoadMask::parseSpectrumNos(std::string inputstr, bool tomask) {
       unmask_specid_pair_up.push_back(pairs[2 * i + 1]);
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -619,8 +599,6 @@ void LoadMask::parseDetectorIDs(std::string inputstr, bool tomask) {
       unmask_detid_pair_up.push_back(pairs[2 * i + 1]);
     }
   }
-
-  return;
 }
 
 /*
@@ -679,8 +657,6 @@ void LoadMask::parseRangeText(std::string inputstr,
     pairs.push_back(intstart);
     pairs.push_back(intend);
   }
-
-  return;
 }
 
 void LoadMask::splitString(std::string inputstr,
@@ -692,8 +668,6 @@ void LoadMask::splitString(std::string inputstr,
 
   // g_log.information() << "Inside... split size = " << strings.size() <<
   // '\n';
-
-  return;
 }
 
 /*
@@ -732,8 +706,6 @@ void LoadMask::loadISISMaskFile(std::string isisfilename) {
   }
 
   ifs.close();
-
-  return;
 }
 
 /*
@@ -812,8 +784,6 @@ void LoadMask::parseISISStringToVector(string ins,
   } // END-WHILE
 
   splitstrings.clear();
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

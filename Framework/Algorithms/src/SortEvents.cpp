@@ -63,8 +63,6 @@ void SortEvents::exec() {
 
   // This runs the SortEvents algorithm in parallel
   eventW->sortAll(sortType, &prog);
-
-  return;
 }
 
 } // namespace Algorithm

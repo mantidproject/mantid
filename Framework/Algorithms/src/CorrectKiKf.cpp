@@ -174,7 +174,6 @@ void CorrectKiKf::exec() {
   if ((negativeEnergyWarning) && (efixedProp == EMPTY_DBL()))
     g_log.information() << "Try to set fixed energy\n";
   this->setProperty("OutputWorkspace", outputWS);
-  return;
 }
 
 /**

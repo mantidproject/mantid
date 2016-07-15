@@ -103,8 +103,6 @@ void CalculateZscore::exec() {
 
   // 4. Set the output
   setProperty("OutputWorkspace", outWS);
-
-  return;
 }
 
 } // namespace Algorithms

@@ -2,6 +2,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
 
 #include <boost/python/class.hpp>
@@ -20,6 +21,8 @@ using namespace Mantid::API;
 using namespace boost::python;
 using Mantid::Kernel::AbstractInstantiator;
 using Mantid::PythonInterface::PythonObjectInstantiator;
+
+GET_POINTER_SPECIALIZATION(AlgorithmFactoryImpl)
 
 namespace {
 ///@cond

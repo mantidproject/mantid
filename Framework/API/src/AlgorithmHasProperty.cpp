@@ -11,7 +11,7 @@ AlgorithmHasProperty::AlgorithmHasProperty(const std::string &propName)
 
 std::string AlgorithmHasProperty::checkValidity(
     const boost::shared_ptr<IAlgorithm> &value) const {
-  std::string message("");
+  std::string message;
   if (value->existsProperty(m_propName)) {
     Kernel::Property *p = value->getProperty(m_propName);
     if (!p->isValid().empty()) {

@@ -127,7 +127,7 @@ void SaveAscii::exec() {
   }
   std::string comment = getPropertyValue("CommentIndicator");
   std::string errstr = "E";
-  std::string errstr2 = "";
+  std::string errstr2;
   std::string comstr = " , ";
   bool ice = getProperty("ICEFormat");
   if (ice) {

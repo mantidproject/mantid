@@ -182,7 +182,6 @@ void ConvertUnitsUsingDetectorTable::exec() {
   // Do right at end (workspace could could change in removeUnphysicalBins or
   // alignBins methods)
   setProperty("OutputWorkspace", outputWS);
-  return;
 }
 
 /** Initialise the member variables
@@ -473,7 +472,6 @@ void ConvertUnitsUsingDetectorTable::convertQuickly(
 
   if (m_inputEvents)
     eventWS->clearMRU();
-  return;
 }
 
 /// Calls Rebin as a Child Algorithm to align the bins

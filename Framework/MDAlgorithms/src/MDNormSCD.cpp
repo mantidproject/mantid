@@ -177,7 +177,7 @@ std::string MDNormSCD::inputEnergyMode() const {
   const size_t nalgs = hist.size();
   const auto &lastAlgorithm = hist.lastAlgorithm();
 
-  std::string emode("");
+  std::string emode;
   if (lastAlgorithm->name() == "ConvertToMD") {
     emode = lastAlgorithm->getPropertyValue("dEAnalysisMode");
   } else if ((lastAlgorithm->name() == "Load" ||

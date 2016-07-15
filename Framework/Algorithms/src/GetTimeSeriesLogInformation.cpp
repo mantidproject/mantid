@@ -76,8 +76,6 @@ void GetTimeSeriesLogInformation::init() {
   declareProperty("IgnoreNegativeTimeInterval", false,
                   "If true, then the time interval with negative number will "
                   "be neglected in doing statistic.");
-
-  return;
 }
 
 /** Main execution
@@ -149,8 +147,6 @@ void GetTimeSeriesLogInformation::exec() {
   // 4. Do more staticts (examine)
   // std::string outputdir = this->getProperty("OutputDirectory");
   // examLog(logname, outputdir);
-
-  return;
 }
 
 /** Do statistic on user proposed range and examine the log
@@ -235,8 +231,6 @@ void GetTimeSeriesLogInformation::processTimeRange() {
     g_log.error(errmsg.str());
     throw std::invalid_argument(errmsg.str());
   }
-
-  return;
 }
 
 /** Convert a value in nanosecond to DateAndTime.  The value is treated as an
@@ -543,8 +537,6 @@ void GetTimeSeriesLogInformation::checkLogBasicInforamtion() {
 
   g_log.notice() << "Size of timevec = " << m_timeVec.size() << '\n';
   */
-
-  return;
 }
 
 /** Check whether log values are changing from 2 adjacent time stamps
@@ -577,8 +569,6 @@ void GetTimeSeriesLogInformation::checkLogValueChanging(
   m_intInfoMap.insert(
       make_pair("Number of adjacent time stamp w/o value change", numchange));
   g_log.debug() << ss.str();
-
-  return;
 }
 
 } // namespace Mantid

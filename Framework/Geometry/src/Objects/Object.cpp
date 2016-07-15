@@ -22,6 +22,7 @@
 
 #include <boost/make_shared.hpp>
 
+#include <array>
 #include <deque>
 #include <iostream>
 #include <stack>
@@ -146,7 +147,6 @@ void Object::convertComplement(const std::map<int, Object> &MList)
 
 {
   this->procString(this->cellStr(MList));
-  return;
 }
 
 /**
@@ -593,7 +593,6 @@ void Object::print() const {
     std::cout << (*mc) << " ";
   }
   std::cout << '\n';
-  return;
 }
 
 /**
@@ -602,7 +601,6 @@ void Object::print() const {
 void Object::makeComplement() {
   std::unique_ptr<Rule> NCG = procComp(std::move(TopRule));
   TopRule = std::move(NCG);
-  return;
 }
 
 /**
@@ -611,7 +609,6 @@ void Object::makeComplement() {
 void Object::printTree() const {
   std::cout << "Name == " << ObjNum << '\n';
   std::cout << TopRule->display() << '\n';
-  return;
 }
 
 /**
@@ -650,7 +647,6 @@ void Object::write(std::ostream &OX) const {
   cx.precision(10);
   cx << str();
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
-  return;
 }
 
 /**
@@ -1833,17 +1829,10 @@ int Object::searchForObject(Kernel::V3D &point) const {
   Kernel::V3D testPt;
   if (isValid(point))
     return 1;
-  std::vector<Kernel::V3D> axes;
-  axes.reserve(6);
-  axes.push_back(Kernel::V3D(1, 0, 0));
-  axes.push_back(Kernel::V3D(-1, 0, 0));
-  axes.push_back(Kernel::V3D(0, 1, 0));
-  axes.push_back(Kernel::V3D(0, -1, 0));
-  axes.push_back(Kernel::V3D(0, 0, 1));
-  axes.push_back(Kernel::V3D(0, 0, -1));
-  std::vector<Kernel::V3D>::const_iterator dir;
-  for (dir = axes.begin(); dir != axes.end(); ++dir) {
-    Geometry::Track tr(point, (*dir));
+  for (const auto &dir :
+       {V3D(1., 0., 0.), V3D(-1., 0., 0.), V3D(0., 1., 0.), V3D(0., -1., 0.),
+        V3D(0., 0., 1.), V3D(0., 0., -1.)}) {
+    Geometry::Track tr(point, dir);
     if (this->interceptSurface(tr) > 0) {
       point = tr.cbegin()->entryPoint;
       return 1;

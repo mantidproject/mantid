@@ -474,7 +474,7 @@ void DetectorGroup::calculateGroupTopology() const {
 }
 
 std::string DetectorGroup::getName() const {
-  std::string result = "";
+  std::string result;
   DetCollection::const_iterator it;
   for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
     result += (*it).second->getName() + this->getNameSeparator();
@@ -483,7 +483,7 @@ std::string DetectorGroup::getName() const {
 }
 
 std::string DetectorGroup::getFullName() const {
-  std::string result = "";
+  std::string result;
   DetCollection::const_iterator it;
   for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
     result += (*it).second->getFullName() + this->getNameSeparator();

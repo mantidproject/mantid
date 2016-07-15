@@ -71,8 +71,6 @@ void ExportTimeSeriesLog::init() {
   declareProperty("IsEventWorkspace", true, "If set to true, output workspace "
                                             "is EventWorkspace.  Otherwise, it "
                                             "is Workspace2D.");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -97,8 +95,6 @@ void ExportTimeSeriesLog::exec() {
 
   // 3. Output
   setProperty("OutputWorkspace", m_outWS);
-
-  return;
 }
 /*
  *  * @param logname ::
@@ -198,8 +194,6 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
     setupWorkspace2D(i_start, i_stop, numentries, times, values, exportepoch,
                      timeunitfactor);
   }
-
-  return;
 }
 
 /** Set up the output workspace in a Workspace2D
@@ -261,8 +255,6 @@ void ExportTimeSeriesLog::setupWorkspace2D(
 
   Axis *xaxis = m_outWS->getAxis(0);
   xaxis->setUnit("Time");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -332,8 +324,6 @@ void ExportTimeSeriesLog::setupEventWorkspace(
   std::vector<WeightedEventNoTime> &events = outEL.getWeightedEventsNoTime();
   outEventWS->setBinEdges(0, HistogramData::BinEdges{events.begin()->tof(),
                                                      events.rbegin()->tof()});
-
-  return;
 }
 
 /** Calculate the range of time vector by start time and stop time

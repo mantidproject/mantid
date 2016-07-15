@@ -7,6 +7,10 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include <vector>
 
 namespace Mantid {
@@ -58,24 +62,11 @@ void CalculateEfficiency::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr rebinnedWS; // = inputWS;
 
-  /* BioSANS has 2 detectors and reduces one at the time: one is masked!
-   * We must use that masked detector
-   **/
-  const std::string maskComponent = getPropertyValue("MaskedFullComponent");
-  if (!maskComponent.empty()) {
-    g_log.debug() << "Masking Full Component: " << maskComponent
-                  << " in workspace name: '" << inputWS->name()
-                  << "' in workspace getName: '" << inputWS->getName()
-                  << "' in workspace: " << inputWS->toString() << "\n";
-
-    IAlgorithm_sptr maskAlgo = createChildAlgorithm("SANSMask");
-    maskAlgo->initialize();
-    maskAlgo->setProperty("Workspace", inputWS);
-    // maskAlgo->setProperty<MatrixWorkspace_sptr>("Workspace", inputWS);
-    // maskAlgo->setProperty("Workspace", inputWS->name());
-    maskAlgo->setProperty("MaskedFullComponent", maskComponent);
-    maskAlgo->execute();
-  }
+  //  BioSANS has 2 detectors and reduces one at the time: one is masked!
+  //  We must use that masked detector
+  const std::string maskedComponent = getPropertyValue("MaskedFullComponent");
+  if (!maskedComponent.empty())
+    maskComponent(*inputWS, maskedComponent);
 
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS; // = getProperty("OutputWorkspace");
@@ -126,8 +117,6 @@ void CalculateEfficiency::exec() {
     normalizeDetectors(rebinnedWS, outputWS, sum, err, npixels, EMPTY_DBL(),
                        EMPTY_DBL());
   }
-
-  return;
 }
 
 /*
@@ -270,6 +259,46 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
         << err.what();
       g_log.error(e.str());
     }
+  }
+}
+
+/**
+ * Fully masks one component named componentName
+ * @param ws :: workspace with the respective instrument assigned
+ * @param componentName :: must be a known CompAssembly.
+ */
+void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
+                                        const std::string &componentName) {
+  auto instrument = ws.getInstrument();
+  try {
+    boost::shared_ptr<const Geometry::ICompAssembly> component =
+        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+            instrument->getComponentByName(componentName));
+    if (!component) {
+      g_log.warning("Component " + componentName +
+                    " expected to be a CompAssembly, e.g., a bank. Component " +
+                    componentName + " not masked!");
+      return;
+    }
+    std::vector<detid_t> detectorList;
+    for (int x = 0; x < component->nelements(); x++) {
+      boost::shared_ptr<Geometry::ICompAssembly> xColumn =
+          boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*component)[x]);
+      for (int y = 0; y < xColumn->nelements(); y++) {
+        boost::shared_ptr<Geometry::Detector> detector =
+            boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
+        if (detector) {
+          auto detID = detector->getID();
+          detectorList.push_back(detID);
+        }
+      }
+    }
+    auto indexList = ws.getIndicesFromDetectorIDs(detectorList);
+    for (const auto &idx : indexList)
+      ws.maskWorkspaceIndex(idx);
+  } catch (std::exception &) {
+    g_log.warning("Expecting the component " + componentName +
+                  " to be a CompAssembly, e.g., a bank. Component not masked!");
   }
 }
 
