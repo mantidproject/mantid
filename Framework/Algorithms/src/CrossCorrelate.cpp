@@ -177,9 +177,7 @@ void CrossCorrelate::exec() {
     // Copy spectra info from input Workspace
     out->getSpectrum(i).copyInfoFrom(inputWS->getSpectrum(wsIndex));
 
-    if (i > 0) {
-      out->setSharedX(i, out->sharedX(0));
-    }
+    out->setSharedX(i, out->sharedX(0));
 
     // Get temp references
     auto &iX = inputWS->x(wsIndex);
