@@ -118,7 +118,6 @@ void DetectorEfficiencyCorUser::applyDetEfficiency(
     const MantidVec &effVec, HistogramY &yOut, HistogramE &eOut) {
 
   for (unsigned int j = 0; j < numberOfChannels; ++j) {
-    // xOut[j] = xIn[j];
     yOut[j] = yIn[j] / effVec[j];
     eOut[j] = eIn[j] / effVec[j];
   }
@@ -147,24 +146,6 @@ DetectorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
         e.GetMsg());
   }
 }
-
-// MantidVec DetectorEfficiencyCorUser::calculateEfficiency(double eff0,
-//		const std::string& formula, const MantidVec& xIn) {
-//
-//	MantidVec effOut(xIn.size() - 1); // x are bins and have more one value
-// than y
-//
-//	MantidVec::const_iterator xIn_it = xIn.begin();
-//	MantidVec::iterator effOut_it = effOut.begin();
-//	for (; effOut_it != effOut.end(); ++xIn_it, ++effOut_it) {
-//		double deltaE = std::fabs((*xIn_it + *(xIn_it + 1)) / 2 - m_Ei);
-//		double e = m_Ei - deltaE;
-//
-//		double eff = calculateFormulaValue(formula, e);
-//		*effOut_it = eff / eff0;
-//	}
-//	return effOut;
-//}
 
 /**
  * Calculate detector efficiency given a formula, the efficiency at the elastic
@@ -201,6 +182,7 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
         e.GetMsg());
   }
 }
+
 /**
  * Returns the value associated to a parameter name in the IDF
  * @param parameterName :: parameter name in the IDF
