@@ -44,7 +44,7 @@ all_symbols = ["Ac", "Ag", "Al", "Am", "Ar",  "As", "At" , "Au" , "B"  , "Ba", "
                ]
 
 
-small_k = 1.0e-8 # norm of k vector below this value is considered zero
+small_k = 1.0e-6 # norm of k vector below this value is considered zero
 
 # conversion constants taken from  (http://physics.nist.gov/cgi-bin/cuu/Convert?exp=0&num=1&From=k&To=hr&Action=Only+show+factor)
 k_2_hartree = 3.16681050000000e-06 #  K * k_2_hartree =  Hartree
