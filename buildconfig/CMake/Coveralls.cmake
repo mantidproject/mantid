@@ -109,7 +109,7 @@ endfunction()
 
 macro(coveralls_turn_on_coverage)
 	if(NOT (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-		AND (NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang"))
+		AND (NOT "${CMAKE_C_COMPILER_ID}" MATCHES "Clang"))
 		message(FATAL_ERROR "Coveralls: Compiler ${CMAKE_C_COMPILER_ID} is not GNU gcc! Aborting... You can set this on the command line using CC=/usr/bin/gcc CXX=/usr/bin/g++ cmake <options> ..")
 	endif()
 
