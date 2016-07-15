@@ -51,6 +51,7 @@ Documentation
 
 Bugs Resolved
 -------------
+ - Floating windows now always stay on top of the main window in OSX
 
 SliceViewer Improvements
 ------------------------
