@@ -149,9 +149,8 @@ DetectorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
 
 /**
  * Calculate detector efficiency given a formula, the efficiency at the elastic
- * line,
- * and a vector with energies.
- *  Efficiency = f(Ei-DeltaE) / f(Ei)
+ * line, and a vector with energies.
+ * Efficiency = f(Ei-DeltaE) / f(Ei)
  * @param eff0 :: calculated eff0
  * @param formula :: formula to calculate efficiency (parsed from IDF)
  * @param xIn :: Energy bins vector (X axis)

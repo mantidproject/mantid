@@ -43,8 +43,10 @@ public:
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "This algorithm calculates the detector efficiency according the "
-           "formula set in the instrument definition file/parameters.";
+    return "Corrects for detector efficiency. The correction factor is calculated "
+           "using an instrument specific formula as a function of the final "
+           "neutron energy E_f=E_i-E. Note that the formula is implemented only "
+           "for a limited number of TOF instruments.";
   }
 
   int version() const override;
