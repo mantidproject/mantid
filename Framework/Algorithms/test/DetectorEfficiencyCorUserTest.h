@@ -28,7 +28,7 @@ public:
 
   // constructor
   DetectorEfficiencyCorUserTest()
-      : m_Efs(m_numBins + 1), m_inWSName("input_workspace"),
+      : m_Efs(m_numBins), m_inWSName("input_workspace"),
         m_outWSName("output_workspace") {
     for (size_t i = 0; i != m_Efs.size(); ++i) {
       m_Efs[i] = 0.1 + 0.2 * static_cast<double>(i);
@@ -76,8 +76,8 @@ public:
 
     const auto eff0 = efficiency(m_Ei);
     for (size_t i = 0; i != outWS->getNumberHistograms(); ++i) {
-      const auto &ys = outWS->readY(i);
-      const auto &es = outWS->readE(i);
+      const auto &ys = outWS->counts(i);
+      const auto &es = outWS->countStandardDeviations(i);
       for (size_t j = 0; j != ys.size(); ++j) {
         const auto eff = efficiency(m_Efs[j]);
         // By default, input workspace has y = 2, e = sqrt(2).
@@ -113,13 +113,13 @@ private:
             numBanks, numPixels, m_numBins);
 
     // Prepare energy bins.
-    std::vector<double> vec(m_Efs.size());
-    for (size_t i = 0; i != vec.size(); ++i) {
-      vec[i] = m_Ei - m_Efs[i];
+    std::vector<double> xs(m_Efs.size());
+    for (size_t i = 0; i != xs.size(); ++i) {
+      xs[i] = m_Ei - m_Efs[i];
     }
 
     for (size_t wi = 0; wi < dataws->getNumberHistograms(); wi++) {
-      dataws->setBinEdges(wi, vec);
+      dataws->setBinEdges(wi, HistogramData::BinEdges(HistogramData::Points(xs)));
     }
     dataws->getAxis(0)->setUnit("DeltaE");
     dataws->mutableRun().addProperty("Ei", double(m_Ei));

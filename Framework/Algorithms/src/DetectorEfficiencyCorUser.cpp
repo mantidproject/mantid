@@ -14,6 +14,7 @@ namespace Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace HistogramData;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DetectorEfficiencyCorUser)
@@ -83,12 +84,12 @@ void DetectorEfficiencyCorUser::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     // MantidVec& xOut = m_outputWS->dataX(i);
-    MantidVec &yOut = m_outputWS->dataY(i);
-    MantidVec &eOut = m_outputWS->dataE(i);
-    const MantidVec &xIn = m_inputWS->readX(i);
-    const MantidVec &yIn = m_inputWS->readY(i);
-    const MantidVec &eIn = m_inputWS->readE(i);
-    m_outputWS->setX(i, m_inputWS->refX(i));
+    auto &yOut = m_outputWS->mutableY(i);
+    auto &eOut = m_outputWS->mutableE(i);
+    const auto xIn = m_inputWS->points(i);
+    const auto yIn = m_inputWS->y(i);
+    const auto eIn = m_inputWS->e(i);
+    m_outputWS->setBinEdges(i, m_inputWS->binEdges(i));
 
     const MantidVec effVec = calculateEfficiency(eff0, effFormula, xIn);
     // run this outside to benefit from parallel for (?)
@@ -113,8 +114,8 @@ void DetectorEfficiencyCorUser::exec() {
  * @param eOut corrected spectrum errors
  */
 void DetectorEfficiencyCorUser::applyDetEfficiency(
-    const size_t numberOfChannels, const MantidVec &yIn, const MantidVec &eIn,
-    const MantidVec &effVec, MantidVec &yOut, MantidVec &eOut) {
+    const size_t numberOfChannels, const HistogramY &yIn, const HistogramE &eIn,
+    const MantidVec &effVec, HistogramY &yOut, HistogramE &eOut) {
 
   for (unsigned int j = 0; j < numberOfChannels; ++j) {
     // xOut[j] = xIn[j];
@@ -176,10 +177,9 @@ DetectorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
  * @return a vector with the efficiencies
  */
 MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
-    double eff0, const std::string &formula, const MantidVec &xIn) {
+    double eff0, const std::string &formula, const Points &xIn) {
 
-  // Histogram data: xIn.size() == yIn.size() + 1
-  MantidVec effOut(xIn.size() - 1);
+  MantidVec effOut(xIn.size());
 
   try {
     double e;
