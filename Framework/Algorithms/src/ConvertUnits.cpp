@@ -676,7 +676,6 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
     // Next, loop again copying in the correct range for each spectrum
     for (int64_t j = 0; j < int64_t(numSpec); ++j) {
       auto edges = workspace->binEdges(j);
-      auto &resX = result->mutableX(j);
 
       auto k = lastBins[j];
 
