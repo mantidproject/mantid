@@ -9624,7 +9624,9 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
   MDIWindowList windows = getAllWindows();
   foreach (MdiSubWindow *w, windows) {
     w->confirmClose(false);
+    w->setAttribute(Qt::WA_DeleteOnClose, false);
     w->close();
+    delete w;
   }
 
   mantidUI->shutdown();
