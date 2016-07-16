@@ -25,8 +25,8 @@ from IOmodule import  IOmodule
 from GeneralDFTProgram import GeneralDFTProgram
 from LoadCASTEP import LoadCASTEP
 from CalculateQ import CalculateQ
-from CalculateDW import CalculateDW
-from CalculateMSD import CalculateMSD
+from CalculateDWCrystal import CalculateDWCrystal
+from CalculatePowder import CalculatePowder
 
 # Data
 from GeneralData import GeneralData
@@ -34,8 +34,8 @@ from QData import  QData
 from KpointsData import KpointsData
 from AtomsData import AtomsDaTa
 from AbinsData import  AbinsData
-from DwData import  DwData
-from MSDData import MSDData
+from DwCrystalData import  DwCrystalData
+from PowderData import PowderData
 
 # Instruments
 from InstrumentProducer import  InstrumentProducer

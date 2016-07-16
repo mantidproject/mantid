@@ -18,7 +18,7 @@ Q_data_group = "Q_data" # name of the group where Q data is stored
 
 DW_data_group = "DW_factors" # name of the group where Debye-Waller factors are stored
 
-MSQ_data_group = "MSQ" # name of the group where mean square displacements are stored
+powder_data_group = "Powder" # name of the group where PowderData is stored
 
 S_data_group = "S" # name of the group where dynamical factor is stored
 
@@ -32,6 +32,8 @@ all_keywords_k_data = ["weights", "k_vectors", "frequencies", "atomic_displaceme
 
 # keywords which define data structure of AtomsData
 all_keywords_atoms_data = ["symbol", "fract_coord", "atom", "sort", "mass"]
+
+all_keyword_msd_data = ["msd", "dw"]
 
 # symbols of all elements
 all_symbols = ["Ac", "Ag", "Al", "Am", "Ar",  "As", "At" , "Au" , "B"  , "Ba", "Be", "Bh", "Bi", "Bk", "Br", "C" , "Ca" ,

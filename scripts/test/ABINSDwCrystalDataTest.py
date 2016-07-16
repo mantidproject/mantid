@@ -2,10 +2,10 @@ import unittest
 from mantid.simpleapi import *
 import numpy as np
 
-from AbinsModules import DwData
+from AbinsModules import DwCrystalData
 
 
-class DwDataTest(unittest.TestCase):
+class ABINSDwCrystalDataTest(unittest.TestCase):
     # fake DW tensors for two atoms
     _good_data = np.asarray([ [[1.0, 1.0, 1.0],
                                [1.0, 1.0, 1.0],
@@ -17,18 +17,18 @@ class DwDataTest(unittest.TestCase):
 
 
     def setUp(self):
-         self.tester = DwData(temperature=20, num_atoms=2)
+         self.tester = DwCrystalData(temperature=20, num_atoms=2)
 
 
     def test_bad_input(self):
 
         # invalid temperature
         with self.assertRaises(ValueError):
-            poor_tester = DwData(temperature=-1, num_atoms=2)
+            poor_tester = DwCrystalData(temperature=-1, num_atoms=2)
 
         # invalid number of atoms
         with self.assertRaises(ValueError):
-            poor_tester = DwData(temperature=10, num_atoms=-2)
+            poor_tester = DwCrystalData(temperature=10, num_atoms=-2)
 
 
     def test_wrong_append(self):

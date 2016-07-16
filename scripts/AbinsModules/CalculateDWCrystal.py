@@ -1,16 +1,16 @@
 import numpy as np
 
 # ABINS modules
-from DwData import DwData
+from DwCrystalData import DwCrystalData
 from AbinsData import AbinsData
 from IOmodule import  IOmodule
 
 import Constants
 
 
-class CalculateDW(IOmodule):
+class CalculateDWCrystal(IOmodule):
     """
-    Class for calculating Debye-Waller factors.
+    Class for calculating Debye-Waller factors for single crystals (sample form is a SingleCrystal).
     """
     
     def __init__(self, filename=None, temperature=None, abins_data=None):
@@ -20,7 +20,7 @@ class CalculateDW(IOmodule):
         @param abins_data: input Abins data (type: AbinsData)
         """
 
-        super(CalculateDW, self).__init__(input_filename=filename, group_name=Constants.DW_data_group)
+        super(CalculateDWCrystal, self).__init__(input_filename=filename, group_name=Constants.DW_data_group)
 
         if not (isinstance(temperature, float) or isinstance(temperature, int)):
             raise ValueError("Invalid value of the temperature. Number was expected.")
@@ -49,7 +49,7 @@ class CalculateDW(IOmodule):
         Working equation implemented according to:
         https://forge.epn-campus.eu/html/ab2tds/debye_waller.html
         """
-        _DW = DwData(temperature=self._temperature, num_atoms=self._num_atoms)
+        _DW = DwCrystalData(temperature=self._temperature, num_atoms=self._num_atoms)
 
         _data = self._abins_data.extract()
         _mass_hartree_factor = np.asarray([1.0 / ( atom["mass"] * 2)  for atom in _data["atoms_data"]])
@@ -109,7 +109,7 @@ class CalculateDW(IOmodule):
         """
         _data = self.load(list_of_numpy_datasets=["data"], list_of_attributes=["temperature"])
         _num_atoms = _data["datasets"]["data"].shape[0]
-        _dw_data = DwData(num_atoms=_num_atoms, temperature=_data["attributes"]["temperature"])
+        _dw_data = DwCrystalData(num_atoms=_num_atoms, temperature=_data["attributes"]["temperature"])
         _dw_data.set(_data["datasets"]["data"])
 
         return _dw_data

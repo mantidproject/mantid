@@ -5,16 +5,16 @@ from GeneralData import GeneralData
 import Constants
 
 
-class DwData(GeneralData):
+class DwCrystalData(GeneralData):
     """
-    Data structure for Debye-Waller coefficients.
+    Data structure for Debye-Waller coefficients for single crystals (sample form is a SingleCrystal).
     """
     def __init__(self, temperature=None, num_atoms=None):
         """
         @param temperature:  temperature in K
         @param num_atom: number of atoms in the unit cell
         """
-        super(DwData, self).__init__()
+        super(DwCrystalData, self).__init__()
 
         if isinstance(temperature, int) and temperature > 0:
             self._temperature = temperature

@@ -60,9 +60,9 @@ set ( TEST_PY_FILES
       test/ABINSQDataTest.py
       test/ABINSKpointsDataTest.py
       test/ABINSAtomsDataTest.py
-      test/ABINSDwDataTest.py
-      test/ABINSCalculateDWTest.py
-      test/ABINSMSDDataTest.py
+      test/ABINSDwCrystalDataTest.py
+      test/ABINSCalculateDWCrystalTest.py
+      test/ABINSPowderDataTest.py
       )
 
 
