@@ -119,7 +119,7 @@ class EnggFocus(PythonAlgorithm):
         nreports = 5
         if detPos:
             nreports += 1
-        prog = Progress(self, start=0, end=1, nreports=5)
+        prog = Progress(self, start=0, end=1, nreports=nreports)
 
         # Leave only the data for the bank/spectra list requested
         prog.report('Selecting spectra from input workspace')

@@ -239,12 +239,11 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
         self.assertEquals(self.difa_b2, 0)
 
         # this will be used as a comparison delta in relative terms (percentage)
-        exdelta = exdelta_special = 5e-4
+        exdelta_special = 5e-4
         # Mac fitting tests produce large differences for some reason.
         # Windows results are different but within reasonable bounds
         import sys
         if "darwin" == sys.platform:
-            exdelta = 1e-2
             # Some tests need a bigger delta
             exdelta_special = 1e-1
 
