@@ -20,6 +20,10 @@ Single Crystal Diffraction
 Engineering Diffraction
 -----------------------
 
+- EnggFocus: bins are now masked at the beginning of the workflow
+  (when using the option MaskBinsXMins)
+
+
 Powder Diffraction
 ------------------
 
