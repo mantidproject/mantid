@@ -22,6 +22,7 @@ Algorithms
 New
 ###
 
+- :ref:`CropToComponent <algm-CropToComponent>` allows for cropping a workspace to a list of component names.
 
 Improved
 ########
