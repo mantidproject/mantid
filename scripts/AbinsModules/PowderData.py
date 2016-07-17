@@ -70,9 +70,9 @@ class PowderData(GeneralData):
 
          if not isinstance(items["msd"], np.ndarray):
             raise ValueError("New value of MSD should be a numpy array.")
-
          if not isinstance(items["dw"], np.ndarray):
-            raise ValueError("New value of mean square displacements should be a numpy array.")
+            raise ValueError("New value of Debye-Waller factors should be a numpy array.")
+
          if items["msd"].shape != (self._num_atoms,):
             raise ValueError("Invalid size of mean square displacements.")
          if items["dw"].shape != (self._num_atoms,):

@@ -30,8 +30,8 @@ class CalculatePowder(IOmodule):
     def _calculate_msd(self):
         """
         MSD are calculated according to http://atztogo.github.io/phonopy/thermal-displacement.html.
-        MSD are expressed in Hartree atomic units. Additionally DW are calculated. DW are MSD for every frequency
-        multiplied by coth(omega/2T)^2.
+        MSD are expressed in Hartree atomic units. Additionally DW are calculated. DW are MSD multiplied by
+        coth(omega/2T)^2 for every frequency.
         """
 
         _data = self._abins_data.extract()
@@ -69,6 +69,7 @@ class CalculatePowder(IOmodule):
                 for freq in range(start, num_freq):
 
                     disp = displacements[k, atom, freq, :]
+
                     _powder_atom["msd"] += np.vdot(disp, disp).real * (one_over_freq[k, freq] + two_over_freq_n[k, freq])
                     _powder_atom["dw"] = _powder_atom["msd"] * _coth_square[k, freq]
                 _powder_atom["msd"] += _powder_atom["msd"] * weights[k]
@@ -104,7 +105,7 @@ class CalculatePowder(IOmodule):
         @return: object of type PowderData with mean square displacements and Debye-Waller factors.
         """
         _data = self.load(list_of_structured_datasets=["data"], list_of_attributes=["temperature"])
-        _num_atoms = _data["structured_datasets"]["data"].shape[0]
+        _num_atoms = _data["structured_datasets"]["data"]["msd"].shape[0]
         _msd_data = PowderData(temperature=_data["attributes"]["temperature"], num_atoms=_num_atoms)
         _msd_data.set(_data["structured_datasets"]["data"])
 
