@@ -27,7 +27,7 @@ class CalculatePowder(IOmodule):
         self._temperature = temperature # temperature in K
 
 
-    def _calculate_msd(self):
+    def _calculate_powder(self):
         """
         MSD are calculated according to http://atztogo.github.io/phonopy/thermal-displacement.html.
         MSD are expressed in Hartree atomic units. Additionally DW are calculated. DW are MSD multiplied by
@@ -88,7 +88,7 @@ class CalculatePowder(IOmodule):
         @return: object of type PowderData with mean square displacements and Debye-Waller factors.
         """
 
-        data = self._calculate_msd()
+        data = self._calculate_powder()
 
         self.addAttribute("temperature", self._temperature)
         self.addAttribute("filename", self._input_filename)
