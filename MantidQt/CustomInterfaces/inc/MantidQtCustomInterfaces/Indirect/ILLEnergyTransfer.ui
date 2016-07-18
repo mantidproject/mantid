@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>358</height>
+    <height>389</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -33,6 +33,9 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Input file names (numors)</string>
         </property>
         <property name="label" stdset="0">
          <string>Run File</string>
@@ -69,6 +72,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Sum the input files</string>
+        </property>
         <property name="text">
          <string>Sum</string>
         </property>
@@ -85,7 +91,7 @@
      <property name="title">
       <string>Vanadium Calibration</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
       <item>
        <widget class="QCheckBox" name="ckUseCalibration">
         <property name="sizePolicy">
@@ -93,6 +99,9 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Enable vanadium calibration</string>
         </property>
         <property name="text">
          <string>Use Calibration</string>
@@ -103,6 +112,15 @@
        <widget class="MantidQt::MantidWidgets::DataSelector" name="dsCalibration" native="true">
         <property name="enabled">
          <bool>false</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Vanadium file(s) or workspace</string>
         </property>
         <property name="autoLoad" stdset="0">
          <bool>true</bool>
@@ -122,6 +140,22 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QCheckBox" name="ckCalibSum">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Sum calibration files</string>
+        </property>
+        <property name="text">
+         <string>Sum</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -133,6 +167,9 @@
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
        <widget class="QComboBox" name="cbGroupingType">
+        <property name="toolTip">
+         <string>Use detector grouping</string>
+        </property>
         <item>
          <property name="text">
           <string>Default</string>
@@ -161,6 +198,9 @@
           </property>
           <item>
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfMapFile" native="true">
+            <property name="toolTip">
+             <string>Detector grouping .xml file</string>
+            </property>
             <property name="label" stdset="0">
              <string/>
             </property>
@@ -192,6 +232,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Use mirror sense</string>
+        </property>
         <property name="text">
          <string>Mirror Sense</string>
         </property>
@@ -201,10 +244,69 @@
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="sbUnmirrorOption"/>
+       <widget class="QSpinBox" name="sbUnmirrorOption">
+        <property name="toolTip">
+         <string>Unmirror option</string>
+        </property>
+       </widget>
       </item>
       <item>
        <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbOutput">
+     <property name="title">
+      <string>Output Options</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QCheckBox" name="ckControlMode">
+        <property name="toolTip">
+         <string>Output intermediate workspaces along with the final reduced one</string>
+        </property>
+        <property name="text">
+         <string>Control Mode</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="ckPlot">
+        <property name="toolTip">
+         <string>Plot the reduced workspace</string>
+        </property>
+        <property name="text">
+         <string>Plot Result</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="ckSave">
+        <property name="toolTip">
+         <string>Save the reduced workspace</string>
+        </property>
+        <property name="text">
+         <string>Save Result</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -231,52 +333,6 @@
       </size>
      </property>
     </spacer>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="gbOutput">
-     <property name="title">
-      <string>Output Options</string>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QCheckBox" name="ckControlMode">
-        <property name="text">
-         <string>Control Mode</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="ckPlot">
-        <property name="text">
-         <string>Plot Result</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="ckSave">
-        <property name="text">
-         <string>Save Result</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
    </item>
   </layout>
  </widget>
