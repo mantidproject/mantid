@@ -121,7 +121,7 @@ private:
 
     space2D->setHistogram(0, BinEdges{0.0, 0.0, 0.0, 0.0, 4.0},
                           Counts{10, 11, 12, 0},
-                          CountVariances{sqrt(5.0), sqrt(5.0), sqrt(5.0), 0.0});
+                          CountVariances{5.0, 5.0, 5.0, 0.0});
 
     std::string xmlShape = "<cylinder id=\"shape\"> ";
     xmlShape += "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
