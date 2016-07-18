@@ -116,7 +116,7 @@ private:
 
   void checkAssignmentSize(const size_t &size) const {
     if (this->size() != size)
-      throw std::logic_error("FixedLengthVector::operator=: size mismatch");
+      throw std::logic_error("FixedLengthVector::assign: size mismatch");
   }
 
   std::vector<double> m_data;
