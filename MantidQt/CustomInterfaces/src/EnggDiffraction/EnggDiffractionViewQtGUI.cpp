@@ -58,8 +58,7 @@ const std::string EnggDiffractionViewQtGUI::g_settingsGroup =
 * @param parent Parent window (most likely the Mantid main app window).
 */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
-    : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
-      m_splashMsg(nullptr), m_presenter(nullptr) {}
+    : UserSubWindow(parent), IEnggDiffractionView() {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {}
 

@@ -257,7 +257,7 @@ private:
   Ui::EnggDiffractionQtTabFocus m_uiTabFocus;
   Ui::EnggDiffractionQtTabPreproc m_uiTabPreproc;
   // Ui::EnggDiffractionQtTabFitting m_uiTabFitting;
-  EnggDiffFittingViewQtWidget *m_fittingWidget;
+  EnggDiffFittingViewQtWidget *m_fittingWidget{nullptr};
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
   /// converts QList to a vector
@@ -265,7 +265,7 @@ private:
                                          bool validator) const;
 
   /// instrument selected (ENGIN-X, etc.)
-  std::string m_currentInst;
+  std::string m_currentInst{"ENGINX"};
 
   /// User select instrument
   void userSelectInstrument(const QString &prefix);
@@ -286,7 +286,7 @@ private:
   EnggDiffCalibSettings m_calibSettings;
 
   /// To show important non-modal messages
-  QMessageBox *m_splashMsg;
+  QMessageBox *m_splashMsg{nullptr};
 
   /// This is in principle the only settings for 'focus'
   std::string m_focusDir;
@@ -304,7 +304,7 @@ private:
   static const std::string g_DetGrpExtStr;
 
   /// presenter as in the model-view-presenter
-  boost::shared_ptr<IEnggDiffractionPresenter> m_presenter;
+  boost::shared_ptr<IEnggDiffractionPresenter> m_presenter{nullptr};
 };
 
 } // namespace CustomInterfaces
