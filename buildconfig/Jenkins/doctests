@@ -79,6 +79,11 @@ fi
 #####################################################################################
 # Run tests
 #####################################################################################
+# Remove doctrees directory so it forces a full reparse. It seems 
+  # without this newly added doctests are not executed
+  if [ -d $BUILD_DIR/docs/doctrees ]; then
+    rm -rf $BUILD_DIR/docs/doctrees/*
+  fi
 # Create clean user properties with UsageData search path
 userprops=~/.mantid/Mantid.user.properties
 rm -f $userprops
