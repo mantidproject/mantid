@@ -33,6 +33,9 @@ Improved
 - :ref:`SavePlot1D <algm-SavePlot1D>` has options for writing out
   plotly html files.
 
+- :ref:`SofQW <algm-SofQW>` now replaces any NaNs in output workspace
+  with zeroes.
+
 Deprecated
 ##########
 
