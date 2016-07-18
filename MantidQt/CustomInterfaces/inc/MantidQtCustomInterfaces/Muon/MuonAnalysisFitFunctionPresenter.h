@@ -44,6 +44,8 @@ public:
       QObject *parent,
       MantidQt::MantidWidgets::IMuonFitFunctionControl *fitBrowser,
       MantidQt::MantidWidgets::IFunctionBrowser *funcBrowser);
+  /// Toggle compatibility mode
+  void setCompatibilityMode(bool enabled);
 public slots:
   /// Update function and pass to fit property browser
   void updateFunction();
@@ -76,6 +78,8 @@ private:
   MantidQt::MantidWidgets::IMuonFitFunctionControl *m_fitBrowser;
   /// Non-owning pointer to function browser widget
   MantidQt::MantidWidgets::IFunctionBrowser *m_funcBrowser;
+  /// Compatibility mode: when function browser is hidden
+  bool m_compatibilityMode;
 };
 
 } // namespace CustomInterfaces

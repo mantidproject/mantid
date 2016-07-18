@@ -62,6 +62,7 @@ public:
                void(const QString &, const QString &, double));
   MOCK_CONST_METHOD0(getWorkspaceNamesToFit, std::vector<std::string>());
   MOCK_METHOD1(userChangedDatasetIndex, void(int));
+  MOCK_METHOD1(setCompatibilityMode, void(bool));
 };
 
 class MuonAnalysisFitFunctionPresenterTest : public CxxTest::TestSuite {
@@ -141,12 +142,20 @@ public:
   }
 
   void test_handleFitFinished() {
-    doTest_HandleFitFinishedOrUndone("MUSR00015189; Pair; long; Asym; 1; #1");
+    m_presenter->setCompatibilityMode(false);
+    doTest_HandleFitFinishedOrUndone("MUSR00015189; Pair; long; Asym; 1; #1",
+                                     false);
+  }
+
+  void test_handleFitFinished_compatibilityMode() {
+    m_presenter->setCompatibilityMode(true);
+    doTest_HandleFitFinishedOrUndone("MUSR00015189; Pair; long; Asym; 1; #1",
+                                     true);
   }
 
   void test_handleFitUndone() {
     EXPECT_CALL(*m_funcBrowser, clearErrors()).Times(1);
-    doTest_HandleFitFinishedOrUndone("");
+    doTest_HandleFitFinishedOrUndone("", false);
   }
 
   void test_handleParameterEdited() {
@@ -156,7 +165,8 @@ public:
         .WillByDefault(Return(paramValue));
     EXPECT_CALL(*m_funcBrowser, getParameter(funcIndex, paramName)).Times(1);
     EXPECT_CALL(*m_fitBrowser,
-                setParameterValue(funcIndex, paramName, paramValue)).Times(1);
+                setParameterValue(funcIndex, paramName, paramValue))
+        .Times(1);
     m_presenter->handleParameterEdited(funcIndex, paramName);
   }
 
@@ -194,14 +204,27 @@ public:
     m_presenter->handleDatasetIndexChanged(index);
   }
 
+  void test_setCompatibilityMode_On() {
+    EXPECT_CALL(*m_fitBrowser, setCompatibilityMode(true)).Times(1);
+    m_presenter->setCompatibilityMode(true);
+  }
+
+  void test_setCompatibilityMode_Off() {
+    EXPECT_CALL(*m_fitBrowser, setCompatibilityMode(false)).Times(1);
+    m_presenter->setCompatibilityMode(false);
+  }
+
 private:
   /// Run a test of "handleFitFinished" with the given workspace name
-  void doTest_HandleFitFinishedOrUndone(const QString &wsName) {
+  void doTest_HandleFitFinishedOrUndone(const QString &wsName,
+                                        bool compatibility) {
+    const int times = compatibility ? 0 : 1;
     const auto function = createFunction();
     ON_CALL(*m_fitBrowser, getFunction()).WillByDefault(Return(function));
-    EXPECT_CALL(*m_fitBrowser, getFunction()).Times(1);
+    EXPECT_CALL(*m_fitBrowser, getFunction()).Times(times);
     EXPECT_CALL(*m_funcBrowser,
-                updateMultiDatasetParameters(testing::Ref(*function))).Times(1);
+                updateMultiDatasetParameters(testing::Ref(*function)))
+        .Times(times);
     m_presenter->handleFitFinished(wsName);
   }
 
