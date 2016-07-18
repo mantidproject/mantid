@@ -172,16 +172,15 @@ void CreateWorkspace::exec() {
     if (commonX) {
       outputWS->setSharedX(i, XValues);
     } else {
-      outputWS->mutableX(i) =
-          HistogramX(dataX.begin() + xStart, dataX.begin() + xEnd);
+      outputWS->mutableX(i).assign(dataX.begin() + xStart,
+                                   dataX.begin() + xEnd);
     }
 
-    outputWS->mutableY(i) =
-        HistogramY(dataY.begin() + yStart, dataY.begin() + yEnd);
+    outputWS->mutableY(i).assign(dataY.begin() + yStart, dataY.begin() + yEnd);
 
     if (dataE_provided)
-      outputWS->mutableE(i) =
-          HistogramE(dataE.begin() + yStart, dataE.begin() + yEnd);
+      outputWS->mutableE(i).assign(dataE.begin() + yStart,
+                                   dataE.begin() + yEnd);
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION
