@@ -147,6 +147,48 @@ public:
     TS_ASSERT_EQUALS(fun->getParameter("f1.f0.f0.Sigma"), 0.2);
   }
 
+  void test_composite_multispectral() {
+    std::string fun1 =
+        "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(44, "
+        "50),ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,"
+        "B40=-0.031787,B42=-0.11611,B44=-0.12544,"
+        "f0.f1.FWHM=1.6,f0.f2.FWHM=2.0,f0.f3.FWHM=2.3,f1.f1.FWHM=1.6,"
+        "f1.f2.FWHM=2.0,f1.f3.FWHM=2.3";
+    std::string fun2 =
+        "name=CrystalFieldMultiSpectrum,Ion=Pr,Temperatures=(44, "
+        "50),ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,"
+        "B40=-0.031787,B42=-0.11611,B44=-0.12544,"
+        "f0.f1.FWHM=1.6,f0.f2.FWHM=2.0,f0.f3.FWHM=2.3,f1.f1.FWHM=1.6,"
+        "f1.f2.FWHM=2.0,f1.f3.FWHM=2.3";
+    auto fun = fun1 + ";" + fun2;
+
+    auto ws = createWorkspace();
+    auto alg = AlgorithmFactory::Instance().create("EvaluateFunction", -1);
+    alg->initialize();
+    alg->setPropertyValue("Function", fun);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("InputWorkspace_1", ws);
+    alg->setProperty("OutputWorkspace", "out");
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
+
+    auto out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "Workspace_0");
+    TS_ASSERT(out);
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
+    TS_ASSERT_DELTA(out->readY(1)[0], 2.9202, 0.001);
+    TS_ASSERT_DELTA(out->readY(1)[1], 2.4691, 0.001);
+    TS_ASSERT_DELTA(out->readY(1)[2], 1.3817, 0.001);
+    out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "Workspace_1");
+    TS_ASSERT(out);
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
+    TS_ASSERT_DELTA(out->readY(1)[0], 2.9192, 0.001);
+    TS_ASSERT_DELTA(out->readY(1)[1], 2.4647, 0.001);
+    TS_ASSERT_DELTA(out->readY(1)[2], 1.3791, 0.001);
+    AnalysisDataService::Instance().clear();
+  }
+
 private:
   Workspace_sptr createWorkspace() {
     auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 100, 100);

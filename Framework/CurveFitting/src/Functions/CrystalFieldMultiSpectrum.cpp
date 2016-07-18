@@ -1,5 +1,5 @@
-#include "MantidCurveFitting/Functions/CrystalElectricField.h"
 #include "MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h"
+#include "MantidCurveFitting/Functions/CrystalElectricField.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
 
 #include "MantidAPI/FunctionFactory.h"
@@ -110,8 +110,11 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
     }
   }
   // Create the single-spectrum functions.
-  for (size_t i = 0; i < temperatures.size(); ++i) {
-    fun->addFunction(buildSpectrum(nre, en, wf, temperatures[i], fwhms[i]));
+  auto nSpec = temperatures.size();
+  m_nPeaks.resize(nSpec);
+  m_maxNPeaks.resize(nSpec);
+  for (size_t i = 0; i < nSpec; ++i) {
+    fun->addFunction(buildSpectrum(nre, en, wf, temperatures[i], fwhms[i], i));
     fun->setDomainIndex(i, i);
   }
 }
@@ -135,23 +138,27 @@ void CrystalFieldMultiSpectrum::calcExcitations(
 /// Build a function for a single spectrum.
 API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
     int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
-    double temperature, double fwhm) const {
+    double temperature, double fwhm, size_t i) const {
   DoubleFortranVector eExcitations;
   DoubleFortranVector iExcitations;
   calcExcitations(nre, en, wf, temperature, eExcitations, iExcitations);
-  size_t nPeaks = eExcitations.size();
-  size_t maxNPeaks = nPeaks + nPeaks / 2 + 1;
+  auto nPeaks = eExcitations.size();
+  auto maxNPeaks = nPeaks + nPeaks / 2 + 1;
+  m_nPeaks[i] = nPeaks;
+  m_maxNPeaks[i] = maxNPeaks;
   bool fixAll = getAttribute("FixAllPeakParameters").asBool();
 
   auto peakShape = IFunction::getAttribute("PeakShape").asString();
   auto bkgdShape = IFunction::getAttribute("Background").asUnquotedString();
 
-  if (!bkgdShape.empty() && bkgdShape.find("name=") != 0 && bkgdShape.front() != '(') {
+  if (!bkgdShape.empty() && bkgdShape.find("name=") != 0 &&
+      bkgdShape.front() != '(') {
     bkgdShape = "name=" + bkgdShape;
   }
 
   auto spectrum = new CompositeFunction;
-  auto background = API::FunctionFactory::Instance().createInitialized(bkgdShape);
+  auto background =
+      API::FunctionFactory::Instance().createInitialized(bkgdShape);
   spectrum->addFunction(background);
   for (size_t i = 0; i < maxNPeaks; ++i) {
     auto fun = API::FunctionFactory::Instance().createFunction(peakShape);
@@ -194,45 +201,40 @@ void CrystalFieldMultiSpectrum::updateTargetFunction() const {
   auto &fun = dynamic_cast<MultiDomainFunction &>(*m_target);
   auto temperatures = getAttribute("Temperatures").asVector();
   for (size_t i = 0; i < temperatures.size(); ++i) {
-    auto res =
-        updateSpectrum(*fun.getFunction(i), nre, en, wf, temperatures[i]);
-    if (!res) {
-      buildTargetFunction();
-      return;
-    }
+    updateSpectrum(*fun.getFunction(i), nre, en, wf, temperatures[i], i);
   }
 }
 
 /// Update a function for a single spectrum.
-/// If returns false the target must be rebuilt with buldTargetFunction()
-bool CrystalFieldMultiSpectrum::updateSpectrum(API::IFunction &spectrum,
-                                               int nre,
-                                               const DoubleFortranVector &en,
-                                               const ComplexFortranMatrix &wf,
-                                               double temperature) const {
+void CrystalFieldMultiSpectrum::updateSpectrum(
+    API::IFunction &spectrum, int nre, const DoubleFortranVector &en,
+    const ComplexFortranMatrix &wf, double temperature, size_t i) const {
   DoubleFortranVector eExcitations;
   DoubleFortranVector iExcitations;
   calcExcitations(nre, en, wf, temperature, eExcitations, iExcitations);
-  size_t nPeaks = eExcitations.size();
-  size_t maxNPeaks = nPeaks + nPeaks / 2 +
-                     1; // m_source->getAttribute("MaxPeakCount").asInt();
+  size_t nGoodPeaks = eExcitations.size();
+  size_t nOriginalPeaks = m_nPeaks[i];
+  size_t maxNPeaks = m_maxNPeaks[i];
 
   auto &composite = dynamic_cast<CompositeFunction &>(spectrum);
   if (maxNPeaks + 1 != composite.nFunctions()) {
-    return false;
+    throw std::logic_error(
+        "CrystalFieldMultiSpectrum target function size mismatch.");
   }
+
   for (size_t i = 0; i < maxNPeaks; ++i) {
     auto fun = composite.getFunction(i + 1);
     auto &peak = dynamic_cast<API::IPeakFunction &>(*fun);
-    if (i < nPeaks) {
+    if (i < nGoodPeaks) {
       peak.setCentre(eExcitations.get(i));
       peak.setIntensity(iExcitations.get(i));
     } else {
       peak.setHeight(0.0);
-      peak.fixAll();
+      if (i > nOriginalPeaks) {
+        peak.fixAll();
+      }
     }
   }
-  return true;
 }
 
 } // namespace Functions

@@ -160,6 +160,11 @@ public:
   void setUpForFit() override;
   /// Remove a constraint
   void removeConstraint(const std::string &parName) override;
+  /// Get number of domains required by this function
+  size_t getNumberDomains() const override;
+  /// Split this function (if needed) into a list of independent functions.
+  std::vector<boost::shared_ptr<IFunction>>
+  createEquivalentFunctions() const override;
 
   /* CompositeFunction own methods */
 

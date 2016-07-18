@@ -37,8 +37,6 @@ void CrystalFieldSpectrum::buildTargetFunction() const {
   FunctionValues values;
   m_source->function(domain, values);
 
-  size_t maxNPeaks = m_source->getAttribute("MaxPeakCount").asInt();
-
   if (values.size() == 0) {
     return;
   }
@@ -51,6 +49,7 @@ void CrystalFieldSpectrum::buildTargetFunction() const {
   auto peakShape = IFunction::getAttribute("PeakShape").asString();
   auto fwhm = IFunction::getAttribute("FWHM").asDouble();
   auto nPeaks = values.size() / 2;
+  size_t maxNPeaks = nPeaks + nPeaks / 2 + 1;
   for (size_t i = 0; i < maxNPeaks; ++i) {
     auto fun = API::FunctionFactory::Instance().createFunction(peakShape);
     auto peak = boost::dynamic_pointer_cast<API::IPeakFunction>(fun);
@@ -83,11 +82,17 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
   m_source->function(domain, values);
   auto nPeaks = values.size() / 2;
 
-  size_t maxNPeaks = m_source->getAttribute("MaxPeakCount").asInt();
+  size_t maxNPeaks = nPeaks + nPeaks / 2 + 1;
   auto spectrum = dynamic_cast<CompositeFunction *>(m_target.get());
-  if (!spectrum || spectrum->nFunctions() != maxNPeaks) {
+  if (!spectrum) {
     buildTargetFunction();
     return;
+  }
+  if (spectrum->nFunctions() != maxNPeaks) {
+    maxNPeaks = spectrum->nFunctions();
+    if (nPeaks > maxNPeaks) {
+      nPeaks = maxNPeaks;
+    }
   }
 
   for (size_t i = 0; i < maxNPeaks; ++i) {

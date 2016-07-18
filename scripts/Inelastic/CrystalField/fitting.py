@@ -37,6 +37,8 @@ class CrystalField(object):
 
     default_peakShape = 'Gaussian'
 
+    default_background = 'FlatBackground'
+
     default_spectrum_size = 200
 
     field_parameter_names = ['BmolX','BmolY','BmolZ','BextX','BextY','BextZ',
@@ -116,9 +118,6 @@ class CrystalField(object):
         self._intensityScaling = 1.0
         self._resolutionModel = None
 
-        self.peaks = PeaksFunction()
-        self.background = None
-
         for key in kwargs:
             if key == 'ToleranceEnergy':
                 self._toleranceEnergy = kwargs[key]
@@ -135,6 +134,12 @@ class CrystalField(object):
             else:
                 # Crystal field parameters
                 self._fieldParameters[key] = kwargs[key]
+
+        if isinstance(self._temperature, list) or isinstance(self._temperature, np.ndarray):
+            self.peaks = [PeaksFunction() for t in self._temperature]
+        else:
+            self.peaks = PeaksFunction()
+        self.background = None
 
         # Eigensystem
         self._dirty_eigensystem = True
@@ -541,6 +546,7 @@ class CrystalField(object):
         Update values of the fitting parameters in case of a multi-spectrum function.
         @param func: A IFunction object containing new parameter values.
         """
+        from .function import Function
         n = func.nParams()
         for i in range(n):
             par = func.parameterName(i)
@@ -551,6 +557,8 @@ class CrystalField(object):
                 ipeak = int(m.group(2))
                 par = m.group(3)
                 if ipeak == 0:
+                    if self.background is None:
+                        self.setBackground(background=Function(self.default_background))
                     background = self.background[ispec]
                     mb = re.match(fn_pattern, par)
                     if mb:
@@ -689,6 +697,13 @@ class CrystalFieldMulti(object):
             fun += ',ties=(%s)' % ties
         return fun
 
+    def makeMultiSpectrumFunction(self):
+        fun = ';'.join([a.makeMultiSpectrumFunction() for a in self.args])
+        ties = self.getTies()
+        if len(ties) > 0:
+            fun += ',ties=(%s)' % ties
+        return fun
+
     def ties(self, **kwargs):
         """Set ties on the parameters."""
         for tie in kwargs:
@@ -726,6 +741,12 @@ class CrystalFieldMulti(object):
         for i in range(n):
             self.args[i].update(func[i])
 
+    def update_multi(self, func):
+        n = func.nFunctions()
+        assert n == len(self.args)
+        for i in range(n):
+            self.args[i].update_multi(func[i])
+
     def __add__(self, other):
         if isinstance(other, CrystalFieldMulti):
             return CrystalFieldMulti(*(self.args + other.args))
@@ -744,7 +765,7 @@ class CrystalFieldFit(object):
     Object that controls fitting.
     """
 
-    def __init__(self, Model=None, Temperature=None, FWHM=None, InputWorkspace=None):
+    def __init__(self, Model=None, Temperature=None, FWHM=None, InputWorkspace=None, **kwargs):
         self.model = Model
         if Temperature is not None:
             self.model.Temperature = Temperature
@@ -752,6 +773,7 @@ class CrystalFieldFit(object):
             self.model.FWHM = FWHM
         self._input_workspace = InputWorkspace
         self._output_workspace_base_name = 'fit'
+        self._fit_properties = kwargs
 
     def fit(self):
         """
@@ -773,6 +795,7 @@ class CrystalFieldFit(object):
         alg.setProperty('Function', fun)
         alg.setProperty('InputWorkspace', self._input_workspace)
         alg.setProperty('Output', 'fit')
+        self._set_fit_properties(alg)
         alg.execute()
         f = alg.getProperty('Function').value
         self.model.update(f)
@@ -792,6 +815,11 @@ class CrystalFieldFit(object):
             alg.setProperty('InputWorkspace_%s' % i, ws)
             i += 1
         alg.setProperty('Output', 'fit')
+        self._set_fit_properties(alg)
         alg.execute()
         f = alg.getProperty('Function').value
         self.model.update_multi(f)
+
+    def _set_fit_properties(self, alg):
+        for prop in self._fit_properties.items():
+            alg.setProperty(*prop)
