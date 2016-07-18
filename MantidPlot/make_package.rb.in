@@ -184,31 +184,43 @@ else
   exit 1
 end
 
-#change id of all PyQt4 libraries
-pyqt4_patterns = ["**/PyQt4/*.so"]
-pyqt4_patterns.each do |pattern|
-  Dir[pattern].each do |library|
-    basename =  File.basename(library)
-    `chmod +w Contents/MacOS/PyQt4/#{basename}`  
-    `install_name_tool -id @rpath/#{basename} Contents/MacOS/PyQt4/#{basename}`
-  end
+
+#change id of all libraries that match patterns
+def change_id(patterns, lib_path)
+    patterns.each do |pattern|
+        Dir[pattern].each do |library|
+            basename =  File.basename(library)
+            `chmod +w #{lib_path}/#{basename}`
+            `install_name_tool -id @rpath/#{basename} #{lib_path}/#{basename}`
+        end
+    end
 end
 
 #Homebrew recently switched the linking from /usr/local/lib/* to /usr/local/opt/qt/lib/*
 #This attempts to determine the correct path to pass to install_name_tool.
-QtLinkingDir = []
-Dir[pyqt4_patterns[0]].each do |library|
-  dependencies = `otool -L #{library}`
-  dependencies.split("\n").each do |dependency|
-    if dependency.match('Qt.*.framework/Versions/\d/Qt.*')
-       if dependency.match('/usr/local/opt/qt/lib')
-         QtLinkingDir << '/usr/local/opt/qt/lib'
-       else
-         QtLinkingDir << '/usr/local/lib'
-       end
+def find_linking_directories(patterns, lib_name, lib_path)
+    linking_dir = []
+    Dir[patterns[0]].each do |library|
+        dependencies = `otool -L #{library}`
+        dependencies.split("\n").each do |dependency|
+            if dependency.match(lib_name)
+                if dependency.match(lib_path)
+                    linking_dir << lib_path
+                else
+                    linking_dir << '/usr/local/lib'
+                end
+            end
+        end
     end
-  end
+    return linking_dir
 end
+
+
+#change id of all PyQt4 libraries
+pyqt4_patterns = ["**/PyQt4/*.so"]
+change_id(pyqt4_patterns, "Contents/MacOS/PyQt4/")
+
+QtLinkingDir = find_linking_directories(pyqt4_patterns, 'Qt.*.framework/Versions/\d/Qt.*', '/usr/local/opt/qt/lib')
 
 if QtLinkingDir.uniq != [QtLinkingDir[0]]
   p "Error updating PyQt4 dynamic linking!"
@@ -236,6 +248,27 @@ end
 `install_name_tool -change #{QtLinkingDir[0]}/QtXml.framework/Versions/4/QtXml @loader_path/../../Frameworks/QtXml.framework/Versions/4/QtXml Contents/MacOS/PyQt4/QtXml.so`
 `install_name_tool -change #{QtLinkingDir[0]}/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtXml.so`
 
+
+path = "/usr/local/Cellar/h5py/2.6.0/lib/python2.7/site-packages"
+directories = ["h5py"]
+directories.each do |directory|
+  addPythonLibrary("#{path}/#{directory}")
+end
+
+
+h5py_patterns = ["**/h5py/*.so"]
+change_id(h5py_patterns, "Contents/MacOS/h5py/")
+
+h5pyLinkingDir = find_linking_directories(h5py_patterns, 'hdf5/lib*', '/usr/local/opt/hdf5/lib')
+
+h5py_patterns.each do |pattern|
+  Dir[pattern].each do |library|
+    basename =  File.basename(library)
+    `install_name_tool -change #{h5pyLinkingDir[0]}/libhdf5.10.dylib @loader_path/../libhdf5.dylib Contents/MacOS/h5py/#{basename}`
+    `install_name_tool -change #{h5pyLinkingDir[0]}/libhdf5_hl.10.dylib @loader_path/../libhdf5_hl.dylib Contents/MacOS/h5py/#{basename}`
+  end
+end
+
 #Copy over python libraries not included with OSX. 
 #currently missing epics
 path = "/Library/Python/2.7/site-packages"
@@ -243,6 +276,7 @@ directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","bac
 directories.each do |directory|
   addPythonLibrary("#{path}/#{directory}")
 end
+
 
 files = ["gnureadline.so","readline.py","pyparsing.py","mistune.py"]
 files.each do |file|
