@@ -60,8 +60,8 @@ void ConvertTableToMatrixWorkspace::exec() {
   MatrixWorkspace_sptr outputWorkspace =
       WorkspaceFactory::Instance().create("Workspace2D", 1, nrows, nrows);
 
-  outputWorkspace->mutableX(0) = std::move(X);
-  outputWorkspace->mutableY(0) = std::move(Y);
+  outputWorkspace->mutableX(0).assign(X.begin(), X.end());
+  outputWorkspace->mutableY(0).assign(Y.begin(), Y.end());
 
   if (!columnE.empty()) {
     std::vector<double> E(nrows);
