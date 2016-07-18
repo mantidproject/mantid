@@ -78,6 +78,7 @@ set ( SRC_FILES
 	src/CreateTransmissionWorkspaceAuto.cpp
 	src/CreateUserDefinedBackground.cpp
 	src/CreateWorkspace.cpp
+	src/CropToComponent.cpp
 	src/CropWorkspace.cpp
 	src/CrossCorrelate.cpp
 	src/CuboidGaugeVolumeAbsorption.cpp
@@ -376,6 +377,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreateTransmissionWorkspaceAuto.h
 	inc/MantidAlgorithms/CreateUserDefinedBackground.h
 	inc/MantidAlgorithms/CreateWorkspace.h
+	inc/MantidAlgorithms/CropToComponent.h
 	inc/MantidAlgorithms/CropWorkspace.h
 	inc/MantidAlgorithms/CrossCorrelate.h
 	inc/MantidAlgorithms/CuboidGaugeVolumeAbsorption.h
@@ -688,6 +690,7 @@ set ( TEST_FILES
 	CreateTransmissionWorkspaceTest.h
 	CreateUserDefinedBackgroundTest.h
 	CreateWorkspaceTest.h
+	CropToComponentTest.h
 	CropWorkspaceTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
 	CylinderAbsorptionTest.h

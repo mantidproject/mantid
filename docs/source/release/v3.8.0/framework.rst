@@ -22,6 +22,7 @@ Algorithms
 New
 ###
 
+- :ref:`CropToComponent <algm-CropToComponent>` allows for cropping a workspace to a list of component names.
 - :ref:`CreateUserDefinedBackground <algm-CreateUserDefinedBackground>` takes a set of points
   that the user has chosen and creates a background workspace out of them. It interpolates the
   points so the resulting background can be subtracted from the original data.
@@ -29,12 +30,19 @@ New
 Improved
 ########
 
+- :ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>` & :ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
+  now accept 'Direct' as a possible ``EMode`` parameter.
+
 - :ref:`FilterEvents <algm-FilterEvents>` now produces output
   workspaces with the same workspace numbers as specified by the
   ``SplittersWorkspace``.
 
 - :ref:`SavePlot1D <algm-SavePlot1D>` has options for writing out
   plotly html files.
+  
+- :ref:`ConvertTableToMatrixWorkspaceDialog <algm-ConvertTableToMatrixWorkspaceDialog>`
+  had a bug where the table columns were in a reversed order in the dialogue's combo boxes. 
+  This is now fixed and the order is correct.
 
 Deprecated
 ##########
