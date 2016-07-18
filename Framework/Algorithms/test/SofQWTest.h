@@ -111,8 +111,9 @@ public:
   }
 
   void testExecNansReplaced() {
-	  auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>("NormalisedPolygon");
-	  bool nanFound = false;
+    auto result =
+        SofQWTest::runSQW<Mantid::Algorithms::SofQW>("NormalisedPolygon");
+    bool nanFound = false;
 
     for (int i = 0; i < result->getNumberHistograms(); i++) {
       if (nanFound = isNanInHistogram(*result, i)) {
@@ -120,7 +121,7 @@ public:
       }
     }
 
-	  TS_ASSERT(!nanFound);
+    TS_ASSERT(!nanFound);
   }
 
 private:
@@ -134,17 +135,16 @@ private:
   }
 
   bool isNanInHistogram(const Mantid::API::MatrixWorkspace &result,
-						            const size_t index) {
-	  bool nanFound = false;
-	  for (int i = 0; i < result.blocksize(); i++) {
-	    if (isnan(result.y(index)[i]) ||
-		      isnan(result.e(index)[i])) {
-			  nanFound = true;
-			  break; // NaN found in histogram, no need to keep searching
-	    }
-	  }
+                        const size_t index) {
+    bool nanFound = false;
+    for (int i = 0; i < result.blocksize(); i++) {
+      if (isnan(result.y(index)[i]) || isnan(result.e(index)[i])) {
+        nanFound = true;
+        break; // NaN found in histogram, no need to keep searching
+      }
+    }
 
-	  return nanFound;
+    return nanFound;
   }
 };
 
