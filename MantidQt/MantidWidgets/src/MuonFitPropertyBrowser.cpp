@@ -41,6 +41,7 @@
 #include <QMessageBox>
 #include <QAction>
 #include <QLayout>
+#include <QSplitter>
 
 namespace {
 Mantid::Kernel::Logger g_log("MuonFitPropertyBrowser");
@@ -149,8 +150,14 @@ void MuonFitPropertyBrowser::init() {
   auto parentLayout = qobject_cast<QVBoxLayout *>(w->layout());
   if (parentLayout) {
     const int index = parentLayout->count() - 2;
-    parentLayout->insertLayout(index, m_additionalLayout);
+    constexpr int stretchFactor = 10; // so these widgets get any extra space
+    parentLayout->insertLayout(index, m_additionalLayout, stretchFactor);
   }
+  m_widgetSplitter = new QSplitter(w);
+  m_widgetSplitter->setOrientation(Qt::Vertical);
+  m_widgetSplitter->setSizePolicy(QSizePolicy::Policy::Expanding,
+                                  QSizePolicy::Policy::Expanding);
+  m_additionalLayout->addWidget(m_widgetSplitter);
 }
 
 /**
@@ -469,8 +476,10 @@ void MuonFitPropertyBrowser::finishAfterSimultaneousFit(
  * @param widget :: [input] Pointer to widget to add
  */
 void MuonFitPropertyBrowser::addExtraWidget(QWidget *widget) {
-  if (m_additionalLayout) {
-    m_additionalLayout->addWidget(widget);
+  widget->setSizePolicy(QSizePolicy::Policy::Expanding,
+                        QSizePolicy::Policy::Expanding);
+  if (m_additionalLayout && m_widgetSplitter) {
+    m_widgetSplitter->addWidget(widget);
   }
 }
 

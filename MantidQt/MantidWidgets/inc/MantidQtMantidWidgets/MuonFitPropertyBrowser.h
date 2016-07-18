@@ -16,6 +16,7 @@ class QtEnumPropertyManager;
 class QtProperty;
 class QtBrowserItem;
 class QVBoxLayout;
+class QSplitter;
 
 namespace Mantid {
 namespace API {
@@ -112,6 +113,8 @@ private:
                                   const int nWorkspaces) const;
   /// Layout for extra widgets
   QVBoxLayout *m_additionalLayout;
+  /// Splitter for additional widgets
+  QSplitter *m_widgetSplitter;
   /// Names of workspaces to fit
   std::vector<std::string> m_workspacesToFit;
   /// Label to use for simultaneous fits
