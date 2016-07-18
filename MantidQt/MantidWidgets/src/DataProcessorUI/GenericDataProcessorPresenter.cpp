@@ -316,9 +316,8 @@ void GenericDataProcessorPresenter::process() {
     // Are we only partially processing a group?
     if (static_cast<int>(rowIds.size()) < numRowsInGroup(groupId) &&
         m_options["WarnProcessPartialGroup"].toBool()) {
-      const std::string groupName = m_model->data(m_model->index(groupId, 0))
-	.toString()
-	.toStdString();
+      const std::string groupName =
+          m_model->data(m_model->index(groupId, 0)).toString().toStdString();
       std::stringstream err;
       err << "You have only selected " << rowIds.size() << " of the ";
       err << numRowsInGroup(groupId) << " rows in group '" << groupName << "'.";
@@ -1286,8 +1285,8 @@ void GenericDataProcessorPresenter::clearSelected() {
     auto rows = item.second;
     for (const auto &row : rows) {
       for (auto col = 0; col < m_model->columnCount(); col++)
-        m_model->setData(
-            m_model->index(row, col, m_model->index(group, 0)), "");
+        m_model->setData(m_model->index(row, col, m_model->index(group, 0)),
+                         "");
     }
   }
   m_tableDirty = true;
