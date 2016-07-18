@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidKernel/UnitLabel.h"
@@ -11,6 +12,8 @@
 
 using namespace Mantid::Geometry;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IMDDimension)
 
 // clang-format off
 GCC_DIAG_OFF(strict-aliasing)

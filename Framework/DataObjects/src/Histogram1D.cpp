@@ -6,16 +6,13 @@ namespace Mantid {
 namespace DataObjects {
 
 /// Construct from ISpectrum.
-Histogram1D::Histogram1D(const ISpectrum &other) : ISpectrum(other) {
-  dataY() = other.readY();
-  dataE() = other.readE();
-}
+Histogram1D::Histogram1D(const ISpectrum &other)
+    : ISpectrum(other), m_histogram(other.histogram()) {}
 
 /// Assignment from ISpectrum.
 Histogram1D &Histogram1D::operator=(const ISpectrum &rhs) {
   ISpectrum::operator=(rhs);
-  dataY() = rhs.readY();
-  dataE() = rhs.readE();
+  m_histogram = rhs.histogram();
   return *this;
 }
 
@@ -25,6 +22,33 @@ void Histogram1D::clearData() {
   MantidVec &eValues = this->dataE();
   std::fill(eValues.begin(), eValues.end(), 0.0);
 }
+
+/// Deprecated, use setSharedX() instead. Sets the x data.
+/// @param X :: vector of X data
+void Histogram1D::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
+  m_histogram.setX(X);
+}
+
+/// Deprecated, use mutableX() instead. Returns the x data
+MantidVec &Histogram1D::dataX() { return m_histogram.dataX(); }
+
+/// Deprecated, use x() instead. Returns the x data const
+const MantidVec &Histogram1D::dataX() const { return m_histogram.dataX(); }
+
+/// Deprecated, use x() instead. Returns the x data const
+const MantidVec &Histogram1D::readX() const { return m_histogram.readX(); }
+
+/// Deprecated, use sharedX() instead. Returns a pointer to the x data
+Kernel::cow_ptr<HistogramData::HistogramX> Histogram1D::ptrX() const {
+  return m_histogram.ptrX();
+}
+
+/// Deprecated, use mutableDx() instead.
+MantidVec &Histogram1D::dataDx() { return m_histogram.dataDx(); }
+/// Deprecated, use dx() instead.
+const MantidVec &Histogram1D::dataDx() const { return m_histogram.dataDx(); }
+/// Deprecated, use dx() instead.
+const MantidVec &Histogram1D::readDx() const { return m_histogram.readDx(); }
 
 } // namespace DataObjects
 } // namespace Mantid

@@ -283,7 +283,7 @@ void LoadTBL::exec() {
   if (!file) {
     throw Exception::FileError("Unable to open file: ", filename);
   }
-  std::string line = "";
+  std::string line;
 
   ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
@@ -346,7 +346,7 @@ void LoadTBL::exec() {
     if (!file) {
       throw Exception::FileError("Unable to open file: ", filename);
     }
-    std::string line = "";
+    std::string line;
     int stitchID = 1;
     while (Kernel::Strings::extractToEOL(file, line)) {
       if (line == "" || line == ",,,,,,,,,,,,,,,,") {

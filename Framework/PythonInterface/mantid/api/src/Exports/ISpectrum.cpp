@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidAPI/ISpectrum.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -6,6 +7,8 @@
 using Mantid::API::ISpectrum;
 using Mantid::detid_t;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(ISpectrum)
 
 void export_ISpectrum() {
   register_ptr_to_python<ISpectrum *>();

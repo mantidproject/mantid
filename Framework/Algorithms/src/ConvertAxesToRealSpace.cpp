@@ -179,10 +179,9 @@ void ConvertAxesToRealSpace::exec() {
                   << " spectra, see the debug log for more details.\n";
 
   // set up the axes on the output workspace
-  MantidVecPtr x, y;
-  MantidVec &xRef = x.access();
-  xRef.resize(axisVector[0].bins);
-  fillAxisValues(xRef, axisVector[0], false);
+  HistogramData::Points x(axisVector[0].bins);
+  MantidVecPtr y;
+  fillAxisValues(x.mutableRawData(), axisVector[0], false);
 
   outputWs->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
   Unit_sptr xUnit = outputWs->getAxis(0)->unit();
@@ -212,7 +211,7 @@ void ConvertAxesToRealSpace::exec() {
       dataVector[i].verticalIndex = -1;
     } else {
       int xIndex = static_cast<int>(std::distance(
-          x->begin(), std::lower_bound(x->begin(), x->end(),
+          x.cbegin(), std::lower_bound(x.cbegin(), x.cend(),
                                        dataVector[i].horizontalValue)));
       if (xIndex > 0)
         --xIndex;
@@ -232,7 +231,7 @@ void ConvertAxesToRealSpace::exec() {
   int nOutputHist = static_cast<int>(outputWs->getNumberHistograms());
   PARALLEL_FOR1(outputWs)
   for (int i = 0; i < nOutputHist; ++i) {
-    outputWs->setX(i, x);
+    outputWs->setPoints(i, x);
   }
 
   // insert the data into the new workspace

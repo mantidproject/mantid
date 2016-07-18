@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/DataServiceExporter.h"
 
 #include "MantidKernel/PropertyManagerDataService.h"
@@ -13,6 +14,8 @@ using namespace boost::python;
 
 /// Weak pointer to DataItem typedef
 typedef boost::weak_ptr<PropertyManager> PropertyManager_wptr;
+
+GET_POINTER_SPECIALIZATION(PropertyManagerDataServiceImpl)
 
 void export_PropertyManagerDataService() {
 

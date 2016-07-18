@@ -166,8 +166,6 @@ void FindPeaks::init() {
 
   declareProperty("StartFromObservedPeakCentre", true,
                   "Use observed value as the starting value of peak centre. ");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -204,8 +202,6 @@ void FindPeaks::exec() {
   g_log.information() << "Total " << m_outPeakTableWS->rowCount()
                       << " peaks found and successfully fitted.\n";
   setProperty("PeaksList", m_outPeakTableWS);
-
-  return;
 } // END: exec()
 
 //----------------------------------------------------------------------------------------------
@@ -278,8 +274,6 @@ void FindPeaks::processAlgorithmProperties() {
   m_useObsCentre = getProperty("StartFromObservedPeakCentre");
 
   m_leastMaxObsY = getProperty("MinimumPeakHeightObs");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -881,8 +875,6 @@ void FindPeaks::fitPeakGivenFWHM(const API::MatrixWorkspace_sptr &input,
   g_log.information(outss.str());
 
   fitSinglePeak(input, wsIndex, i_min, i_max, i_centre);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -936,8 +928,6 @@ void FindPeaks::fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
 
   // finally do the actual fit
   fitSinglePeak(input, wsIndex, i_min, i_max, i_centre);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1051,8 +1041,6 @@ void FindPeaks::fitSinglePeak(const API::MatrixWorkspace_sptr &input,
                costfuncvalue);
   else
     addNonFitRecord(spectrum, m_peakFunction->centre());
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1345,8 +1333,6 @@ void FindPeaks::estimateBackground(const MantidVec &X, const MantidVec &Y,
     vecbkgdparvalues[1] = 0.;
     vecbkgdparvalues[0] = 0.5 * (y0 + yf);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1400,8 +1386,6 @@ void FindPeaks::estimatePeakRange(const MantidVec &vecX, size_t i_centre,
   // Set result to output vector
   vecpeakrange[0] = peakleftbound;
   vecpeakrange[1] = peakrightbound;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1476,8 +1460,6 @@ void FindPeaks::addInfoRow(const size_t spectrum,
   g_log.debug() << " chsq=" << mincost << "\n";
   // Minimum cost function value
   t << mincost;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1503,8 +1485,6 @@ void FindPeaks::addNonFitRecord(const size_t spectrum, const double centre) {
 
   // HUGE chi-square
   t << DBL_MAX;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1514,7 +1494,7 @@ void FindPeaks::createFunctions() {
   // Setup the background
   // FIXME (No In This Ticket)  Need to have a uniformed routine to name
   // background function
-  std::string backgroundposix("");
+  std::string backgroundposix;
   if (m_backgroundType.compare("Quadratic")) {
     // FlatBackground, LinearBackground, Quadratic
     backgroundposix = "Background";
@@ -1534,8 +1514,6 @@ void FindPeaks::createFunctions() {
   m_peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(
       API::FunctionFactory::Instance().createFunction(m_peakFuncType));
   m_peakParameterNames = m_peakFunction->getParameterNames();
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

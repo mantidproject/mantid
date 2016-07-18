@@ -28,7 +28,7 @@ createTestSeries(const std::string &name) {
   source->addValue("2007-11-30T16:17:20", 3);
   source->addValue("2007-11-30T16:17:30", 4);
   source->addValue("2007-11-30T16:17:40", 5);
-  return std::move(source);
+  return source;
 }
 
 /// Create test filter

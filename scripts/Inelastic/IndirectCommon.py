@@ -1,6 +1,5 @@
 #pylint: disable=invalid-name
 from mantid.simpleapi import *
-from mantid.api import TextAxis
 from mantid import config, logger
 
 from IndirectImport import import_mantidplot
@@ -10,7 +9,6 @@ import math
 import datetime
 import re
 import numpy as np
-import itertools
 
 
 def StartTime(prog):
@@ -527,68 +525,6 @@ def transposeFitParametersTable(params_table, output_table=None):
 
     RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
 
-
-def search_for_fit_params(suffix, table_ws):
-    """
-    Find all fit parameters in a table workspace with the given suffix.
-
-    @param suffix - the name of the parameter to find.
-    @param table_ws - the name of the table workspace to search.
-    """
-    return [name for name in mtd[table_ws].getColumnNames() if name.endswith(suffix)]
-
-
-def convertParametersToWorkspace(params_table, x_column, param_names, output_name):
-    """
-    Convert a parameter table output by PlotPeakByLogValue to a MatrixWorkspace.
-
-    This will make a spectrum for each parameter name using the x_column vairable as the
-    x values for the spectrum.
-
-    @param params_table - the table workspace to convert to a MatrixWorkspace.
-    @param x_column - the column in the table to use for the x values.
-    @param parameter_names - list of parameter names to add to the workspace
-    @param output_name - name to call the output workspace.
-    """
-    # Search for any parameters in the table with the given parameter names,
-    # ignoring their function index and output them to a workspace
-    workspace_names = []
-    for param_name in param_names:
-        column_names = search_for_fit_params(param_name, params_table)
-        column_error_names = search_for_fit_params(param_name + '_Err', params_table)
-        param_workspaces = []
-        for name, error_name in zip(column_names, column_error_names):
-            ConvertTableToMatrixWorkspace(params_table, x_column, name, error_name,
-                                          OutputWorkspace=name)
-            param_workspaces.append(name)
-        workspace_names.append(param_workspaces)
-
-    # Transpose list of workspaces, ignoring unequal length of lists
-    # this handles the case where a parameter occurs only once in the whole workspace
-    workspace_names = map(list, itertools.izip_longest(*workspace_names))
-    workspace_names = [filter(None, sublist) for sublist in workspace_names]
-
-    # Join all the parameters for each peak into a single workspace per peak
-    temp_workspaces = []
-    for peak_params in workspace_names:
-        temp_peak_ws = peak_params[0]
-        for param_ws in peak_params[1:]:
-            ConjoinWorkspaces(temp_peak_ws, param_ws, False)
-        temp_workspaces.append(temp_peak_ws)
-
-    # Join all peaks into a single workspace
-    temp_workspace = temp_workspaces[0]
-    for temp_ws in temp_workspaces[1:]:  # TODO: fairly certain something is wrong here
-        ConjoinWorkspaces(temp_workspace, temp_peak_ws, False)
-
-    RenameWorkspace(temp_workspace, OutputWorkspace=output_name)
-
-    # Replace axis on workspaces with text axis
-    axis = TextAxis.create(mtd[output_name].getNumberHistograms())
-    workspace_names = [name for sublist in workspace_names for name in sublist]
-    for i, name in enumerate(workspace_names):
-        axis.setLabel(i, name)
-    mtd[output_name].replaceAxis(1, axis)
 
 def IndentifyDataBoundaries(sample_ws):
     """

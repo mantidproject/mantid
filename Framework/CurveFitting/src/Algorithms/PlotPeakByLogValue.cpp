@@ -263,7 +263,7 @@ void PlotPeakByLogValue::exec() {
         g_log.debug() << ifun->asString() << '\n';
 
         const std::string spectrum_index = std::to_string(j);
-        std::string wsBaseName = "";
+        std::string wsBaseName;
 
         if (createFitOutput)
           wsBaseName = wsNames[i].name + "_" + spectrum_index;

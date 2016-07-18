@@ -32,8 +32,9 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IEnggDiffractionPresenter {
+
 public:
-  virtual ~IEnggDiffractionPresenter() {}
+  virtual ~IEnggDiffractionPresenter() = default;
 
   /// These are user actions, triggered from the (passive) view, that need
   /// handling by the presenter
@@ -48,8 +49,6 @@ public:
     ResetFocus,        ///< Re-set / clear all focus inputs and options
     RebinTime,         ///< From event to histo, with a time bin
     RebinMultiperiod,  ///< From event to histo, multiperiod event data
-    FittingRunNo,      ///< Creates widgets and handles multi/run numbers
-    FitPeaks,          ///< Preforms single peak fits
     LogMsg,            ///< need to send a message to the Mantid log system
     InstrumentChange,  ///< Instrument selection updated
     RBNumberChange,    ///< RBNumber filled-in/changed

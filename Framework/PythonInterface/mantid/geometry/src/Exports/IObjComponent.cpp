@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Objects/Object.h"
 #include <boost/python/class.hpp>
@@ -6,6 +7,8 @@
 using Mantid::Geometry::IObjComponent;
 using Mantid::Geometry::IComponent;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IObjComponent)
 
 namespace {
 /**

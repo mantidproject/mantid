@@ -45,6 +45,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Folder.cpp
                    src/FunctionCurve.cpp
                    src/FunctionDialog.cpp
+                   src/globals.cpp
                    src/Graph3D.cpp
                    src/Graph.cpp
                    src/Grid.cpp
@@ -90,6 +91,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/PluginFit.cpp
                    src/PolynomFitDialog.cpp
                    src/PolynomialFit.cpp
+		    src/ProjectSerialiser.cpp
                    src/PythonScript.cpp
                    src/PythonScripting.cpp
                    src/QwtBarCurve.cpp
@@ -289,6 +291,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/PluginFit.h
                    src/PolynomFitDialog.h
                    src/PolynomialFit.h
+		    src/ProjectSerialiser.h
                    src/PythonScript.h
                    src/PythonScripting.h
                    src/QwtBarCurve.h
@@ -863,6 +866,7 @@ set ( MANTIDPLOT_TEST_PY_FILES
     MantidPlotSliceViewerTest.py
     MantidPlot1DPlotTest.py
     MantidPlot2DPlotTest.py
+    MantidPlotProjectSerialiseTest.py
     MantidPlotProxiesTest.py
     MantidPlotPythonImportTest.py
     MantidPlotFoldersTest.py
