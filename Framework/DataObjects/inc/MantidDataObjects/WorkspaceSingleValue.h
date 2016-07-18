@@ -82,7 +82,7 @@ private:
 
   /// Instance of Histogram1D that holds the "spectrum" (AKA the single value);
   Histogram1D data{HistogramData::Histogram::XMode::Points,
-                   HistogramData::Histogram::YMode::Frequencies};
+                   HistogramData::Histogram::YMode::Counts};
 };
 
 /// shared pointer to the WorkspaceSingleValue class
