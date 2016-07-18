@@ -443,12 +443,12 @@ private:
     MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create(
         "Workspace2D", nSpec, nBins + 1, nBins);
     for (size_t j = 0; j < nSpec; ++j) {
+      auto &X = space->mutableX(j);
       for (size_t k = 0; k <= nBins; ++k) {
-        space->mutableX(j)[k] = double(j + k);
+        X[k] = double(j + k);
       }
-      space->mutableY(j) = HistogramData::HistogramY(nBins, double(j + 1));
-      space->mutableE(j) =
-          HistogramData::HistogramE(nBins, sqrt(double(j + 1)));
+      space->mutableY(j).assign(nBins, double(j + 1));
+      space->mutableE(j).assign(nBins, sqrt(double(j + 1)));
     }
     return space;
   }

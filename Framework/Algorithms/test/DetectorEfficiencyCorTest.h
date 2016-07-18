@@ -123,8 +123,8 @@ private:
     std::vector<double> e{sqrt(5.0), sqrt(5.0), sqrt(5.0), 0.0};
 
     space2D->setBinEdges(0, x);
-    space2D->mutableY(0) = y;
-    space2D->mutableE(0) = e;
+    space2D->mutableY(0).assign(y.begin(), y.end());
+    space2D->mutableE(0).assign(e.begin(), e.end());
 
     std::string xmlShape = "<cylinder id=\"shape\"> ";
     xmlShape += "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";
