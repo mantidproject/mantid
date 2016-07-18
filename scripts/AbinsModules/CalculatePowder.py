@@ -112,10 +112,10 @@ class CalculatePowder(IOmodule):
         """
         _data = self.load(list_of_structured_datasets=["data"], list_of_attributes=["temperature"])
         _num_atoms = _data["structured_datasets"]["data"]["msd"].shape[0]
-        _msd_data = PowderData(temperature=_data["attributes"]["temperature"], num_atoms=_num_atoms)
-        _msd_data.set(_data["structured_datasets"]["data"])
+        _powder_data = PowderData(temperature=_data["attributes"]["temperature"], num_atoms=_num_atoms)
+        _powder_data.set(_data["structured_datasets"]["data"])
 
-        return _msd_data
+        return _powder_data
 
 
 
