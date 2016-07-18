@@ -52,16 +52,6 @@ public:
         dataStore.retrieveWS<Mantid::API::MatrixWorkspace>(wsname.str());
     dataStore.remove(wsname.str());
 
-    // Enables several NaNs to be inserted into the workspace 
-    if (insertNans) {
-      result->mutableX(5)[8] = NAN;
-      result->mutableX(3)[2] = NAN;
-      result->mutableY(5)[8] = NAN;
-      result->mutableY(3)[2] = NAN;
-      result->mutableE(5)[8] = NAN;
-      result->mutableE(3)[2] = NAN;
-    }
-
     return result;
   }
 
@@ -121,7 +111,7 @@ public:
   }
 
   void testExecNansReplaced() {
-	  auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>("", true);
+	  auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>("NormalisedPolygon", true);
 	  bool nanFound = false;
 
 	  for (int i = 0; i < result->getNumberHistograms(); i++) {
@@ -129,6 +119,12 @@ public:
 		    break; // NaN found in workspace, no need to keep searching
 	    }
 	  }
+
+    if (nanFound) {
+      std::cout << "NAN HAS BEEN FOUND\n";
+    } else {
+      std::cout << "NAN HAS NOT BEEN FOUND\n";
+    }
 
 	  TS_ASSERT(!nanFound);
   }
