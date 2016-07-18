@@ -1678,9 +1678,8 @@ std::map<std::string, std::string> LoadNexusProcessed::validateInputs() {
 
   // Cant use Min/Max with list on processed nexus files so throw
   // exception
-  bool isInvalid = false;
   if (!specList.empty()) {
-
+    bool isInvalid = false;
     if (specMin != 1) {
       // Test for SpecMin
       errorList["SpectrumMin"] =
