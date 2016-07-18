@@ -5,17 +5,42 @@ from KpointsData import  KpointsData
 from AtomsData import  AtomsDaTa
 
 class AbinsData(GeneralData):
-    def __init__(self, k_points_data=None, atoms_data=None):
+    """
+    Class for storing input DFT data.
+    """
+    def __init__(self, ):
 
-        if not isinstance(k_points_data, KpointsData):
+        super(AbinsData, self).__init__()
+        self._atoms_data = None
+        self._kpoints_data = None
+
+
+    def set(self, k_points_data=None, atoms_data=None):
+        """
+
+        @param k_points_data: object of type KpointsData
+        @param atoms_data: object of type AtomsData
+        """
+
+        if isinstance(k_points_data, KpointsData):
+            self._kpoints_data = k_points_data
+        else:
             raise ValueError("Invalid type of k-points data.")
 
-        if not isinstance(atoms_data, AtomsDaTa):
+        if isinstance(atoms_data, AtomsDaTa):
+            self._atoms_data = atoms_data
+        else:
             raise ValueError("Invalid type of atoms data.")
 
-        self._kpoints_data = k_points_data
-        self._atoms_data = atoms_data
         self._data = {"k_points_data":k_points_data.extract(), "atoms_data":atoms_data.extract()}
+
+
+    def getKpointsData(self):
+        return self._kpoints_data
+
+
+    def getAtomsData(self):
+        return self._atoms_data
 
 
     def extract(self):
