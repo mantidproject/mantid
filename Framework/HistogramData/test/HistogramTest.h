@@ -27,11 +27,13 @@ public:
   static void destroySuite(HistogramTest *suite) { delete suite; }
 
   void test_construction_Points() {
-    TS_ASSERT_THROWS_NOTHING(Histogram hist(Histogram::XMode::Points));
+    TS_ASSERT_THROWS_NOTHING(
+        Histogram hist(Histogram::XMode::Points, Histogram::YMode::Counts));
   }
 
   void test_construction_BinEdges() {
-    TS_ASSERT_THROWS_NOTHING(Histogram hist(Histogram::XMode::BinEdges));
+    TS_ASSERT_THROWS_NOTHING(
+        Histogram hist(Histogram::XMode::BinEdges, Histogram::YMode::Counts));
   }
 
   void test_construct_from_Points() {
@@ -112,7 +114,7 @@ public:
 
   void test_copy_assignment() {
     Histogram src(Points{0.1, 0.2, 0.4});
-    Histogram dest(Histogram::XMode::BinEdges);
+    Histogram dest(Histogram::XMode::BinEdges, Histogram::YMode::Counts);
     TS_ASSERT_EQUALS(dest.xMode(), Histogram::XMode::BinEdges);
     dest = src;
     TS_ASSERT(src.points());
@@ -127,7 +129,7 @@ public:
 
   void test_move_assignment() {
     Histogram src(Points{0.1, 0.2, 0.4});
-    Histogram dest(Histogram::XMode::BinEdges);
+    Histogram dest(Histogram::XMode::BinEdges, Histogram::YMode::Counts);
     TS_ASSERT_EQUALS(dest.xMode(), Histogram::XMode::BinEdges);
     dest = std::move(src);
     TS_ASSERT(!src.points());
@@ -136,9 +138,9 @@ public:
   }
 
   void test_xMode() {
-    Histogram hist1(Histogram::XMode::Points);
+    Histogram hist1(Histogram::XMode::Points, Histogram::YMode::Counts);
     TS_ASSERT_EQUALS(hist1.xMode(), Histogram::XMode::Points);
-    Histogram hist2(Histogram::XMode::BinEdges);
+    Histogram hist2(Histogram::XMode::BinEdges, Histogram::YMode::Counts);
     TS_ASSERT_EQUALS(hist2.xMode(), Histogram::XMode::BinEdges);
   }
 
