@@ -52,12 +52,13 @@ public:
   FixedLengthVector(const std::vector<double> &other) : m_data(other) {}
   FixedLengthVector(std::vector<double> &&other) : m_data(std::move(other)) {}
   template <class InputIt>
-  FixedLengthVector(InputIt first, InputIt last)
-      : m_data(first, last) {}
+  FixedLengthVector(InputIt first, InputIt last) : m_data(first, last) {}
   template <class InputIt> void assign(InputIt first, InputIt last) & {
+    checkAssignmentSize(static_cast<size_t>(std::distance(first, last)));
     m_data.assign(first, last);
   }
   void assign(size_t count, const double &value) & {
+    checkAssignmentSize(count);
     m_data.assign(count, value);
   }
   FixedLengthVector &operator=(const FixedLengthVector &rhs) {
@@ -107,8 +108,13 @@ protected:
   ~FixedLengthVector() = default;
 
 private:
-  template <class Other> void checkAssignmentSize(const Other &other) {
+  template <class Other> void checkAssignmentSize(const Other &other) const {
     if (size() != other.size())
+      throw std::logic_error("FixedLengthVector::operator=: size mismatch");
+  }
+
+  void checkAssignmentSize(const size_t &size) const {
+    if (this->size() != size)
       throw std::logic_error("FixedLengthVector::operator=: size mismatch");
   }
 
