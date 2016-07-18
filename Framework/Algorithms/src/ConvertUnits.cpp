@@ -124,7 +124,8 @@ void ConvertUnits::exec() {
   if (inputWS->x(0).size() < 2) {
     std::stringstream msg;
     msg << "Input workspace has invalid X axis binning parameters. Should have "
-           "at least 2 values. Found " << inputWS->x(0).size() << ".";
+           "at least 2 values. Found "
+        << inputWS->x(0).size() << ".";
     throw std::runtime_error(msg.str());
   }
   if (inputWS->x(0).front() > inputWS->x(0).back() ||
@@ -471,8 +472,8 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
 
       // EventWorkspace part, modifying the EventLists.
       if (m_inputEvents) {
-        eventWS->getSpectrum(i)
-            .convertUnitsViaTof(localFromUnit, localOutputUnit);
+        eventWS->getSpectrum(i).convertUnitsViaTof(localFromUnit,
+                                                   localOutputUnit);
 
         //        std::vector<double> tofs;
         //        eventWS->getSpectrum(i).getTofs(tofs);
@@ -648,9 +649,9 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
       auto &X = workspace->x(i);
       auto &Y = workspace->y(i);
       auto &E = workspace->e(i);
-      result->mutableX(i) = HistogramX(X.begin() + first, X.end());
-      result->mutableY(i) = HistogramY(Y.begin() + first, Y.end());
-      result->mutableE(i) = HistogramE(E.begin() + first, E.end());
+      result->mutableX(i).assign(X.begin() + first, X.end());
+      result->mutableY(i).assign(Y.begin() + first, Y.end());
+      result->mutableE(i).assign(E.begin() + first, E.end());
     }
   } else if (emode == "Indirect") {
     // Now the indirect instruments. In this case we could want to keep a
@@ -677,18 +678,22 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
     for (int64_t j = 0; j < int64_t(numSpec); ++j) {
       auto edges = workspace->binEdges(j);
 
-      auto k = lastBins[j];
+      result->mutableX(j).assign(edges.cbegin(), edges.cbegin() + lastBins[j]);
 
-      std::copy(edges.cbegin(), edges.cbegin() + lastBins[j],
-                result->mutableX(j).begin());
+      // If the entire X range is not covered, generate fake values.
+      auto l = lastBins[j];
 
-      std::copy(workspace->y(j).cbegin(),
-                workspace->y(j).cbegin() + (lastBins[j] - 1),
-                result->mutableY(j).begin());
+      std::generate(result->mutableX(j).begin() + l, result->mutableX(j).end(),
+                    [=]() mutable {
+                      ++l;
+                      return result->mutableX(j)[lastBins[j]] + 1 + l -
+                             lastBins[j];
+                    });
 
-      std::copy(workspace->e(j).cbegin(),
-                workspace->e(j).cbegin() + (lastBins[j] - 1),
-                result->mutableE(j).begin());
+      result->mutableY(j).assign(workspace->y(j).cbegin(),
+                                 workspace->y(j).cbegin() + (lastBins[j] - 1));
+      result->mutableE(j).assign(workspace->e(j).cbegin(),
+                                 workspace->e(j).cbegin() + (lastBins[j] - 1));
     }
   }
 
