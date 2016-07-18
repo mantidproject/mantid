@@ -1,13 +1,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/CalMuonDeadTime.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ArrayProperty.h"
 
 #include <cmath>
 #include <vector>
@@ -131,23 +131,29 @@ void CalMuonDeadTime::exec() {
   const size_t numSpec = wsFitAgainst->getNumberHistograms();
   size_t timechannels = wsFitAgainst->y(0).size();
   for (size_t i = 0; i < numSpec; i++) {
+    auto &fitX = wsFitAgainst->mutableX(i);
+    auto &fitY = wsFitAgainst->mutableY(i);
+    auto &fitE = wsFitAgainst->mutableE(i);
+    auto &cFitX = wsFitAgainst->x(i);
+    auto &cropY = wsCrop->y(i);
+    auto &cropE = wsCrop->e(i);
+
     for (size_t t = 0; t < timechannels; t++) {
-      const double time =
-          wsFitAgainst->x(i)[t]; // mid-point time value because point WS
+      const double time = cFitX[t]; // mid-point time value because point WS
       const double decayFac = exp(time / muonLifetime);
-      if (wsCrop->y(i)[t] > 0) {
-        wsFitAgainst->mutableY(i)[t] = wsCrop->y(i)[t] * decayFac;
-        wsFitAgainst->mutableX(i)[t] = wsCrop->y(i)[t];
-        wsFitAgainst->mutableE(i)[t] = wsCrop->e(i)[t] * decayFac;
+      if (cropY[t] > 0) {
+        fitY[t] = cropY[t] * decayFac;
+        fitX[t] = cropY[t];
+        fitE[t] = cropE[t] * decayFac;
       } else {
         // For the Muon data which I have looked at when zero counts
         // the errors are zero which is likely nonsense. Hence to get
         // around this problem treat such counts to be 0.1 with standard
         // of one........
 
-        wsFitAgainst->mutableY(i)[t] = 0.1 * decayFac;
-        wsFitAgainst->mutableX(i)[t] = 0.1;
-        wsFitAgainst->mutableE(i)[t] = decayFac;
+        fitY[t] = 0.1 * decayFac;
+        fitX[t] = 0.1;
+        fitE[t] = decayFac;
       }
     }
   }
