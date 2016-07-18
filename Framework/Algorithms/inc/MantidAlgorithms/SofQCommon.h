@@ -26,9 +26,6 @@ struct SofQCommon {
 
   /// Get the efixed value for the given detector
   double getEFixed(const Geometry::IDetector &det) const;
-
-  /// Replace NaNs in workspace with zeroes
-  void replaceNans(API::MatrixWorkspace &workspace);
 };
 }
 }

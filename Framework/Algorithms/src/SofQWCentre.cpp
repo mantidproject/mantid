@@ -255,7 +255,15 @@ void SofQWCentre::exec() {
   outputWorkspace->updateSpectraUsing(outputDetectorMap);
 
   // Replace any NaNs in outputWorkspace with zeroes
-  m_EmodeProperties.replaceNans(*outputWorkspace);
+  auto replaceNans = this->createChildAlgorithm("ReplaceSpecialValues");
+  replaceNans->setChild(true);
+  replaceNans->initialize();
+  replaceNans->setProperty("InputWorkspace", outputWorkspace);
+  replaceNans->setProperty("OutputWorkspace", outputWorkspace);
+  replaceNans->setProperty("NaNValue", 0.0);
+  replaceNans->setProperty("InfinityValue", 0.0);
+  replaceNans->setProperty("BigNumberThreshold", DBL_MAX);
+  replaceNans->execute();
 }
 
 /** Creates the output workspace, setting the axes according to the input

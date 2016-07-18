@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SofQWPolygon.h"
 #include "MantidAlgorithms/SofQW.h"
+#include "MantidAlgorithms/ReplaceSpecialValues.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Math/PolygonIntersection.h"
@@ -136,8 +137,15 @@ void SofQWPolygon::exec() {
   outputWS->updateSpectraUsing(outputDetectorMap);
 
   // Replace any NaNs in outputWorkspace with zeroes
-  MatrixWorkspace_sptr outputWorkspace = getProperty("OutputWorkspace");
-  m_EmodeProperties.replaceNans(*outputWorkspace);
+  auto replaceNans = this->createChildAlgorithm("ReplaceSpecialValues");
+  replaceNans->setChild(true);
+  replaceNans->initialize();
+  replaceNans->setProperty("InputWorkspace", outputWS);
+  replaceNans->setProperty("OutputWorkspace", outputWS);
+  replaceNans->setProperty("NaNValue", 0.0);
+  replaceNans->setProperty("InfinityValue", 0.0);
+  replaceNans->setProperty("BigNumberThreshold", DBL_MAX);
+  replaceNans->execute();
 }
 
 /**
