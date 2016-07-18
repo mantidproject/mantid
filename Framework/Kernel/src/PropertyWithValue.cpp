@@ -24,7 +24,6 @@ PROPERTYWITHVALUE_SAVEPROPERTY(std::string)
 PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<double>)
 PROPERTYWITHVALUE_SAVEPROPERTY(std::vector<int32_t>)
 
-
 /// @cond
 #define INSTANTIATE_WITH_EXPORT(Type)                                          \
   template class DLLExport PropertyWithValue<Type>;
@@ -34,7 +33,6 @@ INSTANTIATE_WITH_EXPORT(uint16_t)
 INSTANTIATE_WITH_EXPORT(bool)
 INSTANTIATE_WITH_EXPORT(OptionalBool)
 /// @endcond
-
 
 #define INSTANTIATE_WITH_EXPORT_VECTOR(Type)                                   \
   template class DLLExport PropertyWithValue<std::vector<Type>>;
@@ -46,8 +44,8 @@ INSTANTIATE_WITH_EXPORT_VECTOR(bool)
 INSTANTIATE_WITH_EXPORT_VECTOR(OptionalBool)
 INSTANTIATE_WITH_EXPORT_VECTOR(std::string)
 
-
-// The explicit template instantiations for some types does not have an export macro
+// The explicit template instantiations for some types does not have an export
+// macro
 // since this produces a warning on "gcc: warning: type attributes ignored after
 // type is already define". We can remove the issue, by removing the visibility
 // attribute
