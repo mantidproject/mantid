@@ -48,6 +48,8 @@ void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS,
   // workspace independent determination of length
   const int histnumber = static_cast<int>(inWS->getNumberHistograms());
 
+  auto x = Kernel::make_cow<HistogramData::HistogramX>(OutXValues_scaled);
+
   PARALLEL_FOR2(inWS, outputWS)
   for (int i = 0; i < histnumber; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -58,7 +60,7 @@ void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS,
     el.generateHistogramPulseTime(*XValues_new, y_data, e_data);
 
     // Set the X axis for each output histogram
-    outputWS->setX(i, OutXValues_scaled);
+    outputWS->setX(i, x);
 
     // Copy the data over.
     outputWS->dataY(i).assign(y_data.begin(), y_data.end());

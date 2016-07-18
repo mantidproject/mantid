@@ -45,7 +45,7 @@ void HFIRDarkCurrentSubtraction::init() {
 }
 
 void HFIRDarkCurrentSubtraction::exec() {
-  std::string output_message = "";
+  std::string output_message;
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
   boost::shared_ptr<PropertyManager> reductionManager;

@@ -4,6 +4,7 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidKernel/UsageService.h"
 
 #include <QIcon>
 #include <QMessageBox>
@@ -48,6 +49,9 @@ void UserSubWindow::initializeLayout() {
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
 
   m_bIsInitialized = true;
+
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Interface", m_ifacename.toStdString(), false);
 }
 
 /**

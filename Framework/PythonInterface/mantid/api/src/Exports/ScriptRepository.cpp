@@ -1,4 +1,5 @@
 #include "MantidAPI/ScriptRepository.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
 
 #include <boost/python/class.hpp>
@@ -9,6 +10,8 @@
 
 using namespace Mantid::API;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(ScriptRepository)
 
 namespace {
 /** @cond */
@@ -23,8 +26,8 @@ PyObject *getListFiles(ScriptRepository &self) {
   std::vector<std::string> files = self.listFiles();
 
   PyObject *registered = PyList_New(0);
-  for (auto &file : files) {
-    PyObject *value = PyBytes_FromString(file.c_str());
+  for (const auto &file : files) {
+    PyObject *value = to_python_value<const std::string &>()(file);
     if (PyList_Append(registered, value))
       throw std::runtime_error("Failed to insert value into PyList");
   }
@@ -43,34 +46,32 @@ PyObject *getStatus(ScriptRepository &self, const std::string &path) {
   PyObject *value;
   switch (st) {
   case BOTH_UNCHANGED:
-    value = PyBytes_FromString("BOTH_UNCHANGED");
+    value = to_python_value<char const *&>()("BOTH_UNCHANGED");
     break;
   case REMOTE_ONLY:
-    value = PyBytes_FromString("REMOTE_ONLY");
+    value = to_python_value<char const *&>()("REMOTE_ONLY");
     break;
   case LOCAL_ONLY:
-    value = PyBytes_FromString("LOCAL_ONLY");
+    value = to_python_value<char const *&>()("LOCAL_ONLY");
     break;
   case REMOTE_CHANGED:
-    value = PyBytes_FromString("REMOTE_CHANGED");
+    value = to_python_value<char const *&>()("REMOTE_CHANGED");
     break;
   case LOCAL_CHANGED:
-    value = PyBytes_FromString("LOCAL_CHANGED");
+    value = to_python_value<char const *&>()("LOCAL_CHANGED");
     break;
   case BOTH_CHANGED:
-    value = PyBytes_FromString("BOTH_CHANGED");
+    value = to_python_value<char const *&>()("BOTH_CHANGED");
     break;
   default:
-    value = PyBytes_FromString("BOTH_UNCHANGED");
+    value = to_python_value<char const *&>()("BOTH_UNCHANGED");
     break;
   }
   return value;
 }
 
 PyObject *getDescription(ScriptRepository &self, const std::string &path) {
-  PyObject *value;
-  value = PyBytes_FromString(self.description(path).c_str());
-  return value;
+  return to_python_value<const std::string &>()(self.description(path));
 }
 
 /** @endcond */

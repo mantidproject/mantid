@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 
 #include <boost/python/class.hpp>
@@ -7,6 +8,8 @@ using Mantid::Geometry::ObjCompAssembly;
 using Mantid::Geometry::ICompAssembly;
 using Mantid::Geometry::ObjComponent;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(ObjCompAssembly)
 
 void export_ObjCompAssembly() {
   register_ptr_to_python<boost::shared_ptr<ObjCompAssembly>>();

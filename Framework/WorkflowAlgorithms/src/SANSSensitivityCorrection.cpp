@@ -220,7 +220,7 @@ void SANSSensitivityCorrection::exec() {
         const std::string darkCurrentFile = getPropertyValue("DarkCurrentFile");
 
         // Look for a dark current subtraction algorithm
-        std::string dark_result = "";
+        std::string dark_result;
         if (reductionManager->existsProperty("DarkCurrentAlgorithm")) {
           IAlgorithm_sptr darkAlg =
               reductionManager->getProperty("DarkCurrentAlgorithm");

@@ -649,8 +649,6 @@ void AlignAndFocusPowder::exec() {
 
   // return the output workspace
   setProperty("OutputWorkspace", m_outputW);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -943,8 +941,6 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
     AnalysisDataService::Instance().addOrReplace(name, m_maskWS);
     this->setPropertyValue("MaskWorkspace", name);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

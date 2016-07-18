@@ -148,7 +148,7 @@ protected:
   bool readData(FILE *file, int64_t hist);
 
   // Constructs the time channel (X) vector(s)
-  std::vector<boost::shared_ptr<MantidVec>>
+  std::vector<boost::shared_ptr<HistogramData::HistogramX>>
   getTimeChannels(const int64_t &regimes, const int64_t &lengthIn);
   /// loadinstrument Child Algorithm
   void runLoadInstrument(const std::string &fileName,
@@ -174,7 +174,8 @@ protected:
   /// This method sets the raw file data to workspace vectors
   void setWorkspaceData(
       DataObjects::Workspace2D_sptr newWorkspace,
-      const std::vector<boost::shared_ptr<MantidVec>> &timeChannelsVec,
+      const std::vector<boost::shared_ptr<HistogramData::HistogramX>> &
+          timeChannelsVec,
       int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes,
       int64_t lengthIn, int64_t binStart);
 
@@ -208,7 +209,7 @@ protected:
   /// load the spectra
   void loadSpectra(FILE *file, const int &period, const int &total_specs,
                    DataObjects::Workspace2D_sptr ws_sptr,
-                   std::vector<boost::shared_ptr<MantidVec>>);
+                   std::vector<boost::shared_ptr<HistogramData::HistogramX>>);
 
   /// Has the spectrum_list property been set?
   bool m_list;
