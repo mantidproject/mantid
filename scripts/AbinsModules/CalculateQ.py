@@ -16,7 +16,7 @@ class CalculateQ(IOmodule):
     def __init__(self, filename=None, instrument=None, sample_form=None):
         """
         @param filename: name of input filename (CASTEP: foo.phonon)
-        @param instrument: name of instrument
+        @param instrument: object of type  Instrument
         @param sample_form: form in which sample is (Powder or SingleCrystal)
         """
         super(CalculateQ, self).__init__(input_filename=filename, group_name=Constants.Q_data_group)
