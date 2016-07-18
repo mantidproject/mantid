@@ -164,11 +164,11 @@ void ExtractSpectra::execHistogram() {
     }
 
     auto &oldY = m_inputWorkspace->y(i);
-    outputWorkspace->mutableY(j).assign(oldY.begin() + m_minX,
-                                        oldY.begin() + (m_maxX - m_histogram));
+    outputWorkspace->mutableY(j)
+        .assign(oldY.begin() + m_minX, oldY.begin() + (m_maxX - m_histogram));
     auto &oldE = m_inputWorkspace->e(i);
-    outputWorkspace->mutableE(j).assign(oldE.begin() + m_minX,
-                                        oldE.begin() + (m_maxX - m_histogram));
+    outputWorkspace->mutableE(j)
+        .assign(oldE.begin() + m_minX, oldE.begin() + (m_maxX - m_histogram));
 
     // copy over the axis entry for each spectrum, regardless of the type of
     // axes present

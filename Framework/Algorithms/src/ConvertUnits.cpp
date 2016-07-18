@@ -124,8 +124,7 @@ void ConvertUnits::exec() {
   if (inputWS->x(0).size() < 2) {
     std::stringstream msg;
     msg << "Input workspace has invalid X axis binning parameters. Should have "
-           "at least 2 values. Found "
-        << inputWS->x(0).size() << ".";
+           "at least 2 values. Found " << inputWS->x(0).size() << ".";
     throw std::runtime_error(msg.str());
   }
   if (inputWS->x(0).front() > inputWS->x(0).back() ||
@@ -472,8 +471,8 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
 
       // EventWorkspace part, modifying the EventLists.
       if (m_inputEvents) {
-        eventWS->getSpectrum(i).convertUnitsViaTof(localFromUnit,
-                                                   localOutputUnit);
+        eventWS->getSpectrum(i)
+            .convertUnitsViaTof(localFromUnit, localOutputUnit);
 
         //        std::vector<double> tofs;
         //        eventWS->getSpectrum(i).getTofs(tofs);

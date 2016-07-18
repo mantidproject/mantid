@@ -116,7 +116,7 @@ void CorrectFlightPaths::exec() {
     auto edges = m_outputWS->binEdges(i);
     auto &X = m_outputWS->mutableX(i);
 
-	m_outputWS->mutableX(i) += -deltaTOF;
+    m_outputWS->mutableX(i) += -deltaTOF;
 
     prog.report("Aligning elastic line...");
     PARALLEL_END_INTERUPT_REGION
