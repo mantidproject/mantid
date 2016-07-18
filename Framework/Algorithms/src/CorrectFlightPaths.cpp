@@ -113,9 +113,6 @@ void CorrectFlightPaths::exec() {
     ComponentHelper::moveComponent(*det, pmap, newPos,
                                    ComponentHelper::Absolute);
 
-    auto edges = m_outputWS->binEdges(i);
-    auto &X = m_outputWS->mutableX(i);
-
     m_outputWS->mutableX(i) += -deltaTOF;
 
     prog.report("Aligning elastic line...");
