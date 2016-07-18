@@ -20,6 +20,8 @@ DW_data_group = "DW_factors" # name of the group where Debye-Waller factors are 
 
 powder_data_group = "Powder" # name of the group where PowderData is stored
 
+crystal_data_group = "Crystal" # name of the group where CrystalData is stored
+
 S_data_group = "S" # name of the group where dynamical factor is stored
 
 
