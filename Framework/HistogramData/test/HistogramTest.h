@@ -576,16 +576,18 @@ public:
     Histogram h(Points(0));
     h.setFrequencies(0);
     auto &y = h.y();
-    h.setCounts(y);
-    // y is always counts, setting it as frequencies must fail.
-    TS_ASSERT_THROWS(h.setFrequencies(y), std::logic_error);
+    auto old_address = &y;
+    h.setFrequencies(y);
+    TS_ASSERT_EQUALS(&h.y(), old_address);
   }
 
   void test_setFrequencies_legacy_self_assignment() {
     Histogram h(Points(0));
-    h.setCounts(0);
+    h.setFrequencies(0);
     auto &y = h.readY();
-    TS_ASSERT_THROWS(h.setFrequencies(y), std::logic_error);
+    auto old_address = &y;
+    h.setFrequencies(y);
+    TS_ASSERT_EQUALS(&h.readY(), old_address);
   }
 
   void test_setCountVariances() {

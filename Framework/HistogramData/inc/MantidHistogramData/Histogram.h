@@ -394,11 +394,8 @@ template <typename... T> void Histogram::setFrequencies(T &&... data) & {
   checkAndSetYModeFrequencies();
   Frequencies frequencies(std::forward<T>(data)...);
   checkSize(frequencies);
-  // No sensible self assignment is possible, we do not store frequencies, so if
-  // anyone tries to set our current data as frequencies it must be an error.
   if (selfAssignmentY(data...))
-    throw std::logic_error("Histogram::setFrequencies: Attempt to self-assign "
-                           "counts as frequencies.");
+    return;
   m_y = Counts(frequencies, binEdges()).cowData();
 }
 
@@ -407,11 +404,8 @@ template <typename... T> void Histogram::setFrequencyVariances(T &&... data) & {
   checkAndSetYModeFrequencies();
   FrequencyVariances frequencies(std::forward<T>(data)...);
   checkSize(frequencies);
-  // No sensible self assignment is possible, we do not store frequencies, so if
-  // anyone tries to set our current data as frequencies it must be an error.
   if (selfAssignmentE(data...))
-    throw std::logic_error("Histogram::setFrequencyVariances: Attempt to "
-                           "self-assign counts as frequencies.");
+    return;
   m_e = CountStandardDeviations(frequencies, binEdges()).cowData();
 }
 
@@ -421,11 +415,8 @@ void Histogram::setFrequencyStandardDeviations(T &&... data) & {
   checkAndSetYModeFrequencies();
   FrequencyStandardDeviations frequencies(std::forward<T>(data)...);
   checkSize(frequencies);
-  // No sensible self assignment is possible, we do not store frequencies, so if
-  // anyone tries to set our current data as frequencies it must be an error.
   if (selfAssignmentE(data...))
-    throw std::logic_error("Histogram::setFrequencyVariances: Attempt to "
-                           "self-assign counts as frequencies.");
+    return;
   m_e = CountStandardDeviations(frequencies, binEdges()).cowData();
 }
 
