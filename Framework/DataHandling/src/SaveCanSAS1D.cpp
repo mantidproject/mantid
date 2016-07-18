@@ -15,7 +15,7 @@
 #include "MantidKernel/ListValidator.h"
 
 #include <boost/shared_ptr.hpp>
-#include <Poco\XML\XMLString.h>
+#include <Poco/XML/XMLString.h>
 
 //-----------------------------------------------------------------------------
 using namespace Mantid::Kernel;
