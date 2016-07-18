@@ -109,7 +109,8 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
                       "here if not available in the instrument definition.");
   alg.declareProperty("ReplaceNaNs", false,
                       "If true, replaces all NaNs in output workspace with "
-                      "zeroes.");
+                      "zeroes.",
+                      Direction::Input);
 }
 
 void SofQW::exec() {

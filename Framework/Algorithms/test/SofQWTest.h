@@ -42,6 +42,7 @@ public:
         sqw.setPropertyValue("QAxisBinning", "0.5,0.25,2"));
     TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("EMode", "Indirect"));
     TS_ASSERT_THROWS_NOTHING(sqw.setPropertyValue("EFixed", "1.84"));
+    TS_ASSERT_THROWS_NOTHING(sqw.setProperty("ReplaceNaNs", true));
     if (!method.empty())
       sqw.setPropertyValue("Method", method);
     TS_ASSERT_THROWS_NOTHING(sqw.execute());
