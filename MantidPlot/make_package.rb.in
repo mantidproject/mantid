@@ -20,7 +20,7 @@ end
 
 def addPythonLibrary(directory)
   p "copying directory #{directory}"
-  output = system("rsync -a --exclude=.pyc #{directory} Contents/MacOS/")
+  output = system("rsync -a -L --exclude=.pyc #{directory} Contents/MacOS/")
   if output != true
     exit 1
   end
@@ -249,12 +249,13 @@ end
 `install_name_tool -change #{QtLinkingDir[0]}/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtXml.so`
 
 
-path = "/usr/local/Cellar/h5py/2.6.0/lib/python2.7/site-packages"
-directories = ["h5py"]
+#Copy over python libraries not included with OSX. 
+#currently missing epics
+path = "/Library/Python/2.7/site-packages"
+directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports","certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess","CifFile", "h5py"]
 directories.each do |directory|
   addPythonLibrary("#{path}/#{directory}")
 end
-
 
 h5py_patterns = ["**/h5py/*.so"]
 change_id(h5py_patterns, "Contents/MacOS/h5py/")
@@ -267,14 +268,6 @@ h5py_patterns.each do |pattern|
     `install_name_tool -change #{h5pyLinkingDir[0]}/libhdf5.10.dylib @loader_path/../libhdf5.dylib Contents/MacOS/h5py/#{basename}`
     `install_name_tool -change #{h5pyLinkingDir[0]}/libhdf5_hl.10.dylib @loader_path/../libhdf5_hl.dylib Contents/MacOS/h5py/#{basename}`
   end
-end
-
-#Copy over python libraries not included with OSX. 
-#currently missing epics
-path = "/Library/Python/2.7/site-packages"
-directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports","certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess","CifFile"]
-directories.each do |directory|
-  addPythonLibrary("#{path}/#{directory}")
 end
 
 
