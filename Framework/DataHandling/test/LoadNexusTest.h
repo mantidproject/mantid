@@ -15,7 +15,6 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include <Poco/Path.h>
-#include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
