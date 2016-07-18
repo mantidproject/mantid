@@ -330,15 +330,11 @@ void LoadTBL::exec() {
     auto colScale = ws->addColumn("str", "Scale");
     auto colOptions = ws->addColumn("str", "Options");
 
-    colStitch->setPlotType(0);
-    colRuns->setPlotType(0);
-    colTheta->setPlotType(0);
-    colTrans->setPlotType(0);
-    colQmin->setPlotType(0);
-    colQmax->setPlotType(0);
-    colDqq->setPlotType(0);
-    colScale->setPlotType(0);
-    colOptions->setPlotType(0);
+    for (size_t i = 0; i < ws->columnCount(); i++) {
+      auto col = ws->getColumn(i);
+      col->setPlotType(0);
+    }
+
     // we are using the old ReflTBL format
     // where all of the entries are on one line
     // so we must reset the stream to reread the first line.
