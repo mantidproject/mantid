@@ -2441,7 +2441,17 @@ p, li { white-space: pre-wrap; }
             <layout class="QGridLayout" name="gridLayout_20">
              <item row="3" column="0">
               <layout class="QGridLayout" name="gridLayout_21">
-               <item row="0" column="1">
+               <item row="3" column="0">
+                <widget class="QLabel" name="lblCompatMode">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When selected, uses the old style &amp;quot;Data Analysis&amp;quot; tab that was present pre-Mantid 3.8.&lt;/p&gt;&lt;p&gt;Simultaneous fits are not possible in this mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Compatibility mode:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="2">
                 <widget class="QComboBox" name="plotCreation">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -2471,7 +2481,7 @@ p, li { white-space: pre-wrap; }
                  </item>
                 </widget>
                </item>
-               <item row="0" column="2">
+               <item row="0" column="3">
                 <spacer name="horizontalSpacer_23">
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
@@ -2501,7 +2511,7 @@ p, li { white-space: pre-wrap; }
                  </property>
                 </widget>
                </item>
-               <item row="1" column="1">
+               <item row="1" column="2">
                 <widget class="QComboBox" name="newPlotPolicy">
                  <item>
                   <property name="text">
@@ -2525,7 +2535,7 @@ p, li { white-space: pre-wrap; }
                  </property>
                 </widget>
                </item>
-               <item row="1" column="2">
+               <item row="1" column="3">
                 <widget class="QStackedWidget" name="newPlotPolicyOptions">
                  <property name="currentIndex">
                   <number>0</number>
@@ -2548,7 +2558,7 @@ p, li { white-space: pre-wrap; }
                   </layout>
                  </widget>
                  <widget class="QWidget" name="page_2">
-                  <widget class="QWidget" name="">
+                  <widget class="QWidget" name="layoutWidget">
                    <property name="geometry">
                     <rect>
                      <x>0</x>
@@ -2594,8 +2604,18 @@ p, li { white-space: pre-wrap; }
                  </property>
                 </widget>
                </item>
-               <item row="2" column="1">
+               <item row="2" column="2">
                 <widget class="QCheckBox" name="hideToolbars">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="2">
+                <widget class="QCheckBox" name="chkCompatibilityMode">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When selected, uses the old style &amp;quot;Data Analysis&amp;quot; tab that was present pre-Mantid 3.8.&lt;/p&gt;&lt;p&gt;Simultaneous fits are not possible in this mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
                  <property name="text">
                   <string/>
                  </property>

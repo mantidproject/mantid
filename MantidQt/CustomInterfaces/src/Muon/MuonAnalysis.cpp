@@ -2061,8 +2061,9 @@ void MuonAnalysis::loadFittings() {
           SLOT(dataToFitChanged()));
   connect(m_dataSelector, SIGNAL(workspaceChanged()), this,
           SLOT(dataToFitChanged()));
-  // TEMPORARY - TEST
-  m_fitFunctionPresenter->setCompatibilityMode(true);
+  // Set compatibility mode on/off as appropriate
+  const bool isCompMode = m_optionTab->getCompatibilityMode();
+  m_fitFunctionPresenter->setCompatibilityMode(isCompMode);
 }
 
 /**
@@ -2388,6 +2389,8 @@ void MuonAnalysis::connectAutoUpdate() {
           SLOT(settingsTabUpdatePlot()));
   connect(m_optionTab, SIGNAL(plotStyleChanged()), this,
           SLOT(updateCurrentPlotStyle()));
+  connect(m_optionTab, SIGNAL(compatibilityModeChanged(int)), this,
+          SLOT(compatibilityModeChanged(int)));
 }
 
 /**
@@ -2898,6 +2901,15 @@ void MuonAnalysis::setLoadCurrentRunEnabled(bool enabled) {
 #endif
   }
   m_uiForm.loadCurrent->setEnabled(enabled);
+}
+
+/**
+ * Called when the "compatibility mode" checkbox is changed on the settings tab.
+ * Forward this to the fit function presenter.
+ */
+void MuonAnalysis::compatibilityModeChanged(int state) {
+  m_fitFunctionPresenter->setCompatibilityMode(state ==
+                                               Qt::CheckState::Checked);
 }
 
 } // namespace MantidQt

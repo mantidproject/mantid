@@ -240,6 +240,9 @@ private slots:
   /// Called when selected workspace/groups/periods to fit changes
   void dataToFitChanged();
 
+  /// Called when compatibility mode is turned on/off
+  void compatibilityModeChanged(int state);
+
 private:
   /// Initialize local Python environment
   void initLocalPython() override;
