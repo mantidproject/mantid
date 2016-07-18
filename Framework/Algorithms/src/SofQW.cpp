@@ -107,6 +107,9 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
                       "The value of fixed energy: :math:`E_i` (EMode=Direct) "
                       "or :math:`E_f` (EMode=Indirect) (meV).\nMust be set "
                       "here if not available in the instrument definition.");
+  alg.declareProperty("ReplaceNaNs", false,
+                      "If true, replaces all NaNs in output workspace with "
+                      "zeroes.");
 }
 
 void SofQW::exec() {

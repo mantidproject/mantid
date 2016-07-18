@@ -189,15 +189,17 @@ void SofQWNormalisedPolygon::exec() {
   outputWS->updateSpectraUsing(outputDetectorMap);
 
   // Replace any NaNs in outputWorkspace with zeroes
-  auto replaceNans = this->createChildAlgorithm("ReplaceSpecialValues");
-  replaceNans->setChild(true);
-  replaceNans->initialize();
-  replaceNans->setProperty("InputWorkspace", outputWS);
-  replaceNans->setProperty("OutputWorkspace", outputWS);
-  replaceNans->setProperty("NaNValue", 0.0);
-  replaceNans->setProperty("InfinityValue", 0.0);
-  replaceNans->setProperty("BigNumberThreshold", DBL_MAX);
-  replaceNans->execute();
+  if (this->getProperty("ReplaceNaNs")) {
+    auto replaceNans = this->createChildAlgorithm("ReplaceSpecialValues");
+    replaceNans->setChild(true);
+    replaceNans->initialize();
+    replaceNans->setProperty("InputWorkspace", outputWS);
+    replaceNans->setProperty("OutputWorkspace", outputWS);
+    replaceNans->setProperty("NaNValue", 0.0);
+    replaceNans->setProperty("InfinityValue", 0.0);
+    replaceNans->setProperty("BigNumberThreshold", DBL_MAX);
+    replaceNans->execute();
+  }
 }
 
 /**
