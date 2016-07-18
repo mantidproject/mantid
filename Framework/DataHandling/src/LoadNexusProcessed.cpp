@@ -1663,51 +1663,53 @@ void LoadNexusProcessed::readInstrumentGroup(
 
 /**
  * Validates that a SpectrumList has not been used with either
- * SpectrumMin or SpectrumMax 
+ * SpectrumMin or SpectrumMax
  * @return Returns a map indicating invalid input combinations
  */
 std::map<std::string, std::string> LoadNexusProcessed::validateInputs() {
-	using namespace std;
-	map<string, string> errorList;
+  using namespace std;
+  map<string, string> errorList;
 
-	vector<int64_t> specList = getProperty("SpectrumList");
-	int64_t specMin = getProperty("SpectrumMin");
-	int64_t specMax = getProperty("SpectrumMax");
+  vector<int64_t> specList = getProperty("SpectrumList");
+  int64_t specMin = getProperty("SpectrumMin");
+  int64_t specMax = getProperty("SpectrumMax");
 
-	// SpectrumList and SpectrumMin or SpectrumMax cannot be used simultaneously.
+  // SpectrumList and SpectrumMin or SpectrumMax cannot be used simultaneously.
 
-	// Cant use Min/Max with list on processed nexus files so throw
-	// exception
-	bool isInvalid = false;
-	if (!specList.empty()) {
+  // Cant use Min/Max with list on processed nexus files so throw
+  // exception
+  bool isInvalid = false;
+  if (!specList.empty()) {
 
-		if (specMin != 1) {
-			// Test for SpecMin
-			errorList["SpectrumMin"] = "SpectrumMin cannot be"
-				" set with a SpectrumList Use SpectrumList"
-				" to specify the maximum and minimum with a list.";
-			isInvalid = true;
-		}
+    if (specMin != 1) {
+      // Test for SpecMin
+      errorList["SpectrumMin"] =
+          "SpectrumMin cannot be"
+          " set with a SpectrumList Use SpectrumList"
+          " to specify the maximum and minimum with a list.";
+      isInvalid = true;
+    }
 
-		if (specMax != Mantid::EMPTY_INT()) {
-			// Test for SpecMax
-			errorList["SpectrumMax"] = "SpectrumMax cannot be"
-				"set with a SpectrumList. Use SpectrumList"
-				" to specify the maximum and minimum with a list.";
-			isInvalid = true;
-		}
+    if (specMax != Mantid::EMPTY_INT()) {
+      // Test for SpecMax
+      errorList["SpectrumMax"] =
+          "SpectrumMax cannot be"
+          "set with a SpectrumList. Use SpectrumList"
+          " to specify the maximum and minimum with a list.";
+      isInvalid = true;
+    }
 
-		if (isInvalid) {
-			errorList["SpectrumList"] = "SpectrumList cannot"
-				"be set with SpectrumMin or SpectrumMax. Use SpectrumList"
-				" to specify the maximum and minimum with a list.";
-		}
-	}
+    if (isInvalid) {
+      errorList["SpectrumList"] =
+          "SpectrumList cannot"
+          "be set with SpectrumMin or SpectrumMax. Use SpectrumList"
+          " to specify the maximum and minimum with a list.";
+    }
+  }
 
-	// Finished testing return any errors
-	return errorList;
+  // Finished testing return any errors
+  return errorList;
 }
-
 
 //-------------------------------------------------------------------------------------------------
 /**
