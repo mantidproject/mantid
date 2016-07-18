@@ -15,11 +15,13 @@
 #include "MantidKernel/ListValidator.h"
 
 #include <boost/shared_ptr.hpp>
+#include <Poco\XML\XMLString.h>
 
 //-----------------------------------------------------------------------------
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
+using namespace Poco::XML;
 
 namespace Mantid {
 namespace DataHandling {
@@ -582,9 +584,10 @@ void SaveCanSAS1D::createSASProcessElement(std::string &sasProcess) {
   sasProcess += sasProcuserfile;
 
   // Reduction process note, if available
-  const std::string process_xml = getProperty("Process");
+  std::string process_xml = getProperty("Process");
   if (process_xml.size() > 0) {
     std::string processNote = "\n\t\t\t<SASprocessnote>\n";
+    process_xml = toXMLString(process_xml);
     processNote += process_xml + "\n";
     processNote += "\n\t\t\t</SASprocessnote>\n";
     sasProcess += processNote;
