@@ -158,14 +158,6 @@ void SaveCanSAS1D::exec() {
   createSASProcessElement(sasProcess);
   m_outFile << sasProcess;
 
-  // Reduction process, if available
-  const std::string process_xml = getProperty("Process");
-  if (process_xml.size() > 0) {
-    m_outFile << "\n\t\t<SASProcess>\n";
-    m_outFile << process_xml;
-    m_outFile << "\n\t\t</SASProcess>\n";
-  }
-
   std::string sasNote = "\n\t\t<SASnote>";
   sasNote += "\n\t\t</SASnote>";
   m_outFile << sasNote;
@@ -595,7 +587,17 @@ void SaveCanSAS1D::createSASProcessElement(std::string &sasProcess) {
   // outFile<<sasProcuserfile;
   sasProcess += sasProcuserfile;
 
-  sasProcess += "\n\t\t\t<SASprocessnote/>";
+  // Reduction process note, if available
+  const std::string process_xml = getProperty("Process");
+  if (process_xml.size() > 0) {
+    std::string processNote = "\n\t\t\t<SASprocessnote>\n";
+    processNote += process_xml + "\n";
+    processNote += "\n\t\t\t</SASprocessnote>\n";
+    sasProcess += processNote;
+  }
+  else {
+     sasProcess += "\n\t\t\t<SASprocessnote/>";
+  }
 
   sasProcess += "\n\t\t</SASprocess>";
 }
