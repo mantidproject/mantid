@@ -16,7 +16,7 @@ class SofQWTest : public CxxTest::TestSuite {
 public:
   template <typename SQWType>
   static Mantid::API::MatrixWorkspace_sptr
-  runSQW(const std::string &method = "", bool insertNans = false) {
+  runSQW(const std::string &method = "") {
     Mantid::DataHandling::LoadNexusProcessed loader;
     loader.initialize();
     loader.setChild(true);
@@ -111,7 +111,7 @@ public:
   }
 
   void testExecNansReplaced() {
-	  auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>("NormalisedPolygon", true);
+	  auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>("NormalisedPolygon");
 	  bool nanFound = false;
 
     for (int i = 0; i < result->getNumberHistograms(); i++) {
