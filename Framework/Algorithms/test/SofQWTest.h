@@ -114,16 +114,10 @@ public:
 	  auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>("NormalisedPolygon", true);
 	  bool nanFound = false;
 
-	  for (int i = 0; i < result->getNumberHistograms(); i++) {
-	    if (nanFound = isNanInHistogram(*result, i)) {
-		    break; // NaN found in workspace, no need to keep searching
-	    }
-	  }
-
-    if (nanFound) {
-      std::cout << "NAN HAS BEEN FOUND\n";
-    } else {
-      std::cout << "NAN HAS NOT BEEN FOUND\n";
+    for (int i = 0; i < result->getNumberHistograms(); i++) {
+      if (nanFound = isNanInHistogram(*result, i)) {
+        break; // NaN found in workspace, no need to keep searching
+      }
     }
 
 	  TS_ASSERT(!nanFound);
@@ -143,8 +137,7 @@ private:
 						            const size_t index) {
 	  bool nanFound = false;
 	  for (int i = 0; i < result.blocksize(); i++) {
-	    if (isnan(result.x(index)[i]) ||
-		      isnan(result.y(index)[i]) ||
+	    if (isnan(result.y(index)[i]) ||
 		      isnan(result.e(index)[i])) {
 			  nanFound = true;
 			  break; // NaN found in histogram, no need to keep searching
