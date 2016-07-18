@@ -26,14 +26,24 @@ public:
   static HistogramTest *createSuite() { return new HistogramTest(); }
   static void destroySuite(HistogramTest *suite) { delete suite; }
 
-  void test_construction_Points() {
+  void test_construction_Points_Counts() {
     TS_ASSERT_THROWS_NOTHING(
         Histogram hist(Histogram::XMode::Points, Histogram::YMode::Counts));
   }
 
-  void test_construction_BinEdges() {
+  void test_construction_BinEdges_Counts() {
     TS_ASSERT_THROWS_NOTHING(
         Histogram hist(Histogram::XMode::BinEdges, Histogram::YMode::Counts));
+  }
+
+  void test_construction_Points_Frequencies() {
+    TS_ASSERT_THROWS_NOTHING(Histogram hist(Histogram::XMode::Points,
+                                            Histogram::YMode::Frequencies));
+  }
+
+  void test_construction_BinEdges_Frequencies() {
+    TS_ASSERT_THROWS_NOTHING(Histogram hist(Histogram::XMode::BinEdges,
+                                            Histogram::YMode::Frequencies));
   }
 
   void test_construct_from_Points() {
@@ -840,6 +850,72 @@ public:
     Histogram hist{BinEdges(0)};
     hist.setCountStandardDeviations(data1);
     TS_ASSERT_THROWS(hist.setSharedE(data2), std::logic_error);
+  }
+
+  void test_yMode() {
+    Histogram hist1(Histogram::XMode::Points, Histogram::YMode::Counts);
+    TS_ASSERT_EQUALS(hist1.yMode(), Histogram::YMode::Counts);
+    Histogram hist2(Histogram::XMode::Points, Histogram::YMode::Frequencies);
+    TS_ASSERT_EQUALS(hist2.yMode(), Histogram::YMode::Frequencies);
+  }
+
+  void test_yMode_Uninitialized() {
+    Histogram hist(Points(1));
+    TS_ASSERT_EQUALS(hist.yMode(), Histogram::YMode::Uninitialized);
+  }
+
+  void test_yMode_initialized_by_setCounts() {
+    Histogram h(Points(2));
+    h.setCounts(2);
+    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Counts);
+  }
+
+  void test_yMode_initialized_by_setCountStandardDeviations() {
+    Histogram h(Points(2));
+    h.setCountStandardDeviations(2);
+    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Counts);
+  }
+
+  void test_yMode_initialized_by_setCountVariances() {
+    Histogram h(Points(2));
+    h.setCountVariances(2);
+    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Counts);
+  }
+
+  void test_yMode_initialized_by_setFrequencies() {
+    Histogram h(Points(2));
+    h.setFrequencies(2);
+    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Frequencies);
+  }
+
+  void test_yMode_initialized_by_setFrequencyStandardDeviations() {
+    Histogram h(Points(2));
+    h.setFrequencyStandardDeviations(2);
+    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Frequencies);
+  }
+
+  void test_yMode_initialized_by_setFrequencyVariances() {
+    Histogram h(Points(2));
+    h.setFrequencyVariances(2);
+    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Frequencies);
+  }
+
+  void test_yMode_cannot_be_changed_by_setters() {
+    Histogram countHist(Points(1), Counts(1));
+    TS_ASSERT_THROWS(countHist.setFrequencies(1), std::logic_error);
+    TS_ASSERT_THROWS(countHist.setFrequencyVariances(1), std::logic_error);
+    TS_ASSERT_THROWS(countHist.setFrequencyStandardDeviations(1),
+                     std::logic_error);
+    Histogram freqHist(Points(1), Frequencies(1));
+    TS_ASSERT_THROWS(freqHist.setCounts(1), std::logic_error);
+    TS_ASSERT_THROWS(freqHist.setCountVariances(1), std::logic_error);
+    TS_ASSERT_THROWS(freqHist.setCountStandardDeviations(1), std::logic_error);
+  }
+
+  void test_setSharedY_fails_for_YMode_Uninitialized() {
+    Histogram hist(Points(1));
+    Counts counts(1);
+    TS_ASSERT_THROWS(hist.setSharedY(counts.cowData()), std::logic_error);
   }
 };
 

@@ -247,7 +247,10 @@ template <class TE> void Histogram::initE(const TE &e) {
                              "histogram without data");
     setUncertainties(e);
   } else if (m_y) {
-    setCountVariances(m_y->rawData());
+    if (yMode() == YMode::Counts)
+      setCountVariances(m_y->rawData());
+    if (yMode() == YMode::Frequencies)
+      setFrequencyVariances(m_y->rawData());
   }
 }
 
