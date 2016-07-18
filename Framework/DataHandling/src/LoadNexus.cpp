@@ -173,18 +173,6 @@ void LoadNexus::runLoadNexusProcessed() {
   // Get the array passed in the spectrum_list, if an empty array was passed use
   // the default
 
-  std::vector<int> specList = getProperty("SpectrumList");
-  int specMin = getProperty("SpectrumMin");
-  int specMax = getProperty("SpectrumMax");
-
-  // Cant use Min/Max with list on processed nexus files so throw exception
-  if (!specList.empty() && (specMax != Mantid::EMPTY_INT() || specMin != 1)) {
-    throw std::invalid_argument(
-        "SpectrumList and SpectrumMin or SpectrumMax."
-        " cannot be used simultaneously. SpectrumList should be used to"
-        " specify the maximum and minimum spectra");
-  }
-
   loadNexusPro->setPropertyValue("EntryNumber",
                                  getPropertyValue("EntryNumber"));
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.

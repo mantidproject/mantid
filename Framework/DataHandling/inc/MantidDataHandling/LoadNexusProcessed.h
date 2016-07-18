@@ -12,6 +12,9 @@
 
 #include "MantidNexus/NexusClasses.h"
 
+#include <map>
+#include <vector>
+
 namespace NeXus {
 class File;
 }
@@ -81,6 +84,7 @@ public:
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
+  std::map<std::string, std::string> validateInputs() override;
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method
