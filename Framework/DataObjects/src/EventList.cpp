@@ -120,22 +120,24 @@ bool compareEventPulseTimeTOF(const TofEvent &e1, const TofEvent &e2) {
 /// Constructor (empty)
 // EventWorkspace is always histogram data and so is thus EventList
 EventList::EventList()
-    : m_histogram(HistogramData::Histogram::XMode::BinEdges), eventType(TOF),
-      order(UNSORTED), mru(nullptr) {}
+    : m_histogram(HistogramData::Histogram::XMode::BinEdges,
+                  HistogramData::Histogram::YMode::Counts),
+      eventType(TOF), order(UNSORTED), mru(nullptr) {}
 
 /** Constructor with a MRU list
  * @param mru :: pointer to the MRU of the parent EventWorkspace
  * @param specNo :: the spectrum number for the event list
  */
 EventList::EventList(EventWorkspaceMRU *mru, specnum_t specNo)
-    : IEventList(specNo),
-      m_histogram(HistogramData::Histogram::XMode::BinEdges), eventType(TOF),
-      order(UNSORTED), mru(mru) {}
+    : IEventList(specNo), m_histogram(HistogramData::Histogram::XMode::BinEdges,
+                                      HistogramData::Histogram::YMode::Counts),
+      eventType(TOF), order(UNSORTED), mru(mru) {}
 
 /** Constructor copying from an existing event list
  * @param rhs :: EventList object to copy*/
 EventList::EventList(const EventList &rhs)
-    : IEventList(rhs), m_histogram(HistogramData::Histogram::XMode::BinEdges),
+    : IEventList(rhs), m_histogram(HistogramData::Histogram::XMode::BinEdges,
+                                   HistogramData::Histogram::YMode::Counts),
       mru(rhs.mru) {
   // Call the copy operator to do the job,
   this->operator=(rhs);
@@ -144,8 +146,9 @@ EventList::EventList(const EventList &rhs)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of TofEvent's */
 EventList::EventList(const std::vector<TofEvent> &events)
-    : m_histogram(HistogramData::Histogram::XMode::BinEdges), eventType(TOF),
-      mru(nullptr) {
+    : m_histogram(HistogramData::Histogram::XMode::BinEdges,
+                  HistogramData::Histogram::YMode::Counts),
+      eventType(TOF), mru(nullptr) {
   this->events.assign(events.begin(), events.end());
   this->eventType = TOF;
   this->order = UNSORTED;
@@ -154,7 +157,9 @@ EventList::EventList(const std::vector<TofEvent> &events)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEvent's */
 EventList::EventList(const std::vector<WeightedEvent> &events)
-    : m_histogram(HistogramData::Histogram::XMode::BinEdges), mru(nullptr) {
+    : m_histogram(HistogramData::Histogram::XMode::BinEdges,
+                  HistogramData::Histogram::YMode::Counts),
+      mru(nullptr) {
   this->weightedEvents.assign(events.begin(), events.end());
   this->eventType = WEIGHTED;
   this->order = UNSORTED;
@@ -163,7 +168,9 @@ EventList::EventList(const std::vector<WeightedEvent> &events)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEventNoTime's */
 EventList::EventList(const std::vector<WeightedEventNoTime> &events)
-    : m_histogram(HistogramData::Histogram::XMode::BinEdges), mru(nullptr) {
+    : m_histogram(HistogramData::Histogram::XMode::BinEdges,
+                  HistogramData::Histogram::YMode::Counts),
+      mru(nullptr) {
   this->weightedEventsNoTime.assign(events.begin(), events.end());
   this->eventType = WEIGHTED_NOTIME;
   this->order = UNSORTED;

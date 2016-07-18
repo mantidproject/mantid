@@ -182,6 +182,34 @@ void Histogram::setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & {
   m_dx = Dx;
 }
 
+void Histogram::convertToCounts() {
+  if (yMode() == YMode::Counts)
+    return;
+  const auto &X = x();
+  auto &Y = mutableY();
+  auto &E = mutableE();
+  for (size_t i = 0; i < Y.size(); ++i) {
+    double width = X[i + 1] - X[i];
+    Y[i] *= width;
+    E[i] *= width;
+  }
+  m_yMode = YMode::Counts;
+}
+
+void Histogram::convertToFrequencies() {
+  if (yMode() == YMode::Frequencies)
+    return;
+  const auto &X = x();
+  auto &Y = mutableY();
+  auto &E = mutableE();
+  for (size_t i = 0; i < Y.size(); ++i) {
+    double width = X[i + 1] - X[i];
+    Y[i] /= width;
+    E[i] /= width;
+  }
+  m_yMode = YMode::Frequencies;
+}
+
 template <> void Histogram::initX(const Points &x) {
   m_xMode = XMode::Points;
   m_x = x.cowData();

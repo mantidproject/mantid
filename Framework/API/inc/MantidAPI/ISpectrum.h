@@ -109,6 +109,19 @@ public:
     mutableHistogramRef() = std::move(histogram);
   }
 
+  HistogramData::Histogram::YMode yMode() const {
+    return histogramRef().yMode();
+  }
+  void setYMode(HistogramData::Histogram::YMode ymode) {
+    return mutableHistogramRef().setYMode(ymode);
+  }
+  void convertToCounts() {
+    mutableHistogramRef().convertToCounts();
+  }
+  void convertToFrequencies() {
+    mutableHistogramRef().convertToFrequencies();
+  }
+
   HistogramData::BinEdges binEdges() const { return histogramRef().binEdges(); }
   HistogramData::BinEdgeStandardDeviations binEdgeStandardDeviations() const {
     return histogramRef().binEdgeStandardDeviations();

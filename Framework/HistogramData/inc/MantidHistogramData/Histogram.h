@@ -182,6 +182,11 @@ public:
     return m_dx->rawData();
   }
 
+  // TODO This is a temporary helper function for refactoring, must be removed!
+  void setYMode(YMode ymode) { m_yMode = ymode; }
+  void convertToCounts();
+  void convertToFrequencies();
+
 private:
   template <class TX> void initX(const TX &x);
   template <class TY> void initY(const TY &y);
