@@ -137,7 +137,7 @@ void ChopData::exec() {
       PARALLEL_START_INTERUPT_REGION;
 
       workspace->mutableX(j).assign(edges.cbegin() + indexLow,
-                                    edges.cbegin() + indexLow + nbins);
+                                    edges.cbegin() + indexLow + nbins + 1);
 
       workspace->mutableX(j) += -stepDiff;
 
