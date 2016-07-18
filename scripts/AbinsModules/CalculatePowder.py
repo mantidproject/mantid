@@ -14,6 +14,12 @@ class CalculatePowder(IOmodule):
     Obtained MSD and DW  can be directly used for calculation of S(Q, omega) in case sample has a form of powder.
     """
     def __init__(self, filename=None, abins_data=None, temperature=None):
+        """
+
+        @param filename:  name of input DFT filename
+        @param abins_data: object of type AbinsData with data from input DFt file
+        @param temperature:  temperature in K
+        """
         super(CalculatePowder, self).__init__(input_filename=filename, group_name=Constants.powder_data_group)
 
         if not isinstance(abins_data, AbinsData):
