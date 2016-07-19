@@ -195,8 +195,7 @@ PeaksWorkspace::createPeak(Kernel::V3D QLabFrame,
   Geometry::Goniometer goniometer = this->run().getGoniometer();
 
   // create a peak using the qLab frame
-  auto peak =
-      new Peak(this->getInstrument(), QLabFrame, detectorDistance);
+  auto peak = new Peak(this->getInstrument(), QLabFrame, detectorDistance);
 
   // Set the goniometer
   peak->setGoniometerMatrix(goniometer.getR());

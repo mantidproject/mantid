@@ -30,6 +30,11 @@ Single Crystal Diffraction
    :align: center
 
   
+- Some improvements were done for creating peaks from python. :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>`
+  copies the goniometer from the input MatrixWorkspace to PeaksWorkspace. createPeak for PeaksWorkspace copies goniometer 
+  from PeaksWorkspace to peak. setGoniometer for a peak can be done from python and setQLabFrame and setQSampleFrame works 
+  correctly now with one argument.
+
 
 Engineering Diffraction
 -----------------------
