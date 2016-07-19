@@ -439,6 +439,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.peaks[1].param[1]['FWHM'] = 1.12
         cf.setBackground(peak=Function('Gaussian', Height=10, Sigma=0.3),
                          background=Function('FlatBackground', A0=1.0))
+        cf.ties(IntensityScaling0 = 1.0, IntensityScaling1 = 1.0)
 
         ws0 = MakeWorkspace(*origin.getSpectrum(0))
         ws1 = MakeWorkspace(*origin.getSpectrum(1))
@@ -511,6 +512,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.peaks[0].param[0]['FWHM'] = 1.11
         cf.peaks[1].param[1]['FWHM'] = 1.12
         cf.setBackground(background=Function('FlatBackground', A0=0.9))
+        cf.ties(IntensityScaling0=1.0, IntensityScaling1=1.0)
 
         ws0 = MakeWorkspace(*origin.getSpectrum(0))
         ws1 = MakeWorkspace(*origin.getSpectrum(1))
@@ -552,6 +554,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.peaks[0].param[0]['FWHM'] = 1.11
         cf.peaks[1].param[1]['FWHM'] = 1.12
         cf.setBackground(peak=Function('Gaussian', Height=10, Sigma=0.3))
+        cf.ties(IntensityScaling0=1.0, IntensityScaling1=1.0)
 
         ws0 = MakeWorkspace(*origin.getSpectrum(0))
         ws1 = MakeWorkspace(*origin.getSpectrum(1))
@@ -615,7 +618,9 @@ class CrystalFieldFitTest(unittest.TestCase):
         params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
                   'Temperature': [44.0, 50], 'FWHM': [1.1, 0.9]}
         cf1 = CrystalField('Ce', 'C2v', **params)
+        cf1.ties(IntensityScaling0=1.0, IntensityScaling1=1.0)
         cf2 = CrystalField('Pr', 'C2v', **params)
+        cf2.ties(IntensityScaling0=1.0, IntensityScaling1=1.0)
         cf = cf1 + cf2
 
         fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws1, ws2])

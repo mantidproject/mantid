@@ -43,6 +43,14 @@ public:
     throw Exception::NotImplementedError(
         "This method is intentionally not implemented.");
   }
+  /// Decalre the intensity scaling parameters: one per spectrum.
+  void declareIntensityScaling(size_t nSpec) {
+    for (size_t i = 0; i < nSpec; ++i) {
+      auto si = std::to_string(i);
+      declareParameter("IntensityScaling" + si, 1.0,
+                       "Intensity scaling factor for spectrum " + si);
+    }
+  }
 };
 }
 
@@ -74,6 +82,18 @@ CrystalFieldMultiSpectrum::createEquivalentFunctions() const {
     funs.push_back(composite.getFunction(i));
   }
   return funs;
+}
+
+/// Perform custom actions on setting certain attributes.
+void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
+                                             const Attribute &attr) {
+  if (name == "Temperatures") {
+    // Define (declare) the parameters for intensity scaling.
+    auto nSpec = attr.asVector().size();
+    dynamic_cast<Peaks&>(*m_source).declareIntensityScaling(nSpec);
+    m_nOwnParams = m_source->nParams();
+  }
+  FunctionGenerator::setAttribute(name, attr);
 }
 
 /// Uses source to calculate peak centres and intensities
@@ -138,15 +158,19 @@ void CrystalFieldMultiSpectrum::calcExcitations(
 /// Build a function for a single spectrum.
 API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
     int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
-    double temperature, double fwhm, size_t i) const {
+    double temperature, double fwhm, size_t iSpec) const {
   DoubleFortranVector eExcitations;
   DoubleFortranVector iExcitations;
   calcExcitations(nre, en, wf, temperature, eExcitations, iExcitations);
   auto nPeaks = eExcitations.size();
   auto maxNPeaks = nPeaks + nPeaks / 2 + 1;
-  m_nPeaks[i] = nPeaks;
-  m_maxNPeaks[i] = maxNPeaks;
+  m_nPeaks[iSpec] = nPeaks;
+  m_maxNPeaks[iSpec] = maxNPeaks;
   bool fixAll = getAttribute("FixAllPeakParameters").asBool();
+  const size_t nSpec = m_nPeaks.size();
+  // Get intensity scaling parameter "IntensityScaling" + std::to_string(iSpec)
+  // using an index instead of a name for performance reasons
+  double intensityScaling = getParameter(m_nOwnParams - nSpec + iSpec);
 
   auto peakShape = IFunction::getAttribute("PeakShape").asString();
   auto bkgdShape = IFunction::getAttribute("Background").asUnquotedString();
@@ -170,7 +194,7 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildSpectrum(
       peak->fixCentre();
       peak->fixIntensity();
       peak->setCentre(eExcitations.get(i));
-      peak->setIntensity(iExcitations.get(i));
+      peak->setIntensity(iExcitations.get(i) * intensityScaling);
       peak->setFwhm(fwhm);
       if (fixAll) {
         peak->fixAll();
@@ -208,26 +232,30 @@ void CrystalFieldMultiSpectrum::updateTargetFunction() const {
 /// Update a function for a single spectrum.
 void CrystalFieldMultiSpectrum::updateSpectrum(
     API::IFunction &spectrum, int nre, const DoubleFortranVector &en,
-    const ComplexFortranMatrix &wf, double temperature, size_t i) const {
+    const ComplexFortranMatrix &wf, double temperature, size_t iSpec) const {
   DoubleFortranVector eExcitations;
   DoubleFortranVector iExcitations;
   calcExcitations(nre, en, wf, temperature, eExcitations, iExcitations);
   size_t nGoodPeaks = eExcitations.size();
-  size_t nOriginalPeaks = m_nPeaks[i];
-  size_t maxNPeaks = m_maxNPeaks[i];
+  size_t nOriginalPeaks = m_nPeaks[iSpec];
+  size_t maxNPeaks = m_maxNPeaks[iSpec];
 
   auto &composite = dynamic_cast<CompositeFunction &>(spectrum);
   if (maxNPeaks + 1 != composite.nFunctions()) {
     throw std::logic_error(
         "CrystalFieldMultiSpectrum target function size mismatch.");
   }
+  const size_t nSpec = m_nPeaks.size();
+  // Get intensity scaling parameter "IntensityScaling" + std::to_string(iSpec)
+  // using an index instead of a name for performance reasons
+  double intensityScaling = getParameter(m_nOwnParams - nSpec + iSpec);
 
   for (size_t i = 0; i < maxNPeaks; ++i) {
     auto fun = composite.getFunction(i + 1);
     auto &peak = dynamic_cast<API::IPeakFunction &>(*fun);
     if (i < nGoodPeaks) {
       peak.setCentre(eExcitations.get(i));
-      peak.setIntensity(iExcitations.get(i));
+      peak.setIntensity(iExcitations.get(i) * intensityScaling);
     } else {
       peak.setHeight(0.0);
       if (i > nOriginalPeaks) {
