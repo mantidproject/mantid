@@ -1096,110 +1096,110 @@ void ConfigDialog::addDialog() {
 
 // Edit a program
 void ConfigDialog::editDialog() {
-	auto firstSelectedItem = treePrograms->selectedItems()[0];
-	auto selectedProgram =
-		m_sendToSettings.find(firstSelectedItem->text(0).toStdString());
-	// If the program name itself isn't initially selected, recurse up.
-	while (selectedProgram == m_sendToSettings.end()) {
-		firstSelectedItem = treePrograms->itemAbove(firstSelectedItem);
-		// It shouldn't happen that we get to the top without finding anything, but
-		// should this happen just return
-		if (firstSelectedItem == treePrograms->invisibleRootItem())
-			return;
-		selectedProgram =
-			m_sendToSettings.find(firstSelectedItem->text(0).toStdString());
-	}
+  auto firstSelectedItem = treePrograms->selectedItems()[0];
+  auto selectedProgram =
+      m_sendToSettings.find(firstSelectedItem->text(0).toStdString());
+  // If the program name itself isn't initially selected, recurse up.
+  while (selectedProgram == m_sendToSettings.end()) {
+    firstSelectedItem = treePrograms->itemAbove(firstSelectedItem);
+    // It shouldn't happen that we get to the top without finding anything, but
+    // should this happen just return
+    if (firstSelectedItem == treePrograms->invisibleRootItem())
+      return;
+    selectedProgram =
+        m_sendToSettings.find(firstSelectedItem->text(0).toStdString());
+  }
 
-	SendToProgramDialog *editProgram = new SendToProgramDialog(
-		this, firstSelectedItem->text(0), selectedProgram->second);
+  SendToProgramDialog *editProgram = new SendToProgramDialog(
+      this, firstSelectedItem->text(0), selectedProgram->second);
 
-	editProgram->setWindowTitle(tr("Edit a Program"));
-	editProgram->setModal(true);
-	if (editProgram->exec() == 1) {
-		// Get the settings of the program the user just edited
-		std::pair<std::string, std::map<std::string, std::string>> tempSettings =
-			editProgram->getSettings();
-		m_sendToSettings[tempSettings.first] = tempSettings.second;
-	}
+  editProgram->setWindowTitle(tr("Edit a Program"));
+  editProgram->setModal(true);
+  if (editProgram->exec() == 1) {
+    // Get the settings of the program the user just edited
+    std::pair<std::string, std::map<std::string, std::string>> tempSettings =
+        editProgram->getSettings();
+    m_sendToSettings[tempSettings.first] = tempSettings.second;
+  }
 
-	// clear the tree and repopulate it without the programs that have just been
-	// deleted
-	treePrograms->clear();
-	updateProgramTree();
-	enableButtons();
+  // clear the tree and repopulate it without the programs that have just been
+  // deleted
+  treePrograms->clear();
+  updateProgramTree();
+  enableButtons();
 }
 
 // Deleting send to options. Deletes them off the mantid.user.properties
 void ConfigDialog::deleteDialog() {
-	QList<QTreeWidgetItem *> selectedItems = treePrograms->selectedItems();
-	if (selectedItems.size() > 0) {
-		// Question box asking to continue to avoid accidental deletion of program
-		// options
-		int status = QMessageBox::question(
-			this, tr("Delete save options?"),
-			tr("Are you sure you want to delete \nthe (%1) selected save "
-				"option(s)?").arg(selectedItems.size()),
-			QMessageBox::Yes | QMessageBox::Default,
-			QMessageBox::No | QMessageBox::Escape, QMessageBox::NoButton);
+  QList<QTreeWidgetItem *> selectedItems = treePrograms->selectedItems();
+  if (selectedItems.size() > 0) {
+    // Question box asking to continue to avoid accidental deletion of program
+    // options
+    int status = QMessageBox::question(
+        this, tr("Delete save options?"),
+        tr("Are you sure you want to delete \nthe (%1) selected save "
+           "option(s)?").arg(selectedItems.size()),
+        QMessageBox::Yes | QMessageBox::Default,
+        QMessageBox::No | QMessageBox::Escape, QMessageBox::NoButton);
 
-		if (status == QMessageBox::Yes) {
-			// For each program selected, remove all details from the user.properties
-			// file;
-			for (int i = 0; i < selectedItems.size(); ++i) {
-				m_sendToSettings.erase(selectedItems[i]->text(0).toStdString());
-			}
-			// clear the tree and repopulate it without the programs that have just
-			// been deleted
-			treePrograms->clear();
-			updateProgramTree();
-		}
-	}
+    if (status == QMessageBox::Yes) {
+      // For each program selected, remove all details from the user.properties
+      // file;
+      for (int i = 0; i < selectedItems.size(); ++i) {
+        m_sendToSettings.erase(selectedItems[i]->text(0).toStdString());
+      }
+      // clear the tree and repopulate it without the programs that have just
+      // been deleted
+      treePrograms->clear();
+      updateProgramTree();
+    }
+  }
 }
 
 void ConfigDialog::populateProgramTree() {
-	std::vector<std::string> programNames =
-		Mantid::Kernel::ConfigService::Instance().getKeys(
-			"workspace.sendto.name");
+  std::vector<std::string> programNames =
+      Mantid::Kernel::ConfigService::Instance().getKeys(
+          "workspace.sendto.name");
 
-	for (size_t i = 0; i < programNames.size(); i++) {
-		// Create a map for the keys and details to go into
-		std::map<std::string, std::string> programKeysAndDetails;
+  for (size_t i = 0; i < programNames.size(); i++) {
+    // Create a map for the keys and details to go into
+    std::map<std::string, std::string> programKeysAndDetails;
 
-		// Get a list of the program detail keys (mandatory - target, saveusing)
-		// (optional - arguments, save parameters, workspace type)
-		std::vector<std::string> programKeys =
-			(Mantid::Kernel::ConfigService::Instance().getKeys("workspace.sendto." +
-				programNames[i]));
+    // Get a list of the program detail keys (mandatory - target, saveusing)
+    // (optional - arguments, save parameters, workspace type)
+    std::vector<std::string> programKeys =
+        (Mantid::Kernel::ConfigService::Instance().getKeys("workspace.sendto." +
+                                                           programNames[i]));
 
-		for (size_t j = 0; j < programKeys.size(); j++) {
-			// Assign a key to its value using the map
-			programKeysAndDetails[programKeys[j]] =
-				(Mantid::Kernel::ConfigService::Instance().getString(
-				("workspace.sendto." + programNames[i] + "." + programKeys[j])));
-		}
+    for (size_t j = 0; j < programKeys.size(); j++) {
+      // Assign a key to its value using the map
+      programKeysAndDetails[programKeys[j]] =
+          (Mantid::Kernel::ConfigService::Instance().getString(
+              ("workspace.sendto." + programNames[i] + "." + programKeys[j])));
+    }
 
-		m_sendToSettings.emplace(programNames[i], programKeysAndDetails);
-	}
-	updateProgramTree();
+    m_sendToSettings.emplace(programNames[i], programKeysAndDetails);
+  }
+  updateProgramTree();
 }
 
 void ConfigDialog::updateProgramTree() {
-	// Store into a map ready to go into config service when apply is clicked
-	std::map<std::string, std::map<std::string, std::string>>::const_iterator
-		itr = m_sendToSettings.begin();
-	for (; itr != m_sendToSettings.end(); ++itr) {
-		// creating the map of kvps needs to happen first as createing the item
-		// requires them.
-		std::map<std::string, std::string> programKeysAndDetails = itr->second;
+  // Store into a map ready to go into config service when apply is clicked
+  std::map<std::string, std::map<std::string, std::string>>::const_iterator
+      itr = m_sendToSettings.begin();
+  for (; itr != m_sendToSettings.end(); ++itr) {
+    // creating the map of kvps needs to happen first as createing the item
+    // requires them.
+    std::map<std::string, std::string> programKeysAndDetails = itr->second;
 
-		Qt::CheckState checkStatus = Qt::Unchecked;
-		if (programKeysAndDetails.find("visible")->second == "Yes") {
-			checkStatus = Qt::Checked;
-		}
+    Qt::CheckState checkStatus = Qt::Unchecked;
+    if (programKeysAndDetails.find("visible")->second == "Yes") {
+      checkStatus = Qt::Checked;
+    }
 
     // Populate list
-    QTreeWidgetItem *program = createCheckedTreeItem(
-        QString::fromStdString(itr->first), checkStatus);
+    QTreeWidgetItem *program =
+        createCheckedTreeItem(QString::fromStdString(itr->first), checkStatus);
     treePrograms->addTopLevelItem(program);
     updateChildren(programKeysAndDetails, program);
   }
@@ -1312,25 +1312,24 @@ void ConfigDialog::buildTreeCategoryStructure(
   // We wont be using the last element (null) of the array so decrement 1
   splitCatIndex--;
 
-  //Finally create tick status
+  // Finally create tick status
   Qt::CheckState tickStatus = Qt::Unchecked;
   if (!isHidden) {
-	  tickStatus = Qt::Checked;
+    tickStatus = Qt::Checked;
   }
-  
 
   if (splitCatIndex == 0) {
     // This is a top level category and standalone
-    QTreeWidgetItem *catWidget = createCheckedTreeItem(splitCats[0], tickStatus);
+    QTreeWidgetItem *catWidget =
+        createCheckedTreeItem(splitCats[0], tickStatus);
     treeCategories->addTopLevelItem(catWidget);
     seenCategories->insert(catKey, catWidget);
   } else {
     // We need to determine if we have seen this category before
     // and get any pointers to its parent(s) and set their tick status
     int prevElement = splitCatIndex - 1;
-    QTreeWidgetItem *parentWidgetPtr =
-        walkBackwardsThroughCategories(catNames, prevElement,
-			seenCategories, tickStatus);
+    QTreeWidgetItem *parentWidgetPtr = walkBackwardsThroughCategories(
+        catNames, prevElement, seenCategories, tickStatus);
 
     // At this point we now all parent categories have been created
     // So lets create the child
@@ -1343,14 +1342,14 @@ void ConfigDialog::buildTreeCategoryStructure(
   // We have built tree now fix any ticks or make partial ticks
   int topLevelCats = treeCategories->topLevelItemCount();
   for (int i = 0; i < topLevelCats; i++) {
-	  correctTreePatrialTicks(treeCategories->topLevelItem(i));
+    correctTreePatrialTicks(treeCategories->topLevelItem(i));
   }
 }
 
 QTreeWidgetItem *ConfigDialog::walkBackwardsThroughCategories(
     const QString *catNames, int elementToCheck,
-    QMap<QString, QTreeWidgetItem *> *seenCategories, 
-	Qt::CheckState childTickState) {
+    QMap<QString, QTreeWidgetItem *> *seenCategories,
+    Qt::CheckState childTickState) {
 
   // Split the categories whose name is delimited by '\\'
   QStringList splitCats = catNames->split('\\');
@@ -1368,12 +1367,11 @@ QTreeWidgetItem *ConfigDialog::walkBackwardsThroughCategories(
   // right category pointer
   if (!seenCategories->contains(catKey)) {
     // We have not see this parent category check any other parents first
-	// From the array of categories
+    // From the array of categories
     if (elementToCheck > 0) {
       int prevElement = elementToCheck - 1;
-      parentWidgetPtr =
-          walkBackwardsThroughCategories(catNames, prevElement, 
-			  seenCategories, childTickState);
+      parentWidgetPtr = walkBackwardsThroughCategories(
+          catNames, prevElement, seenCategories, childTickState);
     }
     // Now deal with this category
     if (!parentWidgetPtr) {
@@ -1402,51 +1400,47 @@ QTreeWidgetItem *ConfigDialog::walkBackwardsThroughCategories(
 }
 
 void ConfigDialog::correctTreePatrialTicks(QTreeWidgetItem *topLevelCat) {
-	// Check all children for a tick and untick we need to do this
-	// as some parents come with their own tick status which we might
-	// need to override 
-	bool hasUntickedChildren = false;
-	bool hasTickedChildren = false;
-	bool hasChildren = false;
+  // Check all children for a tick and untick we need to do this
+  // as some parents come with their own tick status which we might
+  // need to override
+  bool hasUntickedChildren = false;
+  bool hasTickedChildren = false;
+  bool hasChildren = false;
 
-	int childCount = topLevelCat->childCount();
-	for (int i = 0; i < childCount; i++) {
-		hasChildren = true;
-		//Check for nested children and deal with them
-		correctTreePatrialTicks(topLevelCat->child(i));
-		
-		QTreeWidgetItem *child = topLevelCat->child(i);
-		//Now actually check this ptr's children for their tick status
-		if (child->checkState(0) == Qt::Checked) {
-			hasTickedChildren = true;
-		}
-		else if (child->checkState(0) == Qt::Unchecked) {
-			hasUntickedChildren = true;
-		}
-		else {
-			//Partial tick - we will count this as a normal tick
-			hasTickedChildren = true;
-		}
-	} //Checked all children now set parent
+  int childCount = topLevelCat->childCount();
+  for (int i = 0; i < childCount; i++) {
+    hasChildren = true;
+    // Check for nested children and deal with them
+    correctTreePatrialTicks(topLevelCat->child(i));
 
-	if (hasChildren && hasUntickedChildren && hasTickedChildren) {
-		topLevelCat->setCheckState(0, Qt::PartiallyChecked);
-	}
-	else if (hasChildren && hasTickedChildren) {
-		topLevelCat->setCheckState(0, Qt::Checked);
-	}
-	else if (hasChildren) {
-		//Everything is unticked at this point 
-		topLevelCat->setCheckState(0, Qt::Unchecked);
-	}
+    QTreeWidgetItem *child = topLevelCat->child(i);
+    // Now actually check this ptr's children for their tick status
+    if (child->checkState(0) == Qt::Checked) {
+      hasTickedChildren = true;
+    } else if (child->checkState(0) == Qt::Unchecked) {
+      hasUntickedChildren = true;
+    } else {
+      // Partial tick - we will count this as a normal tick
+      hasTickedChildren = true;
+    }
+  } // Checked all children now set parent
 
+  if (hasChildren && hasUntickedChildren && hasTickedChildren) {
+    topLevelCat->setCheckState(0, Qt::PartiallyChecked);
+  } else if (hasChildren && hasTickedChildren) {
+    topLevelCat->setCheckState(0, Qt::Checked);
+  } else if (hasChildren) {
+    // Everything is unticked at this point
+    topLevelCat->setCheckState(0, Qt::Unchecked);
+  }
 }
 
-QTreeWidgetItem *ConfigDialog::createCheckedTreeItem(QString name,
-                                                     Qt::CheckState checkBoxState) {
+QTreeWidgetItem *
+ConfigDialog::createCheckedTreeItem(QString name,
+                                    Qt::CheckState checkBoxState) {
   QTreeWidgetItem *item = new QTreeWidgetItem(QStringList(name));
   item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-    item->setCheckState(0, checkBoxState);
+  item->setCheckState(0, checkBoxState);
   return item;
 }
 
