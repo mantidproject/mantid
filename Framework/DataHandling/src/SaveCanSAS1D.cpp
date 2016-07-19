@@ -616,7 +616,7 @@ void SaveCanSAS1D::createSASProcessElement(std::string &sasProcess) {
   if (process_xml.size() > 0) {
     std::string processNote = "\n\t\t\t<SASprocessnote>\n";
     encode(process_xml);
-    processNote += process_xml + "\n";
+    processNote += process_xml;
     processNote += "\n\t\t\t</SASprocessnote>\n";
     sasProcess += processNote;
   } else {
