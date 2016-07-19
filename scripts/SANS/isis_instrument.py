@@ -1667,7 +1667,7 @@ class LARMOR(ISISInstrument):
 
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
-        """Unforunately getting the angle of the bench does not work so we have to get bench and detector"""
+        # Unforunately getting the angle of the bench does not work so we have to get bench and detector
 
         # logger.warning("Entering cur_detector_position")
         ws = mtd[ws_name]
@@ -1716,8 +1716,8 @@ class LARMOR(ISISInstrument):
                     run = ws_ref.run()
                     if not run.hasProperty("Bench_Rot"):
                         additional_message = ("The Bench_Rot entry seems to be missing. There might be "
-                                             "an issue with your data aquisition. Make sure that the sample_log entry "
-                                             "Bench_Rot is available.")
+                                              "an issue with your data aquisition. Make sure that the sample_log entry "
+                                              "Bench_Rot is available.")
                     else:
                         additional_message = ""
 
