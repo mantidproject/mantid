@@ -3,6 +3,9 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+class IReflMainWindowPresenter;
+
 /** @class IReflRunsTabPresenter
 
 IReflRunsTabPresenter is an interface which defines the functions any
@@ -32,6 +35,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class IReflRunsTabPresenter {
 public:
   virtual ~IReflRunsTabPresenter(){};
+  /// Accept a main presenter
+  virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
 
   enum Flag { SearchFlag, ICATSearchCompleteFlag, TransferFlag };
 

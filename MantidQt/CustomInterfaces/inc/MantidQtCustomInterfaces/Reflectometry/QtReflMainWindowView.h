@@ -4,10 +4,13 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
 #include "ui_ReflMainWindowWidget.h"
-#include "ui_ReflRunsTabWidget.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+class IReflMainWindowPresenter;
+class IReflRunsTabPresenter;
+class IReflSettingsTabPresenter;
 
 /** @class ReflMainWindowView
 
@@ -38,21 +41,27 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class QtReflMainWindowView : public MantidQt::API::UserSubWindow,
                              public IReflMainWindowView {
 public:
-	/// Constructor
+  /// Constructor
   QtReflMainWindowView(QWidget *parent = 0);
-	/// Destructor
+  /// Destructor
   ~QtReflMainWindowView() override;
   /// Name of the interface
   static std::string name() { return "ISIS Reflectometry (Polref) 2"; }
   /// This interface's categories.
   static QString categoryInfo() { return "Reflectometry"; }
-	/// Initialise the interface
-	void initLayout() override;
+
 private:
+  /// Initializes the interface
+  void initLayout() override;
+  /// Creates the 'Runs' tab
+  IReflRunsTabPresenter *createRunsTab();
+  /// Creates the 'Settings' tab
+  IReflSettingsTabPresenter *createSettingsTab();
+
   /// Interface definition with widgets for the main interface window
   Ui::RelMainWindowWidget m_ui;
-	/// 'Runs' tab
-	Ui::ReflRunsTabWidget m_uiRunsTab;
+  /// The presenter handling this view
+  IReflMainWindowPresenter *m_presenter;
 };
 }
 }

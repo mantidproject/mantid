@@ -6,6 +6,7 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
+
 #include "ui_ReflRunsTabWidget.h"
 
 namespace MantidQt {
@@ -64,12 +65,6 @@ public:
   QtReflRunsTabView(QWidget *parent = 0);
   /// Destructor
   ~QtReflRunsTabView() override;
-  /// initialise the interface
-  void initLayout();
-  /// Name of the interface
-  static std::string name() { return "ISIS Reflectometry (Polref)"; }
-  // This interface's categories.
-  static QString categoryInfo() { return "Reflectometry"; }
   // Connect the model
   void showSearch(boost::shared_ptr<ReflSearchModel> model) override;
 
@@ -101,18 +96,20 @@ public:
   std::string getSearchString() const override;
   std::string getTransferMethod() const override;
 
-  boost::shared_ptr<IReflRunsTabPresenter> getPresenter() const override;
+  IReflRunsTabPresenter *getPresenter() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
 
 private:
+  /// initialise the interface
+  void initLayout();
   // Adds an action (command) to a menu
   void addToMenu(QMenu *menu, std::unique_ptr<DataProcessorCommand> command);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 
   // the presenter
-  boost::shared_ptr<IReflRunsTabPresenter> m_presenter;
+  IReflRunsTabPresenter *m_presenter;
   // the search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
   // the interface

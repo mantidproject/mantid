@@ -43,6 +43,14 @@ public:
 
   // Notify this receiver that something changed in the ADS
   virtual void notify(DataProcessorMainPresenter::Flag flag) = 0;
+
+  // Return global options for pre-processing
+  virtual std::map<std::string, std::string>
+  getPreprocessingOptions() const = 0;
+  // Return global options for reduction
+  virtual std::string getProcessingOptions() const = 0;
+  // Return global options for post-processing
+  virtual std::string getPostprocessingOptions() const = 0;
 };
 }
 }

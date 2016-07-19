@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ReflSettingsTabWidget</class>
+  <widget class="QWidget" name="ReflSettingsTabWidget">
+    <property name="geometry">
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>959</width>
+        <height>346</height>
+      </rect>
+    </property>
+    <property name="windowTitle">
+      <string>Settings Tab</string>
+    </property>
+    <layout class="QVBoxLayout" name="settingsMainLayout">
+      <property name="margin">
+        <number>5</number>
+      </property>
+      <item>
+        <widget class="QGroupBox" name="expSettingsGroup">
+          <property name="title">
+            <string>Experiment Settings</string>
+          </property>
+          <property name="checkable">
+            <bool>true</bool>
+          </property>
+          <layout class="QGridLayout" name="expSettingsLayout">
+            <property name="margin">
+              <number>10</number>
+            </property>
+            <item row="0" column="0">
+              <widget class="QLabel" name="analysisModeLabel">
+                <property name="text">
+                  <string>Analysis Mode</string>
+                </property>
+              </widget>
+            </item>
+            <item row="0" column="1">
+              <widget class="QComboBox" name="analysisModeComboBox">
+                <item>
+                  <property name="text">
+                    <string>MultiDetectorAnalysis</string>
+                  </property>
+                </item>
+                <item>
+                  <property name="text">
+                    <string>PointDetectorAnalysis</string>
+                  </property>
+                </item>
+              </widget>
+            </item>
+            <item row="0" column="2">
+              <spacer name="instSettingsSpacer">
+                <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                  <size>
+                    <width>40</width>
+                    <height>20</height>
+                  </size>
+                </property>
+              </spacer>
+            </item>
+            <item row="1" column="0">
+              <widget class="QLabel" name="expSettingsCRhoLabel">
+                <property name="text">
+                  <string>CRho</string>
+                </property>
+              </widget>
+            </item>
+            <item row="1" column="1">
+              <widget class="QLineEdit" name="expSettingsCRhoEdit"/>
+            </item>
+            <item row="2" column="0">
+              <widget class="QLabel" name="expSettingsCAlphaLabel">
+                <property name="text">
+                  <string>CAlpha</string>
+                </property>
+              </widget>
+            </item>
+            <item row="2" column="1">
+              <widget class="QLineEdit" name="expSettingsCAlphaEdit"/>
+            </item>
+            <item row="3" column="0">
+              <widget class="QLabel" name="expSettingsCApLabel">
+                <property name="text">
+                  <string>CAp</string>
+                </property>
+              </widget>
+            </item>
+            <item row="3" column="1">
+              <widget class="QLineEdit" name="expSettingsCApEdit"/>
+            </item>
+            <item row="4" column="0">
+              <widget class="QLabel" name="expSettingsCPpLabel">
+                <property name="text">
+                  <string>CPp</string>
+                </property>
+              </widget>
+            </item>
+            <item row="4" column="1">
+              <widget class="QLineEdit" name="expSettingsCPpEdit"/>
+            </item>
+          </layout>
+        </widget>
+      </item>
+      <item>
+        <widget class="QGroupBox" name="instSettingsGroup">
+          <property name="title">
+            <string>Instrument Settings</string>
+          </property>
+          <property name="checkable">
+            <bool>true</bool>
+          </property>
+          <layout class="QGridLayout" name="instSettingsLayout">
+            <property name="margin">
+              <number>10</number>
+            </property>
+            <item row="0" column="0">
+              <widget class="QLabel" name="resolutionLabel">
+                <property name="text">
+                  <string>Resolution (dQ/Q)</string>
+                </property>
+              </widget>
+            </item>
+            <item row="0" column="1">
+              <widget class="QLineEdit" name="resolutionLineEdit">
+                <property name="text">
+                  <string>-0.04</string>
+                </property>
+              </widget>
+            </item>
+            <item row="0" column="2">
+              <spacer name="expSettingsSpacer">
+                <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                  <size>
+                    <width>40</width>
+                    <height>20</height>
+                  </size>
+                </property>
+              </spacer>
+            </item>
+          </layout>
+        </widget>
+      </item>
+    </layout>
+  </widget>
+ <tabstops/>
+ <customwidgets/>
+ <resources/>
+ <connections/>
+</ui>

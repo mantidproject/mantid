@@ -23,8 +23,7 @@ class ReflSearchModel;
 /** @class IReflRunsTabView
 
 IReflRunsTabView is the base view class for the Reflectometry Interface. It
-contains
-no QT specific functionality as that should be handled by a subclass.
+contains no QT specific functionality as that should be handled by a subclass.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -80,7 +79,7 @@ public:
   virtual std::string getSearchString() const = 0;
   virtual std::string getTransferMethod() const = 0;
 
-  virtual boost::shared_ptr<IReflRunsTabPresenter> getPresenter() const = 0;
+  virtual IReflRunsTabPresenter *getPresenter() const = 0;
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const = 0;
 };

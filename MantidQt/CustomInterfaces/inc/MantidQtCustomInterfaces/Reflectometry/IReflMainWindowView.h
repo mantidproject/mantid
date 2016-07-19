@@ -3,10 +3,13 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
 /** @class IReflMainWindowView
 
 IReflMainWindowView is the interface defining the functions that the main
-window view needs to implement
+window view needs to implement. It is empty and not necessary at the moment, but
+can be used in the future if widgets common to all tabs are added, for instance,
+the help button.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,6 +34,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class IReflMainWindowView {
 public:
+  /// Destructor
   virtual ~IReflMainWindowView(){};
 };
 }

@@ -18,9 +18,10 @@ class DataProcessorPresenter;
 namespace CustomInterfaces {
 
 // Forward decs
+class IReflMainWindowPresenter;
 class IReflRunsTabView;
-class ReflSearchModel;
 class IReflSearcher;
+class ReflSearchModel;
 class ReflTransferStrategy;
 
 using MantidWidgets::DataProcessorPresenter;
@@ -62,27 +63,38 @@ public:
                        boost::shared_ptr<IReflSearcher> searcher =
                            boost::shared_ptr<IReflSearcher>());
   ~ReflRunsTabPresenter() override;
+  void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
   void notify(DataProcessorMainPresenter::Flag flag) override;
 
 protected:
-  // the search model
+  /// The search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
-  // the main view we're managing
+  /// The main view we're managing
   IReflRunsTabView *m_view;
-  // The table view's presenter
-  boost::shared_ptr<DataProcessorPresenter> m_tablePresenter;
-  // The progress view
+  /// The progress view
   ProgressableView *m_progressView;
-  // the search implementation
+  /// The data processor presenter
+  boost::shared_ptr<DataProcessorPresenter> m_tablePresenter;
+  /// The main presenter
+  IReflMainWindowPresenter *m_mainPresenter;
+  /// The search implementation
   boost::shared_ptr<IReflSearcher> m_searcher;
-  // searching
+  /// searching
   void search();
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   void transfer();
   void pushCommands();
 
 private:
+  /// Methods inherited from DataProcessorMainPresenter
+  /// Request global options for pre-processing
+  std::map<std::string, std::string> getPreprocessingOptions() const override;
+  /// Request global options for processing
+  std::string getProcessingOptions() const override;
+  /// Request global options for post-processing
+  std::string getPostprocessingOptions() const override;
+
   static const std::string LegacyTransferMethod;
   static const std::string MeasureTransferMethod;
 

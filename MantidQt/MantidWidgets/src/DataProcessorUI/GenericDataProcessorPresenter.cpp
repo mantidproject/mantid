@@ -23,6 +23,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h"
@@ -35,7 +36,6 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QtDataProcessorOptionsDialog.h"
@@ -71,8 +71,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorPostprocessingAlgorithm &postprocessor)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_whitelist(whitelist), m_preprocessMap(preprocessMap),
-      m_processor(processor), m_postprocessor(postprocessor),
-      m_mainPresenter(), m_tableDirty(false), m_colGroup(0) {
+      m_processor(processor), m_postprocessor(postprocessor), m_mainPresenter(),
+      m_tableDirty(false), m_colGroup(0) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -303,15 +303,15 @@ void GenericDataProcessorPresenter::saveNotebook(
     return;
   }
 
-  // Get all the options used for the reduction from the view
-
-  // TODO : get global pre-processing options as a map where keys are column
+  // Global pre-processing options as a map where keys are column
   // name and values are pre-processing options as a string
-  const std::map<std::string, std::string> preprocessingOptionsMap;
-  // TODO : get global processing options as a string
-  const std::string processingOptions;
-  // TODO : get global post-processing options as a string
-  const std::string postprocessingOptions;
+  const std::map<std::string, std::string> preprocessingOptionsMap =
+      m_mainPresenter->getPreprocessingOptions();
+  // Global processing options as a string
+  const std::string processingOptions = m_mainPresenter->getProcessingOptions();
+  // Global post-processing options as a string
+  const std::string postprocessingOptions =
+      m_mainPresenter->getPostprocessingOptions();
 
   auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
       m_wsName, m_model, m_view->getProcessInstrument(), m_whitelist,
@@ -370,8 +370,8 @@ void GenericDataProcessorPresenter::postProcessGroup(
   alg->setProperty(m_postprocessor.inputProperty(), inputWSNames);
   alg->setProperty(m_postprocessor.outputProperty(), outputWSName);
 
-  // TODO : get global post-processing options
-  const std::string options;
+  // Global post-processing options
+  const std::string options = m_mainPresenter->getPostprocessingOptions();
 
   auto optionsMap = parseKeyValueString(options);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
@@ -712,6 +712,9 @@ void GenericDataProcessorPresenter::reduceRow(int groupNo, int rowNo) {
   /* Read input properties from the table */
   /* excluding 'Group' and 'Options' */
 
+  // Global pre-processing options as a map
+  auto globalOptions = m_mainPresenter->getPreprocessingOptions();
+
   // Loop over all columns in the whitelist except 'Options'
   for (int i = 0; i < m_columns - 1; i++) {
 
@@ -732,9 +735,8 @@ void GenericDataProcessorPresenter::reduceRow(int groupNo, int rowNo) {
 
         auto preprocessor = m_preprocessMap[columnName];
 
-        // TODO : get global pre-processing options for this algorithm as a
-        // string
-        const std::string options;
+        // Global pre-processing options for this algorithm as a string
+        const std::string options = globalOptions[columnName];
 
         auto optionsMap = parseKeyValueString(options);
         auto runWS = prepareRunWorkspace(runStr, preprocessor, optionsMap);
@@ -751,8 +753,8 @@ void GenericDataProcessorPresenter::reduceRow(int groupNo, int rowNo) {
     }
   }
 
-  // TODO : get global processing options as a string
-  std::string options;
+  // Global processing options as a string
+  std::string options = m_mainPresenter->getProcessingOptions();
 
   // Parse and set any user-specified options
   auto optionsMap = parseKeyValueString(options);

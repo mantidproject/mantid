@@ -18,6 +18,8 @@ using namespace Mantid::API;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
+* @param presenter :: [input] A unique ptr to the presenter
+* @param parent :: [input] The parent of this view
 */
 QDataProcessorWidget::QDataProcessorWidget(
     boost::shared_ptr<DataProcessorPresenter> presenter, QWidget *parent)

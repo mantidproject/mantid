@@ -7,6 +7,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
@@ -29,12 +30,19 @@ using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+/** Constructor
+* @param mainView :: [input] The view we're managing
+* @param progressableView :: [input] The view reporting progress
+* @param tablePresenter :: [input] The data processor presenter
+* @param searcher :: [input] The search implementation
+*/
 ReflRunsTabPresenter::ReflRunsTabPresenter(
-    IReflRunsTabView *mainView, ProgressableView *progressView,
+    IReflRunsTabView *mainView, ProgressableView *progressableView,
     boost::shared_ptr<DataProcessorPresenter> tablePresenter,
     boost::shared_ptr<IReflSearcher> searcher)
-    : m_view(mainView), m_tablePresenter(tablePresenter),
-      m_progressView(progressView), m_searcher(searcher) {
+    : m_view(mainView), m_tablePresenter(tablePresenter), m_mainPresenter(),
+      m_searcher(searcher) {
 
   // Register this presenter as the workspace receiver
   // When doing so, the inner presenter will notify this
@@ -82,6 +90,15 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
 }
 
 ReflRunsTabPresenter::~ReflRunsTabPresenter() {}
+
+/** Accept a main presenter
+* @param mainPresenter :: [input] A main presenter
+*/
+void ReflRunsTabPresenter::acceptMainPresenter(
+    IReflMainWindowPresenter *mainPresenter) {
+
+  m_mainPresenter = mainPresenter;
+}
 
 /**
 Used by the view to tell the presenter something has changed
@@ -303,6 +320,31 @@ void ReflRunsTabPresenter::notify(DataProcessorMainPresenter::Flag flag) {
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
+}
+
+/** Requests global pre-processing options. Options are supplied by the main
+* presenter
+* @return :: Global pre-processing options
+*/
+std::map<std::string, std::string>
+ReflRunsTabPresenter::getPreprocessingOptions() const {
+  return m_mainPresenter->getPreprocessingOptions();
+}
+
+/** Requests global pre-processing options. Options are supplied by the main
+* presenter
+* @return :: Global pre-processing options
+*/
+std::string ReflRunsTabPresenter::getProcessingOptions() const {
+  return m_mainPresenter->getProcessingOptions();
+}
+
+/** Requests global pre-processing options. Options are supplied by the main
+* presenter
+* @return :: Global pre-processing options
+*/
+std::string ReflRunsTabPresenter::getPostprocessingOptions() const {
+  return m_mainPresenter->getPostprocessingOptions();
 }
 
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";

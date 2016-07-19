@@ -6,10 +6,14 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class IReflMainWindowView;
+class IReflRunsTabPresenter;
+class IReflSettingsTabPresenter;
+
 /** @class ReflMainWindowPresenter
 
 ReflMainWindowPresenter is the concrete main window presenter implementing the
-functionality defined by the interface IReflMainWindowPresenter
+functionality defined by the interface IReflMainWindowPresenter.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -32,9 +36,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflMainWindowPresenter : public IReflMainWindowPresenter{
+class ReflMainWindowPresenter : public IReflMainWindowPresenter {
 public:
+  /// Constructor
+  ReflMainWindowPresenter(IReflMainWindowView *view,
+                          IReflRunsTabPresenter *runsPresenter,
+                          IReflSettingsTabPresenter *settingsPresenter);
+  /// Destructor
   ~ReflMainWindowPresenter() override;
+  /// Returns global pre-processing options
+  std::map<std::string, std::string> getPreprocessingOptions() override;
+  /// Returns global processing options
+  std::string getProcessingOptions() override;
+  /// Returns global post-processing options
+  std::string getPostprocessingOptions() override;
+
+private:
+  /// The view we are handling
+  IReflMainWindowView *m_view;
+  /// The presenter of tab 'Runs'
+  IReflRunsTabPresenter *m_runsPresenter;
+  /// The presenter of tab 'Settings'
+  IReflSettingsTabPresenter *m_settingsPresenter;
 };
 }
 }

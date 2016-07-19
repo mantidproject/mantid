@@ -9,6 +9,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflRunsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include "MantidQtMantidWidgets/SlitCalculator.h"
@@ -22,14 +23,18 @@ using namespace MantidQt::MantidWidgets;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
+* @param parent :: The parent of this view
 */
 QtReflRunsTabView::QtReflRunsTabView(QWidget *parent)
-    : m_calculator(new SlitCalculator(this)) {}
+    : m_presenter(), m_calculator(new SlitCalculator(this)) {
+
+  initLayout();
+}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-QtReflRunsTabView::~QtReflRunsTabView() {}
+QtReflRunsTabView::~QtReflRunsTabView() { delete m_presenter; }
 
 /**
 Initialise the Interface
@@ -43,10 +48,9 @@ void QtReflRunsTabView::initLayout() {
   ui.splitterTables->setStretchFactor(0, 0);
   ui.splitterTables->setStretchFactor(1, 1);
 
+  // Create the DataProcessor presenter
   ReflGenericDataProcessorPresenterFactory presenterFactory;
-
-  boost::shared_ptr<DataProcessorPresenter> processorPresenter =
-      presenterFactory.create();
+  auto processorPresenter = presenterFactory.create();
 
   QDataProcessorWidget *qDataProcessorWidget =
       new QDataProcessorWidget(processorPresenter, this);
@@ -74,10 +78,11 @@ void QtReflRunsTabView::initLayout() {
           SIGNAL(runAsPythonScript(const QString &, bool)), this,
           SIGNAL(runAsPythonScript(const QString &, bool)));
 
-  m_presenter = boost::make_shared<ReflRunsTabPresenter>(
-      this /*main view*/,
-      this /*currently this concrete view is also responsibile for prog reporting*/,
-      processorPresenter /*the table presenter*/);
+  // Create the presenter
+  m_presenter = new ReflRunsTabPresenter(
+      this /* main view */,
+      this /* Currently this concrete view is also responsible for prog reporting */,
+      processorPresenter /* The data processor presenter */);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 }
 
@@ -86,7 +91,8 @@ void QtReflRunsTabView::initLayout() {
 * @param menu : [input] The menu where actions will be added
 * @param command : [input] The command (action) to add
 */
-void QtReflRunsTabView::addToMenu(QMenu *menu, DataProcessorCommand_uptr command) {
+void QtReflRunsTabView::addToMenu(QMenu *menu,
+                                  DataProcessorCommand_uptr command) {
 
   m_commands.push_back(Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
       menu, std::move(command)));
@@ -134,7 +140,8 @@ void QtReflRunsTabView::clearCommands() { m_commands.clear(); }
 * Set all possible tranfer methods
 * @param methods : All possible transfer methods.
 */
-void QtReflRunsTabView::setTransferMethods(const std::set<std::string> &methods) {
+void QtReflRunsTabView::setTransferMethods(
+    const std::set<std::string> &methods) {
   for (auto method = methods.begin(); method != methods.end(); ++method) {
     ui.comboTransferMethod->addItem((*method).c_str());
   }
@@ -265,7 +272,8 @@ Show an critical error dialog
 @param prompt : The prompt to appear on the dialog
 @param title : The text for the title bar of the dialog
 */
-void QtReflRunsTabView::giveUserCritical(std::string prompt, std::string title) {
+void QtReflRunsTabView::giveUserCritical(std::string prompt,
+                                         std::string title) {
   QMessageBox::critical(this, QString(title.c_str()), QString(prompt.c_str()),
                         QMessageBox::Ok, QMessageBox::Ok);
 }
@@ -278,8 +286,8 @@ Ask the user to enter a string.
 @returns The user's string if submitted, or an empty string
 */
 std::string QtReflRunsTabView::askUserString(const std::string &prompt,
-                                          const std::string &title,
-                                          const std::string &defaultValue) {
+                                             const std::string &title,
+                                             const std::string &defaultValue) {
   bool ok;
   QString text = QInputDialog::getText(
       this, QString::fromStdString(title), QString::fromStdString(prompt),
@@ -328,7 +336,7 @@ std::set<int> QtReflRunsTabView::getSelectedSearchRows() const {
 Get a pointer to the presenter that's currently controlling this view.
 @returns A pointer to the presenter
 */
-boost::shared_ptr<IReflRunsTabPresenter> QtReflRunsTabView::getPresenter() const {
+IReflRunsTabPresenter *QtReflRunsTabView::getPresenter() const {
   return m_presenter;
 }
 

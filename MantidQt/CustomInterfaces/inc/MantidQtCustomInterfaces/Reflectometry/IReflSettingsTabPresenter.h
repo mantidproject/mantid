@@ -1,17 +1,15 @@
-#ifndef MANTID_CUSTOMINTERFACES_IREFLMAINWINDOWPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_IREFLMAINWINDOWPRESENTER_H
-
-#include <map>
-#include <string>
+#ifndef MANTID_CUSTOMINTERFACES_IREFLSETTINGSTABPRESENTER_H
+#define MANTID_CUSTOMINTERFACES_IREFLSETTINGSTABPRESENTER_H
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** @class IReflMainWindowPresenter
+class IReflMainWindowPresenter;
 
-IReflMainWindowPresenter is the interface defining the functions that the main
-window presenter needs to implement. This interface is used by tab presenters to
-request information from other tabs.
+/** @class IReflSettingsTabPresenter
+
+IReflSettingsTabPresenter is an interface which defines the functions that need
+to be implemented by a concrete 'Settings' tab presenter
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -34,17 +32,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IReflMainWindowPresenter {
+class IReflSettingsTabPresenter {
 public:
-  /// Destructor
-  virtual ~IReflMainWindowPresenter(){};
-  /// Returns global pre-processing options
-  virtual std::map<std::string, std::string> getPreprocessingOptions() = 0;
-  /// Returns global processing options
-  virtual std::string getProcessingOptions() = 0;
-  /// Returns global post-processing options
-  virtual std::string getPostprocessingOptions() = 0;
+  virtual ~IReflSettingsTabPresenter(){};
+  /// Accept a main presenter
+  virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
+  /// Get global pre-processing options
+  virtual std::map<std::string, std::string>
+  getPreprocessingOptions() const = 0;
+  /// Get global processing options
+  virtual std::string getProcessingOptions() const = 0;
+  /// Get global post-processing options
+  virtual std::string getPostprocessingOptions() const = 0;
 };
 }
 }
-#endif /* MANTID_CUSTOMINTERFACES_IREFLMAINWINDOWPRESENTER_H */
+#endif /* MANTID_CUSTOMINTERFACES_IREFLSETTINGSTABPRESENTER_H */
