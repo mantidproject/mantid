@@ -120,13 +120,10 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
  */
 void AlgorithmManagerImpl::clear() {
   std::lock_guard<std::mutex> _lock(this->m_managedMutex);
-  for (auto itAlg = m_managed_algs.begin(); itAlg != m_managed_algs.end();)
-  {
-    if (!(*itAlg)->isRunning())
-    {
+  for (auto itAlg = m_managed_algs.begin(); itAlg != m_managed_algs.end();) {
+    if (!(*itAlg)->isRunning()) {
       itAlg = m_managed_algs.erase(itAlg);
-    } else
-    {
+    } else {
       ++itAlg;
     }
   }
