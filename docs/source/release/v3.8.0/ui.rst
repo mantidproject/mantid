@@ -53,7 +53,7 @@ Documentation
 
 Bugs Resolved
 -------------
- - Floating windows now always stay on top of the main window in OSX
+- Floating windows now always stay on top of the main window in OSX
 
 SliceViewer Improvements
 ------------------------
@@ -62,6 +62,10 @@ SliceViewer Improvements
 VSI Improvements
 ----------------
 * ParaView updated to version 5.1.0
+
+Multi-dataset fitting interface improvements
+--------------------------------------------
+* Fitting a single dataset with a composite function no longer causes a crash
 
 |
 
