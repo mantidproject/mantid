@@ -144,7 +144,6 @@ void AbsorptionCorrection::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     // Copy over bin boundaries
-    auto &X = m_inputWS->x(i);
     correctionFactors->setSharedX(i, m_inputWS->sharedX(i));
 
     // Get detector position
@@ -213,7 +212,7 @@ void AbsorptionCorrection::exec() {
     {
       // TODO linearlyInterpolateY should be implemented in HistogramData
       // Until then use old interface
-      VectorHelper::linearlyInterpolateY(X.rawData(), Y,
+      VectorHelper::linearlyInterpolateY(m_inputWS->x(i).rawData(), Y,
                                          static_cast<double>(m_xStep));
     }
 
