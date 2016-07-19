@@ -295,52 +295,6 @@ public:
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
   }
 
-  void testProcessedMinMaxAndListDefined() {
-
-	  // Tests that a processed spectrum cannot be loaded in with
-	  // The Minimum/Maximum spectrum and Spectrum List set
-	  // As this will fail to load
-	  std::string inputFile;
-          std::string outputSpace;
-          LoadNexusProcessed loadNexusAlg;
-	  loadNexusAlg.initialize();
-
-	  // Setup algorithm
-	  inputFile = "GEM38370_Focussed_Legacy.nxs";
-	  loadNexusAlg.setPropertyValue("Filename", inputFile);
-	  outputSpace = "testProcessedData";
-	  loadNexusAlg.setPropertyValue("OutputWorkspace", outputSpace);
-	  loadNexusAlg.setRethrows(true);
-
-	  // Set min and max parameters
-	  loadNexusAlg.setProperty("SpectrumMin", 2);
-	  loadNexusAlg.setProperty("SpectrumMax", 5);
-
-	  // Set a spectrum list
-	  std::vector<int> spectrumList{ 2, 3, 5, 6 };
-	  loadNexusAlg.setProperty("SpectrumList", spectrumList);
-
-	  // Test it picks up all being set
-	  loadNexusAlg.execute();
-	  TS_ASSERT_EQUALS(loadNexusAlg.isExecuted(), false);
-
-	  // Test it detects with only min being set
-	  loadNexusAlg.setProperty("SpectrumMin", 1);
-	  loadNexusAlg.execute();
-	  TS_ASSERT_EQUALS(loadNexusAlg.isExecuted(), false);
-
-	  // Test it detects with only max being set
-	  loadNexusAlg.setProperty("SpectrumMin", 3);
-	  loadNexusAlg.setProperty("SpectrumMax", Mantid::EMPTY_INT());
-	  loadNexusAlg.execute();
-	  TS_ASSERT_EQUALS(loadNexusAlg.isExecuted(), false);
-
-	  // Finally reset to having just a list and test this still works
-	  loadNexusAlg.setProperty("SpectrumMin", 1);
-	  TS_ASSERT_THROWS_NOTHING(loadNexusAlg.execute());
-	  TS_ASSERT_EQUALS(loadNexusAlg.isExecuted(), true);
-  }
-
   // Saving and reading masking correctly
   void testMasked() {
     LoadNexusProcessed alg;

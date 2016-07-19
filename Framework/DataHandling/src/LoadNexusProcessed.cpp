@@ -1662,53 +1662,37 @@ void LoadNexusProcessed::readInstrumentGroup(
 }
 
 /**
- * Validates that a SpectrumList has not been used with either
- * SpectrumMin or SpectrumMax
+ * Validates SpectrumMin and SpectrumMax conditions
  * @return Returns a map indicating invalid input combinations
  */
 std::map<std::string, std::string> LoadNexusProcessed::validateInputs() {
   using namespace std;
   map<string, string> errorList;
 
-  vector<int64_t> specList = getProperty("SpectrumList");
   int64_t specMin = getProperty("SpectrumMin");
   int64_t specMax = getProperty("SpectrumMax");
 
-  // SpectrumList and SpectrumMin or SpectrumMax cannot be used simultaneously.
+  //Check our range is not reversed
+  if (specMax < specMin) {
+    errorList["SpectrumMin"] = "SpectrumMin must be smaller than SpectrumMax";
+          errorList["SpectrumMax"] = "SpectrumMax must be larger than SpectrumMin";
+  }
 
-  // Cant use Min/Max with list on processed nexus files so throw
-  // exception
-  if (!specList.empty()) {
-    bool isInvalid = false;
-    if (specMin != 1) {
-      // Test for SpecMin
-      errorList["SpectrumMin"] =
-          "SpectrumMin cannot be"
-          " set with a SpectrumList Use SpectrumList"
-          " to specify the maximum and minimum with a list.";
-      isInvalid = true;
-    }
+  //Next check that SpecMax is less than maximum int
+  if (specMax > INT_MAX) {
+	  errorList["SpectrumMax"] = "SpectrumMax must be less than " +
+		 INT_MAX;
+  }
 
-    if (specMax != Mantid::EMPTY_INT()) {
-      // Test for SpecMax
-      errorList["SpectrumMax"] =
-          "SpectrumMax cannot be"
-          "set with a SpectrumList. Use SpectrumList"
-          " to specify the maximum and minimum with a list.";
-      isInvalid = true;
-    }
-
-    if (isInvalid) {
-      errorList["SpectrumList"] =
-          "SpectrumList cannot"
-          "be set with SpectrumMin or SpectrumMax. Use SpectrumList"
-          " to specify the maximum and minimum with a list.";
-    }
+  if (specMin > INT_MAX) {
+	  errorList["SpectrumMin"] = "SpectrumMin must be less than " +
+		INT_MAX;
   }
 
   // Finished testing return any errors
   return errorList;
 }
+
 
 //-------------------------------------------------------------------------------------------------
 /**
@@ -2118,7 +2102,6 @@ void LoadNexusProcessed::checkOptionalProperties(
 
   // Check validity of spectra list property, if set
   if (m_list) {
-    m_list = true;
     const int64_t minlist =
         *min_element(m_spec_list.begin(), m_spec_list.end());
     const int64_t maxlist =

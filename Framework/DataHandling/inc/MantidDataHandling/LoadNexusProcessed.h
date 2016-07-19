@@ -84,6 +84,7 @@ public:
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
+  /// Validates the input Min < Max and Max < Maximum_Int
   std::map<std::string, std::string> validateInputs() override;
   /// Overwrites Algorithm method.
   void init() override;
