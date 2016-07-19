@@ -21,12 +21,16 @@ algorithms and data objects that are:
 
 from IOmodule import  IOmodule
 
-# Calculating modules
+# Loading modules
 from GeneralDFTProgram import GeneralDFTProgram
 from LoadCASTEP import LoadCASTEP
+
+# Calculating modules
 from CalculateQ import CalculateQ
-from CalculateDWCrystal import CalculateDWCrystal
 from CalculatePowder import CalculatePowder
+from CalculateDWCrystal import CalculateDWCrystal
+from CalculateCrystal import CalculateCrystal
+from CalculateS import CalculateS
 
 # Data
 from GeneralData import GeneralData
@@ -35,7 +39,9 @@ from KpointsData import KpointsData
 from AtomsData import AtomsDaTa
 from AbinsData import  AbinsData
 from DwCrystalData import  DwCrystalData
+from CrystalData import CrystalData
 from PowderData import PowderData
+from SData import SData
 
 # Instruments
 from InstrumentProducer import  InstrumentProducer
