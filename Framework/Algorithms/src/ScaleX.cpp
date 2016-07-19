@@ -128,13 +128,13 @@ void ScaleX::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     // Copy y and e data
-    auto &outY = outputW->dataY(i);
-    outY = inputW->dataY(i);
-    auto &outE = outputW->dataE(i);
-    outE = inputW->dataE(i);
+    auto &outY = outputW->mutableY(i);
+    outY = inputW->mutableY(i);
+    auto &outE = outputW->mutableE(i);
+    outE = inputW->mutableE(i);
 
-    auto &outX = outputW->dataX(i);
-    const auto &inX = inputW->readX(i);
+    auto &outX = outputW->mutableX(i);
+    const auto &inX = inputW->x(i);
     // Change bin value by offset
     if ((i >= m_wi_min) && (i <= m_wi_max)) {
       double factor = getScaleFactor(inputW, i);
