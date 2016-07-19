@@ -29,16 +29,6 @@ using namespace API;
 DECLARE_ALGORITHM(ConvertEmptyToTof)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertEmptyToTof::ConvertEmptyToTof() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertEmptyToTof::~ConvertEmptyToTof() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertEmptyToTof::name() const {
   return "ConvertEmptyToTof";
@@ -138,7 +128,7 @@ void ConvertEmptyToTof::exec() {
 
     for (auto &epp : eppMap) {
       g_log.debug() << "Spectra idx =" << epp.first << ", epp=" << epp.second
-                    << std::endl;
+                    << '\n';
     }
 
     std::pair<int, double> eppAndEpTof = findAverageEppAndEpTof(eppMap);
@@ -177,7 +167,7 @@ void ConvertEmptyToTof::validateWorkspaceIndices(std::vector<int> &v) {
     for (auto index : v) {
       if (index < 0 || static_cast<size_t>(index) >= nHist) {
         throw std::runtime_error("Spectra index out of limits: " +
-                                 boost::lexical_cast<std::string>(index));
+                                 std::to_string(index));
       }
     }
   }
@@ -202,7 +192,7 @@ void ConvertEmptyToTof::validateChannelIndices(std::vector<int> &v) {
     for (auto &index : v) {
       if (index < 0 || static_cast<size_t>(index) >= blockSize) {
         throw std::runtime_error("Channel index out of limits: " +
-                                 boost::lexical_cast<std::string>(index));
+                                 std::to_string(index));
       }
     }
   }
@@ -223,7 +213,7 @@ std::map<int, int> ConvertEmptyToTof::findElasticPeakPositions(
   assert(static_cast<size_t>(*(channelIndices.end() - 1)) <
          m_inputWS->blocksize() + 1);
 
-  g_log.information() << "Peak detection, search for peak " << std::endl;
+  g_log.information() << "Peak detection, search for peak \n";
 
   for (auto spectrumIndex : spectraIndices) {
 
@@ -239,18 +229,18 @@ std::map<int, int> ConvertEmptyToTof::findElasticPeakPositions(
 
     g_log.debug() << "Peak estimate :: center=" << center
                   << "\t sigma=" << sigma << "\t height=" << height
-                  << "\t minX=" << minX << "\t maxX=" << maxX << std::endl;
+                  << "\t minX=" << minX << "\t maxX=" << maxX << '\n';
 
     bool doFit =
         doFitGaussianPeak(spectrumIndex, center, sigma, height, minX, maxX);
     if (!doFit) {
-      g_log.error() << "doFitGaussianPeak failed..." << std::endl;
+      g_log.error() << "doFitGaussianPeak failed...\n";
       throw std::runtime_error("Gaussin Peak Fit failed....");
     }
 
     g_log.debug() << "Peak Fitting :: center=" << center << "\t sigma=" << sigma
                   << "\t height=" << height << "\t minX=" << minX
-                  << "\t maxX=" << maxX << std::endl;
+                  << "\t maxX=" << maxX << '\n';
 
     // round up the center to the closest int
     eppMap[spectrumIndex] = roundUp(center);
@@ -292,7 +282,7 @@ void ConvertEmptyToTof::estimateFWHM(const Mantid::MantidVec &spec,
   height = maxValue;
 
   g_log.debug() << "Peak estimate  : center=" << center << "\t sigma=" << sigma
-                << "\t h=" << height << std::endl;
+                << "\t h=" << height << '\n';
 
   // determination of the range used for the peak definition
   size_t ipeak_min = std::max(
@@ -306,7 +296,7 @@ void ConvertEmptyToTof::estimateFWHM(const Mantid::MantidVec &spec,
   size_t i_delta_peak = ipeak_max - ipeak_min;
 
   g_log.debug() << "Peak estimate xmin/max: " << ipeak_min - 1 << "\t"
-                << ipeak_max + 1 << std::endl;
+                << ipeak_max + 1 << '\n';
 
   minX = static_cast<double>(ipeak_min - 2 * i_delta_peak);
   maxX = static_cast<double>(ipeak_max + 2 * i_delta_peak);
@@ -371,7 +361,7 @@ bool ConvertEmptyToTof::doFitGaussianPeak(int workspaceindex, double &center,
   if (!fitalg->isExecuted() || !successfulfit) {
     // Early return due to bad fit
     g_log.warning() << "Fitting Gaussian peak for peak around "
-                    << gaussianpeak->centre() << std::endl;
+                    << gaussianpeak->centre() << '\n';
     return false;
   }
 
@@ -404,7 +394,7 @@ ConvertEmptyToTof::findAverageEppAndEpTof(const std::map<int, int> &eppMap) {
     double l2 = getL2(m_inputWS, epp.first);
     if (!areEqual(l2, firstL2, 0.0001)) {
       g_log.error() << "firstL2=" << firstL2 << " , "
-                    << "l2=" << l2 << std::endl;
+                    << "l2=" << l2 << '\n';
       throw std::runtime_error("All the pixels for selected spectra must have "
                                "the same distance from the sample!");
     } else {
@@ -418,7 +408,7 @@ ConvertEmptyToTof::findAverageEppAndEpTof(const std::map<int, int> &eppMap) {
 
     g_log.debug() << "WS index = " << epp.first << ", l1 = " << l1
                   << ", l2 = " << l2
-                  << ", TOF(l1+l2) = " << *(epTofList.end() - 1) << std::endl;
+                  << ", TOF(l1+l2) = " << *(epTofList.end() - 1) << '\n';
   }
 
   double averageEpTof =
@@ -429,7 +419,7 @@ ConvertEmptyToTof::findAverageEppAndEpTof(const std::map<int, int> &eppMap) {
       static_cast<double>(eppList.size()));
 
   g_log.debug() << "Average epp=" << averageEpp
-                << " , Average epTof=" << averageEpTof << std::endl;
+                << " , Average epTof=" << averageEpTof << '\n';
   return std::make_pair(averageEpp, averageEpTof);
 }
 
@@ -496,7 +486,7 @@ std::vector<double> ConvertEmptyToTof::makeTofAxis(int epp, double epTof,
   std::vector<double> axis(size);
 
   g_log.debug() << "Building the TOF X Axis: epp=" << epp << ", epTof=" << epTof
-                << ", Channel Width=" << channelWidth << std::endl;
+                << ", Channel Width=" << channelWidth << '\n';
   for (size_t i = 0; i < size; ++i) {
     axis[i] =
         epTof + channelWidth * static_cast<double>(static_cast<int>(i) - epp) -
@@ -504,7 +494,7 @@ std::vector<double> ConvertEmptyToTof::makeTofAxis(int epp, double epTof,
             2; // to make sure the bin is in the middle of the elastic peak
   }
   g_log.debug() << "TOF X Axis: [start,end] = [" << *axis.begin() << ","
-                << *(axis.end() - 1) << "]" << std::endl;
+                << *(axis.end() - 1) << "]\n";
   return axis;
 }
 
@@ -516,8 +506,9 @@ void ConvertEmptyToTof::setTofInWS(const std::vector<double> &tofAxis,
       static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
   g_log.debug() << "Setting the TOF X Axis for numberOfSpectra="
-                << numberOfSpectra << std::endl;
+                << numberOfSpectra << '\n';
 
+  auto axisPtr = Kernel::make_cow<HistogramData::HistogramX>(tofAxis);
   Progress prog(this, 0.0, 0.2, numberOfSpectra);
   PARALLEL_FOR2(m_inputWS, outputWS)
   for (int64_t i = 0; i < numberOfSpectraInt64; ++i) {
@@ -526,7 +517,7 @@ void ConvertEmptyToTof::setTofInWS(const std::vector<double> &tofAxis,
     outputWS->dataY(i) = m_inputWS->readY(i);
     outputWS->dataE(i) = m_inputWS->readE(i);
     // copy
-    outputWS->setX(i, tofAxis);
+    outputWS->setX(i, axisPtr);
 
     prog.report();
     PARALLEL_END_INTERUPT_REGION

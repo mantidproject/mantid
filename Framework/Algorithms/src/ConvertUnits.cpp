@@ -42,9 +42,6 @@ ConvertUnits::ConvertUnits()
     : Algorithm(), m_numberOfSpectra(0), m_distribution(false),
       m_inputEvents(false), m_inputUnit(), m_outputUnit() {}
 
-/// Destructor
-ConvertUnits::~ConvertUnits() {}
-
 /// Initialisation method
 void ConvertUnits::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
@@ -105,7 +102,7 @@ void ConvertUnits::exec() {
       g_log.information() << "Input workspace already has target unit ("
                           << m_outputUnit->unitID()
                           << "), so just pointing the output workspace "
-                             "property to the input workspace." << std::endl;
+                             "property to the input workspace.\n";
       setProperty("OutputWorkspace",
                   boost::const_pointer_cast<MatrixWorkspace>(inputWS));
       return;
@@ -180,7 +177,6 @@ void ConvertUnits::exec() {
   // Do right at end (workspace could could change in removeUnphysicalBins or
   // alignBins methods)
   setProperty("OutputWorkspace", outputWS);
-  return;
 }
 
 /** Initialise the member variables
@@ -275,8 +271,7 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS,
         *iter = factor *std::pow(*iter, power);
       }
 
-      MantidVecPtr xVals;
-      xVals.access() = outputWS->dataX(0);
+      auto xVals = outputWS->refX(0);
 
       PARALLEL_FOR1(outputWS)
       for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
@@ -309,16 +304,16 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS,
     }
     // Convert the events themselves if necessary. Inefficiently.
     if (m_inputEvents) {
-      eventWS->getEventList(k).convertUnitsQuickly(factor, power);
+      eventWS->getSpectrum(k).convertUnitsQuickly(factor, power);
 
       //      std::vector<double> tofs;
-      //      eventWS->getEventList(k).getTofs(tofs);
+      //      eventWS->getSpectrum(k).getTofs(tofs);
       //      std::vector<double>::iterator tofIt;
       //      for (tofIt = tofs.begin(); tofIt != tofs.end(); ++tofIt)
       //      {
       //        *tofIt = factor * std::pow(*tofIt,power);
       //      }
-      //      eventWS->getEventList(k).setTofs(tofs);
+      //      eventWS->getSpectrum(k).setTofs(tofs);
     }
     prog.report("Convert to " + m_outputUnit->unitID());
     PARALLEL_END_INTERUPT_REGION
@@ -327,7 +322,6 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS,
 
   if (m_inputEvents)
     eventWS->clearMRU();
-  return;
 }
 
 /** Convert the workspace units using TOF as an intermediate step in the
@@ -366,7 +360,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
   double l1;
   try {
     l1 = source->getDistance(*sample);
-    g_log.debug() << "Source-sample distance: " << l1 << std::endl;
+    g_log.debug() << "Source-sample distance: " << l1 << '\n';
   } catch (Exception::NotFoundError &) {
     g_log.error("Unable to calculate source-sample distance");
     throw Exception::InstrumentDefinitionError(
@@ -488,14 +482,14 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
 
       // EventWorkspace part, modifying the EventLists.
       if (m_inputEvents) {
-        eventWS->getEventList(i)
+        eventWS->getSpectrum(i)
             .convertUnitsViaTof(localFromUnit, localOutputUnit);
 
         //        std::vector<double> tofs;
-        //        eventWS->getEventList(i).getTofs(tofs);
+        //        eventWS->getSpectrum(i).getTofs(tofs);
         //        localFromUnit->toTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
         //        localOutputUnit->fromTOF(tofs,emptyVec,l1,l2,twoTheta,emode,efixed,delta);
-        //        eventWS->getEventList(i).setTofs(tofs);
+        //        eventWS->getSpectrum(i).setTofs(tofs);
       }
       // Clear unit memory
       delete localFromUnit;
@@ -518,8 +512,8 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
 
   if (failedDetectorCount != 0) {
     g_log.information() << "Unable to calculate sample-detector distance for "
-                        << failedDetectorCount << " spectra. Masking spectrum."
-                        << std::endl;
+                        << failedDetectorCount
+                        << " spectra. Masking spectrum.\n";
   }
   if (m_inputEvents)
     eventWS->clearMRU();
@@ -579,8 +573,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
     std::reverse(WS->dataY(0).begin(), WS->dataY(0).end());
     std::reverse(WS->dataE(0).begin(), WS->dataE(0).end());
 
-    MantidVecPtr xVals;
-    xVals.access() = WS->dataX(0);
+    auto xVals = WS->refX(0);
     for (size_t j = 1; j < m_numberOfSpectra; ++j) {
       WS->setX(j, xVals);
       std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());
@@ -598,7 +591,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
     for (int j = 0; j < m_numberOfSpectra_i; ++j) {
       PARALLEL_START_INTERUPT_REGION
       if (m_inputEvents) {
-        eventWS->getEventList(j).reverse();
+        eventWS->getSpectrum(j).reverse();
       } else {
         std::reverse(WS->dataX(j).begin(), WS->dataX(j).end());
         std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());
@@ -687,7 +680,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
       if (bins > maxBins)
         maxBins = static_cast<int>(bins);
     }
-    g_log.debug() << maxBins << std::endl;
+    g_log.debug() << maxBins << '\n';
     // Now create an output workspace large enough for the longest 'good' range
     result = WorkspaceFactory::Instance().create(workspace, numSpec, maxBins,
                                                  maxBins - 1);

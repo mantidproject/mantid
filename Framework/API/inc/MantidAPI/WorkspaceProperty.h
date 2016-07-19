@@ -253,7 +253,7 @@ public:
   */
   std::string isValid() const override {
     // start with the no error condition
-    std::string error = "";
+    std::string error;
 
     // If an output workspace it must have a name, although it might not exist
     // in the ADS yet
@@ -398,7 +398,7 @@ private:
   *  @returns A user level description of the problem or "" if it is valid.
   */
   std::string isValidGroup(boost::shared_ptr<WorkspaceGroup> wsGroup) const {
-    g_log.debug() << " Input WorkspaceGroup found " << std::endl;
+    g_log.debug() << " Input WorkspaceGroup found \n";
 
     std::vector<std::string> wsGroupNames = wsGroup->getNames();
     std::string error;
@@ -414,7 +414,7 @@ private:
                                               "will therefore be ignored as "
                                               "part of the GroupedWorkspace.";
 
-        g_log.debug() << error << std::endl;
+        g_log.debug() << error << '\n';
       } else {
         // ... and if it is a workspace of incorrect type, exclude the group by
         // returning an error.
@@ -423,7 +423,7 @@ private:
                   Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::type() +
                   ".";
 
-          g_log.debug() << error << std::endl;
+          g_log.debug() << error << '\n';
 
           return error;
         }
@@ -447,7 +447,7 @@ private:
   *  @returns A user level description of the problem or "" if it is valid.
   */
   std::string isValidOutputWs() const {
-    std::string error("");
+    std::string error;
     const std::string value = this->value();
     if (!value.empty()) {
       // Will the ADS accept it

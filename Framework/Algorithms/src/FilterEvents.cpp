@@ -47,11 +47,6 @@ FilterEvents::FilterEvents()
       m_filterStartTime(0) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FilterEvents::~FilterEvents() {}
-
-//----------------------------------------------------------------------------------------------
 /** Declare Inputs
  */
 void FilterEvents::init() {
@@ -146,8 +141,6 @@ void FilterEvents::init() {
   declareProperty(
       "FilterStartTime", "",
       "Start time for splitters that can be parsed to DateAndTime.");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -205,7 +198,7 @@ void FilterEvents::exec() {
     groupws->setProperty("OutputWorkspace", groupname);
     groupws->execute();
     if (!groupws->isExecuted()) {
-      g_log.error() << "Grouping all output workspaces fails." << std::endl;
+      g_log.error() << "Grouping all output workspaces fails.\n";
     }
   }
 
@@ -219,8 +212,6 @@ void FilterEvents::exec() {
 
   m_progress = 1.0;
   progress(m_progress, "Completed");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -333,8 +324,6 @@ void FilterEvents::processAlgorithmProperties() {
       }
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -372,7 +361,7 @@ void FilterEvents::examineEventWS() {
         m_vecSkip[i] = true;
 
         ++numskipspec;
-        const EventList &elist = m_eventWS->getEventList(i);
+        const EventList &elist = m_eventWS->getSpectrum(i);
         numeventsskip += elist.getNumberEvents();
         msgss << i;
         if (numskipspec % 10 == 0)
@@ -396,8 +385,6 @@ void FilterEvents::examineEventWS() {
     }
 
   } // END-IF-ELSE
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -439,11 +426,9 @@ void FilterEvents::processSplittersWorkspace() {
                       << m_workGroupIndexes.size() - 1
                       << ") than input information workspaces ("
                       << m_informationWS->rowCount() << "). "
-                      << "  Information may not be accurate. " << std::endl;
+                      << "  Information may not be accurate. \n";
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -487,8 +472,6 @@ void FilterEvents::processMatrixSplitterWorkspace() {
     m_vecSplitterGroup[i] = static_cast<int>(vecY[i]);
     m_workGroupIndexes.insert(m_vecSplitterGroup[i]);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -604,8 +587,6 @@ void FilterEvents::createOutputWorkspaces() {
   setProperty("NumberOutputWS", numoutputws);
 
   g_log.information("Output workspaces are created. ");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -654,8 +635,6 @@ void FilterEvents::setupDetectorTOFCalibration() {
       }
     }
   }
-
-  return;
 }
 
 TimeAtSampleStrategy *FilterEvents::setupElasticTOFCorrection() const {
@@ -772,7 +751,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
       // It is assumed that there is one detector per spectra.
       // If there are more than 1 spectrum, it is very likely to have problem
       // with correction factor
-      const DataObjects::EventList events = m_eventWS->getEventList(i);
+      const DataObjects::EventList events = m_eventWS->getSpectrum(i);
       auto detids = events.getDetectorIDs();
       if (detids.size() != 1) {
         // Check whether there are more than 1 detector per spectra.
@@ -833,8 +812,6 @@ void FilterEvents::setupCustomizedTOFCorrection() {
       }
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -843,7 +820,6 @@ void FilterEvents::setupCustomizedTOFCorrection() {
  */
 void FilterEvents::filterEventsBySplitters(double progressamount) {
   size_t numberOfSpectra = m_eventWS->getNumberHistograms();
-  std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
 
   // Loop over the histograms (detector spectra) to do split from 1 event list
   // to N event list
@@ -860,17 +836,15 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
       // Get the output event lists (should be empty) to be a map
       std::map<int, DataObjects::EventList *> outputs;
       PARALLEL_CRITICAL(build_elist) {
-        for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end();
-             ++wsiter) {
-          int index = wsiter->first;
-          DataObjects::EventList *output_el =
-              wsiter->second->getEventListPtr(iws);
-          outputs.emplace(index, output_el);
+        for (auto &ws : m_outputWS) {
+          int index = ws.first;
+          auto &output_el = ws.second->getSpectrum(iws);
+          outputs.emplace(index, &output_el);
         }
       }
 
       // Get a holder on input workspace's event list of this spectrum
-      const DataObjects::EventList &input_el = m_eventWS->getEventList(iws);
+      const DataObjects::EventList &input_el = m_eventWS->getSpectrum(iws);
 
       // Perform the filtering (using the splitting function and just one
       // output)
@@ -904,9 +878,9 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
 
   double numws = static_cast<double>(m_outputWS.size());
   double outwsindex = 0.;
-  for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++wsiter) {
-    int wsindex = wsiter->first;
-    DataObjects::EventWorkspace_sptr opws = wsiter->second;
+  for (auto &ws : m_outputWS) {
+    int wsindex = ws.first;
+    DataObjects::EventWorkspace_sptr opws = ws.second;
 
     // Generate a list of splitters for current output workspace
     Kernel::TimeSplitterType splitters = generateSplitters(wsindex);
@@ -934,8 +908,6 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
     progress(0.1 + progressamount + outwsindex / numws * 0.2, "Splitting logs");
     outwsindex += 1.;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -944,7 +916,6 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
 void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
   size_t numberOfSpectra = m_eventWS->getNumberHistograms();
   // FIXME : consider to use vector to index workspace and event list
-  std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
 
   // Loop over the histograms (detector spectra) to do split from 1 event list
   // to N event list
@@ -960,17 +931,15 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
       // Get the output event lists (should be empty) to be a map
       map<int, DataObjects::EventList *> outputs;
       PARALLEL_CRITICAL(build_elist) {
-        for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end();
-             ++wsiter) {
-          int index = wsiter->first;
-          DataObjects::EventList *output_el =
-              wsiter->second->getEventListPtr(iws);
-          outputs.emplace(index, output_el);
+        for (auto &ws : m_outputWS) {
+          int index = ws.first;
+          auto &output_el = ws.second->getSpectrum(iws);
+          outputs.emplace(index, &output_el);
         }
       }
 
       // Get a holder on input workspace's event list of this spectrum
-      const DataObjects::EventList &input_el = m_eventWS->getEventList(iws);
+      const DataObjects::EventList &input_el = m_eventWS->getSpectrum(iws);
 
       bool printdetail = false;
       if (m_useDBSpectrum)
@@ -978,7 +947,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
 
       // Perform the filtering (using the splitting function and just one
       // output)
-      std::string logmessage("");
+      std::string logmessage;
       if (m_FilterByPulseTime) {
         throw runtime_error(
             "It is not a good practice to split fast event by pulse time. ");
@@ -1005,8 +974,6 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
 
   g_log.notice("Splitters in format of Matrixworkspace are not recommended to "
                "split sample logs. ");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1057,8 +1024,6 @@ void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
     else
       int_prop->filterByTimes(splitters);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

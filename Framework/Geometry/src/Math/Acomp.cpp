@@ -44,7 +44,6 @@ positive value
     S = -1;
     V = -A;
   }
-  return;
 }
 
 //
@@ -294,7 +293,6 @@ Deletes everything in Composite
 */
 {
   Comp.clear();
-  return;
 }
 
 void Acomp::addComp(const Acomp &AX)
@@ -335,7 +333,6 @@ Assumes that the component is sorted and inserts appropiately.
   cpt = std::lower_bound(Comp.begin(), Comp.end(), AX);
   if (cpt == Comp.end() || *cpt != AX) // Only insert if new
     Comp.insert(cpt, AX);
-  return;
 }
 
 void Acomp::addUnitItem(const int Item)
@@ -349,7 +346,6 @@ Adds a unit to the Unit list (if it doesn't exist).
   ipt = std::lower_bound(Units.begin(), Units.end(), Item);
   if (ipt == Units.end() || *ipt != Item) // Only insert if new
     Units.insert(ipt, Item);
-  return;
 }
 
 void Acomp::processIntersection(const std::string &Ln)
@@ -365,7 +361,7 @@ must not contain a toplevel +
   std::string Bexpress; // bracket expression
   int blevel = 0;       // this should already be zero!!
   // find first Component to add
-  //  std::cerr<<"Process Inter:"<<Ln<<std::endl;
+  //  std::cerr<<"Process Inter:"<<Ln<<'\n';
   int numItem(0);
   for (unsigned int iu = 0; iu < Ln.length(); iu++) {
     if (blevel) // we are in a bracket then...
@@ -382,7 +378,7 @@ must not contain a toplevel +
         try {
           AX.setString(Bexpress);
         } catch (...) {
-          std::cerr << "Error in string creation" << std::endl;
+          std::cerr << "Error in string creation\n";
         }
         Bexpress.erase(); // reset string
         addComp(AX);      // add components
@@ -415,7 +411,6 @@ must not contain a toplevel +
       }
     }
   }
-  return;
 }
 
 void Acomp::processUnion(const std::string &Ln)
@@ -432,7 +427,7 @@ Units are sorted after this function is returned.
   int blevel = 0;
   int bextra = 0;
   // find first Component to add
-  //  std::cerr<<"Process Union:"<<Ln<<std::endl;
+  //  std::cerr<<"Process Union:"<<Ln<<'\n';
   for (char iu : Ln) {
     if (blevel) // we are in a bracket then...
     {
@@ -448,7 +443,7 @@ Units are sorted after this function is returned.
         try {
           AX.setString(Express);
         } catch (...) {
-          std::cerr << "Error in string " << std::endl;
+          std::cerr << "Error in string \n";
           throw;
         }
         Express.erase(); // reset string
@@ -469,12 +464,11 @@ Units are sorted after this function is returned.
     try {
       AX.setString(Express);
     } catch (...) {
-      std::cerr << "Error in bracket ::" << std::endl;
+      std::cerr << "Error in bracket ::\n";
       throw;
     }
     addComp(AX); // add component
   }
-  return;
 }
 
 int Acomp::copySimilar(const Acomp &A)
@@ -523,7 +517,6 @@ adds it to the main Units object.
     }
   }
   std::sort(Units.begin(), Units.end());
-  return;
 }
 
 void Acomp::assignDNF(const std::vector<int> &Index, const std::vector<BnId> &A)
@@ -553,7 +546,6 @@ A. This will make the form DNF.
     Px.addUnit(Index, *vc);
     addComp(Px);
   }
-  return;
 }
 
 void Acomp::assignCNF(const std::vector<int> &Index, const std::vector<BnId> &A)
@@ -580,13 +572,12 @@ A. This will make the form DNF.
   std::vector<BnId>::const_iterator vc;
   for (vc = A.begin(); vc != A.end(); ++vc) {
     Acomp Px(0); // Union
-    // std::cout<<"Item == "<<*vc<<std::endl;
+    // std::cout<<"Item == "<<*vc<<'\n';
     BnId X = *vc;
     X.reverse();
     Px.addUnit(Index, X);
     addComp(Px);
   }
-  return;
 }
 
 // -------------------------------------
@@ -604,7 +595,6 @@ Decends down the Comp Tree.
   std::for_each(Comp.begin(), Comp.end(), std::mem_fun_ref(&Acomp::Sort));
   // use the sorted components to sort our component list
   std::sort(Comp.begin(), Comp.end());
-  return;
 }
 
 int Acomp::makeReadOnce()
@@ -731,7 +721,6 @@ literals
   std::vector<Acomp>::const_iterator cc;
   for (cc = Comp.begin(); cc != Comp.end(); ++cc)
     cc->getAbsLiterals(literalMap);
-  return;
 }
 
 void Acomp::getLiterals(std::map<int, int> &literalMap) const
@@ -759,7 +748,6 @@ literals
   // Doesn't work because literal map is a reference
   //  for_each(Comp.begin(),Comp.end(),
   // std::bind2nd(std::mem_fun(&Acomp::getLiterals),literalMap));
-  return;
 }
 
 int Acomp::isSimple() const
@@ -913,11 +901,11 @@ It is set on exit (to the EPI)
       }
     }
     if (DNFscore[ic] == 0) {
-      std::cerr << "PIForm:" << std::endl;
+      std::cerr << "PIForm:\n";
       copy(PIform.begin(), PIform.end(),
            std::ostream_iterator<BnId>(std::cerr, "\n"));
-      std::cerr << "Error with DNF / EPI determination at " << ic << std::endl;
-      std::cerr << " Items " << DNFobj[ic] << std::endl;
+      std::cerr << "Error with DNF / EPI determination at " << ic << '\n';
+      std::cerr << " Items " << DNFobj[ic] << '\n';
       return 0;
     }
   }
@@ -963,9 +951,9 @@ It is set on exit (to the EPI)
       std::cerr << PIform[*px] << ":";
       for (ddx = DNFactive.begin(); ddx != DNFactive.end(); ++ddx)
         std::cerr << ((Grid[*px][*ddx]) ? " 1" : " 0");
-      std::cerr << std::endl;
+      std::cerr << '\n';
     }
-    std::cerr << "END OF TABLE " << std::endl;
+    std::cerr << "END OF TABLE \n";
   }
 
   // Ok -- now the hard work...
@@ -1288,10 +1276,10 @@ Carries out algebraic division
   /*
   std::cerr<<"U == ";
   copy(U.begin(),U.end(),std::ostream_iterator<Acomp>(std::cerr,":"));
-  std::cerr<<std::endl;
+  std::cerr<<'\n';
   std::cerr<<"V == ";
   copy(V.begin(),V.end(),std::ostream_iterator<Acomp>(std::cerr,":"));
-  std::cerr<<std::endl;
+  std::cerr<<'\n';
   */
   for (cc = Glist.begin(); cc != Glist.end(); ++cc) {
     std::vector<Acomp>::const_iterator ux, vx;
@@ -1476,7 +1464,6 @@ given a inner bracket expand that etc.
   else
     processUnion(Ln);
   sort(Units.begin(), Units.end()); /// Resort the list.
-  return;
 }
 
 std::pair<int, int> Acomp::size() const
@@ -1528,7 +1515,6 @@ ab -> a'+b'
 
   for_each(Comp.begin(), Comp.end(), std::mem_fun_ref(&Acomp::complement));
   sort(Comp.begin(), Comp.end());
-  return;
 }
 
 void Acomp::writeFull(std::ostream &OXF, const int Indent) const
@@ -1541,15 +1527,14 @@ Real pretty print out statement  :-)
   for (int i = 0; i < Indent; i++)
     OXF << " ";
   OXF << ((Intersect == 1) ? "Inter" : "Union");
-  OXF << " " << Units.size() << " " << Comp.size() << std::endl;
+  OXF << " " << Units.size() << " " << Comp.size() << '\n';
   for (int i = 0; i < Indent; i++)
     OXF << " ";
-  OXF << display() << std::endl;
+  OXF << display() << '\n';
   std::vector<Acomp>::const_iterator vc;
   for (vc = Comp.begin(); vc != Comp.end(); ++vc) {
     vc->writeFull(OXF, Indent + 2);
   }
-  return;
 }
 
 std::string Acomp::display() const
@@ -1640,9 +1625,8 @@ PI and Grid :
     std::cerr << PIform[pc] << ":";
     for (size_t ic = 0; ic != RX.second; ic++)
       std::cerr << ((Grid[pc][ic]) ? " 1" : " 0");
-    std::cerr << std::endl;
+    std::cerr << '\n';
   }
-  return;
 }
 
 } // NAMESPACE Geometry

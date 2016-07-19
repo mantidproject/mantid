@@ -42,6 +42,8 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QCheckBox>
+#include <QCloseEvent>
+#include <QContextMenuEvent>
 #include <QLayout>
 #include <QListWidget>
 #include <QGroupBox>

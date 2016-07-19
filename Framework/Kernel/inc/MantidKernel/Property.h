@@ -8,6 +8,11 @@
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
+
+namespace NeXus {
+class File;
+}
+
 #include <set>
 #include <string>
 #include <vector>
@@ -129,6 +134,11 @@ public:
   void setDocumentation(const std::string &documentation);
   void setBriefDocumentation(const std::string &documentation);
 
+  virtual void saveProperty(::NeXus::File * /*file*/) {
+    throw std::invalid_argument("Property::saveProperty - Cannot save '" +
+                                this->name() +
+                                "', property type not implemented.");
+  }
   /// Returns the value of the property as a string
   virtual std::string value() const = 0;
   /// Set the value of the property via a string.  If the value is unacceptable
@@ -142,6 +152,11 @@ public:
   /// Get the default value for the property which is the value the property was
   /// initialised with
   virtual std::string getDefault() const = 0;
+
+  /** Is Multiple Selection Allowed
+  *  @return true if multiple selection is allowed
+  */
+  virtual bool isMultipleSelectionAllowed() { return false; };
 
   virtual std::vector<std::string> allowedValues() const;
 

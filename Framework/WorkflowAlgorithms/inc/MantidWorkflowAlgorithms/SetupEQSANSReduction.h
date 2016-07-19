@@ -38,10 +38,6 @@ namespace WorkflowAlgorithms {
 
 class DLLExport SetupEQSANSReduction : public API::Algorithm {
 public:
-  /// Constructor
-  SetupEQSANSReduction() : API::Algorithm() {}
-  /// Virtual destructor
-  ~SetupEQSANSReduction() override {}
   /// Algorithm's name
   const std::string name() const override { return "SetupEQSANSReduction"; }
   /// Summary of algorithms purpose

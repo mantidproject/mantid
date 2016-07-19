@@ -17,6 +17,8 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
+using HistogramData::Counts;
+using HistogramData::CountStandardDeviations;
 
 /// Empty default constructor
 LoadEmptyInstrument::LoadEmptyInstrument() {}
@@ -113,44 +115,34 @@ void LoadEmptyInstrument::exec() {
 
   if (MakeEventWorkspace) {
     // Make a brand new EventWorkspace
-    EventWorkspace_sptr localWorkspace =
-        boost::dynamic_pointer_cast<EventWorkspace>(
-            API::WorkspaceFactory::Instance().create("EventWorkspace",
-                                                     number_spectra, 2, 1));
+    outWS = WorkspaceFactory::Instance().create("EventWorkspace",
+                                                number_spectra, 2, 1);
     // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(ws, localWorkspace,
-                                                           true);
-
-    // Cast to matrix WS
-    outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(localWorkspace);
+    WorkspaceFactory::Instance().initializeFromParent(ws, outWS, true);
   } else {
     // Now create the outputworkspace and copy over the instrument object
-    DataObjects::Workspace2D_sptr localWorkspace =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-            WorkspaceFactory::Instance().create(ws, number_spectra, 2, 1));
-
-    outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(localWorkspace);
+    outWS = WorkspaceFactory::Instance().create(ws, number_spectra, 2, 1);
   }
 
   outWS->rebuildSpectraMapping(true /* include monitors */);
 
   // ---- Set the values ----------
   if (!MakeEventWorkspace) {
-    MantidVecPtr x, v, v_monitor;
-    x.access().resize(2);
-    x.access()[0] = 1.0;
-    x.access()[1] = 2.0;
-    v.access().resize(1);
-    v.access()[0] = detector_value;
-    v_monitor.access().resize(1);
-    v_monitor.access()[0] = monitor_value;
+    auto ws2D = boost::dynamic_pointer_cast<Workspace2D>(outWS);
+    Counts v_y(1, detector_value);
+    Counts v_monitor_y(1, monitor_value);
+    CountStandardDeviations v_e(1, detector_value);
+    CountStandardDeviations v_monitor_e(1, monitor_value);
 
-    for (size_t i = 0; i < outWS->getNumberHistograms(); i++) {
-      IDetector_const_sptr det = outWS->getDetector(i);
-      if (det->isMonitor())
-        outWS->setData(i, v_monitor, v_monitor);
-      else
-        outWS->setData(i, v, v);
+    for (size_t i = 0; i < ws2D->getNumberHistograms(); i++) {
+      IDetector_const_sptr det = ws2D->getDetector(i);
+      if (det->isMonitor()) {
+        ws2D->setCounts(i, v_monitor_y);
+        ws2D->setCountStandardDeviations(i, v_monitor_e);
+      } else {
+        ws2D->setCounts(i, v_y);
+        ws2D->setCountStandardDeviations(i, v_e);
+      }
     }
   }
   // Save in output

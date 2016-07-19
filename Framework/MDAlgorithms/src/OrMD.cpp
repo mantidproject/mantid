@@ -11,16 +11,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(OrMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-OrMD::OrMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-OrMD::~OrMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string OrMD::name() const { return "OrMD"; }
 

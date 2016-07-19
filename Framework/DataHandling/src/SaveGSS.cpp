@@ -126,8 +126,6 @@ void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
 
   difc = ((2.0 * PhysicalConstants::NeutronMass * sin(tth * 0.5) * (l1 + l2)) /
           (PhysicalConstants::h * 1.e4));
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -186,8 +184,6 @@ void SaveGSS::exec() {
 
   writeGSASFile(filename, append, bank, MultiplyByBinWidth, split,
                 outputFormat);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -252,7 +248,7 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
                   << "\n";
 
     bool writeheader = false;
-    std::string splitfilename("");
+    std::string splitfilename;
     if (!split && iws == 0 && !append) {
       // Non-split mode and first spectrum and in non-append mode
       writeheader = true;
@@ -291,7 +287,7 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
     // Determine bank number into GSAS file
     int bankid;
     if (m_useSpecAsBank) {
-      bankid = static_cast<int>(inputWS->getSpectrum(iws)->getSpectrumNo());
+      bankid = static_cast<int>(inputWS->getSpectrum(iws).getSpectrumNo());
     } else {
       bankid = basebanknumber + iws;
     }
@@ -332,8 +328,6 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
     out.write(outbuffer.str().c_str(), outbuffer.str().length());
     out.close();
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -399,8 +393,6 @@ void writeLogValue(std::ostream &os, const Run &runinfo,
   std::string units = prop->units();
   if (!units.empty())
     os << " " << units;
-
-  return;
 }
 
 //--------------------------------------------------------------------------------------------
@@ -487,8 +479,6 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
   }
 
   os.flags(fflags);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -535,7 +525,7 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
       << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc2
       << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc1
       << std::fixed << " " << std::setprecision(5) << std::setw(7) << bc4
-      << " FXYE" << std::endl;
+      << " FXYE\n";
 
   // Do each Y entry
   for (size_t j = 0; j < datasize; j++) {
@@ -561,8 +551,6 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
     // The error
     out << std::fixed << std::setprecision(8) << std::setw(18) << Epos << "\n";
   }
-
-  return;
 }
 
 //--------------------------------------------------------------------------------------------
@@ -587,13 +575,13 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
                       *(X.rbegin() + 1));      // maximum TOF (in microseconds?)
   double bc3 = (*(X.begin() + 1) - bc1) / bc1; // deltaT/T
 
-  g_log.debug() << "SaveGSS(): Min TOF = " << bc1 << std::endl;
+  g_log.debug() << "SaveGSS(): Min TOF = " << bc1 << '\n';
 
   writeBankLine(out, "SLOG", bank, datasize);
   out << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc1
       << std::fixed << " " << std::setprecision(0) << std::setw(10) << bc2
       << std::fixed << " " << std::setprecision(7) << std::setw(10) << bc3
-      << std::fixed << " 0 FXYE" << std::endl;
+      << std::fixed << " 0 FXYE\n";
 
   for (size_t i = 0; i < datasize; i++) {
     double y = Y[i];
@@ -613,8 +601,6 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
         << "\n"; // let it flush its own buffer
   }
   out << std::flush;
-
-  return;
 }
 
 } // namespace DataHandling

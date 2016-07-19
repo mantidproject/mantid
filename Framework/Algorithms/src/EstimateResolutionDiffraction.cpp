@@ -36,17 +36,6 @@ const double WAVELENGTH_TO_VELOCITY =
 const double WAVELENGTH_MAX = 1000.;
 }
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-EstimateResolutionDiffraction::EstimateResolutionDiffraction()
-    : m_inputWS(), m_outputWS(), m_centreVelocity(0.), m_L1(0.), m_deltaT(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-EstimateResolutionDiffraction::~EstimateResolutionDiffraction() {}
-
 const std::string EstimateResolutionDiffraction::name() const {
   return "EstimateResolutionDiffraction";
 }
@@ -164,8 +153,6 @@ void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
   V3D sourcepos = instrument->getSource()->getPos();
   m_L1 = samplepos.distance(sourcepos);
   g_log.notice() << "L1 = " << m_L1 << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -179,7 +166,6 @@ void EstimateResolutionDiffraction::createOutputWorkspace() {
   // Copy geometry over.
   API::WorkspaceFactory::Instance().initializeFromParent(m_inputWS, m_outputWS,
                                                          false);
-  return;
 }
 //----------------------------------------------------------------------------------------------
 /**
@@ -263,8 +249,6 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
   g_log.notice() << "t3 range: " << mint3 << ", " << maxt3 << "\n";
   g_log.notice() << "Number of detector having NO size information = "
                  << count_nodetsize << "\n";
-
-  return;
 }
 
 } // namespace Algorithms

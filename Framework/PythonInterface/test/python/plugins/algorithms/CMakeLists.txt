@@ -18,7 +18,6 @@ set ( TEST_PY_FILES
   IndirectCalibrationTest.py
   CorrectTOFTest.py
   CreateWorkspaceTest.py
-  CylinderPaalmanPingsCorrectionTest.py
   CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py
   DNSComputeDetEffCorrCoefsTest.py
@@ -31,6 +30,7 @@ set ( TEST_PY_FILES
   EnggFitPeaksTest.py
   EnggFocusTest.py
   EnggVanadiumCorrectionsTest.py
+  ExportSpectraMaskTest.py   
   FilterLogByTimeTest.py
   FindEPPTest.py
   FindReflectometryLinesTest.py

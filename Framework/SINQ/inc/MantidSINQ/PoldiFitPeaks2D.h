@@ -54,9 +54,6 @@ namespace Poldi {
 
 class MANTID_SINQ_DLL PoldiFitPeaks2D : public API::Algorithm {
 public:
-  PoldiFitPeaks2D();
-  ~PoldiFitPeaks2D() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -165,7 +162,7 @@ protected:
 
   PoldiInstrumentAdapter_sptr m_poldiInstrument;
   PoldiTimeTransformer_sptr m_timeTransformer;
-  double m_deltaT;
+  double m_deltaT{0.0};
 
 private:
   void init() override;

@@ -50,11 +50,6 @@ FitOneSinglePeak::FitOneSinglePeak()
       m_finalGoodnessValue(0.), m_numFitCalls(0), m_sstream("") {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor for FitOneSinglePeak
-  */
-FitOneSinglePeak::~FitOneSinglePeak() {}
-
-//----------------------------------------------------------------------------------------------
 /** Set workspaces
   */
 void FitOneSinglePeak::setWorskpace(API::MatrixWorkspace_sptr dataws,
@@ -70,8 +65,6 @@ void FitOneSinglePeak::setWorskpace(API::MatrixWorkspace_sptr dataws,
   } else {
     throw runtime_error("Input workspace index is out of range.");
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -84,8 +77,6 @@ void FitOneSinglePeak::setFunctions(IPeakFunction_sptr peakfunc,
 
   if (bkgdfunc)
     m_bkgdFunc = bkgdfunc;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -101,8 +92,6 @@ void FitOneSinglePeak::setFitWindow(double leftwindow, double rightwindow) {
   i_maxFitX = getVectorIndex(vecX, m_maxFitX);
 
   m_peakWindowSet = true;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -122,8 +111,6 @@ void FitOneSinglePeak::setPeakRange(double xpeakleft, double xpeakright) {
   i_maxPeakX = getVectorIndex(vecX, m_maxPeakX);
 
   m_peakRangeSet = true;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -148,8 +135,6 @@ void FitOneSinglePeak::setFittingMethod(std::string minimizer,
   }
 
   m_fitMethodSet = true;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -240,8 +225,6 @@ void FitOneSinglePeak::setupGuessedFWHM(double usrwidth, int minfwhm,
 
     m_vecFWHM.push_back(in_fwhm);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -259,8 +242,6 @@ void FitOneSinglePeak::setFitPeakCriteria(bool usepeakpostol,
     if (peakpostol < 1.0E-13)
       g_log.warning("Peak position tolerance is very tight. ");
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -361,19 +342,22 @@ bool FitOneSinglePeak::simpleFit() {
 /** Generate a new temporary workspace for removed background peak
   */
 API::MatrixWorkspace_sptr FitOneSinglePeak::genFitWindowWS() {
-  size_t size = i_maxFitX - i_minFitX + 1;
-  MatrixWorkspace_sptr purePeakWS =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, size, size);
   const MantidVec &vecX = m_dataWS->readX(m_wsIndex);
   const MantidVec &vecY = m_dataWS->readY(m_wsIndex);
   const MantidVec &vecE = m_dataWS->readE(m_wsIndex);
+  size_t size = i_maxFitX - i_minFitX + 1;
+  size_t ysize = size;
+  size_t ishift = i_maxFitX + 1;
+  if (ishift >= vecY.size())
+    ysize = vecY.size() - i_minFitX;
+  MatrixWorkspace_sptr purePeakWS =
+      WorkspaceFactory::Instance().create("Workspace2D", 1, size, ysize);
 
   MantidVec &dataX = purePeakWS->dataX(0);
   MantidVec &dataY = purePeakWS->dataY(0);
   MantidVec &dataE = purePeakWS->dataE(0);
 
   dataX.assign(vecX.begin() + i_minFitX, vecX.begin() + i_maxFitX + 1);
-  size_t ishift = i_maxFitX + 1;
   if (ishift < vecY.size()) {
     dataY.assign(vecY.begin() + i_minFitX, vecY.begin() + i_maxFitX + 1);
     dataE.assign(vecE.begin() + i_minFitX, vecE.begin() + i_maxFitX + 1);
@@ -445,8 +429,6 @@ void FitOneSinglePeak::removeBackground(MatrixWorkspace_sptr purePeakWS) {
     vecY[i] = y;
     vecE[i] = 1.0;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -573,8 +555,6 @@ void FitOneSinglePeak::highBkgdFit() {
   m_sstream << "MultStep-Fit: Best Fitted Peak: " << m_peakFunc->asString()
             << ". Final " << m_costFunction << " = " << compcost << "\n"
             << "Number of calls on Fit = " << m_numFitCalls << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -630,8 +610,6 @@ void FitOneSinglePeak::pop(const std::map<std::string, double> &funcparammap,
     double parvalue = miter->second;
     func->setParameter(parname, parvalue);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -973,7 +951,7 @@ FitOneSinglePeak::fitBackground(API::IBackgroundFunction_sptr bkgdfunc) {
   */
 void FitOneSinglePeak::processNStoreFitResult(double rwp, bool storebkgd) {
   bool fitsuccess = true;
-  string failreason("");
+  string failreason;
 
   if (rwp < DBL_MAX) {
     // A valid Rwp returned from Fit
@@ -1028,8 +1006,6 @@ void FitOneSinglePeak::processNStoreFitResult(double rwp, bool storebkgd) {
   } else if (!fitsuccess) {
     m_sstream << "Reason of fit's failure: " << failreason << "\n";
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1081,11 +1057,6 @@ FitPeak::FitPeak()
       m_bestPeakFunc(), m_bestBkgdFunc(), m_bestRwp(DBL_MAX),
       m_finalGoodnessValue(0.), m_vecybkup(), m_vecebkup(), m_costFunction(),
       m_lightWeightOutput(false) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FitPeak::~FitPeak() {}
 
 //----------------------------------------------------------------------------------------------
 /** Declare properties
@@ -1209,8 +1180,6 @@ void FitPeak::init() {
   declareProperty("CostFunctionValue", DBL_MAX,
                   "Value of cost function of the fitted peak. ",
                   Kernel::Direction::Output);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1254,8 +1223,6 @@ void FitPeak::exec() {
 
   // Output
   setupOutput(fit1peakalg.getPeakError(), fit1peakalg.getBackgroundError());
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1397,8 +1364,6 @@ void FitPeak::processProperties() {
 
   // Output option
   m_outputRawParams = getProperty("RawParams");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1480,8 +1445,6 @@ void FitPeak::createFunctions() {
   for (size_t i = 0; i < m_peakParameterNames.size(); ++i) {
     m_peakFunc->setParameter(m_peakParameterNames[i], vec_peakparvalues[i]);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1521,8 +1484,6 @@ void FitPeak::prescreenInputData() {
   // Peak width and centre: from user input
   m_userGuessedFWHM = m_peakFunc->fwhm();
   m_userPeakCentre = m_peakFunc->centre();
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1601,8 +1562,6 @@ void FitPeak::setupOutput(
 
   // Output chi^2 or Rwp
   setProperty("CostFunctionValue", m_finalGoodnessValue);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

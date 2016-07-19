@@ -16,16 +16,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(AddLogDerivative)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-AddLogDerivative::AddLogDerivative() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-AddLogDerivative::~AddLogDerivative() {}
-
-//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -150,7 +140,7 @@ void AddLogDerivative::exec() {
   // Add the log
   run.addProperty(output, true);
 
-  g_log.notice() << "Added log named " << NewLogName << std::endl;
+  g_log.notice() << "Added log named " << NewLogName << '\n';
 }
 
 } // namespace Mantid

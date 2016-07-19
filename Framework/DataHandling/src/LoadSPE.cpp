@@ -9,7 +9,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <cstdio>
@@ -136,9 +135,8 @@ void LoadSPE::exec() {
     reportFormatError(std::string(comment));
 
   // Now the X bin boundaries
-  MantidVecPtr XValues;
-  MantidVec &X = XValues.access();
-  X.resize(nbins + 1);
+  auto XValues = HistogramData::BinEdges(nbins + 1);
+  auto &X = XValues.mutableData();
 
   for (size_t i = 0; i <= nbins; ++i) {
     retval = fscanf(speFile, "%10le", &X[i]);
@@ -164,7 +162,7 @@ void LoadSPE::exec() {
   Progress progress(this, 0, 1, nhist);
   for (size_t j = 0; j < nhist; ++j) {
     // Set the common X vector
-    workspace->setX(j, XValues);
+    workspace->setBinEdges(j, XValues);
     // Read in the Y & E data
     readHistogram(speFile, workspace, j);
 
@@ -197,7 +195,7 @@ void LoadSPE::readHistogram(FILE *speFile, API::MatrixWorkspace_sptr workspace,
   int retval;
   for (size_t i = 0; i < nbins; ++i) {
     retval = fscanf(speFile, "%10le", &Y[i]);
-    // g_log.error() << Y[i] << std::endl;
+    // g_log.error() << Y[i] << '\n';
     if (retval != 1) {
       std::stringstream ss;
       ss << "Reading data value" << i << " of histogram " << index;
@@ -229,8 +227,6 @@ void LoadSPE::readHistogram(FILE *speFile, API::MatrixWorkspace_sptr workspace,
   }
   // Read to EOL
   fgets(comment, 100, speFile);
-
-  return;
 }
 
 /** Called if the file is not formatted as expected

@@ -45,8 +45,6 @@ namespace Algorithms {
 class DLLExport GetAllEi : public API::Algorithm {
 public:
   GetAllEi();
-  ~GetAllEi() override{};
-
   /// Algorithms name for identification. @see Algorithm::name
   const std::string name() const override { return "GetAllEi"; };
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary

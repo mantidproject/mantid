@@ -25,7 +25,8 @@ DECLARE_ALGORITHM(IQTransform)
 using namespace Kernel;
 using namespace API;
 
-IQTransform::IQTransform() : API::Algorithm(), m_label(new Units::Label) {
+IQTransform::IQTransform()
+    : API::Algorithm(), m_label(boost::make_shared<Units::Label>()) {
   /* Just for fun, this is implemented as follows....
    * We fill a map below with the transformation name as the key and
    * a function pointer to the method that does the transformation as
@@ -43,8 +44,6 @@ IQTransform::IQTransform() : API::Algorithm(), m_label(new Units::Label) {
   m_transforms["Log-Log"] = &IQTransform::logLog;
   m_transforms["General"] = &IQTransform::general;
 }
-
-IQTransform::~IQTransform() {}
 
 void IQTransform::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
@@ -118,12 +117,7 @@ void IQTransform::exec() {
   m_label->setLabel("");
   outputWS->setYUnit("");
   // Copy the data over. Assume single spectrum input (output will be).
-  // Take the mid-point of histogram bins
-  if (tmpWS->isHistogramData()) {
-    VectorHelper::convertToBinCentre(tmpWS->readX(0), outputWS->dataX(0));
-  } else {
-    outputWS->setX(0, tmpWS->refX(0));
-  }
+  outputWS->setPoints(0, tmpWS->points(0));
   MantidVec &Y = outputWS->dataY(0) = tmpWS->dataY(0);
   outputWS->dataE(0) = tmpWS->dataE(0);
 

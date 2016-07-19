@@ -64,10 +64,10 @@ public:
   size_t nPeriods() const;
   DataObjects::EventWorkspace_sptr getSingleHeldWorkspace();
   API::Workspace_sptr combinedWorkspace();
-  const DataObjects::EventList &getEventList(const size_t workspace_index,
-                                             const size_t periodNumber) const;
-  DataObjects::EventList &getEventList(const size_t workspace_index,
-                                       const size_t periodNumber);
+  const DataObjects::EventList &getSpectrum(const size_t workspace_index,
+                                            const size_t periodNumber) const;
+  DataObjects::EventList &getSpectrum(const size_t workspace_index,
+                                      const size_t periodNumber);
   void setGeometryFlag(const int flag);
   void setThickness(const float flag);
   void setHeight(const float flag);
@@ -82,14 +82,10 @@ public:
   const API::Run &run() const;
   API::Run &mutableRun();
   API::Sample &mutableSample();
-  Mantid::API::ISpectrum *getSpectrum(const size_t index);
-  const Mantid::API::ISpectrum *getSpectrum(const size_t index) const;
+  DataObjects::EventList &getSpectrum(const size_t index);
+  const DataObjects::EventList &getSpectrum(const size_t index) const;
   Mantid::API::Axis *getAxis(const size_t &i) const;
   size_t getNumberHistograms() const;
-  const DataObjects::EventList &
-  getEventList(const size_t workspace_index) const;
-
-  DataObjects::EventList &getEventList(const std::size_t workspace_index);
 
   std::vector<size_t>
   getSpectrumToWorkspaceIndexVector(Mantid::specnum_t &offset) const;
@@ -98,7 +94,7 @@ public:
   getDetectorIDToWorkspaceIndexVector(Mantid::specnum_t &offset,
                                       bool dothrow) const;
   Kernel::DateAndTime getFirstPulseTime() const;
-  void setAllX(Kernel::cow_ptr<MantidVec> &x);
+  void setAllX(const HistogramData::BinEdges &x);
   size_t getNumberEvents() const;
   void resizeTo(const size_t size);
   void padSpectra(const std::vector<int32_t> &padding);
@@ -106,7 +102,6 @@ public:
   void
   setMonitorWorkspace(const boost::shared_ptr<API::MatrixWorkspace> &monitorWS);
   void updateSpectraUsing(const API::SpectrumDetectorMapping &map);
-  DataObjects::EventList *getEventListPtr(size_t i);
   void populateInstrumentParameters();
   void setTitle(std::string title);
   void applyFilter(boost::function<void(API::MatrixWorkspace_sptr)> func);

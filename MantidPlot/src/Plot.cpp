@@ -110,7 +110,7 @@ Plot::Plot(int width, int height, QWidget *parent, const char *)
   plCanvas->setFocusIndicator(QwtPlotCanvas::ItemFocusIndicator);
   // plCanvas->setFocus();
   plCanvas->setFrameShadow(QwtPlot::Plain);
-  plCanvas->setCursor(Qt::arrowCursor);
+  plCanvas->setCursor(QCursor(Qt::ArrowCursor));
   plCanvas->setLineWidth(1);
   plCanvas->setPaintAttribute(QwtPlotCanvas::PaintCached, false);
   plCanvas->setPaintAttribute(QwtPlotCanvas::PaintPacked, true);
@@ -172,7 +172,7 @@ void Plot::printCanvas(QPainter *painter, const QRect &,
   int lw = plotCanvas->lineWidth();
   if (lw > 0) {
     QColor color =
-        plotCanvas->palette().color(QPalette::Active, QColorGroup::Foreground);
+        plotCanvas->palette().color(QPalette::Active, QPalette::Foreground);
     painter->setPen(
         QPen(color, lw, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
     QwtPainter::drawRect(painter, canvasRect.adjusted(0, 0, -1, -1));
@@ -263,7 +263,7 @@ void Plot::drawInwardTicks(QPainter *painter, const QRect &rect,
   int y2 = rect.bottom();
 
   QPalette pal = axisWidget(axis)->palette();
-  QColor color = pal.color(QPalette::Active, QColorGroup::Foreground);
+  QColor color = pal.color(QPalette::Active, QPalette::Foreground);
 
   painter->save();
   painter->setPen(QPen(color, axesLinewidth(), Qt::SolidLine));
@@ -401,8 +401,8 @@ void Plot::drawBreak(QPainter *painter, const QRect &rect,
 
   painter->save();
 
-  QColor color = axisWidget(axis)->palette().color(QPalette::Active,
-                                                   QColorGroup::Foreground);
+  QColor color =
+      axisWidget(axis)->palette().color(QPalette::Active, QPalette::Foreground);
   painter->setPen(QPen(color, axesLinewidth(), Qt::SolidLine));
 
   int left = map.transform(sc_engine->axisBreakLeft());

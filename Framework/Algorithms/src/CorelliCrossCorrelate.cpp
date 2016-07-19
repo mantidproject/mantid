@@ -22,16 +22,6 @@ using namespace DataObjects;
 DECLARE_ALGORITHM(CorelliCrossCorrelate)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CorelliCrossCorrelate::CorelliCrossCorrelate() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CorelliCrossCorrelate::~CorelliCrossCorrelate() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CorelliCrossCorrelate::init() {
@@ -200,14 +190,14 @@ void CorelliCrossCorrelate::exec() {
   for (int64_t i = 0; i < numHistograms; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    EventList *evlist = outputWS->getEventListPtr(i);
+    auto &evlist = outputWS->getSpectrum(i);
     IDetector_const_sptr detector = inputWS->getDetector(i);
 
     // Switch to weighted if needed.
-    if (evlist->getEventType() == TOF)
-      evlist->switchTo(WEIGHTED);
+    if (evlist.getEventType() == TOF)
+      evlist.switchTo(WEIGHTED);
 
-    std::vector<WeightedEvent> &events = evlist->getWeightedEvents();
+    std::vector<WeightedEvent> &events = evlist.getWeightedEvents();
 
     // Skip if empty.
     if (events.empty())

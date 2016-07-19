@@ -22,12 +22,6 @@ namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveCanSAS1D2)
 
-/// constructor
-SaveCanSAS1D2::SaveCanSAS1D2() {}
-
-/// destructor
-SaveCanSAS1D2::~SaveCanSAS1D2() {}
-
 /// Overwrites Algorithm method.
 void SaveCanSAS1D2::init() {
   SaveCanSAS1D::init();
@@ -246,7 +240,7 @@ void SaveCanSAS1D2::writeHeader(const std::string &fileName) {
     m_outFile
         << "<?xml version=\"1.0\"?>\n"
         << "<?xml-stylesheet type=\"text/xsl\" href=\"cansas1d.xsl\" ?>\n";
-    std::string sasroot = "";
+    std::string sasroot;
     createSASRootElement(sasroot);
     m_outFile << sasroot;
   } catch (std::fstream::failure &) {

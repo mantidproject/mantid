@@ -6,6 +6,8 @@
 
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
+using namespace Mantid::API;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 

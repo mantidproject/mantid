@@ -123,11 +123,9 @@ void AbsorptionCorrection::exec() {
 
   std::ostringstream message;
   message << "Numerical integration performed every " << m_xStep
-          << " wavelength points" << std::endl;
+          << " wavelength points\n";
   g_log.information(message.str());
   message.str("");
-
-  const bool isHist = m_inputWS->isHistogramData();
 
   // Calculate the cached values of L1 and element volumes.
   initialiseCachedDistances();
@@ -188,8 +186,9 @@ void AbsorptionCorrection::exec() {
     MantidVec &Y = correctionFactors->dataY(i);
 
     // Loop through the bins in the current spectrum every m_xStep
+    const auto lambdas = m_inputWS->points(i);
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
-      const double lambda = (isHist ? (0.5 * (X[j] + X[j + 1])) : X[j]);
+      const double lambda = lambdas[j];
       if (m_emode == 0) // Elastic
       {
         Y[j] = this->doIntegration(lambda, L2s);
@@ -222,7 +221,7 @@ void AbsorptionCorrection::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   g_log.information() << "Total number of elements in the integration was "
-                      << m_L1s.size() << std::endl;
+                      << m_L1s.size() << '\n';
   setProperty("OutputWorkspace", correctionFactors);
 
   // Now do some cleaning-up since destructor may not be called immediately
@@ -357,7 +356,7 @@ void AbsorptionCorrection::calculateDistances(
 
       // std::ostringstream message;
       // message << "Problem with detector at " << detectorPos << " ID:" <<
-      // detector->getID() << std::endl;
+      // detector->getID() << '\n';
       // message << "This usually means that this detector is defined inside the
       // sample cylinder";
       // g_log.error(message.str());

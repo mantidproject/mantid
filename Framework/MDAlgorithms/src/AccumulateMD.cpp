@@ -196,16 +196,6 @@ void insertDataSources(
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(AccumulateMD)
 
-/*
- * Constructor
-*/
-AccumulateMD::AccumulateMD() {}
-
-/*
- * Destructor
-*/
-AccumulateMD::~AccumulateMD() {}
-
 /// Algorithms name for identification. @see Algorithm::name
 const std::string AccumulateMD::name() const { return "AccumulateMD"; }
 
@@ -335,12 +325,12 @@ void AccumulateMD::exec() {
   const std::string nonexistent =
       filterToExistingSources(input_data, psi, gl, gs, efix);
   g_log.notice() << "These data sources were not found: " << nonexistent
-                 << std::endl;
+                 << '\n';
 
   // If we can't find any data, we can't do anything
   if (input_data.empty()) {
     g_log.warning() << "No data found matching input in " << this->name()
-                    << std::endl;
+                    << '\n';
     this->setProperty("OutputWorkspace", input_ws);
     return; // POSSIBLE EXIT POINT
   }
@@ -354,8 +344,8 @@ void AccumulateMD::exec() {
     IMDEventWorkspace_sptr out_ws = createMDWorkspace(
         input_data, psi, gl, gs, efix, out_filename, filebackend);
     this->setProperty("OutputWorkspace", out_ws);
-    g_log.notice() << this->name() << " successfully created a clean workspace"
-                   << std::endl;
+    g_log.notice() << this->name()
+                   << " successfully created a clean workspace\n";
     this->progress(1.0);
     return; // POSSIBLE EXIT POINT
   }
@@ -373,11 +363,11 @@ void AccumulateMD::exec() {
   const std::string old_sources =
       filterToNew(input_data, current_data, psi, gl, gs, efix);
   g_log.notice() << "Data from these sources are already in the workspace: "
-                 << old_sources << std::endl;
+                 << old_sources << '\n';
 
   if (input_data.empty()) {
     g_log.notice() << "No new data to append to workspace in " << this->name()
-                   << std::endl;
+                   << '\n';
     this->setProperty("OutputWorkspace", input_ws);
     return; // POSSIBLE EXIT POINT
   }
@@ -407,7 +397,7 @@ void AccumulateMD::exec() {
       merge_alg->getProperty("OutputWorkspace");
 
   this->setProperty("OutputWorkspace", out_ws);
-  g_log.notice() << this->name() << " successfully appended data" << std::endl;
+  g_log.notice() << this->name() << " successfully appended data\n";
 
   this->progress(1.0); // Report as MergeMD is complete
 

@@ -124,8 +124,7 @@ void DiffractionFocussing::exec() {
       ++discarded;
     }
   g_log.warning() << "Discarded " << discarded
-                  << " spectra that were not assigned to any group"
-                  << std::endl;
+                  << " spectra that were not assigned to any group\n";
 
   // Running GroupDetectors leads to a load of redundant spectra
   // Create a new workspace that's the right size for the meaningful spectra and
@@ -146,9 +145,9 @@ void DiffractionFocussing::exec() {
     outE.assign(tmpE.begin(), tmpE.end());
     outY.assign(tmpY.begin(), tmpY.end());
     outX.assign(tmpX.begin(), tmpX.end());
-    API::ISpectrum *inSpec = tmpW->getSpectrum(i);
-    outputW->getSpectrum(hist)->setSpectrumNo(inSpec->getSpectrumNo());
-    inSpec->setSpectrumNo(-1);
+    auto &inSpec = tmpW->getSpectrum(i);
+    outputW->getSpectrum(hist).setSpectrumNo(inSpec.getSpectrumNo());
+    inSpec.setSpectrumNo(-1);
   }
 
   progress(1.);
@@ -157,8 +156,6 @@ void DiffractionFocussing::exec() {
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputW);
-
-  return;
 }
 
 /// Run ConvertUnits as a Child Algorithm to convert to dSpacing
@@ -247,7 +244,7 @@ DiffractionFocussing::readGroupingFile(std::string groupingFileName) {
   std::ifstream grFile(groupingFileName.c_str());
   if (!grFile) {
     g_log.error() << "Unable to open grouping file " << groupingFileName
-                  << std::endl;
+                  << '\n';
     throw Exception::FileError("Error reading .cal file", groupingFileName);
   }
 

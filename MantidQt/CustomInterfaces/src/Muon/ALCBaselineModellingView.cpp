@@ -15,6 +15,7 @@
 #include <qwt_symbol.h>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt {
 namespace CustomInterfaces {

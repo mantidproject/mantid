@@ -15,16 +15,6 @@ using namespace API;
 using namespace Kernel;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CopyLogs::CopyLogs() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CopyLogs::~CopyLogs() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CopyLogs::name() const { return "CopyLogs"; }
 
@@ -83,7 +73,7 @@ void CopyLogs::exec() {
     throw std::runtime_error("Cannot copy logs using unknown merge strategy");
   }
 
-  setPropertyValue("OutputWorkspace", outputWs->name());
+  setProperty("OutputWorkspace", outputWs->getName());
 }
 
 /**

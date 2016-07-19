@@ -25,7 +25,6 @@
 
 #include <functional>
 
-using std::endl;
 using std::map;
 using std::string;
 using std::vector;
@@ -373,14 +372,14 @@ public:
         if (usedDetIds[pixID - m_min_id]) {
           // Find the the workspace index corresponding to that pixel ID
           size_t wi = pixelID_to_wi_vector[pixID + pixelID_to_wi_offset];
-          EventList *el = outputWS.getEventListPtr(wi);
+          auto &el = outputWS.getSpectrum(wi);
           if (compress)
-            el->compressEvents(alg->compressTolerance, el);
+            el.compressEvents(alg->compressTolerance, &el);
           else {
             if (pulsetimesincreasing)
-              el->setSortOrder(DataObjects::PULSETIME_SORT);
+              el.setSortOrder(DataObjects::PULSETIME_SORT);
             else
-              el->setSortOrder(DataObjects::UNSORTED);
+              el.setSortOrder(DataObjects::UNSORTED);
           }
         }
       }
@@ -389,7 +388,7 @@ public:
 
     alg->getLogger().debug()
         << entry_name << (pulsetimesincreasing ? " had " : " DID NOT have ")
-        << "monotonically increasing pulse times" << std::endl;
+        << "monotonically increasing pulse times\n";
 
     // Join back up the tof limits to the global ones
     // This is not thread safe, so only one thread at a time runs this.
@@ -503,7 +502,7 @@ public:
       thisBankPulseTimes = alg->m_allBanksPulseTimes;
       return;
     }
-    std::string thisStartTime = "";
+    std::string thisStartTime;
     size_t thisNumPulses = 0;
     file.getAttr("offset", thisStartTime);
     if (!file.getInfo().dims.empty())
@@ -556,8 +555,6 @@ public:
         alg->getLogger().debug() << "Bank " << entry_name << " is empty.\n";
       }
     }
-
-    return;
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -627,8 +624,6 @@ public:
 
     alg->getLogger().debug() << entry_name << ": start_event " << start_event
                              << " stop_event " << stop_event << "\n";
-
-    return;
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -686,8 +681,6 @@ public:
       if (m_max_id > static_cast<uint32_t>(alg->eventid_max))
         m_max_id = static_cast<uint32_t>(alg->eventid_max);
     }
-
-    return;
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -736,8 +729,6 @@ public:
       }
       file.closeData();
     } // no error
-
-    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -782,8 +773,6 @@ public:
     if (!m_loadError) {
       file.closeData();
     }
-
-    return;
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -863,12 +852,12 @@ public:
     } // try block
     catch (std::exception &e) {
       alg->getLogger().error() << "Error while loading bank " << entry_name
-                               << ":" << std::endl;
-      alg->getLogger().error() << e.what() << std::endl;
+                               << ":\n";
+      alg->getLogger().error() << e.what() << '\n';
       m_loadError = true;
     } catch (...) {
       alg->getLogger().error() << "Unspecified error while loading bank "
-                               << entry_name << std::endl;
+                               << entry_name << '\n';
       m_loadError = true;
     }
 
@@ -1275,9 +1264,8 @@ void LoadEventNexus::setTopEntryName() {
       }
     }
   } catch (const std::exception &) {
-    g_log.error()
-        << "Unable to determine name of top level NXentry - assuming \"entry\"."
-        << std::endl;
+    g_log.error() << "Unable to determine name of top level NXentry - assuming "
+                     "\"entry\".\n";
     m_top_entry_name = "entry";
   }
 }
@@ -1371,9 +1359,9 @@ void LoadEventNexus::exec() {
     const bool monitorsAsEvents = getProperty("MonitorsAsEvents");
 
     if (monitorsAsEvents && !this->hasEventMonitors()) {
-      g_log.warning() << "The property MonitorsAsEvents has been enabled but "
-                         "this file does not seem to have monitors with events."
-                      << endl;
+      g_log.warning()
+          << "The property MonitorsAsEvents has been enabled but "
+             "this file does not seem to have monitors with events.\n";
     }
     if (monitorsAsEvents) {
       // no matter whether the file has events or not, the user has requested to
@@ -1389,8 +1377,6 @@ void LoadEventNexus::exec() {
       this->runLoadMonitors();
     }
   }
-
-  return;
 }
 
 //-----------------------------------------------------------------------------
@@ -1423,11 +1409,9 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
     }
     for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
       for (size_t i = 0; i < m_ws->getNumberHistograms(); ++i) {
-        const ISpectrum *spec = m_ws->getSpectrum(i);
-        if (spec) {
-          getEventsFrom(m_ws->getEventList(i, period),
-                        vectors[period][spec->getSpectrumNo()]);
-        }
+        const auto &spec = m_ws->getSpectrum(i);
+        getEventsFrom(m_ws->getSpectrum(i, period),
+                      vectors[period][spec.getSpectrumNo()]);
       }
     }
   } else {
@@ -1448,7 +1432,7 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
       // Save a POINTER to the vector
       if (wi < m_ws->getNumberHistograms()) {
         for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
-          getEventsFrom(m_ws->getEventList(wi, period),
+          getEventsFrom(m_ws->getSpectrum(wi, period),
                         vectors[period][j - pixelID_to_wi_offset]);
         }
       }
@@ -1767,7 +1751,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
                                                      m_top_entry_name);
   } catch (std::runtime_error &e) {
     // Missing metadata is not a fatal error. Log and go on with your life
-    g_log.error() << "Error loading metadata: " << e.what() << std::endl;
+    g_log.error() << "Error loading metadata: " << e.what() << '\n';
   }
 
   // --------------------------- Time filtering
@@ -1813,17 +1797,12 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   if (metaDataOnly) {
     // Now, create a default X-vector for histogramming, with just 2 bins.
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec &xRef = axis.access();
-    xRef.resize(2);
-    xRef[0] = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1 -
-              1; // Just to make sure the bins hold it all
-    xRef[1] = 1;
+    auto axis = HistogramData::BinEdges{
+        static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1 - 1, 1};
     // Set the binning axis using this.
     m_ws->setAllX(axis);
 
     createWorkspaceIndexMaps(monitors, std::vector<std::string>());
-
     return;
   }
 
@@ -1883,7 +1862,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   } else {
     // Convert to weighted events
     for (size_t i = 0; i < m_ws->getNumberHistograms(); i++) {
-      m_ws->getEventList(i).switchTo(API::WEIGHTED);
+      m_ws->getSpectrum(i).switchTo(API::WEIGHTED);
     }
     this->makeMapToEventLists<WeightedEventVector_pt>(weightedEventVectors);
   }
@@ -1891,7 +1870,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Set all (empty) event lists as sorted by pulse time. That way, calling
   // SortEvents will not try to sort these empty lists.
   for (size_t i = 0; i < m_ws->getNumberHistograms(); i++)
-    m_ws->getEventList(i).setSortOrder(DataObjects::PULSETIME_SORT);
+    m_ws->getSpectrum(i).setSortOrder(DataObjects::PULSETIME_SORT);
 
   // Count the limits to time of flight
   shortest_tof =
@@ -1995,15 +1974,15 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   g_log.information() << "Read " << eventsLoaded << " events"
                       << ". Shortest TOF: " << shortest_tof
                       << " microsec; longest TOF: " << longest_tof
-                      << " microsec." << std::endl;
+                      << " microsec.\n";
 
   if (shortest_tof < 0)
     g_log.warning() << "The shortest TOF was negative! At least 1 event has an "
-                       "invalid time-of-flight." << std::endl;
+                       "invalid time-of-flight.\n";
   if (bad_tofs > 0)
     g_log.warning() << "Found " << bad_tofs << " events with TOF > 2e8. This "
                                                "may indicate errors in the raw "
-                                               "TOF data." << std::endl;
+                                               "TOF data.\n";
 
   // Use T0 offset from TOPAZ Parameter file if it exists
   if (m_ws->getInstrument()->hasParameter("T0")) {
@@ -2018,7 +1997,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
         for (int64_t i = 0; i < numHistograms; ++i) {
           PARALLEL_START_INTERUPT_REGION
           // Do the offsetting
-          m_ws->getEventList(i).addTof(mT0);
+          m_ws->getSpectrum(i).addTof(mT0);
           PARALLEL_END_INTERUPT_REGION
         }
         PARALLEL_CHECK_INTERUPT_REGION
@@ -2029,15 +2008,10 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
   }
   // Now, create a default X-vector for histogramming, with just 2 bins.
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &xRef = axis.access();
-  xRef.resize(2, 0.0);
-  if (eventsLoaded > 0) {
-    xRef[0] = shortest_tof - 1; // Just to make sure the bins hold it all
-    xRef[1] = longest_tof + 1;
-  }
-  // Set the binning axis using this.
-  m_ws->setAllX(axis);
+  if (eventsLoaded > 0)
+    m_ws->setAllX(HistogramData::BinEdges{shortest_tof - 1, longest_tof + 1});
+  else
+    m_ws->setAllX(HistogramData::BinEdges(2, 0.0));
 
   // if there is time_of_flight load it
   loadTimeOfFlight(m_ws, m_top_entry_name, classType);
@@ -2072,7 +2046,7 @@ bool LoadEventNexus::runLoadIDFFromNexus<EventWorkspaceCollection_sptr>(
 */
 std::string
 LoadEventNexus::readInstrumentFromISIS_VMSCompat(::NeXus::File &hFile) {
-  std::string instrumentName("");
+  std::string instrumentName;
   try {
     hFile.openGroup("isis_vms_compat", "IXvms");
   } catch (std::runtime_error &) {
@@ -2203,7 +2177,6 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
       inst->remove(comp);
     }
   }
-  return;
 }
 //-----------------------------------------------------------------------------
 /**
@@ -2330,7 +2303,7 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     if (m_instrument_loaded_correctly) {
       m_ws->setInstrument(dataWS->getInstrument());
       g_log.information() << "Instrument data copied into monitors workspace "
-                             " from the data workspace." << std::endl;
+                             " from the data workspace.\n";
     }
 
     // Perform the load (only events from monitor)
@@ -2342,17 +2315,17 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     if (m_logs_loaded_correctly) {
       g_log.information()
           << "Copying log data into monitors workspace from the "
-          << "data workspace." << std::endl;
+          << "data workspace.\n";
       try {
         auto to = m_ws->getSingleHeldWorkspace();
         auto from = dataWS;
         copyLogs(from, to);
-        g_log.information() << "Log data copied." << std::endl;
+        g_log.information() << "Log data copied.\n";
       } catch (std::runtime_error &) {
         g_log.error()
             << "Could not copy log data into monitors workspace. Some "
                " logs may be wrong and/or missing in the output "
-               "monitors workspace." << std::endl;
+               "monitors workspace.\n";
       }
     }
 
@@ -2371,7 +2344,7 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     filterDuringPause(m_ws);
   } catch (const std::exception &e) {
     g_log.error() << "Error while loading monitors as events from file: ";
-    g_log.error() << e.what() << std::endl;
+    g_log.error() << e.what() << '\n';
   }
 }
 
@@ -2394,7 +2367,7 @@ void LoadEventNexus::runLoadMonitors() {
     g_log.information("Loading monitors from NeXus file...");
     loadMonitors->setPropertyValue("Filename", m_filename);
     g_log.information() << "New workspace name for monitors: " << mon_wsname
-                        << std::endl;
+                        << '\n';
     loadMonitors->setPropertyValue("OutputWorkspace", mon_wsname);
     loadMonitors->setPropertyValue("MonitorsAsEvents",
                                    this->getProperty("MonitorsAsEvents"));
@@ -2678,8 +2651,8 @@ void LoadEventNexus::loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
       }
       if (time_channels_number > 0) // the numbers start with 1
       {
-        m_file->openGroup("time_channels_" + boost::lexical_cast<std::string>(
-                                                 time_channels_number),
+        m_file->openGroup("time_channels_" +
+                              std::to_string(time_channels_number),
                           "IXtime_channels");
         entries = m_file->getEntries();
         for (string_map_t::const_iterator it = entries.begin();
@@ -2742,7 +2715,7 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
 
   // loop over spectra
   for (size_t wi = start_wi; wi < end_wi; ++wi) {
-    EventList &event_list = WS->getEventList(wi);
+    EventList &event_list = WS->getSpectrum(wi);
     // sort the events
     event_list.sortTof();
     std::vector<TofEvent> &events = event_list.getEvents();

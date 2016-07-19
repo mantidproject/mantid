@@ -19,16 +19,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(TransformMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-TransformMD::TransformMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-TransformMD::~TransformMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string TransformMD::name() const { return "TransformMD"; }
 

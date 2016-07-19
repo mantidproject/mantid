@@ -5,12 +5,9 @@
 
 #include "MantidCurveFitting/Functions/MuonFInteraction.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid::Kernel;

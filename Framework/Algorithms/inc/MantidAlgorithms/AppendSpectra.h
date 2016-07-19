@@ -44,9 +44,6 @@ namespace Algorithms {
 */
 class DLLExport AppendSpectra : public WorkspaceJoiners {
 public:
-  AppendSpectra();
-  ~AppendSpectra() override;
-
   const std::string name() const override;
   int version() const override;
 

@@ -643,7 +643,7 @@ FileFinderImpl::findRuns(const std::string &hintstr) const {
         throw std::invalid_argument("Malformed range of runs: " + *h);
       }
       for (int irun = runNumber; irun <= runEndNumber; ++irun) {
-        run = boost::lexical_cast<std::string>(irun);
+        run = std::to_string(irun);
         while (run.size() < nZero)
           run.insert(0, "0");
         std::string path = findRun(p1.first + run);
@@ -680,7 +680,7 @@ std::string
 FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
                                const std::set<std::string> &filenames,
                                const std::vector<std::string> &exts) const {
-  std::string path = "";
+  std::string path;
   for (const auto &arch : archs) {
     try {
       path = arch->getArchivePath(filenames, exts);

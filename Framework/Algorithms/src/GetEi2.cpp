@@ -175,7 +175,7 @@ double GetEi2::calculateEi(const double initial_guess) {
       double tzero = p.Eval();
       setProperty("Tzero", tzero);
 
-      g_log.debug() << "T0 = " << tzero << std::endl;
+      g_log.debug() << "T0 = " << tzero << '\n';
       return initial_guess;
     } catch (mu::Parser::exception_type &e) {
       throw Kernel::Exception::InstrumentDefinitionError(
@@ -237,7 +237,7 @@ double GetEi2::calculateEi(const double initial_guess) {
       if (!m_fixedei) {
         throw std::invalid_argument(
             "No peak found for the monitor with spectra num: " +
-            boost::lexical_cast<std::string>(spec_nums[i]) + " (at " +
+            std::to_string(spec_nums[i]) + " (at " +
             boost::lexical_cast<std::string>(det_distances[i]) +
             "  metres from source).\n");
       } else {
@@ -265,8 +265,8 @@ double GetEi2::calculateEi(const double initial_guess) {
     double mean_speed =
         (det_distances[1] - det_distances[0]) / (peak_times[1] - peak_times[0]);
     double tzero = peak_times[1] - ((1.0 / mean_speed) * det_distances[1]);
-    g_log.debug() << "T0 = " << tzero << std::endl;
-    g_log.debug() << "Mean Speed = " << mean_speed << std::endl;
+    g_log.debug() << "T0 = " << tzero << '\n';
+    g_log.debug() << "Mean Speed = " << mean_speed << '\n';
     setProperty("Tzero", tzero);
 
     const double energy = mean_speed * mean_speed * m_t_to_mev;

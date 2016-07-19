@@ -111,9 +111,6 @@ void ConvertToMD::init() {
                   "demand in order to reduce memory use.");
 }
 //----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ConvertToMD::~ConvertToMD() {}
 
 const std::string ConvertToMD::name() const { return "ConvertToMD"; }
 
@@ -264,7 +261,6 @@ void ConvertToMD::exec() {
   // free up the sp to the input workspace, which would be deleted if nobody
   // needs it any more;
   m_InWS2D.reset();
-  return;
 }
 /**
  * Copy over the part of metadata necessary to initialize ConvertToMD plugin
@@ -359,7 +355,7 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   // objects instead
   auto mapping = boost::make_shared<det2group_map>();
   for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
-    const auto &dets = m_InWS2D->getSpectrum(i)->getDetectorIDs();
+    const auto &dets = m_InWS2D->getSpectrum(i).getDetectorIDs();
     if (!dets.empty()) {
       mapping->emplace(*dets.begin(),
                        std::vector<detid_t>(dets.begin(), dets.end()));
@@ -378,8 +374,6 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   }
 }
 
-/** Constructor */
-ConvertToMD::ConvertToMD() {}
 /** handle the input parameters and build target workspace description as
 function of input parameters
 * @param spws shared pointer to target MD workspace (just created or already
@@ -457,7 +451,7 @@ bool ConvertToMD::buildTargetWSDescription(
     MsliceProj.setUVvectors(ut, vt, wt);
   } catch (std::invalid_argument &) {
     g_log.error() << "The projections are coplanar. Will use defaults "
-                     "[1,0,0],[0,1,0] and [0,0,1]" << std::endl;
+                     "[1,0,0],[0,1,0] and [0,0,1]\n";
   }
 
   if (createNewTargetWs) {
@@ -626,7 +620,7 @@ void ConvertToMD::findMinMax(
       {
         g_log.information()
             << " Min Value: " << minVal[i] << " for dimension N: " << i
-            << " equal or exceeds max value:" << maxVal[i] << std::endl;
+            << " equal or exceeds max value:" << maxVal[i] << '\n';
         wellDefined = false;
         break;
       }

@@ -142,7 +142,7 @@ void MergeMDFiles::loadBoxData() {
   }
 
   g_log.notice() << totalEvents << " events in " << m_Filenames.size()
-                 << " files." << std::endl;
+                 << " files.\n";
 }
 
 /** Task that loads all of the events from corresponded boxes of all files
@@ -212,7 +212,7 @@ void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,
   if (m_fileBasedTargetWS) {
     bc->setFileBacked(saver, outputFile);
     // Complete the file-back-end creation.
-    g_log.notice() << "Setting cache to 400 MB write." << std::endl;
+    g_log.notice() << "Setting cache to 400 MB write.\n";
     bc->getFileIO()->setWriteBufferSize(400000000 / m_OutIWS->sizeofEvent());
   }
 
@@ -291,7 +291,7 @@ void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,
   }
   //// Run any final tasks
   // tp.joinAll();
-  g_log.information() << overallTime << " to do all the adding." << std::endl;
+  g_log.information() << overallTime << " to do all the adding.\n";
 
   // Close any open file handle
   clearEventLoaders();
@@ -308,11 +308,10 @@ void MergeMDFiles::finalizeOutput(const std::string &outputFile) {
   this->progress(0.90, "Refreshing Cache");
   m_OutIWS->refreshCache();
 
-  g_log.information() << overallTime << " to run refreshCache()." << std::endl;
+  g_log.information() << overallTime << " to run refreshCache().\n";
 
   if (!outputFile.empty()) {
-    g_log.notice() << "Starting SaveMD to update the file back-end."
-                   << std::endl;
+    g_log.notice() << "Starting SaveMD to update the file back-end.\n";
     // create or open WS group and put there additional information about WS and
     // its dimensions
     bool old_data_there;
@@ -337,8 +336,7 @@ void MergeMDFiles::finalizeOutput(const std::string &outputFile) {
     // Save box structure;
     m_BoxStruct.saveBoxStructure(outputFile);
 
-    g_log.information() << overallTime << " to run SaveMD structure"
-                        << std::endl;
+    g_log.information() << overallTime << " to run SaveMD structure\n";
   }
 }
 

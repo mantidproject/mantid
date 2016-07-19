@@ -7,6 +7,10 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include <vector>
 
 namespace Mantid {
@@ -40,6 +44,8 @@ void CalculateEfficiency::init() {
   declareProperty(
       "MaxEfficiency", EMPTY_DBL(), positiveDouble,
       "Maximum efficiency for a pixel to be considered (default: no maximum).");
+  declareProperty("MaskedFullComponent", "",
+                  "Component Name to fully mask according to the IDF file.");
 }
 
 /** Executes the algorithm
@@ -55,6 +61,12 @@ void CalculateEfficiency::exec() {
   // Get the input workspace
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr rebinnedWS; // = inputWS;
+
+  //  BioSANS has 2 detectors and reduces one at the time: one is masked!
+  //  We must use that masked detector
+  const std::string maskedComponent = getPropertyValue("MaskedFullComponent");
+  if (!maskedComponent.empty())
+    maskComponent(*inputWS, maskedComponent);
 
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS; // = getProperty("OutputWorkspace");
@@ -105,8 +117,6 @@ void CalculateEfficiency::exec() {
     normalizeDetectors(rebinnedWS, outputWS, sum, err, npixels, EMPTY_DBL(),
                        EMPTY_DBL());
   }
-
-  return;
 }
 
 /*
@@ -147,6 +157,9 @@ void CalculateEfficiency::sumUnmaskedDetectors(MatrixWorkspace_sptr rebinnedWS,
     error += YErrors[0] * YErrors[0];
     nPixels++;
   }
+
+  g_log.debug() << "sumUnmaskedDetectors: unmasked pixels = " << nPixels
+                << " from a total of " << numberOfSpectra << "\n";
 
   error = std::sqrt(error);
 }
@@ -211,6 +224,13 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
       dets_to_mask.push_back(i);
   }
 
+  g_log.debug() << "normalizeDetectors: Masked pixels outside the acceptable "
+                   "efficiency range [" << min_eff << "," << max_eff
+                << "] = " << dets_to_mask.size()
+                << " from a total of non masked = " << nPixels
+                << " (from a total number of spectra in the ws = "
+                << numberOfSpectra << ")\n";
+
   // If we identified pixels to be masked, mask them now
   if (!dets_to_mask.empty()) {
     // Mask detectors that were found to be outside the acceptable efficiency
@@ -239,6 +259,46 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
         << err.what();
       g_log.error(e.str());
     }
+  }
+}
+
+/**
+ * Fully masks one component named componentName
+ * @param ws :: workspace with the respective instrument assigned
+ * @param componentName :: must be a known CompAssembly.
+ */
+void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
+                                        const std::string &componentName) {
+  auto instrument = ws.getInstrument();
+  try {
+    boost::shared_ptr<const Geometry::ICompAssembly> component =
+        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+            instrument->getComponentByName(componentName));
+    if (!component) {
+      g_log.warning("Component " + componentName +
+                    " expected to be a CompAssembly, e.g., a bank. Component " +
+                    componentName + " not masked!");
+      return;
+    }
+    std::vector<detid_t> detectorList;
+    for (int x = 0; x < component->nelements(); x++) {
+      boost::shared_ptr<Geometry::ICompAssembly> xColumn =
+          boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*component)[x]);
+      for (int y = 0; y < xColumn->nelements(); y++) {
+        boost::shared_ptr<Geometry::Detector> detector =
+            boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
+        if (detector) {
+          auto detID = detector->getID();
+          detectorList.push_back(detID);
+        }
+      }
+    }
+    auto indexList = ws.getIndicesFromDetectorIDs(detectorList);
+    for (const auto &idx : indexList)
+      ws.maskWorkspaceIndex(idx);
+  } catch (std::exception &) {
+    g_log.warning("Expecting the component " + componentName +
+                  " to be a CompAssembly, e.g., a bank. Component not masked!");
   }
 }
 

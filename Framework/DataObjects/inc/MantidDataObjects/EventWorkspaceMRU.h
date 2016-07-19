@@ -5,6 +5,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/MRUList.h"
+#include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/CountStandardDeviations.h"
 #include <vector>
 #include <mutex>
 
@@ -14,51 +16,31 @@ namespace DataObjects {
 //============================================================================
 //============================================================================
 /**
- * This little class holds a MantidVec of data and an index marker that
- * is used for uniqueness.
+ * This little class holds data and an index marker that is used for uniqueness.
  * This is used in the MRUList.
- *
  */
-class MantidVecWithMarker {
+template <class T> class TypeWithMarker {
 public:
   /**
    * Constructor.
    * @param the_index :: unique index into the workspace of this data
-   * @param locked :: reference to a bool that will be set to true if
-   *        the marker should NOT be deleted
    */
-  MantidVecWithMarker(const size_t the_index, bool &locked)
-      : m_index(the_index), m_locked(locked) {}
-
-  /// Destructor
-  ~MantidVecWithMarker() {
-    m_data.clear();
-    // Trick to release the allocated memory
-    // MantidVec().swap(m_data);
-  }
-
-private:
-  /// Unimplemented, private copy constructor
-  MantidVecWithMarker(const MantidVecWithMarker &other);
-  /// Unimplemented, private assignment operator
-  MantidVecWithMarker &operator=(const MantidVecWithMarker &other);
+  TypeWithMarker(const size_t the_index) : m_index(the_index) {}
+  TypeWithMarker(const TypeWithMarker &other) = delete;
+  TypeWithMarker &operator=(const TypeWithMarker &other) = delete;
 
 public:
   /// Unique index value.
   size_t m_index;
 
   /// Pointer to a vector of data
-  MantidVec m_data;
+  T m_data;
 
   /// Function returns a unique index, used for hashing for MRU list
   size_t hashIndexFunction() const { return m_index; }
 
   /// Set the unique index value.
   void setIndex(const size_t the_index) { m_index = the_index; }
-
-  /// Locked: can't be deleted. This will point to the EventList's m_lockedMRU
-  /// bool.
-  bool &m_locked;
 };
 
 //============================================================================
@@ -89,10 +71,11 @@ public:
 */
 class DLLExport EventWorkspaceMRU {
 public:
+  using YWithMarker = TypeWithMarker<HistogramData::Counts>;
+  using EWithMarker = TypeWithMarker<HistogramData::CountStandardDeviations>;
   // Typedef for a Most-Recently-Used list of Data objects.
-  typedef Mantid::Kernel::MRUList<MantidVecWithMarker> mru_list;
-  // Typedef for a vector of MRUlists.
-  typedef std::vector<mru_list *> mru_lists;
+  using mru_listY = Kernel::MRUList<YWithMarker>;
+  using mru_listE = Kernel::MRUList<EWithMarker>;
 
   EventWorkspaceMRU();
   ~EventWorkspaceMRU();
@@ -102,10 +85,12 @@ public:
 
   void clear();
 
-  MantidVecWithMarker *findY(size_t thread_num, size_t index);
-  MantidVecWithMarker *findE(size_t thread_num, size_t index);
-  void insertY(size_t thread_num, MantidVecWithMarker *data);
-  void insertE(size_t thread_num, MantidVecWithMarker *data);
+  HistogramData::Counts findY(size_t thread_num, size_t index);
+  HistogramData::CountStandardDeviations findE(size_t thread_num, size_t index);
+  void insertY(size_t thread_num, HistogramData::Counts data,
+               const size_t index);
+  void insertE(size_t thread_num, HistogramData::CountStandardDeviations data,
+               const size_t index);
 
   void deleteIndex(size_t index);
 
@@ -116,16 +101,10 @@ public:
 
 protected:
   /// The most-recently-used list of dataY histograms
-  mutable mru_lists m_bufferedDataY;
+  mutable std::vector<mru_listY *> m_bufferedDataY;
 
   /// The most-recently-used list of dataE histograms
-  mutable mru_lists m_bufferedDataE;
-
-  /// These markers will be deleted when they are NOT locked
-  mutable std::vector<MantidVecWithMarker *> m_markersToDelete;
-
-  /// Mutex around accessing m_markersToDelete
-  std::mutex m_toDeleteMutex;
+  mutable std::vector<mru_listE *> m_bufferedDataE;
 
   /// Mutex when adding entries in the MRU list
   mutable std::mutex m_changeMruListsMutexE;

@@ -251,8 +251,8 @@ void ScaleDetails::initWidgets() {
   } else {
     Plot *d_plot = m_graph->plotWidget();
     const QwtScaleDiv *scDiv = d_plot->axisScaleDiv(m_mappedaxis);
-    double start = QMIN(scDiv->lBound(), scDiv->hBound());
-    double end = QMAX(scDiv->lBound(), scDiv->hBound());
+    double start = qMin(scDiv->lBound(), scDiv->hBound());
+    double end = qMax(scDiv->lBound(), scDiv->hBound());
     ScaleDraw::ScaleType type = m_graph->axisType(m_mappedaxis);
     if (type == ScaleDraw::Date) {
       ScaleDraw *sclDraw =

@@ -133,11 +133,6 @@ GetDetOffsetsMultiPeaks::GetDetOffsetsMultiPeaks()
       m_useFitWindowTable(false), m_vecFitWindow() {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
-  */
-GetDetOffsetsMultiPeaks::~GetDetOffsetsMultiPeaks() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialisation method. Declares properties to be used in algorithm.
    */
 void GetDetOffsetsMultiPeaks::init() {
@@ -286,8 +281,6 @@ void GetDetOffsetsMultiPeaks::exec() {
   // Make summary
   progress(0.92, "Making summary");
   makeFitSummary();
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -385,8 +378,6 @@ void GetDetOffsetsMultiPeaks::processProperties() {
       throw std::runtime_error(
           "Input workspace does not match resolution workspace. ");
   }
-
-  return;
 }
 
 //-----------------------------------------------------------------------------------------
@@ -468,8 +459,6 @@ void GetDetOffsetsMultiPeaks::importFitWindowTableWorkspace(
       if (m_vecFitWindow[i].empty())
         m_vecFitWindow[i] = vec_univFitWindow;
   }
-
-  return;
 }
 
 //-----------------------------------------------------------------------------------------
@@ -495,8 +484,7 @@ void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
           calculatePeakOffset(wi, fittedpeakpositions, tofitpeakpositions);
 
       // Get the list of detectors in this pixel
-      const std::set<detid_t> &dets =
-          m_inputWS->getSpectrum(wi)->getDetectorIDs();
+      const auto &dets = m_inputWS->getSpectrum(wi).getDetectorIDs();
 
       // Most of the exec time is in FitSpectra, so this critical block should
       // not be a problem.
@@ -552,8 +540,6 @@ void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
-
-    return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -584,7 +570,7 @@ FitPeakOffsetResult GetDetOffsetsMultiPeaks::calculatePeakOffset(
   fr.dev_resolution = 0.0;
 
   // Checks for empty and dead detectors
-  if ((m_isEvent) && (m_eventW->getEventList(wi).empty())) {
+  if ((m_isEvent) && (m_eventW->getSpectrum(wi).empty())) {
     // empty detector will be masked
     fr.offset = BAD_OFFSET;
     fr.fitoffsetstatus = "empty det";
@@ -776,7 +762,6 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
   gsl_vector_free(x);
   gsl_vector_free(ss);
   gsl_multimin_fminimizer_free(s);
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -808,8 +793,6 @@ void deletePeaks(std::vector<size_t> &banned, std::vector<double> &peakPosToFit,
     vecDeltaDovD.erase(vecDeltaDovD.begin() + (*it));
   }
   banned.clear();
-
-  return;
 }
 }
 
@@ -858,7 +841,7 @@ int GetDetOffsetsMultiPeaks::fitSpectra(
     // throw if minD >= maxD
     std::stringstream ess;
     ess << "Stuff went wrong with wkspIndex=" << wi
-        << " specNum=" << inputW->getSpectrum(wi)->getSpectrumNo();
+        << " specNum=" << inputW->getSpectrum(wi).getSpectrumNo();
     throw std::runtime_error(ess.str());
   }
 
@@ -870,8 +853,8 @@ int GetDetOffsetsMultiPeaks::fitSpectra(
     }
   }
   std::stringstream dbss;
-  dbss << "D-RANGE[" << inputW->getSpectrum(wi)->getSpectrumNo()
-       << "]: " << minD << " -> " << maxD;
+  dbss << "D-RANGE[" << inputW->getSpectrum(wi).getSpectrumNo() << "]: " << minD
+       << " -> " << maxD;
   g_log.debug(dbss.str());
 
   // Setup the fit windows
@@ -1125,8 +1108,6 @@ void GetDetOffsetsMultiPeaks::generatePeaksList(
   Statistics widthDivPos = getStatistics(vec_widthDivPos);
   deltaDovD = widthDivPos.mean;
   dev_deltaDovD = widthDivPos.standard_deviation;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1176,8 +1157,6 @@ void GetDetOffsetsMultiPeaks::createInformationWorkspaces() {
   // Create resolution (delta(d)/d) workspace
   m_resolutionWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", numspec, 1, 1));
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1260,8 +1239,6 @@ void GetDetOffsetsMultiPeaks::addInfoToReportWS(
     size_t icol = m_peakOffsetTableWS->columnCount() - 1;
     m_peakOffsetTableWS->cell<double>(wi, icol) = stddev;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1294,8 +1271,6 @@ void GetDetOffsetsMultiPeaks::removeEmptyRowsFromPeakOffsetTable() {
       ++icurrow;
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1328,17 +1303,16 @@ void GetDetOffsetsMultiPeaks::makeFitSummary() {
   if (0 == numunmasked) {
     g_log.warning()
         << "Found 0 unmasked rows in the spectra info table. "
-           "Cannot calculate Chi-sq sensibly. it's value will be NaN"
-        << std::endl;
+           "Cannot calculate Chi-sq sensibly. it's value will be NaN\n";
     avgchi2 = NAN;
   } else {
     avgchi2 = sumchi2 / static_cast<double>(numunmasked);
   }
 
   if (0 == weight_numfittedpeaks) {
-    g_log.warning() << "Found 0 fitted peaks in the spectra info table. "
-                       "Cannot calculate the weighted average Chi-sq sensibly"
-                    << std::endl;
+    g_log.warning()
+        << "Found 0 fitted peaks in the spectra info table. "
+           "Cannot calculate the weighted average Chi-sq sensibly\n";
     wtavgchi2 = NAN;
   } else {
     wtavgchi2 = weight_sumchi2 / static_cast<double>(weight_numfittedpeaks);

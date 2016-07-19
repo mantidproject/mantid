@@ -149,11 +149,11 @@ size_t AlgorithmHistory::childHistorySize() const {
 }
 
 /**
- * Retrieve a child algorithm history by index
- * @param index ::  An index within the child algorithm history set
- * @returns A pointer to an AlgorithmHistory object
- * @throws std::out_of_range error if the index is invalid
- */
+  * Retrieve a child algorithm history by index
+  * @param index ::  An index within the child algorithm history set
+  * @returns A pointer to an AlgorithmHistory object
+  * @throws std::out_of_range error if the index is invalid
+  */
 AlgorithmHistory_sptr
 AlgorithmHistory::getChildAlgorithmHistory(const size_t index) const {
   if (index >= this->getChildHistories().size()) {
@@ -174,6 +174,23 @@ AlgorithmHistory_sptr AlgorithmHistory::operator[](const size_t index) const {
 }
 
 /**
+* Gets the value of a specified algorithm property
+* @param name ::  The property to find
+* @returns The string value of the property
+* @throw Exception::NotFoundError if the named property is unknown
+*/
+const std::string &
+AlgorithmHistory::getPropertyValue(const std::string &name) const {
+  for (const auto &hist : m_properties) {
+    if (hist->name() == name) {
+      return hist->value();
+    }
+  }
+  throw Kernel::Exception::NotFoundError(
+      "Could not find the specified property", name);
+}
+
+/**
  *  Create an algorithm from a history record at a given index
  * @param index :: An index within the workspace history
  * @returns A shared pointer to an algorithm object
@@ -190,15 +207,14 @@ AlgorithmHistory::getChildAlgorithm(const size_t index) const {
  */
 void AlgorithmHistory::printSelf(std::ostream &os, const int indent) const {
   os << std::string(indent, ' ') << "Algorithm: " << m_name;
-  os << std::string(indent, ' ') << " v" << m_version << std::endl;
+  os << std::string(indent, ' ') << " v" << m_version << '\n';
 
   os << std::string(indent, ' ')
-     << "Execution Date: " << m_executionDate.toFormattedString() << std::endl;
+     << "Execution Date: " << m_executionDate.toFormattedString() << '\n';
   os << std::string(indent, ' ')
-     << "Execution Duration: " << m_executionDuration << " seconds"
-     << std::endl;
+     << "Execution Duration: " << m_executionDuration << " seconds\n";
 
-  os << std::string(indent, ' ') << "Parameters:" << std::endl;
+  os << std::string(indent, ' ') << "Parameters:\n";
 
   for (const auto &property : m_properties) {
     property->printSelf(os, indent + 2);

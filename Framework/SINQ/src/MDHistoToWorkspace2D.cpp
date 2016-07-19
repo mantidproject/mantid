@@ -44,11 +44,11 @@ void MDHistoToWorkspace2D::exec() {
 
   m_rank = inWS->getNumDims();
   size_t nSpectra = calculateNSpectra(inWS);
-  std::cout << "nSpectra = " << nSpectra << std::endl;
+  std::cout << "nSpectra = " << nSpectra << '\n';
 
   boost::shared_ptr<const IMDDimension> lastDim =
       inWS->getDimension(m_rank - 1);
-  std::cout << "spectraLength = " << lastDim->getNBins() << std::endl;
+  std::cout << "spectraLength = " << lastDim->getNBins() << '\n';
 
   Mantid::DataObjects::Workspace2D_sptr outWS;
   outWS = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
@@ -96,9 +96,9 @@ void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS,
     for (unsigned int i = 0; i < dim->getNBins(); i++) {
       xData.push_back(dim->getX(i));
     }
-    outWS->setX(m_currentSpectra, xData);
+    outWS->setPoints(m_currentSpectra, xData);
     outWS->getSpectrum(m_currentSpectra)
-        ->setSpectrumNo(static_cast<specnum_t>(m_currentSpectra));
+        .setSpectrumNo(static_cast<specnum_t>(m_currentSpectra));
     m_currentSpectra++;
   } else {
     // recurse deeper
@@ -118,10 +118,10 @@ void MDHistoToWorkspace2D::checkW2D(
   g_log.information() << "W2D has " << nSpectra << " histograms of length "
                       << length;
   for (size_t i = 0; i < nSpectra; i++) {
-    ISpectrum *spec = outWS->getSpectrum(i);
-    x = spec->dataX();
-    y = spec->dataY();
-    e = spec->dataE();
+    auto &spec = outWS->getSpectrum(i);
+    x = spec.dataX();
+    y = spec.dataY();
+    e = spec.dataE();
     if (x.size() != length) {
       g_log.information() << "Spectrum " << i << " x-size mismatch, is "
                           << x.size() << " should be " << length << "\n";

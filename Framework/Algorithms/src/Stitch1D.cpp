@@ -380,10 +380,8 @@ MatrixWorkspace_sptr Stitch1D::multiplyRange(MatrixWorkspace_sptr &input,
   multiplyRange->setProperty("StartBin", startBin);
   multiplyRange->setProperty("EndBin", endBin);
   multiplyRange->setProperty("Factor", factor);
-  g_log.information("MultiplyRange StartBin: " +
-                    boost::lexical_cast<std::string>(startBin));
-  g_log.information("MultiplyRange EndBin: " +
-                    boost::lexical_cast<std::string>(endBin));
+  g_log.information("MultiplyRange StartBin: " + std::to_string(startBin));
+  g_log.information("MultiplyRange EndBin: " + std::to_string(endBin));
   g_log.information("MultiplyRange Factor: " +
                     boost::lexical_cast<std::string>(factor));
   multiplyRange->execute();
@@ -404,8 +402,7 @@ MatrixWorkspace_sptr Stitch1D::multiplyRange(MatrixWorkspace_sptr &input,
   multiplyRange->setProperty("InputWorkspace", input);
   multiplyRange->setProperty("StartBin", startBin);
   multiplyRange->setProperty("Factor", factor);
-  g_log.information("MultiplyRange StartBin: " +
-                    boost::lexical_cast<std::string>(startBin));
+  g_log.information("MultiplyRange StartBin: " + std::to_string(startBin));
   g_log.information("MultiplyRange Factor: " +
                     boost::lexical_cast<std::string>(factor));
   multiplyRange->execute();

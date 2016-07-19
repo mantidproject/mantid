@@ -32,16 +32,6 @@ using namespace Kernel;
 DECLARE_ALGORITHM(ConvolutionFitSequential)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvolutionFitSequential::ConvolutionFitSequential() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvolutionFitSequential::~ConvolutionFitSequential() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ConvolutionFitSequential::name() const {
@@ -120,7 +110,9 @@ void ConvolutionFitSequential::init() {
                   "The maximum number of iterations permitted",
                   Direction::Input);
 
-  declareProperty("OutputWorkspace", "", Direction::Output);
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The OutputWorkspace containing the results of the fit.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -176,9 +168,9 @@ void ConvolutionFitSequential::exec() {
     outputWsName += convertFuncToShort(funcName);
   }
   outputWsName += backType + "_s";
-  outputWsName += boost::lexical_cast<std::string>(specMin);
+  outputWsName += std::to_string(specMin);
   outputWsName += "_to_";
-  outputWsName += boost::lexical_cast<std::string>(specMax);
+  outputWsName += std::to_string(specMax);
 
   // Convert input workspace to get Q axis
   const std::string tempFitWsName = "__convfit_fit_ws";
@@ -186,10 +178,10 @@ void ConvolutionFitSequential::exec() {
 
   Progress plotPeakStringProg(this, 0.0, 0.05, specMax - specMin);
   // Construct plotpeak string
-  std::string plotPeakInput = "";
+  std::string plotPeakInput;
   for (int i = specMin; i < specMax + 1; i++) {
     std::string nextWs = tempFitWsName + ",i";
-    nextWs += boost::lexical_cast<std::string>(i);
+    nextWs += std::to_string(i);
     plotPeakInput += nextWs + ";";
     plotPeakStringProg.report("Constructing PlotPeak name");
   }
@@ -266,7 +258,7 @@ void ConvolutionFitSequential::exec() {
   }
 
   // Construct comma separated list for ProcessIndirectFitParameters
-  std::string paramNamesList = "";
+  std::string paramNamesList;
   const size_t maxNames = paramNames.size();
   for (size_t i = 0; i < maxNames; i++) {
     paramNamesList += paramNames.at(i);
@@ -287,6 +279,7 @@ void ConvolutionFitSequential::exec() {
   pifp->executeAsChildAlg();
 
   MatrixWorkspace_sptr resultWs = pifp->getProperty("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace(resultWsName, resultWs);
 
   // Handle sample logs
   auto logCopier = createChildAlgorithm("CopyLogs");
@@ -328,6 +321,7 @@ void ConvolutionFitSequential::exec() {
     logAdder->executeAsChildAlg();
     logAdderProg.report("Adding Numerical logs");
   }
+
   // Copy Logs to GroupWorkspace
   logCopier = createChildAlgorithm("CopyLogs", 0.97, 0.98, true);
   logCopier->setProperty("InputWorkspace", resultWs);
@@ -345,15 +339,14 @@ void ConvolutionFitSequential::exec() {
   for (int i = specMin; i < specMax + 1; i++) {
     renamer->setProperty("InputWorkspace", groupWsNames.at(i - specMin));
     std::string outName = outputWsName + "_";
-    outName += boost::lexical_cast<std::string>(i);
+    outName += std::to_string(i);
     outName += "_Workspace";
     renamer->setProperty("OutputWorkspace", outName);
     renamer->executeAsChildAlg();
     renamerProg.report("Renaming group workspaces");
   }
 
-  AnalysisDataService::Instance().addOrReplace(resultWsName, resultWs);
-  setProperty("OutputWorkspace", resultWsName);
+  setProperty("OutputWorkspace", resultWs);
 }
 
 /**
@@ -376,8 +369,8 @@ bool ConvolutionFitSequential::checkForTwoLorentz(
 std::vector<std::string>
 ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
   std::vector<std::string> result;
-  std::string fitType = "";
-  std::string functionName = "";
+  std::string fitType;
+  std::string functionName;
   auto startPos = function.rfind("name=");
   if (startPos != std::string::npos) {
     fitType = function.substr(startPos, function.size());
@@ -613,7 +606,7 @@ ConvolutionFitSequential::convertBackToShort(const std::string &original) {
  */
 std::string
 ConvolutionFitSequential::convertFuncToShort(const std::string &original) {
-  std::string result = "";
+  std::string result;
   if (original.compare("DeltaFunction") != 0) {
     if (original.at(0) == 'E') {
       result += "E";

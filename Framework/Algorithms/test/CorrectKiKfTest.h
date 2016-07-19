@@ -16,6 +16,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::HistogramX;
 
 class CorrectKiKfTest : public CxxTest::TestSuite {
 public:
@@ -170,11 +171,11 @@ public:
       return;
 
     TS_ASSERT_DELTA(
-        out_ws->getEventList(0).getEvent(0).weight(),
-        std::sqrt(3. / (3. - out_ws->getEventList(0).getEvent(0).tof())), 1e-7);
+        out_ws->getSpectrum(0).getEvent(0).weight(),
+        std::sqrt(3. / (3. - out_ws->getSpectrum(0).getEvent(0).tof())), 1e-7);
     TS_ASSERT_DELTA(
-        out_ws->getEventList(0).getEvent(3).weight(),
-        std::sqrt(3. / (3. - out_ws->getEventList(0).getEvent(3).tof())), 1e-7);
+        out_ws->getSpectrum(0).getEvent(3).weight(),
+        std::sqrt(3. / (3. - out_ws->getSpectrum(0).getEvent(3).tof())), 1e-7);
     TS_ASSERT_LESS_THAN(
         out_ws->getNumberEvents(),
         in_ws->getNumberEvents()); // Check that events with Ef<0 are dropped
@@ -252,30 +253,28 @@ private:
       h = 0.5;
 
     Workspace2D_sptr ws2D(new Workspace2D);
-    ws2D->initialize(nspecs, nbins + 1, nbins);
+    ws2D->initialize(nspecs, isHistogram ? nbins + 1 : nbins, nbins);
     ws2D->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
 
-    Mantid::MantidVecPtr xv, yv, ev;
+    Mantid::MantidVec xv;
     if (isHistogram) {
-      xv.access().resize(nbins + 1, 0.0);
+      xv.resize(nbins + 1, 0.0);
     } else {
-      xv.access().resize(nbins, 0.0);
+      xv.resize(nbins, 0.0);
     }
-    yv.access().resize(nbins, 0.0);
-    ev.access().resize(nbins, 0.0);
     for (int i = 0; i < nbins; ++i) {
-      xv.access()[i] = static_cast<double>((i - 2. - h) * 5.);
-      yv.access()[i] = 1.0 + i;
-      ev.access()[i] = std::sqrt(1.0 + i);
+      xv[i] = static_cast<double>((i - 2. - h) * 5.);
     }
     if (isHistogram) {
-      xv.access()[nbins] = static_cast<double>((nbins - 2.5) * 5.);
+      xv[nbins] = static_cast<double>((nbins - 2.5) * 5.);
     }
 
+    auto cow_xv = make_cow<HistogramX>(std::move(xv));
     for (int i = 0; i < nspecs; i++) {
-      ws2D->setX(i, xv);
-      ws2D->setData(i, yv, ev);
-      ws2D->getSpectrum(i)->setSpectrumNo(i);
+      ws2D->setX(i, cow_xv);
+      ws2D->dataY(i) = {1, 2, 3, 4, 5};
+      ws2D->dataE(i) = {sqrt(1), sqrt(2), sqrt(3), sqrt(4), sqrt(5)};
+      ws2D->getSpectrum(i).setSpectrumNo(i);
     }
 
     AnalysisDataService::Instance().add(inputWSname, ws2D);

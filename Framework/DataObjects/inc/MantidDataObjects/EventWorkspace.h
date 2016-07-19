@@ -75,13 +75,8 @@ public:
   // Get the number of histograms. aka the number of pixels or detectors.
   std::size_t getNumberHistograms() const override;
 
-  //------------------------------------------------------------
-  // Return the underlying ISpectrum ptr at the given workspace index.
-  Mantid::API::ISpectrum *getSpectrum(const size_t index) override;
-
-  // Return the underlying ISpectrum ptr (const version) at the given workspace
-  // index.
-  const Mantid::API::ISpectrum *getSpectrum(const size_t index) const override;
+  EventList &getSpectrum(const size_t index) override;
+  const EventList &getSpectrum(const size_t index) const override;
 
   //------------------------------------------------------------
 
@@ -103,33 +98,16 @@ public:
   double getEventXMax() const;
   void getEventXMinMax(double &xmin, double &xmax) const;
 
-  //------------------------------------------------------------
-  // Return the data X vector at a given workspace index
   MantidVec &dataX(const std::size_t) override;
-
-  // Return the data Y vector at a given workspace index
   MantidVec &dataY(const std::size_t) override;
-
-  // Return the data E vector at a given workspace index
   MantidVec &dataE(const std::size_t) override;
-
-  // Return the X data erro vector at a given workspace index
   MantidVec &dataDx(const std::size_t) override;
-
-  // Return the const data X vector at a given workspace index
   const MantidVec &dataX(const std::size_t) const override;
-
-  // Return the const data Y vector at a given workspace index
   const MantidVec &dataY(const std::size_t) const override;
-
-  // Return the const data E vector at a given workspace index
   const MantidVec &dataE(const std::size_t) const override;
-
-  // Return the const X data error vector at a given workspace index
   const MantidVec &dataDx(const std::size_t) const override;
-
-  // Get a pointer to the x data at the given workspace index
-  Kernel::cow_ptr<MantidVec> refX(const std::size_t) const override;
+  Kernel::cow_ptr<HistogramData::HistogramX>
+  refX(const std::size_t) const override;
 
   /// Generate a new histogram from specified event list at the given index.
   void generateHistogram(const std::size_t index, const MantidVec &X,
@@ -143,17 +121,7 @@ public:
 
   //------------------------------------------------------------
   // Set the x-axis data (histogram bins) for all pixels
-  virtual void setAllX(Kernel::cow_ptr<MantidVec> &x);
-
-  // Get an EventList object at the given workspace index number
-  virtual EventList &getEventList(const std::size_t workspace_index);
-
-  // Get a const EventList object at the given workspace index number
-  virtual const EventList &
-  getEventList(const std::size_t workspace_index) const;
-
-  // Get an EventList pointer at the given workspace index number
-  EventList *getEventListPtr(const std::size_t workspace_index) override;
+  virtual void setAllX(const HistogramData::BinEdges &x);
 
   // Get or add an EventList
   EventList &getOrAddEventList(const std::size_t workspace_index);

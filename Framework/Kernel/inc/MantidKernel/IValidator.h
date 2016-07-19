@@ -7,6 +7,7 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/DataItem.h"
 #include "MantidKernel/Logger.h"
+
 #ifndef Q_MOC_RUN
 #include <boost/any.hpp>
 #include <boost/shared_ptr.hpp>
@@ -105,6 +106,11 @@ public:
   virtual std::vector<std::string> allowedValues() const {
     return std::vector<std::string>();
   }
+
+  /** Is Multiple Selection Allowed
+  *  @return true if multiple selection is allowed
+  */
+  virtual bool isMultipleSelectionAllowed() { return false; };
 
   /**
    * Implement this method for validators which wish to support aliasing for

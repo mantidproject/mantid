@@ -39,18 +39,6 @@ using boost::bind;
 DECLARE_ALGORITHM(ConvertUnitsUsingDetectorTable)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertUnitsUsingDetectorTable::ConvertUnitsUsingDetectorTable()
-    : Algorithm(), m_numberOfSpectra(0), m_distribution(false),
-      m_inputEvents(false) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertUnitsUsingDetectorTable::~ConvertUnitsUsingDetectorTable() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ConvertUnitsUsingDetectorTable::name() const {
@@ -67,7 +55,7 @@ const std::string ConvertUnitsUsingDetectorTable::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ConvertUnitsUsingDetectorTable::summary() const {
-  return " *** Warning - This Routine is under development *** \n"
+  return "**Warning - This Routine is under development**\n"
          "Performs a unit change on the X values of a workspace";
 }
 
@@ -118,7 +106,7 @@ void ConvertUnitsUsingDetectorTable::exec() {
       g_log.information() << "Input workspace already has target unit ("
                           << m_outputUnit->unitID()
                           << "), so just pointing the output workspace "
-                             "property to the input workspace." << std::endl;
+                             "property to the input workspace.\n";
       setProperty("OutputWorkspace",
                   boost::const_pointer_cast<MatrixWorkspace>(inputWS));
       return;
@@ -193,7 +181,6 @@ void ConvertUnitsUsingDetectorTable::exec() {
   // Do right at end (workspace could could change in removeUnphysicalBins or
   // alignBins methods)
   setProperty("OutputWorkspace", outputWS);
-  return;
 }
 
 /** Initialise the member variables
@@ -332,7 +319,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
       // int spectraNumber = static_cast<int>(spectraColumn->toDouble(i));
       // wsid = outputWS->getIndexFromSpectrumNumber(spectraNumber);
       g_log.debug() << "###### Spectra #" << specNo
-                    << " ==> Workspace ID:" << wsid << std::endl;
+                    << " ==> Workspace ID:" << wsid << '\n';
 
       // Now we need to find the row that contains this spectrum
       std::vector<int>::iterator specIter;
@@ -347,7 +334,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
         int emode = emodeColumn[detectorRow];
 
         g_log.debug() << "specNo from detector table = "
-                      << spectraColumn[detectorRow] << std::endl;
+                      << spectraColumn[detectorRow] << '\n';
 
         // l1 = l1Column->toDouble(detectorRow);
         // l2 = l2Column->toDouble(detectorRow);
@@ -356,10 +343,10 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
         // emode = static_cast<int>(emodeColumn->toDouble(detectorRow));
 
         g_log.debug() << "###### Spectra #" << specNo
-                      << " ==> Det Table Row:" << detectorRow << std::endl;
+                      << " ==> Det Table Row:" << detectorRow << '\n';
 
         g_log.debug() << "\tL1=" << l1 << ",L2=" << l2 << ",TT=" << twoTheta
-                      << ",EF=" << efixed << ",EM=" << emode << std::endl;
+                      << ",EF=" << efixed << ",EM=" << emode << '\n';
 
         // Make local copies of the units. This allows running the loop in
         // parallel
@@ -375,7 +362,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
                                  twoTheta, emode, efixed, delta);
         // EventWorkspace part, modifying the EventLists.
         if (m_inputEvents) {
-          eventWS->getEventList(wsid)
+          eventWS->getSpectrum(wsid)
               .convertUnitsViaTof(localFromUnit, localOutputUnit);
         }
         // Clear unit memory
@@ -384,7 +371,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
 
       } else {
         // Not found
-        g_log.debug() << "Spectrum " << specNo << " not found!" << std::endl;
+        g_log.debug() << "Spectrum " << specNo << " not found!\n";
         failedDetectorCount++;
         outputWS->maskWorkspaceIndex(wsid);
       }
@@ -406,7 +393,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
 
   if (failedDetectorCount != 0) {
     g_log.information() << "Something went wrong for " << failedDetectorCount
-                        << " spectra. Masking spectrum." << std::endl;
+                        << " spectra. Masking spectrum.\n";
   }
   if (m_inputEvents)
     eventWS->clearMRU();
@@ -440,8 +427,7 @@ void ConvertUnitsUsingDetectorTable::convertQuickly(
         *iter = factor *std::pow(*iter, power);
       }
 
-      MantidVecPtr xVals;
-      xVals.access() = outputWS->dataX(0);
+      auto xVals = outputWS->refX(0);
 
       PARALLEL_FOR1(outputWS)
       for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
@@ -474,7 +460,7 @@ void ConvertUnitsUsingDetectorTable::convertQuickly(
     }
     // Convert the events themselves if necessary. Inefficiently.
     if (m_inputEvents) {
-      eventWS->getEventList(k).convertUnitsQuickly(factor, power);
+      eventWS->getSpectrum(k).convertUnitsQuickly(factor, power);
     }
     prog.report("Convert to " + m_outputUnit->unitID());
     PARALLEL_END_INTERUPT_REGION
@@ -483,7 +469,6 @@ void ConvertUnitsUsingDetectorTable::convertQuickly(
 
   if (m_inputEvents)
     eventWS->clearMRU();
-  return;
 }
 
 /// Calls Rebin as a Child Algorithm to align the bins
@@ -540,8 +525,7 @@ void ConvertUnitsUsingDetectorTable::reverse(API::MatrixWorkspace_sptr WS) {
     std::reverse(WS->dataY(0).begin(), WS->dataY(0).end());
     std::reverse(WS->dataE(0).begin(), WS->dataE(0).end());
 
-    MantidVecPtr xVals;
-    xVals.access() = WS->dataX(0);
+    auto xVals = WS->refX(0);
     for (size_t j = 1; j < m_numberOfSpectra; ++j) {
       WS->setX(j, xVals);
       std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());
@@ -559,7 +543,7 @@ void ConvertUnitsUsingDetectorTable::reverse(API::MatrixWorkspace_sptr WS) {
     for (int j = 0; j < m_numberOfSpectra_i; ++j) {
       PARALLEL_START_INTERUPT_REGION
       if (m_inputEvents) {
-        eventWS->getEventList(j).reverse();
+        eventWS->getSpectrum(j).reverse();
       } else {
         std::reverse(WS->dataX(j).begin(), WS->dataX(j).end());
         std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());
@@ -648,7 +632,7 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::removeUnphysicalBins(
       if (bins > maxBins)
         maxBins = static_cast<int>(bins);
     }
-    g_log.debug() << maxBins << std::endl;
+    g_log.debug() << maxBins << '\n';
     // Now create an output workspace large enough for the longest 'good' range
     result = WorkspaceFactory::Instance().create(workspace, numSpec, maxBins,
                                                  maxBins - 1);

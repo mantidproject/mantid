@@ -15,16 +15,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(CalculatePeaksHKL)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CalculatePeaksHKL::CalculatePeaksHKL() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CalculatePeaksHKL::~CalculatePeaksHKL() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CalculatePeaksHKL::name() const {
   return "CalculatePeaksHKL";

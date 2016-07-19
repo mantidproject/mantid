@@ -98,8 +98,6 @@ SCDPanelErrors::SCDPanelErrors()
   SampleOffsets = false;
 }
 
-SCDPanelErrors::~SCDPanelErrors() {}
-
 size_t SCDPanelErrors::nAttributes() const { return m_attrNames.size(); }
 
 std::vector<std::string> SCDPanelErrors::getAttributeNames() const {
@@ -324,7 +322,7 @@ SCDPanelErrors::getNewInstrument(const Geometry::IPeak &peak) const {
   boost::split(GroupBanks, BankNames, boost::is_any_of("!"));
 
   for (size_t group = 0; group < (size_t)GroupBanks.size(); ++group) {
-    string prefix = "f" + boost::lexical_cast<std::string>(group) + "_";
+    string prefix = "f" + std::to_string(group) + "_";
 
     std::vector<std::string> bankNames;
     Quat rot = Quat(getParameter(prefix + "Xrot"), Kernel::V3D(1.0, 0.0, 0.0)) *
@@ -419,7 +417,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   Check(m_peaks, xValues, nData, StartX, EndX);
 
   g_log.debug() << "BankNames " << BankNames << "   Number of peaks"
-                << (EndX - StartX + 1) / 3 << std::endl;
+                << (EndX - StartX + 1) / 3 << '\n';
 
   // some pointers for the updated instrument
   boost::shared_ptr<Geometry::Instrument> instChange =
@@ -459,7 +457,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   //----------------------------------
 
   // determine the OrientedLattice for converting to Q-sample
-  Geometry::OrientedLattice lattice(*m_unitCell.get());
+  Geometry::OrientedLattice lattice(*m_unitCell);
   lattice.setUB(m_peaks->sample().getOrientedLattice().getUB());
 
   // cumulative error
@@ -479,21 +477,21 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   for (size_t i = EndX; i < nData; ++i)
     out[i] = 0.;
 
-  g_log.debug() << "Parameters" << std::endl;
+  g_log.debug() << "Parameters\n";
 
   for (size_t i = 0; i < this->nParams(); ++i)
     g_log.debug() << setw(20) << parameterName(i) << setw(20) << getParameter(i)
-                  << std::endl;
+                  << '\n';
 
   g_log.debug() << "      chi Squared=" << std::setprecision(12) << chiSq
-                << std::endl;
+                << '\n';
 
   // Get values for test program. TODO eliminate
   g_log.debug() << "  out[evenxx]=";
   for (size_t i = 0; i < std::min<size_t>(nData, 30); ++i)
     g_log.debug() << out[i] << "  ";
 
-  g_log.debug() << std::endl;
+  g_log.debug() << '\n';
 }
 
 double SCDPanelErrors::checkForNonsenseParameters() const {
@@ -562,7 +560,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     return;
   FunctionDomain1DView domain(xValues, nData);
   calNumericalDeriv(domain, *out);
-  return;
 }
 
 DataObjects::Workspace2D_sptr
@@ -570,14 +567,11 @@ SCDPanelErrors::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
                               std::vector<std::string> &bankNames,
                               double tolerance) {
   int N = 0;
-  Mantid::MantidVecPtr pX;
   if (tolerance < 0)
     tolerance = .5;
   tolerance = std::min<double>(.5, tolerance);
 
-  Mantid::MantidVec &xRef = pX.access();
-  Mantid::MantidVecPtr yvals;
-  Mantid::MantidVec &yvalB = yvals.access();
+  Mantid::MantidVec xRef;
 
   for (auto &bankName : bankNames)
     for (size_t j = 0; j < pwks->rowCount(); ++j) {
@@ -594,21 +588,16 @@ SCDPanelErrors::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
                 xRef.push_back(static_cast<double>(j));
                 xRef.push_back(static_cast<double>(j));
                 xRef.push_back(static_cast<double>(j));
-                yvalB.push_back(0.0);
-                yvalB.push_back(0.0);
-                yvalB.push_back(0.0);
               }
     }
 
   MatrixWorkspace_sptr mwkspc = API::WorkspaceFactory::Instance().create(
       "Workspace2D", static_cast<size_t>(3), 3 * N, 3 * N);
 
+  auto pX = Kernel::make_cow<HistogramData::HistogramX>(std::move(xRef));
   mwkspc->setX(0, pX);
   mwkspc->setX(1, pX);
   mwkspc->setX(2, pX);
-  mwkspc->setData(0, yvals);
-  mwkspc->setData(0, yvals);
-  mwkspc->setData(0, yvals);
 
   return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(mwkspc);
 }
@@ -657,7 +646,7 @@ void SCDPanelErrors::setAttribute(const std::string &attName,
     }
     NGroups = value.asInt();
     for (int k = 1; k < NGroups; ++k) {
-      std::string prefix = "f" + boost::lexical_cast<std::string>(k) + "_";
+      std::string prefix = "f" + std::to_string(k) + "_";
       declareParameter(prefix + "detWidthScale", 1.0, "panel Width");
       declareParameter(prefix + "detHeightScale", 1.0, "panelHeight");
 

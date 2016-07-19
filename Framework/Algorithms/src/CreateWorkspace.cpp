@@ -20,12 +20,6 @@ using namespace API;
 
 DECLARE_ALGORITHM(CreateWorkspace)
 
-/// Default (empty) constructor
-CreateWorkspace::CreateWorkspace() : Algorithm() {}
-
-/// Default (empty) destructor
-CreateWorkspace::~CreateWorkspace() {}
-
 /// Init function
 void CreateWorkspace::init() {
 
@@ -127,10 +121,10 @@ void CreateWorkspace::exec() {
   const bool commonX(dataX.size() == ySize || dataX.size() == ySize + 1);
 
   std::size_t xSize;
-  MantidVecPtr XValues;
+  Kernel::cow_ptr<HistogramData::HistogramX> XValues(nullptr);
   if (commonX) {
     xSize = dataX.size();
-    XValues.access() = dataX;
+    XValues = Kernel::make_cow<HistogramData::HistogramX>(dataX);
   } else {
     if (dataX.size() % nSpec != 0) {
       throw std::invalid_argument("Length of DataX must be divisible by NSpec");

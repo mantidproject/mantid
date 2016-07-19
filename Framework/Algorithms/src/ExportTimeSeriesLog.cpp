@@ -27,15 +27,6 @@ namespace Mantid {
 namespace Algorithms {
 
 DECLARE_ALGORITHM(ExportTimeSeriesLog)
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ExportTimeSeriesLog::ExportTimeSeriesLog() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ExportTimeSeriesLog::~ExportTimeSeriesLog() {}
 
 //----------------------------------------------------------------------------------------------
 /** Definition of all input arguments
@@ -80,8 +71,6 @@ void ExportTimeSeriesLog::init() {
   declareProperty("IsEventWorkspace", true, "If set to true, output workspace "
                                             "is EventWorkspace.  Otherwise, it "
                                             "is Workspace2D.");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -106,8 +95,6 @@ void ExportTimeSeriesLog::exec() {
 
   // 3. Output
   setProperty("OutputWorkspace", m_outWS);
-
-  return;
 }
 /*
  *  * @param logname ::
@@ -207,8 +194,6 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
     setupWorkspace2D(i_start, i_stop, numentries, times, values, exportepoch,
                      timeunitfactor);
   }
-
-  return;
 }
 
 /** Set up the output workspace in a Workspace2D
@@ -270,8 +255,6 @@ void ExportTimeSeriesLog::setupWorkspace2D(
 
   Axis *xaxis = m_outWS->getAxis(0);
   xaxis->setUnit("Time");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -338,17 +321,9 @@ void ExportTimeSeriesLog::setupEventWorkspace(
   outEventWS->sortAll(TOF_SORT, nullptr);
 
   // Now, create a default X-vector for histogramming, with just 2 bins.
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &xRef = axis.access();
-  xRef.resize(2);
   std::vector<WeightedEventNoTime> &events = outEL.getWeightedEventsNoTime();
-  xRef[0] = events.begin()->tof();
-  xRef[1] = events.rbegin()->tof();
-
-  // Set the binning axis using this.
-  outEventWS->setX(0, axis);
-
-  return;
+  outEventWS->setBinEdges(0, HistogramData::BinEdges{events.begin()->tof(),
+                                                     events.rbegin()->tof()});
 }
 
 /** Calculate the range of time vector by start time and stop time

@@ -49,7 +49,7 @@ public:
 
     std::ofstream fil(m_asciiFileName.c_str());
     for (size_t i = 0; i < x.size(); ++i) {
-      fil << x[i] << ' ' << y[i] << std::endl;
+      fil << x[i] << ' ' << y[i] << '\n';
     }
   }
 
@@ -211,7 +211,7 @@ public:
       const double tol = fabs(xx) > 4.0 ? 0.2 : 0.07;
       TS_ASSERT_DELTA(fabs(y[i] - 3.3 * exp(-xx * xx)) / y[i], 0, tol);
       TS_ASSERT_DELTA(fabs(jac.get(i, 0) - exp(-xx * xx)) / y[i], 0, tol);
-      // std::cerr << xx << ' ' << y[i] << std::endl;
+      // std::cerr << xx << ' ' << y[i] << '\n';
     }
     AnalysisDataService::Instance().clear();
   }

@@ -43,11 +43,8 @@ public:
         for (int k = 0; k < 6; ++k) {
           space2D->dataX(j)[k] = k;
         }
-        space2D->setData(
-            j, boost::shared_ptr<Mantid::MantidVec>(
-                   new std::vector<double>(a + (5 * j), a + (5 * j) + 5)),
-            boost::shared_ptr<Mantid::MantidVec>(
-                new std::vector<double>(e + (5 * j), e + (5 * j) + 5)));
+        space2D->dataY(j) = std::vector<double>(a + (5 * j), a + (5 * j) + 5);
+        space2D->dataE(j) = std::vector<double>(e + (5 * j), e + (5 * j) + 5);
       }
       // Register the workspace in the data service
       AnalysisDataService::Instance().add(name, space);
@@ -135,11 +132,11 @@ public:
     TS_ASSERT_EQUALS(3, ws->getNumberHistograms()); // reduced histograms
     TS_ASSERT_EQUALS(30, ws->getNumberEvents());
 
-    TS_ASSERT(40. <= ws->getEventList(0).getTofMin());
-    TS_ASSERT(50. >= ws->getEventList(0).getTofMax());
+    TS_ASSERT(40. <= ws->getSpectrum(0).getTofMin());
+    TS_ASSERT(50. >= ws->getSpectrum(0).getTofMax());
 
-    TS_ASSERT(40. <= ws->getEventList(2).getTofMin());
-    TS_ASSERT(50. >= ws->getEventList(2).getTofMax());
+    TS_ASSERT(40. <= ws->getSpectrum(2).getTofMin());
+    TS_ASSERT(50. >= ws->getSpectrum(2).getTofMax());
   }
 
   void testExec() {
@@ -181,8 +178,8 @@ public:
       TS_ASSERT_EQUALS(output->readX(i)[3], input->readX(i + 2)[4]);
       TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(i),
                        input->getAxis(1)->spectraNo(i + 2));
-      TS_ASSERT_EQUALS(output->getSpectrum(i)->getDetectorIDs(),
-                       input->getSpectrum(i + 2)->getDetectorIDs());
+      TS_ASSERT_EQUALS(output->getSpectrum(i).getDetectorIDs(),
+                       input->getSpectrum(i + 2).getDetectorIDs());
     }
   }
 
@@ -226,8 +223,8 @@ public:
     for (int i = 0; i < 5; ++i) {
       TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(i),
                        input->getAxis(1)->spectraNo(i));
-      TS_ASSERT_EQUALS(output->getSpectrum(i)->getDetectorIDs(),
-                       input->getSpectrum(i)->getDetectorIDs());
+      TS_ASSERT_EQUALS(output->getSpectrum(i).getDetectorIDs(),
+                       input->getSpectrum(i).getDetectorIDs());
     }
   }
 

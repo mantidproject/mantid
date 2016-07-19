@@ -64,22 +64,22 @@ private:
   std::mutex copyMutex;
 
 public:
-  cow_ptr(ptr_type &&resourceSptr);
-  cow_ptr(const ptr_type &resourceSptr);
+  cow_ptr(ptr_type &&resourceSptr) noexcept;
+  cow_ptr(const ptr_type &resourceSptr) noexcept;
   explicit cow_ptr(DataType *resourcePtr);
   cow_ptr();
   /// Constructs a cow_ptr with no managed object, i.e. empty cow_ptr.
-  constexpr cow_ptr(std::nullptr_t) : Data(nullptr) {}
-  cow_ptr(const cow_ptr<DataType> &);
+  constexpr cow_ptr(std::nullptr_t) noexcept : Data(nullptr) {}
+  cow_ptr(const cow_ptr<DataType> &) noexcept;
   // Move is hand-written, since std::mutex member prevents auto-generation.
   cow_ptr(cow_ptr<DataType> &&other) noexcept : Data(std::move(other.Data)) {}
-  cow_ptr<DataType> &operator=(const cow_ptr<DataType> &);
+  cow_ptr<DataType> &operator=(const cow_ptr<DataType> &) noexcept;
   // Move is hand-written, since std::mutex member prevents auto-generation.
   cow_ptr<DataType> &operator=(cow_ptr<DataType> &&rhs) noexcept {
     Data = std::move(rhs.Data);
     return *this;
   }
-  cow_ptr<DataType> &operator=(const ptr_type &);
+  cow_ptr<DataType> &operator=(const ptr_type &) noexcept;
 
   /// Returns the stored pointer.
   const DataType *get() const noexcept { return Data.get(); }
@@ -101,7 +101,7 @@ public:
   const DataType *operator->() const {
     return Data.get();
   } ///<indirectrion dereference access
-  bool operator==(const cow_ptr<DataType> &A) {
+  bool operator==(const cow_ptr<DataType> &A) noexcept {
     return Data == A.Data;
   } ///< Based on ptr equality
   DataType &access();
@@ -128,8 +128,8 @@ cow_ptr<DataType>::cow_ptr()
 */
 // Note: Need custom implementation, since std::mutex is not copyable.
 template <typename DataType>
-cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A)
-    : Data(A.Data) {}
+cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A) noexcept : Data(A.Data) {
+}
 
 /**
   Assignment operator : double references the data object
@@ -139,7 +139,8 @@ cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A)
 */
 // Note: Need custom implementation, since std::mutex is not copyable.
 template <typename DataType>
-cow_ptr<DataType> &cow_ptr<DataType>::operator=(const cow_ptr<DataType> &A) {
+cow_ptr<DataType> &cow_ptr<DataType>::
+operator=(const cow_ptr<DataType> &A) noexcept {
   if (this != &A) {
     Data = A.Data;
   }
@@ -153,7 +154,7 @@ cow_ptr<DataType> &cow_ptr<DataType>::operator=(const cow_ptr<DataType> &A) {
   @return *this
 */
 template <typename DataType>
-cow_ptr<DataType> &cow_ptr<DataType>::operator=(const ptr_type &A) {
+cow_ptr<DataType> &cow_ptr<DataType>::operator=(const ptr_type &A) noexcept {
   if (this->Data != A) {
     Data = A;
   }
@@ -187,12 +188,12 @@ template <typename DataType> DataType &cow_ptr<DataType>::access() {
 }
 
 template <typename DataType>
-cow_ptr<DataType>::cow_ptr(ptr_type &&resourceSptr) {
+cow_ptr<DataType>::cow_ptr(ptr_type &&resourceSptr) noexcept {
   this->Data = std::move(resourceSptr);
 }
 
 template <typename DataType>
-cow_ptr<DataType>::cow_ptr(const ptr_type &resourceSptr) {
+cow_ptr<DataType>::cow_ptr(const ptr_type &resourceSptr) noexcept {
   this->Data = resourceSptr;
 }
 

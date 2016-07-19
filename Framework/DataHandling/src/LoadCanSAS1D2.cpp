@@ -35,12 +35,6 @@ namespace DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D2)
 
-/// constructor
-LoadCanSAS1D2::LoadCanSAS1D2() : LoadCanSAS1D() {}
-
-/// destructor
-LoadCanSAS1D2::~LoadCanSAS1D2() {}
-
 /// Overwrites Algorithm Init method.
 void LoadCanSAS1D2::init() {
   LoadCanSAS1D::init();
@@ -150,7 +144,7 @@ LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
       workspaceElem->getElementsByTagName("SAStransmission_spectrum");
   if (!sasTransList->length()) {
     g_log.warning() << "There is no transmission data for this file "
-                    << getPropertyValue("Filename") << std::endl;
+                    << getPropertyValue("Filename") << '\n';
     return main_out;
   }
 

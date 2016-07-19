@@ -128,7 +128,7 @@ void ILLCalibration::newInstrumentSelected() {
     double peakLower = -res * 10;
     double peakUpper = res * 10;
 
-    g_log.debug() << "Resolution is " << res << std::endl;
+    g_log.debug() << "Resolution is " << res << '\n';
 
     m_uiForm.spPeakLower->setValue(peakLower);
     m_uiForm.spPeakUpper->setValue(peakUpper);

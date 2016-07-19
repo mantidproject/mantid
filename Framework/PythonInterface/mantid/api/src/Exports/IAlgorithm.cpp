@@ -9,19 +9,22 @@
 #pragma warning(default : 4250)
 #endif
 #include "MantidKernel/Strings.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/IsNone.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/MapToPyDictionary.h"
+#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 
 #include <Poco/Thread.h>
 
 #include <boost/python/arg_from_python.hpp>
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>
-#include <boost/python/dict.hpp>
 #include <boost/python/object.hpp>
 #include <boost/python/operators.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+
+#include <unordered_map>
 
 using Mantid::Kernel::IPropertyManager;
 using Mantid::Kernel::Property;
@@ -32,12 +35,23 @@ using Mantid::API::IAlgorithm_sptr;
 using Mantid::PythonInterface::AlgorithmIDProxy;
 using Mantid::PythonInterface::isNone;
 using Mantid::PythonInterface::Policies::VectorToNumpy;
+namespace Environment = Mantid::PythonInterface::Environment;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IAlgorithm)
 
 namespace {
 
+/// Converter for std::string to python string
+using ToPyString = to_python_value<const std::string &>;
+
 // Global map of the thread ID to the current algorithm object
-dict THREAD_ID_MAP;
+using ThreadIDObjectMap = std::unordered_map<long, object>;
+
+ThreadIDObjectMap &threadIDMap() {
+  static ThreadIDObjectMap threadIDs;
+  return threadIDs;
+}
 
 /**
  * Private method to add an algorithm reference to the thread id map.
@@ -45,9 +59,15 @@ dict THREAD_ID_MAP;
  * @param threadID The current Python thread ID
  * @param alg A Python reference to the algorithm object
  */
-void _trackAlgorithmInThread(long threadID, const object &alg) {
-  THREAD_ID_MAP[threadID] = alg;
+void _trackAlgorithm(long threadID, const object &alg) {
+  threadIDMap()[threadID] = alg;
 }
+
+/**
+ * Private method to remove an algorithm reference from the thread id map.
+ * @param threadID The current Python thread ID
+ */
+void _forgetAlgorithm(long threadID) { threadIDMap().erase(threadID); }
 
 /**
  * Return the algorithm object for the given thread ID or None
@@ -55,10 +75,15 @@ void _trackAlgorithmInThread(long threadID, const object &alg) {
  * if it is found
  */
 object _algorithmInThread(long threadID) {
-  auto value = THREAD_ID_MAP.get(threadID);
-  if (value)
-    api::delitem(THREAD_ID_MAP, threadID);
-  return value;
+  auto &threadMap = threadIDMap();
+  auto it = threadMap.find(threadID);
+  if (it != threadMap.end()) {
+    auto value = it->second;
+    threadMap.erase(it);
+    return value;
+  } else {
+    return object();
+  }
 }
 
 /// Functor for use with sorting algorithm to put the properties that do not
@@ -98,17 +123,15 @@ PropertyVector apiOrderedProperties(const IAlgorithm &propMgr) {
  * @return A Python list of strings
  */
 
-PyObject *getInputPropertiesWithMandatoryFirst(IAlgorithm &self) {
+object getInputPropertiesWithMandatoryFirst(IAlgorithm &self) {
   PropertyVector properties(apiOrderedProperties(self));
 
-  PropertyVector::const_iterator iend = properties.end();
-  // Build a python list
-  PyObject *names = PyList_New(0);
-  for (PropertyVector::const_iterator itr = properties.begin(); itr != iend;
-       ++itr) {
-    Property *p = *itr;
-    if (p->direction() != Direction::Output) {
-      PyList_Append(names, PyString_FromString(p->name().c_str()));
+  Environment::GlobalInterpreterLock gil;
+  list names;
+  ToPyString toPyStr;
+  for (const auto &prop : properties) {
+    if (prop->direction() != Direction::Output) {
+      names.append(handle<>(toPyStr(prop->name())));
     }
   }
   return names;
@@ -121,16 +144,14 @@ PyObject *getInputPropertiesWithMandatoryFirst(IAlgorithm &self) {
 * @param self :: A pointer to the python object wrapping and Algorithm.
 * @return A Python list of strings
 */
-PyObject *getAlgorithmPropertiesOrdered(IAlgorithm &self) {
+object getAlgorithmPropertiesOrdered(IAlgorithm &self) {
   PropertyVector properties(apiOrderedProperties(self));
 
-  PropertyVector::const_iterator iend = properties.end();
-  // Build a python list
-  PyObject *names = PyList_New(0);
-  for (PropertyVector::const_iterator itr = properties.begin(); itr != iend;
-       ++itr) {
-    Property *p = *itr;
-    PyList_Append(names, PyString_FromString(p->name().c_str()));
+  Environment::GlobalInterpreterLock gil;
+  list names;
+  ToPyString toPyStr;
+  for (const auto &prop : properties) {
+    names.append(handle<>(toPyStr(prop->name())));
   }
   return names;
 }
@@ -140,13 +161,15 @@ PyObject *getAlgorithmPropertiesOrdered(IAlgorithm &self) {
  * @param self :: A pointer to the python object wrapping and Algorithm.
  * @return A Python list of strings
  */
-PyObject *getOutputProperties(IAlgorithm &self) {
+object getOutputProperties(IAlgorithm &self) {
   const PropertyVector &properties(self.getProperties()); // No copy
-  // Build the list
-  PyObject *names = PyList_New(0);
-  for (auto p : properties) {
+
+  Environment::GlobalInterpreterLock gil;
+  list names;
+  ToPyString toPyStr;
+  for (const auto &p : properties) {
     if (p->direction() == Direction::Output) {
-      PyList_Append(names, PyString_FromString(p->name().c_str()));
+      names.append(handle<>(toPyStr(p->name())));
     }
   }
   return names;
@@ -213,7 +236,7 @@ struct AllowCThreads {
     Py_XINCREF(m_tracearg);
     PyEval_SetTrace(nullptr, nullptr);
     if (!isNone(algm)) {
-      _trackAlgorithmInThread(curThreadState->thread_id, algm);
+      _trackAlgorithm(curThreadState->thread_id, algm);
       m_tracking = true;
     }
     m_saved = PyEval_SaveThread();
@@ -221,11 +244,7 @@ struct AllowCThreads {
   ~AllowCThreads() {
     PyEval_RestoreThread(m_saved);
     if (m_tracking) {
-      try {
-        api::delitem(THREAD_ID_MAP, m_saved->thread_id);
-      } catch (error_already_set &) {
-        PyErr_Clear();
-      }
+      _forgetAlgorithm(m_saved->thread_id);
     }
     PyEval_SetTrace(m_tracefunc, m_tracearg);
     Py_XDECREF(m_tracearg);

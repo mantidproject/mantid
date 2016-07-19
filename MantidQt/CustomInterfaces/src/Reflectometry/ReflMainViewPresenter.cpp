@@ -6,15 +6,15 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/UserCatalogInfo.h"
-#include "MantidQtCustomInterfaces/ProgressableView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/DataProcessorPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ProgressPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
+#include "MantidQtMantidWidgets/ProgressPresenter.h"
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
@@ -24,6 +24,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -108,7 +109,7 @@ void ReflMainViewPresenter::pushCommands() {
   m_view->clearCommands();
 
   // The expected number of commands
-  const size_t nCommands = 26;
+  const size_t nCommands = 27;
   auto commands = m_tablePresenter->publishCommands();
   if (commands.size() != nCommands) {
     throw std::runtime_error("Invalid list of commands");

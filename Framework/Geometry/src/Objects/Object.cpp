@@ -22,6 +22,7 @@
 
 #include <boost/make_shared.hpp>
 
+#include <array>
 #include <deque>
 #include <iostream>
 #include <stack>
@@ -146,7 +147,6 @@ void Object::convertComplement(const std::map<int, Object> &MList)
 
 {
   this->procString(this->cellStr(MList));
-  return;
 }
 
 /**
@@ -504,8 +504,8 @@ int Object::createSurfaceList(const int outFlag) {
 
     std::vector<const Surface *>::const_iterator vc;
     for (vc = SurList.begin(); vc != SurList.end(); ++vc) {
-      std::cerr << "Point == " << *vc << std::endl;
-      std::cerr << (*vc)->getName() << std::endl;
+      std::cerr << "Point == " << *vc << '\n';
+      std::cerr << (*vc)->getName() << '\n';
     }
   }
   return 1;
@@ -585,15 +585,14 @@ void Object::print() const {
     }
   }
 
-  std::cout << "Name == " << ObjNum << std::endl;
-  std::cout << "Rules == " << Rcount << std::endl;
+  std::cout << "Name == " << ObjNum << '\n';
+  std::cout << "Rules == " << Rcount << '\n';
   std::vector<int>::const_iterator mc;
   std::cout << "Surface included == ";
   for (mc = Cells.begin(); mc < Cells.end(); ++mc) {
     std::cout << (*mc) << " ";
   }
-  std::cout << std::endl;
-  return;
+  std::cout << '\n';
 }
 
 /**
@@ -602,16 +601,14 @@ void Object::print() const {
 void Object::makeComplement() {
   std::unique_ptr<Rule> NCG = procComp(std::move(TopRule));
   TopRule = std::move(NCG);
-  return;
 }
 
 /**
 * Displays the rule tree
 */
 void Object::printTree() const {
-  std::cout << "Name == " << ObjNum << std::endl;
-  std::cout << TopRule->display() << std::endl;
-  return;
+  std::cout << "Name == " << ObjNum << '\n';
+  std::cout << TopRule->display() << '\n';
 }
 
 /**
@@ -650,7 +647,6 @@ void Object::write(std::ostream &OX) const {
   cx.precision(10);
   cx << str();
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
-  return;
 }
 
 /**
@@ -725,16 +721,16 @@ int Object::procString(const std::string &Line) {
   }
   // Do outside loop...
   int nullInt;
-  while (procPair(Ln, RuleList, nullInt))
-    ;
-
-  if (RuleList.size() != 1) {
-    std::cerr << "Map size not equal to 1 == " << RuleList.size() << std::endl;
-    std::cerr << "Error Object::ProcString : " << Ln << std::endl;
-    exit(1);
-    return 0;
+  while (procPair(Ln, RuleList, nullInt)) {
   }
-  TopRule = std::move((RuleList.begin())->second);
+
+  if (RuleList.size() == 1) {
+    TopRule = std::move((RuleList.begin())->second);
+  } else {
+    throw std::logic_error("Object::procString() - Unexpected number of "
+                           "surface rules found. Expected=1, found=" +
+                           std::to_string(RuleList.size()));
+  }
   return 1;
 }
 
@@ -1647,20 +1643,19 @@ void Object::calcBoundingBoxByGeometry() {
     }
   } break;
   case GluGeometryHandler::GeometryType::HEXAHEDRON: {
-    // Vectors are in the same order as the following webpage:
-    // http://docs.mantidproject.org/nightly/concepts/HowToDefineGeometricShape.html#hexahedron
-    auto &lf = vectors[1];
-    auto &lb = vectors[0];
-    auto &rb = vectors[3];
-    auto &rf = vectors[2];
-    auto dz = vectors[4] - lf;
+    // These will be replaced by more realistic values in the loop below
+    minX = minY = minZ = std::numeric_limits<decltype(minZ)>::max();
+    maxX = maxY = maxZ = -std::numeric_limits<decltype(maxZ)>::max();
 
-    minX = std::min(lf.X(), lb.X());
-    maxX = std::max(rb.X(), rf.X());
-    minY = lb.Y();
-    maxY = rf.Y();
-    minZ = 0;
-    maxZ = dz.Z();
+    // Loop over all corner points to find minima and maxima on each axis
+    for (const auto &vector : vectors) {
+      minX = std::min(minX, vector.X());
+      maxX = std::max(maxX, vector.X());
+      minY = std::min(minY, vector.Y());
+      maxY = std::max(maxY, vector.Y());
+      minZ = std::min(minZ, vector.Z());
+      maxZ = std::max(maxZ, vector.Z());
+    }
   } break;
   case GluGeometryHandler::GeometryType::CYLINDER:
   case GluGeometryHandler::GeometryType::SEGMENTED_CYLINDER: {
@@ -1834,17 +1829,10 @@ int Object::searchForObject(Kernel::V3D &point) const {
   Kernel::V3D testPt;
   if (isValid(point))
     return 1;
-  std::vector<Kernel::V3D> axes;
-  axes.reserve(6);
-  axes.push_back(Kernel::V3D(1, 0, 0));
-  axes.push_back(Kernel::V3D(-1, 0, 0));
-  axes.push_back(Kernel::V3D(0, 1, 0));
-  axes.push_back(Kernel::V3D(0, -1, 0));
-  axes.push_back(Kernel::V3D(0, 0, 1));
-  axes.push_back(Kernel::V3D(0, 0, -1));
-  std::vector<Kernel::V3D>::const_iterator dir;
-  for (dir = axes.begin(); dir != axes.end(); ++dir) {
-    Geometry::Track tr(point, (*dir));
+  for (const auto &dir :
+       {V3D(1., 0., 0.), V3D(-1., 0., 0.), V3D(0., 1., 0.), V3D(0., -1., 0.),
+        V3D(0., 0., 1.), V3D(0., 0., -1.)}) {
+    Geometry::Track tr(point, dir);
     if (this->interceptSurface(tr) > 0) {
       point = tr.cbegin()->entryPoint;
       return 1;

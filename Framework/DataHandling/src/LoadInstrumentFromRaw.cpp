@@ -136,7 +136,7 @@ void LoadInstrumentFromRaw::exec() {
         monIndex + numMonitors) {
       instrument->markAsMonitor(detector);
       g_log.information() << "Detector with ID " << detID[i]
-                          << " marked as a monitor." << std::endl;
+                          << " marked as a monitor.\n";
     }
     // otherwise mark as a detector
     else {
@@ -163,8 +163,6 @@ void LoadInstrumentFromRaw::exec() {
          "the source is " << l1 << "m in front \n"
       << "of the sample. This value can be changed via the 'instrument.l1' "
          "configuration property.\n";
-
-  return;
 }
 
 } // namespace DataHandling

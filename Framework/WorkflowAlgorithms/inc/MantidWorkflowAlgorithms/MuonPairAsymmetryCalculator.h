@@ -38,7 +38,6 @@ public:
                               const int firstPairIndex,
                               const int secondPairIndex,
                               const double alpha = 1);
-  ~MuonPairAsymmetryCalculator() override;
 
   /// Performs pair asymmetry calculation
   API::MatrixWorkspace_sptr calculate() const override;
