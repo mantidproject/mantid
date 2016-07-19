@@ -185,6 +185,48 @@ public:
     TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
   }
 
+  void testNexusProcessed_Min_Max_List() {
+    LoadNexusProcessed alg;
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    testFile = "focussed.nxs";
+    alg.setPropertyValue("Filename", testFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMin", "1");
+    alg.setPropertyValue("SpectrumMax", "3");
+    alg.setPropertyValue("SpectrumList", "4,5");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Test some aspects of the file
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(
+        workspace = AnalysisDataService::Instance().retrieve(output_ws));
+    TS_ASSERT(workspace.get());
+
+    MatrixWorkspace_sptr matrix_ws =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+    TS_ASSERT(matrix_ws.get());
+
+    // Testing the number of histograms
+    TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(), 5);
+    // Test spectrum numbers
+    size_t index(0);
+    for (auto spectrum : {2, 3, 4, 5, 6}) {
+      TS_ASSERT_EQUALS(matrix_ws->getSpectrum(index).getSpectrumNo(), spectrum);
+      index++;
+    }
+
+    // Test history
+    doHistoryTest(matrix_ws);
+
+    boost::shared_ptr<const Mantid::Geometry::Instrument> inst =
+        matrix_ws->getInstrument();
+    TS_ASSERT_EQUALS(inst->getName(), "GEM");
+    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
+  }
+
   void testNexusProcessed_Min() {
     LoadNexusProcessed alg;
 
@@ -255,46 +297,48 @@ public:
 
   void testProcessedMinMaxAndListDefined() {
 
-    // Tests that a processed spectrum cannot be loaded in with
-    // The Minimum/Maximum spectrum and Spectrum List set
-    // As this will fail to load
-    std::string inputFile;
-    std::string outputSpace;
+	  // Tests that a processed spectrum cannot be loaded in with
+	  // The Minimum/Maximum spectrum and Spectrum List set
+	  // As this will fail to load
+	  std::string inputFile;
+          std::string outputSpace;
+          LoadNexusProcessed loadNexusAlg;
+	  loadNexusAlg.initialize();
 
-    LoadNexusProcessed loadNexusAlg;
-    loadNexusAlg.initialize();
+	  // Setup algorithm
+	  inputFile = "GEM38370_Focussed_Legacy.nxs";
+	  loadNexusAlg.setPropertyValue("Filename", inputFile);
+	  outputSpace = "testProcessedData";
+	  loadNexusAlg.setPropertyValue("OutputWorkspace", outputSpace);
+	  loadNexusAlg.setRethrows(true);
 
-    // Setup algorithm
-    inputFile = "GEM38370_Focussed_Legacy.nxs";
-    loadNexusAlg.setPropertyValue("Filename", inputFile);
-    outputSpace = "testProcessedData";
-    loadNexusAlg.setPropertyValue("OutputWorkspace", outputSpace);
-    loadNexusAlg.setRethrows(true);
+	  // Set min and max parameters
+	  loadNexusAlg.setProperty("SpectrumMin", 2);
+	  loadNexusAlg.setProperty("SpectrumMax", 5);
 
-    // Set min and max parameters
-    loadNexusAlg.setProperty("SpectrumMin", (int64_t)2);
-    loadNexusAlg.setProperty("SpectrumMax", (int64_t)5);
+	  // Set a spectrum list
+	  std::vector<int> spectrumList{ 2, 3, 5, 6 };
+	  loadNexusAlg.setProperty("SpectrumList", spectrumList);
 
-    // Set a spectrum list
-    std::vector<int64_t> spectrumList{2, 3, 5, 6};
-    loadNexusAlg.setProperty("SpectrumList", spectrumList);
+	  // Test it picks up all being set
+	  loadNexusAlg.execute();
+	  TS_ASSERT_EQUALS(loadNexusAlg.isExecuted(), false);
 
-    // Test it picks up all being set
-    TS_ASSERT_THROWS(loadNexusAlg.execute(), std::runtime_error);
+	  // Test it detects with only min being set
+	  loadNexusAlg.setProperty("SpectrumMin", 1);
+	  loadNexusAlg.execute();
+	  TS_ASSERT_EQUALS(loadNexusAlg.isExecuted(), false);
 
-    // Test it detects with only SpectrumMax being set
-    loadNexusAlg.setProperty("SpectrumMin", (int64_t)1);
-    TS_ASSERT_THROWS(loadNexusAlg.execute(), std::runtime_error);
+	  // Test it detects with only max being set
+	  loadNexusAlg.setProperty("SpectrumMin", 3);
+	  loadNexusAlg.setProperty("SpectrumMax", Mantid::EMPTY_INT());
+	  loadNexusAlg.execute();
+	  TS_ASSERT_EQUALS(loadNexusAlg.isExecuted(), false);
 
-    // Test it detects with only SpectrumMin being set
-    loadNexusAlg.setProperty("SpectrumMin", (int64_t)3);
-    loadNexusAlg.setProperty("SpectrumMax", (int64_t)Mantid::EMPTY_INT());
-    TS_ASSERT_THROWS(loadNexusAlg.execute(), std::runtime_error);
-
-    // Finally reset to having just a list and test this still works
-    loadNexusAlg.setProperty("SpectrumMin", (int64_t)1);
-    TS_ASSERT_THROWS_NOTHING(loadNexusAlg.execute());
-    TS_ASSERT_EQUALS(loadNexusAlg.isExecuted(), true);
+	  // Finally reset to having just a list and test this still works
+	  loadNexusAlg.setProperty("SpectrumMin", 1);
+	  TS_ASSERT_THROWS_NOTHING(loadNexusAlg.execute());
+	  TS_ASSERT_EQUALS(loadNexusAlg.isExecuted(), true);
   }
 
   // Saving and reading masking correctly
@@ -509,6 +553,58 @@ public:
 
     // expected number of spectra and length of the alg history
     doCommonEventLoadChecks(alg, 3, 2);
+  }
+
+  void test_loadEventNexus_Min_List() {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumList", "5");
+    alg.setPropertyValue("SpectrumMin", "4");
+    // this should imply 2==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 3, 2);
+  }
+
+  void test_loadEventNexus_Max_List() {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMax", "2");
+    alg.setPropertyValue("SpectrumList", "3,5");
+    // this should imply 4==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 4, 2);
+  }
+
+  void test_loadEventNexus_Min_Max_List() {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMin", "3");
+    alg.setPropertyValue("SpectrumMax", "5");
+    alg.setPropertyValue("SpectrumList", "1,2,3,5");
+    // this should imply 5(all)==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 5, 2);
   }
 
   void test_load_saved_workspace_group() {
