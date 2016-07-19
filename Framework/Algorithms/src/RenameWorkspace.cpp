@@ -64,10 +64,11 @@ void RenameWorkspace::exec() {
   // Test to see if the output already exists
   if (AnalysisDataService::Instance().doesExist(outputwsName)) {
     // Output name already exists - either remove or error
-    if (overrideWorkspaces) {
-      // Delete existing workspace
-      AnalysisDataService::Instance().remove(outputwsName);
-    } else {
+    if (!overrideWorkspaces) {
+      // If we try to delete the workspace here a subtle bug is introduced
+      // Where the workspace group handle is deleted if we are renaming
+      // Its last workspace member, then when we add (or rename) that member
+      // undefined behavior happens usually Python Unit tests breaking
       throw std::runtime_error("The workspace " + outputwsName +
                                " already exists");
     }
