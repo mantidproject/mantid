@@ -50,6 +50,14 @@ public:
   std::string getProcessingOptions() override;
   /// Returns global post-processing options
   std::string getPostprocessingOptions() override;
+  /// Dialog/Prompt methods
+  std::string askUserString(const std::string &prompt, const std::string &title,
+                            const std::string &defaultValue) override;
+  bool askUserYesNo(std::string prompt, std::string title) override;
+  void giveUserWarning(std::string prompt, std::string title) override;
+  void giveUserCritical(std::string prompt, std::string title) override;
+  void giveUserInfo(std::string prompt, std::string title) override;
+  std::string runPythonAlgorithm(const std::string &pythonCode) override;
 
 private:
   /// The view we are handling

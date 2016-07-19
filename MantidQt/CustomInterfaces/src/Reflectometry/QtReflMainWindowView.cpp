@@ -3,6 +3,9 @@
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflSettingsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainWindowPresenter.h"
 
+#include <qinputdialog.h>
+#include <qmessagebox.h>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -42,12 +45,6 @@ IReflRunsTabPresenter *QtReflMainWindowView::createRunsTab() {
   QtReflRunsTabView *runsTab = new QtReflRunsTabView(this);
   m_ui.mainTab->addTab(runsTab, QString("Runs"));
 
-  // This tab may need to run python code (to import/export TBL and to search
-  // the ICAT). The corresponding signal needs to be re-emitted by this widget
-  // so the python code is executed
-  connect(runsTab, SIGNAL(runAsPythonScript(const QString &, bool)), this,
-          SIGNAL(runAsPythonScript(const QString &, bool)));
-
   return runsTab->getPresenter();
 }
 
@@ -60,6 +57,87 @@ IReflSettingsTabPresenter *QtReflMainWindowView::createSettingsTab() {
   m_ui.mainTab->addTab(settingsTab, QString("Settings"));
 
   return settingsTab->getPresenter();
+}
+
+/**
+Show an critical error dialog
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+*/
+void QtReflMainWindowView::giveUserCritical(std::string prompt,
+                                            std::string title) {
+  QMessageBox::critical(this, QString(title.c_str()), QString(prompt.c_str()),
+                        QMessageBox::Ok, QMessageBox::Ok);
+}
+
+/**
+Show a warning dialog
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+*/
+void QtReflMainWindowView::giveUserWarning(std::string prompt,
+                                           std::string title) {
+  QMessageBox::warning(this, QString(title.c_str()), QString(prompt.c_str()),
+                       QMessageBox::Ok, QMessageBox::Ok);
+}
+
+/**
+Show an information dialog
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+*/
+void QtReflMainWindowView::giveUserInfo(std::string prompt, std::string title) {
+	QMessageBox::information(this, QString(title.c_str()),
+		QString(prompt.c_str()), QMessageBox::Ok,
+		QMessageBox::Ok);
+}
+
+/**
+Ask the user a Yes/No question
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+@returns a boolean true if Yes, false if No
+*/
+bool QtReflMainWindowView::askUserYesNo(std::string prompt, std::string title) {
+  auto response = QMessageBox::question(
+      this, QString(title.c_str()), QString(prompt.c_str()),
+      QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+  if (response == QMessageBox::Yes) {
+    return true;
+  }
+  return false;
+}
+
+/**
+Ask the user to enter a string.
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+@param defaultValue : The default value entered.
+@returns The user's string if submitted, or an empty string
+*/
+std::string
+QtReflMainWindowView::askUserString(const std::string &prompt,
+                                    const std::string &title,
+                                    const std::string &defaultValue) {
+  bool ok;
+  QString text = QInputDialog::getText(
+      this, QString::fromStdString(title), QString::fromStdString(prompt),
+      QLineEdit::Normal, QString::fromStdString(defaultValue), &ok);
+  if (ok)
+    return text.toStdString();
+  return "";
+}
+
+/**
+Runs python code
+* @param pythonCode : [input] The code to run
+* @return : Result of the execution
+*/
+std::string
+QtReflMainWindowView::runPythonAlgorithm(const std::string &pythonCode) {
+
+  QString output = runPythonCode(QString::fromStdString(pythonCode), false);
+  return output.toStdString();
 }
 }
 }

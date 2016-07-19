@@ -41,15 +41,24 @@ public:
 
   enum Flag { ADSChangedFlag };
 
-  // Notify this receiver that something changed in the ADS
+  /// Notify this receiver that something changed in the ADS
   virtual void notify(DataProcessorMainPresenter::Flag flag) = 0;
 
-  // Return global options for pre-processing
+  /// Dialog/Prompt methods
+  virtual std::string askUserString(const std::string &prompt,
+                                    const std::string &title,
+                                    const std::string &defaultValue) = 0;
+  virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
+  virtual void giveUserWarning(std::string prompt, std::string title) = 0;
+  virtual void giveUserCritical(std::string prompt, std::string title) = 0;
+  virtual std::string runPythonAlgorithm(const std::string &algorithm) = 0;
+
+  /// Return global options for pre-processing
   virtual std::map<std::string, std::string>
   getPreprocessingOptions() const = 0;
-  // Return global options for reduction
+  /// Return global options for reduction
   virtual std::string getProcessingOptions() const = 0;
-  // Return global options for post-processing
+  /// Return global options for post-processing
   virtual std::string getPostprocessingOptions() const = 0;
 };
 }

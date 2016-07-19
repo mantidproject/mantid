@@ -52,21 +52,11 @@ public:
   void showTable(QDataProcessorTreeModel_sptr model) override;
 
   // Dialog/Prompt methods
-  std::string askUserString(const std::string &prompt, const std::string &title,
-                            const std::string &defaultValue) override;
-  bool askUserYesNo(std::string prompt, std::string title) override;
-  void giveUserWarning(std::string prompt, std::string title) override;
-  void giveUserCritical(std::string prompt, std::string title) override;
-  void showAlgorithmDialog(const std::string &algorithm) override;
-  void showImportDialog() override;
   std::string requestNotebookPath() override;
 
   // Settings
   void saveSettings(const std::map<std::string, QVariant> &options) override;
   void loadSettings(std::map<std::string, QVariant> &options) override;
-
-  // Plotting
-  void plotWorkspaces(const std::set<std::string> &workspaces) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;

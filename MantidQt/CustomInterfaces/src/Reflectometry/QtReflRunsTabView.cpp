@@ -13,8 +13,6 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 #include "MantidQtMantidWidgets/SlitCalculator.h"
-#include <qinputdialog.h>
-#include <qmessagebox.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -73,10 +71,6 @@ void QtReflRunsTabView::initLayout() {
   connect(qDataProcessorWidget,
           SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
-  // Needed to Import/Export TBL, plot row and plot group
-  connect(qDataProcessorWidget,
-          SIGNAL(runAsPythonScript(const QString &, bool)), this,
-          SIGNAL(runAsPythonScript(const QString &, bool)));
 
   // Create the presenter
   m_presenter = new ReflRunsTabPresenter(
@@ -254,59 +248,6 @@ void QtReflRunsTabView::instrumentChanged(int index) {
   m_calculator->setCurrentInstrumentName(
       ui.comboSearchInstrument->itemText(index).toStdString());
   m_calculator->processInstrumentHasBeenChanged();
-}
-
-/**
-Show an information dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void QtReflRunsTabView::giveUserInfo(std::string prompt, std::string title) {
-  QMessageBox::information(this, QString(title.c_str()),
-                           QString(prompt.c_str()), QMessageBox::Ok,
-                           QMessageBox::Ok);
-}
-
-/**
-Show an critical error dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void QtReflRunsTabView::giveUserCritical(std::string prompt,
-                                         std::string title) {
-  QMessageBox::critical(this, QString(title.c_str()), QString(prompt.c_str()),
-                        QMessageBox::Ok, QMessageBox::Ok);
-}
-
-/**
-Ask the user to enter a string.
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@param defaultValue : The default value entered.
-@returns The user's string if submitted, or an empty string
-*/
-std::string QtReflRunsTabView::askUserString(const std::string &prompt,
-                                             const std::string &title,
-                                             const std::string &defaultValue) {
-  bool ok;
-  QString text = QInputDialog::getText(
-      this, QString::fromStdString(title), QString::fromStdString(prompt),
-      QLineEdit::Normal, QString::fromStdString(defaultValue), &ok);
-  if (ok)
-    return text.toStdString();
-  return "";
-}
-
-/**
-Show the user the dialog for an algorithm
-*/
-void QtReflRunsTabView::showAlgorithmDialog(const std::string &algorithm) {
-  std::stringstream pythonSrc;
-  pythonSrc << "try:\n";
-  pythonSrc << "  algm = " << algorithm << "Dialog()\n";
-  pythonSrc << "except:\n";
-  pythonSrc << "  pass\n";
-  runPythonCode(QString::fromStdString(pythonSrc.str()), false);
 }
 
 /**

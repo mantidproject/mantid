@@ -223,7 +223,8 @@ Process selected rows
 */
 void GenericDataProcessorPresenter::process() {
   if (m_model->rowCount() == 0) {
-    m_view->giveUserWarning("Cannot process an empty Table", "Warning");
+    m_mainPresenter->giveUserWarning("Cannot process an empty Table",
+                                     "Warning");
     return;
   }
 
@@ -235,7 +236,7 @@ void GenericDataProcessorPresenter::process() {
   if (groups.empty() && rows.empty()) {
     if (m_options["WarnProcessAll"].toBool()) {
       // Does the user want to abort?
-      if (!m_view->askUserYesNo(
+      if (!m_mainPresenter->askUserYesNo(
               "This will process all rows in the table. Continue?",
               "Process all rows?"))
         return;
@@ -271,7 +272,7 @@ void GenericDataProcessorPresenter::process() {
       err << "You have only selected " << rowIds.size() << " of the ";
       err << numRowsInGroup(groupId) << " rows in group " << groupId << ".";
       err << " Are you sure you want to continue?";
-      if (!m_view->askUserYesNo(err.str(), "Continue Processing?"))
+      if (!m_mainPresenter->askUserYesNo(err.str(), "Continue Processing?"))
         return;
     }
   }
@@ -420,7 +421,7 @@ bool GenericDataProcessorPresenter::processGroups(
             Mantid::Kernel::Strings::toString<int>(groupId);
         const std::string message = "Error encountered while processing row " +
                                     rowNo + " in group " + groupNo + ":\n";
-        m_view->giveUserCritical(message + ex.what(), "Error");
+        m_mainPresenter->giveUserCritical(message + ex.what(), "Error");
         progressReporter.clear();
         return false;
       }
@@ -436,7 +437,7 @@ bool GenericDataProcessorPresenter::processGroups(
             Mantid::Kernel::Strings::toString<int>(groupId);
         const std::string message =
             "Error encountered while stitching group " + groupNo + ":\n";
-        m_view->giveUserCritical(message + ex.what(), "Error");
+        m_mainPresenter->giveUserCritical(message + ex.what(), "Error");
         progressReporter.clear();
         return false;
       }
@@ -470,9 +471,10 @@ bool GenericDataProcessorPresenter::rowsValid(
 
         const std::string rowNo =
             Mantid::Kernel::Strings::toString<int>(*it + 1);
-        m_view->giveUserCritical("Error found in group " + groupNo + ", row " +
-                                     rowNo + ":\n" + ex.what(),
-                                 "Error");
+        m_mainPresenter->giveUserCritical("Error found in group " + groupNo +
+                                              ", row " + rowNo + ":\n" +
+                                              ex.what(),
+                                          "Error");
         return false;
       }
     }
@@ -1057,8 +1059,8 @@ void GenericDataProcessorPresenter::saveTable() {
 Press changes to a new item in the ADS
 */
 void GenericDataProcessorPresenter::saveTableAs() {
-  const std::string userString =
-      m_view->askUserString("Save As", "Enter a workspace name:", "Workspace");
+  const std::string userString = m_mainPresenter->askUserString(
+      "Save As", "Enter a workspace name:", "Workspace");
   if (!userString.empty()) {
     m_wsName = userString;
     saveTable();
@@ -1070,9 +1072,10 @@ Start a new, untitled table
 */
 void GenericDataProcessorPresenter::newTable() {
   if (m_tableDirty && m_options["WarnDiscardChanges"].toBool())
-    if (!m_view->askUserYesNo("Your current table has unsaved changes. Are you "
-                              "sure you want to discard them?",
-                              "Start New Table?"))
+    if (!m_mainPresenter->askUserYesNo(
+            "Your current table has unsaved changes. Are you "
+            "sure you want to discard them?",
+            "Start New Table?"))
       return;
 
   m_ws = createDefaultWorkspace();
@@ -1088,9 +1091,10 @@ Open a table from the ADS
 */
 void GenericDataProcessorPresenter::openTable() {
   if (m_tableDirty && m_options["WarnDiscardChanges"].toBool())
-    if (!m_view->askUserYesNo("Your current table has unsaved changes. Are you "
-                              "sure you want to discard them?",
-                              "Open Table?"))
+    if (!m_mainPresenter->askUserYesNo(
+            "Your current table has unsaved changes. Are you "
+            "sure you want to discard them?",
+            "Open Table?"))
       return;
 
   auto &ads = AnalysisDataService::Instance();
@@ -1100,7 +1104,8 @@ void GenericDataProcessorPresenter::openTable() {
     return;
 
   if (!ads.isValid(toOpen).empty()) {
-    m_view->giveUserCritical("Could not open workspace: " + toOpen, "Error");
+    m_mainPresenter->giveUserCritical("Could not open workspace: " + toOpen,
+                                      "Error");
     return;
   }
 
@@ -1119,7 +1124,7 @@ void GenericDataProcessorPresenter::openTable() {
     m_view->showTable(m_model);
     m_tableDirty = false;
   } catch (std::runtime_error &e) {
-    m_view->giveUserCritical(
+    m_mainPresenter->giveUserCritical(
         "Could not open workspace: " + std::string(e.what()), "Error");
   }
 }
@@ -1128,14 +1133,38 @@ void GenericDataProcessorPresenter::openTable() {
 Import a table from TBL file
 */
 void GenericDataProcessorPresenter::importTable() {
-  m_view->showImportDialog();
+
+  std::stringstream pythonSrc;
+  pythonSrc << "try:\n";
+  pythonSrc << "  algm = "
+            << "LoadTBL"
+            << "Dialog()\n";
+  pythonSrc << "  print algm.getPropertyValue(\"OutputWorkspace\")\n";
+  pythonSrc << "except:\n";
+  pythonSrc << "  pass\n";
+
+  const std::string result =
+      m_mainPresenter->runPythonAlgorithm(pythonSrc.str());
+
+  // result will hold the name of the output workspace
+  // otherwise this should be an empty string.
+  QString outputWorkspaceName = QString::fromStdString(result);
+  auto toOpen = outputWorkspaceName.trimmed().toStdString();
+  m_view->setModel(toOpen);
 }
 
 /**
 Export a table to TBL file
 */
 void GenericDataProcessorPresenter::exportTable() {
-  m_view->showAlgorithmDialog("SaveTBL");
+
+  std::stringstream pythonSrc;
+  pythonSrc << "try:\n";
+  pythonSrc << "  algm = SaveTBLDialog()\n";
+  pythonSrc << "except:\n";
+  pythonSrc << "  pass\n";
+
+  m_mainPresenter->runPythonAlgorithm(pythonSrc.str());
 }
 
 /**
@@ -1387,14 +1416,15 @@ void GenericDataProcessorPresenter::plotRow() {
   }
 
   if (!notFound.empty())
-    m_view->giveUserWarning("The following workspaces were not plotted because "
-                            "they were not found:\n" +
-                                boost::algorithm::join(notFound, "\n") +
-                                "\n\nPlease check that the rows you are trying "
-                                "to plot have been fully processed.",
-                            "Error plotting rows.");
+    m_mainPresenter->giveUserWarning(
+        "The following workspaces were not plotted because "
+        "they were not found:\n" +
+            boost::algorithm::join(notFound, "\n") +
+            "\n\nPlease check that the rows you are trying "
+            "to plot have been fully processed.",
+        "Error plotting rows.");
 
-  m_view->plotWorkspaces(workspaces);
+  plotWorkspaces(workspaces);
 }
 
 /** Plots any currently selected groups */
@@ -1428,14 +1458,35 @@ void GenericDataProcessorPresenter::plotGroup() {
   }
 
   if (!notFound.empty())
-    m_view->giveUserWarning("The following workspaces were not plotted because "
-                            "they were not found:\n" +
-                                boost::algorithm::join(notFound, "\n") +
-                                "\n\nPlease check that the groups you are "
-                                "trying to plot have been fully processed.",
-                            "Error plotting groups.");
+    m_mainPresenter->giveUserWarning(
+        "The following workspaces were not plotted because "
+        "they were not found:\n" +
+            boost::algorithm::join(notFound, "\n") +
+            "\n\nPlease check that the groups you are "
+            "trying to plot have been fully processed.",
+        "Error plotting groups.");
 
-  m_view->plotWorkspaces(workspaces);
+  plotWorkspaces(workspaces);
+}
+
+/**
+Plot a set of workspaces
+* @param workspaces : [input] The list of workspaces as a set
+*/
+void GenericDataProcessorPresenter::plotWorkspaces(
+    const std::set<std::string> &workspaces) {
+  if (workspaces.empty())
+    return;
+
+  std::stringstream pythonSrc;
+  pythonSrc << "base_graph = None\n";
+  for (auto ws = workspaces.begin(); ws != workspaces.end(); ++ws)
+    pythonSrc << "base_graph = plotSpectrum(\"" << *ws
+              << "\", 0, True, window = base_graph)\n";
+
+  pythonSrc << "base_graph.activeLayer().logLogAxes()\n";
+
+  m_mainPresenter->runPythonAlgorithm(pythonSrc.str());
 }
 
 /** Shows the Refl Options dialog */

@@ -170,6 +170,8 @@ protected:
   // plotting
   void plotRow();
   void plotGroup();
+  void plotWorkspaces(const std::set<std::string> &workspaces);
+
   // options
   void showOptionsDialog();
   void initOptions();

@@ -51,14 +51,6 @@ public:
   virtual void showTable(QDataProcessorTreeModel_sptr model) = 0;
 
   // Dialog/Prompt methods
-  virtual std::string askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue) = 0;
-  virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
-  virtual void giveUserWarning(std::string prompt, std::string title) = 0;
-  virtual void giveUserCritical(std::string prompt, std::string title) = 0;
-  virtual void showAlgorithmDialog(const std::string &algorithm) = 0;
-  virtual void showImportDialog() = 0;
   virtual std::string requestNotebookPath() = 0;
 
   // Settings
@@ -68,9 +60,6 @@ public:
   // Get status of the checkbox which dictates whether an ipython notebook is
   // produced
   virtual bool getEnableNotebook() = 0;
-
-  // Plotting
-  virtual void plotWorkspaces(const std::set<std::string> &workspaces) = 0;
 
   // Setter methods
   virtual void setTableList(const std::set<std::string> &tables) = 0;

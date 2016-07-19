@@ -159,9 +159,14 @@ void ReflRunsTabPresenter::search() {
   // If we're not logged into a catalog, prompt the user to do so
   if (CatalogManager::Instance().getActiveSessions().empty()) {
     try {
-      m_view->showAlgorithmDialog("CatalogLogin");
+      std::stringstream pythonSrc;
+      pythonSrc << "try:\n";
+      pythonSrc << "  algm = CatalogLoginDialog()\n";
+      pythonSrc << "except:\n";
+      pythonSrc << "  pass\n";
+      m_mainPresenter->runPythonAlgorithm(pythonSrc.str());
     } catch (std::runtime_error &e) {
-      m_view->giveUserCritical("Error Logging in:\n" + std::string(e.what()),
+      m_mainPresenter->giveUserCritical("Error Logging in:\n" + std::string(e.what()),
                                "login failed");
     }
   }
@@ -173,7 +178,7 @@ void ReflRunsTabPresenter::search() {
         CatalogManager::Instance().getActiveSessions().front()->getSessionId();
   } else {
     // there are no active sessions, we return here to avoid an exception
-    m_view->giveUserInfo(
+    m_mainPresenter->giveUserInfo(
         "Error Logging in: Please press 'Search' to try again.",
         "Login Failed");
     return;
@@ -345,6 +350,65 @@ std::string ReflRunsTabPresenter::getProcessingOptions() const {
 */
 std::string ReflRunsTabPresenter::getPostprocessingOptions() const {
   return m_mainPresenter->getPostprocessingOptions();
+}
+
+/**
+Tells the view to show an critical error dialog
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+*/
+void ReflRunsTabPresenter::giveUserCritical(std::string prompt,
+                                            std::string title) {
+
+  m_mainPresenter->giveUserCritical(prompt, title);
+}
+
+/**
+Tells the view to show a warning dialog
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+*/
+void ReflRunsTabPresenter::giveUserWarning(std::string prompt,
+                                           std::string title) {
+
+  m_mainPresenter->giveUserWarning(prompt, title);
+}
+
+/**
+Tells the view to ask the user a Yes/No question
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+@returns a boolean true if Yes, false if No
+*/
+bool ReflRunsTabPresenter::askUserYesNo(std::string prompt, std::string title) {
+
+  return m_mainPresenter->askUserYesNo(prompt, title);
+}
+
+/**
+Tells the view to ask the user to enter a string.
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+@param defaultValue : The default value entered.
+@returns The user's string if submitted, or an empty string
+*/
+std::string
+ReflRunsTabPresenter::askUserString(const std::string &prompt,
+                                    const std::string &title,
+                                    const std::string &defaultValue) {
+
+  return m_mainPresenter->askUserString(prompt, title, defaultValue);
+}
+
+/**
+Tells the main presenter to run an algorithm as python code
+* @param pythonCode : [input] The algorithm as python code
+* @return : The result of the execution
+*/
+std::string
+ReflRunsTabPresenter::runPythonAlgorithm(const std::string &pythonCode) {
+
+  return m_mainPresenter->runPythonAlgorithm(pythonCode);
 }
 
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";

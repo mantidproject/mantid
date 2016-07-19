@@ -50,6 +50,15 @@ public:
   /// This interface's categories.
   static QString categoryInfo() { return "Reflectometry"; }
 
+  /// Dialog/Prompt methods
+  std::string askUserString(const std::string &prompt, const std::string &title,
+                            const std::string &defaultValue) override;
+  bool askUserYesNo(std::string prompt, std::string title) override;
+  void giveUserWarning(std::string prompt, std::string title) override;
+  void giveUserCritical(std::string prompt, std::string title) override;
+  void giveUserInfo(std::string prompt, std::string title) override;
+  std::string runPythonAlgorithm(const std::string &pythonCode) override;
+
 private:
   /// Initializes the interface
   void initLayout() override;

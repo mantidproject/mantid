@@ -55,14 +55,6 @@ public:
   // Connect the model
   virtual void showSearch(boost::shared_ptr<ReflSearchModel> model) = 0;
 
-  // Dialog/Prompt methods
-  virtual std::string askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue) = 0;
-  virtual void giveUserInfo(std::string prompt, std::string title) = 0;
-  virtual void giveUserCritical(std::string prompt, std::string title) = 0;
-  virtual void showAlgorithmDialog(const std::string &algorithm) = 0;
-
   // Setter methods
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
                                  const std::string &defaultInstrument) = 0;

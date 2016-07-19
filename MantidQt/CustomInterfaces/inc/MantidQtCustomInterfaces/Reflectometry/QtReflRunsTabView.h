@@ -68,13 +68,6 @@ public:
   // Connect the model
   void showSearch(boost::shared_ptr<ReflSearchModel> model) override;
 
-  // Dialog/Prompt methods
-  std::string askUserString(const std::string &prompt, const std::string &title,
-                            const std::string &defaultValue) override;
-  void giveUserInfo(std::string prompt, std::string title) override;
-  void giveUserCritical(std::string prompt, std::string title) override;
-  void showAlgorithmDialog(const std::string &algorithm) override;
-
   // Setter methods
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;

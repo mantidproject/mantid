@@ -66,6 +66,13 @@ public:
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
   void notify(DataProcessorMainPresenter::Flag flag) override;
+  /// Dialog/Prompt methods
+  std::string askUserString(const std::string &prompt, const std::string &title,
+                            const std::string &defaultValue) override;
+  bool askUserYesNo(std::string prompt, std::string title) override;
+  void giveUserWarning(std::string prompt, std::string title) override;
+  void giveUserCritical(std::string prompt, std::string title) override;
+  std::string runPythonAlgorithm(const std::string &pythonCode) override;
 
 protected:
   /// The search model
