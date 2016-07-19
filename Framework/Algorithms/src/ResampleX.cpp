@@ -346,9 +346,8 @@ void ResampleX::exec() {
         for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
           PARALLEL_START_INTERUPT_REGION
           BinEdges xValues(0);
-          double delta = this->determineBinning(xValues.mutableRawData(),
-                                                xmins[wkspIndex],
-                                                xmaxs[wkspIndex]);
+          double delta = this->determineBinning(
+              xValues.mutableRawData(), xmins[wkspIndex], xmaxs[wkspIndex]);
           g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta
                         << " xmin=" << xmins[wkspIndex]
                         << " xmax=" << xmaxs[wkspIndex] << "\n";
