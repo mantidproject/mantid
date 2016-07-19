@@ -670,6 +670,13 @@ void SliceViewer::updateDimensionSliceWidgets() {
     if (w > maxUnitsWidth)
       maxUnitsWidth = w;
 
+    // if the workspace is already binned, update the interface with the
+    // existing number of bins
+    if(boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws)) {
+        auto dim = m_ws->getDimension(d);
+        int numBins = static_cast<int>(dim->getNBins());
+        widget->setNumBins(numBins);
+    }
     widget->blockSignals(false);
   }
 
@@ -1117,14 +1124,6 @@ void SliceViewer::SnapToGrid_toggled(bool checked) {
 void SliceViewer::RebinMode_toggled(bool checked) {
   for (size_t d = 0; d < m_dimWidgets.size(); d++) {
     m_dimWidgets[d]->showRebinControls(checked);
-
-    // if the workspace is already binned, update the interface with the
-    // existing number of bins
-    if(boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws)) {
-        auto dim = m_ws->getDimension(d);
-        int numBins = static_cast<int>(dim->getNBins());
-        m_dimWidgets[d]->setNumBins(numBins);
-    }
   }
   ui.btnRebinRefresh->setEnabled(checked);
   m_syncAutoRebin->setEnabled(checked);
