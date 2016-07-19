@@ -151,16 +151,19 @@ private:
   void initMantidOptionsTab();
   void initSendToProgramTab();
   void refreshTreeCategories();
-  void
-  buildTreeCategoryStructure(const QString *catNames, const bool isHidden,
-                             QMap<QString, QTreeWidgetItem *> *seenCategories);
-
-  QTreeWidgetItem *walkBackwardsThroughCategories(
-      const QString *catNames, int elementToCheck,
-      QMap<QString, QTreeWidgetItem *> *seenCategories);
-
   void populateProgramTree();
   void updateProgramTree();
+
+  void buildTreeCategoryStructure(const QString *catNames, const bool isHidden,
+                             QMap<QString, QTreeWidgetItem *> *seenCategories);
+
+  QTreeWidgetItem *walkBackwardsThroughCategories(const QString *catNames, 
+	  int elementToCheck,QMap<QString, QTreeWidgetItem *> *seenCategories,
+	  Qt::CheckState childTickState);
+
+  void correctTreePatrialTicks(QTreeWidgetItem *topLevelCat);
+
+
 
   // MD Plotting
   void initMdPlottingPage();
@@ -169,7 +172,7 @@ private:
   void updateMdPlottingSettings();
   void setupMdPlottingConnections();
 
-  QTreeWidgetItem *createCheckedTreeItem(QString name, bool checkBoxState);
+  QTreeWidgetItem *createCheckedTreeItem(QString name, Qt::CheckState checkBoxState);
   QStringList buildHiddenCategoryString(QTreeWidgetItem *parent = 0);
 
   std::map<std::string, std::map<std::string, std::string>> m_sendToSettings;
