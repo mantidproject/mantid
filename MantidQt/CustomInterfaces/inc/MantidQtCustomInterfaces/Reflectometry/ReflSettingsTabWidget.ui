@@ -40,12 +40,12 @@
               <widget class="QComboBox" name="analysisModeComboBox">
                 <item>
                   <property name="text">
-                    <string>MultiDetectorAnalysis</string>
+                    <string>PointDetectorAnalysis</string>
                   </property>
                 </item>
                 <item>
                   <property name="text">
-                    <string>PointDetectorAnalysis</string>
+                    <string>MultiDetectorAnalysis</string>
                   </property>
                 </item>
               </widget>

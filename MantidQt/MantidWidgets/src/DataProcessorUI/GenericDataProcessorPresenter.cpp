@@ -403,7 +403,10 @@ bool GenericDataProcessorPresenter::processGroups(
 
   int progress = 0;
   // Each group and each row within count as a progress step.
-  const int maxProgress = (int)(rows.size() + groups.size());
+  int maxProgress = (int)(groups.size());
+  for (const auto row : rows) {
+    maxProgress += (int)(row.second.size());
+  }
   ProgressPresenter progressReporter(progress, maxProgress, maxProgress,
                                      m_progressView);
 
