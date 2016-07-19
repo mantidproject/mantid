@@ -30,6 +30,9 @@ add_test_data() {
 
   # Compute hash
   hash=$(hash_code $content_file)
+  if [ "$hash" = "" ]; then
+    exit 1
+  fi
   debug_msg "${INDENT}${HASH_ALG} hash: $hash"
 
   # Create content link if required
@@ -68,6 +71,9 @@ hash_code() {
 md5sum() {
   md5cmd="cmake -E md5sum"
   cmake_output=$($md5cmd $1)
+  if [ "$cmake_output" = "" ]; then
+    fatal "CMake was unable to create the MD5 Sum"
+  fi
   # CMake output is of form: HASH   filename
   md5=$(echo $cmake_output | awk '{print $1}')
   echo $md5
@@ -181,6 +187,9 @@ datafiles=$*
 all_hashed_files=""
 for datafile in $datafiles; do
   hashed_content=$(add_test_data ${GIT_PREFIX}$datafile)
+  if [ "$hashed_content" = "" ]; then
+    fatal "Unable to add test data '${GIT_PREFIX}$datafile'"
+  fi
   all_hashed_files="$all_hashed_files $hashed_content"
 done
 
