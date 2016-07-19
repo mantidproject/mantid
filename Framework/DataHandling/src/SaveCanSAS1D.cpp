@@ -15,13 +15,29 @@
 #include "MantidKernel/ListValidator.h"
 
 #include <boost/shared_ptr.hpp>
-#include <Poco/XML/XMLString.h>
 
 //-----------------------------------------------------------------------------
+namespace {
+void encode(std::string& data) {
+  std::string buffer;
+  buffer.reserve(data.size());
+  for (size_t pos = 0; pos != data.size(); ++pos) {
+    switch (data[pos]) {
+    case '&':  buffer.append("&amp;");       break;
+    case '\"': buffer.append("&quot;");      break;
+    case '\'': buffer.append("&apos;");      break;
+    case '<':  buffer.append("&lt;");        break;
+    case '>':  buffer.append("&gt;");        break;
+    default:   buffer.append(&data[pos], 1); break;
+    }
+  }
+  data.swap(buffer);
+}
+}
+
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
-using namespace Poco::XML;
 
 namespace Mantid {
 namespace DataHandling {
@@ -587,7 +603,7 @@ void SaveCanSAS1D::createSASProcessElement(std::string &sasProcess) {
   std::string process_xml = getProperty("Process");
   if (process_xml.size() > 0) {
     std::string processNote = "\n\t\t\t<SASprocessnote>\n";
-    process_xml = toXMLString(process_xml);
+    encode(process_xml);
     processNote += process_xml + "\n";
     processNote += "\n\t\t\t</SASprocessnote>\n";
     sasProcess += processNote;
