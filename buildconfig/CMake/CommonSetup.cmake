@@ -247,7 +247,7 @@ endif ()
 ###########################################################################
 if ( CMAKE_COMPILER_IS_GNUCXX )
   include ( GNUSetup )
-elseif ( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
+elseif ( ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang" )
   include ( GNUSetup )
 endif ()
 
@@ -309,6 +309,13 @@ endif()
 ###########################################################################
 if ( CXXTEST_FOUND OR PYUNITTEST_FOUND )
   include( SetupDataTargets )
+endif()
+
+###########################################################################
+# Visibility Setting
+###########################################################################
+if ( CMAKE_COMPILER_IS_GNUCXX )
+  set(CMAKE_CXX_VISIBILITY_PRESET hidden CACHE STRING "")
 endif()
 
 ###########################################################################
