@@ -79,8 +79,9 @@ PointStandardDeviations Histogram::pointStandardDeviations() const {
 
 /** Returns the counts of the Histogram.
 
-  The returned Counts's internal pointer references the same data as the
-  Histogram, i.e., there is little overhead. */
+  If the histogram stores frequencies, the counts are computed based on them.
+  Otherwise the returned Counts's internal pointer references the same data as
+  the Histogram, i.e., there is little overhead. */
 Counts Histogram::counts() const {
   if (yMode() == YMode::Counts)
     return Counts(m_y);
@@ -98,9 +99,10 @@ CountVariances Histogram::countVariances() const {
 
 /** Returns the standard deviations of the counts of the Histogram.
 
-  The returned CountStandardDeviations's internal pointer references the same
-  data as the uncertainties stored in the Histogram, i.e., there is little
-  overhead. */
+  If the histogram stores frequencies, the CountStandardDeviations are computed
+  based on the standard deviations of the frequencies. Otherwise the returned
+  CountStandardDeviations's internal pointer references the same data as the
+  Histogram, i.e., there is little overhead. */
 CountStandardDeviations Histogram::countStandardDeviations() const {
   if (yMode() == YMode::Counts)
     return CountStandardDeviations(m_e);
@@ -112,8 +114,9 @@ CountStandardDeviations Histogram::countStandardDeviations() const {
 /** Returns the frequencies of the Histogram, i.e., the counts divided by the
   bin widths.
 
-  The frequencies are computed on the fly from other data stored in the
-  Histogram, i.e., this method comes with an overhead. */
+  If the histogram stores counts, the frequencies are computed based on them.
+  Otherwise the returned Frequencies's internal pointer references the same data
+  as the Histogram, i.e., there is little overhead. */
 Frequencies Histogram::frequencies() const {
   if (yMode() == YMode::Counts)
     return Frequencies(Counts(m_y), binEdges());
@@ -131,8 +134,10 @@ FrequencyVariances Histogram::frequencyVariances() const {
 
 /** Returns the standard deviations of the frequencies of the Histogram.
 
-  The standard deviations are computed on the fly from other data stored in the
-  Histogram, i.e., this method comes with an overhead. */
+  If the histogram stores counts, the FrequencyStandardDeviations are computed
+  based on the standard deviations of the counts. Otherwise the returned
+  FrequencyStandardDeviations's internal pointer references the same data as the
+  Histogram, i.e., there is little overhead. */
 FrequencyStandardDeviations Histogram::frequencyStandardDeviations() const {
   if (yMode() == YMode::Counts)
     return FrequencyStandardDeviations(CountStandardDeviations(m_e),
@@ -145,8 +150,6 @@ FrequencyStandardDeviations Histogram::frequencyStandardDeviations() const {
 
   Throws if the size does not match the current size. */
 void Histogram::setSharedX(const Kernel::cow_ptr<HistogramX> &x) & {
-  // TODO Check size only if we have y-data.
-  // TODO but if size changes, also need to invalidate m_dx!
   if (m_x->size() != x->size())
     throw std::logic_error("Histogram::setSharedX: size mismatch\n");
   m_x = x;
@@ -182,6 +185,7 @@ void Histogram::setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & {
   m_dx = Dx;
 }
 
+/// Converts the histogram storage mode into YMode::Counts
 void Histogram::convertToCounts() {
   if (yMode() == YMode::Counts)
     return;
@@ -196,6 +200,7 @@ void Histogram::convertToCounts() {
   m_yMode = YMode::Counts;
 }
 
+/// Converts the histogram storage mode into YMode::Frequencies
 void Histogram::convertToFrequencies() {
   if (yMode() == YMode::Frequencies)
     return;
