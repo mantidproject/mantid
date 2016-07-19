@@ -46,7 +46,7 @@ bool ILLEnergyTransfer::validate() {
     uiv.checkDataSelectorIsValid("Calibration", m_uiForm.dsCalibration);
 
   // Validate map file if it is being used
-  bool useMapFile = m_uiForm.cbGroupingType->currentText() == "File";
+  bool useMapFile = m_uiForm.rdGroupChoose->isChecked();
   if (useMapFile && !m_uiForm.rfMapFile->isValid())
     uiv.addErrorMessage("Grouping file is invalid.");
 
@@ -81,7 +81,7 @@ void ILLEnergyTransfer::run() {
   }
 
   // Handle mapping file
-  bool useMapFile = m_uiForm.cbGroupingType->currentText() == "File";
+  bool useMapFile = m_uiForm.rdGroupChoose->isChecked();
   if (useMapFile) {
     QString mapFilename = m_uiForm.rfMapFile->getFirstFilename();
     reductionAlg->setProperty("MapFile", mapFilename.toStdString());

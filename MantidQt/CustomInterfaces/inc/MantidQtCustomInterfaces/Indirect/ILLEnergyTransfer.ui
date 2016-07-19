@@ -7,8 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>389</height>
+    <height>452</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
@@ -19,9 +25,18 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <layout class="QVBoxLayout" name="loMain">
    <item>
     <widget class="QGroupBox" name="gbInput">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Input File(s)</string>
      </property>
@@ -46,6 +61,28 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="ckSum">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Sum the input files</string>
+        </property>
+        <property name="text">
+         <string>Sum All</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -61,33 +98,82 @@
         </property>
        </spacer>
       </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbType">
+     <property name="title">
+      <string>Reduction Type</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_14">
       <item>
-       <widget class="QCheckBox" name="ckSum">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Sum the input files</string>
-        </property>
+       <widget class="QRadioButton" name="rdQENS">
         <property name="text">
-         <string>Sum</string>
+         <string>QENS</string>
         </property>
         <property name="checked">
          <bool>true</bool>
         </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="rdFWS">
+        <property name="text">
+         <string>E/I - FWS</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lbObservable">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Observable</string>
+        </property>
+       </widget>
+      </item>
+      <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+       <widget class="QComboBox" name="cbObservable">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <item>
+         <property name="text">
+          <string>Temperature [K]</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Pressure [bar]</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>
     </widget>
    </item>
-   <item>
+   <item alignment="Qt::AlignVCenter">
     <widget class="QGroupBox" name="gbCalibration">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Vanadium Calibration</string>
      </property>
@@ -128,19 +214,10 @@
         <property name="showLoad" stdset="0">
          <bool>false</bool>
         </property>
-        <property name="workspaceSuffixes" stdset="0">
-         <stringlist>
-          <string>_calib</string>
-         </stringlist>
-        </property>
-        <property name="fileBrowserSuffixes" stdset="0">
-         <stringlist>
-          <string>_calib.nxs</string>
-         </stringlist>
-        </property>
+        <zorder>gbInput</zorder>
        </widget>
       </item>
-      <item>
+      <item alignment="Qt::AlignVCenter">
        <widget class="QCheckBox" name="ckCalibSum">
         <property name="enabled">
          <bool>false</bool>
@@ -161,29 +238,44 @@
    </item>
    <item>
     <widget class="QGroupBox" name="gbGrouping">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Detector Grouping</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <widget class="QComboBox" name="cbGroupingType">
-        <property name="toolTip">
-         <string>Use detector grouping</string>
+       <widget class="QRadioButton" name="rdGroupDefault">
+        <property name="text">
+         <string>Default</string>
         </property>
-        <item>
-         <property name="text">
-          <string>Default</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>File</string>
-         </property>
-        </item>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup_2</string>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="rdGroupChoose">
+        <property name="text">
+         <string>Choose File</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup_2</string>
+        </attribute>
        </widget>
       </item>
       <item>
        <widget class="QStackedWidget" name="swGroupingTypes">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="currentIndex">
          <number>1</number>
         </property>
@@ -196,8 +288,11 @@
           <property name="bottomMargin">
            <number>0</number>
           </property>
-          <item>
+          <item alignment="Qt::AlignVCenter">
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfMapFile" native="true">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="toolTip">
              <string>Detector grouping .xml file</string>
             </property>
@@ -220,6 +315,12 @@
    </item>
    <item>
     <widget class="QGroupBox" name="gbOptions">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Unmirror Options</string>
      </property>
@@ -227,7 +328,7 @@
       <item>
        <widget class="QCheckBox" name="ckMirrorSense">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -245,13 +346,19 @@
       </item>
       <item>
        <widget class="QSpinBox" name="sbUnmirrorOption">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="toolTip">
          <string>Unmirror option</string>
         </property>
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_3">
+       <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -274,6 +381,12 @@
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QCheckBox" name="ckControlMode">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="toolTip">
          <string>Output intermediate workspaces along with the final reduced one</string>
         </property>
@@ -287,6 +400,12 @@
       </item>
       <item>
        <widget class="QCheckBox" name="ckPlot">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="toolTip">
          <string>Plot the reduced workspace</string>
         </property>
@@ -295,8 +414,14 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
        <widget class="QCheckBox" name="ckSave">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="toolTip">
          <string>Save the reduced workspace</string>
         </property>
@@ -304,19 +429,6 @@
          <string>Save Result</string>
         </property>
        </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </widget>
@@ -352,26 +464,9 @@
  </customwidgets>
  <tabstops>
   <tabstop>ckUseCalibration</tabstop>
-  <tabstop>cbGroupingType</tabstop>
  </tabstops>
  <resources/>
  <connections>
-  <connection>
-   <sender>cbGroupingType</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>swGroupingTypes</receiver>
-   <slot>setCurrentIndex(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>80</x>
-     <y>230</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>343</x>
-     <y>161</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>ckUseCalibration</sender>
    <signal>toggled(bool)</signal>
@@ -388,5 +483,137 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbObservable</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>70</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>499</x>
+     <y>116</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbObservable</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>171</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>499</x>
+     <y>116</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbObservable</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>70</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>373</x>
+     <y>115</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbObservable</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>171</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>373</x>
+     <y>115</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>ckSum</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>171</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>536</x>
+     <y>45</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>ckSum</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>70</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>536</x>
+     <y>45</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdGroupDefault</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>rfMapFile</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>59</x>
+     <y>245</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>391</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdGroupChoose</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>rfMapFile</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>151</x>
+     <y>245</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>391</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
+ </buttongroups>
 </ui>
