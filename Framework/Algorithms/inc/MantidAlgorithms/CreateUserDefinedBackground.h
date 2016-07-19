@@ -69,6 +69,8 @@ private:
   Kernel::Interpolation
   getInterpolator(const API::ITableWorkspace_const_sptr &background,
                   const API::MatrixWorkspace_const_sptr &workspace) const;
+  /// Key name for "normalize histogram to bin width" option on plots
+  static const std::string AUTODISTRIBUTIONKEY;
 };
 
 } // namespace Algorithms

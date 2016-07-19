@@ -3,12 +3,17 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Interpolation.h"
 
 #include <algorithm>
 
 namespace Mantid {
 namespace Algorithms {
+
+// Key for the "normalize data to bin width" plot option
+const std::string CreateUserDefinedBackground::AUTODISTRIBUTIONKEY =
+    "graph1d.autodistribution";
 
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
@@ -156,11 +161,20 @@ CreateUserDefinedBackground::createBackgroundWorkspace(
     yBackground.push_back(y);
   }
 
+  // Find out if user has selected the option "normalize histogram to bin width"
+  const bool distributionPlot = []() {
+    const auto retval =
+        Kernel::ConfigService::Instance().getString(AUTODISTRIBUTIONKEY);
+    return retval == "On";
+  }();
+
+  // Y is frequencies for distribution data (histo), otherwise counts
+  const bool useFrequencies =
+      data->isHistogramData() && (data->isDistribution() || distributionPlot);
+
   // Apply Y and E data to all spectra in the workspace
-  // If input was histogram, Y is frequencies
-  // If input was points, Y is counts
   for (size_t spec = 0; spec < outputWS->getNumberHistograms(); spec++) {
-    if (data->isHistogramData()) {
+    if (useFrequencies) {
       outputWS->setFrequencies(spec, yBackground);
       outputWS->setFrequencyStandardDeviations(spec, eBackground);
     } else {
