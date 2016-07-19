@@ -685,8 +685,8 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
       std::generate(result->mutableX(j).begin() + l, result->mutableX(j).end(),
                     [=]() mutable {
                       ++l;
-                      return result->mutableX(j)[lastBins[j]] + 1 + l -
-                             lastBins[j];
+                      return result->mutableX(j)[lastBins[j]] + 1 +
+                             static_cast<double>(l - lastBins[j]);
                     });
 
       result->mutableY(j).assign(workspace->y(j).cbegin(),
