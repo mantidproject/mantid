@@ -263,7 +263,7 @@ end
 # ---------------------------------------------
 h5py_path = "/usr/local/lib/python2.7/site-packages"
 h5py_directories = ["h5py"]
-directories.each do |directory|
+h5py_directories.each do |directory|
   addPythonLibrary("#{h5py_path}/#{directory}")
 end
 
