@@ -900,16 +900,18 @@ public:
     TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Frequencies);
   }
 
-  void test_yMode_cannot_be_changed_by_setters() {
-    Histogram countHist(Points(1), Counts(1));
-    TS_ASSERT_THROWS(countHist.setFrequencies(1), std::logic_error);
-    TS_ASSERT_THROWS(countHist.setFrequencyVariances(1), std::logic_error);
-    TS_ASSERT_THROWS(countHist.setFrequencyStandardDeviations(1),
-                     std::logic_error);
-    Histogram freqHist(Points(1), Frequencies(1));
-    TS_ASSERT_THROWS(freqHist.setCounts(1), std::logic_error);
-    TS_ASSERT_THROWS(freqHist.setCountVariances(1), std::logic_error);
-    TS_ASSERT_THROWS(freqHist.setCountStandardDeviations(1), std::logic_error);
+  void test_yMode_cannot_be_changed_by_Count_setters() {
+    Histogram h(Points(1), Counts(1));
+    TS_ASSERT_THROWS(h.setFrequencies(1), std::logic_error);
+    TS_ASSERT_THROWS(h.setFrequencyVariances(1), std::logic_error);
+    TS_ASSERT_THROWS(h.setFrequencyStandardDeviations(1), std::logic_error);
+  }
+
+  void test_yMode_cannot_be_changed_by_Frequency_setters() {
+    Histogram h(Points(1), Frequencies(1));
+    TS_ASSERT_THROWS(h.setCounts(1), std::logic_error);
+    TS_ASSERT_THROWS(h.setCountVariances(1), std::logic_error);
+    TS_ASSERT_THROWS(h.setCountStandardDeviations(1), std::logic_error);
   }
 
   void test_setSharedY_fails_for_YMode_Uninitialized() {
