@@ -351,7 +351,7 @@ public:
 		delete suite;
 	}
 
-	ScaleXTestPerformance(){
+	void setUp(){
 		inputMatrix = WorkspaceCreationHelper::Create2DWorkspaceBinned(10000, 1000);
 		inputEvent = WorkspaceCreationHelper::CreateEventWorkspace(10000, 1000, 5000);
 
@@ -364,7 +364,6 @@ public:
 
 
 	void testPerformanceMatrixWS() {
-
 		Mantid::Algorithms::ScaleX scale;
 		scale.initialize();	
 		scale.setProperty("InputWorkspace", inputMatrix);
