@@ -5,9 +5,9 @@
 #include "MantidAlgorithms/ScaleX.h"
 #include "MantidGeometry/Instrument.h"
 
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <MantidAPI/FrameworkManager.h>
 
 using Mantid::MantidVec;
@@ -114,21 +114,21 @@ public:
 
 			for (size_t j = 0; j < xsize; ++j) {
 				if (factor > 0) {
-					TS_ASSERT_DELTA(result->readX(i)[j], factor * inputWS->readX(i)[j],
+					TS_ASSERT_DELTA(result->x(i)[j], factor * inputWS->x(i)[j],
 						1e-12);
-					TS_ASSERT_EQUALS(result->readY(i)[j], inputWS->readY(i)[j]);
-					TS_ASSERT_EQUALS(result->readE(i)[j], inputWS->readE(i)[j]);
+					TS_ASSERT_EQUALS(result->y(i)[j], inputWS->y(i)[j]);
+					TS_ASSERT_EQUALS(result->e(i)[j], inputWS->e(i)[j]);
 				}
 				else {
 					// ScaleX reverses the histogram if the factor is negative
 					// X vector has length xsize+1
-					TS_ASSERT_DELTA(result->readX(i)[j],
-						factor * inputWS->readX(i)[xsize - j], 1e-12);
+					TS_ASSERT_DELTA(result->x(i)[j],
+						factor * inputWS->x(i)[xsize - j], 1e-12);
 					// Y and E have length xsize
-					TS_ASSERT_EQUALS(result->readY(i)[j],
-						inputWS->readY(i)[xsize - 1 - j]);
-					TS_ASSERT_EQUALS(result->readE(i)[j],
-						inputWS->readE(i)[xsize - 1 - j]);
+					TS_ASSERT_EQUALS(result->y(i)[j],
+						inputWS->y(i)[xsize - 1 - j]);
+					TS_ASSERT_EQUALS(result->e(i)[j],
+						inputWS->e(i)[xsize - 1 - j]);
 				}
 			}
 		}
@@ -184,21 +184,21 @@ public:
 
 			for (size_t j = 0; j < xsize; ++j) {
 				if (factor > 0) {
-					TS_ASSERT_DELTA(result->readX(i)[j], factor * inputWS->readX(i)[j],
+					TS_ASSERT_DELTA(result->x(i)[j], factor * inputWS->x(i)[j],
 						1e-12);
-					TS_ASSERT_EQUALS(result->readY(i)[j], inputWS->readY(i)[j]);
-					TS_ASSERT_EQUALS(result->readE(i)[j], inputWS->readE(i)[j]);
+					TS_ASSERT_EQUALS(result->y(i)[j], inputWS->y(i)[j]);
+					TS_ASSERT_EQUALS(result->e(i)[j], inputWS->e(i)[j]);
 				}
 				else {
 					// ScaleX reverses the histogram if the factor is negative
 					// X vector has length xsize+1
-					TS_ASSERT_DELTA(result->readX(i)[j],
-						factor * inputWS->readX(i)[xsize - j], 1e-12);
+					TS_ASSERT_DELTA(result->x(i)[j],
+						factor * inputWS->x(i)[xsize - j], 1e-12);
 					// Y and E have length xsize
-					TS_ASSERT_EQUALS(result->readY(i)[j],
-						inputWS->readY(i)[xsize - 1 - j]);
-					TS_ASSERT_EQUALS(result->readE(i)[j],
-						inputWS->readE(i)[xsize - 1 - j]);
+					TS_ASSERT_EQUALS(result->y(i)[j],
+						inputWS->y(i)[xsize - 1 - j]);
+					TS_ASSERT_EQUALS(result->e(i)[j],
+						inputWS->e(i)[xsize - 1 - j]);
 				}
 			}
 		}
@@ -327,11 +327,11 @@ private:
 		const size_t xsize = outputWS->blocksize();
 		for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
 			for (size_t j = 0; j < xsize; ++j) {
-				double resultX = (multiply) ? factor * inputWS->readX(i)[j]
-					                 : factor + inputWS->readX(i)[j];
-				TS_ASSERT_DELTA(outputWS->readX(i)[j], resultX, 1e-12);
-				TS_ASSERT_EQUALS(outputWS->readY(i)[j], inputWS->readY(i)[j]);
-				TS_ASSERT_EQUALS(outputWS->readE(i)[j], inputWS->readE(i)[j]);
+				double resultX = (multiply) ? factor * inputWS->x(i)[j]
+					                 : factor + inputWS->x(i)[j];
+				TS_ASSERT_DELTA(outputWS->x(i)[j], resultX, 1e-12);
+				TS_ASSERT_EQUALS(outputWS->y(i)[j], inputWS->y(i)[j]);
+				TS_ASSERT_EQUALS(outputWS->e(i)[j], inputWS->e(i)[j]);
 			}
 		}
 	}
