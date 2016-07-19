@@ -13,7 +13,7 @@ class IReflSettingsTabPresenter;
 /** QtReflSettingsTabView : Provides an interface for the "Settings" tab in the
 Reflectometry (Polref) interface.
 
-Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.

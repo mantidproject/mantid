@@ -24,7 +24,7 @@ GenericDataProcessorPresenter is a presenter class for the Data Processor
 Interface. It
 handles any interface functionality and model manipulation.
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
