@@ -9,6 +9,8 @@ set ( SRC_FILES
 	src/DynamicPDF/DPDFInputDataControl.cpp
 	src/DynamicPDF/DisplayCurveFitTest.cpp
 	src/DynamicPDF/SliceSelector.cpp
+	src/EnggDiffraction/EnggDiffFittingPresenter.cpp
+	src/EnggDiffraction/EnggDiffFittingViewQtWidget.cpp
 	src/EnggDiffraction/EnggDiffractionPresenter.cpp
 	src/EnggDiffraction/EnggDiffractionViewQtGUI.cpp
 	src/Homer.cpp
@@ -147,9 +149,13 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/DynamicPDF/DisplayCurveFitTest.h
 	inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h
+	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h
+	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresWorker.h
+	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingViewQtWidget.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h
+	inc/MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffFittingPresenter.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h
 	inc/MantidQtCustomInterfaces/Homer.h
@@ -305,6 +311,9 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/DynamicPDF/DPDFFourierTransform.h
                 inc/MantidQtCustomInterfaces/DynamicPDF/DPDFInputDataControl.h
                 inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h
+                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h
+                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresWorker.h
+                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingViewQtWidget.h
                 inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
                 inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
                 inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h
@@ -480,6 +489,7 @@ set ( TEST_FILES
 	ALCLatestFileFinderTest.h
 	ALCPeakFittingModelTest.h
 	ALCPeakFittingPresenterTest.h
+	EnggDiffFittingPresenterTest.h
 	EnggDiffractionPresenterTest.h
 	IO_MuonGroupingTest.h
 	ImageROIPresenterTest.h
