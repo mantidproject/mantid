@@ -73,8 +73,8 @@ size_t WorkspaceSingleValue::getNumDims() const { return 0; }
 
 ///\cond TEMPLATE
 
-template DLLExport class Mantid::API::WorkspaceProperty<
-    Mantid::DataObjects::WorkspaceSingleValue>;
+template class DLLExport
+    Mantid::API::WorkspaceProperty<Mantid::DataObjects::WorkspaceSingleValue>;
 
 namespace Mantid {
 namespace Kernel {

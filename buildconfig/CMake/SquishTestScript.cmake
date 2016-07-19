@@ -10,7 +10,7 @@
 #
 # Based on the SQUISH_ADD_TEST macro
 #
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
 message(STATUS "squish_server_executable='${squish_server_executable}'")
 message(STATUS "squish_aut='${squish_aut}'")

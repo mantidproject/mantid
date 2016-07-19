@@ -63,16 +63,14 @@ private:
       SelectionNotificationServiceImpl>;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// SelectionNotificationServiceImpl
-/// (needed for dllexport/dllimport) and a typedef for it.
-#ifdef _WIN32
-template class EXPORT_OPT_MANTIDQT_API
-    Mantid::Kernel::SingletonHolder<SelectionNotificationServiceImpl>;
-#endif /* _WIN32 */
-
-typedef EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<
-    SelectionNotificationServiceImpl> SelectionNotificationService;
+typedef Mantid::Kernel::SingletonHolder<SelectionNotificationServiceImpl>
+    SelectionNotificationService;
+}
+}
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTIDQT_API template class EXPORT_OPT_MANTIDQT_API Mantid::Kernel::
+    SingletonHolder<MantidQt::API::SelectionNotificationServiceImpl>;
 }
 }
 
