@@ -461,13 +461,9 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(m_dirWS)),
         source = boost::dynamic_pointer_cast<MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(m_transWS));
-    auto &Xfiddle0 = dir->mutableX(0);
-    auto &Xsource = source->x(0);
-    auto &Xfiddle1 = dir->mutableX(1);
-    for (unsigned int i = 0; i < Xfiddle0.size(); ++i) {
-      Xfiddle0[i] = Xsource[i];
-      Xfiddle1[i] = Xsource[i];
-    }
+
+    dir->setSharedX(0, source->sharedX(0));
+    dir->setSharedX(1, source->sharedX(0));
   }
 
 private:

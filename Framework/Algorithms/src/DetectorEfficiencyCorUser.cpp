@@ -8,6 +8,11 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 
+using Mantid::HistogramData::Histogram;
+using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -82,17 +87,10 @@ void DetectorEfficiencyCorUser::exec() {
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    // MantidVec& xOut = m_outputWS->dataX(i);
-    auto &yOut = m_outputWS->mutableY(i);
-    auto &eOut = m_outputWS->mutableE(i);
-    auto &xIn = m_inputWS->x(i);
-    auto &yIn = m_inputWS->y(i);
-    auto &eIn = m_inputWS->e(i);
-    m_outputWS->setSharedX(i, m_inputWS->sharedX(i));
-
-    const MantidVec effVec = calculateEfficiency(eff0, effFormula, xIn);
+    const auto effVec = calculateEfficiency(eff0, effFormula, m_inputWS->x(i));
     // run this outside to benefit from parallel for (?)
-    applyDetEfficiency(numberOfChannels, yIn, eIn, effVec, yOut, eOut);
+    m_outputWS->setHistogram(i, applyDetEfficiency(numberOfChannels, effVec,
+                                                   m_inputWS->histogram(i)));
 
     prog.report("Detector Efficiency correction...");
 
@@ -105,24 +103,22 @@ void DetectorEfficiencyCorUser::exec() {
 
 /**
  * Apply the detector efficiency to a single spectrum
- * @param numberOfChannels Number of channels in a spectra (nbins - 1)
- * @param yIn spectrum counts
- * @param eIn spectrum errors
+ * @param nChans Number of channels in a spectra (nbins - 1)
  * @param effVec efficiency values (to be divided by the counts)
- * @param yOut corrected spectrum counts
- * @param eOut corrected spectrum errors
- */
-void DetectorEfficiencyCorUser::applyDetEfficiency(
-    const size_t numberOfChannels, const Mantid::HistogramData::HistogramY &yIn,
-    const Mantid::HistogramData::HistogramE &eIn, const MantidVec &effVec,
-    Mantid::HistogramData::HistogramY &yOut,
-    Mantid::HistogramData::HistogramE &eOut) {
+ * @param histogram uncorrected histogram
 
-  for (unsigned int j = 0; j < numberOfChannels; ++j) {
-    // xOut[j] = xIn[j];
-    yOut[j] = yIn[j] / effVec[j];
-    eOut[j] = eIn[j] / effVec[j];
+ * @returns corrected histogram
+ */
+Histogram DetectorEfficiencyCorUser::applyDetEfficiency(
+    const size_t nChans, const MantidVec &effVec, const Histogram &histogram) {
+  Histogram outHist(histogram);
+
+  for (unsigned int j = 0; j < nChans; ++j) {
+    outHist.mutableY()[j] = histogram.y()[j] / effVec[j];
+    outHist.mutableE()[j] = histogram.e()[j] / effVec[j];
   }
+
+  return outHist;
 }
 /**
  * Calculate the value of a formula
@@ -161,8 +157,7 @@ DetectorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
  * @return a vector with the efficiencies
  */
 MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
-    double eff0, const std::string &formula,
-    const Mantid::HistogramData::HistogramX &xIn) {
+    double eff0, const std::string &formula, const HistogramX &xIn) {
 
   MantidVec effOut(xIn.size() - 1); // x are bins and have more one value than y
 

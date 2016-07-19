@@ -114,7 +114,7 @@ void FFT::exec() {
   double df = 1.0 / (dx * ySize);
 
   // Output label
-  outputLabel(df);
+  createUnitsLabels(df);
 
   setupTAxis(nOut, addPositiveOnly);
 
@@ -280,7 +280,7 @@ void FFT::setupTAxis(const int nOut, const bool addPositiveOnly) {
   m_outWS->replaceAxis(1, tAxis);
 }
 
-void FFT::outputLabel(double &df) {
+void FFT::createUnitsLabels(double &df) {
   m_outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
 
   auto inputUnit = m_inWS->getAxis(0)->unit();

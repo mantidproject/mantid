@@ -70,7 +70,7 @@ private:
   void init() override;
   void exec() override;
 
-  void outputLabel(double &df);
+  void createUnitsLabels(double &df);
 
   // Perform forward transformation
   void transformForward(boost::shared_array<double> &data, const int xSize,

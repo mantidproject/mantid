@@ -7,6 +7,7 @@
 namespace Mantid {
 
 namespace HistogramData {
+class Histogram;
 class HistogramX;
 class HistogramY;
 class HistogramE;
@@ -62,16 +63,13 @@ private:
   void retrieveProperties();
   double calculateFormulaValue(const std::string &, double);
   MantidVec calculateEfficiency(double, const std::string &,
-                                const Mantid::HistogramData::HistogramX &);
+                                const HistogramData::HistogramX &);
 
   std::string getValFromInstrumentDef(const std::string &);
 
-  void applyDetEfficiency(const size_t numberOfChannels,
-                          const Mantid::HistogramData::HistogramY &yIn,
-                          const Mantid::HistogramData::HistogramE &eIn,
-                          const MantidVec &effVec,
-                          Mantid::HistogramData::HistogramY &yOut,
-                          Mantid::HistogramData::HistogramE &eOut);
+  HistogramData::Histogram
+  applyDetEfficiency(const size_t nChans, const Mantid::MantidVec &effVec,
+                     const HistogramData::Histogram &histogram);
 
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr m_inputWS;

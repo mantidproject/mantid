@@ -365,7 +365,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
         localOutputUnit->fromTOF(values, emptyVec, l1, l2, twoTheta, emode,
                                  efixed, delta);
 
-        outputWS->mutableX(wsid) = HistogramX(values);
+        outputWS->mutableX(wsid) = std::move(values);
 
         // EventWorkspace part, modifying the EventLists.
         if (m_inputEvents) {
@@ -530,7 +530,7 @@ void ConvertUnitsUsingDetectorTable::reverse(API::MatrixWorkspace_sptr WS) {
 
     auto xVals = WS->sharedX(0);
     for (size_t j = 1; j < m_numberOfSpectra; ++j) {
-      WS->setX(j, xVals);
+      WS->setSharedX(j, xVals);
       std::reverse(WS->mutableY(j).begin(), WS->mutableY(j).end());
       std::reverse(WS->mutableE(j).begin(), WS->mutableE(j).end());
       if (j % 100 == 0)
@@ -643,17 +643,15 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::removeUnphysicalBins(
     // Next, loop again copying in the correct range for each spectrum
     for (int64_t j = 0; j < int64_t(numSpec); ++j) {
       auto edges = workspace->binEdges(j);
+      auto &X = workspace->x(j);
+      auto k = lastBins[j];
 
       result->mutableX(j).assign(edges.cbegin(), edges.cbegin() + lastBins[j]);
 
       // If the entire X range is not covered, generate fake values.
-      auto l = lastBins[j];
-
-      std::generate(result->mutableX(j).begin() + l, result->mutableX(j).end(),
-                    [=]() mutable {
-                      ++l;
-                      return result->mutableX(j)[lastBins[j]] + 1 +
-                             static_cast<double>(l - lastBins[j]);
+      std::generate(result->mutableX(j).begin() + k, result->mutableX(j).end(),
+                    [ l = k, k, j, X ]() mutable {
+                      return X[k] + 1 + static_cast<double>(l++ - k);
                     });
 
       result->mutableY(j).assign(workspace->y(j).cbegin(),

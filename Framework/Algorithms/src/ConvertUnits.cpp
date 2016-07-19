@@ -676,17 +676,15 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
     // Next, loop again copying in the correct range for each spectrum
     for (int64_t j = 0; j < int64_t(numSpec); ++j) {
       auto edges = workspace->binEdges(j);
+      auto &X = workspace->x(j);
+      auto k = lastBins[j];
 
       result->mutableX(j).assign(edges.cbegin(), edges.cbegin() + lastBins[j]);
 
       // If the entire X range is not covered, generate fake values.
-      auto l = lastBins[j];
-
-      std::generate(result->mutableX(j).begin() + l, result->mutableX(j).end(),
-                    [=]() mutable {
-                      ++l;
-                      return result->mutableX(j)[lastBins[j]] + 1 +
-                             static_cast<double>(l - lastBins[j]);
+      std::generate(result->mutableX(j).begin() + k, result->mutableX(j).end(),
+                    [ l = k, k, j, X ]() mutable {
+                      return X[k] + 1 + static_cast<double>(l++ - k);
                     });
 
       result->mutableY(j).assign(workspace->y(j).cbegin(),

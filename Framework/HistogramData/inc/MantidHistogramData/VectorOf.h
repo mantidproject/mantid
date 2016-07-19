@@ -116,7 +116,7 @@ public:
       m_data = Kernel::make_cow<CowType>(std::move(data));
     return *this;
   }
-  /// Assigns the contents of the range [first, last]
+  /// Assigns the contents of the range [first, last)
   template <class InputIt> void assign(InputIt first, InputIt last) & {
     m_data = Kernel::make_cow<CowType>(first, last);
   }
