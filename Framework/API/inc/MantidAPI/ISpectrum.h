@@ -114,7 +114,7 @@ public:
   }
   void setYMode(HistogramData::Histogram::YMode ymode) {
     checkIsYAndEWritable();
-    return mutableHistogramRef().setYMode(ymode);
+    mutableHistogramRef().setYMode(ymode);
   }
   void convertToCounts() {
     checkIsYAndEWritable();
