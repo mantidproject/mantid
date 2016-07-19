@@ -9,7 +9,7 @@ from mantid.api import WorkspaceGroup, Workspace
 from mantid.kernel import Logger
 from mantid.kernel import V3D
 import SANSUtility as su
-from math import (acos, sqrt, degrees, copysign)
+from math import copysign
 
 sanslog = Logger("SANS")
 
@@ -1688,7 +1688,7 @@ class LARMOR(ISISInstrument):
         instrument = ws.getInstrument()
         detector_bench = instrument.getComponentByName("DetectorBench")
         rot = detector_bench.getRotation()
-        angle, axis = LARMOR.quaternion_to_angle_and_axis(rot)
+        angle, axis = su.quaternion_to_angle_and_axis(rot)
         angle = copysign(angle, axis[1])
 
         # return the angle and the y displacement
@@ -1762,29 +1762,6 @@ class LARMOR(ISISInstrument):
         else:
             run_num = ws_ref.getRun().getLogData('run_number').value
         return run_num
-
-    @staticmethod
-    def quaternion_to_angle_and_axis(quaternion):
-        """
-        Converts a quaterion to an angle + an axis
-
-        The conversion from a quaternion to an angle + axis is explained here:
-        http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToAngle/
-        """
-        angle = 2*acos(quaternion[0])
-        s_parameter = sqrt(1 - quaternion[0]*quaternion[0])
-
-        axis = []
-        # If the the angle is zero, then it does not make sense to have an axis
-        if s_parameter < 1e-8:
-            axis.append(quaternion[1])
-            axis.append(quaternion[2])
-            axis.append(quaternion[3])
-        else:
-            axis.append(quaternion[1]/s_parameter)
-            axis.append(quaternion[2]/s_parameter)
-            axis.append(quaternion[3]/s_parameter)
-        return degrees(angle), axis
 
 
 if __name__ == '__main__':
