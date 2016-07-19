@@ -1672,27 +1672,24 @@ std::map<std::string, std::string> LoadNexusProcessed::validateInputs() {
   int64_t specMin = getProperty("SpectrumMin");
   int64_t specMax = getProperty("SpectrumMax");
 
-  //Check our range is not reversed
+  // Check our range is not reversed
   if (specMax < specMin) {
     errorList["SpectrumMin"] = "SpectrumMin must be smaller than SpectrumMax";
-          errorList["SpectrumMax"] = "SpectrumMax must be larger than SpectrumMin";
+    errorList["SpectrumMax"] = "SpectrumMax must be larger than SpectrumMin";
   }
 
-  //Next check that SpecMax is less than maximum int
+  // Next check that SpecMax is less than maximum int
   if (specMax > INT_MAX) {
-	  errorList["SpectrumMax"] = "SpectrumMax must be less than " +
-		 INT_MAX;
+    errorList["SpectrumMax"] = "SpectrumMax must be less than " + INT_MAX;
   }
 
   if (specMin > INT_MAX) {
-	  errorList["SpectrumMin"] = "SpectrumMin must be less than " +
-		INT_MAX;
+    errorList["SpectrumMin"] = "SpectrumMin must be less than " + INT_MAX;
   }
 
   // Finished testing return any errors
   return errorList;
 }
-
 
 //-------------------------------------------------------------------------------------------------
 /**
