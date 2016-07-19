@@ -672,10 +672,10 @@ void SliceViewer::updateDimensionSliceWidgets() {
 
     // if the workspace is already binned, update the interface with the
     // existing number of bins
-    if(boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws)) {
-        auto dim = m_ws->getDimension(d);
-        int numBins = static_cast<int>(dim->getNBins());
-        widget->setNumBins(numBins);
+    if (boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws)) {
+      auto dim = m_ws->getDimension(d);
+      int numBins = static_cast<int>(dim->getNBins());
+      widget->setNumBins(numBins);
     }
     widget->blockSignals(false);
   }
