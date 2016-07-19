@@ -97,7 +97,8 @@ echo "UpdateInstrumentDefinitions.OnStartup = 0" >> $userprops
 echo "usagereports.enabled = 0" >> $userprops
 
 set +e #don't immediately exit on failure so that we can remove the package
-$SCL_ON_RHEL6 "cmake --build . --target docs-test"
+$SCL_ON_RHEL6 "bin/MantidPlot -xq docs/runsphinx_html.py"
+$SCL_ON_RHEL6 "bin/MantidPlot -xq docs/runsphinx_doctest.py"
 status=$?
 set -e #exit on failures from now on
 
