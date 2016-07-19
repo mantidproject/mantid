@@ -879,8 +879,8 @@ void EventWorkspace::getIntegratedSpectra(std::vector<double> &out,
 } // namespace Mantid
 
 ///\cond TEMPLATE
-template DLLExport class Mantid::API::WorkspaceProperty<
-    Mantid::DataObjects::EventWorkspace>;
+template class DLLExport
+    Mantid::API::WorkspaceProperty<Mantid::DataObjects::EventWorkspace>;
 
 namespace Mantid {
 namespace Kernel {

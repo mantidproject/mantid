@@ -8,9 +8,9 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include <fstream>
 #include "Poco/File.h"
 #include <boost/tokenizer.hpp>
+#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -79,23 +79,7 @@ void SaveTBL::exec() {
     TableRow row = ws->getRow(rowIndex);
     for (size_t columnIndex = 0; columnIndex < columnHeadings.size();
          columnIndex++) {
-      if (columnIndex == columnHeadings.size() - 2) {
-        std::string groupHeading = columnHeadings[columnIndex];
-        if (ws->getColumn(groupHeading)->type() != "int") {
-          file.close();
-          int error = remove(filename.c_str());
-          if (error == 0)
-            throw std::runtime_error(groupHeading + " column must be of type "
-                                                    "\"int\". The TBL file "
-                                                    "will not be saved.");
-          else
-            throw std::runtime_error(
-                "Saving TBL was unsuccessful, " + groupHeading +
-                " column must be of type \"int\". Removal of " + filename +
-                " failed, please check that this file exists.");
-        } else
-          writeVal<int>(row.Int(columnIndex), file);
-      } else if (ws->getColumn(columnIndex)->type() != "str") {
+      if (ws->getColumn(columnIndex)->type() != "str") {
         file.close();
         int error = remove(filename.c_str());
         if (error == 0)

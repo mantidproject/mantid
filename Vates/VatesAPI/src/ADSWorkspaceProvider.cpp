@@ -41,9 +41,11 @@ void ADSWorkspaceProvider<Workspace_Type>::disposeWorkspace(
   AnalysisDataService::Instance().remove(wsName);
 }
 
+///@cond
 // Templated assembled types.
-template class ADSWorkspaceProvider<Mantid::API::IMDWorkspace>;
-template class ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>;
-template class ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace>;
+template class DLLExport ADSWorkspaceProvider<Mantid::API::IMDWorkspace>;
+template class DLLExport ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>;
+template class DLLExport ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace>;
+///@endcond
 }
 }
