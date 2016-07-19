@@ -1731,6 +1731,15 @@ def extract_fit_parameters(rAnds):
     else:
         fit_mode = "None"
     return scale_factor, shift_factor, fit_mode
+
+def check_has_bench_rot(workspace, log_dict=None):
+    if log_dict:
+        run = workspace.run()
+        if not run.hasProperty("Bench_Rot"):
+            raise RuntimeError("LARMOR Instrument: Bench_Rot does not seem to be available on {0}. There might be "
+                                "an issue with your data aquisition. Make sure that the sample_log entry "
+                                "Bench_Rot is available.".format(workspace.name()))
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

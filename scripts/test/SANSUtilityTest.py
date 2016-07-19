@@ -3,7 +3,7 @@ import unittest
 # Need to import mantid before we import SANSUtility
 import mantid
 from mantid.simpleapi import *
-from mantid.api import mtd, WorkspaceGroup
+from mantid.api import (mtd, WorkspaceGroup, AlgorithmManager)
 from mantid.kernel import DateAndTime, time_duration, FloatTimeSeriesProperty,BoolTimeSeriesProperty,StringTimeSeriesProperty,StringPropertyWithValue
 import SANSUtility as su
 import re
@@ -1474,6 +1474,49 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
 
         # Clean up
         self._clean_up_workspaces()
+
+class TestBenchRotDetection(unittest.TestCase):
+    def _get_sample_workspace(has_bench_rot=True):
+        sample_alg = AlgorithmManager.createUnmanaged("CreateSampleWorkspace")
+        sample_alg.setChild(True)
+        sample_alg.initialize()
+        sample_alg.setProperty("OutputWorkspace", "dummy")
+        sample_alg.execute()
+        ws = sample_alg.getProperty("OutputWorkspace").value
+
+        if has_bench_rot:
+            log_alg = AlgorithmManager.createUnmanaged("AddSampleLog")
+            log_alg.setChild(True)
+            log_alg.initialize()
+            log_alg.setProperty("Workspace", ws)
+            log_alg.setProperty("LogName", "Bench_Rot")
+            log_alg.setProperty("LogType", "Number")
+            log_alg.setProperty("LogText", str(123.5))
+            log_alg.execute()
+        return ws
+
+    def _do_test(expected_raise, workspace):
+        has_raised = False
+        try:
+            su.check_has_bench_rot(workspace)
+        except RuntimeError:
+            has_raised = True
+        self.asserTrue(has_raised == raise_expected)
+
+    def test_workspace_with_bench_rot_does_not_raise(self):
+        # Arrange
+        ws = self._get_sample_workspace(has_bench_rot=True)
+        # Act + Assert
+        expected_raise = False
+        self._do_test(expected_raise, ws)
+
+    def test_workspace_without_bench_raises(self):
+        # Arrange
+        ws = self._get_sample_workspace(has_bench_rot=False)
+        # Act + Assert
+        expected_raise = True
+        self._do_test(expected_raise, ws)
+
 
 if __name__ == "__main__":
     unittest.main()

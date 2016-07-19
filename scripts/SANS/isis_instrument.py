@@ -1715,7 +1715,9 @@ class LARMOR(ISISInstrument):
                 if isSample:
                     run = ws_ref.run()
                     if not run.hasProperty("Bench_Rot"):
-                        additional_message = "The Bench_Rot entry seems to be missing."
+                        additional_message = ("The Bench_Rot entry seems to be missing. There might be "
+                                             "an issue with your data aquisition. Make sure that the sample_log entry "
+                                             "Bench_Rot is available.")
                     else:
                         additional_message = ""
 
@@ -1724,20 +1726,13 @@ class LARMOR(ISISInstrument):
                     logger.warning("Can logs could not be loaded, using sample values.")
 
             if isSample:
-                LARMOR.check_has_bench_rot(ws_ref, log)
+                su.check_has_bench_rot(ws_ref, log)
                 self.apply_detector_logs(log)
             else:
-                LARMOR.check_has_bench_rot(ws_ref, log)
+                su.check_has_bench_rot(ws_ref, log)
                 self.check_can_logs(log)
 
         ISISInstrument.on_load_sample(self, ws_name, beamcentre, isSample)
-
-    @staticmethod
-    def check_has_bench_rot(workspace, log_dict=None):
-        if log_dict:
-            run = workspace.run()
-            if not run.hasProperty("Bench_Rot"):
-                raise RuntimeError("LARMOR Instrument: Bench_Rot does not seem to be available on {0}".format(workspace.name()))
 
     @staticmethod
     def is_run_new_style_run(workspace_ref):
