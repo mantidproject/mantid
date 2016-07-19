@@ -200,7 +200,6 @@ void FindSXPeaks::exec() {
 
   setProperty("OutputWorkspace", m_peaks);
   progress.report();
-  return;
 }
 
 /**

@@ -20,6 +20,25 @@
 #include <MantidKernel/StringTokenizer.h>
 
 #include <istream>
+#include <numeric>
+#include <boost/regex.hpp>
+
+namespace {
+// Check if we are dealing with a unit line
+bool isUnit(const Mantid::Kernel::StringTokenizer &codes) {
+  // The unit line needs to have the format of
+  //  1. Either 0 or 6 [06]
+  //  2. Then several characters [\w]
+  //  3. Open bracket
+  //  4. Several characters
+  //  5. Close bracket
+  std::string input =
+      std::accumulate(codes.begin(), codes.end(), std::string(""));
+  std::string reg("^[06][\\w]+\\([/ \\w\\^-]+\\)$");
+  boost::regex baseRegex(reg);
+  return boost::regex_match(input, baseRegex);
+}
+}
 
 namespace Mantid {
 namespace DataHandling {
@@ -33,7 +52,7 @@ void readLinesForRKH1D(std::istream &stream, int readStart, int readEnd,
                        std::vector<double> &columnOne,
                        std::vector<double> &ydata, std::vector<double> &errdata,
                        Progress &prog) {
-  std::string fileline = "";
+  std::string fileline;
   for (int index = 1; index <= readEnd; ++index) {
     getline(stream, fileline);
     if (index < readStart)
@@ -53,7 +72,7 @@ void readLinesWithXErrorForRKH1D(std::istream &stream, int readStart,
                                  std::vector<double> &ydata,
                                  std::vector<double> &errdata,
                                  std::vector<double> &xError, Progress &prog) {
-  std::string fileline = "";
+  std::string fileline;
   for (int index = 1; index <= readEnd; ++index) {
     getline(stream, fileline);
     if (index < readStart)
@@ -81,7 +100,7 @@ int LoadRKH::confidence(Kernel::FileDescriptor &descriptor) const {
     return 0;
 
   auto &file = descriptor.data();
-  std::string fileline("");
+  std::string fileline;
 
   // Header looks something like this where the text inside [] could be anything
   //  LOQ Thu 28-OCT-2004 12:23 [W 26  INST_DIRECT_BEAM]
@@ -192,15 +211,20 @@ void LoadRKH::exec() {
   // Set the output workspace
   setProperty("OutputWorkspace", result);
 }
+
 /** Determines if the file is 1D or 2D based on the first after the workspace's
 *  title
 *  @param testLine :: the first line in the file after the title
 *  @return true if the file must contain 1D data
 */
 bool LoadRKH::is2D(const std::string &testLine) {
-  // check the line part of a valid for 2D data else assume the file is 1D
-  return readUnit(testLine) != "C++ no unit found";
+  // split the line into words
+  const Mantid::Kernel::StringTokenizer codes(
+      testLine, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                         Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  return isUnit(codes);
 }
+
 /** Read a data file that contains only one spectrum into a workspace
 *  @return the new workspace
 */
@@ -466,6 +490,11 @@ const std::string LoadRKH::readUnit(const std::string &line) {
   const Mantid::Kernel::StringTokenizer codes(
       line, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
                      Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+
+  if (!isUnit(codes)) {
+    return "C++ no unit found";
+  }
+
   if (codes.count() < 1) {
     return "C++ no unit found";
   }
@@ -493,8 +522,9 @@ const std::string LoadRKH::readUnit(const std::string &line) {
     if (unit.find('(') != 0 || unit.find(')') != unit.size()) {
       std::string qCode = std::to_string(SaveRKH::Q_CODE);
       if (symbol == qCode && theQuantity == "q" &&
-          unit == "(1/Angstrom)") { // 6 q (1/Angstrom) is the synatx for
-                                    // MomentumTransfer
+          (unit == "(1/Angstrom)" ||
+           unit == "(Angstrom^-1)")) { // 6 q (1/Angstrom) is the synatx for
+                                       // MomentumTransfer
         return "MomentumTransfer";
       }
 
@@ -514,7 +544,7 @@ const std::string LoadRKH::readUnit(const std::string &line) {
  * @param nlines :: The number of lines to remove
  */
 void LoadRKH::skipLines(std::istream &strm, int nlines) {
-  std::string buried("");
+  std::string buried;
   for (int i = 0; i < nlines; ++i) {
     getline(strm, buried);
   }

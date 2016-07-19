@@ -38,7 +38,7 @@ void ComputeSensitivity::init() {
 }
 
 void ComputeSensitivity::exec() {
-  std::string outputMessage = "";
+  std::string outputMessage;
   progress(0.1, "Setting up sensitivity calculation");
 
   // Reduction property manager

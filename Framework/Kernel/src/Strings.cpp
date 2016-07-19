@@ -103,7 +103,6 @@ void printHex(std::ostream &OFS, const int n) {
   hex(OFS);
   OFS << n;
   OFS.flags(PrevFlags);
-  return;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -337,7 +336,6 @@ void stripComment(std::string &A) {
     posA = posC;
   if (posA != std::string::npos)
     A.erase(posA, std::string::npos);
-  return;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -405,7 +403,6 @@ void writeMCNPX(const std::string &Line, std::ostream &OX) {
       OX << std::string(spc, ' ');
     OX << X << '\n';
   }
-  return;
 }
 
 //------------------------------------------------------------------------------------------------

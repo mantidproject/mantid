@@ -98,8 +98,6 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         assert self._roiStart is not None
         assert self._roiEnd is not None
 
-        print '[DB] Polygon corner = [%s, %s]' % (str(self._roiStart), str(self._roiEnd))
-
         # create a vertex list of a rectangular
         vertex_array = np.ndarray(shape=(4, 2))
         # upper left corner
@@ -130,8 +128,6 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         """
         if self._myPolygon is not None:
             # polygon is of type matplotlib.patches.Polygon
-            # print 'My polygon is of type %s.' % str(type(self._myPolygon))
-            # print dir(self._myPolygon)
             self._myPolygon.remove()
             self._myPolygon = None
 
@@ -200,7 +196,6 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         if self._roiSelectMode is True and self._mousePressed == Detector2DView.MousePress.LEFT:
             # start to select a region
             self._roiStart = (self._currX, self._currY)
-            print '[DB] Set RIO start to ', self._roiStart
 
         return
 

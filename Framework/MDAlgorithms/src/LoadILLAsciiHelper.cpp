@@ -233,7 +233,7 @@ std::string ILLParser::getInstrumentName() {
     // throw std::runtime_error("Must be called before reading the file!");
   }
 
-  std::string line, instrumentKeyword("Inst"), instrumentName("");
+  std::string line, instrumentKeyword("Inst"), instrumentName;
   int lineRead = 0, maxLineRead = 20; // never read more than
 
   while (std::getline(fin, line) && lineRead < maxLineRead) {
@@ -277,7 +277,7 @@ void ILLParser::parseFieldA() {
   // int numberOfCharsToRead = evaluate<int>(parsedLineFields[0]);
   int numberOfLinesToRead = evaluate<int>(parsedLineFields[1]);
   std::string key;
-  std::string value("");
+  std::string value;
   std::getline(fin, key);
   for (int i = 0; i < numberOfLinesToRead; i++) {
     std::getline(fin, line);

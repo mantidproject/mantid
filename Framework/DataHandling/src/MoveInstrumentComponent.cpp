@@ -94,8 +94,6 @@ void MoveInstrumentComponent::exec() {
     positionType = Relative;
   Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(X, Y, Z),
                                            positionType);
-
-  return;
 }
 
 } // namespace DataHandling

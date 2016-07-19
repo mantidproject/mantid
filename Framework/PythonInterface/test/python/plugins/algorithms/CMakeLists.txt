@@ -30,6 +30,7 @@ set ( TEST_PY_FILES
   EnggFitPeaksTest.py
   EnggFocusTest.py
   EnggVanadiumCorrectionsTest.py
+  ExportSpectraMaskTest.py   
   FilterLogByTimeTest.py
   FindEPPTest.py
   FindReflectometryLinesTest.py
