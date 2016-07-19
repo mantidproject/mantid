@@ -51,7 +51,8 @@ Documentation
 
 Bugs Resolved
 -------------
- - Floating windows now always stay on top of the main window in OSX
+- Floating windows now always stay on top of the main window in OSX
+- The sliceviewer will now rebin an existing binned workspace correctly.
 
 SliceViewer Improvements
 ------------------------
