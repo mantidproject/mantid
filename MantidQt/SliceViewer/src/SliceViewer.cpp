@@ -2188,7 +2188,8 @@ void SliceViewer::rebinParamsChanged() {
       auto dim = m_ws->getDimension(d);
       min = dim->getMinimum();
       max = dim->getMaximum();
-      numBins = static_cast<int>(dim->getNBins());
+      // And the user-entered number of bins
+      numBins = widget->getNumBins();
     } else if (widget->getShownDim() < 0) {
       // Slice point. So integrate with a thickness
       min = widget->getSlicePoint() - widget->getThickness();
