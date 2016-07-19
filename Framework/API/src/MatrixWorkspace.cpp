@@ -932,7 +932,7 @@ bool MatrixWorkspace::isDistribution() const {
 *  @return whether workspace is now a distribution
 */
 void MatrixWorkspace::setDistribution(bool newValue) {
-  if(isDistribution() == newValue)
+  if (isDistribution() == newValue)
     return;
   HistogramData::Histogram::YMode ymode =
       newValue ? HistogramData::Histogram::YMode::Frequencies
