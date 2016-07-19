@@ -128,13 +128,11 @@ def parse_float_array(array_str):
     :param array_str:
     :return: boolean, list of floats/error message
     """
-    print array_str
-    assert isinstance(array_str, str)
+    assert isinstance(array_str, str), 'Input array for parsing must be of type string.'
     array_str = array_str.replace(',', ' ')
     array_str = array_str.replace('\n', ' ')
     array_str = array_str.replace('\t ', ' ')
     array_str = array_str.strip()
-    print '[DB] After processing: ', array_str
 
     float_str_list = array_str.split()
     float_list = list()
