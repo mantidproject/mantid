@@ -83,7 +83,7 @@ PointStandardDeviations Histogram::pointStandardDeviations() const {
   Otherwise the returned Counts's internal pointer references the same data as
   the Histogram, i.e., there is little overhead. */
 Counts Histogram::counts() const {
-  if (yMode() == YMode::Counts)
+  if (yMode() != YMode::Frequencies)
     return Counts(m_y);
   else
     return Counts(Frequencies(m_y), binEdges());
@@ -104,7 +104,7 @@ CountVariances Histogram::countVariances() const {
   CountStandardDeviations's internal pointer references the same data as the
   Histogram, i.e., there is little overhead. */
 CountStandardDeviations Histogram::countStandardDeviations() const {
-  if (yMode() == YMode::Counts)
+  if (yMode() != YMode::Frequencies)
     return CountStandardDeviations(m_e);
   else
     return CountStandardDeviations(FrequencyStandardDeviations(m_e),
