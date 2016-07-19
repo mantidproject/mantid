@@ -1012,11 +1012,6 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
 
 class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
 
-    def skipTests(self):
-        # Skip Test OSX
-        if platform.system() == "Darwin":
-            return True
-
     def __init__(self):
         ISISIndirectInelasticIqtAndIqtFitMulti.__init__(self)
 
