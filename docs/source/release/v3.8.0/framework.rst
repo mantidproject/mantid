@@ -22,9 +22,16 @@ Algorithms
 New
 ###
 
+- :ref:`LoadPreNexusLive <algm-LoadPreNexusLive>` will load "live"
+  data from file on legacy SNS DAS instruments.
+
+- :ref:`CropToComponent <algm-CropToComponent>` allows for cropping a workspace to a list of component names.
 
 Improved
 ########
+
+- :ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>` & :ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
+  now accept 'Direct' as a possible ``EMode`` parameter.
 
 - :ref:`FilterEvents <algm-FilterEvents>` now produces output
   workspaces with the same workspace numbers as specified by the
@@ -35,6 +42,10 @@ Improved
 
 - :ref:`SofQW <algm-SofQW>` has option to replace any NaNs in output workspace
   with zeroes.
+
+- :ref:`ConvertTableToMatrixWorkspace <algm-ConvertTableToMatrixWorkspace>` The input dialog
+  had a bug where the table columns were in a reversed order in the dialogue's combo boxes.
+  This is now fixed and the order is correct.
 
 Deprecated
 ##########

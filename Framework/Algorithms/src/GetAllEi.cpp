@@ -340,7 +340,7 @@ void GetAllEi::exec() {
     bool found = findMonitorPeak(monitorWS, guess_ei[i], monsRangeMin,
                                  monsRangeMax, energy, height, twoSigma);
     if (found) {
-      peaks.push_back(peakKeeper(energy, height, 0.5 * twoSigma));
+      peaks.emplace_back(energy, height, 0.5 * twoSigma);
       if (peaks.back().energy > maxPeakEnergy)
         maxPeakEnergy = peaks.back().energy;
     }

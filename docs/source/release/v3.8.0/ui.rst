@@ -51,10 +51,15 @@ Documentation
 
 Bugs Resolved
 -------------
+ - Floating windows now always stay on top of the main window in OSX
 
 SliceViewer Improvements
 ------------------------
 * When opening the sliceviewer, it will default to showing the first two non-integrated dimensions
+
+VSI Improvements
+----------------
+* ParaView updated to version 5.1.0
 
 |
 

@@ -176,12 +176,12 @@ void FindPeakBackground::exec() {
     // for loop can start > 1 for multiple peaks
     vector<cont_peak> peaks;
     if (mask[0] == 1) {
-      peaks.push_back(cont_peak());
+      peaks.emplace_back();
       peaks.back().start = l0;
     }
     for (size_t l = 1; l < n - l0; ++l) {
       if (mask[l] != mask[l - 1] && mask[l] == 1) {
-        peaks.push_back(cont_peak());
+        peaks.emplace_back();
         peaks.back().start = l + l0;
       } else if (!peaks.empty()) {
         size_t ipeak = peaks.size() - 1;
