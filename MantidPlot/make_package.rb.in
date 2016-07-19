@@ -252,21 +252,31 @@ end
 #Copy over python libraries not included with OSX. 
 #currently missing epics
 path = "/Library/Python/2.7/site-packages"
-directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports","certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess","CifFile", "h5py"]
+directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports","certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess","CifFile"]
 directories.each do |directory|
   addPythonLibrary("#{path}/#{directory}")
+end
+
+
+# ---------------------------------------------
+# H5Py section
+# ---------------------------------------------
+h5py_path = "/usr/local/lib/python2.7/site-packages"
+h5py_directories = ["h5py"]
+directories.each do |directory|
+  addPythonLibrary("#{h5py_path}/#{directory}")
 end
 
 h5py_patterns = ["**/h5py/*.so"]
 change_id(h5py_patterns, "Contents/MacOS/h5py/")
 
-h5pyLinkingDir = find_linking_directories(h5py_patterns, 'hdf5/lib*', '/usr/local/opt/hdf5/lib')
+h5py_linking_dir = find_linking_directories(h5py_patterns, 'hdf5/lib*', '/usr/local/opt/hdf5/lib')
 
 h5py_patterns.each do |pattern|
   Dir[pattern].each do |library|
     basename =  File.basename(library)
-    `install_name_tool -change #{h5pyLinkingDir[0]}/libhdf5.10.dylib @loader_path/../libhdf5.dylib Contents/MacOS/h5py/#{basename}`
-    `install_name_tool -change #{h5pyLinkingDir[0]}/libhdf5_hl.10.dylib @loader_path/../libhdf5_hl.dylib Contents/MacOS/h5py/#{basename}`
+    `install_name_tool -change #{h5py_linking_dir[0]}/libhdf5.10.dylib @loader_path/../libhdf5.dylib Contents/MacOS/h5py/#{basename}`
+    `install_name_tool -change #{h5py_linking_dir[0]}/libhdf5_hl.10.dylib @loader_path/../libhdf5_hl.dylib Contents/MacOS/h5py/#{basename}`
   end
 end
 
