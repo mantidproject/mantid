@@ -21,8 +21,9 @@ namespace {
 void encode(std::string &data) {
   std::string buffer;
   buffer.reserve(data.size());
-  for (size_t pos = 0; pos != data.size(); ++pos) {
-    switch (data[pos]) {
+
+  for (auto &element : data) {
+    switch (element) {
     case '&':
       buffer.append("&amp;");
       break;
@@ -39,10 +40,10 @@ void encode(std::string &data) {
       buffer.append("&gt;");
       break;
     default:
-      buffer.append(&data[pos], 1);
-      break;
+      buffer.push_back(element);
     }
   }
+
   data.swap(buffer);
 }
 }
@@ -619,7 +620,7 @@ void SaveCanSAS1D::createSASProcessElement(std::string &sasProcess) {
 
   // Reduction process note, if available
   std::string process_xml = getProperty("Process");
-  if (process_xml.size() > 0) {
+  if (!process_xml.empty()) {
     std::string processNote = "\n\t\t\t<SASprocessnote>\n";
     encode(process_xml);
     processNote += process_xml;
