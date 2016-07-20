@@ -26,8 +26,6 @@ class BayesStretch(PythonAlgorithm):
     _nbet = None
     _nsig = None
     _loop = None
-    _save = None
-    _plot = None
 
 
     def category(self):
@@ -66,10 +64,6 @@ class BayesStretch(PythonAlgorithm):
 
         self.declareProperty(name='Loop', defaultValue=True, doc='Switch Sequential fit On/Off')
 
-        self.declareProperty(name='Plot', defaultValue='', doc='Plot options')
-
-        self.declareProperty(name='Save', defaultValue=False, doc='Switch Save result to nxs file Off/On')
-
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceFit', '', direction=Direction.Output),
                              doc='The name of the fit output workspaces')
 
@@ -107,17 +101,14 @@ class BayesStretch(PythonAlgorithm):
         self._nbet = self.getProperty('NumberBeta').value
         self._nsig = self.getProperty('NumberSigma').value
         self._loop = self.getProperty('Loop').value
-        self._save = self.getProperty('Save').value
-        self._plot = self.getPropertyValue('Plot')
 
     #pylint: disable=too-many-locals,too-many-branches
     def PyExec(self):
         run_f2py_compatibility_test()
 
-        from IndirectBayes import (CalcErange, GetXYE, ReadNormFile,
-                                   ReadWidthFile, QLAddSampleLogs, QuestPlot)
+        from IndirectBayes import (CalcErange, GetXYE, QLAddSampleLogs)
         from IndirectCommon import (CheckXrange, CheckAnalysers, getEfixed, GetThetaQ,
-                                    CheckHistZero, CheckHistSame)
+                                    CheckHistZero)
         setup_prog = Progress(self, start=0.0, end=0.3, nreports = 5)
         self.log().information('BayesStretch input')
 
@@ -237,10 +228,8 @@ class BayesStretch(PythonAlgorithm):
 
             zpWS = fname + '_Zp' + str(m)
             CreateWorkspace(OutputWorkspace=zpWS,
-                            DataX=dataXz,
-                            DataY=dataYz,
-                            DataE=dataEz,
-                            Nspec=Nsig,
+                            DataX=dataXz, DataY=dataYz,
+                            DataE=dataEz, Nspec=Nsig,
                             UnitX='MomentumTransfer',
                             VerticalAxisUnit='MomentumTransfer',
                             VerticalAxisValues=dataXs)
@@ -270,22 +259,16 @@ class BayesStretch(PythonAlgorithm):
 	#create workspaces for sigma and beta
         workflow_prog.report('Creating OutputWorkspace')
         CreateWorkspace(OutputWorkspace=fname + '_Sigma',
-                        DataX=xSig,
-                        DataY=ySig,
-                        DataE=eSig,
-                        Nspec=nsam,
-                        UnitX='',
+                        DataX=xSig, DataY=ySig, DataE=eSig,
+                        Nspec=nsam, UnitX='',
                         VerticalAxisUnit='MomentumTransfer',
                         VerticalAxisValues=Qaxis)
         unitx = mtd[fname + '_Sigma'].getAxis(0).setUnit("Label")
         unitx.setLabel('sigma' , '')
 
         CreateWorkspace(OutputWorkspace=fname + '_Beta',
-                        DataX=xBet,
-                        DataY=yBet,
-                        DataE=eBet,
-                        Nspec=nsam,
-                        UnitX='',
+                        DataX=xBet, DataY=yBet, DataE=eBet,
+                        Nspec=nsam, UnitX='',
                         VerticalAxisUnit='MomentumTransfer',
                         VerticalAxisValues=Qaxis)
         unitx = mtd[fname + '_Beta'].getAxis(0).setUnit("Label")
@@ -314,18 +297,6 @@ class BayesStretch(PythonAlgorithm):
         QLAddSampleLogs(contour_ws, self._res_name, prog, self._background, self._elastic, erange,
                         (nbin, nrbin), '', '')
         log_prog.report('Finialising log copying')
-
-        if self._save:
-            log_prog.report('Saving workspaces')
-            fit_path = os.path.join(workdir, fit_ws + '.nxs')
-            SaveNexusProcessed(InputWorkspace=fit_ws,
-                               Filename=fit_path)
-            logger.information('Output Fit file created : %s' % fit_path)
-            contour_path = os.path.join(workdir, contour_ws + '.nxs')                    # path name for nxs file
-            SaveNexusProcessed(InputWorkspace=contour_ws,
-                               Filename=contour_path)
-            logger.information('Output Contour file created : %s' % contour_path)
-            log_prog.report('Files Saved')
 
         self.setProperty('OutputWorkspaceFit', fit_ws)
         self.setProperty('OutputWorkspaceContour', contour_ws)
