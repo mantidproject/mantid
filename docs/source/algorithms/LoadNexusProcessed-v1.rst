@@ -25,10 +25,6 @@ spectra to load can also be given (SpectrumList). Filtering of spectra
 is supported when loading into workspaces of type :ref:`Workspace2Ds
 <Workspace2D>` and also :ref:`EventWorkspaces <EventWorkspace>`.
 
-.. warning::
-	LoadNexusProcessed does not allow SpectrumList to be used with SpectrumMin or
-	SpectrumMax. A SpectrumList can be used to specify the minimum and maximum spectrum
-	numbers instead. 
 
 A Mantid Nexus file may contain several workspace entries each labelled
 with an integer starting at 1. By default the highest number workspace
