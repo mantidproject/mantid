@@ -69,7 +69,6 @@ stresstesting.MantidStressTest
 
 import stresstesting
 import os
-import platform
 from abc import ABCMeta, abstractmethod
 
 from mantid.simpleapi import *
