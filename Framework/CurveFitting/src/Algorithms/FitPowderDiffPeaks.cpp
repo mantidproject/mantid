@@ -75,11 +75,6 @@ FitPowderDiffPeaks::FitPowderDiffPeaks()
       m_fitPeakBackgroundComposite(false) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FitPowderDiffPeaks::~FitPowderDiffPeaks() {}
-
-//----------------------------------------------------------------------------------------------
 /** Parameter declaration
  */
 void FitPowderDiffPeaks::init() {
@@ -201,8 +196,6 @@ void FitPowderDiffPeaks::init() {
   declareProperty("FitCompositePeakBackground", true,
                   "Flag to do fit to both peak and background in a composite "
                   "function as last fit step.");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -272,8 +265,6 @@ void FitPowderDiffPeaks::exec() {
   // c) Create data workspace for X0, A, B and S of peak with good fit
   Workspace2D_sptr peakparamvaluews = genPeakParameterDataWorkspace();
   setProperty("OutputBraggPeakParameterDataWorkspace", peakparamvaluews);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -358,8 +349,6 @@ void FitPowderDiffPeaks::processInputProperties() {
   m_minPeakHeight = getProperty("MinimumPeakHeight");
 
   m_fitPeakBackgroundComposite = getProperty("FitCompositePeakBackground");
-
-  return;
 }
 
 //=================================  Fit Peaks In Robust Mode
@@ -524,8 +513,6 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
     }
 
   } // ENDFOR Peaks
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -577,8 +564,6 @@ void FitPowderDiffPeaks::observePeakRange(BackToBackExponential_sptr thispeak,
       g_log.warning() << "Peak @ " << peakcentre
                       << "'s right boundary is too close to its right peak!\n";
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1225,8 +1210,6 @@ void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
   // 3. Clean up
   g_log.information() << "[FitPeaks] Number of peak of good chi2 = "
                       << m_chi2GoodFitPeaks.size() << '\n';
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1523,8 +1506,6 @@ void FitPowderDiffPeaks::calculatePeakFitBoundary(size_t ileftpeak,
     if (rightneighborleftbound < peakrightboundary)
       peakrightboundary = rightneighborleftbound;
   }
-
-  return;
 }
 
 //=======================  Fit 1 Set of Overlapped Peaks ======================
@@ -1653,7 +1634,6 @@ void FitPowderDiffPeaks::storeFunctionParameters(
   parammaps.clear();
   for (auto &paramname : paramnames)
     parammaps.emplace(paramname, function->getParameter(paramname));
-  return;
 }
 
 //----------------------------------------------------------------------------
@@ -1667,8 +1647,6 @@ void FitPowderDiffPeaks::restoreFunctionParameters(
     if (miter != parammap.end())
       function->setParameter(parname, miter->second);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------
@@ -2151,8 +2129,6 @@ void FitPowderDiffPeaks::estimatePeakHeightsLeBail(
                         << "  Set Guessed Height (LeBail) = "
                         << thispeak->height() << '\n';
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -2171,8 +2147,6 @@ void FitPowderDiffPeaks::setOverlappedPeaksConstraints(
         thispeak.get(), "X0", leftcentrebound, rightcentrebound, false);
     thispeak->addConstraint(bc);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -2330,8 +2304,6 @@ void FitPowderDiffPeaks::importInstrumentParameterFromTable(
     g_log.notice() << "[DBx211] Import parameter " << parname << ": " << value
                    << '\n';
   }
-
-  return;
 }
 
 /** Import Bragg peak table workspace
@@ -2381,8 +2353,6 @@ void FitPowderDiffPeaks::parseBraggPeakTable(
   g_log.information() << "Import " << hklmaps.size()
                       << " entries from Bragg peak TableWorkspace "
                       << peakws->name() << '\n';
-
-  return;
 }
 
 //----------------------------------------------------------------------------
@@ -2773,8 +2743,6 @@ void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws) {
   }
   g_log.information() << "[DBx531] Peaks To Fit:  Number of peaks = "
                       << m_vecPeakFunctions.size() << "\n" << dbout.str();
-
-  return;
 }
 
 //-----------------------------------------------------------------------------------------
@@ -3010,8 +2978,6 @@ void FitPowderDiffPeaks::plotFunction(IFunction_sptr peakfunction,
 
   for (int i = 0; i < static_cast<int>(domain.size()); ++i)
     m_peakData[i + ix0] += values2[i];
-
-  return;
 }
 
 //=====================================  Auxiliary Functions
@@ -3079,8 +3045,6 @@ void FitPowderDiffPeaks::cropWorkspace(double tofmin, double tofmax) {
          << m_dataWS->readX(m_wsIndex)[0] << ", "
          << m_dataWS->readX(m_wsIndex).back() << '\n';
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -3259,8 +3223,6 @@ void estimateBackgroundCoarse(DataObjects::Workspace2D_sptr dataws,
     pY[i] = Y[i] - bY[i];
     pE[i] = origE[i];
   }
-
-  return;
 }
 
 //-----------------------------------------------------------------------------------------------------------

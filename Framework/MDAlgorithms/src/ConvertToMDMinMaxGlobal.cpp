@@ -26,16 +26,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(ConvertToMDMinMaxGlobal)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertToMDMinMaxGlobal::ConvertToMDMinMaxGlobal() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertToMDMinMaxGlobal::~ConvertToMDMinMaxGlobal() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToMDMinMaxGlobal::name() const {
   return "ConvertToMDMinMaxGlobal";

@@ -21,6 +21,11 @@ set PYTHONPATH=%MANTIDPATH%;%PYTHONPATH%
 set _PYTHON_EXE=%PYTHONHOME%\python.exe
 set _IPYTHON_CMD=%PYTHONHOME%\Scripts\ipython.cmd
 
+:: Matplotlib backend should default to Qt if not set (requires matplotlib >= 1.5)
+if "%MPLBACKEND%"=="" (
+  set MPLBACKEND=qt4agg
+)
+
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Start python
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

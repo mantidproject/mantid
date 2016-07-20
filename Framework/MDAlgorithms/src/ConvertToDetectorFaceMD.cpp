@@ -23,18 +23,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(ConvertToDetectorFaceMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertToDetectorFaceMD::ConvertToDetectorFaceMD()
-    : in_ws(), m_numXPixels(0), m_numYPixels(0), m_detID_to_WI(),
-      m_detID_to_WI_offset(0) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertToDetectorFaceMD::~ConvertToDetectorFaceMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToDetectorFaceMD::name() const {
   return "ConvertToDetectorFaceMD";

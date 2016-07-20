@@ -102,6 +102,12 @@ void HFIRLoad::moveToBeamCenter(API::MatrixWorkspace_sptr &dataWS,
                       << '\n';
 }
 
+/**
+ * Here the property "sample_detector_distance" is set.
+ * This is the Sample - center of detector distance that all legacy algorithms
+ * use
+ * This was done by Mathieu before BioSANS had the wing detector
+ */
 void HFIRLoad::exec() {
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
@@ -129,7 +135,7 @@ void HFIRLoad::exec() {
   const std::string fileName = getPropertyValue("Filename");
 
   // Output log
-  std::string output_message = "";
+  std::string output_message;
   const double wavelength_input = getProperty("Wavelength");
   const double wavelength_spread_input = getProperty("WavelengthSpread");
 
@@ -137,6 +143,8 @@ void HFIRLoad::exec() {
 
   IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadSpice2D", 0, 0.2);
   loadAlg->setProperty("Filename", fileName);
+  loadAlg->setPropertyValue("OutputWorkspace",
+                            getPropertyValue("OutputWorkspace"));
   if (!isEmpty(wavelength_input)) {
     loadAlg->setProperty("Wavelength", wavelength_input);
     loadAlg->setProperty("WavelengthSpread", wavelength_spread_input);
@@ -167,6 +175,10 @@ void HFIRLoad::exec() {
     return;
   }
   Workspace_sptr dataWS_tmp = loadAlg->getProperty("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace(
+      getPropertyValue("OutputWorkspace"), dataWS_tmp);
+  g_log.debug() << "Calling LoadSpice2D Done. OutputWorkspace name = "
+                << dataWS_tmp->name() << "\n";
   API::MatrixWorkspace_sptr dataWS =
       boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
 
@@ -177,6 +189,8 @@ void HFIRLoad::exec() {
   double sdd = 0.0;
   const double sample_det_dist = getProperty("SampleDetectorDistance");
   if (!isEmpty(sample_det_dist)) {
+    g_log.debug() << "Getting the SampleDetectorDistance = " << sample_det_dist
+                  << " from the Algorithm input property.\n";
     sdd = sample_det_dist;
   } else {
     const std::string sddName = "sample-detector-distance";
@@ -197,6 +211,8 @@ void HFIRLoad::exec() {
     }
   }
   dataWS->mutableRun().addProperty("sample_detector_distance", sdd, "mm", true);
+  g_log.debug() << "FINAL: Using Total Sample Detector Distance = " << sdd
+                << "\n";
 
   progress.report("MoveInstrumentComponent...");
 

@@ -111,9 +111,6 @@ void ConvertToMD::init() {
                   "demand in order to reduce memory use.");
 }
 //----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ConvertToMD::~ConvertToMD() {}
 
 const std::string ConvertToMD::name() const { return "ConvertToMD"; }
 
@@ -264,7 +261,6 @@ void ConvertToMD::exec() {
   // free up the sp to the input workspace, which would be deleted if nobody
   // needs it any more;
   m_InWS2D.reset();
-  return;
 }
 /**
  * Copy over the part of metadata necessary to initialize ConvertToMD plugin
@@ -378,8 +374,6 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   }
 }
 
-/** Constructor */
-ConvertToMD::ConvertToMD() {}
 /** handle the input parameters and build target workspace description as
 function of input parameters
 * @param spws shared pointer to target MD workspace (just created or already

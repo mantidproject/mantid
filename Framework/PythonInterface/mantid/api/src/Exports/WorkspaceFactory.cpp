@@ -3,6 +3,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/AsType.h"
 
 #include <boost/python/class.hpp>
@@ -11,6 +12,8 @@
 using namespace boost::python;
 using namespace Mantid::API;
 using namespace Mantid::PythonInterface::Policies;
+
+GET_POINTER_SPECIALIZATION(WorkspaceFactoryImpl)
 
 namespace {
 /**

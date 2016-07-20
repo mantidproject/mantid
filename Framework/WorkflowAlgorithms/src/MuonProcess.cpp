@@ -32,18 +32,6 @@ using API::WorkspaceGroup_sptr;
 DECLARE_ALGORITHM(MuonProcess)
 
 //----------------------------------------------------------------------------------------------
-/**
- * Constructor
- */
-MuonProcess::MuonProcess() {}
-
-//----------------------------------------------------------------------------------------------
-/**
- * Destructor
- */
-MuonProcess::~MuonProcess() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MuonProcess::name() const { return "MuonProcess"; }
 

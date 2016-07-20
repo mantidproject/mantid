@@ -12,4 +12,3 @@ import os
 import cxxtest
 
 cxxtest.main(sys.argv)
-

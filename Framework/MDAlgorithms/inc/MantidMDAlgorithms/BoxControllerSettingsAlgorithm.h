@@ -40,9 +40,6 @@ namespace MDAlgorithms {
 */
 class DLLExport BoxControllerSettingsAlgorithm : public API::Algorithm {
 public:
-  BoxControllerSettingsAlgorithm();
-  ~BoxControllerSettingsAlgorithm() override;
-
 protected:
   /// Initialise the properties
   void initBoxControllerProps(const std::string &SplitInto = "5",

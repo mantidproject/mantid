@@ -189,7 +189,6 @@ void AnvredCorrection::exec() {
 
     // Copy over bin boundaries
     const auto &inSpec = m_inputWS->getSpectrum(i);
-    inSpec.lockData(); // for MRU-related thread safety
 
     const MantidVec &Xin = inSpec.readX();
     correctionFactors->dataX(i) = Xin;
@@ -224,7 +223,7 @@ void AnvredCorrection::exec() {
     int bank = 0;
     double depth = 0.2;
     double pathlength = 0.0;
-    std::string bankName = "";
+    std::string bankName;
     if (m_useScaleFactors)
       scale_init(det, inst, bank, L2, depth, pathlength, bankName);
 
@@ -246,8 +245,6 @@ void AnvredCorrection::exec() {
         E[j] = Ein[j] * value;
       }
     }
-
-    inSpec.unlockData();
 
     prog.report();
 
@@ -337,7 +334,7 @@ void AnvredCorrection::execEvent() {
     int bank = 0;
     double depth = 0.2;
     double pathlength = 0.0;
-    std::string bankName = "";
+    std::string bankName;
     if (m_useScaleFactors)
       scale_init(det, inst, bank, L2, depth, pathlength, bankName);
 

@@ -36,7 +36,6 @@ class DLLExport LoadILLIndirect
     : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadILLIndirect();
-  ~LoadILLIndirect() override;
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 

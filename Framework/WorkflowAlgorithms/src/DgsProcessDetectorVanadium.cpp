@@ -19,16 +19,6 @@ namespace WorkflowAlgorithms {
 DECLARE_ALGORITHM(DgsProcessDetectorVanadium)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsProcessDetectorVanadium::DgsProcessDetectorVanadium() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsProcessDetectorVanadium::~DgsProcessDetectorVanadium() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsProcessDetectorVanadium::name() const {
   return "DgsProcessDetectorVanadium";
@@ -154,7 +144,7 @@ void DgsProcessDetectorVanadium::exec() {
   if (reductionManager->existsProperty("SaveProcessedDetVan")) {
     bool saveProc = reductionManager->getProperty("SaveProcessedDetVan");
     if (saveProc) {
-      std::string outputFile("");
+      std::string outputFile;
       if (reductionManager->existsProperty("SaveProcDetVanFilename")) {
         outputFile =
             reductionManager->getPropertyValue("SaveProcDetVanFilename");

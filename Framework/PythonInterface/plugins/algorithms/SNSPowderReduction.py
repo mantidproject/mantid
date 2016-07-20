@@ -1,12 +1,15 @@
 #pylint: disable=invalid-name,no-init,too-many-lines
+from __future__ import (absolute_import, division, print_function)
+
 import os
-import numpy
 
 import mantid
 import mantid.api
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
+# Use xrange in Python 2
+from six.moves import range #pylint: disable=redefined-builtin
 
 if AlgorithmFactory.exists('GatherWorkspaces'):
     HAVE_MPI = True
@@ -244,7 +247,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._determineInstrument(samRuns[0])
 
         preserveEvents = self.getProperty("PreserveEvents").value
-        if HAVE_MPI and preserveEvents == True:
+        if HAVE_MPI and preserveEvents:
             self.log().warning("preserveEvents set to False for MPI tasks.")
             preserveEvents = False
         self._info = None
@@ -279,7 +282,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         focuspos = self._focusPos
         if self._lowResTOFoffset >= 0:
             # Dealing with the parameters for editing instrument parameters
-            if focuspos.has_key("PrimaryFlightPath") is True:
+            if ("PrimaryFlightPath" in focuspos) is True:
                 l1 = focuspos["PrimaryFlightPath"]
                 if l1 > 0:
                     specids = focuspos['SpectrumIDs'][:]
@@ -572,10 +575,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             if donorLogfilename is not None and len(donorLogfilename) > 0:
                 api.Load(Filename=donorLogfilename, MetaDataOnly=True, OutputWorkspace='temp_log_donor')
                 api.CopyLogs(InputWorkspace='temp_log_donor', OutputWorkspace=wksp,
-                                    MergeStrategy='MergeKeepExisting')
+                             MergeStrategy='MergeKeepExisting')
                 api.DeleteWorkspace('temp_log_donor')
                 wksp = mtd[str(wksp)]  # convert back to a pointer
-                print wksp
+                print(wksp)
 
         return wksp
 
@@ -606,7 +609,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return strategy
 
     def __logChunkInfo(self, chunk):
-        keys = chunk.keys()
+        keys = list(chunk.keys())
         keys.sort()
 
         keys = [str(key) + "=" + str(chunk[key]) for key in keys]
@@ -826,7 +829,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # log
             msg = "[Fx1142] Workspace of chunk %d is %d (vs. estimated %d). \n" % (
                 chunk_index, len(output_ws_name_list), num_out_wksp)
-            for iws in xrange(len(output_ws_name_list)):
+            for iws in range(len(output_ws_name_list)):
                 ws = output_ws_name_list[iws]
                 msg += "%s\t\t" % (str(ws))
                 if iws %5 == 4:
@@ -835,7 +838,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # Do align and focus
             num_out_wksp = len(output_ws_name_list)
-            for split_index in xrange(num_out_wksp):
+            for split_index in range(num_out_wksp):
                 # Get workspace name
                 out_ws_name_chunk_split = output_ws_name_list[split_index]
                 # Align and focus
@@ -859,7 +862,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                                      **self._focusPos)
                 assert out_ws_c_s is not None
                 # logging (ignorable)
-                for iws in xrange(out_ws_c_s.getNumberHistograms()):
+                for iws in range(out_ws_c_s.getNumberHistograms()):
                     spec = out_ws_c_s.getSpectrum(iws)
                     self.log().debug("[DBx131] ws %d: spectrum No = %d. " % (iws, spec.getSpectrumNo()))
                 if out_ws_c_s.id() == EVENT_WORKSPACE_ID:
@@ -903,7 +906,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # Sum workspaces for all mpi tasks
         if HAVE_MPI:
-            for split_index in xrange(num_out_wksp):
+            for split_index in range(num_out_wksp):
                 temp_ws = api.GatherWorkspaces(InputWorkspace=output_wksp_list[split_index],
                                                PreserveEvents=preserveEvents,
                                                AccumulationMethod="Add",
@@ -913,19 +916,19 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         if self._chunks > 0:
             # When chunks are added, proton charge is summed for all chunks
-            for split_index in xrange(num_out_wksp):
+            for split_index in range(num_out_wksp):
                 temp_out_ws = self.get_workspace(output_wksp_list[split_index])
                 temp_out_ws.getRun().integrateProtonCharge()
         # ENDIF
 
         if (self.iparmFile is not None) and (len(self.iparmFile) > 0):
             # When chunks are added, add iparamFile
-            for split_index in xrange(num_out_wksp):
+            for split_index in range(num_out_wksp):
                 temp_ws = self.get_workspace(output_wksp_list[split_index])
                 temp_ws.getRun()['iparm_file'] = self.iparmFile
 
         # Compress events
-        for split_index in xrange(num_out_wksp):
+        for split_index in range(num_out_wksp):
             temp_out_ws = self.get_workspace(output_wksp_list[split_index])
             if temp_out_ws.id() == EVENT_WORKSPACE_ID:
                 temp_out_ws = api.CompressEvents(InputWorkspace=output_wksp_list[split_index],
@@ -1065,7 +1068,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         tmin_absns = splitws.cell(0,0)
         tmax_absns = splitws.cell(0,1)
 
-        for r in xrange(1, numrow):
+        for r in range(1, numrow):
             timestart = splitws.cell(r, 0)
             timeend = splitws.cell(r, 1)
             if timestart < tmin_absns:
@@ -1092,11 +1095,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         splitws = AnalysisDataService.retrieve(str(splitwksp))
         numrows = splitws.rowCount()
         wscountdict = {}
-        for r in xrange(numrows):
+        for r in range(numrows):
             wsindex = splitws.cell(r,2)
             wscountdict[wsindex] = 0
 
-        return len(wscountdict.keys())
+        return len(list(wscountdict.keys()))
 
     @staticmethod
     def does_workspace_exist(workspace_name):
@@ -1222,7 +1225,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return can_run_ws_name
 
-    def _process_vanadium_runs(self, van_run_number_list, timeFilterWall, samRunIndex, calib, **focuspos):
+    def _process_vanadium_runs(self, van_run_number_list, timeFilterWall, samRunIndex, calib, **dummy_focuspos):
         """
         Purpose: process vanadium runs
         Requirements: if more than 1 run in given run number list, then samRunIndex must be given.
@@ -1403,7 +1406,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # Splitting workspace
         self.log().information("SplitterWorkspace = %s, Information Workspace = %s. " % (
-                split_ws_name, str(self._splitinfotablews)))
+            split_ws_name, str(self._splitinfotablews)))
 
         base_name = raw_ws_name
         if self._splitinfotablews is None:

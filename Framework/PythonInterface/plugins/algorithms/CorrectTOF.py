@@ -1,10 +1,12 @@
+from __future__ import (absolute_import, division, print_function)
+
+import numpy as np
+import scipy as sp
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceUnitValidator, \
                        InstrumentValidator, ITableWorkspaceProperty
 from mantid.kernel import Direction, CompositeValidator
 # pylint: disable=no-name-in-module
 from mantid.simpleapi import CloneWorkspace, MaskDetectors
-import numpy as np
-import scipy as sp
 
 
 class CorrectTOF (PythonAlgorithm):

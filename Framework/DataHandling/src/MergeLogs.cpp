@@ -11,16 +11,6 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(Merge2WorkspaceLogs)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-Merge2WorkspaceLogs::Merge2WorkspaceLogs() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-Merge2WorkspaceLogs::~Merge2WorkspaceLogs() {}
-
 void Merge2WorkspaceLogs::init() {
 
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
@@ -34,8 +24,6 @@ void Merge2WorkspaceLogs::init() {
                   "Reset both logs' values to unity for each one.");
   declareProperty("LogValue1", 0.0, "Unity value of log 1.");
   declareProperty("LogValue2", 1.0, "Unity value of log 2.");
-
-  return;
 }
 
 void Merge2WorkspaceLogs::exec() {
@@ -63,8 +51,6 @@ void Merge2WorkspaceLogs::exec() {
   // 3. Merge log
   this->mergeLogs(logname1, logname2, mlogname, resetlogvalue, logvalue1,
                   logvalue2);
-
-  return;
 }
 
 /*
@@ -168,8 +154,6 @@ void Merge2WorkspaceLogs::mergeLogs(std::string ilogname1,
   }
 
   matrixWS->mutableRun().addProperty(rp);
-
-  return;
 }
 
 /*

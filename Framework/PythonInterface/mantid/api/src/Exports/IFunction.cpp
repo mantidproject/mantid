@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 
 #include <boost/python/class.hpp>
@@ -8,6 +9,8 @@
 using Mantid::API::IFunction;
 using Mantid::PythonInterface::IFunctionAdapter;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IFunction)
 
 namespace {
 ///@cond
@@ -22,8 +25,8 @@ PyObject *getCategories(IFunction &self) {
   std::vector<std::string> categories = self.categories();
 
   PyObject *registered = PyList_New(0);
-  for (auto &categorie : categories) {
-    PyObject *value = PyString_FromString(categorie.c_str());
+  for (const auto &category : categories) {
+    PyObject *value = to_python_value<const std::string &>()(category);
     if (PyList_Append(registered, value))
       throw std::runtime_error("Failed to insert value into PyList");
   }

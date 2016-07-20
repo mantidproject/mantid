@@ -40,9 +40,6 @@ namespace DataHandling {
 */
 class DLLExport LoadGSASInstrumentFile : public API::Algorithm {
 public:
-  LoadGSASInstrumentFile();
-  ~LoadGSASInstrumentFile() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadGSASInstrumentFile"; }
   /// Summary of algorithms purpose

@@ -25,12 +25,6 @@ using namespace API;
 using namespace DataObjects;
 using std::size_t;
 
-/// (Empty) Constructor
-GroupDetectors2::GroupDetectors2() : m_FracCompl(0.0) {}
-
-/// Destructor
-GroupDetectors2::~GroupDetectors2() {}
-
 // progress estimates
 const double GroupDetectors2::CHECKBINS = 0.10;
 const double GroupDetectors2::OPENINGFILE = 0.03;
@@ -246,8 +240,7 @@ void GroupDetectors2::execEvent() {
   }
 
   // Set all X bins on the output
-  cow_ptr<MantidVec> XValues;
-  XValues.access() = inputWS->readX(0);
+  auto XValues = HistogramData::BinEdges(inputWS->readX(0));
   outputWS->setAllX(XValues);
 
   g_log.information() << name() << " algorithm has finished\n";
@@ -483,7 +476,6 @@ void GroupDetectors2::processFile(std::string fname,
   g_log.debug() << "Closed file " << fname << " after reading in "
                 << m_GroupWsInds.size() << " groups\n";
   m_FracCompl += fileReadProg(m_GroupWsInds.size(), specs2index.size());
-  return;
 }
 
 /** Get groupings from XML file
@@ -575,8 +567,6 @@ void GroupDetectors2::processXMLFile(std::string fname,
       }
     } // for index
   }   // for group
-
-  return;
 }
 
 /** Get groupings from groupingworkspace
@@ -645,8 +635,6 @@ void GroupDetectors2::processGroupingWorkspace(
     m_GroupWsInds.insert(
         std::make_pair(static_cast<specnum_t>(groupid), tempv));
   }
-
-  return;
 }
 
 /** Get groupings from a matrix workspace
@@ -714,8 +702,6 @@ void GroupDetectors2::processMatrixWorkspace(
           std::make_pair(static_cast<specnum_t>(groupid), tempv));
     }
   }
-
-  return;
 }
 /** The function expects that the string passed to it contains an integer
 * number,

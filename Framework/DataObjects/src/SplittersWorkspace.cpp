@@ -30,8 +30,6 @@ void SplittersWorkspace::addSplitter(
   row << splitter.start().totalNanoseconds();
   row << splitter.stop().totalNanoseconds();
   row << splitter.index();
-
-  return;
 }
 
 Kernel::SplittingInterval SplittersWorkspace::getSplitter(size_t index) {

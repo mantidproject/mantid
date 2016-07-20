@@ -35,12 +35,6 @@ namespace DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D)
 
-/// constructor
-LoadCanSAS1D::LoadCanSAS1D() : m_groupNumber(0) {}
-
-/// destructor
-LoadCanSAS1D::~LoadCanSAS1D() {}
-
 /**
  * Return the confidence with with this algorithm can load the file
  * @param descriptor A descriptor for the file
@@ -183,9 +177,10 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
   MantidVec &X = dataWS->dataX(0);
   MantidVec &Y = dataWS->dataY(0);
   MantidVec &E = dataWS->dataE(0);
-  MantidVec &Dx = dataWS->dataDx(0);
+  dataWS->setPointStandardDeviations(0, nBins);
+  auto &Dx = dataWS->mutableDx(0);
   int vecindex = 0;
-  std::string yUnit = "";
+  std::string yUnit;
   bool isCommon = true;
   // iterate through each Idata element  and get the values of "Q",
   //"I" and "Idev" text nodes and fill X,Y,E vectors

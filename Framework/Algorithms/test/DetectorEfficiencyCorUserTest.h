@@ -70,8 +70,8 @@ public:
     if (!inWS)
       return;
 
-    TS_ASSERT_DELTA(outWS->readY(0).front(), inWS->readY(0).front(), 1);
-    TS_ASSERT_DELTA(outWS->readY(0).back(), inWS->readY(0).back(), 0.5);
+    TS_ASSERT_DELTA(outWS->y(0).front(), inWS->y(0).front(), 1);
+    TS_ASSERT_DELTA(outWS->y(0).back(), inWS->y(0).back(), 0.5);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(m_outWSName);
@@ -92,13 +92,12 @@ private:
 
     // WorkspaceCreationHelper::addNoise(dataws,10);
     // np.linspace(2,5,21)
-    static const double arr[] = {
+    HistogramData::BinEdges binEdges = {
         -10.,  -9.25, -8.5,  -7.75, -7.,  -6.25, -5.5, -4.75, -4.,  -3.25, -2.5,
         -1.75, -1.,   -0.25, 0.5,   1.25, 2.,    2.75, 3.5,   4.25, 5.};
-    std::vector<double> vec(arr, arr + sizeof(arr) / sizeof(arr[0]));
 
     for (size_t wi = 0; wi < dataws->getNumberHistograms(); wi++) {
-      dataws->setX(wi, vec);
+      dataws->setBinEdges(wi, binEdges);
     }
     // WorkspaceCreationHelper::DisplayDataX(dataws);
 

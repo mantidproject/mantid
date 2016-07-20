@@ -2,6 +2,7 @@
 ## mantid.api tests
 ##
 set ( TEST_PY_FILES
+  ADSValidatorTest.py
   AlgorithmTest.py
   AlgorithmFactoryTest.py
   AlgorithmHistoryTest.py

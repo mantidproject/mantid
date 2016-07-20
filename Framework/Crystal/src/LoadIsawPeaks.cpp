@@ -23,16 +23,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadIsawPeaks::LoadIsawPeaks() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadIsawPeaks::~LoadIsawPeaks() {}
-
-//----------------------------------------------------------------------------------------------
 /**
  * Determine the confidence with which this algorithm can load a given file
  * @param descriptor A descriptor for the file

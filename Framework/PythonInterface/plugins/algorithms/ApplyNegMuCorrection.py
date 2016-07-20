@@ -1,7 +1,8 @@
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import *  # PythonAlgorithm, registerAlgorithm, WorkspaceProperty
 from mantid.simpleapi import *
 from mantid.kernel import *
-import os
 
 #pylint: disable=no-init, too-many-arguments
 class ApplyNegMuCorrection(PythonAlgorithm):
@@ -13,7 +14,7 @@ class ApplyNegMuCorrection(PythonAlgorithm):
             specNo='0'+str(spec)
         else:
             specNo=str(spec)
-        print dataDir+'ral0'+runno+'.rooth30'+specNo+'.dat'
+        print(dataDir+'ral0'+runno+'.rooth30'+specNo+'.dat')
         #loading data
         rooth30_filename = dataDir+r'\ral0'+runno+'.rooth30'+specNo+'.dat'
         rooth20_filename = dataDir+r'\ral0'+runno+'.rooth20'+specNo+'.dat'
@@ -36,8 +37,8 @@ class ApplyNegMuCorrection(PythonAlgorithm):
         for count in range (0,8000):
             ws2000_total=ws2000_corr.readY(0)[count]+ws2000_total
             ws3000_total=ws3000_corr.readY(0)[count]+ws3000_total
-        print ws2000_total
-        print ws3000_total
+        print(ws2000_total)
+        print(ws3000_total)
         #normalising
         ws2000_corr=ws2000_corr/ws2000_total
         ws3000_corr=ws3000_corr/ws3000_total

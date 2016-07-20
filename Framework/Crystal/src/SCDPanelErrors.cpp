@@ -98,8 +98,6 @@ SCDPanelErrors::SCDPanelErrors()
   SampleOffsets = false;
 }
 
-SCDPanelErrors::~SCDPanelErrors() {}
-
 size_t SCDPanelErrors::nAttributes() const { return m_attrNames.size(); }
 
 std::vector<std::string> SCDPanelErrors::getAttributeNames() const {
@@ -459,7 +457,7 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   //----------------------------------
 
   // determine the OrientedLattice for converting to Q-sample
-  Geometry::OrientedLattice lattice(*m_unitCell.get());
+  Geometry::OrientedLattice lattice(*m_unitCell);
   lattice.setUB(m_peaks->sample().getOrientedLattice().getUB());
 
   // cumulative error
@@ -562,7 +560,6 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     return;
   FunctionDomain1DView domain(xValues, nData);
   calNumericalDeriv(domain, *out);
-  return;
 }
 
 DataObjects::Workspace2D_sptr
@@ -570,14 +567,11 @@ SCDPanelErrors::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
                               std::vector<std::string> &bankNames,
                               double tolerance) {
   int N = 0;
-  Mantid::MantidVecPtr pX;
   if (tolerance < 0)
     tolerance = .5;
   tolerance = std::min<double>(.5, tolerance);
 
-  Mantid::MantidVec &xRef = pX.access();
-  Mantid::MantidVecPtr yvals;
-  Mantid::MantidVec &yvalB = yvals.access();
+  Mantid::MantidVec xRef;
 
   for (auto &bankName : bankNames)
     for (size_t j = 0; j < pwks->rowCount(); ++j) {
@@ -594,21 +588,16 @@ SCDPanelErrors::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
                 xRef.push_back(static_cast<double>(j));
                 xRef.push_back(static_cast<double>(j));
                 xRef.push_back(static_cast<double>(j));
-                yvalB.push_back(0.0);
-                yvalB.push_back(0.0);
-                yvalB.push_back(0.0);
               }
     }
 
   MatrixWorkspace_sptr mwkspc = API::WorkspaceFactory::Instance().create(
       "Workspace2D", static_cast<size_t>(3), 3 * N, 3 * N);
 
+  auto pX = Kernel::make_cow<HistogramData::HistogramX>(std::move(xRef));
   mwkspc->setX(0, pX);
   mwkspc->setX(1, pX);
   mwkspc->setX(2, pX);
-  mwkspc->setData(0, yvals);
-  mwkspc->setData(0, yvals);
-  mwkspc->setData(0, yvals);
 
   return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(mwkspc);
 }

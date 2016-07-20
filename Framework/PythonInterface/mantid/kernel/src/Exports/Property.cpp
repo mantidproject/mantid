@@ -1,6 +1,7 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/StlExportDefinitions.h"
 
 #include <boost/python/class.hpp>
@@ -15,6 +16,8 @@ using Mantid::Kernel::Property;
 using Mantid::Kernel::Direction;
 using Mantid::PythonInterface::std_vector_exporter;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(Property)
 
 void export_Property() {
   register_ptr_to_python<Property *>();

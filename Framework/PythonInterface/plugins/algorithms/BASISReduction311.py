@@ -1,17 +1,19 @@
 #pylint: disable=no-init,too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
+
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 from mantid import config
 import os
 
-MICROEV_TO_MILLIEV = 1000.0
 DEFAULT_BINS = [-740, 1.6, 740]
 DEFAULT_QBINS = [0.4, 0.2, 3.8]
 DEFAULT_WRANGE = [6.24, 6.30]
 DEFAULT_MASK_GROUP_DIR = "/SNS/BSS/shared/autoreduce/new_masks_08_12_2015"
 DEFAULT_MASK_FILE = "BASIS_Mask_OneQuarterRemains_SouthBottom.xml"
 DEFAULT_CONFIG_DIR = config["instrumentDefinition.directory"]
+
 DEFAULT_ENERGY = 7.6368
 
 class BASISReduction311(PythonAlgorithm):
@@ -80,7 +82,7 @@ class BASISReduction311(PythonAlgorithm):
         config['default.facility'] = "SNS"
         config['default.instrument'] = self._long_inst
         self._doIndiv = self.getProperty("DoIndividual").value
-        self._etBins = self.getProperty("EnergyBins").value / MICROEV_TO_MILLIEV
+        self._etBins = 1.E-03 * self.getProperty("EnergyBins").value  # micro-eV to mili-eV
         self._qBins = self.getProperty("MomentumTransferBins").value
         self._noMonNorm = self.getProperty("NoMonitorNorm").value
         self._maskFile = self.getProperty("MaskFile").value
@@ -223,8 +225,8 @@ class BASISReduction311(PythonAlgorithm):
                 ws_name += extra_ext
             mon_ws_name = ws_name  + "_monitors"
             run_file = self._makeRunFile(run)
-
-            api.Load(Filename=run_file, OutputWorkspace=ws_name)
+            # Reflection 311 is restricted to bank with name "bank2"
+            api.LoadEventNexus(Filename=run_file, BankName="bank2", OutputWorkspace=ws_name)
 
             if not self._noMonNorm:
                 api.LoadNexusMonitors(Filename=run_file,
@@ -240,18 +242,13 @@ class BASISReduction311(PythonAlgorithm):
                 api.DeleteWorkspace(mon_ws_name)
 
     def _calibData(self, sam_ws, mon_ws):
-        api.LoadInstrument(Workspace=sam_ws,
-                           Filename=os.path.join(DEFAULT_CONFIG_DIR,
-                                                 'BASIS_Definition_311.xml'),
-                           RewriteSpectraMap=True)
-        api.MaskDetectors(Workspace=sam_ws,
-                          DetectorList=self._dMask)
-                          #MaskedWorkspace='BASIS_MASK')
-        api.ModeratorTzeroLinear(InputWorkspace=sam_ws,\
-                           OutputWorkspace=sam_ws)
         api.LoadParameterFile(Workspace=sam_ws,
                               Filename=os.path.join(DEFAULT_CONFIG_DIR,
                                                     'BASIS_silicon_311_Parameters.xml'))
+        api.MaskDetectors(Workspace=sam_ws,
+                          DetectorList=self._dMask)
+                          #MaskedWorkspace='BASIS_MASK')
+        api.ModeratorTzeroLinear(InputWorkspace=sam_ws, OutputWorkspace=sam_ws)
         api.ConvertUnits(InputWorkspace=sam_ws,
                          OutputWorkspace=sam_ws,
                          Target='Wavelength', EMode='Indirect')

@@ -379,9 +379,8 @@ RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
     API::MatrixWorkspace_const_sptr inputWorkspace,
     const std::vector<double> &binParams, std::vector<double> &newAxis) {
   // Create vector to hold the new X axis values
-  MantidVecPtr xAxis;
-  xAxis.access() = inputWorkspace->readX(0);
-  const int xLength = static_cast<int>(xAxis->size());
+  HistogramData::BinEdges xAxis(inputWorkspace->refX(0));
+  const int xLength = static_cast<int>(xAxis.size());
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that
   const int yLength = static_cast<int>(
@@ -401,7 +400,7 @@ RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
 
   // Now set the axis values
   for (int i = 0; i < yLength - 1; ++i) {
-    outputWorkspace->setX(i, xAxis);
+    outputWorkspace->setBinEdges(i, xAxis);
   }
 
   // Set the axis units

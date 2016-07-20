@@ -27,16 +27,6 @@ using namespace DataObjects;
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStas)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadMcStas::LoadMcStas() : m_countNumWorkspaceAdded(1) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadMcStas::~LoadMcStas() {}
-
-//----------------------------------------------------------------------------------------------
 // Algorithm's name for identification. @see Algorithm::name
 const std::string LoadMcStas::name() const { return "LoadMcStas"; }
 
@@ -375,15 +365,7 @@ void LoadMcStas::readEventData(
   // 2 bins is the standard. However for McStas simulation data it may make
   // sense to
   // increase this number for better initial visual effect
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &xRef = axis.access();
-  xRef.resize(2, 0.0);
-  // if ( nNeutrons > 0)
-  if (isAnyNeutrons) {
-    xRef[0] = shortestTOF - 1; // Just to make sure the bins hold it all
-    xRef[1] = longestTOF + 1;
-  }
-  // Set the binning axis
+  auto axis = HistogramData::BinEdges{shortestTOF - 1, longestTOF + 1};
   eventWS->setAllX(axis);
 
   // ensure that specified name is given to workspace (eventWS) when added to

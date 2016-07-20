@@ -71,18 +71,6 @@ this class.
 const std::string ImportMDEventWorkspace::CommentLineStartFlag() { return "#"; }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ImportMDEventWorkspace::ImportMDEventWorkspace()
-    : API::Algorithm(), m_file_data(), m_posDimStart(), m_posMDEventStart(),
-      m_IsFullDataObjects(false), m_nDimensions(0), m_nDataObjects(0) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ImportMDEventWorkspace::~ImportMDEventWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ImportMDEventWorkspace::name() const {
   return "ImportMDEventWorkspace";

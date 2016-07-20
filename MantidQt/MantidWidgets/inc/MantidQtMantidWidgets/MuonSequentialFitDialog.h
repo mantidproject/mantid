@@ -11,8 +11,6 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
 
 /** MuonSequentialFitDialog : Dialog for running sequential fits for Muon data
 
@@ -44,7 +42,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonSequentialFitDialog
 
 public:
   MuonSequentialFitDialog(MuonFitPropertyBrowser *fitPropBrowser,
-                          Algorithm_sptr loadAlg);
+                          Mantid::API::Algorithm_sptr loadAlg);
   ~MuonSequentialFitDialog() override;
 
   enum DialogState { Preparing, Running, Stopped };
@@ -70,7 +68,7 @@ private:
 
   /// Add a new entry to the diagnosis table
   void addDiagnosisEntry(const std::string &runTitle, double fitQuality,
-                         IFunction_sptr fittedFunction);
+                         Mantid::API::IFunction_sptr fittedFunction);
 
   /// Helper function to create new item for Diagnosis table
   QTableWidgetItem *createTableWidgetItem(const QString &text);
@@ -90,7 +88,7 @@ private:
   bool m_stopRequested;
 
   /// Algorithm the dialog should use for loading
-  Algorithm_sptr m_loadAlg;
+  Mantid::API::Algorithm_sptr m_loadAlg;
 
   // -- STATIC MEMBERS ------------------------------------------------------
 
@@ -98,7 +96,7 @@ private:
   static std::string isValidLabel(const std::string &label);
 
   /// Returns displayable title for the given workspace
-  static std::string getRunTitle(Workspace_const_sptr ws);
+  static std::string getRunTitle(Mantid::API::Workspace_const_sptr ws);
 
 private slots:
   /// Updates visibility/tooltip of label error asterisk

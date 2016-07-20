@@ -1,6 +1,8 @@
 """
     Specifically tests the Load function in the simple API
 """
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.simpleapi import Load, LoadDialog
 from mantid.api import mtd, MatrixWorkspace, WorkspaceGroup
@@ -18,7 +20,7 @@ class SimpleAPILoadTest(unittest.TestCase):
     def test_Load_returns_correct_args_when_extra_output_props_are_added_at_execute_time(self):
         try:
             data, monitors = Load('IRS21360.raw', LoadMonitors='Separate')
-        except Exception, exc:
+        except Exception as exc:
             self.fail("An error occurred when returning outputs declared at algorithm execution: '%s'" % str(exc))
 
         self.assertTrue(isinstance(data, MatrixWorkspace))
@@ -80,7 +82,7 @@ class SimpleAPILoadTest(unittest.TestCase):
     def test_that_dialog_call_raises_runtime_error(self):
         try:
             LoadDialog()
-        except RuntimeError, exc:
+        except RuntimeError as exc:
             msg = str(exc)
             if msg != "Can only display properties dialog in gui mode":
                 self.fail("Dialog function raised the correct exception type but the message was wrong")

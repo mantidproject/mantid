@@ -29,7 +29,7 @@ AlgorithmManagerImpl::AlgorithmManagerImpl() : m_managed_algs() {
 *  Prevents client from calling 'delete' on the pointer handed
 *  out by Instance
 */
-AlgorithmManagerImpl::~AlgorithmManagerImpl() {}
+AlgorithmManagerImpl::~AlgorithmManagerImpl() = default;
 
 /** Creates an instance of an algorithm, but does not own that instance
 *
@@ -121,7 +121,6 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
 void AlgorithmManagerImpl::clear() {
   std::lock_guard<std::mutex> _lock(this->m_managedMutex);
   m_managed_algs.clear();
-  return;
 }
 
 std::size_t AlgorithmManagerImpl::size() const { return m_managed_algs.size(); }
