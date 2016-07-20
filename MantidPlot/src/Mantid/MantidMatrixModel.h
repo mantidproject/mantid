@@ -88,7 +88,7 @@ private:
   QColor m_mon_color;                   // Monitor Specific background color
   mutable QHash<int, bool> m_monCache;  // monitor flag cache
   QColor m_mask_color;                  // Masked Detector Specific background color
-  mutable QHash<int, bool> m_maskCache; // monitor flag cache
+  mutable QHash<int, bool> m_maskCache; // masked flag cache
 };
 
 #endif
