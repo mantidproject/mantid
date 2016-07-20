@@ -193,7 +193,8 @@ void Stretch::algorithmComplete(const bool &error) {
         plotWorkspaces(beta, sigma);
       }
     } else {
-		g_log.error("Beta and Sigma workspace were not found and could not be plotted.");
+      g_log.error(
+          "Beta and Sigma workspace were not found and could not be plotted.");
     }
   }
 }
