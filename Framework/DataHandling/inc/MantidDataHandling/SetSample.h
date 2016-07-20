@@ -55,9 +55,8 @@ private:
                       const Geometry::SampleEnvironment *sampleEnv);
   std::string tryCreateXMLFromArgsOnly(const Kernel::PropertyManager_sptr args);
   std::string createFlatPlateXML(const Kernel::PropertyManager &args) const;
-  std::string createCylinderXML(const Kernel::PropertyManager &args) const;
-  std::string
-  createHollowCylinderXML(const Kernel::PropertyManager &args) const;
+  std::string createCylinderLikeXML(const Kernel::PropertyManager &args,
+                                    bool hollow) const;
 
   void runSetSampleShape(API::MatrixWorkspace_sptr &workspace,
                          const std::string &xml);
