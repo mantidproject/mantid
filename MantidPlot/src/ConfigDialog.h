@@ -125,6 +125,9 @@ private slots:
   void editDialog();
   void deleteDialog();
 
+  // Slot for tick boxes in options
+  void tickBoxClickedSlot(QTreeWidgetItem *widgetPtr, int column);
+
 private:
   void initPlotsPage();
   void initOptionsPage();
@@ -154,15 +157,15 @@ private:
   void populateProgramTree();
   void updateProgramTree();
 
+  //Options Window - Selected Options
   void
   buildTreeCategoryStructure(const QString *catNames, const bool isHidden,
                              QMap<QString, QTreeWidgetItem *> *seenCategories);
-
   QTreeWidgetItem *walkBackwardsThroughCategories(
       const QString *catNames, int elementToCheck,
       QMap<QString, QTreeWidgetItem *> *seenCategories,
       Qt::CheckState childTickState);
-
+  void updateChildTickStatuses(QTreeWidgetItem *widgetPtr, const Qt::CheckState newState);
   void correctTreePatrialTicks(QTreeWidgetItem *topLevelCat);
 
   // MD Plotting

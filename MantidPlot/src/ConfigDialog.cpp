@@ -983,7 +983,9 @@ void ConfigDialog::initMantidOptionsTab() {
   treeCategories->setColumnCount(1);
   treeCategories->setSortingEnabled(false);
   treeCategories->setHeaderLabel("Show Algorithm Categories");
-
+  //Connect this item's signal to check box SLOT
+  connect(treeCategories, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
+	 this, SLOT(tickBoxClickedSlot(QTreeWidgetItem*, int)));
   grid->addWidget(treeCategories, 2, 0);
   refreshTreeCategories();
 
@@ -1397,6 +1399,47 @@ QTreeWidgetItem *ConfigDialog::walkBackwardsThroughCategories(
   }
 
   return parentWidgetPtr;
+}
+
+void ConfigDialog::tickBoxClickedSlot(QTreeWidgetItem *widgetPtr, int column)
+{
+	int numberOfChildren = widgetPtr->childCount();
+	Qt::CheckState newState = widgetPtr->checkState(0);
+
+	//Now we have new state lets update children to reflect this
+	for (int i = 0; i < numberOfChildren; i++) {
+		updateChildTickStatuses(widgetPtr->child(i), newState);
+	}
+
+	//Next walk upwards to find very top level
+        bool hasReachedTop = false;
+        QTreeWidgetItem *parentPtr = widgetPtr;
+	do {
+		if (parentPtr->parent()) {
+			//Check a parent actually exists before assigning
+			parentPtr = parentPtr->parent();
+		}
+		else {
+			//We are top level as no parent
+			hasReachedTop = true;
+		}
+	} while (!hasReachedTop);
+
+	//Now update any partial ticks if needed
+	correctTreePatrialTicks(parentPtr);
+}
+
+void ConfigDialog::updateChildTickStatuses(QTreeWidgetItem *widgetPtr,
+	const Qt::CheckState newState) {
+	int numberOfChildren = widgetPtr->childCount();
+
+	//Check if there are additional sub levels
+	for (int i = 0; i < numberOfChildren; i++) {
+		updateChildTickStatuses(widgetPtr->child(i), newState);
+	}
+
+	//Set all children tick statuses to match parent
+	widgetPtr->setCheckState(0, newState);
 }
 
 void ConfigDialog::correctTreePatrialTicks(QTreeWidgetItem *topLevelCat) {
