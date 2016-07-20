@@ -1,8 +1,10 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import mantid
 import mantid.simpleapi as api
 from mantid.kernel import StringListValidator
+from six.moves import range
 
 try:
     import h5py  # http://www.h5py.org/
@@ -150,7 +152,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
             temp.attrs['units'] = units
 
     def _writeProtonCharge(self, nxentry, wksp):
-        if not 'gd_prtn_chrg' in wksp.run().keys():
+        if not 'gd_prtn_chrg' in list(wksp.run().keys()):
             return  # nothing to do
 
         pcharge = wksp.run()['gd_prtn_chrg']
@@ -268,7 +270,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
                 wkspname = str(wksp)
 
             # check for the entry alread existing in append mode
-            if append and wkspname in handle.keys():
+            if append and wkspname in list(handle.keys()):
                 raise IOError("NXentry named '%s' already exists in '%s'" % \
                       (wkspname, filename))
 
@@ -280,7 +282,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
 
             nxinstrument = self._createInstrument(nxentry)
 
-            for i in xrange(wksp.getNumberHistograms()):
+            for i in range(wksp.getNumberHistograms()):
                 writeDx = not np.all(wksp.readDx(i) == 0)
 
                 dataname = "spectrum_%d" % wksp.getSpectrum(i).getSpectrumNo()
