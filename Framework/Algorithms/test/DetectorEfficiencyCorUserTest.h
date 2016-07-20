@@ -70,8 +70,8 @@ public:
     if (!inWS)
       return;
 
-    TS_ASSERT_DELTA(outWS->readY(0).front(), inWS->readY(0).front(), 1);
-    TS_ASSERT_DELTA(outWS->readY(0).back(), inWS->readY(0).back(), 0.5);
+    TS_ASSERT_DELTA(outWS->y(0).front(), inWS->y(0).front(), 1);
+    TS_ASSERT_DELTA(outWS->y(0).back(), inWS->y(0).back(), 0.5);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(m_outWSName);

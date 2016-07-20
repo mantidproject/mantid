@@ -94,15 +94,17 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<CenteringGroupCreatorImpl>;
 };
 
-#ifdef _WIN32
-template class MANTID_GEOMETRY_DLL
-    Mantid::Kernel::SingletonHolder<CenteringGroupCreatorImpl>;
-#endif
-
 typedef Mantid::Kernel::SingletonHolder<CenteringGroupCreatorImpl>
     CenteringGroupCreator;
 
 } // namespace Geometry
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
+    SingletonHolder<Mantid::Geometry::CenteringGroupCreatorImpl>;
+}
+}
 
 #endif /* MANTID_GEOMETRY_CENTERINGGROUP_H_ */

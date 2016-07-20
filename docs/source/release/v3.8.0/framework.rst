@@ -5,6 +5,8 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+- ``Facilities.xml`` was updated for changes to the SNS live data servers.
+
 HistogramData
 -------------
 
@@ -21,6 +23,9 @@ Algorithms
 
 New
 ###
+
+- :ref:`LoadPreNexusLive <algm-LoadPreNexusLive>` will load "live"
+  data from file on legacy SNS DAS instruments.
 
 - :ref:`CropToComponent <algm-CropToComponent>` allows for cropping a workspace to a list of component names.
 
