@@ -178,6 +178,8 @@ void LoadMask::initDetectors() {
 
 //----------------------------------------------------------------------------------------------
 /**  Mask detectors or Unmask detectors
+ *   @param inexmap: spectraId-> spectraNum map used
+ *                   in masking
  *   @param tomask:  true to mask, false to unmask
  *   @param singledetids: list of individual det ids to mask
  *   @param pairdetids_low: list of lower bound of det ids to mask
