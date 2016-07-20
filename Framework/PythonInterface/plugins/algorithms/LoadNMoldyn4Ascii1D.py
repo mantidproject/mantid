@@ -71,17 +71,16 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
             # Converts the x-axis units and sets all axis properties
             x_axis = self.axis_conversion(x_axis[0], x_axis[1], y_axis[3])
             y_data = y_axis[0]
-            y_unit = y_axis[1]
             y_name = y_axis[2]
             x_data = x_axis[0]
             x_unit = x_axis[1]
             x_name = x_axis[2]
 
             # Convolutes the data if required
-            if (self.getPropertyValue('ResolutionConvolution') == 'TOSCA' and x_name == 'frequency'):
-                    resolutions = self.gaussians(x_data, self.TOSCA_resfunction)
-                    y_data = self.convolutor(y_data, resolutions, x_data)
-                    logger.information('Function \'{}\' will be convoluted'.format(y_name))
+            if self.getPropertyValue('ResolutionConvolution') == 'TOSCA' and x_name == 'frequency':
+                resolutions = self.gaussians(x_data, self.TOSCA_resfunction)
+                y_data = self.convolutor(y_data, resolutions, x_data)
+                logger.information('Function \'{}\' will be convoluted'.format(y_name))
 
             # Create the workspace for function
             ws_title = out_ws_name+'('+function+')'
