@@ -48,6 +48,10 @@ Improved
 
 - :ref:`ConvertUnits <algm-ConvertUnits>` and `ConvertUnitsUsingDetectorTable <algm-ConvertUnitsUsingDetectorTable>` will no longer corrupt a workspace used as input and output if the algorithm fails.
 
+- :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli 
+
+
+
 Deprecated
 ##########
 
