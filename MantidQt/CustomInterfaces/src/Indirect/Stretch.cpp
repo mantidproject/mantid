@@ -129,8 +129,8 @@ void Stretch::run() {
   // Construct OutputNames
   auto cutIndex = sampleName.find_last_of("_");
   auto baseName = sampleName.substr(0, cutIndex);
-  m_fitWorkspaceName = baseName + "_Qst_Fit";
-  m_contourWorkspaceName = baseName + "_Qst_Contour";
+  m_fitWorkspaceName = baseName + "_Stretch_Fit";
+  m_contourWorkspaceName = baseName + "_Stretch_Contour";
 
   auto stretch = AlgorithmManager::Instance().create("BayesStretch");
   stretch->initialize();
