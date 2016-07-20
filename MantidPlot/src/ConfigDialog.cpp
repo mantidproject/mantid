@@ -1281,9 +1281,9 @@ void ConfigDialog::refreshTreeCategories() {
   // Loop over all categories loaded into Mantid
   for (const auto i : categoryMap) {
 
-    QString catNames = QString::fromStdString(i->first);
+    QString catNames = QString::fromStdString(i.first);
     // Start recursion down building tree from names
-    buildTreeCategoryStructure(catNames, i->second, categories);
+    buildTreeCategoryStructure(catNames, i.second, categories);
   }
 }
 

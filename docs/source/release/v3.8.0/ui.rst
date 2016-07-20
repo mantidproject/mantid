@@ -48,11 +48,13 @@ Documentation
 #############
 * Added Ragged Workspace as a concept page
 
+Options Window
+###############
+- Within Preferences->Mantid->Options ticking a category off/on will now untick/tick all subcategories. Also having some subcategories on and off will now show a partially ticked box for that category. 
+
 
 Bugs Resolved
 -------------
-
-- Within Preferences->Mantid->Options unticking the first element of some subcategories cause the whole category to become unticked when loading the options window again. These categories will now remain on if a subcategory exists. 
 
 
 SliceViewer Improvements
