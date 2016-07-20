@@ -85,12 +85,7 @@ public:
          const QString &name = QString(), Qt::WFlags f = 0);
   Matrix(ScriptingEnv *env, const QImage &image, const QString &label,
          QWidget *parent, const QString &name = QString(), Qt::WFlags f = 0);
-  Matrix();
   ~Matrix() override;
-
-  /// Initilise and uninitilised instance of Matrix
-  void init(ScriptingEnv *env, int r, int c, const QString &label,
-            QWidget *parent, const QString &name, Qt::WFlags f = 0);
 
   enum Operation {
     Transpose,

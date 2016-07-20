@@ -52,15 +52,7 @@ using namespace Mantid;
 
 Note::Note(const QString &label, QWidget *parent, const QString &name,
            Qt::WFlags f)
-    : MdiSubWindow() {
-  init(label, parent, name, f);
-}
-
-Note::Note() : MdiSubWindow(), te(nullptr) {}
-
-void Note::init(const QString &label, QWidget *parent, const QString &name,
-                Qt::WFlags f) {
-  MdiSubWindow::init(parent, label, name, f);
+    : MdiSubWindow(parent, label, name, f) {
   te = new QTextEdit(this);
   te->setObjectName(name);
   setWidget(te);

@@ -71,21 +71,9 @@ DECLARE_WINDOW(Table)
 
 using namespace Mantid;
 
-Table::Table(ScriptingEnv *env, int r, int c, const QString &label,
+Table::Table(ScriptingEnv *env, int rows, int cols, const QString &label,
              QWidget *parent, const QString &name, Qt::WFlags f)
-    : MdiSubWindow(), Scripted() {
-  init(env, r, c, label, parent, name, f);
-}
-
-Table::Table()
-    : MdiSubWindow(), Scripted(), d_table(nullptr), d_show_comments(false),
-      selectedCol(-1), d_numeric_precision(13), d_saved_cells(nullptr) {}
-
-void Table::init(ScriptingEnv *env, int rows, int cols, const QString &label,
-                 QWidget *parent, const QString &name, Qt::WFlags f) {
-  MdiSubWindow::init(parent, label, name, f);
-  Scripted::init(env);
-
+    : MdiSubWindow(parent, label, name, f), Scripted(env) {
   selectedCol = -1;
   d_saved_cells = nullptr;
   d_show_comments = false;

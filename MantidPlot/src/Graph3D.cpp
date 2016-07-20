@@ -120,23 +120,7 @@ Triple UserParametricSurface::operator()(double u, double v) {
 
 Graph3D::Graph3D(const QString &label, QWidget *parent, const char *name,
                  Qt::WFlags f)
-    : MdiSubWindow() {
-  init(label, parent, name, f);
-}
-
-Graph3D::Graph3D()
-    : MdiSubWindow(), animation_redraw_wait(50), d_timer(nullptr),
-      legendOn(false), d_autoscale(true), labelsDist(0), legendMajorTicks(5),
-      ignoreFonts(false), col_(0), barsRad(0.007), alpha(1.0), d_point_size(5),
-      crossHairRad(0.03), crossHairLineWidth(2), conesRad(0.5),
-      d_smooth_points(false), crossHairSmooth(true), crossHairBoxed(false),
-      conesQuality(32), pointStyle(None), d_table(nullptr), d_matrix(nullptr),
-      d_surface(nullptr), m_zoomInScale(1), m_zoomOutScale(1),
-      m_PreviousYpos(0) {}
-
-void Graph3D::init(const QString &label, QWidget *parent, const char *name,
-                   Qt::WFlags f) {
-  MdiSubWindow::init(parent, label, name, f);
+    : MdiSubWindow(parent, label, name, f) {
   d_table = 0;
   d_matrix = 0;
   plotAssociation = QString();

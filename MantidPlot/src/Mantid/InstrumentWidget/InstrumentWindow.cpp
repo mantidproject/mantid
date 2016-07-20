@@ -22,18 +22,7 @@ using namespace MantidQt::MantidWidgets;
 InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
                                    ApplicationWindow *parent,
                                    const QString &name)
-    : MdiSubWindow() {
-  init(wsName, label, parent, name);
-}
-
-InstrumentWindow::InstrumentWindow()
-    : MdiSubWindow(), m_instrumentWidget(nullptr) {}
-
-InstrumentWindow::~InstrumentWindow() {}
-
-void InstrumentWindow::init(const QString &wsName, const QString &label,
-                            ApplicationWindow *parent, const QString &name) {
-  MdiSubWindow::init(parent, label, name, 0);
+    : MdiSubWindow(parent, label, name, 0) {
 
   m_instrumentWidget = new InstrumentWidget(wsName, this);
   this->setWidget(m_instrumentWidget);
@@ -45,6 +34,8 @@ void InstrumentWindow::init(const QString &wsName, const QString &label,
   connect(m_instrumentWidget, SIGNAL(clearingHandle()), this,
           SLOT(closeSafely()));
 }
+
+InstrumentWindow::~InstrumentWindow() {}
 
 IProjectSerialisable* InstrumentWindow::loadFromProject(const std::string &lines,
                                        ApplicationWindow *app,

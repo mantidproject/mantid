@@ -90,12 +90,6 @@ public:
                const QString &label, const QString &name = QString(),
                int start = -1, int end = -1);
 
-  MantidMatrix();
-
-  void init(Mantid::API::MatrixWorkspace_const_sptr ws, QWidget *parent,
-            const QString &label, const QString &name = QString(),
-            int start = -1, int end = -1);
-
   void connectTableView(QTableView *, MantidMatrixModel *);
   MantidMatrixModel *model() { return m_modelY; }
   MantidMatrixModel *modelY() { return m_modelY; }

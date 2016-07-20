@@ -68,7 +68,6 @@ class Graph3D : public MdiSubWindow {
 public:
   Graph3D(const QString &label, QWidget *parent, const char *name = 0,
           Qt::WFlags f = 0);
-  Graph3D();
   ~Graph3D() override;
 
   enum PlotType { Scatter = 0, Trajectory = 1, Bars = 2, Ribbon = 3 };
@@ -117,8 +116,6 @@ public:
 
 public slots:
   void copy(Graph3D *g);
-  void init(const QString &label, QWidget *parent, const char *name,
-            Qt::WFlags f);
   void initCoord();
   void addFunction(Function2D *hfun, double xl, double xr, double yl, double yr,
                    double zl, double zr, size_t columns, size_t rows);

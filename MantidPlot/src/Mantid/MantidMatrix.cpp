@@ -86,16 +86,6 @@ int modelTypeToInt(MantidMatrixModel::Type type) {
 }
 }
 
-MantidMatrix::MantidMatrix()
-    : MdiSubWindow(), WorkspaceObserver(), m_workspace(nullptr), y_start(0.0),
-      y_end(0.0), m_histogram(false), m_min(0), m_max(0),
-      m_are_min_max_set(false), m_boundingRect(), m_strName(), m_selectedRows(),
-      m_selectedCols(), m_appWindow(nullptr), m_tabs(nullptr),
-      m_table_viewX(nullptr), m_table_viewY(nullptr), m_table_viewE(nullptr),
-      x_start(0), x_end(0), m_rows(0), m_cols(0), m_startRow(0), m_endRow(0),
-      m_workspaceTotalHist(0), m_spectrogramRows(0), m_spectrogramCols(0),
-      m_column_width(100), m_PrevIndex(0) {}
-
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
                            QWidget *parent, const QString &label,
                            const QString &name, int start, int end)
@@ -103,14 +93,6 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
       m_workspace(ws), y_start(0.0), y_end(0.0), m_histogram(false), m_min(0),
       m_max(0), m_are_min_max_set(false), m_boundingRect(),
       m_strName(name.toStdString()), m_selectedRows(), m_selectedCols() {
-  init(ws, parent, label, name, start, end);
-}
-
-void MantidMatrix::init(Mantid::API::MatrixWorkspace_const_sptr ws,
-                        QWidget *parent, const QString &label,
-                        const QString &name, int start, int end) {
-
-  MdiSubWindow::init(parent, label, name, 0);
   m_workspace = ws;
   m_strName = name.toStdString();
 

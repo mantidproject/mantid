@@ -47,11 +47,8 @@ class Note : public MdiSubWindow {
 public:
   Note(const QString &label, QWidget *parent, const QString &name = QString(),
        Qt::WFlags f = 0);
-  Note();
   ~Note() override{};
 
-  void init(const QString &label, QWidget *parent,
-            const QString &name = QString(), Qt::WFlags f = 0);
   static IProjectSerialisable* loadFromProject(const std::string &lines, ApplicationWindow *app,
                        const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;

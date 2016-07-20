@@ -26,7 +26,6 @@ public:
                             const QString &label = QString(),
                             ApplicationWindow *parent = nullptr,
                             const QString &name = QString());
-  InstrumentWindow();
   ~InstrumentWindow() override;
 
   static IProjectSerialisable* loadFromProject(const std::string &lines, ApplicationWindow *app,
@@ -52,8 +51,6 @@ public slots:
 
 private:
   MantidQt::MantidWidgets::InstrumentWidget *m_instrumentWidget;
-  void init(const QString &wsName, const QString &label,
-            ApplicationWindow *parent, const QString &name);
 };
 
 #endif // INSTRUMENTWINDOW_H

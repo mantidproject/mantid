@@ -117,7 +117,6 @@ public:
 
   Table(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent,
         const QString &name = QString(), Qt::WFlags f = 0);
-  Table();
 
   int topSelectedRow() const { return d_table->topSelectedRow(); }
   int bottomSelectedRow() const { return d_table->bottomSelectedRow(); }
@@ -302,8 +301,6 @@ public slots:
   void clear();
   //@}
 
-  void init(ScriptingEnv *env, int r, int c, const QString &label,
-            QWidget *parent, const QString &name = QString(), Qt::WFlags f = 0);
   QStringList selectedColumns();
   QStringList selectedYColumns();
   QStringList selectedXColumns();
