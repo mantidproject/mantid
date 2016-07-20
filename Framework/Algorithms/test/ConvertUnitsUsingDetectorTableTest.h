@@ -83,7 +83,6 @@ public:
     auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         workspaceName);
 
-
     TS_ASSERT_DELTA(outWS->dataX(0)[0], 0.0, 0.000001);
     TS_ASSERT_DELTA(outWS->dataX(0)[9], 0.000323676, 0.000001);
 
@@ -92,11 +91,11 @@ public:
 
   void testDeltaEFailDoesNotAlterInPlaceWorkspace() {
 
-    std::string wsName =
-      "ConvertUnitsUsingDetectorTable_testDeltaEFailDoesNotAlterInPlaceWorkspace";
+    std::string wsName = "ConvertUnitsUsingDetectorTable_"
+                         "testDeltaEFailDoesNotAlterInPlaceWorkspace";
     MatrixWorkspace_sptr ws =
-      WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 200,
-        false);
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 200,
+                                                                     false);
     // set to a distribution
     ws->setDistribution(true);
     AnalysisDataService::Instance().add(wsName, ws);
@@ -107,10 +106,9 @@ public:
     TS_ASSERT_THROWS_ANYTHING(ws->getEFixed());
     auto originalYdata = ws->readY(0);
 
-
     // Create TableWorkspace with values in it
     ITableWorkspace_sptr pars =
-      WorkspaceFactory::Instance().createTable("TableWorkspace");
+        WorkspaceFactory::Instance().createTable("TableWorkspace");
     pars->addColumn("int", "spectra");
     pars->addColumn("double", "l1");
     pars->addColumn("double", "l2");
@@ -126,7 +124,6 @@ public:
     API::TableRow row1 = pars->appendRow();
     row1 << 2 << 1.0 << 1.0 << 90.0 << 7.0 << 0;
 
-
     ConvertUnitsUsingDetectorTable conv;
     conv.initialize();
     conv.setPropertyValue("InputWorkspace", wsName);
@@ -137,9 +134,10 @@ public:
 
     conv.execute();
 
-    TSM_ASSERT("Expected ConvertUnitsUsingDetectorTable to throw on deltaE conversion without valid"
-      "eMode",
-      !conv.isExecuted());
+    TSM_ASSERT("Expected ConvertUnitsUsingDetectorTable to throw on deltaE "
+               "conversion without valid"
+               "eMode",
+               !conv.isExecuted());
 
     TS_ASSERT_EQUALS(originalUnit, ws->getAxis(0)->unit());
     TS_ASSERT_EQUALS(originalEMode, ws->getEMode());

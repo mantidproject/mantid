@@ -1,6 +1,5 @@
 #include "MantidAlgorithms/ConvertUnitsUsingDetectorTable.h"
 
-
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/IDetector.h"
@@ -82,9 +81,9 @@ void ConvertUnitsUsingDetectorTable::init() {
 /** This implementation does NOT stores the emode in the provided workspace
 *  @param outputWS The workspace
 */
-void ConvertUnitsUsingDetectorTable::storeEModeOnWorkspace(API::MatrixWorkspace_sptr outputWS)
-{
-  //do nothing here - don't store this value
+void ConvertUnitsUsingDetectorTable::storeEModeOnWorkspace(
+    API::MatrixWorkspace_sptr outputWS) {
+  // do nothing here - don't store this value
 }
 
 /** Convert the workspace units using TOF as an intermediate step in the
@@ -93,9 +92,8 @@ void ConvertUnitsUsingDetectorTable::storeEModeOnWorkspace(API::MatrixWorkspace_
 * @param inputWS :: The input workspace
 * @returns A shared pointer to the output workspace
 */
-MatrixWorkspace_sptr
-ConvertUnitsUsingDetectorTable::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
-  API::MatrixWorkspace_const_sptr inputWS) {
+MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
+    Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_const_sptr inputWS) {
   using namespace Geometry;
 
   // Let's see if we are using a TableWorkspace to override parameters
@@ -120,12 +118,12 @@ ConvertUnitsUsingDetectorTable::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
   }
 
   // Now let's take a reference to the vectors.
-  const auto& l1Column = paramWS->getColVector<double>("l1");
-  const auto& l2Column = paramWS->getColVector<double>("l2");
-  const auto& twoThetaColumn = paramWS->getColVector<double>("twotheta");
-  const auto& efixedColumn = paramWS->getColVector<double>("efixed");
-  const auto& emodeColumn = paramWS->getColVector<int>("emode");
-  auto& spectraColumn = paramWS->getColVector<int>("spectra");
+  const auto &l1Column = paramWS->getColVector<double>("l1");
+  const auto &l2Column = paramWS->getColVector<double>("l2");
+  const auto &twoThetaColumn = paramWS->getColVector<double>("twotheta");
+  const auto &efixedColumn = paramWS->getColVector<double>("efixed");
+  const auto &emodeColumn = paramWS->getColVector<int>("emode");
+  auto &spectraColumn = paramWS->getColVector<int>("spectra");
 
   Progress prog(this, 0.2, 1.0, m_numberOfSpectra);
   int64_t numberOfSpectra_i =
@@ -139,7 +137,8 @@ ConvertUnitsUsingDetectorTable::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
   // Perform Sanity Validation before creating workspace
   size_t checkIndex = 0;
   int checkSpecNo = inputWS->getDetector(checkIndex)->getID();
-  auto checkSpecIter = std::find(spectraColumn.begin(), spectraColumn.end(), checkSpecNo);
+  auto checkSpecIter =
+      std::find(spectraColumn.begin(), spectraColumn.end(), checkSpecNo);
   if (checkSpecIter != spectraColumn.end()) {
     size_t detectorRow = std::distance(spectraColumn.begin(), checkSpecIter);
     // copy the X values for the check
@@ -148,17 +147,21 @@ ConvertUnitsUsingDetectorTable::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     auto checkFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
     auto checkOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
     double checkdelta = 0;
-    checkFromUnit->toTOF(checkXValues, emptyVec, l1Column[detectorRow], l2Column[detectorRow], twoThetaColumn[detectorRow],
-      emodeColumn[detectorRow], efixedColumn[detectorRow], checkdelta);
+    checkFromUnit->toTOF(checkXValues, emptyVec, l1Column[detectorRow],
+                         l2Column[detectorRow], twoThetaColumn[detectorRow],
+                         emodeColumn[detectorRow], efixedColumn[detectorRow],
+                         checkdelta);
     // Convert from time-of-flight to the desired unit
-    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1Column[detectorRow], l2Column[detectorRow], twoThetaColumn[detectorRow],
-      emodeColumn[detectorRow], efixedColumn[detectorRow], checkdelta);
+    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1Column[detectorRow],
+                             l2Column[detectorRow], twoThetaColumn[detectorRow],
+                             emodeColumn[detectorRow],
+                             efixedColumn[detectorRow], checkdelta);
   }
 
   // create the output workspace
   MatrixWorkspace_sptr outputWS = this->setupOutputWorkspace(inputWS);
   EventWorkspace_sptr eventWS =
-    boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+      boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
   assert(static_cast<bool>(eventWS) == m_inputEvents); // Sanity check
 
   // TODO: Check why this parallel stuff breaks
@@ -254,7 +257,6 @@ ConvertUnitsUsingDetectorTable::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
 
   return outputWS;
 }
-
 
 } // namespace Algorithms
 } // namespace Mantid

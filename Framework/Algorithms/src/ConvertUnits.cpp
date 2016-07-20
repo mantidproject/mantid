@@ -197,10 +197,10 @@ void ConvertUnits::setupMemberVariables(
   m_outputUnit = UnitFactory::Instance().create(targetUnit);
 }
 
-  /** Create an output workspace of the appropriate (histogram or event) type and
-   * copy over the data
-   *  @param inputWS The input workspace
-   */
+/** Create an output workspace of the appropriate (histogram or event) type and
+ * copy over the data
+ *  @param inputWS The input workspace
+ */
 API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
     const API::MatrixWorkspace_const_sptr inputWS) {
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
@@ -247,7 +247,7 @@ void ConvertUnits::storeEModeOnWorkspace(API::MatrixWorkspace_sptr outputWS) {
   // Store the emode
   const bool overwrite(true);
   outputWS->mutableRun().addProperty("deltaE-mode", getPropertyValue("EMode"),
-    overwrite);
+                                     overwrite);
 }
 
 /** Convert the workspace units according to a simple output = a * (input^b)

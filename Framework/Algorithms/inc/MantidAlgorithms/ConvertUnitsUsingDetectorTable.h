@@ -53,8 +53,8 @@ private:
   /// Convert the workspace units using TOF as an intermediate step in the
   /// conversion
   API::MatrixWorkspace_sptr
-    convertViaTOF(Kernel::Unit_const_sptr fromUnit,
-      API::MatrixWorkspace_const_sptr inputWS) override;
+  convertViaTOF(Kernel::Unit_const_sptr fromUnit,
+                API::MatrixWorkspace_const_sptr inputWS) override;
 };
 
 } // namespace Algorithms
