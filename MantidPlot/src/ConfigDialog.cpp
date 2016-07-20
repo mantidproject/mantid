@@ -715,8 +715,8 @@ void ConfigDialog::initMantidPage() {
 
   // Populate boxes
   auto faclist = cfgSvc.getFacilityNames();
-  for (auto it = faclist.begin(); it != faclist.end(); ++it) {
-    facility->addItem(QString::fromStdString(*it));
+  for (auto it : faclist) {
+    facility->addItem(QString::fromStdString(it));
   }
 
   // Set default property
@@ -1279,7 +1279,7 @@ void ConfigDialog::refreshTreeCategories() {
   widgetMap categories; // Keeps track of categories added to the tree
 
   // Loop over all categories loaded into Mantid
-  for (auto i = categoryMap.cbegin(); i != categoryMap.cend(); ++i) {
+  for (const auto i : categoryMap) {
 
     QString catNames = QString::fromStdString(i->first);
     // Start recursion down building tree from names
