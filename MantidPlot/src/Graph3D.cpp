@@ -121,11 +121,10 @@ Triple UserParametricSurface::operator()(double u, double v) {
 Graph3D::Graph3D(const QString &label, QWidget *parent, const char *name,
                  Qt::WFlags f)
     : MdiSubWindow(parent, label, name, f) {
-    initPlot();
+  initPlot();
 }
 
-void Graph3D::initPlot()
-{
+void Graph3D::initPlot() {
   d_table = 0;
   d_matrix = 0;
   d_plotAssociation = QString();
@@ -2492,7 +2491,7 @@ void Graph3D::copy(Graph3D *g) {
 
 Graph3D::~Graph3D() {
   if (d_surface)
-      delete d_surface;
+    delete d_surface;
 }
 
 IProjectSerialisable *Graph3D::loadFromProject(const std::string &lines,
