@@ -1,7 +1,9 @@
 """Defines tests for the simple property declarations types within
 Python algorithms
 """
+from __future__ import (absolute_import, division, print_function)
 
+import sys
 import unittest
 import testhelpers
 
@@ -22,6 +24,8 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
             _testdocstring = "This is a doc string"
             def PyInit(self):
                 self.declareProperty('SimpleInput', 1)
+                if sys.version_info[0] < 3:
+                    self.declareProperty('SimpleLongInput', long(5))
                 self.declareProperty('Switch', True)
                 self.declareProperty('SimpleOutput', 1.0, Direction.Output)
                 self.declareProperty('InputString', "", Direction.Input)
@@ -37,11 +41,18 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
         self.assertEquals(0, len(props))
         alg.initialize()
         props = alg.getProperties()
-        self.assertEquals(6, len(props))
+        if sys.version_info[0] < 3:
+            self.assertEquals(7, len(props))
+        else:
+            self.assertEquals(6, len(props))
 
         input = alg.getProperty("SimpleInput")
         self.assertEquals(input.direction, Direction.Input)
         self.assertEquals(input.value, 1)
+        if sys.version_info < (3,):
+            input_long = alg.getProperty("SimpleLongInput")
+            self.assertEquals(input_long.direction, Direction.Input)
+            self.assertEquals(input_long.value, 5)
         switch = alg.getProperty("Switch")
         self.assertEquals(switch.direction, Direction.Input)
         self.assertEquals(switch.value, True)

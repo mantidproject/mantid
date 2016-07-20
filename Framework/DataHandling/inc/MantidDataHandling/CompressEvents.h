@@ -45,9 +45,6 @@ namespace DataHandling {
 */
 class DLLExport CompressEvents : public API::Algorithm {
 public:
-  CompressEvents();
-  ~CompressEvents() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CompressEvents"; };
   /// Summary of algorithms purpose

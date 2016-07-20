@@ -49,11 +49,6 @@ SetSpecialCoordinates::SetSpecialCoordinates() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SetSpecialCoordinates::~SetSpecialCoordinates() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SetSpecialCoordinates::name() const {
   return "SetSpecialCoordinates";

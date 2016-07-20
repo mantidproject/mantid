@@ -21,6 +21,9 @@ namespace Mantid {
 namespace API {
 class MatrixWorkspace;
 }
+namespace HistogramData {
+class BinEdges;
+}
 
 namespace LiveData {
 /** ILiveListener is the interface implemented by classes which connect directly
@@ -113,7 +116,7 @@ private:
   std::vector<specnum_t> m_periodList;
 
   /// Store the bin boundaries for each time regime
-  std::vector<boost::shared_ptr<MantidVec>> m_bins;
+  std::vector<HistogramData::BinEdges> m_bins;
 
   /// Detector IDs
   std::vector<int> m_detIDs;

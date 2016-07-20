@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import mantid
 from mantid.kernel import VMD
 from mantid.geometry import IMDDimension

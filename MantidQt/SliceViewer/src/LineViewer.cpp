@@ -5,6 +5,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/VMD.h"
+#include "MantidKernel/UsageService.h"
 #include "MantidQtSliceViewer/LineViewer.h"
 #include <qwt_plot_curve.h>
 #include <qwt_plot.h>
@@ -140,6 +141,9 @@ LineViewer::LineViewer(QWidget *parent)
                    SLOT(refreshPlot()));
   QObject::connect(m_lineOptions, SIGNAL(changedYLogScaling()), this,
                    SLOT(onToggleLogYAxis()));
+
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "SliceViewer->LineViewer", false);
 }
 
 LineViewer::~LineViewer() {}

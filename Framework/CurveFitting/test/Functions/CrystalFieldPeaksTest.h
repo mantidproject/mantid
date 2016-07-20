@@ -80,7 +80,7 @@ public:
     auto fun = FunctionFactory::Instance().createInitialized(ini);
     TS_ASSERT(fun);
     TS_ASSERT_EQUALS(fun->nParams(), 34);
-    TS_ASSERT_EQUALS(fun->nAttributes(), 5);
+    TS_ASSERT_EQUALS(fun->nAttributes(), 6);
     fun->applyTies();
     TS_ASSERT_DELTA(fun->getParameter("B20"), 1.0, 1e-10);
     TS_ASSERT_DELTA(fun->getParameter("B22"), 2.0, 1e-10);

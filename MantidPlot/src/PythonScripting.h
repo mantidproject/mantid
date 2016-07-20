@@ -120,8 +120,12 @@ private:
   bool start() override;
   /// Shutdown the environment
   void shutdown() override;
-  /// Run execfile on a given file
-  bool loadInitFile(const QString &path);
+  /// Configure python path
+  void setupPythonPath();
+  /// Configure sip
+  void setupSip();
+  /// Exec the mantidplotrc file
+  bool loadInitRCFile();
 
 private:
   /// The global dictionary

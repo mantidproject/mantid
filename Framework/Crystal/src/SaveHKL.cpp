@@ -39,18 +39,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(SaveHKL)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveHKL::SaveHKL() : m_smu(0.), m_amu(0.), m_radius(0.), m_power_th(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveHKL::~SaveHKL() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SaveHKL::init() {
@@ -177,7 +165,7 @@ void SaveHKL::exec() {
   bool append = getProperty("AppendFile");
   if (append && Poco::File(filename.c_str()).exists()) {
     IAlgorithm_sptr load_alg = createChildAlgorithm("LoadHKL");
-    load_alg->setPropertyValue("Filename", filename.c_str());
+    load_alg->setPropertyValue("Filename", filename);
     load_alg->setProperty("OutputWorkspace", "peaks");
     load_alg->executeAsChildAlg();
     // Get back the result

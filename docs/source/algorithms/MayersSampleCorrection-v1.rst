@@ -59,33 +59,19 @@ Usage
 
 .. testcode:: WithMultipleScattering
 
-   # Define function to create sample shape
-   def cylinder_sample(workspace, radius, height):
-       radius_m = radius/100.
-       height_m = height/100.
-       xml = '<cylinder id="sample">' \
-                  '<centre-of-bottom-base x="0.0" y="{0}" z="0.0" />' \
-                   '<axis x="0.0" y="1.0" z="0" />' \
-                   '<radius val="{1}" />' \
-                   '<height val="{2}" />'\
-                   '</cylinder>'.format(0.5*height_m, radius_m, height_m)
-       CreateSampleShape(InputWorkspace=workspace, ShapeXML=xml)
-   #enddef
-
    # Create a fake workspace with TOF data
    sample_ws = CreateSampleWorkspace(Function='Powder Diffraction',
                                      NumBanks=1,BankPixelWidth=1,XUnit='TOF',
                                      XMin=1000,XMax=10000)
-
-   cyl_height_cm = 4
+   # Set meta data about shape and material
+   cyl_height_cm = 4.0
    cyl_radius_cm = 0.25
-   cylinder_sample(sample_ws, cyl_radius_cm, cyl_height_cm)
-
-   # Vanadium material
    material = 'V'
    num_density = 0.07261
-   SetSampleMaterial(sample_ws, ChemicalFormula=material,
-                     SampleNumberDensity=num_density)
+   SetSample(sample_ws,
+       Geometry={'Shape': 'Cylinder', 'Height': cyl_height_cm,
+                 'Radius': cyl_radius_cm, 'Center': [0.0,0.0,0.0]},
+       Material={'ChemicalFormula': material, 'SampleNumberDensity': num_density})
 
    # Run corrections
    corrected_sample = MayersSampleCorrection(sample_ws,
@@ -110,4 +96,3 @@ References
 .. categories::
 
 .. sourcelink::
-

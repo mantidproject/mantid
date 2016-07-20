@@ -1,9 +1,10 @@
 #ifndef MANTID_KERNEL_USERCATALOGINFOTEST_H_
 #define MANTID_KERNEL_USERCATALOGINFOTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/UserCatalogInfo.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
 using namespace testing;
@@ -18,7 +19,7 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
   return out;
 }
 }
-
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 using namespace Mantid::Kernel;
 class MockCatalogConfigService : public CatalogConfigService {
 public:
@@ -35,9 +36,8 @@ public:
   MOCK_CONST_METHOD0(macPrefix, const std::string());
   MOCK_CONST_METHOD0(linuxPrefix, const std::string());
   MOCK_CONST_METHOD0(clone, ICatalogInfo *());
-  ~MockICatalogInfo() override {}
 };
-
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 // Adaptee
 struct UserType {
   std::string getString(const std::string &) const { return "my_value"; }

@@ -5,8 +5,8 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -127,8 +127,6 @@ void AbsorptionCorrection::exec() {
   g_log.information(message.str());
   message.str("");
 
-  const bool isHist = m_inputWS->isHistogramData();
-
   // Calculate the cached values of L1 and element volumes.
   initialiseCachedDistances();
   // If sample not at origin, shift cached positions.
@@ -146,8 +144,7 @@ void AbsorptionCorrection::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     // Copy over bin boundaries
-    const MantidVec &X = m_inputWS->readX(i);
-    correctionFactors->dataX(i) = X;
+    correctionFactors->setSharedX(i, m_inputWS->sharedX(i));
 
     // Get detector position
     IDetector_const_sptr det;
@@ -185,11 +182,12 @@ void AbsorptionCorrection::exec() {
     }
 
     // Get a reference to the Y's in the output WS for storing the factors
-    MantidVec &Y = correctionFactors->dataY(i);
+    auto &Y = correctionFactors->dataY(i);
 
     // Loop through the bins in the current spectrum every m_xStep
+    const auto lambdas = m_inputWS->points(i);
     for (int64_t j = 0; j < specSize; j = j + m_xStep) {
-      const double lambda = (isHist ? (0.5 * (X[j] + X[j + 1])) : X[j]);
+      const double lambda = lambdas[j];
       if (m_emode == 0) // Elastic
       {
         Y[j] = this->doIntegration(lambda, L2s);
@@ -212,7 +210,10 @@ void AbsorptionCorrection::exec() {
         1) // Interpolate linearly between points separated by m_xStep,
            // last point required
     {
-      VectorHelper::linearlyInterpolateY(X, Y, static_cast<double>(m_xStep));
+      // TODO linearlyInterpolateY should be implemented in HistogramData
+      // Until then use old interface
+      VectorHelper::linearlyInterpolateY(m_inputWS->x(i).rawData(), Y,
+                                         static_cast<double>(m_xStep));
     }
 
     prog.report();

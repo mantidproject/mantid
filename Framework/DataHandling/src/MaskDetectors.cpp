@@ -23,12 +23,6 @@ using Geometry::Instrument_const_sptr;
 using Geometry::IDetector_const_sptr;
 using namespace DataObjects;
 
-/// (Empty) Constructor
-MaskDetectors::MaskDetectors() {}
-
-/// Destructor
-MaskDetectors::~MaskDetectors() {}
-
 /*
  * Define input arguments
  */
@@ -326,8 +320,6 @@ void MaskDetectors::appendToIndexListFromWS(
       indexList.push_back(i);
     }
   }
-
-  return;
 } // appendToIndexListFromWS
 
 /**
@@ -354,8 +346,6 @@ void MaskDetectors::appendToIndexListFromMaskWS(
       indexList.push_back(i);
     }
   }
-
-  return;
 } // appendToIndexListFromWS
 
 } // namespace DataHandling

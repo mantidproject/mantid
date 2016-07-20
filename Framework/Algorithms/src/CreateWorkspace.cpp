@@ -1,22 +1,23 @@
 #include "MantidAlgorithms/CreateWorkspace.h"
 
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/UnitFactory.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 using namespace Kernel;
 using namespace API;
+using namespace HistogramData;
 
 DECLARE_ALGORITHM(CreateWorkspace)
 
@@ -121,10 +122,10 @@ void CreateWorkspace::exec() {
   const bool commonX(dataX.size() == ySize || dataX.size() == ySize + 1);
 
   std::size_t xSize;
-  MantidVecPtr XValues;
+  Kernel::cow_ptr<HistogramX> XValues(nullptr);
   if (commonX) {
     xSize = dataX.size();
-    XValues.access() = dataX;
+    XValues = Kernel::make_cow<HistogramX>(dataX);
   } else {
     if (dataX.size() % nSpec != 0) {
       throw std::invalid_argument("Length of DataX must be divisible by NSpec");
@@ -169,15 +170,17 @@ void CreateWorkspace::exec() {
     // Just set the pointer if common X bins. Otherwise, copy in the right chunk
     // (as we do for Y).
     if (commonX) {
-      outputWS->setX(i, XValues);
+      outputWS->setSharedX(i, XValues);
     } else {
-      outputWS->dataX(i).assign(dataX.begin() + xStart, dataX.begin() + xEnd);
+      outputWS->mutableX(i)
+          .assign(dataX.begin() + xStart, dataX.begin() + xEnd);
     }
 
-    outputWS->dataY(i).assign(dataY.begin() + yStart, dataY.begin() + yEnd);
+    outputWS->mutableY(i).assign(dataY.begin() + yStart, dataY.begin() + yEnd);
 
     if (dataE_provided)
-      outputWS->dataE(i).assign(dataE.begin() + yStart, dataE.begin() + yEnd);
+      outputWS->mutableE(i)
+          .assign(dataE.begin() + yStart, dataE.begin() + yEnd);
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION

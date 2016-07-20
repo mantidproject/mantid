@@ -16,10 +16,6 @@ DECLARE_ALGORITHM(LoadSavuTomoConfig)
 
 using namespace Mantid::API;
 
-LoadSavuTomoConfig::LoadSavuTomoConfig() {}
-
-LoadSavuTomoConfig::~LoadSavuTomoConfig() {}
-
 /**
  * Standard Initialisation method. Declares properties.
  */
@@ -174,10 +170,10 @@ ITableWorkspace_sptr LoadSavuTomoConfig::loadFile(std::string &fname,
     }
 
     // TODO: check final 'schema', get these 4 fields from the file
-    std::string id = "";
-    std::string params = "";
-    std::string name = "";
-    std::string cite = "";
+    std::string id;
+    std::string params;
+    std::string name;
+    std::string cite;
     try {
       f->readData("data", params);
       f->readData("id", id);

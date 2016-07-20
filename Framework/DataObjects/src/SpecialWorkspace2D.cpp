@@ -222,8 +222,6 @@ void SpecialWorkspace2D::binaryOperation(
     throw std::invalid_argument("Invalid Operator");
     break;
   }
-
-  return;
 }
 
 //--------------------------------------------------------------------------------------------
@@ -243,8 +241,6 @@ void SpecialWorkspace2D::binaryOperation(const unsigned int operatortype) {
     throw std::invalid_argument("Invalid Operator");
     break;
   }
-
-  return;
 }
 
 /** AND operator
@@ -263,8 +259,6 @@ void SpecialWorkspace2D::binaryAND(
       this->dataY(i)[0] += y2;
     }
   }
-
-  return;
 }
 
 /** OR operator
@@ -291,8 +285,6 @@ if (y1 < 1.0E-10 && y2 < 1.0E-10){
 }
 */
   }
-
-  return;
 }
 
 /** Excluded Or operator
@@ -312,8 +304,6 @@ void SpecialWorkspace2D::binaryXOR(
       this->dataY(i)[0] = 1.0;
     }
   }
-
-  return;
 }
 
 /**
@@ -329,8 +319,6 @@ void SpecialWorkspace2D::binaryNOT() {
       this->dataY(i)[0] = 0.0;
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -414,8 +402,6 @@ void SpecialWorkspace2D::copyFrom(
 
   // Copy detector map
   this->detID_to_WI = sourcews->detID_to_WI;
-
-  return;
 }
 
 } // namespace Mantid

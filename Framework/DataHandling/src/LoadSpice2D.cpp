@@ -136,14 +136,6 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
   return confidence;
 }
 
-/// Constructor
-LoadSpice2D::LoadSpice2D()
-    : m_wavelength_input(0), m_wavelength_spread_input(0), m_wavelength(0),
-      m_dwavelength(0) {}
-
-/// Destructor
-LoadSpice2D::~LoadSpice2D() {}
-
 /// Overwrites Algorithm Init method.
 void LoadSpice2D::init() {
   declareProperty(Kernel::make_unique<API::FileProperty>(
@@ -316,7 +308,7 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
                 << detectors.size() << '\n';
 
   // iterate every detector in the xml file
-  for (const auto detector : detectors) {
+  for (const auto &detector : detectors) {
     std::string detectorXpath = dataXpath + "/" + detector;
     // type : INT32[192,256]
     std::map<std::string, std::string> attributes =

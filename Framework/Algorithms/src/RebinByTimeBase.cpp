@@ -147,8 +147,6 @@ void RebinByTimeBase::exec() {
 
   // Go through all the histograms and set the data
   doHistogramming(inWS, outputWS, XValues_new, OutXValues_scaled, prog);
-
-  return;
 }
 
 } // namespace Algorithms

@@ -10,12 +10,6 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace API {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MultiPeriodGroupWorker::MultiPeriodGroupWorker()
-    : m_workspacePropertyName("") {}
-
 /**
  * Constructor
  * @param workspacePropertyName : Property name to treat as source of
@@ -24,11 +18,6 @@ MultiPeriodGroupWorker::MultiPeriodGroupWorker()
 MultiPeriodGroupWorker::MultiPeriodGroupWorker(
     const std::string &workspacePropertyName)
     : m_workspacePropertyName(workspacePropertyName) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MultiPeriodGroupWorker::~MultiPeriodGroupWorker() {}
 
 /**
  * Try to add the input workspace to the multiperiod input group list.
@@ -128,8 +117,8 @@ bool MultiPeriodGroupWorker::useCustomWorkspaceProperty() const {
  */
 std::string MultiPeriodGroupWorker::createFormattedInputWorkspaceNames(
     const size_t &periodIndex, const VecWSGroupType &vecWorkspaceGroups) const {
-  std::string prefix = "";
-  std::string inputWorkspaces = "";
+  std::string prefix;
+  std::string inputWorkspaces;
   for (const auto &vecWorkspaceGroup : vecWorkspaceGroups) {
     inputWorkspaces += prefix + vecWorkspaceGroup->getItem(periodIndex)->name();
     prefix = ",";
@@ -203,12 +192,20 @@ bool MultiPeriodGroupWorker::processGroups(
   WorkspaceGroup_sptr outputWS = boost::make_shared<WorkspaceGroup>();
   AnalysisDataService::Instance().addOrReplace(outName, outputWS);
 
+  double progress_proportion = 1.0 / static_cast<double>(nPeriods);
   // Loop through all the periods. Create spawned algorithms of the same type as
   // this to process pairs from the input groups.
   for (size_t i = 0; i < nPeriods; ++i) {
     const int periodNumber = static_cast<int>(i + 1);
-    Algorithm_sptr alg_sptr = API::AlgorithmManager::Instance().createUnmanaged(
-        sourceAlg->name(), sourceAlg->version());
+    // use create Child Algorithm that look like this one
+    Algorithm_sptr alg_sptr = sourceAlg->createChildAlgorithm(
+        sourceAlg->name(), progress_proportion * periodNumber,
+        progress_proportion * (1 + periodNumber), sourceAlg->isLogging(),
+        sourceAlg->version());
+    // Don't make the new algorithm a child so that it's workspaces are stored
+    // correctly
+    alg_sptr->setChild(false);
+    alg_sptr->setRethrows(true);
     IAlgorithm *alg = alg_sptr.get();
     if (!alg) {
       throw std::runtime_error("Algorithm creation failed.");

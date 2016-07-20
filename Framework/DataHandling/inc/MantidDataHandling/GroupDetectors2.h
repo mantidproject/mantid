@@ -109,9 +109,6 @@ namespace DataHandling {
 */
 class DLLExport GroupDetectors2 : public API::Algorithm {
 public:
-  GroupDetectors2();
-  ~GroupDetectors2() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "GroupDetectors"; };
   /// Summary of algorithms purpose
@@ -141,7 +138,7 @@ private:
   private:
     /// this class can't be constructed it is just a holder for some static
     /// things
-    RangeHelper(){};
+    RangeHelper() = default;
     /// give an enum from poco a better name here
     enum {
       IGNORE_SPACES =
@@ -158,7 +155,7 @@ private:
 
   /// An estimate of the percentage of the algorithm runtimes that has been
   /// completed
-  double m_FracCompl;
+  double m_FracCompl = 0.0;
   /// stores lists of spectra indexes to group, although we never do an index
   /// search on it
   storage_map m_GroupWsInds;

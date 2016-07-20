@@ -61,6 +61,17 @@ MANTID_DATAHANDLING_DLL H5::Group createGroupNXS(H5::H5File &file,
 MANTID_DATAHANDLING_DLL H5::Group createGroupNXS(H5::Group &group,
                                                  const std::string &name,
                                                  const std::string &nxtype);
+
+MANTID_DATAHANDLING_DLL H5::Group createGroupCanSAS(H5::Group &group,
+                                                    const std::string &name,
+                                                    const std::string &nxtype,
+                                                    const std::string &cstype);
+
+MANTID_DATAHANDLING_DLL H5::Group createGroupCanSAS(H5::H5File &file,
+                                                    const std::string &name,
+                                                    const std::string &nxtype,
+                                                    const std::string &cstype);
+
 /**
  * Sets up the chunking and compression rate.
  * @param length
@@ -74,13 +85,21 @@ template <typename LocationType>
 void writeStrAttribute(LocationType &location, const std::string &name,
                        const std::string &value);
 
+template <typename NumT, typename LocationType>
+void writeNumAttribute(LocationType &location, const std::string &name,
+                       const NumT &value);
+
+template <typename NumT, typename LocationType>
+void writeNumAttribute(LocationType &location, const std::string &name,
+                       const std::vector<NumT> &value);
+
 MANTID_DATAHANDLING_DLL void write(H5::Group &group, const std::string &name,
                                    const std::string &value);
 
-MANTID_DATAHANDLING_DLL void
-writeWithStrAttributes(H5::Group &group, const std::string &name,
-                       const std::string &value,
-                       const std::map<std::string, std::string> &attributes);
+template <typename T>
+void writeScalarDataSetWithStrAttributes(
+    H5::Group &group, const std::string &name, const T &value,
+    const std::map<std::string, std::string> &attributes);
 
 template <typename NumT>
 void writeArray1D(H5::Group &group, const std::string &name,
@@ -97,6 +116,14 @@ MANTID_DATAHANDLING_DLL std::string readString(H5::DataSet &dataset);
 template <typename LocationType>
 std::string readAttributeAsString(LocationType &dataset,
                                   const std::string &attributeName);
+
+template <typename NumT, typename LocationType>
+NumT readNumAttributeCoerce(LocationType &location,
+                            const std::string &attributeName);
+
+template <typename NumT, typename LocationType>
+std::vector<NumT> readNumArrayAttributeCoerce(LocationType &location,
+                                              const std::string &attributeName);
 
 template <typename NumT>
 std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name);

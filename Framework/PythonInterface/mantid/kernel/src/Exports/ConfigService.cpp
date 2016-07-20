@@ -1,5 +1,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/StlExportDefinitions.h"
 #include <boost/python/class.hpp>
@@ -13,6 +14,8 @@ using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl;
 using Mantid::Kernel::FacilityInfo;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(ConfigServiceImpl)
 
 namespace {
 /// Set directories from a python list

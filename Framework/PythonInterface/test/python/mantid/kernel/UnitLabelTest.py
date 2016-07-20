@@ -1,6 +1,9 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.kernel import UnitFactory, UnitLabel
-import types
+import six
+import sys
 
 class UnitLabelTest(unittest.TestCase):
 
@@ -17,19 +20,22 @@ class UnitLabelTest(unittest.TestCase):
     def test_utf8_is_converted_to_unicode_object(self):
         tof = UnitFactory.Instance().create("TOF")
         unit_lbl = tof.symbol()
-        self.assertTrue(isinstance(unit_lbl.utf8(), types.UnicodeType))
+        self.assertTrue(isinstance(unit_lbl.utf8(), six.text_type))
         self.assertEquals(u"\u03bcs", unit_lbl.utf8())
         self.assertEquals("\mu s", unit_lbl.latex())
 
     def test_str_function_produces_ascii_string_from_label(self):
         label = UnitLabel("MyLabel", u"\u03bcs","\mu s")
-        self.assertTrue(isinstance(str(label), types.StringType))
+        self.assertTrue(isinstance(str(label), six.string_types))
         self.assertEquals("MyLabel", str(label))
 
-    def test_unicode_function_produces_unicode_string_from_label(self):
-        label = UnitLabel("MyLabel", u"\u03bcs","\mu s")
-        self.assertTrue(isinstance(unicode(label), types.UnicodeType))
-        self.assertEquals(u"\u03bcs", unicode(label))
+    def test_unicode_function_produces_unicode_string_from_label_py2(self):
+        if sys.version_info[0] < 3:
+            label = UnitLabel("MyLabel", u"\u03bcs","\mu s")
+            self.assertTrue(isinstance(unicode(label), six.text_type))
+            self.assertEquals(u"\u03bcs", unicode(label))
+        else:
+            pass
 
 if __name__ == '__main__':
     unittest.main()

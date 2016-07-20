@@ -15,14 +15,14 @@
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidKernel/MDUnit.h"
 
+#include "MantidVatesAPI/vtkRectilinearGrid_Silent.h"
 #include <vtkDataArray.h>
 #include <vtkFieldData.h>
 #include <vtkFloatArray.h>
-#include <vtkPoints.h>
-#include "MantidVatesAPI/vtkRectilinearGrid_Silent.h"
-#include <vtkUnstructuredGrid.h>
 #include <vtkNew.h>
+#include <vtkPoints.h>
 #include <vtkSmartPointer.h>
+#include <vtkUnstructuredGrid.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -125,12 +125,11 @@ private:
     return ds;
   }
 
-  template <typename T>
-  std::vector<T> getRangeComp(vtkDataSet *ds, std::string fieldname, int size) {
-    vtkDataArray *arr = ds->GetFieldData()->GetArray(fieldname.c_str());
-    vtkTypedDataArray<T> *tarr = vtkTypedDataArray<T>::FastDownCast(arr);
-    std::vector<T> vals(size);
-    tarr->GetTupleValue(0, &vals[0]);
+  std::vector<double> getRangeComp(vtkDataSet *ds, const char *fieldname) {
+    vtkDataArray *arr = ds->GetFieldData()->GetArray(fieldname);
+    std::vector<double> vals(arr->GetNumberOfComponents());
+    TS_ASSERT_EQUALS(vals.size(), 16);
+    arr->GetTuple(0, vals.data());
     return vals;
   }
 
@@ -146,8 +145,7 @@ private:
     TS_ASSERT_DELTA(point[2], 0.8660254, eps);
     // See if the basis vectors are available
 
-    std::vector<double> basisMatrix =
-        getRangeComp<double>(grid, "ChangeOfBasisMatrix", 16);
+    std::vector<double> basisMatrix = getRangeComp(grid, "ChangeOfBasisMatrix");
 
     // Row by row check
 
@@ -299,8 +297,7 @@ public:
     TS_ASSERT_DELTA(point[1], 1.0, eps);
     TS_ASSERT_DELTA(point[2], 1.0, eps);
     // See if the basis vectors are available
-    std::vector<double> basisMatrix =
-        getRangeComp<double>(ds, "ChangeOfBasisMatrix", 16);
+    std::vector<double> basisMatrix = getRangeComp(ds, "ChangeOfBasisMatrix");
 
     // Row by row check
 
@@ -361,8 +358,7 @@ public:
     TS_ASSERT_DELTA(point[1], 1.0, eps);
     TS_ASSERT_DELTA(point[2], 0.75592895, eps);
     // See if the basis vectors are available
-    std::vector<double> basisMatrix =
-        getRangeComp<double>(ds, "ChangeOfBasisMatrix", 16);
+    std::vector<double> basisMatrix = getRangeComp(ds, "ChangeOfBasisMatrix");
 
     // Row by row check
 

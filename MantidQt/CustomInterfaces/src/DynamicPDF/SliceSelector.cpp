@@ -8,7 +8,8 @@
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h"
 #include <qwt_plot_spectrogram.h>
-// system includes
+// Mantid headers from other projects
+#include "MantidKernel/UsageService.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("DynamicPDF");
@@ -64,6 +65,8 @@ SliceSelector::SliceSelector(QWidget *parent)
     : QMainWindow(parent), m_pickerLine{nullptr}, m_loadedWorkspace(),
       m_selectedWorkspaceIndex{0} {
   this->observePreDelete(true); // Subscribe to notifications
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "DynamicPDF->SliceSelector", false);
   this->initLayout();
 }
 

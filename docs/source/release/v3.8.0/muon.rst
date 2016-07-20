@@ -17,8 +17,8 @@ Algorithms
 ----------
 
 - :ref:`MaxEnt <algm-MaxEnt>`: MaxEnt has a new property, *ComplexImage*, which can be set
-to *False* when the imaginary part of the image should not be taken into account for the
-calculations.
+  to *False* when the imaginary part of the image should not be taken into account for the
+  calculations.
 
 - :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>`: the *Frequency* parameter is now supplied in MHz rather than megaradians per second.
 
@@ -26,6 +26,8 @@ calculations.
 
 Fit Functions
 -------------
+
+- :ref:`Keren <func-Keren>`: A bug was fixed so that the field comes out in the correct units.
 
 |
 

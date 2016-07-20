@@ -22,9 +22,6 @@ TestGroupDataListener::TestGroupDataListener() : ILiveListener(), m_buffer() {
   m_dataReset = false;
 }
 
-/// Destructor
-TestGroupDataListener::~TestGroupDataListener() {}
-
 bool TestGroupDataListener::connect(const Poco::Net::SocketAddress &) {
   // Do nothing.
   return true;
@@ -38,9 +35,7 @@ int TestGroupDataListener::runNumber() const { return 0; }
 
 void TestGroupDataListener::start(
     Kernel::DateAndTime /*startTime*/) // Ignore the start time
-{
-  return;
-}
+{}
 
 /** Create the default empty event workspace */
 void TestGroupDataListener::createWorkspace() {

@@ -200,7 +200,15 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
     xmlstring += InfinitePlaneXML(p1id, centre, plane1Axis)
     p2id = 'pl-b'
     xmlstring += InfinitePlaneXML(p2id, centre, plane2Axis)
-    xmlstring += '<algebra val="(#((#(' + cout_id + ':(#' + cin_id  + '))) ' + p1id + ' ' + p2id + '))"/>\n'
+    
+    # The composition of the shape is "(cyl-out (#cyl-in) (pl-a:pl-b))". The breakdown is:
+    # 1. Create an infinite hollow cylinder by performing "cyl-out (#cyl-in)". This is the intersection of the
+    #    outer radius cylinder with the inverse inner radius cylinder. We have a shell-like selection
+    # 2. Create a three-quarter wedge selection by performing (pl-a:pl-b). This selects everything except
+    #    for the slice region we don't want to be masked.
+    # 3. Create the intersection between 1 and 2. This will provide a three-quarter wedge of the hollow
+    #    cylinder.
+    xmlstring += '<algebra val="((' + cout_id + ' (#' + cin_id  + ')) (' + p1id + ':' + p2id + '))"/>\n'
     return xmlstring
 
 def getWorkspaceReference(ws_pointer):
@@ -1723,6 +1731,40 @@ def extract_fit_parameters(rAnds):
     else:
         fit_mode = "None"
     return scale_factor, shift_factor, fit_mode
+
+
+def check_has_bench_rot(workspace, log_dict=None):
+    if log_dict:
+        run = workspace.run()
+        if not run.hasProperty("Bench_Rot"):
+            raise RuntimeError("LARMOR Instrument: Bench_Rot does not seem to be available on {0}. There might be "
+                               "an issue with your data aquisition. Make sure that the sample_log entry "
+                               "Bench_Rot is available.".format(workspace.name()))
+
+
+def quaternion_to_angle_and_axis(quaternion):
+    """
+    Converts a quaterion to an angle + an axis
+
+    The conversion from a quaternion to an angle + axis is explained here:
+    http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToAngle/
+    """
+    angle = 2*math.acos(quaternion[0])
+    s_parameter = math.sqrt(1 - quaternion[0]*quaternion[0])
+
+    axis = []
+    # If the the angle is zero, then it does not make sense to have an axis
+    if s_parameter < 1e-8:
+        axis.append(quaternion[1])
+        axis.append(quaternion[2])
+        axis.append(quaternion[3])
+    else:
+        axis.append(quaternion[1]/s_parameter)
+        axis.append(quaternion[2]/s_parameter)
+        axis.append(quaternion[3]/s_parameter)
+    return math.degrees(angle), axis
+
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

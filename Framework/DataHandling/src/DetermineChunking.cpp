@@ -60,14 +60,6 @@ const std::string RAW_EXT[NUM_EXT_RAW] = {".raw"};
 DECLARE_ALGORITHM(DetermineChunking)
 
 //----------------------------------------------------------------------------------------------
-/// Constructor
-DetermineChunking::DetermineChunking() {}
-
-//----------------------------------------------------------------------------------------------
-/// Destructor
-DetermineChunking::~DetermineChunking() {}
-
-//----------------------------------------------------------------------------------------------
 /// @copydoc Mantid::API::IAlgorithm::name()
 const std::string DetermineChunking::name() const {
   return "DetermineChunking";
