@@ -27,23 +27,24 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "TableStatistics.h"
-
 #include "ApplicationWindow.h"
+#include "TableStatistics.h"
 #include "TSVSerialiser.h"
+
+#include "Mantid/IProjectSerialisable.h"
 #include "MantidKernel/Strings.h"
 
 #include <QList>
-
 #include <QHeaderView>
 
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_statistics.h>
-
 #include <boost/algorithm/string.hpp>
 
 // Register the window into the WindowFactory
 DECLARE_WINDOW(TableStatistics)
+
+using namespace Mantid;
 
 TableStatistics::TableStatistics(ScriptingEnv *env, QWidget *parent,
                                  Table *base, Type t, QList<int> targets)
@@ -283,7 +284,7 @@ void TableStatistics::removeCol(const QString &col) {
     }
 }
 
-void TableStatistics::loadFromProject(const std::string &lines,
+IProjectSerialisable* TableStatistics::loadFromProject(const std::string &lines,
                                       ApplicationWindow *app,
                                       const int fileVersion) {
   Q_UNUSED(fileVersion);
@@ -296,7 +297,7 @@ void TableStatistics::loadFromProject(const std::string &lines,
   boost::split(firstLineVec, firstLine, boost::is_any_of("\t"));
 
   if (firstLineVec.size() < 4)
-    return;
+    return nullptr;
 
   QString name = QString::fromStdString(firstLineVec[0]);
   const std::string tableName = firstLineVec[1];
@@ -306,7 +307,7 @@ void TableStatistics::loadFromProject(const std::string &lines,
   TSVSerialiser tsv(lines);
 
   if (!tsv.hasLine("Targets"))
-    return;
+    return nullptr;
 
   const std::string targetsLine = tsv.lineAsString("Targets");
 
@@ -326,47 +327,48 @@ void TableStatistics::loadFromProject(const std::string &lines,
   // create instance
   int typeCode = type == "row" ? TableStatistics::row : TableStatistics::column;
 
-  init(app->scriptingEnv(), app, app->table(QString::fromStdString(tableName)),
+
+  TableStatistics* table = new TableStatistics(app->scriptingEnv(), app, app->table(QString::fromStdString(tableName)),
        (TableStatistics::Type)typeCode, targets);
 
   if (tsv.selectLine("geometry"))
     app->restoreWindowGeometry(
-        app, this, QString::fromStdString(tsv.lineAsString("geometry")));
+        app, table, QString::fromStdString(tsv.lineAsString("geometry")));
 
   if (tsv.selectLine("header")) {
     QStringList header =
         QString::fromUtf8(tsv.lineAsString("header").c_str()).split("\t");
     header.pop_front();
-    loadHeader(header);
+    table->loadHeader(header);
   }
 
   if (tsv.selectLine("ColWidth")) {
     QStringList colWidths =
         QString::fromUtf8(tsv.lineAsString("ColWidth").c_str()).split("\t");
     colWidths.pop_front();
-    setColWidths(colWidths);
+    table->setColWidths(colWidths);
   }
 
   if (tsv.selectLine("ColType")) {
     QStringList colTypes =
         QString::fromUtf8(tsv.lineAsString("ColType").c_str()).split("\t");
     colTypes.pop_front();
-    setColumnTypes(colTypes);
+    table->setColumnTypes(colTypes);
   }
 
   if (tsv.selectLine("Comments")) {
     QStringList comments =
         QString::fromUtf8(tsv.lineAsString("Comments").c_str()).split("\t");
     comments.pop_front();
-    setColComments(comments);
+    table->setColComments(comments);
   }
 
   if (tsv.selectLine("WindowLabel")) {
     QString caption;
     int policy;
     tsv >> caption >> policy;
-    setWindowLabel(caption);
-    setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
+    table->setWindowLabel(caption);
+    table->setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
   }
 
   if (tsv.hasSection("com")) {
@@ -397,20 +399,21 @@ void TableStatistics::loadFromProject(const std::string &lines,
 
           formula += valVec[i];
         }
-        setCommand(col, QString::fromUtf8(formula.c_str()));
+        table->setCommand(col, QString::fromUtf8(formula.c_str()));
       }
     }
   }
 
   if (name.isEmpty())
-    app->initTable(this, objectName());
+    app->initTable(table, table->objectName());
   else
-    app->initTable(this, name);
+    app->initTable(table, name);
 
   // populate with values
-  showNormal();
-  setBirthDate(birthDate);
+  table->showNormal();
+  table->setBirthDate(birthDate);
   app->setListViewDate(name, birthDate);
+  return table;
 }
 
 std::string TableStatistics::saveToProject(ApplicationWindow *app) {

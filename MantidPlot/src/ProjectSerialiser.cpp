@@ -162,8 +162,7 @@ void ProjectSerialiser::loadWindows(const TSVSerialiser &tsv,
   for (auto &classname : WindowFactory::Instance().getKeys()) {
     if (tsv.hasSection(classname)) {
       for (auto &section : tsv.sections(classname)) {
-        auto w = WindowFactory::Instance().createUnwrapped(classname);
-        w->loadFromProject(section, window, fileVersion);
+        WindowFactory::Instance().loadFromProject(classname, section, window, fileVersion);
       }
     }
   }

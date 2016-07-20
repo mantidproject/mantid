@@ -15,6 +15,7 @@
 // Register the window into the WindowFactory
 DECLARE_WINDOW(InstrumentWindow)
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
@@ -45,7 +46,7 @@ void InstrumentWindow::init(const QString &wsName, const QString &label,
           SLOT(closeSafely()));
 }
 
-void InstrumentWindow::loadFromProject(const std::string &lines,
+IProjectSerialisable* InstrumentWindow::loadFromProject(const std::string &lines,
                                        ApplicationWindow *app,
                                        const int fileVersion) {
   Q_UNUSED(fileVersion);
@@ -56,12 +57,12 @@ void InstrumentWindow::loadFromProject(const std::string &lines,
     QString name = QString::fromStdString(wsName);
 
     if (!Mantid::API::AnalysisDataService::Instance().doesExist(wsName))
-      return;
+      return nullptr;
     MatrixWorkspace_const_sptr ws =
         boost::dynamic_pointer_cast<const MatrixWorkspace>(
             app->mantidUI->getWorkspace(QString::fromStdString(wsName)));
     if (!ws)
-      return;
+      return nullptr;
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
@@ -69,25 +70,26 @@ void InstrumentWindow::loadFromProject(const std::string &lines,
       QApplication::restoreOverrideCursor();
       QMessageBox::critical(app, "MantidPlot - Error",
                             "Instrument view cannot be opened");
-      return;
+      return nullptr;
     }
 
     // Need a new window
     const QString windowName(QString("InstrumentWindow:") +
                              QString::fromStdString(wsName));
-    init(name, QString("Instrument"), app, windowName);
+    InstrumentWindow* iw = new InstrumentWindow(name, QString("Instrument"), app, windowName);
 
     try {
-      selectTab(-1);
+      iw->selectTab(-1);
 
       if (tsv.hasLine("geometry")) {
         const QString geometry =
             QString::fromStdString(tsv.lineAsString("geometry"));
-        app->restoreWindowGeometry(app, this, geometry);
+        app->restoreWindowGeometry(app, iw, geometry);
       }
 
-      app->addMdiSubWindow(this);
+      app->addMdiSubWindow(iw);
 
+      return iw;
       QApplication::restoreOverrideCursor();
     } catch (const std::exception &e) {
       QApplication::restoreOverrideCursor();
@@ -96,6 +98,8 @@ void InstrumentWindow::loadFromProject(const std::string &lines,
       QMessageBox::critical(app, "MantidPlot - Error", errorMessage);
     }
   }
+
+  return nullptr;
 }
 
 std::string InstrumentWindow::saveToProject(ApplicationWindow *app) {

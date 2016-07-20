@@ -76,6 +76,8 @@
 // Register the window into the WindowFactory
 DECLARE_WINDOW(MultiLayer)
 
+using namespace Mantid;
+
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MultiLayer");
@@ -1739,7 +1741,7 @@ void WaterfallFillDialog::setFillMode() {
   }
 }
 
-void MultiLayer::loadFromProject(const std::string &lines,
+IProjectSerialisable* MultiLayer::loadFromProject(const std::string &lines,
                                  ApplicationWindow *app,
                                  const int fileVersion) {
   std::string multiLayerLines = lines;
@@ -1748,7 +1750,7 @@ void MultiLayer::loadFromProject(const std::string &lines,
   // and lacks a name. Take it out and parse it manually.
 
   if (multiLayerLines.length() == 0)
-    return;
+    return nullptr;
 
   std::vector<std::string> lineVec;
   boost::split(lineVec, multiLayerLines, boost::is_any_of("\n"));
@@ -1770,52 +1772,52 @@ void MultiLayer::loadFromProject(const std::string &lines,
 
   QString label = caption;
 
-  init(app, 0, rows, cols);
+  MultiLayer *multiLayer = new MultiLayer(app, 0, rows, cols);
 
   TSVSerialiser tsv(lines);
 
   if (tsv.hasLine("geometry"))
     app->restoreWindowGeometry(
-        app, this, QString::fromStdString(tsv.lineAsString("geometry")));
+        app, multiLayer, QString::fromStdString(tsv.lineAsString("geometry")));
 
-  blockSignals(true);
+  multiLayer->blockSignals(true);
 
   if (tsv.selectLine("WindowLabel")) {
-    setWindowLabel(QString::fromUtf8(tsv.asString(1).c_str()));
-    setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
+    multiLayer->setWindowLabel(QString::fromUtf8(tsv.asString(1).c_str()));
+    multiLayer->setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
   }
 
   if (tsv.selectLine("Margins")) {
     int left = 0, right = 0, top = 0, bottom = 0;
     tsv >> left >> right >> top >> bottom;
-    setMargins(left, right, top, bottom);
+    multiLayer->setMargins(left, right, top, bottom);
   }
 
   if (tsv.selectLine("Spacing")) {
     int rowSpace = 0, colSpace = 0;
     tsv >> rowSpace >> colSpace;
-    setSpacing(rowSpace, colSpace);
+    multiLayer->setSpacing(rowSpace, colSpace);
   }
 
   if (tsv.selectLine("LayerCanvasSize")) {
     int width = 0, height = 0;
     tsv >> width >> height;
-    setLayerCanvasSize(width, height);
+    multiLayer->setLayerCanvasSize(width, height);
   }
 
   if (tsv.selectLine("Alignement")) {
     int hor = 0, vert = 0;
     tsv >> hor >> vert;
-    setAlignement(hor, vert);
+    multiLayer->setAlignement(hor, vert);
   }
 
   if (tsv.hasSection("waterfall")) {
     const std::string wfStr = tsv.sections("waterfall").front();
 
     if (wfStr == "1")
-      setWaterfallLayout(true);
+      multiLayer->setWaterfallLayout(true);
     else
-      setWaterfallLayout(false);
+      multiLayer->setWaterfallLayout(false);
   }
 
   if (tsv.hasSection("graph")) {
@@ -1829,18 +1831,19 @@ void MultiLayer::loadFromProject(const std::string &lines,
         int x = 0, y = 0, w = 0, h = 0;
         gtsv >> x >> y >> w >> h;
 
-        Graph *g = dynamic_cast<Graph *>(addLayer(x, y, w, h));
+        Graph *g = dynamic_cast<Graph *>(multiLayer->addLayer(x, y, w, h));
         if (g)
           g->loadFromProject(graphLines, app, fileVersion);
       }
     }
   }
 
-  blockSignals(false);
+  multiLayer->blockSignals(false);
 
-  setBirthDate(birthDate);
-  app->initMultilayerPlot(this, label.replace(QRegExp("_"), "-"));
+  multiLayer->setBirthDate(birthDate);
+  app->initMultilayerPlot(multiLayer, label.replace(QRegExp("_"), "-"));
   app->setListViewDate(caption, birthDate);
+  return multiLayer;
 }
 
 std::string MultiLayer::saveToProject(ApplicationWindow *app) {

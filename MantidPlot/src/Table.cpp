@@ -69,6 +69,8 @@
 // Register the window into the WindowFactory
 DECLARE_WINDOW(Table)
 
+using namespace Mantid;
+
 Table::Table(ScriptingEnv *env, int r, int c, const QString &label,
              QWidget *parent, const QString &name, Qt::WFlags f)
     : MdiSubWindow(), Scripted() {
@@ -3011,7 +3013,7 @@ void Table::showAllColumns() {
   }
 }
 
-void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
+IProjectSerialisable* Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
                             const int fileVersion) {
   Q_UNUSED(fileVersion);
 
@@ -3022,7 +3024,7 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
   boost::split(valVec, firstLine, boost::is_any_of("\t"));
 
   if (valVec.size() < 4)
-    return;
+    return nullptr;
 
   QString caption = QString::fromStdString(valVec[0]);
   QString date = QString::fromStdString(valVec[3]);
@@ -3032,16 +3034,16 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
   Mantid::Kernel::Strings::convert<int>(valVec[2], cols);
 
   // create instance
-  init(app->scriptingEnv(), rows, cols, "", app);
-  app->initTable(this, caption);
-  if (objectName() != caption) { // the table was renamed
-    app->renamedTables << caption << objectName();
+  Table* table = new Table(app->scriptingEnv(), rows, cols, "", app);
+  app->initTable(table, caption);
+  if (table->objectName() != caption) { // the table was renamed
+    app->renamedTables << caption << table->objectName();
     if (app->d_inform_rename_table) {
       QMessageBox::warning(
           app, app->tr("MantidPlot - Renamed Window"),
           app->tr("The table '%1' already exists. It has been renamed '%2'.")
               .arg(caption)
-              .arg(objectName()));
+              .arg(table->objectName()));
     }
   }
 
@@ -3049,18 +3051,18 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
 
   if (tsv.selectLine("geometry"))
     app->restoreWindowGeometry(
-        app, this, QString::fromStdString(tsv.lineAsString("geometry")));
+        app, table, QString::fromStdString(tsv.lineAsString("geometry")));
 
   if (tsv.selectLine("tgeometry"))
     app->restoreWindowGeometry(
-        app, this, QString::fromStdString(tsv.lineAsString("tgeometry")));
+        app, table, QString::fromStdString(tsv.lineAsString("tgeometry")));
 
   if (tsv.selectLine("header")) {
     const QString headerLine =
         QString::fromUtf8(tsv.lineAsString("header").c_str());
     QStringList sl = headerLine.split("\t");
     sl.pop_front();
-    loadHeader(sl);
+    table->loadHeader(sl);
   }
 
   if (tsv.selectLine("ColWidth")) {
@@ -3068,7 +3070,7 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
         QString::fromUtf8(tsv.lineAsString("ColWidth").c_str());
     QStringList sl = cwLine.split("\t");
     sl.pop_front();
-    setColWidths(sl);
+    table->setColWidths(sl);
   }
 
   if (tsv.hasSection("com")) {
@@ -3099,7 +3101,7 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
 
           formula += valVec[i];
         }
-        setCommand(col, QString::fromUtf8(formula.c_str()));
+        table->setCommand(col, QString::fromUtf8(formula.c_str()));
       }
     }
   }
@@ -3109,7 +3111,7 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
         QString::fromUtf8(tsv.lineAsString("ColType").c_str());
     QStringList sl = ctLine.split("\t");
     sl.pop_front();
-    setColumnTypes(sl);
+    table->setColumnTypes(sl);
   }
 
   if (tsv.selectLine("Comments")) {
@@ -3117,8 +3119,8 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
         QString::fromUtf8(tsv.lineAsString("Comments").c_str());
     QStringList sl = cLine.split("\t");
     sl.pop_front();
-    setColComments(sl);
-    setHeaderColType();
+    table->setColComments(sl);
+    table->setHeaderColType();
   }
 
   if (tsv.selectLine("ReadOnlyColumn")) {
@@ -3126,8 +3128,8 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
         QString::fromUtf8(tsv.lineAsString("ReadOnlyColumn").c_str());
     QStringList sl = rocLine.split("\t");
     sl.pop_front();
-    for (int i = 0; i < numCols(); ++i)
-      setReadOnlyColumn(i, sl[i] == "1");
+    for (int i = 0; i < table->numCols(); ++i)
+      table->setReadOnlyColumn(i, sl[i] == "1");
   }
 
   if (tsv.selectLine("HiddenColumn")) {
@@ -3135,21 +3137,21 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
         QString::fromUtf8(tsv.lineAsString("HiddenColumn").c_str());
     QStringList sl = hcLine.split("\t");
     sl.pop_front();
-    for (int i = 0; i < numCols(); ++i)
-      hideColumn(i, sl[i] == "1");
+    for (int i = 0; i < table->numCols(); ++i)
+      table->hideColumn(i, sl[i] == "1");
   }
 
   if (tsv.selectLine("WindowLabel")) {
     QString label;
     int policy;
     tsv >> label >> policy;
-    setWindowLabel(label);
-    setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
+    table->setWindowLabel(label);
+    table->setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
   }
 
   if (tsv.selectSection("data")) {
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    table()->blockSignals(true);
+    table->table()->blockSignals(true);
 
     QString dataStr;
     tsv >> dataStr;
@@ -3158,29 +3160,30 @@ void Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
     for (auto it = dataLines.begin(); it != dataLines.end(); ++it) {
       QStringList fields = it->split("\t");
       int row = fields[0].toInt();
-      for (int col = 0; col < numCols(); ++col) {
+      for (int col = 0; col < table->numCols(); ++col) {
         if (fields.count() >= col + 2) {
           QString cell = fields[col + 1];
 
           if (cell.isEmpty())
             continue;
 
-          if (columnType(col) == Table::Numeric)
-            setCell(row, col, cell.toDouble());
+          if (table->columnType(col) == Table::Numeric)
+            table->setCell(row, col, cell.toDouble());
           else
-            setText(row, col, cell);
+            table->setText(row, col, cell);
         }
       }
     }
 
     QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
     QApplication::restoreOverrideCursor();
-    table()->blockSignals(false);
+    table->table()->blockSignals(false);
   }
 
-  showNormal();
-  setBirthDate(date);
+  table->showNormal();
+  table->setBirthDate(date);
   app->setListViewDate(caption, date);
+  return table;
 }
 
 std::string Table::saveTableMetadata() {

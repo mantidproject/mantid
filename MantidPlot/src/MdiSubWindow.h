@@ -277,8 +277,8 @@ public: // non-slot methods
   /// Set the label property on the widget
   void setLabel(const QString &label);
   /// Loads the given lines from the project file and applies them.
-  void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion) override;
+  static IProjectSerialisable* loadFromProject(const std::string &lines, ApplicationWindow *app,
+                       const int fileVersion);
   /// Serialises to a string that can be saved to a project file.
   std::string saveToProject(ApplicationWindow *app) override;
 signals:

@@ -52,8 +52,8 @@ public:
 
   void init(const QString &label, QWidget *parent,
             const QString &name = QString(), Qt::WFlags f = 0);
-  void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion) override;
+  static IProjectSerialisable* loadFromProject(const std::string &lines, ApplicationWindow *app,
+                       const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
 
   void setName(const QString &name);

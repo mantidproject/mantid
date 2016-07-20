@@ -27,6 +27,7 @@
 #include <limits>
 
 #include <boost/math/special_functions/fpclassify.hpp>
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::API;
@@ -1203,12 +1204,13 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
   }
 }
 
-void MantidMatrix::loadFromProject(const std::string &lines,
+IProjectSerialisable* MantidMatrix::loadFromProject(const std::string &lines,
                                    ApplicationWindow *app,
                                    const int fileVersion) {
   Q_UNUSED(fileVersion);
   TSVSerialiser tsv(lines);
 
+  MantidMatrix* matrix = nullptr;
   if (tsv.selectLine("WorkspaceName")) {
     const std::string wsName = tsv.asString(1);
     MatrixWorkspace_sptr ws;
@@ -1217,24 +1219,28 @@ void MantidMatrix::loadFromProject(const std::string &lines,
       ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
     if (!ws)
-      return;
+      return nullptr;
 
-    init(ws, app, "Mantid", QString::fromStdString(wsName), -1, -1);
+    matrix = new MantidMatrix(ws, app, "Mantid", QString::fromStdString(wsName), -1, -1);
   }
 
+  if(!matrix)
+      return nullptr;
+
   // Append to the list of mantid matrix apps
-  app->addMantidMatrixWindow(this);
-  app->addMdiSubWindow(this);
+  app->addMantidMatrixWindow(matrix);
+  app->addMdiSubWindow(matrix);
 
   if (tsv.selectLine("geometry")) {
     const std::string geometry = tsv.lineAsString("geometry");
-    app->restoreWindowGeometry(app, this, QString::fromStdString(geometry));
+    app->restoreWindowGeometry(app, matrix, QString::fromStdString(geometry));
   }
 
   if (tsv.selectLine("tgeometry")) {
     const std::string geometry = tsv.lineAsString("tgeometry");
-    app->restoreWindowGeometry(app, this, QString::fromStdString(geometry));
+    app->restoreWindowGeometry(app, matrix, QString::fromStdString(geometry));
   }
+  return matrix;
 }
 
 std::string MantidMatrix::saveToProject(ApplicationWindow *app) {

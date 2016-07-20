@@ -72,6 +72,8 @@
 // Register the window into the WindowFactory
 DECLARE_WINDOW(Matrix)
 
+using namespace Mantid;
+
 Matrix::Matrix(ScriptingEnv *env, const QString &label, QWidget *parent,
                const QString &name, Qt::WFlags f)
     : MdiSubWindow(parent, label, name, f), Scripted(env), d_matrix_model(NULL),
@@ -1522,7 +1524,7 @@ Matrix::~Matrix() {
   delete d_matrix_model;
 }
 
-void Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
+IProjectSerialisable* Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
                              const int fileVersion) {
   Q_UNUSED(fileVersion);
   std::vector<std::string> lineVec;
@@ -1536,7 +1538,7 @@ void Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
   boost::split(values, firstLine, boost::is_any_of("\t"));
 
   if (values.size() < 4) {
-    return;
+    return nullptr;
   }
 
   const QString caption = QString::fromStdString(values[0]);
@@ -1553,19 +1555,19 @@ void Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
     gStr = tsv.lineAsString("geometry");
   }
 
-  init(app->scriptingEnv(), rows, cols, "", app, "");
-  app->initMatrix(this, caption);
-  if (objectName() != caption) // the matrix was renamed
-    app->renamedTables << caption << objectName();
+  Matrix* matrix = new Matrix(app->scriptingEnv(), rows, cols, "", app, "");
+  app->initMatrix(matrix, caption);
+  if (matrix->objectName() != caption) // the matrix was renamed
+    app->renamedTables << caption << matrix->objectName();
 
   if (tsv.selectLine("ColWidth")) {
-    setColumnsWidth(tsv.asInt(1));
+    matrix->setColumnsWidth(tsv.asInt(1));
   }
 
   if (tsv.selectSection("formula")) {
     QString formula;
     tsv >> formula;
-    setFormula(formula);
+    matrix->setFormula(formula);
   }
 
   if (tsv.selectLine("TextFormat")) {
@@ -1573,40 +1575,40 @@ void Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
     int value;
     tsv >> format >> value;
     if (format == "f")
-      setTextFormat('f', value);
+      matrix->setTextFormat('f', value);
     else
-      setTextFormat('e', value);
+      matrix->setTextFormat('e', value);
   }
 
   if (tsv.selectLine("WindowLabel")) {
     QString label;
     int captionPolicy;
     tsv >> label >> captionPolicy;
-    setWindowLabel(label);
-    setCaptionPolicy((MdiSubWindow::CaptionPolicy)captionPolicy);
+    matrix->setWindowLabel(label);
+    matrix->setCaptionPolicy((MdiSubWindow::CaptionPolicy)captionPolicy);
   }
 
   if (tsv.selectLine("Coordinates")) {
-    setCoordinates(tsv.asDouble(1), tsv.asDouble(2), tsv.asDouble(3),
+    matrix->setCoordinates(tsv.asDouble(1), tsv.asDouble(2), tsv.asDouble(3),
                    tsv.asDouble(4));
   }
 
   if (tsv.selectLine("ViewType")) {
-    setViewType((Matrix::ViewType)tsv.asInt(1));
+    matrix->setViewType((Matrix::ViewType)tsv.asInt(1));
   }
 
   if (tsv.selectLine("HeaderViewType")) {
-    setHeaderViewType((Matrix::HeaderViewType)tsv.asInt(1));
+    matrix->setHeaderViewType((Matrix::HeaderViewType)tsv.asInt(1));
   }
 
   if (tsv.selectLine("ColorPolicy")) {
-    setColorMapType((Matrix::ColorMapType)tsv.asInt(1));
+    matrix->setColorMapType((Matrix::ColorMapType)tsv.asInt(1));
   }
 
   if (tsv.selectSection("ColorMap")) {
     QString colorMap;
     tsv >> colorMap;
-    setColorMap(colorMap.split("\n"));
+    matrix->setColorMap(colorMap.split("\n"));
   }
 
   if (tsv.selectSection("data")) {
@@ -1627,7 +1629,7 @@ void Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
       // Remove the row number, so we're just left with the values
       valVec.erase(valVec.begin());
 
-      for (int col = 0; col < numCols(); ++col) {
+      for (int col = 0; col < matrix->numCols(); ++col) {
         const std::string cellStr = valVec[col];
         if (cellStr.empty())
           continue;
@@ -1636,21 +1638,22 @@ void Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
         double cell;
         cellSS >> cell;
 
-        setCell(row, col, cell);
+        matrix->setCell(row, col, cell);
       }
 
       // Clear out the value vector for the next iteration
       valVec.clear();
     }
-    resetView();
+    matrix->resetView();
   }
 
-  showNormal();
+  matrix->showNormal();
   app->setListViewDate(caption, date);
-  setBirthDate(date);
+  matrix->setBirthDate(date);
   if (!gStr.empty()) {
-    app->restoreWindowGeometry(app, this, QString::fromStdString(gStr));
+    app->restoreWindowGeometry(app, matrix, QString::fromStdString(gStr));
   }
+  return matrix;
 }
 
 std::string Matrix::saveToProject(ApplicationWindow *app) {

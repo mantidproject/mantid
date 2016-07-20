@@ -29,8 +29,8 @@ public:
   InstrumentWindow();
   ~InstrumentWindow() override;
 
-  void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion) override;
+  static IProjectSerialisable* loadFromProject(const std::string &lines, ApplicationWindow *app,
+                       const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
   void selectTab(int tab);
   MantidQt::MantidWidgets::InstrumentWidgetTab *

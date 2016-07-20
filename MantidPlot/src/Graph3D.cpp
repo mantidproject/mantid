@@ -63,6 +63,7 @@ DECLARE_WINDOW(Graph3D)
 DECLARE_WINDOW_WITH_NAME(Graph3D, SurfacePlot)
 
 using namespace Qwt3D;
+using namespace Mantid;
 using namespace MantidQt::API;
 
 UserParametricSurface::UserParametricSurface(const QString &xFormula,
@@ -2505,11 +2506,10 @@ Graph3D::~Graph3D() {
     delete d_surface;
 }
 
-void Graph3D::loadFromProject(const std::string &lines, ApplicationWindow *app,
+IProjectSerialisable* Graph3D::loadFromProject(const std::string &lines, ApplicationWindow *app,
                               const int fileVersion) {
   Q_UNUSED(fileVersion);
-
-  init("", app, "", 0);
+  Graph3D *graph = new Graph3D("", app, "", 0);
 
   std::vector<std::string> lineVec, valVec;
   boost::split(lineVec, lines, boost::is_any_of("\n"));
@@ -2519,7 +2519,7 @@ void Graph3D::loadFromProject(const std::string &lines, ApplicationWindow *app,
   boost::split(valVec, firstLine, boost::is_any_of("\t"));
 
   if (valVec.size() < 2)
-    return;
+    return nullptr;
 
   QString caption = QString::fromStdString(valVec[0]);
   QString dateStr = QString::fromStdString(valVec[1]);
@@ -2530,26 +2530,26 @@ void Graph3D::loadFromProject(const std::string &lines, ApplicationWindow *app,
   TSVSerialiser tsv(tsvLines);
 
   if (tsv.selectLine("SurfaceFunction")) {
-    auto params = readSurfaceFunction(tsv);
+    auto params = graph->readSurfaceFunction(tsv);
 
     switch (params.type) {
     case Plot3D:
-      setupPlot3D(app, caption, params);
+      graph->setupPlot3D(app, caption, params);
       break;
     case XYZ:
-      setupPlotXYZ(app, caption, params);
+      graph->setupPlotXYZ(app, caption, params);
       break;
     case MatrixPlot3D:
-      setupMatrixPlot3D(app, caption, params);
+      graph->setupMatrixPlot3D(app, caption, params);
       break;
     case MantidMatrixPlot3D:
-      setupMantidMatrixPlot3D(app, tsv);
+      graph->setupMantidMatrixPlot3D(app, tsv);
       break;
     case ParametricSurface:
-      setupPlotParametricSurface(app, params);
+      graph->setupPlotParametricSurface(app, params);
       break;
     case Surface:
-      setupPlotSurface(app, params);
+      graph->setupPlotSurface(app, params);
       break;
     default:
       // just break and do nothing if we cannot find it
@@ -2558,119 +2558,121 @@ void Graph3D::loadFromProject(const std::string &lines, ApplicationWindow *app,
   }
 
   if (tsv.selectLine("grids")) {
-    setGrid(tsv.asInt(1));
+    graph->setGrid(tsv.asInt(1));
   }
 
   if (tsv.selectLine("title")) {
     QString qTitle = QString::fromUtf8(tsv.lineAsString("title").c_str());
-    setTitle(qTitle.split("\t"));
+    graph->setTitle(qTitle.split("\t"));
   }
 
   if (tsv.selectLine("colors")) {
     QString qColors = QString::fromUtf8(tsv.lineAsString("colors").c_str());
-    setColors(qColors.split("\t"));
+    graph->setColors(qColors.split("\t"));
   }
 
   if (tsv.selectLine("axesLabels")) {
     QString qLabels = QString::fromUtf8(tsv.lineAsString("axesLabels").c_str());
     QStringList qLabelList = qLabels.split("\t");
     qLabelList.pop_front();
-    setAxesLabels(qLabelList);
+    graph->setAxesLabels(qLabelList);
   }
 
   if (tsv.selectLine("tics")) {
     QString qTicks = QString::fromUtf8(tsv.lineAsString("tics").c_str());
-    setTicks(qTicks.split("\t"));
+    graph->setTicks(qTicks.split("\t"));
   }
 
   if (tsv.selectLine("tickLengths")) {
     QString qTickLen =
         QString::fromUtf8(tsv.lineAsString("tickLengths").c_str());
-    setTickLengths(qTickLen.split("\t"));
+    graph->setTickLengths(qTickLen.split("\t"));
   }
 
   if (tsv.selectLine("options")) {
     QString qOpts = QString::fromUtf8(tsv.lineAsString("options").c_str());
-    setOptions(qOpts.split("\t"));
+    graph->setOptions(qOpts.split("\t"));
   }
 
   if (tsv.selectLine("numbersFont")) {
     QString qFont = QString::fromUtf8(tsv.lineAsString("numbersFont").c_str());
-    setNumbersFont(qFont.split("\t"));
+    graph->setNumbersFont(qFont.split("\t"));
   }
 
   if (tsv.selectLine("xAxisLabelFont")) {
     QString qAxisFont =
         QString::fromUtf8(tsv.lineAsString("xAxisLabelFont").c_str());
-    setXAxisLabelFont(qAxisFont.split("\t"));
+    graph->setXAxisLabelFont(qAxisFont.split("\t"));
   }
 
   if (tsv.selectLine("yAxisLabelFont")) {
     QString qAxisFont =
         QString::fromUtf8(tsv.lineAsString("yAxisLabelFont").c_str());
-    setYAxisLabelFont(qAxisFont.split("\t"));
+    graph->setYAxisLabelFont(qAxisFont.split("\t"));
   }
 
   if (tsv.selectLine("zAxisLabelFont")) {
     QString qAxisFont =
         QString::fromUtf8(tsv.lineAsString("zAxisLabelFont").c_str());
-    setZAxisLabelFont(qAxisFont.split("\t"));
+    graph->setZAxisLabelFont(qAxisFont.split("\t"));
   }
 
   if (tsv.selectLine("rotation")) {
     double x, y, z;
     tsv >> x >> y >> z;
-    setRotation(x, y, z);
+    graph->setRotation(x, y, z);
   }
 
   if (tsv.selectLine("zoom")) {
-    setZoom(tsv.asDouble(1));
+    graph->setZoom(tsv.asDouble(1));
   }
 
   if (tsv.selectLine("scaling")) {
     double x, y, z;
     tsv >> x >> y >> z;
-    setScale(x, y, z);
+    graph->setScale(x, y, z);
   }
 
   if (tsv.selectLine("shift")) {
     double x, y, z;
     tsv >> x >> y >> z;
-    setShift(x, y, z);
+    graph->setShift(x, y, z);
   }
 
   if (tsv.selectLine("LineWidth")) {
-    setMeshLineWidth(tsv.asDouble(1));
+    graph->setMeshLineWidth(tsv.asDouble(1));
   }
 
   if (tsv.selectLine("WindowLabel")) {
     QString label;
     int policy;
     tsv >> label >> policy;
-    setWindowLabel(label);
-    setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
+    graph->setWindowLabel(label);
+    graph->setCaptionPolicy((MdiSubWindow::CaptionPolicy)policy);
   }
 
   if (tsv.selectLine("Orthogonal")) {
-    setOrthogonal(tsv.asInt(1));
+    graph->setOrthogonal(tsv.asInt(1));
   }
 
   if (tsv.selectLine("Style")) {
     QString qStyle = QString::fromUtf8(tsv.lineAsString("Style").c_str());
     QStringList sl = qStyle.split("\t");
     sl.pop_front();
-    setStyle(sl);
+    graph->setStyle(sl);
   }
 
-  setIgnoreFonts(true);
-  update();
+  graph->setIgnoreFonts(true);
+  graph->update();
 
-  app->setWindowName(this, caption);
-  setBirthDate(dateStr);
+  app->setWindowName(graph, caption);
+  graph->setBirthDate(dateStr);
   app->setListViewDate(caption, dateStr);
-  setIgnoreFonts(true);
+  graph->setIgnoreFonts(true);
   app->restoreWindowGeometry(
-      app, this, QString::fromStdString(tsv.lineAsString("geometry")));
+      app, graph, QString::fromStdString(tsv.lineAsString("geometry")));
+
+  return graph;
 }
 
 void Graph3D::setupPlot3D(ApplicationWindow *app, const QString &caption,

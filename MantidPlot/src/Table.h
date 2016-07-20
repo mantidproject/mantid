@@ -394,8 +394,8 @@ public slots:
   void showComments(bool on = true);
   bool commentsEnabled() { return d_show_comments; }
 
-  void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion) override;
+  static IProjectSerialisable* loadFromProject(const std::string &lines, ApplicationWindow *app,
+                       const int fileVersion);
   void restore(const QStringList &lst) override;
 
   //! This slot notifies the main application that the table has been modified.

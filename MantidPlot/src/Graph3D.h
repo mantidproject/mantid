@@ -300,8 +300,8 @@ public slots:
   void exportVector(const QString &fileName);
   void exportToFile(const QString &fileName);
 
-  void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion) override;
+  static IProjectSerialisable* loadFromProject(const std::string &lines, ApplicationWindow *app,
+                       const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
 
   void zoomChanged(double);
