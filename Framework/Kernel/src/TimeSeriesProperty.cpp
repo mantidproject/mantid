@@ -2143,8 +2143,7 @@ void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
 /// @cond
 // -------------------------- Macro to instantiation concrete types
 // --------------------------------
-#define INSTANTIATE(TYPE)                                                      \
-  template MANTID_KERNEL_DLL class TimeSeriesProperty<TYPE>;
+#define INSTANTIATE(TYPE) template class TimeSeriesProperty<TYPE>;
 
 // -------------------------- Concrete instantiation
 // -----------------------------------------------

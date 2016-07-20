@@ -8,13 +8,13 @@ namespace Kernel {
 
 /// @cond
 
-template DLLExport class ArrayProperty<int32_t>;
-template DLLExport class ArrayProperty<int64_t>;
-template DLLExport class ArrayProperty<size_t>;
-template DLLExport class ArrayProperty<double>;
-template DLLExport class ArrayProperty<std::string>;
+template class DLLExport ArrayProperty<int32_t>;
+template class DLLExport ArrayProperty<int64_t>;
+template class DLLExport ArrayProperty<size_t>;
+template class DLLExport ArrayProperty<double>;
+template class DLLExport ArrayProperty<std::string>;
 
-template DLLExport class ArrayProperty<std::vector<std::string>>;
+template class DLLExport ArrayProperty<std::vector<std::string>>;
 
 /// @endcond
 
