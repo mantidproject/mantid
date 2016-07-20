@@ -1399,7 +1399,7 @@ QTreeWidgetItem *ConfigDialog::walkBackwardsThroughCategories(
 
 void ConfigDialog::tickBoxClickedSlot(QTreeWidgetItem *widgetPtr, int column) {
   int numberOfChildren = widgetPtr->childCount();
-  Qt::CheckState newState = widgetPtr->checkState(0);
+  Qt::CheckState newState = widgetPtr->checkState(column);
 
   // Now we have new state lets update children to reflect this
   for (int i = 0; i < numberOfChildren; i++) {
