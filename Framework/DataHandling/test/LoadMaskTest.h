@@ -246,6 +246,7 @@ public:
     loadMask.initialize();
     loadMask.setChild(true);
 
+    loadMask.setProperty("Instrument", "MARI");
     loadMask.setProperty("RefWorkspace", source);
     loadMask.setProperty("InputFile", testFile.getFileName());
     loadMask.setProperty("OutputWorkspace", "MaskedWithSample");
