@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import AlgorithmFactory, FileFinder, PythonAlgorithm
 from mantid.kernel import ConfigService, Direction, IntBoundedValidator, \
     StringListValidator
@@ -28,7 +29,7 @@ class GetIPTS(PythonAlgorithm):
 
     def findFile(self, instrument, runnumber):
         # start with run and check the five before it
-        runIds = range(runnumber, runnumber-6, -1)
+        runIds = list(range(runnumber, runnumber-6, -1))
         # check for one after as well
         runIds.append(runnumber + 1)
 
