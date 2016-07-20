@@ -49,8 +49,9 @@ public:
        Qt::WFlags f = 0);
   ~Note() override{};
 
-  static IProjectSerialisable* loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion);
+  static IProjectSerialisable *loadFromProject(const std::string &lines,
+                                               ApplicationWindow *app,
+                                               const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
 
   void setName(const QString &name);

@@ -37,9 +37,8 @@ InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
 
 InstrumentWindow::~InstrumentWindow() {}
 
-IProjectSerialisable* InstrumentWindow::loadFromProject(const std::string &lines,
-                                       ApplicationWindow *app,
-                                       const int fileVersion) {
+IProjectSerialisable *InstrumentWindow::loadFromProject(
+    const std::string &lines, ApplicationWindow *app, const int fileVersion) {
   Q_UNUSED(fileVersion);
 
   TSVSerialiser tsv(lines);
@@ -67,7 +66,8 @@ IProjectSerialisable* InstrumentWindow::loadFromProject(const std::string &lines
     // Need a new window
     const QString windowName(QString("InstrumentWindow:") +
                              QString::fromStdString(wsName));
-    InstrumentWindow* iw = new InstrumentWindow(name, QString("Instrument"), app, windowName);
+    InstrumentWindow *iw =
+        new InstrumentWindow(name, QString("Instrument"), app, windowName);
 
     try {
       iw->selectTab(-1);

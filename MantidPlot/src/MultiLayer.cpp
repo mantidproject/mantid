@@ -104,13 +104,13 @@ void LayerButton::mouseDoubleClickEvent(QMouseEvent *) {
 
 MultiLayer::MultiLayer(QWidget *parent, int layers, int rows, int cols,
                        const QString &label, const char *name, Qt::WFlags f)
-    : MdiSubWindow(parent, label, name, f), active_graph(NULL), d_cols(cols), d_rows(rows),
-      graph_width(500), graph_height(400), colsSpace(5), rowsSpace(5),
-      left_margin(5), right_margin(5), top_margin(5), bottom_margin(5),
-      l_canvas_width(400), l_canvas_height(300), hor_align(HCenter),
-      vert_align(VCenter), d_scale_on_print(true), d_print_cropmarks(false),
-      d_close_on_empty(false), d_is_waterfall_plot(false),
-      d_waterfall_fill_color(/*Invalid color*/) {
+    : MdiSubWindow(parent, label, name, f), active_graph(NULL), d_cols(cols),
+      d_rows(rows), graph_width(500), graph_height(400), colsSpace(5),
+      rowsSpace(5), left_margin(5), right_margin(5), top_margin(5),
+      bottom_margin(5), l_canvas_width(400), l_canvas_height(300),
+      hor_align(HCenter), vert_align(VCenter), d_scale_on_print(true),
+      d_print_cropmarks(false), d_close_on_empty(false),
+      d_is_waterfall_plot(false), d_waterfall_fill_color(/*Invalid color*/) {
   d_cols = cols;
   d_rows = rows;
 
@@ -1725,9 +1725,9 @@ void WaterfallFillDialog::setFillMode() {
   }
 }
 
-IProjectSerialisable* MultiLayer::loadFromProject(const std::string &lines,
-                                 ApplicationWindow *app,
-                                 const int fileVersion) {
+IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
+                                                  ApplicationWindow *app,
+                                                  const int fileVersion) {
   std::string multiLayerLines = lines;
 
   // The very first line of a multilayer section has some important settings,

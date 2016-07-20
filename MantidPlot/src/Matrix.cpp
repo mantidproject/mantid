@@ -1508,8 +1508,9 @@ Matrix::~Matrix() {
   delete d_matrix_model;
 }
 
-IProjectSerialisable* Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
-                             const int fileVersion) {
+IProjectSerialisable *Matrix::loadFromProject(const std::string &lines,
+                                              ApplicationWindow *app,
+                                              const int fileVersion) {
   Q_UNUSED(fileVersion);
   std::vector<std::string> lineVec;
   boost::split(lineVec, lines, boost::is_any_of("\n"));
@@ -1539,7 +1540,7 @@ IProjectSerialisable* Matrix::loadFromProject(const std::string &lines, Applicat
     gStr = tsv.lineAsString("geometry");
   }
 
-  Matrix* matrix = new Matrix(app->scriptingEnv(), rows, cols, "", app, "");
+  Matrix *matrix = new Matrix(app->scriptingEnv(), rows, cols, "", app, "");
   app->initMatrix(matrix, caption);
   if (matrix->objectName() != caption) // the matrix was renamed
     app->renamedTables << caption << matrix->objectName();
@@ -1574,7 +1575,7 @@ IProjectSerialisable* Matrix::loadFromProject(const std::string &lines, Applicat
 
   if (tsv.selectLine("Coordinates")) {
     matrix->setCoordinates(tsv.asDouble(1), tsv.asDouble(2), tsv.asDouble(3),
-                   tsv.asDouble(4));
+                           tsv.asDouble(4));
   }
 
   if (tsv.selectLine("ViewType")) {

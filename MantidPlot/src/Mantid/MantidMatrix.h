@@ -153,8 +153,9 @@ public:
   int precision();
 
   // Loading and saving projects
-  static IProjectSerialisable* loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion);
+  static IProjectSerialisable *loadFromProject(const std::string &lines,
+                                               ApplicationWindow *app,
+                                               const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
 
   /// returns the workspace name

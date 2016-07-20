@@ -1186,13 +1186,13 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
   }
 }
 
-IProjectSerialisable* MantidMatrix::loadFromProject(const std::string &lines,
-                                   ApplicationWindow *app,
-                                   const int fileVersion) {
+IProjectSerialisable *MantidMatrix::loadFromProject(const std::string &lines,
+                                                    ApplicationWindow *app,
+                                                    const int fileVersion) {
   Q_UNUSED(fileVersion);
   TSVSerialiser tsv(lines);
 
-  MantidMatrix* matrix = nullptr;
+  MantidMatrix *matrix = nullptr;
   if (tsv.selectLine("WorkspaceName")) {
     const std::string wsName = tsv.asString(1);
     MatrixWorkspace_sptr ws;
@@ -1203,11 +1203,12 @@ IProjectSerialisable* MantidMatrix::loadFromProject(const std::string &lines,
     if (!ws)
       return nullptr;
 
-    matrix = new MantidMatrix(ws, app, "Mantid", QString::fromStdString(wsName), -1, -1);
+    matrix = new MantidMatrix(ws, app, "Mantid", QString::fromStdString(wsName),
+                              -1, -1);
   }
 
-  if(!matrix)
-      return nullptr;
+  if (!matrix)
+    return nullptr;
 
   // Append to the list of mantid matrix apps
   app->addMantidMatrixWindow(matrix);

@@ -132,8 +132,9 @@ QString Note::exportASCII(const QString &filename) {
   return fn;
 }
 
-IProjectSerialisable* Note::loadFromProject(const std::string &lines, ApplicationWindow *app,
-                           const int fileVersion) {
+IProjectSerialisable *Note::loadFromProject(const std::string &lines,
+                                            ApplicationWindow *app,
+                                            const int fileVersion) {
   Q_UNUSED(fileVersion);
 
   std::vector<std::string> lineVec;
@@ -149,7 +150,7 @@ IProjectSerialisable* Note::loadFromProject(const std::string &lines, Applicatio
 
   const QString name = QString::fromUtf8(firstLineVec[0].c_str());
   const QString date = QString::fromUtf8(firstLineVec[1].c_str());
-  Note* note = new Note("", app, name);
+  Note *note = new Note("", app, name);
 
   app->setListViewDate(name, date);
   note->setBirthDate(date);

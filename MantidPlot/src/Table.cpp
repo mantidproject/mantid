@@ -3001,8 +3001,9 @@ void Table::showAllColumns() {
   }
 }
 
-IProjectSerialisable* Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
-                            const int fileVersion) {
+IProjectSerialisable *Table::loadFromProject(const std::string &lines,
+                                             ApplicationWindow *app,
+                                             const int fileVersion) {
   Q_UNUSED(fileVersion);
 
   std::vector<std::string> lineVec, valVec;
@@ -3022,7 +3023,7 @@ IProjectSerialisable* Table::loadFromProject(const std::string &lines, Applicati
   Mantid::Kernel::Strings::convert<int>(valVec[2], cols);
 
   // create instance
-  Table* table = new Table(app->scriptingEnv(), rows, cols, "", app);
+  Table *table = new Table(app->scriptingEnv(), rows, cols, "", app);
   app->initTable(table, caption);
   if (table->objectName() != caption) { // the table was renamed
     app->renamedTables << caption << table->objectName();

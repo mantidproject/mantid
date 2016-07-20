@@ -43,15 +43,16 @@ struct CaseInsensitiveStringComparator {
  * This is required to hold the templated base type for dynamic instantiation
  * after subscription.
  */
-template<class Base>
-class AbstractProjectInstantiator {
+template <class Base> class AbstractProjectInstantiator {
 public:
   /// Creates the AbstractInstantiator.
   AbstractProjectInstantiator() = default;
   /// Destroys the AbstractProjectInstantiator.
   virtual ~AbstractProjectInstantiator() = default;
   /// Load a class of type Base from a serialised form
-  virtual Base* loadFromProject(const std::string &lines, ApplicationWindow *app, const int fileVersion = -1) const = 0;
+  virtual Base *loadFromProject(const std::string &lines,
+                                ApplicationWindow *app,
+                                const int fileVersion = -1) const = 0;
 
 private:
   /// Private copy constructor
@@ -73,11 +74,11 @@ public:
   /** Creates an instance of a concrete subclass of Base from its serialised
    * form.
    */
-  Base *loadFromProject(const std::string &lines, ApplicationWindow *app, const int fileVersion = -1) const {
+  Base *loadFromProject(const std::string &lines, ApplicationWindow *app,
+                        const int fileVersion = -1) const {
     return C::loadFromProject(lines, app, fileVersion);
   }
 };
-
 
 /** The WindowFactory class is in charge of the creation of concrete
     instances of IProjectSerialisable.
@@ -123,7 +124,10 @@ public:
    * @param fileVersion :: the file version number
    * @return an instance of IProjectSerialisable
    */
-  IProjectSerialisable* loadFromProject(const std::string &className, const std::string &lines, ApplicationWindow *app, const int fileVersion = -1) {
+  IProjectSerialisable *loadFromProject(const std::string &className,
+                                        const std::string &lines,
+                                        ApplicationWindow *app,
+                                        const int fileVersion = -1) {
     auto it = _map.find(className);
     if (it != _map.end())
       return it->second->loadFromProject(lines, app, fileVersion);
@@ -137,7 +141,8 @@ public:
    * @param className :: the name of the class to subscribe
    */
   template <class C> void subscribe(const std::string &className) {
-    auto instantiator = std::make_unique<ProjectWindowInstantiator<C, IProjectSerialisable> >();
+    auto instantiator =
+        std::make_unique<ProjectWindowInstantiator<C, IProjectSerialisable>>();
     subscribe(className, std::move(instantiator));
   }
 
@@ -149,21 +154,18 @@ public:
     std::vector<std::string> names;
     names.reserve(_map.size());
     std::transform(_map.cbegin(), _map.cend(), std::back_inserter(names),
-                   [](auto &mapPair) {
-          return mapPair.first;
-    });
+                   [](auto &mapPair) { return mapPair.first; });
     return names;
   }
 
-
 private:
-
   /** Subscribe a class to the factory.
    *
    * @param className :: the name of the class to subscribe
    * @param instantiator :: the instantiator object to used to create the object
    */
-  void subscribe(const std::string &className, std::unique_ptr<AbstractFactory> instantiator) {
+  void subscribe(const std::string &className,
+                 std::unique_ptr<AbstractFactory> instantiator) {
     if (className.empty()) {
       throw std::invalid_argument("Cannot register empty class name");
     }
@@ -177,10 +179,10 @@ private:
   }
 
   /// A typedef for the map of registered classes
-  typedef std::map<std::string, std::unique_ptr<AbstractFactory>, CaseInsensitiveStringComparator> FactoryMap;
+  typedef std::map<std::string, std::unique_ptr<AbstractFactory>,
+                   CaseInsensitiveStringComparator> FactoryMap;
   /// The map holding the registered class names and their instantiators
   FactoryMap _map;
-
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for

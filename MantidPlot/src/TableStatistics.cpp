@@ -48,7 +48,8 @@ using namespace Mantid;
 
 TableStatistics::TableStatistics(ScriptingEnv *env, QWidget *parent,
                                  Table *base, Type t, QList<int> targets)
-    : Table(env, 1, 1, "", parent, ""), d_base(base), d_type(t), d_targets(targets) {
+    : Table(env, 1, 1, "", parent, ""), d_base(base), d_type(t),
+      d_targets(targets) {
 
   setCaptionPolicy(MdiSubWindow::Both);
   if (d_type == row) {
@@ -272,9 +273,9 @@ void TableStatistics::removeCol(const QString &col) {
     }
 }
 
-IProjectSerialisable* TableStatistics::loadFromProject(const std::string &lines,
-                                      ApplicationWindow *app,
-                                      const int fileVersion) {
+IProjectSerialisable *TableStatistics::loadFromProject(const std::string &lines,
+                                                       ApplicationWindow *app,
+                                                       const int fileVersion) {
   Q_UNUSED(fileVersion);
   std::vector<std::string> lineVec;
   boost::split(lineVec, lines, boost::is_any_of("\n"));
@@ -315,9 +316,9 @@ IProjectSerialisable* TableStatistics::loadFromProject(const std::string &lines,
   // create instance
   int typeCode = type == "row" ? TableStatistics::row : TableStatistics::column;
 
-
-  TableStatistics* table = new TableStatistics(app->scriptingEnv(), app, app->table(QString::fromStdString(tableName)),
-       (TableStatistics::Type)typeCode, targets);
+  TableStatistics *table = new TableStatistics(
+      app->scriptingEnv(), app, app->table(QString::fromStdString(tableName)),
+      (TableStatistics::Type)typeCode, targets);
 
   if (tsv.selectLine("geometry"))
     app->restoreWindowGeometry(

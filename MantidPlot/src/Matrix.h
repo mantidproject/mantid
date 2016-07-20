@@ -258,8 +258,9 @@ public slots:
   void restore(const QStringList &l) override;
 
   // loading and saving project files
-  static IProjectSerialisable* loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion);
+  static IProjectSerialisable *loadFromProject(const std::string &lines,
+                                               ApplicationWindow *app,
+                                               const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
 
   // selection operations

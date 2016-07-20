@@ -121,9 +121,9 @@ void MdiSubWindow::updateCaption() {
 
 void MdiSubWindow::setLabel(const QString &label) { d_label = label; }
 
- IProjectSerialisable* MdiSubWindow::loadFromProject(const std::string &lines,
-                                   ApplicationWindow *app,
-                                   const int fileVersion) {
+IProjectSerialisable *MdiSubWindow::loadFromProject(const std::string &lines,
+                                                    ApplicationWindow *app,
+                                                    const int fileVersion) {
   Q_UNUSED(lines);
   Q_UNUSED(app);
   Q_UNUSED(fileVersion);
