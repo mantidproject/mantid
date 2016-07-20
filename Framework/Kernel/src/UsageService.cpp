@@ -301,5 +301,5 @@ int UsageServiceImpl::sendReport(const std::string &message,
   return status;
 }
 
-} // namespace API
+} // namespace Kernel
 } // namespace Mantid
