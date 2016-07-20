@@ -48,8 +48,7 @@ DECLARE_ALGORITHM(LoadMask)
 /** Constructor
  */
 LoadMask::LoadMask()
-    : m_maskWS(), m_instrumentPropValue(""),
-      m_sourceMapWS(),m_pDoc(nullptr),
+    : m_maskWS(), m_instrumentPropValue(""), m_sourceMapWS(), m_pDoc(nullptr),
       m_pRootElem(nullptr), m_defaultToUse(true) {}
 
 //----------------------------------------------------------------------------------------------
@@ -86,7 +85,8 @@ void LoadMask::init() {
       "used as the source of the spectra-detector map for the mask to load.");
 
   setPropertySettings(
-      "RefWorkspace", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+      "RefWorkspace",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
           "Instrument", Kernel::ePropertyCriterion::IS_DEFAULT));
 
   declareProperty(
