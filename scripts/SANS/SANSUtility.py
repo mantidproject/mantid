@@ -1732,6 +1732,7 @@ def extract_fit_parameters(rAnds):
         fit_mode = "None"
     return scale_factor, shift_factor, fit_mode
 
+
 def check_has_bench_rot(workspace, log_dict=None):
     if log_dict:
         run = workspace.run()
