@@ -56,8 +56,7 @@ void export_MaterialBuilder() {
            "Set the atomic number of the material")
 
       .def("build", &MaterialBuilder::build,
-           return_value_policy<return_by_value>(),
-           (arg("self")),
+           return_value_policy<return_by_value>(), (arg("self")),
            "Build the new mantid.kernel.Material object from the current set "
            "of options");
 }

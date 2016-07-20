@@ -56,7 +56,7 @@ struct MANTID_KERNEL_DLL NeutronAtom {
 
   NeutronAtom(const NeutronAtom &other);
 
-  NeutronAtom & operator=(const NeutronAtom &other);
+  NeutronAtom &operator=(const NeutronAtom &other);
 
   NeutronAtom();
 
@@ -122,8 +122,7 @@ MANTID_KERNEL_DLL NeutronAtom
 getNeutronAtom(const uint16_t z_number, const uint16_t a_number = 0);
 MANTID_KERNEL_DLL NeutronAtom
 getNeutronNoExceptions(const uint16_t z_number, const uint16_t a_number);
-MANTID_KERNEL_DLL NeutronAtom
-getNeutronNoExceptions(const NeutronAtom &other);
+MANTID_KERNEL_DLL NeutronAtom getNeutronNoExceptions(const NeutronAtom &other);
 
 /// Utility function to calculate scattering lengths from cross-sections.
 MANTID_KERNEL_DLL void calculateScatteringLengths(NeutronAtom *atom);

@@ -23,12 +23,13 @@ namespace {
 const double INV_FOUR_PI = 1. / (4. * M_PI);
 }
 
- Mantid::Kernel::Material::FormulaUnit::FormulaUnit(const boost::shared_ptr<Atom> & atom, const double multiplicity) :
-      atom(atom), multiplicity(multiplicity) {}
+Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
+    const boost::shared_ptr<Atom> &atom, const double multiplicity)
+    : atom(atom), multiplicity(multiplicity) {}
 
-  Mantid::Kernel::Material::FormulaUnit::FormulaUnit(const Atom &atom, const double multiplicity) :
-    atom(boost::make_shared<Atom>(atom)), multiplicity(multiplicity) {
-    }
+Mantid::Kernel::Material::FormulaUnit::FormulaUnit(const Atom &atom,
+                                                   const double multiplicity)
+    : atom(boost::make_shared<Atom>(atom)), multiplicity(multiplicity) {}
 
 /**
  * Construct an "empty" material. Everything returns zero
@@ -463,8 +464,8 @@ void Material::loadNexus(::NeXus::File *file, const std::string &group) {
       if (element_Z > 0) {
         m_chemicalFormula.emplace_back(getAtom(element_Z, element_A), 1);
       } else {
-        m_chemicalFormula.emplace_back(Mantid::PhysicalConstants::getNeutronAtom(
-                element_Z, element_A), 1);
+        m_chemicalFormula.emplace_back(
+            Mantid::PhysicalConstants::getNeutronAtom(element_Z, element_A), 1);
       }
     } catch (std::runtime_error &) { /* ignore and use the default */
     }
