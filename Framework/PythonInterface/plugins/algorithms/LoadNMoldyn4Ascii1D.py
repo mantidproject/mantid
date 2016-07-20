@@ -23,7 +23,8 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
         return 'Simulation; Inelastic\\DataHandling'
 
     def summary(self):
-        return (r'Imports 1D dos and vac functions from an nMolDyn 4 output file, convoluting it with a resolution function if required.')
+        return 'Imports 1D dos and vac functions from an nMolDyn 4 output file,' \
+               'convoluting it with a resolution function if required.'
 
     def PyInit(self):
         self.declareProperty(FileProperty('Directory', '',
@@ -45,7 +46,7 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
         issues = dict()
 
         if len(self.getProperty('Functions').value) == 0:
-                issues['Functions'] = 'Must specify at least one function to load'
+            issues['Functions'] = 'Must specify at least one function to load'
 
         return issues
 
@@ -62,32 +63,32 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
         out_ws_name = self.getPropertyValue('OutputWorkspace')
 
         for function in func_names:
-                prog_reporter.report('Loading {0} function'.format(function))
-                # Loads the two axes
-                y_axis = self.read_axis(function)
-                x_axis = self.read_axis(y_axis[3])
+            prog_reporter.report('Loading {0} function'.format(function))
+            # Loads the two axes
+            y_axis = self.read_axis(function)
+            x_axis = self.read_axis(y_axis[3])
 
-                # Converts the x-axis units and sets all axis properties
-                x_axis = self.axis_conversion(x_axis[0], x_axis[1], y_axis[3])
-                y_data = y_axis[0]
-                y_unit = y_axis[1]
-                y_name = y_axis[2]
-                x_data = x_axis[0]
-                x_unit = x_axis[1]
-                x_name = x_axis[2]
+            # Converts the x-axis units and sets all axis properties
+            x_axis = self.axis_conversion(x_axis[0], x_axis[1], y_axis[3])
+            y_data = y_axis[0]
+            y_unit = y_axis[1]
+            y_name = y_axis[2]
+            x_data = x_axis[0]
+            x_unit = x_axis[1]
+            x_name = x_axis[2]
 
-                # Convolutes the data if required
-                if (self.getPropertyValue('ResolutionConvolution') == 'TOSCA' and x_name == 'frequency'):
-                        resolutions = self.gaussians(x_data, self.TOSCA_resfunction)
-                        y_data = self.convolutor(y_data, resolutions, x_data)
-                        logger.information('Function \'{}\' will be convoluted'.format(y_name))
+            # Convolutes the data if required
+            if (self.getPropertyValue('ResolutionConvolution') == 'TOSCA' and x_name == 'frequency'):
+                    resolutions = self.gaussians(x_data, self.TOSCA_resfunction)
+                    y_data = self.convolutor(y_data, resolutions, x_data)
+                    logger.information('Function \'{}\' will be convoluted'.format(y_name))
 
-                # Create the workspace for function
-                ws_title = out_ws_name+'('+function+')'
-                CreateWorkspace(OutputWorkspace=ws_title, DataX=x_data, DataY=y_data,
-                                UnitX=x_unit, WorkspaceTitle=ws_title)
+            # Create the workspace for function
+            ws_title = out_ws_name+'('+function+')'
+            CreateWorkspace(OutputWorkspace=ws_title, DataX=x_data, DataY=y_data,
+                            UnitX=x_unit, WorkspaceTitle=ws_title)
 
-                loaded_function_workspaces.append(ws_title)
+            loaded_function_workspaces.append(ws_title)
 
         if len(loaded_function_workspaces) == 0:
             raise RuntimeError('Failed to load any functions for data')
@@ -126,7 +127,7 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
                     if slice_match:
                         length = int(slice_match.group(1))
                         data = self.slice_read(f_handle, length)
-            f_handle.close
+            f_handle.close()
             data = self.del_symmetry(data)
         return (data, unit, func_name, x_axis)
 
@@ -137,11 +138,13 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
         # Returns numpy array of data
 
         data = []
-        for idx in range(length):
+        i = 0
+        while i < length:
             line = file_handle.readline()
             if not line:
                 break
             data.append(ast.literal_eval(line))
+            i += 1
         data = np.asarray(data)
         return data
 
@@ -186,38 +189,37 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
         # the width of the Gaussian a function of wavenumber(x)
         # Used in convolution
 
-        gx = []
+        g_of_x = []
         for i in range(len(x_data)):
             fwhm = resfunction(point_x)/2.35482
             coeff = -((x_data[i]-point_x)**2)/(2*fwhm**2)
-            g = (np.exp(coeff))
-            gx.append(g)
-        return gx
+            g_of_x.append(np.exp(coeff))
+        return g_of_x
 
-    def integrator(self, y_data, gx, x_data):
+    def integrator(self, y_data, g_of_x, x_data):
         # Numerically integrates two functions
         # Used in convolution
 
-        hx = 0
+        h_of_x = 0
         for i in range(len(x_data)):
-            hx += (y_data[i]*gx[i])
-        return hx
+            h_of_x += (y_data[i]*g_of_x[i])
+        return h_of_x
 
     def gaussians(self, x_data, resfunction):
         # Outputs a list of gaussian functions, one for each value of x
         # Used in convolution
 
-        gx = []
+        all_gx = []
         for i in range(len(x_data)):
-            gx.append(self.gaussianfunc(x_data, x_data[i], resfunction))
-        return gx
+            all_gx.append(self.gaussianfunc(x_data, x_data[i], resfunction))
+        return all_gx
 
-    def convolutor(self, y_data, gxs, x_data):
+    def convolutor(self, y_data, all_gx, x_data):
         # Convolutes two functions, ouputting a numpy array of the convolution
 
-        gx = []
+        g_of_x = []
         for i in range(len(x_data)):
-            gx.append(self.integrator(y_data, gxs[i], x_data))
-        return np.asarray(gx)
+            g_of_x.append(self.integrator(y_data, all_gx[i], x_data))
+        return np.asarray(g_of_x)
 
 AlgorithmFactory.subscribe(LoadNMoldyn4Ascii1D)
