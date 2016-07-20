@@ -74,7 +74,7 @@ DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
 
 /**
   Generate an ipython notebook
-	@param rows : groups that were post-processed
+        @param rows : groups that were post-processed
   @param rows : rows that were reduced
   @returns ipython notebook string
   */
@@ -336,8 +336,7 @@ boost::tuple<std::string, std::string> postprocessGroupString(
   stitch_string << outputWSName;
   stitch_string << completeOutputProperties(
                        postprocessor.name(),
-                       postprocessor.numberOfOutputProperties())
-                << " = ";
+                       postprocessor.numberOfOutputProperties()) << " = ";
   stitch_string << postprocessor.name() << "(";
   stitch_string << postprocessor.inputProperty() << " = '";
   stitch_string << boost::algorithm::join(inputNames, ", ") << "'";
