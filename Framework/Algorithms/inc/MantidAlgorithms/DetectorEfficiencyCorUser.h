@@ -61,11 +61,11 @@ private:
   void init() override;
   void exec() override;
   void retrieveProperties();
-  double calculateFormulaValue(const std::string &, double);
-  MantidVec calculateEfficiency(double, const std::string &,
-                                const HistogramData::HistogramX &);
+  double calculateFormulaValue(const std::string &formula, double energy);
+  MantidVec calculateEfficiency(double eff0, const std::string &formula,
+                                const HistogramData::HistogramX &xIn);
 
-  std::string getValFromInstrumentDef(const std::string &);
+  std::string getValFromInstrumentDef(const std::string &parameterName);
 
   HistogramData::Histogram
   applyDetEfficiency(const size_t nChans, const Mantid::MantidVec &effVec,
