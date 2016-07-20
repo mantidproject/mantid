@@ -176,7 +176,6 @@ void Torus::rotate(const Kernel::Matrix<double> &R)
 {
   Centre.rotate(R);
   Normal.rotate(R);
-  return;
 }
 
 void Torus::displace(const Kernel::V3D &A)
@@ -187,7 +186,6 @@ void Torus::displace(const Kernel::V3D &A)
 */
 {
   Centre += A;
-  return;
 }
 
 void Torus::setCentre(const Kernel::V3D &A)
@@ -197,7 +195,6 @@ void Torus::setCentre(const Kernel::V3D &A)
 */
 {
   Centre = A;
-  return;
 }
 
 void Torus::setNorm(const Kernel::V3D &A)
@@ -210,7 +207,6 @@ void Torus::setNorm(const Kernel::V3D &A)
     Normal = A;
     Normal.normalize();
   }
-  return;
 }
 
 Kernel::V3D Torus::surfaceNormal(const Kernel::V3D &Pt) const
@@ -296,7 +292,6 @@ void Torus::write(std::ostream &OX) const
 
   cx << Centre << " " << Displacement << " " << Iradius << " " << Dradius;
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
-  return;
 }
 
 /** SGenerates a bounding box for the Torus

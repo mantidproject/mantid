@@ -43,8 +43,6 @@ void BinaryOperateMasks::init() {
   declareProperty(make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Output MaskWorkspace as result of binary operation");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -97,8 +95,6 @@ void BinaryOperateMasks::exec() {
 
   // 4. Output
   this->setProperty("OutputWorkspace", outputws);
-
-  return;
 }
 
 } // namespace Mantid

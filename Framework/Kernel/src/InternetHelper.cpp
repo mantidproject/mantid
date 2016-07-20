@@ -134,6 +134,7 @@ int InternetHelper::sendRequestAndProcess(HTTPClientSession &session,
   if (retStatus == HTTP_OK ||
       (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
     Poco::StreamCopier::copyStream(rs, responseStream);
+    processResponseHeaders(*m_response);
     return retStatus;
   } else if (isRelocated(retStatus)) {
     return this->processRelocation(*m_response, responseStream);
@@ -301,6 +302,11 @@ void InternetHelper::setProxy(const Kernel::ProxyInfo &proxy) {
   m_isProxySet = true;
 }
 
+/** Process any headers from the response stream
+Basic implementation does nothing.
+*/
+void InternetHelper::processResponseHeaders(const Poco::Net::HTTPResponse &) {}
+
 /** Process any HTTP errors states.
 
 @param res : The http response
@@ -349,7 +355,7 @@ int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res,
   } else if ((retStatus == HTTP_FORBIDDEN) && (rateLimitRemaining == 0)) {
     throw Exception::InternetError(
         "The Github API rate limit has been reached, try again after " +
-            rateLimitReset.toSimpleString(),
+            rateLimitReset.toSimpleString() + " GMT",
         retStatus);
   } else {
     std::stringstream info;

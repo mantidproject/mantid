@@ -1,10 +1,10 @@
-#ifndef MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTABLEMODEL_H_
-#define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTABLEMODEL_H_
+#ifndef MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTREEMODEL_H_
+#define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTREEMODEL_H_
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
-#include <QAbstractTableModel>
+#include <QAbstractItemModel>
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <vector>
@@ -12,7 +12,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-/** QDataProcessorTableModel : Provides a QAbstractTableModel for a Mantid
+/** QDataProcessorTreeModel : Provides a QAbstractItemModel for a Mantid
 ITableWorkspace.
 
 Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -36,61 +36,70 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QDataProcessorTableModel
-    : public QAbstractTableModel {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QDataProcessorTreeModel
+    : public QAbstractItemModel {
   Q_OBJECT
 public:
-  QDataProcessorTableModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
-                           const DataProcessorWhiteList &whitelist);
-  ~QDataProcessorTableModel() override;
-  // emit a signal saying things have changed
-  void update();
-  // row and column counts
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  // get data fro a cell
+  QDataProcessorTreeModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
+                          const DataProcessorWhiteList &whitelist);
+  ~QDataProcessorTreeModel() override;
+
+  // Functions to read data from the model
+
+  // Get flags for a cell
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
+  // Get data for a cell
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
-  // get header data for the table
+  // Get header data for the table
   QVariant headerData(int section, Qt::Orientation orientation,
                       int role) const override;
-  // get flags for a cell
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
-  // change or add data to the model
+  // Row count
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  // Column count
+  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  // Get the index for a given column, row and parent
+  QModelIndex index(int row, int column,
+                    const QModelIndex &parent = QModelIndex()) const override;
+
+  // Get the parent
+  QModelIndex parent(const QModelIndex &index) const override;
+
+  // Functions to edit model
+
+  // Change or add data to the model
   bool setData(const QModelIndex &index, const QVariant &value,
                int role = Qt::EditRole) override;
-  // add new rows to the model
+  // Add new rows to the model
   bool insertRows(int row, int count,
                   const QModelIndex &parent = QModelIndex()) override;
-  // remove rows from the model
+  // Remove rows from the model
   bool removeRows(int row, int count,
                   const QModelIndex &parent = QModelIndex()) override;
 
 private:
-  // cache for a row's data
-  mutable std::vector<QString> m_dataCache;
-  // the index of the current row held in cache
-  mutable int m_dataCachePeakIndex;
-
-  // get a column's name
-  QString findColumnName(const int colIndex) const;
-  // update data cache if required
-  void updateDataCache(const int row) const;
-  // invalidate a row's data cache
-  void invalidateDataCache(const int row) const;
+  void setupModelData(Mantid::API::ITableWorkspace_sptr table);
+  bool insertGroups(int position, int count);
+  bool insertRows(int position, int count, int parent);
+  bool removeGroups(int position, int count);
+  bool removeRows(int position, int count, int parent);
 
   /// Collection of data for viewing.
   Mantid::API::ITableWorkspace_sptr m_tWS;
 
   /// Map of column indexes to names and viceversa
   DataProcessorWhiteList m_whitelist;
+
+  /// Vector containing group names
+  std::vector<std::string> m_groupName;
+  /// Vector containing the (absolute) row indices for a given group
+  std::vector<std::vector<int>> m_rowsOfGroup;
 };
 
-/// Typedef for a shared pointer to \c QDataProcessorTableModel
-typedef boost::shared_ptr<QDataProcessorTableModel>
-    QDataProcessorTableModel_sptr;
+/// Typedef for a shared pointer to \c QDataProcessorTreeModel
+typedef boost::shared_ptr<QDataProcessorTreeModel> QDataProcessorTreeModel_sptr;
 
 } // namespace MantidWidgets
 } // namespace Mantid
 
-#endif /* MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTABLEMODEL_H_ */
+#endif /* MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTREEMODEL_H_ */

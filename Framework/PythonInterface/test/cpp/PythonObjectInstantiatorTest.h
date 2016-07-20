@@ -8,7 +8,6 @@
 
 #include "MantidKernel/ConfigService.h"
 #include <boost/python/object.hpp>
-#include <boost/python/numeric.hpp>
 
 // ---------- Test world initialization ---------------------------------
 

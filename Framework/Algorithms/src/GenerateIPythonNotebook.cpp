@@ -101,7 +101,7 @@ void GenerateIPythonNotebook::exec() {
     versionSpecificity = "all";
 
   NotebookBuilder builder(view, versionSpecificity);
-  std::string generatedNotebook = "";
+  std::string generatedNotebook;
   generatedNotebook +=
       builder.build(ws->getName(), ws->getTitle(), ws->getComment());
 

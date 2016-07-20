@@ -1,10 +1,11 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
-#include <boost/python/numeric.hpp>
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
@@ -12,7 +13,10 @@
 using namespace Mantid::API;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 namespace Converters = Mantid::PythonInterface::Converters;
+namespace NumPy = Mantid::PythonInterface::NumPy;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IMDHistoWorkspace)
 
 namespace {
 /**
@@ -100,7 +104,7 @@ PyObject *getNumEventsArrayAsNumpyArray(IMDHistoWorkspace &self) {
  * @param signal :: The new values
  * @param fnLabel :: A message prefix to pass if the sizes are incorrect
  */
-void throwIfSizeIncorrect(IMDHistoWorkspace &self, const numeric::array &signal,
+void throwIfSizeIncorrect(IMDHistoWorkspace &self, const NumPy::NdArray &signal,
                           const std::string &fnLabel) {
   auto wsShape = countDimensions(self);
   const size_t ndims = wsShape.size();
@@ -134,7 +138,7 @@ void throwIfSizeIncorrect(IMDHistoWorkspace &self, const numeric::array &signal,
  * correct
  */
 void setSignalArray(IMDHistoWorkspace &self,
-                    const numeric::array &signalValues) {
+                    const NumPy::NdArray &signalValues) {
   throwIfSizeIncorrect(self, signalValues, "setSignalArray");
   object rav = signalValues.attr("ravel")("F");
   object flattened = rav.attr("flat");
@@ -152,7 +156,7 @@ void setSignalArray(IMDHistoWorkspace &self,
  * correct
  */
 void setErrorSquaredArray(IMDHistoWorkspace &self,
-                          const numeric::array &errorSquared) {
+                          const NumPy::NdArray &errorSquared) {
   throwIfSizeIncorrect(self, errorSquared, "setErrorSquaredArray");
   object rav = errorSquared.attr("ravel")("F");
   object flattened = rav.attr("flat");

@@ -1,4 +1,5 @@
 #include "MantidAPI/BoxController.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -6,6 +7,8 @@
 
 using Mantid::API::BoxController;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(BoxController)
 
 void export_BoxController() {
   register_ptr_to_python<boost::shared_ptr<BoxController>>();

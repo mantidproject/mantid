@@ -1,15 +1,16 @@
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPENDROWCOMMAND_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPENDROWCOMMAND_H
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORAPPENDGROUPCOMMAND_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORAPPENDGROUPCOMMAND_H
 
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
-/** @class DataProcessorPrependRowCommand
+/** @class DataProcessorAppendGroupCommand
 
-DataProcessorPrependRowCommand defines the action "Insert Row Before"
+DataProcessorAppendGroupCommand defines the action "Insert Group"
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -30,18 +31,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorPrependRowCommand : public DataProcessorCommandBase {
+class DataProcessorAppendGroupCommand : public DataProcessorCommandBase {
 public:
-  DataProcessorPrependRowCommand(DataProcessorPresenter *tablePresenter)
+  DataProcessorAppendGroupCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
-  virtual ~DataProcessorPrependRowCommand(){};
+  virtual ~DataProcessorAppendGroupCommand(){};
 
   void execute() override {
-    m_presenter->notify(DataProcessorPresenter::PrependRowFlag);
+    m_presenter->notify(DataProcessorPresenter::AppendGroupFlag);
   };
-  std::string name() override { return std::string("Insert Row Before"); }
-  std::string icon() override { return std::string("://insert_row.png"); }
+  std::string name() override { return std::string("Insert Group After"); }
+  std::string icon() override { return std::string("://insert_group.png"); }
 };
 }
 }
-#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPENDROWCOMMAND_H*/
+#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORAPPENDGROUPCOMMAND_H*/

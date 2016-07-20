@@ -6,6 +6,12 @@ from mantid import mtd
 
 import numpy
 
+try:
+    long
+except NameError:
+    # Defined for backwards compatability with Python 2
+    def long(x): return x
+
 class MDHistoWorkspaceTest(unittest.TestCase):
     """
     Test the interface to MDHistoWorkspaces
@@ -210,7 +216,7 @@ class MDHistoWorkspaceTest(unittest.TestCase):
                       AlignedDim2="z,0,10,30", IterateEvents="1", Parallel="0")
         BH = mtd['BH']
         signal = BH.getSignalArray()
-        expected =(20L, 1L, 30L)
+        expected =(long(20), long(1), long(30))
         shape = signal.shape
         self.assertEqual(shape,expected)
         mtd.remove('BH')
@@ -220,11 +226,10 @@ class MDHistoWorkspaceTest(unittest.TestCase):
                        IterateEvents="1", Parallel="0")
         BH = mtd['BH']
         signal = BH.getSignalArray()
-        expected =(20L, 1L)
+        expected = (long(20), long(1))
         shape = signal.shape
         self.assertEqual(shape,expected)
         mtd.remove('BH')
-
 
     def test_heterogeneous_bin(self):
         run_algorithm('CreateMDWorkspace', Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='10',
@@ -240,13 +245,13 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         nEvents = BH.getNEvents();
         self.assertEqual(nEvents,1000);
         signal = BH.getSignalArray()
-        expected =(20L,5L,40L)
+        expected =(long(20), long(5), long(40))
         shape = signal.shape
         self.assertEqual(shape,expected)
 
         for i in range(0,expected[1]):
-    		self.assertEqual(signal[1,i,2],2)
-    		self.assertEqual(signal[2,i,1],0)
+            self.assertEqual(signal[1,i,2],2)
+            self.assertEqual(signal[2,i,1],0)
 
 
         self.assertEqual(BH.signalAt(3+20*(2+5*1)),signal[1,2,3])
