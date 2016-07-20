@@ -388,9 +388,9 @@ public:
 
     AlgorithmManager::Instance().cancelAll();
     TS_ASSERT_EQUALS(AlgorithmManager::Instance()
-      .runningInstancesOf("AlgRunsForever")
-      .size(),
-      0);
+                         .runningInstancesOf("AlgRunsForever")
+                         .size(),
+                     0);
     AlgorithmManager::Instance().clear();
   }
 
