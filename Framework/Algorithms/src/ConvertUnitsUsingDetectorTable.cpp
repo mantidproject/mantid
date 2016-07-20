@@ -80,7 +80,6 @@ void ConvertUnitsUsingDetectorTable::init() {
                   "http://www.mantidproject.org/ConvertUnits).");
 }
 
-
 /** This implementation does NOT stores the emode in the provided workspace
 *  @param outputWS The workspace
 */
