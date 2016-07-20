@@ -216,7 +216,6 @@ void Stretch::saveWorkspaces(const QString &fitWorkspace,
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-
 /**
  * Handles the plotting of workspace post algorithm completion
  * @param betaWorkspace		:: The name of the beta workspace to plot
@@ -224,12 +223,19 @@ void Stretch::saveWorkspaces(const QString &fitWorkspace,
  */
 void Stretch::plotWorkspaces(const QString &betaWorkspace,
                              const QString &sigmaWorkspace) {
+  QString pyInput = "from mantidplot import plot2D\n";
   if (m_plotType.compare("All") == 0 || m_plotType.compare("Beta") == 0) {
-    plot2D(betaWorkspace);
+    pyInput += "importMatrixWorkspace('";
+    pyInput += betaWorkspace;
+    pyInput += "').plotGraph2D()\n";
   }
   if (m_plotType.compare("All") == 0 || m_plotType.compare("Sigma") == 0) {
-    plot2D(sigmaWorkspace);
+    pyInput += "importMatrixWorkspace('";
+    pyInput += sigmaWorkspace;
+    pyInput += "').plotGraph2D()\n";
   }
+
+  m_pythonRunner.runPythonCode(pyInput);
 }
 
 /**
