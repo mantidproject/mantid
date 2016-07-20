@@ -242,8 +242,6 @@ void ISISCalibration::run() {
   if (save)
     addSaveWorkspaceToQueue(m_outputCalibrationName);
 
-
-
   // Configure the resolution algorithm
   if (m_uiForm.ckCreateResolution->isChecked()) {
     m_outputResolutionName = outputWorkspaceNameStem;
@@ -283,7 +281,7 @@ void ISISCalibration::run() {
     resAlg->setProperty("RebinParam", rebinString.toStdString());
     resAlg->setProperty("DetectorRange", resDetectorRange.toStdString());
     resAlg->setProperty("BackgroundRange", background.toStdString());
-	resAlg->setProperty("LoadLogFiles", loadLog);
+    resAlg->setProperty("LoadLogFiles", loadLog);
 
     if (m_uiForm.ckResolutionScale->isChecked())
       resAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
