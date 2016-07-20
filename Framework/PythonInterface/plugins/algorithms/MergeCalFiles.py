@@ -96,7 +96,7 @@ class MergeCalFiles(PythonAlgorithm):
                     pass
 
     #add any lines at the end
-        for UDET in list(updateDict.keys()):
+        for UDET in updateDict.keys():
             (offset,select,group)=updateDict.pop(UDET)
             lastNumber += 1
             outputFile.write(self.FormatLine(lastNumber,UDET,offset,select,group))
