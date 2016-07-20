@@ -106,7 +106,7 @@ class BayesStretch(PythonAlgorithm):
     def PyExec(self):
         run_f2py_compatibility_test()
 
-        from IndirectBayes import (CalcErange, GetXYE, QLAddSampleLogs)
+        from IndirectBayes import (CalcErange, GetXYE)
         from IndirectCommon import (CheckXrange, CheckAnalysers, getEfixed, GetThetaQ,
                                     CheckHistZero)
         setup_prog = Progress(self, start=0.0, end=0.3, nreports = 5)
@@ -164,10 +164,10 @@ class BayesStretch(PythonAlgorithm):
         nres = CheckHistZero(self._res_name)[0]
 
         setup_prog.report('Checking Histograms')
-        prog = 'Qst'
-        logger.information('Version is Qst')
-        logger.information(' Number of spectra = %s ' % nsam)
-        logger.information(' Erange : %f to %f ' % (erange[0], erange[1]))
+        prog = 'Stretch'
+        logger.information('Version is Stretch')
+        logger.information('Number of spectra = %s ' % nsam)
+        logger.information('Erange : %f to %f ' % (erange[0], erange[1]))
 
         setup_prog.report('Establishing output workspace name')
         fname = self._sam_name[:-4] + '_'+ prog
@@ -288,18 +288,36 @@ class BayesStretch(PythonAlgorithm):
         CopyLogs(InputWorkspace=self._sam_name,
                  OutputWorkspace=fit_ws)
         log_prog.report('Adding Sample logs to Fit workspace')
-        QLAddSampleLogs(fit_ws, self._res_name, prog, self._background, self._elastic, erange,
-                        (nbin, nrbin), '', '')
+        self._add_sample_logs(fit_ws, self._res_name, self._background, self._elastic, erange, nbin)
         log_prog.report('Copying logs to Contour workspace')
         CopyLogs(InputWorkspace=self._sam_name,
                  OutputWorkspace=contour_ws)
         log_prog.report('Adding sample logs to Contour workspace')
-        QLAddSampleLogs(contour_ws, self._res_name, prog, self._background, self._elastic, erange,
-                        (nbin, nrbin), '', '')
+        self._add_sample_logs(contour_ws, self._res_name, self._background, self._elastic, erange, nbin)
         log_prog.report('Finialising log copying')
 
         self.setProperty('OutputWorkspaceFit', fit_ws)
         self.setProperty('OutputWorkspaceContour', contour_ws)
         log_prog.report('Setting workspace properties')
+
+    def _add_sample_logs(self, workspace, resolution, background, elastic, erange, sample_binning):
+        """
+        Add the Bayes Stretch specific values to the sample logs
+        """
+        energy_min, energy_max = erange
+
+        AddSampleLog(Workspace=workspace, LogName="res_file",
+                     LogType="String", LogText=resolution)
+        AddSampleLog(Workspace=workspace, LogName="background",
+                     LogType="String", LogText=str(background))
+        AddSampleLog(Workspace=workspace, LogName="elastic_peak",
+                     LogType="String", LogText=str(elastic))
+        AddSampleLog(Workspace=workspace, LogName="energy_min",
+                     LogType="Number", LogText=str(energy_min))
+        AddSampleLog(Workspace=workspace, LogName="energy_max",
+                     LogType="Number", LogText=str(energy_max))
+        AddSampleLog(Workspace=workspace, LogName="sample_binning",
+                     LogType="Number", LogText=str(sample_binning))
+
 
 AlgorithmFactory.subscribe(BayesStretch)         # Register algorithm with Mantid
