@@ -177,7 +177,7 @@ Output:
     print "sorted initial detIDs : ",Det0Masked    
     print "sorted RSDM    DedIDs : ",MaskedDet_R    
     print "*** ************************************ **********************************************" 
-    print "*** note spectra with id 4 is a monitor, not present in the masking workspaces"
+    print "*** note spectra with id 4 is a monitor, not present in the masking workspaces",
 
 Output:
 
