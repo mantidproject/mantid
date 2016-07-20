@@ -128,7 +128,7 @@ Output:
     #rws1 = Load(Filename=r'MAR11001.raw', OutputWorkspace='realWs1',InlcudeMonitors=True);
     
     # Load Mask using  instrument and spectra-detector map provided with source workspace
-    maskRealSDM=LoadMask('SampleMask.msk',Instrument='',Workspace=rws)
+    maskRealSDM=LoadMask('SampleMask.msk',Instrument='',RefWorkspace=rws)
 
     # Clear up rubbish 
     os.remove(file2remove)

@@ -48,7 +48,8 @@ DECLARE_ALGORITHM(LoadMask)
 /** Constructor
  */
 LoadMask::LoadMask()
-    : m_maskWS(), m_instrumentPropValue(""), m_pDoc(nullptr),
+    : m_maskWS(), m_instrumentPropValue(""),
+      m_sourceMapWS(),m_pDoc(nullptr),
       m_pRootElem(nullptr), m_defaultToUse(true) {}
 
 //----------------------------------------------------------------------------------------------
@@ -80,12 +81,12 @@ void LoadMask::init() {
                   "ISIS ASCII. ");
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-          "Workspace", "", Direction::Input, PropertyMode::Optional),
+          "RefWorkspace", "", Direction::Input, PropertyMode::Optional),
       "The name of the workspace with defined insrtument and spectra, "
       "used as the source of the spectra-detector map for the mask to load.");
 
   setPropertySettings(
-      "Workspace", Kernel::make_unique<Kernel::EnabledWhenProperty>(
+      "RefWorkspace", Kernel::make_unique<Kernel::EnabledWhenProperty>(
           "Instrument", Kernel::ePropertyCriterion::IS_DEFAULT));
 
   declareProperty(
@@ -100,7 +101,7 @@ void LoadMask::init() {
 void LoadMask::exec() {
   // 1. Load Instrument and create output Mask workspace
   const std::string instrumentname = getProperty("Instrument");
-  m_sourceMapWS = getProperty("Workspace");
+  m_sourceMapWS = getProperty("RefWorkspace");
 
   m_instrumentPropValue = instrumentname;
   if (m_instrumentPropValue.size() == 0) {
