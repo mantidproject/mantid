@@ -82,7 +82,7 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Transforms\\Units"; }
 
-private:
+protected:
   const std::string workspaceMethodName() const override {
     return "convertUnits";
   }
@@ -95,6 +95,7 @@ private:
   void exec() override;
 
   void setupMemberVariables(const API::MatrixWorkspace_const_sptr inputWS);
+  virtual void storeEModeOnWorkspace(API::MatrixWorkspace_sptr outputWS);
   API::MatrixWorkspace_sptr
   setupOutputWorkspace(const API::MatrixWorkspace_const_sptr inputWS);
 
@@ -107,14 +108,14 @@ private:
   /// Internal function to gather detector specific L2, theta and efixed values
   bool getDetectorValues(
       const Kernel::Unit &outputUnit, const Geometry::IComponent &source,
-      const Geometry::IComponent &sample, double l1, int emode,
+      const Geometry::IComponent &sample, double &l1, int &emode,
       const API::MatrixWorkspace &ws,
       boost::function<double(const Geometry::IDetector &)> thetaFunction,
       int64_t wsIndex, double &efixed, double &l2, double &twoTheta);
 
   /// Convert the workspace units using TOF as an intermediate step in the
   /// conversion
-  API::MatrixWorkspace_sptr
+  virtual API::MatrixWorkspace_sptr
   convertViaTOF(Kernel::Unit_const_sptr fromUnit,
                 API::MatrixWorkspace_const_sptr inputWS);
 

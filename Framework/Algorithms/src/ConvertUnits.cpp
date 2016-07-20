@@ -197,10 +197,10 @@ void ConvertUnits::setupMemberVariables(
   m_outputUnit = UnitFactory::Instance().create(targetUnit);
 }
 
-/** Create an output workspace of the appropriate (histogram or event) type and
- * copy over the data
- *  @param inputWS The input workspace
- */
+  /** Create an output workspace of the appropriate (histogram or event) type and
+   * copy over the data
+   *  @param inputWS The input workspace
+   */
 API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
     const API::MatrixWorkspace_const_sptr inputWS) {
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
@@ -235,12 +235,19 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
 
   // Set the final unit that our output workspace will have
   outputWS->getAxis(0)->unit() = m_outputUnit;
+  storeEModeOnWorkspace(outputWS);
+
+  return outputWS;
+}
+
+/** Stores the emode in the provided workspace
+*  @param outputWS The workspace
+*/
+void ConvertUnits::storeEModeOnWorkspace(API::MatrixWorkspace_sptr outputWS) {
   // Store the emode
   const bool overwrite(true);
   outputWS->mutableRun().addProperty("deltaE-mode", getPropertyValue("EMode"),
-                                     overwrite);
-
-  return outputWS;
+    overwrite);
 }
 
 /** Convert the workspace units according to a simple output = a * (input^b)
@@ -335,7 +342,7 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
 */
 bool ConvertUnits::getDetectorValues(
     const Kernel::Unit &outputUnit, const Geometry::IComponent &source,
-    const Geometry::IComponent &sample, double l1, int emode,
+    const Geometry::IComponent &sample, double &l1, int &emode,
     const MatrixWorkspace &ws,
     function<double(const Geometry::IDetector &)> thetaFunction,
     int64_t wsIndex, double &efixed, double &l2, double &twoTheta) {
