@@ -19,6 +19,17 @@ using PhysicalConstants::Atom;
 using PhysicalConstants::getAtom;
 using PhysicalConstants::NeutronAtom;
 
+namespace {
+const double INV_FOUR_PI = 1. / (4. * M_PI);
+}
+
+ Mantid::Kernel::Material::FormulaUnit::FormulaUnit(const boost::shared_ptr<Atom> & atom, const double multiplicity) :
+      atom(atom), multiplicity(multiplicity) {}
+
+  Mantid::Kernel::Material::FormulaUnit::FormulaUnit(const Atom &atom, const double multiplicity) :
+    atom(boost::make_shared<Atom>(atom)), multiplicity(multiplicity) {
+    }
+
 /**
  * Construct an "empty" material. Everything returns zero
  */
@@ -58,16 +69,12 @@ Material::Material(const std::string &name,
     : m_name(name), m_chemicalFormula(), m_atomTotal(1.0),
       m_numberDensity(numberDensity), m_temperature(temperature),
       m_pressure(pressure) {
-  if (atom.a_number == 0) { // user specified atom
-    FormulaUnit unit{boost::make_shared<Atom>(atom), 1.};
-    m_chemicalFormula.push_back(unit);
+  if (atom.z_number == 0) { // user specified atom
+    m_chemicalFormula.emplace_back(atom, 1.);
   } else if (atom.z_number > 0) { // single isotope
-    FormulaUnit unit{
-        boost::make_shared<Atom>(getAtom(atom.z_number, atom.a_number)), 1.};
-    m_chemicalFormula.push_back(unit);
+    m_chemicalFormula.emplace_back(getAtom(atom.z_number, atom.a_number), 1.);
   } else { // isotopic average
-    FormulaUnit unit{boost::make_shared<Atom>(atom), 1.};
-    m_chemicalFormula.push_back(unit);
+    m_chemicalFormula.emplace_back(atom, 1.);
   }
 }
 // update the total atom count
@@ -487,17 +494,10 @@ void Material::loadNexus(::NeXus::File *file, const std::string &group) {
     try {
       m_chemicalFormula.clear();
       if (element_Z > 0) {
-        FormulaUnit formulaUnit{
-            boost::make_shared<Atom>(
-                Mantid::PhysicalConstants::getAtom(element_Z, element_A)),
-            1.};
-        m_chemicalFormula.push_back(formulaUnit);
+        m_chemicalFormula.emplace_back(getAtom(element_Z, element_A), 1);
       } else {
-        FormulaUnit formulaUnit{
-            boost::make_shared<Atom>(Mantid::PhysicalConstants::getNeutronAtom(
-                element_Z, element_A)),
-            1.};
-        m_chemicalFormula.push_back(formulaUnit);
+        m_chemicalFormula.emplace_back(Mantid::PhysicalConstants::getNeutronAtom(
+                element_Z, element_A), 1);
       }
     } catch (std::runtime_error &) { /* ignore and use the default */
     }
@@ -524,8 +524,7 @@ void Material::loadNexus(::NeXus::File *file, const std::string &group) {
       file->readData("coh_scatt_length", neutron.coh_scatt_length);
       file->readData("inc_scatt_length", neutron.inc_scatt_length);
 
-      FormulaUnit formulaUnit{boost::make_shared<Atom>(neutron), 1.};
-      m_chemicalFormula.push_back(formulaUnit);
+      m_chemicalFormula.emplace_back(boost::make_shared<Atom>(neutron), 1);
     }
     // the other option is empty which does not need to be addressed
   } else {
@@ -599,10 +598,7 @@ Material::parseChemicalFormula(const std::string chemicalSymbol) {
           numberAtoms = boost::lexical_cast<float>(temp.second);
       }
 
-      Material::FormulaUnit formulaUnit{
-          boost::make_shared<PhysicalConstants::Atom>(getAtom(name, aNumber)),
-          static_cast<double>(numberAtoms)};
-      CF.push_back(formulaUnit);
+      CF.emplace_back(getAtom(name, aNumber), static_cast<double>(numberAtoms));
     } catch (boost::bad_lexical_cast &e) {
       std::stringstream msg;
       msg << "While trying to parse atom \"" << atom

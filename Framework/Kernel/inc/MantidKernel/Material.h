@@ -54,6 +54,8 @@ public:
   struct FormulaUnit {
     boost::shared_ptr<PhysicalConstants::Atom> atom;
     double multiplicity;
+    FormulaUnit(const boost::shared_ptr<PhysicalConstants::Atom> & atom, const double multiplicity);
+    FormulaUnit(const PhysicalConstants::Atom &atom, const double multiplicity);
   };
 
   typedef std::vector<FormulaUnit> ChemicalFormula;
