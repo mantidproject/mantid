@@ -157,15 +157,16 @@ private:
   void populateProgramTree();
   void updateProgramTree();
 
-  //Options Window - Selected Options
+  // Options Window - Selected Options
   void
   buildTreeCategoryStructure(const QString &catNames, const bool isHidden,
                              QMap<QString, QTreeWidgetItem *> &seenCategories);
-  QTreeWidgetItem* walkBackwardsThroughCategories(
+  QTreeWidgetItem *walkBackwardsThroughCategories(
       const QString &catNames, int elementToCheck,
       QMap<QString, QTreeWidgetItem *> &seenCategories,
       Qt::CheckState childTickState);
-  void updateChildTickStatuses(QTreeWidgetItem &widgetPtr, const Qt::CheckState newState);
+  void updateChildTickStatuses(QTreeWidgetItem &widgetPtr,
+                               const Qt::CheckState newState);
   void correctTreePatrialTicks(QTreeWidgetItem &topLevelCat);
 
   // MD Plotting
