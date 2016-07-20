@@ -1061,8 +1061,11 @@ void MatrixWorkspace::maskBin(const size_t &workspaceIndex,
   // this is the actual result of the masking that most algorithms and plotting
   // implementations will see, the bin mask flags defined above are used by only
   // some algorithms
-  this->dataY(workspaceIndex)[binIndex] *= (1 - weight);
-  this->dataE(workspaceIndex)[binIndex] *= (1 - weight);
+  // NaN values are set to 0, other values are scaled by (1 - weight)
+  double &y = this->dataY(workspaceIndex)[binIndex];
+  isnan(y) ? y = 0 : y *= (1 - weight);
+  double &e = this->dataE(workspaceIndex)[binIndex];
+  isnan(e) ? e = 0 : e *= (1 - weight);
 }
 
 /** Writes the masking weight to m_masks (doesn't alter y-values). Contains a
