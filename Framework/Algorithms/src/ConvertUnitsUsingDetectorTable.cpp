@@ -12,6 +12,7 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 
 #include <algorithm>
+#include <numeric>
 #include <cfloat>
 #include <limits>
 
@@ -23,6 +24,7 @@ using Mantid::API::WorkspaceProperty;
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using namespace HistogramData;
 using boost::function;
 using boost::bind;
 
@@ -77,6 +79,7 @@ void ConvertUnitsUsingDetectorTable::init() {
                   "recommended (see "
                   "http://www.mantidproject.org/ConvertUnits).");
 }
+
 
 /** This implementation does NOT stores the emode in the provided workspace
 *  @param outputWS The workspace
@@ -214,12 +217,18 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
         auto localOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
         /// @todo Don't yet consider hold-off (delta)
         const double delta = 0.0;
+        std::vector<double> values(outputWS->x(wsid).begin(),
+                                   outputWS->x(wsid).end());
+
         // Convert the input unit to time-of-flight
-        localFromUnit->toTOF(outputWS->dataX(wsid), emptyVec, l1, l2, twoTheta,
-                             emode, efixed, delta);
+        localFromUnit->toTOF(values, emptyVec, l1, l2, twoTheta, emode, efixed,
+                             delta);
         // Convert from time-of-flight to the desired unit
-        localOutputUnit->fromTOF(outputWS->dataX(wsid), emptyVec, l1, l2,
-                                 twoTheta, emode, efixed, delta);
+        localOutputUnit->fromTOF(values, emptyVec, l1, l2, twoTheta, emode,
+                                 efixed, delta);
+
+        outputWS->mutableX(wsid) = std::move(values);
+
         // EventWorkspace part, modifying the EventLists.
         if (m_inputEvents) {
           eventWS->getSpectrum(wsid)

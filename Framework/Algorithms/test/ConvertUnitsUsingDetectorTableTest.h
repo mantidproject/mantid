@@ -30,7 +30,6 @@ public:
   static void destroySuite(ConvertUnitsUsingDetectorTableTest *suite) {
     delete suite;
   }
-
   void test_Init() {
     ConvertUnitsUsingDetectorTable alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -83,8 +82,8 @@ public:
     auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         workspaceName);
 
-    TS_ASSERT_DELTA(outWS->dataX(0)[0], 0.0, 0.000001);
-    TS_ASSERT_DELTA(outWS->dataX(0)[9], 0.000323676, 0.000001);
+    TS_ASSERT_DELTA(outWS->x(0)[0], 0.0, 0.000001);
+    TS_ASSERT_DELTA(outWS->x(0)[9], 0.000323676, 0.000001);
 
     AnalysisDataService::Instance().remove(workspaceName);
   };

@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CrossCorrelate.h"
 #include "MantidAPI/RawCountValidator.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -73,7 +73,7 @@ void CrossCorrelate::exec() {
     throw std::runtime_error("Must specify xmin < xmax");
 
   // Now check if the range between x_min and x_max is valid
-  const MantidVec &referenceX = inputWS->readX(index_ref);
+  auto &referenceX = inputWS->x(index_ref);
   auto minIt = std::find_if(referenceX.cbegin(), referenceX.cend(),
                             std::bind2nd(std::greater<double>(), xmin));
   if (minIt == referenceX.cend())
@@ -115,8 +115,8 @@ void CrossCorrelate::exec() {
   mess.str("");
 
   // Take a copy of  the reference spectrum
-  const MantidVec &referenceY = inputWS->dataY(index_ref);
-  const MantidVec &referenceE = inputWS->dataE(index_ref);
+  auto &referenceY = inputWS->y(index_ref);
+  auto &referenceE = inputWS->e(index_ref);
 
   std::vector<double> refX(maxIt - minIt);
   std::vector<double> refY(maxIt - minIt - 1);
@@ -167,6 +167,7 @@ void CrossCorrelate::exec() {
   for (int i = 0; i < npoints; ++i)
     XX[i] = static_cast<double>(i - nY + 2);
   // Initialise the progress reporting object
+  out->mutableX(0) = XX;
   m_progress = new Progress(this, 0.0, 1.0, nspecs);
   PARALLEL_FOR2(inputWS, out)
   for (int i = 0; i < nspecs; ++i) // Now loop on all spectra
@@ -175,17 +176,19 @@ void CrossCorrelate::exec() {
     size_t wsIndex = indexes[i]; // Get the ws index from the table
     // Copy spectra info from input Workspace
     out->getSpectrum(i).copyInfoFrom(inputWS->getSpectrum(wsIndex));
-    out->dataX(i) = XX;
+
+    out->setSharedX(i, out->sharedX(0));
 
     // Get temp references
-    const MantidVec &iX = inputWS->readX(wsIndex);
-    const MantidVec &iY = inputWS->readY(wsIndex);
-    const MantidVec &iE = inputWS->readE(wsIndex);
+    auto &iX = inputWS->x(wsIndex);
+    auto &iY = inputWS->y(wsIndex);
+    auto &iE = inputWS->e(wsIndex);
     // Copy Y,E data of spec(i) to temp vector
     // Now rebin on the grid of reference spectrum
     std::vector<double> tempY(nY);
     std::vector<double> tempE(nY);
-    VectorHelper::rebin(iX, iY, iE, refX, tempY, tempE, is_distrib);
+    VectorHelper::rebin(iX.rawData(), iY.rawData(), iE.rawData(), refX, tempY,
+                        tempE, is_distrib);
     // Calculate the mean value of tempY
     double tempMean = std::accumulate(tempY.begin(), tempY.end(), 0.0);
     tempMean /= static_cast<double>(nY);
@@ -213,8 +216,8 @@ void CrossCorrelate::exec() {
     double normalisationE2 =
         pow((refNorm * tempNormE), 2) + pow((tempNorm * refNormE), 2);
     // Get reference to the ouput spectrum
-    MantidVec &outY = out->dataY(i);
-    MantidVec &outE = out->dataE(i);
+    auto &outY = out->mutableY(i);
+    auto &outE = out->mutableE(i);
 
     for (int k = -nY + 2; k <= nY - 2; ++k) {
       int kp = abs(k);

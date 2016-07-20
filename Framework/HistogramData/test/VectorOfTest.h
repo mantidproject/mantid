@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/make_cow.h"
-#include "MantidHistogramData/VectorOf.h"
-#include "MantidHistogramData/Iterable.h"
 #include "MantidHistogramData/HistogramX.h"
+#include "MantidHistogramData/Iterable.h"
+#include "MantidHistogramData/VectorOf.h"
+#include "MantidKernel/make_cow.h"
 
 using Mantid::HistogramData::detail::VectorOf;
 using Mantid::HistogramData::detail::Iterable;
@@ -106,6 +106,29 @@ public:
     const VectorOfTester dest(std::move(src));
     TS_ASSERT(!src);
     TS_ASSERT(!dest);
+  }
+
+  void test_interator_assignment() {
+    std::vector<double> src{0.1, 3.5, 1.0, 2.4};
+    VectorOfTester dest(1);
+
+    dest.assign(src.cbegin(), src.cend());
+    TS_ASSERT_EQUALS(dest.size(), 4);
+    TS_ASSERT_EQUALS(dest[0], src[0]);
+    TS_ASSERT_EQUALS(dest[1], src[1]);
+    TS_ASSERT_EQUALS(dest[2], src[2]);
+    TS_ASSERT_EQUALS(dest[3], src[3]);
+  }
+
+  void test_value_assignment() {
+    VectorOfTester dest(1);
+
+    dest.assign(3, 9.8);
+
+    TS_ASSERT_EQUALS(dest.size(), 3);
+    TS_ASSERT_EQUALS(dest[0], 9.8);
+    TS_ASSERT_EQUALS(dest[1], 9.8);
+    TS_ASSERT_EQUALS(dest[2], 9.8);
   }
 
   void test_copy_assignment() {
