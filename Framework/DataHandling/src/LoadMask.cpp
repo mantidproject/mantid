@@ -925,7 +925,7 @@ std::map<std::string, std::string> LoadMask::validateInputs() {
 
   std::map<std::string, std::string> result;
 
-  API::MatrixWorkspace_sptr inputWS = getProperty("Workspace");
+  API::MatrixWorkspace_sptr inputWS = getProperty("RefWorkspace");
   std::string InstrName = getProperty("Instrument");
   if (InstrName.size() == 0) {
     if (!inputWS) {
@@ -935,7 +935,7 @@ std::map<std::string, std::string> LoadMask::validateInputs() {
       try {
         auto inst = inputWS->getInstrument();
       } catch (Kernel::Exception::NotFoundError &) {
-        result["Workspace"] =
+        result["RefWorkspace"] =
             "If workspace is defined, it mast have an instrument";
       }
     }
@@ -945,12 +945,12 @@ std::map<std::string, std::string> LoadMask::validateInputs() {
         auto inst = inputWS->getInstrument();
         std::string Name = inst->getName();
         if (Name != InstrName) {
-          result["Workspace"] =
+          result["RefWorkspace"] =
               "If both workspace and instrument name are defined, "
               "workspace has to have the instrument with the same name";
         }
       } catch (Kernel::Exception::NotFoundError &) {
-        result["Workspace"] =
+        result["RefWorkspace"] =
             "If workspace is defined, it mast have an instrument";
       }
     }
