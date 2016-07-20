@@ -120,10 +120,9 @@ Triple UserParametricSurface::operator()(double u, double v) {
 
 Graph3D::Graph3D(const QString &label, QWidget *parent, const char *name,
                  Qt::WFlags f)
-    : MdiSubWindow(parent, label, name, f) {
+    : MdiSubWindow(parent, label, name, f), plotAssociation(QString()) {
   d_table = 0;
   d_matrix = 0;
-  plotAssociation = QString();
 
   color_map = QString::null;
   animation_redraw_wait = 50;

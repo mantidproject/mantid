@@ -94,7 +94,6 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
       m_max(0), m_are_min_max_set(false), m_boundingRect(),
       m_strName(name.toStdString()), m_selectedRows(), m_selectedCols() {
   m_workspace = ws;
-  m_strName = name.toStdString();
 
   setup(ws, start, end);
   setWindowTitle(name);

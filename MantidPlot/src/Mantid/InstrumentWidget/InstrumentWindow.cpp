@@ -80,8 +80,8 @@ IProjectSerialisable *InstrumentWindow::loadFromProject(
 
       app->addMdiSubWindow(iw);
 
-      return iw;
       QApplication::restoreOverrideCursor();
+      return iw;
     } catch (const std::exception &e) {
       QApplication::restoreOverrideCursor();
       QString errorMessage =
