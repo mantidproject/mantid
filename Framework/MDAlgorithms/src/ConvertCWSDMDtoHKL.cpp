@@ -155,8 +155,6 @@ void ConvertCWSDMDtoHKL::getUBMatrix() {
       }
     }
   }
-
-  return;
 }
 
 //--------------------------------------------------------------------------
@@ -211,8 +209,6 @@ void ConvertCWSDMDtoHKL::exportEvents(
       scancell = false;
     }
   }
-
-  return;
 }
 
 //--------------------------------------------------------------------------
@@ -241,8 +237,6 @@ void ConvertCWSDMDtoHKL::saveMDToFile(
           << vec_event_qsample[i][2] << ", " << vec_event_signal[i] << "\n";
   }
   ofile.close();
-
-  return;
 }
 
 //--------------------------------------------------------------------------
@@ -268,8 +262,6 @@ void ConvertCWSDMDtoHKL::saveEventsToFile(
           << vec_event_detid[i] << "\n";
   }
   ofile.close();
-
-  return;
 }
 
 //--------------------------------------------------------------------------
@@ -288,8 +280,6 @@ void ConvertCWSDMDtoHKL::convertFromQSampleToHKL(
 
   g_log.notice() << "[DB] " << original_indexed << " peaks are indexed."
                  << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -396,8 +386,6 @@ void ConvertCWSDMDtoHKL::getRange(const std::vector<Kernel::V3D> vec_hkl,
     extentMins[i] = minvalue;
     extentMaxs[i] = maxvalue;
   }
-
-  return;
 }
 
 } // namespace MDAlgorithms

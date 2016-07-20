@@ -61,9 +61,7 @@ void ExtractFFTSpectrum::exec() {
     MatrixWorkspace_const_sptr fftTemp =
         childFFT->getProperty("OutputWorkspace");
 
-    outputWS->dataE(i) = fftTemp->readE(fftPart);
-    outputWS->dataY(i) = fftTemp->readY(fftPart);
-    outputWS->dataX(i) = fftTemp->readX(fftPart);
+    outputWS->setHistogram(i, fftTemp->histogram(fftPart));
 
     prog.report();
 

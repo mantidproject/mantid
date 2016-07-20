@@ -360,7 +360,7 @@ void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType *> response,
     if (investigation) {
       API::TableRow table = outputws->appendRow();
       // Used to insert an empty string into the cell if value does not exist.
-      std::string emptyCell("");
+      std::string emptyCell;
 
       // Now add the relevant investigation data to the table (They always
       // exist).
@@ -442,7 +442,7 @@ void ICat4Catalog::saveDataSets(std::vector<xsd__anyType *> response,
     outputws->addColumn("size_t", "Number of datafiles");
   }
 
-  std::string emptyCell = "";
+  std::string emptyCell;
   for (auto &iter : response) {
     ns1__dataset *dataset = dynamic_cast<ns1__dataset *>(iter);
     if (dataset) {

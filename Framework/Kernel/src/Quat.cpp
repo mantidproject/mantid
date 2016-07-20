@@ -98,7 +98,6 @@ void Quat::set(const double ww, const double aa, const double bb,
   a = aa;
   b = bb;
   c = cc;
-  return;
 }
 
 /** Constructor from an angle and axis.
@@ -118,7 +117,6 @@ void Quat::setAngleAxis(const double _deg, const V3D &_axis) {
   a = s * temp[0];
   b = s * temp[1];
   c = s * temp[2];
-  return;
 }
 
 bool Quat::isNull(const double tolerance) const {
@@ -151,7 +149,6 @@ void Quat::getAngleAxis(double &_deg, double &_ax0, double &_ax1,
   _ax0 = a / s;
   _ax1 = b / s;
   _ax2 = c / s;
-  return;
 }
 
 /** Set the rotation (but don't change rotation axis).
@@ -190,7 +187,6 @@ void Quat::operator()(const Quat &q) {
   a = q.a;
   b = q.b;
   c = q.c;
-  return;
 }
 
 /**
@@ -240,7 +236,6 @@ void Quat::operator()(const V3D &rX, const V3D &rY, const V3D &rZ) {
 void Quat::init() {
   w = 1.0;
   a = b = c = 0.0;
-  return;
 }
 
 /** Quaternion addition operator
@@ -356,7 +351,6 @@ void Quat::normalize() {
   a *= overnorm;
   b *= overnorm;
   c *= overnorm;
-  return;
 }
 
 /** Quaternion complex conjugate
@@ -368,7 +362,6 @@ void Quat::conjugate() {
   a *= -1.0;
   b *= -1.0;
   c *= -1.0;
-  return;
 }
 
 /** Quaternion length
@@ -458,7 +451,6 @@ void Quat::GLMatrix(double *mat) const {
     mat++;
   }
   *mat = 1.0;
-  return;
 }
 /// using convention at
 /// http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
@@ -621,7 +613,6 @@ double &Quat::operator[](const int Index) {
  */
 void Quat::printSelf(std::ostream &os) const {
   os << "[" << w << "," << a << "," << b << "," << c << "]";
-  return;
 }
 
 /**  Read data from a stream in the format returned by printSelf ("[w,a,b,c]").
@@ -649,8 +640,6 @@ void Quat::readPrinted(std::istream &IX) {
   a = atof(in.substr(c1 + 1, c2 - c1 - 1).c_str());
   b = atof(in.substr(c2 + 1, c3 - c2 - 1).c_str());
   c = atof(in.substr(c3 + 1, j - c3 - 1).c_str());
-
-  return;
 }
 
 /** Prints a string representation
@@ -725,7 +714,6 @@ void Quat::rotateBB(double &xmin, double &ymin, double &zmin, double &xmax,
   xmax = maxV[0];
   ymax = maxV[1];
   zmax = maxV[2];
-  return;
 }
 
 /** Calculate the Euler angles that are equivalent to this Quaternion.

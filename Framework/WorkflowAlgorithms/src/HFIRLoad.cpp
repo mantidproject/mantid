@@ -135,7 +135,7 @@ void HFIRLoad::exec() {
   const std::string fileName = getPropertyValue("Filename");
 
   // Output log
-  std::string output_message = "";
+  std::string output_message;
   const double wavelength_input = getProperty("Wavelength");
   const double wavelength_spread_input = getProperty("WavelengthSpread");
 

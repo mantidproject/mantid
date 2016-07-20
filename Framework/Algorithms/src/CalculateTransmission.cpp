@@ -7,8 +7,8 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -239,7 +239,7 @@ void CalculateTransmission::exec() {
 
   // Check that there are more than a single bin in the transmission
   // workspace. Skip the fit if there isn't.
-  if (transmission->dataY(0).size() > 1) {
+  if (transmission->y(0).size() > 1) {
     transmission =
         fit(transmission, getProperty("RebinParams"), getProperty("FitMethod"));
   }
@@ -311,8 +311,8 @@ CalculateTransmission::fit(API::MatrixWorkspace_sptr raw,
   if (logFit) {
     g_log.debug("Fitting to the logarithm of the transmission");
 
-    MantidVec &Y = output->dataY(0);
-    MantidVec &E = output->dataE(0);
+    auto &Y = output->mutableY(0);
+    auto &E = output->mutableE(0);
     double start = m_done;
     Progress prog2(this, start, m_done += 0.1, Y.size());
     for (size_t i = 0; i < Y.size(); ++i) {
@@ -350,14 +350,14 @@ CalculateTransmission::fit(API::MatrixWorkspace_sptr raw,
   // otherwise we can just use the workspace kicked out by the fitData()'s call
   // to Linear
   if ((!rebinParams.empty()) || logFit) {
-    const MantidVec &X = output->readX(0);
-    MantidVec &Y = output->dataY(0);
+    auto &X = output->x(0);
+    auto &Y = output->mutableY(0);
     if (logFit) {
       // Need to transform back to 'unlogged'
       const double m(std::pow(10, grad));
       const double factor(std::pow(10, offset));
 
-      MantidVec &E = output->dataE(0);
+      auto &E = output->mutableE(0);
       for (size_t i = 0; i < Y.size(); ++i) {
         // the relationship between the grad and interspt of the log fit and the
         // un-logged value of Y contain this dependence on the X (bin center

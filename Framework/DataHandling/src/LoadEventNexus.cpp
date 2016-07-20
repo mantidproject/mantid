@@ -502,7 +502,7 @@ public:
       thisBankPulseTimes = alg->m_allBanksPulseTimes;
       return;
     }
-    std::string thisStartTime = "";
+    std::string thisStartTime;
     size_t thisNumPulses = 0;
     file.getAttr("offset", thisStartTime);
     if (!file.getInfo().dims.empty())
@@ -555,8 +555,6 @@ public:
         alg->getLogger().debug() << "Bank " << entry_name << " is empty.\n";
       }
     }
-
-    return;
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -626,8 +624,6 @@ public:
 
     alg->getLogger().debug() << entry_name << ": start_event " << start_event
                              << " stop_event " << stop_event << "\n";
-
-    return;
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -685,8 +681,6 @@ public:
       if (m_max_id > static_cast<uint32_t>(alg->eventid_max))
         m_max_id = static_cast<uint32_t>(alg->eventid_max);
     }
-
-    return;
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -735,8 +729,6 @@ public:
       }
       file.closeData();
     } // no error
-
-    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -781,8 +773,6 @@ public:
     if (!m_loadError) {
       file.closeData();
     }
-
-    return;
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -1387,8 +1377,6 @@ void LoadEventNexus::exec() {
       this->runLoadMonitors();
     }
   }
-
-  return;
 }
 
 //-----------------------------------------------------------------------------
@@ -1815,7 +1803,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_ws->setAllX(axis);
 
     createWorkspaceIndexMaps(monitors, std::vector<std::string>());
-
     return;
   }
 
@@ -2059,7 +2046,7 @@ bool LoadEventNexus::runLoadIDFFromNexus<EventWorkspaceCollection_sptr>(
 */
 std::string
 LoadEventNexus::readInstrumentFromISIS_VMSCompat(::NeXus::File &hFile) {
-  std::string instrumentName("");
+  std::string instrumentName;
   try {
     hFile.openGroup("isis_vms_compat", "IXvms");
   } catch (std::runtime_error &) {
@@ -2190,7 +2177,6 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
       inst->remove(comp);
     }
   }
-  return;
 }
 //-----------------------------------------------------------------------------
 /**

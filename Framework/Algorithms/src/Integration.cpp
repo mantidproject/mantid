@@ -273,8 +273,6 @@ void Integration::exec() {
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputWorkspace);
-
-  return;
 }
 
 /**

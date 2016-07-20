@@ -1,5 +1,5 @@
 #include "MantidDataHandling/CheckMantidVersion.h"
-#include "MantidKernel/InternetHelper.h"
+#include "MantidKernel/GitHubApiHelper.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Strings.h"
 
@@ -60,7 +60,7 @@ void CheckMantidVersion::init() {
 void CheckMantidVersion::exec() {
   std::string currentVersion = getCurrentVersion();
   setProperty("CurrentVersion", currentVersion);
-  std::string mostRecentVersion = "";
+  std::string mostRecentVersion;
 
   std::string gitHubReleaseUrl = ConfigService::Instance().getString(
       "CheckMantidVersion.GitHubReleaseURL");
@@ -74,7 +74,7 @@ void CheckMantidVersion::exec() {
     downloadUrl = "http://download.mantidproject.org";
   }
 
-  std::string json = "";
+  std::string json;
   try {
     json = getVersionsFromGitHub(gitHubReleaseUrl);
   } catch (Exception::InternetError &ex) {
@@ -226,11 +226,11 @@ behaviour.
 */
 std::string CheckMantidVersion::getVersionsFromGitHub(const std::string &url) {
 
-  Kernel::InternetHelper inetHelper;
+  Kernel::GitHubApiHelper inetHelper;
   std::ostringstream os;
   int tzd = 0;
 
-  inetHelper.headers().emplace(
+  inetHelper.addHeader(
       "if-modified-since",
       Poco::DateTimeFormatter::format(
           Poco::DateTimeParser::parse(MantidVersion::releaseDate(), tzd),
