@@ -86,6 +86,7 @@ void ConvertUnitsUsingDetectorTable::init() {
 void ConvertUnitsUsingDetectorTable::storeEModeOnWorkspace(
     API::MatrixWorkspace_sptr outputWS) {
   // do nothing here - don't store this value
+  UNUSED_ARG(outputWS);
 }
 
 /** Convert the workspace units using TOF as an intermediate step in the
