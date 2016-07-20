@@ -123,8 +123,7 @@ void ConvertUnits::exec() {
   if (inputWS->dataX(0).size() < 2) {
     std::stringstream msg;
     msg << "Input workspace has invalid X axis binning parameters. Should have "
-           "at least 2 values. Found "
-        << inputWS->dataX(0).size() << ".";
+           "at least 2 values. Found " << inputWS->dataX(0).size() << ".";
     throw std::runtime_error(msg.str());
   }
   if (inputWS->dataX(0).front() > inputWS->dataX(0).back() ||
@@ -271,7 +270,7 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
       MantidVec::iterator iter;
       for (iter = outputWS->dataX(0).begin(); iter != outputWS->dataX(0).end();
            ++iter) {
-        *iter = factor * std::pow(*iter, power);
+        *iter = factor *std::pow(*iter, power);
       }
 
       auto xVals = outputWS->refX(0);
@@ -302,7 +301,7 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
       MantidVec::iterator it;
       for (it = outputWS->dataX(k).begin(); it != outputWS->dataX(k).end();
            ++it) {
-        *it = factor * std::pow(*it, power);
+        *it = factor *std::pow(*it, power);
       }
     }
     // Convert the events themselves if necessary.
