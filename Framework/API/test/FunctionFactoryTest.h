@@ -395,6 +395,52 @@ public:
       TS_ASSERT_EQUALS(funcB->name(), "FunctionFactoryTest_FunctB");
     }
   }
+
+  void test_MultiDomainFunction_creation_moreComplex() {
+    const std::string fnString =
+        "composite=MultiDomainFunction,NumDeriv=true;(name=FunctionFactoryTest_"
+        "FunctA,a0=0,a1=0.5;name=FunctionFactoryTest_FunctB,b0=0.1,b1=0.2,ties="
+        "(b1=0.2),$domains=i);(name=FunctionFactoryTest_FunctA,a0=0,a1=0.5;"
+        "name=FunctionFactoryTest_FunctB,b0=0.1,b1=0.2,$domains=i);ties=(f1.f1."
+        "b1=f0.f1.b1)";
+    IFunction_sptr fun;
+    TS_ASSERT_THROWS_NOTHING(
+        fun = FunctionFactory::Instance().createInitialized(fnString));
+    TS_ASSERT(fun);
+    const auto mdfunc = boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
+    TS_ASSERT(mdfunc);
+    if (mdfunc) {
+      TS_ASSERT_EQUALS(mdfunc->asString(), fnString);
+      TS_ASSERT_EQUALS(mdfunc->nFunctions(), 2);
+
+      // test the domains for each function
+      std::vector<size_t> domainsFirstFunc, domainsSecondFunc;
+      mdfunc->getDomainIndices(0, 1, domainsFirstFunc);
+      mdfunc->getDomainIndices(1, 1, domainsSecondFunc);
+      TS_ASSERT_EQUALS(domainsFirstFunc, std::vector<size_t>{0});
+      TS_ASSERT_EQUALS(domainsSecondFunc, std::vector<size_t>{1});
+
+      // test composite functions
+      const auto first = boost::dynamic_pointer_cast<CompositeFunction>(
+          mdfunc->getFunction(0));
+      const auto second = boost::dynamic_pointer_cast<CompositeFunction>(
+          mdfunc->getFunction(1));
+      TS_ASSERT(first);
+      TS_ASSERT(second);
+
+      // test each individual function
+      auto testFunc = [](CompositeFunction_sptr f) {
+        if (f) {
+          TS_ASSERT_EQUALS(f->nFunctions(), 2);
+          TS_ASSERT_EQUALS(f->getFunction(0)->name(),
+                           "FunctionFactoryTest_FunctA");
+          TS_ASSERT_EQUALS(f->getFunction(1)->name(),
+                           "FunctionFactoryTest_FunctB");
+        }
+      };
+      testFunc(first);
+      testFunc(second);
+    }
   }
 
   void test_getFunctionNames() {
