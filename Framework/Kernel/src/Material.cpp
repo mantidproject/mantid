@@ -355,60 +355,27 @@ double Material::incohScatterLengthRealSqrd(const double lambda) const {
 }
 
 double Material::cohScatterLengthSqrd(const double lambda) const {
-  UNUSED_ARG(lambda);
+  // cross section has this properly averaged already
+  double crossSection = cohScatterXSection(lambda);
 
-  const double weightedTotal =
-      std::accumulate(
-          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
-          [](double subtotal, const FormulaUnit &right) {
-            const double value = right.atom->neutron.coh_scatt_length;
-            return subtotal + value * value * right.multiplicity;
-          }) /
-      m_atomTotal;
-
-  if (!std::isnormal(weightedTotal)) {
-    return 0.;
-  } else {
-    return weightedTotal;
-  }
+  // 1 barn = 100 fm
+  return 100. * crossSection * INV_FOUR_PI;
 }
 
 double Material::incohScatterLengthSqrd(const double lambda) const {
-  UNUSED_ARG(lambda);
+  // cross section has this properly averaged already
+  double crossSection = incohScatterXSection(lambda);
 
-  const double weightedTotal =
-      std::accumulate(
-          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
-          [](double subtotal, const FormulaUnit &right) {
-            const double value = right.atom->neutron.inc_scatt_length;
-            return subtotal + value * value * right.multiplicity;
-          }) /
-      m_atomTotal;
-
-  if (!std::isnormal(weightedTotal)) {
-    return 0.;
-  } else {
-    return weightedTotal;
-  }
+  // 1 barn = 100 fm
+  return 100. * crossSection * INV_FOUR_PI;
 }
 
 double Material::totalScatterLengthSqrd(const double lambda) const {
-  UNUSED_ARG(lambda);
+  // cross section has this properly averaged already
+  double crossSection = totalScatterXSection(lambda);
 
-  const double weightedTotal =
-      std::accumulate(
-          std::begin(m_chemicalFormula), std::end(m_chemicalFormula), 0.,
-          [](double subtotal, const FormulaUnit &right) {
-            const double value = right.atom->neutron.tot_scatt_length;
-            return subtotal + value * value * right.multiplicity;
-          }) /
-      m_atomTotal;
-
-  if (!std::isnormal(weightedTotal)) {
-    return 0.;
-  } else {
-    return weightedTotal;
-  }
+  // 1 barn = 100 fm
+  return 100. * crossSection * INV_FOUR_PI;
 }
 
 /** Save the object to an open NeXus file.
