@@ -428,9 +428,9 @@ void LoadSpice2D::addRunProperty(const std::string &name, const T &value,
 void LoadSpice2D::setBeamTrapRunProperty(
     std::map<std::string, std::string> &metadata) {
 
-  std::vector<double> trapDiameters = {25.4, 50.8, 76.2, 101.6};
+  std::vector<double> trapDiameters = {76.2, 50.8, 76.2, 101.6};
   // default use the shortest trap
-  double trapInUseDiameter = 25.4;
+  double trapDiameterInUse = trapDiameters[1];
 
   std::vector<double> trapMotorPositions;
   trapMotorPositions.push_back(
@@ -442,18 +442,34 @@ void LoadSpice2D::setBeamTrapRunProperty(
   trapMotorPositions.push_back(
       boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_101mm"]));
 
-  // The maximum value for the motors is the trap in use
-  std::vector<double>::iterator motorPosForTheTrapInUse =
-      std::max_element(trapMotorPositions.begin(), trapMotorPositions.end());
-
-  // Resting positions are below 10. Make sure we have one trap in use!
-  if (*motorPosForTheTrapInUse > 11.0) {
-    size_t indexOfMaxMotorPosition =
-        std::distance(trapMotorPositions.begin(), motorPosForTheTrapInUse);
-    trapInUseDiameter = trapDiameters[indexOfMaxMotorPosition];
+  // Check how many traps are in use (store indexes):
+  std::vector<size_t> trapIndexInUse;
+  for (size_t i = 0; i < trapMotorPositions.size(); i++) {
+    if (trapMotorPositions[i] > 11.0) {
+      // Resting positions are below 10. Make sure we have one trap in use!
+      trapIndexInUse.push_back(i);
+    }
   }
 
-  addRunProperty<double>("beam-trap-diameter", trapInUseDiameter, "mm");
+  g_log.debug() << "trapIndexInUse length:" <<  trapIndexInUse.size() << "\n";
+
+  // store trap diameters in use
+  std::vector<double> trapDiametersInUse;
+  for (auto index : trapIndexInUse) {
+    trapDiametersInUse.push_back(trapDiameters[index]);
+  }
+
+  g_log.debug() << "trapDiametersInUse length:" <<  trapDiametersInUse.size() << "\n";
+
+  // The maximum value for the trapDiametersInUse is the trap in use
+  std::vector<double>::iterator trapDiameterInUseIt =
+      std::max_element(trapDiametersInUse.begin(), trapDiametersInUse.end());
+  if (trapDiameterInUseIt != trapDiametersInUse.end())
+    trapDiameterInUse = *trapDiameterInUseIt;
+
+  g_log.debug() << "trapDiameterInUse:" <<  trapDiameterInUse << "\n";
+
+  addRunProperty<double>("beam-trap-diameter", trapDiameterInUse, "mm");
 }
 void LoadSpice2D::setMetadataAsRunProperties(
     std::map<std::string, std::string> &metadata) {
