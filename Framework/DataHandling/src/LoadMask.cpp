@@ -72,7 +72,9 @@ void LoadMask::init() {
 
   // 1. Declare property
   declareProperty("Instrument", "",
+                  boost::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the instrument to apply the mask.");
+
   const std::vector<std::string> maskExts{".xml", ".msk"};
   declareProperty(Kernel::make_unique<FileProperty>(
                       "InputFile", "", FileProperty::Load, maskExts),
@@ -82,12 +84,9 @@ void LoadMask::init() {
       Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "RefWorkspace", "", Direction::Input, PropertyMode::Optional),
       "The name of the workspace with defines insrtument and spectra, "
-      "used as the source of the spectra-detector map for the mask to load.");
-
-  setPropertySettings(
-      "RefWorkspace",
-      Kernel::make_unique<Kernel::EnabledWhenProperty>(
-          "Instrument", Kernel::ePropertyCriterion::IS_DEFAULT));
+      "used as the source of the spectra-detector map for the mask to load. "
+      "The instrument, attached to this workspace has to be the same as the "
+      "one specified by 'Instrument' property");
 
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
@@ -104,10 +103,7 @@ void LoadMask::exec() {
   m_sourceMapWS = getProperty("RefWorkspace");
 
   m_instrumentPropValue = instrumentname;
-  if (m_instrumentPropValue.size() == 0) {
-    // m_mapWS is not empty and has instrument due to the validator
-    m_instrumentPropValue = m_sourceMapWS->getInstrument()->getName();
-  }
+  setProperty("Instrument", instrumentname);
 
   this->intializeMaskWorkspace();
   setProperty("OutputWorkspace", m_maskWS);
@@ -927,32 +923,19 @@ std::map<std::string, std::string> LoadMask::validateInputs() {
 
   API::MatrixWorkspace_sptr inputWS = getProperty("RefWorkspace");
   std::string InstrName = getProperty("Instrument");
-  if (InstrName.size() == 0) {
-    if (!inputWS) {
-      result["Instrumet"] =
-          "Either Instrument Name or Workspace have to be defined";
-    } else {
-      try {
-        auto inst = inputWS->getInstrument();
-      } catch (Kernel::Exception::NotFoundError &) {
+
+  if (inputWS) {
+    try {
+      auto inst = inputWS->getInstrument();
+      std::string Name = inst->getName();
+      if (Name != InstrName) {
         result["RefWorkspace"] =
-            "If workspace is defined, it mast have an instrument";
+            "If both workspace and instrument name are defined, "
+            "workspace has to have the instrument with the same name";
       }
-    }
-  } else {
-    if (inputWS) {
-      try {
-        auto inst = inputWS->getInstrument();
-        std::string Name = inst->getName();
-        if (Name != InstrName) {
-          result["RefWorkspace"] =
-              "If both workspace and instrument name are defined, "
-              "workspace has to have the instrument with the same name";
-        }
-      } catch (Kernel::Exception::NotFoundError &) {
-        result["RefWorkspace"] =
-            "If workspace is defined, it mast have an instrument";
-      }
+    } catch (Kernel::Exception::NotFoundError &) {
+      result["RefWorkspace"] =
+          "If workspace is defined, it mast have an instrument";
     }
   }
 
