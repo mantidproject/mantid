@@ -145,9 +145,7 @@ int ISISHistoDataListener::runNumber() const {
 
 void ISISHistoDataListener::start(
     Kernel::DateAndTime /*startTime*/) // Ignore the start time
-{
-  return;
-}
+{}
 
 /**
  * Read the data from the DAE.
@@ -432,7 +430,7 @@ void ISISHistoDataListener::getData(int period, int index, int count,
 
   for (size_t i = 0; i < static_cast<size_t>(count); ++i) {
     size_t wi = workspaceIndex + i;
-    workspace->setX(wi, m_bins[m_timeRegime]);
+    workspace->setBinEdges(wi, m_bins[m_timeRegime]);
     MantidVec &y = workspace->dataY(wi);
     MantidVec &e = workspace->dataE(wi);
     workspace->getSpectrum(wi).setSpectrumNo(index + static_cast<specnum_t>(i));
@@ -562,9 +560,8 @@ void ISISHistoDataListener::loadTimeRegimes() {
         getFloatArray(detRTCB, floatBuffer, nbins + 1);
       }
 
-      // copy them into a MantidVec
-      m_bins.push_back(boost::make_shared<MantidVec>(floatBuffer.begin(),
-                                                     floatBuffer.end()));
+      // copy them into BinEdges
+      m_bins.emplace_back(floatBuffer.begin(), floatBuffer.end());
     } else {
       // check that dimensions haven't changed
       if (nspec != m_numberOfSpectra[tr] || nbins != m_numberOfBins[tr]) {

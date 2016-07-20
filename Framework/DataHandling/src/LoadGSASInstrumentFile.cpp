@@ -88,8 +88,6 @@ void LoadGSASInstrumentFile::init() {
                   "Default is all workspaces in numerical order. "
                   "If default banks are specified, they too are taken to be in "
                   "numerical order");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -203,8 +201,6 @@ void LoadGSASInstrumentFile::exec() {
       loadParamAlg->execute();
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -241,8 +237,6 @@ void LoadGSASInstrumentFile::loadFile(string filename, vector<string> &lines) {
     g_log.error(errmsg.str());
     throw runtime_error(errmsg.str());
   }
-
-  return;
 }
 
 /* Get the histogram type

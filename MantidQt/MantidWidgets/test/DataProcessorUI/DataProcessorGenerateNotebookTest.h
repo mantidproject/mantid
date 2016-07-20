@@ -261,9 +261,8 @@ public:
         "1 | 24682 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 | ", ""};
 
     int i = 0;
-    for (auto it = notebookLines.begin(); it != notebookLines.end();
-         ++it, ++i) {
-      TS_ASSERT_EQUALS(*it, result[i])
+    for (const auto &line : notebookLines) {
+      TS_ASSERT_EQUALS(line, result[i++])
     }
   }
 
@@ -357,9 +356,8 @@ public:
     boost::split(notebookLines, boost::get<0>(output), boost::is_any_of("\n"));
 
     int i = 0;
-    for (auto it = notebookLines.begin(); it != notebookLines.end();
-         ++it, ++i) {
-      TS_ASSERT_EQUALS(*it, result[i])
+    for (const auto &line : notebookLines) {
+      TS_ASSERT_EQUALS(line, result[i++])
     }
   }
 
@@ -411,9 +409,8 @@ public:
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, boost::get<0>(output), boost::is_any_of("\n"));
     int i = 0;
-    for (auto it = notebookLines.begin(); it != notebookLines.end();
-         ++it, ++i) {
-      TS_ASSERT_EQUALS(*it, result[i])
+    for (const auto &line : notebookLines) {
+      TS_ASSERT_EQUALS(line, result[i++])
     }
   }
 
@@ -566,9 +563,8 @@ public:
     boost::split(notebookLines, boost::get<0>(output), boost::is_any_of("\n"));
 
     int i = 0;
-    for (auto it = notebookLines.begin(); it != notebookLines.end();
-         ++it, ++i) {
-      TS_ASSERT_EQUALS(*it, result[i])
+    for (const auto &line : notebookLines) {
+      TS_ASSERT_EQUALS(line, result[i++])
     }
 
     // All rows in second group
@@ -641,9 +637,8 @@ public:
     boost::split(notebookLines, output, boost::is_any_of("\n"));
 
     int i = 0;
-    for (auto it = notebookLines.begin(); it != notebookLines.end();
-         ++it, ++i) {
-      TS_ASSERT_EQUALS(*it, result[i])
+    for (const auto &line : notebookLines) {
+      TS_ASSERT_EQUALS(line, result[i++])
     }
   }
 
@@ -673,9 +668,8 @@ public:
     boost::split(notebookLines, output, boost::is_any_of("\n"));
 
     int i = 0;
-    for (auto it = notebookLines.begin(); it != notebookLines.end();
-         ++it, ++i) {
-      TS_ASSERT_EQUALS(*it, result[i])
+    for (const auto &line : notebookLines) {
+      TS_ASSERT_EQUALS(line, result[i++])
     }
   }
 
@@ -852,9 +846,6 @@ public:
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));
-
-    for (size_t i = 0; i < notebookLines.size(); i++)
-      std::cout << i << " " << notebookLines[i] << "\n";
 
     // Only 75 lines because we only analyzed the first two runs
     TS_ASSERT_EQUALS(notebookLines.size(), 75);

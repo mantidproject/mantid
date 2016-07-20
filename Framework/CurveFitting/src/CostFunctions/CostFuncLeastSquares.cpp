@@ -89,8 +89,6 @@ void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain,
 
   PARALLEL_ATOMIC
   m_value += m_factor * retVal;
-
-  return;
 }
 
 /** Calculate the derivatives of the cost function

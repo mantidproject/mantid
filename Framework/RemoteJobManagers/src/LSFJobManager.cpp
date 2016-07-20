@@ -535,7 +535,7 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
         "Error while sending HTTP request to submit a job: " +
         std::string(ie.what()));
   }
-  std::string jobID = "";
+  std::string jobID;
   if (Mantid::Kernel::InternetHelper::HTTP_OK == code) {
     std::string resp = ss.str();
     if (std::string::npos != resp.find("<errMsg>")) {

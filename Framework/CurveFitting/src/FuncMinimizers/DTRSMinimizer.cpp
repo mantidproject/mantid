@@ -343,14 +343,12 @@ void roots_quadratic(double a0, double a1, double a2, double tol, int &nroots,
     auto pprime = two * a2 * root1 + a1;
     if (pprime != zero) {
       root1 = root1 - p / pprime;
-      p = (a2 * root1 + a1) * root1 + a0;
     }
     if (nroots == 2) {
       p = (a2 * root2 + a1) * root2 + a0;
       pprime = two * a2 * root2 + a1;
       if (pprime != zero) {
         root2 = root2 - p / pprime;
-        p = (a2 * root2 + a1) * root2 + a0;
       }
     }
   }
@@ -592,14 +590,11 @@ void dtrs_solve_main(int n, double radius, double f,
         if (h(i) == lambda_min) {
           i_hard = i;
           break;
-        };
+        }
       }
       x(i_hard) = one / radius;
       inform.x_norm = radius;
       inform.obj = f + lambda_min * radius * radius;
-      lambda = -lambda_min;
-    } else {
-      lambda = zero;
     }
     inform.status = ErrorCode::ral_nlls_ok;
     return;
@@ -730,11 +725,6 @@ void dtrs_solve_main(int n, double radius, double f,
 
     if (fabs(inform.x_norm - radius) <=
         std::max(control.stop_normal * radius, control.stop_absolute_normal)) {
-      if (inform.x_norm > radius) {
-        lambda_l = std::max(lambda_l, lambda);
-      } else {
-        lambda_u = std::min(lambda_u, lambda);
-      }
       inform.status = ErrorCode::ral_nlls_ok;
       break;
     }

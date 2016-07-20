@@ -827,7 +827,7 @@ void ConfigServiceImpl::updateConfig(const std::string &filename,
  */
 void ConfigServiceImpl::saveConfig(const std::string &filename) const {
   // Open and read the user properties file
-  std::string updated_file("");
+  std::string updated_file;
 
   std::ifstream reader(filename.c_str(), std::ios::in);
   if (reader.bad()) {
@@ -835,7 +835,7 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
                              "updated configuration.");
   }
 
-  std::string file_line(""), output("");
+  std::string file_line, output;
   bool line_continuing(false);
   while (std::getline(reader, file_line)) {
     if (!file_line.empty()) {
@@ -1418,7 +1418,7 @@ std::string ConfigServiceImpl::getDirectoryOfExecutable() const {
   * @returns A string containing the full path the the executable
   */
 std::string ConfigServiceImpl::getPathToExecutable() const {
-  std::string execpath("");
+  std::string execpath;
   const size_t LEN(1024);
   // cppcheck-suppress variableScope
   char pBuf[LEN];
@@ -1579,6 +1579,41 @@ void ConfigServiceImpl::setDataSearchDirs(
  */
 void ConfigServiceImpl::setDataSearchDirs(const std::string &searchDirs) {
   setString("datasearch.directories", searchDirs);
+}
+
+/**
+ *  Appends the passed subdirectory path to the end of each of data
+ *  search dirs and adds these new dirs to data search directories
+ *  @param subdir :: the subdirectory path to add (relative)
+ */
+void ConfigServiceImpl::appendDataSearchSubDir(const std::string &subdir) {
+  if (subdir.empty())
+    return;
+
+  Poco::Path subDirPath;
+  try {
+    subDirPath = Poco::Path(subdir);
+  } catch (Poco::PathSyntaxException &) {
+    return;
+  }
+
+  if (!subDirPath.isDirectory() || !subDirPath.isRelative()) {
+    return;
+  }
+
+  auto newDataDirs = m_DataSearchDirs;
+  for (const auto &path : m_DataSearchDirs) {
+    Poco::Path newDirPath;
+    try {
+      newDirPath = Poco::Path(path);
+      newDirPath.append(subDirPath);
+      newDataDirs.push_back(newDirPath.toString());
+    } catch (Poco::PathSyntaxException &) {
+      continue;
+    }
+  }
+
+  setDataSearchDirs(newDataDirs);
 }
 
 /**
@@ -1994,7 +2029,7 @@ void ConfigServiceImpl::setFilterChannelLogLevel(
 int ConfigServiceImpl::FindLowestFilterLevel() const {
   int lowestPriority = Logger::Priority::PRIO_FATAL;
   // Find the lowest level of all of the filter channels
-  for (const auto filterChannelName : m_filterChannels) {
+  for (const auto &filterChannelName : m_filterChannels) {
     try {
       auto *channel = Poco::LoggingRegistry::defaultRegistry().channelForName(
           filterChannelName);
@@ -2013,6 +2048,7 @@ int ConfigServiceImpl::FindLowestFilterLevel() const {
 
   return lowestPriority;
 }
+
 /// \cond TEMPLATE
 template DLLExport int ConfigServiceImpl::getValue(const std::string &,
                                                    double &);

@@ -117,7 +117,6 @@ void FileEventDataListener::start(
   // Kick off loading the first chunk (which will include loading the instrument
   // etc.)
   loadChunk();
-  return;
 }
 
 boost::shared_ptr<Workspace> FileEventDataListener::extractData() {

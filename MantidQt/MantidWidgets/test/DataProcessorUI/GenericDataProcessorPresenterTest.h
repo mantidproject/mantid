@@ -1797,8 +1797,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedRows())
         .Times(1)
         .WillRepeatedly(Return(selection));
-    EXPECT_CALL(mockDataProcessorView, setSelection(_))
-        .Times(0);
+    EXPECT_CALL(mockDataProcessorView, setSelection(_)).Times(0);
     presenter.notify(DataProcessorPresenter::ExpandSelectionFlag);
 
     // Tidy up

@@ -39,11 +39,8 @@ public:
       for (int k = 0; k < 6; ++k) {
         space2D->dataX(j)[k] = k;
       }
-      space2D->setData(
-          j, boost::shared_ptr<Mantid::MantidVec>(
-                 new Mantid::MantidVec(a + (5 * j), a + (5 * j) + 5)),
-          boost::shared_ptr<Mantid::MantidVec>(
-              new Mantid::MantidVec(e + (5 * j), e + (5 * j) + 5)));
+      space2D->dataY(j) = Mantid::MantidVec(a + (5 * j), a + (5 * j) + 5);
+      space2D->dataE(j) = Mantid::MantidVec(e + (5 * j), e + (5 * j) + 5);
     }
     // Register the workspace in the data service
     AnalysisDataService::Instance().add("testSpace", space);

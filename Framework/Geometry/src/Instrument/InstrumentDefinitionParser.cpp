@@ -152,7 +152,7 @@ void InstrumentDefinitionParser::initialise(const std::string &filename,
  * */
 std::string InstrumentDefinitionParser::getMangledName() {
 
-  std::string retVal = "";
+  std::string retVal;
   // use the xml in preference if available
   auto xml = Poco::trim(m_instrument->getXmlText());
   if (!(xml.empty())) {
@@ -940,7 +940,7 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
     XMLString s_alongBeam("z");
     XMLString s_pointingUp("y");
     XMLString s_handedness("right");
-    XMLString s_origin("");
+    XMLString s_origin;
 
     // Make extractions from sub elements where possible.
     if (alongElement) {
@@ -1067,7 +1067,7 @@ void InstrumentDefinitionParser::appendAssembly(
       m_instrument
           ->getLogfileCache()); // params specified within specific <location>
 
-  std::string category = "";
+  std::string category;
   if (pType->hasAttribute("is"))
     category = pType->getAttribute("is");
 
@@ -1434,7 +1434,7 @@ void InstrumentDefinitionParser::createStructuredDetector(
   while (pNode) {
     Element *check = static_cast<Element *>(pNode);
     if (pNode->nodeName().compare("type") == 0 && check->hasAttribute("is")) {
-      std::string is = check->getAttribute("is").c_str();
+      std::string is = check->getAttribute("is");
       if (StructuredDetector::compareName(is) &&
           typeName.compare(check->getAttribute("name")) == 0) {
         pElem = check;
@@ -1563,7 +1563,7 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
   std::string typeName = pCompElem->getAttribute("type");
   Element *pType = getTypeElement[typeName];
 
-  std::string category = "";
+  std::string category;
   if (pType->hasAttribute("is"))
     category = pType->getAttribute("is");
 
@@ -2005,12 +2005,12 @@ void InstrumentDefinitionParser::setLogfile(
       continue;
     }
 
-    std::string logfileID = "";
-    std::string value = "";
+    std::string logfileID;
+    std::string value;
 
     std::string type = "double";               // default
     std::string extractSingleValueAs = "mean"; // default
-    std::string eq = "";
+    std::string eq;
 
     Poco::AutoPtr<NodeList> pNLvalue =
         pParamElem->getElementsByTagName("value");
@@ -2093,8 +2093,8 @@ void InstrumentDefinitionParser::setLogfile(
 
     // some processing
 
-    std::string fittingFunction = "";
-    std::string tie = "";
+    std::string fittingFunction;
+    std::string tie;
 
     if (type.compare("fitting") == 0) {
       size_t found = paramName.find(':');
@@ -2199,9 +2199,9 @@ void InstrumentDefinitionParser::setLogfile(
 
     // Check if formula is specified
 
-    std::string formula = "";
-    std::string formulaUnit = "";
-    std::string resultUnit = "";
+    std::string formula;
+    std::string formulaUnit;
+    std::string resultUnit;
 
     if (numberFormula >= 1) {
       Element *pFormula = static_cast<Element *>(pNLFormula->item(0));
@@ -2221,7 +2221,7 @@ void InstrumentDefinitionParser::setLogfile(
         resultUnit = pFormula->getAttribute("result-unit");
     }
     // Check if parameter description is
-    std::string description = "";
+    std::string description;
 
     Poco::AutoPtr<NodeList> pNLDescription =
         pParamElem->getElementsByTagName("description");
@@ -2771,7 +2771,7 @@ InstrumentDefinitionParser::convertLocationsElement(
         "www.mantidproject.org/IDF.");
   }
 
-  std::string name("");
+  std::string name;
   if (pElem->hasAttribute("name")) {
     name = pElem->getAttribute("name");
   }

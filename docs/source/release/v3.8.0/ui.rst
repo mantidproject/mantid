@@ -11,6 +11,8 @@ Installation
 Windows
 #######
 
+* IPython has been upgraded to version 3.2.1
+
 OS X
 ####
 
@@ -26,8 +28,23 @@ Plotting Improvements
 Algorithm Toolbox
 #################
 
+Algorithms
+##########
+.. figure::  ../../images/GroupWorkspaces_multipleInput.png
+   :width: 487
+   :align: right
+
+- Algorithms can now use a multiple selection list box for property input, :ref:`MergeRuns <algm-MergeRuns>` and :ref:`GroupWorkspaces <algm-GroupWorkspaces>` use this so far. To select multiple rows use the Shift or Ctrl (Cmd) keys while clicking  with the mouse.
+
+
 Scripting Window
 ################
+
+Progress Reporting
+##################
+
+- The progress reporting for algorithms has been improved, so that the progress is reported correctly when processin workspace groups or multi-period workspaces.
+
 
 Documentation
 #############
@@ -36,10 +53,16 @@ Documentation
 
 Bugs Resolved
 -------------
+ - Floating windows now always stay on top of the main window in OSX
 
 SliceViewer Improvements
 ------------------------
 * When opening the sliceviewer, it will default to showing the first two non-integrated dimensions
+
+VSI Improvements
+----------------
+* ParaView updated to version 5.1.0
+
 |
 
 Full list of

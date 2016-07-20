@@ -29,6 +29,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::Points;
 
 class LoadInstrumentTest : public CxxTest::TestSuite {
 public:
@@ -49,23 +50,23 @@ public:
     Workspace_sptr ws = WorkspaceFactory::Instance().create(
         "Workspace2D", histogramNumber, timechannels, timechannels);
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Points timeChannelsVec(timechannels);
+    int j = 0;
+    std::generate(begin(timeChannelsVec), end(timeChannelsVec),
+                  [&j] { return j++ * 100; });
     // loop to create data
     for (int i = 0; i < histogramNumber; i++) {
-      boost::shared_ptr<Mantid::MantidVec> timeChannelsVec(
-          new Mantid::MantidVec),
-          v(new Mantid::MantidVec), e(new Mantid::MantidVec);
-      timeChannelsVec->resize(timechannels);
-      v->resize(timechannels);
-      e->resize(timechannels);
+      std::vector<double> v(timechannels);
+      std::vector<double> e(timechannels);
       // timechannels
       for (int j = 0; j < timechannels; j++) {
-        (*timeChannelsVec)[j] = j * 100;
-        (*v)[j] = (i + j) % 256;
-        (*e)[j] = (i + j) % 78;
+        v[j] = (i + j) % 256;
+        e[j] = (i + j) % 78;
       }
       // Populate the workspace.
-      ws2D->setX(i, timeChannelsVec);
-      ws2D->setData(i, v, e);
+      ws2D->setPoints(i, timeChannelsVec);
+      ws2D->dataY(i) = v;
+      ws2D->dataE(i) = e;
     }
 
     // put this workspace in the data service

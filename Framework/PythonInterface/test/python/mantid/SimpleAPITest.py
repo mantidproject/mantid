@@ -5,6 +5,7 @@ from mantid.api import (AlgorithmFactory, AlgorithmProxy, IAlgorithm, IEventWork
                         PythonAlgorithm, MatrixWorkspace, mtd, WorkspaceGroup)
 import mantid.simpleapi as simpleapi
 import numpy
+import six
 
 #======================================================================================================================
 
@@ -186,10 +187,10 @@ FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller 
         self.assertEqual(MatrixWorkspace.rebin.__doc__, simpleapi.Rebin.__doc__)
         
         # Signature of method will have extra self argument
-        freefunction_sig = simpleapi.rebin.func_code.co_varnames
+        freefunction_sig = six.get_function_code(simpleapi.rebin).co_varnames
         expected_method_sig = ['self']
         expected_method_sig.extend(freefunction_sig)
-        self.assertEqual(MatrixWorkspace.rebin.func_code.co_varnames, tuple(expected_method_sig))
+        self.assertEqual(six.get_function_code(MatrixWorkspace.rebin).co_varnames, tuple(expected_method_sig))
 
     def test_function_attached_as_workpace_method_does_the_same_as_the_free_function(self):
         # Use Rebin as a test

@@ -5,16 +5,15 @@
 
 #include "MantidCurveFitting/Functions/PawleyFunction.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::CurveFitting;
-using namespace Mantid::CurveFitting::Functions;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+
+using Mantid::CurveFitting::Functions::PawleyParameterFunction;
+using Mantid::CurveFitting::Functions::PawleyParameterFunction_sptr;
+using Mantid::CurveFitting::Functions::PawleyFunction;
 
 class PawleyFunctionTest : public CxxTest::TestSuite {
 public:
@@ -425,105 +424,7 @@ public:
     TS_ASSERT_EQUALS(parameters->getParameter("Gamma"), 90.0);
   }
 
-  void testFunctionFitSi() {
-    /* This example generates a spectrum with the first two reflections
-     * of Silicon with lattice parameter a = 5.4311946 Angstr.
-     *    hkl      d       height      fwhm
-     *   1 1 1  3.13570    40.0       0.006
-     *   2 2 0  1.92022    110.0      0.004
-     */
-    auto ws = getWorkspace(
-        "name=Gaussian,PeakCentre=3.13570166,Height=40.0,Sigma=0.003;name="
-        "Gaussian,PeakCentre=1.92021727,Height=110.0,Sigma=0.002",
-        1.85, 3.2, 400);
-
-    PawleyFunction_sptr pawleyFn = boost::make_shared<PawleyFunction>();
-    pawleyFn->initialize();
-    pawleyFn->setLatticeSystem("Cubic");
-    pawleyFn->addPeak(V3D(1, 1, 1), 0.0065, 35.0);
-    pawleyFn->addPeak(V3D(2, 2, 0), 0.0045, 110.0);
-    pawleyFn->setUnitCell("5.4295 5.4295 5.4295");
-
-    // fix ZeroShift
-    pawleyFn->fix(pawleyFn->parameterIndex("f0.ZeroShift"));
-
-    IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
-    fit->setProperty("Function",
-                     boost::dynamic_pointer_cast<IFunction>(pawleyFn));
-    fit->setProperty("InputWorkspace", ws);
-    fit->execute();
-
-    PawleyParameterFunction_sptr parameters =
-        pawleyFn->getPawleyParameterFunction();
-
-    TS_ASSERT_DELTA(parameters->getParameter("a"), 5.4311946, 1e-6);
-  }
-
-  void testFunctionFitSiZeroShift() {
-    /* This example generates a spectrum with the first three reflections
-     * of Silicon with lattice parameter a = 5.4311946 Angstr.
-     *    hkl      d       height     ca. fwhm
-     *   1 1 1  3.13570    40.0       0.006
-     *   2 2 0  1.92022    110.0      0.004
-     *   3 1 1  1.63757    101.0      0.003
-     */
-    auto ws = getWorkspace(
-        "name=Gaussian,PeakCentre=3.13870166,Height=40.0,Sigma=0.003;name="
-        "Gaussian,PeakCentre=1.92321727,Height=110.0,Sigma=0.002;name=Gaussian,"
-        "PeakCentre=1.6405667,Height=105.0,Sigma=0.0016",
-        1.6, 3.2, 800);
-
-    PawleyFunction_sptr pawleyFn = boost::make_shared<PawleyFunction>();
-    pawleyFn->initialize();
-    pawleyFn->setLatticeSystem("Cubic");
-    pawleyFn->addPeak(V3D(1, 1, 1), 0.0065, 35.0);
-    pawleyFn->addPeak(V3D(2, 2, 0), 0.0045, 115.0);
-    pawleyFn->addPeak(V3D(3, 1, 1), 0.0035, 115.0);
-    pawleyFn->setUnitCell("5.433 5.433 5.433");
-    pawleyFn->setParameter("f0.ZeroShift", 0.001);
-
-    IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
-    fit->setProperty("Function",
-                     boost::dynamic_pointer_cast<IFunction>(pawleyFn));
-    fit->setProperty("InputWorkspace", ws);
-    fit->execute();
-
-    PawleyParameterFunction_sptr parameters =
-        pawleyFn->getPawleyParameterFunction();
-
-    TS_ASSERT_DELTA(parameters->getParameter("a"), 5.4311946, 1e-5);
-    TS_ASSERT_DELTA(parameters->getParameter("ZeroShift"), 0.003, 1e-4);
-  }
-
 private:
-  MatrixWorkspace_sptr getWorkspace(const std::string &functionString,
-                                    double xMin, double xMax, size_t n) {
-    IFunction_sptr siFn =
-        FunctionFactory::Instance().createInitialized(functionString);
-
-    auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, n, n);
-
-    FunctionDomain1DVector xValues(xMin, xMax, n);
-    FunctionValues yValues(xValues);
-    std::vector<double> eValues(n, 1.0);
-
-    siFn->function(xValues, yValues);
-
-    std::vector<double> &xData = ws->dataX(0);
-    std::vector<double> &yData = ws->dataY(0);
-    std::vector<double> &eData = ws->dataE(0);
-
-    for (size_t i = 0; i < n; ++i) {
-      xData[i] = xValues[i];
-      yData[i] = yValues[i];
-      eData[i] = eValues[i];
-    }
-
-    WorkspaceCreationHelper::addNoise(ws, 0, -0.1, 0.1);
-
-    return ws;
-  }
-
   void cellParametersAre(const UnitCell &cell, double a, double b, double c,
                          double alpha, double beta, double gamma) {
     TS_ASSERT_DELTA(cell.a(), a, 1e-9);

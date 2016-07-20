@@ -767,8 +767,6 @@ void Fit1D::exec() {
   delete[] l_data.forSimplexLSwrap;
   delete[] l_data.parameters;
   gsl_vector_free(initFuncArg);
-
-  return;
 }
 
 /**  Constructor.

@@ -109,10 +109,8 @@ void Qxy::exec() {
   MatrixWorkspace_sptr weights =
       WorkspaceFactory::Instance().create(outputWorkspace);
   // Copy the X values from the output workspace to the solidAngles one
-  cow_ptr<MantidVec> axis;
-  axis.access() = outputWorkspace->readX(0);
   for (size_t i = 0; i < weights->getNumberHistograms(); ++i)
-    weights->setX(i, axis);
+    weights->setX(i, outputWorkspace->refX(0));
 
   const size_t numSpec = inputWorkspace->getNumberHistograms();
   const size_t numBins = inputWorkspace->blocksize();
@@ -371,9 +369,8 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   outputWorkspace->replaceAxis(1, verticalAxis);
 
   // Build up the X values
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &horizontalAxisRef = axis.access();
-  horizontalAxisRef.resize(bins);
+  HistogramData::BinEdges axis(bins);
+  auto &horizontalAxisRef = axis.mutableData();
   for (int i = 0; i < bins; ++i) {
     const double currentVal = startVal + i * delta;
     // Set the X value
@@ -384,7 +381,7 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
 
   // Fill the X vectors in the output workspace
   for (int i = 0; i < bins - 1; ++i) {
-    outputWorkspace->setX(i, axis);
+    outputWorkspace->setBinEdges(i, axis);
     for (int j = 0; j < bins - j; ++j) {
       outputWorkspace->dataY(i)[j] = std::numeric_limits<double>::quiet_NaN();
       outputWorkspace->dataE(i)[j] = std::numeric_limits<double>::quiet_NaN();

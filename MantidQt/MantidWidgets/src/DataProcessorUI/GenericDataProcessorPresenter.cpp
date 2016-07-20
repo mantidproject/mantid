@@ -301,24 +301,26 @@ void GenericDataProcessorPresenter::process() {
   } else {
     // They may have selected a group, in this case we want to process and
     // post-process the whole group, so populate group with every row
-    for (auto idxGroup = groups.begin(); idxGroup != groups.end(); ++idxGroup) {
-      for (int row = 0; row < numRowsInGroup(*idxGroup); row++)
-        rows[*idxGroup].insert(row);
+    for (const auto &group : groups) {
+      for (int row = 0; row < numRowsInGroup(group); row++)
+        rows[group].insert(row);
     }
   }
 
   // Check each group and warn if we're only partially processing it
-  for (auto gIt = rows.begin(); gIt != rows.end(); ++gIt) {
+  for (const auto &item : rows) {
 
-    const int &groupId = gIt->first;
-    const std::set<int> &rowIds = gIt->second;
+    const int &groupId = item.first;
+    const std::set<int> &rowIds = item.second;
 
     // Are we only partially processing a group?
-    if (static_cast<int>(rowIds.size()) < numRowsInGroup(gIt->first) &&
+    if (static_cast<int>(rowIds.size()) < numRowsInGroup(groupId) &&
         m_options["WarnProcessPartialGroup"].toBool()) {
+      const std::string groupName =
+          m_model->data(m_model->index(groupId, 0)).toString().toStdString();
       std::stringstream err;
       err << "You have only selected " << rowIds.size() << " of the ";
-      err << numRowsInGroup(groupId) << " rows in group " << groupId << ".";
+      err << numRowsInGroup(groupId) << " rows in group '" << groupName << "'.";
       err << " Are you sure you want to continue?";
       if (!m_view->askUserYesNo(err.str(), "Continue Processing?"))
         return;
@@ -459,13 +461,13 @@ bool GenericDataProcessorPresenter::processGroups(
     auto rows = it->second;
 
     // Reduce each row
-    for (auto rIt = rows.begin(); rIt != rows.end(); ++rIt) {
+    for (const auto &row : rows) {
       try {
-        reduceRow(groupId, *rIt);
+        reduceRow(groupId, row);
         progressReporter.report();
       } catch (std::exception &ex) {
         const std::string rowNo =
-            Mantid::Kernel::Strings::toString<int>(*rIt + 1);
+            Mantid::Kernel::Strings::toString<int>(row + 1);
         const std::string groupNo =
             Mantid::Kernel::Strings::toString<int>(groupId);
         const std::string message = "Error encountered while processing row " +
@@ -971,7 +973,7 @@ void GenericDataProcessorPresenter::groupRows() {
   // If they don't, remove rows from their groups and add them to a
   // new group
 
-  auto selectedRows = m_view->getSelectedRows();
+  const auto selectedRows = m_view->getSelectedRows();
 
   if (selectedRows.size() < 2) {
     // Rows belong to the same group (size == 1) or
@@ -985,20 +987,20 @@ void GenericDataProcessorPresenter::groupRows() {
   appendGroup();
   // Append as many rows as the number of selected rows minus one
   int rowsToAppend = -1;
-  for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
-    rowsToAppend += static_cast<int>(it->second.size());
+  for (const auto &row : selectedRows)
+    rowsToAppend += static_cast<int>(row.second.size());
   for (int i = 0; i < rowsToAppend; i++)
     insertRow(groupId, i);
 
   // Now we just have to set the data
   int rowIndex = 0;
-  for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
-    int oldGroupId = it->first;
-    auto rows = it->second;
-    for (auto row = rows.begin(); row != rows.end(); ++row) {
+  for (const auto &item : selectedRows) {
+    int oldGroupId = item.first;
+    auto rows = item.second;
+    for (const auto &row : rows) {
       for (int col = 0; col < m_columns; col++) {
         auto value = m_model->data(
-            m_model->index(*row, col, m_model->index(oldGroupId, 0)));
+            m_model->index(row, col, m_model->index(oldGroupId, 0)));
         m_model->setData(
             m_model->index(rowIndex, col, m_model->index(groupId, 0)), value);
       }
@@ -1277,16 +1279,15 @@ void GenericDataProcessorPresenter::expandSelection() {
 
 /** Clear the currently selected rows */
 void GenericDataProcessorPresenter::clearSelected() {
-  auto selectedRows = m_view->getSelectedRows();
+  const auto selectedRows = m_view->getSelectedRows();
 
-  for (auto group = selectedRows.begin(); group != selectedRows.end();
-       ++group) {
-    int groupIndex = group->first;
-    auto rows = group->second;
-    for (auto row = rows.begin(); row != rows.end(); ++row) {
+  for (const auto &item : selectedRows) {
+    int group = item.first;
+    auto rows = item.second;
+    for (const auto &row : rows) {
       for (auto col = 0; col < m_model->columnCount(); col++)
-        m_model->setData(
-            m_model->index(*row, col, m_model->index(groupIndex, 0)), "");
+        m_model->setData(m_model->index(row, col, m_model->index(group, 0)),
+                         "");
     }
   }
   m_tableDirty = true;
@@ -1296,18 +1297,18 @@ void GenericDataProcessorPresenter::clearSelected() {
 void GenericDataProcessorPresenter::copySelected() {
   std::vector<std::string> lines;
 
-  auto selectedRows = m_view->getSelectedRows();
-  for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
-    const int groupId = it->first;
-    auto rows = it->second;
+  const auto selectedRows = m_view->getSelectedRows();
+  for (const auto &item : selectedRows) {
+    const int group = item.first;
+    auto rows = item.second;
 
-    for (auto row = rows.begin(); row != rows.end(); ++row) {
+    for (const auto &row : rows) {
       std::vector<std::string> line;
-      line.push_back(std::to_string(groupId));
+      line.push_back(std::to_string(group));
 
       for (int col = 0; col < m_columns; ++col) {
         line.push_back(
-            m_model->data(m_model->index(*row, col, m_model->index(groupId, 0)))
+            m_model->data(m_model->index(row, col, m_model->index(group, 0)))
                 .toString()
                 .toStdString());
       }
@@ -1334,7 +1335,7 @@ void GenericDataProcessorPresenter::pasteSelected() {
 
   // If we have rows selected, we'll overwrite them. If not, we'll append new
   // rows.
-  auto selectedRows = m_view->getSelectedRows();
+  const auto selectedRows = m_view->getSelectedRows();
   if (selectedRows.empty()) {
     // No rows were selected
     // Use group where rows in clipboard belong and paste new rows to it

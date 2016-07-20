@@ -97,7 +97,6 @@ void ConvolveWorkspaces::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputWS);
-  return;
 }
 
 } // namespace Algorithms

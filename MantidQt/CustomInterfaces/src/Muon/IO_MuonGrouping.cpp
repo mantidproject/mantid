@@ -30,6 +30,8 @@
 #endif
 
 //-----------------------------------------------------------------------------
+using namespace Mantid;
+using namespace Mantid::API;
 using namespace Poco::XML;
 
 namespace MantidQt {

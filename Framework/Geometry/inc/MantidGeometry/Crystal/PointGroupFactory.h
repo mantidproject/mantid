@@ -120,17 +120,18 @@ private:
   boost::regex m_originChoiceRegex;
 };
 
-// This is taken from FuncMinimizerFactory
-#ifdef _WIN32
-template class MANTID_GEOMETRY_DLL
-    Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl>;
-#endif
-
 typedef Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl>
     PointGroupFactory;
 
 } // namespace Geometry
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::Geometry::PointGroupFactoryImpl>;
+}
+}
 
 #define PGF_CONCAT_IMPL(x, y) x##y
 #define PGF_CONCAT(x, y) PGF_CONCAT_IMPL(x, y)
