@@ -129,10 +129,10 @@ public:
         0.0001);
     TS_ASSERT_DELTA(
         m_sampleMaterial->cohScatterLength(NeutronAtom::ReferenceLambda),
-        4.8615, 0.0001);
+        4.9965, 0.0001);
     TS_ASSERT_DELTA(
         m_sampleMaterial->totalScatterLengthSqrd(NeutronAtom::ReferenceLambda),
-        23.6709, 0.0001); // TODO - should be zero?
+        24.9905, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
