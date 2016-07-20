@@ -594,7 +594,7 @@ void LoadMask::parseSpectrumNos(const std::string &inputstr,
     for (int32_t spectranum = pairs[2 * i]; spectranum <= pairs[2 * i + 1];
          spectranum++) {
 
-        targetMask.push_back(spectranum);
+      targetMask.push_back(spectranum);
     }
   }
 }
