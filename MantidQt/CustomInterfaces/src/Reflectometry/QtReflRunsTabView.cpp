@@ -32,7 +32,7 @@ QtReflRunsTabView::QtReflRunsTabView(QWidget *parent)
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-QtReflRunsTabView::~QtReflRunsTabView() { delete m_presenter; }
+QtReflRunsTabView::~QtReflRunsTabView() {}
 
 /**
 Initialise the Interface
@@ -50,8 +50,9 @@ void QtReflRunsTabView::initLayout() {
   ReflGenericDataProcessorPresenterFactory presenterFactory;
   auto processorPresenter = presenterFactory.create();
 
-  QDataProcessorWidget *qDataProcessorWidget =
-      new QDataProcessorWidget(processorPresenter, this);
+  QDataProcessorWidget *qDataProcessorWidget = new QDataProcessorWidget(
+      std::unique_ptr<DataProcessorPresenter>(processorPresenter.release()),
+      this);
   ui.layoutProcessPane->addWidget(qDataProcessorWidget);
 
   // Custom context menu for table
@@ -73,10 +74,10 @@ void QtReflRunsTabView::initLayout() {
           SLOT(instrumentChanged(int)));
 
   // Create the presenter
-  m_presenter = new ReflRunsTabPresenter(
+  m_presenter = std::make_shared<ReflRunsTabPresenter>(
       this /* main view */,
       this /* Currently this concrete view is also responsible for prog reporting */,
-      processorPresenter /* The data processor presenter */);
+      qDataProcessorWidget->getPresenter() /* The data processor presenter */);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 }
 
@@ -278,7 +279,7 @@ Get a pointer to the presenter that's currently controlling this view.
 @returns A pointer to the presenter
 */
 IReflRunsTabPresenter *QtReflRunsTabView::getPresenter() const {
-  return m_presenter;
+  return m_presenter.get();
 }
 
 boost::shared_ptr<MantidQt::API::AlgorithmRunner>

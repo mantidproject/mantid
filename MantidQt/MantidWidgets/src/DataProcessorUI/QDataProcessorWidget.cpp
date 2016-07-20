@@ -22,8 +22,8 @@ using namespace Mantid::API;
 * @param parent :: [input] The parent of this view
 */
 QDataProcessorWidget::QDataProcessorWidget(
-    boost::shared_ptr<DataProcessorPresenter> presenter, QWidget *parent)
-    : MantidWidget(parent), m_presenter(presenter),
+    std::unique_ptr<DataProcessorPresenter> presenter, QWidget *parent)
+    : MantidWidget(parent), m_presenter(std::move(presenter)),
       m_openMap(new QSignalMapper(this)) {
 
   createTable();
@@ -481,9 +481,8 @@ std::string QDataProcessorWidget::getWorkspaceToOpen() const {
 Get a pointer to the presenter that's currently controlling this view.
 @returns A pointer to the presenter
 */
-boost::shared_ptr<DataProcessorPresenter>
-QDataProcessorWidget::getTablePresenter() const {
-  return m_presenter;
+DataProcessorPresenter *QDataProcessorWidget::getPresenter() const {
+  return m_presenter.get();
 }
 
 /**

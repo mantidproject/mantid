@@ -44,7 +44,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QDataProcessorWidget
 
   Q_OBJECT
 public:
-  QDataProcessorWidget(boost::shared_ptr<DataProcessorPresenter> presenter,
+  QDataProcessorWidget(std::unique_ptr<DataProcessorPresenter> presenter,
                        QWidget *parent = 0);
   ~QDataProcessorWidget() override;
 
@@ -84,7 +84,7 @@ public:
   std::string getWorkspaceToOpen() const override;
   std::string getClipboard() const override;
 
-  boost::shared_ptr<DataProcessorPresenter> getTablePresenter() const override;
+  DataProcessorPresenter *getPresenter() const override;
 
 private:
   // initialise the interface
@@ -93,7 +93,7 @@ private:
   void setModel(const std::string &name) override;
 
   // the presenter
-  boost::shared_ptr<DataProcessorPresenter> m_presenter;
+  std::unique_ptr<DataProcessorPresenter> m_presenter;
   // the models
   QDataProcessorTreeModel_sptr m_model;
   // the interface

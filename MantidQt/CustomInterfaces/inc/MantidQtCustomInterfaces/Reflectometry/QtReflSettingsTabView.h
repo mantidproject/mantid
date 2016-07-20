@@ -55,7 +55,7 @@ private:
   /// The widget
   Ui::ReflSettingsTabWidget m_ui;
   /// The presenter
-  IReflSettingsTabPresenter *m_presenter;
+  std::unique_ptr<IReflSettingsTabPresenter> m_presenter;
 };
 
 } // namespace Mantid

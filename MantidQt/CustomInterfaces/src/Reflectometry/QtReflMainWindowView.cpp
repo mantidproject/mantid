@@ -20,7 +20,7 @@ QtReflMainWindowView::QtReflMainWindowView(QWidget *parent)
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-QtReflMainWindowView::~QtReflMainWindowView() { delete m_presenter; }
+QtReflMainWindowView::~QtReflMainWindowView() {}
 
 /**
 Initialise the Interface
@@ -33,8 +33,8 @@ void QtReflMainWindowView::initLayout() {
   auto settingsPresenter = createSettingsTab();
 
   // Create the presenter
-  m_presenter =
-      new ReflMainWindowPresenter(this, runsPresenter, settingsPresenter);
+  m_presenter.reset(
+      new ReflMainWindowPresenter(this, runsPresenter, settingsPresenter));
 }
 
 /** Creates the 'Runs' tab and returns a pointer to its presenter

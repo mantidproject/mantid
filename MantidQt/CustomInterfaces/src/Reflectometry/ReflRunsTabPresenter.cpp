@@ -39,7 +39,7 @@ namespace CustomInterfaces {
 */
 ReflRunsTabPresenter::ReflRunsTabPresenter(
     IReflRunsTabView *mainView, ProgressableView *progressableView,
-    boost::shared_ptr<DataProcessorPresenter> tablePresenter,
+    DataProcessorPresenter *tablePresenter,
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
       m_tablePresenter(tablePresenter), m_mainPresenter(),

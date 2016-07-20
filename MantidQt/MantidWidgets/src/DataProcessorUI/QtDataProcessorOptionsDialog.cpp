@@ -8,7 +8,7 @@ namespace MantidWidgets {
 /** Constructor */
 QtDataProcessorOptionsDialog::QtDataProcessorOptionsDialog(
     DataProcessorView *view,
-    boost::shared_ptr<DataProcessorPresenter> presenter)
+    DataProcessorPresenter *presenter)
     : QDialog(dynamic_cast<QWidget *>(view)), m_presenter(presenter) {
   initLayout();
   initBindings();

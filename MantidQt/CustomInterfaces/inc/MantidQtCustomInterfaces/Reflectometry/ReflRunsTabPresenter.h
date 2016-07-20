@@ -59,7 +59,7 @@ class MANTIDQT_CUSTOMINTERFACES_DLL ReflRunsTabPresenter
 public:
   ReflRunsTabPresenter(IReflRunsTabView *mainView,
                        ProgressableView *progressView,
-                       boost::shared_ptr<DataProcessorPresenter> tablePresenter,
+                       DataProcessorPresenter *tablePresenter,
                        boost::shared_ptr<IReflSearcher> searcher =
                            boost::shared_ptr<IReflSearcher>());
   ~ReflRunsTabPresenter() override;
@@ -82,7 +82,7 @@ protected:
   /// The progress view
   ProgressableView *m_progressView;
   /// The data processor presenter
-  boost::shared_ptr<DataProcessorPresenter> m_tablePresenter;
+  DataProcessorPresenter *m_tablePresenter;
   /// The main presenter
   IReflMainWindowPresenter *m_mainPresenter;
   /// The search implementation

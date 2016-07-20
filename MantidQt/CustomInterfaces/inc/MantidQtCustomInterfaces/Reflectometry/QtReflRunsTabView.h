@@ -102,7 +102,7 @@ private:
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 
   // the presenter
-  IReflRunsTabPresenter *m_presenter;
+  std::shared_ptr<IReflRunsTabPresenter> m_presenter;
   // the search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
   // the interface

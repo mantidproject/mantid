@@ -44,7 +44,7 @@ class DLLExport QtDataProcessorOptionsDialog : public QDialog {
 public:
   QtDataProcessorOptionsDialog(
       DataProcessorView *view,
-      boost::shared_ptr<DataProcessorPresenter> presenter);
+      DataProcessorPresenter *presenter);
   ~QtDataProcessorOptionsDialog() override;
 
 protected:
@@ -58,7 +58,7 @@ protected:
   // the interface
   Ui::DataProcessorOptionsDialog ui;
   // the presenter
-  boost::shared_ptr<DataProcessorPresenter> m_presenter;
+  DataProcessorPresenter *m_presenter;
   // maps option names to widget names
   std::map<std::string, QString> m_bindings;
 };

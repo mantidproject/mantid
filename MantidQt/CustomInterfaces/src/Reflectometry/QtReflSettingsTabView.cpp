@@ -12,13 +12,13 @@ QtReflSettingsTabView::QtReflSettingsTabView(QWidget *parent) {
 
   initLayout();
 
-  m_presenter = new ReflSettingsTabPresenter(this);
+  m_presenter.reset(new ReflSettingsTabPresenter(this));
 }
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-QtReflSettingsTabView::~QtReflSettingsTabView() { delete m_presenter; }
+QtReflSettingsTabView::~QtReflSettingsTabView() {}
 
 /**
 Initialise the Interface
@@ -30,7 +30,7 @@ void QtReflSettingsTabView::initLayout() { m_ui.setupUi(this); }
 */
 IReflSettingsTabPresenter *QtReflSettingsTabView::getPresenter() const {
 
-  return m_presenter;
+  return m_presenter.get();
 }
 
 /** Retuns the selected analysis mode

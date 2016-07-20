@@ -70,7 +70,7 @@ private:
   /// Interface definition with widgets for the main interface window
   Ui::RelMainWindowWidget m_ui;
   /// The presenter handling this view
-  IReflMainWindowPresenter *m_presenter;
+  std::unique_ptr<IReflMainWindowPresenter> m_presenter;
 };
 }
 }

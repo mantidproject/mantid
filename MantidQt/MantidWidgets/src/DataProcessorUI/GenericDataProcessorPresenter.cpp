@@ -1496,7 +1496,7 @@ void GenericDataProcessorPresenter::plotWorkspaces(
 /** Shows the Refl Options dialog */
 void GenericDataProcessorPresenter::showOptionsDialog() {
   auto options =
-      new QtDataProcessorOptionsDialog(m_view, m_view->getTablePresenter());
+      new QtDataProcessorOptionsDialog(m_view, m_view->getPresenter());
   // By default the dialog is only destroyed when ReflMainView is and so they'll
   // stack up.
   // This way, they'll be deallocated as soon as they've been closed.

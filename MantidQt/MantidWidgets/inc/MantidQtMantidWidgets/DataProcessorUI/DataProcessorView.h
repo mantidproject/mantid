@@ -78,8 +78,7 @@ public:
   virtual std::string getWorkspaceToOpen() const = 0;
   virtual std::string getClipboard() const = 0;
   virtual std::string getProcessInstrument() const = 0;
-  virtual boost::shared_ptr<DataProcessorPresenter>
-  getTablePresenter() const = 0;
+  virtual DataProcessorPresenter *getPresenter() const = 0;
 };
 }
 }
