@@ -1,13 +1,14 @@
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORPROCESSCOMMAND_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPROCESSCOMMAND_H
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORDELETEGROUPCOMMAND_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORDELETEGROUPCOMMAND_H
 
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
-/** @class DataProcessorProcessCommand
 
-DataProcessorProcessCommand defines the action "Process"
+/** @class DataProcessorDeleteGroupCommand
+
+DataProcessorDeleteGroupCommand defines the action "Delete Group"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -30,18 +31,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorProcessCommand : public DataProcessorCommandBase {
+class DataProcessorDeleteGroupCommand : public DataProcessorCommandBase {
 public:
-  DataProcessorProcessCommand(DataProcessorPresenter *tablePresenter)
+  DataProcessorDeleteGroupCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
-  virtual ~DataProcessorProcessCommand(){};
+  virtual ~DataProcessorDeleteGroupCommand(){};
 
   void execute() override {
-    m_presenter->notify(DataProcessorPresenter::ProcessFlag);
+    m_presenter->notify(DataProcessorPresenter::DeleteGroupFlag);
   };
-  std::string name() override { return std::string("Process"); }
-  std::string icon() override { return std::string("://stat_rows.png"); }
+  std::string name() override { return std::string("Delete Group"); }
+  std::string icon() override { return std::string("://delete_group.png"); }
 };
 }
 }
-#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPROCESSCOMMAND_H*/
+#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORDELETEGROUPCOMMAND_H*/

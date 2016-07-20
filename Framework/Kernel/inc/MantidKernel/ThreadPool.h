@@ -93,7 +93,7 @@ private:
 //    template class MANTID_KERNEL_DLL
 //    Mantid::Kernel::SingletonHolder<ThreadPoolImpl>;
 //#endif /* _WIN32 */
-//    typedef MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<ThreadPoolImpl>
+//    typedef Mantid::Kernel::SingletonHolder<ThreadPoolImpl>
 //    ThreadPool;
 
 } // namespace Kernel
