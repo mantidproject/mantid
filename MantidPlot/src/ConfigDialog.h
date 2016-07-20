@@ -159,14 +159,14 @@ private:
 
   //Options Window - Selected Options
   void
-  buildTreeCategoryStructure(const QString *catNames, const bool isHidden,
-                             QMap<QString, QTreeWidgetItem *> *seenCategories);
-  QTreeWidgetItem *walkBackwardsThroughCategories(
-      const QString *catNames, int elementToCheck,
-      QMap<QString, QTreeWidgetItem *> *seenCategories,
+  buildTreeCategoryStructure(const QString &catNames, const bool isHidden,
+                             QMap<QString, QTreeWidgetItem *> &seenCategories);
+  QTreeWidgetItem* walkBackwardsThroughCategories(
+      const QString &catNames, int elementToCheck,
+      QMap<QString, QTreeWidgetItem *> &seenCategories,
       Qt::CheckState childTickState);
-  void updateChildTickStatuses(QTreeWidgetItem *widgetPtr, const Qt::CheckState newState);
-  void correctTreePatrialTicks(QTreeWidgetItem *topLevelCat);
+  void updateChildTickStatuses(QTreeWidgetItem &widgetPtr, const Qt::CheckState newState);
+  void correctTreePatrialTicks(QTreeWidgetItem &topLevelCat);
 
   // MD Plotting
   void initMdPlottingPage();
