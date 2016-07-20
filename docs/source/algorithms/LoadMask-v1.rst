@@ -164,7 +164,7 @@ Output:
     print "*** Initial workspace masking parameters **********************************************"
     print "Masked Spectra Numbers: ",Sig0Masked
     print "Masked Detector IDs   : ",Det0Masked
-    print "*** One to one mask workspace has masked the same spectra numbers but different detectors "
+    print "*** One to one mask workspace has masked the same spectra numbers but different detectors"
     print "ws 1to1 Masked spectra: ",MaskedSp1to1
     print "ws 1to1 Masked DedIDs : ",MaskedDet1to1
     print "*** Real spectra-det-map workspace has masked different spectra numbers but the same detectors" 
@@ -173,7 +173,7 @@ Output:
     print "*** indeed the same:"
     Det0Masked.sort()
     MaskedDet_R.sort()
-    print "sorted initial detIDs : ",Det0Masked
+    print "sorted initial DetIDs : ",Det0Masked
     print "sorted RSDM    DedIDs : ",MaskedDet_R
     print "*** ************************************ **********************************************"
     print "*** note spectra with id 4 is a monitor, not present in the masking workspaces"
@@ -195,7 +195,7 @@ Output:
     ws RSDM Masked spectra:  [318, 418, 787, 788, 789, 790, 877, 887, 897, 907, 917]
     ws RSDM Masked DedIDs :  [2220, 2524, 4106, 4107, 4108, 4109, 4608, 4702, 4712, 4806, 4816]
     *** indeed the same:
-    sorted initial detIDs :  [2220, 2524, 4106, 4107, 4108, 4109, 4608, 4702, 4712, 4806, 4816]
+    sorted initial DetIDs :  [2220, 2524, 4106, 4107, 4108, 4109, 4608, 4702, 4712, 4806, 4816]
     sorted RSDM    DedIDs :  [2220, 2524, 4106, 4107, 4108, 4109, 4608, 4702, 4712, 4806, 4816]
     *** ************************************ **********************************************
     *** note spectra with id 4 is a monitor, not present in the masking workspaces
