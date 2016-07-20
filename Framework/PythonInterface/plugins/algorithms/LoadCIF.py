@@ -400,6 +400,7 @@ class LoadCIF(PythonAlgorithm):
     def _getFileUrl(self):
         # ReadCif requires a URL, windows path specs seem to confuse urllib,
         # so the pathname is converted to a URL before passing it to ReadCif.
+        # pylint: disable=no-name-in-module
         try:
             from urllib import pathname2url
         except ImportError:

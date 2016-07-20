@@ -14,7 +14,7 @@ import os
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
-from functools import reduce
+from functools import reduce #pylint: disable=redefined-builtin
 
 class LiquidsReflectometryReduction(PythonAlgorithm):
     number_of_pixels_x=0

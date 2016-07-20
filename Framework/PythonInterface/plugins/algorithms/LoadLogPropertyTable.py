@@ -56,7 +56,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
                 v=v.unfiltered()
             for tt in v.times:
                 times2.append((datetime.datetime(*(time.strptime(str(tt),"%Y-%m-%dT%H:%M:%S")[0:6]))-begin).total_seconds())
-        except Exception:
+        except: #pylint: disable=bare-except
             # print "probably not a time series"
             pass
         if name[0:8]=="Beamlog_" and (name.find("Counts")>0 or name.find("Frames")>0):
