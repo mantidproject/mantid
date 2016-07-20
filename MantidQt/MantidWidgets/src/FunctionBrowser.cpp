@@ -2194,7 +2194,8 @@ void FunctionBrowser::updateMultiDatasetParameters(
     if (const auto *multiFun =
             dynamic_cast<const Mantid::API::MultiDomainFunction *>(cfun)) {
       // Check the function has the correct number of domains
-      if (multiFun->getNumberDomains() != m_numberOfDatasets) {
+      if (multiFun->getNumberDomains() !=
+          static_cast<size_t>(m_numberOfDatasets)) {
         throw std::invalid_argument("Function has incorrect number of domains");
       }
       // update function
