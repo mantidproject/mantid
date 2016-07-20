@@ -1548,13 +1548,9 @@ Kernel::cow_ptr<HistogramData::HistogramY> EventList::sharedY() const {
   }
 
   if (!yData) {
-    // see if E should be calculated;
-    bool skipErrors = (eventType == TOF);
-
-    // Set the Y data in it
     MantidVec Y;
     MantidVec E;
-    this->generateHistogram(readX(), Y, E, skipErrors);
+    this->generateHistogram(readX(), Y, E);
 
     // Create the MRU object
     yData = Kernel::make_cow<HistogramData::HistogramY>(std::move(Y));
@@ -1562,12 +1558,9 @@ Kernel::cow_ptr<HistogramData::HistogramY> EventList::sharedY() const {
     // Lets save it in the MRU
     if (mru) {
       mru->insertY(thread, yData, this->m_specNo);
-      if (!skipErrors) {
-        // prepare to update the uncertainties
-        auto eData = Kernel::make_cow<HistogramData::HistogramE>(std::move(E));
-        mru->ensureEnoughBuffersE(thread);
-        mru->insertE(thread, eData, this->m_specNo);
-      }
+      auto eData = Kernel::make_cow<HistogramData::HistogramE>(std::move(E));
+      mru->ensureEnoughBuffersE(thread);
+      mru->insertE(thread, eData, this->m_specNo);
     }
   }
   return yData;
