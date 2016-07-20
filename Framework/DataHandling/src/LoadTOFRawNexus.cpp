@@ -383,7 +383,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
   HistogramData::BinEdges X(tof.begin(), tof.end());
 
   // Load the data. Coerce ints into double.
-  std::string errorsField = "";
+  std::string errorsField;
   std::vector<double> data;
   file->openData(m_dataField);
   file->getDataCoerce(data);

@@ -109,7 +109,7 @@ void ReflMainViewPresenter::pushCommands() {
   m_view->clearCommands();
 
   // The expected number of commands
-  const size_t nCommands = 26;
+  const size_t nCommands = 27;
   auto commands = m_tablePresenter->publishCommands();
   if (commands.size() != nCommands) {
     throw std::runtime_error("Invalid list of commands");

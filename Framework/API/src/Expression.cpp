@@ -311,7 +311,7 @@ void Expression::tokenize() {
 
   if (!tokens.empty()) {
     // remove operators of higher prec
-    m_tokens.push_back(Token(tokens[0]));
+    m_tokens.emplace_back(tokens[0]);
     for (size_t i = 0; i < tokens.size(); i++) {
       Token &tok = tokens[i];
       std::string op = m_expr.substr(tok.ie + 1, tok.is1 - tok.ie - 1); //?
@@ -320,7 +320,7 @@ void Expression::tokenize() {
         last_tok.ie = tok.ie;
         last_tok.is1 = tok.is1;
         if (i != tokens.size() - 1)
-          m_tokens.push_back(Token(tokens[i + 1]));
+          m_tokens.emplace_back(tokens[i + 1]);
       }
     }
   }
@@ -364,7 +364,7 @@ void Expression::logPrint(const std::string &pads) const {
 
 void Expression::setFunct(const std::string &name) {
   if (!op_prec(name)) {
-    std::string op = "";
+    std::string op;
     if (name.size() > 1 && is_op_symbol(name[0])) {
       op = name.substr(0, 1);
       if (name.size() > 2 && is_op_symbol(name[1])) {

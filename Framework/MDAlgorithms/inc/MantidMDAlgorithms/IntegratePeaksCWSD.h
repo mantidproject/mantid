@@ -20,7 +20,6 @@ namespace MDAlgorithms {
 class DLLExport IntegratePeaksCWSD : public API::Algorithm {
 public:
   IntegratePeaksCWSD();
-  ~IntegratePeaksCWSD();
 
   /// Algorithm's name for identification
   const std::string name() const override { return "IntegratePeaksCWSD"; }

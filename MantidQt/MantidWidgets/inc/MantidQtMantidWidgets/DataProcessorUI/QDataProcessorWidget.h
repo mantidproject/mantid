@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTableModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "ui_DataProcessorWidget.h"
@@ -49,7 +49,7 @@ public:
   ~QDataProcessorWidget() override;
 
   // Connect the model
-  void showTable(QDataProcessorTableModel_sptr model) override;
+  void showTable(QDataProcessorTreeModel_sptr model) override;
 
   // Dialog/Prompt methods
   std::string askUserString(const std::string &prompt, const std::string &title,
@@ -78,7 +78,7 @@ public:
   bool getEnableNotebook() override;
 
   // Settor methods
-  void setSelection(const std::set<int> &rows) override;
+  void setSelection(const std::set<int> &groups) override;
   void setTableList(const std::set<std::string> &tables) override;
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
@@ -92,7 +92,8 @@ public:
       const std::vector<std::map<std::string, std::string>> &hints) override;
 
   // Accessor methods
-  std::set<int> getSelectedRows() const override;
+  std::map<int, std::set<int>> getSelectedRows() const override;
+  std::set<int> getSelectedGroups() const override;
   std::string getProcessInstrument() const override;
   std::string getProcessingOptions(const std::string &name) const override;
   std::string getWorkspaceToOpen() const override;
@@ -109,7 +110,7 @@ private:
   // the presenter
   boost::shared_ptr<DataProcessorPresenter> m_presenter;
   // the models
-  QDataProcessorTableModel_sptr m_model;
+  QDataProcessorTreeModel_sptr m_model;
   // the interface
   Ui::DataProcessorWidget ui;
   // the workspace the user selected to open
@@ -123,12 +124,10 @@ public slots:
   void on_comboProcessInstrument_currentIndexChanged(int index);
 
 private slots:
-  void on_actionNewTable_triggered();
-  void on_actionSaveTable_triggered();
-  void on_actionSaveTableAs_triggered();
   void on_actionAppendRow_triggered();
-  void on_actionPrependRow_triggered();
+  void on_actionAppendGroup_triggered();
   void on_actionDeleteRow_triggered();
+  void on_actionDeleteGroup_triggered();
   void on_actionProcess_triggered();
   void on_actionGroupRows_triggered();
   void on_actionClearSelected_triggered();
@@ -136,9 +135,6 @@ private slots:
   void on_actionCutSelected_triggered();
   void on_actionPasteSelected_triggered();
   void on_actionExpandSelection_triggered();
-  void on_actionOptionsDialog_triggered();
-  void on_actionImportTable_triggered();
-  void on_actionExportTable_triggered();
   void on_actionHelp_triggered();
   void on_actionPlotRow_triggered();
   void on_actionPlotGroup_triggered();

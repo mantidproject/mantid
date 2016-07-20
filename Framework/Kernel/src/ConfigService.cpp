@@ -827,7 +827,7 @@ void ConfigServiceImpl::updateConfig(const std::string &filename,
  */
 void ConfigServiceImpl::saveConfig(const std::string &filename) const {
   // Open and read the user properties file
-  std::string updated_file("");
+  std::string updated_file;
 
   std::ifstream reader(filename.c_str(), std::ios::in);
   if (reader.bad()) {
@@ -835,7 +835,7 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
                              "updated configuration.");
   }
 
-  std::string file_line(""), output("");
+  std::string file_line, output;
   bool line_continuing(false);
   while (std::getline(reader, file_line)) {
     if (!file_line.empty()) {
@@ -1418,7 +1418,7 @@ std::string ConfigServiceImpl::getDirectoryOfExecutable() const {
   * @returns A string containing the full path the the executable
   */
 std::string ConfigServiceImpl::getPathToExecutable() const {
-  std::string execpath("");
+  std::string execpath;
   const size_t LEN(1024);
   // cppcheck-suppress variableScope
   char pBuf[LEN];
@@ -2048,6 +2048,7 @@ int ConfigServiceImpl::FindLowestFilterLevel() const {
 
   return lowestPriority;
 }
+
 /// \cond TEMPLATE
 template DLLExport int ConfigServiceImpl::getValue(const std::string &,
                                                    double &);

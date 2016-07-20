@@ -247,9 +247,10 @@ public:
       coord_t const *const centers = &(data[ii + 4]);
 
       // Create the event with signal, error squared, and the centers
-      events.push_back(MDEvent<nd>(signal_t(data[ii]), signal_t(data[ii + 1]),
-                                   uint16_t(data[ii + 2]),
-                                   int32_t(data[ii + 3]), centers));
+      events.emplace_back(static_cast<signal_t>(data[ii]),
+                          static_cast<signal_t>(data[ii + 1]),
+                          static_cast<uint16_t>(data[ii + 2]),
+                          static_cast<int32_t>(data[ii + 3]), centers);
     }
   }
 };

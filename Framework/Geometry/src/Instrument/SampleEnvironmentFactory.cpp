@@ -77,7 +77,7 @@ SampleEnvironment_uptr SampleEnvironmentFactory::create(
   } else {
     auto specUPtr = m_finder->find(facility, instrument, specName);
     spec = specUPtr.get();
-    specCache.insert(std::make_pair(cacheKey, std::move(specUPtr)));
+    specCache.emplace(cacheKey, std::move(specUPtr));
   }
   return spec->buildEnvironment(canName);
 }

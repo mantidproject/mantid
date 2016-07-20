@@ -217,7 +217,7 @@ std::string MDNormDirectSC::inputEnergyMode() const {
   const auto &lastAlgHist = hist.getAlgorithmHistory(nalgs - 1);
   const auto &penultimateAlgHist = hist.getAlgorithmHistory(nalgs - 2);
 
-  std::string emode("");
+  std::string emode;
   if (lastAlgHist->name() == "ConvertToMD") {
     emode = lastAlgHist->getPropertyValue("dEAnalysisMode");
   } else if ((lastAlgHist->name() == "Load" ||

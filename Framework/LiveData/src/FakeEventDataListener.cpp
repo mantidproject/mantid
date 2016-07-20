@@ -87,8 +87,6 @@ void FakeEventDataListener::start(
 
   // When we are past this time, end the run.
   m_nextEndRunTime = DateAndTime::getCurrentTime() + m_endRunEvery;
-
-  return;
 }
 
 boost::shared_ptr<Workspace> FakeEventDataListener::extractData() {
@@ -141,8 +139,6 @@ void FakeEventDataListener::generateEvents(Poco::Timer &) {
     m_buffer->getSpectrum(1)
         .addEventQuickly(DataObjects::TofEvent(m_rand->nextValue()));
   }
-
-  return;
 }
 } // namespace LiveData
 } // namespace Mantid

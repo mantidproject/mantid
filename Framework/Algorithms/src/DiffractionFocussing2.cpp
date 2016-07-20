@@ -498,7 +498,6 @@ void DiffractionFocussing2::execEvent() {
   setProperty("OutputWorkspace",
               boost::dynamic_pointer_cast<MatrixWorkspace>(out));
   delete prog;
-  return;
 }
 
 //=============================================================================
@@ -648,7 +647,6 @@ void DiffractionFocussing2::determineRebinParameters() {
   }
   // Not needed anymore
   udet2group.clear();
-  return;
 }
 
 /***

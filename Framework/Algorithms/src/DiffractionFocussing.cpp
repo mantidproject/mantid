@@ -156,8 +156,6 @@ void DiffractionFocussing::exec() {
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputW);
-
-  return;
 }
 
 /// Run ConvertUnits as a Child Algorithm to convert to dSpacing

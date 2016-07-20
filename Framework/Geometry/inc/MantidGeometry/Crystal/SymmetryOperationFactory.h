@@ -78,17 +78,18 @@ private:
   SymmetryOperationFactoryImpl();
 };
 
-// This is taken from FuncMinimizerFactory
-#ifdef _WIN32
-template class MANTID_GEOMETRY_DLL
-    Mantid::Kernel::SingletonHolder<SymmetryOperationFactoryImpl>;
-#endif
-
 typedef Mantid::Kernel::SingletonHolder<SymmetryOperationFactoryImpl>
     SymmetryOperationFactory;
 
 } // namespace Geometry
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
+    SingletonHolder<Mantid::Geometry::SymmetryOperationFactoryImpl>;
+}
+}
 
 #define DECLARE_SYMMETRY_OPERATION(operation, name)                            \
   namespace {                                                                  \
