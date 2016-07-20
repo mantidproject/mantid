@@ -5,22 +5,24 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendGroupCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMockObjects.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPrependRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessCommand.h"
@@ -28,7 +30,6 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMockObjects.h"
 
 using namespace MantidQt::MantidWidgets;
 // using namespace Mantid::API;
@@ -206,12 +207,12 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockPresenter));
   }
 
-  void test_prepend_row_command() {
+  void test_append_group_command() {
     NiceMock<MockDataProcessorPresenter> mockPresenter;
-    DataProcessorPrependRowCommand command(&mockPresenter);
+    DataProcessorAppendGroupCommand command(&mockPresenter);
 
-    // The presenter should be notified with the PrependRowFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::PrependRowFlag))
+    // The presenter should be notified with the AppendRowFlag
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::AppendGroupFlag))
         .Times(Exactly(1));
     // Execute the command
     command.execute();
@@ -292,6 +293,19 @@ public:
 
     // The presenter should be notified with the DeleteRowFlag
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::DeleteRowFlag))
+        .Times(Exactly(1));
+    // Execute the command
+    command.execute();
+    // Verify expectations
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockPresenter));
+  }
+
+  void test_delete_group_command() {
+    NiceMock<MockDataProcessorPresenter> mockPresenter;
+    DataProcessorDeleteGroupCommand command(&mockPresenter);
+
+    // The presenter should be notified with the DeleteRowFlag
+    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::DeleteGroupFlag))
         .Times(Exactly(1));
     // Execute the command
     command.execute();

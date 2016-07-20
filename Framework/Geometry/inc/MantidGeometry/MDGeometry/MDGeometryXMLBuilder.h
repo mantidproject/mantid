@@ -125,7 +125,7 @@ private:
  @date May 2011
  @version 1.0
 */
-struct StrictDimensionPolicy
+struct MANTID_GEOMETRY_DLL StrictDimensionPolicy
     : public std::unary_function<IMDDimension_const_sptr, void> {
 public:
   StrictDimensionPolicy() {}
@@ -147,7 +147,7 @@ public:
  @author Owen Arnold
  @date May 2011
 */
-struct NoDimensionPolicy
+struct MANTID_GEOMETRY_DLL NoDimensionPolicy
     : public std::unary_function<IMDDimension_const_sptr, void> {
   void operator()(IMDDimension_const_sptr) {
     // Do nothing.

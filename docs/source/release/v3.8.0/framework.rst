@@ -22,6 +22,10 @@ Algorithms
 New
 ###
 
+- :ref:`LoadPreNexusLive <algm-LoadPreNexusLive>` will load "live"
+  data from file on legacy SNS DAS instruments.
+
+- :ref:`CropToComponent <algm-CropToComponent>` allows for cropping a workspace to a list of component names.
 
 Improved
 ########
@@ -35,7 +39,7 @@ Improved
 
 - :ref:`SavePlot1D <algm-SavePlot1D>` has options for writing out
   plotly html files.
-  
+
 - :ref:`ConvertTableToMatrixWorkspace <algm-ConvertTableToMatrixWorkspace>`
   had a bug where the table columns were in a reversed order in the dialogue's combo boxes. 
   This is now fixed and the order is correct.

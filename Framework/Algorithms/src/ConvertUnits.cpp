@@ -123,7 +123,8 @@ void ConvertUnits::exec() {
   if (inputWS->dataX(0).size() < 2) {
     std::stringstream msg;
     msg << "Input workspace has invalid X axis binning parameters. Should have "
-           "at least 2 values. Found " << inputWS->dataX(0).size() << ".";
+           "at least 2 values. Found "
+        << inputWS->dataX(0).size() << ".";
     throw std::runtime_error(msg.str());
   }
   if (inputWS->dataX(0).front() > inputWS->dataX(0).back() ||
@@ -270,7 +271,7 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
       MantidVec::iterator iter;
       for (iter = outputWS->dataX(0).begin(); iter != outputWS->dataX(0).end();
            ++iter) {
-        *iter = factor *std::pow(*iter, power);
+        *iter = factor * std::pow(*iter, power);
       }
 
       auto xVals = outputWS->refX(0);
@@ -301,7 +302,7 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
       MantidVec::iterator it;
       for (it = outputWS->dataX(k).begin(); it != outputWS->dataX(k).end();
            ++it) {
-        *it = factor *std::pow(*it, power);
+        *it = factor * std::pow(*it, power);
       }
     }
     // Convert the events themselves if necessary.
@@ -334,16 +335,16 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
 * @returns true if lookup successful, false on error
 */
 bool ConvertUnits::getDetectorValues(
-    Kernel::Unit_const_sptr outputUnit, Geometry::IComponent_const_sptr source,
-    Geometry::IComponent_const_sptr sample, double l1, int emode,
-    MatrixWorkspace_const_sptr ws,
+    const Kernel::Unit &outputUnit, const Geometry::IComponent &source,
+    const Geometry::IComponent &sample, double l1, int emode,
+    const MatrixWorkspace &ws,
     function<double(const Geometry::IDetector &)> thetaFunction,
     int64_t wsIndex, double &efixed, double &l2, double &twoTheta) {
   try {
-    Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
+    Geometry::IDetector_const_sptr det = ws.getDetector(wsIndex);
     // Get the sample-detector distance for this detector (in metres)
     if (!det->isMonitor()) {
-      l2 = det->getDistance(*sample);
+      l2 = det->getDistance(sample);
       // The scattering angle for this detector (in radians).
       twoTheta = thetaFunction(*det);
       // If an indirect instrument, try getting Efixed from the geometry
@@ -353,8 +354,8 @@ bool ConvertUnits::getDetectorValues(
           try {
             // Get the parameter map
             Geometry::Parameter_sptr par =
-                ws->constInstrumentParameters().getRecursive(det.get(),
-                                                             "Efixed");
+                ws.constInstrumentParameters().getRecursive(det.get(),
+                                                            "Efixed");
             if (par) {
               efixed = par->value<double>();
               g_log.debug() << "Detector: " << det->getID()
@@ -368,12 +369,12 @@ bool ConvertUnits::getDetectorValues(
     } else // If this is a monitor then make l1+l2 = source-detector distance
     // and twoTheta=0
     {
-      l2 = det->getDistance(*source);
+      l2 = det->getDistance(source);
       l2 = l2 - l1;
       twoTheta = 0.0;
       efixed = DBL_MIN;
       // Energy transfer is meaningless for a monitor, so set l2 to 0.
-      if (outputUnit->unitID().find("DeltaE") != std::string::npos) {
+      if (outputUnit.unitID().find("DeltaE") != std::string::npos) {
         l2 = 0.0;
       }
     }
@@ -477,23 +478,20 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
   double checkl2;
   double checktwoTheta;
   size_t checkIndex = 0;
-  if (getDetectorValues(outputUnit, source, sample, l1, emode, inputWS,
+  if (getDetectorValues(*outputUnit, *source, *sample, l1, emode, *inputWS,
                         thetaFunction, checkIndex, checkefixed, checkl2,
                         checktwoTheta)) {
     const double checkdelta = 0.0;
     // copy the X values for the check
     auto checkXValues = inputWS->readX(checkIndex);
     // Convert the input unit to time-of-flight
-    Unit *checkFromUnit = fromUnit->clone();
-    Unit *checkOutputUnit = outputUnit->clone();
+    auto checkFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
+    auto checkOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
     checkFromUnit->toTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
                          emode, checkefixed, checkdelta);
     // Convert from time-of-flight to the desired unit
     checkOutputUnit->fromTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
                              emode, checkefixed, checkdelta);
-    // Clear unit memory
-    delete checkFromUnit;
-    delete checkOutputUnit;
   }
 
   // create the output workspace
@@ -511,13 +509,13 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     // Now get the detector object for this histogram
     double l2;
     double twoTheta;
-    if (getDetectorValues(outputUnit, source, sample, l1, emode, outputWS,
+    if (getDetectorValues(*outputUnit, *source, *sample, l1, emode, *outputWS,
                           thetaFunction, i, efixed, l2, twoTheta)) {
 
       // Make local copies of the units. This allows running the loop in
       // parallel
-      Unit *localFromUnit = fromUnit->clone();
-      Unit *localOutputUnit = outputUnit->clone();
+      auto localFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
+      auto localOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
 
       /// @todo Don't yet consider hold-off (delta)
       const double delta = 0.0;
@@ -531,11 +529,8 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
       // EventWorkspace part, modifying the EventLists.
       if (m_inputEvents) {
         eventWS->getSpectrum(i)
-            .convertUnitsViaTof(localFromUnit, localOutputUnit);
+            .convertUnitsViaTof(localFromUnit.get(), localOutputUnit.get());
       }
-      // Clear unit memory
-      delete localFromUnit;
-      delete localOutputUnit;
     } else {
       // Get to here if exception thrown when calculating distance to detector
       failedDetectorCount++;
