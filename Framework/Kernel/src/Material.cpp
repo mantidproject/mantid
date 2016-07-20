@@ -24,12 +24,14 @@ const double INV_FOUR_PI = 1. / (4. * M_PI);
 }
 
 Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
-    const boost::shared_ptr<Atom> &atom, const double multiplicity)
+    const boost::shared_ptr<PhysicalConstants::Atom> &atom,
+    const double multiplicity)
     : atom(atom), multiplicity(multiplicity) {}
 
 Mantid::Kernel::Material::FormulaUnit::FormulaUnit(const Atom &atom,
                                                    const double multiplicity)
-    : atom(boost::make_shared<Atom>(atom)), multiplicity(multiplicity) {}
+    : atom(boost::make_shared<PhysicalConstants::Atom>(atom)),
+      multiplicity(multiplicity) {}
 
 /**
  * Construct an "empty" material. Everything returns zero
