@@ -65,11 +65,12 @@ Supporting ::
  * Spectrum Number --> Workspace Indexes
  
 
-When spectra mask is used on multiple workspaces, the same masking is produced only
+When a spectra mask (ISIS) is used on multiple workspaces, the same masking is produced only
 if all masked workspaces have the same spectra-detector map.
 When mask is generated for one workspace and applied to workspace with different 
 spectra-detector mapping, the same masking can be produced by using *Workspace*
-option, using this workspace as the source of the spectra-detector mapping.
+option, using this workspace as the source of the spectra-detector mapping. 
+See the Spectra mask usage sample below.
 
 
 Usage
@@ -103,77 +104,99 @@ Output:
     Is detector 17578 masked: False
     Is detector 20475 masked: True
 
-**Example: Using reference workspace with spectra mask**
+**Example: Using reference workspace with Spectra Mask**
    
 .. testcode:: 
 
     # Load workspace with real spectra-derector mask
     rws = Load(Filename=r'MAR11001.raw', OutputWorkspace='realWs',InlcudeMonitors=True);
-    # Create simulation workspace for MARI using 1:1 spectra-detector map
-    sws  = CreateSimulationWorkspace(Instrument='MARI', BinParams='-0.5,0.5,1', OutputWorkspace='simWS')
-    # Create similar simulation workspace to compare different masking options
-    swc  = CloneWorkspace(sws)
 
     # Create sample mask
     MaskDetectors(Workspace=rws, SpectraList='10,11,12,13,100,110,120,130,140,200,300')
     masked_list = ExportSpectraMask(rws,'SampleMask')
     file2remove = os.path.join(config.getString('defaultsave.directory'),'SampleMask.msk')
-    print ("Masked Spectra No:  {0}".format(masked_list))
+
     #
     
-    # Apply spectra mask to 1:1 instrument
-    sws= LoadMask('SampleMask.msk','MARI',sws)
+    # Load sample  spectra mask using 1:1 instrument
+    mask1to1ws= LoadMask('SampleMask.msk',Instrument='MARI')
+    
     # Apply spectra mask using real workspace spectra-detector map. 
-    # rws1 = Load(Filename=r'MAR11001.raw', OutputWorkspace='realWs',InlcudeMonitors=True);
-    # Note that rws does not need to be masked, We use it masked here only to avoid loading it again
-    # it just needs to contain the same spectra-detector map as the initial workspace
-    swc= LoadMask('SampleMask.msk',Workspace=rws)
+    # Note that rws does not need to be masked like its here, We use it masked here only to avoid overhead of loading it again   
+    # it just needs to contain the same spectra-detector map as the initial workspace    
+    # you may want to try rows below to be sure:
+    #rws1 = Load(Filename=r'MAR11001.raw', OutputWorkspace='realWs1',InlcudeMonitors=True);
+    
+    # Load Mask using  instrument and spectra-detector map provided with source workspace
+    maskRealSDM=LoadMask('SampleMask.msk',Instrument='',Workspace=rws)
 
-    # Delete unnecessary test mask file
+    # Clear up rubbish 
     os.remove(file2remove)
 
     # See the difference:
-    nhist = sws.getNumberHistograms()
-    sp00 = []
-    dp0m = []
-    sp1m = []
-    dp1m = []
-    sp2m = []
-    dp2m = []
+    nhist = mask1to1ws.getNumberHistograms()
+    Sig0Masked = []
+    Det0Masked= []
+    MaskedSp1to1 = []
+    MaskedDet1to1= []
+    MaskedSp_R  = []
+    MaskedDet_R= []
     for ind in xrange(0,nhist):
         try:
-            sig0  = sum(rws.readY(ind))
-            if sig0 == 0:
-                sp00.append(ind)
-            det0 = rws.getDetector(ind)
-            if det0.isMasked():
-                dp0m.append(det0.getID())
-            if sws.readY(ind)[0]>0.5:
-                det1 = sws.getDetector(ind)
-                sp1m.append(ind)
-                dp1m.append(det1.getID())
-            if swc.readY(ind)[0]>0.5:        
-                det1 = swc.getDetector(ind)
-                sp2m.append(ind)
-                dp2m.append(det1.getID())
+            det = rws.getDetector(ind)
+            if det.isMasked():
+                Sig0Masked.append(ind)                
+                Det0Masked.append(det.getID())
+            #  1:1 map generated from instrument definitions
+            if mask1to1ws.readY(ind)[0]>0.5: 
+                det = mask1to1ws.getDetector(ind)
+                MaskedSp1to1.append(ind)
+                MaskedDet1to1.append(det.getID())
+            # Real spectra-detector map:
+            if maskRealSDM.readY(ind)[0]>0.5:        
+                det = maskRealSDM.getDetector(ind)
+                MaskedSp_R.append(ind)
+                MaskedDet_R.append(det.getID())
         except:
             pass
-
-    print "Zero signal Spect N: ",sp00
-    print "Init  masked Det ID: ",dp0m
-    print "Masked spectra ws 1: ",sp1m
-    print "Masked detID   ws 1: ",dp1m
-    print "Masked spectra ws 2: ",sp2m
-    print "Masked detID   ws 2: ",dp2m
-    print " Note identical detector ID-s for initial and mask 2 Ws:"
-    dp0m.sort()
-    dp2m.sort()
-    print " Initial masked detID: ",dp0m
-    print " Final   masked detID: ",dp2m
-
+    print "*** ************************************ **********************************************"             
+    print ("*** Masked Spec. Id(s):  {0}".format(masked_list))            
+    print "*** Initial workspace masking parameters **********************************************"
+    print "Masked Spectra Numbers: ",Sig0Masked
+    print "Masked Detector IDs   : ",Det0Masked
+    print "*** One to one mask workspace has masked the same spectra numbers but different detectors "
+    print "ws 1to1 Masked spectra: ",MaskedSp1to1
+    print "ws 1to1 Masked DedIDs : ",MaskedDet1to1
+    print "*** Real spectra-det-map workspace has masked different spectra numbers but the same detectors" 
+    #MaskedDet1to1.sort()
+    print "ws RSDM Masked spectra: ",MaskedSp_R    
+    print "ws RSDM Masked DedIDs : ",MaskedDet_R
+    print "*** indeed the same:"
+    Det0Masked.sort()
+    MaskedDet_R.sort()
+    print "sorted initial detIDs : ",Det0Masked    
+    print "sorted RSDM    DedIDs : ",MaskedDet_R    
+    print "*** ************************************ **********************************************" 
+    print "*** note spectra with id 4 is a monitor, not present in the masking workspaces"
 
 Output:
 
+    *** ************************************ **********************************************
+    *** Masked Spec. Id(s):  [  4  10  11  12  13 100 110 120 130 140 200 300]
+    *** Initial workspace masking parameters **********************************************
+    Masked Spectra Numbers:  [9, 10, 11, 12, 99, 109, 119, 129, 139, 199, 299]
+    Masked Detector IDs   :  [4106, 4107, 4108, 4109, 4608, 4702, 4712, 4806, 4816, 2220, 2524]
+    *** One to one mask workspace has masked the same spectra numbers but different detectors 
+    ws 1to1 Masked spectra:  [9, 10, 11, 12, 99, 109, 119, 129, 139, 199, 299]
+    ws 1to1 Masked DedIDs :  [1110, 1111, 1112, 1113, 1401, 1411, 1421, 1431, 1509, 1705, 2201]
+    *** Real spectra-det-map workspace has masked different spectra numbers but the same detectors
+    ws RSDM Masked spectra:  [318, 418, 787, 788, 789, 790, 877, 887, 897, 907, 917]
+    ws RSDM Masked DedIDs :  [2220, 2524, 4106, 4107, 4108, 4109, 4608, 4702, 4712, 4806, 4816]
+    *** indeed the same:
+    sorted initial detIDs :  [2220, 2524, 4106, 4107, 4108, 4109, 4608, 4702, 4712, 4806, 4816]
+    sorted RSDM    DedIDs :  [2220, 2524, 4106, 4107, 4108, 4109, 4608, 4702, 4712, 4806, 4816]
+    *** ************************************ **********************************************
+    *** note spectra with id 4 is a monitor, not present in the masking workspaces
 
 .. categories::
 
