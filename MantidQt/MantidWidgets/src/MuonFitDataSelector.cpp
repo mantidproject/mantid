@@ -22,6 +22,11 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent)
   m_groupBoxes.insert("bwd", m_ui.chkBwd);
   m_periodBoxes.insert("1", m_ui.chk1);
   m_periodBoxes.insert("2", m_ui.chk2);
+
+  // Disable "Browse" button - use case is that first run will always be the one
+  // selected on front tab. User will type in the runs they want rather than
+  // using the Browse button. (If they want to "Browse" they can use front tab).
+  m_ui.runs->doButtonOpt(MWRunFiles::ButtonOpts::None);
 }
 
 /**
