@@ -139,7 +139,7 @@ void NDArrayToVector<DestElementType>::typeCheck() {
 // Explicit instantiations
 //------------------------------------------------------------------------
 #define INSTANTIATE_TOVECTOR(ElementType)                                      \
-  template DLLExport struct NDArrayToVector<ElementType>;
+  template struct DLLExport NDArrayToVector<ElementType>;
 
 ///@cond Doxygen doesn't seem to like this...
 INSTANTIATE_TOVECTOR(int)

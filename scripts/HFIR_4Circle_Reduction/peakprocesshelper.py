@@ -44,6 +44,7 @@ class PeakProcessHelper(object):
 
         self._myPeakWSKey = (None, None, None)
         self._myPeakIndex = None
+        self._ptIntensityDict = None
 
         self._myLastPeakUB = None
 
@@ -103,7 +104,6 @@ class PeakProcessHelper(object):
         # END-FOR (i_peak)
 
         self._avgPeakCenter = q_sample_sum/weight_sum
-        print '[DB] Weighted peak center = %s' % str(self._avgPeakCenter)
 
         return
 
@@ -159,10 +159,16 @@ class PeakProcessHelper(object):
     def get_weighted_peak_centres(self):
         """ Get the peak centers found in peak workspace.
         Guarantees: the peak centers and its weight (detector counts) are exported
-        :return: 2 lists: list of 3-tuple (Qx, Qy, Qz) and list of double (Det_Counts)
+        :return: 2-tuple: list of 3-tuple (Qx, Qy, Qz)
+                          list of double (Det_Counts)
         """
+        # get PeaksWorkspace
+        if AnalysisDataService.doesExist(self._myPeakWorkspaceName) is False:
+            raise RuntimeError('PeaksWorkspace %s does ot exit.' % self._myPeakWorkspaceName)
+
         peak_ws = AnalysisDataService.retrieve(self._myPeakWorkspaceName)
 
+        # get peak center, peak intensity and etc.
         peak_center_list = list()
         peak_intensity_list = list()
         num_peaks = peak_ws.getNumberPeaks()
@@ -184,7 +190,7 @@ class PeakProcessHelper(object):
         # get SPICE table
         spice_table_name = get_spice_table_name(self._myExpNumber, self._myScanNumber)
         assert AnalysisDataService.doesExist(spice_table_name), 'Spice table for exp %d scan %d cannot be found.' \
-                                                              '' % (self._myExpNumber, self._myScanNumber)
+                                                                '' % (self._myExpNumber, self._myScanNumber)
 
         spice_table_ws = AnalysisDataService.retrieve(spice_table_name)
 
@@ -264,6 +270,20 @@ class PeakProcessHelper(object):
 
         return
 
+    def set_pt_intensity(self, pt_intensity_dict):
+        """
+        Set Pt. intensity
+        :param pt_intensity_dict:
+        :return:
+        """
+        assert isinstance(pt_intensity_dict, dict)
+
+        print '[DB...BAT] Pt intensity dict keys: ', pt_intensity_dict.keys()
+
+        self._ptIntensityDict = pt_intensity_dict
+
+        return
+
     def get_sigma(self):
         """ Get peak intensity's sigma
         :return:
@@ -295,9 +315,6 @@ class PeakProcessHelper(object):
         self._userHKL[0] = mi_h
         self._userHKL[1] = mi_k
         self._userHKL[2] = mi_l
-
-        print '[DB] PeakInfo Set User HKL to (%f, %f, %f) ' % (self._userHKL[0], self._userHKL[1],
-                                                               self._userHKL[2])
 
         return
 

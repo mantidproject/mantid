@@ -20,6 +20,8 @@ Elwin
 ~~~~~
 
 - Additional option to ungroup Elwin output
+- When using multiple input files, the naming convention for the outputworkspace contains the `first-final` run number.
+  An example of this would be `osi92764-92767_graphite002_red_elwin_elf` for OSIRIS run between 92764-92767
 
 Jump Fit
 ~~~~~~~~
@@ -33,6 +35,7 @@ Improvements
 - Range bars colours in the *ISIS Calibration* interface have been updated to match the convention in the fit wizard.
 - Vesuvio sigma_theta value updated for single and double differencing in both forward and back scattering. The new value is 0.016 for all.
 
+
 Bugfixes
 --------
 
@@ -42,5 +45,6 @@ Bugfixes
 * Fix memory leak in :ref:`LoadSassena <algm-LoadSassena>`
 * The *ResNorm* interface should no longer crash when using workspaces (rather than files) as input.
 * Fix bug showing incorrect doublet peaks in :ref:`ISISIndirectDiffractionReduction <algm-ISISIndirectDiffractionReduction>`
+
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_

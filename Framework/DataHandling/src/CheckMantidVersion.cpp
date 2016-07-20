@@ -1,5 +1,5 @@
 #include "MantidDataHandling/CheckMantidVersion.h"
-#include "MantidKernel/InternetHelper.h"
+#include "MantidKernel/GitHubApiHelper.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Strings.h"
 
@@ -226,11 +226,11 @@ behaviour.
 */
 std::string CheckMantidVersion::getVersionsFromGitHub(const std::string &url) {
 
-  Kernel::InternetHelper inetHelper;
+  Kernel::GitHubApiHelper inetHelper;
   std::ostringstream os;
   int tzd = 0;
 
-  inetHelper.headers().emplace(
+  inetHelper.addHeader(
       "if-modified-since",
       Poco::DateTimeFormatter::format(
           Poco::DateTimeParser::parse(MantidVersion::releaseDate(), tzd),

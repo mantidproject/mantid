@@ -116,7 +116,14 @@ public:
       m_data = Kernel::make_cow<CowType>(std::move(data));
     return *this;
   }
-
+  /// Assigns the contents of the range [first, last)
+  template <class InputIt> void assign(InputIt first, InputIt last) & {
+    m_data = Kernel::make_cow<CowType>(first, last);
+  }
+  /// Assigns data of size count with all elements initialized to value.
+  void assign(size_t count, const double &value) & {
+    m_data = Kernel::make_cow<CowType>(count, value);
+  }
   /// Checks if *this stores a non-null pointer.
   explicit operator bool() const { return m_data.operator bool(); }
 
