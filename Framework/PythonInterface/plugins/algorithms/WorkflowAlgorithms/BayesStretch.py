@@ -1,7 +1,7 @@
 #pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
 from IndirectImport import *
 
-from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode,
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         WorkspaceGroupProperty, Progress)
 from mantid.kernel import StringListValidator, Direction
 from mantid.simpleapi import *
@@ -155,13 +155,9 @@ class BayesStretch(PythonAlgorithm):
 
         nsam,ntc = CheckHistZero(self._sam_name)
 
-        totalNoSam = nsam
-
         #check if we're performing a sequential fit
         if self._loop != True:
             nsam = 1
-
-        nres = CheckHistZero(self._res_name)[0]
 
         setup_prog.report('Checking Histograms')
         prog = 'Stretch'
@@ -171,7 +167,6 @@ class BayesStretch(PythonAlgorithm):
 
         setup_prog.report('Establishing output workspace name')
         fname = self._sam_name[:-4] + '_'+ prog
-        fitWS = fname + '_Fit'
         wrks=os.path.join(workdir, self._sam_name[:-4])
         logger.information(' lptfile : %s_Qst.lpt' % wrks)
         lwrk=len(wrks)
@@ -197,7 +192,7 @@ class BayesStretch(PythonAlgorithm):
                 mm = m
             else:
                 mm = 0
-            Nb, Xb, Yb, Eb = GetXYE(self._res_name, mm, array_len)     # get resolution data
+            Nb, Xb, Yb, _ = GetXYE(self._res_name, mm, array_len)     # get resolution data
             numb = [nsam, nsp, ntc, Ndat, nbin, Imin, Imax, Nb, nrbin, Nbet, Nsig]
             rscl = 1.0
             reals = [efix, theta[m], rscl, bnorm]
@@ -210,14 +205,14 @@ class BayesStretch(PythonAlgorithm):
             dataXb = xbout[:Nbet]
             dataYb = ybout[:Nbet]
             zpWS = fname + '_Zp' +str(m)
-            if (m > 0):
+            if m > 0:
                 Qaxis += ','
             Qaxis += str(Q[m])
 
             dataXz = []
             dataYz = []
             dataEz = []
-		
+
             for n in range(Nsig):
                 yfit_list = np.split(zpout[:Nsig*Nbet], Nsig)
                 dataYzp = yfit_list[n]
@@ -233,7 +228,7 @@ class BayesStretch(PythonAlgorithm):
                             UnitX='MomentumTransfer',
                             VerticalAxisUnit='MomentumTransfer',
                             VerticalAxisValues=dataXs)
-		
+
             unitx = mtd[zpWS].getAxis(0).setUnit("Label")
             unitx.setLabel('beta' , '')
             unity = mtd[zpWS].getAxis(1).setUnit("Label")
@@ -242,10 +237,10 @@ class BayesStretch(PythonAlgorithm):
             if m == 0:
                 xSig = dataXs
                 ySig = dataYs
-                eSig = eSig0		
+                eSig = eSig0
                 xBet = dataXb
                 yBet = dataYb
-                eBet = eBet0		
+                eBet = eBet0
                 groupZ = zpWS
             else:
                 xSig = np.append(xSig,dataXs)
@@ -255,7 +250,7 @@ class BayesStretch(PythonAlgorithm):
                 yBet = np.append(yBet,dataYb)
                 eBet = np.append(eBet,eBet0)
                 groupZ = groupZ +','+ zpWS
-	
+
 	#create workspaces for sigma and beta
         workflow_prog.report('Creating OutputWorkspace')
         CreateWorkspace(OutputWorkspace=fname + '_Sigma',
@@ -278,7 +273,7 @@ class BayesStretch(PythonAlgorithm):
         fit_ws = fname + '_Fit'
         GroupWorkspaces(InputWorkspaces=group,
                         OutputWorkspace=fit_ws)
-        contour_ws = fname + '_Contour'					
+        contour_ws = fname + '_Contour'
         GroupWorkspaces(InputWorkspaces=groupZ,
                         OutputWorkspace=contour_ws)
 
@@ -288,30 +283,30 @@ class BayesStretch(PythonAlgorithm):
         CopyLogs(InputWorkspace=self._sam_name,
                  OutputWorkspace=fit_ws)
         log_prog.report('Adding Sample logs to Fit workspace')
-        self._add_sample_logs(fit_ws, self._res_name, self._background, self._elastic, erange, nbin)
+        self._add_sample_logs(fit_ws, erange, nbin)
         log_prog.report('Copying logs to Contour workspace')
         CopyLogs(InputWorkspace=self._sam_name,
                  OutputWorkspace=contour_ws)
         log_prog.report('Adding sample logs to Contour workspace')
-        self._add_sample_logs(contour_ws, self._res_name, self._background, self._elastic, erange, nbin)
+        self._add_sample_logs(contour_ws, erange, nbin)
         log_prog.report('Finialising log copying')
 
         self.setProperty('OutputWorkspaceFit', fit_ws)
         self.setProperty('OutputWorkspaceContour', contour_ws)
         log_prog.report('Setting workspace properties')
 
-    def _add_sample_logs(self, workspace, resolution, background, elastic, erange, sample_binning):
+    def _add_sample_logs(self, workspace, erange, sample_binning):
         """
         Add the Bayes Stretch specific values to the sample logs
         """
         energy_min, energy_max = erange
 
         AddSampleLog(Workspace=workspace, LogName="res_file",
-                     LogType="String", LogText=resolution)
+                     LogType="String", LogText=self._res_name)
         AddSampleLog(Workspace=workspace, LogName="background",
-                     LogType="String", LogText=str(background))
+                     LogType="String", LogText=str(self._background))
         AddSampleLog(Workspace=workspace, LogName="elastic_peak",
-                     LogType="String", LogText=str(elastic))
+                     LogType="String", LogText=str(self._elastic))
         AddSampleLog(Workspace=workspace, LogName="energy_min",
                      LogType="Number", LogText=str(energy_min))
         AddSampleLog(Workspace=workspace, LogName="energy_max",
