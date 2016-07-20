@@ -300,6 +300,7 @@ PhysicalConstants::NeutronAtom MaterialBuilder::generateCustomNeutron() const {
     neutronAtom = (1. / totalNumAtoms) * neutronAtom;
   }
   neutronAtom.a_number = 0; // signifies custom neutron atom
+  neutronAtom.z_number = 0; // signifies custom neutron atom
 
   overrideNeutronProperties(neutronAtom);
   return neutronAtom;
