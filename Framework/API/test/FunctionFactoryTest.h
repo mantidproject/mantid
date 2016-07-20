@@ -12,6 +12,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidKernel/System.h"
 
 #include <sstream>
@@ -377,13 +378,23 @@ public:
   }
 
   void test_MultiDomainFunction_creation() {
-    std::string fnString = "composite=MultiDomainFunction;"
-                           "name=FunctionFactoryTest_FunctA;"
-                           "name=FunctionFactoryTest_FunctB";
-    IFunction_sptr fun =
-        FunctionFactory::Instance().createInitialized(fnString);
+    const std::string fnString = "composite=MultiDomainFunction;"
+                                 "name=FunctionFactoryTest_FunctA;"
+                                 "name=FunctionFactoryTest_FunctB";
+    IFunction_sptr fun;
+    TS_ASSERT_THROWS_NOTHING(
+        fun = FunctionFactory::Instance().createInitialized(fnString));
     TS_ASSERT(fun);
-    // TODO: add more asserts
+    const auto mdfunc = boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
+    TS_ASSERT(mdfunc);
+    if (mdfunc) {
+      TS_ASSERT_EQUALS(mdfunc->nFunctions(), 2);
+      const auto funcA = mdfunc->getFunction(0);
+      const auto funcB = mdfunc->getFunction(1);
+      TS_ASSERT_EQUALS(funcA->name(), "FunctionFactoryTest_FunctA");
+      TS_ASSERT_EQUALS(funcB->name(), "FunctionFactoryTest_FunctB");
+    }
+  }
   }
 
   void test_getFunctionNames() {
