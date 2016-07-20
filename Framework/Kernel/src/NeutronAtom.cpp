@@ -93,6 +93,39 @@ NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
   calculateScatteringLengths(this);
 }
 
+NeutronAtom::NeutronAtom(const NeutronAtom &other) :
+    z_number(other.z_number), a_number(other.a_number),
+    coh_scatt_length_real(other.coh_scatt_length_real),
+    coh_scatt_length_img(other.coh_scatt_length_img),
+    inc_scatt_length_real(other.inc_scatt_length_real),
+    inc_scatt_length_img(other.inc_scatt_length_img),
+    coh_scatt_xs(other.coh_scatt_xs),
+    inc_scatt_xs(other.inc_scatt_xs),
+    tot_scatt_xs(other.tot_scatt_xs),
+    abs_scatt_xs(other.abs_scatt_xs) {
+    calculateScatteringLengths(this);
+}
+
+NeutronAtom & NeutronAtom::operator=(const NeutronAtom &other) {
+  if (this == &other)
+    return *this;
+
+  z_number = other.z_number;
+  a_number = other.a_number;
+  coh_scatt_length_real = other.coh_scatt_length_real;
+  coh_scatt_length_img = other.coh_scatt_length_img;
+  inc_scatt_length_real = other.inc_scatt_length_real;
+  inc_scatt_length_img = other.inc_scatt_length_img;
+  coh_scatt_xs = other.coh_scatt_xs;
+  inc_scatt_xs = other.inc_scatt_xs;
+  tot_scatt_xs = other.tot_scatt_xs;
+  abs_scatt_xs = other.abs_scatt_xs;
+
+  calculateScatteringLengths(this);
+
+  return *this;
+}
+
 /**
  * DO NOT USE THIS! This constructor generates a complete garbage NeutronAtom
  * that is only available to allow for callers to declare variables then
@@ -723,8 +756,9 @@ NeutronAtom getNeutronAtom(const uint16_t z_number, const uint16_t a_number) {
 
   return *result;
 }
-const NeutronAtom getNeutronNoExceptions(const uint16_t z_number,
-                                         const uint16_t a_number) {
+
+NeutronAtom getNeutronNoExceptions(const uint16_t z_number,
+                                   const uint16_t a_number) {
 
   NeutronAtom temp(z_number, a_number, NAN, NAN, NAN, NAN, NAN,
                    NAN); // set to junk value
@@ -736,6 +770,14 @@ const NeutronAtom getNeutronNoExceptions(const uint16_t z_number,
     return temp;
   } else
     return *result;
+}
+
+NeutronAtom getNeutronNoExceptions(const NeutronAtom &other) {
+  if (other.z_number == 0) {
+    return NeutronAtom(other);
+  } else {
+    return getNeutronNoExceptions(other.z_number, other.a_number);
+  }
 }
 
 } // namespace PhysicalConstants

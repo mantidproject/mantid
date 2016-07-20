@@ -54,6 +54,10 @@ struct MANTID_KERNEL_DLL NeutronAtom {
               const double inc_b_img, const double coh_xs, const double inc_xs,
               const double tot_xs, const double abs_xs);
 
+  NeutronAtom(const NeutronAtom &other);
+
+  NeutronAtom & operator=(const NeutronAtom &other);
+
   NeutronAtom();
 
   /// The atomic number, or number of protons, for the atom.
@@ -116,8 +120,10 @@ MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &out,
                                            const NeutronAtom &atom);
 MANTID_KERNEL_DLL NeutronAtom
 getNeutronAtom(const uint16_t z_number, const uint16_t a_number = 0);
-MANTID_KERNEL_DLL const NeutronAtom
+MANTID_KERNEL_DLL NeutronAtom
 getNeutronNoExceptions(const uint16_t z_number, const uint16_t a_number);
+MANTID_KERNEL_DLL NeutronAtom
+getNeutronNoExceptions(const NeutronAtom &other);
 
 /// Utility function to calculate scattering lengths from cross-sections.
 MANTID_KERNEL_DLL void calculateScatteringLengths(NeutronAtom *atom);
