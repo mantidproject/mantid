@@ -113,9 +113,14 @@ Histogram DetectorEfficiencyCorUser::applyDetEfficiency(
     const size_t nChans, const MantidVec &effVec, const Histogram &histogram) {
   Histogram outHist(histogram);
 
+  auto &outY = outHist.mutableY();
+  auto &outX = outHist.mutableX();
+  auto &inY = histogram.y();
+  auto &inX = histogram.x();
+
   for (unsigned int j = 0; j < nChans; ++j) {
-    outHist.mutableY()[j] = histogram.y()[j] / effVec[j];
-    outHist.mutableE()[j] = histogram.e()[j] / effVec[j];
+    outY[j] = inY[j] / effVec[j];
+    outX[j] = inX[j] / effVec[j];
   }
 
   return outHist;

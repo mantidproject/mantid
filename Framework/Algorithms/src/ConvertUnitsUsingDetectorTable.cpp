@@ -21,6 +21,7 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 
 #include <algorithm>
+#include <numeric>
 #include <cfloat>
 #include <limits>
 
@@ -643,21 +644,18 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::removeUnphysicalBins(
     // Next, loop again copying in the correct range for each spectrum
     for (int64_t j = 0; j < int64_t(numSpec); ++j) {
       auto edges = workspace->binEdges(j);
-      auto &X = workspace->x(j);
       auto k = lastBins[j];
 
-      result->mutableX(j).assign(edges.cbegin(), edges.cbegin() + lastBins[j]);
+      result->mutableX(j).assign(edges.cbegin(), edges.cbegin() + k);
 
       // If the entire X range is not covered, generate fake values.
-      std::generate(result->mutableX(j).begin() + k, result->mutableX(j).end(),
-                    [ l = k, k, j, X ]() mutable {
-                      return X[k] + 1 + static_cast<double>(l++ - k);
-                    });
+      std::iota(result->mutableX(j).begin() + k, result->mutableX(j).end(),
+                workspace->x(j)[k] + 1);
 
       result->mutableY(j).assign(workspace->y(j).cbegin(),
-                                 workspace->y(j).cbegin() + (lastBins[j] - 1));
+                                 workspace->y(j).cbegin() + (k - 1));
       result->mutableE(j).assign(workspace->e(j).cbegin(),
-                                 workspace->e(j).cbegin() + (lastBins[j] - 1));
+                                 workspace->e(j).cbegin() + (k - 1));
     }
   }
 
