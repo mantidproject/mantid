@@ -284,6 +284,12 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
     s = metadata["Header/wavelength_spread"];
     from_string<double>(m_dwavelength, s, std::dec);
 
+    // 20160720: New wavelength will be in %
+    if (m_dwavelength > 1.0) {
+      // it's in percentage!!!
+      m_dwavelength /= 100.0;
+    }
+
     g_log.debug() << "setWavelength: " << m_wavelength << " , " << m_dwavelength
                   << '\n';
 
@@ -451,7 +457,7 @@ void LoadSpice2D::setBeamTrapRunProperty(
     }
   }
 
-  g_log.debug() << "trapIndexInUse length:" <<  trapIndexInUse.size() << "\n";
+  g_log.debug() << "trapIndexInUse length:" << trapIndexInUse.size() << "\n";
 
   // store trap diameters in use
   std::vector<double> trapDiametersInUse;
@@ -459,7 +465,8 @@ void LoadSpice2D::setBeamTrapRunProperty(
     trapDiametersInUse.push_back(trapDiameters[index]);
   }
 
-  g_log.debug() << "trapDiametersInUse length:" <<  trapDiametersInUse.size() << "\n";
+  g_log.debug() << "trapDiametersInUse length:" << trapDiametersInUse.size()
+                << "\n";
 
   // The maximum value for the trapDiametersInUse is the trap in use
   std::vector<double>::iterator trapDiameterInUseIt =
@@ -467,7 +474,7 @@ void LoadSpice2D::setBeamTrapRunProperty(
   if (trapDiameterInUseIt != trapDiametersInUse.end())
     trapDiameterInUse = *trapDiameterInUseIt;
 
-  g_log.debug() << "trapDiameterInUse:" <<  trapDiameterInUse << "\n";
+  g_log.debug() << "trapDiameterInUse:" << trapDiameterInUse << "\n";
 
   addRunProperty<double>("beam-trap-diameter", trapDiameterInUse, "mm");
 }
