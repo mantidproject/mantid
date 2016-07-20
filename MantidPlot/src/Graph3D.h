@@ -70,6 +70,8 @@ public:
           Qt::WFlags f = 0);
   ~Graph3D() override;
 
+  void initPlot();
+
   enum PlotType { Scatter = 0, Trajectory = 1, Bars = 2, Ribbon = 3 };
   enum PointStyle {
     None = 0,
