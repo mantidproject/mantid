@@ -106,7 +106,7 @@ Output:
 
 **Example: Using reference workspace with Spectra Mask**
    
-.. testcode:: 
+.. testcode:: ExLoadSpectraMask
 
     # Load workspace with real spectra-derector mask
     rws = Load(Filename=r'MAR11001.raw', OutputWorkspace='realWs',InlcudeMonitors=True);
@@ -180,6 +180,8 @@ Output:
     print "*** note spectra with id 4 is a monitor, not present in the masking workspaces"
 
 Output:
+
+.. testoutput:: ExLoadSpectraMask
 
     *** ************************************ **********************************************
     *** Masked Spec. Id(s):  [  4  10  11  12  13 100 110 120 130 140 200 300]

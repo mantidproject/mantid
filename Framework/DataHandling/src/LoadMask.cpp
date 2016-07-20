@@ -73,6 +73,11 @@ void LoadMask::init() {
   // 1. Declare property
   declareProperty("Instrument", "",
                   "The name of the instrument to apply the mask.");
+  const std::vector<std::string> maskExts{".xml", ".msk"};
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "InputFile", "", FileProperty::Load, maskExts),
+                  "Masking file for masking. Supported file format is XML and "
+                  "ISIS ASCII. ");
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "Workspace", "", Direction::Input, PropertyMode::Optional),
@@ -81,13 +86,8 @@ void LoadMask::init() {
 
   setPropertySettings(
       "Workspace", Kernel::make_unique<Kernel::EnabledWhenProperty>(
-                       "Instrument", Kernel::ePropertyCriterion::IS_DEFAULT));
+          "Instrument", Kernel::ePropertyCriterion::IS_DEFAULT));
 
-  const std::vector<std::string> maskExts{".xml", ".msk"};
-  declareProperty(Kernel::make_unique<FileProperty>(
-                      "InputFile", "", FileProperty::Load, maskExts),
-                  "Masking file for masking. Supported file format is XML and "
-                  "ISIS ASCII. ");
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
           "OutputWorkspace", "Masking", Direction::Output),
