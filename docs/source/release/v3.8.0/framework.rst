@@ -5,6 +5,8 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+- ``Facilities.xml`` was updated for changes to the SNS live data servers.
+
 HistogramData
 -------------
 

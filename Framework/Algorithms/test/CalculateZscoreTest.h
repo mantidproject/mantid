@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CalculateZscore.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/CalculateZscore.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 #include <cmath>
@@ -49,14 +49,14 @@ public:
     Workspace2D_sptr outWS = boost::dynamic_pointer_cast<Workspace2D>(
         AnalysisDataService::Instance().retrieve("Zscores"));
 
-    const MantidVec &Zscore = outWS->readY(0);
+    auto &Zscore = outWS->y(0);
     TS_ASSERT_DELTA(Zscore[4], 1.6397, 0.0001);
     TS_ASSERT_DELTA(Zscore[6], 0.3223, 0.0001);
 
-    const MantidVec &vecX = outWS->readX(0);
-    TS_ASSERT_DELTA(vecX[0], 0.0, 0.000001);
-    TS_ASSERT_DELTA(vecX[5], 5.0, 0.000001);
-    TS_ASSERT_DELTA(vecX[10], 10.0, 0.000001);
+    auto &histX = outWS->x(0);
+    TS_ASSERT_DELTA(histX[0], 0.0, 0.000001);
+    TS_ASSERT_DELTA(histX[5], 5.0, 0.000001);
+    TS_ASSERT_DELTA(histX[10], 10.0, 0.000001);
 
     return;
   }
@@ -71,14 +71,14 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", 1, data.size(),
                                             data.size()));
 
-    MantidVec &vecX = ws->dataX(0);
-    MantidVec &vecY = ws->dataY(0);
-    MantidVec &vecE = ws->dataE(0);
+    auto &histX = ws->mutableX(0);
+    auto &histY = ws->mutableY(0);
+    auto &histE = ws->mutableE(0);
 
     for (size_t i = 0; i < data.size(); ++i) {
-      vecX[i] = static_cast<double>(i);
-      vecY[i] = data[i];
-      vecE[i] = sqrt(data[i]);
+      histX[i] = static_cast<double>(i);
+      histY[i] = data[i];
+      histE[i] = sqrt(data[i]);
     }
 
     return ws;
