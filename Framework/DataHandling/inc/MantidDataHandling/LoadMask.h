@@ -125,7 +125,6 @@ private:
   void convertSpMasksToDetIDs(const API::MatrixWorkspace_sptr &SourceWS,
                               const std::vector<int32_t> &maskedSpecID,
                               std::vector<int32_t> &singleDetIds);
-  ;
 
   /// Mask Workspace
   DataObjects::MaskWorkspace_sptr m_maskWS;

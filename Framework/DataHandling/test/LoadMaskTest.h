@@ -209,7 +209,7 @@ public:
     auto masker = AlgorithmManager::Instance().create("MaskDetectors");
     masker->initialize();
     masker->setChild(true);
-    masker->setProperty("RefWorkspace", source);
+    masker->setProperty("Workspace", source);
     std::vector<int> masked_spectra(11);
     masked_spectra[0] = 10;
     masked_spectra[1] = 11;
@@ -224,7 +224,7 @@ public:
     masked_spectra[10] = 4;
     masker->setProperty("SpectraList", masked_spectra);
     masker->execute();
-    Workspace_sptr tsource = masker->getProperty("RefWorkspace");
+    Workspace_sptr tsource = masker->getProperty("Workspace");
     source = boost::dynamic_pointer_cast<MatrixWorkspace>(tsource);
     TS_ASSERT(source);
 
@@ -234,7 +234,7 @@ public:
     auto exporter =
         AlgorithmManager::Instance().create("ExportSpectraMask");
     exporter->initialize();
-    exporter->setProperty("RefWorkspace", source);
+    exporter->setProperty("Workspace", source);
     exporter->execute();
     */
     /*Fake export mask algorithm: */

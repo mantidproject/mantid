@@ -81,7 +81,7 @@ void LoadMask::init() {
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "RefWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "The name of the workspace with defined insrtument and spectra, "
+      "The name of the workspace with defines insrtument and spectra, "
       "used as the source of the spectra-detector map for the mask to load.");
 
   setPropertySettings(
