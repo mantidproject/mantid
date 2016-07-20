@@ -2,6 +2,7 @@
 """
     Top-level auto-reduction algorithm for the SNS Liquids Reflectometer
 """
+from __future__ import (absolute_import, division, print_function)
 import sys
 import math
 import re
@@ -425,7 +426,7 @@ class LRAutoReduction(PythonAlgorithm):
         direct_beam_runs_str = self._read_property(meta_data_run, "direct_beam_runs",
                                                    _direct_beam_runs, is_string=True)
         # The direct runs in the DAS logs are stored as a string
-        if isinstance(direct_beam_runs_str, (str, unicode)):
+        if isinstance(direct_beam_runs_str, str):
             try:
                 direct_beam_runs = [int(r.strip()) for r in direct_beam_runs_str.split(',')]
             except ValueError:
@@ -617,7 +618,7 @@ class LRAutoReduction(PythonAlgorithm):
             incident_medium = self._read_property(meta_data_run, "incident_medium",
                                                   _incident_medium, is_string=True)
             file_id = incident_medium.replace("medium", "")
-            LRDirectBeamSort(RunList=range(first_run_of_set, first_run_of_set + sequence_number),
+            LRDirectBeamSort(RunList=list(range(first_run_of_set, first_run_of_set + sequence_number)),
                              UseLowResCut=True, ComputeScalingFactors=True, TOFSteps=sf_tof_step,
                              IncidentMedium=incident_medium,
                              SlitTolerance=slit_tolerance,

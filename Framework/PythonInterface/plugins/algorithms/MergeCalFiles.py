@@ -1,4 +1,5 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import *
 
@@ -95,7 +96,7 @@ class MergeCalFiles(PythonAlgorithm):
                     pass
 
     #add any lines at the end
-        for UDET in updateDict.keys():
+        for UDET in list(updateDict.keys()):
             (offset,select,group)=updateDict.pop(UDET)
             lastNumber += 1
             outputFile.write(self.FormatLine(lastNumber,UDET,offset,select,group))
