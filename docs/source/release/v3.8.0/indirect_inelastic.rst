@@ -13,6 +13,15 @@ Algorithms
 
 * Remove CylinderPaalmanPingsCorrection v1. This algorithm has been replaced by :ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
 
+
+Bayes
+#####
+
+Stretch
+~~~~~~~
+
+- Previously the Quest script was used to drive the Bayes stretch interface. This functionality has been ported to the algorithm :ref:`BayesStretch <algm-BayesStretch>`.
+
 Data Analysis
 #############
 
