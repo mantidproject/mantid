@@ -1478,8 +1478,9 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
         # Clean up
         self._clean_up_workspaces()
 
+
 class TestBenchRotDetection(unittest.TestCase):
-    def _get_sample_workspace(has_bench_rot=True):
+    def _get_sample_workspace(self, has_bench_rot=True):
         sample_alg = AlgorithmManager.createUnmanaged("CreateSampleWorkspace")
         sample_alg.setChild(True)
         sample_alg.initialize()
@@ -1498,13 +1499,13 @@ class TestBenchRotDetection(unittest.TestCase):
             log_alg.execute()
         return ws
 
-    def _do_test(expected_raise, workspace):
+    def _do_test(self, expected_raise, workspace):
         has_raised = False
         try:
             su.check_has_bench_rot(workspace)
         except RuntimeError:
             has_raised = True
-        self.asserTrue(has_raised == raise_expected)
+        self.asserTrue(has_raised == expected_raise)
 
     def test_workspace_with_bench_rot_does_not_raise(self):
         # Arrange
@@ -1521,7 +1522,7 @@ class TestBenchRotDetection(unittest.TestCase):
         self._do_test(expected_raise, ws)
 
 
-class TestQuaterionToAngleAndAxis(unittest.TestCase):
+class TestQuaternionToAngleAndAxis(unittest.TestCase):
     def _do_test_quaternion(self, angle, axis, expected_axis=None):
         # Act
         quaternion = Quat(angle, axis)
