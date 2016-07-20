@@ -274,13 +274,13 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
         "DetectorParameter TableWorkspace is not defined correctly.");
   }
 
-  // Now let's read them into some vectors.
-  auto l1Column = paramWS->getColVector<double>("l1");
-  auto l2Column = paramWS->getColVector<double>("l2");
-  auto twoThetaColumn = paramWS->getColVector<double>("twotheta");
-  auto efixedColumn = paramWS->getColVector<double>("efixed");
-  auto emodeColumn = paramWS->getColVector<int>("emode");
-  auto spectraColumn = paramWS->getColVector<int>("spectra");
+  // Now let's take a reference to the vectors.
+  auto& l1Column = paramWS->getColVector<double>("l1");
+  auto& l2Column = paramWS->getColVector<double>("l2");
+  auto& twoThetaColumn = paramWS->getColVector<double>("twotheta");
+  auto& efixedColumn = paramWS->getColVector<double>("efixed");
+  auto& emodeColumn = paramWS->getColVector<int>("emode");
+  auto& spectraColumn = paramWS->getColVector<int>("spectra");
 
   EventWorkspace_sptr eventWS =
       boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
@@ -295,8 +295,6 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
 
   std::vector<double> emptyVec;
   int failedDetectorCount = 0;
-
-  // ConstColumnVector<int> spectraNumber = paramWS->getVector("spectra");
 
   // TODO: Check why this parallel stuff breaks
   // Loop over the histograms (detector spectra)
