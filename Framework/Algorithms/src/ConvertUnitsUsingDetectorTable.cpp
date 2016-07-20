@@ -652,10 +652,10 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::removeUnphysicalBins(
       std::iota(result->mutableX(j).begin() + k, result->mutableX(j).end(),
                 workspace->x(j)[k] + 1);
 
-      result->mutableY(j).assign(workspace->y(j).cbegin(),
-                                 workspace->y(j).cbegin() + (k - 1));
-      result->mutableE(j).assign(workspace->e(j).cbegin(),
-                                 workspace->e(j).cbegin() + (k - 1));
+      result->mutableY(j)
+          .assign(workspace->y(j).cbegin(), workspace->y(j).cbegin() + (k - 1));
+      result->mutableE(j)
+          .assign(workspace->e(j).cbegin(), workspace->e(j).cbegin() + (k - 1));
     }
   }
 
