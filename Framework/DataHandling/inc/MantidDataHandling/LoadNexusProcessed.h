@@ -13,7 +13,6 @@
 #include "MantidNexus/NexusClasses.h"
 
 #include <map>
-#include <vector>
 
 namespace NeXus {
 class File;
