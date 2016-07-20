@@ -306,7 +306,8 @@ void Elwin::loadSettings(const QSettings &settings) {
   m_uiForm.dsInputFiles->readSettings(settings.group());
 }
 
-void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws) {
+void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
+                                 const QPair<double, double> &range) {
   auto inst = ws->getInstrument();
   auto analyser = inst->getStringParameter("analyser");
 
@@ -322,6 +323,9 @@ void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws) {
 
       m_dblManager->setValue(m_properties["BackgroundStart"], -10 * res);
       m_dblManager->setValue(m_properties["BackgroundEnd"], -9 * res);
+    } else {
+      m_dblManager->setValue(m_properties["IntegrationStart"], range.first);
+      m_dblManager->setValue(m_properties["IntegrationEnd"], range.second);
     }
   }
 }
@@ -423,22 +427,17 @@ void Elwin::plotInput() {
 
   int specNo = m_uiForm.spPreviewSpec->value();
 
-  setDefaultResolution(ws);
-  setDefaultSampleLog(ws);
-
-  m_uiForm.ppPlot->clear();
-  m_uiForm.ppPlot->addSpectrum("Sample", ws, specNo);
-
   try {
+    m_uiForm.ppPlot->clear();
+    m_uiForm.ppPlot->addSpectrum("Sample", ws, specNo);
     QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
-    // Set maximum range of Integration
-    m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")
-        ->setRange(range.first, range.second);
-    // Set initial values
-    m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")
-        ->setMinimum(range.first);
-    m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")
-        ->setMaximum(range.second);
+    auto rangeSelector =
+        m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
+    setPlotPropertyRange(rangeSelector, m_properties["IntegrationStart"],
+                         m_properties["IntegrationEnd"], range);
+
+    setDefaultResolution(ws, range);
+    setDefaultSampleLog(ws);
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
   }
