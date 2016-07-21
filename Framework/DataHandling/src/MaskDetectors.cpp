@@ -8,6 +8,7 @@
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include <set>
 #include <numeric>
 
@@ -67,6 +68,15 @@ void MaskDetectors::init() {
                   "If given but not as a SpecialWorkspace2D, the masking from "
                   "this workspace will be copied. If given as a "
                   "SpecialWorkspace2D, the masking is read from its Y values.");
+  declareProperty("ForceInstrumentMasking", false,
+                  "Works when 'MaskedWorkspace' is provided and forces "
+                  "to use spectra-detector mapping even in case when number of "
+                  "spectra in 'Workspace' and 'MaskedWorkspace' are equal",
+                  Direction::Input);
+  setPropertySettings(
+      "ForceInstrumentMasking",
+      make_unique<EnabledWhenProperty>("MaskedWorkspace",
+                                       ePropertyCriterion::IS_NOT_DEFAULT));
 
   auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
@@ -150,7 +160,9 @@ void MaskDetectors::exec() {
 
       g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
                     << ")\n";
-      if (prevMasking->getNumberHistograms() != WS->getNumberHistograms()) {
+      bool forceDetIDs = getProperty("ForceInstrumentMasking");
+      if (prevMasking->getNumberHistograms() != WS->getNumberHistograms() ||
+          forceDetIDs) {
         extractMaskedWSDetIDs(detectorList, maskWS);
       } else {
         appendToIndexListFromMaskWS(indexList, maskWS, ranges_info);
@@ -301,13 +313,11 @@ void MaskDetectors::extractMaskedWSDetIDs(
       try {
         const auto dets = maskWS->getSpectrum(i).getDetectorIDs();
         for (auto det : dets) {
-            detectorList.push_back(det);
+          detectorList.push_back(det);
         }
       } catch (Exception::NotFoundError &) {
         continue;
       }
-
-
     }
   }
 }
