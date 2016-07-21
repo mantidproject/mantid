@@ -1,4 +1,5 @@
 # pylint: disable=too-many-locals
+from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
 from mantid.kernel import Direction
@@ -67,10 +68,10 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         """
         # sort workspaces for sf and nsf
         nsf = []
-        for key in self.input_workspaces.keys():
+        for key in list(self.input_workspaces.keys()):
             if 'NSF' in key:
                 nsf.append(key)
-        for key in self.input_workspaces.keys():
+        for key in list(self.input_workspaces.keys()):
             wks = api.AnalysisDataService.retrieve(self.input_workspaces[key])
             run = wks.getRun()
             if not run.hasProperty('flipper'):
@@ -103,7 +104,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         self._flipper_valid()
 
         # algorithm must warn if some properties_to_compare are different
-        result = api.CompareSampleLogs(self.input_workspaces.values(), self.properties_to_compare, 5e-3)
+        result = api.CompareSampleLogs(list(self.input_workspaces.values()), self.properties_to_compare, 5e-3)
         if len(result) > 0:
             self.log().warning("Sample logs " + result + " do not match!")
         return True
@@ -175,7 +176,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         workspaces = {"NSFDataWorkspace": None, "SFNiCrWorkspace": None, "NSFNiCrWorkspace": None,
                       "SFBkgrWorkspace": None, "NSFBkgrWorkspace": None}
 
-        for key in workspaces.keys():
+        for key in list(workspaces.keys()):
             workspaces[key] = self.getProperty(key).value
 
         # dimensions must match
@@ -184,7 +185,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         nhists = datasf.getNumberHistograms()
         nblocks = datasf.blocksize()
 
-        for key in workspaces.keys():
+        for key in list(workspaces.keys()):
             if workspaces[key].getNumDims() != ndims:
                 issues[key] = "Number of dimensions does not match to the data workspace."
             if workspaces[key].getNumberHistograms() != nhists:
@@ -194,7 +195,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
 
         # normalizations must match and must be either monitor or duration, polarisations must match
         lognames = "normalized,polarisation,polarisation_comment"
-        wslist = workspaces.values()
+        wslist = list(workspaces.values())
         wslist.append(datasf)
         result = api.CompareSampleLogs(wslist, lognames)
         if len(result) > 0:
