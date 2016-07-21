@@ -244,15 +244,9 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", NVectors, size,
                                             size));
 
-    MantidVec &vecX = ws->dataX(0);
-    MantidVec &vecY = ws->dataY(0);
-    MantidVec &vecE = ws->dataE(0);
-
-    for (size_t i = 0; i < size; ++i) {
-      vecX[i] = vecx[i];
-      vecY[i] = vecy[i];
-      vecE[i] = vece[i];
-    }
+    ws->mutableX(0).assign(vecx.cbegin(), vecx.cend());
+    ws->mutableY(0).assign(vecy.cbegin(), vecy.cend());
+    ws->mutableE(0).assign(vece.cbegin(), vece.cend());
 
     return ws;
   }
@@ -541,16 +535,9 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", NVectors, sizex,
                                             sizey));
 
-    MantidVec &vecX = ws->dataX(0);
-    MantidVec &vecY = ws->dataY(0);
-    MantidVec &vecE = ws->dataE(0);
-
-    for (size_t i = 0; i < sizex; ++i)
-      vecX[i] = vecx[i];
-    for (size_t i = 0; i < sizey; ++i) {
-      vecY[i] = vecy[i];
-      vecE[i] = vece[i];
-    }
+	ws->mutableX(0).assign(vecx.cbegin(), vecx.cend());
+	ws->mutableY(0).assign(vecy.cbegin(), vecy.cend());
+	ws->mutableE(0).assign(vece.cbegin(), vece.cend());
 
     return ws;
   }
