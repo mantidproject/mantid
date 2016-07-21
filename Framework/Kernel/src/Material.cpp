@@ -28,8 +28,8 @@ Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
     const double multiplicity)
     : atom(atom), multiplicity(multiplicity) {}
 
-Mantid::Kernel::Material::FormulaUnit::FormulaUnit(const Atom &atom,
-                                                   const double multiplicity)
+Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
+    const PhysicalConstants::Atom &atom, const double multiplicity)
     : atom(boost::make_shared<PhysicalConstants::Atom>(atom)),
       multiplicity(multiplicity) {}
 
