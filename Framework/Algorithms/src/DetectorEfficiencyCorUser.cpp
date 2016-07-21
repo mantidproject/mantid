@@ -11,10 +11,8 @@
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::Points;
 
-namespace Mantid
-{
-namespace Algorithms
-{
+namespace Mantid {
+namespace Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -25,20 +23,15 @@ DECLARE_ALGORITHM(DetectorEfficiencyCorUser)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string DetectorEfficiencyCorUser::name() const
-{
+const std::string DetectorEfficiencyCorUser::name() const {
   return "DetectorEfficiencyCorUser";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int DetectorEfficiencyCorUser::version() const
-{
-  return 1;
-}
+int DetectorEfficiencyCorUser::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string DetectorEfficiencyCorUser::category() const
-{
+const std::string DetectorEfficiencyCorUser::category() const {
   return "CorrectionFunctions\\EfficiencyCorrections;Inelastic\\Corrections";
 }
 
@@ -47,8 +40,7 @@ const std::string DetectorEfficiencyCorUser::category() const
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void DetectorEfficiencyCorUser::init()
-{
+void DetectorEfficiencyCorUser::init() {
   auto val = boost::make_shared<CompositeValidator>();
   // val->add<WorkspaceUnitValidator>("Energy");
   val->add<WorkspaceUnitValidator>("DeltaE");
@@ -69,8 +61,7 @@ void DetectorEfficiencyCorUser::init()
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void DetectorEfficiencyCorUser::exec()
-{
+void DetectorEfficiencyCorUser::exec() {
   // get input properties (WSs, Ei)
   retrieveProperties();
 
@@ -82,19 +73,19 @@ void DetectorEfficiencyCorUser::exec()
 
   const size_t numberOfChannels = this->m_inputWS->blocksize();
   // Calculate the number of spectra in this workspace
-  const int numberOfSpectra = static_cast
-      <int>(this->m_inputWS->size() / numberOfChannels);
+  const int numberOfSpectra =
+      static_cast<int>(this->m_inputWS->size() / numberOfChannels);
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
-  int64_t numberOfSpectra_i = static_cast
-      <int64_t>(numberOfSpectra); // cast to make openmp happy
+  int64_t numberOfSpectra_i =
+      static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR2(m_outputWS, m_inputWS)
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    const auto effVec
-        = calculateEfficiency(eff0, effFormula, m_inputWS->points(i));
+    const auto effVec =
+        calculateEfficiency(eff0, effFormula, m_inputWS->points(i));
     // run this outside to benefit from parallel for (?)
     m_outputWS->setHistogram(i, applyDetEfficiency(numberOfChannels, effVec,
                                                    m_inputWS->histogram(i)));
@@ -116,11 +107,8 @@ void DetectorEfficiencyCorUser::exec()
 
  * @returns corrected histogram
  */
-Histogram DetectorEfficiencyCorUser::applyDetEfficiency(const size_t nChans,
-                                                        const MantidVec &effVec,
-                                                        const Histogram
-                                                        &histogram)
-{
+Histogram DetectorEfficiencyCorUser::applyDetEfficiency(
+    const size_t nChans, const MantidVec &effVec, const Histogram &histogram) {
   Histogram outHist(histogram);
 
   auto &outY = outHist.mutableY();
@@ -139,12 +127,10 @@ Histogram DetectorEfficiencyCorUser::applyDetEfficiency(const size_t nChans,
  * @param energy :: value to use in the formula
  * @return value calculated
  */
-double DetectorEfficiencyCorUser::calculateFormulaValue(const std::string
-                                                        &formula,
-                                                        double energy)
-{
-  try
-  {
+double
+DetectorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
+                                                 double energy) {
+  try {
     mu::Parser p;
     p.DefineVar("e", &energy);
     p.SetExpr(formula);
@@ -152,12 +138,10 @@ double DetectorEfficiencyCorUser::calculateFormulaValue(const std::string
     g_log.debug() << "Formula: " << formula << " with: " << energy
                   << "evaluated to: " << eff << '\n';
     return eff;
-  }
-  catch (mu::Parser::exception_type &e)
-  {
+  } catch (mu::Parser::exception_type &e) {
     throw Kernel::Exception::InstrumentDefinitionError(
-        "Error calculating formula from string. Muparser error message is: "
-        + e.GetMsg());
+        "Error calculating formula from string. Muparser error message is: " +
+        e.GetMsg());
   }
 }
 
@@ -170,15 +154,11 @@ double DetectorEfficiencyCorUser::calculateFormulaValue(const std::string
  * @param xIn :: Energy bins vector (X axis)
  * @return a vector with the efficiencies
  */
-MantidVec DetectorEfficiencyCorUser::calculateEfficiency(double eff0,
-                                                         const std::string
-                                                         &formula,
-                                                         const Points &xIn)
-{
+MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
+    double eff0, const std::string &formula, const Points &xIn) {
   MantidVec effOut(xIn.size());
 
-  try
-  {
+  try {
     double e;
     mu::Parser p;
     p.DefineVar("e", &e);
@@ -192,12 +172,10 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(double eff0,
       effOut[i] = eff / eff0;
     }
     return effOut;
-  }
-  catch (mu::Parser::exception_type &e)
-  {
+  } catch (mu::Parser::exception_type &e) {
     throw Kernel::Exception::InstrumentDefinitionError(
-        "Error calculating formula from string. Muparser error message is: "
-        + e.GetMsg());
+        "Error calculating formula from string. Muparser error message is: " +
+        e.GetMsg());
   }
 }
 
@@ -206,13 +184,12 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(double eff0,
  * @param parameterName :: parameter name in the IDF
  * @return the value associated to the parameter name
  */
-std::string DetectorEfficiencyCorUser::getValFromInstrumentDef(const std::string
-                                                               &parameterName)
-{
+std::string DetectorEfficiencyCorUser::getValFromInstrumentDef(
+    const std::string &parameterName) {
   const ParameterMap &pmap = m_inputWS->constInstrumentParameters();
   Instrument_const_sptr instrument = m_inputWS->getInstrument();
-  Parameter_sptr par
-      = pmap.getRecursive(instrument->getChild(0).get(), parameterName);
+  Parameter_sptr par =
+      pmap.getRecursive(instrument->getChild(0).get(), parameterName);
   if (par) {
     std::string ret = par->asString();
     g_log.debug() << "Parsed parameter " << parameterName << ": " << ret
@@ -229,8 +206,7 @@ std::string DetectorEfficiencyCorUser::getValFromInstrumentDef(const std::string
  *  @throw invalid_argument if there is an incapatible property value so the
  *algorithm can't continue
  */
-void DetectorEfficiencyCorUser::retrieveProperties()
-{
+void DetectorEfficiencyCorUser::retrieveProperties() {
   // Get the workspaces
   m_inputWS = this->getProperty("InputWorkspace");
 
