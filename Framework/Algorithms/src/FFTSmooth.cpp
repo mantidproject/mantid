@@ -57,12 +57,16 @@ void FFTSmooth::exec() {
 
   double dx = (m_inWS->x(spec).back() - m_inWS->x(spec).front()) /
               static_cast<double>(m_inWS->x(spec).size() - 1);
-  for (int i = 0; i < dn; i++) {
-    symmWS->mutableX(0)[dn + i] = m_inWS->x(spec)[i];
-    symmWS->mutableY(0)[dn + i] = m_inWS->y(spec)[i];
 
-    symmWS->mutableX(0)[dn - i] = x0 - dx * i;
-    symmWS->mutableY(0)[dn - i] = m_inWS->y(spec)[i];
+  auto &symX = symmWS->mutableX(0);
+  auto &symY = symmWS->mutableY(0);
+
+  for (int i = 0; i < dn; i++) {
+    symX[dn + i] = m_inWS->x(spec)[i];
+    symY[dn + i] = m_inWS->y(spec)[i];
+
+    symX[dn - i] = x0 - dx * i;
+    symY[dn - i] = m_inWS->y(spec)[i];
   }
   symmWS->mutableY(0).front() = m_inWS->y(spec).back();
   symmWS->mutableX(0).front() = x0 - dx * dn;
@@ -171,17 +175,10 @@ void FFTSmooth::zero(int n) {
   m_filteredWS =
       API::WorkspaceFactory::Instance().create(m_unfilteredWS, 2, mx, my);
 
-  m_filteredWS->setSharedX(0, m_unfilteredWS->sharedX(0));
-  m_filteredWS->setSharedX(1, m_unfilteredWS->sharedX(0));
-
-  m_filteredWS->mutableY(0).assign(m_unfilteredWS->y(0).size(), 0);
-  m_filteredWS->mutableY(1).assign(m_unfilteredWS->y(0).size(), 0);
-
-  std::copy(m_unfilteredWS->y(0).cbegin(), m_unfilteredWS->y(0).begin() + ny,
-            m_filteredWS->mutableY(0).begin());
-
-  std::copy(m_unfilteredWS->y(1).cbegin(), m_unfilteredWS->y(1).begin() + ny,
-            m_filteredWS->mutableY(1).begin());
+  m_filteredWS->mutableY(0).assign(m_unfilteredWS->y(0).cbegin(),
+                                   m_unfilteredWS->y(0).cbegin() + ny);
+  m_filteredWS->mutableY(1).assign(m_unfilteredWS->y(1).cbegin(),
+                                   m_unfilteredWS->y(1).cbegin() + ny);
 }
 
 } // namespace Algorithm

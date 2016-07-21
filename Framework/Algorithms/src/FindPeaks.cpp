@@ -700,7 +700,7 @@ void FindPeaks::calculateStandardDeviation(
 
   const size_t numHists = smoothed->getNumberHistograms();
   for (size_t i = 0; i < size_t(numHists); ++i) {
-    smoothed->mutableE(i).assign(input->e(i).cbegin(), input->e(i).cend());
+    smoothed->setSharedE(i, input->sharedE(i));
     std::transform(smoothed->e(i).cbegin(), smoothed->e(i).cend(),
                    smoothed->mutableE(i).begin(),
                    std::bind2nd(std::multiplies<double>(), constant));

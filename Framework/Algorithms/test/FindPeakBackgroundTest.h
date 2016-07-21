@@ -16,6 +16,8 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using HistogramData::Points;
+using HistogramData::Counts;
 
 using namespace std;
 
@@ -71,17 +73,15 @@ public:
 
     const size_t size = 20;
 
-    std::array<double, size> data = {{1, 2, 1, 1, 9, 11, 13, 20, 24, 32, 28, 48,
-                                      42, 77, 67, 33, 27, 20, 9, 2}};
-
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
-    ws->mutableY(0).assign(data.begin(), data.end());
-    std::iota(ws->mutableX(0).begin(), ws->mutableX(0).end(), 0);
-    std::transform(ws->y(0).cbegin(), ws->y(0).cend(), ws->mutableE(0).begin(),
-                   [](const double &y) { return sqrt(y); });
+    MantidVec xdata(size);
+    std::iota(xdata.begin(), xdata.end(), 0);
 
+    ws->setHistogram(0, Points(xdata),
+                     Counts{1,  2,  1,  1,  9,  11, 13, 20, 24, 32,
+                            28, 48, 42, 77, 67, 33, 27, 20, 9,  2});
     return ws;
   }
 
@@ -180,23 +180,23 @@ public:
   /** Generate a workspace with 2 spectra for test
    */
   MatrixWorkspace_sptr generate2SpectraTestWorkspace() {
-    vector<double> data{1,  2,  1,  1,  9,  11, 13, 20, 24, 32,
-                        28, 48, 42, 77, 67, 33, 27, 20, 9,  2};
+
+    const size_t size = 20;
 
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceFactory::Instance().create("Workspace2D", 2, data.size(),
-                                            data.size()));
+        WorkspaceFactory::Instance().create("Workspace2D", 2, size, size));
 
     // Workspace index = 0
-    ws->mutableY(0).assign(data.size(), 0.0);
-    ws->mutableE(0).assign(data.size(), 1.0);
-    std::iota(ws->mutableX(0).begin(), ws->mutableX(0).end(), 0);
+    MantidVec xdata(size);
+    std::iota(xdata.begin(), xdata.end(), 0);
+    ws->mutableX(0) = std::move(xdata);
+    ws->mutableE(0).assign(size, 1.0);
 
     // Workspace index = 1
-    ws->mutableY(1).assign(data.cbegin(), data.cend());
-    std::iota(ws->mutableX(1).begin(), ws->mutableX(1).end(), 0);
-    std::transform(ws->y(1).cbegin(), ws->y(1).cend(), ws->mutableE(1).begin(),
-                   [](const double &y) { return sqrt(y); });
+    ws->setSharedX(1, ws->sharedX(0));
+    ws->setCounts(1, Counts{1,  2,  1,  1,  9,  11, 13, 20, 24, 32,
+                            28, 48, 42, 77, 67, 33, 27, 20, 9,  2});
+
     return ws;
   }
 };

@@ -427,7 +427,7 @@ void FitOneSinglePeak::removeBackground(MatrixWorkspace_sptr purePeakWS) {
   std::transform(purePeakWS->y(0).cbegin(), purePeakWS->y(0).cend(),
                  purePeakWS->mutableY(0).begin(), [=](const double &y) mutable {
                    double newY = y - bkgdvalues[i++];
-                   return newY > 0. ? newY : 0.;
+                   return std::max(0.0, newY);
                  });
 }
 
@@ -1513,7 +1513,7 @@ void FitPeak::setupOutput(
   compfunc->function(domain, values);
 
   const auto domainVec = domain.toVector();
-  outws->mutableX(0).assign(domainVec.cbegin(), domainVec.cbegin() + sizex);
+  outws->mutableX(0).assign(domainVec.cbegin(), domainVec.cend());
   outws->setSharedX(1, outws->sharedX(0));
   outws->setSharedX(2, outws->sharedX(0));
 

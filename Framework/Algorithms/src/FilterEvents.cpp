@@ -447,11 +447,10 @@ void FilterEvents::processMatrixSplitterWorkspace() {
   // Check input workspace validity
   assert(m_matrixSplitterWS);
 
-  auto &X = m_matrixSplitterWS->x(0);
+  auto X = m_matrixSplitterWS->binEdges(0);
   auto &Y = m_matrixSplitterWS->y(0);
   size_t sizex = X.size();
   size_t sizey = Y.size();
-  assert(sizex - sizey == 1);
 
   // Assign vectors for time comparison
   m_vecSplitterTime.assign(X.size(), 0);

@@ -94,7 +94,7 @@ void FindPeakBackground::exec() {
   // Generate output
   auto &inpX = inpWS->x(inpwsindex);
   size_t sizex = inpWS->x(inpwsindex).size();
-  size_t sizey = inpWS->x(inpwsindex).size();
+  size_t sizey = inpWS->y(inpwsindex).size();
   size_t n = sizey;
   size_t l0 = 0;
 

@@ -90,13 +90,16 @@ void FFTSmooth2::exec() {
 
     progress.report();
 
-    for (int i = 0; i < dn; i++) {
-      symmWS->mutableX(0)[dn + i] = inWS->x(spec)[i];
-      symmWS->mutableY(0)[dn + i] = inWS->y(spec)[i];
+	auto &symX = symmWS->mutableX(0);
+	auto &symY = symmWS->mutableY(0);
 
-      symmWS->mutableX(0)[dn - i] = x0 - dx * i;
-      symmWS->mutableY(0)[dn - i] = inWS->y(spec)[i];
-    }
+	for (int i = 0; i < dn; i++) {
+		symX[dn + i] = inWS->x(spec)[i];
+		symY[dn + i] = inWS->y(spec)[i];
+
+		symX[dn - i] = x0 - dx * i;
+		symY[dn - i] = inWS->y(spec)[i];
+	}
     symmWS->mutableY(0).front() = inWS->y(spec).back();
     symmWS->mutableX(0).front() = x0 - dx * dn;
     if (inWS->isHistogramData())
@@ -218,9 +221,6 @@ void FFTSmooth2::zero(int n, API::MatrixWorkspace_sptr &unfilteredWS,
   filteredWS->setSharedX(0, unfilteredWS->sharedX(0));
   filteredWS->setSharedX(1, unfilteredWS->sharedX(0));
 
-  filteredWS->mutableY(0).assign(unfilteredWS->y(0).size(), 0);
-  filteredWS->mutableY(1).assign(unfilteredWS->y(0).size(), 0);
-
   std::copy(unfilteredWS->y(0).cbegin(), unfilteredWS->y(0).begin() + ny,
             filteredWS->mutableY(0).begin());
 
@@ -261,9 +261,6 @@ void FFTSmooth2::Butterworth(int n, int order,
   auto &uY1 = unfilteredWS->y(1);
   auto &Y0 = filteredWS->mutableY(0);
   auto &Y1 = filteredWS->mutableY(1);
-
-  Y0.assign(uY0.size(), 0);
-  Y1.assign(uY0.size(), 0);
 
   double cutoff = ny;
 
