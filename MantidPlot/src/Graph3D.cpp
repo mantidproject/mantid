@@ -127,7 +127,7 @@ Graph3D::Graph3D(const QString &label, QWidget *parent, const char *name,
 void Graph3D::initPlot() {
   d_table = 0;
   d_matrix = 0;
-  d_plotAssociation = QString();
+  plotAssociation = QString();
 
   color_map = QString::null;
   animation_redraw_wait = 50;
