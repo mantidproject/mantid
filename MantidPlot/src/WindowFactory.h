@@ -153,10 +153,12 @@ public:
   virtual const std::vector<std::string> getKeys() const {
     std::vector<std::string> names;
     names.reserve(_map.size());
-    std::transform(_map.cbegin(), _map.cend(), std::back_inserter(names),
-    [](const std::pair<const std::string, std::unique_ptr<AbstractFactory> > &mapPair) {
-        return mapPair.first;
-    });
+    std::transform(
+        _map.cbegin(), _map.cend(), std::back_inserter(names),
+        [](const std::pair<const std::string,
+                           std::unique_ptr<AbstractFactory>> &mapPair) {
+          return mapPair.first;
+        });
     return names;
   }
 
