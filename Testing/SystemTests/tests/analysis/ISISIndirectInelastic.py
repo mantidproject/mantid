@@ -69,7 +69,6 @@ stresstesting.MantidStressTest
 
 import stresstesting
 import os
-import platform
 from abc import ABCMeta, abstractmethod
 
 from mantid.simpleapi import *
@@ -1012,38 +1011,29 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
 
 class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
 
-    def skipTests(self):
-        operating_sys = platform.system()
-        # Skip Test on Windows and OSX
-        if operating_sys == "Darwin" or operating_sys == "Windows":
-            return True
-
     def __init__(self):
         ISISIndirectInelasticIqtAndIqtFitMulti.__init__(self)
 
         # TransformToIqt
-        self.samples = ['osi97935_graphite002_red.nxs']
+        self.samples = ['osiris97944_graphite002_red.nxs']
         self.resolution = 'osi97935_graphite002_res.nxs'
         self.e_min = -0.4
         self.e_max = 0.4
         self.num_bins = 4
 
         # Iqt Fit
-        self.func = r'name=LinearBackground,A0=0.510595,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp( -(x/Tau)^Beta),'\
-                     'Intensity=0.489405,Tau=0.105559,Beta=1.61112e-14;ties=(f1.Intensity=1-f0.A0)'
+        self.func = r'name=LinearBackground,A0=0.213439,A1=0,ties=(A1=0);name=UserFunction,'\
+                    'Formula=Intensity*exp(-(x/Tau)^Beta),Intensity=0.786561,Tau=0.0247894,'\
+                    'Beta=1;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
         self.startx = 0.0
-        self.endx = 0.119681
+        self.endx = 0.12
         self.spec_min = 0
         self.spec_max = 41
 
     def get_reference_files(self):
-        ref_files = ['II.OSIRISFury.nxs']
-        if platform.system() == "Windows":
-            ref_files += ['II.OSIRISFuryFitMulti_win.nxs']
-        else:
-            ref_files += ['II.OSIRISFuryFitMulti_lin.nxs']
-        return ref_files
+        return ['II.OSIRISIqt.nxs',
+                'II.OSIRISIqtFitMulti.nxs']
 
 #------------------------- IRIS tests -----------------------------------------
 

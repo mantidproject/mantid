@@ -115,17 +115,43 @@ void Elwin::run() {
   std::string inputGroupWsName = "IDA_Elwin_Input";
 
   QFileInfo firstFileInfo(inputFilenames[0]);
-  QString filename = firstFileInfo.baseName();
-  QString workspaceBaseName =
-      filename.left(filename.lastIndexOf("_")) + "_elwin_";
+  const auto filename = firstFileInfo.baseName();
 
-  QString qWorkspace = workspaceBaseName + "eq";
-  QString qSquaredWorkspace = workspaceBaseName + "eq2";
-  QString elfWorkspace = workspaceBaseName + "elf";
-  QString eltWorkspace = workspaceBaseName + "elt";
+  auto workspaceBaseName = filename.left(filename.lastIndexOf("_"));
+
+  if (inputFilenames.size() > 1) {
+    QFileInfo fileInfo(inputFilenames[inputFilenames.length() - 1]);
+    auto runNumber = fileInfo.baseName().toStdString();
+    runNumber = runNumber.substr(0, runNumber.find_first_of("_"));
+    size_t runNumberStart = 0;
+    const auto strLength = runNumber.length();
+    for (size_t i = 0; i < strLength; i++) {
+      if (std::isdigit(runNumber[i])) {
+        runNumberStart = i;
+        break;
+      }
+    }
+    // reassemble workspace base name with additional run number
+    runNumber = runNumber.substr(runNumberStart, strLength);
+    auto baseName = firstFileInfo.baseName();
+    const auto prefix = baseName.left(baseName.indexOf("_"));
+    auto testPre = prefix.toStdString();
+    const auto suffix =
+        baseName.right(baseName.length() - baseName.indexOf("_"));
+    auto testsuf = suffix.toStdString();
+    workspaceBaseName =
+        prefix + QString::fromStdString("-" + runNumber) + suffix;
+  }
+
+  workspaceBaseName += "_elwin_";
+
+  const auto qWorkspace = (workspaceBaseName + "eq").toStdString();
+  const auto qSquaredWorkspace = (workspaceBaseName + "eq2").toStdString();
+  const auto elfWorkspace = (workspaceBaseName + "elf").toStdString();
+  const auto eltWorkspace = (workspaceBaseName + "elt").toStdString();
 
   // Load input files
-  std::vector<std::string> inputWorkspaceNames;
+  std::string inputWorkspacesString;
 
   for (auto it = inputFilenames.begin(); it != inputFilenames.end(); ++it) {
     QFileInfo inputFileInfo(*it);
@@ -137,17 +163,18 @@ void Elwin::run() {
     loadAlg->setProperty("OutputWorkspace", workspaceName);
 
     m_batchAlgoRunner->addAlgorithm(loadAlg);
-    inputWorkspaceNames.push_back(workspaceName);
+    inputWorkspacesString += workspaceName + ",";
   }
 
   // Group input workspaces
   IAlgorithm_sptr groupWsAlg =
       AlgorithmManager::Instance().create("GroupWorkspaces");
   groupWsAlg->initialize();
-  groupWsAlg->setProperty("InputWorkspaces", inputWorkspaceNames);
+  API::BatchAlgorithmRunner::AlgorithmRuntimeProps runTimeProps;
+  runTimeProps["InputWorkspaces"] = inputWorkspacesString;
   groupWsAlg->setProperty("OutputWorkspace", inputGroupWsName);
 
-  m_batchAlgoRunner->addAlgorithm(groupWsAlg);
+  m_batchAlgoRunner->addAlgorithm(groupWsAlg, runTimeProps);
 
   // Configure ElasticWindowMultiple algorithm
   IAlgorithm_sptr elwinMultAlg =
@@ -156,10 +183,9 @@ void Elwin::run() {
 
   elwinMultAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
 
-  elwinMultAlg->setProperty("OutputInQ", qWorkspace.toStdString());
-  elwinMultAlg->setProperty("OutputInQSquared",
-                            qSquaredWorkspace.toStdString());
-  elwinMultAlg->setProperty("OutputELF", elfWorkspace.toStdString());
+  elwinMultAlg->setProperty("OutputInQ", qWorkspace);
+  elwinMultAlg->setProperty("OutputInQSquared", qSquaredWorkspace);
+  elwinMultAlg->setProperty("OutputELF", elfWorkspace);
 
   elwinMultAlg->setProperty("SampleEnvironmentLogName",
                             m_uiForm.leLogName->text().toStdString());
@@ -183,7 +209,7 @@ void Elwin::run() {
   }
 
   if (m_blnManager->value(m_properties["Normalise"])) {
-    elwinMultAlg->setProperty("OutputELT", eltWorkspace.toStdString());
+    elwinMultAlg->setProperty("OutputELT", eltWorkspace);
   }
 
   BatchAlgorithmRunner::AlgorithmRuntimeProps elwinInputProps;
@@ -206,7 +232,7 @@ void Elwin::run() {
   m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
-  m_pythonExportWsName = qSquaredWorkspace.toStdString();
+  m_pythonExportWsName = qSquaredWorkspace;
 }
 
 /**
@@ -232,18 +258,19 @@ void Elwin::unGroupInput(bool error) {
  * @param workspaceName Name of the workspace to save
  * @param filename Name of the file to save it as
  */
-void Elwin::addSaveAlgorithm(QString workspaceName, QString filename) {
+void Elwin::addSaveAlgorithm(const std::string &workspaceName,
+                             std::string filename) {
   // Set a default filename if none provided
-  if (filename.isEmpty())
+  if (filename.length() == 0)
     filename = workspaceName + ".nxs";
 
   // Configure the algorithm
   IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("SaveNexus");
   loadAlg->initialize();
-  loadAlg->setProperty("Filename", filename.toStdString());
+  loadAlg->setProperty("Filename", filename);
 
   BatchAlgorithmRunner::AlgorithmRuntimeProps saveAlgProps;
-  saveAlgProps["InputWorkspace"] = workspaceName.toStdString();
+  saveAlgProps["InputWorkspace"] = workspaceName;
 
   // Add it to the batch runner
   m_batchAlgoRunner->addAlgorithm(loadAlg, saveAlgProps);
@@ -279,7 +306,8 @@ void Elwin::loadSettings(const QSettings &settings) {
   m_uiForm.dsInputFiles->readSettings(settings.group());
 }
 
-void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws) {
+void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
+                                 const QPair<double, double> &range) {
   auto inst = ws->getInstrument();
   auto analyser = inst->getStringParameter("analyser");
 
@@ -295,6 +323,9 @@ void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws) {
 
       m_dblManager->setValue(m_properties["BackgroundStart"], -10 * res);
       m_dblManager->setValue(m_properties["BackgroundEnd"], -9 * res);
+    } else {
+      m_dblManager->setValue(m_properties["IntegrationStart"], range.first);
+      m_dblManager->setValue(m_properties["IntegrationEnd"], range.second);
     }
   }
 }
@@ -396,22 +427,17 @@ void Elwin::plotInput() {
 
   int specNo = m_uiForm.spPreviewSpec->value();
 
-  setDefaultResolution(ws);
-  setDefaultSampleLog(ws);
-
-  m_uiForm.ppPlot->clear();
-  m_uiForm.ppPlot->addSpectrum("Sample", ws, specNo);
-
   try {
+    m_uiForm.ppPlot->clear();
+    m_uiForm.ppPlot->addSpectrum("Sample", ws, specNo);
     QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
-    // Set maximum range of Integration
-    m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")
-        ->setRange(range.first, range.second);
-    // Set initial values
-    m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")
-        ->setMinimum(range.first);
-    m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")
-        ->setMaximum(range.second);
+    auto rangeSelector =
+        m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
+    setPlotPropertyRange(rangeSelector, m_properties["IntegrationStart"],
+                         m_properties["IntegrationEnd"], range);
+
+    setDefaultResolution(ws, range);
+    setDefaultSampleLog(ws);
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
   }

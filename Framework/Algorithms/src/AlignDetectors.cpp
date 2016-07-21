@@ -23,6 +23,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using Mantid::DataObjects::OffsetsWorkspace;
 
 namespace Mantid {
@@ -337,9 +338,8 @@ void AlignDetectors::align(const ConversionFactors &converter,
       std::transform(x.begin(), x.end(), x.begin(), toDspacing);
     } catch (Exception::NotFoundError &) {
       // Zero the data in this case
-      outputWS.dataX(i).assign(outputWS.readX(i).size(), 0.0);
-      outputWS.dataY(i).assign(outputWS.readY(i).size(), 0.0);
-      outputWS.dataE(i).assign(outputWS.readE(i).size(), 0.0);
+      outputWS.setHistogram(i, BinEdges(outputWS.x(i).size()),
+                            Counts(outputWS.y(i).size()));
     }
     progress.report();
     PARALLEL_END_INTERUPT_REGION

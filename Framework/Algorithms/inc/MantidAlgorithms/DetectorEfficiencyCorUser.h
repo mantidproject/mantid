@@ -2,10 +2,15 @@
 #define MANTID_ALGORITHMS_DETECTOREFFICIENCYCORUSER_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+
+namespace HistogramData {
+class Histogram;
+class Points;
+}
+
 namespace Algorithms {
 
 /** DetectorEfficiencyCorUser :
@@ -56,18 +61,15 @@ private:
   void init() override;
   void exec() override;
   void retrieveProperties();
-  double calculateFormulaValue(const std::string &, double);
+  double calculateFormulaValue(const std::string &formula, double energy);
   MantidVec calculateEfficiency(double eff0, const std::string &formula,
                                 const HistogramData::Points &xIn);
 
-  std::string getValFromInstrumentDef(const std::string &);
+  std::string getValFromInstrumentDef(const std::string &parameterName);
 
-  void applyDetEfficiency(const size_t numberOfChannels,
-                          const HistogramData::HistogramY &yIn,
-                          const HistogramData::HistogramE &eIn,
-                          const MantidVec &effVec,
-                          HistogramData::HistogramY &yOut,
-                          HistogramData::HistogramE &eOut);
+  HistogramData::Histogram
+  applyDetEfficiency(const size_t nChans, const Mantid::MantidVec &effVec,
+                     const HistogramData::Histogram &histogram);
 
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr m_inputWS;

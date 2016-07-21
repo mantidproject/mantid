@@ -249,8 +249,7 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
             double tof = X[i] + tofStep * (0.5 + double(j));
             // Create and add the event
             // TODO: try emplace_back() here.
-            weightedEventsNoTime.push_back(
-                WeightedEventNoTime(tof, weight, errorSquared));
+            weightedEventsNoTime.emplace_back(tof, weight, errorSquared);
           }
         } else {
           // --------- Single event per bin ----------
@@ -260,8 +259,7 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
           double errorSquared = E[i];
           errorSquared *= errorSquared;
           // Create and add the event
-          weightedEventsNoTime.push_back(
-              WeightedEventNoTime(tof, weight, errorSquared));
+          weightedEventsNoTime.emplace_back(tof, weight, errorSquared);
         }
       } // error is nont NAN or infinite
     }   // weight is non-zero, not NAN, and non-infinite
@@ -308,11 +306,11 @@ EventList &EventList::operator+=(const TofEvent &event) {
     break;
 
   case WEIGHTED:
-    this->weightedEvents.push_back(WeightedEvent(event));
+    this->weightedEvents.emplace_back(event);
     break;
 
   case WEIGHTED_NOTIME:
-    this->weightedEventsNoTime.push_back(WeightedEventNoTime(event));
+    this->weightedEventsNoTime.emplace_back(event);
     break;
   }
 
@@ -685,14 +683,9 @@ void EventList::switchToWeightedEvents() {
     break;
 
   case TOF:
-    weightedEvents.clear();
     weightedEventsNoTime.clear();
     // Convert and copy all TofEvents to the weightedEvents list.
-    std::vector<TofEvent>::const_iterator it;
-    std::vector<TofEvent>::const_iterator it_end =
-        events.end(); // Cache for speed
-    for (it = events.begin(); it != it_end; ++it)
-      this->weightedEvents.push_back(WeightedEvent(*it));
+    this->weightedEvents.assign(events.cbegin(), events.cend());
     // Get rid of the old events
     events.clear();
     eventType = WEIGHTED;
@@ -712,12 +705,7 @@ void EventList::switchToWeightedEventsNoTime() {
 
   case TOF: {
     // Convert and copy all TofEvents to the weightedEvents list.
-    weightedEventsNoTime.clear();
-    std::vector<TofEvent>::const_iterator it;
-    std::vector<TofEvent>::const_iterator it_end =
-        events.end(); // Cache for speed
-    for (it = events.begin(); it != it_end; ++it)
-      this->weightedEventsNoTime.push_back(WeightedEventNoTime(*it));
+    this->weightedEventsNoTime.assign(events.cbegin(), events.cend());
     // Get rid of the old events
     events.clear();
     weightedEvents.clear();
@@ -726,12 +714,8 @@ void EventList::switchToWeightedEventsNoTime() {
 
   case WEIGHTED: {
     // Convert and copy all TofEvents to the weightedEvents list.
-    weightedEventsNoTime.clear();
-    std::vector<WeightedEvent>::const_iterator it;
-    std::vector<WeightedEvent>::const_iterator it_end =
-        weightedEvents.end(); // Cache for speed
-    for (it = weightedEvents.begin(); it != it_end; ++it)
-      this->weightedEventsNoTime.push_back(WeightedEventNoTime(*it));
+    this->weightedEventsNoTime.assign(weightedEvents.cbegin(),
+                                      weightedEvents.cend());
     // Get rid of the old events
     events.clear();
     weightedEvents.clear();
@@ -1676,8 +1660,7 @@ EventList::compressEventsHelper(const std::vector<T> &events,
       if (num > 0) {
         // Create a new event with the average TOF and summed weights and
         // squared errors.
-        out.push_back(
-            WeightedEventNoTime(totalTof / num, weight, errorSquared));
+        out.emplace_back(totalTof / num, weight, errorSquared);
       }
       // Start a new combined object
       num = 1;
@@ -1692,7 +1675,7 @@ EventList::compressEventsHelper(const std::vector<T> &events,
   if (num > 0) {
     // Create a new event with the average TOF and summed weights and squared
     // errors.
-    out.push_back(WeightedEventNoTime(totalTof / num, weight, errorSquared));
+    out.emplace_back(totalTof / num, weight, errorSquared);
   }
 
   // If you have over-allocated by more than 5%, reduce the size.
@@ -1761,8 +1744,7 @@ void EventList::compressEventsParallelHelper(
         if (num > 0) {
           // Create a new event with the average TOF and summed weights and
           // squared errors.
-          localOut.push_back(
-              WeightedEventNoTime(totalTof / num, weight, errorSquared));
+          localOut.emplace_back(totalTof / num, weight, errorSquared);
         }
         // Start a new combined object
         num = 1;
@@ -1777,8 +1759,7 @@ void EventList::compressEventsParallelHelper(
     if (num > 0) {
       // Create a new event with the average TOF and summed weights and squared
       // errors.
-      localOut.push_back(
-          WeightedEventNoTime(totalTof / num, weight, errorSquared));
+      localOut.emplace_back(totalTof / num, weight, errorSquared);
     }
   }
 

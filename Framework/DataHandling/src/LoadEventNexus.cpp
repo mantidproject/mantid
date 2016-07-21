@@ -1803,6 +1803,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_ws->setAllX(axis);
 
     createWorkspaceIndexMaps(monitors, std::vector<std::string>());
+    return;
   }
 
   // --------- Loading only one bank ? ----------------------------------

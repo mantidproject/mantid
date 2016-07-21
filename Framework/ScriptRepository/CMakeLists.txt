@@ -4,6 +4,7 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
+  inc/MantidScriptRepository/DllConfig.h
 	inc/MantidScriptRepository/ScriptRepositoryImpl.h
 )
 
