@@ -502,7 +502,8 @@ void ISISCalibration::calPlotEnergy() {
   reductionAlg->setProperty("OutputWorkspace",
                             "__IndirectCalibration_reduction");
   reductionAlg->setProperty("SpectraRange", detRange.toStdString());
-  reductionAlg->setProperty("LoadLogFiles", m_uiForm.ckLoadLogFiles->isChecked());
+  reductionAlg->setProperty("LoadLogFiles",
+                            m_uiForm.ckLoadLogFiles->isChecked());
   reductionAlg->execute();
 
   if (!reductionAlg->isExecuted()) {
