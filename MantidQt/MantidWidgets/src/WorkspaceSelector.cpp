@@ -260,8 +260,8 @@ void WorkspaceSelector::refresh() {
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   std::vector<std::string> items;
   if (showHiddenWorkspaces()) {
-	  items = ads.getObjectNames(Mantid::Kernel::DataServiceSort::Sorted,
-		  Mantid::Kernel::DataServiceHidden::Include);
+    items = ads.getObjectNames(Mantid::Kernel::DataServiceSort::Sorted,
+                               Mantid::Kernel::DataServiceHidden::Include);
   } else {
     items = ads.getObjectNames();
   }

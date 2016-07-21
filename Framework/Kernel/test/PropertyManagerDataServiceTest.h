@@ -93,12 +93,12 @@ public:
   }
   void testGetObjectNames() {
     PropertyManagerDataService::Instance().add("inst2", inst2);
-	std::vector<std::string> expectedNames = { "inst1", "inst2" };
+    std::vector<std::string> expectedNames = {"inst1", "inst2"};
     auto result = PropertyManagerDataService::Instance().getObjectNames();
     TS_ASSERT_EQUALS(result, expectedNames);
     // Check with an empty store
     PropertyManagerDataService::Instance().clear();
-	expectedNames.clear();
+    expectedNames.clear();
     result = PropertyManagerDataService::Instance().getObjectNames();
     TS_ASSERT_EQUALS(result, expectedNames);
   }
