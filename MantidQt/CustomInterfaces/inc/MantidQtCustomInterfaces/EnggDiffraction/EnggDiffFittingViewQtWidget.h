@@ -143,8 +143,6 @@ public:
   std::string fittingRunNoFactory(std::string bank, std::string fileName,
                                   std::string &bankDir, std::string fileDir);
 
-  std::string readPeaksFile(std::string fileDir);
-
   void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data,
                          std::vector<QwtPlotCurve *> &dataVector, bool focused);
 
@@ -177,6 +175,7 @@ private slots:
   void fitClicked();
   void FittingRunNo();
   void addPeaks();
+
   void plotSeparateWindow();
   void setBankDir(int idx);
   void listViewFittingRun();

@@ -263,28 +263,6 @@ std::string EnggDiffFittingViewQtWidget::fittingRunNoFactory(
   return bankDir;
 }
 
-std::string EnggDiffFittingViewQtWidget::readPeaksFile(std::string fileDir) {
-  std::string fileData = "";
-  std::string line;
-  std::string comma = ", ";
-
-  std::ifstream peakFile(fileDir);
-
-  if (peakFile.is_open()) {
-    while (std::getline(peakFile, line)) {
-      fileData += line;
-      if (!peakFile.eof())
-        fileData += comma;
-    }
-    peakFile.close();
-  }
-
-  else
-    fileData = "";
-
-  return fileData;
-}
-
 void EnggDiffFittingViewQtWidget::setDataVector(
     std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
     bool plotSinglePeaks) {

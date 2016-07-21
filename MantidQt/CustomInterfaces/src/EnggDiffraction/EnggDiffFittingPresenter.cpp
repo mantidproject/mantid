@@ -7,6 +7,7 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresWorker.h"
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
+#include <fstream>
 #include <boost/lexical_cast.hpp>
 
 #include <Poco/DirectoryIterator.h>
@@ -744,6 +745,28 @@ void EnggDiffFittingPresenter::addPeakToList() {
       m_view->setPeakList(curExpPeaksList.toStdString());
     }
   }
+}
+
+std::string EnggDiffFittingPresenter::readPeaksFile(std::string fileDir) {
+  std::string fileData = "";
+  std::string line;
+  std::string comma = ", ";
+
+  std::ifstream peakFile(fileDir);
+
+  if (peakFile.is_open()) {
+    while (std::getline(peakFile, line)) {
+      fileData += line;
+      if (!peakFile.eof())
+        fileData += comma;
+    }
+    peakFile.close();
+  }
+
+  else
+    fileData = "";
+
+  return fileData;
 }
 
 void EnggDiffFittingPresenter::runEvaluateFunctionAlg(

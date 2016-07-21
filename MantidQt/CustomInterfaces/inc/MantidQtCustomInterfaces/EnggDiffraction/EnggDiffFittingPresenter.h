@@ -78,6 +78,8 @@ public:
 
   void addPeakToList();
 
+  std::string readPeaksFile(std::string fileDir);
+
   void plotFitPeaksCurves();
 
   void runEvaluateFunctionAlg(const std::string &bk2BkExpFunction,
