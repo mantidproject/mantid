@@ -82,6 +82,10 @@ void EnggDiffFittingPresenter::notify(
     addPeakToList();
     break;
 
+  case IEnggDiffFittingPresenter::browsePeaks:
+    browsePeaksToFit();
+	break;
+
   case IEnggDiffFittingPresenter::ShutDown:
     processShutDown();
     break;
@@ -712,6 +716,32 @@ std::string EnggDiffFittingPresenter::functionStrFactory(
       boost::lexical_cast<std::string>(S);
 
   return functionStr;
+}
+
+void EnggDiffFittingPresenter::browsePeaksToFit() {
+  try {
+    QString prevPath = QString::fromStdString(m_view->focusingDir());
+    if (prevPath.isEmpty()) {
+      prevPath = QString::fromStdString(m_view->getPreviousDir());
+    }
+
+    std::string pathStd = m_view->getOpenFile(prevPath.toStdString());
+
+    if (pathStd.empty()) {
+      return;
+    }
+
+    m_view->setPreviousDir(pathStd);
+
+    std::string peaksData = readPeaksFile(pathStd);
+
+    m_view->setPeakList(peaksData);
+  } catch (...) {
+    m_view->userWarning(
+        "Unable to import the peaks from a file: ",
+        "File corrupted or could not be opened. Please try again");
+    return;
+  }
 }
 
 void EnggDiffFittingPresenter::addPeakToList() {

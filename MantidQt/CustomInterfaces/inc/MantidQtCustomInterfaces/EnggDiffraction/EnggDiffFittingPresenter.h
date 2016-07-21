@@ -76,6 +76,8 @@ public:
                      std::string tableName, size_t row, std::string &startX,
                      std::string &endX);
 
+  void browsePeaksToFit();
+
   void addPeakToList();
 
   std::string readPeaksFile(std::string fileDir);

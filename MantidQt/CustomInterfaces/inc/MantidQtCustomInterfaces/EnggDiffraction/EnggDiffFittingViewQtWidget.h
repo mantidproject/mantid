@@ -140,6 +140,12 @@ public:
 
   bool peakPickerEnabled() const override;
 
+  std::string getPreviousDir() const override;
+
+  void setPreviousDir(std::string path) override;
+
+  std::string getOpenFile(std::string prevPath) override;
+
   std::string fittingRunNoFactory(std::string bank, std::string fileName,
                                   std::string &bankDir, std::string fileDir);
 
@@ -168,14 +174,13 @@ private slots:
   void browseFitFocusedRun();
   void resetFittingMultiMode();
   void setBankIdComboBox(int idx) override;
-  void browsePeaksToFit();
   void setPeakPick();
   void savePeakList();
   void clearPeakList();
   void fitClicked();
   void FittingRunNo();
   void addPeaks();
-
+  void browsePeaks();
   void plotSeparateWindow();
   void setBankDir(int idx);
   void listViewFittingRun();

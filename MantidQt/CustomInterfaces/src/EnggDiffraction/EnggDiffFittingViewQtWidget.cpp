@@ -99,7 +99,7 @@ void EnggDiffFittingViewQtWidget::doSetup() {
           SLOT(setBankDir(int)));
 
   connect(m_ui.pushButton_fitting_browse_peaks, SIGNAL(released()), this,
-          SLOT(browsePeaksToFit()));
+          SLOT(browsePeaks()));
 
   connect(m_ui.pushButton_fit, SIGNAL(released()), this, SLOT(fitClicked()));
 
@@ -219,6 +219,10 @@ void EnggDiffFittingViewQtWidget::FittingRunNo() {
 
 void EnggDiffFittingViewQtWidget::addPeaks() {
 	m_presenter->notify(IEnggDiffFittingPresenter::addPeaks);
+}
+
+void EnggDiffFittingViewQtWidget::browsePeaks() {
+	m_presenter->notify(IEnggDiffFittingPresenter::browsePeaks);
 }
 
 void EnggDiffFittingViewQtWidget::setBankDir(int idx) {
@@ -401,36 +405,26 @@ void EnggDiffFittingViewQtWidget::resetView() {
   m_zoomTool->setZoomBase(true);
 }
 
-void EnggDiffFittingViewQtWidget::browsePeaksToFit() {
+std::string EnggDiffFittingViewQtWidget::getPreviousDir() const {
 
-  // TODO: the logic, checks and decision on what message to show should be
-  // moved to the presenter
+  QString prevPath =
+      MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
 
-  try {
-    QString prevPath = QString::fromStdString(focusingDir());
-    if (prevPath.isEmpty()) {
-      prevPath = MantidQt::API::AlgorithmInputHistory::Instance()
-                     .getPreviousDirectory();
-    }
+  return prevPath.toStdString();
+}
 
-    QString path(
-        QFileDialog::getOpenFileName(this, tr("Open Peaks To Fit"), prevPath,
-                                     QString::fromStdString(g_peaksListExt)));
+void EnggDiffFittingViewQtWidget::setPreviousDir(std::string path) {
+  QString qPath = QString::fromStdString(path);
+  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(qPath);
+}
 
-    if (path.isEmpty()) {
-      return;
-    }
+std::string EnggDiffFittingViewQtWidget::getOpenFile(std::string prevPath) {
 
-    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+  QString path(QFileDialog::getOpenFileName(this, tr("Open Peaks To Fit"),
+                                            QString::fromStdString(prevPath),
+                                            QString::fromStdString(g_peaksListExt)));
 
-    std::string peaksData = readPeaksFile(path.toStdString());
-
-    m_ui.lineEdit_fitting_peaks->setText(QString::fromStdString(peaksData));
-  } catch (...) {
-    userWarning("Unable to import the peaks from a file: ",
-                "File corrupted or could not be opened. Please try again");
-    return;
-  }
+  return path.toStdString();
 }
 
 void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
