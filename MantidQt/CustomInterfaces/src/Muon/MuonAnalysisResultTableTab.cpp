@@ -39,9 +39,11 @@ using namespace MantidQt::MantidWidgets;
 const std::string MuonAnalysisResultTableTab::WORKSPACE_POSTFIX("_Workspace");
 const std::string MuonAnalysisResultTableTab::PARAMS_POSTFIX("_Parameters");
 const QString MuonAnalysisResultTableTab::RUN_NUMBER_LOG("run_number");
+const QString MuonAnalysisResultTableTab::RUN_START_LOG("run_start");
+const QString MuonAnalysisResultTableTab::RUN_END_LOG("run_end");
 const QStringList MuonAnalysisResultTableTab::NON_TIMESERIES_LOGS{
     MuonAnalysisResultTableTab::RUN_NUMBER_LOG, "sample_temp",
-    "sample_magn_field"};
+    "sample_magn_field", RUN_START_LOG, RUN_END_LOG};
 
 /**
 * Constructor
@@ -463,6 +465,13 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
 
           if (logName == RUN_NUMBER_LOG) { // special case
             value = MuonAnalysisHelper::runNumberString(wsName, prop->value());
+          } else if (logName == RUN_START_LOG || logName == RUN_END_LOG) {
+            // Convert these to the date/time format QtiPlot understands so that
+            // they can be used to plot a graph from the table
+            auto dateString = QString::fromStdString(prop->value());
+            dateString.replace("T", " ", Qt::CaseInsensitive);
+            dateString.remove('-');
+            value = dateString;
           } else if (auto stringProp =
                          dynamic_cast<PropertyWithValue<std::string> *>(prop)) {
             value = QString::fromStdString((*stringProp)());
