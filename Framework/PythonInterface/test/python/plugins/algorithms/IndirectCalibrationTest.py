@@ -26,7 +26,8 @@ class IndirectCalibrationTest(unittest.TestCase):
 
         self.assertEqual(cal_ws.getNumberHistograms(), 51)
         self.assertEqual(cal_ws.blocksize(), 1)
+        
         self.assertEqual(cal_ws.run().getProperty('current_period').value, 1)
-
+        
 if __name__ == "__main__":
 	unittest.main()
