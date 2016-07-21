@@ -699,7 +699,6 @@ void FindPeaks::calculateStandardDeviation(
       sqrt(static_cast<double>(this->computePhi(w))) / factor;
 
   const size_t numHists = smoothed->getNumberHistograms();
-  const size_t blocksize = smoothed->blocksize();
   for (size_t i = 0; i < size_t(numHists); ++i) {
     smoothed->mutableE(i).assign(input->e(i).cbegin(), input->e(i).cend());
     std::transform(smoothed->e(i).cbegin(), smoothed->e(i).cend(),

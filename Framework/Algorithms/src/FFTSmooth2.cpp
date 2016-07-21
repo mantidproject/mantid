@@ -265,7 +265,6 @@ void FFTSmooth2::Butterworth(int n, int order,
   Y0.assign(uY0.size(), 0);
   Y1.assign(uY0.size(), 0);
 
-  int i = 0;
   double cutoff = ny;
 
   for (int i = 0; i < my; i++) {
