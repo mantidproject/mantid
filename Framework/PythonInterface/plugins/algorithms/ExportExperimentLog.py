@@ -1,10 +1,12 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 import mantid
 from mantid.api import *
 from mantid.kernel import *
 import datetime
 import time
 import os
+from six.moves import range
 
 #pylint: disable=too-many-instance-attributes
 class ExportExperimentLog(PythonAlgorithm):
@@ -132,7 +134,7 @@ class ExportExperimentLog(PythonAlgorithm):
         if len(self._sampleLogNames) != len(ops):
             raise RuntimeError("Size of sample log names and sample operations are unequal!")
         self._sampleLogOperations = []
-        for i in xrange(len(self._sampleLogNames)):
+        for i in range(len(self._sampleLogNames)):
             value = ops[i]
             self._sampleLogOperations.append(value)
         # ENDFOR
@@ -197,7 +199,7 @@ class ExportExperimentLog(PythonAlgorithm):
             if len(overridelist) % 2 != 0:
                 raise RuntimeError("Number of items in OverrideLogValue must be even.")
             self._ovrdTitleValueDict = {}
-            for i in xrange(len(overridelist)/2):
+            for i in range(len(overridelist)/2):
                 title = overridelist[2*i]
                 if title in self._headerTitles:
                     self._ovrdTitleValueDict[title] = overridelist[2*i+1]
@@ -213,7 +215,7 @@ class ExportExperimentLog(PythonAlgorithm):
             raise RuntimeError("No header title specified. Unable to write a new file.")
 
         wbuf = ""
-        for ititle in xrange(len(self._headerTitles)):
+        for ititle in range(len(self._headerTitles)):
             title = self._headerTitles[ititle]
             wbuf += "%s" % (title)
             if ititle < len(self._headerTitles)-1:
@@ -259,7 +261,7 @@ class ExportExperimentLog(PythonAlgorithm):
                 self._headerTitles = titles[:]
             else:
                 same = False
-        for ititle in xrange(len(titles)):
+        for ititle in range(len(titles)):
             title1 = titles[ititle]
             title2 = self._headerTitles[ititle]
             if title1 != title2:
@@ -309,10 +311,10 @@ class ExportExperimentLog(PythonAlgorithm):
             skip = False
 
         headertitle = None
-        for il in xrange(len(self._sampleLogNames)):
+        for il in range(len(self._sampleLogNames)):
             if skip is False:
                 headertitle = self._headerTitles[il]
-            if headertitle is not None and headertitle in self._ovrdTitleValueDict.keys():
+            if headertitle is not None and headertitle in list(self._ovrdTitleValueDict.keys()):
                 # overriden
                 value = self._ovrdTitleValueDict[headertitle]
 
@@ -321,9 +323,9 @@ class ExportExperimentLog(PythonAlgorithm):
                 logname = self._sampleLogNames[il]
                 optype = self._sampleLogOperations[il]
                 key = logname + "-" + optype
-                if key in logvaluedict.keys():
+                if key in list(logvaluedict.keys()):
                     value = logvaluedict[key]
-                elif logname in logvaluedict.keys():
+                elif logname in list(logvaluedict.keys()):
                     value = logvaluedict[logname]
             # ENDIFELSE
 
@@ -370,7 +372,7 @@ class ExportExperimentLog(PythonAlgorithm):
                 except IndexError:
                     self.log().error("Order record failed.")
                     return
-                if linedict.has_key(keyvalue) is False:
+                if (keyvalue in linedict) is False:
                     linedict[keyvalue] = []
                 linedict[keyvalue].append(line)
                 totnumlines += 1
@@ -378,7 +380,7 @@ class ExportExperimentLog(PythonAlgorithm):
         # ENDFOR
 
         # Check needs to re-order
-        if linedict.keys() != sorted(linedict.keys()):
+        if list(linedict.keys()) != sorted(linedict.keys()):
             # Re-write file
             wbuf = ""
 
@@ -391,7 +393,7 @@ class ExportExperimentLog(PythonAlgorithm):
 
             # consider the mode to remove duplicate
             if self._removeDupRecord is True:
-                totnumlines = len(linedict.keys())
+                totnumlines = len(list(linedict.keys()))
 
             for ivalue in sorted(linedict.keys()):
                 if self._removeDupRecord is True:
@@ -451,7 +453,7 @@ class ExportExperimentLog(PythonAlgorithm):
             return None
 
         #for logname in self._sampleLogNames:
-        for il in xrange(len(self._sampleLogNames)):
+        for il in range(len(self._sampleLogNames)):
             logname = self._sampleLogNames[il]
             isexist = run.hasProperty(logname)
 
