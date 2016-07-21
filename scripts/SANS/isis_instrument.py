@@ -9,6 +9,7 @@ from mantid.api import WorkspaceGroup, Workspace
 from mantid.kernel import Logger
 from mantid.kernel import V3D
 import SANSUtility as su
+from math import copysign
 
 sanslog = Logger("SANS")
 
@@ -1666,7 +1667,7 @@ class LARMOR(ISISInstrument):
 
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
-        """Unforunately getting the angle of the bench does not work so we have to get bench and detector"""
+        # Unforunately getting the angle of the bench does not work so we have to get bench and detector
 
         # logger.warning("Entering cur_detector_position")
         ws = mtd[ws_name]
@@ -1681,6 +1682,14 @@ class LARMOR(ISISInstrument):
         deg2rad = 4.0 * math.atan(1.0) / 180.0
         # now finally find the angle between the vector for the difference and the beam axis
         angle = posdiff.angle(a1) / deg2rad
+
+        # Get the angle of the rotation from the rotation quaternion
+        # At this point we also need to take the sign of the axis into account
+        instrument = ws.getInstrument()
+        detector_bench = instrument.getComponentByName("DetectorBench")
+        rot = detector_bench.getRotation()
+        angle, axis = su.quaternion_to_angle_and_axis(rot)
+        angle = copysign(angle, axis[1])
 
         # return the angle and the y displacement
         # logger.warning("Blah: angle=" + str(angle) + " Y displacement=" +str(-pos2.getY()) )
@@ -1704,13 +1713,23 @@ class LARMOR(ISISInstrument):
                     raise "Invalid log"
             except:
                 if isSample:
-                    raise RuntimeError('Sample logs cannot be loaded, cannot continue')
+                    run = ws_ref.run()
+                    if not run.hasProperty("Bench_Rot"):
+                        additional_message = ("The Bench_Rot entry seems to be missing. There might be "
+                                              "an issue with your data aquisition. Make sure that the sample_log entry "
+                                              "Bench_Rot is available.")
+                    else:
+                        additional_message = ""
+
+                    raise RuntimeError('Sample logs cannot be loaded, cannot continue. {0}'.format(additional_message))
                 else:
                     logger.warning("Can logs could not be loaded, using sample values.")
 
             if isSample:
+                su.check_has_bench_rot(ws_ref, log)
                 self.apply_detector_logs(log)
             else:
+                su.check_has_bench_rot(ws_ref, log)
                 self.check_can_logs(log)
 
         ISISInstrument.on_load_sample(self, ws_name, beamcentre, isSample)
