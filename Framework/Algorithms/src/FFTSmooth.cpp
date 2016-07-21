@@ -174,11 +174,15 @@ void FFTSmooth::zero(int n) {
 
   m_filteredWS =
       API::WorkspaceFactory::Instance().create(m_unfilteredWS, 2, mx, my);
+  
+  m_filteredWS->setSharedX(0, m_unfilteredWS->sharedX(0));
+  m_filteredWS->setSharedX(1, m_unfilteredWS->sharedX(0));
 
-  m_filteredWS->mutableY(0).assign(m_unfilteredWS->y(0).cbegin(),
-                                   m_unfilteredWS->y(0).cbegin() + ny);
-  m_filteredWS->mutableY(1).assign(m_unfilteredWS->y(1).cbegin(),
-                                   m_unfilteredWS->y(1).cbegin() + ny);
+  std::copy(m_unfilteredWS->y(0).cbegin(), m_unfilteredWS->y(0).begin() + ny,
+	  m_filteredWS->mutableY(0).begin());
+
+  std::copy(m_unfilteredWS->y(1).cbegin(), m_unfilteredWS->y(1).begin() + ny,
+	  m_filteredWS->mutableY(1).begin());
 }
 
 } // namespace Algorithm
