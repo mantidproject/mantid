@@ -9,9 +9,7 @@
 #include "MantidKernel/CompositeValidator.h"
 
 using Mantid::HistogramData::Histogram;
-using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::Points;
 
 namespace Mantid {
 namespace Algorithms {
@@ -64,7 +62,6 @@ void DetectorEfficiencyCorUser::init() {
 /** Execute the algorithm.
  */
 void DetectorEfficiencyCorUser::exec() {
-
   // get input properties (WSs, Ei)
   retrieveProperties();
 
@@ -87,7 +84,8 @@ void DetectorEfficiencyCorUser::exec() {
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    const auto effVec = calculateEfficiency(eff0, effFormula, m_inputWS->x(i));
+    const auto effVec =
+        calculateEfficiency(eff0, effFormula, m_inputWS->points(i));
     // run this outside to benefit from parallel for (?)
     m_outputWS->setHistogram(i, applyDetEfficiency(numberOfChannels, effVec,
                                                    m_inputWS->histogram(i)));
@@ -140,7 +138,6 @@ DetectorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
     g_log.debug() << "Formula: " << formula << " with: " << energy
                   << "evaluated to: " << eff << '\n';
     return eff;
-
   } catch (mu::Parser::exception_type &e) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Error calculating formula from string. Muparser error message is: " +
@@ -150,19 +147,16 @@ DetectorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
 
 /**
  * Calculate detector efficiency given a formula, the efficiency at the elastic
- * line,
- * and a vector with energies.
- *  Efficiency = f(Ei-DeltaE) / f(Ei)
- * Hope all compilers supports the NRVO (otherwise will copy the output vector)
+ * line, and a vector with energies.
+ * Efficiency = f(Ei-DeltaE) / f(Ei)
  * @param eff0 :: calculated eff0
  * @param formula :: formula to calculate efficiency (parsed from IDF)
  * @param xIn :: Energy bins vector (X axis)
  * @return a vector with the efficiencies
  */
 MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
-    double eff0, const std::string &formula, const HistogramX &xIn) {
-
-  MantidVec effOut(xIn.size() - 1); // x are bins and have more one value than y
+    double eff0, const std::string &formula, const Points &xIn) {
+  MantidVec effOut(xIn.size());
 
   try {
     double e;
@@ -170,24 +164,12 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
     p.DefineVar("e", &e);
     p.SetExpr(formula);
 
-    // copied from Jaques Ollivier Code
-    bool conditionForEnergy =
-        std::min(std::abs(*std::min_element(xIn.begin(), xIn.end())), m_Ei) <
-        m_Ei;
-
-    auto xIn_it = xIn.cbegin(); // DeltaE
-    auto effOut_it = effOut.begin();
-    for (; effOut_it != effOut.end(); ++xIn_it, ++effOut_it) {
-      if (conditionForEnergy) {
-        // cppcheck cannot see that this is used by reference by muparser
-        e = std::fabs(m_Ei + *xIn_it);
-      } else {
-        // cppcheck cannot see that this is used by reference by muparser
-        // cppcheck-suppress unreadVariable
-        e = std::fabs(m_Ei - *xIn_it);
-      }
+    for (size_t i = 0; i < effOut.size(); ++i) {
+      // Cppcheck cannot see that e is accessed in p.Eval().
+      // cppcheck-suppress unreadVariable
+      e = m_Ei - xIn[i];
       double eff = p.Eval();
-      *effOut_it = eff / eff0;
+      effOut[i] = eff / eff0;
     }
     return effOut;
   } catch (mu::Parser::exception_type &e) {
@@ -196,6 +178,7 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
         e.GetMsg());
   }
 }
+
 /**
  * Returns the value associated to a parameter name in the IDF
  * @param parameterName :: parameter name in the IDF
@@ -203,7 +186,6 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
  */
 std::string DetectorEfficiencyCorUser::getValFromInstrumentDef(
     const std::string &parameterName) {
-
   const ParameterMap &pmap = m_inputWS->constInstrumentParameters();
   Instrument_const_sptr instrument = m_inputWS->getInstrument();
   Parameter_sptr par =
@@ -225,7 +207,6 @@ std::string DetectorEfficiencyCorUser::getValFromInstrumentDef(
  *algorithm can't continue
  */
 void DetectorEfficiencyCorUser::retrieveProperties() {
-
   // Get the workspaces
   m_inputWS = this->getProperty("InputWorkspace");
 
