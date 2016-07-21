@@ -29,7 +29,7 @@ public:
     const int numYPoints(10);
     const int numSpectra(2);
     Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspace123(
-      numSpectra, numYPoints, false);
+        numSpectra, numYPoints, false);
     // Reset the X data to something reasonable
     Points x(numYPoints);
     std::iota(begin(x), end(x), 0.0);
@@ -39,10 +39,9 @@ public:
 
     TS_ASSERT_EQUALS(testWS->isHistogramData(), false);
     TS_ASSERT_THROWS_ANYTHING(
-      alg.setProperty<MatrixWorkspace_sptr>("WorkspaceToMatch", testWS));
+        alg.setProperty<MatrixWorkspace_sptr>("WorkspaceToMatch", testWS));
     TS_ASSERT_THROWS_ANYTHING(
-      alg.setProperty<MatrixWorkspace_sptr>("WorkspaceToRebin", testWS));
-
+        alg.setProperty<MatrixWorkspace_sptr>("WorkspaceToRebin", testWS));
   }
 
   void testExec() {
