@@ -77,6 +77,10 @@ void EnggDiffFittingPresenter::notify(
     processFitPeaks();
     break;
 
+  case IEnggDiffFittingPresenter::addPeaks:
+    addPeakToList();
+    break;
+
   case IEnggDiffFittingPresenter::ShutDown:
     processShutDown();
     break;
@@ -707,6 +711,39 @@ std::string EnggDiffFittingPresenter::functionStrFactory(
       boost::lexical_cast<std::string>(S);
 
   return functionStr;
+}
+
+void EnggDiffFittingPresenter::addPeakToList() {
+
+  if (m_view->peakPickerEnabled()) {
+    auto peakCentre = m_view->getPeakCentre();
+
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(4) << peakCentre;
+    auto strPeakCentre = stream.str();
+
+    QString curExpPeaksList =
+        QString::fromStdString(m_view->fittingPeaksData());
+    QString comma = ",";
+
+    if (!curExpPeaksList.isEmpty()) {
+      // when further peak added to list
+      std::string expPeakStr = curExpPeaksList.toStdString();
+      std::string lastTwoChr = expPeakStr.substr(expPeakStr.size() - 2);
+      auto lastChr = expPeakStr.back();
+      if (lastChr == ',' || lastTwoChr == ", ") {
+        curExpPeaksList.append(QString::fromStdString(strPeakCentre));
+      } else {
+        curExpPeaksList.append(comma + QString::fromStdString(strPeakCentre));
+      }
+      m_view->setPeakList(curExpPeaksList.toStdString());
+    } else {
+      // when new peak given when list is empty
+      curExpPeaksList.append(QString::fromStdString(strPeakCentre));
+      curExpPeaksList.append(comma);
+      m_view->setPeakList(curExpPeaksList.toStdString());
+    }
+  }
 }
 
 void EnggDiffFittingPresenter::runEvaluateFunctionAlg(

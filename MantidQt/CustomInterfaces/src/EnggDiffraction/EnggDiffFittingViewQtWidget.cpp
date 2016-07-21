@@ -106,7 +106,7 @@ void EnggDiffFittingViewQtWidget::doSetup() {
   // add peak by clicking the button
   connect(m_ui.pushButton_select_peak, SIGNAL(released()), SLOT(setPeakPick()));
 
-  connect(m_ui.pushButton_add_peak, SIGNAL(released()), SLOT(addPeakToList()));
+  connect(m_ui.pushButton_add_peak, SIGNAL(released()), SLOT(addPeaks()));
 
   connect(m_ui.pushButton_save_peak_list, SIGNAL(released()),
           SLOT(savePeakList()));
@@ -215,6 +215,10 @@ void EnggDiffFittingViewQtWidget::fitClicked() {
 
 void EnggDiffFittingViewQtWidget::FittingRunNo() {
   m_presenter->notify(IEnggDiffFittingPresenter::FittingRunNo);
+}
+
+void EnggDiffFittingViewQtWidget::addPeaks() {
+	m_presenter->notify(IEnggDiffFittingPresenter::addPeaks);
 }
 
 void EnggDiffFittingViewQtWidget::setBankDir(int idx) {
@@ -388,6 +392,10 @@ double EnggDiffFittingViewQtWidget::getPeakCentre() const {
   auto peak = m_peakPicker->peak();
   auto centre = peak->centre();
   return centre;
+}
+
+bool EnggDiffFittingViewQtWidget::peakPickerEnabled() const {
+	return m_peakPicker->isEnabled();
 }
 
 void EnggDiffFittingViewQtWidget::fittingWriteFile(const std::string &fileDir) {
@@ -595,38 +603,6 @@ void EnggDiffFittingViewQtWidget::setPeakPick() {
   // set the peak to BackToBackExponential function
   setPeakPicker(bk2bkFunc);
   setPeakPickerEnabled(true);
-}
-
-void EnggDiffFittingViewQtWidget::addPeakToList() {
-
-  if (m_peakPicker->isEnabled()) {
-    auto peakCentre = getPeakCentre();
-
-    std::stringstream stream;
-    stream << std::fixed << std::setprecision(4) << peakCentre;
-    auto strPeakCentre = stream.str();
-
-    auto curExpPeaksList = m_ui.lineEdit_fitting_peaks->text();
-    QString comma = ",";
-
-    if (!curExpPeaksList.isEmpty()) {
-      // when further peak added to list
-      std::string expPeakStr = curExpPeaksList.toStdString();
-      std::string lastTwoChr = expPeakStr.substr(expPeakStr.size() - 2);
-      auto lastChr = expPeakStr.back();
-      if (lastChr == ',' || lastTwoChr == ", ") {
-        curExpPeaksList.append(QString::fromStdString(strPeakCentre));
-      } else {
-        curExpPeaksList.append(comma + QString::fromStdString(strPeakCentre));
-      }
-      m_ui.lineEdit_fitting_peaks->setText(curExpPeaksList);
-    } else {
-      // when new peak given when list is empty
-      curExpPeaksList.append(QString::fromStdString(strPeakCentre));
-      curExpPeaksList.append(comma);
-      m_ui.lineEdit_fitting_peaks->setText(curExpPeaksList);
-    }
-  }
 }
 
 void EnggDiffFittingViewQtWidget::savePeakList() {
