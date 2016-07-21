@@ -93,30 +93,38 @@ Output:
 **Example - Setting override on and off:**
 
 .. testcode:: ExOverrideExisting
-	
+
    #Clear the ADS before starting
    AnalysisDataService.clear()
-	
+       
    #Create an existing workspace called 'wsOld'
    CreateWorkspace([0], [0], OutputWorkspace="wsOld")
-	
+       
    #Next create a workspace we are going to rename
    CreateWorkspace([0], [0], OutputWorkspace="wsNew")
-	
+       
    #This will fail telling us that 'wsOld' already exists
    print 'Trying to rename with OverrideExisting set to false.'
-   RenameWorkspace(InputWorkspace="wsNew", OutputWorkspace="wsOld", OverrideExisting=False)
-
+   try:
+       RenameWorkspace(InputWorkspace="wsNew", OutputWorkspace="wsOld", OverrideExisting=False)
+   except RuntimeError:
+       print 'RuntimeError: The workspace wsOld already exists'
+       
    #This will succeed in renaming and 'wsOld' will be replaced with 'wsNew'
+   print 'Trying to rename with OverrideExisting set to true.'
    RenameWorkspace(InputWorkspace="wsNew", OutputWorkspace="wsOld", OverrideExisting=True) 
+   print 'Succeeded'
    
 Output:
-	
-.. testoutput:: ExOverrideExisting
-	Trying to rename with OverrideExisting set to false.
-	RuntimeError: The workspace wsOld already exists
-	
 
+.. testoutput:: ExOverrideExisting
+
+   Trying to rename with OverrideExisting set to false.
+   RuntimeError: The workspace wsOld already exists
+   Trying to rename with OverrideExisting set to true.
+   Succeeded
+
+   
 .. categories::
 
 .. sourcelink::

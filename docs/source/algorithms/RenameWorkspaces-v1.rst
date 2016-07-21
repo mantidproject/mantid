@@ -98,31 +98,39 @@ Output:
 **Example - Setting override on and off:**
 
 .. testcode:: ExOverrideExisting
-	
+
    #Clear the ADS before starting
    mtd.clear()
-	
+       
    #Create an existing workspace called 'new_ws1'
    CreateWorkspace([0], [0], OutputWorkspace="new_ws1")
-	
+       
    #Next create workspaces we are going to rename
    names = ['ws1', 'ws2', 'ws3']
-
+   
    for name in names:
-     CreateWorkspace([0], [0], OutputWorkspace=name)
-	
+       CreateWorkspace([0], [0], OutputWorkspace=name)
+       
    #This will fail telling us that 'new_ws1' already exists
    print 'Trying to rename with OverrideExisting set to false.'
-   RenameWorkspaces(names, Prefix='new_', OverrideExisting=False)
-
+   try:
+       RenameWorkspaces(names, Prefix='new_', OverrideExisting=False)
+   except RuntimeError:
+       print 'RuntimeError: A workspace called new_ws1 already exists'
+   
    #This will succeed in renaming and 'new_ws1' will be replaced with 'ws1'
+   print 'Trying to rename with OverrideExisting set to true.'
    RenameWorkspaces(names, Prefix='new_', OverrideExisting=True)   
+   print 'Succeeded'
    
 Output:
 
 .. testoutput:: ExOverrideExisting
-	Trying to rename with OverrideExisting set to false.
-	RuntimeError: A workspace called new_ws1 already exists
+   
+   Trying to rename with OverrideExisting set to false.
+   RuntimeError: A workspace called new_ws1 already exists
+   Trying to rename with OverrideExisting set to true.
+   Succeeded
    
 .. categories::
 
