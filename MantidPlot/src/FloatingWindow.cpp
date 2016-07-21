@@ -29,7 +29,6 @@ FloatingWindow::FloatingWindow(ApplicationWindow *appWindow, Qt::WindowFlags f)
       m_isInsideTiledWindow(false), m_dragMouseDown(false) {
   setFocusPolicy(Qt::StrongFocus);
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
-  connect(appWindow, SIGNAL(shutting_down()), this, SLOT(close()));
 #ifdef Q_OS_WIN
   // remember the flags
   m_flags = windowFlags();
@@ -49,9 +48,7 @@ FloatingWindow::FloatingWindow(ApplicationWindow *appWindow, Qt::WindowFlags f)
 #endif
 }
 
-FloatingWindow::~FloatingWindow() {
-  // std::cerr << "Deleted FloatingWindow\n";
-}
+FloatingWindow::~FloatingWindow() {}
 
 /**
   * Returns the inner MdiSubWindow.

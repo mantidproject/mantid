@@ -1,13 +1,13 @@
 #ifndef APPLYTRANSMISSIONCORRECTIONTEST_H_
 #define APPLYTRANSMISSIONCORRECTIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/ApplyTransmissionCorrection.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/ApplyTransmissionCorrection.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -50,8 +50,8 @@ public:
     Workspace2D_sptr trans_ws =
         WorkspaceCreationHelper::Create2DWorkspace154(1, 1, 1);
     trans_ws->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
-    trans_ws->dataY(0)[0] = 0.6;
-    trans_ws->dataE(0)[0] = 0.02;
+    trans_ws->mutableY(0)[0] = 0.6;
+    trans_ws->mutableE(0)[0] = 0.02;
     Mantid::API::AnalysisDataService::Instance().addOrReplace(transWS,
                                                               trans_ws);
 
@@ -75,10 +75,10 @@ public:
     // Spot check (multiply by counting time to be on the same scale as the IGOR
     // result)
     int id = 4 + Mantid::DataHandling::LoadSpice2D::nMonitors;
-    TS_ASSERT_DELTA(result->dataY(id)[0], 640.5134, 0.001)
+    TS_ASSERT_DELTA(result->y(id)[0], 640.5134, 0.001)
 
     id = 176 + Mantid::DataHandling::LoadSpice2D::nMonitors;
-    TS_ASSERT_DELTA(result->dataY(id)[0], 798.8448, 0.001)
+    TS_ASSERT_DELTA(result->y(id)[0], 798.8448, 0.001)
 
     Mantid::API::AnalysisDataService::Instance().remove(transWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
@@ -110,10 +110,10 @@ public:
     // Spot check (multiply by counting time to be on the same scale as the IGOR
     // result)
     int id = 4 + Mantid::DataHandling::LoadSpice2D::nMonitors;
-    TS_ASSERT_DELTA(result->dataY(id)[0], 640.5134, 0.001)
+    TS_ASSERT_DELTA(result->y(id)[0], 640.5134, 0.001)
 
     id = 176 + Mantid::DataHandling::LoadSpice2D::nMonitors;
-    TS_ASSERT_DELTA(result->dataY(id)[0], 798.8448, 0.001)
+    TS_ASSERT_DELTA(result->y(id)[0], 798.8448, 0.001)
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
