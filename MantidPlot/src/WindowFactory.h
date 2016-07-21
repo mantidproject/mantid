@@ -11,6 +11,7 @@
 #include "Mantid/IProjectSerialisable.h"
 
 #include <cstring>
+#include <stdexcept>
 #include <map>
 #include <vector>
 
