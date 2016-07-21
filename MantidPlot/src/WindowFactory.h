@@ -142,7 +142,7 @@ public:
    */
   template <class C> void subscribe(const std::string &className) {
     auto instantiator =
-        std::make_unique<ProjectWindowInstantiator<C, IProjectSerialisable>>();
+        Mantid::Kernel::make_unique<ProjectWindowInstantiator<C, IProjectSerialisable>>();
     subscribe(className, std::move(instantiator));
   }
 
