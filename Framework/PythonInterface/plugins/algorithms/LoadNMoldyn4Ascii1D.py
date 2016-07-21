@@ -80,7 +80,7 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
             if self.getPropertyValue('ResolutionConvolution') == 'TOSCA' and x_name == 'frequency':
                 resolutions = self.gaussians(x_data, self.TOSCA_resfunction)
                 y_data = self.convolutor(y_data, resolutions, x_data)
-                logger.information('Function \'{}\' will be convoluted'.format(y_name))
+                logger.information('Function ' + str(y_name) + ' will be convoluted')
 
             # Create the workspace for function
             ws_title = out_ws_name+'('+function+')'
