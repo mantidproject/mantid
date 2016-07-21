@@ -73,6 +73,10 @@ public:
   void giveUserWarning(std::string prompt, std::string title) override;
   void giveUserCritical(std::string prompt, std::string title) override;
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
+  /// Global options (inherited from DataProcessorMainPresenter)
+  std::map<std::string, std::string> getPreprocessingOptions() const override;
+  std::string getProcessingOptions() const override;
+  std::string getPostprocessingOptions() const override;
 
 protected:
   /// The search model
@@ -94,14 +98,6 @@ protected:
   void pushCommands();
 
 private:
-  /// Methods inherited from DataProcessorMainPresenter
-  /// Request global options for pre-processing
-  std::map<std::string, std::string> getPreprocessingOptions() const override;
-  /// Request global options for processing
-  std::string getProcessingOptions() const override;
-  /// Request global options for post-processing
-  std::string getPostprocessingOptions() const override;
-
   static const std::string LegacyTransferMethod;
   static const std::string MeasureTransferMethod;
 

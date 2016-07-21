@@ -45,11 +45,11 @@ public:
   /// Destructor
   ~ReflMainWindowPresenter() override;
   /// Returns global pre-processing options
-  std::map<std::string, std::string> getPreprocessingOptions() override;
+  std::map<std::string, std::string> getPreprocessingOptions() const override;
   /// Returns global processing options
-  std::string getProcessingOptions() override;
+  std::string getProcessingOptions() const override;
   /// Returns global post-processing options
-  std::string getPostprocessingOptions() override;
+  std::string getPostprocessingOptions() const override;
   /// Dialog/Prompt methods
   std::string askUserString(const std::string &prompt, const std::string &title,
                             const std::string &defaultValue) override;

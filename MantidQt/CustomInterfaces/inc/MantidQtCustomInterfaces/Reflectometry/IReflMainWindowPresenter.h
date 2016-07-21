@@ -39,11 +39,11 @@ public:
   /// Destructor
   virtual ~IReflMainWindowPresenter(){};
   /// Returns global pre-processing options
-  virtual std::map<std::string, std::string> getPreprocessingOptions() = 0;
+  virtual std::map<std::string, std::string> getPreprocessingOptions() const = 0;
   /// Returns global processing options
-  virtual std::string getProcessingOptions() = 0;
+  virtual std::string getProcessingOptions() const = 0;
   /// Returns global post-processing options
-  virtual std::string getPostprocessingOptions() = 0;
+  virtual std::string getPostprocessingOptions() const = 0;
   /// Dialog/Prompt methods
   virtual std::string askUserString(const std::string &prompt,
                                     const std::string &title,

@@ -1,10 +1,11 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEWMOCKOBJECTS_H
-#define MANTID_CUSTOMINTERFACES_REFLMAINVIEWMOCKOBJECTS_H
+#ifndef MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
+#define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
 
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include <gmock/gmock.h>
@@ -14,7 +15,7 @@ using namespace Mantid::API;
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockView : public ReflMainView {
+class MockView : public IReflRunsTabView {
 public:
   // Gmock requires parameters and return values of mocked methods to be
   // copyable
@@ -35,14 +36,6 @@ public:
     setRowCommandsProxy();
   }
 
-  // Prompts
-  MOCK_METHOD3(askUserString,
-               std::string(const std::string &prompt, const std::string &title,
-                           const std::string &defaultValue));
-  MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
-  MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
-  MOCK_METHOD1(showAlgorithmDialog, void(const std::string &));
-
   // IO
   MOCK_CONST_METHOD0(getSelectedSearchRows, std::set<int>());
   MOCK_CONST_METHOD0(getSearchString, std::string());
@@ -59,11 +52,23 @@ public:
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
-  virtual void setProgressRange(int, int){};
-  virtual void setProgress(int){};
-  boost::shared_ptr<IReflPresenter> getPresenter() const override {
-    return boost::shared_ptr<IReflPresenter>();
-  }
+  IReflRunsTabPresenter *getPresenter() const override { return nullptr; }
+};
+
+class MockMainWindowPresenter : public IReflMainWindowPresenter {
+public:
+  MOCK_CONST_METHOD0(getPreprocessingOptions, std::map<std::string, std::string>());
+  MOCK_CONST_METHOD0(getProcessingOptions, std::string());
+  MOCK_CONST_METHOD0(getPostprocessingOptions, std::string());
+  MOCK_METHOD3(askUserString,
+               std::string(const std::string &, const std::string &,
+                           const std::string &));
+  MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
+  MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
+  MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
+  MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
+  MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
+  ~MockMainWindowPresenter() override{};
 };
 
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
@@ -88,4 +93,4 @@ public:
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
 
-#endif /*MANTID_CUSTOMINTERFACES_REFLMAINVIEWMOCKOBJECTS_H*/
+#endif /*MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H*/

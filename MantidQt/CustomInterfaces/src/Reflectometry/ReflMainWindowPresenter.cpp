@@ -30,7 +30,7 @@ ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
 * @return :: Global pre-processing options
 */
 std::map<std::string, std::string>
-ReflMainWindowPresenter::getPreprocessingOptions() {
+ReflMainWindowPresenter::getPreprocessingOptions() const {
 
   // Empty map at present
   // Options to 'CreateTransmissionWorkspaceAuto' are likely to be added
@@ -41,7 +41,7 @@ ReflMainWindowPresenter::getPreprocessingOptions() {
 /** Returns global processing options
 * @return :: Global processing options
 */
-std::string ReflMainWindowPresenter::getProcessingOptions() {
+std::string ReflMainWindowPresenter::getProcessingOptions() const {
 
   // Request global processing options to 'Settings' presenter
   return m_settingsPresenter->getProcessingOptions();
@@ -50,7 +50,7 @@ std::string ReflMainWindowPresenter::getProcessingOptions() {
 /** Returns global post-processing options
 * @return :: Global post-processing options
 */
-std::string ReflMainWindowPresenter::getPostprocessingOptions() {
+std::string ReflMainWindowPresenter::getPostprocessingOptions() const {
 
   // Request global post-processing options to 'Settings' presenter
   return m_settingsPresenter->getPostprocessingOptions();
