@@ -254,7 +254,11 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const {
   }
   case Qt::ToolTipRole: {
     if (checkMaskedCache(index.row())) {
-      return QString("This spectrum is masked");
+      if (checkMonitorCache(index.row())) {
+        return QString("This is a masked monitor spectrum");
+      } else {
+        return QString("This is a masked spectrum");
+      }
     } else if (checkMonitorCache(index.row())) {
       return QString("This is a monitor spectrum");
     } else {
