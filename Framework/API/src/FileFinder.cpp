@@ -125,6 +125,7 @@ std::string FileFinderImpl::getFullPath(const std::string &filename,
   const std::vector<std::string> &searchPaths =
       Kernel::ConfigService::Instance().getDataSearchDirs();
   for (const auto &searchPath : searchPaths) {
+    g_log.debug() << "Searching for " << fName << " in " << searchPath << "\n";
 // On windows globbing is note working properly with network drives
 // for example a network drive containing a $
 // For this reason, and since windows is case insensitive anyway
@@ -683,6 +684,7 @@ FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
   std::string path;
   for (const auto &arch : archs) {
     try {
+      g_log.debug() << "Getting archive path for requested files\n";
       path = arch->getArchivePath(filenames, exts);
       if (!path.empty()) {
         return path;

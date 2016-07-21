@@ -64,6 +64,10 @@ VSI Improvements
 ----------------
 * ParaView updated to version 5.1.0
 
+Multi-dataset fitting interface improvements
+--------------------------------------------
+* Fitting a single dataset with a composite function no longer causes a crash
+
 |
 
 Full list of
