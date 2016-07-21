@@ -5,6 +5,8 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+- ``Facilities.xml`` was updated for changes to the SNS live data servers.
+
 HistogramData
 -------------
 
@@ -43,6 +45,9 @@ Improved
 - :ref:`ConvertTableToMatrixWorkspace <algm-ConvertTableToMatrixWorkspace>` The input dialog
   had a bug where the table columns were in a reversed order in the dialogue's combo boxes.
   This is now fixed and the order is correct.
+
+- :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli 
+
 
 
 Deprecated
