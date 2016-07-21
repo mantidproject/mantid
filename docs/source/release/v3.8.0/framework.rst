@@ -42,9 +42,11 @@ Improved
 - :ref:`SavePlot1D <algm-SavePlot1D>` has options for writing out
   plotly html files.
 
-- :ref:`ConvertTableToMatrixWorkspace <algm-ConvertTableToMatrixWorkspace>` The input dialog
-  had a bug where the table columns were in a reversed order in the dialogue's combo boxes.
+- :ref:`ConvertTableToMatrixWorkspace <algm-ConvertTableToMatrixWorkspace>`
+  had a bug where the table columns were in a reversed order in the dialogue's combo boxes. 
   This is now fixed and the order is correct.
+
+- :ref:`ConvertUnits <algm-ConvertUnits>` will no longer corrupt an in place workspace if the algorithm fails.
 
 - :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli 
 
