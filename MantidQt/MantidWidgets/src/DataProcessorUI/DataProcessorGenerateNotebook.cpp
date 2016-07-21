@@ -74,7 +74,7 @@ DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
 
 /**
   Generate an ipython notebook
-        @param rows : groups that were post-processed
+  @param groups : groups that were post-processed
   @param rows : rows that were reduced
   @returns ipython notebook string
   */
