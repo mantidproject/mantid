@@ -90,16 +90,16 @@ void FFTSmooth2::exec() {
 
     progress.report();
 
-	auto &symX = symmWS->mutableX(0);
-	auto &symY = symmWS->mutableY(0);
+    auto &symX = symmWS->mutableX(0);
+    auto &symY = symmWS->mutableY(0);
 
-	for (int i = 0; i < dn; i++) {
-		symX[dn + i] = inWS->x(spec)[i];
-		symY[dn + i] = inWS->y(spec)[i];
+    for (int i = 0; i < dn; i++) {
+      symX[dn + i] = inWS->x(spec)[i];
+      symY[dn + i] = inWS->y(spec)[i];
 
-		symX[dn - i] = x0 - dx * i;
-		symY[dn - i] = inWS->y(spec)[i];
-	}
+      symX[dn - i] = x0 - dx * i;
+      symY[dn - i] = inWS->y(spec)[i];
+    }
     symmWS->mutableY(0).front() = inWS->y(spec).back();
     symmWS->mutableX(0).front() = x0 - dx * dn;
     if (inWS->isHistogramData())

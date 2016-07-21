@@ -80,8 +80,8 @@ public:
     std::iota(xdata.begin(), xdata.end(), 0);
 
     ws->setHistogram(0, Points(xdata),
-                     Counts{1,  2,  1,  1,  9,  11, 13, 20, 24, 32,
-                            28, 48, 42, 77, 67, 33, 27, 20, 9,  2});
+                     Counts{1, 2, 1, 1, 9, 11, 13, 20, 24, 32, 28, 48, 42, 77,
+                            67, 33, 27, 20, 9, 2});
     return ws;
   }
 
@@ -194,8 +194,8 @@ public:
 
     // Workspace index = 1
     ws->setSharedX(1, ws->sharedX(0));
-    ws->setCounts(1, Counts{1,  2,  1,  1,  9,  11, 13, 20, 24, 32,
-                            28, 48, 42, 77, 67, 33, 27, 20, 9,  2});
+    ws->setCounts(1, Counts{1, 2, 1, 1, 9, 11, 13, 20, 24, 32, 28, 48, 42, 77,
+                            67, 33, 27, 20, 9, 2});
 
     return ws;
   }
