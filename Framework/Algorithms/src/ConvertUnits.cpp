@@ -622,7 +622,6 @@ const std::vector<double> ConvertUnits::calculateRebinParams(
  *  @param WS The workspace to operate on
  */
 void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
-
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
   bool isInputEvents = static_cast<bool>(eventWS);
   size_t numberOfSpectra = WS->getNumberHistograms();
