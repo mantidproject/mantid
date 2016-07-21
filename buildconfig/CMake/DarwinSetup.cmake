@@ -54,7 +54,7 @@ endif ()
 execute_process(COMMAND python${PY_VER}-config --prefix OUTPUT_VARIABLE PYTHON_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 if(${PYTHON_VERSION_MAJOR} GREATER 2)
-  execute_process(COMMAND python$PY_VER}-config --abiflags OUTPUT_VARIABLE PY_ABI OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND python${PY_VER}-config --abiflags OUTPUT_VARIABLE PY_ABI OUTPUT_STRIP_TRAILING_WHITESPACE)
 else()
   # --abiflags option not available in python 2
   set(PY_ABI "")
