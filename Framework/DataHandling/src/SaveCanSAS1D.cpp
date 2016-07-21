@@ -615,10 +615,10 @@ void SaveCanSAS1D::createSASProcessElement(std::string &sasProcess) {
   // Reduction process note, if available
   std::string process_xml = getProperty("Process");
   if (!process_xml.empty()) {
-    std::string processNote = "\n\t\t\t<SASprocessnote>\n";
+    std::string processNote = "\n\t\t\t<SASprocessnote>";
     encode(process_xml);
     processNote += process_xml;
-    processNote += "\n\t\t\t</SASprocessnote>\n";
+    processNote += "</SASprocessnote>";
     sasProcess += processNote;
   } else {
     sasProcess += "\n\t\t\t<SASprocessnote/>";
