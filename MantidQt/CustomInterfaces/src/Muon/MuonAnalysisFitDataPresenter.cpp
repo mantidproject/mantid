@@ -133,8 +133,10 @@ void MuonAnalysisFitDataPresenter::handleDataPropertiesChanged() {
  */
 void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(bool overwrite) {
   const auto names = generateWorkspaceNames(overwrite);
-  createWorkspacesToFit(names);
-  updateWorkspaceNames(names);
+  if (!names.empty()) {
+    createWorkspacesToFit(names);
+    updateWorkspaceNames(names);
+  }
 }
 
 /**
