@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 import math
 
 from mantid.kernel import *
@@ -170,7 +171,7 @@ class EnggFitPeaks(PythonAlgorithm):
 
             try:
                 param_table, chi_over_dof = self._fit_single_peak(peaks[1][i], initial_params, in_wks, wks_index)
-            except StandardError:
+            except Exception:
                 self.log().warning("Problem found when trying to fit a peak centered at {0} (dSpacing), "
                                    "for which the initial guess from FindPeaks is at {1} (ToF). Single "
                                    "peak fitting failed. Skipping this peak."

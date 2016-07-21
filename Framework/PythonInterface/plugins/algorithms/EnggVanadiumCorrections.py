@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 import mantid.simpleapi as sapi
@@ -320,7 +321,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
             raise RuntimeError("Expecting a dictionary with fitting workspaces from 'Fit' but got an "
                                "empty dictionary")
         if 1 == len(curvesDict):
-            return curvesDict.values()[0]
+            return list(curvesDict.values())[0]
 
         keys = sorted(curvesDict)
         ws = curvesDict[keys[0]]
