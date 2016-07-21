@@ -63,8 +63,6 @@ void MuonFitDataSelector::setUpConnections() {
           SIGNAL(dataPropertiesChanged()));
   connect(m_ui.chkCombine, SIGNAL(stateChanged(int)), this,
           SLOT(periodCombinationStateChanged(int)));
-  connect(m_ui.chkCombine, SIGNAL(clicked()), this,
-          SIGNAL(selectedPeriodsChanged()));
   connect(m_ui.txtSimFitLabel, SIGNAL(editingFinished()), this,
           SIGNAL(simulLabelChanged()));
   connect(this, SIGNAL(selectedGroupsChanged()), this,
@@ -76,6 +74,10 @@ void MuonFitDataSelector::setUpConnections() {
   connect(m_ui.btnNextDataset, SIGNAL(clicked()), this, SLOT(setNextDataset()));
   connect(m_ui.btnPrevDataset, SIGNAL(clicked()), this,
           SLOT(setPreviousDataset()));
+  connect(m_ui.txtFirst, SIGNAL(editingFinished()), this,
+          SIGNAL(selectedPeriodsChanged()));
+  connect(m_ui.txtSecond, SIGNAL(editingFinished()), this,
+          SIGNAL(selectedPeriodsChanged()));
 }
 
 /**
@@ -352,7 +354,10 @@ QStringList MuonFitDataSelector::getPeriodSelections() const {
     // combination
     if (m_ui.chkCombine->isChecked()) {
       QString combination = m_ui.txtFirst->text();
-      combination.append("-").append(m_ui.txtSecond->text());
+      const auto second = m_ui.txtSecond->text();
+      if (!second.isEmpty()) {
+        combination.append("-").append(m_ui.txtSecond->text());
+      }
       combination.replace(" ", "");
       combination.replace(",", "+");
       checked.append(combination);
@@ -434,11 +439,11 @@ void MuonFitDataSelector::setChosenPeriod(const QString &period) {
       setPeriodCombination(false);
     } else {
       // set the combination
-      setPeriodCombination(true);
       QStringList parts = period.split('-');
       if (parts.size() == 2) {
         m_ui.txtFirst->setText(parts[0].replace("+", ", "));
         m_ui.txtSecond->setText(parts[1].replace("+", ", "));
+        setPeriodCombination(true);
       }
     }
   }
@@ -558,7 +563,12 @@ void MuonFitDataSelector::setPeriodCombination(bool on) {
 void MuonFitDataSelector::periodCombinationStateChanged(int state) {
   m_ui.txtFirst->setEnabled(state == Qt::Checked);
   m_ui.txtSecond->setEnabled(state == Qt::Checked);
+  // If no text is set in the boxes, put something in there
+  if (m_ui.txtFirst->text().isEmpty() && m_ui.txtSecond->text().isEmpty()) {
+    m_ui.txtFirst->setText("1");
+  }
   checkForMultiGroupPeriodSelection();
+  emit selectedPeriodsChanged();
 }
 
 /**
