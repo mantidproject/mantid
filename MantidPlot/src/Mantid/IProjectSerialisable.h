@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include <string>
+#include <stdexcept>
 
 class ApplicationWindow;
 
