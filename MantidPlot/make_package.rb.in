@@ -203,6 +203,9 @@ def find_linking_directories(patterns, lib_name, lib_path)
     Dir[patterns[0]].each do |library|
         dependencies = `otool -L #{library}`
         dependencies.split("\n").each do |dependency|
+	    puts"================"
+	    puts dependency
+	    puts lib_name
             if dependency.match(lib_name)
                 if dependency.match(lib_path)
                     linking_dir << lib_path
