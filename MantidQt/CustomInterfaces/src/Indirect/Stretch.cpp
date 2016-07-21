@@ -185,7 +185,7 @@ void Stretch::algorithmComplete(const bool &error) {
                    QString::fromStdString(contourWorkspace->getName()));
 
   // Handle plotting
-  if (!m_plotType.compare("None") == 0) {
+  if (m_plotType.compare("None") != 0) {
     auto sigma = QString::fromStdString(fitWorkspace->getItem(0)->getName());
     auto beta = QString::fromStdString(fitWorkspace->getItem(1)->getName());
     if (sigma.right(5).compare("Sigma") == 0) {
