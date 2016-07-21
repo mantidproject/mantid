@@ -19,7 +19,6 @@
 #include <Poco/SAX/InputSource.h>
 #include <Poco/DOM/DOMParser.h>
 
-
 #include <fstream>
 #include <sstream>
 
@@ -245,7 +244,7 @@ private:
     Poco::XML::DOMParser parser;
     Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parse(&src);
     Poco::XML::NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
-    Poco::XML::Node* pNode = it.root();
+    Poco::XML::Node *pNode = it.root();
     Poco::XML::Node *node = pNode->getNodeByPath(xPath);
     auto innerText = node->innerText();
     std::string expectedInnerText = "Earth < Sun";
