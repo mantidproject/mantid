@@ -720,7 +720,9 @@ void GenericDataProcessorPresenter::reduceRow(int groupNo, int rowNo) {
   /* excluding 'Group' and 'Options' */
 
   // Global pre-processing options as a map
-  auto globalOptions = m_mainPresenter->getPreprocessingOptions();
+  std::map<std::string, std::string> globalOptions;
+  if (!m_preprocessMap.empty())
+    globalOptions = m_mainPresenter->getPreprocessingOptions();
 
   // Loop over all columns in the whitelist except 'Options'
   for (int i = 0; i < m_columns - 1; i++) {

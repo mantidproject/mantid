@@ -70,6 +70,7 @@ public:
   std::vector<std::unique_ptr<DataProcessorCommand>> publishCommands() override;
   void acceptViews(DataProcessorView *tableView,
                    ProgressableView *progressView) override;
+  void accept(DataProcessorMainPresenter *mainPresenter) override;
   void setModel(std::string name) override;
 
   // The following methods are public only for testing purposes
@@ -188,7 +189,6 @@ protected:
   void afterReplaceHandle(const std::string &name,
                           Mantid::API::Workspace_sptr workspace) override;
   void saveNotebook(const std::map<int, std::set<int>> &rows);
-  void accept(DataProcessorMainPresenter *mainPresenter) override;
   std::vector<std::unique_ptr<DataProcessorCommand>> getTableList();
 
   void validateModel(Mantid::API::ITableWorkspace_sptr model);
