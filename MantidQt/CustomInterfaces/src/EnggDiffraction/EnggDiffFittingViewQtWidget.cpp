@@ -1,12 +1,11 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingViewQtWidget.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h"
 #include "MantidQtMantidWidgets/PeakPicker.h"
 
 #include <array>
-#include <fstream>
 #include <iomanip>
 #include <random>
 #include <sstream>
@@ -99,17 +98,17 @@ void EnggDiffFittingViewQtWidget::doSetup() {
           SLOT(setBankDir(int)));
 
   connect(m_ui.pushButton_fitting_browse_peaks, SIGNAL(released()), this,
-          SLOT(browsePeaks()));
+          SLOT(browseClicked()));
 
   connect(m_ui.pushButton_fit, SIGNAL(released()), this, SLOT(fitClicked()));
 
   // add peak by clicking the button
   connect(m_ui.pushButton_select_peak, SIGNAL(released()), SLOT(setPeakPick()));
 
-  connect(m_ui.pushButton_add_peak, SIGNAL(released()), SLOT(addPeaks()));
+  connect(m_ui.pushButton_add_peak, SIGNAL(released()), SLOT(addClicked()));
 
   connect(m_ui.pushButton_save_peak_list, SIGNAL(released()),
-          SLOT(savePeakList()));
+          SLOT(saveClicked()));
 
   connect(m_ui.pushButton_clear_peak_list, SIGNAL(released()),
           SLOT(clearPeakList()));
@@ -217,13 +216,18 @@ void EnggDiffFittingViewQtWidget::FittingRunNo() {
   m_presenter->notify(IEnggDiffFittingPresenter::FittingRunNo);
 }
 
-void EnggDiffFittingViewQtWidget::addPeaks() {
-	m_presenter->notify(IEnggDiffFittingPresenter::addPeaks);
+void EnggDiffFittingViewQtWidget::addClicked() {
+  m_presenter->notify(IEnggDiffFittingPresenter::addPeaks);
 }
 
-void EnggDiffFittingViewQtWidget::browsePeaks() {
-	m_presenter->notify(IEnggDiffFittingPresenter::browsePeaks);
+void EnggDiffFittingViewQtWidget::browseClicked() {
+  m_presenter->notify(IEnggDiffFittingPresenter::browsePeaks);
 }
+
+void EnggDiffFittingViewQtWidget::saveClicked() {
+	m_presenter->notify(IEnggDiffFittingPresenter::savePeaks);
+}
+
 
 void EnggDiffFittingViewQtWidget::setBankDir(int idx) {
 
@@ -377,18 +381,7 @@ double EnggDiffFittingViewQtWidget::getPeakCentre() const {
 }
 
 bool EnggDiffFittingViewQtWidget::peakPickerEnabled() const {
-	return m_peakPicker->isEnabled();
-}
-
-void EnggDiffFittingViewQtWidget::fittingWriteFile(const std::string &fileDir) {
-  std::ofstream outfile(fileDir.c_str());
-  if (!outfile) {
-    userWarning("File not found",
-                "File " + fileDir + " , could not be found. Please try again!");
-  } else {
-    auto expPeaks = m_ui.lineEdit_fitting_peaks->text();
-    outfile << expPeaks.toStdString();
-  }
+  return m_peakPicker->isEnabled();
 }
 
 void EnggDiffFittingViewQtWidget::setZoomTool(bool enabled) {
@@ -420,11 +413,20 @@ void EnggDiffFittingViewQtWidget::setPreviousDir(std::string path) {
 
 std::string EnggDiffFittingViewQtWidget::getOpenFile(std::string prevPath) {
 
-  QString path(QFileDialog::getOpenFileName(this, tr("Open Peaks To Fit"),
-                                            QString::fromStdString(prevPath),
-                                            QString::fromStdString(g_peaksListExt)));
+  QString path(QFileDialog::getOpenFileName(
+      this, tr("Open Peaks To Fit"), QString::fromStdString(prevPath),
+      QString::fromStdString(g_peaksListExt)));
 
   return path.toStdString();
+}
+
+std::string EnggDiffFittingViewQtWidget::getSaveFile(std::string prevPath) {
+
+	QString path(QFileDialog::getSaveFileName(
+		this, tr("Save Expected Peaks List"), QString::fromStdString(prevPath),
+		QString::fromStdString(g_peaksListExt)));
+
+	return path.toStdString();
 }
 
 void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
@@ -575,35 +577,6 @@ void EnggDiffFittingViewQtWidget::setPeakPick() {
   // set the peak to BackToBackExponential function
   setPeakPicker(bk2bkFunc);
   setPeakPickerEnabled(true);
-}
-
-void EnggDiffFittingViewQtWidget::savePeakList() {
-  // call function in EnggPresenter..
-
-  // TODO: the logic, checks and decision on what message to show should be
-  // moved to the presenter
-
-  try {
-    QString prevPath = QString::fromStdString(focusingDir());
-    if (prevPath.isEmpty()) {
-      prevPath = MantidQt::API::AlgorithmInputHistory::Instance()
-                     .getPreviousDirectory();
-    }
-
-    QString path(QFileDialog::getSaveFileName(
-        this, tr("Save Expected Peaks List"), prevPath,
-        QString::fromStdString(g_peaksListExt)));
-
-    if (path.isEmpty()) {
-      return;
-    }
-    const std::string strPath = path.toStdString();
-    fittingWriteFile(strPath);
-  } catch (...) {
-    userWarning("Unable to save the peaks file: ",
-                "Invalid file path or or could not be saved. Please try again");
-    return;
-  }
 }
 
 void EnggDiffFittingViewQtWidget::clearPeakList() {

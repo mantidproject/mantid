@@ -4,9 +4,9 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffFittingPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffFittingView.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
 
 #include <string>
 #include <vector>
@@ -80,7 +80,11 @@ public:
 
   void addPeakToList();
 
+  void savePeakList();
+
   std::string readPeaksFile(std::string fileDir);
+
+  void fittingWriteFile(const std::string &fileDir);
 
   void plotFitPeaksCurves();
 

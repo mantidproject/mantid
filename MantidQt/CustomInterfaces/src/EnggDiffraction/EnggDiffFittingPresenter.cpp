@@ -86,6 +86,11 @@ void EnggDiffFittingPresenter::notify(
     browsePeaksToFit();
 	break;
 
+  case IEnggDiffFittingPresenter::savePeaks:
+	savePeakList();
+	break;
+
+
   case IEnggDiffFittingPresenter::ShutDown:
     processShutDown();
     break;
@@ -725,15 +730,15 @@ void EnggDiffFittingPresenter::browsePeaksToFit() {
       prevPath = QString::fromStdString(m_view->getPreviousDir());
     }
 
-    std::string pathStd = m_view->getOpenFile(prevPath.toStdString());
+    std::string path = m_view->getOpenFile(prevPath.toStdString());
 
-    if (pathStd.empty()) {
+    if (path.empty()) {
       return;
     }
 
-    m_view->setPreviousDir(pathStd);
+    m_view->setPreviousDir(path);
 
-    std::string peaksData = readPeaksFile(pathStd);
+    std::string peaksData = readPeaksFile(path);
 
     m_view->setPeakList(peaksData);
   } catch (...) {
@@ -777,6 +782,29 @@ void EnggDiffFittingPresenter::addPeakToList() {
   }
 }
 
+void EnggDiffFittingPresenter::savePeakList()
+{
+	try {
+		QString prevPath = QString::fromStdString(m_view->focusingDir());
+		if (prevPath.isEmpty()) {
+			prevPath = QString::fromStdString(m_view->getPreviousDir());
+		}
+
+		std::string path = m_view->getSaveFile(prevPath.toStdString());
+
+		if (path.empty()) {
+			return;
+		}
+
+		fittingWriteFile(path);
+	}
+	catch (...) {
+		m_view->userWarning("Unable to save the peaks file: ",
+			"Invalid file path or or could not be saved. Please try again");
+		return;
+	}
+}
+
 std::string EnggDiffFittingPresenter::readPeaksFile(std::string fileDir) {
   std::string fileData = "";
   std::string line;
@@ -797,6 +825,18 @@ std::string EnggDiffFittingPresenter::readPeaksFile(std::string fileDir) {
     fileData = "";
 
   return fileData;
+}
+
+void EnggDiffFittingPresenter::fittingWriteFile(const std::string &fileDir) {
+  std::ofstream outfile(fileDir.c_str());
+  if (!outfile) {
+    m_view->userWarning("File not found",
+                        "File " + fileDir +
+                            " , could not be found. Please try again!");
+  } else {
+    auto expPeaks = m_view->fittingPeaksData();
+    outfile << expPeaks;
+  }
 }
 
 void EnggDiffFittingPresenter::runEvaluateFunctionAlg(

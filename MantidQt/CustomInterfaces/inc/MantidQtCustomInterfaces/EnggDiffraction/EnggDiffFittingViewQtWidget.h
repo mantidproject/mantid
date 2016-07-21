@@ -146,6 +146,8 @@ public:
 
   std::string getOpenFile(std::string prevPath) override;
 
+  std::string getSaveFile(std::string prevPath) override;
+
   std::string fittingRunNoFactory(std::string bank, std::string fileName,
                                   std::string &bankDir, std::string fileDir);
 
@@ -155,8 +157,6 @@ public:
   void setPeakPickerEnabled(bool enabled);
 
   void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak);
-
-  void fittingWriteFile(const std::string &fileDir);
 
   void setZoomTool(bool enabled);
 
@@ -175,12 +175,12 @@ private slots:
   void resetFittingMultiMode();
   void setBankIdComboBox(int idx) override;
   void setPeakPick();
-  void savePeakList();
   void clearPeakList();
   void fitClicked();
   void FittingRunNo();
-  void addPeaks();
-  void browsePeaks();
+  void addClicked();
+  void browseClicked();
+  void saveClicked();
   void plotSeparateWindow();
   void setBankDir(int idx);
   void listViewFittingRun();

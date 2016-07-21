@@ -46,6 +46,7 @@ public:
     FitPeaks,     ///< Preforms single peak fits
     addPeaks,     ///< Adds peak to the list
     browsePeaks,  ///< Browse peaks to the list
+    savePeaks,    ///< Save the peaks list
     ShutDown,     ///< closing the interface
     LogMsg,       ///< need to send a message to the Mantid log system
   };
