@@ -191,8 +191,7 @@ void FitOneSinglePeak::setupGuessedFWHM(double usrwidth, int minfwhm,
 
   auto &vecX = m_dataWS->x(m_wsIndex);
 
-  int i_centre = static_cast<int>(
-      getIndex(vecX, m_peakFunc->centre()));
+  int i_centre = static_cast<int>(getIndex(vecX, m_peakFunc->centre()));
   int i_maxindex = static_cast<int>(vecX.size()) - 1;
 
   m_sstream << "FWHM to guess. Range = " << minfwhm << ", " << maxfwhm
@@ -425,10 +424,11 @@ void FitOneSinglePeak::removeBackground(MatrixWorkspace_sptr purePeakWS) {
   // Calculate pure background and put weight on peak if using Rwp
   purePeakWS->mutableE(0).assign(purePeakWS->y(0).size(), 1.0);
   size_t i = 0;
-  std::transform(purePeakWS->y(0).cbegin(), purePeakWS->y(0).cend(), purePeakWS->mutableY(0).begin(), [=](const double &y) mutable {
-	  double newY = y - bkgdvalues[i++];
-	  return newY > 0. ? newY : 0.;
-  });
+  std::transform(purePeakWS->y(0).cbegin(), purePeakWS->y(0).cend(),
+                 purePeakWS->mutableY(0).begin(), [=](const double &y) mutable {
+                   double newY = y - bkgdvalues[i++];
+                   return newY > 0. ? newY : 0.;
+                 });
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1490,7 +1490,7 @@ void FitPeak::setupOutput(
   // Data workspace
   size_t nspec = 3;
   // Get a vector for fit window
-  
+
   size_t vecsize = i_maxFitX - i_minFitX + 1;
   vector<double> vecoutx(vecsize);
   for (size_t i = i_minFitX; i <= i_maxFitX; ++i)
@@ -1519,8 +1519,8 @@ void FitPeak::setupOutput(
 
   auto &vecY = m_dataWS->y(m_wsIndex);
   const auto valvec = values.toVector();
-  outws->mutableY(0).assign(vecY.cbegin() + i_minFitX,
-                            vecY.cbegin() + i_minFitX + sizey);
+  outws->mutableY(0)
+      .assign(vecY.cbegin() + i_minFitX, vecY.cbegin() + i_minFitX + sizey);
   outws->mutableY(1).assign(valvec.cbegin(), valvec.cbegin() + sizey);
   std::transform(outws->y(0).cbegin(), outws->y(0).cbegin() + sizey,
                  outws->y(1).cbegin(), outws->mutableY(2).begin(),

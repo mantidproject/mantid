@@ -67,7 +67,7 @@ void FFTSmooth::exec() {
   symmWS->mutableY(0).front() = m_inWS->y(spec).back();
   symmWS->mutableX(0).front() = x0 - dx * dn;
   if (m_inWS->isHistogramData())
-	  symmWS->mutableX(0).back() = m_inWS->x(spec).back();
+    symmWS->mutableX(0).back() = m_inWS->x(spec).back();
 
   // Forward Fourier transform
   IAlgorithm_sptr fft = createChildAlgorithm("RealFFT", 0, 0.5);
@@ -181,7 +181,7 @@ void FFTSmooth::zero(int n) {
             m_filteredWS->mutableY(0).begin());
 
   std::copy(m_unfilteredWS->y(1).cbegin(), m_unfilteredWS->y(1).begin() + ny,
-	  m_filteredWS->mutableY(1).begin());
+            m_filteredWS->mutableY(1).begin());
 }
 
 } // namespace Algorithm

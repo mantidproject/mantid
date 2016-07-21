@@ -267,9 +267,9 @@ public:
     MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
-	dataws->mutableX(0).assign(vecX.cbegin(), vecX.cend());
-	dataws->mutableY(0).assign(vecY.cbegin(), vecY.cend());
-	dataws->mutableE(0).assign(vecE.cbegin(), vecE.cend());
+    dataws->mutableX(0).assign(vecX.cbegin(), vecX.cend());
+    dataws->mutableY(0).assign(vecY.cbegin(), vecY.cend());
+    dataws->mutableE(0).assign(vecE.cbegin(), vecE.cend());
 
     return dataws;
   }

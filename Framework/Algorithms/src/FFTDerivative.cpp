@@ -31,9 +31,7 @@ void FFTDerivative::init() {
   // declareProperty("Transform",false,"Output the transform workspace");
 }
 
-void FFTDerivative::exec() {
-  execComplexFFT();
-}
+void FFTDerivative::exec() { execComplexFFT(); }
 
 void FFTDerivative::execComplexFFT() {
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
@@ -85,14 +83,14 @@ void FFTDerivative::execComplexFFT() {
     }
 
     // Save the upper half of the inverse transform for output
-	size_t m2 = transWS->y(0).size() / 2;
+    size_t m2 = transWS->y(0).size() / 2;
     double dx = copyWS->x(0)[m2];
 
-    outWS->mutableX(spec).assign(transWS->x(0).cbegin() + m2,
-                                 transWS->x(0).cend());
+    outWS->mutableX(spec)
+        .assign(transWS->x(0).cbegin() + m2, transWS->x(0).cend());
     outWS->mutableX(spec) += dx;
-    outWS->mutableY(spec).assign(transWS->y(0).cbegin() + m2,
-                                 transWS->y(0).cend());
+    outWS->mutableY(spec)
+        .assign(transWS->y(0).cbegin() + m2, transWS->y(0).cend());
 
     progress.report();
   }

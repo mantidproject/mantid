@@ -90,17 +90,17 @@ void FFTSmooth2::exec() {
 
     progress.report();
 
-	for (int i = 0; i < dn; i++) {
-		symmWS->mutableX(0)[dn + i] = inWS->x(spec)[i];
-		symmWS->mutableY(0)[dn + i] = inWS->y(spec)[i];
+    for (int i = 0; i < dn; i++) {
+      symmWS->mutableX(0)[dn + i] = inWS->x(spec)[i];
+      symmWS->mutableY(0)[dn + i] = inWS->y(spec)[i];
 
-		symmWS->mutableX(0)[dn - i] = x0 - dx * i;
-		symmWS->mutableY(0)[dn - i] = inWS->y(spec)[i];
-	}
-	symmWS->mutableY(0).front() = inWS->y(spec).back();
-	symmWS->mutableX(0).front() = x0 - dx * dn;
-	if (inWS->isHistogramData())
-		symmWS->mutableX(0).back() = inWS->x(spec).back();
+      symmWS->mutableX(0)[dn - i] = x0 - dx * i;
+      symmWS->mutableY(0)[dn - i] = inWS->y(spec)[i];
+    }
+    symmWS->mutableY(0).front() = inWS->y(spec).back();
+    symmWS->mutableX(0).front() = x0 - dx * dn;
+    if (inWS->isHistogramData())
+      symmWS->mutableX(0).back() = inWS->x(spec).back();
 
     // setProperty("OutputWorkspace",symmWS); return;
 
@@ -186,8 +186,8 @@ void FFTSmooth2::exec() {
 
     if (getProperty("AllSpectra")) {
       outWS->setSharedX(spec, inWS->sharedX(spec));
-      outWS->mutableY(spec).assign(tmpWS->y(0).cbegin() + dn,
-                                   tmpWS->y(0).cend());
+      outWS->mutableY(spec)
+          .assign(tmpWS->y(0).cbegin() + dn, tmpWS->y(0).cend());
     } else {
       outWS->setSharedX(0, inWS->sharedX(spec));
       outWS->mutableY(0).assign(tmpWS->y(0).cbegin() + dn, tmpWS->y(0).cend());
@@ -213,7 +213,7 @@ void FFTSmooth2::zero(int n, API::MatrixWorkspace_sptr &unfilteredWS,
     ny = 1;
 
   filteredWS =
-	  API::WorkspaceFactory::Instance().create(unfilteredWS, 2, mx, my);
+      API::WorkspaceFactory::Instance().create(unfilteredWS, 2, mx, my);
 
   filteredWS->setSharedX(0, unfilteredWS->sharedX(0));
   filteredWS->setSharedX(1, unfilteredWS->sharedX(0));
@@ -222,11 +222,10 @@ void FFTSmooth2::zero(int n, API::MatrixWorkspace_sptr &unfilteredWS,
   filteredWS->mutableY(1).assign(unfilteredWS->y(0).size(), 0);
 
   std::copy(unfilteredWS->y(0).cbegin(), unfilteredWS->y(0).begin() + ny,
-	  filteredWS->mutableY(0).begin());
+            filteredWS->mutableY(0).begin());
 
   std::copy(unfilteredWS->y(1).cbegin(), unfilteredWS->y(1).begin() + ny,
-	  filteredWS->mutableY(1).begin());
-
+            filteredWS->mutableY(1).begin());
 }
 
 /** Smoothing using Butterworth filter.
@@ -270,9 +269,10 @@ void FFTSmooth2::Butterworth(int n, int order,
   double cutoff = ny;
 
   for (int i = 0; i < my; i++) {
-	  double scale = 1.0 / (1.0 + pow(static_cast<double>(i) / cutoff, 2 * order));
-	  Y0[i] = scale * uY0[i];
-	  Y1[i] = scale * uY1[i];
+    double scale =
+        1.0 / (1.0 + pow(static_cast<double>(i) / cutoff, 2 * order));
+    Y0[i] = scale * uY0[i];
+    Y1[i] = scale * uY1[i];
   }
 }
 

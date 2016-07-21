@@ -535,9 +535,9 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", NVectors, sizex,
                                             sizey));
 
-	ws->mutableX(0).assign(vecx.cbegin(), vecx.cend());
-	ws->mutableY(0).assign(vecy.cbegin(), vecy.cend());
-	ws->mutableE(0).assign(vece.cbegin(), vece.cend());
+    ws->mutableX(0).assign(vecx.cbegin(), vecx.cend());
+    ws->mutableY(0).assign(vecy.cbegin(), vecy.cend());
+    ws->mutableE(0).assign(vece.cbegin(), vece.cend());
 
     return ws;
   }
