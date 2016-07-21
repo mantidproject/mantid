@@ -80,6 +80,9 @@ public:
                                const size_t nData);
 
 protected:
+  virtual void histogram1D(double *out, double left, const double *right,
+                           const size_t nBins) const;
+
   /// Logger instance
   static Kernel::Logger g_log;
 
