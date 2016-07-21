@@ -1,10 +1,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/AsymmetryCalc.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ArrayProperty.h"
 
 #include <cmath>
 #include <vector>
@@ -137,36 +137,33 @@ void AsymmetryCalc::exec() {
   Progress prog(this, 0.0, 1.0, blocksize);
   for (size_t j = 0; j < blocksize; ++j) {
     // cal F-aB
-    double numerator =
-        tmpWS->dataY(forward)[j] - alpha * tmpWS->dataY(backward)[j];
+    double numerator = tmpWS->y(forward)[j] - alpha * tmpWS->y(backward)[j];
     // cal F+aB
-    double denominator =
-        (tmpWS->dataY(forward)[j] + alpha * tmpWS->dataY(backward)[j]);
+    double denominator = (tmpWS->y(forward)[j] + alpha * tmpWS->y(backward)[j]);
 
     // cal F-aB / F+aB
     if (denominator != 0.0) {
-      outputWS->dataY(0)[j] = numerator / denominator;
+      outputWS->mutableY(0)[j] = numerator / denominator;
     } else {
-      outputWS->dataY(0)[j] = 0.;
+      outputWS->mutableY(0)[j] = 0.;
     }
 
     // Work out the error (as in 1st attachment of ticket #4188)
     double error = 1.0;
     if (denominator != 0.0) {
       // cal F + a2B
-      double q1 =
-          tmpWS->dataY(forward)[j] + alpha * alpha * tmpWS->dataY(backward)[j];
+      double q1 = tmpWS->y(forward)[j] + alpha * alpha * tmpWS->y(backward)[j];
       // cal 1 + ((f-aB)/(F+aB))2
       double q2 = 1 + numerator * numerator / (denominator * denominator);
       // cal error
       error = sqrt(q1 * q2) / denominator;
     }
-    outputWS->dataE(0)[j] = error;
+    outputWS->mutableE(0)[j] = error;
 
     prog.report();
   }
 
-  assert(outputWS->dataX(0).size() == blocksize);
+  assert(outputWS->x(0).size() == blocksize);
 
   // Update Y axis units
   outputWS->setYUnit("Asymmetry");
