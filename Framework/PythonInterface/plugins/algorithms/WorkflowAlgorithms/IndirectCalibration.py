@@ -1,7 +1,8 @@
 #pylint: disable=no-init,too-many-instance-attributes
 from mantid.kernel import *
-from mantid.api import *
 from mantid.simpleapi import *
+from mantid.api import *
+
 
 import os.path
 
@@ -46,9 +47,9 @@ class IndirectCalibration(DataProcessorAlgorithm):
 
         self.declareProperty(name='ScaleFactor', defaultValue=1.0,
                              doc='Factor by which to scale the result.')
-                             
+
         self.declareProperty(name='LoadLogFiles', defaultValue=False,
-                             doc = 'Option to load log files.' ) 
+                             doc = 'Option to load log files.' )
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                direction=Direction.Output),

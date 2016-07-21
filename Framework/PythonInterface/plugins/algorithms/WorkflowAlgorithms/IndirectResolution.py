@@ -16,7 +16,7 @@ class IndirectResolution(DataProcessorAlgorithm):
     _background = None
     _rebin_string = None
     _scale_factor = None
-
+    _load_logs = None
 
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\Indirect'
@@ -50,8 +50,8 @@ class IndirectResolution(DataProcessorAlgorithm):
                              doc='Rebinning parameters (min,width,max)')
         self.declareProperty(name='ScaleFactor', defaultValue=1.0,
                              doc='Factor to scale resolution curve by')
-                             
-        self.declareProperty(name = "LoadLogFiles", defaultValue=True, 
+
+        self.declareProperty(name = "LoadLogFiles", defaultValue=True,
                              doc='Option to load log files')
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
