@@ -102,67 +102,17 @@ public:
 
     auto result = runScaleX(inputWS, "Multiply", -1.0, parname);
 
-    const size_t xsize = result->blocksize();
 
-	auto outX = result->x(0);
-	outX = result->x(1);
-
-    auto &outY = result->y(0);
-    auto &outE = result->e(0);
-
-    auto &inX = inputWS->x(0);
-    auto &inY = inputWS->y(0);
-    auto &inE = inputWS->e(0);
-	outX = result->x(1);
-
-	// Factor 5, loop through histogram 0
-    double factor(det1Factor);
-    for (size_t j = 0; j < xsize; ++j) {
-
-        TS_ASSERT_DELTA(outX[j], factor * inX[j], 1e-12);
-        TS_ASSERT_EQUALS(outY[j], inY[j]);
-        TS_ASSERT_EQUALS(outE[j], inE[j]);
-
-    }
-
-	// TODO how to reassign
-	/*
-	outX = &result->x(0);
-	outY = &result->y(0);
-	outE = &result->e(0);
-
-	inX = &inputWS->x(0);
-	inY = &inputWS->y(0);
-	inE = &inputWS->e(0);
-	*/
-	// The negative factor -10, loop through histogram 1
-    factor = det2Factor;
-    for (size_t j = 0; j < xsize; ++j) {
-
-      // ScaleX reverses the histogram if the factor is negative
-      // X vector has length xsize+1
-      TS_ASSERT_DELTA(outX[j], factor * inX[xsize - j], 1e-12);
-      // Y and E have length xsize
-      TS_ASSERT_EQUALS(outY[j], inY[xsize - 1 - j]);
-      TS_ASSERT_EQUALS(outE[j], inX[xsize - 1 - j]);
-    }
-
+	// Test indecies 0 for factor 5 and 
+	double factor(det1Factor);
+	testScaleFactorAppliedAtHistogramIndex(0, inputWS, result, factor, true);
+	factor = det2Factor;
+	testScaleFactorAppliedAtHistogramIndex(1, inputWS, result, factor, true);
 	factor = instFactor;
-    // start at 2 because 0 and 1 are checked above
+
+    // start at index 2 because 0 and 1 are checked above
     for (size_t i = 2; i < result->getNumberHistograms(); ++i) {
-      auto &outX = result->x(i);
-      auto &outY = result->y(i);
-      auto &outE = result->e(i);
-
-      auto &inX = inputWS->x(i);
-      auto &inY = inputWS->y(i);
-      auto &inE = inputWS->e(i);
-
-      for (size_t j = 0; j < xsize; ++j) {
-          TS_ASSERT_DELTA(outX[j], factor * inX[j], 1e-12);
-          TS_ASSERT_EQUALS(outY[j], inY[j]);
-          TS_ASSERT_EQUALS(outE[j], inE[j]);
-      }
+		testScaleFactorAppliedAtHistogramIndex(i, inputWS, result, factor, true);
     }
   }
 
@@ -172,7 +122,7 @@ public:
     using namespace Mantid::Geometry;
 
     auto inputWS =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 3);
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 3, false);
     auto &pmap = inputWS->instrumentParameters();
     const std::string parname("factor");
 
@@ -193,9 +143,8 @@ public:
         boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(result);
     TS_ASSERT(resultEventWS);
 
-    const size_t xsize = result->blocksize();
-    for (size_t i = 0; i < resultEventWS->getNumberHistograms(); ++i) {
-      double factor(1.0);
+    double factor(0.0);
+    for (size_t i = 2; i < resultEventWS->getNumberHistograms(); ++i) {
       if (i == 0)
         factor = det1Factor;
       else if (i == 1)
@@ -203,32 +152,19 @@ public:
       else
         factor = instFactor;
 
-      auto &inEvents = resultEventWS->getSpectrum(i);
+      auto &inEvents = inputWS->getSpectrum(i);
       auto &outEvents = resultEventWS->getSpectrum(i);
       TS_ASSERT_EQUALS(outEvents.getNumberEvents(), inEvents.getNumberEvents());
 
       auto inTOFs = inEvents.getTofs();
       auto outTOFs = outEvents.getTofs();
       TS_ASSERT_EQUALS(inTOFs.size(), outTOFs.size());
-      for (size_t j = 0; i < inTOFs.size(); ++j) {
+
+      for (size_t j = 0; j < inTOFs.size(); ++j) {
         TS_ASSERT_DELTA(outTOFs[j], factor * inTOFs[j], 1e-12);
       }
 
-      for (size_t j = 0; j < xsize; ++j) {
-        if (factor > 0) {
-          TS_ASSERT_DELTA(result->x(i)[j], factor * inputWS->x(i)[j], 1e-12);
-          TS_ASSERT_EQUALS(result->y(i)[j], inputWS->y(i)[j]);
-          TS_ASSERT_EQUALS(result->e(i)[j], inputWS->e(i)[j]);
-        } else {
-          // ScaleX reverses the histogram if the factor is negative
-          // X vector has length xsize+1
-          TS_ASSERT_DELTA(result->x(i)[j], factor * inputWS->x(i)[xsize - j],
-                          1e-12);
-          // Y and E have length xsize
-          TS_ASSERT_EQUALS(result->y(i)[j], inputWS->y(i)[xsize - 1 - j]);
-          TS_ASSERT_EQUALS(result->e(i)[j], inputWS->e(i)[xsize - 1 - j]);
-        }
-      }
+      testScaleFactorAppliedAtHistogramIndex(i, inputWS, result, factor, true);
     }
   }
 
@@ -362,6 +298,64 @@ private:
         TS_ASSERT_EQUALS(outputWS->e(i)[j], inputWS->e(i)[j]);
       }
     }
+  }
+
+  /// 
+  /**
+  Only loops through the bins of the index of the parameter histogram
+  The idea is to be called from within a loop that goes through the histograms
+  like on line 113
+
+  @param i :: Specifies the histogram index 
+  */
+  void testScaleFactorAppliedAtHistogramIndex(size_t i, const Mantid::API::MatrixWorkspace_const_sptr &inputWS,
+		  const Mantid::API::MatrixWorkspace_const_sptr &outputWS, double factor,
+		  bool multiply) {
+
+	  // get bin sizes, outputWS and inputWS should be equal
+	  const size_t xsize = outputWS->blocksize();
+	  TS_ASSERT_EQUALS(inputWS->blocksize(), xsize);
+
+	  // get all histograms of input and output
+	  auto &outX = outputWS->x(i);
+	  auto &outY = outputWS->y(i);
+	  auto &outE = outputWS->e(i);
+
+	  auto &inX = inputWS->x(i);
+	  auto &inY = inputWS->y(i);
+	  auto &inE = inputWS->e(i);
+
+	  if (factor > 0) { // taken out of the tight loop
+		  if (multiply) { // taken out of the tight loop
+						  // this branch will perform the multiplication assert
+			  for (size_t j = 0; j < xsize; ++j) {
+				  TS_ASSERT_DELTA(outX[j], factor * inX[j], 1e-12);
+				  TS_ASSERT_EQUALS(outY[j], inY[j]);
+				  TS_ASSERT_EQUALS(outE[j], inE[j]);
+			  }
+		  }
+		  else {
+
+			  // this branch will perform the plus assert
+			  for (size_t j = 0; j < xsize; ++j) {
+				  TS_ASSERT_DELTA(outX[j], factor + inX[j], 1e-12);
+				  TS_ASSERT_EQUALS(outY[j], inY[j]);
+				  TS_ASSERT_EQUALS(outE[j], inE[j]);
+			  }
+		  }
+
+	  }
+	  else { // for negative factor
+
+		  for (size_t j = 0; j < xsize; ++j) {
+			  // ScaleX reverses the histogram if the factor is negative
+			  // X vector has length xsize+1
+			  TS_ASSERT_DELTA(outX[j], factor * inX[xsize - j], 1e-12);
+			  // Y and E have length xsize
+			  TS_ASSERT_EQUALS(outY[j], inY[xsize - 1 - j]);
+			  TS_ASSERT_EQUALS(outE[j], inE[xsize - 1 - j]);
+		  }
+	  }
   }
 };
 
