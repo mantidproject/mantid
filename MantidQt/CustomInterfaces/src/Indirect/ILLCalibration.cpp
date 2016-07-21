@@ -35,7 +35,7 @@ void ILLCalibration::run() {
   QMap<QString, QString> instDetails = getInstrumentDetails();
 
   IAlgorithm_sptr calibrationAlg =
-      AlgorithmManager::Instance().create("ILLIN16BCalibration");
+      AlgorithmManager::Instance().create("IndirectCalibration");
   calibrationAlg->initialize();
 
   // Handle einput files
