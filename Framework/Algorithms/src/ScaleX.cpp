@@ -128,11 +128,11 @@ void ScaleX::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     // Copy y and e data
-	outputW->setHistogram(i, inputW->histogram(i));
+    outputW->setHistogram(i, inputW->histogram(i));
 
     auto &outX = outputW->mutableX(i);
-	auto &outY = outputW->mutableY(i);
-	auto &outE = outputW->mutableE(i);
+    auto &outY = outputW->mutableY(i);
+    auto &outE = outputW->mutableE(i);
 
     const auto &inX = inputW->x(i);
     // Change bin value by offset
