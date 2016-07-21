@@ -20,7 +20,7 @@ end
 
 def addPythonLibrary(directory)
   p "copying directory #{directory}"
-  output = system("rsync -a --exclude=.pyc #{directory} Contents/MacOS/")
+  output = system("rsync -a -L --exclude=.pyc #{directory} Contents/MacOS/")
   if output != true
     exit 1
   end
@@ -261,7 +261,7 @@ end
 # ---------------------------------------------
 # H5Py section
 # ---------------------------------------------
-h5py_path = "/usr/local/Cellar/h5py/2.6.0/lib/python2.7/site-packages"
+h5py_path = "/usr/local/lib/python2.7/site-packages"
 h5py_directories = ["h5py"]
 h5py_directories.each do |directory|
   addPythonLibrary("#{h5py_path}/#{directory}")
