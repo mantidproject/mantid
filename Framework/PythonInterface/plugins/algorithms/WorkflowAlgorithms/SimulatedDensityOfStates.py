@@ -228,8 +228,12 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
             # Build a dictionary of ions that the user cares about
             partial_ions = dict()
-            for ion in self._ions:
-                partial_ions[ion] = [i['index'] for i in ions if i['species'] == ion]
+            #for ion in self._ions:
+             #   partial_ions[ion] = [i['index'] for i in ions if i['species'] == ion]
+
+            for ion in ions:
+                ion_identifier = ion['species'] + str(ion['index'])
+                partial_ions[ion_identifier] = ion['index']
 
             partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(partial_ions, frequencies, eigenvectors, weights)
 
