@@ -337,26 +337,30 @@ void MuonFitDataSelector::setNumPeriods(size_t numPeriods) {
 
 /**
  * Returns a list of periods and combinations chosen in UI
- * @returns :: list of periods e.g. "1", "3", "1+2-3+4"
+ * @returns :: list of periods e.g. "1", "3", "1+2-3+4", or "" if single-period
  */
 QStringList MuonFitDataSelector::getPeriodSelections() const {
   QStringList checked;
-  for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
-       ++iter) {
-    if (iter.value()->isChecked()) {
-      checked.append(iter.key());
+  if (m_ui.groupBoxPeriods->isVisible()) {
+    for (auto iter = m_periodBoxes.constBegin();
+         iter != m_periodBoxes.constEnd(); ++iter) {
+      if (iter.value()->isChecked()) {
+        checked.append(iter.key());
+      }
     }
-  }
 
-  // combination
-  if (m_ui.chkCombine->isChecked()) {
-    QString combination = m_ui.txtFirst->text();
-    combination.append("-").append(m_ui.txtSecond->text());
-    combination.replace(" ", "");
-    combination.replace(",", "+");
-    checked.append(combination);
+    // combination
+    if (m_ui.chkCombine->isChecked()) {
+      QString combination = m_ui.txtFirst->text();
+      combination.append("-").append(m_ui.txtSecond->text());
+      combination.replace(" ", "");
+      combination.replace(",", "+");
+      checked.append(combination);
+    }
+  } else {
+    // Single-period data
+    checked << "";
   }
-
   return checked;
 }
 
