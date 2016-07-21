@@ -76,6 +76,8 @@ public:
                      std::string tableName, size_t row, std::string &startX,
                      std::string &endX);
 
+  void addPeakToList();
+
   void plotFitPeaksCurves();
 
   void runEvaluateFunctionAlg(const std::string &bk2BkExpFunction,

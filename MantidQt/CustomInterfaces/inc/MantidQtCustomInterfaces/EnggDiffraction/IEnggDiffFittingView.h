@@ -1,9 +1,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEW_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEW_H_
 
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionUserMsg.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionSettings.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPythonRunner.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionSettings.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionUserMsg.h"
 
 #include <string>
 #include <vector>
@@ -142,6 +142,21 @@ public:
    * @param enable or disable the fitting list widget
    */
   virtual void enableFittingListWidget(bool enable) const = 0;
+
+  /**
+  * Gets the peak picker's center (d-spacing value)
+  *
+  * @return the peak picker's center value
+  */
+  virtual double getPeakCentre() const = 0;
+
+  /**
+  * Checks whether peak picker widget is enabled or no
+  *
+  * @return true or false according to the state of the
+  *  peak picker widget
+  */
+  virtual bool peakPickerEnabled() const = 0;
 
   /**
    * @return idx of current selected row of list widget

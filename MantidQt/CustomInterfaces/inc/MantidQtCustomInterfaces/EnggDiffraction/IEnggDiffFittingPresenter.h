@@ -44,6 +44,7 @@ public:
     Start,        ///< Start and setup interface
     FittingRunNo, ///< Creates widgets and handles multi/run numbers
     FitPeaks,     ///< Preforms single peak fits
+    addPeaks,     ///< Adds peak to the list
     ShutDown,     ///< closing the interface
     LogMsg,       ///< need to send a message to the Mantid log system
   };
