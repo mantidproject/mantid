@@ -9,6 +9,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#include <numeric>
 #include <cmath>
 
 using namespace Mantid;
@@ -70,21 +71,16 @@ public:
 
     const size_t size = 20;
 
-    std::array<double, size> data = {{1, 2, 1, 1, 9, 11, 13, 20, 24, 32, 28, 48,
-                                      42, 77, 67, 33, 27, 20, 9, 2}};
+    std::array<double, size> data = {{1,  2,  1,  1,  9,  11, 13, 20, 24, 32,
+                                      28, 48, 42, 77, 67, 33, 27, 20, 9,  2}};
 
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
-    MantidVec &vecX = ws->dataX(0);
-    MantidVec &vecY = ws->dataY(0);
-    MantidVec &vecE = ws->dataE(0);
-
-    for (size_t i = 0; i < data.size(); ++i) {
-      vecX[i] = static_cast<double>(i);
-      vecY[i] = data[i];
-      vecE[i] = sqrt(data[i]);
-    }
+    ws->mutableY(0).assign(data.begin(), data.end());
+    std::iota(ws->mutableX(0).begin(), ws->mutableX(0).end(), 0);
+    std::transform(ws->y(0).cbegin(), ws->y(0).cend(), ws->mutableE(0).begin(),
+                   [](const double &y) { return sqrt(y); });
 
     return ws;
   }
@@ -184,52 +180,23 @@ public:
   /** Generate a workspace with 2 spectra for test
    */
   MatrixWorkspace_sptr generate2SpectraTestWorkspace() {
-    vector<double> data;
-    data.push_back(1);
-    data.push_back(2);
-    data.push_back(1);
-    data.push_back(1);
-    data.push_back(9);
-    data.push_back(11);
-    data.push_back(13);
-    data.push_back(20);
-    data.push_back(24);
-    data.push_back(32);
-    data.push_back(28);
-    data.push_back(48);
-    data.push_back(42);
-    data.push_back(77);
-    data.push_back(67);
-    data.push_back(33);
-    data.push_back(27);
-    data.push_back(20);
-    data.push_back(9);
-    data.push_back(2);
+    vector<double> data{1,  2,  1,  1,  9,  11, 13, 20, 24, 32,
+                        28, 48, 42, 77, 67, 33, 27, 20, 9,  2};
 
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 2, data.size(),
                                             data.size()));
 
     // Workspace index = 0
-    MantidVec &vecX = ws->dataX(0);
-    MantidVec &vecY = ws->dataY(0);
-    MantidVec &vecE = ws->dataE(0);
-    for (size_t i = 0; i < data.size(); ++i) {
-      vecX[i] = static_cast<double>(i);
-      vecY[i] = 0.0;
-      vecE[i] = 1.0;
-    }
+    ws->mutableY(0).assign(data.size(), 0.0);
+    ws->mutableE(0).assign(data.size(), 1.0);
+    std::iota(ws->mutableX(0).begin(), ws->mutableX(0).end(), 0);
 
     // Workspace index = 1
-    MantidVec &vecX1 = ws->dataX(1);
-    MantidVec &vecY1 = ws->dataY(1);
-    MantidVec &vecE1 = ws->dataE(1);
-    for (size_t i = 0; i < data.size(); ++i) {
-      vecX1[i] = static_cast<double>(i);
-      vecY1[i] = data[i];
-      vecE1[i] = sqrt(data[i]);
-    }
-
+    ws->mutableY(1).assign(data.cbegin(), data.cend());
+    std::iota(ws->mutableX(1).begin(), ws->mutableX(1).end(), 0);
+    std::transform(ws->y(1).cbegin(), ws->y(1).cend(), ws->mutableE(1).begin(),
+                   [](const double &y) { return sqrt(y); });
     return ws;
   }
 };
