@@ -1,4 +1,4 @@
-from __future__ import (absolute_import, division, print_function)
+﻿from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from testhelpers import run_algorithm
@@ -74,7 +74,8 @@ class RunTest(unittest.TestCase):
 
     def test_add_property_with_unknown_type_raises_error(self):
         run = self._expt_ws.run()
-        self.assertRaises(ValueError, run.addProperty, 'dict_t', {}, False)
+        # This used to test for dict, but we allow for dict now.
+        self.assertRaises(ValueError, run.addProperty, 'set_t', set(), False)
 
     def test_keys_returns_a_list_of_the_property_names(self):
         run = self._expt_ws.run()

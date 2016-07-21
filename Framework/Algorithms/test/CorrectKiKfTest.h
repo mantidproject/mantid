@@ -1,21 +1,22 @@
 #ifndef CORRECTKIKFTEST_H_
 #define CORRECTKIKFTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAlgorithms/CorrectKiKf.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAlgorithms/CorrectKiKf.h"
+#include "MantidDataHandling/LoadRaw3.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::HistogramX;
 
 class CorrectKiKfTest : public CxxTest::TestSuite {
 public:
@@ -57,8 +58,8 @@ public:
       } else {
         factor = std::sqrt(ei / ef);
       }
-      TS_ASSERT_DELTA(factor, (result->readY(0)[i]) / (stdval), 1e-8);
-      TS_ASSERT_DELTA(factor, (result->readE(0)[i]) / std::sqrt(stdval), 1e-8);
+      TS_ASSERT_DELTA(factor, (result->y(0)[i]) / (stdval), 1e-8);
+      TS_ASSERT_DELTA(factor, (result->e(0)[i]) / std::sqrt(stdval), 1e-8);
     }
     AnalysisDataService::Instance().remove(outputWSname);
     AnalysisDataService::Instance().remove(inputWSname);
@@ -84,8 +85,8 @@ public:
       } else {
         factor = std::sqrt(ei / ef);
       }
-      TS_ASSERT_DELTA(factor, (result->readY(0)[i]) / (stdval), 1e-8);
-      TS_ASSERT_DELTA(factor, (result->readE(0)[i]) / std::sqrt(stdval), 1e-8);
+      TS_ASSERT_DELTA(factor, (result->y(0)[i]) / (stdval), 1e-8);
+      TS_ASSERT_DELTA(factor, (result->e(0)[i]) / std::sqrt(stdval), 1e-8);
     }
     AnalysisDataService::Instance().remove(outputWSname);
     AnalysisDataService::Instance().remove(inputWSname);
@@ -111,8 +112,8 @@ public:
       } else {
         factor = std::sqrt(ei / ef);
       }
-      TS_ASSERT_DELTA(factor, (result->readY(0)[i]) / (stdval), 1e-8);
-      TS_ASSERT_DELTA(factor, (result->readE(0)[i]) / std::sqrt(stdval), 1e-8);
+      TS_ASSERT_DELTA(factor, (result->y(0)[i]) / (stdval), 1e-8);
+      TS_ASSERT_DELTA(factor, (result->e(0)[i]) / std::sqrt(stdval), 1e-8);
     }
     AnalysisDataService::Instance().remove(outputWSname);
     AnalysisDataService::Instance().remove(inputWSname);
@@ -138,8 +139,8 @@ public:
       } else {
         factor = std::sqrt(ei / ef);
       }
-      TS_ASSERT_DELTA(factor, (result->readY(0)[i]) / (stdval), 1e-8);
-      TS_ASSERT_DELTA(factor, (result->readE(0)[i]) / std::sqrt(stdval), 1e-8);
+      TS_ASSERT_DELTA(factor, (result->y(0)[i]) / (stdval), 1e-8);
+      TS_ASSERT_DELTA(factor, (result->e(0)[i]) / std::sqrt(stdval), 1e-8);
     }
     AnalysisDataService::Instance().remove(outputWSname);
     AnalysisDataService::Instance().remove(inputWSname);
@@ -220,16 +221,15 @@ public:
         result = boost::dynamic_pointer_cast<Workspace2D>(
             AnalysisDataService::Instance().retrieve(finalWS)));
 
-    TS_ASSERT_DELTA(result->readX(0)[1976], 1.18785, 0.0001);
-    TS_ASSERT_DELTA(result->readX(0)[1977], 1.18912, 0.0001);
-    TS_ASSERT_DELTA(result->readY(0)[1976], 1.28225, 0.0001);
+    TS_ASSERT_DELTA(result->x(0)[1976], 1.18785, 0.0001);
+    TS_ASSERT_DELTA(result->x(0)[1977], 1.18912, 0.0001);
+    TS_ASSERT_DELTA(result->y(0)[1976], 1.28225, 0.0001);
 
     // Ef=1.845, Ei=Ef+0.5*(x[1977]+x[1976]), Y [1976] uncorrected=1,
     // ki/kf=sqrt(Ei/Ef)
     TS_ASSERT_DELTA(
-        sqrt(((result->readX(0)[1976] + result->readX(0)[1977]) * 0.5 + 1.845) /
-             1.845),
-        result->readY(0)[1976], 0.0001);
+        sqrt(((result->x(0)[1976] + result->x(0)[1977]) * 0.5 + 1.845) / 1.845),
+        result->y(0)[1976], 0.0001);
 
     AnalysisDataService::Instance().remove(initialWS);
     AnalysisDataService::Instance().remove(intermediaryWS);
@@ -252,29 +252,27 @@ private:
       h = 0.5;
 
     Workspace2D_sptr ws2D(new Workspace2D);
-    ws2D->initialize(nspecs, nbins + 1, nbins);
+    ws2D->initialize(nspecs, isHistogram ? nbins + 1 : nbins, nbins);
     ws2D->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
 
-    Mantid::MantidVecPtr xv, yv, ev;
+    Mantid::MantidVec xv;
     if (isHistogram) {
-      xv.access().resize(nbins + 1, 0.0);
+      xv.resize(nbins + 1, 0.0);
     } else {
-      xv.access().resize(nbins, 0.0);
+      xv.resize(nbins, 0.0);
     }
-    yv.access().resize(nbins, 0.0);
-    ev.access().resize(nbins, 0.0);
     for (int i = 0; i < nbins; ++i) {
-      xv.access()[i] = static_cast<double>((i - 2. - h) * 5.);
-      yv.access()[i] = 1.0 + i;
-      ev.access()[i] = std::sqrt(1.0 + i);
+      xv[i] = static_cast<double>((i - 2. - h) * 5.);
     }
     if (isHistogram) {
-      xv.access()[nbins] = static_cast<double>((nbins - 2.5) * 5.);
+      xv[nbins] = static_cast<double>((nbins - 2.5) * 5.);
     }
 
+    auto cow_xv = make_cow<HistogramX>(std::move(xv));
     for (int i = 0; i < nspecs; i++) {
-      ws2D->setX(i, xv);
-      ws2D->setData(i, yv, ev);
+      ws2D->setSharedX(i, cow_xv);
+      ws2D->mutableY(i) = {1, 2, 3, 4, 5};
+      ws2D->mutableE(i) = {sqrt(1), sqrt(2), sqrt(3), sqrt(4), sqrt(5)};
       ws2D->getSpectrum(i).setSpectrumNo(i);
     }
 

@@ -107,6 +107,7 @@ private:
     MOCK_METHOD1(setSuccessorParser,
                  void(Mantid::API::ImplicitFunctionParameterParser *successor));
   };
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 
   class MockImplicitFunctionBuilderA
       : public Mantid::API::ImplicitFunctionBuilder {
@@ -186,7 +187,5 @@ public:
         std::runtime_error);
   }
 };
-
-GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif

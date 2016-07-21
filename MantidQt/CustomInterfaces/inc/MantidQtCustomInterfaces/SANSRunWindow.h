@@ -457,7 +457,7 @@ private:
   /// Reset the to M3
   void resetToM3IfNecessary();
   /// Check the validty of inputs
-  bool areSettingsValid();
+  bool areSettingsValid(States type);
   /// Check setting for wavelengths and Q values
   void checkWaveLengthAndQValues(bool &isValid, QString &message,
                                  QLineEdit *min, QLineEdit *max,

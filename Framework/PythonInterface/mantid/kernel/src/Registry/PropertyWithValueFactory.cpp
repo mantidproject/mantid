@@ -2,6 +2,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
+#include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -50,6 +51,9 @@ void initTypeLookup(PyTypeIndex &index) {
   // Version 2 also has the PyString_Type
   index.emplace(&PyString_Type, boost::make_shared<AsciiStrHandler>());
 #endif
+
+  // Handle a dictionary type
+  index.emplace(&PyDict_Type, boost::make_shared<MappingTypeHandler>());
 }
 
 /**
@@ -145,10 +149,10 @@ PropertyWithValueFactory::create(const std::string &name,
 const PropertyValueHandler &
 PropertyWithValueFactory::lookup(PyObject *const object) {
   // Check if object is array.
-  const auto ptype = isArray(object);
-  if (!ptype.empty()) {
+  const auto arrayType = isArray(object);
+  if (!arrayType.empty()) {
     const PyArrayIndex &arrayIndex = getArrayIndex();
-    auto ait = arrayIndex.find(ptype);
+    auto ait = arrayIndex.find(arrayType);
     if (ait != arrayIndex.end()) {
       return *(ait->second);
     }

@@ -9,7 +9,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/MandatoryValidator.h"
+#include "MantidAPI/ADSValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -36,9 +36,8 @@ void MergeRuns::init() {
   // moment
   declareProperty(
       Kernel::make_unique<ArrayProperty<std::string>>(
-          "InputWorkspaces",
-          boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
-      "The names of the input workspaces as a comma-separated list. You may "
+          "InputWorkspaces", boost::make_shared<ADSValidator>()),
+      "The names of the input workspaces as a list. You may "
       "also group workspaces using the GUI or [[GroupWorkspaces]], and specify "
       "the name of the group instead.");
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(

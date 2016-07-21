@@ -29,8 +29,6 @@
 
 #include "MantidKernel/ANN/ANNx.h" // all ANN includes
 
-using namespace std; // make std:: available
-
 //----------------------------------------------------------------------
 //	Generic kd-tree node
 //

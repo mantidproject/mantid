@@ -1,4 +1,5 @@
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/ToWeakPtr.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
@@ -8,6 +9,8 @@
 using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(WorkspaceGroup)
 
 void export_WorkspaceGroup() {
   class_<WorkspaceGroup, bases<Workspace>, boost::noncopyable>("WorkspaceGroup",
@@ -37,13 +40,17 @@ void export_WorkspaceGroup() {
       .def("isMultiPeriod", &WorkspaceGroup::isMultiperiod, arg("self"),
            "Retuns true if the workspace group is multi-period")
       // ------------ Operators --------------------------------
-      .def("__len__", &WorkspaceGroup::getNumberOfEntries)
+      .def("__len__", &WorkspaceGroup::getNumberOfEntries, arg("self"),
+           "Gets the number of entries in the workspace group")
       .def("__contains__",
            (bool (WorkspaceGroup::*)(const std::string &wsName) const) &
-               WorkspaceGroup::contains)
+               WorkspaceGroup::contains,
+           (arg("self"), arg("workspace name")),
+           "Does this group contain the named workspace?")
       .def("__getitem__",
            (Workspace_sptr (WorkspaceGroup::*)(const size_t) const) &
                WorkspaceGroup::getItem,
+           (arg("self"), arg("index")),
            return_value_policy<Policies::ToWeakPtr>());
 
   Registry::RegisterWorkspacePtrToPython<WorkspaceGroup>();

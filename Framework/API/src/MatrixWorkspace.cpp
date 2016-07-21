@@ -940,7 +940,22 @@ void MatrixWorkspace::setDistribution(bool newValue) {
 *  @return whether the workspace contains histogram data
 */
 bool MatrixWorkspace::isHistogramData() const {
-  return (readX(0).size() != blocksize());
+  bool isHist = (readX(0).size() != blocksize());
+  // TODOHIST temporary sanity check
+  if (isHist) {
+    if (getSpectrum(0).histogram().xMode() !=
+        HistogramData::Histogram::XMode::BinEdges) {
+      throw std::logic_error("In MatrixWorkspace::isHistogramData(): "
+                             "Histogram::Xmode is not BinEdges");
+    }
+  } else {
+    if (getSpectrum(0).histogram().xMode() !=
+        HistogramData::Histogram::XMode::Points) {
+      throw std::logic_error("In MatrixWorkspace::isHistogramData(): "
+                             "Histogram::Xmode is not Points");
+    }
+  }
+  return isHist;
 }
 
 /**
@@ -1143,9 +1158,9 @@ size_t MatrixWorkspace::getMemorySize() const {
 */
 size_t MatrixWorkspace::getMemorySizeForXAxes() const {
   size_t total = 0;
-  MantidVecPtr lastX = this->refX(0);
+  auto lastX = this->refX(0);
   for (size_t wi = 0; wi < getNumberHistograms(); wi++) {
-    MantidVecPtr X = this->refX(wi);
+    auto X = this->refX(wi);
     // If the pointers are the same
     if (!(X == lastX) || wi == 0)
       total += (*X).size() * sizeof(double);

@@ -1,5 +1,5 @@
 #include "MantidAPI/IMDEventWorkspace.h"
-
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -7,6 +7,8 @@
 using namespace Mantid::API;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IMDEventWorkspace)
 
 void export_IMDEventWorkspace() {
   // IMDEventWorkspace class

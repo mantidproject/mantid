@@ -233,6 +233,9 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         if final_name == '':
             final_name = reduced
 
+        # Remove illegal characters
+        final_name = sanitize_name(final_name)
+
         #convert the names from the default one, to the agreement
         names = [final_name]
         if combineDet == 'rear':
@@ -490,3 +493,10 @@ def setUserFileInBatchMode(new_user_file, current_user_file, original_user_file,
             ReductionSingleton().user_settings.execute(ReductionSingleton())
         current_user_file = user_file_to_set
     return current_user_file
+
+def sanitize_name(filename):
+    # Users have used invalid characters for the output file in the past. We need to
+    # catch them and remove them. We are fairly restrictive here, but this should
+    # ensure that most user selections are supported
+    keepcharacters = (' ','.','_')
+    return "".join(c for c in filename if c.isalnum() or c in keepcharacters).rstrip()

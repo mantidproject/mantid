@@ -1,7 +1,7 @@
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CreateWorkspace.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAlgorithms/CreateWorkspace.h"
 #include "MantidKernel/Memory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -50,15 +50,15 @@ public:
     TS_ASSERT(!ws->isHistogramData());
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
 
-    TS_ASSERT_EQUALS(ws->dataX(0)[0], 0);
-    TS_ASSERT_EQUALS(ws->dataX(0)[1], 1.234);
-    TS_ASSERT_EQUALS(ws->dataX(0)[2], 2.468);
-    TS_ASSERT_EQUALS(ws->dataY(0)[0], 0);
-    TS_ASSERT_EQUALS(ws->dataY(0)[1], 1.234);
-    TS_ASSERT_EQUALS(ws->dataY(0)[2], 2.468);
-    TS_ASSERT_EQUALS(ws->dataE(0)[0], 0);
-    TS_ASSERT_EQUALS(ws->dataE(0)[1], 1.234);
-    TS_ASSERT_EQUALS(ws->dataE(0)[2], 2.468);
+    TS_ASSERT_EQUALS(ws->x(0)[0], 0);
+    TS_ASSERT_EQUALS(ws->x(0)[1], 1.234);
+    TS_ASSERT_EQUALS(ws->x(0)[2], 2.468);
+    TS_ASSERT_EQUALS(ws->y(0)[0], 0);
+    TS_ASSERT_EQUALS(ws->y(0)[1], 1.234);
+    TS_ASSERT_EQUALS(ws->y(0)[2], 2.468);
+    TS_ASSERT_EQUALS(ws->e(0)[0], 0);
+    TS_ASSERT_EQUALS(ws->e(0)[1], 1.234);
+    TS_ASSERT_EQUALS(ws->e(0)[2], 2.468);
     TS_ASSERT_EQUALS(ws->getAxis(0)->unit()->caption(), "Wavelength");
 
     TS_ASSERT_EQUALS(ws->getAxis(1)->unit()->unitID(), "MomentumTransfer");
@@ -108,8 +108,8 @@ public:
 
     TS_ASSERT(workspace->isHistogramData());
     TS_ASSERT_EQUALS(workspace->getNumberHistograms(), 4);
-    TS_ASSERT_EQUALS(workspace->readX(0)[0], 1.1);
-    TS_ASSERT_EQUALS(workspace->readX(2)[1], 1.1);
+    TS_ASSERT_EQUALS(workspace->x(0)[0], 1.1);
+    TS_ASSERT_EQUALS(workspace->x(2)[1], 1.1);
 
     Mantid::API::TextAxis *axis =
         dynamic_cast<Mantid::API::TextAxis *>(workspace->getAxis(1));

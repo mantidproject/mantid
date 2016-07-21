@@ -167,7 +167,7 @@ std::string FileProperty::setValue(const std::string &propValue) {
   // sure the
   // directory exists for a Save property
   if (Poco::Path(strippedValue).isAbsolute()) {
-    std::string error("");
+    std::string error;
     if (isSaveProperty()) {
       error = createDirectory(strippedValue);
       if (!error.empty())
@@ -177,7 +177,7 @@ std::string FileProperty::setValue(const std::string &propValue) {
     return PropertyWithValue<std::string>::setValue(strippedValue);
   }
 
-  std::string errorMsg("");
+  std::string errorMsg;
   // For relative paths, differentiate between load and save types
   if (isLoadProperty()) {
     errorMsg = setLoadProperty(strippedValue);
@@ -252,7 +252,7 @@ bool FileProperty::extsMatchRunFiles() {
  */
 std::string FileProperty::setLoadProperty(const std::string &propValue) {
   // determine the initial version of foundFile
-  std::string foundFile("");
+  std::string foundFile;
   if ((propValue == m_oldLoadPropValue) && (!m_oldLoadFoundFile.empty())) {
     foundFile = m_oldLoadFoundFile;
   }
@@ -317,7 +317,7 @@ std::string FileProperty::setSaveProperty(const std::string &propValue) {
     } else
       return "Empty filename not allowed.";
   }
-  std::string errorMsg("");
+  std::string errorMsg;
   // We have a relative save path so just prepend the path that is in the
   // 'defaultsave.directory'
   // Note that this catches the Poco::NotFoundException and returns an empty

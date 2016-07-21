@@ -129,7 +129,6 @@ void FindDeadDetectors::exec() {
 
   // Close the output file
   file.close();
-  return;
 }
 
 /// Run Integration as a Child Algorithm

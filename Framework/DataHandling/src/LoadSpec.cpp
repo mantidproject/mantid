@@ -75,7 +75,7 @@ void LoadSpec::exec() {
     }
   }
 
-  spectra.resize(spectra_nbr);
+  spectra.resize(spectra_nbr, HistogramData::Histogram::XMode::Points);
   file.clear(); // end of file has been reached so we need to clear file state
   file.seekg(0, std::ios::beg); // go back to beginning of file
 

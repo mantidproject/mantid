@@ -3,7 +3,7 @@
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTableModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 
 #include <QWidget>
@@ -46,8 +46,11 @@ void QDataProcessorWidget::createTable() {
   ui.rowToolBar->addAction(QWhatsThis::createAction(this));
 
   // Allow rows and columns to be reordered
-  ui.viewTable->verticalHeader()->setMovable(true);
-  ui.viewTable->horizontalHeader()->setMovable(true);
+  QHeaderView *header = new QHeaderView(Qt::Horizontal);
+  header->setMovable(true);
+  header->setStretchLastSection(true);
+  header->setResizeMode(QHeaderView::ResizeToContents);
+  ui.viewTable->setHeader(header);
 
   // Re-emit a signal when the instrument changes
   connect(ui.comboProcessInstrument, SIGNAL(currentIndexChanged(int)), this,
@@ -76,21 +79,19 @@ this method is intended to be called by the presenter
 */
 void QDataProcessorWidget::setModel(const std::string &name) {
   m_toOpen = name;
-  m_presenter->notify(DataProcessorPresenter::TableUpdatedFlag);
 }
 
 /**
 Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
-void QDataProcessorWidget::showTable(QDataProcessorTableModel_sptr model) {
+void QDataProcessorWidget::showTable(QDataProcessorTreeModel_sptr model) {
   m_model = model;
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),
           SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
           SLOT(tableUpdated(const QModelIndex &, const QModelIndex &)));
   ui.viewTable->setModel(m_model.get());
-  ui.viewTable->resizeColumnsToContents();
 }
 
 /**
@@ -119,20 +120,6 @@ void QDataProcessorWidget::setTableList(const std::set<std::string> &tables) {
 }
 
 /**
-This slot notifies the presenter that the "save" button has been pressed
-*/
-void QDataProcessorWidget::on_actionSaveTable_triggered() {
-  m_presenter->notify(DataProcessorPresenter::SaveFlag);
-}
-
-/**
-This slot notifies the presenter that the "save as" button has been pressed
-*/
-void QDataProcessorWidget::on_actionSaveTableAs_triggered() {
-  m_presenter->notify(DataProcessorPresenter::SaveAsFlag);
-}
-
-/**
 This slot notifies the presenter that the "append row" button has been pressed
 */
 void QDataProcessorWidget::on_actionAppendRow_triggered() {
@@ -140,17 +127,24 @@ void QDataProcessorWidget::on_actionAppendRow_triggered() {
 }
 
 /**
-This slot notifies the presenter that the "prepend row" button has been pressed
+This slot notifies the presenter that the "append group" button has been pressed
 */
-void QDataProcessorWidget::on_actionPrependRow_triggered() {
-  m_presenter->notify(DataProcessorPresenter::PrependRowFlag);
+void QDataProcessorWidget::on_actionAppendGroup_triggered() {
+  m_presenter->notify(DataProcessorPresenter::AppendGroupFlag);
 }
 
 /**
-This slot notifies the presenter that the "delete" button has been pressed
+This slot notifies the presenter that the "delete row" button has been pressed
 */
 void QDataProcessorWidget::on_actionDeleteRow_triggered() {
   m_presenter->notify(DataProcessorPresenter::DeleteRowFlag);
+}
+
+/**
+This slot notifies the presenter that the "delete group" button has been pressed
+*/
+void QDataProcessorWidget::on_actionDeleteGroup_triggered() {
+  m_presenter->notify(DataProcessorPresenter::DeleteGroupFlag);
 }
 
 /**
@@ -200,39 +194,11 @@ void QDataProcessorWidget::on_actionPasteSelected_triggered() {
 }
 
 /**
-This slot notifies the presenter that the "new table" button has been pressed
-*/
-void QDataProcessorWidget::on_actionNewTable_triggered() {
-  m_presenter->notify(DataProcessorPresenter::NewTableFlag);
-}
-
-/**
 This slot notifies the presenter that the "expand selection" button has been
 pressed
 */
 void QDataProcessorWidget::on_actionExpandSelection_triggered() {
   m_presenter->notify(DataProcessorPresenter::ExpandSelectionFlag);
-}
-
-/**
-This slot notifies the presenter that the "options..." button has been pressed
-*/
-void QDataProcessorWidget::on_actionOptionsDialog_triggered() {
-  m_presenter->notify(DataProcessorPresenter::OptionsDialogFlag);
-}
-
-/**
-This slot notifies the presenter that the "export table" button has been pressed
-*/
-void QDataProcessorWidget::on_actionExportTable_triggered() {
-  m_presenter->notify(DataProcessorPresenter::ExportTableFlag);
-}
-
-/**
-This slot notifies the presenter that the "import table" button has been pressed
-*/
-void QDataProcessorWidget::on_actionImportTable_triggered() {
-  m_presenter->notify(DataProcessorPresenter::ImportTableFlag);
 }
 
 /**
@@ -295,8 +261,8 @@ void QDataProcessorWidget::showContextMenu(const QPoint &pos) {
   menu->addAction(ui.actionPlotRow);
   menu->addAction(ui.actionPlotGroup);
   menu->addSeparator();
-  menu->addAction(ui.actionPrependRow);
   menu->addAction(ui.actionAppendRow);
+  menu->addAction(ui.actionAppendGroup);
   menu->addSeparator();
   menu->addAction(ui.actionGroupRows);
   menu->addAction(ui.actionCopySelected);
@@ -305,6 +271,7 @@ void QDataProcessorWidget::showContextMenu(const QPoint &pos) {
   menu->addAction(ui.actionClearSelected);
   menu->addSeparator();
   menu->addAction(ui.actionDeleteRow);
+  menu->addAction(ui.actionDeleteGroup);
 
   menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
 }
@@ -504,17 +471,19 @@ bool QDataProcessorWidget::getEnableNotebook() {
 }
 
 /**
-Set which rows are selected
-@param rows : The set of rows to select
+Set which groups are selected
+@param groups : The set of groups to select
 */
-void QDataProcessorWidget::setSelection(const std::set<int> &rows) {
+void QDataProcessorWidget::setSelection(const std::set<int> &groups) {
+
   ui.viewTable->clearSelection();
   auto selectionModel = ui.viewTable->selectionModel();
 
-  for (auto row = rows.begin(); row != rows.end(); ++row)
-    selectionModel->select(ui.viewTable->model()->index((*row), 0),
+  for (auto group = groups.begin(); group != groups.end(); ++group) {
+    selectionModel->select(ui.viewTable->model()->index((*group), 0),
                            QItemSelectionModel::Select |
                                QItemSelectionModel::Rows);
+  }
 }
 
 /**
@@ -607,18 +576,50 @@ std::string QDataProcessorWidget::getProcessInstrument() const {
 }
 
 /**
-Get the indices of the highlighted rows
-@returns a set of ints containing the highlighted row numbers
+Get the indices of the highlighted runs (rows)
+@returns :: a map where keys are group indices and values are sets containing
+the highlighted row numbers
 */
-std::set<int> QDataProcessorWidget::getSelectedRows() const {
-  std::set<int> rows;
+std::map<int, std::set<int>> QDataProcessorWidget::getSelectedRows() const {
+  std::map<int, std::set<int>> rows;
   auto selectionModel = ui.viewTable->selectionModel();
   if (selectionModel) {
     auto selectedRows = selectionModel->selectedRows();
-    for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
-      rows.insert(it->row());
+    for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
+
+      if (it->parent().isValid()) {
+        // This item is a run (row)
+        // Add run and corresponding group
+        int run = it->row();
+        int group = it->parent().row();
+        rows[group].insert(run);
+      }
+      // else :
+      // A group was selected, selected groups can be retrieved using
+      // getSelectedGroups()
+    }
   }
   return rows;
+}
+
+/**
+Get the indices of the highlighted groups
+@returns :: a sets containing
+the highlighted row numbers
+*/
+std::set<int> QDataProcessorWidget::getSelectedGroups() const {
+  std::set<int> groups;
+  auto selectionModel = ui.viewTable->selectionModel();
+  if (selectionModel) {
+    auto selectedRows = selectionModel->selectedRows();
+    for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
+      if (!it->parent().isValid()) {
+        // This group was selected
+        groups.insert(it->row());
+      }
+    }
+  }
+  return groups;
 }
 
 /**

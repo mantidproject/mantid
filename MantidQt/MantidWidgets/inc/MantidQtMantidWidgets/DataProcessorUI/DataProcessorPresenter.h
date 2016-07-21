@@ -1,10 +1,10 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORPRESENTER_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPRESENTER_H
 
+#include <QVariant>
 #include <map>
 #include <string>
 #include <vector>
-#include <QVariant>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -48,8 +48,9 @@ public:
     SaveFlag,
     SaveAsFlag,
     AppendRowFlag,
-    PrependRowFlag,
+    AppendGroupFlag,
     DeleteRowFlag,
+    DeleteGroupFlag,
     ProcessFlag,
     GroupRowsFlag,
     OpenTableFlag,

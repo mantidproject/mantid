@@ -60,8 +60,8 @@ public:
   void test_presenter_sets_commands_when_notified() {
     NiceMock<MockView> mockView;
     MockProgressableView mockProgress;
-    boost::shared_ptr<MockDataProcessorPresenter> mockTablePresenter =
-        boost::make_shared<MockDataProcessorPresenter>();
+    boost::shared_ptr<NiceMock<MockDataProcessorPresenter>> mockTablePresenter =
+        boost::make_shared<NiceMock<MockDataProcessorPresenter>>();
 
     ReflMainViewPresenter presenter(&mockView, &mockProgress,
                                     mockTablePresenter);

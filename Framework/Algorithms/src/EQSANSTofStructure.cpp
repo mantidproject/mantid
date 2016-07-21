@@ -182,7 +182,7 @@ void EQSANSTofStructure::execEvent(
       // At this point the events in the second frame are still off by a frame
       if (frame_skipping && rel_tof > tof_frame_width)
         newtof += tof_frame_width;
-      clean_events.push_back(TofEvent(newtof, it->pulseTime()));
+      clean_events.emplace_back(newtof, it->pulseTime());
     }
     events.clear();
     events.reserve(clean_events.size());
