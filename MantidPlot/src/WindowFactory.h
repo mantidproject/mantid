@@ -141,8 +141,8 @@ public:
    * @param className :: the name of the class to subscribe
    */
   template <class C> void subscribe(const std::string &className) {
-    auto instantiator =
-        Mantid::Kernel::make_unique<ProjectWindowInstantiator<C, IProjectSerialisable>>();
+    auto instantiator = Mantid::Kernel::make_unique<
+        ProjectWindowInstantiator<C, IProjectSerialisable>>();
     subscribe(className, std::move(instantiator));
   }
 
