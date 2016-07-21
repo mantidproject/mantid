@@ -128,13 +128,13 @@ void ScaleX::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     // Copy y and e data
-    outputW->setHistogram(i, inputW->histogram(i));
+    auto &outY = outputW->dataY(i);
+    outY = inputW->dataY(i);
+    auto &outE = outputW->dataE(i);
+    outE = inputW->dataE(i);
 
-    auto &outX = outputW->mutableX(i);
-    auto &outY = outputW->mutableY(i);
-    auto &outE = outputW->mutableE(i);
-
-    const auto &inX = inputW->x(i);
+    auto &outX = outputW->dataX(i);
+    const auto &inX = inputW->readX(i);
     // Change bin value by offset
     if ((i >= m_wi_min) && (i <= m_wi_max)) {
       double factor = getScaleFactor(inputW, i);
@@ -147,8 +147,9 @@ void ScaleX::exec() {
         std::reverse(outY.begin(), outY.end());
         std::reverse(outE.begin(), outE.end());
       }
+    } else {
+      outX = inX; // copy
     }
-
     m_progress->report("Scaling X");
 
     PARALLEL_END_INTERUPT_REGION
