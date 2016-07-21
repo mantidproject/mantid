@@ -1,4 +1,6 @@
 import numpy as np
+from scipy import constants
+
 
 """
 Constants for instruments and ABINS
@@ -50,13 +52,12 @@ all_symbols = ["Ac", "Ag", "Al", "Am", "Ar",  "As", "At" , "Au" , "B"  , "Ba", "
 
 small_k = 1.0e-6 # norm of k vector below this value is considered zero
 
-# conversion constants taken from  (http://physics.nist.gov/cgi-bin/cuu/Convert?exp=0&num=1&From=k&To=hr&Action=Only+show+factor)
-k_2_hartree = 3.16681050000000e-06 #  K * k_2_hartree =  Hartree
-cm1_2_hartree = 4.556335252767e-6 #  cm-1 * cm1_2_hartree =  Hartree
+k_2_hartree =  constants.codata.value("kelvin-hartree relationship") #  K * k_2_hartree =  Hartree
 
+# here we have to multiply by 100 because frequency is expressed in cm^-1
+cm1_2_hartree = constants.codata.value("inverse meter-hartree relationship") * 100.0   # cm-1 * cm1_2_hartree =  Hartree
 
-# https://en.wikipedia.org/wiki/Atomic_mass_unit
-m_2_hartree = 1822.88839  #  amu * m2_hartree =  Hartree
+m_2_hartree = constants.codata.value("atomic mass unit-hartree relationship") #  amu * m2_hartree =  Hartree
 
 
 # Instruments constants

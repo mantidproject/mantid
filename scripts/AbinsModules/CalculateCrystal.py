@@ -46,7 +46,7 @@ class CalculateCrystal(IOmodule):
         data = self._calculate_crystal()
         self.addAttribute("temperature", self._temperature)
         self.addAttribute("filename", self._input_filename)
-        self.addNumpyDataset("data", data.extract()["dw_crystal_data"]) # AbinsData is already stored in an hdf file so only data for DW factors should be stored.
+        self.addNumpyDataset("dw", data.extract()["dw_crystal_data"]) # AbinsData is already stored in an hdf file so only data for DW factors should be stored.
 
         self.save()
 
@@ -55,11 +55,11 @@ class CalculateCrystal(IOmodule):
 
     def loadData(self):
 
-        _data = self.load(list_of_numpy_datasets=["data"], list_of_attributes=["temperature"])
-        _num_atoms = _data["datasets"]["data"].shape[0]
+        _data = self.load(list_of_numpy_datasets=["dw"], list_of_attributes=["temperature"])
+        _num_atoms = _data["datasets"]["dw"].shape[0]
 
         _dw_crystal_data = DwCrystalData(temperature=self._temperature, num_atoms=_num_atoms)
-        _dw_crystal_data.set(items=_data["datasets"]["data"])
+        _dw_crystal_data.set(items=_data["datasets"]["dw"])
 
         _crystal_data = CrystalData()
         _crystal_data.set(abins_data=self._abins_data, dw_crystal_data=_dw_crystal_data)

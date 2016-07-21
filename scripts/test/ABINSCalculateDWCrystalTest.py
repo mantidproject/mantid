@@ -63,16 +63,11 @@ class ABINSCalculateDWCrystalTest(unittest.TestCase):
         # check if evaluated DW are correct
         self.assertEqual(True, np.allclose(_good_data["DW"], calculated_data.extract()))
 
-        # check loading DW
-        new_tester =  CalculateDWCrystal(filename=name + ".phonon", temperature=self._temperature, abins_data=_good_data["DFT"])
-        loaded_data = new_tester.loadData()
-        self.assertEqual(True, np.allclose(calculated_data.extract(), loaded_data.extract()))
-
 
     def _get_good_data(self, filename=None):
 
         _CASTEP_reader = LoadCASTEP(input_DFT_filename=filename + ".phonon")
-        _dw = self._prepare_data(filename=filename + "_DW.txt")
+        _dw = self._prepare_data(filename=filename + "_crystal_DW.txt")
 
         return {"DFT":_CASTEP_reader.readPhononFile(), "DW": _dw}
 

@@ -93,12 +93,6 @@ class CalculateDWCrystal(IOmodule):
 
         data = self._calculate_DW()
 
-        self.addAttribute("temperature", self._temperature)
-        self.addAttribute("filename", self._input_filename)
-        self.addNumpyDataset("data", data.extract())
-
-        self.save()
-
         return data
 
 

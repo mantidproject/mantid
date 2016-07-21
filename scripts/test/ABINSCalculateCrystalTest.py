@@ -71,7 +71,7 @@ class ABINSCalculateCrystalTest(unittest.TestCase):
     def _get_good_data(self, filename=None):
 
         _CASTEP_reader = LoadCASTEP(input_DFT_filename=filename + ".phonon")
-        _crystal = self._prepare_data(filename=filename + "_DW.txt")
+        _crystal = self._prepare_data(filename=filename + "_crystal_DW.txt")
 
         return {"DFT":_CASTEP_reader.readPhononFile(), "dw_crystal_data": _crystal}
 
