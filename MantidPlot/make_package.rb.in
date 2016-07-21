@@ -282,10 +282,14 @@ h5py_patterns.each do |pattern|
         if filename.include? "libhdf5"
           name_split_on_slash = filename.strip.split("/")
           filename_no_dir = name_split_on_slash[-1]
-          puts filename_no_dir
           parts = filename_no_dir.strip.split(".")
           loader_filename = parts[0] + "." + parts[2]
           `install_name_tool -change #{h5py_linking_dir[0]}/#{filename_no_dir} @loader_path/../#{loader_filename} Contents/MacOS/h5py/#{basename}`
+          puts "----"
+          puts h5py_linking_dir[0]
+          puts filename_no_dir
+          puts basename
+          puts loader_filename
        end
     end
   end
