@@ -13,6 +13,13 @@ Algorithms
 
 * Remove CylinderPaalmanPingsCorrection v1. This algorithm has been replaced by :ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
 
+Data Reduction
+##############
+
+ISIS Calibration
+~~~~~~~~~~~~~~~~
+- Add load log option to ISIS calibration interface
+
 Data Analysis
 #############
 
