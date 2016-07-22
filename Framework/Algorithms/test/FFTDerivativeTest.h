@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/FFTDerivative.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/FFTDerivative.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid;
@@ -30,8 +30,8 @@ public:
     MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("FFTDerivative_out"));
 
-    const MantidVec &X = fWS->readX(0);
-    const MantidVec &Y = fWS->readY(0);
+    auto &X = fWS->x(0);
+    auto &Y = fWS->y(0);
 
     TS_ASSERT_EQUALS(Y.size(), 100);
 
@@ -60,8 +60,8 @@ public:
     MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("FFTDerivative_out"));
 
-    const MantidVec &X = fWS->readX(0);
-    const MantidVec &Y = fWS->readY(0);
+    auto &X = fWS->x(0);
+    auto &Y = fWS->y(0);
 
     TS_ASSERT_EQUALS(Y.size(), 100);
 
@@ -85,9 +85,9 @@ private:
     const double dX = 10.0 / (n - 1);
     const double x0 = 0.;
     const double c = 5.1;
-    Mantid::MantidVec &X = ws->dataX(0);
-    Mantid::MantidVec &Y = ws->dataY(0);
-    Mantid::MantidVec &E = ws->dataE(0);
+    auto &X = ws->mutableX(0);
+    auto &Y = ws->mutableY(0);
+    auto &E = ws->mutableE(0);
 
     for (int i = 0; i < n; i++) {
       double x = x0 + dX * (i);
