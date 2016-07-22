@@ -299,18 +299,17 @@ class BayesStretch(PythonAlgorithm):
         """
         energy_min, energy_max = erange
 
-        AddSampleLog(Workspace=workspace, LogName="res_file",
-                     LogType="String", LogText=self._res_name)
-        AddSampleLog(Workspace=workspace, LogName="background",
-                     LogType="String", LogText=str(self._background))
-        AddSampleLog(Workspace=workspace, LogName="elastic_peak",
-                     LogType="String", LogText=str(self._elastic))
-        AddSampleLog(Workspace=workspace, LogName="energy_min",
-                     LogType="Number", LogText=str(energy_min))
-        AddSampleLog(Workspace=workspace, LogName="energy_max",
-                     LogType="Number", LogText=str(energy_max))
-        AddSampleLog(Workspace=workspace, LogName="sample_binning",
-                     LogType="Number", LogText=str(sample_binning))
+        log_names = ['res_file', 'background', 'elastic_peak',
+                     'energy_min', 'energy_max','sample_binning']
+        log_values = [self._res_name, str(self._background), str(self._elastic),
+                      energy_min, energy_max, sample_binning]
+
+        add_log = self.createChildAlgorithm('AddSampleLogMultiple', enableLogging=False)
+        add_log.setProperty('Workspace', workspace)
+        add_log.setProperty('LogNames', log_names)
+        add_log.setProperty('LogValues', log_values)
+        add_log.setProperty('ParseType', True) # Should determine String/Number type
+        add_log.execute()
 
 
     def _get_properties(self):
