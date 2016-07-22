@@ -1,6 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLSETTINGSTABPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_REFLSETTINGSTABPRESENTER_H
 
+#include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
 
 namespace MantidQt {
@@ -36,7 +37,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflSettingsTabPresenter : public IReflSettingsTabPresenter {
+class MANTIDQT_CUSTOMINTERFACES_DLL ReflSettingsTabPresenter
+    : public IReflSettingsTabPresenter {
 public:
   /// Constructor
   ReflSettingsTabPresenter(IReflSettingsTabView *view);

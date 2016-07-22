@@ -5,7 +5,11 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include <gmock/gmock.h>
@@ -15,7 +19,9 @@ using namespace Mantid::API;
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockView : public IReflRunsTabView {
+/**** Views ****/
+
+class MockRunsTabView : public IReflRunsTabView {
 public:
   // Gmock requires parameters and return values of mocked methods to be
   // copyable
@@ -52,14 +58,70 @@ public:
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
-  IReflRunsTabPresenter *getPresenter() const override { return nullptr; }
+  IReflRunsTabPresenter *const getPresenter() const override { return nullptr; }
+};
+
+class MockSettingsTabView : public IReflSettingsTabView {
+public:
+  // Global options
+  MOCK_CONST_METHOD0(getPlusOptions, std::string());
+  MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
+  MOCK_CONST_METHOD0(getReductionOptions, std::string());
+  MOCK_CONST_METHOD0(getStitchOptions, std::string());
+
+  // Calls we don't care about
+  void
+  createPlusHints(const std::map<std::string, std::string> &hints) override{};
+  void createTransmissionHints(
+      const std::map<std::string, std::string> &hints) override{};
+  void createReductionHints(
+      const std::map<std::string, std::string> &hints) override{};
+  void
+  createStitchHints(const std::map<std::string, std::string> &hints) override{};
+  IReflSettingsTabPresenter *const getPresenter() const override {
+    return nullptr;
+  }
+};
+
+class MockMainWindowView : public IReflMainWindowView {
+public:
+	MOCK_METHOD3(askUserString,
+		std::string(const std::string &, const std::string &,
+			const std::string &));
+	MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
+	MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
+	MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
+	MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
+	MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
+	~MockMainWindowView() override {};
+};
+
+/**** Presenters ****/
+
+class MockRunsTabPresenter : public IReflRunsTabPresenter {
+public:
+	void notify(IReflRunsTabPresenter::Flag flag) override {};
+	void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {};
+	~MockRunsTabPresenter() override {};
+};
+
+class MockSettingsTabPresenter : public IReflSettingsTabPresenter {
+public:
+  MOCK_CONST_METHOD0(getPlusOptions, std::string());
+  MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
+  MOCK_CONST_METHOD0(getReductionOptions, std::string());
+  MOCK_CONST_METHOD0(getStitchOptions, std::string());
+  // Other calls we don't care about
+  void acceptMainPresenter(IReflMainWindowPresenter *presenter) override{};
+  ~MockSettingsTabPresenter() override{};
 };
 
 class MockMainWindowPresenter : public IReflMainWindowPresenter {
 public:
-  MOCK_CONST_METHOD0(getPreprocessingOptions, std::map<std::string, std::string>());
-  MOCK_CONST_METHOD0(getProcessingOptions, std::string());
-  MOCK_CONST_METHOD0(getPostprocessingOptions, std::string());
+  MOCK_CONST_METHOD0(getPlusOptions, std::string());
+  MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
+  MOCK_CONST_METHOD0(getReductionOptions, std::string());
+  MOCK_CONST_METHOD0(getStitchOptions, std::string());
   MOCK_METHOD3(askUserString,
                std::string(const std::string &, const std::string &,
                            const std::string &));
@@ -71,11 +133,15 @@ public:
   ~MockMainWindowPresenter() override{};
 };
 
+/**** Progress ****/
+
 class MockProgressBase : public Mantid::Kernel::ProgressBase {
 public:
   MOCK_METHOD1(doReport, void(const std::string &));
   ~MockProgressBase() override {}
 };
+
+/**** Catalog ****/
 
 class MockICatalogInfo : public Mantid::Kernel::ICatalogInfo {
 public:

@@ -497,9 +497,11 @@ set ( TEST_FILES
 	MeasurementItemTest.h
 	MuonAnalysisHelperTest.h
 	ReflLegacyTransferStrategyTest.h
-	ReflRunsTabPresenterTest.h
+	ReflMainWindowPresenterTest.h
 	ReflMeasureTransferStrategyTest.h
 	ReflNexusMeasurementItemSourceTest.h
+	ReflRunsTabPresenterTest.h
+	ReflSettingsTabPresenterTest.h
 	StackOfImagesDirsTest.h
 	TomographyIfacePresenterTest.h
 	UserInputValidatorTest.h
