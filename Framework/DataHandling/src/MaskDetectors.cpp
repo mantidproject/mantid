@@ -155,7 +155,7 @@ void MaskDetectors::exec() {
       if (maskWS->getInstrument()->getDetectorIDs().size() !=
           WS->getInstrument()->getDetectorIDs().size()) {
         throw std::runtime_error(
-            "Size mismatch between input Workspace and MaskWorkspace");
+            "Instrument's detector numbers mismatch between input Workspace and MaskWorkspace");
       }
 
       g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
@@ -167,7 +167,7 @@ void MaskDetectors::exec() {
       } else {
         appendToIndexListFromMaskWS(indexList, maskWS, ranges_info);
       }
-    } else {
+    } else { // not mask workspace
       // Check the provided workspace has the same number of spectra as the
       // input
       if (prevMasking->getNumberHistograms() > WS->getNumberHistograms()) {
