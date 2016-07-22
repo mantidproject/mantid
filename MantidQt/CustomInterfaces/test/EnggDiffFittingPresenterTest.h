@@ -363,9 +363,6 @@ public:
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     EnggDiffFittingPresenterNoThread pres(&mockView);
 
-    // should not get to the point where the status is updated
-    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
-
     EXPECT_CALL(mockView, focusingDir()).Times(1);
 
     EXPECT_CALL(mockView, getPreviousDir()).Times(1);
@@ -373,6 +370,31 @@ public:
     EXPECT_CALL(mockView, getOpenFile(testing::_)).Times(1);
 
     EXPECT_CALL(mockView, getSaveFile(testing::_)).Times(0);
+
+    // No errors/0 warnings.
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffFittingPresenter::browsePeaks);
+  }
+
+  void test_browse_peaks_list_with_warning() {
+    testing::NiceMock<MockEnggDiffFittingView> mockView;
+    EnggDiffFittingPresenterNoThread pres(&mockView);
+
+    std::string dummyDir = "I/am/a/dummy/directory";
+
+    EXPECT_CALL(mockView, focusingDir()).Times(1);
+
+    EXPECT_CALL(mockView, getPreviousDir()).Times(1);
+
+    EXPECT_CALL(mockView, getOpenFile(testing::_))
+        .Times(1)
+        .WillOnce(Return(dummyDir));
+
+    EXPECT_CALL(mockView, setPreviousDir(dummyDir)).Times(1);
+
+    EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
 
     // No errors/0 warnings.
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -489,6 +511,57 @@ public:
 
     pres.notify(IEnggDiffFittingPresenter::addPeaks);
   }
+
+  void test_add_customised_valid_peaks_to_list_without_comma() {
+
+    testing::NiceMock<MockEnggDiffFittingView> mockView;
+    EnggDiffFittingPresenterNoThread pres(&mockView);
+
+    EXPECT_CALL(mockView, peakPickerEnabled()).Times(1).WillOnce(Return(true));
+
+    EXPECT_CALL(mockView, getPeakCentre()).Times(1).WillOnce(Return(3.0234));
+
+    EXPECT_CALL(mockView, fittingPeaksData())
+        .Times(1)
+        .WillOnce(Return("2.0684,1.2676"));
+
+    EXPECT_CALL(mockView, setPeakList("2.0684,1.2676,3.0234")).Times(1);
+
+    // should not be updating the status
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
+    // No errors/0 warnings.
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffFittingPresenter::addPeaks);
+  }
+
+  void test_add_invalid_peaks_to_list() {
+
+    testing::NiceMock<MockEnggDiffFittingView> mockView;
+    EnggDiffFittingPresenterNoThread pres(&mockView);
+
+    EXPECT_CALL(mockView, peakPickerEnabled()).Times(1).WillOnce(Return(true));
+
+    EXPECT_CALL(mockView, getPeakCentre()).Times(1).WillOnce(Return(0.0133));
+
+    EXPECT_CALL(mockView, fittingPeaksData()).Times(1).WillOnce(Return(""));
+
+    // string should be "0.133," instead
+    EXPECT_CALL(mockView, setPeakList("0.0133")).Times(0);
+
+    EXPECT_CALL(mockView, setPeakList(",0.0133")).Times(0);
+
+    EXPECT_CALL(mockView, setPeakList("0.0133,")).Times(1);
+
+    // No errors/0 warnings. File entered is not found
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffFittingPresenter::addPeaks);
+  }
+
   void test_shutDown() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView,
