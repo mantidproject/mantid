@@ -41,9 +41,8 @@ const std::string MatrixWorkspace::yDimensionId = "yDimension";
 MatrixWorkspace::MatrixWorkspace(
     Mantid::Geometry::INearestNeighboursFactory *nnFactory)
     : IMDWorkspace(), ExperimentInfo(), m_axes(), m_isInitialized(false),
-      m_YUnit(), m_YUnitLabel(), m_isDistribution(false),
-      m_isCommonBinsFlagSet(false), m_isCommonBinsFlag(false), m_masks(),
-      m_indexCalculator(),
+      m_YUnit(), m_YUnitLabel(), m_isCommonBinsFlagSet(false),
+      m_isCommonBinsFlag(false), m_masks(), m_indexCalculator(),
       m_nearestNeighboursFactory(
           (nnFactory == nullptr) ? new NearestNeighboursFactory : nnFactory),
       m_nearestNeighbours() {}
@@ -57,7 +56,6 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
   m_isInitialized = other.m_isInitialized;
   m_YUnit = other.m_YUnit;
   m_YUnitLabel = other.m_YUnitLabel;
-  m_isDistribution = other.m_isDistribution;
   m_isCommonBinsFlagSet = other.m_isCommonBinsFlagSet;
   m_isCommonBinsFlag = other.m_isCommonBinsFlag;
   m_masks = other.m_masks;
@@ -926,13 +924,21 @@ void MatrixWorkspace::setYUnitLabel(const std::string &newLabel) {
 * TODO: For example: ????
 * @return whether workspace is a distribution or not
 */
-const bool &MatrixWorkspace::isDistribution() const { return m_isDistribution; }
+bool MatrixWorkspace::isDistribution() const {
+  return getSpectrum(0).yMode() == HistogramData::Histogram::YMode::Frequencies;
+}
 
 /** Set the flag for whether the Y-values are dimensioned
 *  @return whether workspace is now a distribution
 */
 void MatrixWorkspace::setDistribution(bool newValue) {
-  m_isDistribution = newValue;
+  if (isDistribution() == newValue)
+    return;
+  HistogramData::Histogram::YMode ymode =
+      newValue ? HistogramData::Histogram::YMode::Frequencies
+               : HistogramData::Histogram::YMode::Counts;
+  for (size_t i = 0; i < getNumberHistograms(); ++i)
+    getSpectrum(i).setYMode(ymode);
 }
 
 /**

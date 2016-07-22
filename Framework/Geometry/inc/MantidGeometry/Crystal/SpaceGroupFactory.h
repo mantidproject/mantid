@@ -265,17 +265,18 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<SpaceGroupFactoryImpl>;
 };
 
-// This is taken from FuncMinimizerFactory
-#ifdef _WIN32
-template class MANTID_GEOMETRY_DLL
-    Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl>;
-#endif
-
 typedef Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl>
     SpaceGroupFactory;
 
 } // namespace Geometry
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::Geometry::SpaceGroupFactoryImpl>;
+}
+}
 
 /* Macros for compile time space group registration
  *

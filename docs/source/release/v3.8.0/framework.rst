@@ -5,6 +5,8 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+- ``Facilities.xml`` was updated for changes to the SNS live data servers.
+
 HistogramData
 -------------
 
@@ -22,10 +24,16 @@ Algorithms
 New
 ###
 
+-  :ref:`ClearCache <algm-ClearCache>` an algorithm to simplify the clearance of several in memory or disk caches used in Mantid.
+
+- :ref:`LoadPreNexusLive <algm-LoadPreNexusLive>` will load "live"
+  data from file on legacy SNS DAS instruments.
+
 - :ref:`CropToComponent <algm-CropToComponent>` allows for cropping a workspace to a list of component names.
 - :ref:`CreateUserDefinedBackground <algm-CreateUserDefinedBackground>` takes a set of points
   that the user has chosen and creates a background workspace out of them. It interpolates the
   points so the resulting background can be subtracted from the original data.
+
 
 Improved
 ########
@@ -39,10 +47,15 @@ Improved
 
 - :ref:`SavePlot1D <algm-SavePlot1D>` has options for writing out
   plotly html files.
-  
-- :ref:`ConvertTableToMatrixWorkspaceDialog <algm-ConvertTableToMatrixWorkspaceDialog>`
+
+- :ref:`ConvertTableToMatrixWorkspace <algm-ConvertTableToMatrixWorkspace>`
   had a bug where the table columns were in a reversed order in the dialogue's combo boxes. 
   This is now fixed and the order is correct.
+
+- :ref:`ConvertUnits <algm-ConvertUnits>` will no longer corrupt an in place workspace if the algorithm fails.
+
+- :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli 
+
 
 Deprecated
 ##########

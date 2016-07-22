@@ -74,7 +74,8 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
   for (size_t i = 0; i < m_noVectors; i++) {
     // Create the spectrum upon init
     auto spec =
-        new Histogram1D(HistogramData::getHistogramXMode(XLength, YLength));
+        new Histogram1D(HistogramData::getHistogramXMode(XLength, YLength),
+                        HistogramData::Histogram::YMode::Counts);
     data[i] = spec;
     // Set the data and X
     spec->setX(x);
@@ -316,8 +317,8 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
 } // NamespaceMantid
 
 ///\cond TEMPLATE
-template DLLExport class Mantid::API::WorkspaceProperty<
-    Mantid::DataObjects::Workspace2D>;
+template class DLLExport
+    Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace2D>;
 
 namespace Mantid {
 namespace Kernel {

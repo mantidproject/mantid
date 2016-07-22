@@ -2048,6 +2048,7 @@ int ConfigServiceImpl::FindLowestFilterLevel() const {
 
   return lowestPriority;
 }
+
 /// \cond TEMPLATE
 template DLLExport int ConfigServiceImpl::getValue(const std::string &,
                                                    double &);

@@ -81,7 +81,8 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
 
   m_spectra.clear();
   m_curSpectra =
-      new DataObjects::Histogram1D(HistogramData::Histogram::XMode::Points);
+      new DataObjects::Histogram1D(HistogramData::Histogram::XMode::Points,
+                                   HistogramData::Histogram::YMode::Counts);
   std::string line;
 
   std::list<std::string> columns;
@@ -508,7 +509,8 @@ void LoadAscii2::newSpectra() {
     }
 
     m_curSpectra =
-        new DataObjects::Histogram1D(HistogramData::Histogram::XMode::Points);
+        new DataObjects::Histogram1D(HistogramData::Histogram::XMode::Points,
+                                     HistogramData::Histogram::YMode::Counts);
     m_curDx.clear();
     m_spectraStart = true;
   }

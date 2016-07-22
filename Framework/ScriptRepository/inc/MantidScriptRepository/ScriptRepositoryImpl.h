@@ -3,18 +3,9 @@
 
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidScriptRepository/DllConfig.h"
 #include <map>
 #include <json/value.h>
-
-#ifdef _WIN32
-#if (IN_MANTID_SCRIPTREPO)
-#define SCRIPT_DLL_EXPORT DLLExport
-#else
-#define SCRIPT_DLL_EXPORT DLLImport
-#endif
-#else
-#define SCRIPT_DLL_EXPORT
-#endif
 
 namespace Mantid {
 namespace API {

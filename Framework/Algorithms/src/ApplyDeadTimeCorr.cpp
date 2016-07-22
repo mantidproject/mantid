@@ -2,10 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ApplyDeadTimeCorr.h"
+#include "MantidAPI/EqualBinSizesValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/EqualBinSizesValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -78,7 +78,7 @@ void ApplyDeadTimeCorr::exec() {
           boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
       // Presumed to be the same for all data
-      double timeBinWidth(inputWs->dataX(0)[1] - inputWs->dataX(0)[0]);
+      double timeBinWidth(inputWs->x(0)[1] - inputWs->x(0)[0]);
 
       if (timeBinWidth != 0) {
         try {
@@ -92,10 +92,10 @@ void ApplyDeadTimeCorr::exec() {
             for (size_t j = 0; j < inputWs->blocksize(); ++j) {
               double temp(
                   1 -
-                  inputWs->dataY(index)[j] *
+                  inputWs->y(index)[j] *
                       (deadTimeRow.Double(1) / (timeBinWidth * numGoodFrames)));
               if (temp != 0) {
-                outputWs->dataY(index)[j] = inputWs->dataY(index)[j] / temp;
+                outputWs->mutableY(index)[j] = inputWs->y(index)[j] / temp;
               } else {
                 g_log.error() << "1 - MeasuredCount * (Deadtime/TimeBin width "
                                  "is currently (" << temp
