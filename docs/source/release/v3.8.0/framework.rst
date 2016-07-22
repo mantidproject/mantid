@@ -18,9 +18,6 @@ A new module for dealing with histogram data has been added, it is now being use
 Concepts
 --------
 
-Improved
-########
-
 - ``MatrixWorkspace`` : When masking bins or detectors with non-zero weights,
   undefined and infinite values and errors will be zeroed.
 
