@@ -21,15 +21,15 @@ the same manner as done by RenameWorkspace.
 The new names can be either explicitly defined by a comma separated list
 or by adding a prefix, suffix or both a prefix and suffix.
 
-The new name can be the same as any existing workspaces if the override flag
+The new name can be the same as any existing workspaces if the overwrite flag
 is set to true. This will replace any existing workspaces with the same output 
 name.
-If the override flag is set to false and any name is in use RenameWorkspaces
+If the overwrite flag is set to false and any name is in use RenameWorkspaces
 will not rename any of the workspaces and log an error.
 
 .. warning::
-   RenameWorkspaces is set to override by default to maintain backwards compatibility. 
-   Ensure the override flag is set to false to prevent any existing workspaces being 
+   RenameWorkspaces is set to overwrite by default to maintain backwards compatibility. 
+   Ensure the overwrite flag is set to false to prevent any existing workspaces being 
    replaced with a renamed workspace.
 
 Usage
@@ -95,9 +95,9 @@ Output:
    Workspaces in the ADS _before_ renaming: ['ws1', 'ws2', 'ws3']
    Workspaces in the ADS _after_ renaming: ['new_ws1_name', 'new_ws2_name', 'new_ws3_name']
 
-**Example - Setting override on and off:**
+**Example - Setting overwrite on and off:**
 
-.. testcode:: ExOverrideExisting
+.. testcode:: ExOverwriteExisting
 
    #Clear the ADS before starting
    mtd.clear()
@@ -112,24 +112,24 @@ Output:
        CreateWorkspace([0], [0], OutputWorkspace=name)
        
    #This will fail telling us that 'new_ws1' already exists
-   print 'Trying to rename with OverrideExisting set to false.'
+   print 'Trying to rename with OverwriteExisting set to false.'
    try:
-       RenameWorkspaces(names, Prefix='new_', OverrideExisting=False)
+       RenameWorkspaces(names, Prefix='new_', OverwriteExisting=False)
    except RuntimeError:
        print 'RuntimeError: A workspace called new_ws1 already exists'
    
    #This will succeed in renaming and 'new_ws1' will be replaced with 'ws1'
-   print 'Trying to rename with OverrideExisting set to true.'
-   RenameWorkspaces(names, Prefix='new_', OverrideExisting=True)   
+   print 'Trying to rename with OverwriteExisting set to true.'
+   RenameWorkspaces(names, Prefix='new_', OverwriteExisting=True)   
    print 'Succeeded'
    
 Output:
 
-.. testoutput:: ExOverrideExisting
+.. testoutput:: ExOverwriteExisting
    
-   Trying to rename with OverrideExisting set to false.
+   Trying to rename with OverwriteExisting set to false.
    RuntimeError: A workspace called new_ws1 already exists
-   Trying to rename with OverrideExisting set to true.
+   Trying to rename with OverwriteExisting set to true.
    Succeeded
    
 .. categories::

@@ -73,7 +73,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg3.setPropertyValue("OutputWorkspace", "InputWS"));
 
-    TS_ASSERT_THROWS_NOTHING(alg3.execute());
+    TS_ASSERT_THROWS(alg3.execute(), std::runtime_error);
     TS_ASSERT(!alg3.isExecuted());
 
     Workspace_sptr result;
@@ -103,7 +103,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue(
         "OutputWorkspace", "ExistingWorkspace"));
     TS_ASSERT_THROWS_NOTHING(
-        renameAlgorithm.setProperty("OverrideExisting", false));
+        renameAlgorithm.setProperty("OverwriteExisting", false));
 
     // Try to rename it should throw exception
     renameAlgorithm.setRethrows(true);
@@ -111,7 +111,7 @@ public:
     TS_ASSERT_EQUALS(renameAlgorithm.isExecuted(), false);
 
     TS_ASSERT_THROWS_NOTHING(
-        renameAlgorithm.setProperty("OverrideExisting", true));
+        renameAlgorithm.setProperty("OverwriteExisting", true));
     TS_ASSERT_THROWS_NOTHING(renameAlgorithm.execute());
     TS_ASSERT(renameAlgorithm.isExecuted());
   }

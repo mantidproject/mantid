@@ -154,19 +154,19 @@ public:
     alg6.initialize();
     alg6.setPropertyValue("InputWorkspaces", "InputWS1, InputWS2");
     // Check throw if no workspace name set
-    TS_ASSERT_THROWS(alg6.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg6.execute(), std::runtime_error);
     // Check throw if conflicting workspace names are set
     alg6.setPropertyValue("WorkspaceNames", "NewName1, NewName2");
     alg6.setPropertyValue("Prefix", "A_");
-    TS_ASSERT_THROWS(alg6.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg6.execute(), std::runtime_error);
     alg6.setPropertyValue("Suffix", "_1");
-    TS_ASSERT_THROWS(alg6.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg6.execute(), std::runtime_error);
     alg6.setPropertyValue("Prefix", "");
-    TS_ASSERT_THROWS(alg6.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg6.execute(), std::runtime_error);
     // Check throw if duplicate workspace names are set
     alg6.setPropertyValue("Suffix", "");
     alg6.setPropertyValue("WorkspaceNames", "NewName3, NewName3");
-    TS_ASSERT_THROWS(alg6.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg6.execute(), std::runtime_error);
 
     AnalysisDataService::Instance().remove("InputWS7");
     AnalysisDataService::Instance().remove("InputWS8");
@@ -227,7 +227,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue(
         "WorkspaceNames", "ExistingWorkspace"));
     TS_ASSERT_THROWS_NOTHING(
-        renameAlgorithm.setProperty("OverrideExisting", false));
+        renameAlgorithm.setProperty("OverwriteExisting", false));
 
     // Try to rename it should throw exception
     renameAlgorithm.setRethrows(true);
@@ -235,7 +235,7 @@ public:
     TS_ASSERT_EQUALS(renameAlgorithm.isExecuted(), false);
 
     TS_ASSERT_THROWS_NOTHING(
-        renameAlgorithm.setProperty("OverrideExisting", true));
+        renameAlgorithm.setProperty("OverwriteExisting", true));
     TS_ASSERT_THROWS_NOTHING(renameAlgorithm.execute());
     TS_ASSERT(renameAlgorithm.isExecuted());
   }

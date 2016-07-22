@@ -60,6 +60,9 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Utility\\Workspaces"; }
 
+  /// Validator to check out name does not already exist
+  std::map<std::string, std::string> validateInputs() override;
+
 private:
   // Overridden Algorithm methods
   void init() override;

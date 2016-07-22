@@ -40,10 +40,60 @@ void RenameWorkspaces::init() {
   // Set to default true to maintain compatibility with existing scripts
   // as this just allowed overriding by default
   declareProperty<bool>(
-      "OverrideExisting", true,
+      "OverwriteExisting", true,
       "If true all existing workspaces with the output name will be"
-      " overridden. Defaults to true to maintain backwards compatibility.",
+      " overwritten. Defaults to true to maintain backwards compatibility.",
       Direction::Input);
+}
+
+/**
+  * Validates that the output names do not already exist
+  * @return A map of the workspace property and error message
+  */
+std::map<std::string, std::string> RenameWorkspaces::validateInputs() {
+  using namespace std;
+  map<string, string> errorList;
+  std::vector<std::string> inputWsName = getProperty("InputWorkspaces");
+
+  // Get the workspace name list
+  std::vector<std::string> newWsName = getProperty("WorkspaceNames");
+  // Get the prefix and suffix
+  std::string prefix = getPropertyValue("Prefix");
+  std::string suffix = getPropertyValue("Suffix");
+
+  bool overrideWorkspace = getProperty("OverwriteExisting");
+
+  // Check properties
+  if (newWsName.empty() && prefix == "" && suffix == "") {
+    errorList["WorkspaceNames"] =
+        "No list of Workspace names, prefix or suffix has been supplied.";
+  }
+
+  if (!newWsName.empty() && (prefix != "" || suffix != "")) {
+    errorList["WorkspaceNames"] = "Both a list of workspace names and a prefix "
+                                  "or suffix has been supplied.";
+    if (prefix != "") {
+      errorList["Prefix"] = "Both a list of workspace names and a prefix "
+                            "or suffix has been supplied.";
+    } else {
+      errorList["Suffix"] = "Both a list of workspace names and a prefix "
+                            "or suffix has been supplied.";
+    }
+  }
+
+  if (newWsName.size() > 1) {
+	  for (size_t i = 0; i < newWsName.size() - 1; ++i) {
+		  for (size_t j = i + 1; j < newWsName.size(); ++j) {
+			  if (newWsName[i] == newWsName[j]) {
+				  errorList["WorkspaceNames"] =
+					  "Duplicate '" + newWsName[i] + "' found in WorkspaceNames.";
+			  }
+		  }
+	  }
+  }
+
+  return errorList;
+
 }
 
 /** Executes the algorithm
@@ -60,27 +110,9 @@ void RenameWorkspaces::exec() {
   std::string prefix = getPropertyValue("Prefix");
   std::string suffix = getPropertyValue("Suffix");
 
-  bool overrideWorkspace = getProperty("OverrideExisting");
+  bool overrideWorkspace = getProperty("OverwriteExisting");
 
   // Check properties
-  if (newWsName.empty() && prefix == "" && suffix == "") {
-    throw std::invalid_argument(
-        "No list of Workspace names, prefix or suffix has been supplied.");
-  }
-  if (!newWsName.empty() && (prefix != "" || suffix != "")) {
-    throw std::invalid_argument("Both a list of workspace names and a prefix "
-                                "or suffix has been supplied.");
-  }
-  if (newWsName.size() > 1) {
-    for (size_t i = 0; i < newWsName.size() - 1; ++i) {
-      for (size_t j = i + 1; j < newWsName.size(); ++j) {
-        if (newWsName[i] == newWsName[j]) {
-          throw std::invalid_argument("Duplicate '" + newWsName[i] +
-                                      "' found in WorkspaceNames.");
-        }
-      }
-    }
-  }
 
   size_t nWs = inputWsName.size();
   if (!newWsName.empty()) {
@@ -97,15 +129,15 @@ void RenameWorkspaces::exec() {
   }
 
   // Check all names are not used already before starting rename
-  for (size_t i = 0; i < nWs; ++i) {
-    if (AnalysisDataService::Instance().doesExist(newWsName[i])) {
-      // Name exists, stop if override if not set but let
-      // RenameWorkspace handle deleting if we are overriding
-      if (!overrideWorkspace) {
-        throw std::runtime_error("A workspace called " + newWsName[i] +
-                                 " already exists");
-      }
-    }
+  for (const auto &name : newWsName) {
+	  if (AnalysisDataService::Instance().doesExist(name)) {
+		  // Name exists, stop if override if not set but let
+		  // RenameWorkspace handle deleting if we are overriding
+		  if (!overrideWorkspace) {
+			  throw std::runtime_error("A workspace called " + name + 
+				  " already exists");
+		  }
+	  }
   }
 
   // loop over array and rename each workspace
@@ -117,7 +149,7 @@ void RenameWorkspaces::exec() {
     auto alg = createChildAlgorithm("RenameWorkspace");
     alg->setPropertyValue("InputWorkspace", inputWsName[i]);
     alg->setPropertyValue("OutputWorkspace", newWsName[i]);
-    alg->setProperty("OverrideExisting", overrideWorkspace);
+    alg->setProperty("OverwriteExisting", overrideWorkspace);
 
     alg->executeAsChildAlg();
 
