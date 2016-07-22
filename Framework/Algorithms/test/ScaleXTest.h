@@ -10,7 +10,7 @@
 
 #include <MantidAPI/FrameworkManager.h>
 
-using Mantid::MantidVec;
+using Mantid::HistogramData::Histogram;
 
 class ScaleXTest : public CxxTest::TestSuite {
 public:
@@ -37,7 +37,7 @@ public:
     auto inputWS = WorkspaceCreationHelper::Create2DWorkspace123(10, 10);
     double factor = 2.5;
     auto result = runScaleX(inputWS, "Multiply", factor);
-    testScaleFactorApplied(inputWS, result, factor, true); // multiply=true
+    checkScaleFactorApplied(inputWS, result, factor, true); // multiply=true
   }
 
   void testAddOnWS2D() {
@@ -47,7 +47,7 @@ public:
     auto inputWS = WorkspaceCreationHelper::Create2DWorkspace123(10, 10);
     double factor = 2.5;
     auto result = runScaleX(inputWS, "Add", factor);
-    testScaleFactorApplied(inputWS, result, factor, false); // multiply=false
+    checkScaleFactorApplied(inputWS, result, factor, false); // multiply=false
   }
 
   void testMulitplyOnEvents() {
@@ -61,7 +61,7 @@ public:
     double factor(2.5);
     auto result = runScaleX(inputWS, "Multiply", factor);
     TS_ASSERT_EQUALS("EventWorkspace", result->id());
-    testScaleFactorApplied(inputWS, result, factor, true); // multiply=true
+    checkScaleFactorApplied(inputWS, result, factor, true); // multiply=true
   }
 
   void testAddOnEvents() {
@@ -75,7 +75,7 @@ public:
     double factor(2.5);
     auto result = runScaleX(inputWS, "Add", factor);
     TS_ASSERT_EQUALS("EventWorkspace", result->id());
-    testScaleFactorApplied(inputWS, result, factor, false); // multiply=false
+    checkScaleFactorApplied(inputWS, result, factor, false); // multiply=false
   }
 
   void
@@ -101,21 +101,26 @@ public:
     pmap.addDouble(inst->getComponentID(), parname, instFactor);
 
     auto result = runScaleX(inputWS, "Multiply", -1.0, parname);
-    bool multiply = true;
+
+    const size_t xsize = result->blocksize();
+    TS_ASSERT_EQUALS(inputWS->blocksize(), xsize);
 
     // Test index 0 for factor 5
     double factor(det1Factor);
-    testScaleFactorAppliedAtHistIndex(0, inputWS, result, factor, multiply);
+    checkScaleFactorAppliedAtHistIndex(inputWS->histogram(0),
+                                       result->histogram(0), xsize, factor);
 
     // Test index 1 for factor -10
     factor = det2Factor;
-    testScaleFactorAppliedAtHistIndex(1, inputWS, result, factor, multiply);
+    checkScaleFactorAppliedAtHistIndex(inputWS->histogram(1),
+                                       result->histogram(1), xsize, factor);
 
     // Test the rest for factor 100
     // start at index 2 because 0 and 1 are checked above
     factor = instFactor;
     for (size_t i = 2; i < result->getNumberHistograms(); ++i) {
-      testScaleFactorAppliedAtHistIndex(i, inputWS, result, factor, multiply);
+      checkScaleFactorAppliedAtHistIndex(inputWS->histogram(i),
+                                         result->histogram(i), xsize, factor);
     }
   }
 
@@ -148,23 +153,31 @@ public:
         boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(result);
     TS_ASSERT(resultEventWS);
 
+    const size_t xsize = result->blocksize();
+    TS_ASSERT_EQUALS(inputWS->blocksize(), xsize);
+
     // Test index 0 for factor 5
     double factor(det1Factor);
-    testTimeOfFlightAtHistogramIndex(0, inputWS, resultEventWS, factor);
-    testScaleFactorAppliedAtHistIndex(0, inputWS, resultEventWS, factor, true);
+    checkTimeOfFlightEvents(inputWS->getSpectrum(0),
+                            resultEventWS->getSpectrum(0), factor);
+    checkScaleFactorAppliedAtHistIndex(inputWS->histogram(0),
+                                       result->histogram(0), xsize, factor);
 
     // Test index 1 for factor -10
     factor = det2Factor;
-    testTimeOfFlightAtHistogramIndex(1, inputWS, resultEventWS, factor);
-    testScaleFactorAppliedAtHistIndex(1, inputWS, resultEventWS, factor, true);
+    checkTimeOfFlightEvents(inputWS->getSpectrum(1),
+                            resultEventWS->getSpectrum(1), factor);
+    checkScaleFactorAppliedAtHistIndex(inputWS->histogram(1),
+                                       result->histogram(1), xsize, factor);
 
     // Test the rest for factor 100
     // start at index 2 because 0 and 1 are checked above
     factor = instFactor;
     for (size_t i = 2; i < resultEventWS->getNumberHistograms(); ++i) {
-      testTimeOfFlightAtHistogramIndex(i, inputWS, resultEventWS, factor);
-      testScaleFactorAppliedAtHistIndex(i, inputWS, resultEventWS, factor,
-                                        true);
+      checkTimeOfFlightEvents(inputWS->getSpectrum(i),
+                              resultEventWS->getSpectrum(i), factor);
+      checkScaleFactorAppliedAtHistIndex(inputWS->histogram(i),
+                                         result->histogram(i), xsize, factor);
     }
   }
 
@@ -184,8 +197,8 @@ public:
     double algFactor(2.0);
     bool combine(true);
     auto result = runScaleX(inputWS, "Multiply", algFactor, parname, combine);
-    testScaleFactorApplied(inputWS, result, algFactor * instFactor,
-                           true); // multiply=true
+    checkScaleFactorApplied(inputWS, result, algFactor * instFactor,
+                            true); // multiply=true
   }
 
   void testAddOperationWithCombineAddsTheInstrumentAndFactorArguments() {
@@ -203,8 +216,8 @@ public:
     double algFactor(2.0);
     bool combine(true);
     auto result = runScaleX(inputWS, "Add", algFactor, parname, combine);
-    testScaleFactorApplied(inputWS, result, algFactor + instFactor,
-                           false); // multiply=true
+    checkScaleFactorApplied(inputWS, result, algFactor + instFactor,
+                            false); // multiply=true
   }
 
   //------------------------------- Failure cases
@@ -284,12 +297,9 @@ private:
     return scale.getProperty("OutputWorkspace");
   }
 
-  void testTimeOfFlightAtHistogramIndex(
-      size_t i, Mantid::DataObjects::EventWorkspace_sptr inputWS,
-      boost::shared_ptr<Mantid::API::IEventWorkspace> resultEventWS,
-      double factor) {
-    auto &inEvents = inputWS->getSpectrum(i);
-    auto &outEvents = resultEventWS->getSpectrum(i);
+  void checkTimeOfFlightEvents(const Mantid::API::IEventList &inEvents,
+                               const Mantid::API::IEventList &outEvents,
+                               const double factor) {
     TS_ASSERT_EQUALS(outEvents.getNumberEvents(), inEvents.getNumberEvents());
 
     auto inTOFs = inEvents.getTofs();
@@ -301,45 +311,25 @@ private:
     }
   }
 
-  void testScaleFactorApplied(
+  void checkScaleFactorApplied(
       const Mantid::API::MatrixWorkspace_const_sptr &inputWS,
       const Mantid::API::MatrixWorkspace_const_sptr &outputWS, double factor,
       bool multiply) {
 
-    for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
-      testScaleFactorAppliedAtHistIndex(i, inputWS, outputWS, factor, multiply);
-    }
-  }
-
-  ///
-  /**
-  Only loops through the bins of the index of the parameter histogram
-  The idea is to be called from within a loop that goes through the histograms
-  like on line 113
-
-  @param i :: Specifies the histogram index
-  */
-  void testScaleFactorAppliedAtHistIndex(
-      size_t i, const Mantid::API::MatrixWorkspace_const_sptr &inputWS,
-      const Mantid::API::MatrixWorkspace_const_sptr &outputWS, double factor,
-      bool multiply) {
-
-    // get bin sizes, outputWS and inputWS should be equal
     const size_t xsize = outputWS->blocksize();
     TS_ASSERT_EQUALS(inputWS->blocksize(), xsize);
 
-    // get all histograms of input and output
-    auto &outX = outputWS->x(i);
-    auto &outY = outputWS->y(i);
-    auto &outE = outputWS->e(i);
+    for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
+      auto &outX = outputWS->x(i);
+      auto &outY = outputWS->y(i);
+      auto &outE = outputWS->e(i);
 
-    auto &inX = inputWS->x(i);
-    auto &inY = inputWS->y(i);
-    auto &inE = inputWS->e(i);
+      auto &inX = inputWS->x(i);
+      auto &inY = inputWS->y(i);
+      auto &inE = inputWS->e(i);
 
-    if (factor > 0) { // taken out of the tight loop
-      if (multiply) { // taken out of the tight loop
-                      // this branch will perform the multiplication assert
+      if (multiply) { // taken out of the tight loop, this way only 1 check
+        // this branch will perform the multiplication assert
         for (size_t j = 0; j < xsize; ++j) {
           TS_ASSERT_DELTA(outX[j], factor * inX[j], 1e-12);
           TS_ASSERT_EQUALS(outY[j], inY[j]);
@@ -354,16 +344,37 @@ private:
           TS_ASSERT_EQUALS(outE[j], inE[j]);
         }
       }
+    }
+  }
 
+  void checkScaleFactorAppliedAtHistIndex(const Histogram &input,
+                                          const Histogram &output,
+                                          const size_t blocksize,
+                                          const double factor) {
+
+    // get all histograms of input and output
+    auto &outX = output.x();
+    auto &outY = output.y();
+    auto &outE = output.e();
+
+    auto &inX = input.x();
+    auto &inY = input.y();
+    auto &inE = input.e();
+
+    if (factor > 0) { // taken out of the tight loop
+      for (size_t j = 0; j < blocksize; ++j) {
+        TS_ASSERT_DELTA(outX[j], factor * inX[j], 1e-12);
+        TS_ASSERT_EQUALS(outY[j], inY[j]);
+        TS_ASSERT_EQUALS(outE[j], inE[j]);
+      }
     } else { // for negative factor
-
-      for (size_t j = 0; j < xsize; ++j) {
+      for (size_t j = 0; j < blocksize; ++j) {
         // ScaleX reverses the histogram if the factor is negative
         // X vector has length xsize+1
-        TS_ASSERT_DELTA(outX[j], factor * inX[xsize - j], 1e-12);
+        TS_ASSERT_DELTA(outX[j], factor * inX[blocksize - j], 1e-12);
         // Y and E have length xsize
-        TS_ASSERT_EQUALS(outY[j], inY[xsize - 1 - j]);
-        TS_ASSERT_EQUALS(outE[j], inE[xsize - 1 - j]);
+        TS_ASSERT_EQUALS(outY[j], inY[blocksize - 1 - j]);
+        TS_ASSERT_EQUALS(outE[j], inE[blocksize - 1 - j]);
       }
     }
   }
