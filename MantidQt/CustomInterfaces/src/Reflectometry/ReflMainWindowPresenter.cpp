@@ -31,8 +31,7 @@ ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
 */
 std::string ReflMainWindowPresenter::getPlusOptions() const {
 
-  if (m_settingsPresenter == nullptr)
-    throw std::runtime_error("Could not read settings");
+  checkPtrValid(m_settingsPresenter);
 
   return m_settingsPresenter->getPlusOptions();
 }
@@ -42,8 +41,7 @@ std::string ReflMainWindowPresenter::getPlusOptions() const {
 */
 std::string ReflMainWindowPresenter::getTransmissionOptions() const {
 
-  if (m_settingsPresenter == nullptr)
-    throw std::runtime_error("Could not read settings");
+  checkPtrValid(m_settingsPresenter);
 
   return m_settingsPresenter->getTransmissionOptions();
 }
@@ -53,8 +51,7 @@ std::string ReflMainWindowPresenter::getTransmissionOptions() const {
 */
 std::string ReflMainWindowPresenter::getReductionOptions() const {
 
-  if (m_settingsPresenter == nullptr)
-    throw std::runtime_error("Could not read settings");
+  checkPtrValid(m_settingsPresenter);
 
   // Request global processing options to 'Settings' presenter
   return m_settingsPresenter->getReductionOptions();
@@ -65,8 +62,7 @@ std::string ReflMainWindowPresenter::getReductionOptions() const {
 */
 std::string ReflMainWindowPresenter::getStitchOptions() const {
 
-  if (m_settingsPresenter == nullptr)
-    throw std::runtime_error("Could not read settings");
+  checkPtrValid(m_settingsPresenter);
 
   // Request global post-processing options to 'Settings' presenter
   return m_settingsPresenter->getStitchOptions();
@@ -141,6 +137,15 @@ std::string
 ReflMainWindowPresenter::runPythonAlgorithm(const std::string &pythonCode) {
 
   return m_view->runPythonAlgorithm(pythonCode);
+}
+
+/** Checks for null pointer
+* @param pointer :: The pointer
+*/
+void ReflMainWindowPresenter::checkPtrValid(
+    IReflSettingsTabPresenter *pointer) const {
+  if (pointer == nullptr)
+    throw std::invalid_argument("Could not read settings");
 }
 }
 }

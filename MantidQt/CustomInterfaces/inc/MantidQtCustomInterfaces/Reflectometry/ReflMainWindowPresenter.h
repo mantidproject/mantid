@@ -62,6 +62,8 @@ public:
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
 
 private:
+  /// Check for null pointer
+  void checkPtrValid(IReflSettingsTabPresenter *pointer) const;
   /// The view we are handling
   IReflMainWindowView *m_view;
   /// The presenter of tab 'Runs'
