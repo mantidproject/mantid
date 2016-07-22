@@ -246,9 +246,6 @@ public:
             two); // Same pointer again - should appear twice in getObjects()
     svc.add("__Three", three);
 
-    typedef Mantid::Kernel::DataServiceSort sortedEnum;
-    typedef Mantid::Kernel::DataServiceHidden hiddenEnum;
-
     auto names = svc.getObjectNames();
     auto objects = svc.getObjects();
     TSM_ASSERT_EQUALS("Hidden entries should not be returned", names.size(), 3);
