@@ -37,10 +37,12 @@ class BayesStretch(PythonAlgorithm):
         return "This is a variation of the stretched exponential option of Quasi."
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
+                                                     direction=Direction.Input),
                              doc='Name of the Sample input Workspace')
 
-        self.declareProperty(MatrixWorkspaceProperty('ResolutionWorkspace', '', direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('ResolutionWorkspace', '',
+                                                     direction=Direction.Input),
                              doc='Name of the resolution input Workspace')
 
         self.declareProperty(name='EMin', defaultValue=-0.2,
@@ -61,15 +63,18 @@ class BayesStretch(PythonAlgorithm):
 
         self.declareProperty(name='NumberSigma', defaultValue=50,
                              doc='Number of sigma values. Default=50')
+
         self.declareProperty(name='NumberBeta', defaultValue=30,
                              doc='Number of beta values. Default=30')
 
         self.declareProperty(name='Loop', defaultValue=True, doc='Switch Sequential fit On/Off')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceFit', '', direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceFit', '',
+                                                    direction=Direction.Output),
                              doc='The name of the fit output workspaces')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceContour', '', direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceContour', '',
+                                                    direction=Direction.Output),
                              doc='The name of the contour output workspaces')
 
 
@@ -97,8 +102,7 @@ class BayesStretch(PythonAlgorithm):
         run_f2py_compatibility_test()
 
         from IndirectBayes import (CalcErange, GetXYE)
-        from IndirectCommon import (CheckXrange, CheckAnalysers, getEfixed, GetThetaQ,
-                                    CheckHistZero)
+        from IndirectCommon import (CheckXrange, CheckAnalysers, getEfixed, GetThetaQ, CheckHistZero)
         setup_prog = Progress(self, start=0.0, end=0.3, nreports = 5)
         logger.information('BayesStretch input')
         logger.information('Sample is %s' % self._sam_name)
@@ -116,8 +120,6 @@ class BayesStretch(PythonAlgorithm):
 
         setup_prog.report('Checking X Range')
         CheckXrange(self._erange, 'Energy')
-
-        nbin,nrbin = self._nbins[0], 1
 
         setup_prog.report('Checking Analysers')
         CheckAnalysers(self._sam_name, self._res_name)
@@ -137,42 +139,45 @@ class BayesStretch(PythonAlgorithm):
         logger.information('Number of spectra = %s ' % nsam)
         logger.information('Erange : %f to %f ' % (self._erange[0], self._erange[1]))
 
-        setup_prog.report('Establishing output workspace name')
+        setup_prog.report('Creating FORTRAN Input')
         fname = self._sam_name[:-4] + '_'+ prog
         wrks=os.path.join(workdir, self._sam_name[:-4])
-        logger.information(' lptfile : %s_Qst.lpt' % wrks)
+        logger.information('lptfile : %s_Qst.lpt' % wrks)
         lwrk=len(wrks)
         wrks.ljust(140, ' ')
         wrkr=self._res_name
         wrkr.ljust(140, ' ')
-        Nbet, Nsig = self._nbet, self._nsig
-        eBet0 = np.zeros(Nbet)                  # set errors to zero
-        eSig0 = np.zeros(Nsig)                  # set errors to zero
+        eBet0 = np.zeros(self._nbet)                  # set errors to zero
+        eSig0 = np.zeros(self._nsig)                  # set errors to zero
         rscl = 1.0
         Qaxis = ''
-        group = ''
 
         workflow_prog = Progress(self, start=0.3, end=0.7, nreports=nsam*3)
+
+        # Empty arrays to hold Sigma and Bet x,y,e values
+        xSig, ySig, eSig = [],[],[]
+        xBet, yBet, eBet = [],[],[]
+
         for m in range(nsam):
             logger.information('Group %i at angle %f' % (m, theta[m]))
             nsp = m + 1
-            nout, bnorm, Xdat, Xv, Yv, Ev = CalcErange(self._sam_name, m, self._erange, nbin)
+            nout, bnorm, Xdat, Xv, Yv, Ev = CalcErange(self._sam_name, m, self._erange, self._nbins[0])
             Ndat = nout[0]
             Imin = nout[1]
             Imax = nout[2]
 
             Nb, Xb, Yb, _ = GetXYE(self._res_name, 0, 4096) # get resolution data (4096 = FORTRAN array length)
-            numb = [nsam, nsp, ntc, Ndat, nbin, Imin, Imax, Nb, nrbin, Nbet, Nsig]
-            rscl = 1.0
+            numb = [nsam, nsp, ntc, Ndat, self._nbins[0], Imin,
+                    Imax, Nb, self._nbins[1], self._nbet, self._nsig]
             reals = [efix, theta[m], rscl, bnorm]
 
             workflow_prog.report('Processing spectrum number %i' % m)
             xsout, ysout, xbout, ybout, zpout=Que.quest(numb, Xv, Yv, Ev, reals, fitOp,
                                                         Xdat, Xb, Yb, wrks, wrkr, lwrk)
-            dataXs = xsout[:Nsig]               # reduce from fixed FORTRAN array
-            dataYs = ysout[:Nsig]
-            dataXb = xbout[:Nbet]
-            dataYb = ybout[:Nbet]
+            dataXs = xsout[:self._nsig]               # reduce from fixed FORTRAN array
+            dataYs = ysout[:self._nsig]
+            dataXb = xbout[:self._nbet]
+            dataYb = ybout[:self._nbet]
             zpWS = fname + '_Zp' +str(m)
             if m > 0:
                 Qaxis += ','
@@ -182,18 +187,18 @@ class BayesStretch(PythonAlgorithm):
             dataYz = []
             dataEz = []
 
-            for n in range(Nsig):
-                yfit_list = np.split(zpout[:Nsig*Nbet], Nsig)
+            for n in range(self._nsig):
+                yfit_list = np.split(zpout[:self._nsig*self._nbet], self._nsig)
                 dataYzp = yfit_list[n]
 
-                dataXz = np.append(dataXz, xbout[:Nbet])
-                dataYz = np.append(dataYz, dataYzp[:Nbet])
+                dataXz = np.append(dataXz, xbout[:self._nbet])
+                dataYz = np.append(dataYz, dataYzp[:self._nbet])
                 dataEz = np.append(dataEz, eBet0)
 
             zpWS = fname + '_Zp' + str(m)
             CreateWorkspace(OutputWorkspace=zpWS,
                             DataX=dataXz, DataY=dataYz,
-                            DataE=dataEz, Nspec=Nsig,
+                            DataE=dataEz, Nspec=self._nsig,
                             UnitX='MomentumTransfer',
                             VerticalAxisUnit='MomentumTransfer',
                             VerticalAxisValues=dataXs)
@@ -203,21 +208,16 @@ class BayesStretch(PythonAlgorithm):
             unity = mtd[zpWS].getAxis(1).setUnit("Label")
             unity.setLabel('sigma' , '')
 
+            xSig = np.append(xSig,dataXs)
+            ySig = np.append(ySig,dataYs)
+            eSig = np.append(eSig,eSig0)
+            xBet = np.append(xBet,dataXb)
+            yBet = np.append(yBet,dataYb)
+            eBet = np.append(eBet,eBet0)
+
             if m == 0:
-                xSig = dataXs
-                ySig = dataYs
-                eSig = eSig0
-                xBet = dataXb
-                yBet = dataYb
-                eBet = eBet0
                 groupZ = zpWS
             else:
-                xSig = np.append(xSig,dataXs)
-                ySig = np.append(ySig,dataYs)
-                eSig = np.append(eSig,eSig0)
-                xBet = np.append(xBet,dataXb)
-                yBet = np.append(yBet,dataYb)
-                eBet = np.append(eBet,eBet0)
                 groupZ = groupZ +','+ zpWS
 
         #create workspaces for sigma and beta
@@ -233,18 +233,18 @@ class BayesStretch(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=groupZ,
                         OutputWorkspace=contour_ws)
 
-        log_prog = Progress(self, start=0.8, end =1.0, nreports=8)
+        log_prog = Progress(self, start=0.8, end =1.0, nreports=6)
         #Add some sample logs to the output workspaces
         log_prog.report('Copying Logs to Fit workspace')
         CopyLogs(InputWorkspace=self._sam_name,
                  OutputWorkspace=fit_ws)
         log_prog.report('Adding Sample logs to Fit workspace')
-        self._add_sample_logs(fit_ws, self._erange, nbin)
+        self._add_sample_logs(fit_ws, self._erange, self._nbins[0])
         log_prog.report('Copying logs to Contour workspace')
         CopyLogs(InputWorkspace=self._sam_name,
                  OutputWorkspace=contour_ws)
         log_prog.report('Adding sample logs to Contour workspace')
-        self._add_sample_logs(contour_ws, self._erange, nbin)
+        self._add_sample_logs(contour_ws, self._erange, self._nbins[0])
         log_prog.report('Finialising log copying')
 
         self.setProperty('OutputWorkspaceFit', fit_ws)
@@ -328,6 +328,7 @@ class BayesStretch(PythonAlgorithm):
         self._loop = self.getProperty('Loop').value
 
         self._erange = [self._e_min, self._e_max]
+        # [sample_bins, resNorm_bins=1]
         self._nbins = [self._sam_bins, 1]
 
 
