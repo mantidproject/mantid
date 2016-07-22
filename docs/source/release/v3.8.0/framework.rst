@@ -79,6 +79,9 @@ Improved
 Python
 ------
 
+- :py:obj:`mantid.kernel.MaterialBuilder` has been exposed to python
+  and :py:obj:`mantid.kernel.Material` has been modified to expose the
+  individual atoms.
 
 Python Algorithms
 #################
