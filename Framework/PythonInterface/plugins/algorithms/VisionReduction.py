@@ -7,6 +7,7 @@ from mantid.kernel import *
 from mantid.simpleapi import *
 import csv
 import os
+import string
 
 ######################################################################
 # Remove artifacts such as prompt pulse
