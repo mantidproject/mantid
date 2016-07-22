@@ -1229,8 +1229,8 @@ public:
   void test_is_histogram_is_true() {
     MDHistoWorkspace_sptr hw =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.23, 2, 5, 10.0, 3.0);
-    TSM_ASSERT_FALSE("Should always be true for histogram workspace",
-                     hw->isHistogramData());
+    TSM_ASSERT("Should always be true for histogram workspace",
+               hw->isHistogramData());
   }
   /**
   * Test declaring an input IMDHistoWorkspace and retrieving as const_sptr or

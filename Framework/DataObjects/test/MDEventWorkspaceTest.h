@@ -756,8 +756,8 @@ public:
   void test_is_histogram_is_false() {
     MDEventWorkspace3Lean::sptr ew =
         MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
-    TSM_ASSERT_FALSE("Should always be false for event workspace",
-                     ew->isHistogramData());
+    TSM_ASSERT("Should always be false for event workspace",
+               !ew->isHistogramData());
   }
 
   /**
