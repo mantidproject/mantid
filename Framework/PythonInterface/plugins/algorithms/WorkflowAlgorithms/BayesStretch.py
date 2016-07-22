@@ -97,7 +97,7 @@ class BayesStretch(PythonAlgorithm):
         return issues
 
 
-    #pylint: disable=too-many-locals,too-many-branches
+    #pylint: disable=too-many-locals
     def PyExec(self):
         run_f2py_compatibility_test()
 
@@ -109,14 +109,10 @@ class BayesStretch(PythonAlgorithm):
         logger.information('Resolution is %s' % self._res_name)
 
         setup_prog.report('Converting to binary for Fortran')
-        #convert true/false to 1/0 for fortran
         fitOp = self._encode_fit_ops(self._elastic, self._background)
 
         setup_prog.report('Establishing save path')
-        workdir = config['defaultsave.directory']
-        if not os.path.isdir(workdir):
-            workdir = os.getcwd()
-            logger.information('Default Save directory is not set. Defaulting to current working Directory: ' + workdir)
+        workdir = self._establish_save_path()
 
         setup_prog.report('Checking X Range')
         CheckXrange(self._erange, 'Energy')
@@ -127,20 +123,19 @@ class BayesStretch(PythonAlgorithm):
         efix = getEfixed(self._sam_name)
         theta, Q = GetThetaQ(self._sam_name)
 
+        setup_prog.report('Checking Histograms')
         nsam,ntc = CheckHistZero(self._sam_name)
 
         #check if we're performing a sequential fit
         if self._loop != True:
             nsam = 1
 
-        setup_prog.report('Checking Histograms')
-        prog = 'Stretch'
         logger.information('Version is Stretch')
         logger.information('Number of spectra = %s ' % nsam)
         logger.information('Erange : %f to %f ' % (self._erange[0], self._erange[1]))
 
         setup_prog.report('Creating FORTRAN Input')
-        fname = self._sam_name[:-4] + '_'+ prog
+        fname = self._sam_name[:-4] + '_Stretch'
         wrks=os.path.join(workdir, self._sam_name[:-4])
         logger.information('lptfile : %s_Qst.lpt' % wrks)
         lwrk=len(wrks)
@@ -161,12 +156,14 @@ class BayesStretch(PythonAlgorithm):
         for m in range(nsam):
             logger.information('Group %i at angle %f' % (m, theta[m]))
             nsp = m + 1
-            nout, bnorm, Xdat, Xv, Yv, Ev = CalcErange(self._sam_name, m, self._erange, self._nbins[0])
+            nout, bnorm, Xdat, Xv, Yv, Ev = CalcErange(self._sam_name, m,
+                                                       self._erange, self._nbins[0])
             Ndat = nout[0]
             Imin = nout[1]
             Imax = nout[2]
 
-            Nb, Xb, Yb, _ = GetXYE(self._res_name, 0, 4096) # get resolution data (4096 = FORTRAN array length)
+            # get resolution data (4096 = FORTRAN array length)
+            Nb, Xb, Yb, _ = GetXYE(self._res_name, 0, 4096)
             numb = [nsam, nsp, ntc, Ndat, self._nbins[0], Imin,
                     Imax, Nb, self._nbins[1], self._nbet, self._nsig]
             reals = [efix, theta[m], rscl, bnorm]
@@ -196,17 +193,7 @@ class BayesStretch(PythonAlgorithm):
                 dataEz = np.append(dataEz, eBet0)
 
             zpWS = fname + '_Zp' + str(m)
-            CreateWorkspace(OutputWorkspace=zpWS,
-                            DataX=dataXz, DataY=dataYz,
-                            DataE=dataEz, Nspec=self._nsig,
-                            UnitX='MomentumTransfer',
-                            VerticalAxisUnit='MomentumTransfer',
-                            VerticalAxisValues=dataXs)
-
-            unitx = mtd[zpWS].getAxis(0).setUnit("Label")
-            unitx.setLabel('beta' , '')
-            unity = mtd[zpWS].getAxis(1).setUnit("Label")
-            unity.setLabel('sigma' , '')
+            self._create_workspace(zpWS, [dataXz, dataYz, dataEz], self._nsig, dataXs, True)
 
             xSig = np.append(xSig,dataXs)
             ySig = np.append(ySig,dataYs)
@@ -233,8 +220,8 @@ class BayesStretch(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=groupZ,
                         OutputWorkspace=contour_ws)
 
-        log_prog = Progress(self, start=0.8, end =1.0, nreports=6)
         #Add some sample logs to the output workspaces
+        log_prog = Progress(self, start=0.8, end =1.0, nreports=6)
         log_prog.report('Copying Logs to Fit workspace')
         CopyLogs(InputWorkspace=self._sam_name,
                  OutputWorkspace=fit_ws)
@@ -271,8 +258,18 @@ class BayesStretch(PythonAlgorithm):
         fitOp = [1 if self._elastic else 0, o_bgd, 0, 0]
         return fitOp
 
+    def _establish_save_path(self):
+        """
+        @return the directory to save FORTRAN outputs to
+        """
+        workdir = config['defaultsave.directory']
+        if not os.path.isdir(workdir):
+            workdir = os.getcwd()
+            logger.information('Default Save directory is not set.')
+            logger.information('Defaulting to current working Directory: ' + workdir)
+        return workdir
 
-    def _create_workspace(self, name, xye, num_spec, vert_axis):
+    def _create_workspace(self, name, xye, num_spec, vert_axis, is_zp_ws = False):
         """
         Creates a workspace from FORTRAN data
 
@@ -280,19 +277,29 @@ class BayesStretch(PythonAlgorithm):
         @param xye          :: List of axis data [x, y , e]
         @param num_spec     :: Number of spectra
         @param vert_axis    :: The values on the vertical axis
+        @param is_zp_ws     :: Creating a zp_ws (if True)
         """
+
+        unit_x = ''
+        if is_zp_ws:
+            unit_x = 'MomentumTransfer'
 
         CreateWorkspace(OutputWorkspace=name,
                         DataX=xye[0], DataY=xye[1], DataE=xye[2],
-                        Nspec=num_spec, UnitX='',
+                        Nspec=num_spec, UnitX=unit_x,
                         VerticalAxisUnit='MomentumTransfer',
                         VerticalAxisValues=vert_axis)
 
         unitx = mtd[name].getAxis(0).setUnit("Label")
-        if name[:4] == 'Beta':
+        if is_zp_ws:
+            unity = mtd[name].getAxis(1).setUnit("Label")
             unitx.setLabel('beta' , '')
+            unity.setLabel('sigma' , '')
         else:
-            unitx.setLabel('sigma', '')
+            if name[:4] == 'Beta':
+                unitx.setLabel('beta' , '')
+            else:
+                unitx.setLabel('sigma', '')
 
 
     def _add_sample_logs(self, workspace, erange, sample_binning):
