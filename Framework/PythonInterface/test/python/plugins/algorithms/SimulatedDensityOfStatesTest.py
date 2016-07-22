@@ -38,6 +38,7 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
     def setUp(self):
         self._phonon_file = 'squaricn.phonon'
         self._castep_file = 'squaricn.castep'
+        self._isotope_phonon = 'test_isotopes.phonon'
 
     def test_phonon_load(self):
         wks = SimulatedDensityOfStates(PHONONFile=self._phonon_file)
@@ -239,6 +240,14 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
             ws = wks_grp.getItem(idx)
             self.assertAlmostEqual(expected_x_min,ws.readX(0)[0])
             self.assertAlmostEqual(bin_width,(ws.readX(0)[1] - ws.readX(0)[0]))
+
+    def test_isotopes_are_parsed_correctly(self):
+        """
+        Test that isotopes in the file in the format `element:P` are valid
+        """
+        wks_group = SimulatedDensityOfStates(PHONONFile=self._isotope_phonon,
+                                             SpectrumType='DOS',
+                                             Ions='H:P,C:P,O')
 
 if __name__=="__main__":
     unittest.main()
