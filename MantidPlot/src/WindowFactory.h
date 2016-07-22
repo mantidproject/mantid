@@ -4,11 +4,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "Mantid/IProjectSerialisable.h"
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "Mantid/IProjectSerialisable.h"
+#include "MantidKernel/case_insensitive_map.h"
+#include "MantidKernel/make_unique.h"
 
 #include <cstring>
 #include <map>
@@ -25,18 +26,6 @@ class ApplicationWindow;
 
 namespace Mantid {
 namespace API {
-
-/* Cross platform string case insensitive string comparator functor.
- */
-struct CaseInsensitiveStringComparator {
-  bool operator()(const std::string &s1, const std::string &s2) const {
-#ifdef _MSC_VER
-    return _stricmp(s1.c_str(), s2.c_str()) < 0;
-#else
-    return strcasecmp(s1.c_str(), s2.c_str()) < 0;
-#endif
-  }
-};
 
 /** Abstract base instantiator object.
  *
@@ -183,8 +172,8 @@ private:
   }
 
   /// A typedef for the map of registered classes
-  typedef std::map<std::string, std::unique_ptr<AbstractFactory>,
-                   CaseInsensitiveStringComparator> FactoryMap;
+  typedef Mantid::Kernel::CaseInsensitiveMap<std::unique_ptr<AbstractFactory>>
+      FactoryMap;
   /// The map holding the registered class names and their instantiators
   FactoryMap _map;
 };

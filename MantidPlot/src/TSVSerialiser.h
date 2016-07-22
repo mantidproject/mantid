@@ -1,6 +1,8 @@
 #ifndef MANTID_TSVSERIALISER_H_
 #define MANTID_TSVSERIALISER_H_
 
+#include "MantidKernel/case_insensitive_map.h"
+
 #include <map>
 #include <sstream>
 #include <string>
@@ -90,10 +92,8 @@ public:
   void writeInlineSection(const std::string &name, const std::string &body);
 
 private:
-  std::map<std::string, std::vector<std::string>,
-           CaseInsensitiveStringComparator> m_sections;
-  std::map<std::string, std::vector<std::string>,
-           CaseInsensitiveStringComparator> m_lines;
+  Mantid::Kernel::CaseInsensitiveMap<std::vector<std::string>> m_sections;
+  Mantid::Kernel::CaseInsensitiveMap<std::vector<std::string>> m_lines;
 
   std::vector<std::string> m_curValues;
   int m_curIndex;
