@@ -306,7 +306,6 @@ private:
       const Mantid::API::MatrixWorkspace_const_sptr &outputWS, double factor,
       bool multiply) {
 
-    const size_t xsize = outputWS->blocksize();
     for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
       testScaleFactorAppliedAtHistIndex(i, inputWS, outputWS, factor, multiply);
     }
