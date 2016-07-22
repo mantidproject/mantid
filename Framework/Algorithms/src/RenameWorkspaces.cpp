@@ -53,15 +53,12 @@ void RenameWorkspaces::init() {
 std::map<std::string, std::string> RenameWorkspaces::validateInputs() {
   using namespace std;
   map<string, string> errorList;
-  std::vector<std::string> inputWsName = getProperty("InputWorkspaces");
 
   // Get the workspace name list
   std::vector<std::string> newWsName = getProperty("WorkspaceNames");
   // Get the prefix and suffix
   std::string prefix = getPropertyValue("Prefix");
   std::string suffix = getPropertyValue("Suffix");
-
-  bool overrideWorkspace = getProperty("OverwriteExisting");
 
   // Check properties
   if (newWsName.empty() && prefix == "" && suffix == "") {
