@@ -47,10 +47,8 @@ SampleLogDialogBase::SampleLogDialogBase(const QString &wsname,
                                          QWidget *parentContainer,
                                          Qt::WFlags flags,
                                          size_t experimentInfoIndex)
-    : QDialog(parentContainer, flags), m_parentContainer(parentContainer),
-      m_wsname(wsname.toStdString()),
-      m_experimentInfoIndex(experimentInfoIndex), buttonPlot(nullptr),
-      buttonClose(nullptr), m_spinNumber(nullptr), m_tree(nullptr) {
+    : QDialog(parentContainer, flags), m_tree(nullptr), m_parentContainer(parentContainer), m_wsname(wsname.toStdString()),      
+      m_experimentInfoIndex(experimentInfoIndex), buttonPlot(nullptr), buttonClose(nullptr), m_spinNumber(nullptr) {
 
   for (auto i = 0; i < NUM_STATS; ++i) {
     statValues[i] = nullptr;
