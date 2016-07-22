@@ -43,6 +43,9 @@ ReflMainWindowPresenter::getPreprocessingOptions() const {
 */
 std::string ReflMainWindowPresenter::getProcessingOptions() const {
 
+	if (m_settingsPresenter == nullptr)
+		throw std::runtime_error("Could not read settings");
+
   // Request global processing options to 'Settings' presenter
   return m_settingsPresenter->getProcessingOptions();
 }
@@ -51,6 +54,9 @@ std::string ReflMainWindowPresenter::getProcessingOptions() const {
 * @return :: Global post-processing options
 */
 std::string ReflMainWindowPresenter::getPostprocessingOptions() const {
+
+	if (m_settingsPresenter == nullptr)
+		throw std::runtime_error("Could not read settings");
 
   // Request global post-processing options to 'Settings' presenter
   return m_settingsPresenter->getPostprocessingOptions();

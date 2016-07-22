@@ -8,11 +8,9 @@ namespace CustomInterfaces {
 /** Constructor
 * @param parent :: [input] The parent of this widget
 */
-QtReflSettingsTabView::QtReflSettingsTabView(QWidget *parent) {
+QtReflSettingsTabView::QtReflSettingsTabView(QWidget *parent): m_presenter(new ReflSettingsTabPresenter(this)) {
 
   initLayout();
-
-  m_presenter.reset(new ReflSettingsTabPresenter(this));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -28,7 +26,7 @@ void QtReflSettingsTabView::initLayout() { m_ui.setupUi(this); }
 /** Returns the presenter managing this view
 * @return :: A pointer to the presenter
 */
-IReflSettingsTabPresenter *QtReflSettingsTabView::getPresenter() const {
+IReflSettingsTabPresenter *const QtReflSettingsTabView::getPresenter() const {
 
   return m_presenter.get();
 }

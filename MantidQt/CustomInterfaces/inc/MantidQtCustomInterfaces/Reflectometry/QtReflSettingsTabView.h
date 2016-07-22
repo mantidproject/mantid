@@ -42,7 +42,7 @@ public:
   /// Destructor
   ~QtReflSettingsTabView() override;
   /// Returns the presenter managing this view
-  IReflSettingsTabPresenter *getPresenter() const;
+  IReflSettingsTabPresenter *const getPresenter() const;
   /// Returns selected analysis mode
   std::string getAnalysisMode() const override;
   /// Returns selected resolution (dQ/Q)

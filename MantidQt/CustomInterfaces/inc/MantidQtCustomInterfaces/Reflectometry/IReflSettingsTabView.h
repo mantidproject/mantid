@@ -42,7 +42,7 @@ public:
   /// Destructor
   virtual ~IReflSettingsTabView(){};
   /// Returns the presenter managing this view
-  virtual IReflSettingsTabPresenter *getPresenter() const = 0;
+  virtual IReflSettingsTabPresenter *const getPresenter() const = 0;
 
   /// Processing
   /// Returns selected analysis mode

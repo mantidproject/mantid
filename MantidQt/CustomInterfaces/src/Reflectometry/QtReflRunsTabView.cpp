@@ -48,10 +48,9 @@ void QtReflRunsTabView::initLayout() {
 
   // Create the DataProcessor presenter
   ReflGenericDataProcessorPresenterFactory presenterFactory;
-  auto processorPresenter = presenterFactory.create();
 
   QDataProcessorWidget *qDataProcessorWidget = new QDataProcessorWidget(
-      std::unique_ptr<DataProcessorPresenter>(processorPresenter.release()),
+      std::unique_ptr<DataProcessorPresenter>(presenterFactory.create()),
       this);
   ui.layoutProcessPane->addWidget(qDataProcessorWidget);
 
@@ -278,7 +277,7 @@ std::set<int> QtReflRunsTabView::getSelectedSearchRows() const {
 Get a pointer to the presenter that's currently controlling this view.
 @returns A pointer to the presenter
 */
-IReflRunsTabPresenter *QtReflRunsTabView::getPresenter() const {
+IReflRunsTabPresenter *const QtReflRunsTabView::getPresenter() const {
   return m_presenter.get();
 }
 
