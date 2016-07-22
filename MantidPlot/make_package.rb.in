@@ -274,7 +274,7 @@ end
 h5py_patterns = ["**/h5py/*.so"]
 change_id(h5py_patterns, "Contents/MacOS/h5py/")
 
-h5py_linking_dir = find_linking_directories(h5py_patterns, 'hdf5/lib*', '/usr/local/opt/hdf5/lib')
+h5py_linking_dir = find_linking_directories(h5py_patterns, 'lib/libhdf5', '/usr/local/opt/hdf5/lib')
 
 h5py_patterns.each do |pattern|
   Dir[pattern].each do |library|
