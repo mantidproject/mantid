@@ -3,7 +3,6 @@ import os
 import numpy as np
 
 from IndirectImport import *
-
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode,
                         WorkspaceGroupProperty, Progress)
 from mantid.kernel import StringListValidator, Direction
@@ -147,7 +146,7 @@ class BayesQuasi(PythonAlgorithm):
             raise RuntimeError(unsupported_msg)
 
         from IndirectBayes import (CalcErange, GetXYE, ReadNormFile,
-                                   ReadWidthFile, QLAddSampleLogs, C2Fw,
+                                   ReadWidthFile, C2Fw,
                                    C2Se, QuasiPlot)
         from IndirectCommon import (CheckXrange, CheckAnalysers, getEfixed, GetThetaQ,
                                     CheckHistZero, CheckHistSame, IndentifyDataBoundaries)
@@ -382,13 +381,11 @@ class BayesQuasi(PythonAlgorithm):
         log_prog.report('Copying Logs to outputWorkspace')
         CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=outWS)
         log_prog.report('Adding Sample logs to Output workspace')
-        QLAddSampleLogs(outWS, self._resWS, prog, self._background, self._elastic, erange,
-                        (nbin, nrbin), self._resnormWS, self._wfile)
+        self.QLAddSampleLogs(outWS, prog, erange, nbins)
         log_prog.report('Copying logs to fit Workspace')
         CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=fitWS)
         log_prog.report('Adding sample logs to Fit workspace')
-        QLAddSampleLogs(fitWS, self._resWS, prog, self._background, self._elastic, erange,
-                        (nbin, nrbin), self._resnormWS, self._wfile)
+        self.QLAddSampleLogs(fitWS, prog, erange, nbins)
         log_prog.report('Finialising log copying')
 
         if self._save:
@@ -407,7 +404,35 @@ class BayesQuasi(PythonAlgorithm):
         if self._program == 'QL':
             self.setProperty('OutputWorkspaceProb', probWS)
 
+    def QLAddSampleLogs(self, workspace, fit_program, e_range, binning):
 
+        sample_binning, res_binning = binning
+        energy_min, energy_max = e_range
+
+        sample_logs = [('res_workspace', self._resWS),
+                    ('fit_program', fit_program),
+                    ('background', self._background),
+                    ('elastic_peak', self._elastic),
+                    ('energy_min', energy_min),
+                    ('energy_max', energy_max),
+                    ('sample_binning', sample_binning),
+                    ('resolution_binning', res_binning)]
+
+        resnorm_used = (self._resnormWS != '')
+        sample_logs.append(('resnorm', str(resnorm_used)))
+        if resnorm_used:
+            sample_logs.append(('resnorm_file', str(self._resnormWS)))
+
+        width_file_used = (self._wfile != '')
+        sample_logs.append(('width', str(width_file_used)))
+        if width_file_used:
+            sample_logs.append(('width_file', str(self._wfile)))
+
+        log_alg = self.createChildAlgorithm('AddSampleLogMultiple', 0.9, 1.0, False)
+        log_alg.setProperty('Workspace', workspace)
+        log_alg.setProperty('LogNames', [log[0] for log in sample_logs])
+        log_alg.setProperty('LogValues', [log[1] for log in sample_logs])
+        log_alg.execute()
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(BayesQuasi)
