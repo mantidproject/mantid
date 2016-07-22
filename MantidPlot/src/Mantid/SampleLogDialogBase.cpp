@@ -52,6 +52,10 @@ SampleLogDialogBase::SampleLogDialogBase(const QString &wsname,
       m_experimentInfoIndex(experimentInfoIndex), buttonPlot(nullptr),
       buttonClose(nullptr), m_spinNumber(nullptr), m_tree(nullptr) {
 
+	for(auto i = 0; i < NUM_STATS; ++i) {
+		statValues[i] = nullptr;
+	}
+
   // No further initialisation provided, must be done in derived classes
 }
 
