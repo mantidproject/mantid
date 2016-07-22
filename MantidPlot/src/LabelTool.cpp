@@ -305,12 +305,13 @@ void LabelTool::blankRegionClicked() {
   }
 
   // For viewing log values.
+  // For viewing log values.
   QMenu *logVals = info->addMenu(tr("Log values"));
 
-  foreach (QString logProperty, logValues()) {
-    QAction *qa = new QAction(logProperty, this);
-    logVals->addAction(qa);
-    connect(qa, SIGNAL(triggered()), this, SLOT(insertLegend()));
+  foreach(QString wsName, workspaceNames()) {
+	  QAction *qa = new QAction(wsName, this);
+	  logVals->addAction(qa);
+	  connect(qa, SIGNAL(triggered()), this, SLOT(showLogValuesDialog()));
   }
 
   clickMenu->exec(QCursor::pos());
@@ -356,8 +357,8 @@ void LabelTool::dataPointClicked() {
   // For viewing log values.
   QMenu *logVals = info->addMenu(tr("Log values"));
 
-  foreach (QString logProperty, logValues()) {
-    QAction *qa = new QAction(logProperty, this);
+  foreach (QString wsName, workspaceNames()) {
+    QAction *qa = new QAction(wsName, this);
     logVals->addAction(qa);
     connect(qa, SIGNAL(triggered()), this, SLOT(showLogValuesDialog()));
   }
