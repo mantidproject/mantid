@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='ASCII'?>
 <instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2016-02-12 16:44:43.011103" name="CNCS" valid-from="2016-02-12 00:00:00" valid-to="2016-07-13 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
-  <!--Created by Michael Reuter-->
+  <!--Created by Andrei Savici-->
   <defaults>
     <length unit="metre"/>
     <angle unit="degree"/>
