@@ -116,7 +116,6 @@ class BayesStretch(PythonAlgorithm):
             o_bgd = 0
 
         fitOp = [o_el, o_bgd, 0, 0]
-        nbs = [self._nbet, self._nsig]
 
         setup_prog.report('Establishing save path')
         workdir = config['defaultsave.directory']
@@ -159,13 +158,13 @@ class BayesStretch(PythonAlgorithm):
         wrks.ljust(140, ' ')
         wrkr=self._res_name
         wrkr.ljust(140, ' ')
-        Nbet, Nsig = nbs[0], nbs[1]
+        Nbet, Nsig = self._nbet, self._nsig
         eBet0 = np.zeros(Nbet)                  # set errors to zero
         eSig0 = np.zeros(Nsig)                  # set errors to zero
         rscl = 1.0
         Qaxis = ''
-
         group = ''
+
         workflow_prog = Progress(self, start=0.3, end=0.7, nreports=nsam*3)
         for m in range(nsam):
             logger.information('Group %i at angle %f' % (m, theta[m]))
@@ -174,11 +173,8 @@ class BayesStretch(PythonAlgorithm):
             Ndat = nout[0]
             Imin = nout[1]
             Imax = nout[2]
-            if prog == 'QLd':
-                mm = m
-            else:
-                mm = 0
-            Nb, Xb, Yb, _ = GetXYE(self._res_name, mm, array_len)     # get resolution data
+
+            Nb, Xb, Yb, _ = GetXYE(self._res_name, 0, array_len)     # get resolution data
             numb = [nsam, nsp, ntc, Ndat, nbin, Imin, Imax, Nb, nrbin, Nbet, Nsig]
             rscl = 1.0
             reals = [efix, theta[m], rscl, bnorm]
