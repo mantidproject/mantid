@@ -50,10 +50,15 @@ Documentation
 #############
 * Added Ragged Workspace as a concept page
 
+Options Window
+###############
+- Within Preferences->Mantid->Options ticking a category off/on will now untick/tick all subcategories. Also having some subcategories on and off will now show a partially ticked box for that category. 
+
 
 Bugs Resolved
 -------------
 - Floating windows now always stay on top of the main window in OSX
+
 
 SliceViewer Improvements
 ------------------------
