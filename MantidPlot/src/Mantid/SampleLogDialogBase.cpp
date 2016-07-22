@@ -34,7 +34,8 @@ using namespace Mantid::Kernel;
 *displayed
 *	@param parentContainer The parent container relative to which the window
 *will be centered.
-*						Also delegates the parentContainer to
+*						Also delegates the parentContainer
+*to
 *the QDialog(QWidget, flags) constructor.
 *	@param flags Flags for QT
 *				Also delegates the flags to the QDialog(QWidget,
