@@ -145,8 +145,7 @@ class BayesQuasi(PythonAlgorithm):
                               + " what platforms are currently supported"
             raise RuntimeError(unsupported_msg)
 
-        from IndirectBayes import (CalcErange, GetXYE, ReadNormFile,
-                                   ReadWidthFile, C2Fw,
+        from IndirectBayes import (CalcErange, GetXYE, C2Fw,
                                    QuasiPlot)
         from IndirectCommon import (CheckXrange, CheckAnalysers, getEfixed, GetThetaQ,
                                     CheckHistZero, CheckHistSame, IndentifyDataBoundaries)
@@ -236,8 +235,8 @@ class BayesQuasi(PythonAlgorithm):
         logger.information(' Erange : '+str(erange[0])+' to '+str(erange[1]))
 
         setup_prog.report('Reading files')
-        Wy,We = ReadWidthFile(self._width,self._wfile,totalNoSam)
-        dtn,xsc = ReadNormFile(self._res_norm,self._resnormWS,totalNoSam)
+        Wy,We = self.ReadWidthFile(self._width,self._wfile,totalNoSam)
+        dtn,xsc = self.ReadNormFile(self._res_norm,self._resnormWS,totalNoSam)
 
         setup_prog.report('Establishing output workspace name')
         fname = self._samWS[:-4] + '_'+ prog
@@ -269,6 +268,7 @@ class BayesQuasi(PythonAlgorithm):
         for m in range(0,nsam):
             logger.information('Group ' +str(m)+ ' at angle '+ str(theta[m]))
             nsp = m+1
+  
             nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(self._samWS,m,erange,nbin)
             Ndat = nout[0]
             Imin = nout[1]
@@ -441,29 +441,17 @@ class BayesQuasi(PythonAlgorithm):
         var = asc[3].split()                            #split line on spaces
         nspec = var[0]
         var = ExtractInt(asc[6])
-        first = 7
-        Xout = []
-        Yf = []
-        Ef = []
-        Yi = []
-        Ei = []
-        Yb = []
-        Eb = []
+        first = 7; Xout = []; Yf = []; Ef = []; Yi = []; Ei = []; Yb = []; Eb = []
         ns = int(nspec)
 
-        dataX = np.array([])
-        dataY = np.array([])
-        dataE = np.array([])
+        dataX = np.array([]); dataY = np.array([]); dataE = np.array([])
 
         for _ in range(0,ns):
             first,Q,_,fw,it,be = self.SeBlock(asc,first)
             Xout.append(Q)
-            Yf.append(fw[0])
-            Ef.append(fw[1])
-            Yi.append(it[0])
-            Ei.append(it[1])
-            Yb.append(be[0])
-            Eb.append(be[1])
+            Yf.append(fw[0]); Ef.append(fw[1])
+            Yi.append(it[0]); Ei.append(it[1])
+            Yb.append(be[0]); Eb.append(be[1])
         Vaxis = []
 
         dataX = np.append(dataX,np.array(Xout))
@@ -505,20 +493,13 @@ class BayesQuasi(PythonAlgorithm):
     def SeBlock(self, a,first):                                 #read Ascii block of Integers
         first += 1
         val = ExtractFloat(a[first])               #Q,AMAX,HWHM
-        Q = val[0]
-        AMAX = val[1]
-        HWHM = val[2]
-        first += 1
+        Q = val[0]; AMAX = val[1]; HWHM = val[2]; first += 1
         val = ExtractFloat(a[first])               #A0
-        int0 = [AMAX*val[0]]
-        first += 1
+        int0 = [AMAX*val[0]]; first += 1
         val = ExtractFloat(a[first])                #AI,FWHM first peak
-        fw = [2.*HWHM*val[1]]
-        integer = [AMAX*val[0]]
-        first += 1
+        fw = [2.*HWHM*val[1]]; integer = [AMAX*val[0]]; first += 1
         val = ExtractFloat(a[first])                 #SIG0
-        int0.append(val[0])
-        first += 1
+        int0.append(val[0]); first += 1
         val = ExtractFloat(a[first])                  #SIG3K
         integer.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
         first += 1
@@ -532,6 +513,79 @@ class BayesQuasi(PythonAlgorithm):
         first += 1
         return first,Q,int0,fw,integer,be                                      #values as list
         
- 
+    def GetResNorm(self, resnormWS,ngrp):
+        if ngrp == 0:                                # read values from WS
+            dtnorm = mtd[resnormWS+'_Intensity'].readY(0)
+            xscale = mtd[resnormWS+'_Stretch'].readY(0)
+        else:                                        # constant values
+            dtnorm = []; xscale = []
+            for _ in range(0,ngrp):
+                dtnorm.append(1.0); xscale.append(1.0)
+        dtn=PadArray(dtnorm,51)                      # pad for Fortran call
+        xsc=PadArray(xscale,51)
+        return dtn,xsc
+
+    def ReadNormFile(self, readRes,resnormWS,nsam):            # get norm & scale values
+        resnorm_root = resnormWS
+        # Obtain root of resnorm group name
+        if '_Intensity' in resnormWS:
+            resnorm_root = resnormWS[:-10]
+        if '_Stretch' in resnormWS:
+            resnorm_root = resnormWS[:-8]
+
+        if readRes:                   # use ResNorm file option=o_res
+            Xin = mtd[resnorm_root+'_Intensity'].readX(0)
+            nrm = len(Xin)                        # no. points from length of x array
+            if nrm == 0:
+                raise ValueError('ResNorm file has no Intensity points')
+            Xin = mtd[resnorm_root+'_Stretch'].readX(0)  # no. points from length of x array
+            if len(Xin) == 0:
+                raise ValueError('ResNorm file has no xscale points')
+            if nrm != nsam:                # check that no. groups are the same
+                raise ValueError('ResNorm groups (' +str(nrm) + ') not = Sample (' +str(nsam) +')')
+            else:
+                dtn,xsc = self.GetResNorm(resnorm_root,0)
+        else:
+            # do not use ResNorm file
+            dtn,xsc = self.GetResNorm(resnorm_root,nsam)
+        return dtn,xsc
+
+    #Reads in a width ASCII file
+    def ReadWidthFile(self, readWidth,widthFile,numSampleGroups):
+        widthY = []; widthE = []
+
+        if readWidth:
+
+            logger.information('Width file is ' + widthFile)
+
+            # read ascii based width file
+            try:
+                wfPath = FileFinder.getFullPath(widthFile)
+                handle = open(wfPath, 'r')
+                asc = []
+
+                for line in handle:
+                    line = line.rstrip()
+                    asc.append(line)
+                handle.close()
+
+            except Exception:
+                raise ValueError('Failed to read width file')
+
+            numLines = len(asc)
+
+            if numLines == 0:
+                raise ValueError('No groups in width file')
+
+            if numLines != numSampleGroups:                # check that no. groups are the same
+                raise ValueError('Width groups (' +str(numLines) + ') not = Sample (' +str(numSampleGroups) +')')
+        else:
+            # no file: just use constant values
+            widthY = np.zeros(numSampleGroups); widthE = np.zeros(numSampleGroups)
+
+        # pad for Fortran call
+        widthY = PadArray(widthY,51); widthE = PadArray(widthE,51)
+
+        return widthY, widthE
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(BayesQuasi)
