@@ -20,12 +20,14 @@ class BayesStretch(PythonAlgorithm):
     _e_min = None
     _e_max = None
     _sam_bins = None
-    _res_bins = 1
     _elastic = None
     _background = None
     _nbet = None
     _nsig = None
     _loop = None
+
+    _erange = None
+    _nbins = None
 
 
     def category(self):
@@ -70,6 +72,7 @@ class BayesStretch(PythonAlgorithm):
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceContour', '', direction=Direction.Output),
                              doc='The name of the contour output workspaces')
 
+
     def validateInputs(self):
         self._get_properties()
         issues = dict()
@@ -89,19 +92,6 @@ class BayesStretch(PythonAlgorithm):
         return issues
 
 
-    def _get_properties(self):
-        self._sam_name = self.getPropertyValue('SampleWorkspace')
-        self._sam_ws = self.getProperty('SampleWorkspace').value
-        self._res_name = self.getPropertyValue('ResolutionWorkspace')
-        self._e_min = self.getProperty('EMin').value
-        self._e_max = self.getProperty('EMax').value
-        self._sam_bins = self.getPropertyValue('SampleBins')
-        self._elastic = self.getProperty('Elastic').value
-        self._background = self.getPropertyValue('Background')
-        self._nbet = self.getProperty('NumberBeta').value
-        self._nsig = self.getProperty('NumberSigma').value
-        self._loop = self.getProperty('Loop').value
-
     #pylint: disable=too-many-locals,too-many-branches
     def PyExec(self):
         run_f2py_compatibility_test()
@@ -112,13 +102,9 @@ class BayesStretch(PythonAlgorithm):
         setup_prog = Progress(self, start=0.0, end=0.3, nreports = 5)
         self.log().information('BayesStretch input')
 
-        erange = [self._e_min, self._e_max]
-        nbins = [self._sam_bins, self._res_bins]
         setup_prog.report('Converting to binary for Fortran')
         #convert true/false to 1/0 for fortran
         o_el = 1 if self._elastic else 0
-        o_w1 = 0
-        o_res = 0
 
         #fortran code uses background choices defined using the following numbers
         setup_prog.report('Encoding input options')
@@ -129,7 +115,7 @@ class BayesStretch(PythonAlgorithm):
         elif self._background == 'Zero':
             o_bgd = 0
 
-        fitOp = [o_el, o_bgd, o_w1, o_res]
+        fitOp = [o_el, o_bgd, 0, 0]
         nbs = [self._nbet, self._nsig]
 
         setup_prog.report('Establishing save path')
@@ -140,9 +126,9 @@ class BayesStretch(PythonAlgorithm):
 
         array_len = 4096                           # length of array in Fortran
         setup_prog.report('Checking X Range')
-        CheckXrange(erange, 'Energy')
+        CheckXrange(self._erange, 'Energy')
 
-        nbin,nrbin = nbins[0], nbins[1]
+        nbin,nrbin = self._nbins[0], 1
 
         logger.information('Sample is %s' % self._sam_name)
         logger.information('Resolution is %s' % self._res_name)
@@ -163,7 +149,7 @@ class BayesStretch(PythonAlgorithm):
         prog = 'Stretch'
         logger.information('Version is Stretch')
         logger.information('Number of spectra = %s ' % nsam)
-        logger.information('Erange : %f to %f ' % (erange[0], erange[1]))
+        logger.information('Erange : %f to %f ' % (self._erange[0], self._erange[1]))
 
         setup_prog.report('Establishing output workspace name')
         fname = self._sam_name[:-4] + '_'+ prog
@@ -184,7 +170,7 @@ class BayesStretch(PythonAlgorithm):
         for m in range(nsam):
             logger.information('Group %i at angle %f' % (m, theta[m]))
             nsp = m + 1
-            nout, bnorm, Xdat, Xv, Yv, Ev = CalcErange(self._sam_name, m, erange, nbin)
+            nout, bnorm, Xdat, Xv, Yv, Ev = CalcErange(self._sam_name, m, self._erange, nbin)
             Ndat = nout[0]
             Imin = nout[1]
             Imax = nout[2]
@@ -251,23 +237,10 @@ class BayesStretch(PythonAlgorithm):
                 eBet = np.append(eBet,eBet0)
                 groupZ = groupZ +','+ zpWS
 
-	#create workspaces for sigma and beta
+        #create workspaces for sigma and beta
         workflow_prog.report('Creating OutputWorkspace')
-        CreateWorkspace(OutputWorkspace=fname + '_Sigma',
-                        DataX=xSig, DataY=ySig, DataE=eSig,
-                        Nspec=nsam, UnitX='',
-                        VerticalAxisUnit='MomentumTransfer',
-                        VerticalAxisValues=Qaxis)
-        unitx = mtd[fname + '_Sigma'].getAxis(0).setUnit("Label")
-        unitx.setLabel('sigma' , '')
-
-        CreateWorkspace(OutputWorkspace=fname + '_Beta',
-                        DataX=xBet, DataY=yBet, DataE=eBet,
-                        Nspec=nsam, UnitX='',
-                        VerticalAxisUnit='MomentumTransfer',
-                        VerticalAxisValues=Qaxis)
-        unitx = mtd[fname + '_Beta'].getAxis(0).setUnit("Label")
-        unitx.setLabel('beta' , '')
+        self._create_workspace(fname + '_Sigma', [xSig, ySig, eSig], nsam, Qaxis)
+        self._create_workspace(fname + '_Beta', [xBet, yBet, eBet], nsam, Qaxis)
 
         group = fname + '_Sigma,' + fname + '_Beta'
         fit_ws = fname + '_Fit'
@@ -283,17 +256,42 @@ class BayesStretch(PythonAlgorithm):
         CopyLogs(InputWorkspace=self._sam_name,
                  OutputWorkspace=fit_ws)
         log_prog.report('Adding Sample logs to Fit workspace')
-        self._add_sample_logs(fit_ws, erange, nbin)
+        self._add_sample_logs(fit_ws, self._erange, nbin)
         log_prog.report('Copying logs to Contour workspace')
         CopyLogs(InputWorkspace=self._sam_name,
                  OutputWorkspace=contour_ws)
         log_prog.report('Adding sample logs to Contour workspace')
-        self._add_sample_logs(contour_ws, erange, nbin)
+        self._add_sample_logs(contour_ws, self._erange, nbin)
         log_prog.report('Finialising log copying')
 
         self.setProperty('OutputWorkspaceFit', fit_ws)
         self.setProperty('OutputWorkspaceContour', contour_ws)
         log_prog.report('Setting workspace properties')
+
+#----------------------------- Helper functions -----------------------------
+
+    def _create_workspace(self, name, xye, num_spec, vert_axis):
+        """
+        Creates a workspace from FORTRAN data
+
+        @param name         :: Full name of outputworkspace
+        @param xye          :: List of axis data [x, y , e]
+        @param num_spec     :: Number of spectra
+        @param vert_axis    :: The values on the vertical axis
+        """
+
+        CreateWorkspace(OutputWorkspace=name,
+                        DataX=xye[0], DataY=xye[1], DataE=xye[2],
+                        Nspec=num_spec, UnitX='',
+                        VerticalAxisUnit='MomentumTransfer',
+                        VerticalAxisValues=vert_axis)
+
+        unitx = mtd[name].getAxis(0).setUnit("Label")
+        if name[:4] == 'Beta':
+            unitx.setLabel('beta' , '')
+        else:
+            unitx.setLabel('sigma', '')
+
 
     def _add_sample_logs(self, workspace, erange, sample_binning):
         """
@@ -313,6 +311,23 @@ class BayesStretch(PythonAlgorithm):
                      LogType="Number", LogText=str(energy_max))
         AddSampleLog(Workspace=workspace, LogName="sample_binning",
                      LogType="Number", LogText=str(sample_binning))
+
+
+    def _get_properties(self):
+        self._sam_name = self.getPropertyValue('SampleWorkspace')
+        self._sam_ws = self.getProperty('SampleWorkspace').value
+        self._res_name = self.getPropertyValue('ResolutionWorkspace')
+        self._e_min = self.getProperty('EMin').value
+        self._e_max = self.getProperty('EMax').value
+        self._sam_bins = self.getPropertyValue('SampleBins')
+        self._elastic = self.getProperty('Elastic').value
+        self._background = self.getPropertyValue('Background')
+        self._nbet = self.getProperty('NumberBeta').value
+        self._nsig = self.getProperty('NumberSigma').value
+        self._loop = self.getProperty('Loop').value
+
+        self._erange = [self._e_min, self._e_max]
+        self._nbins = [self._sam_bins, 1]
 
 
 AlgorithmFactory.subscribe(BayesStretch)         # Register algorithm with Mantid
