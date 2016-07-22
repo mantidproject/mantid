@@ -145,8 +145,7 @@ class BayesQuasi(PythonAlgorithm):
                               + " what platforms are currently supported"
             raise RuntimeError(unsupported_msg)
 
-        from IndirectBayes import (CalcErange, GetXYE, C2Fw,
-                                   QuasiPlot)
+        from IndirectBayes import (CalcErange, GetXYE)
         from IndirectCommon import (CheckXrange, CheckAnalysers, getEfixed, GetThetaQ,
                                     CheckHistZero, CheckHistSame, IndentifyDataBoundaries)
         setup_prog = Progress(self, start=0.0, end=0.3, nreports = 5)
@@ -367,14 +366,14 @@ class BayesQuasi(PythonAlgorithm):
             yProb = np.append(yProb,yPr2)
             CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,\
                 Nspec=3, UnitX='MomentumTransfer')
-            outWS = C2Fw(self._samWS[:-4],fname)
+            outWS = self.C2Fw(self._samWS[:-4],fname)
             if self._plot != 'None':
-                QuasiPlot(fname,self._plot,res_plot,self._loop)
+                self.QuasiPlot(fname,self._plot,res_plot,self._loop)
         if self._program == 'QSe':
             comp_prog.report('Runnning C2Se')
             outWS = self.C2Se(fname)
             if self._plot != 'None':
-                QuasiPlot(fname,self._plot,res_plot,self._loop)
+                self.QuasiPlot(fname,self._plot,res_plot,self._loop)
 
         log_prog = Progress(self, start=0.8, end =1.0, nreports=8)
         #Add some sample logs to the output workspaces
@@ -553,39 +552,205 @@ class BayesQuasi(PythonAlgorithm):
     #Reads in a width ASCII file
     def ReadWidthFile(self, readWidth,widthFile,numSampleGroups):
         widthY = []; widthE = []
-
         if readWidth:
-
             logger.information('Width file is ' + widthFile)
-
             # read ascii based width file
             try:
                 wfPath = FileFinder.getFullPath(widthFile)
                 handle = open(wfPath, 'r')
                 asc = []
-
                 for line in handle:
                     line = line.rstrip()
                     asc.append(line)
                 handle.close()
-
             except Exception:
                 raise ValueError('Failed to read width file')
-
             numLines = len(asc)
-
             if numLines == 0:
                 raise ValueError('No groups in width file')
-
             if numLines != numSampleGroups:                # check that no. groups are the same
                 raise ValueError('Width groups (' +str(numLines) + ') not = Sample (' +str(numSampleGroups) +')')
         else:
             # no file: just use constant values
             widthY = np.zeros(numSampleGroups); widthE = np.zeros(numSampleGroups)
-
         # pad for Fortran call
         widthY = PadArray(widthY,51); widthE = PadArray(widthE,51)
 
         return widthY, widthE
+        
+    def QuasiPlot(self, ws_stem,plot_type,res_plot,sequential):
+        if plot_type:
+            if sequential:
+                ws_name = ws_stem + '_Result'
+            if plot_type == 'Prob' or plot_type == 'All':
+                prob_ws = ws_stem+'_Prob'
+                if prob_ws in mtd.getObjectNames():
+                    MTD_PLOT.plotSpectrum(prob_ws,[1,2],False)
+
+            self.QuasiPlotParameters(ws_name, plot_type)
+
+        if plot_type == 'Fit' or plot_type == 'All':
+            fWS = ws_stem+'_Workspace_0'
+            MTD_PLOT.plotSpectrum(fWS,res_plot,False)
+
+
+    def QuasiPlotParameters(self, ws_name, plot_type):
+        """
+        Plot a parameter if the user requested it and it exists
+        in the workspace
+
+        @param ws_name :: name of the workspace to plot from. This function expects it has a TextAxis
+        @param plot_type :: the name of the parameter to plot (or All if all parameters should
+                            be plotted)
+        """
+        num_spectra = mtd[ws_name].getNumberHistograms()
+        param_names = ['Amplitude', 'FWHM', 'Beta']
+
+        for param_name in param_names:
+            if plot_type == param_name or plot_type == 'All':
+                spectra_indicies = [i for i in range(num_spectra) if param_name in mtd[ws_name].getAxis(1).label(i)]
+
+                if len(spectra_indicies) > 0:
+                    plotSpectra(ws_name, param_name, indicies=spectra_indicies[:3])
+        
+    def C2Fw(self, prog,sname):
+        output_workspace = sname+'_Result'
+        num_spectra = 0
+        axis_names = []
+        x, y, e = [], [], []
+        for nl in range(1,4):
+            num_params = nl*3+1
+            num_spectra += num_params
+
+            amplitude_data, width_data = [], []
+            amplitude_error, width_error  = [], []
+
+            #read data from file output by fortran code
+            file_name = sname + '.ql' +str(nl)
+            x_data, peak_data, peak_error = self.read_ql_file(file_name, nl)
+            x_data = np.asarray(x_data)
+
+            amplitude_data, width_data, height_data = peak_data
+            amplitude_error, width_error, height_error = peak_error
+
+            #transpose y and e data into workspace rows
+            amplitude_data, width_data = np.asarray(amplitude_data).T, np.asarray(width_data).T
+            amplitude_error, width_error = np.asarray(amplitude_error).T, np.asarray(width_error).T
+            height_data, height_error = np.asarray(height_data), np.asarray(height_error)
+
+            #calculate EISF and EISF error
+            total = height_data+amplitude_data
+            EISF_data = height_data / total
+            total_error = height_error**2 + amplitude_error**2
+            EISF_error = EISF_data * np.sqrt((height_error**2/height_data**2) + (total_error/total**2))
+
+            #interlace amplitudes and widths of the peaks
+            y.append(np.asarray(height_data))
+            for amp, width, EISF in zip(amplitude_data, width_data, EISF_data):
+                y.append(amp); y.append(width); y.append(EISF)
+
+            #iterlace amplitude and width errors of the peaks
+            e.append(np.asarray(height_error))
+            for amp, width, EISF in zip(amplitude_error, width_error, EISF_error):
+                e.append(amp); e.append(width); e.append(EISF)
+
+            #create x data and axis names for each function
+            axis_names.append('f'+str(nl)+'.f0.'+'Height')
+            x.append(x_data)
+            for j in range(1,nl+1):
+                axis_names.append('f'+str(nl)+'.f'+str(j)+'.Amplitude')
+                x.append(x_data)
+                axis_names.append('f'+str(nl)+'.f'+str(j)+'.FWHM')
+                x.append(x_data)
+                axis_names.append('f'+str(nl)+'.f'+str(j)+'.EISF')
+                x.append(x_data)
+
+        x = np.asarray(x).flatten(); y = np.asarray(y).flatten(); e = np.asarray(e).flatten()
+
+        CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,\
+            UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=axis_names)
+
+        return output_workspace    
+        
+    def yield_floats(self, block):
+        #yield a list of floats from a list of lines of text
+        #encapsulates the iteration over a block of lines
+        for line in block:
+            yield ExtractFloat(line)
+
+
+    def read_ql_file(self, file_name, nl):
+        #offet to ignore header
+        header_offset = 8
+        block_size = 4+nl*3
+
+        asc = self.readASCIIFile(file_name)
+        #extract number of blocks from the file header
+        num_blocks = int(ExtractFloat(asc[3])[0])
+
+        q_data = []
+        amp_data, FWHM_data, height_data = [], [], []
+        amp_error, FWHM_error, height_error = [], [], []
+
+        #iterate over each block of fit parameters in the file
+        #each block corresponds to a single column in the final workspace
+        for block_num in xrange(num_blocks):
+            lower_index = header_offset+(block_size*block_num)
+            upper_index = lower_index+block_size
+
+            #create iterator for each line in the block
+            line_pointer = self.yield_floats(asc[lower_index:upper_index])
+
+            #Q,AMAX,HWHM,BSCL,GSCL
+            line = line_pointer.next()
+            Q, AMAX, HWHM, _, _ = line
+            q_data.append(Q)
+
+            #A0,A1,A2,A4
+            line = line_pointer.next()
+            block_height = AMAX*line[0]
+
+            #parse peak data from block
+            block_FWHM = []
+            block_amplitude = []
+            for _ in range(nl):
+                #Amplitude,FWHM for each peak
+                line = line_pointer.next()
+                amp = AMAX*line[0]
+                FWHM = 2.*HWHM*line[1]
+                block_amplitude.append(amp)
+                block_FWHM.append(FWHM)
+
+            #next parse error data from block
+            #SIG0
+            line = line_pointer.next()
+            block_height_e = line[0]
+
+            block_FWHM_e = []
+            block_amplitude_e = []
+            for _ in range(nl):
+                #Amplitude error,FWHM error for each peak
+                #SIGIK
+                line = line_pointer.next()
+                amp = AMAX*math.sqrt(math.fabs(line[0])+1.0e-20)
+                block_amplitude_e.append(amp)
+
+                #SIGFK
+                line = line_pointer.next()
+                FWHM = 2.0*HWHM*math.sqrt(math.fabs(line[0])+1.0e-20)
+                block_FWHM_e.append(FWHM)
+
+            #append data from block
+            amp_data.append(block_amplitude)
+            FWHM_data.append(block_FWHM)
+            height_data.append(block_height)
+
+            #append error values from block
+            amp_error.append(block_amplitude_e)
+            FWHM_error.append(block_FWHM_e)
+            height_error.append(block_height_e)
+
+        return q_data, (amp_data, FWHM_data, height_data), (amp_error, FWHM_error, height_error)    
+        
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(BayesQuasi)
