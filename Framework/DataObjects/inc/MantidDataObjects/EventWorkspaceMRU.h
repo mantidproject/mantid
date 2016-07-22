@@ -5,8 +5,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/MRUList.h"
-#include "MantidHistogramData/Counts.h"
-#include "MantidHistogramData/CountStandardDeviations.h"
+#include "MantidHistogramData/HistogramY.h"
+#include "MantidHistogramData/HistogramE.h"
 #include <vector>
 #include <mutex>
 
@@ -71,13 +71,14 @@ public:
 */
 class DLLExport EventWorkspaceMRU {
 public:
-  using YWithMarker = TypeWithMarker<HistogramData::Counts>;
-  using EWithMarker = TypeWithMarker<HistogramData::CountStandardDeviations>;
+  using YType = Kernel::cow_ptr<HistogramData::HistogramY>;
+  using EType = Kernel::cow_ptr<HistogramData::HistogramE>;
+  using YWithMarker = TypeWithMarker<YType>;
+  using EWithMarker = TypeWithMarker<EType>;
   // Typedef for a Most-Recently-Used list of Data objects.
   using mru_listY = Kernel::MRUList<YWithMarker>;
   using mru_listE = Kernel::MRUList<EWithMarker>;
 
-  EventWorkspaceMRU();
   ~EventWorkspaceMRU();
 
   void ensureEnoughBuffersY(size_t thread_num) const;
@@ -85,12 +86,10 @@ public:
 
   void clear();
 
-  HistogramData::Counts findY(size_t thread_num, size_t index);
-  HistogramData::CountStandardDeviations findE(size_t thread_num, size_t index);
-  void insertY(size_t thread_num, HistogramData::Counts data,
-               const size_t index);
-  void insertE(size_t thread_num, HistogramData::CountStandardDeviations data,
-               const size_t index);
+  YType findY(size_t thread_num, size_t index);
+  EType findE(size_t thread_num, size_t index);
+  void insertY(size_t thread_num, YType data, const size_t index);
+  void insertE(size_t thread_num, EType data, const size_t index);
 
   void deleteIndex(size_t index);
 

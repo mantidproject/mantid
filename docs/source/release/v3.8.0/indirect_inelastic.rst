@@ -22,6 +22,15 @@ Stretch
 
 - Previously the Quest script was used to drive the Bayes stretch interface. This functionality has been ported to the algorithm :ref:`BayesStretch <algm-BayesStretch>`.
 
+
+Data Reduction
+##############
+
+ISIS Calibration
+~~~~~~~~~~~~~~~~
+- Add load log option to ISIS calibration interface
+
+
 Data Analysis
 #############
 
@@ -43,6 +52,7 @@ Improvements
 - Algorithm :ref:`BASISReduction311 <algm-BASISReduction311>` has been included in algorithm :ref:`BASISReduction <algm-BASISReduction>`.
 - Range bars colours in the *ISIS Calibration* interface have been updated to match the convention in the fit wizard.
 - Vesuvio sigma_theta value updated for single and double differencing in both forward and back scattering. The new value is 0.016 for all.
+- The Elwin interface now uses the resolution of the instrument to create the range bars when possible
 
 
 Bugfixes

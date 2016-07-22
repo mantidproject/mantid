@@ -100,12 +100,23 @@ private:
 
   /// Convert the workspace units according to a simple output = a * (input^b)
   /// relationship
-  void convertQuickly(API::MatrixWorkspace_sptr outputWS, const double &factor,
-                      const double &power);
+  API::MatrixWorkspace_sptr
+  convertQuickly(API::MatrixWorkspace_const_sptr inputWS, const double &factor,
+                 const double &power);
+
+  /// Internal function to gather detector specific L2, theta and efixed values
+  bool getDetectorValues(
+      const Kernel::Unit &outputUnit, const Geometry::IComponent &source,
+      const Geometry::IComponent &sample, double l1, int emode,
+      const API::MatrixWorkspace &ws,
+      boost::function<double(const Geometry::IDetector &)> thetaFunction,
+      int64_t wsIndex, double &efixed, double &l2, double &twoTheta);
+
   /// Convert the workspace units using TOF as an intermediate step in the
   /// conversion
-  void convertViaTOF(Kernel::Unit_const_sptr fromUnit,
-                     API::MatrixWorkspace_sptr outputWS);
+  API::MatrixWorkspace_sptr
+  convertViaTOF(Kernel::Unit_const_sptr fromUnit,
+                API::MatrixWorkspace_const_sptr inputWS);
 
   // Calls Rebin as a Child Algorithm to align the bins of the output workspace
   API::MatrixWorkspace_sptr

@@ -4,14 +4,6 @@
 namespace Mantid {
 namespace DataObjects {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-EventWorkspaceMRU::EventWorkspaceMRU() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
 EventWorkspaceMRU::~EventWorkspaceMRU() {
   // Make sure you free up the memory in the MRUs
   for (auto &data : m_bufferedDataY) {
@@ -82,13 +74,13 @@ void EventWorkspaceMRU::clear() {
  * @param index :: index of the data to return
  * @return pointer to the TypeWithMarker that has the data; NULL if not found.
  */
-HistogramData::Counts EventWorkspaceMRU::findY(size_t thread_num,
-                                               size_t index) {
+Kernel::cow_ptr<HistogramData::HistogramY>
+EventWorkspaceMRU::findY(size_t thread_num, size_t index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
   auto result = m_bufferedDataY[thread_num]->find(index);
   if (result)
     return result->m_data;
-  return HistogramData::Counts();
+  return YType(nullptr);
 }
 
 /** Find a Y histogram in the MRU
@@ -97,13 +89,13 @@ HistogramData::Counts EventWorkspaceMRU::findY(size_t thread_num,
  * @param index :: index of the data to return
  * @return pointer to the TypeWithMarker that has the data; NULL if not found.
  */
-HistogramData::CountStandardDeviations
+Kernel::cow_ptr<HistogramData::HistogramE>
 EventWorkspaceMRU::findE(size_t thread_num, size_t index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
   auto result = m_bufferedDataE[thread_num]->find(index);
   if (result)
     return result->m_data;
-  return HistogramData::CountStandardDeviations();
+  return EType(nullptr);
 }
 
 /** Insert a new histogram into the MRU
@@ -112,10 +104,10 @@ EventWorkspaceMRU::findE(size_t thread_num, size_t index) {
  * @param data :: the new data
  * @param index :: index of the data to insert
  */
-void EventWorkspaceMRU::insertY(size_t thread_num, HistogramData::Counts data,
+void EventWorkspaceMRU::insertY(size_t thread_num, YType data,
                                 const size_t index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
-  auto yWithMarker = new TypeWithMarker<HistogramData::Counts>(index);
+  auto yWithMarker = new TypeWithMarker<YType>(index);
   yWithMarker->m_data = std::move(data);
   auto oldData = m_bufferedDataY[thread_num]->insert(yWithMarker);
   // And clear up the memory of the old one, if it is dropping out.
@@ -128,12 +120,10 @@ void EventWorkspaceMRU::insertY(size_t thread_num, HistogramData::Counts data,
  * @param data :: the new data
  * @param index :: index of the data to insert
  */
-void EventWorkspaceMRU::insertE(size_t thread_num,
-                                HistogramData::CountStandardDeviations data,
+void EventWorkspaceMRU::insertE(size_t thread_num, EType data,
                                 const size_t index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
-  auto eWithMarker =
-      new TypeWithMarker<HistogramData::CountStandardDeviations>(index);
+  auto eWithMarker = new TypeWithMarker<EType>(index);
   eWithMarker->m_data = std::move(data);
   auto oldData = m_bufferedDataE[thread_num]->insert(eWithMarker);
   // And clear up the memory of the old one, if it is dropping out.
