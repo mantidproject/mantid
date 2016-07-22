@@ -1388,5 +1388,10 @@ void MDHistoWorkspace::setDisplayNormalization(
   m_displayNormalization = preferredNormalization;
 }
 
+/**
+Return if the workspace is a histogram
+*/
+bool MDHistoWorkspace::isHistogramData() const { return true; }
+
 } // namespace Mantid
 } // namespace DataObjects

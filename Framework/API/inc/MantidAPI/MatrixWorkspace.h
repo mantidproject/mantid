@@ -446,7 +446,7 @@ public:
 
   /// Returns true if the workspace contains data in histogram form (as opposed
   /// to point-like)
-  virtual bool isHistogramData() const;
+  virtual bool isHistogramData() const override;
 
   /// Returns true if the workspace contains has common X bins
   virtual bool isCommonBins() const;
