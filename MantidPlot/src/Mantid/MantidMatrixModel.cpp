@@ -262,7 +262,7 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const {
     } else if (checkMonitorCache(index.row())) {
       return QString("This is a monitor spectrum");
     } else {
-      return QVariant();
+      return QString();
     }
   }
   default:
