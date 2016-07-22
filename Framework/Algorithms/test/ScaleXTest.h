@@ -300,6 +300,7 @@ private:
   void checkTimeOfFlightEvents(const Mantid::API::IEventList &inEvents,
                                const Mantid::API::IEventList &outEvents,
                                const double factor) {
+
     TS_ASSERT_EQUALS(outEvents.getNumberEvents(), inEvents.getNumberEvents());
 
     auto inTOFs = inEvents.getTofs();
@@ -349,7 +350,7 @@ private:
 
   void checkScaleFactorAppliedAtHistIndex(const Histogram &input,
                                           const Histogram &output,
-                                          const size_t blocksize,
+                                          const size_t xsize,
                                           const double factor) {
 
     // get all histograms of input and output
@@ -362,19 +363,19 @@ private:
     auto &inE = input.e();
 
     if (factor > 0) { // taken out of the tight loop
-      for (size_t j = 0; j < blocksize; ++j) {
+      for (size_t j = 0; j < xsize; ++j) {
         TS_ASSERT_DELTA(outX[j], factor * inX[j], 1e-12);
         TS_ASSERT_EQUALS(outY[j], inY[j]);
         TS_ASSERT_EQUALS(outE[j], inE[j]);
       }
     } else { // for negative factor
-      for (size_t j = 0; j < blocksize; ++j) {
+      for (size_t j = 0; j < xsize; ++j) {
         // ScaleX reverses the histogram if the factor is negative
         // X vector has length xsize+1
-        TS_ASSERT_DELTA(outX[j], factor * inX[blocksize - j], 1e-12);
+        TS_ASSERT_DELTA(outX[j], factor * inX[xsize - j], 1e-12);
         // Y and E have length xsize
-        TS_ASSERT_EQUALS(outY[j], inY[blocksize - 1 - j]);
-        TS_ASSERT_EQUALS(outE[j], inE[blocksize - 1 - j]);
+        TS_ASSERT_EQUALS(outY[j], inY[xsize - 1 - j]);
+        TS_ASSERT_EQUALS(outE[j], inE[xsize - 1 - j]);
       }
     }
   }
