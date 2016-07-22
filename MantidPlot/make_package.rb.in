@@ -202,11 +202,7 @@ def find_linking_directories(patterns, lib_name, lib_path)
     linking_dir = []
     Dir[patterns[0]].each do |library|
         dependencies = `otool -L #{library}`
-	puts dependencies
         dependencies.split("\n").each do |dependency|
-	    puts"================"
-	    puts dependency
-	    puts lib_name
             if dependency.match(lib_name)
                 if dependency.match(lib_path)
                     linking_dir << lib_path
@@ -289,11 +285,6 @@ h5py_patterns.each do |pattern|
           parts = filename_no_dir.strip.split(".")
           loader_filename = parts[0] + "." + parts[2]
           `install_name_tool -change #{h5py_linking_dir[0]}/#{filename_no_dir} @loader_path/../#{loader_filename} Contents/MacOS/h5py/#{basename}`
-          puts "----"
-          puts h5py_linking_dir[0]
-          puts filename_no_dir
-          puts basename
-          puts loader_filename
        end
     end
   end
