@@ -1128,7 +1128,7 @@ void EnggDiffFittingPresenter::setBankItems() {
 }
 
 void EnggDiffFittingPresenter::setRunNoItems(
-    std::vector<std::string> runNumVector, bool multiRun) {
+    const std::vector<std::string> &runNumVector, bool multiRun) {
   try {
     if (!runNumVector.empty()) {
 

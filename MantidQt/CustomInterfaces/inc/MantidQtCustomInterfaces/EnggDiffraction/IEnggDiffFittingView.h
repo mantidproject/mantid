@@ -159,6 +159,39 @@ public:
   virtual bool peakPickerEnabled() const = 0;
 
   /**
+  * gets the previously used directory path by the user
+  *
+  * @return directory of previously used directory by user,
+  * may return empty if no previous history
+  */
+  virtual std::string getPreviousDir() const = 0;
+
+  /**
+  * sets the previously used directory path
+  *
+  * @param path is set according to the file selected by user
+  */
+  virtual void setPreviousDir(const std::string &path) = 0;
+
+  /**
+  * gets the path as string which required when browsing the file
+  *
+  * @param path set according to the previously file selected
+  *
+  * @return string of the browsed file path
+  */
+  virtual std::string getOpenFile(const std::string &prevPath) = 0;
+
+  /**
+  * gets the path as string which is required when saving the file
+  *
+  * @param path set according to the previously selected file
+  *
+  * @return string of the saved file
+  */
+  virtual std::string getSaveFile(const std::string &prevPath) = 0;
+
+  /**
    * @return idx of current selected row of list widget
    */
   virtual int getFittingListWidgetCurrentRow() const = 0;

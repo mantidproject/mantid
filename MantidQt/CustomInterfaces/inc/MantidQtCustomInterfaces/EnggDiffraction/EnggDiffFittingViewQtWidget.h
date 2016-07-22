@@ -142,11 +142,11 @@ public:
 
   std::string getPreviousDir() const override;
 
-  void setPreviousDir(std::string path) override;
+  void setPreviousDir(const std::string &path) override;
 
-  std::string getOpenFile(std::string prevPath) override;
+  std::string getOpenFile(const std::string &prevPath) override;
 
-  std::string getSaveFile(std::string prevPath) override;
+  std::string getSaveFile(const std::string &prevPath) override;
 
   void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data,
                          std::vector<QwtPlotCurve *> &dataVector, bool focused);

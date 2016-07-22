@@ -394,12 +394,12 @@ std::string EnggDiffFittingViewQtWidget::getPreviousDir() const {
   return prevPath.toStdString();
 }
 
-void EnggDiffFittingViewQtWidget::setPreviousDir(std::string path) {
+void EnggDiffFittingViewQtWidget::setPreviousDir(const std::string &path) {
   QString qPath = QString::fromStdString(path);
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(qPath);
 }
 
-std::string EnggDiffFittingViewQtWidget::getOpenFile(std::string prevPath) {
+std::string EnggDiffFittingViewQtWidget::getOpenFile(const std::string &prevPath) {
 
   QString path(QFileDialog::getOpenFileName(
       this, tr("Open Peaks To Fit"), QString::fromStdString(prevPath),
@@ -408,7 +408,7 @@ std::string EnggDiffFittingViewQtWidget::getOpenFile(std::string prevPath) {
   return path.toStdString();
 }
 
-std::string EnggDiffFittingViewQtWidget::getSaveFile(std::string prevPath) {
+std::string EnggDiffFittingViewQtWidget::getSaveFile(const std::string &prevPath) {
 
 	QString path(QFileDialog::getSaveFileName(
 		this, tr("Save Expected Peaks List"), QString::fromStdString(prevPath),
