@@ -248,14 +248,14 @@ class BayesStretch(PythonAlgorithm):
         @return fit_ops [elastic, background, width, resNorm]
         """
 
-        if self._background == 'Sloping':
+        if background == 'Sloping':
             o_bgd = 2
-        elif self._background == 'Flat':
+        elif background == 'Flat':
             o_bgd = 1
-        elif self._background == 'Zero':
+        elif background == 'Zero':
             o_bgd = 0
 
-        fitOp = [1 if self._elastic else 0, o_bgd, 0, 0]
+        fitOp = [1 if elastic else 0, o_bgd, 0, 0]
         return fitOp
 
     def _establish_save_path(self):
@@ -269,6 +269,7 @@ class BayesStretch(PythonAlgorithm):
             logger.information('Defaulting to current working Directory: ' + workdir)
         return workdir
 
+    #pylint: disable=too-many-arguements
     def _create_workspace(self, name, xye, num_spec, vert_axis, is_zp_ws = False):
         """
         Creates a workspace from FORTRAN data
