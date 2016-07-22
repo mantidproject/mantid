@@ -43,10 +43,27 @@ public:
   ~QtReflSettingsTabView() override;
   /// Returns the presenter managing this view
   IReflSettingsTabPresenter *const getPresenter() const;
-  /// Returns selected analysis mode
-  std::string getAnalysisMode() const override;
-  /// Returns selected resolution (dQ/Q)
-  std::string getResolution() const override;
+  /// Returns global options for 'Plus' algorithm
+  std::string getPlusOptions() const;
+  /// Returns global options for 'CreateTransmissionWorkspaceAuto'
+  std::string getTransmissionOptions() const;
+  /// Returns global options for 'ReflectometryReductionOneAuto'
+  std::string getReductionOptions() const;
+  /// Returns global options for 'Stitch1DMany'
+  std::string getStitchOptions() const;
+
+  /// Creates hints for 'Plus'
+  void
+  createPlusHints(const std::map<std::string, std::string> &hints) override;
+  /// Creates hints for 'CreateTransmissionWorkspaceAuto'
+  void createTransmissionHints(
+      const std::map<std::string, std::string> &hints) override;
+  /// Creates hints for 'ReflectometryReductionOneAuto'
+  void createReductionHints(
+      const std::map<std::string, std::string> &hints) override;
+  /// Creates hints for 'Stitch1DMany'
+  void
+  createStitchHints(const std::map<std::string, std::string> &hints) override;
 
 private:
   /// Initialise the interface

@@ -1,6 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_IREFLSETTINGSTABVIEW_H
 #define MANTID_CUSTOMINTERFACES_IREFLSETTINGSTABVIEW_H
 
+#include <map>
+
 namespace MantidQt {
 
 namespace CustomInterfaces {
@@ -44,13 +46,21 @@ public:
   /// Returns the presenter managing this view
   virtual IReflSettingsTabPresenter *const getPresenter() const = 0;
 
+  /// Pre-processing
+  virtual std::string getPlusOptions() const = 0;
+  virtual std::string getTransmissionOptions() const = 0;
+  virtual void
+  createPlusHints(const std::map<std::string, std::string> &hints) = 0;
+  virtual void
+  createTransmissionHints(const std::map<std::string, std::string> &hints) = 0;
   /// Processing
-  /// Returns selected analysis mode
-  virtual std::string getAnalysisMode() const = 0;
-
+  virtual std::string getReductionOptions() const = 0;
+  virtual void
+  createReductionHints(const std::map<std::string, std::string> &hints) = 0;
   /// Post-processing
-  /// Returns selected resolution (dQ/Q)
-  virtual std::string getResolution() const = 0;
+  virtual std::string getStitchOptions() const = 0;
+  virtual void
+  createStitchHints(const std::map<std::string, std::string> &hints) = 0;
 };
 }
 }

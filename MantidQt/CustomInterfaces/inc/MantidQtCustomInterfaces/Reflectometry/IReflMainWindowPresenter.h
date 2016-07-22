@@ -38,12 +38,13 @@ class IReflMainWindowPresenter {
 public:
   /// Destructor
   virtual ~IReflMainWindowPresenter(){};
-  /// Returns global pre-processing options
-  virtual std::map<std::string, std::string> getPreprocessingOptions() const = 0;
-  /// Returns global processing options
-  virtual std::string getProcessingOptions() const = 0;
-  /// Returns global post-processing options
-  virtual std::string getPostprocessingOptions() const = 0;
+  /// Pre-processing
+  virtual std::string getPlusOptions() const = 0;
+  virtual std::string getTransmissionOptions() const = 0;
+  /// Processing
+  virtual std::string getReductionOptions() const = 0;
+  /// Post-processing
+  virtual std::string getStitchOptions() const = 0;
   /// Dialog/Prompt methods
   virtual std::string askUserString(const std::string &prompt,
                                     const std::string &title,

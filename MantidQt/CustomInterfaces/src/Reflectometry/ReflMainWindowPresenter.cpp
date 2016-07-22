@@ -26,40 +26,50 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
 */
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
 
-/** Returns global pre-processing options
-* @return :: Global pre-processing options
+/** Returns global options for 'Plus' algorithm
+* @return :: Global options for 'Plus' algorithm
 */
-std::map<std::string, std::string>
-ReflMainWindowPresenter::getPreprocessingOptions() const {
+std::string ReflMainWindowPresenter::getPlusOptions() const {
 
-  // Empty map at present
-  // Options to 'CreateTransmissionWorkspaceAuto' are likely to be added
-  // in the future
-  return std::map<std::string, std::string>();
+  if (m_settingsPresenter == nullptr)
+    throw std::runtime_error("Could not read settings");
+
+  return m_settingsPresenter->getPlusOptions();
+}
+
+/** Returns global options for 'CreateTransmissionWorkspaceAuto'
+* @return :: Global options for 'CreateTransmissionWorkspaceAuto'
+*/
+std::string ReflMainWindowPresenter::getTransmissionOptions() const {
+
+  if (m_settingsPresenter == nullptr)
+    throw std::runtime_error("Could not read settings");
+
+  return m_settingsPresenter->getTransmissionOptions();
 }
 
 /** Returns global processing options
 * @return :: Global processing options
 */
-std::string ReflMainWindowPresenter::getProcessingOptions() const {
+std::string ReflMainWindowPresenter::getReductionOptions() const {
 
-	if (m_settingsPresenter == nullptr)
-		throw std::runtime_error("Could not read settings");
+  if (m_settingsPresenter == nullptr)
+    throw std::runtime_error("Could not read settings");
 
   // Request global processing options to 'Settings' presenter
-  return m_settingsPresenter->getProcessingOptions();
+  return m_settingsPresenter->getReductionOptions();
 }
 
 /** Returns global post-processing options
 * @return :: Global post-processing options
 */
-std::string ReflMainWindowPresenter::getPostprocessingOptions() const {
+std::string ReflMainWindowPresenter::getStitchOptions() const {
 
-	if (m_settingsPresenter == nullptr)
-		throw std::runtime_error("Could not read settings");
+  if (m_settingsPresenter == nullptr)
+    throw std::runtime_error("Could not read settings");
 
   // Request global post-processing options to 'Settings' presenter
-  return m_settingsPresenter->getPostprocessingOptions();
+  return m_settingsPresenter->getStitchOptions();
 }
 
 /**

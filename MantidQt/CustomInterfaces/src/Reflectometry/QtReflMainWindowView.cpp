@@ -87,9 +87,9 @@ Show an information dialog
 @param title : The text for the title bar of the dialog
 */
 void QtReflMainWindowView::giveUserInfo(std::string prompt, std::string title) {
-	QMessageBox::information(this, QString(title.c_str()),
-		QString(prompt.c_str()), QMessageBox::Ok,
-		QMessageBox::Ok);
+  QMessageBox::information(this, QString(title.c_str()),
+                           QString(prompt.c_str()), QMessageBox::Ok,
+                           QMessageBox::Ok);
 }
 
 /**

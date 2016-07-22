@@ -45,14 +45,21 @@ public:
   /// Accept a main presenter
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
 
-  /// Get global pre-processing options
-  std::map<std::string, std::string> getPreprocessingOptions() const override;
-  /// Get global processing options
-  std::string getProcessingOptions() const override;
-  /// Get global post-processing options
-  std::string getPostprocessingOptions() const override;
+  /// Returns global options for 'Plus' algorithm
+  std::string getPlusOptions() const;
+  /// Returns global options for 'CreateTransmissionWorkspaceAuto'
+  std::string getTransmissionOptions() const;
+  /// Returns global options for 'ReflectometryReductionOneAuto'
+  std::string getReductionOptions() const;
+  /// Returns global options for 'Stitch1DMany'
+  std::string getStitchOptions() const;
 
-protected:
+private:
+  void createPlusHints();
+  void createTransmissionHints();
+  void createReductionHints();
+  void createStitchHints();
+
   /// The view we are managing
   IReflSettingsTabView *m_view;
   /// The main presenter

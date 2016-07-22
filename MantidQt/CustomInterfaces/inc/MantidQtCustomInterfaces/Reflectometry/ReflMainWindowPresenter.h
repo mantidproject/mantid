@@ -44,12 +44,14 @@ public:
                           IReflSettingsTabPresenter *settingsPresenter);
   /// Destructor
   ~ReflMainWindowPresenter() override;
-  /// Returns global pre-processing options
-  std::map<std::string, std::string> getPreprocessingOptions() const override;
-  /// Returns global processing options
-  std::string getProcessingOptions() const override;
-  /// Returns global post-processing options
-  std::string getPostprocessingOptions() const override;
+  /// Returns global options for 'Plus' algorithm
+  std::string getPlusOptions() const;
+  /// Returns global options for 'CreateTransmissionWorkspaceAuto'
+  std::string getTransmissionOptions() const;
+  /// Returns global options for 'ReflectometryReductionOneAuto'
+  std::string getReductionOptions() const;
+  /// Returns global options for 'Stitch1DMany'
+  std::string getStitchOptions() const;
   /// Dialog/Prompt methods
   std::string askUserString(const std::string &prompt, const std::string &title,
                             const std::string &defaultValue) override;

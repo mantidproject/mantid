@@ -37,13 +37,13 @@ public:
   virtual ~IReflSettingsTabPresenter(){};
   /// Accept a main presenter
   virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
-  /// Get global pre-processing options
-  virtual std::map<std::string, std::string>
-  getPreprocessingOptions() const = 0;
-  /// Get global processing options
-  virtual std::string getProcessingOptions() const = 0;
-  /// Get global post-processing options
-  virtual std::string getPostprocessingOptions() const = 0;
+  /// Pre-processing
+  virtual std::string getPlusOptions() const = 0;
+  virtual std::string getTransmissionOptions() const = 0;
+  /// Processing
+  virtual std::string getReductionOptions() const = 0;
+  /// Post-processing
+  virtual std::string getStitchOptions() const = 0;
 };
 }
 }

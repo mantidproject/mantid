@@ -334,7 +334,13 @@ void ReflRunsTabPresenter::notify(DataProcessorMainPresenter::Flag flag) {
 */
 std::map<std::string, std::string>
 ReflRunsTabPresenter::getPreprocessingOptions() const {
-  return m_mainPresenter->getPreprocessingOptions();
+
+  std::map<std::string, std::string> options;
+  options["Plus"] = m_mainPresenter->getPlusOptions();
+  options["CreateTransmissionWorkspaceAuto"] =
+      m_mainPresenter->getTransmissionOptions();
+
+  return options;
 }
 
 /** Requests global pre-processing options. Options are supplied by the main
@@ -342,7 +348,7 @@ ReflRunsTabPresenter::getPreprocessingOptions() const {
 * @return :: Global pre-processing options
 */
 std::string ReflRunsTabPresenter::getProcessingOptions() const {
-  return m_mainPresenter->getProcessingOptions();
+	return m_mainPresenter->getReductionOptions();
 }
 
 /** Requests global pre-processing options. Options are supplied by the main
@@ -350,7 +356,7 @@ std::string ReflRunsTabPresenter::getProcessingOptions() const {
 * @return :: Global pre-processing options
 */
 std::string ReflRunsTabPresenter::getPostprocessingOptions() const {
-  return m_mainPresenter->getPostprocessingOptions();
+	return m_mainPresenter->getStitchOptions();
 }
 
 /**
