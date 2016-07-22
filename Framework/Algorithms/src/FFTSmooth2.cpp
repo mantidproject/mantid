@@ -100,10 +100,10 @@ void FFTSmooth2::exec() {
       symX[dn - i] = x0 - dx * i;
       symY[dn - i] = inWS->y(spec)[i];
     }
-    symmWS->mutableY(0).front() = inWS->y(spec).back();
-    symmWS->mutableX(0).front() = x0 - dx * dn;
+    symY.front() = inWS->y(spec).back();
+    symX.front() = x0 - dx * dn;
     if (inWS->isHistogramData())
-      symmWS->mutableX(0).back() = inWS->x(spec).back();
+      symX.back() = inWS->x(spec).back();
 
     // setProperty("OutputWorkspace",symmWS); return;
 
@@ -257,18 +257,18 @@ void FFTSmooth2::Butterworth(int n, int order,
   filteredWS->setSharedX(0, unfilteredWS->sharedX(0));
   filteredWS->setSharedX(1, unfilteredWS->sharedX(0));
 
-  auto &uY0 = unfilteredWS->y(0);
-  auto &uY1 = unfilteredWS->y(1);
-  auto &Y0 = filteredWS->mutableY(0);
-  auto &Y1 = filteredWS->mutableY(1);
+  auto &Yr = unfilteredWS->y(0);
+  auto &Yi = unfilteredWS->y(1);
+  auto &yr = filteredWS->mutableY(0);
+  auto &yi = filteredWS->mutableY(1);
 
   double cutoff = ny;
 
   for (int i = 0; i < my; i++) {
     double scale =
         1.0 / (1.0 + pow(static_cast<double>(i) / cutoff, 2 * order));
-    Y0[i] = scale * uY0[i];
-    Y1[i] = scale * uY1[i];
+    yr[i] = scale * Yr[i];
+    yi[i] = scale * Yi[i];
   }
 }
 

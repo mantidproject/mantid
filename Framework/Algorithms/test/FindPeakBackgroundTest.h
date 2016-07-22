@@ -193,9 +193,8 @@ public:
     ws->mutableE(0).assign(size, 1.0);
 
     // Workspace index = 1
-    ws->setSharedX(1, ws->sharedX(0));
-    ws->setCounts(1, Counts{1, 2, 1, 1, 9, 11, 13, 20, 24, 32, 28, 48, 42, 77,
-                            67, 33, 27, 20, 9, 2});
+	ws->setHistogram(1, ws->points(0), Counts{ 1, 2, 1, 1, 9, 11, 13, 20, 24, 32, 28, 48, 42, 77,
+		67, 33, 27, 20, 9, 2 });
 
     return ws;
   }

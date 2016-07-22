@@ -120,7 +120,7 @@ void FFTSmooth::exec() {
 
   dn = static_cast<int>(tmpWS->blocksize()) / 2;
 
-  outWS->mutableX(0).assign(tmpWS->x(0).cbegin() + dn, tmpWS->x(0).cend());
+  outWS->setSharedX(0, m_inWS->sharedX(0));
   outWS->mutableY(0).assign(tmpWS->y(0).cbegin() + dn, tmpWS->y(0).cend());
 
   setProperty("OutputWorkspace", outWS);
