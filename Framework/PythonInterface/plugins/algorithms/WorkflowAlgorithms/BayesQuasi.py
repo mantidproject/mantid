@@ -8,7 +8,7 @@ from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProper
 from mantid.kernel import StringListValidator, Direction
 from mantid.simpleapi import *
 from mantid import config, logger
-
+from IndirectCommon import *
 
 if is_supported_f2py_platform():
     QLr     = import_f2py("QLres")
@@ -147,7 +147,7 @@ class BayesQuasi(PythonAlgorithm):
 
         from IndirectBayes import (CalcErange, GetXYE, ReadNormFile,
                                    ReadWidthFile, C2Fw,
-                                   C2Se, QuasiPlot)
+                                   QuasiPlot)
         from IndirectCommon import (CheckXrange, CheckAnalysers, getEfixed, GetThetaQ,
                                     CheckHistZero, CheckHistSame, IndentifyDataBoundaries)
         setup_prog = Progress(self, start=0.0, end=0.3, nreports = 5)
@@ -372,7 +372,7 @@ class BayesQuasi(PythonAlgorithm):
                 QuasiPlot(fname,self._plot,res_plot,self._loop)
         if self._program == 'QSe':
             comp_prog.report('Runnning C2Se')
-            outWS = C2Se(fname)
+            outWS = self.C2Se(fname)
             if self._plot != 'None':
                 QuasiPlot(fname,self._plot,res_plot,self._loop)
 
@@ -434,5 +434,104 @@ class BayesQuasi(PythonAlgorithm):
         log_alg.setProperty('LogValues', [log[1] for log in sample_logs])
         log_alg.execute()
 
+        
+    def C2Se(self, sname):
+        outWS = sname+'_Result'
+        asc = self.readASCIIFile(sname+'.qse')
+        var = asc[3].split()                            #split line on spaces
+        nspec = var[0]
+        var = ExtractInt(asc[6])
+        first = 7
+        Xout = []
+        Yf = []
+        Ef = []
+        Yi = []
+        Ei = []
+        Yb = []
+        Eb = []
+        ns = int(nspec)
+
+        dataX = np.array([])
+        dataY = np.array([])
+        dataE = np.array([])
+
+        for _ in range(0,ns):
+            first,Q,_,fw,it,be = self.SeBlock(asc,first)
+            Xout.append(Q)
+            Yf.append(fw[0])
+            Ef.append(fw[1])
+            Yi.append(it[0])
+            Ei.append(it[1])
+            Yb.append(be[0])
+            Eb.append(be[1])
+        Vaxis = []
+
+        dataX = np.append(dataX,np.array(Xout))
+        dataY = np.append(dataY,np.array(Yi))
+        dataE = np.append(dataE,np.array(Ei))
+        nhist = 1
+        Vaxis.append('f1.Amplitude')
+
+        dataX = np.append(dataX, np.array(Xout))
+        dataY = np.append(dataY, np.array(Yf))
+        dataE = np.append(dataE, np.array(Ef))
+        nhist += 1
+        Vaxis.append('f1.FWHM')
+
+        dataX = np.append(dataX,np.array(Xout))
+        dataY = np.append(dataY,np.array(Yb))
+        dataE = np.append(dataE,np.array(Eb))
+        nhist += 1
+        Vaxis.append('f1.Beta')
+
+        logger.information('Vaxis=' + str(Vaxis))
+        CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,\
+            UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
+
+        return outWS
+    
+    def readASCIIFile(self, file_name):
+        workdir = config['defaultsave.directory']
+
+        file_path = os.path.join(workdir, file_name)
+        asc = []
+
+        with open(file_path, 'r') as handle:
+            for line in handle:
+                line = line.rstrip()
+                asc.append(line)
+        return asc
+    
+    def SeBlock(self, a,first):                                 #read Ascii block of Integers
+        first += 1
+        val = ExtractFloat(a[first])               #Q,AMAX,HWHM
+        Q = val[0]
+        AMAX = val[1]
+        HWHM = val[2]
+        first += 1
+        val = ExtractFloat(a[first])               #A0
+        int0 = [AMAX*val[0]]
+        first += 1
+        val = ExtractFloat(a[first])                #AI,FWHM first peak
+        fw = [2.*HWHM*val[1]]
+        integer = [AMAX*val[0]]
+        first += 1
+        val = ExtractFloat(a[first])                 #SIG0
+        int0.append(val[0])
+        first += 1
+        val = ExtractFloat(a[first])                  #SIG3K
+        integer.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
+        first += 1
+        val = ExtractFloat(a[first])                  #SIG1K
+        fw.append(2.0*HWHM*math.sqrt(math.fabs(val[0])+1.0e-20))
+        first += 1
+        be = ExtractFloat(a[first])                  #EXPBET
+        first += 1
+        val = ExtractFloat(a[first])                  #SIG2K
+        be.append(math.sqrt(math.fabs(val[0])+1.0e-20))
+        first += 1
+        return first,Q,int0,fw,integer,be                                      #values as list
+        
+ 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(BayesQuasi)
