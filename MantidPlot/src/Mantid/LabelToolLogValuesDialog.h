@@ -51,24 +51,23 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class LabelToolLogValuesDialog : public SampleLogDialogBase {
-	Q_OBJECT
+  Q_OBJECT
 public:
-	/// Constructor
-	LabelToolLogValuesDialog(const QString &wsname,
-		QWidget *parentContainer, Qt::WFlags flags = nullptr,
-		size_t experimentInfoIndex = 0);
+  /// Constructor
+  LabelToolLogValuesDialog(const QString &wsname, QWidget *parentContainer,
+                           Qt::WFlags flags = nullptr,
+                           size_t experimentInfoIndex = 0);
 
-	virtual ~LabelToolLogValuesDialog() override;
+  virtual ~LabelToolLogValuesDialog() override;
 
 private slots:
-	
-	/// Override providing custom functionality to the import function
-	virtual void importItem(QTreeWidgetItem *item) override;
+
+  /// Override providing custom functionality to the import function
+  virtual void importItem(QTreeWidgetItem *item) override;
 
 private:
-
-	/// Tracks which statistic of the log is selected
-	QRadioButton *statRadioChoice[NUM_STATS];
+  /// Tracks which statistic of the log is selected
+  QRadioButton *statRadioChoice[NUM_STATS];
 };
 
-#endif //LABELTOOLLOGVALUESDIALOG_H_
+#endif // LABELTOOLLOGVALUESDIALOG_H_

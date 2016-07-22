@@ -22,7 +22,7 @@ class QSpinBox;
 class QLineEdit;
 
 /**
-This is the base class for the Sample Log Dialog. 
+This is the base class for the Sample Log Dialog.
 It provides methods to create, initialise and show the dialog window
 with the log information loaded.
 
@@ -53,75 +53,76 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class SampleLogDialogBase : public QDialog{
-	Q_OBJECT
+class SampleLogDialogBase : public QDialog {
+  Q_OBJECT
 public:
-	/// Constructor
-	SampleLogDialogBase(const QString &wsname, QWidget *parentContainer,
-		Qt::WFlags flags = nullptr, size_t experimentInfoIndex = 0);
+  /// Constructor
+  SampleLogDialogBase(const QString &wsname, QWidget *parentContainer,
+                      Qt::WFlags flags = nullptr,
+                      size_t experimentInfoIndex = 0);
 
-	/// Virtual Destructor for derived classes
-	virtual ~SampleLogDialogBase();
+  /// Virtual Destructor for derived classes
+  virtual ~SampleLogDialogBase();
 
 protected slots:
-	/// Plot logs
-	virtual void importSelectedLogs();
+  /// Plot logs
+  virtual void importSelectedLogs();
 
-	/// Show the stats of the selected log
-	virtual void showLogStatistics();
-	virtual void showLogStatisticsOfItem(QTreeWidgetItem *item);
+  /// Show the stats of the selected log
+  virtual void showLogStatistics();
+  virtual void showLogStatisticsOfItem(QTreeWidgetItem *item);
 
-	/// Context menu popup
-	virtual void popupMenu(const QPoint &pos);
+  /// Context menu popup
+  virtual void popupMenu(const QPoint &pos);
 
-	/// Import a single item
-	virtual void importItem(QTreeWidgetItem *item) = 0;
+  /// Import a single item
+  virtual void importItem(QTreeWidgetItem *item) = 0;
 
-	virtual void selectExpInfoNumber(int num);
+  virtual void selectExpInfoNumber(int num);
 
 protected:
-	/// This function is not virtual because it is called from derived classes
-	/// without overriding
-	/// This function initalises everything in the tree widget
-	void init();
+  /// This function is not virtual because it is called from derived classes
+  /// without overriding
+  /// This function initalises everything in the tree widget
+  void init();
 
-	/// A tree widget
-	QTreeWidget *m_tree;
+  /// A tree widget
+  QTreeWidget *m_tree;
 
-	/// The parent container of the window
-	QWidget *m_parentContainer;
+  /// The parent container of the window
+  QWidget *m_parentContainer;
 
-	/// The workspace name
-	std::string m_wsname;
+  /// The workspace name
+  std::string m_wsname;
 
-	/// Index into the ExperimentInfo list.
-	size_t m_experimentInfoIndex;
+  /// Index into the ExperimentInfo list.
+  size_t m_experimentInfoIndex;
 
-	/// The actual experiment info being looked at.
-	Mantid::API::ExperimentInfo_const_sptr m_ei;
-	
-	/// Buttons to do things
-	QPushButton *buttonPlot, *buttonClose;
+  /// The actual experiment info being looked at.
+  Mantid::API::ExperimentInfo_const_sptr m_ei;
 
-	/// Number of statistic values
-	static const std::size_t NUM_STATS = 7;
+  /// Buttons to do things
+  QPushButton *buttonPlot, *buttonClose;
 
-	/// Testboxes with stats data
-	QLineEdit *statValues[NUM_STATS];
+  /// Number of statistic values
+  static const std::size_t NUM_STATS = 7;
 
-	/// Widget to select the # of the experiment info to look at.
-	QSpinBox *m_spinNumber;
+  /// Testboxes with stats data
+  QLineEdit *statValues[NUM_STATS];
 
-	/// these values are used to specify the format of the log file, all of which
-	/// are stored as strings
-	enum logType {
-		string,			///< indicates the log is a string, no other known formating
-		numTSeries,		///< for time series properties that contain numbers
-		stringTSeries,	///< for logs that are string time series properties
-		numeric,		///< for logs that are single numeric values (int or double)
-		numericArray	///< for logs that are an array of numeric values (int or
-						/// double)
-	};
+  /// Widget to select the # of the experiment info to look at.
+  QSpinBox *m_spinNumber;
+
+  /// these values are used to specify the format of the log file, all of which
+  /// are stored as strings
+  enum logType {
+    string,        ///< indicates the log is a string, no other known formating
+    numTSeries,    ///< for time series properties that contain numbers
+    stringTSeries, ///< for logs that are string time series properties
+    numeric,       ///< for logs that are single numeric values (int or double)
+    numericArray   ///< for logs that are an array of numeric values (int or
+                   /// double)
+  };
 };
 
-#endif //SAMPLELOGDIALOGBASE_H_
+#endif // SAMPLELOGDIALOGBASE_H_

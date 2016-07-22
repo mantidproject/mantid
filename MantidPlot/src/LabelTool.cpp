@@ -308,10 +308,10 @@ void LabelTool::blankRegionClicked() {
   // For viewing log values.
   QMenu *logVals = info->addMenu(tr("Log values"));
 
-  foreach(QString wsName, workspaceNames()) {
-	  QAction *qa = new QAction(wsName, this);
-	  logVals->addAction(qa);
-	  connect(qa, SIGNAL(triggered()), this, SLOT(showLogValuesDialog()));
+  foreach (QString wsName, workspaceNames()) {
+    QAction *qa = new QAction(wsName, this);
+    logVals->addAction(qa);
+    connect(qa, SIGNAL(triggered()), this, SLOT(showLogValuesDialog()));
   }
 
   clickMenu->exec(QCursor::pos());
@@ -367,16 +367,17 @@ void LabelTool::dataPointClicked() {
 }
 
 void LabelTool::showLogValuesDialog() {
-	QAction *action = qobject_cast<QAction *>(sender());
-	QString wsname = action->text();
+  QAction *action = qobject_cast<QAction *>(sender());
+  QString wsname = action->text();
 
-	LegendWidget *label = new LegendWidget(d_graph->plotWidget());
-	label->setOriginCoord(m_xPos, m_yPos);
-	label->setFont(d_graph->axisFont(0));
+  LegendWidget *label = new LegendWidget(d_graph->plotWidget());
+  label->setOriginCoord(m_xPos, m_yPos);
+  label->setFont(d_graph->axisFont(0));
 
-	LabelToolLogValuesDialog *logValues = new LabelToolLogValuesDialog(wsname, label);
-		// window set visibe
-	logValues->setVisible(true);
+  LabelToolLogValuesDialog *logValues =
+      new LabelToolLogValuesDialog(wsname, label);
+  // window set visibe
+  logValues->setVisible(true);
 }
 /// Creates a label with size equal to the axisFont size
 void LabelTool::insertLegend() {

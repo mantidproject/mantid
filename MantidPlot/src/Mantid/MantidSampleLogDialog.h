@@ -50,33 +50,32 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MantidSampleLogDialog : public SampleLogDialogBase {
-	Q_OBJECT
+  Q_OBJECT
 
 public:
-	/// Constructor
-	MantidSampleLogDialog(const QString &wsname, MantidUI *mui,
-		Qt::WFlags flags = 0, size_t experimentInfoIndex = 0);
+  /// Constructor
+  MantidSampleLogDialog(const QString &wsname, MantidUI *mui,
+                        Qt::WFlags flags = 0, size_t experimentInfoIndex = 0);
 
-	/// Destructor
-	virtual ~MantidSampleLogDialog() override;
+  /// Destructor
+  virtual ~MantidSampleLogDialog() override;
 
 protected slots:
 
-	/// Import a single item
-	virtual void importItem(QTreeWidgetItem *item) override;
+  /// Import a single item
+  virtual void importItem(QTreeWidgetItem *item) override;
 
 protected:
+  /// Filter radio buttons
+  QRadioButton *filterNone, *filterStatus, *filterPeriod, *filterStatusPeriod;
 
-	/// Filter radio buttons
-	QRadioButton *filterNone, *filterStatus, *filterPeriod, *filterStatusPeriod;
+  /// Stats labels
+  QLabel *statLabels[NUM_STATS]; // minLabel, maxLabel, meanLabel,
+                                 // timeAverageLabel, medianLabel, stddevLabel,
+                                 // durationLabel;
 
-	/// Stats labels
-	QLabel *statLabels[NUM_STATS]; // minLabel, maxLabel, meanLabel,
-								   // timeAverageLabel, medianLabel, stddevLabel,
-								   // durationLabel;
-
-	/// A pointer to the MantidUI object
-	MantidUI *m_mantidUI;
+  /// A pointer to the MantidUI object
+  MantidUI *m_mantidUI;
 };
 
 #endif // MANTIDSAMPLELOGDIALOG_H_
