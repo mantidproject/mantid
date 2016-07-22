@@ -53,6 +53,11 @@ if [ -n "$1" ] && [ "$1" = "--classic" ]; then
     PROG=@PYTHON_EXECUTABLE@
 fi
 
+# Warn the user if they are starting mantid with anaconda's python
+if [ "${PROG}" != "${PROG%conda*}" ]; then
+    echo "WARNING: using anaconda's python is unsupported"
+fi
+
 # Define MANTIDPATH
 MANTIDPATH="${INSTALLDIR}"
 
