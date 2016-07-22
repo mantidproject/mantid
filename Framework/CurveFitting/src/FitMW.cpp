@@ -49,7 +49,6 @@ private:
   std::vector<double> m_data; ///< data storage
 };
 
-bool greaterIsLess(double x1, double x2) { return x1 > x2; }
 }
 
 using namespace Kernel;
@@ -131,15 +130,12 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
 
   const Mantid::MantidVec &X = m_matrixWorkspace->readX(m_workspaceIndex);
 
-  if (X.empty()) {
-    throw std::runtime_error("Workspace contains no data.");
-  }
-
   // find the fitting interval: from -> to
-  Mantid::MantidVec::const_iterator from;
-  size_t n = 0;
-  getStartIterator(X, from, n, m_matrixWorkspace->isHistogramData());
-  auto to = from + n;
+  size_t endIndex = 0;
+  std::tie(m_startIndex, endIndex) = getXInterval();
+  auto from = X.begin() + m_startIndex;
+  auto to = X.begin() + endIndex;
+  auto n = endIndex - m_startIndex;
 
   if (m_domainType != Simple) {
     if (m_maxSize < n) {
@@ -186,16 +182,14 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
   bool shouldNormalise = m_normalise && m_matrixWorkspace->isHistogramData();
 
   // set the data to fit to
-  m_startIndex = std::distance(X.cbegin(), from);
   assert(n == domain->size());
-  size_t ito = m_startIndex + n;
   const Mantid::MantidVec &Y = m_matrixWorkspace->readY(m_workspaceIndex);
   const Mantid::MantidVec &E = m_matrixWorkspace->readE(m_workspaceIndex);
-  if (ito > Y.size()) {
+  if (endIndex > Y.size()) {
     throw std::runtime_error("FitMW: Inconsistent MatrixWorkspace");
   }
   // bool foundZeroOrNegativeError = false;
-  for (size_t i = m_startIndex; i < ito; ++i) {
+  for (size_t i = m_startIndex; i < endIndex; ++i) {
     size_t j = i - m_startIndex + i0;
     double y = Y[i];
     double error = E[i];

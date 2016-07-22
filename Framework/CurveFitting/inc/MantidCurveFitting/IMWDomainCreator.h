@@ -76,9 +76,7 @@ public:
 
 protected:
   /// Calculate size and starting iterator in the X array
-  void getStartIterator(const Mantid::MantidVec &X,
-                        Mantid::MantidVec::const_iterator &from, size_t &n,
-                        bool isHisto) const;
+  std::pair<size_t, size_t> getXInterval() const;
   /// Set all parameters
   virtual void setParameters() const;
 
@@ -102,10 +100,6 @@ protected:
   std::string m_startXPropertyName;
   /// Store endX property name
   std::string m_endXPropertyName;
-  /// Store maxSize property name
-  //std::string m_maxSizePropertyName;
-  /// Store Normalise property name
-  //std::string m_normalisePropertyName;
 
   /// The input MareixWorkspace
   mutable boost::shared_ptr<API::MatrixWorkspace> m_matrixWorkspace;
@@ -115,10 +109,6 @@ protected:
   mutable double m_startX;
   /// endX
   mutable double m_endX;
-  /// Max size for seq domain
-  //mutable size_t m_maxSize;
-  /// Option to normalise the data
-  //mutable bool m_normalise;
   /// Store the created domain and values
   mutable boost::weak_ptr<API::FunctionDomain1D> m_domain;
   mutable boost::weak_ptr<API::FunctionValues> m_values;

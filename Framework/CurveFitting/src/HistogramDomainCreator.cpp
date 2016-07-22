@@ -1,5 +1,5 @@
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidCurveFitting/HistogramDomainCreator.h"
@@ -19,29 +19,9 @@ using namespace API;
  * @param workspacePropertyName :: Name of the output property for a created
  * workspace in case a PropertyManager is used.
  */
-HistogramDomainCreator::HistogramDomainCreator(
-    const API::IFunctionGeneral &fun, Kernel::IPropertyManager &manager,
+HistogramDomainCreator::HistogramDomainCreator(Kernel::IPropertyManager &manager,
     const std::string &workspacePropertyName)
-    : IDomainCreator(&manager,
-                     std::vector<std::string>(1, workspacePropertyName)) {
-
-}
-
-/// Declare properties that specify the dataset within the workspace to fit
-/// to.
-/// @param suffix :: A suffix to give to all new properties.
-/// @param addProp :: If false don't actually declare new properties but do
-/// other stuff if needed
-void HistogramDomainCreator::declareDatasetProperties(const std::string &suffix,
-                                                    bool addProp) {
-  UNUSED_ARG(suffix);
-}
-
-/// Retrive the input workspace from the property manager.
-boost::shared_ptr<API::MatrixWorkspace>
-HistogramDomainCreator::getInputWorkspace() const {
-  return boost::shared_ptr<API::MatrixWorkspace>();
-}
+    : IMWDomainCreator(&manager, workspacePropertyName) {}
 
 /**
  * Creates a domain corresponding to the assigned MatrixWorkspace
@@ -54,13 +34,67 @@ void HistogramDomainCreator::createDomain(
     boost::shared_ptr<FunctionDomain> &domain,
     boost::shared_ptr<FunctionValues> &values, size_t i0) {
 
-  // Create the values object
-  if (!values) {
-    values.reset(new FunctionValues);
+  setParameters();
+
+  if (!m_matrixWorkspace->isHistogramData()) {
+    throw std::runtime_error("Cannot create a histogram domain from point data.");
   }
 
-  // get the workspace
-  auto tableWorkspace = getInputWorkspace();
+  if (m_domainType != Simple) {
+    throw std::runtime_error("Cannot create non-simple domain for histogram fitting.");
+  }
+
+  const Mantid::MantidVec &X = m_matrixWorkspace->readX(m_workspaceIndex);
+
+  // find the fitting interval: from -> to
+  size_t endIndex = 0;
+  std::tie(m_startIndex, endIndex) = getXInterval();
+  auto fromX = X.begin() + m_startIndex;
+  auto toX = X.begin() + endIndex + 1;
+
+  domain.reset(new API::FunctionDomain1DHistogram(fromX, toX));
+  assert(endIndex - m_startIndex == domain->size());
+
+  if (!values) {
+    values.reset(new API::FunctionValues(*domain));
+  } else {
+    values->expand(i0 + domain->size());
+  }
+
+  // set the data to fit to
+  const Mantid::MantidVec &Y = m_matrixWorkspace->readY(m_workspaceIndex);
+  const Mantid::MantidVec &E = m_matrixWorkspace->readE(m_workspaceIndex);
+  if (endIndex > Y.size()) {
+    throw std::runtime_error("FitMW: Inconsistent MatrixWorkspace");
+  }
+
+  for (size_t i = m_startIndex; i < endIndex; ++i) {
+    size_t j = i - m_startIndex + i0;
+    double y = Y[i];
+    double error = E[i];
+    double weight = 0.0;
+
+    if (!boost::math::isfinite(y)) // nan or inf data
+    {
+      if (!m_ignoreInvalidData)
+        throw std::runtime_error("Infinte number or NaN found in input data.");
+      y = 0.0; // leaving inf or nan would break the fit
+    } else if (!boost::math::isfinite(error)) // nan or inf error
+    {
+      if (!m_ignoreInvalidData)
+        throw std::runtime_error("Infinte number or NaN found in input data.");
+    } else if (error <= 0) {
+      if (!m_ignoreInvalidData)
+        weight = 1.0;
+    } else {
+      weight = 1.0 / error;
+    }
+
+    values->setFitData(j, y);
+    values->setFitWeight(j, weight);
+  }
+  m_domain = boost::dynamic_pointer_cast<API::FunctionDomain1D>(domain);
+  m_values = values;
 
 }
 
@@ -85,8 +119,15 @@ Workspace_sptr HistogramDomainCreator::createOutputWorkspace(
     throw std::runtime_error("Failed to create output workspace: domain and "
                              "values object don't match.");
   }
-
+  return Workspace_sptr();
 }
+
+/// Add the calculated function values to the workspace
+void HistogramDomainCreator::addFunctionValuesToWS(
+    const API::IFunction_sptr &function,
+    boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
+    const boost::shared_ptr<API::FunctionDomain> &domain,
+    boost::shared_ptr<API::FunctionValues> resultValues) const {}
 
 } // namespace CurveFitting
 } // namespace Mantid

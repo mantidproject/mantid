@@ -148,6 +148,9 @@ class MANTID_API_DLL FunctionDomain1DHistogram : public FunctionDomain1D {
 public:
   /// Constructor.
   FunctionDomain1DHistogram(const std::vector<double> &bins);
+  /// Constructor.
+  FunctionDomain1DHistogram(std::vector<double>::const_iterator from,
+                            std::vector<double>::const_iterator to);
   /// Get the leftmost boundary
   double leftBoundary() const;
 

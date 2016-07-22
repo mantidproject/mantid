@@ -1,8 +1,8 @@
 #ifndef MANTID_CURVEFITTING_GENERALDOMAINCREATOR_H_
 #define MANTID_CURVEFITTING_GENERALDOMAINCREATOR_H_
 
-#include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidCurveFitting/IMWDomainCreator.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -39,10 +39,9 @@ namespace CurveFitting {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-class DLLExport HistogramDomainCreator : public API::IDomainCreator {
+class DLLExport HistogramDomainCreator : public IMWDomainCreator {
 public:
-  HistogramDomainCreator(const API::IFunctionGeneral &fun,
-                        Kernel::IPropertyManager &manager,
+  HistogramDomainCreator(Kernel::IPropertyManager &manager,
                         const std::string &workspacePropertyName);
 
   void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
@@ -57,12 +56,13 @@ public:
                         const std::string &outputWorkspacePropertyName =
                             "OutputWorkspace") override;
 
-  void declareDatasetProperties(const std::string &suffix = "",
-                                bool addProp = true) override;
-
-private:
-  boost::shared_ptr<API::MatrixWorkspace>
-  HistogramDomainCreator::getInputWorkspace() const;
+protected:
+  /// Add the calculated function values to the workspace
+  void addFunctionValuesToWS(
+      const API::IFunction_sptr &function,
+      boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
+      const boost::shared_ptr<API::FunctionDomain> &domain,
+      boost::shared_ptr<API::FunctionValues> resultValues) const override;
 };
 
 } // namespace CurveFitting

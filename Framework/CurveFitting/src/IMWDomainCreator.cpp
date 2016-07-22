@@ -27,28 +27,6 @@ namespace Mantid {
 namespace CurveFitting {
 
 namespace {
-/**
- * A simple implementation of Jacobian.
- */
-class SimpleJacobian : public API::Jacobian {
-public:
-  /// Constructor
-  SimpleJacobian(size_t nData, size_t nParams)
-      : m_nParams(nParams), m_data(nData * nParams) {}
-  /// Setter
-  void set(size_t iY, size_t iP, double value) override {
-    m_data[iY * m_nParams + iP] = value;
-  }
-  /// Getter
-  double get(size_t iY, size_t iP) override {
-    return m_data[iY * m_nParams + iP];
-  }
-
-private:
-  size_t m_nParams;           ///< number of parameters / second dimension
-  std::vector<double> m_data; ///< data storage
-};
-
 bool greaterIsLess(double x1, double x2) { return x1 > x2; }
 }
 
@@ -97,11 +75,6 @@ void IMWDomainCreator::setParameters() const {
     m_workspaceIndex = static_cast<size_t>(index);
     m_startX = m_manager->getProperty(m_startXPropertyName);
     m_endX = m_manager->getProperty(m_endXPropertyName);
-    //if (m_domainType != Simple) {
-    //  const int maxSizeInt = m_manager->getProperty(m_maxSizePropertyName);
-    //  m_maxSize = static_cast<size_t>(maxSizeInt);
-    //}
-    //m_normalise = m_manager->getProperty(m_normalisePropertyName);
   }
 }
 
@@ -115,8 +88,6 @@ void IMWDomainCreator::declareDatasetProperties(const std::string &suffix, bool 
   m_workspaceIndexPropertyName = "WorkspaceIndex" + suffix;
   m_startXPropertyName = "StartX" + suffix;
   m_endXPropertyName = "EndX" + suffix;
-  //m_maxSizePropertyName = "MaxSize" + suffix;
-  //m_normalisePropertyName = "Normalise" + suffix;
 
   if (addProp && !m_manager->existsProperty(m_workspaceIndexPropertyName)) {
     auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
@@ -134,27 +105,16 @@ void IMWDomainCreator::declareDatasetProperties(const std::string &suffix, bool 
         "A value in, or on the high x boundary of, the last bin the fitting "
         "range\n"
         "(default the highest value of x)");
-    //if (m_domainType != Simple) {
-    //  declareProperty(new PropertyWithValue<int>(m_maxSizePropertyName, 1,
-    //                                             mustBePositive->clone()),
-    //                  "The maximum number of values per a simple domain.");
-    //}
-    //declareProperty(
-    //    new PropertyWithValue<bool>(m_normalisePropertyName, false),
-    //    "An option to normalise the histogram data (divide be the bin width).");
   }
 }
 
 /**
  * Calculate size and starting iterator in the X array
- * @param X :: The x array.
- * @param from :: iterator to the beginning of the fitting data
- * @param n :: Size of the fitting data
- * @param isHisto :: True if it's histogram data.
+ * @returns :: A pair of start iterator and size of the data.
  */
-void IMWDomainCreator::getStartIterator(const Mantid::MantidVec &X,
-                             Mantid::MantidVec::const_iterator &from, size_t &n,
-                             bool isHisto) const {
+std::pair<size_t, size_t> IMWDomainCreator::getXInterval() const {
+
+  const Mantid::MantidVec &X = m_matrixWorkspace->readX(m_workspaceIndex);
   if (X.empty()) {
     throw std::runtime_error("Workspace contains no data.");
   }
@@ -162,6 +122,7 @@ void IMWDomainCreator::getStartIterator(const Mantid::MantidVec &X,
   setParameters();
 
   // find the fitting interval: from -> to
+  Mantid::MantidVec::const_iterator from;
   Mantid::MantidVec::const_iterator to;
 
   bool isXAscending = X.front() < X.back();
@@ -182,8 +143,8 @@ void IMWDomainCreator::getStartIterator(const Mantid::MantidVec &X,
       from = std::lower_bound(X.begin(), X.end(), m_startX);
       to = std::upper_bound(from, X.end(), m_endX);
     }
-  } else // x is descending
-  {
+  } else {
+    // x is descending
     if (m_startX == EMPTY_DBL() && m_endX == EMPTY_DBL()) {
       m_startX = X.front();
       from = X.begin();
@@ -196,23 +157,17 @@ void IMWDomainCreator::getStartIterator(const Mantid::MantidVec &X,
       if (m_startX < m_endX) {
         std::swap(m_startX, m_endX);
       }
-      // from = std::lower_bound(X.begin(),X.end(),startX,([](double x1,double
-      // x2)->bool{return x1 > x2;}));
-      // to = std::upper_bound(from,X.end(),endX,([](double x1,double
-      // x2)->bool{return x1 > x2;}));
       from = std::lower_bound(X.begin(), X.end(), m_startX, greaterIsLess);
       to = std::upper_bound(from, X.end(), m_endX, greaterIsLess);
     }
   }
 
-  n = static_cast<size_t>(to - from);
-
-  if (isHisto) {
+  if (m_matrixWorkspace->isHistogramData()) {
     if (X.end() == to) {
       to = X.end() - 1;
-      --n;
     }
   }
+  return std::make_pair(std::distance(X.begin(), from), std::distance(X.begin(), to));
 }
 
 /**
@@ -220,11 +175,9 @@ void IMWDomainCreator::getStartIterator(const Mantid::MantidVec &X,
  */
 size_t IMWDomainCreator::getDomainSize() const {
   setParameters();
-  const Mantid::MantidVec &X = m_matrixWorkspace->readX(m_workspaceIndex);
-  size_t n = 0;
-  Mantid::MantidVec::const_iterator from;
-  getStartIterator(X, from, n, m_matrixWorkspace->isHistogramData());
-  return n;
+  size_t startIndex, endIndex;
+  std::tie(startIndex, endIndex) = getXInterval();
+  return endIndex - startIndex;
 }
 
 /**
