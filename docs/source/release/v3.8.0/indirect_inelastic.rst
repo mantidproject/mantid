@@ -33,6 +33,14 @@ Elwin
 Jump Fit
 ~~~~~~~~
 
+Simulations
+###########
+
+Density Of States
+~~~~~~~~~~~~~~~~~
+
+- :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` now allows for the parsing of isotopes from the *.phonon or *.castep file in the form 'element:isotope' 
+
 Improvements
 ------------
 
