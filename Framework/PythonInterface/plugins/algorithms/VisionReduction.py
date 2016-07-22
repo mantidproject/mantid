@@ -7,7 +7,7 @@ from mantid.kernel import *
 from mantid.simpleapi import *
 import csv
 import os
-from string import ascii_leters, digits # pylint: disable=deprecated-module
+from string import ascii_letters, digits # pylint: disable=deprecated-module
 
 ######################################################################
 # Remove artifacts such as prompt pulse
