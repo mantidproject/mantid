@@ -82,18 +82,17 @@ std::map<std::string, std::string> RenameWorkspaces::validateInputs() {
   }
 
   if (newWsName.size() > 1) {
-	  for (size_t i = 0; i < newWsName.size() - 1; ++i) {
-		  for (size_t j = i + 1; j < newWsName.size(); ++j) {
-			  if (newWsName[i] == newWsName[j]) {
-				  errorList["WorkspaceNames"] =
-					  "Duplicate '" + newWsName[i] + "' found in WorkspaceNames.";
-			  }
-		  }
-	  }
+    for (size_t i = 0; i < newWsName.size() - 1; ++i) {
+      for (size_t j = i + 1; j < newWsName.size(); ++j) {
+        if (newWsName[i] == newWsName[j]) {
+          errorList["WorkspaceNames"] =
+              "Duplicate '" + newWsName[i] + "' found in WorkspaceNames.";
+        }
+      }
+    }
   }
 
   return errorList;
-
 }
 
 /** Executes the algorithm
@@ -130,14 +129,14 @@ void RenameWorkspaces::exec() {
 
   // Check all names are not used already before starting rename
   for (const auto &name : newWsName) {
-	  if (AnalysisDataService::Instance().doesExist(name)) {
-		  // Name exists, stop if override if not set but let
-		  // RenameWorkspace handle deleting if we are overriding
-		  if (!overrideWorkspace) {
-			  throw std::runtime_error("A workspace called " + name + 
-				  " already exists");
-		  }
-	  }
+    if (AnalysisDataService::Instance().doesExist(name)) {
+      // Name exists, stop if override if not set but let
+      // RenameWorkspace handle deleting if we are overriding
+      if (!overrideWorkspace) {
+        throw std::runtime_error("A workspace called " + name +
+                                 " already exists");
+      }
+    }
   }
 
   // loop over array and rename each workspace

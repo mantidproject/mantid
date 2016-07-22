@@ -42,50 +42,49 @@ void RenameWorkspace::init() {
 }
 
 /**
-  * Tests that the inputs are all valid 
+  * Tests that the inputs are all valid
   * @return A map containing the incorrect workspace
   * properties and an error message
   */
 std::map<std::string, std::string> RenameWorkspace::validateInputs() {
-	using namespace std;
-	map<string, string> errorList;
+  using namespace std;
+  map<string, string> errorList;
 
-	// Get the input workspace
-	Workspace_sptr inputWS = getProperty("InputWorkspace");
-	// get the workspace name
-	std::string inputwsName = inputWS->getName();
-	// get the output workspace name
-	std::string outputwsName = getPropertyValue("OutputWorkspace");
-	// check if we are overriding existing workspaces
-	bool overrideWorkspaces = getProperty("OverwriteExisting");
+  // Get the input workspace
+  Workspace_sptr inputWS = getProperty("InputWorkspace");
+  // get the workspace name
+  std::string inputwsName = inputWS->getName();
+  // get the output workspace name
+  std::string outputwsName = getPropertyValue("OutputWorkspace");
+  // check if we are overriding existing workspaces
+  bool overrideWorkspaces = getProperty("OverwriteExisting");
 
-	//First check input and output names are different
-	if (getPropertyValue("InputWorkspace") ==
-		getPropertyValue("OutputWorkspace")) {
-		errorList["InputWorkspace"] = "Input and output workspace"
-			" names must be different";
-		errorList["OutputWorkspace"] = "Input and output workspace"
-			" names must be different";
-	}
+  // First check input and output names are different
+  if (getPropertyValue("InputWorkspace") ==
+      getPropertyValue("OutputWorkspace")) {
+    errorList["InputWorkspace"] = "Input and output workspace"
+                                  " names must be different";
+    errorList["OutputWorkspace"] = "Input and output workspace"
+                                   " names must be different";
+  }
 
-	// Test to see if the output already exists
-	if (AnalysisDataService::Instance().doesExist(outputwsName)) {
-		// Output name already exists - either remove or error
-		if (!overrideWorkspaces) {
-			// If we try to delete the workspace here a subtle bug is introduced
-			// Where the workspace group handle is deleted if we are renaming
-			// Its last workspace member, then when we add (or rename) that member
-			// undefined behavior happens usually Python Unit tests breaking
-			errorList["OutputWorkspace"] = "The workspace " + outputwsName +
-				" already exists";
-			errorList["OverwriteExisting"] = "Set OverwriteExisting to true"
-				" to overwrite the existing workspace";
-		}
-	}
+  // Test to see if the output already exists
+  if (AnalysisDataService::Instance().doesExist(outputwsName)) {
+    // Output name already exists - either remove or error
+    if (!overrideWorkspaces) {
+      // If we try to delete the workspace here a subtle bug is introduced
+      // Where the workspace group handle is deleted if we are renaming
+      // Its last workspace member, then when we add (or rename) that member
+      // undefined behavior happens usually Python Unit tests breaking
+      errorList["OutputWorkspace"] =
+          "The workspace " + outputwsName + " already exists";
+      errorList["OverwriteExisting"] = "Set OverwriteExisting to true"
+                                       " to overwrite the existing workspace";
+    }
+  }
 
-	return errorList;
+  return errorList;
 }
-
 
 /** Executes the algorithm
  *
@@ -100,8 +99,6 @@ void RenameWorkspace::exec() {
   std::string outputwsName = getPropertyValue("OutputWorkspace");
   // check if we are overriding existing workspaces
   bool overrideWorkspaces = getProperty("OverwriteExisting");
-
-
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", inputWS);
