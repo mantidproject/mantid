@@ -53,6 +53,16 @@ public:
     delete suite;
   }
 
+  /// Constructor: cache the value of the setting
+  CreateUserDefinedBackgroundTest() : m_key("graph1d.autodistribution") {
+    m_option = Mantid::Kernel::ConfigService::Instance().getString(m_key);
+  }
+
+  /// Destructor: reset the setting to its stored value
+  ~CreateUserDefinedBackgroundTest() {
+    Mantid::Kernel::ConfigService::Instance().setString(m_key, m_option);
+  }
+
   void test_Init() {
     CreateUserDefinedBackground alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -92,7 +102,10 @@ public:
     TS_ASSERT(workspacesEqual(expected, outputWS, 1e-4));
   }
 
-  void test_exec_HistoWS() {
+  void test_exec_HistoWS_NormalisePlotsOff() {
+    // Turn the "normalise plots" option off
+    Mantid::Kernel::ConfigService::Instance().setString(m_key, "Off");
+
     // Create test input
     const auto inputWS = createTestData(true);
     const auto bgPoints = createTable();
@@ -114,6 +127,34 @@ public:
 
     // The expected result
     const auto expected = createExpectedResults(true);
+    TS_ASSERT(workspacesEqual(expected, outputWS, 0.1, true));
+  }
+
+  void test_exec_HistoWS_NormalisePlotsOn() {
+    // Turn the "normalise plots" option on
+    Mantid::Kernel::ConfigService::Instance().setString(m_key, "On");
+
+    // Create test input
+    const auto inputWS = createTestData(true);
+    const auto bgPoints = createTable();
+
+    CreateUserDefinedBackground alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundPoints", bgPoints))
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outputWS =
+        alg.getProperty("OutputBackgroundWorkspace");
+    TS_ASSERT(outputWS);
+
+    // The expected result
+    const auto expected = createExpectedResults(true, true);
     TS_ASSERT(workspacesEqual(expected, outputWS, 5e-2));
   }
 
@@ -146,7 +187,10 @@ public:
                     outputWS->frequencies(0).back(), 0.001);
   }
 
-  void test_exec_HistoWS_extend() {
+  void test_exec_HistoWS_extend_NormalisePlotsOff() {
+    // Turn the "normalise plots" option off
+    Mantid::Kernel::ConfigService::Instance().setString(m_key, "Off");
+
     // Create test input
     const auto inputWS = createTestData(true);
     const auto bgPoints = createTable();
@@ -175,6 +219,64 @@ public:
                     0.001);
   }
 
+  void test_exec_HistoWS_extend_NormalisePlotsOn() {
+    // Turn the "normalise plots" option on
+    Mantid::Kernel::ConfigService::Instance().setString(m_key, "On");
+
+    // Create test input
+    const auto inputWS = createTestData(true);
+    const auto bgPoints = createTable();
+
+    // Remove last row, to make it extend the background to the data
+    bgPoints->removeRow(bgPoints->rowCount() - 1);
+
+    CreateUserDefinedBackground alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundPoints", bgPoints))
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outputWS =
+        alg.getProperty("OutputBackgroundWorkspace");
+    TS_ASSERT(outputWS);
+
+    // The expected result
+    const auto expected = createExpectedResults(true, true);
+    TS_ASSERT_DELTA(expected->counts(0).back(), outputWS->counts(0).back(),
+                    0.001);
+  }
+
+  void test_exec_distribution() {
+    // Create test input
+    const auto inputWS = createTestData(true);
+    const auto bgPoints = createTable();
+    Mantid::API::WorkspaceHelpers::makeDistribution(inputWS);
+
+    CreateUserDefinedBackground alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundPoints", bgPoints))
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outputWS =
+        alg.getProperty("OutputBackgroundWorkspace");
+    TS_ASSERT(outputWS);
+
+    // The expected result
+    const auto expected = createExpectedResults(true, true);
+    TS_ASSERT(workspacesEqual(expected, outputWS, 5e-2));
+  }
+
 private:
   /// Create workspace containing test data
   MatrixWorkspace_sptr createTestData(bool isHisto) {
@@ -196,14 +298,15 @@ private:
   }
 
   /// Create expected results
-  MatrixWorkspace_sptr createExpectedResults(bool isHisto) {
+  MatrixWorkspace_sptr createExpectedResults(bool isHisto,
+                                             bool plotsNormalised = false) {
     std::vector<double> xData, yData, eData;
     constexpr double binWidth = 0.1;
     for (size_t i = 0; i < 100; ++i) {
       const double x = binWidth * static_cast<double>(i);
       xData.push_back(x);
       const double y = background(x);
-      yData.push_back(isHisto ? y * binWidth : y);
+      yData.push_back(isHisto && plotsNormalised ? y * binWidth : y);
       eData.push_back(0.0);
     }
     if (isHisto) {
@@ -225,12 +328,14 @@ private:
     alg->setProperty("DataE", eData);
     alg->execute();
     MatrixWorkspace_sptr output = alg->getProperty("OutputWorkspace");
+
     return output;
   }
 
   /// Compare workspaces
   bool workspacesEqual(const MatrixWorkspace_sptr lhs,
-                       const MatrixWorkspace_sptr rhs, double tolerance) {
+                       const MatrixWorkspace_sptr rhs, double tolerance,
+                       bool relativeError = false) {
     auto alg = Mantid::API::AlgorithmFactory::Instance().create(
         "CompareWorkspaces", 1);
     alg->setChild(true);
@@ -238,10 +343,17 @@ private:
     alg->setProperty<MatrixWorkspace_sptr>("Workspace1", lhs);
     alg->setProperty<MatrixWorkspace_sptr>("Workspace2", rhs);
     alg->setProperty<double>("Tolerance", tolerance);
+    alg->setProperty<bool>("ToleranceRelErr", relativeError);
     alg->setProperty<bool>("CheckAxes", false);
     alg->execute();
     return alg->getProperty("Result");
   }
+
+  /// Cached string for option
+  std::string m_option;
+
+  /// Key for option
+  const std::string m_key;
 };
 
 #endif /* MANTID_ALGORITHMS_CREATEUSERDEFINEDBACKGROUNDTEST_H_ */
