@@ -1066,9 +1066,9 @@ void MatrixWorkspace::maskBin(const size_t &workspaceIndex,
   // If the weight is not 0, NaN and Inf values are set to 0,
   // whereas other values are scaled by (1 - weight)
   if (weight != 0.) {
-    double &y = this->dataY(workspaceIndex)[binIndex];
+    double &y = this->mutableY(workspaceIndex)[binIndex];
     (isnan(y) || isinf(y)) ? y = 0. : y *= (1 - weight);
-    double &e = this->dataE(workspaceIndex)[binIndex];
+    double &e = this->mutableE(workspaceIndex)[binIndex];
     (isnan(e) || isinf(e)) ? e = 0. : e *= (1 - weight);
   }
 }
