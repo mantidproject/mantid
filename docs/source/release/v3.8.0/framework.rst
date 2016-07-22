@@ -21,7 +21,7 @@ Concepts
 Improved
 ########
 
-- :red:`MatrixWorkspace` : When masking bins or detectors with non-zero weights,
+- :ref:`MatrixWorkspace` : When masking bins or detectors with non-zero weights,
   undefined and infinite values and errors will be zeroed.
 
 
