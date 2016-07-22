@@ -28,13 +28,13 @@ public:
     IAlgorithm_sptr gsd = Mantid::API::AlgorithmManager::Instance().create(
         "GeneralisedSecondDifference", 1);
 
-    std::vector<double> x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    std::vector<double> y = {0.3,  0.3, 0.3,  0.47, 3.9,
+	Mantid::HistogramData::HistogramX x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+	Mantid::HistogramData::HistogramY y = {0.3,  0.3, 0.3,  0.47, 3.9,
                              10.3, 3.9, 0.47, 0.3,  0.3};
     MatrixWorkspace_sptr inputWs = WorkspaceFactory::Instance().create(
         "Workspace2D", 1, y.size(), y.size());
-    inputWs->dataY(0) = y;
-    inputWs->dataX(0) = x;
+    inputWs->mutableY(0) = y;
+    inputWs->mutableX(0) = x;
 
     gsd->setProperty("InputWorkspace", inputWs);
     gsd->setProperty("M", "1");
@@ -51,11 +51,11 @@ public:
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(outWs->blocksize(), 4);
 
-    x = outWs->readX(0);
+    x = outWs->x(0);
     TS_ASSERT_EQUALS(x[0], 3);
     TS_ASSERT_EQUALS(x[3], 6);
 
-    y = outWs->readY(0);
+    y = outWs->y(0);
     TS_ASSERT_DELTA(y[1], -7.0300, 0.0001);
     TS_ASSERT_DELTA(y[2], -20.0000, 0.0001);
 
