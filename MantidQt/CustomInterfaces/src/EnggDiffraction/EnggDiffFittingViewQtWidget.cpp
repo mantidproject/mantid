@@ -259,18 +259,6 @@ void EnggDiffFittingViewQtWidget::resetFittingMultiMode() {
   m_fittingMutliRunMode = false;
 }
 
-std::string EnggDiffFittingViewQtWidget::fittingRunNoFactory(
-    std::string bank, std::string fileName, std::string &bankDir,
-    std::string fileDir) {
-
-  std::string genDir = fileName.substr(0, fileName.size() - 1);
-  Poco::Path bankFile(genDir + bank + ".nxs");
-  if (bankFile.isFile()) {
-    bankDir = fileDir + genDir + bank + ".nxs";
-  }
-  return bankDir;
-}
-
 void EnggDiffFittingViewQtWidget::setDataVector(
     std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
     bool plotSinglePeaks) {

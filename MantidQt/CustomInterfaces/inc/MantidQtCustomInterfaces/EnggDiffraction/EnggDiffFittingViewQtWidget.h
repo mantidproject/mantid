@@ -148,9 +148,6 @@ public:
 
   std::string getSaveFile(std::string prevPath) override;
 
-  std::string fittingRunNoFactory(std::string bank, std::string fileName,
-                                  std::string &bankDir, std::string fileDir);
-
   void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data,
                          std::vector<QwtPlotCurve *> &dataVector, bool focused);
 
