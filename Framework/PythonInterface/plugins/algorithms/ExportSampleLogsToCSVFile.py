@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import *
 import os
-from six.moves import range
+from six.moves import range # pylint: disable=redefined-builtin
 
 class ExportSampleLogsToCSVFile(PythonAlgorithm):
     """ Python algorithm to export sample logs to spread sheet file

@@ -171,7 +171,7 @@ class EnggFitPeaks(PythonAlgorithm):
 
             try:
                 param_table, chi_over_dof = self._fit_single_peak(peaks[1][i], initial_params, in_wks, wks_index)
-            except Exception:
+            except RuntimeError:
                 self.log().warning("Problem found when trying to fit a peak centered at {0} (dSpacing), "
                                    "for which the initial guess from FindPeaks is at {1} (ToF). Single "
                                    "peak fitting failed. Skipping this peak."
@@ -306,9 +306,9 @@ class EnggFitPeaks(PythonAlgorithm):
         if 1 == in_wks.getNumberHistograms() and run.hasProperty('difc'):
             difc = run.getLogData('difc').value
             if run.hasProperty('difa'):
-                difa = run.getLogData('difa').value
+                _difa = run.getLogData('difa').value
             else:
-                difa = 0
+                _difa = 0
             if run.hasProperty('tzero'):
                 tzero = run.getLogData('tzero').value
             else:
