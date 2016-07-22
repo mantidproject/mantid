@@ -359,6 +359,69 @@ public:
     pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
   }
 
+  void test_browse_peaks_list() {
+    testing::NiceMock<MockEnggDiffFittingView> mockView;
+    EnggDiffFittingPresenterNoThread pres(&mockView);
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
+    EXPECT_CALL(mockView, focusingDir()).Times(1);
+
+    EXPECT_CALL(mockView, getPreviousDir()).Times(1);
+
+    EXPECT_CALL(mockView, getOpenFile(testing::_)).Times(1);
+
+    EXPECT_CALL(mockView, getSaveFile(testing::_)).Times(0);
+
+    // No errors/0 warnings.
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffFittingPresenter::browsePeaks);
+  }
+
+  void test_save_peaks_list() {
+    testing::NiceMock<MockEnggDiffFittingView> mockView;
+    EnggDiffFittingPresenterNoThread pres(&mockView);
+
+    EXPECT_CALL(mockView, focusingDir()).Times(1);
+
+    EXPECT_CALL(mockView, getPreviousDir()).Times(1);
+
+    EXPECT_CALL(mockView, getSaveFile(testing::_)).Times(1);
+
+    // No errors/No warnings.
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffFittingPresenter::savePeaks);
+  }
+
+  void test_add_peaks_to_empty_list() {
+
+    testing::NiceMock<MockEnggDiffFittingView> mockView;
+    EnggDiffFittingPresenterNoThread pres(&mockView);
+
+    EXPECT_CALL(mockView, peakPickerEnabled()).Times(1).WillOnce(Return(true));
+
+    EXPECT_CALL(mockView, getPeakCentre()).Times(1);
+
+    EXPECT_CALL(mockView, fittingPeaksData()).Times(1).WillOnce(Return(""));
+    ;
+
+    EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
+
+    // should not be updating the status
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
+    // No errors/0 warnings.
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffFittingPresenter::addPeaks);
+  }
+
   void test_shutDown() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView,
