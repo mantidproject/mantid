@@ -248,6 +248,8 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
         wks_group = SimulatedDensityOfStates(PHONONFile=self._isotope_phonon,
                                              SpectrumType='DOS',
                                              Ions='H:P,C:P,O')
+        self.assertEqual(3, wks_group.size())
+        self.assertEqual('wks_group_C:P', wks_group.getItem(0).getName())
 
 if __name__=="__main__":
     unittest.main()
