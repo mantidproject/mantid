@@ -15,8 +15,9 @@ namespace Algorithms {
 const std::string CreateUserDefinedBackground::AUTODISTRIBUTIONKEY =
     "graph1d.autodistribution";
 
-using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
+using Mantid::HistogramData::Histogram;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateUserDefinedBackground)
@@ -161,20 +162,12 @@ CreateUserDefinedBackground::createBackgroundWorkspace(
     yBackground.push_back(y);
   }
 
-  // Find out if user has selected the option "normalize histogram to bin width"
-  const bool distributionPlot = []() {
-    const auto retval =
-        Kernel::ConfigService::Instance().getString(AUTODISTRIBUTIONKEY);
-    return retval == "On";
-  }();
-
-  // Y is frequencies for distribution data (histo), otherwise counts
-  const bool useFrequencies =
-      data->isHistogramData() && (data->isDistribution() || distributionPlot);
+  // Decide if Y data is counts or frequencies
+  const Histogram::YMode yMode = getBackgroundYMode(data, yBackground);
 
   // Apply Y and E data to all spectra in the workspace
   for (size_t spec = 0; spec < outputWS->getNumberHistograms(); spec++) {
-    if (useFrequencies) {
+    if (yMode == Histogram::YMode::Frequencies) {
       outputWS->setFrequencies(spec, yBackground);
       outputWS->setFrequencyStandardDeviations(spec, eBackground);
     } else {
@@ -184,6 +177,61 @@ CreateUserDefinedBackground::createBackgroundWorkspace(
   }
 
   return API::MatrixWorkspace_sptr(std::move(outputWS));
+}
+
+/**
+ * Get Y storage mode for background data.
+ *
+ * - Point data -> counts
+ * - Histogram and distribution -> frequencies
+ * - Histogram, not distribution -> counts, BUT if the data was plotted using
+ * the "normalize histogram to bin width" option then it needs to be multiplied
+ * by bin width
+ *
+ * @param data :: [input] Input workspace
+ * @param yBackground :: [input, output] Y background data - could be changed
+ * depending on options
+ * @returns :: Y storage mode to be used
+ */
+HistogramData::Histogram::YMode CreateUserDefinedBackground::getBackgroundYMode(
+    const API::MatrixWorkspace_const_sptr &data,
+    std::vector<double> &yBackground) const {
+  if (data->isHistogramData()) {
+    if (data->isDistribution()) {
+      return Histogram::YMode::Frequencies;
+    } else {
+      if ("On" ==
+          Kernel::ConfigService::Instance().getString(AUTODISTRIBUTIONKEY)) {
+        // User has selected the option "normalize histogram to bin width"
+        multiplyByBinWidth(data, yBackground);
+      }
+      return Histogram::YMode::Counts;
+    }
+  } else {
+    return Histogram::YMode::Counts;
+  }
+}
+
+/**
+ * Multiplies the Y background data by input workspace bin width, to convert
+ * from frequencies to counts
+ * @param data :: [input] Input workspace - must be histogram data
+ * @param yBackground :: [input, output] Y background data - will be multiplied
+ * by bin width
+ */
+void CreateUserDefinedBackground::multiplyByBinWidth(
+    const API::MatrixWorkspace_const_sptr &data,
+    std::vector<double> &yBackground) const {
+  if (!data->isHistogramData()) {
+    throw std::invalid_argument(
+        "Data is not histogram data: cannot multiply background by bin width");
+  }
+
+  const auto &X = data->binEdges(0);
+  for (size_t i = 0; i < yBackground.size(); ++i) {
+    const double width = X[i + 1] - X[i];
+    yBackground[i] *= width;
+  }
 }
 
 /**

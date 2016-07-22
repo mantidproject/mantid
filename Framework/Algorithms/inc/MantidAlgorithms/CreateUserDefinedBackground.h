@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidHistogramData/Histogram.h"
 namespace Mantid {
 namespace Kernel {
 class Interpolation;
@@ -69,6 +70,13 @@ private:
   Kernel::Interpolation
   getInterpolator(const API::ITableWorkspace_const_sptr &background,
                   const API::MatrixWorkspace_const_sptr &workspace) const;
+  /// Get Y storage mode for background data
+  HistogramData::Histogram::YMode
+  getBackgroundYMode(const API::MatrixWorkspace_const_sptr &data,
+                     std::vector<double> &yBackground) const;
+  /// Multiply y data by bin width
+  void multiplyByBinWidth(const API::MatrixWorkspace_const_sptr &data,
+                          std::vector<double> &yBackground) const;
   /// Key name for "normalize histogram to bin width" option on plots
   static const std::string AUTODISTRIBUTIONKEY;
 };
