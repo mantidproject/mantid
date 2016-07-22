@@ -66,7 +66,8 @@ IProjectSerialisable *InstrumentWindow::loadFromProject(
     // Need a new window
     const QString windowName(QString("InstrumentWindow:") +
                              QString::fromStdString(wsName));
-   auto iw = new InstrumentWindow(name, QString("Instrument"), app, windowName);
+    auto iw =
+        new InstrumentWindow(name, QString("Instrument"), app, windowName);
 
     try {
       iw->selectTab(-1);
