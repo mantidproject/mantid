@@ -52,7 +52,7 @@ SampleLogDialogBase::SampleLogDialogBase(const QString &wsname,
       m_experimentInfoIndex(experimentInfoIndex), buttonPlot(nullptr),
       buttonClose(nullptr), m_spinNumber(nullptr) {
 
-  for (auto i = 0; i < NUM_STATS; ++i) {
+  for (size_t i = 0; i < NUM_STATS; ++i) {
     statValues[i] = nullptr;
   }
 
