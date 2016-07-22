@@ -188,7 +188,8 @@ protected:
                     const std::string &newName) override;
   void afterReplaceHandle(const std::string &name,
                           Mantid::API::Workspace_sptr workspace) override;
-  void saveNotebook(const std::map<int, std::set<int>> &rows);
+  void saveNotebook(const std::set<int> &groups,
+                    const std::map<int, std::set<int>> &rows);
   std::vector<std::unique_ptr<DataProcessorCommand>> getTableList();
 
   void validateModel(Mantid::API::ITableWorkspace_sptr model);

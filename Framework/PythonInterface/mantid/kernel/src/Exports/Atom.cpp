@@ -29,6 +29,10 @@ dict neutron(Atom &self) {
   retval["inc_scatt_length_real"] = self.neutron.inc_scatt_length_real;
   retval["inc_scatt_length_img"] = self.neutron.inc_scatt_length_img;
 
+  retval["tot_scatt_length"] = self.neutron.tot_scatt_length;
+  retval["coh_scatt_length"] = self.neutron.coh_scatt_length;
+  retval["inc_scatt_length"] = self.neutron.inc_scatt_length;
+
   return retval;
 }
 /**
