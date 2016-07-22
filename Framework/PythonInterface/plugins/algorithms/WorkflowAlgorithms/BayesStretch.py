@@ -100,22 +100,13 @@ class BayesStretch(PythonAlgorithm):
         from IndirectCommon import (CheckXrange, CheckAnalysers, getEfixed, GetThetaQ,
                                     CheckHistZero)
         setup_prog = Progress(self, start=0.0, end=0.3, nreports = 5)
-        self.log().information('BayesStretch input')
+        logger.information('BayesStretch input')
+        logger.information('Sample is %s' % self._sam_name)
+        logger.information('Resolution is %s' % self._res_name)
 
         setup_prog.report('Converting to binary for Fortran')
         #convert true/false to 1/0 for fortran
-        o_el = 1 if self._elastic else 0
-
-        #fortran code uses background choices defined using the following numbers
-        setup_prog.report('Encoding input options')
-        if self._background == 'Sloping':
-            o_bgd = 2
-        elif self._background == 'Flat':
-            o_bgd = 1
-        elif self._background == 'Zero':
-            o_bgd = 0
-
-        fitOp = [o_el, o_bgd, 0, 0]
+        fitOp = self._encode_fit_ops(self._elastic, self._background)
 
         setup_prog.report('Establishing save path')
         workdir = config['defaultsave.directory']
@@ -123,14 +114,10 @@ class BayesStretch(PythonAlgorithm):
             workdir = os.getcwd()
             logger.information('Default Save directory is not set. Defaulting to current working Directory: ' + workdir)
 
-        array_len = 4096                           # length of array in Fortran
         setup_prog.report('Checking X Range')
         CheckXrange(self._erange, 'Energy')
 
         nbin,nrbin = self._nbins[0], 1
-
-        logger.information('Sample is %s' % self._sam_name)
-        logger.information('Resolution is %s' % self._res_name)
 
         setup_prog.report('Checking Analysers')
         CheckAnalysers(self._sam_name, self._res_name)
@@ -174,7 +161,7 @@ class BayesStretch(PythonAlgorithm):
             Imin = nout[1]
             Imax = nout[2]
 
-            Nb, Xb, Yb, _ = GetXYE(self._res_name, 0, array_len)     # get resolution data
+            Nb, Xb, Yb, _ = GetXYE(self._res_name, 0, 4096) # get resolution data (4096 = FORTRAN array length)
             numb = [nsam, nsp, ntc, Ndat, nbin, Imin, Imax, Nb, nrbin, Nbet, Nsig]
             rscl = 1.0
             reals = [efix, theta[m], rscl, bnorm]
@@ -182,7 +169,7 @@ class BayesStretch(PythonAlgorithm):
             workflow_prog.report('Processing spectrum number %i' % m)
             xsout, ysout, xbout, ybout, zpout=Que.quest(numb, Xv, Yv, Ev, reals, fitOp,
                                                         Xdat, Xb, Yb, wrks, wrkr, lwrk)
-            dataXs = xsout[:Nsig]               # reduce from fixed Fortran array
+            dataXs = xsout[:Nsig]               # reduce from fixed FORTRAN array
             dataYs = ysout[:Nsig]
             dataXb = xbout[:Nbet]
             dataYb = ybout[:Nbet]
@@ -265,6 +252,25 @@ class BayesStretch(PythonAlgorithm):
         log_prog.report('Setting workspace properties')
 
 #----------------------------- Helper functions -----------------------------
+
+    def _encode_fit_ops(self, elastic, background):
+        """
+        Encode the fit options are boolean values for use in FORTRAN
+        @param elastic      :: If the peak is elastic
+        @param background   :: Type of background to fit
+        @return fit_ops [elastic, background, width, resNorm]
+        """
+
+        if self._background == 'Sloping':
+            o_bgd = 2
+        elif self._background == 'Flat':
+            o_bgd = 1
+        elif self._background == 'Zero':
+            o_bgd = 0
+
+        fitOp = [1 if self._elastic else 0, o_bgd, 0, 0]
+        return fitOp
+
 
     def _create_workspace(self, name, xye, num_spec, vert_axis):
         """
