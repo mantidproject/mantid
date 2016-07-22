@@ -120,7 +120,7 @@ class VisionReduction(PythonAlgorithm):
         bank_list = ["bank%d" % i for i in range(1, 15)]
         bank_property = ",".join(bank_list)
         LoadEventNexus(Filename=NexusFile, BankName=bank_property, OutputWorkspace='__IED_T', LoadMonitors='0')
-        LoadInstrument(Workspace='__IED_T',Filename='/SNS/VIS/shared/autoreduce/VISION_Definition_no_efixed.xml')
+        LoadInstrument(Workspace='__IED_T',Filename='/SNS/VIS/shared/autoreduce/VISION_Definition_no_efixed.xml',RewriteSpectraMap=True)
         MaskDetectors(Workspace='__IED_T', DetectorList=MaskPX)
 
         print "Title:", mtd['__IED_T'].getTitle()
