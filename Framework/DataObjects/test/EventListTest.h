@@ -2585,7 +2585,12 @@ public:
                      HistogramData::Histogram::YMode::Frequencies);
   }
 
-  void test_YMode_works() {
+  void test_YMode_affects_event_data_interpretation() {
+    // Data generated from the events is put into the histogram as Y and E.
+    // Depending on the YMode, this is interpreted as Counts or Frequencies. In
+    // particular, data generated from events is *not* forcibly intepreted as
+    // counts, i.e., internally we do not use Histogram.setCounts(), since the
+    // bin width may be absorbed into the event weight.
     EventList e;
     e += TofEvent(1);
     e += TofEvent(1);
