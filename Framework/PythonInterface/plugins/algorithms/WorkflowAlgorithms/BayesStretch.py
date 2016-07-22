@@ -269,7 +269,7 @@ class BayesStretch(PythonAlgorithm):
             logger.information('Defaulting to current working Directory: ' + workdir)
         return workdir
 
-    #pylint: disable=too-many-arguements
+    #pylint: disable-msg=R0912 #Too many arguements
     def _create_workspace(self, name, xye, num_spec, vert_axis, is_zp_ws = False):
         """
         Creates a workspace from FORTRAN data
