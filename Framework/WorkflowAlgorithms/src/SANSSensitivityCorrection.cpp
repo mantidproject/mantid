@@ -19,6 +19,7 @@
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/ArrayProperty.h"
 namespace Mantid {
 namespace WorkflowAlgorithms {
 
@@ -62,6 +63,12 @@ void SANSSensitivityCorrection::init() {
                   "sample beam center is used)");
   declareProperty("MaskedFullComponent", "",
                   "Component Name to fully mask according to the IDF file.");
+  declareProperty(
+      make_unique<ArrayProperty<int>>("MaskedEdges"),
+      "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
+  declareProperty(
+      "MaskedComponent", "",
+      "Component Name to mask the edges according to the IDF file.");
 
   declareProperty(make_unique<WorkspaceProperty<>>(
       "OutputWorkspace", "", Direction::Output, PropertyMode::Optional));
@@ -292,11 +299,16 @@ void SANSSensitivityCorrection::exec() {
 
         const double minEff = getProperty("MinEfficiency");
         const double maxEff = getProperty("MaxEfficiency");
-        const std::string maskComponent =
+        const std::string maskFullComponent =
             getPropertyValue("MaskedFullComponent");
+        const std::string maskEdges = getPropertyValue("MaskedEdges");
+        const std::string maskComponent = getPropertyValue("MaskedComponent");
+
         effAlg->setProperty("MinEfficiency", minEff);
         effAlg->setProperty("MaxEfficiency", maxEff);
-        effAlg->setProperty("MaskedFullComponent", maskComponent);
+        effAlg->setProperty("MaskedFullComponent", maskFullComponent);
+        effAlg->setProperty("MaskedEdges", maskEdges);
+        effAlg->setProperty("MaskedComponent", maskComponent);
         effAlg->execute();
         floodWS = effAlg->getProperty("OutputWorkspace");
       } else {
