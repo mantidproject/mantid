@@ -550,9 +550,7 @@ public:
 
     // string should be "0.133," instead
     EXPECT_CALL(mockView, setPeakList("0.0133")).Times(0);
-
     EXPECT_CALL(mockView, setPeakList(",0.0133")).Times(0);
-
     EXPECT_CALL(mockView, setPeakList("0.0133,")).Times(1);
 
     // No errors/0 warnings. File entered is not found

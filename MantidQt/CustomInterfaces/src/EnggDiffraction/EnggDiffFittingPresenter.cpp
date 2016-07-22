@@ -84,12 +84,11 @@ void EnggDiffFittingPresenter::notify(
 
   case IEnggDiffFittingPresenter::browsePeaks:
     browsePeaksToFit();
-	break;
+    break;
 
   case IEnggDiffFittingPresenter::savePeaks:
-	savePeakList();
-	break;
-
+    savePeakList();
+    break;
 
   case IEnggDiffFittingPresenter::ShutDown:
     processShutDown();
@@ -782,27 +781,26 @@ void EnggDiffFittingPresenter::addPeakToList() {
   }
 }
 
-void EnggDiffFittingPresenter::savePeakList()
-{
-	try {
-		QString prevPath = QString::fromStdString(m_view->focusingDir());
-		if (prevPath.isEmpty()) {
-			prevPath = QString::fromStdString(m_view->getPreviousDir());
-		}
+void EnggDiffFittingPresenter::savePeakList() {
+  try {
+    QString prevPath = QString::fromStdString(m_view->focusingDir());
+    if (prevPath.isEmpty()) {
+      prevPath = QString::fromStdString(m_view->getPreviousDir());
+    }
 
-		std::string path = m_view->getSaveFile(prevPath.toStdString());
+    std::string path = m_view->getSaveFile(prevPath.toStdString());
 
-		if (path.empty()) {
-			return;
-		}
+    if (path.empty()) {
+      return;
+    }
 
-		fittingWriteFile(path);
-	}
-	catch (...) {
-		m_view->userWarning("Unable to save the peaks file: ",
-			"Invalid file path or or could not be saved. Please try again");
-		return;
-	}
+    fittingWriteFile(path);
+  } catch (...) {
+    m_view->userWarning(
+        "Unable to save the peaks file: ",
+        "Invalid file path or or could not be saved. Please try again");
+    return;
+  }
 }
 
 std::string EnggDiffFittingPresenter::readPeaksFile(std::string fileDir) {

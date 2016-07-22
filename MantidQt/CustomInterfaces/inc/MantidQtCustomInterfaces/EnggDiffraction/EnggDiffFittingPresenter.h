@@ -116,7 +116,8 @@ public:
 
   void setBankItems();
 
-  void setRunNoItems(const std::vector<std::string> &runNumVector, bool multiRun);
+  void setRunNoItems(const std::vector<std::string> &runNumVector,
+                     bool multiRun);
 
   void setDefaultBank(const std::vector<std::string> &splittedBaseName,
                       const std::string &selectedFile);

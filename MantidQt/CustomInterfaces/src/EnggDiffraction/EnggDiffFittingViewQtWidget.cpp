@@ -225,9 +225,8 @@ void EnggDiffFittingViewQtWidget::browseClicked() {
 }
 
 void EnggDiffFittingViewQtWidget::saveClicked() {
-	m_presenter->notify(IEnggDiffFittingPresenter::savePeaks);
+  m_presenter->notify(IEnggDiffFittingPresenter::savePeaks);
 }
-
 
 void EnggDiffFittingViewQtWidget::setBankDir(int idx) {
 
@@ -399,7 +398,8 @@ void EnggDiffFittingViewQtWidget::setPreviousDir(const std::string &path) {
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(qPath);
 }
 
-std::string EnggDiffFittingViewQtWidget::getOpenFile(const std::string &prevPath) {
+std::string
+EnggDiffFittingViewQtWidget::getOpenFile(const std::string &prevPath) {
 
   QString path(QFileDialog::getOpenFileName(
       this, tr("Open Peaks To Fit"), QString::fromStdString(prevPath),
@@ -408,13 +408,14 @@ std::string EnggDiffFittingViewQtWidget::getOpenFile(const std::string &prevPath
   return path.toStdString();
 }
 
-std::string EnggDiffFittingViewQtWidget::getSaveFile(const std::string &prevPath) {
+std::string
+EnggDiffFittingViewQtWidget::getSaveFile(const std::string &prevPath) {
 
-	QString path(QFileDialog::getSaveFileName(
-		this, tr("Save Expected Peaks List"), QString::fromStdString(prevPath),
-		QString::fromStdString(g_peaksListExt)));
+  QString path(QFileDialog::getSaveFileName(
+      this, tr("Save Expected Peaks List"), QString::fromStdString(prevPath),
+      QString::fromStdString(g_peaksListExt)));
 
-	return path.toStdString();
+  return path.toStdString();
 }
 
 void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
