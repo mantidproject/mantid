@@ -81,7 +81,7 @@ public:
     Cones = 4
   };
 
-  enum SurfaceFunctionType {
+  enum class SurfaceFunctionType {
     XYZ,
     Plot3D,
     MatrixPlot3D,

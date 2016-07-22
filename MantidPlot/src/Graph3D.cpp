@@ -2522,22 +2522,22 @@ IProjectSerialisable *Graph3D::loadFromProject(const std::string &lines,
     auto params = graph->readSurfaceFunction(tsv);
 
     switch (params.type) {
-    case Plot3D:
+    case SurfaceFunctionType::Plot3D:
       graph->setupPlot3D(app, caption, params);
       break;
-    case XYZ:
+    case SurfaceFunctionType::XYZ:
       graph->setupPlotXYZ(app, caption, params);
       break;
-    case MatrixPlot3D:
+    case SurfaceFunctionType::MatrixPlot3D:
       graph->setupMatrixPlot3D(app, caption, params);
       break;
-    case MantidMatrixPlot3D:
+    case SurfaceFunctionType::MantidMatrixPlot3D:
       graph->setupMantidMatrixPlot3D(app, tsv);
       break;
-    case ParametricSurface:
+    case SurfaceFunctionType::ParametricSurface:
       graph->setupPlotParametricSurface(app, params);
       break;
-    case Surface:
+    case SurfaceFunctionType::Surface:
       graph->setupPlotSurface(app, params);
       break;
     default:
@@ -2871,7 +2871,7 @@ Graph3D::readSurfaceFunction(TSVSerialiser &tsv) {
   tsv >> params.zStart;
   tsv >> params.zStop;
 
-  if (params.type == ParametricSurface) {
+  if (params.type == SurfaceFunctionType::ParametricSurface) {
     QString func = QString::fromStdString(params.formula);
     QStringList funcParts = func.split(";", QString::SkipEmptyParts);
 
@@ -2887,7 +2887,7 @@ Graph3D::readSurfaceFunction(TSVSerialiser &tsv) {
     params.uPeriodic = funcParts[9].toInt();
     params.vPeriodic = funcParts[10].toInt();
 
-  } else if (params.type == Surface) {
+  } else if (params.type == SurfaceFunctionType::Surface) {
     QString func = QString::fromStdString(params.formula);
     QStringList funcParts = func.split(";", QString::SkipEmptyParts);
 
@@ -2911,18 +2911,18 @@ Graph3D::readSurfaceFunctionType(const std::string &formula) {
 
   QString func = QString::fromStdString(formula);
   if (func.endsWith("(Y)", Qt::CaseSensitive))
-    type = Plot3D;
+    type = SurfaceFunctionType::Plot3D;
   else if (func.contains("(Z)", Qt::CaseSensitive) > 0)
-    type = XYZ;
+    type = SurfaceFunctionType::XYZ;
   else if (func.startsWith("matrix<", Qt::CaseSensitive) &&
            func.endsWith(">", Qt::CaseInsensitive))
-    type = MatrixPlot3D;
+    type = SurfaceFunctionType::MatrixPlot3D;
   else if (func.contains("mantidMatrix3D"))
-    type = MantidMatrixPlot3D;
+    type = SurfaceFunctionType::MantidMatrixPlot3D;
   else if (func.contains(","))
-    type = ParametricSurface;
+    type = SurfaceFunctionType::ParametricSurface;
   else
-    type = Surface;
+    type = SurfaceFunctionType::Surface;
 
   return type;
 }
