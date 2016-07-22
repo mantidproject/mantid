@@ -432,8 +432,12 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             mtd[self._out_ws_name].setYUnitLabel('Intensity')
 
             # Add the sample material to the workspace
+            chemical = ion_name
+            if ':' in ion_name:
+                chemical = ion_name[:ion_name.index(':')]
+
             SetSampleMaterial(InputWorkspace=self._out_ws_name,
-                              ChemicalFormula=ion_name)
+                              ChemicalFormula=chemical)
 
             # Multiply intensity by scatttering cross section
             if self._scale_by_cross_section == 'Incoherent':
