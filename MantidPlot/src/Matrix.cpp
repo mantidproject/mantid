@@ -1540,7 +1540,7 @@ IProjectSerialisable *Matrix::loadFromProject(const std::string &lines,
     gStr = tsv.lineAsString("geometry");
   }
 
-  Matrix *matrix = new Matrix(app->scriptingEnv(), rows, cols, "", app, "");
+  auto matrix = new Matrix(app->scriptingEnv(), rows, cols, "", app, "");
   app->initMatrix(matrix, caption);
   if (matrix->objectName() != caption) // the matrix was renamed
     app->renamedTables << caption << matrix->objectName();

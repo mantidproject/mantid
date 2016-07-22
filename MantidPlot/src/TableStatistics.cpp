@@ -316,7 +316,7 @@ IProjectSerialisable *TableStatistics::loadFromProject(const std::string &lines,
   // create instance
   int typeCode = type == "row" ? TableStatistics::row : TableStatistics::column;
 
-  TableStatistics *table = new TableStatistics(
+  auto table = new TableStatistics(
       app->scriptingEnv(), app, app->table(QString::fromStdString(tableName)),
       (TableStatistics::Type)typeCode, targets);
 

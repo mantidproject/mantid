@@ -3023,7 +3023,7 @@ IProjectSerialisable *Table::loadFromProject(const std::string &lines,
   Mantid::Kernel::Strings::convert<int>(valVec[2], cols);
 
   // create instance
-  Table *table = new Table(app->scriptingEnv(), rows, cols, "", app);
+  auto table = new Table(app->scriptingEnv(), rows, cols, "", app);
   app->initTable(table, caption);
   if (table->objectName() != caption) { // the table was renamed
     app->renamedTables << caption << table->objectName();

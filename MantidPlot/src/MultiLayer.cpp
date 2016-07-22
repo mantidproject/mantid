@@ -1756,7 +1756,7 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
 
   QString label = caption;
 
-  MultiLayer *multiLayer = new MultiLayer(app, 0, rows, cols);
+  auto multiLayer = new MultiLayer(app, 0, rows, cols);
 
   TSVSerialiser tsv(lines);
 
@@ -1805,9 +1805,9 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
   }
 
   if (tsv.hasSection("graph")) {
-    std::vector<std::string> graphSections = tsv.sections("graph");
-    for (auto it = graphSections.begin(); it != graphSections.end(); ++it) {
-      const std::string graphLines = *it;
+    auto graphSections = tsv.sections("graph");
+    for (auto it = graphSections.cbegin(); it != graphSections.cend(); ++it) {
+      auto graphLines = *it;
 
       TSVSerialiser gtsv(graphLines);
 
@@ -1815,7 +1815,7 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
         int x = 0, y = 0, w = 0, h = 0;
         gtsv >> x >> y >> w >> h;
 
-        Graph *g = dynamic_cast<Graph *>(multiLayer->addLayer(x, y, w, h));
+        auto g = dynamic_cast<Graph *>(multiLayer->addLayer(x, y, w, h));
         if (g)
           g->loadFromProject(graphLines, app, fileVersion);
       }

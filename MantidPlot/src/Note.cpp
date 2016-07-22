@@ -150,7 +150,7 @@ IProjectSerialisable *Note::loadFromProject(const std::string &lines,
 
   const QString name = QString::fromUtf8(firstLineVec[0].c_str());
   const QString date = QString::fromUtf8(firstLineVec[1].c_str());
-  Note *note = new Note("", app, name);
+  auto note = new Note("", app, name);
 
   app->setListViewDate(name, date);
   note->setBirthDate(date);
