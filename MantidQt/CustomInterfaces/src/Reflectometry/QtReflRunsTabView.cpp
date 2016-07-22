@@ -50,8 +50,7 @@ void QtReflRunsTabView::initLayout() {
   ReflGenericDataProcessorPresenterFactory presenterFactory;
 
   QDataProcessorWidget *qDataProcessorWidget = new QDataProcessorWidget(
-      std::unique_ptr<DataProcessorPresenter>(presenterFactory.create()),
-      this);
+      std::unique_ptr<DataProcessorPresenter>(presenterFactory.create()), this);
   ui.layoutProcessPane->addWidget(qDataProcessorWidget);
 
   // Custom context menu for table

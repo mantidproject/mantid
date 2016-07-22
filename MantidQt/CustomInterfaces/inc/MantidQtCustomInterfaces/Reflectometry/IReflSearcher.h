@@ -10,7 +10,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 /** @class IReflSearcher
 
-IReflSearcher is an interface for search implementations used by IReflRunsTabPresenter
+IReflSearcher is an interface for search implementations used by
+IReflRunsTabPresenter
 implementations.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge

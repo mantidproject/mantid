@@ -167,8 +167,8 @@ void ReflRunsTabPresenter::search() {
       pythonSrc << "  pass\n";
       m_mainPresenter->runPythonAlgorithm(pythonSrc.str());
     } catch (std::runtime_error &e) {
-      m_mainPresenter->giveUserCritical("Error Logging in:\n" + std::string(e.what()),
-                               "login failed");
+      m_mainPresenter->giveUserCritical(
+          "Error Logging in:\n" + std::string(e.what()), "login failed");
     }
   }
   std::string sessionId;
@@ -348,7 +348,7 @@ ReflRunsTabPresenter::getPreprocessingOptions() const {
 * @return :: Global pre-processing options
 */
 std::string ReflRunsTabPresenter::getProcessingOptions() const {
-	return m_mainPresenter->getReductionOptions();
+  return m_mainPresenter->getReductionOptions();
 }
 
 /** Requests global pre-processing options. Options are supplied by the main
@@ -356,7 +356,7 @@ std::string ReflRunsTabPresenter::getProcessingOptions() const {
 * @return :: Global pre-processing options
 */
 std::string ReflRunsTabPresenter::getPostprocessingOptions() const {
-	return m_mainPresenter->getStitchOptions();
+  return m_mainPresenter->getStitchOptions();
 }
 
 /**

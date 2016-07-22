@@ -65,8 +65,8 @@ namespace MantidWidgets {
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorWhiteList &whitelist,
-    const std::map<std::string, DataProcessorPreprocessingAlgorithm>
-        &preprocessMap,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+        preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
@@ -778,9 +778,8 @@ void GenericDataProcessorPresenter::reduceRow(int groupNo, int rowNo) {
   }
 
   /* Now deal with 'Options' column */
-  options = m_model
-                ->data(m_model->index(rowNo, m_model->columnCount() - 1,
-                                      m_model->index(groupNo, 0)))
+  options = m_model->data(m_model->index(rowNo, m_model->columnCount() - 1,
+                                         m_model->index(groupNo, 0)))
                 .toString()
                 .toStdString();
   // Parse and set any user-specified options

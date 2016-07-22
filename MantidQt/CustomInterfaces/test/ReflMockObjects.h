@@ -85,24 +85,24 @@ public:
 
 class MockMainWindowView : public IReflMainWindowView {
 public:
-	MOCK_METHOD3(askUserString,
-		std::string(const std::string &, const std::string &,
-			const std::string &));
-	MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
-	MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
-	MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
-	MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
-	MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
-	~MockMainWindowView() override {};
+  MOCK_METHOD3(askUserString,
+               std::string(const std::string &, const std::string &,
+                           const std::string &));
+  MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
+  MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
+  MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
+  MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
+  MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
+  ~MockMainWindowView() override{};
 };
 
 /**** Presenters ****/
 
 class MockRunsTabPresenter : public IReflRunsTabPresenter {
 public:
-	void notify(IReflRunsTabPresenter::Flag flag) override {};
-	void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {};
-	~MockRunsTabPresenter() override {};
+  void notify(IReflRunsTabPresenter::Flag flag) override{};
+  void acceptMainPresenter(IReflMainWindowPresenter *presenter) override{};
+  ~MockRunsTabPresenter() override{};
 };
 
 class MockSettingsTabPresenter : public IReflSettingsTabPresenter {

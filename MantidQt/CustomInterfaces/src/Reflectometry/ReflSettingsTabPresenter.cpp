@@ -106,17 +106,11 @@ void ReflSettingsTabPresenter::createReductionHints() {
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
   // The blacklist
-  std::set<std::string> blacklist = {"ThetaIn",
-                                     "ThetaOut",
-                                     "InputWorkspace",
-                                     "OutputWorkspace",
-                                     "OutputWorkspaceWavelength",
-                                     "FirstTransmissionRun",
-                                     "SecondTransmissionRun",
-                                     "MomentumTransferMinimum",
-                                     "MomentumTransferMaximum",
-                                     "MomentumTransferStep",
-                                     "ScaleFactor"};
+  std::set<std::string> blacklist = {
+      "ThetaIn", "ThetaOut", "InputWorkspace", "OutputWorkspace",
+      "OutputWorkspaceWavelength", "FirstTransmissionRun",
+      "SecondTransmissionRun", "MomentumTransferMinimum",
+      "MomentumTransferMaximum", "MomentumTransferStep", "ScaleFactor"};
   AlgorithmHintStrategy strategy(alg, blacklist);
 
   m_view->createReductionHints(strategy.createHints());

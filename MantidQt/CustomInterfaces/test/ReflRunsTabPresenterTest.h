@@ -83,8 +83,7 @@ public:
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     EXPECT_CALL(mockMainPresenter,
-                askUserString("Prompt", "Title", "DefaultValue"))
-        .Times(1);
+                askUserString("Prompt", "Title", "DefaultValue")).Times(1);
     presenter.askUserString("Prompt", "Title", "DefaultValue");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -131,8 +130,7 @@ public:
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     EXPECT_CALL(mockMainPresenter,
-                giveUserCritical("Prompt", "Critical Message"))
-        .Times(1);
+                giveUserCritical("Prompt", "Critical Message")).Times(1);
     presenter.giveUserCritical("Prompt", "Critical Message");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));

@@ -1116,12 +1116,10 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
-    EXPECT_CALL(mockMainPresenter,
-                getProcessingOptions())
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
-        .Times(0);
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions()).Times(0);
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillRepeatedly(Return(false));
