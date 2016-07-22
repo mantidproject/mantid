@@ -30,17 +30,14 @@ using namespace Mantid::Kernel;
 * over the initialisation order and placement of the widgets inside
 * the window.
 *
-*	@param wsname The name of the workspace for which the logs will be
-*displayed
-*	@param parentContainer The parent container relative to which the window
-*will be centered.
-*						Also delegates the parentContainer
-*to
-*the QDialog(QWidget, flags) constructor.
-*	@param flags Flags for QT
-*				Also delegates the flags to the QDialog(QWidget,
-*flags) constructor
-*	@param experimentInfoIndex Index into the ExperimentInfo list.
+*	@param wsname :: The name of the workspace for which the logs will be
+*		displayed
+*	@param parentContainer :: The parent container relative to
+*		which the window will be centered. Also
+*		delegates the parentContainer to
+*		the QDialog(QWidget, flags) constructor.
+*	@param flags :: Flags for QDialog
+*	@param experimentInfoIndex :: Index into the ExperimentInfo list.
 *
 *	@author Martyn Gigg, Tessella Support Services plc
 *	@date 05/11/2009

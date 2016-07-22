@@ -22,9 +22,8 @@ using namespace Mantid::Kernel;
 //----------------------------------
 /**
 * Construct an object of this type
-*	@param wsname :: The name of the workspace object from which to retrieve
-*the
-*	log files
+*	@param wsname :: The name of the workspace object from
+*			which to retrieve the log files
 *	@param mui :: The MantidUI area
 *	@param flags :: Window flags that are passed the the QDialog constructor
 *	@param experimentInfoIndex :: optional index in the array of
