@@ -1,5 +1,6 @@
-
 #include "MantidGeometry/Crystal/Group.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
@@ -11,8 +12,10 @@
 
 using namespace Mantid::Geometry;
 using Mantid::Geometry::SymmetryOperation;
-
+using Mantid::PythonInterface::Converters::PyObjectToMatrix;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(Group)
 
 namespace {
 std::vector<std::string> getSymmetryOperationStrings(Group &self) {
@@ -46,6 +49,15 @@ Group_sptr constructGroupFromPythonList(const boost::python::list &symOpList) {
 
   return boost::const_pointer_cast<Group>(
       GroupFactory::create<Group>(operations));
+}
+
+bool isInvariantDefault(Group &self, const boost::python::object &tensor) {
+  return self.isInvariant(PyObjectToMatrix(tensor)());
+}
+
+bool isInvariantTolerance(Group &self, const boost::python::object &tensor,
+                          double tolerance) {
+  return self.isInvariant(PyObjectToMatrix(tensor)(), tolerance);
 }
 }
 
@@ -89,6 +101,14 @@ void export_Group() {
       .def("containsOperation", &Group::containsOperation,
            (arg("self"), arg("operation")),
            "Checks whether a SymmetryOperation is included in Group.")
+
+      .def("isInvariant", &isInvariantDefault, (arg("self"), arg("tensor")),
+           "Returns true if the tensor is not changed by the group's symmetry "
+           "operations with a tolerance of 1e-8.")
+      .def("isInvariant", &isInvariantTolerance,
+           (arg("self"), arg("tensor"), arg("tolerance")),
+           "Returns true if the tensor is not changed by the group's symmetry "
+           "operations with the given tolerance.")
       .def("isGroup", &Group::isGroup, arg("self"),
            "Checks whether the contained symmetry "
            "operations fulfill the group axioms.")

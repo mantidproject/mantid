@@ -95,7 +95,7 @@ void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,
   // dimensionless
   else if (lhs->YUnit() == rhs->YUnit() && rhs->blocksize() > 1) {
     out->setYUnit("");
-    out->isDistribution(true);
+    out->setDistribution(true);
   }
   // Else we need to set the unit that results from the division
   else {
@@ -118,8 +118,8 @@ void Divide::performEventBinaryOperation(DataObjects::EventList &lhs,
                                          const DataObjects::EventList &rhs) {
   // We must histogram the rhs event list to divide.
   MantidVec rhsY, rhsE;
-  rhs.generateHistogram(rhs.constDataX(), rhsY, rhsE);
-  lhs.divide(rhs.constDataX(), rhsY, rhsE);
+  rhs.generateHistogram(rhs.readX(), rhsY, rhsE);
+  lhs.divide(rhs.readX(), rhsY, rhsE);
 }
 
 /** Carries out the binary operation IN-PLACE on a single EventList,
@@ -209,7 +209,7 @@ std::string Divide::checkSizeCompatibility(
   // If RHS only has one value (1D vertical), the number of histograms needs to
   // match.
   // Each lhs spectrum will be divided by that scalar
-  // std::cout << "rhs->blocksize() " << rhs->blocksize() << std::endl;
+  // std::cout << "rhs->blocksize() " << rhs->blocksize() << '\n';
   // Are we allowing the division by different # of spectra, using detector IDs
   // to match up?
   if (m_AllowDifferentNumberSpectra ||

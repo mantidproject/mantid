@@ -1,16 +1,17 @@
 #ifndef FLATBACKGROUNDTEST_H_
 #define FLATBACKGROUNDTEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/CalculateFlatBackground.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/Axis.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <boost/lexical_cast.hpp>
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -117,11 +118,11 @@ public:
     MersenneTwister randGen(seed, lower, upper);
 
     for (int i = 0; i < NUMBINS; ++i) {
-      WS->dataX(0)[i] = i;
-      WS->dataY(0)[i] = bg + randGen.nextValue();
-      WS->dataE(0)[i] = 0.05 * WS->dataY(0)[i];
+      WS->mutableX(0)[i] = i;
+      WS->mutableY(0)[i] = bg + randGen.nextValue();
+      WS->mutableE(0)[i] = 0.05 * WS->y(0)[i];
     }
-    WS->dataX(0)[NUMBINS] = NUMBINS;
+    WS->mutableX(0)[NUMBINS] = NUMBINS;
 
     AnalysisDataService::Instance().add("calcFlatBG", WS);
 
@@ -132,12 +133,12 @@ public:
 
     for (int j = 0; j < NUMSPECS; ++j) {
       for (int i = 0; i < NUMBINS; ++i) {
-        WS2D->dataX(j)[i] = i;
+        WS2D->mutableX(j)[i] = i;
         // any function that means the calculation is non-trivial
-        WS2D->dataY(j)[i] = j + 4 * (i + 1) - (i * i) / 10;
-        WS2D->dataE(j)[i] = 2 * i;
+        WS2D->mutableY(j)[i] = j + 4 * (i + 1) - (i * i) / 10;
+        WS2D->mutableE(j)[i] = 2 * i;
       }
-      WS2D->dataX(j)[NUMBINS] = NUMBINS;
+      WS2D->mutableX(j)[NUMBINS] = NUMBINS;
     }
     // used only in the last test
     this->addInstrument(WS2D);
@@ -165,9 +166,9 @@ public:
     MatrixWorkspace_sptr outputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed");
     // The X vectors should be the same
-    TS_ASSERT_DELTA(inputWS->readX(0), outputWS->readX(0), 1e-6)
+    TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
     // Just do a spot-check on Y & E
-    const Mantid::MantidVec &Y = outputWS->readY(0);
+    auto &Y = outputWS->y(0);
     for (unsigned int i = 0; i < Y.size(); ++i) {
       TS_ASSERT_LESS_THAN(Y[i], 1.5)
     }
@@ -182,9 +183,9 @@ public:
     MatrixWorkspace_sptr outputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed");
     // The X vectors should be the same
-    TS_ASSERT_DELTA(inputWS->readX(0), outputWS->readX(0), 1e-6)
+    TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
     // Just do a spot-check on Y & E
-    const Mantid::MantidVec &Y = outputWS->readY(0);
+    auto &Y = outputWS->y(0);
     for (unsigned int i = 0; i < Y.size(); ++i) {
       TS_ASSERT(100.3431 > Y[i]);
     }
@@ -200,13 +201,13 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "calculateflatbackgroundtest_first");
     // The X vectors should be the same
-    TS_ASSERT_DELTA(inputWS->readX(0), outputWS->readX(0), 1e-6)
+    TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
 
     for (int j = 0; j < NUMSPECS; ++j) {
-      const Mantid::MantidVec &YIn = inputWS->readY(j);
-      const Mantid::MantidVec &EIn = inputWS->readE(j);
-      const Mantid::MantidVec &YOut = outputWS->readY(j);
-      const Mantid::MantidVec &EOut = outputWS->readE(j);
+      auto &YIn = inputWS->y(j);
+      auto &EIn = inputWS->e(j);
+      auto &YOut = outputWS->y(j);
+      auto &EOut = outputWS->e(j);
       // do our own calculation of the background and its error to check with
       // later
       double background = 0, backError = 0;
@@ -242,13 +243,13 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "calculateflatbackgroundtest_first");
     // The X vectors should be the same
-    TS_ASSERT_DELTA(inputWS->readX(0), outputWS->readX(0), 1e-6)
+    TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
 
     for (int j = 0; j < NUMSPECS; ++j) {
-      const Mantid::MantidVec &YIn = inputWS->readY(j);
-      const Mantid::MantidVec &EIn = inputWS->readE(j);
-      const Mantid::MantidVec &YOut = outputWS->readY(j);
-      const Mantid::MantidVec &EOut = outputWS->readE(j);
+      auto &YIn = inputWS->y(j);
+      auto &EIn = inputWS->e(j);
+      auto &YOut = outputWS->y(j);
+      auto &EOut = outputWS->e(j);
       // do our own calculation of the background and its error to check with
       // later
       double background = 0, backError = 0;
@@ -278,13 +279,13 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "calculateflatbackgroundtest_second");
     // The X vectors should be the same
-    TS_ASSERT_DELTA(inputWS->readX(0), outputWS->readX(0), 1e-6)
+    TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
 
     for (int j = 0; j < NUMSPECS; ++j) {
-      const Mantid::MantidVec &YIn = inputWS->readY(j);
-      const Mantid::MantidVec &EIn = inputWS->readE(j);
-      const Mantid::MantidVec &YOut = outputWS->readY(j);
-      const Mantid::MantidVec &EOut = outputWS->readE(j);
+      auto &YIn = inputWS->y(j);
+      auto &EIn = inputWS->e(j);
+      auto &YOut = outputWS->y(j);
+      auto &EOut = outputWS->e(j);
       // do our own calculation of the background and its error to check with
       // later
       double background = 0, backError = 0, numSummed = 0;
@@ -320,13 +321,13 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "calculateflatbackgroundtest_second");
     // The X vectors should be the same
-    TS_ASSERT_DELTA(inputWS->readX(0), outputWS->readX(0), 1e-6)
+    TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
 
     for (int j = 0; j < NUMSPECS; ++j) {
-      const Mantid::MantidVec &YIn = inputWS->readY(j);
-      const Mantid::MantidVec &EIn = inputWS->readE(j);
-      const Mantid::MantidVec &YOut = outputWS->readY(j);
-      const Mantid::MantidVec &EOut = outputWS->readE(j);
+      auto &YIn = inputWS->y(j);
+      auto &EIn = inputWS->e(j);
+      auto &YOut = outputWS->y(j);
+      auto &EOut = outputWS->e(j);
       // do our own calculation of the background and its error to check with
       // later
       double background = 0, backError = 0, numSummed = 0;
@@ -354,11 +355,11 @@ public:
     WS->initialize(1, NUMBINS + 1, NUMBINS);
 
     for (int i = 0; i < NUMBINS; ++i) {
-      WS->dataX(0)[i] = 2 * i;
-      WS->dataY(0)[i] = YVALUE;
-      WS->dataE(0)[i] = YVALUE / 3.0;
+      WS->mutableX(0)[i] = 2 * i;
+      WS->mutableY(0)[i] = YVALUE;
+      WS->mutableE(0)[i] = YVALUE / 3.0;
     }
-    WS->dataX(0)[NUMBINS] = 2 * (NUMBINS - 1) + 4.0;
+    WS->mutableX(0)[NUMBINS] = 2 * (NUMBINS - 1) + 4.0;
 
     Mantid::Algorithms::CalculateFlatBackground back;
     back.initialize();
@@ -381,10 +382,10 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "calculateflatbackgroundtest_third");
     // The X vectors should be the same
-    TS_ASSERT_DELTA(WS->readX(0), outputWS->readX(0), 1e-6)
+    TS_ASSERT_DELTA(WS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
 
-    const Mantid::MantidVec &YOut = outputWS->readY(0);
-    const Mantid::MantidVec &EOut = outputWS->readE(0);
+    auto &YOut = outputWS->y(0);
+    auto &EOut = outputWS->e(0);
 
     TS_ASSERT_DELTA(YOut[5], 50.0, 1e-6)
     TS_ASSERT_DELTA(YOut[25], 50.0, 1e-6)
@@ -419,13 +420,13 @@ public:
     MatrixWorkspace_sptr outputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed1");
     // The X vectors should be the same
-    TS_ASSERT_DELTA(inputWS->readX(0), outputWS->readX(0), 1e-6)
+    TS_ASSERT_DELTA(inputWS->x(0).rawData(), outputWS->x(0).rawData(), 1e-6)
 
     for (int j = 0; j < NUMSPECS; ++j) {
-      const Mantid::MantidVec &YIn = inputWS->readY(j);
-      const Mantid::MantidVec &EIn = inputWS->readE(j);
-      const Mantid::MantidVec &YOut = outputWS->readY(j);
-      const Mantid::MantidVec &EOut = outputWS->readE(j);
+      auto &YIn = inputWS->y(j);
+      auto &EIn = inputWS->e(j);
+      auto &YOut = outputWS->y(j);
+      auto &EOut = outputWS->e(j);
 
       for (int i = 0; i < NUMBINS; ++i) {
         TS_ASSERT_DELTA(YIn[i], YOut[i], 1e-12)
@@ -473,7 +474,7 @@ private:
       physicalPixel->setPos(detXPos, ypos, 0.0);
       testInst->add(physicalPixel);
       testInst->markAsMonitor(physicalPixel);
-      WS->getSpectrum(i)->addDetectorID(physicalPixel->getID());
+      WS->getSpectrum(i).addDetectorID(physicalPixel->getID());
     }
   }
 };

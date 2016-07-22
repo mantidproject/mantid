@@ -4,18 +4,28 @@
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/ProgressableView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
-#include "MantidQtMantidWidgets/SlitCalculator.h"
+#include "MantidQtMantidWidgets/ProgressableView.h"
 #include "ui_ReflMainWidget.h"
 
 namespace MantidQt {
+
+namespace MantidWidgets {
+// Forward decs
+class DataProcessorCommand;
+class DataProcessorCommandAdapter;
+class SlitCalculator;
+}
+
 namespace CustomInterfaces {
-// Forward dec
-class ReflCommandAdapter;
-using ReflCommandAdapter_uptr = std::unique_ptr<ReflCommandAdapter>;
+
+// Forward decs
+class IReflPresenter;
+class ReflSearchModel;
+
+using MantidWidgets::DataProcessorCommand;
+using MantidWidgets::DataProcessorCommandAdapter;
+using MantidWidgets::SlitCalculator;
 
 /** QtReflMainView : Provides an interface for processing reflectometry data.
 
@@ -40,9 +50,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport QtReflMainView : public MantidQt::API::UserSubWindow,
-                                 public ReflMainView,
-                                 public ProgressableView {
+class MANTIDQT_CUSTOMINTERFACES_DLL QtReflMainView
+    : public MantidQt::API::UserSubWindow,
+      public ReflMainView,
+      public MantidQt::MantidWidgets::ProgressableView {
   Q_OBJECT
 public:
   QtReflMainView(QWidget *parent = 0);
@@ -65,8 +76,10 @@ public:
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
   void setTransferMethods(const std::set<std::string> &methods) override;
-  void setTableCommands(std::vector<ReflCommand_uptr> tableCommands) override;
-  void setRowCommands(std::vector<ReflCommand_uptr> rowCommands) override;
+  void setTableCommands(std::vector<std::unique_ptr<DataProcessorCommand>>
+                            tableCommands) override;
+  void setRowCommands(
+      std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) override;
   void clearCommands() override;
 
   // Set the status of the progress bar
@@ -88,7 +101,7 @@ private:
   // initialise the interface
   void initLayout() override;
   // Adds an action (command) to a menu
-  void addToMenu(QMenu *menu, ReflCommand_uptr command);
+  void addToMenu(QMenu *menu, std::unique_ptr<DataProcessorCommand> command);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 
@@ -99,17 +112,16 @@ private:
   // the interface
   Ui::reflMainWidget ui;
   // the slit calculator
-  MantidWidgets::SlitCalculator *m_calculator;
+  SlitCalculator *m_calculator;
   // Command adapters
-  std::vector<ReflCommandAdapter_uptr> m_commands;
+  std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_commands;
 
 private slots:
   void on_actionSearch_triggered();
   void on_actionTransfer_triggered();
-  void on_actionHelp_triggered();
   void slitCalculatorTriggered();
   void icatSearchComplete();
-
+  void instrumentChanged(int index);
   void showSearchContextMenu(const QPoint &pos);
 };
 

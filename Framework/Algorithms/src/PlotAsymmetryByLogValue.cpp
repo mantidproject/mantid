@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "MantidAPI/AlgorithmManager.h"
-#include <MantidAPI/FileFinder.h>
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/ScopedWorkspace.h"
@@ -20,6 +19,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "Poco/File.h"
+#include <MantidAPI/FileFinder.h>
 
 namespace // anonymous
     {
@@ -311,7 +311,7 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad(size_t runNumber) {
 
   // Check if file exists
   if (!Poco::File(fn.str()).exists()) {
-    m_log.warning() << "File " << fn.str() << " not found" << std::endl;
+    m_log.warning() << "File " << fn.str() << " not found\n";
     return Workspace_sptr();
   }
 
@@ -508,11 +508,11 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN,
 
     // First run number with last base name
     std::ostringstream tempFirst;
-    tempFirst << lastBase << firstFN << firstExt << std::endl;
+    tempFirst << lastBase << firstFN << firstExt << '\n';
     std::string pathFirst = FileFinder::Instance().getFullPath(tempFirst.str());
     // Last run number with first base name
     std::ostringstream tempLast;
-    tempLast << firstBase << lastFN << lastExt << std::endl;
+    tempLast << firstBase << lastFN << lastExt << '\n';
     std::string pathLast = FileFinder::Instance().getFullPath(tempLast.str());
 
     // Try to correct this on the fly by
@@ -522,14 +522,14 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN,
       fnExt = firstExt;
       g_log.warning()
           << "First and last run are not in the same directory. File "
-          << pathLast << " will be used instead." << std::endl;
+          << pathLast << " will be used instead.\n";
     } else if (Poco::File(pathFirst).exists()) {
       // ...or viceversa
       fnBase = lastBase;
       fnExt = lastExt;
       g_log.warning()
           << "First and last run are not in the same directory. File "
-          << pathFirst << " will be used instead." << std::endl;
+          << pathFirst << " will be used instead.\n";
     } else {
       throw std::runtime_error(
           "First and last runs are not in the same directory.");
@@ -821,17 +821,13 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
     return value;
   if (convertLogToDouble<float>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<int>(property, value, m_logFunc))
+  if (convertLogToDouble<int32_t>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<long>(property, value, m_logFunc))
+  if (convertLogToDouble<int64_t>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<long long>(property, value, m_logFunc))
+  if (convertLogToDouble<uint32_t>(property, value, m_logFunc))
     return value;
-  if (convertLogToDouble<unsigned int>(property, value, m_logFunc))
-    return value;
-  if (convertLogToDouble<unsigned long>(property, value, m_logFunc))
-    return value;
-  if (convertLogToDouble<unsigned long long>(property, value, m_logFunc))
+  if (convertLogToDouble<uint64_t>(property, value, m_logFunc))
     return value;
   // try if it's a string and can be lexically cast to double
   auto slog =

@@ -112,27 +112,27 @@ void ReadGroupsFromFile::exec() {
   bool success = false;
 
   for (int64_t i = 0; i < nHist; i++) {
-    ISpectrum *spec = localWorkspace->getSpectrum(i);
-    const auto &dets = spec->getDetectorIDs();
+    auto &spec = localWorkspace->getSpectrum(i);
+    const auto &dets = spec.getDetectorIDs();
     if (dets.empty()) // Nothing
     {
-      spec->dataY()[0] = 0.0;
+      spec.dataY()[0] = 0.0;
       continue;
     }
     // Find the first detector ID in the list
     calmap::const_iterator it = calibration.find(*dets.begin());
     if (it == calibration.end()) // Could not find the detector
     {
-      spec->dataY()[0] = 0.0;
+      spec.dataY()[0] = 0.0;
       continue;
     }
     if (showunselected) {
       if (((*it).second).second == 0)
-        spec->dataY()[0] = 0.0;
+        spec.dataY()[0] = 0.0;
       else
-        spec->dataY()[0] = static_cast<double>(((*it).second).first);
+        spec.dataY()[0] = static_cast<double>(((*it).second).first);
     } else
-      spec->dataY()[0] = static_cast<double>(((*it).second).first);
+      spec.dataY()[0] = static_cast<double>(((*it).second).first);
     if (!success)
       success = true; // At least one detector is found in the cal file
   }
@@ -146,7 +146,6 @@ void ReadGroupsFromFile::exec() {
                              " existing in instrument " + inst->getName());
   }
   setProperty("OutputWorkspace", localWorkspace);
-  return;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -157,7 +156,7 @@ void ReadGroupsFromFile::exec() {
 void ReadGroupsFromFile::readGroupingFile(const std::string &filename) {
   std::ifstream grFile(filename.c_str());
   if (!grFile.is_open()) {
-    g_log.error() << "Unable to open grouping file " << filename << std::endl;
+    g_log.error() << "Unable to open grouping file " << filename << '\n';
     throw Exception::FileError("Error reading .cal file", filename);
   }
   calibration.clear();
@@ -174,7 +173,6 @@ void ReadGroupsFromFile::readGroupingFile(const std::string &filename) {
   }
   grFile.close();
   progress(0.7);
-  return;
 }
 
 //-----------------------------------------------------------------------------------------------

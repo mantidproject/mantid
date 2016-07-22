@@ -161,25 +161,25 @@ void Integration::exec() {
     }
 
     // This is the output
-    ISpectrum *outSpec = outputWorkspace->getSpectrum(outWI);
+    auto &outSpec = outputWorkspace->getSpectrum(outWI);
     // This is the input
-    const ISpectrum *inSpec = localworkspace->getSpectrum(i);
+    const auto &inSpec = localworkspace->getSpectrum(i);
 
     // Copy spectrum number, detector IDs
-    outSpec->copyInfoFrom(*inSpec);
+    outSpec.copyInfoFrom(inSpec);
 
     // Retrieve the spectrum into a vector
-    const MantidVec &X = inSpec->readX();
-    const MantidVec &Y = inSpec->readY();
-    const MantidVec &E = inSpec->readE();
+    const MantidVec &X = inSpec.readX();
+    const MantidVec &Y = inSpec.readY();
+    const MantidVec &E = inSpec.readE();
 
     // If doing partial bins, we want to set the bin boundaries to the specified
     // values
     // regardless of whether they're 'in range' for this spectrum
     // Have to do this here, ahead of the 'continue' a bit down from here.
     if (incPartBins) {
-      outSpec->dataX()[0] = minRange;
-      outSpec->dataX()[1] = maxRange;
+      outSpec.dataX()[0] = minRange;
+      outSpec.dataX()[1] = maxRange;
     }
 
     // Find the range [min,max]
@@ -259,12 +259,12 @@ void Integration::exec() {
         sumE += eval * eval * fraction * fraction;
       }
     } else {
-      outSpec->dataX()[0] = lowit == X.end() ? *(lowit - 1) : *(lowit);
-      outSpec->dataX()[1] = *highit;
+      outSpec.dataX()[0] = lowit == X.end() ? *(lowit - 1) : *(lowit);
+      outSpec.dataX()[1] = *highit;
     }
 
-    outSpec->dataY()[0] = sumY;
-    outSpec->dataE()[0] = sqrt(sumE); // Propagate Gaussian error
+    outSpec.dataY()[0] = sumY;
+    outSpec.dataE()[0] = sqrt(sumE); // Propagate Gaussian error
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION
@@ -273,8 +273,6 @@ void Integration::exec() {
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputWorkspace);
-
-  return;
 }
 
 /**
@@ -326,7 +324,7 @@ MatrixWorkspace_sptr Integration::getInputWorkspace() {
     alg->setProperty("OutputWorkspace", outName);
     alg->executeAsChildAlg();
     temp = alg->getProperty("OutputWorkspace");
-    temp->isDistribution(true);
+    temp->setDistribution(true);
   }
 
   return temp;

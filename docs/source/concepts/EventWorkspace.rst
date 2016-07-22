@@ -101,7 +101,7 @@ Event Workspaces store their data in event lists, one per spectrum.  You can acc
    evListCount = eventWS.getNumberHistograms()
 
    # Get the first event list
-   evList = eventWS.getEventList(0)
+   evList = eventWS.getSpectrum(0)
 
    # Get some basic information
    print "Number of events in event List 0:", evList.getNumberEvents()
@@ -151,7 +151,7 @@ Please note these should only be done as part of a Python Algorithm, otherwise t
    import math
    eventWS = CreateSampleWorkspace(WorkspaceType="Event")
    # Get the first event list
-   evList = eventWS.getEventList(0)
+   evList = eventWS.getSpectrum(0)
 
    # Add an offset to the pulsetime (wall-clock time) of each event in the list.
    print "First pulse time before addPulsetime:", evList.getPulseTimes()[0]

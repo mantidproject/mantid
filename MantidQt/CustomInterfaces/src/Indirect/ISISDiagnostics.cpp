@@ -390,7 +390,6 @@ void ISISDiagnostics::doublePropertyChanged(QtProperty *prop, double val) {
   }
 }
 
-
 /**
  * Updates the preview plot when the algorithm is complete.
  *

@@ -1,4 +1,4 @@
-# pylint: disable=anomalous-backslash-in-string, global-variable-undefined, global-variable-not-assigned, too-many-lines
+# pylint: disable=anomalous-backslash-in-string, global-variable-undefined, global-variable-not-assigned
 # pylint: disable=invalid-name, too-many-arguments, superfluous-parens, too-many-branches, redefined-builtin
 
 import os.path
@@ -6,7 +6,6 @@ import sys
 
 from mantid.simpleapi import *
 import numpy as n
-
 
 # directories generator
 import pearl_calib_factory
@@ -341,7 +340,14 @@ def PEARL_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van
     return outwork
 
 
-def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False):
+def pearl_run_focus(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False,
+                    focus_mode=1):
+    alg_range = 12
+    save_range = 3
+    if focus_mode == 2:
+        alg_range = 14
+        save_range = 5
+
     global mode
     global tt_mode
     tt_mode = ttmode
@@ -377,7 +383,7 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
     if (debug != True):
         mtd.remove(work)
 
-    for i in range(0, 12):
+    for i in range(0, alg_range):
 
         output = outwork + "_mod" + str(i + 1)
         van = "van" + str(i + 1)
@@ -438,7 +444,7 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
 
         if (debug != True):
 
-            for i in range(0, 12):
+            for i in range(0, alg_range):
                 output = outwork + "_mod" + str(i + 1)
                 van = "van" + str(i + 1)
                 rdata = "rdata" + str(i + 1)
@@ -450,59 +456,53 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
 
     elif (mode == "groups"):
 
-        name1 = outwork + "_mods1-3"
-        name2 = outwork + "_mods4-6"
-        name3 = outwork + "_mods7-9"
-        name4 = outwork + "_mods4-9"
+        name = []
+        name.extend((outwork + "_mods1-3", outwork + "_mods4-6",
+                     outwork + "_mods7-9", outwork + "_mods4-9"))
 
-        input1 = outwork + "_mod1"
-        input2 = outwork + "_mod4"
-        input3 = outwork + "_mod7"
+        input = []
+        input.extend((outwork + "_mod1", outwork + "_mod4", outwork + "_mod7"))
 
-        CloneWorkspace(InputWorkspace=input1, OutputWorkspace=name1)
-        CloneWorkspace(InputWorkspace=input2, OutputWorkspace=name2)
-        CloneWorkspace(InputWorkspace=input3, OutputWorkspace=name3)
+        for i in range(0, 3):
+            CloneWorkspace(InputWorkspace=input[i], OutputWorkspace=name[i])
 
         for i in range(1, 3):
             toadd = outwork + "_mod" + str(i + 1)
-            Plus(LHSWorkspace=name1, RHSWorkspace=toadd, OutputWorkspace=name1)
+            Plus(LHSWorkspace=name[0], RHSWorkspace=toadd, OutputWorkspace=name[0])
 
-        Scale(InputWorkspace=name1, OutputWorkspace=name1, Factor=0.333333333333)
+        Scale(InputWorkspace=name[0], OutputWorkspace=name[0], Factor=0.333333333333)
 
         for i in range(1, 3):
             toadd = outwork + "_mod" + str(i + 4)
-            Plus(LHSWorkspace=name2, RHSWorkspace=toadd, OutputWorkspace=name2)
+            Plus(LHSWorkspace=name[1], RHSWorkspace=toadd, OutputWorkspace=name[1])
 
-        Scale(InputWorkspace=name2, OutputWorkspace=name2, Factor=0.333333333333)
+        Scale(InputWorkspace=name[1], OutputWorkspace=name[1], Factor=0.333333333333)
 
         for i in range(1, 3):
             toadd = outwork + "_mod" + str(i + 7)
-            Plus(LHSWorkspace=name3, RHSWorkspace=toadd, OutputWorkspace=name3)
+            Plus(LHSWorkspace=name[2], RHSWorkspace=toadd, OutputWorkspace=name[2])
 
-        Scale(InputWorkspace=name3, OutputWorkspace=name3, Factor=0.333333333333)
+        Scale(InputWorkspace=name[2], OutputWorkspace=name[2], Factor=0.333333333333)
         #
         #       Sum left and right 90degree bank modules, i.e. modules 4-9...
         #
-        Plus(LHSWorkspace=name2, RHSWorkspace=name3, OutputWorkspace=name4)
-        Scale(InputWorkspace=name4, OutputWorkspace=name4, Factor=0.5)
+        Plus(LHSWorkspace=name[1], RHSWorkspace=name[2], OutputWorkspace=name[3])
+        Scale(InputWorkspace=name[3], OutputWorkspace=name[3], Factor=0.5)
 
-        SaveGSS(InputWorkspace=name1, Filename=gssfile, Append=False, Bank=1)
-        ConvertUnits(InputWorkspace=name1, OutputWorkspace=name1, Target="dSpacing")
-        SaveNexus(Filename=outfile, InputWorkspace=name1, Append=False)
+        for i in range(0, 4):
+            append = True
+            if i is 0:
+                append = False
 
-        SaveGSS(InputWorkspace=name2, Filename=gssfile, Append=True, Bank=2)
-        ConvertUnits(InputWorkspace=name2, OutputWorkspace=name2, Target="dSpacing")
-        SaveNexus(Filename=outfile, InputWorkspace=name2, Append=True)
+            if focus_mode == 1:
+                SaveGSS(InputWorkspace=name[i], Filename=gssfile, Append=append, Bank=i + 1)
+            elif focus_mode == 2:
+                SaveGSS(InputWorkspace=name[i], Filename=gssfile, Append=False, Bank=i + 1)
 
-        SaveGSS(InputWorkspace=name3, Filename=gssfile, Append=True, Bank=3)
-        ConvertUnits(InputWorkspace=name3, OutputWorkspace=name3, Target="dSpacing")
-        SaveNexus(Filename=outfile, InputWorkspace=name3, Append=True)
+            ConvertUnits(InputWorkspace=name[i], OutputWorkspace=name[i], Target="dSpacing")
+            SaveNexus(Filename=outfile, InputWorkspace=name[i], Append=append)
 
-        SaveGSS(InputWorkspace=name4, Filename=gssfile, Append=True, Bank=4)
-        ConvertUnits(InputWorkspace=name4, OutputWorkspace=name4, Target="dSpacing")
-        SaveNexus(Filename=outfile, InputWorkspace=name4, Append=True)
-
-        for i in range(0, 3):
+        for i in range(0, save_range):
             tosave = outwork + "_mod" + str(i + 10)
 
             SaveGSS(InputWorkspace=tosave, Filename=gssfile, Append=True, Bank=i + 5)
@@ -513,7 +513,7 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
 
         if (debug != True):
 
-            for i in range(0, 12):
+            for i in range(0, alg_range):
                 output = outwork + "_mod" + str(i + 1)
                 van = "van" + str(i + 1)
                 rdata = "rdata" + str(i + 1)
@@ -521,10 +521,8 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
                 mtd.remove(van)
                 mtd.remove(output)
 
-            mtd.remove(name1)
-            mtd.remove(name2)
-            mtd.remove(name3)
-            mtd.remove(name4)
+            for i in range(1, 4):
+                mtd.remove(name[i])
 
     elif (mode == "trans"):
 
@@ -565,7 +563,7 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
             SaveNexus(Filename=outfile, InputWorkspace=tosave, Append=True)
 
         if (debug != True):
-            for i in range(0, 12):
+            for i in range(0, alg_range):
                 output = outwork + "_mod" + str(i + 1)
                 van = "van" + str(i + 1)
                 rdata = "rdata" + str(i + 1)
@@ -576,7 +574,7 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
 
     elif (mode == "mods"):
 
-        for i in range(0, 12):
+        for i in range(0, alg_range):
 
             output = outwork + "_mod" + str(i + 1)
 
@@ -608,262 +606,15 @@ def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, 
     return outwork
 
 
+def PEARL_focus_v1(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False):
+    outwork = pearl_run_focus(number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm, debug=debug,
+                              focus_mode=1)
+    return outwork
+
+
 def PEARL_focus_v2(number, ext="raw", fmode="trans", ttmode="TT70", atten=True, van_norm=True, debug=False):
-    global mode
-    global tt_mode
-    tt_mode = ttmode
-    mode = fmode
-    PEARL_getcycle(number)
-    PEARL_getcalibfiles()
-    print "Focussing mode is:", mode
-    print "Two theta mode is:", tt_mode
-    print "Group file is", groupfile
-    print "Calibration file is", calfile
-    print "Tof binning", tofbinning
-    work = "work"
-    focus = "focus"
-    if type(number) is int:
-        outfile = userdataprocessed + "PRL" + str(number) + ".nxs"
-        gssfile = userdataprocessed + "PRL" + str(number) + ".gss"
-        tof_xye_file = userdataprocessed + "PRL" + str(number) + "_tof_xye.dat"
-        d_xye_file = userdataprocessed + "PRL" + str(number) + "_d_xye.dat"
-        outwork = "PRL" + str(number)
-    else:
-        outfile = userdataprocessed + "PRL" + number + ".nxs"
-        gssfile = userdataprocessed + "PRL" + number + ".gss"
-        tof_xye_file = userdataprocessed + "PRL" + number + "_tof_xye.dat"
-        d_xye_file = userdataprocessed + "PRL" + number + "_d_xye.dat"
-        outwork = "PRL" + number
-
-    PEARL_read(number, ext, work)
-    Rebin(InputWorkspace=work, OutputWorkspace=work, Params=tofbinning)
-    AlignDetectors(InputWorkspace=work, OutputWorkspace=work, CalibrationFile=calfile)
-    DiffractionFocussing(InputWorkspace=work, OutputWorkspace=focus, GroupingFileName=groupfile)
-
-    if (debug != True):
-        mtd.remove(work)
-
-    for i in range(0, 14):
-
-        output = outwork + "_mod" + str(i + 1)
-        van = "van" + str(i + 1)
-        rdata = "rdata" + str(i + 1)
-
-        if (van_norm):
-            print "Using vanadium file", vanfile
-            LoadNexus(Filename=vanfile, OutputWorkspace=van, EntryNumber=i + 1)
-            ExtractSingleSpectrum(InputWorkspace=focus, OutputWorkspace=rdata, WorkspaceIndex=i)
-            # ConvertUnits(van,van,"TOF")
-            Rebin(InputWorkspace=van, OutputWorkspace=van, Params=tofbinning)
-            ConvertUnits(InputWorkspace=rdata, OutputWorkspace=rdata, Target="TOF")
-            Rebin(InputWorkspace=rdata, OutputWorkspace=rdata, Params=tofbinning)
-            Divide(LHSWorkspace=rdata, RHSWorkspace=van, OutputWorkspace=output)
-            CropWorkspace(InputWorkspace=output, OutputWorkspace=output, XMin=0.1)
-            Scale(InputWorkspace=output, OutputWorkspace=output, Factor=10)
-        else:
-            print "Not Using vanadium file"
-            # LoadNexus(Filename=vanfile,OutputWorkspace=van,EntryNumber=i+1)
-            ExtractSingleSpectrum(InputWorkspace=focus, OutputWorkspace=rdata, WorkspaceIndex=i)
-            # ConvertUnits(van,van,"TOF")
-            # Rebin(van,van,tofbinning)
-            ConvertUnits(InputWorkspace=rdata, OutputWorkspace=rdata, Target="TOF")
-            Rebin(InputWorkspace=rdata, OutputWorkspace=output, Params=tofbinning)
-            # Divide(rdata,van,output)
-            CropWorkspace(InputWorkspace=output, OutputWorkspace=output, XMin=0.1)
-    if (debug != True):
-        mtd.remove(focus)
-
-    if (mode == "all"):
-
-        name = outwork + "_mods1-9"
-
-        input = outwork + "_mod1"
-
-        CloneWorkspace(InputWorkspace=input, OutputWorkspace=name)
-
-        for i in range(1, 9):
-            toadd = outwork + "_mod" + str(i + 1)
-            Plus(LHSWorkspace=name, RHSWorkspace=toadd, OutputWorkspace=name)
-
-        Scale(InputWorkspace=name, OutputWorkspace=name, Factor=0.111111111111111)
-        SaveGSS(InputWorkspace=name, Filename=gssfile, Append=False, Bank=1)
-        ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target="dSpacing")
-
-        SaveNexus(Filename=outfile, InputWorkspace=name, Append=False)
-
-        for i in range(0, 5):
-            tosave = outwork + "_mod" + str(i + 10)
-
-            SaveGSS(InputWorkspace=tosave, Filename=gssfile, Append=True, Bank=i + 2)
-            ConvertUnits(InputWorkspace=tosave, OutputWorkspace=tosave, Target="dSpacing")
-
-            SaveNexus(Filename=outfile, InputWorkspace=tosave, Append=True)
-
-        if (debug != True):
-            for i in range(0, 14):
-                output = outwork + "_mod" + str(i + 1)
-                van = "van" + str(i + 1)
-                rdata = "rdata" + str(i + 1)
-                mtd.remove(rdata)
-                mtd.remove(van)
-                mtd.remove(output)
-            mtd.remove(name)
-
-    elif (mode == "groups"):
-
-        name1 = outwork + "_mods1-3"
-        name2 = outwork + "_mods4-6"
-        name3 = outwork + "_mods7-9"
-        name4 = outwork + "_mods4-9"
-
-        input1 = outwork + "_mod1"
-        input2 = outwork + "_mod4"
-        input3 = outwork + "_mod7"
-
-        CloneWorkspace(InputWorkspace=input1, OutputWorkspace=name1)
-        CloneWorkspace(InputWorkspace=input2, OutputWorkspace=name2)
-        CloneWorkspace(InputWorkspace=input3, OutputWorkspace=name3)
-
-        for i in range(1, 3):
-            toadd = outwork + "_mod" + str(i + 1)
-            Plus(LHSWorkspace=name1, RHSWorkspace=toadd, OutputWorkspace=name1)
-
-        Scale(InputWorkspace=name1, OutputWorkspace=name1, Factor=0.333333333333)
-
-        for i in range(1, 3):
-            toadd = outwork + "_mod" + str(i + 4)
-            Plus(LHSWorkspace=name2, RHSWorkspace=toadd, OutputWorkspace=name2)
-
-        Scale(InputWorkspace=name2, OutputWorkspace=name2, Factor=0.333333333333)
-
-        for i in range(1, 3):
-            toadd = outwork + "_mod" + str(i + 7)
-            Plus(LHSWorkspace=name3, RHSWorkspace=toadd, OutputWorkspace=name3)
-
-        Scale(InputWorkspace=name3, OutputWorkspace=name3, Factor=0.333333333333)
-        #
-        #       Sum left and right 90degree bank modules, i.e. modules 4-9...
-        #
-        Plus(LHSWorkspace=name2, RHSWorkspace=name3, OutputWorkspace=name4)
-        Scale(InputWorkspace=name4, OutputWorkspace=name4, Factor=0.5)
-
-        SaveGSS(InputWorkspace=name1, Filename=gssfile, Append=False, Bank=1)
-        ConvertUnits(InputWorkspace=name1, OutputWorkspace=name1, Target="dSpacing")
-        SaveNexus(Filename=outfile, InputWorkspace=name1, Append=False)
-
-        SaveGSS(InputWorkspace=name2, Filename=gssfile, Append=True, Bank=2)
-        ConvertUnits(InputWorkspace=name2, OutputWorkspace=name2, Target="dSpacing")
-        SaveNexus(Filename=outfile, InputWorkspace=name2, Append=True)
-
-        SaveGSS(InputWorkspace=name3, Filename=gssfile, Append=True, Bank=3)
-        ConvertUnits(InputWorkspace=name3, OutputWorkspace=name3, Target="dSpacing")
-        SaveNexus(Filename=outfile, InputWorkspace=name3, Append=True)
-
-        SaveGSS(InputWorkspace=name4, Filename=gssfile, Append=True, Bank=4)
-        ConvertUnits(InputWorkspace=name4, OutputWorkspace=name4, Target="dSpacing")
-        SaveNexus(Filename=outfile, InputWorkspace=name4, Append=True)
-
-        for i in range(0, 3):
-            tosave = outwork + "_mod" + str(i + 10)
-            SaveGSS(InputWorkspace=tosave, Filename=gssfile, Append=True, Bank=i + 5)
-            ConvertUnits(InputWorkspace=tosave, OutputWorkspace=tosave, Target="dSpacing")
-            SaveNexus(Filename=outfile, InputWorkspace=tosave, Append=True)
-
-        if (debug != True):
-
-            for i in range(0, 14):
-                output = outwork + "_mod" + str(i + 1)
-                van = "van" + str(i + 1)
-                rdata = "rdata" + str(i + 1)
-
-                mtd.remove(rdata)
-                mtd.remove(van)
-                mtd.remove(output)
-
-            mtd.remove(name1)
-            mtd.remove(name2)
-            mtd.remove(name3)
-            mtd.remove(name4)
-
-    elif (mode == "trans"):
-
-        name = outwork + "_mods1-9"
-
-        input = outwork + "_mod1"
-
-        CloneWorkspace(InputWorkspace=input, OutputWorkspace=name)
-
-        for i in range(1, 9):
-            toadd = outwork + "_mod" + str(i + 1)
-            Plus(LHSWorkspace=name, RHSWorkspace=toadd, OutputWorkspace=name)
-
-        Scale(InputWorkspace=name, OutputWorkspace=name, Factor=0.111111111111111)
-
-        if (atten):
-            no_att = outwork + "_noatten"
-
-            ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target="dSpacing")
-            CloneWorkspace(InputWorkspace=name, OutputWorkspace=no_att)
-
-            PEARL_atten(name, name)
-
-            ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target="TOF")
-
-        SaveGSS(InputWorkspace=name, Filename=gssfile, Append=False, Bank=1)
-        SaveFocusedXYE(InputWorkspace=name, Filename=tof_xye_file, Append=False, IncludeHeader=False)
-
-        ConvertUnits(InputWorkspace=name, OutputWorkspace=name, Target="dSpacing")
-
-        SaveFocusedXYE(InputWorkspace=name, Filename=d_xye_file, Append=False, IncludeHeader=False)
-        SaveNexus(Filename=outfile, InputWorkspace=name, Append=False)
-
-        for i in range(0, 9):
-            tosave = outwork + "_mod" + str(i + 1)
-            # SaveGSS(tosave,Filename=gssfile,Append=True,Bank=i+2)
-            ConvertUnits(InputWorkspace=tosave, OutputWorkspace=tosave, Target="dSpacing")
-            SaveNexus(Filename=outfile, InputWorkspace=tosave, Append=True)
-
-        if (debug != True):
-            for i in range(0, 14):
-                output = outwork + "_mod" + str(i + 1)
-                van = "van" + str(i + 1)
-                rdata = "rdata" + str(i + 1)
-                mtd.remove(rdata)
-                mtd.remove(van)
-                mtd.remove(output)
-            mtd.remove(name)
-
-    elif (mode == "mods"):
-
-        for i in range(0, 14):
-
-            output = outwork + "_mod" + str(i + 1)
-
-            van = "van" + str(i + 1)
-
-            rdata = "rdata" + str(i + 1)
-
-            status = True
-
-            if (i == 0):
-                status = False
-
-            SaveGSS(InputWorkspace=output, Filename=gssfile, Append=status, Bank=i + 1)
-
-            ConvertUnits(InputWorkspace=output, OutputWorkspace=output, Target="dSpacing")
-
-            SaveNexus(Filename=outfile, InputWorkspace=output, Append=status)
-
-            if (debug != True):
-                mtd.remove(rdata)
-                mtd.remove(van)
-                mtd.remove(output)
-
-    else:
-        print "Sorry I don't know that mode", mode
-        return
-
-    LoadNexus(Filename=outfile, OutputWorkspace=outwork)
+    outwork = pearl_run_focus(number, ext=ext, fmode=fmode, ttmode=ttmode, atten=atten, van_norm=van_norm, debug=debug,
+                              focus_mode=2)
     return outwork
 
 
@@ -874,6 +625,9 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     global tt_mode
     mode = fmode
     tt_mode = ttmode
+
+    # tt_mode set here will not be used within the function but instead when the PEARL_calibfiles()
+    # is called it will return the correct tt_mode files.
 
     PEARL_getcycle(van)
     PEARL_getcalibfiles()
@@ -933,38 +687,18 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
 
         print "About to strip Work=0"
         StripPeaks(InputWorkspace="vanmask", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=0)
-        print "About to strip Work=1"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=1)
-        print "About to strip Work=2"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=2)
-        print "About to strip Work=3"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=3)
-        print "About to strip Work=4"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=4)
-        print "About to strip Work=5"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=5)
-        print "About to strip Work=6"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=6)
-        print "About to strip Work=7"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=7)
-        print "About to strip Work=8"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=8)
-        print "About to strip Work=9"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=9)
-        print "About to strip Work=10"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=10)
-        print "About to strip Work=11"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=11)
-        print "About to strip Work=12"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=100, Tolerance=10, WorkspaceIndex=12)
-        print "About to strip Work=13"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=60, Tolerance=10, WorkspaceIndex=13)
+
+        for i in range(1, 12):
+            print "About to strip Work=" + str(i)
+            StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=i)
 
         # run twice on low angle as peaks are very broad
-        print "About to strip Work=12 (again)"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=100, Tolerance=10, WorkspaceIndex=12)
-        print "About to strip Work=13 (again)"
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=60, Tolerance=10, WorkspaceIndex=13)
+        print("About to strip work=12 and work=13 twice")
+        for i in range(0, 2):
+            print "About to strip Work=12"
+            StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=100, Tolerance=10, WorkspaceIndex=12)
+            print "About to strip Work=13"
+            StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=60, Tolerance=10, WorkspaceIndex=13)
 
         print "Finished striping-out peaks..."
 
@@ -978,20 +712,9 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
 
         print "Starting splines..."
 
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline1", WorkspaceIndex=0, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline2", WorkspaceIndex=1, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline3", WorkspaceIndex=2, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline4", WorkspaceIndex=3, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline5", WorkspaceIndex=4, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline6", WorkspaceIndex=5, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline7", WorkspaceIndex=6, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline8", WorkspaceIndex=7, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline9", WorkspaceIndex=8, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline10", WorkspaceIndex=9, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline11", WorkspaceIndex=10, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline12", WorkspaceIndex=11, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline13", WorkspaceIndex=12, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline14", WorkspaceIndex=13, NCoeff=nspline)
+        for i in range(0, 14):
+            SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline" + str(i + 1), WorkspaceIndex=i,
+                             NCoeff=nspline)
 
         # ConvertUnits("spline1","spline1","TOF")
         # ConvertUnits("spline2","spline2","TOF")
@@ -1005,36 +728,17 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         # ConvertUnits("spline10","spline10","TOF")
         # ConvertUnits("spline11","spline11","TOF")
         # ConvertUnits("spline12","spline12","TOF")
+
         SaveNexus(Filename=nvanfile, InputWorkspace="spline1", Append=False)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline2", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline3", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline4", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline5", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline6", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline7", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline8", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline9", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline10", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline11", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline12", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline13", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline14", Append=True)
+
+        for i in range(2, 15):
+            SaveNexus(Filename=nvanfile, InputWorkspace="spline" + str(i), Append=True)
+
         if (debug != True):
             mtd.remove("vanstrip")
-            mtd.remove("spline1")
-            mtd.remove("spline2")
-            mtd.remove("spline3")
-            mtd.remove("spline4")
-            mtd.remove("spline5")
-            mtd.remove("spline6")
-            mtd.remove("spline7")
-            mtd.remove("spline8")
-            mtd.remove("spline9")
-            mtd.remove("spline10")
-            mtd.remove("spline11")
-            mtd.remove("spline12")
-            mtd.remove("spline13")
-            mtd.remove("spline14")
+            for i in range(1, 15):
+                mtd.remove("spline" + str(i))
+
     elif (instver == "new"):
         ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace="vanmask", Target="dSpacing")
         if (debug != True):
@@ -1042,37 +746,21 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
 
         # remove bragg peaks before spline
         StripPeaks(InputWorkspace="vanmask", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=0)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=1)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=2)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=3)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=4)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=5)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=6)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=7)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=8)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=9)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=10)
-        StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=11)
+
+        for i in range(1, 12):
+            StripPeaks(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", FWHM=15, Tolerance=8, WorkspaceIndex=i)
 
         if (debug != True):
             mtd.remove("vanmask")
 
         if (debug != True):
             print "Not in debug mode so will delete all temporary workspaces"
-
         ConvertUnits(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", Target="TOF")
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline1", WorkspaceIndex=0, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline2", WorkspaceIndex=1, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline3", WorkspaceIndex=2, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline4", WorkspaceIndex=3, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline5", WorkspaceIndex=4, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline6", WorkspaceIndex=5, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline7", WorkspaceIndex=6, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline8", WorkspaceIndex=7, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline9", WorkspaceIndex=8, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline10", WorkspaceIndex=9, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline11", WorkspaceIndex=10, NCoeff=nspline)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline12", WorkspaceIndex=11, NCoeff=nspline)
+
+        for i in range(0, 12):
+            SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline" + str(i + 1), WorkspaceIndex=i,
+                             NCoeff=nspline)
+
         # ConvertUnits("spline1","spline1","TOF")
         # ConvertUnits("spline2","spline2","TOF")
         # ConvertUnits("spline3","spline3","TOF")
@@ -1085,32 +773,18 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
         # ConvertUnits("spline10","spline10","TOF")
         # ConvertUnits("spline11","spline11","TOF")
         # ConvertUnits("spline12","spline12","TOF")
+
         SaveNexus(Filename=nvanfile, InputWorkspace="spline1", Append=False)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline2", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline3", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline4", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline5", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline6", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline7", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline8", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline9", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline10", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline11", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline12", Append=True)
+
+        for i in range(2, 13):
+            SaveNexus(Filename=nvanfile, InputWorkspace="spline" + str(i), Append=True)
+
         if (debug != True):
             mtd.remove("vanstrip")
-            mtd.remove("spline1")
-            mtd.remove("spline2")
-            mtd.remove("spline3")
-            mtd.remove("spline4")
-            mtd.remove("spline5")
-            mtd.remove("spline6")
-            mtd.remove("spline7")
-            mtd.remove("spline8")
-            mtd.remove("spline9")
-            mtd.remove("spline10")
-            mtd.remove("spline11")
-            mtd.remove("spline12")
+
+            for i in range(1, 13):
+                mtd.remove("spline" + str(i))
+
     elif (instver == "old"):
         ConvertUnits(InputWorkspace=vanfoc, OutputWorkspace="vanmask", Target="dSpacing")
         if (debug != True):
@@ -1137,24 +811,28 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
             print "Not in debug mode so will delete all temporary workspaces"
 
         ConvertUnits(InputWorkspace="vanstrip", OutputWorkspace="vanstrip", Target="TOF")
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline1", WorkspaceIndex=0, NCoeff=100)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline2", WorkspaceIndex=1, NCoeff=80)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline3", WorkspaceIndex=2, NCoeff=100)
-        SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline4", WorkspaceIndex=3, NCoeff=100)
+
+        for i in range(0, 4):
+            coeff = 100
+            if (i == 1):
+                coeff = 80
+            SplineBackground(InputWorkspace="vanstrip", OutputWorkspace="spline" + str(i + 1), WorkspaceIndex=i,
+                             NCoeff=coeff)
+
         # ConvertUnits("spline1","spline1","TOF")
         # ConvertUnits("spline2","spline2","TOF")
         # ConvertUnits("spline3","spline3","TOF")
         # ConvertUnits("spline4","spline4","TOF")
+
         SaveNexus(Filename=nvanfile, InputWorkspace="spline1", Append=False)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline2", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline3", Append=True)
-        SaveNexus(Filename=nvanfile, InputWorkspace="spline4", Append=True)
+        for i in range(1, 4):
+            SaveNexus(Filename=nvanfile, InputWorkspace="spline" + str(i), Append=True)
+
         if (debug != True):
             mtd.remove("vanstrip")
-            mtd.remove("spline1")
-            mtd.remove("spline2")
-            mtd.remove("spline3")
-            mtd.remove("spline4")
+            for i in range(1, 5):
+                mtd.remove("spline" + str(i))
+
     else:
         print "Sorry I don't know that mode"
         return
@@ -1164,49 +842,36 @@ def PEARL_createvan(van, empty, ext="raw", fmode="all", ttmode="TT88",
     return
 
 
-def PEARL_createcal(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal"):
+def PEARL_createcal(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal",
+                    groupfile="P:\Mantid\\Calibration\\pearl_group_11_2_TT88.cal"):
     PEARL_getcycle(calruns)
 
     print "Instrument version is ", instver
 
-    if (instver == "new2"):
-        wcal = "cal_raw"
-        PEARL_read(calruns, "raw", wcal)
+    wcal = "cal_raw"
+    PEARL_read(calruns, "raw", wcal)
+
+    if instver == "new" or instver == "new2":
         Rebin(InputWorkspace=wcal, OutputWorkspace=wcal, Params="100,-0.0006,19950")
-        ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
-        Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.8,0.002,2.1")
+
+    ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
+    Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.8,0.002,2.1")
+
+    if instver == "new2":
         CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=20,
                        WorkspaceIndexMin=9, WorkspaceIndexMax=1063, XMin=1.8, XMax=2.1)
-        # Ceo Cell refeined to 5.4102(3) so 220 is 1.912795
-        GetDetectorOffsets(InputWorkspace="crosscor", OutputWorkspace="OutputOffsets", Step=0.002, DReference=1.912795,
-                           XMin=-200, XMax=200, GroupingFileName=noffsetfile)
-        AlignDetectors(InputWorkspace=wcal, OutputWorkspace="cal_aligned", CalibrationFile=noffsetfile)
-        DiffractionFocussing(InputWorkspace="cal_aligned", OutputWorkspace="cal_grouped", GroupingFileName=groupfile)
-    elif (instver == "new"):
-        wcal = "cal_raw"
-        PEARL_read(calruns, "raw", wcal)
-        Rebin(InputWorkspace=wcal, OutputWorkspace=wcal, Params="100,-0.0006,19950")
-        ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
-        Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.8,0.002,2.1")
+    elif instver == "new":
         CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=20,
                        WorkspaceIndexMin=9, WorkspaceIndexMax=943, XMin=1.8, XMax=2.1)
-        # Ceo Cell refeined to 5.4102(3) so 220 is 1.912795
-        GetDetectorOffsets(InputWorkspace="crosscor", OutputWorkspace="OutputOffsets", Step=0.002, DReference=1.912795,
-                           XMin=-200, XMax=200, GroupingFileName=noffsetfile)
-        AlignDetectors(InputWorkspace=wcal, OutputWorkspace="cal_aligned", CalibrationFile=noffsetfile)
-        DiffractionFocussing(InputWorkspace="cal_aligned", OutputWorkspace="cal_grouped", GroupingFileName=groupfile)
     else:
-        wcal = "cal_raw"
-        PEARL_read(calruns, "raw", wcal)
-        ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
-        Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.8,0.002,2.1")
         CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=500,
                        WorkspaceIndexMin=1, WorkspaceIndexMax=1440, XMin=1.8, XMax=2.1)
-        # Ceo Cell refeined to 5.4102(3) so 220 is 1.912795
-        GetDetectorOffsets(InputWorkspace="crosscor", OutputWorkspace="OutputOffsets", Step=0.002, DReference=1.912795,
-                           XMin=-200, XMax=200, GroupingFileName=noffsetfile)
-        AlignDetectors(InputWorkspace=wcal, OutputWorkspace="cal_aligned", CalibrationFile=noffsetfile)
-        DiffractionFocussing(InputWorkspace="cal_aligned", OutputWorkspace="cal_grouped", GroupingFileName=groupfile)
+
+    # Ceo Cell refeined to 5.4102(3) so 220 is 1.912795
+    GetDetectorOffsets(InputWorkspace="crosscor", OutputWorkspace="OutputOffsets", Step=0.002, DReference=1.912795,
+                       XMin=-200, XMax=200, GroupingFileName=noffsetfile)
+    AlignDetectors(InputWorkspace=wcal, OutputWorkspace="cal_aligned", CalibrationFile=noffsetfile)
+    DiffractionFocussing(InputWorkspace="cal_aligned", OutputWorkspace="cal_grouped", GroupingFileName=groupfile)
 
     return
 
@@ -1214,46 +879,38 @@ def PEARL_createcal(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal"):
 def PEARL_createcal_Si(calruns, noffsetfile="C:\PEARL\\pearl_offset_11_2.cal"):
     PEARL_getcycle(calruns)
 
-    if (instver == "new2"):
-        wcal = "cal_raw"
-        PEARL_read(calruns, "raw", wcal)
+    wcal = "cal_raw"
+    PEARL_read(calruns, "raw", wcal)
+
+    if instver == "new" or instver == "new2":
         Rebin(InputWorkspace=wcal, OutputWorkspace=wcal, Params="100,-0.0006,19950")
-        ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
+
+    ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
+
+    if instver == "new2":
         Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.71,0.002,2.1")
         CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=20,
                        WorkspaceIndexMin=9, WorkspaceIndexMax=1063, XMin=1.71, XMax=2.1)
-        GetDetectorOffsets(InputWorkspace="crosscor", OutputWorkspace="OutputOffsets", Step=0.002,
-                           DReference=1.920127251, XMin=-200, XMax=200, GroupingFileName=noffsetfile)
-        AlignDetectors(InputWorkspace=wcal, OutputWorkspace="cal_aligned", CalibrationFile=noffsetfile)
-        DiffractionFocussing(InputWorkspace="cal_aligned", OutputWorkspace="cal_grouped", GroupingFileName=groupfile)
-    elif (instver == "new"):
-        wcal = "cal_raw"
-        PEARL_read(calruns, "raw", wcal)
-        Rebin(InputWorkspace=wcal, OutputWorkspace=wcal, Params="100,-0.0006,19950")
-        ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
+    elif instver == "new":
         Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="1.85,0.002,2.05")
         CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=20,
                        WorkspaceIndexMin=9, WorkspaceIndexMax=943, XMin=1.85, XMax=2.05)
-        GetDetectorOffsets(InputWorkspace="crosscor", OutputWorkspace="OutputOffsets", Step=0.002,
-                           DReference=1.920127251, XMin=-200, XMax=200, GroupingFileName=noffsetfile)
-        AlignDetectors(InputWorkspace=wcal, OutputWorkspace="cal_aligned", CalibrationFile=noffsetfile)
-        DiffractionFocussing(InputWorkspace="cal_aligned", OutputWorkspace="cal_grouped", GroupingFileName=groupfile)
     else:
-        wcal = "cal_raw"
-        PEARL_read(calruns, "raw", wcal)
-        ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")
         Rebin(InputWorkspace="cal_inD", OutputWorkspace="cal_Drebin", Params="3,0.002,3.2")
         CrossCorrelate(InputWorkspace="cal_Drebin", OutputWorkspace="crosscor", ReferenceSpectra=500,
                        WorkspaceIndexMin=1, WorkspaceIndexMax=1440, XMin=3, XMax=3.2)
-        GetDetectorOffsets(InputWorkspace="crosscor", OutputWorkspace="OutputOffsets", Step=0.002,
-                           DReference=1.920127251, XMin=-200, XMax=200, GroupingFileName=noffsetfile)
-        AlignDetectors(InputWorkspace=wcal, OutputWorkspace="cal_aligned", CalibrationFile=noffsetfile)
-        DiffractionFocussing(InputWorkspace="cal_aligned", OutputWorkspace="cal_grouped", GroupingFileName=groupfile)
+
+    GetDetectorOffsets(InputWorkspace="crosscor", OutputWorkspace="OutputOffsets", Step=0.002,
+                       DReference=1.920127251, XMin=-200, XMax=200, GroupingFileName=noffsetfile)
+    AlignDetectors(InputWorkspace=wcal, OutputWorkspace="cal_aligned", CalibrationFile=noffsetfile)
+    DiffractionFocussing(InputWorkspace="cal_aligned", OutputWorkspace="cal_grouped", GroupingFileName=groupfile)
 
     return
 
 
 def PEARL_creategroup(calruns, ngroupfile="C:\PEARL\\test_cal_group_11_1.cal", ngroup="bank1,bank2,bank3,bank4"):
+    PEARL_getcycle(calruns)
+
     wcal = "cal_raw"
     PEARL_read(calruns, "raw", wcal)
     ConvertUnits(InputWorkspace=wcal, OutputWorkspace="cal_inD", Target="dSpacing")

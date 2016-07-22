@@ -68,12 +68,6 @@ void loadSampleDataISIScompatibilityInfo(
 } // namespace
 
 //------------------------------------------------------------------------------
-LoadNexusMonitors2::LoadNexusMonitors2() : Algorithm(), m_monitor_count(0) {}
-
-//------------------------------------------------------------------------------
-LoadNexusMonitors2::~LoadNexusMonitors2() {}
-
-//------------------------------------------------------------------------------
 /// Initialization method.
 void LoadNexusMonitors2::init() {
   declareProperty(
@@ -178,8 +172,7 @@ void LoadNexusMonitors2::exec() {
     if (!m_allMonitorsHaveHistoData) {
       g_log.information() << "Cannot load monitors as histogram data. Loading "
                              "as events even if the opposite was requested by "
-                             "disabling the property MonitorsAsEvents"
-                          << std::endl;
+                             "disabling the property MonitorsAsEvents\n";
       monitorsAsEvents = true;
     }
 
@@ -245,8 +238,8 @@ void LoadNexusMonitors2::exec() {
       // Use the default as matching the workspace index
     }
 
-    g_log.debug() << "monIndex = " << monIndex << std::endl;
-    g_log.debug() << "spectrumNo = " << spectrumNo << std::endl;
+    g_log.debug() << "monIndex = " << monIndex << '\n';
+    g_log.debug() << "spectrumNo = " << spectrumNo << '\n';
 
     spectra_numbers[ws_index] = spectrumNo;
     detector_numbers[ws_index] = monIndex;
@@ -262,8 +255,8 @@ void LoadNexusMonitors2::exec() {
     file.closeGroup(); // NXmonitor
 
     // Default values, might change later.
-    m_workspace->getSpectrum(ws_index)->setSpectrumNo(spectrumNo);
-    m_workspace->getSpectrum(ws_index)->setDetectorID(monIndex);
+    m_workspace->getSpectrum(ws_index).setSpectrumNo(spectrumNo);
+    m_workspace->getSpectrum(ws_index).setDetectorID(monIndex);
 
     ++ws_index;
     prog3.report();
@@ -276,13 +269,7 @@ void LoadNexusMonitors2::exec() {
     double xmin, xmax;
     eventWS->getEventXMinMax(xmin, xmax);
 
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec &xRef = axis.access();
-    xRef.resize(2, 0.0);
-    if (eventWS->getNumberEvents() > 0) {
-      xRef[0] = xmin - 1; // Just to make sure the bins hold it all
-      xRef[1] = xmax + 1;
-    }
+    auto axis = HistogramData::BinEdges{xmin - 1, xmax + 1};
     eventWS->setAllX(axis); // Set the binning axis using this.
   }
 
@@ -295,7 +282,7 @@ void LoadNexusMonitors2::exec() {
   // spectrum numbers
   // @todo: Find out if there is a better (i.e. more generic) way to do this
   try {
-    g_log.debug() << "Load Sample data isis" << std::endl;
+    g_log.debug() << "Load Sample data isis\n";
     loadSampleDataISIScompatibilityInfo(file, m_workspace);
   } catch (::NeXus::Exception &) {
   }
@@ -321,7 +308,7 @@ void LoadNexusMonitors2::exec() {
   }
 
   g_log.debug() << "Instrument name read from NeXus file is " << instrumentName
-                << std::endl;
+                << '\n';
 
   m_workspace->getAxis(0)->unit() =
       Kernel::UnitFactory::Instance().create("TOF");
@@ -346,19 +333,18 @@ void LoadNexusMonitors2::exec() {
                                  this);
 
   // Load the meta data, but don't stop on errors
-  g_log.debug() << "Loading metadata" << std::endl;
+  g_log.debug() << "Loading metadata\n";
   try {
     LoadEventNexus::loadEntryMetadata<API::MatrixWorkspace_sptr>(
         m_filename, m_workspace, m_top_entry_name);
   } catch (std::exception &e) {
-    g_log.warning() << "Error while loading meta data: " << e.what()
-                    << std::endl;
+    g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
   }
 
   // Fix the detector IDs/spectrum numbers
   for (size_t i = 0; i < m_workspace->getNumberHistograms(); i++) {
-    m_workspace->getSpectrum(i)->setSpectrumNo(spectra_numbers[i]);
-    m_workspace->getSpectrum(i)->setDetectorID(detector_numbers[i]);
+    m_workspace->getSpectrum(i).setSpectrumNo(spectra_numbers[i]);
+    m_workspace->getSpectrum(i).setDetectorID(detector_numbers[i]);
   }
   // add filename
   m_workspace->mutableRun().addProperty("Filename", m_filename);
@@ -453,14 +439,14 @@ void LoadNexusMonitors2::runLoadLogs(const std::string filename,
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
-    g_log.information() << "Loading logs from NeXus file..." << std::endl;
+    g_log.information() << "Loading logs from NeXus file...\n";
     loadLogs->setPropertyValue("Filename", filename);
     loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace",
                                                      localWorkspace);
     loadLogs->execute();
   } catch (...) {
     g_log.error() << "Error while loading Logs from Nexus. Some sample logs "
-                     "may be missing." << std::endl;
+                     "may be missing.\n";
   }
 }
 
@@ -480,7 +466,7 @@ bool LoadNexusMonitors2::canOpenAsNeXus(const std::string &fname) {
       f->getEntries();
   } catch (::NeXus::Exception &e) {
     g_log.error() << "Failed to open as a NeXus file: '" << fname
-                  << "', error description: " << e.what() << std::endl;
+                  << "', error description: " << e.what() << '\n';
     res = false;
   }
   if (f)
@@ -502,7 +488,7 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
   if (numPeriods < 2) {
     g_log.warning()
         << "Attempted to split multiperiod histogram workspace with "
-        << numPeriods << "periods, aborted." << std::endl;
+        << numPeriods << "periods, aborted.\n";
     return;
   }
 
@@ -512,7 +498,7 @@ void LoadNexusMonitors2::splitMutiPeriodHistrogramData(
         << "Attempted to split multiperiod histogram workspace with "
         << m_workspace->blocksize() << "data entries, into " << numPeriods
         << "periods."
-           " Aborted." << std::endl;
+           " Aborted.\n";
     return;
   }
 
@@ -782,7 +768,7 @@ bool LoadNexusMonitors2::createOutputWorkspace(
       numSpec = m_monitor_count;
 
     m_workspace =
-        API::WorkspaceFactory::Instance().create("Workspace2D", numSpec, 1, 1);
+        API::WorkspaceFactory::Instance().create("Workspace2D", numSpec, 2, 1);
     // if there is a distinct monitor number for each monitor sort them by that
     // number
     if (monitorNumber2Name.size() == monitorNames.size()) {
@@ -825,7 +811,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file, size_t i) {
   file.closeData();
 
   // load up the event list
-  DataObjects::EventList &event_list = eventWS->getEventList(i);
+  DataObjects::EventList &event_list = eventWS->getSpectrum(i);
 
   Mantid::Kernel::DateAndTime pulsetime(0);
   Mantid::Kernel::DateAndTime lastpulsetime(0);

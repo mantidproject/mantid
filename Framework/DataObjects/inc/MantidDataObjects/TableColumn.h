@@ -145,12 +145,7 @@ public:
     return static_cast<long int>(m_data.size() * sizeof(Type));
   }
   /// Clone
-  TableColumn *clone() const override {
-    TableColumn *temp = new TableColumn();
-    temp->m_data = this->m_data;
-    temp->setName(this->m_name);
-    return temp;
-  }
+  TableColumn *clone() const override { return new TableColumn(*this); }
 
   /**
    * Cast an element to double if possible. If it's impossible
@@ -221,7 +216,7 @@ protected:
     if (index < m_data.size())
       m_data.insert(m_data.begin() + index, Type());
     else
-      m_data.push_back(Type());
+      m_data.emplace_back();
   }
   /// Removes an item at index.
   void remove(size_t index) override { m_data.erase(m_data.begin() + index); }

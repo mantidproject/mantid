@@ -1,10 +1,10 @@
 #ifndef MANTID_ALGORITHMS_CONVERTEMPTYTOTOF_H_
 #define MANTID_ALGORITHMS_CONVERTEMPTYTOTOF_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
 
 #include <utility> // std::pair
 
@@ -40,9 +40,6 @@ namespace Algorithms {
  */
 class DLLExport ConvertEmptyToTof : public API::Algorithm {
 public:
-  ConvertEmptyToTof();
-  ~ConvertEmptyToTof() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -61,8 +58,8 @@ private:
   std::map<int, int> findElasticPeakPositions(const std::vector<int> &,
                                               const std::vector<int> &);
 
-  void estimateFWHM(const Mantid::MantidVec &, double &, double &, double &,
-                    double &, double &);
+  void estimateFWHM(const Mantid::HistogramData::HistogramY &, double &,
+                    double &, double &, double &, double &);
 
   bool doFitGaussianPeak(int, double &, double &, double &, double, double);
   std::pair<int, double> findAverageEppAndEpTof(const std::map<int, int> &);

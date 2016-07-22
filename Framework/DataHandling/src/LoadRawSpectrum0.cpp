@@ -1,12 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRawSpectrum0.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/UnitFactory.h"
@@ -30,8 +26,6 @@ using namespace API;
 LoadRawSpectrum0::LoadRawSpectrum0()
     : isisRaw(), m_filename(), m_numberOfSpectra(0), m_cache_options(),
       m_specTimeRegimes(), m_prog(0.0), m_lengthIn(0), m_noTimeRegimes(0) {}
-
-LoadRawSpectrum0::~LoadRawSpectrum0() {}
 
 /// Initialisation method.
 void LoadRawSpectrum0::init() { LoadRawHelper::init(); }
@@ -71,8 +65,7 @@ void LoadRawSpectrum0::exec() {
   const int64_t total_specs = 1;
 
   // Get the time channel array(s) and store in a vector inside a shared pointer
-  std::vector<boost::shared_ptr<MantidVec>> timeChannelsVec =
-      getTimeChannels(m_noTimeRegimes, m_lengthIn);
+  auto timeChannelsVec = getTimeChannels(m_noTimeRegimes, m_lengthIn);
 
   double histTotal = static_cast<double>(total_specs * m_numberOfPeriods);
   int64_t histCurrent = -1;

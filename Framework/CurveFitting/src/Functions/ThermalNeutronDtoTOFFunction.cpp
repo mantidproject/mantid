@@ -54,8 +54,6 @@ void ThermalNeutronDtoTOFFunction::function1D(double *out,
     out[i] = calThermalNeutronTOF(xValues[i], dtt1, dtt1t, dtt2t, zero, zerot,
                                   width, tcross);
   }
-
-  return;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -78,8 +76,6 @@ void ThermalNeutronDtoTOFFunction::function1D(
     out[i] = calThermalNeutronTOF(xValues[i], dtt1, dtt1t, dtt2t, zero, zerot,
                                   width, tcross);
   }
-
-  return;
 }
 
 void ThermalNeutronDtoTOFFunction::functionDeriv1D(Jacobian *out,
@@ -120,8 +116,6 @@ void ThermalNeutronDtoTOFFunction::functionDeriv1D(Jacobian *out,
     out->set(i, 5, deriv_width);
     out->set(i, 6, deriv_tcross);
   }
-
-  return;
 }
 
 /** Some forbidden function

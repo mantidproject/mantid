@@ -130,7 +130,7 @@ std::string EQSANSLoad::findConfigFile(const int &run) {
       Kernel::ConfigService::Instance().getDataSearchDirs();
 
   int max_run_number = 0;
-  std::string config_file = "";
+  std::string config_file;
   static boost::regex re1("eqsans_configuration\\.([0-9]+)$");
   boost::smatch matches;
   for (const auto &searchPath : searchPaths) {
@@ -336,7 +336,7 @@ void EQSANSLoad::moveToBeamCenter() {
   if (isEmpty(m_center_x) || isEmpty(m_center_y)) {
     EQSANSInstrument::getDefaultBeamCenter(dataWS, m_center_x, m_center_y);
     g_log.information() << "Setting beam center to [" << m_center_x << ", "
-                        << m_center_y << "]" << std::endl;
+                        << m_center_y << "]\n";
     return;
   }
 
@@ -373,7 +373,7 @@ void EQSANSLoad::moveToBeamCenter() {
   // Poco::NumberFormatter::format(-x_offset-beam_ctr_x)
   //    + ", " + Poco::NumberFormatter::format(-y_offset-beam_ctr_y) + " m\n";
   g_log.information() << "Moving beam center to " << m_center_x << " "
-                      << m_center_y << std::endl;
+                      << m_center_y << '\n';
 
   dataWS->mutableRun().addProperty("beam_center_x", m_center_x, "pixel", true);
   dataWS->mutableRun().addProperty("beam_center_y", m_center_y, "pixel", true);
@@ -396,10 +396,10 @@ void EQSANSLoad::readConfigFile(const std::string &filePath) {
 
   std::ifstream file(filePath.c_str());
   if (!file) {
-    g_log.error() << "Unable to open file: " << filePath << std::endl;
+    g_log.error() << "Unable to open file: " << filePath << '\n';
     throw Exception::FileError("Unable to open file: ", filePath);
   }
-  g_log.information() << "Using config file: " << filePath << std::endl;
+  g_log.information() << "Using config file: " << filePath << '\n';
   m_output_message += "   Using configuration file: " + filePath + "\n";
 
   std::string line;
@@ -446,13 +446,12 @@ void EQSANSLoad::exec() {
   EventWorkspace_sptr inputEventWS = getProperty("InputWorkspace");
   if (fileName.size() == 0 && !inputEventWS) {
     g_log.error() << "EQSANSLoad input error: Either a valid file path or an "
-                     "input workspace must be provided" << std::endl;
+                     "input workspace must be provided\n";
     throw std::runtime_error("EQSANSLoad input error: Either a valid file path "
                              "or an input workspace must be provided");
   } else if (fileName.size() > 0 && inputEventWS) {
     g_log.error() << "EQSANSLoad input error: Either a valid file path or an "
-                     "input workspace must be provided, but not both"
-                  << std::endl;
+                     "input workspace must be provided, but not both\n";
     throw std::runtime_error("EQSANSLoad input error: Either a valid file path "
                              "or an input workspace must be provided, but not "
                              "both");
@@ -554,10 +553,10 @@ void EQSANSLoad::exec() {
     sdd = sample_det_dist;
   } else {
     if (!dataWS->run().hasProperty("detectorZ")) {
-      g_log.error() << "Could not determine Z position: the "
-                       "SampleDetectorDistance property was not set "
-                       "and the run logs do not contain the detectorZ property"
-                    << std::endl;
+      g_log.error()
+          << "Could not determine Z position: the "
+             "SampleDetectorDistance property was not set "
+             "and the run logs do not contain the detectorZ property\n";
       throw std::invalid_argument(
           "Could not determine Z position: stopping execution");
     }
@@ -589,14 +588,13 @@ void EQSANSLoad::exec() {
   mvAlg->setProperty("Z", sdd / 1000.0);
   mvAlg->setProperty("RelativePosition", false);
   mvAlg->executeAsChildAlg();
-  g_log.information() << "Moving detector to " << sdd / 1000.0 << " meters"
-                      << std::endl;
+  g_log.information() << "Moving detector to " << sdd / 1000.0 << " meters\n";
   m_output_message += "   Detector position: " +
                       Poco::NumberFormatter::format(sdd / 1000.0, 3) + " m\n";
 
   // Get the run number so we can find the proper config file
   int run_number = 0;
-  std::string config_file = "";
+  std::string config_file;
   if (dataWS->run().hasProperty("run_number")) {
     const std::string run_str =
         dataWS->run().getPropertyValueAsType<std::string>("run_number");
@@ -605,7 +603,7 @@ void EQSANSLoad::exec() {
     config_file = findConfigFile(run_number);
   } else {
     g_log.error() << "Could not find run number for workspace "
-                  << getPropertyValue("OutputWorkspace") << std::endl;
+                  << getPropertyValue("OutputWorkspace") << '\n';
     m_output_message += "   Could not find run number for data file\n";
   }
 
@@ -623,7 +621,7 @@ void EQSANSLoad::exec() {
   } else if (use_config) {
     use_config = false;
     g_log.error() << "Cound not find config file for workspace "
-                  << getPropertyValue("OutputWorkspace") << std::endl;
+                  << getPropertyValue("OutputWorkspace") << '\n';
     m_output_message += "   Could not find configuration file for run " +
                         Poco::NumberFormatter::format(run_number) + "\n";
   }
@@ -632,10 +630,9 @@ void EQSANSLoad::exec() {
   if (use_config) {
     if (m_moderator_position > -13.0)
       g_log.error()
-          << "Moderator position seems close to the sample, please check"
-          << std::endl;
+          << "Moderator position seems close to the sample, please check\n";
     g_log.information() << "Moving moderator to " << m_moderator_position
-                        << std::endl;
+                        << '\n';
     m_output_message += "   Moderator position: " +
                         Poco::NumberFormatter::format(m_moderator_position) +
                         " m\n";
@@ -687,7 +684,7 @@ void EQSANSLoad::exec() {
     dataWS->mutableRun().addProperty("is_frame_skipping", 0, true);
     if (correct_for_flight_path) {
       g_log.error() << "CorrectForFlightPath and SkipTOFCorrection can't be "
-                       "set to true at the same time" << std::endl;
+                       "set to true at the same time\n";
       m_output_message += "    Skipped flight path correction: see error log\n";
     }
   } else {
@@ -707,8 +704,8 @@ void EQSANSLoad::exec() {
     wl_min = tofAlg->getProperty("WavelengthMin");
     wl_max = tofAlg->getProperty("WavelengthMax");
     if (wl_min != wl_min || wl_max != wl_max) {
-      g_log.error() << "Bad wavelength range" << std::endl;
-      g_log.error() << m_output_message << std::endl;
+      g_log.error() << "Bad wavelength range\n";
+      g_log.error() << m_output_message << '\n';
     }
 
     const bool frame_skipping = tofAlg->getProperty("FrameSkipping");
@@ -753,7 +750,7 @@ void EQSANSLoad::exec() {
     wl_max = dataWS_evt->getTofMax() * conversion_factor;
     wl_combined_max = wl_max;
     g_log.information() << "Wavelength range: " << wl_min << " to " << wl_max
-                        << std::endl;
+                        << '\n';
     dataWS->mutableRun().addProperty("wavelength_min", wl_min, "Angstrom",
                                      true);
     dataWS->mutableRun().addProperty("wavelength_max", wl_max, "Angstrom",
@@ -776,7 +773,7 @@ void EQSANSLoad::exec() {
   std::string params = Poco::NumberFormatter::format(wl_min_rounded, 2) + "," +
                        Poco::NumberFormatter::format(wl_step) + "," +
                        Poco::NumberFormatter::format(wl_max_rounded, 2);
-  g_log.information() << "Rebin parameters: " << params << std::endl;
+  g_log.information() << "Rebin parameters: " << params << '\n';
   IAlgorithm_sptr rebinAlg = createChildAlgorithm("Rebin", 0.71, 0.72);
   rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
   if (preserveEvents)

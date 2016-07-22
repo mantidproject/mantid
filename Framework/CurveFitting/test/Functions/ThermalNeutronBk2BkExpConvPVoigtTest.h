@@ -36,7 +36,7 @@ public:
     peak.setParameter(1, 123.4);
     double parvalue1 = peak.getParameter(1);
     TS_ASSERT_DELTA(123.4, parvalue1, 0.00001);
-    cout << "Parameter 1: Set To 123.4.  Value got = " << parvalue1 << endl;
+    cout << "Parameter 1: Set To 123.4.  Value got = " << parvalue1 << '\n';
 
     // Set parameter, get it and compare
     peak.setParameter("Dtt1", 123456.78);
@@ -45,7 +45,7 @@ public:
 
     TS_ASSERT_DELTA(123.4, parvalue1, 0.00001);
     cout << "Parameter Dtt1: Set To 123456.78.  Value got = " << parvalue2
-         << endl;
+         << '\n';
   }
 
   /** Test on calcualte peak parameters
@@ -102,7 +102,7 @@ public:
     TS_ASSERT_DELTA(tof_h, 71229.45, 0.1);
     TS_ASSERT_DELTA(fwhm, 50.0613, 0.0001);
 
-    cout << "TOF_h = " << tof_h << ", FWHM = " << fwhm << endl;
+    cout << "TOF_h = " << tof_h << ", FWHM = " << fwhm << '\n';
 
     // 4. Calculate
     size_t nData = vecX.size();
@@ -267,7 +267,7 @@ public:
     cout << "Alpha  = " << alpha << ", Beta  = " << beta << "\n";
     cout << "Sigma2 = " << sigma2 << ", Gamma = " << gamma << "\n";
     cout << "Peak height = " << h1 << ", FWHM = " << fwhm << ", Eta = " << eta
-    << endl;
+    << '\n';
     */
 
     // 4. Calculate
@@ -279,7 +279,7 @@ public:
     std::stringstream outstring;
     for (size_t id = 0; id < nData; ++id)
     {
-      outstring << vecX[id] << "\t\t" << out[id] << std::endl;
+      outstring << vecX[id] << "\t\t" << out[id] << '\n';
     }
     std::ofstream ofile;
     ofile.open("peaks_200.dat");

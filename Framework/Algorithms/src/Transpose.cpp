@@ -44,12 +44,12 @@ void Transpose::exec() {
 
   // Create a shareable X vector for the output workspace
   Axis *inputYAxis = getVerticalAxis(inputWorkspace);
-  MantidVecPtr newXVector;
-  newXVector.access() = MantidVec(newXsize);
-  MantidVec &newXValues = newXVector.access();
+  MantidVec newXValues(newXsize);
   for (size_t i = 0; i < newXsize; ++i) {
     newXValues[i] = (*inputYAxis)(i);
   }
+  auto newXVector =
+      Kernel::make_cow<HistogramData::HistogramX>(std::move(newXValues));
 
   Progress progress(this, 0.0, 1.0, newNhist * newYsize);
   PARALLEL_FOR2(inputWorkspace, outputWorkspace)

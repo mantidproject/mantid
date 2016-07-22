@@ -26,16 +26,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(ConvertToMDMinMaxGlobal)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertToMDMinMaxGlobal::ConvertToMDMinMaxGlobal() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertToMDMinMaxGlobal::~ConvertToMDMinMaxGlobal() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToMDMinMaxGlobal::name() const {
   return "ConvertToMDMinMaxGlobal";
@@ -245,7 +235,7 @@ void ConvertToMDMinMaxGlobal::exec() {
       } else // HKL
       {
         if (!ws->sample().hasOrientedLattice()) {
-          g_log.error() << "Sample has no oriented lattice" << std::endl;
+          g_log.error() << "Sample has no oriented lattice\n";
           throw std::invalid_argument("No UB set");
         }
         Mantid::Geometry::OrientedLattice ol =
@@ -270,7 +260,7 @@ void ConvertToMDMinMaxGlobal::exec() {
   for (auto &OtherDimension : OtherDimensions) {
     if (!ws->run().hasProperty(OtherDimension)) {
       g_log.error() << "The workspace does not have a property "
-                    << OtherDimension << std::endl;
+                    << OtherDimension << '\n';
       throw std::invalid_argument("Property not found. Please see error log.");
     }
     Kernel::Property *pProperty = (ws->run().getProperty(OtherDimension));

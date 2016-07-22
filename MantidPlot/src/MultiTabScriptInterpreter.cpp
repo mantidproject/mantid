@@ -419,7 +419,10 @@ void MultiTabScriptInterpreter::toggleWhitespace(bool state) {
  */
 void MultiTabScriptInterpreter::openConfigTabs() {
   // Create dialogue
-  QDialog configTabs(this, "Configure Tab Whitespace", false, Qt::Dialog);
+  QDialog configTabs(this, Qt::Dialog);
+  configTabs.setModal(false);
+  configTabs.setWindowTitle("Configure Tab Whitespace");
+
   QBoxLayout *layoutTabDialogue =
       new QBoxLayout(QBoxLayout::Direction::TopToBottom);
   configTabs.setLayout(layoutTabDialogue);
@@ -484,8 +487,10 @@ void MultiTabScriptInterpreter::spacesToTabs() { m_current->spacesToTabs(); }
 void MultiTabScriptInterpreter::showSelectFont() {
   // Would prefer to use QFontDialog but only interested in font family
 
-  QDialog *selectFont =
-      new QDialog(this, "Configure Tab Whitespace", false, Qt::Dialog);
+  QDialog *selectFont = new QDialog(this, Qt::Dialog);
+  selectFont->setModal(false);
+  selectFont->setWindowTitle("Configure Tab Whitespace");
+
   QBoxLayout *layoutFontDialogue =
       new QBoxLayout(QBoxLayout::Direction::TopToBottom);
   selectFont->setLayout(layoutFontDialogue);
@@ -639,7 +644,7 @@ void MultiTabScriptInterpreter::contextMenuEvent(QContextMenuEvent *event) {
     connect(closeall, SIGNAL(triggered()), this, SLOT(closeAllTabs()));
     context.addAction(closeall);
 
-    context.insertSeparator();
+    context.addSeparator();
   }
 
   QAction *newtab = new QAction(tr("&New Tab"), this);
@@ -702,8 +707,8 @@ void MultiTabScriptInterpreter::open(bool newtab, const QString &filename) {
  */
 void MultiTabScriptInterpreter::setTabTitle(QWidget *widget,
                                             const QString &filename) {
-  setTabLabel(widget, createTabTitle(filename));
-  setTabToolTip(widget, filename);
+  setTabText(this->indexOf(widget), createTabTitle(filename));
+  setTabToolTip(this->indexOf(widget), filename);
 }
 
 /**
@@ -738,7 +743,7 @@ void MultiTabScriptInterpreter::closeTabAtPosition(const QPoint &pos) {
  */
 void MultiTabScriptInterpreter::updateRecentScriptList(
     const QString &filename) {
-  m_recentScriptList.remove(filename);
+  m_recentScriptList.removeAll(filename);
   m_recentScriptList.push_front(filename);
   if (m_recentScriptList.count() > MaxRecentScripts) {
     m_recentScriptList.pop_back();

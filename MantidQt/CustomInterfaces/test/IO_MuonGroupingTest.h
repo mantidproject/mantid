@@ -12,37 +12,37 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h"
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces::Muon;
 
-class IO_MuonGroupingTest : public CxxTest::TestSuite
-{
+class IO_MuonGroupingTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static IO_MuonGroupingTest *createSuite() { return new IO_MuonGroupingTest(); }
-  static void destroySuite( IO_MuonGroupingTest *suite ) { delete suite; }
+  static IO_MuonGroupingTest *createSuite() {
+    return new IO_MuonGroupingTest();
+  }
+  static void destroySuite(IO_MuonGroupingTest *suite) { delete suite; }
 
   /// Constructor
-  IO_MuonGroupingTest()
-  {
+  IO_MuonGroupingTest() {
     using Mantid::Kernel::ConfigService;
 
     auto dataPaths = ConfigService::Instance().getDataSearchDirs();
 
     // Find the path of AutoTestData
-    for(auto it = dataPaths.begin(); it != dataPaths.end(); ++it)
-    {
+    for (auto it = dataPaths.begin(); it != dataPaths.end(); ++it) {
       Poco::Path path(*it);
 
-      if(path.directory(path.depth() - 1) == "UnitTest")
-      {
+      if (path.directory(path.depth() - 1) == "UnitTest") {
         m_testDataDir = *it;
         break;
       }
     }
 
-    TSM_ASSERT("Unable to find UnitTest data directory", !m_testDataDir.empty());
+    TSM_ASSERT("Unable to find UnitTest data directory",
+               !m_testDataDir.empty());
 
     m_tmpDir = ConfigService::Instance().getTempDir();
 
@@ -50,8 +50,7 @@ public:
     FrameworkManager::Instance();
   }
 
-  void test_saveGroupingToXML()
-  {
+  void test_saveGroupingToXML() {
     Grouping g, lg;
 
     std::string tmpFile = m_tmpDir + "tmp_MUSRGrouping.xml";
@@ -97,17 +96,14 @@ private:
   std::string m_testDataDir;
   std::string m_tmpDir;
 
-  std::set<int> setFromRange(int from, int to)
-  {
+  std::set<int> setFromRange(int from, int to) {
     std::set<int> result;
 
-    for(int i = from; i <= to; i++)
+    for (int i = from; i <= to; i++)
       result.insert(i);
-    
+
     return result;
   }
-
 };
-
 
 #endif /* MANTID_CUSTOMINTERFACES_IO_MUONGROUPINGTEST_H_ */

@@ -83,9 +83,9 @@ void Q1DWeighted::exec() {
   const std::vector<double> binParams = getProperty("OutputBinning");
   // XOut defines the output histogram, so its length is equal to the number of
   // bins + 1
-  MantidVecPtr XOut;
+  HistogramData::BinEdges XOut(0);
   const int sizeOut =
-      VectorHelper::createAxisFromRebinParams(binParams, XOut.access());
+      VectorHelper::createAxisFromRebinParams(binParams, XOut.mutableRawData());
 
   // Get pixel size and pixel sub-division
   double pixelSizeX = getProperty("PixelSizeX");
@@ -104,11 +104,11 @@ void Q1DWeighted::exec() {
   outputWS->getAxis(0)->unit() =
       UnitFactory::Instance().create("MomentumTransfer");
   outputWS->setYUnitLabel("1/cm");
-  outputWS->isDistribution(true);
+  outputWS->setDistribution(true);
   setProperty("OutputWorkspace", outputWS);
 
   // Set the X vector for the output workspace
-  outputWS->setX(0, XOut);
+  outputWS->setBinEdges(0, XOut);
   MantidVec &YOut = outputWS->dataY(0);
   MantidVec &EOut = outputWS->dataE(0);
 
@@ -148,8 +148,8 @@ void Q1DWeighted::exec() {
     wedge_ws->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
     wedge_ws->setYUnitLabel("1/cm");
-    wedge_ws->isDistribution(true);
-    wedge_ws->setX(0, XOut);
+    wedge_ws->setDistribution(true);
+    wedge_ws->setBinEdges(0, XOut);
     wedge_ws->mutableRun().addProperty("wedge_angle", center_angle, "degrees",
                                        true);
     wedgeWorkspaces.push_back(wedge_ws);
@@ -185,8 +185,7 @@ void Q1DWeighted::exec() {
         det = inputWS->getDetector(i);
       } catch (Exception::NotFoundError &) {
         g_log.warning() << "Workspace index " << i
-                        << " has no detector assigned to it - discarding"
-                        << std::endl;
+                        << " has no detector assigned to it - discarding\n";
         // Catch if no detector. Next line tests whether this happened - test
         // placed
         // outside here because Mac Intel compiler doesn't like 'continue' in a
@@ -235,9 +234,9 @@ void Q1DWeighted::exec() {
           }
           // If we got a more complicated binning, find the q bin the slow way
         } else {
-          for (int i_qbin = 0;
-               i_qbin < static_cast<int>(XOut.access().size()) - 1; i_qbin++) {
-            if (q >= XOut.access()[i_qbin] && q < XOut.access()[(i_qbin + 1)]) {
+          for (int i_qbin = 0; i_qbin < static_cast<int>(XOut.size()) - 1;
+               i_qbin++) {
+            if (q >= XOut[i_qbin] && q < XOut[(i_qbin + 1)]) {
               iq = i_qbin;
               break;
             }

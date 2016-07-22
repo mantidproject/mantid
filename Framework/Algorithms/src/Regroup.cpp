@@ -65,11 +65,12 @@ void Regroup::exec() {
   bool dist = inputW->isDistribution();
 
   int histnumber = static_cast<int>(inputW->getNumberHistograms());
-  MantidVecPtr XValues_new;
+  HistogramData::BinEdges XValues_new(0);
   const MantidVec &XValues_old = inputW->readX(0);
   std::vector<int> xoldIndex; // indeces of new x in XValues_old
   // create new output X axis
-  int ntcnew = newAxis(rb_params, XValues_old, XValues_new.access(), xoldIndex);
+  int ntcnew =
+      newAxis(rb_params, XValues_old, XValues_new.mutableRawData(), xoldIndex);
 
   // make output Workspace the same type is the input, but with new length of
   // signal array
@@ -92,7 +93,7 @@ void Regroup::exec() {
     // output data arrays are implicitly filled by function
     rebin(XValues, YValues, YErrors, xoldIndex, YValues_new, YErrors_new, dist);
 
-    outputW->setX(hist, XValues_new);
+    outputW->setBinEdges(hist, XValues_new);
 
     if (hist % progress_step == 0) {
       progress(double(hist) / histnumber);
@@ -100,7 +101,7 @@ void Regroup::exec() {
     }
   }
 
-  outputW->isDistribution(dist);
+  outputW->setDistribution(dist);
 
   // Copy units
   if (outputW->getAxis(0)->unit().get())
@@ -114,8 +115,6 @@ void Regroup::exec() {
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputW);
-
-  return;
 }
 
 /** Regroup the data according to new output X array
@@ -172,8 +171,6 @@ void Regroup::rebin(const std::vector<double> &xold,
       enew[i] = sqrt(enew[i]);
     }
   }
-
-  return; // without problems
 }
 
 /** Creates a new  output X array  according to specific boundary defnitions

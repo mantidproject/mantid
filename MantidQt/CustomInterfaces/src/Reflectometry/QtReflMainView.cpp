@@ -3,12 +3,12 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/QReflTableModel.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflCommandAdapter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
+#include "MantidQtMantidWidgets/SlitCalculator.h"
 #include <qinputdialog.h>
 #include <qmessagebox.h>
 
@@ -19,6 +19,7 @@ const QString ReflSettingsGroup = "Mantid/CustomInterfaces/ISISReflectometry";
 namespace MantidQt {
 namespace CustomInterfaces {
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 
 DECLARE_SUBWINDOW(QtReflMainView)
 
@@ -26,8 +27,7 @@ DECLARE_SUBWINDOW(QtReflMainView)
 /** Constructor
 */
 QtReflMainView::QtReflMainView(QWidget *parent)
-    : UserSubWindow(parent),
-      m_calculator(new MantidWidgets::SlitCalculator(this)) {}
+    : UserSubWindow(parent), m_calculator(new SlitCalculator(this)) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -46,25 +46,41 @@ void QtReflMainView::initLayout() {
   ui.splitterTables->setStretchFactor(0, 0);
   ui.splitterTables->setStretchFactor(1, 1);
 
+  ReflGenericDataProcessorPresenterFactory presenterFactory;
+
+  boost::shared_ptr<DataProcessorPresenter> processorPresenter =
+      presenterFactory.create();
+
+  QDataProcessorWidget *qDataProcessorWidget =
+      new QDataProcessorWidget(processorPresenter, this);
+  ui.layoutProcessPane->addWidget(qDataProcessorWidget);
+
   // Custom context menu for table
   connect(ui.tableSearchResults,
           SIGNAL(customContextMenuRequested(const QPoint &)), this,
           SLOT(showSearchContextMenu(const QPoint &)));
   // Synchronize the two instrument selection widgets
   connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)),
-          ui.qReflTableView,
+          qDataProcessorWidget,
           SLOT(on_comboProcessInstrument_currentIndexChanged(int)));
-  connect(ui.qReflTableView,
+  connect(qDataProcessorWidget,
           SIGNAL(comboProcessInstrument_currentIndexChanged(int)),
           ui.comboSearchInstrument, SLOT(setCurrentIndex(int)));
-
+  // Synchronize the slit calculator
+  connect(ui.comboSearchInstrument, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(instrumentChanged(int)));
+  connect(qDataProcessorWidget,
+          SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
+          SLOT(instrumentChanged(int)));
   // Needed to Import/Export TBL, plot row and plot group
-  connect(ui.qReflTableView, SIGNAL(runAsPythonScript(const QString &, bool)),
-          this, SIGNAL(runAsPythonScript(const QString &, bool)));
+  connect(qDataProcessorWidget,
+          SIGNAL(runAsPythonScript(const QString &, bool)), this,
+          SIGNAL(runAsPythonScript(const QString &, bool)));
 
   m_presenter = boost::make_shared<ReflMainViewPresenter>(
-      this /*main view*/, ui.qReflTableView->getTablePresenter().get(),
-      this /*currently this concrete view is also responsibile for prog reporting*/);
+      this /*main view*/,
+      this /*currently this concrete view is also responsibile for prog reporting*/,
+      processorPresenter /*the table presenter*/);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 }
 
@@ -73,9 +89,9 @@ void QtReflMainView::initLayout() {
 * @param menu : [input] The menu where actions will be added
 * @param command : [input] The command (action) to add
 */
-void QtReflMainView::addToMenu(QMenu *menu, ReflCommand_uptr command) {
+void QtReflMainView::addToMenu(QMenu *menu, DataProcessorCommand_uptr command) {
 
-  m_commands.push_back(Mantid::Kernel::make_unique<ReflCommandAdapter>(
+  m_commands.push_back(Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
       menu, std::move(command)));
 }
 
@@ -85,7 +101,7 @@ void QtReflMainView::addToMenu(QMenu *menu, ReflCommand_uptr command) {
 * "Reflectometry" menu
 */
 void QtReflMainView::setTableCommands(
-    std::vector<ReflCommand_uptr> tableCommands) {
+    std::vector<DataProcessorCommand_uptr> tableCommands) {
 
   ui.menuTable->clear();
   for (auto &command : tableCommands) {
@@ -103,7 +119,8 @@ void QtReflMainView::setTableCommands(
 * Adds actions to the "Edit" menu
 * @param rowCommands : [input] The list of commands to add to the "Edit" menu
 */
-void QtReflMainView::setRowCommands(std::vector<ReflCommand_uptr> rowCommands) {
+void QtReflMainView::setRowCommands(
+    std::vector<DataProcessorCommand_uptr> rowCommands) {
 
   ui.menuRows->clear();
   for (auto &command : rowCommands) {
@@ -203,16 +220,6 @@ void QtReflMainView::on_actionTransfer_triggered() {
 }
 
 /**
-This slot opens the documentation when the "help" button has been pressed
-*/
-void QtReflMainView::on_actionHelp_triggered() {
-  MantidQt::API::HelpWindow::showPage(
-      this,
-      QString(
-          "qthelp://org.mantidproject/doc/interfaces/ISIS_Reflectometry.html"));
-}
-
-/**
 This slot shows the slit calculator
 */
 void QtReflMainView::slitCalculatorTriggered() {
@@ -233,6 +240,16 @@ void QtReflMainView::showSearchContextMenu(const QPoint &pos) {
   QMenu *menu = new QMenu(this);
   menu->addAction(ui.actionTransfer);
   menu->popup(ui.tableSearchResults->viewport()->mapToGlobal(pos));
+}
+
+/** This is slot is triggered when any of the instrument combo boxes changes. It
+ * is used to update the Slit Calculator
+ * @param index : The index of the combo box
+ */
+void QtReflMainView::instrumentChanged(int index) {
+  m_calculator->setCurrentInstrumentName(
+      ui.comboSearchInstrument->itemText(index).toStdString());
+  m_calculator->processInstrumentHasBeenChanged();
 }
 
 /**

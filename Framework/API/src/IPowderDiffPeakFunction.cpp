@@ -48,8 +48,6 @@ void IPowderDiffPeakFunction::setParameter(size_t i, const double &value,
     m_hasNewParameterValue = true;
   }
   ParamFunction::setParameter(i, value, explicitlySet);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -66,8 +64,6 @@ void IPowderDiffPeakFunction::setParameter(const std::string &name,
     m_hasNewParameterValue = true;
   }
   ParamFunction::setParameter(name, value, explicitlySet);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -105,8 +101,6 @@ void IPowderDiffPeakFunction::setHeight(const double h)
  */
 void IPowderDiffPeakFunction::setHeight(const double h) {
   setParameter(HEIGHTINDEX, h);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -176,8 +170,6 @@ void IPowderDiffPeakFunction::setMillerIndex(int h, int k, int l) {
     errmsg << "H = K = L = 0 is not allowed";
     throw std::invalid_argument(errmsg.str());
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -187,8 +179,6 @@ void IPowderDiffPeakFunction::getMillerIndex(int &h, int &k, int &l) {
   h = static_cast<int>(mH);
   k = static_cast<int>(mK);
   l = static_cast<int>(mL);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -233,7 +223,7 @@ std::complex<double> E1(std::complex<double> z) {
     exp_e1 = r;
   } else if (az <= 10.0 || (rz < 0.0 && az < 20.0)) {
     // Some interesting region, equal to integrate to infinity, converged
-    // cout << "[DB] Type 1" << endl;
+    // cout << "[DB] Type 1\n";
 
     std::complex<double> r(1.0, 0.0);
     exp_e1 = r;

@@ -39,7 +39,7 @@ void PoldiAutoCorrelationCore::setInstrument(
   m_detector = detector;
   m_chopper = chopper;
 
-  m_logger.information() << "Detector and chopper assigned..." << std::endl;
+  m_logger.information() << "Detector and chopper assigned...\n";
 }
 
 /** Takes wavelength limits to be considered for the calculation.
@@ -76,7 +76,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::finalizeCalculation(
     qValues[dCount - i - 1] = Conversions::dToQ(dValues[i]);
   }
 
-  m_logger.information() << "  Setting result..." << std::endl;
+  m_logger.information() << "  Setting result...\n";
   DataObjects::Workspace2D_sptr outputWorkspace =
       boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create("Workspace2D", 1, dValues.size(),
@@ -86,7 +86,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::finalizeCalculation(
 
   outputWorkspace->dataY(0) = correctedCorrelatedIntensities;
 
-  outputWorkspace->setX(0, qValues);
+  outputWorkspace->setPoints(0, qValues);
 
   return outputWorkspace;
 }
@@ -100,10 +100,10 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::finalizeCalculation(
 DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
     DataObjects::Workspace2D_sptr &countData,
     const DataObjects::Workspace2D_sptr &normCountData) {
-  m_logger.information() << "Starting Autocorrelation method..." << std::endl;
+  m_logger.information() << "Starting Autocorrelation method...\n";
 
   if (m_detector && m_chopper) {
-    m_logger.information() << "  Assigning count data..." << std::endl;
+    m_logger.information() << "  Assigning count data...\n";
     setCountData(countData);
 
     if (normCountData) {
@@ -119,7 +119,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
      */
     std::vector<double> timeData = m_countData->readX(0);
 
-    m_logger.information() << "  Setting time data..." << std::endl;
+    m_logger.information() << "  Setting time data...\n";
     m_deltaT = timeData[1] - timeData[0];
     m_timeBinCount = static_cast<int>(m_chopper->cycleTime() / m_deltaT);
 
@@ -146,7 +146,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
      * the instrument,
      * which was calculated before.
      */
-    m_logger.information() << "  Generating d-grid..." << std::endl;
+    m_logger.information() << "  Generating d-grid...\n";
     std::vector<double> dValues = dGrid.grid();
 
     /* When the correlation background is subtracted from the correlation
@@ -156,7 +156,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
      * although it simply leads to unit weights.
      */
     m_logger.information() << "  Calculating weights (" << dValues.size()
-                           << ")..." << std::endl;
+                           << ")...\n";
     m_weightsForD = calculateDWeights(m_tofsFor1Angstrom, m_deltaT, m_deltaD,
                                       dValues.size());
 
@@ -172,7 +172,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
      * elements, the parallelization
      * pays off quite well.
      */
-    m_logger.information() << "  Calculating intensities..." << std::endl;
+    m_logger.information() << "  Calculating intensities...\n";
     std::vector<double> rawCorrelatedIntensities(dValues.size());
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < static_cast<int>(dValues.size()); ++i) {
@@ -195,13 +195,13 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
     double sumOfCorrelatedIntensities = std::accumulate(
         rawCorrelatedIntensities.begin(), rawCorrelatedIntensities.end(), 0.0);
     double sumOfCounts = getSumOfCounts(m_timeBinCount, m_detectorElements);
-    m_logger.information() << "  Summing intensities (" << sumOfCounts << ")..."
-                           << std::endl;
+    m_logger.information() << "  Summing intensities (" << sumOfCounts
+                           << ")...\n";
 
     m_correlationBackground =
         calculateCorrelationBackground(sumOfCorrelatedIntensities, sumOfCounts);
 
-    m_logger.information() << "  Correcting intensities..." << std::endl;
+    m_logger.information() << "  Correcting intensities...\n";
     std::vector<double> correctedCorrelatedIntensities(dValues.size());
     std::transform(rawCorrelatedIntensities.begin(),
                    rawCorrelatedIntensities.end(), m_weightsForD.begin(),
@@ -386,11 +386,9 @@ UncertainValue PoldiAutoCorrelationCore::getCMessAndCSigma(
       m_logger.warning() << "Inconsistency foun while calculating correlation "
                             "intensity and error for d-value: "
                          << boost::lexical_cast<std::string>(dValue)
-                         << ", with detector index: "
-                         << boost::lexical_cast<std::string>(index)
+                         << ", with detector index: " << std::to_string(index)
                          << ", got middle index: "
-                         << boost::lexical_cast<std::string>(middleIndex)
-                         << ", ignoring it." << std::endl;
+                         << std::to_string(middleIndex) << ", ignoring it.\n";
       break;
     }
 

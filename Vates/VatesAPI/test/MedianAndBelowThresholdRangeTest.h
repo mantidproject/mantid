@@ -17,41 +17,40 @@ using namespace testing;
 // Functional tests
 //=====================================================================================
 
-class MedianAndBelowThresholdRangeTest: public CxxTest::TestSuite
-{
+class MedianAndBelowThresholdRangeTest : public CxxTest::TestSuite {
 private:
-
   // Fake workspace
   MDHistoWorkspace_sptr sptrWs;
 
-public :
+public:
   void setUp() override {
     // Fake workspace with 8 cells
     sptrWs = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1, 8, 8.0);
-    //Set up a standard set of values for subsequent tests. Note that the following set gives a standard deviation of +/-2
-    sptrWs->setSignalAt(0,-1.0);
-    sptrWs->setSignalAt(1,2);
-    sptrWs->setSignalAt(2,2);
-    sptrWs->setSignalAt(3,3);
-    sptrWs->setSignalAt(4,4);
-    sptrWs->setSignalAt(5,5);
-    sptrWs->setSignalAt(6,6);
-    sptrWs->setSignalAt(7,7);
+    // Set up a standard set of values for subsequent tests. Note that the
+    // following set gives a standard deviation of +/-2
+    sptrWs->setSignalAt(0, -1.0);
+    sptrWs->setSignalAt(1, 2);
+    sptrWs->setSignalAt(2, 2);
+    sptrWs->setSignalAt(3, 3);
+    sptrWs->setSignalAt(4, 4);
+    sptrWs->setSignalAt(5, 5);
+    sptrWs->setSignalAt(6, 6);
+    sptrWs->setSignalAt(7, 7);
   }
 
-  void testMedianCalculation()
-  {
+  void testMedianCalculation() {
     Mantid::VATES::MedianAndBelowThresholdRange medianCalculator;
     medianCalculator.setWorkspace(sptrWs);
     medianCalculator.calculate();
     //-1 + 2 + 2 + 3 + 4 + 5 + 6 + 7 / 8 = 3.5
 
-    TSM_ASSERT_EQUALS("Wrong maximum value.", 3.5, medianCalculator.getMaximum());
-    TSM_ASSERT_EQUALS("Wrong minimum value.", -1, medianCalculator.getMinimum());
+    TSM_ASSERT_EQUALS("Wrong maximum value.", 3.5,
+                      medianCalculator.getMaximum());
+    TSM_ASSERT_EQUALS("Wrong minimum value.", -1,
+                      medianCalculator.getMinimum());
   }
 
-  void testInRange()
-  {
+  void testInRange() {
     Mantid::VATES::MedianAndBelowThresholdRange medianCalculator;
     medianCalculator.setWorkspace(sptrWs);
     medianCalculator.calculate();
@@ -60,7 +59,6 @@ public :
     TS_ASSERT_EQUALS(true, medianCalculator.inRange(3.499));
     TS_ASSERT_EQUALS(false, medianCalculator.inRange(3.501));
   }
-
 };
 
 #endif

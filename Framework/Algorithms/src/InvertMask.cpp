@@ -11,16 +11,6 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(InvertMask)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-InvertMask::InvertMask() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-InvertMask::~InvertMask() {}
-
 void InvertMask::init() {
   this->declareProperty(
       make_unique<API::WorkspaceProperty<DataObjects::MaskWorkspace>>(
@@ -51,8 +41,8 @@ void InvertMask::exec() {
   invert->execute();
 
   if (!invert->isExecuted()) {
-    g_log.error() << "ChildAlgorithm BinaryOperateMask() cannot be executed. "
-                  << std::endl;
+    g_log.error()
+        << "ChildAlgorithm BinaryOperateMask() cannot be executed. \n";
     throw std::runtime_error(
         "ChildAlgorithm BinaryOperateMask() cannot be executed. ");
   }
@@ -65,8 +55,6 @@ void InvertMask::exec() {
 
   // 3. Set
   this->setProperty("OutputWorkspace", outputws);
-
-  return;
 }
 
 } // namespace Mantid

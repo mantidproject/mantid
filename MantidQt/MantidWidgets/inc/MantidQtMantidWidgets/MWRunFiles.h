@@ -21,7 +21,7 @@ class IAlgorithm;
 namespace MantidQt {
 namespace MantidWidgets {
 /**
- * A class to allow the asyncronous finding of files.
+ * A class to allow the asynchronous finding of files.
  */
 class FindFilesThread : public QThread {
   Q_OBJECT
@@ -137,9 +137,9 @@ public:
   };
   /// Options for the live button
   enum LiveButtonOpts {
-    Hide,            ///< Don't use the live button
-    AlwaysShow,      ///< Show whether a connection is possible or not (will be
-                     ///disabled)
+    Hide,       ///< Don't use the live button
+    AlwaysShow, ///< Show whether a connection is possible or not (will be
+    /// disabled)
     ShowIfCanConnect ///< Only show if able to connect to the live data server
   };
 
@@ -240,6 +240,8 @@ signals:
   void liveButtonPressed(bool);
   /// Signal emitted after asynchronous checking of live stream availability
   void liveButtonSetEnabledSignal(bool);
+  /// Emitted when inspection of any found files is completed
+  void fileInspectionFinished();
 
 public slots:
   /// Set the file text and try and find it

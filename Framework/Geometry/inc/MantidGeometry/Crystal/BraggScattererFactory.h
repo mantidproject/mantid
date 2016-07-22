@@ -73,8 +73,7 @@ public:
 
   /// Subscribes a scatterer class into the factory.
   template <class C> void subscribeScatterer() {
-    Kernel::Instantiator<C, BraggScatterer> *instantiator =
-        new Kernel::Instantiator<C, BraggScatterer>;
+    auto instantiator = new Kernel::Instantiator<C, BraggScatterer>;
     BraggScatterer_sptr scatterer = instantiator->createInstance();
 
     subscribe(scatterer->name(), instantiator);
@@ -86,17 +85,18 @@ private:
   BraggScattererFactoryImpl();
 };
 
-// This is taken from FuncMinimizerFactory
-#ifdef _WIN32
-template class MANTID_GEOMETRY_DLL
-    Mantid::Kernel::SingletonHolder<BraggScattererFactoryImpl>;
-#endif
-
 typedef Mantid::Kernel::SingletonHolder<BraggScattererFactoryImpl>
     BraggScattererFactory;
 
 } // namespace Geometry
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
+    SingletonHolder<Mantid::Geometry::BraggScattererFactoryImpl>;
+}
+}
 
 #define DECLARE_BRAGGSCATTERER(classname)                                      \
   namespace {                                                                  \

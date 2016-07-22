@@ -10,10 +10,15 @@
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+}
+
 namespace Algorithms {
 /// Get an index of a value in a sorted vector.  The index should be the item
 /// with value nearest to X
-size_t getVectorIndex(const MantidVec &vecx, double x);
+size_t getIndex(const HistogramData::HistogramX &vecx, double x);
 
 /** FitOneSinglePeak: a class to perform peak fitting on a single peak
   */
@@ -21,9 +26,6 @@ class DLLExport FitOneSinglePeak : public API::Algorithm {
 public:
   /// Constructor
   FitOneSinglePeak();
-
-  /// Desctructor
-  ~FitOneSinglePeak() override;
 
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -247,7 +249,6 @@ private:
 class DLLExport FitPeak : public API::Algorithm {
 public:
   FitPeak();
-  ~FitPeak() override;
 
   /// Algorithm's name
   const std::string name() const override { return "FitPeak"; }

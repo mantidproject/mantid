@@ -69,8 +69,6 @@ public:
                  std::string &Component_name, double ax, double bx, double cx,
                  double alphax, double betax, double gammax, double tolerance1);
 
-  ~SCDPanelErrors() override;
-
   std::string name() const override { return "SCDPanelErrors"; }
 
   const std::string category() const override { return "Calibrate"; }
@@ -80,13 +78,6 @@ public:
 
   void functionDeriv1D(API::Jacobian *out, const double *xValues,
                        const size_t nData) override;
-
-  Kernel::Matrix<double>
-  CalcDiffDerivFromdQ(Kernel::Matrix<double> const &DerivQ,
-                      Kernel::Matrix<double> const &Mhkl,
-                      Kernel::Matrix<double> const &MhklT,
-                      Kernel::Matrix<double> const &InvhklThkl,
-                      Kernel::Matrix<double> const &UB) const;
 
   size_t nAttributes() const override;
 
@@ -203,6 +194,9 @@ private:
   int m_endX;   ///<end index in xValues array in functionMW. -1 use all.
 
   std::vector<std::string> m_attrNames;
+
+  // ki-kf for Inelastic convention; kf-ki for Crystallography convention
+  std::string convention;
 };
 }
 }

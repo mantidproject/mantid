@@ -249,8 +249,8 @@ ElemType &VectorParameter<Derived, ElemType>::at(size_t index) {
     static std::string parameterName() { return #classname; }                  \
     classname() : SuperType() {}                                               \
     classname(size_t index) : SuperType(index) {}                              \
-    std::string getName() const { return #classname; }                         \
-    classname *clone() const { return new classname(*this); }                  \
+    std::string getName() const override { return #classname; }                \
+    classname *clone() const override { return new classname(*this); }         \
   };
 }
 }

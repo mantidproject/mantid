@@ -2,9 +2,9 @@
 #define MANTID_DATAOBJECTS_VECTORCOLUMN_H_
 
 #include "MantidAPI/Column.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
@@ -77,15 +77,11 @@ public:
   /// Set item from a string value
   void read(size_t index, const std::string &text) override {
     std::vector<Type> newValues;
+    Mantid::Kernel::StringTokenizer elements(
+        text, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
 
-    boost::char_separator<char> delim(",");
-    boost::tokenizer<boost::char_separator<char>> elements(text, delim);
-
-    for (auto it = elements.begin(); it != elements.end(); it++) {
-      std::string element(*it);
-
-      boost::trim(element);
-
+    for (const auto &it : elements) {
+      std::string element(it);
       try {
         newValues.push_back(boost::lexical_cast<Type>(element));
       } catch (boost::bad_lexical_cast &) {
@@ -113,7 +109,7 @@ public:
 
   /// Create another copy of the column
   VectorColumn *clone() const override {
-    VectorColumn *newColumn = new VectorColumn<Type>();
+    auto newColumn = new VectorColumn<Type>();
     newColumn->m_data = m_data;
     newColumn->setName(m_name);
     newColumn->setPlotType(m_plotType);

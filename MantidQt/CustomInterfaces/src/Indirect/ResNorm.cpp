@@ -111,13 +111,13 @@ bool ResNorm::validate() {
  * Run the ResNorm v2 algorithm.
  */
 void ResNorm::run() {
-  QString vanWsName(m_uiForm.dsVanadium->getCurrentDataName());
-  QString resWsName(m_uiForm.dsResolution->getCurrentDataName());
+  const auto vanWsName(m_uiForm.dsVanadium->getCurrentDataName());
+  const auto resWsName(m_uiForm.dsResolution->getCurrentDataName());
 
-  double eMin(m_dblManager->value(m_properties["EMin"]));
-  double eMax(m_dblManager->value(m_properties["EMax"]));
+  const auto eMin(m_dblManager->value(m_properties["EMin"]));
+  const auto eMax(m_dblManager->value(m_properties["EMax"]));
 
-  QString outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
+  const auto outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
 
   IAlgorithm_sptr resNorm = AlgorithmManager::Instance().create("ResNorm", 2);
   resNorm->initialize();
@@ -132,7 +132,7 @@ void ResNorm::run() {
   m_batchAlgoRunner->addAlgorithm(resNorm);
 
   // Handle saving
-  bool save(m_uiForm.ckSave->isChecked());
+  const auto save(m_uiForm.ckSave->isChecked());
   if (save)
     addSaveWorkspaceToQueue(outputWsName);
 
@@ -149,16 +149,9 @@ void ResNorm::handleAlgorithmComplete(bool error) {
   if (error)
     return;
 
-  QString outputBase = (m_uiForm.dsResolution->getCurrentDataName()).toLower();
-  const int indexCut = outputBase.lastIndexOf("_");
-  outputBase = outputBase.left(indexCut);
-  outputBase += "_ResNorm";
-
-  std::string outputBaseStr = outputBase.toStdString();
-
   WorkspaceGroup_sptr fitWorkspaces =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          outputBaseStr + "_Fit_Workspaces");
+          m_pythonExportWsName + "_Fit_Workspaces");
   QString fitWsName("");
   if (fitWorkspaces)
     fitWsName =
@@ -172,9 +165,6 @@ void ResNorm::handleAlgorithmComplete(bool error) {
     plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Stretch");
   if (plotOptions == "Fit" || plotOptions == "All")
     plotSpectrum(fitWsName, 0, 1);
-
-  loadFile(m_uiForm.dsResolution->getFullFilePath(),
-           m_uiForm.dsResolution->getCurrentDataName());
 
   // Update preview plot
   previewSpecChanged(m_previewSpec);
@@ -213,6 +203,7 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("ResNormERange");
 
   // Use the values from the instrument parameter file if we can
+  // The the maximum and minimum value of the plot
   if (getResolutionRangeFromWs(filename, res)) {
     // ResNorm resolution should be +/- 10 * the IPF resolution
     res.first = res.first * 10;
@@ -227,6 +218,10 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
 
   setPlotPropertyRange(eRangeSelector, m_properties["EMin"],
                        m_properties["EMax"], range);
+
+  // Set the current values of the range bars
+  eRangeSelector->setMinimum(range.first);
+  eRangeSelector->setMaximum(range.second);
 }
 
 /**
@@ -307,8 +302,9 @@ void ResNorm::previewSpecChanged(int value) {
               fitWsName);
 
       MatrixWorkspace_sptr fit = WorkspaceFactory::Instance().create(fitWs, 1);
-      fit->setX(0, fitWs->readX(1));
-      fit->getSpectrum(0)->setData(fitWs->readY(1), fitWs->readE(1));
+      fit->setX(0, fitWs->refX(1));
+      fit->dataY(0) = fitWs->readY(1);
+      fit->dataE(0) = fitWs->readE(1);
 
       for (size_t i = 0; i < fit->blocksize(); i++)
         fit->dataY(0)[i] /= scaleFactors->cell<double>(m_previewSpec);

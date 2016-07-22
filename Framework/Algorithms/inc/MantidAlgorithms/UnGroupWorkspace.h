@@ -41,10 +41,6 @@ namespace Algorithms {
  */
 class DLLExport UnGroupWorkspace : public API::Algorithm {
 public:
-  /// Default constructor
-  UnGroupWorkspace() : API::Algorithm(){};
-  /// Destructor
-  ~UnGroupWorkspace() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "UnGroupWorkspace"; }
   /// Summary of algorithms purpose

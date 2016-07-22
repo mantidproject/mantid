@@ -109,16 +109,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(PolarizationCorrection)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PolarizationCorrection::PolarizationCorrection() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PolarizationCorrection::~PolarizationCorrection() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PolarizationCorrection::name() const {
   return "PolarizationCorrection";
@@ -244,7 +234,7 @@ PolarizationCorrection::copyShapeAndFill(MatrixWorkspace_sptr &base,
   MatrixWorkspace_sptr wsTemplate = WorkspaceFactory::Instance().create(base);
   // Copy the x-array across to the new workspace.
   for (size_t i = 0; i < wsTemplate->getNumberHistograms(); ++i) {
-    wsTemplate->setX(i, base->readX(i));
+    wsTemplate->setX(i, base->refX(i));
   }
   auto zeroed = this->multiply(wsTemplate, 0);
   auto filled = this->add(zeroed, value);
@@ -332,8 +322,7 @@ WorkspaceGroup_sptr PolarizationCorrection::execPA(WorkspaceGroup_sptr inWS) {
   for (size_t i = 1; i < totalGroupEntries; i++) {
     auto alg = this->createChildAlgorithm("ReplaceSpecialValues");
     alg->setProperty("InputWorkspace", dataOut->getItem(i));
-    alg->setProperty("OutputWorkspace",
-                     "dataOut_" + boost::lexical_cast<std::string>(i));
+    alg->setProperty("OutputWorkspace", "dataOut_" + std::to_string(i));
     alg->setProperty("NaNValue", 0.0);
     alg->setProperty("NaNError", 0.0);
     alg->setProperty("InfinityValue", 0.0);

@@ -1,4 +1,5 @@
 set ( SRC_FILES
+	src/ADSValidator.cpp
 	src/Algorithm.cpp
 	src/AlgorithmFactory.cpp
 	src/AlgorithmHasProperty.cpp
@@ -28,6 +29,7 @@ set ( SRC_FILES
 	src/DeprecatedAlgorithm.cpp
 	src/DomainCreatorFactory.cpp
 	src/EnabledWhenWorkspaceIsType.cpp
+	src/EqualBinSizesValidator.cpp
 	src/ExperimentInfo.cpp
 	src/Expression.cpp
 	src/FermiChopperModel.cpp
@@ -92,7 +94,6 @@ set ( SRC_FILES
 	src/MatrixWSIndexCalculator.cpp
 	src/MatrixWorkspace.cpp
 	src/MatrixWorkspaceMDIterator.cpp
-	src/MemoryManager.cpp
 	src/ModeratorModel.cpp
 	src/MultiDomainFunction.cpp
 	src/MultiPeriodGroupAlgorithm.cpp
@@ -110,13 +111,11 @@ set ( SRC_FILES
 	src/PeakFunctionIntegrator.cpp
 	src/Progress.cpp
 	src/Projection.cpp
-	src/PropertyNexus.cpp
 	src/RawCountValidator.cpp
 	src/RefAxis.cpp
 	src/RemoteJobManagerFactory.cpp
 	src/Run.cpp
 	src/Sample.cpp
-	src/SampleEnvironment.cpp
 	src/SampleShapeValidator.cpp
 	src/SampleValidator.cpp
 	src/ScopedWorkspace.cpp
@@ -149,6 +148,7 @@ set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
 
 set ( INC_FILES
 	#	inc/MantidAPI/BoxCtrlChangesInterface.h
+	inc/MantidAPI/ADSValidator.h
 	inc/MantidAPI/Algorithm.h
 	inc/MantidAPI/AlgorithmFactory.h
 	inc/MantidAPI/AlgorithmHasProperty.h
@@ -182,6 +182,7 @@ set ( INC_FILES
 	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/DomainCreatorFactory.h
 	inc/MantidAPI/EnabledWhenWorkspaceIsType.h
+	inc/MantidAPI/EqualBinSizesValidator.h
 	inc/MantidAPI/ExperimentInfo.h
 	inc/MantidAPI/Expression.h
 	inc/MantidAPI/FermiChopperModel.h
@@ -276,7 +277,6 @@ set ( INC_FILES
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
 	inc/MantidAPI/MatrixWorkspaceValidator.h
 	inc/MantidAPI/MatrixWorkspace_fwd.h
-	inc/MantidAPI/MemoryManager.h
 	inc/MantidAPI/ModeratorModel.h
 	inc/MantidAPI/MultiDomainFunction.h
 	inc/MantidAPI/MultiPeriodGroupAlgorithm.h
@@ -294,13 +294,11 @@ set ( INC_FILES
 	inc/MantidAPI/PeakFunctionIntegrator.h
 	inc/MantidAPI/Progress.h
 	inc/MantidAPI/Projection.h
-	inc/MantidAPI/PropertyNexus.h
 	inc/MantidAPI/RawCountValidator.h
 	inc/MantidAPI/RefAxis.h
 	inc/MantidAPI/RemoteJobManagerFactory.h
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
-	inc/MantidAPI/SampleEnvironment.h
 	inc/MantidAPI/SampleShapeValidator.h
 	inc/MantidAPI/SampleValidator.h
 	inc/MantidAPI/ScopedWorkspace.h
@@ -330,6 +328,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	#	IkedaCarpenterModeratorTest.h
+	ADSValidatorTest.h
 	AlgorithmFactoryTest.h
 	AlgorithmHasPropertyTest.h
 	AlgorithmHistoryTest.h
@@ -347,6 +346,7 @@ set ( TEST_FILES
 	CostFunctionFactoryTest.h
 	DataProcessorAlgorithmTest.h
 	EnabledWhenWorkspaceIsTypeTest.h
+	EqualBinSizesValidatorTest.h
 	ExperimentInfoTest.h
 	ExpressionTest.h
 	FermiChopperModelTest.h
@@ -388,7 +388,6 @@ set ( TEST_FILES
 	LogManagerTest.h
 	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
-	MemoryManagerTest.h
 	ModeratorModelTest.h
 	MultiDomainFunctionTest.h
 	MultiPeriodGroupAlgorithmTest.h
@@ -404,11 +403,9 @@ set ( TEST_FILES
 	ParameterTieTest.h
 	PeakFunctionIntegratorTest.h
 	ProjectionTest.h
-	PropertyNexusTest.h
 	RawCountValidatorTest.h
 	RemoteJobManagerFactoryTest.h
 	RunTest.h
-	SampleEnvironmentTest.h
 	SampleShapeValidatorTest.h
 	SampleTest.h
 	SampleValidatorTest.h

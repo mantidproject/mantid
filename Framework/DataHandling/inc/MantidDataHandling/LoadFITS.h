@@ -12,27 +12,11 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-struct FITSInfo {
-  std::vector<std::string> headerItems;
-  std::map<std::string, std::string> headerKeys;
-  int bitsPerPixel;
-  int numberOfAxis;
-  int offset;
-  int headerSizeMultiplier;
-  std::vector<size_t> axisPixelLengths;
-  double tof;
-  double timeBin;
-  double scale;
-  std::string imageKey;
-  long int countsInImage;
-  long int numberOfTriggers;
-  std::string extension;
-  std::string filePath;
-  bool isFloat;
-};
-
 namespace Mantid {
 namespace DataHandling {
+
+struct FITSInfo;
+
 /**
 LoadFITS: Load one or more of FITS files into a Workspace2D. The FITS
 format, normally used for images, is described for example here:
@@ -66,7 +50,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport LoadFITS : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadFITS();
-  ~LoadFITS() override {}
 
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadFITS"; }
@@ -97,9 +80,13 @@ private:
   /// Execution code
   void exec() override;
 
-  /// Loads the FITS header(s) into a struct
+  /// Load a block of FITS header(s) at once
   void doLoadHeaders(const std::vector<std::string> &paths,
-                     std::vector<FITSInfo> &headers);
+                     std::vector<FITSInfo> &headers, size_t firstIndex,
+                     size_t lastIndex);
+
+  /// Load the FITS header(s) from one fits file into a struct
+  void loadHeader(const std::string &filePath, FITSInfo &header);
 
   /// Once loaded, check against standard and limitations of this algorithm
   void headerSanityCheck(const FITSInfo &hdr, const FITSInfo &hdrFirst);
@@ -144,7 +131,7 @@ private:
                API::MantidImage &rebinnedY, API::MantidImage &rebinnedE);
 
   /// identifies fits coming from 'other' cameras by specific headers
-  bool isInstrOtherThanIMAT(FITSInfo &hdr);
+  bool isInstrOtherThanIMAT(const FITSInfo &hdr);
 
   void setupDefaultKeywordNames();
 
@@ -184,8 +171,13 @@ private:
   /// multiples of this block.
   static const int g_BASE_HEADER_SIZE = 2880;
 
-  // names for several options that can be given in a "FITS" header
+  // TODO: in the next round of refactoring of LoadFITS, this should
+  // become common between LoadFITS and the new SaveFITS
+  // Names for several options that can be given in a "FITS" header
   // setup file
+  static const std::string g_END_KEYNAME;
+  static const std::string g_COMMENT_KEYNAME;
+  static const std::string g_XTENSION_KEYNAME;
   static const std::string g_BIT_DEPTH_NAME;
   static const std::string g_AXIS_NAMES_NAME;
   static const std::string g_ROTATION_NAME;

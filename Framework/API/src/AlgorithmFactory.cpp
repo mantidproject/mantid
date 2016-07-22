@@ -22,10 +22,10 @@ AlgorithmFactoryImpl::AlgorithmFactoryImpl()
   // are constructed so that it is destroyed after us and thus does
   // not close any loaded DLLs with loaded algorithms in them
   Mantid::Kernel::LibraryManager::Instance();
-  g_log.debug() << "Algorithm Factory created." << std::endl;
+  g_log.debug() << "Algorithm Factory created.\n";
 }
 
-AlgorithmFactoryImpl::~AlgorithmFactoryImpl() {}
+AlgorithmFactoryImpl::~AlgorithmFactoryImpl() = default;
 
 /** Creates an instance of an algorithm
 * @param name :: the name of the Algrorithm to create
@@ -58,9 +58,9 @@ AlgorithmFactoryImpl::create(const std::string &name,
       throw std::runtime_error("algorithm not registered " + name);
     else {
       g_log.error() << "algorithm " << name << " version " << version
-                    << " is not registered " << std::endl;
+                    << " is not registered \n";
       g_log.error() << "the latest registered version is " << it->second
-                    << std::endl;
+                    << '\n';
       throw std::runtime_error("algorithm not registered " +
                                createName(name, local_version));
     }
@@ -142,7 +142,7 @@ AlgorithmFactoryImpl::decodeName(const std::string &mangledName) const {
   ss >> version;
 
   g_log.debug() << "mangled string:" << mangledName << " name:" << name
-                << " version:" << version << std::endl;
+                << " version:" << version << '\n';
   return std::pair<std::string, int>(name, version);
 }
 
@@ -361,7 +361,7 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
       boost::split(categoryLayers, desc.category, boost::is_any_of("\\"));
 
       // Traverse each parent category, working our way from the top down.
-      std::string currentLayer = "";
+      std::string currentLayer;
       for (auto &categoryLayer : categoryLayers) {
         currentLayer.append(categoryLayer);
 

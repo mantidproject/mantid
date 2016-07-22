@@ -71,11 +71,6 @@ LeBailFit::LeBailFit()
       m_roundBkgd(0), m_bkgdParameterStepVec(), m_peakCentreTol(0.) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LeBailFit::~LeBailFit() {}
-
-//----------------------------------------------------------------------------------------------
 /** Declare the input properties for this algorithm
 */
 void LeBailFit::init() {
@@ -284,8 +279,6 @@ void LeBailFit::init() {
                   "Xmax+Tol will be imported. "
                   "It is used in the case that the geometry parameters are "
                   "close to true values. ");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -379,8 +372,6 @@ void LeBailFit::exec() {
                  << ", Data points = " << m_outputWS->readY(1).size()
                  << ", Range = " << m_outputWS->readX(0)[0] << ", "
                  << m_outputWS->readX(0).back() << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -448,8 +439,6 @@ void LeBailFit::processInputBackground() {
           "Polynomial and Chebyshev at least be order 0 (1 parameter). ");
     --m_bkgdorder;
   }
-
-  return;
 }
 
 //===================================  Pattern Calculation & Minimizing
@@ -523,8 +512,6 @@ void LeBailFit::execPatternCalculation() {
         << "Input parameters are unable to generate peaks that are physical."
         << ".\n";
   }
-
-  return;
 }
 
 //====================================  Refine background
@@ -684,8 +671,6 @@ void LeBailFit::execRefineBackground() {
   }
 
   setProperty("BackgroundParametersWorkspace", outtablews);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -697,8 +682,6 @@ void LeBailFit::storeBackgroundParameters(vector<double> &bkgdparamvec) {
   for (size_t i = 0; i < m_numberBkgdParameters; ++i) {
     bkgdparamvec[i] = m_backgroundFunction->getParameter(i);
   }
-
-  return;
 }
 
 /** Restore/recover the buffered background parameters to m_background function
@@ -710,8 +693,6 @@ void LeBailFit::recoverBackgroundParameters(
   for (size_t i = 0; i < m_numberBkgdParameters; ++i) {
     m_backgroundFunction->setParameter(i, bkgdparamvec[i]);
   }
-
-  return;
 }
 
 /** Propose new background parameters
@@ -732,8 +713,6 @@ void LeBailFit::proposeNewBackgroundValues() {
   m_backgroundFunction->setParameter(static_cast<size_t>(iparam), newvalue);
 
   ++m_roundBkgd;
-
-  return;
 }
 
 //===================================  Set up the Le Bail Fit
@@ -772,8 +751,6 @@ void LeBailFit::createLeBailFunction() {
   m_lebailFunction->addBackgroundFunction(
       m_backgroundType, m_bkgdorder, m_backgroundParameterNames,
       m_backgroundParameters, m_startX, m_endX);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -921,8 +898,6 @@ void LeBailFit::processInputProperties() {
 
   // Tolerance in peak positions to import peak
   m_peakCentreTol = getProperty("ToleranceToImportPeak");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1090,8 +1065,6 @@ void LeBailFit::parseInstrumentParametersTable() {
       << parameterWS->name() << ". Imported " << m_funcParameters.size()
       << " parameters. "
       << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1161,8 +1134,6 @@ void LeBailFit::parseBraggPeaksParametersTable() {
 
   g_log.information() << "Imported HKL TableWorkspace.   Size of Rows = "
                       << numrows << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1240,8 +1211,6 @@ void LeBailFit::parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws,
     msg << bkgdparnames[iod] << " = " << bkgdorderparams[iod] << "; ";
   }
   g_log.information(msg.str());
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1300,8 +1269,6 @@ void LeBailFit::exportBraggPeakParameterToTable() {
 
   // Set property
   this->setProperty("OutputPeaksWorkspace", peakWS);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1392,8 +1359,6 @@ void LeBailFit::exportInstrumentParameterToTable(
 
   // 4. Add to output peroperty
   setProperty("OutputParameterWorkspace", parameterws);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1468,8 +1433,6 @@ void LeBailFit::createOutputDataWorkspace() {
   }
 
   m_outputWS->replaceAxis(1, tAxis);
-
-  return;
 }
 
 // ====================================== Random Walk Suite
@@ -1566,8 +1529,6 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles,
   par_rwp.name = "Rwp";
   par_rwp.curvalue = m_bestRwp;
   parammap["Rwp"] = par_rwp;
-
-  return;
 } // Main Exec MC
 
 //----------------------------------------------------------------------------------------------
@@ -1834,8 +1795,6 @@ void LeBailFit::setupRandomWalkStrategyFromTable(
     mapiter->second.numnomove = 0;
     mapiter->second.maxabsstepsize = -0.0;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1974,8 +1933,6 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
     mapiter->second.numnomove = 0;
     mapiter->second.maxabsstepsize = -0.0;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -2000,8 +1957,6 @@ void LeBailFit::addParameterToMCMinimize(vector<string> &parnamesforMC,
 
   if (pariter->second.fit)
     parnamesforMC.push_back(parname);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -2416,8 +2371,6 @@ void LeBailFit::bookKeepBestMCResult(map<string, Parameter> parammap,
     g_log.warning("[Book keep best MC result] Shouldn't be here as it is found "
                   "that it is not the best solution ");
   }
-
-  return;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -2448,8 +2401,6 @@ void LeBailFit::applyParameterValues(map<string, Parameter> &srcparammap,
 
     tgtmapiter->second.curvalue = srcparam.curvalue;
   }
-
-  return;
 }
 
 //===============================  Background Functions
@@ -2471,9 +2422,6 @@ void LeBailFit::fitBackground(size_t wsindex, FunctionDomain1DVector domain,
   MantidVec &vecSmoothBkgd = m_outputWS->dataY(SMOOTHEDBKGDINDEX);
 
   smoothBackgroundAnalytical(wsindex, domain, values, vecSmoothBkgd);
-  // smoothBackgroundExponential(wsindex, domain, values, vecSmoothBkgd);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -2634,8 +2582,6 @@ void LeBailFit::smoothBackgroundAnalytical(size_t wsindex,
   for (size_t i = 0; i < numpts; ++i)
     background[i] = values[i];
   */
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -2667,8 +2613,6 @@ void writeRfactorsToFile(vector<double> vecX, vector<Rfactor> vecR,
           << vecR[i].Rp << "\n";
 
   ofile.close();
-
-  return;
 }
 
 } // namespace Algorithms

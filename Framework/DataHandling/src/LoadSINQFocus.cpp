@@ -27,18 +27,13 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQFocus)
 /** Constructor
  */
 LoadSINQFocus::LoadSINQFocus()
-    : m_instrumentName(""), m_instrumentPath(), m_localWorkspace(),
-      m_numberOfTubes(0), m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
-      m_numberOfHistograms(0), m_loader() {
-  m_supportedInstruments.emplace_back("FOCUS");
+    : m_supportedInstruments{"FOCUS"}, m_numberOfTubes{0},
+      m_numberOfPixelsPerTube{0}, m_numberOfChannels{0},
+      m_numberOfHistograms{0} {
+
   this->useAlgorithm("LoadSINQ");
   this->deprecatedDate("2013-10-28");
 }
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadSINQFocus::~LoadSINQFocus() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -139,10 +134,9 @@ void LoadSINQFocus::initWorkSpace(NeXus::NXEntry &entry) {
   // dim0 * m_numberOfPixelsPerTube is the total number of detectors
   m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
 
-  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << std::endl;
-  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube
-                << std::endl;
-  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << std::endl;
+  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << '\n';
+  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube << '\n';
+  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << '\n';
 
   // Now create the output workspace
   // Might need to get this value from the number of monitors in the Nexus file
@@ -188,7 +182,7 @@ void LoadSINQFocus::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
       progress.report();
     }
   }
-  g_log.debug() << "Data loading into WS done...." << std::endl;
+  g_log.debug() << "Data loading into WS done....\n";
 }
 
 void LoadSINQFocus::loadRunDetails(NXEntry &entry) {

@@ -51,11 +51,17 @@ Rebin::rebinParamsFromInput(const std::vector<double> &inParams,
     inputWS.getXMinMax(xmin, xmax);
 
     logger.information() << "Using the current min and max as default " << xmin
-                         << ", " << xmax << std::endl;
+                         << ", " << xmax << '\n';
     rbParams.resize(3);
     rbParams[0] = xmin;
     rbParams[1] = inParams[0];
     rbParams[2] = xmax;
+    if ((rbParams[1] < 0.) && (xmin < 0.) && (xmax > 0.)) {
+      std::stringstream msg;
+      msg << "Cannot create logorithmic binning that changes sign (xmin="
+          << xmin << ", xmax=" << xmax << ")";
+      throw std::runtime_error(msg.str());
+    }
   }
   return rbParams;
 }
@@ -132,10 +138,10 @@ void Rebin::exec() {
 
   bool fullBinsOnly = getProperty("FullBinsOnly");
 
-  MantidVecPtr XValues_new;
+  HistogramData::BinEdges XValues_new(0);
   // create new output X axis
   const int ntcnew = VectorHelper::createAxisFromRebinParams(
-      rbParams, XValues_new.access(), true, fullBinsOnly);
+      rbParams, XValues_new.mutableRawData(), true, fullBinsOnly);
 
   //---------------------------------------------------------------------------------
   // Now, determine if the input workspace is actually an EventWorkspace
@@ -178,13 +184,13 @@ void Rebin::exec() {
         PARALLEL_START_INTERUPT_REGION
 
         // Set the X axis for each output histogram
-        outputWS->setX(i, XValues_new);
+        outputWS->setBinEdges(i, XValues_new);
 
         // Get a const event list reference. eventInputWS->dataY() doesn't work.
-        const EventList &el = eventInputWS->getEventList(i);
+        const EventList &el = eventInputWS->getSpectrum(i);
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
-        el.generateHistogram(*XValues_new, y_data, e_data);
+        el.generateHistogram(XValues_new.rawData(), y_data, e_data);
 
         // Copy the data over.
         outputWS->dataY(i).assign(y_data.begin(), y_data.end());
@@ -219,8 +225,7 @@ void Rebin::exec() {
   { //------- Workspace2D or other MatrixWorkspace ---------------------------
 
     if (!isHist) {
-      g_log.information() << "Rebin: Converting Data to Histogram."
-                          << std::endl;
+      g_log.information() << "Rebin: Converting Data to Histogram.\n";
       Mantid::API::Algorithm_sptr ChildAlg =
           createChildAlgorithm("ConvertToHistogram");
       ChildAlg->initialize();
@@ -256,21 +261,21 @@ void Rebin::exec() {
 
       // output data arrays are implicitly filled by function
       try {
-        VectorHelper::rebin(XValues, YValues, YErrors, *XValues_new,
+        VectorHelper::rebin(XValues, YValues, YErrors, XValues_new.rawData(),
                             YValues_new, YErrors_new, dist);
       } catch (std::exception &ex) {
-        g_log.error() << "Error in rebin function: " << ex.what() << std::endl;
+        g_log.error() << "Error in rebin function: " << ex.what() << '\n';
         throw;
       }
 
       // Populate the output workspace X values
-      outputWS->setX(hist, XValues_new);
+      outputWS->setBinEdges(hist, XValues_new);
 
       prog.report(name());
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
-    outputWS->isDistribution(dist);
+    outputWS->setDistribution(dist);
 
     // Now propagate any masking correctly to the output workspace
     // More efficient to have this in a separate loop because
@@ -288,8 +293,7 @@ void Rebin::exec() {
     }
 
     if (!isHist) {
-      g_log.information() << "Rebin: Converting Data back to Data Points."
-                          << std::endl;
+      g_log.information() << "Rebin: Converting Data back to Data Points.\n";
       Mantid::API::Algorithm_sptr ChildAlg =
           createChildAlgorithm("ConvertToPointData");
       ChildAlg->initialize();
@@ -302,8 +306,6 @@ void Rebin::exec() {
     setProperty("OutputWorkspace", outputWS);
 
   } // END ---- Workspace2D
-
-  return;
 }
 //
 //    /** Continue execution for EventWorkspace scenario */

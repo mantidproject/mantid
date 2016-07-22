@@ -159,7 +159,7 @@ public:
   size_t addEvents(const std::vector<MDE> &events);
 
   std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-  getMinimumExtents(size_t depth = 2) override;
+  getMinimumExtents(size_t depth = 2) const override;
 
   /// Return true if the underlying box is a MDGridBox.
   bool isGridBox() {
@@ -193,6 +193,7 @@ public:
       const Kernel::SpecialCoordinateSystem coordSystem) override;
   /// make the workspace file backed if it has not been already file backed;
   virtual void setFileBacked(const std::string &fileName);
+  void setFileBacked() override;
   /// if workspace was file-backed, this should clear file-backed information
   /// and close back-up files.
   void clearFileBacked(bool LoadFileBackedData) override;

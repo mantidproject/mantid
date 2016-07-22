@@ -104,11 +104,9 @@ TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> *box)
   // Prepare to distribute the events that were in the box before, this will
   // load missing events from HDD in file based ws if there are some.
   const std::vector<MDE> &events = box->getConstEvents();
-  typename std::vector<MDE>::const_iterator it = events.begin();
-  typename std::vector<MDE>::const_iterator it_end = events.end();
   // just add event to the existing internal box
-  for (; it != it_end; ++it)
-    addEvent(*it);
+  for (const auto & evnt : events)
+    addEvent(evnt);
 
   // Copy the cached numbers from the incoming box. This is quick - don't need
   // to refresh cache
@@ -141,7 +139,7 @@ void MDGridBox<MDE, nd>::fillBoxShell(const size_t tot,
   for (size_t i = 0; i < tot; i++) {
     // Create the box
     // (Increase the depth of this box to one more than the parent (this))
-    MDBox<MDE, nd> *splitBox = new MDBox<MDE, nd>(
+    auto splitBox = new MDBox<MDE, nd>(
         this->m_BoxController, this->m_depth + 1, UNDEF_SIZET, size_t(ID0 + i));
     // This MDGridBox is the parent of the new child.
     splitBox->setParent(this);
@@ -200,12 +198,11 @@ TMDE(MDGridBox)::MDGridBox(const MDGridBox<MDE, nd> &other,
     const MDGridBox<MDE, nd> *otherMDGridBox =
         dynamic_cast<const MDGridBox<MDE, nd> *>(otherBox);
     if (otherMDBox) {
-      MDBox<MDE, nd> *newBox = new MDBox<MDE, nd>(*otherMDBox, otherBC);
+      auto newBox = new MDBox<MDE, nd>(*otherMDBox, otherBC);
       newBox->setParent(this);
       m_Children.push_back(newBox);
     } else if (otherMDGridBox) {
-      MDGridBox<MDE, nd> *newBox =
-          new MDGridBox<MDE, nd>(*otherMDGridBox, otherBC);
+      auto newBox = new MDGridBox<MDE, nd>(*otherMDGridBox, otherBC);
       newBox->setParent(this);
       m_Children.push_back(newBox);
     } else {
@@ -366,13 +363,9 @@ TMDE(void MDGridBox)::refreshCache(Kernel::ThreadScheduler *ts) {
   this->m_errorSquared = 0;
   this->m_totalWeight = 0;
 
-  typename boxVector_t::iterator it;
-  typename boxVector_t::iterator it_end = m_Children.end();
-
   if (!ts) {
     //--------- Serial -----------
-    for (it = m_Children.begin(); it != it_end; ++it) {
-      MDBoxBase<MDE, nd> *ibox = *it;
+    for (MDBoxBase<MDE, nd> *ibox : m_Children) {
 
       // Refresh the cache (does nothing for MDBox)
       ibox->refreshCache();
@@ -393,7 +386,7 @@ TMDE(void MDGridBox)::refreshCache(Kernel::ThreadScheduler *ts) {
 /** Allocate and return a vector with a copy of all events contained
  */
 TMDE(std::vector<MDE> *MDGridBox)::getEventsCopy() {
-  std::vector<MDE> *out = new std::vector<MDE>();
+  auto out = new std::vector<MDE>();
   // Make the copy
   // out->insert(out->begin(), data.begin(), data.end());
   return out;
@@ -469,7 +462,7 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
     size_t numPlanes = function->getNumPlanes();
 
     // This array will hold whether each vertex is contained by each plane.
-    bool *vertexContained = new bool[numVertices * numPlanes];
+    auto vertexContained = new bool[numVertices * numPlanes];
 
     // The index to the vertex in each dimension
     size_t vertexIndex[nd];
@@ -510,7 +503,7 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
 
     /* There is a fixed relationship betwen a vertex (in a linear index) and its
      * neighbors for a given box. This array calculates this:  */
-    size_t *vertexNeighborsOffsets = new size_t[verticesPerBox];
+    auto vertexNeighborsOffsets = new size_t[verticesPerBox];
 
     for (size_t i = 0; i < verticesPerBox; i++) {
       // Index (in n-dimensions) of this neighbor)
@@ -597,7 +590,7 @@ TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
           box->getBoxes(outBoxes, maxDepth, leafOnly, function);
         }
       } else {
-        //          std::cout << " is not touching at all." << std::endl;
+        //          std::cout << " is not touching at all.\n";
       }
 
       // Move on to the next box in the list
@@ -659,7 +652,7 @@ TMDE(void MDGridBox)::splitContents(size_t index, Kernel::ThreadScheduler *ts) {
   // Track how many MDBoxes there are in the overall workspace
   this->m_BoxController->trackNumBoxes(box->getDepth());
   // Construct the grid box. This should take the object out of the disk MRU
-  MDGridBox<MDE, nd> *gridbox = new MDGridBox<MDE, nd>(box);
+  auto gridbox = new MDGridBox<MDE, nd>(box);
 
   // Delete the old ungridded box
   delete m_Children[index];
@@ -707,7 +700,7 @@ TMDE(void MDGridBox)::splitAllIfNeeded(Kernel::ThreadScheduler *ts) {
         // The MDBox needs to split into a grid box.
         if (!ts) {
           // ------ Perform split serially (no ThreadPool) ------
-          MDGridBox<MDE, nd> *gridBox = new MDGridBox<MDE, nd>(box);
+          auto gridBox = new MDGridBox<MDE, nd>(box);
           // Track how many MDBoxes there are in the overall workspace
           this->m_BoxController->trackNumBoxes(box->getDepth());
           // Replace in the array
@@ -818,7 +811,7 @@ TMDE(void MDGridBox)::centerpointBin(MDBin<MDE, nd> &bin,
     index_max[d] = max;
 
     // std::cout << d << " from " << std::setw(5) << index_min[d] << " to " <<
-    // std::setw(5)  << index_max[d] << "inc" << std::endl;
+    // std::setw(5)  << index_max[d] << "inc\n";
   }
 
   // If you reach here, than at least some of bin is overlapping this box
@@ -830,7 +823,7 @@ TMDE(void MDGridBox)::centerpointBin(MDBin<MDE, nd> &bin,
   while (!allDone) {
     size_t index = getLinearIndex(counters);
     // std::cout << index << ": " << counters[0] << ", " << counters[1] <<
-    // std::endl;
+    // '\n';
 
     // Find if the box is COMPLETELY held in the bin.
     bool completelyWithin = true;
@@ -923,7 +916,7 @@ TMDE(void MDGridBox)::centerpointBin(MDBin<MDE, nd> &bin,
 //      index_max[d] = max;
 //
 //      //std::cout << d << " from " << std::setw(5) << index_min[d] << " to "
-//      << std::setw(5)  << index_max[d] << "inc" << std::endl;
+//      << std::setw(5)  << index_max[d] << "inc\n";
 //    }
 //
 //    // If you reach here, than at least some of bin is overlapping this box
@@ -1098,12 +1091,12 @@ TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform,
   // to see which boxes are partially contained/fully contained.
 
   // One entry with the # of vertices in this box contained; start at 0.
-  size_t *verticesContained = new size_t[numBoxes];
+  auto verticesContained = new size_t[numBoxes];
   memset(verticesContained, 0, numBoxes * sizeof(size_t));
 
   // Set to true if there is a possibility of the box at least partly touching
   // the integration volume.
-  bool *boxMightTouch = new bool[numBoxes];
+  auto boxMightTouch = new bool[numBoxes];
   memset(boxMightTouch, 0, numBoxes * sizeof(bool));
 
   // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd
@@ -1315,12 +1308,12 @@ TMDE(void MDGridBox)::integrateCylinder(
   // to see which boxes are partially contained/fully contained.
 
   // One entry with the # of vertices in this box contained; start at 0.
-  size_t *verticesContained = new size_t[numBoxes];
+  auto verticesContained = new size_t[numBoxes];
   memset(verticesContained, 0, numBoxes * sizeof(size_t));
 
   // Set to true if there is a possibility of the box at least partly touching
   // the integration volume.
-  bool *boxMightTouch = new bool[numBoxes];
+  auto boxMightTouch = new bool[numBoxes];
   memset(boxMightTouch, 0, numBoxes * sizeof(bool));
 
   // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd

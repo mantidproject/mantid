@@ -11,97 +11,102 @@
 
 #include <atomic>
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
+namespace MantidQt {
+namespace CustomInterfaces {
 
-  /** ALCDataLoadingPresenter : Presenter for ALC Data Loading step
-    
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+/** ALCDataLoadingPresenter : Presenter for ALC Data Loading step
 
-    This file is part of Mantid.
+  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class MANTIDQT_CUSTOMINTERFACES_DLL ALCDataLoadingPresenter : public QObject
-  {
-    Q_OBJECT
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  public:
-    ALCDataLoadingPresenter(IALCDataLoadingView* view);
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class MANTIDQT_CUSTOMINTERFACES_DLL ALCDataLoadingPresenter : public QObject {
+  Q_OBJECT
 
-    void initialize();
+public:
+  ALCDataLoadingPresenter(IALCDataLoadingView *view);
 
-    /// @return Last loaded data workspace
-    MatrixWorkspace_const_sptr loadedData() const { return m_loadedData; }
+  void initialize();
 
-    /// @return Loaded data as MatrixWorkspace_sptr
-    MatrixWorkspace_sptr exportWorkspace();
+  /// @return Last loaded data workspace
+  Mantid::API::MatrixWorkspace_const_sptr loadedData() const {
+    return m_loadedData;
+  }
 
-    /// Sets some data
-    void setData (MatrixWorkspace_const_sptr data);
+  /// @return Loaded data as MatrixWorkspace_sptr
+  Mantid::API::MatrixWorkspace_sptr exportWorkspace();
 
-  private slots:
-    /// Check file range and call method to load new data
-    void handleLoadRequested();
+  /// Sets some data
+  void setData(Mantid::API::MatrixWorkspace_const_sptr data);
 
-    /// Updates the list of logs and number of periods
-    void updateAvailableInfo();
+private slots:
+  /// Check file range and call method to load new data
+  void handleLoadRequested();
 
-    /// When directory contents change, set flag
-    void updateDirectoryChangedFlag(const QString &path);
+  /// Updates the list of logs and number of periods
+  void updateAvailableInfo();
 
-    /// When "Auto" selected/deselected, start/stop watching directory
-    void changeWatchState(int state);
+  /// When directory contents change, set flag
+  void updateDirectoryChangedFlag(const QString &path);
 
-  signals:
-    /// Signal emitted when data get changed
-    void dataChanged();
+  /// When "Auto" selected/deselected, start/stop watching directory
+  void changeWatchState(int state);
 
-  protected:
-    /// Signal emitted when timer event occurs
-    void timerEvent(QTimerEvent *timeup) override;
+signals:
+  /// Signal emitted when data get changed
+  void dataChanged();
 
-  private:
-    /// Load new data and update the view accordingly
-    void load(const std::string &lastFile);
+protected:
+  /// Signal emitted when timer event occurs
+  void timerEvent(QTimerEvent *timeup) override;
 
-    /// Start/stop watching directory
-    void changeWatchState(bool watching);
+private:
+  /// Load new data and update the view accordingly
+  void load(const std::string &lastFile);
 
-    /// View which the object works with
-    IALCDataLoadingView* const m_view;
+  /// Start/stop watching directory
+  void changeWatchState(bool watching);
 
-    /// Last loaded data workspace
-    MatrixWorkspace_const_sptr m_loadedData;
+  /// Check custom grouping is sensible
+  bool checkCustomGrouping();
 
-    /// Watch a directory for changes
-    QFileSystemWatcher m_watcher;
+  /// View which the object works with
+  IALCDataLoadingView *const m_view;
 
-    /// Flag to indicate directory has had changes since last load
-    std::atomic_bool m_directoryChanged;
+  /// Last loaded data workspace
+  Mantid::API::MatrixWorkspace_const_sptr m_loadedData;
 
-    /// ID of timer, if one is running
-    int m_timerID;
-  };
+  /// Watch a directory for changes
+  QFileSystemWatcher m_watcher;
 
+  /// Flag to indicate directory has had changes since last load
+  std::atomic_bool m_directoryChanged;
+
+  /// ID of timer, if one is running
+  int m_timerID;
+
+  /// Number of detectors for current first run
+  size_t m_numDetectors;
+};
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif  /* MANTIDQT_CUSTOMINTERFACES_ALCDATALOADINGPRESENTER_H_ */
+#endif /* MANTIDQT_CUSTOMINTERFACES_ALCDATALOADINGPRESENTER_H_ */

@@ -27,6 +27,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
+using Mantid::HistogramData::BinEdges;
 
 class CentroidPeaksTest : public CxxTest::TestSuite {
 public:
@@ -84,7 +85,7 @@ public:
     DateAndTime run_start("2010-01-01T00:00:00");
 
     for (int pix = 0; pix < numPixels; pix++) {
-      EventList &el = retVal->getEventList(pix);
+      auto &el = retVal->getSpectrum(pix);
       el.setSpectrumNo(pix);
       el.setDetectorID(pix);
       // Background
@@ -111,12 +112,9 @@ public:
       delete gens[d];
 
     // Create the x-axis for histogramming.
-    MantidVecPtr x1;
-    MantidVec &xRef = x1.access();
-    xRef.resize(numBins);
-    for (int i = 0; i < numBins; ++i) {
-      xRef[i] = i * binDelta;
-    }
+    BinEdges x1(numBins);
+    int i = 0;
+    std::generate(begin(x1), end(x1), [&] { return i++ * binDelta; });
 
     // Set all the histograms at once.
     retVal->setAllX(x1);
@@ -142,16 +140,6 @@ public:
     EventWorkspace_sptr in_ws =
         boost::dynamic_pointer_cast<EventWorkspace>(inputW);
     inputW->getAxis(0)->setUnit("TOF");
-    /*if (type == WEIGHTED)
-      in_ws *= 2.0;
-    if (type == WEIGHTED_NOTIME)
-    {
-      for (size_t i =0; i<in_ws->getNumberHistograms(); i++)
-      {
-        EventList & el = in_ws->getEventList(i);
-        el.compressEvents(0.0, &el);
-      }
-    }*/
     // Register the workspace in the data service
 
     // Create the peaks workspace

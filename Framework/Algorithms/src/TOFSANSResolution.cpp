@@ -68,6 +68,22 @@ double TOFSANSResolution::getTOFResolution(double wl) {
   return m_wl_resolution;
 }
 
+/*
+ * Return the effective pixel size in X, in meters
+ */
+double TOFSANSResolution::getEffectiveXPixelSize() {
+  double pixel_size_x = getProperty("PixelSizeX");
+  return pixel_size_x / 1000.0;
+}
+
+/*
+ * Return the effective pixel size in Y, in meters
+ */
+double TOFSANSResolution::getEffectiveYPixelSize() {
+  double pixel_size_y = getProperty("PixelSizeY");
+  return pixel_size_y / 1000.0;
+}
+
 void TOFSANSResolution::exec() {
   MatrixWorkspace_sptr iqWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr reducedWS = getProperty("ReducedWorkspace");
@@ -75,13 +91,11 @@ void TOFSANSResolution::exec() {
       boost::dynamic_pointer_cast<EventWorkspace>(reducedWS);
   const double min_wl = getProperty("MinWavelength");
   const double max_wl = getProperty("MaxWavelength");
-  double pixel_size_x = getProperty("PixelSizeX");
-  double pixel_size_y = getProperty("PixelSizeY");
+  double pixel_size_x = getEffectiveXPixelSize();
+  double pixel_size_y = getEffectiveYPixelSize();
   double R1 = getProperty("SourceApertureRadius");
   double R2 = getProperty("SampleApertureRadius");
   // Convert to meters
-  pixel_size_x /= 1000.0;
-  pixel_size_y /= 1000.0;
   R1 /= 1000.0;
   R2 /= 1000.0;
   m_wl_resolution = getProperty("DeltaT");
@@ -100,7 +114,7 @@ void TOFSANSResolution::exec() {
       make_unique<WorkspaceProperty<>>("ThetaError", "", Direction::Output));
   setPropertyValue("ThetaError", "__" + iqWS->getName() + "_theta_error");
   setProperty("ThetaError", thetaWS);
-  thetaWS->setX(0, iqWS->readX(0));
+  thetaWS->setX(0, iqWS->refX(0));
   MantidVec &ThetaY = thetaWS->dataY(0);
 
   MatrixWorkspace_sptr tofWS = WorkspaceFactory::Instance().create(iqWS);
@@ -108,12 +122,12 @@ void TOFSANSResolution::exec() {
       make_unique<WorkspaceProperty<>>("TOFError", "", Direction::Output));
   setPropertyValue("TOFError", "__" + iqWS->getName() + "_tof_error");
   setProperty("TOFError", tofWS);
-  tofWS->setX(0, iqWS->readX(0));
+  tofWS->setX(0, iqWS->refX(0));
   MantidVec &TOFY = tofWS->dataY(0);
 
   // Initialize Dq
   MantidVec &DxOut = iqWS->dataDx(0);
-  for (int i = 0; i < xLength - 1; i++)
+  for (int i = 0; i < xLength; i++)
     DxOut[i] = 0.0;
 
   const V3D samplePos = reducedWS->getInstrument()->getSample()->getPos();
@@ -133,8 +147,7 @@ void TOFSANSResolution::exec() {
       det = reducedWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
       g_log.warning() << "Workspace index " << i
-                      << " has no detector assigned to it - discarding"
-                      << std::endl;
+                      << " has no detector assigned to it - discarding\n";
       // Catch if no detector. Next line tests whether this happened - test
       // placed
       // outside here because Mac Intel compiler doesn't like 'continue' in a
@@ -202,8 +215,8 @@ void TOFSANSResolution::exec() {
                     wl_bin_over_wl * wl_bin_over_wl);
 
       // By using only events with a positive weight, we use only the data
-      // distribution and
-      // leave out the background events
+      // distribution and leave out the background events.
+      // Note: we are looping over bins, therefore the xLength-1.
       if (iq >= 0 && iq < xLength - 1 && !boost::math::isnan(dq_over_q) &&
           dq_over_q > 0 && YIn[j] > 0) {
         _dx[iq] += q * dq_over_q * YIn[j];
@@ -214,6 +227,7 @@ void TOFSANSResolution::exec() {
     }
 
     // Move over the distributions for that pixel
+    // Note: we are looping over bins, therefore the xLength-1.
     PARALLEL_CRITICAL(iq) /* Write to shared memory - must protect */
     for (int iq = 0; iq < xLength - 1; iq++) {
       DxOut[iq] += _dx[iq];
@@ -226,7 +240,9 @@ void TOFSANSResolution::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
   // Normalize according to the chosen weighting scheme
+  // Note: we are looping over bins, therefore the xLength-1.
   for (int i = 0; i < xLength - 1; i++) {
     if (XNorm[i] == 0)
       continue;

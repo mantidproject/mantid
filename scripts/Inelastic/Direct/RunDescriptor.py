@@ -516,7 +516,7 @@ class RunDescriptor(PropDescriptor):
         if not noutputs:
             try:
 #pylint: disable=unused-variable
-                noutputs,r = funcreturns.lhs_info('both')
+                noutputs,r = funcinspect.lhs_info('both')
 #pylint: disable=bare-except
             except:
                 noutputs=0
@@ -1379,12 +1379,12 @@ class RunDescriptor(PropDescriptor):
             f_guess,index = self._run_list.get_file_guess(inst_name,run_num)
 
             wsp = self.load_file(inst_name,term_name,False,
-                                monitors_with_ws,False,file_hint=f_guess)
+                                 monitors_with_ws,False,file_hint=f_guess)
 
             wsp_name = wsp.name()
             wsp_mon_name = wsp_name + '_monitors'
             Plus(LHSWorkspace=sum_ws_name,RHSWorkspace=wsp_name,
-                OutputWorkspace=sum_ws_name,ClearRHSWorkspace=True)
+                 OutputWorkspace=sum_ws_name,ClearRHSWorkspace=True)
             #  AddedRunNumbers.append(run_num)
             AddedRunNumbers+=',' + str(run_num)
             if not monitors_with_ws:
@@ -1401,7 +1401,7 @@ class RunDescriptor(PropDescriptor):
         #RunDescriptor._sum_log_name,
         #             LogText=AddedRunNumbers,LogType='Number Series')
         AddSampleLog(Workspace=sum_ws_name,LogName = RunDescriptor._sum_log_name,
-                    LogText=AddedRunNumbers,LogType='String')
+                     LogText=AddedRunNumbers,LogType='String')
 
         if RunDescriptor._holder.cashe_sum_ws:
             # store workspace in cash for further usage

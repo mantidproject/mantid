@@ -148,16 +148,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(ConvertToReflectometryQ)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertToReflectometryQ::ConvertToReflectometryQ() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertToReflectometryQ::~ConvertToReflectometryQ() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToReflectometryQ::name() const {
   return "ConvertToReflectometryQ";

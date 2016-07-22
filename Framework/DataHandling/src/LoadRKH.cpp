@@ -20,6 +20,25 @@
 #include <MantidKernel/StringTokenizer.h>
 
 #include <istream>
+#include <numeric>
+#include <boost/regex.hpp>
+
+namespace {
+// Check if we are dealing with a unit line
+bool isUnit(const Mantid::Kernel::StringTokenizer &codes) {
+  // The unit line needs to have the format of
+  //  1. Either 0 or 6 [06]
+  //  2. Then several characters [\w]
+  //  3. Open bracket
+  //  4. Several characters
+  //  5. Close bracket
+  std::string input =
+      std::accumulate(codes.begin(), codes.end(), std::string(""));
+  std::string reg("^[06][\\w]+\\([/ \\w\\^-]+\\)$");
+  boost::regex baseRegex(reg);
+  return boost::regex_match(input, baseRegex);
+}
+}
 
 namespace Mantid {
 namespace DataHandling {
@@ -33,7 +52,7 @@ void readLinesForRKH1D(std::istream &stream, int readStart, int readEnd,
                        std::vector<double> &columnOne,
                        std::vector<double> &ydata, std::vector<double> &errdata,
                        Progress &prog) {
-  std::string fileline = "";
+  std::string fileline;
   for (int index = 1; index <= readEnd; ++index) {
     getline(stream, fileline);
     if (index < readStart)
@@ -53,7 +72,7 @@ void readLinesWithXErrorForRKH1D(std::istream &stream, int readStart,
                                  std::vector<double> &ydata,
                                  std::vector<double> &errdata,
                                  std::vector<double> &xError, Progress &prog) {
-  std::string fileline = "";
+  std::string fileline;
   for (int index = 1; index <= readEnd; ++index) {
     getline(stream, fileline);
     if (index < readStart)
@@ -81,7 +100,7 @@ int LoadRKH::confidence(Kernel::FileDescriptor &descriptor) const {
     return 0;
 
   auto &file = descriptor.data();
-  std::string fileline("");
+  std::string fileline;
 
   // Header looks something like this where the text inside [] could be anything
   //  LOQ Thu 28-OCT-2004 12:23 [W 26  INST_DIRECT_BEAM]
@@ -188,19 +207,24 @@ void LoadRKH::exec() {
   MatrixWorkspace_sptr result = is2D(line) ? read2D(line) : read1D();
 
   // all RKH files contain distribution data
-  result->isDistribution(true);
+  result->setDistribution(true);
   // Set the output workspace
   setProperty("OutputWorkspace", result);
 }
+
 /** Determines if the file is 1D or 2D based on the first after the workspace's
 *  title
 *  @param testLine :: the first line in the file after the title
 *  @return true if the file must contain 1D data
 */
 bool LoadRKH::is2D(const std::string &testLine) {
-  // check the line part of a valid for 2D data else assume the file is 1D
-  return readUnit(testLine) != "C++ no unit found";
+  // split the line into words
+  const Mantid::Kernel::StringTokenizer codes(
+      testLine, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
+                         Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  return isUnit(codes);
 }
+
 /** Read a data file that contains only one spectrum into a workspace
 *  @return the new workspace
 */
@@ -298,7 +322,7 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
     localworkspace->dataY(0) = ydata;
     localworkspace->dataE(0) = errdata;
     if (hasXError) {
-      localworkspace->dataDx(0) = xError;
+      localworkspace->setPointStandardDeviations(0, xError);
     }
     return localworkspace;
   } else {
@@ -307,14 +331,14 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
     // Set the appropriate values
     for (int index = 0; index < pointsToRead; ++index) {
       localworkspace->getSpectrum(index)
-          ->setSpectrumNo(static_cast<int>(columnOne[index]));
+          .setSpectrumNo(static_cast<int>(columnOne[index]));
       localworkspace->dataY(index)[0] = ydata[index];
       localworkspace->dataE(index)[0] = errdata[index];
     }
 
     if (hasXError) {
       for (int index = 0; index < pointsToRead; ++index) {
-        localworkspace->dataDx(index)[0] = xError[index];
+        localworkspace->setPointStandardDeviations(0, 1, xError[index]);
       }
     }
     return localworkspace;
@@ -337,10 +361,9 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string &firstLine) {
   Progress prog(read2DHeader(firstLine, outWrksp, axis0Data));
   const size_t nAxis1Values = outWrksp->getNumberHistograms();
 
+  // set the X-values to the common bin values we read above
+  auto toPass = Kernel::make_cow<HistogramData::HistogramX>(axis0Data);
   for (size_t i = 0; i < nAxis1Values; ++i) {
-    // set the X-values to the common bin values we read above
-    MantidVecPtr toPass;
-    toPass.access() = axis0Data;
     outWrksp->setX(i, toPass);
 
     // now read in the Y values
@@ -467,6 +490,11 @@ const std::string LoadRKH::readUnit(const std::string &line) {
   const Mantid::Kernel::StringTokenizer codes(
       line, " ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
                      Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+
+  if (!isUnit(codes)) {
+    return "C++ no unit found";
+  }
+
   if (codes.count() < 1) {
     return "C++ no unit found";
   }
@@ -492,10 +520,11 @@ const std::string LoadRKH::readUnit(const std::string &line) {
     // accepted.
     // cppcheck-suppress stlIfStrFind
     if (unit.find('(') != 0 || unit.find(')') != unit.size()) {
-      std::string qCode = boost::lexical_cast<std::string>(SaveRKH::Q_CODE);
+      std::string qCode = std::to_string(SaveRKH::Q_CODE);
       if (symbol == qCode && theQuantity == "q" &&
-          unit == "(1/Angstrom)") { // 6 q (1/Angstrom) is the synatx for
-                                    // MomentumTransfer
+          (unit == "(1/Angstrom)" ||
+           unit == "(Angstrom^-1)")) { // 6 q (1/Angstrom) is the synatx for
+                                       // MomentumTransfer
         return "MomentumTransfer";
       }
 
@@ -515,7 +544,7 @@ const std::string LoadRKH::readUnit(const std::string &line) {
  * @param nlines :: The number of lines to remove
  */
 void LoadRKH::skipLines(std::istream &strm, int nlines) {
-  std::string buried("");
+  std::string buried;
   for (int i = 0; i < nlines; ++i) {
     getline(strm, buried);
   }

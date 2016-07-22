@@ -20,6 +20,7 @@ class TOFTOFConvertTofToDeltaE(PythonAlgorithm):
     def category(self):
         """ Return category
         """
+        # Category: Deprecated is not in the allowed list.
         return "Workflow\\MLZ\\TOFTOF;Transforms\\Units;CorrectionFunctions"
 
     def name(self):
@@ -78,6 +79,8 @@ class TOFTOFConvertTofToDeltaE(PythonAlgorithm):
     def PyExec(self):
         """ Main execution body
         """
+        self.log().notice("This algorithm is deprecated and will be removed in the future version of Mantid. " +
+                          "Use ConvertUnits and ConvertToDistribution instead.")
         input_ws   = self.getProperty("InputWorkspace").value
         outws_name = self.getPropertyValue("OutputWorkspace")
         eppws_name = self.getPropertyValue("EPPTable")

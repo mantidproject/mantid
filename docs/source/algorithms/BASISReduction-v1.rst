@@ -6,9 +6,14 @@
 
 .. properties::
 
+For each property, the algorithm will remember the last value used. If user deletes
+this value and leaves blank the property field, the default value will be used. Default
+values are typical of the silicon111 reflection.
+
 Description
 -----------
 
+**Run numbers**:
 The syntax for the run numbers designation allows runs to be segregated
 into sets. The semicolon symbol ";" is used to separate the runs into sets.
 Runs within each set are jointly reduced.
@@ -19,12 +24,47 @@ Examples:
 
 - 2144-2147,2149;2156  is set 2144-2147,2149 and set 2156. The sets are reduced separately from each other.
 
-If **DoIndividual** is checked, then each run number is reduced separately
+If *DoIndividual* is checked, then each run number is reduced separately
 from the rest. The semicolon symbol is ignored.
 
-**Y-axis rescaling**: Since the Y-scale has arbitrary units, a
+**Momentum transfer binning scheme**: Three values are required, the
+center of the bin with the minimum momentum, the bin width, and the
+center of the bin with the maximum momentum.
+
+**Rescaling to first spectrum**: Since the Y-scale has arbitrary units, a
 rescaling convention is taken whereby the maximum of the
-first spectrum (lowest Q-value) is rescaled to 1.0.
+first spectrum (lowest Q-value) is rescaled to 1.0. This rescaling may not
+be employed when the intent is to compare to other runs, like can substraction
+of comparison between deuterated and hydrogenated samples.
+
+Reflection Selector
+===================
+
+Currently two types of reflection are possible, associated with the two analyzers of BASIS.
+There are typical values for the properties of each reflection:
+
++------------+----------------+------------------------+
+| Reflection |  Energy bins   | Momentum transfer bins |
+|            |   (micro-eV)   |   (inverse Angstroms)  |
++============+================+========================+
+| silicon111 | -150, 0.4, 500 |      0.3, 0.2, 1.9     |
++------------+----------------+------------------------+
+| silicon311 | -740, 1.6, 740 |      0.5, 0.2, 3.7     |
++------------+----------------+------------------------+
+
+Also the following mask files are associated to each reflection:
+
++-----------+------------------------------------------------------------------------------------------------+
+|Reflection | Mask file                                                                                      |
++===========+================================================================================================+
+|silicon111 | BASIS_Mask_ThreeQuartersRemain_SouthTop_NorthTop_NorthBottom_MorePixelsEliminated_08122015.xml |
++-----------+------------------------------------------------------------------------------------------------+
+|silicon311 | BASIS_Mask_OneQuarterRemains_SouthBottom.xml                                                   |
++-----------+------------------------------------------------------------------------------------------------+
+
+These mask files can be found in the SNS filesystem
+(**/SNS/BSS/shared/autoreduce/new_masks_08_12_2015/**)
+
 
 Vanadium Normalization
 ======================

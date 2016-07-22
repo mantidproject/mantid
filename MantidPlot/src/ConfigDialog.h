@@ -54,17 +54,14 @@ class QTreeWidget;
 class QTreeWidgetItem;
 class QStringList;
 
-namespace MantidQt
-{
-  namespace MantidWidgets
-  {
-    class InstrumentSelector;
-  }
+namespace MantidQt {
+namespace MantidWidgets {
+class InstrumentSelector;
+}
 }
 
 //! Preferences dialog
-class ConfigDialog : public QDialog
-{
+class ConfigDialog : public QDialog {
   Q_OBJECT
 
 public:
@@ -73,59 +70,63 @@ public:
   * @param parent :: parent widget (must be the application window!=
   * @param fl :: window flags
   */
-  ConfigDialog( QWidget* parent, Qt::WFlags fl = 0 );
-  void setColumnSeparator(const QString& sep);
+  ConfigDialog(QWidget *parent, Qt::WFlags fl = 0);
+  void setColumnSeparator(const QString &sep);
   void gotoMantidDirectories();
 
-  private slots:
-    void languageChange() override;
-    void insertLanguagesList();
+private slots:
+  void languageChange() override;
+  void insertLanguagesList();
 
-    void accept() override;
-    void apply();
+  void accept() override;
+  void apply();
 
-    void setCurrentPage(int index);
+  void setCurrentPage(int index);
 
-    //table fonts
-    void pickTextFont();
-    void pickHeaderFont();
+  // table fonts
+  void pickTextFont();
+  void pickHeaderFont();
 
-    //graph fonts
-    void pickAxesFont();
-    void pickNumbersFont();
-    void pickLegendFont();
-    void pickTitleFont();
+  // graph fonts
+  void pickAxesFont();
+  void pickNumbersFont();
+  void pickLegendFont();
+  void pickTitleFont();
 
-    void enableScaleFonts();
-    void showFrameWidth(bool ok);
+  void enableScaleFonts();
+  void showFrameWidth(bool ok);
 
-    //application
-    void pickApplicationFont();
+  // application
+  void pickApplicationFont();
 
-    //2D curves
-    int curveStyle();
-    void pick3DTitleFont();
-    void pick3DNumbersFont();
-    void pick3DAxesFont();
+  // 2D curves
+  int curveStyle();
+  void pick3DTitleFont();
+  void pick3DNumbersFont();
+  void pick3DAxesFont();
 
-    //Fitting
-    void showPointsBox(bool);
+  // Fitting
+  void showPointsBox(bool);
 
-    void switchToLanguage(int param);
+  void switchToLanguage(int param);
 
-    void chooseTranslationsFolder();
-    void chooseHelpFolder();
+  void chooseTranslationsFolder();
+  void chooseHelpFolder();
 
-    //Mantid
-    void addPythonScriptsDirs();
-    void addPythonPluginDirs();
-    void addInstrumentDir();
-    void enableButtons();
-    void itemCheckedChanged(QTreeWidgetItem* item);
-    void updateChildren(std::map<std::string, std::string> &programKeysAndDetails, QTreeWidgetItem* program);
-    void addDialog();
-    void editDialog();
-    void deleteDialog();
+  // Mantid
+  void addPythonScriptsDirs();
+  void addPythonPluginDirs();
+  void addInstrumentDir();
+  void enableButtons();
+  void itemCheckedChanged(QTreeWidgetItem *item);
+  void updateChildren(std::map<std::string, std::string> &programKeysAndDetails,
+                      QTreeWidgetItem *program);
+  void addDialog();
+  void editDialog();
+  void deleteDialog();
+
+  // Slot for tick boxes in options
+  void tickBoxClickedSlot(QTreeWidgetItem *widgetPtr, int column);
 
 private:
   void initPlotsPage();
@@ -150,11 +151,23 @@ private:
   void updateMantidOptionsTab();
   void updateSendToTab();
 
-  void initMantidOptionsTab(); 
+  void initMantidOptionsTab();
   void initSendToProgramTab();
   void refreshTreeCategories();
   void populateProgramTree();
   void updateProgramTree();
+
+  // Options Window - Selected Options
+  void
+  buildTreeCategoryStructure(const QString &catNames, const bool isHidden,
+                             QMap<QString, QTreeWidgetItem *> &seenCategories);
+  QTreeWidgetItem *walkBackwardsThroughCategories(
+      const QString &catNames, int elementToCheck,
+      QMap<QString, QTreeWidgetItem *> &seenCategories,
+      Qt::CheckState childTickState);
+  void updateChildTickStatuses(QTreeWidgetItem &widgetPtr,
+                               const Qt::CheckState newState);
+  void correctTreePatrialTicks(QTreeWidgetItem &topLevelCat);
 
   // MD Plotting
   void initMdPlottingPage();
@@ -163,49 +176,54 @@ private:
   void updateMdPlottingSettings();
   void setupMdPlottingConnections();
 
-  QTreeWidgetItem* createCheckedTreeItem(QString name,bool checkBoxState);
+  QTreeWidgetItem *createCheckedTreeItem(QString name,
+                                         Qt::CheckState checkBoxState);
   QStringList buildHiddenCategoryString(QTreeWidgetItem *parent = 0);
 
-  std::map<std::string,std::map<std::string,std::string> > m_sendToSettings;
+  std::map<std::string, std::map<std::string, std::string>> m_sendToSettings;
 
-  QFont textFont, headerFont, axesFont, numbersFont, legendFont, titleFont, appFont;
+  QFont textFont, headerFont, axesFont, numbersFont, legendFont, titleFont,
+      appFont;
   QFont plot3DTitleFont, plot3DNumbersFont, plot3DAxesFont;
 
-  QCheckBox *boxScaleLayersOnPrint, *boxPrintCropmarks, *boxUpdateSeparators, *linearFit2PointsBox;
+  QCheckBox *boxScaleLayersOnPrint, *boxPrintCropmarks, *boxUpdateSeparators,
+      *linearFit2PointsBox;
   QTabWidget *plotsTabWidget, *appTabWidget, *mtdTabWidget;
   ColorButton *btnBackground3D, *btnMesh, *btnAxes, *btnLabels, *btnNumbers;
   ColorButton *btnFromColor, *btnToColor, *btnGrid;
-  QPushButton	*btnTitleFnt, *btnLabelsFnt, *btnNumFnt;
+  QPushButton *btnTitleFnt, *btnLabelsFnt, *btnNumFnt;
   QPushButton *deleteButton, *editButton, *addButton;
   ColorButton *buttonBackground, *buttonText, *buttonHeader;
   QPushButton *buttonOk, *buttonCancel, *buttonApply;
-  QPushButton* buttonTextFont, *buttonHeaderFont;
-  QStackedWidget * generalDialog;
-  QWidget *appColors, *tables, *plotOptions, *plotTicks, *plotFonts, *confirm, *plotPrint;
-  QWidget *application, *curves, *axesPage, *plots3D, *fitPage, *numericFormatPage, *floatingWindowsPage;
-  //Mantid
+  QPushButton *buttonTextFont, *buttonHeaderFont;
+  QStackedWidget *generalDialog;
+  QWidget *appColors, *tables, *plotOptions, *plotTicks, *plotFonts, *confirm,
+      *plotPrint;
+  QWidget *application, *curves, *axesPage, *plots3D, *fitPage,
+      *numericFormatPage, *floatingWindowsPage;
+  // Mantid
   QWidget *instrumentPage;
   QComboBox *facility;
-  MantidQt::MantidWidgets::InstrumentSelector  *defInstr;
-  QCheckBox* ckIgnoreParaView;
-  QCheckBox* ckQconvention;
+  MantidQt::MantidWidgets::InstrumentSelector *defInstr;
+  QCheckBox *ckIgnoreParaView;
+  QCheckBox *ckQconvention;
 
   /// Mantid tab for setting directories
   QWidget *directoriesPage;
-  QLineEdit* lePythonScriptsDirs;///< pythonscripts.directories
-  QLineEdit* lePythonPluginsDirs;///< python plugins directories
-  QLineEdit* leInstrumentDir;///< instrumentDefinition.directory
+  QLineEdit *lePythonScriptsDirs; ///< pythonscripts.directories
+  QLineEdit *lePythonPluginsDirs; ///< python plugins directories
+  QLineEdit *leInstrumentDir;     ///< instrumentDefinition.directory
   // Mantid curve fitting page
   QWidget *curveFittingPage;
   QComboBox *backgroundFunctions;
   QLineEdit *functionArguments;
   QComboBox *defaultPeakShape;
-  QSpinBox  *findPeaksFWHM,*findPeaksTolerance;
-  QSpinBox  *peakRadius;
-  QSpinBox  *decimals;
+  QSpinBox *findPeaksFWHM, *findPeaksTolerance;
+  QSpinBox *peakRadius;
+  QSpinBox *decimals;
   /// mantid options page
-  QWidget*  mantidOptionsPage;
-  QWidget*  mantidSendToPage;
+  QWidget *mantidOptionsPage;
+  QWidget *mantidSendToPage;
   QCheckBox *m_invisibleWorkspaces;
   QCheckBox *m_reusePlotInstances;
   QCheckBox *m_useOpenGL;
@@ -213,62 +231,78 @@ private:
   QTreeWidget *treeCategories;
   QTreeWidget *treePrograms;
 
-  //MDPlotting
-  QTabWidget* mdPlottingTabWidget;
+  // MDPlotting
+  QTabWidget *mdPlottingTabWidget;
   QWidget *vsiPage, *mdPlottingGeneralPage;
   QComboBox *vsiDefaultColorMap, *vsiInitialView, *mdPlottingGeneralColorMap;
-  QLabel *lblVsiDefaultColorMap, *lblVsiDefaultBackground, *lblGeneralDefaultColorMap, *lblBoxGeneralDefaultColorMap, *lblVsiLastSession, *lblVsiInitialView;
+  QLabel *lblVsiDefaultColorMap, *lblVsiDefaultBackground,
+      *lblGeneralDefaultColorMap, *lblBoxGeneralDefaultColorMap,
+      *lblVsiLastSession, *lblVsiInitialView;
   ColorButton *vsiDefaultBackground;
-  QGroupBox* mdPlottingGeneralFrame, *mdPlottingVsiFrameBottom;
-  QCheckBox* vsiLastSession;
+  QGroupBox *mdPlottingGeneralFrame, *mdPlottingVsiFrameBottom;
+  QCheckBox *vsiLastSession;
   MantidQt::API::MdSettings m_mdSettings;
 
-  QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
-  QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;
-  QCheckBox *boxTitle, *boxFrame, *boxDistribution, *boxPlots3D, *boxPlots2D, *boxTables, *boxNotes, *boxFolders,*boxInstrWindow;
+  QPushButton *buttonAxesFont, *buttonNumbersFont, *buttonLegendFont,
+      *buttonTitleFont, *fontsBtn;
+  QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox,
+      *scaleErrorsBox;
+  QCheckBox *boxTitle, *boxFrame, *boxDistribution, *boxPlots3D, *boxPlots2D,
+      *boxTables, *boxNotes, *boxFolders, *boxInstrWindow;
   QCheckBox *boxSave, *boxBackbones, *boxShowLegend, *boxSmoothMesh;
-  QCheckBox *boxAutoscaling, *boxShowProjection, *boxMatrices, *boxScaleFonts, *boxResize, *boxAspectRatio;
-  QComboBox *boxMajTicks, *boxMinTicks, *boxStyle, *boxCurveStyle, *boxSeparator, *boxLanguage, *boxDecimalSeparator;
-  QCheckBox *boxFloatingGraph, *boxFloatingTable, *boxFloatingInstrumentWindow, *boxFloatingMantidMatrix, *boxFloatingNote, *boxFloatingMatrix;
-  QCheckBox *boxFloatingCustomInterfaces,*boxFloatingTiledWindows;
-  QSpinBox *boxMinutes, *boxLineWidth, *boxFrameWidth, *boxResolution, *boxMargin, *boxPrecision, *boxAppPrecision;
-  QSpinBox *boxSymbolSize, *boxMinTicksLength, *boxMajTicksLength, *generatePointsBox;
+  QCheckBox *boxAutoscaling, *boxShowProjection, *boxMatrices, *boxScaleFonts,
+      *boxResize, *boxAspectRatio;
+  QComboBox *boxMajTicks, *boxMinTicks, *boxStyle, *boxCurveStyle,
+      *boxSeparator, *boxLanguage, *boxDecimalSeparator;
+  QCheckBox *boxFloatingGraph, *boxFloatingTable, *boxFloatingInstrumentWindow,
+      *boxFloatingMantidMatrix, *boxFloatingNote, *boxFloatingMatrix;
+  QCheckBox *boxFloatingCustomInterfaces, *boxFloatingTiledWindows;
+  QSpinBox *boxMinutes, *boxLineWidth, *boxFrameWidth, *boxResolution,
+      *boxMargin, *boxPrecision, *boxAppPrecision;
+  QSpinBox *boxSymbolSize, *boxMinTicksLength, *boxMajTicksLength,
+      *generatePointsBox;
   DoubleSpinBox *boxCurveLineWidth;
   ColorButton *btnWorkspace, *btnPanels, *btnPanelsText;
-  QListWidget * itemsList;
-  QLabel *labelFrameWidth, *lblLanguage, *lblWorkspace, *lblPanels, *lblPageHeader;
-  QLabel *lblPanelsText, *lblFonts, *lblStyle, *lblDecimalSeparator, *lblAppPrecision;
+  QListWidget *itemsList;
+  QLabel *labelFrameWidth, *lblLanguage, *lblWorkspace, *lblPanels,
+      *lblPageHeader;
+  QLabel *lblPanelsText, *lblFonts, *lblStyle, *lblDecimalSeparator,
+      *lblAppPrecision;
   QGroupBox *groupBoxConfirm;
   QGroupBox *groupBoxTableFonts, *groupBoxTableCol;
   QLabel *lblSeparator, *lblTableBackground, *lblTextColor, *lblHeaderColor;
-  QLabel *lblSymbSize, *lblAxesLineWidth, *lblCurveStyle, *lblResolution, *lblPrecision;
+  QLabel *lblSymbSize, *lblAxesLineWidth, *lblCurveStyle, *lblResolution,
+      *lblPrecision;
   QGroupBox *groupBox3DFonts, *groupBox3DCol;
-  QLabel *lblMargin, *lblMajTicks, *lblMajTicksLength, *lblLineWidth, *lblMinTicks, *lblMinTicksLength, *lblPoints, *lblPeaksColor;
+  QLabel *lblMargin, *lblMajTicks, *lblMajTicksLength, *lblLineWidth,
+      *lblMinTicks, *lblMinTicksLength, *lblPoints, *lblPeaksColor;
   QGroupBox *groupBoxFittingCurve, *groupBoxFitParameters;
   QRadioButton *samePointsBtn, *generatePointsBtn;
   QGroupBox *groupBoxMultiPeak;
   ColorBox *boxPeaksColor;
   QLabel *lblScriptingLanguage, *lblInitWindow;
   QComboBox *boxScriptingLanguage, *boxInitWindow;
-  QCheckBox *boxAntialiasing, *boxAutoscale3DPlots, *boxTableComments, *boxThousandsSeparator;
-  QCheckBox *boxPromptRenameTables, *boxBackupProject, *boxLabelsEditing, *boxPromptDeleteWorkspace;
+  QCheckBox *boxAntialiasing, *boxAutoscale3DPlots, *boxTableComments,
+      *boxThousandsSeparator;
+  QCheckBox *boxPromptRenameTables, *boxBackupProject, *boxLabelsEditing,
+      *boxPromptDeleteWorkspace;
   QWidget *fileLocationsPage;
   QLabel *lblTranslationsPath, *lblHelpPath, *lblUndoStackSize, *lblEndOfLine;
   QLineEdit *translationsPathLine, *helpPathLine;
   QSpinBox *undoStackSizeBox;
   QComboBox *boxEndLine;
-  QCheckBox* cbApplyToMantid;
-  QCheckBox* cbDrawAllErrors;
-  QCheckBox* cbEnableQtiPlotFitting;
+  QCheckBox *cbApplyToMantid;
+  QCheckBox *cbDrawAllErrors;
+  QCheckBox *cbEnableQtiPlotFitting;
 
   QLabel *labelGraphAxesLabelsDist, *labelTickLabelsDist;
   QSpinBox *boxAxesLabelsDist, *boxTickLabelsDist;
-  QLabel *xBottomLabel, *xTopLabel, *yLeftLabel, *yRightLabel, *enableAxisLabel, *showNumbersLabel, *scaleLabel;
+  QLabel *xBottomLabel, *xTopLabel, *yLeftLabel, *yRightLabel, *enableAxisLabel,
+      *showNumbersLabel, *scaleLabel;
   QCheckBox *boxEnableAxis, *boxShowAxisLabels;
-  QGroupBox * enabledAxesGroupBox;
+  QGroupBox *enabledAxesGroupBox;
   QGridLayout *enabledAxesGrid;
   QCheckBox *boxSynchronizeScales;
-
 
 #ifdef SCRIPTING_PYTHON
   QLabel *lblPythonConfigDir;
@@ -276,9 +310,9 @@ private:
 #endif
   QCheckBox *boxUpdateTableValues;
 
-  public slots:
-    void changeUsageGeneralMdColorMap();
-    void changeUsageLastSession();
+public slots:
+  void changeUsageGeneralMdColorMap();
+  void changeUsageLastSession();
 };
 
 #endif // CONFIGDIALOG_H

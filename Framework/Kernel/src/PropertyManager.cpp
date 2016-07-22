@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include <json/json.h>
 
@@ -292,6 +293,49 @@ void PropertyManager::setProperties(
 }
 
 /** Sets all the declared properties from a string.
+  @param propertiesString :: Either a list of name = value pairs separated by a
+    semicolon or a JSON code string.
+  @param ignoreProperties :: A set of names of any properties NOT to set
+  from the propertiesArray
+*/
+void PropertyManager::setPropertiesWithString(
+    const std::string &propertiesString,
+    const std::unordered_set<std::string> &ignoreProperties) {
+  if (propertiesString.empty()) {
+    return;
+  }
+  auto firstSymbol = propertiesString.find_first_not_of(" \n\t");
+  if (firstSymbol == std::string::npos) {
+    return;
+  }
+  if (propertiesString[firstSymbol] == '{') {
+    setPropertiesWithJSONString(propertiesString, ignoreProperties);
+  } else {
+    setPropertiesWithSimpleString(propertiesString, ignoreProperties);
+  }
+}
+
+/** Sets all the declared properties from a string.
+  @param propertiesString :: A JSON code string.
+  @param ignoreProperties :: A set of names of any properties NOT to set
+  from the propertiesArray
+*/
+void PropertyManager::setPropertiesWithJSONString(
+    const std::string &propertiesString,
+    const std::unordered_set<std::string> &ignoreProperties) {
+  ::Json::Reader reader;
+  ::Json::Value propertyJson;
+
+  if (reader.parse(propertiesString, propertyJson)) {
+    setProperties(propertyJson, ignoreProperties);
+  } else {
+    throw std::invalid_argument(
+        "Could not parse JSON string when trying to set a property from: " +
+        propertiesString);
+  }
+}
+
+/** Sets all the declared properties from a string.
   @param propertiesString :: A list of name = value pairs separated by a
     semicolon
   @param ignoreProperties :: A set of names of any properties NOT to set
@@ -302,22 +346,19 @@ void PropertyManager::setPropertiesWithSimpleString(
     const std::unordered_set<std::string> &ignoreProperties) {
   ::Json::Value propertyJson;
   // Split up comma-separated properties
-  typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
 
   boost::char_separator<char> sep(";");
-  tokenizer propPairs(propertiesString, sep);
+  tokenizer propPairs(propertiesString, ";",
+                      Mantid::Kernel::StringTokenizer::TOK_TRIM);
   int index = 0;
   // Iterate over the properties
-  for (tokenizer::iterator it = propPairs.begin(); it != propPairs.end();
-       ++it) {
-    // Pair of the type "
-    std::string pair = *it;
-
+  for (const auto &pair : propPairs) {
     size_t n = pair.find('=');
     if (n != std::string::npos) {
       // Normal "PropertyName=value" string.
-      std::string propName = "";
-      std::string value = "";
+      std::string propName;
+      std::string value;
 
       // Extract the value string
       if (n < pair.size() - 1) {
@@ -404,8 +445,7 @@ bool PropertyManager::validateProperties() const {
     //"" means no error
     if (!error.empty()) {
       g_log.error() << "Property \"" << property.first
-                    << "\" is not set to a valid value: \"" << error << "\"."
-                    << std::endl;
+                    << "\" is not set to a valid value: \"" << error << "\".\n";
       allValid = false;
     }
   }

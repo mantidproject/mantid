@@ -14,16 +14,16 @@ WorkspaceSingleValue::WorkspaceSingleValue(double value, double error)
     : API::MatrixWorkspace() {
   // Set the "histogram" to the single value
   data.dataX().resize(1, 0.0);
-  data.dataY().resize(1, value);
-  data.dataE().resize(1, error);
-  data.dataDx().resize(1, 0.0);
+  data.setCounts(1, value);
+  data.setCountStandardDeviations(1, error);
+  data.setPointStandardDeviations(1, 0.0);
 
-  isDistribution(true);
+  setDistribution(true);
 }
 
 WorkspaceSingleValue::WorkspaceSingleValue(const WorkspaceSingleValue &other)
     : MatrixWorkspace(other), data(other.data) {
-  isDistribution(true);
+  setDistribution(true);
 }
 
 /** Does nothing in this case
@@ -40,17 +40,15 @@ void WorkspaceSingleValue::init(const std::size_t &NVectors,
   (void)YLength; // Avoid compiler warning
 }
 
-//--------------------------------------------------------------------------------------------
-/// Return the underlying ISpectrum ptr at the given workspace index.
-Mantid::API::ISpectrum *
-WorkspaceSingleValue::getSpectrum(const size_t /*index*/) {
-  return &data;
+/// Return the underlying Histogram1D at the given workspace index.
+Histogram1D &WorkspaceSingleValue::getSpectrum(const size_t /*index*/) {
+  return data;
 }
 
-/// Return the underlying ISpectrum ptr at the given workspace index.
-const Mantid::API::ISpectrum *
+/// Return the underlying Histogram1D at the given workspace index.
+const Histogram1D &
 WorkspaceSingleValue::getSpectrum(const size_t /*index*/) const {
-  return &data;
+  return data;
 }
 
 /// Rebin the workspace. Not implemented for this workspace.
@@ -75,8 +73,8 @@ size_t WorkspaceSingleValue::getNumDims() const { return 0; }
 
 ///\cond TEMPLATE
 
-template DLLExport class Mantid::API::WorkspaceProperty<
-    Mantid::DataObjects::WorkspaceSingleValue>;
+template class DLLExport
+    Mantid::API::WorkspaceProperty<Mantid::DataObjects::WorkspaceSingleValue>;
 
 namespace Mantid {
 namespace Kernel {

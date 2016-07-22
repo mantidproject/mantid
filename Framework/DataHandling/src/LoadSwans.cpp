@@ -130,7 +130,7 @@ void LoadSwans::placeDetectorInSpace() {
   const double angle = -m_ws->run().getPropertyValueAsType<double>("angle");
 
   g_log.information() << "Moving detector " << componentName << " " << distance
-                      << " meters and " << angle << " degrees." << std::endl;
+                      << " meters and " << angle << " degrees.\n";
 
   LoadHelper helper;
   constexpr double deg2rad = M_PI / 180.0;
@@ -172,7 +172,7 @@ std::map<uint32_t, std::vector<uint32_t>> LoadSwans::loadData() {
     uint32_t pos = 0;
     input.read(reinterpret_cast<char *>(&pos), sizeof(pos));
     if (pos < 400000) {
-      g_log.warning() << "Detector index invalid: " << pos << std::endl;
+      g_log.warning() << "Detector index invalid: " << pos << '\n';
       continue;
     }
     pos -= 400000;
@@ -198,7 +198,7 @@ std::vector<double> LoadSwans::loadMetaData() {
   while (getline(infile, line)) {
     // line with data, need to be parsed by white spaces
     if (!line.empty() && line[0] != '#') {
-      g_log.debug() << "Metadata parsed line: " << line << std::endl;
+      g_log.debug() << "Metadata parsed line: " << line << '\n';
       auto tokenizer = Mantid::Kernel::StringTokenizer(
           line, "\t ", Mantid::Kernel::StringTokenizer::TOK_TRIM |
                            Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
@@ -239,7 +239,7 @@ void LoadSwans::setMetaDataAsWorkspaceProperties(
 void LoadSwans::loadDataIntoTheWorkspace(
     const std::map<uint32_t, std::vector<uint32_t>> &eventMap) {
   for (const auto &position : eventMap) {
-    EventList &el = m_ws->getEventList(position.first);
+    EventList &el = m_ws->getSpectrum(position.first);
     el.setSpectrumNo(position.first);
     el.setDetectorID(position.first);
     for (const auto &event : position.second) {
@@ -260,10 +260,8 @@ void LoadSwans::setTimeAxis() {
   const unsigned int longest_tof = static_cast<unsigned int>(
       m_ws->getInstrument()->getNumberParameter("longest-tof")[0]);
   // Now, create a default X-vector for histogramming, with just 2 bins.
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &xRef = axis.access();
-  xRef = {static_cast<double>(shortest_tof), static_cast<double>(longest_tof)};
-  // Set the binning axis using this.
+  auto axis = HistogramData::BinEdges{static_cast<double>(shortest_tof),
+                                      static_cast<double>(longest_tof)};
   m_ws->setAllX(axis);
 }
 

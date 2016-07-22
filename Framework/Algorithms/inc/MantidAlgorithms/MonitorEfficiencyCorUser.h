@@ -9,10 +9,6 @@ namespace Algorithms {
 
 class DLLExport MonitorEfficiencyCorUser : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  MonitorEfficiencyCorUser(); // : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~MonitorEfficiencyCorUser() override;
   /// Algorithm's name
   const std::string name() const override { return "MonitorEfficiencyCorUser"; }
   /// Summary of algorithms purpose
@@ -46,9 +42,9 @@ private:
   /// The output workspace, maybe the same as the input one
   API::MatrixWorkspace_sptr m_outputWS;
   /// stores the incident energy of the neutrons
-  double m_Ei;
+  double m_Ei = 0.0;
   /// stores the total count of neutrons from the monitor
-  int m_monitorCounts;
+  int m_monitorCounts = 0;
 };
 
 } // namespace Algorithms

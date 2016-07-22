@@ -6,15 +6,15 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/UserCatalogInfo.h"
-#include "MantidQtCustomInterfaces/ProgressableView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflTablePresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ProgressPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
+#include "MantidQtMantidWidgets/ProgressPresenter.h"
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
@@ -24,12 +24,14 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt {
 namespace CustomInterfaces {
 ReflMainViewPresenter::ReflMainViewPresenter(
-    ReflMainView *mainView, IReflTablePresenter *tablePresenter,
-    ProgressableView *progressView, boost::shared_ptr<IReflSearcher> searcher)
+    ReflMainView *mainView, ProgressableView *progressView,
+    boost::shared_ptr<DataProcessorPresenter> tablePresenter,
+    boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_tablePresenter(tablePresenter),
       m_progressView(progressView), m_searcher(searcher) {
 
@@ -107,7 +109,7 @@ void ReflMainViewPresenter::pushCommands() {
   m_view->clearCommands();
 
   // The expected number of commands
-  const size_t nCommands = 26;
+  const size_t nCommands = 27;
   auto commands = m_tablePresenter->publishCommands();
   if (commands.size() != nCommands) {
     throw std::runtime_error("Invalid list of commands");
@@ -116,12 +118,12 @@ void ReflMainViewPresenter::pushCommands() {
   const size_t rowCommStart = 10;
   // We want to have two menus
   // Populate the "Reflectometry" menu
-  std::vector<ReflCommand_uptr> tableCommands;
+  std::vector<DataProcessorCommand_uptr> tableCommands;
   for (size_t i = 0; i < rowCommStart; i++)
     tableCommands.push_back(std::move(commands[i]));
   m_view->setTableCommands(std::move(tableCommands));
   // Populate the "Edit" menu
-  std::vector<ReflCommand_uptr> rowCommands;
+  std::vector<DataProcessorCommand_uptr> rowCommands;
   for (size_t i = rowCommStart; i < nCommands; i++)
     rowCommands.push_back(std::move(commands[i]));
   m_view->setRowCommands(std::move(rowCommands));

@@ -198,7 +198,7 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
     // These are some heuristic rules to discard bad fits.
     // Hope to be able to remove them when we have better fitting routine
     if (height < 0) {
-      g_log.error() << "Find Peak with Negative Height" << std::endl;
+      g_log.error() << "Find Peak with Negative Height\n";
       continue; // Height must be positive
     }
     if (chisq > m_maxChiSq) {

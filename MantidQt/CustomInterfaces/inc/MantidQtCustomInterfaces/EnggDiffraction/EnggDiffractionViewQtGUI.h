@@ -1,9 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
 
-#include "MantidQtAPI/UserSubWindow.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingViewQtWidget.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
 #include "MantidQtMantidWidgets/PeakPicker.h"
@@ -12,14 +13,16 @@
 #include "ui_EnggDiffractionQtTabCalib.h"
 #include "ui_EnggDiffractionQtTabFocus.h"
 #include "ui_EnggDiffractionQtTabPreproc.h"
-#include "ui_EnggDiffractionQtTabFitting.h"
 #include "ui_EnggDiffractionQtTabSettings.h"
 
 #include <boost/scoped_ptr.hpp>
-#include <qwt_plot_zoomer.h>
 
 // Qt classes forward declarations
+class QMessageBox;
 class QMutex;
+
+class QwtPlotCurve;
+class QwtPlotZoomer;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -69,6 +72,11 @@ public:
   /// This interface's categories.
   static QString categoryInfo() { return "Diffraction"; }
 
+  void splashMessage(bool visible, const std::string &shortMsg,
+                     const std::string &description) override;
+
+  void showStatus(const std::string &sts) override;
+
   void userWarning(const std::string &warn,
                    const std::string &description) override;
 
@@ -100,8 +108,6 @@ public:
 
   std::vector<std::string> newCeriaNo() const override;
 
-  std::string outCalibFilename() const override { return m_outCalibFilename; }
-
   int currentCropCalibBankName() const override {
     return m_currentCropCalibBankName;
   }
@@ -113,13 +119,11 @@ public:
   void newCalibLoaded(const std::string &vanadiumNo, const std::string &ceriaNo,
                       const std::string &fname) override;
 
-  void writeOutCalibFile(const std::string &outFilename,
-                         const std::vector<double> &difc,
-                         const std::vector<double> &tzero) override;
+  std::string enggRunPythonCode(const std::string &pyCode) override;
 
   void enableTabs(bool enable) override;
 
-  void enableCalibrateAndFocusActions(bool enable) override;
+  void enableCalibrateFocusFitUserActions(bool enable) override;
 
   std::string focusingDir() const override;
 
@@ -149,45 +153,6 @@ public:
 
   double rebinningPulsesTime() const override;
 
-  void setfittingRunNo(QString path);
-
-  std::string fittingRunNo() const override;
-
-  std::string fittingPeaksData() const override;
-
-  void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
-                     bool focused) override;
-
-  std::vector<std::string> splitFittingDirectory(std::string &selectedfPath);
-
-  void addBankItems(std::vector<std::string> splittedBaseName,
-                    QString selectedFile);
-
-  void setDefaultBank(std::vector<std::string> splittedBaseName,
-                      QString selectedFile);
-
-  std::string fittingRunNoFactory(std::string bank, std::string fileName,
-                                  std::string &bankDir, std::string fileDir);
-
-  void updateFittingDirVec(std::string &bankDir, std::string &focusedFile);
-
-  std::string readPeaksFile(std::string fileDir);
-
-  void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data,
-                         std::vector<QwtPlotCurve *> &dataVector, bool focused);
-
-  void setPeakPickerEnabled(bool enabled);
-
-  void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak);
-
-  double getPeakCentre() const;
-
-  void fittingWriteFile(const std::string &fileDir);
-
-  void setZoomTool(bool enabled);
-
-  void resetView();
-
   void plotFocusedSpectrum(const std::string &wsName) override;
 
   void plotWaterfallSpectrum(const std::string &wsName) override;
@@ -196,9 +161,7 @@ public:
                            const std::string &spectrum,
                            const std::string &type) override;
 
-  void plotVanCurvesCalibOutput() override;
-
-  void plotDifcZeroCalibOutput(const std::string &pyCode) override;
+  void plotCalibOutput(const std::string &pyCode) override;
 
   bool saveFocusedOutputFiles() const override;
 
@@ -208,6 +171,7 @@ public:
 
 signals:
   void getBanks();
+  void setBank();
 
 private slots:
   /// for buttons, do calibrate, focus, event->histo rebin, and similar
@@ -220,9 +184,6 @@ private slots:
   void focusStopClicked();
   void rebinTimeClicked();
   void rebinMultiperiodClicked();
-  void fitClicked();
-  void fittingRunNoChanged();
-  void setBankDir(int idx);
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
@@ -254,22 +215,8 @@ private slots:
   // slots of plot spectrum check box status
   void plotFocusStatus();
 
-  // updates the cropped calib run number with new ceria
-  void updateCroppedCalibRun();
-
   // enables the text field when appropriate bank name is selected
   void enableSpecNos();
-
-  // slot of the fitting peaks per part of the interface
-  void browseFitFocusedRun();
-  void fittingBankIdChanged(int idx);
-  void setBankIdComboBox(int idx);
-  void browsePeaksToFit();
-  void fittingListWidgetBank(int idx);
-  void setListWidgetBank(int idx);
-  void setPeakPick();
-  void addPeakToList();
-  void savePeakList();
 
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
@@ -278,10 +225,10 @@ private:
   /// Setup the interface (tab UI)
   void initLayout() override;
   void doSetupGeneralWidgets();
+  void doSetupSplashMsg();
   void doSetupTabCalib();
   void doSetupTabFocus();
   void doSetupTabPreproc();
-  void doSetupTabFitting();
   void doSetupTabSettings();
 
   std::string guessGSASTemplatePath() const;
@@ -296,7 +243,7 @@ private:
   void closeEvent(QCloseEvent *ev) override;
 
   // path/name for the persistent settings group of this interface
-  const static std::string m_settingsGroup;
+  const static std::string g_settingsGroup;
 
   // here the view puts messages before notifying the presenter to show them
   std::vector<std::string> m_logMsgs;
@@ -309,7 +256,8 @@ private:
   Ui::EnggDiffractionQtTabCalib m_uiTabCalib;
   Ui::EnggDiffractionQtTabFocus m_uiTabFocus;
   Ui::EnggDiffractionQtTabPreproc m_uiTabPreproc;
-  Ui::EnggDiffractionQtTabFitting m_uiTabFitting;
+  // Ui::EnggDiffractionQtTabFitting m_uiTabFitting;
+  EnggDiffFittingViewQtWidget *m_fittingWidget;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
   /// converts QList to a vector
@@ -334,17 +282,11 @@ private:
   // multi-run focus mode type selected
   int static m_currentRunMode;
 
-  // fitting bankID
-  int static m_fitting_bank_Id;
-
-  // vector holding directory of focused bank file
-  std::vector<std::string> static m_fitting_runno_dir_vec;
-
-  /// current calibration produced in the 'Calibration' tab
-  std::string m_currentCalibFilename;
   /// calibration settings - from/to the 'settings' tab
   EnggDiffCalibSettings m_calibSettings;
-  std::string m_outCalibFilename;
+
+  /// To show important non-modal messages
+  QMessageBox *m_splashMsg;
 
   /// This is in principle the only settings for 'focus'
   std::string m_focusDir;
@@ -361,20 +303,8 @@ private:
   /// (focusing)
   static const std::string g_DetGrpExtStr;
 
-  /// Loaded focused workspace
-  std::vector<QwtPlotCurve *> m_focusedDataVector;
-
-  /// Loaded data curves
-  std::vector<QwtPlotCurve *> m_fittedDataVector;
-
-  /// Peak picker tool for fitting - only one on the plot at any given moment
-  MantidWidgets::PeakPicker *m_peakPicker;
-
-  /// zoom-in/zoom-out tool for fitting
-  QwtPlotZoomer *m_zoomTool;
-
   /// presenter as in the model-view-presenter
-  boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
+  boost::shared_ptr<IEnggDiffractionPresenter> m_presenter;
 };
 
 } // namespace CustomInterfaces

@@ -14,14 +14,6 @@ using DataObjects::PeaksWorkspace_const_sptr;
 using DataObjects::PeaksWorkspace_sptr;
 using DataObjects::Peak;
 
-/** Constructor
- */
-DiffPeaksWorkspaces::DiffPeaksWorkspaces() {}
-
-/** Destructor
- */
-DiffPeaksWorkspaces::~DiffPeaksWorkspaces() {}
-
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DiffPeaksWorkspaces::name() const {
   return "DiffPeaksWorkspaces";

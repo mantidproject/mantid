@@ -37,27 +37,26 @@ Extract the geometry and function information
 @param eventWs : event workspace to get the information from.
 */
 void MDEWLoadingPresenter::extractMetadata(
-    Mantid::API::IMDEventWorkspace_sptr eventWs) {
+    const Mantid::API::IMDEventWorkspace &eventWs) {
   using namespace Mantid::Geometry;
   MDGeometryBuilderXML<NoDimensionPolicy> refresh;
   xmlBuilder = refresh; // Reassign.
-  std::vector<MDDimensionExtents<coord_t>> ext = eventWs->getMinimumExtents(5);
+  std::vector<MDDimensionExtents<coord_t>> ext = eventWs.getMinimumExtents(5);
   std::vector<IMDDimension_sptr> dimensions;
-  size_t nDimensions = eventWs->getNumDims();
+  size_t nDimensions = eventWs.getNumDims();
   for (size_t d = 0; d < nDimensions; d++) {
-    IMDDimension_const_sptr inDim = eventWs->getDimension(d);
+    IMDDimension_const_sptr inDim = eventWs.getDimension(d);
     coord_t min = ext[d].getMin();
     coord_t max = ext[d].getMax();
     if (min > max) {
       min = 0.0;
       max = 1.0;
     }
-    // std::cout << "dim " << d << min << " to " <<  max << std::endl;
-    axisLabels.push_back(makeAxisTitle(inDim));
-    MDHistoDimension_sptr dim(
-        new MDHistoDimension(inDim->getName(), inDim->getName(),
-                             inDim->getMDFrame(), min, max, inDim->getNBins()));
-    dimensions.push_back(dim);
+    // std::cout << "dim " << d << min << " to " <<  max << '\n';
+    axisLabels.push_back(makeAxisTitle(*inDim));
+    dimensions.push_back(boost::make_shared<MDHistoDimension>(
+        inDim->getName(), inDim->getName(), inDim->getMDFrame(), min, max,
+        inDim->getNBins()));
   }
 
   // Configuring the geometry xml builder allows the object panel associated
@@ -144,8 +143,8 @@ void MDEWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
   VatesKnowledgeSerializer serializer;
   serializer.setWorkspaceName(wsName);
   serializer.setGeometryXML(xmlBuilder.create());
-  serializer.setImplicitFunction(Mantid::Geometry::MDImplicitFunction_sptr(
-      new Mantid::Geometry::NullImplicitFunction()));
+  serializer.setImplicitFunction(
+      boost::make_shared<Mantid::Geometry::NullImplicitFunction>());
   std::string xmlString = serializer.createXMLString();
 
   // Serialize Json metadata

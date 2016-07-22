@@ -1,6 +1,6 @@
-
 #include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 
 #include <boost/python/class.hpp>
@@ -12,8 +12,9 @@
 using Mantid::Geometry::Group;
 using Mantid::Geometry::SpaceGroup;
 using Mantid::Geometry::SymmetryOperation;
-
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(SpaceGroup)
 
 namespace //<unnamed>
     {
@@ -63,6 +64,9 @@ void export_SpaceGroup() {
            (arg("self"), arg("hkl")),
            "Returns True if the supplied reflection is allowed with respect to "
            "space group symmetry operations.")
+      .def("isAllowedUnitCell", &SpaceGroup::isAllowedUnitCell,
+           (arg("self"), arg("cell")), "Returns true if the metric of the cell "
+                                       "is compatible with the space group.")
       .def("getPointGroup", &SpaceGroup::getPointGroup, arg("self"),
            "Returns the point group of the space group.")
       .def("getSiteSymmetryGroup", &getSiteSymmetryGroup,

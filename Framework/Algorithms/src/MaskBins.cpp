@@ -154,8 +154,6 @@ void MaskBins::exec() {
 
     } // ENDFOR(i)
   }   // ENDIFELSE(eventworkspace?)
-
-  return;
 }
 
 /** Execution code for EventWorkspaces
@@ -178,7 +176,7 @@ void MaskBins::execEvent() {
     for (int i = 0; i < static_cast<int>(this->spectra_list.size()); // NOLINT
          ++i) {
       PARALLEL_START_INTERUPT_REGION
-      outputWS->getEventList(this->spectra_list[i]).maskTof(m_startX, m_endX);
+      outputWS->getSpectrum(this->spectra_list[i]).maskTof(m_startX, m_endX);
       progress.report();
       PARALLEL_END_INTERUPT_REGION
     }
@@ -188,7 +186,7 @@ void MaskBins::execEvent() {
     PARALLEL_FOR1(outputWS)
     for (int64_t i = 0; i < int64_t(numHists); ++i) {
       PARALLEL_START_INTERUPT_REGION
-      outputWS->getEventList(i).maskTof(m_startX, m_endX);
+      outputWS->getSpectrum(i).maskTof(m_startX, m_endX);
       progress.report();
       PARALLEL_END_INTERUPT_REGION
     }

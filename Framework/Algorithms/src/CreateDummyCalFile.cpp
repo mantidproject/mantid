@@ -31,8 +31,6 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
-CreateDummyCalFile::CreateDummyCalFile() : API::Algorithm() {}
-
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */
@@ -153,7 +151,6 @@ void CreateDummyCalFile::exec() {
   // Write the results in a file
   saveGroupingFile(filename, overwrite);
   progress(0.2);
-  return;
 }
 
 bool CreateDummyCalFile::groupingFileDoesExist(
@@ -232,7 +229,6 @@ void CreateDummyCalFile::saveGroupingFile(const std::string &filename,
   outfile.close();
   if (overwrite)
     infile.close();
-  return;
 }
 
 /// Writes a single calibration line to the output file
@@ -242,7 +238,6 @@ void CreateDummyCalFile::writeCalEntry(std::ostream &os, int number, int udet,
      << udet << std::fixed << std::setprecision(7) << std::setw(15) << offset
      << std::fixed << std::setw(8) << select << std::fixed << std::setw(8)
      << group << "\n";
-  return;
 }
 
 /// Writes out the header to the output file
@@ -264,7 +259,6 @@ void CreateDummyCalFile::writeHeaders(std::ostream &os,
 
   os << "#  Number           UDET         offset      select  group"
      << "\n";
-  return;
 }
 
 } // namespace Algorithm

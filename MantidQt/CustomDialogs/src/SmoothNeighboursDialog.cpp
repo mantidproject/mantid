@@ -5,23 +5,23 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace MantidQt::API;
 
-//Register the class with the factory
+// Register the class with the factory
 DECLARE_DIALOG(SmoothNeighboursDialog)
 
-// As defined in algorithm. Make sure you change them in SmoothNeighbours.cpp as well.
-const QString SmoothNeighboursDialog::NON_UNIFORM_GROUP = "NonUniform Detectors";
-const QString SmoothNeighboursDialog::RECTANGULAR_GROUP = "Rectangular Detectors";
+// As defined in algorithm. Make sure you change them in SmoothNeighbours.cpp as
+// well.
+const QString SmoothNeighboursDialog::NON_UNIFORM_GROUP =
+    "NonUniform Detectors";
+const QString SmoothNeighboursDialog::RECTANGULAR_GROUP =
+    "Rectangular Detectors";
 const QString SmoothNeighboursDialog::INPUT_WORKSPACE = "InputWorkspace";
 
-SmoothNeighboursDialog::SmoothNeighboursDialog(QWidget* parent) 
-  : AlgorithmDialog(parent),
-  m_propertiesWidget(NULL), m_dialogLayout(NULL)
-{
-}
- 
-void SmoothNeighboursDialog::initLayout()
-{
+SmoothNeighboursDialog::SmoothNeighboursDialog(QWidget *parent)
+    : AlgorithmDialog(parent), m_propertiesWidget(NULL), m_dialogLayout(NULL) {}
+
+void SmoothNeighboursDialog::initLayout() {
   // Create main layout
   m_dialogLayout = new QVBoxLayout();
 
@@ -38,18 +38,21 @@ void SmoothNeighboursDialog::initLayout()
   m_propertiesWidget->setAlgorithm(this->getAlgorithm());
 
   // Mark the properties that will be forced enabled or disabled
-  m_propertiesWidget->addEnabledAndDisableLists(m_enabled, m_disabled + m_python_arguments);
+  m_propertiesWidget->addEnabledAndDisableLists(
+      m_enabled, m_disabled + m_python_arguments);
 
   // Tie all the widgets to properties
-  for (auto it = m_propertiesWidget->m_propWidgets.begin(); it != m_propertiesWidget->m_propWidgets.end(); it++)
+  for (auto it = m_propertiesWidget->m_propWidgets.begin();
+       it != m_propertiesWidget->m_propWidgets.end(); it++)
     this->tie(it.value(), it.key());
 
   m_propertiesWidget->hideOrDisableProperties();
 
-  PropertyWidget* inputWorkspaceWidget = m_propertiesWidget->m_propWidgets[INPUT_WORKSPACE];
+  PropertyWidget *inputWorkspaceWidget =
+      m_propertiesWidget->m_propWidgets[INPUT_WORKSPACE];
 
-  connect(inputWorkspaceWidget, SIGNAL(valueChanged(const QString&)),
-          this, SLOT(inputWorkspaceChanged(const QString&)));
+  connect(inputWorkspaceWidget, SIGNAL(valueChanged(const QString &)), this,
+          SLOT(inputWorkspaceChanged(const QString &)));
 
   m_dialogLayout->addWidget(m_propertiesWidget);
 
@@ -60,8 +63,7 @@ void SmoothNeighboursDialog::initLayout()
   inputWorkspaceWidget->valueChangedSlot();
 }
 
-void SmoothNeighboursDialog::inputWorkspaceChanged(const QString& pName)
-{
+void SmoothNeighboursDialog::inputWorkspaceChanged(const QString &pName) {
   UNUSED_ARG(pName);
 
   m_propertiesWidget->m_groupWidgets[RECTANGULAR_GROUP]->setVisible(false);
@@ -69,42 +71,48 @@ void SmoothNeighboursDialog::inputWorkspaceChanged(const QString& pName)
 
   std::string inWsName = INPUT_WORKSPACE.toStdString();
 
-  // Workspace should have been set by PropertyWidget before emitting valueChanged
+  // Workspace should have been set by PropertyWidget before emitting
+  // valueChanged
   MatrixWorkspace_sptr inWs = this->getAlgorithm()->getProperty(inWsName);
 
-  if(!inWs)
-  {
-    // Workspace groups are NOT returned by IWP->getWorkspace(), as they are not MatrixWorkspace,
+  if (!inWs) {
+    // Workspace groups are NOT returned by IWP->getWorkspace(), as they are not
+    // MatrixWorkspace,
     // so check the ADS for the GroupWorkspace with the same name
-    std::string inWsValue = this->getAlgorithm()->getPointerToProperty(inWsName)->value();
+    std::string inWsValue =
+        this->getAlgorithm()->getPointerToProperty(inWsName)->value();
 
     // If it really doesn't exist, don't do anything
-    if(!AnalysisDataService::Instance().doesExist(inWsValue))
+    if (!AnalysisDataService::Instance().doesExist(inWsValue))
       return;
 
-    WorkspaceGroup_sptr inGroupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(inWsValue);
+    WorkspaceGroup_sptr inGroupWs =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(inWsValue);
 
-    if(inGroupWs)
-      // If is a group workspace, use the first workspace to determine the instrument type,
+    if (inGroupWs)
+      // If is a group workspace, use the first workspace to determine the
+      // instrument type,
       // as most of the times it will be the same for all the workspaces
-      inWs = boost::dynamic_pointer_cast<MatrixWorkspace>(inGroupWs->getItem(0));
+      inWs =
+          boost::dynamic_pointer_cast<MatrixWorkspace>(inGroupWs->getItem(0));
     else
       // If is not a GroupWorkspace as well, do nothing
       return;
   }
-  Instrument::ContainsState containsRectDetectors = inWs->getInstrument()->containsRectDetectors();
+  Instrument::ContainsState containsRectDetectors =
+      inWs->getInstrument()->containsRectDetectors();
 
-  if(containsRectDetectors == Instrument::ContainsState::Full)
+  if (containsRectDetectors == Instrument::ContainsState::Full)
     m_propertiesWidget->m_groupWidgets[RECTANGULAR_GROUP]->setVisible(true);
   else
     m_propertiesWidget->m_groupWidgets[NON_UNIFORM_GROUP]->setVisible(true);
 }
 
-void SmoothNeighboursDialog::accept()
-{
+void SmoothNeighboursDialog::accept() {
   AlgorithmDialog::accept();
 
   // If got there, there were errors
-  for(auto it = m_errors.begin(); it != m_errors.end(); it++)
-    m_propertiesWidget->m_propWidgets[it.key()]->updateIconVisibility(it.value());
+  for (auto it = m_errors.begin(); it != m_errors.end(); it++)
+    m_propertiesWidget->m_propWidgets[it.key()]->updateIconVisibility(
+        it.value());
 }

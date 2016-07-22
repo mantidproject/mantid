@@ -9,128 +9,123 @@
 
 #include <QDialog>
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
-  using namespace Mantid::Kernel;
-  using namespace Mantid::API;
+namespace MantidQt {
+namespace MantidWidgets {
 
-  /** MuonSequentialFitDialog : TODO: DESCRIPTION
-    
-    Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+/** MuonSequentialFitDialog : Dialog for running sequential fits for Muon data
 
-    This file is part of Mantid.
+  Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonSequentialFitDialog : public QDialog
-  {
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    Q_OBJECT
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonSequentialFitDialog
+    : public QDialog {
 
-  public:
-    MuonSequentialFitDialog(MuonFitPropertyBrowser* fitPropBrowser, Algorithm_sptr loadAlg);
-    ~MuonSequentialFitDialog() override;
+  Q_OBJECT
 
-    enum DialogState 
-    {
-      Preparing,
-      Running,
-      Stopped
-    };
+public:
+  MuonSequentialFitDialog(MuonFitPropertyBrowser *fitPropBrowser,
+                          Mantid::API::Algorithm_sptr loadAlg);
+  ~MuonSequentialFitDialog() override;
 
-    // Prefix added to the names of the sequential fit result workspaces and groups
-    static const std::string SEQUENTIAL_PREFIX;
+  enum DialogState { Preparing, Running, Stopped };
 
-  signals:
-    void stateChanged(DialogState newState);
+  // Prefix added to the names of the sequential fit result workspaces and
+  // groups
+  static const std::string SEQUENTIAL_PREFIX;
 
-  private:
+signals:
+  void stateChanged(DialogState newState);
 
-    // -- FUNCTIONS -----------------------------------------------------------
+private:
+  // -- FUNCTIONS -----------------------------------------------------------
 
-    /// Check if all the input field are valid 
-    bool isInputValid();
+  /// Check if all the input field are valid
+  bool isInputValid();
 
-    /// Set current dialog state
-    void setState(DialogState newState);
+  /// Set current dialog state
+  void setState(DialogState newState);
 
-    /// Initialize diagnosis table 
-    void initDiagnosisTable();
+  /// Initialize diagnosis table
+  void initDiagnosisTable();
 
-    /// Add a new entry to the diagnosis table 
-    void addDiagnosisEntry(const std::string& runTitle, double fitQuality,
-        IFunction_sptr fittedFunction);
+  /// Add a new entry to the diagnosis table
+  void addDiagnosisEntry(const std::string &runTitle, double fitQuality,
+                         Mantid::API::IFunction_sptr fittedFunction);
 
-    /// Helper function to create new item for Diagnosis table
-    QTableWidgetItem* createTableWidgetItem(const QString& text);
-    
-    // -- VARIABLES -----------------------------------------------------------
+  /// Helper function to create new item for Diagnosis table
+  QTableWidgetItem *createTableWidgetItem(const QString &text);
 
-    /// UI form
-    Ui::MuonSequentialFitDialog m_ui;
+  // -- VARIABLES -----------------------------------------------------------
 
-    /// Fit properties browser used to start the dialog
-    MuonFitPropertyBrowser* m_fitPropBrowser;
+  /// UI form
+  Ui::MuonSequentialFitDialog m_ui;
 
-    /// Current state of the dialog
-    DialogState m_state;
+  /// Fit properties browser used to start the dialog
+  MuonFitPropertyBrowser *m_fitPropBrowser;
 
-    /// Whether user requested fitting to be stopped
-    bool m_stopRequested;
+  /// Current state of the dialog
+  DialogState m_state;
 
-    /// Algorithm the dialog should use for loading 
-    Algorithm_sptr m_loadAlg;
+  /// Whether user requested fitting to be stopped
+  bool m_stopRequested;
 
-    // -- STATIC MEMBERS ------------------------------------------------------
+  /// Algorithm the dialog should use for loading
+  Mantid::API::Algorithm_sptr m_loadAlg;
 
-    /// Checks if specified name is valid as a name for label. 
-    static std::string isValidLabel(const std::string& label);
+  // -- STATIC MEMBERS ------------------------------------------------------
 
-    /// Returns displayable title for the given workspace
-    static std::string getRunTitle(Workspace_const_sptr ws);
+  /// Checks if specified name is valid as a name for label.
+  static std::string isValidLabel(const std::string &label);
 
-  private slots:
-    /// Updates visibility/tooltip of label error asterisk
-    void updateLabelError(const QString& label);
+  /// Returns displayable title for the given workspace
+  static std::string getRunTitle(Mantid::API::Workspace_const_sptr ws);
 
-    /// Sets control button to be start/stop depending on new dialog state 
-    void updateControlButtonType(DialogState newState);
+private slots:
+  /// Updates visibility/tooltip of label error asterisk
+  void updateLabelError(const QString &label);
 
-    /// Update enabled state off all the input widgets depending on new dialog state
-    void updateInputEnabled(DialogState newState); 
+  /// Sets control button to be start/stop depending on new dialog state
+  void updateControlButtonType(DialogState newState);
 
-    /// Update control button enabled status depending on the new state. 
-    void updateControlEnabled(DialogState newState); 
+  /// Update enabled state off all the input widgets depending on new dialog
+  /// state
+  void updateInputEnabled(DialogState newState);
 
-    /// Update cursor depending on the new state of the dialog.
-    void updateCursor(DialogState newState); 
+  /// Update control button enabled status depending on the new state.
+  void updateControlEnabled(DialogState newState);
 
-    /// Start fitting process
-    void startFit();
+  /// Update cursor depending on the new state of the dialog.
+  void updateCursor(DialogState newState);
 
-    /// Stop fitting process
-    void stopFit();
+  /// Start fitting process
+  void startFit();
 
-  };
+  /// Stop fitting process
+  void stopFit();
 
+  /// Run fit after getting file input
+  void continueFit();
+};
 
 } // namespace MantidWidgets
 } // namespace Mantid
 
-#endif  /* MANTID_MANTIDWIDGETS_MUONSEQUENTIALFITDIALOG_H_ */
+#endif /* MANTID_MANTIDWIDGETS_MUONSEQUENTIALFITDIALOG_H_ */

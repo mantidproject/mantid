@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.simpleapi import *
 from mantid.api import *
@@ -25,8 +27,8 @@ class EnggFitDIFCFromPeaksTest(unittest.TestCase):
         Tests fitting DIFC/TZERO on a couple of peaks from EnggFitPeaks.
         """
 
-        peak_def1 = "name=BackToBackExponential, I=15000, A=1, B=1.7, X0=15000, S=100"
-        peak_def2 = "name=BackToBackExponential, I=8000, A=1, B=1.7, X0=20000, S=300"
+        peak_def1 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=15000, A=0.1, B=0.14, X0=15000, S=50"
+        peak_def2 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=6000, A=0.02, B=0.021, X0=20000, S=40"
         sws = CreateSampleWorkspace(Function="User Defined",
                                     UserDefinedFunction=peak_def1 + ";" + peak_def2,
                                     NumBanks=1, BankPixelWidth=1,
@@ -41,8 +43,8 @@ class EnggFitDIFCFromPeaksTest(unittest.TestCase):
                                             OutFittedPeaksTable=peaksTblName)
 
         paramsTblName = 'test_difc_zero_table'
-        difa, difc, zero = EnggFitDIFCFromPeaks(FittedPeaks=test_fit_peaks_table,
-                                                OutParametersTable=paramsTblName)
+        difa, difc, zero = EnggFitDIFCFromPeaks(OutParametersTable=paramsTblName, 
+						FittedPeaks=test_fit_peaks_table)
 
 
         self.assertEquals(difa, 0)
@@ -68,9 +70,9 @@ class EnggFitDIFCFromPeaksTest(unittest.TestCase):
         Tests fitting DIFC/TZERO on three clean peaks
         """
 
-        peak_def1 = "name=BackToBackExponential, I=15000, A=1, B=1.7, X0=15000, S=100"
-        peak_def2 = "name=BackToBackExponential, I=8000, A=1, B=1.2, X0=20000, S=800"
-        peak_def3 = "name=BackToBackExponential, I=10000, A=1, B=0.9, X0=25000, S=350"
+        peak_def1 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=15000, A=0.1, B=0.14, X0=15000, S=50"
+        peak_def2 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=6000, A=0.02, B=0.021, X0=20000, S=40"
+        peak_def3 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=10000, A=0.1, B=0.09, X0=25000, S=60"
         sws = CreateSampleWorkspace(Function="User Defined",
                                     UserDefinedFunction=
                                     peak_def1 + ";" + peak_def2 + ";" + peak_def3,
@@ -105,7 +107,7 @@ class EnggFitDIFCFromPeaksTest(unittest.TestCase):
         expected_difc = 17500.7287679
         # assertLess would be nices, but only available in unittest >= 2.7
         self.assertTrue(self._approxRelErrorLessThan(difc, expected_difc, 5e-3))
-        expected_zero = 658.544128868
+        expected_zero = 646.607522992
         self.assertTrue(self._approxRelErrorLessThan(zero, expected_zero, 5e-3))
 
     def _approxRelErrorLessThan(self, val, ref, epsilon):

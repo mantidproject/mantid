@@ -40,10 +40,6 @@ namespace DataHandling {
 */
 class DLLExport CreateSampleShape : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  CreateSampleShape() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~CreateSampleShape() override {}
   /// Algorithm's name
   const std::string name() const override { return "CreateSampleShape"; }
   /// Summary of algorithms purpose
@@ -55,6 +51,8 @@ public:
   int version() const override { return (1); }
   /// Algorithm's category for identification
   const std::string category() const override { return "Sample;"; }
+  /// Algorithm's aliases
+  const std::string alias() const override { return "SetSampleShape"; }
 
 private:
   /// Initialisation code

@@ -162,7 +162,10 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         # Validate SpectrumList
         grp_spectra_list = self.getProperty(SPECTRA_PROP).value
-        if ";" in grp_spectra_list:
+        if "," in grp_spectra_list:
+            # Split on ',' if in form of 2-3,6-7
+            grp_spectra_list = grp_spectra_list.split(",")
+        elif ";" in grp_spectra_list:
             # Split on ';' if in form of 2-3;6-7
             grp_spectra_list = grp_spectra_list.split(";")
         else:
@@ -176,9 +179,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 spectra_list = spectra_grp.split("-")
                 # Validate format
                 issues = self._validate_range_formatting(spectra_list[0], spectra_list[1], SPECTRA_PROP, issues)
-            elif "," in spectra_grp:
-                # Split comma separated lists
-                spectra_list = spectra_grp.split(",")
             else:
                 # Single spectra (put into list for use in loop)
                 spectra_list = [spectra_grp]
@@ -594,10 +594,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
         ms.CropWorkspace(Inputworkspace= SUMMED_WS,
                          OutputWorkspace=SUMMED_WS,
                          XMax=x_max,
-                         EnableLogging=_LOGGING_)
-        ms.CropWorkspace(Inputworkspace= SUMMED_WS + '_monitors',
-                         OutputWorkspace=SUMMED_WS + '_monitors',
-                         XMax=self._mon_tof_max,
                          EnableLogging=_LOGGING_)
 
         summed_data, summed_mon = mtd[SUMMED_WS], mtd[SUMMED_WS + '_monitors']
@@ -1040,13 +1036,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
             crop.setProperty("XMax", self._tof_max)
             crop.execute()
             self.foil_out = crop.getProperty("OutputWorkspace").value
-            if self._load_monitors:
-                crop_mon = self.createChildAlgorithm("CropWorkspace")
-                crop.setProperty("InputWorkspace" , self._load_monitors_workspace)
-                crop.setProperty("OutputWorkspace", self._load_monitors_workspace)
-                crop.setProperty("XMax", self._tof_max)
-                crop.execute()
-                self._load_monitors_workspace = crop.getProperty("OutputWorkspace").value
 
         self.setProperty(WKSP_PROP, self.foil_out)
         # Add OutputWorkspace property for Monitors

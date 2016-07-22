@@ -248,7 +248,7 @@ bool TomographyIfaceModel::doPing(const std::string &compRes) {
     tid = alg->getPropertyValue("TransactionID");
     g_log.information() << "Pinged '" << compRes
                         << "'succesfully. Checked that a transaction could "
-                           "be created, with ID: " << tid << std::endl;
+                           "be created, with ID: " << tid << '\n';
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Error. Failed to ping and start a transaction on "
                              "the remote resource." +
@@ -422,7 +422,7 @@ void TomographyIfaceModel::doRefreshJobsInfo(const std::string &compRes) {
                        "prevent more failures. You can start the automatic "
                        "update mechanism again by logging in, as apparently "
                        "there is some problem with the last session: "
-                    << e.what() << std::endl;
+                    << e.what() << '\n';
   }
 }
 
@@ -786,7 +786,7 @@ TomographyIfaceModel::loadFITSImage(const std::string &path) {
 }
 
 void TomographyIfaceModel::logMsg(const std::string &msg) {
-  g_log.notice() << msg << std::endl;
+  g_log.notice() << msg << '\n';
 }
 
 /**

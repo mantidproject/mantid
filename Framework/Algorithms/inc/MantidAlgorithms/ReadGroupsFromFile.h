@@ -75,8 +75,6 @@ class DLLExport ReadGroupsFromFile : public API::Algorithm {
 public:
   /// (Empty) Constructor
   ReadGroupsFromFile();
-  /// Virtual destructor
-  ~ReadGroupsFromFile() override {}
   /// Algorithm's name
   const std::string name() const override { return "ReadGroupsFromFile"; }
   /// Summary of algorithms purpose

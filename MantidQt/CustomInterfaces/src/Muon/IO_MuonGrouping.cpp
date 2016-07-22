@@ -30,6 +30,8 @@
 #endif
 
 //-----------------------------------------------------------------------------
+using namespace Mantid;
+using namespace Mantid::API;
 using namespace Poco::XML;
 
 namespace MantidQt {
@@ -191,9 +193,8 @@ int MuonGroupingHelper::fillGroupingTable(
 
     // Set alpha
     m_uiForm.pairTable->setItem(
-        pi, 3,
-        new QTableWidgetItem(
-            boost::lexical_cast<std::string>(grouping.pairAlphas[pi]).c_str()));
+        pi, 3, new QTableWidgetItem(boost::lexical_cast<std::string>(
+                                        grouping.pairAlphas[pi]).c_str()));
   }
 
   // Set description

@@ -1,9 +1,12 @@
 #ifndef MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H
 #define MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H
 
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 
 #include <gmock/gmock.h>
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockImageROIView : public MantidQt::CustomInterfaces::IImageROIView {
 public:
@@ -76,8 +79,17 @@ public:
   // void updateRotationAngle(float angle)
   MOCK_METHOD1(updateRotationAngle, void(float));
 
+  // std::string askSingleImagePath();
+  MOCK_METHOD0(askSingleImagePath, std::string());
+
   // std::string askImgOrStackPath();
   MOCK_METHOD0(askImgOrStackPath, std::string());
+
+  // std::string askColorMapFile();
+  MOCK_METHOD0(askColorMapFile, std::string());
+
+  // void updateColorMap(const std::string &filename);
+  MOCK_METHOD1(updateColorMap, void(const std::string &));
 
   // void saveSettings() const {}
   MOCK_CONST_METHOD0(saveSettings, void());
@@ -94,5 +106,7 @@ public:
   // void resetNormArea()
   MOCK_METHOD0(resetWidgetsOnNewStack, void());
 };
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H

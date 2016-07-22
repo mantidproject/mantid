@@ -66,7 +66,7 @@ endif ()
 find_package ( Doxygen ) # optional
 
 if(CMAKE_HOST_WIN32)
-  find_package ( ZLIB REQUIRED 
+  find_package ( ZLIB REQUIRED
     CONFIGS zlib-config.cmake )
   set (HDF5_DIR "${THIRD_PARTY_DIR}/cmake")
   find_package ( HDF5 COMPONENTS CXX HL REQUIRED
@@ -84,6 +84,7 @@ else()
 endif()
 
 find_package ( PythonInterp )
+set ( Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} )
 
 find_package ( OpenSSL REQUIRED )
 
@@ -246,7 +247,7 @@ endif ()
 ###########################################################################
 if ( CMAKE_COMPILER_IS_GNUCXX )
   include ( GNUSetup )
-elseif ( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
+elseif ( ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang" )
   include ( GNUSetup )
 endif ()
 
@@ -308,6 +309,13 @@ endif()
 ###########################################################################
 if ( CXXTEST_FOUND OR PYUNITTEST_FOUND )
   include( SetupDataTargets )
+endif()
+
+###########################################################################
+# Visibility Setting
+###########################################################################
+if ( CMAKE_COMPILER_IS_GNUCXX )
+  set(CMAKE_CXX_VISIBILITY_PRESET hidden CACHE STRING "")
 endif()
 
 ###########################################################################

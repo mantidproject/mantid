@@ -50,10 +50,10 @@ stresstesting.MantidStressTest
      |   +--IRISElwinAndMSDFit
      |   +--OSIRISElwinAndMSDFit
      |
-     +--ISISIndirectInelasticFuryAndFuryFit
+     +--ISISIndirectInelasticIqtAndIqtFit
      |   |
-     |   +--IRISFuryAndFuryFit
-     |   +--OSIRISFuryAndFuryFit
+     |   +--IRISIqtAndIqtFit
+     |   +--OSIRISIqtAndIqtFit
      |
      +--ISISIndirectInelasticIqtAndIqtFitMulti
      |   |
@@ -69,16 +69,12 @@ stresstesting.MantidStressTest
 
 import stresstesting
 import os
-import platform
 from abc import ABCMeta, abstractmethod
 
 from mantid.simpleapi import *
 
 # For debugging only.
 from mantid.api import FileFinder
-
-# Import our workflows.
-from IndirectDataAnalysis import furyfitSeq
 
 class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
     '''
@@ -823,11 +819,11 @@ class IRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
 
 #==============================================================================
 
-class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
+class ISISIndirectInelasticIqtAndIqtFit(ISISIndirectInelasticBase):
     '''
-    A base class for the ISIS indirect inelastic Fury/FuryFit tests
+    A base class for the ISIS indirect inelastic Iqt/IqtFit tests
 
-    The output of TransformToIqt is usually used with FuryFit and so we plug one into
+    The output of TransformToIqt is usually used with IqtFit and so we plug one into
     the other in this test.
     '''
 
@@ -843,29 +839,29 @@ class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
             LoadNexus(sample, OutputWorkspace=sample)
         LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
-        _, fury_ws = TransformToIqt(SampleWorkspace=self.samples[0],
-                                    ResolutionWorkspace=self.resolution,
-                                    EnergyMin=self.e_min,
-                                    EnergyMax=self.e_max,
-                                    BinReductionFactor=self.num_bins,
-                                    DryRun=False)
+        _, iqt_ws = TransformToIqt(SampleWorkspace=self.samples[0],
+                                   ResolutionWorkspace=self.resolution,
+                                   EnergyMin=self.e_min,
+                                   EnergyMax=self.e_max,
+                                   BinReductionFactor=self.num_bins,
+                                   DryRun=False)
 
-        # Test FuryFit Sequential
-        furyfitSeq_ws = furyfitSeq(fury_ws.getName(),
-                                   self.func,
-                                   self.ftype,
-                                   self.startx,
-                                   self.endx,
-                                   Save=False,
-                                   Plot='None')
+        # Test IqtFit Sequential
+        iqtfitSeq_ws, params, fit_group = IqtFitSequential(iqt_ws,
+                                                           self.func,
+                                                           self.ftype,
+                                                           self.startx,
+                                                           self.endx, 0,
+                                                           self.spec_max)
 
-        self.result_names = [fury_ws.getName(),
-                             furyfitSeq_ws]
+        self.result_names = [iqt_ws.getName(),
+                             iqtfitSeq_ws.getName()]
 
         # Remove workspaces from Mantid
         for sample in self.samples:
             DeleteWorkspace(sample)
-
+        DeleteWorkspace(params)
+        DeleteWorkspace(fit_group)
         DeleteWorkspace(self.resolution)
 
     def _validate_properties(self):
@@ -892,10 +888,10 @@ class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
 
 #------------------------- OSIRIS tests ---------------------------------------
 
-class OSIRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
+class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
 
     def __init__(self):
-        ISISIndirectInelasticFuryAndFuryFit.__init__(self)
+        ISISIndirectInelasticIqtAndIqtFit.__init__(self)
 
         # TransformToIqt
         self.samples = ['osi97935_graphite002_red.nxs']
@@ -904,10 +900,11 @@ class OSIRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
         self.e_max = 0.4
         self.num_bins = 4
 
-        # Fury Seq Fit
+        # Iqt Seq Fit
         self.func = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
                      'Intensity=0.304185,Tau=100;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
+        self.spec_max = 41
         self.startx = 0.022861
         self.endx = 0.118877
 
@@ -917,10 +914,10 @@ class OSIRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
 
 #------------------------- IRIS tests -----------------------------------------
 
-class IRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
+class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
 
     def __init__(self):
-        ISISIndirectInelasticFuryAndFuryFit.__init__(self)
+        ISISIndirectInelasticIqtAndIqtFit.__init__(self)
 
         # TransformToIqt
         self.samples = ['irs53664_graphite002_red.nxs']
@@ -929,10 +926,11 @@ class IRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
         self.e_max = 0.4
         self.num_bins = 4
 
-        # Fury Seq Fit
+        # Iqt Seq Fit
         self.func = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
                      'Intensity=0.355286,Tau=100;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
+        self.spec_max = 50
         self.startx = 0.013717
         self.endx = 0.169171
 
@@ -961,24 +959,24 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
             LoadNexus(sample, OutputWorkspace=sample)
         LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
-        _, fury_ws = TransformToIqt(SampleWorkspace=self.samples[0],
-                                    ResolutionWorkspace=self.resolution,
-                                    EnergyMin=self.e_min,
-                                    EnergyMax=self.e_max,
-                                    BinReductionFactor=self.num_bins,
-                                    DryRun=False)
+        _, iqt_ws = TransformToIqt(SampleWorkspace=self.samples[0],
+                                   ResolutionWorkspace=self.resolution,
+                                   EnergyMin=self.e_min,
+                                   EnergyMax=self.e_max,
+                                   BinReductionFactor=self.num_bins,
+                                   DryRun=False)
 
         # Test IqtFitMultiple
-        furyfitSeq_ws, params, fit_group = IqtFitMultiple(fury_ws.getName(),
-                                                          self.func,
-                                                          self.ftype,
-                                                          self.startx,
-                                                          self.endx,
-                                                          self.spec_min,
-                                                          self.spec_max)
+        iqtfitSeq_ws, params, fit_group = IqtFitMultiple(iqt_ws.getName(),
+                                                         self.func,
+                                                         self.ftype,
+                                                         self.startx,
+                                                         self.endx,
+                                                         self.spec_min,
+                                                         self.spec_max)
 
-        self.result_names = [fury_ws.getName(),
-                             furyfitSeq_ws.getName()]
+        self.result_names = [iqt_ws.getName(),
+                             iqtfitSeq_ws.getName()]
 
         #remove workspaces from mantid
         for sample in self.samples:
@@ -1013,35 +1011,29 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
 
 class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
 
-    def skipTests(self):
-        return platform.system() == "Darwin"
-
     def __init__(self):
         ISISIndirectInelasticIqtAndIqtFitMulti.__init__(self)
 
         # TransformToIqt
-        self.samples = ['osi97935_graphite002_red.nxs']
+        self.samples = ['osiris97944_graphite002_red.nxs']
         self.resolution = 'osi97935_graphite002_res.nxs'
         self.e_min = -0.4
         self.e_max = 0.4
         self.num_bins = 4
 
         # Iqt Fit
-        self.func = r'name=LinearBackground,A0=0.510595,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp( -(x/Tau)^Beta),'\
-                     'Intensity=0.489405,Tau=0.105559,Beta=1.61112e-14;ties=(f1.Intensity=1-f0.A0)'
+        self.func = r'name=LinearBackground,A0=0.213439,A1=0,ties=(A1=0);name=UserFunction,'\
+                    'Formula=Intensity*exp(-(x/Tau)^Beta),Intensity=0.786561,Tau=0.0247894,'\
+                    'Beta=1;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
         self.startx = 0.0
-        self.endx = 0.119681
+        self.endx = 0.12
         self.spec_min = 0
         self.spec_max = 41
 
     def get_reference_files(self):
-        ref_files = ['II.OSIRISFury.nxs']
-        if platform.system() == "Windows":
-            ref_files += ['II.OSIRISFuryFitMulti_win.nxs']
-        else:
-            ref_files += ['II.OSIRISFuryFitMulti_lin.nxs']
-        return ref_files
+        return ['II.OSIRISIqt.nxs',
+                'II.OSIRISIqtFitMulti.nxs']
 
 #------------------------- IRIS tests -----------------------------------------
 
@@ -1095,7 +1087,8 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
             EndX=self.endx,
             BackgroundType=self.bg,
             SpecMin=self.spectra_min,
-            SpecMax=self.spectra_max)
+            SpecMax=self.spectra_max,
+            OutputWorkspace='result')
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''

@@ -25,18 +25,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(LoadIsawSpectrum)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadIsawSpectrum::LoadIsawSpectrum() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadIsawSpectrum::~LoadIsawSpectrum() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadIsawSpectrum::init() {
@@ -140,20 +128,20 @@ void LoadIsawSpectrum::exec() {
   outWS->setInstrument(inst);
   outWS->getAxis(0)->setUnit("TOF");
   outWS->setYUnit("Counts");
-  outWS->isDistribution(true);
+  outWS->setDistribution(true);
   outWS->rebuildSpectraMapping(false);
 
   // Go through each point at this run / bank
   for (size_t i = 0; i < spectra.size(); i++) {
-    ISpectrum *outSpec = outWS->getSpectrum(i);
-    outSpec->clearDetectorIDs();
+    auto &outSpec = outWS->getSpectrum(i);
+    outSpec.clearDetectorIDs();
     for (int j = 0; j < detList[i]->xpixels(); j++)
       for (int k = 0; k < detList[i]->ypixels(); k++)
-        outSpec->addDetectorID(
+        outSpec.addDetectorID(
             static_cast<detid_t>(detList[i]->getDetectorIDAtXY(j, k)));
-    MantidVec &outY = outSpec->dataY();
-    MantidVec &outE = outSpec->dataE();
-    MantidVec &outX = outSpec->dataX();
+    MantidVec &outY = outSpec.dataY();
+    MantidVec &outE = outSpec.dataE();
+    MantidVec &outX = outSpec.dataX();
     // This is the scattered beam direction
     V3D dir = detList[i]->getPos() - samplePos;
 

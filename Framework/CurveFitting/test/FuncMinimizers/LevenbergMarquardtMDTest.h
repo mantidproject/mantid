@@ -3,12 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
-#include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
+#include "MantidCurveFitting/Functions/BSpline.h"
+#include "MantidCurveFitting/Functions/UserFunction.h"
+
+#include "MantidTestHelpers/MultiDomainFunctionHelper.h"
 
 #include <sstream>
 
@@ -260,13 +263,231 @@ public:
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
 
-    // std::cerr << "a=" << fun->getParameter("a") << std::endl;
-    // std::cerr << "b=" << fun->getParameter("b") << std::endl;
+    // std::cerr << "a=" << fun->getParameter("a") << '\n';
+    // std::cerr << "b=" << fun->getParameter("b") << '\n';
 
     TS_ASSERT_DELTA(costFun->val(), 0.00, 0.0001);
     TS_ASSERT_DELTA(fun->getParameter("a"), 1.0, 0.01);
     TS_ASSERT_DELTA(fun->getParameter("b"), 2.0, 0.01);
     TS_ASSERT_EQUALS(s.getError(), "success");
+  }
+
+  void test_BSpline_fit_uniform() {
+    double startx = -3.14;
+    double endx = 3.14;
+
+    boost::shared_ptr<BSpline> bsp = boost::make_shared<BSpline>();
+    bsp->setAttributeValue("Order", 3);
+    bsp->setAttributeValue("NBreak", 10);
+    bsp->setAttributeValue("StartX", startx);
+    bsp->setAttributeValue("EndX", endx);
+
+    double chi2 = fitBSpline(bsp, "sin(x)");
+    TS_ASSERT_DELTA(chi2, 1e-4, 1e-5);
+
+    FunctionDomain1DVector x(startx, endx, 100);
+    FunctionValues y(x);
+    bsp->function(x, y);
+
+    for (size_t i = 0; i < x.size(); ++i) {
+      double xx = x[i];
+      TS_ASSERT_DELTA(y[i], sin(xx), 0.003);
+    }
+  }
+
+  void test_BSpline_fit_uniform_finer() {
+    double startx = -3.14;
+    double endx = 3.14;
+
+    boost::shared_ptr<BSpline> bsp = boost::make_shared<BSpline>();
+    bsp->setAttributeValue("Order", 3);
+    bsp->setAttributeValue("NBreak", 20);
+    bsp->setAttributeValue("StartX", startx);
+    bsp->setAttributeValue("EndX", endx);
+
+    double chi2 = fitBSpline(bsp, "sin(x)");
+    TS_ASSERT_DELTA(chi2, 1e-6, 1e-7);
+
+    FunctionDomain1DVector x(startx, endx, 100);
+    FunctionValues y(x);
+    bsp->function(x, y);
+
+    for (size_t i = 0; i < x.size(); ++i) {
+      double xx = x[i];
+      TS_ASSERT_DELTA(y[i], sin(xx), 0.0003);
+    }
+  }
+
+  void test_BSpline_fit_nonuniform() {
+    double startx = 0.0;
+    double endx = 6.28;
+
+    boost::shared_ptr<BSpline> bsp = boost::make_shared<BSpline>();
+    bsp->setAttributeValue("Order", 3);
+    bsp->setAttributeValue("NBreak", 10);
+    bsp->setAttributeValue("StartX", startx);
+    bsp->setAttributeValue("EndX", endx);
+
+    // this function changes faster at the lower end
+    // fit it with uniform break points first
+    double chi2 = fitBSpline(bsp, "sin(10/(x+1))");
+    TS_ASSERT_DELTA(chi2, 0.58, 0.005);
+
+    // now do a nonuniform fit. increase density of break points at lower end
+    std::vector<double> breaks = bsp->getAttribute("BreakPoints").asVector();
+    breaks[1] = 0.3;
+    breaks[2] = 0.5;
+    breaks[3] = 1.0;
+    breaks[4] = 1.5;
+    breaks[5] = 2.0;
+    breaks[6] = 3.0;
+    bsp->setAttributeValue("Uniform", false);
+    bsp->setAttributeValue("BreakPoints", breaks);
+    chi2 = fitBSpline(bsp, "sin(10/(x+1))");
+    TS_ASSERT_DELTA(chi2, 0.0055, 5e-5);
+  }
+
+  void test_BSpline_derivative() {
+
+    double startx = -3.14;
+    double endx = 3.14;
+
+    boost::shared_ptr<BSpline> bsp = boost::make_shared<BSpline>();
+    bsp->setAttributeValue("Order", 3);
+    bsp->setAttributeValue("NBreak", 30);
+    bsp->setAttributeValue("StartX", startx);
+    bsp->setAttributeValue("EndX", endx);
+
+    double chi2 = fitBSpline(bsp, "sin(x)");
+    TS_ASSERT_DELTA(chi2, 1e-7, 5e-8);
+
+    FunctionDomain1DVector x(startx, endx, 100);
+    FunctionValues y(x);
+    bsp->derivative(x, y); // first derivative
+
+    for (size_t i = 0; i < x.size(); ++i) {
+      double xx = x[i];
+      TS_ASSERT_DELTA(y[i], cos(xx), 0.005);
+    }
+  }
+
+  void test_BSpline_derivative_2() {
+
+    double startx = -3.14;
+    double endx = 3.14;
+
+    boost::shared_ptr<BSpline> bsp = boost::make_shared<BSpline>();
+    bsp->setAttributeValue("Order", 4);
+    bsp->setAttributeValue("NBreak", 30);
+    bsp->setAttributeValue("StartX", startx);
+    bsp->setAttributeValue("EndX", endx);
+
+    double chi2 = fitBSpline(bsp, "sin(x)");
+    TS_ASSERT_DELTA(chi2, 2e-10, 1e-10);
+
+    FunctionDomain1DVector x(startx, endx, 100);
+    FunctionValues y(x);
+    bsp->derivative(x, y, 2); // second derivative
+
+    for (size_t i = 0; i < x.size(); ++i) {
+      double xx = x[i];
+      TS_ASSERT_DELTA(y[i], -sin(xx), 0.005);
+    }
+  }
+
+  void test_BSpline_derivative_3() {
+
+    double startx = -3.14;
+    double endx = 3.14;
+
+    boost::shared_ptr<BSpline> bsp = boost::make_shared<BSpline>();
+    bsp->setAttributeValue("Order", 5);
+    bsp->setAttributeValue("NBreak", 20);
+    bsp->setAttributeValue("StartX", startx);
+    bsp->setAttributeValue("EndX", endx);
+
+    double chi2 = fitBSpline(bsp, "sin(x)");
+    TS_ASSERT_DELTA(chi2, 1e-11, 5e-12);
+
+    FunctionDomain1DVector x(startx, endx, 100);
+    FunctionValues y(x);
+    bsp->derivative(x, y, 3); // third derivative
+
+    for (size_t i = 0; i < x.size(); ++i) {
+      double xx = x[i];
+      TS_ASSERT_DELTA(y[i], -cos(xx), 0.012);
+    }
+  }
+
+  void test_Multidomain() {
+    auto domain = Mantid::TestHelpers::makeMultiDomainDomain3();
+
+    auto values = boost::make_shared<FunctionValues>(*domain);
+    const double A0 = 0, A1 = 1, A2 = 2;
+    const double B0 = 1, B1 = 2, B2 = 3;
+
+    auto &d0 = static_cast<const FunctionDomain1D &>(domain->getDomain(0));
+    for (size_t i = 0; i < d0.size(); ++i) {
+      values->setFitData(i, A0 + A1 + A2 + (B0 + B1 + B2) * d0[i]);
+    }
+
+    auto &d1 = static_cast<const FunctionDomain1D &>(domain->getDomain(1));
+    for (size_t i = 0; i < d1.size(); ++i) {
+      values->setFitData(9 + i, A0 + A1 + (B0 + B1) * d1[i]);
+    }
+
+    auto &d2 = static_cast<const FunctionDomain1D &>(domain->getDomain(2));
+    for (size_t i = 0; i < d2.size(); ++i) {
+      values->setFitData(19 + i, A0 + A2 + (B0 + B2) * d2[i]);
+    }
+    values->setFitWeights(1);
+
+    auto multi = Mantid::TestHelpers::makeMultiDomainFunction3();
+
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
+    costFun->setFittingFunction(multi, domain, values);
+    TS_ASSERT_EQUALS(costFun->nParams(), 6);
+
+    FuncMinimisers::LevenbergMarquardtMDMinimizer s;
+    s.initialize(costFun);
+    TS_ASSERT(s.minimize());
+
+    TS_ASSERT_EQUALS(s.getError(), "success");
+    TS_ASSERT_DELTA(s.costFunctionVal(), 0, 1e-4);
+
+    TS_ASSERT_DELTA(multi->getFunction(0)->getParameter("A"), 0, 1e-8);
+    TS_ASSERT_DELTA(multi->getFunction(0)->getParameter("B"), 1, 1e-8);
+    TS_ASSERT_DELTA(multi->getFunction(1)->getParameter("A"), 1, 1e-8);
+    TS_ASSERT_DELTA(multi->getFunction(1)->getParameter("B"), 2, 1e-8);
+    TS_ASSERT_DELTA(multi->getFunction(2)->getParameter("A"), 2, 1e-8);
+    TS_ASSERT_DELTA(multi->getFunction(2)->getParameter("B"), 3, 1e-8);
+  }
+
+private:
+  double fitBSpline(boost::shared_ptr<IFunction> bsp, std::string func) {
+    const double startx = bsp->getAttribute("StartX").asDouble();
+    const double endx = bsp->getAttribute("EndX").asDouble();
+
+    API::FunctionDomain1D_sptr domain(
+        new API::FunctionDomain1DVector(startx, endx, 100));
+    API::FunctionValues mockData(*domain);
+    UserFunction dataMaker;
+    dataMaker.setAttributeValue("Formula", func);
+    dataMaker.function(*domain, mockData);
+
+    API::FunctionValues_sptr values(new API::FunctionValues(*domain));
+    values->setFitDataFromCalculated(mockData);
+    values->setFitWeights(1.0);
+
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
+    costFun->setFittingFunction(bsp, domain, values);
+
+    FuncMinimisers::LevenbergMarquardtMDMinimizer s;
+    s.initialize(costFun);
+    TS_ASSERT(s.minimize());
+    return costFun->val();
   }
 };
 
