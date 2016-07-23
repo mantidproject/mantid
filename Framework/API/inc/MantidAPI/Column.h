@@ -166,6 +166,7 @@ public:
     for (size_t i = 0; i < vec.size(); ++i) {
       vec[i] = static_cast<T>(toDouble(i));
     }
+    return vec;
   }
 
 protected:
