@@ -199,7 +199,7 @@ class ExportExperimentLog(PythonAlgorithm):
             if len(overridelist) % 2 != 0:
                 raise RuntimeError("Number of items in OverrideLogValue must be even.")
             self._ovrdTitleValueDict = {}
-            for i in range(len(overridelist)/2):
+            for i in range(int(len(overridelist)/2)):
                 title = overridelist[2*i]
                 if title in self._headerTitles:
                     self._ovrdTitleValueDict[title] = overridelist[2*i+1]

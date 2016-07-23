@@ -395,7 +395,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                                "histograms multiple of 3. Number of hsitograms found: %d"%
                                ws.getNumberHistograms())
 
-        for wi in range(0, ws.getNumberHistograms()/3):
+        for wi in range(0, int(ws.getNumberHistograms()/3)):
             indiv = EnggUtils.cropData(self, ws, [wi, wi+2])
             curves.update({wi: indiv})
 
