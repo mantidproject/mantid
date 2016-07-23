@@ -24,10 +24,13 @@ Algorithms
 New
 ###
 
+-  :ref:`ClearCache <algm-ClearCache>` an algorithm to simplify the clearance of several in memory or disk caches used in Mantid.
+
 - :ref:`LoadPreNexusLive <algm-LoadPreNexusLive>` will load "live"
   data from file on legacy SNS DAS instruments.
 
 - :ref:`CropToComponent <algm-CropToComponent>` allows for cropping a workspace to a list of component names.
+
 
 Improved
 ########
@@ -76,6 +79,9 @@ Improved
 Python
 ------
 
+- :py:obj:`mantid.kernel.MaterialBuilder` has been exposed to python
+  and :py:obj:`mantid.kernel.Material` has been modified to expose the
+  individual atoms.
 
 Python Algorithms
 #################

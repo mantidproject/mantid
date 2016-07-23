@@ -27,6 +27,7 @@ public:
     MaterialBuilder builder;
     Material mat = builder.setName("Nickel").setFormula("Ni").build();
 
+    TS_ASSERT_EQUALS(mat.name(), "Nickel");
     TS_ASSERT_DELTA(mat.numberDensity(), 0.0913375, 0.0001);
     TS_ASSERT_DELTA(mat.totalScatterXSection(), 18.5, 0.0001);
     TS_ASSERT_DELTA(mat.absorbXSection(), 4.49, 0.0001);

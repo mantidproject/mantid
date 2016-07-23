@@ -143,7 +143,7 @@ void FindDetectorsOutsideLimits::exec() {
       }
     }
 
-    const double &yValue = countsWS->readY(i)[0];
+    const double &yValue = countsWS->y(i)[0];
     // Mask out NaN and infinite
     if (boost::math::isinf(yValue) || boost::math::isnan(yValue)) {
       keepData = false;
@@ -158,7 +158,7 @@ void FindDetectorsOutsideLimits::exec() {
     }
 
     if (!keepData) {
-      outputWS->dataY(i)[0] = deadValue;
+      outputWS->mutableY(i)[0] = deadValue;
       PARALLEL_ATOMIC
       ++numFailed;
     }

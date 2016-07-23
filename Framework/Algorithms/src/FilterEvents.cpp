@@ -1,21 +1,21 @@
 #include "MantidAlgorithms/FilterEvents.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyDirect.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyElastic.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyIndirect.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include <memory>
 #include <sstream>
 
@@ -447,19 +447,18 @@ void FilterEvents::processMatrixSplitterWorkspace() {
   // Check input workspace validity
   assert(m_matrixSplitterWS);
 
-  const MantidVec &vecX = m_matrixSplitterWS->readX(0);
-  const MantidVec &vecY = m_matrixSplitterWS->readY(0);
-  size_t sizex = vecX.size();
-  size_t sizey = vecY.size();
-  assert(sizex - sizey == 1);
+  auto X = m_matrixSplitterWS->binEdges(0);
+  auto &Y = m_matrixSplitterWS->y(0);
+  size_t sizex = X.size();
+  size_t sizey = Y.size();
 
   // Assign vectors for time comparison
-  m_vecSplitterTime.assign(vecX.size(), 0);
-  m_vecSplitterGroup.assign(vecY.size(), -1);
+  m_vecSplitterTime.assign(X.size(), 0);
+  m_vecSplitterGroup.assign(Y.size(), -1);
 
   // Transform vector
   for (size_t i = 0; i < sizex; ++i) {
-    m_vecSplitterTime[i] = static_cast<int64_t>(vecX[i]);
+    m_vecSplitterTime[i] = static_cast<int64_t>(X[i]);
   }
   // shift the splitters' time if applied
   if (m_isSplittersRelativeTime) {
@@ -469,7 +468,7 @@ void FilterEvents::processMatrixSplitterWorkspace() {
   }
 
   for (size_t i = 0; i < sizey; ++i) {
-    m_vecSplitterGroup[i] = static_cast<int>(vecY[i]);
+    m_vecSplitterGroup[i] = static_cast<int>(Y[i]);
     m_workGroupIndexes.insert(m_vecSplitterGroup[i]);
   }
 }
@@ -630,8 +629,8 @@ void FilterEvents::setupDetectorTOFCalibration() {
         m_detTofOffsets[i] = correction.offset;
         m_detTofFactors[i] = correction.factor;
 
-        corrws->dataY(i)[0] = correction.factor;
-        corrws->dataY(i)[1] = correction.offset;
+        corrws->mutableY(i)[0] = correction.factor;
+        corrws->mutableY(i)[1] = correction.offset;
       }
     }
   }
