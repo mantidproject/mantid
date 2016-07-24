@@ -24,10 +24,13 @@ Algorithms
 New
 ###
 
+-  :ref:`ClearCache <algm-ClearCache>` an algorithm to simplify the clearance of several in memory or disk caches used in Mantid.
+
 - :ref:`LoadPreNexusLive <algm-LoadPreNexusLive>` will load "live"
   data from file on legacy SNS DAS instruments.
 
 - :ref:`CropToComponent <algm-CropToComponent>` allows for cropping a workspace to a list of component names.
+
 
 Improved
 ########
@@ -42,9 +45,11 @@ Improved
 - :ref:`SavePlot1D <algm-SavePlot1D>` has options for writing out
   plotly html files.
 
-- :ref:`ConvertTableToMatrixWorkspace <algm-ConvertTableToMatrixWorkspace>` The input dialog
-  had a bug where the table columns were in a reversed order in the dialogue's combo boxes.
+- :ref:`ConvertTableToMatrixWorkspace <algm-ConvertTableToMatrixWorkspace>`
+  had a bug where the table columns were in a reversed order in the dialogue's combo boxes. 
   This is now fixed and the order is correct.
+
+- :ref:`ConvertUnits <algm-ConvertUnits>` will no longer corrupt an in place workspace if the algorithm fails.
 
 - :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli 
 
@@ -74,6 +79,9 @@ Improved
 Python
 ------
 
+- :py:obj:`mantid.kernel.MaterialBuilder` has been exposed to python
+  and :py:obj:`mantid.kernel.Material` has been modified to expose the
+  individual atoms.
 
 Python Algorithms
 #################
