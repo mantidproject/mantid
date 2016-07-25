@@ -412,8 +412,8 @@ public:
   void setDisplayNormalization(
       const Mantid::API::MDNormalization &preferredNormalization) override;
 
-  /// Return if this workspace is a histogram. Will always return true.
-  bool isHistogramData() const override;
+  /// Return if this workspace is a MDHistoWorkspace. Will always return true.
+  bool isMDHistoWorkspace() const override { return true; }
 
 private:
   MDHistoWorkspace *doClone() const override {

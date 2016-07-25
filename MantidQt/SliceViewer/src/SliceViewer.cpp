@@ -2159,7 +2159,7 @@ void SliceViewer::rebinParamsChanged() {
   // If we are rebinning from an existing MDHistoWorkspace, and that workspace
   // has been created with basis vectors normalized, then we reapply that
   // setting here.
-  if (m_ws->isHistogramData()) {
+  if (m_ws->isMDHistoWorkspace()) {
     alg->setProperty("NormalizeBasisVectors", m_ws->allBasisNormalized());
   }
 

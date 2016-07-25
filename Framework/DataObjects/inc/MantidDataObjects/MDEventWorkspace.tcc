@@ -1011,13 +1011,6 @@ TMDE(void MDEventWorkspace)::setDisplayNormalization(
 }
 
 /**
-  Return if the workspace is a histogram.
-*/
-TMDE(bool MDEventWorkspace)::isHistogramData() const {
-  return false;
-}
-
-/**
 Return the preferred normalization to use for visualization.
 */
 TMDE(API::MDNormalization MDEventWorkspace)::displayNormalization() const {

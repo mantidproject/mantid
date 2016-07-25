@@ -209,9 +209,6 @@ public:
       Mantid::API::MDNormalization preferredNormalization) override;
   Mantid::API::MDNormalization displayNormalization() const override;
 
-  /// Check if this workspace is a histogram. Will allways return false.
-  bool isHistogramData() const override;
-
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other);
