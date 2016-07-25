@@ -164,9 +164,7 @@ public:
   virtual MDNormalization displayNormalizationHisto() const;
 
   // Check if this class is an instance of MDHistoWorkspace
-  virtual bool isMDHistoWorkspace() const {
-    return false;
-  }
+  virtual bool isMDHistoWorkspace() const { return false; }
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
