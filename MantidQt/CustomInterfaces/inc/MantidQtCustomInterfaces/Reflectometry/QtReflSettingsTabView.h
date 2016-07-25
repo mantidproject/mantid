@@ -43,7 +43,7 @@ public:
   /// Destructor
   ~QtReflSettingsTabView() override;
   /// Returns the presenter managing this view
-  IReflSettingsTabPresenter * getPresenter() const;
+  IReflSettingsTabPresenter *getPresenter() const;
   /// Returns global options for 'Plus' algorithm
   std::string getPlusOptions() const;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'

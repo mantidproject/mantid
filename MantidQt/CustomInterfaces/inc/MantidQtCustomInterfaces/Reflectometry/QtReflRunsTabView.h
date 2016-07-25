@@ -89,7 +89,7 @@ public:
   std::string getSearchString() const override;
   std::string getTransferMethod() const override;
 
-  IReflRunsTabPresenter * getPresenter() const override;
+  IReflRunsTabPresenter *getPresenter() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
 

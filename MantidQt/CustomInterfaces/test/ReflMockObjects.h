@@ -71,16 +71,22 @@ public:
 
   // Calls we don't care about
   void
-    createPlusHints(const std::map<std::string, std::string> &hints) override{ UNUSED_ARG(hints); };
+  createPlusHints(const std::map<std::string, std::string> &hints) override {
+    UNUSED_ARG(hints);
+  };
   void createTransmissionHints(
-			       const std::map<std::string, std::string> &hints) override{ UNUSED_ARG(hints); };
+      const std::map<std::string, std::string> &hints) override {
+    UNUSED_ARG(hints);
+  };
   void createReductionHints(
-			    const std::map<std::string, std::string> &hints) override{ UNUSED_ARG(hints); };
+      const std::map<std::string, std::string> &hints) override {
+    UNUSED_ARG(hints);
+  };
   void
-    createStitchHints(const std::map<std::string, std::string> &hints) override{ UNUSED_ARG(hints); };
-  IReflSettingsTabPresenter *getPresenter() const override {
-    return nullptr;
-  }
+  createStitchHints(const std::map<std::string, std::string> &hints) override {
+    UNUSED_ARG(hints);
+  };
+  IReflSettingsTabPresenter *getPresenter() const override { return nullptr; }
 };
 
 class MockMainWindowView : public IReflMainWindowView {
@@ -100,8 +106,10 @@ public:
 
 class MockRunsTabPresenter : public IReflRunsTabPresenter {
 public:
-  void notify(IReflRunsTabPresenter::Flag flag) override{ UNUSED_ARG(flag); };
-  void acceptMainPresenter(IReflMainWindowPresenter *presenter) override{ UNUSED_ARG(presenter); };
+  void notify(IReflRunsTabPresenter::Flag flag) override { UNUSED_ARG(flag); };
+  void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
+    UNUSED_ARG(presenter);
+  };
   ~MockRunsTabPresenter() override{};
 };
 
@@ -112,7 +120,9 @@ public:
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   // Other calls we don't care about
-  void acceptMainPresenter(IReflMainWindowPresenter *presenter) override{ UNUSED_ARG(presenter); };
+  void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
+    UNUSED_ARG(presenter);
+  };
   ~MockSettingsTabPresenter() override{};
 };
 

@@ -11,7 +11,7 @@ using namespace MantidQt::MantidWidgets;
 /** Constructor
 * @param parent :: [input] The parent of this widget
 */
-QtReflSettingsTabView::QtReflSettingsTabView(QWidget * parent) {
+QtReflSettingsTabView::QtReflSettingsTabView(QWidget *parent) {
 
   UNUSED_ARG(parent);
   initLayout();
@@ -32,7 +32,7 @@ void QtReflSettingsTabView::initLayout() { m_ui.setupUi(this); }
 /** Returns the presenter managing this view
 * @return :: A pointer to the presenter
 */
-IReflSettingsTabPresenter * QtReflSettingsTabView::getPresenter() const {
+IReflSettingsTabPresenter *QtReflSettingsTabView::getPresenter() const {
 
   return m_presenter.get();
 }

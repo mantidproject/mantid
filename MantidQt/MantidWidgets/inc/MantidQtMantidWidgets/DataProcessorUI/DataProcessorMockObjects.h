@@ -58,9 +58,7 @@ public:
   void saveSettings(const std::map<std::string, QVariant> &) override{};
   std::string getProcessInstrument() const override { return "FAKE"; }
 
-  DataProcessorPresenter *getPresenter() const override {
-    return nullptr;
-  }
+  DataProcessorPresenter *getPresenter() const override { return nullptr; }
 };
 
 class MockMainPresenter : public DataProcessorMainPresenter {
