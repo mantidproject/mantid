@@ -22,6 +22,13 @@ User Interface
 Instrument View
 ###############
 
+Workspace Matrix View
+#####################
+* Masked spectra (including masked monitors) will be highlighted with background colour (typically light grey).
+* Unmasked monitor spectra will have a dynamic background colour depending on the system settings (typically light yellow, as before).
+
+.. figure::  ../../images/MaskedAndMonitor.png
+
 Plotting Improvements
 #####################
 
