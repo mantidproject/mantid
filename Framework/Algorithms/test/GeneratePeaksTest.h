@@ -9,11 +9,11 @@
 #include "MantidAPI/Column.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 
 #include <MantidDataObjects/EventWorkspace.h>
-#include "../../../MantidQt/API/test/QwtWorkspaceBinDataTest.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -531,8 +531,8 @@ class GeneratePeaksTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GeneratePeaksTest *createSuite() { return new GeneratePeaksTest(); }
-  static void destroySuite(GeneratePeaksTest *suite) { delete suite; }
+  static GeneratePeaksTestPerformance *createSuite() { return new GeneratePeaksTestPerformance(); }
+  static void destroySuite(GeneratePeaksTestPerformance *suite) { delete suite; }
 
   void setUp() {
     inputMatrix = GeneratePeaksTest().createTestInputWorkspace();
@@ -543,14 +543,14 @@ public:
   }
 
   void tearDown() {
-    Mantid::API::AnalysisDataService::Instance().remove("output");
-    Mantid::API::AnalysisDataService::Instance().remove("outputEffectiveFunc");
-    Mantid::API::AnalysisDataService::Instance().remove("outputPeakParams2");
-    Mantid::API::AnalysisDataService::Instance().remove("outputPeakParams3");
+   AnalysisDataService::Instance().remove("output");
+   AnalysisDataService::Instance().remove("outputEffectiveFunc");
+   AnalysisDataService::Instance().remove("outputPeakParams2");
+   AnalysisDataService::Instance().remove("outputPeakParams3");
   }
 
   void testPerformanceMatrixWS() {
-    Mantid::Algorithms::GeneratePeaks genPeaks;
+    GeneratePeaks genPeaks;
     genPeaks.initialize();
     genPeaks.setProperty("InputWorkspace", inputMatrix);
     genPeaks.setPropertyValue("OutputWorkspace", "output");
@@ -558,7 +558,7 @@ public:
   }
 
   void testPerformanceEffectiveFunc() {
-    Mantid::Algorithms::GeneratePeaks genPeaks;
+    GeneratePeaks genPeaks;
     genPeaks.initialize();
     genPeaks.setProperty("InputWorkspace", inputMatrixEffectiveFunc);
     genPeaks.setPropertyValue("OutputWorkspace", "outputEffectiveFunc");
@@ -566,7 +566,7 @@ public:
   }
 
   void testPerformancePeakParams2() {
-    Mantid::Algorithms::GeneratePeaks genPeaks;
+    GeneratePeaks genPeaks;
     genPeaks.initialize();
     genPeaks.setProperty("InputWorkspace", inputMatrixPeakParams2);
     genPeaks.setPropertyValue("OutputWorkspace", "outputPeakParams2");
@@ -582,10 +582,10 @@ public:
   }
 
 private:
-  Mantid::API::MatrixWorkspace_sptr inputMatrix;
-  Mantid::API::MatrixWorkspace_sptr inputMatrixEffectiveFunc;
-  Mantid::API::MatrixWorkspace_sptr inputMatrixPeakParams2;
-  Mantid::API::MatrixWorkspace_sptr inputMatrixPeakParams3;
+  MatrixWorkspace_sptr inputMatrix;
+  DataObjects::TableWorkspace_sptr inputMatrixEffectiveFunc;
+  DataObjects::TableWorkspace_sptr inputMatrixPeakParams2;
+  DataObjects::TableWorkspace_sptr inputMatrixPeakParams3;
 };
 
 #endif /* MANTID_ALGORITHMS_GENERATEPEAKSTEST_H_ */
