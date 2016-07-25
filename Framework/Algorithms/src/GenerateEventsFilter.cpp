@@ -3,12 +3,10 @@
 //----------------------------------------------------------------------
 
 #include "MantidAlgorithms/GenerateEventsFilter.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/Column.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 

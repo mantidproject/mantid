@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 
 #include "MantidAlgorithms/GeneratePeaks.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -13,7 +12,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 
-#include "MantidAPI/FunctionFactory.h"
 #include <MantidDataObjects/EventWorkspace.h>
 #include "../../../MantidQt/API/test/QwtWorkspaceBinDataTest.h"
 
@@ -517,10 +515,10 @@ public:
       auto &dataX = inpWS->mutableX(iw);
       auto &dataY = inpWS->mutableX(iw);
 
-      for (size_t ix = 0; ix < inpWS->mutableX(iw).size(); ++ix) {
+      for (size_t ix = 0; ix < dataX.size(); ++ix) {
         dataX[ix] = minx + double(ix) * dx;
       }
-      for (size_t iy = 0; iy < inpWS->dataY(iw).size(); ++iy) {
+      for (size_t iy = 0; iy < dataY.size(); ++iy) {
         dataY[iy] = 100.0;
       }
     }

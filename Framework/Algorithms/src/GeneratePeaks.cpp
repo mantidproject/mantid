@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 
 #include "MantidAlgorithms/GeneratePeaks.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -11,7 +10,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
