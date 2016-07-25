@@ -703,7 +703,8 @@ API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace() {
     // Only copy the X-values from spectra with peaks specified in the table
     // workspace.
     for (const auto &iws : m_spectraSet) {
-      std::copy(inputWS->x(iws).begin(), inputWS->x(iws).end(), outputWS->mutableX(iws).begin());
+      std::copy(inputWS->x(iws).begin(), inputWS->x(iws).end(),
+                outputWS->mutableX(iws).begin());
     }
 
     m_newWSFromParent = true;
