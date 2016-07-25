@@ -1140,35 +1140,38 @@ public:
 
 class GenerateEventsFilterTestPerformance : public CxxTest::TestSuite {
 public:
-	// This pair of boilerplate methods prevent the suite being created statically
-	// This means the constructor isn't called when running other tests
-	static GenerateEventsFilterTestPerformance *createSuite() {
-		return new GenerateEventsFilterTestPerformance();
-	}
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static GenerateEventsFilterTestPerformance *createSuite() {
+    return new GenerateEventsFilterTestPerformance();
+  }
 
-	static void destroySuite(GenerateEventsFilterTestPerformance *suite) { delete suite; }
+  static void destroySuite(GenerateEventsFilterTestPerformance *suite) {
+    delete suite;
+  }
 
-	void setUp() {
-		inputEvent =
-			WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10000, 1000, false);
-	}
+  void setUp() {
+    inputEvent =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
+            10000, 1000, false);
+  }
 
-	void tearDown() {
-		Mantid::API::AnalysisDataService::Instance().remove("output");
-		Mantid::API::AnalysisDataService::Instance().remove("infoOutput");
-	}
+  void tearDown() {
+    Mantid::API::AnalysisDataService::Instance().remove("output");
+    Mantid::API::AnalysisDataService::Instance().remove("infoOutput");
+  }
 
-	void testPerformanceEventWS() {
-		Mantid::Algorithms::GenerateEventsFilter genEvenFilter;
-		genEvenFilter.initialize();
-		genEvenFilter.setProperty("InputWorkspace", inputEvent);
-		genEvenFilter.setPropertyValue("OutputWorkspace", "output");
-		genEvenFilter.setPropertyValue("InformationWorkspace", "infoOutput");
-		genEvenFilter.execute();
-	}
+  void testPerformanceEventWS() {
+    Mantid::Algorithms::GenerateEventsFilter genEvenFilter;
+    genEvenFilter.initialize();
+    genEvenFilter.setProperty("InputWorkspace", inputEvent);
+    genEvenFilter.setPropertyValue("OutputWorkspace", "output");
+    genEvenFilter.setPropertyValue("InformationWorkspace", "infoOutput");
+    genEvenFilter.execute();
+  }
 
 private:
-	Mantid::DataObjects::EventWorkspace_sptr inputEvent;
+  Mantid::DataObjects::EventWorkspace_sptr inputEvent;
 };
 
 #endif /* MANTID_ALGORITHMS_GENERATEEVENTSFILTERTEST_H_ */
