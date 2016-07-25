@@ -1,6 +1,8 @@
 #ifndef MANTID_CUSTOMINTERFACES_IREFLSETTINGSTABPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_IREFLSETTINGSTABPRESENTER_H
 
+#include <string>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 

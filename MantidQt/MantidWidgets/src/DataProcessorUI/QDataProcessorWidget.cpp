@@ -481,7 +481,7 @@ std::string QDataProcessorWidget::getWorkspaceToOpen() const {
 Get a pointer to the presenter that's currently controlling this view.
 @returns A pointer to the presenter
 */
-DataProcessorPresenter *const QDataProcessorWidget::getPresenter() const {
+DataProcessorPresenter * QDataProcessorWidget::getPresenter() const {
   return m_presenter.get();
 }
 

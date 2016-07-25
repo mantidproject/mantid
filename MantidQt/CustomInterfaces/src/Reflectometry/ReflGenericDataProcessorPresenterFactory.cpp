@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h"
+#include "MantidKernel/make_unique.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -99,7 +100,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
   // The post-processor algorithm's name, 'Stitch1DMany' by default
   DataProcessorPostprocessingAlgorithm postprocessor;
 
-  return std::make_unique<GenericDataProcessorPresenter>(
+  return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
       whitelist, preprocessMap, processor, postprocessor);
 }
 }

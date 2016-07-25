@@ -23,9 +23,10 @@ using namespace MantidQt::MantidWidgets;
 /** Constructor
 * @param parent :: The parent of this view
 */
-QtReflRunsTabView::QtReflRunsTabView(QWidget *parent)
+QtReflRunsTabView::QtReflRunsTabView(QWidget * parent)
     : m_presenter(), m_calculator(new SlitCalculator(this)) {
 
+  UNUSED_ARG(parent);
   initLayout();
 }
 
@@ -276,7 +277,7 @@ std::set<int> QtReflRunsTabView::getSelectedSearchRows() const {
 Get a pointer to the presenter that's currently controlling this view.
 @returns A pointer to the presenter
 */
-IReflRunsTabPresenter *const QtReflRunsTabView::getPresenter() const {
+IReflRunsTabPresenter * QtReflRunsTabView::getPresenter() const {
   return m_presenter.get();
 }
 

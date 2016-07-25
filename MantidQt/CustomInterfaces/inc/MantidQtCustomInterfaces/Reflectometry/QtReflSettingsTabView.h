@@ -3,6 +3,7 @@
 
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h"
 #include "ui_ReflSettingsTabWidget.h"
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -42,7 +43,7 @@ public:
   /// Destructor
   ~QtReflSettingsTabView() override;
   /// Returns the presenter managing this view
-  IReflSettingsTabPresenter *const getPresenter() const;
+  IReflSettingsTabPresenter * getPresenter() const;
   /// Returns global options for 'Plus' algorithm
   std::string getPlusOptions() const;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'

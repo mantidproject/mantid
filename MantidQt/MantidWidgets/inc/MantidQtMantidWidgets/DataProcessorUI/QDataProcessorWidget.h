@@ -84,7 +84,7 @@ public:
   std::string getWorkspaceToOpen() const override;
   std::string getClipboard() const override;
 
-  DataProcessorPresenter *const getPresenter() const override;
+  DataProcessorPresenter * getPresenter() const override;
 
 private:
   // initialise the interface
