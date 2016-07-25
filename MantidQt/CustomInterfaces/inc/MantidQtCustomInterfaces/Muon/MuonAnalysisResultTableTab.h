@@ -133,7 +133,6 @@ private:
   QMap<int, int> getWorkspaceColors(const QStringList &wsList);
 
   Ui::MuonAnalysis &m_uiForm;
-  int m_numLogsdisplayed;
 
   // Log values for all the fitted workspaces
   QMap<QString, QMap<QString, QVariant>> m_logValues;
