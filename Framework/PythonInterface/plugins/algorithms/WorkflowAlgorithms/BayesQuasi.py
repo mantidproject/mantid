@@ -488,7 +488,7 @@ class BayesQuasi(PythonAlgorithm):
         file_path = os.path.join(workdir, file_name)
         asc = []
 
-        with open(file_path, 'r') as handle:
+        with open(file_path, 'U') as handle:
             for line in handle:
                 line = line.rstrip()
                 asc.append(line)
