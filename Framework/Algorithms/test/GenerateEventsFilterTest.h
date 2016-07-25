@@ -2,10 +2,7 @@
 #define MANTID_ALGORITHMS_GENERATEEVENTSFILTERTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include <cmath>
-#include <fstream>
 #include <Poco/File.h>
 
 #include "MantidAlgorithms/GenerateEventsFilter.h"
@@ -15,13 +12,9 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/Column.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
-#include "MantidDataObjects/Events.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid;
