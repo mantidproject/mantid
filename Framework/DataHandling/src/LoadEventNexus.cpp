@@ -1,14 +1,10 @@
 // TODO-LIST:
 // 1. refactor LoadEventNexus::loadEvents(). It is way tooooo lone
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Instrument.h"
@@ -33,7 +29,6 @@
 
 #include <functional>
 
-using std::endl;
 using std::map;
 using std::string;
 using std::vector;
@@ -307,12 +302,22 @@ void LoadEventNexus::init() {
                                            Direction::Input),
       "If present, load the monitors as events. '''WARNING:''' WILL "
       "SIGNIFICANTLY INCREASE MEMORY USAGE (optional, default False). ");
-  declareProperty(make_unique<PropertyWithValue<bool>>("LoadEventMonitors",
-                                                       true, Direction::Input),
-                  "blablabla");
-  declareProperty(make_unique<PropertyWithValue<bool>>("LoadHistoMonitors",
-                                                       true, Direction::Input),
-                  "blablabla");
+
+  declareProperty("LoadEventMonitors", true,
+                  "Load event monitor in NeXus file both event monitor and "
+                  "histogram monitor found in NeXus file."
+                  "If both of LoadEventMonitor and LoadHistoMonitor are true, "
+                  "or both of them are false,"
+                  "then it is in the auto mode such that any existing monitor "
+                  "will be loaded.");
+
+  declareProperty("LoadHistoMonitors", true,
+                  "Load histogram monitor in NeXus file both event monitor and "
+                  "histogram monitor found in NeXus file."
+                  "If both of LoadEventMonitor and LoadHistoMonitor are true, "
+                  "or both of them are false,"
+                  "then it is in the auto mode such that any existing monitor "
+                  "will be loaded.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
                       "FilterMonByTofMin", EMPTY_DBL(), Direction::Input),
@@ -410,9 +415,8 @@ void LoadEventNexus::setTopEntryName() {
       }
     }
   } catch (const std::exception &) {
-    g_log.error()
-        << "Unable to determine name of top level NXentry - assuming \"entry\"."
-        << std::endl;
+    g_log.error() << "Unable to determine name of top level NXentry - assuming "
+                     "\"entry\".\n";
     m_top_entry_name = "entry";
   }
 }
@@ -506,9 +510,9 @@ void LoadEventNexus::exec() {
     const bool monitorsAsEvents = getProperty("MonitorsAsEvents");
 
     if (monitorsAsEvents && !this->hasEventMonitors()) {
-      g_log.warning() << "The property MonitorsAsEvents has been enabled but "
-                         "this file does not seem to have monitors with events."
-                      << endl;
+      g_log.warning()
+          << "The property MonitorsAsEvents has been enabled but "
+             "this file does not seem to have monitors with events.\n";
     }
     if (monitorsAsEvents) {
       // no matter whether the file has events or not, the user has requested to
@@ -524,9 +528,6 @@ void LoadEventNexus::exec() {
       this->runLoadMonitors();
     }
   }
-
-  // Some memory feels like it sticks around (on Linux). Free it.
-  MemoryManager::Instance().releaseFreeMemory();
 
   return;
 }
@@ -561,11 +562,9 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
     }
     for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
       for (size_t i = 0; i < m_ws->getNumberHistograms(); ++i) {
-        const ISpectrum *spec = m_ws->getSpectrum(i);
-        if (spec) {
-          getEventsFrom(m_ws->getEventList(i, period),
-                        vectors[period][spec->getSpectrumNo()]);
-        }
+        const auto &spec = m_ws->getSpectrum(i);
+        getEventsFrom(m_ws->getSpectrum(i, period),
+                      vectors[period][spec.getSpectrumNo()]);
       }
     }
   } else {
@@ -586,7 +585,7 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
       // Save a POINTER to the vector
       if (wi < m_ws->getNumberHistograms()) {
         for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
-          getEventsFrom(m_ws->getEventList(wi, period),
+          getEventsFrom(m_ws->getSpectrum(wi, period),
                         vectors[period][j - pixelID_to_wi_offset]);
         }
       }
@@ -905,7 +904,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
                                                      m_top_entry_name);
   } catch (std::runtime_error &e) {
     // Missing metadata is not a fatal error. Log and go on with your life
-    g_log.error() << "Error loading metadata: " << e.what() << std::endl;
+    g_log.error() << "Error loading metadata: " << e.what() << "\n";
   }
 
   // --------------------------- Time filtering
@@ -951,12 +950,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   if (metaDataOnly) {
     // Now, create a default X-vector for histogramming, with just 2 bins.
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec &xRef = axis.access();
-    xRef.resize(2);
-    xRef[0] = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1 -
-              1; // Just to make sure the bins hold it all
-    xRef[1] = 1;
+    auto axis = HistogramData::BinEdges{
+        static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1 - 1, 1};
     // Set the binning axis using this.
     m_ws->setAllX(axis);
 
@@ -1021,7 +1016,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   } else {
     // Convert to weighted events
     for (size_t i = 0; i < m_ws->getNumberHistograms(); i++) {
-      m_ws->getEventList(i).switchTo(API::WEIGHTED);
+      m_ws->getSpectrum(i).switchTo(API::WEIGHTED);
     }
     this->makeMapToEventLists<WeightedEventVector_pt>(weightedEventVectors);
   }
@@ -1029,7 +1024,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Set all (empty) event lists as sorted by pulse time. That way, calling
   // SortEvents will not try to sort these empty lists.
   for (size_t i = 0; i < m_ws->getNumberHistograms(); i++)
-    m_ws->getEventList(i).setSortOrder(DataObjects::PULSETIME_SORT);
+    m_ws->getSpectrum(i).setSortOrder(DataObjects::PULSETIME_SORT);
 
   // Count the limits to time of flight
   shortest_tof =
@@ -1140,15 +1135,15 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   g_log.information() << "Read " << eventsLoaded << " events"
                       << ". Shortest TOF: " << shortest_tof
                       << " microsec; longest TOF: " << longest_tof
-                      << " microsec." << std::endl;
+                      << " microsec." << "\n";
 
   if (shortest_tof < 0)
-    g_log.warning() << "The shortest TOF was negative! At least 1 event has an "
-                       "invalid time-of-flight." << std::endl;
+    g_log.warning("The shortest TOF was negative! At least 1 event has an "
+                       "invalid time-of-flight.\n");
   if (bad_tofs > 0)
     g_log.warning() << "Found " << bad_tofs << " events with TOF > 2e8. This "
                                                "may indicate errors in the raw "
-                                               "TOF data." << std::endl;
+                                               "TOF data.\n";
 
   // Use T0 offset from TOPAZ Parameter file if it exists
   if (m_ws->getInstrument()->hasParameter("T0")) {
@@ -1163,7 +1158,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
         for (int64_t i = 0; i < numHistograms; ++i) {
           PARALLEL_START_INTERUPT_REGION
           // Do the offsetting
-          m_ws->getEventList(i).addTof(mT0);
+          m_ws->getSpectrum(i).addTof(mT0);
           PARALLEL_END_INTERUPT_REGION
         }
         PARALLEL_CHECK_INTERUPT_REGION
@@ -1174,15 +1169,10 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
   }
   // Now, create a default X-vector for histogramming, with just 2 bins.
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &xRef = axis.access();
-  xRef.resize(2, 0.0);
-  if (eventsLoaded > 0) {
-    xRef[0] = shortest_tof - 1; // Just to make sure the bins hold it all
-    xRef[1] = longest_tof + 1;
-  }
-  // Set the binning axis using this.
-  m_ws->setAllX(axis);
+  if (eventsLoaded > 0)
+    m_ws->setAllX(HistogramData::BinEdges{shortest_tof - 1, longest_tof + 1});
+  else
+    m_ws->setAllX(HistogramData::BinEdges(2, 0.0));
 
   // if there is time_of_flight load it
   loadTimeOfFlight(m_ws, m_top_entry_name, classType);
@@ -1474,8 +1464,8 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     // below, can re-use it.
     if (m_instrument_loaded_correctly) {
       m_ws->setInstrument(dataWS->getInstrument());
-      g_log.information() << "Instrument data copied into monitors workspace "
-                             " from the data workspace." << std::endl;
+      g_log.information("Instrument data copied into monitors workspace "
+                             " from the data workspace.");
     }
 
     // Perform the load (only events from monitor)
@@ -1485,19 +1475,16 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     // this is not strictly needed for the load to work (like the instrument is)
     // so it can be done after loadEvents, and it doesn't throw
     if (m_logs_loaded_correctly) {
-      g_log.information()
-          << "Copying log data into monitors workspace from the "
-          << "data workspace." << std::endl;
+      g_log.information("Copying log data into monitors workspace from the data workspace.");
       try {
         auto to = m_ws->getSingleHeldWorkspace();
         auto from = dataWS;
         copyLogs(from, to);
-        g_log.information() << "Log data copied." << std::endl;
+        g_log.information("Log data copied.");
       } catch (std::runtime_error &) {
-        g_log.error()
-            << "Could not copy log data into monitors workspace. Some "
+        g_log.error("Could not copy log data into monitors workspace. Some "
                " logs may be wrong and/or missing in the output "
-               "monitors workspace." << std::endl;
+               "monitors workspace.");
       }
     }
 
@@ -1516,7 +1503,7 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     filterDuringPause(m_ws);
   } catch (const std::exception &e) {
     g_log.error() << "Error while loading monitors as events from file: ";
-    g_log.error() << e.what() << std::endl;
+    g_log.error() << e.what() << "\n";
   }
 }
 
@@ -1539,7 +1526,7 @@ void LoadEventNexus::runLoadMonitors() {
     g_log.information("Loading monitors from NeXus file...");
     loadMonitors->setPropertyValue("Filename", m_filename);
     g_log.information() << "New workspace name for monitors: " << mon_wsname
-                        << std::endl;
+                        << "\n";
     loadMonitors->setPropertyValue("OutputWorkspace", mon_wsname);
     loadMonitors->setPropertyValue("MonitorsAsEvents",
                                    this->getProperty("MonitorsAsEvents"));
@@ -1823,8 +1810,8 @@ void LoadEventNexus::loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
       }
       if (time_channels_number > 0) // the numbers start with 1
       {
-        m_file->openGroup("time_channels_" + boost::lexical_cast<std::string>(
-                                                 time_channels_number),
+        m_file->openGroup("time_channels_" +
+                              std::to_string(time_channels_number),
                           "IXtime_channels");
         entries = m_file->getEntries();
         for (string_map_t::const_iterator it = entries.begin();
@@ -1887,7 +1874,7 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
 
   // loop over spectra
   for (size_t wi = start_wi; wi < end_wi; ++wi) {
-    EventList &event_list = WS->getEventList(wi);
+    EventList &event_list = WS->getSpectrum(wi);
     // sort the events
     event_list.sortTof();
     std::vector<TofEvent> &events = event_list.getEvents();

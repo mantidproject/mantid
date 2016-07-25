@@ -1,4 +1,3 @@
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/Progress.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataObjects/EventList.h"

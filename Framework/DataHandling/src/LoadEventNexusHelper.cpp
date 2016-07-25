@@ -2,7 +2,6 @@
 // Class LoadBankFromDiskTask
 //==============================================================================================
 #include "MantidDataHandling/LoadEventNexusHelper.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/Progress.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataObjects/EventList.h"
@@ -72,14 +71,14 @@ void ProcessBankData::compressEvents(bool compress, bool pulsetimesincreasing,
     if (usedDetIds[pixID - m_min_id]) {
       // Find the the workspace index corresponding to that pixel ID
       size_t wi = pixelID_to_wi_vector[pixID + pixelID_to_wi_offset];
-      Mantid::DataObjects::EventList *el = outputWS.getEventListPtr(wi);
+      auto &el = outputWS.getSpectrum(wi);
       if (compress)
-        el->compressEvents(alg->compressTolerance, el);
+        el.compressEvents(alg->compressTolerance, &el);
       else {
         if (pulsetimesincreasing)
-          el->setSortOrder(DataObjects::PULSETIME_SORT);
+          el.setSortOrder(DataObjects::PULSETIME_SORT);
         else
-          el->setSortOrder(DataObjects::UNSORTED);
+          el.setSortOrder(DataObjects::UNSORTED);
       }
     }
   }
@@ -310,11 +309,6 @@ void ProcessBankData::run() {
     alg->bad_tofs += badTofs;
     alg->discarded_events += my_discarded_events;
   }
-
-  // For Linux with tcmalloc, make sure memory goes back;
-  // but don't call if more than 15% of memory is still available, since that
-  // slows down the loading.
-  Mantid::API::MemoryManager::Instance().releaseFreeMemoryIfAbove(0.85);
 
 #ifndef _WIN32
   alg->getLogger().debug() << "Time to process " << entry_name << " " << m_timer
