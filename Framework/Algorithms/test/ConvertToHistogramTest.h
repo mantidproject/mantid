@@ -134,11 +134,24 @@ public:
 
   static void destroySuite(ConvertToHistogramTestPerformance *suite) { delete suite; }
 
-  void setUp() { }
+  void setUp() {
+    inputWS = WorkspaceCreationHelper::Create2DWorkspace123(10000, 10000, false);
+  }
 
-  void tearDown() { }
+  void tearDown() {
+    Mantid::API::AnalysisDataService::Instance().remove("output");
+  }
+
+  void testPerformanceWS() {
+    ConvertToHistogram cth;
+    cth.initialize();
+    cth.setProperty("InputWorkspace", inputWS);
+    cth.setProperty("OutputWorkspace", "output");
+    cth.execute();
+  }
 
 private:
+  Workspace2D_sptr inputWS;
 };
 
 #endif // CONVERTTOHISTOGRAMTEST_H_

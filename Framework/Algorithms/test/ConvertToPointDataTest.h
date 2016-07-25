@@ -169,11 +169,24 @@ public:
 
   static void destroySuite(ConvertToPointDataTestPerformance *suite) { delete suite; }
 
-  void setUp() { }
+  void setUp() {
+    inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(10000, 10000);
+  }
 
-  void tearDown() { }
+  void tearDown() {
+    Mantid::API::AnalysisDataService::Instance().remove("output");
+  }
+
+  void testPerformanceWS() {
+    ConvertToPointData ctpd;
+    ctpd.initialize();
+    ctpd.setProperty("InputWorkspace", inputWS);
+    ctpd.setProperty("OutputWorkspace", "output");
+    ctpd.execute();
+  }
 
 private:
+  Workspace2D_sptr inputWS;
 };
 
 #endif // CONVERTTOPONTDATATEST_H_
