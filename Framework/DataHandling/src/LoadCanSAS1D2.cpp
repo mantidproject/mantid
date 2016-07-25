@@ -214,13 +214,13 @@ LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
         // setting the error vector
         Element *idevElem = elem->getChildElement("Tdev");
         if (idevElem) {
-            check(qElem, "Tdev");
-            nodeVal = idevElem->innerText();
-            std::stringstream e(nodeVal);
-            e >> d;
-            E[vecindex] = d;
+          check(qElem, "Tdev");
+          nodeVal = idevElem->innerText();
+          std::stringstream e(nodeVal);
+          e >> d;
+          E[vecindex] = d;
         } else {
-           E[vecindex] = std::sqrt(d);
+          E[vecindex] = std::sqrt(d);
         }
 
         ++vecindex;
