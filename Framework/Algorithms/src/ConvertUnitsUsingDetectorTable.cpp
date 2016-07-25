@@ -62,11 +62,11 @@ void ConvertUnitsUsingDetectorTable::init() {
   wsValidator->add<API::WorkspaceUnitValidator>();
   wsValidator->add<API::HistogramValidator>();
   declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-    "InputWorkspace", "", Direction::Input, wsValidator),
-    "Name of the input workspace");
+                      "InputWorkspace", "", Direction::Input, wsValidator),
+                  "Name of the input workspace");
   declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-    "OutputWorkspace", "", Direction::Output),
-    "Name of the output workspace, can be the same as the input");
+                      "OutputWorkspace", "", Direction::Output),
+                  "Name of the output workspace, can be the same as the input");
   declareProperty("Target", "", boost::make_shared<StringListValidator>(
                                     UnitFactory::Instance().getKeys()),
                   "The name of the units to convert to (must be one of those "
@@ -201,7 +201,8 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
 
       specIter = std::find(spectraColumn.begin(), spectraColumn.end(), specNo);
       if (specIter != spectraColumn.end()) {
-        const size_t detectorRow = std::distance(spectraColumn.begin(), specIter);
+        const size_t detectorRow =
+            std::distance(spectraColumn.begin(), specIter);
         const double l1 = l1Column[detectorRow];
         const double l2 = l2Column[detectorRow];
         const double twoTheta = twoThetaColumn[detectorRow] * deg2rad;
@@ -210,13 +211,13 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
 
         if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
           g_log.debug() << "specNo from detector table = "
-            << spectraColumn[detectorRow] << '\n';
+                        << spectraColumn[detectorRow] << '\n';
 
           g_log.debug() << "###### Spectra #" << specNo
-            << " ==> Det Table Row:" << detectorRow << '\n';
+                        << " ==> Det Table Row:" << detectorRow << '\n';
 
           g_log.debug() << "\tL1=" << l1 << ",L2=" << l2 << ",TT=" << twoTheta
-            << ",EF=" << efixed << ",EM=" << emode << '\n';
+                        << ",EF=" << efixed << ",EM=" << emode << '\n';
         }
 
         // Make local copies of the units. This allows running the loop in
@@ -272,7 +273,6 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
     eventWS->clearMRU();
 
   return outputWS;
-
 }
 
 } // namespace Algorithms
