@@ -77,29 +77,18 @@ public:
                      "CorrectionFunctions\\BackgroundCorrections");
   }
 
-  void test_exec_PointsWS() {
-    // Create test input
-    const auto inputWS = createTestData(false);
-    const auto bgPoints = createTable();
+  void test_exec_PointsWS_NormalisePlotsOff() {
+    // Turn the "normalise plots" option off
+    Mantid::Kernel::ConfigService::Instance().setString(m_key, "Off");
 
-    CreateUserDefinedBackground alg;
-    alg.setChild(true);
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundPoints", bgPoints))
-    TS_ASSERT_THROWS_NOTHING(alg.execute(););
-    TS_ASSERT(alg.isExecuted());
+    doTest_pointsWS();
+  }
 
-    MatrixWorkspace_sptr outputWS =
-        alg.getProperty("OutputBackgroundWorkspace");
-    TS_ASSERT(outputWS);
+  void test_exec_PointsWS_NormalisePlotsOn() {
+    // Turn the "normalise plots" option on
+    Mantid::Kernel::ConfigService::Instance().setString(m_key, "On");
 
-    // The expected result
-    const auto expected = createExpectedResults(false);
-    TS_ASSERT(workspacesEqual(expected, outputWS, 1e-4));
+    doTest_pointsWS();
   }
 
   void test_exec_HistoWS_NormalisePlotsOff() {
@@ -347,6 +336,32 @@ private:
     alg->setProperty<bool>("CheckAxes", false);
     alg->execute();
     return alg->getProperty("Result");
+  }
+
+  /// Run test for a point data workspace
+  void doTest_pointsWS() {
+    // Create test input
+    const auto inputWS = createTestData(false);
+    const auto bgPoints = createTable();
+
+    CreateUserDefinedBackground alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputBackgroundWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundPoints", bgPoints))
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outputWS =
+        alg.getProperty("OutputBackgroundWorkspace");
+    TS_ASSERT(outputWS);
+
+    // The expected result
+    const auto expected = createExpectedResults(false);
+    TS_ASSERT(workspacesEqual(expected, outputWS, 1e-4));
   }
 
   /// Cached string for option
