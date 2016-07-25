@@ -267,7 +267,7 @@ class BayesQuasi(PythonAlgorithm):
         for m in range(0,nsam):
             logger.information('Group ' +str(m)+ ' at angle '+ str(theta[m]))
             nsp = m+1
-  
+
             nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(self._samWS,m,erange,nbin)
             Ndat = nout[0]
             Imin = nout[1]
@@ -366,7 +366,7 @@ class BayesQuasi(PythonAlgorithm):
             yProb = np.append(yProb,yPr2)
             CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,\
                 Nspec=3, UnitX='MomentumTransfer')
-            outWS = self.C2Fw(self._samWS[:-4],fname)
+            outWS = self.C2Fw(fname)
             if self._plot != 'None':
                 self.QuasiPlot(fname,self._plot,res_plot,self._loop)
         if self._program == 'QSe':
@@ -409,13 +409,13 @@ class BayesQuasi(PythonAlgorithm):
         energy_min, energy_max = e_range
 
         sample_logs = [('res_workspace', self._resWS),
-                    ('fit_program', fit_program),
-                    ('background', self._background),
-                    ('elastic_peak', self._elastic),
-                    ('energy_min', energy_min),
-                    ('energy_max', energy_max),
-                    ('sample_binning', sample_binning),
-                    ('resolution_binning', res_binning)]
+                     ('fit_program', fit_program),
+                     ('background', self._background),
+                     ('elastic_peak', self._elastic),
+                     ('energy_min', energy_min),
+                     ('energy_max', energy_max),
+                     ('sample_binning', sample_binning),
+                     ('resolution_binning', res_binning)]
 
         resnorm_used = (self._resnormWS != '')
         sample_logs.append(('resnorm', str(resnorm_used)))
@@ -433,7 +433,7 @@ class BayesQuasi(PythonAlgorithm):
         log_alg.setProperty('LogValues', [log[1] for log in sample_logs])
         log_alg.execute()
 
-        
+
     def C2Se(self, sname):
         outWS = sname+'_Result'
         asc = self.readASCIIFile(sname+'.qse')
@@ -476,7 +476,7 @@ class BayesQuasi(PythonAlgorithm):
             UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
 
         return outWS
-    
+
     def readASCIIFile(self, file_name):
         workdir = config['defaultsave.directory']
 
@@ -488,7 +488,7 @@ class BayesQuasi(PythonAlgorithm):
                 line = line.rstrip()
                 asc.append(line)
         return asc
-    
+
     def SeBlock(self, a,first):                                 #read Ascii block of Integers
         first += 1
         val = ExtractFloat(a[first])               #Q,AMAX,HWHM
@@ -511,7 +511,7 @@ class BayesQuasi(PythonAlgorithm):
         be.append(math.sqrt(math.fabs(val[0])+1.0e-20))
         first += 1
         return first,Q,int0,fw,integer,be                                      #values as list
-        
+
     def GetResNorm(self, resnormWS,ngrp):
         if ngrp == 0:                                # read values from WS
             dtnorm = mtd[resnormWS+'_Intensity'].readY(0)
@@ -577,7 +577,7 @@ class BayesQuasi(PythonAlgorithm):
         widthY = PadArray(widthY,51); widthE = PadArray(widthE,51)
 
         return widthY, widthE
-        
+
     def QuasiPlot(self, ws_stem,plot_type,res_plot,sequential):
         if plot_type:
             if sequential:
@@ -612,8 +612,8 @@ class BayesQuasi(PythonAlgorithm):
 
                 if len(spectra_indicies) > 0:
                     plotSpectra(ws_name, param_name, indicies=spectra_indicies[:3])
-        
-    def C2Fw(self, prog,sname):
+
+    def C2Fw(self, sname):
         output_workspace = sname+'_Result'
         num_spectra = 0
         axis_names = []
@@ -670,8 +670,8 @@ class BayesQuasi(PythonAlgorithm):
         CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,\
             UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=axis_names)
 
-        return output_workspace    
-        
+        return output_workspace
+
     def yield_floats(self, block):
         #yield a list of floats from a list of lines of text
         #encapsulates the iteration over a block of lines
@@ -750,7 +750,7 @@ class BayesQuasi(PythonAlgorithm):
             FWHM_error.append(block_FWHM_e)
             height_error.append(block_height_e)
 
-        return q_data, (amp_data, FWHM_data, height_data), (amp_error, FWHM_error, height_error)    
-        
+        return q_data, (amp_data, FWHM_data, height_data), (amp_error, FWHM_error, height_error)
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(BayesQuasi)
