@@ -175,9 +175,7 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
   // progress 0.2 to 0.3 in this loop
   double prg = 0.2;
   for (size_t k = 0; k < hists; ++k) {
-    outputWS->dataX(k) = input->readX(k);
-    outputWS->dataY(k) = input->readY(k);
-    outputWS->dataE(k) = input->readE(k);
+    outputWS->setHistogram(k, input->histogram(k));
     prg += (0.1 / static_cast<double>(hists));
     progress(prg);
   }
@@ -187,9 +185,10 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
   prg = 0.3;
   // Loop over the list of peaks
   for (size_t i = 0; i < peakslist->rowCount(); ++i) {
-    // Get references to the data
-    const MantidVec &X = outputWS->readX(peakslist->getRef<int>("spectrum", i));
-    MantidVec &Y = outputWS->dataY(peakslist->getRef<int>("spectrum", i));
+    // Get references to the data - X can be const
+    // but Y needs to be mutable
+    auto &X = outputWS->x(peakslist->getRef<int>("spectrum", i));
+    auto &Y = outputWS->mutableY(peakslist->getRef<int>("spectrum", i));
     // Get back the gaussian parameters
     const double height = peakslist->getRef<double>("Height", i);
     const double centre = peakslist->getRef<double>("PeakCentre", i);
