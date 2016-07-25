@@ -5,7 +5,7 @@ from mantid.kernel import ConfigService, Direction, IntBoundedValidator, \
 
 class GetIPTS(PythonAlgorithm):
     def category(self):
-        return "PythonAlgorithms;Utility"
+        return "Utility\\ORNL"
 
     def name(self):
         return "GetIPTS"

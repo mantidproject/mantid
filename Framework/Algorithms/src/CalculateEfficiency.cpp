@@ -84,7 +84,7 @@ void CalculateEfficiency::exec() {
   WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
   for (int i = 0; i < static_cast<int>(rebinnedWS->getNumberHistograms());
        i++) {
-    outputWS->dataX(i) = rebinnedWS->readX(i);
+    outputWS->setSharedX(i, rebinnedWS->sharedX(i));
   }
   setProperty("OutputWorkspace", outputWS);
 
@@ -150,8 +150,8 @@ void CalculateEfficiency::sumUnmaskedDetectors(MatrixWorkspace_sptr rebinnedWS,
       continue;
 
     // Retrieve the spectrum into a vector
-    const MantidVec &YValues = rebinnedWS->readY(i);
-    const MantidVec &YErrors = rebinnedWS->readE(i);
+    auto &YValues = rebinnedWS->y(i);
+    auto &YErrors = rebinnedWS->e(i);
 
     sum += YValues[0];
     error += YErrors[0] * YErrors[0];
@@ -200,10 +200,10 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
       continue;
 
     // Retrieve the spectrum into a vector
-    const MantidVec &YIn = rebinnedWS->readY(i);
-    const MantidVec &EIn = rebinnedWS->readE(i);
-    MantidVec &YOut = outputWS->dataY(i);
-    MantidVec &EOut = outputWS->dataE(i);
+    auto &YIn = rebinnedWS->y(i);
+    auto &EIn = rebinnedWS->e(i);
+    auto &YOut = outputWS->mutableY(i);
+    auto &EOut = outputWS->mutableE(i);
     // If this detector is a monitor, skip to the next one
     if (det->isMonitor()) {
       YOut[0] = 1.0;
