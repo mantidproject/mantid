@@ -284,6 +284,7 @@ h5py_patterns.each do |pattern|
           filename_no_dir = name_split_on_slash[-1]
           parts = filename_no_dir.strip.split(".")
           loader_filename = parts[0] + "." + parts[2]
+          `install_name_tool -add_rpath @loader_path/../ Contents/MacOS/h5py/#{basename} > /dev/null 2>&1`
           `install_name_tool -change #{h5py_linking_dir[0]}/#{filename_no_dir} @rpath/#{loader_filename} Contents/MacOS/h5py/#{basename}`
        end
     end
