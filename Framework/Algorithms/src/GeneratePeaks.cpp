@@ -10,7 +10,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -704,8 +703,7 @@ API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace() {
     // Only copy the X-values from spectra with peaks specified in the table
     // workspace.
     for (const auto &iws : m_spectraSet) {
-      std::copy(inputWS->x(iws).begin(), inputWS->x(iws).end(),
-                outputWS->x(iws).begin());
+      std::copy(inputWS->x(iws).begin(), inputWS->x(iws).end(), outputWS->mutableX(iws).begin());
     }
 
     m_newWSFromParent = true;
@@ -768,7 +766,7 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
   MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
       "Workspace2D", m_spectraSet.size(), numxvalue, numxvalue - 1);
   for (size_t ip = 0; ip < m_spectraSet.size(); ip++)
-    std::copy(xarray.begin(), xarray.end(), ws->x(ip).begin());
+    std::copy(xarray.begin(), xarray.end(), ws->mutableX(ip).begin());
 
   // Set spectrum numbers
   std::map<specnum_t, specnum_t>::iterator spiter;
