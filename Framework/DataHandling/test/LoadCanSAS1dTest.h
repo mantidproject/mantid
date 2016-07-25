@@ -188,7 +188,6 @@ public:
 
     TS_ASSERT_EQUALS(ws2d->getNumberHistograms(), 1);
 
-
     TS_ASSERT_EQUALS((ws2d->dataX(0).size()), 4);
     TS_ASSERT_EQUALS((ws2d->dataY(0).size()), 4);
     TS_ASSERT_EQUALS((ws2d->dataE(0).size()), 4);
