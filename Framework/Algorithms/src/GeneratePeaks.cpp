@@ -10,6 +10,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
