@@ -408,14 +408,7 @@ class BayesQuasi(PythonAlgorithm):
         sample_binning, res_binning = binning
         energy_min, energy_max = e_range
 
-        sample_logs = [('res_workspace', self._resWS),
-                    ('fit_program', fit_program),
-                    ('background', self._background),
-                    ('elastic_peak', self._elastic),
-                    ('energy_min', energy_min),
-                    ('energy_max', energy_max),
-                    ('sample_binning', sample_binning),
-                    ('resolution_binning', res_binning)]
+        sample_logs = [('res_workspace', self._resWS),('fit_program', fit_program),('background', self._background),('elastic_peak', self._elastic),('energy_min', energy_min),('energy_max', energy_max),('sample_binning', sample_binning),('resolution_binning', res_binning)]
 
         resnorm_used = (self._resnormWS != '')
         sample_logs.append(('resnorm', str(resnorm_used)))
