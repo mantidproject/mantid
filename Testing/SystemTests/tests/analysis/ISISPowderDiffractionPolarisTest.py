@@ -424,3 +424,48 @@ class LoadTests2(unittest.TestCase):
 
         self.assertAlmostEqual(dat_data[8].readE(0)[3369], dat_data[9].readE(0)[3369], places=DIFF_PLACES)
         self.assertAlmostEqual(300.4597, dat_data[9].readX(0)[10], places=DIFF_PLACES)
+
+
+# ================ Below test cases uses cycle 16_1 pref file ==================
+# =================== where 'ExistingV' = 'no' in pref file ===================
+
+class ISISPowderDiffractionPol3(stresstesting.MantidStressTest):
+    def requiredFiles(self):
+        filenames = []
+        filenames.extend(("POLARIS/POL93105.raw", "POLARIS/POL93106.raw",
+                          "POLARIS/POL93107.raw", "POLARIS/VanaPeaks.dat",
+                          "POLARIS/test/GrpOff/Cycle_12_2_group_masked_collimator_no_b5mod6.cal",
+                          "POLARIS/test/GrpOff/cycle_16_1_silicon_all_spectra.cal",
+                          "POLARIS/test/Cycle_16_1/Mantid_tester/UserPrefFile_16_1_si_calfile_"
+                          "from_all_spectra_emptysub.pref"))
+        # note: VanaPeaks.dat is used only if provided in the directory
+        return filenames
+
+    def _clean_up_files(self, filenames, directories):
+        try:
+            for files in filenames:
+                path = os.path.join(directories[0], files)
+                os.remove(path)
+        except OSError, ose:
+            print 'could not delete generated file : ', ose.filename
+
+    def runTest(self):
+        self._success = False
+        expt = cry_ini.Files('POLARIS', RawDir=(DIRS[0] + "POLARIS"), Analysisdir='test',
+                             forceRootDirFromScripts=False, inputInstDir=DIRS[0])
+        expt.initialize('Cycle_16_1', user='Mantid_tester', prefFile='UserPrefFile_16_1_si_calfile_'
+                                                                     'from_all_spectra_emptysub.pref')
+        expt.tell()
+        cry_focus.focus_all(expt, "93107", Write_ExtV=False)
+
+        # Custom code to create and run this single test suite
+        # and then mark as success or failure
+        suite = unittest.TestSuite()
+        suite.addTest(unittest.makeSuite(LoadTests2, "test"))
+        runner = unittest.TextTestRunner()
+        # Run using either runner
+        res = runner.run(suite)
+        if res.wasSuccessful():
+            self._success = True
+        else:
+            self._success = False
