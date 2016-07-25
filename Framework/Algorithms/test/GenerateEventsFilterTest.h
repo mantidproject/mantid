@@ -603,14 +603,14 @@ public:
 
     TS_ASSERT(splittersws);
 
-    TS_ASSERT_EQUALS(splittersws->readX(0).size(), 2);
-    TS_ASSERT_EQUALS(splittersws->readY(0).size(), 1);
+    TS_ASSERT_EQUALS(splittersws->x(0).size(), 2);
+    TS_ASSERT_EQUALS(splittersws->x(0).size(), 1);
     Kernel::DateAndTime runstart(3000000000);
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->readX(0)[0]),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[0]),
                      runstart.totalNanoseconds() + 100);
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->readX(0)[1]),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[1]),
                      runstart.totalNanoseconds() + 1000000);
-    TS_ASSERT_EQUALS(static_cast<int>(splittersws->readY(0)[0]), 0);
+    TS_ASSERT_EQUALS(static_cast<int>(splittersws->y(0)[0]), 0);
 
     TS_ASSERT_EQUALS(splittersinfo->rowCount(), 1);
 
@@ -660,7 +660,7 @@ public:
 
     // Check values of output workspace
     size_t numintervals = 74;
-    TS_ASSERT_EQUALS(splittersws->readY(0).size(), numintervals);
+    TS_ASSERT_EQUALS(splittersws->y(0).size(), numintervals);
 
     std::string runstarttimestr =
         eventWS->run().getProperty("run_start")->value();
@@ -674,16 +674,16 @@ public:
         protonchargelog->lastTime().totalNanoseconds() + 100000);
 
     // First interval
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->readX(0)[0]),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[0]),
                      runstarttime_ns);
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->readX(0)[1]),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[1]),
                      runstarttime_ns + timeinterval_ns);
-    TS_ASSERT_EQUALS(static_cast<int>(splittersws->readY(0)[0]), 0);
+    TS_ASSERT_EQUALS(static_cast<int>(splittersws->y(0)[0]), 0);
 
     // c) Last interval
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->readX(0).back()),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0).back()),
                      runstoptime.totalNanoseconds());
-    TS_ASSERT_EQUALS(static_cast<int>(splittersws->readY(0).back()),
+    TS_ASSERT_EQUALS(static_cast<int>(splittersws->y(0).back()),
                      numintervals - 1);
 
     /* d) Randomly
@@ -949,7 +949,7 @@ public:
             AnalysisDataService::Instance().retrieve("Splitters09"));
     TS_ASSERT(splittersws);
     if (splittersws)
-      TS_ASSERT(splittersws->readX(0).size() >= 2);
+      TS_ASSERT(splittersws->x(0).size() >= 2);
 
     DataObjects::TableWorkspace_const_sptr infows =
         boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
@@ -1013,15 +1013,15 @@ public:
     if (!splittersws || !infows)
       return;
 
-    TS_ASSERT_EQUALS(splittersws->readY(0).size(), 10);
+    TS_ASSERT_EQUALS(splittersws->y(0).size(), 10);
 
     int64_t factor = static_cast<int64_t>(1.0E9 + 0.5);
-    TS_ASSERT_DELTA(splittersws->readX(0)[0],
+    TS_ASSERT_DELTA(splittersws->x(0)[0],
                     static_cast<double>(11 * factor - 5 * factor / 100),
                     0.000001);
 
-    TS_ASSERT_DELTA(splittersws->readY(0)[0], 0.0, 0.00001);
-    TS_ASSERT_DELTA(splittersws->readY(0)[1], 1.0, 0.00001);
+    TS_ASSERT_DELTA(splittersws->y(0)[0], 0.0, 0.00001);
+    TS_ASSERT_DELTA(splittersws->y(0)[1], 1.0, 0.00001);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -1067,7 +1067,7 @@ public:
 
     // Check values of output workspace
     size_t numintervals = 38;
-    TS_ASSERT_EQUALS(splittersws->readY(0).size(), numintervals);
+    TS_ASSERT_EQUALS(splittersws->y(0).size(), numintervals);
 
     std::string runstarttimestr =
         eventWS->run().getProperty("run_start")->value();
@@ -1081,24 +1081,24 @@ public:
         protonchargelog->lastTime().totalNanoseconds() + 100000);
 
     // First 3 intervals
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->readX(0)[0]),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[0]),
                      runstarttime_ns);
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->readX(0)[1]),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[1]),
                      runstarttime_ns + timeinterval_ns);
-    TS_ASSERT_EQUALS(static_cast<int>(splittersws->readY(0)[0]), 0);
+    TS_ASSERT_EQUALS(static_cast<int>(splittersws->y(0)[0]), 0);
 
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->readX(0)[2]),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[2]),
                      runstarttime_ns + timeinterval_ns * 3);
-    TS_ASSERT_EQUALS(static_cast<int>(splittersws->readY(0)[1]), 1);
+    TS_ASSERT_EQUALS(static_cast<int>(splittersws->y(0)[1]), 1);
 
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->readX(0)[3]),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[3]),
                      runstarttime_ns + timeinterval_ns * 6);
-    TS_ASSERT_EQUALS(static_cast<int>(splittersws->readY(0)[2]), 2);
+    TS_ASSERT_EQUALS(static_cast<int>(splittersws->y(0)[2]), 2);
 
     // Last interval
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->readX(0).back()),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0).back()),
                      runstoptime.totalNanoseconds());
-    TS_ASSERT_EQUALS(static_cast<int>(splittersws->readY(0).back()),
+    TS_ASSERT_EQUALS(static_cast<int>(splittersws->y(0).back()),
                      numintervals - 1);
 
     // Clean
@@ -1119,8 +1119,8 @@ public:
     splitters.clear();
     size_t numsplitters = 0;
 
-    const MantidVec &vecX = matrixws->readX(0);
-    const MantidVec &vecY = matrixws->readY(0);
+    const auto &vecX = matrixws->x(0);
+    const auto &vecY = matrixws->y(0);
     for (size_t i = 0; i < vecY.size(); ++i) {
       if (vecY[i] >= -0.0) {
         // A valid time interval for Splitters
@@ -1136,6 +1136,39 @@ public:
 
     return numsplitters;
   }
+};
+
+class GenerateEventsFilterTestPerformance : public CxxTest::TestSuite {
+public:
+	// This pair of boilerplate methods prevent the suite being created statically
+	// This means the constructor isn't called when running other tests
+	static GenerateEventsFilterTestPerformance *createSuite() {
+		return new GenerateEventsFilterTestPerformance();
+	}
+
+	static void destroySuite(GenerateEventsFilterTestPerformance *suite) { delete suite; }
+
+	void setUp() {
+		inputEvent =
+			WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10000, 1000, false);
+	}
+
+	void tearDown() {
+		Mantid::API::AnalysisDataService::Instance().remove("output");
+		Mantid::API::AnalysisDataService::Instance().remove("infoOutput");
+	}
+
+	void testPerformanceEventWS() {
+		Mantid::Algorithms::GenerateEventsFilter genEvenFilter;
+		genEvenFilter.initialize();
+		genEvenFilter.setProperty("InputWorkspace", inputEvent);
+		genEvenFilter.setPropertyValue("OutputWorkspace", "output");
+		genEvenFilter.setPropertyValue("InformationWorkspace", "infoOutput");
+		genEvenFilter.execute();
+	}
+
+private:
+	Mantid::DataObjects::EventWorkspace_sptr inputEvent;
 };
 
 #endif /* MANTID_ALGORITHMS_GENERATEEVENTSFILTERTEST_H_ */
