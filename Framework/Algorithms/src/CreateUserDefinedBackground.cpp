@@ -182,7 +182,7 @@ CreateUserDefinedBackground::createBackgroundWorkspace(
 /**
  * Get Y storage mode for background data.
  *
- * - Point data -> counts
+ * - Point data -> use same as input workspace
  * - Histogram and distribution -> frequencies
  * - Histogram, not distribution -> counts, BUT if the data was plotted using
  * the "normalize histogram to bin width" option then it needs to be multiplied
@@ -208,7 +208,8 @@ HistogramData::Histogram::YMode CreateUserDefinedBackground::getBackgroundYMode(
       return Histogram::YMode::Counts;
     }
   } else {
-    return Histogram::YMode::Counts;
+    // use the same as the input workspace
+    return data->histogram(0).yMode();
   }
 }
 
