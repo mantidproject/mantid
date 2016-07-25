@@ -18,6 +18,8 @@ const std::string CreateUserDefinedBackground::AUTODISTRIBUTIONKEY =
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 using Mantid::HistogramData::Histogram;
+using Mantid::HistogramData::Frequencies;
+using Mantid::HistogramData::FrequencyStandardDeviations;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateUserDefinedBackground)
@@ -152,6 +154,7 @@ CreateUserDefinedBackground::createBackgroundWorkspace(
   auto outputWS = data->clone();
 
   const auto &xPoints = outputWS->points(0);
+  const auto &xBinEdges = outputWS->binEdges(0);
   std::vector<double> yBackground;
   std::vector<double> eBackground(xPoints.size(), 0);
 
@@ -162,77 +165,32 @@ CreateUserDefinedBackground::createBackgroundWorkspace(
     yBackground.push_back(y);
   }
 
-  // Decide if Y data is counts or frequencies
-  const Histogram::YMode yMode = getBackgroundYMode(data, yBackground);
+  auto histogram = outputWS->histogram(0);
+  if (histogram.yMode() == Histogram::YMode::Frequencies) {
+    histogram.setFrequencies(yBackground);
+    histogram.setFrequencyStandardDeviations(eBackground);
+  } else {
+    if (data->isHistogramData() &&
+        "On" ==
+            Kernel::ConfigService::Instance().getString(AUTODISTRIBUTIONKEY)) {
+      // Background data is actually frequencies, we put it into temporary to
+      // benefit from automatic conversion in setCounts(), etc.
+      histogram.setCounts(Frequencies(yBackground), xBinEdges);
+      histogram.setCountStandardDeviations(
+          FrequencyStandardDeviations(eBackground), xBinEdges);
+    } else {
+      histogram.setCounts(yBackground);
+      histogram.setCountStandardDeviations(eBackground);
+    }
+  }
 
   // Apply Y and E data to all spectra in the workspace
   for (size_t spec = 0; spec < outputWS->getNumberHistograms(); spec++) {
-    if (yMode == Histogram::YMode::Frequencies) {
-      outputWS->setFrequencies(spec, yBackground);
-      outputWS->setFrequencyStandardDeviations(spec, eBackground);
-    } else {
-      outputWS->setCounts(spec, yBackground);
-      outputWS->setCountStandardDeviations(spec, eBackground);
-    }
+    // Setting same histogram for all spectra, data is shared, saving memory
+    outputWS->setHistogram(spec, histogram);
   }
 
   return API::MatrixWorkspace_sptr(std::move(outputWS));
-}
-
-/**
- * Get Y storage mode for background data.
- *
- * - Point data -> use same as input workspace
- * - Histogram and distribution -> frequencies
- * - Histogram, not distribution -> counts, BUT if the data was plotted using
- * the "normalize histogram to bin width" option then it needs to be multiplied
- * by bin width
- *
- * @param data :: [input] Input workspace
- * @param yBackground :: [input, output] Y background data - could be changed
- * depending on options
- * @returns :: Y storage mode to be used
- */
-HistogramData::Histogram::YMode CreateUserDefinedBackground::getBackgroundYMode(
-    const API::MatrixWorkspace_const_sptr &data,
-    std::vector<double> &yBackground) const {
-  if (data->isHistogramData()) {
-    if (data->isDistribution()) {
-      return Histogram::YMode::Frequencies;
-    } else {
-      if ("On" ==
-          Kernel::ConfigService::Instance().getString(AUTODISTRIBUTIONKEY)) {
-        // User has selected the option "normalize histogram to bin width"
-        multiplyByBinWidth(data, yBackground);
-      }
-      return Histogram::YMode::Counts;
-    }
-  } else {
-    // use the same as the input workspace
-    return data->histogram(0).yMode();
-  }
-}
-
-/**
- * Multiplies the Y background data by input workspace bin width, to convert
- * from frequencies to counts
- * @param data :: [input] Input workspace - must be histogram data
- * @param yBackground :: [input, output] Y background data - will be multiplied
- * by bin width
- */
-void CreateUserDefinedBackground::multiplyByBinWidth(
-    const API::MatrixWorkspace_const_sptr &data,
-    std::vector<double> &yBackground) const {
-  if (!data->isHistogramData()) {
-    throw std::invalid_argument(
-        "Data is not histogram data: cannot multiply background by bin width");
-  }
-
-  const auto &X = data->binEdges(0);
-  for (size_t i = 0; i < yBackground.size(); ++i) {
-    const double width = X[i + 1] - X[i];
-    yBackground[i] *= width;
-  }
 }
 
 /**
