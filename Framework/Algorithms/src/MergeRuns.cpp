@@ -19,6 +19,7 @@ DECLARE_ALGORITHM(MergeRuns)
 
 using namespace Kernel;
 using namespace API;
+using namespace Geometry;
 using namespace DataObjects;
 
 /// Default constructor
@@ -96,6 +97,10 @@ void MergeRuns::exec() {
 
     // Iterate over the collection of input workspaces
     auto it = m_inMatrixWS.begin();
+
+    std::string average("sample_logs_average");
+    m_sampleLogs = this->createSampleLogsMap(*it);
+
     // Take the first input workspace as the first argument to the addition
     MatrixWorkspace_sptr outWS = m_inMatrixWS.front();
     int64_t n = m_inMatrixWS.size() - 1;
@@ -644,6 +649,40 @@ void MergeRuns::fillHistory() {
     copyHistoryFromInputWorkspaces<std::list<MatrixWorkspace_sptr>>(
         m_inMatrixWS);
   }
+}
+
+/**
+ * Returns the value associated to a parameter name in the IDF
+ * @param parameterName :: parameter name in the IDF
+ * @return the value associated to the parameter name
+ */
+std::vector<std::string> MergeRuns::getSampleLogsList(API::MatrixWorkspace_sptr &ws,
+  const std::string &parameterName) {
+
+  const ParameterMap &pmap = ws->constInstrumentParameters();
+
+  Instrument_const_sptr instrument = m_inMatrixWS.front()->getInstrument();
+  Parameter_sptr par =
+      pmap.getRecursive(instrument->getChild(0).get(), parameterName);
+  if (par) {
+    std::string parsedString = par->asString();
+    g_log.debug() << "Parsed parameter " << parameterName << ": " << parsedString
+                  << "\n";
+
+    Mantid::Kernel::StringTokenizer tokenize(parsedString, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM | Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+    std::vector<std::string> returnVector = tokenize.asVector();
+    for(std::string value : returnVector) {
+        g_log.debug() << "Combining " << value << " as " << parameterName << "\n";
+    }
+    return returnVector;
+  } else {
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "There is no <" + parameterName + "> in the instrument definition!");
+  }
+}
+
+sample_log_map MergeRuns::createSampleLogsMap(*it) {
+
 }
 
 } // namespace Algorithm

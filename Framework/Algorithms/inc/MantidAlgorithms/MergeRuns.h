@@ -124,6 +124,9 @@ private:
       m_parentHistory->addChildHistory(m_history);
     }
   }
+  std::vector<std::string> getSampleLogsList(API::MatrixWorkspace_sptr &ws, const std::string &parameterName);
+  typedef pair<const std::string, double> sample_log_map;
+  sample_log_map m_sampleLogs;
 
   // Methods called by exec()
   using Mantid::API::Algorithm::validateInputs;
