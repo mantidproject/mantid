@@ -176,7 +176,7 @@ public:
   /**
   * gets the path as string which required when browsing the file
   *
-  * @param path set according to the previously file selected
+  * @param prevPath path set according to the previously file selected
   *
   * @return string of the browsed file path
   */
@@ -185,7 +185,7 @@ public:
   /**
   * gets the path as string which is required when saving the file
   *
-  * @param path set according to the previously selected file
+  * @param prevPath path set according to the previously selected file
   *
   * @return string of the saved file
   */
