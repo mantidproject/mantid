@@ -82,18 +82,18 @@ void MaskDetectors::init() {
   mustBePosInt->setLower(0);
   declareProperty(
       "StartWorkspaceIndex", 0, mustBePosInt,
-      "If other masks are provided, its the first index of the "
-      "target workspace allowed to be masked by these masks, "
+      "If other masks fields are provided, its the first index of the "
+      "target workspace to be allowed to be masked from by these masks, "
       "if not, its the first index of the target workspace to mask.\n"
-      "Default is 0 if other maks are present or ignored otherwise.");
+      "Default value is 0 if other masking is present or ignored if not.");
   declareProperty(
       "EndWorkspaceIndex", EMPTY_INT(), mustBePosInt,
       "If other masks are provided, its the last index of the "
-      "target workspace allowed to be masked by these masks, "
+      "target workspace allowed to be masked to by these masks, "
       "if not, its the last index of the target workspace to mask.\n"
-      "Default is number of histograms in target worspace if other masks are "
-      "provided"
-      "or nothing otherwise");
+      "Default is number of histograms in target worspace if other masks are"
+      " present "
+      "or ignored if not.");
 }
 
 /*
@@ -243,17 +243,20 @@ void MaskDetectors::exec() {
   */
   WS->rebuildNearestNeighbours();
 }
-/* Verifies input ranges are defined and returns these ranges if they are
-@return tuple containing min/max ranges provided to algorithm
-        (from 0 to max histogram range) and  boolean value, containing true if
-the ranges
-        are constrained and false if they are not.
+/* Verifies input ranges are defined and returns these ranges if they are.
+*
+* @return tuple containing min/max ranges provided to algorithm
+*        (from 0 to max histogram range) and boolean value,
+*        containing true if the ranges are
+*        constrained (or defined in other words) 
+*        and false if they are not.
 */
 std::tuple<size_t, size_t, bool>
 MaskDetectors::getRanges(const MatrixWorkspace_sptr &targWS) {
   int endIndex = getProperty("EndWorkspaceIndex");
   int startIndex = getProperty("StartWorkspaceIndex");
   size_t max_ind = targWS->getNumberHistograms() - 1;
+
   if (endIndex == EMPTY_INT() && startIndex == 0) {
     return std::tuple<size_t, size_t, bool>(0, max_ind, false);
   } else {
