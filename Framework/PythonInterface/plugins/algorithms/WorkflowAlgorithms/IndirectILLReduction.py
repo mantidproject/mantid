@@ -48,7 +48,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     _sum_runs = None
     _save = None
     _plot = None
-    _use_mirror_mode = None
+    _mirror_sense = None
 
     # Integer
     _unmirror_option = 3
@@ -108,6 +108,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(name='SumRuns',
                 defaultValue=False,
                 doc='Whether to sum all the input runs.')
+
+        self.declareProperty(name='MirrorSense',
+                defaultValue=False,
+                doc='Whether the input data has two wings.')
 
         self.declareProperty(name='UnmirrorOption',
                 defaultValue=3,
@@ -182,8 +186,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._map_file = self.getPropertyValue('MapFile')
         self._reflection = self.getPropertyValue('Reflection')
 
+        self._mirror_sense = self.getProperty('MirrorSense').value
         self._control_mode = self.getProperty('ControlMode').value
-        self._use_mirror_mode = self.getProperty('UnmirrorOption').value
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
         self._sum_runs = self.getProperty('SumRuns').value
@@ -363,7 +367,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         """
         print('Unmirror')
 
-        if self._use_mirror_mode == 0:
+        if self._unmirror_option == 0:
 
             print('Normalisation of grouped workspace to monitor, bins will not be masked, X-axis will not be in energy transfer.')
 
@@ -382,7 +386,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             x_end = len(x)
             mid_point = int((x_end - 1) / 2)
 
-            if self._use_mirror_mode == 1:
+            if self._unmirror_option == 1:
                 print('Left reduced, monitor, detectors grouped and normalised workspace')
                 self._extract_workspace(0,
                                                                 x[mid_point],
@@ -391,7 +395,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                                                                 self._det_grouped_ws,
                                                                 self._mnorm_ws)
 
-            if self._use_mirror_mode == 2:
+            if self._unmirror_option == 2:
                 print('Right reduced, monitor, detectors grouped and normalised workspace')
                 self._extract_workspace(x[mid_point],
                                                                 x_end,
@@ -400,7 +404,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                                                                 self._det_grouped_ws,
                                                                 self._mnorm_ws)
 
-            if self._use_mirror_mode > 2:
+            if self._unmirror_option > 2:
                 # Temporary workspace names needed for unmirror options 3 to 7
                 __left_ws = '__left_ws'
                 __left_monitor_ws = '__left_monitor_ws'
@@ -430,23 +434,23 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                                                                 __right_grouped_ws,
                                                                 __right_mnorm_ws)
 
-                if self._use_mirror_mode == 3:
+                if self._unmirror_option == 3:
                     print('Sum left and right workspace for unmirror option 3')
                     __left = __left_ws
                     __right = __right_ws
-                elif self._use_mirror_mode == 4:
+                elif self._unmirror_option == 4:
                     print('Shift each sepctrum of the right workspace according to the maximum peak positions of the corresponding spectrum of the left workspace')
                     self._shift_spectra(__right_ws, __left_ws, __right)
                     __left = __left_ws
                     # Shifted workspace in control mode?
-                elif self._use_mirror_mode == 5:
+                elif self._unmirror_option == 5:
                     # _shift_spectra needs extension
                     pass
-                elif self._use_mirror_mode == 6:
+                elif self._unmirror_option == 6:
                     # Vanadium file must be loaded, left and right workspaces extracted
                     # Update PyExec and _set_workspace_properties accordingly, _vanadium_ws = None
                     pass
-                elif self._use_mirror_mode == 7:
+                elif self._unmirror_option == 7:
                     # Vanadium file must be loaded, left and right workspaces extracted
                     # Update PyExec and _set_workspace_properties accordingly, _vanadium_ws = None
                     pass
