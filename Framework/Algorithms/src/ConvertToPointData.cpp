@@ -42,7 +42,7 @@ bool ConvertToPointData::isProcessingRequired(
 bool ConvertToPointData::isWorkspaceLogical(
     const MatrixWorkspace_sptr inputWS) const {
   const size_t numBins = inputWS->blocksize();
-  const size_t numBoundaries = inputWS->readX(0).size();
+  const size_t numBoundaries = inputWS->x(0).size();
   if (numBoundaries != (numBins + 1)) {
     g_log.error() << "The number of bin boundaries must be one greater than "
                      "the number of bins. "

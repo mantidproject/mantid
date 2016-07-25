@@ -42,7 +42,7 @@ bool ConvertToHistogram::isWorkspaceLogical(
     const MatrixWorkspace_sptr inputWS) const {
   const size_t numYPoints = inputWS->blocksize();
   // Workspace guarantees that each X-vector is the same size
-  const size_t numXPoints = inputWS->readX(0).size();
+  const size_t numXPoints = inputWS->x(0).size();
   if (numYPoints != numXPoints) {
     g_log.error() << "The number of Y data points must equal the number of X "
                      "data points on the InputWorkspace. "

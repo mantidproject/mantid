@@ -69,9 +69,9 @@ void XDataConverter::exec() {
   for (int i = 0; i < int(numSpectra); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    // Copy over the Y and E data
-    outputWS->dataY(i) = inputWS->readY(i);
-    outputWS->dataE(i) = inputWS->readE(i);
+      // Copy over the Y and E data
+    outputWS->setSharedY(i, inputWS->sharedY(i));
+    outputWS->setSharedE(i, inputWS->sharedE(i));
     setXData(outputWS, inputWS, i);
     prog.report();
 
@@ -103,7 +103,7 @@ void XDataConverter::setXData(API::MatrixWorkspace_sptr outputWS,
         }
       }
     }
-    outputWS->setX(index, m_cachedX);
+    outputWS->setSharedX(index, m_cachedX);
   } else {
     const MantidVec &xBoundaries = inputWS->readX(index);
     MantidVec &xPoints = outputWS->dataX(index);
