@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_IMWDomainCreator_H_
-#define MANTID_CURVEFITTING_FITMW_H_
+#ifndef MANTID_CURVEFITTING_IMWDOMAINCREATOR_H_
+#define MANTID_CURVEFITTING_IMWDOMAINCREATOR_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -118,4 +118,4 @@ protected:
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_FITMW_H_*/
+#endif /*MANTID_CURVEFITTING_IMWDOMAINCREATOR_H_*/

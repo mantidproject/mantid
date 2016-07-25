@@ -80,7 +80,11 @@ public:
                                const size_t nData);
 
 protected:
+  /// Calculate histogram data for the bins provided.
   virtual void histogram1D(double *out, double left, const double *right,
+                           const size_t nBins) const;
+  /// Devivatives of the histogram.
+  virtual void histogramDerivative1D(Jacobian *jacobian, double left, const double *right,
                            const size_t nBins) const;
 
   /// Logger instance

@@ -2,6 +2,7 @@
 
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/GeneralDomainCreator.h"
+#include "MantidCurveFitting/HistogramDomainCreator.h"
 #include "MantidCurveFitting/LatticeDomainCreator.h"
 #include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
@@ -42,7 +43,12 @@ IDomainCreator *createDomainCreator(const IFunction *fun,
   } else if (auto gfun = dynamic_cast<const IFunctionGeneral *>(fun)) {
     creator = new GeneralDomainCreator(*gfun, *manager, workspacePropertyName);
   } else {
-    creator = new FitMW(manager, workspacePropertyName, domainType);
+    bool histogramFit = manager->getProperty("HistogramFit");
+    if (histogramFit) {
+      creator = new HistogramDomainCreator(*manager, workspacePropertyName);
+    } else {
+      creator = new FitMW(manager, workspacePropertyName, domainType);
+    }
   }
   return creator;
 }
@@ -66,6 +72,8 @@ void IFittingAlgorithm::init() {
                   "Name of the input Workspace");
   declareProperty("IgnoreInvalidData", false,
                   "Flag to ignore infinities, NaNs and data with zero errors.");
+  declareProperty("HistogramFit", false,
+                  "Flag to perform histogram fitting.");
 
   std::vector<std::string> domainTypes{"Simple", "Sequential", "Parallel"};
   declareProperty(

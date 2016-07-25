@@ -49,6 +49,12 @@ void IFunction1D::function(const FunctionDomain &domain,
 
 void IFunction1D::functionDeriv(const FunctionDomain &domain,
                                 Jacobian &jacobian) {
+  auto histoDomain = dynamic_cast<const FunctionDomain1DHistogram *>(&domain);
+  if (histoDomain) {
+    histogramDerivative1D(&jacobian, histoDomain->leftBoundary(),
+      histoDomain->getPointerAt(0), histoDomain->size());
+    return;
+  }
   const FunctionDomain1D *d1d = dynamic_cast<const FunctionDomain1D *>(&domain);
   if (!d1d) {
     throw std::invalid_argument("Unexpected domain in IFunction1D");
@@ -98,6 +104,22 @@ void IFunction1D::histogram1D(double *out, double left, const double *right,
   throw Kernel::Exception::NotImplementedError(
       "Integration is not implemented for this function.");
 }
+
+/// Derivatives of the histogram.
+/// @param jacobian :: The output Jacobian.
+/// @param left :: The left-most bin boundary.
+/// @param right :: A pointer to an array of successive right bin boundaries (size = nBins).
+/// @param nBins :: Number of bins.
+void IFunction1D::histogramDerivative1D(Jacobian *jacobian, double left, const double *right,
+  const size_t nBins) const {
+  UNUSED_ARG(jacobian);
+  UNUSED_ARG(left);
+  UNUSED_ARG(right);
+  UNUSED_ARG(nBins);
+  throw Kernel::Exception::NotImplementedError(
+      "Integration is not implemented for this function.");
+}
+
 
 } // namespace API
 } // namespace Mantid

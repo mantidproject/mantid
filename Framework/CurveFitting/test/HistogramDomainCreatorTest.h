@@ -9,16 +9,21 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Functions/Lorentzian.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 #include <algorithm>
+#include <math.h>
+
+#include "D:/Work/mantid_stuff/Testing/class/MyTestDef.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::CurveFitting::Functions;
 using Mantid::CurveFitting::HistogramDomainCreator;
+using Mantid::CurveFitting::Algorithms::Fit;
 
 class HistogramDomainCreatorTest : public CxxTest::TestSuite {
 public:
@@ -80,8 +85,54 @@ public:
     for(size_t j = 0; j < 10; ++j) {
       TS_ASSERT_EQUALS(h[j], x[j + 1]);
     }
+  }
 
-}
+  void test_Lorentzian() {
+
+    PropertyManager manager;
+    HistogramDomainCreator creator(manager, "InputWorkspace");
+    creator.declareDatasetProperties();
+    manager.declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+                                "InputWorkspace", "", Direction::Input),
+                            "Name of the input Workspace");
+
+    auto ws = createFitWorkspace(10);
+    manager.setProperty("InputWorkspace", ws);
+    FunctionDomain_sptr domain;
+    FunctionValues_sptr values;
+    creator.createDomain(domain, values);
+
+    Lorentzian fun;
+    fun.initialize();
+    fun.setParameter("FWHM", 1.0);
+    fun.function(*domain, *values);
+
+    auto &d1d = dynamic_cast<FunctionDomain1D&>(*domain);
+    TS_ASSERT_DELTA(values->getCalculated(0), 0.0302240668, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(1), 0.0433343771, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(2), 0.0640812259, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(3), 0.0936577709, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(4), 0.121118942, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(5), 0.121118942, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(6), 0.0936577709, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(7), 0.0640812259, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(8), 0.0433343771, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(9), 0.0302240668, 1e-9);
+  }
+
+  void test_fit() {
+    auto ws = createFitWorkspace(3);
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=Lorentzian,FWHM=0.5");
+    fit.setProperty("HistogramFit", true);
+    fit.setProperty("InputWorkspace", ws);
+    fit.execute();
+    IFunction_sptr fun = fit.getProperty("Function");
+    for(size_t i = 0; i < fun->nParams(); ++i) {
+      std::cerr << i << ' ' << fun->parameterName(i) << ' ' << fun->getParameter(i) << std::endl;
+    }
+  }
 
 private:
   MatrixWorkspace_sptr createTestWorkspace(const bool histogram) {
@@ -101,6 +152,30 @@ private:
         x.back() = x[x.size() - 2] + 0.1;
     }
     return ws2;
+  }
+
+  MatrixWorkspace_sptr createFitWorkspace(const size_t ny = 10) {
+    MatrixWorkspace_sptr ws(new WorkspaceTester);
+    size_t nx = ny + 1;
+    double x0 = -1.0;
+    double x1 = 1.0;
+    double dx = (x1 - x0) / ny;
+    double gamma = 0.2;
+    double A = 10.;
+    auto cumulFun = [gamma](double x){return atan(x / gamma) / M_PI;};
+    ws->initialize(1, nx, ny);
+    Mantid::MantidVec &x = ws->dataX(0);
+    Mantid::MantidVec &y = ws->dataY(0);
+    Mantid::MantidVec &e = ws->dataE(0);
+    x.front() = x0;
+    for (size_t i = 0; i < ny; ++i) {
+      double xl = x0 + dx * double(i);
+      double xr = x0 + dx * double(i + 1);
+      x[i + 1] = xr;
+      y[i] = cumulFun(xr) - cumulFun(xl);
+      e[i] = 1.0;
+    }
+    return ws;
   }
 };
 
