@@ -221,12 +221,19 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
       Y[vecindex] = d;
 
       // setting the error vector
+      // If there is no error of the intensity recorded, then
+      // it is assumed to be the sqare root of the intensity
       Element *idevElem = elem->getChildElement("Idev");
-      check(qElem, "Idev");
-      nodeVal = idevElem->innerText();
-      std::stringstream e(nodeVal);
-      e >> d;
-      E[vecindex] = d;
+      if (idevElem) {
+        check(qElem, "Idev");
+        nodeVal = idevElem->innerText();
+        std::stringstream e(nodeVal);
+        e >> d;
+        E[vecindex] = d;
+      } else {
+        E[vecindex] = std::sqrt(d);
+      }
+
       ++vecindex;
     }
   }
