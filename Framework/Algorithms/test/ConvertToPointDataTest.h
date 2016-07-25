@@ -170,7 +170,7 @@ public:
   static void destroySuite(ConvertToPointDataTestPerformance *suite) { delete suite; }
 
   void setUp() {
-    inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(10000, 10000);
+    inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(20000, 10000);
   }
 
   void tearDown() {
