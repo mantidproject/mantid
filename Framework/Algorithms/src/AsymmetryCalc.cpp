@@ -1,10 +1,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/AsymmetryCalc.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ArrayProperty.h"
 
 #include <cmath>
 #include <vector>
@@ -125,57 +125,45 @@ void AsymmetryCalc::exec() {
 
   const size_t blocksize = inputWS->blocksize();
   assert(tmpWS->blocksize() == blocksize);
-  const bool isInputHistogram = inputWS->isHistogramData();
 
   // Create a point data workspace with only one spectra for forward
   API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(
       inputWS, 1, blocksize, blocksize);
 
-  // Get the reference to the input x values.
-  auto &tmpX = tmpWS->readX(forward);
+  outputWS->setPoints(0, tmpWS->points(forward));
 
   // Calculate asymmetry for each time bin
   // F-aB / F+aB
   Progress prog(this, 0.0, 1.0, blocksize);
   for (size_t j = 0; j < blocksize; ++j) {
     // cal F-aB
-    double numerator =
-        tmpWS->dataY(forward)[j] - alpha * tmpWS->dataY(backward)[j];
+    double numerator = tmpWS->y(forward)[j] - alpha * tmpWS->y(backward)[j];
     // cal F+aB
-    double denominator =
-        (tmpWS->dataY(forward)[j] + alpha * tmpWS->dataY(backward)[j]);
+    double denominator = (tmpWS->y(forward)[j] + alpha * tmpWS->y(backward)[j]);
 
     // cal F-aB / F+aB
     if (denominator != 0.0) {
-      outputWS->dataY(0)[j] = numerator / denominator;
+      outputWS->mutableY(0)[j] = numerator / denominator;
     } else {
-      outputWS->dataY(0)[j] = 0.;
+      outputWS->mutableY(0)[j] = 0.;
     }
 
     // Work out the error (as in 1st attachment of ticket #4188)
     double error = 1.0;
     if (denominator != 0.0) {
       // cal F + a2B
-      double q1 =
-          tmpWS->dataY(forward)[j] + alpha * alpha * tmpWS->dataY(backward)[j];
+      double q1 = tmpWS->y(forward)[j] + alpha * alpha * tmpWS->y(backward)[j];
       // cal 1 + ((f-aB)/(F+aB))2
       double q2 = 1 + numerator * numerator / (denominator * denominator);
       // cal error
       error = sqrt(q1 * q2) / denominator;
     }
-    outputWS->dataE(0)[j] = error;
-
-    // set the x values
-    if (isInputHistogram) {
-      outputWS->dataX(0)[j] = (tmpX[j] + tmpX[j + 1]) / 2;
-    } else {
-      outputWS->dataX(0)[j] = tmpX[j];
-    }
+    outputWS->mutableE(0)[j] = error;
 
     prog.report();
   }
 
-  assert(outputWS->dataX(0).size() == blocksize);
+  assert(outputWS->x(0).size() == blocksize);
 
   // Update Y axis units
   outputWS->setYUnit("Asymmetry");

@@ -71,6 +71,7 @@ namespace DataHandling {
 DECLARE_ALGORITHM(CreateSimulationWorkspace)
 
 using namespace API;
+using namespace HistogramData;
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -169,8 +170,8 @@ void CreateSimulationWorkspace::createInstrument() {
  */
 void CreateSimulationWorkspace::createOutputWorkspace() {
   const size_t nhistograms = createDetectorMapping();
-  const MantidVecPtr binBoundaries = createBinBoundaries();
-  const size_t xlength = binBoundaries->size();
+  const auto binBoundaries = createBinBoundaries();
+  const size_t xlength = binBoundaries.size();
   const size_t ylength = xlength - 1;
 
   m_outputWS = WorkspaceFactory::Instance().create("Workspace2D", nhistograms,
@@ -185,7 +186,7 @@ void CreateSimulationWorkspace::createOutputWorkspace() {
 
   PARALLEL_FOR1(m_outputWS)
   for (int64_t i = 0; i < static_cast<int64_t>(nhistograms); ++i) {
-    m_outputWS->setX(i, binBoundaries);
+    m_outputWS->setBinEdges(i, binBoundaries);
     MantidVec &yOut = m_outputWS->dataY(i);
     for (size_t j = 0; j < ylength; ++j) {
       yOut[j] = 1.0; // Set everything to a value so that you can visualize the
@@ -334,10 +335,9 @@ void CreateSimulationWorkspace::createGroupingsFromTables(int *specTable,
 /**
  * @returns The bin bounadries for the new workspace
  */
-MantidVecPtr CreateSimulationWorkspace::createBinBoundaries() const {
+BinEdges CreateSimulationWorkspace::createBinBoundaries() const {
   const std::vector<double> rbparams = getProperty("BinParams");
-  MantidVecPtr binsPtr;
-  MantidVec &newBins = binsPtr.access();
+  MantidVec newBins;
   const int numBoundaries =
       Mantid::Kernel::VectorHelper::createAxisFromRebinParams(rbparams,
                                                               newBins);
@@ -346,7 +346,7 @@ MantidVecPtr CreateSimulationWorkspace::createBinBoundaries() const {
         "Error in BinParams - Gave invalid number of bin boundaries: " +
         std::to_string(numBoundaries));
   }
-  return binsPtr;
+  return BinEdges(std::move(newBins));
 }
 
 /**

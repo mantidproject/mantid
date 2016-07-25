@@ -143,12 +143,12 @@ std::map<string, string> PDFFourierTransform::validateInputs() {
 void PDFFourierTransform::exec() {
   // get input data
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  MantidVec inputQ = inputWS->dataX(0);     //  x for input
-  MantidVec inputDQ = inputWS->dataDx(0);   // dx for input
+  MantidVec inputQ = inputWS->dataX(0);                   //  x for input
+  HistogramData::HistogramDx inputDQ(inputQ.size(), 0.0); // dx for input
+  if (inputWS->sharedDx(0))
+    inputDQ = inputWS->dx(0);
   MantidVec inputFOfQ = inputWS->dataY(0);  //  y for input
   MantidVec inputDfOfQ = inputWS->dataE(0); // dy for input
-  if (inputDQ.empty())
-    inputDQ.assign(inputQ.size(), 0.);
 
   // transform input data into Q/MomentumTransfer
   const std::string inputXunit = inputWS->getAxis(0)->unit()->unitID();

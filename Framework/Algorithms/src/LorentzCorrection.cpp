@@ -68,14 +68,12 @@ void LorentzCorrection::exec() {
 
   const auto numHistos = inWS->getNumberHistograms();
   Progress prog(this, 0, 1, numHistos);
-  const bool isHist = inWS->isHistogramData();
 
   PARALLEL_FOR1(inWS)
   for (int64_t i = 0; i < int64_t(numHistos); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     const MantidVec &inY = inWS->readY(i);
-    const MantidVec &inX = inWS->readX(i);
 
     MantidVec &outY = outWS->dataY(i);
     MantidVec &outE = outWS->dataE(i);
@@ -98,16 +96,17 @@ void LorentzCorrection::exec() {
     const double sinTheta = std::sin(twoTheta / 2);
     double sinThetaSq = sinTheta * sinTheta;
 
+    const auto points = inWS->points(i);
+    const auto pos = std::find(cbegin(points), cend(points), 0.0);
+    if (pos != cend(points)) {
+      std::stringstream buffer;
+      buffer << "Cannot have zero values Wavelength. At workspace index: "
+             << pos - cbegin(points);
+      throw std::runtime_error(buffer.str());
+    }
     for (size_t j = 0; j < inY.size(); ++j) {
-      const double wL = isHist ? (0.5 * (inX[j] + inX[j + 1])) : inX[j];
-      if (wL == 0) {
-        std::stringstream buffer;
-        buffer << "Cannot have zero values Wavelength. At workspace index: "
-               << i;
-        throw std::runtime_error(buffer.str());
-      }
-
-      double weight = sinThetaSq / (wL * wL * wL * wL);
+      double weight =
+          sinThetaSq / (points[j] * points[j] * points[j] * points[j]);
       outY[j] *= weight;
       outE[j] *= weight;
     }

@@ -11,37 +11,20 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
 
-class CompositeFunctionTest_MocSpectrum : public ISpectrum {
+class CompositeFunctionTest_MocSpectrum : public SpectrumTester {
 public:
   CompositeFunctionTest_MocSpectrum(size_t nx, size_t ny)
-      : m_x(nx), m_y(ny), m_e(ny) {}
-
-  void clearData() override {}
-  void setData(const MantidVec &) override {}
-  void setData(const MantidVec &, const MantidVec &) override {}
-
-  void setData(const MantidVecPtr &) override {}
-  void setData(const MantidVecPtr &, const MantidVecPtr &) override {}
-
-  void setData(const MantidVecPtr::ptr_type &) override {}
-  void setData(const MantidVecPtr::ptr_type &,
-               const MantidVecPtr::ptr_type &) override {}
-
-  MantidVec &dataX() override { return m_x; }
-  MantidVec &dataY() override { return m_y; }
-  MantidVec &dataE() override { return m_e; }
-
-  const MantidVec &dataX() const override { return m_x; }
-  const MantidVec &dataY() const override { return m_y; }
-  const MantidVec &dataE() const override { return m_e; }
-
-  size_t getMemorySize() const override { return 0; }
-
-  MantidVec m_x, m_y, m_e;
+      : SpectrumTester(HistogramData::getHistogramXMode(nx, ny),
+                       HistogramData::Histogram::YMode::Counts) {
+    dataX().resize(nx);
+    dataY().resize(ny);
+    dataE().resize(ny);
+  }
 };
 
 class CompositeFunctionTest_MocMatrixWorkspace : public MatrixWorkspace {

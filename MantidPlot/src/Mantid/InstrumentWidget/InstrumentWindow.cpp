@@ -4,6 +4,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/UsageService.h"
 #include "TSVSerialiser.h"
 
 #include <QApplication>
@@ -33,6 +34,8 @@ InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
           SLOT(closeSafely()));
   connect(m_instrumentWidget, SIGNAL(clearingHandle()), this,
           SLOT(closeSafely()));
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Interface", "InstrumentView", false);
 }
 
 InstrumentWindow::~InstrumentWindow() {}

@@ -166,7 +166,7 @@ void FindCenterOfMassPosition2::exec() {
         continue;
 
       // Get the current spectrum
-      const MantidVec &YIn = inputWS->readY(i);
+      auto &YIn = inputWS->y(i);
       const V3D pos = det->getPos();
       double x = pos.X();
       double y = pos.Y();

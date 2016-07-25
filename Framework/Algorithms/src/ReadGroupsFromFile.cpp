@@ -146,7 +146,6 @@ void ReadGroupsFromFile::exec() {
                              " existing in instrument " + inst->getName());
   }
   setProperty("OutputWorkspace", localWorkspace);
-  return;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -174,7 +173,6 @@ void ReadGroupsFromFile::readGroupingFile(const std::string &filename) {
   }
   grFile.close();
   progress(0.7);
-  return;
 }
 
 //-----------------------------------------------------------------------------------------------

@@ -227,7 +227,6 @@ void SmoothNeighbours::findNeighboursRectangular() {
     setWeightingStrategy("Flat", Radius);
     nNeighbours = AdjX * AdjY - 1;
     findNeighboursUbiqutious();
-    return;
   }
 
   // Resize the vector we are setting
@@ -250,7 +249,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
   // Build a map to sort by the detectorID
   std::vector<std::pair<int, int>> v1;
   for (int i = 0; i < static_cast<int>(detList.size()); i++)
-    v1.push_back(std::pair<int, int>(detList[i]->getAtXY(0, 0)->getID(), i));
+    v1.emplace_back(detList[i]->getAtXY(0, 0)->getID(), i);
 
   // To sort in descending order
   if (sum)
@@ -287,7 +286,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
               auto mapEntry = pixel_to_wi.find(pixelID);
               if (mapEntry != pixel_to_wi.end()) {
                 size_t wi = mapEntry->second;
-                neighbours.push_back(weightedNeighbour(wi, smweight));
+                neighbours.emplace_back(wi, smweight);
                 // Count the total weight
                 totalWeight += smweight;
               }
@@ -421,7 +420,7 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
             noNeigh++;
             used[neighWI] = true;
           }
-          neighbours.push_back(weightedNeighbour(neighWI, weight));
+          neighbours.emplace_back(neighWI, weight);
           totalWeight += weight;
         }
       }
@@ -759,7 +758,6 @@ void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws) {
     }
   }
   this->setProperty("OutputWorkspace", outws2);
-  return;
 }
 //--------------------------------------------------------------------------------------------
 /** Execute the algorithm for a EventWorkspace input
@@ -818,8 +816,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws) {
   PARALLEL_CHECK_INTERUPT_REGION
 
   // Give the 0-th X bins to all the output spectra.
-  Kernel::cow_ptr<MantidVec> outX = inWS->refX(0);
-  outWS->setAllX(outX);
+  outWS->setAllX(HistogramData::BinEdges(inWS->refX(0)));
   if (expandSumAllPixels)
     spreadPixels(outWS);
 }

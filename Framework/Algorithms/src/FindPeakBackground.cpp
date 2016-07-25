@@ -1,14 +1,14 @@
 #include "MantidAlgorithms/FindPeakBackground.h"
-#include "MantidAlgorithms/FindPeaks.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/Statistics.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAlgorithms/FindPeaks.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Statistics.h"
 
 #include <sstream>
 
@@ -17,6 +17,8 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace std;
+using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::HistogramY;
 
 namespace Mantid {
 namespace Algorithms {
@@ -90,16 +92,16 @@ void FindPeakBackground::exec() {
   }
 
   // Generate output
-  const MantidVec &inpX = inpWS->readX(inpwsindex);
-  size_t sizex = inpWS->readX(inpwsindex).size();
-  size_t sizey = inpWS->readY(inpwsindex).size();
+  auto &inpX = inpWS->x(inpwsindex);
+  size_t sizex = inpWS->x(inpwsindex).size();
+  size_t sizey = inpWS->y(inpwsindex).size();
   size_t n = sizey;
   size_t l0 = 0;
 
   if (m_vecFitWindows.size() > 1) {
     Mantid::Algorithms::FindPeaks fp;
-    l0 = fp.getVectorIndex(inpX, m_vecFitWindows[0]);
-    n = fp.getVectorIndex(inpX, m_vecFitWindows[1]);
+    l0 = fp.getIndex(inpX, m_vecFitWindows[0]);
+    n = fp.getIndex(inpX, m_vecFitWindows[1]);
     if (n < sizey)
       n++;
   }
@@ -122,7 +124,7 @@ void FindPeakBackground::exec() {
 
   // Find background
 
-  const MantidVec &inpY = inpWS->readY(inpwsindex);
+  auto &inpY = inpWS->y(inpwsindex);
 
   double Ymean, Yvariance, Ysigma;
   MantidVec maskedY;
@@ -176,12 +178,12 @@ void FindPeakBackground::exec() {
     // for loop can start > 1 for multiple peaks
     vector<cont_peak> peaks;
     if (mask[0] == 1) {
-      peaks.push_back(cont_peak());
+      peaks.emplace_back();
       peaks.back().start = l0;
     }
     for (size_t l = 1; l < n - l0; ++l) {
       if (mask[l] != mask[l - 1] && mask[l] == 1) {
-        peaks.push_back(cont_peak());
+        peaks.emplace_back();
         peaks.back().start = l + l0;
       } else if (!peaks.empty()) {
         size_t ipeak = peaks.size() - 1;
@@ -228,8 +230,6 @@ void FindPeakBackground::exec() {
 
   // 4. Set the output
   setProperty("OutputWorkspace", m_outPeakTableWS);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -246,7 +246,7 @@ void FindPeakBackground::exec() {
 * @param out_bg2 :: a2 = 0
 */
 void FindPeakBackground::estimateBackground(
-    const MantidVec &X, const MantidVec &Y, const size_t i_min,
+    const HistogramX &X, const HistogramY &Y, const size_t i_min,
     const size_t i_max, const size_t p_min, const size_t p_max,
     const bool hasPeak, double &out_bg0, double &out_bg1, double &out_bg2) {
   // Validate input
@@ -385,8 +385,6 @@ void FindPeakBackground::estimateBackground(
 
   g_log.information() << "Estimated background: A0 = " << out_bg0
                       << ", A1 = " << out_bg1 << ", A2 = " << out_bg2 << "\n";
-
-  return;
 }
 //----------------------------------------------------------------------------------------------
 /** Calculate 4th moment

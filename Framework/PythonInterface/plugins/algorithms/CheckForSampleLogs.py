@@ -1,4 +1,6 @@
 #pylint: disable=invalid-name, no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty
 from mantid.kernel import Direction, logger
 

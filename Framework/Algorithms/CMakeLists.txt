@@ -34,6 +34,7 @@ set ( SRC_FILES
 	src/ChangeTimeZero.cpp
 	src/CheckWorkspacesMatch.cpp
 	src/ChopData.cpp
+	src/ClearCache.cpp
 	src/ClearInstrumentParameters.cpp
 	src/ClearMaskFlag.cpp
 	src/CloneWorkspace.cpp
@@ -77,6 +78,7 @@ set ( SRC_FILES
 	src/CreateTransmissionWorkspace.cpp
 	src/CreateTransmissionWorkspaceAuto.cpp
 	src/CreateWorkspace.cpp
+	src/CropToComponent.cpp
 	src/CropWorkspace.cpp
 	src/CrossCorrelate.cpp
 	src/CuboidGaugeVolumeAbsorption.cpp
@@ -314,7 +316,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AverageLogData.h
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
-    inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
+	inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalMuonDetectorPhases.h
 	inc/MantidAlgorithms/CalculateDIFC.h
@@ -331,6 +333,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ChangeTimeZero.h
 	inc/MantidAlgorithms/CheckWorkspacesMatch.h
 	inc/MantidAlgorithms/ChopData.h
+	inc/MantidAlgorithms/ClearCache.h
 	inc/MantidAlgorithms/ClearInstrumentParameters.h
 	inc/MantidAlgorithms/ClearMaskFlag.h
 	inc/MantidAlgorithms/CloneWorkspace.h
@@ -374,6 +377,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreateTransmissionWorkspace.h
 	inc/MantidAlgorithms/CreateTransmissionWorkspaceAuto.h
 	inc/MantidAlgorithms/CreateWorkspace.h
+	inc/MantidAlgorithms/CropToComponent.h
 	inc/MantidAlgorithms/CropWorkspace.h
 	inc/MantidAlgorithms/CrossCorrelate.h
 	inc/MantidAlgorithms/CuboidGaugeVolumeAbsorption.h
@@ -642,6 +646,7 @@ set ( TEST_FILES
 	ChangeTimeZeroTest.h
 	CheckWorkspacesMatchTest.h
 	ChopDataTest.h
+	ClearCacheTest.h
 	ClearInstrumentParametersTest.h
 	ClearMaskFlagTest.h
 	CloneWorkspaceTest.h
@@ -685,6 +690,7 @@ set ( TEST_FILES
 	CreateTransmissionWorkspaceAutoTest.h
 	CreateTransmissionWorkspaceTest.h
 	CreateWorkspaceTest.h
+	CropToComponentTest.h
 	CropWorkspaceTest.h
 	CuboidGaugeVolumeAbsorptionTest.h
 	CylinderAbsorptionTest.h
@@ -736,7 +742,7 @@ set ( TEST_FILES
 	GetDetOffsetsMultiPeaksTest.h
 	GetDetectorOffsetsTest.h
 	GetEiTest.h
-	GetEiV1Test.h    
+	GetEiV1Test.h
 	GetTimeSeriesLogInformationTest.h
 	GroupWorkspacesTest.h
 	HRPDSlabCanAbsorptionTest.h
@@ -759,8 +765,8 @@ set ( TEST_FILES
 	MaxEnt/MaxentEntropyPositiveValuesTest.h
 	MaxEnt/MaxentSpaceComplexTest.h
 	MaxEnt/MaxentSpaceRealTest.h
-	MaxEntTest.h
 	MaxEnt/MaxentTransformFourierTest.h
+	MaxEntTest.h
 	MaxMinTest.h
 	MayersSampleCorrectionStrategyTest.h
 	MayersSampleCorrectionTest.h
