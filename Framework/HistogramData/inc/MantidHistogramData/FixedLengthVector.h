@@ -50,12 +50,10 @@ public:
   FixedLengthVector(std::initializer_list<double> init) : m_data(init) {
     Validator<T>::checkValidity(m_data);
   }
-  FixedLengthVector(const FixedLengthVector &other) : m_data(other.m_data) {}
-  FixedLengthVector(FixedLengthVector &&other) {
-    m_data = std::move(other.m_data);
-  }
+  FixedLengthVector(const FixedLengthVector &) = default;
+  FixedLengthVector(FixedLengthVector &&) = default;
   FixedLengthVector(const std::vector<double> &other) : m_data(other) {}
-  FixedLengthVector(std::vector<double> &&other) { m_data = std::move(other); }
+  FixedLengthVector(std::vector<double> &&other) : m_data(std::move(other)) {}
   template <class InputIt>
   FixedLengthVector(InputIt first, InputIt last)
       : m_data(first, last) {}
