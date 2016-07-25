@@ -230,6 +230,8 @@ void export_MatrixWorkspace() {
       .def("getAxis", &MatrixWorkspace::getAxis,
            (arg("self"), arg("axis_index")), return_internal_reference<>(),
            "Get a pointer to a workspace axis")
+      .def("isHistogramData", &MatrixWorkspace::isHistogramData, arg("self"),
+           "Returns True if this is considered to be binned data.")
       .def("isDistribution", (bool (MatrixWorkspace::*)() const) &
                                  MatrixWorkspace::isDistribution,
            arg("self"), "Returns the status of the distribution flag")
