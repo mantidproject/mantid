@@ -46,10 +46,10 @@ class BayesStretch(PythonAlgorithm):
                              doc='Name of the resolution input Workspace')
 
         self.declareProperty(name='EMin', defaultValue=-0.2,
-                             doc='The start of the fit range. Default=-0.2')
+                             doc='The start of the fitting range')
 
         self.declareProperty(name='EMax', defaultValue=0.2,
-                             doc='The end of the fit range. Default=0.2')
+                             doc='The end of the fitting range')
 
         self.declareProperty(name='SampleBins', defaultValue=1,
                              doc='The number of sample bins')
@@ -62,10 +62,10 @@ class BayesStretch(PythonAlgorithm):
                              doc='Fit option for the type of background')
 
         self.declareProperty(name='NumberSigma', defaultValue=50,
-                             doc='Number of sigma values. Default=50')
+                             doc='Number of sigma values')
 
         self.declareProperty(name='NumberBeta', defaultValue=30,
-                             doc='Number of beta values. Default=30')
+                             doc='Number of beta values')
 
         self.declareProperty(name='Loop', defaultValue=True, doc='Switch Sequential fit On/Off')
 
