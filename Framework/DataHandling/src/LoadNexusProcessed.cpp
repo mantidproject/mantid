@@ -740,14 +740,14 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
 
       // Set the X axis
       if (this->m_shared_bins)
-        el.setSharedX(this->m_xbins.cowData());
+        el.setX(this->m_xbins.cowData());
       else {
         MantidVec x;
         x.resize(xbins.dim1());
         for (int i = 0; i < xbins.dim1(); i++)
           x[i] = xbins(static_cast<int>(wi), i);
         // Workspace and el was just created, so we can just set a new histogram
-        el.setSharedX(make_cow<HistogramData::HistogramX>(x));
+        el.setX(make_cow<HistogramData::HistogramX>(x));
       }
     }
 
