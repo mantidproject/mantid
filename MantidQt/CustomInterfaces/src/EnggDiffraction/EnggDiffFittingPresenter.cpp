@@ -724,26 +724,24 @@ std::string EnggDiffFittingPresenter::functionStrFactory(
 
 void EnggDiffFittingPresenter::browsePeaksToFit() {
   try {
-    QString prevPath = QString::fromStdString(m_view->focusingDir());
-    if (prevPath.isEmpty()) {
-      prevPath = QString::fromStdString(m_view->getPreviousDir());
+    auto prevPath = m_view->focusingDir();
+    if (prevPath.empty()) {
+      prevPath = m_view->getPreviousDir();
     }
-
-    std::string path = m_view->getOpenFile(prevPath.toStdString());
-
+    std::string path = m_view->getOpenFile(prevPath);
     if (path.empty()) {
       return;
     }
 
     m_view->setPreviousDir(path);
-
     std::string peaksData = readPeaksFile(path);
-
     m_view->setPeakList(peaksData);
-  } catch (...) {
+
+  } catch (std::runtime_error &re) {
     m_view->userWarning(
         "Unable to import the peaks from a file: ",
-        "File corrupted or could not be opened. Please try again");
+        "File corrupted or could not be opened. Please try again" +
+            static_cast<std::string>(re.what()) + '\n');
     return;
   }
 }
@@ -757,26 +755,27 @@ void EnggDiffFittingPresenter::addPeakToList() {
     stream << std::fixed << std::setprecision(4) << peakCentre;
     auto strPeakCentre = stream.str();
 
-    QString curExpPeaksList =
-        QString::fromStdString(m_view->fittingPeaksData());
-    QString comma = ",";
+    auto curExpPeaksList = m_view->fittingPeaksData();
 
-    if (!curExpPeaksList.isEmpty()) {
+    std::string comma = ",";
+
+    if (!curExpPeaksList.empty()) {
       // when further peak added to list
-      std::string expPeakStr = curExpPeaksList.toStdString();
-      std::string lastTwoChr = expPeakStr.substr(expPeakStr.size() - 2);
-      auto lastChr = expPeakStr.back();
+
+      std::string lastTwoChr =
+          curExpPeaksList.substr(curExpPeaksList.size() - 2);
+      auto lastChr = curExpPeaksList.back();
       if (lastChr == ',' || lastTwoChr == ", ") {
-        curExpPeaksList.append(QString::fromStdString(strPeakCentre));
+        curExpPeaksList.append(strPeakCentre);
       } else {
-        curExpPeaksList.append(comma + QString::fromStdString(strPeakCentre));
+        curExpPeaksList.append(comma + strPeakCentre);
       }
-      m_view->setPeakList(curExpPeaksList.toStdString());
+      m_view->setPeakList(curExpPeaksList);
     } else {
       // when new peak given when list is empty
-      curExpPeaksList.append(QString::fromStdString(strPeakCentre));
+      curExpPeaksList.append(strPeakCentre);
       curExpPeaksList.append(comma);
-      m_view->setPeakList(curExpPeaksList.toStdString());
+      m_view->setPeakList(curExpPeaksList);
     }
   }
 }
@@ -795,10 +794,11 @@ void EnggDiffFittingPresenter::savePeakList() {
     }
 
     fittingWriteFile(path);
-  } catch (...) {
+  } catch (std::runtime_error &re) {
     m_view->userWarning(
         "Unable to save the peaks file: ",
-        "Invalid file path or or could not be saved. Please try again");
+        "Invalid file path or could not be saved. Error description : " +
+            static_cast<std::string>(re.what()) + '\n');
     return;
   }
 }

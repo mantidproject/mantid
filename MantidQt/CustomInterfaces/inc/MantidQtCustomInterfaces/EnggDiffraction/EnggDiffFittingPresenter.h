@@ -76,16 +76,6 @@ public:
                      std::string tableName, size_t row, std::string &startX,
                      std::string &endX);
 
-  void browsePeaksToFit();
-
-  void addPeakToList();
-
-  void savePeakList();
-
-  std::string readPeaksFile(std::string fileDir);
-
-  void fittingWriteFile(const std::string &fileDir);
-
   void plotFitPeaksCurves();
 
   void runEvaluateFunctionAlg(const std::string &bk2BkExpFunction,
@@ -154,6 +144,16 @@ private:
 
   void enableMultiRun(std::string firstRun, std::string lastRun,
                       std::vector<std::string> &fittingRunNoDirVec);
+
+  void browsePeaksToFit();
+
+  void addPeakToList();
+
+  void savePeakList();
+
+  std::string readPeaksFile(std::string fileDir);
+
+  void fittingWriteFile(const std::string &fileDir);
 
   // whether to use AlignDetectors to convert units
   static const bool g_useAlignDetectors;
