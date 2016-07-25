@@ -158,4 +158,22 @@ private:
   }
 };
 
+class ConvertToPointDataTestPerformance : public CxxTest::TestSuite {
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ConvertToPointDataTestPerformance *createSuite() {
+    return new ConvertToPointDataTestPerformance();
+  }
+
+  static void destroySuite(ConvertToPointDataTestPerformance *suite) { delete suite; }
+
+  void setUp() { }
+
+  void tearDown() { }
+
+private:
+};
+
 #endif // CONVERTTOPONTDATATEST_H_

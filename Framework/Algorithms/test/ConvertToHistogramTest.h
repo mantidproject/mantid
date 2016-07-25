@@ -123,4 +123,22 @@ private:
   }
 };
 
+class ConvertToHistogramTestPerformance : public CxxTest::TestSuite {
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ConvertToHistogramTestPerformance *createSuite() {
+    return new ConvertToHistogramTestPerformance();
+  }
+
+  static void destroySuite(ConvertToHistogramTestPerformance *suite) { delete suite; }
+
+  void setUp() { }
+
+  void tearDown() { }
+
+private:
+};
+
 #endif // CONVERTTOHISTOGRAMTEST_H_
