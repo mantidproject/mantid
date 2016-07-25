@@ -9,10 +9,12 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidCrystal/SCDPanelErrors.h"
 #include <fstream>
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/ReducedCell.h"
+#include <boost/math/special_functions/round.hpp>
 #include <Poco/File.h>
 #include <sstream>
 
@@ -605,9 +607,13 @@ void SCDCalibratePanels::exec() {
       }
     }
   }
-
-  int nPeaks = peaksWs->getNumberPeaks();
-  std::string cell_type = getProperty("CellType");
+  IAlgorithm_sptr ub_alg;
+  try {
+    ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
+  } catch (Exception::NotFoundError &) {
+    g_log.error("Can't locate CalculateUMatrix algorithm");
+    throw;
+  }
   double a = getProperty("a");
   double b = getProperty("b");
   double c = getProperty("c");
@@ -624,656 +630,80 @@ void SCDCalibratePanels::exec() {
     alpha = latt.alpha();
     beta = latt.beta();
     gamma = latt.gamma();
-  } /*else {
-    boost::shared_ptr<Algorithm> alg =
-        createChildAlgorithm("FindUBUsingLatticeParameters", .2, .9, true);
-    alg->setProperty("PeaksWorkspace", peaksWs);
-    alg->setProperty("a", a);
-    alg->setProperty("b", b);
-    alg->setProperty("c", c);
-    alg->setProperty("alpha", alpha);
-    alg->setProperty("beta", beta);
-    alg->setProperty("gamma", gamma);
-    alg->setProperty("NumInitial", 15);
-    alg->setProperty("Tolerance", 0.12);
-    alg->executeAsChildAlg();
-  }*/
-  double tolerance = getProperty("tolerance");
-
-  string DetCalFileName = getProperty("DetCalFilename");
-  if (Poco::File(DetCalFileName).exists())
-    Poco::File(DetCalFileName).remove();
-
-  bool useL0 = getProperty("useL0");
-  bool useTimeOffset = getProperty("useTimeOffset");
-  int nIter = 1;
-  if (useL0 || useTimeOffset)
-    nIter = 2;
-  bool use_PanelWidth = getProperty("usePanelWidth");
-  bool use_PanelHeight = getProperty("usePanelHeight");
-  bool use_PanelPosition = getProperty("usePanelPosition");
-  bool use_PanelOrientation = getProperty("usePanelOrientation");
-  double SampleXoffset = getProperty("SampleXoffset");
-  double SampleYoffset = getProperty("SampleYoffset");
-  double SampleZoffset = getProperty("SampleZoffset");
-
-  string Grouping = getProperty("PanelGroups");
-  string bankPrefix = getProperty("PanelNamePrefix");
-  string bankingCode = getProperty("Grouping");
-
-  //----------------- Set Up Bank Name Vectors -------------------------
-  set<string, compareBanks> AllBankNames;
-  for (int i = 0; i < nPeaks; ++i)
-    AllBankNames.insert(peaksWs->getPeak(i).getBankName());
-
-  vector<vector<string>> Groups;
-  CalculateGroups(AllBankNames, Grouping, bankPrefix, bankingCode, Groups);
-
-  //----------------- Calculate & Create Calculated vs Theoretical
-  // workspaces------------------,);
-  int nGroups = static_cast<int>(AllBankNames.size());
-  MatrixWorkspace_sptr ColWksp =
-      Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", nGroups,
-                                                       nPeaks, nPeaks);
-  MatrixWorkspace_sptr RowWksp =
-      Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", nGroups,
-                                                       nPeaks, nPeaks);
-  MatrixWorkspace_sptr TofWksp =
-      Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", nGroups,
-                                                       nPeaks, nPeaks);
-  nGroups = static_cast<int>(Groups.size());
-
-  double chisqSum = 0;
-  int NDofSum = 0;
-  if (!GoodStart(peaksWs, a, b, c, alpha, beta, gamma, tolerance)) {
-    g_log.warning() << "**** Indexing is NOT compatible with given lattice "
-                       "parameters******\n";
-    g_log.warning()
-        << "        Index with conventional orientation matrix???\n";
   }
+  ub_alg->setProperty("PeaksWorkspace", peaksWs);
+  ub_alg->setProperty("a", a);
+  ub_alg->setProperty("b", b);
+  ub_alg->setProperty("c", c);
+  ub_alg->setProperty("alpha", alpha);
+  ub_alg->setProperty("beta", beta);
+  ub_alg->setProperty("gamma", gamma);
+  ub_alg->executeAsChildAlg();
 
-  //----------- Initialize peaksWorkspace, initial parameter values
-  // etc.---------
-  boost::shared_ptr<const Instrument> instrument =
-      peaksWs->getPeak(0).getInstrument();
-
-  // Time offset from property
-  const API::Run &run = peaksWs->run();
-  double T0 = 0.0;
-  if (run.hasProperty("T0")) {
-    Kernel::Property *prop = run.getProperty("T0");
-    T0 = boost::lexical_cast<double, std::string>(prop->value());
-    if (T0 != 0) {
-      g_log.notice() << "T0 = " << T0 << '\n';
+  for (int i = int(peaksWs->getNumberPeaks()) - 1; i >= 0; --i) {
+    Peak peak = peaksWs->getPeak(i);
+    if (peak.getHKL() == V3D(0,0,0) || peak.getBankName() != "bank13") {
+      peaksWs->removePeak(i);
     }
   }
-  if ((string)getProperty("PreProcessInstrument") ==
-      "C)Apply a LoadParameter.xml type file")
-    T0 = getProperty("InitialTimeOffset"); //!*****
+  int nPeaks = peaksWs->getNumberPeaks();
 
-  double L0 = peaksWs->getPeak(0).getL1();
-  std::ofstream outfile(DetCalFileName);
-  g_log.debug() << "Initial L0,T0=" << L0 << "," << T0 << '\n';
-  std::vector<std::string> detcal;
+  MatrixWorkspace_sptr q3DWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1,
+                                                 nPeaks*3, nPeaks*3));
 
-  for (auto iIter = 0; iIter != nIter; ++iIter) {
-    detcal.clear();
-    PARALLEL_FOR1(peaksWs)
-    for (int iGr = 0; iGr < nGroups; iGr++) {
-      PARALLEL_START_INTERUPT_REGION
-      auto group = Groups.begin() + iGr;
-      vector<string> banksVec;
-      for (auto &bankName : *group) {
-        banksVec.push_back(bankName);
-      }
-      //------------------ Set Up Workspace for IFitFunction Fit---------------
-      vector<int> bounds;
-      Workspace2D_sptr ws = calcWorkspace(peaksWs, banksVec, tolerance, bounds);
-      double T0_bank = T0;
-      double L0_bank = L0;
-      boost::shared_ptr<const Instrument> PreCalibinstrument =
-          GetNewCalibInstrument(instrument,
-                                (string)getProperty("PreProcessInstrument"),
-                                (string)getProperty("PreProcFilename"), T0_bank,
-                                L0_bank, banksVec);
-      V3D samplePos =
-          peaksWs->getPeak(0).getInstrument()->getSample()->getPos();
+    auto &outSpec = q3DWS->getSpectrum(0);
+    MantidVec &yVec = outSpec.dataY();
+    MantidVec &xVec = outSpec.dataX();
 
-      string PeakWSName = getPropertyValue("PeakWorkspace");
-      if (PeakWSName.length() < 1) {
-        PeakWSName = "xxx";
-        AnalysisDataService::Instance().addOrReplace("xxx", peaksWs);
-      }
-
-      int NGroups = 1; //(int)Groups.size();
-      double detWidthScale0, detHeightScale0, Xoffset0, Yoffset0, Zoffset0,
-          Xrot0, Yrot0, Zrot0;
-
-      //------------------- For each Group set up Function,
-      //--------------------------
-      //---------------Ties, and Constraint Properties for Fit
-      // algorithm--------------------
-
-      // set up the string for specifying groups
-      string BankNameString;
-      // for (auto group = Groups.begin(); group != Groups.end(); ++group) {
-      // if (group != Groups.begin())
-      // BankNameString += "!";
-      for (auto bank = group->begin(); bank != group->end(); ++bank) {
-        if (bank != group->begin())
-          BankNameString += "/";
-
-        BankNameString += (*bank);
-      }
-      //}
-
-      int RotGroups = 0;
-      if (getProperty("RotateCenters"))
-        RotGroups = 1;
-      int SampOffsets = 0;
-      if (getProperty("AllowSampleShift"))
-        SampOffsets = 1;
-
-      // first round of function setup
-      IFunction_sptr iFunc =
-          FunctionFactory::Instance().createFunction("SCDPanelErrors");
-      iFunc->setAttributeValue("PeakWorkspaceName", PeakWSName);
-      iFunc->setAttributeValue("a", a);
-      iFunc->setAttributeValue("b", b);
-      iFunc->setAttributeValue("c", c);
-      iFunc->setAttributeValue("alpha", alpha);
-      iFunc->setAttributeValue("beta", beta);
-      iFunc->setAttributeValue("gamma", gamma);
-      iFunc->setAttributeValue("NGroups", NGroups);
-      iFunc->setAttributeValue("BankNames", BankNameString);
-      iFunc->setAttributeValue("startX", -1);
-      iFunc->setAttributeValue("endX", -1);
-      iFunc->setAttributeValue("RotateCenters", RotGroups);
-      iFunc->setAttributeValue("SampleOffsets", SampOffsets);
-      iFunc->setParameter("l0", L0_bank);
-      iFunc->setParameter("t0", T0_bank);
-
-      double maxXYOffset = getProperty("MaxPositionChange_meters");
-
-      boost::shared_ptr<const RectangularDetector> bank_rect;
-
-      string name = group->front();
-      boost::shared_ptr<const IComponent> bank_cmp =
-          instrument->getComponentByName(name);
-      bank_rect =
-          boost::dynamic_pointer_cast<const RectangularDetector>(bank_cmp);
-
-      if (!bank_rect) {
-        g_log.error("No Rectangular detector bank " + banksVec[0] +
-                    " in instrument");
-        throw invalid_argument("No Rectangular detector bank " + banksVec[0] +
-                               " in instrument");
-      }
-
-      // if( it1 == (*itv).begin())
-      CalcInitParams(bank_rect, instrument, PreCalibinstrument, detWidthScale0,
-                     detHeightScale0, Xoffset0, Yoffset0, Zoffset0, Xrot0,
-                     Yrot0, Zrot0);
-
-      // --- set Function property ----------------------
-      iFunc->setParameter("f0_detWidthScale", detWidthScale0);
-      iFunc->setParameter("f0_detHeightScale", detHeightScale0);
-      iFunc->setParameter("f0_Xoffset", Xoffset0);
-      iFunc->setParameter("f0_Yoffset", Yoffset0);
-      iFunc->setParameter("f0_Zoffset", Zoffset0);
-      iFunc->setParameter("f0_Xrot", Xrot0);
-      iFunc->setParameter("f0_Yrot", Yrot0);
-      iFunc->setParameter("f0_Zrot", Zrot0);
-
-      set<string> MyBankNames;
-      for (int i = 0; i < nPeaks; ++i)
-        MyBankNames.insert(banksVec[0]);
-      int startX = bounds[0];
-      int endXp1 = bounds[group->size()];
-      if (endXp1 - startX < 13) {
-        g_log.error() << "Bank Group " << BankNameString
-                      << " does not have enough peaks for fitting\n";
-        saveIsawDetCal(instrument, MyBankNames, T0_bank,
-                       DetCalFileName + std::to_string(iGr));
-        continue;
-      }
-
-      //---------- setup ties ----------------------------------
-      tie(iFunc, !use_PanelWidth, "f0_detWidthScale", detWidthScale0);
-      tie(iFunc, !use_PanelHeight, "f0_detHeightScale", detHeightScale0);
-      tie(iFunc, !use_PanelPosition, "f0_Xoffset", Xoffset0);
-      tie(iFunc, !use_PanelPosition, "f0_Yoffset", Yoffset0);
-      tie(iFunc, !use_PanelPosition, "f0_Zoffset", Zoffset0);
-      tie(iFunc, !use_PanelOrientation, "f0_Xrot", Xrot0);
-      tie(iFunc, !use_PanelOrientation, "f0_Yrot", Yrot0);
-      tie(iFunc, !use_PanelOrientation, "f0_Zrot", Zrot0);
-
-      //--------------- setup constraints ------------------------------
-      constrain(iFunc, "l0", (MIN_DET_HW_SCALE * L0_bank),
-                (MAX_DET_HW_SCALE * L0_bank));
-      constrain(iFunc, "t0", -5., 5.);
-
-      constrain(iFunc, "f0_detWidthScale", MIN_DET_HW_SCALE * detWidthScale0,
-                MAX_DET_HW_SCALE * detWidthScale0);
-      constrain(iFunc, "f0_detHeightScale", MIN_DET_HW_SCALE * detHeightScale0,
-                MAX_DET_HW_SCALE * detHeightScale0);
-      constrain(iFunc, "f0_Xoffset", -1. * maxXYOffset + Xoffset0,
-                maxXYOffset + Xoffset0);
-      constrain(iFunc, "f0_Yoffset", -1. * maxXYOffset + Yoffset0,
-                maxXYOffset + Yoffset0);
-      constrain(iFunc, "f0_Zoffset", -1. * maxXYOffset + Zoffset0,
-                maxXYOffset + Zoffset0);
-
-      double MaxRotOffset = getProperty("MaxRotationChangeDegrees");
-      constrain(iFunc, "f0_Xrot", -1. * MaxRotOffset, MaxRotOffset);
-      constrain(iFunc, "f0_Yrot", -1. * MaxRotOffset, MaxRotOffset);
-      constrain(iFunc, "f0_Zrot", -1. * MaxRotOffset, MaxRotOffset);
-      //} // for vector< string > in Groups
-
-      // Function supports setting the sample position even when it isn't be
-      // refined
-      iFunc->setAttributeValue("SampleX", samplePos.X() + SampleXoffset);
-      iFunc->setAttributeValue("SampleY", samplePos.Y() + SampleYoffset);
-      iFunc->setAttributeValue("SampleZ", samplePos.Z() + SampleZoffset);
-
-      // Constraints for sample offsets
-      if (getProperty("AllowSampleShift")) {
-        maxXYOffset = getProperty("MaxSamplePositionChangeMeters");
-        constrain(iFunc, "SampleX", samplePos.X() + SampleXoffset - maxXYOffset,
-                  samplePos.X() + SampleXoffset + maxXYOffset);
-        constrain(iFunc, "SampleY", samplePos.Y() + SampleYoffset - maxXYOffset,
-                  samplePos.Y() + SampleYoffset + maxXYOffset);
-        constrain(iFunc, "SampleZ", samplePos.Z() + SampleZoffset - maxXYOffset,
-                  samplePos.Z() + SampleZoffset + maxXYOffset);
-      } else {
-        tie(iFunc, true, "SampleX", samplePos.X() + SampleXoffset);
-        tie(iFunc, true, "SampleY", samplePos.Y() + SampleYoffset);
-        tie(iFunc, true, "SampleZ", samplePos.Z() + SampleZoffset);
-      }
-
-      tie(iFunc, !useL0, "l0", L0_bank);
-      tie(iFunc, !useTimeOffset, "t0", T0_bank);
-
-      //--------------------- Set up Fit Algorithm and
-      // Execute-------------------
-      boost::shared_ptr<Algorithm> fit_alg =
-          createChildAlgorithm("Fit", .2, .9, true);
-
-      if (!fit_alg)
-        throw invalid_argument("Cannot find Fit algorithm");
-      fit_alg->initialize();
-
-      int Niterations = getProperty("NumIterations");
-      std::string minimizerError = getProperty("MinimizerError");
-      std::string minimizer = getProperty("Minimizer");
-      fit_alg->setProperty("Function", iFunc);
-      fit_alg->setProperty("MaxIterations", Niterations);
-      fit_alg->setProperty("InputWorkspace", ws);
-      fit_alg->setProperty("Output", "out");
-      fit_alg->setProperty("CreateOutput", true);
-      fit_alg->setProperty("CalcErrors", false);
-      fit_alg->setPropertyValue("Minimizer", minimizer + ",AbsError=" +
-                                                 minimizerError + ",RelError=" +
-                                                 minimizerError);
-      fit_alg->executeAsChildAlg();
-
-      PARALLEL_CRITICAL(afterFit) {
-        MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
-        // AnalysisDataService::Instance().addOrReplace("out"+boost::lexical_cast<std::string>(iGr),
-        // fitWS);
-        g_log.debug() << "Finished executing Fit algorithm\n";
-        string OutputStatus = fit_alg->getProperty("OutputStatus");
-        g_log.notice() << BankNameString << " Output Status=" << OutputStatus
-                       << "\n";
-
-        //--------------------- Get and Process Results -----------------------
-        double chisq = fit_alg->getProperty("OutputChi2overDoF");
-        chisqSum += chisq;
-
-        if (chisq > 1) {
-          g_log.warning() << "************* This is a large chi squared value "
-                             "************\n";
-          g_log.warning()
-              << "    the indexing may have been using an incorrect\n";
-          g_log.warning() << "    orientation matrix, instrument geometry or "
-                             "goniometer info\n";
-        }
-        ITableWorkspace_sptr RRes = fit_alg->getProperty("OutputParameters");
-        vector<double> params;
-        vector<double> errs;
-        vector<string> names;
-        double sigma = sqrt(chisq);
-
-        if (chisq < 0 || chisq != chisq)
-          sigma = -1;
-        string fieldBaseNames =
-            ";l0;t0;detWidthScale;detHeightScale;Xoffset;Yoffset;"
-            "Zoffset;Xrot;Yrot;Zrot;";
-        if (getProperty("AllowSampleShift"))
-          fieldBaseNames += "SampleX;SampleY;SampleZ;";
-        for (size_t prm = 0; prm < RRes->rowCount(); ++prm) {
-          string namee = RRes->getRef<string>("Name", prm);
-          size_t dotPos = namee.find('_');
-          if (dotPos >= namee.size())
-            dotPos = 0;
-          else
-            dotPos++;
-          string Field = namee.substr(dotPos);
-          size_t FieldNum = fieldBaseNames.find(";" + Field + ";");
-          if (FieldNum > fieldBaseNames.size())
-            continue;
-          if (dotPos != 0) {
-            int col = atoi(namee.substr(1, dotPos).c_str());
-            if (col < 0 || col >= NGroups)
-              continue;
-          }
-          names.push_back(namee);
-          params.push_back(RRes->getRef<double>("Value", prm));
-          double err = RRes->getRef<double>("Error", prm);
-          errs.push_back(sigma * err);
-        }
-
-        //------------------- Report chi^2 value --------------------
-        int nVars = 8; // NGroups;
-
-        if (!use_PanelWidth)
-          nVars--;
-        if (!use_PanelHeight)
-          nVars--;
-        if (!use_PanelPosition)
-          nVars -= 3;
-        if (!use_PanelOrientation)
-          nVars -= 3;
-        nVars *= NGroups;
-        nVars += 2;
-
-        if (!useL0)
-          nVars--;
-        if (!useTimeOffset)
-          nVars--;
-
-        // g_log.notice() << "      nVars=" <<nVars<< '\n';
-        int NDof = (static_cast<int>(ws->dataX(0).size()) - nVars);
-        NDofSum = +NDof;
-
-        map<string, double> result;
-
-        for (size_t i = 0; i < min<size_t>(params.size(), names.size()); ++i) {
-          result[names[i]] = params[i];
-        }
-
-        g_log.notice() << BankNameString << " ChiSqoverDoF =" << chisq
-                       << " NDof =" << NDof << " l0 = " << result["l0"]
-                       << " T0 = " << result["t0"]
-                       << " peaks = " << endXp1 - startX << "\n";
-
-        //--------------------- Create Result Table Workspace-------------------
-        this->progress(.92, "Creating Results table");
-        createResultWorkspace(nGroups, iGr + 1, names, params, errs);
-
-        //---------------- Create new instrument with ------------------------
-        //--------------new parameters to SAVE to files---------------------
-
-        auto pmap = boost::make_shared<ParameterMap>();
-        boost::shared_ptr<const ParameterMap> pmapOld =
-            instrument->getParameterMap();
-        boost::shared_ptr<const Instrument> NewInstrument =
-            boost::make_shared<Instrument>(instrument->baseInstrument(), pmap);
-
-        boost::shared_ptr<const RectangularDetector> bank_rect;
-        double rotx, roty, rotz;
-
-        rotx = result["f0_Xrot"];
-        roty = result["f0_Yrot"];
-        rotz = result["f0_Zrot"];
-
-        Quat newRelRot = Quat(rotx, V3D(1, 0, 0)) * Quat(roty, V3D(0, 1, 0)) *
-                         Quat(rotz, V3D(0, 0, 1)); //*RelRot;
-
-        FixUpBankParameterMap((banksVec), NewInstrument,
-                              V3D(result["f0_Xoffset"], result["f0_Yoffset"],
-                                  result["f0_Zoffset"]),
-                              newRelRot, result["f0_detWidthScale"],
-                              result["f0_detHeightScale"], pmapOld,
-                              getProperty("RotateCenters"));
-
-        //} // For @ group
-
-        V3D sampPos(
-            NewInstrument->getSample()->getPos()); // should be (0,0,0)???
-        if (getProperty("AllowSampleShift"))
-          sampPos =
-              V3D(result["SampleX"], result["SampleY"], result["SampleZ"]);
-
-        FixUpSourceParameterMap(NewInstrument, result["l0"], sampPos, pmapOld);
-
-        //---------------------- Save new instrument to DetCal--------------
-        this->progress(.94, "Saving detcal file");
-        saveIsawDetCal(NewInstrument, MyBankNames, result["t0"],
-                       DetCalFileName + std::to_string(iGr));
-      }
-      PARALLEL_END_INTERUPT_REGION
-    }
-    PARALLEL_CHECK_INTERUPT_REGION
-    std::vector<double> l0vec, t0vec;
-    std::string line, seven;
-    for (int iGr = 0; iGr < nGroups; iGr++) {
-      std::ifstream infile(DetCalFileName + std::to_string(iGr));
-      while (std::getline(infile, line)) {
-        if (iGr == 0 && iIter == nIter - 1) {
-          if (line[0] == '#' || line[0] == '6')
-            outfile << line << "\n";
-        }
-        if (line[0] == '7') {
-          double L0bank, T0bank;
-          std::stringstream(line) >> seven >> L0bank >> T0bank;
-          l0vec.push_back(L0bank);
-          t0vec.push_back(T0bank);
-        } else if (line[0] == '5')
-          detcal.push_back(line);
-      }
-      infile.close();
-      if (Poco::File(DetCalFileName + std::to_string(iGr)).exists())
-        Poco::File(DetCalFileName + std::to_string(iGr)).remove();
-    }
-    if (useL0) {
-      removeOutliers(l0vec);
-      Statistics stats = getStatistics(l0vec);
-      L0 = stats.mean * 0.01; // cm when read from file
-      useL0 = false;
-    }
-    if (useTimeOffset) {
-      removeOutliers(t0vec);
-      Statistics stats = getStatistics(t0vec);
-      T0 = stats.mean;
-      // set T0 in the run parameters
-      API::Run &m_run = peaksWs->mutableRun();
-      m_run.addProperty<double>("T0", T0, true);
-      useTimeOffset = false;
-    }
-  }
-  L0 *= 100; // ISAW uses cm
-  outfile << "7  " << std::setprecision(4) << std::fixed << L0;
-  outfile << std::setw(13) << std::setprecision(3) << T0 << '\n';
-  outfile << "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT   DEPTH   DETD   CenterX "
-             "  CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY "
-             "     UpZ\n";
-  for (vector<std::string>::const_iterator itdet = detcal.begin();
-       itdet != detcal.end(); ++itdet)
-    outfile << *itdet << "\n";
-  outfile.close();
-
-  setProperty("ColWorkspace", ColWksp);
-  setProperty("RowWorkspace", RowWksp);
-  setProperty("TofWorkspace", TofWksp);
-  setProperty("ChiSqOverDOF", chisqSum);
-  setProperty("DOF", NDofSum);
-
-  set<string> bankNames;
-  for (int i = 0; i < nPeaks; ++i) {
-    IPeak &peak = peaksWs->getPeak(i);
-    instrument = peak.getInstrument();
-    LoadISawDetCal(instrument, bankNames, T0, L0, DetCalFileName, "bank");
-    peak.setInstrument(instrument);
-    peak.setDetectorID(peak.getDetectorID());
+  OrientedLattice lattice = peaksWs->mutableSample().getOrientedLattice();
+  for (int i = 0; i < nPeaks; i++) {
+    Peak peak = peaksWs->getPeak(i);
+    V3D hkl =  V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
+         boost::math::iround(peak.getL()));
+    V3D Q2 = lattice.qFromHKL(hkl);
+    xVec[i*3] = i*3;
+    xVec[i*3+1] = i*3+1;
+    xVec[i*3+2] = i*3+2;
+    yVec[i*3] = Q2.X();
+    yVec[i*3+1] = Q2.Y();
+    yVec[i*3+2] = Q2.Z();
   }
 
-  //-----------------------Save new instrument to  xml(for LoadParameterFile)
-  // files----------
-  this->progress(.96, "Saving xml param file");
-  string XmlFileName = getProperty("XmlFilename");
-  saveXmlFile(XmlFileName, Groups, peaksWs->getInstrument());
-
-  IFunction_sptr fn =
-      FunctionFactory::Instance().createFunction("LatticeFunction");
-  fn->setAttributeValue("LatticeSystem", cell_type);
-  fn->addTies("ZeroShift=0.0");
-  fn->setParameter("a", a);
-  if (cell_type == ReducedCell::TRICLINIC() ||
-      cell_type == ReducedCell::MONOCLINIC() ||
-      cell_type == ReducedCell::ORTHORHOMBIC()) {
-    fn->setParameter("b", b);
-  }
-  if (cell_type == ReducedCell::TRICLINIC() ||
-      cell_type == ReducedCell::TETRAGONAL() ||
-      cell_type == ReducedCell::ORTHORHOMBIC() ||
-      cell_type == ReducedCell::HEXAGONAL() ||
-      cell_type == ReducedCell::MONOCLINIC()) {
-    fn->setParameter("c", c);
-  }
-  if (cell_type == ReducedCell::TRICLINIC() ||
-      cell_type == ReducedCell::RHOMBOHEDRAL()) {
-    fn->setParameter("Alpha", alpha);
-  }
-  if (cell_type == ReducedCell::TRICLINIC() ||
-      cell_type == ReducedCell::MONOCLINIC()) {
-    fn->setParameter("Beta", beta);
-  }
-  if (cell_type == ReducedCell::TRICLINIC()) {
-    fn->setParameter("Gamma", gamma);
-  }
-
-  IAlgorithm_sptr fit =
-      Mantid::API::AlgorithmFactory::Instance().create("Fit", -1);
-  fit->initialize();
-  fit->setChild(true);
-  fit->setLogging(false);
-  fit->setProperty("Function", fn);
-  fit->setProperty("InputWorkspace", peaksWs);
-  fit->setProperty("CostFunction", "Unweighted least squares");
-  fit->setProperty("CreateOutput", true);
-  fit->execute();
-
-  IAlgorithm_sptr ub_alg;
+  IAlgorithm_sptr fit_alg;
   try {
-    ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
+    fit_alg = createChildAlgorithm("Fit", -1, -1, false);
   } catch (Exception::NotFoundError &) {
-    g_log.error("Can't locate CalculateUMatrix algorithm");
+    g_log.error("Can't locate Fit algorithm");
     throw;
   }
+  std::ostringstream fun_str;
+  fun_str << "name=SCDPanelErrors,Workspace="<<peaksWs->name()<<",Bank=bank13";
+  fit_alg->setPropertyValue("Function", fun_str.str());
+  fit_alg->setProperty("InputWorkspace", q3DWS);
+  fit_alg->setProperty("CreateOutput", true);
+  fit_alg->setProperty("Output", "fit");
+  fit_alg->setProperty("MaxIterations", 0);
+  fit_alg->executeAsChildAlg();
+  MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace("fit", fitWS);
+  ITableWorkspace_sptr paramsWS = fit_alg->getProperty("OutputParameters");
+  AnalysisDataService::Instance().addOrReplace("params", paramsWS);
+  double xShift = paramsWS->getRef<double>("Value",0);
+  double yShift = paramsWS->getRef<double>("Value",1);
+  double zShift = paramsWS->getRef<double>("Value",2);
+  double xRotate = paramsWS->getRef<double>("Value",3);
+  double yRotate = paramsWS->getRef<double>("Value",4);
+  double zRotate = paramsWS->getRef<double>("Value",5);
+  SCDPanelErrors det;
+  det.moveDetector(xShift, yShift, zShift, xRotate, yRotate, zRotate, "bank13", peaksWs);
 
-  ub_alg->setProperty("PeaksWorkspace", peaksWs);
-  ub_alg->setProperty("a", fn->getParameter("a"));
-  double sigabc[6];
-  sigabc[0] = fn->getError(0);
-  if (cell_type == ReducedCell::TRICLINIC() ||
-      cell_type == ReducedCell::MONOCLINIC() ||
-      cell_type == ReducedCell::ORTHORHOMBIC()) {
-    ub_alg->setProperty("b", fn->getParameter("b"));
-    sigabc[1] = fn->getError(1);
-  } else {
-    ub_alg->setProperty("b", fn->getParameter("a"));
-    sigabc[1] = fn->getError(0);
-  }
-  if (cell_type == ReducedCell::TRICLINIC() ||
-      cell_type == ReducedCell::TETRAGONAL() ||
-      cell_type == ReducedCell::ORTHORHOMBIC() ||
-      cell_type == ReducedCell::HEXAGONAL() ||
-      cell_type == ReducedCell::MONOCLINIC()) {
-    ub_alg->setProperty("c", fn->getParameter("c"));
-    sigabc[2] = fn->getError(2);
-  } else {
-    ub_alg->setProperty("c", fn->getParameter("a"));
-    sigabc[2] = fn->getError(0);
-  }
-  if (cell_type == ReducedCell::TRICLINIC() ||
-      cell_type == ReducedCell::RHOMBOHEDRAL()) {
-    ub_alg->setProperty("alpha", fn->getParameter("Alpha"));
-    sigabc[3] = fn->getError(3);
-  } else {
-    ub_alg->setProperty("alpha", 90.0);
-    sigabc[3] = 0.0;
-  }
-  if (cell_type == ReducedCell::TRICLINIC() ||
-      cell_type == ReducedCell::MONOCLINIC()) {
-    ub_alg->setProperty("beta", fn->getParameter("Beta"));
-    sigabc[4] = fn->getError(4);
-  } else {
-    ub_alg->setProperty("beta", 90.0);
-    sigabc[4] = 0.0;
-  }
-  if (cell_type == ReducedCell::TRICLINIC()) {
-    ub_alg->setProperty("gamma", fn->getParameter("Gamma"));
-    sigabc[5] = fn->getError(5);
-  } else if (cell_type == ReducedCell::HEXAGONAL()) {
-    ub_alg->setProperty("gamma", 120.0);
-    sigabc[5] = 0.0;
-  } else {
-    ub_alg->setProperty("gamma", 90.0);
-    sigabc[5] = 0.0;
-  }
-  ub_alg->executeAsChildAlg();
-  OrientedLattice lattice = peaksWs->mutableSample().getOrientedLattice();
-  DblMatrix UB = lattice.getUB();
-  lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
-                   sigabc[5]);
-  peaksWs->mutableSample().setOrientedLattice(&lattice);
-  g_log.notice() << "Lattice after optimization: " << lattice << "\n";
-
-  // We must sort the peaks
-  // std::vector<std::pair<std::string, bool>> criteria;
-  // criteria.push_back(std::pair<std::string, bool>("BankName", true));
-  criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
-  criteria.push_back(std::pair<std::string, bool>("h", true));
-  criteria.push_back(std::pair<std::string, bool>("k", true));
-  criteria.push_back(std::pair<std::string, bool>("l", true));
-  peaksWs->sort(criteria);
-
-  // create table of theoretical vs calculated
-  int bankLast = -1;
-  int iSpectrum = -1;
-  int icount = 0;
-
-  for (int j = 0; j < nPeaks; ++j) {
-    const Geometry::IPeak &peak = peaksWs->getPeak(j);
-    string bankName = peak.getBankName();
-    size_t k = bankName.find_last_not_of("0123456789");
-    int bank = 0;
-    if (k < bankName.length())
-      bank = boost::lexical_cast<int>(bankName.substr(k + 1));
-    if (bank != bankLast) {
-      iSpectrum++;
-      ColWksp->getSpectrum(iSpectrum).setSpectrumNo(specnum_t(bank));
-      RowWksp->getSpectrum(iSpectrum).setSpectrumNo(specnum_t(bank));
-      TofWksp->getSpectrum(iSpectrum).setSpectrumNo(specnum_t(bank));
-      bankLast = bank;
-      icount = 0;
-    }
-
-    try {
-      V3D q_lab = (peak.getGoniometerMatrix() * UB) * peak.getHKL() * M_2_PI;
-      Peak theoretical(peak.getInstrument(), q_lab);
-      ColWksp->dataX(iSpectrum)[icount] = peak.getCol();
-      ColWksp->dataY(iSpectrum)[icount] = theoretical.getCol();
-      RowWksp->dataX(iSpectrum)[icount] = peak.getRow();
-      RowWksp->dataY(iSpectrum)[icount] = theoretical.getRow();
-      TofWksp->dataX(iSpectrum)[icount] = peak.getTOF();
-      TofWksp->dataY(iSpectrum)[icount] = theoretical.getTOF();
-      icount++;
-    } catch (...) {
-      // g_log.debug() << "Problem only in printing peaks\n";
-    }
-  }
+  string DetCalFileName = getProperty("DetCalFilename");
+  set<string> MyBankNames;
+  MyBankNames.insert("bank13");
+  Instrument_sptr inst = boost::const_pointer_cast<Instrument>(peaksWs->getInstrument());
+  saveIsawDetCal(inst, MyBankNames, 0.0,
+                 DetCalFileName);
 }
 
 /**
@@ -1487,7 +917,7 @@ void SCDCalibratePanels::createResultWorkspace(const int numGroups,
     Result->cell<double>(rowNum + 10 + nn, colNum) = errs[p];
   }
 
-  setProperty("ResultWorkspace", Result);
+  //setProperty("ResultWorkspace", Result);
 }
 
 /**
@@ -1501,7 +931,7 @@ void SCDCalibratePanels::createResultWorkspace(const int numGroups,
  * @param filename     -The name of the DetCal file to save the results to
  */
 void SCDCalibratePanels::saveIsawDetCal(
-    boost::shared_ptr<const Instrument> &instrument, set<string> &AllBankName,
+    boost::shared_ptr<Instrument> &instrument, set<string> &AllBankName,
     double T0, string filename) {
   // having a filename triggers doing the work
   if (filename.empty())
@@ -1629,7 +1059,7 @@ void SCDCalibratePanels::init() {
       "Path to an Mantid .xml description(for LoadParameterFile) file to "
       "save.");
 
-  declareProperty(
+  /*declareProperty(
       Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "ResultWorkspace", "ResultWorkspace", Kernel::Direction::Output),
       "Workspace of Results");
@@ -1647,15 +1077,15 @@ void SCDCalibratePanels::init() {
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "TofWorkspace", "TofWorkspace", Kernel::Direction::Output),
-      "Workspace comparing calculated and theoretical TOF of each peak.");
+      "Workspace comparing calculated and theoretical TOF of each peak.");*/
 
   const string OUTPUTS("Outputs");
   setPropertyGroup("DetCalFilename", OUTPUTS);
   setPropertyGroup("XmlFilename", OUTPUTS);
-  setPropertyGroup("ResultWorkspace", OUTPUTS);
+  /*setPropertyGroup("ResultWorkspace", OUTPUTS);
   setPropertyGroup("ColWorkspace", OUTPUTS);
   setPropertyGroup("RowWorkspace", OUTPUTS);
-  setPropertyGroup("TofWorkspace", OUTPUTS);
+  setPropertyGroup("TofWorkspace", OUTPUTS);*/
 
   //------------------------------------ Tolerance
   // settings-------------------------

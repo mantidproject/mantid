@@ -238,7 +238,7 @@ public:
                       std::string bankPrefixName);
 
 private:
-  void saveIsawDetCal(boost::shared_ptr<const Geometry::Instrument> &instrument,
+  void saveIsawDetCal(boost::shared_ptr<Geometry::Instrument> &instrument,
                       std::set<std::string> &AllBankName, double T0,
                       std::string filename);
 
