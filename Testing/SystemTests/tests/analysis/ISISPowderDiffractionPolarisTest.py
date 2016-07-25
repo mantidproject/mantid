@@ -446,6 +446,8 @@ class ISISPowderDiffractionPol3(stresstesting.MantidStressTest):
             for files in filenames:
                 path = os.path.join(directories[0], files)
                 os.remove(path)
+            cali_path = os.path.join(directories[0], "POLARIS/test/Cycle_16_1/Calibration")
+            shutil.rmtree(cali_path)
         except OSError, ose:
             print 'could not delete generated file : ', ose.filename
 
@@ -469,3 +471,48 @@ class ISISPowderDiffractionPol3(stresstesting.MantidStressTest):
             self._success = True
         else:
             self._success = False
+
+    def validate(self):
+        return self._success
+
+    def cleanup(self):
+        filenames = []
+        filenames.extend(("POLARIS/test/Cycle_16_1/Mantid_tester/Cycle_12_2_group_masked_collimator_no_"
+                          "b5mod6.cal", "POLARIS/test/Cycle_16_1/Mantid_tester/POL93107_newoffsets.gss",
+                          "POLARIS/test/Cycle_16_1/Mantid_tester/POL93107_newoffsets.nxs",
+                          "POLARIS/test/Cycle_16_1/Calibration/Cycle_12_2_group_masked_collimator_no_"
+                          "b5mod6.cal", "POLARIS/test/Cycle_16_1/Calibration/POL_2016_1_5mm_vrod_testing_"
+                                        "newcalfile_unstripped.nxs"))
+
+        for i in range(0, 5):
+            filenames.append("POLARIS/test/Cycle_16_1/Mantid_tester/POL93107_newoffsets_b" + str(i + 1) + "_D.dat")
+            filenames.append("POLARIS/test/Cycle_16_1/Mantid_tester/POL93107_newoffsets_b" + str(i + 1) + "_TOF.dat")
+
+            filenames.append("POLARIS/test/Cycle_16_1/Calibration/"
+                             "POL_2016_1_5mm_vrod_testing_newcalfile-" + str(i) + ".nxs")
+        filenames.append("POLARIS/test/Cycle_16_1/Calibration/"
+                         "POL_2016_1_5mm_vrod_testing_newcalfile-" + str(i) + "_.dat")
+
+        for i in range(0, 5):
+            filenames.append("POLARIS/test/Cycle_16_1/Calibration/"
+                             "POL_2016_1_5mm_vrod_testing_newcalfile_unstripped-" + str(i) + ".dat")
+
+        self._clean_up_files(filenames, DIRS)
+
+
+# ======================================================================
+# work horse
+class LoadTests2(unittest.TestCase):
+    wsname = "__LoadTest"
+    cleanup_names = []
+
+    def tearDown(self):
+        self.cleanup_names.append(self.wsname)
+        for name in self.cleanup_names:
+            try:
+                AnalysisDataService.remove(name)
+            except KeyError:
+                pass
+        self.cleanup_names = []
+
+        # ============================ Success ==============================
