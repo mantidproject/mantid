@@ -60,8 +60,8 @@ else()
   set(PY_ABI "")
 endif()
 
-set( PYTHON_LIBRARY "${PYTHON_PREFIX}/lib/libpython${PY_VER}${PY_ABI}.dylib" CACHE FILEPATH "PYTHON_LIBRARY")
-set( PYTHON_INCLUDE_DIR "${PYTHON_PREFIX}/include/python${PY_VER}${PY_ABI}" CACHE PATH "PYTHON_INCLUDE_DIR")
+set( PYTHON_LIBRARY "${PYTHON_PREFIX}/lib/libpython${PY_VER}${PY_ABI}.dylib" CACHE FILEPATH "PYTHON_LIBRARY" FORCE )
+set( PYTHON_INCLUDE_DIR "${PYTHON_PREFIX}/include/python${PY_VER}${PY_ABI}" CACHE PATH "PYTHON_INCLUDE_DIR" FORCE )
 
 find_package ( PythonLibs REQUIRED )
 # If found, need to add debug library into libraries variable
