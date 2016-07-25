@@ -340,7 +340,7 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
 */
 bool ConvertUnits::getDetectorValues(
     const Kernel::Unit &outputUnit, const Geometry::IComponent &source,
-    const Geometry::IComponent &sample, double &l1, int &emode,
+    const Geometry::IComponent &sample, double l1, int emode,
     const MatrixWorkspace &ws,
     function<double(const Geometry::IDetector &)> thetaFunction,
     int64_t wsIndex, double &efixed, double &l2, double &twoTheta) {
@@ -748,8 +748,10 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
       result->mutableX(j).assign(edges.cbegin(), edges.cbegin() + k);
 
       // If the entire X range is not covered, generate fake values.
-      std::iota(result->mutableX(j).begin() + k, result->mutableX(j).end(),
-                workspace->x(j)[k] + 1);
+      if (k < maxBins) {
+        std::iota(result->mutableX(j).begin() + k, result->mutableX(j).end(),
+                  workspace->x(j)[k] + 1);
+      }
 
       result->mutableY(j)
           .assign(workspace->y(j).cbegin(), workspace->y(j).cbegin() + (k - 1));

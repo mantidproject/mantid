@@ -2,7 +2,10 @@
 
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/HistogramValidator.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
@@ -55,12 +58,15 @@ const std::string ConvertUnitsUsingDetectorTable::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ConvertUnitsUsingDetectorTable::init() {
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
-                  "An output workspace.");
+  auto wsValidator = boost::make_shared<CompositeValidator>();
+  wsValidator->add<API::WorkspaceUnitValidator>();
+  wsValidator->add<API::HistogramValidator>();
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+    "InputWorkspace", "", Direction::Input, wsValidator),
+    "Name of the input workspace");
+  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+    "OutputWorkspace", "", Direction::Output),
+    "Name of the output workspace, can be the same as the input");
   declareProperty("Target", "", boost::make_shared<StringListValidator>(
                                     UnitFactory::Instance().getKeys()),
                   "The name of the units to convert to (must be one of those "
@@ -126,7 +132,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
   const auto &twoThetaColumn = paramWS->getColVector<double>("twotheta");
   const auto &efixedColumn = paramWS->getColVector<double>("efixed");
   const auto &emodeColumn = paramWS->getColVector<int>("emode");
-  auto &spectraColumn = paramWS->getColVector<int>("spectra");
+  const auto &spectraColumn = paramWS->getColVector<int>("spectra");
 
   Progress prog(this, 0.2, 1.0, m_numberOfSpectra);
   int64_t numberOfSpectra_i =
@@ -191,25 +197,27 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
                     << " ==> Workspace ID:" << wsid << '\n';
 
       // Now we need to find the row that contains this spectrum
-      std::vector<int>::iterator specIter;
+      std::vector<int>::const_iterator specIter;
 
       specIter = std::find(spectraColumn.begin(), spectraColumn.end(), specNo);
       if (specIter != spectraColumn.end()) {
-        size_t detectorRow = std::distance(spectraColumn.begin(), specIter);
-        double l1 = l1Column[detectorRow];
-        double l2 = l2Column[detectorRow];
-        double twoTheta = twoThetaColumn[detectorRow] * deg2rad;
-        double efixed = efixedColumn[detectorRow];
-        int emode = emodeColumn[detectorRow];
+        const size_t detectorRow = std::distance(spectraColumn.begin(), specIter);
+        const double l1 = l1Column[detectorRow];
+        const double l2 = l2Column[detectorRow];
+        const double twoTheta = twoThetaColumn[detectorRow] * deg2rad;
+        const double efixed = efixedColumn[detectorRow];
+        const int emode = emodeColumn[detectorRow];
 
-        g_log.debug() << "specNo from detector table = "
-                      << spectraColumn[detectorRow] << '\n';
+        if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
+          g_log.debug() << "specNo from detector table = "
+            << spectraColumn[detectorRow] << '\n';
 
-        g_log.debug() << "###### Spectra #" << specNo
-                      << " ==> Det Table Row:" << detectorRow << '\n';
+          g_log.debug() << "###### Spectra #" << specNo
+            << " ==> Det Table Row:" << detectorRow << '\n';
 
-        g_log.debug() << "\tL1=" << l1 << ",L2=" << l2 << ",TT=" << twoTheta
-                      << ",EF=" << efixed << ",EM=" << emode << '\n';
+          g_log.debug() << "\tL1=" << l1 << ",L2=" << l2 << ",TT=" << twoTheta
+            << ",EF=" << efixed << ",EM=" << emode << '\n';
+        }
 
         // Make local copies of the units. This allows running the loop in
         // parallel
@@ -237,7 +245,6 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
 
       } else {
         // Not found
-        g_log.debug() << "Spectrum " << specNo << " not found!\n";
         failedDetectorCount++;
         outputWS->maskWorkspaceIndex(wsid);
       }
@@ -265,6 +272,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
     eventWS->clearMRU();
 
   return outputWS;
+
 }
 
 } // namespace Algorithms

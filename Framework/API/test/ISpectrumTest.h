@@ -10,26 +10,27 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using Mantid::HistogramData::Histogram;
 
 class ISpectrumTest : public CxxTest::TestSuite {
 public:
   void test_empty_constructor() {
-    SpectrumTester s(HistogramData::Histogram::XMode::Points);
+    SpectrumTester s(Histogram::XMode::Points, Histogram::YMode::Counts);
     TS_ASSERT_EQUALS(s.getDetectorIDs().size(), 0);
     TS_ASSERT_EQUALS(s.getSpectrumNo(), 0);
   }
 
   void test_constructor() {
-    SpectrumTester s(1234, HistogramData::Histogram::XMode::Points);
+    SpectrumTester s(1234, Histogram::XMode::Points, Histogram::YMode::Counts);
     TS_ASSERT_EQUALS(s.getDetectorIDs().size(), 0);
     TS_ASSERT_EQUALS(s.getSpectrumNo(), 1234);
   }
 
   void test_copyInfoFrom() {
-    SpectrumTester a(1234, HistogramData::Histogram::XMode::Points);
+    SpectrumTester a(1234, Histogram::XMode::Points, Histogram::YMode::Counts);
     a.addDetectorID(678);
     a.addDetectorID(789);
-    SpectrumTester b(456, HistogramData::Histogram::XMode::Points);
+    SpectrumTester b(456, Histogram::XMode::Points, Histogram::YMode::Counts);
 
     TS_ASSERT_EQUALS(b.getDetectorIDs().size(), 0);
     b.copyInfoFrom(a);
@@ -38,14 +39,14 @@ public:
   }
 
   void test_setSpectrumNo() {
-    SpectrumTester s(HistogramData::Histogram::XMode::Points);
+    SpectrumTester s(Histogram::XMode::Points, Histogram::YMode::Counts);
     TS_ASSERT_EQUALS(s.getSpectrumNo(), 0);
     s.setSpectrumNo(1234);
     TS_ASSERT_EQUALS(s.getSpectrumNo(), 1234);
   }
 
   void test_detectorID_handling() {
-    SpectrumTester s(HistogramData::Histogram::XMode::Points);
+    SpectrumTester s(Histogram::XMode::Points, Histogram::YMode::Counts);
     TS_ASSERT(s.getDetectorIDs().empty());
     s.addDetectorID(123);
     TS_ASSERT_EQUALS(s.getDetectorIDs().size(), 1);
@@ -87,19 +88,19 @@ public:
   }
 
   void test_use_dx_flag_being_set_when_accessing_dx_with_non_const() {
-    SpectrumTester s(HistogramData::Histogram::XMode::Points);
+    SpectrumTester s(Histogram::XMode::Points, Histogram::YMode::Counts);
     s.setPointStandardDeviations(0);
     TS_ASSERT(s.hasDx());
 
     // setDX vesion 2
-    SpectrumTester s4(HistogramData::Histogram::XMode::Points);
+    SpectrumTester s4(Histogram::XMode::Points, Histogram::YMode::Counts);
     auto Dx_vec_ptr_type =
         boost::make_shared<Mantid::HistogramData::HistogramDx>(0);
     s4.setSharedDx(Dx_vec_ptr_type);
     TS_ASSERT(s4.hasDx());
 
     // setDX version 3
-    SpectrumTester s5(HistogramData::Histogram::XMode::Points);
+    SpectrumTester s5(Histogram::XMode::Points, Histogram::YMode::Counts);
     cow_ptr<Mantid::HistogramData::HistogramDx> Dx_vec_ptr;
     s5.setSharedDx(Dx_vec_ptr);
     TS_ASSERT(s5.hasDx());
@@ -107,7 +108,7 @@ public:
 
   void test_use_dx_flag_is_copied_during_copy_construction() {
     // Copy spectrum which had the flag set
-    SpectrumTester s(HistogramData::Histogram::XMode::Points);
+    SpectrumTester s(Histogram::XMode::Points, Histogram::YMode::Counts);
     s.setPointStandardDeviations(0);
     TS_ASSERT(s.hasDx());
 
@@ -115,7 +116,7 @@ public:
     TS_ASSERT(s2.hasDx());
 
     // Copy spectrum which did not have the flag set
-    SpectrumTester s3(HistogramData::Histogram::XMode::Points);
+    SpectrumTester s3(Histogram::XMode::Points, Histogram::YMode::Counts);
     SpectrumTester s4(s);
     TS_ASSERT(!s3.hasDx());
   }

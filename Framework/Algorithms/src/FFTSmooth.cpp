@@ -47,30 +47,31 @@ void FFTSmooth::exec() {
   int spec = getProperty("WorkspaceIndex");
 
   // Save the starting x value so it can be restored after all transforms.
-  double x0 = m_inWS->readX(spec)[0];
+  double x0 = m_inWS->x(spec)[0];
 
   // Symmetrize the input spectrum
-  int dn = static_cast<int>(m_inWS->readY(0).size());
+  int dn = static_cast<int>(m_inWS->y(0).size());
 
   API::MatrixWorkspace_sptr symmWS = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", 1, m_inWS->readX(0).size() + dn,
-      m_inWS->readY(0).size() + dn);
+      "Workspace2D", 1, m_inWS->x(0).size() + dn, m_inWS->y(0).size() + dn);
 
-  double dx = (m_inWS->readX(spec).back() - m_inWS->readX(spec).front()) /
-              static_cast<double>(m_inWS->readX(spec).size() - 1);
+  double dx = (m_inWS->x(spec).back() - m_inWS->x(spec).front()) /
+              static_cast<double>(m_inWS->x(spec).size() - 1);
+
+  auto &symX = symmWS->mutableX(0);
+  auto &symY = symmWS->mutableY(0);
+
   for (int i = 0; i < dn; i++) {
-    symmWS->dataX(0)[dn + i] = m_inWS->readX(spec)[i];
-    symmWS->dataY(0)[dn + i] = m_inWS->readY(spec)[i];
+    symX[dn + i] = m_inWS->x(spec)[i];
+    symY[dn + i] = m_inWS->y(spec)[i];
 
-    symmWS->dataX(0)[dn - i] = x0 - dx * i;
-    symmWS->dataY(0)[dn - i] = m_inWS->readY(spec)[i];
+    symX[dn - i] = x0 - dx * i;
+    symY[dn - i] = m_inWS->y(spec)[i];
   }
-  symmWS->dataY(0).front() = m_inWS->readY(spec).back();
-  symmWS->dataX(0).front() = x0 - dx * dn;
+  symmWS->mutableY(0).front() = m_inWS->y(spec).back();
+  symmWS->mutableX(0).front() = x0 - dx * dn;
   if (m_inWS->isHistogramData())
-    symmWS->dataX(0).back() = m_inWS->readX(spec).back();
-
-  // setProperty("OutputWorkspace",symmWS); return;
+    symmWS->mutableX(0).back() = m_inWS->x(spec).back();
 
   // Forward Fourier transform
   IAlgorithm_sptr fft = createChildAlgorithm("RealFFT", 0, 0.5);
@@ -87,18 +88,7 @@ void FFTSmooth::exec() {
 
   // Apply the filter
   std::string type = getProperty("Filter");
-  // x - value correction doesn't work, so no truncation yet
-  // if (type == "Truncation")
-  //{
-  //  std::string sn = getProperty("Params");
-  //  int n;
-  //  if (sn.empty()) n = 2;
-  //  else
-  //    n = atoi(sn.c_str());
-  //  if (n <= 1) throw std::invalid_argument("Truncation parameter must be an
-  //  integer > 1");
-  //  truncate(n);
-  //}else
+
   if (type == "Zeroing") {
     std::string sn = getProperty("Params");
     int n;
@@ -115,8 +105,6 @@ void FFTSmooth::exec() {
   // Backward transform
   fft = createChildAlgorithm("RealFFT", 0.5, 1.);
   fft->setProperty("InputWorkspace", m_filteredWS);
-  // fft->setProperty("Real",0);
-  // fft->setProperty("Imaginary",1);
   fft->setProperty("Transform", "Backward");
   try {
     fft->execute();
@@ -128,30 +116,12 @@ void FFTSmooth::exec() {
 
   // Create output
   API::MatrixWorkspace_sptr outWS = API::WorkspaceFactory::Instance().create(
-      m_inWS, 1, m_inWS->readX(0).size(), m_inWS->readY(0).size());
+      m_inWS, 1, m_inWS->x(0).size(), m_inWS->y(0).size());
 
   dn = static_cast<int>(tmpWS->blocksize()) / 2;
 
-  // x-value correction is needed if the size of the spectrum is changed (e.g.
-  // after truncation)
-  // but it doesn't work accurately enough, so commented out
-  //// Correct the x values:
-  // x0 -= tmpWS->dataX(0)[dn];
-  // if (tmpWS->isHistogramData())
-  //{// Align centres of the in and out histograms. I am not sure here
-  //  double dX = m_inWS->readX(0)[1] - m_inWS->readX(0)[0];
-  //  double dx = tmpWS->readX(0)[1] - tmpWS->readX(0)[0];
-  //  x0 += dX/2 - dx;
-  //}
-  // outWS->dataX(0).assign(tmpWS->readX(0).begin()+dn,tmpWS->readX(0).end());
-  // outWS->dataY(0).assign(tmpWS->readY(0).begin()+dn,tmpWS->readY(0).end());
-  //
-  // std::transform( outWS->dataX(0).begin(), outWS->dataX(0).end(),
-  // outWS->dataX(0).begin(),
-  //  std::bind2nd(std::plus<double>(), x0) );
-
-  outWS->dataX(0).assign(m_inWS->readX(0).begin(), m_inWS->readX(0).end());
-  outWS->dataY(0).assign(tmpWS->readY(0).begin() + dn, tmpWS->readY(0).end());
+  outWS->setSharedX(0, m_inWS->sharedX(0));
+  outWS->mutableY(0).assign(tmpWS->y(0).cbegin() + dn, tmpWS->y(0).cend());
 
   setProperty("OutputWorkspace", outWS);
 }
@@ -160,7 +130,7 @@ void FFTSmooth::exec() {
  *  @param n :: The order of truncation
  */
 void FFTSmooth::truncate(int n) {
-  int my = static_cast<int>(m_unfilteredWS->readY(0).size());
+  int my = static_cast<int>(m_unfilteredWS->y(0).size());
   int ny = my / n;
 
   double f = double(ny) / my;
@@ -171,16 +141,14 @@ void FFTSmooth::truncate(int n) {
   m_filteredWS =
       API::WorkspaceFactory::Instance().create(m_unfilteredWS, 2, nx, ny);
 
-  const Mantid::MantidVec &Yr = m_unfilteredWS->readY(0);
-  const Mantid::MantidVec &Yi = m_unfilteredWS->readY(1);
-  const Mantid::MantidVec &X = m_unfilteredWS->readX(0);
+  auto &Yr = m_unfilteredWS->y(0);
+  auto &Yi = m_unfilteredWS->y(1);
+  auto &X = m_unfilteredWS->x(0);
 
-  Mantid::MantidVec &yr = m_filteredWS->dataY(0);
-  Mantid::MantidVec &yi = m_filteredWS->dataY(1);
-  Mantid::MantidVec &xr = m_filteredWS->dataX(0);
-  Mantid::MantidVec &xi = m_filteredWS->dataX(1);
-
-  // int odd = ny % 2;
+  auto &yr = m_filteredWS->mutableY(0);
+  auto &yi = m_filteredWS->mutableY(1);
+  auto &xr = m_filteredWS->mutableX(0);
+  auto &xi = m_filteredWS->mutableX(1);
 
   yr.assign(Yr.begin(), Yr.begin() + ny);
   yi.assign(Yi.begin(), Yi.begin() + ny);
@@ -191,39 +159,14 @@ void FFTSmooth::truncate(int n) {
                  std::bind2nd(std::multiplies<double>(), f));
   std::transform(yi.begin(), yi.end(), yi.begin(),
                  std::bind2nd(std::multiplies<double>(), f));
-
-  // for(int i=0;i<=ny2;i++)
-  //{
-  //  double re = Yr[my2 - i] * f;
-  //  double im = Yi[my2 - i] * f;
-  //  double x = X[my2 - i];
-  //  yr[ny2 - i] = re;
-  //  yi[ny2 - i] = im;
-  //  xr[ny2 - i] = x;
-  //  xi[ny2 - i] = x;
-  //  if (odd || i < ny2)
-  //  {
-  //    yr[ny2 + i] = re;
-  //    if (i > 0) yi[ny2 + i] = -im;
-  //    x = X[my2 + i];
-  //    xr[ny2 + i] = x;
-  //    xi[ny2 + i] = x;
-  //  }
-  //}
-
-  // if (m_filteredWS->isHistogramData())
-  //{
-  //  xr[ny] = X[my2 + ny2 + odd];
-  //  xi[ny] = xr[ny];
-  //}
 }
 
 /** Smoothing by zeroing.
  *  @param n :: The order of truncation
  */
 void FFTSmooth::zero(int n) {
-  int mx = static_cast<int>(m_unfilteredWS->readX(0).size());
-  int my = static_cast<int>(m_unfilteredWS->readY(0).size());
+  int mx = static_cast<int>(m_unfilteredWS->x(0).size());
+  int my = static_cast<int>(m_unfilteredWS->y(0).size());
   int ny = my / n;
 
   if (ny == 0)
@@ -232,27 +175,14 @@ void FFTSmooth::zero(int n) {
   m_filteredWS =
       API::WorkspaceFactory::Instance().create(m_unfilteredWS, 2, mx, my);
 
-  const Mantid::MantidVec &Yr = m_unfilteredWS->readY(0);
-  const Mantid::MantidVec &Yi = m_unfilteredWS->readY(1);
-  const Mantid::MantidVec &X = m_unfilteredWS->readX(0);
+  m_filteredWS->setSharedX(0, m_unfilteredWS->sharedX(0));
+  m_filteredWS->setSharedX(1, m_unfilteredWS->sharedX(0));
 
-  Mantid::MantidVec &yr = m_filteredWS->dataY(0);
-  Mantid::MantidVec &yi = m_filteredWS->dataY(1);
-  Mantid::MantidVec &xr = m_filteredWS->dataX(0);
-  Mantid::MantidVec &xi = m_filteredWS->dataX(1);
+  std::copy(m_unfilteredWS->y(0).cbegin(), m_unfilteredWS->y(0).begin() + ny,
+            m_filteredWS->mutableY(0).begin());
 
-  xr.assign(X.begin(), X.end());
-  xi.assign(X.begin(), X.end());
-  yr.assign(Yr.size(), 0);
-  yi.assign(Yr.size(), 0);
-
-  for (int i = 0; i < ny; i++) {
-    // if (abs(my2-i) < ny2)
-    //{
-    yr[i] = Yr[i];
-    yi[i] = Yi[i];
-    //}
-  }
+  std::copy(m_unfilteredWS->y(1).cbegin(), m_unfilteredWS->y(1).begin() + ny,
+            m_filteredWS->mutableY(1).begin());
 }
 
 } // namespace Algorithm

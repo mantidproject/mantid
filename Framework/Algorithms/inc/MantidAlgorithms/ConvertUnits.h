@@ -108,7 +108,7 @@ protected:
   /// Internal function to gather detector specific L2, theta and efixed values
   bool getDetectorValues(
       const Kernel::Unit &outputUnit, const Geometry::IComponent &source,
-      const Geometry::IComponent &sample, double &l1, int &emode,
+      const Geometry::IComponent &sample, double l1, int emode,
       const API::MatrixWorkspace &ws,
       boost::function<double(const Geometry::IDetector &)> thetaFunction,
       int64_t wsIndex, double &efixed, double &l2, double &twoTheta);
