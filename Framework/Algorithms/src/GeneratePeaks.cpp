@@ -448,7 +448,7 @@ void GeneratePeaks::generatePeaks(
       double fwhm = thispeak->fwhm();
 
       //
-      const MantidVec &X = dataWS->dataX(wsindex);
+      const auto &X = dataWS->x(wsindex);
       double leftbound = centre - m_numPeakWidth * fwhm;
       if (ipeak > 0) {
         // Not left most peak.
@@ -485,8 +485,10 @@ void GeneratePeaks::generatePeaks(
       // Put to output
       std::size_t offset = (left - X.begin());
       std::size_t numY = values.size();
+
+      auto &dataY = dataWS->mutableY(wsindex);
       for (std::size_t i = 0; i < numY; i++) {
-        dataWS->dataY(wsindex)[i + offset] += values[i];
+        dataY[i + offset] += values[i];
       }
 
     } // ENDFOR(ipeak)
@@ -697,14 +699,14 @@ API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace() {
           << "Using input worksapce to generate output workspace!\n";
 
     outputWS = API::WorkspaceFactory::Instance().create(
-        inputWS, inputWS->getNumberHistograms(), inputWS->dataX(0).size(),
-        inputWS->dataY(0).size());
+        inputWS, inputWS->getNumberHistograms(), inputWS->x(0).size(),
+        inputWS->y(0).size());
 
     // Only copy the X-values from spectra with peaks specified in the table
     // workspace.
     for (const auto &iws : m_spectraSet) {
-      std::copy(inputWS->dataX(iws).begin(), inputWS->dataX(iws).end(),
-                outputWS->dataX(iws).begin());
+      std::copy(inputWS->x(iws).begin(), inputWS->x(iws).end(),
+                outputWS->x(iws).begin());
     }
 
     m_newWSFromParent = true;
@@ -767,7 +769,7 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
   MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
       "Workspace2D", m_spectraSet.size(), numxvalue, numxvalue - 1);
   for (size_t ip = 0; ip < m_spectraSet.size(); ip++)
-    std::copy(xarray.begin(), xarray.end(), ws->dataX(ip).begin());
+    std::copy(xarray.begin(), xarray.end(), ws->x(ip).begin());
 
   // Set spectrum numbers
   std::map<specnum_t, specnum_t>::iterator spiter;

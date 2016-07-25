@@ -89,8 +89,8 @@ public:
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 2);
 
     // peak 0:
-    MantidVec p0_x = peaksws->readX(0);
-    MantidVec p0_y = peaksws->readY(0);
+    const auto &p0_x = peaksws->x(0);
+    const auto &p0_y = peaksws->y(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[200], 5.0, 1.0E-4);
 
@@ -102,8 +102,8 @@ public:
     TS_ASSERT_DELTA(p0_y[800], 10.0, 1.0E-4);
 
     // peak 2:
-    MantidVec p1_x = peaksws->readX(1);
-    MantidVec p1_y = peaksws->readY(1);
+    const auto &p1_x = peaksws->x(1);
+    const auto &p1_y = peaksws->y(1);
     TS_ASSERT_DELTA(p1_x[400], 4.0, 1.0E-8);
     TS_ASSERT_DELTA(p1_y[400], 20.0, 1.0E-4);
 
@@ -163,8 +163,8 @@ public:
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 5);
 
     // Peak 0:
-    MantidVec p0_x = peaksws->readX(0);
-    MantidVec p0_y = peaksws->readY(0);
+    const auto &p0_x = peaksws->x(0);
+    const auto &p0_y = peaksws->y(0);
     TS_ASSERT_DELTA(p0_x[50], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[50], 5.0, 1.0E-4);
 
@@ -176,8 +176,8 @@ public:
     TS_ASSERT_DELTA(p0_y[350], 10.0, 1.0E-4);
 
     // Peak 2:
-    MantidVec p1_x = peaksws->readX(2);
-    MantidVec p1_y = peaksws->readY(2);
+    const auto &p1_x = peaksws->x(2);
+    const auto &p1_y = peaksws->y(2);
     TS_ASSERT_DELTA(p1_x[150], 4.0, 1.0E-8);
     TS_ASSERT_DELTA(p1_y[150], 20.0, 1.0E-4);
 
@@ -237,8 +237,8 @@ public:
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 2);
 
     // peak 0:
-    MantidVec p0_x = peaksws->readX(0);
-    MantidVec p0_y = peaksws->readY(0);
+    const auto &p0_x = peaksws->x(0);
+    const auto &p0_y = peaksws->y(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[200], 10.0, 1.0E-4);
 
@@ -247,8 +247,8 @@ public:
     TS_ASSERT_DELTA(p0_y[800], 20.0, 1.0E-4);
 
     // peak 2:
-    MantidVec p1_x = peaksws->readX(1);
-    MantidVec p1_y = peaksws->readY(1);
+    const auto &p1_x = peaksws->x(1);
+    const auto &p1_y = peaksws->y(1);
     TS_ASSERT_DELTA(p1_x[400], 4.0, 1.0E-8);
     TS_ASSERT_DELTA(p1_y[400], 24.0, 1.0E-4);
 
@@ -307,8 +307,8 @@ public:
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 1);
 
     // peak 0:
-    MantidVec p0_x = peaksws->readX(0);
-    MantidVec p0_y = peaksws->readY(0);
+    const auto &p0_x = peaksws->x(0);
+    const auto &p0_y = peaksws->y(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[200], 5.0, 1.0E-4);
 
@@ -366,8 +366,8 @@ public:
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 1);
 
     // peak 0:
-    MantidVec p0_x = peaksws->readX(0);
-    MantidVec p0_y = peaksws->readY(0);
+    const auto &p0_x = peaksws->x(0);
+    const auto &p0_y = peaksws->y(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[200], 5.0, 1.0E-4);
 
@@ -511,11 +511,15 @@ public:
 
     // 2. Put x values and y values
     for (size_t iw = 0; iw < inpWS->getNumberHistograms(); iw++) {
-      for (size_t ix = 0; ix < inpWS->dataX(iw).size(); ++ix) {
-        inpWS->dataX(iw)[ix] = minx + double(ix) * dx;
+
+      auto &dataX = inpWS->mutableX(iw);
+      auto &dataY = inpWS->mutableX(iw);
+
+      for (size_t ix = 0; ix < inpWS->mutableX(iw).size(); ++ix) {
+        dataX[ix] = minx + double(ix) * dx;
       }
       for (size_t iy = 0; iy < inpWS->dataY(iw).size(); ++iy) {
-        inpWS->dataY(iw)[iy] = 100.0;
+        dataY[iy] = 100.0;
       }
     }
 
