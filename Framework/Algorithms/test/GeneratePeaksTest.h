@@ -13,10 +13,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 
-#include "MantidAPI/FunctionDomain.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/FunctionDomain1D.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
