@@ -1135,11 +1135,12 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   g_log.information() << "Read " << eventsLoaded << " events"
                       << ". Shortest TOF: " << shortest_tof
                       << " microsec; longest TOF: " << longest_tof
-                      << " microsec." << "\n";
+                      << " microsec."
+                      << "\n";
 
   if (shortest_tof < 0)
     g_log.warning("The shortest TOF was negative! At least 1 event has an "
-                       "invalid time-of-flight.\n");
+                  "invalid time-of-flight.\n");
   if (bad_tofs > 0)
     g_log.warning() << "Found " << bad_tofs << " events with TOF > 2e8. This "
                                                "may indicate errors in the raw "
@@ -1465,7 +1466,7 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     if (m_instrument_loaded_correctly) {
       m_ws->setInstrument(dataWS->getInstrument());
       g_log.information("Instrument data copied into monitors workspace "
-                             " from the data workspace.");
+                        " from the data workspace.");
     }
 
     // Perform the load (only events from monitor)
@@ -1475,7 +1476,8 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     // this is not strictly needed for the load to work (like the instrument is)
     // so it can be done after loadEvents, and it doesn't throw
     if (m_logs_loaded_correctly) {
-      g_log.information("Copying log data into monitors workspace from the data workspace.");
+      g_log.information(
+          "Copying log data into monitors workspace from the data workspace.");
       try {
         auto to = m_ws->getSingleHeldWorkspace();
         auto from = dataWS;
@@ -1483,8 +1485,8 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
         g_log.information("Log data copied.");
       } catch (std::runtime_error &) {
         g_log.error("Could not copy log data into monitors workspace. Some "
-               " logs may be wrong and/or missing in the output "
-               "monitors workspace.");
+                    " logs may be wrong and/or missing in the output "
+                    "monitors workspace.");
       }
     }
 
