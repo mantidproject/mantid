@@ -60,7 +60,7 @@ public:
   template <class Generator,
             class = typename std::enable_if<
                 !std::is_convertible<Generator, double>::value>::type>
-  FixedLengthVector(size_t count, Generator g)
+  FixedLengthVector(size_t count, const Generator &g)
       : m_data(count) {
     std::generate(m_data.begin(), m_data.end(), g);
   }

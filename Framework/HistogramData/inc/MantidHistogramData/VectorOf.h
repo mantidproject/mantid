@@ -85,7 +85,7 @@ public:
   template <class Generator,
             class = typename std::enable_if<
                 !std::is_convertible<Generator, double>::value>::type>
-  VectorOf(size_t count, Generator g)
+  VectorOf(size_t count, const Generator &g)
       : m_data(Kernel::make_cow<CowType>(count, g)) {}
 
   /// Copy construct from cow_ptr. Lightweight, stored object will be shared.
