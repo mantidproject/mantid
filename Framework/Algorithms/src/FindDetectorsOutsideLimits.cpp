@@ -123,8 +123,7 @@ void FindDetectorsOutsideLimits::exec() {
   }
 
   int numFailed(0);
-  PRAGMA(omp parallel for if ((!countsWS || countsWS->threadSafe()) && \
-      (!outputWS || outputWS->threadSafe())), reduction(+: numFailed))
+  PRAGMA(omp parallel for if ((!countsWS || countsWS->threadSafe()) && (!outputWS || outputWS->threadSafe())), reduction(+: numFailed))
   for (int i = minIndex; i < maxIndex; ++i) {
     bool keepData = true;
     int countsInd = i - minIndex;
