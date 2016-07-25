@@ -409,13 +409,13 @@ class BayesQuasi(PythonAlgorithm):
         energy_min, energy_max = e_range
 
         sample_logs = [('res_workspace', self._resWS),
-                     ('fit_program', fit_program),
-                     ('background', self._background),
-                     ('elastic_peak', self._elastic),
-                     ('energy_min', energy_min),
-                     ('energy_max', energy_max),
-                     ('sample_binning', sample_binning),
-                     ('resolution_binning', res_binning)]
+                    ('fit_program', fit_program),
+                    ('background', self._background),
+                    ('elastic_peak', self._elastic),
+                    ('energy_min', energy_min),
+                    ('energy_max', energy_max),
+                    ('sample_binning', sample_binning),
+                    ('resolution_binning', res_binning)]
 
         resnorm_used = (self._resnormWS != '')
         sample_logs.append(('resnorm', str(resnorm_used)))
@@ -440,17 +440,29 @@ class BayesQuasi(PythonAlgorithm):
         var = asc[3].split()                            #split line on spaces
         nspec = var[0]
         var = ExtractInt(asc[6])
-        first = 7; Xout = []; Yf = []; Ef = []; Yi = []; Ei = []; Yb = []; Eb = []
+        first = 7
+        Xout = []
+        Yf = []
+        Ef = []
+        Yi = []
+        Ei = []
+        Yb = []
+        Eb = []
         ns = int(nspec)
 
-        dataX = np.array([]); dataY = np.array([]); dataE = np.array([])
+        dataX = np.array([])
+        dataY = np.array([])
+        dataE = np.array([])
 
         for _ in range(0,ns):
             first,Q,_,fw,it,be = self.SeBlock(asc,first)
             Xout.append(Q)
-            Yf.append(fw[0]); Ef.append(fw[1])
-            Yi.append(it[0]); Ei.append(it[1])
-            Yb.append(be[0]); Eb.append(be[1])
+            Yf.append(fw[0])
+            Ef.append(fw[1])
+            Yi.append(it[0])
+            Ei.append(it[1])
+            Yb.append(be[0])
+            Eb.append(be[1])
         Vaxis = []
 
         dataX = np.append(dataX,np.array(Xout))
@@ -492,13 +504,20 @@ class BayesQuasi(PythonAlgorithm):
     def SeBlock(self, a,first):                                 #read Ascii block of Integers
         first += 1
         val = ExtractFloat(a[first])               #Q,AMAX,HWHM
-        Q = val[0]; AMAX = val[1]; HWHM = val[2]; first += 1
+        Q = val[0]
+        AMAX = val[1]
+        HWHM = val[2]
+        first += 1
         val = ExtractFloat(a[first])               #A0
-        int0 = [AMAX*val[0]]; first += 1
+        int0 = [AMAX*val[0]]
+        first += 1
         val = ExtractFloat(a[first])                #AI,FWHM first peak
-        fw = [2.*HWHM*val[1]]; integer = [AMAX*val[0]]; first += 1
+        fw = [2.*HWHM*val[1]]
+        integer = [AMAX*val[0]]
+        first += 1
         val = ExtractFloat(a[first])                 #SIG0
-        int0.append(val[0]); first += 1
+        int0.append(val[0])
+        first += 1
         val = ExtractFloat(a[first])                  #SIG3K
         integer.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
         first += 1
@@ -517,9 +536,11 @@ class BayesQuasi(PythonAlgorithm):
             dtnorm = mtd[resnormWS+'_Intensity'].readY(0)
             xscale = mtd[resnormWS+'_Stretch'].readY(0)
         else:                                        # constant values
-            dtnorm = []; xscale = []
+            dtnorm = []
+            xscale = []
             for _ in range(0,ngrp):
-                dtnorm.append(1.0); xscale.append(1.0)
+                dtnorm.append(1.0)
+                xscale.append(1.0)
         dtn=PadArray(dtnorm,51)                      # pad for Fortran call
         xsc=PadArray(xscale,51)
         return dtn,xsc
@@ -551,7 +572,8 @@ class BayesQuasi(PythonAlgorithm):
 
     #Reads in a width ASCII file
     def ReadWidthFile(self, readWidth,widthFile,numSampleGroups):
-        widthY = []; widthE = []
+        widthY = []
+        widthE = []
         if readWidth:
             logger.information('Width file is ' + widthFile)
             # read ascii based width file
@@ -572,9 +594,11 @@ class BayesQuasi(PythonAlgorithm):
                 raise ValueError('Width groups (' +str(numLines) + ') not = Sample (' +str(numSampleGroups) +')')
         else:
             # no file: just use constant values
-            widthY = np.zeros(numSampleGroups); widthE = np.zeros(numSampleGroups)
+            widthY = np.zeros(numSampleGroups)
+            widthE = np.zeros(numSampleGroups)
         # pad for Fortran call
-        widthY = PadArray(widthY,51); widthE = PadArray(widthE,51)
+        widthY = PadArray(widthY,51)
+        widthE = PadArray(widthE,51)
 
         return widthY, widthE
 
@@ -647,12 +671,16 @@ class BayesQuasi(PythonAlgorithm):
             #interlace amplitudes and widths of the peaks
             y.append(np.asarray(height_data))
             for amp, width, EISF in zip(amplitude_data, width_data, EISF_data):
-                y.append(amp); y.append(width); y.append(EISF)
+                y.append(amp)
+                y.append(width)
+                y.append(EISF)
 
             #iterlace amplitude and width errors of the peaks
             e.append(np.asarray(height_error))
             for amp, width, EISF in zip(amplitude_error, width_error, EISF_error):
-                e.append(amp); e.append(width); e.append(EISF)
+                e.append(amp)
+                e.append(width)
+                e.append(EISF)
 
             #create x data and axis names for each function
             axis_names.append('f'+str(nl)+'.f0.'+'Height')
@@ -665,7 +693,9 @@ class BayesQuasi(PythonAlgorithm):
                 axis_names.append('f'+str(nl)+'.f'+str(j)+'.EISF')
                 x.append(x_data)
 
-        x = np.asarray(x).flatten(); y = np.asarray(y).flatten(); e = np.asarray(e).flatten()
+        x = np.asarray(x).flatten()
+        y = np.asarray(y).flatten()
+        e = np.asarray(e).flatten()
 
         CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,\
             UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=axis_names)
