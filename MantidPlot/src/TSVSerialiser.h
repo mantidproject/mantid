@@ -36,16 +36,6 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
-struct CaseInsensitiveStringComparator {
-  bool operator()(const std::string &s1, const std::string &s2) const {
-#ifdef _MSC_VER
-    return stricmp(s1.c_str(), s2.c_str()) < 0;
-#else
-    return strcasecmp(s1.c_str(), s2.c_str()) < 0;
-#endif
-  }
-};
-
 class TSVSerialiser {
 public:
   TSVSerialiser();

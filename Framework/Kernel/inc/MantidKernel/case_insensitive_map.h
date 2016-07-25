@@ -1,8 +1,9 @@
 #ifndef CASE_INSENSITIVE_MAP_H
 #define CASE_INSENSITIVE_MAP_H
 
-#include <boost/algorithm/string/predicate.hpp>
+#include <cstring>
 #include <map>
+#include <string>
 
 namespace Mantid {
 namespace Kernel {
@@ -11,7 +12,11 @@ namespace Kernel {
  */
 struct CaseInsensitiveStringComparator {
   bool operator()(const std::string &s1, const std::string &s2) const {
-    return boost::iequals(s1, s2);
+#ifdef _MSC_VER
+    return __stricmp(s1.c_str(), s2.c_str()) < 0;
+#else
+    return strcasecmp(s1.c_str(), s2.c_str()) < 0;
+#endif
   }
 };
 

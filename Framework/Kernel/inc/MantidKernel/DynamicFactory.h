@@ -239,7 +239,7 @@ private:
   }
 
   /// A typedef for the map of registered classes
-  typedef CaseInsensitiveMap<AbstractFactory *> FactoryMap;
+  typedef std::map<std::string, AbstractFactory *, Comparator> FactoryMap;
   /// The map holding the registered class names and their instantiators
   FactoryMap _map;
   /// Flag marking whether we should dispatch notifications

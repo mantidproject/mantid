@@ -1,5 +1,5 @@
-#ifndef PROJECTMANAGER_H
-#define PROJECTMANAGER_H
+#ifndef PROJECT_SERIALISER_H
+#define PROJECT_SERIALISER_H
 
 #include <string>
 
@@ -118,4 +118,4 @@ private:
 }
 }
 
-#endif // PROJECTMANAGER_H
+#endif // PROJECT_SERIALISER_H
