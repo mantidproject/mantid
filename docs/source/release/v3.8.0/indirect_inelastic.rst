@@ -33,6 +33,11 @@ Elwin
 Jump Fit
 ~~~~~~~~
 
+Simulations
+###########
+
+- New algorithm :ref:`LoadNMoldyn4Ascii1D <algm-LoadNMoldyn4Ascii1D>` has been added to allow 1D nmoldyn data to be loaded in Mantid
+
 Improvements
 ------------
 
