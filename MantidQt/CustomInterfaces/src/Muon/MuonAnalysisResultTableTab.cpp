@@ -798,7 +798,7 @@ void MuonAnalysisResultTableTab::createTable() {
 
       // Get log values for this row
       const auto &logValues = m_logValues[wsName];
-      
+
       // Write log values in each column
       for (int i = 0; i < logsSelected.size(); ++i) {
         Mantid::API::Column_sptr col = table->getColumn(i);

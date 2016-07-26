@@ -34,9 +34,7 @@ public:
       : firstRun("MUSR00015189.nxs"), lastRun("MUSR00015190.nxs") {}
 
   /// Clear the ADS at the end of every test
-  void tearDown() override {
-    AnalysisDataService::Instance().clear();
-  }
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void testExec() {
     PlotAsymmetryByLogValue alg;
