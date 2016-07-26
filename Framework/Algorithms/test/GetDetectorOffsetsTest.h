@@ -7,7 +7,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-#include <Poco/File.h>
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -43,9 +42,9 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const Mantid::MantidVec &X = WS->readX(0);
-    Mantid::MantidVec &Y = WS->dataY(0);
-    Mantid::MantidVec &E = WS->dataE(0);
+    const Mantid::HistogramData::HistogramX &X = WS->readX(0);
+    Mantid::HistogramData::HistogramY &Y = WS->mutableY(0);
+    Mantid::HistogramData::HistogramE &E = WS->mutableE(0);
     for (size_t i = 0; i < Y.size(); ++i) {
       const double x = (X[i] + X[i + 1]) / 2;
       Y[i] = exp(-0.5 * pow((x - 1) / 10.0, 2));
@@ -75,7 +74,7 @@ public:
     if (!output)
       return;
 
-    TS_ASSERT_DELTA(output->dataY(0)[0], -0.0196, 0.0001);
+    TS_ASSERT_DELTA(output->y(0)[0], -0.0196, 0.0001);
 
     AnalysisDataService::Instance().remove(outputWS);
 
@@ -94,9 +93,9 @@ public:
         WorkspaceCreationHelper::CreateGroupedWorkspace2D(3, 200, 1.0);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const Mantid::MantidVec &X = WS->readX(0);
-    Mantid::MantidVec &Y = WS->dataY(0);
-    Mantid::MantidVec &E = WS->dataE(0);
+    const Mantid::HistogramData::HistogramX &X = WS->readX(0);
+    Mantid::HistogramData::HistogramY &Y = WS->mutableY(0);
+    Mantid::HistogramData::HistogramE &E = WS->mutableE(0);
     for (size_t i = 0; i < Y.size(); ++i) {
       const double x = (X[i] + X[i + 1]) / 2;
       Y[i] = exp(-0.5 * pow((x - 1) / 10.0, 2));
@@ -144,9 +143,9 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const Mantid::MantidVec &X = WS->readX(0);
-    Mantid::MantidVec &Y = WS->dataY(0);
-    Mantid::MantidVec &E = WS->dataE(0);
+    const Mantid::HistogramData::HistogramX &X = WS->readX(0);
+    Mantid::HistogramData::HistogramY &Y = WS->mutableY(0);
+    Mantid::HistogramData::HistogramE &E = WS->mutableE(0);
     for (size_t i = 0; i < Y.size(); ++i) {
       const double x = (X[i] + X[i + 1]) / 2;
       Y[i] = exp(-0.5 * pow((x - 1) / 10.0, 2));
@@ -180,7 +179,7 @@ public:
     if (!output)
       return;
 
-    TS_ASSERT_DELTA(output->dataY(0)[0], 2.4803, 0.0001);
+    TS_ASSERT_DELTA(output->y(0)[0], 2.4803, 0.0001);
 
     AnalysisDataService::Instance().remove(outputWS);
 
@@ -218,9 +217,9 @@ public:
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
     for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
-      const Mantid::MantidVec &X = WS->readX(wi);
-      Mantid::MantidVec &Y = WS->dataY(wi);
-      Mantid::MantidVec &E = WS->dataE(wi);
+      const Mantid::HistogramData::HistogramX &X = WS->readX(wi);
+      Mantid::HistogramData::HistogramY &Y = WS->mutableY(wi);
+      Mantid::HistogramData::HistogramE &E = WS->mutableE(wi);
       for (int i = 0; i < static_cast<int>(Y.size()); ++i) {
         const double x = (X[i] + X[i + 1]) / 2;
         Y[i] = exp(-0.5 * pow((x - 1) / 10.0, 2));
@@ -247,7 +246,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = offsets.getProperty("OutputWorkspace"));
     if (!output)
       return;
-    TS_ASSERT_DELTA(output->dataY(0)[0], -0.0196, 0.0001);
+    TS_ASSERT_DELTA(output->mutableY(0)[0], -0.0196, 0.0001);
   }
 };
 
