@@ -154,8 +154,8 @@ void MaskDetectors::exec() {
     if (maskWS) {
       if (maskWS->getInstrument()->getDetectorIDs().size() !=
           WS->getInstrument()->getDetectorIDs().size()) {
-        throw std::runtime_error(
-            "Instrument's detector numbers mismatch between input Workspace and MaskWorkspace");
+        throw std::runtime_error("Instrument's detector numbers mismatch "
+                                 "between input Workspace and MaskWorkspace");
       }
 
       g_log.debug() << "Extracting mask from MaskWorkspace (" << maskWS->name()
@@ -248,7 +248,7 @@ void MaskDetectors::exec() {
 * @return tuple containing min/max ranges provided to algorithm
 *        (from 0 to max histogram range) and boolean value,
 *        containing true if the ranges are
-*        constrained (or defined in other words) 
+*        constrained (or defined in other words)
 *        and false if they are not.
 */
 std::tuple<size_t, size_t, bool>
