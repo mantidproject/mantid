@@ -48,6 +48,14 @@ MCInteractionVolume::MCInteractionVolume(const API::Sample &sample)
 }
 
 /**
+ * Returns the axis-aligned bounding box for the volume
+ * @return A reference to the bounding box
+ */
+const Geometry::BoundingBox &MCInteractionVolume::getBoundingBox() const {
+  return m_sample.getBoundingBox();
+}
+
+/**
  * Calculate the attenuation correction factor for given track through the
  * volume
  * @param rng A reference to a PseudoRandomNumberGenerator
@@ -57,7 +65,8 @@ MCInteractionVolume::MCInteractionVolume(const API::Sample &sample)
  * outside of the "volume")
  * @param lambdaBefore Wavelength, in \f$\\A^-1\f$, before scattering
  * @param lambdaAfter Wavelength, in \f$\\A^-1\f$, after scattering
- * @return The fraction of the beam that has been attenuated
+ * @return The fraction of the beam that has been attenuated. A negative number
+ * indicates the track was not valid.
  */
 double MCInteractionVolume::calculateAbsorption(
     Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
