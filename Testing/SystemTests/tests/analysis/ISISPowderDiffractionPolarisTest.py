@@ -516,3 +516,30 @@ class LoadTests2(unittest.TestCase):
         self.cleanup_names = []
 
         # ============================ Success ==============================
+
+    def test_calfile_with_workspace(self):
+        self.wsname = "CalWorkspace1"
+        calfile1 = (DIRS[0] + 'POLARIS/test/Cycle_16_1/Calibration/Cycle_12_2_group_masked_collimator_no_b5mod6.cal')
+        calfile2 = (DIRS[0] + 'POLARIS/test/Cycle_16_1/Mantid_tester/Cycle_12_2_group_masked_collimator_no_b5mod6.cal')
+        data1 = LoadCalFile(InstrumentName="POL", CalFilename=calfile1,
+                            WorkspaceName=self.wsname)
+        data2 = LoadCalFile(InstrumentName="POL", CalFilename=calfile2,
+                            WorkspaceName="CalWorkspace2")
+
+        for i in range(0, 3):
+            self.assertTrue(isinstance(data1[i], MatrixWorkspace))
+        self.assertTrue(isinstance(data1[3], ITableWorkspace))
+
+        self.assertTrue("CalWorkspace1_group" in data1[0].getName())
+        self.assertTrue("CalWorkspace1_offsets" in data1[1].getName())
+        self.assertTrue("CalWorkspace1_mask" in data1[2].getName())
+        self.assertTrue("CalWorkspace1_cal" in data1[3].getName())
+
+        for i in range(0, 3):
+            self.assertTrue(isinstance(data2[i], MatrixWorkspace))
+            self.assertTrue(isinstance(data2[3], ITableWorkspace))
+
+        self.assertTrue("CalWorkspace2_group" in data2[0].getName())
+        self.assertTrue("CalWorkspace2_offsets" in data2[1].getName())
+        self.assertTrue("CalWorkspace2_mask" in data2[2].getName())
+        self.assertTrue("CalWorkspace2_cal" in data2[3].getName())
