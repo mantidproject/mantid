@@ -1760,10 +1760,6 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
 
   TSVSerialiser tsv(lines);
 
-  if (tsv.hasLine("geometry"))
-    app->restoreWindowGeometry(
-        app, multiLayer, QString::fromStdString(tsv.lineAsString("geometry")));
-
   multiLayer->blockSignals(true);
 
   if (tsv.selectLine("WindowLabel")) {
@@ -1827,6 +1823,12 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
   multiLayer->setBirthDate(birthDate);
   app->initMultilayerPlot(multiLayer, label.replace(QRegExp("_"), "-"));
   app->setListViewDate(caption, birthDate);
+
+  if (tsv.hasLine("geometry")) {
+    app->restoreWindowGeometry(
+        app, multiLayer, QString::fromStdString(tsv.lineAsString("geometry")));
+  }
+
   return multiLayer;
 }
 
