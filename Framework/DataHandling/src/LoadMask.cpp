@@ -511,6 +511,9 @@ void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks,
       int32_t detid = det->getID();
       detectors.push_back(detid);
     }
+    g_log.debug() << "Number of Detectors in Bank  " << singlebank
+                  << "  is: " << numdets << "\nRange From: " << detid_first
+                  << " To: " << detid_last << '\n';
 
   } // ENDFOR
 }
