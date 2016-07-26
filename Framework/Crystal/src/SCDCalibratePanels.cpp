@@ -302,6 +302,55 @@ void SCDCalibratePanels::exec() {
   saveIsawDetCal(inst, MyBankNames, 0.0, DetCalFileName);
   string XmlFileName = getProperty("XmlFilename");
   saveXmlFile(XmlFileName, MyBankNames, inst);
+  // create table of theoretical vs calculated
+  int bankLast = -1;
+  int iSpectrum = -1;
+  int icount = 0;
+  //----------------- Calculate & Create Calculated vs Theoretical workspaces------------------,);
+  MatrixWorkspace_sptr ColWksp =
+      Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", MyBankNames.size(),
+                                                       nPeaks, nPeaks);
+  MatrixWorkspace_sptr RowWksp =
+      Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", MyBankNames.size(),
+                                                       nPeaks, nPeaks);
+  MatrixWorkspace_sptr TofWksp =
+      Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", MyBankNames.size(),
+                                                       nPeaks, nPeaks);
+  setProperty("ColWorkspace", ColWksp);
+  setProperty("RowWorkspace", RowWksp);
+  setProperty("TofWorkspace", TofWksp);
+  OrientedLattice lattice = peaksWs->mutableSample().getOrientedLattice();
+  DblMatrix UB = lattice.getUB();
+  for (int j = 0; j < nPeaks; ++j) {
+    const Geometry::IPeak &peak = peaksWs->getPeak(j);
+    string bankName = peak.getBankName();
+    size_t k = bankName.find_last_not_of("0123456789");
+    int bank = 0;
+    if (k < bankName.length())
+      bank = boost::lexical_cast<int>(bankName.substr(k + 1));
+    if (bank != bankLast) {
+      iSpectrum++;
+      ColWksp->getSpectrum(iSpectrum).setSpectrumNo(specnum_t(bank));
+      RowWksp->getSpectrum(iSpectrum).setSpectrumNo(specnum_t(bank));
+      TofWksp->getSpectrum(iSpectrum).setSpectrumNo(specnum_t(bank));
+      bankLast = bank;
+      icount = 0;
+    }
+
+    try {
+      V3D q_lab = (peak.getGoniometerMatrix() * UB) * peak.getHKL() * M_2_PI;
+      Peak theoretical(peak.getInstrument(), q_lab);
+      ColWksp->dataX(iSpectrum)[icount] = peak.getCol();
+      ColWksp->dataY(iSpectrum)[icount] = theoretical.getCol();
+      RowWksp->dataX(iSpectrum)[icount] = peak.getRow();
+      RowWksp->dataY(iSpectrum)[icount] = theoretical.getRow();
+      TofWksp->dataX(iSpectrum)[icount] = peak.getTOF();
+      TofWksp->dataY(iSpectrum)[icount] = theoretical.getTOF();
+      icount++;
+    } catch (...) {
+      // g_log.debug() << "Problem only in printing peaks\n";
+    }
+  }
 }
 
 /**
@@ -600,11 +649,6 @@ void SCDCalibratePanels::init() {
       "Path to an Mantid .xml description(for LoadParameterFile) file to "
       "save.");
 
-  /*declareProperty(
-      Kernel::make_unique<WorkspaceProperty<ITableWorkspace>>(
-          "ResultWorkspace", "ResultWorkspace", Kernel::Direction::Output),
-      "Workspace of Results");
-
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "ColWorkspace", "ColWorkspace", Kernel::Direction::Output),
@@ -618,15 +662,14 @@ void SCDCalibratePanels::init() {
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "TofWorkspace", "TofWorkspace", Kernel::Direction::Output),
-      "Workspace comparing calculated and theoretical TOF of each peak.");*/
+      "Workspace comparing calculated and theoretical TOF of each peak.");
 
   const string OUTPUTS("Outputs");
   setPropertyGroup("DetCalFilename", OUTPUTS);
   setPropertyGroup("XmlFilename", OUTPUTS);
-  /*setPropertyGroup("ResultWorkspace", OUTPUTS);
   setPropertyGroup("ColWorkspace", OUTPUTS);
   setPropertyGroup("RowWorkspace", OUTPUTS);
-  setPropertyGroup("TofWorkspace", OUTPUTS);*/
+  setPropertyGroup("TofWorkspace", OUTPUTS);
 
   declareProperty("EdgePixels", 0,
                   "Remove peaks that are at pixels this close to edge. ");

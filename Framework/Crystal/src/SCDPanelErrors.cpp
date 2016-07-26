@@ -135,7 +135,7 @@ void SCDPanelErrors::eval(double xrotate, double yrotate, double zrotate, double
     V3D hkl =  V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
          boost::math::iround(peak.getL()));
     DataObjects::Peak peak2(inst,peak.getDetectorID(),peak.getWavelength(),hkl,peak.getGoniometerMatrix());
-    peak2.findDetector();
+   //peak2.findDetector();
     V3D Q3 = peak2.getQSampleFrame();
     out[i] = Q3[0];
     out [i+1] = Q3[1];
