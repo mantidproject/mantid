@@ -51,21 +51,12 @@ public:
     std::sort(spectrumNumbers.begin(), spectrumNumbers.end());
 
     size_t currentIndex = 0;
-    bool first = true;
     for (size_t i = 0; i < spectrumNumbers.size(); ++i) {
       auto number = spectrumNumbers[i];
       auto partition = partitioning.indexOf(number);
       m_partitions.emplace(number, partition);
-      if (partition == m_partition) {
+      if (partition == m_partition)
         m_indices.emplace(number, currentIndex++);
-        // Store min spectrum number in this partition
-        if (first) {
-          m_min = number;
-          first = false;
-        }
-        // Store max spectrum number in this partition
-        m_max = number;
-      }
     }
     if (spectrumNumbers.size() != m_partitions.size())
       throw std::logic_error("SpectrumNumberTranslator: The vector of spectrum "
@@ -81,42 +72,12 @@ public:
     if (min_iterator == m_partitions.end() ||
         max_iterator == m_partitions.end())
       throw std::out_of_range("Invalid spectrum number.");
-    // Empty set if range does not cover this partition.
-    if (min > m_max || max < m_min)
+
+    auto begin = m_indices.lower_bound(min);
+    auto end = m_indices.upper_bound(max);
+    if (begin == m_indices.end() || end == m_indices.begin() || begin == end)
       return SpectrumIndexSet(0);
-    size_t minIndex;
-    size_t maxIndex;
-    if (min <= m_min) {
-      minIndex = m_indices.at(m_min);
-    } else {
-      // m_min < min < m_max
-      // need to find next after min that is on this rank
-      while (true) {
-        const auto it = m_indices.find(min);
-        if (it != m_indices.end()) {
-          minIndex = it->second;
-          break;
-        }
-        min = SpectrumNumber(static_cast<int32_t>(min) + 1);
-      }
-    }
-    if (m_max <= max) {
-      maxIndex = m_indices.at(m_max);
-    } else {
-      // m_min < max < m_max
-      // need to find previous before max that is on this rank
-      while (true) {
-        const auto it = m_indices.find(max);
-        if (it != m_indices.end()) {
-          maxIndex = it->second;
-          break;
-        }
-        max = SpectrumNumber(static_cast<int32_t>(max) - 1);
-      }
-    }
-    if (minIndex > maxIndex)
-      return SpectrumIndexSet(0);
-    return SpectrumIndexSet(minIndex, maxIndex, m_indices.size());
+    return SpectrumIndexSet(begin->second, (--end)->second, m_indices.size());
   }
 
   SpectrumIndexSet
@@ -141,11 +102,9 @@ private:
   };
 
   const PartitionIndex m_partition;
-  SpectrumNumber m_min{1};
-  SpectrumNumber m_max{0};
   std::unordered_map<SpectrumNumber, PartitionIndex, SpectrumNumberHash>
       m_partitions;
-  std::unordered_map<SpectrumNumber, size_t, SpectrumNumberHash> m_indices;
+  std::map<SpectrumNumber, size_t> m_indices;
 };
 
 } // namespace Indexing
