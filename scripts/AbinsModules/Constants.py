@@ -26,6 +26,7 @@ crystal_data_group = "Crystal" # name of the group where CrystalData is stored
 
 S_data_group = "S" # name of the group where dynamical factor is stored
 
+overtones_num = 10 # number of overtones taken into account in powder case scenario
 
 all_instruments = ["None", "TOSCA"] # supported instruments
 
@@ -37,7 +38,11 @@ all_keywords_k_data = ["weights", "k_vectors", "frequencies", "atomic_displaceme
 # keywords which define data structure of AtomsData
 all_keywords_atoms_data = ["symbol", "fract_coord", "atom", "sort", "mass"]
 
-all_keyword_msd_data = ["msd", "dw"]
+# keywords which define data structure for PowderData
+all_keyword_powder_data = ["msd", "dw"]
+
+# keywords which define data structure for SData
+all_keywords_s_data = ["sort", "atom", "value"]
 
 # symbols of all elements
 all_symbols = ["Ac", "Ag", "Al", "Am", "Ar",  "As", "At" , "Au" , "B"  , "Ba", "Be", "Bh", "Bi", "Bk", "Br", "C" , "Ca" ,
@@ -61,5 +66,10 @@ m_2_hartree = constants.codata.value("atomic mass unit-hartree relationship") # 
 
 
 # Instruments constants
+
+# TOSCA
 TOSCA_constant = 1 / 16.0 # magic number for TOSCA...
+TOSCA_A = 0.0000001 # width = TOSCA_A^2 * omega + TOSCa_B * omega + TOSCA_C
+TOSCA_B = 0.005
+TOSCA_C = 2.5
 
