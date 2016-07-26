@@ -434,7 +434,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             # Add the sample material to the workspace
             chemical = ion_name
             if ':' in ion_name:
-                chemical = ion_name[:ion_name.index(':')]
+                chemical = ion_name.split(':')[0]
 
             SetSampleMaterial(InputWorkspace=self._out_ws_name,
                               ChemicalFormula=chemical)
