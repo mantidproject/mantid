@@ -103,6 +103,8 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
 
         file_name = os.path.join(self.data_directory, '{0}.dat'.format(func_name))
         x_axis = 0
+        unit = ''
+        header_data = [unit, func_name, x_axis]
         with open(file_name, 'rU') as f_handle:
             while True:
                 line = f_handle.readline()
@@ -112,23 +114,36 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
                     pass
                 # Parse metadata from file
                 elif line[0] == '#':
-                    func_match = FUNC_NAME_REGEX.match(line)
-                    if func_match:
-                        func_name = func_match.group(1)
-                    axis_match = AXIS_REGEX.match(line)
-                    if axis_match:
-                        x_axis = axis_match.group(1)
-                    unit_match = UNIT_REGEX.match(line)
-                    if unit_match:
-                        unit = unit_match.group(1)
-                    # Reads actual data from file
+                    # Read header data
+                    header_data = self._parse_header_data(line, header_data)
+                    # Read data from file
                     slice_match = SLICE_HEADER_REGEX.match(line)
                     if slice_match:
                         length = int(slice_match.group(1))
                         data = self.slice_read(f_handle, length)
             f_handle.close()
             data = self.del_symmetry(data)
-        return (data, unit, func_name, x_axis)
+        return (data, header_data[0], header_data[1], header_data[2])
+
+
+    def _parse_header_data(self, line, header_data):
+        """
+        Attempts to parse current line as unit, function_name or x_axis
+        """
+        # Attempt to match unit
+        unit_match = UNIT_REGEX.match(line)
+        if unit_match:
+            header_data[0] = unit_match.group(1)
+        # Attempt to match fucntion name
+        func_match = FUNC_NAME_REGEX.match(line)
+        if func_match:
+            header_data[1] = func_match.group(1)
+        # Attempt to match x_axis
+        axis_match = AXIS_REGEX.match(line)
+        if axis_match:
+            header_data[2] = axis_match.group(1)
+
+        return header_data
 
     def slice_read(self, file_handle, length):
         # Loads the actual data from a data file
