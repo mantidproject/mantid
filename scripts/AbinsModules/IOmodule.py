@@ -91,13 +91,17 @@ class IOmodule(object):
         """
 
         for key, item in dic.items():
-            if isinstance(item, (numpy.ndarray, numpy.int64, int, numpy.float64, float, str, bytes)):
-                folder = path + key
+            folder = path + key
+            if isinstance(item, (numpy.int64, int, numpy.float64, float, str, bytes)):
                 if folder in hdf_file:
                     del hdf_file[folder]
                 hdf_file[folder] = item
+            elif isinstance(item, numpy.ndarray):
+                if folder in hdf_file:
+                    del hdf_file[folder]
+                hdf_file.create_dataset(name=folder, data=item, compression="gzip", compression_opts=9)
             elif isinstance(item, dict):
-                self._recursively_save_structured_data_to_group(hdf_file=hdf_file, path=path + key + '/', dic=item)
+                self._recursively_save_structured_data_to_group(hdf_file=hdf_file, path=folder + '/', dic=item)
             else:
                 raise ValueError('Cannot save %s type'%type(item))
 
