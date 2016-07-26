@@ -70,11 +70,12 @@ public:
     checkAndGetPartitionIndex(min);
     checkAndGetPartitionIndex(max);
 
-    auto begin = m_indices.lower_bound(min);
-    auto end = m_indices.upper_bound(max);
+    const auto begin = m_indices.lower_bound(min);
+    const auto end = m_indices.upper_bound(max);
     if (begin == m_indices.end() || end == m_indices.begin() || begin == end)
       return SpectrumIndexSet(0);
-    return SpectrumIndexSet(begin->second, (--end)->second, m_indices.size());
+    return SpectrumIndexSet(begin->second, std::prev(end)->second,
+                            m_indices.size());
   }
 
   SpectrumIndexSet
