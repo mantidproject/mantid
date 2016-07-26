@@ -73,8 +73,6 @@ private:
   void initializeXMLParser(const std::string &filename);
   /// Parse XML
   void parseXML();
-  /// Convert value to data
-  void parseComponent(const std::string &valuetext, bool tomask);
   /// Convert value to detector ids
   void parseDetectorIDs(const std::string &inputstr, bool tomask);
   /// Convert value to spectrum Nos
@@ -118,18 +116,18 @@ private:
   /// Default setup.  If true, not masking, but use the pixel
   bool m_defaultToUse;
 
-  //detector id-s to mask
+  // detector id-s to mask
   std::vector<detid_t> m_maskDetID;
-  //spectrum id-s to unmask
+  // spectrum id-s to unmask
   std::vector<detid_t> m_unMaskDetID;
 
   // spectra mask provided
   std::vector<specnum_t> m_maskSpecID;
-  // spectra unmask provided
-  std::vector<specnum_t> m_unMaskSpecID;
+  // spectra unmask provided NOT IMPLEMENTED
+  // std::vector<specnum_t> m_unMaskSpecID;
 
-  std::vector<std::string> m_maskBankIdSingle;
-  std::vector<std::string> m_umaskBankIdSingle;
+  std::vector<std::string> m_maskCompIdSingle;
+  std::vector<std::string> m_uMaskCompIdSingle;
 };
 
 } // namespace DataHandling
