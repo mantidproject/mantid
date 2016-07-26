@@ -478,9 +478,9 @@ void LoadMask::componentToDetectors(
 
 //----------------------------------------------------------------------------------------------
 /** Convert bank to detectors
-* This routine have never worked.
+* This routine have never been invoked.
 * @param   singlebanks -- vector of string containing bank names
-* @return  detectors   -- vector of detector-id-s belonging to these banks
+* @param  detectors   -- vector of detector-id-s belonging to these banks
  */
 void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks,
                                std::vector<detid_t> &detectors) {
