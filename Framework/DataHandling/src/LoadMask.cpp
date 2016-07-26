@@ -47,10 +47,11 @@ namespace {
 *                   changes.
 * @param ranges  -- input vector of data ranges -- pairs of min-max values,
 *                   expanded to result as numbers from min to max
-*                   inclusively, with step  1
-* @param tot_singles -- on input contains range of single value vectors already
-*                   copied into the result, on output, all signles
-*                   and expanded pairs from input are added to it.
+*                   inclusively, with step 1
+* @param tot_singles -- on input contains range of single values already
+*                   copied into the result by previous call to the routine,
+*                   on output, all signles and expanded pairs
+*                   from the input are added to it.
 */
 template <typename T>
 void convertToVector(const std::vector<T> &singles,
@@ -129,6 +130,8 @@ void parseRangeText(const std::string &inputstr, std::vector<T> &singles,
 * Combination of 5 types of format for unit
 * (1) a (2) a-b (3) a - b (4) a- b (5) a- b
 * separated by space(s)
+* @param  ins    -- input string in ISIS ASCII format
+* @return ranges -- vector of a,b pairs converted from input
 */
 void parseISISStringToVector(const std::string &ins,
                              std::vector<Mantid::specnum_t> &ranges) {
@@ -241,9 +244,11 @@ void loadISISMaskFile(const std::string &isisfilename,
 }
 
 /** Parse bank IDs (string name)
-* Sample:  bank2
+* Sample:            bank2
 * @param valuetext:  must be bank name
-* @param tomask: if true, mask, if not unmask
+* @param tomask:     if true, mask, if not unmask
+* @param toMask:     vector of string containing component names for masking
+* @param toUnmask    vector of strings containing component names for unmasking
 */
 void parseComponent(const std::string &valuetext, bool tomask,
                     std::vector<std::string> &toMask,
@@ -351,7 +356,7 @@ void LoadMask::exec() {
   this->componentToDetectors(m_maskCompIdSingle, m_maskDetID);
 
   // unmasking is not implemented
-  //g_log.information() << "To UnMask: \n";
+  // g_log.information() << "To UnMask: \n";
 
   // As m_uMaskCompIdSingle os empty, this never works
   this->bankToDetectors(m_uMaskCompIdSingle, m_unMaskDetID);
@@ -365,7 +370,8 @@ void LoadMask::exec() {
       m_maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
   this->processMaskOnDetectors(indexmap, true, m_maskDetID);
-  // TODO: Not implemented, but should work as soon as m_unMask contains something
+  // TODO: Not implemented, but should work as soon as m_unMask contains
+  // something
   this->processMaskOnDetectors(indexmap, false, m_unMaskDetID);
 }
 
@@ -473,6 +479,8 @@ void LoadMask::componentToDetectors(
 //----------------------------------------------------------------------------------------------
 /** Convert bank to detectors
 * This routine have never worked.
+* @param   singlebanks -- vector of string containing bank names
+* @return  detectors   -- vector of detector-id-s belonging to these banks
  */
 void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks,
                                std::vector<detid_t> &detectors) {
@@ -576,6 +584,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
 
 //----------------------------------------------------------------------------------------------
 /** Initalize Poco XML Parser
+* @param filename  -- name of the xml file to process.
  */
 void LoadMask::initializeXMLParser(const std::string &filename) {
   // const std::string instName
@@ -615,12 +624,14 @@ void LoadMask::initializeXMLParser(const std::string &filename) {
 
     std::vector<std::string> m_maskCompIDSingle;
     std::vector<std::string> m_uMaskCompIDSingle;
+//
 Supported xml Node names are:
 component:  the name of an instrument component, containing detectors.
 ids      : spectra numbers
 detids   : detector numbers
 Full implementation needs unit tests verifying all these. Only detector id-s are
 currently implemented
+// There are also no current support for keyword, switching on un-masking
  */
 void LoadMask::parseXML() {
   // 0. Check
@@ -689,7 +700,8 @@ void LoadMask::parseXML() {
 
   convertToVector(singleSp, pairSp, m_maskSpecID);
   convertToVector(maskSingleDet, maskPairDet, m_maskDetID);
-  // NOTE: -- TODO: NOT IMPLEMENTD
+  // NOTE: -- TODO: NOT IMPLEMENTD -- if unmasking is implemented, should be
+  // enabled
   // convertToVector(umaskSingleDet, umaskPairDet, m_unMaskDetID);
 }
 

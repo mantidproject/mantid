@@ -73,11 +73,6 @@ private:
   void initializeXMLParser(const std::string &filename);
   /// Parse XML
   void parseXML();
-  /// Convert value to detector ids
-  void parseDetectorIDs(const std::string &inputstr, bool tomask);
-  /// Convert value to spectrum Nos
-  void parseSpectrumNos(const std::string &inputstr,
-                        std::vector<specnum_t> &targetMask);
   /// Initialize a Mask Workspace
   void intializeMaskWorkspace();
   /// Convert component to detectors
