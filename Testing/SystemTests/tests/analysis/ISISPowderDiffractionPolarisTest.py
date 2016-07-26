@@ -571,3 +571,38 @@ class LoadTests2(unittest.TestCase):
         self.assertAlmostEqual(221.59375, data.readX(0)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(0.1326732445697, data.readY(0)[0], places=DIFF_PLACES)
 
+    def test_datfile_with_workspace(self):
+        dat_files = []
+        for i in range(0, 5):
+            dat_files.append(
+                DIRS[0] + "POLARIS/test/Cycle_16_1/Mantid_tester/POL93107_newoffsets_b" + str(i + 1) +
+                "_D.dat")
+            dat_files.append(DIRS[0] + "POLARIS/test/Cycle_16_1/Mantid_tester/"
+                                       "POL93107_newoffsets_b" + str(i + 1) + "_TOF.dat")
+
+        dat_data = []
+        for i in range(0, len(dat_files)):
+            dat_data.append(LoadAscii(Filename=dat_files[i], OutputWorkspace=("datWorkspace" + str(i))))
+
+        for data in dat_data:
+            self.assertTrue(isinstance(data, MatrixWorkspace))
+            self.assertEquals(1, data.getNumberHistograms())
+
+        for i in range(0, len(dat_data), 2):
+            b_size_avg = ((dat_data[i].blocksize() + dat_data[i + 1].blocksize()) / 2)
+            self.assertEquals(b_size_avg, dat_data[i + 1].blocksize())
+
+        self.assertAlmostEqual(0.30138, dat_data[0].readX(0)[2], places=DIFF_PLACES)
+        self.assertAlmostEqual(dat_data[0].readY(0)[6], dat_data[1].readY(0)[6], places=DIFF_PLACES)
+
+        self.assertAlmostEqual(0.16076, dat_data[2].readX(0)[199], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.03525161, dat_data[3].readE(0)[10], places=DIFF_PLACES)
+
+        self.assertAlmostEqual(dat_data[4].readY(0)[2228], dat_data[5].readY(0)[2228], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.24750087, dat_data[5].readY(0)[0], places=DIFF_PLACES)
+
+        self.assertAlmostEqual(0.01483319, dat_data[6].readE(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(dat_data[6].readY(0)[6], dat_data[7].readY(0)[6], places=DIFF_PLACES)
+
+        self.assertAlmostEqual(dat_data[8].readE(0)[3369], dat_data[9].readE(0)[3369], places=DIFF_PLACES)
+        self.assertAlmostEqual(300.55868, dat_data[9].readX(0)[10], places=DIFF_PLACES)
