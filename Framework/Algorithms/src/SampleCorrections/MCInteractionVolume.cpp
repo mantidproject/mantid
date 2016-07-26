@@ -88,8 +88,7 @@ double MCInteractionVolume::calculateAbsorption(
     nsegments += m_env->interceptSurfaces(path1);
   }
   if (nsegments == 0) {
-    // The track passed through nothing and so was not attenuated at all.
-    return 1.0;
+    return -1.0;
   }
   int scatterSegmentNo(1);
   if (nsegments != 1) {
