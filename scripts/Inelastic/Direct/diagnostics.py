@@ -83,8 +83,13 @@ def diagnose(white_int,**kwargs):
         van_mask = CloneWorkspace(white_int)
 
     if not hardmask_file is None:
+        if parser.mapmask_ref_ws is None:
+            ref_ws = white_int
+        else:
+            ref_ws = parser.mapmask_ref_ws
+
         hm_ws = LoadMask(Instrument=kwargs.get('instr_name',''),InputFile=parser.hard_mask_file,
-                 OutputWorkspace='hard_mask_ws',RefWorkspace = white_int)
+                 OutputWorkspace='hard_mask_ws',RefWorkspace = ref_ws)
         MaskDetectors(Workspace=white_int, MaskedWorkspace=hm_ws)
         MaskDetectors(Workspace=van_mask, MaskedWorkspace=hm_ws)
         # Find out how many detectors we hard masked

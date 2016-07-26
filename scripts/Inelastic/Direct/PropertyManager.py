@@ -333,7 +333,7 @@ class PropertyManager(NonIDF_Properties):
                            'van_out_lo':0.01, 'van_out_hi':100., 'van_lo':0.1, 'van_hi':1.5, 'van_sig':0.0, 'variation':1.1,\
                            'bleed_test':False,'bleed_pixels':0,'bleed_maxrate':0,\
                            'hard_mask_file':None,'use_hard_mask_only':False,'background_test_range':None,\
-                           'instr_name':'','print_diag_results':True}
+                           'instr_name':'','print_diag_results':True,'mapmask_ref_ws':None}
         result = {}
 
         for key,val in diag_param_list.iteritems():
