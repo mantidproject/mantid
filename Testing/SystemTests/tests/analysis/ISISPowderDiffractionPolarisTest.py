@@ -543,3 +543,31 @@ class LoadTests2(unittest.TestCase):
         self.assertTrue("CalWorkspace2_offsets" in data2[1].getName())
         self.assertTrue("CalWorkspace2_mask" in data2[2].getName())
         self.assertTrue("CalWorkspace2_cal" in data2[3].getName())
+
+    def test_nxsfile_with_workspace(self):
+        self.wsname = "NexusWorkspace"
+        nxsfile = (DIRS[0] + "POLARIS/test/Cycle_16_1/Mantid_tester/POL93107_newoffsets.nxs")
+        data = LoadNexusProcessed(Filename=nxsfile, OutputWorkspace=self.wsname)
+
+        self.assertTrue(isinstance(data[0], WorkspaceGroup))
+        self.assertEquals(5, data[0].getNumberOfEntries())
+
+        for i in range(1, 6):
+            self.assertTrue(isinstance(data[i], MatrixWorkspace))
+
+        self.assertTrue('POL93107_newoffsets', self.wsname[0])
+
+        for i in range(1, 6):
+            self.assertTrue("ResultTOF-" + str(i) in data[i].getName())
+
+    def test_gssfile_with_workspace(self):
+        self.wsname = "GSSFile"
+        gssfile = (DIRS[0] + "POLARIS/test/Cycle_16_1/Mantid_tester/POL93107_newoffsets.gss")
+        data = LoadGSS(Filename=gssfile, OutputWorkspace=self.wsname)
+
+        self.assertTrue(isinstance(data, MatrixWorkspace))
+        self.assertEquals(5, data.getNumberHistograms())
+        self.assertEquals(988, data.blocksize())
+        self.assertAlmostEqual(221.59375, data.readX(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.1326732445697, data.readY(0)[0], places=DIFF_PLACES)
+
