@@ -1,23 +1,23 @@
 #ifndef DETECTOREFFICIENCYVARIATION_H_
 #define DETECTOREFFICIENCYVARIATION_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/DetectorEfficiencyVariation.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAlgorithms/DetectorEfficiencyVariation.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/UnitFactory.h"
 #include <Poco/Path.h>
+#include <boost/lexical_cast.hpp>
+#include <boost/shared_ptr.hpp>
 #include <cmath>
-#include <sstream>
 #include <fstream>
 #include <ios>
+#include <sstream>
 #include <string>
 
 using namespace Mantid::Kernel;
@@ -84,15 +84,15 @@ public:
     int firstGoodSpec = (Nhist / 2) - int((variation - 1) / m_ramp) + 1;
     int lastGoodSpec = (Nhist / 2) + int((variation - 1) / m_ramp) - 1;
     for (int lHist = 0; lHist < firstGoodSpec; lHist++) {
-      TS_ASSERT_EQUALS(static_cast<double>(outputMat->readY(lHist).front()),
+      TS_ASSERT_EQUALS(static_cast<double>(outputMat->y(lHist).front()),
                        static_cast<double>(BadVal))
     }
     for (int lHist = firstGoodSpec; lHist <= lastGoodSpec; lHist++) {
-      TS_ASSERT_EQUALS(static_cast<double>(outputMat->readY(lHist).front()),
+      TS_ASSERT_EQUALS(static_cast<double>(outputMat->y(lHist).front()),
                        static_cast<double>(GoodVal))
     }
     for (int lHist = lastGoodSpec + 1; lHist < Nhist; lHist++) {
-      TS_ASSERT_EQUALS(static_cast<double>(outputMat->readY(lHist).front()),
+      TS_ASSERT_EQUALS(static_cast<double>(outputMat->y(lHist).front()),
                        static_cast<double>(BadVal))
     }
   }

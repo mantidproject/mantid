@@ -50,10 +50,15 @@ Documentation
 #############
 * Added Ragged Workspace as a concept page
 
+Options Window
+###############
+- Within Preferences->Mantid->Options ticking a category off/on will now untick/tick all subcategories. Also having some subcategories on and off will now show a partially ticked box for that category. 
+
 
 Bugs Resolved
 -------------
- - Floating windows now always stay on top of the main window in OSX
+- Floating windows now always stay on top of the main window in OSX
+
 
 SliceViewer Improvements
 ------------------------
@@ -62,6 +67,10 @@ SliceViewer Improvements
 VSI Improvements
 ----------------
 * ParaView updated to version 5.1.0
+
+Multi-dataset fitting interface improvements
+--------------------------------------------
+* Fitting a single dataset with a composite function no longer causes a crash
 
 |
 
