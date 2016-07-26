@@ -403,7 +403,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     pass
 
                 # Sum left, right and corresponding workspaces
-                self._perform_mirror(__left, __right,
+                self._perform_mirror(__left, __right, run,
                                                         __left_monitor_ws,
                                                         __right_monitor_ws,
                                                         __left_grouped_ws,
@@ -522,12 +522,17 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         """
         print('Extract left or right workspace from detector grouped workspace and perform energy transfer')
 
-        CropWorkspace(InputWorkspace=self._det_grouped_ws,
+        # named temporaries (do not use self.* directly, neither overwrite,
+        # otherwise multiple file reduction will break down
+        det_grouped_in = run + '_' + self._det_grouped_ws
+        monitor_in = run + '_' + self._monitor_ws
+
+        CropWorkspace(InputWorkspace=det_grouped_in,
                                         OutputWorkspace=det_grouped,
                                         XMin=x_start,
                                         XMax=x_end)
 
-        CropWorkspace(InputWorkspace=self._monitor_ws,
+        CropWorkspace(InputWorkspace=monitor_in,
                                         OutputWorkspace=monitor,
                                         XMin=x_start,
                                         XMax=x_end)
@@ -576,7 +581,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         print('Done')
 
-    def _perform_mirror(self, ws1, ws2, monitor1=None, monitor2=None, detgrouped1=None, detgrouped2=None, mnorm1=None, mnorm2=None):
+    def _perform_mirror(self, ws1, ws2, run, monitor1=None, monitor2=None, detgrouped1=None, detgrouped2=None, mnorm1=None, mnorm2=None):
         """
         @params    :: ws1 reduced left workspace
         @params    :: ws2 reduced right workspace
@@ -588,12 +593,18 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         @params    :: mnorm2 optional right normalised workspace
         """
 
+        # named temporaries
+        red = run + '_' + self._red_ws
+        mon = run + '_' + self._monitor_ws
+        det_grouped = run + '_' + self._det_grouped_ws
+        mnorm = run + '_' + self._mnorm_ws
+
         # Reduced workspaces
         Plus(LHSWorkspace=ws1,
                 RHSWorkspace=ws2,
-                OutputWorkspace=self._red_ws)
-        Scale(InputWorkspace=self._red_ws,
-                OutputWorkspace=self._red_ws,
+                OutputWorkspace=red)
+        Scale(InputWorkspace=red,
+                OutputWorkspace=red,
                 Factor=0.5, Operation='Multiply')
 
         if (monitor1 is not None and monitor2 is not None
@@ -602,25 +613,25 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             # Monitors
             Plus(LHSWorkspace=monitor1,
                     RHSWorkspace=monitor2,
-                    OutputWorkspace=self._monitor_ws)
-            Scale(InputWorkspace=self._monitor_ws,
-                    OutputWorkspace=self._monitor_ws,
+                    OutputWorkspace=mon)
+            Scale(InputWorkspace=mon,
+                    OutputWorkspace=mon,
                     Factor=0.5, Operation='Multiply')
 
             # detectors grouped workspaces
             Plus(LHSWorkspace=detgrouped1,
                     RHSWorkspace=detgrouped2,
-                    OutputWorkspace=self._det_grouped_ws)
-            Scale(InputWorkspace=self._det_grouped_ws,
-                    OutputWorkspace=self._det_grouped_ws,
+                    OutputWorkspace=det_grouped )
+            Scale(InputWorkspace=det_grouped ,
+                    OutputWorkspace=det_grouped ,
                     Factor=0.5, Operation='Multiply')
 
             # Normalised workspaces
             Plus(LHSWorkspace=mnorm1,
                     RHSWorkspace=mnorm2,
-                    OutputWorkspace=self._mnorm_ws)
-            Scale(InputWorkspace=self._mnorm_ws,
-                    OutputWorkspace=self._mnorm_ws,
+                    OutputWorkspace=mnorm)
+            Scale(InputWorkspace=mnorm,
+                    OutputWorkspace=mnorm,
                     Factor=0.5, Operation='Multiply')
 
     def _shift_spectra(self, ws, ws_shift_origin, ws_out):
@@ -685,15 +696,15 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         print('Done')
 
-    def _peak_maximum_position(self):
+    def _peak_maximum_position(self, ws):
         """
         @return    :: position where peak of single spectrum has its maximum
         """
         print('Get (reasonable) position at maximum peak value if FindEPP cannot determine it (peak too narrow)')
 
         # Consider the normalised workspace
-        x_values = np.array(mtd[self._mnorm_ws].readX(0))
-        y_values = np.array(mtd[self._mnorm_ws].readY(0))
+        x_values = np.array(mtd[ws].readX(0))
+        y_values = np.array(mtd[ws].readY(0))
 
         y_imax = np.argmax(y_values)
 
@@ -738,7 +749,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     DeleteWorkspace(run + '_' + self._mnorm_ws)
                     DeleteWorkspace(run + '_' + self._det_grouped_ws)
                     DeleteWorkspace(run + '_' + self._monitor_ws)
-                    if self._unmirror_option > 0 and self._calibration_ws == '':
+                    if self._unmirror_option > 0 :
                         DeleteWorkspace(run + '_' + self._vnorm_ws)
             else:
                 # group and set optional properties
@@ -765,7 +776,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 self.setPropertyValue('DetGroupedWorkspace', self._det_grouped_ws)
                 self.setPropertyValue('MonitorWorkspace', self._monitor_ws)
 
-                if self._unmirror_option > 0 and self._calibration_ws != '':
+                if self._unmirror_option > 0 :
                     GroupWorkspaces(list_vnorm, OutputWorkspace=self._vnorm_ws)
                     self.setPropertyValue('VNormalisedWorkspace', self._vnorm_ws)
         else:
@@ -785,7 +796,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 self.setPropertyValue('MNormalisedWorkspace', runlist[0] + '_' + self._mnorm_ws)
                 self.setPropertyValue('DetGroupedWorkspace', runlist[0] + '_' + self._det_grouped_ws)
                 self.setPropertyValue('MonitorWorkspace', runlist[0] + '_' + self._monitor_ws)
-                if self._unmirror_option > 0 and self._calibration_ws != '':
+                if self._unmirror_option > 0 :
                     self.setPropertyValue('VNormalisedWorkspace', runlist[0] + '_' + self._vnorm_ws)
             else:
                 # Cleanup unused workspaces
@@ -794,7 +805,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 DeleteWorkspace(runlist[0] + '_' + self._det_grouped_ws)
                 DeleteWorkspace(runlist[0] + '_' + self._monitor_ws)
 
-            if self._unmirror_option > 0 and self._calibration_ws == '':
+            if self._unmirror_option > 0 :
                     DeleteWorkspace(runlist[0] + '_' + self._vnorm_ws)
 
 
