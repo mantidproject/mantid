@@ -45,14 +45,14 @@ public:
     partitioning.checkValid(m_partition);
 
     size_t currentIndex = 0;
-    for(const auto spectrumDefinition : spectrumDefinitions) {
+    for (const auto spectrumDefinition : spectrumDefinitions) {
       auto number = spectrumDefinition.first;
       auto partition = partitioning.indexOf(number);
       bool inThisPartition = (partition == m_partition);
-      for(const auto detectorID : spectrumDefinition.second) {
+      for (const auto detectorID : spectrumDefinition.second) {
         m_inThisPartition.emplace(detectorID, inThisPartition);
-      if (inThisPartition)
-        m_indices.emplace(detectorID, currentIndex++);
+        if (inThisPartition)
+          m_indices.emplace(detectorID, currentIndex++);
       }
     }
   }
@@ -64,8 +64,7 @@ public:
   // etc.
   // DetectorIndexSet makeIndexSet(DetectorID min, DetectorID max);
 
-  DetectorIndexSet
-  makeIndexSet(const std::vector<DetectorID> &detectorIDs) {
+  DetectorIndexSet makeIndexSet(const std::vector<DetectorID> &detectorIDs) {
     std::vector<size_t> indices;
     for (const auto &detectorID : detectorIDs) {
       const auto rank_iterator = m_inThisPartition.find(detectorID);
@@ -80,8 +79,7 @@ public:
 private:
   struct DetectorIDHash {
     std::size_t operator()(const DetectorID &detectorID) const {
-      return std::hash<std::int32_t>()(
-          static_cast<const int32_t>(detectorID));
+      return std::hash<std::int32_t>()(static_cast<const int32_t>(detectorID));
     }
   };
 

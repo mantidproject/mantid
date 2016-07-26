@@ -12,26 +12,25 @@ class DetectorIDTranslatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DetectorIDTranslatorTest *createSuite() { return new DetectorIDTranslatorTest(); }
-  static void destroySuite( DetectorIDTranslatorTest *suite ) { delete suite; }
+  static DetectorIDTranslatorTest *createSuite() {
+    return new DetectorIDTranslatorTest();
+  }
+  static void destroySuite(DetectorIDTranslatorTest *suite) { delete suite; }
 
   DetectorIDTranslator makeTranslator(int ranks, int rank) {
     std::vector<std::pair<SpectrumNumber, std::vector<DetectorID>>> spectra;
     spectra.emplace_back(SpectrumNumber{2}, makeDetectorIDs({0}));
     spectra.emplace_back(SpectrumNumber{1}, makeDetectorIDs({2}));
-    spectra.emplace_back(SpectrumNumber{4}, makeDetectorIDs({4,6}));
+    spectra.emplace_back(SpectrumNumber{4}, makeDetectorIDs({4, 6}));
     spectra.emplace_back(SpectrumNumber{5}, makeDetectorIDs({8}));
-    return {spectra, RoundRobinPartitioning(ranks),
-            PartitionIndex(rank)};
+    return {spectra, RoundRobinPartitioning(ranks), PartitionIndex(rank)};
   }
 
-  std::vector<DetectorID>
-  makeDetectorIDs(std::initializer_list<int64_t> init) {
+  std::vector<DetectorID> makeDetectorIDs(std::initializer_list<int64_t> init) {
     return std::vector<DetectorID>(init.begin(), init.end());
   }
 
-  template <class... T>
-  std::vector<DetectorID> makeDetectorIDs(T &&... args) {
+  template <class... T> std::vector<DetectorID> makeDetectorIDs(T &&... args) {
     return std::vector<DetectorID>(std::forward<T>(args)...);
   }
 
@@ -98,8 +97,6 @@ public:
     TS_ASSERT_EQUALS(set2[0], 1);
     TS_ASSERT_EQUALS(set2[1], 2);
   }
-
 };
-
 
 #endif /* MANTID_INDEXING_DETECTORIDTRANSLATORTEST_H_ */

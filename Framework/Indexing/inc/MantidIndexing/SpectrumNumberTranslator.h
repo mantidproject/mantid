@@ -82,7 +82,7 @@ public:
         max_iterator == m_partitions.end())
       throw std::out_of_range("Invalid spectrum number.");
     // Empty set if range does not cover this partition.
-    if(min > m_max || max < m_min)
+    if (min > m_max || max < m_min)
       return SpectrumIndexSet(0);
     size_t minIndex;
     size_t maxIndex;
