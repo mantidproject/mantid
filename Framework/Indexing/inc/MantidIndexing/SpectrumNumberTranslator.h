@@ -53,6 +53,9 @@ public:
       if (partition == m_partition)
         m_indices.emplace(number, currentIndex++);
     }
+    if (spectrumNumbers.size() != m_partitions.size())
+      throw std::logic_error("SpectrumNumberTranslator: The vector of spectrum "
+                             "numbers contained duplicate entries.");
   }
 
   // Full set

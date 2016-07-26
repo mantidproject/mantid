@@ -44,6 +44,15 @@ public:
         spectrumNumbers, RoundRobinPartitioning(1), PartitionIndex(0)));
   }
 
+  void test_construct_fail() {
+    auto numbers = {1, 2, 3, 3};
+    std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
+    TS_ASSERT_THROWS(SpectrumNumberTranslator(spectrumNumbers,
+                                              RoundRobinPartitioning(1),
+                                              PartitionIndex(0)),
+                     std::logic_error);
+  }
+
   void test_makeIndexSet_full_1_rank() {
     auto translator = makeTranslator(1, 0);
     auto set = translator.makeIndexSet();
