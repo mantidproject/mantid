@@ -1,5 +1,4 @@
 #include "MantidAlgorithms/GetDetOffsetsMultiPeaks.h"
-#include "MantidAlgorithms/GSLFunctions.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -19,7 +18,6 @@
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <sstream>
 
 namespace Mantid {
