@@ -10,7 +10,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <boost/lexical_cast.hpp>
-#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -184,6 +183,8 @@ private:
   /// Function to find peaks near detector edge
   bool edgePixel(DataObjects::PeaksWorkspace_sptr ws, std::string bankName,
                  int col, int row, int Edge);
+ /// Function to calculate U
+  void findU(DataObjects::PeaksWorkspace_sptr peaksWs);
 
   void exec() override;
 

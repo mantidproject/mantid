@@ -189,38 +189,7 @@ void SCDCalibratePanels::exec() {
       }
     }
   }
-  IAlgorithm_sptr ub_alg;
-  try {
-    ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
-  } catch (Exception::NotFoundError &) {
-    g_log.error("Can't locate CalculateUMatrix algorithm");
-    throw;
-  }
-  double a = getProperty("a");
-  double b = getProperty("b");
-  double c = getProperty("c");
-  double alpha = getProperty("alpha");
-  double beta = getProperty("beta");
-  double gamma = getProperty("gamma");
-  if ((a == EMPTY_DBL() || b == EMPTY_DBL() || c == EMPTY_DBL() ||
-       alpha == EMPTY_DBL() || beta == EMPTY_DBL() || gamma == EMPTY_DBL()) &&
-      peaksWs->sample().hasOrientedLattice()) {
-    OrientedLattice latt = peaksWs->mutableSample().getOrientedLattice();
-    a = latt.a();
-    b = latt.b();
-    c = latt.c();
-    alpha = latt.alpha();
-    beta = latt.beta();
-    gamma = latt.gamma();
-  }
-  ub_alg->setProperty("PeaksWorkspace", peaksWs);
-  ub_alg->setProperty("a", a);
-  ub_alg->setProperty("b", b);
-  ub_alg->setProperty("c", c);
-  ub_alg->setProperty("alpha", alpha);
-  ub_alg->setProperty("beta", beta);
-  ub_alg->setProperty("gamma", gamma);
-  ub_alg->executeAsChildAlg();
+  findU(peaksWs);
 
   set<string> MyBankNames;
   int nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
@@ -232,7 +201,7 @@ void SCDCalibratePanels::exec() {
     std::set<string>::iterator it=MyBankNames.begin();
     advance(it,i);
     std::string iBank = *it;
-    const std::string bankName = "PWS_"+iBank;
+    const std::string bankName = "_PWS_"+iBank;
     PeaksWorkspace_sptr local = peaksWs->clone();
     AnalysisDataService::Instance().addOrReplace(bankName, local);
     for (int i = nPeaks - 1; i >= 0; --i) {
@@ -290,6 +259,7 @@ void SCDCalibratePanels::exec() {
     double xRotate = paramsWS->getRef<double>("Value",3);
     double yRotate = paramsWS->getRef<double>("Value",4);
     double zRotate = paramsWS->getRef<double>("Value",5);
+    AnalysisDataService::Instance().remove(bankName);
     PARALLEL_CRITICAL(afterFit) {
       SCDPanelErrors det;
       det.moveDetector(xShift, yShift, zShift, xRotate, yRotate, zRotate, iBank, peaksWs);
@@ -297,6 +267,7 @@ void SCDCalibratePanels::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+  findU(peaksWs);
   string DetCalFileName = getProperty("DetCalFilename");
   Instrument_sptr inst = boost::const_pointer_cast<Instrument>(peaksWs->getInstrument());
   saveIsawDetCal(inst, MyBankNames, 0.0, DetCalFileName);
@@ -353,6 +324,47 @@ void SCDCalibratePanels::exec() {
   }
 }
 
+void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
+  IAlgorithm_sptr ub_alg;
+  try {
+    ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
+  } catch (Exception::NotFoundError &) {
+    g_log.error("Can't locate CalculateUMatrix algorithm");
+    throw;
+  }
+  double a = getProperty("a");
+  double b = getProperty("b");
+  double c = getProperty("c");
+  double alpha = getProperty("alpha");
+  double beta = getProperty("beta");
+  double gamma = getProperty("gamma");
+  if ((a == EMPTY_DBL() || b == EMPTY_DBL() || c == EMPTY_DBL() ||
+       alpha == EMPTY_DBL() || beta == EMPTY_DBL() || gamma == EMPTY_DBL()) &&
+      peaksWs->sample().hasOrientedLattice()) {
+    OrientedLattice latt = peaksWs->mutableSample().getOrientedLattice();
+    a = latt.a();
+    b = latt.b();
+    c = latt.c();
+    alpha = latt.alpha();
+    beta = latt.beta();
+    gamma = latt.gamma();
+  }
+  ub_alg->setProperty("PeaksWorkspace", peaksWs);
+  ub_alg->setProperty("a", a);
+  ub_alg->setProperty("b", b);
+  ub_alg->setProperty("c", c);
+  ub_alg->setProperty("alpha", alpha);
+  ub_alg->setProperty("beta", beta);
+  ub_alg->setProperty("gamma", gamma);
+  ub_alg->executeAsChildAlg();
+
+  // Reindex peaks with new UB
+  Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("IndexPeaks");
+  alg->setPropertyValue("PeaksWorkspace", peaksWs->getName());
+  alg->setProperty("Tolerance", 0.15);
+  alg->executeAsChildAlg();
+
+}
 /**
  *  This is part of the algorithm, LoadIsawDetCal, starting with an existing
  *instrument
