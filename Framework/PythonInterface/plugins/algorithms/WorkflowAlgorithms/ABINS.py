@@ -3,7 +3,7 @@ import multiprocessing
 from mantid.api import AlgorithmFactory,  FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty
 from mantid.kernel import logger, StringListValidator, Direction
 
-from AbinsModules import LoadCASTEP
+from AbinsModules import LoadCASTEP, CalculateS
 
 
 class ABINS(PythonAlgorithm):
@@ -67,12 +67,6 @@ class ABINS(PythonAlgorithm):
                              validator=StringListValidator(["SingleCrystal", "Powder"]),
                              doc="Form of the sample: SingleCrystal or Powder.")
 
-        self.declareProperty(name="Intrinsic Broadening",
-                             direction=Direction.Input,
-                             defaultValue="Gaussian",
-                             validator=StringListValidator(["None", "Gaussian", "Lorentzian", "Voigt"]),
-                             doc="Natural broadening of spectrum. This function will be convoluted with the theoretical spectrum.")
-
         self.declareProperty(name="Instrument",
                              direction=Direction.Input,
                              defaultValue="TOSCA",
@@ -82,18 +76,8 @@ class ABINS(PythonAlgorithm):
         self.declareProperty(name="Dynamical Structure Factor",
                              direction=Direction.Input,
                              defaultValue="Full",
-                             validator=StringListValidator(["Full", "FundamentalsAndOvertones", "Atoms"]),
-                             doc="Theoretical dynamical structure S. The valid options are Full FundamentalsAndOvertones, Atoms")
-
-        self.declareProperty(name="Number of threads",
-                             direction=Direction.Input,
-                             defaultValue=1,
-                             doc="Number of threads for parallel calculations of Debye-Waller factors and dynamical structure factor; Default is 1.")
-
-        self.declareProperty(name="Save S",
-                             direction=Direction.Input,
-                             defaultValue=False,
-                             doc="Save unrefined and refined dynamical structure factor to *hdf5 file.")
+                             validator=StringListValidator(["Full", "Atoms"]),
+                             doc="Theoretical dynamical structure S. The valid options are Full, Atoms")
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),
                              doc="Name to give the output workspace.")
@@ -107,18 +91,9 @@ class ABINS(PythonAlgorithm):
         """
         issues = dict()
 
-        # TODO: check consistency between chosen DFT program and file with DFT phonon data
-
         temperature = self.getPropertyValue("Temperature")
         if temperature < 0:
             issues["Temperature"] = "Temperature must be positive!"
-
-        tot_num_cpu = multiprocessing.cpu_count()
-        num_cpu = self.getPropertyValue("Number of threads")
-        if num_cpu < 1:
-            issues["Number of threads"] = "Number of threads cannot be smaller than 1!"
-        elif num_cpu > tot_num_cpu:
-            issues["Number of threads"] = "Number of threads cannot be larger than available number of threads!"
 
         dft_filename = self.getProperty("DFT program")
         if dft_filename == "CASTEP":
@@ -141,13 +116,20 @@ class ABINS(PythonAlgorithm):
         self._get_properties()
         prog_reporter.report("Input data from the user has been collected.")
 
-        castep_reader = LoadCASTEP(self._phononFile)
-        castep_reader.readPhononFile()
-        # castep_data = castep_reader.readPhononFile()
+        castep_reader = LoadCASTEP(input_DFT_filename=self._phononFile)
+        castep_data = castep_reader.readPhononFile()
         prog_reporter.report("Phonon file has been read.")
+
+        s_calculator = CalculateS(filename=self._phononFile, temperature=self._temperature,
+                                  instrument_name=self._instrument, abins_data=castep_data,
+                                  sample_form=self._sampleForm)
+        Sdata = s_calculator.getS()
+        prog_reporter.report("Dynamical structure factor is ready to be plotted.")
+
 
     def _validate_crystal_input_file(self, filename=None):
         pass
+
 
     def _validate_castep_input_file(self, filename=None):
         """
@@ -161,8 +143,6 @@ class ABINS(PythonAlgorithm):
         """
         output = {"Valid": True, "Comment": ""}
         msg_err = "Invalid %s file. " %filename
-        msg_case_explanation = "(Fortran notation is followed: case of letter does not matter; " \
-                               "empty lines are not taken into account)"
         msg_rename = "Please rename your file and try again."
 
         # check name of file
@@ -183,37 +163,34 @@ class ABINS(PythonAlgorithm):
 
             line = self._get_one_line(castep_file)
             if not self._compare_one_line(line, "beginheader"): # first line is BEGIN header
-                output = {"Valid": False, "Comment": msg_err+"The first line should be 'BEGIN header' "+msg_case_explanation}
+                output = {"Valid": False, "Comment": msg_err+"The first line should be 'BEGIN header'."}
                 return output
 
             line = self._get_one_line(castep_file)
             if not self._compare_one_line(one_line=line, pattern="numberofions"):
 
-                output = {"Valid": False, "Comment": msg_err+"The second line should include 'Number of ions' " +
-                                                     msg_case_explanation}
+                output = {"Valid": False, "Comment": msg_err+"The second line should include 'Number of ions'."}
                 return output
 
             line = self._get_one_line(castep_file)
             if not self._compare_one_line(one_line=line, pattern="numberofbranches"):
 
-                output = {"Valid": False, "Comment": msg_err+"The third line should include 'Number of branches' " +
-                                                     msg_case_explanation}
+                output = {"Valid": False, "Comment": msg_err+"The third line should include 'Number of branches'."}
                 return output
 
             line = self._get_one_line(castep_file)
             if not self._compare_one_line(one_line=line, pattern="numberofwavevectors"):
 
-                output = {"Valid": False, "Comment": msg_err+"The fourth line should include 'Number of wavevectors' " +
-                                                     msg_case_explanation}
+                output = {"Valid": False, "Comment": msg_err+"The fourth line should include 'Number of wavevectors'."}
 
             line = self._get_one_line(castep_file)
             if not self._compare_one_line(one_line=line,
                                           pattern="frequenciesin"):
 
-                output = {"Valid": False, "Comment": msg_err+"The fifth line should be 'Frequencies in'" +
-                                                     msg_case_explanation}
+                output = {"Valid": False, "Comment": msg_err+"The fifth line should be 'Frequencies in'."}
 
         return output
+
 
     def _get_one_line(self, file_obj=None):
         """
@@ -224,9 +201,10 @@ class ABINS(PythonAlgorithm):
         line = file_obj.readline().strip()
 
         while line and line == "":
-            line = file_obj.readline().strip()
+            line = file_obj.readline().strip().lower()
 
         return line
+
 
     def _compare_one_line(self, one_line, pattern):
         """
@@ -236,7 +214,7 @@ class ABINS(PythonAlgorithm):
                         letters to lower case
         :return:  True is pattern present in the line, otherwise False
         """
-        return one_line and pattern in one_line.lower().replace(" ", "")
+        return one_line and pattern in one_line.replace(" ", "")
 
     def _get_properties(self):
 
@@ -244,11 +222,8 @@ class ABINS(PythonAlgorithm):
         self._experimentalFile = self.getProperty("Experimental File").value
         self._temperature = self.getProperty("Temperature").value
         self._sampleForm = self.getProperty("Sample Form").value
-        self._intrinsicBroadening = self.getProperty("Intrinsic Broadening").value
         self._instrument = self.getProperty("Instrument").value
         self._structureFactorMode = self.getProperty("Dynamical Structure Factor").value
-        self._threadsNumber = self.getProperty("Number of threads")
-        self._saveS = self.getProperty("Save S")
         self._output_workspace_name = self.getProperty("OutputWorkspace")
 
 try:
