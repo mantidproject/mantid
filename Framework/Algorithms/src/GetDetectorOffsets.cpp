@@ -172,7 +172,7 @@ void GetDetectorOffsets::exec() {
  */
 double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
   // Find point of peak centre
-  const HistogramData::HistogramY &yValues = inputW->y(s);
+  const auto &yValues = inputW->y(s);
   auto it = std::max_element(yValues.cbegin(), yValues.cend());
   const double peakHeight = *it;
   const double peakLoc = inputW->x(s)[it - yValues.begin()];

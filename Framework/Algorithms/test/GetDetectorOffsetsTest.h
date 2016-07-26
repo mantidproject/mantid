@@ -42,9 +42,9 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const Mantid::HistogramData::HistogramX &X = WS->readX(0);
-    Mantid::HistogramData::HistogramY &Y = WS->mutableY(0);
-    Mantid::HistogramData::HistogramE &E = WS->mutableE(0);
+    const auto &X = WS->readX(0);
+    auto &Y = WS->mutableY(0);
+    auto &E = WS->mutableE(0);
     for (size_t i = 0; i < Y.size(); ++i) {
       const double x = (X[i] + X[i + 1]) / 2;
       Y[i] = exp(-0.5 * pow((x - 1) / 10.0, 2));
@@ -93,9 +93,9 @@ public:
         WorkspaceCreationHelper::CreateGroupedWorkspace2D(3, 200, 1.0);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const Mantid::HistogramData::HistogramX &X = WS->readX(0);
-    Mantid::HistogramData::HistogramY &Y = WS->mutableY(0);
-    Mantid::HistogramData::HistogramE &E = WS->mutableE(0);
+    const auto &X = WS->readX(0);
+    auto &Y = WS->mutableY(0);
+    auto &E = WS->mutableE(0);
     for (size_t i = 0; i < Y.size(); ++i) {
       const double x = (X[i] + X[i + 1]) / 2;
       Y[i] = exp(-0.5 * pow((x - 1) / 10.0, 2));
@@ -143,9 +143,9 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const Mantid::HistogramData::HistogramX &X = WS->readX(0);
-    Mantid::HistogramData::HistogramY &Y = WS->mutableY(0);
-    Mantid::HistogramData::HistogramE &E = WS->mutableE(0);
+    const auto &X = WS->readX(0);
+    auto &Y = WS->mutableY(0);
+    auto &E = WS->mutableE(0);
     for (size_t i = 0; i < Y.size(); ++i) {
       const double x = (X[i] + X[i + 1]) / 2;
       Y[i] = exp(-0.5 * pow((x - 1) / 10.0, 2));
@@ -217,9 +217,9 @@ public:
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
     for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
-      const Mantid::HistogramData::HistogramX &X = WS->readX(wi);
-      Mantid::HistogramData::HistogramY &Y = WS->mutableY(wi);
-      Mantid::HistogramData::HistogramE &E = WS->mutableE(wi);
+      const auto &X = WS->readX(wi);
+      auto &Y = WS->mutableY(wi);
+      auto &E = WS->mutableE(wi);
       for (int i = 0; i < static_cast<int>(Y.size()); ++i) {
         const double x = (X[i] + X[i + 1]) / 2;
         Y[i] = exp(-0.5 * pow((x - 1) / 10.0, 2));
