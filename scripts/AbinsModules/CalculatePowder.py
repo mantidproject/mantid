@@ -2,6 +2,7 @@ import numpy as np
 
 from IOmodule import  IOmodule
 from PowderData import PowderData
+from QData import QData
 from AbinsData import AbinsData
 import Constants
 
@@ -10,7 +11,8 @@ class CalculatePowder(IOmodule):
     Class for calculating mean square displacements (MSD) for the powder use case.
     Mean square displacements are in Hartree atomic units.
     Working equation is taken from http://atztogo.github.io/phonopy/thermal-displacement.html.
-    Additionally Debye-Waller factors are calculated which are  MSD multiplied by coth(omega/2T)^2 for each frequency.
+    Additionally Debye-Waller factors are calculated which are  MSD multiplied by coth(omega/2T)^2 for each frequency
+    They have to be multiplied by Q and raised to power 2 to be equivalent to DW from "Vibrational spectroscopy with neutrons...." .
     Obtained MSD and DW  can be directly used for calculation of S(Q, omega) in case sample has a form of powder.
     """
     def __init__(self, filename=None, abins_data=None, temperature=None):
@@ -55,7 +57,7 @@ class CalculatePowder(IOmodule):
         exp_factor = 1.0 / temperature_hartree
         _coth_factor = 1.0 / (2.0 * temperature_hartree) # coth( _coth_factor * omega)
 
-        _msd = PowderData(temperature=self._temperature, num_atoms=num_atoms)
+        _powder = PowderData(temperature=self._temperature, num_atoms=num_atoms)
 
         for atom in range(num_atoms):
 
@@ -83,9 +85,10 @@ class CalculatePowder(IOmodule):
 
             _powder_atom["msd"] += _powder_atom["msd"] * mass_hartree_factor[atom]
             _powder_atom["dw"] += _powder_atom["dw"] * mass_hartree_factor[atom]
-            _msd._append(num_atom=atom, powder_atom=_powder_atom)
 
-        return _msd
+            _powder._append(num_atom=atom, powder_atom=_powder_atom)
+
+        return _powder
 
 
     def getPowder(self):
