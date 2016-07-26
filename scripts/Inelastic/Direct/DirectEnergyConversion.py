@@ -1,5 +1,6 @@
 ﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
+#pylind: disable=attribute-defined-outside-init
 from mantid.simpleapi import *
 from mantid.kernel import funcinspect
 from mantid import geometry,api
@@ -215,7 +216,7 @@ class DirectEnergyConversion(object):
                 if self.prop_man.mapmask_ref_ws is None:
                     ref_ws = white
                 else:
-                    ref_ws = self.prop_man.mapmask_ref_ws 
+                    ref_ws = self.prop_man.mapmask_ref_ws
                 idf_file = api.ExperimentInfo.getInstrumentFilename(self.instr_name)
                 diag_mask = LoadMask(Instrument=idf_file,InputFile=self.hard_mask_file,\
                                  OutputWorkspace='hard_mask_ws',RefWorkspace = ref_ws)

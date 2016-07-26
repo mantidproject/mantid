@@ -1,5 +1,6 @@
 ﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
+#pylint: disable=attribute-defined-outside-init
 """ File contains Descriptors used describe run for direct inelastic reduction """
 
 from mantid.simpleapi import *

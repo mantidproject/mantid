@@ -1,3 +1,6 @@
+#pylind: disable=too-many-instance-attributes
+#pylint: disable=too-many-branches
+#pylint: disable=too-many-locals
 """
 Provide functions to perform various diagnostic tests.
 
@@ -88,7 +91,7 @@ def diagnose(white_int,**kwargs):
         else:
             ref_ws = parser.mapmask_ref_ws
 
-        hm_ws = LoadMask(Instrument=kwargs.get('instr_name',''),InputFile=parser.hard_mask_file,
+        hm_ws = LoadMask(Instrument=kwargs.get('instr_name',''),InputFile=parser.hard_mask_file,\
                  OutputWorkspace='hard_mask_ws',RefWorkspace = ref_ws)
         MaskDetectors(Workspace=white_int, MaskedWorkspace=hm_ws)
         MaskDetectors(Workspace=van_mask, MaskedWorkspace=hm_ws)
