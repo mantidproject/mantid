@@ -2,6 +2,7 @@
 #define MANTID_INDEXING_SPECTRUMNUMBERTRANSLATOR_H_
 
 #include "MantidIndexing/DllConfig.h"
+#include "MantidIndexing/GlobalWorkspaceIndex.h"
 #include "MantidIndexing/Partitioning.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidIndexing/SpectrumNumber.h"
@@ -55,8 +56,11 @@ public:
       auto number = spectrumNumbers[i];
       auto partition = partitioning.indexOf(number);
       m_partitions.emplace(number, partition);
-      if (partition == m_partition)
-        m_indices.emplace(number, currentIndex++);
+      if (partition == m_partition) {
+        m_indices.emplace(number, currentIndex);
+        m_globalToLocal.emplace(GlobalWorkspaceIndex(i), currentIndex);
+        ++currentIndex;
+      }
     }
     if (spectrumNumbers.size() != m_partitions.size())
       throw std::logic_error("SpectrumNumberTranslator: The vector of spectrum "
@@ -79,6 +83,24 @@ public:
                             m_indices.size());
   }
 
+  SpectrumIndexSet makeIndexSet(GlobalWorkspaceIndex min,
+                                GlobalWorkspaceIndex max) {
+    if (min > max)
+      throw std::logic_error(
+          "SpectrumIndexTranslator: specified min is larger than max.");
+    if (max >= m_partitions.size())
+      throw std::out_of_range(
+          "SpectrumIndexTranslator: specified max value is out of range.");
+
+    const auto begin = m_globalToLocal.lower_bound(min);
+    const auto end = m_globalToLocal.upper_bound(max);
+    if (begin == m_globalToLocal.end() || end == m_globalToLocal.begin() ||
+        begin == end)
+      return SpectrumIndexSet(0);
+    return SpectrumIndexSet(begin->second, std::prev(end)->second,
+                            m_globalToLocal.size());
+  }
+
   SpectrumIndexSet
   makeIndexSet(const std::vector<SpectrumNumber> &spectrumNumbers) {
     std::vector<size_t> indices;
@@ -86,6 +108,20 @@ public:
       if (m_partitions.at(spectrumNumber) == m_partition)
         indices.push_back(m_indices.at(spectrumNumber));
     return SpectrumIndexSet(indices, m_indices.size());
+  }
+
+  SpectrumIndexSet
+  makeIndexSet(const std::vector<GlobalWorkspaceIndex> &globalIndices) {
+    std::vector<size_t> indices;
+    for (const auto &globalIndex : globalIndices) {
+      if (globalIndex >= m_partitions.size())
+        throw std::out_of_range(
+            "SpectrumIndexTranslator: specified index is out of range.");
+      const auto it = m_globalToLocal.find(globalIndex);
+      if (it != m_globalToLocal.end())
+        indices.push_back(std::distance(m_globalToLocal.begin(), it));
+    }
+    return SpectrumIndexSet(indices, m_globalToLocal.size());
   }
 
 private:
@@ -100,6 +136,7 @@ private:
   std::unordered_map<SpectrumNumber, PartitionIndex, SpectrumNumberHash>
       m_partitions;
   std::map<SpectrumNumber, size_t> m_indices;
+  std::map<GlobalWorkspaceIndex, size_t> m_globalToLocal;
 };
 
 } // namespace Indexing

@@ -7,6 +7,7 @@ set ( INC_FILES
 	inc/MantidIndexing/DetectorIDTranslator.h
 	inc/MantidIndexing/DetectorIndexSet.h
 	inc/MantidIndexing/DllConfig.h
+	inc/MantidIndexing/GlobalWorkspaceIndex.h
 	inc/MantidIndexing/IndexSet.h
 	inc/MantidIndexing/IndexType.h
 	inc/MantidIndexing/PartitionIndex.h
@@ -21,6 +22,7 @@ set ( TEST_FILES
 	DetectorIDTest.h
 	DetectorIDTranslatorTest.h
 	DetectorIndexSetTest.h
+	GlobalWorkspaceIndexTest.h
 	IndexSetTest.h
 	IndexTypeTest.h
 	PartitionIndexTest.h

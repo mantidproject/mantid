@@ -21,6 +21,10 @@ public:
   }
 
   SpectrumNumberTranslator makeTranslator(int ranks, int rank) {
+    // SpectrumNumber       1 2 4 5
+    // GlobalWorkspaceIndex 0 1 2 3
+    // Rank                 1 2 1 2
+    // Local index          0 1 0 1
     auto numbers = {2, 1, 4, 5};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     return {spectrumNumbers, RoundRobinPartitioning(ranks),
@@ -35,6 +39,11 @@ public:
   template <class... T>
   std::vector<SpectrumNumber> makeSpectrumNumbers(T &&... args) {
     return std::vector<SpectrumNumber>(std::forward<T>(args)...);
+  }
+
+  std::vector<GlobalWorkspaceIndex>
+  makeGlobalWorkspaceIndices(std::initializer_list<int64_t> init) {
+    return std::vector<GlobalWorkspaceIndex>(init.begin(), init.end());
   }
 
   void test_construct() {
@@ -147,6 +156,40 @@ public:
         t2.makeIndexSet(SpectrumNumber(4), SpectrumNumber(4)).size(), 0);
   }
 
+  void test_makeIndexSet_minmax_GlobalWorkspaceIndex_param_check_3_ranks() {
+    auto t = makeTranslator(3, 1);
+    TS_ASSERT_THROWS(
+        t.makeIndexSet(GlobalWorkspaceIndex(1), GlobalWorkspaceIndex(0)),
+        std::logic_error);
+    TS_ASSERT_THROWS(
+        t.makeIndexSet(GlobalWorkspaceIndex(0), GlobalWorkspaceIndex(4)),
+        std::out_of_range);
+    TS_ASSERT_THROWS(
+        t.makeIndexSet(GlobalWorkspaceIndex(5), GlobalWorkspaceIndex(4)),
+        std::logic_error);
+    // -1 converted to size_t is positive and >> 1
+    TS_ASSERT_THROWS(
+        t.makeIndexSet(GlobalWorkspaceIndex(-1), GlobalWorkspaceIndex(1)),
+        std::logic_error);
+    // -1 converted to size_t is > 0 but out of range
+    TS_ASSERT_THROWS(
+        t.makeIndexSet(GlobalWorkspaceIndex(0), GlobalWorkspaceIndex(-1)),
+        std::out_of_range);
+  }
+
+  void test_makeIndexSet_minmax_GlobalWorkspaceIndex_3_ranks() {
+    auto translator = makeTranslator(3, 1);
+    auto set = translator.makeIndexSet(GlobalWorkspaceIndex(0),
+                                       GlobalWorkspaceIndex(3));
+    TS_ASSERT_EQUALS(set.size(), 2);
+    TS_ASSERT_EQUALS(set[0], 0);
+    TS_ASSERT_EQUALS(set[1], 1);
+    set = translator.makeIndexSet(GlobalWorkspaceIndex(1),
+                                  GlobalWorkspaceIndex(2));
+    TS_ASSERT_EQUALS(set.size(), 1);
+    TS_ASSERT_EQUALS(set[0], 1);
+  }
+
   void test_makeIndexSet_partial_1_rank() {
     auto translator = makeTranslator(1, 0);
     auto set1 = translator.makeIndexSet(makeSpectrumNumbers({1, 2}));
@@ -175,6 +218,41 @@ public:
     TS_ASSERT_EQUALS(set1[0], 0);
     // 4 is on this rank
     auto set2 = translator.makeIndexSet(makeSpectrumNumbers({4, 5}));
+    TS_ASSERT_EQUALS(set2.size(), 1);
+    TS_ASSERT_EQUALS(set2[0], 1);
+  }
+
+  void test_makeIndexSet_GlobalWorkspaceIndex_partial_1_rank() {
+    auto translator = makeTranslator(1, 0);
+    auto set1 = translator.makeIndexSet(makeGlobalWorkspaceIndices({0, 2}));
+    TS_ASSERT_EQUALS(set1.size(), 2);
+    TS_ASSERT_EQUALS(set1[0], 0);
+    TS_ASSERT_EQUALS(set1[1], 2);
+    auto set2 = translator.makeIndexSet(makeGlobalWorkspaceIndices({1, 3}));
+    TS_ASSERT_EQUALS(set2.size(), 2);
+    TS_ASSERT_EQUALS(set2[0], 1);
+    TS_ASSERT_EQUALS(set2[1], 3);
+  }
+
+  void test_makeIndexSet_GlobalWorkspaceIndex_partial_3_ranks_range_checks() {
+    auto t = makeTranslator(3, 1);
+    TS_ASSERT_THROWS(t.makeIndexSet(makeGlobalWorkspaceIndices({-1})),
+                     std::out_of_range);
+    TS_ASSERT_THROWS(t.makeIndexSet(makeGlobalWorkspaceIndices({4})),
+                     std::out_of_range);
+    // Index is not on this rank but it is correct.
+    TS_ASSERT_THROWS_NOTHING(t.makeIndexSet(makeGlobalWorkspaceIndices({1})));
+    TS_ASSERT_EQUALS(t.makeIndexSet(makeGlobalWorkspaceIndices({1})).size(), 0);
+  }
+
+  void test_makeIndexSet_GlobalWorkspaceIndex_partial_3_ranks() {
+    auto translator = makeTranslator(3, 1);
+    // 0 is on this rank
+    auto set1 = translator.makeIndexSet(makeGlobalWorkspaceIndices({0, 1}));
+    TS_ASSERT_EQUALS(set1.size(), 1);
+    TS_ASSERT_EQUALS(set1[0], 0);
+    // 2 is on this rank
+    auto set2 = translator.makeIndexSet(makeGlobalWorkspaceIndices({2, 3}));
     TS_ASSERT_EQUALS(set2.size(), 1);
     TS_ASSERT_EQUALS(set2[0], 1);
   }
