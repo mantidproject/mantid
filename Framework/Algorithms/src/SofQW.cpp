@@ -110,20 +110,25 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
 }
 
 void SofQW::exec() {
-  // Find the approopriate algorithm
-  std::string method = this->getProperty("Method");
-  std::string child = "SofQW" + method;
+	// Find the approopriate algorithm
+	std::string method = this->getProperty("Method");
+	std::string child = "SofQW" + method;
 
-  // Setup and run
-  Algorithm_sptr childAlg = boost::dynamic_pointer_cast<Algorithm>(
-      createChildAlgorithm(child, 0.0, 1.0));
-  // This will add the Method property to the child algorithm but it will be
-  // ignored anyway...
-  childAlg->copyPropertiesFrom(*this);
-  childAlg->execute();
+	// Setup and run
+	Algorithm_sptr childAlg = boost::dynamic_pointer_cast<Algorithm>(
+		createChildAlgorithm(child, 0.0, 1.0));
+	// This will add the Method property to the child algorithm but it will be
+	// ignored anyway...
+	childAlg->copyPropertiesFrom(*this);
+	childAlg->execute();
 
-  MatrixWorkspace_sptr outputWS = childAlg->getProperty("OutputWorkspace");
-  this->setProperty("OutputWorkspace", outputWS);
+	MatrixWorkspace_sptr outputWS = childAlg->getProperty("OutputWorkspace");
+	this->setProperty("OutputWorkspace", outputWS);
+
+	// Progress reports & cancellation
+	MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+	const size_t nHistos = inputWorkspace->getNumberHistograms();
+	auto m_progress = new Progress(this, 0.0, 1.0, nHistos);
 }
 
 /** Creates the output workspace, setting the axes according to the input
@@ -146,7 +151,9 @@ SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
   const int yLength = static_cast<int>(
       VectorHelper::createAxisFromRebinParams(binParams, newAxis));
 
+
   // Create the output workspace
+  m_progress->report("Calculating detector angular widths");
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
       inputWorkspace, yLength - 1, xLength, xLength - 1);
   // Create a numeric axis to replace the default vertical one
