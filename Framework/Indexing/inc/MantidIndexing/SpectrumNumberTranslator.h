@@ -67,11 +67,8 @@ public:
   SpectrumIndexSet makeIndexSet() { return SpectrumIndexSet(m_indices.size()); }
 
   SpectrumIndexSet makeIndexSet(SpectrumNumber min, SpectrumNumber max) {
-    const auto min_iterator = m_partitions.find(min);
-    const auto max_iterator = m_partitions.find(max);
-    if (min_iterator == m_partitions.end() ||
-        max_iterator == m_partitions.end())
-      throw std::out_of_range("Invalid spectrum number.");
+    checkAndGetPartitionIndex(min);
+    checkAndGetPartitionIndex(max);
 
     auto begin = m_indices.lower_bound(min);
     auto end = m_indices.upper_bound(max);
@@ -83,17 +80,21 @@ public:
   SpectrumIndexSet
   makeIndexSet(const std::vector<SpectrumNumber> &spectrumNumbers) {
     std::vector<size_t> indices;
-    for (const auto &spectrumNumber : spectrumNumbers) {
-      const auto rank_iterator = m_partitions.find(spectrumNumber);
-      if (rank_iterator == m_partitions.end())
-        throw std::out_of_range("Invalid spectrum number.");
-      if (rank_iterator->second == m_partition)
+    for (const auto &spectrumNumber : spectrumNumbers)
+      if (checkAndGetPartitionIndex(spectrumNumber) == m_partition)
         indices.push_back(m_indices.at(spectrumNumber));
-    }
     return SpectrumIndexSet(indices, m_indices.size());
   }
 
 private:
+  PartitionIndex
+  checkAndGetPartitionIndex(const SpectrumNumber &spectrumNumber) {
+    const auto rank_iterator = m_partitions.find(spectrumNumber);
+    if (rank_iterator == m_partitions.end())
+      throw std::out_of_range("Invalid spectrum number.");
+    return rank_iterator->second;
+  }
+
   struct SpectrumNumberHash {
     std::size_t operator()(const SpectrumNumber &spectrumNumber) const {
       return std::hash<std::int32_t>()(
