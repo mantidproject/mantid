@@ -163,6 +163,9 @@ public:
   // Preferred normalization to use for displaying histo workspaces
   virtual MDNormalization displayNormalizationHisto() const;
 
+  // Check if this class is an instance of MDHistoWorkspace
+  virtual bool isMDHistoWorkspace() const { return false; }
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IMDWorkspace(const IMDWorkspace &) = default;

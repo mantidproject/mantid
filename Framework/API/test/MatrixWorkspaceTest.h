@@ -23,6 +23,7 @@
 #include <boost/make_shared.hpp>
 
 #include <algorithm>
+#include <cmath>
 #include <functional>
 #include <numeric>
 
@@ -342,6 +343,33 @@ public:
     TS_ASSERT_EQUALS(ws2->maskedBins(0).rbegin()->first, 1);
     TS_ASSERT_EQUALS(ws2->maskedBins(0).rbegin()->second, 0.5);
     TS_ASSERT_EQUALS(ws2->dataY(0)[1], 0.5);
+  }
+
+  void testMaskingNaNInf() {
+    const size_t s = 4;
+    const double y[s] = {NAN, INFINITY, -INFINITY, 2.};
+    WorkspaceTester ws;
+    ws.initialize(1, s + 1, s);
+
+    // initialize and mask first with 0 weights
+    // masking with 0 weight should be equiavalent to flagMasked
+    // i.e. values should not change, even Inf and NaN
+    for (size_t i = 0; i < s; ++i) {
+      ws.mutableY(0)[i] = y[i];
+      ws.maskBin(0, i, 0);
+    }
+
+    TS_ASSERT(isnan(ws.y(0)[0]));
+    TS_ASSERT(isinf(ws.y(0)[1]));
+    TS_ASSERT(isinf(ws.y(0)[2]));
+    TS_ASSERT_EQUALS(ws.y(0)[3], 2.);
+
+    // now mask w/o specifying weight (e.g. 1 by default)
+    // in this case everything should be 0, even NaN and Inf
+    for (size_t i = 0; i < s; ++i) {
+      ws.maskBin(0, i);
+      TS_ASSERT_EQUALS(ws.y(0)[i], 0.);
+    }
   }
 
   void testSize() {
