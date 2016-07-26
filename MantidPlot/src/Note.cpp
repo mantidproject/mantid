@@ -173,6 +173,15 @@ IProjectSerialisable *Note::loadFromProject(const std::string &lines,
     note->te->setText(QString::fromUtf8(content.c_str()));
   }
 
+  QString newName = name;
+  while (newName.isEmpty() || app->alreadyUsedName(newName))
+    newName = app->generateUniqueName("Notes");
+
+  note->setName(newName);
+  note->confirmClose(app->confirmCloseNotes);
+
+  app->addMdiSubWindow(note);
+  note->showNormal();
   return note;
 }
 
