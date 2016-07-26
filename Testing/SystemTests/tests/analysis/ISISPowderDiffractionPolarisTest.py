@@ -490,8 +490,8 @@ class ISISPowderDiffractionPol3(stresstesting.MantidStressTest):
 
             filenames.append("POLARIS/test/Cycle_16_1/Calibration/"
                              "POL_2016_1_5mm_vrod_testing_newcalfile-" + str(i) + ".nxs")
-        filenames.append("POLARIS/test/Cycle_16_1/Calibration/"
-                         "POL_2016_1_5mm_vrod_testing_newcalfile-" + str(i) + "_.dat")
+            filenames.append("POLARIS/test/Cycle_16_1/Calibration/"
+                             "POL_2016_1_5mm_vrod_testing_newcalfile-" + str(i) + "_.dat")
 
         for i in range(0, 5):
             filenames.append("POLARIS/test/Cycle_16_1/Calibration/"
