@@ -13,7 +13,7 @@ namespace Kernel {
 struct CaseInsensitiveStringComparator {
   bool operator()(const std::string &s1, const std::string &s2) const {
 #ifdef _MSC_VER
-    return __stricmp(s1.c_str(), s2.c_str()) < 0;
+    return _stricmp(s1.c_str(), s2.c_str()) < 0;
 #else
     return strcasecmp(s1.c_str(), s2.c_str()) < 0;
 #endif
