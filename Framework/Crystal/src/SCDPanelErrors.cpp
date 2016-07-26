@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
+#include <boost/math/special_functions/round.hpp>
 #include <algorithm>
 #include <cmath>
 #include <fstream>
@@ -66,10 +67,10 @@ void SCDPanelErrors::moveDetector(
   alg1->setLogging(false);
   alg1->setProperty<Workspace_sptr>("Workspace", inputW);
   alg1->setPropertyValue("ComponentName", detname);
-  // Move in cm for small shifts
-  alg1->setProperty("X", x * 0.01);
-  alg1->setProperty("Y", y * 0.01);
-  alg1->setProperty("Z", z * 0.01);
+  // Move in m
+  alg1->setProperty("X", x);
+  alg1->setProperty("Y", y);
+  alg1->setProperty("Z", z);
   alg1->setPropertyValue("RelativePosition", "1");
   alg1->execute();
 
@@ -123,7 +124,7 @@ void SCDPanelErrors::eval(double xrotate, double yrotate, double zrotate, double
 
   setupData();
 
-  moveDetector(xrotate, yrotate, zrotate, xshift, yshift, zshift,m_bank,m_workspace);
+  moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, m_bank,m_workspace);
   DataObjects::PeaksWorkspace_sptr inputP =
       boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
   Geometry::Instrument_sptr inst = boost::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
@@ -131,15 +132,16 @@ void SCDPanelErrors::eval(double xrotate, double yrotate, double zrotate, double
   for (size_t i = 0; i < nData; i += 3) {
     DataObjects::Peak peak = inputP->getPeak(j);
     j++;
-    V3D Q1 = peak.getQSampleFrame();
-    DataObjects::Peak peak2(inst,Q1,peak.getGoniometerMatrix());
-    peak2.setDetectorID(peak.getDetectorID());
+    V3D hkl =  V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
+         boost::math::iround(peak.getL()));
+    DataObjects::Peak peak2(inst,peak.getDetectorID(),peak.getWavelength(),hkl,peak.getGoniometerMatrix());
+    peak2.findDetector();
     V3D Q3 = peak2.getQSampleFrame();
     out[i] = Q3[0];
     out [i+1] = Q3[1];
     out[i+2] = Q3[2];
   }
-  moveDetector(-xrotate, -yrotate, -zrotate, -xshift, -yshift, -zshift,m_bank,m_workspace);
+  moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate, m_bank,m_workspace);
 }
 
 /**
