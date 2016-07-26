@@ -47,22 +47,6 @@ public:
   void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
                     boost::shared_ptr<API::FunctionValues> &values,
                     size_t i0 = 0) override;
-
-  API::Workspace_sptr
-  createOutputWorkspace(const std::string &baseName,
-                        API::IFunction_sptr function,
-                        boost::shared_ptr<API::FunctionDomain> domain,
-                        boost::shared_ptr<API::FunctionValues> values,
-                        const std::string &outputWorkspacePropertyName =
-                            "OutputWorkspace") override;
-
-protected:
-  /// Add the calculated function values to the workspace
-  void addFunctionValuesToWS(
-      const API::IFunction_sptr &function,
-      boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
-      const boost::shared_ptr<API::FunctionDomain> &domain,
-      boost::shared_ptr<API::FunctionValues> resultValues) const override;
 };
 
 } // namespace CurveFitting

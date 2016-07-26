@@ -5,6 +5,7 @@
 
 #include "MantidCurveFitting/HistogramDomainCreator.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -127,11 +128,26 @@ public:
     fit.setProperty("Function", "name=Lorentzian,FWHM=0.5");
     fit.setProperty("HistogramFit", true);
     fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Output", "fit");
     fit.execute();
     IFunction_sptr fun = fit.getProperty("Function");
-    for(size_t i = 0; i < fun->nParams(); ++i) {
-      std::cerr << i << ' ' << fun->parameterName(i) << ' ' << fun->getParameter(i) << std::endl;
+
+    TS_ASSERT_DELTA(fun->getParameter("Amplitude"), 1.0, 1e-5);
+    TS_ASSERT_DELTA(fun->getParameter("PeakCentre"), 0.0, 1e-5);
+    TS_ASSERT_DELTA(fun->getParameter("FWHM"), 0.4, 1e-5);
+
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fit_Workspace");
+    TS_ASSERT(outWS);
+
+    auto &y = outWS->readY(0);
+    auto &f = outWS->readY(1);
+    auto &d = outWS->readY(2);
+    for(size_t i = 0; i < y.size(); ++i) {
+      TS_ASSERT_DELTA(y[i], f[i], 1e-5);
+      TS_ASSERT_DELTA(d[i], 0.0, 1e-5);
     }
+
+    AnalysisDataService::Instance().clear();
   }
 
 private:

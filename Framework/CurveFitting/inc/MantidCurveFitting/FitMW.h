@@ -85,22 +85,6 @@ protected:
   void setParameters() const override;
 
 private:
-  // Unrolls function into its constituent parts if it is a composite and adds
-  // it to the list. Note this is recursive
-  void
-  appendCompositeFunctionMembers(std::list<API::IFunction_sptr> &functionList,
-                                 const API::IFunction_sptr &function) const;
-  // Create separate Convolutions for each component of the model of a
-  // convolution
-  void appendConvolvedCompositeFunctionMembers(
-      std::list<API::IFunction_sptr> &functionList,
-      const API::IFunction_sptr &function) const;
-  /// Add the calculated function values to the workspace
-  void addFunctionValuesToWS(
-      const API::IFunction_sptr &function,
-      boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
-      const boost::shared_ptr<API::FunctionDomain> &domain,
-      boost::shared_ptr<API::FunctionValues> resultValues) const;
 
   /// Store maxSize property name
   std::string m_maxSizePropertyName;

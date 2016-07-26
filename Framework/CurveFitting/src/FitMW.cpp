@@ -26,31 +26,6 @@
 namespace Mantid {
 namespace CurveFitting {
 
-namespace {
-/**
- * A simple implementation of Jacobian.
- */
-class SimpleJacobian : public API::Jacobian {
-public:
-  /// Constructor
-  SimpleJacobian(size_t nData, size_t nParams)
-      : m_nParams(nParams), m_data(nData * nParams) {}
-  /// Setter
-  void set(size_t iY, size_t iP, double value) override {
-    m_data[iY * m_nParams + iP] = value;
-  }
-  /// Getter
-  double get(size_t iY, size_t iP) override {
-    return m_data[iY * m_nParams + iP];
-  }
-
-private:
-  size_t m_nParams;           ///< number of parameters / second dimension
-  std::vector<double> m_data; ///< data storage
-};
-
-}
-
 using namespace Kernel;
 using API::Workspace;
 using API::Axis;
@@ -241,220 +216,21 @@ FitMW::createOutputWorkspace(const std::string &baseName,
                              boost::shared_ptr<API::FunctionDomain> domain,
                              boost::shared_ptr<API::FunctionValues> values,
                              const std::string &outputWorkspacePropertyName) {
-  if (!values) {
-    throw std::logic_error("FunctionValues expected");
-  }
+  auto ws = IMWDomainCreator::createOutputWorkspace(baseName, function, domain, values, outputWorkspacePropertyName);
+  auto &mws = dynamic_cast<MatrixWorkspace&>(*ws);
 
-  // Compile list of functions to output. The top-level one is first
-  std::list<API::IFunction_sptr> functionsToDisplay(1, function);
-  if (m_outputCompositeMembers) {
-    appendCompositeFunctionMembers(functionsToDisplay, function);
-  }
-
-  // Nhist = Data histogram, Difference Histogram + nfunctions
-  const size_t nhistograms = functionsToDisplay.size() + 2;
-  const size_t nyvalues = values->size();
-  auto ws = createEmptyResultWS(nhistograms, nyvalues);
-  // The workspace was constructed with a TextAxis
-  API::TextAxis *textAxis = static_cast<API::TextAxis *>(ws->getAxis(1));
-  textAxis->setLabel(0, "Data");
-  textAxis->setLabel(1, "Calc");
-  textAxis->setLabel(2, "Diff");
-
-  // Add each calculated function
-  auto iend = functionsToDisplay.end();
-  size_t wsIndex(1); // Zero reserved for data
-  for (auto it = functionsToDisplay.begin(); it != iend; ++it) {
-    if (wsIndex > 2)
-      textAxis->setLabel(wsIndex, (*it)->name());
-    addFunctionValuesToWS(*it, ws, wsIndex, domain, values);
-    if (it == functionsToDisplay.begin())
-      wsIndex += 2; // Skip difference histogram for now
-    else
-      ++wsIndex;
-  }
-
-  bool shouldDeNormalise = m_normalise && m_matrixWorkspace->isHistogramData();
-
-  // Set the difference spectrum
-  const MantidVec &X = ws->readX(0);
-  MantidVec &Ycal = ws->dataY(1);
-  MantidVec &Diff = ws->dataY(2);
-  const size_t nData = values->size();
-  for (size_t i = 0; i < nData; ++i) {
-    Diff[i] = values->getFitData(i) - Ycal[i];
-    if (shouldDeNormalise) {
+  if (m_normalise && m_matrixWorkspace->isHistogramData()) {
+    const MantidVec &X = mws.readX(0);
+    MantidVec &Ycal = mws.dataY(1);
+    MantidVec &Diff = mws.dataY(2);
+    const size_t nData = values->size();
+    for (size_t i = 0; i < nData; ++i) {
       double binWidth = X[i + 1] - X[i];
       Ycal[i] *= binWidth;
       Diff[i] *= binWidth;
     }
   }
-
-  if (!outputWorkspacePropertyName.empty()) {
-    declareProperty(
-        new API::WorkspaceProperty<MatrixWorkspace>(outputWorkspacePropertyName,
-                                                    "", Direction::Output),
-        "Name of the output Workspace holding resulting simulated spectrum");
-    m_manager->setPropertyValue(outputWorkspacePropertyName,
-                                baseName + "Workspace");
-    m_manager->setProperty(outputWorkspacePropertyName, ws);
-  }
-
-  // If the input is a not an EventWorkspace and is a distrubution, then convert
-  // the output also to a distribution
-  if (!boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(
-          m_matrixWorkspace)) {
-    if (m_matrixWorkspace->isDistribution()) {
-      ws->setDistribution(true);
-    }
-  }
-
   return ws;
-}
-
-//--------------------------------------------------------------------------------------------------------------
-/**
- * @param functionList The current list of functions to append to
- * @param function A function that may or not be composite
- */
-void FitMW::appendCompositeFunctionMembers(
-    std::list<API::IFunction_sptr> &functionList,
-    const API::IFunction_sptr &function) const {
-  // if function is a Convolution then output of convolved model's mebers may be
-  // required
-  if (m_convolutionCompositeMembers &&
-      boost::dynamic_pointer_cast<Functions::Convolution>(function)) {
-    appendConvolvedCompositeFunctionMembers(functionList, function);
-  } else {
-    const auto compositeFn =
-        boost::dynamic_pointer_cast<API::CompositeFunction>(function);
-    if (!compositeFn)
-      return;
-
-    const size_t nlocals = compositeFn->nFunctions();
-    for (size_t i = 0; i < nlocals; ++i) {
-      auto localFunction = compositeFn->getFunction(i);
-      auto localComposite =
-          boost::dynamic_pointer_cast<API::CompositeFunction>(localFunction);
-      if (localComposite)
-        appendCompositeFunctionMembers(functionList, localComposite);
-      else
-        functionList.insert(functionList.end(), localFunction);
-    }
-  }
-}
-
-/**
-  * If the fit function is Convolution and flag m_convolutionCompositeMembers is
- * set and Convolution's
-  * second function (the model) is composite then use members of the model for
- * the output.
-  * @param functionList :: A list of Convolutions constructed from the
- * resolution of the fitting function (index 0)
-  *   and members of the model.
-  * @param function A Convolution function which model may or may not be a
- * composite function.
-  * @return True if all conditions are fulfilled and it is possible to produce
- * the output.
-  */
-void FitMW::appendConvolvedCompositeFunctionMembers(
-    std::list<API::IFunction_sptr> &functionList,
-    const API::IFunction_sptr &function) const {
-  boost::shared_ptr<Functions::Convolution> convolution =
-      boost::dynamic_pointer_cast<Functions::Convolution>(function);
-
-  const auto compositeFn = boost::dynamic_pointer_cast<API::CompositeFunction>(
-      convolution->getFunction(1));
-  if (!compositeFn) {
-    functionList.insert(functionList.end(), convolution);
-  } else {
-    auto resolution = convolution->getFunction(0);
-    const size_t nlocals = compositeFn->nFunctions();
-    for (size_t i = 0; i < nlocals; ++i) {
-      auto localFunction = compositeFn->getFunction(i);
-      boost::shared_ptr<Functions::Convolution> localConvolution =
-          boost::make_shared<Functions::Convolution>();
-      localConvolution->addFunction(resolution);
-      localConvolution->addFunction(localFunction);
-      functionList.insert(functionList.end(), localConvolution);
-    }
-  }
-}
-
-/**
- * Add the calculated function values to the workspace. Estimate an error for
- * each calculated value.
- * @param function The function to evaluate
- * @param ws A workspace to fill
- * @param wsIndex The index to store the values
- * @param domain The domain to calculate the values over
- * @param resultValues A presized values holder for the results
- */
-void FitMW::addFunctionValuesToWS(
-    const API::IFunction_sptr &function,
-    boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
-    const boost::shared_ptr<API::FunctionDomain> &domain,
-    boost::shared_ptr<API::FunctionValues> resultValues) const {
-  const size_t nData = resultValues->size();
-  resultValues->zeroCalculated();
-
-  // Function value
-  function->function(*domain, *resultValues);
-
-  size_t nParams = function->nParams();
-  // and errors
-  SimpleJacobian J(nData, nParams);
-  try {
-    function->functionDeriv(*domain, J);
-  } catch (...) {
-    function->calNumericalDeriv(*domain, J);
-  }
-
-  // the function should contain the parameter's covariance matrix
-  auto covar = function->getCovarianceMatrix();
-
-  if (covar) {
-    // if the function has a covariance matrix attached - use it for the errors
-    const Kernel::Matrix<double> &C = *covar;
-    // The formula is E = J * C * J^T
-    // We don't do full 3-matrix multiplication because we only need the
-    // diagonals of E
-    std::vector<double> E(nData);
-    for (size_t k = 0; k < nData; ++k) {
-      double s = 0.0;
-      for (size_t i = 0; i < nParams; ++i) {
-        double tmp = J.get(k, i);
-        s += C[i][i] * tmp * tmp;
-        for (size_t j = i + 1; j < nParams; ++j) {
-          s += J.get(k, i) * C[i][j] * J.get(k, j) * 2;
-        }
-      }
-      E[k] = s;
-    }
-
-    double chi2 = function->getChiSquared();
-    MantidVec &yValues = ws->dataY(wsIndex);
-    MantidVec &eValues = ws->dataE(wsIndex);
-    for (size_t i = 0; i < nData; i++) {
-      yValues[i] = resultValues->getCalculated(i);
-      eValues[i] = std::sqrt(E[i] * chi2);
-    }
-
-  } else {
-    // otherwise use the parameter errors which is OK for uncorrelated
-    // parameters
-    MantidVec &yValues = ws->dataY(wsIndex);
-    MantidVec &eValues = ws->dataE(wsIndex);
-    for (size_t i = 0; i < nData; i++) {
-      yValues[i] = resultValues->getCalculated(i);
-      double err = 0.0;
-      for (size_t j = 0; j < nParams; ++j) {
-        double d = J.get(i, j) * function->getError(j);
-        err += d * d;
-      }
-      eValues[i] = std::sqrt(err);
-    }
-  }
 }
 
 } // namespace Algorithm

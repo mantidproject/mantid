@@ -98,36 +98,5 @@ void HistogramDomainCreator::createDomain(
 
 }
 
-/**
- * Creates an output workspace using the given function and domain
- *
- * @param baseName :: Basename for output workspace.
- * @param function :: Function that can handle a FunctionDomain1D-domain.
- * @param domain :: Pointer to FunctionDomain instance.
- * @param values :: Pointer to FunctionValues instance, currently not used.
- * @param outputWorkspacePropertyName :: Name of output workspace property, if
- * used.
- * @return Workspace with calculated values.
- */
-
-Workspace_sptr HistogramDomainCreator::createOutputWorkspace(
-    const std::string &baseName, IFunction_sptr function,
-    boost::shared_ptr<FunctionDomain> domain,
-    boost::shared_ptr<FunctionValues> values,
-    const std::string &outputWorkspacePropertyName) {
-  if (function->getValuesSize(*domain) != values->size()) {
-    throw std::runtime_error("Failed to create output workspace: domain and "
-                             "values object don't match.");
-  }
-  return Workspace_sptr();
-}
-
-/// Add the calculated function values to the workspace
-void HistogramDomainCreator::addFunctionValuesToWS(
-    const API::IFunction_sptr &function,
-    boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
-    const boost::shared_ptr<API::FunctionDomain> &domain,
-    boost::shared_ptr<API::FunctionValues> resultValues) const {}
-
 } // namespace CurveFitting
 } // namespace Mantid
