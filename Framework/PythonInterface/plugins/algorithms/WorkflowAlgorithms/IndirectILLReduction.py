@@ -157,16 +157,14 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 defaultValue=False,
                 doc='Whether to plot the output workspace.')
 
-        self.validateInputs()
-
     def validateInputs(self):
 
         issues = dict()
         # Unmirror options 6 and 7 require a Vanadium run as input workspace
-        if self._unmirror_option==6 and self._vanadium_run!='':
-            issues['UnmirrorOption'] = 'Requires calibration workspace to be set'
-        if self._unmirror_option==7 and self._vanadium_run!='':
-            issues['UnmirrorOption'] = 'Requires calibration workspace to be set'
+        if self._mirror_sense and self._unmirror_option==6 and self._vanadium_run!='':
+            issues['UnmirrorOption'] = 'Unmirror option 6 requires calibration workspace to be set'
+        if self._mirror_sense and self._unmirror_option==7 and self._vanadium_run!='':
+            issues['UnmirrorOption'] = 'Unmirror option 7 requires calibration workspace to be set'
 
         return issues
 
@@ -192,6 +190,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._save = self.getProperty('Save').value
         self._sum_runs = self.getProperty('SumRuns').value
         self._unmirror_option = self.getProperty('UnmirrorOption').value
+
+        if not self._mirror_sense:
+            self.log().warning('MirrorSense is OFF, UnmirrorOption will fall back to 0 (i.e. no unmirroring)')
+
+        self.validateInputs()
 
     def PyExec(self):
 
@@ -230,6 +233,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             ws = run + '_' + self._raw_ws
             RenameWorkspace(InputWorkspace = self._raw_ws, OutputWorkspace = ws)
             self._reduce_run(run)
+            # after reduction, set output ws
             self._set_output_workspace_properties([run])
 
     def _load_config_files(self):
