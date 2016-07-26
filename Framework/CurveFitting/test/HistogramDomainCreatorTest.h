@@ -11,6 +11,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/Lorentzian.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidTestHelpers/FakeObjects.h"
@@ -97,7 +98,7 @@ public:
                                 "InputWorkspace", "", Direction::Input),
                             "Name of the input Workspace");
 
-    auto ws = createFitWorkspace(10);
+    auto ws = createLorentzWorkspace(10);
     manager.setProperty("InputWorkspace", ws);
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
@@ -121,8 +122,22 @@ public:
     TS_ASSERT_DELTA(values->getCalculated(9), 0.0302240668, 1e-9);
   }
 
+  void test_Lorentzian_integral() {
+    Lorentzian fun;
+    fun.initialize();
+    fun.setParameter("Amplitude", 1.0);
+    fun.setParameter("FWHM", 1.0);
+
+    FunctionDomain1DHistogram domain({-10000.0, 10000.0});
+    FunctionValues values(domain);
+
+    fun.function(domain, values);
+    TS_ASSERT_DELTA(fun.intensity(), 1.0, 1e-15);
+    TS_ASSERT_DELTA(values[0], 1.0, 1e-4);
+  }
+
   void test_fit() {
-    auto ws = createFitWorkspace(3);
+    auto ws = createLorentzWorkspace(3);
     Fit fit;
     fit.initialize();
     fit.setProperty("Function", "name=Lorentzian,FWHM=0.5");
@@ -135,6 +150,70 @@ public:
     TS_ASSERT_DELTA(fun->getParameter("Amplitude"), 1.0, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("PeakCentre"), 0.0, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("FWHM"), 0.4, 1e-5);
+
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fit_Workspace");
+    TS_ASSERT(outWS);
+
+    auto &y = outWS->readY(0);
+    auto &f = outWS->readY(1);
+    auto &d = outWS->readY(2);
+    for(size_t i = 0; i < y.size(); ++i) {
+      TS_ASSERT_DELTA(y[i], f[i], 1e-5);
+      TS_ASSERT_DELTA(d[i], 0.0, 1e-5);
+    }
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_Gaussian_integral() {
+    Gaussian fun;
+    fun.initialize();
+    double sigma = 0.2;
+    double a = 1.3;
+    fun.setParameter("Sigma", sigma);
+    fun.setIntensity(a);
+
+    {
+      FunctionDomain1DHistogram domain({-10.0, 10.0});
+      FunctionValues values(domain);
+      fun.function(domain, values);
+      TS_ASSERT_DELTA(fun.intensity(), a, 1e-15);
+      TS_ASSERT_DELTA(values[0], a, 1e-15);
+    }
+    { // 1-sigma
+      FunctionDomain1DHistogram domain({-sigma, sigma});
+      FunctionValues values(domain);
+      fun.function(domain, values);
+      TS_ASSERT_DELTA(values[0], 0.6826 * a, 1e-3);
+    }
+    { // 2-sigma
+      FunctionDomain1DHistogram domain({-2.0*sigma, 2.0*sigma});
+      FunctionValues values(domain);
+      fun.function(domain, values);
+      TS_ASSERT_DELTA(values[0], 0.9544 * a, 1e-3);
+    }
+    { // 3-sigma
+      FunctionDomain1DHistogram domain({-3.0*sigma, 3.0*sigma});
+      FunctionValues values(domain);
+      fun.function(domain, values);
+      TS_ASSERT_DELTA(values[0], 0.9973 * a, 1e-3);
+    }
+  }
+
+  void test_fit_Gaussian() {
+    auto ws = createGaussWorkspace(3);
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=Gaussian,Height=1,Sigma=0.5");
+    fit.setProperty("HistogramFit", true);
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Output", "fit");
+    fit.execute();
+    IFunction_sptr fun = fit.getProperty("Function");
+
+    TS_ASSERT_DELTA(fun->getParameter("Height"), 1.0 / 0.2 / sqrt(2.0*M_PI), 1e-5);
+    TS_ASSERT_DELTA(fun->getParameter("PeakCentre"), 0.0, 1e-5);
+    TS_ASSERT_DELTA(fun->getParameter("Sigma"), 0.2, 1e-5);
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fit_Workspace");
     TS_ASSERT(outWS);
@@ -170,15 +249,12 @@ private:
     return ws2;
   }
 
-  MatrixWorkspace_sptr createFitWorkspace(const size_t ny = 10) {
+  MatrixWorkspace_sptr createFitWorkspace(const size_t ny, std::function<double(double)> fun) {
     MatrixWorkspace_sptr ws(new WorkspaceTester);
     size_t nx = ny + 1;
     double x0 = -1.0;
     double x1 = 1.0;
     double dx = (x1 - x0) / ny;
-    double gamma = 0.2;
-    double A = 10.;
-    auto cumulFun = [gamma](double x){return atan(x / gamma) / M_PI;};
     ws->initialize(1, nx, ny);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
@@ -188,10 +264,22 @@ private:
       double xl = x0 + dx * double(i);
       double xr = x0 + dx * double(i + 1);
       x[i + 1] = xr;
-      y[i] = cumulFun(xr) - cumulFun(xl);
+      y[i] = fun(xr) - fun(xl);
       e[i] = 1.0;
     }
     return ws;
+  }
+
+  MatrixWorkspace_sptr createLorentzWorkspace(const size_t ny = 10) {
+    double gamma = 0.2;
+    auto cumulFun = [gamma](double x){return atan(x / gamma) / M_PI;};
+    return createFitWorkspace(ny, cumulFun);
+  }
+
+  MatrixWorkspace_sptr createGaussWorkspace(const size_t ny = 10) {
+    double sigma = 0.2;
+    auto cumulFun = [sigma](double x){return 0.5 * erf(x / sigma / sqrt(2.0));};
+    return createFitWorkspace(ny, cumulFun);
   }
 };
 
