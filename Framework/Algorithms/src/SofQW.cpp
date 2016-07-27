@@ -129,6 +129,7 @@ void SofQW::exec() {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   const size_t nHistos = inputWorkspace->getNumberHistograms();
   auto m_progress = new Progress(this, 0.0, 1.0, nHistos);
+  m_progress->report("Creating output workspace");
 }
 
 /** Creates the output workspace, setting the axes according to the input
@@ -152,7 +153,6 @@ SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
       VectorHelper::createAxisFromRebinParams(binParams, newAxis));
 
   // Create the output workspace
-  m_progress->report("Creating output workspace");
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
       inputWorkspace, yLength - 1, xLength, xLength - 1);
   // Create a numeric axis to replace the default vertical one
