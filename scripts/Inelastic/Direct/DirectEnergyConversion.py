@@ -214,7 +214,7 @@ class DirectEnergyConversion(object):
                 # stuff and can load masks directly
                 white_data = white.get_ws_clone('white_ws_clone')
                 if self.prop_man.mapmask_ref_ws is None:
-                    ref_ws = white
+                    ref_ws = white.get_workspace()
                 else:
                     ref_ws = self.prop_man.mapmask_ref_ws
                 idf_file = api.ExperimentInfo.getInstrumentFilename(self.instr_name)
