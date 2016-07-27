@@ -166,7 +166,7 @@ bool MantidEVWorker::loadAndConvertToMD(
       alg = AlgorithmManager::Instance().create("FilterBadPulses");
       alg->setProperty("InputWorkspace", ev_ws_name);
       alg->setProperty("OutputWorkspace", ev_ws_name);
-      alg->setProperty("LowerCutoff", 95.0);
+      alg->setProperty("LowerCutoff", 25.0);
 
       if (!alg->execute())
         return false;
