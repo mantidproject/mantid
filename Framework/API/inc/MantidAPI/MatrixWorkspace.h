@@ -187,6 +187,12 @@ public:
   void setHistogram(const size_t index, T &&... data) & {
     getSpectrum(index).setHistogram(std::forward<T>(data)...);
   }
+  void convertToCounts(const size_t index) {
+    getSpectrum(index).convertToCounts();
+  }
+  void convertToFrequencies(const size_t index) {
+    getSpectrum(index).convertToFrequencies();
+  }
   HistogramData::BinEdges binEdges(const size_t index) const {
     return getSpectrum(index).binEdges();
   }
@@ -451,7 +457,7 @@ public:
   void setYUnitLabel(const std::string &newLabel);
 
   /// Are the Y-values dimensioned?
-  const bool &isDistribution() const;
+  bool isDistribution() const;
   void setDistribution(bool newValue);
 
   /// Mask a given workspace index, setting the data and error values to zero
@@ -599,8 +605,6 @@ private:
   std::string m_YUnit;
   /// A text label for use when plotting spectra
   std::string m_YUnitLabel;
-  /// Flag indicating whether the Y-values are dimensioned. False by default
-  bool m_isDistribution;
 
   /// Flag indicating whether the m_isCommonBinsFlag has been set. False by
   /// default

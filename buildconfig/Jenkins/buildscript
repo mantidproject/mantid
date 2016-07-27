@@ -121,10 +121,11 @@ if [[ ${NODE_LABELS} == *ubuntu* ]]; then
 fi
 
 ###############################################################################
-# Enable warnings about used Qt3Support functions
+# Check if this is a Python 3 build and set CMake arguments.
 ###############################################################################
-if [[ ${JOB_NAME} == *Qt3-warnings* ]]; then
-  DIST_FLAGS="${DIST_FLAGS} -DWITH_QT3_SUPPORT_WARNINGS=ON"
+if [[ ${JOB_NAME} == *python3* ]]; then
+  PYTHON3_EXECUTABLE=`which python3`
+  DIST_FLAGS="${DIST_FLAGS} -DPYTHON_EXECUTABLE=$PYTHON3_EXECUTABLE"
 fi
 
 ###############################################################################

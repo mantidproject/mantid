@@ -164,6 +164,51 @@ public:
     }
   }
 
+  void testThatMissingIDevIsHandledCorrectly() {
+    // Arrange
+    std::string fileName = "missingIdevInCanSAS.xml";
+    if (!cansas1d.isInitialized())
+      cansas1d.initialize();
+
+    cansas1d.setPropertyValue("Filename", fileName);
+    std::string outputSpace = "outws";
+    cansas1d.setPropertyValue("OutputWorkspace", outputSpace);
+
+    // Act
+    TS_ASSERT_THROWS_NOTHING(cansas1d.execute());
+    TS_ASSERT(cansas1d.isExecuted());
+
+    // Assert
+    Mantid::API::Workspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws =
+            Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace));
+    Mantid::DataObjects::Workspace2D_sptr ws2d =
+        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+
+    TS_ASSERT_EQUALS(ws2d->getNumberHistograms(), 1);
+
+    TS_ASSERT_EQUALS((ws2d->dataX(0).size()), 4);
+    TS_ASSERT_EQUALS((ws2d->dataY(0).size()), 4);
+    TS_ASSERT_EQUALS((ws2d->dataE(0).size()), 4);
+
+    double tolerance(1e-06);
+    TS_ASSERT_DELTA(ws2d->dataX(0)[0], 1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->dataX(0)[1], 2.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->dataX(0)[2], 3.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->dataX(0)[3], 4.0, tolerance);
+
+    TS_ASSERT_DELTA(ws2d->dataY(0)[0], 4.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->dataY(0)[1], 9.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->dataY(0)[2], 16.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->dataY(0)[3], 25.0, tolerance);
+
+    TS_ASSERT_DELTA(ws2d->dataE(0)[0], 2.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->dataE(0)[1], 3.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->dataE(0)[2], 4.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->dataE(0)[3], 5.0, tolerance);
+  }
+
 private:
   std::string inputFile;
   Mantid::DataHandling::LoadCanSAS1D cansas1d;

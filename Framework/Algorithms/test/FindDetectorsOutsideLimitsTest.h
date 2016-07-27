@@ -105,7 +105,7 @@ public:
     const double liveValue(0.0);
     const double maskValue(1.0);
     for (int i = 0; i < sizey; i++) {
-      const double val = work_out->readY(i)[0];
+      const double val = work_out->y(i)[0];
       double valExpected = liveValue;
       // Check masking
       IDetector_const_sptr det;
@@ -134,7 +134,7 @@ public:
 
     // Check the dead detectors found agrees with what was setup above
     for (int i = 0; i < sizey; i++) {
-      const double val = work_out->readY(i)[0];
+      const double val = work_out->y(i)[0];
       double valExpected = liveValue;
       // Check masking
       IDetector_const_sptr det;
@@ -182,10 +182,10 @@ public:
         work_out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "testdead_out"));
 
-    TS_ASSERT_EQUALS(work_out->dataY(0)[0], 0.0);
-    TS_ASSERT_EQUALS(work_out->dataY(9)[0], 0.0);
-    TS_ASSERT_EQUALS(work_out->dataY(10)[0], 1.0);
-    TS_ASSERT_EQUALS(work_out->dataY(11)[0], 0.0);
+    TS_ASSERT_EQUALS(work_out->y(0)[0], 0.0);
+    TS_ASSERT_EQUALS(work_out->y(9)[0], 0.0);
+    TS_ASSERT_EQUALS(work_out->y(10)[0], 1.0);
+    TS_ASSERT_EQUALS(work_out->y(11)[0], 0.0);
 
     AnalysisDataService::Instance().remove("testdead_in");
     AnalysisDataService::Instance().remove("testdead_out");
