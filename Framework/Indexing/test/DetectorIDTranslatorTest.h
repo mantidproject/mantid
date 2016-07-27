@@ -23,7 +23,11 @@ public:
     spectra.emplace_back(SpectrumNumber{1}, makeDetectorIDs({2}));
     spectra.emplace_back(SpectrumNumber{4}, makeDetectorIDs({4, 6}));
     spectra.emplace_back(SpectrumNumber{5}, makeDetectorIDs({8}));
-    return {spectra, RoundRobinPartitioning(ranks), PartitionIndex(rank)};
+    return {spectra, RoundRobinPartitioning(
+                         ranks, PartitionIndex(0),
+                         Partitioning::MonitorStrategy::CloneOnEachPartition,
+                         std::vector<SpectrumNumber>{}),
+            PartitionIndex(rank)};
   }
 
   std::vector<DetectorID> makeDetectorIDs(std::initializer_list<int64_t> init) {
@@ -39,7 +43,11 @@ public:
     std::vector<std::pair<SpectrumNumber, std::vector<DetectorID>>> spectra;
     spectra.emplace_back(SpectrumNumber{1}, detectorIDs);
     TS_ASSERT_THROWS_NOTHING(DetectorIDTranslator(
-        spectra, RoundRobinPartitioning(1), PartitionIndex(0)));
+        spectra, RoundRobinPartitioning(
+                     1, PartitionIndex(0),
+                     Partitioning::MonitorStrategy::CloneOnEachPartition,
+                     std::vector<SpectrumNumber>{}),
+        PartitionIndex(0)));
   }
 
   void test_makeIndexSet_full_1_rank() {

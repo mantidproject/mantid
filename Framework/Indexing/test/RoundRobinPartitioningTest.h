@@ -5,8 +5,7 @@
 
 #include "MantidIndexing/RoundRobinPartitioning.h"
 
-using Mantid::Indexing::RoundRobinPartitioning;
-using Mantid::Indexing::SpectrumNumber;
+using namespace Mantid::Indexing;
 
 class RoundRobinPartitioningTest : public CxxTest::TestSuite {
 public:
@@ -17,13 +16,11 @@ public:
   }
   static void destroySuite(RoundRobinPartitioningTest *suite) { delete suite; }
 
-  void test_constructor_failures() {
-    TS_ASSERT_THROWS(RoundRobinPartitioning(-1), std::logic_error);
-    TS_ASSERT_THROWS(RoundRobinPartitioning(0), std::logic_error);
-  }
-
   void test_1_rank() {
-    RoundRobinPartitioning partitioning(1);
+    RoundRobinPartitioning partitioning(
+        1, PartitionIndex(0),
+        Partitioning::MonitorStrategy::CloneOnEachPartition,
+        std::vector<SpectrumNumber>{});
     TS_ASSERT_EQUALS(partitioning.numberOfPartitions(), 1);
     TS_ASSERT_EQUALS(partitioning.indexOf(SpectrumNumber(0)), 0);
     TS_ASSERT_EQUALS(partitioning.indexOf(SpectrumNumber(1)), 0);
@@ -31,7 +28,9 @@ public:
   }
 
   void test_3_ranks() {
-    RoundRobinPartitioning partitioning(3);
+    RoundRobinPartitioning partitioning(3, PartitionIndex(0),
+        Partitioning::MonitorStrategy::CloneOnEachPartition,
+        std::vector<SpectrumNumber>{});
     TS_ASSERT_EQUALS(partitioning.numberOfPartitions(), 3);
     TS_ASSERT_EQUALS(partitioning.indexOf(SpectrumNumber(0)), 0);
     TS_ASSERT_EQUALS(partitioning.indexOf(SpectrumNumber(1)), 1);

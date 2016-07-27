@@ -37,10 +37,7 @@ namespace Indexing {
 */
 class MANTID_INDEXING_DLL RoundRobinPartitioning : public Partitioning {
 public:
-  explicit RoundRobinPartitioning(int numberOfPartitions)
-      : Partitioning(numberOfPartitions, PartitionIndex(0),
-                     Partitioning::MonitorStrategy::CloneOnEachPartition,
-                     std::vector<SpectrumNumber>{}) {}
+  using Partitioning::Partitioning;
 
 private:
   PartitionIndex doIndexOf(const SpectrumNumber spectrumNumber) const override {
