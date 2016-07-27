@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
   AlignComponentsTest.py
   ApplyPaalmanPingsCorrectionTest.py
   BayesQuasiTest.py
+  BayesStretchTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
