@@ -554,8 +554,13 @@ bool MuonAnalysisResultTableTab::logNameLessThan(const QString &logName1,
     // If both are timeseries logs - compare lexicographically ignoring the case
     return logName1.toLower() < logName2.toLower();
   } else if (index1 != -1 && index2 != -1) {
-    // If both timeseries - keep the order of non-timeseries logs list
-    return index1 < index2;
+    // If both non-timeseries - keep the order of non-timeseries logs list
+    if (index1 == index2) {
+      // Correspond to same log, compare lexicographically
+      return logName1.toLower() < logName2.toLower();
+    } else {
+      return index1 < index2;
+    }
   } else {
     // If one is timeseries and another is not - the one which is not is always
     // less
