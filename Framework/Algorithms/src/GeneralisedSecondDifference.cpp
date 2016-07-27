@@ -102,11 +102,11 @@ void GeneralisedSecondDifference::exec() {
         .setSpectrumNo(inputWS->getSpectrum(i).getSpectrumNo());
 
     const auto &refX = inputWS->x(i);
-	const auto &refY = inputWS->y(i);
-	const auto &refE = inputWS->e(i);
+    const auto &refY = inputWS->y(i);
+    const auto &refE = inputWS->e(i);
     auto &outX = out->mutableX(out_index);
-	auto &outY = out->mutableY(out_index);
-	auto &outE = out->mutableE(out_index);
+    auto &outY = out->mutableY(out_index);
+    auto &outE = out->mutableE(out_index);
 
     std::copy(refX.begin() + n_av, refX.end() - n_av, outX.begin());
     auto itInY = refY.cbegin();

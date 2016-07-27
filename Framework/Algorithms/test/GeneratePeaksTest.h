@@ -531,8 +531,12 @@ class GeneratePeaksTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static GeneratePeaksTestPerformance *createSuite() { return new GeneratePeaksTestPerformance(); }
-  static void destroySuite(GeneratePeaksTestPerformance *suite) { delete suite; }
+  static GeneratePeaksTestPerformance *createSuite() {
+    return new GeneratePeaksTestPerformance();
+  }
+  static void destroySuite(GeneratePeaksTestPerformance *suite) {
+    delete suite;
+  }
 
   void setUp() {
     inputMatrix = GeneratePeaksTest().createTestInputWorkspace();
@@ -543,10 +547,10 @@ public:
   }
 
   void tearDown() {
-   AnalysisDataService::Instance().remove("output");
-   AnalysisDataService::Instance().remove("outputEffectiveFunc");
-   AnalysisDataService::Instance().remove("outputPeakParams2");
-   AnalysisDataService::Instance().remove("outputPeakParams3");
+    AnalysisDataService::Instance().remove("output");
+    AnalysisDataService::Instance().remove("outputEffectiveFunc");
+    AnalysisDataService::Instance().remove("outputPeakParams2");
+    AnalysisDataService::Instance().remove("outputPeakParams3");
   }
 
   void testPerformanceMatrixWS() {
