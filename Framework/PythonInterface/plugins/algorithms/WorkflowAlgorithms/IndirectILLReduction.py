@@ -1,25 +1,23 @@
 #pylint: disable=no-init,invalid-name,too-many-instance-attributes
 from __future__ import (absolute_import, division, print_function)
 
+import os.path
+import numpy as np
 from mantid.simpleapi import *
-from mantid.kernel import StringListValidator, IntBoundedValidator, Direction
+from mantid.kernel import *
 from mantid.api import *
 from mantid import config, logger, mtd
-#from scipy.constants import codata, Planck # needed eventually for energy computation
 from IndirectImport import import_mantidplot
-
-import numpy as np
-import os.path
 
 class IndirectILLReduction(DataProcessorAlgorithm):
     """
     Authors:
     G.Vardanyan :  vardanyan@ill.fr
     V.Reimund   :  reimund@ill.fr
-    This version is created on 01/08/2016 partly based on previous work by S.Howells
+    This version is created on 01/08/2016 partly based on previous work by S.Howells et. Al.
     This is an algorithm for data reduction from IN16B instrument at ILL.
     It reads raw .nxs files and produces the reduced workspace with series of
-    manipulations performed dependent on the many options given.
+    manipulations performed dependent on the many input options.
     This file is part of Mantid.
     For the full documentation, see
     http://docs.mantidproject.org/nightly/algorithms/IndirectILLReduction-v1.html?highlight=indirectillreduction
@@ -68,94 +66,88 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     def PyInit(self):
         # Input options
         # This has to be MultipleFileProperty.
-        self.declareProperty(MultipleFileProperty('Run',
-                extensions=["nxs"]),
-                doc='File path of run (s).')
+        self.declareProperty(MultipleFileProperty('Run',extensions=["nxs"]),
+                             doc='File path of run (s).')
 
         self.declareProperty(name='Analyser',
-                defaultValue='silicon',
-                validator=StringListValidator(['silicon']),
-                doc='Analyser crystal.')
+                             defaultValue='silicon',
+                             validator=StringListValidator(['silicon']),
+                             doc='Analyser crystal.')
 
         self.declareProperty(name='Reflection',
-                defaultValue='111',
-                validator=StringListValidator(['111']),
-                doc='Analyser reflection.')
+                             defaultValue='111',
+                             validator=StringListValidator(['111']),
+                             doc='Analyser reflection.')
 
-        self.declareProperty(FileProperty('MapFile',
-                '',
-                action=FileAction.OptionalLoad,
-                extensions=["xml"]),
-                doc='Filename of the map file to use. If left blank the default will be used.')
+        self.declareProperty(FileProperty('MapFile','',
+                                          action=FileAction.OptionalLoad,
+                                          extensions=["xml"]),
+                             doc='Filename of the map file to use. If left blank the default will be used.')
 
         # Output workspace properties
-        self.declareProperty(MatrixWorkspaceProperty("ReducedWorkspace",
-                "red",
-                optional=PropertyMode.Optional,
-                direction=Direction.Output),
-                doc="Name for the output reduced workspace created. \n Depending on the unmirror option.")
+        self.declareProperty(MatrixWorkspaceProperty("ReducedWorkspace","red",
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Name for the output reduced workspace created.")
 
-        self.declareProperty(MatrixWorkspaceProperty("CalibrationWorkspace",
-                "",
-                optional=PropertyMode.Optional,
-                direction=Direction.Input),
-                doc="Workspace containing calibration intensities.")
+        self.declareProperty(MatrixWorkspaceProperty("CalibrationWorkspace","",
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
+                             doc="Workspace containing calibration intensities.")
 
         self.declareProperty(name='ControlMode',
-                defaultValue=False,
-                doc='Whether to output the workspaces in intermediate steps.')
+                             defaultValue=False,
+                             doc='Whether to output the workspaces in intermediate steps.')
 
         self.declareProperty(name='SumRuns',
-                defaultValue=False,
-                doc='Whether to sum all the input runs.')
+                             defaultValue=False,
+                             doc='Whether to sum all the input runs.')
 
         self.declareProperty(name='MirrorSense',
-                defaultValue=True,
-                doc='Whether the input data has two wings.')
+                             defaultValue=True,
+                             doc='Whether the input data has two wings.')
 
-        self.declareProperty(name='UnmirrorOption',
-                defaultValue=3,
-                validator=IntBoundedValidator(lower=0,upper=7),
-                doc='Unmirroring options: \n 0 Normalisation of grouped workspace to monitor spectrum and no energy transfer\n 1 left workspace\n 2 right workspace\n 3 sum of left and right workspaces\n 4 shift right workspace according to maximum peak positions of left workspace \n 5 like option 4 and center all spectra \n 6 like 4, but use Vanadium workspace for estimating maximum peak positions \n 7 like 6 and center all spectra')
+        self.declareProperty(name='UnmirrorOption',defaultValue=3,
+                             validator=IntBoundedValidator(lower=0,upper=7),
+                             doc='Unmirroring options: \n '
+                                 '0 Normalisation of grouped workspace to monitor spectrum and no energy transfer\n'
+                                 '1 left workspace\n 2 right workspace\n 3 sum of left and right workspaces\n'
+                                 '4 shift right workspace according to maximum peak positions of left workspace\n'
+                                 '5 like option 4 and center all spectra \n '
+                                 '6 like 4, but use Vanadium workspace for estimating maximum peak positions \n'
+                                 '7 like 6 and center all spectra')
 
         # Optional workspaces created when running in debug mode
-        self.declareProperty(MatrixWorkspaceProperty("RawWorkspace",
-                "raw",
-                optional=PropertyMode.Optional,
-                direction=Direction.Output),
-                doc="Name for the output raw workspace created.")
+        self.declareProperty(MatrixWorkspaceProperty("RawWorkspace","raw",
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Name for the output raw workspace created.")
 
-        self.declareProperty(MatrixWorkspaceProperty("MNormalisedWorkspace",
-                "mnorm",
-                optional=PropertyMode.Optional,
-                direction=Direction.Output),
-                doc="Name for the workspace normalised to monitor.")
+        self.declareProperty(MatrixWorkspaceProperty("MNormalisedWorkspace","mnorm",
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Name for the workspace normalised to monitor.")
 
-        self.declareProperty(MatrixWorkspaceProperty("DetGroupedWorkspace",
-                "detectors_grouped",
-                optional=PropertyMode.Optional,
-                direction=Direction.Output),
-                doc="Name for the workspace with grouped detectors.")
+        self.declareProperty(MatrixWorkspaceProperty("DetGroupedWorkspace","detectors_grouped",
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Name for the workspace with grouped detectors.")
 
-        self.declareProperty(MatrixWorkspaceProperty("MonitorWorkspace",
-                "monitor",
-                optional=PropertyMode.Optional,
-                direction=Direction.Output),
-                doc="Name for the monitor spectrum.")
+        self.declareProperty(MatrixWorkspaceProperty("MonitorWorkspace","monitor",
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Name for the monitor spectrum.")
 
-        self.declareProperty(MatrixWorkspaceProperty("VNormalisedWorkspace",
-                "vnorm",
-                optional=PropertyMode.Optional,
-                direction=Direction.Output),
-                doc="Name for the workspace normalised to vanadium.")
+        self.declareProperty(MatrixWorkspaceProperty("VNormalisedWorkspace","vnorm",
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Name for the workspace normalised to vanadium.")
 
         # Output options
-        self.declareProperty(name='Save',
-                defaultValue=False,
-                doc='Whether to save the output workpsaces to nxs file.')
-        self.declareProperty(name='Plot',
-                defaultValue=False,
-                doc='Whether to plot the output workspace.')
+        self.declareProperty(name='Save',defaultValue=False,
+                             doc='Whether to save the reduced workpsace to nxs file.')
+        self.declareProperty(name='Plot',defaultValue=False,
+                             doc='Whether to plot the reduced workspace.')
 
     def validateInputs(self):
 
@@ -276,10 +268,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         if self._map_file == '':
             # path name for default map file
             if self._instrument.hasParameter('Workflow.GroupingFile'):
-               grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile')[0]
-               self._map_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
+                grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile')[0]
+                self._map_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
             else:
-               raise ValueError("Failed to find default detector grouping file. Please specify manually.")
+                raise ValueError("Failed to find default detector grouping file. Please specify manually.")
 
         self.log().information('Set detector map file : %s' % self._map_file)
 
@@ -312,9 +304,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     def _unmirror(self, run):
         """
         Runs energy reduction for corresponding unmirror option.
-
         This function calls self._calculate_energy() for the energy transfer
-
         """
         print('Unmirror')
 
@@ -330,11 +320,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             print('Normalisation of grouped workspace to monitor, bins will not be masked, X-axis will not be in energy transfer.')
             # No energy transform is performed, since
             # energy transfer requires X-Axis to be in range -Emin Emax -Emin Emax ...
-
             NormaliseToMonitor(InputWorkspace=det_grouped_ws,
-                            MonitorWorkspace=monitor_ws,
-                            OutputWorkspace=mnorm_ws)
-
+                               MonitorWorkspace=monitor_ws,
+                               OutputWorkspace=mnorm_ws)
             CloneWorkspace(Inputworkspace=mnorm_ws, OutputWorkspace=red_ws)
 
         else:
@@ -366,29 +354,19 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 __right = '__left'
 
                 # Left workspace
-                self._extract_workspace(0,
-                                                                x[mid_point],
-                                                                __left_ws,
-                                                                __left_monitor_ws,
-                                                                __left_grouped_ws,
-                                                                __left_mnorm_ws,
-                                                                run)
+                self._extract_workspace(0,x[mid_point],__left_ws,__left_monitor_ws,__left_grouped_ws,__left_mnorm_ws,run)
 
                 # Right workspace
-                self._extract_workspace(x[mid_point],
-                                                                x_end,
-                                                                __right_ws,
-                                                                __right_monitor_ws,
-                                                                __right_grouped_ws,
-                                                                __right_mnorm_ws,
-                                                                run)
+                self._extract_workspace(x[mid_point],x_end,__right_ws,__right_monitor_ws,
+                                        __right_grouped_ws,__right_mnorm_ws,run)
 
                 if self._unmirror_option == 3:
                     print('Sum left and right workspace for unmirror option 3')
                     __left = __left_ws
                     __right = __right_ws
                 elif self._unmirror_option == 4:
-                    print('Shift each sepctrum of the right workspace according to the maximum peak positions of the corresponding spectrum of the left workspace')
+                    print('Shift each sepctrum of the right workspace according to the maximum peak'
+                          ' positions of the corresponding spectrum of the left workspace')
                     self._shift_spectra(__right_ws, __left_ws, __right)
                     __left = __left_ws
                     # Shifted workspace in control mode?
@@ -404,14 +382,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     # Update PyExec and _set_workspace_properties accordingly, _vanadium_ws = None
                     pass
 
-                # Sum left, right and corresponding workspaces
-                self._perform_mirror(__left, __right, run,
-                                                        __left_monitor_ws,
-                                                        __right_monitor_ws,
-                                                        __left_grouped_ws,
-                                                        __right_grouped_ws,
-                                                        __left_mnorm_ws,
-                                                        __right_mnorm_ws)
+                # Sum left, right and corresponding workspaces, the same for reduced, monitor, mnorm and det grouped
+                self._perform_mirror(__left, __right, red_ws)
+                self._perform_mirror(__left_monitor_ws,__right_monitor_ws, monitor_ws)
+                self._perform_mirror(__left_grouped_ws,__right_grouped_ws, det_grouped_ws)
+                self._perform_mirror(__left_mnorm_ws,__right_mnorm_ws, mnorm_ws)
 
         print('Done')
 
@@ -528,59 +503,15 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         self._calculate_energy(mnorm, ws_out, run)
 
-    def _perform_mirror(self, ws1, ws2, run, monitor1=None, monitor2=None, detgrouped1=None, detgrouped2=None, mnorm1=None, mnorm2=None):
+    def _perform_mirror(self, ws1, ws2, ws_out):
         """
-        Performs actuall unmirroring (?)
-        @param ws1          ::  reduced left workspace
-        @param ws2          ::  reduced right workspace
-        @param monitor1     ::  optional left monitor workspace
-        @param monitor2     ::  optional right monitor workspace
-        @param detgrouped1  ::  optional left detectors grouped workspace
-        @param detgrouped2  ::  optional right detectors grouped workspace
-        @param mnorm1       ::  optional left normalised workspace
-        @param mnorm2       ::  optional right normalised workspace
+        Sum and average two ws
+        @param ws1          ::  left workspace
+        @param ws2          ::  right workspace
+        @param ws_out       ::  output ws name
         """
-
-        # named temporaries
-        red = run + '_' + self._red_ws
-        mon = run + '_' + self._monitor_ws
-        det_grouped = run + '_' + self._det_grouped_ws
-        mnorm = run + '_' + self._mnorm_ws
-
-        # Reduced workspaces
-        Plus(LHSWorkspace=ws1,
-                RHSWorkspace=ws2,
-                OutputWorkspace=red)
-        Scale(InputWorkspace=red,
-                OutputWorkspace=red,
-                Factor=0.5, Operation='Multiply')
-
-        if (monitor1 is not None and monitor2 is not None
-           and detgrouped1 is not None and detgrouped2 is not None
-           and mnorm1 is not None and mnorm2 is not None):
-            # Monitors
-            Plus(LHSWorkspace=monitor1,
-                    RHSWorkspace=monitor2,
-                    OutputWorkspace=mon)
-            Scale(InputWorkspace=mon,
-                    OutputWorkspace=mon,
-                    Factor=0.5, Operation='Multiply')
-
-            # detectors grouped workspaces
-            Plus(LHSWorkspace=detgrouped1,
-                    RHSWorkspace=detgrouped2,
-                    OutputWorkspace=det_grouped )
-            Scale(InputWorkspace=det_grouped ,
-                    OutputWorkspace=det_grouped ,
-                    Factor=0.5, Operation='Multiply')
-
-            # Normalised workspaces
-            Plus(LHSWorkspace=mnorm1,
-                    RHSWorkspace=mnorm2,
-                    OutputWorkspace=mnorm)
-            Scale(InputWorkspace=mnorm,
-                    OutputWorkspace=mnorm,
-                    Factor=0.5, Operation='Multiply')
+        Plus(LHSWorkspace=ws1,RHSWorkspace=ws2,OutputWorkspace=ws_out)
+        Scale(InputWorkspace=ws_out,OutputWorkspace=ws_out,Factor=0.5, Operation='Multiply')
 
     def _shift_spectra(self, ws, ws_shift_origin, ws_out):
         """
@@ -599,16 +530,17 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # shift each single spectrum in a workspace
         for i in range(number_spectra):
 
-            __temp = ExtractSingleSpectrum(InputWorkspace=ws, WorkspaceIndex=i)
+            temp = ExtractSingleSpectrum(InputWorkspace=ws, WorkspaceIndex=i)
             peak_position = int(table_shift.row(i)["PeakCentre"])
 
-            x_values = np.array(__temp.readX(0)) # will not change
-            y_values = np.array(__temp.readY(0)) # will be shifted
-            e_values = np.array(__temp.readE(0)) # will be shifted
+            x_values = np.array(temp.readX(0)) # will not change
+            y_values = np.array(temp.readY(0)) # will be shifted
+            e_values = np.array(temp.readE(0)) # will be shifted
+
+            DeleteWorkspace(temp)
 
             # Perform shift only if FindEPP returns success. Possibility to use self._peak_maximum_position() instead
             if peak_position:
-
                 # A proposition was to use ConvertAxisByFormula. I my opinion the code would be much longer
                 # This is the implementation of a circular shift
                 if peak_position < 0:
@@ -630,15 +562,18 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
             if not i:
                 # Initial spectrum 0
-                CreateWorkspace(OutputWorkspace=ws_out, DataX=x_values, DataY=y_values, DataE=e_values, NSpec=1)#UnitX='TOF'
+                CreateWorkspace(OutputWorkspace=ws_out, DataX=x_values, DataY=y_values, DataE=e_values, NSpec=1, UnitX='DeltaE')
                 # Mask shifted bins missing here
             else:
-                # Override temporary workspace __temp by ith shifted spectrum and append to output workspace
-                __temp_single_spectrum = CreateWorkspace(DataX=x_values, DataY=y_values, DataE=e_values, NSpec=1)
+                # Override temporary workspace temp by i-th shifted spectrum and append to output workspace
+                temp_single_spectrum = CreateWorkspace(DataX=x_values, DataY=y_values, DataE=e_values, NSpec=1, UnitX='DeltaE')
                 # Mask shifted bins missing here
                 AppendSpectra(InputWorkspace1=ws_out,
-                                                InputWorkspace2=__temp_single_spectrum,
-                                                OutputWorkspace=ws_out)
+                              InputWorkspace2=temp_single_spectrum,
+                              OutputWorkspace=ws_out)
+                DeleteWorkspace(temp_single_spectrum)
+
+        DeleteWorkspace(table_shift)
 
     def _peak_maximum_position(self, ws):
         """
@@ -646,8 +581,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         @param  ws  :: input workspace name
         @return     :: peak maximum position
         """
-
-        # Consider the normalised workspace
         x_values = np.array(mtd[ws].readX(0))
         y_values = np.array(mtd[ws].readY(0))
         y_imax = np.argmax(y_values)
@@ -656,8 +589,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         mid = int(len(x_values) / 2)
 
         if maximum_position in range(mid - bin_range, mid + bin_range):
-            self.log().notice('Maybe no peak present, taking mid position instead '
-                              '(no shift operation for this spectrum)')
+            self.log().notice('Maybe no peak present, taking mid position instead ')
             maximum_position = mid
 
         return maximum_position
@@ -766,7 +698,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         filename = mtd[ws].getName() + '.nxs'
         workdir = config['defaultsave.directory']
         file_path = os.path.join(workdir, filename)
-        SaveNexusProcessed(InputWorkspace=ws, Filename=filename)
+        SaveNexusProcessed(InputWorkspace=ws, Filename=file_path)
         self.log().information('Saved file: ' + filename)
 
     def _plot_ws(self, ws):
