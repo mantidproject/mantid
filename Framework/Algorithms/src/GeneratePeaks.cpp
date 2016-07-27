@@ -703,8 +703,8 @@ API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace() {
     // Only copy the X-values from spectra with peaks specified in the table
     // workspace.
     for (const auto &iws : m_spectraSet) {
-      std::copy(inputWS->x(iws).begin(), inputWS->x(iws).end(),
-                outputWS->mutableX(iws).begin());
+      outputWS->mutableX(iws)
+          .assign(inputWS->x(iws).begin(), inputWS->x(iws).end());
     }
 
     m_newWSFromParent = true;
@@ -766,9 +766,9 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
   // Create new workspace
   MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
       "Workspace2D", m_spectraSet.size(), numxvalue, numxvalue - 1);
-  for (size_t ip = 0; ip < m_spectraSet.size(); ip++)
-    std::copy(xarray.begin(), xarray.end(), ws->mutableX(ip).begin());
-
+  for (size_t ip = 0; ip < m_spectraSet.size(); ip++) {
+    ws->mutableX(ip).assign(xarray.begin(), xarray.end());
+  }
   // Set spectrum numbers
   std::map<specnum_t, specnum_t>::iterator spiter;
   for (spiter = m_SpectrumMap.begin(); spiter != m_SpectrumMap.end();

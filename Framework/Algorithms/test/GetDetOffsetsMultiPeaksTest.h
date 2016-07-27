@@ -202,8 +202,6 @@ public:
     if (!output)
       return;
 
-    // TS_ASSERT_DELTA( output->mutableY(0)[0], -0.002, 0.0002);
-
     AnalysisDataService::Instance().remove(outputWS);
     AnalysisDataService::Instance().remove("PeakFitRangeTableWS");
 
@@ -273,8 +271,6 @@ public:
             outputWS));
     if (!output)
       return;
-
-    // TS_ASSERT_DELTA( output->mutableY(0)[0], -0.002, 0.0002);
 
     AnalysisDataService::Instance().remove(outputWS);
     AnalysisDataService::Instance().remove("PeakFitRangeTableWS");
@@ -426,10 +422,12 @@ public:
   void generateNoisyData(MatrixWorkspace_sptr WS) {
     auto &Y = WS->mutableY(0);
     auto &E = WS->mutableE(0);
-    for (size_t i = 0; i < Y.size(); ++i) {
-      Y[i] = static_cast<double>(rand() % 5);
-      E[i] = 0.01;
-    }
+
+    std::transform(Y.begin(), Y.end(), Y.begin(), [](auto y) -> auto {
+      return static_cast<double>(rand() % 5);
+    });
+
+    E.assign(E.size(), 0.01);
 
     return;
   }

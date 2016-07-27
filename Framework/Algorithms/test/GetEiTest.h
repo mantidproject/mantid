@@ -237,17 +237,19 @@ private:
     const double peakOneCentre(6493.0), sigmaSqOne(250 * 250.),
         peakTwoCentre(10625.), sigmaSqTwo(50 * 50);
     const double peakOneHeight(3000.), peakTwoHeight(1000.);
+
+    auto &Y0 = testWS->mutableY(0);
+    auto &Y1 = testWS->mutableY(1);
+    auto &xMutableData = xdata.mutableData();
     for (int i = 0; i <= numBins; ++i) {
       const double xValue = 5.0 + 5.5 * i;
       if (includePeaks && i < numBins) {
-        testWS->mutableY(0)[i] =
-            peakOneHeight *
-            exp(-0.5 * pow(xValue - peakOneCentre, 2.) / sigmaSqOne);
-        testWS->mutableY(1)[i] =
-            peakTwoHeight *
-            exp(-0.5 * pow(xValue - peakTwoCentre, 2.) / sigmaSqTwo);
+        Y0[i] = peakOneHeight *
+                exp(-0.5 * pow(xValue - peakOneCentre, 2.) / sigmaSqOne);
+        Y1[i] = peakTwoHeight *
+                exp(-0.5 * pow(xValue - peakTwoCentre, 2.) / sigmaSqTwo);
       }
-      xdata.mutableData()[i] = xValue;
+      xMutableData[i] = xValue;
     }
     testWS->setBinEdges(0, xdata);
     testWS->setBinEdges(1, xdata);
@@ -356,17 +358,19 @@ private:
     const double peakOneCentre(6493.0), sigmaSqOne(250 * 250.),
         peakTwoCentre(10625.), sigmaSqTwo(50 * 50);
     const double peakOneHeight(3000.), peakTwoHeight(1000.);
+
+    auto &Y0 = testWS->mutableY(0);
+    auto &Y1 = testWS->mutableY(1);
+    auto &xMutableData = xdata.mutableData();
     for (int i = 0; i <= numBins; ++i) {
       const double xValue = 5.0 + 5.5 * i;
       if (includePeaks && i < numBins) {
-        testWS->mutableY(0)[i] =
-            peakOneHeight *
-            exp(-0.5 * pow(xValue - peakOneCentre, 2.) / sigmaSqOne);
-        testWS->mutableY(1)[i] =
-            peakTwoHeight *
-            exp(-0.5 * pow(xValue - peakTwoCentre, 2.) / sigmaSqTwo);
+        Y0[i] = peakOneHeight *
+                exp(-0.5 * pow(xValue - peakOneCentre, 2.) / sigmaSqOne);
+        Y1[i] = peakTwoHeight *
+                exp(-0.5 * pow(xValue - peakTwoCentre, 2.) / sigmaSqTwo);
       }
-      xdata.mutableData()[i] = xValue;
+      xMutableData[i] = xValue;
     }
     testWS->setBinEdges(0, xdata);
     testWS->setBinEdges(1, xdata);

@@ -479,8 +479,8 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
   double xOfMax(0), dXmax(0);
   double Intensity(0);
 
-  const auto X = inputWS->x(index);
-  const auto S = inputWS->y(index);
+  const auto &X = inputWS->x(index);
+  const auto &S = inputWS->y(index);
   size_t ind_min = monsRangeMin[index];
   size_t ind_max = monsRangeMax[index];
   // interval too small -- not interested in a peak there
@@ -897,16 +897,20 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   // general.
   working_ws->setX(0, bins);
   working_ws->setX(1, bins);
-  auto &Signal1 = working_ws->mutableY(0);
-  auto &Error1 = working_ws->mutableE(0);
-  auto &Signal2 = working_ws->mutableY(1);
-  auto &Error2 = working_ws->mutableE(1);
-  for (size_t i = 0; i < YLength; i++) {
-    Signal1[i] = inputWS->mutableY(wsIndex0)[i];
-    Error1[i] = inputWS->mutableE(wsIndex0)[i];
-    Signal2[i] = inputWS->mutableY(wsIndex1)[i];
-    Error2[i] = inputWS->mutableE(wsIndex1)[i];
-  }
+
+  // signal 1
+  working_ws->mutableY(0).assign(inputWS->mutableY(wsIndex0).begin(),
+                                 inputWS->mutableY(wsIndex0).end());
+  // error 1
+  working_ws->mutableE(0).assign(inputWS->mutableE(wsIndex0).begin(),
+                                 inputWS->mutableE(wsIndex0).end());
+  // signal 2
+  working_ws->mutableY(1).assign(inputWS->mutableY(wsIndex1).begin(),
+                                 inputWS->mutableY(wsIndex1).end());
+  // error 2
+  working_ws->mutableE(1).assign(inputWS->mutableE(wsIndex1).begin(),
+                                 inputWS->mutableE(wsIndex1).end());
+
   // copy detector mapping
   auto &spectrum1 = working_ws->getSpectrum(0);
   spectrum1.setSpectrumNo(specNum1);
