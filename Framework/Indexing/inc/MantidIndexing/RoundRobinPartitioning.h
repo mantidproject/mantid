@@ -38,20 +38,16 @@ namespace Indexing {
 class MANTID_INDEXING_DLL RoundRobinPartitioning : public Partitioning {
 public:
   explicit RoundRobinPartitioning(int numberOfPartitions)
-      : m_partitions(numberOfPartitions) {
-    if (m_partitions < 1)
-      throw std::logic_error(
-          "RoundRobinPartitioning: There must be at least 1 partition");
-  }
-
-  int numberOfPartitions() const override { return m_partitions; }
-  PartitionIndex indexOf(const SpectrumNumber &spectrumNumber) const override {
-    return PartitionIndex(
-        static_cast<int>(static_cast<int32_t>(spectrumNumber) % m_partitions));
-  }
+      : Partitioning(numberOfPartitions, PartitionIndex(0),
+                     Partitioning::MonitorStrategy::CloneOnEachPartition,
+                     std::vector<SpectrumNumber>{}) {}
 
 private:
-  int m_partitions;
+  PartitionIndex
+  doIndexOf(const SpectrumNumber spectrumNumber) const override {
+    return PartitionIndex(static_cast<int>(
+        static_cast<int32_t>(spectrumNumber) % numberOfNonMonitorPartitions()));
+  }
 };
 
 } // namespace Indexing

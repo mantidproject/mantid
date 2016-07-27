@@ -5,6 +5,8 @@
 #include "MantidIndexing/PartitionIndex.h"
 #include "MantidIndexing/SpectrumNumber.h"
 
+#include <vector>
+
 namespace Mantid {
 namespace Indexing {
 
@@ -36,14 +38,32 @@ namespace Indexing {
 */
 class MANTID_INDEXING_DLL Partitioning {
 public:
+  enum class MonitorStrategy { CloneOnEachPartition, DedicatedPartition };
+
+  Partitioning(const int numberOfPartitions, const PartitionIndex partition,
+               const MonitorStrategy monitorStrategy,
+               std::vector<SpectrumNumber> monitors);
+
   virtual ~Partitioning() = default;
 
-  virtual int numberOfPartitions() const = 0;
-  virtual PartitionIndex
-  indexOf(const SpectrumNumber &spectrumNumber) const = 0;
+  int numberOfPartitions() const;
+  PartitionIndex indexOf(const SpectrumNumber spectrumNumber) const;
 
-  bool isValid(const PartitionIndex &index) const;
-  void checkValid(const PartitionIndex &index) const;
+  bool isValid(const PartitionIndex index) const;
+  void checkValid(const PartitionIndex index) const;
+
+protected:
+  bool isMonitor(const SpectrumNumber spectrumNumber) const;
+  int numberOfNonMonitorPartitions() const;
+
+private:
+  virtual PartitionIndex
+  doIndexOf(const SpectrumNumber spectrumNumber) const = 0;
+
+  const int m_partitions;
+  const PartitionIndex m_partition;
+  const MonitorStrategy m_monitorStrategy;
+  const std::vector<SpectrumNumber> m_monitors;
 };
 
 } // namespace Indexing
