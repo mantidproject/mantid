@@ -3,27 +3,27 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.simpleapi import *
 from mantid.kernel import StringListValidator, IntBoundedValidator, Direction
-from mantid.api import DataProcessorAlgorithm, PropertyMode,\
-	AlgorithmFactory, FileProperty, FileAction, \
-	MatrixWorkspaceProperty, MultipleFileProperty, \
-	Progress, WorkspaceGroup
+from mantid.api import *
 from mantid import config, logger, mtd
 #from scipy.constants import codata, Planck # needed eventually for energy computation
+from IndirectImport import import_mantidplot
 
 import numpy as np
 import os.path
 
-"""
-ws          : workspace
-det_grouped : grouping of detectors and not a WorkspaceGroup (_workspace_group)
-mnorm       : monitor normalised
-vnorm       : vanadium normalised
-red         : reduced
-
-In the following, ws as function parameter refers to the input workspace whereas ws_out refers to the output workspace
-"""
-
 class IndirectILLReduction(DataProcessorAlgorithm):
+    """
+    Authors:
+    G.Vardanyan :  vardanyan@ill.fr
+    V.Reimund   :  reimund@ill.fr
+    This version is created on 01/08/2016 partly based on previous work by S.Howells
+    This is an algorithm for data reduction from IN16B instrument at ILL.
+    It reads raw .nxs files and produces the reduced workspace with series of
+    manipulations performed dependent on the many options given.
+    This file is part of Mantid.
+    For the full documentation, see
+    http://docs.mantidproject.org/nightly/algorithms/IndirectILLReduction-v1.html?highlight=indirectillreduction
+    """
 
     # Workspaces
     _raw_ws = None
@@ -63,7 +63,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         return "Workflow\\MIDAS;Inelastic\\Reduction"
 
     def summary(self):
-        return 'Performs an energy transfer reduction for ILL indirect inelastic data, instrument IN16B.'
+        return 'Performs an energy transfer reduction for ILL indirect geometry data, instrument IN16B.'
 
     def PyInit(self):
         # Input options
@@ -193,55 +193,76 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         if not self._mirror_sense:
             self.log().warning('MirrorSense is OFF, UnmirrorOption will fall back to 0 (i.e. no unmirroring)')
+            self._unmirror_option = 0
 
-        self.validateInputs()
+        # if SumRuns is specified, force to sum all the listed files
+        if self._sum_runs:
+            self._run_file = self._run_file.replace(',', '+')
 
     def PyExec(self):
 
         self.setUp()
+        self.validateInputs()
 
-        # if SumAll is specified, force to sum all the listed files
-        if self._sum_runs:
-            self._run_file = self._run_file.replace(',','+')
-
-        # This must be Load, to be able to treat multiple files
         Load(Filename=self._run_file, OutputWorkspace=self._raw_ws)
-        print('Loaded .nxs file(s) : %s' % self._run_file)
-        # When multiple files are loaded, raw_ws will be a group workspace
+        # this must be Load, to be able to treat multiple files
+        # when multiple files are loaded, _raw_ws will be a group workspace
         # containing workspaces having run numbers as names
+        # when single file (or sum) is loaded, the workspace name will be _raw_ws
 
+        self.log().information('Loaded .nxs file(s) : %s' % self._run_file)
+
+        # check if it is a workspace or workspace group and perform reduction correspondingly
         if isinstance(mtd[self._raw_ws],WorkspaceGroup):
-            # Get instrument from the first ws in a group
+
+            # get instrument from the first ws in a group and load config files
             self._instrument = mtd[self._raw_ws].getItem(0).getInstrument()
             self._load_config_files()
+
+            # figure out number of progress reports, i.e. one for each input workspace/file
+            progress = Progress(self, start=0.0, end=1.0, nreports = mtd[self._raw_ws].size())
+
+            # to collect the list of runs
             runlist = []
+
+            # traverse over items in workspace group and reduce individually
             for i in range(0, mtd[self._raw_ws].size()):
+
                 run = str(mtd[self._raw_ws].getItem(i).getRunNumber())
                 runlist.append(run)
                 ws = run + '_' + self._raw_ws
                 RenameWorkspace(InputWorkspace = run, OutputWorkspace = ws)
+
+                # call reduction for each run
                 self._reduce_run(run)
+
+                # report progress
+                progress.report("Reduced run #"+run)
 
             # after all the runs are reduced, set output ws
             self._set_output_workspace_properties(runlist)
+
         else:
+            # get instrument name and laod config files
             self._instrument = mtd[self._raw_ws].getInstrument()
-            run = str(mtd[self._raw_ws].getRunNumber())
             self._load_config_files()
-            # After loading sinlge file, it will have "raw" name
-            # So rename to RunNumber_raw for consistency with multiple file case
+
+            run = str(mtd[self._raw_ws].getRunNumber())
             ws = run + '_' + self._raw_ws
             RenameWorkspace(InputWorkspace = self._raw_ws, OutputWorkspace = ws)
+
+            # reduce
             self._reduce_run(run)
+
             # after reduction, set output ws
             self._set_output_workspace_properties([run])
 
     def _load_config_files(self):
         """
         Loads parameter and detector grouping map file
+        self._instrument must be already set before calling this
         """
 
-        print('Load instrument definition file and detectors grouping (map) file')
         self._instrument_name = self._instrument.getName()
         self._analyser = self.getPropertyValue('Analyser')
         self._reflection = self.getPropertyValue('Reflection')
@@ -250,7 +271,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         ipf_name = self._instrument_name + '_' + self._analyser + '_' + self._reflection + '_Parameters.xml'
         self._parameter_file = os.path.join(idf_directory, ipf_name)
 
-        print('Parameter file : %s' % self._parameter_file)
+        self.log().information('Set parameter file : %s' % self._parameter_file)
 
         if self._map_file == '':
             # path name for default map file
@@ -260,52 +281,33 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             else:
                raise ValueError("Failed to find default detector grouping file. Please specify manually.")
 
-        print('Map file : %s' % self._map_file)
-        print('Done')
+        self.log().information('Set detector map file : %s' % self._map_file)
 
     def _reduce_run(self, run):
         """
-        Run indirect reduction for IN16B
-        @ param         run :: string of run number to reduce
-        @ return         :: the reduced workspace or a list of workspaces
-                           depending on the control mode
+        Performs the reduction for a given single run
+        @param run :: string of run number to reduce
         """
 
         # Must use named temporaries here
-        raw_ws = run + '_' + self._raw_ws
-        det_grouped_ws = run + '_' + self._det_grouped_ws
-        monitor_ws = run + '_' + self._monitor_ws
-        red_ws = run + '_' + self._red_ws
-        mnorm_ws = run + '_' + self._mnorm_ws
-        vnorm_ws = run + '_' + self._vnorm_ws
+        raw = run + '_' + self._raw_ws
+        det_grouped = run + '_' + self._det_grouped_ws
+        mon = run + '_' + self._monitor_ws
 
+        self.log().information('Reducing run #' + run)
 
-        print('Reduction')
-        print('Input workspace : %s' % raw_ws)
+        # load parameter file
+        LoadParameterFile(Workspace=raw,Filename=self._parameter_file)
 
+        # group the detectors
+        GroupDetectors(InputWorkspace=raw,OutputWorkspace=det_grouped,
+                       MapFile=self._map_file,Behaviour='Sum')
 
-        # Raw workspace
-        LoadParameterFile(Workspace=raw_ws,Filename=self._parameter_file)
+        # extract the monitor spectrum
+        ExtractSingleSpectrum(InputWorkspace=raw,OutputWorkspace=mon,WorkspaceIndex=0)
 
-        # Detectors grouped workspace
-        GroupDetectors(InputWorkspace=raw_ws,
-                                OutputWorkspace=det_grouped_ws,
-                                MapFile=self._map_file,
-                                Behaviour='Sum')
-
-        # Monitor workspace
-        ExtractSingleSpectrum(InputWorkspace=raw_ws,
-                                OutputWorkspace=monitor_ws,
-                                WorkspaceIndex=0)
-
+        # unmirror
         self._unmirror(run)
-
-        print('Add unmirror_option and _sum_runs to Sample Log of reduced workspace (right click on workspace, click on Sample Logs...)')
-        #AddSampleLog(Workspace=self._red_ws, LogName="unmirror_option",
-        #                        LogType="String", LogText=str(self._unmirror_option))
-        #AddSampleLog(Workspace=self._red_ws, LogName="_sum_runs",
-        #                        LogType="String", LogText=str(self._sum_runs))
-        print('Done')
 
     def _unmirror(self, run):
         """
@@ -415,182 +417,128 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
     def _calculate_energy(self, ws, ws_out, run):
         """
-        Convert the input run to energy transfer
-        @param ws       :: energy transfer for workspace ws
-                @param ws_out   :: output workspace
+        Convert the input ws x-axis from channel # to energy transfer
+        @param ws     :: input workspace name
+        @param ws_out :: output workspace name
+        @param run    :: run number string
         """
 
-        print('Energy calculation')
-
         # Again temporaries needed
-        vnorm_ws = run + '_' + self._vnorm_ws
+        vnorm = run + '_' + self._vnorm_ws
 
         # Apply the detector intensity calibration
         if self._calibration_ws != '':
-            Divide(LHSWorkspace=ws,
-                            RHSWorkspace=self._calibration_ws,
-                            OutputWorkspace=vnorm_ws)
+            Divide(LHSWorkspace=ws,RHSWorkspace=self._calibration_ws,OutputWorkspace=vnorm)
         else:
-            CloneWorkspace(InputWorkspace=ws,
-                            OutputWorkspace=vnorm_ws)
+            CloneWorkspace(InputWorkspace=ws,OutputWorkspace=vnorm)
 
-        formula = self._energy_range(vnorm_ws)
+        formula = self._energy_formula(vnorm)
 
-        ConvertAxisByFormula(InputWorkspace=vnorm_ws,
-                                OutputWorkspace=ws_out,
-                                Axis='X',
-                                Formula=formula)
+        ConvertAxisByFormula(InputWorkspace=vnorm,OutputWorkspace=ws_out,Axis='X',Formula=formula)
 
         # Set unit of the X-Axis
         mtd[ws_out].getAxis(0).setUnit('DeltaE')
 
         xnew = mtd[ws_out].readX(0)  # energy array
-        print('Energy range : %f to %f' % (xnew[0], xnew[-1]))
+        self.log().information('Energy range : %f to %f' % (xnew[0], xnew[-1]))
 
-        print('Done')
-
-    def _energy_range(self, ws):
+    def _energy_formula(self, ws):
         """
-        Calculate the energy range for the workspace
-
+        Calculate the formula for channel number to energy transfer transformation
         @param ws :: name of the input workspace
         @return   :: formula to transform from time channel to energy transfer
         """
-        print('Calculate energy range')
-
         x = mtd[ws].readX(0)
         npt = len(x)
         imid = float( npt / 2 + 1 )
         gRun = mtd[ws].getRun()
         energy = 0
+        scale = 1000. # from mev to micro ev
 
         if gRun.hasProperty('Doppler.maximum_delta_energy'):
-            # Check whether Doppler drive has incident_wavelength
-            velocity_profile = gRun.getLogData('Doppler.velocity_profile').value
-            if velocity_profile == 0:
-                energy = gRun.getLogData('Doppler.maximum_delta_energy').value  # max energy in meV
-                print('Doppler max energy : %s' % energy)
-            else:
-                print('Check operation mode of Doppler drive: velocity profile 0 (sinudoidal) required')
+            energy = gRun.getLogData('Doppler.maximum_delta_energy').value / scale  # max energy in meV
+            self.log().information('Doppler max energy : %s' % energy)
         elif gRun.hasProperty('Doppler.delta_energy'):
-            energy = gRun.getLogData('Doppler.delta_energy').value  # delta energy in meV
-            print('Warning: Doppler delta energy used : %s' % energy)
-        else:
-            print('Error: Energy is 0 micro electron Volt')
+            energy = gRun.getLogData('Doppler.delta_energy').value / scale # delta energy in meV
+            self.log().information('Doppler delta energy : %s' % energy)
 
         dele = 2.0 * energy / (npt - 1)
         formula = '(x-%f)*%f' % (imid, dele)
 
-        print('Done')
+        self.log().information(formula)
         return formula
 
-    def _monitor_range(self, monitor_ws):
+    def _monitor_range(self, ws):
         """
-        Get sensible values for the min and max cropping range
-        @param monitor_ws :: name of the monitor workspace
-        @return tuple containing the min and max x values in the range
+        Get sensible x-range where monitor ws has meaningful content
+        e.g. to mask out the first and last few channels, where monitor count is 0
+        @param ws :: name of workspace
+        @return   :: tuple of xmin and xmax
         """
-        print('Determine monitor range')
 
-        x = mtd[monitor_ws].readX(0)  # energy array
-        y = mtd[monitor_ws].readY(0)  # energy array
+        x = mtd[ws].readX(0)
+        y = mtd[ws].readY(0)
 
-        # mid x value in order to seach for first and right monitor range delimiter
+        # mid x value in order to search for left and right monitor range delimiter
         mid = int(len(x) / 2)
-
         imin = np.argmax(np.array(y[0 : mid])) - 1
         nch = len(y)
         im = np.argmax(np.array(y[nch - mid : nch]))
         imax = nch - mid + 1 + im + 1
 
-        print('Cropping range %f to %f' % (x[imin], x[imax]))
-        print('Cropping range %f to %f' % (x[imin], x[imax]))
-
-        print('Done')
+        self.log().information('Masking range %f to %f' % (x[imin], x[imax]))
         return x[imin], x[imax]
 
     def _extract_workspace(self, x_start, x_end, ws_out, monitor, det_grouped, mnorm, run):
         """
         Extract left or right workspace from detector grouped workspace and perform energy transfer
-        @params      :: x_start defines start bin of workspace to be extracted
-        @params      :: x_end defines end bin of workspace to be extracted
-        @params      :: x_shift determines shift of x-values
-        @return      :: ws_out reduced workspace, normalised, bins masked, energy transfer
-        @return      :: corresponding monitor spectrum
-        @return      :: corresponding detector grouped workspace
-        @return      :: corresponding normalised workspace
+        @param  x_start :: start bin of workspace to be extracted
+        @param  x_end   :: end bin of workspace to be extracted
+        @param  ws_out  :: extracted workspace, normalised, bins masked, energy transfer performed
+        @param  monitor :: corresponding monitor spectrum
+        @param  det_grouped :: corresponding detector grouped workspace
+        @param  mnorm   :: corresponding normalised workspace
+        @param  run     :: run number string
         """
-        print('Extract left or right workspace from detector grouped workspace and perform energy transfer')
 
         # named temporaries (do not use self.* directly, neither overwrite,
         # otherwise multiple file reduction will break down
         det_grouped_in = run + '_' + self._det_grouped_ws
         monitor_in = run + '_' + self._monitor_ws
 
-        CropWorkspace(InputWorkspace=det_grouped_in,
-                                        OutputWorkspace=det_grouped,
-                                        XMin=x_start,
-                                        XMax=x_end)
-
-        CropWorkspace(InputWorkspace=monitor_in,
-                                        OutputWorkspace=monitor,
-                                        XMin=x_start,
-                                        XMax=x_end)
+        CropWorkspace(InputWorkspace=det_grouped_in,OutputWorkspace=det_grouped,XMin=x_start,XMax=x_end)
+        CropWorkspace(InputWorkspace=monitor_in,OutputWorkspace=monitor,XMin=x_start,XMax=x_end)
 
         # Shift X-values of extracted workspace and its corresponding monitor in order to let X-values start with 0
         __x = mtd[det_grouped].readX(0)
         x_shift =  - __x[0]
 
-        ScaleX(InputWorkspace=det_grouped,
-                                        OutputWorkspace=det_grouped,
-                                        Factor=x_shift,
-                                        Operation='Add')
-
-        ScaleX(InputWorkspace=monitor,
-                                        OutputWorkspace=monitor,
-                                        Factor=x_shift,
-                                        Operation='Add')
+        ScaleX(InputWorkspace=det_grouped,OutputWorkspace=det_grouped,Factor=x_shift,Operation='Add')
+        ScaleX(InputWorkspace=monitor,OutputWorkspace=monitor,Factor=x_shift,Operation='Add')
 
         # Normalise left workspace to left monitor spectrum
-        NormaliseToMonitor(InputWorkspace=det_grouped,
-                                OutputWorkspace=mnorm,
-                                MonitorWorkspace=monitor)
-
-        # Division by zero for bins that will be masked since MaskBins does not take care of them
-        ReplaceSpecialValues(InputWorkspace=mnorm,
-                                                OutputWorkspace=mnorm,
-                                                NaNValue=0)
+        NormaliseToMonitor(InputWorkspace=det_grouped,OutputWorkspace=mnorm,MonitorWorkspace=monitor)
 
         # Mask bins according to monitor range
         xmin, xmax = self._monitor_range(monitor)
-
-        # MaskBins cannot mask nan values!
-        # Mask bins (first bins) outside monitor range (nan's after normalisation)
-        MaskBins(InputWorkspace=mnorm,
-                                                OutputWorkspace=mnorm,
-                                                XMin=0,
-                                                XMax=xmin)
-
-        # Mask bins (last bins)  outside monitor range (nan's after normalisation)
-        MaskBins(InputWorkspace=mnorm,
-                                                OutputWorkspace=mnorm,
-                                                XMin=xmax,
-                                                XMax=x_end)
+        # Mask first bins, where monitor count was 0
+        MaskBins(InputWorkspace=mnorm,OutputWorkspace=mnorm,XMin=0,XMax=xmin)
+        # Mask last bins, where monitor count was 0
+        MaskBins(InputWorkspace=mnorm,OutputWorkspace=mnorm,XMin=xmax,XMax=x_end)
 
         self._calculate_energy(mnorm, ws_out, run)
 
-        print('Done')
-
     def _perform_mirror(self, ws1, ws2, run, monitor1=None, monitor2=None, detgrouped1=None, detgrouped2=None, mnorm1=None, mnorm2=None):
         """
-        @params    :: ws1 reduced left workspace
-        @params    :: ws2 reduced right workspace
-        @params    :: monitor1 optional left monitor workspace
-        @params    :: monitor2 optional right monitor workspace
-        @params    :: detgrouped1 optional left detectors grouped workspace
-        @params    :: detgrouped2 optional right detectors grouped workspace
-        @params    :: mnorm1 optional left normalised workspace
-        @params    :: mnorm2 optional right normalised workspace
+        Performs actuall unmirroring (?)
+        @param ws1          ::  reduced left workspace
+        @param ws2          ::  reduced right workspace
+        @param monitor1     ::  optional left monitor workspace
+        @param monitor2     ::  optional right monitor workspace
+        @param detgrouped1  ::  optional left detectors grouped workspace
+        @param detgrouped2  ::  optional right detectors grouped workspace
+        @param mnorm1       ::  optional left normalised workspace
+        @param mnorm2       ::  optional right normalised workspace
         """
 
         # named temporaries
@@ -636,22 +584,20 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
     def _shift_spectra(self, ws, ws_shift_origin, ws_out):
         """
-        @params   :: ws workspace to be shifted
-        @params   :: ws_shift_origin that provides the spectra according to which the shift will be performed
-        @params   :: ws_out shifted output workspace
-
+        Shifts a workspace x-axis corresponding to second workspace peak positions
+        @param ws               ::   workspace to be shifted
+        @param ws_shift_origin  ::   workspace according to which to shift
+        @param ws_out           ::   shifted output workspace
         """
-        print('Shift spectra')
 
-        # Get a table maximum peak positions via optimization with Gaussian
-        # FindEPP needs modification: validator for TOF axis disable and category generalisation
+        # get a table of peak positions via Gaussian fits
+        # FindEPP needs modification: remove validator for TOF axis and category generalisation
         table_shift = FindEPP(InputWorkspace=ws_shift_origin)
 
         number_spectra = mtd[ws].getNumberHistograms()
 
-        # Shift each single spectrum
+        # shift each single spectrum in a workspace
         for i in range(number_spectra):
-            print('Process spectrum ' + str(i))
 
             __temp = ExtractSingleSpectrum(InputWorkspace=ws, WorkspaceIndex=i)
             peak_position = int(table_shift.row(i)["PeakCentre"])
@@ -694,35 +640,29 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                                                 InputWorkspace2=__temp_single_spectrum,
                                                 OutputWorkspace=ws_out)
 
-        print('Done')
-
     def _peak_maximum_position(self, ws):
         """
-        @return    :: position where peak of single spectrum has its maximum
+        Finds peak position without fitting
+        @param  ws  :: input workspace name
+        @return     :: peak maximum position
         """
-        print('Get (reasonable) position at maximum peak value if FindEPP cannot determine it (peak too narrow)')
 
         # Consider the normalised workspace
         x_values = np.array(mtd[ws].readX(0))
         y_values = np.array(mtd[ws].readY(0))
-
         y_imax = np.argmax(y_values)
-
         maximum_position = x_values[y_imax]
-
         bin_range = int(len(x_values) / 4)
         mid = int(len(x_values) / 2)
 
         if maximum_position in range(mid - bin_range, mid + bin_range):
-                print('Maybe no peak present, take mid position instead (no shift operation of this spectrum)')
-                maximum_position = mid
-
-        print('Done')
+            self.log().notice('Maybe no peak present, taking mid position instead '
+                              '(no shift operation for this spectrum)')
+            maximum_position = mid
 
         return maximum_position
 
     def _set_output_workspace_properties(self, runlist):
-        print('Set workspace properties and deletes temporary workspaces depending on control mode.')
 
         if len(runlist) > 1:
             # multiple runs
@@ -734,13 +674,12 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             GroupWorkspaces(list_red, OutputWorkspace=self._red_ws)
             self.setPropertyValue('ReducedWorkspace', self._red_ws)
 
-            # plot and save if needed, before deleting
+            # save if needed, before deleting
             if self._save:
-                self._save_reduced_ws(self._red_ws)
+                self._save_ws(self._red_ws)
 
             if self._plot:
                 self.log().warning('Automatic plotting for multiple files is disabled.')
-                print('Automatic plotting for multiple files is disabled.')
 
             if not self._control_mode:
                 # delete everything else
@@ -752,7 +691,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     if self._unmirror_option > 0 :
                         DeleteWorkspace(run + '_' + self._vnorm_ws)
             else:
-                # group and set optional properties
+                # group and set optional workspace properties
                 list_raw = []
                 list_monitor = []
                 list_det_grouped = []
@@ -782,73 +721,69 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         else:
             # single run
 
+            # named temporaries
+            raw = runlist[0] + '_' + self._raw_ws
+            red = runlist[0] + '_' + self._red_ws
+            mnorm = runlist[0] + '_' + self._mnorm_ws
+            vnorm = runlist[0] + '_' + self._vnorm_ws
+            det_grouped = runlist[0] + '_' + self._det_grouped_ws
+            mon = runlist[0] + '_' + self._monitor_ws
+
+            # save and plot if needed before cleaning up
             if self._save:
-                self._save_reduced_ws(runlist[0] + '_' + self._red_ws )
+                self._save_ws(red)
 
             if self._plot:
-                self._plot_reduced_ws(runlist[0])
+                SumSpectra(InputWorkspace=red, OutputWorkspace=red + '_sum_to_plot')
+                self._plot_ws(red + '_sum_to_plot')
+                # do not delete summed spectra while the plot is open
 
-            self.setPropertyValue('ReducedWorkspace', runlist[0] + '_' + self._red_ws)
+            self.setPropertyValue('ReducedWorkspace', red)
 
             if self._control_mode:
                 # Set properties
-                self.setPropertyValue('RawWorkspace', runlist[0] + '_' + self._raw_ws)
-                self.setPropertyValue('MNormalisedWorkspace', runlist[0] + '_' + self._mnorm_ws)
-                self.setPropertyValue('DetGroupedWorkspace', runlist[0] + '_' + self._det_grouped_ws)
-                self.setPropertyValue('MonitorWorkspace', runlist[0] + '_' + self._monitor_ws)
+                self.setPropertyValue('RawWorkspace', raw)
+                self.setPropertyValue('MNormalisedWorkspace', mnorm)
+                self.setPropertyValue('DetGroupedWorkspace', det_grouped)
+                self.setPropertyValue('MonitorWorkspace',mon)
                 if self._unmirror_option > 0 :
-                    self.setPropertyValue('VNormalisedWorkspace', runlist[0] + '_' + self._vnorm_ws)
+                    self.setPropertyValue('VNormalisedWorkspace', vnorm)
             else:
                 # Cleanup unused workspaces
-                DeleteWorkspace(runlist[0] + '_' + self._raw_ws)
-                DeleteWorkspace(runlist[0] + '_' + self._mnorm_ws)
-                DeleteWorkspace(runlist[0] + '_' + self._det_grouped_ws)
-                DeleteWorkspace(runlist[0] + '_' + self._monitor_ws)
+                DeleteWorkspace(raw)
+                DeleteWorkspace(mnorm)
+                DeleteWorkspace(det_grouped)
+                DeleteWorkspace(mon)
 
-            if self._unmirror_option > 0 :
-                    DeleteWorkspace(runlist[0] + '_' + self._vnorm_ws)
+                if self._unmirror_option > 0 :
+                    DeleteWorkspace(vnorm)
 
-
-
-        print('Done')
-
-    def _save_reduced_ws(self, ws):
+    def _save_ws(self, ws):
         """
-        Saves the reduced workspace
+        Saves given workspace in default save directory
+        @param ws : input workspace or workspace group name
         """
         filename = mtd[ws].getName() + '.nxs'
-
-        print('Save ' + filename + ' in current directory')
-
-        #workdir = config['defaultsave.directory']
-        #file_path = os.path.join(workdir, filename)
+        workdir = config['defaultsave.directory']
+        file_path = os.path.join(workdir, filename)
         SaveNexusProcessed(InputWorkspace=ws, Filename=filename)
-        print('Saved file : ' + filename)
+        self.log().information('Saved file: ' + filename)
 
-    def _plot_reduced_ws(self, run):
+    def _plot_ws(self, ws):
         """
-        Plots the reduced workspace
+        plots the given workspace
+        @param ws : input workspace name
         """
-        _red = run + '_' + self._red_ws
-        _summed_spectra = _red + '_toplot'
-
-        print('Plot (all spectra summed)' + _summed_spectra)
-
-        SumSpectra(InputWorkspace=_red, OutputWorkspace=_summed_spectra)
-
-        from IndirectImport import import_mantidplot
+        # think about getting the unit and label from ws
+        #x_unit = mtd[ws].getAxis(0).getUnit()
+        x_label = 'Energy Transfer [mev]'
         mtd_plot = import_mantidplot()
         graph = mtd_plot.newGraph()
-
-        mtd_plot.plotSpectrum(_summed_spectra, 0, window=graph)
-
+        mtd_plot.plotSpectrum(ws, 0, window=graph)
         layer = graph.activeLayer()
-        layer.setAxisTitle(mtd_plot.Layer.Bottom, 'Energy Transfer (micro eV)')
-        layer.setAxisTitle(mtd_plot.Layer.Left, '')
+        layer.setAxisTitle(mtd_plot.Layer.Bottom, x_label)
+        layer.setAxisTitle(mtd_plot.Layer.Left, 'Intensity [a.u.]')
         layer.setTitle('')
-
-        # Should not delete, since if the plot is open it disappears
-        # DeleteWorkspace(_summed_spectra)
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReduction)
