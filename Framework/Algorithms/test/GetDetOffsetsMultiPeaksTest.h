@@ -12,8 +12,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-
-
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::Algorithms::GetDetOffsetsMultiPeaks;
@@ -49,7 +47,7 @@ public:
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
     const auto &X = WS->x(0);
     auto &Y = WS->mutableY(0);
-	auto &E = WS->mutableE(0);
+    auto &E = WS->mutableE(0);
     for (size_t i = 0; i < Y.size(); ++i) {
       const double x = (X[i] + X[i + 1]) / 2;
       Y[i] = 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
