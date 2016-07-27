@@ -65,6 +65,7 @@ Options Window
 Bugs Resolved
 -------------
 - Floating windows now always stay on top of the main window in OSX
+- 2D plots now display correctly for point data workspaces as well as for histogram data
 
 
 SliceViewer Improvements
