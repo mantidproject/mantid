@@ -6,7 +6,6 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -389,10 +388,10 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
     std::vector<double> &peak_x, std::vector<double> &peak_y,
     std::vector<double> &peak_e) const {
   // First create a temporary vector of bin_centre values to work with
-  std::vector<double> Xs(data_ws->readX(0).size());
-  VectorHelper::convertToBinCentre(data_ws->readX(0), Xs);
-  const MantidVec &Ys = data_ws->readY(0);
-  const MantidVec &Es = data_ws->readE(0);
+  std::vector<double> Xs(data_ws->x(0).size());
+  VectorHelper::convertToBinCentre(data_ws->x(0).rawData(), Xs);
+  const auto &Ys = data_ws->y(0);
+  const auto &Es = data_ws->e(0);
 
   auto peakIt = std::max_element(Ys.cbegin(), Ys.cend());
   double bkg_val = *std::min_element(Ys.begin(), Ys.end());
@@ -400,7 +399,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
     throw std::invalid_argument("No peak in the range specified as minimal and "
                                 "maximal values of the function are equal ");
   }
-  MantidVec::difference_type iPeak = peakIt - Ys.begin();
+  auto iPeak = peakIt - Ys.begin();
   double peakY = Ys[iPeak] - bkg_val;
   double peakE = Es[iPeak];
 
@@ -661,20 +660,21 @@ API::MatrixWorkspace_sptr GetEi2::rebin(API::MatrixWorkspace_sptr monitor_ws,
  * @param xmax :: The maximum value for the integration
  */
 void GetEi2::integrate(double &integral_val, double &integral_err,
-                       const Mantid::MantidVec &x, const Mantid::MantidVec &s,
-                       const Mantid::MantidVec &e, const double xmin,
+                       const HistogramData::HistogramX &x,
+                       const HistogramData::HistogramY &s,
+                       const HistogramData::HistogramE &e, const double xmin,
                        const double xmax) const {
   // MG: Note that this is integration of a point data set from libisis
   // @todo: Move to Kernel::VectorHelper and improve performance
 
   auto lowit = std::lower_bound(x.cbegin(), x.cend(), xmin);
-  MantidVec::difference_type ml = std::distance(x.cbegin(), lowit);
+  auto ml = std::distance(x.cbegin(), lowit);
   auto highit = std::upper_bound(lowit, x.cend(), xmax);
-  MantidVec::difference_type mu = std::distance(x.cbegin(), highit);
+  auto mu = std::distance(x.cbegin(), highit);
   if (mu > 0)
     --mu;
 
-  MantidVec::size_type nx(x.size());
+  auto nx(x.size());
   if (mu < ml) {
     // special case of no data points in the integration range
     unsigned int ilo =
