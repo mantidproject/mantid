@@ -213,6 +213,10 @@ void FitPropertyBrowser::init() {
   m_boolManager->setValue(m_showParamErrors, showParamErrors);
   m_parameterManager->setErrorsEnabled(showParamErrors);
 
+  m_histogramFit = m_boolManager->addProperty("Histogram fit");
+  bool histoFit = settings.value(m_histogramFit->propertyName(), false).toBool();
+  m_boolManager->setValue(m_histogramFit, histoFit);
+
   m_xColumn = m_columnManager->addProperty("XColumn");
   m_yColumn = m_columnManager->addProperty("YColumn");
   m_errColumn = m_columnManager->addProperty("ErrColumn");
@@ -233,6 +237,7 @@ void FitPropertyBrowser::init() {
   settingsGroup->addSubProperty(m_plotCompositeMembers);
   settingsGroup->addSubProperty(m_convolveMembers);
   settingsGroup->addSubProperty(m_showParamErrors);
+  settingsGroup->addSubProperty(m_histogramFit);
 
   /* Create editors and assign them to the managers */
   createEditors(w);
@@ -1102,6 +1107,12 @@ bool FitPropertyBrowser::convolveMembers() const {
   return m_boolManager->value(m_convolveMembers);
 }
 
+/// Get "HistogramFit" option
+bool FitPropertyBrowser::isHistogramFit() const {
+  return m_boolManager->value(m_histogramFit);
+}
+
+
 /// Get the max number of iterations
 int FitPropertyBrowser::maxIterations() const {
   return m_intManager->value(m_maxIterations);
@@ -1461,6 +1472,7 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
+    alg->setProperty("HistogramFit", isHistogramFit());
     alg->setPropertyValue("Function", funStr);
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("WorkspaceIndex", workspaceIndex());
@@ -1471,11 +1483,13 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     alg->setProperty("IgnoreInvalidData", ignoreInvalidData());
     alg->setPropertyValue("CostFunction", costFunction());
     alg->setProperty("MaxIterations", maxIterations);
-    alg->setProperty("Normalise", m_shouldBeNormalised);
-    // Always output each composite function but not necessarily plot it
-    alg->setProperty("OutputCompositeMembers", true);
-    if (alg->existsProperty("ConvolveMembers")) {
-      alg->setProperty("ConvolveMembers", convolveMembers());
+    if (!isHistogramFit()) {
+      alg->setProperty("Normalise", m_shouldBeNormalised);
+      // Always output each composite function but not necessarily plot it
+      alg->setProperty("OutputCompositeMembers", true);
+      if (alg->existsProperty("ConvolveMembers")) {
+        alg->setProperty("ConvolveMembers", convolveMembers());
+      }
     }
     observeFinish(alg);
     alg->executeAsync();

@@ -143,6 +143,8 @@ public:
   std::string costFunction() const;
   /// Get the "ConvolveMembers" option
   bool convolveMembers() const;
+  /// Get "HistogramFit" option
+  bool isHistogramFit() const;
   /// Set if the data must be normalised before fitting
   void normaliseData(bool on) { m_shouldBeNormalised = on; }
   /// Get the max number of iterations
@@ -407,6 +409,7 @@ protected:
   QtProperty *m_yColumn;
   QtProperty *m_errColumn;
   QtProperty *m_showParamErrors;
+  QtProperty *m_histogramFit;
   QList<QtProperty *> m_minimizerProperties;
 
   /// A copy of the edited function
