@@ -229,6 +229,97 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_fit_Flat() {
+    auto ws = createFlatWorkspace();
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=FlatBackground");
+    fit.setProperty("HistogramFit", true);
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Output", "fit");
+    fit.execute();
+    IFunction_sptr fun = fit.getProperty("Function");
+
+    TS_ASSERT_DELTA(fun->getParameter("A0"), 3.1, 1e-5);
+
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fit_Workspace");
+    TS_ASSERT(outWS);
+
+    auto &y = outWS->readY(0);
+    auto &f = outWS->readY(1);
+    auto &d = outWS->readY(2);
+    for(size_t i = 0; i < y.size(); ++i) {
+      TS_ASSERT_DELTA(y[i], f[i], 1e-5);
+      TS_ASSERT_DELTA(d[i], 0.0, 1e-5);
+    }
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_fit_Linear() {
+    auto ws = createLinearWorkspace();
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=LinearBackground");
+    fit.setProperty("HistogramFit", true);
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Output", "fit");
+    fit.execute();
+    IFunction_sptr fun = fit.getProperty("Function");
+
+    TS_ASSERT_DELTA(fun->getParameter("A0"), 3.1, 1e-5);
+    TS_ASSERT_DELTA(fun->getParameter("A1"), 0.3, 1e-5);
+
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fit_Workspace");
+    TS_ASSERT(outWS);
+
+    auto &y = outWS->readY(0);
+    auto &f = outWS->readY(1);
+    auto &d = outWS->readY(2);
+    for(size_t i = 0; i < y.size(); ++i) {
+      TS_ASSERT_DELTA(y[i], f[i], 1e-5);
+      TS_ASSERT_DELTA(d[i], 0.0, 1e-5);
+    }
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_fit_GaussLinear() {
+    auto ws = createGaussLinearWorkspace();
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=LinearBackground;name=Gaussian,Height=1,Sigma=0.3");
+    fit.setProperty("HistogramFit", true);
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Output", "fit");
+    fit.execute();
+    IFunction_sptr fun = fit.getProperty("Function");
+
+    TS_ASSERT_DELTA(fun->getParameter("f0.A0"), 3.1, 1e-5);
+    TS_ASSERT_DELTA(fun->getParameter("f0.A1"), 0.3, 1e-5);
+    TS_ASSERT_DELTA(fun->getParameter("f1.Height"), 1.0 / 0.2 / sqrt(2.0*M_PI), 1e-4);
+    TS_ASSERT_DELTA(fun->getParameter("f1.PeakCentre"), 0.0, 1e-5);
+    TS_ASSERT_DELTA(fun->getParameter("f1.Sigma"), 0.2, 1e-5);
+
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fit_Workspace");
+    TS_ASSERT(outWS);
+
+    auto &y = outWS->readY(0);
+    auto &f = outWS->readY(1);
+    auto &d = outWS->readY(2);
+
+    CHECK_OUT_2("x", outWS->readX(0));
+    CHECK_OUT_2("y", y);
+    CHECK_OUT_2("f", f);
+
+    for(size_t i = 0; i < y.size(); ++i) {
+      TS_ASSERT_DELTA(y[i], f[i], 1e-5);
+      TS_ASSERT_DELTA(d[i], 0.0, 1e-5);
+    }
+
+    AnalysisDataService::Instance().clear();
+  }
+
 private:
   MatrixWorkspace_sptr createTestWorkspace(const bool histogram) {
     MatrixWorkspace_sptr ws2(new WorkspaceTester);
@@ -279,6 +370,27 @@ private:
   MatrixWorkspace_sptr createGaussWorkspace(const size_t ny = 10) {
     double sigma = 0.2;
     auto cumulFun = [sigma](double x){return 0.5 * erf(x / sigma / sqrt(2.0));};
+    return createFitWorkspace(ny, cumulFun);
+  }
+
+  MatrixWorkspace_sptr createFlatWorkspace(const size_t ny = 10) {
+    double a = 3.1;
+    auto cumulFun = [a](double x){return a * x;};
+    return createFitWorkspace(ny, cumulFun);
+  }
+
+  MatrixWorkspace_sptr createLinearWorkspace(const size_t ny = 10) {
+    double a0 = 3.1;
+    double a1 = 0.3;
+    auto cumulFun = [a0, a1](double x){return (a0 + 0.5 * a1 * x) * x;};
+    return createFitWorkspace(ny, cumulFun);
+  }
+
+  MatrixWorkspace_sptr createGaussLinearWorkspace(const size_t ny = 10) {
+    double a0 = 3.1;
+    double a1 = 0.3;
+    double sigma = 0.2;
+    auto cumulFun = [a0, a1, sigma](double x){return (a0 + 0.5 * a1 * x) * x + 0.5 * erf(x / sigma / sqrt(2.0));};
     return createFitWorkspace(ny, cumulFun);
   }
 };
