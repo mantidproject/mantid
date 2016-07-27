@@ -1526,14 +1526,14 @@ const HistogramData::HistogramY &EventList::y() const {
     throw std::runtime_error(
         "'EventList::y()' called with no MRU set. This is not allowed.");
 
-  return histogram().y();
+  return *sharedY();
 }
 const HistogramData::HistogramE &EventList::e() const {
   if (!mru)
     throw std::runtime_error(
         "'EventList::e()' called with no MRU set. This is not allowed.");
 
-  return histogram().e();
+  return *sharedE();
 }
 Kernel::cow_ptr<HistogramData::HistogramY> EventList::sharedY() const {
   // This is the thread number from which this function was called.
