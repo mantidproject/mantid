@@ -115,7 +115,7 @@ public:
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
-    auto &X = WS->x(1);
+    auto &X = WS->points(1);
     auto &Y1 = WS->mutableY(1);
     auto &E1 = WS->mutableE(1);
     auto &Y0 = WS->mutableY(0);
@@ -124,7 +124,7 @@ public:
       Y0[i] = 5000;
 
       // Spectrum 1
-      const double x = (X[i] + X[i + 1]) / 2;
+	  const double x = X[i];
       double funcVal = 2500 * exp(-0.5 * pow((x - 3.14) / 0.022, 2));
       funcVal += 1000 * exp(-0.5 * pow((x - 1.22) / 0.02, 2));
       Y1[i] = 5000 + funcVal;
