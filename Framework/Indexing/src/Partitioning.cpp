@@ -17,9 +17,7 @@ Partitioning::Partitioning(const int numberOfPartitions,
                            "must be larger than 0.");
 }
 
-int Partitioning::numberOfPartitions() const {
-  return m_partitions;
-}
+int Partitioning::numberOfPartitions() const { return m_partitions; }
 
 int Partitioning::numberOfNonMonitorPartitions() const {
   if (m_monitorStrategy == MonitorStrategy::DedicatedPartition)

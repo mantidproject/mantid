@@ -43,8 +43,7 @@ public:
                      std::vector<SpectrumNumber>{}) {}
 
 private:
-  PartitionIndex
-  doIndexOf(const SpectrumNumber spectrumNumber) const override {
+  PartitionIndex doIndexOf(const SpectrumNumber spectrumNumber) const override {
     return PartitionIndex(static_cast<int>(
         static_cast<int32_t>(spectrumNumber) % numberOfNonMonitorPartitions()));
   }
