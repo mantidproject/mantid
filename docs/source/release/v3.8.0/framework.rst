@@ -52,12 +52,15 @@ Improved
   plotly html files.
 
 - :ref:`ConvertTableToMatrixWorkspace <algm-ConvertTableToMatrixWorkspace>`
-  had a bug where the table columns were in a reversed order in the dialogue's combo boxes. 
+  had a bug where the table columns were in a reversed order in the dialogue's combo boxes.
   This is now fixed and the order is correct.
 
 - :ref:`ConvertUnits <algm-ConvertUnits>` will no longer corrupt an in place workspace if the algorithm fails.
 
-- :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli 
+- :ref:`SetSample <algm-SetSample>`: fixed a bug with interpreting the `Center` attribute for cylinders/annuli
+
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` had a bug in cases where the beam was larger than the
+  sample, which lead to the attenuation factor being too high. This has been fixed.
 
 
 Deprecated

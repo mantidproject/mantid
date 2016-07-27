@@ -51,7 +51,8 @@ The algorithm proceeds as follows. For each spectrum:
 
    * for each event in `NEvents`:
 
-     - generate a random point on the beam face define by the input height & width
+     - generate a random point on the beam face defined by the input height & width. If the point is outside of the
+       area defined by the face of the sample then it is pulled to the boundary of this area
 
      - assume the neutron travels in the direction defined by the `samplePos - srcPos` and define a `Track`
 
