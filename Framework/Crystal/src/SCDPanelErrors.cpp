@@ -61,61 +61,69 @@ void SCDPanelErrors::moveDetector(
     double x, double y, double z, double rotx, double roty, double rotz,
     std::string detname, Workspace_sptr inputW) const {
 
-  IAlgorithm_sptr alg1 = Mantid::API::AlgorithmFactory::Instance().create("MoveInstrumentComponent", -1);
-  alg1->initialize();
-  alg1->setChild(true);
-  alg1->setLogging(false);
-  alg1->setProperty<Workspace_sptr>("Workspace", inputW);
-  alg1->setPropertyValue("ComponentName", detname);
-  // Move in m
-  alg1->setProperty("X", x);
-  alg1->setProperty("Y", y);
-  alg1->setProperty("Z", z);
-  alg1->setPropertyValue("RelativePosition", "1");
-  alg1->execute();
+  if (x != 0.0 || y !=0.0 || z != 0.0) {
+    IAlgorithm_sptr alg1 = Mantid::API::AlgorithmFactory::Instance().create("MoveInstrumentComponent", -1);
+    alg1->initialize();
+    alg1->setChild(true);
+    alg1->setLogging(false);
+    alg1->setProperty<Workspace_sptr>("Workspace", inputW);
+    alg1->setPropertyValue("ComponentName", detname);
+    // Move in m
+    alg1->setProperty("X", x);
+    alg1->setProperty("Y", y);
+    alg1->setProperty("Z", z);
+    alg1->setPropertyValue("RelativePosition", "1");
+    alg1->execute();
+  }
 
-  IAlgorithm_sptr algx = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
-  algx->initialize();
-  algx->setChild(true);
-  algx->setLogging(false);
-  algx->setProperty<Workspace_sptr>("Workspace", inputW);
-  algx->setPropertyValue("ComponentName", detname);
-  algx->setProperty("X", 1.0);
-  algx->setProperty("Y", 0.0);
-  algx->setProperty("Z", 0.0);
-  algx->setProperty("Angle", rotx);
-  algx->setPropertyValue("RelativeRotation", "1");
-  algx->execute();
+  if (rotx != 0.0) {
+    IAlgorithm_sptr algx = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
+    algx->initialize();
+    algx->setChild(true);
+    algx->setLogging(false);
+    algx->setProperty<Workspace_sptr>("Workspace", inputW);
+    algx->setPropertyValue("ComponentName", detname);
+    algx->setProperty("X", 1.0);
+    algx->setProperty("Y", 0.0);
+    algx->setProperty("Z", 0.0);
+    algx->setProperty("Angle", rotx);
+    algx->setPropertyValue("RelativeRotation", "1");
+    algx->execute();
+  }
 
-  IAlgorithm_sptr algy = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
-  algy->initialize();
-  algy->setChild(true);
-  algy->setLogging(false);
-  algy->setProperty<Workspace_sptr>("Workspace", inputW);
-  algy->setPropertyValue("ComponentName", detname);
-  algy->setProperty("X", 0.0);
-  algy->setProperty("Y", 1.0);
-  algy->setProperty("Z", 0.0);
-  algy->setProperty("Angle", roty);
-  algy->setPropertyValue("RelativeRotation", "1");
-  algy->execute();
+  if (roty != 0.0) {
+    IAlgorithm_sptr algy = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
+    algy->initialize();
+    algy->setChild(true);
+    algy->setLogging(false);
+    algy->setProperty<Workspace_sptr>("Workspace", inputW);
+    algy->setPropertyValue("ComponentName", detname);
+    algy->setProperty("X", 0.0);
+    algy->setProperty("Y", 1.0);
+    algy->setProperty("Z", 0.0);
+    algy->setProperty("Angle", roty);
+    algy->setPropertyValue("RelativeRotation", "1");
+    algy->execute();
+  }
 
-  IAlgorithm_sptr algz = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
-  algz->initialize();
-  algz->setChild(true);
-  algz->setLogging(false);
-  algz->setProperty<Workspace_sptr>("Workspace", inputW);
-  algz->setPropertyValue("ComponentName", detname);
-  algz->setProperty("X", 0.0);
-  algz->setProperty("Y", 0.0);
-  algz->setProperty("Z", 1.0);
-  algz->setProperty("Angle", rotz);
-  algz->setPropertyValue("RelativeRotation", "1");
-  algz->execute();
+  if (rotz != 0.0) {
+    IAlgorithm_sptr algz = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
+    algz->initialize();
+    algz->setChild(true);
+    algz->setLogging(false);
+    algz->setProperty<Workspace_sptr>("Workspace", inputW);
+    algz->setPropertyValue("ComponentName", detname);
+    algz->setProperty("X", 0.0);
+    algz->setProperty("Y", 0.0);
+    algz->setProperty("Z", 1.0);
+    algz->setProperty("Angle", rotz);
+    algz->setPropertyValue("RelativeRotation", "1");
+    algz->execute();
+  }
 }
 
 /// Evaluate the function for a list of arguments and given scaling factor
-void SCDPanelErrors::eval(double xrotate, double yrotate, double zrotate, double xshift, double yshift, double zshift,
+void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xrotate, double yrotate, double zrotate,
                              double *out, const double *xValues,
                              const size_t nData) const {
   UNUSED_ARG(xValues);
@@ -123,11 +131,11 @@ void SCDPanelErrors::eval(double xrotate, double yrotate, double zrotate, double
     return;
 
   setupData();
-
-  moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, m_bank,m_workspace);
+  moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, m_bank, m_workspace);
   DataObjects::PeaksWorkspace_sptr inputP =
       boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
   Geometry::Instrument_sptr inst = boost::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
+  std::cout <<xshift<<"  "<<yshift<<"  "<<zshift<<"  "<<xrotate<<"  "<<yrotate<<"  "<<zrotate<<"  "<<m_bank<<"  "<< inst->getSource()->getPos()-inst->getSample()->getPos()<<"\n";
   int j = 0;
   for (size_t i = 0; i < nData; i += 3) {
     DataObjects::Peak peak = inputP->getPeak(j);
@@ -135,13 +143,12 @@ void SCDPanelErrors::eval(double xrotate, double yrotate, double zrotate, double
     V3D hkl =  V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
          boost::math::iround(peak.getL()));
     DataObjects::Peak peak2(inst,peak.getDetectorID(),peak.getWavelength(),hkl,peak.getGoniometerMatrix());
-   //peak2.findDetector();
     V3D Q3 = peak2.getQSampleFrame();
     out[i] = Q3[0];
     out [i+1] = Q3[1];
     out[i+2] = Q3[2];
   }
-  moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate, m_bank,m_workspace);
+  moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate, m_bank, m_workspace);
 }
 
 /**
@@ -152,13 +159,13 @@ void SCDPanelErrors::eval(double xrotate, double yrotate, double zrotate, double
  */
 void SCDPanelErrors::function1D(double *out, const double *xValues,
                                    const size_t nData) const {
-  const double xrotate = getParameter("XRotate");
-  const double yrotate = getParameter("YRotate");
-  const double zrotate = getParameter("ZRotate");
   const double xshift = getParameter("XShift");
   const double yshift = getParameter("YShift");
   const double zshift = getParameter("ZShift");
-  eval(xrotate, yrotate, zrotate, xshift, yshift, zshift, out, xValues, nData);
+  const double xrotate = getParameter("XRotate");
+  const double yrotate = getParameter("YRotate");
+  const double zrotate = getParameter("ZRotate");
+  eval(xshift, yshift, zshift, xrotate, yrotate, zrotate, out, xValues, nData);
 }
 
 /**

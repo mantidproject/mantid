@@ -185,6 +185,8 @@ private:
                  int col, int row, int Edge);
  /// Function to calculate U
   void findU(DataObjects::PeaksWorkspace_sptr peaksWs);
+ /// Function to optimize L1
+  void findL1(int nPeaks, DataObjects::PeaksWorkspace_sptr peaksWs);
 
   void exec() override;
 

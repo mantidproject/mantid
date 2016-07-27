@@ -191,8 +191,16 @@ void SCDCalibratePanels::exec() {
   }
   findU(peaksWs);
 
-  set<string> MyBankNames;
+  // Remove peaks that were not indexed
+    for (int i = static_cast<int>(peaksWs->getNumberPeaks()) - 1; i >= 0; --i) {
+      Peak peak = peaksWs->getPeak(i);
+      if (peak.getHKL() == V3D(0,0,0)) {
+        peaksWs->removePeak(i);
+      }
+    }
   int nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
+  findL1(nPeaks,peaksWs);
+  set<string> MyBankNames;
   for (int i = 0; i < nPeaks; ++i) MyBankNames.insert(peaksWs->getPeak(i).getBankName());
 
   PARALLEL_FOR1(peaksWs)
@@ -201,12 +209,12 @@ void SCDCalibratePanels::exec() {
     std::set<string>::iterator it=MyBankNames.begin();
     advance(it,i);
     std::string iBank = *it;
-    const std::string bankName = "_PWS_"+iBank;
+    const std::string bankName = "__PWS_"+iBank;
     PeaksWorkspace_sptr local = peaksWs->clone();
     AnalysisDataService::Instance().addOrReplace(bankName, local);
     for (int i = nPeaks - 1; i >= 0; --i) {
       Peak peak = local->getPeak(i);
-      if (peak.getHKL() == V3D(0,0,0) || peak.getBankName() != iBank) {
+      if (peak.getBankName() != iBank) {
         local->removePeak(i);
       }
     }
@@ -220,11 +228,11 @@ void SCDCalibratePanels::exec() {
       MantidVec &yVec = outSpec.dataY();
       MantidVec &xVec = outSpec.dataX();
 
-    OrientedLattice lattice = local->mutableSample().getOrientedLattice();
     for (int i = 0; i < nBankPeaks; i++) {
       Peak peak = local->getPeak(i);
       V3D hkl =  V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
            boost::math::iround(peak.getL()));
+      OrientedLattice lattice = local->mutableSample().getOrientedLattice();
       V3D Q2 = lattice.qFromHKL(hkl);
       xVec[i*3] = i*3;
       xVec[i*3+1] = i*3+1;
@@ -245,20 +253,24 @@ void SCDCalibratePanels::exec() {
     fun_str << "name=SCDPanelErrors,Workspace="+bankName<<",Bank="<<iBank;
     fit_alg->setPropertyValue("Function", fun_str.str());
     fit_alg->setProperty("InputWorkspace", q3DWS);
+    fit_alg->setProperty("MaxIterations", 5000);
     fit_alg->setProperty("CreateOutput", true);
     fit_alg->setProperty("Output", "fit");
     // fit_alg->setProperty("MaxIterations", 0);
     fit_alg->executeAsChildAlg();
+    std::string fitStatus = fit_alg->getProperty("OutputStatus");
+    double chisq = fit_alg->getProperty("OutputChi2overDoF");
+    g_log.notice() << fitStatus << "Chi2overDoF " << chisq << "\n";
     MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
     AnalysisDataService::Instance().addOrReplace("fit_"+iBank, fitWS);
     ITableWorkspace_sptr paramsWS = fit_alg->getProperty("OutputParameters");
     AnalysisDataService::Instance().addOrReplace("params_"+iBank, paramsWS);
-    double xShift = paramsWS->getRef<double>("Value",0);
-    double yShift = paramsWS->getRef<double>("Value",1);
-    double zShift = paramsWS->getRef<double>("Value",2);
-    double xRotate = paramsWS->getRef<double>("Value",3);
-    double yRotate = paramsWS->getRef<double>("Value",4);
-    double zRotate = paramsWS->getRef<double>("Value",5);
+    double xShift = paramsWS->getRef<double>("Value", 0);
+    double yShift = paramsWS->getRef<double>("Value", 1);
+    double zShift = paramsWS->getRef<double>("Value", 2);
+    double xRotate = paramsWS->getRef<double>("Value", 3);
+    double yRotate = paramsWS->getRef<double>("Value", 4);
+    double zRotate = paramsWS->getRef<double>("Value", 5);
     AnalysisDataService::Instance().remove(bankName);
     PARALLEL_CRITICAL(afterFit) {
       SCDPanelErrors det;
@@ -267,7 +279,7 @@ void SCDCalibratePanels::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  findU(peaksWs);
+  //findU(peaksWs);
   string DetCalFileName = getProperty("DetCalFilename");
   Instrument_sptr inst = boost::const_pointer_cast<Instrument>(peaksWs->getInstrument());
   saveIsawDetCal(inst, MyBankNames, 0.0, DetCalFileName);
@@ -322,6 +334,57 @@ void SCDCalibratePanels::exec() {
       // g_log.debug() << "Problem only in printing peaks\n";
     }
   }
+}
+
+void SCDCalibratePanels::findL1(int nPeaks, DataObjects::PeaksWorkspace_sptr peaksWs) {
+MatrixWorkspace_sptr L1WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      API::WorkspaceFactory::Instance().create("Workspace2D", 1,
+                                               nPeaks*3, nPeaks*3));
+
+  auto &outSp = L1WS->getSpectrum(0);
+  MantidVec &yV = outSp.dataY();
+  MantidVec &xV = outSp.dataX();
+
+OrientedLattice lattice = peaksWs->mutableSample().getOrientedLattice();
+for (int i = 0; i < nPeaks; i++) {
+  Peak peak = peaksWs->getPeak(i);
+  V3D hkl =  V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
+       boost::math::iround(peak.getL()));
+  V3D Q2 = lattice.qFromHKL(hkl);
+  xV[i*3] = i*3;
+  xV[i*3+1] = i*3+1;
+  xV[i*3+2] = i*3+2;
+  yV[i*3] = Q2.X();
+  yV[i*3+1] = Q2.Y();
+  yV[i*3+2] = Q2.Z();
+}
+IAlgorithm_sptr fitL1_alg;
+try {
+fitL1_alg = createChildAlgorithm("Fit", -1, -1, false);
+} catch (Exception::NotFoundError &) {
+g_log.error("Can't locate Fit algorithm");
+throw;
+}
+std::ostringstream fun_str;
+fun_str << "name=SCDPanelErrors,Workspace="<<peaksWs->getName()<<",Bank=moderator";
+std::ostringstream tie_str;
+tie_str << "XShift=0.0,YShift=0.0,XRotate=0.0,YRotate=0.0,ZRotate=0.0";
+fitL1_alg->setPropertyValue("Function", fun_str.str());
+fitL1_alg->setProperty("Ties", tie_str.str());
+fitL1_alg->setProperty("InputWorkspace", L1WS);
+fitL1_alg->setProperty("CreateOutput", true);
+fitL1_alg->setProperty("Output", "fit");
+fitL1_alg->executeAsChildAlg();
+std::string fitL1Status = fitL1_alg->getProperty("OutputStatus");
+double chisqL1 = fitL1_alg->getProperty("OutputChi2overDoF");
+g_log.notice() << fitL1Status << "Chi2overDoF " << chisqL1 << "\n";
+MatrixWorkspace_sptr fitL1 = fitL1_alg->getProperty("OutputWorkspace");
+AnalysisDataService::Instance().addOrReplace("fit_L1", fitL1);
+ITableWorkspace_sptr paramsL1 = fitL1_alg->getProperty("OutputParameters");
+AnalysisDataService::Instance().addOrReplace("params_L1", paramsL1);
+double deltaL1 = paramsL1->getRef<double>("Value",2);
+SCDPanelErrors com;
+com. moveDetector(0.0, 0.0, deltaL1, 0.0, 0.0, 0.0, "moderator", peaksWs);
 }
 
 void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {

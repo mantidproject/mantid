@@ -75,7 +75,7 @@ private:
   void clear() const;
 
   /// Evaluate the function for a list of arguments and given scaling factor
-  void eval(double xrotate, double yrotate, double zrotate, double xshift, double yshift, double zshift, double *out,
+  void eval(double xshift, double yshift, double zshift, double xrotate, double yrotate, double zrotate, double *out,
             const double *xValues, const size_t nData) const;
 
   /// Fill in the workspace and bank names
