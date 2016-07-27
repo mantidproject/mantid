@@ -18,6 +18,9 @@
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <gsl/gsl_multifit_nlin.h>
+#include <gsl/gsl_multimin.h>
+
 #include <sstream>
 
 namespace Mantid {
