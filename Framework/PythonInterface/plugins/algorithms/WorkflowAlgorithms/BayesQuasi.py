@@ -146,8 +146,6 @@ class BayesQuasi(PythonAlgorithm):
             raise RuntimeError(unsupported_msg)
 
         from IndirectBayes import (CalcErange, GetXYE)
-        from IndirectCommon import (CheckXrange, CheckAnalysers, getEfixed, GetThetaQ,
-                                    CheckHistZero, CheckHistSame, IndentifyDataBoundaries)
         setup_prog = Progress(self, start=0.0, end=0.3, nreports = 5)
         self.log().information('BayesQuasi input')
 
