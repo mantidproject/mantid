@@ -251,9 +251,7 @@ class BayesQuasi(PythonAlgorithm):
         setup_prog.report('Initialising probability list')
         # initialise probability list
         if self._program == 'QL':
-            prob0 = []
-            prob1 = []
-            prob2 = []
+            prob0, prob1, prob2 = [], [], []
         xQ = np.array([Q[0]])
         for m in range(1,nsam):
             xQ = np.append(xQ,Q[m])
@@ -435,12 +433,8 @@ class BayesQuasi(PythonAlgorithm):
         var = ExtractInt(asc[6])
         first = 7
         Xout = []
-        Yf = []
-        Ef = []
-        Yi = []
-        Ei = []
-        Yb = []
-        Eb = []
+        Yf, Yi, Yb = [], [], []
+        Ef, Ei, Eb = [], [], []
         ns = int(nspec)
 
         dataX = np.array([])
@@ -484,10 +478,8 @@ class BayesQuasi(PythonAlgorithm):
 
     def _read_ascii_file(self, file_name):
         workdir = config['defaultsave.directory']
-
         file_path = os.path.join(workdir, file_name)
         asc = []
-
         with open(file_path, 'U') as handle:
             for line in handle:
                 line = line.rstrip()
@@ -565,8 +557,7 @@ class BayesQuasi(PythonAlgorithm):
 
     #Reads in a width ASCII file
     def _read_width_file(self, readWidth,widthFile,numSampleGroups):
-        widthY = []
-        widthE = []
+        widthY, widthE = [], []
         if readWidth:
             logger.information('Width file is ' + widthFile)
             # read ascii based width file
