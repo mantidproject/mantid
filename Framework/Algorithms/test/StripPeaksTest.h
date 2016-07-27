@@ -124,7 +124,7 @@ public:
       Y0[i] = 5000;
 
       // Spectrum 1
-	  const double x = X[i];
+      const double x = X[i];
       double funcVal = 2500 * exp(-0.5 * pow((x - 3.14) / 0.022, 2));
       funcVal += 1000 * exp(-0.5 * pow((x - 1.22) / 0.02, 2));
       Y1[i] = 5000 + funcVal;
