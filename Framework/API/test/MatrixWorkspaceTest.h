@@ -359,9 +359,9 @@ public:
       ws.maskBin(0, i, 0);
     }
 
-    TS_ASSERT(isnan(ws.y(0)[0]));
-    TS_ASSERT(isinf(ws.y(0)[1]));
-    TS_ASSERT(isinf(ws.y(0)[2]));
+    TS_ASSERT(std::isnan(ws.y(0)[0]));
+    TS_ASSERT(std::isinf(ws.y(0)[1]));
+    TS_ASSERT(std::isinf(ws.y(0)[2]));
     TS_ASSERT_EQUALS(ws.y(0)[3], 2.);
 
     // now mask w/o specifying weight (e.g. 1 by default)
