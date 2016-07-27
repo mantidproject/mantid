@@ -53,7 +53,7 @@ all_symbols = ["Ac", "Ag", "Al", "Am", "Ar",  "As", "At" , "Au" , "B"  , "Ba", "
                "Rg", "Rh", "Rn", "Ru", "S" ,  "Sb", "Sc" , "Se" , "Sg" , "Si", "Sm", "Sn", "Sr", "Ta", "Tb", "Tc", "Te",
                "Th", "Ti", "Tl", "Tm", "U" , "Uuo", "Uup", "Uus", "Uut", "V" , "W" , "Xe", "Y" , "Yb", "Zn", "Zr",
                ]
-_pkt_per_peak = 100 # number of points for each broadened peak
+_pkt_per_peak = 30 # number of points for each broadened peak
 
 small_k = 1.0e-6 # norm of k vector below this value is considered zero
 
