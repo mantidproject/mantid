@@ -1,5 +1,6 @@
 // TODO-LIST:
 // 1. refactor LoadEventNexus::loadEvents(). It is way tooooo lone
+// 2. add multiple threading back
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 
