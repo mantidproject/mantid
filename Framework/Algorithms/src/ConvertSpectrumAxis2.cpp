@@ -196,8 +196,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
   // Create the output workspace. Can not re-use the input one because the
   // spectra are re-ordered.
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-      inputWS, m_indexMap.size(), inputWS->readX(0).size(),
-      inputWS->readY(0).size());
+      inputWS, m_indexMap.size(), inputWS->x(0).size(), inputWS->y(0).size());
 
   // Now set up a new numeric axis holding the theta values corresponding to
   // each spectrum.
@@ -222,9 +221,7 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     // Set the axis value.
     newAxis->setValue(currentIndex, it->first);
     // Copy over the data.
-    outputWorkspace->dataX(currentIndex) = inputWS->dataX(it->second);
-    outputWorkspace->dataY(currentIndex) = inputWS->dataY(it->second);
-    outputWorkspace->dataE(currentIndex) = inputWS->dataE(it->second);
+    outputWorkspace->setHistogram(currentIndex, inputWS->histogram(it->second));
     // We can keep the spectrum numbers etc.
     outputWorkspace->getSpectrum(currentIndex)
         .copyInfoFrom(inputWS->getSpectrum(it->second));
