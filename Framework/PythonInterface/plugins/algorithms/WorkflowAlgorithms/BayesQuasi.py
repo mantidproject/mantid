@@ -486,35 +486,35 @@ class BayesQuasi(PythonAlgorithm):
                 asc.append(line)
         return asc
 
-    def SeBlock(self, a,first):                                 #read Ascii block of Integers
-        first += 1
-        val = ExtractFloat(a[first])               #Q,AMAX,HWHM
+    def SeBlock(self, a, index):                                 #read Ascii block of Integers
+        index += 1
+        val = ExtractFloat(a[index])               #Q,AMAX,HWHM
         Q = val[0]
         AMAX = val[1]
         HWHM = val[2]
-        first += 1
-        val = ExtractFloat(a[first])               #A0
+        index += 1
+        val = ExtractFloat(a[index])               #A0
         int0 = [AMAX*val[0]]
-        first += 1
-        val = ExtractFloat(a[first])                #AI,FWHM first peak
+        index += 1
+        val = ExtractFloat(a[index])                #AI,FWHM index peak
         fw = [2.*HWHM*val[1]]
         integer = [AMAX*val[0]]
-        first += 1
-        val = ExtractFloat(a[first])                 #SIG0
+        index += 1
+        val = ExtractFloat(a[index])                 #SIG0
         int0.append(val[0])
-        first += 1
-        val = ExtractFloat(a[first])                  #SIG3K
+        index += 1
+        val = ExtractFloat(a[index])                  #SIG3K
         integer.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
-        first += 1
-        val = ExtractFloat(a[first])                  #SIG1K
+        index += 1
+        val = ExtractFloat(a[index])                  #SIG1K
         fw.append(2.0*HWHM*math.sqrt(math.fabs(val[0])+1.0e-20))
-        first += 1
-        be = ExtractFloat(a[first])                  #EXPBET
-        first += 1
-        val = ExtractFloat(a[first])                  #SIG2K
+        index += 1
+        be = ExtractFloat(a[index])                  #EXPBET
+        index += 1
+        val = ExtractFloat(a[index])                  #SIG2K
         be.append(math.sqrt(math.fabs(val[0])+1.0e-20))
-        first += 1
-        return first,Q,int0,fw,integer,be                                      #values as list
+        index += 1
+        return index, Q, int0 ,fw , integer, be                                      #values as list
 
     def _get_res_norm(self, resnormWS,ngrp):
         if ngrp == 0:                                # read values from WS
