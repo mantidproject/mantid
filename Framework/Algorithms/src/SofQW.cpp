@@ -152,7 +152,7 @@ SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
       VectorHelper::createAxisFromRebinParams(binParams, newAxis));
 
   // Create the output workspace
-  m_progress->report("Calculating detector angular widths");
+  m_progress->report("Creating output workspace");
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
       inputWorkspace, yLength - 1, xLength, xLength - 1);
   // Create a numeric axis to replace the default vertical one
