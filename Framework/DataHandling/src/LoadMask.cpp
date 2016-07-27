@@ -274,7 +274,7 @@ DECLARE_ALGORITHM(LoadMask)
  */
 LoadMask::LoadMask()
     : m_maskWS(), m_instrumentPropValue(""), m_sourceMapWS(), m_pDoc(nullptr),
-      m_pRootElem(nullptr), m_defaultToUse(true) {}
+      m_pRootElem(nullptr), m_defaultToUse(true), m_IDF_provided(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -331,6 +331,17 @@ void LoadMask::exec() {
   setProperty("Instrument", instrumentname);
 
   this->intializeMaskWorkspace();
+
+  if (m_sourceMapWS) { // check if the instruments are compartible
+    auto t_inst_name = m_maskWS->getInstrument()->getName();
+    auto r_inst_name = m_sourceMapWS->getInstrument()->getName();
+    if (t_inst_name.compare(r_inst_name) != 0) {
+      throw std::invalid_argument("If reference workspace is provided, it has "
+                                  "to have instrument with the same name as "
+                                  "specified by 'Instriment' property");
+    }
+  }
+
   setProperty("OutputWorkspace", m_maskWS);
 
   m_defaultToUse = true;
@@ -805,19 +816,35 @@ std::map<std::string, std::string> LoadMask::validateInputs() {
 
   API::MatrixWorkspace_sptr inputWS = getProperty("RefWorkspace");
   std::string InstrName = getProperty("Instrument");
-
   if (inputWS) {
+    boost::trim(InstrName);
+    boost::algorithm::to_lower(InstrName);
+    size_t len = InstrName.size();
+    // Check if the name ends up with .xml which means that idf file name
+    // is provided rather then an instrument name.
+    if (len > 4) {
+      if (InstrName.compare(len - 4, len, ".xml") == 0) {
+        m_IDF_provided = true;
+      } else {
+        m_IDF_provided = false;
+      }
+    } else {
+      m_IDF_provided = false;
+    }
     try {
       auto inst = inputWS->getInstrument();
       std::string Name = inst->getName();
-      if (Name != InstrName) {
+      boost::algorithm::to_lower(Name);
+      if (Name != InstrName && !m_IDF_provided) {
         result["RefWorkspace"] =
-            "If both workspace and instrument name are defined, "
-            "workspace has to have the instrument with the same name";
+            "If both reference workspace and instrument name are defined, "
+            "workspace has to have the instrument with the same name\n"
+            "'Instrument' value: " +
+            InstrName + " Workspace Instrument name: " + Name;
       }
     } catch (Kernel::Exception::NotFoundError &) {
       result["RefWorkspace"] =
-          "If workspace is defined, it mast have an instrument";
+          "If reference workspace is defined, it mast have an instrument";
     }
   }
 

@@ -110,6 +110,9 @@ private:
 
   /// Default setup.  If true, not masking, but use the pixel
   bool m_defaultToUse;
+  /// input porperty contains name of instrument definition file rather then
+  /// instrument name itself
+  bool m_IDF_provided;
 
   // detector id-s to mask
   std::vector<detid_t> m_maskDetID;
