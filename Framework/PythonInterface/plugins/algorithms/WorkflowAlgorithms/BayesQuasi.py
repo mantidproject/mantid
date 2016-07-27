@@ -234,8 +234,8 @@ class BayesQuasi(PythonAlgorithm):
         logger.information(' Erange : '+str(erange[0])+' to '+str(erange[1]))
 
         setup_prog.report('Reading files')
-        Wy,We = self.ReadWidthFile(self._width,self._wfile,totalNoSam)
-        dtn,xsc = self.ReadNormFile(self._res_norm,self._resnormWS,totalNoSam)
+        Wy,We = self._read_width_file(self._width,self._wfile,totalNoSam)
+        dtn,xsc = self._read_norm_file(self._res_norm,self._resnormWS,totalNoSam)
 
         setup_prog.report('Establishing output workspace name')
         fname = self._samWS[:-4] + '_'+ prog
@@ -380,11 +380,11 @@ class BayesQuasi(PythonAlgorithm):
         log_prog.report('Copying Logs to outputWorkspace')
         CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=outWS)
         log_prog.report('Adding Sample logs to Output workspace')
-        self.QLAddSampleLogs(outWS, prog, erange, nbins)
+        self._add_sample_logs(outWS, prog, erange, nbins)
         log_prog.report('Copying logs to fit Workspace')
         CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=fitWS)
         log_prog.report('Adding sample logs to Fit workspace')
-        self.QLAddSampleLogs(fitWS, prog, erange, nbins)
+        self._add_sample_logs(fitWS, prog, erange, nbins)
         log_prog.report('Finialising log copying')
 
         if self._save:
@@ -403,7 +403,7 @@ class BayesQuasi(PythonAlgorithm):
         if self._program == 'QL':
             self.setProperty('OutputWorkspaceProb', probWS)
 
-    def QLAddSampleLogs(self, workspace, fit_program, e_range, binning):
+    def _add_sample_logs(self, workspace, fit_program, e_range, binning):
 
         sample_binning, res_binning = binning
         energy_min, energy_max = e_range
@@ -429,7 +429,7 @@ class BayesQuasi(PythonAlgorithm):
 
     def C2Se(self, sname):
         outWS = sname+'_Result'
-        asc = self.readASCIIFile(sname+'.qse')
+        asc = self._read_ascii_file(sname+'.qse')
         var = asc[3].split()                            #split line on spaces
         nspec = var[0]
         var = ExtractInt(asc[6])
@@ -482,7 +482,7 @@ class BayesQuasi(PythonAlgorithm):
 
         return outWS
 
-    def readASCIIFile(self, file_name):
+    def _read_ascii_file(self, file_name):
         workdir = config['defaultsave.directory']
 
         file_path = os.path.join(workdir, file_name)
@@ -524,7 +524,7 @@ class BayesQuasi(PythonAlgorithm):
         first += 1
         return first,Q,int0,fw,integer,be                                      #values as list
 
-    def GetResNorm(self, resnormWS,ngrp):
+    def _get_res_norm(self, resnormWS,ngrp):
         if ngrp == 0:                                # read values from WS
             dtnorm = mtd[resnormWS+'_Intensity'].readY(0)
             xscale = mtd[resnormWS+'_Stretch'].readY(0)
@@ -538,7 +538,7 @@ class BayesQuasi(PythonAlgorithm):
         xsc=PadArray(xscale,51)
         return dtn,xsc
 
-    def ReadNormFile(self, readRes,resnormWS,nsam):            # get norm & scale values
+    def _read_norm_file(self, readRes,resnormWS,nsam):            # get norm & scale values
         resnorm_root = resnormWS
         # Obtain root of resnorm group name
         if '_Intensity' in resnormWS:
@@ -557,14 +557,14 @@ class BayesQuasi(PythonAlgorithm):
             if nrm != nsam:                # check that no. groups are the same
                 raise ValueError('ResNorm groups (' +str(nrm) + ') not = Sample (' +str(nsam) +')')
             else:
-                dtn,xsc = self.GetResNorm(resnorm_root,0)
+                dtn,xsc = self._get_res_norm(resnorm_root,0)
         else:
             # do not use ResNorm file
-            dtn,xsc = self.GetResNorm(resnorm_root,nsam)
+            dtn,xsc = self._get_res_norm(resnorm_root,nsam)
         return dtn,xsc
 
     #Reads in a width ASCII file
-    def ReadWidthFile(self, readWidth,widthFile,numSampleGroups):
+    def _read_width_file(self, readWidth,widthFile,numSampleGroups):
         widthY = []
         widthE = []
         if readWidth:
@@ -604,14 +604,14 @@ class BayesQuasi(PythonAlgorithm):
                 if prob_ws in mtd.getObjectNames():
                     MTD_PLOT.plotSpectrum(prob_ws,[1,2],False)
 
-            self.QuasiPlotParameters(ws_name, plot_type)
+            self._quasi_plot_parameters(ws_name, plot_type)
 
         if plot_type == 'Fit' or plot_type == 'All':
             fWS = ws_stem+'_Workspace_0'
             MTD_PLOT.plotSpectrum(fWS,res_plot,False)
 
 
-    def QuasiPlotParameters(self, ws_name, plot_type):
+    def _quasi_plot_parameters(self, ws_name, plot_type):
         """
         Plot a parameter if the user requested it and it exists
         in the workspace
@@ -644,7 +644,7 @@ class BayesQuasi(PythonAlgorithm):
 
             #read data from file output by fortran code
             file_name = sname + '.ql' +str(nl)
-            x_data, peak_data, peak_error = self.read_ql_file(file_name, nl)
+            x_data, peak_data, peak_error = self._read_ql_file(file_name, nl)
             x_data = np.asarray(x_data)
 
             amplitude_data, width_data, height_data = peak_data
@@ -695,19 +695,19 @@ class BayesQuasi(PythonAlgorithm):
 
         return output_workspace
 
-    def yield_floats(self, block):
+    def _yield_floats(self, block):
         #yield a list of floats from a list of lines of text
         #encapsulates the iteration over a block of lines
         for line in block:
             yield ExtractFloat(line)
 
 
-    def read_ql_file(self, file_name, nl):
+    def _read_ql_file(self, file_name, nl):
         #offet to ignore header
         header_offset = 8
         block_size = 4+nl*3
 
-        asc = self.readASCIIFile(file_name)
+        asc = self._read_ascii_file(file_name)
         #extract number of blocks from the file header
         num_blocks = int(ExtractFloat(asc[3])[0])
 
@@ -722,7 +722,7 @@ class BayesQuasi(PythonAlgorithm):
             upper_index = lower_index+block_size
 
             #create iterator for each line in the block
-            line_pointer = self.yield_floats(asc[lower_index:upper_index])
+            line_pointer = self._yield_floats(asc[lower_index:upper_index])
 
             #Q,AMAX,HWHM,BSCL,GSCL
             line = line_pointer.next()
