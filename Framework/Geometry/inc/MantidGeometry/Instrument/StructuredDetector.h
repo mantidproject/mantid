@@ -140,9 +140,7 @@ public:
   /// Returns the shape of the Object
   const boost::shared_ptr<const Object> shape() const override;
   /// Returns the material of the detector
-  const Kernel::Material material() const override {
-    return Kernel::Material();
-  }
+  const Kernel::Material material() const override;
 
   // ------------ End of IObjComponent methods ----------------
 private:

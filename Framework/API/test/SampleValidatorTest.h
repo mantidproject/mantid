@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/SampleValidator.h"
+#include "MantidKernel/Material.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 

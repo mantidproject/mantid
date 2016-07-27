@@ -1,6 +1,7 @@
 #include "MantidGeometry/Instrument/SampleEnvironmentSpecParser.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
+#include "MantidKernel/Material.h"
 #include "MantidKernel/MaterialXMLParser.h"
 #include "MantidKernel/make_unique.h"
 

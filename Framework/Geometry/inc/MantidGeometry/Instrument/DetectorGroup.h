@@ -251,9 +251,7 @@ protected:
     return boost::shared_ptr<const Object>();
   }
   /// Returns the material of the Object
-  const Kernel::Material material() const override {
-    return Kernel::Material();
-  }
+  const Kernel::Material material() const override;
 
 private:
   /// Private, unimplemented copy constructor

@@ -5,6 +5,7 @@
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Material.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include <cfloat>
 

@@ -3,6 +3,7 @@
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 
 namespace Mantid {
