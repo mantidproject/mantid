@@ -7,7 +7,6 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/Exception.h"
 
 #include <boost/lexical_cast.hpp>
 #include <cmath>
@@ -367,22 +366,26 @@ void GetEi::extractSpec(int wsInd, double start, double end) {
 */
 void GetEi::getPeakEstimates(double &height, int64_t &centreInd,
                              double &background) const {
+
+  const auto &X = m_tempWS->x(0);
+  const auto &Y = m_tempWS->y(0);
   // take note of the number of background counts as error checking, do we have
   // a peak or just a bump in the background
   background = 0;
   // start at the first Y value
-  height = m_tempWS->y(0)[0];
+  height = Y[0];
   centreInd = 0;
+
   // then loop through all the Y values and find the tallest peak
-  for (size_t i = 1; i < m_tempWS->y(0).size() - 1; ++i) {
-    background += m_tempWS->y(0)[i];
-    if (m_tempWS->y(0)[i] > height) {
+  for (size_t i = 1; i < Y.size() - 1; ++i) {
+    background += Y[i];
+    if (Y[i] > height) {
       centreInd = i;
-      height = m_tempWS->y(0)[centreInd];
+      height = Y[centreInd];
     }
   }
 
-  background = background / static_cast<double>(m_tempWS->y(0).size());
+  background = background / static_cast<double>(Y.size());
   if (height < PEAK_THRESH_H * background) {
     throw std::invalid_argument(
         "No peak was found or its height is less than the threshold of " +
@@ -393,10 +396,8 @@ void GetEi::getPeakEstimates(double &height, int64_t &centreInd,
 
   g_log.debug() << "Peak position is the bin that has the maximum Y value in "
                    "the monitor spectrum, which is at TOF "
-                << (m_tempWS->x(0)[centreInd] +
-                    m_tempWS->x(0)[centreInd + 1]) /
-                       2 << " (peak height " << height
-                << " counts/microsecond)\n";
+                << (X[centreInd] + X[centreInd + 1]) / 2 << " (peak height "
+                << height << " counts/microsecond)\n";
 }
 /** Estimates the closest time, looking either or back, when the number of
 * counts is
@@ -416,8 +417,9 @@ double GetEi::findHalfLoc(size_t startInd, const double height,
                           const double noise, const direction go) const {
   auto endInd = startInd;
 
-  // todo move y(0) to const auto
-  while (m_tempWS->y(0)[endInd] > (height + noise) / 2.0) {
+  const auto &X = m_tempWS->x(0);
+  const auto &Y = m_tempWS->y(0);
+  while (Y[endInd] > (height + noise) / 2.0) {
     endInd += go;
     if (endInd < 1) {
       throw std::out_of_range(
@@ -426,7 +428,7 @@ double GetEi::findHalfLoc(size_t startInd, const double height,
           "% window, at TOF values that are too low. Was the energy estimate "
           "close enough?");
     }
-    if (endInd > m_tempWS->y(0).size() - 2) {
+    if (endInd > Y.size() - 2) {
       throw std::out_of_range(
           "Can't analyse peak, some of the peak is outside the " +
           boost::lexical_cast<std::string>(HALF_WINDOW * 100) +
@@ -458,8 +460,7 @@ double GetEi::findHalfLoc(size_t startInd, const double height,
   }
   // get the TOF value in the middle of the bin with the first value below the
   // half height
-  double halfTime =
-      (m_tempWS->x(0)[endInd] + m_tempWS->x(0)[endInd + 1]) / 2;
+  double halfTime = (X[endInd] + X[endInd + 1]) / 2;
   // interpolate back between the first bin with less than half the counts to
   // the bin before it
   if (endInd != startInd) { // let the bin that we found have coordinates (x_1,
@@ -468,11 +469,10 @@ double GetEi::findHalfLoc(size_t startInd, const double height,
                             // (y_3-y_1)/(x_3-x_1) where (x_3, y_3) are the
                             // coordinates of the other bin we are using
     double gradient =
-        (m_tempWS->y(0)[endInd] - m_tempWS->y(0)[endInd - go]) /
-        (m_tempWS->x(0)[endInd] - m_tempWS->x(0)[endInd - go]);
+        (Y[endInd] - Y[endInd - go]) / (X[endInd] - X[endInd - go]);
     // we don't need to check for a zero or negative gradient if we assume the
     // endInd bin was found when the Y-value dropped below the threshold
-    double deltaY = m_tempWS->y(0)[endInd] - (height + noise) / 2.0;
+    double deltaY = Y[endInd] - (height + noise) / 2.0;
     // correct for the interpolation back in the direction towards the peak
     // centre
     halfTime -= deltaY / gradient;
