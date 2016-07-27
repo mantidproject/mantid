@@ -144,12 +144,17 @@ void SANSSensitivityCorrection::exec() {
     floodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
     m_output_message += "   |Using " + wsName + "\n";
-    g_log.debug() << "Using sensitivity worspace " << wsName << "\n";
+    g_log.debug()
+        << "SANSSensitivityCorrection :: Using sensitivity workspace: "
+        << wsName << "\n";
   } else {
     // Load the flood field if we don't have it already
     // First, try to determine whether we need to load data or a sensitivity
     // workspace...
     if (!floodWS && fileCheck(fileName)) {
+      g_log.debug()
+          << "SANSSensitivityCorrection :: Loading sensitivity file: "
+          << fileName << "\n";
       IAlgorithm_sptr loadAlg = createChildAlgorithm("Load", 0.1, 0.3);
       loadAlg->setProperty("Filename", fileName);
       loadAlg->executeAsChildAlg();

@@ -80,10 +80,11 @@ void CalculateEfficiency::exec() {
   // BioSANS has 2 detectors and the front masks the back!!!!
   // We must mask the shaded part to calculate efficency
   std::vector<int> maskedEdges = getProperty("MaskedEdges");
-  const std::string maskedComponent = getPropertyValue("MaskedComponent");
-  maskEdges(inputWS, maskedEdges[0], maskedEdges[1], maskedEdges[2],
-            maskedEdges[3], maskedComponent);
-
+  if (!maskedEdges.empty()) {
+    const std::string maskedComponent = getPropertyValue("MaskedComponent");
+    maskEdges(inputWS, maskedEdges[0], maskedEdges[1], maskedEdges[2],
+              maskedEdges[3], maskedComponent);
+  }
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS; // = getProperty("OutputWorkspace");
 
