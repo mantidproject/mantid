@@ -33,9 +33,9 @@ class PowderData(GeneralData):
             raise ValueError("Invalid number of atom.")
 
         if not isinstance(powder_atom, dict):
-            raise ValueError("Invalid value. Dictionary with the following entries : %s" % Constants.all_keyword_powder_data + " was expected")
+            raise ValueError("Invalid value. Dictionary with the following entries : %s" % Constants.all_keywords_powder_data + " was expected")
 
-        if sorted(powder_atom.keys()) != sorted(Constants.all_keyword_powder_data):
+        if sorted(powder_atom.keys()) != sorted(Constants.all_keywords_powder_data):
             raise ValueError("Invalid structure of the dictionary.")
 
         if isinstance(powder_atom["msd"], float):
@@ -63,9 +63,9 @@ class PowderData(GeneralData):
     def _check_items(self, items=None):
 
          if not isinstance(items, dict):
-             raise ValueError("Invalid value. Dictionary with the following entries : %s" % Constants.all_keyword_powder_data + " was expected")
+             raise ValueError("Invalid value. Dictionary with the following entries : %s" % Constants.all_keywords_powder_data + " was expected")
 
-         if sorted(items.keys()) != sorted(Constants.all_keyword_powder_data):
+         if sorted(items.keys()) != sorted(Constants.all_keywords_powder_data):
             raise ValueError("Invalid structure of the dictionary.")
 
          if not isinstance(items["msd"], np.ndarray):

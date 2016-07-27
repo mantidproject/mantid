@@ -39,10 +39,10 @@ all_keywords_k_data = ["weights", "k_vectors", "frequencies", "atomic_displaceme
 all_keywords_atoms_data = ["symbol", "fract_coord", "atom", "sort", "mass"]
 
 # keywords which define data structure for PowderData
-all_keyword_powder_data = ["msd", "dw"]
+all_keywords_powder_data = ["msd", "dw"]
 
 # keywords which define data structure for SData
-all_keywords_s_data = ["sort", "atom", "value"]
+all_keywords_s_data = ["sort", "symbol", "value"]
 
 # symbols of all elements
 all_symbols = ["Ac", "Ag", "Al", "Am", "Ar",  "As", "At" , "Au" , "B"  , "Ba", "Be", "Bh", "Bi", "Bk", "Br", "C" , "Ca" ,
@@ -53,7 +53,7 @@ all_symbols = ["Ac", "Ag", "Al", "Am", "Ar",  "As", "At" , "Au" , "B"  , "Ba", "
                "Rg", "Rh", "Rn", "Ru", "S" ,  "Sb", "Sc" , "Se" , "Sg" , "Si", "Sm", "Sn", "Sr", "Ta", "Tb", "Tc", "Te",
                "Th", "Ti", "Tl", "Tm", "U" , "Uuo", "Uup", "Uus", "Uut", "V" , "W" , "Xe", "Y" , "Yb", "Zn", "Zr",
                ]
-
+_pkt_per_peak = 100 # number of points for each broadened peak
 
 small_k = 1.0e-6 # norm of k vector below this value is considered zero
 
@@ -69,7 +69,7 @@ m_2_hartree = constants.codata.value("atomic mass unit-hartree relationship") # 
 
 # TOSCA
 TOSCA_constant = 1 / 16.0 # magic number for TOSCA...
-TOSCA_A = 0.0000001 # width = TOSCA_A^2 * omega + TOSCa_B * omega + TOSCA_C
+TOSCA_A = 0.0000001 # width = TOSCA_A * omega * omega + TOSCA_B * omega + TOSCA_C
 TOSCA_B = 0.005
 TOSCA_C = 2.5
 
