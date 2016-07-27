@@ -5,6 +5,7 @@
 
 #include "MantidCurveFitting/HistogramDomainCreator.h"
 
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
@@ -316,6 +317,30 @@ public:
       TS_ASSERT_DELTA(y[i], f[i], 1e-5);
       TS_ASSERT_DELTA(d[i], 0.0, 1e-5);
     }
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_distribution() {
+    auto ws = createFlatWorkspace();
+    auto alg = AlgorithmFactory::Instance().create("ConvertToDistribution",-1);
+    alg->setChild(true);
+    alg->initialize();
+    alg->setProperty("Workspace", ws);
+    alg->execute();
+
+    TS_ASSERT(ws->isDistribution());
+
+    Fit fit;
+    fit.initialize();
+    fit.setProperty("Function", "name=FlatBackground");
+    fit.setProperty("HistogramFit", true);
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Output", "fit");
+    fit.execute();
+    IFunction_sptr fun = fit.getProperty("Function");
+
+    TS_ASSERT_DELTA(fun->getParameter("A0"), 3.1, 1e-5);
 
     AnalysisDataService::Instance().clear();
   }

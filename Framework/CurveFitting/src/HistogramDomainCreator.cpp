@@ -68,11 +68,20 @@ void HistogramDomainCreator::createDomain(
     throw std::runtime_error("FitMW: Inconsistent MatrixWorkspace");
   }
 
+  bool isDistribution = m_matrixWorkspace->isDistribution();
+
   for (size_t i = m_startIndex; i < endIndex; ++i) {
     size_t j = i - m_startIndex + i0;
     double y = Y[i];
     double error = E[i];
     double weight = 0.0;
+
+    if (isDistribution) {
+      // If workspace is a distribution, convert data to histogram
+      auto dx = X[i + 1] - X[i];
+      y *= dx;
+      error *= dx;
+    }
 
     if (!boost::math::isfinite(y)) // nan or inf data
     {
