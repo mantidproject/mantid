@@ -3,17 +3,20 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/System.h"
 
 #include "MantidAlgorithms/GeneratePeaks.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 
-#include <MantidDataObjects/EventWorkspace.h>
+#include "MantidAPI/FunctionDomain.h"
+#include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionDomain1D.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -49,8 +52,8 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test to use user-provided binning parameters and effective function
-   * parameters
-   */
+  * parameters
+  */
   void test_UserBinningParameters() {
     // Create input parameter table workspace
     DataObjects::TableWorkspace_sptr peakparmsws =
@@ -89,8 +92,8 @@ public:
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 2);
 
     // peak 0:
-    const auto &p0_x = peaksws->x(0);
-    const auto &p0_y = peaksws->y(0);
+    auto p0_x = peaksws->x(0);
+    auto p0_y = peaksws->y(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[200], 5.0, 1.0E-4);
 
@@ -102,8 +105,8 @@ public:
     TS_ASSERT_DELTA(p0_y[800], 10.0, 1.0E-4);
 
     // peak 2:
-    const auto &p1_x = peaksws->x(1);
-    const auto &p1_y = peaksws->y(1);
+    auto p1_x = peaksws->x(1);
+    auto p1_y = peaksws->y(1);
     TS_ASSERT_DELTA(p1_x[400], 4.0, 1.0E-8);
     TS_ASSERT_DELTA(p1_y[400], 20.0, 1.0E-4);
 
@@ -123,7 +126,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test algorithm by using an existing input workspace as X-values
-   */
+  */
   void test_FromInputWorkspace() {
     // Create input
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters2();
@@ -163,8 +166,8 @@ public:
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 5);
 
     // Peak 0:
-    const auto &p0_x = peaksws->x(0);
-    const auto &p0_y = peaksws->y(0);
+    auto p0_x = peaksws->x(0);
+    auto p0_y = peaksws->y(0);
     TS_ASSERT_DELTA(p0_x[50], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[50], 5.0, 1.0E-4);
 
@@ -176,8 +179,8 @@ public:
     TS_ASSERT_DELTA(p0_y[350], 10.0, 1.0E-4);
 
     // Peak 2:
-    const auto &p1_x = peaksws->x(2);
-    const auto &p1_y = peaksws->y(2);
+    auto p1_x = peaksws->x(2);
+    auto p1_y = peaksws->y(2);
     TS_ASSERT_DELTA(p1_x[150], 4.0, 1.0E-8);
     TS_ASSERT_DELTA(p1_y[150], 20.0, 1.0E-4);
 
@@ -199,7 +202,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test to use user-provided binning parameters
-   */
+  */
   void test_Background() {
     // Create input
     DataObjects::TableWorkspace_sptr peakparmsws = createTestPeakParameters3();
@@ -237,8 +240,8 @@ public:
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 2);
 
     // peak 0:
-    const auto &p0_x = peaksws->x(0);
-    const auto &p0_y = peaksws->y(0);
+    auto p0_x = peaksws->x(0);
+    auto p0_y = peaksws->y(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[200], 10.0, 1.0E-4);
 
@@ -247,8 +250,8 @@ public:
     TS_ASSERT_DELTA(p0_y[800], 20.0, 1.0E-4);
 
     // peak 2:
-    const auto &p1_x = peaksws->x(1);
-    const auto &p1_y = peaksws->y(1);
+    auto p1_x = peaksws->x(1);
+    auto p1_y = peaksws->y(1);
     TS_ASSERT_DELTA(p1_x[400], 4.0, 1.0E-8);
     TS_ASSERT_DELTA(p1_y[400], 24.0, 1.0E-4);
 
@@ -268,7 +271,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test to input parameter values by vectors user-provided binning parameters
-   */
+  */
   void test_InputValueViaVector() {
     // Create vectors for peak and background parameters
     std::string vecpeakvalue("5.0, 2.0, 0.0849322");
@@ -307,8 +310,8 @@ public:
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 1);
 
     // peak 0:
-    const auto &p0_x = peaksws->x(0);
-    const auto &p0_y = peaksws->y(0);
+    auto p0_x = peaksws->x(0);
+    auto p0_y = peaksws->y(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[200], 5.0, 1.0E-4);
 
@@ -327,7 +330,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test to input parameter values by vectors user-provided binning parameters
-   */
+  */
   void test_InputValueViaVectorEffective() {
     // Create vectors for peak and background parameters
     std::string vecpeakvalue("2.0, 5.0, 0.2");
@@ -366,8 +369,8 @@ public:
     TS_ASSERT_EQUALS(peaksws->getNumberHistograms(), 1);
 
     // peak 0:
-    const auto &p0_x = peaksws->x(0);
-    const auto &p0_y = peaksws->y(0);
+    auto p0_x = peaksws->x(0);
+    auto p0_y = peaksws->y(0);
     TS_ASSERT_DELTA(p0_x[200], 2.0, 1.0E-8);
     TS_ASSERT_DELTA(p0_y[200], 5.0, 1.0E-4);
 
@@ -386,14 +389,14 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Generate a TableWorkspace containing 3 peaks on 2 spectra by using
-   * effective parameters
-   *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2
-   * = 0
-   *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2
-   * = 0
-   *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2
-   * = 0
-   */
+  * effective parameters
+  *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2
+  * = 0
+  *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2
+  * = 0
+  *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2
+  * = 0
+  */
   DataObjects::TableWorkspace_sptr createTestEffectiveFuncParameters() {
     // 1. Build a TableWorkspace
     DataObjects::TableWorkspace_sptr peakparms =
@@ -423,14 +426,14 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Generate a TableWorkspace containing 3 peaks on 2 spectra by using raw
-   * parameters
-   *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2
-   * = 0
-   *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2
-   * = 0
-   *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2
-   * = 0
-   */
+  * parameters
+  *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2
+  * = 0
+  *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2
+  * = 0
+  *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2
+  * = 0
+  */
   DataObjects::TableWorkspace_sptr createTestPeakParameters2() {
     // 1. Build a TableWorkspace
     DataObjects::TableWorkspace_sptr peakparms =
@@ -460,15 +463,15 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Generate a TableWorkspace containing 3 peaks on 2 spectra by using
-   * effective parameters
-    * of old style f0., f1.
-   *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2
-   * = 0
-   *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2
-   * = 0
-   *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2
-   * = 0
-   */
+  * effective parameters
+  * of old style f0., f1.
+  *  spectra 0:  center = 2.0, width = 0.2, height = 5,  a0 = 1.0, a1 = 2.0, a2
+  * = 0
+  *  spectra 0:  center = 8.0, width = 0.1, height = 10, a0 = 2.0, a1 = 1.0, a2
+  * = 0
+  *  spectra 2:  center = 4.0, width = 0.4, height = 20, a0 = 4.0, a1 = 0.0, a2
+  * = 0
+  */
   DataObjects::TableWorkspace_sptr createTestPeakParameters3() {
     // 1. Build a TableWorkspace
     DataObjects::TableWorkspace_sptr peakparms =
@@ -498,8 +501,8 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Create a MatrixWorkspace containing 5 spectra
-   *  Binning parameter = 1.0, 0.02, 9.0
-   */
+  *  Binning parameter = 1.0, 0.02, 9.0
+  */
   API::MatrixWorkspace_sptr createTestInputWorkspace() {
     // 1. Create empty workspace
     double minx = 1.0;
@@ -511,15 +514,13 @@ public:
 
     // 2. Put x values and y values
     for (size_t iw = 0; iw < inpWS->getNumberHistograms(); iw++) {
-
-      auto &dataX = inpWS->mutableX(iw);
-      auto &dataY = inpWS->mutableX(iw);
-
-      for (size_t ix = 0; ix < dataX.size(); ++ix) {
-        dataX[ix] = minx + double(ix) * dx;
+      auto &X = inpWS->mutableX(iw);
+      auto &Y = inpWS->mutableY(iw);
+      for (size_t ix = 0; ix < X.size(); ++ix) {
+        X[ix] = minx + double(ix) * dx;
       }
-      for (size_t iy = 0; iy < dataY.size(); ++iy) {
-        dataY[iy] = 100.0;
+      for (size_t iy = 0; iy < Y.size(); ++iy) {
+        Y[iy] = 100.0;
       }
     }
 
