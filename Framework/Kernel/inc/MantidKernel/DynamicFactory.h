@@ -8,7 +8,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Instantiator.h"
 #include "MantidKernel/RegistrationHelper.h"
-#include "MantidKernel/case_insensitive_map.h"
+#include "MantidKernel/CaseInsensitiveMap.h"
 
 // Boost
 #ifndef Q_MOC_RUN

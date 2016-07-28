@@ -1,5 +1,5 @@
-#ifndef CASE_INSENSITIVE_MAP_H
-#define CASE_INSENSITIVE_MAP_H
+#ifndef MANTID_KERNEL_CASE_INSENSITIVE_MAP_H
+#define MANTID_KERNEL_CASE_INSENSITIVE_MAP_H
 
 #include <cstring>
 #include <map>
@@ -28,4 +28,4 @@ using CaseInsensitiveMap =
 }
 }
 
-#endif // CASE_INSENSITIVE_MAP_H
+#endif // MANTID_KERNEL_CASE_INSENSITIVE_MAP_H

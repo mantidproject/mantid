@@ -1,7 +1,7 @@
 #ifndef MANTID_TSVSERIALISER_H_
 #define MANTID_TSVSERIALISER_H_
 
-#include "MantidKernel/case_insensitive_map.h"
+#include "MantidKernel/CaseInsensitiveMap.h"
 
 #include <map>
 #include <sstream>

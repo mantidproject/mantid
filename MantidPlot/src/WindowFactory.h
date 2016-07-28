@@ -8,7 +8,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/case_insensitive_map.h"
+#include "MantidKernel/CaseInsensitiveMap.h"
 #include "MantidKernel/make_unique.h"
 
 #include <cstring>
