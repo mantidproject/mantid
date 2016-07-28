@@ -38,6 +38,8 @@ private slots:
   void setTieAll(QString);
   void copy();
   void paste();
+  void setValueToLog(int);
+  void setAllValuesToLog();
 
 private:
   bool eventFilter(QObject *obj, QEvent *ev) override;

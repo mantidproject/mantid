@@ -67,6 +67,8 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit,
   connect(deleg, SIGNAL(setTie(int, QString)), this,
           SLOT(setTie(int, QString)));
   connect(deleg, SIGNAL(setTieAll(QString)), this, SLOT(setTieAll(QString)));
+  connect(deleg, SIGNAL(setValueToLog(int)), this, SLOT(setValueToLog(int)));
+  connect(deleg, SIGNAL(setAllValuesToLog()), this, SLOT(setAllValuesToLog()));
 
   m_uiForm.tableWidget->installEventFilter(this);
 }
@@ -271,6 +273,17 @@ bool EditLocalParameterDialog::areOthersTied(int i) const {
       return true;
   }
   return false;
+}
+
+/// Set value to log value
+/// @param i :: [input] Index of parameter to set
+void EditLocalParameterDialog::setValueToLog(int i) {
+  // TODO: needs implementation
+}
+
+/// Set value of each parameter to log value from respective workspace
+void EditLocalParameterDialog::setAllValuesToLog() {
+  // TODO: needs implementation
 }
 
 } // MDF
