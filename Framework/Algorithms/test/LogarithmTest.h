@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/Logarithm.h"
 
@@ -117,9 +117,9 @@ public:
             "test_ev_log_out"));
     TS_ASSERT(histo_out); // this should be a 2d workspace
 
-    TS_ASSERT_DELTA(histo_out->readY(0)[0], 123, 1e-10);
+    TS_ASSERT_DELTA(histo_out->y(0)[0], 123, 1e-10);
     for (size_t i = 1; i < 5; ++i) {
-      TS_ASSERT_DELTA(histo_out->readY(i)[0], std::log(static_cast<double>(i)),
+      TS_ASSERT_DELTA(histo_out->y(i)[0], std::log(static_cast<double>(i)),
                       1e-10);
     }
     AnalysisDataService::Instance().remove("test_ev_log");
