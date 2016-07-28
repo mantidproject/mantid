@@ -27,6 +27,8 @@ signals:
   void setAllFixed(bool);
   void setTie(int, QString);
   void setTieAll(QString);
+  void setValueToLog(int);
+  void setAllValuesToLog();
 private slots:
   void setAll();
   void fixParameter();
@@ -37,6 +39,7 @@ private slots:
   void setTieAll();
   void removeAllTies();
   void updateValue(const QString &value);
+  void setToLog();
 
 private:
   bool eventFilter(QObject *widget, QEvent *evn) override;
@@ -52,6 +55,8 @@ private:
   QAction *m_removeTieAction;
   QAction *m_setTieToAllAction;
   QAction *m_removeAllTiesAction;
+  QAction *m_setToLogAction;
+  QAction *m_setAllToLogAction;
 
   int m_index;
   QString m_value;

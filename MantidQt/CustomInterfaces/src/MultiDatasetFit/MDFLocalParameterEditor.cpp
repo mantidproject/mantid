@@ -93,6 +93,19 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index,
           SLOT(removeAllTies()));
   setMenu->addAction(m_removeAllTiesAction);
 
+  setMenu->addSeparator();
+  m_setToLogAction = new QAction("Set to log", this);
+  m_setToLogAction->setToolTip("Set this parameter to a log value.");
+  connect(m_setToLogAction, SIGNAL(activated()), this, SLOT(setToLog()));
+  setMenu->addAction(m_setToLogAction);
+
+  m_setAllToLogAction = new QAction("Set all to log", this);
+  m_setAllToLogAction->setToolTip(
+      "Set all parameters to log value from the relevant workspace");
+  connect(m_setAllToLogAction, SIGNAL(activated()), this,
+          SIGNAL(setAllValuesToLog()));
+  setMenu->addAction(m_setAllToLogAction);
+
   m_button->setMenu(setMenu);
 
   m_editor->installEventFilter(this);
@@ -162,12 +175,17 @@ void LocalParameterEditor::setTieAll() {
   setEditorState();
 }
 
-/// Remove ties form all parameters
+/// Remove ties from all parameters
 void LocalParameterEditor::removeAllTies() {
   m_tie = "";
   m_othersTied = false;
   emit setTieAll("");
   setEditorState();
+}
+
+/// Send a signal to set value to log
+void LocalParameterEditor::setToLog() {
+  emit setValueToLog(m_index);
 }
 
 /// Filter events in the line editor to emulate a shortcut (F to fix/unfix).
