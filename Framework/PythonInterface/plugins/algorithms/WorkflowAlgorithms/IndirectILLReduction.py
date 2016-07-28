@@ -24,12 +24,15 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     """
 
     # Output Workspaces
-    _raw_ws = None
-    _det_ws = None
-    _monitor_ws = None
-    _mnorm_ws = None
-    _vnorm_ws = None
-    _red_ws = None
+    _red_ws = 'red'
+    _left_ws = 'left'
+    _right_ws = 'right'
+
+    _raw_ws = 'raw'
+    _det_ws = 'detgrouped'
+    _monitor_ws = 'monitor'
+    _mnorm_ws = 'mnorm'
+    _vnorm_ws = 'vnorm'
 
     # Optional input calibration workspace
     _calib_ws = None
@@ -48,7 +51,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     _mirror_sense = None
 
     # Integer
-    _unmirror_option = 3
+    _unmirror_option = None
 
     # Other
     _instrument_name = None
@@ -64,15 +67,26 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         return 'Performs an energy transfer reduction for ILL indirect geometry data, instrument IN16B.'
 
     def PyInit(self):
-        # Input options
+        # File properties
         # This has to be MultipleFileProperty.
-        self.declareProperty(MultipleFileProperty('Run',extensions=["nxs"]),
+        self.declareProperty(MultipleFileProperty('Run',extensions=['nxs']),
                              doc='File path of run (s).')
 
         self.declareProperty(FileProperty('VanadiumRun','',
                                           action=FileAction.OptionalLoad,
-                                          extensions=["nxs"]),
+                                          extensions=['nxs']),
                              doc='File path of vanadium run (s).')
+
+        self.declareProperty(FileProperty('MapFile', '',
+                                          action=FileAction.OptionalLoad,
+                                          extensions=['xml']),
+                             doc='Filename of the map file to use. If left blank the default will be used.')
+
+        # Other inputs
+        self.declareProperty(MatrixWorkspaceProperty("CalibrationWorkspace", "",
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
+                             doc="Workspace containing calibration intensities.")
 
         self.declareProperty(name='Analyser',
                              defaultValue='silicon',
@@ -84,29 +98,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                              validator=StringListValidator(['111']),
                              doc='Analyser reflection.')
 
-        self.declareProperty(FileProperty('MapFile','',
-                                          action=FileAction.OptionalLoad,
-                                          extensions=["xml"]),
-                             doc='Filename of the map file to use. If left blank the default will be used.')
-
-        # Output workspace properties
-        self.declareProperty(MatrixWorkspaceProperty("ReducedWorkspace","red",
-                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
-                             doc="Name for the output reduced workspace created.")
-
-        self.declareProperty(MatrixWorkspaceProperty("CalibrationWorkspace","",
-                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Input),
-                             doc="Workspace containing calibration intensities.")
+        self.declareProperty(name='SumRuns',
+                             defaultValue=False,
+                             doc='Whether to sum all the input runs.')
 
         self.declareProperty(name='ControlMode',
                              defaultValue=False,
                              doc='Whether to output the workspaces in intermediate steps.')
-
-        self.declareProperty(name='SumRuns',
-                             defaultValue=False,
-                             doc='Whether to sum all the input runs.')
 
         self.declareProperty(name='MirrorSense',
                              defaultValue=True,
@@ -114,45 +112,38 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         self.declareProperty(name='UnmirrorOption',defaultValue=3,
                              validator=IntBoundedValidator(lower=0,upper=7),
-                             doc='Unmirroring options: \n '
-                                 '0 Normalisation of grouped workspace to monitor spectrum and no energy transfer\n'
-                                 '1 left workspace\n 2 right workspace\n 3 sum of left and right workspaces\n'
-                                 '4 shift right workspace according to maximum peak positions of left workspace\n'
-                                 '5 like option 4 and center all spectra \n '
-                                 '6 like 4, but use Vanadium workspace for estimating maximum peak positions \n'
-                                 '7 like 6 and center all spectra')
-
-        # Optional workspaces created when running in debug mode
-        self.declareProperty(MatrixWorkspaceProperty("RawWorkspace","raw",
-                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
-                             doc="Name for the output raw workspace created.")
-
-        self.declareProperty(MatrixWorkspaceProperty("MNormalisedWorkspace","mnorm",
-                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
-                             doc="Name for the workspace normalised to monitor.")
-
-        self.declareProperty(MatrixWorkspaceProperty("DetGroupedWorkspace","detgrouped",
-                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
-                             doc="Name for the workspace with grouped detectors.")
-
-        self.declareProperty(MatrixWorkspaceProperty("MonitorWorkspace","monitor",
-                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
-                             doc="Name for the monitor spectrum.")
-
-        self.declareProperty(MatrixWorkspaceProperty("VNormalisedWorkspace","vnorm",
-                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
-                             doc="Name for the workspace normalised to vanadium.")
+                             doc='Unmirroring options: \n'
+                                 '0 no unmirroring\n'
+                                 '1 left\n '
+                                 '2 right\n '
+                                 '3 sum of left and right\n'
+                                 '4 shift right according to left and sum\n'
+                                 '5 center both left and right at zero\n'
+                                 '6 like 4, but use Vanadium run for peak positions \n'
+                                 '7 like 5, but use Vanadium run for peak positions')
 
         # Output options
         self.declareProperty(name='Save',defaultValue=False,
                              doc='Whether to save the reduced workpsace to nxs file.')
+
         self.declareProperty(name='Plot',defaultValue=False,
                              doc='Whether to plot the reduced workspace.')
+
+        # Output workspace properties
+        self.declareProperty(MatrixWorkspaceProperty("ReducedWorkspace", "red",
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Name for the output reduced workspace created.")
+
+        self.declareProperty(MatrixWorkspaceProperty("ReducedLeftWorkspace", "left",
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Name for the output reduced left workspace created.")
+
+        self.declareProperty(MatrixWorkspaceProperty("ReducedRightWorkspace", "right",
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Name for the output reduced left workspace created.")
 
     def validateInputs(self):
 
@@ -166,16 +157,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     def setUp(self):
 
         self._run_file = self.getPropertyValue('Run')
-
         self._vanadium_file = self.getPropertyValue('VanadiumRun')
 
-        self._raw_ws = self.getPropertyValue('RawWorkspace')
-        self._det_ws = self.getPropertyValue('DetGroupedWorkspace')
-        self._red_ws= self.getPropertyValue('ReducedWorkspace')
-        self._calib_ws = self.getPropertyValue('CalibrationWorkspace')
-        self._vnorm_ws = self.getPropertyValue('VNormalisedWorkspace')
-        self._mnorm_ws = self.getPropertyValue('MNormalisedWorkspace')
-        self._monitor_ws = self.getPropertyValue('MonitorWorkspace')
+        self._red_ws = self.getPropertyValue('ReducedWorkspace')
+        self._left_ws = self.getPropertyValue('ReducedLeftWorkspace')
+        self._right_ws= self.getPropertyValue('ReducedRightWorkspace')
 
         self._analyser = self.getPropertyValue('Analyser')
         self._map_file = self.getPropertyValue('MapFile')
@@ -293,20 +279,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         red = run + '_' + self._red_ws
         mnorm = run + '_' + self._mnorm_ws
         vnorm = run + '_' + self._vnorm_ws
-
-        # Temporary workspace names
-        left = 'left'
-        left_raw = 'left_raw'
-        left_mon = 'left_mon'
-        left_det = 'left_det'
-        left_mnorm = 'left_mnorm'
-        left_vnorm = 'left_mnorm'
-        right = 'right'
-        right_raw = 'right_raw'
-        right_mon = 'right_mon'
-        right_det = 'right_det'
-        right_mnorm = 'right_mnorm'
-        right_vnorm = 'right_vnorm'
+        left = run + '_' + self._left_ws
+        right = run + '_' + self._right_ws
 
         # Main reduction workflow
         LoadParameterFile(Workspace=raw,Filename=self._parameter_file)
@@ -319,7 +293,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         # calibrate to vanadium calibration workspace if specified
         # note, this is a one-column calibration workspace, it is not extracted from VanadiumRun (maybe it should?)
-        if self._calib_ws != '':
+        if self._calib_ws != None:
             Divide(LHSWorkspace=mnorm, RHSWorkspace=self._calib_ws, OutputWorkspace=vnorm)
         else:
             CloneWorkspace(InputWorkspace=mnorm, OutputWorkspace=vnorm)
@@ -330,35 +304,29 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         end = len(x) - 1
         mid = int(end / 2)
 
-        # get the left and right wings of vnorm, mnorm, monitor, det
+        # get the left and right wings
         self._extract_workspace(vnorm, left, x[start], x[mid])
         self._extract_workspace(vnorm, right, x[mid], x[end])
         # get the left and right monitors, needed to identify the masked bins
-        self._extract_workspace(mon, left_mon, x[start], x[mid])
-        self._extract_workspace(mon, right_mon, x[mid], x[end])
+        self._extract_workspace(mon, 'left_mon', x[start], x[mid])
+        self._extract_workspace(mon, 'right_mon', x[mid], x[end])
 
-        if self._control_mode:
-            # get left and right wings also from control workspaces
-            # is this really needed?
-            self._extract_workspace(raw, left_raw, x[start], x[mid])
-            self._extract_workspace(raw, right_raw, x[mid], x[end])
-            self._extract_workspace(mnorm, left_mnorm, x[start], x[mid])
-            self._extract_workspace(mnorm, right_mnorm, x[mid], x[end])
-            self._extract_workspace(det, left_det, x[start], x[mid])
-            self._extract_workspace(det, right_det, x[mid], x[end])
-
-        # Get sensible range from monitor and mask correspondingly
-        xmin, xmax = self._monitor_range(left_mon)
+        # Get sensible range from left monitor and mask correspondingly
+        xmin, xmax = self._monitor_range('left_mon')
         # Mask first bins, where monitor count was 0
         MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=0, XMax=xmin)
         # Mask last bins, where monitor count was 0
         MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=xmax, XMax=end)
         # the same for the right
-        xmin, xmax = self._monitor_range(right_mon)
+        xmin, xmax = self._monitor_range('right_mon')
         # Mask first bins, where monitor count was 0
         MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=0, XMax=xmin)
         # Mask last bins, where monitor count was 0
         MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=xmax, XMax=end)
+
+        # delete the left and right monitors
+        DeleteWorkspace('left_mon')
+        DeleteWorkspace('right_mon')
 
         # first convert both to energy
         # it is crucial to do this first, since this sets the axis unit
@@ -386,10 +354,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         elif o == 4:
             self.log().information('Unmirror 4: shift the right according to left and sum to left')
-            right_shifted = 'right_shifted'
-            self._shift_spectra(right, left, right_shifted)
-            self._perform_mirror(left, right_shifted, red)
-            DeleteWorkspace(right_shifted)
+            self._shift_spectra(right, left, 'right_shifted')
+            self._perform_mirror(left, 'right_shifted', red)
+            DeleteWorkspace('right_shifted')
 
         elif o == 5:
             # _shift_spectra needs extension ??
@@ -400,20 +367,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         elif o == 7:
             # Vanadium file must be loaded, left and right workspaces extracted
             pass
-
-        # delete all the remporary ws
-        DeleteWorkspace(left)
-        DeleteWorkspace(right)
-        DeleteWorkspace(left_mon)
-        DeleteWorkspace(right_mon)
-
-        if self._control_mode:
-            DeleteWorkspace(left_det)
-            DeleteWorkspace(right_det)
-            DeleteWorkspace(left_raw)
-            DeleteWorkspace(right_raw)
-            DeleteWorkspace(left_mnorm)
-            DeleteWorkspace(right_mnorm)
 
     def _convert_to_energy(self, ws):
         """
@@ -576,19 +529,22 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         if len(runlist) > 1:
             # multiple runs
             list_red = []
+            list_right = []
+            list_left = []
 
             # first group and set reduced ws
             for run in runlist:
                 list_red.append(run + '_' + self._red_ws)
+                list_right.append(run + '_' + self._right_ws)
+                list_left.append(run + '_' + self._left_ws)
+
             GroupWorkspaces(list_red, OutputWorkspace=self._red_ws)
+            GroupWorkspaces(list_left, OutputWorkspace=self._red_ws + '_' + self._left_ws)
+            GroupWorkspaces(list_right, OutputWorkspace=self._red_ws + '_' + self._right_ws)
+
             self.setPropertyValue('ReducedWorkspace', self._red_ws)
-
-            # save if needed, before deleting
-            if self._save:
-                self._save_ws(self._red_ws)
-
-            if self._plot:
-                self.log().warning('Automatic plotting for multiple files is disabled.')
+            self.setPropertyValue('ReducedLeftWorkspace', self._red_ws + '_' + self._left_ws)
+            self.setPropertyValue('ReducedRightWorkspace', self._red_ws + '_' + self._right_ws)
 
             if not self._control_mode:
                 # delete everything else
@@ -597,10 +553,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     DeleteWorkspace(run + '_' + self._mnorm_ws)
                     DeleteWorkspace(run + '_' + self._det_ws)
                     DeleteWorkspace(run + '_' + self._monitor_ws)
-                    if self._unmirror_option > 0 :
-                        DeleteWorkspace(run + '_' + self._vnorm_ws)
+                    DeleteWorkspace(run + '_' + self._vnorm_ws)
             else:
-                # group and set optional workspace properties
+                # group optional workspace properties
                 list_raw = []
                 list_monitor = []
                 list_det = []
@@ -613,32 +568,46 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     list_mnorm.append(run + '_' + self._mnorm_ws)
                     list_vnorm.append(run + '_' + self._vnorm_ws)
 
-                GroupWorkspaces(list_raw, OutputWorkspace=self._raw_ws)
-                GroupWorkspaces(list_monitor, OutputWorkspace=self._monitor_ws)
-                GroupWorkspaces(list_det, OutputWorkspace=self._det_ws)
-                GroupWorkspaces(list_mnorm, OutputWorkspace=self._mnorm_ws)
+                GroupWorkspaces(list_raw, OutputWorkspace=self._red_ws + '_' + self._raw_ws)
+                GroupWorkspaces(list_monitor, OutputWorkspace=self._red_ws + '_' + self._monitor_ws)
+                GroupWorkspaces(list_det, OutputWorkspace=self._red_ws + '_' + self._det_ws)
+                GroupWorkspaces(list_mnorm, OutputWorkspace=self._red_ws + '_' +  self._mnorm_ws)
+                GroupWorkspaces(list_vnorm, OutputWorkspace=self._red_ws + '_' +  self._vnorm_ws)
 
-                # set workspace properties
-                self.setPropertyValue('RawWorkspace', self._raw_ws)
-                self.setPropertyValue('MNormalisedWorkspace', self._mnorm_ws)
-                self.setPropertyValue('DetGroupedWorkspace', self._det_ws)
-                self.setPropertyValue('MonitorWorkspace', self._monitor_ws)
+            # save if needed, before deleting
+            if self._save:
+                self._save_ws(self._red_ws)
 
-                if self._unmirror_option > 0 :
-                    GroupWorkspaces(list_vnorm, OutputWorkspace=self._vnorm_ws)
-                    self.setPropertyValue('VNormalisedWorkspace', self._vnorm_ws)
+            if self._plot:
+                self.log().warning('Automatic plotting for multiple files is disabled.')
+
         else:
             # single run
 
             # named temporaries
-            raw = runlist[0] + '_' + self._raw_ws
             red = runlist[0] + '_' + self._red_ws
+            left = runlist[0] + '_' + self._left_ws
+            right = runlist[0] + '_' + self._right_ws
+
+            raw = runlist[0] + '_' + self._raw_ws
             mnorm = runlist[0] + '_' + self._mnorm_ws
             vnorm = runlist[0] + '_' + self._vnorm_ws
             det = runlist[0] + '_' + self._det_ws
             mon = runlist[0] + '_' + self._monitor_ws
 
-            # save and plot if needed before cleaning up
+            self.setPropertyValue('ReducedWorkspace', red)
+            self.setPropertyValue('ReducedWorkspace', left)
+            self.setPropertyValue('ReducedWorkspace', right)
+
+            if not self._control_mode:
+                # Cleanup unused workspaces
+                DeleteWorkspace(raw)
+                DeleteWorkspace(mnorm)
+                DeleteWorkspace(det)
+                DeleteWorkspace(mon)
+                DeleteWorkspace(vnorm)
+
+            # save and plot
             if self._save:
                 self._save_ws(red)
 
@@ -646,26 +615,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 SumSpectra(InputWorkspace=red, OutputWorkspace=red + '_sum_to_plot')
                 self._plot_ws(red + '_sum_to_plot')
                 # do not delete summed spectra while the plot is open
-
-            self.setPropertyValue('ReducedWorkspace', red)
-
-            if self._control_mode:
-                # Set properties
-                self.setPropertyValue('RawWorkspace', raw)
-                self.setPropertyValue('MNormalisedWorkspace', mnorm)
-                self.setPropertyValue('DetGroupedWorkspace', det)
-                self.setPropertyValue('MonitorWorkspace',mon)
-                if self._unmirror_option > 0 :
-                    self.setPropertyValue('VNormalisedWorkspace', vnorm)
-            else:
-                # Cleanup unused workspaces
-                DeleteWorkspace(raw)
-                DeleteWorkspace(mnorm)
-                DeleteWorkspace(det)
-                DeleteWorkspace(mon)
-
-                if self._unmirror_option > 0 :
-                    DeleteWorkspace(vnorm)
 
     def _save_ws(self, ws):
         """
