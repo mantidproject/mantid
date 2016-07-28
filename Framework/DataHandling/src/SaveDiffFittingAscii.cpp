@@ -34,6 +34,25 @@ void SaveDiffFittingAscii::init() {
 */
 void SaveDiffFittingAscii::exec() {
   // Get the workspace
+
+template <class T>
+void SaveDiffFittingAscii::writeVal(T &val, std::ofstream &file, bool endline) {
+  std::string valStr = boost::lexical_cast<std::string>(val);
+
+  // checking if it needs to be surrounded in
+  // quotes due to a comma being included
+  size_t comPos = valStr.find(',');
+  if (comPos != std::string::npos) {
+    file << '"' << val << '"';
+  } else {
+    file << boost::lexical_cast<T>(val);
+  }
+
+  if (endline) {
+    file << m_endl;
+  } else {
+    file << m_sep;
+  }
 }
 
 } // namespace DataHandling

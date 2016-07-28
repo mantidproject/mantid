@@ -37,6 +37,10 @@ private:
 
   /// Execution code
   void exec() override;
+
+  template <class T>
+  void writeVal(T &val, std::ofstream &file, bool endline);
+
 };
 } // namespace DataHandling
 } // namespace Mantid
