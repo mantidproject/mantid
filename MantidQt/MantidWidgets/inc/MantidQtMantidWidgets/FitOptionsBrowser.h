@@ -133,6 +133,8 @@ private:
   QtProperty *m_costFunction;
   /// MaxIterations property
   QtProperty *m_maxIterations;
+  /// HistogramFit property
+  QtProperty *m_histogramFit;
 
   // Fit properties
   /// Output property

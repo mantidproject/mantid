@@ -107,5 +107,44 @@ void HistogramDomainCreator::createDomain(
 
 }
 
+/**
+ * Create an output workspace with the calculated values.
+ * @param baseName :: Specifies the name of the output workspace
+ * @param function :: A Pointer to the fitting function
+ * @param domain :: The domain containing x-values for the function
+ * @param values :: A API::FunctionValues instance containing the fitting data
+ * @param outputWorkspacePropertyName :: The property name
+ */
+boost::shared_ptr<API::Workspace> HistogramDomainCreator::createOutputWorkspace(
+    const std::string &baseName, API::IFunction_sptr function,
+    boost::shared_ptr<API::FunctionDomain> domain,
+    boost::shared_ptr<API::FunctionValues> values,
+    const std::string &outputWorkspacePropertyName) {
+  auto ws = IMWDomainCreator::createOutputWorkspace(baseName, function, domain, values, outputWorkspacePropertyName);
+
+  if (m_matrixWorkspace->isDistribution()) {
+    // Convert the calculated values to distribution
+    auto &mws = dynamic_cast<MatrixWorkspace&>(*ws);
+    auto &bins = dynamic_cast<FunctionDomain1DHistogram&>(*domain);
+    double left = bins.leftBoundary();
+    for(size_t iSpec = 1; iSpec < mws.getNumberHistograms(); ++iSpec) {
+      if (iSpec == 2) continue;
+      auto &x = mws.readX(iSpec);
+      auto &y = mws.dataY(iSpec);
+      auto &e = mws.dataE(iSpec);
+      double left = bins.leftBoundary();
+      for(size_t i = 0; i < bins.size(); ++i) {
+        double right = bins[i];
+        double dx = right - left;
+        y[i] /= dx;
+        e[i] /= dx;
+        left = right;
+      }
+    }
+  }
+
+  return ws;
+}
+
 } // namespace CurveFitting
 } // namespace Mantid

@@ -8,9 +8,7 @@
 namespace Mantid {
 
 namespace API {
-class IFunctionGeneral;
-class Column;
-class ITableWorkspace;
+  class FunctionDomain1DHistogram;
 }
 
 namespace CurveFitting {
@@ -47,6 +45,11 @@ public:
   void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
                     boost::shared_ptr<API::FunctionValues> &values,
                     size_t i0 = 0) override;
+  boost::shared_ptr<API::Workspace> createOutputWorkspace(
+      const std::string &baseName, API::IFunction_sptr function,
+      boost::shared_ptr<API::FunctionDomain> domain,
+      boost::shared_ptr<API::FunctionValues> values,
+      const std::string &outputWorkspacePropertyName) override;
 };
 
 } // namespace CurveFitting

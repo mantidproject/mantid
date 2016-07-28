@@ -188,6 +188,15 @@ void FitOptionsBrowser::createCommonProperties() {
                 &FitOptionsBrowser::getStringEnumProperty,
                 &FitOptionsBrowser::setStringEnumProperty);
   }
+
+  // Create HistogramFit property
+  m_histogramFit = m_boolManager->addProperty("Histogram Fit");
+  {
+    m_browser->addProperty(m_histogramFit);
+    addProperty("HistogramFit", m_histogramFit,
+                &FitOptionsBrowser::getBoolProperty,
+                &FitOptionsBrowser::setBoolProperty);
+  }
 }
 
 void FitOptionsBrowser::createSimultaneousFitProperties() {
