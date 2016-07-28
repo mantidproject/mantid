@@ -11,8 +11,8 @@ class CalculatePowder(IOmodule):
     Class for calculating mean square displacements (MSD) for the powder use case.
     Mean square displacements are in Hartree atomic units.
     Working equation is taken from http://atztogo.github.io/phonopy/thermal-displacement.html.
-    Additionally Debye-Waller factors are calculated which are  MSD multiplied by coth(omega/2T)^2 for each frequency
-    They have to be multiplied by Q and raised to power 2 to be equivalent to DW from "Vibrational spectroscopy with neutrons...." .
+    Additionally Debye-Waller factors are calculated which are  MSD multiplied by coth(omega/2T)^2 for each frequency.
+    They have to be multiplied by Q^2 to be equivalent to DW from "Vibrational spectroscopy with neutrons...." .
     Obtained MSD and DW  can be directly used for calculation of S(Q, omega) in case sample has a form of powder.
     """
     def __init__(self, filename=None, abins_data=None, temperature=None):

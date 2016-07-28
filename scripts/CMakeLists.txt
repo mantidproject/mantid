@@ -65,6 +65,7 @@ set ( TEST_PY_FILES
       test/ABINSPowderDataTest.py
       test/ABINSCalculatePowderTest.py
       test/ABINSCalculateCrystalTest.py
+      test/ABINSCalculateSTest.py
       )
 
 
