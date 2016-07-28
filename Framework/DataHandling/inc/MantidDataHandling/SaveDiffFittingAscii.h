@@ -38,8 +38,7 @@ private:
   /// Execution code
   void exec() override;
 
-  template <class T>
-  void writeVal(T &val, std::ofstream &file, bool endline);
+  void writeVal(std::string &val, std::ofstream &file, bool endline);
 
   /// the separator
   const char m_sep;

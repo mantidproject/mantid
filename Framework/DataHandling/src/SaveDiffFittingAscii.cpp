@@ -81,18 +81,21 @@ void SaveDiffFittingAscii::exec() {
   std::string bank = getProperty("Bank");
   file << "bank: " << bank << m_endl;
 
+
   std::vector<std::string> columnHeadings = tbl_ws->getColumnNames();
   for (auto &heading : columnHeadings) {
     if (heading == "Chi") {
-      writeVal<std::string>(heading, file, true);
+      writeVal(heading, file, true);
     } else {
-      writeVal<std::string>(heading, file, false);
+      writeVal(heading, file, false);
+    }
+  }
     }
   }
 }
 
-template <class T>
-void SaveDiffFittingAscii::writeVal(T &val, std::ofstream &file, bool endline) {
+void SaveDiffFittingAscii::writeVal(std::string &val, std::ofstream &file,
+                                    bool endline) {
   std::string valStr = boost::lexical_cast<std::string>(val);
 
   // checking if it needs to be surrounded in
@@ -101,7 +104,7 @@ void SaveDiffFittingAscii::writeVal(T &val, std::ofstream &file, bool endline) {
   if (comPos != std::string::npos) {
     file << '"' << val << '"';
   } else {
-    file << boost::lexical_cast<T>(val);
+    file << boost::lexical_cast<std::string>(val);
   }
 
   if (endline) {
