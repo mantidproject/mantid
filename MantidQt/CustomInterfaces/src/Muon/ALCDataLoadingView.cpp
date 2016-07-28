@@ -2,6 +2,7 @@
 
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtMantidWidgets/ErrorCurve.h"
+#include "MantidQtMantidWidgets/LogValueSelector.h"
 
 #include <QMessageBox>
 
@@ -27,6 +28,8 @@ ALCDataLoadingView::~ALCDataLoadingView() {
 
 void ALCDataLoadingView::initialize() {
   m_ui.setupUi(m_widget);
+  m_ui.logValueSelector->setCheckboxShown(false);
+  m_ui.logValueSelector->setVisible(true);
   connect(m_ui.load, SIGNAL(clicked()), SIGNAL(loadRequested()));
   connect(m_ui.firstRun, SIGNAL(fileFindingFinished()),
           SIGNAL(firstRunSelected()));
@@ -87,11 +90,11 @@ std::string ALCDataLoadingView::lastRun() const {
 }
 
 std::string ALCDataLoadingView::log() const {
-  return m_ui.log->currentText().toStdString();
+  return m_ui.logValueSelector->getLog().toStdString();
 }
 
 std::string ALCDataLoadingView::function() const {
-  return m_ui.function->currentText().toStdString();
+  return m_ui.logValueSelector->getFunction().toStdString();
 }
 
 std::string ALCDataLoadingView::calculationType() const {
@@ -182,7 +185,7 @@ void ALCDataLoadingView::displayError(const std::string &error) {
  */
 void ALCDataLoadingView::setAvailableLogs(
     const std::vector<std::string> &logs) {
-  setAvailableItems(m_ui.log, logs);
+  setAvailableItems(m_ui.logValueSelector->getLogComboBox(), logs);
 }
 
 /**

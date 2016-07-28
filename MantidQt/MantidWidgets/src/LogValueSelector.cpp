@@ -10,6 +10,7 @@ namespace MantidWidgets {
 LogValueSelector::LogValueSelector(QWidget *parent)
     : API::MantidWidget(parent) {
   m_ui.setupUi(this);
+  m_ui.horizontalLayout->addStretch(1);
   doConnect();
 }
 
