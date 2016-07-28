@@ -90,6 +90,20 @@ void SaveDiffFittingAscii::exec() {
       writeVal(heading, file, false);
     }
   }
+
+  for (size_t rowIndex = 0; rowIndex < tbl_ws->rowCount(); ++rowIndex) {
+    TableRow row = tbl_ws->getRow(rowIndex);
+    for (size_t columnIndex = 0; columnIndex < columnHeadings.size();
+         columnIndex++) {
+
+      // if (tbl_ws->getColumn(columnIndex)->type() != "float") {
+		auto row_str = boost::lexical_cast<std::string>(row.Double(columnIndex));
+		g_log.error() << row_str << std::endl;
+
+      if (columnIndex == columnHeadings.size() - 1)
+        writeVal(row_str, file, true);
+      else
+        writeVal(row_str, file, false);
     }
   }
 }
