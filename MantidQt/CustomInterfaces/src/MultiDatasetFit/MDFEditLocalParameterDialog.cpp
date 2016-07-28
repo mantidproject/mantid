@@ -21,6 +21,9 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit,
     : QDialog(multifit), m_parName(parName) {
   m_uiForm.setupUi(this);
   m_uiForm.logValueSelector->setCheckboxShown(true);
+  connect(m_uiForm.logValueSelector, SIGNAL(logOptionsEnabled(bool)), this,
+          SIGNAL(logOptionsChecked(bool)));
+
   QHeaderView *header = m_uiForm.tableWidget->horizontalHeader();
   header->setResizeMode(0, QHeaderView::Stretch);
   connect(m_uiForm.tableWidget, SIGNAL(cellChanged(int, int)), this,

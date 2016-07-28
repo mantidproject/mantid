@@ -10,7 +10,7 @@ class QPushButton;
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace MDF {
-
+class EditLocalParameterDialog;
 /**
  * An editor widget for editing a local parameter value.
  * It allows edit the values as well as fix/unfix the parameter.
@@ -40,6 +40,7 @@ private slots:
   void removeAllTies();
   void updateValue(const QString &value);
   void setToLog();
+  void setLogOptionsEnabled(bool enabled);
 
 private:
   bool eventFilter(QObject *widget, QEvent *evn) override;

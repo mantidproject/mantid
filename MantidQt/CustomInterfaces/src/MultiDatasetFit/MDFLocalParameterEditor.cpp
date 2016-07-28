@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterEditor.h"
+#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h"
 
 #include <QHBoxLayout>
 #include <QLineEdit>
@@ -255,6 +256,15 @@ void LocalParameterEditor::updateValue(const QString &value) {
   m_value = value;
 }
 
+/**
+ * Slot: when log checkbox state changes, enable/disable the "set to log" and
+ * "set all to log" options
+ * @param enabled :: [input] Whether to enable or disable options
+ */
+void LocalParameterEditor::setLogOptionsEnabled(bool enabled) {
+  m_setToLogAction->setEnabled(enabled);
+  m_setAllToLogAction->setEnabled(enabled);
+}
 } // MDF
 } // CustomInterfaces
 } // MantidQt

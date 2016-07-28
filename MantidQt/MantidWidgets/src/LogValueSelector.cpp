@@ -68,6 +68,7 @@ void LogValueSelector::setEnabled(int checkstate) {
   const bool enabled = checkstate == Qt::Checked;
   m_ui.log->setEnabled(enabled);
   m_ui.function->setEnabled(enabled);
+  emit logOptionsEnabled(enabled);
 }
 
 } // namespace MantidWidgets

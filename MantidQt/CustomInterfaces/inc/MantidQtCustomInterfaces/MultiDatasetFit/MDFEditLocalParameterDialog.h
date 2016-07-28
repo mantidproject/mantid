@@ -29,6 +29,10 @@ public:
   bool areOthersFixed(int i) const;
   bool areAllOthersFixed(int i) const;
   bool areOthersTied(int i) const;
+
+signals:
+  void logOptionsChecked(bool);
+
 private slots:
   void valueChanged(int, int);
   void setAllValues(double);

@@ -38,6 +38,8 @@ LocalParameterItemDelegate::createEditor(QWidget *parent,
           SIGNAL(setValueToLog(int)));
   connect(m_currentEditor, SIGNAL(setAllValuesToLog()), this,
           SIGNAL(setAllValuesToLog()));
+  connect(owner(), SIGNAL(logOptionsChecked(bool)), m_currentEditor,
+          SLOT(setLogOptionsEnabled(bool)));
   m_currentEditor->installEventFilter(
       const_cast<LocalParameterItemDelegate *>(this));
   return m_currentEditor;

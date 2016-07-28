@@ -58,6 +58,10 @@ public:
     this->setEnabled(enabled ? Qt::Checked : Qt::Unchecked);
   }
 
+signals:
+  /// Checkbox state has changed
+  void logOptionsEnabled(bool enabled);
+
 private slots:
   /// Set enabled/disabled
   void setEnabled(int checkstate);
