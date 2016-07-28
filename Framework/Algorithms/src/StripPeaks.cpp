@@ -188,8 +188,6 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
     // but Y needs to be mutable
     auto &X = outputWS->x(peakslist->getRef<int>("spectrum", i));
     auto &Y = outputWS->mutableY(peakslist->getRef<int>("spectrum", i));
-    // Also create point data for later
-    auto &pointData = outputWS->points(i);
     // Get back the gaussian parameters
     const double height = peakslist->getRef<double>("Height", i);
     const double centre = peakslist->getRef<double>("PeakCentre", i);
@@ -253,10 +251,11 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
                           << " x + " << a2 << " x^2\n";
     }
 
+	// Get central bin values using points
+	auto binCenters = outputWS->points(i);
     const int spectrumLength = static_cast<int>(Y.size());
     for (int j = 0; j < spectrumLength; ++j) {
-      // If this is histogram data, we want to use the bin's central value
-      double x = pointData[j];
+      double x = binCenters[j];
       // Skip if not anywhere near this peak
       if (x < centre - 5.0 * width)
         continue;
