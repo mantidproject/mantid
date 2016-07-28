@@ -47,7 +47,7 @@ namespace Kernel {
 template <typename TYPE> class ListValidator : public TypedValidator<TYPE> {
 public:
   /// Default constructor. Sets up an empty list of valid values.
-  ListValidator() : TypedValidator<TYPE>() {}
+  ListValidator() : TypedValidator<TYPE>(), m_allowMultiSelection(false) {}
 
   /** Constructor
    *  @param values :: A set of values consisting of the valid values
@@ -220,7 +220,7 @@ protected:
   std::map<std::string, std::string> m_aliases;
 
   /// if the validator should allow multiple selection
-  bool m_allowMultiSelection{false};
+  bool m_allowMultiSelection;
 };
 
 /// ListValidator<std::string> is used heavily

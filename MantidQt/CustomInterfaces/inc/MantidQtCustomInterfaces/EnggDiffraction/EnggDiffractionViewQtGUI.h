@@ -109,7 +109,7 @@ public:
   std::vector<std::string> newCeriaNo() const override;
 
   int currentCropCalibBankName() const override {
-    return m_currentCropCalibBankName;
+    return g_currentCropCalibBankName;
   }
 
   std::string currentCalibSpecNos() const override;
@@ -165,9 +165,9 @@ public:
 
   bool saveFocusedOutputFiles() const override;
 
-  int currentPlotType() const override { return m_currentType; }
+  int currentPlotType() const override { return g_currentType; }
 
-  int currentMultiRunMode() const override { return m_currentRunMode; }
+  int currentMultiRunMode() const override { return g_currentRunMode; }
 
 signals:
   void getBanks();
@@ -257,7 +257,7 @@ private:
   Ui::EnggDiffractionQtTabFocus m_uiTabFocus;
   Ui::EnggDiffractionQtTabPreproc m_uiTabPreproc;
   // Ui::EnggDiffractionQtTabFitting m_uiTabFitting;
-  EnggDiffFittingViewQtWidget *m_fittingWidget{nullptr};
+  EnggDiffFittingViewQtWidget *m_fittingWidget;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
   /// converts QList to a vector
@@ -265,7 +265,7 @@ private:
                                          bool validator) const;
 
   /// instrument selected (ENGIN-X, etc.)
-  std::string m_currentInst{"ENGINX"};
+  std::string m_currentInst;
 
   /// User select instrument
   void userSelectInstrument(const QString &prefix);
@@ -273,20 +273,24 @@ private:
   /// setting the instrument prefix ahead of the run number
   void setPrefix(std::string prefix);
 
+  // TODO: The values of these three next static members (bank name,
+  // type, run mode) can be obtained from widgets when requested/required.  They
+  // shouldn't need to be cached in data members. Remove them.
+
   // current bank number used for cropped calibration
-  int static m_currentCropCalibBankName;
+  int static g_currentCropCalibBankName;
 
   // plot data representation type selected
-  int static m_currentType;
+  int static g_currentType;
 
   // multi-run focus mode type selected
-  int static m_currentRunMode;
+  int static g_currentRunMode;
 
   /// calibration settings - from/to the 'settings' tab
   EnggDiffCalibSettings m_calibSettings;
 
   /// To show important non-modal messages
-  QMessageBox *m_splashMsg{nullptr};
+  QMessageBox *m_splashMsg;
 
   /// This is in principle the only settings for 'focus'
   std::string m_focusDir;
@@ -304,7 +308,7 @@ private:
   static const std::string g_DetGrpExtStr;
 
   /// presenter as in the model-view-presenter
-  boost::shared_ptr<IEnggDiffractionPresenter> m_presenter{nullptr};
+  boost::shared_ptr<IEnggDiffractionPresenter> m_presenter;
 };
 
 } // namespace CustomInterfaces
