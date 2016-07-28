@@ -73,10 +73,10 @@ void LorentzCorrection::exec() {
   for (int64_t i = 0; i < int64_t(numHistos); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    const MantidVec &inY = inWS->readY(i);
+    auto &inY = inWS->y(i);
 
-    MantidVec &outY = outWS->dataY(i);
-    MantidVec &outE = outWS->dataE(i);
+    auto &outY = outWS->mutableY(i);
+    auto &outE = outWS->mutableE(i);
 
     IDetector_const_sptr detector;
     try {

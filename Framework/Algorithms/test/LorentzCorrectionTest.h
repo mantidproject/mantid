@@ -27,7 +27,7 @@ private:
    * Calculate what the weight should be.
    */
   double calculate_weight_at(MatrixWorkspace_sptr &ws, const int bin_index) {
-    const Mantid::MantidVec &xData = ws->readX(0);
+    auto &xData = ws->x(0);
 
     auto detector = ws->getDetector(0);
     double twotheta = ws->detectorTwoTheta(*detector);
@@ -68,12 +68,9 @@ private:
     auto workspace = Create2DWorkspaceBinned(nSpectra, nBins, startX,
                                              deltaX); // Creates histogram data
 
-    auto &ydata = workspace->dataY(0);
-    auto &edata = workspace->dataE(0);
-    for (size_t i = 0; i < ydata.size(); ++i) {
-      ydata[i] = 1;
-      edata[i] = 1;
-    }
+	auto size = workspace->mutableY(0).size();
+	workspace->mutableY(0).assign(size, 1.0);
+	workspace->mutableE(0).assign(size, 1.0);
 
     workspace->getAxis(0)->setUnit("Wavelength");
     workspace->setYUnit("Counts");
@@ -111,8 +108,8 @@ public:
 
   void test_throws_if_wavelength_zero() {
     auto ws_lam = this->create_workspace(2 /*nBins*/);
-    ws_lam->dataX(0)[0] = 0; // Make wavelength zero
-    ws_lam->dataX(0)[1] = 0; // Make wavelength zero
+    ws_lam->mutableX(0)[0] = 0; // Make wavelength zero
+    ws_lam->mutableX(0)[1] = 0; // Make wavelength zero
     LorentzCorrection alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -138,8 +135,8 @@ public:
     const std::string unitID = out_ws->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unitID, "Wavelength");
 
-    const Mantid::MantidVec &yData = out_ws->readY(0);
-    const Mantid::MantidVec &eData = out_ws->readE(0);
+    auto &yData = out_ws->y(0);
+    auto &eData = out_ws->e(0);
 
     int index = 0;
     double weight = calculate_weight_at(out_ws, index /*y index*/);
