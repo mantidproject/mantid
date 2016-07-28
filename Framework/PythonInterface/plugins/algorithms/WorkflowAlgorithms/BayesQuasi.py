@@ -404,7 +404,14 @@ class BayesQuasi(PythonAlgorithm):
         sample_binning, res_binning = binning
         energy_min, energy_max = e_range
 
-        sample_logs = [('res_workspace', self._resWS),('fit_program', fit_program),('background', self._background),('elastic_peak', self._elastic),('energy_min', energy_min),('energy_max', energy_max),('sample_binning', sample_binning),('resolution_binning', res_binning)]
+        sample_logs = [('res_workspace', self._resWS),
+                        ('fit_program', fit_program),
+                        ('background', self._background),
+                        ('elastic_peak', self._elastic),
+                        ('energy_min', energy_min),
+                        ('energy_max', energy_max),
+                        ('sample_binning', sample_binning),
+                        ('resolution_binning', res_binning)]
 
         resnorm_used = (self._resnormWS != '')
         sample_logs.append(('resnorm', str(resnorm_used)))
@@ -450,14 +457,16 @@ class BayesQuasi(PythonAlgorithm):
             Eb.append(be[1])
         Vaxis = []
 
-        nhist = 0
-        dataX, dataY, dataE, nhist = self._add_xye_data(dataX, dataY, dataE, nhist, Xout, Yi, Ei)
+        dataX, dataY, dataE = self._add_xye_data(dataX, dataY, dataE, Xout, Yi, Ei)
+        nhist = 1
         Vaxis.append('f1.Amplitude')
 
-        dataX, dataY, dataE, nhist = self._add_xye_data(dataX, dataY, dataE, nhist, Xout, Yf, Ef)
+        dataX, dataY, dataE = self._add_xye_data(dataX, dataY, dataE, Xout, Yf, Ef)
+        nhist += 1
         Vaxis.append('f1.FWHM')
 
-        dataX, dataY, dataE, nhist = self._add_xye_data(dataX, dataY, dataE, nhist, Xout, Yb, Eb)
+        dataX, dataY, dataE = self._add_xye_data(dataX, dataY, dataE, Xout, Yb, Eb)
+        nhist += 1
         Vaxis.append('f1.Beta')
 
         logger.information('Vaxis=' + str(Vaxis))
@@ -466,15 +475,14 @@ class BayesQuasi(PythonAlgorithm):
 
         return outWS
 
-    def _add_xye_data(self, dX, dY, dE, nhist, xout, Y, E):
-    
+    def _add_xye_data(self, dX, dY, dE, xout, Y, E):
+
         dX = np.append(dX,np.array(xout))
         dY = np.append(dY,np.array(Y))
         dE = np.append(dE,np.array(E))
-        nhist += 1
-        
-        return dX, dY, dE, nhist
-    
+
+        return dX, dY, dE
+
     def _read_ascii_file(self, file_name):
         workdir = config['defaultsave.directory']
         file_path = os.path.join(workdir, file_name)
