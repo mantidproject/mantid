@@ -43,7 +43,7 @@ IDomainCreator *createDomainCreator(const IFunction *fun,
   } else if (auto gfun = dynamic_cast<const IFunctionGeneral *>(fun)) {
     creator = new GeneralDomainCreator(*gfun, *manager, workspacePropertyName);
   } else {
-    bool histogramFit = manager->getProperty("HistogramFit");
+    bool histogramFit = manager->getPropertyValue("EvaluationType") == "Histogram";
     if (histogramFit) {
       creator = new HistogramDomainCreator(*manager, workspacePropertyName);
     } else {
@@ -72,8 +72,6 @@ void IFittingAlgorithm::init() {
                   "Name of the input Workspace");
   declareProperty("IgnoreInvalidData", false,
                   "Flag to ignore infinities, NaNs and data with zero errors.");
-  declareProperty("HistogramFit", false,
-                  "Flag to perform histogram fitting.");
 
   std::vector<std::string> domainTypes{"Simple", "Sequential", "Parallel"};
   declareProperty(
@@ -81,6 +79,14 @@ void IFittingAlgorithm::init() {
       Kernel::IValidator_sptr(
           new Kernel::ListValidator<std::string>(domainTypes)),
       "The type of function domain to use: Simple, Sequential, or Parallel.",
+      Kernel::Direction::Input);
+
+  std::vector<std::string> evaluationTypes{"CentrePoint", "Histogram"};
+  declareProperty(
+      "EvaluationType", "CentrePoint",
+      Kernel::IValidator_sptr(
+          new Kernel::ListValidator<std::string>(evaluationTypes)),
+      "The way the function is evaluated: CentrePoint or Histogram.",
       Kernel::Direction::Input);
 
   initConcrete();

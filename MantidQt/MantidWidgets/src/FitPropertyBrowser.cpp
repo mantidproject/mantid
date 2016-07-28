@@ -213,9 +213,10 @@ void FitPropertyBrowser::init() {
   m_boolManager->setValue(m_showParamErrors, showParamErrors);
   m_parameterManager->setErrorsEnabled(showParamErrors);
 
-  m_histogramFit = m_boolManager->addProperty("Histogram fit");
-  bool histoFit = settings.value(m_histogramFit->propertyName(), false).toBool();
-  m_boolManager->setValue(m_histogramFit, histoFit);
+  m_evaluationType = m_enumManager->addProperty("Evaluate Function As");
+  m_evaluationTypes << "CentrePoint"
+                    << "Histogram";
+  m_enumManager->setEnumNames(m_evaluationType, m_evaluationTypes);
 
   m_xColumn = m_columnManager->addProperty("XColumn");
   m_yColumn = m_columnManager->addProperty("YColumn");
@@ -237,7 +238,7 @@ void FitPropertyBrowser::init() {
   settingsGroup->addSubProperty(m_plotCompositeMembers);
   settingsGroup->addSubProperty(m_convolveMembers);
   settingsGroup->addSubProperty(m_showParamErrors);
-  settingsGroup->addSubProperty(m_histogramFit);
+  settingsGroup->addSubProperty(m_evaluationType);
 
   /* Create editors and assign them to the managers */
   createEditors(w);
@@ -1109,7 +1110,8 @@ bool FitPropertyBrowser::convolveMembers() const {
 
 /// Get "HistogramFit" option
 bool FitPropertyBrowser::isHistogramFit() const {
-  return m_boolManager->value(m_histogramFit);
+  int i = m_enumManager->value(m_evaluationType);
+  return m_evaluationTypes[i].toStdString() == "Histogram";
 }
 
 
@@ -1472,7 +1474,9 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
-    alg->setProperty("HistogramFit", isHistogramFit());
+    if (isHistogramFit()) {
+      alg->setProperty("EvaluationType", "Histogram");
+    }
     alg->setPropertyValue("Function", funStr);
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("WorkspaceIndex", workspaceIndex());

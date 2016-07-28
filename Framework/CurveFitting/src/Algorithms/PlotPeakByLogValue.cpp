@@ -130,8 +130,14 @@ void PlotPeakByLogValue::init() {
       "If true and OutputCompositeMembers is true members of any "
       "Convolution are output convolved\n"
       "with corresponding resolution");
-  declareProperty("HistogramFit", false,
-                  "Flag to perform histogram fitting.");
+
+  std::vector<std::string> evaluationTypes{"CentrePoint", "Histogram"};
+  declareProperty(
+      "EvaluationType", "CentrePoint",
+      Kernel::IValidator_sptr(
+          new Kernel::ListValidator<std::string>(evaluationTypes)),
+      "The way the function is evaluated: CentrePoint or Histogram.",
+      Kernel::Direction::Input);
 }
 
 /**
@@ -270,14 +276,14 @@ void PlotPeakByLogValue::exec() {
         if (createFitOutput)
           wsBaseName = wsNames[i].name + "_" + spectrum_index;
 
-        bool histogramFit = getProperty("HistogramFit");
+        bool histogramFit = getPropertyValue("EvaluationType") == "Histogram";
 
         // Fit the function
         API::IAlgorithm_sptr fit =
             AlgorithmManager::Instance().createUnmanaged("Fit");
         fit->initialize();
         if (histogramFit) {
-          fit->setProperty("HistogramFit", histogramFit);
+          fit->setPropertyValue("EvaluationType", getPropertyValue("EvaluationType"));
         }
         fit->setProperty("Function", ifun);
         fit->setProperty("InputWorkspace", data.ws);

@@ -578,7 +578,7 @@ public:
       std::string fun = "name=FlatBackground,A0=" + std::to_string(fwhms[i]);
       auto alg = AlgorithmFactory::Instance().create("EvaluateFunction", -1);
       alg->initialize();
-      alg->setProperty("HistogramFit", true);
+      alg->setProperty("EvaluationType", "Histogram");
       alg->setProperty("Function", fun);
       alg->setProperty("InputWorkspace", ws);
       alg->setProperty("OutputWorkspace", "out");
@@ -590,7 +590,7 @@ public:
 
     PlotPeakByLogValue alg;
     alg.initialize();
-    alg.setProperty("HistogramFit", true);
+    alg.setProperty("EvaluationType", "Histogram");
     alg.setPropertyValue("Input", "InputWS,v1:3");
     alg.setPropertyValue("OutputWorkspace", "out");
     alg.setProperty("CreateOutput", true);

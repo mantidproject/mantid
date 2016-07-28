@@ -237,9 +237,9 @@ def fitting_algorithm(f):
         # Create and execute
         algm = _create_algorithm_object(function_name)
         _set_logging_option(algm, kwargs)
-        if 'HistogramFit' in kwargs:
-            algm.setProperty('HistogramFit', kwargs['HistogramFit'])
-            del kwargs['HistogramFit']
+        if 'EvaluationType' in kwargs:
+            algm.setProperty('EvaluationType', kwargs['EvaluationType'])
+            del kwargs['EvaluationType']
         algm.setProperty('Function', Function) # Must be set first
         if InputWorkspace is not None:
             algm.setProperty('InputWorkspace', InputWorkspace)

@@ -189,13 +189,16 @@ void FitOptionsBrowser::createCommonProperties() {
                 &FitOptionsBrowser::setStringEnumProperty);
   }
 
-  // Create HistogramFit property
-  m_histogramFit = m_boolManager->addProperty("Histogram Fit");
+  // Create EvaluationType property
+  m_evaluationType = m_enumManager->addProperty("Evaluate Function As");
   {
-    m_browser->addProperty(m_histogramFit);
-    addProperty("HistogramFit", m_histogramFit,
-                &FitOptionsBrowser::getBoolProperty,
-                &FitOptionsBrowser::setBoolProperty);
+    QStringList evaluationTypes;
+    evaluationTypes << "CentrePoint" << "Histogram";
+    m_enumManager->setEnumNames(m_evaluationType, evaluationTypes);
+    m_browser->addProperty(m_evaluationType);
+    addProperty("EvaluationType", m_evaluationType,
+                &FitOptionsBrowser::getStringEnumProperty,
+                &FitOptionsBrowser::setStringEnumProperty);
   }
 }
 

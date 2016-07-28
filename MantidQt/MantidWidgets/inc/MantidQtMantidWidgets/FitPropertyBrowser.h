@@ -409,7 +409,7 @@ protected:
   QtProperty *m_yColumn;
   QtProperty *m_errColumn;
   QtProperty *m_showParamErrors;
-  QtProperty *m_histogramFit;
+  QtProperty *m_evaluationType;
   QList<QtProperty *> m_minimizerProperties;
 
   /// A copy of the edited function
@@ -452,6 +452,8 @@ protected:
   mutable QStringList m_workspaceNames;
   /// A list of available cost functions
   mutable QStringList m_costFunctions;
+  /// A list of possible function evaluation types
+  mutable QStringList m_evaluationTypes;
 
   /// To keep a copy of the initial parameters in case for undo fit
   std::vector<double> m_initialParameters;

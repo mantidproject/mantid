@@ -140,7 +140,7 @@ public:
     Fit fit;
     fit.initialize();
     fit.setProperty("Function", "name=Lorentzian,FWHM=0.5");
-    fit.setProperty("HistogramFit", true);
+    fit.setProperty("EvaluationType", "Histogram");
     fit.setProperty("InputWorkspace", ws);
     fit.setProperty("Output", "fit");
     fit.execute();
@@ -204,7 +204,7 @@ public:
     Fit fit;
     fit.initialize();
     fit.setProperty("Function", "name=Gaussian,Height=1,Sigma=0.5");
-    fit.setProperty("HistogramFit", true);
+    fit.setProperty("EvaluationType", "Histogram");
     fit.setProperty("InputWorkspace", ws);
     fit.setProperty("Output", "fit");
     fit.execute();
@@ -233,7 +233,7 @@ public:
     Fit fit;
     fit.initialize();
     fit.setProperty("Function", "name=FlatBackground");
-    fit.setProperty("HistogramFit", true);
+    fit.setProperty("EvaluationType", "Histogram");
     fit.setProperty("InputWorkspace", ws);
     fit.setProperty("Output", "fit");
     fit.execute();
@@ -260,7 +260,7 @@ public:
     Fit fit;
     fit.initialize();
     fit.setProperty("Function", "name=LinearBackground");
-    fit.setProperty("HistogramFit", true);
+    fit.setProperty("EvaluationType", "Histogram");
     fit.setProperty("InputWorkspace", ws);
     fit.setProperty("Output", "fit");
     fit.execute();
@@ -288,7 +288,7 @@ public:
     Fit fit;
     fit.initialize();
     fit.setProperty("Function", "name=LinearBackground;name=Gaussian,Height=1,Sigma=0.3");
-    fit.setProperty("HistogramFit", true);
+    fit.setProperty("EvaluationType", "Histogram");
     fit.setProperty("InputWorkspace", ws);
     fit.setProperty("Output", "fit");
     fit.execute();
@@ -328,7 +328,7 @@ public:
     Fit fit;
     fit.initialize();
     fit.setProperty("Function", "name=FlatBackground");
-    fit.setProperty("HistogramFit", true);
+    fit.setProperty("EvaluationType", "Histogram");
     fit.setProperty("InputWorkspace", ws);
     fit.setProperty("Output", "fit");
     fit.execute();

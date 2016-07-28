@@ -336,7 +336,9 @@ void SequentialFitDialog::accept() {
   if (ui.rbIndividual->isChecked()) {
     alg->setPropertyValue("FitType", "Individual");
   }
-  alg->setProperty("HistogramFit", m_fitBrowser->isHistogramFit());
+  if (m_fitBrowser->isHistogramFit()) {
+    alg->setProperty("EvaluationType", "Histogram");
+  }
 
   bool passWSIndexToFunction = ui.ckbPassWS->isChecked();
   alg->setProperty("PassWSIndexToFunction", passWSIndexToFunction);
