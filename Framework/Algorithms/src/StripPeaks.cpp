@@ -251,8 +251,8 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
                           << " x + " << a2 << " x^2\n";
     }
 
-	// Get central bin values using points
-	auto binCenters = outputWS->points(i);
+    // Get central bin values using points
+    auto binCenters = outputWS->points(i);
     const int spectrumLength = static_cast<int>(Y.size());
     for (int j = 0; j < spectrumLength; ++j) {
       double x = binCenters[j];
