@@ -104,7 +104,7 @@ void OrientedLattice::setU(const DblMatrix &newU, const bool force) {
 /** Sets the UB matrix and recalculates lattice parameters
   @param newUB :: the new UB matrix*/
 void OrientedLattice::setUB(const DblMatrix &newUB) {
-  //check if determinant is close to 0. The 1e-10 value is arbitrary
+  // check if determinant is close to 0. The 1e-10 value is arbitrary
   if (std::fabs(newUB.determinant()) > 1e-10) {
     UB = newUB;
     DblMatrix newGstar, B;
