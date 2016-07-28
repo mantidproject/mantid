@@ -29,7 +29,7 @@ namespace HistogramData {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_HISTOGRAMDATA_DLL LogarithmicGenerator {
+class LogarithmicGenerator {
 public:
   LogarithmicGenerator(double start, double increment)
       : current(start), increment(1.0 + increment) {}
