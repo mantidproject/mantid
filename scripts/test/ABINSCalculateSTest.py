@@ -66,20 +66,12 @@ class ABINSCalculateSTest(unittest.TestCase):
                                   abins_data=_good_data["DFT"], instrument_name=self._instrument_name)
         calculated_data = _good_tester.getS().extract()
         self._check_data(good_data=_good_data["S"], data=calculated_data)
-        # check if evaluated powder data  is correct
-
-        # for key in _good_data["S"]:
-        #     for item in _good_data["S"][key]:
-        #         self.assertEqual(True, np.allclose(_good_data["S"][key][item], calculated_data[key][item]))
 
         # check if loading powder data is correct
         new_tester =  CalculateS(filename=name + ".phonon", temperature=self._temperature, sample_form=self._sample_form,
                                  abins_data=_good_data["DFT"], instrument_name=self._instrument_name)
         loaded_data = new_tester.loadData().extract()
         self._check_data(good_data=_good_data["S"], data=loaded_data)
-        # for key in _good_data["S"]:
-        #     for item in _good_data["S"][key]:
-        #         self.assertEqual(True, np.allclose(calculated_data[key][item], loaded_data[key][item]))
 
 
     def _get_good_data(self, filename=None):
