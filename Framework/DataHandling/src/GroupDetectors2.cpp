@@ -1249,12 +1249,15 @@ std::map<std::string, std::string> GroupDetectors2::validateInputs() {
 
   const std::string pattern = getPropertyValue("GroupingPattern");
 
-  boost::regex re1("^\\s*[0-9]+\\s*$");
-
-  boost::regex re("^(\\s*,*[0-9]+(\\s*(,|:|\\+|\\-)\\s*)*[0-9]*)*$");
-  if (!pattern.empty() && !boost::regex_match(pattern, re)) {
-    errors["GroupingPattern"] =
-        "GroupingPattern is not well formed: " + pattern;
+  boost::regex re(
+      "^\\s*[0-9]+\\s*$|^(\\s*,*[0-9]+(\\s*(,|:|\\+|\\-)\\s*)*[0-9]*)*$");
+  auto groups = Kernel::StringTokenizer(pattern, ",", IGNORE_SPACES);
+  for (const auto &groupStr : groups) {
+    if (!pattern.empty() && !boost::regex_match(groupStr, re)) {
+      errors["GroupingPattern"] =
+          "GroupingPattern is not well formed: " + pattern;
+      break;
+    }
   }
 
   return errors;
@@ -1274,9 +1277,7 @@ void GroupDetectors2::translateInstructions(const std::string &instructions,
 
   // split into comma separated groups, each group potentially containing
   // an operation (+-:) that produces even more groups.
-  auto groups = Kernel::StringTokenizer(
-      instructions, ",", Kernel::StringTokenizer::TOK_TRIM |
-                             Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  auto groups = Kernel::StringTokenizer(instructions, ",", IGNORE_SPACES);
   for (const auto &groupStr : groups) {
     // Look for the various operators in the string. If one is found then
     // do the necessary translation into groupings.
