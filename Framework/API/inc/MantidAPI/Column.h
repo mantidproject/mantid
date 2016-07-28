@@ -157,7 +157,7 @@ public:
 
   /**
    * Fills a std vector with values from the column if the types are compatible.
-   * @param maxSize :: Set size than the full column.
+   * @param maxSize :: Set size to less than the full column.
    */
   template <class T = double>
   std::vector<T>
