@@ -38,7 +38,29 @@ public:
   /// Constructor
   LogValueSelector(QWidget *parent);
 
+  /// Get selected log text
+  QString getLog() const;
+
+  /// Get selected function text
+  QString getFunction() const;
+
+  /// Whether checkbox is shown or not
+  bool isCheckboxShown() const;
+
+  /// Control whether checkbox is shown
+  void setCheckboxShown(bool visible);
+
+  /// Get a pointer to log combo box
+  QComboBox *getLogComboBox() const;
+
+private slots:
+  /// Set enabled/disabled
+  void setEnabled(int checkstate);
+
 private:
+  /// Set up connections
+  void doConnect();
+
   /// User interface
   Ui::LogValueSelector m_ui;
 };
