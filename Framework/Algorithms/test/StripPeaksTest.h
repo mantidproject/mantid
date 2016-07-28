@@ -115,7 +115,7 @@ public:
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
-    auto &X = WS->points(1);
+    auto X = WS->points(1);
     auto &Y1 = WS->mutableY(1);
     auto &E1 = WS->mutableE(1);
     auto &Y0 = WS->mutableY(0);
