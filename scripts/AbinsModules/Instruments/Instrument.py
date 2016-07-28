@@ -1,5 +1,3 @@
-from AbinsModules import Constants
-
 class Instrument(object):
 
     _name  = None
@@ -7,7 +5,7 @@ class Instrument(object):
     def calculate_q(self, frequencies=None):
         """
 
-        @param frequencies:  frequencies for which Q data should be calculated
+        @param frequencies:  frequencies for which Q data should be calculated (frequencies in Hartree atomic units)
         """
         return None
 
@@ -16,10 +14,18 @@ class Instrument(object):
         """
         Convolves discrete spectrum with the  resolution function for the particular instrument.
 
-        @param frequencies:   frequencies for which resolution function should be calculated
+        @param frequencies:   frequencies for which resolution function should be calculated (frequencies in Hartree atomic units)
         @param s_dft:  discrete S calculated directly from DFT
         @param points_per_peak: number of points for each peak
 
        """
         return None
 
+    def produce_abscissa(self, frequencies=None, points_per_peak=None):
+        """
+        Creates abscissa for convoluted spectrum.
+        @param frequencies: DFT frequencies for which frequencies which correspond to broadened spectrum should be regenerated (frequencies in Hartree atomic units)
+        @param points_per_peak:  number of points for each peak of broadened spectrum
+        @return: abscissa for convoluted S
+        """
+        return None

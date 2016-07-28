@@ -42,7 +42,8 @@ all_keywords_atoms_data = ["symbol", "fract_coord", "atom", "sort", "mass"]
 all_keywords_powder_data = ["msd", "dw"]
 
 # keywords which define data structure for SData
-all_keywords_s_data = ["sort", "symbol", "value"]
+all_keywords_s_data = ["atoms", "frequencies"]
+all_keywords_s_sub_data = ["sort", "symbol", "value"]
 
 # symbols of all elements
 all_symbols = ["Ac", "Ag", "Al", "Am", "Ar",  "As", "At" , "Au" , "B"  , "Ba", "Be", "Bh", "Bi", "Bk", "Br", "C" , "Ca" ,
@@ -69,7 +70,8 @@ m_2_hartree = constants.codata.value("atomic mass unit-hartree relationship") # 
 
 # TOSCA
 TOSCA_constant = 1 / 16.0 # magic number for TOSCA...
-TOSCA_A = 0.0000001 # width = TOSCA_A * omega * omega + TOSCA_B * omega + TOSCA_C
+# sigma = TOSCA_A * omega * omega + TOSCA_B * omega + TOSCA_C
+TOSCA_A = 0.0000001
 TOSCA_B = 0.005
 TOSCA_C = 2.5
 
