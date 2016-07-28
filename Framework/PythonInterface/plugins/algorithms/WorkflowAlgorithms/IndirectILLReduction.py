@@ -23,22 +23,21 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     http://docs.mantidproject.org/nightly/algorithms/IndirectILLReduction-v1.html?highlight=indirectillreduction
     """
 
-    # Workspaces
+    # Output Workspaces
     _raw_ws = None
-    _det_grouped_ws = None
+    _det_ws = None
     _monitor_ws = None
     _mnorm_ws = None
     _vnorm_ws = None
     _red_ws = None
-    _red_left_ws = None
-    _red_right_ws = None
-    _calibration_ws = None
-    _vanadium_ws = None
+
+    # Input calibration workspace
+    _calib_ws = None
 
     # Files
     _map_file = None
     _run_file = None
-    _vanadium_run = None
+    _vanadium_file = None
     _parameter_file = None
 
     # Bool flags
@@ -69,6 +68,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # This has to be MultipleFileProperty.
         self.declareProperty(MultipleFileProperty('Run',extensions=["nxs"]),
                              doc='File path of run (s).')
+
+        self.declareProperty(FileProperty('VanadiumRun','',
+                                          action=FileAction.OptionalLoad,
+                                          extensions=["nxs"]),
+                             doc='File path of vanadium run (s).')
 
         self.declareProperty(name='Analyser',
                              defaultValue='silicon',
@@ -129,7 +133,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                                                      direction=Direction.Output),
                              doc="Name for the workspace normalised to monitor.")
 
-        self.declareProperty(MatrixWorkspaceProperty("DetGroupedWorkspace","detectors_grouped",
+        self.declareProperty(MatrixWorkspaceProperty("DetGroupedWorkspace","detgrouped",
                                                      optional=PropertyMode.Optional,
                                                      direction=Direction.Output),
                              doc="Name for the workspace with grouped detectors.")
@@ -154,10 +158,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         issues = dict()
         # Unmirror options 6 and 7 require a Vanadium run as input workspace
-        if self._mirror_sense and self._unmirror_option==6 and self._vanadium_run!='':
-            issues['UnmirrorOption'] = 'Unmirror option 6 requires calibration workspace to be set'
-        if self._mirror_sense and self._unmirror_option==7 and self._vanadium_run!='':
-            issues['UnmirrorOption'] = 'Unmirror option 7 requires calibration workspace to be set'
+        if self._mirror_sense and self._unmirror_option > 5 and self._vanadium_file!='':
+            issues['UnmirrorOption'] = 'Given unmirror option requires vanadium run to be set'
 
         return issues
 
@@ -165,10 +167,12 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         self._run_file = self.getPropertyValue('Run')
 
+        self._vanadium_file = self.getPropertyValue('VanadiumRun')
+
         self._raw_ws = self.getPropertyValue('RawWorkspace')
-        self._det_grouped_ws = self.getPropertyValue('DetGroupedWorkspace')
+        self._det_ws = self.getPropertyValue('DetGroupedWorkspace')
         self._red_ws= self.getPropertyValue('ReducedWorkspace')
-        self._calibration_ws = self.getPropertyValue('CalibrationWorkspace')
+        self._calib_ws = self.getPropertyValue('CalibrationWorkspace')
         self._vnorm_ws = self.getPropertyValue('VNormalisedWorkspace')
         self._mnorm_ws = self.getPropertyValue('MNormalisedWorkspace')
         self._monitor_ws = self.getPropertyValue('MonitorWorkspace')
@@ -188,8 +192,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self.log().warning('MirrorSense is OFF, UnmirrorOption will fall back to 0 (i.e. no unmirroring)')
             self._unmirror_option = 0
 
-        # if SumRuns is specified, force to sum all the listed files
         if self._sum_runs:
+            self.log().information('All the runs will be summed')
             self._run_file = self._run_file.replace(',', '+')
 
     def PyExec(self):
@@ -279,126 +283,129 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     def _reduce_run(self, run):
         """
         Performs the reduction for a given single run
+        All the main reduction workflow logic goes here
         @param run :: string of run number to reduce
         """
-
+        self.log().information('Reducing run #' + run)
         # Must use named temporaries here
         raw = run + '_' + self._raw_ws
-        det_grouped = run + '_' + self._det_grouped_ws
+        det = run + '_' + self._det_ws
         mon = run + '_' + self._monitor_ws
+        red = run + '_' + self._red_ws
+        mnorm = run + '_' + self._mnorm_ws
+        vnorm = run + '_' + self._vnorm_ws
 
-        self.log().information('Reducing run #' + run)
+        # Temporary workspace names
+        left = 'left'
+        left_raw = 'left_raw'
+        left_mon = 'left_mon'
+        left_det = 'left_det'
+        left_mnorm = 'left_mnorm'
+        right = 'right'
+        right_raw = 'right_raw'
+        right_mon = 'right_mon'
+        right_det = 'right_det'
+        right_mnorm = 'right_mnorm'
 
-        # load parameter file
         LoadParameterFile(Workspace=raw,Filename=self._parameter_file)
 
-        # group the detectors
-        GroupDetectors(InputWorkspace=raw,OutputWorkspace=det_grouped,
-                       MapFile=self._map_file,Behaviour='Sum')
+        GroupDetectors(InputWorkspace=raw,OutputWorkspace=det,MapFile=self._map_file,Behaviour='Sum')
 
-        # extract the monitor spectrum
         ExtractSingleSpectrum(InputWorkspace=raw,OutputWorkspace=mon,WorkspaceIndex=0)
 
-        # unmirror
-        self._unmirror(run)
+        NormaliseToMonitor(InputWorkspace=det, OutputWorkspace=mnorm, MonitorWorkspace=mon)
 
-    def _unmirror(self, run):
-        """
-        Performs the unmirroring dependent on the given option.
-        @param run : run number string
-        """
-
-        # Again need temporaries here
-        det_grouped_ws = run + '_' + self._det_grouped_ws
-        monitor_ws = run + '_' + self._monitor_ws
-        red_ws = run + '_' + self._red_ws
-        mnorm_ws = run + '_' + self._mnorm_ws
-
-        if self._unmirror_option == 0:
-
-            self.log().notice('Unmirror 0: X-axis will not be converted to energy transfer.')
-            # No energy transform is performed, since
-            # energy transfer requires X-Axis to be in range -Emin Emax -Emin Emax ...
-            NormaliseToMonitor(InputWorkspace=det_grouped_ws,
-                               MonitorWorkspace=monitor_ws,
-                               OutputWorkspace=mnorm_ws)
-            CloneWorkspace(Inputworkspace=mnorm_ws, OutputWorkspace=red_ws)
-
+        # calibrate to vanadium calibration workspace if specified
+        # note, this is a one-column calibration workspace, it is not extracted from VanadiumRun (maybe it should?)
+        if self._calib_ws != '':
+            Divide(LHSWorkspace=mnorm, RHSWorkspace=self._calib_ws, OutputWorkspace=vnorm)
         else:
-            # Get X-values of the grouped workspace
-            x = mtd[det_grouped_ws].readX(0)
-            x_end = len(x)
-            mid_point = int((x_end - 1) / 2)
+            CloneWorkspace(InputWorkspace=mnorm, OutputWorkspace=vnorm)
 
-            if self._unmirror_option == 1:
-                self.log().information('Unmirror 1: reducing the left wing')
-                self._extract_workspace(0, x[mid_point], red_ws, monitor_ws, det_grouped_ws, mnorm_ws, run)
+        # get the start, end, mid points
+        x = mtd[vnorm].readX(0)
+        start = 0
+        end = len(x) - 1
+        mid = int(end / 2)
 
-            if self._unmirror_option == 2:
-                self.log().information('Unmirror 2: reducing the right wing')
-                self._extract_workspace(x[mid_point], x_end, red_ws, monitor_ws, det_grouped_ws, mnorm_ws, run)
+        # get the left and right wings of vnorm, mnorm, monitor, det
+        self._extract_workspace(vnorm, left, x[start], x[mid])
+        self._extract_workspace(vnorm, right, x[mid], x[end])
 
-            if self._unmirror_option > 2:
-                # Temporary workspace names needed for unmirror options 3 to 7
-                temp_left_ws = '__left_ws'
-                temp_left_monitor_ws = '__left_monitor_ws'
-                temp_left_grouped_ws = '__left_grouped_ws'
-                temp_left_mnorm_ws = '__left_mnorm_ws'
-                temp_right_ws = '__right_ws'
-                temp_right_monitor_ws = '__right_monitor_ws'
-                temp_right_grouped_ws = '__right_grouped_ws'
-                temp_right_mnorm_ws = '__right_mnorm_ws'
+        self._extract_workspace(raw, left_raw, x[start], x[mid])
+        self._extract_workspace(raw, right_raw, x[mid], x[end])
+        self._extract_workspace(mnorm, left_mnorm, x[start], x[mid])
+        self._extract_workspace(mnorm, right_mnorm, x[mid], x[end])
+        self._extract_workspace(det, left_det, x[start], x[mid])
+        self._extract_workspace(det, right_det, x[mid], x[end])
+        self._extract_workspace(mon, left_mon, x[start], x[mid])
+        self._extract_workspace(mon, right_mon, x[mid], x[end])
 
-                temp_left = '__right'
-                temp_right = '__left'
+        # Get sensible range from monitor and mask correspondingly
+        xmin, xmax = self._monitor_range(left_mon)
+        # Mask first bins, where monitor count was 0
+        MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=0, XMax=xmin)
+        # Mask last bins, where monitor count was 0
+        MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=xmax, XMax=end)
+        # the same for the right
+        xmin, xmax = self._monitor_range(right_mon)
+        # Mask first bins, where monitor count was 0
+        MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=0, XMax=xmin)
+        # Mask last bins, where monitor count was 0
+        MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=xmax, XMax=end)
 
-                # Left workspace
-                self._extract_workspace(0,x[mid_point],temp_left_ws,temp_left_monitor_ws,
-                                        temp_left_grouped_ws,temp_left_mnorm_ws,run)
+        # first convert both to energy
+        # it is crucial to do this first, since this sets the axis unit
+        # which is needed for shift operations for unmirror > 3
+        self._convert_to_energy(left)
+        self._convert_to_energy(right)
 
-                # Right workspace
-                self._extract_workspace(x[mid_point],x_end,temp_right_ws,temp_right_monitor_ws,
-                                        temp_right_grouped_ws,temp_right_mnorm_ws,run)
+        # finally perform unmirror
+        o = self._unmirror_option
+        if o == 0:
+            self.log().information('Unmirror 0: X-axis will not be converted to energy transfer.')
+            CloneWorkspace(Inputworkspace=mnorm, OutputWorkspace=red)
 
-                if self._unmirror_option == 3:
-                    self.log().information('Unmirror 3: sum left and right wings')
-                    temp_left = temp_left_ws
-                    temp_right = temp_right_ws
-                elif self._unmirror_option == 4:
-                    print('Shift each sepctrum of the right workspace according to the maximum peak'
-                          ' positions of the corresponding spectrum of the left workspace')
-                    self._shift_spectra(temp_right_ws, temp_left_ws, temp_right)
-                    temp_left = temp_left_ws
-                    # Shifted workspace in control mode?
-                elif self._unmirror_option == 5:
-                    # _shift_spectra needs extension
-                    pass
-                elif self._unmirror_option == 6:
-                    # Vanadium file must be loaded, left and right workspaces extracted
-                    # Update PyExec and _set_workspace_properties accordingly, _vanadium_ws = None
-                    pass
-                elif self._unmirror_option == 7:
-                    # Vanadium file must be loaded, left and right workspaces extracted
-                    # Update PyExec and _set_workspace_properties accordingly, _vanadium_ws = None
-                    pass
+        elif o == 1:
+            self.log().information('Unmirror 1: return the left wings')
+            RenameWorkspace(InputWorkspace=left,OutputWorkspace=red)
 
-                # Sum left, right and corresponding workspaces, the same for reduced, monitor, mnorm and det grouped
-                self._perform_mirror(temp_left, temp_right, red_ws)
-                self._perform_mirror(temp_left_monitor_ws,temp_right_monitor_ws, monitor_ws)
-                self._perform_mirror(temp_left_grouped_ws,temp_right_grouped_ws, det_grouped_ws)
-                self._perform_mirror(temp_left_mnorm_ws,temp_right_mnorm_ws, mnorm_ws)
+        elif o == 2:
+            self.log().information('Unmirror 2: return the light wing')
+            RenameWorkspace(InputWorkspace=right,OutputWorkspace=red)
 
-    def _convert_to_energy(self, ws, ws_out):
+        elif o == 3:
+            self.log().information('Unmirror 3: sum the left and right wings')
+            self._perform_mirror(left, right, red)
+
+        elif o == 4:
+            self.log().information('Unmirror 4: shift the right according to left and sum to left')
+            right_shifted = 'right_shifted'
+            self._shift_spectra(right, left, right_shifted)
+            self._perform_mirror(left, right_shifted, red)
+
+        elif o == 5:
+            # _shift_spectra needs extension ??
+            pass
+        elif o == 6:
+            # Vanadium file must be loaded, left and right workspaces extracted
+            # Update PyExec and _set_workspace_properties accordingly, _vanadium_file = None
+            pass
+        elif o == 7:
+            # Vanadium file must be loaded, left and right workspaces extracted
+            # Update PyExec and _set_workspace_properties accordingly, _vanadium_file = None
+            pass
+
+    def _convert_to_energy(self, ws):
         """
         Convert the input ws x-axis from channel # to energy transfer
         @param ws     :: input workspace name
-        @param ws_out :: output workspace name
         """
         # get energy formula from cache or compute if it is not yet set
         formula = (self._energy_formula(ws) if self._formula is None else self._formula)
-        ConvertAxisByFormula(InputWorkspace=ws,OutputWorkspace=ws_out,Axis='X',Formula=formula)
-        mtd[ws_out].getAxis(0).setUnit('DeltaE')
-        xnew = mtd[ws_out].readX(0)  # energy array
+        ConvertAxisByFormula(InputWorkspace=ws,OutputWorkspace=ws,Axis='X',Formula=formula)
+        mtd[ws].getAxis(0).setUnit('DeltaE') # in mev
+        xnew = mtd[ws].readX(0)  # energy array
         self.log().information('Energy range : %f to %f' % (xnew[0], xnew[-1]))
 
     def _energy_formula(self, ws):
@@ -446,51 +453,16 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.log().information('Masking range %f to %f' % (x[imin], x[imax]))
         return x[imin], x[imax]
 
-    def _extract_workspace(self, x_start, x_end, ws_out, monitor, det_grouped, mnorm, run):
+    def _extract_workspace(self, ws, ws_out, x_start, x_end):
         """
-        Extract left or right workspace from detector grouped workspace and perform energy transfer
+        Extracts part of the workspace
+        @param  ws      :: input workspace name
+        @param  ws_out  :: output workspace name
         @param  x_start :: start bin of workspace to be extracted
         @param  x_end   :: end bin of workspace to be extracted
-        @param  ws_out  :: extracted workspace, normalised, bins masked, energy transfer performed
-        @param  monitor :: corresponding monitor spectrum
-        @param  det_grouped :: corresponding detector grouped workspace
-        @param  mnorm   :: corresponding normalised workspace
-        @param  run     :: run number string
         """
-
-        # named temporaries (do not use self.* directly, neither overwrite,
-        # otherwise multiple file reduction will break down
-        det_grouped_in = run + '_' + self._det_grouped_ws
-        monitor_in = run + '_' + self._monitor_ws
-        vnorm = run + '_' + self._vnorm_ws
-
-        CropWorkspace(InputWorkspace=det_grouped_in,OutputWorkspace=det_grouped,XMin=x_start,XMax=x_end)
-        CropWorkspace(InputWorkspace=monitor_in,OutputWorkspace=monitor,XMin=x_start,XMax=x_end)
-
-        # Shift X-values of extracted workspace and its corresponding monitor in order to let X-values start with 0
-        __x = mtd[det_grouped].readX(0)
-        x_shift =  - __x[0]
-
-        ScaleX(InputWorkspace=det_grouped,OutputWorkspace=det_grouped,Factor=x_shift,Operation='Add')
-        ScaleX(InputWorkspace=monitor,OutputWorkspace=monitor,Factor=x_shift,Operation='Add')
-
-        # Normalise left workspace to left monitor spectrum
-        NormaliseToMonitor(InputWorkspace=det_grouped,OutputWorkspace=mnorm,MonitorWorkspace=monitor)
-
-        # Mask bins according to monitor range
-        xmin, xmax = self._monitor_range(monitor)
-        # Mask first bins, where monitor count was 0
-        MaskBins(InputWorkspace=mnorm,OutputWorkspace=mnorm,XMin=0,XMax=xmin)
-        # Mask last bins, where monitor count was 0
-        MaskBins(InputWorkspace=mnorm,OutputWorkspace=mnorm,XMin=xmax,XMax=x_end)
-
-        # Apply the detector intensity calibration
-        if self._calibration_ws != '':
-            Divide(LHSWorkspace=mnorm, RHSWorkspace=self._calibration_ws, OutputWorkspace=vnorm)
-        else:
-            CloneWorkspace(InputWorkspace=mnorm, OutputWorkspace=vnorm)
-
-        self._convert_to_energy(vnorm, ws_out)
+        CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws_out, XMin=x_start, XMax=x_end)
+        ScaleX(InputWorkspace=ws_out, OutputWorkspace=ws_out, Factor=-x_start, Operation='Add')
 
     def _perform_mirror(self, ws1, ws2, ws_out):
         """
@@ -509,7 +481,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         @param ws_shift_origin  ::   workspace according to which to shift
         @param ws_out           ::   shifted output workspace
         """
-
         # get a table of peak positions via Gaussian fits
         table_shift = FindEPP(InputWorkspace=ws_shift_origin)
         number_spectra = mtd[ws].getNumberHistograms()
@@ -605,7 +576,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 for run in runlist:
                     DeleteWorkspace(run + '_' + self._raw_ws)
                     DeleteWorkspace(run + '_' + self._mnorm_ws)
-                    DeleteWorkspace(run + '_' + self._det_grouped_ws)
+                    DeleteWorkspace(run + '_' + self._det_ws)
                     DeleteWorkspace(run + '_' + self._monitor_ws)
                     if self._unmirror_option > 0 :
                         DeleteWorkspace(run + '_' + self._vnorm_ws)
@@ -613,25 +584,25 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 # group and set optional workspace properties
                 list_raw = []
                 list_monitor = []
-                list_det_grouped = []
+                list_det = []
                 list_mnorm = []
                 list_vnorm = []
                 for run in runlist:
                     list_raw.append(run + '_' + self._raw_ws)
                     list_monitor.append(run + '_' + self._monitor_ws)
-                    list_det_grouped.append(run + '_' + self._det_grouped_ws)
+                    list_det.append(run + '_' + self._det_ws)
                     list_mnorm.append(run + '_' + self._mnorm_ws)
                     list_vnorm.append(run + '_' + self._vnorm_ws)
 
                 GroupWorkspaces(list_raw, OutputWorkspace=self._raw_ws)
                 GroupWorkspaces(list_monitor, OutputWorkspace=self._monitor_ws)
-                GroupWorkspaces(list_det_grouped, OutputWorkspace=self._det_grouped_ws)
+                GroupWorkspaces(list_det, OutputWorkspace=self._det_ws)
                 GroupWorkspaces(list_mnorm, OutputWorkspace=self._mnorm_ws)
 
                 # set workspace properties
                 self.setPropertyValue('RawWorkspace', self._raw_ws)
                 self.setPropertyValue('MNormalisedWorkspace', self._mnorm_ws)
-                self.setPropertyValue('DetGroupedWorkspace', self._det_grouped_ws)
+                self.setPropertyValue('DetGroupedWorkspace', self._det_ws)
                 self.setPropertyValue('MonitorWorkspace', self._monitor_ws)
 
                 if self._unmirror_option > 0 :
@@ -645,7 +616,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             red = runlist[0] + '_' + self._red_ws
             mnorm = runlist[0] + '_' + self._mnorm_ws
             vnorm = runlist[0] + '_' + self._vnorm_ws
-            det_grouped = runlist[0] + '_' + self._det_grouped_ws
+            det = runlist[0] + '_' + self._det_ws
             mon = runlist[0] + '_' + self._monitor_ws
 
             # save and plot if needed before cleaning up
@@ -663,7 +634,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 # Set properties
                 self.setPropertyValue('RawWorkspace', raw)
                 self.setPropertyValue('MNormalisedWorkspace', mnorm)
-                self.setPropertyValue('DetGroupedWorkspace', det_grouped)
+                self.setPropertyValue('DetGroupedWorkspace', det)
                 self.setPropertyValue('MonitorWorkspace',mon)
                 if self._unmirror_option > 0 :
                     self.setPropertyValue('VNormalisedWorkspace', vnorm)
@@ -671,7 +642,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 # Cleanup unused workspaces
                 DeleteWorkspace(raw)
                 DeleteWorkspace(mnorm)
-                DeleteWorkspace(det_grouped)
+                DeleteWorkspace(det)
                 DeleteWorkspace(mon)
 
                 if self._unmirror_option > 0 :
