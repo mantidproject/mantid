@@ -1,6 +1,6 @@
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
-from six.moves import range
+from six.moves import range #pylint: disable=redefined-builtin
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory
 from mantid.kernel import Direction
 import warnings

@@ -4,7 +4,7 @@ import numpy as np
 import mantid
 import mantid.simpleapi as api
 from mantid.kernel import StringListValidator
-from six.moves import range
+from six.moves import range #pylint: disable=redefined-builtin
 
 try:
     import h5py  # http://www.h5py.org/
