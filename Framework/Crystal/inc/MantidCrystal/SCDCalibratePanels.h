@@ -195,10 +195,6 @@ private:
   API::ITableWorkspace_sptr Result;
 
 
-
-
-
-
   /**
    * Saves the new instrument to an xml file that can be used with the
    * LoadParameterFile Algorithm. If the filename is empty, nothing gets done.

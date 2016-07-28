@@ -131,18 +131,30 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xr
     return;
 
   setupData();
+  DataObjects::PeaksWorkspace_sptr inputP0 =
+      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
+  std::vector<double> l1l2;
+  for (int j = 0; j < static_cast<int>(nData/3); j++) {
+    DataObjects::Peak peak = inputP0->getPeak(j);
+    l1l2.push_back(peak.getL1()+peak.getL2());
+  }
+
   moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, m_bank, m_workspace);
   DataObjects::PeaksWorkspace_sptr inputP =
-      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
+        boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
   Geometry::Instrument_sptr inst = boost::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
-  std::cout <<xshift<<"  "<<yshift<<"  "<<zshift<<"  "<<xrotate<<"  "<<yrotate<<"  "<<zrotate<<"  "<<m_bank<<"  "<< inst->getSource()->getPos()-inst->getSample()->getPos()<<"\n";
+  //double lShift = zshift; //V3D(xshift,yshift,zshift).norm();
   int j = 0;
   for (size_t i = 0; i < nData; i += 3) {
     DataObjects::Peak peak = inputP->getPeak(j);
-    j++;
+    peak.setInstrument(inst);
+    peak.setDetectorID(peak.getDetectorID());
     V3D hkl =  V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
          boost::math::iround(peak.getL()));
-    DataObjects::Peak peak2(inst,peak.getDetectorID(),peak.getWavelength(),hkl,peak.getGoniometerMatrix());
+    double ratio = l1l2[j] / (peak.getL1()+peak.getL2());
+    double wl = peak.getWavelength() *ratio;
+    j++;
+    DataObjects::Peak peak2(inst, peak.getDetectorID(), wl, hkl, peak.getGoniometerMatrix());
     V3D Q3 = peak2.getQSampleFrame();
     out[i] = Q3[0];
     out [i+1] = Q3[1];

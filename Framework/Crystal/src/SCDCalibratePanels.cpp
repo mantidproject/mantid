@@ -226,6 +226,7 @@ void SCDCalibratePanels::exec() {
 
       auto &outSpec = q3DWS->getSpectrum(0);
       MantidVec &yVec = outSpec.dataY();
+      MantidVec &eVec = outSpec.dataE();
       MantidVec &xVec = outSpec.dataX();
 
     for (int i = 0; i < nBankPeaks; i++) {
@@ -240,6 +241,17 @@ void SCDCalibratePanels::exec() {
       yVec[i*3] = Q2.X();
       yVec[i*3+1] = Q2.Y();
       yVec[i*3+2] = Q2.Z();
+      // 1/sigma is considered the weight for the fit
+      double weight = 1.;                // default is even weighting
+      if (peak.getSigmaIntensity() > 0.) // prefer weight by sigmaI
+        weight = 1.0 / peak.getSigmaIntensity();
+      else if (peak.getIntensity() > 0.) // next favorite weight by I
+        weight = 1.0 / peak.getIntensity();
+      else if (peak.getBinCount() > 0.) // then by counts in peak centre
+        weight = 1.0 / peak.getBinCount();
+      eVec[i*3] = weight;
+      eVec[i*3+1] = weight;
+      eVec[i*3+2] = weight;
     }
 
     IAlgorithm_sptr fit_alg;
@@ -253,14 +265,12 @@ void SCDCalibratePanels::exec() {
     fun_str << "name=SCDPanelErrors,Workspace="+bankName<<",Bank="<<iBank;
     fit_alg->setPropertyValue("Function", fun_str.str());
     fit_alg->setProperty("InputWorkspace", q3DWS);
-    fit_alg->setProperty("MaxIterations", 5000);
     fit_alg->setProperty("CreateOutput", true);
     fit_alg->setProperty("Output", "fit");
-    // fit_alg->setProperty("MaxIterations", 0);
     fit_alg->executeAsChildAlg();
     std::string fitStatus = fit_alg->getProperty("OutputStatus");
     double chisq = fit_alg->getProperty("OutputChi2overDoF");
-    g_log.notice() << fitStatus << "Chi2overDoF " << chisq << "\n";
+    g_log.notice() <<iBank<<"  "<< fitStatus << " Chi2overDoF " << chisq << "\n";
     MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
     AnalysisDataService::Instance().addOrReplace("fit_"+iBank, fitWS);
     ITableWorkspace_sptr paramsWS = fit_alg->getProperty("OutputParameters");
@@ -343,6 +353,7 @@ MatrixWorkspace_sptr L1WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
 
   auto &outSp = L1WS->getSpectrum(0);
   MantidVec &yV = outSp.dataY();
+  MantidVec &eV = outSp.dataE();
   MantidVec &xV = outSp.dataX();
 
 OrientedLattice lattice = peaksWs->mutableSample().getOrientedLattice();
@@ -357,6 +368,17 @@ for (int i = 0; i < nPeaks; i++) {
   yV[i*3] = Q2.X();
   yV[i*3+1] = Q2.Y();
   yV[i*3+2] = Q2.Z();
+  // 1/sigma is considered the weight for the fit
+  double weight = 1.;                // default is even weighting
+  if (peak.getSigmaIntensity() > 0.) // prefer weight by sigmaI
+    weight = 1.0 / peak.getSigmaIntensity();
+  else if (peak.getIntensity() > 0.) // next favorite weight by I
+    weight = 1.0 / peak.getIntensity();
+  else if (peak.getBinCount() > 0.) // then by counts in peak centre
+    weight = 1.0 / peak.getBinCount();
+  eV[i*3] = weight;
+  eV[i*3+1] = weight;
+  eV[i*3+2] = weight;
 }
 IAlgorithm_sptr fitL1_alg;
 try {
@@ -377,14 +399,15 @@ fitL1_alg->setProperty("Output", "fit");
 fitL1_alg->executeAsChildAlg();
 std::string fitL1Status = fitL1_alg->getProperty("OutputStatus");
 double chisqL1 = fitL1_alg->getProperty("OutputChi2overDoF");
-g_log.notice() << fitL1Status << "Chi2overDoF " << chisqL1 << "\n";
 MatrixWorkspace_sptr fitL1 = fitL1_alg->getProperty("OutputWorkspace");
 AnalysisDataService::Instance().addOrReplace("fit_L1", fitL1);
 ITableWorkspace_sptr paramsL1 = fitL1_alg->getProperty("OutputParameters");
 AnalysisDataService::Instance().addOrReplace("params_L1", paramsL1);
 double deltaL1 = paramsL1->getRef<double>("Value",2);
+g_log.notice() <<"L1 = "<<peaksWs->getInstrument()->getSource()->getPos().Z()<<"  "<< fitL1Status << " Chi2overDoF " << chisqL1 << "\n";
 SCDPanelErrors com;
 com. moveDetector(0.0, 0.0, deltaL1, 0.0, 0.0, 0.0, "moderator", peaksWs);
+g_log.notice() <<"L1 = "<<peaksWs->getInstrument()->getSource()->getPos().Z()<<"  "<< fitL1Status << " Chi2overDoF " << chisqL1 << "\n";
 }
 
 void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
