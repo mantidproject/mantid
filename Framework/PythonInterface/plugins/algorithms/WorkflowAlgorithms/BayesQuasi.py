@@ -6,7 +6,7 @@ from IndirectImport import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode,
                         WorkspaceGroupProperty, Progress)
 from mantid.kernel import StringListValidator, Direction
-from mantid.simpleapi import *
+import mantid.simpleapi as s_api
 from mantid import config, logger
 from IndirectCommon import *
 
@@ -338,15 +338,15 @@ class BayesQuasi(PythonAlgorithm):
             fout = fname+'_Workspace_'+ str(m)
 
             workflow_prog.report('Creating OutputWorkspace')
-            CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,\
-                Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names)
+            s_api.CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,
+                                  Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names)
 
             # append workspace to list of results
             group += fout + ','
 
         comp_prog = Progress(self, start=0.7, end=0.8, nreports=2)
         comp_prog.report('Creating Group Workspace')
-        GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
+        s_api.GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
 
         if self._program == 'QL':
             comp_prog.report('Processing Lorentzian probability data')
@@ -360,8 +360,8 @@ class BayesQuasi(PythonAlgorithm):
             yProb = yPr0
             yProb = np.append(yProb,yPr1)
             yProb = np.append(yProb,yPr2)
-            CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,\
-                Nspec=3, UnitX='MomentumTransfer')
+            s_api.CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,
+                                  Nspec=3, UnitX='MomentumTransfer')
             outWS = self.C2Fw(fname)
             if self._plot != 'None':
                 self.QuasiPlot(fname,self._plot,res_plot,self._loop)
@@ -374,11 +374,11 @@ class BayesQuasi(PythonAlgorithm):
         log_prog = Progress(self, start=0.8, end =1.0, nreports=8)
         #Add some sample logs to the output workspaces
         log_prog.report('Copying Logs to outputWorkspace')
-        CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=outWS)
+        s_api.CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=outWS)
         log_prog.report('Adding Sample logs to Output workspace')
         self._add_sample_logs(outWS, prog, erange, nbins)
         log_prog.report('Copying logs to fit Workspace')
-        CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=fitWS)
+        s_api.CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=fitWS)
         log_prog.report('Adding sample logs to Fit workspace')
         self._add_sample_logs(fitWS, prog, erange, nbins)
         log_prog.report('Finialising log copying')
@@ -386,9 +386,9 @@ class BayesQuasi(PythonAlgorithm):
         if self._save:
             log_prog.report('Saving workspaces')
             fit_path = os.path.join(workdir,fitWS+'.nxs')
-            SaveNexusProcessed(InputWorkspace=fitWS, Filename=fit_path)
+            s_api.SaveNexusProcessed(InputWorkspace=fitWS, Filename=fit_path)
             out_path = os.path.join(workdir, outWS+'.nxs')                    # path name for nxs file
-            SaveNexusProcessed(InputWorkspace=outWS, Filename=out_path)
+            s_api.SaveNexusProcessed(InputWorkspace=outWS, Filename=out_path)
             logger.information('Output fit file created : ' + fit_path)
             logger.information('Output paramter file created : ' + out_path)
 
