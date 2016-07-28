@@ -12,14 +12,14 @@ namespace Algorithms {
   constant steady rate which depends on beam intensity, instrument settings and
   sample.
   Sometimes hardware issues cause it to count much faster or slower. This
-  appears as spurious signals on the final neutronic images and users want to
+  appears as spurious signals on the final neutron images and users want to
   filter these signals.
 
   The algorithm calculates neutrons counting rate as the function of the
   experiment's time
   and adds appropriate logs to the event workspace
   for further event filtering on the basis of these logs, if the log values in
-  some parts differ stronlgly from average values.
+  some parts differ strongly from average values.
 
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
