@@ -1,5 +1,4 @@
 
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -60,6 +59,37 @@ void SaveDiffFittingAscii::init() {
 */
 void SaveDiffFittingAscii::exec() {
   // Get the workspace
+
+  // Process properties
+
+  // Retrieve the input workspace
+  /// Workspace
+  ITableWorkspace_sptr tbl_ws = getProperty("InputWorkspace");
+  if (!tbl_ws)
+    throw std::runtime_error("Please provide an input workspace to be saved.");
+
+  std::string filename = getProperty("Filename");
+  std::ofstream file(filename.c_str());
+
+  if (!file) {
+    throw Exception::FileError("Unable to create file: ", filename);
+  }
+
+  std::string runNum = getProperty("RunNumber");
+  file << "run number: " << runNum << m_endl;
+
+  std::string bank = getProperty("Bank");
+  file << "bank: " << bank << m_endl;
+
+  std::vector<std::string> columnHeadings = tbl_ws->getColumnNames();
+  for (auto &heading : columnHeadings) {
+    if (heading == "Chi") {
+      writeVal<std::string>(heading, file, true);
+    } else {
+      writeVal<std::string>(heading, file, false);
+    }
+  }
+}
 
 template <class T>
 void SaveDiffFittingAscii::writeVal(T &val, std::ofstream &file, bool endline) {
