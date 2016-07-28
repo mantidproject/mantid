@@ -104,7 +104,8 @@ void OrientedLattice::setU(const DblMatrix &newU, const bool force) {
 /** Sets the UB matrix and recalculates lattice parameters
   @param newUB :: the new UB matrix*/
 void OrientedLattice::setUB(const DblMatrix &newUB) {
-  if (UB.determinant() > 0) {
+  //check if determinant is close to 0. The 1e-10 value is arbitrary
+  if (std::fabs(newUB.determinant()) > 1e-10) {
     UB = newUB;
     DblMatrix newGstar, B;
     newGstar = newUB.Tprime() * newUB;
@@ -113,7 +114,7 @@ void OrientedLattice::setUB(const DblMatrix &newUB) {
     B.Invert();
     U = newUB * B;
   } else
-    throw std::invalid_argument("determinant of UB is not greater than 0");
+    throw std::invalid_argument("determinant of UB is too close to 0");
 }
 
 /** Calculate the hkl corresponding to a given Q-vector
