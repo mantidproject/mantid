@@ -405,15 +405,6 @@ class BayesQuasi(PythonAlgorithm):
         energy_min, energy_max = e_range
 
         sample_logs = [('res_workspace', self._resWS),
-                        ('fit_program', fit_program),
-                        ('background', self._background),
-                        ('elastic_peak', self._elastic),
-                        ('energy_min', energy_min),
-                        ('energy_max', energy_max),
-                        ('sample_binning', sample_binning),
-                        ('resolution_binning', res_binning)]
-
-        sample_logs = [('res_workspace', self._resWS),
                        ('fit_program', fit_program),
                        ('background', self._background),
                        ('elastic_peak', self._elastic),
@@ -455,7 +446,7 @@ class BayesQuasi(PythonAlgorithm):
         dataY = np.array([])
         dataE = np.array([])
         data = np.array([dataX, dataY, dataE])
-        
+
         for _ in range(0,ns):
             first,Q,_,fw,it,be = self.SeBlock(asc,first)
             Xout.append(Q)
@@ -466,7 +457,7 @@ class BayesQuasi(PythonAlgorithm):
             Yb.append(be[0])
             Eb.append(be[1])
         Vaxis = []
-        
+
         dataX, dataY, dataE, data = self._add_xye_data(data, Xout, Yi, Ei)
         nhist = 1
         Vaxis.append('f1.Amplitude')
