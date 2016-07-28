@@ -54,13 +54,15 @@ void CalcCountRate::init() {
       Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(
           "RangeUnits", "Energy", Kernel::Direction::Input),
       "The units from Mantid Unit factory for calculating the "
-      "counting rate and XMin-XMax ranges are expressed in. If the "
+      "counting rate and XMin-XMax ranges are in. If the "
       "X-axis of the input workspace is not expressed"
       "in this units, unit conversion will be performed, so the "
       "workspace should contain all necessary information for this "
       "conversion. E.g. if *RangeUnits* is *EnergyTransfer*, Ei "
       "log containing incident energy value should be attached to the "
       "input workspace.");
+  // Used logs group
+  std::string used_logs_mode("Used normalization logs");
   declareProperty(
       "NormalizeTheRate", true,
       "Usually you want to normalize counting rate to some "
@@ -74,16 +76,26 @@ void CalcCountRate::init() {
   declareProperty(
       "NormalizationLogName", "proton_charge",
       "The name of the log, used in the counting rate normalization. ");
-  declareProperty("UseNormLogGranularity", true,
-                  "If true, the calculated log will have the normalization log "
-                  "accuracy. If false, the number of bins in the visualization "
-                  "workspace below will be used for log granularity too");
-  declareProperty("CountRateLogName", "block_count_rate",
-                  "The name of the time series log with counting rate to be "
-                  "added to the source workspace");
+  declareProperty(
+      "UseNormLogGranularity", true,
+      "If true, the calculated log will have the normalization log "
+      "accuracy; If false, the 'NumTimeSteps' in the visualization "
+      "workspace below will be used for the target log granularity too.");
+  setPropertyGroup("NormalizeTheRate", used_logs_mode);
+  setPropertyGroup("UseLogDerivative", used_logs_mode);
+  setPropertyGroup("NormalizationLogName", used_logs_mode);
+  setPropertyGroup("UseNormLogGranularity", used_logs_mode);
+
+  declareProperty(
+      "CountRateLogName", "block_count_rate",
+      "The name of the processed time series log with count rate to add"
+      " to the source workspace");
+  // visualisation group
+  std::string spur_vis_mode("Spurion visualisation");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<DataObjects::Workspace2D>>(
-          "VisualizationWs", "", Kernel::Direction::Output, API::PropertyMode::Optional),
+          "VisualizationWs", "", Kernel::Direction::Output,
+          API::PropertyMode::Optional),
       "Optional workspace name to build workspace for spurion visualization. "
       "If name is provided, a 2D workspace with this name will be created "
       "containing workspace to visualize counting rate in the ranges "
@@ -102,6 +114,9 @@ void CalcCountRate::init() {
           "XResolution", 100, mustBePositive, Kernel::Direction::Input),
       "Number of steps (accuracy) of the visualization workspace has along "
       "X-axis. ");
+  setPropertyGroup("VisualizationWs", spur_vis_mode);
+  setPropertyGroup("NumTimeSteps", spur_vis_mode);
+  setPropertyGroup("XResolution", spur_vis_mode);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -172,7 +187,6 @@ void CalcCountRate::getSearchRanges(
     m_rangeDefined = true;
   }
 }
-
 
 } // namespace Algorithms
 } // namespace Mantid
