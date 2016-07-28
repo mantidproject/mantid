@@ -24,8 +24,7 @@ class FindEPP(PythonAlgorithm):
 
     def PyInit(self):
         # input
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input,
-                                                     validator=WorkspaceUnitValidator("TOF")),
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input),
                              doc="Input Sample or Vanadium workspace")
 
         # output
