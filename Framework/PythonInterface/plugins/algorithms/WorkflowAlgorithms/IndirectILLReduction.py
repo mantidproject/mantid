@@ -56,6 +56,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     _instrument = None
     _analyser = None
     _reflection = None
+    _formula = None
 
     def category(self):
         return "Workflow\\MIDAS;Inelastic\\Reduction"
@@ -303,21 +304,19 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
     def _unmirror(self, run):
         """
-        Runs energy reduction for corresponding unmirror option.
-        This function calls self._calculate_energy() for the energy transfer
+        Performs the unmirroring dependent on the given option.
+        @param run : run number string
         """
-        print('Unmirror')
 
         # Again need temporaries here
-        raw_ws = run + '_' + self._raw_ws
         det_grouped_ws = run + '_' + self._det_grouped_ws
         monitor_ws = run + '_' + self._monitor_ws
         red_ws = run + '_' + self._red_ws
         mnorm_ws = run + '_' + self._mnorm_ws
-        vnorm_ws = run + '_' + self._vnorm_ws
 
         if self._unmirror_option == 0:
-            print('Normalisation of grouped workspace to monitor, bins will not be masked, X-axis will not be in energy transfer.')
+
+            self.log().notice('Unmirror 0: X-axis will not be converted to energy transfer.')
             # No energy transform is performed, since
             # energy transfer requires X-Axis to be in range -Emin Emax -Emin Emax ...
             NormaliseToMonitor(InputWorkspace=det_grouped_ws,
@@ -332,43 +331,44 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             mid_point = int((x_end - 1) / 2)
 
             if self._unmirror_option == 1:
-                print('Left reduced, monitor, detectors grouped and normalised workspace')
+                self.log().information('Unmirror 1: reducing the left wing')
                 self._extract_workspace(0, x[mid_point], red_ws, monitor_ws, det_grouped_ws, mnorm_ws, run)
 
             if self._unmirror_option == 2:
-                print('Right reduced, monitor, detectors grouped and normalised workspace')
+                self.log().information('Unmirror 2: reducing the right wing')
                 self._extract_workspace(x[mid_point], x_end, red_ws, monitor_ws, det_grouped_ws, mnorm_ws, run)
 
             if self._unmirror_option > 2:
                 # Temporary workspace names needed for unmirror options 3 to 7
-                __left_ws = '__left_ws'
-                __left_monitor_ws = '__left_monitor_ws'
-                __left_grouped_ws = '__left_grouped_ws'
-                __left_mnorm_ws = '__left_mnorm_ws'
-                __right_ws = '__right_ws'
-                __right_monitor_ws = '__right_monitor_ws'
-                __right_grouped_ws = '__right_grouped_ws'
-                __right_mnorm_ws = '__right_mnorm_ws'
+                temp_left_ws = '__left_ws'
+                temp_left_monitor_ws = '__left_monitor_ws'
+                temp_left_grouped_ws = '__left_grouped_ws'
+                temp_left_mnorm_ws = '__left_mnorm_ws'
+                temp_right_ws = '__right_ws'
+                temp_right_monitor_ws = '__right_monitor_ws'
+                temp_right_grouped_ws = '__right_grouped_ws'
+                temp_right_mnorm_ws = '__right_mnorm_ws'
 
-                __left = '__right'
-                __right = '__left'
+                temp_left = '__right'
+                temp_right = '__left'
 
                 # Left workspace
-                self._extract_workspace(0,x[mid_point],__left_ws,__left_monitor_ws,__left_grouped_ws,__left_mnorm_ws,run)
+                self._extract_workspace(0,x[mid_point],temp_left_ws,temp_left_monitor_ws,
+                                        temp_left_grouped_ws,temp_left_mnorm_ws,run)
 
                 # Right workspace
-                self._extract_workspace(x[mid_point],x_end,__right_ws,__right_monitor_ws,
-                                        __right_grouped_ws,__right_mnorm_ws,run)
+                self._extract_workspace(x[mid_point],x_end,temp_right_ws,temp_right_monitor_ws,
+                                        temp_right_grouped_ws,temp_right_mnorm_ws,run)
 
                 if self._unmirror_option == 3:
-                    print('Sum left and right workspace for unmirror option 3')
-                    __left = __left_ws
-                    __right = __right_ws
+                    self.log().information('Unmirror 3: sum left and right wings')
+                    temp_left = temp_left_ws
+                    temp_right = temp_right_ws
                 elif self._unmirror_option == 4:
                     print('Shift each sepctrum of the right workspace according to the maximum peak'
                           ' positions of the corresponding spectrum of the left workspace')
-                    self._shift_spectra(__right_ws, __left_ws, __right)
-                    __left = __left_ws
+                    self._shift_spectra(temp_right_ws, temp_left_ws, temp_right)
+                    temp_left = temp_left_ws
                     # Shifted workspace in control mode?
                 elif self._unmirror_option == 5:
                     # _shift_spectra needs extension
@@ -383,37 +383,21 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     pass
 
                 # Sum left, right and corresponding workspaces, the same for reduced, monitor, mnorm and det grouped
-                self._perform_mirror(__left, __right, red_ws)
-                self._perform_mirror(__left_monitor_ws,__right_monitor_ws, monitor_ws)
-                self._perform_mirror(__left_grouped_ws,__right_grouped_ws, det_grouped_ws)
-                self._perform_mirror(__left_mnorm_ws,__right_mnorm_ws, mnorm_ws)
+                self._perform_mirror(temp_left, temp_right, red_ws)
+                self._perform_mirror(temp_left_monitor_ws,temp_right_monitor_ws, monitor_ws)
+                self._perform_mirror(temp_left_grouped_ws,temp_right_grouped_ws, det_grouped_ws)
+                self._perform_mirror(temp_left_mnorm_ws,temp_right_mnorm_ws, mnorm_ws)
 
-        print('Done')
-
-    def _calculate_energy(self, ws, ws_out, run):
+    def _convert_to_energy(self, ws, ws_out):
         """
         Convert the input ws x-axis from channel # to energy transfer
         @param ws     :: input workspace name
         @param ws_out :: output workspace name
-        @param run    :: run number string
         """
-
-        # Again temporaries needed
-        vnorm = run + '_' + self._vnorm_ws
-
-        # Apply the detector intensity calibration
-        if self._calibration_ws != '':
-            Divide(LHSWorkspace=ws,RHSWorkspace=self._calibration_ws,OutputWorkspace=vnorm)
-        else:
-            CloneWorkspace(InputWorkspace=ws,OutputWorkspace=vnorm)
-
-        formula = self._energy_formula(vnorm)
-
-        ConvertAxisByFormula(InputWorkspace=vnorm,OutputWorkspace=ws_out,Axis='X',Formula=formula)
-
-        # Set unit of the X-Axis
+        # get energy formula from cache or compute if it is not yet set
+        formula = (self._energy_formula(ws) if self._formula is None else self._formula)
+        ConvertAxisByFormula(InputWorkspace=ws,OutputWorkspace=ws_out,Axis='X',Formula=formula)
         mtd[ws_out].getAxis(0).setUnit('DeltaE')
-
         xnew = mtd[ws_out].readX(0)  # energy array
         self.log().information('Energy range : %f to %f' % (xnew[0], xnew[-1]))
 
@@ -439,28 +423,26 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         dele = 2.0 * energy / (npt - 1)
         formula = '(x-%f)*%f' % (imid, dele)
-
-        self.log().information(formula)
+        self.log().information('Energy transform formula: '+formula)
+        # set in the cache and return
+        self._formula = formula
         return formula
 
     def _monitor_range(self, ws):
         """
-        Get sensible x-range where monitor ws has meaningful content
-        e.g. to mask out the first and last few channels, where monitor count is 0
+        Get sensible x-range where monitor has meaningful content
+        Used to mask out the first and last few channels, where monitor count is 0
         @param ws :: name of workspace
         @return   :: tuple of xmin and xmax
         """
-
         x = mtd[ws].readX(0)
         y = mtd[ws].readY(0)
-
         # mid x value in order to search for left and right monitor range delimiter
         mid = int(len(x) / 2)
         imin = np.argmax(np.array(y[0 : mid])) - 1
         nch = len(y)
         im = np.argmax(np.array(y[nch - mid : nch]))
         imax = nch - mid + 1 + im + 1
-
         self.log().information('Masking range %f to %f' % (x[imin], x[imax]))
         return x[imin], x[imax]
 
@@ -480,6 +462,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # otherwise multiple file reduction will break down
         det_grouped_in = run + '_' + self._det_grouped_ws
         monitor_in = run + '_' + self._monitor_ws
+        vnorm = run + '_' + self._vnorm_ws
 
         CropWorkspace(InputWorkspace=det_grouped_in,OutputWorkspace=det_grouped,XMin=x_start,XMax=x_end)
         CropWorkspace(InputWorkspace=monitor_in,OutputWorkspace=monitor,XMin=x_start,XMax=x_end)
@@ -501,7 +484,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # Mask last bins, where monitor count was 0
         MaskBins(InputWorkspace=mnorm,OutputWorkspace=mnorm,XMin=xmax,XMax=x_end)
 
-        self._calculate_energy(mnorm, ws_out, run)
+        # Apply the detector intensity calibration
+        if self._calibration_ws != '':
+            Divide(LHSWorkspace=mnorm, RHSWorkspace=self._calibration_ws, OutputWorkspace=vnorm)
+        else:
+            CloneWorkspace(InputWorkspace=mnorm, OutputWorkspace=vnorm)
+
+        self._convert_to_energy(vnorm, ws_out)
 
     def _perform_mirror(self, ws1, ws2, ws_out):
         """
@@ -522,9 +511,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         """
 
         # get a table of peak positions via Gaussian fits
-        # FindEPP needs modification: remove validator for TOF axis and category generalisation
         table_shift = FindEPP(InputWorkspace=ws_shift_origin)
-
         number_spectra = mtd[ws].getNumberHistograms()
 
         # shift each single spectrum in a workspace
