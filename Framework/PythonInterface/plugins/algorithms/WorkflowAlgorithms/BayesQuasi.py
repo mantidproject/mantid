@@ -413,6 +413,15 @@ class BayesQuasi(PythonAlgorithm):
                         ('sample_binning', sample_binning),
                         ('resolution_binning', res_binning)]
 
+        sample_logs = [('res_workspace', self._resWS),
+                       ('fit_program', fit_program),
+                       ('background', self._background),
+                       ('elastic_peak', self._elastic),
+                       ('energy_min', energy_min),
+                       ('energy_max', energy_max),
+                       ('sample_binning', sample_binning),
+                       ('resolution_binning', res_binning)]
+
         resnorm_used = (self._resnormWS != '')
         sample_logs.append(('resnorm', str(resnorm_used)))
         if resnorm_used:
@@ -445,7 +454,8 @@ class BayesQuasi(PythonAlgorithm):
         dataX = np.array([])
         dataY = np.array([])
         dataE = np.array([])
-
+        data = np.array([dataX, dataY, dataE])
+        
         for _ in range(0,ns):
             first,Q,_,fw,it,be = self.SeBlock(asc,first)
             Xout.append(Q)
@@ -456,16 +466,16 @@ class BayesQuasi(PythonAlgorithm):
             Yb.append(be[0])
             Eb.append(be[1])
         Vaxis = []
-
-        dataX, dataY, dataE = self._add_xye_data(dataX, dataY, dataE, Xout, Yi, Ei)
+        
+        dataX, dataY, dataE, data = self._add_xye_data(data, Xout, Yi, Ei)
         nhist = 1
         Vaxis.append('f1.Amplitude')
 
-        dataX, dataY, dataE = self._add_xye_data(dataX, dataY, dataE, Xout, Yf, Ef)
+        dataX, dataY, dataE, data = self._add_xye_data(data, Xout, Yf, Ef)
         nhist += 1
         Vaxis.append('f1.FWHM')
 
-        dataX, dataY, dataE = self._add_xye_data(dataX, dataY, dataE, Xout, Yb, Eb)
+        dataX, dataY, dataE, data = self._add_xye_data(data, Xout, Yb, Eb)
         nhist += 1
         Vaxis.append('f1.Beta')
 
@@ -475,13 +485,15 @@ class BayesQuasi(PythonAlgorithm):
 
         return outWS
 
-    def _add_xye_data(self, dX, dY, dE, xout, Y, E):
+    def _add_xye_data(self, data, xout, Y, E):
 
+        dX, dY, dE = data[0], data[1], data[2]
         dX = np.append(dX,np.array(xout))
         dY = np.append(dY,np.array(Y))
         dE = np.append(dE,np.array(E))
+        data = (dX, dY, dE)
 
-        return dX, dY, dE
+        return dX, dY, dE, data
 
     def _read_ascii_file(self, file_name):
         workdir = config['defaultsave.directory']
