@@ -80,7 +80,7 @@ public:
                                const size_t nData);
 
 protected:
-  /// Calculate histogram data for the bins provided.
+  /// Calculate histogram data for the given bin boundaries.
   virtual void histogram1D(double *out, double left, const double *right,
                            const size_t nBins) const;
   /// Devivatives of the histogram.

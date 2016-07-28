@@ -120,7 +120,7 @@ void Gaussian::fixIntensity() {
 
 void Gaussian::unfixIntensity() { removeTie("Height"); }
 
-/// Calculate histogram data for the bins provided.
+/// Calculate histogram data for the given bin boundaries.
 /// @param out :: Output bin values (size == nBins) - integrals of the function
 ///    inside each bin.
 /// @param left :: The left-most bin boundary.

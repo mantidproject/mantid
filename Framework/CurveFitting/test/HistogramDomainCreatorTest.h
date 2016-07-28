@@ -20,8 +20,6 @@
 #include <algorithm>
 #include <math.h>
 
-#include "D:/Work/mantid_stuff/Testing/class/MyTestDef.h"
-
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::CurveFitting::Functions;
@@ -308,10 +306,6 @@ public:
     auto &y = outWS->readY(0);
     auto &f = outWS->readY(1);
     auto &d = outWS->readY(2);
-
-    CHECK_OUT_2("x", outWS->readX(0));
-    CHECK_OUT_2("y", y);
-    CHECK_OUT_2("f", f);
 
     for(size_t i = 0; i < y.size(); ++i) {
       TS_ASSERT_DELTA(y[i], f[i], 1e-5);
