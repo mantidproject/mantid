@@ -7,7 +7,12 @@
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "Poco/File.h"
+#include <boost/tokenizer.hpp>
+#include <fstream>
 
 namespace Mantid {
 namespace DataHandling {
@@ -22,11 +27,32 @@ using namespace Kernel;
 using namespace API;
 
 /// Empty constructor
-SaveDiffFittingAscii::SaveDiffFittingAscii() : Mantid::API::Algorithm() {}
+SaveDiffFittingAscii::SaveDiffFittingAscii()
+    : Mantid::API::Algorithm(), m_sep(','), m_endl('\n') {}
 
 /// Initialisation method.
 void SaveDiffFittingAscii::init() {
 
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      "InputWorkspace", "", Direction::Input),
+                  "The name of the workspace containing the data you want to "
+                  "save to a TBL file.");
+
+  // Declare required parameters, filename with ext {.his} and input
+  // workspace
+  const std::vector<std::string> exts{".txt", ".csv", ""};
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Save, exts),
+                  "The filename to use for the saved data");
+
+  declareProperty("RunNumber", "",
+                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  "Run number of the focused file used to generate the "
+                  "parameters table workspace.");
+
+  declareProperty("Bank", "",
+                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  "Bank of the focused file used to generate the parameters.");
 }
 
 /**

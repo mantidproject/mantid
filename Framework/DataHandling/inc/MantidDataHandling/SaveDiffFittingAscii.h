@@ -41,6 +41,12 @@ private:
   template <class T>
   void writeVal(T &val, std::ofstream &file, bool endline);
 
+  /// the separator
+  const char m_sep;
+
+  /// next line
+  const char m_endl;
+
 };
 } // namespace DataHandling
 } // namespace Mantid
