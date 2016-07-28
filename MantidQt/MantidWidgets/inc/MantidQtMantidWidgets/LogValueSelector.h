@@ -53,6 +53,11 @@ public:
   /// Get a pointer to log combo box
   QComboBox *getLogComboBox() const;
 
+  /// Set enabled/disabled
+  void setEnabled(bool enabled) {
+    this->setEnabled(enabled ? Qt::Checked : Qt::Unchecked);
+  }
+
 private slots:
   /// Set enabled/disabled
   void setEnabled(int checkstate);

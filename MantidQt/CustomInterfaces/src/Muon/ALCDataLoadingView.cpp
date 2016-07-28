@@ -30,6 +30,7 @@ void ALCDataLoadingView::initialize() {
   m_ui.setupUi(m_widget);
   m_ui.logValueSelector->setCheckboxShown(false);
   m_ui.logValueSelector->setVisible(true);
+  m_ui.logValueSelector->setEnabled(true);
   connect(m_ui.load, SIGNAL(clicked()), SIGNAL(loadRequested()));
   connect(m_ui.firstRun, SIGNAL(fileFindingFinished()),
           SIGNAL(firstRunSelected()));

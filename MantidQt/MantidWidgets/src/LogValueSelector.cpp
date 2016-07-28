@@ -12,6 +12,8 @@ LogValueSelector::LogValueSelector(QWidget *parent)
   m_ui.setupUi(this);
   m_ui.horizontalLayout->addStretch(1);
   doConnect();
+  m_ui.chkUseLog->setChecked(false);
+  this->setEnabled(Qt::Unchecked);
 }
 
 /**
