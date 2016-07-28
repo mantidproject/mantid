@@ -31,7 +31,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     _vnorm_ws = None
     _red_ws = None
 
-    # Input calibration workspace
+    # Optional input calibration workspace
     _calib_ws = None
 
     # Files
@@ -259,7 +259,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         Loads parameter and detector grouping map file
         self._instrument must be already set before calling this
         """
-
         self._instrument_name = self._instrument.getName()
         self._analyser = self.getPropertyValue('Analyser')
         self._reflection = self.getPropertyValue('Reflection')
@@ -301,12 +300,15 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         left_mon = 'left_mon'
         left_det = 'left_det'
         left_mnorm = 'left_mnorm'
+        left_vnorm = 'left_mnorm'
         right = 'right'
         right_raw = 'right_raw'
         right_mon = 'right_mon'
         right_det = 'right_det'
         right_mnorm = 'right_mnorm'
+        right_vnorm = 'right_vnorm'
 
+        # Main reduction workflow
         LoadParameterFile(Workspace=raw,Filename=self._parameter_file)
 
         GroupDetectors(InputWorkspace=raw,OutputWorkspace=det,MapFile=self._map_file,Behaviour='Sum')
@@ -331,15 +333,19 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # get the left and right wings of vnorm, mnorm, monitor, det
         self._extract_workspace(vnorm, left, x[start], x[mid])
         self._extract_workspace(vnorm, right, x[mid], x[end])
-
-        self._extract_workspace(raw, left_raw, x[start], x[mid])
-        self._extract_workspace(raw, right_raw, x[mid], x[end])
-        self._extract_workspace(mnorm, left_mnorm, x[start], x[mid])
-        self._extract_workspace(mnorm, right_mnorm, x[mid], x[end])
-        self._extract_workspace(det, left_det, x[start], x[mid])
-        self._extract_workspace(det, right_det, x[mid], x[end])
+        # get the left and right monitors, needed to identify the masked bins
         self._extract_workspace(mon, left_mon, x[start], x[mid])
         self._extract_workspace(mon, right_mon, x[mid], x[end])
+
+        if self._control_mode:
+            # get left and right wings also from control workspaces
+            # is this really needed?
+            self._extract_workspace(raw, left_raw, x[start], x[mid])
+            self._extract_workspace(raw, right_raw, x[mid], x[end])
+            self._extract_workspace(mnorm, left_mnorm, x[start], x[mid])
+            self._extract_workspace(mnorm, right_mnorm, x[mid], x[end])
+            self._extract_workspace(det, left_det, x[start], x[mid])
+            self._extract_workspace(det, right_det, x[mid], x[end])
 
         # Get sensible range from monitor and mask correspondingly
         xmin, xmax = self._monitor_range(left_mon)
@@ -383,18 +389,31 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             right_shifted = 'right_shifted'
             self._shift_spectra(right, left, right_shifted)
             self._perform_mirror(left, right_shifted, red)
+            DeleteWorkspace(right_shifted)
 
         elif o == 5:
             # _shift_spectra needs extension ??
             pass
         elif o == 6:
             # Vanadium file must be loaded, left and right workspaces extracted
-            # Update PyExec and _set_workspace_properties accordingly, _vanadium_file = None
             pass
         elif o == 7:
             # Vanadium file must be loaded, left and right workspaces extracted
-            # Update PyExec and _set_workspace_properties accordingly, _vanadium_file = None
             pass
+
+        # delete all the remporary ws
+        DeleteWorkspace(left)
+        DeleteWorkspace(right)
+        DeleteWorkspace(left_mon)
+        DeleteWorkspace(right_mon)
+
+        if self._control_mode:
+            DeleteWorkspace(left_det)
+            DeleteWorkspace(right_det)
+            DeleteWorkspace(left_raw)
+            DeleteWorkspace(right_raw)
+            DeleteWorkspace(left_mnorm)
+            DeleteWorkspace(right_mnorm)
 
     def _convert_to_energy(self, ws):
         """
