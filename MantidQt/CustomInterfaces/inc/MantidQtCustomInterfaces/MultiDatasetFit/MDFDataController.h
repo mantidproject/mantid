@@ -44,6 +44,7 @@ public:
   int getNumberOfSpectra() const;
   void checkSpectra();
   std::pair<double, double> getFittingRange(int i) const;
+  std::vector<std::string> getWorkspaceLogNames(int i) const;
 
 signals:
   void dataTableUpdated();

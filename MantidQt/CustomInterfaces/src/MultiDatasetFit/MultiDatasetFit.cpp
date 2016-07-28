@@ -713,5 +713,17 @@ void MultiDatasetFit::updateGuessFunction(const QString &, const QString &) {
   m_plotController->updateGuessFunction(*m_functionBrowser->getFunction());
 }
 
+/**
+ * Returns list of log names from the first workspace
+ * @return :: list of log names
+ */
+std::vector<std::string> MultiDatasetFit::getLogNames() const {
+  if (getNumberOfSpectra() > 0) {
+    return m_dataController->getWorkspaceLogNames(0);
+  }
+
+  return std::vector<std::string>();
+}
+
 } // CustomInterfaces
 } // MantidQt

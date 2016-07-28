@@ -27,6 +27,12 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit,
           SLOT(valueChanged(int, int)));
   m_uiForm.lblParameterName->setText("Parameter: " + parName);
 
+  // Populate list of logs
+  auto *logCombo = m_uiForm.logValueSelector->getLogComboBox();
+  for (const auto &logName : multifit->getLogNames()) {
+    logCombo->addItem(QString::fromStdString(logName));
+  }
+
   auto n = multifit->getNumberOfSpectra();
   for (int i = 0; i < n; ++i) {
     double value = multifit->getLocalParameterValue(parName, i);

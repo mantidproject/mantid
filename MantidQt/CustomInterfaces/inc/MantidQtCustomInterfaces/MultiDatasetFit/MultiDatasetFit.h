@@ -75,6 +75,8 @@ public:
   QString getLocalParameterTie(const QString &parName, int i) const;
   /// Set a tie for a local parameter.
   void setLocalParameterTie(const QString &parName, int i, QString tie);
+  /// Get log names from workspace(s)
+  std::vector<std::string> getLogNames() const;
 
   /// Make it public
   using API::UserSubWindow::runPythonCode;
