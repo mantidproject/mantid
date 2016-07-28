@@ -1,17 +1,25 @@
-#ifndef MANTID_ALGORITHMS_CALCULATE_COUNTINGRATE_H_
-#define MANTID_ALGORITHMS_CALCULATE_COUNTINGRATE_H_
+#ifndef MANTID_ALGORITHMS_CALCCOUNTRATE_H_
+#define MANTID_ALGORITHMS_CALCCOUNTRATE_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-/**  In normal circumstances an instrument in event mode counts neutrons with constant steady rate which depends on beam, instrument settings and sample.
-    Sometimes hardware issues cause it to count much faster or slower. This appears as spurious signals on the final neutronic images and users want to filter these signals.
+/**  In normal circumstances an instrument in event mode counts neutrons with
+  constant steady rate which depends on beam intensity, instrument settings and
+  sample.
+  Sometimes hardware issues cause it to count much faster or slower. This
+  appears as spurious signals on the final neutronic images and users want to
+  filter these signals.
 
-    The calculate neutrons counting rate as the function of the experiment time and add appropriate logs to the event workspace 
-    for further event filtering on the basis of these logs.
+  The algorithm calculates neutrons counting rate as the function of the
+  experiment's time
+  and adds appropriate logs to the event workspace
+  for further event filtering on the basis of these logs, if the log values in
+  some parts differ stronlgly from average values.
 
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -35,7 +43,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CalculateCountingRate : public API::Algorithm {
+class DLLExport CalcCountRate : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -46,9 +54,19 @@ private:
   void init() override;
   void exec() override;
 
+  /// specifies if rate is calculatet in selected frame interval (range defined)
+  /// or all frame should be used
+  bool m_rangeDefined{false};
+  /// spurion search ranges
+  double m_XRangeMin{0},m_XRangeMax{0};
+  void getSearchRanges(const DataObjects::EventWorkspace_sptr &InputWorkspace);
+
+  DataObjects::EventWorkspace_sptr m_workingWS;
+
+
 };
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_CALCULATE_COUNTINGRATE_H_ */
+#endif /* MANTID_ALGORITHMS_CALCCOUNTRATE_H_ */
