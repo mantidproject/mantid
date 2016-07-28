@@ -450,30 +450,31 @@ class BayesQuasi(PythonAlgorithm):
             Eb.append(be[1])
         Vaxis = []
 
-        dataX = np.append(dataX,np.array(Xout))
-        dataY = np.append(dataY,np.array(Yi))
-        dataE = np.append(dataE,np.array(Ei))
-        nhist = 1
+        nhist = 0
+        dataX, dataY, dataE, nhist = self._add_xye_data(dataX, dataY, dataE, nhist, Xout, Yi, Ei)
         Vaxis.append('f1.Amplitude')
 
-        dataX = np.append(dataX, np.array(Xout))
-        dataY = np.append(dataY, np.array(Yf))
-        dataE = np.append(dataE, np.array(Ef))
-        nhist += 1
+        dataX, dataY, dataE, nhist = self._add_xye_data(dataX, dataY, dataE, nhist, Xout, Yf, Ef)
         Vaxis.append('f1.FWHM')
 
-        dataX = np.append(dataX,np.array(Xout))
-        dataY = np.append(dataY,np.array(Yb))
-        dataE = np.append(dataE,np.array(Eb))
-        nhist += 1
+        dataX, dataY, dataE, nhist = self._add_xye_data(dataX, dataY, dataE, nhist, Xout, Yb, Eb)
         Vaxis.append('f1.Beta')
 
         logger.information('Vaxis=' + str(Vaxis))
-        CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,\
+        s_api.CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,\
             UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
 
         return outWS
 
+    def _add_xye_data(self, dX, dY, dE, nhist, xout, Y, E):
+    
+        dX = np.append(dX,np.array(xout))
+        dY = np.append(dY,np.array(Y))
+        dE = np.append(dE,np.array(E))
+        nhist += 1
+        
+        return dX, dY, dE, nhist
+    
     def _read_ascii_file(self, file_name):
         workdir = config['defaultsave.directory']
         file_path = os.path.join(workdir, file_name)
@@ -679,7 +680,7 @@ class BayesQuasi(PythonAlgorithm):
         y = np.asarray(y).flatten()
         e = np.asarray(e).flatten()
 
-        CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,\
+        s_api.CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,\
             UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=axis_names)
 
         return output_workspace
