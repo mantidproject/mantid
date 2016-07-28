@@ -109,6 +109,7 @@ void GeneralisedSecondDifference::exec() {
     auto &outE = out->mutableE(out_index);
 
     std::copy(refX.begin() + n_av, refX.end() - n_av, outX.begin());
+
     auto itInY = refY.cbegin();
     auto itOutY = outY.begin();
     auto itInE = refE.cbegin();
@@ -140,7 +141,7 @@ void GeneralisedSecondDifference::computePrefactors() {
   if (m_z == 0) //
   {
     m_Cij.resize(3);
-    std::copy(previous.begin(), previous.end(), m_Cij.begin());
+	m_Cij.assign(previous.begin(), previous.end());
     m_Cij2.resize(3);
     std::transform(m_Cij.begin(), m_Cij.end(), m_Cij2.begin(),
                    VectorHelper::Squares<double>());
@@ -164,12 +165,13 @@ void GeneralisedSecondDifference::computePrefactors() {
     }
     previous.resize(n_el);
     std::copy(next.begin(), next.end(), previous.begin());
+	previous.assign(next.begin(), next.end());
     max_index_prev = max_index;
     n_el_prev = n_el;
   } while (zz != m_z);
 
   m_Cij.resize(2 * m_z * m_m + 3);
-  std::copy(previous.begin(), previous.end(), m_Cij.begin());
+  m_Cij.assign(previous.begin(), previous.end());
   m_Cij2.resize(2 * m_z * m_m + 3);
   std::transform(m_Cij.begin(), m_Cij.end(), m_Cij2.begin(),
                  VectorHelper::Squares<double>());
