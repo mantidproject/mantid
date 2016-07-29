@@ -895,27 +895,25 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   // This does not matter in this case as below we convert units
   // which should decouple cow_pointer but very scary operation in
   // general.
-  working_ws->setX(0, bins);
-  working_ws->setX(1, bins);
+
+  working_ws->setSharedX(0, bins);
+  working_ws->setSharedX(1, bins);
 
   // signal 1
-  working_ws->mutableY(0).assign(inputWS->mutableY(wsIndex0).begin(),
-                                 inputWS->mutableY(wsIndex0).end());
-  // error 1
-  working_ws->mutableE(0).assign(inputWS->mutableE(wsIndex0).begin(),
-                                 inputWS->mutableE(wsIndex0).end());
+  working_ws->setSharedY(0, inputWS->sharedY(wsIndex0));
   // signal 2
-  working_ws->mutableY(1).assign(inputWS->mutableY(wsIndex1).begin(),
-                                 inputWS->mutableY(wsIndex1).end());
+  working_ws->setSharedY(1, inputWS->sharedY(wsIndex1));
+  // error 1
+  working_ws->setSharedE(0, inputWS->sharedE(wsIndex0));
   // error 2
-  working_ws->mutableE(1).assign(inputWS->mutableE(wsIndex1).begin(),
-                                 inputWS->mutableE(wsIndex1).end());
+  working_ws->setSharedE(1, inputWS->sharedE(wsIndex1));
 
   // copy detector mapping
   auto &spectrum1 = working_ws->getSpectrum(0);
   spectrum1.setSpectrumNo(specNum1);
   spectrum1.clearDetectorIDs();
   spectrum1.addDetectorIDs(pSpectr1.getDetectorIDs());
+
   auto &spectrum2 = working_ws->getSpectrum(1);
   spectrum2.setSpectrumNo(specNum2);
   spectrum2.clearDetectorIDs();
