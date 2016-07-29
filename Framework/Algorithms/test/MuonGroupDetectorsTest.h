@@ -67,8 +67,8 @@ public:
       TS_ASSERT_EQUALS(ws->readY(0)[0], 4);
       TS_ASSERT_EQUALS(ws->readY(1)[0], 6);
 
-      TS_ASSERT_EQUALS(ws->readX(0)[1], 1);
-      TS_ASSERT_EQUALS(ws->readX(1)[1], 1);
+      TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
+      TS_ASSERT_EQUALS(ws->readX(1)[1], 2);
 
       TS_ASSERT_DELTA(ws->readE(0)[2], 4.243, 0.001);
       TS_ASSERT_DELTA(ws->readE(1)[2], 5.196, 0.001);

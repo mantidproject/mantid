@@ -121,7 +121,7 @@ def getFilePath(run, ext, instr):
 # Load an ascii/inx file
 def loadFile(path):
     try:
-        handle = open(path, 'r')
+        handle = open(path, 'U')
         asc = []
         for line in handle:
             line = line.rstrip()

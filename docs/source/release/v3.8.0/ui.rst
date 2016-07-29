@@ -22,6 +22,13 @@ User Interface
 Instrument View
 ###############
 
+Workspace Matrix View
+#####################
+* Masked spectra (including masked monitors) will be highlighted with background colour (typically light grey).
+* Unmasked monitor spectra will have a dynamic background colour depending on the system settings (typically light yellow, as before).
+
+.. figure::  ../../images/MaskedAndMonitor.png
+
 Plotting Improvements
 #####################
 
@@ -58,7 +65,8 @@ Options Window
 Bugs Resolved
 -------------
 - Floating windows now always stay on top of the main window in OSX
-
+- The sliceviewer will now rebin an existing binned workspace correctly.
+- 2D plots now display correctly for point data workspaces as well as for histogram data
 
 SliceViewer Improvements
 ------------------------

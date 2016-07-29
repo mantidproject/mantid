@@ -5,16 +5,14 @@
 
 #include "MantidHistogramData/Iterable.h"
 #include "MantidHistogramData/VectorOf.h"
-#include "MantidHistogramData/HistogramX.h"
 
 using Mantid::HistogramData::detail::VectorOf;
 using Mantid::HistogramData::detail::Iterable;
-using Mantid::HistogramData::HistogramX;
 
-class IterableTester : public VectorOf<IterableTester, HistogramX>,
+class IterableTester : public VectorOf<IterableTester, std::vector<double>>,
                        public Iterable<IterableTester> {
-  using VectorOf<IterableTester, HistogramX>::VectorOf;
-  using VectorOf<IterableTester, HistogramX>::operator=;
+  using VectorOf<IterableTester, std::vector<double>>::VectorOf;
+  using VectorOf<IterableTester, std::vector<double>>::operator=;
 };
 
 class IterableTest : public CxxTest::TestSuite {
