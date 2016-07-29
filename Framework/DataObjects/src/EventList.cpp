@@ -3749,7 +3749,7 @@ void EventList::filterByPulseTime(DateAndTime start, DateAndTime stop,
   // Has to match the given type
   output.switchTo(eventType);
   output.setDetectorIDs(this->getDetectorIDs());
-  output.setSharedX(this->sharedX());
+  output.setHistogram(m_histogram);
 
   // Iterate through all events (sorted by pulse time)
   switch (eventType) {
@@ -3782,7 +3782,7 @@ void EventList::filterByTimeAtSample(Kernel::DateAndTime start,
   // Has to match the given type
   output.switchTo(eventType);
   output.setDetectorIDs(this->getDetectorIDs());
-  output.setSharedX(this->sharedX());
+  output.setHistogram(m_histogram);
 
   // Iterate through all events (sorted by pulse time)
   switch (eventType) {
@@ -3988,7 +3988,7 @@ void EventList::splitByTime(Kernel::TimeSplitterType &splitter,
   for (size_t i = 0; i < numOutputs; i++) {
     outputs[i]->clear();
     outputs[i]->setDetectorIDs(this->getDetectorIDs());
-    outputs[i]->setSharedX(this->sharedX());
+    outputs[i]->setHistogram(m_histogram);
     // Match the output event type.
     outputs[i]->switchTo(eventType);
   }
@@ -4131,7 +4131,7 @@ void EventList::splitByFullTime(Kernel::TimeSplitterType &splitter,
     EventList *opeventlist = outiter->second;
     opeventlist->clear();
     opeventlist->setDetectorIDs(this->getDetectorIDs());
-    opeventlist->setSharedX(this->sharedX());
+    opeventlist->setHistogram(m_histogram);
     // Match the output event type.
     opeventlist->switchTo(eventType);
   }
@@ -4259,7 +4259,7 @@ std::string EventList::splitByFullTimeMatrixSplitter(
     EventList *opeventlist = outiter->second;
     opeventlist->clear();
     opeventlist->setDetectorIDs(this->getDetectorIDs());
-    opeventlist->setSharedX(this->sharedX());
+    opeventlist->setHistogram(m_histogram);
     // Match the output event type.
     opeventlist->switchTo(eventType);
   }
@@ -4379,7 +4379,7 @@ void EventList::splitByPulseTime(Kernel::TimeSplitterType &splitter,
     EventList *opeventlist = outiter->second;
     opeventlist->clear();
     opeventlist->setDetectorIDs(this->getDetectorIDs());
-    opeventlist->setSharedX(this->sharedX());
+    opeventlist->setHistogram(m_histogram);
     // Match the output event type.
     opeventlist->switchTo(eventType);
   }
