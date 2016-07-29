@@ -43,8 +43,8 @@ EventWorkspace::EventWorkspace(const EventWorkspace &other)
 }
 
 EventWorkspace::~EventWorkspace() {
-  delete mru;
   clearData();
+  delete mru;
 }
 
 /** Returns true if the EventWorkspace is safe for multithreaded operations.

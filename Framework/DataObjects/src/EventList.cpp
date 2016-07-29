@@ -845,6 +845,8 @@ EventList::getWeightedEventsNoTime() const {
  * associated detector ID's.
  * */
 void EventList::clear(const bool removeDetIDs) {
+  if (mru)
+    mru->deleteIndex(this->m_specNo);
   this->events.clear();
   std::vector<TofEvent>().swap(this->events); // STL Trick to release memory
   this->weightedEvents.clear();
