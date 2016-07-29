@@ -82,12 +82,14 @@ void IFittingAlgorithm::init() {
       Kernel::Direction::Input);
 
   std::vector<std::string> evaluationTypes{"CentrePoint", "Histogram"};
-  declareProperty(
-      "EvaluationType", "CentrePoint",
-      Kernel::IValidator_sptr(
-          new Kernel::ListValidator<std::string>(evaluationTypes)),
-      "The way the function is evaluated: CentrePoint or Histogram.",
-      Kernel::Direction::Input);
+  declareProperty("EvaluationType", "CentrePoint",
+                  Kernel::IValidator_sptr(
+                      new Kernel::ListValidator<std::string>(evaluationTypes)),
+                  "The way the function is evaluated on histogram data sets. "
+                  "If value is \"CentrePoint\" then function is evaluated at "
+                  "centre of each bin. If it is \"Histogram\" then function is "
+                  "integrated within the bin and the integrals returned.",
+                  Kernel::Direction::Input);
 
   initConcrete();
 }
