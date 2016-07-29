@@ -890,11 +890,7 @@ public:
   }
 
   void test_clearing_EventList_clears_MRU() {
-    int numEvents = 2;
-    int numHistograms = 2;
-    EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents,
-                                                            numHistograms);
+    auto ws = WorkspaceCreationHelper::CreateRandomEventWorkspace(1, 1);
     auto y = ws->sharedY(0);
     TS_ASSERT_EQUALS(y.use_count(), 2);
     ws->getSpectrum(0).clear();
@@ -920,6 +916,22 @@ public:
     TS_ASSERT_EQUALS(ws->getSpectrum(0).getSpectrumNo(), 1);
     // spectrum number of index 0 is now 1, MRU should not mix up data
     TS_ASSERT_DIFFERS(&(ws->y(0)), &yOld1);
+  }
+
+  void test_deleting_spectra_removes_them_from_MRU() {
+    auto ws = WorkspaceCreationHelper::CreateRandomEventWorkspace(1, 1);
+    auto y = ws->sharedY(0);
+    TS_ASSERT_EQUALS(y.use_count(), 2);
+
+    auto &eventList = ws->getSpectrum(0);
+    auto *memory = &eventList;
+
+    // Explicit destructor call should remove y from MRU
+    eventList.~EventList();
+    TS_ASSERT_EQUALS(y.use_count(), 1);
+
+    // Placement-new to put ws back into valid state (avoid double-destruct)
+    static_cast<void>(new (memory) EventList());
   }
 };
 
