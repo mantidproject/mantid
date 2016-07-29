@@ -8,6 +8,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <MantidHistogramData/LinearGenerator.h>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -522,10 +523,9 @@ private:
     double t_chop(delay + inital_chop_phase / chopSpeed);
     double Period =
         (0.5 * 1.e+6) / chopSpeed; // 0.5 because some choppers open twice.
-    auto &x = ws->mutableX(0);
-    for (size_t i = 0; i < x.size(); i++) {
-      x[i] = 5 + double(i) * 10;
-    }
+
+	BinEdges x(ws->x(0).size(), LinearGenerator(5, 10));
+	ws->setBinEdges(0, x);
     // signal at first monitor
     double t1 = t_chop * l_mon1 / l_chop;
     double t2 = (t_chop + Period) * l_mon1 / l_chop;
