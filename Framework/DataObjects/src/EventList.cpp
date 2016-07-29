@@ -846,7 +846,7 @@ EventList::getWeightedEventsNoTime() const {
  * */
 void EventList::clear(const bool removeDetIDs) {
   if (mru)
-    mru->deleteIndex(this->m_specNo);
+    mru->deleteIndex(this);
   this->events.clear();
   std::vector<TofEvent>().swap(this->events); // STL Trick to release memory
   this->weightedEvents.clear();
@@ -1421,7 +1421,7 @@ size_t EventList::histogram_size() const {
 void EventList::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
   m_histogram.setX(X);
   if (mru)
-    mru->deleteIndex(this->m_specNo);
+    mru->deleteIndex(this);
 }
 
 /** Deprecated, use mutableX() instead. Returns a reference to the x data.
@@ -1429,7 +1429,7 @@ void EventList::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
  */
 MantidVec &EventList::dataX() {
   if (mru)
-    mru->deleteIndex(this->m_specNo);
+    mru->deleteIndex(this);
   return m_histogram.dataX();
 }
 
@@ -1536,7 +1536,7 @@ Kernel::cow_ptr<HistogramData::HistogramY> EventList::sharedY() const {
   // Is the data in the mrulist?
   if (mru) {
     mru->ensureEnoughBuffersY(thread);
-    yData = mru->findY(thread, this->m_specNo);
+    yData = mru->findY(thread, this);
   }
 
   if (!yData) {
@@ -1549,10 +1549,10 @@ Kernel::cow_ptr<HistogramData::HistogramY> EventList::sharedY() const {
 
     // Lets save it in the MRU
     if (mru) {
-      mru->insertY(thread, yData, this->m_specNo);
+      mru->insertY(thread, yData, this);
       auto eData = Kernel::make_cow<HistogramData::HistogramE>(std::move(E));
       mru->ensureEnoughBuffersE(thread);
-      mru->insertE(thread, eData, this->m_specNo);
+      mru->insertE(thread, eData, this);
     }
   }
   return yData;
@@ -1566,7 +1566,7 @@ Kernel::cow_ptr<HistogramData::HistogramE> EventList::sharedE() const {
   // Is the data in the mrulist?
   if (mru) {
     mru->ensureEnoughBuffersE(thread);
-    eData = mru->findE(thread, this->m_specNo);
+    eData = mru->findE(thread, this);
   }
 
   if (!eData) {
@@ -1578,7 +1578,7 @@ Kernel::cow_ptr<HistogramData::HistogramE> EventList::sharedE() const {
 
     // Lets save it in the MRU
     if (mru)
-      mru->insertE(thread, eData, this->m_specNo);
+      mru->insertE(thread, eData, this);
   }
   return eData;
 }
@@ -4556,7 +4556,7 @@ void EventList::convertUnitsQuickly(const double &factor, const double &power) {
 
 HistogramData::Histogram &EventList::mutableHistogramRef() {
   if (mru)
-    mru->deleteIndex(this->m_specNo);
+    mru->deleteIndex(this);
   return m_histogram;
 }
 
