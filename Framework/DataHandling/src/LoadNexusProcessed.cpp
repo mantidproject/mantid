@@ -746,7 +746,7 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
         for (int i = 0; i < xbins.dim1(); i++)
           x[i] = xbins(static_cast<int>(wi), i);
         // Workspace and el was just created, so we can just set a new histogram
-		// We can move x as it is not longer used after this point
+        // We can move x as it is not longer used after this point
         el.setHistogram(HistogramData::BinEdges(std::move(x)));
       }
     }
