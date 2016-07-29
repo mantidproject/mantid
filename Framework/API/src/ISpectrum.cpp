@@ -8,8 +8,7 @@ namespace API {
 /** Constructor with spectrum number
  * @param specNo :: spectrum # of the spectrum
  */
-ISpectrum::ISpectrum(const specnum_t specNo)
-    : m_specNo(specNo) {}
+ISpectrum::ISpectrum(const specnum_t specNo) : m_specNo(specNo) {}
 
 /** Copy spectrum number and detector IDs, but not X vector, from another
  *ISpectrum
