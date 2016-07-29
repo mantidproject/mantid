@@ -890,7 +890,7 @@ public:
   }
 
   void test_clearing_EventList_clears_MRU() {
-    auto ws = WorkspaceCreationHelper::CreateRandomEventWorkspace(1, 1);
+    auto ws = WorkspaceCreationHelper::CreateRandomEventWorkspace(2, 1);
     auto y = ws->sharedY(0);
     TS_ASSERT_EQUALS(y.use_count(), 2);
     ws->getSpectrum(0).clear();
@@ -919,7 +919,7 @@ public:
   }
 
   void test_deleting_spectra_removes_them_from_MRU() {
-    auto ws = WorkspaceCreationHelper::CreateRandomEventWorkspace(1, 1);
+    auto ws = WorkspaceCreationHelper::CreateRandomEventWorkspace(2, 1);
     auto y = ws->sharedY(0);
     TS_ASSERT_EQUALS(y.use_count(), 2);
 
