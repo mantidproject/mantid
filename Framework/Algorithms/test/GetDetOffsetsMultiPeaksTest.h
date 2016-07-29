@@ -423,9 +423,8 @@ public:
     auto &Y = WS->mutableY(0);
     auto &E = WS->mutableE(0);
 
-    std::transform(Y.begin(), Y.end(), Y.begin(), [](auto y) -> auto {
-      return static_cast<double>(rand() % 5);
-    });
+    std::transform(Y.begin(), Y.end(), Y.begin(),
+                   []() { return static_cast<double>(rand() % 5); });
 
     E.assign(E.size(), 0.01);
   }

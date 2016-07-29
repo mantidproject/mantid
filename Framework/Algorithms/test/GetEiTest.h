@@ -219,7 +219,6 @@ public:
     AnalysisDataService::Instance().remove(outws_name);
   }
 
-
   MatrixWorkspace_sptr
   createTestWorkspaceWithMonitors(const bool includePeaks = true) {
     const int numHists(2);
@@ -291,7 +290,7 @@ public:
   static void destroySuite(GetEiTestPerformance *suite) { delete suite; }
 
   void setUp() {
-	getEiTest = GetEiTest();
+    getEiTest = GetEiTest();
     inputWS1 = getEiTest.createTestWorkspaceWithMonitors();
     outputName1 = "eitest1";
     AnalysisDataService::Instance().add(outputName1, inputWS1);
@@ -313,8 +312,8 @@ public:
     const bool fixei = false;
 
     IAlgorithm_sptr alg;
-    TS_ASSERT_THROWS_NOTHING(
-        alg = getEiTest.runGetEiUsingTestMonitors(outputName1, input_ei, fixei));
+    TS_ASSERT_THROWS_NOTHING(alg = getEiTest.runGetEiUsingTestMonitors(
+                                 outputName1, input_ei, fixei));
   }
 
   void test_Result_When_Fixing_Ei() {
@@ -322,10 +321,9 @@ public:
     const bool fixei = true;
 
     IAlgorithm_sptr alg;
-    TS_ASSERT_THROWS_NOTHING(
-        alg = getEiTest.runGetEiUsingTestMonitors(outputName2, input_ei, fixei));
+    TS_ASSERT_THROWS_NOTHING(alg = getEiTest.runGetEiUsingTestMonitors(
+                                 outputName2, input_ei, fixei));
   }
-
 
   MatrixWorkspace_sptr inputWS1;
   MatrixWorkspace_sptr inputWS2;

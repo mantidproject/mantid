@@ -532,9 +532,9 @@ private:
     double t1 = t_chop * l_mon1 / l_chop;
     double t2 = (t_chop + Period) * l_mon1 / l_chop;
 
-	// temporary vars, to avoid redeclaring
-	double tm1(0.0);
-	double tm2(0.0);
+    // temporary vars, to avoid redeclaring
+    double tm1(0.0);
+    double tm2(0.0);
 
     auto t = ws->points(0);
     std::transform(t.begin(), t.end(), ws->mutableY(0).begin(),
