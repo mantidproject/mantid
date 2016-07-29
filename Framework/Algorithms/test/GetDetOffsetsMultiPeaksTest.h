@@ -295,11 +295,14 @@ public:
     AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+
     const auto &X = WS->x(0);
     auto &Y = WS->mutableY(0);
     auto &E = WS->mutableE(0);
+
+    double x(0);
     for (size_t i = 0; i < Y.size(); ++i) {
-      const double x = (X[i] + X[i + 1]) / 2;
+      x = (X[i] + X[i + 1]) / 2;
       Y[i] = 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
       E[i] = 0.001;
     }
