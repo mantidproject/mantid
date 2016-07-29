@@ -1790,15 +1790,6 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
     multiLayer->setAlignement(hor, vert);
   }
 
-  if (tsv.hasSection("waterfall")) {
-    const std::string wfStr = tsv.sections("waterfall").front();
-
-    if (wfStr == "1")
-      multiLayer->setWaterfallLayout(true);
-    else
-      multiLayer->setWaterfallLayout(false);
-  }
-
   if (tsv.hasSection("graph")) {
     auto graphSections = tsv.sections("graph");
     for (auto it = graphSections.cbegin(); it != graphSections.cend(); ++it) {
@@ -1815,6 +1806,17 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
           g->loadFromProject(graphLines, app, fileVersion);
       }
     }
+  }
+
+  // waterfall must be updated after graphs have been loaded
+  // as it requires the graphs to exist first!
+  if (tsv.hasSection("waterfall")) {
+    const std::string wfStr = tsv.sections("waterfall").front();
+
+    if (wfStr == "1")
+      multiLayer->setWaterfallLayout(true);
+    else
+      multiLayer->setWaterfallLayout(false);
   }
 
   multiLayer->blockSignals(false);
