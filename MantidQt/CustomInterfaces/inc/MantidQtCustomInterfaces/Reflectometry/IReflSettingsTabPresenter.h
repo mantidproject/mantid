@@ -1,14 +1,17 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
-#define MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H
+#ifndef MANTID_CUSTOMINTERFACES_IREFLSETTINGSTABPRESENTER_H
+#define MANTID_CUSTOMINTERFACES_IREFLSETTINGSTABPRESENTER_H
 
-#include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h"
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** @class ReflGenericDataProcessorPresenterFactory
 
-ReflGenericDataProcessorPresenterFactory creates a Reflectometry
-GenericDataProcessorPresenter
+class IReflMainWindowPresenter;
+
+/** @class IReflSettingsTabPresenter
+
+IReflSettingsTabPresenter is an interface which defines the functions that need
+to be implemented by a concrete 'Settings' tab presenter
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -31,18 +34,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflGenericDataProcessorPresenterFactory
-    : public MantidQt::MantidWidgets::GenericDataProcessorPresenterFactory {
+class IReflSettingsTabPresenter {
 public:
-  ReflGenericDataProcessorPresenterFactory() = default;
-  virtual ~ReflGenericDataProcessorPresenterFactory() = default;
-
-  /**
-  * Creates a Reflectometry Data Processor Presenter
-  */
-  std::unique_ptr<MantidQt::MantidWidgets::GenericDataProcessorPresenter>
-  create() override;
+  virtual ~IReflSettingsTabPresenter(){};
+  /// Accept a main presenter
+  virtual void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) = 0;
+  /// Pre-processing
+  virtual std::string getPlusOptions() const = 0;
+  virtual std::string getTransmissionOptions() const = 0;
+  /// Processing
+  virtual std::string getReductionOptions() const = 0;
+  /// Post-processing
+  virtual std::string getStitchOptions() const = 0;
 };
 }
 }
-#endif /*MANTID_CUSTOMINTERFACES_REFLGENERICDATAPROCESSORPRESENTERFACTORY_H*/
+#endif /* MANTID_CUSTOMINTERFACES_IREFLSETTINGSTABPRESENTER_H */
