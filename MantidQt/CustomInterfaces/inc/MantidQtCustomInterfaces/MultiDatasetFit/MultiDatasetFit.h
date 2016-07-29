@@ -77,6 +77,8 @@ public:
   void setLocalParameterTie(const QString &parName, int i, QString tie);
   /// Get log names from workspace(s)
   std::vector<std::string> getLogNames() const;
+  /// Get value of log from spectrum
+  double getLogValue(const QString &logName, int i) const;
 
   /// Make it public
   using API::UserSubWindow::runPythonCode;

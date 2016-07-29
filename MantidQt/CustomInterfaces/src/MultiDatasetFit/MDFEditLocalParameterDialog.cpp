@@ -281,12 +281,23 @@ bool EditLocalParameterDialog::areOthersTied(int i) const {
 /// Set value to log value
 /// @param i :: [input] Index of parameter to set
 void EditLocalParameterDialog::setValueToLog(int i) {
-  // TODO: needs implementation
+  assert(i < m_values.size());
+  const auto *multifit = static_cast<MultiDatasetFit *>(this->parent());
+  assert(multifit);
+
+  const auto &logName = m_uiForm.logValueSelector->getLog();
+  const double value = multifit->getLogValue(logName, i);
+  m_values[i] = value;
+  m_uiForm.tableWidget->item(i, valueColumn)->setText(makeNumber(value));
+  updateRoleColumn(i);
 }
 
 /// Set value of each parameter to log value from respective workspace
 void EditLocalParameterDialog::setAllValuesToLog() {
-  // TODO: needs implementation
+  const int nValues = m_values.size();
+  for (int i = 0; i < nValues; ++i) {
+    setValueToLog(i);
+  }
 }
 
 /// Returns whether log checkbox is ticked or not
