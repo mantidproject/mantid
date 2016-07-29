@@ -94,7 +94,8 @@ const DblMatrix &OrientedLattice::getUB() const { return UB; }
   @param force :: If true, do not check that U matrix is valid
   */
 void OrientedLattice::setU(const DblMatrix &newU, const bool force) {
-  if (force || newU.isRotation()) {
+  // determinant ==1 or (determinant == +/-1 and force)
+  if (newU.isRotation() || (force && newU.isOrthogonal())) {
     U = newU;
     UB = U * getB();
   } else
