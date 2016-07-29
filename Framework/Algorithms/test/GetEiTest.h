@@ -219,7 +219,7 @@ public:
     AnalysisDataService::Instance().remove(outws_name);
   }
 
-private:
+
   MatrixWorkspace_sptr
   createTestWorkspaceWithMonitors(const bool includePeaks = true) {
     const int numHists(2);
@@ -241,7 +241,7 @@ private:
     const double peakOneHeight(3000.), peakTwoHeight(1000.);
     BinEdges xdata(numBins + 1, LinearGenerator(5.0, 5.5));
 
-	// xdata.end() - 1 because bin edges are 1 bigger than Y's size
+    // xdata.end() - 1 because bin edges are 1 bigger than Y's size
     if (includePeaks) {
       std::transform(
           xdata.begin(), xdata.end() - 1, testWS->mutableY(0).begin(),
@@ -249,12 +249,13 @@ private:
             return peakOneHeight *
                    exp(-0.5 * pow(x - peakOneCentre, 2.) / sigmaSqOne);
           });
-      std::transform(xdata.begin(), xdata.end() - 1, testWS->mutableY(1).begin(),
-                     [peakTwoHeight, peakTwoCentre, sigmaSqTwo](auto x) {
-                       return peakTwoHeight *
-                              exp(-0.5 * pow(x - peakTwoCentre, 2.) /
-                                  sigmaSqTwo);
-                     });
+
+      std::transform(
+          xdata.begin(), xdata.end() - 1, testWS->mutableY(1).begin(),
+          [peakTwoHeight, peakTwoCentre, sigmaSqTwo](auto x) {
+            return peakTwoHeight *
+                   exp(-0.5 * pow(x - peakTwoCentre, 2.) / sigmaSqTwo);
+          });
     }
 
     testWS->setBinEdges(0, xdata);
@@ -279,6 +280,7 @@ private:
     return alg;
   }
 };
+
 class GetEiTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -289,11 +291,12 @@ public:
   static void destroySuite(GetEiTestPerformance *suite) { delete suite; }
 
   void setUp() {
-    inputWS1 = createTestWorkspaceWithMonitors();
+	getEiTest = GetEiTest();
+    inputWS1 = getEiTest.createTestWorkspaceWithMonitors();
     outputName1 = "eitest1";
     AnalysisDataService::Instance().add(outputName1, inputWS1);
 
-    inputWS2 = createTestWorkspaceWithMonitors();
+    inputWS2 = getEiTest.createTestWorkspaceWithMonitors();
     outputName2 = "eitest2";
     AnalysisDataService::Instance().add(outputName2, inputWS1);
 
@@ -311,7 +314,7 @@ public:
 
     IAlgorithm_sptr alg;
     TS_ASSERT_THROWS_NOTHING(
-        alg = runGetEiUsingTestMonitors(outputName1, input_ei, fixei));
+        alg = getEiTest.runGetEiUsingTestMonitors(outputName1, input_ei, fixei));
   }
 
   void test_Result_When_Fixing_Ei() {
@@ -320,74 +323,16 @@ public:
 
     IAlgorithm_sptr alg;
     TS_ASSERT_THROWS_NOTHING(
-        alg = runGetEiUsingTestMonitors(outputName2, input_ei, fixei));
+        alg = getEiTest.runGetEiUsingTestMonitors(outputName2, input_ei, fixei));
   }
 
-private:
-  /// nearly the same method as the unit test above
-  /// changed from std::string to MatrixWorkspace_sptr
-  IAlgorithm_sptr runGetEiUsingTestMonitors(const std::string inWSName,
-                                            const double energyGuess,
-                                            const bool fixei) {
-
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
-    alg->initialize();
-    alg->setPropertyValue("InputWorkspace", inWSName);
-    alg->setProperty("Monitor1Spec", 1);
-    alg->setProperty("Monitor2Spec", 2);
-    alg->setProperty("FixEi", fixei);
-    alg->setProperty("EnergyEstimate", energyGuess);
-    alg->setRethrows(true);
-    alg->execute();
-
-    return alg;
-  }
-
-  /// Same method as the unit test above
-  MatrixWorkspace_sptr
-  createTestWorkspaceWithMonitors(const bool includePeaks = true) {
-    const int numHists(2);
-    const int numBins(2000);
-    MatrixWorkspace_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            numHists, numBins, true);
-    testWS->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    BinEdges xdata(numBins + 1);
-    // Update X data  to a sensible values. Looks roughly like the MARI binning
-    // Update the Y values. We don't care about errors here
-
-    // Instrument geometry + incident energy of ~15 mev (purely made up) gives
-    // these neceesary peak values.
-    // We'll simply use a gaussian as a test
-
-    const double peakOneCentre(6493.0), sigmaSqOne(250 * 250.),
-        peakTwoCentre(10625.), sigmaSqTwo(50 * 50);
-    const double peakOneHeight(3000.), peakTwoHeight(1000.);
-
-    auto &Y0 = testWS->mutableY(0);
-    auto &Y1 = testWS->mutableY(1);
-    auto &xMutableData = xdata.mutableData();
-    for (int i = 0; i <= numBins; ++i) {
-      const double xValue = 5.0 + 5.5 * i;
-      if (includePeaks && i < numBins) {
-        Y0[i] = peakOneHeight *
-                exp(-0.5 * pow(xValue - peakOneCentre, 2.) / sigmaSqOne);
-        Y1[i] = peakTwoHeight *
-                exp(-0.5 * pow(xValue - peakTwoCentre, 2.) / sigmaSqTwo);
-      }
-      xMutableData[i] = xValue;
-    }
-    testWS->setBinEdges(0, xdata);
-    testWS->setBinEdges(1, xdata);
-    return testWS;
-  }
 
   MatrixWorkspace_sptr inputWS1;
   MatrixWorkspace_sptr inputWS2;
   std::string outputName1;
   std::string outputName2;
+  // The test method object so that we can re-use the methods
+  GetEiTest getEiTest;
 };
 
 #endif /*GETEITEST_H_*/
