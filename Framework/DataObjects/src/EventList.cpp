@@ -465,10 +465,7 @@ EventList &EventList::operator+=(const EventList &more_events) {
   // No guaranteed order
   this->order = UNSORTED;
   // Do a union between the detector IDs of both lists
-  std::set<detid_t>::const_iterator it;
-  for (it = more_events.detectorIDs.begin();
-       it != more_events.detectorIDs.end(); ++it)
-    this->detectorIDs.insert(*it);
+  addDetectorIDs(more_events.getDetectorIDs());
 
   return *this;
 }
@@ -856,7 +853,7 @@ void EventList::clear(const bool removeDetIDs) {
   std::vector<WeightedEventNoTime>().swap(
       this->weightedEventsNoTime); // STL Trick to release memory
   if (removeDetIDs)
-    this->detectorIDs.clear();
+    this->clearDetectorIDs();
 }
 
 /** Clear any unused event lists (the ones that do not
@@ -3751,9 +3748,8 @@ void EventList::filterByPulseTime(DateAndTime start, DateAndTime stop,
   output.clear();
   // Has to match the given type
   output.switchTo(eventType);
-  // Copy the detector IDs
-  output.detectorIDs = this->detectorIDs;
-  output.setX(this->ptrX());
+  output.setDetectorIDs(this->getDetectorIDs());
+  output.setSharedX(this->sharedX());
 
   // Iterate through all events (sorted by pulse time)
   switch (eventType) {
@@ -3785,9 +3781,8 @@ void EventList::filterByTimeAtSample(Kernel::DateAndTime start,
   output.clear();
   // Has to match the given type
   output.switchTo(eventType);
-  // Copy the detector IDs
-  output.detectorIDs = this->detectorIDs;
-  output.setX(this->ptrX());
+  output.setDetectorIDs(this->getDetectorIDs());
+  output.setSharedX(this->sharedX());
 
   // Iterate through all events (sorted by pulse time)
   switch (eventType) {
@@ -3992,8 +3987,8 @@ void EventList::splitByTime(Kernel::TimeSplitterType &splitter,
   size_t numOutputs = outputs.size();
   for (size_t i = 0; i < numOutputs; i++) {
     outputs[i]->clear();
-    outputs[i]->detectorIDs = this->detectorIDs;
-    outputs[i]->setX(this->ptrX());
+    outputs[i]->setDetectorIDs(this->getDetectorIDs());
+    outputs[i]->setSharedX(this->sharedX());
     // Match the output event type.
     outputs[i]->switchTo(eventType);
   }
@@ -4135,8 +4130,8 @@ void EventList::splitByFullTime(Kernel::TimeSplitterType &splitter,
   for (outiter = outputs.begin(); outiter != outputs.end(); ++outiter) {
     EventList *opeventlist = outiter->second;
     opeventlist->clear();
-    opeventlist->detectorIDs = this->detectorIDs;
-    opeventlist->setX(this->ptrX());
+    opeventlist->setDetectorIDs(this->getDetectorIDs());
+    opeventlist->setSharedX(this->sharedX());
     // Match the output event type.
     opeventlist->switchTo(eventType);
   }
@@ -4263,8 +4258,8 @@ std::string EventList::splitByFullTimeMatrixSplitter(
        outiter != vec_outputEventList.end(); ++outiter) {
     EventList *opeventlist = outiter->second;
     opeventlist->clear();
-    opeventlist->detectorIDs = this->detectorIDs;
-    opeventlist->setX(this->ptrX());
+    opeventlist->setDetectorIDs(this->getDetectorIDs());
+    opeventlist->setSharedX(this->sharedX());
     // Match the output event type.
     opeventlist->switchTo(eventType);
   }
@@ -4383,8 +4378,8 @@ void EventList::splitByPulseTime(Kernel::TimeSplitterType &splitter,
   for (outiter = outputs.begin(); outiter != outputs.end(); ++outiter) {
     EventList *opeventlist = outiter->second;
     opeventlist->clear();
-    opeventlist->detectorIDs = this->detectorIDs;
-    opeventlist->setX(this->ptrX());
+    opeventlist->setDetectorIDs(this->getDetectorIDs());
+    opeventlist->setSharedX(this->sharedX());
     // Match the output event type.
     opeventlist->switchTo(eventType);
   }

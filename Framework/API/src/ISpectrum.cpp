@@ -5,18 +5,12 @@
 namespace Mantid {
 namespace API {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ISpectrum::ISpectrum() : m_specNo(0), detectorIDs() {}
-
 /** Constructor with spectrum number
  * @param specNo :: spectrum # of the spectrum
  */
 ISpectrum::ISpectrum(const specnum_t specNo)
-    : m_specNo(specNo), detectorIDs() {}
+    : m_specNo(specNo) {}
 
-//----------------------------------------------------------------------------------------------
 /** Copy spectrum number and detector IDs, but not X vector, from another
  *ISpectrum
  *
