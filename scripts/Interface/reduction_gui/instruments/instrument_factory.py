@@ -10,12 +10,14 @@ from reflectometer_m_interface_dev import REFMInterface
 from reflectometer_sf_interface_dev import REFLSFInterface
 from dgs_interface_dev import DgsInterface
 from diffraction_interface_dev import DiffractionInterface
+from toftof_interface_dev import TOFTOFInterface
 
 INSTRUMENT_DICT = {"HFIR": {"BIOSANS": HFIRInterface,
                             "GPSANS": HFIRInterface},
                    "ISIS": {"MAPS": DgsInterface,
                             "MARI": DgsInterface,
                             "MERLIN": DgsInterface},
+                   "MLZ":  {"TOFTOF": TOFTOFInterface},
                    "SNS":  {"ARCS": DgsInterface,
                             "CNCS": DgsInterface,
                             "EQSANS": EQSANSInterface,
