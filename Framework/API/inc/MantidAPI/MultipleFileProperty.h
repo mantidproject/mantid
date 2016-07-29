@@ -145,11 +145,6 @@ public:
   using Kernel::PropertyWithValue<std::vector<std::vector<std::string>>>::
   operator=;
 
-  /// Return a "flattened" vector with the contents of the given vector of
-  /// vectors.
-  static std::vector<std::string>
-  flattenFileNames(const std::vector<std::vector<std::string>> &fileNames);
-
 private:
   std::string setValueAsSingleFile(const std::string &propValue);
   std::string setValueAsMultipleFiles(const std::string &propValue);
