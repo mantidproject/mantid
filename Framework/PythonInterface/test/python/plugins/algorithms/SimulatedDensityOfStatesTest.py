@@ -191,7 +191,7 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
                                        SpectrumType='IonTable')
 
         self.assertTrue(isinstance(wks, ITableWorkspace))
-        self.assertEqual(wks.columnCount(), 9)
+        self.assertEqual(wks.columnCount(), 10)
         self.assertEqual(wks.rowCount(), 20)
 
         all_species = wks.column('Species')
@@ -249,7 +249,9 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
                                              SpectrumType='DOS',
                                              Ions='H:P,C:P,O')
         self.assertEqual(3, wks_group.size())
-        self.assertEqual('wks_group_C:P', wks_group.getItem(0).getName())
+        self.assertEqual('wks_group_C(13)', wks_group.getItem(0).getName())
+        self.assertEqual('(C13)', wks_group.getItem(0).sample().getMaterial().name())
+
 
 
 if __name__=="__main__":
