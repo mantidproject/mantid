@@ -99,31 +99,22 @@ void SaveDiffFittingAscii::exec() {
     throw Exception::FileError("Unable to create file: ", filename);
   }
 
-  Poco::File pFile = (filename);
-  bool exist = pFile.exists();
-
-  if (exist && appendToFile) {
-  }
-
   if (exist && !appendToFile) {
     g_log.warning() << "File " << filename << " exists and will be overwritten."
                     << "\n";
   }
 
-  const std::string runNum = getProperty("RunNumber");
-  file << "run number: " << runNum << m_endl;
+  if (exist && appendToFile) {
+    file << "\n";
+    appendToFile = false;
+  }
 
+  const std::string runNum = getProperty("RunNumber");
   const std::string bank = getProperty("Bank");
-  file << "bank: " << bank << m_endl;
+  writeInfo(runNum, bank, file);
 
   std::vector<std::string> columnHeadings = tbl_ws->getColumnNames();
-  for (auto &heading : columnHeadings) {
-    if (heading == "Chi") {
-      writeVal(heading, file, true);
-    } else {
-      writeVal(heading, file, false);
-    }
-  }
+  writeHeader(columnHeadings, file);
 
   for (size_t rowIndex = 0; rowIndex < tbl_ws->rowCount(); ++rowIndex) {
     TableRow row = tbl_ws->getRow(rowIndex);
@@ -137,6 +128,25 @@ void SaveDiffFittingAscii::exec() {
         writeVal(row_str, file, true);
       else
         writeVal(row_str, file, false);
+    }
+  }
+}
+
+void SaveDiffFittingAscii::writeInfo(const std::string &runNumber,
+                                     const std::string &bank,
+                                     std::ofstream &file) {
+
+  file << "run number: " << runNumber << m_endl;
+  file << "bank: " << bank << m_endl;
+}
+
+void SaveDiffFittingAscii::writeHeader(std::vector<std::string> &columnHeadings,
+                                       std::ofstream &file) {
+  for (auto &heading : columnHeadings) {
+    if (heading == "Chi") {
+      writeVal(heading, file, true);
+    } else {
+      writeVal(heading, file, false);
     }
   }
 }

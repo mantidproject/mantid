@@ -38,6 +38,12 @@ private:
   /// Execution code
   void exec() override;
 
+  void writeInfo(const std::string &runNumber, const std::string &bank,
+                 std::ofstream &file);
+
+  void writeHeader(std::vector<std::string> &columnHeadings,
+                   std::ofstream &file);
+
   void writeVal(std::string &val, std::ofstream &file, bool endline);
 
   /// the separator
@@ -45,7 +51,6 @@ private:
 
   /// next line
   const char m_endl;
-
 };
 } // namespace DataHandling
 } // namespace Mantid
