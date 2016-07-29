@@ -518,8 +518,8 @@ public:
     for (size_t iw = 0; iw < inpWS->getNumberHistograms(); iw++) {
       auto &Y = inpWS->mutableY(iw);
 
-	  BinEdges x(inpWS->mutableX(iw).size(), LinearGenerator(minx, dx));
-	  inpWS->setBinEdges(iw, x);
+      BinEdges x(inpWS->mutableX(iw).size(), LinearGenerator(minx, dx));
+      inpWS->setBinEdges(iw, x);
       Y.assign(Y.size(), 100.0);
     }
 

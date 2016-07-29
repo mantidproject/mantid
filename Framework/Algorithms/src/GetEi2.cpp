@@ -387,7 +387,8 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
     API::MatrixWorkspace_sptr data_ws, const double prominence,
     std::vector<double> &peak_x, std::vector<double> &peak_y,
     std::vector<double> &peak_e) const {
-  // Use WS->points() to create a temporary vector of bin_centre values to work with
+  // Use WS->points() to create a temporary vector of bin_centre values to work
+  // with
   auto Xs = data_ws->points(0);
   const auto &Ys = data_ws->y(0);
   const auto &Es = data_ws->e(0);
