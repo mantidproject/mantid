@@ -36,9 +36,9 @@ LocalParameterItemDelegate::createEditor(QWidget *parent,
   connect(m_currentEditor, SIGNAL(setTieAll(QString)), this,
           SIGNAL(setTieAll(QString)));
   connect(m_currentEditor, SIGNAL(setValueToLog(int)), this,
-          SIGNAL(setValueToLog(int)));
+          SLOT(doSetValueToLog(int)));
   connect(m_currentEditor, SIGNAL(setAllValuesToLog()), this,
-          SIGNAL(setAllValuesToLog()));
+          SLOT(doSetAllValuesToLog()));
   connect(owner(), SIGNAL(logOptionsChecked(bool)), m_currentEditor,
           SLOT(setLogOptionsEnabled(bool)));
   m_currentEditor->installEventFilter(
@@ -91,6 +91,23 @@ void LocalParameterItemDelegate::paint(QPainter *painter,
 /// values and fixes.
 EditLocalParameterDialog *LocalParameterItemDelegate::owner() const {
   return static_cast<EditLocalParameterDialog *>(parent());
+}
+
+/**
+ * Slot: close the editor and re-emit the signal
+ * @param i :: [input] Index of row
+ */
+void LocalParameterItemDelegate::doSetValueToLog(int i) {
+  closeEditor(m_currentEditor);
+  emit setValueToLog(i);
+}
+
+/**
+ * Slot: close the editor and re-emit the signal
+ */
+void LocalParameterItemDelegate::doSetAllValuesToLog() {
+  closeEditor(m_currentEditor);
+  emit setAllValuesToLog();
 }
 
 } // MDF

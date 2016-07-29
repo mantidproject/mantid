@@ -41,6 +41,10 @@ protected:
   void paint(QPainter *painter, const QStyleOptionViewItem &option,
              const QModelIndex &index) const override;
 
+private slots:
+  void doSetValueToLog(int);
+  void doSetAllValuesToLog();
+
 private:
   bool eventFilter(QObject *obj, QEvent *ev) override;
   EditLocalParameterDialog *owner() const;
