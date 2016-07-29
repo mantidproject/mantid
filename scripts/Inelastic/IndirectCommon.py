@@ -463,7 +463,7 @@ def convertToElasticQ(input_ws, output_ws=None):
     axis = s_api.mtd[input_ws].getAxis(1)
     if axis.isSpectra():
         e_fixed = getEfixed(input_ws)
-        ConvertSpectrumAxis(input_ws, Target='ElasticQ', EMode='Indirect', EFixed=e_fixed,
+        s_api.ConvertSpectrumAxis(input_ws, Target='ElasticQ', EMode='Indirect', EFixed=e_fixed,
                             OutputWorkspace=output_ws)
 
     elif axis.isNumeric():
@@ -471,7 +471,7 @@ def convertToElasticQ(input_ws, output_ws=None):
         if axis.getUnit().unitID() != 'MomentumTransfer':
             raise RuntimeError('Input must have axis values of Q')
 
-        CloneWorkspace(input_ws, OutputWorkspace=output_ws)
+        s_api.CloneWorkspace(input_ws, OutputWorkspace=output_ws)
 
     else:
         raise RuntimeError('Input workspace must have either spectra or numeric axis.')
@@ -489,7 +489,7 @@ def transposeFitParametersTable(params_table, output_table=None):
     params_table = s_api.mtd[params_table]
 
     table_ws = '__tmp_table_ws'
-    table_ws = CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
+    table_ws = s_api.CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
 
     param_names = params_table.column(0)[:-1]  # -1 to remove cost function
     param_values = params_table.column(1)[:-1]
