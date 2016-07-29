@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/DataItem.h"
 
 ///@cond
 DEFINE_IPROPERTYMANAGER_GETVALUE(int16_t)
@@ -23,6 +24,8 @@ DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<double>)
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<std::string>)
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<std::vector<std::string>>)
 
+typedef std::vector<boost::shared_ptr<Mantid::Kernel::DataItem>> DataItemSptrVec;
+
 namespace Mantid {
 namespace Kernel {
 // This template implementation has been left in because although you can't
@@ -39,6 +42,24 @@ template <>
 DLLExport Property *
 IPropertyManager::getValue<Property *>(const std::string &name) const {
   return getPointerToProperty(name);
+}
+
+template <>
+DLLExport DataItemSptrVec
+IPropertyManager::getValue<DataItemSptrVec>(const std::string &name) const {
+  auto *temp = getPointerToProperty(name);
+  auto *prop = static_cast<PropertyWithValue<DataItemSptrVec> *>(temp);
+  if (prop) {
+    return *prop;
+  } else {
+    std::string message = "Attempt to assign property " + name +
+                          " to incorrect type. Expected type "
+                          "std::vector<boost::shared_ptr<Mantid::Kernel::"
+                          "DataItem>>";
+    throw std::runtime_error(message);
+  }
+
+  return DataItemSptrVec();
 }
 
 // If a string is given in the argument, we can be more flexible

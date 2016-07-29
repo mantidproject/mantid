@@ -304,6 +304,16 @@ public:
 
   void modified();
 
+  friend std::ostream &
+  operator<<(std::ostream &os, const boost::shared_ptr<ITableWorkspace> &ws) {
+    return os << ws->m_name;
+  }
+
+  friend std::istream &operator>>(std::istream &is,
+                                  boost::shared_ptr<ITableWorkspace> &ws) {
+    return is >> ws->m_name;
+  }
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   ITableWorkspace(const ITableWorkspace &) = default;

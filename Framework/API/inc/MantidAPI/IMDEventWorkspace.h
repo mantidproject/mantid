@@ -99,6 +99,16 @@ public:
       Mantid::API::MDNormalization preferredNormalization) = 0;
   Mantid::API::MDNormalization displayNormalization() const override = 0;
 
+  friend std::ostream &
+  operator<<(std::ostream &os, const boost::shared_ptr<IMDEventWorkspace> &ws) {
+    return os << ws->m_name;
+  }
+
+  friend std::istream &operator>>(std::istream &is,
+                                  boost::shared_ptr<IMDEventWorkspace> &ws) {
+    return is >> ws->m_name;
+  }
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IMDEventWorkspace(const IMDEventWorkspace &) = default;

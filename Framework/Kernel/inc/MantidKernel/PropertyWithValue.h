@@ -567,8 +567,9 @@ protected:
   /// The value of the property
   TYPE m_value;
   /// the property's default value which is also its initial value
-  // const TYPE m_initialValue;
   TYPE m_initialValue;
+  /// Visitor validator class
+  IValidator_sptr m_validator;
 
 private:
   /**
@@ -639,9 +640,6 @@ private:
     toValue(strValue, value);
     return value;
   }
-
-  /// Visitor validator class
-  IValidator_sptr m_validator;
 
   /// Static reference to the logger class
   static Logger g_logger;

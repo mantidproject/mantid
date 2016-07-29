@@ -70,8 +70,21 @@ public:
   virtual const std::string toString() const = 0;
   //@}
 
+  friend std::ostream &operator<<(std::ostream &os,
+	  const boost::shared_ptr<DataItem> &ws) {
+	  return os << ws->m_name;
+  }
+
+  friend std::istream &operator >> (std::istream &is,
+	  boost::shared_ptr<DataItem> &ws) {
+	  return is >> ws->m_name;
+  }
+
 protected:
   Poco::RWLock *getLock() const;
+  /// The name associated with the object within the ADS (This is required for
+  /// workspace algebra
+  std::string m_name;
 
 private:
   /// Multiple-reader/single-writer lock to restrict multithreaded

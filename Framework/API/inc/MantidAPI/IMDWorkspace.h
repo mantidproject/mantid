@@ -166,6 +166,16 @@ public:
   // Check if this class is an instance of MDHistoWorkspace
   virtual bool isMDHistoWorkspace() const { return false; }
 
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const boost::shared_ptr<IMDWorkspace> &ws) {
+    return os << ws->m_name;
+  }
+
+  friend std::istream &operator>>(std::istream &is,
+                                  boost::shared_ptr<IMDWorkspace> &ws) {
+    return is >> ws->m_name;
+  }
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IMDWorkspace(const IMDWorkspace &) = default;

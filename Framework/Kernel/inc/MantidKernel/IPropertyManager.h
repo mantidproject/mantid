@@ -401,10 +401,10 @@ protected:
     template <typename T> operator std::vector<T>() {
       return pm.getValue<std::vector<T>>(prop);
     }
-    /// explicit specialization for std::vector
-    template <typename T> operator std::vector<std::vector<T>>() {
-      return pm.getValue<std::vector<std::vector<T>>>(prop);
-    }
+	/// explicit specialization for std::vector
+	template <typename T> operator std::vector<boost::shared_ptr<T>>() {
+		return pm.getValue<std::vector<boost::shared_ptr<T>>>(prop);
+	}
     /// explicit specialization for boost::shared_ptr
     template <typename T> operator boost::shared_ptr<T>() {
       return pm.getValue<boost::shared_ptr<T>>(prop);

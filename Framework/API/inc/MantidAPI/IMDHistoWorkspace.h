@@ -101,6 +101,16 @@ public:
   virtual void setDisplayNormalization(
       const Mantid::API::MDNormalization &preferredNormalization) = 0;
 
+  friend std::ostream &
+  operator<<(std::ostream &os, const boost::shared_ptr<IMDHistoWorkspace> &ws) {
+    return os << ws->m_name;
+  }
+
+  friend std::istream &operator>>(std::istream &is,
+                                  boost::shared_ptr<IMDHistoWorkspace> &ws) {
+    return is >> ws->m_name;
+  }
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   IMDHistoWorkspace(const IMDHistoWorkspace &) = default;

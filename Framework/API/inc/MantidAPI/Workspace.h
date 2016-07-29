@@ -103,6 +103,16 @@ public:
   /// Returns a reference to the WorkspaceHistory const
   const WorkspaceHistory &getHistory() const { return m_history; }
 
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const boost::shared_ptr<Workspace> &ws) {
+    return os << ws->m_name;
+  }
+
+  friend std::istream &operator>>(std::istream &is,
+                                  boost::shared_ptr<Workspace> &ws) {
+    return is >> ws->m_name;
+  }
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   Workspace(const Workspace &) = default;
@@ -113,9 +123,6 @@ private:
   std::string m_title;
   /// A user-provided comment that is attached to the workspace
   std::string m_comment;
-  /// The name associated with the object within the ADS (This is required for
-  /// workspace algebra
-  std::string m_name;
   /// The history of the workspace, algorithm and environment
   WorkspaceHistory m_history;
 
