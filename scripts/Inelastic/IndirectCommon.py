@@ -523,7 +523,7 @@ def transposeFitParametersTable(params_table, output_table=None):
     if output_table is None:
         output_table = params_table.name()
 
-    RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
+    s_api.RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
 
 
 def IndentifyDataBoundaries(sample_ws):
