@@ -240,12 +240,15 @@ private:
     const double peakOneCentre(6493.0), sigmaSqOne(250 * 250.),
         peakTwoCentre(10625.), sigmaSqTwo(50 * 50);
     const double peakOneHeight(3000.), peakTwoHeight(1000.);
+
+	auto &Y0 = testWS->mutableY(0);
+	auto &Y1 = testWS->mutableY(1);
     for (int i = 0; i < numBins; ++i) {
       if (includePeaks) {
-        testWS->dataY(0)[i] =
+		  Y0[i] =
             peakOneHeight *
             exp(-0.5 * pow(xdata[i] - peakOneCentre, 2.) / sigmaSqOne);
-        testWS->dataY(1)[i] =
+		  Y1[i] =
             peakTwoHeight *
             exp(-0.5 * pow(xdata[i] - peakTwoCentre, 2.) / sigmaSqTwo);
       }
