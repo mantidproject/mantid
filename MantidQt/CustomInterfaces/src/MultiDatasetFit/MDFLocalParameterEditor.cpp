@@ -189,9 +189,7 @@ void LocalParameterEditor::removeAllTies() {
 }
 
 /// Send a signal to set value to log
-void LocalParameterEditor::setToLog() {
-  emit setValueToLog(m_index);
-}
+void LocalParameterEditor::setToLog() { emit setValueToLog(m_index); }
 
 /// Filter events in the line editor to emulate a shortcut (F to fix/unfix).
 bool LocalParameterEditor::eventFilter(QObject *, QEvent *evn) {
