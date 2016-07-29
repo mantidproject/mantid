@@ -168,7 +168,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         # Find out local time
         if loglength > 0:
             # Locate time0
-            for key in list(logtimesdict.keys()):
+            for key in logtimesdict.keys():
                 times = logtimesdict[key]
                 if times is not None:
                     time0 = logtimesdict[key][0]
@@ -191,7 +191,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             vec_time = None
             init_abs_time = 0
             # Try to get the time vector
-            for log in list(logtimesdict.keys()):
+            for log in logtimesdict.keys():
                 if logtimesdict[log] is not None:
                     time0 = logtimesdict[log][0]
                     init_abs_time = time0.totalNanoseconds() * 1.E-9 - localtimediff

@@ -314,7 +314,7 @@ class ExportExperimentLog(PythonAlgorithm):
         for il in range(len(self._sampleLogNames)):
             if skip is False:
                 headertitle = self._headerTitles[il]
-            if headertitle is not None and headertitle in list(self._ovrdTitleValueDict.keys()):
+            if headertitle is not None and headertitle in self._ovrdTitleValueDict.keys():
                 # overriden
                 value = self._ovrdTitleValueDict[headertitle]
 
@@ -323,9 +323,9 @@ class ExportExperimentLog(PythonAlgorithm):
                 logname = self._sampleLogNames[il]
                 optype = self._sampleLogOperations[il]
                 key = logname + "-" + optype
-                if key in list(logvaluedict.keys()):
+                if key in logvaluedict.keys():
                     value = logvaluedict[key]
-                elif logname in list(logvaluedict.keys()):
+                elif logname in logvaluedict.keys():
                     value = logvaluedict[logname]
             # ENDIFELSE
 
@@ -393,7 +393,7 @@ class ExportExperimentLog(PythonAlgorithm):
 
             # consider the mode to remove duplicate
             if self._removeDupRecord is True:
-                totnumlines = len(list(linedict.keys()))
+                totnumlines = len(linedict.keys())
 
             for ivalue in sorted(linedict.keys()):
                 if self._removeDupRecord is True:

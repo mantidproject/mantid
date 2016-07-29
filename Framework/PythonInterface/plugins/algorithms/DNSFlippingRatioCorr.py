@@ -68,10 +68,10 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         """
         # sort workspaces for sf and nsf
         nsf = []
-        for key in list(self.input_workspaces.keys()):
+        for key in self.input_workspaces.keys():
             if 'NSF' in key:
                 nsf.append(key)
-        for key in list(self.input_workspaces.keys()):
+        for key in self.input_workspaces.keys():
             wks = api.AnalysisDataService.retrieve(self.input_workspaces[key])
             run = wks.getRun()
             if not run.hasProperty('flipper'):
@@ -176,7 +176,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         workspaces = {"NSFDataWorkspace": None, "SFNiCrWorkspace": None, "NSFNiCrWorkspace": None,
                       "SFBkgrWorkspace": None, "NSFBkgrWorkspace": None}
 
-        for key in list(workspaces.keys()):
+        for key in workspaces.keys():
             workspaces[key] = self.getProperty(key).value
 
         # dimensions must match
@@ -185,7 +185,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         nhists = datasf.getNumberHistograms()
         nblocks = datasf.blocksize()
 
-        for key in list(workspaces.keys()):
+        for key in workspaces.keys():
             if workspaces[key].getNumDims() != ndims:
                 issues[key] = "Number of dimensions does not match to the data workspace."
             if workspaces[key].getNumberHistograms() != nhists:
