@@ -528,8 +528,8 @@ class BayesQuasi(PythonAlgorithm):
 
     def _get_res_norm(self, resnormWS,ngrp):
         if ngrp == 0:                                # read values from WS
-            dtnorm = mtd[resnormWS+'_Intensity'].readY(0)
-            xscale = mtd[resnormWS+'_Stretch'].readY(0)
+            dtnorm = s_api.mtd[resnormWS+'_Intensity'].readY(0)
+            xscale = s_api.mtd[resnormWS+'_Stretch'].readY(0)
         else:                                        # constant values
             dtnorm = []
             xscale = []
@@ -549,11 +549,11 @@ class BayesQuasi(PythonAlgorithm):
             resnorm_root = resnormWS[:-8]
 
         if readRes:                   # use ResNorm file option=o_res
-            Xin = mtd[resnorm_root+'_Intensity'].readX(0)
+            Xin = s_api.mtd[resnorm_root+'_Intensity'].readX(0)
             nrm = len(Xin)                        # no. points from length of x array
             if nrm == 0:
                 raise ValueError('ResNorm file has no Intensity points')
-            Xin = mtd[resnorm_root+'_Stretch'].readX(0)  # no. points from length of x array
+            Xin = s_api.mtd[resnorm_root+'_Stretch'].readX(0)  # no. points from length of x array
             if len(Xin) == 0:
                 raise ValueError('ResNorm file has no xscale points')
             if nrm != nsam:                # check that no. groups are the same
@@ -602,7 +602,7 @@ class BayesQuasi(PythonAlgorithm):
                 ws_name = ws_stem + '_Result'
             if plot_type == 'Prob' or plot_type == 'All':
                 prob_ws = ws_stem+'_Prob'
-                if prob_ws in mtd.getObjectNames():
+                if prob_ws in s_api.mtd.getObjectNames():
                     MTD_PLOT.plotSpectrum(prob_ws,[1,2],False)
 
             self._quasi_plot_parameters(ws_name, plot_type)
@@ -621,12 +621,12 @@ class BayesQuasi(PythonAlgorithm):
         @param plot_type :: the name of the parameter to plot (or All if all parameters should
                             be plotted)
         """
-        num_spectra = mtd[ws_name].getNumberHistograms()
+        num_spectra = s_api.mtd[ws_name].getNumberHistograms()
         param_names = ['Amplitude', 'FWHM', 'Beta']
 
         for param_name in param_names:
             if plot_type == param_name or plot_type == 'All':
-                spectra_indicies = [i for i in range(num_spectra) if param_name in mtd[ws_name].getAxis(1).label(i)]
+                spectra_indicies = [i for i in range(num_spectra) if param_name in s_api.mtd[ws_name].getAxis(1).label(i)]
 
                 if len(spectra_indicies) > 0:
                     plotSpectra(ws_name, param_name, indicies=spectra_indicies[:3])
