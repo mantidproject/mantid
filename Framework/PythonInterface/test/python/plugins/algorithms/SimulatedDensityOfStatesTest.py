@@ -240,5 +240,17 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
             self.assertAlmostEqual(expected_x_min,ws.readX(0)[0])
             self.assertAlmostEqual(bin_width,(ws.readX(0)[1] - ws.readX(0)[0]))
 
+
+    def test_element_index_loading(self):
+        """
+        Test that the individual indices for each element can be loaded seperately
+        """
+        wks_grp = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
+                                           SpectrumType='DOS',
+                                           CalculateIonIndex=True,
+                                           Ions='H,C,O')
+        self.assertEqual(20, len(wks_grp))
+
+
 if __name__=="__main__":
     unittest.main()
