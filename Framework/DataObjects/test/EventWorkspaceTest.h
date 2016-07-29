@@ -895,11 +895,10 @@ public:
     EventWorkspace_sptr ws =
         WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents,
                                                             numHistograms);
-    const auto *yOld = &ws->y(0);
+    auto y = ws->sharedY(0);
+    TS_ASSERT_EQUALS(y.use_count(), 2);
     ws->getSpectrum(0).clear();
-    // Access something else first to prevent accidental alloc in same position
-    ws->y(1);
-    TS_ASSERT_DIFFERS(yOld, &ws->y(0));
+    TS_ASSERT_EQUALS(y.use_count(), 1);
   }
 
   void test_swapping_spectrum_numbers_does_not_break_MRU() {
