@@ -47,7 +47,6 @@ EventWorkspace::~EventWorkspace() {
   clearData();
 }
 
-//-----------------------------------------------------------------------------
 /** Returns true if the EventWorkspace is safe for multithreaded operations.
  * WARNING: This is only true for OpenMP threading. EventWorkspace is NOT thread
  * safe with Poco threads or other threading mechanisms.
@@ -58,7 +57,6 @@ bool EventWorkspace::threadSafe() const {
   return true;
 }
 
-//-----------------------------------------------------------------------------
 /** Initialize the pixels
  *  @param NVectors :: The number of vectors/histograms/detectors in the
  * workspace. Does not need
@@ -95,7 +93,6 @@ void EventWorkspace::init(const std::size_t &NVectors,
   m_axes[1] = new API::SpectraAxis(this);
 }
 
-//-----------------------------------------------------------------------------
 /**
  * Copy all of the data (event lists) from the source workspace to this
  *workspace.
@@ -144,14 +141,12 @@ void EventWorkspace::copyDataFrom(const EventWorkspace &source,
   this->clearMRU();
 }
 
-//-----------------------------------------------------------------------------
 /// The total size of the workspace
 /// @returns the number of single indexable items in the workspace
 size_t EventWorkspace::size() const {
   return this->data.size() * this->blocksize();
 }
 
-//-----------------------------------------------------------------------------
 /// Get the blocksize, aka the number of bins in the histogram
 /// @returns the number of bins in the Y data
 size_t EventWorkspace::blocksize() const {
@@ -165,7 +160,6 @@ size_t EventWorkspace::blocksize() const {
   }
 }
 
-//-----------------------------------------------------------------------------
 /** Get the number of histograms, usually the same as the number of pixels or
  detectors.
  @returns the number of histograms / event lists
@@ -186,8 +180,6 @@ const EventList &EventWorkspace::getSpectrum(const size_t index) const {
         "EventWorkspace::getSpectrum, workspace index out of range");
   return *data[index];
 }
-
-//-----------------------------------------------------------------------------
 
 double EventWorkspace::getTofMin() const { return this->getEventXMin(); }
 
@@ -358,7 +350,6 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
   }
 }
 
-//-----------------------------------------------------------------------------
 /// The total number of events across all of the spectra.
 /// @returns The total number of events
 size_t EventWorkspace::getNumberEvents() const {
@@ -368,7 +359,6 @@ size_t EventWorkspace::getNumberEvents() const {
                          });
 }
 
-//-----------------------------------------------------------------------------
 /** Get the EventType of the most-specialized EventList in the workspace
  *
  * @return the EventType of the most-specialized EventList in the workspace
@@ -387,7 +377,6 @@ Mantid::API::EventType EventWorkspace::getEventType() const {
   return out;
 }
 
-//-----------------------------------------------------------------------------
 /** Switch all event lists to the given event type
  *
  * @param type :: EventType to switch to
@@ -397,24 +386,20 @@ void EventWorkspace::switchEventType(const Mantid::API::EventType type) {
     eventList->switchTo(type);
 }
 
-//-----------------------------------------------------------------------------
 /// Returns true always - an EventWorkspace always represents histogramm-able
 /// data
 /// @returns If the data is a histogram - always true for an eventWorkspace
 bool EventWorkspace::isHistogramData() const { return true; }
 
-//-----------------------------------------------------------------------------
 /** Return how many entries in the Y MRU list are used.
  * Only used in tests. It only returns the 0-th MRU list size.
  * @return :: number of entries in the MRU list.
  */
 size_t EventWorkspace::MRUSize() const { return mru->MRUSize(); }
 
-//-----------------------------------------------------------------------------
 /** Clears the MRU lists */
 void EventWorkspace::clearMRU() const { mru->clear(); }
 
-//-----------------------------------------------------------------------------
 /** Clear the data[] vector and delete
  * any EventList objects in it
  */
@@ -424,7 +409,6 @@ void EventWorkspace::clearData() {
   data.clear();
 }
 
-//-----------------------------------------------------------------------------
 /// Returns the amount of memory used in bytes
 size_t EventWorkspace::getMemorySize() const {
   // TODO: Add the MRU buffer
@@ -443,11 +427,6 @@ size_t EventWorkspace::getMemorySize() const {
   return total;
 }
 
-//-----------------------------------------------------------------------------
-// --- Data Access ----
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 /** Either return an existing EventList from the list, or
  * create a new one if needed and expand the list.
  *  to finalize the stuff that needs to.
@@ -622,7 +601,6 @@ EventWorkspace::refX(const std::size_t index) const {
   return getSpectrum(index).ptrX();
 }
 
-//---------------------------------------------------------------------------
 /** Using the event data in the event list, generate a histogram of it w.r.t
  *TOF.
  *
@@ -642,7 +620,6 @@ void EventWorkspace::generateHistogram(const std::size_t index,
   this->data[index]->generateHistogram(X, Y, E, skipError);
 }
 
-//---------------------------------------------------------------------------
 /** Using the event data in the event list, generate a histogram of it w.r.t
  *PULSE TIME.
  *
@@ -663,11 +640,6 @@ void EventWorkspace::generateHistogramPulseTime(const std::size_t index,
   this->data[index]->generateHistogramPulseTime(X, Y, E, skipError);
 }
 
-//-----------------------------------------------------------------------------
-// --- Histogramming ----
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 /*** Set all histogram X vectors.
  * @param x :: The X vector of histogram bins to use.
  */
@@ -682,7 +654,6 @@ void EventWorkspace::setAllX(const HistogramData::BinEdges &x) {
   this->clearMRU();
 }
 
-//-----------------------------------------------------------------------------
 /** Task for sorting an event list */
 class EventSortingTask final : public Task {
 public:
@@ -743,8 +714,6 @@ private:
   /// Optional Progress dialog.
   Mantid::API::Progress *prog;
 };
-
-//-----------------------------------------------------------------------------
 
 /*
  * Review each event list to get the sort type
@@ -816,7 +785,6 @@ void EventWorkspace::sortAll(EventSortType sortType,
   pool.joinAll();
 }
 
-//---------------------------------------------------------------------------------------
 /** Integrate all the spectra in the matrix workspace within the range given.
  * Default implementation, can be overridden by base classes if they know
  *something smarter!

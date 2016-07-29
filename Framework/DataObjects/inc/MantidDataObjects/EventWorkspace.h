@@ -1,10 +1,6 @@
 #ifndef MANTID_DATAOBJECTS_EVENTWORKSPACE_H_
 #define MANTID_DATAOBJECTS_EVENTWORKSPACE_H_ 1
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidDataObjects/EventList.h"
@@ -13,9 +9,6 @@
 #include <string>
 
 namespace Mantid {
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
 namespace API {
 class Progress;
 }
