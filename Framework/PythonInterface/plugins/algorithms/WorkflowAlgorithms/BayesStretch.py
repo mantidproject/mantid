@@ -223,13 +223,19 @@ class BayesStretch(PythonAlgorithm):
         #Add some sample logs to the output workspaces
         log_prog = Progress(self, start=0.8, end =1.0, nreports=6)
         log_prog.report('Copying Logs to Fit workspace')
-        s_api.CopyLogs(InputWorkspace=self._sam_name,
-                 OutputWorkspace=fit_ws)
+        copy_log_alg = self.createChildAlgorithm('CopyLogs', enableLogging=False)
+        copy_log_alg.setProperty('InputWorkspace', self._sam_name)
+        copy_log_alg.setProperty('OutputWorkspace',fit_ws)
+        copy_log_alg.execute()
+
         log_prog.report('Adding Sample logs to Fit workspace')
         self._add_sample_logs(fit_ws, self._erange, self._nbins[0])
+
         log_prog.report('Copying logs to Contour workspace')
-        s_api.CopyLogs(InputWorkspace=self._sam_name,
-                 OutputWorkspace=contour_ws)
+        copy_log_alg.setProperty('InputWorkspace',self._sam_name)
+        copy_log_alg.setProperty('OutputWorkspace',contour_ws)
+        copy_log_alg.execute()
+
         log_prog.report('Adding sample logs to Contour workspace')
         self._add_sample_logs(contour_ws, self._erange, self._nbins[0])
         log_prog.report('Finialising log copying')
