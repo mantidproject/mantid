@@ -216,6 +216,11 @@ void EditLocalParameterDialog::paste() {
   auto text = QApplication::clipboard()->text();
   auto vec = text.split(QRegExp("\\s|,"), QString::SkipEmptyParts);
   auto n = qMin(vec.size(), m_uiForm.tableWidget->rowCount());
+  // prepare for pasting data
+  auto deleg = static_cast<LocalParameterItemDelegate *>(
+      m_uiForm.tableWidget->itemDelegateForColumn(valueColumn));
+  deleg->prepareForPastedData();
+  // insert data into table
   for (int i = 0; i < n; ++i) {
     auto str = vec[i];
     bool ok;

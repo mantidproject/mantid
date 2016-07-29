@@ -110,6 +110,15 @@ void LocalParameterItemDelegate::doSetAllValuesToLog() {
   emit setAllValuesToLog();
 }
 
+/**
+ * Data is about to be pasted into the table.
+ * Prepare for this by:
+ *   - closing the editor
+ */
+void LocalParameterItemDelegate::prepareForPastedData() {
+  closeEditor(m_currentEditor);
+}
+
 } // MDF
 } // CustomInterfaces
 } // MantidQt

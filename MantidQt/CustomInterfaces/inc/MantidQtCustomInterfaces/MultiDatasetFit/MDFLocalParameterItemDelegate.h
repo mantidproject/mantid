@@ -28,6 +28,8 @@ public:
   void setEditorData(QWidget *editor, const QModelIndex &index) const override;
   void setModelData(QWidget *editor, QAbstractItemModel *model,
                     const QModelIndex &index) const override;
+  void prepareForPastedData();
+
 signals:
   void setAllValues(double);
   void fixParameter(int, bool);
