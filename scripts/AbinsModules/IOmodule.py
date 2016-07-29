@@ -77,10 +77,10 @@ class IOmodule(object):
         @param group: group to which attributes should be saved.
         """
         for name in self._attributes:
-            if isinstance(self._attributes[name], (numpy.int64, int, numpy.float64, str, bytes)):
+            if isinstance(self._attributes[name], (numpy.int64, int, numpy.float64, float, str, bytes)):
                 group.attrs[name] = self._attributes[name]
             else:
-                raise ValueError("Invalid value of attribute. String, int or bytes was expected!")
+                raise ValueError("Invalid value of attribute. String, int or bytes was expected! (invalid type : %s)" %type(self._attributes[name]))
 
     def _recursively_save_structured_data_to_group(self, hdf_file=None, path=None, dic=None):
         """
