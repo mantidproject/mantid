@@ -901,6 +901,27 @@ public:
     ws->y(1);
     TS_ASSERT_DIFFERS(yOld, &ws->y(0));
   }
+
+  void test_swapping_spectrum_numbers_does_not_break_MRU() {
+    int numEvents = 2;
+    int numHistograms = 2;
+    EventWorkspace_sptr ws =
+        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents,
+                                                            numHistograms);
+    // put two items into MRU
+    auto &yOld0 = ws->y(0);
+    auto &yOld1 = ws->y(1);
+    TS_ASSERT_DIFFERS(&yOld0, &yOld1);
+    TS_ASSERT_EQUALS(ws->getSpectrum(0).getSpectrumNo(), 0);
+    TS_ASSERT_EQUALS(ws->getSpectrum(1).getSpectrumNo(), 1);
+    TS_ASSERT_DIFFERS(&(ws->y(0)), &yOld1);
+    // swap their spectrum numbers
+    ws->getSpectrum(0).setSpectrumNo(1);
+    ws->getSpectrum(1).setSpectrumNo(0);
+    TS_ASSERT_EQUALS(ws->getSpectrum(0).getSpectrumNo(), 1);
+    // spectrum number of index 0 is now 1, MRU should not mix up data
+    TS_ASSERT_DIFFERS(&(ws->y(0)), &yOld1);
+  }
 };
 
 #endif /* EVENTWORKSPACETEST_H_ */
