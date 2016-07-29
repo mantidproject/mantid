@@ -1,6 +1,7 @@
 #ifndef MULTIDATASETFIT_H_
 #define MULTIDATASETFIT_H_
 
+#include "MantidKernel/Statistics.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "ui_MultiDatasetFit.h"
@@ -78,7 +79,8 @@ public:
   /// Get log names from workspace(s)
   std::vector<std::string> getLogNames() const;
   /// Get value of log from spectrum
-  double getLogValue(const QString &logName, const QString &function,
+  double getLogValue(const QString &logName,
+                     const Mantid::Kernel::Math::StatisticType &function,
                      int i) const;
 
   /// Make it public

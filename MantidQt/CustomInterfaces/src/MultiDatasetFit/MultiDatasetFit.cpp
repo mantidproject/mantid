@@ -26,6 +26,7 @@ const int rangeToolPage = 1;
 
 namespace MantidQt {
 namespace CustomInterfaces {
+using Mantid::Kernel::Math::StatisticType;
 
 // Register the class with the factory
 DECLARE_SUBWINDOW(MultiDatasetFit)
@@ -733,7 +734,8 @@ std::vector<std::string> MultiDatasetFit::getLogNames() const {
  * @returns :: Value of the named log for given spectrum
  */
 double MultiDatasetFit::getLogValue(const QString &logName,
-                                    const QString &function, int i) const {
+                                    const StatisticType &function,
+                                    int i) const {
   return m_dataController->getLogValue(logName, function, i);
 }
 

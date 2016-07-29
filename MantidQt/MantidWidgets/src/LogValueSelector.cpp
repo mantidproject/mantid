@@ -1,7 +1,17 @@
 #include "MantidQtMantidWidgets/LogValueSelector.h"
 
+using Mantid::Kernel::Math::StatisticType;
+
 namespace MantidQt {
 namespace MantidWidgets {
+
+// Convert strings to enum values
+const std::map<std::string, StatisticType> LogValueSelector::STRING_TO_FUNC = {
+    {"Mean", StatisticType::Mean},
+    {"Min", StatisticType::Minimum},
+    {"Max", StatisticType::Maximum},
+    {"First", StatisticType::FirstValue},
+    {"Last", StatisticType::LastValue}};
 
 /**
  * Constructor for the widget
@@ -34,8 +44,17 @@ QString LogValueSelector::getLog() const { return m_ui.log->currentText(); }
  * Get selected function text
  * @returns Text selected in function dropdown
  */
-QString LogValueSelector::getFunction() const {
+QString LogValueSelector::getFunctionText() const {
   return m_ui.function->currentText();
+}
+
+/**
+ * Get selected function
+ * @returns Function selected in dropdown
+ */
+StatisticType LogValueSelector::getFunction() const {
+  const auto &text = getFunctionText().toStdString();
+  return STRING_TO_FUNC.at(text);
 }
 
 /**

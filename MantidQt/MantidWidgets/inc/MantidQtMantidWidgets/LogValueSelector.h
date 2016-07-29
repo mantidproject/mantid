@@ -3,6 +3,7 @@
 
 #include "ui_LogValueSelector.h"
 #include "WidgetDllOption.h"
+#include "MantidKernel/Statistics.h"
 #include "MantidQtAPI/MantidWidget.h"
 
 namespace MantidQt {
@@ -42,7 +43,10 @@ public:
   QString getLog() const;
 
   /// Get selected function text
-  QString getFunction() const;
+  QString getFunctionText() const;
+
+  /// Get selected function enum value
+  Mantid::Kernel::Math::StatisticType getFunction() const;
 
   /// Whether checkbox is shown or not
   bool isCheckboxShown() const;
@@ -75,6 +79,10 @@ private:
 
   /// User interface
   Ui::LogValueSelector m_ui;
+
+  /// Converts strings like "Mean" or "Max" to enum values
+  static const std::map<std::string, Mantid::Kernel::Math::StatisticType>
+      STRING_TO_FUNC;
 };
 
 } // namespace MantidWidgets

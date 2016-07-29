@@ -276,29 +276,16 @@ std::vector<std::string> DataController::getWorkspaceLogNames(int i) const {
  * @returns :: value of log cast to double
  */
 double DataController::getLogValue(const QString &logName,
-                                   const QString &function, int i) const {
-  // parse function
-  const StatisticType statType = [&function]() {
-    if (function == "Min") {
-      return StatisticType::Minimum;
-    } else if (function == "Max") {
-      return StatisticType::Maximum;
-    } else if (function == "First") {
-      return StatisticType::FirstValue;
-    } else if (function == "Last") {
-      return StatisticType::LastValue;
-    } else { // default
-      return StatisticType::Mean;
-    }
-  }();
-
+                                   const StatisticType &function, int i) const {
   auto &ads = Mantid::API::AnalysisDataService::Instance();
   const auto &wsName = getWorkspaceName(i).toStdString();
   if (ads.doesExist(wsName)) {
     const auto &workspace =
-      ads.retrieveWS<Mantid::API::MatrixWorkspace>(wsName);
+        ads.retrieveWS<Mantid::API::MatrixWorkspace>(wsName);
     return workspace->run().getLogAsSingleValue(logName.toStdString(),
-                                                statType);
+                                                function);
+  } else {
+    throw std::runtime_error("Workspace not found: " + wsName);
   }
 }
 

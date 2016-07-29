@@ -95,7 +95,7 @@ std::string ALCDataLoadingView::log() const {
 }
 
 std::string ALCDataLoadingView::function() const {
-  return m_ui.logValueSelector->getFunction().toStdString();
+  return m_ui.logValueSelector->getFunctionText().toStdString();
 }
 
 std::string ALCDataLoadingView::calculationType() const {

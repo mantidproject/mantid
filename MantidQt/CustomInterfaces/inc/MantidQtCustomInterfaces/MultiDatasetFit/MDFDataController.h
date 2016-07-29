@@ -1,6 +1,7 @@
 #ifndef MDFDATACONTROLLER_H_
 #define MDFDATACONTROLLER_H_
 
+#include <MantidKernel/Statistics.h>
 #include <QObject>
 
 // Forward declaration
@@ -45,7 +46,8 @@ public:
   void checkSpectra();
   std::pair<double, double> getFittingRange(int i) const;
   std::vector<std::string> getWorkspaceLogNames(int i) const;
-  double getLogValue(const QString &logName, const QString &function,
+  double getLogValue(const QString &logName,
+                     const Mantid::Kernel::Math::StatisticType &function,
                      int i) const;
 
 signals:
