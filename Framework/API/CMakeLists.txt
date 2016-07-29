@@ -132,6 +132,7 @@ set ( SRC_FILES
 	src/WorkspaceFactory.cpp
 	src/WorkspaceGroup.cpp
 	src/WorkspaceHistory.cpp
+	src/WorkspaceListProperty.cpp
 	src/WorkspaceOpOverloads.cpp
 	src/WorkspaceProperty.cpp
 	src/WorkspaceUnitValidator.cpp
@@ -320,6 +321,7 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceGroup.h
 	inc/MantidAPI/WorkspaceGroup_fwd.h
 	inc/MantidAPI/WorkspaceHistory.h
+	inc/MantidAPI/WorkspaceListProperty.h
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
 	inc/MantidAPI/WorkspaceUnitValidator.h
@@ -421,6 +423,7 @@ set ( TEST_FILES
 	WorkspaceGroupTest.h
 	WorkspaceHistoryIOTest.h
 	WorkspaceHistoryTest.h
+	WorkspaceListPropertyTest.h
 	WorkspaceOpOverloadsTest.h
 	WorkspacePropertyTest.h
 	WorkspaceUnitValidatorTest.h
