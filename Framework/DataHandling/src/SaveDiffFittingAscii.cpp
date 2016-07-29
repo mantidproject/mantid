@@ -8,6 +8,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "Poco/File.h"
 #include <boost/tokenizer.hpp>
@@ -53,9 +54,15 @@ void SaveDiffFittingAscii::init() {
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "Bank of the focused file used to generate the parameters.");
 
+  std::vector<std::string> formats;
+
+  formats.push_back("AppendToExistingFile");
+  formats.push_back("WriteGroupWorkspace");
   declareProperty(
-      "AppendToFile", true,
-      "If true and Filename already exists, append, else overwrite ");
+      "OutFormat", "AppendToExistingFile",
+      boost::make_shared<Kernel::StringListValidator>(formats),
+      "Append data to existing file or save multiple table workspaces"
+      "in a group workspace");
 }
 
 /**
@@ -73,10 +80,17 @@ void SaveDiffFittingAscii::exec() {
     throw std::runtime_error("Please provide an input workspace to be saved.");
 
   const std::string filename = getProperty("Filename");
-  //  std::ofstream file(filename.c_str());
+
+  Poco::File pFile = (filename);
+  bool exist = pFile.exists();
+  g_log.error() << "exist " << exist << std::endl; // @shahroz
 
   // Initialize the file stream
-  const bool appendToFile = getProperty("AppendToFile");
+  std::string outFormat = getProperty("OutFormat");
+
+  bool appendToFile = false;
+  if (outFormat == "AppendToExistingFile")
+    appendToFile = true;
 
   std::ofstream file(filename.c_str(),
                      (appendToFile ? std::ios::app : std::ios::out));
