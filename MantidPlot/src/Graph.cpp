@@ -5851,11 +5851,6 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   for (auto it = legendSections.begin(); it != legendSections.end(); ++it)
     insertText("legend", *it);
 
-  std::vector<std::string> lineSections = tsv.sections("line");
-  for (auto it = lineSections.begin(); it != lineSections.end(); ++it) {
-    QStringList sl = QString::fromUtf8((*it).c_str()).split("\t");
-    addArrow(sl, fileVersion);
-  }
 
   if (tsv.selectLine("Margin")) {
     int margin;
@@ -5941,6 +5936,14 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
                scl[3].toDouble(), scl[4].toInt(), scl[5].toInt(),
                scl[6].toInt(), bool(scl[7].toInt()));
     }
+  }
+
+  // Line sections must be loaded after setScale above.
+  // otherwise the line markers are lost.
+  std::vector<std::string> lineSections = tsv.sections("line");
+  for (auto it = lineSections.begin(); it != lineSections.end(); ++it) {
+    QStringList sl = QString::fromUtf8((*it).c_str()).split("\t");
+    addArrow(sl, fileVersion);
   }
 
   for (int i = 0; i < 4; ++i) {
