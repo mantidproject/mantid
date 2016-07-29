@@ -215,10 +215,10 @@ class BayesStretch(PythonAlgorithm):
         group = fname + '_Sigma,' + fname + '_Beta'
         fit_ws = fname + '_Fit'
         s_api.GroupWorkspaces(InputWorkspaces=group,
-                        OutputWorkspace=fit_ws)
+                              OutputWorkspace=fit_ws)
         contour_ws = fname + '_Contour'
         s_api.GroupWorkspaces(InputWorkspaces=groupZ,
-                        OutputWorkspace=contour_ws)
+                              OutputWorkspace=contour_ws)
 
         #Add some sample logs to the output workspaces
         log_prog = Progress(self, start=0.8, end =1.0, nreports=6)
