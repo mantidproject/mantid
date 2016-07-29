@@ -84,6 +84,7 @@ private:
   int validateVanadium(const std::string &);
 
   API::MatrixWorkspace_sptr m_localWorkspace;
+  API::MatrixWorkspace_sptr m_monitorWorkspace;
 
   //	NeXus::NXRoot m_dataRoot;
   //	NeXus::NXRoot m_vanaRoot;

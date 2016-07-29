@@ -105,6 +105,7 @@ void LoadILL::exec() {
   std::string filenameData = getPropertyValue("Filename");
   std::string filenameVanadium = getPropertyValue("FilenameVanadium");
   MatrixWorkspace_sptr vanaWS = getProperty("WorkspaceVanadium");
+  std::string outputWSName = getPropertyValue("OutputWorkspace");
 
   // open the root node
   NeXus::NXRoot dataRoot(filenameData);
@@ -135,6 +136,10 @@ void LoadILL::exec() {
 
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
+
+  // Set the monitor workspace
+  std::string monitorWSName = outputWSName + "_monitors";
+  AnalysisDataService::Instance().add(monitorWSName, m_monitorWorkspace);
 }
 
 /**
@@ -266,10 +271,14 @@ void LoadILL::initWorkSpace(NeXus::NXEntry &entry,
   // bin boundaries = m_numberOfChannels + 1
   // Z/time dimension
   m_localWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", m_numberOfHistograms + numberOfMonitors,
+      "Workspace2D", m_numberOfHistograms,
       m_numberOfChannels + 1, m_numberOfChannels);
+  m_monitorWorkspace = WorkspaceFactory::Instance().create(
+            "Workspace2D", numberOfMonitors,
+            m_numberOfChannels + 1, m_numberOfChannels);
   m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   m_localWorkspace->setYUnitLabel("Counts");
+  m_localWorkspace->setMonitorWorkspace(m_monitorWorkspace);
 }
 
 /**
@@ -517,18 +526,24 @@ void LoadILL::loadDataIntoTheWorkSpace(
   // The binning for monitors is considered the same as for detectors
   size_t spec = 0;
 
-  for (const auto &monitor : monitors) {
+  auto const &instrument = m_localWorkspace->getInstrument();
+  std::vector<detid_t> monitorIDs = instrument->getMonitors();
 
-    m_localWorkspace->dataX(spec)
+  for (const auto &monitor : monitors) {
+    m_monitorWorkspace->dataX(spec)
         .assign(detectorTofBins.begin(), detectorTofBins.end());
     // Assign Y
-    m_localWorkspace->dataY(spec).assign(monitor.begin(), monitor.end());
+    m_monitorWorkspace->dataY(spec).assign(monitor.begin(), monitor.end());
     // Assign Error
-    MantidVec &E = m_localWorkspace->dataE(spec);
+    MantidVec &E = m_monitorWorkspace->dataE(spec);
     std::transform(monitor.begin(), monitor.end(), E.begin(),
                    LoadILL::calculateError);
+    m_monitorWorkspace->getSpectrum(spec).setDetectorID(monitorIDs[spec]);
     ++spec;
   }
+
+  spec = 0;
+  std::vector<detid_t> detectorIDs = instrument->getDetectorIDs(true);
 
   // Assign calculated bins to first X axis
   size_t firstSpec = spec;
@@ -551,7 +566,7 @@ void LoadILL::loadDataIntoTheWorkSpace(
       MantidVec &E = m_localWorkspace->dataE(spec);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
                      LoadILL::calculateError);
-
+      m_localWorkspace->getSpectrum(spec).setDetectorID(detectorIDs[spec]);
       ++spec;
       progress.report();
     }
@@ -606,7 +621,18 @@ void LoadILL::runLoadInstrument() {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
     loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(true));
+                          Mantid::Kernel::OptionalBool(false));
+    loadInst->execute();
+  } catch (...) {
+    g_log.information("Cannot load the instrument definition.");
+  }
+
+  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+  try {
+    loadInst->setPropertyValue("InstrumentName", m_instrumentName);
+    loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_monitorWorkspace);
+    loadInst->setProperty("RewriteSpectraMap",
+                          Mantid::Kernel::OptionalBool(false));
     loadInst->execute();
   } catch (...) {
     g_log.information("Cannot load the instrument definition.");
