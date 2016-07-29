@@ -79,8 +79,9 @@ bool MANTID_KERNEL_DLL isConstantValue(const std::vector<double> &arra);
  * @param v :: the vector of vectors to be flattened.
  * @return a single vector containing all elements in v.
  */
-template<typename T>
-std::vector<T> MANTID_KERNEL_DLL flattenVector(const std::vector<std::vector<T>> &v) {
+template <typename T>
+std::vector<T> MANTID_KERNEL_DLL
+flattenVector(const std::vector<std::vector<T>> &v) {
   std::vector<T> flattened;
 
   for (const auto &subVector : v) {

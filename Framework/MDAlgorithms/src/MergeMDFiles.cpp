@@ -355,8 +355,7 @@ void MergeMDFiles::exec() {
     throw std::logic_error(
         "Filenames property must have MultipleFileProperty type.");
   }
-  m_Filenames =
-      VectorHelper::flattenVector(multiFileProp->operator()());
+  m_Filenames = VectorHelper::flattenVector(multiFileProp->operator()());
   if (m_Filenames.empty())
     throw std::invalid_argument("Must specify at least one filename.");
   std::string firstFile = m_Filenames[0];
