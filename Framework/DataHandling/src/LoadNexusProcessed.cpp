@@ -33,6 +33,10 @@
 
 #include <nexus/NeXusException.hpp>
 
+#include <map>
+#include <string>
+#include <vector>
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -1657,6 +1661,38 @@ void LoadNexusProcessed::readInstrumentGroup(
   }
 }
 
+/**
+ * Validates SpectrumMin and SpectrumMax conditions
+ * @return Returns a map indicating invalid input combinations
+ */
+std::map<std::string, std::string> LoadNexusProcessed::validateInputs() {
+  using namespace std;
+  map<string, string> errorList;
+
+  int64_t specMin = getProperty("SpectrumMin");
+  int64_t specMax = getProperty("SpectrumMax");
+
+  // Check our range is not reversed
+  if (specMax < specMin) {
+    errorList["SpectrumMin"] = "SpectrumMin must be smaller than SpectrumMax";
+    errorList["SpectrumMax"] = "SpectrumMax must be larger than SpectrumMin";
+  }
+
+  // Next check that SpecMax is less than maximum int
+  if (specMax > INT_MAX) {
+    errorList["SpectrumMax"] =
+        "SpectrumMax must be less than " + to_string(INT_MAX);
+  }
+
+  if (specMin > INT_MAX) {
+    errorList["SpectrumMin"] =
+        "SpectrumMin must be less than " + to_string(INT_MAX);
+  }
+
+  // Finished testing return any errors
+  return errorList;
+}
+
 //-------------------------------------------------------------------------------------------------
 /**
 * Loads the information contained in non-Spectra (ie, Text or Numeric) axis
@@ -2065,7 +2101,6 @@ void LoadNexusProcessed::checkOptionalProperties(
 
   // Check validity of spectra list property, if set
   if (m_list) {
-    m_list = true;
     const int64_t minlist =
         *min_element(m_spec_list.begin(), m_spec_list.end());
     const int64_t maxlist =

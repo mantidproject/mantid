@@ -105,8 +105,23 @@ public:
     HistogramData::Histogram histogram(std::forward<T>(data)...);
     // Check for the special case EventList, it only accepts histograms without
     // Y and E data.
-    checkHistogram(histogram);
+    checkAndSanitizeHistogram(histogram);
     mutableHistogramRef() = std::move(histogram);
+  }
+
+  HistogramData::Histogram::YMode yMode() const {
+    return histogramRef().yMode();
+  }
+  void setYMode(HistogramData::Histogram::YMode ymode) {
+    mutableHistogramRef().setYMode(ymode);
+  }
+  void convertToCounts() {
+    checkIsYAndEWritable();
+    mutableHistogramRef().convertToCounts();
+  }
+  void convertToFrequencies() {
+    checkIsYAndEWritable();
+    mutableHistogramRef().convertToFrequencies();
   }
 
   HistogramData::BinEdges binEdges() const { return histogramRef().binEdges(); }
@@ -236,7 +251,7 @@ public:
   }
 
 protected:
-  virtual void checkHistogram(const HistogramData::Histogram &) const {}
+  virtual void checkAndSanitizeHistogram(HistogramData::Histogram &) {}
   virtual void checkWorksWithPoints() const {}
   virtual void checkIsYAndEWritable() const {}
 
