@@ -222,7 +222,7 @@ void EditLocalParameterDialog::paste() {
     m_values[i] = str.toDouble(&ok);
     if (!ok)
       str = "0";
-    m_uiForm.tableWidget->item(i, 1)->setText(str);
+    m_uiForm.tableWidget->item(i, valueColumn)->setText(str);
   }
 }
 
