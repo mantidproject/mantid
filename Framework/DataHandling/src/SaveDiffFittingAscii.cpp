@@ -52,6 +52,10 @@ void SaveDiffFittingAscii::init() {
   declareProperty("Bank", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "Bank of the focused file used to generate the parameters.");
+
+  declareProperty(
+      "AppendToFile", true,
+      "If true and Filename already exists, append, else overwrite ");
 }
 
 /**
@@ -64,23 +68,39 @@ void SaveDiffFittingAscii::exec() {
 
   // Retrieve the input workspace
   /// Workspace
-  ITableWorkspace_sptr tbl_ws = getProperty("InputWorkspace");
+  const ITableWorkspace_sptr tbl_ws = getProperty("InputWorkspace");
   if (!tbl_ws)
     throw std::runtime_error("Please provide an input workspace to be saved.");
 
-  std::string filename = getProperty("Filename");
-  std::ofstream file(filename.c_str());
+  const std::string filename = getProperty("Filename");
+  //  std::ofstream file(filename.c_str());
+
+  // Initialize the file stream
+  const bool appendToFile = getProperty("AppendToFile");
+
+  std::ofstream file(filename.c_str(),
+                     (appendToFile ? std::ios::app : std::ios::out));
 
   if (!file) {
     throw Exception::FileError("Unable to create file: ", filename);
   }
 
-  std::string runNum = getProperty("RunNumber");
+  Poco::File pFile = (filename);
+  bool exist = pFile.exists();
+
+  if (exist && appendToFile) {
+  }
+
+  if (exist && !appendToFile) {
+    g_log.warning() << "File " << filename << " exists and will be overwritten."
+                    << "\n";
+  }
+
+  const std::string runNum = getProperty("RunNumber");
   file << "run number: " << runNum << m_endl;
 
-  std::string bank = getProperty("Bank");
+  const std::string bank = getProperty("Bank");
   file << "bank: " << bank << m_endl;
-
 
   std::vector<std::string> columnHeadings = tbl_ws->getColumnNames();
   for (auto &heading : columnHeadings) {
@@ -96,9 +116,8 @@ void SaveDiffFittingAscii::exec() {
     for (size_t columnIndex = 0; columnIndex < columnHeadings.size();
          columnIndex++) {
 
-      // if (tbl_ws->getColumn(columnIndex)->type() != "float") {
-		auto row_str = boost::lexical_cast<std::string>(row.Double(columnIndex));
-		g_log.error() << row_str << std::endl;
+      auto row_str = boost::lexical_cast<std::string>(row.Double(columnIndex));
+      g_log.debug() << row_str << std::endl;
 
       if (columnIndex == columnHeadings.size() - 1)
         writeVal(row_str, file, true);
