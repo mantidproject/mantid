@@ -52,8 +52,6 @@ void ISpectrum::addDetectorID(const detid_t detID) {
  * @param detIDs :: set of detector IDs to insert in set.
  */
 void ISpectrum::addDetectorIDs(const std::set<detid_t> &detIDs) {
-  if (detIDs.empty())
-    return;
   this->detectorIDs.insert(detIDs.begin(), detIDs.end());
 }
 
@@ -62,8 +60,6 @@ void ISpectrum::addDetectorIDs(const std::set<detid_t> &detIDs) {
  * @param detIDs :: vector of detector IDs to insert in set.
  */
 void ISpectrum::addDetectorIDs(const std::vector<detid_t> &detIDs) {
-  if (detIDs.empty())
-    return;
   this->detectorIDs.insert(detIDs.begin(), detIDs.end());
 }
 
@@ -90,11 +86,7 @@ void ISpectrum::setDetectorIDs(const std::set<detid_t> &detIDs) {
  *  @param detIDs The new list of detector ID numbers
  */
 void ISpectrum::setDetectorIDs(std::set<detid_t> &&detIDs) {
-#if !(defined(__INTEL_COMPILER))
   detectorIDs = std::move(detIDs);
-#else
-  detectorIDs = detIDs; // No moving on the Mac :(
-#endif
 }
 
 // --------------------------------------------------------------------------
