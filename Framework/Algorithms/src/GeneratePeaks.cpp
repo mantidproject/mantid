@@ -21,6 +21,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 namespace Mantid {
 namespace Algorithms {
@@ -703,8 +704,7 @@ API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace() {
     // Only copy the X-values from spectra with peaks specified in the table
     // workspace.
     for (const auto &iws : m_spectraSet) {
-      outputWS->mutableX(iws)
-          .assign(inputWS->x(iws).begin(), inputWS->x(iws).end());
+      outputWS->setSharedX(iws, inputWS->sharedX(iws));
     }
 
     m_newWSFromParent = true;
@@ -737,8 +737,8 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
   }
 
   double x0 = binparameters[0];
-  double dx = binparameters[1];
-  double xf = binparameters[2];
+  double dx = binparameters[1]; // binDelta
+  double xf = binparameters[2]; // max value
   if (x0 >= xf || (xf - x0) < dx || dx == 0.) {
     std::stringstream errss;
     errss << "Order of input binning parameters is not correct.  It is not "
@@ -748,9 +748,9 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
     throw std::invalid_argument(errss.str());
   }
 
-  // Determine number of x values
   std::vector<double> xarray;
   double xvalue = x0;
+
   while (xvalue <= xf) {
     // Push current value to vector
     xarray.push_back(xvalue);
@@ -763,11 +763,13 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
   }
   size_t numxvalue = xarray.size();
 
+  BinEdges xArrayEdges(xarray);
+
   // Create new workspace
   MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
       "Workspace2D", m_spectraSet.size(), numxvalue, numxvalue - 1);
   for (size_t ip = 0; ip < m_spectraSet.size(); ip++) {
-    ws->mutableX(ip).assign(xarray.begin(), xarray.end());
+    ws->setBinEdges(ip, xArrayEdges);
   }
   // Set spectrum numbers
   std::map<specnum_t, specnum_t>::iterator spiter;
