@@ -125,8 +125,7 @@ void EventWorkspace::copyDataFrom(const EventWorkspace &source,
   this->clearData(); // properly de-allocates memory!
 
   // Copy the vector of EventLists
-  EventListVector source_data = source.data;
-  EventListVector::iterator it;
+  const auto &source_data = source.data;
   auto it_start = source_data.begin();
   auto it_end = source_data.end();
   size_t source_data_size = source_data.size();
@@ -141,7 +140,7 @@ void EventWorkspace::copyDataFrom(const EventWorkspace &source,
     it_end = source_data.begin() + sourceEndWorkspaceIndex + 1;
   }
 
-  for (it = it_start; it != it_end; ++it) {
+  for (auto it = it_start; it != it_end; ++it) {
     // Create a new event list, copying over the events
     auto newel = new EventList(**it);
     // Make sure to update the MRU to point to THIS event workspace.
@@ -403,10 +402,8 @@ Mantid::API::EventType EventWorkspace::getEventType() const {
  * @param type :: EventType to switch to
  */
 void EventWorkspace::switchEventType(const Mantid::API::EventType type) {
-  for (EventListVector::const_iterator it = this->data.begin();
-       it != this->data.end(); ++it) {
-    (*it)->switchTo(type);
-  }
+  for (auto &eventList : this->data)
+    eventList->switchTo(type);
 }
 
 //-----------------------------------------------------------------------------
@@ -553,27 +550,17 @@ void EventWorkspace::padSpectra(const std::vector<int32_t> &specList) {
 }
 
 void EventWorkspace::deleteEmptyLists() {
-  // figure out how much data to copy
-  size_t orig_length = this->data.size();
-  size_t new_length = 0;
-  for (size_t i = 0; i < orig_length; i++) {
-    if (!(this->data[i]->empty()))
-      new_length++;
-  }
-
   // copy over the data
-  EventListVector notEmpty;
-  notEmpty.reserve(new_length);
-  for (size_t i = 0; i < orig_length; i++) {
-    if (!(this->data[i]->empty()))
-      notEmpty.push_back(this->data[i]);
+  std::vector<EventList *> notEmpty;
+  for (auto &eventList : this->data) {
+    if (!eventList->empty())
+      notEmpty.push_back(eventList);
     else
-      delete this->data[i];
+      delete eventList;
   }
 
   // replace the old vector
   this->data.swap(notEmpty);
-
   this->m_noVectors = this->data.size();
 
   // Clearing the MRU list is a good idea too.
