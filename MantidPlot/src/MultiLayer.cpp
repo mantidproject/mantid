@@ -1754,12 +1754,11 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
   Mantid::Kernel::Strings::convert<int>(values[2], cols);
   QString birthDate = QString::fromStdString(values[3]);
 
-  QString label = caption;
-
-  auto multiLayer = new MultiLayer(app, 0, rows, cols);
-
   TSVSerialiser tsv(lines);
 
+  auto multiLayer = new MultiLayer(app, 0, rows, cols);
+  multiLayer->setBirthDate(birthDate);
+  app->setListViewDate(caption, birthDate);
   multiLayer->blockSignals(true);
 
   if (tsv.selectLine("WindowLabel")) {
@@ -1820,9 +1819,9 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
 
   multiLayer->blockSignals(false);
 
-  multiLayer->setBirthDate(birthDate);
-  app->initMultilayerPlot(multiLayer, label.replace(QRegExp("_"), "-"));
-  app->setListViewDate(caption, birthDate);
+  QString label = caption;
+  label = label.replace(QRegExp("_"), "-");
+  app->initMultilayerPlot(multiLayer, label);
 
   if (tsv.hasLine("geometry")) {
     app->restoreWindowGeometry(

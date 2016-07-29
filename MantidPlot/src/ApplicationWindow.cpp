@@ -5917,7 +5917,7 @@ std::string ApplicationWindow::windowGeometryInfo(MdiSubWindow *w) {
     x = wrapper->x();
     y = wrapper->y();
     if (w->getFloatingWindow()) {
-      QPoint pos = QPoint(x, y) - mdiAreaTopLeft();
+      QPoint pos = QPoint(x, y);
       x = pos.x();
       y = pos.y();
     }
