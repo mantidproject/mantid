@@ -894,9 +894,6 @@ void EventList::clearData() { this->clear(false); }
  */
 void EventList::setMRU(EventWorkspaceMRU *newMRU) { mru = newMRU; }
 
-/** Return the MRU list for this event list */
-EventWorkspaceMRU *EventList::getMRU() { return mru; }
-
 /** Reserve a certain number of entries in the (NOT-WEIGHTED) event list. Do NOT
  *call
  * on weighted events!
