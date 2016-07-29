@@ -47,20 +47,24 @@ public:
   /// Destructor
   ~ReflMainWindowPresenter() override;
   /// Returns global options for 'Plus' algorithm
-  std::string getPlusOptions() const;
+  std::string getPlusOptions() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
-  std::string getTransmissionOptions() const;
+  std::string getTransmissionOptions() const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
-  std::string getReductionOptions() const;
+  std::string getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
-  std::string getStitchOptions() const;
+  std::string getStitchOptions() const override;
   /// Dialog/Prompt methods
   std::string askUserString(const std::string &prompt, const std::string &title,
                             const std::string &defaultValue) override;
-  bool askUserYesNo(std::string prompt, std::string title) override;
-  void giveUserWarning(std::string prompt, std::string title) override;
-  void giveUserCritical(std::string prompt, std::string title) override;
-  void giveUserInfo(std::string prompt, std::string title) override;
+  bool askUserYesNo(const std::string &prompt,
+                    const std::string &title) override;
+  void giveUserWarning(const std::string &prompt,
+                       const std::string &title) override;
+  void giveUserCritical(const std::string &prompt,
+                        const std::string &title) override;
+  void giveUserInfo(const std::string &prompt,
+                    const std::string &title) override;
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
 
 private:
