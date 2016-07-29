@@ -464,7 +464,7 @@ def convertToElasticQ(input_ws, output_ws=None):
     if axis.isSpectra():
         e_fixed = getEfixed(input_ws)
         s_api.ConvertSpectrumAxis(input_ws, Target='ElasticQ', EMode='Indirect', EFixed=e_fixed,
-                            OutputWorkspace=output_ws)
+                                  OutputWorkspace=output_ws)
 
     elif axis.isNumeric():
         # Check that units are Momentum Transfer
