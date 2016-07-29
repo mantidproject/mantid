@@ -229,7 +229,6 @@ private:
             numHists, numBins, true);
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    BinEdges xdata(numBins + 1, LinearGenerator(5.0, 5.5));
     // Update X data  to a sensible values. Looks roughly like the MARI binning
     // Update the Y values. We don't care about errors here
 
@@ -240,19 +239,27 @@ private:
     const double peakOneCentre(6493.0), sigmaSqOne(250 * 250.),
         peakTwoCentre(10625.), sigmaSqTwo(50 * 50);
     const double peakOneHeight(3000.), peakTwoHeight(1000.);
+    BinEdges xdata(numBins + 1, LinearGenerator(5.0, 5.5));
 
-    auto &Y0 = testWS->mutableY(0);
-    auto &Y1 = testWS->mutableY(1);
-    for (int i = 0; i < numBins; ++i) {
-      if (includePeaks) {
-        Y0[i] = peakOneHeight *
-                exp(-0.5 * pow(xdata[i] - peakOneCentre, 2.) / sigmaSqOne);
-        Y1[i] = peakTwoHeight *
-                exp(-0.5 * pow(xdata[i] - peakTwoCentre, 2.) / sigmaSqTwo);
-      }
+	// xdata.end() - 1 because bin edges are 1 bigger than Y's size
+    if (includePeaks) {
+      std::transform(
+          xdata.begin(), xdata.end() - 1, testWS->mutableY(0).begin(),
+          [peakOneHeight, peakOneCentre, sigmaSqOne](auto x) {
+            return peakOneHeight *
+                   exp(-0.5 * pow(x - peakOneCentre, 2.) / sigmaSqOne);
+          });
+      std::transform(xdata.begin(), xdata.end() - 1, testWS->mutableY(1).begin(),
+                     [peakTwoHeight, peakTwoCentre, sigmaSqTwo](auto x) {
+                       return peakTwoHeight *
+                              exp(-0.5 * pow(x - peakTwoCentre, 2.) /
+                                  sigmaSqTwo);
+                     });
     }
+
     testWS->setBinEdges(0, xdata);
     testWS->setBinEdges(1, xdata);
+
     return testWS;
   }
 
