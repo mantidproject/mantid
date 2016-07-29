@@ -222,7 +222,7 @@ void SCDCalibratePanels::exec() {
 
     MatrixWorkspace_sptr q3DWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
           API::WorkspaceFactory::Instance().create("Workspace2D", 1,
-                                                   nBankPeaks*3, nBankPeaks*3));
+                                                   nBankPeaks, nBankPeaks));
 
       auto &outSpec = q3DWS->getSpectrum(0);
       MantidVec &yVec = outSpec.dataY();
@@ -231,16 +231,8 @@ void SCDCalibratePanels::exec() {
 
     for (int i = 0; i < nBankPeaks; i++) {
       Peak peak = local->getPeak(i);
-      V3D hkl =  V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
-           boost::math::iround(peak.getL()));
-      OrientedLattice lattice = local->mutableSample().getOrientedLattice();
-      V3D Q2 = lattice.qFromHKL(hkl);
-      xVec[i*3] = i*3;
-      xVec[i*3+1] = i*3+1;
-      xVec[i*3+2] = i*3+2;
-      yVec[i*3] = Q2.X();
-      yVec[i*3+1] = Q2.Y();
-      yVec[i*3+2] = Q2.Z();
+      xVec[i] = i;
+      yVec[i] = 0.0;
       // 1/sigma is considered the weight for the fit
       double weight = 1.;                // default is even weighting
       if (peak.getSigmaIntensity() > 0.) // prefer weight by sigmaI
@@ -249,9 +241,7 @@ void SCDCalibratePanels::exec() {
         weight = 1.0 / peak.getIntensity();
       else if (peak.getBinCount() > 0.) // then by counts in peak centre
         weight = 1.0 / peak.getBinCount();
-      eVec[i*3] = weight;
-      eVec[i*3+1] = weight;
-      eVec[i*3+2] = weight;
+      eVec[i] = weight;
     }
 
     IAlgorithm_sptr fit_alg;
@@ -289,9 +279,25 @@ void SCDCalibratePanels::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  //findU(peaksWs);
+  // Try again to optimize L1
+  findL1(nPeaks, peaksWs);
+
+  // Use new instrument for PeaksWorkspace
+  Geometry::Instrument_sptr inst = boost::const_pointer_cast<Geometry::Instrument>(peaksWs->getInstrument());
+  Geometry::OrientedLattice lattice0 = peaksWs->mutableSample().getOrientedLattice();
+  for (int i = 0; i < nPeaks; i ++) {
+    DataObjects::Peak &peak = peaksWs->getPeak(i);
+    V3D hkl =  V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
+         boost::math::iround(peak.getL()));
+    V3D Q2 = lattice0.qFromHKL(hkl);
+    peak.setInstrument(inst);
+    peak.setQSampleFrame(Q2);
+    peak.setHKL(hkl);
+  }
+  // Find U again for optimized geometry and index peaks
+  findU(peaksWs);
+  // Save as DetCal and XML if requested
   string DetCalFileName = getProperty("DetCalFilename");
-  Instrument_sptr inst = boost::const_pointer_cast<Instrument>(peaksWs->getInstrument());
   saveIsawDetCal(inst, MyBankNames, 0.0, DetCalFileName);
   string XmlFileName = getProperty("XmlFilename");
   saveXmlFile(XmlFileName, MyBankNames, inst);
@@ -317,6 +323,10 @@ void SCDCalibratePanels::exec() {
   for (int j = 0; j < nPeaks; ++j) {
     const Geometry::IPeak &peak = peaksWs->getPeak(j);
     string bankName = peak.getBankName();
+    if(bankName == "None") {
+      g_log.notice() << "Peak not mapped to detector: Number = " << j+1 <<"\n";
+      continue;
+    }
     size_t k = bankName.find_last_not_of("0123456789");
     int bank = 0;
     if (k < bankName.length())
@@ -349,25 +359,18 @@ void SCDCalibratePanels::exec() {
 void SCDCalibratePanels::findL1(int nPeaks, DataObjects::PeaksWorkspace_sptr peaksWs) {
 MatrixWorkspace_sptr L1WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1,
-                                               nPeaks*3, nPeaks*3));
+                                               nPeaks, nPeaks));
 
   auto &outSp = L1WS->getSpectrum(0);
   MantidVec &yV = outSp.dataY();
   MantidVec &eV = outSp.dataE();
   MantidVec &xV = outSp.dataX();
 
-OrientedLattice lattice = peaksWs->mutableSample().getOrientedLattice();
 for (int i = 0; i < nPeaks; i++) {
-  Peak peak = peaksWs->getPeak(i);
-  V3D hkl =  V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
-       boost::math::iround(peak.getL()));
-  V3D Q2 = lattice.qFromHKL(hkl);
-  xV[i*3] = i*3;
-  xV[i*3+1] = i*3+1;
-  xV[i*3+2] = i*3+2;
-  yV[i*3] = Q2.X();
-  yV[i*3+1] = Q2.Y();
-  yV[i*3+2] = Q2.Z();
+  DataObjects::Peak peak = peaksWs->getPeak(i);
+  xV[i] = i;
+  yV[i] = 0.0;
+
   // 1/sigma is considered the weight for the fit
   double weight = 1.;                // default is even weighting
   if (peak.getSigmaIntensity() > 0.) // prefer weight by sigmaI
@@ -376,9 +379,7 @@ for (int i = 0; i < nPeaks; i++) {
     weight = 1.0 / peak.getIntensity();
   else if (peak.getBinCount() > 0.) // then by counts in peak centre
     weight = 1.0 / peak.getBinCount();
-  eV[i*3] = weight;
-  eV[i*3+1] = weight;
-  eV[i*3+2] = weight;
+  eV[i] = weight;
 }
 IAlgorithm_sptr fitL1_alg;
 try {
@@ -404,7 +405,6 @@ AnalysisDataService::Instance().addOrReplace("fit_L1", fitL1);
 ITableWorkspace_sptr paramsL1 = fitL1_alg->getProperty("OutputParameters");
 AnalysisDataService::Instance().addOrReplace("params_L1", paramsL1);
 double deltaL1 = paramsL1->getRef<double>("Value",2);
-g_log.notice() <<"L1 = "<<peaksWs->getInstrument()->getSource()->getPos().Z()<<"  "<< fitL1Status << " Chi2overDoF " << chisqL1 << "\n";
 SCDPanelErrors com;
 com. moveDetector(0.0, 0.0, deltaL1, 0.0, 0.0, 0.0, "moderator", peaksWs);
 g_log.notice() <<"L1 = "<<peaksWs->getInstrument()->getSource()->getPos().Z()<<"  "<< fitL1Status << " Chi2overDoF " << chisqL1 << "\n";
@@ -449,7 +449,7 @@ void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
   alg->setPropertyValue("PeaksWorkspace", peaksWs->getName());
   alg->setProperty("Tolerance", 0.15);
   alg->executeAsChildAlg();
-
+  g_log.notice() << peaksWs->sample().getOrientedLattice().getUB() << "\n";
 }
 /**
  *  This is part of the algorithm, LoadIsawDetCal, starting with an existing
@@ -708,7 +708,7 @@ void SCDCalibratePanels::saveIsawDetCal(
 
 void SCDCalibratePanels::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "PeakWorkspace", "", Kernel::Direction::Input),
+                      "PeakWorkspace", "", Kernel::Direction::InOut),
                   "Workspace of Indexed Peaks");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();

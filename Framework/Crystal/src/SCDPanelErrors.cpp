@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <boost/math/special_functions/round.hpp>
 #include <algorithm>
 #include <cmath>
@@ -133,32 +134,27 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xr
   setupData();
   DataObjects::PeaksWorkspace_sptr inputP0 =
       boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
-  std::vector<double> l1l2;
-  for (int j = 0; j < static_cast<int>(nData/3); j++) {
+  std::vector<V3D> detP;
+  for (int j = 0; j < static_cast<int>(nData); j++) {
     DataObjects::Peak peak = inputP0->getPeak(j);
-    l1l2.push_back(peak.getL1()+peak.getL2());
+    detP.push_back(peak.getDetPos());
   }
 
   moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, m_bank, m_workspace);
   DataObjects::PeaksWorkspace_sptr inputP =
         boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
   Geometry::Instrument_sptr inst = boost::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
-  //double lShift = zshift; //V3D(xshift,yshift,zshift).norm();
-  int j = 0;
-  for (size_t i = 0; i < nData; i += 3) {
-    DataObjects::Peak peak = inputP->getPeak(j);
-    peak.setInstrument(inst);
-    peak.setDetectorID(peak.getDetectorID());
+  Geometry::OrientedLattice lattice = inputP->mutableSample().getOrientedLattice();
+  for (size_t i = 0; i < nData; i ++) {
+    DataObjects::Peak peak = inputP->getPeak(static_cast<int>(i));
     V3D hkl =  V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
          boost::math::iround(peak.getL()));
-    double ratio = l1l2[j] / (peak.getL1()+peak.getL2());
-    double wl = peak.getWavelength() *ratio;
-    j++;
-    DataObjects::Peak peak2(inst, peak.getDetectorID(), wl, hkl, peak.getGoniometerMatrix());
-    V3D Q3 = peak2.getQSampleFrame();
-    out[i] = Q3[0];
-    out [i+1] = Q3[1];
-    out[i+2] = Q3[2];
+    V3D Q2 = lattice.qFromHKL(hkl);
+    DataObjects::Peak peak2(inst, Q2, peak.getGoniometerMatrix());
+    V3D detP2 = peak2.getDetPos();
+    V3D cross = detP2.cross_prod(detP[i]);
+
+    out[i] = cross.norm();
   }
   moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate, m_bank, m_workspace);
 }
