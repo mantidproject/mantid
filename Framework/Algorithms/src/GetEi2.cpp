@@ -387,9 +387,8 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
     API::MatrixWorkspace_sptr data_ws, const double prominence,
     std::vector<double> &peak_x, std::vector<double> &peak_y,
     std::vector<double> &peak_e) const {
-  // First create a temporary vector of bin_centre values to work with
-  std::vector<double> Xs(data_ws->x(0).size());
-  VectorHelper::convertToBinCentre(data_ws->x(0).rawData(), Xs);
+  // Use WS->points() to create a temporary vector of bin_centre values to work with
+  auto Xs = data_ws->points(0);
   const auto &Ys = data_ws->y(0);
   const auto &Es = data_ws->e(0);
 
@@ -499,14 +498,14 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
 
   if (im > 0) {
     double bkgd_m, bkgd_err_m;
-    integrate(bkgd_m, bkgd_err_m, Xs, Ys, Es, bkgd_min, pk_min);
+    integrate(bkgd_m, bkgd_err_m, Xs.rawData(), Ys, Es, bkgd_min, pk_min);
     bkgd = bkgd + bkgd_m;
     bkgd_range = bkgd_range + (pk_min - bkgd_min);
   }
 
   if (ip < nxvals - 1) {
     double bkgd_p, bkgd_err_p;
-    integrate(bkgd_p, bkgd_err_p, Xs, Ys, Es, pk_max, bkgd_max);
+    integrate(bkgd_p, bkgd_err_p, Xs.rawData(), Ys, Es, pk_max, bkgd_max);
     bkgd = bkgd + bkgd_p;
     bkgd_range = bkgd_range + (bkgd_max - pk_max);
   }
