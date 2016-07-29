@@ -252,7 +252,7 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
 
   const size_t nHistograms = periodWorkspace->getNumberHistograms();
   for (size_t i = 0; i < nHistograms; ++i) {
-    periodWorkspace->setSharedX(i, tempMatrixWorkspace->refX(i));
+    periodWorkspace->setSharedX(i, tempMatrixWorkspace->sharedX(i));
   }
 
   // We avoid using `openEntry` or similar here because they're just wrappers
@@ -742,12 +742,12 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
       if (this->m_shared_bins)
         el.setHistogram(this->m_xbins);
       else {
-        MantidVec x;
-        x.resize(xbins.dim1());
+        MantidVec x(xbins.dim1());
         for (int i = 0; i < xbins.dim1(); i++)
           x[i] = xbins(static_cast<int>(wi), i);
         // Workspace and el was just created, so we can just set a new histogram
-        el.setHistogram(HistogramData::BinEdges(x));
+		// We can move x as it is not longer used after this point
+        el.setHistogram(HistogramData::BinEdges(std::move(x)));
       }
     }
 
