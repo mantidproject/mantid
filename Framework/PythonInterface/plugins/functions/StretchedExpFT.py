@@ -64,7 +64,7 @@ class StretchedExpFT(IFunction1D):
         beta = self.getParameterValue('Beta')
         Centre = self.getParameterValue('Centre')
 
-        for _, value in list({'Height': height, 'Tau': tau, 'Beta': beta}.items()):
+        for _, value in {'Height': height, 'Tau': tau, 'Beta': beta}.items():
             if value <= 0:
                 return None
         return {'Height': height, 'Tau': tau, 'Beta': beta, 'Centre': Centre}
@@ -86,7 +86,7 @@ class StretchedExpFT(IFunction1D):
             return np.zeros(len(xvals), dtype=float)
         # override with optparms (used for the numerical derivative)
         if optparms:
-            for name in list(optparms.keys()):
+            for name in optparms.keys():
                 p[name] = optparms[name]
 
         ne = len(xvals)
@@ -148,7 +148,7 @@ class StretchedExpFT(IFunction1D):
               'Beta': 0.01,
               'Centre': 0.0001  # change by 0.1 micro-eV
              }
-        for name in list(dp.keys()):
+        for name in dp.keys():
             pp = copy.copy(p)
             pp[name] += dp[name]
             partials[name] = (self.function1D(xvals, **pp) - f0) / dp[name]
