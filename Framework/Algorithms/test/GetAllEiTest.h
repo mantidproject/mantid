@@ -524,12 +524,14 @@ private:
     double Period =
         (0.5 * 1.e+6) / chopSpeed; // 0.5 because some choppers open twice.
 
-	BinEdges x(ws->x(0).size(), LinearGenerator(5, 10));
-	ws->setBinEdges(0, x);
+	ws->setBinEdges(0, BinEdges(ws->x(0).size(), LinearGenerator(5, 10)));
+	
+	auto &x = ws->mutableX(0);
     // signal at first monitor
     double t1 = t_chop * l_mon1 / l_chop;
     double t2 = (t_chop + Period) * l_mon1 / l_chop;
-    {
+
+    { // start of inner scope
       auto &y = ws->mutableY(0);
       for (size_t i = 0; i < y.size(); i++) {
         double t = 0.5 * (x[i] + x[i + 1]);
@@ -537,13 +539,14 @@ private:
         double tm2 = t - t2;
         y[i] = (10000 * std::exp(-tm1 * tm1 / 1000.) +
                 20000 * std::exp(-tm2 * tm2 / 1000.));
-        // std::cout<<"t="<<t<<" signal="<<y[i]<<" ind="<<i<<'\n';
       }
-    }
+    } // end of inner scope
+
     // signal at second monitor
     t1 = t_chop * l_mon2 / l_chop;
     t2 = (t_chop + Period) * l_mon2 / l_chop;
-    {
+
+    {// start of inner scope
       auto &y = ws->mutableY(1);
       for (size_t i = 0; i < y.size(); i++) {
         double t = 0.5 * (x[i] + x[i + 1]);
@@ -551,9 +554,8 @@ private:
         double tm2 = t - t2;
         y[i] = (100 * std::exp(-tm1 * tm1 / 1000.) +
                 200 * std::exp(-tm2 * tm2 / 1000.));
-        // std::cout<<"t="<<t<<" signal="<<y[i]<<" ind="<<i<<'\n';
       }
-    }
+    }// end of inner scope
 
     if (noLogs)
       return ws;
