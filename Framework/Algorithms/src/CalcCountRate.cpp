@@ -5,6 +5,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -67,10 +68,10 @@ void CalcCountRate::init() {
       "conversion. E.g. if *RangeUnits* is *EnergyTransfer*, Ei "
       "log containing incident energy value should be attached to the "
       "input workspace.");
-  std::vector<std::string> propOptions{ "Elastic", "Direct", "Indirect" };
+  std::vector<std::string> propOptions{"Elastic", "Direct", "Indirect"};
   declareProperty("EMode", "Elastic",
-      boost::make_shared<Kernel::StringListValidator>(propOptions),
-      "The energy conversion mode (default: elastic)");
+                  boost::make_shared<Kernel::StringListValidator>(propOptions),
+                  "The energy conversion mode (default: elastic)");
 
   // Used logs group
   std::string used_logs_mode("Used normalization logs");
@@ -99,6 +100,7 @@ void CalcCountRate::init() {
 
   declareProperty(
       "CountRateLogName", "block_count_rate",
+      boost::make_shared<Kernel::MandatoryValidator<std::string>>(),
       "The name of the processed time series log with count rate to add"
       " to the source workspace");
   // visualisation group
@@ -107,22 +109,23 @@ void CalcCountRate::init() {
       Kernel::make_unique<API::WorkspaceProperty<DataObjects::Workspace2D>>(
           "VisualizationWs", "", Kernel::Direction::Output,
           API::PropertyMode::Optional),
-      "Optional workspace name to build workspace for spurion visualization. "
+      "Optional name to build 2D matrix workspace for spurion visualization. "
       "If name is provided, a 2D workspace with this name will be created "
-      "containing workspace to visualize counting rate in the ranges "
+      "containing data to visualize counting rate as function of time in the "
+      "ranges "
       "XMin-XMax");
 
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
-  mustBePositive->setLower(0);
+  auto mustBeReasonable = boost::make_shared<Kernel::BoundedValidator<int>>();
+  mustBeReasonable->setLower(2);
   declareProperty(
       Kernel::make_unique<Kernel::PropertyWithValue<int>>(
-          "NumTimeSteps", 200, mustBePositive, Kernel::Direction::Input),
+          "NumTimeSteps", 200, mustBeReasonable, Kernel::Direction::Input),
       "Number of time steps (time accuracy) the visualization workspace has. "
       "Also number of steps in 'CountRateLogName' log if "
       "'UseNormLogGranularity' is set to false");
   declareProperty(
       Kernel::make_unique<Kernel::PropertyWithValue<int>>(
-          "XResolution", 100, mustBePositive, Kernel::Direction::Input),
+          "XResolution", 100, mustBeReasonable, Kernel::Direction::Input),
       "Number of steps (accuracy) of the visualization workspace has along "
       "X-axis. ");
   setPropertyGroup("VisualizationWs", spur_vis_mode);
@@ -136,11 +139,21 @@ void CalcCountRate::init() {
 void CalcCountRate::exec() {
 
   DataObjects::EventWorkspace_sptr sourceWS = getProperty("Workspace");
+
+  // Identity correct way to treat input logs and general properties of output
+  // log
+  this->setOutLogParameters(sourceWS);
+
+  //
+  std::string SourceWSName = sourceWS->name();
+  if (SourceWSName.size() == 0) {
+    SourceWSName = "CalcCountRateInputWS";
+  }
   // Sum spectra of the input workspace
-  auto summator = createChildAlgorithm("SumSpectra",0,1);
+  auto summator = createChildAlgorithm("SumSpectra", 0, 1);
   summator->setProperty("InputWorkspace", sourceWS);
-  summator->setProperty("OutputWorkspace","__"+ sourceWS->name()+ "_Sum");
-  summator->setProperty("IncludeMonitors",false);
+  summator->setProperty("OutputWorkspace", "__" + SourceWSName + "_Sum");
+  summator->setProperty("IncludeMonitors", false);
 
   summator->execute();
 
@@ -186,7 +199,64 @@ void CalcCountRate::exec() {
 
     */
 }
-/* Retrieve and define data search ranges from input workspace properties */
+/*Analyse input log parameters and logs, attached to the workspace and identify
+ * the parameters of the target log*/
+void CalcCountRate::setOutLogParameters(
+    const DataObjects::EventWorkspace_sptr &InputWorkspace) {
+
+  std::string NormLogName = getProperty("NormalizationLogName");
+
+  bool normalizeResult = getProperty("NormalizeTheRate");
+  bool useLogDerivative = getProperty("UseLogDerivative");
+  bool useLogAccuracy = getProperty("UseNormLogGranularity");
+
+  bool logPresent = InputWorkspace->run().hasProperty(NormLogName);
+  if (!logPresent) {
+    if (normalizeResult) {
+      g_log.warning() << "Normalization by log " << NormLogName
+                      << " values requested but the log is not attached to the "
+                         "workspace. Normalization disabled\n";
+      normalizeResult = false;
+    }
+    if (useLogDerivative) {
+      g_log.warning() << "Normalization by log " << NormLogName
+                      << " derivative requested but the log is not attached to "
+                         "the workspace. Normalization disabled\n";
+      useLogDerivative = false;
+    }
+    if (useLogAccuracy) {
+      g_log.warning() << "Using accuracy of the log " << NormLogName
+                      << " is requested but the log is not attached to the "
+                         "workspace. Will use accurace defined by "
+                         "'NumTimeSteps' property value\n";
+      useLogAccuracy = false;
+    }
+  }
+  else {
+      m_pNormalizationLog = InputWorkspace->run().getTimeSeriesProperty<double>(NormLogName);
+  }
+  // Analyze properties interactions
+  if (useLogDerivative) {
+
+  }
+
+  ///
+  if (useLogAccuracy) {
+      m_numLogSteps = m_pNormalizationLog->realSize();
+  }
+  else {
+      m_numLogSteps = getProperty("NumTimeSteps");
+  }
+}
+
+/* Retrieve and define data search ranges from input workspace parameters and
+ *algorithm properties
+ *@param InputWorkspace -- event workspace to process. Also get access to
+ *algorithm properties
+ *@return -- the input workspace cropped accoding to XMin-XMax ranges in units,
+ *requested by
+ *
+*/
 void CalcCountRate::setWSDataRanges(
     DataObjects::EventWorkspace_sptr &InputWorkspace) {
   m_XRangeMin = getProperty("XMin");
@@ -203,21 +273,20 @@ void CalcCountRate::setWSDataRanges(
     m_XRangeMax = axis->getMax();
     return;
   }
-  // Search wihin partial range; 
+  // Search wihin partial range;
   std::string RangeUnits = getProperty("RangeUnits");
   const auto unit = axis->unit();
 
   API::MatrixWorkspace_sptr wst;
   std::string wsName = InputWorkspace->name();
   if (wsName.size() == 0) {
-      wsName = "_CropDataWS";
+    wsName = "_CropDataWS";
   }
 
-
   if (unit->unitID() != RangeUnits) {
-    auto conv = createChildAlgorithm("ConvertUnits",0,1);
+    auto conv = createChildAlgorithm("ConvertUnits", 0, 1);
 
-    conv->setProperty("InputWorkspace",InputWorkspace);
+    conv->setProperty("InputWorkspace", InputWorkspace);
     conv->setPropertyValue("OutputWorkspace", wsName);
     std::string Emode = getProperty("Emode");
     conv->setProperty("Emode", Emode);
@@ -225,22 +294,21 @@ void CalcCountRate::setWSDataRanges(
     conv->execute();
     wst = conv->getProperty("OutputWorkspace");
 
-  }
-  else {
-      wst = InputWorkspace;
+  } else {
+    wst = InputWorkspace;
   }
   // here the ranges have been changed so both will newer remain defaults
   axis = wst->getAxis(0);
   if (m_XRangeMin == EMPTY_DBL()) {
-      m_XRangeMin = axis->getMin();
+    m_XRangeMin = axis->getMin();
   }
   if (m_XRangeMax == EMPTY_DBL()) {
-      m_XRangeMax = axis->getMax();
+    m_XRangeMax = axis->getMax();
   }
 
   //
   auto crop = createChildAlgorithm("CropWorkspace", 0, 1);
-  crop->setProperty("InputWorkspace",wst);
+  crop->setProperty("InputWorkspace", wst);
   crop->setProperty("OutputWorkspace", wsName);
   crop->setProperty("XMin", m_XRangeMin);
   crop->setProperty("XMax", m_XRangeMax);
@@ -249,9 +317,11 @@ void CalcCountRate::setWSDataRanges(
 
   wst = crop->getProperty("OutputWorkspace");
 
-  InputWorkspace = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(wst);
+  InputWorkspace =
+      boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(wst);
   if (!InputWorkspace) {
-      throw std::runtime_error("Can not crop input workspace within the XMin-XMax ranges requested");
+    throw std::runtime_error(
+        "Can not crop input workspace within the XMin-XMax ranges requested");
   }
 }
 

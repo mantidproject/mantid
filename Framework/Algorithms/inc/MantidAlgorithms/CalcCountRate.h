@@ -53,19 +53,26 @@ public:
 private:
   void init() override;
   void exec() override;
+
 protected: // for testing, actually private
+  /// pointer to the log used to normalize results or NULL if no such log
+  /// present on input workspace.
+  Kernel::TimeSeriesProperty<double> const * m_pNormalizationLog{nullptr};
+  /// default number of points in the target log
+  size_t m_numLogSteps{100};
 
   /// specifies if rate is calculatet in selected frame interval (range defined)
   /// or all frame should be used
   bool m_rangeExplicit{false};
   /// spurion search ranges
-  double m_XRangeMin{0},m_XRangeMax{0};
+  double m_XRangeMin{0}, m_XRangeMax{0};
 
   DataObjects::EventWorkspace_sptr m_workingWS;
 
   void setWSDataRanges(DataObjects::EventWorkspace_sptr &InputWorkspace);
 
-
+  void
+  setOutLogParameters(const DataObjects::EventWorkspace_sptr &InputWorkspace);
 };
 
 } // namespace Algorithms
