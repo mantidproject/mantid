@@ -3,8 +3,11 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -52,7 +55,10 @@ void CalcCountRate::init() {
                   "to default, Workspace X-axis maximal value is used.");
   declareProperty(
       Kernel::make_unique<Kernel::PropertyWithValue<std::string>>(
-          "RangeUnits", "Energy", Kernel::Direction::Input),
+          "RangeUnits", "Energy",
+          boost::make_shared<Kernel::StringListValidator>(
+              Kernel::UnitFactory::Instance().getKeys()),
+          Kernel::Direction::Input),
       "The units from Mantid Unit factory for calculating the "
       "counting rate and XMin-XMax ranges are in. If the "
       "X-axis of the input workspace is not expressed"
@@ -61,6 +67,11 @@ void CalcCountRate::init() {
       "conversion. E.g. if *RangeUnits* is *EnergyTransfer*, Ei "
       "log containing incident energy value should be attached to the "
       "input workspace.");
+  std::vector<std::string> propOptions{ "Elastic", "Direct", "Indirect" };
+  declareProperty("EMode", "Elastic",
+      boost::make_shared<Kernel::StringListValidator>(propOptions),
+      "The energy conversion mode (default: elastic)");
+
   // Used logs group
   std::string used_logs_mode("Used normalization logs");
   declareProperty(
@@ -126,11 +137,11 @@ void CalcCountRate::exec() {
 
   DataObjects::EventWorkspace_sptr sourceWS = getProperty("Workspace");
   // Sum spectra of the input workspace
-  auto summator =
-      API::AlgorithmManager::Instance().createUnmanaged("SumSpectra");
-  summator->initialize();
-  summator->setChild(true);
+  auto summator = createChildAlgorithm("SumSpectra",0,1);
   summator->setProperty("InputWorkspace", sourceWS);
+  summator->setProperty("OutputWorkspace","__"+ sourceWS->name()+ "_Sum");
+  summator->setProperty("IncludeMonitors",false);
+
   summator->execute();
 
   API::MatrixWorkspace_sptr source = summator->getProperty("OutputWorkspace");
@@ -141,7 +152,7 @@ void CalcCountRate::exec() {
         "Can not sum spectra of input event workspace: " + sourceWS->name());
   }
   //-------------------------------------
-  this->getSearchRanges(m_workingWS);
+  this->setWSDataRanges(m_workingWS);
 
   std::string logname = getProperty("CountRateLogName");
   auto newlog = new Kernel::TimeSeriesProperty<double>(logname);
@@ -176,15 +187,71 @@ void CalcCountRate::exec() {
     */
 }
 /* Retrieve and define data search ranges from input workspace properties */
-void CalcCountRate::getSearchRanges(
-    const DataObjects::EventWorkspace_sptr &InputWorkspace) {
+void CalcCountRate::setWSDataRanges(
+    DataObjects::EventWorkspace_sptr &InputWorkspace) {
   m_XRangeMin = getProperty("XMin");
   m_XRangeMax = getProperty("XMax");
 
   if (m_XRangeMin == EMPTY_DBL() && m_XRangeMax == EMPTY_DBL()) {
-    m_rangeDefined = false;
+    m_rangeExplicit = false;
   } else {
-    m_rangeDefined = true;
+    m_rangeExplicit = true;
+  }
+  auto axis = InputWorkspace->getAxis(0);
+  if (!m_rangeExplicit) {
+    m_XRangeMin = axis->getMin();
+    m_XRangeMax = axis->getMax();
+    return;
+  }
+  // Search wihin partial range; 
+  std::string RangeUnits = getProperty("RangeUnits");
+  const auto unit = axis->unit();
+
+  API::MatrixWorkspace_sptr wst;
+  std::string wsName = InputWorkspace->name();
+  if (wsName.size() == 0) {
+      wsName = "_CropDataWS";
+  }
+
+
+  if (unit->unitID() != RangeUnits) {
+    auto conv = createChildAlgorithm("ConvertUnits",0,1);
+
+    conv->setProperty("InputWorkspace",InputWorkspace);
+    conv->setPropertyValue("OutputWorkspace", wsName);
+    std::string Emode = getProperty("Emode");
+    conv->setProperty("Emode", Emode);
+
+    conv->execute();
+    wst = conv->getProperty("OutputWorkspace");
+
+  }
+  else {
+      wst = InputWorkspace;
+  }
+  // here the ranges have been changed so both will newer remain defaults
+  axis = wst->getAxis(0);
+  if (m_XRangeMin == EMPTY_DBL()) {
+      m_XRangeMin = axis->getMin();
+  }
+  if (m_XRangeMax == EMPTY_DBL()) {
+      m_XRangeMax = axis->getMax();
+  }
+
+  //
+  auto crop = createChildAlgorithm("CropWorkspace", 0, 1);
+  crop->setProperty("InputWorkspace",wst);
+  crop->setProperty("OutputWorkspace", wsName);
+  crop->setProperty("XMin", m_XRangeMin);
+  crop->setProperty("XMax", m_XRangeMax);
+
+  crop->execute();
+
+  wst = crop->getProperty("OutputWorkspace");
+
+  InputWorkspace = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(wst);
+  if (!InputWorkspace) {
+      throw std::runtime_error("Can not crop input workspace within the XMin-XMax ranges requested");
   }
 }
 

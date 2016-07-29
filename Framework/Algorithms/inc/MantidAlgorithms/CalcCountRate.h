@@ -53,15 +53,17 @@ public:
 private:
   void init() override;
   void exec() override;
+protected: // for testing, actually private
 
   /// specifies if rate is calculatet in selected frame interval (range defined)
   /// or all frame should be used
-  bool m_rangeDefined{false};
+  bool m_rangeExplicit{false};
   /// spurion search ranges
   double m_XRangeMin{0},m_XRangeMax{0};
-  void getSearchRanges(const DataObjects::EventWorkspace_sptr &InputWorkspace);
 
   DataObjects::EventWorkspace_sptr m_workingWS;
+
+  void setWSDataRanges(DataObjects::EventWorkspace_sptr &InputWorkspace);
 
 
 };
