@@ -514,12 +514,12 @@ public:
     API::MatrixWorkspace_sptr inpWS = API::WorkspaceFactory::Instance().create(
         "Workspace2D", 5, size, size - 1);
 
-	// 1.5 Generate shared Copy-On-Write x values
-	BinEdges x(size, LinearGenerator(minx, dx));
-	// 2. Put x values and y values
+    // 1.5 Generate shared Copy-On-Write x values
+    BinEdges x(size, LinearGenerator(minx, dx));
+    // 2. Put x values and y values
     for (size_t iw = 0; iw < inpWS->getNumberHistograms(); iw++) {
       inpWS->setBinEdges(iw, x);
-	  inpWS->mutableY(iw).assign(size - 1, 100.0);
+      inpWS->mutableY(iw).assign(size - 1, 100.0);
     }
 
     return inpWS;
