@@ -28,6 +28,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
     _calc_partial = None
     _num_ions = None
     _num_branches = None
+    _element_isotope = dict()
 
 #----------------------------------------------------------------------------------------
 
@@ -185,6 +186,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             ion_table.addColumn('float', 'CartesianX')
             ion_table.addColumn('float', 'CartesianY')
             ion_table.addColumn('float', 'CartesianZ')
+            ion_table.addColumn('float', 'Isotope')
 
             self._convert_to_cartesian_coordinates(unit_cell, ions)
 
@@ -197,7 +199,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                                   ion['fract_coord'][2],
                                   ion['cartesian_coord'][0],
                                   ion['cartesian_coord'][1],
-                                  ion['cartesian_coord'][2]])
+                                  ion['cartesian_coord'][2],
+                                  ion['isotope_number']])
 
         # We want to output a table workspace with bond information
         if self._spec_type == 'BondTable':
@@ -435,6 +438,10 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             chemical = ion_name
             if ':' in ion_name:
                 chemical = ion_name.split(':')[0]
+                # Parse isotope to rounded int
+                isotope = str(int(round(self._element_isotope[ion_name])))
+                chemical = '(' + chemical + isotope + ')'
+                partial_ws_name += str('('+isotope+')')
 
             SetSampleMaterial(InputWorkspace=self._out_ws_name,
                               ChemicalFormula=chemical)
@@ -711,6 +718,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                     species = line_data[4]
                     ion = {'species': species}
                     ion['fract_coord'] = np.array([float(line_data[1]), float(line_data[2]), float(line_data[3])])
+                    ion['isotope_number'] = float(line_data[5])
+                    self._element_isotope[species] = float(line_data[5])
                     # -1 to convert to zero based indexing
                     ion['index'] = int(line_data[0]) - 1
                     ion['bond_number'] = len([i for i in file_data['ions'] if i['species'] == species]) + 1
