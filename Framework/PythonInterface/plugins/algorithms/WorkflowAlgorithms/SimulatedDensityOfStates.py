@@ -426,7 +426,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         # Output each contribution to it's own workspace
         for ion_name, ions in partial_ions.items():
-            partial_ws_name = self._out_ws_name + '_' + ion_name
+            partial_ws_name = self._out_ws_name + '_'
 
             self._compute_partial(ions, frequencies, eigenvectors, weights)
 
@@ -438,10 +438,13 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             chemical = ion_name
             if ':' in ion_name:
                 chemical = ion_name.split(':')[0]
+                partial_ws_name += chemical
                 # Parse isotope to rounded int
                 isotope = str(int(round(self._element_isotope[ion_name])))
                 chemical = '(' + chemical + isotope + ')'
                 partial_ws_name += str('('+isotope+')')
+            else:
+                partial_ws_name += ion_name
 
             SetSampleMaterial(InputWorkspace=self._out_ws_name,
                               ChemicalFormula=chemical)
