@@ -17,10 +17,12 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include <MantidHistogramData/LinearGenerator.h>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
+using namespace Mantid::HistogramData;
 
 class GeneratePeaksTest : public CxxTest::TestSuite {
 public:
@@ -514,14 +516,11 @@ public:
 
     // 2. Put x values and y values
     for (size_t iw = 0; iw < inpWS->getNumberHistograms(); iw++) {
-      auto &X = inpWS->mutableX(iw);
       auto &Y = inpWS->mutableY(iw);
-      for (size_t ix = 0; ix < X.size(); ++ix) {
-        X[ix] = minx + double(ix) * dx;
-      }
-      for (size_t iy = 0; iy < Y.size(); ++iy) {
-        Y[iy] = 100.0;
-      }
+
+	  BinEdges x(inpWS->mutableX(iw).size(), LinearGenerator(minx, dx));
+	  inpWS->setBinEdges(iw, x);
+      Y.assign(Y.size(), 100.0);
     }
 
     return inpWS;
