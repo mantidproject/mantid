@@ -888,6 +888,17 @@ public:
     TS_ASSERT_EQUALS(hist1.sharedY(), hist2.sharedY());
     TS_ASSERT_EQUALS(hist1.sharedE(), hist2.sharedE());
   }
+
+  void test_clearing_EventList_clears_MRU() {
+    int numEvents = 2;
+    int numHistograms = 2;
+    EventWorkspace_sptr ws =
+        WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents,
+                                                            numHistograms);
+    const auto *yOld = &ws->y(0);
+    ws->getSpectrum(0).clear();
+    TS_ASSERT_DIFFERS(yOld, &ws->y(0));
+  }
 };
 
 #endif /* EVENTWORKSPACETEST_H_ */
