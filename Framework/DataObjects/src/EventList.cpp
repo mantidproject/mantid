@@ -110,13 +110,6 @@ bool compareEventPulseTimeTOF(const TofEvent &e1, const TofEvent &e2) {
   return false;
 }
 
-//==========================================================================
-// ---------------------- EventList stuff ----------------------------------
-//==========================================================================
-
-// --- Constructors
-// -------------------------------------------------------------------
-
 /// Constructor (empty)
 // EventWorkspace is always histogram data and so is thus EventList
 EventList::EventList()
@@ -137,9 +130,7 @@ EventList::EventList(EventWorkspaceMRU *mru, specnum_t specNo)
  * @param rhs :: EventList object to copy*/
 EventList::EventList(const EventList &rhs)
     : IEventList(rhs), m_histogram(HistogramData::Histogram::XMode::BinEdges,
-                                   HistogramData::Histogram::YMode::Counts),
-      mru(rhs.mru) {
-  // Call the copy operator to do the job,
+                                   HistogramData::Histogram::YMode::Counts) {
   this->operator=(rhs);
 }
 
@@ -289,6 +280,7 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
  * @return reference to this
  * */
 EventList &EventList::operator=(const EventList &rhs) {
+  // Note that we are NOT copying the MRU pointer.
   IEventList::operator=(rhs);
   m_histogram = rhs.m_histogram;
   events = rhs.events;
