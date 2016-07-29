@@ -897,6 +897,8 @@ public:
                                                             numHistograms);
     const auto *yOld = &ws->y(0);
     ws->getSpectrum(0).clear();
+    // Access something else first to prevent accidental alloc in same position
+    ws->y(1);
     TS_ASSERT_DIFFERS(yOld, &ws->y(0));
   }
 };
