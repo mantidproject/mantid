@@ -130,7 +130,8 @@ EventList::EventList(EventWorkspaceMRU *mru, specnum_t specNo)
  * @param rhs :: EventList object to copy*/
 EventList::EventList(const EventList &rhs)
     : IEventList(rhs), m_histogram(HistogramData::Histogram::XMode::BinEdges,
-                                   HistogramData::Histogram::YMode::Counts) {
+                                   HistogramData::Histogram::YMode::Counts),
+      mru{nullptr} {
   this->operator=(rhs);
 }
 
