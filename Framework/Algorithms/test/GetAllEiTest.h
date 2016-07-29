@@ -455,9 +455,10 @@ public:
   }
 
   void test_getAllEi() {
-    auto ws = createTestingWS();
+    auto ws = createTestingWS(false);
+    API::MatrixWorkspace_sptr out_ws;
 
-    m_getAllEi.initialize();
+    TS_ASSERT_THROWS_NOTHING(m_getAllEi.initialize());
     m_getAllEi.setProperty("Workspace", ws);
     m_getAllEi.setProperty("OutputWorkspace", "monitor_peaks");
     m_getAllEi.setProperty("Monitor1SpecID", 1);
@@ -469,7 +470,8 @@ public:
     m_getAllEi.setProperty("OutputWorkspace", "allEiWs");
 
     TS_ASSERT_THROWS_NOTHING(m_getAllEi.execute());
-    API::MatrixWorkspace_sptr out_ws;
+    TSM_ASSERT_EQUALS("GetAllEi Algorithms should be executed",
+                      m_getAllEi.isExecuted(), true);
     TS_ASSERT_THROWS_NOTHING(
         out_ws = API::AnalysisDataService::Instance()
                      .retrieveWS<API::MatrixWorkspace>("allEiWs"));
@@ -524,38 +526,36 @@ private:
     double Period =
         (0.5 * 1.e+6) / chopSpeed; // 0.5 because some choppers open twice.
 
-	ws->setBinEdges(0, BinEdges(ws->x(0).size(), LinearGenerator(5, 10)));
-	
-	auto &x = ws->mutableX(0);
+    ws->setBinEdges(0, BinEdges(ws->x(0).size(), LinearGenerator(5, 10)));
+
     // signal at first monitor
     double t1 = t_chop * l_mon1 / l_chop;
     double t2 = (t_chop + Period) * l_mon1 / l_chop;
 
-    { // start of inner scope
-      auto &y = ws->mutableY(0);
-      for (size_t i = 0; i < y.size(); i++) {
-        double t = 0.5 * (x[i] + x[i + 1]);
-        double tm1 = t - t1;
-        double tm2 = t - t2;
-        y[i] = (10000 * std::exp(-tm1 * tm1 / 1000.) +
-                20000 * std::exp(-tm2 * tm2 / 1000.));
-      }
-    } // end of inner scope
+	// temporary vars, to avoid redeclaring
+	double tm1(0.0);
+	double tm2(0.0);
+
+    auto t = ws->points(0);
+    std::transform(t.begin(), t.end(), ws->mutableY(0).begin(),
+                   [t1, t2, &tm1, &tm2](auto t) {
+                     tm1 = t - t1;
+                     tm2 = t - t2;
+                     return (10000 * std::exp(-tm1 * tm1 / 1000.) +
+                             20000 * std::exp(-tm2 * tm2 / 1000.));
+                   });
 
     // signal at second monitor
     t1 = t_chop * l_mon2 / l_chop;
     t2 = (t_chop + Period) * l_mon2 / l_chop;
 
-    {// start of inner scope
-      auto &y = ws->mutableY(1);
-      for (size_t i = 0; i < y.size(); i++) {
-        double t = 0.5 * (x[i] + x[i + 1]);
-        double tm1 = t - t1;
-        double tm2 = t - t2;
-        y[i] = (100 * std::exp(-tm1 * tm1 / 1000.) +
-                200 * std::exp(-tm2 * tm2 / 1000.));
-      }
-    }// end of inner scope
+    std::transform(t.begin(), t.end(), ws->mutableY(1).begin(),
+                   [t1, t2, &tm1, &tm2](auto t) {
+                     tm1 = t - t1;
+                     tm2 = t - t2;
+                     return (100 * std::exp(-tm1 * tm1 / 1000.) +
+                             200 * std::exp(-tm2 * tm2 / 1000.));
+                   });
 
     if (noLogs)
       return ws;
