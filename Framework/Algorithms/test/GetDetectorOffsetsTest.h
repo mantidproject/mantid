@@ -42,14 +42,14 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const auto &X = WS->readX(0);
-    auto &Y = WS->mutableY(0);
+
+    auto xvals = WS->points(0);
+    // loop through xvals, calculate and set to Y
+    std::transform(xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
+                   [](auto x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
+
     auto &E = WS->mutableE(0);
-    for (size_t i = 0; i < Y.size(); ++i) {
-      const double x = (X[i] + X[i + 1]) / 2;
-      Y[i] = exp(-0.5 * pow((x - 1) / 10.0, 2));
-      E[i] = 0.001;
-    }
+    E.assign(E.size(), 0.001);
 
     // ---- Run algo -----
     if (!offsets.isInitialized())
@@ -93,14 +93,14 @@ public:
         WorkspaceCreationHelper::CreateGroupedWorkspace2D(3, 200, 1.0);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const auto &X = WS->readX(0);
-    auto &Y = WS->mutableY(0);
+
+    auto xvals = WS->points(0);
+    // loop through xvals, calculate and set to Y
+    std::transform(xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
+                   [](auto x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
+
     auto &E = WS->mutableE(0);
-    for (size_t i = 0; i < Y.size(); ++i) {
-      const double x = (X[i] + X[i + 1]) / 2;
-      Y[i] = exp(-0.5 * pow((x - 1) / 10.0, 2));
-      E[i] = 0.001;
-    }
+    E.assign(E.size(), 0.001);
 
     // ---- Run algo -----
     if (!offsets.isInitialized())
@@ -143,14 +143,13 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 200);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const auto &X = WS->readX(0);
-    auto &Y = WS->mutableY(0);
+
+    auto xvals = WS->points(0);
+    // loop through xvals, calculate and set to Y
+    std::transform(xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
+                   [](auto x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
     auto &E = WS->mutableE(0);
-    for (size_t i = 0; i < Y.size(); ++i) {
-      const double x = (X[i] + X[i + 1]) / 2;
-      Y[i] = exp(-0.5 * pow((x - 1) / 10.0, 2));
-      E[i] = 0.001;
-    }
+    E.assign(E.size(), 0.001);
 
     // ---- Run algo -----
     if (!offsets.isInitialized())
@@ -217,14 +216,12 @@ public:
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
     for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
-      const auto &X = WS->readX(wi);
-      auto &Y = WS->mutableY(wi);
+
+      auto xvals = WS->points(0);
+      std::transform(xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
+                     [](auto x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
       auto &E = WS->mutableE(wi);
-      for (int i = 0; i < static_cast<int>(Y.size()); ++i) {
-        const double x = (X[i] + X[i + 1]) / 2;
-        Y[i] = exp(-0.5 * pow((x - 1) / 10.0, 2));
-        E[i] = 0.001;
-      }
+      E.assign(E.size(), 0.001);
     }
   }
 

@@ -45,14 +45,14 @@ public:
     AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const auto &X = WS->x(0);
-    auto &Y = WS->mutableY(0);
+
+    auto xvals = WS->points(0);
+    std::transform(
+        xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
+        [](auto x) { return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2)); });
+
     auto &E = WS->mutableE(0);
-    for (size_t i = 0; i < Y.size(); ++i) {
-      const double x = (X[i] + X[i + 1]) / 2;
-      Y[i] = 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
-      E[i] = 0.001;
-    }
+    E.assign(E.size(), 0.001);
 
     // ---- Run algo -----
     if (!offsets.isInitialized())
@@ -99,14 +99,14 @@ public:
         WorkspaceCreationHelper::CreateGroupedWorkspace2D(3, 200, 1.0);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const auto &X = WS->x(0);
-    auto &Y = WS->mutableY(0);
+
+    auto xvals = WS->points(0);
+    std::transform(xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
+                   [](auto x) { return exp(-0.5 * pow((x - 10) / 1.0, 2)); });
+
     auto &E = WS->mutableE(0);
-    for (size_t i = 0; i < Y.size(); ++i) {
-      const double x = (X[i] + X[i + 1]) / 2;
-      Y[i] = exp(-0.5 * pow((x - 10) / 1.0, 2));
-      E[i] = 0.001;
-    }
+    E.assign(E.size(), 0.001);
+
     AnalysisDataService::Instance().addOrReplace("temp_event_ws3", WS);
 
     // ---- Run algo -----
@@ -155,14 +155,14 @@ public:
     AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const auto &X = WS->x(0);
-    auto &Y = WS->mutableY(0);
+
+    auto xvals = WS->points(0);
+    std::transform(
+        xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
+        [](auto x) { return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2)); });
+
     auto &E = WS->mutableE(0);
-    for (size_t i = 0; i < Y.size(); ++i) {
-      const double x = (X[i] + X[i + 1]) / 2;
-      Y[i] = 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
-      E[i] = 0.001;
-    }
+    E.assign(E.size(), 0.001);
 
     // Create table workspace
     TableWorkspace_sptr fitWindowWS = boost::make_shared<TableWorkspace>();
@@ -225,14 +225,14 @@ public:
     AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const auto &X = WS->x(0);
-    auto &Y = WS->mutableY(0);
+
+    auto xvals = WS->points(0);
+    std::transform(
+        xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
+        [](auto x) { return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2)); });
+
     auto &E = WS->mutableE(0);
-    for (size_t i = 0; i < Y.size(); ++i) {
-      const double x = (X[i] + X[i + 1]) / 2;
-      Y[i] = 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
-      E[i] = 0.001;
-    }
+    E.assign(E.size(), 0.001);
 
     // Create table workspace
     TableWorkspace_sptr fitWindowWS = boost::make_shared<TableWorkspace>();
@@ -296,16 +296,13 @@ public:
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
-    const auto &X = WS->x(0);
-    auto &Y = WS->mutableY(0);
-    auto &E = WS->mutableE(0);
+    auto xvals = WS->points(0);
+    std::transform(
+        xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
+        [](auto x) { return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2)); });
 
-    double x(0);
-    for (size_t i = 0; i < Y.size(); ++i) {
-      x = (X[i] + X[i + 1]) / 2;
-      Y[i] = 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
-      E[i] = 0.001;
-    }
+    auto &E = WS->mutableE(0);
+    E.assign(E.size(), 0.001);
 
     // Resolution workspace
     MatrixWorkspace_sptr resWS =
@@ -431,8 +428,6 @@ public:
     });
 
     E.assign(E.size(), 0.01);
-
-    return;
   }
 
 private:
@@ -460,14 +455,13 @@ public:
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
     for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
-      const auto &X = WS->x(wi);
-      auto &Y = WS->mutableY(wi);
-      auto &E = WS->mutableE(wi);
-      for (int i = 0; i < static_cast<int>(Y.size()); ++i) {
-        const double x = (X[i] + X[i + 1]) / 2;
-        Y[i] = exp(-0.5 * pow((x - 10) / 1.0, 2));
-        E[i] = 0.001;
-      }
+
+      auto xvals = WS->points(0);
+      std::transform(xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
+                     [](auto x) { return exp(-0.5 * pow((x - 10) / 1.0, 2)); });
+
+      auto &E = WS->mutableE(0);
+      E.assign(E.size(), 0.001);
     }
     AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
   }
