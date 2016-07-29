@@ -18,6 +18,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
     _bin_width = None
     _spec_type = None
     _peak_func = None
+    _calc_ion_index = None
     _out_ws_name = None
     _peak_width = None
     _scale = None
@@ -63,6 +64,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self.declareProperty(name='SpectrumType', defaultValue='DOS',
                              validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active', 'BondTable']),
                              doc="Type of intensities to extract and model (fundamentals-only) from .phonon.")
+
+        self.declareProperty(name='CalculateIonIndex', defaultValue=False,
+                             doc="Calculates the individual index of all Ions in the simulated data.")
 
         self.declareProperty(name='StickHeight', defaultValue=0.01,
                              doc='Intensity of peaks in stick diagram.')
@@ -228,12 +232,13 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
             # Build a dictionary of ions that the user cares about
             partial_ions = dict()
-            #for ion in self._ions:
-             #   partial_ions[ion] = [i['index'] for i in ions if i['species'] == ion]
-
-            for ion in ions:
-                ion_identifier = ion['species'] + str(ion['index'])
-                partial_ions[ion_identifier] = ion['index']
+            if not self._calc_ion_index:
+                for ion in self._ions:
+                    partial_ions[ion] = [i['index'] for i in ions if i['species'] == ion]
+            else:
+                for ion in ions:
+                    ion_identifier = ion['species'] + str(ion['index'])
+                    partial_ions[ion_identifier] = ion['index']
 
             partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(partial_ions, frequencies, eigenvectors, weights)
 
@@ -315,6 +320,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self._bin_width = self.getProperty('BinWidth').value
         self._spec_type = self.getPropertyValue('SpectrumType')
         self._peak_func = self.getPropertyValue('Function')
+        self._calc_ion_index = self.getProperty('CalculateIonIndex').value
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
         self._peak_width = self.getProperty('PeakWidth').value
         self._scale = self.getProperty('Scale').value
