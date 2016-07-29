@@ -6,7 +6,7 @@ import math
 
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import *
+import mantid.simpleapi as s_api
 
 PEAK_WIDTH_ENERGY_FLAG = 'energy'
 
@@ -176,7 +176,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         # We want to output a table workspace with ion information
         if self._spec_type == 'IonTable':
-            ion_table = CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
+            ion_table = s_api.CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
             ion_table.addColumn('str', 'Species')
             ion_table.addColumn('int', 'FileIndex')
             ion_table.addColumn('int', 'Number')
@@ -208,7 +208,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             if bonds is None or len(bonds) == 0:
                 raise RuntimeError('No bonds found in CASTEP file')
 
-            bond_table = CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
+            bond_table = s_api.CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
             bond_table.addColumn('str', 'SpeciesA')
             bond_table.addColumn('int', 'NumberA')
             bond_table.addColumn('str', 'SpeciesB')
@@ -239,16 +239,16 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             if self._sum_contributions:
                 # Discard the partial workspaces
                 for partial_ws in partial_workspaces:
-                    DeleteWorkspace(partial_ws)
+                    s_api.DeleteWorkspace(partial_ws)
 
                 # Rename the summed workspace, this will be the output
-                RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._out_ws_name)
+                s_api.RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._out_ws_name)
 
             else:
-                DeleteWorkspace(sum_workspace)
+                s_api.DeleteWorkspace(sum_workspace)
 
                 group = ','.join(partial_workspaces)
-                GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
+                s_api.GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
 
         # We want to calculate a total DoS with scaled intensities
         elif self._spec_type == 'DOS' and self._scale_by_cross_section != 'None':
@@ -264,10 +264,10 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
             # Discard the partial workspaces
             for partial_ws in partial_workspaces:
-                DeleteWorkspace(partial_ws)
+                s_api.DeleteWorkspace(partial_ws)
 
             # Rename the summed workspace, this will be the output
-            RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._out_ws_name)
+            s_api.RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._out_ws_name)
 
         # We want to calculate a total DoS without scaled intensities
         elif self._spec_type == 'DOS':
@@ -446,8 +446,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             else:
                 partial_ws_name += ion_name
 
-            SetSampleMaterial(InputWorkspace=self._out_ws_name,
-                              ChemicalFormula=chemical)
+            s_api.SetSampleMaterial(InputWorkspace=self._out_ws_name,
+                                    ChemicalFormula=chemical)
 
             # Multiply intensity by scatttering cross section
             if self._scale_by_cross_section == 'Incoherent':
@@ -458,14 +458,14 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 scattering_x_section = mtd[self._out_ws_name].mutableSample().getMaterial().totalScatterXSection()
 
             if self._scale_by_cross_section != 'None':
-                Scale(InputWorkspace=self._out_ws_name,
-                      OutputWorkspace=self._out_ws_name,
-                      Operation='Multiply',
-                      Factor=scattering_x_section)
+                s_api.Scale(InputWorkspace=self._out_ws_name,
+                            OutputWorkspace=self._out_ws_name,
+                            Operation='Multiply',
+                            Factor=scattering_x_section)
 
             partial_workspaces.append(partial_ws_name)
-            RenameWorkspace(self._out_ws_name,
-                            OutputWorkspace=partial_ws_name)
+            s_api.RenameWorkspace(self._out_ws_name,
+                                  OutputWorkspace=partial_ws_name)
 
         total_workspace = self._out_ws_name + "_Total"
 
@@ -489,8 +489,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         # Otherwise just repackage the WS we have as the total
         else:
-            CloneWorkspace(InputWorkspace=partial_workspaces[0],
-                           OutputWorkspace=total_workspace)
+            s_api.CloneWorkspace(InputWorkspace=partial_workspaces[0],
+                                 OutputWorkspace=total_workspace)
 
         logger.debug('Partial workspaces: ' + str(partial_workspaces))
         logger.debug('Summed workspace: ' + str(total_workspace))
@@ -597,14 +597,14 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 #----------------------------------------------------------------------------------------
 
     def _create_dos_workspace(self, data_x, dos, dos_sticks, out_name):
-        CreateWorkspace(DataX=data_x,
-                        DataY=np.ravel(np.array([dos, dos_sticks])),
-                        NSpec=2,
-                        VerticalAxisUnit='Text',
-                        VerticalAxisValues=[self._peak_func, 'Stick'],
-                        OutputWorkspace=out_name,
-                        EnableLogging=False)
-        unitx = mtd[out_name].getAxis(0).setUnit("Label")
+        ws = s_api.CreateWorkspace(DataX=data_x,
+                                   DataY=np.ravel(np.array([dos, dos_sticks])),
+                                   NSpec=2,
+                                   VerticalAxisUnit='Text',
+                                   VerticalAxisValues=[self._peak_func, 'Stick'],
+                                   OutputWorkspace=out_name,
+                                   EnableLogging=False)
+        unitx = ws.getAxis(0).setUnit("Label")
         unitx.setLabel("Energy Shift", 'cm^-1')
 
 #----------------------------------------------------------------------------------------
