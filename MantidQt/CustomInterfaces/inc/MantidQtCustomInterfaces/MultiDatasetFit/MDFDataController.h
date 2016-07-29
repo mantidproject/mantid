@@ -45,6 +45,8 @@ public:
   void checkSpectra();
   std::pair<double, double> getFittingRange(int i) const;
   std::vector<std::string> getWorkspaceLogNames(int i) const;
+  double getLogValue(const QString &logName, const QString &function,
+                     int i) const;
 
 signals:
   void dataTableUpdated();

@@ -728,11 +728,13 @@ std::vector<std::string> MultiDatasetFit::getLogNames() const {
 /**
  * Get value of the named log from workspace for spectrum i
  * @param logName :: [input] Name of log
+ * @param function :: [input] Function to apply to log (e.g. mean, min, max...)
  * @param i :: [input] Spectrum number
  * @returns :: Value of the named log for given spectrum
  */
-double MultiDatasetFit::getLogValue(const QString &logName, int i) const {
-  throw std::runtime_error("TODO: Not implemented yet!");
+double MultiDatasetFit::getLogValue(const QString &logName,
+                                    const QString &function, int i) const {
+  return m_dataController->getLogValue(logName, function, i);
 }
 
 } // CustomInterfaces

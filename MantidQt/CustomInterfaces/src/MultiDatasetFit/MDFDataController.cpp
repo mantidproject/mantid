@@ -23,6 +23,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace MDF {
 
+using Mantid::Kernel::Math::StatisticType;
+
 /// Constructor.
 DataController::DataController(MultiDatasetFit *parent, QTableWidget *dataTable)
     : QObject(parent), m_dataTable(dataTable), m_isFittingRangeGlobal(false) {
@@ -237,6 +239,7 @@ MultiDatasetFit *DataController::owner() const {
 
 /**
  * Get list of log names from workspace i
+ * @param i :: [input] index of dataset
  * @returns :: list of log names
  */
 std::vector<std::string> DataController::getWorkspaceLogNames(int i) const {
@@ -262,6 +265,41 @@ std::vector<std::string> DataController::getWorkspaceLogNames(int i) const {
     }
   }
   return logNames;
+}
+
+/**
+ * Get value of named log from workspace i
+ * (Must be able to cast to double)
+ * @param logName :: [input] Name of log
+ * @param function :: [input] Function to apply to log e.g. min, max, mean...
+ * @param i :: [input] index of dataset
+ * @returns :: value of log cast to double
+ */
+double DataController::getLogValue(const QString &logName,
+                                   const QString &function, int i) const {
+  // parse function
+  const StatisticType statType = [&function]() {
+    if (function == "Min") {
+      return StatisticType::Minimum;
+    } else if (function == "Max") {
+      return StatisticType::Maximum;
+    } else if (function == "First") {
+      return StatisticType::FirstValue;
+    } else if (function == "Last") {
+      return StatisticType::LastValue;
+    } else { // default
+      return StatisticType::Mean;
+    }
+  }();
+
+  auto &ads = Mantid::API::AnalysisDataService::Instance();
+  const auto &wsName = getWorkspaceName(i).toStdString();
+  if (ads.doesExist(wsName)) {
+    const auto &workspace =
+      ads.retrieveWS<Mantid::API::MatrixWorkspace>(wsName);
+    return workspace->run().getLogAsSingleValue(logName.toStdString(),
+                                                statType);
+  }
 }
 
 } // MDF

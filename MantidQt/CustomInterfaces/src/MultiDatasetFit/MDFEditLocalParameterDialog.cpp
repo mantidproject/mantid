@@ -286,7 +286,8 @@ void EditLocalParameterDialog::setValueToLog(int i) {
   assert(multifit);
 
   const auto &logName = m_uiForm.logValueSelector->getLog();
-  const double value = multifit->getLogValue(logName, i);
+  const auto &function = m_uiForm.logValueSelector->getFunction();
+  const double value = multifit->getLogValue(logName, function, i);
   m_values[i] = value;
   m_uiForm.tableWidget->item(i, valueColumn)->setText(makeNumber(value));
   updateRoleColumn(i);

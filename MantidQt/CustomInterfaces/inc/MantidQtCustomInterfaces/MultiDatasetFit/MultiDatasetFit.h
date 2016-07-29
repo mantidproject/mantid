@@ -78,7 +78,8 @@ public:
   /// Get log names from workspace(s)
   std::vector<std::string> getLogNames() const;
   /// Get value of log from spectrum
-  double getLogValue(const QString &logName, int i) const;
+  double getLogValue(const QString &logName, const QString &function,
+                     int i) const;
 
   /// Make it public
   using API::UserSubWindow::runPythonCode;
