@@ -289,6 +289,12 @@ void EditLocalParameterDialog::setAllValuesToLog() {
   // TODO: needs implementation
 }
 
+/// Returns whether log checkbox is ticked or not
+/// @returns True if log options are enabled
+bool EditLocalParameterDialog::isLogCheckboxTicked() const {
+  return m_uiForm.logValueSelector->isCheckboxTicked();
+}
+
 } // MDF
 } // CustomInterfaces
 } // MantidQt

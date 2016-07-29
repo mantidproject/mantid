@@ -23,10 +23,12 @@ namespace MDF {
 /// @param othersFixed :: True if some other local parameters are fixed.
 /// @param allOthersFixed :: True if all other local parameters are fixed.
 /// @param othersTied :: True if there are other tied parameters.
+/// @param logOptionsEnabled :: True if the log checkbox is ticked.
 LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index,
                                            double value, bool fixed,
                                            QString tie, bool othersFixed,
-                                           bool allOthersFixed, bool othersTied)
+                                           bool allOthersFixed, bool othersTied,
+                                           bool logOptionsEnabled)
     : QWidget(parent), m_index(index), m_value(QString::number(value, 'g', 16)),
       m_fixed(fixed), m_tie(tie), m_othersFixed(othersFixed),
       m_allOthersFixed(allOthersFixed), m_othersTied(othersTied) {
@@ -99,6 +101,7 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index,
   m_setToLogAction->setToolTip("Set this parameter to a log value.");
   connect(m_setToLogAction, SIGNAL(activated()), this, SLOT(setToLog()));
   setMenu->addAction(m_setToLogAction);
+  m_setToLogAction->setEnabled(logOptionsEnabled);
 
   m_setAllToLogAction = new QAction("Set all to log", this);
   m_setAllToLogAction->setToolTip(
@@ -106,6 +109,7 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index,
   connect(m_setAllToLogAction, SIGNAL(activated()), this,
           SIGNAL(setAllValuesToLog()));
   setMenu->addAction(m_setAllToLogAction);
+  m_setAllToLogAction->setEnabled(logOptionsEnabled);
 
   m_button->setMenu(setMenu);
 

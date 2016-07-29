@@ -58,6 +58,9 @@ public:
     this->setEnabled(enabled ? Qt::Checked : Qt::Unchecked);
   }
 
+  /// Whether checkbox is ticked or not
+  bool isCheckboxTicked() const;
+
 signals:
   /// Checkbox state has changed
   void logOptionsEnabled(bool enabled);

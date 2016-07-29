@@ -29,6 +29,7 @@ public:
   bool areOthersFixed(int i) const;
   bool areAllOthersFixed(int i) const;
   bool areOthersTied(int i) const;
+  bool isLogCheckboxTicked() const;
 
 signals:
   void logOptionsChecked(bool);

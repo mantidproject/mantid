@@ -71,5 +71,13 @@ void LogValueSelector::setEnabled(int checkstate) {
   emit logOptionsEnabled(enabled);
 }
 
+/**
+ * Returns whether checkbox is ticked or not
+ * @returns :: true if checkbox is ticked
+ */
+bool LogValueSelector::isCheckboxTicked() const {
+  return m_ui.chkUseLog->isChecked();
+}
+
 } // namespace MantidWidgets
 } // namespace MantidQt

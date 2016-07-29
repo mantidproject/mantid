@@ -20,7 +20,7 @@ class LocalParameterEditor : public QWidget {
 public:
   LocalParameterEditor(QWidget *parent, int index, double value, bool fixed,
                        QString tie, bool othersFixed, bool allOthersFixed,
-                       bool othersTied);
+                       bool othersTied, bool logOptionsEnabled);
 signals:
   void setAllValues(double);
   void fixParameter(int, bool);
