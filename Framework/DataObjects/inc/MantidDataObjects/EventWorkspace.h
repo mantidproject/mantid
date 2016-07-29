@@ -174,9 +174,6 @@ private:
    */
   std::vector<EventList *> data;
 
-  /// The number of vectors in the workspace
-  std::size_t m_noVectors;
-
   /// Container for the MRU lists of the event lists contained.
   mutable EventWorkspaceMRU *mru;
 };

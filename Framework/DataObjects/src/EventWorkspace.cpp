@@ -35,10 +35,7 @@ using Kernel::Exception::NotImplementedError;
 using std::size_t;
 using namespace Mantid::Kernel;
 
-//---- Constructors
-//-------------------------------------------------------------------
-EventWorkspace::EventWorkspace()
-    : data(), m_noVectors(), mru(new EventWorkspaceMRU) {}
+EventWorkspace::EventWorkspace() : mru(new EventWorkspaceMRU) {}
 
 EventWorkspace::EventWorkspace(const EventWorkspace &other)
     : IEventWorkspace(other), mru(new EventWorkspaceMRU) {
@@ -47,10 +44,7 @@ EventWorkspace::EventWorkspace(const EventWorkspace &other)
 
 EventWorkspace::~EventWorkspace() {
   delete mru;
-
-  for (auto i = data.begin(); i != this->data.end(); ++i) {
-    delete (*i);
-  }
+  clearData();
 }
 
 //-----------------------------------------------------------------------------
@@ -84,10 +78,9 @@ void EventWorkspace::init(const std::size_t &NVectors,
         "Negative or 0 Number of Pixels specified to EventWorkspace::init");
   }
   // Initialize the data
-  m_noVectors = NVectors;
-  data.resize(m_noVectors, nullptr);
+  data.resize(NVectors, nullptr);
   // Make sure SOMETHING exists for all initialized spots.
-  for (size_t i = 0; i < m_noVectors; i++)
+  for (size_t i = 0; i < NVectors; i++)
     data[i] = new EventList(mru, specnum_t(i));
 
   // Set each X vector to have one bin of 0 & extremely close to zero
@@ -147,8 +140,6 @@ void EventWorkspace::copyDataFrom(const EventWorkspace &source,
     newel->setMRU(this->mru);
     this->data.push_back(newel);
   }
-  // Save the number of vectors
-  m_noVectors = this->data.size();
 
   this->clearMRU();
 }
@@ -190,7 +181,7 @@ EventList &EventWorkspace::getSpectrum(const size_t index) {
 
 /// Return const reference to EventList at the given workspace index.
 const EventList &EventWorkspace::getSpectrum(const size_t index) const {
-  if (index >= m_noVectors)
+  if (index >= data.size())
     throw std::range_error(
         "EventWorkspace::getSpectrum, workspace index out of range");
   return *data[index];
@@ -428,12 +419,9 @@ void EventWorkspace::clearMRU() const { mru->clear(); }
  * any EventList objects in it
  */
 void EventWorkspace::clearData() {
-  m_noVectors = data.size();
-  for (size_t i = 0; i < m_noVectors; i++) {
-    delete data[i];
-  }
+  for (auto &eventList : data)
+    delete eventList;
   data.clear();
-  m_noVectors = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -478,7 +466,6 @@ EventWorkspace::getOrAddEventList(const std::size_t workspace_index) {
       // Add to list
       this->data.push_back(newel);
     }
-    m_noVectors = data.size();
   }
 
   // Now it should be safe to return the value
@@ -499,7 +486,6 @@ void EventWorkspace::resizeTo(const std::size_t numSpectra) {
   // Remove all old EventLists and resize the vector
   this->clearData();
   data.resize(numSpectra);
-  m_noVectors = numSpectra;
   for (size_t i = 0; i < numSpectra; ++i) {
     data[i] = new EventList(mru, static_cast<specnum_t>(i + 1));
   }
@@ -561,7 +547,6 @@ void EventWorkspace::deleteEmptyLists() {
 
   // replace the old vector
   this->data.swap(notEmpty);
-  this->m_noVectors = this->data.size();
 
   // Clearing the MRU list is a good idea too.
   this->clearMRU();
@@ -651,7 +636,7 @@ EventWorkspace::refX(const std::size_t index) const {
 void EventWorkspace::generateHistogram(const std::size_t index,
                                        const MantidVec &X, MantidVec &Y,
                                        MantidVec &E, bool skipError) const {
-  if (index >= this->m_noVectors)
+  if (index >= data.size())
     throw std::range_error(
         "EventWorkspace::generateHistogram, histogram number out of range");
   this->data[index]->generateHistogram(X, Y, E, skipError);
@@ -672,7 +657,7 @@ void EventWorkspace::generateHistogramPulseTime(const std::size_t index,
                                                 const MantidVec &X,
                                                 MantidVec &Y, MantidVec &E,
                                                 bool skipError) const {
-  if (index >= this->m_noVectors)
+  if (index >= data.size())
     throw std::range_error("EventWorkspace::generateHistogramPulseTime, "
                            "histogram number out of range");
   this->data[index]->generateHistogramPulseTime(X, Y, E, skipError);
@@ -795,7 +780,7 @@ void EventWorkspace::sortAll(EventSortType sortType,
 
   // Initial chunk size: set so that each core will be called for 20 tasks.
   // (This is to avoid making too small tasks.)
-  size_t chunk_size = m_noVectors / (num_threads * 20);
+  size_t chunk_size = data.size() / (num_threads * 20);
   if (chunk_size < 1)
     chunk_size = 1;
 
@@ -804,12 +789,12 @@ void EventWorkspace::sortAll(EventSortType sortType,
   // And auto-detect how many threads
   size_t howManyThreads = 0;
 #ifdef _OPENMP
-  if (m_noVectors < num_threads * 10) {
+  if (data.size() < num_threads * 10) {
     // If you have few vectors, sort with 2 cores.
     chunk_size = 1;
     howManyCores = 2;
     howManyThreads = num_threads / 2 + 1;
-  } else if (m_noVectors < num_threads) {
+  } else if (data.size() < num_threads) {
     // If you have very few vectors, sort with 4 cores.
     chunk_size = 1;
     howManyCores = 4;
@@ -822,7 +807,7 @@ void EventWorkspace::sortAll(EventSortType sortType,
 
   // Create the thread pool, and optimize by doing the longest sorts first.
   ThreadPool pool(new ThreadSchedulerLargestCost(), howManyThreads);
-  for (size_t i = 0; i < m_noVectors; i += chunk_size) {
+  for (size_t i = 0; i < data.size(); i += chunk_size) {
     pool.schedule(new EventSortingTask(this, i, i + chunk_size, sortType,
                                        howManyCores, prog));
   }
