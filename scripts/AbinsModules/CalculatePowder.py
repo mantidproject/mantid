@@ -59,32 +59,43 @@ class CalculatePowder(IOmodule):
 
         _powder = PowderData(temperature=self._temperature, num_atoms=num_atoms)
 
+        _powder_atom = {"msd": 0.0, "dw":0}
+
+        _coth = np.divide(1.0, np.tanh(_coth_factor * freq_hartree))
+        _coth_square = np.multiply(_coth, _coth)
+        expm1 = np.expm1(np.multiply(exp_factor, freq_hartree))
+
+        one_over_freq = np.divide(1.0, freq_hartree)
+        two_over_freq_n = np.divide(2.0, np.multiply(freq_hartree, expm1))
+
         for atom in range(num_atoms):
 
-            _powder_atom = {"msd": 0.0, "dw":0}
-            _coth = 1.0 / np.tanh(_coth_factor * freq_hartree)
-            _coth_square = np.multiply(_coth, _coth)
-            expm1 = np.expm1(exp_factor * freq_hartree)
-            one_over_freq = 1.0 / freq_hartree
-            two_over_freq_n = 2.0 / (np.multiply(freq_hartree, expm1))
+            temp_msd_k = 0.0
+            temp_dw_k = 0.0
 
             for k in range(num_k):
 
+                temp_msd_freq = 0.0
+                temp_dw_freq = 0.0
+
                 # correction for acoustic modes at Gamma point
-                if np.linalg.norm(_data["k_points_data"]["k_vectors"][k]) < Constants.small_k: start = 2
+                if np.linalg.norm(_data["k_points_data"]["k_vectors"][k]) < Constants.small_k: start = 3
                 else: start = 0
 
                 for freq in range(start, num_freq):
 
                     disp = displacements[k, atom, freq, :]
+                    temp = np.vdot(disp, disp).real * (one_over_freq[k, freq] + two_over_freq_n[k, freq])
+                    temp_msd_freq += temp
+                    temp_dw_freq += temp * _coth_square[k, freq]
 
-                    _powder_atom["msd"] += np.vdot(disp, disp).real * (one_over_freq[k, freq] + two_over_freq_n[k, freq])
-                    _powder_atom["dw"] = _powder_atom["msd"] * _coth_square[k, freq]
-                _powder_atom["msd"] += _powder_atom["msd"] * weights[k]
-                _powder_atom["dw"] += _powder_atom["dw"] * weights[k]
+                weight_k = weights[k]
+                temp_msd_k += temp_msd_freq *  weight_k
+                temp_dw_k += temp_dw_freq * weight_k
 
-            _powder_atom["msd"] += _powder_atom["msd"] * mass_hartree_factor[atom]
-            _powder_atom["dw"] += _powder_atom["dw"] * mass_hartree_factor[atom]
+            mass_factor = mass_hartree_factor[atom]
+            _powder_atom["msd"] = temp_msd_k * mass_factor
+            _powder_atom["dw"] = temp_dw_k * mass_factor
 
             _powder._append(num_atom=atom, powder_atom=_powder_atom)
 
@@ -114,8 +125,10 @@ class CalculatePowder(IOmodule):
         @return: object of type PowderData with mean square displacements and Debye-Waller factors.
         """
         _data = self.load(list_of_structured_datasets=["data"], list_of_attributes=["temperature"])
-        _num_atoms = _data["structured_datasets"]["data"]["msd"].shape[0]
-        _powder_data = PowderData(temperature=_data["attributes"]["temperature"], num_atoms=_num_atoms)
+
+        _powder_data = PowderData(temperature=_data["attributes"]["temperature"],
+                                  num_atoms=_data["structured_datasets"]["data"]["msd"].shape[0])
+
         _powder_data.set(_data["structured_datasets"]["data"])
 
         return _powder_data
