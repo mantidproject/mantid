@@ -19,7 +19,7 @@ class CalculatePowder(IOmodule):
         """
 
         @param filename:  name of input DFT filename
-        @param abins_data: object of type AbinsData with data from input DFt file
+        @param abins_data: object of type AbinsData with data from input DFT file
         @param temperature:  temperature in K
         """
         super(CalculatePowder, self).__init__(input_filename=filename, group_name=Constants.powder_data_group)
@@ -61,7 +61,7 @@ class CalculatePowder(IOmodule):
 
         _powder_atom = {"msd": 0.0, "dw":0}
 
-        _coth = np.divide(1.0, np.tanh(_coth_factor * freq_hartree))
+        _coth = np.divide(1.0, np.tanh(np.multiply(_coth_factor, freq_hartree)))
         _coth_square = np.multiply(_coth, _coth)
         expm1 = np.expm1(np.multiply(exp_factor, freq_hartree))
 
