@@ -10,7 +10,7 @@ import Constants
 
 class CalculateDWCrystal(IOmodule):
     """
-    Class for calculating Debye-Waller factors for single crystals (sample form is a SingleCrystal).
+    Class for calculating Debye-Waller factors for single crystals (sample form is SingleCrystal).
     """
     
     def __init__(self, filename=None, temperature=None, abins_data=None):
@@ -60,15 +60,19 @@ class CalculateDWCrystal(IOmodule):
         _atomic_displacements = _data["k_points_data"]["atomic_displacements"]
 
         _coth_factor = 1.0 / (2.0 * _temperature_hartree) # coth( _coth_factor * omega)
+
+        _tanh =  np.tanh(np.multiply(_coth_factor,  _frequencies_hartree))
+        _coth_over_omega = np.divide(1.0, np.multiply(_tanh ,_frequencies_hartree)) # coth(...)/omega
+
         _item = np.zeros((3, 3), dtype=Constants.float_type) # stores DW for one atom
 
         for num in range(self._num_atoms):
             _item.fill(0.0) # erase stored information so that it can be filled with content for the next atom
-            _coth_over_omega = (1.0 / np.tanh(_coth_factor * _frequencies_hartree)) /  _frequencies_hartree # coth(...)/omega
+
             for k in range(self._num_k):
 
                 # correction for acoustic modes at Gamma point
-                if np.linalg.norm(_data["k_points_data"]["k_vectors"][k]) < Constants.small_k: start = 2
+                if np.linalg.norm(_data["k_points_data"]["k_vectors"][k]) < Constants.small_k: start = 3
                 else: start = 0
 
                 for n_freq in range(start, self._num_freq):
@@ -87,7 +91,7 @@ class CalculateDWCrystal(IOmodule):
 
     def getDW(self):
         """
-        Calculates Debye-Waller factors and saves them to an hdf file.
+        Calculates Debye-Waller factors.
         @return: object of type DwData with Debye-Waller factors.
         """
 
@@ -95,15 +99,3 @@ class CalculateDWCrystal(IOmodule):
 
         return data
 
-
-    def loadData(self):
-        """
-        Loads Debye-Waller factors in the form of DwData from hdf file.
-        @return: Debye-Waller factors (DwData)
-        """
-        _data = self.load(list_of_numpy_datasets=["data"], list_of_attributes=["temperature"])
-        _num_atoms = _data["datasets"]["data"].shape[0]
-        _dw_data = DwCrystalData(num_atoms=_num_atoms, temperature=_data["attributes"]["temperature"])
-        _dw_data.set(_data["datasets"]["data"])
-
-        return _dw_data
