@@ -28,6 +28,8 @@ class ToscaInstrument(Instrument):
 
         """
 
+        # noinspection PyTypeChecker
+        frequencies = np.multiply(frequencies, 1.0 / Constants.cm1_2_hartree) # go back to cm^-1;
         all_points = points_per_peak * frequencies.shape[0]
         broadened_spectrum = np.zeros(all_points, dtype=Constants.float_type)
         fwhm = 3 # approximate value for the full width at half maximum
@@ -50,7 +52,8 @@ class ToscaInstrument(Instrument):
         """
         all_points = points_per_peak * frequencies.shape[0]
         abscissa =  np.zeros(all_points, dtype=Constants.float_type)
-        frequencies /=  Constants.cm1_2_hartree # go back to cm^-1; we want abscissa to be in cm^-1
+        # noinspection PyTypeChecker
+        frequencies = np.multiply(frequencies, 1.0 / Constants.cm1_2_hartree) # go back to cm^-1; we want abscissa to be in cm^-1
         fwhm = 3 # approximate value for the full width at half maximum
 
         for indx, freq in np.ndenumerate(frequencies):

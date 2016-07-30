@@ -64,10 +64,11 @@ class CalculateDWCrystal(IOmodule):
         _tanh =  np.tanh(np.multiply(_coth_factor,  _frequencies_hartree))
         _coth_over_omega = np.divide(1.0, np.multiply(_tanh ,_frequencies_hartree)) # coth(...)/omega
 
-        _item = np.zeros((3, 3), dtype=Constants.float_type) # stores DW for one atom
+        _item_k = np.zeros((3, 3), dtype=Constants.float_type) # stores DW for one atom
+        _item_freq = np.zeros((3, 3), dtype=Constants.float_type)
 
         for num in range(self._num_atoms):
-            _item.fill(0.0) # erase stored information so that it can be filled with content for the next atom
+            _item_k.fill(0.0) # erase stored information so that it can be filled with content for the next atom
 
             for k in range(self._num_k):
 
@@ -75,17 +76,19 @@ class CalculateDWCrystal(IOmodule):
                 if np.linalg.norm(_data["k_points_data"]["k_vectors"][k]) < Constants.small_k: start = 3
                 else: start = 0
 
+                _item_freq.fill(0.0)
+
                 for n_freq in range(start, self._num_freq):
 
                     displacement = _atomic_displacements[k, num, n_freq, :]
                     tensor = np.outer(displacement, displacement.conjugate()).real # DW factors are real
                     np.multiply(tensor, _coth_over_omega[k, n_freq], tensor)
-                    np.add(_item, tensor, _item)
+                    np.add(_item_freq , tensor, _item_freq)
 
-                np.add(_item, _item * _weights[k], _item)
+                np.add(_item_k, np.multiply(_item_freq, _weights[k]), _item_k)
 
-            np.multiply(_item, _mass_hartree_factor[num], _item)
-            _DW._append(item=_item, num_atom=num)
+            np.multiply(_item_k, _mass_hartree_factor[num], _item_k)
+            _DW._append(item=_item_k, num_atom=num)
         return _DW
 
 

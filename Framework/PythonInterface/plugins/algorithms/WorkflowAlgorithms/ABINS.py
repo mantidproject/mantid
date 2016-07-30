@@ -1,7 +1,7 @@
 import multiprocessing
 
 from mantid.api import AlgorithmFactory,  FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty
-from mantid.kernel import logger, StringListValidator, Direction
+from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty
 
 from AbinsModules import LoadCASTEP, CalculateS
 
@@ -12,16 +12,11 @@ class ABINS(PythonAlgorithm):
     _phononFile = None
     _experimentalFile = None
     _sampleForm = None
-    _Qvectors = None
     _intrinsicBroadening = None
-    _instrument=None
-    _instrumentalBroadening = None
+    _instrument =None
     _structureFactorMode = None
-    _structureFactorUnrefined = None
-    _structureFactorRefined = None
-    _threadsNumber = None
-    _saveS = None
     _output_workspace_name = None
+    _scale = None
 
     # ----------------------------------------------------------------------------------------
 
@@ -61,6 +56,9 @@ class ABINS(PythonAlgorithm):
                              defaultValue=10.0,
                              doc="Temperature in K for which dynamical structure factor S should be calculated.")
 
+        self.declareProperty(name='Scale', defaultValue=1.0,
+                             doc='Scale the intensity by the given factor. Default is no scaling.')
+
         self.declareProperty(name="Sample Form",
                              direction=Direction.Input,
                              defaultValue="Powder",
@@ -73,11 +71,17 @@ class ABINS(PythonAlgorithm):
                              validator=StringListValidator(["None", "TOSCA"]),
                              doc="Name of an instrument for which analysis should be performed.")
 
-        self.declareProperty(name="Dynamical Structure Factor",
-                             direction=Direction.Input,
-                             defaultValue="Full",
-                             validator=StringListValidator(["Full", "Atoms"]),
-                             doc="Theoretical dynamical structure S. The valid options are Full, Atoms")
+        self.declareProperty(StringArrayProperty('Ions', Direction.Input),
+                             doc="List of Ions to use to calculate partial density of states." \
+                                 "If left blank, total density of states will be calculated")
+
+        self.declareProperty(name='SumContributions', defaultValue=False,
+                             doc="Sum the partial dynamical structure factors into a single workspace.")
+
+        self.declareProperty(name='ScaleByCrossSection', defaultValue='None',
+                             validator=StringListValidator(['None', 'Total', 'Incoherent', 'Coherent']),
+                             doc="Sum the partial dynamical structure factor by the scattering cross section.")
+
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),
                              doc="Name to give the output workspace.")
@@ -91,7 +95,7 @@ class ABINS(PythonAlgorithm):
         """
         issues = dict()
 
-        temperature = self.getPropertyValue("Temperature")
+        temperature = self.getPropertyValue("Temperature [K]")
         if temperature < 0:
             issues["Temperature"] = "Temperature must be positive!"
 
@@ -103,31 +107,70 @@ class ABINS(PythonAlgorithm):
         elif dft_filename == "CRYSTAL":
             issues["DFT program"] = "Support for CRYSTAL DFT program not implemented yet!"
 
+        sum_contributions = self.getProperty('SumContributions').value
+        ions = self.getProperty('Ions').value
+        calc_partial = len(ions) > 0
+        if not calc_partial and sum_contributions:
+            issues['SumContributions'] = 'Cannot sum contributions when not calculating partial density of states'
+
+
         return issues
 
 
     def PyExec(self):
 
-        steps = 10
+        steps = 4
         begin = 0
         end = 1.0
         prog_reporter = Progress(self, begin, end, steps)
 
+        # 1) get input parameters from a user
         self._get_properties()
         prog_reporter.report("Input data from the user has been collected.")
 
-        castep_reader = LoadCASTEP(input_DFT_filename=self._phononFile)
-        castep_data = castep_reader.readPhononFile()
+        # 2) read dft data
+        dft_data = None
+        if self._dft_program == "CASTEP":
+            dft_reader = LoadCASTEP(input_DFT_filename=self._phononFile)
+            dft_data = dft_reader.readPhononFile()
+        else:
+            raise RuntimeError("Currently only output files from CASTEP are supported.")
         prog_reporter.report("Phonon file has been read.")
 
+        # 3) calculate S
         s_calculator = CalculateS(filename=self._phononFile, temperature=self._temperature,
-                                  instrument_name=self._instrument, abins_data=castep_data,
+                                  instrument_name=self._instrument, abins_data=dft_data,
                                   sample_form=self._sampleForm)
-        Sdata = s_calculator.getS()
+        S_data = s_calculator.getS()
         prog_reporter.report("Dynamical structure factor is ready to be plotted.")
+
+        # 4) put S to workspace and plot it
+
+        self.setProperty('OutputWorkspace', self._out_ws_name)
+
+
+    def _produce_workspace_for_S(self):
+        """
+        Puts calculated S into Mantid Workspace so that it can be easily visualise by Mantid utilities.
+        @return:
+        """
+        pass
+
+
+    def _produce_workspace_for_partial_S(self):
+        """
+        Puts S for the given atom into workspace.
+        @return:
+        """
+        pass
 
 
     def _validate_crystal_input_file(self, filename=None):
+        """
+        Method to validate input file for CRYSTAL DFT program.
+        @param filename: name of file.
+        @return: True if file is valid otherwise false.
+        """
         pass
 
 
@@ -218,13 +261,17 @@ class ABINS(PythonAlgorithm):
 
     def _get_properties(self):
 
+        self._dft_program = self.getProperty("DFT program").value
         self._phononFile = self.getProperty("Phonon File").value
         self._experimentalFile = self.getProperty("Experimental File").value
-        self._temperature = self.getProperty("Temperature").value
+        self._temperature = self.getProperty("Temperature [K]").value
         self._sampleForm = self.getProperty("Sample Form").value
         self._instrument = self.getProperty("Instrument").value
-        self._structureFactorMode = self.getProperty("Dynamical Structure Factor").value
+        self._ions = self.getProperty("Ions").value
+        self._sum_contributions = self.getProperty("SumContributions").value
+        self._scale_by_cross_section = self.getProperty("ScaleByCrossSection").value
         self._output_workspace_name = self.getProperty("OutputWorkspace")
+        self._calc_partial = (len(self._ions) > 0)
 
 try:
     AlgorithmFactory.subscribe(ABINS)
