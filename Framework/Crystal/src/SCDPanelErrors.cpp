@@ -61,6 +61,11 @@ SCDPanelErrors::SCDPanelErrors() : m_setupFinished(false) {
 void SCDPanelErrors::moveDetector(
     double x, double y, double z, double rotx, double roty, double rotz,
     std::string detname, Workspace_sptr inputW) const {
+  // CORELLI has sixteenpack under bank
+  DataObjects::PeaksWorkspace_sptr inputP =
+        boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(inputW);
+  Geometry::Instrument_sptr inst = boost::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
+  if (inst->getName().compare("CORELLI") == 0.0 && detname != "moderator") detname.append("/sixteenpack");
 
   if (x != 0.0 || y !=0.0 || z != 0.0) {
     IAlgorithm_sptr alg1 = Mantid::API::AlgorithmFactory::Instance().create("MoveInstrumentComponent", -1);

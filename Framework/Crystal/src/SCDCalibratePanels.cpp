@@ -201,7 +201,9 @@ void SCDCalibratePanels::exec() {
   int nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
   findL1(nPeaks,peaksWs);
   set<string> MyBankNames;
-  for (int i = 0; i < nPeaks; ++i) MyBankNames.insert(peaksWs->getPeak(i).getBankName());
+  for (int i = 0; i < nPeaks; ++i) {
+    MyBankNames.insert(peaksWs->getPeak(i).getBankName());
+  }
 
   PARALLEL_FOR1(peaksWs)
   for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
@@ -320,6 +322,8 @@ void SCDCalibratePanels::exec() {
   setProperty("TofWorkspace", TofWksp);
   OrientedLattice lattice = peaksWs->mutableSample().getOrientedLattice();
   DblMatrix UB = lattice.getUB();
+  // sort again since edge peaks can trace to other banks
+  peaksWs->sort(criteria);
   for (int j = 0; j < nPeaks; ++j) {
     const Geometry::IPeak &peak = peaksWs->getPeak(j);
     string bankName = peak.getBankName();
@@ -407,7 +411,7 @@ AnalysisDataService::Instance().addOrReplace("params_L1", paramsL1);
 double deltaL1 = paramsL1->getRef<double>("Value",2);
 SCDPanelErrors com;
 com. moveDetector(0.0, 0.0, deltaL1, 0.0, 0.0, 0.0, "moderator", peaksWs);
-g_log.notice() <<"L1 = "<<peaksWs->getInstrument()->getSource()->getPos().Z()<<"  "<< fitL1Status << " Chi2overDoF " << chisqL1 << "\n";
+g_log.notice() <<"L1 = "<< -peaksWs->getInstrument()->getSource()->getPos().Z()<<"  "<< fitL1Status << " Chi2overDoF " << chisqL1 << "\n";
 }
 
 void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
