@@ -6,6 +6,8 @@ from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement,
 from PyQt4.QtCore import *
 from PyQt4.QtGui  import *
 
+import traceback
+
 class TOFTOFWidget(BaseWidget):
     ''' The one and only tab page. '''
     name = 'TOFTOF Reduction'
@@ -68,22 +70,76 @@ class TOFTOFWidget(BaseWidget):
 
     def __init__(self, settings, scriptElement):
         BaseWidget.__init__(self, settings = settings)
-        self.state = scriptElement
 
+        # ui data elements
+        self.dataSearchDir          = QLineEdit()
+        self.dataSearchDirBtn       = QPushButton('Browse')
+        self.chkSubtractECFromVan   = QCheckBox('Subtract empty can from vanadium')
+        self.rbtCorrectTOFNone      = QRadioButton('none')
+        self.rbtCorrectTOFVan       = QRadioButton('vanadium')
+        self.rbtCorrectTOFSample    = QRadioButton('sample')
+
+        self.vanRuns       = QLineEdit()
+        self.vanCmnt       = QLineEdit()
+
+        self.ecRuns        = QLineEdit()
+        self.ecCmts        = QLineEdit()
+        self.ecFactor      = QLineEdit()
+
+        self.rebinEnergy   = QLineEdit()
+        self.rebinQ        = QLineEdit()
+        self.maskDetectors = QLineEdit()
+
+        # ui layout
         box = QVBoxLayout()
         self._layout.addLayout(box)
 
         # data path
         box.addWidget(QLabel('Data search directory'))
 
-        self.dataPath    = QLineEdit()
-        self.dataPathBtn = QPushButton('Browse')
-
         hbox = QHBoxLayout()
-        hbox.addWidget(self.dataPath)
-        hbox.addWidget(self.dataPathBtn)
+        hbox.addWidget(self.dataSearchDir)
+        hbox.addWidget(self.dataSearchDirBtn)
 
         box.addLayout(hbox)
+
+        hbox = QHBoxLayout()
+        hbox.addWidget(self.chkSubtractECFromVan)
+        hbox.addStretch(1)
+
+        box.addLayout(hbox)
+
+        hbox = QHBoxLayout()
+        hbox.addWidget(QLabel('correct TOF'))
+        hbox.addWidget(self.rbtCorrectTOFNone)
+        hbox.addWidget(self.rbtCorrectTOFVan)
+        hbox.addWidget(self.rbtCorrectTOFSample)
+        hbox.addStretch(1)
+
+        box.addLayout(hbox)
+
+        # vanadium and EC
+        grid = QGridLayout()
+        grid.addWidget(QLabel('vanadium runs'),   0, 0)
+        grid.addWidget(self.vanRuns,              0, 1)
+        grid.addWidget(QLabel('comment'),         0, 2)
+        grid.addWidget(self.vanCmnt,              0, 3)
+
+        grid.addWidget(QLabel('EC runs'),         1, 0)
+        grid.addWidget(self.ecRuns,               1, 1)
+        grid.addWidget(QLabel('comment'),         1, 2)
+        grid.addWidget(self.ecCmts,               1, 3)
+        grid.addWidget(QLabel('factor'),          1, 4)
+        grid.addWidget(self.ecFactor,             1, 5)
+
+        grid.addWidget(QLabel('rebin in energy'), 2, 0)
+        grid.addWidget(self.rebinEnergy,          2, 1)
+        grid.addWidget(QLabel('rebin in Q'),      2, 2)
+        grid.addWidget(self.rebinQ,               2, 3)
+        grid.addWidget(QLabel('mask detectors'),  3, 0)
+        grid.addWidget(self.maskDetectors,        3, 1)
+
+        box.addLayout(grid)
 
         # data runs
         self.dataRunsView = QTableView(self)
@@ -95,16 +151,27 @@ class TOFTOFWidget(BaseWidget):
         self.runDataModel = TOFTOFWidget.DataRunModel(self, scriptElement)
         self.dataRunsView.setModel(self.runDataModel)
 
-        self.dataPathBtn.clicked.connect(self._onDataPath)
+        self.dataSearchDirBtn.clicked.connect(self._onDataSearchDir)
         self.runDataModel.selectCell.connect(self._onSelectedCell)
 
-    def get_state(self):
-        return self.state
+        # make accessible by scriptElement
+        self.state = scriptElement
 
-    def _onDataPath(self):
+    def get_state(self):
+        el = self.state # scriptElement
+        el.dataSearchDir = self.dataSearchDir.text()
+
+        return el
+
+    def set_state(self, state):
+        el = state # scriptElement, same as state
+        print 'SET_STATE', el.dataSearchDir
+        self.dataSearchDir.setText(el.dataSearchDir)
+
+    def _onDataSearchDir(self):
         dirname = self.base.dir_browse_dialog()
         if dirname:
-            self.dataPath.setText(dirname)
+            self.dataSearchDir.setText(dirname)
 
     def _onSelectedCell(self, row, col):
         index = self.runDataModel.index(row, col)

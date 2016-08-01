@@ -16,33 +16,35 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         self.prefix   = 'ws' # prefix of some workspace names
 
-        self.dataSearchDir    = ''
-        self.dataSearchDir    = '/home/jan/C/scg/toftof_data'
+#self.dataSearchDir    = '/home/jan/C/scg/toftof_data'
+#self.rebiningInEnergy = '-15,0.008,1.5'
+#self.rebiningInQ      = '0.2,0.1,2.0'
+#self.vanRuns  = '12:14'
+#self.vanCmnt  = 'Van'
+#self.ecRuns   = '15:17'
+#self.ecCmnt   = 'EC'
+#self.ecFactor = 0.9
+#self.dataRuns = [('27:29','H2O_21C_sqw'), ('30:31','H2O_34C_sqw')]
+#self.maskDetectors = '308-312,314'
+
+        self.dataSearchDir    = 'AAA'
         self.rebiningInEnergy = ''
-        self.rebiningInEnergy = '-15,0.008,1.5'
         self.rebiningInQ      = ''
-        self.rebiningInQ      = '0.2,0.1,2.0'
 
         # vanadium runs
         self.vanRuns  = ''
-        self.vanRuns  = '12:14'
         self.vanCmnt  = ''
-        self.vanCmnt  = 'Van'
 
         # empty can runs
         self.ecRuns   = ''
-        self.ecRuns   = '15:17'
         self.ecCmnt   = ''
-        self.ecCmnt   = 'EC'
-        self.ecFactor = 0.9
+        self.ecFactor = 1.0
 
         # data runs
         self.dataRuns = []
-        self.dataRuns = [('27:29','H2O_21C_sqw'), ('30:31','H2O_34C_sqw')]
 
         # additional detectors to mask
         self.maskDetectors = ''
-        self.maskDetectors = '308-312,314'
 
     xmlTag = 'TOFTOFReductionData'
 
@@ -73,12 +75,10 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         xml = '<%s>\n%s</%s>\n' % (self.xmlTag, xml[0], self.xmlTag)
 
-        print xml
         return xml
 
     def from_xml(self, xmlString):
         self.reset()
-        print 'FROM_XML__________________', xmlString
 
         dom = xml.dom.minidom.parseString(xmlString)
         els = dom.getElementsByTagName(self.xmlTag)
@@ -110,9 +110,8 @@ class TOFTOFScriptElement(BaseScriptElement):
         dataCmnt      = getStrLst('data_comment')
 
         for i in range(min(len(dataRuns), len(dataCmnt))):
-            self.dataRuns.append((dataRuns[i], dataCmnt(i)))
+            self.dataRuns.append((dataRuns[i], dataCmnt[i]))
 
-        # additional detectors to mask
         self.maskDetectors = getStr('mask_detectors')
 
     def numDataRunsRows(self):
@@ -327,23 +326,3 @@ class TOFTOFReductionScripter(BaseReductionScripter):
                   '    RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws.getComment())\n'
 
         return script
-
-    def set_options(self):
-        print 'SET_OPTIONS__________________'
-        """
-            Set up the reduction options, without executing
-        """
-        if HAS_MANTID:
-            self.update()
-            table_ws = "__patch_options"
-            script = "SetupHFIRReduction(\n"
-            for item in self._observers:
-                if item.state() is not None:
-                    if hasattr(item.state(), "options"):
-                        script += item.state().options()
-
-            script += "ReductionProperties='%s')" % table_ws
-            mantidplot.runPythonScript(script, True)
-            return table_ws
-        else:
-            raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
