@@ -2,6 +2,7 @@
 #define MANTID_HISTOGRAMDATA_FIXEDLENGTHVECTOR_H_
 
 #include "MantidHistogramData/DllConfig.h"
+#include "MantidHistogramData/Validation.h"
 
 #include <stdexcept>
 #include <vector>
@@ -46,7 +47,9 @@ public:
   FixedLengthVector() = default;
   FixedLengthVector(size_t count, const double &value) : m_data(count, value) {}
   explicit FixedLengthVector(size_t count) : m_data(count) {}
-  FixedLengthVector(std::initializer_list<double> init) : m_data(init) {}
+  FixedLengthVector(std::initializer_list<double> init) : m_data(init) {
+    Validator<T>::checkValidity(m_data);
+  }
   FixedLengthVector(const FixedLengthVector &) = default;
   FixedLengthVector(FixedLengthVector &&) = default;
   FixedLengthVector(const std::vector<double> &other) : m_data(other) {}
@@ -54,6 +57,14 @@ public:
   template <class InputIt>
   FixedLengthVector(InputIt first, InputIt last)
       : m_data(first, last) {}
+  template <class Generator,
+            class = typename std::enable_if<
+                !std::is_convertible<Generator, double>::value>::type>
+  FixedLengthVector(size_t count, const Generator &g)
+      : m_data(count) {
+    std::generate(m_data.begin(), m_data.end(), g);
+  }
+
   template <class InputIt> void assign(InputIt first, InputIt last) & {
     checkAssignmentSize(static_cast<size_t>(std::distance(first, last)));
     m_data.assign(first, last);
@@ -62,6 +73,7 @@ public:
     checkAssignmentSize(count);
     m_data.assign(count, value);
   }
+
   FixedLengthVector &operator=(const FixedLengthVector &rhs) {
     checkAssignmentSize(rhs);
     m_data = rhs.m_data;
@@ -84,6 +96,7 @@ public:
   }
   FixedLengthVector &operator=(std::initializer_list<double> ilist) {
     checkAssignmentSize(ilist);
+    Validator<T>::checkValidity(ilist);
     m_data = ilist;
     return *this;
   }
