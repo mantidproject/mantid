@@ -2644,6 +2644,12 @@ IProjectSerialisable *Graph3D::loadFromProject(const std::string &lines,
     graph->setOrthogonal(tsv.asInt(1));
   }
 
+  if (tsv.selectLine("animated")) {
+    int animated;
+    tsv >> animated;
+    graph->animate(animated);
+  }
+
   if (tsv.selectLine("Style")) {
     QString qStyle = QString::fromUtf8(tsv.lineAsString("Style").c_str());
     QStringList sl = qStyle.split("\t");
@@ -3063,6 +3069,7 @@ std::string Graph3D::saveToProject(ApplicationWindow *app) {
   tsv.writeLine("LineWidth") << sp->meshLineWidth();
   tsv.writeLine("WindowLabel") << windowLabel() << captionPolicy();
   tsv.writeLine("Orthogonal") << sp->ortho();
+  tsv.writeLine("animated") << isAnimated();
 
   tsv.writeRaw("</SurfacePlot>");
   return tsv.outputLines();
