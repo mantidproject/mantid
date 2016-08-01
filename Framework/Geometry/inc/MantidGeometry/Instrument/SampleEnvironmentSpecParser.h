@@ -3,8 +3,8 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/SampleEnvironmentSpec.h"
-#include "MantidKernel/Material.h"
 #include <iosfwd>
+#include <memory>
 #include <unordered_map>
 
 namespace Poco {
@@ -14,6 +14,9 @@ class Element;
 }
 
 namespace Mantid {
+namespace Kernel {
+class Material;
+}
 namespace Geometry {
 
 /**
@@ -52,7 +55,8 @@ public:
 
 private:
   // Convenience definitions
-  using MaterialsIndex = std::unordered_map<std::string, Kernel::Material>;
+  using MaterialsIndex =
+      std::unordered_map<std::string, std::unique_ptr<Kernel::Material>>;
 
   // Methods
   void validateRootElement(Poco::XML::Element *element) const;
