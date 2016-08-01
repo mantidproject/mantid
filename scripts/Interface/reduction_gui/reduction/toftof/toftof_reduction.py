@@ -16,33 +16,35 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         self.prefix   = 'ws' # prefix of some workspace names
 
-        self.dataSearchDir    = ''
-        self.dataSearchDir    = '/home/jan/C/scg/toftof_data'
+#self.dataSearchDir    = '/home/jan/C/scg/toftof_data'
+#self.rebiningInEnergy = '-15,0.008,1.5'
+#self.rebiningInQ      = '0.2,0.1,2.0'
+#self.vanRuns  = '12:14'
+#self.vanCmts  = 'Van'
+#self.ecRuns   = '15:17'
+#self.ecCmts   = 'EC'
+#self.ecFactor = 0.9
+#self.dataRuns = [('27:29','H2O_21C_sqw'), ('30:31','H2O_34C_sqw')]
+#self.maskDetectors = '308-312,314'
+
+        self.dataSearchDir    = 'AAA'
         self.rebiningInEnergy = ''
-        self.rebiningInEnergy = '-15,0.008,1.5'
         self.rebiningInQ      = ''
-        self.rebiningInQ      = '0.2,0.1,2.0'
 
         # vanadium runs
         self.vanRuns  = ''
-        self.vanRuns  = '12:14'
-        self.vanCmnt  = ''
-        self.vanCmnt  = 'Van'
+        self.vanCmts  = ''
 
         # empty can runs
         self.ecRuns   = ''
-        self.ecRuns   = '15:17'
-        self.ecCmnt   = ''
-        self.ecCmnt   = 'EC'
-        self.ecFactor = 0.9
+        self.ecCmts   = ''
+        self.ecFactor = 1.0
 
         # data runs
         self.dataRuns = []
-        self.dataRuns = [('27:29','H2O_21C_sqw'), ('30:31','H2O_34C_sqw')]
 
         # additional detectors to mask
         self.maskDetectors = ''
-        self.maskDetectors = '308-312,314'
 
     xmlTag = 'TOFTOFReductionData'
 
@@ -58,10 +60,10 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('rebinning_q',      self.rebiningInQ)
 
         put('van_runs',         self.vanRuns)
-        put('van_comment',      self.vanCmnt)
+        put('van_comment',      self.vanCmts)
 
         put('ec_runs',          self.ecRuns)
-        put('ec_comment',       self.ecCmnt)
+        put('ec_comment',       self.ecCmts)
         put('ec_factor',        self.ecFactor)
 
         for (run, cmt) in self.dataRuns:
@@ -73,12 +75,10 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         xml = '<%s>\n%s</%s>\n' % (self.xmlTag, xml[0], self.xmlTag)
 
-        print xml
         return xml
 
     def from_xml(self, xmlString):
         self.reset()
-        print 'FROM_XML__________________', xmlString
 
         dom = xml.dom.minidom.parseString(xmlString)
         els = dom.getElementsByTagName(self.xmlTag)
@@ -91,6 +91,9 @@ class TOFTOFScriptElement(BaseScriptElement):
         def getStr(tag, default = ''):
             return BaseScriptElement.getStringElement(dom, tag, default)
 
+        def getFlt(tag, default):
+            return BaseScriptElement.getFloatElement(dom, tag, default)
+
         def getStrLst(tag):
             return BaseScriptElement.getStringList(dom, tag)
 
@@ -99,59 +102,20 @@ class TOFTOFScriptElement(BaseScriptElement):
         self.rebiningInEnergy = getStr('rebinning_energy')
         self.rebiningInQ      = getStr('rebinning_q')
 
-        self.vanRuns  = getStr('van_runs')
-        self.vanCmnt  = getStr('van_comment')
+        self.vanRuns          = getStr('van_runs')
+        self.vanCmts          = getStr('van_comment')
 
-        self.ecRuns   = getStr('ec_runs')
-        self.ecCmnt   = getStr('ec_comment')
-        self.ecFactor = getStr('ec_factor')
+        self.ecRuns           = getStr('ec_runs')
+        self.ecCmts           = getStr('ec_comment')
+        self.ecFactor         = getFlt('ec_factor', 1.0)
 
-        dataRuns      = getStrLst('data_runs')
-        dataCmnt      = getStrLst('data_comment')
+        dataRuns              = getStrLst('data_runs')
+        dataCmts              = getStrLst('data_comment')
 
-        for i in range(min(len(dataRuns), len(dataCmnt))):
-            self.dataRuns.append((dataRuns[i], dataCmnt(i)))
+        for i in range(min(len(dataRuns), len(dataCmts))):
+            self.dataRuns.append((dataRuns[i], dataCmts[i]))
 
-        # additional detectors to mask
         self.maskDetectors = getStr('mask_detectors')
-
-    def numDataRunsRows(self):
-        return len(self.dataRuns)
-
-    def _getDataRunsRow(self, row):
-        return self.dataRuns[row] if row < self.numDataRunsRows() else ('', '')
-
-    def _isDataRunsRowEmpty(self, row):
-        (t1, t2) = self._getDataRunsRow(row)
-        return not t1.strip() and not t2.strip()
-
-    def _ensureDataRunsRows(self, rows):
-        while self.numDataRunsRows() < rows:
-            self.dataRuns.append(('', ''))
-
-    def updateDataRuns(self):
-        ''' Remove trailing empty rows. '''
-        for row in reversed(range(self.numDataRunsRows())):
-            if self._isDataRunsRowEmpty(row):
-                del self.dataRuns[row]
-            else:
-                break
-
-    def setDataRun(self, row, col, text):
-        self._ensureDataRunsRows(row + 1)
-        (runText, comment) = self.dataRuns[row]
-
-        text = text.strip()
-        if 0 == col:
-            runText = text
-        else:
-            comment = text
-        self.dataRuns[row] = (runText, comment)
-
-    def getDataRun(self, row, col):
-        return self._getDataRunsRow(row)[col]
-        cls = self.__class__
-        self.pieceOfData = cls.pieceOfData
 
 class TOFTOFReductionScripter(BaseReductionScripter):
 
@@ -176,10 +140,10 @@ class TOFTOFReductionScripter(BaseReductionScripter):
         rebiningInQ      = data.rebiningInQ
 
         vanRuns  = data.vanRuns
-        vanCmnt  = data.vanCmnt
+        vanCmts  = data.vanCmts
 
         ecRuns   = data.ecRuns
-        ecCmnt   = data.ecCmnt
+        ecCmts   = data.ecCmts
         ecFactor = data.ecFactor
 
         dataRuns = data.dataRuns
@@ -207,8 +171,8 @@ class TOFTOFReductionScripter(BaseReductionScripter):
         # vanadium runs
         vanRuns = vanRuns.strip()
         if vanRuns:
-            vanCmnt = vanCmnt.strip()
-            if not vanCmnt:
+            vanCmts = vanCmts.strip()
+            if not vanCmts:
                 _error('missing vanadium comment')
 
             wsRawVan = prefix + 'RawVan'
@@ -217,7 +181,7 @@ class TOFTOFReductionScripter(BaseReductionScripter):
             script += '\n# vanadium runs\n' +\
                       '%s = Load(Filename="%s")\n'   % (wsRawVan, vanRuns) +\
                       '%s = TOFTOFMergeRuns("%s")\n' % (wsVan, wsRawVan)   +\
-                      '%s.setComment("%s")\n'        % (wsVan, vanCmnt)
+                      '%s.setComment("%s")\n'        % (wsVan, vanCmts)
 
             group.append(wsVan)
             ecIdx = ecIdx + 1
@@ -225,8 +189,8 @@ class TOFTOFReductionScripter(BaseReductionScripter):
         # empty can runs
         ecRuns = ecRuns.strip()
         if ecRuns:
-            ecCmnt = ecCmnt.strip()
-            if not ecCmnt:
+            ecCmts = ecCmts.strip()
+            if not ecCmts:
                 _error('missing empty can comment')
 
             wsRawEC = prefix + 'RawEC'
@@ -235,7 +199,7 @@ class TOFTOFReductionScripter(BaseReductionScripter):
             script += '\n# empty can runs\n' +\
                       '%s = Load(Filename="%s")\n'   % (wsRawEC, ecRuns) +\
                       '%s = TOFTOFMergeRuns("%s")\n' % (wsEC, wsRawEC)    +\
-                      '%s.setComment("%s")\n'        % (wsEC, ecCmnt)
+                      '%s.setComment("%s")\n'        % (wsEC, ecCmts)
 
             group.append(wsEC)
 
@@ -327,23 +291,3 @@ class TOFTOFReductionScripter(BaseReductionScripter):
                   '    RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws.getComment())\n'
 
         return script
-
-    def set_options(self):
-        print 'SET_OPTIONS__________________'
-        """
-            Set up the reduction options, without executing
-        """
-        if HAS_MANTID:
-            self.update()
-            table_ws = "__patch_options"
-            script = "SetupHFIRReduction(\n"
-            for item in self._observers:
-                if item.state() is not None:
-                    if hasattr(item.state(), "options"):
-                        script += item.state().options()
-
-            script += "ReductionProperties='%s')" % table_ws
-            mantidplot.runPythonScript(script, True)
-            return table_ws
-        else:
-            raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
