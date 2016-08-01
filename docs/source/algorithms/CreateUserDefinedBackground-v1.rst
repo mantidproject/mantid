@@ -14,6 +14,8 @@ Given an input workspace containing data with a background and a table of
 user-selected points defining the background, creates a new workspace 
 containing background data that can be subtracted from the original data.
 
+The background is constructed using linear interpolation at the same X values as the input workspace.
+
 Typical use case
 ################
 
