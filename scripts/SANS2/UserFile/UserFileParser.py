@@ -25,7 +25,7 @@ def extract_range(to_extract, converter):
     number_of_entries = len(entries_string)
     if number_of_entries != 2:
         raise RuntimeError("Expected a range defined by two numbers,"
-                           " but instead received {}".format(number_of_entries))
+                           " but instead received {0}".format(number_of_entries))
 
     return [converter(entries_string[0]),
             converter(entries_string[1])]
@@ -61,7 +61,7 @@ def extract_float_range_midpoint_and_steps(to_extract):
     number_of_entries = len(entries_string)
     if number_of_entries != 5:
         raise RuntimeError("Expected a range defined by 5 numbers,"
-                           " but instead received {}".format(number_of_entries))
+                           " but instead received {0}".format(number_of_entries))
 
     return [convert_string_to_float(entries_string[0]),
             convert_string_to_float(entries_string[1]),
@@ -281,7 +281,7 @@ user_file_monitor_off = "back_off"
 # ----------------------------------------------------------------
 class UserFileComponentParser(object):
     separator_dash = "/"
-    separator_space = "\s"
+    separator_space = "\\s"
     separator_equal = "="
 
     @abc.abstractmethod
@@ -322,22 +322,22 @@ class BackParser(UserFileComponentParser):
         super(BackParser, self).__init__()
 
         # General
-        self._times = "\s*/\s*TIMES"
+        self._times = "\\s*/\\s*TIMES"
 
         # All Monitors
-        self._all_mons = "\s*MON\s*/\s*TIMES\s*"
+        self._all_mons = "\\s*MON\\s*/\\s*TIMES\\s*"
         self._all_mons_pattern = re.compile(start_string + self._all_mons + space_string + float_number +
                                             space_string + float_number + end_string)
 
         # Single Monitor
         self._mon_id = "M"
-        self._single_monitor = "\s*" + self._mon_id + integer_number + "\s*"
+        self._single_monitor = "\\s*" + self._mon_id + integer_number + "\\s*"
         self._single_monitor_pattern = re.compile(start_string + self._single_monitor +
-                                                  "(\s*" + self._times + "\s*)?" + space_string + float_number +
+                                                  "(\\s*" + self._times + "\\s*)?" + space_string + float_number +
                                                   space_string + float_number + end_string)
 
         # Off
-        self._off_pattern = re.compile(start_string + self._single_monitor + "\s*/\s*OFF\s*" + end_string)
+        self._off_pattern = re.compile(start_string + self._single_monitor + "\\s*/\\s*OFF\\s*" + end_string)
 
     def parse_line(self, line):
         # Get the settings, ie remove command
@@ -351,7 +351,7 @@ class BackParser(UserFileComponentParser):
         elif self._is_off(setting):
             output = self._extract_off(setting)
         else:
-            raise RuntimeError("BackParser: Unknown command for BACK: {}".format(line))
+            raise RuntimeError("BackParser: Unknown command for BACK: {0}".format(line))
         return output
 
     def _is_all_mon(self, line):
@@ -392,7 +392,7 @@ class BackParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + BackParser.get_type() + "\s*/\s*"
+        return "\\s*" + BackParser.get_type() + "\\s*/\\s*"
 
 
 class DetParser(UserFileComponentParser):
@@ -435,34 +435,34 @@ class DetParser(UserFileComponentParser):
         self._reduction_mode.extend(self._MERGE)
 
         # Corrections
-        self._x = "\s*X\s*"
+        self._x = "\\s*X\\s*"
         self._x_pattern = re.compile(start_string + self._x + space_string + float_number + end_string)
-        self._y = "\s*Y\s*"
+        self._y = "\\s*Y\\s*"
         self._y_pattern = re.compile(start_string + self._y + space_string + float_number + end_string)
-        self._z = "\s*Z\s*"
+        self._z = "\\s*Z\\s*"
         self._z_pattern = re.compile(start_string + self._z + space_string + float_number + end_string)
-        self._rotation = "\s*ROT\s*"
+        self._rotation = "\\s*ROT\\s*"
         self._rotation_pattern = re.compile(start_string + self._rotation + space_string + float_number + end_string)
-        self._translation = "\s*SIDE\s*"
+        self._translation = "\\s*SIDE\\s*"
         self._translation_pattern = re.compile(start_string + self._translation + space_string +
                                                float_number + end_string)
-        self._radius = "\s*RADIUS\s*"
+        self._radius = "\\s*RADIUS\\s*"
         self._radius_pattern = re.compile(start_string + self._radius + space_string + float_number + end_string)
-        self._correction_lab = "\s*CORR\s*/\s*REAR\s*/\s*"
-        self._correction_hab = "\s*CORR\s*/\s*FRONT\s*/\s*"
+        self._correction_lab = "\\s*CORR\\s*/\\s*REAR\\s*/\\s*"
+        self._correction_hab = "\\s*CORR\\s*/\\s*FRONT\\s*/\\s*"
         self._correction_LAB_pattern = re.compile(start_string + self._correction_lab)
         self._correction_HAB_pattern = re.compile(start_string + self._correction_hab)
 
         # Merge options
-        self._rescale = "\s*RESCALE\s*"
+        self._rescale = "\\s*RESCALE\\s*"
         self._rescale_pattern = re.compile(start_string + self._rescale + space_string + float_number + end_string)
-        self._shift = "\s*SHIFT\s*"
+        self._shift = "\\s*SHIFT\\s*"
         self._shift_pattern = re.compile(start_string + self._shift + space_string + float_number + end_string)
-        self._rescale_fit = "\s*RESCALE\s*/\s*FIT\s*"
+        self._rescale_fit = "\\s*RESCALE\\s*/\\s*FIT\\s*"
         self._rescale_fit_pattern = re.compile(start_string + self._rescale_fit + space_string +
                                                float_number + space_string +
                                                float_number + end_string)
-        self._shift_fit = "\s*SHIFT\s*/\s*FIT\s*"
+        self._shift_fit = "\\s*SHIFT\\s*/\\s*FIT\\s*"
         self._shift_fit_pattern = re.compile(start_string + self._shift_fit + space_string +
                                              float_number + space_string +
                                              float_number + end_string)
@@ -479,7 +479,7 @@ class DetParser(UserFileComponentParser):
         elif self._is_merge_option_setting(setting):
             output = self._extract_merge_option(setting)
         else:
-            raise RuntimeError("DetParser: Unknown command for DET: {}".format(line))
+            raise RuntimeError("DetParser: Unknown command for DET: {0}".format(line))
         return output
 
     def _is_reduction_mode_setting(self, line):
@@ -507,7 +507,7 @@ class DetParser(UserFileComponentParser):
         elif line_capital in self._MERGE:
             return {user_file_reduction_mode: "MERGE"}
         else:
-            raise RuntimeError("DetParser:  Could not extract line: {}".format(line))
+            raise RuntimeError("DetParser:  Could not extract line: {0}".format(line))
 
     def _extract_correction(self, line):
         if self._correction_HAB_pattern.match(line) is not None:
@@ -519,7 +519,7 @@ class DetParser(UserFileComponentParser):
             qualifier = qualifier.strip()
             return self._extract_detector_setting(qualifier, user_file_lab_suffix)
         else:
-            raise RuntimeError("DetParser: Could not extract line: {}".format(line))
+            raise RuntimeError("DetParser: Could not extract line: {0}".format(line))
 
     def _extract_detector_setting(self, qualifier, detector_suffix):
         if self._x_pattern.match(qualifier):
@@ -541,7 +541,7 @@ class DetParser(UserFileComponentParser):
             value_string = re.sub(self._radius, "", qualifier)
             key = correction_radius
         else:
-            raise RuntimeError("DetParser: Unknown qualifier encountered: {}".format(qualifier))
+            raise RuntimeError("DetParser: Unknown qualifier encountered: {0}".format(qualifier))
 
         # Qualify the key with the selected detector
         key = key + detector_suffix
@@ -569,7 +569,7 @@ class DetParser(UserFileComponentParser):
             return {user_file_rescale_shift_fit_min: shift_fit[0],
                     user_file_rescale_shift_fit_max: shift_fit[1]}
         else:
-            raise RuntimeError("DetParser: Could not extract line: {}".format(line))
+            raise RuntimeError("DetParser: Could not extract line: {0}".format(line))
 
     @staticmethod
     def get_type():
@@ -578,7 +578,7 @@ class DetParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + DetParser.get_type() + "\s*/\s*"
+        return "\\s*" + DetParser.get_type() + "\\s*/\\s*"
 
 
 class LimitParser(UserFileComponentParser):
@@ -608,58 +608,58 @@ class LimitParser(UserFileComponentParser):
         super(LimitParser, self).__init__()
 
         # ranges
-        self._lin = "\s*/\s*LIN\s*"
-        self._log = "\s*/\s*LOG\s*"
+        self._lin = "\\s*/\\s*LIN\\s*"
+        self._log = "\\s*/\\s*LOG\\s*"
         self._lin_or_log = self._lin + "|" + self._log
-        self._simple_step = "(\s+" + float_number + "\s*(" + self._lin_or_log + ")?)?"
-        self._range = float_number + "\s+" + float_number
-        self._simple_range = "\s*" + self._range + self._simple_step
+        self._simple_step = "(\\s+" + float_number + "\\s*(" + self._lin_or_log + ")?)?"
+        self._range = float_number + "\\s+" + float_number
+        self._simple_range = "\\s*" + self._range + self._simple_step
 
-        self._complex_range = "\s*" + float_number + space_string + float_number + space_string + float_number +\
+        self._complex_range = "\\s*" + float_number + space_string + float_number + space_string + float_number +\
                               space_string + float_number + space_string + float_number +\
-                              "(\s*" + self._lin_or_log + ")?"
+                              "(\\s*" + self._lin_or_log + ")?"
 
         # Angle limits
-        self._phi_no_mirror = "\s*/\s*NOMIRROR\s*"
-        self._phi = "\s*PHI\s*(" + self._phi_no_mirror + ")?\s*"
+        self._phi_no_mirror = "\\s*/\\s*NOMIRROR\\s*"
+        self._phi = "\\s*PHI\\s*(" + self._phi_no_mirror + ")?\\s*"
         self._phi_pattern = re.compile(start_string + self._phi + space_string +
                                        float_number + space_string +
                                        float_number + end_string)
 
         # Event time limits
-        self._events_time = "\s*EVENTSTIME\s*"
+        self._events_time = "\\s*EVENTSTIME\\s*"
         self._events_time_pattern = re.compile(start_string + self._events_time +
                                                space_string + rebin_string + end_string)
 
         # Q Limits
-        self._q = "\s*Q\s*"
+        self._q = "\\s*Q\\s*"
         self._q_simple_pattern = re.compile(start_string + self._q + space_string +
                                             self._simple_range + end_string)
         self._q_complex_pattern = re.compile(start_string + self._q + space_string + self._complex_range + end_string)
 
         # Qxy limits
-        self._qxy = "\s*QXY\s*"
+        self._qxy = "\\s*QXY\\s*"
         self._qxy_simple_pattern = re.compile(start_string + self._qxy + space_string + self._simple_range + end_string)
         self._qxy_complex_pattern = re.compile(start_string + self._qxy + space_string +
                                                self._complex_range + end_string)
 
         # Wavelength limits
-        self._wavelength = "\s*WAV\s*"
+        self._wavelength = "\\s*WAV\\s*"
         self._wavelength_simple_pattern = re.compile(start_string + self._wavelength + space_string +
                                                      self._simple_range + end_string)
         self._wavelength_complex_pattern = re.compile(start_string + self._wavelength + space_string +
                                                       self._complex_range + end_string)
 
         # Cut limits
-        self._radius_cut = "\s*Q\s*/\s*RCUT\s*"
+        self._radius_cut = "\\s*Q\\s*/\\s*RCUT\\s*"
         self._radius_cut_pattern = re.compile(start_string + self._radius_cut + space_string +
                                               float_number + end_string)
-        self._wavelength_cut = "\s*Q\s*/\s*WCUT\s*"
+        self._wavelength_cut = "\\s*Q\\s*/\\s*WCUT\\s*"
         self._wavelength_cut_pattern = re.compile(start_string + self._wavelength_cut +
                                                   space_string + float_number + end_string)
 
         # Radius limits
-        self._radius = "\s*R\s*"
+        self._radius = "\\s*R\\s*"
         self._radius_pattern = re.compile(start_string + self._radius +
                                           space_string + float_number +
                                           space_string + float_number + end_string)
@@ -684,7 +684,7 @@ class LimitParser(UserFileComponentParser):
         elif self._is_qxy_limit(setting):
             output = self._extract_qxy_limit(setting)
         else:
-            raise RuntimeError("LimitParser: Unknown command for L: {}".format(line))
+            raise RuntimeError("LimitParser: Unknown command for L: {0}".format(line))
         return output
 
     def _is_angle_limit(self, line):
@@ -825,7 +825,7 @@ class LimitParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + LimitParser.get_type() + "\s*/\s*"
+        return "\\s*" + LimitParser.get_type() + "\\s*/\\s*"
 
 
 class MaskParser(UserFileComponentParser):
@@ -851,47 +851,47 @@ class MaskParser(UserFileComponentParser):
         # Blocks
 
         # ranges
-        self._two_floats = "\s*" + float_number + space_string + float_number + "\s*"
-        self._optional_two_floats = "(\s+" + self._two_floats + "\s*)?\s*"
-        self._range = "\s*>\s*"
+        self._two_floats = "\\s*" + float_number + space_string + float_number + "\\s*"
+        self._optional_two_floats = "(\\s+" + self._two_floats + "\\s*)?\\s*"
+        self._range = "\\s*>\\s*"
 
         # Line Mask
-        self._line = "\s*LINE\s*"
+        self._line = "\\s*LINE\\s*"
         self._line_pattern = re.compile(start_string + self._line + space_string + self._two_floats +
                                         self._optional_two_floats + end_string)
 
         # Time Mask
-        self._time = "\s*/\s*TIME\s*"
-        self._time_or_t = "\s*(TIME|T)\s*"
+        self._time = "\\s*/\\s*TIME\\s*"
+        self._time_or_t = "\\s*(TIME|T)\\s*"
         self._time_pattern = re.compile(start_string + self._time_or_t + space_string + self._two_floats + end_string)
 
         # Clear Mask
-        self._clear = "\s*CLEAR\s*"
-        self._clear_pattern = re.compile(start_string + self._clear + "\s*(" + self._time + ")?" + end_string)
+        self._clear = "\\s*CLEAR\\s*"
+        self._clear_pattern = re.compile(start_string + self._clear + "\\s*(" + self._time + ")?" + end_string)
 
         # Spectrum Mask
-        self._spectrum = "\s*S\s*"
-        self._additional_spectrum = "(\s*>" + self._spectrum + integer_number+")"
+        self._spectrum = "\\s*S\\s*"
+        self._additional_spectrum = "(\\s*>" + self._spectrum + integer_number+")"
         self._spectrum_range_pattern = re.compile(start_string + self._spectrum + integer_number +
                                                   self._additional_spectrum + end_string)
         self._spectrum_single_pattern = re.compile(start_string + self._spectrum + integer_number + end_string)
 
         # Strip Masks
-        self._hab = "\s*\HAB|FRONT\s*"
-        self._lab = "\s*LAB|REAR|MAIN\s*"
-        self._detector = "\s*(" + self._hab + "|" + self._lab + ")?\s*"
+        self._hab = "\\s*\HAB|FRONT\\s*"
+        self._lab = "\\s*LAB|REAR|MAIN\\s*"
+        self._detector = "\\s*(" + self._hab + "|" + self._lab + ")?\\s*"
 
         # Vertical strip Mask
-        self._v = "\s*V\s*"
-        self._additional_v = "(\s*>" + self._v + integer_number + ")"
+        self._v = "\\s*V\\s*"
+        self._additional_v = "(\\s*>" + self._v + integer_number + ")"
         self._single_vertical_strip_pattern = re.compile(start_string + self._detector + self._v +
                                                          integer_number + end_string)
         self._range_vertical_strip_pattern = re.compile(start_string + self._detector + self._v +
                                                         integer_number + self._additional_v + end_string)
 
         # Horizontal strip Mask
-        self._h = "\s*H\s*"
-        self._additional_h = "(\s*>" + self._h + integer_number + ")"
+        self._h = "\\s*H\\s*"
+        self._additional_h = "(\\s*>" + self._h + integer_number + ")"
         self._single_horizontal_strip_pattern = re.compile(start_string + self._detector + self._h +
                                                            integer_number + end_string)
         self._range_horizontal_strip_pattern = re.compile(start_string + self._detector + self._h +
@@ -921,7 +921,7 @@ class MaskParser(UserFileComponentParser):
         elif self._is_horizontal_range_strip_mask(setting):
             output = self._extract_horizontal_range_strip_mask(setting)
         else:
-            raise RuntimeError("MaskParser: Unknown command for MASK: {}".format(line))
+            raise RuntimeError("MaskParser: Unknown command for MASK: {0}".format(line))
         return output
 
     def _is_line_mask(self, line):
@@ -965,7 +965,7 @@ class MaskParser(UserFileComponentParser):
                       user_file_line_y: line_values[3]}
         else:
             raise ValueError("MaskParser: Line mask accepts wither 2 or 4 parameters,"
-                             " but {} parameters were passed in.".format(length_values))
+                             " but {0} parameters were passed in.".format(length_values))
         return output
 
     def _extract_time_mask(self, line):
@@ -1034,7 +1034,7 @@ class MaskParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + MaskParser.get_type() + "(\s*/\s*|\s+)"
+        return "\\s*" + MaskParser.get_type() + "(\\s*/\\s*|\\s+)"
 
 
 class SampleParser(UserFileComponentParser):
@@ -1050,13 +1050,13 @@ class SampleParser(UserFileComponentParser):
         super(SampleParser, self).__init__()
 
         # Offset
-        self._offset = "\s*OFFSET\s*"
+        self._offset = "\\s*OFFSET\\s*"
         self._offset_pattern = re.compile(start_string + self._offset + space_string + float_number + end_string)
 
         # Path
-        self._on = "\s*ON\s*"
-        self._off = "\s*OFF\s*"
-        self._path = "\s*PATH\s*/\s*"
+        self._on = "\\s*ON\\s*"
+        self._off = "\\s*OFF\\s*"
+        self._path = "\\s*PATH\s*/\\s*"
         self._path_pattern = re.compile(start_string + self._path + "(" + self._on + "|" + self._off + ")" + end_string)
 
     def parse_line(self, line):
@@ -1069,7 +1069,7 @@ class SampleParser(UserFileComponentParser):
         elif self._is_sample_offset(setting):
             output = self._extract_sample_offset(setting)
         else:
-            raise RuntimeError("SampleParser: Unknown command for SAMPLE: {}".format(line))
+            raise RuntimeError("SampleParser: Unknown command for SAMPLE: {0}".format(line))
         return output
 
     def _is_sample_path(self, line):
@@ -1094,7 +1094,7 @@ class SampleParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + SampleParser.get_type() + "(\s*/)\s*"
+        return "\\s*" + SampleParser.get_type() + "(\\s*/)\\s*"
 
 
 class SetParser(UserFileComponentParser):
@@ -1110,18 +1110,18 @@ class SetParser(UserFileComponentParser):
         super(SetParser, self).__init__()
 
         # Scales
-        self._scales = "\s*SCALES\s*"
+        self._scales = "\\s*SCALES\\s*"
         self._scales_pattern = re.compile(start_string + self._scales + space_string + float_number + space_string +
                                           float_number + space_string + float_number + space_string + float_number +
                                           space_string + float_number + end_string)
 
         # Centre
-        self._centre = "\s*CENTRE\s*"
-        self._hab = "\s*(HAB|FRONT)\s*"
-        self._lab = "\s*(LAB|REAR|MAIN)\s*"
-        self._hab_or_lab = "\s*((/" + self._hab + "|/" + self._lab + "))\s*"
-        self._centre_pattern = re.compile(start_string + self._centre + "\s*(" + self._hab_or_lab + space_string +
-                                          ")?\s*" + float_number + space_string + float_number + end_string)
+        self._centre = "\\s*CENTRE\\s*"
+        self._hab = "\\s*(HAB|FRONT)\\s*"
+        self._lab = "\\s*(LAB|REAR|MAIN)\\s*"
+        self._hab_or_lab = "\\s*((/" + self._hab + "|/" + self._lab + "))\\s*"
+        self._centre_pattern = re.compile(start_string + self._centre + "\\s*(" + self._hab_or_lab + space_string +
+                                          ")?\\s*" + float_number + space_string + float_number + end_string)
 
     def parse_line(self, line):
         # Get the settings, ie remove command
@@ -1133,7 +1133,7 @@ class SetParser(UserFileComponentParser):
         elif self._is_centre(setting):
             output = self._extract_centre(setting)
         else:
-            raise RuntimeError("SetParser: Unknown command for SET: {}".format(line))
+            raise RuntimeError("SetParser: Unknown command for SET: {0}".format(line))
         return output
 
     def _is_scales(self, line):
@@ -1146,7 +1146,7 @@ class SetParser(UserFileComponentParser):
         scales_string = re.sub(self._scales, "", line)
         scales = extract_float_list(scales_string, separator=" ")
         if len(scales) != 5:
-            raise ValueError("SetParser: Expected 5 entries for the SCALES setting, but got {}.".format(len(scales)))
+            raise ValueError("SetParser: Expected 5 entries for the SCALES setting, but got {0}.".format(len(scales)))
         return {user_file_scales: scales}
 
     def _extract_centre(self, line):
@@ -1163,7 +1163,7 @@ class SetParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + SetParser.get_type() + "\s+"
+        return "\\s*" + SetParser.get_type() + "\\s+"
 
 
 class TransParser(UserFileComponentParser):
@@ -1182,39 +1182,39 @@ class TransParser(UserFileComponentParser):
     def __init__(self):
         super(TransParser, self).__init__()
         # General
-        self._single_file = "[\w]+(\.XML)"
-        self._multiple_files = self._single_file + "(,\s*" + self._single_file + ")*\s*"
-        self._workspace = "[\w]+"
+        self._single_file = "[\\w]+(\\.XML)"
+        self._multiple_files = self._single_file + "(,\\s*" + self._single_file + ")*\\s*"
+        self._workspace = "[\\w]+"
 
         # Trans Spec
-        self._trans_spec = "\s*TRANSSPEC\s*=\s*"
+        self._trans_spec = "\\s*TRANSSPEC\\s*=\\s*"
         self._trans_spec_pattern = re.compile(start_string + self._trans_spec + integer_number +
                                               end_string)
 
         # Trans Spec Shift
-        self._shift = "\s*/\s*SHIFT\s*=\s*"
+        self._shift = "\\s*/\\s*SHIFT\\s*=\\s*"
         self._trans_spec_4 = self._trans_spec + "4"
         self._trans_spec_shift_pattern = re.compile(start_string + self._trans_spec_4 + self._shift + float_number +
                                                     end_string)
 
         # Radius
-        self._radius = "\s*RADIUS\s*=\s*"
+        self._radius = "\\s*RADIUS\\s*=\\s*"
         self._radius_pattern = re.compile(start_string + self._radius + float_number)
 
         # ROI
-        self._roi = "\s*ROI\s*=\s*"
+        self._roi = "\\s*ROI\\s*=\\s*"
         self._roi_pattern = re.compile(start_string + self._roi + self._multiple_files + end_string)
 
         # Mask
-        self._mask = "\s*MASK\s*=\s*"
+        self._mask = "\\s*MASK\\s*=\\s*"
         self._mask_pattern = re.compile(start_string + self._mask + self._multiple_files + end_string)
 
         # CanWS
-        self._can_workspace = "\s*CANWS\s*=\s*"
+        self._can_workspace = "\\s*CANWS\\s*=\\s*"
         self._can_workspace_pattern = re.compile(start_string + self._can_workspace + self._workspace +
                                                  end_string)
         # SampleWS
-        self._sample_workspace = "\s*SAMPLEWS\s*=\s*"
+        self._sample_workspace = "\\s*SAMPLEWS\\s*=\\s*"
         self._sample_workspace_pattern = re.compile(start_string + self._sample_workspace + self._workspace +
                                                     end_string)
 
@@ -1242,7 +1242,7 @@ class TransParser(UserFileComponentParser):
             # Note that we need the original line in order to extract the the case sensitive meaning
             output = self._extract_can_workspace(setting, line)
         else:
-            raise RuntimeError("TransParser: Unknown command for TRANS: {}".format(line))
+            raise RuntimeError("TransParser: Unknown command for TRANS: {0}".format(line))
         return output
 
     def _is_trans_spec(self, line):
@@ -1317,7 +1317,7 @@ class TransParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + TransParser.get_type() + "\s*/\s*"
+        return "\\s*" + TransParser.get_type() + "\\s*/\\s*"
 
 
 class TubeCalibFileParser(UserFileComponentParser):
@@ -1330,7 +1330,7 @@ class TubeCalibFileParser(UserFileComponentParser):
     def __init__(self):
         super(TubeCalibFileParser, self).__init__()
 
-        self._tube_calib_file = "\s*[\w]+(\.NXS)\s*"
+        self._tube_calib_file = "\\s*[\\w]+(\\.NXS)\\s*"
         self._tube_calib_file_pattern = re.compile(start_string + self._tube_calib_file + end_string)
 
     def parse_line(self, line):
@@ -1341,7 +1341,7 @@ class TubeCalibFileParser(UserFileComponentParser):
         if self._is_tube_calib_file(setting):
             output = self._extract_tube_calib_file(setting, line)
         else:
-            raise RuntimeError("TubeCalibFileParser: Unknown command for TUBECALIBFILE: {}".format(line))
+            raise RuntimeError("TubeCalibFileParser: Unknown command for TUBECALIBFILE: {0}".format(line))
         return output
 
     def _is_tube_calib_file(self, line):
@@ -1360,7 +1360,7 @@ class TubeCalibFileParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + TubeCalibFileParser.get_type() + "\s*=\s*"
+        return "\\s*" + TubeCalibFileParser.get_type() + "\\s*=\\s*"
 
 
 class QResolutionParser(UserFileComponentParser):
@@ -1384,47 +1384,47 @@ class QResolutionParser(UserFileComponentParser):
         super(QResolutionParser, self).__init__()
 
         # On Off
-        self._on = "\s*ON\s*"
-        self._off = "\s*OFF\s*"
-        self._on_or_off = "\s*(" + self._on + "|" + self._off + ")\s*"
+        self._on = "\\s*ON\\s*"
+        self._off = "\\s*OFF\\s*"
+        self._on_or_off = "\\s*(" + self._on + "|" + self._off + ")\\s*"
         self._on_or_off_pattern = re.compile(start_string + self._on_or_off + end_string)
 
         # Delta R
-        self._delta_r = "\s*DELTAR\s*=\s*"
+        self._delta_r = "\\s*DELTAR\\s*=\s*"
         self._delta_r_pattern = re.compile(start_string + self._delta_r + float_number + end_string)
 
         # Collimation Length
-        self._collimation_length = "\s*LCOLLIM\s*=\s*"
+        self._collimation_length = "\\s*LCOLLIM\\s*=\\s*"
         self._collimation_length_pattern = re.compile(start_string + self._collimation_length +
                                                       float_number + end_string)
 
         # A1
-        self._a1 = "\s*A1\s*=\s*"
+        self._a1 = "\\s*A1\\s*=\\s*"
         self._a1_pattern = re.compile(start_string + self._a1 + float_number + end_string)
 
         # A2
-        self._a2 = "\s*A2\s*=\s*"
+        self._a2 = "\\s*A2\\s*=\\s*"
         self._a2_pattern = re.compile(start_string + self._a2 + float_number + end_string)
 
         # H1
-        self._h1 = "\s*H1\s*=\s*"
+        self._h1 = "\\s*H1\\s*=\\s*"
         self._h1_pattern = re.compile(start_string + self._h1 + float_number + end_string)
 
         # H2
-        self._h2 = "\s*H2\s*=\s*"
+        self._h2 = "\\s*H2\\s*=\\s*"
         self._h2_pattern = re.compile(start_string + self._h2 + float_number + end_string)
 
         # W1
-        self._w1 = "\s*W1\s*=\s*"
+        self._w1 = "\\s*W1\\s*=\\s*"
         self._w1_pattern = re.compile(start_string + self._w1 + float_number + end_string)
 
         # W2
-        self._w2 = "\s*W2\s*=\s*"
+        self._w2 = "\\s*W2\\s*=\\s*"
         self._w2_pattern = re.compile(start_string + self._w2 + float_number + end_string)
 
         # Moderator
-        self._moderator = "\s*MODERATOR\s*=\s*"
-        self._file = "[\w]+(\.TXT)"
+        self._moderator = "\\s*MODERATOR\\s*=\\s*"
+        self._file = "[\\w]+(\\.TXT)"
         self._moderator_pattern = re.compile(start_string + self._moderator + self._file)
 
     def parse_line(self, line):
@@ -1453,7 +1453,7 @@ class QResolutionParser(UserFileComponentParser):
         elif self._is_moderator(setting):
             output = self._extract_moderator(setting, line)
         else:
-            raise RuntimeError("QResolutionParser: Unknown command for QRESOLUTION: {}".format(line))
+            raise RuntimeError("QResolutionParser: Unknown command for QRESOLUTION: {0}".format(line))
         return output
 
     def _is_on_off(self, line):
@@ -1532,7 +1532,7 @@ class QResolutionParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + QResolutionParser.get_type() + "\s*/\s*"
+        return "\s*" + QResolutionParser.get_type() + "\\s*/\\s*"
 
 
 class FitParser(UserFileComponentParser):
@@ -1553,35 +1553,35 @@ class FitParser(UserFileComponentParser):
         super(FitParser, self).__init__()
 
         # General
-        self._trans_prefix = "\s*TRANS\s*/\s*"
+        self._trans_prefix = "\\s*TRANS\\s*/\\s*"
 
         # Clear
-        trans_off_or_clear = self._trans_prefix + "(OFF|CLEAR)\s*"
+        trans_off_or_clear = self._trans_prefix + "(OFF|CLEAR)\\s*"
         self._trans_clear_pattern = re.compile(start_string + trans_off_or_clear + end_string)
 
         # Range based fits
-        self._lin = "\s*(LINEAR|LIN|STRAIGHT)\s*"
-        self._log = "\s*(YLOG|LOG)\s*"
-        self._lin_or_log = "\s*(" + self._trans_prefix + self._lin + "|" + self._trans_prefix + self._log + ")\s*"
+        self._lin = "\\s*(LINEAR|LIN|STRAIGHT)\\s*"
+        self._log = "\\s*(YLOG|LOG)\\s*"
+        self._lin_or_log = "\\s*(" + self._trans_prefix + self._lin + "|" + self._trans_prefix + self._log + ")\\s*"
         self._range_based_fits_pattern = re.compile(start_string + self._lin_or_log + space_string +
                                                     float_number + space_string + float_number + end_string)
 
         # General fits
-        self._sample = "\s*SAMPLE\s*/\s*"
-        self._can = "\s*CAN\s*/\s*"
-        self._can_or_sample = "\s*(" + self._can + "|" + self._sample + ")"
-        self._optional_can_or_sample = "\s*(" + self._can_or_sample + ")?"
+        self._sample = "\\s*SAMPLE\s*/\\s*"
+        self._can = "\\s*CAN\s*/\\s*"
+        self._can_or_sample = "\\s*(" + self._can + "|" + self._sample + ")"
+        self._optional_can_or_sample = "\\s*(" + self._can_or_sample + ")?"
 
-        self._polynomial = "\s*POLYNOMIAL\s*"
-        self._polynomial_with_optional_order = self._polynomial + "(2|3|4|5)?\s*"
-        self._lin_or_log_or_poly = "\s*(" + self._lin + "|" + self._log + "|" +\
-                                   self._polynomial_with_optional_order + ")\s*"
+        self._polynomial = "\\s*POLYNOMIAL\\s*"
+        self._polynomial_with_optional_order = self._polynomial + "(2|3|4|5)?\\s*"
+        self._lin_or_log_or_poly = "\\s*(" + self._lin + "|" + self._log + "|" +\
+                                   self._polynomial_with_optional_order + ")\\s*"
 
         self._general_fit_pattern = re.compile(start_string + self._trans_prefix + self._optional_can_or_sample +
                                                self._lin_or_log_or_poly + end_string)
 
         # Monitor times
-        self._monitor = "\s*MONITOR\s*"
+        self._monitor = "\\s*MONITOR\\s*"
         self._monitor_pattern = re.compile(start_string + self._monitor + space_string + float_number + space_string +
                                            float_number + end_string)
 
@@ -1599,7 +1599,7 @@ class FitParser(UserFileComponentParser):
         elif self._is_general_fit(setting):
             output = self._extract_general_fit(setting)
         else:
-            raise RuntimeError("FitParser: Unknown command for FIT: {}".format(line))
+            raise RuntimeError("FitParser: Unknown command for FIT: {0}".format(line))
         return output
 
     def _is_clear(self, line):
@@ -1658,7 +1658,7 @@ class FitParser(UserFileComponentParser):
             else:
                 output.update({user_file_fit_can_poly: poly_order})
         else:
-            raise RuntimeError("FitParser: Encountered an unknown workspace selection: {}".format(line))
+            raise RuntimeError("FitParser: Encountered an unknown workspace selection: {0}".format(line))
         return output
 
     def _get_polynomial_order(self, fit_type, line):
@@ -1678,7 +1678,7 @@ class FitParser(UserFileComponentParser):
         elif re.search(self._polynomial, line) is not None:
             fit_type = user_file_poly
         else:
-            raise RuntimeError("FitParser: Encountered unknown fit function: {}".format(line))
+            raise RuntimeError("FitParser: Encountered unknown fit function: {0}".format(line))
         return fit_type
 
     def _get_workspace_type(self, line):
@@ -1718,11 +1718,11 @@ class GravityParser(UserFileComponentParser):
 
         # On Off
         self._on = "ON"
-        self._on_off = "\s*(OFF|" + self._on + ")"
+        self._on_off = "\\s*(OFF|" + self._on + ")"
         self._on_off_pattern = re.compile(start_string + self._on_off + end_string)
 
         # Extra length
-        self._extra_length = "\s*LEXTRA\s*=\s*"
+        self._extra_length = "\\s*LEXTRA\\s*=\\s*"
         self._extra_length_pattern = re.compile(start_string + self._extra_length + float_number + end_string)
 
     def parse_line(self, line):
@@ -1735,7 +1735,7 @@ class GravityParser(UserFileComponentParser):
         elif self._is_extra_length(setting):
             output = self._extract_extra_length(setting)
         else:
-            raise RuntimeError("GravityParser: Unknown command for GRAVITY: {}".format(line))
+            raise RuntimeError("GravityParser: Unknown command for GRAVITY: {0}".format(line))
         return output
 
     def _is_on_off(self, line):
@@ -1760,7 +1760,7 @@ class GravityParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + GravityParser.get_type() + "(\s*/\s*|\s+)"
+        return "\\s*" + GravityParser.get_type() + "(\\s*/\\s*|\\s+)"
 
 
 class MaskFileParser(UserFileComponentParser):
@@ -1774,8 +1774,8 @@ class MaskFileParser(UserFileComponentParser):
         super(MaskFileParser, self).__init__()
 
         # MaskFile
-        self._single_file = "[\w]+(\.XML)"
-        self._multiple_files = self._single_file + "(,\s*" + self._single_file + ")*\s*"
+        self._single_file = "[\\w]+(\\.XML)"
+        self._multiple_files = self._single_file + "(,\\s*" + self._single_file + ")*\\s*"
         self._mask_file_pattern = re.compile(start_string + "\s*" + self._multiple_files + end_string)
 
     def parse_line(self, line):
@@ -1786,7 +1786,7 @@ class MaskFileParser(UserFileComponentParser):
         if self._is_mask_file(setting):
             output = MaskFileParser.extract_mask_file(setting, line)
         else:
-            raise RuntimeError("MaskFileParser: Unknown command for MASKFILE: {}".format(line))
+            raise RuntimeError("MaskFileParser: Unknown command for MASKFILE: {0}".format(line))
         return output
 
     def _is_mask_file(self, line):
@@ -1805,7 +1805,7 @@ class MaskFileParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + MaskFileParser.get_type() + "(\s*=\s*)"
+        return "\s*" + MaskFileParser.get_type() + "(\\s*=\\s*)"
 
 
 class MonParser(UserFileComponentParser):
@@ -1824,40 +1824,40 @@ class MonParser(UserFileComponentParser):
         super(MonParser, self).__init__()
 
         # General
-        self._hab = "\s*\HAB|FRONT\s*"
-        self._lab = "\s*LAB|REAR|MAIN\s*"
-        self._detector = "\s*/\s*(" + self._hab + "|" + self._lab + ")\s*"
-        self._optional_detector = "\s*(" + self._detector + ")?\s*"
-        self._equal = "\s*=\s*"
+        self._hab = "\\s*\HAB|FRONT\\s*"
+        self._lab = "\\s*LAB|REAR|MAIN\\s*"
+        self._detector = "\\s*/\\s*(" + self._hab + "|" + self._lab + ")\\s*"
+        self._optional_detector = "\\s*(" + self._detector + ")?\\s*"
+        self._equal = "\\s*=\\s*"
 
-        self._file_path = "\s*[^\s]*\.[\w]+\s*"
+        self._file_path = "\\s*[^\\s]*\\.[\\w]+\\s*"
 
         # Length
-        self._length = "\s*LENGTH\s*=\s*"
-        self._interpolate = "\s*/\s*INTERPOLATE\s*"
+        self._length = "\\s*LENGTH\s*=\\s*"
+        self._interpolate = "\\s*/\s*INTERPOLATE\\s*"
         self._length_pattern = re.compile(start_string + self._length + float_number + space_string + integer_number +
-                                          "(\s*" + self._interpolate + "\s*)?" + end_string)
+                                          "(\\s*" + self._interpolate + "\\s*)?" + end_string)
 
         # Direct
-        self._direct = "\s*DIRECT\s*"
+        self._direct = "\\s*DIRECT\\s*"
         self._direct_pattern = re.compile(start_string + self._direct + self._optional_detector +
                                           self._equal + self._file_path + end_string)
 
         # Flat
-        self._flat = "\s*FLAT\s*"
+        self._flat = "\\s*FLAT\\s*"
         self._flat_pattern = re.compile(start_string + self._flat + self._optional_detector +
                                         self._equal + self._file_path + end_string)
 
         # Flat
-        self._hab_file = "\s*HAB\s*"
+        self._hab_file = "\\s*HAB\\s*"
         self._hab_pattern = re.compile(start_string + self._hab_file + self._optional_detector +
                                        self._equal + self._file_path + end_string)
 
         # Spectrum
-        self._spectrum = "\s*SPECTRUM\s*"
-        self._trans = "\s*TRANS\s*"
-        self._spectrum_pattern = re.compile(start_string + "(\s*" + self._trans + "\s*/\s*)?" + self._spectrum +
-                                            self._equal + integer_number + "(\s*" + self._interpolate + "\s*)?" +
+        self._spectrum = "\\s*SPECTRUM\\s*"
+        self._trans = "\\s*TRANS\\s*"
+        self._spectrum_pattern = re.compile(start_string + "(\\s*" + self._trans + "\\s*/\\s*)?" + self._spectrum +
+                                            self._equal + integer_number + "(\\s*" + self._interpolate + "\\s*)?" +
                                             end_string)
 
     def parse_line(self, line):
@@ -1877,7 +1877,7 @@ class MonParser(UserFileComponentParser):
         elif self._is_spectrum(setting):
             output = self._extract_spectrum(setting)
         else:
-            raise RuntimeError("MonParser: Unknown command for MON: {}".format(line))
+            raise RuntimeError("MonParser: Unknown command for MON: {0}".format(line))
         return output
 
     def _is_length(self, line):
@@ -1904,7 +1904,7 @@ class MonParser(UserFileComponentParser):
         length_entries = extract_float_list(length_string, separator=" ")
         if len(length_entries) != 2:
             raise RuntimeError("MonParser: Length setting needs 2 numeric parameters, "
-                               "but received {}.".format(len(length_entries)))
+                               "but received {0}.".format(len(length_entries)))
         output.update({user_file_monitor_length: [length_entries[0], int(length_entries[1])]})
         return output
 
@@ -1956,7 +1956,7 @@ class MonParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + MonParser.get_type() + "(\s*/\s*)"
+        return "\\s*" + MonParser.get_type() + "(\\s*/\\s*)"
 
 
 class PrintParser(UserFileComponentParser):
@@ -1970,8 +1970,8 @@ class PrintParser(UserFileComponentParser):
         super(PrintParser, self).__init__()
 
         # Print
-        self._print = "\s*PRINT\s+"
-        self._print_pattern = re.compile(start_string + self._print + "\s*.*\s*" + end_string)
+        self._print = "\\s*PRINT\\s+"
+        self._print_pattern = re.compile(start_string + self._print + "\\s*.*\\s*" + end_string)
 
     def parse_line(self, line):
         # Get the settings, ie remove command
@@ -1988,7 +1988,7 @@ class PrintParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + PrintParser.get_type() + "(\s+)"
+        return "\\s*" + PrintParser.get_type() + "(\\s+)"
 
 
 class SANS2DParser(UserFileComponentParser):
@@ -2010,7 +2010,7 @@ class SANS2DParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + SANS2DParser.get_type() + "(\s*)"
+        return "\\s*" + SANS2DParser.get_type() + "(\\s*)"
 
 
 class LOQParser(UserFileComponentParser):
@@ -2032,7 +2032,7 @@ class LOQParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + LOQParser.get_type() + "(\s*)"
+        return "\\s*" + LOQParser.get_type() + "(\\s*)"
 
 
 class UserFileParser(object):
@@ -2066,7 +2066,7 @@ class UserFileParser(object):
                 continue
         # We have encountered an unknown file specifier.
         raise ValueError("UserFileParser: Unknown user "
-                         "file command: {}".format(line))
+                         "file command: {0}".format(line))
 
     def parse_line(self, line):
         # Clean the line of trailing white space
