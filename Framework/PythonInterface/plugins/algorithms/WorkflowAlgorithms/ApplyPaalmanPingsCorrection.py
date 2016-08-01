@@ -20,6 +20,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
     _shift_can = False
     _shifted_container = None
     _can_shift_amount = 0.0
+    _can_ws_wavelength = None
 
 
     def category(self):
@@ -61,24 +62,51 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         if not self._use_can:
             logger.information('Not using container')
 
-        # Units should be wavelength
-        #x_unit = ws.getAxis(0).getUnit().unitID()
 
-        # Appy container shift if needed
+
+
         prog_container = Progress(self, start=0.0, end=0.2, nreports=4)
         prog_container.report('Starting algorithm')
         if self._use_can:
+            # Units should be wavelength
+            unit_id = mtd[self._can_ws_name].getAxis(0).getUnit().unitID()
+            if unit_id != 'Wavelength':
+                # Configure conversion
+                if unit_id == 'dSpacing':
+                    emode = 'Elastic'
+                    efixed = 0.0
+                elif unit_id == 'DeltaE':
+                    emode = 'Indirect'
+                    from IndirectCommon import getEfixed
+                    efixed = getEfixed(mtd[self._can_ws_name])
+                else:
+                    raise ValueError('Unit %s in sample workspace is not supported' % unit_id)
+
+                # Do conversion
+                # Use temporary workspace so we don't modify data
+                ConvertUnits(InputWorkspace=self._can_ws_name,
+                            OutputWorkspace=self._can_ws_wavelength,
+                            Target=unit_id,
+                            EMode=emode,
+                            EFixed=efixed)
+
+            else:
+                # No need to convert
+                CloneWorkspace(InputWorkspace=self._can_ws_name,
+                               OutputWorkspace=self._can_ws_wavelength)
+
+        # Appy container shift if needed
             if self._shift_can:
                 # Use temp workspace so we don't modify data
                 prog_container.report('Shifting can')
-                Scale(InputWorkspace=self._can_ws_name,
+                Scale(InputWorkspace=self._can_ws_wavelength,
                       OutputWorkspace=self._shifted_container,
                       Factor=self._can_shift_amount,
                       Operation='Add')
                 logger.information('Container data shifted by %f' % self._can_shift_amount)
             else:
                 prog_container.report('Cloning Workspace')
-                CloneWorkspace(InputWorkspace=self._can_ws_name,
+                CloneWorkspace(InputWorkspace=self._can_ws_wavelength,
                                OutputWorkspace=self._shifted_container)
 
         # Apply container scale factor if needed
@@ -92,7 +120,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 logger.information('Container scaled by %f' % self._can_scale_factor)
             else:
                 prog_container.report('Cloning Workspace')
-                CloneWorkspace(InputWorkspace=self._can_ws_name,
+                CloneWorkspace(InputWorkspace=self._can_ws_wavelength,
                                OutputWorkspace=self._scaled_container)
 
 
@@ -166,6 +194,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             DeleteWorkspace(self._scaled_container)
         if self._shifted_container in mtd:
             DeleteWorkspace(self._shifted_container)
+        if self._can_ws_wavelength in mtd:
+            DeleteWorkspace(self._can_ws_wavelength)
         prog_wrkflow.report('Algorithm Complete')
 
 
@@ -229,7 +259,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         self._corrections = '__converted_corrections'
         self._scaled_container = '__scaled_container'
         self._shifted_container = '_shifted_container'
-
+        self._can_ws_wavelength = '_can_ws_wavelength'
 
     def _get_correction_factor_ws_name(self, factor_type):
         """
@@ -292,7 +322,6 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         # Group the temporary factor workspaces (for easy removal later)
         GroupWorkspaces(InputWorkspaces=[self._corrections + '_' + f_type for f_type in factor_types],
                         OutputWorkspace=self._corrections)
-
 
     def _subtract(self):
         """
