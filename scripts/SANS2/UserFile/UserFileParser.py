@@ -1,4 +1,4 @@
-# pylint: disable=invalid-constant-name,too-many-lines, invalid-function-name
+# pylint: disable=too-many-lines, invalid-name
 
 import abc
 import re
