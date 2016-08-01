@@ -178,25 +178,6 @@ void ApplyPaalmanPings::run() {
     clone->setProperty("Outputworkspace", cloneName);
     clone->execute();
 
-    const bool useShift = m_uiForm.ckShiftCan->isChecked();
-    if (useShift) {
-      IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
-      scaleX->initialize();
-      scaleX->setLogging(false);
-      scaleX->setProperty("InputWorkspace", cloneName);
-      scaleX->setProperty("OutputWorkspace", cloneName);
-      scaleX->setProperty("Factor", m_uiForm.spCanShift->value());
-      scaleX->setProperty("Operation", "Add");
-      scaleX->execute();
-      IAlgorithm_sptr rebin =
-          AlgorithmManager::Instance().create("RebinToWorkspace");
-      rebin->initialize();
-      rebin->setLogging(false);
-      rebin->setProperty("WorkspaceToRebin", cloneName);
-      rebin->setProperty("WorkspaceToMatch", m_sampleWorkspaceName);
-      rebin->setProperty("OutputWorkspace", cloneName);
-      rebin->execute();
-    }
     canClone =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(cloneName);
     // Check for same binning across sample and container
@@ -236,6 +217,11 @@ void ApplyPaalmanPings::run() {
       const double canScaleFactor = m_uiForm.spCanScale->value();
       applyCorrAlg->setProperty("CanScaleFactor", canScaleFactor);
     }
+    const bool useShift = m_uiForm.ckShiftCan->isChecked();
+	if (useShift) {
+		const double canShiftAmount = m_uiForm.spCanShift->value();
+		applyCorrAlg->setProperty("CanShiftAmount", canShiftAmount);
+	}
   }
 
   if (useCorrections) {
