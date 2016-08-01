@@ -255,7 +255,7 @@ public:
     doTest_GetPropertyAsSingleValue_SingleType<uint64_t>(1UL);
   }
 
-  void doTest_GetPropertyAsSingleValue_SingleValue_StringType() {
+  void test_GetPropertyAsSingleValue_SingleValue_StringType() {
     LogManager runInfo;
     const std::string name = "string_prop", value = "1";
     runInfo.addProperty<std::string>(name, value);
@@ -487,9 +487,10 @@ private:
     LogManager runInfo;
     const std::string name = "T_series";
     addTestTimeSeries<T>(runInfo, name);
-    const double expectedValue(13.0);
-    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name), expectedValue,
-                    1e-12);
+    const double expectedValue(24.0);
+    TS_ASSERT_DELTA(
+        runInfo.getPropertyAsSingleValue(name, Mantid::Kernel::Math::LastValue),
+        expectedValue, 1e-12);
   }
 };
 

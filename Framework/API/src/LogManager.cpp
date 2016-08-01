@@ -21,7 +21,7 @@ namespace {
 /// static logger
 Logger g_log("LogManager");
 
-// Templated method to convert property to double
+/// Templated method to convert property to double
 template <typename T>
 bool convertSingleValue(const Property *property, double &value) {
   if (auto log = dynamic_cast<const PropertyWithValue<T> *>(property)) {
@@ -32,7 +32,7 @@ bool convertSingleValue(const Property *property, double &value) {
   }
 }
 
-// Converts numeric property to double
+/// Converts numeric property to double
 bool convertSingleValue(const Property *property, double &value) {
   // The first one to succeed short-circuits and the value is returned.
   // If all fail, returns false.
@@ -42,6 +42,47 @@ bool convertSingleValue(const Property *property, double &value) {
          convertSingleValue<float>(property, value) ||
          convertSingleValue<uint32_t>(property, value) ||
          convertSingleValue<uint64_t>(property, value);
+}
+
+/// Templated method to convert time series property to single double
+template <typename T>
+bool convertTimeSeriesToDouble(const Property *property, double &value,
+                               const Math::StatisticType &function) {
+  if (const auto *log = dynamic_cast<const TimeSeriesProperty<T> *>(property)) {
+    if (function == Math::Mean) {
+      value = static_cast<double>(log->timeAverageValue());
+    } else if (function == Math::FirstValue) {
+      value = static_cast<double>(log->firstValue());
+    } else if (function == Math::Minimum) {
+      value = static_cast<double>(log->minValue());
+    } else if (function == Math::Maximum) {
+      value = static_cast<double>(log->maxValue());
+    } else { // default
+      value = static_cast<double>(log->lastValue());
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/// Converts time series property to single double
+bool convertTimeSeriesToDouble(const Property *property, double &value,
+                               const Math::StatisticType &function) {
+  // Double first - can use filterByStatistic in this case
+  if (auto seriesDouble =
+          dynamic_cast<const TimeSeriesProperty<double> *>(property)) {
+    value = Mantid::Kernel::filterByStatistic(seriesDouble, function);
+    return true;
+  } else {
+    // Try other types, first to succeed short-circuits and returns.
+    // If none succeed, return false.
+    return convertTimeSeriesToDouble<int32_t>(property, value, function) ||
+           convertTimeSeriesToDouble<int64_t>(property, value, function) ||
+           convertTimeSeriesToDouble<float>(property, value, function) ||
+           convertTimeSeriesToDouble<uint32_t>(property, value, function) ||
+           convertTimeSeriesToDouble<uint64_t>(property, value, function);
+  }
 }
 }
 
@@ -291,11 +332,9 @@ double LogManager::getPropertyAsSingleValue(
   const auto key = std::make_pair(name, statistic);
   if (!m_singleValueCache.getCache(key, singleValue)) {
     const Property *log = getProperty(name);
-    if (convertSingleValue(log, singleValue)) {
+    if (convertSingleValue(log, singleValue) ||
+        convertTimeSeriesToDouble(log, singleValue, statistic)) {
       return singleValue;
-    } else if (auto seriesDouble =
-                   dynamic_cast<const TimeSeriesProperty<double> *>(log)) {
-      return Mantid::Kernel::filterByStatistic(seriesDouble, statistic);
     } else {
       throw std::invalid_argument(
           "Run::getPropertyAsSingleValue - Property \"" + name +
