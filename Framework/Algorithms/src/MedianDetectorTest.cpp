@@ -253,7 +253,7 @@ int MedianDetectorTest::maskOutliers(
 
     PARALLEL_FOR1(countsWS)
     for (int j = 0; j < static_cast<int>(hists.size()); ++j) { // NOLINT
-      const double value = countsWS->readY(hists[j])[0];
+      const double value = countsWS->y(hists[j])[0];
       if ((value == 0.) && checkForMask) {
         const auto &detids = countsWS->getSpectrum(hists[j]).getDetectorIDs();
         if (instrument->isDetectorMasked(detids)) {
@@ -335,7 +335,7 @@ int MedianDetectorTest::doDetectorTests(
         const auto &detids =
             countsWS->getSpectrum(hists.at(i)).getDetectorIDs();
         if (instrument->isDetectorMasked(detids)) {
-          maskWS->dataY(hists.at(i))[0] = deadValue;
+          maskWS->mutableY(hists.at(i))[0] = deadValue;
           continue;
         }
         if (instrument->isMonitor(detids)) {
@@ -344,21 +344,21 @@ int MedianDetectorTest::doDetectorTests(
         }
       }
 
-      const double signal = countsWS->dataY(hists.at(i))[0];
+      const double signal = countsWS->y(hists.at(i))[0];
 
       // Mask out NaN and infinite
       if (boost::math::isinf(signal) || boost::math::isnan(signal)) {
-        maskWS->dataY(hists.at(i))[0] = deadValue;
+        maskWS->mutableY(hists.at(i))[0] = deadValue;
         PARALLEL_ATOMIC
         ++numFailed;
         continue;
       }
 
-      const double error = minSigma * countsWS->readE(hists.at(i))[0];
+      const double error = minSigma * countsWS->e(hists.at(i))[0];
 
       if ((signal < median * m_loFrac && (signal - median < -error)) ||
           (signal > median * m_hiFrac && (signal - median > error))) {
-        maskWS->dataY(hists.at(i))[0] = deadValue;
+        maskWS->mutableY(hists.at(i))[0] = deadValue;
         PARALLEL_ATOMIC
         ++numFailed;
       }
