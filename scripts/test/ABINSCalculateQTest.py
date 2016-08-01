@@ -1,12 +1,31 @@
 import unittest
-import json
 import numpy as np
 from mantid.simpleapi import *
+
+
+try:
+    import simplejson as json
+except ImportError:
+    logger.warning("Failure of CalculateQTest because simplejson is unavailable.")
+    exit(1)
+
+try:
+    import scipy
+except ImportError:
+    logger.warning("Failure of CalculateQTest because scipy is unavailable.")
+    exit(1)
+
+try:
+    import h5py
+except ImportError:
+    logger.warning("Failure of CalculateQTest because h5py is unavailable.")
+    exit(1)
 
 from AbinsModules import  CalculateQ
 from AbinsModules import KpointsData
 from AbinsModules.InstrumentProducer import InstrumentProducer
 from AbinsModules import Constants
+
 
 class ABINSCalculateQTest(unittest.TestCase):
 

@@ -1,7 +1,14 @@
 import unittest
 from mantid.simpleapi import *
-from AbinsModules import AtomsDaTa
 import numpy as np
+
+try:
+    import h5py
+except ImportError:
+    logger.warning("Failure of AtomsDataTest because h5py is unavailable.")
+    exit(1)
+
+from AbinsModules import AtomsDaTa
 
 class AtomsDataTest(unittest.TestCase):
     _good_data = [{'sort': 0, 'symbol': 'Si', 'fract_coord': np.asarray([ 0.,  0.,  0.]), 'atom': 0, 'mass':28.085500},

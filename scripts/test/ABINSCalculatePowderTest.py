@@ -1,8 +1,21 @@
 import unittest
 from mantid.simpleapi import *
 from os import path
-import simplejson as json
 import numpy as np
+
+try:
+    import simplejson as json
+except ImportError:
+    logger.warning("Failure of CalculatePowderTest because simplejson is unavailable.")
+    exit(1)
+
+
+try:
+    import h5py
+except ImportError:
+    logger.warning("Failure of CalculatePowderTest because h5py is unavailable.")
+    exit(1)
+
 
 from AbinsModules import CalculatePowder, LoadCASTEP
 

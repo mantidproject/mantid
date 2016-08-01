@@ -1,10 +1,30 @@
 import unittest
 from mantid.simpleapi import *
 from os import path
-import simplejson as json
 import numpy as np
 
+
+try:
+    import simplejson as json
+except ImportError:
+    logger.warning("Failure of LoadCASTEPTest because simplejson is unavailable.")
+    exit(1)
+
+try:
+    import scipy
+except ImportError:
+    logger.warning("Failure of LoadCASTEPTest because scipy is unavailable.")
+    exit(1)
+
+try:
+    import h5py
+except ImportError:
+    logger.warning("Failure of LoadCASTEPTest because h5py is unavailable.")
+    exit(1)
+
 from AbinsModules import LoadCASTEP, Constants
+
+
 
 class ABINSLoadCASTEPTest(unittest.TestCase):
 

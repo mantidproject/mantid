@@ -1,9 +1,14 @@
 import unittest
 from mantid.simpleapi import *
+import numpy as np
+
+try:
+    import h5py
+except ImportError:
+    logger.warning("Failure of IOmodule test because h5py is unavailable.")
+    exit(1)
 
 from AbinsModules import IOmodule
-
-import numpy as np
 
 class ABINSIOmoduleTest(unittest.TestCase):
 

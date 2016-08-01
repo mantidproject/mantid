@@ -2,6 +2,23 @@ import unittest
 from mantid.simpleapi import *
 import numpy as np
 
+
+try:
+    import simplejson as json
+except ImportError:
+    logger.warning("Failure of PowderDataTest because simplejson is unavailable.")
+    exit(1)
+try:
+    import scipy
+except ImportError:
+    logger.warning("Failure of PowderDataTest because scipy is unavailable.")
+    exit(1)
+try:
+    import h5py
+except ImportError:
+    logger.warning("Failure of PowderDataTest because h5py is unavailable.")
+    exit(1)
+
 from AbinsModules import PowderData
 
 class ABINSPowderDataTest(unittest.TestCase):

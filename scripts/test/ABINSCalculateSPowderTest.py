@@ -1,12 +1,28 @@
 import unittest
 from mantid.simpleapi import *
 from os import path
-import simplejson as json
 import numpy as np
+
+
+try:
+    import simplejson as json
+except ImportError:
+    logger.warning("Failure of CalculateSPowderTest because simplejson is unavailable.")
+    exit(1)
+
+try:
+    import h5py
+except ImportError:
+    logger.warning("Failure of CalculateSPowderTest because h5py is unavailable.")
+    exir(1)
+
 
 from AbinsModules import CalculateS, LoadCASTEP
 
-class ABINSCalculateSTest(unittest.TestCase):
+class ABINSCalculateSPowderTest(unittest.TestCase):
+    """
+    Test of  CalculateS for the Powder scenario.
+    """
 
     _core = "../ExternalData/Testing/Data/UnitTest/" # path to files
     _temperature = 10 # 10 K,  temperature for the benchmark

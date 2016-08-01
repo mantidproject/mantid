@@ -2,8 +2,23 @@ import unittest
 from mantid.simpleapi import *
 import numpy as np
 
-from AbinsModules import DwCrystalData
+def _extra_modules_not_available():
+    """
+    Check whether additional modules required by ABINS  are available on this platform
+    """
+    try:
+        import simplejson as json
+    except ImportError:
+        logger.warning("Failure of DwCrystalDataTest  because simplejson is unavailable.")
+        exit(1)
 
+    try:
+        import h5py
+    except ImportError:
+        logger.warning("Failure of DwCrystalDataTest because h5py is unavailable.")
+        exit(1)
+
+from AbinsModules import DwCrystalData
 
 class ABINSDwCrystalDataTest(unittest.TestCase):
     # fake DW tensors for two atoms

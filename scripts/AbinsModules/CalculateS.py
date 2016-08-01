@@ -203,7 +203,7 @@ class CalculateS(IOmodule):
     def getS(self):
         """
         Calculates dynamical structure factor S.
-        @return: object of type SData.
+        @return: object of type SData and dictionary with total S.
         """
 
         data = self._calculate_S()
@@ -217,7 +217,20 @@ class CalculateS(IOmodule):
 
         self.save()
 
-        return data
+        dim = extracted_data["convoluted_frequencies"].shape[0]
+        atoms = extracted_data["atoms"].shape[0]
+        _total_s_data = {"frequencies": extracted_data["convoluted_frequencies"],
+                         "total_s": np.zeros(dim, dtype=Constants.float_type)}
+
+        for atom in range(atoms):
+            np.add(total_s_data["total_s"],
+                   extracted_data["atoms"][atom][:, Constants.overtones_num],
+                   total_s_data["total_s"])
+
+        return data, _total_s_data
+
+
+
 
 
     def loadData(self):
@@ -233,5 +246,16 @@ class CalculateS(IOmodule):
         _s_data.set(items=dict(atoms=_data["structured_datasets"]["atoms_data"],
                                frequencies=_data["datasets"]["convoluted_frequencies"]))
 
-        return _s_data
+        dim = _data["datasets"]["convoluted_frequencies"].shape[0]
+        atoms = _data["structured_datasets"]["atoms"].shape[0]
+
+        _total_s_data = {"frequencies": _data["datasets"]["convoluted_frequencies"],
+                         "total_s": np.zeros(dim, dtype=Constants.float_type)}
+
+        for atom in range(atoms):
+            np.add(total_s_data["total_s"],
+                   _data["structured_datasets"]["atoms_data"][atom][:, Constants.overtones_num],
+                   total_s_data["total_s"])
+
+        return _s_data, _total_s_data
 

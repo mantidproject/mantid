@@ -1,11 +1,22 @@
 import unittest
 from mantid.simpleapi import *
 from os import path
-import simplejson as json
 import numpy as np
 
-from AbinsModules import CalculateCrystal, LoadCASTEP
+try:
+    import simplejson as json
+except ImportError:
+    logger.warning("Failure of CalculateCrystalTest because simplejson is unavailable.")
+    exit(1)
 
+try:
+    import h5py
+except ImportError:
+    logger.warning("Failure of CalculateCrystalTest because h5py is unavailable.")
+    exit(1)
+
+
+from AbinsModules import CalculateCrystal, LoadCASTEP
 
 class ABINSCalculateCrystalTest(unittest.TestCase):
 

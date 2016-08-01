@@ -1,6 +1,14 @@
 import unittest
 import numpy as np
 from mantid.simpleapi import *
+
+
+try:
+    import h5py
+except ImportError:
+    logger.warning("Failure of KpointsDataTest because h5py is unavailable.")
+    exit(1)
+
 from AbinsModules import KpointsData
 
 

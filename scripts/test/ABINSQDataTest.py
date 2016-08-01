@@ -5,6 +5,7 @@ from mantid.simpleapi import *
 from AbinsModules import QData
 
 
+
 class ABINSQvectorsTEST(unittest.TestCase):
     _good_array =  np.asarray([2.,3.,4.])
 
