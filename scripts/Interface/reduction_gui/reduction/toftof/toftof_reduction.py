@@ -3,20 +3,117 @@ from reduction_gui.reduction.scripter import BaseReductionScripter, BaseScriptEl
 from PyQt4.QtCore import *
 from PyQt4.QtGui  import *
 
+import xml.dom.minidom
 import time
 
 class TOFTOFScriptElement(BaseScriptElement):
-
-    # defaults
-    pieceOfData = 0.5 # TODO
 
     def __init__(self):
         BaseScriptElement.__init__(self)
         self.reset()
 
     def reset(self):
+
+        self.prefix   = 'ws' # prefix of some workspace names
+
+        self.dataSearchDir    = ''
+        self.dataSearchDir    = '/home/jan/C/scg/toftof_data'
+        self.rebiningInEnergy = ''
+        self.rebiningInEnergy = '-15,0.008,1.5'
+        self.rebiningInQ      = ''
+        self.rebiningInQ      = '0.2,0.1,2.0'
+
+        # vanadium runs
+        self.vanRuns  = ''
+        self.vanRuns  = '12:14'
+        self.vanCmnt  = ''
+        self.vanCmnt  = 'Van'
+
+        # empty can runs
+        self.ecRuns   = ''
+        self.ecRuns   = '15:17'
+        self.ecCmnt   = ''
+        self.ecCmnt   = 'EC'
+        self.ecFactor = 0.9
+
         # data runs
         self.dataRuns = []
+        self.dataRuns = [('27:29','H2O_21C_sqw'), ('30:31','H2O_34C_sqw')]
+
+        # additional detectors to mask
+        self.maskDetectors = ''
+        self.maskDetectors = '308-312,314'
+
+    xmlTag = 'TOFTOFReductionData'
+
+    def to_xml(self):
+        xml = ['']
+
+        def put(tag, s):
+            xml[0] += '  <%s>%s</%s>\n' % (tag, str(s), tag)
+
+        put('prefix',           self.prefix)
+        put('data_dir',         self.dataSearchDir)
+        put('rebinning_energy', self.rebiningInEnergy)
+        put('rebinning_q',      self.rebiningInQ)
+
+        put('van_runs',         self.vanRuns)
+        put('van_comment',      self.vanCmnt)
+
+        put('ec_runs',          self.ecRuns)
+        put('ec_comment',       self.ecCmnt)
+        put('ec_factor',        self.ecFactor)
+
+        for (run, cmt) in self.dataRuns:
+            put('data_runs',    run)
+            put('data_comment', cmt)
+
+        # additional detectors to mask
+        put('mask_detectors', self.maskDetectors)
+
+        xml = '<%s>\n%s</%s>\n' % (self.xmlTag, xml[0], self.xmlTag)
+
+        print xml
+        return xml
+
+    def from_xml(self, xmlString):
+        self.reset()
+        print 'FROM_XML__________________', xmlString
+
+        dom = xml.dom.minidom.parseString(xmlString)
+        els = dom.getElementsByTagName(self.xmlTag)
+
+        if els:
+            self._from_dom(els[0])
+
+    def _from_dom(self, dom):
+
+        def getStr(tag, default = ''):
+            return BaseScriptElement.getStringElement(dom, tag, default)
+
+        def getStrLst(tag):
+            return BaseScriptElement.getStringList(dom, tag)
+
+        self.prefix           = getStr('prefix', 'ws')
+        self.dataSearchDir    = getStr('data_dir')
+        self.rebiningInEnergy = getStr('rebinning_energy')
+        self.rebiningInQ      = getStr('rebinning_q')
+
+        self.vanRuns  = getStr('van_runs')
+        self.vanCmnt  = getStr('van_comment')
+
+        self.ecRuns   = getStr('ec_runs')
+        self.ecCmnt   = getStr('ec_comment')
+        self.ecFactor = getStr('ec_factor')
+
+        dataRuns      = getStrLst('data_runs')
+        dataCmnt      = getStrLst('data_comment')
+
+        for i in range(min(len(dataRuns), len(dataCmnt))):
+            self.dataRuns.append((dataRuns[i], dataCmnt(i)))
+
+        # additional detectors to mask
+        self.maskDetectors = getStr('mask_detectors')
 
     def numDataRunsRows(self):
         return len(self.dataRuns)
@@ -56,61 +153,38 @@ class TOFTOFScriptElement(BaseScriptElement):
         cls = self.__class__
         self.pieceOfData = cls.pieceOfData
 
-    def to_script(self):
-        script  = ''
-        # script += "SetPieceOfData(%g)\n" % (self.pieceOfData)
-        return script
-
-    def to_xml(self): # save
-        xml_out  = "<DirectBeam>\n"
-        xml_out += "  <sample_file>%s</sample_file>\n" % self.pieceOfData
-        xml_out += "</DirectBeam>\n"
-        return xml_out
-
-    def from_xml(self, dom): # on load
-        self.reset()
-#        element_list = dom.getElementsByTagName("DirectBeam")
-#        if len(element_list)>0:
-#            instrument_dom = element_list[0]
-#            self.pieceOfData = BaseScriptElement.getStringElement(instrument_dom, "sample_file")
-
-#    def from_setup_info(self, xml_str):
-#        print 'FROM_SETUP_INFO>>', xml_str, '<<\n'
-#        self.reset()
-#        (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
-#        self.pieceOfData = BaseScriptElement.getPropertyValue(
-#            alg, "SampleDetectorDistance", default=ReductionOptions.sample_detector_distance)
-
 class TOFTOFReductionScripter(BaseReductionScripter):
 
-    def __init__(self, name, facility):
+    def __init__(self, name, facility, scriptElement):
         BaseReductionScripter.__init__(self, name, facility)
+
+        self.data = scriptElement # TODO is there a better way to access scriptElement?
 
     def _error(self, message):
         raise RuntimeError('TOFTOF reduction error: ' + message)
 
     def to_script(self, file_name = None):
-        for item in self._observers:
-            print item
-#            if item.state() is not None:
-#                script += str(item.state())
 
-        prefix = 'ws'
+        # briefer access to reduction data
 
-        dataSearchDir    = '/home/jan/C/scg/toftof_data'
-        rebiningInEnergy = '-15,0.008,1.5'
-        rebiningInQ      = '0.2,0.1,2.0'
+        data   = self.data
 
-        vanRuns  = '12:14'
-        vanCmnt  = 'Van'
+        prefix = data.prefix
 
-        ecRuns   = '15:17'
-        ecCmnt   = 'EC'
-        ecFactor = 0.9
+        dataSearchDir    = data.dataSearchDir
+        rebiningInEnergy = data.rebiningInEnergy
+        rebiningInQ      = data.rebiningInQ
 
-        dataRuns = [('27:29','H2O_21C_sqw'), ('30:31','H2O_34C_sqw')]
+        vanRuns  = data.vanRuns
+        vanCmnt  = data.vanCmnt
 
-        maskDetectors = '308-312,314'
+        ecRuns   = data.ecRuns
+        ecCmnt   = data.ecCmnt
+        ecFactor = data.ecFactor
+
+        dataRuns = data.dataRuns
+
+        maskDetectors = data.maskDetectors
 
         # header
         script = '# TOFTOF reduction script\n'                      +\
@@ -255,6 +329,7 @@ class TOFTOFReductionScripter(BaseReductionScripter):
         return script
 
     def set_options(self):
+        print 'SET_OPTIONS__________________'
         """
             Set up the reduction options, without executing
         """

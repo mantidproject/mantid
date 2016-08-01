@@ -7,9 +7,14 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui  import *
 
 class TOFTOFWidget(BaseWidget):
-    name = 'TOFTOF Run'
+    ''' The one and only tab page. '''
+    name = 'TOFTOF Reduction'
 
     class DataRunModel(QAbstractTableModel):
+        ''' The list of data runs and correspnding comments. '''
+
+        headers = ('Data runs', 'Comment')
+
         selectCell = pyqtSignal(int, int)
 
         def __init__(self, parent, scriptElement):
@@ -17,12 +22,10 @@ class TOFTOFWidget(BaseWidget):
             self.data = scriptElement
 
         def rowCount(self, index = QModelIndex()):
-            return self.data.numDataRunsRows() + 1
+            return self.data.numDataRunsRows() + 1  # one additional row for new data
 
         def columnCount(self, index = QModelIndex()):
             return 2
-
-        headers = ('Data runs', 'Comment')
 
         def headerData(self, section, orientation, role):
             if Qt.Horizontal == orientation and Qt.DisplayRole == role:
@@ -36,9 +39,7 @@ class TOFTOFWidget(BaseWidget):
 
             return None
 
-        def setData(self, index, value, role):
-            # it is QVariant if called outside of mantid TODO put
-            text = str(value.toString() if isinstance(value, QVariant) else value)
+        def setData(self, index, text, role):
 
             row = index.row()
             col = index.column()
@@ -46,10 +47,10 @@ class TOFTOFWidget(BaseWidget):
             self.data.setDataRun(row, col, text)
             self.data.updateDataRuns()
 
-            # signal the view
+            # signal the attached view
             self.reset()
 
-            # move to the next column
+            # move selection to the next column or row
             col = col + 1
 
             if col >= 2:
@@ -65,15 +66,15 @@ class TOFTOFWidget(BaseWidget):
         def flags(self, index):
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
 
-    def __init__(self, settings):
+    def __init__(self, settings, scriptElement):
         BaseWidget.__init__(self, settings = settings)
-        self.state = TOFTOFScriptElement()
+        self.state = scriptElement
 
         box = QVBoxLayout()
         self._layout.addLayout(box)
 
         # data path
-        box.addWidget(QLabel('1. Data search directory'))
+        box.addWidget(QLabel('Data search directory'))
 
         self.dataPath    = QLineEdit()
         self.dataPathBtn = QPushButton('Browse')
@@ -91,7 +92,7 @@ class TOFTOFWidget(BaseWidget):
 
         box.addWidget(self.dataRunsView)
 
-        self.runDataModel = TOFTOFWidget.DataRunModel(self, self.state)
+        self.runDataModel = TOFTOFWidget.DataRunModel(self, scriptElement)
         self.dataRunsView.setModel(self.runDataModel)
 
         self.dataPathBtn.clicked.connect(self._onDataPath)
@@ -119,5 +120,7 @@ class TOFTOFInterface(InstrumentInterface):
         self.ERROR_REPORT_NAME   = '%s_error_report.xml' % name
         self.LAST_REDUCTION_NAME = '.mantid_last_%s_reduction.xml' % name
 
-        self.scripter = TOFTOFReductionScripter(name, settings.facility_name)
-        self.attach(TOFTOFWidget(settings))
+        self.scriptElement = TOFTOFScriptElement()
+
+        self.scripter = TOFTOFReductionScripter(name, settings.facility_name, self.scriptElement)
+        self.attach(TOFTOFWidget(settings, self.scriptElement))
