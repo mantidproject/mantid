@@ -304,9 +304,7 @@ void ConvFit::run() {
 void ConvFit::saveClicked() {
   // check workspace exists
   const auto resultName = m_baseName.toStdString() + "_Result";
-  const auto errorMessage = "Error when saving:\nThe workspace \"" + resultName +
-                            "\" could not be found.";
-  const auto wsFound = checkADSForWorkspace(resultName, errorMessage);
+  const auto wsFound = checkADSForPlotSaveWorkspace(resultName, false);
   // process workspace after check
   if (wsFound) {
     QString saveDir = QString::fromStdString(
@@ -329,9 +327,7 @@ void ConvFit::plotClicked() {
 
   // check workspace exists
   const auto resultName = m_baseName.toStdString() + "_Result";
-  const auto errorMessage = "Error when plotting:\nThe workspace \"" +
-                            resultName + "\" could not be found.";
-  const auto wsFound = checkADSForWorkspace(resultName, errorMessage);
+  const auto wsFound = checkADSForPlotSaveWorkspace(resultName, true);
   if (wsFound) {
     MatrixWorkspace_sptr resultWs =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
