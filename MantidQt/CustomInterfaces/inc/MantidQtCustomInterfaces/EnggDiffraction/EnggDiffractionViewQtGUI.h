@@ -310,6 +310,9 @@ private:
   /// save settings (before closing)
   void saveSettings() const override;
 
+  // when the interface is shown
+  void showEvent(QShowEvent *) override;
+
   // window (custom interface) close
   void closeEvent(QCloseEvent *ev) override;
 

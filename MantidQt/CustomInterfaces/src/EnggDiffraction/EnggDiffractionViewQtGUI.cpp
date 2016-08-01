@@ -135,7 +135,11 @@ void EnggDiffractionViewQtGUI::initLayout() {
   // it will know what compute resources and tools we have available:
   // This view doesn't even know the names of compute resources, etc.
   m_presenter->notify(IEnggDiffractionPresenter::Start);
-  m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
+  // Never do this here: if the RB-number checks show a pop-up (splash
+  // message), it will be shown very early (before the interface
+  // window itself is shown) and that will cause a crash in Qt code on
+  // some platforms (windows 10, and 7 sometimes).
+  // m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabCalib() {
@@ -1718,6 +1722,11 @@ void EnggDiffractionViewQtGUI::setPrefix(std::string prefix) {
 
   // rebin tab
   m_uiTabPreproc.MWRunFiles_preproc_run_num->setInstrumentOverride(prefixInput);
+}
+
+void EnggDiffractionViewQtGUI::showEvent(QShowEvent *) {
+  // make sure that the RB number is checked on interface startup/show
+  m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
 }
 
 void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {
