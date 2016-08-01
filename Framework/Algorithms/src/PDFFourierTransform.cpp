@@ -36,6 +36,8 @@ const string S_OF_Q("S(Q)");
 const string S_OF_Q_MINUS_ONE("S(Q)-1");
 /// Kernel of the Fourier transform
 const string Q_S_OF_Q_MINUS_ONE("Q[S(Q)-1]");
+
+const double TWO_OVER_PI(2. / M_PI);
 }
 
 const std::string PDFFourierTransform::name() const {
@@ -138,32 +140,30 @@ std::map<string, string> PDFFourierTransform::validateInputs() {
   return result;
 }
 
-size_t PDFFourierTransform::determineQminIndex() {
-  // get input data
-  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  const auto &inputQ = inputWS->dataX(0);    //  x for input
-  const auto &inputFOfQ = inputWS->dataY(0); //  y for input
+size_t
+PDFFourierTransform::determineQminIndex(const std::vector<double> &Q,
+                                        const std::vector<double> &FofQ) {
   double qmin = getProperty("Qmin");
 
   // check against available Q-range
   if (isEmpty(qmin)) {
-    qmin = inputQ.front();
-  } else if (qmin < inputQ.front()) {
+    qmin = Q.front();
+  } else if (qmin < Q.front()) {
     g_log.information(
         "Specified Qmin < range of data. Adjusting to data range.");
-    qmin = inputQ.front();
+    qmin = Q.front();
   }
 
   // get index for the Qmin from the Q-range
-  auto q_iter = std::upper_bound(inputQ.begin(), inputQ.end(), qmin);
-  size_t qmin_index = std::distance(inputQ.begin(), q_iter);
+  auto q_iter = std::upper_bound(Q.begin(), Q.end(), qmin);
+  size_t qmin_index = std::distance(Q.begin(), q_iter);
   if (qmin_index == 0)
     qmin_index += 1; // so there doesn't have to be a check in integration loop
 
   // go to first non-nan value
-  q_iter = std::find_if(std::next(inputFOfQ.begin(), qmin_index),
-                        inputFOfQ.end(), boost::math::isnormal<double>);
-  size_t first_normal_index = std::distance(inputFOfQ.begin(), q_iter);
+  q_iter = std::find_if(std::next(FofQ.begin(), qmin_index), FofQ.end(),
+                        boost::math::isnormal<double>);
+  size_t first_normal_index = std::distance(FofQ.begin(), q_iter);
   if (first_normal_index > qmin_index) {
     g_log.information(
         "Specified Qmin where data is nan/inf. Adjusting to data range.");
@@ -173,31 +173,29 @@ size_t PDFFourierTransform::determineQminIndex() {
   return qmin_index;
 }
 
-size_t PDFFourierTransform::determineQmaxIndex() {
-  // get input data
-  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  const auto &inputQ = inputWS->dataX(0);    //  x for input
-  const auto &inputFOfQ = inputWS->dataY(0); //  y for input
+size_t
+PDFFourierTransform::determineQmaxIndex(const std::vector<double> &Q,
+                                        const std::vector<double> &FofQ) {
   double qmax = getProperty("Qmax");
 
   // check against available Q-range
   if (isEmpty(qmax)) {
-    qmax = inputQ.back();
-  } else if (qmax > inputQ.back()) {
+    qmax = Q.back();
+  } else if (qmax > Q.back()) {
     g_log.information()
         << "Specified Qmax > range of data. Adjusting to data range.\n";
-    qmax = inputQ.back();
+    qmax = Q.back();
   }
 
   // get pointers for the data range
-  auto q_iter = std::lower_bound(inputQ.begin(), inputQ.end(), qmax);
-  size_t qmax_index = std::distance(inputQ.begin(), q_iter);
+  auto q_iter = std::lower_bound(Q.begin(), Q.end(), qmax);
+  size_t qmax_index = std::distance(Q.begin(), q_iter);
 
   // go to first non-nan value
-  auto q_back_iter = std::find_if(inputFOfQ.rbegin(), inputFOfQ.rend(),
-                                  boost::math::isnormal<double>);
+  auto q_back_iter =
+      std::find_if(FofQ.rbegin(), FofQ.rend(), boost::math::isnormal<double>);
   size_t first_normal_index =
-      inputFOfQ.size() - std::distance(inputFOfQ.rbegin(), q_back_iter) - 1;
+      FofQ.size() - std::distance(FofQ.rbegin(), q_back_iter) - 1;
   if (first_normal_index < qmax_index) {
     g_log.information(
         "Specified Qmax where data is nan/inf. Adjusting to data range.");
@@ -205,6 +203,24 @@ size_t PDFFourierTransform::determineQmaxIndex() {
   }
 
   return qmax_index;
+}
+
+double PDFFourierTransform::determineRho0() {
+  double rho0 = getProperty("rho0");
+
+  if (isEmpty(rho0)) {
+    API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+
+    const Kernel::Material &material = inputWS->sample().getMaterial();
+    double materialDensity = material.numberDensity();
+
+    if (!isEmpty(materialDensity) && materialDensity > 0)
+      rho0 = materialDensity;
+    else
+      rho0 = 1.;
+  }
+
+  return rho0;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -290,8 +306,8 @@ void PDFFourierTransform::exec() {
   }
 
   // determine Q-range
-  size_t qmin_index = determineQminIndex();
-  size_t qmax_index = determineQmaxIndex();
+  size_t qmin_index = determineQminIndex(inputQ, inputFOfQ);
+  size_t qmax_index = determineQmaxIndex(inputQ, inputFOfQ);
   { // keep variable scope small
     size_t qmi_out = qmax_index;
     if (qmi_out == inputQ.size())
@@ -342,13 +358,14 @@ void PDFFourierTransform::exec() {
     double fs = 0;
     double error = 0;
     for (size_t q_index = qmin_index; q_index < qmax_index; q_index++) {
-      double q = inputQ[q_index];
-      double deltaq = inputQ[q_index] - inputQ[q_index - 1];
+      const double q = inputQ[q_index];
+      const double deltaq = inputQ[q_index] - inputQ[q_index - 1];
       double sinus = sin(q * r) * deltaq;
 
       // multiply by filter function sin(q*pi/qmax)/(q*pi/qmax)
       if (filter && q != 0) {
-        sinus *= sin(q * rdelta) / (q * rdelta);
+        const double lorchKernel = q * M_PI / inputQ[qmax_index];
+        sinus *= sin(lorchKernel) / lorchKernel;
       }
       fs += sinus * inputFOfQ[q_index];
       error += (sinus * inputDfOfQ[q_index]) * (sinus * inputDfOfQ[q_index]);
@@ -358,25 +375,17 @@ void PDFFourierTransform::exec() {
     }
 
     // put the information into the output
-    outputY[r_index] = fs * 2 / M_PI;
-    outputE[r_index] = sqrt(error) * 2 / M_PI;
+    outputY[r_index] = fs * TWO_OVER_PI;
+    outputE[r_index] = sqrt(error) * TWO_OVER_PI;
   }
 
   // convert to the correct form of PDF
   string pdfType = getProperty("PDFType");
-  double rho0 = getProperty("rho0");
-  if (isEmpty(rho0)) {
-    const Kernel::Material &material = inputWS->sample().getMaterial();
-    double materialDensity = material.numberDensity();
 
-    if (!isEmpty(materialDensity) && materialDensity > 0)
-      rho0 = materialDensity;
-    else
-      rho0 = 1.;
-    // write out that it was reset if the value is coming into play
-    if (pdfType == LITTLE_G_OF_R || pdfType == RDF_OF_R)
-      g_log.information() << "Using rho0 = " << rho0 << "\n";
-  }
+  double rho0 = determineRho0();
+  if (pdfType == LITTLE_G_OF_R || pdfType == RDF_OF_R)
+    g_log.information() << "Using rho0 = " << rho0 << "\n";
+
   if (pdfType == BIG_G_OF_R) {
     // nothing to do
   } else if (pdfType == LITTLE_G_OF_R) {
