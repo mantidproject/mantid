@@ -264,6 +264,30 @@ public:
     TS_ASSERT_EQUALS(value, std::to_string(result));
   }
 
+  void test_GetPropertyAsSingleValue_TimeSeries_DoubleType() {
+    doTest_GetPropertyAsSingleValue_TimeSeriesType<double>();
+  }
+
+  void test_GetPropertyAsSingleValue_TimeSeries_FloatType() {
+    doTest_GetPropertyAsSingleValue_TimeSeriesType<float>();
+  }
+
+  void test_GetPropertyAsSingleValue_TimeSeries_Int32Type() {
+    doTest_GetPropertyAsSingleValue_TimeSeriesType<int32_t>();
+  }
+
+  void test_GetPropertyAsSingleValue_TimeSeries_Int64Type() {
+    doTest_GetPropertyAsSingleValue_TimeSeriesType<int64_t>();
+  }
+
+  void test_GetPropertyAsSingleValue_TimeSeries_Uint32Type() {
+    doTest_GetPropertyAsSingleValue_TimeSeriesType<uint32_t>();
+  }
+
+  void test_GetPropertyAsSingleValue_TimeSeries_Uint64Type() {
+    doTest_GetPropertyAsSingleValue_TimeSeriesType<uint64_t>();
+  }
+
   void
   test_GetPropertyAsSingleValue_Throws_If_Type_Is_Not_Numeric_Or_TimeSeries_Numeric() {
     LogManager runInfo;
@@ -457,6 +481,15 @@ private:
     double result = std::nan("1");
     TS_ASSERT_THROWS_NOTHING(result = runInfo.getPropertyAsSingleValue(name));
     TS_ASSERT_EQUALS(value, static_cast<T>(result));
+  }
+
+  template <typename T> void doTest_GetPropertyAsSingleValue_TimeSeriesType() {
+    LogManager runInfo;
+    const std::string name = "T_series";
+    addTestTimeSeries<T>(runInfo, name);
+    const double expectedValue(13.0);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name), expectedValue,
+                    1e-12);
   }
 };
 
