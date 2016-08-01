@@ -177,18 +177,22 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
       creator->declareDatasetProperties(suffix, addProperties);
     }
   } else {
-    boost::shared_ptr<MultiDomainCreator> multiCreator =
-        boost::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
-    if (!multiCreator) {
-      auto &reference = *m_domainCreator;
-      throw std::runtime_error(
-          std::string("MultiDomainCreator expected, found ") +
-          typeid(reference).name());
-    }
-    if (!multiCreator->hasCreator(index)) {
+    if (fun->getNumberDomains() > 1) {
+      boost::shared_ptr<MultiDomainCreator> multiCreator =
+          boost::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
+      if (!multiCreator) {
+        auto &reference = *m_domainCreator;
+        throw std::runtime_error(
+            std::string("MultiDomainCreator expected, found ") +
+            typeid(reference).name());
+      }
+      if (!multiCreator->hasCreator(index)) {
+        creator->declareDatasetProperties(suffix, addProperties);
+      }
+      multiCreator->setCreator(index, creator);
+    } else {
       creator->declareDatasetProperties(suffix, addProperties);
     }
-    multiCreator->setCreator(index, creator);
   }
 }
 
