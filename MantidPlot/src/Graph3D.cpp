@@ -2763,7 +2763,7 @@ void Graph3D::setupPlotSurface(ApplicationWindow *app,
   setWindowTitle(label);
   setName(label);
   app->customPlot3D(this);
-  addFunction(QString::fromStdString(params.xFormula), params.xStart,
+  addFunction(QString::fromStdString(params.formula), params.xStart,
               params.xStop, params.yStart, params.yStop, params.zStart,
               params.zStop, params.columns, params.rows);
 
