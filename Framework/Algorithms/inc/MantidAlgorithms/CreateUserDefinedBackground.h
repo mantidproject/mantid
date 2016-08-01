@@ -37,25 +37,25 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL CreateUserDefinedBackground final
+class MANTID_ALGORITHMS_DLL CreateUserDefinedBackground
     : public API::Algorithm {
 public:
   /// Return name of algorithm
-  const std::string name() const override final;
+  const std::string name() const override;
   /// Version number
-  int version() const override final;
+  int version() const override;
   /// Category algorithm belongs to
-  const std::string category() const override final;
+  const std::string category() const override;
   /// Description of algorithm
-  const std::string summary() const override final;
+  const std::string summary() const override;
 
 private:
   /// Declare properties and initialise algorithm
-  void init() override final;
+  void init() override;
   /// Execute algorithm
-  void exec() override final;
+  void exec() override;
   /// Verify input properties and return errors
-  std::map<std::string, std::string> validateInputs() override final;
+  std::map<std::string, std::string> validateInputs() override;
   /// Sort table and remove blank rows
   void cleanUpTable(API::ITableWorkspace_sptr &table) const;
   /// Extend background to cover range of data
