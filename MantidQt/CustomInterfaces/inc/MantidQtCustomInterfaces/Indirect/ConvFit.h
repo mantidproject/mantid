@@ -45,6 +45,8 @@ private slots:
   void singleFitComplete(bool error);
   void fitFunctionSelected(const QString &);
   void algorithmComplete(bool error);
+  void saveClicked();
+  void plotClicked();
 
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
@@ -63,6 +65,7 @@ private:
   void updatePlotOptions();
   QString convertFuncToShort(const QString &);
   QString convertBackToShort(const std::string &original);
+
   Ui::ConvFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
   QtTreePropertyBrowser *m_cfTree;
