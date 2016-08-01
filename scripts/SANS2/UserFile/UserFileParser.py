@@ -1,4 +1,4 @@
-# pylint: disable=too-many-lines, invalid-name
+# pylint: disable=too-many-lines, invalid-name, too-many-instance-attributes, too-many-branches, too-few-public-methods
 
 import abc
 import re
@@ -828,7 +828,7 @@ class LimitParser(UserFileComponentParser):
         return "\\s*" + LimitParser.get_type() + "\\s*/\\s*"
 
 
-class MaskParser(UserFileComponentParser):
+class (UserFileComponentParser):
     """
     The MaskParser handles the following structure for
         MASK/CLEAR[/TIME]
@@ -877,7 +877,7 @@ class MaskParser(UserFileComponentParser):
         self._spectrum_single_pattern = re.compile(start_string + self._spectrum + integer_number + end_string)
 
         # Strip Masks
-        self._hab = "\\s*\HAB|FRONT\\s*"
+        self._hab = "\\s*\\HAB|FRONT\\s*"
         self._lab = "\\s*LAB|REAR|MAIN\\s*"
         self._detector = "\\s*(" + self._hab + "|" + self._lab + ")?\\s*"
 
@@ -1056,7 +1056,7 @@ class SampleParser(UserFileComponentParser):
         # Path
         self._on = "\\s*ON\\s*"
         self._off = "\\s*OFF\\s*"
-        self._path = "\\s*PATH\s*/\\s*"
+        self._path = "\\s*PATH\\s*/\\s*"
         self._path_pattern = re.compile(start_string + self._path + "(" + self._on + "|" + self._off + ")" + end_string)
 
     def parse_line(self, line):
@@ -1390,7 +1390,7 @@ class QResolutionParser(UserFileComponentParser):
         self._on_or_off_pattern = re.compile(start_string + self._on_or_off + end_string)
 
         # Delta R
-        self._delta_r = "\\s*DELTAR\\s*=\s*"
+        self._delta_r = "\\s*DELTAR\\s*=\\s*"
         self._delta_r_pattern = re.compile(start_string + self._delta_r + float_number + end_string)
 
         # Collimation Length
@@ -1532,7 +1532,7 @@ class QResolutionParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + QResolutionParser.get_type() + "\\s*/\\s*"
+        return "\\s*" + QResolutionParser.get_type() + "\\s*/\\s*"
 
 
 class FitParser(UserFileComponentParser):
@@ -1567,8 +1567,8 @@ class FitParser(UserFileComponentParser):
                                                     float_number + space_string + float_number + end_string)
 
         # General fits
-        self._sample = "\\s*SAMPLE\s*/\\s*"
-        self._can = "\\s*CAN\s*/\\s*"
+        self._sample = "\\s*SAMPLE\\s*/\\s*"
+        self._can = "\\s*CAN\\s*/\\s*"
         self._can_or_sample = "\\s*(" + self._can + "|" + self._sample + ")"
         self._optional_can_or_sample = "\\s*(" + self._can_or_sample + ")?"
 
@@ -1701,7 +1701,7 @@ class FitParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + FitParser.get_type() + "\s*/\s*"
+        return "\\s*" + FitParser.get_type() + "\\s*/\\s*"
 
 
 class GravityParser(UserFileComponentParser):
@@ -1776,7 +1776,7 @@ class MaskFileParser(UserFileComponentParser):
         # MaskFile
         self._single_file = "[\\w]+(\\.XML)"
         self._multiple_files = self._single_file + "(,\\s*" + self._single_file + ")*\\s*"
-        self._mask_file_pattern = re.compile(start_string + "\s*" + self._multiple_files + end_string)
+        self._mask_file_pattern = re.compile(start_string + "\\s*" + self._multiple_files + end_string)
 
     def parse_line(self, line):
         # Get the settings, ie remove command
@@ -1805,7 +1805,7 @@ class MaskFileParser(UserFileComponentParser):
     @staticmethod
     @abc.abstractmethod
     def get_type_pattern():
-        return "\s*" + MaskFileParser.get_type() + "(\\s*=\\s*)"
+        return "\\s*" + MaskFileParser.get_type() + "(\\s*=\\s*)"
 
 
 class MonParser(UserFileComponentParser):
@@ -1824,7 +1824,7 @@ class MonParser(UserFileComponentParser):
         super(MonParser, self).__init__()
 
         # General
-        self._hab = "\\s*\HAB|FRONT\\s*"
+        self._hab = "\\s*HAB|FRONT\\s*"
         self._lab = "\\s*LAB|REAR|MAIN\\s*"
         self._detector = "\\s*/\\s*(" + self._hab + "|" + self._lab + ")\\s*"
         self._optional_detector = "\\s*(" + self._detector + ")?\\s*"
@@ -1833,8 +1833,8 @@ class MonParser(UserFileComponentParser):
         self._file_path = "\\s*[^\\s]*\\.[\\w]+\\s*"
 
         # Length
-        self._length = "\\s*LENGTH\s*=\\s*"
-        self._interpolate = "\\s*/\s*INTERPOLATE\\s*"
+        self._length = "\\s*LENGTH\\s*=\\s*"
+        self._interpolate = "\\s*/\\s*INTERPOLATE\\s*"
         self._length_pattern = re.compile(start_string + self._length + float_number + space_string + integer_number +
                                           "(\\s*" + self._interpolate + "\\s*)?" + end_string)
 
