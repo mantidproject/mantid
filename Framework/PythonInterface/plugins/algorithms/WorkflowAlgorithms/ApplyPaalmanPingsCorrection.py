@@ -159,7 +159,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                          LogType='String',
                          LogText=can_base)
 
-        prog_wrkflow = Progress(self, 0.6, 1.0, nreports=4)
+        prog_wrkflow = Progress(self, 0.6, 1.0, nreports=5)
         # Record the container scale factor
         if self._use_can and self._scale_can:
             prog_wrkflow.report('Adding container scaling')
@@ -167,6 +167,14 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                          LogName='container_scale',
                          LogType='Number',
                          LogText=str(self._can_scale_factor))
+
+        # Record the container shift amount
+        if self._use_can and self._shift_can:
+            prog_wrkflow.report('Adding container shift')
+            AddSampleLog(Workspace=self._output_ws_name,
+                         LogName='container_shift',
+                         LogType='Number',
+                         LogText=str(self._can_shift_amount))
 
         # Record the type of corrections applied
         prog_wrkflow.report('Adding correction type')
