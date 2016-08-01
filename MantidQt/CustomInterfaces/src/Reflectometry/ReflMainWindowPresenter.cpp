@@ -73,8 +73,8 @@ Tells the view to show an critical error dialog
 @param prompt : The prompt to appear on the dialog
 @param title : The text for the title bar of the dialog
 */
-void ReflMainWindowPresenter::giveUserCritical(std::string prompt,
-                                               std::string title) {
+void ReflMainWindowPresenter::giveUserCritical(const std::string &prompt,
+                                               const std::string &title) {
 
   m_view->giveUserCritical(prompt, title);
 }
@@ -84,8 +84,8 @@ Tells the view to show a warning dialog
 @param prompt : The prompt to appear on the dialog
 @param title : The text for the title bar of the dialog
 */
-void ReflMainWindowPresenter::giveUserWarning(std::string prompt,
-                                              std::string title) {
+void ReflMainWindowPresenter::giveUserWarning(const std::string &prompt,
+                                              const std::string &title) {
 
   m_view->giveUserWarning(prompt, title);
 }
@@ -95,8 +95,8 @@ Tells the view to show an information dialog
 @param prompt : The prompt to appear on the dialog
 @param title : The text for the title bar of the dialog
 */
-void ReflMainWindowPresenter::giveUserInfo(std::string prompt,
-                                           std::string title) {
+void ReflMainWindowPresenter::giveUserInfo(const std::string &prompt,
+                                           const std::string &title) {
 
   m_view->giveUserInfo(prompt, title);
 }
@@ -107,8 +107,8 @@ Tells the view to ask the user a Yes/No question
 @param title : The text for the title bar of the dialog
 @returns a boolean true if Yes, false if No
 */
-bool ReflMainWindowPresenter::askUserYesNo(std::string prompt,
-                                           std::string title) {
+bool ReflMainWindowPresenter::askUserYesNo(const std::string &prompt,
+                                           const std::string &title) {
 
   return m_view->askUserYesNo(prompt, title);
 }

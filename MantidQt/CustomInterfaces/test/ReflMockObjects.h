@@ -94,10 +94,11 @@ public:
   MOCK_METHOD3(askUserString,
                std::string(const std::string &, const std::string &,
                            const std::string &));
-  MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
-  MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
-  MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
-  MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
+  MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
+  MOCK_METHOD2(giveUserWarning, void(const std::string &, const std::string &));
+  MOCK_METHOD2(giveUserCritical,
+               void(const std::string &, const std::string &));
+  MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
   ~MockMainWindowView() override{};
 };
@@ -135,10 +136,11 @@ public:
   MOCK_METHOD3(askUserString,
                std::string(const std::string &, const std::string &,
                            const std::string &));
-  MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
-  MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
-  MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
-  MOCK_METHOD2(giveUserInfo, void(std::string, std::string));
+  MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
+  MOCK_METHOD2(giveUserWarning, void(const std::string &, const std::string &));
+  MOCK_METHOD2(giveUserCritical,
+               void(const std::string &, const std::string &));
+  MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
   ~MockMainWindowPresenter() override{};
 };

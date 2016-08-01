@@ -49,10 +49,14 @@ public:
   virtual std::string askUserString(const std::string &prompt,
                                     const std::string &title,
                                     const std::string &defaultValue) = 0;
-  virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
-  virtual void giveUserWarning(std::string prompt, std::string title) = 0;
-  virtual void giveUserCritical(std::string prompt, std::string title) = 0;
-  virtual void giveUserInfo(std::string prompt, std::string title) = 0;
+  virtual bool askUserYesNo(const std::string &prompt,
+                            const std::string &title) = 0;
+  virtual void giveUserWarning(const std::string &prompt,
+                               const std::string &title) = 0;
+  virtual void giveUserCritical(const std::string &prompt,
+                                const std::string &title) = 0;
+  virtual void giveUserInfo(const std::string &prompt,
+                            const std::string &title) = 0;
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
 };
 }

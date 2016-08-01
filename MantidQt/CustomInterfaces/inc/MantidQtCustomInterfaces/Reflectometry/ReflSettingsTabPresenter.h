@@ -48,13 +48,13 @@ public:
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
 
   /// Returns global options for 'Plus' algorithm
-  std::string getPlusOptions() const;
+  std::string getPlusOptions() const override;
   /// Returns global options for 'CreateTransmissionWorkspaceAuto'
-  std::string getTransmissionOptions() const;
+  std::string getTransmissionOptions() const override;
   /// Returns global options for 'ReflectometryReductionOneAuto'
-  std::string getReductionOptions() const;
+  std::string getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
-  std::string getStitchOptions() const;
+  std::string getStitchOptions() const override;
 
 private:
   void createPlusHints();
