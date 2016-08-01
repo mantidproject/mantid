@@ -44,6 +44,8 @@ private:
   void writeHeader(std::vector<std::string> &columnHeadings,
                    std::ofstream &file);
 
+  void writeData(API::ITableWorkspace_sptr workspace, std::ofstream &file, size_t columnSize);
+
   void writeVal(std::string &val, std::ofstream &file, bool endline);
 
   /// the separator

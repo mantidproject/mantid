@@ -58,6 +58,7 @@ void SaveDiffFittingAscii::init() {
 
   formats.push_back("AppendToExistingFile");
   formats.push_back("WriteGroupWorkspace");
+  formats.push_back("OverwriteFile");
   declareProperty(
       "OutFormat", "AppendToExistingFile",
       boost::make_shared<Kernel::StringListValidator>(formats),
@@ -89,7 +90,7 @@ void SaveDiffFittingAscii::exec() {
   std::string outFormat = getProperty("OutFormat");
 
   bool appendToFile = false;
-  if (outFormat == "AppendToExistingFile")
+  if (outFormat == "AppendToExistingFile" || outFormat == "WriteGroupWorkspace")
     appendToFile = true;
 
   std::ofstream file(filename.c_str(),
@@ -113,23 +114,13 @@ void SaveDiffFittingAscii::exec() {
   const std::string bank = getProperty("Bank");
   writeInfo(runNum, bank, file);
 
+  // write header
   std::vector<std::string> columnHeadings = tbl_ws->getColumnNames();
   writeHeader(columnHeadings, file);
 
-  for (size_t rowIndex = 0; rowIndex < tbl_ws->rowCount(); ++rowIndex) {
-    TableRow row = tbl_ws->getRow(rowIndex);
-    for (size_t columnIndex = 0; columnIndex < columnHeadings.size();
-         columnIndex++) {
-
-      auto row_str = boost::lexical_cast<std::string>(row.Double(columnIndex));
-      g_log.debug() << row_str << std::endl;
-
-      if (columnIndex == columnHeadings.size() - 1)
-        writeVal(row_str, file, true);
-      else
-        writeVal(row_str, file, false);
-    }
-  }
+  // write out the data form the table workspace
+  size_t columnSize = columnHeadings.size();
+  writeData(tbl_ws, file, columnSize);
 }
 
 void SaveDiffFittingAscii::writeInfo(const std::string &runNumber,
@@ -147,6 +138,24 @@ void SaveDiffFittingAscii::writeHeader(std::vector<std::string> &columnHeadings,
       writeVal(heading, file, true);
     } else {
       writeVal(heading, file, false);
+    }
+  }
+}
+
+void SaveDiffFittingAscii::writeData(API::ITableWorkspace_sptr workspace,
+                                     std::ofstream &file, size_t columnSize) {
+
+  for (size_t rowIndex = 0; rowIndex < workspace->rowCount(); ++rowIndex) {
+    TableRow row = workspace->getRow(rowIndex);
+    for (size_t columnIndex = 0; columnIndex < columnSize; columnIndex++) {
+
+      auto row_str = boost::lexical_cast<std::string>(row.Double(columnIndex));
+      g_log.debug() << row_str << std::endl;
+
+      if (columnIndex == columnSize - 1)
+        writeVal(row_str, file, true);
+      else
+        writeVal(row_str, file, false);
     }
   }
 }
