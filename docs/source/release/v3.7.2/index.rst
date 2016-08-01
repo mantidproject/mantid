@@ -23,7 +23,7 @@ The main changes are:
 * Fix handling of multi-period event-type data for LARMOR
 * Fix crash for ISIS SANS reduction in batch mode
 * Fix initial position for beam centre finder for LARMOR
-
+* Fix engineering diffraction interface crash
 
 Citation
 --------
@@ -51,6 +51,7 @@ Changes in this version
 * `16863 <https://github.com/mantidproject/mantid/issues/16863>`_ ISIS SANS GUI improvements
 * `16787 <https://github.com/mantidproject/mantid/issues/16787>`_ ISIS SANS GUI does not load LARMOR mult-period event files
 * `16759 <https://github.com/mantidproject/mantid/issues/16759>`_ Beam Center Finder seems to not work for LARMOR any longer
+* `17088 <https://github.com/mantidproject/mantid/issues/17088>`_ Engineering diffraction interface crashes on new install
 
 Summary of impact
 -----------------
@@ -89,7 +90,8 @@ Summary of impact
 +-------+--------------------------------------------------------------+-----------------------------------------------+--------------+
 | 16759 | Beam centre finder is broken in release 3.7.1                | Fix geometry description of pizza-slice mask  | low          |
 +-------+--------------------------------------------------------------+-----------------------------------------------+--------------+
-
+| 17088 | Mantid crashes because of too early enginerring prompt       | Fix having prompt appearing too early         | low          |
++-------+--------------------------------------------------------------+-----------------------------------------------+--------------+
 
 
 
