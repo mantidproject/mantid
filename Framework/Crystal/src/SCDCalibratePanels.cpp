@@ -224,7 +224,7 @@ void SCDCalibratePanels::exec() {
 
     MatrixWorkspace_sptr q3DWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
           API::WorkspaceFactory::Instance().create("Workspace2D", 1,
-                                                   nBankPeaks, nBankPeaks));
+                                                   3*nBankPeaks, 3*nBankPeaks));
 
       auto &outSpec = q3DWS->getSpectrum(0);
       MantidVec &yVec = outSpec.dataY();
@@ -233,8 +233,6 @@ void SCDCalibratePanels::exec() {
 
     for (int i = 0; i < nBankPeaks; i++) {
       Peak peak = local->getPeak(i);
-      xVec[i] = i;
-      yVec[i] = 0.0;
       // 1/sigma is considered the weight for the fit
       double weight = 1.;                // default is even weighting
       if (peak.getSigmaIntensity() > 0.) // prefer weight by sigmaI
@@ -243,7 +241,11 @@ void SCDCalibratePanels::exec() {
         weight = 1.0 / peak.getIntensity();
       else if (peak.getBinCount() > 0.) // then by counts in peak centre
         weight = 1.0 / peak.getBinCount();
-      eVec[i] = weight;
+      for (int j = 0; j < 3; j++) {
+        xVec[i*3+j] = i*3+j;
+        yVec[i*3+j] = 0.0;
+        eVec[i*3+j] = weight;
+      }
     }
 
     IAlgorithm_sptr fit_alg;
@@ -328,7 +330,7 @@ void SCDCalibratePanels::exec() {
     const Geometry::IPeak &peak = peaksWs->getPeak(j);
     string bankName = peak.getBankName();
     if(bankName == "None") {
-      g_log.notice() << "Peak not mapped to detector: Number = " << j+1 <<"\n";
+      //g_log.notice() << "Peak not mapped to detector: Number = " << j+1 <<"\n";
       continue;
     }
     size_t k = bankName.find_last_not_of("0123456789");
@@ -366,14 +368,12 @@ MatrixWorkspace_sptr L1WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
                                                nPeaks, nPeaks));
 
   auto &outSp = L1WS->getSpectrum(0);
-  MantidVec &yV = outSp.dataY();
-  MantidVec &eV = outSp.dataE();
-  MantidVec &xV = outSp.dataX();
+  MantidVec &yVec = outSp.dataY();
+  MantidVec &eVec = outSp.dataE();
+  MantidVec &xVec = outSp.dataX();
 
 for (int i = 0; i < nPeaks; i++) {
   DataObjects::Peak peak = peaksWs->getPeak(i);
-  xV[i] = i;
-  yV[i] = 0.0;
 
   // 1/sigma is considered the weight for the fit
   double weight = 1.;                // default is even weighting
@@ -383,7 +383,9 @@ for (int i = 0; i < nPeaks; i++) {
     weight = 1.0 / peak.getIntensity();
   else if (peak.getBinCount() > 0.) // then by counts in peak centre
     weight = 1.0 / peak.getBinCount();
-  eV[i] = weight;
+    xVec[i] = i;
+    yVec[i] = 0.0;
+    eVec[i] = weight;
 }
 IAlgorithm_sptr fitL1_alg;
 try {

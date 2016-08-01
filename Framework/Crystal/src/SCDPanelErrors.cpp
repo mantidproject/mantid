@@ -137,11 +137,40 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xr
     return;
 
   setupData();
+ // if (m_bank == "moderator") {
+
+  moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, m_bank, m_workspace);
+  DataObjects::PeaksWorkspace_sptr inputP =
+        boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
+  Geometry::Instrument_sptr inst = boost::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
+  Geometry::OrientedLattice lattice = inputP->mutableSample().getOrientedLattice();
+  for (int i = 0; i < inputP->getNumberPeaks(); i ++) {
+    DataObjects::Peak peak = inputP->getPeak(i);
+    V3D hkl =  V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
+         boost::math::iround(peak.getL()));
+    V3D Q2 = lattice.qFromHKL(hkl);
+    DataObjects::Peak peak2(inst, peak.getDetectorID(),peak.getWavelength(), hkl, peak.getGoniometerMatrix());
+    Units::Wavelength wl;
+
+    wl.initialize(peak2.getL1(), peak2.getL2(), peak2.getScattering(), 0,
+                  peak.getInitialEnergy(), 0.0);
+
+    peak2.setWavelength(wl.singleFromTOF(peak.getTOF()));
+    V3D Q3 = peak2.getQSampleFrame();
+    out[i*3] = Q3[0]-Q2[0];
+    out[i*3+1] = Q3[1]-Q2[1];
+    out[i*3+2] = Q3[2]-Q2[2];
+  }
+  moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate, m_bank, m_workspace);
+ /* }
+
+else {
+
   DataObjects::PeaksWorkspace_sptr inputP0 =
       boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
   std::vector<V3D> detP;
-  for (int j = 0; j < static_cast<int>(nData); j++) {
-    DataObjects::Peak peak = inputP0->getPeak(j);
+  for (int i = 0; i < inputP0->getNumberPeaks(); i ++) {
+    DataObjects::Peak peak = inputP0->getPeak(i);
     detP.push_back(peak.getDetPos());
   }
 
@@ -150,18 +179,22 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xr
         boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
   Geometry::Instrument_sptr inst = boost::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
   Geometry::OrientedLattice lattice = inputP->mutableSample().getOrientedLattice();
-  for (size_t i = 0; i < nData; i ++) {
-    DataObjects::Peak peak = inputP->getPeak(static_cast<int>(i));
+  for (int i = 0; i < inputP->getNumberPeaks(); i ++) {
+    DataObjects::Peak peak = inputP->getPeak(i);
     V3D hkl =  V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
          boost::math::iround(peak.getL()));
     V3D Q2 = lattice.qFromHKL(hkl);
     DataObjects::Peak peak2(inst, Q2, peak.getGoniometerMatrix());
     V3D detP2 = peak2.getDetPos();
-    V3D cross = detP2.cross_prod(detP[i]);
+    V3D cross = V3D(1.0, 1.0, 1.0);
+    if(detP2 != V3D(0,0,0) || detP[i] != V3D(0,0,0)) cross = detP2.cross_prod(detP[i]);
 
-    out[i] = cross.norm();
+    out[i*3] = cross.X();
+    out[i*3+1] = cross.Y();
+    out[i*3+2] = cross.Z();
   }
   moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate, m_bank, m_workspace);
+  }*/
 }
 
 /**
