@@ -433,6 +433,7 @@ private:
                         const SurfaceFunctionParams &params);
   void setupMatrixPlot3D(ApplicationWindow *app, const QString &caption,
                          const SurfaceFunctionParams &params);
+  void readScaleType(const std::string &scaleTypes);
 
   //! Wait this many msecs before redraw 3D plot (used for animations)
   int animation_redraw_wait;

@@ -2550,6 +2550,10 @@ IProjectSerialisable *Graph3D::loadFromProject(const std::string &lines,
     graph->setGrid(tsv.asInt(1));
   }
 
+  if (tsv.selectLine(("ScaleType"))) {
+    graph->readScaleType(tsv.lineAsString("ScaleType"));
+  }
+
   if (tsv.selectLine("title")) {
     QString qTitle = QString::fromUtf8(tsv.lineAsString("title").c_str());
     graph->setTitle(qTitle.split("\t"));
@@ -2933,6 +2937,27 @@ Graph3D::readSurfaceFunctionType(const std::string &formula) {
   return type;
 }
 
+void Graph3D::readScaleType(const std::string &scaleTypes) {
+  TSVSerialiser tsv(scaleTypes);
+  tsv.selectLine("ScaleType");
+
+  int x, y, z;
+  tsv >> x >> y >> z;
+
+  SCALETYPE xScale, yScale, zScale;
+  xScale = static_cast<SCALETYPE>(x);
+  yScale = static_cast<SCALETYPE>(y);
+  zScale = static_cast<SCALETYPE>(z);
+
+  sp->coordinates()->axes[X1].setScale(xScale);
+  sp->coordinates()->axes[Y1].setScale(yScale);
+  sp->coordinates()->axes[Z1].setScale(zScale);
+
+  scaleType[0] = x;
+  scaleType[1] = y;
+  scaleType[2] = z;
+}
+
 std::string Graph3D::saveToProject(ApplicationWindow *app) {
   TSVSerialiser tsv;
   tsv.writeRaw("<SurfacePlot>");
@@ -2967,6 +2992,8 @@ std::string Graph3D::saveToProject(ApplicationWindow *app) {
   sp->coordinates()->axes[Z1].limits(start, stop);
   surfFunc += QString::number(start) + "\t";
   surfFunc += QString::number(stop);
+
+  tsv.writeLine("ScaleType") << scaleType[0] << scaleType[1] << scaleType[2];
 
   tsv.writeLine("SurfaceFunction") << surfFunc.toStdString();
 
