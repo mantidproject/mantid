@@ -115,9 +115,7 @@ class CalculateS(IOmodule):
         _factorials = [ np.math.factorial(n) for n in range(Constants.overtones_num)]
 
         _value = np.zeros( (Constants._pkt_per_peak * _num_freq, Constants.overtones_num + 1), dtype=Constants.float_type)
-        _frequencies = np.zeros( (Constants._pkt_per_peak * _num_freq), dtype=Constants.float_type)
-
-
+        _frequencies = np.zeros(Constants._pkt_per_peak * _num_freq, dtype=Constants.float_type)
 
         _value_dft = np.zeros( _num_freq, dtype=Constants.float_type) # DFT discrete peaks
         _s_sum = Constants.overtones_num
@@ -127,38 +125,62 @@ class CalculateS(IOmodule):
             _value.fill(0.0)
 
             for overtone in range(Constants.overtones_num):
+                # COMMENT: at the moment only valid for Gamma point calculations
+
+                _value_dft.fill(0.0)
+                # TODO: calculation for the whole FBZ
                 for k in range(_num_k):
+
+                    # correction for acoustic modes at Gamma point
+                    if np.linalg.norm(_abins_data_extracted["k_points_data"]["k_vectors"][k]) < Constants.small_k: start = 3
+                    else: start = 0
 
                     # noinspection PyTypeChecker
                     # only discrete values
-                    # comment:  (_extracted_q_data[k] * _dw[atom])^2 are equivalent to DW from  "Vibrational spectroscopy with neutrons...."
-                    _value_dft = np.power(_extracted_q_data[k] * _msd[atom], 2 * overtone) * np.power(np.exp(- _extracted_q_data[k] * _dw[atom]), 2)
+                    # comment:  (_extracted_q_data[k][start:] * _dw[atom]) are equivalent to DW from  "Vibrational spectroscopy with neutrons...."
 
-                    #  convolve value with instrumental resolution; resulting spectrum has broadened peaks with Gaussian-like shape
-                    _value[:, overtone] += instrument.convolve_with_resolution_function(frequencies=_k_points_data["frequencies"][k],
-                                                                                        s_dft=_value_dft,
-                                                                                        points_per_peak=Constants._pkt_per_peak)
+                    _value_dft[start:] = np.power(np.multiply(_extracted_q_data[k][start:], _msd[atom]),  overtone) * np.exp( -np.multiply(_extracted_q_data[k][start:], _dw[atom]))
+
+                    # convolve value with instrumental resolution; resulting spectrum has broadened peaks with Gaussian-like shape
+                    np.add(instrument.convolve_with_resolution_function(frequencies= np.multiply(_k_points_data["frequencies"][k], 1.0 / Constants.cm1_2_hartree) ,
+                                                                        s_dft=_value_dft,
+                                                                        points_per_peak=Constants._pkt_per_peak,
+                                                                        start=start),
+                           _value[:, overtone],
+                           _value[:, overtone])
 
 
-
-                _value[:, overtone] /=  _factorials[overtone] * 4 * np.pi # overtone contribution
-                _value[:, _s_sum] += _value[:, overtone]  # total contribution
+                    np.divide(_value[:, overtone],  _factorials[overtone] * 4 * np.pi, _value[:, overtone]) # overtone contribution
+                np.add(_value[:, _s_sum], _value[:, overtone], _value[:, _s_sum])  # total contribution
 
             _items.append({"sort":  _atom_data[atom]["sort"],
                            "symbol": _atom_data[atom]["symbol"],
                            "value":  np.copy(_value)})
 
-
+        # TODO: To be changed in the future when calculation of symmetry operations is ready
         for k in range(_num_k):
-            _frequencies += instrument.produce_abscissa(frequencies=_k_points_data["frequencies"][k], points_per_peak=Constants._pkt_per_peak) * _k_points_data["weights"][k]
+
+            # correction for acoustic modes at Gamma point
+            if np.linalg.norm(_abins_data_extracted["k_points_data"]["k_vectors"][k]) < Constants.small_k: start = 3
+            else: start = 0
+
+            np.add(_frequencies,
+                   np.multiply(instrument.produce_abscissa(frequencies=np.multiply(_k_points_data["frequencies"][k], 1.0 / Constants.cm1_2_hartree),
+                                                           points_per_peak=Constants._pkt_per_peak,
+                                                           start=start),
+                               _k_points_data["weights"][k]),
+                   _frequencies)
+
 
         # Variable items is a list. Each entry in the list corresponds to one atom. Each  entry has a form of dictionary
         # with the following entries:
         #
         #     sort:    defines symmetry equivalent atoms (not functional at the moment)
         #     symbol:  symbol of atom (hydrogen -> H)
-        #     value:   value  of dynamical structure factor for the given atom in powder scenario; first dimension
-        #              stores frequencies and the second stores dynamical structure factor S
+        #     value:   value  of dynamical structure factor for the given atom in powder scenario; first
+        #              Constants.overtones_num dimensions stores dynamical structure factor S for overtones for the
+        #              given atom. The last index (value[:, last_index]) stores sum over all overtones for the given
+        #              atom.
         #
 
         _s_data = SData(temperature=self._temperature, sample_form=self._sample_form)

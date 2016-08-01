@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 
 # ABINS modules
 import Constants
@@ -49,7 +49,7 @@ class CalculateQ(IOmodule):
             raise ValueError("Invalid value of k-points data.")
         k_points_data._num_k = len(k_points_data._data)
 
-        self._k_points_data = k_points_data.extract()
+        self._k_points_data = k_points_data
 
 
     def _calculate_qvectors_instrument(self):
@@ -58,12 +58,13 @@ class CalculateQ(IOmodule):
         """
 
         self._Qvectors = QData(frequency_dependence=True)
-        num_k = self._k_points_data["k_vectors"].shape[0]
+        _k_data = self._k_points_data.extract()
+        num_k = _k_data["k_vectors"].shape[0]
         self._Qvectors.set_k(k=num_k)
 
         if self._sample_form == "Powder":
             for k in range(num_k):
-                self._Qvectors._append(self._instrument.calculate_q(frequencies=self._k_points_data["frequencies"][k]))
+                self._Qvectors._append(self._instrument.calculate_q(frequencies=np.multiply(_k_data["frequencies"][k], 1.0 / Constants.cm1_2_hartree)))
         else:
             raise ValueError("SingleCrystal user case is not implemented.")
 
