@@ -255,6 +255,15 @@ public:
     doTest_GetPropertyAsSingleValue_SingleType<uint64_t>(1UL);
   }
 
+  void doTest_GetPropertyAsSingleValue_SingleValue_StringType() {
+    LogManager runInfo;
+    const std::string name = "string_prop", value = "1";
+    runInfo.addProperty<std::string>(name, value);
+    double result = std::nan("1");
+    TS_ASSERT_THROWS_NOTHING(result = runInfo.getPropertyAsSingleValue(name));
+    TS_ASSERT_EQUALS(value, std::to_string(result));
+  }
+
   void
   test_GetPropertyAsSingleValue_Throws_If_Type_Is_Not_Numeric_Or_TimeSeries_Numeric() {
     LogManager runInfo;
