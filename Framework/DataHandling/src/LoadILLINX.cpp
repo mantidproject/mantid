@@ -1,7 +1,7 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include "MantidDataHandling/LoadILL.h"
+#include "MantidDataHandling/LoadILLINX.h"
 #include "MantidDataHandling/LoadHelper.h"
 
 #include "MantidAPI/Axis.h"
@@ -28,7 +28,7 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILL)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLINX)
 
 //---------------------------------------------------
 // Private member functions
@@ -40,7 +40,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILL)
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadILL::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadILLINX::confidence(Kernel::NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL
   if (descriptor.pathExists("/entry0/wavelength") &&
@@ -59,7 +59,7 @@ int LoadILL::confidence(Kernel::NexusDescriptor &descriptor) const {
   }
 }
 
-LoadILL::LoadILL() : API::IFileLoader<Kernel::NexusDescriptor>() {
+LoadILLINX::LoadILLINX() : API::IFileLoader<Kernel::NexusDescriptor>() {
   m_instrumentName = "";
   m_wavelength = 0;
   m_channelWidth = 0;
@@ -78,7 +78,7 @@ LoadILL::LoadILL() : API::IFileLoader<Kernel::NexusDescriptor>() {
 /**
  * Initialise the algorithm
  */
-void LoadILL::init() {
+void LoadILLINX::init() {
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
       "File path of the Data file to load");
@@ -100,7 +100,7 @@ void LoadILL::init() {
 /**
  * Execute the algorithm
  */
-void LoadILL::exec() {
+void LoadILLINX::exec() {
   // Retrieve filename
   std::string filenameData = getPropertyValue("Filename");
   std::string filenameVanadium = getPropertyValue("FilenameVanadium");
@@ -147,7 +147,7 @@ void LoadILL::exec() {
  * @return : list of monitor data
  */
 std::vector<std::vector<int>>
-LoadILL::getMonitorInfo(NeXus::NXEntry &firstEntry) {
+LoadILLINX::getMonitorInfo(NeXus::NXEntry &firstEntry) {
 
   std::vector<std::vector<int>> monitorList;
 
@@ -177,7 +177,7 @@ LoadILL::getMonitorInfo(NeXus::NXEntry &firstEntry) {
  * or filename.
  * @return the EPP
  */
-int LoadILL::getEPPFromVanadium(const std::string &filenameVanadium,
+int LoadILLINX::getEPPFromVanadium(const std::string &filenameVanadium,
                                 MatrixWorkspace_sptr vanaWS) {
   int calculatedDetectorElasticPeakPosition = -1;
 
@@ -206,7 +206,7 @@ int LoadILL::getEPPFromVanadium(const std::string &filenameVanadium,
 /**
  * Set the instrument name along with its path on the nexus file
  */
-void LoadILL::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
+void LoadILLINX::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
 
   m_instrumentPath = m_loader.findInstrumentNexusPath(firstEntry);
 
@@ -236,7 +236,7 @@ void LoadILL::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
  * @param monitors :: list of monitors content
  *
  */
-void LoadILL::initWorkSpace(NeXus::NXEntry &entry,
+void LoadILLINX::initWorkSpace(NeXus::NXEntry &entry,
                             const std::vector<std::vector<int>> &monitors) {
 
   // read in the data
@@ -285,7 +285,7 @@ void LoadILL::initWorkSpace(NeXus::NXEntry &entry,
  * Function to do specific instrument stuff
  *
  */
-void LoadILL::initInstrumentSpecific() {
+void LoadILLINX::initInstrumentSpecific() {
   m_l1 = m_loader.getL1(m_localWorkspace);
   // this will be mainly for IN5 (flat PSD detector)
   m_l2 = m_loader.getInstrumentProperty(m_localWorkspace, "l2");
@@ -299,7 +299,7 @@ void LoadILL::initInstrumentSpecific() {
  * Load the time details from the nexus file.
  * @param entry :: The Nexus entry
  */
-void LoadILL::loadTimeDetails(NeXus::NXEntry &entry) {
+void LoadILLINX::loadTimeDetails(NeXus::NXEntry &entry) {
 
   m_wavelength = entry.getFloat("wavelength");
 
@@ -338,7 +338,7 @@ void LoadILL::loadTimeDetails(NeXus::NXEntry &entry) {
  * as parameters in the workspace
  * @param filename :: NeXus file
  */
-void LoadILL::addAllNexusFieldsAsProperties(std::string filename) {
+void LoadILLINX::addAllNexusFieldsAsProperties(std::string filename) {
 
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
@@ -365,7 +365,7 @@ void LoadILL::addAllNexusFieldsAsProperties(std::string filename) {
  * Calculates the Energy from the wavelength and adds
  * it at property Ei
  */
-void LoadILL::addEnergyToRun() {
+void LoadILLINX::addEnergyToRun() {
 
   API::Run &runDetails = m_localWorkspace->mutableRun();
   double ei = m_loader.calculateEnergy(m_wavelength);
@@ -382,7 +382,7 @@ void LoadILL::addEnergyToRun() {
  * @param data :: spectra data
  * @return detector Elastic Peak Position
  */
-int LoadILL::getDetectorElasticPeakPosition(const NeXus::NXInt &data) {
+int LoadILLINX::getDetectorElasticPeakPosition(const NeXus::NXInt &data) {
 
   // j = index in the equatorial line (256/2=128)
   // both index 127 and 128 are in the equatorial line
@@ -440,7 +440,7 @@ int LoadILL::getDetectorElasticPeakPosition(const NeXus::NXInt &data) {
  * @param filenameVanadium :: The path for the vanadium nexus file.
  * @return The elastic peak position inside the tof channels.
  */
-int LoadILL::validateVanadium(const std::string &filenameVanadium) {
+int LoadILLINX::validateVanadium(const std::string &filenameVanadium) {
   NeXus::NXRoot vanaRoot(filenameVanadium);
   NXEntry vanaFirstEntry = vanaRoot.openFirstEntry();
 
@@ -476,7 +476,7 @@ int LoadILL::validateVanadium(const std::string &filenameVanadium) {
  *the elastic peak position at the detector.
  *
  */
-void LoadILL::loadDataIntoTheWorkSpace(
+void LoadILLINX::loadDataIntoTheWorkSpace(
     NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitors,
     int vanaCalculatedDetectorElasticPeakPosition) {
 
@@ -537,7 +537,7 @@ void LoadILL::loadDataIntoTheWorkSpace(
     // Assign Error
     MantidVec &E = m_monitorWorkspace->dataE(spec);
     std::transform(monitor.begin(), monitor.end(), E.begin(),
-                   LoadILL::calculateError);
+                   LoadILLINX::calculateError);
     m_monitorWorkspace->getSpectrum(spec).setDetectorID(monitorIDs[spec]);
     ++spec;
   }
@@ -565,7 +565,7 @@ void LoadILL::loadDataIntoTheWorkSpace(
       // Assign Error
       MantidVec &E = m_localWorkspace->dataE(spec);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-                     LoadILL::calculateError);
+                     LoadILLINX::calculateError);
       m_localWorkspace->getSpectrum(spec).setDetectorID(detectorIDs[spec]);
       ++spec;
       progress.report();
@@ -600,7 +600,7 @@ void LoadILL::loadDataIntoTheWorkSpace(
         // Assign Error
         MantidVec &E = m_localWorkspace->dataE(spec);
         std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-                       LoadILL::calculateError);
+                       LoadILLINX::calculateError);
 
         ++spec;
         progress.report();
@@ -612,7 +612,7 @@ void LoadILL::loadDataIntoTheWorkSpace(
 /**
  * Run the Child Algorithm LoadInstrument.
  */
-void LoadILL::runLoadInstrument() {
+void LoadILLINX::runLoadInstrument() {
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 

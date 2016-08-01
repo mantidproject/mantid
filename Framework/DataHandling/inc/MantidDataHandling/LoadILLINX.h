@@ -11,7 +11,7 @@
 namespace Mantid {
 namespace DataHandling {
 /**
- Loads an ILL nexus file into a Mantid workspace.
+ Loads an ILL IN4/5/6 nexus file into a Mantid workspace.
 
  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source
@@ -34,12 +34,12 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadILL : public API::IFileLoader<Kernel::NexusDescriptor> {
+class DLLExport LoadILLINX : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Constructor
-  LoadILL();
+  LoadILLINX();
   /// Algorithm's name
-  const std::string name() const override { return "LoadILL"; }
+  const std::string name() const override { return "LoadILLINX"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Loads a ILL nexus file.";
