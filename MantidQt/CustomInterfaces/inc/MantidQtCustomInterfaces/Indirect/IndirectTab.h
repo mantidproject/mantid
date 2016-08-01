@@ -148,6 +148,11 @@ protected:
 
   QString runPythonCode(QString vode, bool no_output = false);
 
+  /// Checks the ADS for a workspace named `workspaceName`,
+  /// opens a message box with `errorMessage` if none found
+  bool checkADSForWorkspace(const std::string &workspaceName,
+                            const std::string &errorMessage);
+
   /// Parent QWidget (if applicable)
   QWidget *m_parentWidget;
 

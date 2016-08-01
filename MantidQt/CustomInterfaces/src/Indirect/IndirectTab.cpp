@@ -9,6 +9,7 @@
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
+#include "Qt/qmessagebox.h"
 
 #include <boost/algorithm/string/find.hpp>
 
@@ -527,6 +528,24 @@ void IndirectTab::algorithmFinished(bool error) {
  */
 QString IndirectTab::runPythonCode(QString code, bool no_output) {
   return m_pythonRunner.runPythonCode(code, no_output);
+}
+/**
+ * Checks if the ADS contains a workspace and opens a message box if not
+ * @param workspaceName The name of the workspace to look for
+ * @param errorMessage The error message to display in the message box
+ * @return False if no workpsace found, True if workspace found
+ */
+bool IndirectTab::checkADSForWorkspace(const std::string &workspaceName,
+                                       const std::string &errorMessage) {
+  const auto workspaceExists =
+      AnalysisDataService::Instance().doesExist(workspaceName);
+  if (workspaceExists) {
+    return true;
+  } else {
+    const char *textMessage = errorMessage.c_str();
+    QMessageBox::warning(NULL, tr("Workspace not found"), tr(textMessage));
+	return false;
+  }
 }
 
 } // namespace CustomInterfaces
