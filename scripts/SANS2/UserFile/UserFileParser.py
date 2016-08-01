@@ -828,7 +828,7 @@ class LimitParser(UserFileComponentParser):
         return "\\s*" + LimitParser.get_type() + "\\s*/\\s*"
 
 
-class (UserFileComponentParser):
+class MaskParser(UserFileComponentParser):
     """
     The MaskParser handles the following structure for
         MASK/CLEAR[/TIME]
