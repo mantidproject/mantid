@@ -5791,12 +5791,6 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
     loadAxesOptions(axesOptions);
   }
 
-  if (tsv.selectLine("EnabledAxes")) {
-    size_t n = tsv.values("EnabledAxes").size();
-    for (size_t i = 0; i < n - 1; ++i)
-      enableAxis((int)i, tsv.asInt(i + 1));
-  }
-
   if (tsv.selectLine("EnabledTicks")) {
     QStringList sl =
         QString::fromUtf8(tsv.lineAsString("EnabledTicks").c_str()).split("\t");
@@ -6281,6 +6275,14 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
     if (sl.size() >= 3)
       setWaterfallSideLines(sl[2].toInt());
     updateDataCurves();
+  }
+
+  // Enabling/disbling axes should be applied after plots are loaded as some
+  // types (i.e. Spectrogram) force axes to be enabled.
+  if (tsv.selectLine("EnabledAxes")) {
+    size_t n = tsv.values("EnabledAxes").size();
+    for (size_t i = 0; i < n - 1; ++i)
+      enableAxis((int)i, tsv.asInt(i + 1));
   }
 
   // Scaling axes should be applied after all plot types have been loaded
