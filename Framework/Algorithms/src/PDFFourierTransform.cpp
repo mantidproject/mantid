@@ -7,6 +7,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <cmath>
 #include <sstream>
 
@@ -137,6 +138,75 @@ std::map<string, string> PDFFourierTransform::validateInputs() {
   return result;
 }
 
+size_t PDFFourierTransform::determineQminIndex() {
+  // get input data
+  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  const auto &inputQ = inputWS->dataX(0);    //  x for input
+  const auto &inputFOfQ = inputWS->dataY(0); //  y for input
+  double qmin = getProperty("Qmin");
+
+  // check against available Q-range
+  if (isEmpty(qmin)) {
+    qmin = inputQ.front();
+  } else if (qmin < inputQ.front()) {
+    g_log.information(
+        "Specified Qmin < range of data. Adjusting to data range.");
+    qmin = inputQ.front();
+  }
+
+  // get index for the Qmin from the Q-range
+  auto q_iter = std::upper_bound(inputQ.begin(), inputQ.end(), qmin);
+  size_t qmin_index = std::distance(inputQ.begin(), q_iter);
+  if (qmin_index == 0)
+    qmin_index += 1; // so there doesn't have to be a check in integration loop
+
+  // go to first non-nan value
+  q_iter = std::find_if(std::next(inputFOfQ.begin(), qmin_index),
+                        inputFOfQ.end(), boost::math::isnormal<double>);
+  size_t first_normal_index = std::distance(inputFOfQ.begin(), q_iter);
+  if (first_normal_index > qmin_index) {
+    g_log.information(
+        "Specified Qmin where data is nan/inf. Adjusting to data range.");
+    qmin_index = first_normal_index;
+  }
+
+  return qmin_index;
+}
+
+size_t PDFFourierTransform::determineQmaxIndex() {
+  // get input data
+  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  const auto &inputQ = inputWS->dataX(0);    //  x for input
+  const auto &inputFOfQ = inputWS->dataY(0); //  y for input
+  double qmax = getProperty("Qmax");
+
+  // check against available Q-range
+  if (isEmpty(qmax)) {
+    qmax = inputQ.back();
+  } else if (qmax > inputQ.back()) {
+    g_log.information()
+        << "Specified Qmax > range of data. Adjusting to data range.\n";
+    qmax = inputQ.back();
+  }
+
+  // get pointers for the data range
+  auto q_iter = std::lower_bound(inputQ.begin(), inputQ.end(), qmax);
+  size_t qmax_index = std::distance(inputQ.begin(), q_iter);
+
+  // go to first non-nan value
+  auto q_back_iter = std::find_if(inputFOfQ.rbegin(), inputFOfQ.rend(),
+                                  boost::math::isnormal<double>);
+  size_t first_normal_index =
+      inputFOfQ.size() - std::distance(inputFOfQ.rbegin(), q_back_iter) - 1;
+  if (first_normal_index < qmax_index) {
+    g_log.information(
+        "Specified Qmax where data is nan/inf. Adjusting to data range.");
+    qmax_index = first_normal_index;
+  }
+
+  return qmax_index;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
 */
@@ -220,50 +290,24 @@ void PDFFourierTransform::exec() {
   }
 
   // determine Q-range
-  double qmin = getProperty("Qmin");
-  double qmax = getProperty("Qmax");
-  if (isEmpty(qmin))
-    qmin = inputQ.front();
-  if (isEmpty(qmax))
-    qmax = inputQ.back();
-
-  // check Q-range and print information
-  if (qmin < inputQ.front()) {
-    g_log.information()
-        << "Specified Qmin < range of data. Adjusting to data range.\n";
-    qmin = inputQ.front();
-  }
-  if (qmax > inputQ.back()) {
-    g_log.information()
-        << "Specified Qmax > range of data. Adjusting to data range.\n";
-  }
-  g_log.debug() << "User specified Qmin = " << qmin
-                << "Angstroms^-1 and Qmax = " << qmax << "Angstroms^-1\n";
-
-  // get pointers for the data range
-  size_t qmin_index;
-  size_t qmax_index;
+  size_t qmin_index = determineQminIndex();
+  size_t qmax_index = determineQmaxIndex();
   { // keep variable scope small
-    auto qmin_ptr = std::upper_bound(inputQ.begin(), inputQ.end(), qmin);
-    qmin_index = std::distance(inputQ.begin(), qmin_ptr);
-    if (qmin_index == 0)
-      qmin_index += 1; // so there doesn't have to be a check below
-    auto qmax_ptr = std::lower_bound(inputQ.begin(), inputQ.end(), qmax);
-    qmax_index = std::distance(inputQ.begin(), qmax_ptr);
+    size_t qmi_out = qmax_index;
+    if (qmi_out == inputQ.size())
+      qmi_out--; // prevent unit test problem under windows (and probably other
+    // hardly identified problem)
+    g_log.notice() << "Adjusting to data: Qmin = " << inputQ[qmin_index]
+                   << " Qmax = " << inputQ[qmi_out] << "\n";
   }
-  size_t qmi_out = qmax_index;
-  if (qmi_out == inputQ.size())
-    qmi_out--; // prevent unit test problem under windows (and probably other
-               // hardly identified problem)
-  g_log.notice() << "Adjusting to data: Qmin = " << inputQ[qmin_index]
-                 << " Qmax = " << inputQ[qmi_out] << "\n";
 
   // determine r axis for result
   const double rmax = getProperty("RMax");
   double rdelta = getProperty("DeltaR");
   if (isEmpty(rdelta))
-    rdelta = M_PI / qmax;
+    rdelta = M_PI / inputQ[qmax_index];
   size_t sizer = static_cast<size_t>(rmax / rdelta);
+
   bool filter = getProperty("Filter");
 
   // create the output workspace
@@ -276,8 +320,10 @@ void PDFFourierTransform::exec() {
   label->setLabel("AtomicDistance", "Angstrom");
   outputWS->setYUnitLabel("PDF");
 
-  outputWS->mutableRun().addProperty("Qmin", qmin, "Angstroms^-1", true);
-  outputWS->mutableRun().addProperty("Qmax", qmax, "Angstroms^-1", true);
+  outputWS->mutableRun().addProperty("Qmin", inputQ[qmin_index], "Angstroms^-1",
+                                     true);
+  outputWS->mutableRun().addProperty("Qmax", inputQ[qmax_index], "Angstroms^-1",
+                                     true);
 
   MantidVec &outputR = outputWS->dataX(0);
   for (size_t i = 0; i < sizer; i++) {
@@ -299,6 +345,7 @@ void PDFFourierTransform::exec() {
       double q = inputQ[q_index];
       double deltaq = inputQ[q_index] - inputQ[q_index - 1];
       double sinus = sin(q * r) * deltaq;
+
       // multiply by filter function sin(q*pi/qmax)/(q*pi/qmax)
       if (filter && q != 0) {
         sinus *= sin(q * rdelta) / (q * rdelta);

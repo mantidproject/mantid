@@ -78,8 +78,8 @@ public:
 
     TS_ASSERT_DELTA(R[0], 0.01, 0.0001);
     TS_ASSERT_DELTA(R[249], 2.5, 0.0001);
-    TS_ASSERT_DELTA(GofR[0], 0.022981, 0.0001);
-    TS_ASSERT_DELTA(GofR[249], -0.616449, 0.0001);
+    TS_ASSERT_DELTA(GofR[0], 0.0186, 0.0001);
+    TS_ASSERT_DELTA(GofR[249], -0.3867, 0.0001);
   }
 
   void test_filter() {

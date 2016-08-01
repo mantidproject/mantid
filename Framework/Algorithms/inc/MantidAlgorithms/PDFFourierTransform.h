@@ -31,6 +31,9 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
+
+  size_t determineQminIndex();
+  size_t determineQmaxIndex();
 };
 
 } // namespace Mantid
