@@ -6171,11 +6171,11 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
     std::vector<std::string> specSections = tsv.sections("spectrogram");
     for (auto it = specSections.begin(); it != specSections.end(); ++it) {
       TSVSerialiser specTSV(*it);
+      Spectrogram *s = nullptr;
 
       if (specTSV.selectLine("workspace")) {
         std::string wsName;
         specTSV >> wsName;
-
         Mantid::API::IMDWorkspace_const_sptr wsPtr =
             Mantid::API::AnalysisDataService::Instance()
                 .retrieveWS<Mantid::API::IMDWorkspace>(wsName);
@@ -6184,32 +6184,28 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
         if (!wsPtr.get())
           continue;
 
-        /* You may notice we plot the spectrogram before loading it.
+        s = new Spectrogram(QString::fromUtf8(wsName.c_str()), wsPtr);
+      } else if (specTSV.selectLine("matrix")) {
+        std::string wsName;
+        specTSV >> wsName;
+        Matrix *m = app->matrix(QString::fromStdString(wsName));
+
+        if (!m)
+          continue;
+
+        s = new Spectrogram(m);
+      }
+
+      /* You may notice we plot the spectrogram before loading it.
         * Why? Because plotSpectrogram overrides the spectrograms' settings
         * based off the second parameter (which has been chosen arbitrarily
         * in this case). We're just use plotSpectrogram to add the spectrogram
         * to the graph for us, and then loading the settings into the
         * spectrogram.
         */
-        Spectrogram *s =
-            new Spectrogram(QString::fromUtf8(wsName.c_str()), wsPtr);
-        plotSpectrogram(s, Graph::ColorMap);
-        s->loadFromProject(*it);
-        curveID++;
-      } else if (specTSV.selectLine("matrix")) {
-        std::string matrixName;
-        specTSV >> matrixName;
-
-        Matrix *m = app->matrix(QString::fromStdString(matrixName));
-
-        if (!m)
-          continue;
-
-        Spectrogram *s = new Spectrogram(m);
-        plotSpectrogram(s, Graph::ColorMap);
-        s->loadFromProject(*it);
-        curveID++;
-      }
+      plotSpectrogram(s, Graph::ColorMap);
+      s->loadFromProject(*it);
+      curveID++;
     }
 
     //<SkipPoints>, <CurveLabels>, and <MantidYErrors> all apply to the
