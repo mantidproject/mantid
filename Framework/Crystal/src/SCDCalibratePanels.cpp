@@ -365,7 +365,7 @@ void SCDCalibratePanels::exec() {
 void SCDCalibratePanels::findL1(int nPeaks, DataObjects::PeaksWorkspace_sptr peaksWs) {
 MatrixWorkspace_sptr L1WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1,
-                                               nPeaks, nPeaks));
+                                               3*nPeaks, 3*nPeaks));
 
   auto &outSp = L1WS->getSpectrum(0);
   MantidVec &yVec = outSp.dataY();
@@ -383,9 +383,9 @@ for (int i = 0; i < nPeaks; i++) {
     weight = 1.0 / peak.getIntensity();
   else if (peak.getBinCount() > 0.) // then by counts in peak centre
     weight = 1.0 / peak.getBinCount();
-    xVec[i] = i;
-    yVec[i] = 0.0;
-    eVec[i] = weight;
+    xVec[i*3] = i;
+    yVec[i*3+1] = 0.0;
+    eVec[i*3+2] = weight;
 }
 IAlgorithm_sptr fitL1_alg;
 try {
