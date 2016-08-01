@@ -61,25 +61,13 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         if not self._use_can:
             logger.information('Not using container')
 
-        # Apply container scale factor if needed
+        # Units should be wavelength
+        #x_unit = ws.getAxis(0).getUnit().unitID()
+
+        # Appy container shift if needed
         prog_container = Progress(self, start=0.0, end=0.2, nreports=4)
         prog_container.report('Starting algorithm')
         if self._use_can:
-            if self._scale_can:
-                # Use temp workspace so we don't modify original data
-                prog_container.report('Scaling can')
-                Scale(InputWorkspace=self._can_ws_name,
-                      OutputWorkspace=self._scaled_container,
-                      Factor=self._can_scale_factor,
-                      Operation='Multiply')
-                logger.information('Container scaled by %f' % self._can_scale_factor)
-            else:
-                prog_container.report('Cloning Workspace')
-                CloneWorkspace(InputWorkspace=self._can_ws_name,
-                               OutputWorkspace=self._scaled_container)
-
-
-        # Appy container shift if needed
             if self._shift_can:
                 # Use temp workspace so we don't modify data
                 prog_container.report('Shifting can')
@@ -92,6 +80,20 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 prog_container.report('Cloning Workspace')
                 CloneWorkspace(InputWorkspace=self._can_ws_name,
                                OutputWorkspace=self._shifted_container)
+
+        # Apply container scale factor if needed
+            if self._scale_can:
+                # Use temp workspace so we don't modify original data
+                prog_container.report('Scaling can')
+                Scale(InputWorkspace=self._shifted_container,
+                      OutputWorkspace=self._scaled_container,
+                      Factor=self._can_scale_factor,
+                      Operation='Multiply')
+                logger.information('Container scaled by %f' % self._can_scale_factor)
+            else:
+                prog_container.report('Cloning Workspace')
+                CloneWorkspace(InputWorkspace=self._can_ws_name,
+                               OutputWorkspace=self._scaled_container)
 
 
         prog_corr = Progress(self, start=0.2, end=0.6, nreports=2)
@@ -219,7 +221,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         self._can_scale_factor = self.getProperty('CanScaleFactor').value
         self._scale_can = self._can_scale_factor != 1.0
-        
+
         self._can_shift_amount = self.getProperty('CanShiftAmount').value
         self._shift_can = self._can_shift_amount != 0.0
 
@@ -308,6 +310,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         Minus(LHSWorkspace=self._sample_ws_name,
               RHSWorkspace=self._scaled_container,
               OutputWorkspace=self._output_ws_name)
+
+
 
 
     def _correct_sample(self):
