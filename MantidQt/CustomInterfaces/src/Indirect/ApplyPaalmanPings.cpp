@@ -218,10 +218,10 @@ void ApplyPaalmanPings::run() {
       applyCorrAlg->setProperty("CanScaleFactor", canScaleFactor);
     }
     const bool useShift = m_uiForm.ckShiftCan->isChecked();
-	if (useShift) {
-		const double canShiftAmount = m_uiForm.spCanShift->value();
-		applyCorrAlg->setProperty("CanShiftAmount", canShiftAmount);
-	}
+    if (useShift) {
+      const double canShiftAmount = m_uiForm.spCanShift->value();
+      applyCorrAlg->setProperty("CanShiftAmount", canShiftAmount);
+    }
   }
 
   if (useCorrections) {
