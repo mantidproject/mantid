@@ -1388,9 +1388,7 @@ void Graph::setAxisScale(int axis, double start, double end, int scaleType,
     updateSecondaryAxis(QwtPlot::xTop);
     updateSecondaryAxis(QwtPlot::yRight);
   }
-  d_plot->replot();
-  ////keep markers on canvas area
-  updateMarkersBoundingRect();
+
   d_plot->replot();
   d_plot->axisWidget(axis)->repaint();
 }
@@ -5851,6 +5849,11 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
   for (auto it = legendSections.begin(); it != legendSections.end(); ++it)
     insertText("legend", *it);
 
+  std::vector<std::string> lineSections = tsv.sections("line");
+  for (auto it = lineSections.begin(); it != lineSections.end(); ++it) {
+    QStringList sl = QString::fromUtf8((*it).c_str()).split("\t");
+    addArrow(sl, fileVersion);
+  }
 
   if (tsv.selectLine("Margin")) {
     int margin;
@@ -5925,25 +5928,6 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
     setTitle(title);
     setTitleColor(QColor(color));
     setTitleAlignment((Qt::AlignmentFlag)alignment);
-  }
-
-  for (int i = 0; tsv.selectLine("scale", i); ++i) {
-    QStringList scl =
-        QString::fromUtf8(tsv.lineAsString("scale", i).c_str()).split("\t");
-    scl.pop_front();
-    if (scl.count() >= 8) {
-      setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(),
-               scl[3].toDouble(), scl[4].toInt(), scl[5].toInt(),
-               scl[6].toInt(), bool(scl[7].toInt()));
-    }
-  }
-
-  // Line sections must be loaded after setScale above.
-  // otherwise the line markers are lost.
-  std::vector<std::string> lineSections = tsv.sections("line");
-  for (auto it = lineSections.begin(); it != lineSections.end(); ++it) {
-    QStringList sl = QString::fromUtf8((*it).c_str()).split("\t");
-    addArrow(sl, fileVersion);
   }
 
   for (int i = 0; i < 4; ++i) {
@@ -6301,6 +6285,19 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
     if (sl.size() >= 3)
       setWaterfallSideLines(sl[2].toInt());
     updateDataCurves();
+  }
+
+  // Scaling axes should be applied after all plot types have been loaded
+  // to avoid incorrectly updating one.
+  for (int i = 0; tsv.selectLine("scale", i); ++i) {
+    QStringList scl =
+        QString::fromUtf8(tsv.lineAsString("scale", i).c_str()).split("\t");
+    scl.pop_front();
+    if (scl.count() >= 8) {
+      setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(),
+               scl[3].toDouble(), scl[4].toInt(), scl[5].toInt(),
+               scl[6].toInt(), bool(scl[7].toInt()));
+    }
   }
 
   replot();
