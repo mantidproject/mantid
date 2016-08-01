@@ -17,6 +17,9 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
     _output_ws_name = None
     _corrections = None
     _scaled_container = None
+    _shift_can = False
+    _shifted_container = None
+    _can_shift_amount = 0.0
 
 
     def category(self):
@@ -42,6 +45,9 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='CanScaleFactor', defaultValue=1.0,
                              doc='Factor to scale the can data')
 
+        self.declareProperty(name='CanShiftAmount', defaultValue=0.0,
+                             doc='Amount by which to shift the container data')
+
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output corrections workspace.')
 
@@ -56,7 +62,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             logger.information('Not using container')
 
         # Apply container scale factor if needed
-        prog_container = Progress(self, start=0.0, end=0.2, nreports=2)
+        prog_container = Progress(self, start=0.0, end=0.2, nreports=4)
         prog_container.report('Starting algorithm')
         if self._use_can:
             if self._scale_can:
@@ -71,6 +77,21 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 prog_container.report('Cloning Workspace')
                 CloneWorkspace(InputWorkspace=self._can_ws_name,
                                OutputWorkspace=self._scaled_container)
+
+
+        # Appy container shift if needed
+            if self._shift_can:
+                # Use temp workspace so we don't modify data
+                prog_container.report('Shifting can')
+                Scale(InputWorkspace=self._can_ws_name,
+                      OutputWorkspace=self._shifted_container,
+                      Factor=self._can_shift_amount,
+                      Operation='Add')
+                logger.information('Container data shifted by %f' % self._can_shift_amount)
+            else:
+                prog_container.report('Cloning Workspace')
+                CloneWorkspace(InputWorkspace=self._can_ws_name,
+                               OutputWorkspace=self._shifted_container)
 
 
         prog_corr = Progress(self, start=0.2, end=0.6, nreports=2)
@@ -141,6 +162,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             DeleteWorkspace(self._corrections)
         if self._scaled_container in mtd:
             DeleteWorkspace(self._scaled_container)
+        if self._shifted_container in mtd:
+            DeleteWorkspace(self._shifted_container)
         prog_wrkflow.report('Algorithm Complete')
 
 
@@ -196,10 +219,14 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         self._can_scale_factor = self.getProperty('CanScaleFactor').value
         self._scale_can = self._can_scale_factor != 1.0
+        
+        self._can_shift_amount = self.getProperty('CanShiftAmount').value
+        self._shift_can = self._can_shift_amount != 0.0
 
         # This temporary WS is needed because ConvertUnits does not like named WS in a Group
         self._corrections = '__converted_corrections'
         self._scaled_container = '__scaled_container'
+        self._shifted_container = '_shifted_container'
 
 
     def _get_correction_factor_ws_name(self, factor_type):
