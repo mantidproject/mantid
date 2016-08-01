@@ -20,6 +20,29 @@ using namespace Kernel;
 namespace {
 /// static logger
 Logger g_log("LogManager");
+
+// Templated method to convert property to double
+template <typename T>
+bool convertSingleValue(const Property *property, double &value) {
+  if (auto log = dynamic_cast<const PropertyWithValue<T> *>(property)) {
+    value = static_cast<double>(*log);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+// Converts numeric property to double
+bool convertSingleValue(const Property *property, double &value) {
+  // The first one to succeed short-circuits and the value is returned.
+  // If all fail, returns false.
+  return convertSingleValue<double>(property, value) ||
+         convertSingleValue<int32_t>(property, value) ||
+         convertSingleValue<int64_t>(property, value) ||
+         convertSingleValue<float>(property, value) ||
+         convertSingleValue<uint32_t>(property, value) ||
+         convertSingleValue<uint64_t>(property, value);
+}
 }
 
 /// Name of the log entry containing the proton charge when retrieved using
@@ -268,16 +291,15 @@ double LogManager::getPropertyAsSingleValue(
   const auto key = std::make_pair(name, statistic);
   if (!m_singleValueCache.getCache(key, singleValue)) {
     const Property *log = getProperty(name);
-    if (auto singleDouble =
-            dynamic_cast<const PropertyWithValue<double> *>(log)) {
-      singleValue = (*singleDouble)();
+    if (convertSingleValue(log, singleValue)) {
+      return singleValue;
     } else if (auto seriesDouble =
                    dynamic_cast<const TimeSeriesProperty<double> *>(log)) {
-      singleValue = Mantid::Kernel::filterByStatistic(seriesDouble, statistic);
+      return Mantid::Kernel::filterByStatistic(seriesDouble, statistic);
     } else {
       throw std::invalid_argument(
           "Run::getPropertyAsSingleValue - Property \"" + name +
-          "\" is not a single double or time series double.");
+          "\" is not a single numeric value or numeric time series.");
     }
     // Put it in the cache
     m_singleValueCache.setCache(key, singleValue);
