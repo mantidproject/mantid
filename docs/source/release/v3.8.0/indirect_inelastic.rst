@@ -13,12 +13,23 @@ Algorithms
 
 * Remove CylinderPaalmanPingsCorrection v1. This algorithm has been replaced by :ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
 
+
+Bayes
+#####
+
+Stretch
+~~~~~~~
+
+- Previously the Quest script was used to drive the Bayes stretch interface. This functionality has been ported to the algorithm :ref:`BayesStretch <algm-BayesStretch>`.
+
+
 Data Reduction
 ##############
 
 ISIS Calibration
 ~~~~~~~~~~~~~~~~
 - Add load log option to ISIS calibration interface
+
 
 Data Analysis
 #############
@@ -32,6 +43,11 @@ Elwin
 
 Jump Fit
 ~~~~~~~~
+
+Simulations
+###########
+
+- New algorithm :ref:`LoadNMoldyn4Ascii1D <algm-LoadNMoldyn4Ascii1D>` has been added to allow 1D nmoldyn data to be loaded in Mantid
 
 Improvements
 ------------
