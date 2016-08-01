@@ -67,6 +67,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         prog_container = Progress(self, start=0.0, end=0.2, nreports=4)
         prog_container.report('Starting algorithm')
+
         if self._use_can:
             # Units should be wavelength
             unit_id = mtd[self._can_ws_name].getAxis(0).getUnit().unitID()
@@ -78,15 +79,16 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 elif unit_id == 'DeltaE':
                     emode = 'Indirect'
                     from IndirectCommon import getEfixed
-                    efixed = getEfixed(mtd[self._can_ws_name])
+                    efixed = getEfixed(self._can_ws_name)
                 else:
                     raise ValueError('Unit %s in sample workspace is not supported' % unit_id)
 
                 # Do conversion
                 # Use temporary workspace so we don't modify data
+                prog_container.report('Converting can units')
                 ConvertUnits(InputWorkspace=self._can_ws_name,
                             OutputWorkspace=self._can_ws_wavelength,
-                            Target=unit_id,
+                            Target="Wavelength",
                             EMode=emode,
                             EFixed=efixed)
 
@@ -95,7 +97,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 CloneWorkspace(InputWorkspace=self._can_ws_name,
                                OutputWorkspace=self._can_ws_wavelength)
 
-        # Appy container shift if needed
+
+            # Appy container shift if needed
             if self._shift_can:
                 # Use temp workspace so we don't modify data
                 prog_container.report('Shifting can')
@@ -311,17 +314,16 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 elif unit_id == 'DeltaE':
                     emode = 'Indirect'
                     from IndirectCommon import getEfixed
-                    efixed = getEfixed(mtd[self._sample_ws_name])
+                    efixed = getEfixed(self._sample_ws_name)
                 else:
                     raise ValueError('Unit %s in sample workspace is not supported' % unit_id)
 
                 # Do conversion
                 ConvertUnits(InputWorkspace=input_name,
-                             OutputWorkspace=output_name,
-                             Target=unit_id,
-                             EMode=emode,
-                             EFixed=efixed)
-
+                            OutputWorkspace=output_name,
+                            Target=unit_id,
+                            EMode=emode,
+                            EFixed=efixed)
             else:
                 # No need to convert
                 CloneWorkspace(InputWorkspace=input_name,
