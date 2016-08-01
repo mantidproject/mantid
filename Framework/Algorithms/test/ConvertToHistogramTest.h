@@ -1,12 +1,11 @@
 #ifndef CONVERTTOHISTOGRAMTEST_H_
 #define CONVERTTOHISTOGRAMTEST_H_
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/ConvertToHistogram.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-
-#include <numeric>
 
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace;
@@ -14,6 +13,7 @@ using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::Algorithms::ConvertToHistogram;
 using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::MantidVecPtr;
+using Mantid::HistogramData::LinearGenerator;
 using Mantid::HistogramData::Points;
 
 class ConvertToHistogramTest : public CxxTest::TestSuite {
@@ -48,8 +48,7 @@ public:
     Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspace123(
         numSpectra, numYPoints, false);
     // Reset the X data to something reasonable
-    Points x(numYPoints);
-    std::iota(begin(x), end(x), 0.0);
+    Points x(numYPoints, LinearGenerator(0.0, 1.0));
     for (int i = 0; i < numSpectra; ++i) {
       testWS->setPoints(i, x);
     }
