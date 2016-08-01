@@ -1,3 +1,5 @@
+# pylint: disable=invalid-constant-name,too-many-lines, invalid-function-name
+
 import abc
 import re
 
@@ -73,7 +75,7 @@ def does_pattern_match(compiled_regex, line):
 
 
 def escape_special_characters_for_file_path(to_escape):
-    escape = {"\a": "\\a", "\b": "\\b", "\c": "\\c", "\f": "\\f",
+    escape = {"\a": "\\a", "\b": "\\b", r"\c": "\\c", "\f": "\\f",
               "\n": "\\n", "\r": "\\r", "\t": "\\t", "\v": "\\v"}
     keys = escape.keys()
     escaped = to_escape
@@ -86,13 +88,13 @@ def escape_special_characters_for_file_path(to_escape):
 # -----------------------------------------------------------------
 # --- Common Regex Strings-----------------------------------------
 # -----------------------------------------------------------------
-float_number = "[-+]?(\d*[.])?\d+"
-integer_number = "[-+]?\d+"
-positive_float_number = "[+]?(\d*[.])?\d+"
-start_string = "^\s*"
-end_string = "\s*$"
-space_string = "\s+"
-rebin_string = "(\s*[-+]?\d+(\.\d+)?)(\s*,\s*[-+]?\d+(\.\d+)?)*"
+float_number = "[-+]?(\\d*[.])?\\d+"
+integer_number = "[-+]?\\d+"
+positive_float_number = "[+]?(\\d*[.])?\\d+"
+start_string = "^\\s*"
+end_string = "\\s*$"
+space_string = "\\s+"
+rebin_string = "(\\s*[-+]?\\d+(\\.\\d+)?)(\\s*,\\s*[-+]?\\d+(\\.\\d+)?)*"
 
 # -----------------------------------------------------------------
 # --- User File keywords ------------------------------------------
