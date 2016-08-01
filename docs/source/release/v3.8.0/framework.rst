@@ -22,7 +22,7 @@ Concepts
 
 - ``MatrixWorkspace`` : When masking bins or detectors with non-zero weights,
   undefined and infinite values and errors will be zeroed.
-
+- ``Lattice`` : Allow setting a UB matrix with negative determinant (improper rotation)  
 
 Algorithms
 ----------
@@ -59,6 +59,9 @@ Improved
 
 - :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli 
 
+- :ref:`RenameWorkspace <algm-RenameWorkspace>` and `RenameWorkspaces <algm-RenameWorkspaces>`
+  now check if a Workspace with that name already exists in the ADS and gives
+  the option to override it.
 
 Deprecated
 ##########
@@ -88,6 +91,7 @@ Python
 - :py:obj:`mantid.kernel.MaterialBuilder` has been exposed to python
   and :py:obj:`mantid.kernel.Material` has been modified to expose the
   individual atoms.
+- :py:obj:`mantid.geometry.OrientedLattice` set U with determinant -1 exposed to python
 
 Python Algorithms
 #################
@@ -95,6 +99,7 @@ Python Algorithms
 Bug Fixes
 ---------
 - Scripts generated from history including algorithms that added dynamic properties at run time (for example Fit, and Load) will not not include those dynamic properties in their script.  This means they will execute without warnings.
+- Cloning a ``MultiDomainFunction``, or serializing to a string and recreating it, now preserves the domains.
 
 
 |
