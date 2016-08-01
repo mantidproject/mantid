@@ -536,7 +536,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
 
   if (m_sourceMapWS) {
     // convert spectra masks into det-id mask using source workspace
-    convertSpMasksToDetIDs(m_sourceMapWS, maskedSpecID, singleDetIds);
+    convertSpMasksToDetIDs(*m_sourceMapWS, maskedSpecID, singleDetIds);
     maskedSpecID
         .clear(); // specrtra ID not needed any more as all converted to det-ids
     return;
@@ -717,13 +717,13 @@ void LoadMask::parseXML() {
 * @param maskedSpecID   -- vector of spectra id to mask
 * @param singleDetIds   -- output vector of detectors id to mask
 */
-void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace_sptr &sourceWS,
+void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS,
                                       const std::vector<int32_t> &maskedSpecID,
                                       std::vector<int32_t> &singleDetIds) {
 
-  spec2index_map s2imap = sourceWS->getSpectrumToWorkspaceIndexMap();
+  spec2index_map s2imap = sourceWS.getSpectrumToWorkspaceIndexMap();
   detid2index_map sourceDetMap =
-      sourceWS->getDetectorIDToWorkspaceIndexMap(false);
+      sourceWS.getDetectorIDToWorkspaceIndexMap(false);
 
   std::multimap<size_t, Mantid::detid_t> spectr2index_map;
   for (auto it = sourceDetMap.begin(); it != sourceDetMap.end(); it++) {
@@ -738,7 +738,7 @@ void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace_sptr &sourceWS,
       throw std::runtime_error(
           "Can not find spectra with ID: " +
           boost::lexical_cast<std::string>(maskedSpecID[i]) +
-          " in the workspace" + sourceWS->getName());
+          " in the workspace" + sourceWS.getName());
     }
     size_t specN = itSpec->second;
 
@@ -747,7 +747,7 @@ void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace_sptr &sourceWS,
     if (source_range.first == spectr2index_map.end()) {
       throw std::runtime_error("Can not find spectra N: " +
                                boost::lexical_cast<std::string>(specN) +
-                               " in the workspace" + sourceWS->getName());
+                               " in the workspace" + sourceWS.getName());
     }
     // add detectors to the masked det-id list
     for (auto it = source_range.first; it != source_range.second; ++it) {

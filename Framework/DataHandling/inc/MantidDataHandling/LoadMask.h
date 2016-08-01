@@ -93,7 +93,7 @@ private:
 
   std::map<std::string, std::string> validateInputs() override;
 
-  void convertSpMasksToDetIDs(const API::MatrixWorkspace_sptr &SourceWS,
+  void convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS,
                               const std::vector<specnum_t> &maskedSpecID,
                               std::vector<detid_t> &singleDetIds);
 
