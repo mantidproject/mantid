@@ -235,6 +235,8 @@ Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(
   return comp;
 }
 
+SampleEnvironmentSpecParser::~SampleEnvironmentSpecParser() {}
+
 //------------------------------------------------------------------------------
 // Concrete instantions
 //------------------------------------------------------------------------------

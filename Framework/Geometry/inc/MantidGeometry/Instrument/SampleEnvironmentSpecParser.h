@@ -48,6 +48,8 @@ class MANTID_GEOMETRY_DLL SampleEnvironmentSpecParser {
 public:
   static constexpr const char *ROOT_TAG = "environmentspec";
 
+  ~SampleEnvironmentSpecParser();
+
 public:
   SampleEnvironmentSpec_uptr parse(const std::string &name, std::istream &istr);
   SampleEnvironmentSpec_uptr parse(const std::string &name,
