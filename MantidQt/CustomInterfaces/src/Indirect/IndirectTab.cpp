@@ -545,8 +545,9 @@ bool IndirectTab::checkADSForPlotSaveWorkspace(const std::string &workspaceName,
     return true;
   } else {
     const std::string plotSave = plotting ? "plotting" : "saving";
-    const auto errorMessage = "Error while " + plotSave + ":\nThe workspace \"" +
-                              workspaceName + "\" could not be found.";
+    const auto errorMessage = "Error while " + plotSave +
+                              ":\nThe workspace \"" + workspaceName +
+                              "\" could not be found.";
     const char *textMessage = errorMessage.c_str();
     QMessageBox::warning(NULL, tr("Workspace not found"), tr(textMessage));
     return false;
