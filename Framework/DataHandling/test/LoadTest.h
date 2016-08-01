@@ -276,7 +276,7 @@ public:
     MatrixWorkspace_sptr output2D =
         boost::dynamic_pointer_cast<MatrixWorkspace>(output);
 
-    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 397);
+    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 396);
   }
 
   void test_EventPreNeXus_WithNoExecute() {
