@@ -1223,7 +1223,7 @@ IProjectSerialisable *MantidMatrix::loadFromProject(const std::string &lines,
     app->restoreWindowGeometry(app, matrix, QString::fromStdString(geometry));
   }
 
-  if(tsv.selectLine("SelectedTab")) {
+  if (tsv.selectLine("SelectedTab")) {
     int index;
     tsv >> index;
     matrix->m_tabs->setCurrentIndex(index);
