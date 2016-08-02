@@ -378,21 +378,17 @@ void GetAllEi::exec() {
                                                             nPeaks, nPeaks);
 
   HistogramX peaks_positions(peaks.size());
-  std::transform(peaks.cbegin(), peaks.cend(), peaks_positions.begin(), [](peakKeeper peak)
-  {
-	  return peak.position;
-  });
-  auto &Signal = result_ws->mutableY(0);  // Signal[i] = peaks[i].height; to transform
-  std::transform(peaks.cbegin(), peaks.cend(), Signal.begin(), [](peakKeeper peak)
-  {
-	  return peak.height;
-  });
+  std::transform(peaks.cbegin(), peaks.cend(), peaks_positions.begin(),
+                 [](peakKeeper peak) { return peak.position; });
+  auto &Signal =
+      result_ws->mutableY(0); // Signal[i] = peaks[i].height; to transform
+  std::transform(peaks.cbegin(), peaks.cend(), Signal.begin(),
+                 [](peakKeeper peak) { return peak.height; });
 
-  auto &Error = result_ws->mutableE(0); // Error[i] = peaks[i].sigma; to transform
-  std::transform(peaks.cbegin(), peaks.cend(), Error.begin(), [](peakKeeper peak)
-  {
-	  return peak.sigma;
-  });
+  auto &Error =
+      result_ws->mutableE(0); // Error[i] = peaks[i].sigma; to transform
+  std::transform(peaks.cbegin(), peaks.cend(), Error.begin(),
+                 [](peakKeeper peak) { return peak.sigma; });
 
   result_ws->setPoints(0, peaks_positions);
 
