@@ -39,10 +39,10 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
           SLOT(validateChemical()));
   UserInputValidator uiv;
   if (uiv.checkFieldIsNotEmpty("Can Chemical Formula",
-	  m_uiForm.leCanChemicalFormula,
-	  m_uiForm.valCanChemicalFormula)) {
-	  uiv.checkFieldIsValid("Can Chemical Formula", m_uiForm.leCanChemicalFormula,
-		  m_uiForm.valCanChemicalFormula);
+                               m_uiForm.leCanChemicalFormula,
+                               m_uiForm.valCanChemicalFormula)) {
+    uiv.checkFieldIsValid("Can Chemical Formula", m_uiForm.leCanChemicalFormula,
+                          m_uiForm.valCanChemicalFormula);
   }
 }
 
@@ -52,25 +52,24 @@ void CalculatePaalmanPings::validateChemical() { doValidation(true); }
 
 void CalculatePaalmanPings::run() {
   // Get correct corrections algorithm
-  QString sampleShape = m_uiForm.cbSampleShape->currentText();
-  QString algorithmName =
-      sampleShape.replace(" ", "") + "PaalmanPingsCorrection";
+  auto sampleShape = m_uiForm.cbSampleShape->currentText();
+  auto algorithmName = sampleShape.replace(" ", "") + "PaalmanPingsCorrection";
   algorithmName = algorithmName.replace(
       "Annulus", "Cylinder"); // Use the cylinder algorithm for annulus
 
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
-  IAlgorithm_sptr absCorAlgo =
+  auto absCorAlgo =
       AlgorithmManager::Instance().create(algorithmName.toStdString());
   absCorAlgo->initialize();
 
   // Sample details
-  QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
+  auto sampleWsName = m_uiForm.dsSample->getCurrentDataName();
   MatrixWorkspace_sptr sampleWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           sampleWsName.toStdString());
 
   // If not in wavelength then do conversion
-  Mantid::Kernel::Unit_sptr sampleXUnit = sampleWs->getAxis(0)->unit();
+  const auto sampleXUnit = sampleWs->getAxis(0)->unit();
   if (sampleXUnit->caption() != "Wavelength") {
     g_log.information(
         "Sample workspace not in wavelength, need to convert to continue.");
@@ -80,22 +79,21 @@ void CalculatePaalmanPings::run() {
     absCorProps["SampleWorkspace"] = sampleWsName.toStdString();
   }
 
-  double sampleNumberDensity = m_uiForm.spSampleNumberDensity->value();
-  absCorAlgo->setProperty("SampleNumberDensity", sampleNumberDensity);
+  absCorAlgo->setProperty("SampleNumberDensity",
+                          m_uiForm.spSampleNumberDensity->value());
 
-  QString sampleChemicalFormula = m_uiForm.leSampleChemicalFormula->text();
-  absCorAlgo->setProperty("SampleChemicalFormula",
-                          sampleChemicalFormula.toStdString());
+  absCorAlgo->setProperty(
+      "SampleChemicalFormula",
+      m_uiForm.leSampleChemicalFormula->text().toStdString());
 
   addShapeSpecificSampleOptions(absCorAlgo, sampleShape);
 
   // Can details
-  bool useCan = m_uiForm.ckUseCan->isChecked();
-  if (useCan) {
-    QString canWsName = m_uiForm.dsContainer->getCurrentDataName();
+  if (m_uiForm.ckUseCan->isChecked()) {
+    const auto canWsName =
+        m_uiForm.dsContainer->getCurrentDataName().toStdString();
     MatrixWorkspace_sptr canWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            canWsName.toStdString());
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(canWsName);
 
     // If not in wavelength then do conversion
     Mantid::Kernel::Unit_sptr canXUnit = canWs->getAxis(0)->unit();
@@ -104,26 +102,26 @@ void CalculatePaalmanPings::run() {
                         "convert to continue.");
       absCorProps["CanWorkspace"] = addConvertUnitsStep(canWs, "Wavelength");
     } else {
-      absCorProps["CanWorkspace"] = canWsName.toStdString();
+      absCorProps["CanWorkspace"] = canWsName;
     }
 
-    double canNumberDensity = m_uiForm.spCanNumberDensity->value();
-    absCorAlgo->setProperty("CanNumberDensity", canNumberDensity);
+    absCorAlgo->setProperty("CanNumberDensity",
+                            m_uiForm.spCanNumberDensity->value());
 
-    QString canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
+    const auto canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
     absCorAlgo->setProperty("CanChemicalFormula",
                             canChemicalFormula.toStdString());
 
     addShapeSpecificCanOptions(absCorAlgo, sampleShape);
   }
 
-  std::string eMode = getEMode(sampleWs);
+  const auto eMode = getEMode(sampleWs);
   absCorAlgo->setProperty("EMode", eMode);
   if (eMode == "Indirect")
     absCorAlgo->setProperty("EFixed", getEFixed(sampleWs));
 
   // Generate workspace names
-  int nameCutIndex = sampleWsName.lastIndexOf("_");
+  auto nameCutIndex = sampleWsName.lastIndexOf("_");
   if (nameCutIndex == -1)
     nameCutIndex = sampleWsName.length();
 
@@ -140,7 +138,7 @@ void CalculatePaalmanPings::run() {
     break;
   }
 
-  QString outputWsName =
+  const auto outputWsName =
       sampleWsName.left(nameCutIndex) + "_" + correctionType + "_abs";
 
   absCorAlgo->setProperty("OutputWorkspace", outputWsName.toStdString());
@@ -149,8 +147,7 @@ void CalculatePaalmanPings::run() {
   m_batchAlgoRunner->addAlgorithm(absCorAlgo, absCorProps);
 
   // Add save algorithms if required
-  bool save = m_uiForm.ckSave->isChecked();
-  if (save)
+  if (m_uiForm.ckSave->isChecked())
     addSaveWorkspaceToQueue(outputWsName);
 
   // Run algorithm queue
@@ -192,7 +189,6 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
     uiv.setErrorLabel(m_uiForm.valSampleChemicalFormula, false);
   }
 
-
   if (m_uiForm.ckUseCan->isChecked()) {
     uiv.checkDataSelectorIsValid("Can", m_uiForm.dsContainer);
 
@@ -215,11 +211,11 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
     }
 
     // Ensure sample and container are the same kind of data
-    QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
-    QString sampleType = sampleWsName.right(sampleWsName.length() -
-                                            sampleWsName.lastIndexOf("_"));
-    QString containerWsName = m_uiForm.dsContainer->getCurrentDataName();
-    QString containerType = containerWsName.right(
+    auto sampleWsName = m_uiForm.dsSample->getCurrentDataName();
+    const auto sampleType = sampleWsName.right(sampleWsName.length() -
+                                               sampleWsName.lastIndexOf("_"));
+    auto containerWsName = m_uiForm.dsContainer->getCurrentDataName();
+    const auto containerType = containerWsName.right(
         containerWsName.length() - containerWsName.lastIndexOf("_"));
 
     g_log.debug() << "Sample type is: " << sampleType.toStdString() << '\n';
@@ -253,10 +249,10 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
   }
 
   // Convert the spectrum axis of correction factors to Q
-  QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
+  const auto sampleWsName =
+      m_uiForm.dsSample->getCurrentDataName().toStdString();
   MatrixWorkspace_sptr sampleWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          sampleWsName.toStdString());
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleWsName);
   WorkspaceGroup_sptr corrections =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
           m_pythonExportWsName);
@@ -266,9 +262,7 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
     if (!factorWs || !sampleWs)
       continue;
 
-    std::string eMode = getEMode(sampleWs);
-
-    if (eMode == "Indirect") {
+    if (getEMode(sampleWs) == "Indirect") {
       API::BatchAlgorithmRunner::AlgorithmRuntimeProps convertSpecProps;
       IAlgorithm_sptr convertSpecAlgo =
           AlgorithmManager::Instance().create("ConvertSpectrumAxis");
@@ -343,9 +337,9 @@ void CalculatePaalmanPings::getBeamWidthFromWorkspace(const QString &wsName) {
 
   const std::string beamWidthParamName = "Workflow.beam-width";
   if (instrument->hasParameter(beamWidthParamName)) {
-    QString beamWidth = QString::fromStdString(
+    const auto beamWidth = QString::fromStdString(
         instrument->getStringParameter(beamWidthParamName)[0]);
-    double beamWidthValue = beamWidth.toDouble();
+    const auto beamWidthValue = beamWidth.toDouble();
 
     m_uiForm.spCylBeamWidth->setValue(beamWidthValue);
     m_uiForm.spAnnBeamWidth->setValue(beamWidthValue);
@@ -353,9 +347,9 @@ void CalculatePaalmanPings::getBeamWidthFromWorkspace(const QString &wsName) {
 
   const std::string beamHeightParamName = "Workflow.beam-height";
   if (instrument->hasParameter(beamHeightParamName)) {
-    QString beamHeight = QString::fromStdString(
+    const auto beamHeight = QString::fromStdString(
         instrument->getStringParameter(beamHeightParamName)[0]);
-    double beamHeightValue = beamHeight.toDouble();
+    const auto beamHeightValue = beamHeight.toDouble();
 
     m_uiForm.spCylBeamHeight->setValue(beamHeightValue);
     m_uiForm.spAnnBeamHeight->setValue(beamHeightValue);
@@ -371,39 +365,39 @@ void CalculatePaalmanPings::getBeamWidthFromWorkspace(const QString &wsName) {
 void CalculatePaalmanPings::addShapeSpecificSampleOptions(IAlgorithm_sptr alg,
                                                           QString shape) {
   if (shape == "FlatPlate") {
-    double sampleThickness = m_uiForm.spFlatSampleThickness->value();
+    const auto sampleThickness = m_uiForm.spFlatSampleThickness->value();
     alg->setProperty("SampleThickness", sampleThickness);
 
-    double sampleAngle = m_uiForm.spFlatSampleAngle->value();
+    const auto sampleAngle = m_uiForm.spFlatSampleAngle->value();
     alg->setProperty("SampleAngle", sampleAngle);
   } else if (shape == "Cylinder") {
     alg->setProperty("SampleInnerRadius", 0.0);
 
-    double sampleOuterRadius = m_uiForm.spCylSampleOuterRadius->value();
+    const auto sampleOuterRadius = m_uiForm.spCylSampleOuterRadius->value();
     alg->setProperty("SampleOuterRadius", sampleOuterRadius);
 
-    double beamWidth = m_uiForm.spCylBeamWidth->value();
+    const auto beamWidth = m_uiForm.spCylBeamWidth->value();
     alg->setProperty("BeamWidth", beamWidth);
 
-    double beamHeight = m_uiForm.spCylBeamHeight->value();
+    const auto beamHeight = m_uiForm.spCylBeamHeight->value();
     alg->setProperty("BeamHeight", beamHeight);
 
-    double stepSize = m_uiForm.spCylStepSize->value();
+    const auto stepSize = m_uiForm.spCylStepSize->value();
     alg->setProperty("StepSize", stepSize);
   } else if (shape == "Annulus") {
-    double sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
+    const auto sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
     alg->setProperty("SampleInnerRadius", sampleInnerRadius);
 
-    double sampleOuterRadius = m_uiForm.spAnnSampleOuterRadius->value();
+    const auto sampleOuterRadius = m_uiForm.spAnnSampleOuterRadius->value();
     alg->setProperty("SampleOuterRadius", sampleOuterRadius);
 
-    double beamWidth = m_uiForm.spAnnBeamWidth->value();
+    const auto beamWidth = m_uiForm.spAnnBeamWidth->value();
     alg->setProperty("BeamWidth", beamWidth);
 
-    double beamHeight = m_uiForm.spAnnBeamHeight->value();
+    const auto beamHeight = m_uiForm.spAnnBeamHeight->value();
     alg->setProperty("BeamHeight", beamHeight);
 
-    double stepSize = m_uiForm.spAnnStepSize->value();
+    const auto stepSize = m_uiForm.spAnnStepSize->value();
     alg->setProperty("StepSize", stepSize);
   }
 }
@@ -417,16 +411,16 @@ void CalculatePaalmanPings::addShapeSpecificSampleOptions(IAlgorithm_sptr alg,
 void CalculatePaalmanPings::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
                                                        QString shape) {
   if (shape == "FlatPlate") {
-    double canFrontThickness = m_uiForm.spFlatCanFrontThickness->value();
+    const auto canFrontThickness = m_uiForm.spFlatCanFrontThickness->value();
     alg->setProperty("CanFrontThickness", canFrontThickness);
 
-    double canBackThickness = m_uiForm.spFlatCanBackThickness->value();
+    const auto canBackThickness = m_uiForm.spFlatCanBackThickness->value();
     alg->setProperty("SampleThickness", canBackThickness);
   } else if (shape == "Cylinder") {
-    double canOuterRadius = m_uiForm.spCylCanOuterRadius->value();
+    const auto canOuterRadius = m_uiForm.spCylCanOuterRadius->value();
     alg->setProperty("CanOuterRadius", canOuterRadius);
   } else if (shape == "Annulus") {
-    double canOuterRadius = m_uiForm.spAnnCanOuterRadius->value();
+    const auto canOuterRadius = m_uiForm.spAnnCanOuterRadius->value();
     alg->setProperty("CanOuterRadius", canOuterRadius);
   }
 }
