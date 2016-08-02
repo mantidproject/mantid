@@ -60,7 +60,7 @@ public:
                           {-9.67714, 1550.63, 3150.16, 4750.07, 6350.04,
                            7950.03, 9550.02, 11150, 12750, 14350, 15950}};
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-      MantidVec xarray = testWS->dataX(ihist);
+      auto &xarray = testWS->x(ihist);
       for (size_t ibin = 0; ibin < xarray.size(); ibin += jump) {
         TS_ASSERT_DELTA(tofs[ihist][ibin / jump], xarray[ibin], 0.1);
       }
@@ -91,7 +91,7 @@ public:
                           {0.0, 1599.32, 3193.02, 4786.52, 6380.87, 7975.78,
                            9571.06, 11166.6, 12762.3, 14358.2, 15954.1}};
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-      MantidVec xarray = testWS->dataX(ihist);
+      auto &xarray = testWS->x(ihist);
       for (size_t ibin = 0; ibin < xarray.size(); ibin += jump) {
         TS_ASSERT_DELTA(tofs[ihist][ibin / jump], xarray[ibin], 0.1);
       }
@@ -124,7 +124,7 @@ public:
         {-10.8185, 1589.18, 3189.18, 4789.18, 6389.18, 7989.18, 9589.18,
          11189.2, 12789.2, 14389.2, 15989.2}};
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-      MantidVec xarray = testWS->dataX(ihist);
+      auto &xarray = testWS->x(ihist);
       for (size_t ibin = 0; ibin < xarray.size(); ibin += jump) {
         TS_ASSERT_DELTA(tofs[ihist][ibin / jump], xarray[ibin], 0.1);
       }
@@ -155,7 +155,7 @@ public:
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
       EventList &evlist = testWS->getSpectrum(ihist);
       MantidVec tofs_b = evlist.getTofs();
-      MantidVec xarray = evlist.readX();
+      auto &xarray = evlist.x();
       for (size_t ibin = 0; ibin < xarray.size(); ibin += jump) {
         TS_ASSERT_DELTA(tofs_a[ibin / jump], xarray[ibin], 0.1);
         TS_ASSERT_DELTA(tofs_a[ibin / jump], tofs_b[ibin], 0.2);
@@ -187,7 +187,7 @@ public:
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
       EventList &evlist = testWS->getSpectrum(ihist);
       MantidVec tofs_b = evlist.getTofs();
-      MantidVec xarray = evlist.readX();
+      auto &xarray = evlist.x();
       for (size_t ibin = 0; ibin < xarray.size(); ibin += jump) {
         TS_ASSERT_DELTA(tofs_a[ibin / jump], xarray[ibin], 0.1);
         TS_ASSERT_DELTA(tofs_a[ibin / jump], tofs_b[ibin], 0.2);
@@ -220,7 +220,7 @@ public:
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
       EventList &evlist = testWS->getSpectrum(ihist);
       MantidVec tofs_b = evlist.getTofs();
-      MantidVec xarray = evlist.readX();
+      auto &xarray = evlist.x();
       for (size_t ibin = 0; ibin < xarray.size(); ibin += jump) {
         TS_ASSERT_DELTA(tofs_a[ibin / jump], xarray[ibin], 0.1);
         TS_ASSERT_DELTA(tofs_a[ibin / jump], tofs_b[ibin], 0.2);
@@ -244,9 +244,11 @@ private:
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
     BinEdges xdata(numBins + 1, LinearGenerator(0.0, 4.0));
     const double peakHeight(1000.), peakCentre(7000.), sigmaSq(1000 * 1000.);
+
+    auto &Y = testWS->mutableY(0);
     // tof ranges from 0 to 16000 (units assumed micro-seconds
     for (int ibin = 0; ibin < numBins; ++ibin) {
-      testWS->dataY(0)[ibin] =
+      Y[ibin] =
           peakHeight * exp(-0.5 * pow(xdata[ibin] - peakCentre, 2.) / sigmaSq);
     }
     for (int ihist = 0; ihist < numHists; ihist++)
@@ -267,11 +269,10 @@ private:
     for (size_t ihist = 0; ihist < numHists; ++ihist) {
       EventList &evlist = testWS->getSpectrum(ihist);
       BinEdges xdata(numBins + 1, LinearGenerator(0.0, rescaling_factor));
-      for (int ibin = 0; ibin <= numBins; ++ibin) {
-        double tof = rescaling_factor * ibin;
-        TofEvent tofevent(tof);
-        evlist.addEventQuickly(tofevent); // insert event
-      }
+
+	  for (auto &tof : xdata)
+		  evlist.addEventQuickly(TofEvent(tof));
+
       evlist.setX(xdata.cowData()); // set the bins for the associated histogram
     }
     return testWS;

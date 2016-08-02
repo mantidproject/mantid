@@ -133,8 +133,8 @@ void ModeratorTzero::exec() {
   // iterate over the spectra
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    MantidVec &inbins = inputWS->dataX(i);
-    MantidVec &outbins = outputWS->dataX(i);
+    auto &inbins = inputWS->mutableX(i);
+    auto &outbins = outputWS->mutableX(i);
 
     // One parser for each parallel processor needed (except Edirect mode)
     double E1;
@@ -218,8 +218,8 @@ void ModeratorTzero::exec() {
     }   // end of if(L2 >= 0)
 
     // Copy y and e data
-    outputWS->dataY(i) = inputWS->dataY(i);
-    outputWS->dataE(i) = inputWS->dataE(i);
+    outputWS->setSharedY(i, inputWS->sharedY(i));
+    outputWS->setSharedE(i, inputWS->sharedE(i));
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   } // end of for (int i = 0; i < static_cast<int>(numHists); ++i)
@@ -331,7 +331,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
           if (t2 >= 0) // t2 < 0 when no detector info is available
           {
             // fix the histogram bins
-            MantidVec &x = evlist.dataX();
+            auto &x = evlist.mutableX();
             for (double &tof : x) {
               if (tof < m_t1min + t2)
                 tof -= min_t0_next;
@@ -352,7 +352,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
         }   // end of if(emode=="Indirect")
         else if (emode == "Elastic") {
           // Apply t0 correction to histogram bins
-          MantidVec &x = evlist.dataX();
+          auto &x = evlist.mutableX();
           for (double &tof : x) {
             if (tof < m_t1min * (L1 + L2) / L1)
               tof -= min_t0_next;
@@ -373,11 +373,11 @@ void ModeratorTzero::execEvent(const std::string &emode) {
           evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
 
           MantidVec tofs_b = evlist.getTofs();
-          MantidVec xarray = evlist.readX();
+          auto &xarray = evlist.x();
         } // end of else if(emode=="Elastic")
         else if (emode == "Direct") {
           // fix the histogram bins
-          MantidVec &x = evlist.dataX();
+          auto &x = evlist.mutableX();
           for (double &tof : x) {
             tof -= t0_direct;
           }
