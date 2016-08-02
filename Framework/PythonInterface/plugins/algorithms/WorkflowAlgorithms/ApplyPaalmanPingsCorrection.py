@@ -181,7 +181,10 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                      LogText=sam_base)
 
         # Convert Units back to original
-
+        self._convert_units_wavelength(sample_unit,
+                                       self._output_ws_name,
+                                       self._output_ws_name,
+                                       sample_unit)
 
 
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
