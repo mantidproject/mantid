@@ -81,6 +81,18 @@ IProjectSerialisable *InstrumentWindow::loadFromProject(
         app->restoreWindowGeometry(app, iw, geometry);
       }
 
+      if (tsv.selectLine("CurrentTab")) {
+        int tab;
+        tsv >> tab;
+        iw->selectTab(tab);
+      }
+
+      if (tsv.selectLine("SurfaceType")) {
+        int surfaceType;
+        tsv >> surfaceType;
+        iw->m_instrumentWidget->setSurfaceType(surfaceType);
+      }
+
       app->addMdiSubWindow(iw);
 
       QApplication::restoreOverrideCursor();
@@ -102,6 +114,10 @@ std::string InstrumentWindow::saveToProject(ApplicationWindow *app) {
   tsv.writeLine("WorkspaceName")
       << m_instrumentWidget->getWorkspaceNameStdString();
   tsv.writeRaw(app->windowGeometryInfo(this));
+
+  tsv.writeLine("SurfaceType") << m_instrumentWidget->getSurfaceType();
+  tsv.writeLine("CurrentTab") << m_instrumentWidget->getCurrentTab();
+
   tsv.writeRaw("</instrumentwindow>");
   return tsv.outputLines();
 }

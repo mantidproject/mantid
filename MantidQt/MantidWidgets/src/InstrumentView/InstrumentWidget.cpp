@@ -1278,5 +1278,10 @@ void InstrumentWidget::clearADSHandle() {
   emit clearingHandle();
   close();
 }
+
+int InstrumentWidget::getCurrentTab() const {
+  return mControlsTab->currentIndex();
+}
+
 } // MantidWidgets
 } // MantidQt

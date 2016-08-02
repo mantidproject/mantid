@@ -128,6 +128,9 @@ public:
       const std::string &wsName,
       const boost::shared_ptr<Mantid::API::Workspace> workspace);
 
+  /// Get the currently selected tab index
+  int getCurrentTab() const;
+
 signals:
   void enableLighting(bool);
   void plot1D(const QString &, const std::set<int> &, bool);
