@@ -53,6 +53,14 @@ private:
 
   /// next line
   const char m_endl;
+
+  /// table_counter
+  int m_counter;
+
+  ITableWorkspace_sptr tbl_ws;
+
+  WorkspaceGroup grp_ws;
+
 };
 } // namespace DataHandling
 } // namespace Mantid

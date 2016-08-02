@@ -28,7 +28,7 @@ using namespace API;
 
 /// Empty constructor
 SaveDiffFittingAscii::SaveDiffFittingAscii()
-    : Mantid::API::Algorithm(), m_sep(','), m_endl('\n') {}
+    : Mantid::API::Algorithm(), m_sep(','), m_endl('\n'), m_counter(0) {}
 
 /// Initialisation method.
 void SaveDiffFittingAscii::init() {
@@ -110,8 +110,23 @@ void SaveDiffFittingAscii::exec() {
     appendToFile = false;
   }
 
-  const std::string runNum = getProperty("RunNumber");
-  const std::string bank = getProperty("Bank");
+  const std::string runNumList = getProperty("RunNumber");
+  const std::string bankList = getProperty("Bank");
+
+  std::vector<std::string> splitRunNum;
+  boost::split(splitRunNum, runNumList, boost::is_any_of(","));
+
+  std::vector<std::string> splitBank;
+  boost::split(splitBank, bankList, boost::is_any_of(","));
+
+  std::string runNum = splitRunNum[m_counter];
+  std::string bank = splitBank[m_counter];
+
+  g_log.error() << "run number: " << runNum << std::endl;
+  g_log.error() << "bank number: " << bank << std::endl;
+  g_log.error() << "counter number: " << std::to_string(m_counter) << std::endl;
+
+  // m_counter++;
   writeInfo(runNum, bank, file);
 
   // write header
@@ -129,6 +144,8 @@ void SaveDiffFittingAscii::writeInfo(const std::string &runNumber,
 
   file << "run number: " << runNumber << m_endl;
   file << "bank: " << bank << m_endl;
+  m_counter++;
+  g_log.error() << "counter: " << m_counter << m_endl;
 }
 
 void SaveDiffFittingAscii::writeHeader(std::vector<std::string> &columnHeadings,
