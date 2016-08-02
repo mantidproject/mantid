@@ -38,6 +38,10 @@ private:
   /// Execution code
   void exec() override;
 
+  /// Process two groups and ensure the Result string is set properly on the
+  /// final algorithm
+  bool processGroups() override;
+
   /// Main exec routine, called for group or individual workspace processing.
   void processAll();
 
@@ -47,7 +51,8 @@ private:
   void writeHeader(std::vector<std::string> &columnHeadings,
                    std::ofstream &file);
 
-  void writeData(API::ITableWorkspace_sptr workspace, std::ofstream &file, size_t columnSize);
+  void writeData(API::ITableWorkspace_sptr workspace, std::ofstream &file,
+                 size_t columnSize);
 
   void writeVal(std::string &val, std::ofstream &file, bool endline);
 
@@ -60,10 +65,7 @@ private:
   /// table_counter
   int m_counter;
 
-  ITableWorkspace_sptr tbl_ws;
-
-  WorkspaceGroup grp_ws;
-
+  std::vector<API::ITableWorkspace_sptr> m_workspaces;
 };
 } // namespace DataHandling
 } // namespace Mantid

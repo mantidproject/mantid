@@ -5,7 +5,6 @@
 #include "MantidDataHandling/SaveDiffFittingAscii.h"
 
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ListValidator.h"
@@ -70,9 +69,6 @@ void SaveDiffFittingAscii::init() {
 *   Executes the algorithm.
 */
 void SaveDiffFittingAscii::exec() {
-  // Get the workspace
-
-  // Process properties
 
   // Retrieve the input workspace
   /// Workspace
@@ -80,6 +76,11 @@ void SaveDiffFittingAscii::exec() {
   if (!tbl_ws)
     throw std::runtime_error("Please provide an input workspace to be saved.");
 
+  m_workspaces.push_back(
+      boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(tbl_ws));
+
+  processAll();
+}
 
 bool SaveDiffFittingAscii::processGroups() {
   try {
@@ -155,20 +156,24 @@ void SaveDiffFittingAscii::processAll() {
 
   for (auto &tbl : m_workspaces) {
 
-  g_log.error() << "run number: " << runNum << std::endl;
-  g_log.error() << "bank number: " << bank << std::endl;
-  g_log.error() << "counter number: " << std::to_string(m_counter) << std::endl;
+    std::string runNum = splitRunNum[m_counter];
+    std::string bank = splitBank[m_counter];
+    writeInfo(runNum, bank, file);
 
-  // m_counter++;
-  writeInfo(runNum, bank, file);
+    // write header
+    std::vector<std::string> columnHeadings = tbl->getColumnNames();
+    writeHeader(columnHeadings, file);
 
-  // write header
-  std::vector<std::string> columnHeadings = tbl_ws->getColumnNames();
-  writeHeader(columnHeadings, file);
+    // write out the data form the table workspace
+    size_t columnSize = columnHeadings.size();
+    writeData(tbl, file, columnSize);
 
-  // write out the data form the table workspace
-  size_t columnSize = columnHeadings.size();
-  writeData(tbl_ws, file, columnSize);
+    if (outFormat == "WriteGroupWorkspace") {
+      file << "\n";
+    }
+  }
+
+  progress.report();
 }
 
 void SaveDiffFittingAscii::writeInfo(const std::string &runNumber,
@@ -178,7 +183,6 @@ void SaveDiffFittingAscii::writeInfo(const std::string &runNumber,
   file << "run number: " << runNumber << m_endl;
   file << "bank: " << bank << m_endl;
   m_counter++;
-  g_log.error() << "counter: " << m_counter << m_endl;
 }
 
 void SaveDiffFittingAscii::writeHeader(std::vector<std::string> &columnHeadings,
