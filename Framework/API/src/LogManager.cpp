@@ -49,16 +49,30 @@ template <typename T>
 bool convertTimeSeriesToDouble(const Property *property, double &value,
                                const Math::StatisticType &function) {
   if (const auto *log = dynamic_cast<const TimeSeriesProperty<T> *>(property)) {
-    if (function == Math::Mean) {
+    switch (function) {
+    case Math::TimeAveragedMean:
       value = static_cast<double>(log->timeAverageValue());
-    } else if (function == Math::FirstValue) {
+      break;
+    case Math::FirstValue:
       value = static_cast<double>(log->firstValue());
-    } else if (function == Math::Minimum) {
-      value = static_cast<double>(log->minValue());
-    } else if (function == Math::Maximum) {
-      value = static_cast<double>(log->maxValue());
-    } else { // default
+      break;
+    case Math::LastValue:
       value = static_cast<double>(log->lastValue());
+      break;
+    case Math::Maximum:
+      value = static_cast<double>(log->maxValue());
+      break;
+    case Math::Minimum:
+      value = static_cast<double>(log->minValue());
+      break;
+    case Math::Mean:
+      value = log->getStatistics().mean;
+      break;
+    case Math::Median:
+      value = log->getStatistics().median;
+      break;
+    default: // should not happen
+      throw std::invalid_argument("Statistic type not recognised/supported");
     }
     return true;
   } else {

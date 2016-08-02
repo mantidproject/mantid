@@ -487,9 +487,9 @@ private:
     LogManager runInfo;
     const std::string name = "T_series";
     addTestTimeSeries<T>(runInfo, name);
-    const double expectedValue(24.0);
+    const double expectedValue(13.0);
     TS_ASSERT_DELTA(
-        runInfo.getPropertyAsSingleValue(name, Mantid::Kernel::Math::LastValue),
+        runInfo.getPropertyAsSingleValue(name, Mantid::Kernel::Math::Mean),
         expectedValue, 1e-12);
   }
 };
