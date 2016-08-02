@@ -154,8 +154,8 @@ bool isMultiPeriodFile(size_t nWorkspaceEntries, Workspace_sptr sampleWS,
     const std::string nPeriodsLogEntryName = "nperiods";
     const Run &run = expInfo->run();
     if (run.hasProperty(nPeriodsLogEntryName)) {
-      const int nPeriods =
-          run.getPropertyValueAsType<int>(nPeriodsLogEntryName);
+      const size_t nPeriods =
+          run.getPropertyValueAsType<size_t>(nPeriodsLogEntryName);
       if (nPeriods == nWorkspaceEntries) {
         isMultiPeriod = true;
         log.information("Loading as MultiPeriod group workspace.");
@@ -289,14 +289,13 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
 
   int blockSize = 8; // Read block size. Set to 8 for efficiency. i.e. read
                      // 8 histograms at a time.
-  const size_t nFullBlocks =
-      nHistograms /
-      blockSize; // Truncated number of full blocks to read. Remainder removed
-  const size_t readOptimumStop = (nFullBlocks * blockSize);
+  int nFullBlocks = static_cast<int>(nHistograms) / blockSize; // Truncated number of full blocks to read. Remainder removed
+  const int readOptimumStop = (nFullBlocks * blockSize);
   const int readStop = m_spec_max - 1;
-  const int finalBlockSize = readStop - static_cast<int>(readOptimumStop);
+  const int finalBlockSize = readStop - readOptimumStop;
 
   int wsIndex = 0;
+  //This cast is safe as m_spec_min must be >= 1
   int histIndex = m_spec_min - 1;
 
   for (; histIndex < readStop;) {
@@ -375,7 +374,7 @@ void LoadNexusProcessed::exec() {
   size_t nWorkspaceEntries = (root.groups().size());
 
   // Check for an entry number property
-  int entrynumber = getProperty("EntryNumber");
+  size_t entrynumber = getProperty("EntryNumber");
   Property const *const entryNumberProperty = this->getProperty("EntryNumber");
   bool bDefaultEntryNumber = entryNumberProperty->isDefault();
 
@@ -1292,8 +1291,9 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
   int blocksize = 8;
   // const int fullblocks = nspectra / blocksize;
   // size of the workspace
-  size_t fullblocks = total_specs / blocksize;
-  size_t read_stop = (fullblocks * blocksize);
+  // have to cast down to int as later functions require ints
+  int fullblocks = static_cast<int>(total_specs) / blocksize;
+  int read_stop = (fullblocks * blocksize);
   const double progressBegin = progressStart + 0.25 * progressRange;
   const double progressScaler = 0.75 * progressRange;
   int hist_index = 0;
@@ -1672,7 +1672,7 @@ void LoadNexusProcessed::loadNonSpectraAxis(
   if (axis->isNumeric()) {
     NXDouble axisData = data.openNXDouble("axis2");
     axisData.load();
-    for (int i = 0; i < axis->length(); i++) {
+    for (int i = 0; i < static_cast<int>(axis->length()); i++) {
       axis->setValue(i, axisData[i]);
     }
   } else if (axis->isText()) {
@@ -2065,7 +2065,13 @@ void LoadNexusProcessed::checkOptionalProperties(
     m_list = true;
     const int minlist = *min_element(m_spec_list.begin(), m_spec_list.end());
     const int maxlist = *max_element(m_spec_list.begin(), m_spec_list.end());
-    if (maxlist > numberofspectra || minlist == 0) {
+    // Need to check before casting
+    if (maxlist < 0){
+        g_log.error("Invalid list of spectra");
+        throw std::invalid_argument("Spectra max is less than 0");
+    }
+    
+    if (maxlist > static_cast<int>(numberofspectra) || minlist == 0) {
       g_log.error("Invalid list of spectra");
       throw std::invalid_argument("Inconsistent properties defined");
     }
@@ -2078,7 +2084,7 @@ void LoadNexusProcessed::checkOptionalProperties(
     if (m_spec_min != 1 && m_spec_max == 1) {
       m_spec_max = static_cast<int>(numberofspectra);
     }
-    if (m_spec_max < m_spec_min || m_spec_max > numberofspectra) {
+    if (m_spec_max < m_spec_min || m_spec_max > static_cast<int>(numberofspectra)) {
       g_log.error("Invalid Spectrum min/max properties");
       throw std::invalid_argument("Inconsistent properties defined");
     }
@@ -2148,7 +2154,7 @@ LoadNexusProcessed::calculateWorkspaceSize(const std::size_t numberofspectra,
 
     if (gen_filtered_list) {
       m_filtered_spec_idxs.resize(total_specs, 0);
-      for (int j = 0; j < total_specs; j++)
+      for (int j = 0; j < static_cast<int>(total_specs); j++)
         m_filtered_spec_idxs[j] = m_spec_min + j;
     }
   }
