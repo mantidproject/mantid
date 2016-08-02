@@ -38,6 +38,9 @@ private:
   /// Execution code
   void exec() override;
 
+  /// Main exec routine, called for group or individual workspace processing.
+  void processAll();
+
   void writeInfo(const std::string &runNumber, const std::string &bank,
                  std::ofstream &file);
 

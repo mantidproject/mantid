@@ -80,6 +80,37 @@ void SaveDiffFittingAscii::exec() {
   if (!tbl_ws)
     throw std::runtime_error("Please provide an input workspace to be saved.");
 
+
+bool SaveDiffFittingAscii::processGroups() {
+  try {
+
+    std::string name = getPropertyValue("InputWorkspace");
+
+    WorkspaceGroup_sptr inputGroup =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
+
+    for (int i = 0; i < inputGroup->getNumberOfEntries(); ++i) {
+      m_workspaces.push_back(
+          boost::dynamic_pointer_cast<ITableWorkspace>(inputGroup->getItem(i)));
+    }
+
+    // Store output workspace in AnalysisDataService
+    if (!isChild())
+      this->store();
+
+    setExecuted(true);
+    notificationCenter().postNotification(
+        new FinishedNotification(this, this->isExecuted()));
+  } catch (...) {
+	  g_log.error()
+		  << "Error while processing groups on SaveDiffFittingAscii algorithm. "
+		  << m_endl;
+  }
+
+  processAll();
+
+  return true;
+}
   const std::string filename = getProperty("Filename");
 
   Poco::File pFile = (filename);
