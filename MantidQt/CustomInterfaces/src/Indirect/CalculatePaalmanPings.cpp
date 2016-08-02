@@ -33,9 +33,22 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
   QValidator *formulaValidator = new QRegExpValidator(regex, this);
   m_uiForm.leSampleChemicalFormula->setValidator(formulaValidator);
   m_uiForm.leCanChemicalFormula->setValidator(formulaValidator);
+  connect(m_uiForm.leSampleChemicalFormula, SIGNAL(editingFinished()), this,
+          SLOT(validateChemical()));
+  connect(m_uiForm.leCanChemicalFormula, SIGNAL(editingFinished()), this,
+          SLOT(validateChemical()));
+  UserInputValidator uiv;
+  if (uiv.checkFieldIsNotEmpty("Can Chemical Formula",
+	  m_uiForm.leCanChemicalFormula,
+	  m_uiForm.valCanChemicalFormula)) {
+	  uiv.checkFieldIsValid("Can Chemical Formula", m_uiForm.leCanChemicalFormula,
+		  m_uiForm.valCanChemicalFormula);
+  }
 }
 
 void CalculatePaalmanPings::setup() { doValidation(true); }
+
+void CalculatePaalmanPings::validateChemical() { doValidation(true); }
 
 void CalculatePaalmanPings::run() {
   // Get correct corrections algorithm
@@ -162,23 +175,6 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
 
-  const auto sampleChem =
-      m_uiForm.leSampleChemicalFormula->text().toStdString();
-  const auto containerChem =
-      m_uiForm.leCanChemicalFormula->text().toStdString();
-  try {
-    Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
-  } catch (std::runtime_error &ex) {
-    UNUSED_ARG(ex);
-    uiv.addErrorMessage("Chemical Formula for Sample was not recognised.");
-  }
-  try {
-    Mantid::Kernel::Material::parseChemicalFormula(containerChem);
-  } catch (std::runtime_error &ex) {
-    UNUSED_ARG(ex);
-    uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
-  }
-
   // Validate chemical formula
   if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula",
                                m_uiForm.leSampleChemicalFormula,
@@ -186,9 +182,18 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
     uiv.checkFieldIsValid("Sample Chemical Formula",
                           m_uiForm.leSampleChemicalFormula,
                           m_uiForm.valSampleChemicalFormula);
+  const auto sampleChem =
+      m_uiForm.leSampleChemicalFormula->text().toStdString();
+  try {
+    Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
+  } catch (std::runtime_error &ex) {
+    UNUSED_ARG(ex);
+    uiv.addErrorMessage("Chemical Formula for Sample was not recognised.");
+    uiv.setErrorLabel(m_uiForm.valSampleChemicalFormula, false);
+  }
 
-  bool useCan = m_uiForm.ckUseCan->isChecked();
-  if (useCan) {
+
+  if (m_uiForm.ckUseCan->isChecked()) {
     uiv.checkDataSelectorIsValid("Can", m_uiForm.dsContainer);
 
     // Validate chemical formula
@@ -198,6 +203,16 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
       uiv.checkFieldIsValid("Can Chemical Formula",
                             m_uiForm.leCanChemicalFormula,
                             m_uiForm.valCanChemicalFormula);
+
+    const auto containerChem =
+        m_uiForm.leCanChemicalFormula->text().toStdString();
+    try {
+      Mantid::Kernel::Material::parseChemicalFormula(containerChem);
+    } catch (std::runtime_error &ex) {
+      UNUSED_ARG(ex);
+      uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
+      uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
+    }
 
     // Ensure sample and container are the same kind of data
     QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
