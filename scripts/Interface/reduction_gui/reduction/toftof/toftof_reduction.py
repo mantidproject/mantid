@@ -14,7 +14,6 @@ class TOFTOFScriptElement(BaseScriptElement):
 
     def reset(self):
 
-        self.prefix   = 'ws' # prefix of some workspace names
 
 #self.dataSearchDir    = '/home/jan/C/scg/toftof_data'
 #self.rebiningInEnergy = '-15,0.008,1.5'
@@ -27,9 +26,9 @@ class TOFTOFScriptElement(BaseScriptElement):
 #self.dataRuns = [('27:29','H2O_21C_sqw'), ('30:31','H2O_34C_sqw')]
 #self.maskDetectors = '308-312,314'
 
-        self.dataSearchDir    = 'AAA'
-        self.rebiningInEnergy = ''
-        self.rebiningInQ      = ''
+        self.dataSearchDir    = ''
+
+        self.prefix   = 'ws' # prefix of some workspace names
 
         # vanadium runs
         self.vanRuns  = ''
@@ -43,7 +42,8 @@ class TOFTOFScriptElement(BaseScriptElement):
         # data runs
         self.dataRuns = []
 
-        # additional detectors to mask
+        self.rebiningInEnergy = ''
+        self.rebiningInQ      = ''
         self.maskDetectors = ''
 
     xmlTag = 'TOFTOFReductionData'
