@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
   AlignComponentsTest.py
   ApplyPaalmanPingsCorrectionTest.py
   BayesQuasiTest.py
+  BayesStretchTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
@@ -57,6 +58,7 @@ set ( TEST_PY_FILES
   LoadLogPropertyTableTest.py
   LoadMultipleGSSTest.py
   LoadNMoldyn3AsciiTest.py
+  LoadNMoldyn4Ascii1DTest.py
   LoadNMoldyn4AsciiTest.py
   MaskAngleTest.py
   MaskBTPTest.py

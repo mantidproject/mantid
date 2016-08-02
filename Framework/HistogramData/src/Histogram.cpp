@@ -79,9 +79,15 @@ PointStandardDeviations Histogram::pointStandardDeviations() const {
 
 /** Returns the counts of the Histogram.
 
-  The returned Counts's internal pointer references the same data as the
-  Histogram, i.e., there is little overhead. */
-Counts Histogram::counts() const { return Counts(m_y); }
+  If the histogram stores frequencies, the counts are computed based on them.
+  Otherwise the returned Counts's internal pointer references the same data as
+  the Histogram, i.e., there is little overhead. */
+Counts Histogram::counts() const {
+  if (yMode() != YMode::Frequencies)
+    return Counts(m_y);
+  else
+    return Counts(Frequencies(m_y), binEdges());
+}
 
 /** Returns the variances of the counts of the Histogram.
 
@@ -93,20 +99,29 @@ CountVariances Histogram::countVariances() const {
 
 /** Returns the standard deviations of the counts of the Histogram.
 
-  The returned CountStandardDeviations's internal pointer references the same
-  data as the uncertainties stored in the Histogram, i.e., there is little
-  overhead. */
+  If the histogram stores frequencies, the CountStandardDeviations are computed
+  based on the standard deviations of the frequencies. Otherwise the returned
+  CountStandardDeviations's internal pointer references the same data as the
+  Histogram, i.e., there is little overhead. */
 CountStandardDeviations Histogram::countStandardDeviations() const {
-  return CountStandardDeviations(m_e);
+  if (yMode() != YMode::Frequencies)
+    return CountStandardDeviations(m_e);
+  else
+    return CountStandardDeviations(FrequencyStandardDeviations(m_e),
+                                   binEdges());
 }
 
 /** Returns the frequencies of the Histogram, i.e., the counts divided by the
   bin widths.
 
-  The frequencies are computed on the fly from other data stored in the
-  Histogram, i.e., this method comes with an overhead. */
+  If the histogram stores counts, the frequencies are computed based on them.
+  Otherwise the returned Frequencies's internal pointer references the same data
+  as the Histogram, i.e., there is little overhead. */
 Frequencies Histogram::frequencies() const {
-  return Frequencies(counts(), binEdges());
+  if (yMode() == YMode::Counts)
+    return Frequencies(Counts(m_y), binEdges());
+  else
+    return Frequencies(m_y);
 }
 
 /** Returns the variances of the frequencies of the Histogram.
@@ -114,23 +129,27 @@ Frequencies Histogram::frequencies() const {
   The variances are computed on the fly from other data stored in the
   Histogram, i.e., this method comes with an overhead. */
 FrequencyVariances Histogram::frequencyVariances() const {
-  return FrequencyVariances(countVariances(), binEdges());
+  return FrequencyVariances(frequencyStandardDeviations());
 }
 
 /** Returns the standard deviations of the frequencies of the Histogram.
 
-  The standard deviations are computed on the fly from other data stored in the
-  Histogram, i.e., this method comes with an overhead. */
+  If the histogram stores counts, the FrequencyStandardDeviations are computed
+  based on the standard deviations of the counts. Otherwise the returned
+  FrequencyStandardDeviations's internal pointer references the same data as the
+  Histogram, i.e., there is little overhead. */
 FrequencyStandardDeviations Histogram::frequencyStandardDeviations() const {
-  return FrequencyStandardDeviations(countStandardDeviations(), binEdges());
+  if (yMode() == YMode::Counts)
+    return FrequencyStandardDeviations(CountStandardDeviations(m_e),
+                                       binEdges());
+  else
+    return FrequencyStandardDeviations(m_e);
 }
 
 /** Sets the internal x-data pointer of the Histogram.
 
   Throws if the size does not match the current size. */
 void Histogram::setSharedX(const Kernel::cow_ptr<HistogramX> &x) & {
-  // TODO Check size only if we have y-data.
-  // TODO but if size changes, also need to invalidate m_dx!
   if (m_x->size() != x->size())
     throw std::logic_error("Histogram::setSharedX: size mismatch\n");
   m_x = x;
@@ -140,6 +159,9 @@ void Histogram::setSharedX(const Kernel::cow_ptr<HistogramX> &x) & {
 
   Throws if the size does not match the current size. */
 void Histogram::setSharedY(const Kernel::cow_ptr<HistogramY> &y) & {
+  if (yMode() == YMode::Uninitialized)
+    throw std::logic_error(
+        "Histogram::setSharedY: YMode is not set and cannot be determined");
   checkSize(*y);
   m_y = y;
 }
@@ -163,6 +185,36 @@ void Histogram::setSharedDx(const Kernel::cow_ptr<HistogramDx> &Dx) & {
   m_dx = Dx;
 }
 
+/// Converts the histogram storage mode into YMode::Counts
+void Histogram::convertToCounts() {
+  if (yMode() == YMode::Counts)
+    return;
+  const auto &X = x();
+  auto &Y = mutableY();
+  auto &E = mutableE();
+  for (size_t i = 0; i < Y.size(); ++i) {
+    double width = X[i + 1] - X[i];
+    Y[i] *= width;
+    E[i] *= width;
+  }
+  m_yMode = YMode::Counts;
+}
+
+/// Converts the histogram storage mode into YMode::Frequencies
+void Histogram::convertToFrequencies() {
+  if (yMode() == YMode::Frequencies)
+    return;
+  const auto &X = x();
+  auto &Y = mutableY();
+  auto &E = mutableE();
+  for (size_t i = 0; i < Y.size(); ++i) {
+    double width = X[i + 1] - X[i];
+    Y[i] /= width;
+    E[i] /= width;
+  }
+  m_yMode = YMode::Frequencies;
+}
+
 template <> void Histogram::initX(const Points &x) {
   m_xMode = XMode::Points;
   m_x = x.cowData();
@@ -175,19 +227,13 @@ template <> void Histogram::initX(const BinEdges &x) {
     throw std::logic_error("Histogram: BinEdges size cannot be 1");
 }
 
-template <> void Histogram::initY(const Counts &y) {
-  if (y)
-    setCounts(y);
+template <> void Histogram::setValues(const Counts &y) {
+  m_yMode = YMode::Counts;
+  setCounts(y);
 }
-
-template <> void Histogram::initY(const Frequencies &y) {
-  if (y)
-    setFrequencies(y);
-}
-
-template <> void Histogram::setValues(const Counts &y) { setCounts(y); }
 
 template <> void Histogram::setValues(const Frequencies &y) {
+  m_yMode = YMode::Frequencies;
   setFrequencies(y);
 }
 
@@ -206,6 +252,20 @@ template <> void Histogram::setUncertainties(const FrequencyVariances &e) {
 template <>
 void Histogram::setUncertainties(const FrequencyStandardDeviations &e) {
   setFrequencyStandardDeviations(e);
+}
+
+void Histogram::checkAndSetYModeCounts() {
+  if (yMode() == YMode::Frequencies)
+    throw std::logic_error("Histogram: Y is storing Counts, modifying "
+                           "Frequencies is not possible.");
+  m_yMode = YMode::Counts;
+}
+
+void Histogram::checkAndSetYModeFrequencies() {
+  if (yMode() == YMode::Counts)
+    throw std::logic_error("Histogram: Y is storing Frequencies, modifying "
+                           "Counts is not possible.");
+  m_yMode = YMode::Frequencies;
 }
 
 template <> void Histogram::checkSize(const BinEdges &binEdges) const {

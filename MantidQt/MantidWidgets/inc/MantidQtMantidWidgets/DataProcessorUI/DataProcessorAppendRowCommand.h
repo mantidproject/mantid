@@ -10,7 +10,7 @@ namespace MantidWidgets {
 
 DataProcessorAppendRowCommand defines the action "Insert Row After"
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.

@@ -136,15 +136,7 @@ void DiffractionFocussing::exec() {
   for (int64_t hist = 0; hist < static_cast<int64_t>(resultIndeces.size());
        hist++) {
     int64_t i = resultIndeces[hist];
-    MantidVec &tmpE = tmpW->dataE(i);
-    MantidVec &outE = outputW->dataE(hist);
-    MantidVec &tmpY = tmpW->dataY(i);
-    MantidVec &outY = outputW->dataY(hist);
-    MantidVec &tmpX = tmpW->dataX(i);
-    MantidVec &outX = outputW->dataX(hist);
-    outE.assign(tmpE.begin(), tmpE.end());
-    outY.assign(tmpY.begin(), tmpY.end());
-    outX.assign(tmpX.begin(), tmpX.end());
+    outputW->setHistogram(hist, tmpW->histogram(i));
     auto &inSpec = tmpW->getSpectrum(i);
     outputW->getSpectrum(hist).setSpectrumNo(inSpec.getSpectrumNo());
     inSpec.setSpectrumNo(-1);
@@ -215,7 +207,7 @@ void DiffractionFocussing::calculateRebinParams(
   // one
   int64_t length = workspace->getNumberHistograms();
   for (int64_t i = 0; i < length; i++) {
-    const MantidVec &xVec = workspace->readX(i);
+    auto &xVec = workspace->x(i);
     const double &localMin = xVec.front();
     const double &localMax = xVec.back();
     if (localMin != std::numeric_limits<double>::infinity() &&

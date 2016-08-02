@@ -120,6 +120,11 @@ void UsageServiceImpl::setEnabled(const bool enabled) {
   m_isEnabled = enabled;
 }
 
+void UsageServiceImpl::clear() {
+  std::queue<FeatureUsage> empty;
+  std::swap(m_FeatureQueue, empty);
+}
+
 void UsageServiceImpl::flush() {
   if (isEnabled()) {
     sendFeatureUsageReport(true);
@@ -301,5 +306,5 @@ int UsageServiceImpl::sendReport(const std::string &message,
   return status;
 }
 
-} // namespace API
+} // namespace Kernel
 } // namespace Mantid
