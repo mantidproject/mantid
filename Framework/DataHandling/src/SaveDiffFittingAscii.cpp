@@ -103,9 +103,9 @@ bool SaveDiffFittingAscii::processGroups() {
     notificationCenter().postNotification(
         new FinishedNotification(this, this->isExecuted()));
   } catch (...) {
-	  g_log.error()
-		  << "Error while processing groups on SaveDiffFittingAscii algorithm. "
-		  << m_endl;
+    g_log.error()
+        << "Error while processing groups on SaveDiffFittingAscii algorithm. "
+        << m_endl;
   }
 
   processAll();
@@ -117,8 +117,8 @@ void SaveDiffFittingAscii::processAll() {
 
   const std::string filename = getProperty("Filename");
   std::string outFormat = getProperty("OutFormat");
-  const std::string runNumList = getProperty("RunNumber");
-  const std::string bankList = getProperty("Bank");
+  std::string runNumList = getProperty("RunNumber");
+  std::string bankList = getProperty("Bank");
 
   Poco::File pFile = (filename);
   bool exist = pFile.exists();
@@ -146,9 +146,14 @@ void SaveDiffFittingAscii::processAll() {
   }
 
   std::vector<std::string> splitRunNum;
+  // remove spaces within string to produce constant format
+  runNumList.erase(std::remove(runNumList.begin(), runNumList.end(), ' '),
+                   runNumList.end());
   boost::split(splitRunNum, runNumList, boost::is_any_of(","));
 
   std::vector<std::string> splitBank;
+  bankList.erase(std::remove(bankList.begin(), bankList.end(), ' '),
+                 bankList.end());
   boost::split(splitBank, bankList, boost::is_any_of(","));
 
   // Create a progress reporting object
