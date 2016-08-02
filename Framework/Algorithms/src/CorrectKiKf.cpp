@@ -2,10 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CorrectKiKf.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -23,12 +23,6 @@ using namespace API;
 using namespace DataObjects;
 using namespace Geometry;
 using std::size_t;
-
-/// Default constructor
-CorrectKiKf::CorrectKiKf() : Algorithm() {}
-
-/// Destructor
-CorrectKiKf::~CorrectKiKf() {}
 
 /// Initialisation method
 void CorrectKiKf::init() {
@@ -77,7 +71,6 @@ void CorrectKiKf::exec() {
   // Calculate the number of spectra in this workspace
   const int numberOfSpectra = static_cast<int>(inputWS->size() / size);
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
-  const bool histogram = inputWS->isHistogramData();
   bool negativeEnergyWarning = false;
 
   const std::string emodeStr = getProperty("EMode");
@@ -137,15 +130,15 @@ void CorrectKiKf::exec() {
         }
     }
 
-    MantidVec &yOut = outputWS->dataY(i);
-    MantidVec &eOut = outputWS->dataE(i);
-    const MantidVec &xIn = inputWS->readX(i);
-    const MantidVec &yIn = inputWS->readY(i);
-    const MantidVec &eIn = inputWS->readE(i);
+    auto &yOut = outputWS->mutableY(i);
+    auto &eOut = outputWS->mutableE(i);
+    const auto &xIn = inputWS->points(i);
+    auto &yIn = inputWS->y(i);
+    auto &eIn = inputWS->e(i);
     // Copy the energy transfer axis
-    outputWS->setX(i, inputWS->refX(i));
+    outputWS->setSharedX(i, inputWS->sharedX(i));
     for (unsigned int j = 0; j < size; ++j) {
-      const double deltaE = histogram ? 0.5 * (xIn[j] + xIn[j + 1]) : xIn[j];
+      const double deltaE = xIn[j];
       double Ei = 0.;
       double Ef = 0.;
       double kioverkf = 1.;
@@ -177,12 +170,10 @@ void CorrectKiKf::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   if (negativeEnergyWarning)
-    g_log.information() << "Ef <= 0 or Ei <= 0 in at least one spectrum!!!!"
-                        << std::endl;
+    g_log.information() << "Ef <= 0 or Ei <= 0 in at least one spectrum!!!!\n";
   if ((negativeEnergyWarning) && (efixedProp == EMPTY_DBL()))
-    g_log.information() << "Try to set fixed energy" << std::endl;
+    g_log.information() << "Try to set fixed energy\n";
   this->setProperty("OutputWorkspace", outputWS);
-  return;
 }
 
 /**
@@ -272,20 +263,20 @@ void CorrectKiKf::execEvent() {
       efixed = efixedProp;
 
     // Do the correction
-    EventList *evlist = outputWS->getEventListPtr(i);
-    switch (evlist->getEventType()) {
+    auto &evlist = outputWS->getSpectrum(i);
+    switch (evlist.getEventType()) {
     case TOF:
       // Switch to weights if needed.
-      evlist->switchTo(WEIGHTED);
+      evlist.switchTo(WEIGHTED);
     /* no break */
     // Fall through
 
     case WEIGHTED:
-      correctKiKfEventHelper(evlist->getWeightedEvents(), efixed, emodeStr);
+      correctKiKfEventHelper(evlist.getWeightedEvents(), efixed, emodeStr);
       break;
 
     case WEIGHTED_NOTIME:
-      correctKiKfEventHelper(evlist->getWeightedEventsNoTime(), efixed,
+      correctKiKfEventHelper(evlist.getWeightedEventsNoTime(), efixed,
                              emodeStr);
       break;
     }
@@ -300,9 +291,9 @@ void CorrectKiKf::execEvent() {
     g_log.information() << "Ef <= 0 or Ei <= 0 for "
                         << inputWS->getNumberEvents() -
                                outputWS->getNumberEvents() << " events, out of "
-                        << inputWS->getNumberEvents() << std::endl;
+                        << inputWS->getNumberEvents() << '\n';
     if (efixedProp == EMPTY_DBL())
-      g_log.information() << "Try to set fixed energy" << std::endl;
+      g_log.information() << "Try to set fixed energy\n";
   }
 }
 

@@ -147,7 +147,7 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent)
       // attempt to install
       repo_ptr->install(dir.toStdString());
       g_log.information() << "ScriptRepository installed at "
-                          << dir.toStdString() << std::endl;
+                          << dir.toStdString() << '\n';
     }
     // create the model
     model = new RepoModel(this);
@@ -163,18 +163,17 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent)
     return;
   } catch (Mantid::API::ScriptRepoException &ex) {
     // means that the installation failed
-    g_log.warning() << "ScriptRepository installation: " << ex.what()
-                    << std::endl;
+    g_log.warning() << "ScriptRepository installation: " << ex.what() << '\n';
     g_log.information()
         << "ScriptRepository installation failed with this information: "
-        << ex.systemError() << std::endl;
+        << ex.systemError() << '\n';
     QMessageBox::warning(this, "Installation Failed", QString(ex.what()));
     close();
     deleteLater();
     return;
   } catch (...) {
     g_log.error() << "Unknown error occurred to install ScriptRepository. It "
-                     "will not be shown." << std::endl;
+                     "will not be shown.\n";
     close();
     deleteLater();
     return;
@@ -615,13 +614,13 @@ void ScriptRepositoryView::openFolderLink(QString link) {
   // the local file system for all platforms.
   const QUrl url = QUrl::fromLocalFile(link);
   if (!url.isValid()) {
-    g_log.error() << error_msg << "Invalid (malformed) URL." << std::endl;
+    g_log.error() << error_msg << "Invalid (malformed) URL.\n";
     return;
   }
 
   const bool openSuccessful = QDesktopServices::openUrl(url);
   if (!openSuccessful)
-    g_log.error() << error_msg << "Could not find directory." << std::endl;
+    g_log.error() << error_msg << "Could not find directory.\n";
 }
 
 } // namespace API

@@ -155,7 +155,6 @@ void Plane::rotate(const Kernel::Matrix<double> &MA)
   NormV.rotate(MA);
   NormV.normalize();
   Quadratic::rotate(MA);
-  return;
 }
 
 void Plane::displace(const Kernel::V3D &Sp)
@@ -167,7 +166,6 @@ void Plane::displace(const Kernel::V3D &Sp)
 {
   Dist += NormV.scalar_prod(Sp);
   Quadratic::displace(Sp);
-  return;
 }
 
 double Plane::distance(const Kernel::V3D &A) const
@@ -235,8 +233,7 @@ void Plane::print() const
 */
 {
   Quadratic::print();
-  std::cout << "NormV == " << NormV << " : " << Dist << std::endl;
-  return;
+  std::cout << "NormV == " << NormV << " : " << Dist << '\n';
 }
 
 std::size_t Plane::planeType() const
@@ -268,7 +265,6 @@ void Plane::setBaseEqn() {
   BaseEqn[7] = NormV[1]; // H y
   BaseEqn[8] = NormV[2]; // J z
   BaseEqn[9] = -Dist;    // K const
-  return;
 }
 
 /**
@@ -291,7 +287,6 @@ void Plane::write(std::ostream &OX) const {
        << "xyz"[ptype - 1] << " " << Dist;
 
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
-  return;
 }
 
 /**
@@ -396,13 +391,13 @@ void Plane::getBoundingBox(double &xmax, double &ymax, double &zmax,
   if (LineIntersectionWithPlane(vertex4, vertex8, edge12) == 1)
     listOfPoints.push_back(edge12);
   // now sort the vertices to find the  mins and max
-  //	std::cout<<listOfPoints.size()<<std::endl;
+  //	std::cout<<listOfPoints.size()<<'\n';
   if (!listOfPoints.empty()) {
     xmin = ymin = zmin = DBL_MAX;
     xmax = ymax = zmax = -DBL_MAX;
     for (std::vector<V3D>::const_iterator it = listOfPoints.begin();
          it != listOfPoints.end(); ++it) {
-      //			std::cout<<(*it)<<std::endl;
+      //			std::cout<<(*it)<<'\n';
       if ((*it)[0] < xmin)
         xmin = (*it)[0];
       if ((*it)[1] < ymin)

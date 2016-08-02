@@ -257,7 +257,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
     //      strcpy(link->targetPath, targetPath.c_str());
     //      if (NXmakelink(outId,link) != NX_OK)
     //        g_log.debug() << "Error while making link to " << targetPath <<
-    //        std::endl;
+    //        '\n';
 
     if (WriteAttributes(is_definition) != NX_OK)
       return NX_ERROR;
@@ -547,7 +547,7 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
         if (!strcmp(current_path, link.targetPath)) {
           // Look for the bank name
           std::string path(current_path);
-          std::string bank("");
+          std::string bank;
 
           size_t a = path.rfind('/');
           if (a != std::string::npos && a > 0) {
@@ -717,8 +717,6 @@ void SaveToSNSHistogramNexus::exec() {
 
   if (ret == NX_ERROR)
     throw std::runtime_error("Nexus error while copying the file.");
-
-  return;
 }
 
 } // namespace NeXus

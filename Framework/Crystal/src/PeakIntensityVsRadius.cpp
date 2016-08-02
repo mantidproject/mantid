@@ -19,16 +19,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(PeakIntensityVsRadius)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PeakIntensityVsRadius::PeakIntensityVsRadius() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeakIntensityVsRadius::~PeakIntensityVsRadius() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PeakIntensityVsRadius::name() const {
   return "PeakIntensityVsRadius";
@@ -168,7 +158,7 @@ void PeakIntensityVsRadius::exec() {
     double radius =
         RadiusStart +
         double(step) * (RadiusEnd - RadiusStart) / (double(NumSteps - 1));
-    g_log.debug() << "Integrating radius " << radius << std::endl;
+    g_log.debug() << "Integrating radius " << radius << '\n';
     prog.report("Radius " + Kernel::Strings::toString(radius));
 
     double OuterRadius = 0;

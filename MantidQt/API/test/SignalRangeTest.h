@@ -1,14 +1,17 @@
 #ifndef MANTIDQT_API_SIGNALRANGETEST_H_
 #define MANTIDQT_API_SIGNALRANGETEST_H_
 
-#include "MantidQtAPI/SignalRange.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtAPI/SignalRange.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "MantidAPI/IMDIterator.h"
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class SignalRangeTest : public CxxTest::TestSuite {
 private:
@@ -41,6 +44,7 @@ private:
     MOCK_METHOD0(clearMDMasking, void());
     MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
                        Mantid::Kernel::SpecialCoordinateSystem());
+    MOCK_CONST_METHOD0(isMDHistoWorkspace, bool());
 
   private:
     MockMDWorkspace *doClone() const override {
@@ -77,7 +81,7 @@ private:
     MOCK_CONST_METHOD0(getLinearIndex, size_t());
     MOCK_CONST_METHOD1(isWithinBounds, bool(size_t));
   };
-
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
   class NormalizableMockIterator : public MockMDIterator {
   public:
     Mantid::signal_t getNormalizedSignal() const override {

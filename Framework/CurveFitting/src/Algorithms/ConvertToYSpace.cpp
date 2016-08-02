@@ -70,7 +70,7 @@ DetectorParams ConvertToYSpace::getDetectorParameters(
   } catch (Kernel::Exception::NotFoundError &) {
     throw std::invalid_argument("ConvertToYSpace - Workspace has no detector "
                                 "attached to histogram at index " +
-                                boost::lexical_cast<std::string>(index));
+                                std::to_string(index));
   }
 
   DetectorParams detpar;
@@ -205,8 +205,7 @@ void ConvertToYSpace::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     if (!convert(i)) {
-      g_log.warning("No detector defined for index=" +
-                    boost::lexical_cast<std::string>(i) +
+      g_log.warning("No detector defined for index=" + std::to_string(i) +
                     ". Zeroing spectrum.");
       m_outputWS->maskWorkspaceIndex(i);
       if (m_qOutputWS)

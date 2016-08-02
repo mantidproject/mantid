@@ -20,12 +20,6 @@ DECLARE_ALGORITHM(SaveRKH)
 
 using namespace API;
 
-/// Constructor
-SaveRKH::SaveRKH() : API::Algorithm(), m_workspace(), m_2d(false), m_outRKH() {}
-
-/// Virtual destructor
-SaveRKH::~SaveRKH() {}
-
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------
@@ -156,31 +150,21 @@ void SaveRKH::write1D() {
 
     specnum_t specid(0);
     try {
-      specid = m_workspace->getSpectrum(i)->getSpectrumNo();
+      specid = m_workspace->getSpectrum(i).getSpectrumNo();
     } catch (...) {
       specid = static_cast<specnum_t>(i + 1);
     }
 
     auto hasDx = m_workspace->hasDx(i);
-    // hasDx = false;
-    // We only want to access the dx values if they exist. In case they don't
-    // exist
-    // set the dXData const reference to the X value. The value will not be used
-    // later on.
-    const auto &dXdata = hasDx ? m_workspace->readDx(i) : m_workspace->readX(i);
+    auto dXvals = m_workspace->pointStandardDeviations(i);
 
     for (size_t j = 0; j < nbins; ++j) {
       // Calculate/retrieve the value to go in the first column
       double xval(0.0);
-      double dXval(0.0);
       if (horizontal)
         xval = histogram ? 0.5 * (xdata[j] + xdata[j + 1]) : xdata[j];
       else {
         xval = static_cast<double>(specid);
-      }
-
-      if (hasDx) {
-        dXval = histogram ? 0.5 * (dXdata[j] + dXdata[j + 1]) : dXdata[j];
       }
 
       m_outRKH << std::fixed << std::setw(12) << std::setprecision(5) << xval
@@ -188,7 +172,7 @@ void SaveRKH::write1D() {
                << ydata[j] << std::setw(16) << edata[j];
 
       if (hasDx) {
-        m_outRKH << std::setw(16) << dXval;
+        m_outRKH << std::setw(16) << dXvals[j];
       }
 
       m_outRKH << "\n";
@@ -211,7 +195,7 @@ void SaveRKH::write2D() {
   }
   const Axis *const Y = m_workspace->getAxis(1);
   const size_t Ybins = Y->length();
-  m_outRKH << "\n  " << Ybins << std::endl;
+  m_outRKH << "\n  " << Ybins << '\n';
   for (size_t i = 0; i < Ybins; ++i) {
     m_outRKH << std::setw(14) << std::scientific << std::setprecision(6)
              << (*Y)(i);

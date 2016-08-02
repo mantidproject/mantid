@@ -171,6 +171,8 @@ Workspace properties:
 -  RawCountValidator - requires that the workspace data is raw counts.
 -  CommonBinsValidator - checks that all spectra in a workspace have the
    same bins.
+-  EqualBinSizesValidator - checks that all bins in each spectrum are equally
+   sized, up to a given tolerance.
 -  SpectraAxisValidator - checks that the axis of the workspace contains
    spectra numbers.
 -  NumericAxisValidator - checks that the axis of the workspace contains

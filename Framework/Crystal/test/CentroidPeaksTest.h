@@ -1,6 +1,7 @@
 #ifndef MANTID_CRYSTAL_CentroidPeaksTEST_H_
 #define MANTID_CRYSTAL_CentroidPeaksTEST_H_
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidCrystal/CentroidPeaks.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
@@ -27,6 +28,8 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::LinearGenerator;
 
 class CentroidPeaksTest : public CxxTest::TestSuite {
 public:
@@ -84,7 +87,7 @@ public:
     DateAndTime run_start("2010-01-01T00:00:00");
 
     for (int pix = 0; pix < numPixels; pix++) {
-      EventList &el = retVal->getEventList(pix);
+      auto &el = retVal->getSpectrum(pix);
       el.setSpectrumNo(pix);
       el.setDetectorID(pix);
       // Background
@@ -110,16 +113,8 @@ public:
     for (size_t d = 0; d < nd; ++d)
       delete gens[d];
 
-    // Create the x-axis for histogramming.
-    MantidVecPtr x1;
-    MantidVec &xRef = x1.access();
-    xRef.resize(numBins);
-    for (int i = 0; i < numBins; ++i) {
-      xRef[i] = i * binDelta;
-    }
-
     // Set all the histograms at once.
-    retVal->setAllX(x1);
+    retVal->setAllX(BinEdges(numBins, LinearGenerator(0.0, binDelta)));
 
     // Some sanity checks
     TS_ASSERT_EQUALS(retVal->getInstrument()->getName(), "MINITOPAZ");
@@ -142,16 +137,6 @@ public:
     EventWorkspace_sptr in_ws =
         boost::dynamic_pointer_cast<EventWorkspace>(inputW);
     inputW->getAxis(0)->setUnit("TOF");
-    /*if (type == WEIGHTED)
-      in_ws *= 2.0;
-    if (type == WEIGHTED_NOTIME)
-    {
-      for (size_t i =0; i<in_ws->getNumberHistograms(); i++)
-      {
-        EventList & el = in_ws->getEventList(i);
-        el.compressEvents(0.0, &el);
-      }
-    }*/
     // Register the workspace in the data service
 
     // Create the peaks workspace

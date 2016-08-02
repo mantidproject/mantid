@@ -1,6 +1,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
 
@@ -21,6 +22,8 @@ using Mantid::Kernel::AbstractInstantiator;
 
 using namespace boost::python;
 
+GET_POINTER_SPECIALIZATION(FunctionFactoryImpl)
+
 namespace {
 ///@cond
 
@@ -36,7 +39,7 @@ PyObject *getFunctionNames(FunctionFactoryImpl &self) {
 
   PyObject *registered = PyList_New(0);
   for (const auto &name : names) {
-    PyObject *value = PyString_FromString(name.c_str());
+    PyObject *value = to_python_value<const std::string &>()(name);
     if (PyList_Append(registered, value))
       throw std::runtime_error("Failed to insert value into PyList");
   }

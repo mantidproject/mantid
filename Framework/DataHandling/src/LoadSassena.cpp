@@ -60,9 +60,8 @@ herr_t LoadSassena::dataSetInfo(const hid_t &h5file, const std::string setName,
                                 hsize_t *dims) const {
   H5T_class_t class_id;
   size_t type_size;
-  herr_t errorcode;
-  errorcode = H5LTget_dataset_info(h5file, setName.c_str(), dims, &class_id,
-                                   &type_size);
+  herr_t errorcode = H5LTget_dataset_info(h5file, setName.c_str(), dims,
+                                          &class_id, &type_size);
   if (errorcode < 0) {
     g_log.error("Unable to read " + setName + " dataset info");
   }
@@ -76,9 +75,10 @@ herr_t LoadSassena::dataSetInfo(const hid_t &h5file, const std::string setName,
  * @param buf storing dataset
  */
 herr_t LoadSassena::dataSetDouble(const hid_t &h5file,
-                                  const std::string setName, double *buf) {
-  herr_t errorcode;
-  errorcode = H5LTread_dataset_double(h5file, setName.c_str(), buf);
+                                  const std::string setName,
+                                  std::vector<double> &buf) {
+  herr_t errorcode =
+      H5LTread_dataset_double(h5file, setName.c_str(), buf.data());
   if (errorcode < 0) {
     this->g_log.error("Cannot read " + setName + " dataset");
   }
@@ -102,9 +102,9 @@ bool compare(const mypair &left, const mypair &right) {
  * @param sorting_indexes permutation of qvmod indexes to render it in
  * increasing order of momemtum transfer
  */
-const MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
-                                          API::WorkspaceGroup_sptr gws,
-                                          std::vector<int> &sorting_indexes) {
+MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
+                                    API::WorkspaceGroup_sptr gws,
+                                    std::vector<int> &sorting_indexes) {
 
   MantidVec qvmod; // store the modulus of the vector
 
@@ -117,7 +117,7 @@ const MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
         "Unable to read " + setName + " dataset info:", m_filename);
   }
   int nq = static_cast<int>(dims[0]); // number of q-vectors
-  auto buf = new double[nq * 3];
+  std::vector<double> buf(nq * 3);
 
   herr_t errorcode = this->dataSetDouble(h5file, "qvectors", buf);
   if (errorcode < 0) {
@@ -126,17 +126,18 @@ const MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
     return qvmod;
   }
 
-  double *curr = buf;
+  qvmod.reserve(nq);
+  auto curr = buf.cbegin();
   for (int iq = 0; iq < nq; iq++) {
     qvmod.push_back(
         sqrt(curr[0] * curr[0] + curr[1] * curr[1] + curr[2] * curr[2]));
-    curr += 3;
+    std::next(curr, 3);
   }
 
   if (getProperty("SortByQVectors")) {
     std::vector<mypair> qvmodpair;
     for (int iq = 0; iq < nq; iq++)
-      qvmodpair.push_back(mypair(qvmod[iq], iq));
+      qvmodpair.emplace_back(qvmod[iq], iq);
     std::sort(qvmodpair.begin(), qvmodpair.end(), compare);
     for (int iq = 0; iq < nq; iq++)
       sorting_indexes.push_back(qvmodpair[iq].second);
@@ -153,11 +154,9 @@ const MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
 
   for (int iq = 0; iq < nq; iq++) {
     MantidVec &Y = ws->dataY(iq);
-    const int index = sorting_indexes[iq];
-    curr = buf + 3 * index;
-    Y.assign(curr, curr + 3);
+    curr = std::next(buf.cbegin(), 3 * sorting_indexes[iq]);
+    Y.assign(curr, std::next(curr, 3));
   }
-  delete[] buf;
 
   ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create(
       "MomentumTransfer"); // Set the Units
@@ -183,7 +182,7 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
                          const std::vector<int> &sorting_indexes) {
 
   int nq = static_cast<int>(qvmod.size()); // number of q-vectors
-  auto buf = new double[nq * 2];
+  std::vector<double> buf(nq * 2);
   herr_t errorcode = this->dataSetDouble(h5file, setName, buf);
   if (errorcode < 0) {
     this->g_log.error("LoadSassena::loadFQ cannot proceed");
@@ -203,14 +202,11 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   MantidVec &im = ws->dataY(1); // store the imaginary part
   ws->dataX(1) = qvmod;
 
-  double *curr;
-  for (int iq = 0; iq < nq; iq++) {
-    const int index = sorting_indexes[iq];
-    curr = buf + 2 * index;
-    re[iq] = curr[0];
-    im[iq] = curr[1];
+  for (int iq = 0; iq < nq; ++iq) {
+    auto curr = std::next(buf.cbegin(), 2 * sorting_indexes[iq]);
+    re[iq] = *curr;
+    im[iq] = *std::next(curr);
   }
-  delete[] buf;
 
   // Set the Units
   ws->getAxis(0)->unit() =
@@ -248,7 +244,7 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   int nt = 2 * nnt - 1;                // number of time points
 
   int nq = static_cast<int>(qvmod.size()); // number of q-vectors
-  auto buf = new double[nq * nnt * 2];
+  std::vector<double> buf(nq * nnt * 2);
   herr_t errorcode = this->dataSetDouble(h5file, setName, buf);
   if (errorcode < 0) {
     this->g_log.error("LoadSassena::loadFQT cannot proceed");
@@ -279,22 +275,21 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
     MantidVec &reY = wsRe->dataY(iq);
     MantidVec &imY = wsIm->dataY(iq);
     const int index = sorting_indexes[iq];
-    double *curr = buf + index * nnt * 2;
+    auto curr = std::next(buf.cbegin(), index * nnt * 2);
     for (int it = 0; it < nnt; it++) {
       reX[origin + it] = it * dt; // time point for the real part
       reY[origin + it] =
           *curr; // real part of the intermediate structure factor
       reX[origin - it] = -it * dt; // symmetric negative time
       reY[origin - it] = *curr;    // symmetric value for the negative time
-      curr++;
+      ++curr;
       imX[origin + it] = it * dt;
       imY[origin + it] = *curr;
       imX[origin - it] = -it * dt;
       imY[origin - it] = -(*curr); // antisymmetric value for negative times
-      curr++;
+      ++curr;
     }
   }
-  delete[] buf;
 
   // Set the Time unit for the X-axis
   wsRe->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("Label");

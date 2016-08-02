@@ -26,16 +26,6 @@ using Mantid::Geometry::Instrument_const_sptr;
 DECLARE_ALGORITHM(ConvertDiffCal)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertDiffCal::ConvertDiffCal() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertDiffCal::~ConvertDiffCal() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ConvertDiffCal::name() const { return "ConvertDiffCal"; }
@@ -73,7 +63,7 @@ void ConvertDiffCal::init() {
  * @return The proper detector id.
  */
 detid_t getDetID(OffsetsWorkspace_const_sptr offsetsWS, const size_t index) {
-  auto detIDs = offsetsWS->getSpectrum(index)->getDetectorIDs();
+  auto detIDs = offsetsWS->getSpectrum(index).getDetectorIDs();
   if (detIDs.size() != 1) {
     std::stringstream msg;
     msg << "Encountered spectrum with multiple detector ids (size="

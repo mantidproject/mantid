@@ -97,12 +97,10 @@ bool MDTransfModQ::calcGenericVariables(std::vector<coord_t> &Coord,
   // sanity check. If fails, something went fundamentally wrong
   if (m_NMatrixDim + m_AddDimCoordinates.size() != nd) {
     std::string ERR =
-        "Number of matrix dimensions: " +
-        boost::lexical_cast<std::string>(m_NMatrixDim) +
+        "Number of matrix dimensions: " + std::to_string(m_NMatrixDim) +
         " plus number of additional dimensions: " +
-        boost::lexical_cast<std::string>(m_AddDimCoordinates.size()) +
-        " not equal to number of workspace dimensions: " +
-        boost::lexical_cast<std::string>(nd);
+        std::to_string(m_AddDimCoordinates.size()) +
+        " not equal to number of workspace dimensions: " + std::to_string(nd);
     throw(std::invalid_argument(ERR));
   }
 

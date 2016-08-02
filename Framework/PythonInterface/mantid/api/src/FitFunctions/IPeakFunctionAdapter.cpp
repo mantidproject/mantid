@@ -112,7 +112,7 @@ void IPeakFunctionAdapter::functionLocal(double *out, const double *xValues,
     PyArray_Descr *dtype = PyArray_DESCR(nparray);
     PyObject *name = PyList_GetItem(dtype->names, 0);
     std::ostringstream os;
-    os << "Unsupported numpy data type: '" << PyString_AsString(name)
+    os << "Unsupported numpy data type: '" << PyBytes_AsString(name)
        << "'. Currently only numpy.float64 is supported";
     throw std::runtime_error(os.str());
   }

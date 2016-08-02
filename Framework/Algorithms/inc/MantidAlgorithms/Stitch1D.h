@@ -34,10 +34,6 @@ namespace Algorithms {
  */
 class DLLExport Stitch1D : public API::Algorithm {
 public:
-  /// Default constructor
-  Stitch1D(){};
-  /// Destructor
-  ~Stitch1D() override{};
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string name() const override { return "Stitch1D"; }
   /// Algorithm's version for identification. @see Algorithm::version

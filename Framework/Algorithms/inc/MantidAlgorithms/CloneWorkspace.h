@@ -45,10 +45,6 @@ namespace Algorithms {
 */
 class DLLExport CloneWorkspace : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  CloneWorkspace() : API::Algorithm() {}
-  /// Virtual destructor
-  ~CloneWorkspace() override {}
   /// Algorithm's name
   const std::string name() const override { return "CloneWorkspace"; }
   /// Summary of algorithms purpose

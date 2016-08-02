@@ -32,16 +32,6 @@ using namespace Mantid::Kernel;
 DECLARE_ALGORITHM(AnnularRingAbsorption)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-AnnularRingAbsorption::AnnularRingAbsorption() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-AnnularRingAbsorption::~AnnularRingAbsorption() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's name for identification. @see Algorithm::version
 const std::string AnnularRingAbsorption::name() const {

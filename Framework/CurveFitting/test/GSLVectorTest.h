@@ -213,6 +213,28 @@ public:
     TS_ASSERT_EQUALS(imin, 2);
   }
 
+  void test_find_max_element() {
+    GSLVector v(3);
+    v[0] = 55;
+    v[1] = 5;
+    v[2] = 555;
+    auto imax = v.indexOfMaxElement();
+    TS_ASSERT_EQUALS(imax, 2);
+    v[2] = -555;
+    imax = v.indexOfMaxElement();
+    TS_ASSERT_EQUALS(imax, 0);
+  }
+
+  void test_find_min_max_element() {
+    GSLVector v(3);
+    v[0] = 55;
+    v[1] = 5;
+    v[2] = 555;
+    auto pit = v.indicesOfMinMaxElements();
+    TS_ASSERT_EQUALS(pit.first, 1);
+    TS_ASSERT_EQUALS(pit.second, 2);
+  }
+
   void test_sort_indices_ascending() {
     GSLVector v(std::vector<double>{3.5, 5.9, 2.9, 0.5, 1.5});
     auto sorted = v.sortIndices();

@@ -44,10 +44,6 @@ namespace Crystal {
  */
 class DLLExport OptimizeLatticeForCellType : public API::Algorithm {
 public:
-  /// Default constructorMatrix
-  OptimizeLatticeForCellType();
-  /// Destructor
-  ~OptimizeLatticeForCellType() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override {
     return "OptimizeLatticeForCellType";

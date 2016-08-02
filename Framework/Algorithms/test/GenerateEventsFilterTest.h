@@ -113,8 +113,8 @@ public:
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i)
       std::cout << "Spectrum " << i << ": max pulse time = "
-                << eventWS->getEventList(i).getPulseTimeMax() << " = "
-                << eventWS->getEventList(i).getPulseTimeMin().totalNanoseconds()
+                << eventWS->getSpectrum(i).getPulseTimeMax() << " = "
+                << eventWS->getSpectrum(i).getPulseTimeMin().totalNanoseconds()
                 << "\n";
 
     int64_t timeinterval_ns = 15000;
@@ -712,8 +712,7 @@ public:
    */
   void test_genMultipleLogValuesFilterMatrixSplitter() {
     std::cout
-        << "\n==== Test Multiple Log Value Filter (Matrix Splitter) ====\n"
-        << std::endl;
+        << "\n==== Test Multiple Log Value Filter (Matrix Splitter) ====\n\n";
 
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();

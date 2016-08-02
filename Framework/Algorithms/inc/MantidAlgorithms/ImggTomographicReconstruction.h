@@ -33,23 +33,23 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL ImggTomographicReconstruction final
+class MANTID_ALGORITHMS_DLL ImggTomographicReconstruction
     : public API::Algorithm {
 public:
-  const std::string name() const override final;
+  const std::string name() const override;
 
-  int version() const override final;
+  int version() const override;
 
-  const std::string category() const override final;
+  const std::string category() const override;
 
-  const std::string summary() const override final;
+  const std::string summary() const override;
 
 private:
-  void init() override final;
+  void init() override;
 
-  void exec() override final;
+  void exec() override;
 
-  bool processGroups() override final;
+  bool processGroups() override;
 
   std::map<std::string, std::string> validateInputs() override;
 

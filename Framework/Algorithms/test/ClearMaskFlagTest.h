@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_CLEARMASKFLAGTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/ClearMaskFlag.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -14,6 +15,10 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::Algorithms::ClearMaskFlag;
 using Mantid::MantidVecPtr;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::LinearGenerator;
 
 class ClearMaskFlagTest : public CxxTest::TestSuite {
 public:
@@ -38,29 +43,28 @@ public:
     instr->markAsDetector(d);
 
     // create the workspace
-    MatrixWorkspace_sptr space =
-        WorkspaceFactory::Instance().create("Workspace2D", numspec, 6, 5);
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    MantidVecPtr x, vec;
-    x.access().resize(6, 10.0);
-    vec.access().resize(5, 1.0);
+    auto space2D = createWorkspace<Workspace2D>(numspec, 6, 5);
+    BinEdges x(6, LinearGenerator(10.0, 1.0));
+    Counts y(5, 1.0);
+    CountStandardDeviations e(5, 1.0);
     for (int j = 0; j < numspec; ++j) {
-      space2D->setX(j, x);
-      space2D->setData(j, vec, vec);
-      space2D->getSpectrum(j)->setSpectrumNo(j);
-      space2D->getSpectrum(j)->setDetectorID(j);
+      space2D->setBinEdges(j, x);
+      space2D->setCounts(j, y);
+      space2D->setCountStandardDeviations(j, e);
+      space2D->getSpectrum(j).setSpectrumNo(j);
+      space2D->getSpectrum(j).setDetectorID(j);
     }
-    space->setInstrument(instr);
+    space2D->setInstrument(instr);
 
     // set the mask on a bunch of spectra
-    Mantid::Geometry::ParameterMap &pmap = space->instrumentParameters();
+    Mantid::Geometry::ParameterMap &pmap = space2D->instrumentParameters();
     for (int j = 0; j < nummask; ++j) {
       pmap.addBool(instr->getDetector(j)->getComponentID(), "masked", true);
     }
 
     // register the workspace in the data service
     std::string wsName("ClearMaskFlagTest_WS");
-    AnalysisDataService::Instance().addOrReplace(wsName, space);
+    AnalysisDataService::Instance().addOrReplace(wsName, space2D);
 
     // run the algorithm with nothing masked
     ClearMaskFlag alg;

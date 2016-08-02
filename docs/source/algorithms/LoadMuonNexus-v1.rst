@@ -19,7 +19,7 @@ workspace name. The optional parameters can be
 used to control which spectra are loaded into the workspace. If
 SpectrumMin and SpectrumMax are given, then only that range of data
 will be loaded. If a SpectrumList is given, then those values will be
-loaded. If a range and a list are supplied, the algorithm will 
+loaded. If a range and a list are supplied, the algorithm will
 load all the specified spectra.
 
 -  TODO get XML descriptions of Muon instruments. This data is not in
@@ -110,7 +110,7 @@ called ``histogram_data_1``, and these names are used below.
 +------------------------------------+------------------------------------------------------+------------------------------------------------+
 | First good data (optional)         | Calculated from first good bin and bin size.         | *FirstGoodData* property                       |
 |                                    |                                                      |                                                |
-|                                    | - First good bin: ``run/histogram_data_1/counts``    | (First good data - time zero) also goes in     | 
+|                                    | - First good bin: ``run/histogram_data_1/counts``    | (First good data - time zero) also goes in     |
 |                                    |   (attribute ``first_good_bin``)                     | run object under the name ``FirstGoodData``    |
 |                                    |                                                      |                                                |
 |                                    | - Bin size: ``run/histogram_data_1/resolution``      |                                                |
@@ -142,7 +142,7 @@ Log values are loaded into the workspace run object as follows:
 +===========================================+===============================+
 | ``run/title``                             | ``run_title``                 |
 +-------------------------------------------+-------------------------------+
-| (data)                                    | ``nspectra``                  | 
+| (data)                                    | ``nspectra``                  |
 +-------------------------------------------+-------------------------------+
 | ``run/start_time``                        | ``run_start``                 |
 +-------------------------------------------+-------------------------------+
@@ -157,11 +157,14 @@ Log values are loaded into the workspace run object as follows:
 +-------------------------------------------+-------------------------------+
 | ``run/sample/magnetic_field``             | ``sample_magn_field``         |
 +-------------------------------------------+-------------------------------+
-| - single-period:                          | ``goodfrm`` (number of good   |
-| ``run/instrument/beam/frames_good``       | frames)                       |
-| - multi-period:                           |                               | 
-| ``run/instrument/beam/frames_period_daq`` |                               |
+| ``run/instrument/beam/frames_good``       | ``goodfrm`` (number of good   |
+| (for single-period data)                  | frames)                       |
 |                                           |                               |
+| (If ``frames_good`` not present, use      |                               |
+| ``frames`` instead.)                      |                               |
++-------------------------------------------+                               |
+| ``run/instrument/beam/frames_period_daq`` |                               |
+| (for multi-period data)                   |                               |
 +-------------------------------------------+-------------------------------+
 | Other NX\_LOG entries under ``run``       | time series (via LoadMuonLog) |
 +-------------------------------------------+-------------------------------+

@@ -313,8 +313,8 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # We only have monitors in our transmission file
         for i in [0,1,2,3]:
-            self.assertFalse(all_entries_zero(transmission_workspace, i), ("Monitor1, Monitor2,"
-                               "Monitor3 and Monitor4 entries should not all be 0"))
+            self.assertFalse(all_entries_zero(transmission_workspace, i),
+                             ("Monitor1, Monitor2, Monitor3 and Monitor4 entries should not all be 0"))
 
     def test_that_subtracts_monitors_and_detectors_for_transmission_workspace_with_monitors_and_detectors(self):
         # Arrange

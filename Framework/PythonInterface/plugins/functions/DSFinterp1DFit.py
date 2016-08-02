@@ -23,12 +23,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
-
+from __future__ import (absolute_import, division, print_function)
+import numpy
+import scipy.interpolate
 from mantid.api import IFunction1D, FunctionFactory
 from mantid.simpleapi import mtd
 from mantid import logger
-import numpy
-import scipy.interpolate
 
 #pylint: disable=too-many-instance-attributes
 
@@ -126,7 +126,7 @@ class DSFinterp1DFit(IFunction1D):
         if not p:
             return numpy.zeros(len(xvals), dtype=float) # return zeros if parameters not valid
         # The first time the function is called requires initialization of the interpolator
-        if self._channelgroup == None:
+        if self._channelgroup is None:
             # Check consistency of the input
             # check InputWorkspaces have at least the workspace index
             for w in self._InputWorkspaces:

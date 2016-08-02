@@ -73,7 +73,7 @@ void GeneratePythonScript::exec() {
   // Get the algorithm histories of the workspace.
   const WorkspaceHistory wsHistory = ws->getHistory();
   g_log.information() << "Number of history items: " << wsHistory.size()
-                      << std::endl;
+                      << '\n';
 
   auto view = wsHistory.createView();
 
@@ -100,7 +100,7 @@ void GeneratePythonScript::exec() {
     versionSpecificity = "all";
 
   ScriptBuilder builder(view, versionSpecificity);
-  std::string generatedScript = "";
+  std::string generatedScript;
   generatedScript += "#########################################################"
                      "#############\n";
   generatedScript +=

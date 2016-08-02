@@ -176,12 +176,11 @@ API::IMDEventWorkspace_sptr
 MDEventWSWrapper::createEmptyMDWS(const MDWSDescription &WSD) {
 
   if (WSD.nDimensions() < 1 || WSD.nDimensions() > MAX_N_DIM) {
-    std::string ERR =
-        " Number of requested MD dimensions: " +
-        boost::lexical_cast<std::string>(WSD.nDimensions()) +
-        " exceeds maximal number of MD dimensions: " +
-        boost::lexical_cast<std::string>(static_cast<int>(MAX_N_DIM)) +
-        " instantiated during compilation\n";
+    std::string ERR = " Number of requested MD dimensions: " +
+                      std::to_string(WSD.nDimensions()) +
+                      " exceeds maximal number of MD dimensions: " +
+                      std::to_string(static_cast<int>(MAX_N_DIM)) +
+                      " instantiated during compilation\n";
     throw(std::invalid_argument(ERR));
   }
 

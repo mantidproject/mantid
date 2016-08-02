@@ -40,16 +40,6 @@ DECLARE_ALGORITHM(LoadFullprofResolution)
 std::map<std::string, size_t> LoadFullprofResolution::m_rowNumbers;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadFullprofResolution::LoadFullprofResolution() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadFullprofResolution::~LoadFullprofResolution() {}
-
-//----------------------------------------------------------------------------------------------
 /** Implement abstract Algorithm methods
  */
 void LoadFullprofResolution::init() {
@@ -98,8 +88,6 @@ void LoadFullprofResolution::init() {
                   "Default is all workspaces in numerical order."
                   "If default banks are specified, they too are taken to be in "
                   "numerical order");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -240,8 +228,6 @@ void LoadFullprofResolution::exec() {
     throw std::runtime_error(
         "Either the OutputTableWorkspace or Workspace property must be set.");
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -278,8 +264,6 @@ void LoadFullprofResolution::loadFile(string filename, vector<string> &lines) {
     g_log.error(errmsg.str());
     throw runtime_error(errmsg.str());
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -360,13 +344,11 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
   }
 
   g_log.debug() << "[DB1112] Number of bank IDs = " << banks.size() << ", "
-                << "Number of ranges = " << bankstartindexmap.size() << endl;
+                << "Number of ranges = " << bankstartindexmap.size() << '\n';
   for (auto &bank : banks) {
     g_log.debug() << "Bank " << bank << " From line " << bankstartindexmap[bank]
-                  << " to " << bankendindexmap[bank] << endl;
+                  << " to " << bankendindexmap[bank] << '\n';
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -634,8 +616,6 @@ void LoadFullprofResolution::parseResolutionStrings(
     } // END -IF StartWith
 
   } // For-all-line
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -677,8 +657,6 @@ void LoadFullprofResolution::parseBankLine(string line, double &cwl,
       }
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1063,8 +1041,6 @@ void LoadFullprofResolution::getTableRowNumbers(
     row >> name;
     parammap.emplace(name, i);
   }
-
-  return;
 }
 
 } // namespace DataHandling

@@ -208,12 +208,11 @@ public:
       m_mutex.unlock();
       throw std::runtime_error(error);
     } else {
-      g_log.debug() << "Add Data Object " << name << " successful" << std::endl;
+      g_log.debug() << "Add Data Object " << name << " successful\n";
       m_mutex.unlock();
 
       notificationCenter.postNotification(new AddNotification(name, Tobject));
     }
-    return;
   }
 
   //--------------------------------------------------------------------------
@@ -253,7 +252,6 @@ public:
       m_mutex.unlock();
       DataService::add(name, Tobject);
     }
-    return;
   }
 
   //--------------------------------------------------------------------------
@@ -290,7 +288,6 @@ public:
 
     m_mutex.unlock();
     notificationCenter.postNotification(new PostDeleteNotification(foundName));
-    return;
   }
 
   //--------------------------------------------------------------------------
@@ -338,8 +335,6 @@ public:
     m_mutex.unlock();
     notificationCenter.postNotification(
         new RenameNotification(oldName, newName));
-
-    return;
   }
 
   //--------------------------------------------------------------------------
@@ -481,7 +476,7 @@ private:
   void checkForEmptyName(const std::string &name) {
     if (name.empty()) {
       const std::string error = "Add Data Object with empty name";
-      g_log.debug() << error << std::endl;
+      g_log.debug() << error << '\n';
       throw std::runtime_error(error);
     }
   }
@@ -489,7 +484,7 @@ private:
   void checkForNullPointer(const boost::shared_ptr<T> &Tobject) {
     if (!Tobject) {
       const std::string error = "Attempt to add empty shared pointer";
-      g_log.debug() << error << std::endl;
+      g_log.debug() << error << '\n';
       throw std::runtime_error(error);
     }
   }

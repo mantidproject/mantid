@@ -34,10 +34,6 @@ namespace WorkflowAlgorithms {
 */
 class DLLExport ComputeSensitivity : public API::DataProcessorAlgorithm {
 public:
-  /// (Empty) Constructor
-  ComputeSensitivity() : API::DataProcessorAlgorithm() {}
-  /// Virtual destructor
-  ~ComputeSensitivity() override {}
   /// Algorithm's name
   const std::string name() const override { return "ComputeSensitivity"; }
   /// Summary of algorithms purpose

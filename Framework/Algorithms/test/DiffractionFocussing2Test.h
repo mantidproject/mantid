@@ -1,6 +1,7 @@
 #ifndef DIFFRACTIONFOCUSSING2TEST_H_
 #define DIFFRACTIONFOCUSSING2TEST_H_
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAlgorithms/MaskBins.h"
@@ -22,6 +23,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::BinEdges;
 
 class DiffractionFocussing2Test : public CxxTest::TestSuite {
 public:
@@ -121,15 +123,10 @@ public:
     // Create a DIFFERENT x-axis for each pixel. Starting bin = the input
     // workspace index #
     for (size_t pix = 0; pix < inputW->getNumberHistograms(); pix++) {
-      Kernel::cow_ptr<MantidVec> axis;
-      MantidVec &xRef = axis.access();
-      xRef.resize(5);
-      for (int i = 0; i < 5; ++i)
-        xRef[i] = static_cast<double>(1 + pix) + i * 1.0;
-      xRef[4] = 1e6;
       // Set an X-axis
-      inputW->setX(pix, axis);
-      inputW->getEventList(pix).addEventQuickly(TofEvent(1000.0));
+      double x = static_cast<double>(1 + pix);
+      inputW->setHistogram(pix, BinEdges{x + 0, x + 1, x + 2, x + 3, 1e6});
+      inputW->getSpectrum(pix).addEventQuickly(TofEvent(1000.0));
     }
 
     // ------------ Create a grouping workspace by name -------------
@@ -191,7 +188,7 @@ public:
     TS_ASSERT_EQUALS(output->blocksize(), 4);
 
     TS_ASSERT_EQUALS(output->getAxis(1)->length(), numgroups);
-    TS_ASSERT_EQUALS(output->getSpectrum(0)->getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(output->getSpectrum(0).getSpectrumNo(), 1);
 
     // Events in these two banks alone
     if (preserveEvents)
@@ -203,7 +200,7 @@ public:
     // Now let's test the grouping of detector UDETS to groups
     for (size_t wi = 0; wi < output->getNumberHistograms(); wi++) {
       // This is the list of the detectors (grouped)
-      auto mylist = output->getSpectrum(wi)->getDetectorIDs();
+      auto mylist = output->getSpectrum(wi).getDetectorIDs();
       // 1024 pixels in a bank
       TS_ASSERT_EQUALS(mylist.size(), bankWidthInPixels * bankWidthInPixels);
     }
@@ -277,19 +274,14 @@ public:
     // Fill a whole bunch of events
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < static_cast<int>(ws->getNumberHistograms()); i++) {
-      EventList &el = ws->getEventList(i);
+      EventList &el = ws->getSpectrum(i);
       for (int j = 0; j < 20; j++) {
         el.addEventQuickly(TofEvent(double(j) * 1e-3));
       }
     }
     ws->getAxis(0)->setUnit("dSpacing");
     // Create the x-axis for histogramming.
-    MantidVecPtr x1;
-    MantidVec &xRef = x1.access();
-    xRef.clear();
-    xRef.push_back(0.0);
-    xRef.push_back(1e6);
-    ws->setAllX(x1);
+    ws->setAllX(BinEdges{0.0, 1e6});
 
     alg = AlgorithmFactory::Instance().create("CreateGroupingWorkspace", 1);
     alg->initialize();

@@ -4,25 +4,106 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/Chebyshev.h"
-#include "MantidCurveFitting/Algorithms/Fit.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-using namespace Mantid;
 using namespace Mantid::API;
-using namespace Mantid::CurveFitting;
-using namespace Mantid::CurveFitting::Algorithms;
-using namespace Mantid::CurveFitting::Functions;
+using Mantid::CurveFitting::Functions::Chebyshev;
 
 class ChebyshevTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ChebyshevTest *createSuite() { return new ChebyshevTest(); }
+  static void destroySuite(ChebyshevTest *suite) { delete suite; }
+
+  void test_category() {
+    Chebyshev cfn;
+    cfn.initialize();
+
+    std::vector<std::string> cats;
+    TS_ASSERT_THROWS_NOTHING(cats = cfn.categories());
+    TS_ASSERT_LESS_THAN_EQUALS(1, cats.size());
+    TS_ASSERT_EQUALS(cats.front(), "Background");
+    // This would enfonce one and only one category:
+    // TS_ASSERT(cfn.category() == "Background");
+  }
+
+  void testNegative() {
+    Chebyshev cheb;
+    cheb.initialize();
+
+    TS_ASSERT_THROWS(cheb.setAttributeValue("A0", 3.3), std::invalid_argument);
+    TS_ASSERT_THROWS(cheb.setAttributeValue("n", -1), std::invalid_argument);
+  }
+
+  void testZero() {
+    Chebyshev cheb;
+    cheb.initialize();
+
+    TS_ASSERT_THROWS(cheb.setAttributeValue("A1", 3.3), std::invalid_argument);
+    TS_ASSERT_THROWS_NOTHING(cheb.setAttributeValue("n", 0));
+  }
+
+  void test_wrongStartEnd() {
+    Chebyshev cheb;
+    cheb.initialize();
+    TS_ASSERT_THROWS(cheb.getAttribute("AX"), std::invalid_argument);
+    TS_ASSERT_EQUALS(cheb.getAttribute("StartX").asDouble(), -1.0);
+    TS_ASSERT_EQUALS(cheb.getAttribute("EndX").asDouble(), 1.0);
+
+    double startx = 10.0;
+    double endx = -10.0;
+    cheb.setAttributeValue("StartX", startx);
+    cheb.setAttributeValue("EndX", endx);
+
+    TS_ASSERT_EQUALS(cheb.getAttribute("StartX").asDouble(), startx);
+    TS_ASSERT_EQUALS(cheb.getAttribute("EndX").asDouble(), endx);
+
+    FunctionDomain1DVector x(startx, endx, 10);
+    FunctionValues y(x);
+
+    TS_ASSERT_THROWS(cheb.function(x, y), std::runtime_error);
+
+    startx = 10.0;
+    endx = startx;
+
+    cheb.setAttributeValue("StartX", startx);
+    cheb.setAttributeValue("EndX", endx);
+
+    TS_ASSERT_EQUALS(cheb.getAttribute("StartX").asDouble(), startx);
+    TS_ASSERT_EQUALS(cheb.getAttribute("EndX").asDouble(), endx);
+
+    FunctionDomain1DVector x1(startx, endx, 100);
+    FunctionValues y1(x1);
+
+    TS_ASSERT_THROWS(cheb.function(x1, y1), std::runtime_error);
+  }
+
+  void testValuesWorkspace() {
+    const int N = 3;
+    Chebyshev cheb;
+    cheb.setAttributeValue("n", N);
+    cheb.setAttributeValue("StartX", -10.0);
+    cheb.setAttributeValue("EndX", 10.0);
+
+    Mantid::API::MatrixWorkspace_sptr ws =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 21, 21);
+    Mantid::MantidVec &X = ws->dataX(0);
+
+    Mantid::API::FunctionDomain1DVector domain(X);
+    Mantid::API::FunctionValues values(domain);
+
+    cheb.function(domain, values);
+    for (size_t i = 0; i < domain.size(); ++i) {
+      TS_ASSERT_DELTA(values[i], cos(N * acos(values[i])), 1e-12);
+    }
+  }
+
   void testValues() {
+
     const int N = 11;
-    double y[N], x[N];
+    std::array<double, N> y, x;
     for (int i = 0; i < N; ++i) {
       x[i] = i * 0.1;
     }
@@ -37,123 +118,6 @@ public:
       for (int i = 0; i < N; ++i) {
         TS_ASSERT_DELTA(y[i], cos(n * acos(x[i])), 1e-12);
       }
-    }
-  }
-
-  /** A test for [-1, 1] range data
-    */
-  void testFit() {
-    Mantid::API::MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 11, 11);
-
-    Mantid::MantidVec &X = ws->dataX(0);
-    Mantid::MantidVec &Y = ws->dataY(0);
-    Mantid::MantidVec &E = ws->dataE(0);
-    for (size_t i = 0; i < Y.size(); i++) {
-      double x = -1. + 0.1 * static_cast<double>(i);
-      X[i] = x;
-      Y[i] = x * x * x;
-      E[i] = 1;
-    }
-    // X.back() = 1.;
-
-    AnalysisDataService::Instance().addOrReplace("ChebyshevTest_ws", ws);
-
-    Chebyshev cheb;
-    cheb.setAttributeValue("n", 3);
-
-    Algorithms::Fit fit;
-    fit.initialize();
-
-    fit.setPropertyValue("Function", cheb.asString());
-    fit.setPropertyValue("InputWorkspace", "ChebyshevTest_ws");
-    fit.setPropertyValue("WorkspaceIndex", "0");
-
-    fit.execute();
-    IFunction::Attribute StartX = cheb.getAttribute("StartX");
-    TS_ASSERT_EQUALS(StartX.asDouble(), -1);
-    IFunction::Attribute EndX = cheb.getAttribute("EndX");
-    TS_ASSERT_EQUALS(EndX.asDouble(), 1);
-    TS_ASSERT(fit.isExecuted());
-
-    IFunction_sptr out = fit.getProperty("Function");
-    TS_ASSERT_DELTA(out->getParameter("A0"), 0, 1e-12);
-    TS_ASSERT_DELTA(out->getParameter("A1"), 0.75, 1e-12);
-    TS_ASSERT_DELTA(out->getParameter("A2"), 0, 1e-12);
-    TS_ASSERT_DELTA(out->getParameter("A3"), 0.25, 1e-12);
-
-    // check its categories
-    const std::vector<std::string> categories = out->categories();
-    TS_ASSERT(categories.size() == 1);
-    TS_ASSERT(categories[0] == "Background");
-
-    AnalysisDataService::Instance().remove("ChebyshevTest_ws");
-  }
-
-  /** A test for a random number data
-    */
-  void testBackground() {
-    Mantid::API::MatrixWorkspace_sptr ws =
-        WorkspaceFactory::Instance().create("Workspace2D", 1, 21, 21);
-
-    Mantid::MantidVec &X = ws->dataX(0);
-    Mantid::MantidVec &Y = ws->dataY(0);
-    Mantid::MantidVec &E = ws->dataE(0);
-    for (size_t i = 0; i < Y.size(); i++) {
-      double x = -10. + 1 * static_cast<double>(i);
-      X[i] = x;
-      Y[i] = x * x * x;
-      if (Y[i] < 1.0) {
-        E[i] = 1.0;
-      } else {
-        E[i] = sqrt(Y[i]);
-      }
-
-      // std::cout << X[i] << "   " << Y[i] << std::endl;
-    }
-
-    AnalysisDataService::Instance().add("ChebyshevTest_ws", ws);
-
-    Chebyshev cheb;
-    cheb.setAttributeValue("n", 3);
-    cheb.setAttributeValue("StartX", -10.0);
-    cheb.setAttributeValue("EndX", 10.0);
-
-    Algorithms::Fit fit;
-    fit.initialize();
-
-    fit.setPropertyValue("Function", cheb.asString());
-    fit.setPropertyValue("InputWorkspace", "ChebyshevTest_ws");
-    fit.setPropertyValue("WorkspaceIndex", "0");
-
-    fit.setProperty("Minimizer", "Levenberg-MarquardtMD");
-    fit.setProperty("CostFunction", "Least squares");
-    fit.setProperty("MaxIterations", 1000);
-
-    fit.execute();
-    IFunction::Attribute StartX = cheb.getAttribute("StartX");
-    TS_ASSERT_EQUALS(StartX.asDouble(), -10.0);
-    IFunction::Attribute EndX = cheb.getAttribute("EndX");
-    TS_ASSERT_EQUALS(EndX.asDouble(), 10.0);
-    TS_ASSERT(fit.isExecuted());
-
-    double chi2 = fit.getProperty("OutputChi2overDoF");
-    TS_ASSERT(chi2 < 2.0);
-
-    IFunction_sptr out = fit.getProperty("Function");
-
-    // check its categories
-    const std::vector<std::string> categories = out->categories();
-    TS_ASSERT(categories.size() == 1);
-    TS_ASSERT(categories[0] == "Background");
-
-    API::FunctionDomain1DVector domain(X);
-    API::FunctionValues values(domain);
-
-    out->function(domain, values);
-
-    for (size_t i = 0; i < domain.size(); ++i) {
-      TS_ASSERT_DELTA(values[i], Y[i], 0.1);
     }
   }
 };

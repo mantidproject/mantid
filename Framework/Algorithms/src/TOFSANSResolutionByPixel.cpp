@@ -96,22 +96,17 @@ void TOFSANSResolutionByPixel::exec() {
   // create interpolation table from sigmaModeratorVSwavelength
   Kernel::Interpolation lookUpTable;
 
-  const MantidVec xInterpolate = sigmaModeratorVSwavelength->readX(0);
+  const auto xInterpolate = sigmaModeratorVSwavelength->points(0);
   const MantidVec yInterpolate = sigmaModeratorVSwavelength->readY(0);
 
   // prefer the input to be a pointworkspace and create interpolation function
   if (sigmaModeratorVSwavelength->isHistogramData()) {
     g_log.notice() << "mid-points of SigmaModerator histogram bins will be "
                       "used for interpolation.";
+  }
 
-    for (size_t i = 0; i < xInterpolate.size() - 1; ++i) {
-      const double midpoint = (xInterpolate[i + 1] + xInterpolate[i]) / 2.0;
-      lookUpTable.addPoint(midpoint, yInterpolate[i]);
-    }
-  } else {
-    for (size_t i = 0; i < xInterpolate.size(); ++i) {
-      lookUpTable.addPoint(xInterpolate[i], yInterpolate[i]);
-    }
+  for (size_t i = 0; i < xInterpolate.size(); ++i) {
+    lookUpTable.addPoint(xInterpolate[i], yInterpolate[i]);
   }
 
   // Calculate the L1 distance
@@ -128,10 +123,9 @@ void TOFSANSResolutionByPixel::exec() {
     LCollim = collimationLengthEstimator.provideCollimationLength(inWS);
     g_log.information() << "No collimation length was specified. A default "
                            "collimation length was estimated to be " << LCollim
-                        << std::endl;
+                        << '\n';
   } else {
-    g_log.information() << "The collimation length is  " << LCollim
-                        << std::endl;
+    g_log.information() << "The collimation length is  " << LCollim << '\n';
   }
 
   const int numberOfSpectra = static_cast<int>(inWS->getNumberHistograms());
@@ -143,8 +137,7 @@ void TOFSANSResolutionByPixel::exec() {
       det = inWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
       g_log.information() << "Workspace index " << i
-                          << " has no detector assigned to it - discarding"
-                          << std::endl;
+                          << " has no detector assigned to it - discarding\n";
     }
     // If no detector found or if it's masked or a monitor, skip onto the next
     // spectrum

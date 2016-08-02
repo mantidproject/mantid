@@ -8,12 +8,8 @@
 #include "MantidQtMantidWidgets/HintStrategy.h"
 #include <boost/scoped_ptr.hpp>
 
-using namespace Mantid::API;
-using namespace Mantid::Kernel;
-using namespace MantidQt::MantidWidgets;
-
 namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidWidgets {
 /** HintingLineEditFactory : A QStyledItemDelegate that produces
 HintingLineEdits using the given hint strategy.
 

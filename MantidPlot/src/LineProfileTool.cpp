@@ -37,6 +37,7 @@
 #include "MultiLayer.h"
 
 #include <QMessageBox>
+#include <QMouseEvent>
 #include <QPainter>
 #include <qwt_plot_canvas.h>
 

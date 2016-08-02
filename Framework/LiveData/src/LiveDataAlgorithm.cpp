@@ -7,26 +7,14 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Strings.h"
 
-#include "boost/tokenizer.hpp"
 #include <boost/algorithm/string/trim.hpp>
 #include <unordered_set>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using boost::tokenizer;
 
 namespace Mantid {
 namespace LiveData {
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LiveDataAlgorithm::LiveDataAlgorithm() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LiveDataAlgorithm::~LiveDataAlgorithm() {}
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LiveDataAlgorithm::category() const {
@@ -222,7 +210,7 @@ Mantid::Kernel::DateAndTime LiveDataAlgorithm::getStartTime() const {
  *         Returns a NULL pointer if no algorithm was chosen.
  */
 IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
-  std::string prefix = "";
+  std::string prefix;
   if (postProcessing)
     prefix = "Post";
 
@@ -253,7 +241,7 @@ IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
     if (!script.empty())
       g_log.warning() << "Running algorithm " << algoName
                       << " and ignoring the script code in "
-                      << prefix + "ProcessingScript" << std::endl;
+                      << prefix + "ProcessingScript\n";
     return alg;
   } else if (!script.empty()) {
     // Run a snippet of python

@@ -372,44 +372,43 @@ void AlignAndFocusPowder::exec() {
   m_progress->report();
 
   if (xmin > 0. || xmax > 0.) {
-    bool doCorrection(true);
-    if (m_outputEW) { // extra check for event workspaces
-      doCorrection = (m_outputEW->getNumberEvents() > 0);
-    }
+    double tempmin;
+    double tempmax;
+    m_outputW->getXMinMax(tempmin, tempmax);
 
-    if (doCorrection) {
-      double tempmin;
-      double tempmax;
-      m_outputW->getXMinMax(tempmin, tempmax);
-
-      g_log.information() << "running CropWorkspace(TOFmin=" << xmin
-                          << ", TOFmax=" << xmax << ")\n";
-      API::IAlgorithm_sptr cropAlg = createChildAlgorithm("CropWorkspace");
-      cropAlg->setProperty("InputWorkspace", m_outputW);
-      cropAlg->setProperty("OutputWorkspace", m_outputW);
-      if ((xmin > 0.) && (xmin > tempmin))
-        cropAlg->setProperty("Xmin", xmin);
-      if ((xmax > 0.) && (xmax < tempmax))
-        cropAlg->setProperty("Xmax", xmax);
-      cropAlg->executeAsChildAlg();
-      m_outputW = cropAlg->getProperty("OutputWorkspace");
-      m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-    }
+    g_log.information() << "running CropWorkspace(TOFmin=" << xmin
+                        << ", TOFmax=" << xmax << ")\n";
+    API::IAlgorithm_sptr cropAlg = createChildAlgorithm("CropWorkspace");
+    cropAlg->setProperty("InputWorkspace", m_outputW);
+    cropAlg->setProperty("OutputWorkspace", m_outputW);
+    if ((xmin > 0.) && (xmin > tempmin))
+      cropAlg->setProperty("Xmin", xmin);
+    if ((xmax > 0.) && (xmax < tempmax))
+      cropAlg->setProperty("Xmax", xmax);
+    cropAlg->executeAsChildAlg();
+    m_outputW = cropAlg->getProperty("OutputWorkspace");
+    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
   m_progress->report();
 
   // filter the input events if appropriate
   double removePromptPulseWidth = getProperty("RemovePromptPulseWidth");
   if (removePromptPulseWidth > 0.) {
-    g_log.information() << "running RemovePromptPulse(Width="
-                        << removePromptPulseWidth << ")\n";
-    API::IAlgorithm_sptr filterPAlg = createChildAlgorithm("RemovePromptPulse");
-    filterPAlg->setProperty("InputWorkspace", m_outputW);
-    filterPAlg->setProperty("OutputWorkspace", m_outputW);
-    filterPAlg->setProperty("Width", removePromptPulseWidth);
-    filterPAlg->executeAsChildAlg();
-    m_outputW = filterPAlg->getProperty("OutputWorkspace");
     m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+    if (m_outputEW->getNumberEvents() > 0) {
+      g_log.information() << "running RemovePromptPulse(Width="
+                          << removePromptPulseWidth << ")\n";
+      API::IAlgorithm_sptr filterPAlg =
+          createChildAlgorithm("RemovePromptPulse");
+      filterPAlg->setProperty("InputWorkspace", m_outputW);
+      filterPAlg->setProperty("OutputWorkspace", m_outputW);
+      filterPAlg->setProperty("Width", removePromptPulseWidth);
+      filterPAlg->executeAsChildAlg();
+      m_outputW = filterPAlg->getProperty("OutputWorkspace");
+      m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+    } else {
+      g_log.information("skipping RemovePromptPulse on empty EventWorkspace");
+    }
   }
   m_progress->report();
 
@@ -503,7 +502,7 @@ void AlignAndFocusPowder::exec() {
     m_outputW = removeAlg->getProperty("OutputWorkspace");
     if (ews)
       g_log.information() << "Number of events = " << ews->getNumberEvents()
-                          << ". ";
+                          << ".\n";
   } else if (DIFCref > 0.) {
     g_log.information() << "running RemoveLowResTof(RefDIFC=" << DIFCref
                         << ",K=3.22)\n";
@@ -650,8 +649,6 @@ void AlignAndFocusPowder::exec() {
 
   // return the output workspace
   setProperty("OutputWorkspace", m_outputW);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -782,7 +779,7 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
   specnum_t maxspecNo1 = 0;
   std::vector<specnum_t> origspecNos;
   for (size_t i = 0; i < nspec1; ++i) {
-    specnum_t tmpspecNo = ws1->getSpectrum(i)->getSpectrumNo();
+    specnum_t tmpspecNo = ws1->getSpectrum(i).getSpectrumNo();
     origspecNos.push_back(tmpspecNo);
     if (tmpspecNo > maxspecNo1)
       maxspecNo1 = tmpspecNo;
@@ -809,12 +806,12 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
 
   // FIXED : Restore the original spectrum Nos to spectra from ws1
   for (size_t i = 0; i < nspec1; ++i) {
-    specnum_t tmpspecNo = outws->getSpectrum(i)->getSpectrumNo();
-    outws->getSpectrum(i)->setSpectrumNo(origspecNos[i]);
+    specnum_t tmpspecNo = outws->getSpectrum(i).getSpectrumNo();
+    outws->getSpectrum(i).setSpectrumNo(origspecNos[i]);
 
     g_log.information() << "[DBx540] Conjoined spectrum " << i
                         << ": restore spectrum number to "
-                        << outws->getSpectrum(i)->getSpectrumNo()
+                        << outws->getSpectrum(i).getSpectrumNo()
                         << " from spectrum number = " << tmpspecNo << ".\n";
   }
 
@@ -822,7 +819,7 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
   if (offset >= 1) {
     for (size_t i = 0; i < nspec2; ++i) {
       specnum_t newspecid = maxspecNo1 + static_cast<specnum_t>((i) + offset);
-      outws->getSpectrum(nspec1 + i)->setSpectrumNo(newspecid);
+      outws->getSpectrum(nspec1 + i).setSpectrumNo(newspecid);
       // ISpectrum* spec = outws->getSpectrum(nspec1+i);
       // if (spec)
       // spec->setSpectrumNo(3);
@@ -944,8 +941,6 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
     AnalysisDataService::Instance().addOrReplace(name, m_maskWS);
     this->setPropertyValue("MaskWorkspace", name);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

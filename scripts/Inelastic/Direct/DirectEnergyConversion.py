@@ -1,7 +1,7 @@
 ﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 from mantid.simpleapi import *
-from mantid.kernel import funcreturns
+from mantid.kernel import funcinspect
 from mantid import geometry,api
 
 import os.path
@@ -30,7 +30,7 @@ def setup_reducer(inst_name,reload_instrument=False):
         raise RuntimeError('Unknown instrument "%s" or wrong IDF file for this instrument, cannot continue' % inst_name)
 
 #How could it be that abstract class is not referenced R0921? What it means?
-#pylint: disable=too-many-instance-attributes,R0921
+#pylint: disable=too-many-instance-attributes
 class DirectEnergyConversion(object):
     """
     Performs a convert to energy assuming the provided instrument is
@@ -189,7 +189,7 @@ class DirectEnergyConversion(object):
         # output workspace name.
         try:
 #pylint: disable=unused-variable
-            n,r = funcreturns.lhs_info('both')
+            n,r = funcinspect.lhs_info('both')
             out_ws_name = r[0]
 #pylint: disable=bare-except
         except:
@@ -343,6 +343,7 @@ class DirectEnergyConversion(object):
 #pylint: disable=too-many-arguments
 #pylint: disable=too-many-branches
 #pylint: disable=too-many-locals
+#pylint: disable=W0621
     def convert_to_energy(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,
                           monovan_run=None,wb_for_monovan_run=None,**kwargs):
         """ One step conversion of run into workspace containing information about energy transfer
@@ -357,7 +358,7 @@ class DirectEnergyConversion(object):
 
         # output workspace name.
         try:
-            _,r = funcreturns.lhs_info('both')
+            _,r = funcinspect.lhs_info('both')
             out_ws_name = r[0]
 #pylint: disable=bare-except
         except:
@@ -459,7 +460,7 @@ class DirectEnergyConversion(object):
         if not prop_man.motor_offset is None and np.isnan(psi):
             #logs have a problem
             prop_man.log("*** Can not retrieve rotation value from sample environment logs: {0}.\n"
-                "     Rotation angle remains undefined".format(prop_man.motor_log_names))
+                         "     Rotation angle remains undefined".format(prop_man.motor_log_names))
             PropertyManager.psi = None # Just in case
         else:
             # store psi in property not to retrieve it from workspace again

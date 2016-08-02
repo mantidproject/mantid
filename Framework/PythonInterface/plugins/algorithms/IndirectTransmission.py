@@ -107,14 +107,15 @@ class IndirectTransmission(PythonAlgorithm):
 
         logger.notice('Analyser : ' + analyser + reflection + ' with energy = ' + str(efixed))
 
-        result = SetSampleMaterial(InputWorkspace=workspace, ChemicalFormula=formula)
+        SetSampleMaterial(InputWorkspace=workspace, ChemicalFormula=formula)
 
         # Elastic wavelength
         wave = 1.8 * math.sqrt(25.2429 / efixed)
 
-        absorption_x_section = result[5] * wave / 1.7982
-        coherent_x_section = result[4]
-        incoherent_x_section = result[3]
+        material = mtd[str(workspace)].sample().getMaterial()
+        absorption_x_section = material.absorbXSection(wave)
+        coherent_x_section = material.cohScatterXSection()
+        incoherent_x_section = material.incohScatterXSection()
         scattering_s_section = incoherent_x_section + coherent_x_section
 
         thickness = float(thickness)

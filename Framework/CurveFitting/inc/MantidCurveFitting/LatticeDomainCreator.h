@@ -44,8 +44,6 @@ public:
                        const std::string &workspacePropertyName,
                        DomainType domainType = Simple);
 
-  ~LatticeDomainCreator() override {}
-
   void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
                     boost::shared_ptr<API::FunctionValues> &values,
                     size_t i0) override;

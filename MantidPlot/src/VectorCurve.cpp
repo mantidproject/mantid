@@ -205,45 +205,45 @@ QwtDoubleRect VectorCurve::boundingRect() const {
   QwtDoubleRect vrect = vectorEnd->boundingRect();
 
   if (d_style == XYXY) {
-    rect.setTop(QMIN((double)rect.top(), (double)vrect.top()));
-    rect.setBottom(QMAX((double)rect.bottom(), (double)vrect.bottom()));
-    rect.setLeft(QMIN((double)rect.left(), (double)vrect.left()));
-    rect.setRight(QMAX((double)rect.right(), (double)vrect.right()));
+    rect.setTop(qMin((double)rect.top(), (double)vrect.top()));
+    rect.setBottom(qMax((double)rect.bottom(), (double)vrect.bottom()));
+    rect.setLeft(qMin((double)rect.left(), (double)vrect.left()));
+    rect.setRight(qMax((double)rect.right(), (double)vrect.right()));
   } else {
     const double angle = vectorEnd->x(0);
     double mag = vectorEnd->y(0);
     switch (d_position) {
     case Tail:
       rect.setTop(
-          QMIN((double)rect.top(), (double)(rect.top() + mag * sin(angle))));
-      rect.setBottom(QMAX((double)rect.bottom(),
+          qMin((double)rect.top(), (double)(rect.top() + mag * sin(angle))));
+      rect.setBottom(qMax((double)rect.bottom(),
                           (double)(rect.bottom() + mag * sin(angle))));
       rect.setLeft(
-          QMIN((double)rect.left(), (double)(rect.left() + mag * cos(angle))));
-      rect.setRight(QMAX((double)rect.right(),
+          qMin((double)rect.left(), (double)(rect.left() + mag * cos(angle))));
+      rect.setRight(qMax((double)rect.right(),
                          (double)(rect.right() + mag * cos(angle))));
       break;
 
     case Middle: {
       mag *= 0.5;
-      rect.setTop(QMIN((double)rect.top(),
+      rect.setTop(qMin((double)rect.top(),
                        (double)(rect.top() - fabs(mag * sin(angle)))));
-      rect.setBottom(QMAX((double)rect.bottom(),
+      rect.setBottom(qMax((double)rect.bottom(),
                           (double)(rect.bottom() + fabs(mag * sin(angle)))));
-      rect.setLeft(QMIN((double)rect.left(),
+      rect.setLeft(qMin((double)rect.left(),
                         (double)(rect.left() - fabs(mag * cos(angle)))));
-      rect.setRight(QMAX((double)rect.right(),
+      rect.setRight(qMax((double)rect.right(),
                          (double)(rect.right() + fabs(mag * cos(angle)))));
     } break;
 
     case Head:
       rect.setTop(
-          QMIN((double)rect.top(), (double)(rect.top() - mag * sin(angle))));
-      rect.setBottom(QMAX((double)rect.bottom(),
+          qMin((double)rect.top(), (double)(rect.top() - mag * sin(angle))));
+      rect.setBottom(qMax((double)rect.bottom(),
                           (double)(rect.bottom() - mag * sin(angle))));
       rect.setLeft(
-          QMIN((double)rect.left(), (double)(rect.left() - mag * cos(angle))));
-      rect.setRight(QMAX((double)rect.right(),
+          qMin((double)rect.left(), (double)(rect.left() - mag * cos(angle))));
+      rect.setRight(qMax((double)rect.right(),
                          (double)(rect.right() - mag * cos(angle))));
       break;
     }

@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 import numpy
 from numpy import *
@@ -34,7 +36,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             lines = ifile.readlines()
             ifile.close()
         except IOError as err:
-            print "Unable to open file %s. " % (outfilename)
+            print("Unable to open file {0}.".format(outfilename))
             self.assertTrue(False)
             return
 
@@ -81,7 +83,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             lines = ifile.readlines()
             ifile.close()
         except IOError as err:
-            print "Unable to open file %s. " % (outfilename)
+            print("Unable to open file {0}.".format(outfilename))
             self.assertTrue(False)
             return
 
@@ -227,7 +229,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             lines = ifile.readlines()
             ifile.close()
         except IOError as err:
-            print "Unable to open file %s. " % (outfilename)
+            print("Unable to open file {0}.".format(outfilename))
             self.assertTrue(False)
             return
 

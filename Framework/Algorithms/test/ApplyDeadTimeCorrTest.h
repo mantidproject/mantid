@@ -3,14 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadMuonNexus2.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAlgorithms/ApplyDeadTimeCorr.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAlgorithms/ApplyDeadTimeCorr.h"
+#include "MantidDataHandling/LoadMuonNexus2.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <stdexcept>
@@ -65,29 +65,29 @@ public:
     TS_ASSERT(outputWs);
 
     TS_ASSERT_EQUALS(
-        outputWs->dataY(0)[0],
-        inputWs->dataY(0)[0] /
+        outputWs->y(0)[0],
+        inputWs->y(0)[0] /
             (1 -
-             inputWs->dataY(0)[0] *
-                 (deadValue() / ((inputWs->dataX(0)[1] - inputWs->dataX(0)[0]) *
-                                 numGoodFrames))));
+             inputWs->y(0)[0] *
+                 (deadValue() /
+                  ((inputWs->x(0)[1] - inputWs->x(0)[0]) * numGoodFrames))));
     TS_ASSERT_EQUALS(
-        outputWs->dataY(0)[40],
-        inputWs->dataY(0)[40] /
+        outputWs->y(0)[40],
+        inputWs->y(0)[40] /
             (1 -
-             inputWs->dataY(0)[40] *
-                 (deadValue() / ((inputWs->dataX(0)[1] - inputWs->dataX(0)[0]) *
-                                 numGoodFrames))));
+             inputWs->y(0)[40] *
+                 (deadValue() /
+                  ((inputWs->x(0)[1] - inputWs->x(0)[0]) * numGoodFrames))));
     TS_ASSERT_EQUALS(
-        outputWs->dataY(31)[20],
-        inputWs->dataY(31)[20] /
+        outputWs->y(31)[20],
+        inputWs->y(31)[20] /
             (1 -
-             inputWs->dataY(31)[20] *
-                 (deadValue() / ((inputWs->dataX(0)[1] - inputWs->dataX(0)[0]) *
-                                 numGoodFrames))));
+             inputWs->y(31)[20] *
+                 (deadValue() /
+                  ((inputWs->x(0)[1] - inputWs->x(0)[0]) * numGoodFrames))));
 
-    TS_ASSERT_DELTA(35.9991, outputWs->dataY(12)[2], 0.001);
-    TS_ASSERT_DELTA(4901.5439, outputWs->dataY(20)[14], 0.001);
+    TS_ASSERT_DELTA(35.9991, outputWs->y(12)[2], 0.001);
+    TS_ASSERT_DELTA(4901.5439, outputWs->y(20)[14], 0.001);
   }
 
   void testDifferentSize() {
@@ -151,21 +151,21 @@ public:
         applyDeadTime.getProperty("OutputWorkspace");
     TS_ASSERT(outputWs);
 
-    TS_ASSERT_EQUALS(outputWs->dataY(0)[0], inputWs->dataY(0)[0]);
+    TS_ASSERT_EQUALS(outputWs->y(0)[0], inputWs->y(0)[0]);
     TS_ASSERT_EQUALS(
-        outputWs->dataY(14)[40],
-        inputWs->dataY(14)[40] /
+        outputWs->y(14)[40],
+        inputWs->y(14)[40] /
             (1 -
-             inputWs->dataY(14)[40] *
-                 (deadValue() / ((inputWs->dataX(0)[1] - inputWs->dataX(0)[0]) *
-                                 numGoodFrames))));
-    TS_ASSERT_EQUALS(outputWs->dataY(31)[20], inputWs->dataY(31)[20]);
+             inputWs->y(14)[40] *
+                 (deadValue() /
+                  ((inputWs->x(0)[1] - inputWs->x(0)[0]) * numGoodFrames))));
+    TS_ASSERT_EQUALS(outputWs->y(31)[20], inputWs->y(31)[20]);
 
     // Should be the same (no dead time associated with it)
-    TS_ASSERT_DELTA(36.0, outputWs->dataY(12)[2], 0.1);
+    TS_ASSERT_DELTA(36.0, outputWs->y(12)[2], 0.1);
 
     // Should be new value (dead time applied based on spectrum number)
-    TS_ASSERT_DELTA(4901.5439, outputWs->dataY(20)[14], 0.001);
+    TS_ASSERT_DELTA(4901.5439, outputWs->y(20)[14], 0.001);
   }
 
   /// Test algorithm rejects an input workspace with uneven bin widths
@@ -187,14 +187,35 @@ public:
     // Dead time table
     auto deadTimes = makeDeadTimeTable(numSpectra);
 
-    // Test that algorithm throws
+    // Test that algorithm throws when property is set
     ApplyDeadTimeCorr applyDT;
     applyDT.initialize();
     applyDT.setChild(true);
-    TS_ASSERT_THROWS_NOTHING(applyDT.setProperty("InputWorkspace", rebinned));
-    applyDT.setProperty("DeadTimeTable", deadTimes);
-    applyDT.setProperty("OutputWorkspace", "__NotUsed");
-    TS_ASSERT_THROWS(applyDT.execute(), std::runtime_error);
+    TS_ASSERT_THROWS(applyDT.setProperty("InputWorkspace", rebinned),
+                     std::invalid_argument);
+  }
+
+  // Test that algorithm throws if input workspace does not contain number of
+  // good frames
+  void testNoGoodfrmPresent() {
+    MatrixWorkspace_sptr inputWs = loadDataFromFile();
+    auto deadTimes = makeDeadTimeTable(32);
+
+    auto &run = inputWs->mutableRun();
+    run.removeLogData("goodfrm");
+    TS_ASSERT(!run.hasProperty("goodfrm"));
+
+    ApplyDeadTimeCorr applyDeadTime;
+    applyDeadTime.initialize();
+    applyDeadTime.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(
+        applyDeadTime.setProperty("InputWorkspace", inputWs));
+    TS_ASSERT_THROWS_NOTHING(
+        applyDeadTime.setProperty("DeadTimeTable", deadTimes));
+    TS_ASSERT_THROWS_NOTHING(
+        applyDeadTime.setProperty("OutputWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS(applyDeadTime.execute(), std::invalid_argument);
+    TS_ASSERT(!applyDeadTime.isExecuted());
   }
 
 private:

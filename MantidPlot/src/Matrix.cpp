@@ -144,10 +144,10 @@ void Matrix::initTable(int rows, int cols) {
   initTableView();
 
   // resize the table
-  setGeometry(50, 50, QMIN(_Matrix_initial_columns_, cols) *
+  setGeometry(50, 50, qMin(_Matrix_initial_columns_, cols) *
                               d_table_view->horizontalHeader()->sectionSize(0) +
                           55,
-              (QMIN(_Matrix_initial_rows_, rows) + 1) *
+              (qMin(_Matrix_initial_rows_, rows) + 1) *
                   d_table_view->verticalHeader()->sectionSize(0));
 }
 
@@ -161,7 +161,7 @@ void Matrix::initImage(const QImage &image) {
   int w = image.width();
   int h = image.height();
   if (w <= 500 && h <= 400) {
-    int size = QMAX(w, h);
+    int size = qMax(w, h);
     imageLabel->resize(size, size);
   } else
     imageLabel->resize(500, 500);
@@ -1228,7 +1228,7 @@ void Matrix::initTableView() {
   d_table_view->setFocus();
 
   QPalette pal = d_table_view->palette();
-  pal.setColor(QColorGroup::Base, m_bk_color);
+  pal.setColor(QPalette::ColorRole::Base, m_bk_color);
   d_table_view->setPalette(pal);
 
   // set header properties
@@ -1375,8 +1375,8 @@ QwtDoubleRect Matrix::boundingRect() {
   double dx = fabs(x_end - x_start) / (double)(cols - 1);
   double dy = fabs(y_end - y_start) / (double)(rows - 1);
 
-  return QwtDoubleRect(QMIN(x_start, x_end) - 0.5 * dx,
-                       QMIN(y_start, y_end) - 0.5 * dy,
+  return QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
+                       qMin(y_start, y_end) - 0.5 * dy,
                        fabs(x_end - x_start) + dx,
                        fabs(y_end - y_start) + dy).normalized();
 }

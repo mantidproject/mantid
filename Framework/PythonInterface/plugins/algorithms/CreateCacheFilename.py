@@ -1,4 +1,6 @@
 #pylint: disable=no-init,invalid-name,bare-except,too-many-arguments
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import *
 from mantid.kernel import *
 import mantid, os
@@ -12,7 +14,7 @@ class CreateCacheFilename(PythonAlgorithm):
     def category(self):
         """
         """
-        return "Utility"
+        return "Workflow\\DataHandling"
 
     def name(self):
         """
@@ -69,7 +71,7 @@ class CreateCacheFilename(PythonAlgorithm):
         # default to all properties in the manager
         props = self.getProperty("Properties").value
         if not props and prop_manager:
-            props = prop_manager.keys()
+            props = list(prop_manager.keys())
         # output settings
         prefix = self.getPropertyValue("Prefix")
         cache_dir = self.getPropertyValue("CacheDir")
@@ -87,7 +89,7 @@ class CreateCacheFilename(PythonAlgorithm):
     def _get_signature(self, prop_manager, props, other_props):
         # get matched properties
         if prop_manager:
-            props = matched(prop_manager.keys(), props)
+            props = matched(list(prop_manager.keys()), props)
             # create the list of key=value strings
             kvpairs = [
                 '%s=%s' % (prop, prop_manager.getPropertyValue(prop))

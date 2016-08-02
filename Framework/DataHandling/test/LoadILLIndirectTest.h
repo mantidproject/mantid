@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadILLIndirect.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/LoadILLIndirect.h"
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLIndirect;
@@ -19,32 +19,51 @@ public:
   }
   static void destroySuite(LoadILLIndirectTest *suite) { delete suite; }
 
-  LoadILLIndirectTest() : m_dataFile("ILLIN16B_034745.nxs") {}
+  LoadILLIndirectTest()
+      : m_dataFile2013("ILLIN16B_034745.nxs"),
+        m_dataFile2015("ILLIN16B_127500.nxs") {}
 
-  void testInit() {
+  void test_Init() {
     LoadILLIndirect loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
   }
 
-  void testName() {
+  void test_Name() {
     LoadILLIndirect loader;
     TS_ASSERT_EQUALS(loader.name(), "LoadILLIndirect");
   }
 
-  void testVersion() {
+  void test_Version() {
     LoadILLIndirect loader;
     TS_ASSERT_EQUALS(loader.version(), 1);
   }
 
-  void testExec() {
+  void test_Load_2013_Format() { doExecTest(m_dataFile2013); }
+
+  void test_Load_2015_Format() { doExecTest(m_dataFile2015); }
+
+  void test_Confidence_2013_Format() { doConfidenceTest(m_dataFile2013); }
+
+  void test_Confidence_2015_Format() { doConfidenceTest(m_dataFile2015); }
+
+  void doConfidenceTest(const std::string &file) {
+    LoadILLIndirect alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    alg.setPropertyValue("Filename", file);
+    Mantid::Kernel::NexusDescriptor descr(alg.getPropertyValue("Filename"));
+    TS_ASSERT_EQUALS(alg.confidence(descr), 80);
+  }
+
+  void doExecTest(const std::string &file) {
     // Name of the output workspace.
     std::string outWSName("LoadILLIndirectTest_OutputWS");
 
     LoadILLIndirect loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_dataFile));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", file));
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
@@ -70,7 +89,8 @@ public:
   }
 
 private:
-  std::string m_dataFile;
+  std::string m_dataFile2013;
+  std::string m_dataFile2015;
 };
 
 #endif /* MANTID_DATAHANDLING_LOADILLINDIRECTTEST_H_ */

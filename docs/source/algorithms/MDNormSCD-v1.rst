@@ -45,7 +45,7 @@ Usage
     flux=CompressEvents(InputWorkspace=flux,Tolerance=1e-4)
     flux=Rebin(InputWorkspace=flux,Params='1.85,10,10')
     for i in range(flux.getNumberHistograms()):
-        el=flux.getEventList(i)
+        el=flux.getSpectrum(i)
         el.divide(flux.readY(i)[0],0)
     flux=Rebin(InputWorkspace=flux,Params='1.85,10,10')
     flux=IntegrateFlux(flux)

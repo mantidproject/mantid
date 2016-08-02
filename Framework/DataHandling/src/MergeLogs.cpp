@@ -11,16 +11,6 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(Merge2WorkspaceLogs)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-Merge2WorkspaceLogs::Merge2WorkspaceLogs() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-Merge2WorkspaceLogs::~Merge2WorkspaceLogs() {}
-
 void Merge2WorkspaceLogs::init() {
 
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
@@ -34,8 +24,6 @@ void Merge2WorkspaceLogs::init() {
                   "Reset both logs' values to unity for each one.");
   declareProperty("LogValue1", 0.0, "Unity value of log 1.");
   declareProperty("LogValue2", 1.0, "Unity value of log 2.");
-
-  return;
 }
 
 void Merge2WorkspaceLogs::exec() {
@@ -51,20 +39,18 @@ void Merge2WorkspaceLogs::exec() {
 
   // 2. Check
   if (logname1.size() == 0 || logname2.size() == 0 || mlogname.size() == 0) {
-    g_log.error() << "One or more than one log name is not given!" << std::endl;
+    g_log.error() << "One or more than one log name is not given!\n";
     throw std::invalid_argument("One or more than one log name is not give");
   }
 
   if (resetlogvalue && fabs(logvalue1 - logvalue2) < 1.0E-9) {
-    g_log.warning() << "User re-defined log values of two logs are very close!"
-                    << std::endl;
+    g_log.warning()
+        << "User re-defined log values of two logs are very close!\n";
   }
 
   // 3. Merge log
   this->mergeLogs(logname1, logname2, mlogname, resetlogvalue, logvalue1,
                   logvalue2);
-
-  return;
 }
 
 /*
@@ -98,12 +84,12 @@ void Merge2WorkspaceLogs::mergeLogs(std::string ilogname1,
   ;
   bool nocomparison = false;
 
-  std::cout << "Merging!!" << std::endl;
+  std::cout << "Merging!!\n";
 
   while (icont) {
     // std::cout << "index1 = " << index1 << ", index2 = " << index2 << ",
     // launch1 = " << launch1 << ", nocomparison = " << nocomparison <<
-    // std::endl;
+    // '\n';
 
     // i. Determine which log to work on
     if (!nocomparison) {
@@ -162,15 +148,12 @@ void Merge2WorkspaceLogs::mergeLogs(std::string ilogname1,
   // 3. Check and add new log
   int newlogsize = rp->size();
   if (size_t(newlogsize) != (times1.size() + times2.size())) {
-    g_log.error()
-        << "Resulted log size is not equal to the sum of two source log sizes"
-        << std::endl;
+    g_log.error() << "Resulted log size is not equal to the sum of two source "
+                     "log sizes\n";
     throw;
   }
 
   matrixWS->mutableRun().addProperty(rp);
-
-  return;
 }
 
 /*
@@ -183,7 +166,7 @@ Merge2WorkspaceLogs::getTimeSeriesLog(std::string logname) {
   Kernel::Property *prop = matrixWS->run().getLogData(logname);
   if (!prop) {
     g_log.error() << "Unable to find log " << logname << " of workspace "
-                  << matrixWS->getName() << std::endl;
+                  << matrixWS->getName() << '\n';
     throw;
   }
 
@@ -193,7 +176,7 @@ Merge2WorkspaceLogs::getTimeSeriesLog(std::string logname) {
       dynamic_cast<Kernel::TimeSeriesProperty<double> *>(prop);
   if (!timeprop) {
     g_log.error() << "Property (log) " << logname
-                  << " is not of class TimeSeriesProperty!" << std::endl;
+                  << " is not of class TimeSeriesProperty!\n";
     throw;
   }
 

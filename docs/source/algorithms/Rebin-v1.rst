@@ -16,7 +16,7 @@ create logarithmic binning using the formula
 :math:`x(j+1)=x(j)(1+|\Delta x_i|)\,`
 
 This algorithms is useful both in data reduction, but also in remapping
-`ragged workspaces <http://www.mantidproject.org/Ragged_Workspace>`__ to a regular set of bin
+:ref:`ragged workspace <Ragged_Workspace>` to a regular set of bin
 boundaries.
 
 Unless the FullBinsOnly option is enabled, the bin immediately before

@@ -6,6 +6,7 @@
 //----------------------------------
 #include <QMainWindow>
 #include "Script.h"
+#include "Mantid/IProjectSerialisable.h"
 
 //----------------------------------------------------------
 // Forward declarations
@@ -24,7 +25,7 @@ class QHideEvent;
 /** @class ScriptingWindow
     This class displays a seperate window for editing and executing scripts
 */
-class ScriptingWindow : public QMainWindow {
+class ScriptingWindow : public QMainWindow, Mantid::IProjectSerialisable {
   /// Qt macro
   Q_OBJECT
 
@@ -51,13 +52,17 @@ public:
   /// automatically
   /// running a script loaded with open
   void executeCurrentTab(const Script::ExecutionMode mode);
-  /// saves scripts file names to a string
-  QString saveToString();
   /// Set whether to accept/reject close events
   void acceptCloseEvent(const bool value);
   /// Opens a script providing a copy is not already open
   void openUnique(QString filename);
-
+  /// Saves the open script names to the current project
+  std::string saveToProject(ApplicationWindow *app) override;
+  /// Loads the open script names for the current project
+  void loadFromProject(const std::string &lines, ApplicationWindow *app,
+                       const int fileVersion) override;
+  // Loads the scripts from a list of filenames
+  void loadFromFileList(const QStringList &files);
 signals:
   /// Show the scripting language dialog
   void chooseScriptingLanguage();

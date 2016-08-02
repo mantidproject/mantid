@@ -64,7 +64,7 @@ public:
     m_tinyReflWS = create2DWorkspaceWithReflectometryInstrument();
 
     FrameworkManager::Instance();
-    MantidVec xData = {0, 0, 0, 0};
+    MantidVec xData = {0, 1, 2, 3};
     MantidVec yData = {0, 0, 0};
 
     auto createWorkspace =
@@ -149,12 +149,6 @@ public:
     alg->setProperty("MonitorIntegrationWavelengthMin", 1.0);
     alg->setProperty("MonitorIntegrationWavelengthMax", 0.0);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
-  }
-
-  void test_monitor_index_positive() {
-    auto alg = construct_standard_algorithm();
-    TS_ASSERT_THROWS(alg->setProperty("I0MonitorIndex", -1),
-                     std::invalid_argument);
   }
 
   void test_execute_one_tranmission() {

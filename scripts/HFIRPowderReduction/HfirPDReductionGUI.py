@@ -146,7 +146,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.actionQuit, QtCore.SIGNAL('triggered()'),
                      self.doExist)
         self.connect(self.ui.actionFind_Help, QtCore.SIGNAL('triggered()'),
-                self.doHelp)
+                     self.doHelp)
 
         # main
         self.connect(self.ui.comboBox_wavelength, QtCore.SIGNAL('currentIndexChanged(int)'),
@@ -180,69 +180,69 @@ class MainWindow(QtGui.QMainWindow):
 
         # tab 'Normalized'
         self.connect(self.ui.pushButton_loadData, QtCore.SIGNAL('clicked()'),
-                self.doLoadData)
+                     self.doLoadData)
         self.connect(self.ui.pushButton_prevScan, QtCore.SIGNAL('clicked()'),
-                self.doLoadReduceScanPrev)
+                     self.doLoadReduceScanPrev)
         self.connect(self.ui.pushButton_nextScan, QtCore.SIGNAL('clicked()'),
-                self.doLoadReduceScanNext)
+                     self.doLoadReduceScanNext)
         self.connect(self.ui.pushButton_unit2theta, QtCore.SIGNAL('clicked()'),
-                self.doReduce2Theta)
+                     self.doReduce2Theta)
         self.connect(self.ui.pushButton_unitD, QtCore.SIGNAL('clicked()'),
-                self.doReduceDSpacing)
+                     self.doReduceDSpacing)
         self.connect(self.ui.pushButton_unitQ, QtCore.SIGNAL('clicked()'),
-                self.doReduceQ)
+                     self.doReduceQ)
         self.connect(self.ui.pushButton_saveData, QtCore.SIGNAL('clicked()'),
-                self.doSaveData)
+                     self.doSaveData)
         self.connect(self.ui.pushButton_clearTab2Canvas, QtCore.SIGNAL('clicked()'),
-                self.doClearCanvas)
+                     self.doClearCanvas)
 
         # tab 'Multiple Scans'
         self.connect(self.ui.pushButton_loadMultData, QtCore.SIGNAL('clicked()'),
                      self.doLoadSetData)
         self.connect(self.ui.pushButton_mscanBin, QtCore.SIGNAL('clicked()'),
-                self.doReduceSetData)
+                     self.doReduceSetData)
         self.connect(self.ui.pushButton_mergeScans, QtCore.SIGNAL('clicked()'),
-                self.doMergeScans)
+                     self.doMergeScans)
         self.connect(self.ui.pushButton_viewMScan1D, QtCore.SIGNAL('clicked()'),
-                self.doMergeScanView1D)
+                     self.doMergeScanView1D)
         self.connect(self.ui.pushButton_view2D, QtCore.SIGNAL('clicked()'),
-                self.doMergeScanView2D)
+                     self.doMergeScanView2D)
         self.connect(self.ui.pushButton_viewMerge, QtCore.SIGNAL('clicked()'),
-                self.doMergeScanViewMerged)
+                     self.doMergeScanViewMerged)
         self.connect(self.ui.pushButton_clearMultCanvas, QtCore.SIGNAL('clicked()'),
-                self.doClearMultiRunCanvas)
+                     self.doClearMultiRunCanvas)
         self.connect(self.ui.pushButton_saveAllIndScans, QtCore.SIGNAL('clicked()'),
-                self.doSaveMultipleScans)
+                     self.doSaveMultipleScans)
         self.connect(self.ui.pushButton_saveMerge, QtCore.SIGNAL('clicked()'),
-                self.doSaveMergedScan)
+                     self.doSaveMergedScan)
         self.connect(self.ui.pushButton_plotRawMultiScans, QtCore.SIGNAL('clicked()'),
                      self.do_convert_plot_multi_scans)
 
         # tab 'Vanadium'
         self.connect(self.ui.pushButton_stripVanPeaks, QtCore.SIGNAL('clicked()'),
-                self.doStripVandiumPeaks)
+                     self.doStripVandiumPeaks)
         self.connect(self.ui.pushButton_saveVanRun, QtCore.SIGNAL('clicked()'),
-                self.doSaveVanRun)
+                     self.doSaveVanRun)
         self.connect(self.ui.pushButton_rebin2Theta, QtCore.SIGNAL('clicked()'),
-                self.doReduceVanadium2Theta)
+                     self.doReduceVanadium2Theta)
         self.connect(self.ui.pushButton_smoothVanData, QtCore.SIGNAL('clicked()'),
-                self.doSmoothVanadiumData)
+                     self.doSmoothVanadiumData)
         self.connect(self.ui.pushButton_applySmooth, QtCore.SIGNAL('clicked()'),
-                self.doSmoothVanadiumApply)
+                     self.doSmoothVanadiumApply)
         self.connect(self.ui.pushButton_undoSmooth, QtCore.SIGNAL('clicked()'),
-                self.doSmoothVanadiumUndo)
+                     self.doSmoothVanadiumUndo)
 
         # tab 'Advanced Setup'
         self.connect(self.ui.pushButton_browseCache, QtCore.SIGNAL('clicked()'),
-                self.doBrowseCache)
+                     self.doBrowseCache)
         self.connect(self.ui.radioButton_useServer, QtCore.SIGNAL('clicked()'),
-                self.doChangeSrcLocation)
+                     self.doChangeSrcLocation)
         self.connect(self.ui.radioButton_useLocal, QtCore.SIGNAL('clicked()'),
-                self.doChangeSrcLocation)
+                     self.doChangeSrcLocation)
         self.connect(self.ui.pushButton_browseLocalSrc, QtCore.SIGNAL('clicked()'),
-                self.doBrowseLocalDataSrc)
+                     self.doBrowseLocalDataSrc)
         self.connect(self.ui.pushButton_chkServer, QtCore.SIGNAL('clicked()'),
-                self.doCheckSrcServer)
+                     self.doCheckSrcServer)
 
         # Define signal-event handling
 
@@ -418,6 +418,9 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.radioButton_useServer.setChecked(True)
             self.ui.radioButton_useLocal.setChecked(False)
         # ENDIF
+
+        #register startup
+        mantid.UsageService.registerFeatureUsage("Interface","HfirPowderReduction",False)
 
         return
 
@@ -1119,7 +1122,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.doClearIndDetCanvas()
 
             self._plot_individual_detector_counts(self._expNo, self._scanNo, currdetid,
-                    self._indvXLabel)
+                                                  self._indvXLabel)
         except KeyError as e:
             self._logError(str(e))
         else:
@@ -1143,7 +1146,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.doClearIndDetCanvas()
 
             self._plot_individual_detector_counts(self._expNo, self._scanNo, currdetid,
-                    self._indvXLabel)
+                                                  self._indvXLabel)
         except KeyError as e:
             self._logError(str(e))
         else:
@@ -1266,7 +1269,7 @@ class MainWindow(QtGui.QMainWindow):
         plotmode = str(self.ui.comboBox_rawDetMode.currentText())
         overplot = bool(self.ui.checkBox_overpltRawDet.isChecked())
         execstatus = self._plotRawDetSignal(self._rawDetExpNo, self._rawDetScanNo, plotmode,
-                ptno, overplot)
+                                            ptno, overplot)
 
         # update if it is good to plot
         if execstatus is True:
@@ -1301,7 +1304,7 @@ class MainWindow(QtGui.QMainWindow):
         plotmode = str(self.ui.comboBox_rawDetMode.currentText())
         overplot = bool(self.ui.checkBox_overpltRawDet.isChecked())
         execstatus = self._plotRawDetSignal(self._rawDetExpNo, self._rawDetScanNo, plotmode,
-                ptno, overplot)
+                                            ptno, overplot)
 
         # update if it is good to plot
         if execstatus is True:
@@ -1933,7 +1936,7 @@ class MainWindow(QtGui.QMainWindow):
         xlabel = self._getXLabelFromUnit(self.ui.comboBox_mscanUnit.currentText())
 
         canvas.add_plot1d(vecx, vecy, marker=marker, color=color,
-            x_label=xlabel, y_label='intensity',label=label)
+                          x_label=xlabel, y_label='intensity',label=label)
 
         xmax = max(vecx)
         xmin = min(vecx)
@@ -2102,11 +2105,11 @@ class MainWindow(QtGui.QMainWindow):
 
         # plot
         canvas.add_plot1d(vecx, vecy, marker=marker, color=color,
-            x_label=xlabel, y_label='intensity',label=label)
+                          x_label=xlabel, y_label='intensity',label=label)
 
         if TempData is False:
             canvas.add_plot1d(vecx, diffY, marker='+', color='green',
-                x_label=xlabel, y_label='intensity',label='Diff')
+                              x_label=xlabel, y_label='intensity',label='Diff')
 
         # reset canvas limits
         if clearcanvas is True:

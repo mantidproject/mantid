@@ -25,12 +25,6 @@ using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
 
-/// Constructor
-PeakIntegration::PeakIntegration() : API::Algorithm(), m_IC(false) {}
-
-/// Destructor
-PeakIntegration::~PeakIntegration() {}
-
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */
@@ -348,7 +342,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0,
     }
   }
 
-  outputW->getSpectrum(idet)->clearDetectorIDs();
+  outputW->getSpectrum(idet).clearDetectorIDs();
   // Find the pixel ID at that XY position on the rectangular detector
   int pixelID = peak.getDetectorID(); // det->getAtXY(x0,y0)->getID();
 
@@ -358,7 +352,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0,
     size_t wi = wiEntry->second;
     // Set detectorIDs
     outputW->getSpectrum(idet)
-        ->addDetectorIDs(inputW->getSpectrum(wi)->getDetectorIDs());
+        .addDetectorIDs(inputW->getSpectrum(wi).getDetectorIDs());
   }
 
   return TOFmax - 1;

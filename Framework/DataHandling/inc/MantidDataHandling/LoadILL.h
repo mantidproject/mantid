@@ -37,8 +37,7 @@ namespace DataHandling {
 class DLLExport LoadILL : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Constructor
-  LoadILL(); /// Virtual destructor
-  ~LoadILL() override {}
+  LoadILL();
   /// Algorithm's name
   const std::string name() const override { return "LoadILL"; }
   /// Summary of algorithms purpose

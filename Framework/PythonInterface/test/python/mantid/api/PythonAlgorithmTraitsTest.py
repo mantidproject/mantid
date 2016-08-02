@@ -1,6 +1,7 @@
 """Defines tests for the traits within Python algorithms
 such as name, version etc.
 """
+from __future__ import (absolute_import, division, print_function)
 
 import unittest
 import testhelpers

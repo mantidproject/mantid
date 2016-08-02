@@ -209,20 +209,19 @@ void UnwrapSNS::execEvent() {
   for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
        workspaceIndex++) {
     //    PARALLEL_START_INTERUPT_REGION
-    std::size_t numEvents =
-        outW->getEventList(workspaceIndex).getNumberEvents();
+    std::size_t numEvents = outW->getSpectrum(workspaceIndex).getNumberEvents();
     bool isMonitor;
     double Ld = this->calculateFlightpath(workspaceIndex, isMonitor);
     MantidVec time_bins;
     if (outW->dataX(0).size() > 2) {
       this->unwrapX(m_inputWS->dataX(workspaceIndex), time_bins, Ld);
-      outW->setX(workspaceIndex, time_bins);
+      outW->setBinEdges(workspaceIndex, time_bins);
     } else {
-      outW->setX(workspaceIndex, m_inputWS->dataX(workspaceIndex));
+      outW->setX(workspaceIndex, m_inputWS->refX(workspaceIndex));
     }
     if (numEvents > 0) {
       MantidVec times(numEvents);
-      outW->getEventList(workspaceIndex).getTofs(times);
+      outW->getSpectrum(workspaceIndex).getTofs(times);
       double filterVal = m_Tmin * Ld / m_LRef;
       for (size_t j = 0; j < numEvents; j++) {
         if (times[j] < filterVal)
@@ -230,7 +229,7 @@ void UnwrapSNS::execEvent() {
         else
           break; // stop filtering
       }
-      outW->getEventList(workspaceIndex).setTofs(times);
+      outW->getSpectrum(workspaceIndex).setTofs(times);
     }
     m_progress->report();
     //    PARALLEL_END_INTERUPT_REGION

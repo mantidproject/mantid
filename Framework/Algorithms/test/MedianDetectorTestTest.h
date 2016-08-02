@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/MedianDetectorTest.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -27,6 +28,9 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 const int THEMASKED(40);
 const int SAVEDBYERRORBAR(143);
@@ -67,7 +71,7 @@ public:
     input =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_IWSName);
     TS_ASSERT(input);
-    // TS_ASSERT(input->getInstrument()->isDetectorMasked(input->getSpectrum(THEMASKED)->getDetectorIDs()));
+    // TS_ASSERT(input->getInstrument()->isDetectorMasked(input->getSpectrum(THEMASKED).getDetectorIDs()));
 
     MatrixWorkspace_sptr outputMat =
         boost::dynamic_pointer_cast<MatrixWorkspace>(output);
@@ -88,7 +92,7 @@ public:
     const int lastGoodSpec = 95;
     for (int lHist = 0; lHist < Nhist; lHist++) {
       //      std::cout << "    " << lHist << " " <<
-      //      outputMat->readY(lHist).front() << std::endl;
+      //      outputMat->readY(lHist).front() << '\n';
       double expected = BAD_VAL;
       if (lHist >= firstGoodSpec && lHist <= lastGoodSpec)
         expected = GOOD_VAL;
@@ -172,14 +176,11 @@ public:
   MedianDetectorTestTest() : m_IWSName("MedianDetectorTestInput") {
     using namespace Mantid;
     // Set up a small workspace for testing
-    Workspace_sptr space =
-        WorkspaceFactory::Instance().create("Workspace2D", Nhist, 11, 10);
-    m_2DWS = boost::dynamic_pointer_cast<Workspace2D>(space);
     const short specLength = 22;
-    boost::shared_ptr<MantidVec> x = boost::make_shared<MantidVec>(specLength);
-    for (int i = 0; i < specLength; ++i) {
-      (*x)[i] = i * 1000;
-    }
+    Workspace_sptr space = WorkspaceFactory::Instance().create(
+        "Workspace2D", Nhist, specLength, specLength - 1);
+    m_2DWS = boost::dynamic_pointer_cast<Workspace2D>(space);
+    BinEdges x(specLength, HistogramData::LinearGenerator(0.0, 1000.0));
     // the data will be 21 random numbers
     double yArray[specLength - 1] = {0.2, 4, 50, 0.001, 0, 0,     0,
                                      1,   0, 15, 4,     0, 0.001, 2e-10,
@@ -190,33 +191,30 @@ public:
     }
 
     // most error values will be small so that they wont affect the tests
-    boost::shared_ptr<MantidVec> smallErrors(
-        new MantidVec(specLength - 1, 0.01 * m_YSum / specLength));
+    CountStandardDeviations smallErrors(specLength - 1,
+                                        0.01 * m_YSum / specLength);
     // if the SignificanceTest property is set to one, knowing what happens in
     // the loop below, these errors will just make or break the tests
-    boost::shared_ptr<MantidVec> almostBigEnough(
-        new MantidVec(specLength - 1, 0));
-    (*almostBigEnough)[0] = 0.9 * m_YSum * (0.5 * Nhist - 1);
-    boost::shared_ptr<MantidVec> bigEnough =
-        boost::make_shared<MantidVec>(specLength - 1, 0);
-    (*bigEnough)[0] = 1.2 * m_YSum * (0.5 * Nhist);
+    CountStandardDeviations almostBigEnough(specLength - 1, 0);
+    almostBigEnough.mutableData()[0] = 0.9 * m_YSum * (0.5 * Nhist - 1);
+    CountStandardDeviations bigEnough(specLength - 1, 0);
+    bigEnough.mutableData()[0] = 1.2 * m_YSum * (0.5 * Nhist);
 
     for (int j = 0; j < Nhist; ++j) {
-      m_2DWS->setX(j, x);
-      boost::shared_ptr<MantidVec> spectrum = boost::make_shared<MantidVec>();
+      m_2DWS->setBinEdges(j, x);
       // the spectravalues will be multiples of the random numbers above
-      for (int l = 0; l < specLength - 1; ++l) {
-        spectrum->push_back(j * yArray[l]);
-      }
-      boost::shared_ptr<MantidVec> errors = smallErrors;
+      Counts spectrum(yArray, yArray + specLength - 1);
+      spectrum *= j;
+      auto errors = smallErrors;
       if (j == Nhist - 2)
         errors = almostBigEnough;
       if (j == SAVEDBYERRORBAR)
         errors = bigEnough;
 
-      m_2DWS->setData(j, spectrum, errors);
+      m_2DWS->setCounts(j, spectrum);
+      m_2DWS->setCountStandardDeviations(j, errors);
       // Just set the spectrum number to match the index
-      m_2DWS->getSpectrum(j)->setSpectrumNo(j + 1);
+      m_2DWS->getSpectrum(j).setSpectrumNo(j + 1);
     }
 
     // Register the workspace in the data service

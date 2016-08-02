@@ -23,16 +23,6 @@ DECLARE_ALGORITHM(ConvertCWPDMDToSpectra)
 const double BIGNUMBER = 1.0E100;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertCWPDMDToSpectra::ConvertCWPDMDToSpectra() : m_infitesimal(1.0E-10) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertCWPDMDToSpectra::~ConvertCWPDMDToSpectra() {}
-
-//----------------------------------------------------------------------------------------------
 void ConvertCWPDMDToSpectra::init() {
 
   declareProperty(make_unique<WorkspaceProperty<IMDEventWorkspace>>(
@@ -598,8 +588,6 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
       scancell = false;
     }
   } // ENDOF(while)
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -673,8 +661,6 @@ void ConvertCWPDMDToSpectra::linearInterpolation(
 
     return;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -701,8 +687,6 @@ void ConvertCWPDMDToSpectra::setupSampleLogs(
     targetrun.addProperty(p->clone());
     g_log.debug() << "Cloned property " << p->name() << "\n";
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -728,8 +712,6 @@ void ConvertCWPDMDToSpectra::scaleMatrixWorkspace(
       }
     }
   } // FOR(iws)
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

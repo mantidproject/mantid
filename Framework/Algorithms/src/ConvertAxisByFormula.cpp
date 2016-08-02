@@ -19,16 +19,6 @@ using namespace API;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(ConvertAxisByFormula)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-ConvertAxisByFormula::ConvertAxisByFormula() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ConvertAxisByFormula::~ConvertAxisByFormula() {}
-
 const std::string ConvertAxisByFormula::name() const {
   return ("ConvertAxisByFormula");
 }
@@ -139,8 +129,7 @@ void ConvertAxisByFormula::exec() {
           *iter = result;
         }
 
-        MantidVecPtr xVals;
-        xVals.access() = outputWs->dataX(0);
+        auto xVals = outputWs->refX(0);
         Progress prog(this, 0.6, 1.0, numberOfSpectra_i);
         PARALLEL_FOR1(outputWs)
         for (int64_t j = 1; j < numberOfSpectra_i; ++j) {

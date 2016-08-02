@@ -164,12 +164,12 @@ public:
 
     // Adjust second workspace
     Mantid::specnum_t start =
-        ws1->getSpectrum(numPixels - 1)->getSpectrumNo() + 10;
+        ws1->getSpectrum(numPixels - 1).getSpectrumNo() + 10;
     for (int i = 0; i < 5; ++i) {
-      Mantid::API::ISpectrum *spec = ws2->getSpectrum(i);
-      spec->setSpectrumNo(start + i);
-      spec->clearDetectorIDs();
-      spec->addDetectorID(start + i);
+      auto &spec = ws2->getSpectrum(i);
+      spec.setSpectrumNo(start + i);
+      spec.clearDetectorIDs();
+      spec.addDetectorID(start + i);
     }
 
     TS_ASSERT_THROWS_NOTHING(conj.setProperty("InputWorkspace2", ws2));
@@ -182,11 +182,11 @@ public:
     TS_ASSERT(output);
     // Check the first spectrum has the correct ID
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 15);
-    TS_ASSERT_EQUALS(output->getSpectrum(0)->getSpectrumNo(),
-                     ws1->getSpectrum(0)->getSpectrumNo());
+    TS_ASSERT_EQUALS(output->getSpectrum(0).getSpectrumNo(),
+                     ws1->getSpectrum(0).getSpectrumNo());
     // and the joining point
-    TS_ASSERT_EQUALS(output->getSpectrum(10)->getSpectrumNo(), start);
-    TS_ASSERT(!output->getSpectrum(11)->getDetectorIDs().empty());
+    TS_ASSERT_EQUALS(output->getSpectrum(10).getSpectrumNo(), start);
+    TS_ASSERT(!output->getSpectrum(11).getDetectorIDs().empty());
 
     AnalysisDataService::Instance().remove(ws1_name);
   }

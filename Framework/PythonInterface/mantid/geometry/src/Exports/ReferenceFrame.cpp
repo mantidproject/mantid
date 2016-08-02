@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 #include <boost/shared_ptr.hpp>
@@ -8,6 +9,8 @@
 using Mantid::Geometry::ReferenceFrame;
 using Mantid::Kernel::V3D;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(ReferenceFrame)
 
 void export_ReferenceFrame() {
   using namespace Mantid::Geometry;

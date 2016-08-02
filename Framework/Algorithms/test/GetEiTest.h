@@ -1,6 +1,7 @@
 #ifndef GETEITEST_H_
 #define GETEITEST_H_
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -13,6 +14,8 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::MantidVecPtr;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::LinearGenerator;
 
 class GetEiTest : public CxxTest::TestSuite {
 public:
@@ -226,8 +229,7 @@ private:
             numHists, numBins, true);
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    MantidVecPtr xdata;
-    xdata.access().resize(numBins + 1);
+    BinEdges xdata(numBins + 1, LinearGenerator(5.0, 5.5));
     // Update X data  to a sensible values. Looks roughly like the MARI binning
     // Update the Y values. We don't care about errors here
 
@@ -238,20 +240,18 @@ private:
     const double peakOneCentre(6493.0), sigmaSqOne(250 * 250.),
         peakTwoCentre(10625.), sigmaSqTwo(50 * 50);
     const double peakOneHeight(3000.), peakTwoHeight(1000.);
-    for (int i = 0; i <= numBins; ++i) {
-      const double xValue = 5.0 + 5.5 * i;
-      if (includePeaks && i < numBins) {
+    for (int i = 0; i < numBins; ++i) {
+      if (includePeaks) {
         testWS->dataY(0)[i] =
             peakOneHeight *
-            exp(-0.5 * pow(xValue - peakOneCentre, 2.) / sigmaSqOne);
+            exp(-0.5 * pow(xdata[i] - peakOneCentre, 2.) / sigmaSqOne);
         testWS->dataY(1)[i] =
             peakTwoHeight *
-            exp(-0.5 * pow(xValue - peakTwoCentre, 2.) / sigmaSqTwo);
+            exp(-0.5 * pow(xdata[i] - peakTwoCentre, 2.) / sigmaSqTwo);
       }
-      xdata.access()[i] = xValue;
     }
-    testWS->setX(0, xdata);
-    testWS->setX(1, xdata);
+    testWS->setBinEdges(0, xdata);
+    testWS->setBinEdges(1, xdata);
     return testWS;
   }
 
