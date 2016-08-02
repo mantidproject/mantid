@@ -6308,9 +6308,7 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
 std::string Graph::saveToProject() {
   TSVSerialiser tsv;
 
-  tsv.writeLine("ggeometry") << pos().x() << pos().y()
-                             << frameGeometry().width()
-                             << frameGeometry().height();
+  tsv.writeLine("ggeometry") << x() << y() << width() << height();
 
   tsv.writeLine("PlotTitle");
   tsv << d_plot->title().text().replace("\n", "<br>");

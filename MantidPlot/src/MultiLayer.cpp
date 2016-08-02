@@ -1790,24 +1790,6 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
     multiLayer->setAlignement(hor, vert);
   }
 
-  if (tsv.hasSection("graph")) {
-    auto graphSections = tsv.sections("graph");
-    for (auto it = graphSections.cbegin(); it != graphSections.cend(); ++it) {
-      auto graphLines = *it;
-
-      TSVSerialiser gtsv(graphLines);
-
-      if (gtsv.selectLine("ggeometry")) {
-        int x = 0, y = 0, w = 0, h = 0;
-        gtsv >> x >> y >> w >> h;
-
-        auto g = dynamic_cast<Graph *>(multiLayer->addLayer(x, y, w, h));
-        if (g)
-          g->loadFromProject(graphLines, app, fileVersion);
-      }
-    }
-  }
-
   // waterfall must be updated after graphs have been loaded
   // as it requires the graphs to exist first!
   if (tsv.hasSection("waterfall")) {
@@ -1828,6 +1810,25 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
   if (tsv.hasLine("geometry")) {
     app->restoreWindowGeometry(
         app, multiLayer, QString::fromStdString(tsv.lineAsString("geometry")));
+  }
+
+  if (tsv.hasSection("graph")) {
+    auto graphSections = tsv.sections("graph");
+    for (auto it = graphSections.cbegin(); it != graphSections.cend(); ++it) {
+      auto graphLines = *it;
+
+      TSVSerialiser gtsv(graphLines);
+
+      if (gtsv.selectLine("ggeometry")) {
+        int x = 0, y = 0, w = 0, h = 0;
+        gtsv >> x >> y >> w >> h;
+
+        auto *g = multiLayer->addLayer(x, y, w, h);
+        if (g) {
+          g->loadFromProject(graphLines, app, fileVersion);
+        }
+      }
+    }
   }
 
   return multiLayer;
