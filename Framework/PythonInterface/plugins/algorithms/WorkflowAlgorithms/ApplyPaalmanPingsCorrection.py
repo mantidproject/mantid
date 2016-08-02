@@ -102,7 +102,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             if self._shift_can:
                 # Use temp workspace so we don't modify data
                 prog_container.report('Shifting can')
-                Scale(InputWorkspace=self._can_ws_wavelength,
+                ScaleX(InputWorkspace=self._can_ws_wavelength,
                       OutputWorkspace=self._shifted_container,
                       Factor=self._can_shift_amount,
                       Operation='Add')
