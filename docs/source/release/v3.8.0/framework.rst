@@ -79,6 +79,9 @@ Performance
   A moderate number of algorithms should experience a speedup and reduced memory consumption.
   If you experience unusual slowdowns, please contact the developer team.
 
+- :ref:`StripPeaks <algm-StripPeaks>` has a slight performance improvement from these changes.
+  
+  
 CurveFitting
 ------------
 
