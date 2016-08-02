@@ -68,62 +68,19 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         prog_container.report('Starting algorithm')
 
         # Units should be wavelength
-        unit_id = mtd[self._sample_ws_name].getAxis(0).getUnit().unitID()
-        if unit_id != 'Wavelength':
-            # Configure conversion
-            if unit_id == 'dSpacing':
-                emode = 'Elastic'
-                efixed = 0.0
-            elif unit_id == 'DeltaE':
-                emode = 'Indirect'
-                from IndirectCommon import getEfixed
-                efixed = getEfixed(self._sample_ws_name)
-            else:
-                raise ValueError('Unit %s in sample workspace is not supported' % unit_id)
-
-            # Do conversion
-            # Use temporary workspace so we don't modify data
-            prog_container.report('Converting sample units')
-            ConvertUnits(InputWorkspace=self._sample_ws_name,
-                         OutputWorkspace=self._sample_ws_wavelength,
-                         Target="Wavelength",
-                         EMode=emode,
-                         EFixed=efixed)
-
-        else:
-            # No need to convert
-            CloneWorkspace(InputWorkspace=self._sample_ws_name,
-                           OutputWorkspace=self._sample_ws_wavelength)
+        sample_unit = mtd[self._sample_ws_name].getAxis(0).getUnit().unitID()
+        self._convert_units_wavelength(sample_unit,
+                                       self._sample_ws_name,
+                                       self._sample_ws_wavelength,
+                                       "Wavelength")
 
         if self._use_can:
             # Units should be wavelength
-            unit_id = mtd[self._can_ws_name].getAxis(0).getUnit().unitID()
-            if unit_id != 'Wavelength':
-                # Configure conversion
-                if unit_id == 'dSpacing':
-                    emode = 'Elastic'
-                    efixed = 0.0
-                elif unit_id == 'DeltaE':
-                    emode = 'Indirect'
-                    from IndirectCommon import getEfixed
-                    efixed = getEfixed(self._can_ws_name)
-                else:
-                    raise ValueError('Unit %s in sample workspace is not supported' % unit_id)
-
-                # Do conversion
-                # Use temporary workspace so we don't modify data
-                prog_container.report('Converting can units')
-                ConvertUnits(InputWorkspace=self._can_ws_name,
-                            OutputWorkspace=self._can_ws_wavelength,
-                            Target="Wavelength",
-                            EMode=emode,
-                            EFixed=efixed)
-
-            else:
-                # No need to convert
-                CloneWorkspace(InputWorkspace=self._can_ws_name,
-                               OutputWorkspace=self._can_ws_wavelength)
-
+            can_unit = mtd[self._can_ws_name].getAxis(0).getUnit().unitID()
+            self._convert_units_wavelength(can_unit,
+                                           self._can_ws_name,
+                                           self._can_ws_wavelength,
+                                           "Wavelength")
 
             # Appy container shift if needed
             if self._shift_can:
@@ -223,6 +180,10 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                      LogType='String',
                      LogText=sam_base)
 
+        # Convert Units back to original
+
+
+
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
 
         # Remove temporary workspaces
@@ -302,6 +263,34 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         self._shifted_container = '_shifted_container'
         self._can_ws_wavelength = '_can_ws_wavelength'
         self._sample_ws_wavelength = '_sample_ws_wavelength'
+
+
+    def _convert_units_wavelength(self, unit, input_ws, output_ws, target):
+
+        if unit != 'Wavelength':
+        # Configure conversion
+            if unit == 'dSpacing':
+                emode = 'Elastic'
+                efixed = 0.0
+            elif unit == 'DeltaE':
+                emode = 'Indirect'
+                from IndirectCommon import getEfixed
+                efixed = getEfixed(input_ws)
+            else:
+                raise ValueError('Unit %s in sample workspace is not supported' % unit)
+
+            # Do conversion
+            # Use temporary workspace so we don't modify data
+            ConvertUnits(InputWorkspace=input_ws,
+                         OutputWorkspace=output_ws,
+                         Target=target,
+                         EMode=emode,
+                         EFixed=efixed)
+
+        else:
+            # No need to convert
+            CloneWorkspace(InputWorkspace=input_ws,
+                           OutputWorkspace=output_ws)
 
     def _get_correction_factor_ws_name(self, factor_type):
         """
