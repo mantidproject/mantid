@@ -21,6 +21,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
     _shifted_container = None
     _can_shift_amount = 0.0
     _can_ws_wavelength = None
+    _sample_ws_wavelength = None
 
 
     def category(self):
@@ -63,10 +64,36 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             logger.information('Not using container')
 
 
-
-
         prog_container = Progress(self, start=0.0, end=0.2, nreports=4)
         prog_container.report('Starting algorithm')
+
+        # Units should be wavelength
+        unit_id = mtd[self._sample_ws_name].getAxis(0).getUnit().unitID()
+        if unit_id != 'Wavelength':
+            # Configure conversion
+            if unit_id == 'dSpacing':
+                emode = 'Elastic'
+                efixed = 0.0
+            elif unit_id == 'DeltaE':
+                emode = 'Indirect'
+                from IndirectCommon import getEfixed
+                efixed = getEfixed(self._sample_ws_name)
+            else:
+                raise ValueError('Unit %s in sample workspace is not supported' % unit_id)
+
+            # Do conversion
+            # Use temporary workspace so we don't modify data
+            prog_container.report('Converting sample units')
+            ConvertUnits(InputWorkspace=self._sample_ws_name,
+                         OutputWorkspace=self._sample_ws_wavelength,
+                         Target="Wavelength",
+                         EMode=emode,
+                         EFixed=efixed)
+
+        else:
+            # No need to convert
+            CloneWorkspace(InputWorkspace=self._sample_ws_name,
+                           OutputWorkspace=self._sample_ws_wavelength)
 
         if self._use_can:
             # Units should be wavelength
@@ -123,8 +150,9 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 logger.information('Container scaled by %f' % self._can_scale_factor)
             else:
                 prog_container.report('Cloning Workspace')
-                CloneWorkspace(InputWorkspace=self._can_ws_wavelength,
+                CloneWorkspace(InputWorkspace=self._shifted_container,
                                OutputWorkspace=self._scaled_container)
+
 
 
         prog_corr = Progress(self, start=0.2, end=0.6, nreports=2)
@@ -154,8 +182,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             self._subtract()
             correction_type = 'can_subtraction'
             # Add container filename to log values
-            can_cut = self._can_ws_name.index('_')
-            can_base = self._can_ws_name[:can_cut]
+            can_cut = self._can_ws_wavelength.index('_')
+            can_base = self._can_ws_wavelength[:can_cut]
             prog_corr.report('Adding container filename')
             AddSampleLog(Workspace=self._output_ws_name,
                          LogName='container_filename',
@@ -207,6 +235,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             DeleteWorkspace(self._shifted_container)
         if self._can_ws_wavelength in mtd:
             DeleteWorkspace(self._can_ws_wavelength)
+        if self._sample_ws_wavelength in mtd:
+            DeleteWorkspace(self._sample_ws_wavelength)
         prog_wrkflow.report('Algorithm Complete')
 
 
@@ -271,6 +301,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         self._scaled_container = '__scaled_container'
         self._shifted_container = '_shifted_container'
         self._can_ws_wavelength = '_can_ws_wavelength'
+        self._sample_ws_wavelength = '_sample_ws_wavelength'
 
     def _get_correction_factor_ws_name(self, factor_type):
         """
@@ -295,7 +326,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         whatever units the sample is in.
         """
 
-        unit_id = mtd[self._sample_ws_name].getAxis(0).getUnit().unitID()
+        unit_id = mtd[self._sample_ws_wavelength].getAxis(0).getUnit().unitID()
         logger.information('x-unit is ' + unit_id)
 
         factor_types = ['ass']
@@ -314,7 +345,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 elif unit_id == 'DeltaE':
                     emode = 'Indirect'
                     from IndirectCommon import getEfixed
-                    efixed = getEfixed(self._sample_ws_name)
+                    efixed = getEfixed(self._sample_ws_wavelength)
                 else:
                     raise ValueError('Unit %s in sample workspace is not supported' % unit_id)
 
@@ -338,15 +369,19 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         Do a simple container subtraction (when no corrections are given).
         """
 
-
         logger.information('Rebining container to ensure Minus')
-        RebinToWorkspace(WorkspaceToRebin=self._can_ws_name,
-                         WorkspaceToMatch=self._sample_ws_name,
-                         OutputWorkspace=self._can_ws_name)
+        RebinToWorkspace(WorkspaceToRebin=self._can_ws_wavelength,
+                         WorkspaceToMatch=self._sample_ws_wavelength,
+                         OutputWorkspace=self._can_ws_wavelength)
 
         logger.information('Using simple container subtraction')
 
-        Minus(LHSWorkspace=self._sample_ws_name,
+        # Rebin can
+        RebinToWorkspace(WorkspaceToRebin=self._scaled_container,
+                         WorkspaceToMatch=self._sample_ws_wavelength,
+                         OutputWorkspace=self._scaled_container)
+
+        Minus(LHSWorkspace=self._sample_ws_wavelength,
               RHSWorkspace=self._scaled_container,
               OutputWorkspace=self._output_ws_name)
 
@@ -361,7 +396,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         logger.information('Correcting sample')
 
         # Ass
-        Divide(LHSWorkspace=self._sample_ws_name,
+        Divide(LHSWorkspace=self._sample_ws_wavelength,
                RHSWorkspace=self._corrections + '_ass',
                OutputWorkspace=self._output_ws_name)
 
@@ -383,7 +418,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         Multiply(LHSWorkspace=corrected_can_ws,
                  RHSWorkspace=self._corrections + '_acsc',
                  OutputWorkspace=corrected_can_ws)
-        Minus(LHSWorkspace=self._sample_ws_name,
+        Minus(LHSWorkspace=self._sample_ws_wavelength,
               RHSWorkspace=corrected_can_ws,
               OutputWorkspace=self._output_ws_name)
 
