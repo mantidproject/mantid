@@ -3,8 +3,8 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/SampleEnvironmentSpec.h"
+#include "MantidKernel/Material.h"
 #include <iosfwd>
-#include <memory>
 #include <unordered_map>
 
 namespace Poco {
@@ -14,9 +14,6 @@ class Element;
 }
 
 namespace Mantid {
-namespace Kernel {
-class Material;
-}
 namespace Geometry {
 
 /**
@@ -48,8 +45,6 @@ class MANTID_GEOMETRY_DLL SampleEnvironmentSpecParser {
 public:
   static constexpr const char *ROOT_TAG = "environmentspec";
 
-  ~SampleEnvironmentSpecParser();
-
 public:
   SampleEnvironmentSpec_uptr parse(const std::string &name, std::istream &istr);
   SampleEnvironmentSpec_uptr parse(const std::string &name,
@@ -57,8 +52,7 @@ public:
 
 private:
   // Convenience definitions
-  using MaterialsIndex =
-      std::unordered_map<std::string, std::unique_ptr<Kernel::Material>>;
+  using MaterialsIndex = std::unordered_map<std::string, Kernel::Material>;
 
   // Methods
   void validateRootElement(Poco::XML::Element *element) const;

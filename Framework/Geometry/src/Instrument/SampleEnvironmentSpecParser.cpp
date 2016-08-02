@@ -1,7 +1,6 @@
 #include "MantidGeometry/Instrument/SampleEnvironmentSpecParser.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
-#include "MantidKernel/Material.h"
 #include "MantidKernel/MaterialXMLParser.h"
 #include "MantidKernel/make_unique.h"
 
@@ -128,8 +127,7 @@ void SampleEnvironmentSpecParser::parseMaterials(Poco::XML::Element *element) {
   MaterialXMLParser parser;
   while (node) {
     auto material = parser.parse(static_cast<Poco::XML::Element *>(node));
-    m_materials.emplace(material.name(),
-                        Kernel::make_unique<Kernel::Material>(material));
+    m_materials.emplace(material.name(), material);
     node = nodeIter.nextNode();
   }
 }
@@ -226,7 +224,7 @@ Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(
   auto materialID = element->getAttribute("material");
   auto iter = m_materials.find(materialID);
   if (iter != m_materials.end()) {
-    comp->setMaterial(*(iter->second));
+    comp->setMaterial(iter->second);
   } else {
     throw std::runtime_error("SampleEnvironmentSpecParser::parseComponent() - "
                              "Unable to find material with id=" +
@@ -234,8 +232,6 @@ Mantid::Geometry::SampleEnvironmentSpecParser::parseComponent(
   }
   return comp;
 }
-
-SampleEnvironmentSpecParser::~SampleEnvironmentSpecParser() {}
 
 //------------------------------------------------------------------------------
 // Concrete instantions
