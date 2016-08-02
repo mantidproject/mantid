@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/Points.h"
 #include "MantidKernel/cow_ptr.h"
 #include <gsl/gsl_fft_complex.h>
 
@@ -86,9 +88,9 @@ private:
 
   void setupTAxis(const int nOut, const bool addPositiveOnly);
   /// Check whether supplied values are evenly spaced
-  bool areBinWidthsUneven(const HistogramData::HistogramX &xValues) const;
+  bool areBinWidthsUneven(const HistogramData::BinEdges &xBins) const;
   /// Get phase shift - user supplied or auto-calculated
-  double getPhaseShift(const HistogramData::HistogramX &xValues);
+  double getPhaseShift(const HistogramData::Points &xPoints);
 
 private:
   Mantid::API::MatrixWorkspace_const_sptr m_inWS;
