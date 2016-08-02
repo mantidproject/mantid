@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -7,6 +8,7 @@ import numpy
 import sys
 import os
 import json
+from six import iteritems
 
 class USANSReduction(PythonAlgorithm):
 
@@ -161,7 +163,7 @@ class USANSReduction(PythonAlgorithm):
                                                    "%s on peak %s, point %s. Offset=%s" % (file_info.workspace, i_wl, point, index_offset))
                     Logger("USANSReduction").error("Array: "+
                                                    "%s x %s    Data: %s" % (len(self.wl_list), self.total_points, file_info.max_index))
-                    Logger("USANSReduction").error(sys.exc_value)
+                    Logger("USANSReduction").error(sys.exc_info()[1])
         return file_info.max_index
 
     def PyExec(self):
@@ -207,9 +209,9 @@ class USANSReduction(PythonAlgorithm):
             e = self.iq_err_output[i_wl]
 
             # Sort the I(q) point just in case we got them in the wrong order
-            zipped = zip(x,y,e)
+            zipped = list(zip(x,y,e))
             combined = sorted(zipped, compare)
-            x,y,e = zip(*combined)
+            x,y,e = list(zip(*combined))
 
             wl = self.wl_list[i_wl]['wavelength']
             CreateWorkspace(DataX=x,
@@ -219,9 +221,9 @@ class USANSReduction(PythonAlgorithm):
                             OutputWorkspace='iq_%1.2f' % wl)
 
         # Sort the I(q) point just in case we got them in the wrong order
-        zipped = zip(x_all,y_all,e_all)
+        zipped = list(zip(x_all,y_all,e_all))
         combined = sorted(zipped, compare)
-        x,y,e = zip(*combined)
+        x,y,e = list(zip(*combined))
 
         # Create the combined output workspace
         output_ws_name = self.getPropertyValue("OutputWorkspace")
@@ -305,7 +307,7 @@ def _execute(algorithm_name, **parameters):
     alg = AlgorithmManager.create(algorithm_name)
     alg.initialize()
     alg.setChild(True)
-    for key, value in parameters.iteritems():
+    for key, value in iteritems(parameters):
         if value is None:
             Logger("USANSReduction").error("Trying to set %s=None" % key)
         if alg.existsProperty(key):
@@ -319,7 +321,7 @@ def _execute(algorithm_name, **parameters):
             return alg.getProperty("OutputWorkspace").value
     except:
         Logger("USANSReduction").error("Error executing [%s]" % str(alg))
-        Logger("USANSReduction").error(str(sys.exc_value))
+        Logger("USANSReduction").error(str(sys.exc_info()[1]))
     return alg
 #############################################################################################
 AlgorithmFactory.subscribe(USANSReduction())

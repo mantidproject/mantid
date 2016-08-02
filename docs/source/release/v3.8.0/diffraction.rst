@@ -55,6 +55,11 @@ Powder Diffraction
   has not been added to the Powder Diffraction interface and will be
   removed without notice.
 
+- :ref:`cry-powder-diffraction-ref`: S-Empty option has been enabled for
+   the Crystallography Powder Diffraction Script. In order to use the
+   S-Empty option, simply provide the S-Empty run number within the
+   ``.pref`` file.
+
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
 and
 `imaging <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+Imaging%22>`_ changes on GitHub.

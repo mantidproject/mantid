@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataHandling/MaskDetectors.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -26,6 +27,7 @@ using Mantid::specnum_t;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::LinearGenerator;
 
 class MaskDetectorsTest : public CxxTest::TestSuite {
 public:
@@ -74,7 +76,7 @@ public:
       auto space2D = createWorkspace<Workspace2D>(numspec, 6, 5);
       space = space2D;
 
-      BinEdges x(6, 10.0);
+      BinEdges x(6, LinearGenerator(10.0, 1.0));
       Counts y(5, 1.0);
       CountStandardDeviations e(5, 1.0);
       for (int j = 0; j < numspec; ++j) {

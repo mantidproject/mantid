@@ -359,9 +359,9 @@ public:
       ws.maskBin(0, i, 0);
     }
 
-    TS_ASSERT(isnan(ws.y(0)[0]));
-    TS_ASSERT(isinf(ws.y(0)[1]));
-    TS_ASSERT(isinf(ws.y(0)[2]));
+    TS_ASSERT(std::isnan(ws.y(0)[0]));
+    TS_ASSERT(std::isinf(ws.y(0)[1]));
+    TS_ASSERT(std::isinf(ws.y(0)[2]));
     TS_ASSERT_EQUALS(ws.y(0)[3], 2.);
 
     // now mask w/o specifying weight (e.g. 1 by default)
@@ -689,24 +689,34 @@ public:
     TS_ASSERT_EQUALS(out[99], 99);
   }
 
-  void test_getSignalAtCoord() {
-    WorkspaceTester ws;
-    // Matrix with 4 spectra, 5 bins each
-    ws.initialize(4, 6, 5);
-    for (size_t wi = 0; wi < 4; wi++)
-      for (size_t x = 0; x < 6; x++) {
-        ws.dataX(wi)[x] = double(x);
-        if (x < 5) {
-          ws.dataY(wi)[x] = double(wi * 10 + x);
-          ws.dataE(wi)[x] = double((wi * 10 + x) * 2);
-        }
-      }
-    coord_t coords[2] = {0.5, 1.0};
-    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords, Mantid::API::NoNormalization),
-                    0.0, 1e-5);
+  void test_getSignalAtCoord_histoData() {
+    // Create a test workspace
+    const auto ws = createTestWorkspace(4, 6, 5);
+
+    // Get signal at coordinates
+    std::vector<coord_t> coords = {0.5, 1.0};
+    TS_ASSERT_DELTA(
+        ws.getSignalAtCoord(coords.data(), Mantid::API::NoNormalization), 0.0,
+        1e-5);
     coords[0] = 1.5;
-    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords, Mantid::API::NoNormalization),
-                    1.0, 1e-5);
+    TS_ASSERT_DELTA(
+        ws.getSignalAtCoord(coords.data(), Mantid::API::NoNormalization), 1.0,
+        1e-5);
+  }
+
+  void test_getSignalAtCoord_pointData() {
+    // Create a test workspace
+    const auto ws = createTestWorkspace(4, 5, 5);
+
+    // Get signal at coordinates
+    std::vector<coord_t> coords = {0.0, 1.0};
+    TS_ASSERT_DELTA(
+        ws.getSignalAtCoord(coords.data(), Mantid::API::NoNormalization), 0.0,
+        1e-5);
+    coords[0] = 1.0;
+    TS_ASSERT_DELTA(
+        ws.getSignalAtCoord(coords.data(), Mantid::API::NoNormalization), 1.0,
+        1e-5);
   }
 
   void test_getCoordAtSignal_regression() {
@@ -1388,6 +1398,52 @@ private:
       startingValue += static_cast<double>(width);
     }
     return image;
+  }
+
+  /**
+   * Create a test workspace. Can be histo or points depending on x/yLength.
+   * @param nVectors :: [input] Number of vectors
+   * @param xLength :: [input] Length of X vector
+   * @param yLength :: [input] Length of Y, E vectors
+   * @returns :: workspace
+   */
+  WorkspaceTester createTestWorkspace(size_t nVectors, size_t xLength,
+                                      size_t yLength) {
+    WorkspaceTester ws;
+    ws.initialize(nVectors, xLength, yLength);
+    // X data
+    std::vector<double> xData(xLength);
+    std::iota(xData.begin(), xData.end(), 0.0);
+
+    // Y data
+    const auto yCounts = [&yLength](size_t wi) {
+      std::vector<double> v(yLength);
+      std::iota(v.begin(), v.end(), static_cast<double>(wi) * 10.0);
+      return v;
+    };
+
+    // E data
+    const auto errors = [&yLength](size_t wi) {
+      std::vector<double> v(yLength);
+      std::generate(v.begin(), v.end(), [&wi]() {
+        return std::sqrt(static_cast<double>(wi) * 10.0);
+      });
+      return v;
+    };
+
+    for (size_t wi = 0; wi < nVectors; ++wi) {
+      if (xLength == yLength) {
+        ws.setPoints(wi, xData);
+      } else if (xLength == yLength + 1) {
+        ws.setBinEdges(wi, xData);
+      } else {
+        throw std::invalid_argument(
+            "yLength must either be equal to xLength or xLength - 1");
+      }
+      ws.setCounts(wi, yCounts(wi));
+      ws.setCountStandardDeviations(wi, errors(wi));
+    }
+    return ws;
   }
 
   boost::shared_ptr<MatrixWorkspace> ws;

@@ -1526,14 +1526,14 @@ const HistogramData::HistogramY &EventList::y() const {
     throw std::runtime_error(
         "'EventList::y()' called with no MRU set. This is not allowed.");
 
-  return histogram().y();
+  return *sharedY();
 }
 const HistogramData::HistogramE &EventList::e() const {
   if (!mru)
     throw std::runtime_error(
         "'EventList::e()' called with no MRU set. This is not allowed.");
 
-  return histogram().e();
+  return *sharedE();
 }
 Kernel::cow_ptr<HistogramData::HistogramY> EventList::sharedY() const {
   // This is the thread number from which this function was called.
@@ -1600,9 +1600,9 @@ const MantidVec &EventList::dataY() const {
     throw std::runtime_error(
         "'EventList::dataY()' called with no MRU set. This is not allowed.");
 
-  // WARNING: The Y data of histogram() is stored in MRU, returning reference
-  // fine as long as it stays there.
-  return histogram().dataY();
+  // WARNING: The Y data of sharedY() is stored in MRU, returning reference fine
+  // as long as it stays there.
+  return sharedY()->rawData();
 }
 
 /** Look in the MRU to see if the E histogram has been generated before.
@@ -1615,9 +1615,9 @@ const MantidVec &EventList::dataE() const {
     throw std::runtime_error(
         "'EventList::dataE()' called with no MRU set. This is not allowed.");
 
-  // WARNING: The E data of histogram() is stored in MRU, returning reference
-  // fine as long as it stays there.
-  return histogram().dataE();
+  // WARNING: The E data of sharedE() is stored in MRU, returning reference fine
+  // as long as it stays there.
+  return sharedE()->rawData();
 }
 
 // --------------------------------------------------------------------------
