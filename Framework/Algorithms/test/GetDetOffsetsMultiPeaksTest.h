@@ -47,9 +47,10 @@ public:
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     auto xvals = WS->points(0);
-    std::transform(
-        xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
-        [](auto x) { return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2)); });
+    std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+                   [](const double x) {
+                     return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
+                   });
 
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
@@ -101,8 +102,9 @@ public:
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     auto xvals = WS->points(0);
-    std::transform(xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
-                   [](auto x) { return exp(-0.5 * pow((x - 10) / 1.0, 2)); });
+    std::transform(
+        xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+        [](const double x) { return exp(-0.5 * pow((x - 10) / 1.0, 2)); });
 
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
@@ -157,9 +159,10 @@ public:
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     auto xvals = WS->points(0);
-    std::transform(
-        xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
-        [](auto x) { return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2)); });
+    std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+                   [](const double x) {
+                     return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
+                   });
 
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
@@ -227,9 +230,10 @@ public:
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     auto xvals = WS->points(0);
-    std::transform(
-        xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
-        [](auto x) { return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2)); });
+    std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+                   [](const double x) {
+                     return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
+                   });
 
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
@@ -297,9 +301,10 @@ public:
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     auto xvals = WS->points(0);
-    std::transform(
-        xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
-        [](auto x) { return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2)); });
+    std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+                   [](const double x) {
+                     return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
+                   });
 
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
@@ -420,12 +425,10 @@ public:
   /** Generate noisy data in a workspace
    */
   void generateNoisyData(MatrixWorkspace_sptr WS) {
+
     auto &Y = WS->mutableY(0);
+    Y.assign(Y.size(), static_cast<double>(rand() % 5));
     auto &E = WS->mutableE(0);
-
-    std::transform(Y.begin(), Y.end(), Y.begin(),
-                   []() { return static_cast<double>(rand() % 5); });
-
     E.assign(E.size(), 0.01);
   }
 
@@ -456,8 +459,9 @@ public:
     for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
 
       auto xvals = WS->points(0);
-      std::transform(xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
-                     [](auto x) { return exp(-0.5 * pow((x - 10) / 1.0, 2)); });
+      std::transform(
+          xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+          [](const double x) { return exp(-0.5 * pow((x - 10) / 1.0, 2)); });
 
       auto &E = WS->mutableE(0);
       E.assign(E.size(), 0.001);

@@ -45,8 +45,9 @@ public:
 
     auto xvals = WS->points(0);
     // loop through xvals, calculate and set to Y
-    std::transform(xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
-                   [](auto x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
+    std::transform(
+        xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+        [](const double x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
 
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
@@ -96,8 +97,9 @@ public:
 
     auto xvals = WS->points(0);
     // loop through xvals, calculate and set to Y
-    std::transform(xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
-                   [](auto x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
+    std::transform(
+        xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+        [](const double x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
 
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
@@ -146,8 +148,9 @@ public:
 
     auto xvals = WS->points(0);
     // loop through xvals, calculate and set to Y
-    std::transform(xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
-                   [](auto x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
+    std::transform(
+        xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+        [](const double x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
     auto &E = WS->mutableE(0);
     E.assign(E.size(), 0.001);
 
@@ -217,9 +220,12 @@ public:
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
     for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
 
-      auto xvals = WS->points(0);
-      std::transform(xvals.begin(), xvals.end(), WS->mutableY(0).begin(),
-                     [](auto x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
+      auto xvals = WS->points(wi);
+      auto &Y = WS->mutableY(wi);
+
+      std::transform(
+          xvals.cbegin(), xvals.cend(), Y.begin(),
+          [](const double x) { return exp(-0.5 * pow((x - 1) / 10.0, 2)); });
       auto &E = WS->mutableE(wi);
       E.assign(E.size(), 0.001);
     }

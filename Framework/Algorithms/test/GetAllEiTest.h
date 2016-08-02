@@ -537,8 +537,8 @@ private:
     double tm2(0.0);
 
     auto t = ws->points(0);
-    std::transform(t.begin(), t.end(), ws->mutableY(0).begin(),
-                   [t1, t2, &tm1, &tm2](auto t) {
+    std::transform(t.cbegin(), t.cend(), ws->mutableY(0).begin(),
+                   [t1, t2, &tm1, &tm2](const double t) {
                      tm1 = t - t1;
                      tm2 = t - t2;
                      return (10000 * std::exp(-tm1 * tm1 / 1000.) +
@@ -549,7 +549,7 @@ private:
     t1 = t_chop * l_mon2 / l_chop;
     t2 = (t_chop + Period) * l_mon2 / l_chop;
 
-    std::transform(t.begin(), t.end(), ws->mutableY(1).begin(),
+    std::transform(t.cbegin(), t.cend(), ws->mutableY(1).begin(),
                    [t1, t2, &tm1, &tm2](auto t) {
                      tm1 = t - t1;
                      tm2 = t - t2;

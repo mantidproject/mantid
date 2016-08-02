@@ -238,20 +238,21 @@ public:
     const double peakOneCentre(6493.0), sigmaSqOne(250 * 250.),
         peakTwoCentre(10625.), sigmaSqTwo(50 * 50);
     const double peakOneHeight(3000.), peakTwoHeight(1000.);
+
     BinEdges xdata(numBins + 1, LinearGenerator(5.0, 5.5));
 
     // xdata.end() - 1 because bin edges are 1 bigger than Y's size
     if (includePeaks) {
       std::transform(
-          xdata.begin(), xdata.end() - 1, testWS->mutableY(0).begin(),
-          [peakOneHeight, peakOneCentre, sigmaSqOne](auto x) {
+          xdata.cbegin(), xdata.cend() - 1, testWS->mutableY(0).begin(),
+          [peakOneHeight, peakOneCentre, sigmaSqOne](const double x) {
             return peakOneHeight *
                    exp(-0.5 * pow(x - peakOneCentre, 2.) / sigmaSqOne);
           });
 
       std::transform(
-          xdata.begin(), xdata.end() - 1, testWS->mutableY(1).begin(),
-          [peakTwoHeight, peakTwoCentre, sigmaSqTwo](auto x) {
+          xdata.cbegin(), xdata.cend() - 1, testWS->mutableY(1).begin(),
+          [peakTwoHeight, peakTwoCentre, sigmaSqTwo](const double x) {
             return peakTwoHeight *
                    exp(-0.5 * pow(x - peakTwoCentre, 2.) / sigmaSqTwo);
           });
