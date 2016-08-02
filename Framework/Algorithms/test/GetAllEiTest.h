@@ -550,7 +550,7 @@ private:
     t2 = (t_chop + Period) * l_mon2 / l_chop;
 
     std::transform(t.cbegin(), t.cend(), ws->mutableY(1).begin(),
-                   [t1, t2, &tm1, &tm2](auto t) {
+                   [t1, t2, &tm1, &tm2](const double t) {
                      tm1 = t - t1;
                      tm2 = t - t2;
                      return (100 * std::exp(-tm1 * tm1 / 1000.) +
