@@ -32,6 +32,7 @@ set ( SRC_FILES
 	src/FilteredTimeSeriesProperty.cpp
 	src/FloatingPointComparison.cpp
 	src/FreeBlock.cpp
+	src/GitHubApiHelper.cpp
 	src/Glob.cpp
 	src/ICatalogInfo.cpp
 	src/IPropertyManager.cpp
@@ -180,6 +181,7 @@ set ( INC_FILES
 	inc/MantidKernel/FloatingPointComparison.h
 	inc/MantidKernel/FreeBlock.h
 	inc/MantidKernel/FunctionTask.h
+	inc/MantidKernel/GitHubApiHelper.h
 	inc/MantidKernel/Glob.h
 	inc/MantidKernel/ICatalogInfo.h
 	inc/MantidKernel/IPropertyManager.h
@@ -291,7 +293,8 @@ set ( INC_FILES
 	inc/MantidKernel/WarningSuppressions.h
 	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/XMLInstantiator.h
-	inc/MantidKernel/cow_ptr.h
+  inc/MantidKernel/CaseInsensitiveMap.h
+  inc/MantidKernel/cow_ptr.h
 	inc/MantidKernel/make_cow.h
 	inc/MantidKernel/make_unique.h
 )
@@ -508,6 +511,20 @@ configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h.in
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp.in
                  ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp
 )
+###########################################################################
+# This section deals with creating the GithubApiHelper implementation
+###########################################################################
+
+if ( WIN32 )
+  set ( GITHUB_AUTHORIZATION_TOKEN "8ec7afc857540ee60af78cba1cf7779a6ed0b6b9")
+elseif ( APPLE )
+  set ( GITHUB_AUTHORIZATION_TOKEN "9f1c1acd61ecb87b21ad0382f6b403c8294992c5")
+else()
+  set ( GITHUB_AUTHORIZATION_TOKEN "ccacbaf39a7ad8151fca03b4ea99a29b28f0993b")
+endif()
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h.in
+                 ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h
+)
 
 ###########################################################################
 # Manipulate the Mantid.properties file to work wherever you build to
@@ -607,14 +624,7 @@ else ()
   set ( MANTID_ROOT .. )
 endif ()
 
-# Whether or not to check for updates is tied to a patch version being defined
-# nighly/unstable is basically ISO8601 so it will be longer than 8 char.
-# This affects Mantid.properties.install only.
-string( LENGTH "VERSION_PATCH ${VERSION_PATCH}" VERSION_PATCH_LENGTH)
-set (ENABLE_WEB_UPDATES 0)
-if (${VERSION_PATCH_LENGTH} LESS 8)
-  set (ENABLE_WEB_UPDATES 1)
-endif()
+set (ENABLE_WEB_UPDATES 1)
 
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )

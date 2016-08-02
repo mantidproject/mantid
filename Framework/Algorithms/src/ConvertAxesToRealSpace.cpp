@@ -169,8 +169,8 @@ void ConvertAxesToRealSpace::exec() {
     }
 
     // take the values from the integrated data
-    dataVector[i].intensity = summedWs->readY(i)[0];
-    dataVector[i].error = summedWs->readE(i)[0];
+    dataVector[i].intensity = summedWs->y(i)[0];
+    dataVector[i].error = summedWs->e(i)[0];
 
     progress.report("Calculating new coords");
   }
@@ -179,9 +179,10 @@ void ConvertAxesToRealSpace::exec() {
                   << " spectra, see the debug log for more details.\n";
 
   // set up the axes on the output workspace
-  HistogramData::Points x(axisVector[0].bins);
+  std::vector<double> x_tmp(axisVector[0].bins);
   MantidVecPtr y;
-  fillAxisValues(x.mutableRawData(), axisVector[0], false);
+  fillAxisValues(x_tmp, axisVector[0], false);
+  HistogramData::Points x(std::move(x_tmp));
 
   outputWs->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
   Unit_sptr xUnit = outputWs->getAxis(0)->unit();
@@ -246,9 +247,9 @@ void ConvertAxesToRealSpace::exec() {
       g_log.warning() << "here " << i << '\n';
     } else {
       // update the data
-      MantidVec &yVec = outputWs->dataY(yIndex);
+      auto &yVec = outputWs->mutableY(yIndex);
       yVec[xIndex] = yVec[xIndex] + dataVector[i].intensity;
-      MantidVec &eVec = outputWs->dataE(yIndex);
+      auto &eVec = outputWs->mutableE(yIndex);
       eVec[xIndex] = eVec[xIndex] + (dataVector[i].error * dataVector[i].error);
     }
 
@@ -258,7 +259,7 @@ void ConvertAxesToRealSpace::exec() {
   // loop over the data and sqrt the errors to complete the error calculation
   PARALLEL_FOR1(outputWs)
   for (int i = 0; i < nOutputHist; ++i) {
-    MantidVec &errorVec = outputWs->dataE(i);
+    auto &errorVec = outputWs->mutableE(i);
     std::transform(errorVec.begin(), errorVec.end(), errorVec.begin(),
                    static_cast<double (*)(double)>(sqrt));
     progress.report("Completing Error Calculation");

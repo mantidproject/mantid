@@ -4,6 +4,7 @@
 #pragma warning disable 1170
 #endif
 
+#include "MantidVatesAPI/vtkImageData_Silent.h"
 #include <pqActiveObjects.h>
 #include <pqCoreUtilities.h>
 #include <pqFileDialog.h>
@@ -12,14 +13,13 @@
 #include <pqRenderViewBase.h>
 #include <pqSaveSnapshotDialog.h>
 #include <pqSettings.h>
+#include <pqStereoModeHelper.h>
 #include <pqTabbedMultiViewWidget.h>
 #include <pqView.h>
-#include "MantidVatesAPI/vtkImageData_Silent.h"
-#include <vtkPVXMLElement.h>
-#include <vtkSmartPointer.h>
-#include <vtkSMSessionProxyManager.h>
 #include <vtkPVConfig.h>
-
+#include <vtkPVXMLElement.h>
+#include <vtkSMSessionProxyManager.h>
+#include <vtkSmartPointer.h>
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1170
 #endif
@@ -113,21 +113,16 @@ void SaveScreenshotReaction::saveScreenshot() {
     colorPalette->Copy(chosenPalette);
   }
 
+  // temporarily set stereo mode from dialog.
   int stereo = ssDialog.getStereoMode();
-  if (stereo) {
-    pqRenderViewBase::setStereo(stereo);
-  }
+  pqStereoModeHelper setStereo(stereo,
+                               pqActiveObjects::instance().activeServer());
 
   SaveScreenshotReaction::saveScreenshot(file, size, ssDialog.quality());
 
   // restore color palette.
   if (clone) {
     colorPalette->Copy(clone);
-  }
-
-  // restore stereo
-  if (stereo) {
-    pqRenderViewBase::setStereo(0);
   }
 
   // check if need to render to clear the changes we did

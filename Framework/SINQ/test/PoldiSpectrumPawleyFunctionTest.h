@@ -16,6 +16,8 @@
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
 
+using Mantid::Kernel::V3D;
+
 using ::testing::_;
 using ::testing::Mock;
 

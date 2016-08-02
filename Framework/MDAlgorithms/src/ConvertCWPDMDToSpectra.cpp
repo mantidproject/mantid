@@ -588,8 +588,6 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
       scancell = false;
     }
   } // ENDOF(while)
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -663,8 +661,6 @@ void ConvertCWPDMDToSpectra::linearInterpolation(
 
     return;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -691,8 +687,6 @@ void ConvertCWPDMDToSpectra::setupSampleLogs(
     targetrun.addProperty(p->clone());
     g_log.debug() << "Cloned property " << p->name() << "\n";
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -718,8 +712,6 @@ void ConvertCWPDMDToSpectra::scaleMatrixWorkspace(
       }
     }
   } // FOR(iws)
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

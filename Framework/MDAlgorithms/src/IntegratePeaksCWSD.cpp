@@ -358,8 +358,6 @@ void IntegratePeaksCWSD::simplePeakIntegration(
   "\n";
   g_log.warning() << "  Number of total detectors = " << num_det << "\n";
   */
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

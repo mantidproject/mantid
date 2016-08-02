@@ -6,9 +6,13 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
+
+std::vector<std::string> MANTID_MDALGORITHMS_DLL
+parseNames(const std::string &names_string);
 
 /** CreateMDWorkspace :
  *

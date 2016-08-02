@@ -5,6 +5,21 @@
 namespace Mantid {
 namespace DataObjects {
 
+/// Construct empty
+Histogram1D::Histogram1D(HistogramData::Histogram::XMode xmode,
+                         HistogramData::Histogram::YMode ymode)
+    : API::ISpectrum(), m_histogram(xmode, ymode) {
+  if (ymode == HistogramData::Histogram::YMode::Counts) {
+    m_histogram.setCounts(0);
+    m_histogram.setCountStandardDeviations(0);
+  } else if (ymode == HistogramData::Histogram::YMode::Frequencies) {
+    m_histogram.setFrequencies(0);
+    m_histogram.setFrequencyStandardDeviations(0);
+  } else {
+    throw std::logic_error("Histogram1D: YMode must be Counts or Frequencies");
+  }
+}
+
 /// Construct from ISpectrum.
 Histogram1D::Histogram1D(const ISpectrum &other)
     : ISpectrum(other), m_histogram(other.histogram()) {}

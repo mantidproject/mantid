@@ -476,7 +476,6 @@ void GroupDetectors2::processFile(std::string fname,
   g_log.debug() << "Closed file " << fname << " after reading in "
                 << m_GroupWsInds.size() << " groups\n";
   m_FracCompl += fileReadProg(m_GroupWsInds.size(), specs2index.size());
-  return;
 }
 
 /** Get groupings from XML file
@@ -568,8 +567,6 @@ void GroupDetectors2::processXMLFile(std::string fname,
       }
     } // for index
   }   // for group
-
-  return;
 }
 
 /** Get groupings from groupingworkspace
@@ -638,8 +635,6 @@ void GroupDetectors2::processGroupingWorkspace(
     m_GroupWsInds.insert(
         std::make_pair(static_cast<specnum_t>(groupid), tempv));
   }
-
-  return;
 }
 
 /** Get groupings from a matrix workspace
@@ -707,8 +702,6 @@ void GroupDetectors2::processMatrixWorkspace(
           std::make_pair(static_cast<specnum_t>(groupid), tempv));
     }
   }
-
-  return;
 }
 /** The function expects that the string passed to it contains an integer
 * number,

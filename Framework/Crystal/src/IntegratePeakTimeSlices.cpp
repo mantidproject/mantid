@@ -254,7 +254,7 @@ void IntegratePeakTimeSlices::exec() {
   double Row0 = lastRow;
   double lastCol = m_COL;
   double Col0 = lastCol;
-  string spec_idList = "";
+  string spec_idList;
 
   // For quickly looking up workspace index from det id
   m_wi_to_detid_map = inpWkSpace->getDetectorIDToWorkspaceIndexMap();
@@ -1944,11 +1944,11 @@ DataModeHandler::CalcConstraints(std::vector<std::pair<double, double>> &Bounds,
   double min =
       max<double>(0.0, back_calc - NSigs * (1 + relError) * sqrt(backVar));
   double maxx = back + NSigs * (1.8 + relError) * sqrt(backVar);
-  Bounds.push_back(pair<double, double>(min, maxx));
-  Bounds.push_back(pair<double, double>(
+  Bounds.emplace_back(min, maxx);
+  Bounds.emplace_back(
       max<double>(0.0,
                   Intensity_calc - NSigs * (1 + relError) * sqrt(IntensVar)),
-      Intensity_calc + NSigs * (1 + relError) * sqrt(IntensVar)));
+      Intensity_calc + NSigs * (1 + relError) * sqrt(IntensVar));
   double relErr1 = relError * .75;
   double val = col_calc;
   double minn = std::max<double>(MinCol - .5, (1 - relErr1) * val);
@@ -1957,7 +1957,7 @@ DataModeHandler::CalcConstraints(std::vector<std::pair<double, double>> &Bounds,
   str << "," << minn << "<"
       << "Mcol"
       << "<" << maxx;
-  Bounds.push_back(pair<double, double>(minn, maxx));
+  Bounds.emplace_back(minn, maxx);
 
   val = row_calc;
 
@@ -1966,7 +1966,7 @@ DataModeHandler::CalcConstraints(std::vector<std::pair<double, double>> &Bounds,
   str << "," << minn << "<"
       << "Mrow"
       << "<" << maxx;
-  Bounds.push_back(pair<double, double>(minn, maxx));
+  Bounds.emplace_back(minn, maxx);
 
   if (N >= 5) {
     val = Vx_calc;
@@ -1981,8 +1981,7 @@ DataModeHandler::CalcConstraints(std::vector<std::pair<double, double>> &Bounds,
     str << "," << (1 - relErr1) * valmin << "<"
         << "SScol"
         << "<" << (1 + relErr1) * valmax;
-    Bounds.push_back(
-        pair<double, double>((1 - relErr1) * valmin, (1 + relErr1) * valmax));
+    Bounds.emplace_back((1 - relErr1) * valmin, (1 + relErr1) * valmax);
 
     val = Vy_calc;
     valmin = val;
@@ -1994,8 +1993,7 @@ DataModeHandler::CalcConstraints(std::vector<std::pair<double, double>> &Bounds,
     str << "," << (1 - relErr1) * valmin << "<"
         << "SSrow"
         << "<" << (1 + relErr1) * valmax;
-    Bounds.push_back(
-        pair<double, double>((1 - relErr1) * valmin, (1 + relErr1) * valmax));
+    Bounds.emplace_back((1 - relErr1) * valmin, (1 + relErr1) * valmax);
   }
 
   return str.str();

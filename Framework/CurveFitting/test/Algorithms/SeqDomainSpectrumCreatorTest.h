@@ -195,8 +195,8 @@ public:
       const std::vector<double> &x = outputWsMatrix->readX(i);
       const std::vector<double> &y = outputWsMatrix->readY(i);
 
+      TS_ASSERT_EQUALS(x, matrixWs->readX(i));
       for (size_t j = 0; j < x.size(); ++j) {
-        TS_ASSERT_EQUALS(x[j], 1.0);
         TS_ASSERT_EQUALS(y[j], static_cast<double>(i) + slope * x[j]);
       }
     }
@@ -240,9 +240,8 @@ public:
       const std::vector<double> &x = outputWsMatrix->readX(i);
       const std::vector<double> &y = outputWsMatrix->readY(i);
 
+      TS_ASSERT_EQUALS(x, matrixWs->readX(i));
       for (size_t j = 0; j < x.size(); ++j) {
-        TS_ASSERT_EQUALS(x[j], 1.0);
-
         // If detector is not masked, there should be values, otherwise 0.
         if (!outputWsMatrix->getDetector(i)->isMasked()) {
           TS_ASSERT_EQUALS(y[j], static_cast<double>(i) + slope * x[j]);
