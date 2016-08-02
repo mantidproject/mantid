@@ -436,16 +436,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             partial_ws.setYUnitLabel('Intensity')
 
             # Add the sample material to the workspace
-            chemical = ion_name
-            if ':' in ion_name:
-                chemical = ion_name.split(':')[0]
-                partial_ws_name += chemical
-                # Parse isotope to rounded int
-                isotope = str(int(round(self._element_isotope[ion_name])))
-                chemical = '(' + chemical + isotope + ')'
-                partial_ws_name += str('('+isotope+')')
-            else:
-                partial_ws_name += ion_name
+            chemical, ws_suffix = self._parse_chemical_and_ws_name(ion_name,
+                                                                   self._element_isotope[ion_name])
+            partial_ws_name += ws_suffix
 
             s_api.SetSampleMaterial(InputWorkspace=self._out_ws_name,
                                     ChemicalFormula=chemical)
@@ -503,6 +496,24 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         logger.debug('Summed workspace: ' + str(total_workspace))
 
         return partial_workspaces, total_workspace
+#----------------------------------------------------------------------------------------
+    def _parse_chemical_and_ws_name(self, ion_name, isotope):
+        """
+        @param ion_name     :: Name of the element used
+        @param isotope      :: Isotope of the element
+        @return The chemical formula of the element and isotope
+                expected by SetSampleMaterial
+                AND
+                The expected suffix for the partial workspace
+        """
+        if ':' in ion_name:
+            chemical = ion_name.split(':')[0]
+            # Parse isotope to rounded int
+            chemical_formula = '(' + chemical + str(int(round(isotope))) + ')'
+            ws_name_suffix = chemical + '('  + str(int(round(isotope))) + ')'
+            return chemical_formula, ws_name_suffix
+        else:
+            return ion_name, ion_name
 
 #----------------------------------------------------------------------------------------
 
