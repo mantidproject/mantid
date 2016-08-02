@@ -2,24 +2,14 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/LoadILLINX.h"
-#include "MantidDataHandling/LoadHelper.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/UnitFactory.h"
-
-#include <boost/algorithm/string/predicate.hpp> // boost::starts_with
-
-#include <limits>
-#include <algorithm>
-#include <vector>
-#include <cmath>
 
 namespace Mantid {
 namespace DataHandling {
@@ -139,7 +129,12 @@ void LoadILLINX::exec() {
 
   // Set the monitor workspace
   std::string monitorWSName = outputWSName + "_monitors";
-  AnalysisDataService::Instance().add(monitorWSName, m_monitorWorkspace);
+
+  this->declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<>>(
+          "MonitorWorkspace", monitorWSName, Direction::Output),
+      "Monitors from the NeXus file");
+  setProperty("MonitorWorkspace", m_monitorWorkspace);
 }
 
 /**
@@ -178,7 +173,7 @@ LoadILLINX::getMonitorInfo(NeXus::NXEntry &firstEntry) {
  * @return the EPP
  */
 int LoadILLINX::getEPPFromVanadium(const std::string &filenameVanadium,
-                                MatrixWorkspace_sptr vanaWS) {
+                                   MatrixWorkspace_sptr vanaWS) {
   int calculatedDetectorElasticPeakPosition = -1;
 
   if (vanaWS != nullptr) {
@@ -237,7 +232,7 @@ void LoadILLINX::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
  *
  */
 void LoadILLINX::initWorkSpace(NeXus::NXEntry &entry,
-                            const std::vector<std::vector<int>> &monitors) {
+                               const std::vector<std::vector<int>> &monitors) {
 
   // read in the data
   NXData dataGroup = entry.openNXData("data");
@@ -253,9 +248,9 @@ void LoadILLINX::initWorkSpace(NeXus::NXEntry &entry,
    */
   size_t numberOfTubesInRosace = 0;
   if (m_instrumentName == "IN4") {
-    NXData dataGroup = entry.openNXData("instrument/Detector_Rosace/data");
-    NXInt data = dataGroup.openIntData();
-    numberOfTubesInRosace += static_cast<size_t>(data.dim0());
+    NXData dataGroupRosace = entry.openNXData("instrument/Detector_Rosace/data");
+    NXInt dataRosace = dataGroupRosace.openIntData();
+    numberOfTubesInRosace += static_cast<size_t>(dataRosace.dim0());
   }
 
   // dim0 * m_numberOfPixelsPerTube is the total number of detectors
@@ -271,11 +266,11 @@ void LoadILLINX::initWorkSpace(NeXus::NXEntry &entry,
   // bin boundaries = m_numberOfChannels + 1
   // Z/time dimension
   m_localWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", m_numberOfHistograms,
-      m_numberOfChannels + 1, m_numberOfChannels);
+      "Workspace2D", m_numberOfHistograms, m_numberOfChannels + 1,
+      m_numberOfChannels);
   m_monitorWorkspace = WorkspaceFactory::Instance().create(
-            "Workspace2D", numberOfMonitors,
-            m_numberOfChannels + 1, m_numberOfChannels);
+      "Workspace2D", numberOfMonitors, m_numberOfChannels + 1,
+      m_numberOfChannels);
   m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   m_localWorkspace->setYUnitLabel("Counts");
   m_localWorkspace->setMonitorWorkspace(m_monitorWorkspace);
@@ -357,8 +352,6 @@ void LoadILLINX::addAllNexusFieldsAsProperties(std::string filename) {
 
   // Add also "Facility", as asked
   runDetails.addProperty("Facility", std::string("ILL"));
-
-  stat = NXclose(&nxfileID);
 }
 
 /**
@@ -580,20 +573,20 @@ void LoadILLINX::loadDataIntoTheWorkSpace(
   if (m_instrumentName == "IN4") {
     g_log.debug() << "Loading data into the workspace: IN4 Rosace!\n";
     // read in the data
-    NXData dataGroup = entry.openNXData("instrument/Detector_Rosace/data");
-    NXInt data = dataGroup.openIntData();
-    auto numberOfTubes = static_cast<size_t>(data.dim0());
+    NXData dataGroupRosace = entry.openNXData("instrument/Detector_Rosace/data");
+    NXInt dataRosace = dataGroupRosace.openIntData();
+    auto numberOfTubes = static_cast<size_t>(dataRosace.dim0());
     // load the counts from the file into memory
-    data.load();
+    dataRosace.load();
 
-    Progress progress(this, 0, 1, numberOfTubes * m_numberOfPixelsPerTube);
+    Progress progressRosace(this, 0, 1, numberOfTubes * m_numberOfPixelsPerTube);
     for (size_t i = 0; i < numberOfTubes; ++i) {
       for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
         // just copy the time binning axis to every spectra
         m_localWorkspace->dataX(spec) = m_localWorkspace->readX(firstSpec);
 
         // Assign Y
-        int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+        int *data_p = &dataRosace(static_cast<int>(i), static_cast<int>(j), 0);
         m_localWorkspace->dataY(spec)
             .assign(data_p, data_p + m_numberOfChannels);
 
@@ -603,7 +596,7 @@ void LoadILLINX::loadDataIntoTheWorkSpace(
                        LoadILLINX::calculateError);
 
         ++spec;
-        progress.report();
+        progressRosace.report();
       }
     }
   }
@@ -630,7 +623,8 @@ void LoadILLINX::runLoadInstrument() {
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
-    loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_monitorWorkspace);
+    loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",
+                                                m_monitorWorkspace);
     loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(false));
     loadInst->execute();
