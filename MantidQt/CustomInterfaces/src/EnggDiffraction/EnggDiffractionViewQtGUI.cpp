@@ -116,11 +116,11 @@ void EnggDiffractionViewQtGUI::initLayout() {
   doSetupTabSettings();
 
   m_presenter->notify(IEnggDiffractionPresenter::Start);
-  // Never do this here: if the RB-number checks show a pop-up (splash
-  // message), it will be shown very early (before the interface
+  // We need to delay the RB-number check for the pop-up (splash message)
+  // as it will be shown very early (before the interface
   // window itself is shown) and that will cause a crash in Qt code on
   // some platforms (windows 10, and 7 sometimes).
-  // m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
+  // so perform the check in the showEvent method to check on start up
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabCalib() {
