@@ -192,7 +192,7 @@ void ApplyPaalmanPings::run() {
       }
     }
 
-	absCorProps["CanWorkspace"] = cloneName;
+    absCorProps["CanWorkspace"] = cloneName;
 
     const bool useCanScale = m_uiForm.ckScaleCan->isChecked();
     if (useCanScale) {
@@ -375,7 +375,6 @@ void ApplyPaalmanPings::absCorComplete(bool error) {
         "Unable to apply corrections.\nSee Results Log for more details.");
     return;
   }
-
 
   // Add save algorithms if required
   bool save = m_uiForm.ckSave->isChecked();
