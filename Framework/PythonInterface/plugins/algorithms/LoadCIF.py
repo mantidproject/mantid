@@ -64,7 +64,7 @@ class SpaceGroupBuilder(object):
         # Try two possibilities for space group symbol. If neither is present, throw a RuntimeError.
         rawSpaceGroupSymbol = [str(cifData[x]) for x in
                                ['_space_group_name_h-m_alt', '_symmetry_space_group_name_h-m'] if
-                               x in list(cifData.keys())]
+                               x in cifData.keys()]
 
         if len(rawSpaceGroupSymbol) == 0:
             raise RuntimeError('No space group symbol in CIF.')
@@ -82,7 +82,7 @@ class SpaceGroupBuilder(object):
     def _getSpaceGroupFromNumber(self, cifData):
         spaceGroupNumber = [int(cifData[x]) for x in
                             ['_space_group_it_number', '_symmetry_int_tables_number'] if
-                            x in list(cifData.keys())]
+                            x in cifData.keys()]
 
         if len(spaceGroupNumber) == 0:
             raise RuntimeError('No space group symbol in CIF.')
@@ -112,7 +112,7 @@ class UnitCellBuilder(object):
         unitCellComponents = ['_cell_length_a', '_cell_length_b', '_cell_length_c',
                               '_cell_angle_alpha', '_cell_angle_beta', '_cell_angle_gamma']
 
-        unitCellValueMap = dict([(str(x), removeErrorEstimateFromNumber(str(cifData[x]))) if x in list(cifData.keys())
+        unitCellValueMap = dict([(str(x), removeErrorEstimateFromNumber(str(cifData[x]))) if x in cifData.keys()
                                  else (str(x), None) for x in
                                  unitCellComponents])
 
@@ -170,7 +170,7 @@ class AtomListBuilder(object):
             return cifData['_atom_site_label']
         except KeyError:
             # If there are no atomic coordinates specified, there is really no point in continuing with replacement labels.
-            if '_atom_site_fract_x' not in list(cifData.keys()):
+            if '_atom_site_fract_x' not in cifData.keys():
                 raise RuntimeError(
                     'Too much information missing from CIF-file. Does it contain a loop_ that defines atoms?')
 
@@ -180,7 +180,7 @@ class AtomListBuilder(object):
         coordinateFields = ['_atom_site_fract_x', '_atom_site_fract_y', '_atom_site_fract_z']
 
         for field in coordinateFields:
-            if field not in list(cifData.keys()):
+            if field not in cifData.keys():
                 raise RuntimeError(
                     'Mandatory field {0} not found in CIF-file.' \
                     'Please check the atomic position definitions.'.format(field))
@@ -194,7 +194,7 @@ class AtomListBuilder(object):
         occupancyField = '_atom_site_occupancy'
 
         occupancies = []
-        if occupancyField in list(cifData.keys()):
+        if occupancyField in cifData.keys():
             occupancies += cifData[occupancyField]
         else:
             occupancies += ['1.0'] * len(labels)
@@ -203,7 +203,7 @@ class AtomListBuilder(object):
 
     def _getAtomSymbols(self, cifData, labels):
         rawAtomSymbols = [cifData[x] for x in ['_atom_site_type_symbol', '_atom_site_label'] if x in
-                          list(cifData.keys())]
+                          cifData.keys()]
 
         if len(rawAtomSymbols) == 0:
             raise RuntimeError('Cannot determine atom types, both _atom_site_type_symbol and _atom_site_label are '
@@ -225,10 +225,10 @@ class AtomListBuilder(object):
 
         # Try to get a list of isotropic U-values, replace invalid ones by None
         isotropicUs = []
-        if keyUIso in list(cifData.keys()):
+        if keyUIso in cifData.keys():
             isotropicUNoErrors = [removeErrorEstimateFromNumber(u) for u in cifData[keyUIso]]
             isotropicUs += [getFloatOrNone(u) for u in isotropicUNoErrors]
-        elif keyBIso in list(cifData.keys()):
+        elif keyBIso in cifData.keys():
             isotropicBsNoErrors = [removeErrorEstimateFromNumber(b) for b in cifData[keyBIso]]
             isotropicUs += [convertBtoU(getFloatOrNone(b)) for b in isotropicBsNoErrors]
         else:
@@ -275,7 +275,7 @@ class AtomListBuilder(object):
 
     def _get_ansitropic_labels(self, cifData):
         anisoLabel = '_atom_site_aniso_label'
-        if anisoLabel not in list(cifData.keys()):
+        if anisoLabel not in cifData.keys():
             raise RuntimeError('Mandatory field \'_atom_site_aniso_label\' is missing.')
         anisoLabels = cifData[anisoLabel]
         return anisoLabels
@@ -284,7 +284,7 @@ class AtomListBuilder(object):
         values = []
 
         for key in keys:
-            if key not in list(cifData.keys()):
+            if key not in cifData.keys():
                 raise RuntimeError('Can not construct tensor with missing element \'{0}\'.'.format(key))
             else:
                 values.append([getFloatOrNone(removeErrorEstimateFromNumber(x)) for x in cifData[key]])
@@ -340,7 +340,7 @@ class UBMatrixBuilder(object):
                         '_diffrn_orient_matrix_ub_21', '_diffrn_orient_matrix_ub_22', '_diffrn_orient_matrix_ub_23',
                         '_diffrn_orient_matrix_ub_31', '_diffrn_orient_matrix_ub_32', '_diffrn_orient_matrix_ub_33']
 
-        ubValues = [str(cifData[key]) if key in list(cifData.keys()) else None for key in ubMatrixKeys]
+        ubValues = [str(cifData[key]) if key in cifData.keys() else None for key in ubMatrixKeys]
 
         if None in ubValues:
             raise RuntimeError('Can not load UB matrix from CIF, values are missing.')
