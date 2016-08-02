@@ -22,7 +22,7 @@ Concepts
 
 - ``MatrixWorkspace`` : When masking bins or detectors with non-zero weights,
   undefined and infinite values and errors will be zeroed.
-
+- ``Lattice`` : Allow setting a UB matrix with negative determinant (improper rotation)  
 
 Algorithms
 ----------
@@ -89,6 +89,7 @@ Python
 - :py:obj:`mantid.kernel.MaterialBuilder` has been exposed to python
   and :py:obj:`mantid.kernel.Material` has been modified to expose the
   individual atoms.
+- :py:obj:`mantid.geometry.OrientedLattice` set U with determinant -1 exposed to python
 
 Python Algorithms
 #################

@@ -1,25 +1,26 @@
 #ifndef WBVMEDIANTESTTEST_H_
 #define WBVMEDIANTESTTEST_H_
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidAlgorithms/MedianDetectorTest.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAlgorithms/MedianDetectorTest.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidDataHandling/LoadInstrument.h"
 //#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include <boost/shared_ptr.hpp>
+#include <boost/lexical_cast.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
+#include <sstream>
 #include <fstream>
 #include <ios>
-#include <sstream>
 #include <string>
 
 using namespace Mantid::Kernel;
@@ -90,6 +91,8 @@ public:
     const int firstGoodSpec = 36;
     const int lastGoodSpec = 95;
     for (int lHist = 0; lHist < Nhist; lHist++) {
+      //      std::cout << "    " << lHist << " " <<
+      //      outputMat->readY(lHist).front() << '\n';
       double expected = BAD_VAL;
       if (lHist >= firstGoodSpec && lHist <= lastGoodSpec)
         expected = GOOD_VAL;
@@ -97,7 +100,7 @@ public:
         expected = BAD_VAL;
       else if (lHist == SAVEDBYERRORBAR)
         expected = GOOD_VAL;
-      TS_ASSERT_EQUALS(outputMat->y(lHist).front(), expected);
+      TS_ASSERT_EQUALS(outputMat->readY(lHist).front(), expected);
     }
   }
 
@@ -107,7 +110,7 @@ public:
             5, 10, 1);
 
     for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
-      ws->mutableY(i)[0] =
+      ws->dataY(i)[0] =
           std::floor(1e9 * ws->getDetector(i)->solidAngle(V3D(0, 0, 0)));
     }
     AnalysisDataService::Instance().addOrReplace("MDTSolidAngle", ws);
@@ -141,7 +144,7 @@ public:
             5, 10, 1);
 
     for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
-      ws->mutableY(i)[0] =
+      ws->dataY(i)[0] =
           std::floor(1e9 * ws->getDetector(i)->solidAngle(V3D(0, 0, 0)));
     }
     AnalysisDataService::Instance().addOrReplace("MDTLevelsUp", ws);
@@ -177,11 +180,7 @@ public:
     Workspace_sptr space = WorkspaceFactory::Instance().create(
         "Workspace2D", Nhist, specLength, specLength - 1);
     m_2DWS = boost::dynamic_pointer_cast<Workspace2D>(space);
-    BinEdges x(specLength);
-    auto &xData = x.mutableData();
-    for (int i = 0; i < specLength; ++i) {
-      xData[i] = i * 1000;
-    }
+    BinEdges x(specLength, HistogramData::LinearGenerator(0.0, 1000.0));
     // the data will be 21 random numbers
     double yArray[specLength - 1] = {0.2, 4, 50, 0.001, 0, 0,     0,
                                      1,   0, 15, 4,     0, 0.001, 2e-10,
