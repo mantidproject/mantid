@@ -16,9 +16,6 @@
 
 #include <gsl/gsl_errno.h>
 
-#define REAL(z, i) ((z)[2 * (i)])
-#define IMAG(z, i) ((z)[2 * (i) + 1])
-
 #include <algorithm>
 #include <cmath>
 #include <functional>
