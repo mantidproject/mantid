@@ -381,6 +381,10 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         logger.information('Correcting sample and container')
         corrected_can_ws = '__corrected_can'
 
+        RebinToWorkspace(WorkspaceToRebin=self._scaled_container,
+                         WorkspaceToMatch=self._corrections + '_acc',
+                         OutputWorkspace=self._scaled_container)
+
         # Acc
         Divide(LHSWorkspace=self._scaled_container,
                RHSWorkspace=self._corrections + '_acc',
