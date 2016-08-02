@@ -377,14 +377,23 @@ void GetAllEi::exec() {
   auto result_ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1,
                                                             nPeaks, nPeaks);
 
-  MantidVec peaks_positions;
-  auto &Signal = result_ws->mutableY(0);
-  auto &Error = result_ws->mutableE(0);
-  for (size_t i = 0; i < nPeaks; i++) {
-    peaks_positions.push_back(peaks[i].position);
-    Signal[i] = peaks[i].height;
-    Error[i] = peaks[i].sigma;
-  }
+  HistogramX peaks_positions(peaks.size());
+  std::transform(peaks.cbegin(), peaks.cend(), peaks_positions.begin(), [](peakKeeper peak)
+  {
+	  return peak.position;
+  });
+  auto &Signal = result_ws->mutableY(0);  // Signal[i] = peaks[i].height; to transform
+  std::transform(peaks.cbegin(), peaks.cend(), Signal.begin(), [](peakKeeper peak)
+  {
+	  return peak.height;
+  });
+
+  auto &Error = result_ws->mutableE(0); // Error[i] = peaks[i].sigma; to transform
+  std::transform(peaks.cbegin(), peaks.cend(), Error.begin(), [](peakKeeper peak)
+  {
+	  return peak.sigma;
+  });
+
   result_ws->setPoints(0, peaks_positions);
 
   setProperty("OutputWorkspace", result_ws);
