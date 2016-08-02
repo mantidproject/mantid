@@ -76,14 +76,14 @@ public:
     double proportionality_coeff = m_monitor_counts * sqrt(m_Ei / 25.3);
     for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
       for (size_t j = 0; j < xsize; ++j) { // Same x-values
-        TS_ASSERT_DELTA(outWS->readX(i)[j], inWS->readX(i)[j], 1e-12);
+        TS_ASSERT_DELTA(outWS->x(i)[j], inWS->x(i)[j], 1e-12);
         // Output Y-values proportional to input
-        TS_ASSERT_DELTA(proportionality_coeff * outWS->readY(i)[j],
-                        inWS->readY(i)[j], 1e-12);
+        TS_ASSERT_DELTA(proportionality_coeff * outWS->y(i)[j],
+                        inWS->y(i)[j], 1e-12);
 
         // Output Err-values proportional to input
-        TS_ASSERT_DELTA(proportionality_coeff * outWS->readE(i)[j],
-                        inWS->readE(i)[j], 1e-12);
+        TS_ASSERT_DELTA(proportionality_coeff * outWS->e(i)[j],
+                        inWS->e(i)[j], 1e-12);
       }
     }
 

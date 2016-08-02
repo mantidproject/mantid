@@ -6,6 +6,10 @@
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/MultiThreaded.h"
 
+using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -70,12 +74,11 @@ void MonitorEfficiencyCorUser::exec() {
   PARALLEL_FOR2(m_outputWS, m_inputWS)
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    // MantidVec& xOut = m_outputWS->dataX(i);
-    MantidVec &yOut = m_outputWS->dataY(i);
-    MantidVec &eOut = m_outputWS->dataE(i);
-    const MantidVec &yIn = m_inputWS->readY(i);
-    const MantidVec &eIn = m_inputWS->readE(i);
-    m_outputWS->setX(i, m_inputWS->refX(i));
+    auto &yOut = m_outputWS->mutableY(i);
+    auto &eOut = m_outputWS->mutableE(i);
+    auto &yIn = m_inputWS->y(i);
+    auto &eIn = m_inputWS->e(i);
+    m_outputWS->setSharedX(i, m_inputWS->sharedX(i));
 
     applyMonEfficiency(numberOfChannels, yIn, eIn, eff0, yOut, eOut);
 
@@ -97,8 +100,8 @@ void MonitorEfficiencyCorUser::exec() {
  * @param eOut corrected spectrum errors
  */
 void MonitorEfficiencyCorUser::applyMonEfficiency(
-    const size_t numberOfChannels, const MantidVec &yIn, const MantidVec &eIn,
-    const double effVec, MantidVec &yOut, MantidVec &eOut) {
+    const size_t numberOfChannels, const HistogramY &yIn, const HistogramE &eIn,
+    const double effVec, HistogramY &yOut, HistogramE &eOut) {
 
   for (unsigned int j = 0; j < numberOfChannels; ++j) {
     yOut[j] = yIn[j] / effVec;
