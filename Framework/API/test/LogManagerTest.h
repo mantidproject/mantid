@@ -261,7 +261,7 @@ public:
     runInfo.addProperty<std::string>(name, value);
     double result = std::nan("1");
     TS_ASSERT_THROWS_NOTHING(result = runInfo.getPropertyAsSingleValue(name));
-    TS_ASSERT_EQUALS(value, std::to_string(result));
+    TS_ASSERT_DELTA(1.0, result, 1e-12);
   }
 
   void test_GetPropertyAsSingleValue_TimeSeries_DoubleType() {

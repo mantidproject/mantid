@@ -335,6 +335,16 @@ double LogManager::getPropertyAsSingleValue(
     if (convertSingleValue(log, singleValue) ||
         convertTimeSeriesToDouble(log, singleValue, statistic)) {
       return singleValue;
+    } else if (const auto stringLog =
+                   dynamic_cast<const PropertyWithValue<std::string> *>(log)) {
+      // Try to lexically cast string to a double
+      try {
+        return std::stod(stringLog->value());
+      } catch (const std::invalid_argument &) {
+        throw std::invalid_argument(
+            "Run::getPropertyAsSingleValue - Property\"" + name +
+            "\"cannot be converted to a numeric value.");
+      }
     } else {
       throw std::invalid_argument(
           "Run::getPropertyAsSingleValue - Property \"" + name +
