@@ -152,16 +152,7 @@ void ApplyPaalmanPings::run() {
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           m_sampleWorkspaceName);
   m_originalSampleUnits = sampleWs->getAxis(0)->unit()->unitID();
-
-  // If not in wavelength then do conversion
-  if (m_originalSampleUnits != "Wavelength") {
-    g_log.information(
-        "Sample workspace not in wavelength, need to convert to continue.");
-    absCorProps["SampleWorkspace"] =
-        addConvertUnitsStep(sampleWs, "Wavelength");
-  } else {
-    absCorProps["SampleWorkspace"] = m_sampleWorkspaceName;
-  }
+  absCorProps["SampleWorkspace"] = m_sampleWorkspaceName;
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
   const bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
@@ -202,15 +193,7 @@ void ApplyPaalmanPings::run() {
       }
     }
 
-    // If not in wavelength then do conversion
-    std::string originalCanUnits = canClone->getAxis(0)->unit()->unitID();
-    if (originalCanUnits != "Wavelength") {
-      g_log.information("Container workspace not in wavelength, need to "
-                        "convert to continue.");
-      absCorProps["CanWorkspace"] = addConvertUnitsStep(canClone, "Wavelength");
-    } else {
-      absCorProps["CanWorkspace"] = cloneName;
-    }
+	absCorProps["CanWorkspace"] = cloneName;
 
     const bool useCanScale = m_uiForm.ckScaleCan->isChecked();
     if (useCanScale) {
