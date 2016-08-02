@@ -293,7 +293,8 @@ set ( INC_FILES
 	inc/MantidKernel/WarningSuppressions.h
 	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/XMLInstantiator.h
-	inc/MantidKernel/cow_ptr.h
+  inc/MantidKernel/CaseInsensitiveMap.h
+  inc/MantidKernel/cow_ptr.h
 	inc/MantidKernel/make_cow.h
 	inc/MantidKernel/make_unique.h
 )

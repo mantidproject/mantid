@@ -22,7 +22,7 @@ Concepts
 
 - ``MatrixWorkspace`` : When masking bins or detectors with non-zero weights,
   undefined and infinite values and errors will be zeroed.
-
+- ``Lattice`` : Allow setting a UB matrix with negative determinant (improper rotation)  
 
 Algorithms
 ----------
@@ -36,6 +36,9 @@ New
   data from file on legacy SNS DAS instruments.
 
 - :ref:`CropToComponent <algm-CropToComponent>` allows for cropping a workspace to a list of component names.
+- :ref:`CreateUserDefinedBackground <algm-CreateUserDefinedBackground>` takes a set of points
+  that the user has chosen and creates a background workspace out of them. It interpolates the
+  points so the resulting background can be subtracted from the original data.
 
 
 Improved
@@ -59,7 +62,9 @@ Improved
 
 - :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli 
 
-
+- :ref:`RenameWorkspace <algm-RenameWorkspace>` and `RenameWorkspaces <algm-RenameWorkspaces>`
+  now check if a Workspace with that name already exists in the ADS and gives
+  the option to override it.
 
 Deprecated
 ##########
@@ -74,6 +79,9 @@ Performance
   A moderate number of algorithms should experience a speedup and reduced memory consumption.
   If you experience unusual slowdowns, please contact the developer team.
 
+- :ref:`StripPeaks <algm-StripPeaks>` has a slight performance improvement from these changes.
+  
+  
 CurveFitting
 ------------
 
@@ -89,6 +97,7 @@ Python
 - :py:obj:`mantid.kernel.MaterialBuilder` has been exposed to python
   and :py:obj:`mantid.kernel.Material` has been modified to expose the
   individual atoms.
+- :py:obj:`mantid.geometry.OrientedLattice` set U with determinant -1 exposed to python
 
 Python Algorithms
 #################
