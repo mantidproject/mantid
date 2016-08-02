@@ -13,6 +13,12 @@
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+}
+
 namespace Algorithms {
 /** This algorithm searches for peaks in a dataset.
     The method used is detailed in: M.A.Mariscotti, NIM 50 (1967) 309.
@@ -83,7 +89,7 @@ public:
     return "Optimization\\PeakFinding";
   }
   /// needed by FindPeaksBackground
-  int getVectorIndex(const MantidVec &vecX, double x);
+  int getIndex(const HistogramData::HistogramX &vecX, double x);
 
 private:
   void init() override;
@@ -155,19 +161,21 @@ private:
                          std::vector<double> &vecpeakrange);
 
   /// Estimate background of a given range
-  void estimateBackground(const MantidVec &X, const MantidVec &Y,
+  void estimateBackground(const HistogramData::HistogramX &X,
+                          const HistogramData::HistogramY &Y,
                           const size_t i_min, const size_t i_max,
                           std::vector<double> &vecbkgdparvalues);
 
   /// Estimate peak range based on background peak parameter
-  void estimatePeakRange(const MantidVec &vecX, size_t i_centre, size_t i_min,
-                         size_t i_max, const double &leftfwhm,
+  void estimatePeakRange(const HistogramData::HistogramX &vecX, size_t i_centre,
+                         size_t i_min, size_t i_max, const double &leftfwhm,
                          const double &rightfwhm,
                          std::vector<double> &vecpeakrange);
 
   /// Estimate peak parameters
   std::string estimatePeakParameters(
-      const MantidVec &vecX, const MantidVec &vecY, size_t i_min, size_t i_max,
+      const HistogramData::HistogramX &vecX,
+      const HistogramData::HistogramY &vecY, size_t i_min, size_t i_max,
       const std::vector<double> &vecbkgdparvalues, size_t &iobscentre,
       double &height, double &fwhm, double &leftfwhm, double &rightfwhm);
 

@@ -96,9 +96,12 @@
 #else
 #define DLL_API __declspec(dllimport)
 #endif
-//----------------------------------------------------------------------
-// DLL_API is ignored for all other systems
-//----------------------------------------------------------------------
+#elif defined(__GNUC__) && !defined(__clang__)
+#ifdef IN_MANTID_KERNEL
+#define DLL_API __attribute__((visibility("default")))
+#else
+#define DLL_API
+#endif
 #else
 #define DLL_API
 #endif

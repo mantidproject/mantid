@@ -35,7 +35,7 @@ becomes
 Limitations
 ###########
 
-The Algorithm will fail if the type of your Group column is not `int`, there will also be a failure if the columns Group and Options are not included in the table.
+The Algorithm will fail if any of the columns is not of type 'str'.
 
 Usage
 -----
@@ -56,15 +56,15 @@ Usage
     ws.addColumn("str","Qmax");
     ws.addColumn("str","dq/q");
     ws.addColumn("str","Scale");
-    ws.addColumn("int","StitchGroup");
+    ws.addColumn("str","StitchGroup");
     ws.addColumn("str","Options");
-    nextRow = {'Run(s)':"13460",'ThetaIn':"0.7",'TransRun(s)':"13463+13464",'Qmin':"0.01",'Qmax':"0.06",'dq/q':"0.04",'Scale':"",'StitchGroup':1,'Options':""}
+    nextRow = {'Run(s)':"13460",'ThetaIn':"0.7",'TransRun(s)':"13463+13464",'Qmin':"0.01",'Qmax':"0.06",'dq/q':"0.04",'Scale':"",'StitchGroup':"1",'Options':""}
     ws.addRow ( nextRow )
-    nextRow = {'Run(s)':"13470",'ThetaIn':"2.3",'TransRun(s)':"13463+13464",'Qmin':"0.035",'Qmax':"0.3",'dq/q':"0.04",'Scale':"",'StitchGroup':0,'Options':""}
+    nextRow = {'Run(s)':"13470",'ThetaIn':"2.3",'TransRun(s)':"13463+13464",'Qmin':"0.035",'Qmax':"0.3",'dq/q':"0.04",'Scale':"",'StitchGroup':"0",'Options':""}
     ws.addRow ( nextRow )
-    nextRow = {'Run(s)':"13462",'ThetaIn':"2.3",'TransRun(s)':"13463+13464",'Qmin':"0.035",'Qmax':"0.3",'dq/q':"0.04",'Scale':"",'StitchGroup':1,'Options':"ProcessingInstructions=\"1:2\""}
+    nextRow = {'Run(s)':"13462",'ThetaIn':"2.3",'TransRun(s)':"13463+13464",'Qmin':"0.035",'Qmax':"0.3",'dq/q':"0.04",'Scale':"",'StitchGroup':"1",'Options':"ProcessingInstructions=\"1:2\""}
     ws.addRow ( nextRow )
-    nextRow = {'Run(s)':"13469",'ThetaIn':"0.7",'TransRun(s)':"13463+13464",'Qmin':"0.01",'Qmax':"0.06",'dq/q':"0.04",'Scale':"",'StitchGroup':2,'Options':""}
+    nextRow = {'Run(s)':"13469",'ThetaIn':"0.7",'TransRun(s)':"13463+13464",'Qmin':"0.01",'Qmax':"0.06",'dq/q':"0.04",'Scale':"",'StitchGroup':"2",'Options':""}
     ws.addRow ( nextRow )
 
     #Create an absolute path by joining the proposed filename to a directory

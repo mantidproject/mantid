@@ -30,9 +30,18 @@ Single Crystal Diffraction
    :align: center
 
   
+- Some improvements were done for creating peaks from python. :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>`
+  copies the goniometer from the input MatrixWorkspace to PeaksWorkspace. createPeak for PeaksWorkspace copies goniometer 
+  from PeaksWorkspace to peak. setGoniometer for a peak can be done from python and setQLabFrame and setQSampleFrame works 
+  correctly now with one argument.
+
 
 Engineering Diffraction
 -----------------------
+
+- EnggFocus: bins are now masked at the beginning of the workflow
+  (when using the option MaskBinsXMins)
+
 
 Powder Diffraction
 ------------------
@@ -45,6 +54,11 @@ Powder Diffraction
   testing files being produced by the "new DAS" at SNS. This parameter
   has not been added to the Powder Diffraction interface and will be
   removed without notice.
+
+- :ref:`cry-powder-diffraction-ref`: S-Empty option has been enabled for
+   the Crystallography Powder Diffraction Script. In order to use the
+   S-Empty option, simply provide the S-Empty run number within the
+   ``.pref`` file.
 
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
 and

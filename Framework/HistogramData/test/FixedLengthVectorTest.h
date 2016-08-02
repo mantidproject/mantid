@@ -91,6 +91,13 @@ public:
     TS_ASSERT_EQUALS(testee[1], 0.3);
   }
 
+  void test_generator_constructor() {
+    FixedLengthVectorTester testee(2, []() { return 0.1; });
+    TS_ASSERT_EQUALS(testee.size(), 2);
+    TS_ASSERT_EQUALS(testee[0], 0.1);
+    TS_ASSERT_EQUALS(testee[1], 0.1);
+  }
+
   void test_iterator_constructor_special_case() {
     // Used like this, we might think that the (count, value) constructor is
     // called. However, that would require converting the second int to a
@@ -105,6 +112,43 @@ public:
     TS_ASSERT_EQUALS(testee[0], 1.0);
     TS_ASSERT_EQUALS(testee[1], 1.0);
     TS_ASSERT_EQUALS(testee[2], 1.0);
+  }
+
+  void test_range_assignment() {
+    std::vector<double> src{3.6, 9.7, 8.5};
+    FixedLengthVectorTester dest(3);
+
+    dest.assign(src.cbegin(), src.cend());
+
+    TS_ASSERT_EQUALS(dest.size(), 3);
+    TS_ASSERT_EQUALS(dest[0], src[0]);
+    TS_ASSERT_EQUALS(dest[1], src[1]);
+    TS_ASSERT_EQUALS(dest[2], src[2]);
+  }
+
+  void test_range_assignment_fail() {
+    std::vector<double> src(10, 0);
+    FixedLengthVectorTester dest(5);
+
+    TS_ASSERT_THROWS(dest.assign(src.cbegin(), src.cend()), std::logic_error);
+  }
+
+  void test_value_assignment() {
+    FixedLengthVectorTester dest(4);
+
+    dest.assign(4, 3.9);
+
+    TS_ASSERT_EQUALS(dest.size(), 4);
+    TS_ASSERT_EQUALS(dest[0], 3.9);
+    TS_ASSERT_EQUALS(dest[1], 3.9);
+    TS_ASSERT_EQUALS(dest[2], 3.9);
+    TS_ASSERT_EQUALS(dest[3], 3.9);
+  }
+
+  void test_value_assignment_fail() {
+    FixedLengthVectorTester dest(3);
+
+    TS_ASSERT_THROWS(dest.assign(20, 4.5), std::logic_error);
   }
 
   void test_copy_assignment() {

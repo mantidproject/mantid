@@ -81,7 +81,7 @@ fi
 # Run tests
 #####################################################################################
 # Remove doctrees directory so it forces a full reparse. This will then pick up all
-# reference warnings
+# reference warnings in a html build
 if [ -d $BUILD_DIR/docs/doctrees ]; then
   rm -rf $BUILD_DIR/docs/doctrees/*
 fi
@@ -97,7 +97,8 @@ echo "UpdateInstrumentDefinitions.OnStartup = 0" >> $userprops
 echo "usagereports.enabled = 0" >> $userprops
 
 set +e #don't immediately exit on failure so that we can remove the package
-$SCL_ON_RHEL6 "cmake --build . --target docs-test"
+${MANTIDPLOT_EXE} -xq docs/runsphinx_html.py
+${MANTIDPLOT_EXE} -xq docs/runsphinx_doctest.py
 status=$?
 set -e #exit on failures from now on
 

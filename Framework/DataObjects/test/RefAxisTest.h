@@ -68,7 +68,7 @@ public:
     TS_ASSERT_EQUALS(clonedAxis->title(), "test axis")
     TS_ASSERT_EQUALS(clonedAxis->unit()->unitID(), "TOF")
     TS_ASSERT(clonedAxis->isNumeric())
-    TS_ASSERT_EQUALS((*clonedAxis)(0, 0), 0.0)
+    TS_ASSERT_EQUALS((*clonedAxis)(0, 0), 1.0)
     TS_ASSERT_THROWS((*clonedAxis)(0, 1), std::range_error)
     delete clonedAxis;
   }

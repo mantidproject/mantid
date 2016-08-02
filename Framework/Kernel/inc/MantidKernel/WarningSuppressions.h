@@ -89,4 +89,10 @@
 #endif
 // clang-format on
 
+#ifdef GCC_VERSION
+#define GCC_UNUSED_FUNCTION __attribute__((unused))
+#else
+#define GCC_UNUSED_FUNCTION
+#endif
+
 #endif /*MANTID_KERNEL_WARNINGSUPPRESSIONS_H_*/

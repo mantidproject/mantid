@@ -11,6 +11,8 @@ Installation
 Windows
 #######
 
+* IPython has been upgraded to version 3.2.1
+
 OS X
 ####
 
@@ -19,6 +21,13 @@ User Interface
 
 Instrument View
 ###############
+
+Workspace Matrix View
+#####################
+* Masked spectra (including masked monitors) will be highlighted with background colour (typically light grey).
+* Unmasked monitor spectra will have a dynamic background colour depending on the system settings (typically light yellow, as before).
+
+.. figure::  ../../images/MaskedAndMonitor.png
 
 Plotting Improvements
 #####################
@@ -48,10 +57,16 @@ Documentation
 #############
 * Added Ragged Workspace as a concept page
 
+Options Window
+###############
+- Within Preferences->Mantid->Options ticking a category off/on will now untick/tick all subcategories. Also having some subcategories on and off will now show a partially ticked box for that category. 
+
 
 Bugs Resolved
 -------------
- - Floating windows now always stay on top of the main window in OSX
+- Floating windows now always stay on top of the main window in OSX
+- The sliceviewer will now rebin an existing binned workspace correctly.
+- 2D plots now display correctly for point data workspaces as well as for histogram data
 
 SliceViewer Improvements
 ------------------------
@@ -60,6 +75,10 @@ SliceViewer Improvements
 VSI Improvements
 ----------------
 * ParaView updated to version 5.1.0
+
+Multi-dataset fitting interface improvements
+--------------------------------------------
+* Fitting a single dataset with a composite function no longer causes a crash
 
 |
 
