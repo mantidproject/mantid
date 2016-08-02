@@ -87,9 +87,9 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 # Use temp workspace so we don't modify data
                 prog_container.report('Shifting can')
                 ScaleX(InputWorkspace=self._can_ws_wavelength,
-                      OutputWorkspace=self._shifted_container,
-                      Factor=self._can_shift_amount,
-                      Operation='Add')
+                       OutputWorkspace=self._shifted_container,
+                       Factor=self._can_shift_amount,
+                       Operation='Add')
                 logger.information('Container data shifted by %f' % self._can_shift_amount)
             else:
                 prog_container.report('Cloning Workspace')
