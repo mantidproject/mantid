@@ -111,19 +111,22 @@ bool SaveDiffFittingAscii::processGroups() {
 
   return true;
 }
+
+void SaveDiffFittingAscii::processAll() {
+
   const std::string filename = getProperty("Filename");
+  std::string outFormat = getProperty("OutFormat");
+  const std::string runNumList = getProperty("RunNumber");
+  const std::string bankList = getProperty("Bank");
 
   Poco::File pFile = (filename);
   bool exist = pFile.exists();
-  g_log.error() << "exist " << exist << std::endl; // @shahroz
-
-  // Initialize the file stream
-  std::string outFormat = getProperty("OutFormat");
 
   bool appendToFile = false;
-  if (outFormat == "AppendToExistingFile" || outFormat == "WriteGroupWorkspace")
+  if (outFormat == "AppendToExistingFile")
     appendToFile = true;
 
+  // Initialize the file stream
   std::ofstream file(filename.c_str(),
                      (appendToFile ? std::ios::app : std::ios::out));
 
@@ -141,17 +144,16 @@ bool SaveDiffFittingAscii::processGroups() {
     appendToFile = false;
   }
 
-  const std::string runNumList = getProperty("RunNumber");
-  const std::string bankList = getProperty("Bank");
-
   std::vector<std::string> splitRunNum;
   boost::split(splitRunNum, runNumList, boost::is_any_of(","));
 
   std::vector<std::string> splitBank;
   boost::split(splitBank, bankList, boost::is_any_of(","));
 
-  std::string runNum = splitRunNum[m_counter];
-  std::string bank = splitBank[m_counter];
+  // Create a progress reporting object
+  Progress progress(this, 0, 1, m_workspaces.size());
+
+  for (auto &tbl : m_workspaces) {
 
   g_log.error() << "run number: " << runNum << std::endl;
   g_log.error() << "bank number: " << bank << std::endl;
