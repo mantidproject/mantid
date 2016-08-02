@@ -138,7 +138,7 @@ public:
   void deleteIndex(const uintptr_t index) {
     std::lock_guard<std::mutex> _lock(m_mutex);
 
-    auto it = il.template get<1>().find((int)index);
+    auto it = il.template get<1>().find(index);
     if (it != il.template get<1>().end()) {
       delete (*it);
       il.template get<1>().erase(it);
@@ -157,7 +157,7 @@ public:
   T *find(const uintptr_t index) const {
     std::lock_guard<std::mutex> _lock(m_mutex);
 
-    auto it = il.template get<1>().find(int(index));
+    auto it = il.template get<1>().find(index);
     if (it == il.template get<1>().end()) {
       return nullptr;
     } else {
