@@ -144,17 +144,17 @@ void ModeratorTzeroLinear::exec() {
     {
       const double scaling = L_i / (L_i + m_gradient);
       const double offset = (1 - scaling) * t_f - scaling * m_intercept;
-      const MantidVec &inbins = inputWS->readX(i);
-      MantidVec &outbins = outputWS->dataX(i);
+      auto &inbins = inputWS->x(i);
+      auto &outbins = outputWS->mutableX(i);
       for (unsigned int j = 0; j < inbins.size(); j++) {
         outbins[j] = scaling * inbins[j] + offset;
       }
     } else {
-      outputWS->dataX(i) = inputWS->readX(i);
+      outputWS->setSharedX(i, inputWS->sharedX(i));
     }
     // Copy y and e data
-    outputWS->dataY(i) = inputWS->readY(i);
-    outputWS->dataE(i) = inputWS->readE(i);
+    outputWS->setSharedY(i, inputWS->sharedY(i));
+    outputWS->setSharedE(i, inputWS->sharedE(i));
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }

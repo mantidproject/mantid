@@ -89,7 +89,7 @@ public:
 
     // Check a few values
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-      const MantidVec &xarray = testWS->readX(ihist);
+      auto &xarray = testWS->x(ihist);
       for (size_t ibin = 0; ibin < xarray.size(); ibin += 400)
         TS_ASSERT_DELTA(1600 * ibin / 400, xarray[ibin], 0.1);
     }
@@ -112,7 +112,7 @@ public:
     for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
       const EventList &evlist = testWS->getSpectrum(ihist);
       const MantidVec &tofs_b = evlist.getTofs();
-      const MantidVec &xarray = evlist.readX();
+      auto &xarray = evlist.x();
       for (size_t ibin = 0; ibin < xarray.size(); ibin += 400) {
         TS_ASSERT_DELTA(1600 * ibin / 400, xarray[ibin], 0.1);
         TS_ASSERT_DELTA(1600 * ibin / 400, tofs_b[ibin], 0.2);
@@ -132,8 +132,9 @@ private:
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
     BinEdges xdata(numBins + 1, LinearGenerator(0.0, 4.0));
     const double peakHeight(1000), peakCentre(7000.), sigmaSq(1000 * 1000.);
+    auto &Y = testWS->mutableY(0);
     for (int ibin = 0; ibin < numBins; ++ibin) {
-      testWS->dataY(0)[ibin] =
+      Y[ibin] =
           peakHeight * exp(-0.5 * pow(xdata[ibin] - peakCentre, 2.) / sigmaSq);
     }
     for (int ihist = 0; ihist < numHists; ihist++)
@@ -153,11 +154,9 @@ private:
     for (size_t ihist = 0; ihist < numHists; ++ihist) {
       EventList &evlist = testWS->getSpectrum(ihist);
       BinEdges xdata(numBins + 1, LinearGenerator(0.0, 4.0));
-      for (int ibin = 0; ibin <= numBins; ++ibin) {
-        double tof = 4 * ibin;
-        TofEvent tofevent(tof);
-        evlist.addEventQuickly(tofevent); // insert event
-      }
+	  for (auto &tof : xdata) {
+		  evlist.addEventQuickly(TofEvent(tof));
+	  }
       evlist.setX(xdata.cowData()); // set the bins for the associated histogram
     }
     return testWS;
