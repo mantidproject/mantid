@@ -237,9 +237,9 @@ class TOFTOFSetupWidget(BaseWidget):
         el.maskDetectors = getText(self.maskDetectors)
 
         el.subtractECVan = self.chkSubtractECVan.isChecked()
-        el.correctTof    = el.correctTofVan    if self.rbtCorrectTOFVan.isChecked()    else \
-                           el.correctTofSample if self.rbtCorrectTOFSample.isChecked() else \
-                           el.correctTofNone
+        el.correctTof    = el.CORR_TOF_VAN    if self.rbtCorrectTOFVan.isChecked()    else \
+                           el.CORR_TOF_SAMPLE if self.rbtCorrectTOFSample.isChecked() else \
+                           el.CORR_TOF_NONE
         return el
 
     def set_state(self, toftofScriptElement):
@@ -265,9 +265,9 @@ class TOFTOFSetupWidget(BaseWidget):
 
         self.chkSubtractECVan.setChecked(el.subtractECVan)
 
-        if el.correctTof == el.correctTofVan:
+        if el.correctTof == el.CORR_TOF_VAN:
             self.rbtCorrectTOFVan.setChecked(True)
-        elif el.correctTof == el.correctTofSample:
+        elif el.correctTof == el.CORR_TOF_SAMPLE:
             self.rbtCorrectTOFSample.setChecked(True)
         else:
             self.rbtCorrectTOFNone.setChecked(True)
