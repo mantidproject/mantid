@@ -54,7 +54,7 @@ private:
   void writeData(API::ITableWorkspace_sptr workspace, std::ofstream &file,
                  size_t columnSize);
 
-  void writeVal(std::string &val, std::ofstream &file, bool endline);
+  void writeVal(const std::string &val, std::ofstream &file, bool endline);
 
   /// the separator
   const char m_sep;

@@ -159,6 +159,29 @@ void SaveDiffFittingAscii::processAll() {
   // Create a progress reporting object
   Progress progress(this, 0, 1, m_workspaces.size());
 
+  size_t breaker = m_workspaces.size();
+  if (outFormat == "AppendToExistingFile")
+    breaker = 1;
+
+  for (size_t i = 0; i < breaker; ++i) {
+
+    std::string runNum = splitRunNum[m_counter];
+    std::string bank = splitBank[m_counter];
+    writeInfo(runNum, bank, file);
+
+    // write header
+    std::vector<std::string> columnHeadings = m_workspaces[i]->getColumnNames();
+    writeHeader(columnHeadings, file);
+
+    // write out the data form the table workspace
+    size_t columnSize = columnHeadings.size();
+    writeData(m_workspaces[i], file, columnSize);
+
+    if (outFormat == "WriteGroupWorkspace" && (i+1) != m_workspaces.size()) {
+      file << m_endl;
+    }
+  }
+  /*
   for (auto &tbl : m_workspaces) {
 
     std::string runNum = splitRunNum[m_counter];
@@ -176,7 +199,7 @@ void SaveDiffFittingAscii::processAll() {
     if (outFormat == "WriteGroupWorkspace") {
       file << "\n";
     }
-  }
+  }*/
 
   progress.report();
 }
@@ -219,7 +242,7 @@ void SaveDiffFittingAscii::writeData(API::ITableWorkspace_sptr workspace,
   }
 }
 
-void SaveDiffFittingAscii::writeVal(std::string &val, std::ofstream &file,
+void SaveDiffFittingAscii::writeVal(const std::string &val, std::ofstream &file,
                                     bool endline) {
   std::string valStr = boost::lexical_cast<std::string>(val);
 
