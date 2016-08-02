@@ -337,28 +337,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             input_name = self._get_correction_factor_ws_name(factor_type)
             output_name = self._corrections + '_' + factor_type
 
-            if unit_id != 'Wavelength':
-                # Configure conversion
-                if unit_id == 'dSpacing':
-                    emode = 'Elastic'
-                    efixed = 0.0
-                elif unit_id == 'DeltaE':
-                    emode = 'Indirect'
-                    from IndirectCommon import getEfixed
-                    efixed = getEfixed(self._sample_ws_wavelength)
-                else:
-                    raise ValueError('Unit %s in sample workspace is not supported' % unit_id)
-
-                # Do conversion
-                ConvertUnits(InputWorkspace=input_name,
-                            OutputWorkspace=output_name,
-                            Target=unit_id,
-                            EMode=emode,
-                            EFixed=efixed)
-            else:
-                # No need to convert
-                CloneWorkspace(InputWorkspace=input_name,
-                               OutputWorkspace=output_name)
+            CloneWorkspace(InputWorkspace=input_name,
+                           OutputWorkspace=output_name)
 
         # Group the temporary factor workspaces (for easy removal later)
         GroupWorkspaces(InputWorkspaces=[self._corrections + '_' + f_type for f_type in factor_types],
