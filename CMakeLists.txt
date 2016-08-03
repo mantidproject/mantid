@@ -13,6 +13,8 @@ set ( SYSTEM_PACKAGE_TARGET "")
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 
+set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Switch for compiling the gui components")
+
 SET (CPACK_INSTALL_CMAKE_PROJECTS
      "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
 
@@ -100,7 +102,9 @@ find_package ( GSL REQUIRED )
 ###########################################################################
 # Add QtPropertyBrowser to build
 ###########################################################################
-add_subdirectory ( QtPropertyBrowser )
+if (ENABLE_MANTIDPLOT)
+  add_subdirectory ( QtPropertyBrowser )
+endif(ENABLE_MANTIDPLOT)
 
 ###########################################################################
 # Now add in all the components
@@ -118,7 +122,7 @@ set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to
 
 # VATES flag. Requires ParaView
 set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
-if (MAKE_VATES)
+if (ENABLE_MANTIDPLOT AND MAKE_VATES )
   find_package(ParaView)
   if(ParaView_FOUND)
     add_definitions ( -DMAKE_VATES )
@@ -134,20 +138,22 @@ include_directories ( Framework/API/inc )
 
 set ( CORE_MANTIDLIBS Kernel HistogramData Geometry API )
 
-# Add a target for all GUI tests
-add_custom_target ( GUITests )
-add_dependencies ( GUITests MantidWidgetsTest)
-add_dependencies ( check GUITests )
-# Collect all tests together
-add_custom_target ( AllTests )
-add_dependencies ( AllTests FrameworkTests GUITests )
+if (ENABLE_MANTIDPLOT)
+  # Add a target for all GUI tests
+  add_custom_target ( GUITests )
+  add_dependencies ( GUITests MantidWidgetsTest)
+  add_dependencies ( check GUITests )
+  # Collect all tests together
+  add_custom_target ( AllTests )
+  add_dependencies ( AllTests FrameworkTests GUITests )
+endif()
 
 if ( UNIX )
   #Experimental feature. Unix only at this point.
   set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
 endif ( UNIX )
 
-if ( MAKE_VATES )
+if (ENABLE_MANTIDPLOT AND MAKE_VATES )
   add_subdirectory ( Vates )
   if (NOT APPLE)
     LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
@@ -164,14 +170,17 @@ if ( MAKE_VATES )
     )
   endif()
 
-endif ( MAKE_VATES )
+endif ( ENABLE_MANTIDPLOT AND MAKE_VATES )
 
 if ( MSVC )
   add_definitions ( -DQWT_DLL )
 endif ()
-add_subdirectory ( MantidQt )
 
-add_subdirectory ( MantidPlot )
+if (ENABLE_MANTIDPLOT)
+  add_subdirectory ( MantidQt )
+
+  add_subdirectory ( MantidPlot )
+endif()
 
 add_subdirectory ( scripts )
 
