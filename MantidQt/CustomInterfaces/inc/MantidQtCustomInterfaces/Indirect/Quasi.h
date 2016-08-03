@@ -38,6 +38,8 @@ private slots:
   void updateMiniPlot();
   /// Handles what happen after the algorithm is run
   void algorithmComplete(bool error);
+  // Handles saving of workspace
+  void saveClicked();
 
 private:
   /// Current preview spectrum

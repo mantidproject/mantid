@@ -60,6 +60,9 @@ Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   // Connect preview spectrum spinner to handler
   connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(previewSpecChanged(int)));
+
+  // Post saving
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
 
 /**
@@ -238,22 +241,6 @@ void Quasi::algorithmComplete(bool error) {
     return;
   else
     updateMiniPlot();
-    if (m_uiForm.chkSave->isChecked()) {
-      auto saveDirectory = Mantid::Kernel::ConfigService::Instance().getString(
-        "defaultsave.directory");      
-      auto fitWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
-      const auto fitPath = saveDirectory.append(fitWS).append(".nxs");
-      QString QfitWS = QString::fromStdString(fitWS);
-      QString QfitPath = QString::fromStdString(fitPath);
-      addSaveWorkspaceToQueue(QfitWS, QfitPath);
-
-      auto resultWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
-      const auto resultPath = saveDirectory.append(resultWS).append(".nxs");
-      QString QresultWS = QString::fromStdString(resultWS);
-      QString QresultPath = QString::fromStdString(resultPath);
-      addSaveWorkspaceToQueue(QresultWS, QresultPath);
-
-  }
 }
 
 void Quasi::updateMiniPlot() {
@@ -422,6 +409,29 @@ void Quasi::previewSpecChanged(int value) {
   m_previewSpec = value;
   updateMiniPlot();
 }
+
+/**
+ * Handles saving the workspace when save is clicked
+ */
+void Quasi::saveClicked() {
+  QString saveDirectory = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString(
+    "defaultsave.directory"));
+  auto fitWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
+  QString QfitWS = QString::fromStdString(fitWS);
+  const auto fitPath = saveDirectory.append(QfitWS).append(".nxs");
+  addSaveWorkspaceToQueue(QfitWS, fitPath);
+
+  QString saveDirectoryr = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString(
+    "defaultsave.directory"));
+  auto resultWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
+  QString QresultWS = QString::fromStdString(resultWS);
+  const auto resultPath = saveDirectory.append(QresultWS).append(".nxs");
+  addSaveWorkspaceToQueue(QresultWS, resultPath);
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+
+
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
