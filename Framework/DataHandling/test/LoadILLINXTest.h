@@ -53,7 +53,7 @@ public:
     MatrixWorkspace_sptr output2D =
         boost::dynamic_pointer_cast<MatrixWorkspace>(output);
 
-    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 98304);
+    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 98305);
 
     AnalysisDataService::Instance().clear();
   }
