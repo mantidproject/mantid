@@ -138,6 +138,17 @@ private:
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &expectedPeaks);
 
+  /**
+  * Splits the file name in to sections of '_' and 'ENGINX' text
+  * within the filename
+  *
+  * @param selectedfPath is the selected file's path
+  *
+  * @return std::vector<std::string> of splitted file name with run
+  * number & bank
+  */
+  std::vector<std::string> splitFittingDirectory(const std::string & selectedfPath);
+
   void updateFittingDirVec(const std::string &bankDir,
                            const std::string &focusedFile, const bool multi_run,
                            std::vector<std::string> &fittingRunNoDirVec);

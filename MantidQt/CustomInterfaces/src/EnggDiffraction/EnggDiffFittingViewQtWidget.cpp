@@ -513,15 +513,7 @@ void EnggDiffFittingViewQtWidget::setPeakList(
   m_ui.lineEdit_fitting_peaks->setText(QString::fromStdString(peakList));
 }
 
-std::vector<std::string> EnggDiffFittingViewQtWidget::splitFittingDirectory(
-    const std::string &selectedfPath) {
 
-  Poco::Path PocofPath(selectedfPath);
-  std::string selectedbankfName = PocofPath.getBaseName();
-  std::vector<std::string> splitBaseName;
-  boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_."));
-  return splitBaseName;
-}
 
 void EnggDiffFittingViewQtWidget::setBankEmit() { emit setBank(); }
 
