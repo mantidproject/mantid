@@ -9,8 +9,8 @@
 Description
 -----------
 
-Saves a TableWorkspace containing Diffraction Fitting results in to an ASCII file in TBL format.
-All of the columns must be typed as 'double' in order to successfully save it as a ASCII file.
+Saves a TableWorkspace containing Diffraction Fitting results as an ASCII file.
+All of the columns must be typed as 'double' in order to successfully save it as an ASCII file.
 A GroupWorkspace of TableWorkspace can also be saved where the run number and bank is provided
 manually as a list in the correct order.
 
@@ -106,15 +106,15 @@ Usage
 
     print "File Exists:", os.path.exists(savefile)
 
-.. testcleanup:: ExSaveDiffFittingAscii
-
-    os.remove(savefile)
-
 Output:
 
 .. testoutput:: ExSaveDiffFittingAscii
 
     File Exists: True
+
+.. testcleanup:: ExSaveDiffFittingAscii
+
+    os.remove(savefile)
 
 .. categories::
 

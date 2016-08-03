@@ -143,7 +143,6 @@ void SaveDiffFittingAscii::processAll() {
 
   if (exist && appendToFile) {
     file << "\n";
-    appendToFile = false;
   }
 
   std::vector<std::string> splitRunNum;

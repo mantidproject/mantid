@@ -37,6 +37,9 @@ New
 
 - :ref:`CropToComponent <algm-CropToComponent>` allows for cropping a workspace to a list of component names.
 
+- :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>` an algorithm which saves a TableWorkspace containing
+  diffraction fitting results as an ASCII file
+
 
 Improved
 ########
