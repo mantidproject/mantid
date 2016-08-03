@@ -71,7 +71,10 @@ library_filenames = ["libboost_regex-mt.dylib",
                      "libsz.dylib",
                      "libjpeg.dylib",
                      "libssl.dylib",
-                     "libcrypto.dylib"]
+                     "libcrypto.dylib",
+                     "libtbb.dylib",
+                     "libtbbmalloc.dylib",
+                     "libtbbmalloc_proxy.dylib"]
 
 poco_version = "@POCO_VERSION@".split(".").map(&:to_i)
 if(poco_version[0] > 1 || (poco_version[0] == 1 && poco_version[1] >= 6))
