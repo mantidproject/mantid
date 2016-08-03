@@ -19,7 +19,8 @@ AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent)
   m_uiForm.setupUi(this);
   // populate the combo box with names of eligible workspaces
   QStringList workspaceNames;
-  auto wsNames = Mantid::API::AnalysisDataService::Instance().getObjectNames();
+  auto wsNames = Mantid::API::AnalysisDataService::Instance().getObjectNames(
+      Mantid::Kernel::DataServiceSort::Sorted);
   for (auto name = wsNames.begin(); name != wsNames.end(); ++name) {
     auto mws = Mantid::API::AnalysisDataService::Instance()
                    .retrieveWS<Mantid::API::MatrixWorkspace>(*name);

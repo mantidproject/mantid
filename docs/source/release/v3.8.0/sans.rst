@@ -18,9 +18,11 @@ Bug Fixes
 - Fix for beam center finder
 - Fix loading of multiperiod event files
 - Fix period selection when loading multiperiod files.
+- Fix process note for SaveCanSAS1D
 - Fix output names for batch processing
 - Fix the loading of RKH files
 - Fix wrong initial position of LARMOR data in the beam centre finder
+- Allow loading of CanSAS data without error data
 
 X uncertainties (delta-Q)
 -------------------------

@@ -2,6 +2,7 @@
 #define SAVERKHTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataHandling/SaveRKH.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -10,6 +11,7 @@
 #include <Poco/File.h>
 using namespace Mantid::API;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::LinearGenerator;
 using Mantid::HistogramData::PointStandardDeviations;
 
 class SaveRKHTest : public CxxTest::TestSuite {
@@ -259,10 +261,8 @@ private:
     const size_t y_length = x_length - 1;
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(
         "Workspace2D", nSpec, x_length, y_length);
-    BinEdges x(x_length);
-    std::iota(x.begin(), x.end(), 0.0);
-    PointStandardDeviations dx(y_length);
-    std::iota(dx.begin(), dx.end(), 0.1);
+    BinEdges x(x_length, LinearGenerator(0.0, 1.0));
+    PointStandardDeviations dx(y_length, LinearGenerator(0.1, 1.0));
     for (size_t j = 0; j < nSpec; ++j) {
       ws->setBinEdges(j, x);
       ws->setPointStandardDeviations(j, dx);

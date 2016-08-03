@@ -179,9 +179,10 @@ void ConvertAxesToRealSpace::exec() {
                   << " spectra, see the debug log for more details.\n";
 
   // set up the axes on the output workspace
-  HistogramData::Points x(axisVector[0].bins);
+  std::vector<double> x_tmp(axisVector[0].bins);
   MantidVecPtr y;
-  fillAxisValues(x.mutableRawData(), axisVector[0], false);
+  fillAxisValues(x_tmp, axisVector[0], false);
+  HistogramData::Points x(std::move(x_tmp));
 
   outputWs->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
   Unit_sptr xUnit = outputWs->getAxis(0)->unit();

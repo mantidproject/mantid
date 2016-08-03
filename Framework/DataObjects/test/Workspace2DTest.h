@@ -2,6 +2,7 @@
 #define WORKSPACE2DTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
@@ -19,6 +20,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using HistogramData::Counts;
 using HistogramData::CountStandardDeviations;
+using HistogramData::LinearGenerator;
 using WorkspaceCreationHelper::Create2DWorkspaceBinned;
 
 class Workspace2DTest : public CxxTest::TestSuite {
@@ -75,7 +77,8 @@ public:
 
   void testSetX() {
     double aNumber = 5.3;
-    auto v = boost::make_shared<HistogramData::HistogramX>(nbins + 1, aNumber);
+    auto v = boost::make_shared<HistogramData::HistogramX>(
+        nbins + 1, LinearGenerator(aNumber, 1.0));
     TS_ASSERT_THROWS_NOTHING(ws->setX(0, v));
     TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
     TS_ASSERT_THROWS(ws->setX(-1, v), std::range_error);
@@ -84,7 +87,8 @@ public:
 
   void testSetX_cowptr() {
     double aNumber = 5.4;
-    auto v = Kernel::make_cow<HistogramData::HistogramX>(nbins + 1, aNumber);
+    auto v = Kernel::make_cow<HistogramData::HistogramX>(
+        nbins + 1, LinearGenerator(aNumber, 1.0));
     TS_ASSERT_THROWS_NOTHING(ws->setX(0, v));
     TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
     TS_ASSERT_THROWS(ws->setX(-1, v), std::range_error);

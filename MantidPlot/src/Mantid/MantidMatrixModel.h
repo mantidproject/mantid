@@ -69,7 +69,10 @@ public slots:
 
 private:
   bool checkMonitorCache(
-      int row) const; // check the cache and add to it if neccessary
+      int row) const; // check the monitor cache and add to it if neccessary
+
+  bool checkMaskedCache(
+      int row) const; // check the masked cache and add to it if neccessary
 
   const Mantid::API::MatrixWorkspace *m_workspace;
   int m_startRow;     ///< starting workspace index to display
@@ -84,6 +87,8 @@ private:
   int m_prec;    //  Number precision
   QColor m_mon_color;                  // Monitor Specific background color
   mutable QHash<int, bool> m_monCache; // monitor flag cache
+  QColor m_mask_color; // Masked Detector Specific background color
+  mutable QHash<int, bool> m_maskCache; // masked flag cache
 };
 
 #endif

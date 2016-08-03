@@ -74,9 +74,11 @@ private:
 
 public:
   enum class XMode { BinEdges, Points };
-  /// Construct with given storage mode for X data (BinEdges or Points).
-  explicit Histogram(XMode mode)
-      : m_x(Kernel::make_cow<HistogramX>(0)), m_xMode(mode) {}
+  enum class YMode { Uninitialized, Counts, Frequencies };
+  /// Construct with given storage mode for X data (BinEdges or Points) and Y
+  /// data (Counts or Frequencies).
+  explicit Histogram(XMode xmode, YMode ymode)
+      : m_x(Kernel::make_cow<HistogramX>(0)), m_xMode(xmode), m_yMode(ymode) {}
 
   template <class TX, class TY = Counts, class TE = CountVariances>
   explicit Histogram(const TX &x, const TY &y = Counts(),
@@ -91,6 +93,9 @@ public:
 
   /// Returns the storage mode of the X data (BinEdges or Points).
   XMode xMode() const noexcept { return m_xMode; }
+
+  /// Returns the storage mode of the Y data (Counts or Frequencies).
+  YMode yMode() const noexcept { return m_yMode; }
 
   BinEdges binEdges() const;
   Points points() const;
@@ -171,12 +176,19 @@ public:
     return m_dx->rawData();
   }
 
+  // TODO This is a temporary helper function for refactoring, must be removed!
+  void setYMode(YMode ymode) { m_yMode = ymode; }
+  void convertToCounts();
+  void convertToFrequencies();
+
 private:
   template <class TX> void initX(const TX &x);
   template <class TY> void initY(const TY &y);
   template <class TE> void initE(const TE &e);
   template <class TY> void setValues(const TY &y);
   template <class TE> void setUncertainties(const TE &e);
+  void checkAndSetYModeCounts();
+  void checkAndSetYModeFrequencies();
   template <class T> void checkSize(const T &data) const;
   template <class... T> bool selfAssignmentX(const T &...) { return false; }
   template <class... T> bool selfAssignmentDx(const T &...) { return false; }
@@ -192,6 +204,7 @@ private:
   }
 
   XMode m_xMode;
+  YMode m_yMode{YMode::Uninitialized};
 };
 
 template <> MANTID_HISTOGRAMDATA_DLL void Histogram::initX(const Points &x);
@@ -239,7 +252,10 @@ template <class TE> void Histogram::initE(const TE &e) {
                              "histogram without data");
     setUncertainties(e);
   } else if (m_y) {
-    setCountVariances(m_y->rawData());
+    if (yMode() == YMode::Counts)
+      setCountVariances(m_y->rawData());
+    if (yMode() == YMode::Frequencies)
+      setFrequencyVariances(m_y->rawData());
   }
 }
 
@@ -302,6 +318,7 @@ void Histogram::setPointStandardDeviations(T &&... data) & {
  however, a size check ensures that the Histogram stays valid, i.e., that x and
  y lengths are consistent. */
 template <typename... T> void Histogram::setCounts(T &&... data) & {
+  checkAndSetYModeCounts();
   Counts counts(std::forward<T>(data)...);
   checkSize(counts);
   if (selfAssignmentY(data...))
@@ -311,6 +328,7 @@ template <typename... T> void Histogram::setCounts(T &&... data) & {
 
 /// Sets the Histogram's count variances.
 template <typename... T> void Histogram::setCountVariances(T &&... data) & {
+  checkAndSetYModeCounts();
   CountVariances counts(std::forward<T>(data)...);
   checkSize(counts);
   // No sensible self assignment is possible, we do not store variances, so if
@@ -325,6 +343,7 @@ template <typename... T> void Histogram::setCountVariances(T &&... data) & {
 /// Sets the Histogram's count standard deviations.
 template <typename... T>
 void Histogram::setCountStandardDeviations(T &&... data) & {
+  checkAndSetYModeCounts();
   CountStandardDeviations counts(std::forward<T>(data)...);
   checkSize(counts);
   if (selfAssignmentE(data...))
@@ -338,38 +357,32 @@ void Histogram::setCountStandardDeviations(T &&... data) & {
  allowed, however, a size check ensures that the Histogram stays valid, i.e.,
  that x and y lengths are consistent. */
 template <typename... T> void Histogram::setFrequencies(T &&... data) & {
+  checkAndSetYModeFrequencies();
   Frequencies frequencies(std::forward<T>(data)...);
   checkSize(frequencies);
-  // No sensible self assignment is possible, we do not store frequencies, so if
-  // anyone tries to set our current data as frequencies it must be an error.
   if (selfAssignmentY(data...))
-    throw std::logic_error("Histogram::setFrequencies: Attempt to self-assign "
-                           "counts as frequencies.");
+    return;
   m_y = Counts(frequencies, binEdges()).cowData();
 }
 
 /// Sets the Histogram's frequency variances.
 template <typename... T> void Histogram::setFrequencyVariances(T &&... data) & {
+  checkAndSetYModeFrequencies();
   FrequencyVariances frequencies(std::forward<T>(data)...);
   checkSize(frequencies);
-  // No sensible self assignment is possible, we do not store frequencies, so if
-  // anyone tries to set our current data as frequencies it must be an error.
   if (selfAssignmentE(data...))
-    throw std::logic_error("Histogram::setFrequencyVariances: Attempt to "
-                           "self-assign counts as frequencies.");
+    return;
   m_e = CountStandardDeviations(frequencies, binEdges()).cowData();
 }
 
 /// Sets the Histogram's frequency standard deviations.
 template <typename... T>
 void Histogram::setFrequencyStandardDeviations(T &&... data) & {
+  checkAndSetYModeFrequencies();
   FrequencyStandardDeviations frequencies(std::forward<T>(data)...);
   checkSize(frequencies);
-  // No sensible self assignment is possible, we do not store frequencies, so if
-  // anyone tries to set our current data as frequencies it must be an error.
   if (selfAssignmentE(data...))
-    throw std::logic_error("Histogram::setFrequencyVariances: Attempt to "
-                           "self-assign counts as frequencies.");
+    return;
   m_e = CountStandardDeviations(frequencies, binEdges()).cowData();
 }
 
