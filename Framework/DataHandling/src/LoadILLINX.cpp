@@ -238,7 +238,8 @@ void LoadILLINX::initWorkSpace(NeXus::NXEntry &entry,
    */
   size_t numberOfTubesInRosace = 0;
   if (m_instrumentName == "IN4") {
-    NXData dataGroupRosace = entry.openNXData("instrument/Detector_Rosace/data");
+    NXData dataGroupRosace =
+        entry.openNXData("instrument/Detector_Rosace/data");
     NXInt dataRosace = dataGroupRosace.openIntData();
     numberOfTubesInRosace += static_cast<size_t>(dataRosace.dim0());
   }
@@ -256,8 +257,8 @@ void LoadILLINX::initWorkSpace(NeXus::NXEntry &entry,
   // bin boundaries = m_numberOfChannels + 1
   // Z/time dimension
   m_localWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", m_numberOfHistograms + numberOfMonitors, m_numberOfChannels + 1,
-      m_numberOfChannels);
+      "Workspace2D", m_numberOfHistograms + numberOfMonitors,
+      m_numberOfChannels + 1, m_numberOfChannels);
   m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   m_localWorkspace->setYUnitLabel("Counts");
 }
@@ -544,7 +545,8 @@ void LoadILLINX::loadDataIntoTheWorkSpace(
       MantidVec &E = m_localWorkspace->dataE(spec);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
                      LoadILLINX::calculateError);
-      m_localWorkspace->getSpectrum(spec).setDetectorID(detectorIDs[spec - numberOfMonitors]);
+      m_localWorkspace->getSpectrum(spec)
+          .setDetectorID(detectorIDs[spec - numberOfMonitors]);
       ++spec;
       progress.report();
     }
@@ -558,13 +560,15 @@ void LoadILLINX::loadDataIntoTheWorkSpace(
   if (m_instrumentName == "IN4") {
     g_log.debug() << "Loading data into the workspace: IN4 Rosace!\n";
     // read in the data
-    NXData dataGroupRosace = entry.openNXData("instrument/Detector_Rosace/data");
+    NXData dataGroupRosace =
+        entry.openNXData("instrument/Detector_Rosace/data");
     NXInt dataRosace = dataGroupRosace.openIntData();
     auto numberOfTubes = static_cast<size_t>(dataRosace.dim0());
     // load the counts from the file into memory
     dataRosace.load();
 
-    Progress progressRosace(this, 0, 1, numberOfTubes * m_numberOfPixelsPerTube);
+    Progress progressRosace(this, 0, 1,
+                            numberOfTubes * m_numberOfPixelsPerTube);
     for (size_t i = 0; i < numberOfTubes; ++i) {
       for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
         // just copy the time binning axis to every spectra
