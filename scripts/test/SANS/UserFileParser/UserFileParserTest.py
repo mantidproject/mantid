@@ -1,6 +1,7 @@
 import unittest
 import mantid
 
+from SANS2.Common.SANSEnumerations import (ISISReductionMode, DetectorType)
 from SANS2.UserFile.UserFileParser import *
 
 
@@ -43,13 +44,13 @@ class DetParserTest(unittest.TestCase):
 
     def test_that_reduction_mode_is_parsed_correctly(self):
         # The dict below has the string to parse as the key and the expected result as a value
-        valid_settings = {"DET/HAB": {user_file_reduction_mode: "HAB"},
-                          "dEt/ frONT ": {user_file_reduction_mode: "HAB"},
-                          "dET/REAR": {user_file_reduction_mode: "LAB"},
-                          "dEt/MAIn   ": {user_file_reduction_mode: "LAB"},
-                          " dEt/ BOtH": {user_file_reduction_mode: "BOTH"},
-                          "DeT /merge ": {user_file_reduction_mode: "MERGE"},
-                          " DEt / MERGED": {user_file_reduction_mode: "MERGE"}}
+        valid_settings = {"DET/HAB": {user_file_det_reduction_mode: ISISReductionMode.Hab},
+                          "dEt/ frONT ": {user_file_det_reduction_mode: ISISReductionMode.Hab},
+                          "dET/REAR": {user_file_det_reduction_mode: ISISReductionMode.Lab},
+                          "dEt/MAIn   ": {user_file_det_reduction_mode: ISISReductionMode.Lab},
+                          " dEt/ BOtH": {user_file_det_reduction_mode: ISISReductionMode.All},
+                          "DeT /merge ": {user_file_det_reduction_mode: ISISReductionMode.Merged},
+                          " DEt / MERGED": {user_file_det_reduction_mode: ISISReductionMode.Merged}}
 
         invalid_settings = {"DET/HUB": RuntimeError,
                             "DET/HAB/": RuntimeError}
@@ -57,12 +58,10 @@ class DetParserTest(unittest.TestCase):
         do_test(det_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_merge_option_is_parsed_correctly(self):
-        valid_settings = {"DET/RESCALE 123": {user_file_rescale: 123},
-                          "dEt/ shiFt 48.5": {user_file_shift: 48.5},
-                          "dET/reSCale/FIT   23 34.6 ": {user_file_rescale_shift_fit_min: 23,
-                                                         user_file_rescale_shift_fit_max: 34.6},
-                          "dEt/SHIFT/FIT 235.2  341   ": {user_file_rescale_shift_fit_min: 235.2,
-                                                          user_file_rescale_shift_fit_max: 341}}
+        valid_settings = {"DET/RESCALE 123": {user_file_det_rescale: 123},
+                          "dEt/ shiFt 48.5": {user_file_det_shift: 48.5},
+                          "dET/reSCale/FIT   23 34.6 ": {user_file_det_rescale_fit: range_entry(start=23, stop=34.6)},
+                          "dEt/SHIFT/FIT 235.2  341   ": {user_file_det_shift_fit: range_entry(start=235.2, stop=341)}}
 
         invalid_settings = {"DET/Ruscale": RuntimeError,
                             "DET/SHIFT/": RuntimeError,
@@ -74,18 +73,42 @@ class DetParserTest(unittest.TestCase):
         do_test(det_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_detector_setting_is_parsed_correctly(self):
-        valid_settings = {"Det/CORR/REAR/X 123": {user_file_correction_x_lab: 123},
-                          "DEt/CORR/ frOnt/X +95.7": {user_file_correction_x_hab: 95.7},
-                          "DeT/ CORR / ReAR/ y 12.3": {user_file_correction_y_lab: 12.3},
-                          " DET/CoRR/fROnt/Y -957": {user_file_correction_y_hab: -957},
-                          "DeT/ CORR /reAR/Z 12.3": {user_file_correction_z_lab: 12.3},
-                          " DET/CoRR/FRONT/ Z -957": {user_file_correction_z_hab: -957},
-                          "DeT/ CORR /reAR/SIDE 12.3": {user_file_correction_translation_lab: 12.3},
-                          " DET/CoRR/FRONT/ SidE -957": {user_file_correction_translation_hab: -957},
-                          "DeT/ CORR /reAR/ROt 12.3": {user_file_correction_rotation_lab: 12.3},
-                          " DET/CoRR/FRONT/ROT -957": {user_file_correction_rotation_hab: -957},
-                          "DeT/ CORR /reAR/Radius 12.3": {user_file_correction_radius_lab: 12.3},
-                          " DET/CoRR/FRONT/RADIUS 957": {user_file_correction_radius_hab: 957}}
+        valid_settings = {"Det/CORR/REAR/X 123": {user_file_det_correction_x:
+                                                      single_entry_with_detector(entry=123,
+                                                                                 detector_type=DetectorType.Lab)},
+                          "DEt/CORR/ frOnt/X +95.7": {user_file_det_correction_x:
+                                                          single_entry_with_detector(entry=95.7,
+                                                                                     detector_type=DetectorType.Hab)},
+                          "DeT/ CORR / ReAR/ y 12.3": {user_file_det_correction_y:
+                                                           single_entry_with_detector(entry=12.3,
+                                                                                      detector_type=DetectorType.Lab)},
+                          " DET/CoRR/fROnt/Y -957": {user_file_det_correction_y:
+                                                         single_entry_with_detector(entry=-957,
+                                                                                    detector_type=DetectorType.Hab)},
+                          "DeT/ CORR /reAR/Z 12.3": {user_file_det_correction_z:
+                                                         single_entry_with_detector(entry=12.3,
+                                                                                    detector_type=DetectorType.Lab)},
+                          " DET/CoRR/FRONT/ Z -957": {user_file_det_correction_z:
+                                                          single_entry_with_detector(entry=-957,
+                                                                                     detector_type=DetectorType.Hab)},
+                          "DeT/ CORR /reAR/SIDE 12.3": {user_file_det_correction_translation:
+                                                            single_entry_with_detector(entry=12.3,
+                                                                                       detector_type=DetectorType.Lab)},
+                          " DET/CoRR/FRONT/ SidE -957": {user_file_det_correction_translation:
+                                                             single_entry_with_detector(entry=-957,
+                                                                                    detector_type=DetectorType.Hab)},
+                          "DeT/ CORR /reAR/ROt 12.3": {user_file_det_correction_rotation:
+                                                           single_entry_with_detector(entry=12.3,
+                                                                                      detector_type=DetectorType.Lab)},
+                          " DET/CoRR/FRONT/ROT -957": {user_file_det_correction_rotation:
+                                                           single_entry_with_detector(entry=-957,
+                                                                                      detector_type=DetectorType.Hab)},
+                          "DeT/ CORR /reAR/Radius 12.3": {user_file_det_correction_radius:
+                                                              single_entry_with_detector(entry=12.3,
+                                                                                     detector_type=DetectorType.Lab)},
+                          " DET/CoRR/FRONT/RADIUS 957": {user_file_det_correction_radius:
+                                                             single_entry_with_detector(entry=957,
+                                                                                     detector_type=DetectorType.Hab)}}
 
         invalid_settings = {"Det/CORR/REAR/X ": RuntimeError,
                             "DEt/CORR/ frOnt/X 12 23": RuntimeError,
@@ -104,13 +127,12 @@ class LimitParserTest(unittest.TestCase):
         self.assertTrue(LimitParser.get_type(), "L")
 
     def test_that_angle_limit_is_parsed_correctly(self):
-        valid_settings = {"L/PhI 123   345.2": {user_file_limit_angle_min: 123,
-                                              user_file_limit_angle_max: 345.2,
-                                              user_file_no_mirror: False},
-                          "L/PHI / NOMIRROR 123 -345.2": {user_file_limit_angle_min: 123,
-                                                       user_file_limit_angle_max: -345.2,
-                                                        user_file_no_mirror: True},
-                          }
+        valid_settings = {"L/PhI 123   345.2": {user_file_limits_angle: mask_angle_entry(min=123,
+                                                                                         max=345.2,
+                                                                                         is_no_mirror=False)},
+                          "L/PHI / NOMIRROR 123 -345.2": {user_file_limits_angle: mask_angle_entry(min=123,
+                                                                                                   max=-345.2,
+                                                                                                   is_no_mirror=True)}}
 
         invalid_settings = {"L/PHI/NMIRROR/ 23 454": RuntimeError,
                             "L /pHI/ 23": RuntimeError,
@@ -121,8 +143,8 @@ class LimitParserTest(unittest.TestCase):
         do_test(limit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_event_time_limit_is_parsed_correctly(self):
-        valid_settings = {"L  / EVEnTStime 0,-10,32,434,34523,35": {user_file_events_binning: [0,-10,32,434,34523,35]}
-                          }
+        valid_settings = {"L  / EVEnTStime 0,-10,32,434,34523,35": {user_file_limits_events_binning:
+                                                                        [0, -10, 32, 434, 34523, 35]}}
 
         invalid_settings = {"L  / EEnTStime 0,-10,32,434,34523,35": RuntimeError,
                             "L/EVENTSTIME 123g, sdf": RuntimeError,
@@ -132,10 +154,10 @@ class LimitParserTest(unittest.TestCase):
         do_test(limit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_cut_limits_are_parsed_correctly(self):
-        valid_settings = {"L/Q/RCUT 234.4": {user_file_radius_cut: 234.4},
-                          "L /q / RcUT -234.34": {user_file_radius_cut: -234.34},
-                          "l/Q/WCUT 234.4": {user_file_wavelength_cut: 234.4},
-                          "L /q / wcUT -234.34": {user_file_wavelength_cut: -234.34}}
+        valid_settings = {"L/Q/RCUT 234.4": {user_file_limits_radius_cut: 234.4},
+                          "L /q / RcUT -234.34": {user_file_limits_radius_cut: -234.34},
+                          "l/Q/WCUT 234.4": {user_file_limits_wavelength_cut: 234.4},
+                          "L /q / wcUT -234.34": {user_file_limits_wavelength_cut: -234.34}}
 
         invalid_settings = {"L/Q/Rcu 123": RuntimeError,
                             "L/Q/RCUT/ 2134": RuntimeError,
@@ -147,11 +169,10 @@ class LimitParserTest(unittest.TestCase):
         do_test(limit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_radius_limits_are_parsed_correctly(self):
-        valid_settings = {"L/R 234 235": {user_file_radius_limit_min: 234,
-                                          user_file_radius_limit_max: 235},
-                          "L / r   -234   235": {user_file_radius_limit_min: -234,
-                                          user_file_radius_limit_max: 235}
-                          }
+        valid_settings = {"L/R 234 235": {user_file_limits_radius: range_entry(start=234,
+                                                                               stop=235)},
+                          "L / r   -234   235": {user_file_limits_radius: range_entry(start=-234,
+                                                                                      stop=235)}}
         invalid_settings = {"L/R/ 234 435": RuntimeError,
                             "L/Rr 234 435": RuntimeError,
                             "L/R 435": RuntimeError,
@@ -163,22 +184,21 @@ class LimitParserTest(unittest.TestCase):
         do_test(limit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_q_limits_are_parsed_correctly(self):
-        valid_settings = {"L/Q 12 34": {user_file_q_min: 12, user_file_q_max: 34},
-                          "L/Q 12 34 2.7": {user_file_q_min: 12, user_file_q_max: 34, user_file_q_step: 2.7,
-                                            user_file_q_step_type: "LIN"},
-                          "L/Q -12 34.6 2.7/LOG": {user_file_q_min: -12, user_file_q_max: 34.6, user_file_q_step: 2.7,
-                                                   user_file_q_step_type: "LOG"},
-                          "L/q -12 3.6 2 /LIN": {user_file_q_min: -12, user_file_q_max: 3.6, user_file_q_step: 2,
-                                                 user_file_q_step_type: "LIN"},
-                          "L/q -12   0.4  23 34.8 3.6": {user_file_q_min: -12, user_file_q_step_min_mid: 0.4,
-                                                         user_file_q_mid: 23, user_file_q_step_mid_max: 34.8,
-                                                         user_file_q_max: 3.6, user_file_q_step_type: "LIN"},
-                          "L/q -12   0.4  23 34.8 3.6 /LIn": {user_file_q_min: -12, user_file_q_step_min_mid: 0.4,
-                                                              user_file_q_mid: 23, user_file_q_step_mid_max: 34.8,
-                                                              user_file_q_max: 3.6, user_file_q_step_type: "LIN"},
-                          "L/q -12   0.4  23  34.8 3.6  /Log": {user_file_q_min: -12, user_file_q_step_min_mid: 0.4,
-                                                                user_file_q_mid: 23, user_file_q_step_mid_max: 34.8,
-                                                                user_file_q_max: 3.6, user_file_q_step_type: "LOG"}}
+        valid_settings = {"L/Q 12 34": {user_file_limits_q: simple_range(start=12, stop=34, step=None, step_type=None)},
+                          "L/Q 12 34 2.7": {user_file_limits_q: simple_range(start=12, stop=34, step=2.7,
+                                                                             step_type="LIN")},
+                          "L/Q -12 34.6 2.7/LOG": {user_file_limits_q: simple_range(start=-12, stop=34.6, step=2.7,
+                                                                                    step_type="LOG")},
+                          "L/q -12 3.6 2 /LIN": {user_file_limits_q: simple_range(start=-12, stop=3.6, step=2,
+                                                                                  step_type="LIN")},
+                          "L/q -12 ,  0.4  ,23 ,34.8, 3.6": {user_file_limits_q: complex_range(start=-12, step1=0.4,
+                                                             mid=23, step2=34.8,stop=3.6, step_type="LIN")},
+                          "L/q -12  , 0.4 , 23 ,34.8 ,3.6 /LIn": {user_file_limits_q: complex_range(start=-12,
+                                                                                                    step1=0.4,
+                                                                  mid=23, step2=34.8, stop=3.6, step_type="LIN")},
+                          "L/q -12  , 0.4 , 23  ,34.8 ,3.6  /Log": {user_file_limits_q: complex_range(start=-12,
+                                                                    step1=0.4, mid=23, step2=34.8, stop=3.6,
+                                                                    step_type="LOG")}}
 
         invalid_settings = {"L/Q 12 2 3 4": RuntimeError,
                             "L/Q 12 2 3 4 23 3": RuntimeError,
@@ -190,27 +210,23 @@ class LimitParserTest(unittest.TestCase):
         limit_parser = LimitParser()
         do_test(limit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
-
     def test_that_qxy_limits_are_parsed_correctly(self):
-        valid_settings = {"L/QXY 12 34": {user_file_qxy_min: 12, user_file_qxy_max: 34},
-                          "L/QXY 12 34 2.7": {user_file_qxy_min: 12, user_file_qxy_max: 34, user_file_qxy_step: 2.7,
-                                            user_file_qxy_step_type: "LIN"},
-                          "L/QXY -12 34.6 2.7/LOG": {user_file_qxy_min: -12, user_file_qxy_max: 34.6,
-                                                     user_file_qxy_step: 2.7, user_file_qxy_step_type: "LOG"},
-                          "L/qxY -12 3.6 2 /LIN": {user_file_qxy_min: -12, user_file_qxy_max: 3.6,
-                                                   user_file_qxy_step: 2, user_file_qxy_step_type: "LIN"},
-                          "L/qxy -12   0.4  23 34.8 3.6": {user_file_qxy_min: -12, user_file_qxy_step_min_mid: 0.4,
-                                                         user_file_qxy_mid: 23, user_file_qxy_step_mid_max: 34.8,
-                                                         user_file_qxy_max: 3.6, user_file_qxy_step_type: "LIN"},
-                          "L/qXY -12   0.4  23 34.8 3.6 /LIn": {user_file_qxy_min: -12, user_file_qxy_step_min_mid: 0.4,
-                                                              user_file_qxy_mid: 23, user_file_qxy_step_mid_max: 34.8,
-                                                              user_file_qxy_max: 3.6, user_file_qxy_step_type: "LIN"},
-                          "L/qXY -12   0.4  23  34.8 3.6  /Log": {user_file_qxy_min: -12,
-                                                                  user_file_qxy_step_min_mid: 0.4,
-                                                                  user_file_qxy_mid: 23,
-                                                                  user_file_qxy_step_mid_max: 34.8,
-                                                                  user_file_qxy_max: 3.6,
-                                                                  user_file_qxy_step_type: "LOG"}}
+        valid_settings = {"L/QXY 12 34": {user_file_limits_qxy: simple_range(start=12, stop=34, step=None,
+                                                                             step_type=None)},
+                          "L/QXY 12 34 2.7": {user_file_limits_qxy: simple_range(start=12, stop=34, step=2.7,
+                                                                                 step_type="LIN")},
+                          "L/QXY -12 34.6 2.7/LOG": {user_file_limits_qxy: simple_range(start=-12, stop=34.6,step=2.7,
+                                                                                        step_type="LOG")},
+                          "L/qxY -12 3.6 2 /LIN": {user_file_limits_qxy: simple_range(start=-12, stop=3.6, step=2,
+                                                                                      step_type="LIN")},
+                          "L/qxy -12  , 0.4,  23, 34.8, 3.6": {user_file_limits_qxy: complex_range(start=-12, step1=0.4,
+                                                               mid=23, step2=34.8, stop=3.6, step_type="LIN")},
+                          "L/qXY -12  , 0.4 , 23 ,34.8 ,3.6 /LIn": {user_file_limits_qxy: complex_range(start=-12,
+                                                                    step1=0.4, mid=23, step2=34.8, stop=3.6,
+                                                                    step_type="LIN")},
+                          "L/qXY -12   ,0.4,  23  ,34.8 ,3.6  /Log": {user_file_limits_qxy: complex_range(start=-12,
+                                                                      step1=0.4, mid=23, step2=34.8, stop=3.6,
+                                                                      step_type="LOG")}}
 
         invalid_settings = {"L/QXY 12 2 3 4": RuntimeError,
                             "L/QXY 12 2 3 4 23 3": RuntimeError,
@@ -223,32 +239,24 @@ class LimitParserTest(unittest.TestCase):
         do_test(limit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_wavelength_limits_are_parsed_correctly(self):
-        valid_settings = {"L/WAV 12 34": {user_file_wavelength_min: 12, user_file_wavelength_max: 34},
-                          "L/waV 12 34 2.7": {user_file_wavelength_min: 12, user_file_wavelength_max: 34,
-                                              user_file_wavelength_step: 2.7, user_file_wavelength_step_type: "LIN"},
-                          "L/wAv -12 34.6 2.7/LOG": {user_file_wavelength_min: -12,  user_file_wavelength_max: 34.6,
-                                                     user_file_wavelength_step: 2.7,
-                                                     user_file_wavelength_step_type: "LOG"},
-                          "L/WaV -12 3.6 2 /LIN": {user_file_wavelength_min: -12, user_file_wavelength_max: 3.6,
-                                                   user_file_wavelength_step: 2, user_file_wavelength_step_type: "LIN"},
-                          "L/wav -12   0.4  23 34.8 3.6": {user_file_wavelength_min: -12,
-                                                           user_file_wavelength_step_min_mid: 0.4,
-                                                           user_file_wavelength_mid: 23,
-                                                           user_file_wavelength_step_mid_max: 34.8,
-                                                           user_file_wavelength_max: 3.6,
-                                                           user_file_wavelength_step_type: "LIN"},
-                          "L/wav -12   0.4  23 34.8 3.6 /LIn": {user_file_wavelength_min: -12,
-                                                                user_file_wavelength_step_min_mid: 0.4,
-                                                                user_file_wavelength_mid: 23,
-                                                                user_file_wavelength_step_mid_max: 34.8,
-                                                                user_file_wavelength_max: 3.6,
-                                                                user_file_wavelength_step_type: "LIN"},
-                          "L/wav -12   0.4  23  34.8 3.6  /Log": {user_file_wavelength_min: -12,
-                                                                  user_file_wavelength_step_min_mid: 0.4,
-                                                                  user_file_wavelength_mid: 23,
-                                                                  user_file_wavelength_step_mid_max: 34.8,
-                                                                  user_file_wavelength_max: 3.6,
-                                                                  user_file_wavelength_step_type: "LOG"}}
+        valid_settings = {"L/WAV 12 34": {user_file_limits_wavelength: simple_range(start=12, stop=34, step=None,
+                                                                             step_type=None)},
+                          "L/waV 12 34 2.7": {user_file_limits_wavelength: simple_range(start=12, stop=34, step=2.7,
+                                                                                 step_type="LIN")},
+                          "L/wAv -12 34.6 2.7/LOG": {user_file_limits_wavelength: simple_range(start=-12, stop=34.6,
+                                                                                               step=2.7,
+                                                                                               step_type="LOG")},
+                          "L/WaV -12 3.6 2 /LIN": {user_file_limits_wavelength: simple_range(start=-12, stop=3.6,
+                                                                                             step=2, step_type="LIN")},
+                          "L/wav -12  , 0.4,  23 ,34.8 ,3.6": {user_file_limits_wavelength: complex_range(start=-12,
+                                                                                                          step1=0.4,
+                                                                       mid=23, step2=34.8, stop=3.6, step_type="LIN")},
+                          "L/wav -12  , 0.4 , 23 ,34.8, 3.6 /LIn": {user_file_limits_wavelength: complex_range(start=-12,
+                                                                        step1=0.4, mid=23, step2=34.8, stop=3.6,
+                                                                        step_type="LIN")},
+                          "L/wav -12 ,  0.4,  23  ,34.8 ,3.6  /Log": {user_file_limits_wavelength: complex_range(start=-12,
+                                                                      step1=0.4, mid=23, step2=34.8, stop=3.6,
+                                                                      step_type="LOG")}}
 
         invalid_settings = {"L/WAV 12 2 3 4": RuntimeError,
                             "L/WAV 12 2 3 4 23 3": RuntimeError,
@@ -266,47 +274,45 @@ class MaskParserTest(unittest.TestCase):
         self.assertTrue(MaskParser.get_type(), "MASK")
 
     def test_that_masked_line_is_parsed_correctly(self):
-        valid_settings = {"MASK/LiNE 12  23.6": {user_file_line_width: 12,
-                                                 user_file_line_angle: 23.6},
-                          "MASK/LiNE 12  23.6 2 346": {user_file_line_width: 12,
-                                                       user_file_line_angle: 23.6,
-                                                       user_file_line_x: 2,
-                                                       user_file_line_y: 346},
-                          "MASK/TIME 23 35": {user_file_time_min: 23,
-                                              user_file_time_max: 35},
-                          "MASK/T 23 35": {user_file_time_min: 23,
-                                          user_file_time_max: 35}
+        valid_settings = {"MASK/LiNE 12  23.6": {user_file_mask_line: mask_line(width=12, angle=23.6, x=None, y=None)},
+                          "MASK/LiNE 12  23.6 2 346": {user_file_mask_line: mask_line(width=12, angle=23.6, x=2, y=346)}
                           }
         invalid_settings = {"MASK/LiN 12 4": RuntimeError,
                             "MASK/LINE 12": RuntimeError,
                             "MASK/LINE 12 34 345 6 7": RuntimeError,
                             "MASK/LINE ": RuntimeError,
                             "MASK/LINE  x y": RuntimeError,
-                            "MASK/TIME 12 34 4 ": RuntimeError,
-                            "MASK/T 2": RuntimeError,
                             }
 
         mask_parser = MaskParser()
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_masked_time_is_parsed_correctly(self):
-        valid_settings = {"MASK/TIME 23 35": {user_file_time_min: 23,
-                                              user_file_time_max: 35},
-                          "MASK/T 23 35": {user_file_time_min: 23,
-                                           user_file_time_max: 35}
+        valid_settings = {"MASK/TIME 23 35": {user_file_mask_time: range_entry_with_detector(start=23, stop=35,
+                                                                                             detector_type=None)},
+                          "MASK/T 23 35": {user_file_mask_time: range_entry_with_detector(start=23, stop=35,
+                                                                                          detector_type=None)},
+                          "MASK/REAR/T 13 35": {user_file_mask_time_detector:
+                                                    range_entry_with_detector(start=13, stop=35,
+                                                                              detector_type=DetectorType.Lab)},
+                          "MASK/FRONT/TIME 33 35": {user_file_mask_time_detector:
+                                                        range_entry_with_detector(start=33, stop=35,
+                                                                                  detector_type=DetectorType.Hab)}
                           }
 
         invalid_settings = {"MASK/TIME 12 34 4 ": RuntimeError,
                             "MASK/T 2": RuntimeError,
                             "MASK/T": RuntimeError,
-                            "MASK/T x y": RuntimeError}
+                            "MASK/T x y": RuntimeError,
+                            "MASK/T x y": RuntimeError,
+                            "MASK/REA/T 12 13": RuntimeError}
 
         mask_parser = MaskParser()
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_clear_mask_is_parsed_correctly(self):
-        valid_settings = {"MASK/CLEAR": {user_file_clear_detector_mask: True},
-                          "MASK/CLeaR /TIMe": {user_file_clear_time_mask: True}}
+        valid_settings = {"MASK/CLEAR": {user_file_mask_clear_detector_mask: True},
+                          "MASK/CLeaR /TIMe": {user_file_mask_clear_time_mask: True}}
 
         invalid_settings = {"MASK/CLEAR/TIME/test": RuntimeError,
                             "MASK/CLEAR/TIIE": RuntimeError,
@@ -316,17 +322,17 @@ class MaskParserTest(unittest.TestCase):
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_single_spectrum_mask_is_parsed_correctly(self):
-        valid_settings = {"MASK S 12  ": {use_file_single_spectrum_mask: 12},
-                          "MASK S234": {use_file_single_spectrum_mask: 234}}
+        valid_settings = {"MASK S 12  ": {user_file_mask_single_spectrum_mask: 12},
+                          "MASK S234": {user_file_mask_single_spectrum_mask: 234}}
 
         invalid_settings = {"MASK B 12  ": RuntimeError,
                             "MASK S 12 23 ": RuntimeError}
         mask_parser = MaskParser()
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
-    def test_that_single_spectrum_mask_is_parsed_correctly(self):
-        valid_settings = {"MASK S 12 >  S23  ": {use_file_spectrum_range_mask: [12, 23]},
-                          "MASK S234>S1234": {use_file_spectrum_range_mask: [234, 1234]}}
+    def test_that_single_spectrum_range_is_parsed_correctly(self):
+        valid_settings = {"MASK S 12 >  S23  ": {user_file_mask_spectrum_range_mask: range_entry(start=12, stop=23)},
+                          "MASK S234>S1234": {user_file_mask_spectrum_range_mask: range_entry(start=234, stop=1234)}}
 
         invalid_settings = {"MASK S 12> S123.5  ": RuntimeError,
                             "MASK S 12> 23 ": RuntimeError}
@@ -334,12 +340,21 @@ class MaskParserTest(unittest.TestCase):
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_single_vertical_strip_mask_is_parsed_correctly(self):
-        valid_settings = {"MASK V 12  ": {user_file_vertical_single_strip_mask_lab: 12},
-                          "MASK / Rear V  12  ": {user_file_vertical_single_strip_mask_lab: 12},
-                          "MASK/mAin V234": {user_file_vertical_single_strip_mask_lab: 234},
-                          "MASK / LaB V  234": {user_file_vertical_single_strip_mask_lab: 234},
-                          "MASK /frOnt V  12  ": {user_file_vertical_single_strip_mask_hab: 12},
-                          "MASK/HAB V234": {user_file_vertical_single_strip_mask_hab: 234}}
+        valid_settings = {"MASK V 12  ": {user_file_mask_vertical_single_strip_mask:
+                                              single_entry_with_detector(entry=12, detector_type=DetectorType.Lab)},
+                          "MASK / Rear V  12  ": {user_file_mask_vertical_single_strip_mask:
+                                                      single_entry_with_detector(entry=12,
+                                                                                 detector_type=DetectorType.Lab)},
+                          "MASK/mAin V234": {user_file_mask_vertical_single_strip_mask:
+                                                 single_entry_with_detector(entry=234, detector_type=DetectorType.Lab)},
+                          "MASK / LaB V  234": {user_file_mask_vertical_single_strip_mask:
+                                                    single_entry_with_detector(entry=234,
+                                                                               detector_type=DetectorType.Lab)},
+                          "MASK /frOnt V  12  ": {user_file_mask_vertical_single_strip_mask:
+                                                      single_entry_with_detector(entry=12,
+                                                                                 detector_type=DetectorType.Hab)},
+                          "MASK/HAB V234": {user_file_mask_vertical_single_strip_mask:
+                                                single_entry_with_detector(entry=234, detector_type=DetectorType.Hab)}}
 
         invalid_settings = {"MASK B 12  ": RuntimeError,
                             "MASK V 12 23 ": RuntimeError,
@@ -348,13 +363,27 @@ class MaskParserTest(unittest.TestCase):
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_range_vertical_strip_mask_is_parsed_correctly(self):
-        valid_settings = {"MASK V  12 >  V23  ": {user_file_vertical_range_strip_mask_lab: [12, 23]},
-                          "MASK V123>V234": {user_file_vertical_range_strip_mask_lab: [123, 234]},
-                          "MASK / Rear V123>V234": {user_file_vertical_range_strip_mask_lab: [123, 234]},
-                          "MASK/mAin  V123>V234": {user_file_vertical_range_strip_mask_lab: [123, 234]},
-                          "MASK / LaB V123>V234": {user_file_vertical_range_strip_mask_lab: [123, 234]},
-                          "MASK/frOnt V123>V234": {user_file_vertical_range_strip_mask_hab: [123, 234]},
-                          "MASK/HAB V123>V234": {user_file_vertical_range_strip_mask_hab: [123, 234]}}
+        valid_settings = {"MASK V  12 >  V23  ": {user_file_mask_vertical_range_strip_mask:
+                                                      range_entry_with_detector(start=12, stop=23,
+                                                                                detector_type=DetectorType.Lab)},
+                          "MASK V123>V234": {user_file_mask_vertical_range_strip_mask:
+                                                 range_entry_with_detector(start=123, stop=234,
+                                                                           detector_type=DetectorType.Lab)},
+                          "MASK / Rear V123>V234": {user_file_mask_vertical_range_strip_mask:
+                                                        range_entry_with_detector(start=123, stop=234,
+                                                                                  detector_type=DetectorType.Lab)},
+                          "MASK/mAin  V123>V234": {user_file_mask_vertical_range_strip_mask:
+                                                       range_entry_with_detector(start=123, stop=234,
+                                                                                 detector_type=DetectorType.Lab)},
+                          "MASK / LaB V123>V234": {user_file_mask_vertical_range_strip_mask:
+                                                       range_entry_with_detector(start=123, stop=234,
+                                                                                 detector_type=DetectorType.Lab)},
+                          "MASK/frOnt V123>V234": {user_file_mask_vertical_range_strip_mask:
+                                                       range_entry_with_detector(start=123, stop=234,
+                                                                                 detector_type=DetectorType.Hab)},
+                          "MASK/HAB V123>V234": {user_file_mask_vertical_range_strip_mask:
+                                                     range_entry_with_detector(start=123, stop=234,
+                                                                               detector_type=DetectorType.Hab)}}
 
         invalid_settings = {"MASK V 12> V123.5  ": RuntimeError,
                             "MASK V 12 23 ": RuntimeError,
@@ -363,12 +392,21 @@ class MaskParserTest(unittest.TestCase):
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_single_horizontal_strip_mask_is_parsed_correctly(self):
-        valid_settings = {"MASK H 12  ": {user_file_horizontal_single_strip_mask_lab: 12},
-                          "MASK / Rear H  12  ": {user_file_horizontal_single_strip_mask_lab: 12},
-                          "MASK/mAin H234": {user_file_horizontal_single_strip_mask_lab: 234},
-                          "MASK / LaB H  234": {user_file_horizontal_single_strip_mask_lab: 234},
-                          "MASK /frOnt H  12  ": {user_file_horizontal_single_strip_mask_hab: 12},
-                          "MASK/HAB H234": {user_file_horizontal_single_strip_mask_hab: 234}}
+        valid_settings = {"MASK H 12  ": {user_file_mask_horizontal_single_strip_mask:
+                                              single_entry_with_detector(entry=12, detector_type=DetectorType.Lab)},
+                          "MASK / Rear H  12  ": {user_file_mask_horizontal_single_strip_mask:
+                                                      single_entry_with_detector(entry=12,
+                                                                                 detector_type=DetectorType.Lab)},
+                          "MASK/mAin H234": {user_file_mask_horizontal_single_strip_mask:
+                                                 single_entry_with_detector(entry=234, detector_type=DetectorType.Lab)},
+                          "MASK / LaB H  234": {user_file_mask_horizontal_single_strip_mask:
+                                                    single_entry_with_detector(entry=234,
+                                                                               detector_type=DetectorType.Lab)},
+                          "MASK /frOnt H  12  ": {user_file_mask_horizontal_single_strip_mask:
+                                                      single_entry_with_detector(entry=12,
+                                                                                 detector_type=DetectorType.Hab)},
+                          "MASK/HAB H234": {user_file_mask_horizontal_single_strip_mask:
+                                                single_entry_with_detector(entry=234, detector_type=DetectorType.Hab)}}
 
         invalid_settings = {"MASK H/12  ": RuntimeError,
                             "MASK H 12 23 ": RuntimeError,
@@ -377,17 +415,64 @@ class MaskParserTest(unittest.TestCase):
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_range_horizontal_strip_mask_is_parsed_correctly(self):
-        valid_settings = {"MASK H  12 >  H23  ": {user_file_horizontal_range_strip_mask_lab: [12, 23]},
-                          "MASK H123>H234": {user_file_horizontal_range_strip_mask_lab: [123, 234]},
-                          "MASK / Rear H123>H234": {user_file_horizontal_range_strip_mask_lab: [123, 234]},
-                          "MASK/mAin  H123>H234": {user_file_horizontal_range_strip_mask_lab: [123, 234]},
-                          "MASK / LaB H123>H234": {user_file_horizontal_range_strip_mask_lab: [123, 234]},
-                          "MASK/frOnt H123>H234": {user_file_horizontal_range_strip_mask_hab: [123, 234]},
-                          "MASK/HAB H123>H234": {user_file_horizontal_range_strip_mask_hab: [123, 234]}}
+        valid_settings = {"MASK H  12 >  H23  ": {user_file_mask_horizontal_range_strip_mask:
+                                                      range_entry_with_detector(start=12, stop=23,
+                                                                                detector_type=DetectorType.Lab)},
+                          "MASK H123>H234": {user_file_mask_horizontal_range_strip_mask:
+                                                 range_entry_with_detector(start=123, stop=234,
+                                                                           detector_type=DetectorType.Lab)},
+                          "MASK / Rear H123>H234": {user_file_mask_horizontal_range_strip_mask:
+                                                        range_entry_with_detector(start=123, stop=234,
+                                                                                  detector_type=DetectorType.Lab)},
+                          "MASK/mAin H123>H234": {user_file_mask_horizontal_range_strip_mask:
+                                                            range_entry_with_detector(start=123, stop=234,
+                                                                                      detector_type=DetectorType.Lab)},
+                          "MASK / LaB H123>H234": {user_file_mask_horizontal_range_strip_mask:
+                                                       range_entry_with_detector(start=123, stop=234,
+                                                                                 detector_type=DetectorType.Lab)},
+                          "MASK/frOnt H123>H234": {user_file_mask_horizontal_range_strip_mask:
+                                                       range_entry_with_detector(start=123, stop=234,
+                                                                                 detector_type=DetectorType.Hab)},
+                          "MASK/HAB H123>H234": {user_file_mask_horizontal_range_strip_mask:
+                                                     range_entry_with_detector(start=123, stop=234,
+                                                                               detector_type=DetectorType.Hab)}}
 
         invalid_settings = {"MASK H 12> H123.5  ": RuntimeError,
                             "MASK H 12 23 ": RuntimeError,
                             "MASK /Rear/ H12>V34": RuntimeError}
+        mask_parser = MaskParser()
+        do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
+
+    def test_that_block_mask_is_parsed_correctly(self):
+        valid_settings = {"MASK H12>H23 + V14>V15 ": {user_file_mask_block: mask_block(horizontal1=12,
+                                                                                       horizontal2=23,
+                                                                                       vertical1=14,
+                                                                                       vertical2=15,
+                                                                                       detector_type=DetectorType.Lab)},
+                          "MASK/ HAB H12>H23 + V14>V15 ": {user_file_mask_block: mask_block(horizontal1=12,
+                                                                                            horizontal2=23,
+                                                                                            vertical1=14,
+                                                                                            vertical2=15,
+                                                                                            detector_type=
+                                                                                            DetectorType.Hab)},
+                          "MASK/ HAB V12>V23 + H14>H15 ": {user_file_mask_block: mask_block(horizontal1=14,
+                                                                                            horizontal2=15,
+                                                                                            vertical1=12,
+                                                                                            vertical2=23,
+                                                                                            detector_type=
+                                                                                            DetectorType.Hab)},
+                          "MASK  V12 + H 14": {user_file_mask_block_cross: mask_block_cross(horizontal=14,
+                                                                                            vertical=12,
+                                                                                            detector_type=
+                                                                                            DetectorType.Lab)},
+                          "MASK/HAB H12 + V 14": {user_file_mask_block_cross: mask_block_cross(horizontal=12,
+                                                                                               vertical=14,
+                                                                                               detector_type=
+                                                                                               DetectorType.Hab)}}
+
+        invalid_settings = {"MASK H12>H23 + V14 + V15 ": RuntimeError,
+                            "MASK H12 + H15 ": RuntimeError,
+                            "MASK/ HAB V12 + H14>H15 ": RuntimeError}
         mask_parser = MaskParser()
         do_test(mask_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
@@ -424,7 +509,7 @@ class SetParserTest(unittest.TestCase):
         self.assertTrue(SetParser.get_type(), "SET")
 
     def test_that_setting_scales_is_parsed_correctly(self):
-        valid_settings = {"SET  scales 2 5 4    7 8": {user_file_scales: [2, 5, 4, 7, 8]}}
+        valid_settings = {"SET  scales 2 5 4    7 8": {user_file_set_scales: set_scales_entry(s=2, a=5, b=4, c=7, d=8)}}
 
         invalid_settings = {"SET scales 2 4 6 7 8 9": RuntimeError,
                             "SET scales ": RuntimeError}
@@ -433,11 +518,20 @@ class SetParserTest(unittest.TestCase):
         do_test(set_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_centre_is_parsed_correctly(self):
-        valid_settings = {"SET centre 23 45": {user_file_centre_lab: [23, 45]},
-                          "SET centre /main 23 45": {user_file_centre_lab: [23, 45]},
-                          "SET centre / lAb 23 45": {user_file_centre_lab: [23, 45]},
-                          "SET centre / hAb 23 45": {user_file_centre_hab: [23, 45]},
-                          "SET centre /FRONT 23 45": {user_file_centre_hab: [23, 45]}}
+        valid_settings = {"SET centre 23 45": {user_file_set_centre:
+                                                   position_entry(pos1=23, pos2=45, detector_type=DetectorType.Lab)},
+                          "SET centre /main 23 45": {user_file_set_centre:
+                                                         position_entry(pos1=23, pos2=45,
+                                                                        detector_type=DetectorType.Lab)},
+                          "SET centre / lAb 23 45": {user_file_set_centre:
+                                                         position_entry(pos1=23, pos2=45,
+                                                                        detector_type=DetectorType.Lab)},
+                          "SET centre / hAb 23 45": {user_file_set_centre:
+                                                         position_entry(pos1=23, pos2=45,
+                                                                        detector_type=DetectorType.Hab)},
+                          "SET centre /FRONT 23 45": {user_file_set_centre:
+                                                          position_entry(pos1=23, pos2=45,
+                                                                         detector_type=DetectorType.Hab)}}
 
         invalid_settings = {"SET centre 23": RuntimeError,
                             "SEt centre 34 34 34": RuntimeError,
@@ -453,27 +547,27 @@ class TransParserTest(unittest.TestCase):
         self.assertTrue(TransParser.get_type(), "TRANS")
 
     def test_that_trans_spec_is_parsed_correctly(self):
-        valid_settings = {"TRANS/TRANSSPEC=23": {user_file_trans_spec: 23},
-                          "TRANS / TransSPEC =  23": {user_file_trans_spec: 23}}
+        valid_settings = {"TRANS/TRANSPEC=23": {user_file_trans_spec: 23},
+                          "TRANS / TransPEC =  23": {user_file_trans_spec: 23}}
 
-        invalid_settings = {"TRANS/TRANSSPEC 23": RuntimeError,
-                            "TRANS/TRANSSPEC/23": RuntimeError,
-                            "TRANS/TRANSSPEC=23.5": RuntimeError,
-                            "TRANS/TRANSSPEC=2t": RuntimeError,
-                            "TRANS/TRANSPEC=23": RuntimeError}
+        invalid_settings = {"TRANS/TRANSPEC 23": RuntimeError,
+                            "TRANS/TRANSPEC/23": RuntimeError,
+                            "TRANS/TRANSPEC=23.5": RuntimeError,
+                            "TRANS/TRANSPEC=2t": RuntimeError,
+                            "TRANS/TRANSSPEC=23": RuntimeError}
 
         trans_parser = TransParser()
         do_test(trans_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_trans_spec_shift_is_parsed_correctly(self):
-        valid_settings = {"TRANS/TRANSSPEC=4/SHIFT=23": {user_file_trans_spec_shift: 23},
-                          "TRANS/TRANSSPEC =4/ SHIFT = 23": {user_file_trans_spec_shift: 23}}
+        valid_settings = {"TRANS/TRANSPEC=4/SHIFT=23": {user_file_trans_spec_shift: 23},
+                          "TRANS/TRANSPEC =4/ SHIFT = 23": {user_file_trans_spec_shift: 23}}
 
-        invalid_settings = {"TRANS/TRANSSPEC=6/SHIFT=23": RuntimeError,
-                            "TRANS/TRANSSPEC=4/SHIFT/23": RuntimeError,
-                            "TRANS/TRANSSPEC=4/SHIFT 23": RuntimeError,
-                            "TRANS/TRANSSPEC/SHIFT=23": RuntimeError,
-                            "TRANS/TRANSSPEC=6/SHIFT=t": RuntimeError}
+        invalid_settings = {"TRANS/TRANSPEC=6/SHIFT=23": RuntimeError,
+                            "TRANS/TRANSPEC=4/SHIFT/23": RuntimeError,
+                            "TRANS/TRANSPEC=4/SHIFT 23": RuntimeError,
+                            "TRANS/TRANSPEC/SHIFT=23": RuntimeError,
+                            "TRANS/TRANSPEC=6/SHIFT=t": RuntimeError}
 
         trans_parser = TransParser()
         do_test(trans_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
@@ -522,7 +616,6 @@ class TransParserTest(unittest.TestCase):
                           "TRANS/ CANWS = testworksaoe234Name": {
                               user_file_trans_can_workspace: "testworksaoe234Name"}}
         invalid_settings = {"TRANS/CANWS/ test": RuntimeError,
-                            "TRANS/CANWS/ test": RuntimeError,
                             "TRANS/SAMPLEWS =": RuntimeError}
 
         trans_parser = TransParser()
@@ -534,8 +627,8 @@ class TubeCalibFileParserTest(unittest.TestCase):
         self.assertTrue(TubeCalibFileParser.get_type(), "TRANS")
 
     def test_that_tube_calibration_file_is_parsed_correctly(self):
-        valid_settings = {"TUBECALIbfile= calib_file.nxs": {user_file_tube_calibration: "calib_file.nxs"},
-                          " tUBECALIBfile=  caAlib_file.Nxs": {user_file_tube_calibration: "caAlib_file.Nxs"}}
+        valid_settings = {"TUBECALIbfile= calib_file.nxs": {user_file_tube_calibration_file: "calib_file.nxs"},
+                          " tUBECALIBfile=  caAlib_file.Nxs": {user_file_tube_calibration_file: "caAlib_file.Nxs"}}
 
         invalid_settings = {"TUBECALIFILE file.nxs": RuntimeError,
                             "TUBECALIBFILE=file.txt": RuntimeError,
@@ -603,11 +696,16 @@ class FitParserTest(unittest.TestCase):
         do_test(fit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_range_based_fit_is_parsed_correctly(self):
-        valid_settings = {"FIT/ trans / LIN 123 3556": {user_file_range_based_fit_lin: [123, 3556]},
-                          "FIT/ tranS/linear 123 3556": {user_file_range_based_fit_lin: [123, 3556]},
-                          "FIT/TRANS/Straight 123 3556": {user_file_range_based_fit_lin: [123, 3556]},
-                          "FIT/ tranS/LoG 123  3556.6 ": {user_file_range_based_fit_log: [123, 3556.6]},
-                          "FIT/TRANS/  YlOG 123   3556": {user_file_range_based_fit_log: [123, 3556]}}
+        valid_settings = {"FIT/ trans / LIN 123 3556": {user_file_fit_range: range_entry_fit(start=123, stop=3556,
+                                                                                             fit_type="LIN")},
+                          "FIT/ tranS/linear 123 3556": {user_file_fit_range: range_entry_fit(start=123, stop=3556,
+                                                                                              fit_type="LIN")},
+                          "FIT/TRANS/Straight 123 3556": {user_file_fit_range: range_entry_fit(start=123, stop=3556,
+                                                                                               fit_type="LIN")},
+                          "FIT/ tranS/LoG 123  3556.6 ": {user_file_fit_range: range_entry_fit(start=123, stop=3556.6,
+                                                                                               fit_type="LOG")},
+                          "FIT/TRANS/  YlOG 123   3556": {user_file_fit_range: range_entry_fit(start=123, stop=3556,
+                                                                                               fit_type="LOG")}}
 
         invalid_settings = {"FIT/TRANS/ YlOG 123": RuntimeError,
                             "FIT/TRANS/ YlOG 123 34 34": RuntimeError,
@@ -617,8 +715,8 @@ class FitParserTest(unittest.TestCase):
         do_test(fit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_monitor_times_are_parsed_correctly(self):
-        valid_settings = {"FIT/monitor 12 34.5": {user_file_monitor_times: [12, 34.5]},
-                          "Fit / Monitor 12.6 34.5": {user_file_monitor_times: [12.6, 34.5]}}
+        valid_settings = {"FIT/monitor 12 34.5": {user_file_fit_monitor_times: range_entry(start=12, stop=34.5)},
+                          "Fit / Monitor 12.6 34.5": {user_file_fit_monitor_times: range_entry(start=12.6, stop=34.5)}}
 
         invalid_settings = {"Fit / Monitor 12.6 34 34": RuntimeError,
                             "Fit / Monitor": RuntimeError}
@@ -627,18 +725,18 @@ class FitParserTest(unittest.TestCase):
         do_test(fit_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_general_fit_is_parsed_correctly(self):
-        valid_settings = {"FIT/Trans/Lin": {user_file_fit_can: user_file_lin,
-                                            user_file_fit_sample: user_file_lin},
-                          "FIT/Trans/ Log": {user_file_fit_can: user_file_log,
-                                            user_file_fit_sample: user_file_log},
+        valid_settings = {"FIT/Trans/Lin": {user_file_fit_can: user_file_fit_lin,
+                                            user_file_fit_sample: user_file_fit_lin},
+                          "FIT/Trans/ Log": {user_file_fit_can: user_file_fit_log,
+                                            user_file_fit_sample: user_file_fit_log},
                           "FIT/Trans/ polYnomial": {user_file_fit_can_poly: 2,
                                              user_file_fit_sample_poly: 2},
                           "FIT/Trans/ polYnomial 3": {user_file_fit_can_poly: 3,
                                               user_file_fit_sample_poly: 3},
-                          "FIT/Trans/Sample/Log": { user_file_fit_sample: user_file_log},
-                          "FIT/Trans/Sample/ Lin": {user_file_fit_sample: user_file_lin},
-                          "FIT/Trans / can/Log": {user_file_fit_can: user_file_log},
-                          "FIT/ Trans/CAN/ lin": {user_file_fit_can: user_file_lin},
+                          "FIT/Trans/Sample/Log": { user_file_fit_sample: user_file_fit_log},
+                          "FIT/Trans/Sample/ Lin": {user_file_fit_sample: user_file_fit_lin},
+                          "FIT/Trans / can/Log": {user_file_fit_can: user_file_fit_log},
+                          "FIT/ Trans/CAN/ lin": {user_file_fit_can: user_file_fit_lin},
                           "FIT/Trans/Sample/ polynomiAL 4": {user_file_fit_sample_poly: 4},
                           "FIT/Trans / can/polynomiAL 5": {user_file_fit_can_poly: 5}}
 
@@ -658,8 +756,8 @@ class GravityParserTest(unittest.TestCase):
         self.assertTrue(GravityParser.get_type(), "GRAVITY")
 
     def test_that_gravity_on_off_is_parsed_correctly(self):
-        valid_settings = {"Gravity on ": {user_file_gravity_on: True},
-                          "Gravity   OFF ": {user_file_gravity_on: False}}
+        valid_settings = {"Gravity on ": {user_file_gravity_on_off: True},
+                          "Gravity   OFF ": {user_file_gravity_on_off: False}}
 
         invalid_settings = {"Gravity ": RuntimeError,
                             "Gravity ONN": RuntimeError}
@@ -699,9 +797,11 @@ class MonParserTest(unittest.TestCase):
         self.assertTrue(MonParser.get_type(), "MON")
 
     def test_that_length_is_parsed_correctly(self):
-        valid_settings = {"MON/length= 23.5 34": {user_file_monitor_length: [23.5, 34]},
-                          "MON/length= 23.5 34  / InterPolate": {user_file_monitor_length: [23.5, 34],
-                                                                 user_file_mon_interpolate: True}}
+        valid_settings = {"MON/length= 23.5 34": {user_file_mon_length: monitor_length(length=23.5, spectrum=34,
+                                                                                       interpolate=False)},
+                          "MON/length= 23.5 34  / InterPolate": {user_file_mon_length:
+                                                                     monitor_length(length=23.5, spectrum=34,
+                                                                                    interpolate=True)}}
 
         invalid_settings = {"MON/length= 23.5 34.7": RuntimeError,
                             "MON/length 23.5 34": RuntimeError,
@@ -712,13 +812,26 @@ class MonParserTest(unittest.TestCase):
         do_test(mon_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_direct_files_are_parsed_correctly(self):
-        valid_settings = {"MON/DIRECT= C:\path1\Path2\file.ext ": {user_file_direct_lab: "C:/path1/Path2/file.ext"},
-                          "MON/ direct  = filE.Ext ": {user_file_direct_lab: "filE.Ext"},
-                          "MON/DIRECT= \path1\Path2\file.ext ": {user_file_direct_lab: "/path1/Path2/file.ext"},
-                          "MON/DIRECT= /path1/Path2/file.ext ": {user_file_direct_lab: "/path1/Path2/file.ext"},
-                          "MON/DIRECT= /path1/Path2/file.ext ": {user_file_direct_lab: "/path1/Path2/file.ext"},
-                          "MON/DIRECT/ rear= /path1/Path2/file.ext ": {user_file_direct_lab: "/path1/Path2/file.ext"},
-                          "MON/DIRECT/ frONT= path1/Path2/file.ext ": {user_file_direct_hab: "path1/Path2/file.ext"}}
+        valid_settings = {"MON/DIRECT= C:\path1\Path2\file.ext ": {user_file_mon_direct:
+                                                                       monitor_file(file_path="C:/path1/Path2/file.ext",
+                                                                                    detector_type=DetectorType.Lab)},
+                          "MON/ direct  = filE.Ext ": {user_file_mon_direct:
+                                                           monitor_file(file_path="filE.Ext",
+                                                                        detector_type=DetectorType.Lab)},
+                          "MON/DIRECT= \path1\Path2\file.ext ": {user_file_mon_direct:
+                                                                     monitor_file(file_path="/path1/Path2/file.ext",
+                                                                                  detector_type=DetectorType.Lab)},
+                          "MON/DIRECT= /path1/Path2/file.ext ": {user_file_mon_direct:
+                                                                     monitor_file(file_path="/path1/Path2/file.ext",
+                                                                                  detector_type=DetectorType.Lab)},
+                          "MON/DIRECT/ rear= /path1/Path2/file.ext ": {user_file_mon_direct:
+                                                                           monitor_file(
+                                                                               file_path="/path1/Path2/file.ext",
+                                                                               detector_type=DetectorType.Lab)},
+                          "MON/DIRECT/ frONT= path1/Path2/file.ext ": {user_file_mon_direct:
+                                                                           monitor_file(
+                                                                               file_path="path1/Path2/file.ext",
+                                                                               detector_type=DetectorType.Hab)}}
 
         invalid_settings = {"MON/DIRECT= /path1/ Path2/file.ext ": RuntimeError,
                             "MON/DIRECT /path1/Path2/file.ext ": RuntimeError,
@@ -728,13 +841,24 @@ class MonParserTest(unittest.TestCase):
         do_test(mon_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_flat_files_are_parsed_correctly(self):
-        valid_settings = {"MON/FLat  = C:\path1\Path2\file.ext ": {user_file_flat_lab: "C:/path1/Path2/file.ext"},
-                          "MON/ flAt  = filE.Ext ": {user_file_flat_lab: "filE.Ext"},
-                          "MON/flAT= \path1\Path2\file.ext ": {user_file_flat_lab: "/path1/Path2/file.ext"},
-                          "MON/FLat= /path1/Path2/file.ext ": {user_file_flat_lab: "/path1/Path2/file.ext"},
-                          "MON/FLat= /path1/Path2/file.ext ": {user_file_flat_lab: "/path1/Path2/file.ext"},
-                          "MON/FLat/ rear= /path1/Path2/file.ext ": {user_file_flat_lab: "/path1/Path2/file.ext"},
-                          "MON/FLat/ frONT= path1/Path2/file.ext ": {user_file_flat_hab: "path1/Path2/file.ext"}}
+        valid_settings = {"MON/FLat  = C:\path1\Path2\file.ext ": {user_file_mon_flat:
+                                                                       monitor_file(file_path="C:/path1/Path2/file.ext",
+                                                                                    detector_type=DetectorType.Lab)},
+                          "MON/ flAt  = filE.Ext ": {user_file_mon_flat:
+                                                         monitor_file(file_path="filE.Ext",
+                                                                      detector_type=DetectorType.Lab)},
+                          "MON/flAT= \path1\Path2\file.ext ": {user_file_mon_flat:
+                                                                   monitor_file(file_path="/path1/Path2/file.ext",
+                                                                                detector_type=DetectorType.Lab)},
+                          "MON/FLat= /path1/Path2/file.ext ": {user_file_mon_flat:
+                                                                   monitor_file(file_path="/path1/Path2/file.ext",
+                                                                                detector_type=DetectorType.Lab)},
+                          "MON/FLat/ rear= /path1/Path2/file.ext ": {user_file_mon_flat:
+                                                                         monitor_file(file_path="/path1/Path2/file.ext",
+                                                                                      detector_type=DetectorType.Lab)},
+                          "MON/FLat/ frONT= path1/Path2/file.ext ": {user_file_mon_flat:
+                                                                         monitor_file(file_path="path1/Path2/file.ext",
+                                                                                      detector_type=DetectorType.Hab)}}
 
         invalid_settings = {"MON/DIRECT= /path1/ Path2/file.ext ": RuntimeError,
                             "MON/DIRECT /path1/Path2/file.ext ": RuntimeError,
@@ -756,12 +880,19 @@ class MonParserTest(unittest.TestCase):
         do_test(mon_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_hab_files_are_parsed_correctly(self):
-        valid_settings = {"MON/Spectrum = 123 ": {user_file_mon_spectrum: 123},
-                          "MON/trans/Spectrum = 123 ": {user_file_mon_spectrum_trans: 123},
-                          "MON/trans/Spectrum = 123 /  interpolate": {user_file_mon_spectrum_trans: 123,
-                                                        user_file_mon_interpolate: True},
-                          "MON/Spectrum = 123 /  interpolate": {user_file_mon_spectrum: 123,
-                                                                user_file_mon_interpolate: True}}
+        valid_settings = {"MON/Spectrum = 123 ": {user_file_mon_spectrum: monitor_spectrum(spectrum=123, is_trans=False,
+                                                                                           interpolate=False)},
+                          "MON/trans/Spectrum = 123 ": {user_file_mon_spectrum: monitor_spectrum(spectrum=123,
+                                                                                                 is_trans=True,
+                                                                                                 interpolate=False)},
+                          "MON/trans/Spectrum = 123 /  interpolate": {user_file_mon_spectrum:
+                                                                          monitor_spectrum(spectrum=123,
+                                                                                           is_trans=True,
+                                                                                           interpolate=True)},
+                          "MON/Spectrum = 123 /  interpolate": {user_file_mon_spectrum:
+                                                                    monitor_spectrum(spectrum=123,
+                                                                                     is_trans=False,
+                                                                                     interpolate=True)}}
         invalid_settings = {}
 
         mon_parser = MonParser()
@@ -786,7 +917,7 @@ class BackParserTest(unittest.TestCase):
         self.assertTrue(BackParser.get_type(), "BACK")
 
     def test_that_all_monitors_is_parsed_correctly(self):
-        valid_settings = {"BACK / MON /times  123 34": {user_file_all_monitors: [123, 34]}}
+        valid_settings = {"BACK / MON /times  123 34": {user_file_back_all_monitors: range_entry(start=123, stop=34)}}
 
         invalid_settings = {}
 
@@ -794,8 +925,13 @@ class BackParserTest(unittest.TestCase):
         do_test(back_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_single_monitors_is_parsed_correctly(self):
-        valid_settings = {"BACK / M3 /times  123 34": {user_file_single_monitors: [3, 123, 34]},
-                          "BACK / M3 123 34": {user_file_single_monitors: [3, 123, 34]}}
+        valid_settings = {"BACK / M3 /times  123 34": {user_file_back_single_monitors:
+                                                           back_single_monitor_entry(monitor=3,
+                                                                                     start=123,
+                                                                                     stop=34)},
+                          "BACK / M3 123 34": {user_file_back_single_monitors: back_single_monitor_entry(monitor=3,
+                                                                                                         start=123,
+                                                                                                         stop=34)}}
 
         invalid_settings = {"BACK / M 123 34": RuntimeError,
                             "BACK / M3 123": RuntimeError}
@@ -804,7 +940,7 @@ class BackParserTest(unittest.TestCase):
         do_test(back_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
     def test_that_off_is_parsed_correctly(self):
-        valid_settings = {"BACK / M3 /OFF": {user_file_monitor_off: 3}}
+        valid_settings = {"BACK / M3 /OFF": {user_file_back_monitor_off: 3}}
 
         invalid_settings = {"BACK / M /OFF": RuntimeError}
 
@@ -819,7 +955,8 @@ class SANS2DParserTest(unittest.TestCase):
     def test_that_sans2d_is_parsed_correctly(self):
         sans2D_parser = SANS2DParser()
         result = sans2D_parser.parse_line("SANS2D ")
-        self.assertTrue(result is None)
+        self.assertTrue(result is not None)
+        self.assertTrue(not result)
 
 
 class LOQParserTest(unittest.TestCase):
@@ -829,7 +966,8 @@ class LOQParserTest(unittest.TestCase):
     def test_that_loq_is_parsed_correctly(self):
         loq_parser = LOQParser()
         result = loq_parser.parse_line("LOQ ")
-        self.assertTrue(result is None)
+        self.assertTrue(result is not None)
+        self.assertTrue(not result)
 
 
 class UserFileParserTest(unittest.TestCase):
@@ -839,15 +977,17 @@ class UserFileParserTest(unittest.TestCase):
 
         # DetParser
         result = user_file_parser.parse_line(" DET/CoRR/FRONT/ SidE -957")
-        assert_valid_result(result, {user_file_correction_translation_hab: -957}, self.assertTrue)
+        assert_valid_result(result, {user_file_det_correction_translation:
+                                         single_entry_with_detector(entry=-957, detector_type=DetectorType.Hab)},
+                            self.assertTrue)
 
         # LimitParser
         result = user_file_parser.parse_line("l/Q/WCUT 234.4")
-        assert_valid_result(result, {user_file_wavelength_cut: 234.4}, self.assertTrue)
+        assert_valid_result(result, {user_file_limits_wavelength_cut: 234.4}, self.assertTrue)
 
         # MaskParser
         result = user_file_parser.parse_line("MASK S 12  ")
-        assert_valid_result(result, {use_file_single_spectrum_mask: 12}, self.assertTrue)
+        assert_valid_result(result, {user_file_mask_single_spectrum_mask: 12}, self.assertTrue)
 
         # SampleParser
         result = user_file_parser.parse_line("SAMPLE /Offset 234.5")
@@ -859,7 +999,7 @@ class UserFileParserTest(unittest.TestCase):
 
         # TubeCalibFileParser
         result = user_file_parser.parse_line("TUBECALIbfile= calib_file.nxs")
-        assert_valid_result(result, {user_file_tube_calibration: "calib_file.nxs"}, self.assertTrue)
+        assert_valid_result(result, {user_file_tube_calibration_file: "calib_file.nxs"}, self.assertTrue)
 
         # QResolutionParser
         result = user_file_parser.parse_line("QRESOLUTION/ON")
@@ -867,7 +1007,8 @@ class UserFileParserTest(unittest.TestCase):
 
         # FitParser
         result = user_file_parser.parse_line("FIT/TRANS/Straight 123 3556")
-        assert_valid_result(result, {user_file_range_based_fit_lin: [123, 3556]}, self.assertTrue)
+        assert_valid_result(result, {user_file_fit_range: range_entry_fit(start=123, stop=3556,
+                                                                          fit_type="LIN")}, self.assertTrue)
 
         # GravityParser
         result = user_file_parser.parse_line("Gravity/LExtra =23.5")
@@ -880,7 +1021,8 @@ class UserFileParserTest(unittest.TestCase):
 
         # MonParser
         result = user_file_parser.parse_line("MON/length= 23.5 34")
-        assert_valid_result(result, {user_file_monitor_length: [23.5, 34]}, self.assertTrue)
+        assert_valid_result(result, {user_file_mon_length: monitor_length(length=23.5, spectrum=34,
+                                                                          interpolate=False)}, self.assertTrue)
 
         # PrintParser
         result = user_file_parser.parse_line("PRINT OdlfP slsk 23lksdl2 34l")
@@ -888,15 +1030,15 @@ class UserFileParserTest(unittest.TestCase):
 
         # BackParser
         result = user_file_parser.parse_line("BACK / M3 /OFF")
-        assert_valid_result(result, {user_file_monitor_off: 3}, self.assertTrue)
+        assert_valid_result(result, {user_file_back_monitor_off: 3}, self.assertTrue)
 
         # SANS2DParser
         result = user_file_parser.parse_line("SANS2D")
-        self.assertTrue(result is None)
+        self.assertTrue(not result)
 
         # LOQParser
         result = user_file_parser.parse_line("LOQ")
-        self.assertTrue(result is None)
+        self.assertTrue(not result)
 
     def test_that_non_existent_parser_throws(self):
         # Arrange

@@ -6,6 +6,9 @@ import inspect
 from SANS2.State.SANSStateBase import (SANSStateBase, TypedParameter, sans_parameters)
 from SANS2.State.SANSStateData import SANSStateData
 from SANS2.State.SANSStateMove import SANSStateMove
+from SANS2.State.SANSStateReduction import SANSStateReduction
+from SANS2.State.SANSStateSliceEvent import SANSStateSliceEvent
+from SANS2.State.SANSStateMask import SANSStateMask
 
 
 # -----------------------------------------------
@@ -34,6 +37,9 @@ class SANSState(object):
 class SANSStateISIS(SANSStateBase, SANSState):
     data = TypedParameter(SANSStateData, validator_sub_state)
     move = TypedParameter(SANSStateMove, validator_sub_state)
+    reduction = TypedParameter(SANSStateReduction, validator_sub_state)
+    slice = TypedParameter(SANSStateSliceEvent, validator_sub_state)
+    mask = TypedParameter(SANSStateMask, validator_sub_state)
 
     def __init__(self):
         super(SANSStateISIS, self).__init__()
@@ -46,6 +52,12 @@ class SANSStateISIS(SANSStateBase, SANSState):
             is_invalid.update("SANSStateISIS: The state object needs to include a SANSStateData object.")
         if not self.move:
             is_invalid.update("SANSStateISIS: The state object needs to include a SANSStateMove object.")
+        if not self.reduction:
+            is_invalid.update("SANSStateISIS: The state object needs to include a SANSStateReduction object.")
+        if not self.slice:
+            is_invalid.update("SANSStateISIS: The state object needs to include a SANSStateSliceEvent object.")
+        if not self.mask:
+            is_invalid.update("SANSStateISIS: The state object needs to include a SANSStateMask object.")
 
         if is_invalid:
             raise ValueError("SANSState: There is an issue with your in put. See: {0}".format(json.dumps(is_invalid)))

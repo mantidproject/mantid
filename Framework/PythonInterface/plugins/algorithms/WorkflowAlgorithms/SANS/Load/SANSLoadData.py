@@ -5,9 +5,9 @@
 from abc import (ABCMeta, abstractmethod)
 from mantid.api import (AnalysisDataService)
 from SANS2.Common.SANSFileInformation import (SANSFileInformationFactory, SANSFileType, get_extension_for_file_type)
-from SANS2.State.SANSStateData import (SANSStateData, SANSDataType)
+from SANS2.State.SANSStateData import (SANSStateData)
 from SANS2.Common.SANSConstants import (SANSConstants)
-from SANS2.Common.SANSEnumerations import (SANSInstrument)
+from SANS2.Common.SANSEnumerations import (SANSInstrument, SANSDataType)
 from SANS2.Common.SANSFunctions import (create_unmanaged_algorithm)
 from SANS.Load.SANSCalibration import apply_calibration
 

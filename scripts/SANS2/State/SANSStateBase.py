@@ -4,8 +4,9 @@
 from abc import (ABCMeta, abstractmethod)
 import copy
 import inspect
+from functools import (partial)
 
-from mantid.kernel import PropertyManager
+from mantid.kernel import (PropertyManager, std_vector_dbl, std_vector_str)
 
 
 # ---------------------------------------------------------------
@@ -17,6 +18,37 @@ def is_not_none(value):
 
 def is_positive(value):
     return value >= 0
+
+
+def all_list_elements_are_of_type_and_not_empty(value, comparison_type, additional_comparison=lambda x: True):
+    is_of_type = True
+    for element in value:
+        # Perform type check
+        if not isinstance(element, comparison_type):
+            is_of_type = False
+        # Perform additional check
+        if not additional_comparison(element):
+            is_of_type = False
+
+    if not value:
+        is_of_type = False
+    return is_of_type
+
+
+def all_list_elements_are_float_and_not_empty(value):
+    typed_comparison = partial(all_list_elements_are_of_type_and_not_empty, comparison_type=float)
+    return typed_comparison(value)
+
+
+def all_list_elements_are_string_and_not_empty(value):
+    typed_comparison = partial(all_list_elements_are_of_type_and_not_empty, comparison_type=str)
+    return typed_comparison(value)
+
+
+def all_list_elements_are_string_and_positive_and_not_empty(value):
+    typed_comparison = partial(all_list_elements_are_of_type_and_not_empty, comparison_type=int,
+                               additional_comparison=lambda x: x>=0)
+    return typed_comparison(value)
 
 
 # -------------------------------------------------------
@@ -81,6 +113,11 @@ class StringParameter(TypedParameter):
         super(StringParameter, self).__init__(str, is_not_none)
 
 
+class BoolParameter(TypedParameter):
+    def __init__(self):
+        super(BoolParameter, self).__init__(bool, is_not_none)
+
+
 class FloatParameter(TypedParameter):
     def __init__(self):
         super(FloatParameter, self).__init__(float, is_not_none)
@@ -117,6 +154,33 @@ class ClassTypeParameter(TypedParameter):
             raise TypeError("Trying to set {0} which expects a value of type {1}."
                             " Got a value of {2} which is of type: {3}".format(self.name, str(self.parameter_type),
                                                                                str(value), str(value)))
+
+
+class FloatWithNoneParameter(TypedParameter):
+    def __init__(self):
+        super(FloatWithNoneParameter, self).__init__(float)
+
+    def _type_check(self, value):
+        if not isinstance(value, self.parameter_type) and value is not None:
+            raise TypeError("Trying to set {0} which expects a value of type {1}."
+                            " Got a value of {2} which is of type: {3}".format(self.name, str(self.parameter_type),
+                                                                               str(value), str(value)))
+
+
+class FloatListParameter(TypedParameter):
+    def __init__(self):
+        super(FloatListParameter, self).__init__(list, all_list_elements_are_float_and_not_empty)
+
+
+class StringListParameter(TypedParameter):
+        def __init__(self):
+            super(StringListParameter, self).__init__(list, all_list_elements_are_string_and_not_empty)
+
+
+class PositiveIntegerListParameter(TypedParameter):
+    def __init__(self):
+        super(PositiveIntegerListParameter, self).__init__(list,
+                                                           all_list_elements_are_string_and_positive_and_not_empty)
 
 
 # ------------------------------------------------
@@ -165,6 +229,14 @@ MODULE = "__module__"
 # ------------------------------------------------
 def is_state(property_manager):
     return property_manager.existsProperty(STATE_NAME) and property_manager.existsProperty(STATE_MODULE)
+
+
+def is_float_vector(value):
+    return isinstance(value, std_vector_dbl)
+
+
+def is_string_vector(value):
+    return isinstance(value, std_vector_str)
 
 
 def get_module_and_class_name(instance):
@@ -298,15 +370,15 @@ def set_state_from_property_manager(instance, property_manager):
         #                      apply recursion
         # 2. ParameterManager 2: In some cases the ParameterManager object is actually a map rather than a state ->
         #                         populate the state
-        # 3. String with special meaning: Admittedly this is a hack, but we limited by the input property types
+        # 3. String with special meaning: Admittedly this is a hack, but we are limited by the input property types
         #                                 of Mantid algorithms, which can be string, int, float and containers of these
         #                                 types (and PropertyManagerProperties). We need a wider range of types, such
         #                                 as ClassTypeParameters. These are encoded (as good as possible) in a string
         # 4. Normal values: all is fine, just populate them
-        if type(value) == PropertyManager and is_state(value):
+        if type(value) is PropertyManager and is_state(value):
             sub_state = create_sub_state(value)
             setattr(instance, key, sub_state)
-        elif type(value) == PropertyManager:
+        elif type(value) is PropertyManager:
             # We must be dealing with an actual dict descriptor
             sub_dict_keys = value.keys()
             dict_element = {}
@@ -328,6 +400,12 @@ def set_state_from_property_manager(instance, property_manager):
             # From the outer class we can then retrieve the inner class which normally defines the users selection
             class_type_parameter = getattr(outer_class_type_parameter, class_name)
             _set_element(instance, key, class_type_parameter)
+        elif is_float_vector(value):
+            float_list_value = list(value)
+            _set_element(instance, key, float_list_value)
+        elif is_string_vector(value):
+            string_list_value = list(value)
+            _set_element(instance, key, string_list_value)
         else:
             _set_element(instance, key, value)
 

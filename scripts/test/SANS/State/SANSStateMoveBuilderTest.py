@@ -2,7 +2,7 @@ import unittest
 import mantid
 
 from SANS2.State.SANSStateData import SANSStateDataISIS
-from SANS2.State.StateBuilder.SANSStateMoveBuilder import get_state_move_builder
+from SANS2.State.StateBuilder.SANSStateMoveBuilder import get_move_builder
 from SANS2.Common.SANSConstants import SANSConstants
 
 
@@ -13,7 +13,7 @@ class SANSStateMoveBuilderTest(unittest.TestCase):
         data_info.sample_scatter = "LOQ74044"
 
         # Act
-        builder = get_state_move_builder(data_info)
+        builder = get_move_builder(data_info)
         self.assertTrue(builder)
         value = 324.2
         builder.set_center_position(value)
@@ -34,7 +34,7 @@ class SANSStateMoveBuilderTest(unittest.TestCase):
         data_info.sample_scatter = "SANS2D00022048"
 
         # Act
-        builder = get_state_move_builder(data_info)
+        builder = get_move_builder(data_info)
         self.assertTrue(builder)
         value = 324.2
         builder.set_HAB_x_translation_correction(value)
@@ -53,7 +53,7 @@ class SANSStateMoveBuilderTest(unittest.TestCase):
         data_info.sample_scatter = "LARMOR00002260"
 
         # Act
-        builder = get_state_move_builder(data_info)
+        builder = get_move_builder(data_info)
         self.assertTrue(builder)
         value = 324.2
         builder.set_HAB_x_translation_correction(value)

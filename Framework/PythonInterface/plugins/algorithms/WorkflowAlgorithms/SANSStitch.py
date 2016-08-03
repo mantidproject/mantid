@@ -159,7 +159,9 @@ class SANSStitch(DataProcessorAlgorithm):
         # We want: (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
         shifted_norm_front = self._scale(nF, shift_factor)
         scaled_norm_front = self._scale(nF, 1.0 / scale_factor)
-        numerator = self._add(self._add(cF, shifted_norm_front), cR)
+        add_counts_and_shift = self._add(cF, shifted_norm_front)
+
+        numerator = self._add(add_counts_and_shift, cR)
         denominator = self._add(scaled_norm_front, nR)
         merged_q = self._divide(numerator, denominator)
         return merged_q
@@ -197,7 +199,10 @@ class SANSStitch(DataProcessorAlgorithm):
         x_vals = ws.readX(0)
         start_x = x_vals[start]
         # Make sure we're inside the bin that we want to crop
-        end_x = x_vals[stop + 1]
+        if len(y_vals) == len(x_vals):
+            end_x = x_vals[stop]
+        else:
+            end_x = x_vals[stop + 1]
         return self._crop_to_x_range(ws=ws,x_min=start_x, x_max=end_x)
 
     def _run_fit(self, q_high_angle, q_low_angle, scale_factor, shift_factor):
@@ -223,6 +228,7 @@ class SANSStitch(DataProcessorAlgorithm):
         nR = self.getProperty('LABNormSample').value
         q_high_angle = self._divide(cF, nF)
         q_low_angle = self._divide(cR, nR)
+
         if self.getProperty('ProcessCan').value:
             cF_can = self.getProperty('HABCountsCan').value
             cR_can = self.getProperty('LABCountsCan').value
@@ -246,8 +252,8 @@ class SANSStitch(DataProcessorAlgorithm):
             scale_factor, shift_factor = self._run_fit(q_high_angle, q_low_angle,
                                                        scale_factor, shift_factor)
 
-        min_q = min(min(q_high_angle.dataX(0)), min(q_low_angle.dataX(0)))
-        max_q = max(max(q_high_angle.dataX(0)), max(q_low_angle.dataX(0)))
+        min_q = max(min(q_high_angle.dataX(0)), min(q_low_angle.dataX(0)))
+        max_q = min(max(q_high_angle.dataX(0)), max(q_low_angle.dataX(0)))
 
         # Crop our input workspaces
         cF = self._crop_to_x_range(cF, min_q, max_q)

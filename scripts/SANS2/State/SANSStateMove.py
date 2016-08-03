@@ -25,10 +25,9 @@ class SANSStateMoveDetectorISIS(SANSStateBase, SANSStateMove):
     y_translation_correction = FloatParameter()
     z_translation_correction = FloatParameter()
 
-    # They signify a rotation around the x, y and z direction
-    x_rotation_correction = FloatParameter()
-    y_rotation_correction = FloatParameter()
-    z_rotation_correction = FloatParameter()
+    rotation_correction = FloatParameter()
+    side_correction = FloatParameter()
+    radius_correction = FloatParameter()
 
     x_tilt_correction = FloatParameter()
     y_tilt_correction = FloatParameter()

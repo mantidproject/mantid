@@ -8,7 +8,7 @@ from SANS2.Common.SANSFileInformation import find_full_file_path
 from SANS2.Common.SANSConstants import SANSConstants
 from SANS2.Common.SANSLogTagger import (has_tag, get_tag, set_tag)
 from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
-from SANS2.State.SANSStateData import SANSDataType
+from SANS2.Common.SANSEnumerations import SANSDataType
 
 
 # -----------------------------

@@ -89,3 +89,13 @@ def quaternion_to_angle_and_axis(quaternion):
         axis.append(quaternion[2]/s_parameter)
         axis.append(quaternion[3]/s_parameter)
     return degrees(angle), axis
+
+
+def get_charge_and_time(workspace):
+    run = workspace.getRun()
+    charges = run.getLogData('proton_charge')
+    total_charge = sum(charges.value)
+    time_passed = (charges.times[-1] - charges.times[0]).total_microseconds()
+    time_passed /= 1e6
+    return total_charge, time_passed
+

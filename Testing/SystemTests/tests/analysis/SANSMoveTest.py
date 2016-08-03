@@ -8,13 +8,13 @@ from mantid.api import AlgorithmManager
 from mantid.kernel import (Quat, V3D)
 from SANS.Move.SANSMoveWorkspaces import (SANSMoveFactory, SANSMoveLOQ, SANSMoveSANS2D, SANSMoveLARMORNewStyle,
                                           SANSMoveLARMOROldStyle)
-from SANS2.State.StateBuilder.SANSStateMoveBuilder import get_state_move_builder
 from SANS2.Common.SANSConstants import SANSConstants
 # Not clear why the names in the module are not found by Pylint, but it seems to get confused. Hence this check
 # needs to be disabled here.
 # pylint: disable=no-name-in-module
+from SANS2.State.StateDirector.TestDirector import TestDirector
+from SANS2.State.StateBuilder.SANSStateMoveBuilder import get_state_move_builder
 from SANS2.State.SANSStateData import SANSStateDataISIS
-from SANS2.State.SANSState import SANSStateISIS
 
 
 def load_workspace(file_name):
@@ -67,18 +67,17 @@ class SANSMoveTest(unittest.TestCase):
         data_info.sample_scatter = sample_scatter
 
         # Set the move parameters
-        builder = SANSMoveTest._provide_builder(sample_scatter)
+        builder = get_state_move_builder(data_info)
         if lab_x_translation_correction is not None:
             builder.set_LAB_x_translation_correction(lab_x_translation_correction)
         if lab_z_translation_correction is not None:
             builder.set_LAB_z_translation_correction(lab_z_translation_correction)
         move_info = builder.build()
 
-        # Create the sample state
-        state = SANSStateISIS()
-        state.data = data_info
-        state.move = move_info
-        return state
+        # Get the sample state
+        test_director = TestDirector()
+        test_director.set_states(data_state=data_info, move_state=move_info)
+        return test_director.construct()
 
     @staticmethod
     def _get_position_and_rotation(workspace, move_info, component):
@@ -88,12 +87,6 @@ class SANSMoveTest(unittest.TestCase):
         position = detector.getPos()
         rotation = detector.getRotation()
         return position, rotation
-
-    @staticmethod
-    def _provide_builder(file_name):
-        data_info = SANSStateDataISIS()
-        data_info.sample_scatter = file_name
-        return get_state_move_builder(data_info)
 
     @staticmethod
     def _provide_mover(workspace):

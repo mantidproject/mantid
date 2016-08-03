@@ -3,17 +3,17 @@
 import copy
 
 from SANS2.Common.SANSEnumerations import SANSFacility
+from SANS2.State.StateBuilder.AutomaticSetters import automatic_setters
 from SANS2.State.SANSStateData import SANSStateDataISIS
-from SANS2.State.StateBuilder.StateBuilderFunctions import automatic_setters
 
 
 # ---------------------------------------
 # State builders
 # ---------------------------------------
-class SANStateDataISISBuilder(object):
+class SANSStateDataISISBuilder(object):
     @automatic_setters(SANSStateDataISIS)
     def __init__(self):
-        super(SANStateDataISISBuilder, self).__init__()
+        super(SANSStateDataISISBuilder, self).__init__()
         self.state = SANSStateDataISIS()
 
     def build(self):
@@ -25,9 +25,9 @@ class SANStateDataISISBuilder(object):
 # ------------------------------------------
 # Factory method for SANStateDataBuilder
 # ------------------------------------------
-def get_state_data_builder(facility):
+def get_data_builder(facility):
     if facility is SANSFacility.ISIS:
-        return SANSStateDataISIS()
+        return SANSStateDataISISBuilder()
     else:
         raise NotImplementedError("SANSStateDataBuilder: The selected facility {0} does not seem"
                                   " to exist".format(str(facility)))

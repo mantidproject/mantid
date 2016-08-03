@@ -13,8 +13,8 @@ from SANS2.Common.SANSConstants import SANSConstants
 # Not clear why the names in the module are not found by Pylint, but it seems to get confused. Hence this check
 # needs to be disabled here.
 # pylint: disable=no-name-in-module
+from SANS2.State.StateDirector.TestDirector import TestDirector
 from SANS2.State.SANSStateData import SANSStateDataISIS
-from SANS2.State.SANSState import SANSStateISIS
 
 
 def remove_all_workspaces_from_ads():
@@ -50,8 +50,10 @@ class SANSLoadFactoryTest(unittest.TestCase):
         data = SANSStateDataISIS()
         ws_name_sample = "SANS2D00022024"
         data.sample_scatter = ws_name_sample
-        state = SANSStateISIS()
-        state.data = data
+        # Get the sample state
+        test_director = TestDirector()
+        test_director.set_states(data_state=data)
+        state = test_director.construct()
 
         # Act + Assert
         try:
@@ -113,9 +115,10 @@ class SANSLoadTest(unittest.TestCase):
         if calibration is not None:
             data_info.calibration = calibration
 
-        state = SANSStateISIS()
-        state.data = data_info
-        return state
+        # Get the sample state
+        test_director = TestDirector()
+        test_director.set_states(data_state=data_info)
+        return test_director.construct()
 
     def _evaluate_workspace_type(self, load_alg, num_workspaces, workspace_name, workspace_type, index):
         if num_workspaces == 1:

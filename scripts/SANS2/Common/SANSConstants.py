@@ -1,5 +1,6 @@
 # pylint: disable=too-few-public-methods
 
+
 class SANSConstants(object):
     monitor_suffix = "_monitors"
     input_workspace = "InputWorkspace"
@@ -13,6 +14,8 @@ class SANSConstants(object):
     output_monitor_workspace_group = output_monitor_workspace + "_"
 
     workspace = "Workspace"
+
+    dummy = "dummy"
 
     sans_suffix = "sans"
     trans_suffix = "trans"

@@ -3,11 +3,18 @@
 ##
 
 set ( TEST_PY_FILES
+   MaskParserTest.py
    SANSStateTest.py
    SANSStateDataTest.py
+   SANSStateDataBuilderTest.py
    SANSStateReductionTest.py
-   SANSStateMoveBuilderTest.py
+   SANSStateReductionBuilderTest.py
+   SANSStateSliceEventTest.py
+   SANSStateSliceEventBuilderTest.py
    SANSStateMoveTest.py
+   SANSStateMaskTest.py
+   SANSStateMaskBuilderTest.py
+   SANSStateMoveBuilderTest.py
   )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

@@ -62,6 +62,38 @@ def convert_sans_instrument_to_string(to_convert):
     return selected_instrument
 
 
+# ------------------------------------
+# Data Types
+# ------------------------------------
+@inner_classes_with_name_space("SampleScatter", "SampleTransmission", "SampleDirect",
+                               "CanScatter", "CanTransmission", "CanDirect",
+                               "Calibration")
+class SANSDataType(object):
+    """
+    Defines the different data types which are required for the reduction. Besides the fundamental data of the
+    sample and the can, we can also specify a calibration.
+    """
+    pass
+
+
+def convert_to_data_type(as_string):
+    if as_string == "sample_scatter":
+        data_type = SANSDataType.SampleScatter
+    elif as_string == "sample_transmission":
+        data_type = SANSDataType.SampleTransmission
+    elif as_string == "sample_direct":
+        data_type = SANSDataType.SampleDirect
+    elif as_string == "can_scatter":
+        data_type = SANSDataType.CanScatter
+    elif as_string == "can_transmission":
+        data_type = SANSDataType.CanTransmission
+    elif as_string == "can_direct":
+        data_type = SANSDataType.CanDirect
+    elif as_string == "calibration":
+        data_type = SANSDataType.Calibration
+    return data_type
+
+
 # --------------------------
 #  Coordinate Definitions (3D)
 # --------------------------
@@ -76,17 +108,106 @@ class CanonicalCoordinates(Coordinates):
 
 
 # --------------------------
-#  Reductions
+#  ReductionMode
 # --------------------------
-class ReductionType(object):
+@inner_classes_with_name_space("Merged", "All")
+class ReductionMode(object):
+    """
+    Defines the reduction modes which should be common to all implementations, namely All and Merged.
+    """
     pass
 
 
-@inner_classes_with_name_space("Hab", "Lab", "Merged", "Both")
-class SANSReductionType(ReductionType):
+@inner_classes_with_name_space("Hab", "Lab")
+class ISISReductionMode(ReductionMode):
+    """
+    Defines the different reduction modes. This can be the high-angle bank, the low-angle bank
+    """
     pass
 
 
+# --------------------------
+#  ReductionDimensionality
+# --------------------------
 @inner_classes_with_name_space("OneDim", "TwoDim")
 class ReductionDimensionality(object):
+    """
+    Defines the dimensionality for reduction. This can be either 1D or 2D
+    """
     pass
+
+
+@inner_classes_with_name_space("Scatter", "Transmission", "Direct")
+class ReductionData(object):
+    """
+    Defines the workspace type of the reduction data. For all known instances this can be scatter, transmission
+    or direct
+    """
+    pass
+
+
+@inner_classes_with_name_space("Sample", "Can")
+class DataType(object):
+    """
+    Defines the type of reduction data. This can be either be with the sample or without the sample, i.e. Can
+    """
+    pass
+
+
+@inner_classes_with_name_space("Count", "Norm")
+class OutputParts(object):
+    """
+    Defines the partial outputs of a reduction. They are the numerator (Count) and denominator (Norm) of a division.
+    """
+    pass
+
+
+@inner_classes_with_name_space("Both", "None", "ShiftOnly", "ScaleOnly")
+class FitModeForMerge(object):
+    """
+    Defines which fit operation to use during the merge of two reductions.
+    """
+    pass
+
+
+def convert_fit_mode_for_merge_to_string(to_convert):
+    if to_convert is FitModeForMerge.Both:
+        selected_fit_mode = "Both"
+    elif to_convert is FitModeForMerge.None:
+        selected_fit_mode = "None"
+    elif to_convert == FitModeForMerge.ShiftOnly:
+        selected_fit_mode = "ShiftOnly"
+    elif to_convert == FitModeForMerge.ScaleOnly:
+        selected_fit_mode = "ScaleOnly"
+    else:
+        selected_fit_mode = ""
+    return selected_fit_mode
+
+# --------------------------
+#  Detectors
+# --------------------------
+@inner_classes_with_name_space("Horizontal", "Vertical", "Rotated")
+class DetectorOrientation(object):
+    """
+    Defines the detector orientation.
+    """
+    pass
+
+
+@inner_classes_with_name_space("Hab", "Lab")
+class DetectorType(object):
+    """
+    Defines the detector type
+    """
+    pass
+
+
+def convert_detector_type_to_string(to_convert):
+    if to_convert is DetectorType.Hab:
+        detector_type_string = SANSConstants.high_angle_bank
+    elif to_convert is DetectorType.Lab:
+        detector_type_string = SANSConstants.low_angle_bank
+    else:
+        raise RuntimeError("Trying to convert a detector of type {0} to a string. Cannot handle this detector"
+                           " type currently.".format(to_convert))
+    return detector_type_string

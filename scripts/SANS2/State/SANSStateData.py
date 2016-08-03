@@ -6,49 +6,6 @@ import json
 from SANS2.State.SANSStateBase import (SANSStateBase, StringParameter, PositiveIntegerParameter, sans_parameters)
 
 
-# ------------------------------------
-# Types
-# ------------------------------------
-class SANSDataType(object):
-    class SampleScatter(object):
-        pass
-
-    class SampleTransmission(object):
-        pass
-
-    class SampleDirect(object):
-        pass
-
-    class CanScatter(object):
-        pass
-
-    class CanTransmission(object):
-        pass
-
-    class CanDirect(object):
-        pass
-
-    class Calibration(object):
-        pass
-
-
-def convert_to_data_type(as_string):
-    if as_string == "sample_scatter":
-        data_type = SANSDataType.SampleScatter
-    elif as_string == "sample_transmission":
-        data_type = SANSDataType.SampleTransmission
-    elif as_string == "sample_direct":
-        data_type = SANSDataType.SampleDirect
-    elif as_string == "can_scatter":
-        data_type = SANSDataType.CanScatter
-    elif as_string == "can_transmission":
-        data_type = SANSDataType.CanTransmission
-    elif as_string == "can_direct":
-        data_type = SANSDataType.CanDirect
-    elif as_string == "calibration":
-        data_type = SANSDataType.Calibration
-    return data_type
-
 # ------------------------------------------------
 # SANSStateData
 # ------------------------------------------------

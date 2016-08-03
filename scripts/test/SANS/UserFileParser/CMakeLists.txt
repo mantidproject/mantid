@@ -4,6 +4,8 @@
 
 set ( TEST_PY_FILES
   UserFileParserTest.py
+  UserFileReaderTest.py
+  UserFileStateDirectorTest.py
   )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
