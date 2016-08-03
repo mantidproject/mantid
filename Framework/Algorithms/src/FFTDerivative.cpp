@@ -56,6 +56,7 @@ void FFTDerivative::execComplexFFT() {
                        copyWS->mutableY(0), nx, ny);
 
     // Transform symmetrized spectrum
+    const bool isHisto = copyWS->isHistogramData();
     IAlgorithm_sptr fft = createChildAlgorithm("FFT");
     fft->setProperty("InputWorkspace", copyWS);
     fft->setProperty("Real", 0);
@@ -76,6 +77,14 @@ void FFTDerivative::execComplexFFT() {
     fft->execute();
 
     transWS = fft->getProperty("OutputWorkspace");
+
+    // If the input was histogram data, convert the output to histogram data too
+    if (isHisto) {
+      IAlgorithm_sptr toHisto = createChildAlgorithm("ConvertToHistogram");
+      toHisto->setProperty("InputWorkspace", transWS);
+      toHisto->execute();
+      transWS = toHisto->getProperty("OutputWorkspace");
+    }
 
     if (!outWS) {
       outWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
