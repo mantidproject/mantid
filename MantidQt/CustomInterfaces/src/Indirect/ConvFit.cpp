@@ -213,7 +213,8 @@ void ConvFit::setup() {
   // Post Plot and Save
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
-  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
+          SLOT(plotCurrentPreview()));
 
   m_previousFit = m_uiForm.cbFitType->currentText();
 
@@ -513,7 +514,7 @@ void ConvFit::loadSettings(const QSettings &settings) {
 void ConvFit::newDataLoaded(const QString wsName) {
   m_cfInputWSName = wsName;
   m_cfInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-	  m_cfInputWSName.toStdString());
+      m_cfInputWSName.toStdString());
 
   int maxWsIndex = static_cast<int>(m_cfInputWS->getNumberHistograms()) - 1;
 
@@ -1198,7 +1199,8 @@ void ConvFit::singleFit() {
       runPythonCode(
           QString(
               "from IndirectCommon import getWSprefix\nprint getWSprefix('") +
-          m_cfInputWSName + QString("')\n")).trimmed();
+          m_cfInputWSName + QString("')\n"))
+          .trimmed();
   m_singleFitOutputName +=
       QString("conv_") + fitType + bgType + m_uiForm.spPlotSpectrum->text();
   int maxIterations =
