@@ -24,8 +24,9 @@ subgraph params {
   wavStep           [label="WavelengthStep"]
   monStartWSIndex   [label="StartWorkspaceIndex"]
   monEndWSIndex     [label="EndWorkspaceIndex"]
-  detWS             [label="Detector Workspace"]
-  regionOfDirectBeam [label="Region of\nDirect Beam"]
+  detWS             [label="DetectorWorkspace"]
+  regionOfDirectBeam [label="RegionOf-\nDirectBeam"]
+  scaleFactor       [label="ScaleFactor"]
 }
 
 subgraph decisions {
@@ -163,7 +164,7 @@ checkSourceRotation -> getSourceRotationAngle [label="No"]
 getSourceRotationAngle -> sourceRotationAngle
 sourceRotationAngle -> rotateSource
 rotateSource      -> convertToMT
-convertToMT      -> checkSourceRotationBack
+convertToMT       -> checkSourceRotationBack
 checkSourceRotationBack -> rotateSourceBack [label = "Yes"]
 checkSourceRotationBack -> outputWorkspaceMT [label="No"]
 sourceRotationAngleBack -> rotateSourceBack [label = "Rotate back by Rotation Angle"]
@@ -172,19 +173,20 @@ outputWorkspaceMT   -> checkRebinMin
 outputWorkspaceMT   -> checkRebinMax
 outputWorkspaceMT   -> checkRebinStep
 outputWorkspaceWL  -> calculateMomentumFromLambda
-checkRebinMin    -> calculateMomentumFromLambda [label="No"]
-checkRebinMax    -> calculateMomentumFromLambda [label="No"]
+checkRebinMin     -> calculateMomentumFromLambda [label="No"]
+checkRebinMax     -> calculateMomentumFromLambda [label="No"]
 calculateMomentumFromLambda -> momentumTransferMin
 calculateMomentumFromLambda -> momentumTransferMax
-checkRebinStep      -> calcResolution [label="No"]
-checkRebinMin -> momentumTransferMin [label="Yes"]
-checkRebinMax -> momentumTransferMax [label="Yes"]
-checkRebinStep   -> momentumTransferStep[label="Yes"]
-calcResolution     -> momentumTransferStep
-checkScale          -> scale [label="Yes"]
-rebin               -> checkScale
-checkScale          -> outputWorksapceMTScale [label="No"]
-scale               -> outputWorksapceMTScale
+checkRebinStep    -> calcResolution [label="No"]
+checkRebinMin     -> momentumTransferMin [label="Yes"]
+checkRebinMax     -> momentumTransferMax [label="Yes"]
+checkRebinStep    -> momentumTransferStep[label="Yes"]
+calcResolution    -> momentumTransferStep
+scaleFactor       -> checkScale
+checkScale        -> scale [label="Yes"]
+rebin             -> checkScale
+checkScale        -> outputWorksapceMTScale [label="No"]
+scale             -> outputWorksapceMTScale
 momentumTransferMin -> rebin
 momentumTransferStep -> rebin
 momentumTransferMax -> rebin
