@@ -1,8 +1,9 @@
+#include "MantidHistogramData/LogarithmicGenerator.h"
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -18,6 +19,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using std::vector;
+using Mantid::HistogramData::BinEdges;
 
 namespace Mantid {
 
@@ -181,11 +183,11 @@ void DiffractionFocussing2::exec() {
     auto it = group2xvector.find(group);
     group2vectormap::difference_type dif =
         std::distance(group2xvector.begin(), it);
-    const MantidVec &Xout = *((*it).second);
+    auto &Xout = (*it).second;
 
     // Assign the new X axis only once (i.e when this group is encountered the
     // first time)
-    out->dataX(static_cast<int64_t>(dif)) = Xout;
+    out->setBinEdges(static_cast<int64_t>(dif), Xout);
 
     // This is the output spectrum
     auto &outSpec = out->getSpectrum(outWorkspaceIndex);
@@ -195,8 +197,9 @@ void DiffractionFocussing2::exec() {
     outSpec.clearDetectorIDs();
 
     // Get the references to Y and E output and rebin
-    MantidVec &Yout = outSpec.dataY();
-    MantidVec &Eout = outSpec.dataE();
+    // TODO can only be changed once rebin implemented in HistogramData
+    auto &Yout = outSpec.dataY();
+    auto &Eout = outSpec.dataE();
 
     // Initialize the group's weight vector here and the dummy vector used for
     // accumulating errors.
@@ -210,13 +213,16 @@ void DiffractionFocussing2::exec() {
       // This is the input spectrum
       const auto &inSpec = m_matrixInputW->getSpectrum(inWorkspaceIndex);
       // Get reference to its old X,Y,and E.
-      const MantidVec &Xin = inSpec.readX();
-      const MantidVec &Yin = inSpec.readY();
-      const MantidVec &Ein = inSpec.readE();
+      auto &Xin = inSpec.x();
+      auto &Yin = inSpec.y();
+      auto &Ein = inSpec.e();
 
       outSpec.addDetectorIDs(inSpec.getDetectorIDs());
       try {
-        VectorHelper::rebinHistogram(Xin, Yin, Ein, Xout, Yout, Eout, true);
+        // TODO This should be implemented in Histogram as rebin
+        Mantid::Kernel::VectorHelper::rebinHistogram(
+            Xin.rawData(), Yin.rawData(), Ein.rawData(), Xout.rawData(), Yout,
+            Eout, true);
       } catch (...) {
         // Should never happen because Xout is constructed to envelop all of the
         // Xin vectors
@@ -258,8 +264,8 @@ void DiffractionFocussing2::exec() {
         // here
         const MantidVec zeroes(weights.size(), 0.0);
         // Rebin the weights - note that this is a distribution
-        VectorHelper::rebin(weight_bins, weights, zeroes, Xout, groupWgt,
-                            EOutDummy, true, true);
+        VectorHelper::rebin(weight_bins, weights, zeroes, Xout.rawData(),
+                            groupWgt, EOutDummy, true, true);
       } else // If no masked bins we want to add 1 to the weight of the output
              // bins that this input covers
       {
@@ -276,8 +282,8 @@ void DiffractionFocussing2::exec() {
         }
 
         // Rebin the weights - note that this is a distribution
-        VectorHelper::rebin(limits, weights_default, emptyVec, Xout, groupWgt,
-                            EOutDummy, true, true);
+        VectorHelper::rebin(limits, weights_default, emptyVec, Xout.rawData(),
+                            groupWgt, EOutDummy, true, true);
       }
       prog->report();
     } // end of loop for input spectra
@@ -402,18 +408,6 @@ void DiffractionFocussing2::execEvent() {
       if (max > totalHistProcess)
         max = totalHistProcess;
 
-      // precalculate output size
-      /* size_t numEventsInChunk(0);
-      for (int wi=wiChunk*chunkSize; wi < max; wi++)
-      {
-        const int group = groupAtWorkspaceIndex[wi];
-        if (group == 1)
-        {
-          // Accumulate the chunk
-          numEventsInChunk += eventW->getSpectrum(wi).getNumberEvents();
-        }
-      } */
-
       // Make a blank EventList that will accumulate the chunk.
       EventList chunkEL;
       chunkEL.switchTo(eventWtype);
@@ -482,10 +476,13 @@ void DiffractionFocussing2::execEvent() {
     if (!group2xvector.empty()) {
       auto git = group2xvector.find(group);
       if (git != group2xvector.end())
-        out->setX(workspaceIndex, (git->second));
+        // Reset Histogram instead of BinEdges, the latter forbids size change.
+        out->setHistogram(workspaceIndex, BinEdges(git->second.cowData()));
       else
         // Just use the 1st X vector it found, instead of nothin.
-        out->setX(workspaceIndex, (group2xvector.begin()->second));
+        // Reset Histogram instead of BinEdges, the latter forbids size change.
+        out->setHistogram(workspaceIndex,
+                          BinEdges(group2xvector.begin()->second.cowData()));
     } else
       g_log.warning() << "Warning! No X histogram bins were found for any "
                          "groups. Histogram will be empty.\n";
@@ -494,7 +491,6 @@ void DiffractionFocussing2::execEvent() {
   setProperty("OutputWorkspace",
               boost::dynamic_pointer_cast<MatrixWorkspace>(out));
   delete prog;
-  return;
 }
 
 //=============================================================================
@@ -591,7 +587,7 @@ void DiffractionFocussing2::determineRebinParameters() {
     }
     const double min = (gpit->second).first;
     const double max = (gpit->second).second;
-    const MantidVec &X = spec.readX();
+    auto &X = spec.x();
     double temp = X.front();
     if (temp < (min)) // New Xmin found
       (gpit->second).first = temp;
@@ -616,6 +612,8 @@ void DiffractionFocussing2::determineRebinParameters() {
       Xmin = Xmax / nPoints;
     if (Xmin <= 0)
       Xmin = 1.0;
+    if (Xmin == Xmax)
+      Xmin = Xmax / 2.0;
 
     if (Xmax < Xmin) // Should never happen
     {
@@ -632,19 +630,12 @@ void DiffractionFocussing2::determineRebinParameters() {
     // g_log.information(mess.str());
     mess.str("");
 
-    // Build up the X vector.
-    boost::shared_ptr<MantidVec> xnew =
-        boost::make_shared<MantidVec>(xPoints); // New X vector
-    (*xnew)[0] = Xmin;
-    for (int64_t j = 1; j < xPoints; j++) {
-      (*xnew)[j] = Xmin * (1.0 + step);
-      Xmin = (*xnew)[j];
-    }
+    HistogramData::BinEdges xnew(
+        xPoints, HistogramData::LogarithmicGenerator(Xmin, step));
     group2xvector[gpit->first] = xnew; // Register this vector in the map
   }
   // Not needed anymore
   udet2group.clear();
-  return;
 }
 
 /***

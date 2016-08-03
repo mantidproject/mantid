@@ -10,8 +10,6 @@
 
 #include <QObject>
 
-using namespace Mantid::API;
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -48,17 +46,17 @@ public:
   /**
    * @return Function produced by the last fit
    */
-  virtual IFunction_const_sptr fittedFunction() const = 0;
+  virtual Mantid::API::IFunction_const_sptr fittedFunction() const = 0;
 
   /**
    * @return Corrected data produced by the last fit
    */
-  virtual MatrixWorkspace_const_sptr correctedData() const = 0;
+  virtual Mantid::API::MatrixWorkspace_const_sptr correctedData() const = 0;
 
   /**
    * @return Current data used for fitting
    */
-  virtual MatrixWorkspace_const_sptr data() const = 0;
+  virtual Mantid::API::MatrixWorkspace_const_sptr data() const = 0;
 
   /**
    * Perform a fit using current data and specified function and sections.
@@ -67,7 +65,7 @@ public:
    * @param function :: Function to fit
    * @param sections :: Data sections to include in the fit
    */
-  virtual void fit(IFunction_const_sptr function,
+  virtual void fit(Mantid::API::IFunction_const_sptr function,
                    const std::vector<Section> &sections) = 0;
 
 signals:

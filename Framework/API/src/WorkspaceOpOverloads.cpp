@@ -537,10 +537,6 @@ bool WorkspaceHelpers::sharedXData(const MatrixWorkspace_const_sptr WS) {
  */
 void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace,
                                         const bool forwards) {
-  // Check workspace isn't already in the correct state - do nothing if it is
-  if (workspace->isDistribution() == forwards)
-    return;
-
   // If we're not able to get a writable reference to Y, then this is an event
   // workspace, which we can't operate on.
   if (workspace->id() == "EventWorkspace")
@@ -548,35 +544,13 @@ void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace,
                              "into distributions.");
 
   const size_t numberOfSpectra = workspace->getNumberHistograms();
-
-  std::vector<double> widths(workspace->readX(0).size());
-
   for (size_t i = 0; i < numberOfSpectra; ++i) {
-    const MantidVec &X = workspace->readX(i);
-    MantidVec &Y = workspace->dataY(i);
-    MantidVec &E = workspace->dataE(i);
-    std::adjacent_difference(X.begin(), X.end(),
-                             widths.begin()); // Calculate bin widths
-
-    // RJT: I'll leave this in, but X should never be out of order.
-    // If it is there'll be problems elsewhere...
-    if (X.front() > X.back()) // If not ascending order
-      std::transform(widths.begin(), widths.end(), widths.begin(),
-                     std::negate<double>());
-
     if (forwards) {
-      std::transform(Y.begin(), Y.end(), widths.begin() + 1, Y.begin(),
-                     std::divides<double>());
-      std::transform(E.begin(), E.end(), widths.begin() + 1, E.begin(),
-                     std::divides<double>());
+      workspace->convertToFrequencies(i);
     } else {
-      std::transform(Y.begin(), Y.end(), widths.begin() + 1, Y.begin(),
-                     std::multiplies<double>());
-      std::transform(E.begin(), E.end(), widths.begin() + 1, E.begin(),
-                     std::multiplies<double>());
+      workspace->convertToCounts(i);
     }
   }
-  workspace->setDistribution(forwards);
 }
 
 } // namespace API

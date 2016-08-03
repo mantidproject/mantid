@@ -20,6 +20,15 @@ will be renamed to newName\_1, newname\_2, etc.). Otherwise, only the
 group itself will be renamed - the members will keep their previous
 names.
 
+The new name can be the same as any existing workspaces if the overwrite flag
+is set to true. This will replace the existing workspace.
+If the Overwrite flag is set to false and any name is in use RenameWorkspace
+will not rename the workspace and log an error.
+
+.. warning::
+   RenameWorkspace is set to overwrite by default to maintain backwards compatibility. 
+   Ensure the overwrite flag is set to false to prevent any existing workspaces being 
+   replaced with the renamed workspace.
 
 
 Usage
@@ -81,6 +90,41 @@ Output:
     The name of the monitor workspace attached to workspace: NameB| Is:  NameB_monitors|
     *********************************************************************
     
+**Example - Setting Overwrite on and off:**
+
+.. testcode:: ExOverwriteExisting
+
+   #Clear the ADS before starting
+   AnalysisDataService.clear()
+       
+   #Create an existing workspace called 'wsOld'
+   CreateWorkspace([0], [0], OutputWorkspace="wsOld")
+       
+   #Next create a workspace we are going to rename
+   CreateWorkspace([0], [0], OutputWorkspace="wsNew")
+       
+   #This will fail telling us that 'wsOld' already exists
+   print 'Trying to rename with OverwriteExisting set to false.'
+   try:
+       RenameWorkspace(InputWorkspace="wsNew", OutputWorkspace="wsOld", OverwriteExisting=False)
+   except RuntimeError:
+       print 'RuntimeError: The workspace wsOld already exists'
+       
+   #This will succeed in renaming and 'wsOld' will be replaced with 'wsNew'
+   print 'Trying to rename with OverwriteExisting set to true.'
+   RenameWorkspace(InputWorkspace="wsNew", OutputWorkspace="wsOld", OverwriteExisting=True) 
+   print 'Succeeded'
+   
+Output:
+
+.. testoutput:: ExOverwriteExisting
+
+   Trying to rename with OverwriteExisting set to false.
+   RuntimeError: The workspace wsOld already exists
+   Trying to rename with OverwriteExisting set to true.
+   Succeeded
+
+   
 .. categories::
 
 .. sourcelink::

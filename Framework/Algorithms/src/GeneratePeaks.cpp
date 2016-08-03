@@ -125,8 +125,6 @@ void GeneratePeaks::init() {
       "width; "
       "the default order of effective background parameters is A0, A1 and "
       "A2. ");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -162,8 +160,6 @@ void GeneratePeaks::exec() {
   }
 
   generatePeaks(functionmap, outputWS);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -229,8 +225,6 @@ void GeneratePeaks::processAlgProperties(std::string &peakfunctype,
     m_spectraSet.insert(static_cast<specnum_t>(m_wsIndex));
     m_SpectrumMap.emplace(static_cast<specnum_t>(m_wsIndex), 0);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -346,8 +340,6 @@ void GeneratePeaks::importPeaksFromTable(
         mapiter->second;
     std::sort(vec_centrefunc.begin(), vec_centrefunc.end());
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -416,8 +408,6 @@ void GeneratePeaks::importPeakFromVector(
 
   // Set up function map
   functionmap.emplace_back(m_peakFunction->centre(), compfunc);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -501,8 +491,6 @@ void GeneratePeaks::generatePeaks(
 
     } // ENDFOR(ipeak)
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -519,8 +507,6 @@ void GeneratePeaks::createFunction(std::string &peaktype,
   if (m_genBackground)
     m_bkgdFunction = boost::dynamic_pointer_cast<IBackgroundFunction>(
         API::FunctionFactory::Instance().createFunction(bkgdtype));
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -622,8 +608,6 @@ void GeneratePeaks::processTableColumnNames() {
                             m_funcParameterNames.begin()) +
            1;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -651,8 +635,6 @@ void GeneratePeaks::getSpectraSet(
     m_SpectrumMap.emplace(specnum, icount);
     ++icount;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

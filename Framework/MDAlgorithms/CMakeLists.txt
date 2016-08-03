@@ -57,6 +57,7 @@ set ( SRC_FILES
 	src/IntegrateMDHistoWorkspace.cpp
 	src/IntegratePeaksMD.cpp
 	src/IntegratePeaksMD2.cpp
+	src/IntegratePeaksMDHKL.cpp
 	src/IntegratePeaksCWSD.cpp
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
@@ -185,6 +186,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/IntegrateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD2.h
+	inc/MantidMDAlgorithms/IntegratePeaksMDHKL.h
 	inc/MantidMDAlgorithms/IntegratePeaksCWSD.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
@@ -312,6 +314,7 @@ set ( TEST_FILES
 	IntegrateFluxTest.h
 	IntegrateMDHistoWorkspaceTest.h
 	IntegratePeaksMD2Test.h
+	IntegratePeaksMDHKLTest.h
 	IntegratePeaksMDTest.h
 	IntegratePeaksCWSDTest.h
 	InvalidParameterParserTest.h

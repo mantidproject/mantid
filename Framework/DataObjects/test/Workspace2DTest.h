@@ -2,6 +2,7 @@
 #define WORKSPACE2DTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
@@ -17,6 +18,10 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
+using HistogramData::Counts;
+using HistogramData::CountStandardDeviations;
+using HistogramData::LinearGenerator;
+using WorkspaceCreationHelper::Create2DWorkspaceBinned;
 
 class Workspace2DTest : public CxxTest::TestSuite {
 public:
@@ -32,26 +37,6 @@ public:
     nbins = 5;
     nhist = 10;
     ws = Create2DWorkspaceBinned(nhist, nbins);
-  }
-
-  static Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins,
-                                                  double x0 = 0.0,
-                                                  double deltax = 1.0) {
-    MantidVecPtr x, y, e;
-    x.access().resize(nbins + 1);
-    y.access().resize(nbins, 2); // Value of 2.0 in all ys
-    e.access().resize(nbins, M_SQRT2);
-    for (int i = 0; i < nbins + 1; ++i) {
-      x.access()[i] = x0 + i * deltax;
-    }
-    Workspace2D_sptr retVal(new Workspace2D());
-    retVal->initialize(nhist, nbins + 1, nbins);
-    for (int i = 0; i < nhist; i++) {
-      retVal->setX(i, x);
-      retVal->setData(i, y, e);
-    }
-
-    return retVal;
   }
 
   void testClone() {
@@ -92,8 +77,8 @@ public:
 
   void testSetX() {
     double aNumber = 5.3;
-    boost::shared_ptr<MantidVec> v =
-        boost::make_shared<MantidVec>(nbins, aNumber);
+    auto v = boost::make_shared<HistogramData::HistogramX>(
+        nbins + 1, LinearGenerator(aNumber, 1.0));
     TS_ASSERT_THROWS_NOTHING(ws->setX(0, v));
     TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
     TS_ASSERT_THROWS(ws->setX(-1, v), std::range_error);
@@ -102,42 +87,40 @@ public:
 
   void testSetX_cowptr() {
     double aNumber = 5.4;
-    MantidVecPtr v;
-    v.access() = MantidVec(nbins, aNumber);
+    auto v = Kernel::make_cow<HistogramData::HistogramX>(
+        nbins + 1, LinearGenerator(aNumber, 1.0));
     TS_ASSERT_THROWS_NOTHING(ws->setX(0, v));
     TS_ASSERT_EQUALS(ws->dataX(0)[0], aNumber);
     TS_ASSERT_THROWS(ws->setX(-1, v), std::range_error);
     TS_ASSERT_THROWS(ws->setX(nhist + 5, v), std::range_error);
   }
 
-  void testSetData_cowptr() {
+  void testSetCounts_cowptr() {
     double aNumber = 5.5;
-    MantidVecPtr v;
-    v.access() = MantidVec(nbins, aNumber);
-    TS_ASSERT_THROWS_NOTHING(ws->setData(0, v));
+    auto v = Kernel::make_cow<HistogramData::HistogramY>(nbins, aNumber);
+    TS_ASSERT_THROWS_NOTHING(ws->setCounts(0, v));
     TS_ASSERT_EQUALS(ws->dataY(0)[0], aNumber);
     TS_ASSERT_DIFFERS(ws->dataY(1)[0], aNumber);
   }
 
-  void testSetData_cowptr2() {
+  void testSetCounts_cowptr2() {
     double aNumber = 5.6;
-    MantidVecPtr v, e;
-    v.access() = MantidVec(nbins, aNumber);
-    e.access() = MantidVec(nbins, aNumber * 2);
-    TS_ASSERT_THROWS_NOTHING(ws->setData(0, v, e));
+    auto v = Kernel::make_cow<HistogramData::HistogramY>(nbins, aNumber);
+    auto e = Kernel::make_cow<HistogramData::HistogramE>(nbins, aNumber * 2);
+    TS_ASSERT_THROWS_NOTHING(ws->setCounts(0, v));
+    TS_ASSERT_THROWS_NOTHING(ws->setCountStandardDeviations(0, e));
     TS_ASSERT_EQUALS(ws->dataY(0)[0], aNumber);
     TS_ASSERT_EQUALS(ws->dataE(0)[0], aNumber * 2);
     TS_ASSERT_DIFFERS(ws->dataY(1)[0], aNumber);
     TS_ASSERT_DIFFERS(ws->dataE(1)[0], aNumber * 2);
   }
 
-  void testSetData() {
+  void testSetCounts() {
     double aNumber = 5.7;
-    const boost::shared_ptr<MantidVec> v =
-        boost::make_shared<MantidVec>(nbins, aNumber);
-    const boost::shared_ptr<MantidVec> e =
-        boost::make_shared<MantidVec>(nbins, aNumber * 2);
-    TS_ASSERT_THROWS_NOTHING(ws->setData(0, v, e));
+    auto v = boost::make_shared<HistogramData::HistogramY>(nbins, aNumber);
+    auto e = boost::make_shared<HistogramData::HistogramE>(nbins, aNumber * 2);
+    TS_ASSERT_THROWS_NOTHING(ws->setCounts(0, v));
+    TS_ASSERT_THROWS_NOTHING(ws->setCountStandardDeviations(0, e));
     TS_ASSERT_EQUALS(ws->dataY(0)[0], aNumber);
     TS_ASSERT_EQUALS(ws->dataE(0)[0], aNumber * 2);
     TS_ASSERT_DIFFERS(ws->dataY(1)[0], aNumber);

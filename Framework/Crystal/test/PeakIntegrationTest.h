@@ -1,6 +1,7 @@
 #ifndef MANTID_CRYSTAL_PeakIntegrationTEST_H_
 #define MANTID_CRYSTAL_PeakIntegrationTEST_H_
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidCrystal/PeakIntegration.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -30,6 +31,8 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::LinearGenerator;
 
 class PeakIntegrationTest : public CxxTest::TestSuite {
 public:
@@ -113,16 +116,8 @@ public:
     for (size_t d = 0; d < nd; ++d)
       delete gens[d];
 
-    // Create the x-axis for histogramming.
-    MantidVecPtr x1;
-    MantidVec &xRef = x1.access();
-    xRef.resize(numBins);
-    for (int i = 0; i < numBins; ++i) {
-      xRef[i] = i * binDelta;
-    }
-
     // Set all the histograms at once.
-    retVal->setAllX(x1);
+    retVal->setAllX(BinEdges(numBins, LinearGenerator(0.0, binDelta)));
 
     // Some sanity checks
     TS_ASSERT_EQUALS(retVal->getInstrument()->getName(), "MINITOPAZ");

@@ -2,17 +2,17 @@
 #define SAVERKHTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataHandling/SaveRKH.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <fstream>
+#include <numeric>
 #include <Poco/File.h>
 using namespace Mantid::API;
-
-namespace {
-const size_t nSpec = 1;
-const size_t nBins = 10;
-}
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::BinEdgeVariances;
+using Mantid::HistogramData::LinearGenerator;
 
 class SaveRKHTest : public CxxTest::TestSuite {
 public:
@@ -256,23 +256,18 @@ private:
   std::string outputFile;
 
   /// Provides a workpace with a x error value
-  MatrixWorkspace_sptr
-  createInputWorkspaceHistoWithXerror(std::string type = "histo") const {
-    size_t x_length = 0;
-    size_t y_length = nBins;
-    if (type == "histo") {
-      x_length = nBins + 1;
-    } else {
-      x_length = nBins;
-    }
-    // Set up a small workspace for testing
+  MatrixWorkspace_sptr createInputWorkspaceHistoWithXerror() const {
+    size_t nSpec = 1;
+    const size_t x_length = 11;
+    const size_t y_length = x_length - 1;
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(
         "Workspace2D", nSpec, x_length, y_length);
+    BinEdges x(x_length, LinearGenerator(0.0, 1.0));
+    BinEdgeVariances dx(x_length);
+    std::iota(dx.begin(), dx.end(), 0.0);
     for (size_t j = 0; j < nSpec; ++j) {
-      for (size_t k = 0; k < x_length; ++k) {
-        ws->dataX(j)[k] = double(k);
-        ws->dataDx(j)[k] = sqrt(double(k));
-      }
+      ws->setBinEdges(j, x);
+      ws->setBinEdgeStandardDeviations(j, dx);
       ws->dataY(j).assign(y_length, double(1));
       ws->dataE(j).assign(y_length, double(1));
     }

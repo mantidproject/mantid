@@ -98,33 +98,16 @@ public:
   double getEventXMax() const;
   void getEventXMinMax(double &xmin, double &xmax) const;
 
-  //------------------------------------------------------------
-  // Return the data X vector at a given workspace index
   MantidVec &dataX(const std::size_t) override;
-
-  // Return the data Y vector at a given workspace index
   MantidVec &dataY(const std::size_t) override;
-
-  // Return the data E vector at a given workspace index
   MantidVec &dataE(const std::size_t) override;
-
-  // Return the X data erro vector at a given workspace index
   MantidVec &dataDx(const std::size_t) override;
-
-  // Return the const data X vector at a given workspace index
   const MantidVec &dataX(const std::size_t) const override;
-
-  // Return the const data Y vector at a given workspace index
   const MantidVec &dataY(const std::size_t) const override;
-
-  // Return the const data E vector at a given workspace index
   const MantidVec &dataE(const std::size_t) const override;
-
-  // Return the const X data error vector at a given workspace index
   const MantidVec &dataDx(const std::size_t) const override;
-
-  // Get a pointer to the x data at the given workspace index
-  Kernel::cow_ptr<MantidVec> refX(const std::size_t) const override;
+  Kernel::cow_ptr<HistogramData::HistogramX>
+  refX(const std::size_t) const override;
 
   /// Generate a new histogram from specified event list at the given index.
   void generateHistogram(const std::size_t index, const MantidVec &X,
@@ -138,7 +121,7 @@ public:
 
   //------------------------------------------------------------
   // Set the x-axis data (histogram bins) for all pixels
-  virtual void setAllX(Kernel::cow_ptr<MantidVec> &x);
+  virtual void setAllX(const HistogramData::BinEdges &x);
 
   // Get or add an EventList
   EventList &getOrAddEventList(const std::size_t workspace_index);

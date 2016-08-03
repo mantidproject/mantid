@@ -8,11 +8,9 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
 #include <QObject>
-#include <qwt_data.h>
-
 #include <boost/optional.hpp>
 
-using namespace Mantid::API;
+class QwtData;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -45,13 +43,13 @@ class MANTIDQT_CUSTOMINTERFACES_DLL IALCPeakFittingView : public QObject {
 
 public:
   /// @return If index empty - total function, otherwise - function at index
-  virtual IFunction_const_sptr function(QString index) const = 0;
+  virtual Mantid::API::IFunction_const_sptr function(QString index) const = 0;
 
   /// @return Index of the function currently seleted in the Function Browser
   virtual boost::optional<QString> currentFunctionIndex() const = 0;
 
   /// @return A peak currently represented by the peak picker
-  virtual IPeakFunction_const_sptr peakPicker() const = 0;
+  virtual Mantid::API::IPeakFunction_const_sptr peakPicker() const = 0;
 
 public slots:
   /// Performs any necessary initialization
@@ -69,7 +67,8 @@ public slots:
 
   /// Set function displayed in Function Browser
   /// @param newFunction :: New function to display
-  virtual void setFunction(const IFunction_const_sptr &newFunction) = 0;
+  virtual void
+  setFunction(const Mantid::API::IFunction_const_sptr &newFunction) = 0;
 
   /// Update a single parameter in Function Browser
   /// @param funcIndex :: Index of the function where to update parameter
@@ -84,7 +83,8 @@ public slots:
 
   /// Resize/move PeakPicker so that it represents specified peak
   /// @param peak :: A new peak to represent
-  virtual void setPeakPicker(const IPeakFunction_const_sptr &peak) = 0;
+  virtual void
+  setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) = 0;
 
   /**
    * Pops-up an error box

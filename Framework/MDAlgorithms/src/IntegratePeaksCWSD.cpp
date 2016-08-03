@@ -28,11 +28,6 @@ IntegratePeaksCWSD::IntegratePeaksCWSD()
     : m_useSinglePeakCenterFmUser(false), m_doMergePeak(false) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IntegratePeaksCWSD::~IntegratePeaksCWSD() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksCWSD::init() {
@@ -363,8 +358,6 @@ void IntegratePeaksCWSD::simplePeakIntegration(
   "\n";
   g_log.warning() << "  Number of total detectors = " << num_det << "\n";
   */
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

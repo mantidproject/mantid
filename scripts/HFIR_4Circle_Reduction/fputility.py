@@ -1,3 +1,4 @@
+#pylint: disable=R0914
 # Utility methods for Fullprof
 
 

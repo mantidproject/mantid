@@ -210,7 +210,7 @@ Mantid::Kernel::DateAndTime LiveDataAlgorithm::getStartTime() const {
  *         Returns a NULL pointer if no algorithm was chosen.
  */
 IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
-  std::string prefix = "";
+  std::string prefix;
   if (postProcessing)
     prefix = "Post";
 

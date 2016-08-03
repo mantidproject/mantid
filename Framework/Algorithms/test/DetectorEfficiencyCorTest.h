@@ -10,6 +10,10 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountVariances;
+
 class DetectorEfficiencyCorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -65,8 +69,8 @@ public:
     MatrixWorkspace_sptr result = grouper.getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1);
-    TS_ASSERT_DELTA(result->readY(0).front(), 10.07373656, 1e-8);
-    TS_ASSERT_DELTA(result->readY(0).back(), 0.0, 1e-8);
+    TS_ASSERT_DELTA(result->y(0).front(), 10.07373656, 1e-8);
+    TS_ASSERT_DELTA(result->y(0).back(), 0.0, 1e-8);
   }
 
   void testDataWithGroupedDetectors() {
@@ -96,8 +100,8 @@ public:
     MatrixWorkspace_sptr result = grouper.getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1);
-    TS_ASSERT_DELTA(result->readY(0).front(), 10.07367566, 1e-8);
-    TS_ASSERT_DELTA(result->readY(0).back(), 0.0, 1e-8);
+    TS_ASSERT_DELTA(result->y(0).front(), 10.07367566, 1e-8);
+    TS_ASSERT_DELTA(result->y(0).back(), 0.0, 1e-8);
   }
 
 private:
@@ -115,24 +119,9 @@ private:
     space->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
 
-    MantidVecPtr x, y, e;
-    x.access().resize(nbins + 1, 0.0);
-    y.access().resize(nbins, 0.0);
-    e.access().resize(nbins, 0.0);
-    for (int i = 0; i < nbins; ++i) {
-      x.access()[i] = static_cast<double>((1 + i) / 100);
-      y.access()[i] = 10 + i;
-      e.access()[i] = sqrt(5.0);
-    }
-    x.access()[nbins] = static_cast<double>(nbins);
-    // Fill a couple of zeros just as a check that it doesn't get changed
-    y.access()[nbins - 1] = 0.0;
-    e.access()[nbins - 1] = 0.0;
-
-    for (int i = 0; i < nspecs; i++) {
-      space2D->setX(i, x);
-      space2D->setData(i, y, e);
-    }
+    space2D->setHistogram(0, BinEdges{1e-14, 2e-14, 3e-14, 4e-14, 4.0},
+                          Counts{10, 11, 12, 0},
+                          CountVariances{5.0, 5.0, 5.0, 0.0});
 
     std::string xmlShape = "<cylinder id=\"shape\"> ";
     xmlShape += "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";

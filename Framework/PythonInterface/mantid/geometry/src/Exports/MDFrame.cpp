@@ -1,10 +1,12 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using namespace Mantid::Geometry;
-
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(MDFrame)
 
 void export_MDFrame() {
 

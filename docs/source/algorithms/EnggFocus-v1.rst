@@ -22,9 +22,9 @@ TOF. The output workspace produced by this algorithm has one spectrum.
 The algorithm also normalizes the spectra values by current or proton
 charge, using :ref:`algm-NormaliseByCurrent` so that the output
 workspace is focused and normalized. In the focusing process, several
-bins will be masked as well. A list of minimum and maximum TOF bin
-boundaries for the masking can be given. The default values of this
-list is set for the ENGIN-X instrument.
+bins will be masked in the spectra as well. A list of minimum and
+maximum TOF bin boundaries for the masking can be given. The default
+values of this list is set for the ENGIN-X instrument.
 
 If a table of detector positions is passed as an input property, the
 detectors are calibrated before performing the conversions between TOF
@@ -69,10 +69,7 @@ Usage
 
    # Print a few arbitrary bins where higher intensities are expected
    fmt = "For TOF of {0:.3f} normalized intensity is {1:.3f}"
-   # This first bin is a pulse that is masked by EnggFocus by default
-   bin = 3169
-   print fmt.format(focussed_ws.readX(0)[bin], focussed_ws.readY(0)[bin]) + " (it is masked out)"
-   for bin in [6037, 7124]:
+   for bin in [3169, 6037, 7124]:
      print fmt.format(focussed_ws.readX(0)[bin], focussed_ws.readY(0)[bin])
 
 .. testcleanup:: ExSimpleFocussing
@@ -87,9 +84,9 @@ Output:
 .. testoutput:: ExSimpleFocussing
 
    No. of spectra: 1
-   For TOF of 20165.642 normalized intensity is 0.000 (it is masked out)
+   For TOF of 20165.642 normalized intensity is 1.769
    For TOF of 33547.826 normalized intensity is 2.895
-   For TOF of 38619.804 normalized intensity is 5.317
+   For TOF of 38619.804 normalized intensity is 5.181
    
 .. categories::
 

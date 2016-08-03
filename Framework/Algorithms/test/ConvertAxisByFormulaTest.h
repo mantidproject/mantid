@@ -122,9 +122,9 @@ public:
     Axis *ax = result->getAxis(0);
     TS_ASSERT_EQUALS(ax->unit()->caption(), "XTitle");
     TS_ASSERT_EQUALS(ax->unit()->label(), "XUnit");
-    for (size_t i = 0; i < ax->length(); ++i) {
-      TS_ASSERT_DELTA(ax->getValue(i), 9.0, 0.0001);
-    }
+    TS_ASSERT_EQUALS(ax->length(), 10);
+    TS_ASSERT_DELTA(ax->getValue(0), 9.0, 1e-14);
+    TS_ASSERT_DELTA(ax->getValue(9), 144.0, 1e-14);
 
     if (AnalysisDataService::Instance().doesExist(inputWs)) {
       AnalysisDataService::Instance().remove(inputWs);

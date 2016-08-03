@@ -11,6 +11,8 @@ Installation
 Windows
 #######
 
+* IPython has been upgraded to version 3.2.1
+
 OS X
 ####
 
@@ -19,6 +21,13 @@ User Interface
 
 Instrument View
 ###############
+
+Workspace Matrix View
+#####################
+* Masked spectra (including masked monitors) will be highlighted with background colour (typically light grey).
+* Unmasked monitor spectra will have a dynamic background colour depending on the system settings (typically light yellow, as before).
+
+.. figure::  ../../images/MaskedAndMonitor.png
 
 Plotting Improvements
 #####################
@@ -31,6 +40,7 @@ Algorithms
 .. figure::  ../../images/GroupWorkspaces_multipleInput.png
    :width: 487
    :align: right
+
 - Algorithms can now use a multiple selection list box for property input, :ref:`MergeRuns <algm-MergeRuns>` and :ref:`GroupWorkspaces <algm-GroupWorkspaces>` use this so far. To select multiple rows use the Shift or Ctrl (Cmd) keys while clicking  with the mouse.
 
 
@@ -47,13 +57,29 @@ Documentation
 #############
 * Added Ragged Workspace as a concept page
 
+Options Window
+###############
+- Within Preferences->Mantid->Options ticking a category off/on will now untick/tick all subcategories. Also having some subcategories on and off will now show a partially ticked box for that category. 
+
 
 Bugs Resolved
 -------------
+- Floating windows now always stay on top of the main window in OSX
+- The sliceviewer will now rebin an existing binned workspace correctly.
+- 2D plots now display correctly for point data workspaces as well as for histogram data
 
 SliceViewer Improvements
 ------------------------
 * When opening the sliceviewer, it will default to showing the first two non-integrated dimensions
+
+VSI Improvements
+----------------
+* ParaView updated to version 5.1.0
+
+Multi-dataset fitting interface improvements
+--------------------------------------------
+* Fitting a single dataset with a composite function no longer causes a crash
+
 |
 
 Full list of

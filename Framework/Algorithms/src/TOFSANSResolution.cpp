@@ -114,7 +114,7 @@ void TOFSANSResolution::exec() {
       make_unique<WorkspaceProperty<>>("ThetaError", "", Direction::Output));
   setPropertyValue("ThetaError", "__" + iqWS->getName() + "_theta_error");
   setProperty("ThetaError", thetaWS);
-  thetaWS->setX(0, iqWS->readX(0));
+  thetaWS->setX(0, iqWS->refX(0));
   MantidVec &ThetaY = thetaWS->dataY(0);
 
   MatrixWorkspace_sptr tofWS = WorkspaceFactory::Instance().create(iqWS);
@@ -122,7 +122,7 @@ void TOFSANSResolution::exec() {
       make_unique<WorkspaceProperty<>>("TOFError", "", Direction::Output));
   setPropertyValue("TOFError", "__" + iqWS->getName() + "_tof_error");
   setProperty("TOFError", tofWS);
-  tofWS->setX(0, iqWS->readX(0));
+  tofWS->setX(0, iqWS->refX(0));
   MantidVec &TOFY = tofWS->dataY(0);
 
   // Initialize Dq
