@@ -2129,6 +2129,27 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
+  void testCopyEmptySelection() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    // The user hits "copy selected" with the second and third rows selected
+    EXPECT_CALL(mockDataProcessorView, setClipboard(std::string())).Times(1);
+    EXPECT_CALL(mockDataProcessorView, getSelectedRows())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
+    presenter.notify(DataProcessorPresenter::CopySelectedFlag);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
   void testCopyRows() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
@@ -2494,6 +2515,27 @@ public:
     TS_ASSERT_EQUALS(ws->String(5, ScaleCol), "3");
     TS_ASSERT_EQUALS(ws->String(5, GroupCol), "1");
     TS_ASSERT_EQUALS(ws->String(5, OptionsCol), "def");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testPasteEmptyClipboard() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    // Empty clipboard
+    EXPECT_CALL(mockDataProcessorView, getClipboard())
+        .Times(1)
+        .WillRepeatedly(Return(std::string()));
+    EXPECT_CALL(mockDataProcessorView, getSelectedRows()).Times(0);
+    presenter.notify(DataProcessorPresenter::PasteSelectedFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
