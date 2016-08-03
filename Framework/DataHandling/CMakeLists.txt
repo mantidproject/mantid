@@ -52,8 +52,8 @@ set ( SRC_FILES
 	src/LoadHelper.cpp
 	src/LoadIDFFromNexus.cpp
 	src/LoadILL.cpp
-	src/LoadILLINX.cpp
 	src/LoadILLIndirect.cpp
+	src/LoadILLINX.cpp
 	src/LoadILLReflectometry.cpp
 	src/LoadILLSANS.cpp
 	src/LoadISISNexus2.cpp
@@ -397,11 +397,10 @@ set ( TEST_FILES
 	LoadGSASInstrumentFileTest.h
 	LoadGSSTest.h
 	LoadIDFFromNexusTest.h
-	LoadILL.h
 	LoadILLIndirectTest.h
+	LoadILLINXTest.h
 	LoadILLReflectometryTest.h
 	LoadILLSANSTest.h
-    LoadILLINXTest.h
 	LoadISISNexusTest.h
 	LoadInstrumentFromRawTest.h
 	LoadInstrumentTest.h

@@ -1,5 +1,5 @@
-#ifndef MANTID_LOADILL_H_
-#define MANTID_LOADILL_H_
+#ifndef MANTID_DATAHANDLING_LOADILL_H_
+#define MANTID_DATAHANDLING_LOADILL_H_
 
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "DataHandling/LoadILLINX.h"
@@ -30,8 +30,7 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadILL : public DataHandling::LoadILLINX,
-                          API::DeprecatedAlgorithm {
+class DLLExport LoadILL : public LoadILLINX, public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   LoadILL();
