@@ -11,7 +11,7 @@ $param_style
   outputWorkspaceMT [label="OutputWorkspace"]
   outputWorksapceMTScale [label="OutputWorkspace"]
   thetaIn           [label="ThetaIn"]
-  sourceRotationAngle  [label = "Rotation Angle"] 
+  sourceRotationAngle  [label = "Rotation Angle"]
   sourceRotationAngleBack [label = "-Rotation Angle"]
   thetaOut          [label="ThetaOut"]
   corrAlg           [label="CorrectionAlgorithm"]
@@ -32,17 +32,18 @@ $decision_style
   checkCorrAlg    [label="CorrectionAlgorithm?"]
   checkSourceRotation [label="Is Source in Correct Position?"]
   checkSourceRotationBack [label = "Was Source Rotated?"]
-  checkRebinMin  [label="MomentumTransferMinimum given?"]
-  checkRebinMax [label="MomentumTransferMaximum given?"]
+  checkRebinMin   [label="MomentumTransferMinimum given?"]
+  checkRebinMax   [label="MomentumTransferMaximum given?"]
   checkRebinStep  [label="MomentumTransferStep given?"]
   checkScale      [label="ScaleFactor given?"]
+  checkMonUnity   [label="Monitors?"]
+  checkBgMinMax   [label="Min or Max non-zero?"]
 }
 
 subgraph algorithms {
 $algorithm_style
   calcTheta       [label="SpecularReflectionCalculateTheta"]
   convertToMT     [label="ConvertUnits\n(Momentum-transfer)"]
-  convertToWL     [label="ConvertUnits\n(To &lambda;)"]
   createTransWS   [label="CreateTransmissionWorkspace"]
   divideDetMon    [label="Divide\n(Detectors / Monitors / Unity)"]
   divideTrans     [label="Divide\n(InputWorkspace / TransmissionWorkspace)"]
@@ -55,6 +56,8 @@ $algorithm_style
   rebin           [label="Rebin"]
   scale           [label="Scale"]
   calcResolution  [label="CalculateResolution"]
+  convertDet      [label="Convert Units\n(AlignBins = True)"]
+  convertMon      [label="Convert Units"]
 }
 
 subgraph processes {
@@ -75,14 +78,35 @@ $value_style
 
 inputWorkspace    -> checkXUnit
 checkXUnit        -> checkTransRun    [label="Yes"]
-checkXUnit        -> convertToWL      [label="No"]
-convertToWL       -> valMon           [label="Monitors"]
-convertToWL       -> valDet           [label="Detectors"]
-convertToWL       -> valUnity         [label="No Monitors"]
-valMon            -> checkNormDetMon
+checkXUnit        -> convertDet       [label="Detectors"]
+checkXUnit        -> checkMonUnity    [label="Monitors"]
+checkMonUnity     -> convertMon       [label="Yes"]
+checkMonUnity     -> valUnity         [label="No"]
+convertDet        -> valDet
+valDet            -> groupDet
+procCommands      -> groupDet
+convertMon        -> valMon
 checkNormDetMon   -> intMon           [label="Yes"]
 checkNormDetMon   -> divideDetMon     [label="No"]
-valDet            -> checkMultDet
+
+groupDet          -> cropDetWS
+wavMin            -> cropDetWS
+wavMax            -> cropDetWS
+cropDetWS         -> rebinDet
+wavStep           -> rebinDet
+rebinDet          -> detWS
+detWS             -> rebinToWS
+
+valMon            -> cropMonWS
+monStartWSIndex   -> cropMonWS
+monEndWSIndex     -> cropMonWS
+cropMonWS         -> checkBgMinMax
+checkBgMinMax     -> calcFlatBg       [label="Yes"]
+checkBgMinMax     -> rebinToWS        [label="No"]
+calcFlatBg        -> rebinToWS
+rebinToWS         -> checkNormDetMon
+
+detWS             -> checkMultDet
 valUnity          -> divideDetMon
 intMon            -> valIntegrated
 valIntegrated     -> divideDetMon
