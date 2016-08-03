@@ -513,8 +513,8 @@ void EnggDiffFittingViewQtWidget::setPeakList(
   m_ui.lineEdit_fitting_peaks->setText(QString::fromStdString(peakList));
 }
 
-std::vector<std::string>
-EnggDiffFittingViewQtWidget::splitFittingDirectory(const std::string &selectedfPath) {
+std::vector<std::string> EnggDiffFittingViewQtWidget::splitFittingDirectory(
+    const std::string &selectedfPath) {
 
   Poco::Path PocofPath(selectedfPath);
   std::string selectedbankfName = PocofPath.getBaseName();
