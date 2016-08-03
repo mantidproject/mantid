@@ -121,13 +121,13 @@ void He3TubeEfficiency::exec() {
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    this->outputWS->setX(i, this->inputWS->refX(i));
+    this->outputWS->setSharedX(i, this->inputWS->sharedX(i));
     try {
       this->correctForEfficiency(i);
     } catch (std::out_of_range &) {
       // if we don't have all the data there will be spectra we can't correct,
       // avoid leaving the workspace part corrected
-      Mantid::MantidVec &dud = this->outputWS->dataY(i);
+      auto &dud = this->outputWS->mutableY(i);
       std::transform(dud.begin(), dud.end(), dud.begin(),
                      std::bind2nd(std::multiplies<double>(), 0));
       PARALLEL_CRITICAL(deteff_invalid) {
@@ -169,27 +169,30 @@ void He3TubeEfficiency::correctForEfficiency(std::size_t spectraIndex) {
   const double exp_constant = this->calculateExponential(spectraIndex, det);
   const double scale = this->getProperty("ScaleFactor");
 
-  Mantid::MantidVec &yout = this->outputWS->dataY(spectraIndex);
-  Mantid::MantidVec &eout = this->outputWS->dataE(spectraIndex);
-  // Need the original values so this is not a reference
-  const Mantid::MantidVec yValues = this->inputWS->readY(spectraIndex);
-  const Mantid::MantidVec eValues = this->inputWS->readE(spectraIndex);
+  const auto &yValues = this->inputWS->y(spectraIndex);
+  const auto &eValues = this->inputWS->e(spectraIndex);
+  auto yInItr = yValues.cbegin();
+  auto eInItr = eValues.cbegin();
 
-  auto yinItr = yValues.cbegin();
-  auto einItr = eValues.cbegin();
-  auto xItr = this->inputWS->readX(spectraIndex).cbegin();
-  auto youtItr = yout.begin();
-  auto eoutItr = eout.begin();
+  auto &yOut = this->outputWS->mutableY(spectraIndex);
+  auto &eOut = this->outputWS->mutableE(spectraIndex);
+  auto yOutItr = yOut.begin();
+  auto eOutItr = eOut.begin();
 
-  for (; youtItr != yout.end(); ++youtItr, ++eoutItr) {
-    const double wavelength = (*xItr + *(xItr + 1)) / 2.0;
-    const double effcorr =
-        this->detectorEfficiency(exp_constant * wavelength, scale);
-    *youtItr = (*yinItr) * effcorr;
-    *eoutItr = (*einItr) * effcorr;
-    ++yinItr;
-    ++einItr;
-    ++xItr;
+  const auto wavelength = this->inputWS->points(spectraIndex);
+  auto wavelenItr = wavelength.cbegin();
+
+  // not declared const to avoid declaration in tight loop for performance
+  /*const*/ double effcorr(0.0);
+  for (; yOutItr != yOut.end(); ++yOutItr, ++eOutItr) {
+    effcorr = this->detectorEfficiency(exp_constant * (*wavelenItr), scale);
+    *yOutItr = (*yInItr) * effcorr;
+    ++yInItr;
+
+    *eOutItr = (*eInItr) * effcorr;
+    ++eInItr;
+
+    ++wavelenItr;
   }
 }
 

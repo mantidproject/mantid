@@ -51,11 +51,11 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
 
     // Monitor should be untouched
-    TS_ASSERT_DELTA(result->readY(0).front(), 10.0, 1e-6);
+    TS_ASSERT_DELTA(result->y(0).front(), 10.0, 1e-6);
     // Check some detector values
-    TS_ASSERT_DELTA(result->readY(1).back(), 15.989063, 1e-6);
-    TS_ASSERT_DELTA(result->readY(2)[2], 21.520201, 1e-6);
-    TS_ASSERT_DELTA(result->readY(3).front(), 31.716197, 1e-6);
+    TS_ASSERT_DELTA(result->y(1).back(), 15.989063, 1e-6);
+    TS_ASSERT_DELTA(result->y(2)[2], 21.520201, 1e-6);
+    TS_ASSERT_DELTA(result->y(3).front(), 31.716197, 1e-6);
 
     AnalysisDataService::Instance().remove(inputWS);
   }
@@ -122,11 +122,11 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS);
 
     // Monitor should be untouched
-    TS_ASSERT_DELTA(result->readY(0).front(), 10.0, 1e-6);
+    TS_ASSERT_DELTA(result->y(0).front(), 10.0, 1e-6);
     // Check that detector values should be zero
-    TS_ASSERT_DELTA(result->readY(1).back(), 0.0, 1e-6);
-    TS_ASSERT_DELTA(result->readY(2)[2], 0.0, 1e-6);
-    TS_ASSERT_DELTA(result->readY(3).front(), 0.0, 1e-6);
+    TS_ASSERT_DELTA(result->y(1).back(), 0.0, 1e-6);
+    TS_ASSERT_DELTA(result->y(2)[2], 0.0, 1e-6);
+    TS_ASSERT_DELTA(result->y(3).front(), 0.0, 1e-6);
 
     AnalysisDataService::Instance().remove(inputWS);
   }
