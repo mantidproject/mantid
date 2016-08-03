@@ -46,6 +46,7 @@ if ( CXXTEST_FOUND )
             DataObjects
             Geometry
             HistogramData
+            Indexing
             Kernel
             Nexus
             ${Boost_LIBRARIES}

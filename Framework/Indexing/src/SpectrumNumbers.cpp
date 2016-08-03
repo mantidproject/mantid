@@ -6,7 +6,7 @@
 namespace Mantid {
 namespace Indexing {
 
-SpectrumNumbers::SpectrumNumbers(std::vector<specnum_t> &&spectrumNumbers) {
+SpectrumNumbers::SpectrumNumbers(std::vector<specnum_t> spectrumNumbers) {
   if (!std::is_sorted(spectrumNumbers.begin(), spectrumNumbers.end(),
                       std::less_equal<specnum_t>()))
     throw std::runtime_error(

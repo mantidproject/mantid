@@ -34,7 +34,7 @@ namespace Indexing {
 */
 class MANTID_INDEXING_DLL SpectrumNumbers {
 public:
-  explicit SpectrumNumbers(std::vector<specnum_t> &&spectrumNumbers);
+  explicit SpectrumNumbers(std::vector<specnum_t> spectrumNumbers);
   explicit SpectrumNumbers(std::initializer_list<specnum_t> &&ilist);
 
   size_t size() const;

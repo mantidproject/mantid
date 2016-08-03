@@ -14,6 +14,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MersenneTwister.h"
+#include "MantidIndexing/IndexTranslator.h"
+#include "MantidIndexing/MakeRange.h"
 
 #include <cmath>
 #include <ctime>
@@ -26,6 +28,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
+using namespace Indexing;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
 using HistogramData::BinEdges;
@@ -309,9 +312,10 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
     retVal->setBinEdges(wi, x);
     retVal->setCounts(wi, y);
     retVal->setCountStandardDeviations(wi, e);
-    retVal->getSpectrum(wi).setDetectorID(detid_t(start_at_pixelID + wi));
-    retVal->getSpectrum(wi).setSpectrumNo(specnum_t(wi + 1));
   }
+  retVal->setIndexTranslator(
+      SpectrumNumbers(makeRange(1, numPixels)),
+      DetectorIDs(makeRange(start_at_pixelID, start_at_pixelID + numPixels)));
 
   return retVal;
 }
@@ -354,10 +358,6 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
   const double hourInSeconds = 60 * 60;
   for (int wi = 0; wi < numPixels; wi++) {
     EventList &el = retVal->getSpectrum(workspaceIndex);
-    el.setSpectrumNo(wi + 1);
-    el.setDetectorID(wi + start_at_pixelID);
-
-    // for each bin
 
     for (int i = 0; i < numBins; ++i) {
       // create randomised events within the bin to match the number required -
@@ -371,6 +371,9 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
     }
     workspaceIndex++;
   }
+  retVal->setIndexTranslator(
+      SpectrumNumbers(makeRange(1, numPixels)),
+      DetectorIDs(makeRange(start_at_pixelID, start_at_pixelID + numPixels)));
 
   return retVal;
 }

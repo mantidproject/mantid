@@ -5,13 +5,13 @@
 namespace Mantid {
 namespace Indexing {
 
-DetectorIDs::DetectorIDs(std::vector<detid_t> &&detectorIDs) {
+DetectorIDs::DetectorIDs(const std::vector<detid_t> &detectorIDs) {
   m_data.reserve(detectorIDs.size());
   for (auto &id : detectorIDs)
     m_data.push_back(std::vector<detid_t>{id});
 }
 
-DetectorIDs::DetectorIDs(std::vector<std::vector<detid_t>> &&detectorIDs) {
+DetectorIDs::DetectorIDs(std::vector<std::vector<detid_t>> detectorIDs) {
   m_data = std::move(detectorIDs);
   for (auto &ids : m_data) {
     std::sort(ids.begin(), ids.end());

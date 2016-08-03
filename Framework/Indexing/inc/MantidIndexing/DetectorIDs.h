@@ -34,8 +34,8 @@ namespace Indexing {
 */
 class MANTID_INDEXING_DLL DetectorIDs {
 public:
-  explicit DetectorIDs(std::vector<detid_t> &&detectorIDs);
-  explicit DetectorIDs(std::vector<std::vector<detid_t>> &&detectorIDs);
+  explicit DetectorIDs(const std::vector<detid_t> &detectorIDs);
+  explicit DetectorIDs(std::vector<std::vector<detid_t>> detectorIDs);
   explicit DetectorIDs(std::initializer_list<detid_t> &&ilist);
 
   size_t size() const;

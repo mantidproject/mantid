@@ -8,12 +8,14 @@ set ( INC_FILES
 	inc/MantidIndexing/DetectorIDs.h
 	inc/MantidIndexing/DllConfig.h
 	inc/MantidIndexing/IndexTranslator.h
+	inc/MantidIndexing/MakeRange.h
 	inc/MantidIndexing/SpectrumNumbers.h
 )
 
 set ( TEST_FILES
 	DetectorIDsTest.h
 	IndexTranslatorTest.h
+	MakeRangeTest.h
 	SpectrumNumbersTest.h
 )
 

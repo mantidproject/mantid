@@ -29,15 +29,6 @@ public:
         std::runtime_error);
   }
 
-  void test_constructor_not_strictly_ascending() {
-    TS_ASSERT_THROWS(
-        IndexTranslator(SpectrumNumbers{1, 2, 1}, DetectorIDs{0, 1, 2}),
-        std::runtime_error);
-    TS_ASSERT_THROWS(
-        IndexTranslator(SpectrumNumbers{1, 2, 2}, DetectorIDs{0, 1, 2}),
-        std::runtime_error);
-  }
-
   void test_size() {
     TS_ASSERT_EQUALS(
         IndexTranslator(SpectrumNumbers{1, 2, 3}, DetectorIDs{0, 1, 2}).size(),
