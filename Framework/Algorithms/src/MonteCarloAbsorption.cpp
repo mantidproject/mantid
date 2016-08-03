@@ -21,9 +21,12 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include "MantidHistogramData/HistogramX.h"
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::HistogramData::HistogramX;
 namespace PhysicalConstants = Mantid::PhysicalConstants;
 
 /// @cond
@@ -42,12 +45,12 @@ inline double toWavelength(double energy) {
 
 /// Get ith wavelength point for point data
 /// Assumes all checks on sizes have been done before calling
-double getWavelengthPointData(int i, const std::vector<double> &lambdas) {
+double getWavelengthPointData(int i, const HistogramX &lambdas) {
   return lambdas[i];
 }
 
 /// Get ith wavelength point for histogram data
-double getWavelengthHistogramData(int i, const std::vector<double> &lambdas) {
+double getWavelengthHistogramData(int i, const HistogramX &lambdas) {
   return 0.5 * (lambdas[i] + lambdas[i + 1]);
 }
 
@@ -163,7 +166,7 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
 
   // Configure strategy
   MCAbsorptionStrategy strategy(*beamProfile, inputWS.sample(), nevents);
-  typedef double (*LambdaPointProvider)(int, const std::vector<double> &);
+  typedef double (*LambdaPointProvider)(int, const HistogramX &);
   LambdaPointProvider lambda;
   if (inputWS.isHistogramData()) {
     lambda = &getWavelengthHistogramData;
@@ -175,12 +178,12 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
   for (int64_t i = 0; i < nhists; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    const auto &xvalues = outputWS->readX(i);
-    auto &signal = outputWS->dataY(i);
-    auto &errors = outputWS->dataE(i);
+    auto &xvalues = outputWS->x(i);
+    auto &signal = outputWS->mutableY(i);
+    auto &errors = outputWS->mutableE(i);
     // The input was cloned so clear the errors out
     // Y values are all overwritten later
-    std::fill(errors.begin(), errors.end(), 0.0);
+    errors.assign(errors.size(), 0.0);
 
     // Final detector position
     IDetector_const_sptr detector;
@@ -217,8 +220,8 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
 
     // Interpolate through points not simulated
     if (lambdaStepSize > 1) {
-      Kernel::VectorHelper::linearlyInterpolateY(xvalues, signal,
-                                                 lambdaStepSize);
+      Kernel::VectorHelper::linearlyInterpolateY(
+          xvalues.rawData(), outputWS->dataY(i), lambdaStepSize);
     }
 
     PARALLEL_END_INTERUPT_REGION
