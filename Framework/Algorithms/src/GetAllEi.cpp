@@ -381,12 +381,12 @@ void GetAllEi::exec() {
   std::transform(peaks.cbegin(), peaks.cend(), peaks_positions.begin(),
                  [](peakKeeper peak) { return peak.position; });
   auto &Signal =
-      result_ws->mutableY(0); // Signal[i] = peaks[i].height; to transform
+      result_ws->mutableY(0); 
   std::transform(peaks.cbegin(), peaks.cend(), Signal.begin(),
                  [](peakKeeper peak) { return peak.height; });
 
   auto &Error =
-      result_ws->mutableE(0); // Error[i] = peaks[i].sigma; to transform
+      result_ws->mutableE(0);
   std::transform(peaks.cbegin(), peaks.cend(), Error.begin(),
                  [](peakKeeper peak) { return peak.sigma; });
 
@@ -746,7 +746,7 @@ namespace { // for lambda extracted from findBinRanges
 void getBinRange(const HistogramData::HistogramX &eBins, double eMin,
                  double eMax, size_t &index_min, size_t &index_max) {
 
-  auto bins = eBins.rawData();
+  auto &bins = eBins.rawData();
   size_t nBins = bins.size();
   if (eMin <= bins[0]) {
     index_min = 0;
@@ -891,7 +891,7 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   // auto bins       = inputWS->dataX(wsIndex0);
   auto bins = pSpectr1.ptrX();
   size_t XLength = bins->size();
-  size_t YLength = inputWS->mutableY(wsIndex0).size();
+  size_t YLength = inputWS->y(wsIndex0).size();
   auto working_ws =
       API::WorkspaceFactory::Instance().create(inputWS, 2, XLength, YLength);
   // copy data --> very bad as implicitly assigns pointer
