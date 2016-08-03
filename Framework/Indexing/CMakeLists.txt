@@ -1,11 +1,14 @@
 set ( SRC_FILES
+	src/IndexTranslator.cpp
 )
 
 set ( INC_FILES
 	inc/MantidIndexing/DllConfig.h
+	inc/MantidIndexing/IndexTranslator.h
 )
 
 set ( TEST_FILES
+	IndexTranslatorTest.h
 )
 
 if (COVERALLS)
