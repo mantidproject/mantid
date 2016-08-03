@@ -213,6 +213,7 @@ void ConvFit::setup() {
   // Post Plot and Save
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
 
   m_previousFit = m_uiForm.cbFitType->currentText();
 
@@ -349,6 +350,26 @@ void ConvFit::plotClicked() {
     }
   } else {
     return;
+  }
+}
+
+/**
+ * Plots the current spectrum displayed in the preview plot
+ */
+void ConvFit::plotCurrentPreview() {
+  if (!m_cfInputWS) {
+    return;
+  }
+  if (m_cfInputWS->getName().compare(m_previewPlotData->getName()) == 0) {
+    // Plot only the sample curve
+    const auto workspaceIndex = m_uiForm.spPlotSpectrum->value();
+    IndirectTab::plotSpectrum(
+        QString::fromStdString(m_previewPlotData->getName()), workspaceIndex,
+        workspaceIndex);
+  } else {
+    // Plot Sample, Fit and Diff curve
+    IndirectTab::plotSpectrum(
+        QString::fromStdString(m_previewPlotData->getName()), 0, 2);
   }
 }
 
@@ -492,7 +513,7 @@ void ConvFit::loadSettings(const QSettings &settings) {
 void ConvFit::newDataLoaded(const QString wsName) {
   m_cfInputWSName = wsName;
   m_cfInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      m_cfInputWSName.toStdString());
+	  m_cfInputWSName.toStdString());
 
   int maxWsIndex = static_cast<int>(m_cfInputWS->getNumberHistograms()) - 1;
 
@@ -1035,6 +1056,7 @@ void ConvFit::updatePlot() {
   int specNo = m_uiForm.spPlotSpectrum->text().toInt();
 
   m_uiForm.ppPlot->clear();
+  m_previewPlotData = m_cfInputWS;
   m_uiForm.ppPlot->addSpectrum("Sample", m_cfInputWS, specNo);
 
   try {
@@ -1069,6 +1091,7 @@ void ConvFit::updatePlot() {
       MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
           outputGroup->getItem(specNo - m_runMin));
       if (ws) {
+        m_previewPlotData = ws;
         m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
         m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
         if (m_uiForm.ckPlotGuess->isChecked()) {
@@ -1226,6 +1249,9 @@ void ConvFit::singleFitComplete(bool error) {
   // Plot the line on the mini plot
   m_uiForm.ppPlot->removeSpectrum("Guess");
   const auto resultName = m_singleFitOutputName + "_Workspace";
+  m_previewPlotData =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          resultName.toStdString());
   m_uiForm.ppPlot->addSpectrum("Fit", resultName, 1, Qt::red);
   m_uiForm.ppPlot->addSpectrum("Diff", resultName, 2, Qt::blue);
 

@@ -47,6 +47,7 @@ private slots:
   void algorithmComplete(bool error);
   void saveClicked();
   void plotClicked();
+  void plotCurrentPreview();
 
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
@@ -71,6 +72,7 @@ private:
   QtTreePropertyBrowser *m_cfTree;
   QMap<QtProperty *, QtProperty *> m_fixedProps;
   Mantid::API::MatrixWorkspace_sptr m_cfInputWS;
+  Mantid::API::MatrixWorkspace_sptr m_previewPlotData;
   QString m_cfInputWSName;
   bool m_confitResFileType;
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;
