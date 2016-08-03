@@ -270,8 +270,8 @@ private:
       EventList &evlist = testWS->getSpectrum(ihist);
       BinEdges xdata(numBins + 1, LinearGenerator(0.0, rescaling_factor));
 
-	  for (auto &tof : xdata)
-		  evlist.addEventQuickly(TofEvent(tof));
+      for (auto &tof : xdata)
+        evlist.addEventQuickly(TofEvent(tof));
 
       evlist.setX(xdata.cowData()); // set the bins for the associated histogram
     }

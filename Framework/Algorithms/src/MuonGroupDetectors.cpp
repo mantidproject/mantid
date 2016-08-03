@@ -97,8 +97,8 @@ void MuonGroupDetectors::exec() {
     // We will be setting them anew
     outWS->getSpectrum(groupIndex).clearDetectorIDs();
 
-	auto &Y = outWS->mutableY(groupIndex);
-	auto &E = outWS->mutableE(groupIndex);
+    auto &Y = outWS->mutableY(groupIndex);
+    auto &E = outWS->mutableE(groupIndex);
 
     for (auto &wsIndex : wsIndices) {
       for (size_t i = 0; i < inWS->blocksize(); ++i) {

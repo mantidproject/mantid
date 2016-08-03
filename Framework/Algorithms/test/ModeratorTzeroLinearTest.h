@@ -154,9 +154,9 @@ private:
     for (size_t ihist = 0; ihist < numHists; ++ihist) {
       EventList &evlist = testWS->getSpectrum(ihist);
       BinEdges xdata(numBins + 1, LinearGenerator(0.0, 4.0));
-	  for (auto &tof : xdata) {
-		  evlist.addEventQuickly(TofEvent(tof));
-	  }
+      for (auto &tof : xdata) {
+        evlist.addEventQuickly(TofEvent(tof));
+      }
       evlist.setX(xdata.cowData()); // set the bins for the associated histogram
     }
     return testWS;

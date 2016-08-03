@@ -218,10 +218,11 @@ void MultipleScatteringCylinderAbsorption::exec() {
         continue;
       const double tth_rad = in_WS->detectorTwoTheta(*det);
 
-	  out_WS->setHistogram(index, in_WS->histogram(index));
+      out_WS->setHistogram(index, in_WS->histogram(index));
 
-      apply_msa_correction(tth_rad, radius, coeff1, coeff2, coeff3, out_WS->x(index),
-                           out_WS->mutableY(index), out_WS->mutableE(index));
+      apply_msa_correction(tth_rad, radius, coeff1, coeff2, coeff3,
+                           out_WS->x(index), out_WS->mutableY(index),
+                           out_WS->mutableE(index));
       prog.report();
     }
     setProperty("OutputWorkspace", out_WS);

@@ -78,12 +78,12 @@ public:
       for (size_t j = 0; j < xsize; ++j) { // Same x-values
         TS_ASSERT_DELTA(outWS->x(i)[j], inWS->x(i)[j], 1e-12);
         // Output Y-values proportional to input
-        TS_ASSERT_DELTA(proportionality_coeff * outWS->y(i)[j],
-                        inWS->y(i)[j], 1e-12);
+        TS_ASSERT_DELTA(proportionality_coeff * outWS->y(i)[j], inWS->y(i)[j],
+                        1e-12);
 
         // Output Err-values proportional to input
-        TS_ASSERT_DELTA(proportionality_coeff * outWS->e(i)[j],
-                        inWS->e(i)[j], 1e-12);
+        TS_ASSERT_DELTA(proportionality_coeff * outWS->e(i)[j], inWS->e(i)[j],
+                        1e-12);
       }
     }
 
