@@ -95,7 +95,6 @@ void LoadILLINX::exec() {
   std::string filenameData = getPropertyValue("Filename");
   std::string filenameVanadium = getPropertyValue("FilenameVanadium");
   MatrixWorkspace_sptr vanaWS = getProperty("WorkspaceVanadium");
-  std::string outputWSName = getPropertyValue("OutputWorkspace");
 
   // open the root node
   NeXus::NXRoot dataRoot(filenameData);
@@ -126,15 +125,6 @@ void LoadILLINX::exec() {
 
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
-
-  // Set the monitor workspace
-  std::string monitorWSName = outputWSName + "_monitors";
-
-  this->declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<>>(
-          "MonitorWorkspace", monitorWSName, Direction::Output),
-      "Monitors from the NeXus file");
-  setProperty("MonitorWorkspace", m_monitorWorkspace);
 }
 
 /**
@@ -266,14 +256,10 @@ void LoadILLINX::initWorkSpace(NeXus::NXEntry &entry,
   // bin boundaries = m_numberOfChannels + 1
   // Z/time dimension
   m_localWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", m_numberOfHistograms, m_numberOfChannels + 1,
-      m_numberOfChannels);
-  m_monitorWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", numberOfMonitors, m_numberOfChannels + 1,
+      "Workspace2D", m_numberOfHistograms + numberOfMonitors, m_numberOfChannels + 1,
       m_numberOfChannels);
   m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   m_localWorkspace->setYUnitLabel("Counts");
-  m_localWorkspace->setMonitorWorkspace(m_monitorWorkspace);
 }
 
 /**
@@ -523,19 +509,18 @@ void LoadILLINX::loadDataIntoTheWorkSpace(
   std::vector<detid_t> monitorIDs = instrument->getMonitors();
 
   for (const auto &monitor : monitors) {
-    m_monitorWorkspace->dataX(spec)
+    m_localWorkspace->dataX(spec)
         .assign(detectorTofBins.begin(), detectorTofBins.end());
     // Assign Y
-    m_monitorWorkspace->dataY(spec).assign(monitor.begin(), monitor.end());
+    m_localWorkspace->dataY(spec).assign(monitor.begin(), monitor.end());
     // Assign Error
-    MantidVec &E = m_monitorWorkspace->dataE(spec);
+    MantidVec &E = m_localWorkspace->dataE(spec);
     std::transform(monitor.begin(), monitor.end(), E.begin(),
                    LoadILLINX::calculateError);
-    m_monitorWorkspace->getSpectrum(spec).setDetectorID(monitorIDs[spec]);
+    m_localWorkspace->getSpectrum(spec).setDetectorID(monitorIDs[spec]);
     ++spec;
   }
 
-  spec = 0;
   std::vector<detid_t> detectorIDs = instrument->getDetectorIDs(true);
 
   // Assign calculated bins to first X axis
@@ -544,7 +529,6 @@ void LoadILLINX::loadDataIntoTheWorkSpace(
       .assign(detectorTofBins.begin(), detectorTofBins.end());
 
   Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
-  // size_t spec = 0;
   for (size_t i = 0; i < m_numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
       if (spec > firstSpec) {
@@ -623,8 +607,6 @@ void LoadILLINX::runLoadInstrument() {
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
-    loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",
-                                                m_monitorWorkspace);
     loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(false));
     loadInst->execute();

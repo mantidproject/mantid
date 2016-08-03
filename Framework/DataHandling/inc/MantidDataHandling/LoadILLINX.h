@@ -71,7 +71,6 @@ private:
 
   int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
   void loadTimeDetails(NeXus::NXEntry &entry);
-  NeXus::NXData loadNexusFileData(NeXus::NXEntry &entry);
   void
   loadDataIntoTheWorkSpace(NeXus::NXEntry &entry,
                            const std::vector<std::vector<int>> &,
@@ -84,7 +83,6 @@ private:
   int validateVanadium(const std::string &);
 
   API::MatrixWorkspace_sptr m_localWorkspace;
-  API::MatrixWorkspace_sptr m_monitorWorkspace;
 
   //	NeXus::NXRoot m_dataRoot;
   //	NeXus::NXRoot m_vanaRoot;
