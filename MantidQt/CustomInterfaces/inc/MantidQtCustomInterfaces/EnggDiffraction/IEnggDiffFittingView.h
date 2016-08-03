@@ -80,7 +80,7 @@ public:
    * number & bank
    */
   virtual std::vector<std::string>
-  splitFittingDirectory(std::string &selectedfPath) = 0;
+  splitFittingDirectory(const std::string &selectedfPath) = 0;
 
   /**
    * adds the number of banks to the combo-box widget on the interface
