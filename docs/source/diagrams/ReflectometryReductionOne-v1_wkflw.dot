@@ -3,7 +3,7 @@ label = "ReflectometryReductionOne Flowchart"
  $global_style
 
 subgraph params {
-$param_style
+ $param_style
   inputWorkspace    [label="InputWorkspace"]
   firstTransRun     [label="FirstTransmissionRun"]
   secondTransRun    [label="SecondTransmissionRun"]
@@ -18,10 +18,17 @@ $param_style
   momentumTransferMin  [label="MomentumTransferMinimum"]
   momentumTransferStep [label="MomentumTransferStep"]
   momentumTransferMax  [label="MomentumTransferMaximum"]
+  procCommands      [label="ProcessingCommands"]
+  wavMax            [label="WavelengthMax"]
+  wavMin            [label="WavelengthMin"]
+  wavStep           [label="WavelengthStep"]
+  monStartWSIndex   [label="StartWorkspaceIndex"]
+  monEndWSIndex     [label="EndWorkspaceIndex"]
+  detWS             [label="Detector Workspace"]
 }
 
 subgraph decisions {
-$decision_style
+ $decision_style
   checkXUnit      [label="X axis in &lambda;?"]
   checkMultDet    [label="Multidetector?"]
   checkTransRun   [label="FirstTransmissionRun\ngiven?"]
@@ -41,7 +48,7 @@ $decision_style
 }
 
 subgraph algorithms {
-$algorithm_style
+ $algorithm_style
   calcTheta       [label="SpecularReflectionCalculateTheta"]
   convertToMT     [label="ConvertUnits\n(Momentum-transfer)"]
   createTransWS   [label="CreateTransmissionWorkspace"]
@@ -58,17 +65,23 @@ $algorithm_style
   calcResolution  [label="CalculateResolution"]
   convertDet      [label="Convert Units\n(AlignBins = True)"]
   convertMon      [label="Convert Units"]
+  groupDet        [label="Group Detectors"]
+  cropDetWS       [label="Crop Detector\nWorkspace"]
+  rebinDet        [label="Rebin Detectors"]
+  cropMonWS       [label="Crop Monitor\nWorkspace"]
+  calcFlatBg      [label="Calculate Flat\nBackground"]
+  rebinToWS       [label="Rebin To\nWorkspace"]
 }
 
 subgraph processes {
-$process_style
+ $process_style
   directBeamNorm  [label="Perform Direct\nBeam Normalisation"]
   getSourceRotationAngle [label="Get Angle for Source Rotation"]
   calculateMomentumFromLambda [label="4&pi;sin(&theta;)/&lambda;"]
 }
 
 subgraph values {
-$value_style
+ $value_style
   valMon          [label="I&#8320;(&lambda;)"]
   valDet          [label="I(&lambda;)"]
   valIntegrated   [label="&Sigma; I&#8320;(&lambda;)"]
