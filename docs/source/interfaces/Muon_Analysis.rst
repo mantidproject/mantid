@@ -1,8 +1,3 @@
-
-
-
-
-
 Muon Analysis
 =============
 
@@ -106,12 +101,6 @@ Detector Grouping
 |       |                          |                                                                                         |
 |       |                          |                                                                                         |
 |       |                          |                                                                                         |
-+-------+--------------------------+-----------------------------------------------------------------------------------------+
-| **2** | **Alpha**                | *(For Pairs only)*.                                                                     |
-|       |                          | Pair alpha value used for Asymmetry Calculation.                                        |
-|       |                          | See :ref:`AsymmetryCalc <algm-AsymmetryCalc>` for broader explanation. The value is     |
-|       |                          | taken from the *Pair Table* on the GroupingOptions_ tab for the selected pair and can   |
-|       |                          | be modified there only.                                                                 |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **3** | **Periods**              | Use the two text boxes to select the combination of periods you would like to plot.     |
 |       |                          | Each holds a comma-separated list of periods, and the periods in the list on the right  |
