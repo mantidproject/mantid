@@ -380,7 +380,7 @@ void GetEi::getPeakEstimates(double &height, int64_t &centreInd,
   // then loop through all the Y values and find the tallest peak
   std::accumulate(Y.begin(), Y.end(), background);
   std::max(Y.begin(), Y.end(), height);
- 
+
   background = background / static_cast<double>(Y.size());
   if (height < PEAK_THRESH_H * background) {
     throw std::invalid_argument(
