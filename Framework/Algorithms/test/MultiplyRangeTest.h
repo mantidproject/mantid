@@ -52,13 +52,13 @@ public:
 
     const size_t length = result->blocksize();
     for (size_t i = 0; i < length; ++i) {
-      TS_ASSERT_EQUALS(in->readX(0)[i], result->readX(0)[i]);
+      TS_ASSERT_EQUALS(in->x(0)[i], result->x(0)[i]);
       if (i >= 60 && i <= 1000) {
-        TS_ASSERT_EQUALS(in->readY(0)[i] * 1.25, result->readY(0)[i]);
-        TS_ASSERT_EQUALS(in->readE(0)[i] * 1.25, result->readE(0)[i]);
+        TS_ASSERT_EQUALS(in->y(0)[i] * 1.25, result->y(0)[i]);
+        TS_ASSERT_EQUALS(in->e(0)[i] * 1.25, result->e(0)[i]);
       } else {
-        TS_ASSERT_EQUALS(in->readY(0)[i], result->readY(0)[i]);
-        TS_ASSERT_EQUALS(in->readE(0)[i], result->readE(0)[i]);
+        TS_ASSERT_EQUALS(in->y(0)[i], result->y(0)[i]);
+        TS_ASSERT_EQUALS(in->e(0)[i], result->e(0)[i]);
       }
     }
 
