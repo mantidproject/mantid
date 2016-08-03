@@ -341,7 +341,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             CloneWorkspace(Inputworkspace=mnorm, OutputWorkspace=red)
 
         elif o == 1:
-            self.log().information('Unmirror 1: return the left wings')
+            self.log().information('Unmirror 1: return the left wing')
             RenameWorkspace(InputWorkspace=left,OutputWorkspace=red)
 
         elif o == 2:
@@ -359,11 +359,17 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             DeleteWorkspace('right_shifted')
 
         elif o == 5:
-            # _shift_spectra needs extension ??
-            pass
-        elif o == 6:
             # Vanadium file must be loaded, left and right workspaces extracted
             pass
+
+        elif o == 6:
+            self.log().information('Unmirror 5: center both the right and the left and sum')
+            self._shift_spectra(right, right, 'right_shifted', True)
+            self._shift_spectra(left, left, 'left_shifted', True)
+            self._perform_mirror('left_shifted', 'right_shifted', red)
+            DeleteWorkspace('right_shifted')
+            DeleteWorkspace('left_shifted')
+
         elif o == 7:
             # Vanadium file must be loaded, left and right workspaces extracted
             pass
@@ -446,83 +452,107 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         Plus(LHSWorkspace=ws1,RHSWorkspace=ws2,OutputWorkspace=ws_out)
         Scale(InputWorkspace=ws_out,OutputWorkspace=ws_out,Factor=0.5, Operation='Multiply')
 
-    def _shift_spectra(self, ws, ws_shift_origin, ws_out):
+    def _shift_spectra(self, ws1, ws2, ws_out, center=False):
         """
-        Shifts a workspace x-axis corresponding to second workspace peak positions
-        @param ws               ::   workspace to be shifted
-        @param ws_shift_origin  ::   workspace according to which to shift
+        Shifts workspace corresponding to peak positions in second workspace or just centers it at 0
+        @param ws1              ::   workspace to be shifted
+        @param ws2              ::   workspace according to which to shift
+        @param center           ::   whether or not to center at zero, if True, ws2 is not needed
         @param ws_out           ::   shifted output workspace
         """
-        # get a table of peak positions via Gaussian fits
-        table_shift = FindEPP(InputWorkspace=ws_shift_origin)
-        number_spectra = mtd[ws].getNumberHistograms()
+        number_spectra = mtd[ws1].getNumberHistograms()
+        size = mtd[ws1].blocksize()
+        mid_bin = int(size / 2)
+        fit_table1 = FindEPP(InputWorkspace=ws1)
+
+        if not center:
+            fit_table2 = FindEPP(InputWorkspace=ws2)
 
         # shift each single spectrum in a workspace
         for i in range(number_spectra):
 
-            temp = ExtractSingleSpectrum(InputWorkspace=ws, WorkspaceIndex=i)
-            peak_position = int(table_shift.row(i)["PeakCentre"])
+            temp1 = ExtractSingleSpectrum(InputWorkspace=ws1,WorkspaceIndex=i)
 
-            x_values = np.array(temp.readX(0)) # will not change
-            y_values = np.array(temp.readY(0)) # will be shifted
-            e_values = np.array(temp.readE(0)) # will be shifted
+            x_values = np.array(temp1.readX(0))
+            y_values = np.array(temp1.readY(0))
+            e_values = np.array(temp1.readE(0))
 
-            DeleteWorkspace(temp)
+            peak_position1 = fit_table1.row(i)["PeakCentre"]
+            fit_status1 = fit_table1.row(i)["FitStatus"]
 
-            # Perform shift only if FindEPP returns success. Possibility to use self._peak_maximum_position() instead
-            if peak_position:
-                # A proposition was to use ConvertAxisByFormula. I my opinion the code would be much longer
-                # This is the implementation of a circular shift
-                if peak_position < 0:
-                    # Shift to the right
-                    # y-values, e-values : insert last values at the beginning
-                    for k in range(peak_position):
-                        y_values = np.insert(y_values, 0, y_values[-1])
-                        y_values = np.delete(y_values, -1)
-                        e_values = np.insert(e_values, 0, e_values[-1])
-                        e_values = np.delete(e_values, -1)
-                else:
-                    # Shift to the left
-                    # y-values, e-values : insert last values at the beginning
-                    for k in range(peak_position):
-                        y_values = np.append(y_values, y_values[0])
-                        y_values = np.delete(y_values, 0)
-                        e_values = np.append(e_values, e_values[0])
-                        e_values = np.delete(e_values, 0)
-
-            if not i:
-                # Initial spectrum 0
-                CreateWorkspace(OutputWorkspace=ws_out, DataX=x_values, DataY=y_values, DataE=e_values, NSpec=1, UnitX='DeltaE')
-                # Mask shifted bins missing here
+            if fit_status1 == 'success':
+                peak_bin1 = temp1.binIndexOf(peak_position1)
             else:
-                # Override temporary workspace temp by i-th shifted spectrum and append to output workspace
-                temp_single_spectrum = CreateWorkspace(DataX=x_values, DataY=y_values, DataE=e_values, NSpec=1, UnitX='DeltaE')
-                # Mask shifted bins missing here
-                AppendSpectra(InputWorkspace1=ws_out,
-                              InputWorkspace2=temp_single_spectrum,
-                              OutputWorkspace=ws_out)
-                DeleteWorkspace(temp_single_spectrum)
+                y_imax1 = np.argmax(y_values)
+                if abs(y_imax1 - mid_bin) < mid_bin / 4:
+                    peak_bin1 = y_imax1
+                else:
+                    self.log().warning('Maybe no peak present, taking mid position instead')
+                    peak_bin1 = mid_bin
 
-        DeleteWorkspace(table_shift)
+            DeleteWorkspace(temp1)
 
-    def _peak_maximum_position(self, ws):
-        """
-        Finds peak position without fitting
-        @param  ws  :: input workspace name
-        @return     :: peak maximum position
-        """
-        x_values = np.array(mtd[ws].readX(0))
-        y_values = np.array(mtd[ws].readY(0))
-        y_imax = np.argmax(y_values)
-        maximum_position = x_values[y_imax]
-        bin_range = int(len(x_values) / 4)
-        mid = int(len(x_values) / 2)
+            if center:
+                to_shift = peak_bin1 - mid_bin
+            else:
+                temp2 = ExtractSingleSpectrum(InputWorkspace=ws2, WorkspaceIndex=i)
+                y_values2 = np.array(temp2.readY(0))
+                peak_position2 = fit_table2.row(i)["PeakCentre"]
+                fit_status2 = fit_table2.row(i)["FitStatus"]
 
-        if maximum_position in range(mid - bin_range, mid + bin_range):
-            self.log().notice('Maybe no peak present, taking mid position instead ')
-            maximum_position = mid
+                if fit_status2 == 'success':
+                    peak_bin2 = temp2.binIndexOf(peak_position2)
+                else:
+                    y_imax2 = np.argmax(y_values2)
+                    if abs(y_imax2 - mid_bin) < mid_bin / 4:
+                        peak_bin2 = y_imax2
+                    else:
+                        self.log().warning('Maybe no peak present, taking mid position instead')
+                        peak_bin2 = mid_bin
 
-        return maximum_position
+                to_shift = peak_bin1 - peak_bin2
+
+                DeleteWorkspace(temp2)
+
+            if to_shift > 0:
+                # shift to the left
+                for k in range(size):
+                    if k < size - to_shift:
+                        y_values[k] = y_values[k + to_shift]
+                        e_values[k] = e_values[k + to_shift]
+                    else:
+                        y_values[k] = 0
+                        e_values[k] = 0
+                mask_min = size - to_shift
+                mask_max = size
+            elif to_shift < 0:
+                # shift to the right
+                for k in range(size-1,0,-1):
+                    if k > -to_shift:
+                        y_values[k] = y_values[k + to_shift]
+                        e_values[k] = e_values[k + to_shift]
+                    else:
+                        y_values[k] = 0
+                        e_values[k] = 0
+                mask_min = 0
+                mask_max = -to_shift
+
+            if i==0:
+                CreateWorkspace(OutputWorkspace=ws_out, DataX=x_values, DataY=y_values, DataE=e_values, NSpec=1, UnitX='DeltaE')
+                # there is problem with masking...
+                #if to_shift != 0:
+                    #MaskBins(InputWorkspace=ws_out,OutputWorkspace=ws_out,XMin=mask_min,XMax=mask_max)
+            else:
+                CreateWorkspace(OutputWorkspace='temp',DataX=x_values, DataY=y_values, DataE=e_values, NSpec=1, UnitX='DeltaE')
+                # there is problem with masking...
+                #if to_shift != 0:
+                #    MaskBins(InputWorkspace='temp', OutputWorkspace='temp',XMin=mask_min, XMax=mask_max)
+                AppendSpectra(InputWorkspace1=ws_out,InputWorkspace2='temp',OutputWorkspace=ws_out)
+                DeleteWorkspace('temp')
+
+        DeleteWorkspace(fit_table1)
+        if not center:
+            DeleteWorkspace(fit_table2)
 
     def _set_output_workspace_properties(self, runlist):
 
