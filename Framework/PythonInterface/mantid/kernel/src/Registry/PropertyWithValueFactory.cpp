@@ -177,6 +177,13 @@ PropertyWithValueFactory::lookup(PyObject *const object) {
  */
 const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
   if (PyList_Check(object) || PyTuple_Check(object)) {
+    // If we are dealing with an empty list/tuple, then we cannot deduce the
+    // ArrayType. We need to throw at this point.
+    if (PySequence_Size(object) < 1) {
+      throw std::runtime_error(
+          "Cannot have a sequence type of length zero in a mapping type.");
+    }
+
     PyObject *item = PySequence_Fast_GET_ITEM(object, 0);
     // Boolean can be cast to int, so check first.
     if (PyBool_Check(item)) {
