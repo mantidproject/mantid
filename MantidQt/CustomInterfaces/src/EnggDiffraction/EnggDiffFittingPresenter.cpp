@@ -447,6 +447,20 @@ void EnggDiffFittingPresenter::inputChecksBeforeFitting(
                                 " is invalid, "
                                 "fitting process failed. Please try again!");
   }
+
+  // Check the filename is the format we expect
+  // As it contains details we need later in the algorithm
+  std::vector<std::string> vecFileSplit =
+      m_view->splitFittingDirectory(focusedRunNo);
+  // The fit filenames are delimited by '_' and should be of
+  // format 'EnginX_<runNumber>_focused_bank_<bankNumber>'
+  // therefore we should always get 5 parts split in the vector
+  if (vecFileSplit.size() != 5) {
+    throw std::invalid_argument(
+        "Name doesn't match expected pattern."
+        " The focused EnginX  filename should be of form: "
+        " 'ENGINX_<Run Number>_focused_bank_<Bank Number>'.");
+  }
 }
 
 std::string EnggDiffFittingPresenter::validateFittingexpectedPeaks(
@@ -500,7 +514,12 @@ void EnggDiffFittingPresenter::setDifcTzero(MatrixWorkspace_sptr wks) const {
     if (!chunks.empty()) {
       try {
         bankID = boost::lexical_cast<size_t>(chunks.back());
-      } catch (std::runtime_error &) {
+      } catch (boost::exception &) {
+        // If we get a bad cast or something goes wrong then
+        // the file is probably not what we were expecting
+        // so throw a runtime error
+        throw std::runtime_error(
+            "File data is bad. Is the file a focused EnginX file?");
       }
     }
   }

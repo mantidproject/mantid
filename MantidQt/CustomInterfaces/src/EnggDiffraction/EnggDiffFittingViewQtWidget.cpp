@@ -514,14 +514,12 @@ void EnggDiffFittingViewQtWidget::setPeakList(
 }
 
 std::vector<std::string>
-EnggDiffFittingViewQtWidget::splitFittingDirectory(std::string &selectedfPath) {
+EnggDiffFittingViewQtWidget::splitFittingDirectory(const std::string &selectedfPath) {
 
   Poco::Path PocofPath(selectedfPath);
   std::string selectedbankfName = PocofPath.getBaseName();
   std::vector<std::string> splitBaseName;
-  if (selectedbankfName.find("ENGINX_") != std::string::npos) {
-    boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_."));
-  }
+  boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_."));
   return splitBaseName;
 }
 
