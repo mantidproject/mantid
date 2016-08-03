@@ -25,6 +25,7 @@ subgraph params {
   monStartWSIndex   [label="StartWorkspaceIndex"]
   monEndWSIndex     [label="EndWorkspaceIndex"]
   detWS             [label="Detector Workspace"]
+  regionOfDirectBeam [label="Region of\nDirect Beam"]
 }
 
 subgraph decisions {
@@ -71,11 +72,13 @@ subgraph algorithms {
   cropMonWS       [label="Crop Monitor\nWorkspace"]
   calcFlatBg      [label="Calculate Flat\nBackground"]
   rebinToWS       [label="Rebin To\nWorkspace"]
+  sumDirectBeam   [label="Sum Direct\nBeam"]
+  rebinByDirectBeam [label="Rebin By\nDirect Beam"]
+  normalizeByDirectBeam [label="Normalize By\nDirect Beam"]
 }
 
 subgraph processes {
  $process_style
-  directBeamNorm  [label="Perform Direct\nBeam Normalisation"]
   getSourceRotationAngle [label="Get Angle for Source Rotation"]
   calculateMomentumFromLambda [label="4&pi;sin(&theta;)/&lambda;"]
 }
@@ -123,9 +126,14 @@ detWS             -> checkMultDet
 valUnity          -> divideDetMon
 intMon            -> valIntegrated
 valIntegrated     -> divideDetMon
-checkMultDet      -> directBeamNorm   [label="Yes"]
+checkMultDet      -> sumDirectBeam    [label="Yes"]
 checkMultDet      -> divideDetMon     [label="No"]
-directBeamNorm    -> divideDetMon
+
+regionOfDirectBeam -> sumDirectBeam
+sumDirectBeam     -> rebinByDirectBeam
+rebinByDirectBeam -> normalizeByDirectBeam
+normalizeByDirectBeam -> divideDetMon
+
 divideDetMon      -> checkTransRun
 checkTransRun     -> checkCorrAlg     [label="No"]
 checkTransRun     -> divideTrans      [label="Yes"]
