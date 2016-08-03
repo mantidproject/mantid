@@ -13,6 +13,7 @@
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidIndexing/IndexTranslator.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 
@@ -80,6 +81,23 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
 MatrixWorkspace::~MatrixWorkspace() {
   for (auto &axis : m_axes) {
     delete axis;
+  }
+}
+
+void MatrixWorkspace::setIndexTranslator(
+    Indexing::IndexTranslator &&translator) {
+  if (translator.size() != getNumberHistograms())
+    throw std::runtime_error("MatrixWorkspace::setIndexTranslator: Translator "
+                             "size does not match number of histograms in "
+                             "workspace");
+
+  auto &spectrumNumbers = translator.spectrumNumbers();
+  auto &detectorIDs = translator.detectorIDs();
+  for (size_t i = 0; i < getNumberHistograms(); ++i) {
+    auto &spectrum = getSpectrum(i);
+    spectrum.setSpectrumNo(spectrumNumbers[i]);
+    spectrum.setDetectorIDs(
+        std::set<detid_t>(detectorIDs[i].begin(), detectorIDs[i].end()));
   }
 }
 

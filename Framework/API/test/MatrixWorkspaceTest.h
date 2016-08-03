@@ -12,6 +12,7 @@
 #include "MantidKernel/make_cow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
+#include "MantidIndexing/IndexTranslator.h"
 #include "MantidTestHelpers/FakeGmockObjects.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
@@ -32,6 +33,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace testing;
+using Mantid::Indexing::IndexTranslator;
 
 // Declare into the factory.
 DECLARE_WORKSPACE(WorkspaceTester)
@@ -72,6 +74,25 @@ public:
 
   MatrixWorkspaceTest() : ws(boost::make_shared<WorkspaceTester>()) {
     ws->initialize(1, 1, 1);
+  }
+
+  void test_setIndexTranslator() {
+    WorkspaceTester ws;
+    ws.initialize(3, 1, 1);
+    IndexTranslator bad_translator({2, 4}, {{0}, {1}});
+    TS_ASSERT_THROWS(ws.setIndexTranslator(std::move(bad_translator)),
+                     std::runtime_error);
+    IndexTranslator translator({2, 4, 6}, {{0}, {1}, {2, 3}});
+    TS_ASSERT_THROWS_NOTHING(ws.setIndexTranslator(std::move(translator)));
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getSpectrumNo(), 2);
+    TS_ASSERT_EQUALS(ws.getSpectrum(1).getSpectrumNo(), 4);
+    TS_ASSERT_EQUALS(ws.getSpectrum(2).getSpectrumNo(), 6);
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs(),
+                     (std::set<detid_t>{0}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(1).getDetectorIDs(),
+                     (std::set<detid_t>{1}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(2).getDetectorIDs(),
+                     (std::set<detid_t>{2, 3}));
   }
 
   void test_toString_Produces_Expected_Contents() {

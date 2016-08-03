@@ -16,9 +16,11 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
-//----------------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------------
+
+namespace Indexing {
+class IndexTranslator;
+}
+
 namespace Geometry {
 class ParameterMap;
 class INearestNeighbours;
@@ -84,6 +86,8 @@ public:
 
   /// Returns a clone of the workspace
   MatrixWorkspace_uptr clone() const { return MatrixWorkspace_uptr(doClone()); }
+
+  void setIndexTranslator(Indexing::IndexTranslator &&translator);
 
   using IMDWorkspace::toString;
   /// String description of state
