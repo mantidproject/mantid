@@ -75,16 +75,16 @@ void CalMuonDeadTime::exec() {
   // Get number of good frames from Run object. This also serves as
   // a test to see if valid input workspace has been provided
 
-  double numGoodFrames = 1.0;
-  const API::Run &run = inputWS->run();
-  if (run.hasProperty("goodfrm")) {
-    numGoodFrames =
-        boost::lexical_cast<double>(run.getProperty("goodfrm")->value());
-  } else {
-    g_log.error() << "To calculate Muon deadtime requires that goodfrm (number "
-                     "of good frames) "
-                  << "is stored in InputWorkspace Run object\n";
-  }
+  const double numGoodFrames = [&inputWS]() {
+    const API::Run &run = inputWS->run();
+    if (run.hasProperty("goodfrm")) {
+      return boost::lexical_cast<double>(run.getProperty("goodfrm")->value());
+    } else {
+      throw std::runtime_error(
+          "To calculate Muon deadtime requires that goodfrm (number of "
+          "good frames) is stored in InputWorkspace Run object");
+    }
+  }();
 
   // Do the initial setup of the ouput table-workspace
 

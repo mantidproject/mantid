@@ -1,12 +1,13 @@
-#ifndef MANTID_CUSTOMINTERFACES_QTREFLMAINVIEW_H_
-#define MANTID_CUSTOMINTERFACES_QTREFLMAINVIEW_H_
+#ifndef MANTID_CUSTOMINTERFACES_QTREFLRUNSTABVIEW_H_
+#define MANTID_CUSTOMINTERFACES_QTREFLRUNSTABVIEW_H_
 
 #include "MantidKernel/System.h"
-#include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
-#include "ui_ReflMainWidget.h"
+
+#include "ui_ReflRunsTabWidget.h"
 
 namespace MantidQt {
 
@@ -16,18 +17,22 @@ class DataProcessorCommand;
 class DataProcessorCommandAdapter;
 class SlitCalculator;
 }
+namespace API {
+class AlgorithmRunner;
+}
 
 namespace CustomInterfaces {
 
 // Forward decs
-class IReflPresenter;
+class IReflRunsTabPresenter;
 class ReflSearchModel;
 
 using MantidWidgets::DataProcessorCommand;
 using MantidWidgets::DataProcessorCommandAdapter;
 using MantidWidgets::SlitCalculator;
 
-/** QtReflMainView : Provides an interface for processing reflectometry data.
+/** QtReflRunsTabView : Provides an interface for the "Runs" tab in the
+Reflectometry (Polref) interface.
 
 Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -50,27 +55,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL QtReflMainView
-    : public MantidQt::API::UserSubWindow,
-      public ReflMainView,
+class MANTIDQT_CUSTOMINTERFACES_DLL QtReflRunsTabView
+    : public MantidQt::API::MantidWidget,
+      public IReflRunsTabView,
       public MantidQt::MantidWidgets::ProgressableView {
   Q_OBJECT
 public:
-  QtReflMainView(QWidget *parent = 0);
-  ~QtReflMainView() override;
-  /// Name of the interface
-  static std::string name() { return "ISIS Reflectometry (Polref)"; }
-  // This interface's categories.
-  static QString categoryInfo() { return "Reflectometry"; }
+  /// Constructor
+  QtReflRunsTabView(QWidget *parent = 0);
+  /// Destructor
+  ~QtReflRunsTabView() override;
   // Connect the model
-  void showSearch(ReflSearchModel_sptr model) override;
-
-  // Dialog/Prompt methods
-  std::string askUserString(const std::string &prompt, const std::string &title,
-                            const std::string &defaultValue) override;
-  void giveUserInfo(std::string prompt, std::string title) override;
-  void giveUserCritical(std::string prompt, std::string title) override;
-  void showAlgorithmDialog(const std::string &algorithm) override;
+  void showSearch(boost::shared_ptr<ReflSearchModel> model) override;
 
   // Setter methods
   void setInstrumentList(const std::vector<std::string> &instruments,
@@ -93,24 +89,24 @@ public:
   std::string getSearchString() const override;
   std::string getTransferMethod() const override;
 
-  boost::shared_ptr<IReflPresenter> getPresenter() const override;
+  IReflRunsTabPresenter *getPresenter() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
 
 private:
-  // initialise the interface
-  void initLayout() override;
+  /// initialise the interface
+  void initLayout();
   // Adds an action (command) to a menu
   void addToMenu(QMenu *menu, std::unique_ptr<DataProcessorCommand> command);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 
   // the presenter
-  boost::shared_ptr<IReflPresenter> m_presenter;
+  std::shared_ptr<IReflRunsTabPresenter> m_presenter;
   // the search model
-  ReflSearchModel_sptr m_searchModel;
+  boost::shared_ptr<ReflSearchModel> m_searchModel;
   // the interface
-  Ui::reflMainWidget ui;
+  Ui::ReflRunsTabWidget ui;
   // the slit calculator
   SlitCalculator *m_calculator;
   // Command adapters
@@ -128,4 +124,4 @@ private slots:
 } // namespace Mantid
 } // namespace CustomInterfaces
 
-#endif /* MANTID_CUSTOMINTERFACES_QTREFLMAINVIEW_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_QTREFLRUNSTABVIEW_H_ */

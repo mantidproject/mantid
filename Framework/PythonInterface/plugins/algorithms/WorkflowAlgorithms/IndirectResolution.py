@@ -143,8 +143,9 @@ class IndirectResolution(DataProcessorAlgorithm):
         log_alg.setProperty('Workspace', self._out_ws)
         log_alg.setProperty('LogNames', [log[0] for log in sample_logs])
         log_alg.setProperty('LogValues',[log[1] for log in sample_logs])
-
         self.setProperty('OutputWorkspace', self._out_ws)
+        log_alg.execute()
+
 
 
 AlgorithmFactory.subscribe(IndirectResolution)

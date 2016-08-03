@@ -4,6 +4,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 #include <gmock/gmock.h>
@@ -30,25 +31,14 @@ public:
   MockDataProcessorView(){};
   ~MockDataProcessorView() override {}
 
-  // Prompts
-  MOCK_METHOD3(askUserString,
-               std::string(const std::string &prompt, const std::string &title,
-                           const std::string &defaultValue));
-  MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
-  MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
-  MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
+  // Prompt
   MOCK_METHOD0(requestNotebookPath, std::string());
-  MOCK_METHOD0(showImportDialog, void());
-  MOCK_METHOD1(showAlgorithmDialog, void(const std::string &));
-
-  MOCK_METHOD1(plotWorkspaces, void(const std::set<std::string> &));
 
   // IO
   MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
   MOCK_CONST_METHOD0(getSelectedRows, std::map<int, std::set<int>>());
   MOCK_CONST_METHOD0(getSelectedGroups, std::set<int>());
   MOCK_CONST_METHOD0(getClipboard, std::string());
-  MOCK_CONST_METHOD1(getProcessingOptions, std::string(const std::string &));
   MOCK_METHOD0(getEnableNotebook, bool());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
   MOCK_METHOD1(setClipboard, void(const std::string &text));
@@ -59,11 +49,6 @@ public:
                void(const std::vector<std::string> &, const std::string &));
   MOCK_METHOD2(setOptionsHintStrategy,
                void(MantidQt::MantidWidgets::HintStrategy *, int));
-  MOCK_METHOD3(
-      setGlobalOptions,
-      void(const std::vector<std::string> &stages,
-           const std::vector<std::string> &algNames,
-           const std::vector<std::map<std::string, std::string>> &hints));
 
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<std::string, QVariant> &));
@@ -73,9 +58,32 @@ public:
   void saveSettings(const std::map<std::string, QVariant> &) override{};
   std::string getProcessInstrument() const override { return "FAKE"; }
 
-  boost::shared_ptr<DataProcessorPresenter> getTablePresenter() const override {
-    return boost::shared_ptr<DataProcessorPresenter>();
-  }
+  DataProcessorPresenter *getPresenter() const override { return nullptr; }
+};
+
+class MockMainPresenter : public DataProcessorMainPresenter {
+
+public:
+  MockMainPresenter(){};
+  ~MockMainPresenter() override {}
+
+  // Notify
+  MOCK_METHOD1(notify, void(DataProcessorMainPresenter::Flag));
+
+  // Prompt methods
+  MOCK_METHOD3(askUserString,
+               std::string(const std::string &, const std::string &,
+                           const std::string &));
+  MOCK_METHOD2(askUserYesNo, bool(std::string, std::string));
+  MOCK_METHOD2(giveUserWarning, void(std::string, std::string));
+  MOCK_METHOD2(giveUserCritical, void(std::string, std::string));
+  MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
+
+  // Global options
+  MOCK_CONST_METHOD0(getPreprocessingOptions,
+                     std::map<std::string, std::string>());
+  MOCK_CONST_METHOD0(getProcessingOptions, std::string());
+  MOCK_CONST_METHOD0(getPostprocessingOptions, std::string());
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {
@@ -86,7 +94,7 @@ public:
 
   MOCK_METHOD1(notify, void(DataProcessorPresenter::Flag));
   MOCK_METHOD1(setModel, void(std::string name));
-  MOCK_METHOD1(accept, void(WorkspaceReceiver *));
+  MOCK_METHOD1(accept, void(DataProcessorMainPresenter *));
 
 private:
   // Calls we don't care about
