@@ -199,7 +199,9 @@ void SCDCalibratePanels::exec() {
       }
     }
   int nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
-  findL1(nPeaks,peaksWs);
+  bool changeL1 = getProperty("changeL1");
+  bool changeSize = getProperty("changePanelSize");
+  if (changeL1) findL1(nPeaks,peaksWs);
   set<string> MyBankNames;
   for (int i = 0; i < nPeaks; ++i) {
     MyBankNames.insert(peaksWs->getPeak(i).getBankName());
@@ -221,6 +223,10 @@ void SCDCalibratePanels::exec() {
       }
     }
     int nBankPeaks = local->getNumberPeaks();
+    if (nBankPeaks < 8) {
+      g_log.notice() << "Too few peaks for " << iBank <<"\n";
+      continue;
+    }
 
     MatrixWorkspace_sptr q3DWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
           API::WorkspaceFactory::Instance().create("Workspace2D", 1,
@@ -258,6 +264,16 @@ void SCDCalibratePanels::exec() {
     std::ostringstream fun_str;
     fun_str << "name=SCDPanelErrors,Workspace="+bankName<<",Bank="<<iBank;
     fit_alg->setPropertyValue("Function", fun_str.str());
+    Geometry::IComponent_const_sptr comp = peaksWs->getInstrument()->getComponentByName(iBank);
+    boost::shared_ptr<const Geometry::RectangularDetector> rectDet =
+        boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(
+            comp);
+    // Scaling only implemented for Rectangular Detectors
+    if (!rectDet || !changeSize) {
+      std::ostringstream tie_str;
+      tie_str << "scaleWidth=1.0,scaleHeight=1.0";
+      fit_alg->setProperty("Ties", tie_str.str());
+    }
     fit_alg->setProperty("InputWorkspace", q3DWS);
     fit_alg->setProperty("CreateOutput", true);
     fit_alg->setProperty("Output", "fit");
@@ -275,16 +291,18 @@ void SCDCalibratePanels::exec() {
     double xRotate = paramsWS->getRef<double>("Value", 3);
     double yRotate = paramsWS->getRef<double>("Value", 4);
     double zRotate = paramsWS->getRef<double>("Value", 5);
+    double scaleWidth = paramsWS->getRef<double>("Value", 6);
+    double scaleHeight = paramsWS->getRef<double>("Value", 7);
     AnalysisDataService::Instance().remove(bankName);
     PARALLEL_CRITICAL(afterFit) {
       SCDPanelErrors det;
-      det.moveDetector(xShift, yShift, zShift, xRotate, yRotate, zRotate, iBank, peaksWs);
+      det.moveDetector(xShift, yShift, zShift, xRotate, yRotate, zRotate, scaleWidth, scaleHeight, iBank, peaksWs);
     }
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
   // Try again to optimize L1
-  findL1(nPeaks, peaksWs);
+  if (changeL1) findL1(nPeaks, peaksWs);
 
   // Use new instrument for PeaksWorkspace
   Geometry::Instrument_sptr inst = boost::const_pointer_cast<Geometry::Instrument>(peaksWs->getInstrument());
@@ -329,7 +347,7 @@ void SCDCalibratePanels::exec() {
   for (int j = 0; j < nPeaks; ++j) {
     const Geometry::IPeak &peak = peaksWs->getPeak(j);
     string bankName = peak.getBankName();
-    if(bankName == "None") {
+    if(bankName == "None" || MyBankNames.find(bankName) == MyBankNames.end()) {
       //g_log.notice() << "Peak not mapped to detector: Number = " << j+1 <<"\n";
       continue;
     }
@@ -397,7 +415,7 @@ throw;
 std::ostringstream fun_str;
 fun_str << "name=SCDPanelErrors,Workspace="<<peaksWs->getName()<<",Bank=moderator";
 std::ostringstream tie_str;
-tie_str << "XShift=0.0,YShift=0.0,XRotate=0.0,YRotate=0.0,ZRotate=0.0";
+tie_str << "XShift=0.0,YShift=0.0,XRotate=0.0,YRotate=0.0,ZRotate=0.0,scaleWidth=1.0,scaleHeight=1.0";
 fitL1_alg->setPropertyValue("Function", fun_str.str());
 fitL1_alg->setProperty("Ties", tie_str.str());
 fitL1_alg->setProperty("InputWorkspace", L1WS);
@@ -412,7 +430,7 @@ ITableWorkspace_sptr paramsL1 = fitL1_alg->getProperty("OutputParameters");
 AnalysisDataService::Instance().addOrReplace("params_L1", paramsL1);
 double deltaL1 = paramsL1->getRef<double>("Value",2);
 SCDPanelErrors com;
-com. moveDetector(0.0, 0.0, deltaL1, 0.0, 0.0, 0.0, "moderator", peaksWs);
+com. moveDetector(0.0, 0.0, deltaL1, 0.0, 0.0, 0.0, 1.0, 1.0, "moderator", peaksWs);
 g_log.notice() <<"L1 = "<< -peaksWs->getInstrument()->getSource()->getPos().Z()<<"  "<< fitL1Status << " Chi2overDoF " << chisqL1 << "\n";
 }
 
@@ -688,7 +706,7 @@ void SCDCalibratePanels::saveIsawDetCal(
   if (filename.empty())
     return;
 
-  // g_log.notice() << "Saving DetCal file in " << filename << "\n";
+  g_log.notice() << "Saving DetCal file in " << filename << "\n";
 
   // create a workspace to pass to SaveIsawDetCal
   const size_t number_spectra = instrument->getNumberDetectors();
@@ -708,7 +726,6 @@ void SCDCalibratePanels::saveIsawDetCal(
   alg->setProperty("Filename", filename);
   alg->setProperty("TimeOffset", T0);
   alg->setProperty("BankNames", banknames);
-  // alg->setProperty("AppendFile", true);
   alg->executeAsChildAlg();
 }
 
@@ -738,7 +755,11 @@ void SCDCalibratePanels::init() {
   declareProperty("gamma", EMPTY_DBL(), mustBePositive,
                   "Lattice Parameter gamma in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
+  declareProperty("changeL1", true, "Change the L1(source to sample) distance");
+  declareProperty("changePanelSize", true, "Change the height and width of the detectors.  Implemented only for RectangularDetectors.");
 
+  declareProperty("EdgePixels", 0,
+                  "Remove peaks that are at pixels this close to edge. ");
 
   // ---------- outputs
   const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
@@ -775,8 +796,6 @@ void SCDCalibratePanels::init() {
   setPropertyGroup("RowWorkspace", OUTPUTS);
   setPropertyGroup("TofWorkspace", OUTPUTS);
 
-  declareProperty("EdgePixels", 0,
-                  "Remove peaks that are at pixels this close to edge. ");
 }
 void SCDCalibratePanels::updateBankParams(
     boost::shared_ptr<const Geometry::IComponent> bank_const,
@@ -952,9 +971,12 @@ void SCDCalibratePanels::saveXmlFile(
   ParameterMap_sptr pmap = instrument->getParameterMap();
 
   // write out the detector banks
-    for (const auto &bankName : AllBankNames) {
+    for (int i = 0; i < static_cast<int>(AllBankNames.size()); ++i) {
+      std::set<string>::iterator it=AllBankNames.begin();
+      advance(it,i);
+      std::string bankName = *it;
+      if (instrument->getName().compare("CORELLI") == 0.0) bankName.append("/sixteenpack");
       oss3 << "<component-link name=\"" << bankName << "\">\n";
-
       boost::shared_ptr<const IComponent> bank =
           instrument->getComponentByName(bankName);
 

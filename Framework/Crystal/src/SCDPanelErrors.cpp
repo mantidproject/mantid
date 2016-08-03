@@ -10,6 +10,8 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include <boost/math/special_functions/round.hpp>
 #include <algorithm>
 #include <cmath>
@@ -42,6 +44,8 @@ SCDPanelErrors::SCDPanelErrors() : m_setupFinished(false) {
   declareParameter("XRotate", 0.0, "Rotate angle in X");
   declareParameter("YRotate", 0.0, "Rotate angle in Y");
   declareParameter("ZRotate", 0.0, "Rotate angle in Z");
+  declareParameter("scaleWidth", 1.0, "Scale width of detector");
+  declareParameter("scaleHeight", 1.0, "Scale height of detector");
   declareAttribute("FileName", Attribute("", true));
   declareAttribute("Workspace", Attribute(""));
   declareAttribute("Bank", Attribute(""));
@@ -54,12 +58,15 @@ SCDPanelErrors::SCDPanelErrors() : m_setupFinished(false) {
  * @param rotx :: The rotation around the X-axis
  * @param roty :: The rotation around the Y-axis
  * @param rotz :: The rotation around the Z-axis
+ * @param scalex :: Scale width of rectangular detector
+ * @param scaley :: Scale height of rectangular detector
  * @param detname :: The detector name
  * @param inputW :: The workspace
  */
 
 void SCDPanelErrors::moveDetector(
     double x, double y, double z, double rotx, double roty, double rotz,
+    double scalex, double scaley,
     std::string detname, Workspace_sptr inputW) const {
   // CORELLI has sixteenpack under bank
   DataObjects::PeaksWorkspace_sptr inputP =
@@ -126,20 +133,31 @@ void SCDPanelErrors::moveDetector(
     algz->setPropertyValue("RelativeRotation", "1");
     algz->execute();
   }
+  if (scalex != 1.0 || scaley != 1.0) {
+    Geometry::IComponent_const_sptr comp = inst->getComponentByName(detname);
+    boost::shared_ptr<const Geometry::RectangularDetector> rectDet =
+        boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(
+            comp);
+    if (rectDet) {
+      Geometry::ParameterMap &pmap = inputP->instrumentParameters();
+      pmap.addDouble(rectDet.get(), "scalex", scalex);
+      pmap.addDouble(rectDet.get(), "scaley", scaley);
+    }
+  }
 }
 
 /// Evaluate the function for a list of arguments and given scaling factor
 void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xrotate, double yrotate, double zrotate,
-                             double *out, const double *xValues,
+                             double scalex, double scaley, double *out, const double *xValues,
                              const size_t nData) const {
   UNUSED_ARG(xValues);
   if (nData == 0)
     return;
 
   setupData();
- // if (m_bank == "moderator") {
 
-  moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, m_bank, m_workspace);
+  moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex, scaley, m_bank, m_workspace);
+
   DataObjects::PeaksWorkspace_sptr inputP =
         boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
   Geometry::Instrument_sptr inst = boost::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
@@ -161,40 +179,7 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xr
     out[i*3+1] = Q3[1]-Q2[1];
     out[i*3+2] = Q3[2]-Q2[2];
   }
-  moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate, m_bank, m_workspace);
- /* }
-
-else {
-
-  DataObjects::PeaksWorkspace_sptr inputP0 =
-      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
-  std::vector<V3D> detP;
-  for (int i = 0; i < inputP0->getNumberPeaks(); i ++) {
-    DataObjects::Peak peak = inputP0->getPeak(i);
-    detP.push_back(peak.getDetPos());
-  }
-
-  moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, m_bank, m_workspace);
-  DataObjects::PeaksWorkspace_sptr inputP =
-        boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
-  Geometry::Instrument_sptr inst = boost::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
-  Geometry::OrientedLattice lattice = inputP->mutableSample().getOrientedLattice();
-  for (int i = 0; i < inputP->getNumberPeaks(); i ++) {
-    DataObjects::Peak peak = inputP->getPeak(i);
-    V3D hkl =  V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
-         boost::math::iround(peak.getL()));
-    V3D Q2 = lattice.qFromHKL(hkl);
-    DataObjects::Peak peak2(inst, Q2, peak.getGoniometerMatrix());
-    V3D detP2 = peak2.getDetPos();
-    V3D cross = V3D(1.0, 1.0, 1.0);
-    if(detP2 != V3D(0,0,0) || detP[i] != V3D(0,0,0)) cross = detP2.cross_prod(detP[i]);
-
-    out[i*3] = cross.X();
-    out[i*3+1] = cross.Y();
-    out[i*3+2] = cross.Z();
-  }
-  moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate, m_bank, m_workspace);
-  }*/
+  moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate, -scalex, -scaley, m_bank, m_workspace);
 }
 
 /**
@@ -211,7 +196,9 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   const double xrotate = getParameter("XRotate");
   const double yrotate = getParameter("YRotate");
   const double zrotate = getParameter("ZRotate");
-  eval(xshift, yshift, zshift, xrotate, yrotate, zrotate, out, xValues, nData);
+  const double scalex = getParameter("scaleWidth");
+  const double scaley = getParameter("scaleHeight");
+  eval(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex, scaley, out, xValues, nData);
 }
 
 /**

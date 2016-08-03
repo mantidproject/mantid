@@ -58,7 +58,7 @@ public:
 
   /// Move detectors with parameters
   void moveDetector(
-      double x, double y, double z, double rotx, double roty, double rotz,
+      double x, double y, double z, double rotx, double roty, double rotz, double scalex, double scaley,
       std::string detname, API::Workspace_sptr inputW) const;
 
 private:
@@ -75,7 +75,7 @@ private:
   void clear() const;
 
   /// Evaluate the function for a list of arguments and given scaling factor
-  void eval(double xshift, double yshift, double zshift, double xrotate, double yrotate, double zrotate, double *out,
+  void eval(double xshift, double yshift, double zshift, double xrotate, double yrotate, double zrotate, double scalex, double scaley, double *out,
             const double *xValues, const size_t nData) const;
 
   /// Fill in the workspace and bank names
