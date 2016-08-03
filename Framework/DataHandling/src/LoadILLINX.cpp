@@ -525,6 +525,7 @@ void LoadILLINX::loadDataIntoTheWorkSpace(
 
   // Assign calculated bins to first X axis
   size_t firstSpec = spec;
+  size_t numberOfMonitors = monitors.size();
   m_localWorkspace->dataX(firstSpec)
       .assign(detectorTofBins.begin(), detectorTofBins.end());
 
@@ -543,7 +544,7 @@ void LoadILLINX::loadDataIntoTheWorkSpace(
       MantidVec &E = m_localWorkspace->dataE(spec);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
                      LoadILLINX::calculateError);
-      m_localWorkspace->getSpectrum(spec).setDetectorID(detectorIDs[spec]);
+      m_localWorkspace->getSpectrum(spec).setDetectorID(detectorIDs[spec - numberOfMonitors]);
       ++spec;
       progress.report();
     }
