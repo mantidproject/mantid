@@ -1,6 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/Qxy.h"
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidAPI/BinEdgeAxis.h"
@@ -369,12 +370,10 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   outputWorkspace->replaceAxis(1, verticalAxis);
 
   // Build up the X values
-  HistogramData::BinEdges axis(bins);
-  auto &horizontalAxisRef = axis.mutableData();
+  HistogramData::BinEdges axis(bins,
+                               HistogramData::LinearGenerator(startVal, delta));
   for (int i = 0; i < bins; ++i) {
     const double currentVal = startVal + i * delta;
-    // Set the X value
-    horizontalAxisRef[i] = currentVal;
     // Set the Y value on the axis
     verticalAxis->setValue(i, currentVal);
   }

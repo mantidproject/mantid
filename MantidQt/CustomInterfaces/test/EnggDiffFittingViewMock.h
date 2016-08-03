@@ -79,6 +79,24 @@ public:
   // enables or disables the fitting list widget
   MOCK_CONST_METHOD1(enableFittingListWidget, void(bool enable));
 
+  // gets the previously used directory path by the user
+  MOCK_CONST_METHOD0(getPreviousDir, std::string());
+
+  // sets the previously used directory path
+  MOCK_METHOD1(setPreviousDir, void(const std::string &path));
+
+  // gets the path as string which required when browsing the file
+  MOCK_METHOD1(getOpenFile, std::string(const std::string &prevPath));
+
+  // gets the path as string which is required when saving the file
+  MOCK_METHOD1(getSaveFile, std::string(const std::string &prevPath));
+
+  // Gets the peak picker's center (d-spacing value)
+  MOCK_CONST_METHOD0(getPeakCentre, double());
+
+  // Checks whether peak picker widget is enabled or no
+  MOCK_CONST_METHOD0(peakPickerEnabled, bool());
+
   // return idx of current selected row of list widget
   MOCK_CONST_METHOD0(getFittingListWidgetCurrentRow, int());
 

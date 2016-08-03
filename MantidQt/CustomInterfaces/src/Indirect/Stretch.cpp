@@ -1,6 +1,10 @@
 #include "MantidQtCustomInterfaces/Indirect/Stretch.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
+#include "MantidAPI/AlgorithmManager.h"
+
+using namespace Mantid::API;
+
 namespace {
 Mantid::Kernel::Logger g_log("Stretch");
 }
@@ -81,7 +85,11 @@ bool Stretch::validate() {
  * script that runs Stretch
  */
 void Stretch::run() {
-  using namespace Mantid::API;
+
+  // Workspace input
+  const auto sampleName = m_uiForm.dsSample->getCurrentDataName().toStdString();
+  const auto resName =
+      m_uiForm.dsResolution->getCurrentDataName().toStdString();
 
   auto saveDirectory = Mantid::Kernel::ConfigService::Instance().getString(
       "defaultsave.directory");
@@ -100,60 +108,142 @@ void Stretch::run() {
     }
   }
 
-  QString save("False");
-
-  QString elasticPeak("False");
-  QString sequence("False");
-
-  QString pyInput = "from IndirectBayes import QuestRun\n";
-
-  QString sampleName = m_uiForm.dsSample->getCurrentDataName();
-  QString resName = m_uiForm.dsResolution->getCurrentDataName();
+  // Obtain save and plot state
+  m_plotType = m_uiForm.cbPlot->currentText().toStdString();
+  m_save = m_uiForm.chkSave->isChecked();
 
   // Collect input from options section
-  QString background = m_uiForm.cbBackground->currentText();
-
-  if (m_uiForm.chkElasticPeak->isChecked()) {
-    elasticPeak = "True";
-  }
-  if (m_uiForm.chkSequentialFit->isChecked()) {
-    sequence = "True";
-  }
-
-  QString fitOps = "[" + elasticPeak + ", '" + background + "', False, False]";
+  const auto background = m_uiForm.cbBackground->currentText().toStdString();
 
   // Collect input from the properties browser
-  QString eMin = m_properties["EMin"]->valueText();
-  QString eMax = m_properties["EMax"]->valueText();
-  QString eRange = "[" + eMin + "," + eMax + "]";
+  const auto eMin = m_properties["EMin"]->valueText().toDouble();
+  const auto eMax = m_properties["EMax"]->valueText().toDouble();
+  const auto beta = m_properties["Beta"]->valueText().toLong();
+  const auto sigma = m_properties["Sigma"]->valueText().toLong();
+  const auto nBins = m_properties["SampleBinning"]->valueText().toLong();
 
-  QString beta = m_properties["Beta"]->valueText();
-  QString sigma = m_properties["Sigma"]->valueText();
-  QString betaSig = "[" + beta + ", " + sigma + "]";
+  // Bool options
+  const auto elasticPeak = m_uiForm.chkElasticPeak->isChecked();
+  const auto sequence = m_uiForm.chkSequentialFit->isChecked();
 
-  QString nBins = m_properties["SampleBinning"]->valueText();
-  nBins = "[" + nBins + ", 1]";
+  // Construct OutputNames
+  auto cutIndex = sampleName.find_last_of("_");
+  auto baseName = sampleName.substr(0, cutIndex);
+  m_fitWorkspaceName = baseName + "_Stretch_Fit";
+  m_contourWorkspaceName = baseName + "_Stretch_Contour";
 
-  // Output options
-  if (m_uiForm.chkSave->isChecked()) {
-    save = "True";
+  auto stretch = AlgorithmManager::Instance().create("BayesStretch");
+  stretch->initialize();
+  stretch->setProperty("SampleWorkspace", sampleName);
+  stretch->setProperty("ResolutionWorkspace", resName);
+  stretch->setProperty("EMin", eMin);
+  stretch->setProperty("EMax", eMax);
+  stretch->setProperty("SampleBins", nBins);
+  stretch->setProperty("Elastic", elasticPeak);
+  stretch->setProperty("Background", background);
+  stretch->setProperty("NumberSigma", sigma);
+  stretch->setProperty("NumberBeta", beta);
+  stretch->setProperty("Loop", sequence);
+  stretch->setProperty("OutputWorkspaceFit", m_fitWorkspaceName);
+  stretch->setProperty("OutputWorkspaceContour", m_contourWorkspaceName);
+
+  m_batchAlgoRunner->addAlgorithm(stretch);
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(algorithmComplete(bool)));
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Handles the saving and plotting of workspaces after execution
+ */
+void Stretch::algorithmComplete(const bool &error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(algorithmComplete(bool)));
+
+  if (error)
+    return;
+
+  // Obtain workspace pointers
+  WorkspaceGroup_sptr fitWorkspace;
+  WorkspaceGroup_sptr contourWorkspace;
+  try {
+    fitWorkspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        m_fitWorkspaceName);
+    contourWorkspace =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            m_contourWorkspaceName);
+  } catch (std::runtime_error) {
+    if (m_save || !m_plotType.compare("None")) {
+      g_log.error("Plotting and Saving could not be executed as the Output "
+                  "Workspaces could not be found.");
+    }
   }
-  QString plot = m_uiForm.cbPlot->currentText();
 
-  pyInput += "QuestRun('" + sampleName + "','" + resName + "'," + betaSig +
-             "," + eRange + "," + nBins + "," + fitOps + "," + sequence +
-             ","
-             " Save=" +
-             save + ", Plot='" + plot + "')\n";
+  // Handle saving
+  if (m_save)
+    saveWorkspaces(QString::fromStdString(fitWorkspace->getName()),
+                   QString::fromStdString(contourWorkspace->getName()));
 
-  runPythonScript(pyInput);
+  // Handle plotting
+  if (m_plotType.compare("None") != 0) {
+    auto sigma = QString::fromStdString(fitWorkspace->getItem(0)->getName());
+    auto beta = QString::fromStdString(fitWorkspace->getItem(1)->getName());
+    if (sigma.right(5).compare("Sigma") == 0) {
+      if (beta.right(4).compare("Beta") == 0) {
+        plotWorkspaces(beta, sigma);
+      }
+    } else {
+      g_log.error(
+          "Beta and Sigma workspace were not found and could not be plotted.");
+    }
+  }
+}
+
+/**
+ * Handles the saving of workspaces post alogrithm completion
+ * @param fitWorkspace		:: The name of the fit workspace to save
+ * @param contourWorkspace	:: The name of the contour workspace to save
+ */
+void Stretch::saveWorkspaces(const QString &fitWorkspace,
+                             const QString &contourWorkspace) {
+  auto saveDir = QString::fromStdString(
+      Mantid::Kernel::ConfigService::Instance().getString(
+          "defaultsave.directory"));
+  // Check validity of save path
+  const auto fitFullPath = saveDir.append(fitWorkspace).append(".nxs");
+  const auto contourFullPath = saveDir.append(contourWorkspace).append(".nxs");
+  addSaveWorkspaceToQueue(fitWorkspace, fitFullPath);
+  addSaveWorkspaceToQueue(contourWorkspace, fitFullPath);
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Handles the plotting of workspace post algorithm completion
+ * @param betaWorkspace		:: The name of the beta workspace to plot
+ * @param sigmaWorkspace	:: The name of the sigma workspace to plot
+ */
+void Stretch::plotWorkspaces(const QString &betaWorkspace,
+                             const QString &sigmaWorkspace) {
+  QString pyInput = "from mantidplot import plot2D\n";
+  if (m_plotType.compare("All") == 0 || m_plotType.compare("Beta") == 0) {
+    pyInput += "importMatrixWorkspace('";
+    pyInput += betaWorkspace;
+    pyInput += "').plotGraph2D()\n";
+  }
+  if (m_plotType.compare("All") == 0 || m_plotType.compare("Sigma") == 0) {
+    pyInput += "importMatrixWorkspace('";
+    pyInput += sigmaWorkspace;
+    pyInput += "').plotGraph2D()\n";
+  }
+
+  m_pythonRunner.runPythonCode(pyInput);
 }
 
 /**
  * Set the data selectors to use the default save directory
  * when browsing for input files.
  *
-* @param settings :: The current settings
+ * @param settings :: The current settings
  */
 void Stretch::loadSettings(const QSettings &settings) {
   m_uiForm.dsSample->readSettings(settings.group());
