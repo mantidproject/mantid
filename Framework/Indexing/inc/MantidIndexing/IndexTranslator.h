@@ -2,6 +2,8 @@
 #define MANTID_INDEXING_INDEXTRANSLATOR_H_
 
 #include "MantidIndexing/DllConfig.h"
+#include "MantidIndexing/DetectorIDs.h"
+#include "MantidIndexing/SpectrumNumbers.h"
 
 #include <vector>
 
@@ -33,17 +35,17 @@ namespace Indexing {
 */
 class MANTID_INDEXING_DLL IndexTranslator {
 public:
-  IndexTranslator(std::vector<int32_t> &&spectrumNumbers,
-                  std::vector<std::vector<int32_t>> &&detectorIDs);
+  IndexTranslator(SpectrumNumbers &&spectrumNumber,
+                  DetectorIDs &&detectorIDs = DetectorIDs{});
 
   size_t size() const;
 
-  const std::vector<int32_t> &spectrumNumbers() const;
-  const std::vector<std::vector<int32_t>> &detectorIDs() const;
+  const std::vector<specnum_t> &spectrumNumbers() const;
+  const std::vector<std::vector<detid_t>> &detectorIDs() const;
 
 private:
-  std::vector<int32_t> m_spectrumNumbers;
-  std::vector<std::vector<int32_t>> m_detectorIDs;
+  SpectrumNumbers m_spectrumNumbers;
+  DetectorIDs m_detectorIDs;
 };
 
 } // namespace Indexing
