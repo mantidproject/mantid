@@ -120,6 +120,16 @@ public:
   WorkspaceGroup(const WorkspaceGroup &ref) = delete;
   WorkspaceGroup &operator=(const WorkspaceGroup &) = delete;
 
+  friend std::ostream &operator<<(std::ostream &os,
+	  const boost::shared_ptr<WorkspaceGroup> &ws) {
+	  return os << ws->m_name;
+  }
+
+  friend std::istream &operator >> (std::istream &is,
+	  boost::shared_ptr<WorkspaceGroup> &ws) {
+	  return is >> ws->m_name;
+  }
+
 private:
   WorkspaceGroup *doClone() const override {
     throw std::runtime_error("Cloning of WorkspaceGroup is not implemented.");

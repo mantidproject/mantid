@@ -11,7 +11,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceListProperty.h"
-#include "MantidKernel/DataItem.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include <gmock/gmock.h>
@@ -19,7 +19,6 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using Mantid::Kernel::DataItem;
 
 class WorkspaceListPropertyTest : public CxxTest::TestSuite {
 private:
@@ -53,7 +52,7 @@ private:
     }
 
     virtual void exec() {
-      std::vector<boost::shared_ptr<DataItem>> val = getProperty("MyProperty");
+      std::vector<Workspace_sptr> val = getProperty("MyProperty");
     }
 
     virtual ~MyAlgorithm() {}
@@ -96,8 +95,8 @@ public:
                                        PropertyMode::Optional);
     WorkspaceListProperty<Workspace> b(a);
 
-    TS_ASSERT_EQUALS(list, a.value());
-    TS_ASSERT_EQUALS(a.value(), b.value());
+    TS_ASSERT_EQUALS(list, a.list());
+    TS_ASSERT_EQUALS(a.list(), b.list());
     TS_ASSERT_EQUALS(a.isOptional(), b.isOptional());
   }
 
@@ -109,30 +108,9 @@ public:
         "PropB", std::vector<Workspace_sptr>(), Direction::Input,
         PropertyMode::Optional);
     propB = propA;
-    TS_ASSERT_EQUALS(list, propA.value());
-    TS_ASSERT_EQUALS(propA.value(), propB.value());
+    TS_ASSERT_EQUALS(list, propA.list());
+    TS_ASSERT_EQUALS(propA.list(), propB.list());
     TS_ASSERT_EQUALS(propA.isOptional(), propB.isOptional());
-    AnalysisDataService::Instance().remove("a");
-  }
-
-  void test_custom_validator_usage() {
-    using namespace testing;
-    std::string okString = "";
-
-    boost::shared_ptr<MockValidator> validator =
-        boost::make_shared<MockValidator>();
-    EXPECT_CALL(*validator.get(), check(_))
-        .Times(2)
-        .WillRepeatedly(Return(okString));
-
-    auto ws = boost::make_shared<WorkspaceTester>();
-
-    auto list = createWorkspaceList();
-    WorkspaceListProperty<Workspace> prop("Prop", list, Direction::Input,
-                                          PropertyMode::Mandatory, validator);
-
-    TSM_ASSERT("Should repeatedly call the validator",
-               Mock::VerifyAndClearExpectations(validator.get()));
   }
 
   void test_clone() {
@@ -157,10 +135,9 @@ public:
     auto ilist = createWorkspaceList();
     alg.setProperty("MyProperty", ilist);
     // Now fetch the property.
-    std::vector<boost::shared_ptr<DataItem>> olist =
-        alg.getProperty("MyProperty");
+    std::vector<Workspace_sptr> olist = alg.getProperty("MyProperty");
 
-    validateDataItemList(ilist, olist);
+    validateWorkspaceList(ilist, olist);
   }
 
   void test_multiple_workspace_types() {
@@ -177,7 +154,7 @@ public:
 
     alg.setProperty("MyProperty", ilist);
 
-    std::vector<boost::shared_ptr<DataItem>> olist =
+    std::vector<Workspace_sptr> olist =
         alg.getProperty("MyProperty");
 
     TS_ASSERT_EQUALS(olist.size(), ilist.size());
@@ -190,14 +167,45 @@ public:
     TS_ASSERT_EQUALS(ilist, tmpList);
   }
 
-  void test_return_property_as_string() {
-	  auto ilist = createWorkspaceList();
+  void test_workspace_groups() {
+	  auto group = boost::make_shared<WorkspaceGroup>();
+	  group->addWorkspace(boost::make_shared<WorkspaceTester>());
+	  group->addWorkspace(boost::make_shared<WorkspaceTester>());
+
 	  MyAlgorithm alg;
 	  alg.initialize();
 
-	  alg.setProperty("MyProperty", ilist);
+	  auto list = std::vector<Workspace_sptr>();
 
-	  std::string strlist = alg.getProperty("MyProperty");
+	  list.push_back(group);
+
+	  alg.setProperty("MyProperty", list);
+
+	  std::vector<Workspace_sptr> olist = alg.getProperty("MyProperty");
+
+	  auto ogroup = boost::dynamic_pointer_cast<WorkspaceGroup>(olist[0]);
+
+	  TS_ASSERT_EQUALS(group->size(), ogroup->size());
+	  
+	  for (size_t i = 0; i < group->size(); i++)
+		  TS_ASSERT_EQUALS(group->getItem(i), ogroup->getItem(i));
+  }
+
+  // TODO: Not sure what is the right thing to return here. One possibility
+  // could be to serialise the contents of the workspace but this could be
+  // an expensive operation.
+  // Alternatively, and also quite expensive, could be to hash the contents of
+  // the workspace.
+  void test_return_property_as_string() {
+    auto ilist = createWorkspaceList();
+    MyAlgorithm alg;
+    alg.initialize();
+
+    alg.setProperty("MyProperty", ilist);
+
+    std::string strlist = alg.getProperty("MyProperty");
+
+    TS_ASSERT_EQUALS(strlist, "");
   }
 
 private:
@@ -211,25 +219,11 @@ private:
     return list;
   }
 
-  std::vector<Workspace_sptr>
-  convertDataItemList(const std::vector<boost::shared_ptr<DataItem>> &list) {
-    auto newList = std::vector<Workspace_sptr>();
-
-    for (auto &i : list) {
-      newList.push_back(boost::dynamic_pointer_cast<WorkspaceTester>(i));
-    }
-
-    return newList;
-  }
-
-  void
-  validateDataItemList(const std::vector<Workspace_sptr> &wkspList,
-                       const std::vector<boost::shared_ptr<DataItem>> &diList) {
+  void validateWorkspaceList(const std::vector<Workspace_sptr> &wkspList,
+                             const std::vector<Workspace_sptr> &diList) {
     TS_ASSERT_EQUALS(wkspList.size(), diList.size());
 
-    auto newList = convertDataItemList(diList);
-
-    TS_ASSERT_EQUALS(wkspList, newList);
+    TS_ASSERT_EQUALS(wkspList, diList);
   }
 };
 

@@ -525,7 +525,7 @@ public:
    *  N.B. Problems found in validator are written to the log
    *  if you override this function to do checking outside a validator may want
    * to do more logging
-   *  @returns "" if the value is valid or a discription of the problem
+   *  @returns "" if the value is valid or a discription of the problemz
    */
   std::string isValid() const override { return m_validator->isValid(m_value); }
 
@@ -568,8 +568,6 @@ protected:
   TYPE m_value;
   /// the property's default value which is also its initial value
   TYPE m_initialValue;
-  /// Visitor validator class
-  IValidator_sptr m_validator;
 
 private:
   /**
@@ -640,6 +638,9 @@ private:
     toValue(strValue, value);
     return value;
   }
+
+  /// Visitor validator class
+  IValidator_sptr m_validator;
 
   /// Static reference to the logger class
   static Logger g_logger;

@@ -63,7 +63,7 @@ public:
       : Mantid::Kernel::PropertyWithValue<WorkspaceListPropertyType>(
             name, WorkspaceListPropertyType(0), validator, direction),
         m_optional(optional) {
-    Kernel::PropertyWithValue<WorkspaceListPropertyType>::m_value = workspaces;
+    SuperClass::operator=(workspaces);
     auto errorMsg = isValid();
     if (!errorMsg.empty())
       throw std::invalid_argument(errorMsg);
@@ -86,8 +86,6 @@ public:
     return *this;
   }
 
-  std::string value() const override { return ""; }
-
   /**
   * Assignment overload
   * @param right : rhs workspace list property type.
@@ -103,29 +101,21 @@ public:
     return new WorkspaceListProperty<TYPE>(*this);
   }
 
-  /** Checks whether the entered workspaces are valid.
-  *  To be valid, in addition to satisfying the conditions of any validators.
-  * Input ones must point to
-  *  workspaces of the correct type.
-  *  @returns A user level description of the problem or "" if it is valid.
-  */
-  std::string isValid() const {
-    std::string error;
-    // Run the validator on each workspace held. This must be done after the
-    // point that we have established that the workspaces exist.
-    for (int i = 0; i < SuperClass::m_value.size(); ++i) {
-      error = SuperClass::m_validator->isValid(SuperClass::m_value[i]);
-      if (!error.empty()) {
-        break;
-      }
-    }
-    return error;
-  }
+  //const WorkspaceListPropertyType  &operator() const { return SuperClass::operator()(); }
+  const WorkspaceListPropertyType &list() const { return SuperClass::operator()(); }
 
-  const WorkspaceListPropertyType &value() { return SuperClass::m_value; }
+  /** Get the name of the workspace
+  *  @return The workspace's name
+  */
+  std::string value() const override { return ""; }
+
+  /** Get the value the property was initialised with -its default value
+  *  @return The default value
+  */
+  std::string getDefault() const override { return ""; }
 
   /// Is the input workspace property optional?
-  virtual bool isOptional() const {
+  bool isOptional() const {
     return m_optional == PropertyMode::Optional;
   }
 
@@ -135,7 +125,7 @@ public:
   virtual ~WorkspaceListProperty() {}
 
 private:
-  void clear() { SuperClass::m_value = WorkspaceListPropertyType(0); }
+  void clear() { SuperClass::operator=(WorkspaceListPropertyType(0)); }
 
   /// Flag indicating whether the type is optional or not.
   PropertyMode::Type m_optional;

@@ -44,24 +44,6 @@ IPropertyManager::getValue<Property *>(const std::string &name) const {
   return getPointerToProperty(name);
 }
 
-template <>
-DLLExport DataItemSptrVec
-IPropertyManager::getValue<DataItemSptrVec>(const std::string &name) const {
-  auto *temp = getPointerToProperty(name);
-  auto *prop = static_cast<PropertyWithValue<DataItemSptrVec> *>(temp);
-  if (prop) {
-    return *prop;
-  } else {
-    std::string message = "Attempt to assign property " + name +
-                          " to incorrect type. Expected type "
-                          "std::vector<boost::shared_ptr<Mantid::Kernel::"
-                          "DataItem>>";
-    throw std::runtime_error(message);
-  }
-
-  return DataItemSptrVec();
-}
-
 // If a string is given in the argument, we can be more flexible
 template <>
 IPropertyManager *
