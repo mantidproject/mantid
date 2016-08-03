@@ -116,7 +116,7 @@ public:
          3.49139}};
 
     // do the final comparison
-    const MantidVec &y_actual = test_output_WS->readY(0);
+    auto &y_actual = test_output_WS->y(0);
     for (size_t i = 0; i < size; i++)
       TS_ASSERT_DELTA(y_actual[i], y_expected[i], 0.00001);
 
