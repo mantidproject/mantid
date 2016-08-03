@@ -56,13 +56,17 @@ Improved
   This is now fixed and the order is correct.
 
 - :ref:`ConvertUnits <algm-ConvertUnits>` will no longer corrupt an in place workspace if the algorithm fails.
-
+s
 - :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli 
 
+- :ref: `LoadILL <algm-LoadILL>` was renamed to `LoadILLINX <algm-LoadILLINX>` to better reflect what it does. The new algorithm can also handle cases where the monitor IDs are greater than the detector IDs.
 
 
 Deprecated
 ##########
+
+- :ref: `LoadILL <algm-LoadILL>` is now deprecated, `LoadILLINX <algm-LoadILLINX>` should be used instead.
+
 
 MD Algorithms (VATES CLI)
 #########################

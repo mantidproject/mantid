@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_LOADILL_H_
-#define MANTID_DATAHANDLING_LOADILL_H_
+#ifndef MANTID_DATAHANDLING_LOADILLINX_H_
+#define MANTID_DATAHANDLING_LOADILLINX_H_
 
 //---------------------------------------------------
 // Includes
@@ -13,7 +13,7 @@ namespace DataHandling {
 /**
  Loads an ILL IN4/5/6 nexus file into a Mantid workspace.
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source
 
  This file is part of Mantid.
