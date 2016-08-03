@@ -130,6 +130,11 @@ class TOFTOFSetupWidget(BaseWidget):
         self.btnDataDir          = QPushButton('Browse')
 
         self.chkSubtractECVan    = QCheckBox('Subtract empty can from vanadium')
+
+        self.rbtNormaliseNone    = QRadioButton('none')
+        self.rbtNormaliseMonitor = QRadioButton('to monitor')
+        self.rbtNormaliseTime    = QRadioButton('to time')
+
         self.rbtCorrectTOFNone   = QRadioButton('none')
         self.rbtCorrectTOFVan    = QRadioButton('vanadium')
         self.rbtCorrectTOFSample = QRadioButton('sample')
@@ -154,11 +159,30 @@ class TOFTOFSetupWidget(BaseWidget):
         box.addLayout(hbox)
 
         hbox = QHBoxLayout()
+        hbox.addWidget(QLabel('normalise'))
+        hbox.addWidget(self.rbtNormaliseNone)
+        hbox.addWidget(self.rbtNormaliseMonitor)
+        hbox.addWidget(self.rbtNormaliseTime)
+        hbox.addStretch(1)
+
+        btnGroup = QButtonGroup(self)
+        btnGroup.addButton(self.rbtNormaliseNone)
+        btnGroup.addButton(self.rbtNormaliseMonitor)
+        btnGroup.addButton(self.rbtNormaliseTime)
+
+        box.addLayout(hbox)
+
+        hbox = QHBoxLayout()
         hbox.addWidget(QLabel('correct TOF'))
         hbox.addWidget(self.rbtCorrectTOFNone)
         hbox.addWidget(self.rbtCorrectTOFVan)
         hbox.addWidget(self.rbtCorrectTOFSample)
         hbox.addStretch(1)
+
+        btnGroup = QButtonGroup(self)
+        btnGroup.addButton(self.rbtCorrectTOFNone)
+        btnGroup.addButton(self.rbtCorrectTOFVan)
+        btnGroup.addButton(self.rbtCorrectTOFSample)
 
         box.addLayout(hbox)
 
@@ -198,6 +222,7 @@ class TOFTOFSetupWidget(BaseWidget):
         self.runDataModel = TOFTOFSetupWidget.DataRunModel(self)
         self.dataRunsView.setModel(self.runDataModel)
 
+        # handle signals
         self.btnDataDir.clicked.connect(self._onDataSearchDir)
         self.runDataModel.selectCell.connect(self._onSelectedCell)
 
@@ -237,6 +262,11 @@ class TOFTOFSetupWidget(BaseWidget):
         el.maskDetectors = getText(self.maskDetectors)
 
         el.subtractECVan = self.chkSubtractECVan.isChecked()
+
+        el.normalise     = el.NORM_MONITOR    if self.rbtNormaliseMonitor.isChecked() else \
+                           el.NORM_TIME       if self.rbtNormaliseTime.isChecked()    else \
+                           el.NORM_NONE
+
         el.correctTof    = el.CORR_TOF_VAN    if self.rbtCorrectTOFVan.isChecked()    else \
                            el.CORR_TOF_SAMPLE if self.rbtCorrectTOFSample.isChecked() else \
                            el.CORR_TOF_NONE
@@ -264,6 +294,13 @@ class TOFTOFSetupWidget(BaseWidget):
         self.maskDetectors.setText(el.maskDetectors)
 
         self.chkSubtractECVan.setChecked(el.subtractECVan)
+
+        if el.normalise == el.NORM_MONITOR:
+            self.rbtNormaliseMonitor.setChecked(True)
+        elif el.normalise == el.NORM_TIME:
+            self.rbtNormaliseTime.setChecked(True)
+        else:
+            self.rbtNormaliseNone.setChecked(True)
 
         if el.correctTof == el.CORR_TOF_VAN:
             self.rbtCorrectTOFVan.setChecked(True)

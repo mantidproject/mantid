@@ -9,6 +9,11 @@ import xml.dom.minidom
 
 class TOFTOFScriptElement(BaseScriptElement):
 
+    # normalisation
+    NORM_NONE       = 0
+    NORM_MONITOR    = 1
+    NORM_TIME       = 2
+
     # TOF correction
     CORR_TOF_NONE   = 0
     CORR_TOF_VAN    = 1
@@ -18,6 +23,7 @@ class TOFTOFScriptElement(BaseScriptElement):
     DEF_prefix     = 'ws'
     DEF_ecFactor   = 1.0
     DEF_subECVan   = False
+    DEF_normalise  = NORM_NONE
     DEF_correctTof = CORR_TOF_NONE
 
     XML_TAG = 'TOFTOFReduction'
@@ -49,8 +55,9 @@ class TOFTOFScriptElement(BaseScriptElement):
         self.rebinQ        = ''
         self.maskDetectors = ''
 
-        # flags
+        # options
         self.subtractECVan = self.DEF_subECVan
+        self.normalise     = self.DEF_normalise
         self.correctTof    = self.DEF_correctTof
 
     def to_xml(self):
@@ -78,6 +85,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('mask_detectors', self.maskDetectors)
 
         put('subtract_ecvan', self.subtractECVan)
+        put('normalise',      self.normalise)
         put('correct_tof',    self.correctTof)
 
         xml = '<%s>\n%s</%s>\n' % (self.XML_TAG, xml[0], self.XML_TAG)
@@ -128,6 +136,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.maskDetectors = getStr('mask_detectors')
 
             self.subtractECVan = getBool('subtract_ecvan')
+            self.normalise     = getInt('normalise',   self.DEF_normalise)
             self.correctTof    = getInt('correct_tof', self.DEF_correctTof)
 
     def to_script(self):
@@ -172,9 +181,16 @@ class TOFTOFScriptElement(BaseScriptElement):
         # generated script
         script = ['']
 
-        # add a line
+        # helper: add a line to the script
         def l(s = ''):
             script[0] += (s + '\n')
+        # helpers
+        def logData(ws,tag):
+            return "%s.getRun().getLogData('%s').value" % (ws, tag)
+        def logEi(ws):
+            return logData(ws, 'Ei')
+        def logTime(ws):
+            return logData(ws, 'duration')
 
         l("import numpy as np")
         l()
@@ -232,9 +248,9 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("%s.setComment('%s')"      % (wsData, cmnt))
             l()
             if 0 == i:
-                l("Ei = %s.getRun().getLogData('Ei').value" % (wsData))
+                l("Ei = %s" % (logEi(wsData)))
             else:
-                l("if abs(Ei - %s.getRun().getLogData('Ei').value) > 0.0001:" % (wsData))
+                l("if abs(Ei - %s) > 0.0001:" % (logEi(wsData)))
                 l("    raise RuntimeError('bad Ei')")
             l()
 
@@ -256,27 +272,60 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("MaskDetectors(gAll, '%s')" % (self.maskDetectors))
         l()
 
-        l("# normalization")
-        l("gDataNorm = MonitorEfficiencyCorUser(gDataRuns)")
-        if self.vanRuns:
-            wsVanNorm = wsVan + 'Norm'
-            l("%s = MonitorEfficiencyCorUser(%s)" % (wsVanNorm, wsVan))
-        if self.ecRuns:
-            wsECNorm = wsEC + 'Norm'
-            l("%s = MonitorEfficiencyCorUser(%s)" % (wsECNorm, wsEC))
-        l()
+        if self.NORM_MONITOR == self.normalise:
+            gDataNorm = 'gDataNorm'
+
+            l("# normaliseto monitor")
+            l("%s = MonitorEfficiencyCorUser(gDataRuns)" % (gDataNorm))
+
+            if self.vanRuns:
+                wsVanNorm = wsVan + 'Norm'
+                l("%s = MonitorEfficiencyCorUser(%s)" % (wsVanNorm, wsVan))
+            if self.ecRuns:
+                wsECNorm = wsEC + 'Norm'
+                l("%s = MonitorEfficiencyCorUser(%s)" % (wsECNorm, wsEC))
+            l()
+
+        elif self.NORM_TIME == self.normalise:
+            gDataNorm = 'gDataNorm'
+
+            # TODO (ask Wiebke how to do it best)
+            l("# normalise to time")
+            l("names = []")
+            l("for ws in gDataRuns:")
+            l("    name = ws.getName() + '_norm'")
+            l("    names.append(name)")
+            l("    Scale(ws, 1/%s, 'Multiply', OutputWorkspace=name)" % (logTime('ws')))
+            l()
+            l("%s = GroupWorkspaces(names)" % (gDataNorm))
+
+            if self.vanRuns:
+                wsVanNorm = wsVan + 'Norm'
+                l("%s = Scale(%s, 1/%s, 'Multiply')" % (wsVanNorm, wsVan, logTime(wsVan)))
+            if self.ecRuns:
+                wsECNorm = wsEC + 'Norm'
+                l("%s = Scale(%s, 1/%s, 'Multiply')" % (wsECNorm, wsEC, logTime(wsEC)))
+            l()
+
+        else: # none, simply use the not normalised workspaces
+            gDataNorm = 'gDataRuns'
+
+            if self.vanRuns:
+                wsVanNorm = wsVan
+            if self.ecRuns:
+                wsECNorm = wsEC
 
         if self.ecRuns:
             l("# subtract empty can")
             l("scaledEC = Scale(%s, Factor=ecFactor, Operation='Multiply')" % (wsECNorm))
-            l("gDataSubEC = Minus(gDataNorm, scaledEC)")
+            l("gDataSubEC = Minus(%s, scaledEC)" % (gDataNorm))
             if self.subtractECVan:
                 wsVanSubEC = wsVan + 'SubEC'
                 l("%s = Minus(%s, scaledEC)" % (wsVanSubEC, wsVanNorm))
             l()
 
         l("# group data for processing") # no empty can, es ist fertig
-        gData = 'gDataSubEC' if self.ecRuns else 'gDataNorm'
+        gData = 'gDataSubEC' if self.ecRuns else gDataNorm
         if self.vanRuns:
             wsVanNorm = wsVanSubEC if self.subtractECVan else wsVanNorm
             l("gData = GroupWorkspaces(%slist(%s.getNames()))" % (gr([wsVanNorm], ' + '), gData))
