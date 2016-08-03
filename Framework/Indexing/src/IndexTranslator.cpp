@@ -25,10 +25,12 @@ IndexTranslator::IndexTranslator(
   }
 }
 
-const std::vector<int32_t> &IndexTranslator::spectrumNumbers() {
+size_t IndexTranslator::size() const { return m_spectrumNumbers.size(); }
+
+const std::vector<int32_t> &IndexTranslator::spectrumNumbers() const {
   return m_spectrumNumbers;
 }
-const std::vector<std::vector<int32_t>> &IndexTranslator::detectorIDs() {
+const std::vector<std::vector<int32_t>> &IndexTranslator::detectorIDs() const {
   return m_detectorIDs;
 }
 

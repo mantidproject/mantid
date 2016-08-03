@@ -32,6 +32,10 @@ public:
                      std::runtime_error);
   }
 
+  void test_size() {
+    TS_ASSERT_EQUALS(IndexTranslator({1, 2, 3}, {{0}, {1}, {2}}).size(), 3);
+  }
+
   void test_spectrumNumbers() {
     std::vector<int32_t> spectrumNumbers{1, 2, 3};
     auto ptr = spectrumNumbers.data();

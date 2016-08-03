@@ -36,8 +36,10 @@ public:
   IndexTranslator(std::vector<int32_t> &&spectrumNumbers,
                   std::vector<std::vector<int32_t>> &&detectorIDs);
 
-  const std::vector<int32_t> &spectrumNumbers();
-  const std::vector<std::vector<int32_t>> &detectorIDs();
+  size_t size() const;
+
+  const std::vector<int32_t> &spectrumNumbers() const;
+  const std::vector<std::vector<int32_t>> &detectorIDs() const;
 
 private:
   std::vector<int32_t> m_spectrumNumbers;
