@@ -1,14 +1,20 @@
 set ( SRC_FILES
+	src/DetectorIDs.cpp
 	src/IndexTranslator.cpp
+	src/SpectrumNumbers.cpp
 )
 
 set ( INC_FILES
+	inc/MantidIndexing/DetectorIDs.h
 	inc/MantidIndexing/DllConfig.h
 	inc/MantidIndexing/IndexTranslator.h
+	inc/MantidIndexing/SpectrumNumbers.h
 )
 
 set ( TEST_FILES
+	DetectorIDsTest.h
 	IndexTranslatorTest.h
+	SpectrumNumbersTest.h
 )
 
 if (COVERALLS)
