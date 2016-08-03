@@ -937,9 +937,8 @@ void GenericDataProcessorPresenter::groupRows() {
 
   const auto selectedRows = m_view->getSelectedRows();
 
-  if (selectedRows.size() < 2) {
-    // Rows belong to the same group (size == 1) or
-    // no rows were selected (size == 0)
+  if (selectedRows.empty()) {
+    // no rows were selected
     return;
   }
 
