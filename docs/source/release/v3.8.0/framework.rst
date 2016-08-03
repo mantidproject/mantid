@@ -50,6 +50,7 @@ Improved
 - :ref:`FilterEvents <algm-FilterEvents>` now produces output
   workspaces with the same workspace numbers as specified by the
   ``SplittersWorkspace``.
+- :ref:`ConvertAxisByFormula <algm-ConvertAxisByFormula>` now supports instrument geometry vairables and several constants within the formula.  Axes are now reversed if the need to be to maintain increasing axis values.
 
 - :ref:`SavePlot1D <algm-SavePlot1D>` has options for writing out
   plotly html files.
