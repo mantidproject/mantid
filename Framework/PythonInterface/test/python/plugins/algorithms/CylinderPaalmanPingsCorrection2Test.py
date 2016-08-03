@@ -151,6 +151,41 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
         self._verify_workspaces_for_can()
 
 
+    def test_number_density_for_sample_can(self):
+        """
+        Test simple run with sample and can workspace and number density for both
+        """
+
+        CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
+                                       SampleWorkspace=self._sample_ws,
+                                       SampleChemicalFormula='H2-O',
+                                       SampleDensityType='Number'
+                                       SampleDensity=0.5,
+                                       CanWorkspace=self._can_ws,
+                                       CanChemicalFormula='V',
+                                       ContainerDensityType='Number'
+                                       ContainerDensity=0.5)
+                                       
+        # Check sample material
+        
+
+
+    def test_mass_density_for_sample_can(self):
+        """
+        Test simple run with sample and can workspace and mass density for both
+        """
+
+        CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
+                                       SampleWorkspace=self._sample_ws,
+                                       SampleChemicalFormula='H2-O',
+                                       SampleDensityType='Mass'
+                                       SampleDenisty=0.5,
+                                       CanWorkspace=self._can_ws,
+                                       CanChemicalFormula='V',
+                                       ContainerDensityType='Mass'
+                                       ContainerDesnity=0.5)
+
+
     def test_InterpolateDisabled(self):
         """
         Tests that a workspace with a bin count equal to NumberWavelengths is created
