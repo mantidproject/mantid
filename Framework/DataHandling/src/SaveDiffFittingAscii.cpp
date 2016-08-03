@@ -35,7 +35,7 @@ void SaveDiffFittingAscii::init() {
   declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the workspace containing the data you want to "
-                  "save to a TBL file.");
+                  "save to a TBL file");
 
   // Declare required parameters, filename with ext {.his} and input
   // workspace
@@ -44,14 +44,15 @@ void SaveDiffFittingAscii::init() {
                       "Filename", "", API::FileProperty::Save, exts),
                   "The filename to use for the saved data");
 
-  declareProperty("RunNumber", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
-                  "Run number of the focused file used to generate the "
-                  "parameters table workspace.");
+  declareProperty(
+      "RunNumber", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "Run number list of the focused files, which is used to generate the "
+      "parameters table workspace");
 
-  declareProperty("Bank", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
-                  "Bank of the focused file used to generate the parameters.");
+  declareProperty(
+      "Bank", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "Bank number list of the focused files, which is used to generate "
+      "the parameters table workspace");
 
   std::vector<std::string> formats;
 
@@ -177,30 +178,10 @@ void SaveDiffFittingAscii::processAll() {
     size_t columnSize = columnHeadings.size();
     writeData(m_workspaces[i], file, columnSize);
 
-    if (outFormat == "WriteGroupWorkspace" && (i+1) != m_workspaces.size()) {
+    if (outFormat == "WriteGroupWorkspace" && (i + 1) != m_workspaces.size()) {
       file << m_endl;
     }
   }
-  /*
-  for (auto &tbl : m_workspaces) {
-
-    std::string runNum = splitRunNum[m_counter];
-    std::string bank = splitBank[m_counter];
-    writeInfo(runNum, bank, file);
-
-    // write header
-    std::vector<std::string> columnHeadings = tbl->getColumnNames();
-    writeHeader(columnHeadings, file);
-
-    // write out the data form the table workspace
-    size_t columnSize = columnHeadings.size();
-    writeData(tbl, file, columnSize);
-
-    if (outFormat == "WriteGroupWorkspace") {
-      file << "\n";
-    }
-  }*/
-
   progress.report();
 }
 

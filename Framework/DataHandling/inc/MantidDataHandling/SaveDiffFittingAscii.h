@@ -20,9 +20,10 @@ public:
 
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Saves the results after carrying out single peak fitting process "
+    return "Saves the results to ASCII file after carrying out single peak "
+           "fitting process "
            "or running "
-           "EnggFitPeaks v1 algorithm to ASCII file";
+           "EnggFitPeaks algorithm.";
   }
 
   /// Algorithm's version
