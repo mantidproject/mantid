@@ -371,9 +371,6 @@ void ModeratorTzero::execEvent(const std::string &emode) {
           }
           evlist.setTofs(tofs);
           evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
-
-          MantidVec tofs_b = evlist.getTofs();
-          auto &xarray = evlist.x();
         } // end of else if(emode=="Elastic")
         else if (emode == "Direct") {
           // fix the histogram bins
