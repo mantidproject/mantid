@@ -42,7 +42,7 @@ public:
   const std::string name() const override { return "LoadILLINX"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Loads a ILL nexus file.";
+    return "Loads an ILL ToF NeXus file.";
   }
 
   /// Algorithm's version
