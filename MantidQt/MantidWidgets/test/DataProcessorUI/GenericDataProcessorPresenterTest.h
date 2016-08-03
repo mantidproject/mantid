@@ -1936,7 +1936,7 @@ public:
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
     presenter.notify(DataProcessorPresenter::GroupRowsFlag);
-		presenter.notify(DataProcessorPresenter::SaveFlag);
+    presenter.notify(DataProcessorPresenter::SaveFlag);
 
     // Check that the table has been modified correctly
     ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
