@@ -289,13 +289,15 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
 
   int blockSize = 8; // Read block size. Set to 8 for efficiency. i.e. read
                      // 8 histograms at a time.
-  int nFullBlocks = static_cast<int>(nHistograms) / blockSize; // Truncated number of full blocks to read. Remainder removed
+  int nFullBlocks =
+      static_cast<int>(nHistograms) /
+      blockSize; // Truncated number of full blocks to read. Remainder removed
   const int readOptimumStop = (nFullBlocks * blockSize);
   const int readStop = m_spec_max - 1;
   const int finalBlockSize = readStop - readOptimumStop;
 
   int wsIndex = 0;
-  //This cast is safe as m_spec_min must be >= 1
+  // This cast is safe as m_spec_min must be >= 1
   int histIndex = m_spec_min - 1;
 
   for (; histIndex < readStop;) {
@@ -2066,11 +2068,11 @@ void LoadNexusProcessed::checkOptionalProperties(
     const int minlist = *min_element(m_spec_list.begin(), m_spec_list.end());
     const int maxlist = *max_element(m_spec_list.begin(), m_spec_list.end());
     // Need to check before casting
-    if (maxlist < 0){
-        g_log.error("Invalid list of spectra");
-        throw std::invalid_argument("Spectra max is less than 0");
+    if (maxlist < 0) {
+      g_log.error("Invalid list of spectra");
+      throw std::invalid_argument("Spectra max is less than 0");
     }
-    
+
     if (maxlist > static_cast<int>(numberofspectra) || minlist == 0) {
       g_log.error("Invalid list of spectra");
       throw std::invalid_argument("Inconsistent properties defined");
@@ -2084,7 +2086,8 @@ void LoadNexusProcessed::checkOptionalProperties(
     if (m_spec_min != 1 && m_spec_max == 1) {
       m_spec_max = static_cast<int>(numberofspectra);
     }
-    if (m_spec_max < m_spec_min || m_spec_max > static_cast<int>(numberofspectra)) {
+    if (m_spec_max < m_spec_min ||
+        m_spec_max > static_cast<int>(numberofspectra)) {
       g_log.error("Invalid Spectrum min/max properties");
       throw std::invalid_argument("Inconsistent properties defined");
     }
