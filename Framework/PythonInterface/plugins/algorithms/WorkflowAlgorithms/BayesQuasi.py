@@ -31,7 +31,6 @@ class BayesQuasi(PythonAlgorithm):
     _res_norm = None
     _wfile = None
     _loop = None
-    _save = None
     _plot = None
 
     def category(self):
@@ -92,7 +91,6 @@ class BayesQuasi(PythonAlgorithm):
 
         self.declareProperty(name='Plot', defaultValue='', doc='Plot options')
 
-        self.declareProperty(name='Save', defaultValue=False, doc='Switch Save result to nxs file Off/On')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceFit', '', direction=Direction.Output),
                              doc='The name of the fit output workspaces')
@@ -132,7 +130,6 @@ class BayesQuasi(PythonAlgorithm):
         self._res_norm = self.getProperty('UseResNorm').value
         self._wfile = self.getPropertyValue('WidthFile')
         self._loop = self.getProperty('Loop').value
-        self._save = self.getProperty('Save').value
         self._plot = self.getPropertyValue('Plot')
 
     #pylint: disable=too-many-locals,too-many-statements
@@ -382,15 +379,6 @@ class BayesQuasi(PythonAlgorithm):
         log_prog.report('Adding sample logs to Fit workspace')
         self._add_sample_logs(fitWS, prog, erange, nbins)
         log_prog.report('Finialising log copying')
-
-        if self._save:
-            log_prog.report('Saving workspaces')
-            fit_path = os.path.join(workdir,fitWS+'.nxs')
-            s_api.SaveNexusProcessed(InputWorkspace=fitWS, Filename=fit_path)
-            out_path = os.path.join(workdir, outWS+'.nxs')                    # path name for nxs file
-            s_api.SaveNexusProcessed(InputWorkspace=outWS, Filename=out_path)
-            logger.information('Output fit file created : ' + fit_path)
-            logger.information('Output paramter file created : ' + out_path)
 
         self.setProperty('OutputWorkspaceFit', fitWS)
         self.setProperty('OutputWorkspaceResult', outWS)
