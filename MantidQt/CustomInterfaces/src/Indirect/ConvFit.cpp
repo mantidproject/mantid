@@ -1199,8 +1199,7 @@ void ConvFit::singleFit() {
       runPythonCode(
           QString(
               "from IndirectCommon import getWSprefix\nprint getWSprefix('") +
-          m_cfInputWSName + QString("')\n"))
-          .trimmed();
+          m_cfInputWSName + QString("')\n")).trimmed();
   m_singleFitOutputName +=
       QString("conv_") + fitType + bgType + m_uiForm.spPlotSpectrum->text();
   int maxIterations =
