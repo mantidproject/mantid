@@ -125,8 +125,8 @@ Bank Name:
   option of "North" and "South", which are equivalent to 1 and 2
   respectively. 
   Custom bank mappings can be created by setting the Bank Name option
-  to `Use spectrum numbers`. By specifying a range or list of 
-  spectra to use a new custom bank can be created and subsequently named.
+  to `Use spectrum numbers`. When the option *Use Spectrum Numbers* is 
+  set a bank name must be specified in *Customise Bank Name*.
   
 Spectrum Numbers:
   This parameter is only required when Cropped Calibration is being
@@ -179,17 +179,17 @@ include different banks and/or combinations of spectra (detectors).
 The behavior for each option is as follows:
 
 1. *Normal focusing* - All the selected banks and spectra present
-in the input runs are considered. The output focused workspace will take 
-suffixes such as *_bank_1, _bank_2*, and so on
+in the input runs are considered. The output focused workspace will 
+be named with suffixes such as *_bank_1, _bank_2*, and so on
  
 2. *Cropped Focusing* - All the banks are considered in
 principle but only a list of spectra provided manually are
-processed. The output focused workspace will take the
-*_cropped* suffix.
+processed. The output focused workspace will be named with 
+the suffix *_cropped*.
 
 3. *Texture Focusing* - The banks are selected by a user-defined
 list of banks and corresponding spectrum numbers provided in a file. 
-The output workspace will take suffixes such as *_texture_bank_1,
+The output workspaces will be named with suffixes such as *_texture_bank_1,
 _texture_bank_2*, and so on. These suffixes are determined by the 
 bank IDs given in the detector grouping file.
 
