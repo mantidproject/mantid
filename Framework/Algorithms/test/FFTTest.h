@@ -678,6 +678,38 @@ public:
     }
   }
 
+  /**
+   * Test suggested by instrument scientists
+   * A function that is symmetrical -- f(x) == f(-x) -- should give an entirely
+   * real transform
+   * (Test that this succeeds for histogram data)
+   */
+  void test_symmetricalFunction_realTransform_histo() {
+    const auto &inputWS =
+        createSymmetricalWorkspace(2000, 6.2 * 2.0 * M_PI, 4.277321, 0.8, true);
+    const auto &fft = doFFT(inputWS, false, true);
+    const auto &imagTransform = fft->y(4); // spectrum 4 is the imaginary one
+    for (const auto &y : imagTransform) {
+      TS_ASSERT_DELTA(y, 0.0, 1e-11);
+    }
+  }
+
+  /**
+ * Test suggested by instrument scientists
+ * A function that is symmetrical -- f(x) == f(-x) -- should give an entirely
+ * real transform
+ * (Test that this succeeds for point data)
+ */
+  void test_symmetricalFunction_realTransform_point() {
+    const auto &inputWS = createSymmetricalWorkspace(2000, 6.2 * 2.0 * M_PI,
+                                                     4.277321, 0.8, false);
+    const auto &fft = doFFT(inputWS, false, true);
+    const auto &imagTransform = fft->y(4); // spectrum 4 is the imaginary one
+    for (const auto &y : imagTransform) {
+      TS_ASSERT_DELTA(y, 0.0, 1e-12);
+    }
+  }
+
 private:
   MatrixWorkspace_sptr doRebin(MatrixWorkspace_sptr inputWS,
                                const std::string &params) {
@@ -909,6 +941,39 @@ private:
     crop->setProperty("XMax", higher);
     crop->execute();
     return crop->getProperty("OutputWorkspace");
+  }
+
+  MatrixWorkspace_sptr createSymmetricalWorkspace(const size_t n,
+                                                  const double omega,
+                                                  const double x0,
+                                                  const double sigma,
+                                                  const bool isHisto) {
+    std::vector<double> X, Y;
+    const size_t xSize = isHisto ? n + 1 : n;
+    X.reserve(xSize);
+    Y.reserve(n);
+    // Bin edges
+    for (size_t i = 0; i < xSize; ++i) {
+      const double x = ((10.0 * double(i)) / double(n)) - x0;
+      X.push_back(x);
+    }
+    // Y values
+    for (size_t i = 0; i < n; ++i) {
+      const double xp = isHisto ? 0.5 * (X[i] + X[i + 1]) : X[i];
+      const double y = cos(omega * xp) * exp(-pow((xp * sigma), 4));
+      Y.push_back(y);
+    }
+    // create workspace
+    auto create =
+        FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    create->initialize();
+    create->setChild(true);
+    create->setProperty("DataX", X);
+    create->setProperty("DataY", Y);
+    create->setProperty("NSpec", 1);
+    create->setPropertyValue("OutputWorkspace", "__NotUsed");
+    create->execute();
+    return create->getProperty("OutputWorkspace");
   }
 
   const double dX;
