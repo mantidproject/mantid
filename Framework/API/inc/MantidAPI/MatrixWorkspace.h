@@ -18,7 +18,9 @@
 namespace Mantid {
 
 namespace Indexing {
+class DetectorIDs;
 class IndexTranslator;
+class SpectrumNumbers;
 }
 
 namespace Geometry {
@@ -87,6 +89,8 @@ public:
   /// Returns a clone of the workspace
   MatrixWorkspace_uptr clone() const { return MatrixWorkspace_uptr(doClone()); }
 
+  void setIndexTranslator(Indexing::SpectrumNumbers &&spectrumNumbers,
+                          Indexing::DetectorIDs &&detectorIDs);
   void setIndexTranslator(Indexing::IndexTranslator &&translator);
 
   using IMDWorkspace::toString;

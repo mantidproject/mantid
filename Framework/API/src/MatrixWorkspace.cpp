@@ -85,6 +85,13 @@ MatrixWorkspace::~MatrixWorkspace() {
 }
 
 void MatrixWorkspace::setIndexTranslator(
+    Indexing::SpectrumNumbers &&spectrumNumbers,
+    Indexing::DetectorIDs &&detectorIDs) {
+  setIndexTranslator(Indexing::IndexTranslator(std::move(spectrumNumbers),
+                                               std::move(detectorIDs)));
+}
+
+void MatrixWorkspace::setIndexTranslator(
     Indexing::IndexTranslator &&translator) {
   if (translator.size() != getNumberHistograms())
     throw std::runtime_error("MatrixWorkspace::setIndexTranslator: Translator "
@@ -96,8 +103,9 @@ void MatrixWorkspace::setIndexTranslator(
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
     auto &spectrum = getSpectrum(i);
     spectrum.setSpectrumNo(spectrumNumbers[i]);
-    spectrum.setDetectorIDs(
-        std::set<detid_t>(detectorIDs[i].begin(), detectorIDs[i].end()));
+    if (!detectorIDs.empty())
+      spectrum.setDetectorIDs(
+          std::set<detid_t>(detectorIDs[i].begin(), detectorIDs[i].end()));
   }
 }
 
