@@ -12,16 +12,21 @@ from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBou
 
 class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
+    # Sample variables
     _sample_ws_name = None
-    _sample_chemical_formula = None
-    _sample_number_density = None
+    _sample_density_type = None
+    _sample_density = None
     _sample_inner_radius = None
     _sample_outer_radius = None
+
+    # Container variables
     _use_can = False
     _can_ws_name = None
-    _can_chemical_formula = None
-    _can_number_density = None
+    _can_density_type = None
+    _can_density = None
     _can_outer_radius = None
+
+
     _number_can = 1
     _ms = 1
     _number_wavelengths = 10
@@ -63,9 +68,12 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
                              validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
-        self.declareProperty(name='SampleNumberDensity', defaultValue=0.1,
+        self.decalreProperty(name='SampleDensityType', 'Number',
+                             validator=StringListValidator(['Number','Mass']),
+                             doc='Use Sample Number Density or Mass Density')
+        self.declareProperty(name='SampleDensity', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Sample number density')
+                             doc='Sample density')
         self.declareProperty(name='SampleInnerRadius', defaultValue=0.05,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample inner radius')
@@ -81,9 +89,12 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
                              doc='Can chemical formula')
-        self.declareProperty(name='CanNumberDensity', defaultValue=0.1,
+        self.decalreProperty(name='CanDesnityType', defaultValue='Number',
+                             validator=StringListValidator(['Number', 'Mass']),
+                             doc='Use Sample Number Density or Mass Density')
+        self.declareProperty(name='CanDensity', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Can number density')
+                             doc='Can density')
         self.declareProperty(name='CanOuterRadius', defaultValue=0.15,
                              validator=FloatBoundedValidator(0.0),
                              doc='Can outer radius')
@@ -236,16 +247,16 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         setup_prog = Progress(self, start=0.00, end=0.01, nreports=2)
         setup_prog.report('Obtaining input properties')
         self._sample_ws_name = self.getPropertyValue('SampleWorkspace')
-        self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
-        self._sample_number_density = self.getProperty('SampleNumberDensity').value
+        self._sample_density_type = self.getPropertyValue('SampleDensityType')
+        self._sample_density = self.getProperty('SampleDensity').value
         self._sample_inner_radius = self.getProperty('SampleInnerRadius').value
         self._sample_outer_radius = self.getProperty('SampleOuterRadius').value
         self._number_can = 1
 
         self._can_ws_name = self.getPropertyValue('CanWorkspace')
         self._use_can = self._can_ws_name != ''
-        self._can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
-        self._can_number_density = self.getProperty('CanNumberDensity').value
+        self._can_density_type = self.getPropertyValue('CanDensityType')
+        self._can_density = self.getProperty('CanDensity').value
         self._can_outer_radius = self.getProperty('CanOuterRadius').value
         if self._use_can:
             self._number_can = 2
@@ -297,29 +308,61 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
     def _sample(self):
         sample_prog = Progress(self, start=0.01, end=0.03, nreports=2)
         sample_prog.report('Setting Sample Material for Sample')
-        SetSampleMaterial(self._sample_ws_name , ChemicalFormula=self._sample_chemical_formula,
-                          SampleNumberDensity=self._sample_number_density)
-        sample = mtd[self._sample_ws_name].sample()
-        sam_material = sample.getMaterial()
+
+        sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
+        sample_ws, self._sample_desnity = self._set_material(self._sample_ws_name, 
+                                                             sample_chemical_formula,
+                                                             self._sample_density_type,
+                                                             self._self._sample_density)
+
+        sample_material = sample_ws.sample().getMaterial()
         # total scattering x-section
         self._sig_s = np.zeros(self._number_can)
-        self._sig_s[0] = sam_material.totalScatterXSection()
+        self._sig_s[0] = sample_material.totalScatterXSection()
         # absorption x-section
         self._sig_a = np.zeros(self._number_can)
-        self._sig_a[0] = sam_material.absorbXSection()
+        self._sig_a[0] = sample_material.absorbXSection()
         # density
         self._density = np.zeros(self._number_can)
-        self._density[0] = self._sample_number_density
+        self._density[0] = self._sample_density
 
         if self._use_can:
             sample_prog.report('Setting Sample Material for Container')
-            SetSampleMaterial(InputWorkspace=self._can_ws_name, ChemicalFormula=self._can_chemical_formula,
-                              SampleNumberDensity=self._can_number_density)
-            can_sample = mtd[self._can_ws_name].sample()
-            can_material = can_sample.getMaterial()
+            
+            can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
+            can_ws, self._can_density = self._set_material(self._can_ws_name, 
+                                                           can_chemical_formula,
+                                                           self._can_desnity_type,
+                                                           self._can_density)
+
+            can_material = can_ws.getSample().getMaterial()
             self._sig_s[1] = can_material.totalScatterXSection()
             self._sig_a[1] = can_material.absorbXSection()
-            self._density[1] = self._can_number_density
+            self._density[1] = self._can_density
+
+    def _set_material(self, ws_name, chemical_formula, density_type, density):
+        """
+        Sets the sample material for a given workspace
+        @param ws_name              :: name of the workspace to set sample material for
+        @param chemical_formula     :: Chemical formula of sample
+        @param density_type         :: 'Number' or 'Mass'
+        @param density              :: Density of sample
+        @return pointer to the workspace with sample material set 
+                AND
+                number density of the sample material
+        """
+        density_property = 'Sample' + density_type + 'Density'
+        set_material_alg = self.createChildAlgorithm('SetSampleMaterial')
+        set_material_alg.setProperty('InputWorkspace', ws_name)
+        set_material_alg.setProperty('ChemicalFormula', chemical_formula)
+        set_material_alg.setProperty(desnity_property, density)
+        set_material_alg.execute()
+        number_density = density
+        ws = set_material_alg.getProperty('InputWorkspace'))
+        if density_type = 'Mass':
+            ## TODO: Need to get number density if mass density provided (might have to be done with the material builder)
+            #number_density = set_material_alg.getProperty('').value
+        return ws, number_density
 
 #------------------------------------------------------------------------------
 
