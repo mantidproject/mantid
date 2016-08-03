@@ -85,6 +85,9 @@ that should be added to the X values to centre the X axis. Setting the *AutoShif
 property will automatically apply the correct shift (overriding any manually supplied
 *Shift*).
 
+The algorithm works internally with point data - if a histogram workspace is provided as input, the bin edges are converted to points automatically inside the algorithm.
+The output transform is always a point data workspace. (It can be subsequently converted back to a histogram workspace using :ref:`algm-ConvertToHistogram`, if required).
+
 Example 1
 #########
 
