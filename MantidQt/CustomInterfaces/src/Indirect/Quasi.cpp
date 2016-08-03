@@ -148,7 +148,6 @@ void Quasi::run() {
     }
   }
 
-  bool save = false;
   bool elasticPeak = false;
   bool sequence = false;
 
@@ -199,9 +198,6 @@ void Quasi::run() {
   long resBins = m_properties["ResBinning"]->valueText().toLong();
 
   // Output options
-  if (m_uiForm.chkSave->isChecked()) {
-    save = true;
-  }
   std::string plot = m_uiForm.cbPlot->currentText().toStdString();
 
   IAlgorithm_sptr runAlg = AlgorithmManager::Instance().create("BayesQuasi");
@@ -223,14 +219,15 @@ void Quasi::run() {
   runAlg->setProperty("UseResNorm", useResNorm);
   runAlg->setProperty("WidthFile", fixedWidthFile);
   runAlg->setProperty("Loop", sequence);
-  runAlg->setProperty("Save", save);
   runAlg->setProperty("Plot", plot);
 
   m_QuasiAlg = runAlg;
   m_batchAlgoRunner->addAlgorithm(runAlg);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
+
   m_batchAlgoRunner->executeBatchAsync();
+
 }
 
 /**
@@ -241,6 +238,22 @@ void Quasi::algorithmComplete(bool error) {
     return;
   else
     updateMiniPlot();
+    if (m_uiForm.chkSave->isChecked()) {
+      auto saveDirectory = Mantid::Kernel::ConfigService::Instance().getString(
+        "defaultsave.directory");      
+      auto fitWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
+      const auto fitPath = saveDirectory.append(fitWS).append(".nxs");
+      QString QfitWS = QString::fromStdString(fitWS);
+      QString QfitPath = QString::fromStdString(fitPath);
+      addSaveWorkspaceToQueue(QfitWS, QfitPath);
+
+      auto resultWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
+      const auto resultPath = saveDirectory.append(resultWS).append(".nxs");
+      QString QresultWS = QString::fromStdString(resultWS);
+      QString QresultPath = QString::fromStdString(resultPath);
+      addSaveWorkspaceToQueue(QresultWS, QresultPath);
+
+  }
 }
 
 void Quasi::updateMiniPlot() {
