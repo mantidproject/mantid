@@ -1589,7 +1589,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   double oneLValues[3] = {0.0, 0.0,
                           0.0}; // previous values for one lorentzian fit
   bool previouslyOneL = false;
-  // If the previosu fit was One Lorentzian and the new fit is Two Lorentzian
+  // If the previous fit was One Lorentzian and the new fit is Two Lorentzian
   // preserve the values of One Lorentzian Fit
   if (m_previousFit.compare("One Lorentzian") == 0 &&
       m_uiForm.cbFitType->currentText().compare("Two Lorentzians") == 0) {
