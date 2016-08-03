@@ -147,7 +147,8 @@ private:
   * @return std::vector<std::string> of splitted file name with run
   * number & bank
   */
-  std::vector<std::string> splitFittingDirectory(const std::string & selectedfPath);
+  std::vector<std::string>
+  splitFittingDirectory(const std::string &selectedfPath);
 
   void updateFittingDirVec(const std::string &bankDir,
                            const std::string &focusedFile, const bool multi_run,

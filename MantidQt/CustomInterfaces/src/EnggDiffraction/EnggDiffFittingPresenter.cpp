@@ -184,9 +184,9 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     std::string strFPath = selectedfPath.toString();
     // returns empty if no directory is found
     std::vector<std::string> splitBaseName;
-	if (strFPath.find("ENGINX_") != std::string::npos) {
-		boost::split(splitBaseName, strFPath, boost::is_any_of("_."));
-	}
+    if (strFPath.find("ENGINX_") != std::string::npos) {
+      boost::split(splitBaseName, strFPath, boost::is_any_of("_."));
+    }
 
     // runNo when single focused file selected
     std::vector<std::string> runNoVec;
@@ -453,8 +453,7 @@ void EnggDiffFittingPresenter::inputChecksBeforeFitting(
 
   // Check the filename is the format we expect
   // As it contains details we need later in the algorithm
-  std::vector<std::string> vecFileSplit =
-      splitFittingDirectory(focusedRunNo);
+  std::vector<std::string> vecFileSplit = splitFittingDirectory(focusedRunNo);
   // The fit filenames are delimited by '_' and should be of
   // format 'EnginX_<runNumber>_focused_bank_<bankNumber>'
   // therefore we should always get 5 parts split in the vector
@@ -466,17 +465,15 @@ void EnggDiffFittingPresenter::inputChecksBeforeFitting(
   }
 }
 
-
 std::vector<std::string> EnggDiffFittingPresenter::splitFittingDirectory(
-	const std::string &selectedfPath) {
+    const std::string &selectedfPath) {
 
-	Poco::Path PocofPath(selectedfPath);
-	std::string selectedbankfName = PocofPath.getBaseName();
-	std::vector<std::string> splitBaseName;
-	boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_."));
-	return splitBaseName;
+  Poco::Path PocofPath(selectedfPath);
+  std::string selectedbankfName = PocofPath.getBaseName();
+  std::vector<std::string> splitBaseName;
+  boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_."));
+  return splitBaseName;
 }
-
 
 std::string EnggDiffFittingPresenter::validateFittingexpectedPeaks(
     std::string &expectedPeaks) const {
