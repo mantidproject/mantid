@@ -16,6 +16,9 @@ namespace detail {
   and HistogramData::HistogramX. By inheriting from it, a type becomes scalable,
   i.e., can be multiplied by a scalar.
 
+  @author Simon Heybrock
+  @date 2016
+
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 

@@ -16,6 +16,7 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
+	inc/MantidHistogramData/Addable.h
 	inc/MantidHistogramData/BinEdgeStandardDeviations.h
 	inc/MantidHistogramData/BinEdgeVariances.h
 	inc/MantidHistogramData/BinEdges.h
@@ -50,6 +51,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+	AddableTest.h
 	BinEdgeStandardDeviationsTest.h
 	BinEdgeVariancesTest.h
 	BinEdgesTest.h
