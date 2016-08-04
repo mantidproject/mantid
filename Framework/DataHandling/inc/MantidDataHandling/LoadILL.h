@@ -46,4 +46,4 @@ public:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif // MANTID_LOADILL_H
+#endif /*MANTID_DATAHANDLING_LoadILL_H_*/

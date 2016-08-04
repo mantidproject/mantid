@@ -111,4 +111,4 @@ private:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*MANTID_DATAHANDLING_LoadILL_H_*/
+#endif /*MANTID_DATAHANDLING_LoadILLINX_H_*/

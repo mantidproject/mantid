@@ -226,9 +226,9 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadIDFFromNexus.h
-    inc/MantidDataHandling/LoadILL.h
-    inc/MantidDataHandling/LoadILLIndirect.h
-    inc/MantidDataHandling/LoadILLINX.h
+	inc/MantidDataHandling/LoadILL.h
+	inc/MantidDataHandling/LoadILLIndirect.h
+	inc/MantidDataHandling/LoadILLINX.h
 	inc/MantidDataHandling/LoadILLReflectometry.h
 	inc/MantidDataHandling/LoadILLSANS.h
 	inc/MantidDataHandling/LoadISISNexus2.h

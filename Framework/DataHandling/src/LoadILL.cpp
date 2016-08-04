@@ -3,7 +3,6 @@
 //---------------------------------------------------
 #include "MantidDataHandling/LoadILL.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -20,6 +19,8 @@ LoadILL::LoadILL() : LoadILLINX() { this->useAlgorithm("LoadILLINX", 1); }
  * be used
  */
 int LoadILL::confidence(Kernel::NexusDescriptor &descriptor) const {
+  // Suppress unused warning
+  (void)descriptor;
   // Deprecated, always return 0
   return 0;
 }
