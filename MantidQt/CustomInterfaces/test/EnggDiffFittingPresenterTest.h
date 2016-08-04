@@ -6,7 +6,6 @@
 
 #include "EnggDiffFittingViewMock.h"
 #include <cxxtest/TestSuite.h>
-#include <poco/TemporaryFile.h>
 
 using namespace MantidQt::CustomInterfaces;
 using testing::TypedEq;
