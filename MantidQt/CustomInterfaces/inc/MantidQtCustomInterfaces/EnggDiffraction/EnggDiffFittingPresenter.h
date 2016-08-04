@@ -115,6 +115,7 @@ public:
 protected:
   void processStart();
   void processFitPeaks();
+  void processFitAllPeaks();
   void processShutDown();
   void processLogMsg();
 
@@ -130,8 +131,9 @@ private:
   bool isDigit(std::string text);
 
   // Methods related single peak fits
-  virtual void startAsyncFittingWorker(const std::string &focusedRunNo,
-                                       const std::string &expectedPeaks);
+  virtual void
+  startAsyncFittingWorker(const std::vector<std::string> &focusedRunNo,
+                          const std::string &expectedPeaks);
 
   std::string validateFittingexpectedPeaks(std::string &expectedPeaks) const;
 

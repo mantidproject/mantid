@@ -110,7 +110,8 @@ EnggDiffFittingPresenter::currentCalibration() const {
 }
 
 void EnggDiffFittingPresenter::startAsyncFittingWorker(
-    const std::string &focusedRunNo, const std::string &expectedPeaks) {
+    const std::vector<std::string> &focusedRunNo,
+    const std::string &expectedPeaks) {
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
@@ -421,7 +422,10 @@ void EnggDiffFittingPresenter::processFitPeaks() {
   m_view->enableCalibrateFocusFitUserActions(false);
   // startAsyncFittingWorker
   // doFitting()
-  startAsyncFittingWorker(focusedRunNo, fitPeaksData);
+  std::vector<std::string> focusRunNoVec;
+  focusRunNoVec.push_back(focusedRunNo);
+
+  startAsyncFittingWorker(focusRunNoVec, fitPeaksData);
 }
 
 void EnggDiffFittingPresenter::inputChecksBeforeFitting(
