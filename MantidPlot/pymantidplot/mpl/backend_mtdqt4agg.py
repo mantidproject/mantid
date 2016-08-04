@@ -10,9 +10,7 @@ API without modification
 """
 from __future__ import division, print_function
 
-import matplotlib
-
-from matplotlib.backends.backend_qt4agg import QtCore, QtGui, draw_if_interactive
+from matplotlib.backends.backend_qt4agg import QtCore, QtGui, draw_if_interactive #pylint: disable=unused-import
 from matplotlib.backends.backend_qt4agg import new_figure_manager as _new_fig_mgr_qt4agg
 from matplotlib.backends.backend_qt4agg import show as _show_qt4agg
 
@@ -22,30 +20,33 @@ class QAppThreadCall(QtCore.QObject):
     on the same thread as the QtGui.qApp object.
     """
 
-    def __init__(self, callable):
+    def __init__(self, callable_obj):
         QtCore.QObject.__init__(self)
         self.moveToThread(QtGui.qApp.thread())
-        self.callable = callable
+        self.callable_obj = callable_obj
         # Help should then give the correct doc
-        self.__call__.__func__.__doc__ = callable.__doc__
-        self._clear_func_props()
+        self.__call__.__func__.__doc__ = callable_obj.__doc__
+        self._args = None
+        self._kwargs = None
+        self._retvalue = None
+        self._exc = None
 
     def __call__(self, *args, **kwargs):
         """
         If the current thread is the qApp thread then this
-        performs a straight call to the wrapped callable. Otherwise
+        performs a straight call to the wrapped callable_obj. Otherwise
         it invokes the do_call method as a slot via a
         BlockingQueuedConnection.
         """
         if QtCore.QThread.currentThread() == QtGui.qApp.thread():
-            return self.callable(*args, **kwargs)
+            return self.callable_obj(*args, **kwargs)
         else:
             self._clear_func_props()
             self._store_func_props(*args, **kwargs)
             QtCore.QMetaObject.invokeMethod(self, "on_call",
                                             QtCore.Qt.BlockingQueuedConnection)
             if self._exc is not None:
-                raise self._exc
+                raise self._exc #pylint: disable=raising-bad-type
             return self._retvalue
 
     @QtCore.pyqtSlot()
@@ -54,8 +55,9 @@ class QAppThreadCall(QtCore.QObject):
         thread and return the result
         """
         try:
-            self._retvalue = self.callable(*self._args, **self._kwargs)
-        except Exception as exc:
+            self._retvalue = \
+                self.callable_obj(*self._args, **self._kwargs)
+        except Exception as exc: #pylint: disable=broad-except
             self._exc = exc
 
     def _clear_func_props(self):
@@ -69,5 +71,5 @@ class QAppThreadCall(QtCore.QObject):
         self._kwargs = kwargs
 
 # Wrap Qt4Agg methods
-show = QAppThreadCall(_show_qt4agg)
-new_figure_manager = QAppThreadCall(_new_fig_mgr_qt4agg)
+show = QAppThreadCall(_show_qt4agg) #pylint: disable=invalid-name
+new_figure_manager = QAppThreadCall(_new_fig_mgr_qt4agg) #pylint: disable=invalid-name
