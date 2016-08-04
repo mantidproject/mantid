@@ -163,7 +163,7 @@ void GeneralisedSecondDifference::computePrefactors() {
           next[i] += previous[index];
       }
     }
-	previous = next;
+    previous = next;
     max_index_prev = max_index;
     n_el_prev = n_el;
   } while (zz != m_z);

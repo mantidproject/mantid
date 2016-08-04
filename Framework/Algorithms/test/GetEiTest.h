@@ -17,66 +17,66 @@ using Mantid::MantidVecPtr;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
 
-namespace GetEiTestHelper{
+namespace GetEiTestHelper {
 IAlgorithm_sptr runGetEiUsingTestMonitors(const std::string &inputWS,
-	const double energyGuess,
-	const bool fixei) {
-	IAlgorithm_sptr alg =
-		AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
-	alg->initialize();
-	alg->setPropertyValue("InputWorkspace", inputWS);
-	alg->setProperty("Monitor1Spec", 1);
-	alg->setProperty("Monitor2Spec", 2);
-	alg->setProperty("FixEi", fixei);
-	alg->setProperty("EnergyEstimate", energyGuess);
-	alg->setRethrows(true);
-	alg->execute();
-	return alg;
+                                          const double energyGuess,
+                                          const bool fixei) {
+  IAlgorithm_sptr alg =
+      AlgorithmManager::Instance().createUnmanaged("GetEi", 2);
+  alg->initialize();
+  alg->setPropertyValue("InputWorkspace", inputWS);
+  alg->setProperty("Monitor1Spec", 1);
+  alg->setProperty("Monitor2Spec", 2);
+  alg->setProperty("FixEi", fixei);
+  alg->setProperty("EnergyEstimate", energyGuess);
+  alg->setRethrows(true);
+  alg->execute();
+  return alg;
 }
 
 MatrixWorkspace_sptr
 createTestWorkspaceWithMonitors(const bool includePeaks = true) {
-	const int numHists(2);
-	const int numBins(2000);
-	MatrixWorkspace_sptr testWS =
-		WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-			numHists, numBins, true);
-	testWS->getAxis(0)->unit() =
-		Mantid::Kernel::UnitFactory::Instance().create("TOF");
-	// Update X data  to a sensible values. Looks roughly like the MARI binning
-	// Update the Y values. We don't care about errors here
+  const int numHists(2);
+  const int numBins(2000);
+  MatrixWorkspace_sptr testWS =
+      WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+          numHists, numBins, true);
+  testWS->getAxis(0)->unit() =
+      Mantid::Kernel::UnitFactory::Instance().create("TOF");
+  // Update X data  to a sensible values. Looks roughly like the MARI binning
+  // Update the Y values. We don't care about errors here
 
-	// Instrument geometry + incident energy of ~15 mev (purely made up) gives
-	// these neceesary peak values.
-	// We'll simply use a gaussian as a test
+  // Instrument geometry + incident energy of ~15 mev (purely made up) gives
+  // these neceesary peak values.
+  // We'll simply use a gaussian as a test
 
-	const double peakOneCentre(6493.0), sigmaSqOne(250 * 250.),
-		peakTwoCentre(10625.), sigmaSqTwo(50 * 50);
-	const double peakOneHeight(3000.), peakTwoHeight(1000.);
+  const double peakOneCentre(6493.0), sigmaSqOne(250 * 250.),
+      peakTwoCentre(10625.), sigmaSqTwo(50 * 50);
+  const double peakOneHeight(3000.), peakTwoHeight(1000.);
 
-	BinEdges xdata(numBins + 1, LinearGenerator(5.0, 5.5));
+  BinEdges xdata(numBins + 1, LinearGenerator(5.0, 5.5));
 
-	// xdata.end() - 1 because bin edges are 1 bigger than Y's size
-	if (includePeaks) {
-		std::transform(
-			xdata.cbegin(), xdata.cend() - 1, testWS->mutableY(0).begin(),
-			[peakOneHeight, peakOneCentre, sigmaSqOne](const double x) {
-			return peakOneHeight *
-				exp(-0.5 * pow(x - peakOneCentre, 2.) / sigmaSqOne);
-		});
+  // xdata.end() - 1 because bin edges are 1 bigger than Y's size
+  if (includePeaks) {
+    std::transform(xdata.cbegin(), xdata.cend() - 1,
+                   testWS->mutableY(0).begin(),
+                   [peakOneHeight, peakOneCentre, sigmaSqOne](const double x) {
+                     return peakOneHeight *
+                            exp(-0.5 * pow(x - peakOneCentre, 2.) / sigmaSqOne);
+                   });
 
-		std::transform(
-			xdata.cbegin(), xdata.cend() - 1, testWS->mutableY(1).begin(),
-			[peakTwoHeight, peakTwoCentre, sigmaSqTwo](const double x) {
-			return peakTwoHeight *
-				exp(-0.5 * pow(x - peakTwoCentre, 2.) / sigmaSqTwo);
-		});
-	}
+    std::transform(xdata.cbegin(), xdata.cend() - 1,
+                   testWS->mutableY(1).begin(),
+                   [peakTwoHeight, peakTwoCentre, sigmaSqTwo](const double x) {
+                     return peakTwoHeight *
+                            exp(-0.5 * pow(x - peakTwoCentre, 2.) / sigmaSqTwo);
+                   });
+  }
 
-	testWS->setBinEdges(0, xdata);
-	testWS->setBinEdges(1, xdata);
+  testWS->setBinEdges(0, xdata);
+  testWS->setBinEdges(1, xdata);
 
-	return testWS;
+  return testWS;
 }
 }
 class GetEiTest : public CxxTest::TestSuite {
@@ -103,14 +103,15 @@ public:
   }
 
   void do_test_on_result_values(double input_ei, bool fixei) {
-    MatrixWorkspace_sptr testWS = GetEiTestHelper::createTestWorkspaceWithMonitors();
+    MatrixWorkspace_sptr testWS =
+        GetEiTestHelper::createTestWorkspaceWithMonitors();
     // This algorithm needs a name attached to the workspace
     const std::string outputName("eitest");
     AnalysisDataService::Instance().add(outputName, testWS);
 
     IAlgorithm_sptr alg;
-    TS_ASSERT_THROWS_NOTHING(
-        alg = GetEiTestHelper::runGetEiUsingTestMonitors(outputName, input_ei, fixei));
+    TS_ASSERT_THROWS_NOTHING(alg = GetEiTestHelper::runGetEiUsingTestMonitors(
+                                 outputName, input_ei, fixei));
 
     // Test output answers
     // The monitor peak should always be calculated from the data
@@ -144,7 +145,8 @@ public:
   }
 
   void testParametersOnWorkspace() {
-    MatrixWorkspace_sptr testWS = GetEiTestHelper::createTestWorkspaceWithMonitors();
+    MatrixWorkspace_sptr testWS =
+        GetEiTestHelper::createTestWorkspaceWithMonitors();
 
     testWS->instrumentParameters().addString(
         testWS->getInstrument()->getChild(0).get(), "ei-mon1-spec", "1");
@@ -158,8 +160,8 @@ public:
     AnalysisDataService::Instance().add(outputName, testWS);
 
     IAlgorithm_sptr alg;
-    TS_ASSERT_THROWS_NOTHING(
-        alg = GetEiTestHelper::runGetEiUsingTestMonitors(outputName, 15, false));
+    TS_ASSERT_THROWS_NOTHING(alg = GetEiTestHelper::runGetEiUsingTestMonitors(
+                                 outputName, 15, false));
 
     // Test output answers
     const double expected_ei = 15.00322845;
@@ -181,7 +183,8 @@ public:
   }
 
   void testThrowsMon1() {
-    MatrixWorkspace_sptr testWS = GetEiTestHelper::createTestWorkspaceWithMonitors();
+    MatrixWorkspace_sptr testWS =
+        GetEiTestHelper::createTestWorkspaceWithMonitors();
     // This algorithm needs a name attached to the workspace
     const std::string outputName("eitest1");
     AnalysisDataService::Instance().add(outputName, testWS);
@@ -199,7 +202,8 @@ public:
     AnalysisDataService::Instance().remove(outputName);
   }
   void testThrowsEi() {
-    MatrixWorkspace_sptr testWS = GetEiTestHelper::createTestWorkspaceWithMonitors();
+    MatrixWorkspace_sptr testWS =
+        GetEiTestHelper::createTestWorkspaceWithMonitors();
     // This algorithm needs a name attached to the workspace
     const std::string outputName("eitest2");
     AnalysisDataService::Instance().add(outputName, testWS);
@@ -219,7 +223,8 @@ public:
 
   void test_throws_error_when_ei_not_fixed_and_no_peaks_found() {
     const bool includePeaks(false);
-    MatrixWorkspace_sptr testWS = GetEiTestHelper::createTestWorkspaceWithMonitors(includePeaks);
+    MatrixWorkspace_sptr testWS =
+        GetEiTestHelper::createTestWorkspaceWithMonitors(includePeaks);
     // This algorithm needs a name attached to the workspace
     const std::string outputName("eitest2");
     AnalysisDataService::Instance().add(outputName, testWS);
@@ -240,14 +245,15 @@ public:
 
   void test_peak_time_is_guess_time_when_ei_fixed_and_no_peak_found() {
     const bool includePeaks(false);
-    MatrixWorkspace_sptr testWS = GetEiTestHelper::createTestWorkspaceWithMonitors(includePeaks);
+    MatrixWorkspace_sptr testWS =
+        GetEiTestHelper::createTestWorkspaceWithMonitors(includePeaks);
     // This algorithm needs a name attached to the workspace
     const std::string outputName("eitest2");
     AnalysisDataService::Instance().add(outputName, testWS);
 
     IAlgorithm_sptr alg;
-    TS_ASSERT_THROWS_NOTHING(
-        alg = GetEiTestHelper::runGetEiUsingTestMonitors(outputName, 15.0, true));
+    TS_ASSERT_THROWS_NOTHING(alg = GetEiTestHelper::runGetEiUsingTestMonitors(
+                                 outputName, 15.0, true));
     if (alg) {
       const double firstMonPeak = alg->getProperty("FirstMonitorPeak");
       TS_ASSERT_DELTA(firstMonPeak, 6493.4402, 1e-4);
@@ -280,7 +286,6 @@ public:
 
     AnalysisDataService::Instance().remove(outws_name);
   }
-
 };
 
 class GetEiTestPerformance : public CxxTest::TestSuite {
