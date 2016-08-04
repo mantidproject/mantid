@@ -148,16 +148,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                                                      direction=Direction.Output),
                              doc="Name for the output reduced left workspace created.")
 
-    def validateInputs(self):
-
-        issues = dict()
-        # Unmirror options 5 and 7 require a Vanadium run as input workspace
-        if self._mirror_sense and (self._unmirror_option == 5 or self._unmirror_option == 7) \
-            and self._vanadium_file is None:
-            issues['UnmirrorOption'] = 'Given unmirror option requires vanadium run to be set'
-
-        return issues
-
     def setUp(self):
 
         self._run_file = self.getPropertyValue('Run')
@@ -185,6 +175,16 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         if self._sum_runs:
             self.log().information('All the runs will be summed')
             self._run_file = self._run_file.replace(',', '+')
+
+    def validateInputs(self):
+
+        issues = dict()
+        # Unmirror options 5 and 7 require a Vanadium run as input workspace
+        if self._mirror_sense and (self._unmirror_option == 5 or self._unmirror_option == 7) \
+            and self._vanadium_file is None:
+            issues['UnmirrorOption'] = 'Given unmirror option requires vanadium run to be set'
+
+        return issues
 
     def PyExec(self):
 
@@ -268,6 +268,58 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 raise ValueError("Failed to find default detector grouping file. Please specify manually.")
 
         self.log().information('Set detector map file : %s' % self._map_file)
+
+    def _load_vanadium_run(self):
+        """
+        Loads vanadium run into workspace and extracts left and right wings to use in shift spectra
+        Used only in unmirror =5,7. Do not confuse with calibration workspace!
+        """
+        Load(Filename=self._vanadium_file, OutputWorkspace='van')
+
+        LoadParameterFile(Workspace='van', Filename=self._parameter_file)
+
+        GroupDetectors(InputWorkspace='van', OutputWorkspace='van', MapFile=self._map_file, Behaviour='Sum')
+
+        NormaliseToMonitor(InputWorkspace='van', OutputWorkspace='van', MonitorID=1)
+
+    def _convert_to_energy(self, ws):
+        """
+        Convert the input ws x-axis from channel # to energy transfer
+        @param ws     :: input workspace name
+        """
+        # get energy formula from cache or compute if it is not yet set
+        formula = (self._energy_formula(ws) if self._formula is None else self._formula)
+        ConvertAxisByFormula(InputWorkspace=ws,OutputWorkspace=ws,Axis='X',Formula=formula)
+        mtd[ws].getAxis(0).setUnit('DeltaE') # in mev
+        xnew = mtd[ws].readX(0)  # energy array
+        self.log().information('Energy range : %f to %f' % (xnew[0], xnew[-1]))
+
+    def _energy_formula(self, ws):
+        """
+        Calculate the formula for channel number to energy transfer transformation
+        @param ws :: name of the input workspace
+        @return   :: formula to transform from time channel to energy transfer
+        """
+        x = mtd[ws].readX(0)
+        npt = len(x)
+        imid = float( npt / 2 + 1 )
+        gRun = mtd[ws].getRun()
+        energy = 0
+        scale = 1000. # from mev to micro ev
+
+        if gRun.hasProperty('Doppler.maximum_delta_energy'):
+            energy = gRun.getLogData('Doppler.maximum_delta_energy').value / scale  # max energy in meV
+            self.log().information('Doppler max energy : %s' % energy)
+        elif gRun.hasProperty('Doppler.delta_energy'):
+            energy = gRun.getLogData('Doppler.delta_energy').value / scale # delta energy in meV
+            self.log().information('Doppler delta energy : %s' % energy)
+
+        dele = 2.0 * energy / (npt - 1)
+        formula = '(x-%f)*%f' % (imid, dele)
+        self.log().information('Energy transform formula: '+formula)
+        # set in the cache and return
+        self._formula = formula
+        return formula
 
     def _reduce_run(self, run):
         """
@@ -385,6 +437,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         elif o == 7:
             self.log().information('Unmirror 7: center both the right and the left and sum')
+            # like 6, but take the reference from vanadium
             self._load_vanadium_run()
             self._extract_workspace('van', 'left_van', x[start], x[mid])
             self._extract_workspace('van', 'right_van', x[start], x[mid])
@@ -398,199 +451,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             DeleteWorkspace('left_van')
             DeleteWorkspace('right_van')
             DeleteWorkspace('van')
-
-    def _convert_to_energy(self, ws):
-        """
-        Convert the input ws x-axis from channel # to energy transfer
-        @param ws     :: input workspace name
-        """
-        # get energy formula from cache or compute if it is not yet set
-        formula = (self._energy_formula(ws) if self._formula is None else self._formula)
-        ConvertAxisByFormula(InputWorkspace=ws,OutputWorkspace=ws,Axis='X',Formula=formula)
-        mtd[ws].getAxis(0).setUnit('DeltaE') # in mev
-        xnew = mtd[ws].readX(0)  # energy array
-        self.log().information('Energy range : %f to %f' % (xnew[0], xnew[-1]))
-
-    def _energy_formula(self, ws):
-        """
-        Calculate the formula for channel number to energy transfer transformation
-        @param ws :: name of the input workspace
-        @return   :: formula to transform from time channel to energy transfer
-        """
-        x = mtd[ws].readX(0)
-        npt = len(x)
-        imid = float( npt / 2 + 1 )
-        gRun = mtd[ws].getRun()
-        energy = 0
-        scale = 1000. # from mev to micro ev
-
-        if gRun.hasProperty('Doppler.maximum_delta_energy'):
-            energy = gRun.getLogData('Doppler.maximum_delta_energy').value / scale  # max energy in meV
-            self.log().information('Doppler max energy : %s' % energy)
-        elif gRun.hasProperty('Doppler.delta_energy'):
-            energy = gRun.getLogData('Doppler.delta_energy').value / scale # delta energy in meV
-            self.log().information('Doppler delta energy : %s' % energy)
-
-        dele = 2.0 * energy / (npt - 1)
-        formula = '(x-%f)*%f' % (imid, dele)
-        self.log().information('Energy transform formula: '+formula)
-        # set in the cache and return
-        self._formula = formula
-        return formula
-
-    def _monitor_range(self, ws):
-        """
-        Get sensible x-range where monitor has meaningful content
-        Used to mask out the first and last few channels, where monitor count is 0
-        @param ws :: name of workspace
-        @return   :: tuple of xmin and xmax
-        """
-        x = mtd[ws].readX(0)
-        y = mtd[ws].readY(0)
-        # mid x value in order to search for left and right monitor range delimiter
-        mid = int(len(x) / 2)
-        imin = np.argmax(np.array(y[0 : mid])) - 1
-        nch = len(y)
-        im = np.argmax(np.array(y[nch - mid : nch]))
-        imax = nch - mid + 1 + im + 1
-        self.log().information('Masking range %f to %f' % (x[imin], x[imax]))
-        return x[imin], x[imax]
-
-    def _extract_workspace(self, ws, ws_out, x_start, x_end):
-        """
-        Extracts part of the workspace
-        @param  ws      :: input workspace name
-        @param  ws_out  :: output workspace name
-        @param  x_start :: start bin of workspace to be extracted
-        @param  x_end   :: end bin of workspace to be extracted
-        """
-        CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws_out, XMin=x_start, XMax=x_end)
-        ScaleX(InputWorkspace=ws_out, OutputWorkspace=ws_out, Factor=-x_start, Operation='Add')
-
-    def _perform_mirror(self, ws1, ws2, ws_out):
-        """
-        Sum and average two ws
-        @param ws1          ::  left workspace
-        @param ws2          ::  right workspace
-        @param ws_out       ::  output ws name
-        """
-        Plus(LHSWorkspace=ws1,RHSWorkspace=ws2,OutputWorkspace=ws_out)
-        Scale(InputWorkspace=ws_out,OutputWorkspace=ws_out,Factor=0.5, Operation='Multiply')
-
-    def _shift_spectra(self, ws1, ws2, ws_out, center=False):
-        """
-        Shifts workspace corresponding to peak positions in second workspace or just centers it at 0
-        @param ws1              ::   workspace to be shifted
-        @param ws2              ::   workspace according to which to shift
-        @param center           ::   whether or not to center at zero, if True, ws2 is not needed
-        @param ws_out           ::   shifted output workspace
-        """
-        number_spectra = mtd[ws1].getNumberHistograms()
-        size = mtd[ws1].blocksize()
-        mid_bin = int(size / 2)
-        fit_table1 = FindEPP(InputWorkspace=ws1)
-        tolerance = int(mid_bin / 2)
-
-        if not center:
-            fit_table2 = FindEPP(InputWorkspace=ws2)
-
-        # shift each single spectrum in a workspace
-        for i in range(number_spectra):
-
-            temp1 = ExtractSingleSpectrum(InputWorkspace=ws1,WorkspaceIndex=i)
-
-            x_values = np.array(temp1.readX(0))
-            y_values = np.array(temp1.readY(0))
-            e_values = np.array(temp1.readE(0))
-
-            peak_position1 = fit_table1.row(i)["PeakCentre"]
-            fit_status1 = fit_table1.row(i)["FitStatus"]
-
-            if fit_status1 == 'success' and \
-                abs(peak_position1 - x_values[mid_bin]) < abs(x_values[mid_bin+tolerance] - x_values[mid_bin]):
-                # if fit is fine, take the position from it
-                peak_bin1 = temp1.binIndexOf(peak_position1)
-            else:
-                # if not, check the maximum of the distribution
-                y_imax1 = np.argmax(y_values)
-                if abs(y_imax1 - mid_bin) < tolerance:
-                    # check if it is reasonably close to the center
-                    peak_bin1 = y_imax1
-                else:
-                    # if not, take the center (i.e. no shift at all)
-                    self.log().warning('Maybe no peak present, taking mid position instead')
-                    peak_bin1 = mid_bin
-
-            DeleteWorkspace(temp1)
-
-            if center:
-                # shift wrt the center
-                to_shift = peak_bin1 - mid_bin
-            else:
-                # find the peak position from 2nd ws and shift wrt it
-                temp2 = ExtractSingleSpectrum(InputWorkspace=ws2, WorkspaceIndex=i)
-                y_values2 = np.array(temp2.readY(0))
-                x_values2 = np.array(temp2.readX(0))
-                peak_position2 = fit_table2.row(i)["PeakCentre"]
-                fit_status2 = fit_table2.row(i)["FitStatus"]
-
-                if fit_status2 == 'success' and \
-                    abs(peak_position2 - x_values2[mid_bin]) < abs(x_values2[mid_bin+tolerance] - x_values2[mid_bin]):
-                    peak_bin2 = temp2.binIndexOf(peak_position2)
-                else:
-                    y_imax2 = np.argmax(y_values2)
-                    if abs(y_imax2 - mid_bin) < tolerance:
-                        peak_bin2 = y_imax2
-                    else:
-                        self.log().warning('Maybe no peak present, taking mid position instead')
-                        peak_bin2 = mid_bin
-
-                to_shift = peak_bin1 - peak_bin2
-
-                DeleteWorkspace(temp2)
-
-            if to_shift > 0:
-                # shift to the left
-                for k in range(size):
-                    if k < size - to_shift:
-                        y_values[k] = y_values[k + to_shift]
-                        e_values[k] = e_values[k + to_shift]
-                    else:
-                        y_values[k] = 0
-                        e_values[k] = 0
-                mask_min = size - to_shift
-                mask_max = size
-            elif to_shift < 0:
-                # shift to the right
-                for k in range(size-1,0,-1):
-                    if k > -to_shift:
-                        y_values[k] = y_values[k + to_shift]
-                        e_values[k] = e_values[k + to_shift]
-                    else:
-                        y_values[k] = 0
-                        e_values[k] = 0
-                mask_min = 0
-                mask_max = -to_shift
-
-            if i==0:
-                CreateWorkspace(OutputWorkspace=ws_out, DataX=x_values, DataY=y_values, DataE=e_values, NSpec=1, UnitX='DeltaE')
-                # there is problem with masking...
-                #if to_shift != 0:
-                    #MaskBins(InputWorkspace=ws_out,OutputWorkspace=ws_out,XMin=mask_min,XMax=mask_max)
-            else:
-                CreateWorkspace(OutputWorkspace='temp',DataX=x_values, DataY=y_values, DataE=e_values, NSpec=1, UnitX='DeltaE')
-                # there is problem with masking...
-                #if to_shift != 0:
-                #    MaskBins(InputWorkspace='temp', OutputWorkspace='temp',XMin=mask_min, XMax=mask_max)
-                AppendSpectra(InputWorkspace1=ws_out,InputWorkspace2='temp',OutputWorkspace=ws_out)
-                DeleteWorkspace('temp')
-
-        # cleanup by-products
-        DeleteWorkspace(fit_table1)
-        DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
-        DeleteWorkspace('EPPfit_Parameters')
-        if not center:
-            DeleteWorkspace(fit_table2)
 
     def _set_output_workspace_properties(self, runlist):
 
@@ -686,19 +546,164 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 self._plot_ws(red + '_sum_to_plot')
                 # do not delete summed spectra while the plot is open
 
-    def _load_vanadium_run(self):
+    # static helper methods performing some generic manipulations
+    @staticmethod
+    def _monitor_range(ws):
         """
-        Loads vanadium run into workspace and extracts left and right wings to use in shift spectra
+        Get sensible x-range where monitor has meaningful content
+        Used to mask out the first and last few channels, where monitor count is 0
+        @param ws :: name of workspace
+        @return   :: tuple of xmin and xmax
         """
-        Load(Filename=self._vanadium_file, OutputWorkspace='van')
+        x = mtd[ws].readX(0)
+        y = mtd[ws].readY(0)
+        # mid x value in order to search for left and right monitor range delimiter
+        mid = int(len(x) / 2)
+        imin = np.argmax(np.array(y[0 : mid])) - 1
+        nch = len(y)
+        im = np.argmax(np.array(y[nch - mid : nch]))
+        imax = nch - mid + 1 + im + 1
+        return x[imin], x[imax]
 
-        LoadParameterFile(Workspace='van', Filename=self._parameter_file)
+    @staticmethod
+    def _extract_workspace(ws, ws_out, x_start, x_end):
+        """
+        Extracts part of the workspace
+        @param  ws      :: input workspace name
+        @param  ws_out  :: output workspace name
+        @param  x_start :: start bin of workspace to be extracted
+        @param  x_end   :: end bin of workspace to be extracted
+        """
+        CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws_out, XMin=x_start, XMax=x_end)
+        ScaleX(InputWorkspace=ws_out, OutputWorkspace=ws_out, Factor=-x_start, Operation='Add')
 
-        GroupDetectors(InputWorkspace='van', OutputWorkspace='van', MapFile=self._map_file, Behaviour='Sum')
+    @staticmethod
+    def _perform_mirror(ws1, ws2, ws_out):
+        """
+        Sum and average two ws
+        @param ws1          ::  left workspace
+        @param ws2          ::  right workspace
+        @param ws_out       ::  output ws name
+        """
+        Plus(LHSWorkspace=ws1,RHSWorkspace=ws2,OutputWorkspace=ws_out)
+        Scale(InputWorkspace=ws_out,OutputWorkspace=ws_out,Factor=0.5, Operation='Multiply')
 
-        NormaliseToMonitor(InputWorkspace='van', OutputWorkspace='van', MonitorID=1)
+    @staticmethod
+    def _shift_spectra(ws1, ws2, ws_out, center=False):
+        """
+        Shifts workspace corresponding to peak positions in second workspace or just centers it at 0
+        @param ws1              ::   workspace to be shifted
+        @param ws2              ::   workspace according to which to shift
+        @param center           ::   whether or not to center at zero, if True, ws2 is not needed
+        @param ws_out           ::   shifted output workspace
+        """
+        number_spectra = mtd[ws1].getNumberHistograms()
+        size = mtd[ws1].blocksize()
+        mid_bin = int(size / 2)
+        fit_table1 = FindEPP(InputWorkspace=ws1)
+        tolerance = int(mid_bin / 2)
 
-    def _save_ws(self, ws):
+        if not center:
+            fit_table2 = FindEPP(InputWorkspace=ws2)
+
+        # shift each single spectrum in a workspace
+        for i in range(number_spectra):
+
+            temp1 = ExtractSingleSpectrum(InputWorkspace=ws1,WorkspaceIndex=i)
+
+            x_values = np.array(temp1.readX(0))
+            y_values = np.array(temp1.readY(0))
+            e_values = np.array(temp1.readE(0))
+
+            peak_position1 = fit_table1.row(i)["PeakCentre"]
+            fit_status1 = fit_table1.row(i)["FitStatus"]
+
+            if fit_status1 == 'success' and \
+                abs(peak_position1 - x_values[mid_bin]) < abs(x_values[mid_bin+tolerance] - x_values[mid_bin]):
+                # if fit is fine, take the position from it
+                peak_bin1 = temp1.binIndexOf(peak_position1)
+            else:
+                # if not, check the maximum of the distribution
+                y_imax1 = np.argmax(y_values)
+                if abs(y_imax1 - mid_bin) < tolerance:
+                    # check if it is reasonably close to the center
+                    peak_bin1 = y_imax1
+                else:
+                    # if not, take the center (i.e. no shift at all)
+                    peak_bin1 = mid_bin
+
+            DeleteWorkspace(temp1)
+
+            if center:
+                # shift wrt the center
+                to_shift = peak_bin1 - mid_bin
+            else:
+                # find the peak position from 2nd ws and shift wrt it
+                temp2 = ExtractSingleSpectrum(InputWorkspace=ws2, WorkspaceIndex=i)
+                y_values2 = np.array(temp2.readY(0))
+                x_values2 = np.array(temp2.readX(0))
+                peak_position2 = fit_table2.row(i)["PeakCentre"]
+                fit_status2 = fit_table2.row(i)["FitStatus"]
+
+                if fit_status2 == 'success' and \
+                    abs(peak_position2 - x_values2[mid_bin]) < abs(x_values2[mid_bin+tolerance] - x_values2[mid_bin]):
+                    peak_bin2 = temp2.binIndexOf(peak_position2)
+                else:
+                    y_imax2 = np.argmax(y_values2)
+                    if abs(y_imax2 - mid_bin) < tolerance:
+                        peak_bin2 = y_imax2
+                    else:
+                        peak_bin2 = mid_bin
+
+                to_shift = peak_bin1 - peak_bin2
+
+                DeleteWorkspace(temp2)
+
+            if to_shift > 0:
+                # shift to the left
+                for k in range(size):
+                    if k < size - to_shift:
+                        y_values[k] = y_values[k + to_shift]
+                        e_values[k] = e_values[k + to_shift]
+                    else:
+                        y_values[k] = 0
+                        e_values[k] = 0
+                mask_min = size - to_shift
+                mask_max = size
+            elif to_shift < 0:
+                # shift to the right
+                for k in range(size-1,0,-1):
+                    if k > -to_shift:
+                        y_values[k] = y_values[k + to_shift]
+                        e_values[k] = e_values[k + to_shift]
+                    else:
+                        y_values[k] = 0
+                        e_values[k] = 0
+                mask_min = 0
+                mask_max = -to_shift
+
+            if i==0:
+                CreateWorkspace(OutputWorkspace=ws_out, DataX=x_values, DataY=y_values, DataE=e_values, NSpec=1, UnitX='DeltaE')
+                # there is problem with masking...
+                #if to_shift != 0:
+                    #MaskBins(InputWorkspace=ws_out,OutputWorkspace=ws_out,XMin=mask_min,XMax=mask_max)
+            else:
+                CreateWorkspace(OutputWorkspace='temp',DataX=x_values, DataY=y_values, DataE=e_values, NSpec=1, UnitX='DeltaE')
+                # there is problem with masking...
+                #if to_shift != 0:
+                #    MaskBins(InputWorkspace='temp', OutputWorkspace='temp',XMin=mask_min, XMax=mask_max)
+                AppendSpectra(InputWorkspace1=ws_out,InputWorkspace2='temp',OutputWorkspace=ws_out)
+                DeleteWorkspace('temp')
+
+        # cleanup by-products
+        DeleteWorkspace(fit_table1)
+        DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
+        DeleteWorkspace('EPPfit_Parameters')
+        if not center:
+            DeleteWorkspace(fit_table2)
+
+    @staticmethod
+    def _save_ws(ws):
         """
         Saves given workspace in default save directory
         @param ws : input workspace or workspace group name
@@ -707,9 +712,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         workdir = config['defaultsave.directory']
         file_path = os.path.join(workdir, filename)
         SaveNexusProcessed(InputWorkspace=ws, Filename=file_path)
-        self.log().information('Saved file: ' + filename)
 
-    def _plot_ws(self, ws):
+    @staticmethod
+    def _plot_ws(ws):
         """
         plots the given workspace
         @param ws : input workspace name
