@@ -213,7 +213,8 @@ int DetectorEfficiencyVariation::doDetectorTests(
 
   const double deadValue(1.0);
   int numFailed(0);
-  PARALLEL_FOR_IF(Threadsafe(counts1.get(), counts2.get(), maskWS.get()));
+  PARALLEL_FOR_IF(
+      Kernel::Threadsafe(counts1.get(), counts2.get(), maskWS.get()));
   for (int i = 0; i < numSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // move progress bar

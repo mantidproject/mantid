@@ -4,8 +4,7 @@
 #include <mutex>
 
 namespace Mantid {
-namespace Kernel {} // namespace
-} // namespace
+namespace Kernel {
 
 /* ===================== ThreadSafe ===================== */
 
@@ -20,6 +19,9 @@ inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
 ThreadSafe(Arg workspace, Args... others) {
   return (!workspace || workspace->threadSafe()) && ThreadSafe(others...);
 }
+
+} // namespace Kernel
+} // namespace Mantid
 
 // The syntax used to define a pragma within a macro is different on windows and
 // GCC
