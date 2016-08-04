@@ -1,12 +1,13 @@
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidQtMantidWidgets/InstrumentView/CompAssemblyActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/ComponentActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/GLActorVisitor.h"
 #include "MantidQtMantidWidgets/InstrumentView/ObjCompAssemblyActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/ObjComponentActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/StructuredDetectorActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/SampleActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/StructuredDetectorActor.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -1281,6 +1282,34 @@ bool FindComponentVisitor::visit(GLActor *actor) {
     }
   }
   return false;
+}
+
+/**
+ * Save the state of the instrument actor to a project file.
+ * @return string representing the current state of the instrumet actor.
+ */
+std::string InstrumentActor::saveToProject() const {
+  TSVSerialiser tsv, actor;
+  const std::string currentColorMap = getCurrentColorMap().toStdString();
+
+  if (!currentColorMap.empty())
+    actor.writeLine("FileName") << currentColorMap;
+
+  tsv.writeSection("actor", actor.outputLines());
+  return tsv.outputLines();
+}
+
+/**
+ * Load the state of the instrument actor from a project file.
+ * @param lines :: string representing the current state of the instrumet actor.
+ */
+void InstrumentActor::loadFromProject(const std::string &lines) {
+  TSVSerialiser tsv(lines);
+  if (tsv.selectLine("FileName")) {
+    QString filename;
+    tsv >> filename;
+    loadColorMap(filename);
+  }
 }
 
 } // MantidWidgets

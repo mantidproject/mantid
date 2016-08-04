@@ -728,5 +728,25 @@ QPointF InstrumentWidgetRenderTab::getUCorrection() const {
   return QPointF();
 }
 
+/**
+ * Save widget render tab to a project file.
+ * @return string representing the current state of the project file.
+ */
+std::string
+MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
+  const auto colorMap = m_colorMapWidget->saveToProject();
+  return colorMap
+}
+
+/**
+ * Load the state of the render tab from a project file.
+ * @param lines :: lines defining the state of the render tab
+ * @return a render tab window handle with settings restored
+ */
+void InstrumentWidgetRenderTab::loadFromProject(
+    const std::string &lines) const {
+  m_colorMapWidget->loadFromProject(lines);
+}
+
 } // MantidWidgets
 } // MantidQt

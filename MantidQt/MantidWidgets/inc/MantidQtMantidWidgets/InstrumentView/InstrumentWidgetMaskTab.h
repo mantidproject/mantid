@@ -71,6 +71,10 @@ public:
   void initSurface() override;
   void setMode(Mode mode);
   void selectTool(Activity tool);
+  /// Load settings for the widget tab from a project file
+  virtual void loadFromProject(const std::string &lines) const override{};
+  /// Save settings for the widget tab to a project file
+  virtual std::string saveToProject() const override { return ""; };
 
 signals:
   void executeAlgorithm(const QString &, const QString &);
