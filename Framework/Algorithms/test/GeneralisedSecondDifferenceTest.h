@@ -11,6 +11,7 @@
 #include <MantidAlgorithms/GeneralisedSecondDifference.h>
 
 using namespace Mantid::API;
+using namespace Mantid::HistogramData;
 
 class GeneralisedSecondDifferenceTest : public CxxTest::TestSuite {
 
@@ -31,13 +32,13 @@ public:
     IAlgorithm_sptr gsd = Mantid::API::AlgorithmManager::Instance().create(
         "GeneralisedSecondDifference", 1);
 
-    std::vector<double> x = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    std::vector<double> y = {0.3,  0.3, 0.3,  0.47, 3.9,
+	auto x = Points{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	auto y = Counts{ 0.3,  0.3, 0.3,  0.47, 3.9,
                              10.3, 3.9, 0.47, 0.3,  0.3};
+
     MatrixWorkspace_sptr inputWs = WorkspaceFactory::Instance().create(
         "Workspace2D", 1, y.size(), y.size());
-    inputWs->mutableY(0) = y;
-    inputWs->mutableX(0) = x;
+	inputWs->setHistogram(0, x, y);
 
     gsd->setProperty("InputWorkspace", inputWs);
     gsd->setProperty("M", "1");
