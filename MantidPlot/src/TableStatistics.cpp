@@ -29,7 +29,7 @@
  ***************************************************************************/
 #include "ApplicationWindow.h"
 #include "TableStatistics.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include "Mantid/IProjectSerialisable.h"
 #include "MantidKernel/Strings.h"

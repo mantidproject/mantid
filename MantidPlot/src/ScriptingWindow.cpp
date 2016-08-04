@@ -6,7 +6,7 @@
 #include "MultiTabScriptInterpreter.h"
 #include "ScriptingEnv.h"
 #include "ScriptFileInterpreter.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "pixmaps.h"
 
 // Mantid

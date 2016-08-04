@@ -35,7 +35,7 @@
 #include "MatrixCommand.h"
 #include "pixmaps.h"
 #include "ScriptingEnv.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include <QtGlobal>
 #include <QTextStream>

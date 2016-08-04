@@ -112,7 +112,7 @@
 #include "DataPickerTool.h"
 #include "TiledWindow.h"
 #include "DockedWindow.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "ProjectSerialiser.h"
 
 // TODO: move tool-specific code to an extension manager

@@ -42,7 +42,7 @@
 
 #include "Table.h"
 #include "Matrix.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 class MantidMatrix;
 class UserFunction2D;

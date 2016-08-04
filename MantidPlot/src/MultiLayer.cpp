@@ -71,7 +71,7 @@
 #include "Mantid/MantidWSIndexDialog.h"
 #include "MantidQtSliceViewer/LinePlotOptions.h"
 
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 // Register the window into the WindowFactory
 DECLARE_WINDOW(MultiLayer)

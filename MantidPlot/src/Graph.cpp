@@ -67,7 +67,7 @@
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "Mantid/ErrorBarSettings.h"
 
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #ifdef EMF_OUTPUT
 #include "EmfEngine.h"

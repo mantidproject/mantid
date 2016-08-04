@@ -35,7 +35,7 @@
 #include "muParserScript.h"
 #include "ApplicationWindow.h"
 #include "pixmaps.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include <QContextMenuEvent>
 #include <QMessageBox>

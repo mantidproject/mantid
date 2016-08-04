@@ -41,7 +41,7 @@
 #include <QPrintDialog>
 
 #include "ApplicationWindow.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 

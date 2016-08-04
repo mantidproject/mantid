@@ -38,7 +38,7 @@
 #include "MatrixModel.h"
 #include "UserFunction.h" //Mantid
 
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include <QApplication>
 #include <QMessageBox>

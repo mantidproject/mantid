@@ -10,7 +10,7 @@
 #include <QDir>
 #include <QApplication>
 
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include "qstring.h"
 #include "Folder.h"

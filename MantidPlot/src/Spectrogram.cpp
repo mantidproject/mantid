@@ -44,7 +44,7 @@
 #include "MantidQtAPI/QwtRasterDataMD.h"
 #include "MantidQtAPI/SignalRange.h"
 
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include <numeric>
 

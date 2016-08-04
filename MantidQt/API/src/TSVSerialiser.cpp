@@ -1,4 +1,4 @@
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include "MantidKernel/Logger.h"
 
