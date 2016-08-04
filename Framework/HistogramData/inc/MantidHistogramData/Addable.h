@@ -51,16 +51,15 @@ public:
     return derived;
   }
 
+  /// Element-wise addition of elements in lhs and rhs.
+  T operator+(T rhs) const {
+    auto &derived = static_cast<const T &>(*this);
+    return rhs += derived;
+  }
+
 protected:
   ~Addable() = default;
 };
-
-/// Element-wise addition of elements in lhs and rhs.
-template <class T, class = typename std::enable_if<
-                       std::is_base_of<Addable<T>, T>::value>::type>
-inline T operator+(T lhs, const T &rhs) {
-  return lhs += rhs;
-}
 
 } // namespace detail
 } // namespace HistogramData
