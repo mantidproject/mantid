@@ -147,7 +147,7 @@ void Q1D2::exec() {
   Progress progress(this, 0.05, 1.0, numSpec + 1);
 
   PARALLEL_FOR_IF(
-      Kernel::ThreadSafe(m_dataWS.get(), outputWS.get(), pixelAdj.get()))
+      Kernel::threadSafe(m_dataWS.get(), outputWS.get(), pixelAdj.get()))
   for (int i = 0; i < numSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Get the pixel relating to this spectrum

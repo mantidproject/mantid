@@ -54,7 +54,7 @@ void PointByPointVCorrection::exec() {
   Progress prog(this, 0.0, 1.0, nHist);
 
   PARALLEL_FOR_IF(
-      Kernel::ThreadSafe(inputWS1.get(), inputWS2.get(), outputWS.get()))
+      Kernel::threadSafe(inputWS1.get(), inputWS2.get(), outputWS.get()))
   for (int i = 0; i < nHist; i++) // Looping on all histograms
   {
     PARALLEL_START_INTERUPT_REGION

@@ -180,7 +180,7 @@ void Rebin::exec() {
 
       // Go through all the histograms and set the data
       PARALLEL_FOR_IF(
-          Kernel::ThreadSafe(inputWS.get(), eventInputWS.get(), outputWS.get()))
+          Kernel::threadSafe(inputWS.get(), eventInputWS.get(), outputWS.get()))
       for (int i = 0; i < histnumber; ++i) {
         PARALLEL_START_INTERUPT_REGION
 

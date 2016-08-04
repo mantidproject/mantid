@@ -6,18 +6,29 @@
 namespace Mantid {
 namespace Kernel {
 
-/* ===================== ThreadSafe ===================== */
-
+/** Thread-safety check
+ * Checks the workspace to ensure it is suitable for multithreaded access.
+ * NULL workspaces are assumed suitable
+ * @param workspace Pointer to workspace to verify.
+ * @return Whether workspace is threadsafe.
+ */
 template <typename Arg>
 inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
-ThreadSafe(Arg workspace) {
+threadSafe(Arg workspace) {
   return !workspace || workspace->threadSafe();
 }
 
+/** Thread-safety check
+  * Checks the workspace to ensure it is suitable for multithreaded access.
+  * NULL workspaces are assumed suitable
+  * @param workspace Pointer to workspace to verify.
+  * @param others Pointers to all other workspaces which need to be checked.
+  * @return Whether workspace is threadsafe.
+  */
 template <typename Arg, typename... Args>
 inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
-ThreadSafe(Arg workspace, Args... others) {
-  return (!workspace || workspace->threadSafe()) && ThreadSafe(others...);
+threadSafe(Arg workspace, Args... others) {
+  return (!workspace || workspace->threadSafe()) && threadSafe(others...);
 }
 
 } // namespace Kernel
