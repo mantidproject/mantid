@@ -308,14 +308,8 @@ void PDFFourierTransform::exec() {
   // determine Q-range
   size_t qmin_index = determineQminIndex(inputQ, inputFOfQ);
   size_t qmax_index = determineQmaxIndex(inputQ, inputFOfQ);
-  { // keep variable scope small
-    size_t qmi_out = qmax_index;
-    if (qmi_out == inputQ.size())
-      qmi_out--; // prevent unit test problem under windows (and probably other
-    // hardly identified problem)
-    g_log.notice() << "Adjusting to data: Qmin = " << inputQ[qmin_index]
-                   << " Qmax = " << inputQ[qmi_out] << "\n";
-  }
+  g_log.notice() << "Adjusting to data: Qmin = " << inputQ[qmin_index]
+                 << " Qmax = " << inputQ[qmax_index] << "\n";
 
   // determine r axis for result
   const double rmax = getProperty("RMax");
