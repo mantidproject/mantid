@@ -385,7 +385,8 @@ signal_t MDHistoWorkspace::getSignalWithMaskAtCoord(
     const coord_t *coords,
     const Mantid::API::MDNormalization &normalization) const {
   size_t linearIndex = this->getLinearIndexAtCoord(coords);
-  if (this->getIsMaskedAt(linearIndex)) {
+  if (linearIndex == std::numeric_limits<size_t>::max() ||
+      this->getIsMaskedAt(linearIndex)) {
     return MDMaskValue;
   }
   return getSignalAtCoord(coords, normalization);
@@ -596,7 +597,9 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
       const auto linearIndex =
           this->getLinearIndexAtCoord(middle.getBareArray());
 
-      if (bin_centres && !this->getIsMaskedAt(linearIndex)) {
+      if (bin_centres &&
+          !(linearIndex == std::numeric_limits<size_t>::max() ||
+            this->getIsMaskedAt(linearIndex))) {
         coord_t bin_centrePos =
             static_cast<coord_t>((linePos + lastLinePos) * 0.5);
         line.x.push_back(bin_centrePos);
