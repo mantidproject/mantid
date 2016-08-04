@@ -70,7 +70,7 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
     #       main test
     def test_good_case(self):
-        self._good_case(name=self.C6H6)
+        #self._good_case(name=self.C6H6)
         self._good_case(name=self.Si2)
 
 
@@ -80,14 +80,16 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
         _good_data = self._get_good_data(filename=name)
         _good_tester = CalculateS(filename=name + ".phonon", temperature=self._temperature, sample_form=self._sample_form,
                                   abins_data=_good_data["DFT"], instrument_name=self._instrument_name)
-        calculated_data = _good_tester.getS().extract()
-        self._check_data(good_data=_good_data["S"], data=calculated_data)
+        calculated_data = _good_tester.getS()
+
+        self._check_data(good_data=_good_data["S"], data=calculated_data.extract())
 
         # check if loading powder data is correct
         new_tester =  CalculateS(filename=name + ".phonon", temperature=self._temperature, sample_form=self._sample_form,
                                  abins_data=_good_data["DFT"], instrument_name=self._instrument_name)
-        loaded_data = new_tester.loadData().extract()
-        self._check_data(good_data=_good_data["S"], data=loaded_data)
+        loaded_data = new_tester.loadData()
+
+        self._check_data(good_data=_good_data["S"], data=loaded_data.extract())
 
 
     def _get_good_data(self, filename=None):
@@ -115,12 +117,12 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
     def _check_data(self, good_data=None, data=None):
 
-        self.assertEqual(True, np.allclose(good_data["frequencies"], data["frequencies"]))
+        self.assertEqual(True, np.allclose(good_data["convoluted_frequencies"], data["convoluted_frequencies"]))
 
-        for el  in range(len(good_data["atoms"])):
-            self.assertEqual(True, np.allclose(good_data["atoms"][el]["value"], data["atoms"][el]["value"]))
-            self.assertEqual(good_data["atoms"][el]["sort"], data["atoms"][el]["sort"])
-            self.assertEqual(good_data["atoms"][el]["symbol"], data["atoms"][el]["symbol"])
+        for el  in range(len(good_data["atoms_data"])):
+            self.assertEqual(True, np.allclose(good_data["atoms_data"][el]["value"], data["atoms_data"][el]["value"]))
+            self.assertEqual(good_data["atoms_data"][el]["sort"], data["atoms_data"][el]["sort"])
+            self.assertEqual(good_data["atoms_data"][el]["symbol"], data["atoms_data"][el]["symbol"])
 
 
 if __name__ == '__main__':

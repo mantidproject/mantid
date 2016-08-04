@@ -1,22 +1,29 @@
 import multiprocessing
+import numpy as np
 
-from mantid.api import AlgorithmFactory,  FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty
+from mantid.api import AlgorithmFactory,  FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
+from mantid.simpleapi import  CreateWorkspace, CloneWorkspace, GroupWorkspaces, Scale, RenameWorkspace, SetSampleMaterial, DeleteWorkspace
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty
 
-from AbinsModules import LoadCASTEP, CalculateS
+from AbinsModules import LoadCASTEP, CalculateS, Constants
 
 
 class ABINS(PythonAlgorithm):
 
-    _temperature = None
+
+    _dft_program = None
     _phononFile = None
     _experimentalFile = None
-    _sampleForm = None
-    _intrinsicBroadening = None
-    _instrument =None
-    _structureFactorMode = None
-    _output_workspace_name = None
+    _temperature = None
     _scale = None
+    _sampleForm = None
+    _instrument = None
+    _atoms = None
+    _sum_contributions = None
+    _scale_by_cross_section = None
+    _output_workspace_name = None
+    _calc_partial = None
+    _out_ws_name = None
 
     # ----------------------------------------------------------------------------------------
 
@@ -71,15 +78,15 @@ class ABINS(PythonAlgorithm):
                              validator=StringListValidator(["None", "TOSCA"]),
                              doc="Name of an instrument for which analysis should be performed.")
 
-        self.declareProperty(StringArrayProperty('Ions', Direction.Input),
-                             doc="List of Ions to use to calculate partial density of states." \
-                                 "If left blank, total density of states will be calculated")
+        self.declareProperty(StringArrayProperty("Atoms", Direction.Input),
+                             doc="List of atoms to use to calculate partial S." \
+                                 "If left blank, total S will be calculated")
 
         self.declareProperty(name='SumContributions', defaultValue=False,
                              doc="Sum the partial dynamical structure factors into a single workspace.")
 
-        self.declareProperty(name='ScaleByCrossSection', defaultValue='None',
-                             validator=StringListValidator(['None', 'Total', 'Incoherent', 'Coherent']),
+        self.declareProperty(name='ScaleByCrossSection', defaultValue='Incoherent',
+                             validator=StringListValidator(['Total', 'Incoherent', 'Coherent']),
                              doc="Sum the partial dynamical structure factor by the scattering cross section.")
 
 
@@ -108,8 +115,8 @@ class ABINS(PythonAlgorithm):
             issues["DFT program"] = "Support for CRYSTAL DFT program not implemented yet!"
 
         sum_contributions = self.getProperty('SumContributions').value
-        ions = self.getProperty('Ions').value
-        calc_partial = len(ions) > 0
+        atoms = self.getProperty('Atoms').value
+        calc_partial = len(atoms) > 0
         if not calc_partial and sum_contributions:
             issues['SumContributions'] = 'Cannot sum contributions when not calculating partial density of states'
 
@@ -141,28 +148,165 @@ class ABINS(PythonAlgorithm):
         s_calculator = CalculateS(filename=self._phononFile, temperature=self._temperature,
                                   instrument_name=self._instrument, abins_data=dft_data,
                                   sample_form=self._sampleForm)
-        S_data = s_calculator.getS()
+        s_data = s_calculator.getS()
         prog_reporter.report("Dynamical structure factor is ready to be plotted.")
 
-        # 4) put S to workspace and plot it
+        # 4) get atoms for which S should be plotted
+        _data  = dft_data.getAtomsData().extract()
+        all_atoms_symbols = [atom["symbol"] for atom in _data]
+
+        if len(self._atoms) == 0: # case: all atoms
+            atoms_symbol = all_atoms_symbols
+        else: # case selected atoms
+            if len(self._atoms) != len(set(self._atoms)): # only different types
+                raise ValueError("Not all user defined atoms are unique.")
+
+            for atom_symbol in self._atoms:
+                if not atom_symbol in all_atoms_symbols:
+                    raise ValueError("User defined atom not present in the system.")
+            atoms_symbol = self._atoms
+
+        # at the moment only types of atom, e.g, for  benzene three options -> 1) C, H;  2) C; 3) H
+        # 5) create workspaces for atoms in interest
+        partial_workspaces = self._create_partial_s_workspaces(atoms_symbol=atoms_symbol, s_data=s_data)
+
+        # 6) Create an output workspace:
+        #           If  a user wants partial workspaces create an output workspace with all workspaces
+        #           If  a user wants total S from the selected atoms then create a workspace with total S and delete partial workspaces
+        if self._sum_contributions:
+
+            total_workspace = self._set_total_workspace(partial_workspaces=partial_workspaces)
+            # Discard the partial workspaces
+            for partial_ws in partial_workspaces:
+                DeleteWorkspace(partial_ws)
+
+            # Rename the summed workspace, this will be the output
+            #RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._out_ws_name)
+            logger.debug('Summed workspace: ' + str(total_workspace))
+
+        else:
+
+            group = ','.join(partial_workspaces)
+            GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
+
+            logger.debug('Partial workspaces: ' + str(group))
 
         self.setProperty('OutputWorkspace', self._out_ws_name)
 
-
-    def _produce_workspace_for_S(self):
+    def _compute_workspace_for_s(self):
         """
         Puts calculated S into Mantid Workspace so that it can be easily visualise by Mantid utilities.
         @return:
         """
-        pass
+
+        partial_workspaces, sum_workspace = self._produce_workspace_for_partial_S_workflow()
+
+    def _create_partial_s_workspaces(self, atoms_symbol=None,s_data=None):
+
+        s_data_extracted = s_data.extract()
+        freq = s_data_extracted["convoluted_frequencies"]
+        dim = freq.shape[0]
+        s_atom_data = np.zeros(dim, dtype=Constants.float_type)
+        s_all_atoms  = s_data_extracted["atoms_data"]
+        num_atoms = len(s_all_atoms)
+
+        partial_workspaces = []
+        total_workspace = None
+
+        for atom_symbol in atoms_symbol:
+            s_atom_data.fill(0.0)
+            for num_atom in range(num_atoms):
+                if s_all_atoms[num_atom]["symbol"] == atom_symbol:
+                    np.add(s_atom_data, s_all_atoms[num_atom]["value"][:,Constants.overtones_num], s_atom_data) # we sum total S over the atoms of the same type
+
+            # total S for the given atom
+            partial_workspaces.append(self._set_workspace(atom_name=atom_symbol, frequencies=freq, s_points=s_atom_data))
 
 
-    def _produce_workspace_for_partial_S(self):
+        return partial_workspaces
+
+
+    def _create_s_workspace(self, freq=None, s_points=None, workspace=None):
         """
         Puts S for the given atom into workspace.
-        @return:
+        @param freq:  frequencies
+        @param s_points: dynamical factor for the given atom
+        @param workspace:  workspace to be filled with S
         """
-        pass
+
+        # order x and y values before saving to workspace
+        sorted_indices = freq.argsort()
+        freq = freq[sorted_indices]
+        s_points = s_points[sorted_indices]
+
+        CreateWorkspace(DataX=freq,
+                        DataY=s_points,
+                        NSpec=1,
+                        VerticalAxisUnit="Text",
+                        VerticalAxisValues="S",
+                        OutputWorkspace=workspace,
+                        EnableLogging=False)
+
+        unitx = mtd[workspace].getAxis(0).setUnit("Label")
+        unitx.setLabel("Energy Shift", 'cm^-1')
+
+
+    def _set_total_workspace(self, partial_workspaces=None):
+
+        total_workspace = self._out_ws_name + "_Total"
+        # If there is more than one partial workspace need to sum first spectrum of all
+        if len(partial_workspaces) > 1:
+            _freq = mtd[partial_workspaces[0]].dataX(0)
+            _s_atoms = np.zeros_like(mtd[partial_workspaces[0]].dataY(0))
+
+            for partial_ws in partial_workspaces:
+                _s_atoms += mtd[partial_ws].dataY(0)
+
+            self._create_s_workspace(_freq, _s_atoms, total_workspace)
+
+            # Set correct units on total workspace
+            mtd[total_workspace].setYUnitLabel('Intensity')
+
+        # Otherwise just repackage the WS we have as the total
+        else:
+            CloneWorkspace(InputWorkspace=partial_workspaces[0],
+                           OutputWorkspace=total_workspace)
+
+        return total_workspace
+
+
+    def _set_workspace(self, atom_name=None, frequencies=None, s_points=None):
+
+        _ws_name = self._out_ws_name + atom_name
+
+        self._create_s_workspace(freq=frequencies, s_points=s_points, workspace=_ws_name)
+
+        # Set correct units on partial workspace
+
+        mtd[_ws_name].setYUnitLabel('Intensity')
+
+        # Add the sample material to the workspace
+        SetSampleMaterial(InputWorkspace=_ws_name,
+                          ChemicalFormula=atom_name)
+
+        # Multiply intensity by scattering cross section
+        scattering_x_section = None
+        if self._scale_by_cross_section == 'Incoherent':
+            scattering_x_section = mtd[_ws_name].mutableSample().getMaterial().incohScatterXSection()
+        elif self._scale_by_cross_section == 'Coherent':
+            scattering_x_section = mtd[_ws_name].mutableSample().getMaterial().cohScatterXSection()
+        elif self._scale_by_cross_section == 'Total':
+            scattering_x_section = mtd[_ws_name].mutableSample().getMaterial().totalScatterXSection()
+
+        Scale(InputWorkspace=_ws_name,
+              OutputWorkspace=_ws_name,
+              Operation='Multiply',
+              Factor=scattering_x_section)
+
+        #RenameWorkspace(self._out_ws_name,
+        #                OutputWorkspace=_ws_name)
+
+        return _ws_name
 
 
     def _validate_crystal_input_file(self, filename=None):
@@ -184,9 +328,12 @@ class ABINS(PythonAlgorithm):
         :return: Dictionary with two entries "Valid", "Comment". Valid key can have two values: True/ False. As it
                  comes to "Comment" it is an empty string if Valid:True, otherwise stores description of the problem.
         """
+        logger.debug('Validate CASTEP phonon file: ' + str(partial_ions))
+
         output = {"Valid": True, "Comment": ""}
         msg_err = "Invalid %s file. " %filename
         msg_rename = "Please rename your file and try again."
+
 
         # check name of file
         if "." not in filename:
@@ -265,13 +412,14 @@ class ABINS(PythonAlgorithm):
         self._phononFile = self.getProperty("Phonon File").value
         self._experimentalFile = self.getProperty("Experimental File").value
         self._temperature = self.getProperty("Temperature [K]").value
+        self._scale =  self.getProperty("Scale").value
         self._sampleForm = self.getProperty("Sample Form").value
         self._instrument = self.getProperty("Instrument").value
-        self._ions = self.getProperty("Ions").value
+        self._atoms = self.getProperty("Atoms").value
         self._sum_contributions = self.getProperty("SumContributions").value
-        self._scale_by_cross_section = self.getProperty("ScaleByCrossSection").value
-        self._output_workspace_name = self.getProperty("OutputWorkspace")
-        self._calc_partial = (len(self._ions) > 0)
+        self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
+        self._out_ws_name = self.getPropertyValue('OutputWorkspace')
+        self._calc_partial = (len(self._atoms) > 0)
 
 try:
     AlgorithmFactory.subscribe(ABINS)

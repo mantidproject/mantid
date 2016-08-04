@@ -31,7 +31,7 @@ class SData(GeneralData):
         if sorted(items.keys()) != sorted(Constants.all_keywords_s_data):
             raise ValueError("Invalid structure of the dictionary.")
 
-        for item in items["atoms"]:
+        for item in items["atoms_data"]:
 
             if not isinstance(item, dict):
                 raise ValueError("New value of item from S data should have a form of dictionary.")
