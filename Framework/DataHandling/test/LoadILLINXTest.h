@@ -16,8 +16,6 @@ public:
   static LoadILLINXTest *createSuite() { return new LoadILLINXTest(); }
   static void destroySuite(LoadILLINXTest *suite) { delete suite; }
 
-  LoadILLINXTest() : m_dataFile("ILLIN5_104007.nxs") {}
-
   void testName() {
     LoadILLINX loader;
     TS_ASSERT_EQUALS(loader.name(), "LoadILLINX");
@@ -38,10 +36,10 @@ public:
    * This test only loads the Sample Data
    * The elastic peak is obtained on the fly from the sample data.
    */
-  void testExecJustSample() {
+  void loadDataFile(const std::string dataFile, const int numberOfHistograms) {
     LoadILLINX loader;
     loader.initialize();
-    loader.setPropertyValue("Filename", m_dataFile);
+    loader.setPropertyValue("Filename", dataFile);
 
     std::string outputSpace = "LoadILLINXTest_out";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
@@ -53,13 +51,13 @@ public:
     MatrixWorkspace_sptr output2D =
         boost::dynamic_pointer_cast<MatrixWorkspace>(output);
 
-    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 98305);
+    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), numberOfHistograms);
 
     AnalysisDataService::Instance().clear();
   }
 
-private:
-  std::string m_dataFile;
+  void test_IN4_load() { loadDataFile("ILL/IN4/084446.nxs", 397); }
+  void test_IN5_load() { loadDataFile("ILL/IN5/104007.nxs", 98305); }
 };
 
 //------------------------------------------------------------------------------
@@ -68,7 +66,7 @@ private:
 
 class LoadILLINXTestPerformance : public CxxTest::TestSuite {
 public:
-  LoadILLINXTestPerformance() : m_dataFile("ILLIN5_104007.nxs") {}
+  LoadILLINXTestPerformance() : m_dataFile("ILL/IN5/104007.nxs") {}
 
   void testDefaultLoad() {
     Mantid::DataHandling::LoadILLINX loader;
