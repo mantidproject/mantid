@@ -199,10 +199,9 @@ void ApplyPaalmanPings::run() {
       const double canScaleFactor = m_uiForm.spCanScale->value();
       applyCorrAlg->setProperty("CanScaleFactor", canScaleFactor);
     }
-    const bool useShift = m_uiForm.ckShiftCan->isChecked();
-    if (useShift) {
-      const double canShiftAmount = m_uiForm.spCanShift->value();
-      applyCorrAlg->setProperty("CanShiftAmount", canShiftAmount);
+    if (m_uiForm.ckShiftCan->isChecked()) { // If container is shifted
+      const double canShiftFactor = m_uiForm.spCanShift->value();
+      applyCorrAlg->setProperty("canShiftFactor", canShiftFactor);
     }
   }
 
@@ -369,7 +368,6 @@ void ApplyPaalmanPings::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(absCorComplete(bool)));
   const bool useCan = m_uiForm.ckUseCan->isChecked();
-  const bool useShift = m_uiForm.ckShiftCan->isChecked();
   if (error) {
     emit showMessageBox(
         "Unable to apply corrections.\nSee Results Log for more details.");
@@ -381,7 +379,7 @@ void ApplyPaalmanPings::absCorComplete(bool error) {
   if (save)
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
   if (useCan) {
-    if (useShift) {
+    if (m_uiForm.ckShiftCan->isChecked()) { // If container is shifted
       IAlgorithm_sptr shiftLog =
           AlgorithmManager::Instance().create("AddSampleLog");
       shiftLog->initialize();
