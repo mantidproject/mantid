@@ -288,11 +288,21 @@ public:
     doTest_GetPropertyAsSingleValue_TimeSeriesType<uint64_t>();
   }
 
-  void
-  test_GetPropertyAsSingleValue_Throws_If_Type_Is_Not_Numeric_Or_TimeSeries_Numeric() {
+  void test_GetPropertyAsSingleValue_Throws_If_String_Is_Invalid() {
     LogManager runInfo;
     const std::string name = "string_prop";
-    runInfo.addProperty<std::string>(name, "hello"); // Adds a string property
+    runInfo.addProperty<std::string>(name, "hello"); // not a number
+
+    TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name),
+                     std::invalid_argument);
+  }
+
+  void
+  test_GetPropertyAsSingleValue_Throws_If_Type_Is_Not_Numeric_Or_TimeSeries_Numeric_Or_Valid_String() {
+    LogManager runInfo;
+    const std::string name = "bool_prop";
+    const bool value(false);
+    runInfo.addProperty<bool>(name, value); // Adds a bool property
 
     TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name),
                      std::invalid_argument);

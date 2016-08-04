@@ -356,8 +356,8 @@ double LogManager::getPropertyAsSingleValue(
         return std::stod(stringLog->value());
       } catch (const std::invalid_argument &) {
         throw std::invalid_argument(
-            "Run::getPropertyAsSingleValue - Property\"" + name +
-            "\"cannot be converted to a numeric value.");
+            "Run::getPropertyAsSingleValue - Property \"" + name +
+            "\" cannot be converted to a numeric value.");
       }
     } else {
       throw std::invalid_argument(
