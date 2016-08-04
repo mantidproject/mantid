@@ -70,10 +70,12 @@ void ReflectometryReductionOneAuto::init() {
   auto analysis_mode_validator =
       boost::make_shared<StringListValidator>(analysis_modes);
 
-  declareProperty(
-      make_unique<ArrayProperty<int>>("RegionOfDirectBeam", Direction::Input),
-      "Indices of the spectra a pair (lower, upper) that mark the ranges that "
-      "correspond to the direct beam in multi-detector mode.");
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "DetectorEfficiencyCorrection", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "Applies flood correction. Must consist of either a single "
+                  "single data point, or a list of spectra with a single "
+                  "value.");
 
   declareProperty("AnalysisMode", analysis_modes[0], analysis_mode_validator,
                   "Analysis Mode to Choose", Direction::Input);
@@ -281,6 +283,7 @@ void ReflectometryReductionOneAuto::exec() {
   std::string analysis_mode = getPropertyValue("AnalysisMode");
   MatrixWorkspace_sptr first_ws = getProperty("FirstTransmissionRun");
   MatrixWorkspace_sptr second_ws = getProperty("SecondTransmissionRun");
+  MatrixWorkspace_sptr dec_ws = getProperty("DetectorEfficiencyCorrection");
   auto start_overlap = isSet<double>("StartOverlap");
   auto end_overlap = isSet<double>("EndOverlap");
   auto params = isSet<MantidVec>("Params");
@@ -355,7 +358,6 @@ void ReflectometryReductionOneAuto::exec() {
   auto detector_component_name = isSet<std::string>("DetectorComponentName");
   auto sample_component_name = isSet<std::string>("SampleComponentName");
   auto theta_in = isSet<double>("ThetaIn");
-  auto region_of_direct_beam = isSet<std::vector<int>>("RegionOfDirectBeam");
 
   bool correct_positions = this->getProperty("CorrectDetectorPositions");
   bool strict_spectrum_checking = this->getProperty("StrictSpectrumChecking");
@@ -468,6 +470,10 @@ void ReflectometryReductionOneAuto::exec() {
       refRedOne->setProperty("SecondTransmissionRun", second_ws);
     }
 
+    if (dec_ws) {
+      refRedOne->setProperty("DetectorEfficiencyCorrection", dec_ws);
+    }
+
     if (start_overlap.is_initialized()) {
       refRedOne->setProperty("StartOverlap", start_overlap.get());
     }
@@ -482,10 +488,6 @@ void ReflectometryReductionOneAuto::exec() {
 
     if (wavelength_step.is_initialized()) {
       refRedOne->setProperty("WavelengthStep", wavelength_step.get());
-    }
-
-    if (region_of_direct_beam.is_initialized()) {
-      refRedOne->setProperty("RegionOfDirectBeam", region_of_direct_beam.get());
     }
 
     if (detector_component_name.is_initialized()) {
