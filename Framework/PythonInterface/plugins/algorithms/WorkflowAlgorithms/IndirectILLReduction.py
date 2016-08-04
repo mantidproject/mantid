@@ -23,11 +23,14 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     http://docs.mantidproject.org/nightly/algorithms/IndirectILLReduction-v1.html?highlight=indirectillreduction
     """
 
-    # Output Workspaces
+    # Output workspaces
+    # these will be set in PyInit by user input
     _red_ws = 'red'
     _left_ws = 'left'
     _right_ws = 'right'
 
+    # optional output workspaces with fixed names
+    # they will be prepended with _red_ws OR runnumber
     _raw_ws = 'raw'
     _det_ws = 'detgrouped'
     _monitor_ws = 'monitor'
@@ -118,9 +121,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                                  '2 right\n '
                                  '3 sum of left and right\n'
                                  '4 shift right according to left and sum\n'
-                                 '5 center both left and right at zero\n'
-                                 '6 like 4, but use Vanadium run for peak positions \n'
-                                 '7 like 5, but use Vanadium run for peak positions')
+                                 '5 like 4, but use Vanadium run for peak positions\n'
+                                 '6 center both left and right at zero and sum\n'
+                                 '7 like 6, but use Vanadium run for peak positions')
 
         # Output options
         self.declareProperty(name='Save',defaultValue=False,
@@ -148,8 +151,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     def validateInputs(self):
 
         issues = dict()
-        # Unmirror options 6 and 7 require a Vanadium run as input workspace
-        if self._mirror_sense and self._unmirror_option > 5 and self._vanadium_file!='':
+        # Unmirror options 5 and 7 require a Vanadium run as input workspace
+        if self._mirror_sense and (self._unmirror_option == 5 or self._unmirror_option == 7) \
+            and self._vanadium_file!='':
             issues['UnmirrorOption'] = 'Given unmirror option requires vanadium run to be set'
 
         return issues
@@ -345,7 +349,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             RenameWorkspace(InputWorkspace=left,OutputWorkspace=red)
 
         elif o == 2:
-            self.log().information('Unmirror 2: return the light wing')
+            self.log().information('Unmirror 2: return the right wing')
             RenameWorkspace(InputWorkspace=right,OutputWorkspace=red)
 
         elif o == 3:
@@ -464,6 +468,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         size = mtd[ws1].blocksize()
         mid_bin = int(size / 2)
         fit_table1 = FindEPP(InputWorkspace=ws1)
+        tolerance = int(mid_bin / 2)
 
         if not center:
             fit_table2 = FindEPP(InputWorkspace=ws2)
@@ -480,31 +485,40 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             peak_position1 = fit_table1.row(i)["PeakCentre"]
             fit_status1 = fit_table1.row(i)["FitStatus"]
 
-            if fit_status1 == 'success':
+            if fit_status1 == 'success' and \
+                abs(peak_position1 - x_values[mid_bin]) < abs(x_values[mid_bin+tolerance] - x_values[mid_bin]):
+                # if fit is fine, take the position from it
                 peak_bin1 = temp1.binIndexOf(peak_position1)
             else:
+                # if not, check the maximum of the distribution
                 y_imax1 = np.argmax(y_values)
-                if abs(y_imax1 - mid_bin) < mid_bin / 4:
+                if abs(y_imax1 - mid_bin) < tolerance:
+                    # check if it is reasonably close to the center
                     peak_bin1 = y_imax1
                 else:
+                    # if not, take the center (i.e. no shift at all)
                     self.log().warning('Maybe no peak present, taking mid position instead')
                     peak_bin1 = mid_bin
 
             DeleteWorkspace(temp1)
 
             if center:
+                # shift wrt the center
                 to_shift = peak_bin1 - mid_bin
             else:
+                # find the peak position from 2nd ws and shift wrt it
                 temp2 = ExtractSingleSpectrum(InputWorkspace=ws2, WorkspaceIndex=i)
                 y_values2 = np.array(temp2.readY(0))
+                x_values2 = np.array(temp2.readX(0))
                 peak_position2 = fit_table2.row(i)["PeakCentre"]
                 fit_status2 = fit_table2.row(i)["FitStatus"]
 
-                if fit_status2 == 'success':
+                if fit_status2 == 'success' and \
+                    abs(peak_position2 - x_values2[mid_bin]) < abs(x_values2[mid_bin+tolerance] - x_values2[mid_bin]):
                     peak_bin2 = temp2.binIndexOf(peak_position2)
                 else:
                     y_imax2 = np.argmax(y_values2)
-                    if abs(y_imax2 - mid_bin) < mid_bin / 4:
+                    if abs(y_imax2 - mid_bin) < tolerance:
                         peak_bin2 = y_imax2
                     else:
                         self.log().warning('Maybe no peak present, taking mid position instead')
@@ -550,7 +564,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 AppendSpectra(InputWorkspace1=ws_out,InputWorkspace2='temp',OutputWorkspace=ws_out)
                 DeleteWorkspace('temp')
 
+        # cleanup by-products
         DeleteWorkspace(fit_table1)
+        DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
+        DeleteWorkspace('EPPfit_Parameters')
         if not center:
             DeleteWorkspace(fit_table2)
 
@@ -572,10 +589,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             GroupWorkspaces(list_left, OutputWorkspace=self._red_ws + '_' + self._left_ws)
             GroupWorkspaces(list_right, OutputWorkspace=self._red_ws + '_' + self._right_ws)
 
-            self.setPropertyValue('ReducedWorkspace', self._red_ws)
-            self.setPropertyValue('ReducedLeftWorkspace', self._red_ws + '_' + self._left_ws)
-            self.setPropertyValue('ReducedRightWorkspace', self._red_ws + '_' + self._right_ws)
-
             if not self._control_mode:
                 # delete everything else
                 for run in runlist:
@@ -591,6 +604,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 list_det = []
                 list_mnorm = []
                 list_vnorm = []
+
                 for run in runlist:
                     list_raw.append(run + '_' + self._raw_ws)
                     list_monitor.append(run + '_' + self._monitor_ws)
@@ -603,8 +617,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 GroupWorkspaces(list_det, OutputWorkspace=self._red_ws + '_' + self._det_ws)
                 GroupWorkspaces(list_mnorm, OutputWorkspace=self._red_ws + '_' +  self._mnorm_ws)
                 GroupWorkspaces(list_vnorm, OutputWorkspace=self._red_ws + '_' +  self._vnorm_ws)
+                DeleteWorkspace(self._raw_ws)
 
-            # save if needed, before deleting
+            self.setPropertyValue('ReducedWorkspace', self._red_ws)
+            self.setPropertyValue('ReducedLeftWorkspace', self._red_ws + '_' + self._left_ws)
+            self.setPropertyValue('ReducedRightWorkspace', self._red_ws + '_' + self._right_ws)
+
+            # save if needed
             if self._save:
                 self._save_ws(self._red_ws)
 
