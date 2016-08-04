@@ -9620,15 +9620,20 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
     }
   }
 
-  // Close all the MDI windows
+  // Close the remaining MDI windows. The Python API is required to be active
+  // when the MDI window destructor is called so that those references can be
+  // cleaned up meaning we cannot rely on the deleteLater functionality to
+  // work correctly as this will happen in the next iteration of the event loop,
+  // i.e after the python shutdown code has been run below.
   MDIWindowList windows = getAllWindows();
-  foreach (MdiSubWindow *w, windows) {
-    w->confirmClose(false);
-    w->close();
+  for (auto &win : windows) {
+    win->confirmClose(false);
+    win->setAttribute(Qt::WA_DeleteOnClose, false);
+    win->close();
+    delete win;
   }
 
   mantidUI->shutdown();
-
   if (catalogSearch) {
     catalogSearch->disconnect();
   }

@@ -133,6 +133,7 @@ set ( SRC_FILES
 	src/SaveDaveGrp.cpp
 	src/SaveDetectorsGrouping.cpp
 	src/SaveDiffCal.cpp
+	src/SaveDiffFittingAscii.cpp
 	src/SaveDspacemap.cpp
 	src/SaveFITS.cpp
 	src/SaveFocusedXYE.cpp
@@ -303,6 +304,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveDaveGrp.h
 	inc/MantidDataHandling/SaveDetectorsGrouping.h
 	inc/MantidDataHandling/SaveDiffCal.h
+	inc/MantidDataHandling/SaveDiffFittingAscii.h
 	inc/MantidDataHandling/SaveDspacemap.h
 	inc/MantidDataHandling/SaveFITS.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
