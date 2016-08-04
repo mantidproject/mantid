@@ -645,8 +645,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             mon = runlist[0] + '_' + self._monitor_ws
 
             self.setPropertyValue('ReducedWorkspace', red)
-            self.setPropertyValue('ReducedWorkspace', left)
-            self.setPropertyValue('ReducedWorkspace', right)
+            self.setPropertyValue('ReducedLeftWorkspace', left)
+            self.setPropertyValue('ReducedRightWorkspace', right)
 
             if not self._control_mode:
                 # Cleanup unused workspaces

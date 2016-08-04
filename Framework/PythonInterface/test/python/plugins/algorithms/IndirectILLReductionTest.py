@@ -36,7 +36,8 @@ class IndirectILLReductionTest(unittest.TestCase):
 
         red = IndirectILLReduction(**self._args)
 
-        self.assertTrue(isinstance(red, MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual(len(red),3)
+        self.assertTrue(isinstance(red[0], MatrixWorkspace), "Should be a matrix workspace")
 
     def test_mutlifile(self):
         self._args['Run'] = self._multi_run_name + '.nxs'
@@ -61,7 +62,8 @@ class IndirectILLReductionTest(unittest.TestCase):
 
         red = IndirectILLReduction(**self._args)
 
-        self.assertTrue(isinstance(red, MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual(len(red), 3)
+        self.assertTrue(isinstance(red[0], MatrixWorkspace), "Should be a matrix workspace")
 
     def test_save_results(self):
         self._args['Run'] = self._run_name + '.nxs'
