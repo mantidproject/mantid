@@ -55,6 +55,13 @@ void SANSSensitivityCorrection::init() {
       "MaxEfficiency", EMPTY_DBL(), positiveDouble,
       "Maximum efficiency for a pixel to be considered (default: no maximum).");
 
+  declareProperty("FloodTransmissionValue", EMPTY_DBL(), positiveDouble,
+                  "Transmission value for the flood field material "
+                  "(default: no transmission).");
+  declareProperty("FloodTransmissionError", 0.0, positiveDouble,
+                  "Transmission error for the flood field material "
+                  "(default: no transmission).");
+
   declareProperty("BeamCenterX", EMPTY_DBL(),
                   "Beam position in X pixel coordinates (optional: otherwise "
                   "sample beam center is used)");
@@ -298,6 +305,24 @@ void SANSSensitivityCorrection::exec() {
               "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
         }
 
+        // Apply transmission correction as needed
+        double floodTransmissionValue = getProperty("FloodTransmissionValue");
+        double floodTransmissionError = getProperty("FloodTransmissionError");
+        
+        if (!isEmpty(floodTransmissionValue)) {
+          g_log.debug()
+            << "SANSSensitivityCorrection :: Applying transmission to flood field\n";
+          IAlgorithm_sptr transAlg = createChildAlgorithm("ApplyTransmissionCorrection");
+          transAlg->setProperty("InputWorkspace", rawFloodWS);
+          transAlg->setProperty("OutputWorkspace", rawFloodWS);
+          transAlg->setProperty("TransmissionValue", floodTransmissionValue);
+          transAlg->setProperty("TransmissionError", floodTransmissionError);
+          transAlg->setProperty("ThetaDependent", true);
+          transAlg->execute();
+          rawFloodWS = transAlg->getProperty("OutputWorkspace");
+          m_output_message += "   |Applied transmission to flood field\n";
+        }
+        
         // Calculate detector sensitivity
         IAlgorithm_sptr effAlg = createChildAlgorithm("CalculateEfficiency");
         effAlg->setProperty("InputWorkspace", rawFloodWS);
