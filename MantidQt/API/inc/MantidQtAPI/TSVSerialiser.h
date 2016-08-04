@@ -62,12 +62,14 @@ public:
   double asDouble(const size_t i) const;
   float asFloat(const size_t i) const;
   std::string asString(const size_t i) const;
+  bool asBool(const size_t i) const;
 
   TSVSerialiser &operator>>(int &val);
   TSVSerialiser &operator>>(double &val);
   TSVSerialiser &operator>>(float &val);
   TSVSerialiser &operator>>(std::string &val);
   TSVSerialiser &operator>>(QString &val);
+  TSVSerialiser &operator>>(bool &val);
 
   TSVSerialiser &writeLine(const std::string &name);
 
@@ -76,6 +78,7 @@ public:
   TSVSerialiser &operator<<(const QString &val);
   TSVSerialiser &operator<<(const double &val);
   TSVSerialiser &operator<<(const int &val);
+  TSVSerialiser &operator<<(const bool &val);
 
   void writeRaw(const std::string &raw);
   void writeSection(const std::string &name, const std::string &body);

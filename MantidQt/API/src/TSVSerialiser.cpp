@@ -214,6 +214,19 @@ float TSVSerialiser::asFloat(const size_t i) const {
   return ret;
 }
 
+bool TSVSerialiser::asBool(const size_t i) const {
+  if (i >= m_curValues.size())
+    return false;
+
+  std::string valStr = m_curValues.at(i);
+
+  std::stringstream valSS(valStr);
+  bool ret;
+  valSS >> ret;
+
+  return ret;
+}
+
 std::string TSVSerialiser::asString(const size_t i) const {
   if (i >= m_curValues.size())
     return "";
@@ -243,6 +256,11 @@ TSVSerialiser &TSVSerialiser::operator>>(std::string &val) {
 
 TSVSerialiser &TSVSerialiser::operator>>(QString &val) {
   val = QString::fromUtf8(asString(m_curIndex++).c_str());
+  return *this;
+}
+
+TSVSerialiser &TSVSerialiser::operator>>(bool &val) {
+  val = asBool(m_curIndex++);
   return *this;
 }
 
@@ -280,6 +298,11 @@ TSVSerialiser &TSVSerialiser::operator<<(const double &val) {
 }
 
 TSVSerialiser &TSVSerialiser::operator<<(const int &val) {
+  m_output << "\t" << val;
+  return *this;
+}
+
+TSVSerialiser &TSVSerialiser::operator<<(const bool &val) {
   m_output << "\t" << val;
   return *this;
 }
