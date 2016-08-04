@@ -153,7 +153,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         issues = dict()
         # Unmirror options 5 and 7 require a Vanadium run as input workspace
         if self._mirror_sense and (self._unmirror_option == 5 or self._unmirror_option == 7) \
-            and self._vanadium_file!='':
+            and self._vanadium_file is None:
             issues['UnmirrorOption'] = 'Given unmirror option requires vanadium run to be set'
 
         return issues
@@ -364,11 +364,19 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             DeleteWorkspace('right_shifted')
 
         elif o == 5:
-            # Vanadium file must be loaded, left and right workspaces extracted
-            pass
+            self.log().information('Unmirror 5: shift the right according to left of the vanadium and sum to left')
+            # like 4, but take the reference from vanadium
+            self._load_vanadium_run()
+            self._extract_workspace('van','left_van',x[start], x[mid])
+            self._convert_to_energy('left_van')
+            self._shift_spectra(right, 'left_van', 'right_shifted')
+            self._perform_mirror(left, 'right_shifted', red)
+            DeleteWorkspace('right_shifted')
+            DeleteWorkspace('left_van')
+            DeleteWorkspace('van')
 
         elif o == 6:
-            self.log().information('Unmirror 5: center both the right and the left and sum')
+            self.log().information('Unmirror 6: center both the right and the left and sum')
             self._shift_spectra(right, right, 'right_shifted', True)
             self._shift_spectra(left, left, 'left_shifted', True)
             self._perform_mirror('left_shifted', 'right_shifted', red)
@@ -376,8 +384,20 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             DeleteWorkspace('left_shifted')
 
         elif o == 7:
-            # Vanadium file must be loaded, left and right workspaces extracted
-            pass
+            self.log().information('Unmirror 7: center both the right and the left and sum')
+            self._load_vanadium_run()
+            self._extract_workspace('van', 'left_van', x[start], x[mid])
+            self._extract_workspace('van', 'right_van', x[start], x[mid])
+            self._convert_to_energy('left_van')
+            self._convert_to_energy('right_van')
+            self._shift_spectra(left, 'left_van', 'left_shifted')
+            self._shift_spectra(right, 'right_van', 'right_shifted')
+            self._perform_mirror('left_shifted', 'right_shifted', red)
+            DeleteWorkspace('left_shifted')
+            DeleteWorkspace('right_shifted')
+            DeleteWorkspace('left_van')
+            DeleteWorkspace('right_van')
+            DeleteWorkspace('van')
 
     def _convert_to_energy(self, ws):
         """
@@ -665,6 +685,18 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 SumSpectra(InputWorkspace=red, OutputWorkspace=red + '_sum_to_plot')
                 self._plot_ws(red + '_sum_to_plot')
                 # do not delete summed spectra while the plot is open
+
+    def _load_vanadium_run(self):
+        """
+        Loads vanadium run into workspace and extracts left and right wings to use in shift spectra
+        """
+        Load(Filename=self._vanadium_file, OutputWorkspace='van')
+
+        LoadParameterFile(Workspace='van', Filename=self._parameter_file)
+
+        GroupDetectors(InputWorkspace='van', OutputWorkspace='van', MapFile=self._map_file, Behaviour='Sum')
+
+        NormaliseToMonitor(InputWorkspace='van', OutputWorkspace='van', MonitorID=1)
 
     def _save_ws(self, ws):
         """
