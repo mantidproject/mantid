@@ -26,7 +26,7 @@ to use the default values (found in the Instrument Defintion File) for the prope
 of this algorithm, you may want to consider using :ref:`algm-ReflectometryReductionOneAuto`.
 
 :ref:`algm-ReflectometryReductionOneAuto` also performs extra processing steps such as
-Background subtraction and :ref:`algm-PolarizationCorrection`. If you want to know how 
+Background subtraction and :ref:`algm-PolarizationCorrection`. If you want to know how
 these processing steps are used, please refer to the :ref:`algm-ReflectometryReductionOneAuto`
 documentation.
 
@@ -35,7 +35,7 @@ Analysis Modes
 
 The default analysis mode is *PointDetectorAnalysis*. For PointAnalysisMode the
 analysis can be roughly reduced to IvsLam = DetectorWS / sum(I0) /
-TransmissionWS / sum(I0). For MultiDetectorAnalysis the analysis can be roughly reduced to 
+TransmissionWS / sum(I0). For MultiDetectorAnalysis the analysis can be roughly reduced to
 IvsLam = DetectorWS / RegionOfDirectBeamWS / sum(I0) / TransmissionWS / sum(I0).
 The normalization by tranmission run(s) is optional.
 If necessary, input workspaces are converted to *Wavelength*
@@ -100,10 +100,10 @@ a negative `MomentumTransferStep` will result in Linear Rebinning. More details 
 If no values are provided for `MomentumTransferMinimum` and `MomentumTransferMaximum` then the algorithm will attempt to calculate these values
 by using the equations below:
 
-    :math:`Q_{min} = 2 \, k \, sin \, \theta = \frac{4 \pi sin \theta}{\lambda_{max}}`  
-    
-    :math:`Q_{max} = 2 \, k \, sin \, \theta = \frac{4 \pi sin \theta}{\lambda_{min}}`  
-    
+    :math:`Q_{min} = 2 \, k \, sin \, \theta = \frac{4 \pi sin \theta}{\lambda_{max}}`
+
+    :math:`Q_{max} = 2 \, k \, sin \, \theta = \frac{4 \pi sin \theta}{\lambda_{min}}`
+
 Where :math:`\lambda_{min}` is the minimum extent of the `IvsLambda` Workspace and :math:`\lambda_{max}` is the maximum extent of the `IvsLambda` Workspace.
 
 If you have not provided a value for `MomentumTransferStep` then the algorithm will use :ref:`algm-CalculateResolution` to calculate this value for you.
@@ -117,6 +117,8 @@ and your IvsQ workspace will be set to the product of this algorithm.
 Workflow
 ########
 
+.. diagram:: ReflectometryReductionOne_HighLvl-v1_wkflw.dot
+
 .. diagram:: ReflectometryReductionOne-v1_wkflw.dot
 
 
@@ -127,7 +129,7 @@ In the workflow diagram above, after we produce the IvsLambda workspace, it may 
 
 Below we see the typical experimental setup for a Reflectometry instrument. The source direction (Beam vector) is along the horizon. This setup is defined in the Instrument Defintion File
 and this instrument setup will be attached to any workspaces associated with that instrument.
-When we pass the IvsLambda workspace to :ref:`algm-ConvertUnits` to produce an IvsQ workspace, :ref:`algm-ConvertUnits` will assume that :math:`2\theta` is the angle between the Beam vector and 
+When we pass the IvsLambda workspace to :ref:`algm-ConvertUnits` to produce an IvsQ workspace, :ref:`algm-ConvertUnits` will assume that :math:`2\theta` is the angle between the Beam vector and
 the sample-to-detector vector. When we have the typical setup seen below, :math:`2\theta` will be exactly half the value we wish it to be.
 
 .. figure:: /images/CurrentExperimentSetupForReflectometry.png

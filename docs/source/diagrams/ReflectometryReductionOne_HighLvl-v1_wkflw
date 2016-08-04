@@ -1,0 +1,49 @@
+digraph ReflectometryReductionOne {
+label = "ReflectometryReductionOne_HighLvl Flowchart"
+ $global_style
+
+subgraph params {
+ $param_style
+  inputWS [label="InputWorkspace"]
+  transWS [label="TransmissionWorkspace"]
+  corrAlg [label="CorrectionAlgorithm"]
+}
+
+subgraph decisions {
+ $decision_style
+  checkXUnit    [label="X axis in &lambda;?"]
+  checkTransRun [label="FirstTransmissionRun\ngiven?"]
+  checkCorrAlg  [label="CorrectionAlgorithm?"]
+  checkThetaIn  [label="ThetaIn given?"]
+}
+
+subgraph algorithms {
+ $algorithm_style
+  divideTrans [label="Divide\n(InputWorkspace / TransmissionWorkspace)"]
+}
+
+subgraph processes {
+ $process_style
+  convertUnits  [label="Convert to &lambda; and\ndivide Detectors\nby Monitors"]
+  corrAlgProc   [label="Apply polynomial or\nExponential correction"]
+}
+
+subgraph values {
+ $value_style
+}
+
+inputWS       -> checkXUnit
+checkXUnit    -> checkTransRun  [label="Yes"]
+checkXUnit    -> convertUnits   [label="No"]
+convertUnits  -> checkTransRun
+
+transWS       -> checkTransRun
+checkTransRun -> divideTrans    [label="Yes"]
+checkTransRun -> checkCorrAlg   [label="No"]
+corrAlg       -> checkCorrAlg
+divideTrans   -> checkThetaIn
+checkCorrAlg  -> corrAlgProc    [label="Yes"]
+checkCorrAlg  -> checkThetaIn   [label="No"]
+corrAlgProc   -> checkThetaIn
+
+}
