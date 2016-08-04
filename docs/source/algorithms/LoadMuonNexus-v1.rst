@@ -24,8 +24,12 @@ load all the specified spectra.
 
 -  TODO get XML descriptions of Muon instruments. This data is not in
    existing Muon Nexus files.
--  TODO load the spectra detector mapping. This may be very simple for
-   Muon instruments.
+
+Spectra-detector mapping
+########################
+
+For all v1 muon Nexus files, there is a one-to-one mapping between spectrum
+number and detector ID.
 
 Time series data
 ################

@@ -62,7 +62,8 @@ void LoadMuonNexus::init() {
 
   declareProperty(make_unique<ArrayProperty<specnum_t>>("SpectrumList"),
                   "Array, or comma separated list, of indexes of spectra to\n"
-                  "load");
+                  "load. If a range and a list of spectra are both supplied,\n"
+                  "all the specified spectra will be loaded.");
   declareProperty("AutoGroup", false,
                   "Determines whether the spectra are automatically grouped\n"
                   "together based on the groupings in the NeXus file, only\n"
