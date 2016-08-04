@@ -8,7 +8,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <cmath>
 #include <sstream>
 
@@ -38,7 +37,7 @@ const string S_OF_Q_MINUS_ONE("S(Q)-1");
 /// Kernel of the Fourier transform
 const string Q_S_OF_Q_MINUS_ONE("Q[S(Q)-1]");
 
-const double TWO_OVER_PI(2. / M_PI);
+constexpr double TWO_OVER_PI(2. / M_PI);
 }
 
 const std::string PDFFourierTransform::name() const {
@@ -163,7 +162,7 @@ PDFFourierTransform::determineQminIndex(const std::vector<double> &Q,
 
   // go to first non-nan value
   q_iter = std::find_if(std::next(FofQ.begin(), qmin_index), FofQ.end(),
-                        boost::math::isnormal<double>);
+                        static_cast<bool (*)(double)>(std::isnormal));
   size_t first_normal_index = std::distance(FofQ.begin(), q_iter);
   if (first_normal_index > qmin_index) {
     g_log.information(
@@ -193,8 +192,8 @@ PDFFourierTransform::determineQmaxIndex(const std::vector<double> &Q,
   size_t qmax_index = std::distance(Q.begin(), q_iter);
 
   // go to first non-nan value
-  auto q_back_iter =
-      std::find_if(FofQ.rbegin(), FofQ.rend(), boost::math::isnormal<double>);
+  auto q_back_iter = std::find_if(FofQ.rbegin(), FofQ.rend(),
+                                  static_cast<bool (*)(double)>(std::isnormal));
   size_t first_normal_index =
       FofQ.size() - std::distance(FofQ.rbegin(), q_back_iter) - 1;
   if (first_normal_index < qmax_index) {
