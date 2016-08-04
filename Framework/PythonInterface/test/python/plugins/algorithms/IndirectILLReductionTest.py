@@ -81,6 +81,21 @@ class IndirectILLReductionTest(unittest.TestCase):
 
         self.assertTrue(isinstance(mtd['146191_red'], MatrixWorkspace), "Should be a matrix workspace")
 
+    def test_control_mode(self):
+        self._args['Run'] = self._run_name + '.nxs'
+        self._args['ControlMode'] = True
+
+        IndirectILLReduction(**self._args)
+
+        self.assertTrue(isinstance(mtd['146191_red'], MatrixWorkspace), "Should be a matrix workspace")
+        self.assertTrue(isinstance(mtd['146191_raw'], MatrixWorkspace), "Should be a matrix workspace")
+        self.assertTrue(isinstance(mtd['146191_left'], MatrixWorkspace), "Should be a matrix workspace")
+        self.assertTrue(isinstance(mtd['146191_right'], MatrixWorkspace), "Should be a matrix workspace")
+        self.assertTrue(isinstance(mtd['146191_monitor'], MatrixWorkspace), "Should be a matrix workspace")
+        self.assertTrue(isinstance(mtd['146191_mnorm'], MatrixWorkspace), "Should be a matrix workspace")
+        self.assertTrue(isinstance(mtd['146191_vnorm'], MatrixWorkspace), "Should be a matrix workspace")
+        self.assertTrue(isinstance(mtd['146191_detgrouped'], MatrixWorkspace), "Should be a matrix workspace")
+
     def test_mapping_file_option(self):
         self._args['Run'] = self._run_name + '.nxs'
 
