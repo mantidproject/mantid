@@ -1,8 +1,11 @@
 #ifndef MANTID_DATAHANDLING_LOADILL_H_
 #define MANTID_DATAHANDLING_LOADILL_H_
 
+#include "MantidAPI/IFileLoader.h"
+#include "MantidNexus/NexusClasses.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
-#include "DataHandling/LoadILLINX.h"
+#include "MantidDataHandling/LoadILLINX.h"
 
 namespace Mantid {
 namespace DataHandling {
