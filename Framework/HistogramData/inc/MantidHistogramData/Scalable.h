@@ -47,6 +47,11 @@ public:
     return derived;
   }
 
+  /// Divides each element in the container by denominator.
+  T &operator/=(const double denominator) & {
+    return (*this) *= 1.0 / denominator;
+  }
+
 protected:
   ~Scalable() = default;
 };
@@ -58,11 +63,28 @@ inline T operator*(T lhs, const double rhs) {
   return lhs *= rhs;
 }
 
+/// Divides each element in lhs by rhs.
+template <class T, class = typename std::enable_if<
+                       std::is_base_of<Scalable<T>, T>::value>::type>
+inline T operator/(T lhs, const double rhs) {
+  return lhs /= rhs;
+}
+
 /// Scales each element in rhs by the factor given by lhs.
 template <class T, class = typename std::enable_if<
                        std::is_base_of<Scalable<T>, T>::value>::type>
 inline T operator*(const double lhs, T rhs) {
   return rhs *= lhs;
+}
+
+/// Divides lhs by each element in rhs.
+template <class T, class = typename std::enable_if<
+                       std::is_base_of<Scalable<T>, T>::value>::type>
+inline T operator/(const double lhs, T rhs) {
+  auto &derived = static_cast<T &>(rhs);
+  std::for_each(derived.begin(), derived.end(),
+                [=](double &value) { value = lhs / value; });
+  return derived;
 }
 
 } // namespace detail
