@@ -13,7 +13,7 @@ from SANS2.Common.SANSConstants import SANSConstants
 # needs to be disabled here.
 # pylint: disable=no-name-in-module
 from SANS2.State.StateDirector.TestDirector import TestDirector
-from SANS2.State.StateBuilder.SANSStateMoveBuilder import get_state_move_builder
+from SANS2.State.StateBuilder.SANSStateMoveBuilder import get_move_builder
 from SANS2.State.SANSStateData import SANSStateDataISIS
 
 
@@ -67,7 +67,7 @@ class SANSMoveTest(unittest.TestCase):
         data_info.sample_scatter = sample_scatter
 
         # Set the move parameters
-        builder = get_state_move_builder(data_info)
+        builder = get_move_builder(data_info)
         if lab_x_translation_correction is not None:
             builder.set_LAB_x_translation_correction(lab_x_translation_correction)
         if lab_z_translation_correction is not None:
@@ -333,6 +333,69 @@ class SANSMoveTest(unittest.TestCase):
 
         # Act + Assert for setting to zero position for all
         self.check_that_sets_to_zero(workspace, move_alg, state.move, comp_name=None)
+
+    def test_that_missing_beam_centre_is_taken_from_move_state(self):
+        # Arrange
+        file_name = "SANS2D00028784"
+        lab_z_translation_correction = 123.
+
+        workspace = load_workspace(file_name)
+        state = SANSMoveTest._get_simple_state(sample_scatter=file_name,
+                                               lab_z_translation_correction=lab_z_translation_correction)
+        # These values should be used instead of an explicitly specified beam centre
+        state.move.detectors[SANSConstants.high_angle_bank].sample_centre_pos1 = 26.
+        state.move.detectors[SANSConstants.high_angle_bank].sample_centre_pos2 = 98.
+
+        # Act
+        # The component input is not relevant for SANS2D's initial move. All detectors are moved
+        component = "front-detector"
+        move_alg = self._run_move(state, workspace=workspace, move_type="InitialMove", component=component)
+
+        # Assert for initial move for high angle bank
+        # These values are on the workspace and in the sample logs
+        component_to_investigate = SANSConstants.high_angle_bank
+        initial_x_position = 1.1
+        x_correction = -0.188187
+        initial_z_position = 23.281
+        z_correction = 1.002
+        total_x = initial_x_position + x_correction
+        total_y = 0.
+        total_z = initial_z_position + z_correction
+        expected_position = V3D(total_x - 26., total_y - 98., total_z)
+        expected_rotation = Quat(1., 0., 7.87625e-05, 0.)
+        self.compare_expected_position(expected_position, expected_rotation,
+                                       component_to_investigate, state.move, workspace)
+
+    def test_that_missing_beam_centre_is_taken_from_lab_move_state_when_no_component_is_specified(self):
+        # Arrange
+        file_name = "SANS2D00028784"
+        lab_z_translation_correction = 123.
+
+        workspace = load_workspace(file_name)
+        state = SANSMoveTest._get_simple_state(sample_scatter=file_name,
+                                               lab_z_translation_correction=lab_z_translation_correction)
+        # These values should be used instead of an explicitly specified beam centre
+        state.move.detectors[SANSConstants.low_angle_bank].sample_centre_pos1 = 26.
+        state.move.detectors[SANSConstants.low_angle_bank].sample_centre_pos2 = 98.
+
+        # Act
+        # The component input is not relevant for SANS2D's initial move. All detectors are moved
+        component = None
+        move_alg = self._run_move(state, workspace=workspace, move_type="InitialMove", component=component)
+
+        # Assert for initial move for low angle bank
+        # These values are on the workspace and in the sample logs,
+        component_to_investigate = SANSConstants.low_angle_bank
+        initial_z_position = 23.281
+        rear_det_z = 11.9989755859
+        offset = 4.
+        total_x = 0.
+        total_y = 0.
+        total_z = initial_z_position + rear_det_z - offset + lab_z_translation_correction
+        expected_position = V3D(total_x - 26., total_y - 98., total_z)
+        expected_rotation = Quat(1., 0., 0., 0.)
+        self.compare_expected_position(expected_position, expected_rotation,
+                                       component_to_investigate, state.move, workspace)
 
 
 class SANSMoveRunnerTest(stresstesting.MantidStressTest):

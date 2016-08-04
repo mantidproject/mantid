@@ -33,6 +33,9 @@ class SANSStateMoveDetectorISIS(SANSStateBase, SANSStateMove):
     y_tilt_correction = FloatParameter()
     z_tilt_correction = FloatParameter()
 
+    sample_centre_pos1 = FloatParameter()
+    sample_centre_pos2 = FloatParameter()
+
     # Name of the detector
     detector_name = StringParameter()
     detector_name_short = StringParameter()
@@ -51,6 +54,10 @@ class SANSStateMoveDetectorISIS(SANSStateBase, SANSStateMove):
         self.x_tilt_correction = 0.0
         self.y_tilt_correction = 0.0
         self.z_tilt_correction = 0.0
+
+        # Sample centre Pos 1 + Pos 2
+        self.sample_centre_pos1 = 0.0
+        self.sample_centre_pos2 = 0.0
 
     def validate(self):
         is_invalid = {}

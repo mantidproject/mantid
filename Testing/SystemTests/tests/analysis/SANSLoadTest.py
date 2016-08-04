@@ -171,7 +171,8 @@ class SANSLoadTest(unittest.TestCase):
         sample_workspace = load_alg.getProperty("SampleScatterWorkspace").value
         return has_tag(SANSConstants.Calibration.calibration_workspace_tag, sample_workspace)
 
-    def _run_load(self, state, publish_to_cache, use_cached, move_workspace):
+    def _run_load(self, state, publish_to_cache, use_cached, move_workspace=False, beam_coordinates=None,
+                  component=None):
         load_alg = AlgorithmManager.createUnmanaged("SANSLoad")
         load_alg.setChild(True)
         load_alg.initialize()
@@ -181,6 +182,9 @@ class SANSLoadTest(unittest.TestCase):
         load_alg.setProperty("PublishToCache", publish_to_cache)
         load_alg.setProperty("UseCached", use_cached)
         load_alg.setProperty("MoveWorkspace", move_workspace)
+        if move_workspace:
+            load_alg.setProperty("Component", component)
+            load_alg.setProperty("BeamCoordinates", beam_coordinates)
 
         # Act
         load_alg.execute()

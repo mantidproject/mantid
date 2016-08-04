@@ -18,6 +18,7 @@ class SANSStateMoveBuilderTest(unittest.TestCase):
         value = 324.2
         builder.set_center_position(value)
         builder.set_HAB_x_translation_correction(value)
+        builder.set_LAB_sample_centre_pos1(value)
 
         # Assert
         state = builder.build()
@@ -27,6 +28,7 @@ class SANSStateMoveBuilderTest(unittest.TestCase):
         self.assertTrue(state.detectors[SANSConstants.low_angle_bank].detector_name == "main-detector-bank")
         self.assertTrue(state.monitor_names[str(2)] == "monitor2")
         self.assertTrue(len(state.monitor_names) == 2)
+        self.assertTrue(state.detectors[SANSConstants.low_angle_bank].sample_centre_pos1 == value)
 
     def test_that_state_for_sans2d_can_be_built(self):
         # Arrange

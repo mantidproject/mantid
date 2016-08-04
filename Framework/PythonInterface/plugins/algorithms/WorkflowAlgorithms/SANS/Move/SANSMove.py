@@ -53,7 +53,8 @@ class SANSMove(DataProcessorAlgorithm):
 
         # Coordinates of the beam
         self.declareProperty(FloatArrayProperty(name='BeamCoordinates', values=[]),
-                             doc='The coordinates which is used to position the instrument component(s).')
+                             doc='The coordinates which are used to position the instrument component(s). If nothing '
+                                 'is specified, then the coordinates from SANSState are used')
 
         # Components which are to be moved
         self.declareProperty('Component', '', direction=Direction.Input, doc='Component that should be moved.')
@@ -68,10 +69,10 @@ class SANSMove(DataProcessorAlgorithm):
         move_factory = SANSMoveFactory()
         mover = move_factory.create_mover(workspace)
 
-        # Get the workspace and the beam coordinates
-        coordinates = self.getProperty("BeamCoordinates").value
-        component = self.getProperty("Component").value
+        # Get the selected component and the beam coordinates
         move_info = state.move
+        component = self.getProperty("Component").value
+        coordinates = self._get_coordinates(move_info, component)
 
         # Get which move operation the user wants to perform on the workspace. This can be:
         # 1. Initial move: Suitable when a workspace has been freshly loaded.
@@ -93,6 +94,31 @@ class SANSMove(DataProcessorAlgorithm):
         move_type_map = self._make_move_type_map()
         return move_type_map[move_type_input]
 
+    def _get_coordinates(self, move_info, component):
+        coordinates = self.getProperty("BeamCoordinates").value.tolist()
+        # If the coordinates were not specified by the user then the coordinates are taken from the move state.
+        # There are several possible scenarios
+        # 1. component is specified => take the beam centre from the appropriate detector
+        # 2. component is not specified => take the beam centre from the LAB
+        if not coordinates:
+            selected_detector = None
+            detectors = move_info.detectors
+            if component:
+                # Check which component we are using can be found in the SANSStateMove object. We need to know which
+                # detector we are dealing with
+                for detector_name, detector in detectors.items():
+                    if detector.detector_name == component or detector.detector_name_short == component:
+                        selected_detector = detector
+                if selected_detector is None:
+                    raise RuntimeError("SANSMove: The selected detector {0} could not be found in the SANSStateMove "
+                                       "information.".format(component))
+            else:
+                selected_detector = detectors[SANSConstants.low_angle_bank]
+            pos1 = selected_detector.sample_centre_pos1
+            pos2 = selected_detector.sample_centre_pos2
+            coordinates = [pos1, pos2]
+        return coordinates
+
     def validateInputs(self):
         errors = dict()
         # Check that the input can be converted into the right state object
@@ -108,10 +134,9 @@ class SANSMove(DataProcessorAlgorithm):
         # supplied. In the case of SetToZero these coordinates are ignored if they are supplied
         coordinates = self.getProperty("BeamCoordinates").value
         selected_move_type = self._get_move_type()
-
-        if len(coordinates) == 0 and (selected_move_type is MoveType.InitialMove or
-                                      selected_move_type is MoveType.ElementaryDisplacement):
-            errors.update({"BeamCoordinates": "Beam coordinates were not specified."})
+        if len(coordinates) == 0 and (selected_move_type is MoveType.ElementaryDisplacement):
+            errors.update({"BeamCoordinates": "Beam coordinates were not specified. An elementary displacement "
+                                              "requires beam coordinates."})
 
         # If components were specified, then check if they are part of the workspace
         component = self.getProperty("Component").value
@@ -122,6 +147,7 @@ class SANSMove(DataProcessorAlgorithm):
             if component_by_name is None:
                 errors.update({"Component": "The component {0} cannot be found on "
                                             "the workspace.".format(str(component))})
+
         return errors
 
 

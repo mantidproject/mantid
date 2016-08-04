@@ -48,11 +48,14 @@ user_file_det_correction_z = "det_correction_z"
 user_file_det_correction_rotation = "det_correction_rotation"
 user_file_det_correction_radius = "det_correction_radius"
 user_file_det_correction_translation = "det_correction_translation"
+user_file_det_correction_x_tilt = "det_correction_x_tilt"
+user_file_det_correction_y_tilt = "det_correction_y_tilt"
 
 # --- LIMITS
 user_file_limits_angle = "limits_angle"
 
 user_file_limits_events_binning = "limits_events_binning"
+user_file_limits_events_binning_range = "limits_events_binning_range "
 
 user_file_limits_radius_cut = "limits_radius_cut"
 user_file_limits_wavelength_cut = "limits_wavelength_cut"

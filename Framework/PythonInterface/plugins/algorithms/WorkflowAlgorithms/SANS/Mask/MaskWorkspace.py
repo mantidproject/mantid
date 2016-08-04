@@ -1,8 +1,9 @@
 from abc import (ABCMeta, abstractmethod)
+from SANS2.Common.SANSConstants import SANSConstants
 from SANS2.Common.SANSEnumerations import (SANSInstrument, convert_detector_type_to_string)
 from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
-from SANS2.Common.SANSFileInformation import find_full_file_path
-from SANS2.State.SANSStateFunctions import get_instrument_from_state_data
+from SANS2.Common.SANSFileInformation import (find_full_file_path, SANSFileInformationFactory,
+                                              get_instrument_paths_for_sans_file)
 from SANS.Mask.XMLShapes import (add_cylinder, add_outside_cylinder, create_phi_mask, create_line_mask)
 from SANS.Mask.MaskFunctions import (yield_masked_det_ids, SpectraBlock)
 
@@ -19,19 +20,26 @@ def mask_bins(mask_info, workspace, detector_type):
     bin_mask_stop = mask_info.detectors[convert_detector_type_to_string(detector_type)].bin_mask_stop
 
     # Combine the settings and run the binning
-    start_mask = bin_mask_general_start.extend(bin_mask_start)
-    stop_mask = bin_mask_general_stop.extend(bin_mask_stop)
+    start_mask = []
+    stop_mask = []
+    if bin_mask_general_start and bin_mask_general_stop:
+        start_mask.extend(bin_mask_general_start)
+        stop_mask.extend(bin_mask_general_stop)
+
+    if bin_mask_start and bin_mask_stop:
+        start_mask.extend(bin_mask_start)
+        stop_mask.extend(bin_mask_stop)
 
     mask_name = "MaskBins"
-    mask_options = {"InputWorkspace": workspace}
+    mask_options = {SANSConstants.input_workspace: workspace}
     mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
     for start, stop in zip(start_mask, stop_mask):
-        mask_alg.setProperty("InputWorkspace", workspace)
-        mask_alg.setProperty("OutputWorkspace", "dummy")
+        mask_alg.setProperty(SANSConstants.input_workspace, workspace)
+        mask_alg.setProperty(SANSConstants.output_workspace, SANSConstants.dummy)
         mask_alg.setProperty("XMin", start)
         mask_alg.setProperty("XMax", stop)
         mask_alg.execute()
-        workspace = mask_alg.getProperty("OutputWorkspace").value
+        workspace = mask_alg.getProperty(SANSConstants.output_workspace).value
     return workspace
 
 
@@ -51,14 +59,13 @@ def mask_cylinder(mask_info, workspace):
     # Mask the cylinder shape if there is anything to mask, else don't do anything
     if xml:
         mask_name = "MaskDetectorsInShape"
-        mask_options = {"InputWorkspace": workspace}
+        mask_options = {SANSConstants.workspace: workspace}
         mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
         for shape in xml:
-            mask_alg.setProperty("InputWorkspace", workspace)
-            mask_alg.setProperty("OutputWorkspace", "dummy")
+            mask_alg.setProperty(SANSConstants.workspace, workspace)
             mask_alg.setProperty("ShapeXML", shape)
             mask_alg.execute()
-            workspace = mask_alg.getProperty("OutputWorkspace").value
+            workspace = mask_alg.getProperty(SANSConstants.workspace).value
     return workspace
 
 
@@ -85,12 +92,12 @@ def mask_with_mask_files(mask_info, workspace):
         # Mask loader
         load_name = "LoadMask"
         load_options = {"Instrument": idf_path,
-                        "OutputWorkspace": "dummy"}
+                        SANSConstants.output_workspace: "dummy"}
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
 
         # Masker
         mask_name = "MaskDetectors"
-        mask_options = {"Workspace": workspace}
+        mask_options = {SANSConstants.workspace: workspace}
         mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
         for mask_file in mask_files:
             mask_file = find_full_file_path(mask_file)
@@ -98,13 +105,14 @@ def mask_with_mask_files(mask_info, workspace):
             # Get the detector ids which need to be masked
             load_alg.setProperty("InputFile", mask_file)
             load_alg.execute()
-            masking_workspace = load_alg.getProperty("OutputWorkspace").value
+            masking_workspace = load_alg.getProperty(SANSConstants.output_workspace).value
             detector_list = list(yield_masked_det_ids(masking_workspace))
 
             # Mask the detector ids on the original workspace
             mask_alg.setProperty("DetectorList", detector_list)
             mask_alg.execute()
-        workspace = mask_alg.getProperty("Workspace").value
+
+        workspace = mask_alg.getProperty(SANSConstants.workspace).value
     return workspace
 
 
@@ -313,13 +321,12 @@ class MaskerISIS(Masker):
         # Mask beam stop
         mask_beam_stop(mask_info, workspace_to_mask, self._instrument)
 
-
 class MaskFactory(object):
     def __init__(self):
         super(MaskFactory, self).__init__()
 
     @staticmethod
-    def create_masker(state):
+    def create_masker(state, detector_type):
         """
         Provides the appropriate masker.
 
@@ -327,11 +334,16 @@ class MaskFactory(object):
         :return: the corresponding slicer
         """
         data_info = state.data
-        instrument = get_instrument_from_state_data(data_info)
+        file_name = data_info.sample_scatter
+        file_information_factory = SANSFileInformationFactory()
+        file_information = file_information_factory.create_sans_file_information(file_name)
+        instrument = file_information.get_instrument()
 
         if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or \
                         instrument is SANSInstrument.SANS2D:
-            spectra_block = SpectraBlock(data_info)
+            run_number = file_information.get_run_number()
+            _, ipf_path = get_instrument_paths_for_sans_file(file_name)
+            spectra_block = SpectraBlock(ipf_path, run_number, instrument, detector_type)
             masker = MaskerISIS(spectra_block, instrument)
         else:
             masker = NullMasker()

@@ -39,14 +39,16 @@ class SANSMaskWorkspace(DataProcessorAlgorithm):
         state_property_manager = self.getProperty("SANSState").value
         state = create_deserialized_sans_state_from_property_manager(state_property_manager)
 
+        component = self._get_component()
+
         # Get the correct SANS masking strategy from the SANSMaskFactory
         workspace = self.getProperty(SANSConstants.workspace).value
         mask_factory = MaskFactory()
-        masker = mask_factory.create_masker(state)
+        masker = mask_factory.create_masker(state, component)
 
         # Perform the masking
         mask_info = state.mask
-        component = self._get_component()
+
         masker.mask_workspace(mask_info, workspace, component)
 
     def _get_component(self):

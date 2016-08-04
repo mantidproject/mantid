@@ -23,8 +23,8 @@ class SANSStateMaskTest(unittest.TestCase):
         state.radius_max = 133.5
         self.assertTrue(state.radius_max == 133.5)
 
-        state.mask_files = ["file1.xml", "file2.xml"]
-        self.assertTrue(state.mask_files == ["file1.xml", "file2.xml"])
+        state.mask_files = ["MaskSANS2D.txt", "MaskSANS2D.txt"]
+        self.assertTrue(state.mask_files == ["MaskSANS2D.txt", "MaskSANS2D.txt"])
 
         state.phi_min = 1.0
         self.assertTrue(state.phi_min == 1.0)
@@ -32,8 +32,8 @@ class SANSStateMaskTest(unittest.TestCase):
         state.phi_max = 2.0
         self.assertTrue(state.phi_max == 2.0)
 
-        state.use_mask_phi = True
-        self.assertTrue(state.use_mask_phi)
+        state.use_mask_phi_mirror = True
+        self.assertTrue(state.use_mask_phi_mirror)
 
         try:
             state.validate()
@@ -75,11 +75,10 @@ class SANSStateMaskTest(unittest.TestCase):
         state.radius_min = 10.0
         state.radius_max = 20.0
 
-        state.mask_files = ["file1.xml", "file2.xml"]
+        state.mask_files = ["MaskSANS2D.txt", "MaskSANS2D.txt"]
 
         state.phi_min = 10.0
         state.phi_max = 20.0
-        state.use_mask_phi = True
         state.use_mask_phi_mirror = False
 
         state.beam_stop_arm_width = 10.0
@@ -105,8 +104,8 @@ class SANSStateMaskTest(unittest.TestCase):
         self.assertTrue(state_2.radius_min == 10.0)
         self.assertTrue(state_2.radius_max == 20.0)
         self.assertTrue(state_2.phi_min == 10.0)
-        self.assertTrue(state_2.mask_files == ["file1.xml", "file2.xml"])
-        self.assertTrue(state_2.use_mask_phi)
+        self.assertTrue(state_2.mask_files == ["MaskSANS2D.txt", "MaskSANS2D.txt"])
+        self.assertFalse(state_2.use_mask_phi_mirror)
 
 
 if __name__ == '__main__':

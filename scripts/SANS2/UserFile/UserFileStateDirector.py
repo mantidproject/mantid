@@ -135,8 +135,9 @@ class UserFileStateDirectorISIS(object):
         # 1. Correction in X, Y, Z
         # 2. Rotation
         # 3. Side translation
-        # 4. Sample offset
-        # 5. Monitor 4 offset
+        # 4. Xtilt and Ytilt
+        # 5. Sample offset
+        # 6. Monitor 4 offset
 
         # ---------------------------
         # Correction for X, Y, Z
@@ -202,7 +203,7 @@ class UserFileStateDirectorISIS(object):
                     self._move_builder.set_LAB_radius_correction(convert_mm_to_m(radius_correction.entry))
                 else:
                     raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
-                                       " rotation correction.".format(radius_correction.detector_type))
+                                       " radius correction.".format(radius_correction.detector_type))
 
         # ---------------------------
         # Correction for Translation
@@ -216,7 +217,32 @@ class UserFileStateDirectorISIS(object):
                     self._move_builder.set_LAB_side_correction(convert_mm_to_m(side_correction.entry))
                 else:
                     raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
-                                       " rotation correction.".format(side_correction.detector_type))
+                                       " side correction.".format(side_correction.detector_type))
+
+        # ---------------------------
+        # Tilt
+        # ---------------------------
+        if user_file_det_correction_x_tilt in user_file_items:
+            tilt_correction = user_file_items[user_file_det_correction_x_tilt]
+            tilt_correction = tilt_correction[-1]
+            if tilt_correction.detector_type is DetectorType.Hab:
+                self._move_builder.set_HAB_x_tilt_correction(tilt_correction.entry)
+            elif tilt_correction.detector_type is DetectorType.Lab:
+                self._move_builder.set_LAB_side_correction(tilt_correction.entry)
+            else:
+                raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
+                                   " titlt correction.".format(tilt_correction.detector_type))
+
+        if user_file_det_correction_y_tilt in user_file_items:
+            tilt_correction = user_file_items[user_file_det_correction_y_tilt]
+            tilt_correction = tilt_correction[-1]
+            if tilt_correction.detector_type is DetectorType.Hab:
+                self._move_builder.set_HAB_y_tilt_correction(tilt_correction.entry)
+            elif tilt_correction.detector_type is DetectorType.Lab:
+                self._move_builder.set_LAB_side_correction(tilt_correction.entry)
+            else:
+                raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
+                                   " titlt correction.".format(tilt_correction.detector_type))
 
         # ---------------------------
         # Sample offset
@@ -346,7 +372,7 @@ class UserFileStateDirectorISIS(object):
         if user_file_mask_line in user_file_items:
             mask_lines = user_file_items[user_file_mask_line]
             # If there were several arms specified then we take only the last
-            check_if_contains_only_one_element(mask_lines)
+            check_if_contains_only_one_element(mask_lines, user_file_mask_line)
             mask_line = mask_lines[-1]
             # We need the width and the angle
             angle = mask_line.angle

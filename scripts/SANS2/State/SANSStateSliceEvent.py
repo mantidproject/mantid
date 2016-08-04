@@ -21,38 +21,41 @@ class SANSStateSliceEventISIS(SANSStateSliceEvent, SANSStateBase):
 
     def __init__(self):
         super(SANSStateSliceEventISIS, self).__init__()
-        self.start_time = []
-        self.end_time = []
 
     def validate(self):
         is_invalid = dict()
-        # The length of start_time and end_time needs to be identical
-        if len(self.start_time) != len(self.end_time):
-            is_invalid.update({"start_time": "The length of start_time is {} and the length of end_time is {}, but they "
-                                            "have to be identical".format(len(self.start_time), len(self.end_time))})
-
-        # Each entry in start_time and end_time must be a float
-        if len(self.start_time) == len(self.end_time) and len(self.start_time) > 0:
-            for item in range(0, len(self.start_time)):
-                for element1, element2 in zip(self.start_time, self.end_time):
-                    if not isinstance(element1, float) or not isinstance(element2, float):
-                        is_invalid.update(
-                            {"start_time or endTof": "An input for the time of flight for event slicing is not a"
-                                                    " floating point value. Start_time is {0} and end_time is "
-                                                    "{1}".format(element1, element2)})
-
-        # Check that the entries are monotonically increasing. We don't want 12, 24, 22
-        if len(self.start_time) > 1 and not monotonically_increasing(self.start_time):
+        if self.start_time and not self.end_time or not self.start_time and self.end_time:
             is_invalid.update(
-                {"start_time": "The values in start_time don't seem to be monotonically increasing."})
-        if len(self.end_time) > 1 and not monotonically_increasing(self.end_time):
-            is_invalid.update(
-                {"end_time": "The values in end_time don't seem to be monotonically increasing."})
+                {"start_time or end_time": "Either only the start_time {0} or the end_time {1} "
+                                           "was set.".format(len(self.start_time), len(self.end_time))})
+        if self.start_time and self.end_time:
+            # The length of start_time and end_time needs to be identical
+            if len(self.start_time) != len(self.end_time):
+                is_invalid.update({"start_time": "The length of start_time is {} and the length of end_time is {}, but they "
+                                                "have to be identical".format(len(self.start_time), len(self.end_time))})
 
-        # Check that end_time is not smaller than start_time
-        if not is_smaller(self.start_time, self.end_time):
-            is_invalid.update(
-                {"start_time and end_time": "The end_time values seem to be smaller than the start_time values."})
+            # Each entry in start_time and end_time must be a float
+            if len(self.start_time) == len(self.end_time) and len(self.start_time) > 0:
+                for item in range(0, len(self.start_time)):
+                    for element1, element2 in zip(self.start_time, self.end_time):
+                        if not isinstance(element1, float) or not isinstance(element2, float):
+                            is_invalid.update(
+                                {"start_time or end_time": "An input for the time of flight for event slicing is not a"
+                                                        " floating point value. Start_time is {0} and end_time is "
+                                                        "{1}".format(element1, element2)})
+
+            # Check that the entries are monotonically increasing. We don't want 12, 24, 22
+            if len(self.start_time) > 1 and not monotonically_increasing(self.start_time):
+                is_invalid.update(
+                    {"start_time": "The values in start_time don't seem to be monotonically increasing."})
+            if len(self.end_time) > 1 and not monotonically_increasing(self.end_time):
+                is_invalid.update(
+                    {"end_time": "The values in end_time don't seem to be monotonically increasing."})
+
+            # Check that end_time is not smaller than start_time
+            if not is_smaller(self.start_time, self.end_time):
+                is_invalid.update(
+                    {"start_time and end_time": "The end_time values seem to be smaller than the start_time values."})
 
         if is_invalid:
             raise ValueError("SANSStateSliceEvent: The provided inputs are illegal. "

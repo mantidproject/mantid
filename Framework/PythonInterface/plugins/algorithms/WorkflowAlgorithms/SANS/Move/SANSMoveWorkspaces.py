@@ -373,7 +373,7 @@ class SANSMoveSANS2D(SANSMove):
     @staticmethod
     def _move_monitor_4(workspace, move_info):
         if move_info.monitor_4_offset != 0.0:
-            monitor_4_name = move_info.monitors[4]
+            monitor_4_name = move_info.monitor_names["4"]
             instrument = workspace.getInstrument()
             monitor_4 = instrument.getComponentByName(monitor_4_name)
 

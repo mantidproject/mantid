@@ -30,6 +30,11 @@ class SANSStateMoveWorkspaceLOQTest(unittest.TestCase):
         state.center_position = test_value
         self.assertTrue(state.center_position == test_value)
 
+        state.detectors[SANSConstants.high_angle_bank].sample_centre_pos1 = test_value
+        self.assertTrue(state.detectors[SANSConstants.high_angle_bank].sample_centre_pos1 == test_value)
+        state.detectors[SANSConstants.low_angle_bank].sample_centre_pos2 = test_value
+        self.assertTrue(state.detectors[SANSConstants.low_angle_bank].sample_centre_pos2 == test_value)
+
         # Name of the detector
         test_name = "test_name"
         state.detectors[SANSConstants.high_angle_bank].detector_name = test_name

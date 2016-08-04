@@ -19,6 +19,9 @@ class SANSCrop(DataProcessorAlgorithm):
         return 'Crops a SANS workspaces.'
 
     def PyInit(self):
+        # ----------
+        # INPUT
+        # ----------
         # Workspace which is to be cropped
         self.declareProperty(MatrixWorkspaceProperty(SANSConstants.input_workspace, '',
                                                      optional=PropertyMode.Mandatory, direction=Direction.Input),

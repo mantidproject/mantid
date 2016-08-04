@@ -51,7 +51,6 @@ class UserFileReaderTest(unittest.TestCase):
                            user_file_mask_time: [range_entry_with_detector(17500, 22000, None)],
                            user_file_mon_direct: [monitor_file("DIRECTM1_15785_12m_31Oct12_v12.dat", DetectorType.Lab)],
                            user_file_mon_spectrum: [monitor_spectrum(1, True, True), monitor_spectrum(1, False, True)],
-                           user_file_trans_spec: [3],
                            user_file_set_centre: [position_entry(155.45, -169.6, DetectorType.Lab)],
                            user_file_set_scales: [set_scales_entry(0.074, 1.0, 1.0, 1.0, 1.0)],
                            user_file_sample_offset: [53],
@@ -65,8 +64,8 @@ class UserFileReaderTest(unittest.TestCase):
                            user_file_mask_clear_detector_mask: [True],
                            user_file_mask_clear_time_mask : [True],
                            user_file_limits_radius: [range_entry(12, 15)],
-                           user_file_print: ["for changer"]
-                           }
+                           user_file_trans_spec_shift: [-70],
+                           user_file_print: ["for changer"]}
 
         self.assertTrue(len(expected_values) == len(output))
         for key, value in expected_values.items():

@@ -57,7 +57,7 @@ class SANSSliceEvent(DataProcessorAlgorithm):
 
         # Get the correct SANS move strategy from the SANSMoveFactory
         input_workspace = self.getProperty(SANSConstants.input_workspace).value
-        slicer = SANSSliceEventFactory.create_slicer(state, input_workspace)
+        slicer = SliceEventFactory.create_slicer(state, input_workspace)
         slice_info = state.slice
 
         # Perform the slicing

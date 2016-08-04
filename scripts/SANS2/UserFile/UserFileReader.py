@@ -12,10 +12,22 @@ class UserFileReader(object):
     @staticmethod
     def _add_to_output(output, parsed):
         # If the parsed values already exist in the output dict, then we extend the output
-        # else we just add it to the output dict.
+        # else we just add it to the output dict. We have to be careful if we are dealing with a sequence. The scenarios
+        # are:
+        # 1. Exists and is standard value => add it to the existing list
+        # 2. Exists and is a sequence type => extend the existing list
+        # 3. Does not exist and is a standard value => create a list with that value and add it
+        # 4. Does not exist and is a sequence type => add the list itself
         for key, value in parsed.items():
-            if key in output:
+            is_list = isinstance(value, list)
+            is_key_in_output = key in output
+            if is_key_in_output and is_list:
+                print value
+                output[key].extend(value)
+            elif is_key_in_output and not is_list:
                 output[key].append(value)
+            elif not is_key_in_output and is_list:
+                output[key] = value
             else:
                 output[key] = [value]
 

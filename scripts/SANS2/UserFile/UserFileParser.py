@@ -228,7 +228,10 @@ class DetParser(UserFileComponentParser):
             DET/CORR/FRONT/qualifier [parameter]
             DET/CORR/REAR/qualifier [parameter]
               qualifiers are:
-              X , Y, Z, ROT, RADIUS, SIDE
+              X , Y, Z, ROT, RADIUS, SIDE, XTILT, YTILT
+
+            Note that illegally the combination DET/CORR FRONT qualifier is accepted by the old ISIS SANS reduction
+            code, therefore we need to support it here
 
         2) Reduction Mode
             DET/FRONT
@@ -272,10 +275,16 @@ class DetParser(UserFileComponentParser):
         self._translation = "\\s*SIDE\\s*"
         self._translation_pattern = re.compile(start_string + self._translation + space_string +
                                                float_number + end_string)
+        self._x_tilt = "\\s*XTILT\\s*"
+        self._x_tilt_pattern = re.compile(start_string + self._x_tilt + space_string + float_number + end_string)
+        self._y_tilt = "\\s*YTILT\\s*"
+        self._y_tilt_pattern = re.compile(start_string + self._y_tilt + space_string + float_number + end_string)
+
+
         self._radius = "\\s*RADIUS\\s*"
         self._radius_pattern = re.compile(start_string + self._radius + space_string + float_number + end_string)
-        self._correction_lab = "\\s*CORR\\s*/\\s*REAR\\s*/\\s*"
-        self._correction_hab = "\\s*CORR\\s*/\\s*FRONT\\s*/\\s*"
+        self._correction_lab = "\\s*CORR\\s*[/]?\\s*REAR\\s*[/]?\\s*"
+        self._correction_hab = "\\s*CORR\\s*[/]?\\s*FRONT\\s*[/]?\\s*"
         self._correction_LAB_pattern = re.compile(start_string + self._correction_lab)
         self._correction_HAB_pattern = re.compile(start_string + self._correction_hab)
 
@@ -366,6 +375,12 @@ class DetParser(UserFileComponentParser):
         elif self._radius_pattern.match(qualifier):
             value_string = re.sub(self._radius, "", qualifier)
             key = user_file_det_correction_radius
+        elif self._x_tilt_pattern.match(qualifier):
+            value_string = re.sub(self._x_tilt, "", qualifier)
+            key = user_file_det_correction_x_tilt
+        elif self._y_tilt_pattern.match(qualifier):
+            value_string = re.sub(self._y_tilt, "", qualifier)
+            key = user_file_det_correction_y_tilt
         else:
             raise RuntimeError("DetParser: Unknown qualifier encountered: {0}".format(qualifier))
 
@@ -463,6 +478,9 @@ class LimitParser(UserFileComponentParser):
         self._events_time_pattern = re.compile(start_string + self._events_time +
                                                space_string + rebin_string + end_string)
 
+        self._events_time_pattern_simple_pattern = re.compile(start_string + self._events_time +
+                                                              space_string + self._simple_range + end_string)
+
         # Q Limits
         self._q = "\\s*Q\\s*"
         self._q_simple_pattern = re.compile(start_string + self._q + space_string +
@@ -523,7 +541,8 @@ class LimitParser(UserFileComponentParser):
         return does_pattern_match(self._phi_pattern, line)
 
     def _is_event_binning(self, line):
-        return does_pattern_match(self._events_time_pattern, line)
+        return does_pattern_match(self._events_time_pattern, line) or \
+               does_pattern_match(self._events_time_pattern_simple_pattern, line)
 
     def _is_cut_limit(self, line):
         return does_pattern_match(self._radius_cut_pattern, line) or \
@@ -551,9 +570,13 @@ class LimitParser(UserFileComponentParser):
                                                          is_no_mirror=is_no_mirror)}
 
     def _extract_event_binning(self, line):
-        rebin_values_string = re.sub(self._events_time, "", line)
-        rebin_values = extract_float_list(rebin_values_string)
-        return {user_file_limits_events_binning: rebin_values}
+        event_binning = re.sub(self._events_time, "", line)
+        if does_pattern_match(self._events_time_pattern_simple_pattern, line):
+            output = self._extract_simple_pattern(event_binning, user_file_limits_events_binning_range)
+        else:
+            rebin_values = extract_float_list(event_binning)
+            output = {user_file_limits_events_binning: rebin_values}
+        return output
 
     def _extract_cut_limit(self, line):
         if self._radius_cut_pattern.match(line) is not None:
@@ -1965,6 +1988,10 @@ class UserFileParser(object):
     def parse_line(self, line):
         # Clean the line of trailing white space
         line = line.strip()
+
+        # If the line is empty, then ignore it
+        if not line:
+            return {}
 
         # If the entry is a comment, then ignore it
         if line.startswith("!"):

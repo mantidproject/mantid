@@ -10,6 +10,36 @@ from SANS2.Common.SANSConstants import SANSConstants
 from SANS2.Common.SANSFileInformation import find_full_file_path
 
 
+def range_check(start, stop, invalid_dict, start_name, stop_name, general_name=None):
+    """
+    Checks a start container against a stop container
+
+    :param start: The start container
+    :param stop:  the stop container
+    :param invalid_dict: The invalid dict to which we write our error messages
+    :param start_name: The name of the start container
+    :param stop_name: The name of the stop container
+    :param general_name: The general name of this container family
+    :return: A (potentially) updated invalid_dict
+    """
+    if start and not stop or not start and stop:
+        invalid_dict.update({general_name: "You have to either specify " + start_name + " AND " +
+                                               stop_name +" or none"})
+
+    if start and stop:
+        # Start and stop need to have the same length
+        if len(start) != len(stop):
+            invalid_dict.update({general_name: "The entries for start and stop values of the " + general_name +
+                                                     " have differing lengths, namely {0} and {1}".format(start, stop)})
+        # Start values need to be smaller than the stop values
+        for a, b in zip(start, stop):
+            if a > b:
+                invalid_dict.update({general_name: start_name + " has a value of {0} and " + stop_name + " has "
+                                    "value of {1}. The start value should be smaller than the stop value".format(start,
+                                                                                                                 stop)})
+    return invalid_dict
+
+
 # ------------------------------------------------
 # SANSStateData
 # ------------------------------------------------
@@ -52,6 +82,32 @@ class SANSStateMaskDetectorISIS(SANSStateBase, SANSStateMask):
 
     def validate(self):
         is_invalid = {}
+        # --------------------
+        # Vertical strip mask
+        # --------------------
+        range_check(self.range_vertical_strip_start, self.range_horizontal_strip_stop,
+                    is_invalid, "range_vertical_strip_start", "range_horizontal_strip_stop", "range_horizontal_strip")
+
+        # --------------------
+        # Horizontal strip mask
+        # --------------------
+        range_check(self.range_horizontal_strip_start, self.range_horizontal_strip_stop,
+                    is_invalid, "range_horizontal_strip_start", "range_horizontal_strip_stop", "range_horizontal_strip")
+
+        # --------------------
+        # Block mask
+        # --------------------
+        range_check(self.block_horizontal_start, self.block_horizontal_stop,
+                    is_invalid, "block_horizontal_start", "block_horizontal_stop", "block_horizontal")
+        range_check(self.block_vertical_start, self.block_vertical_stop,
+                    is_invalid, "block_vertical_start", "block_vertical_stop", "block_vertical")
+
+        # --------------------
+        # Time/Bin mask
+        # --------------------
+        range_check(self.bin_mask_start, self.bin_mask_stop,
+                    is_invalid, "bin_mask_start", "bin_mask_stop", "bin_mask")
+
         if not self.detector_name:
             is_invalid.update({"detector_name": "The detector name has not been specified."})
         if not self.detector_name_short:
@@ -117,6 +173,9 @@ class SANSStateMaskISIS(SANSStateBase, SANSStateMask):
     def validate(self):
         is_invalid = dict()
 
+        # --------------------
+        # Radius Mask
+        # --------------------
         # Radius mask rule: If there is a minimum, then we also want a maximum
         if self.radius_max and not self.radius_min or not self.radius_max and self.radius_min:
             is_invalid.update({"radius mask": "You have to either specify radius_min AND radius_max or none"})
@@ -125,18 +184,26 @@ class SANSStateMaskISIS(SANSStateBase, SANSStateMask):
         if self.radius_max and self.radius_min and (self.radius_min > self.radius_max):
             is_invalid.update({"radius mask": "radius_min has to be smaller than radius_max."})
 
-        # Bin mask general rule: If there is a start, then there also has to be a stop
-        if self.bin_mask_general_start and not self.bin_mask_general_stop or \
-                        not self.bin_mask_general_start and self.bin_mask_general_stop:
-            is_invalid.update({"bin mask general": "You have to either specify bin_mask_general_start AND"
-                                                   "bin_mask_general_stop or none"})
+        # --------------------
+        # General bin mask
+        # --------------------
+        range_check(self.bin_mask_general_start, self.bin_mask_general_stop,
+                    is_invalid, "bin_mask_general_start", "bin_mask_general_stop", "bin_mask_general")
 
-        # Make sure that the mask files are valid and exist
+        # --------------------
+        # Mask files
+        # --------------------
         if self.mask_files:
             for mask_file in self.mask_files:
                 if not find_full_file_path(mask_file):
                     is_invalid.update({"mask_files": "The mask file {0} cannot be found. Make sure it is "
                                                      "visible to the Mantid path.".format(mask_file)})
+
+        # --------------------
+        # Spectrum Range
+        # --------------------
+        range_check(self.spectrum_range_start, self.spectrum_range_start,
+                    is_invalid, "spectrum_range_start", "spectrum_range_start", "spectrum_range")
 
         if is_invalid:
             raise ValueError("SANSStateMask: The provided inputs are illegal. "

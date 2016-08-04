@@ -42,8 +42,14 @@ class SANSLoad(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty(name='BeamCoordinates', values=[]),
                              doc='The coordinates which is used to position the instrument component(s). '
                                  'If the workspaces should be loaded with an initial move, then this '
-                                 'needs to be specified')
+                                 'needs to be specified.')
+        # Components which are to be moved
+        self.declareProperty('Component', '', direction=Direction.Input,
+                             doc='Component that should be moved. '
+                                 'If the workspaces should be loaded with an initial move, then this '
+                                 'needs to be specified.')
         self.setPropertySettings("BeamCoordinates", enabled_condition)
+        self.setPropertySettings("Component", enabled_condition)
 
         # ------------
         #  OUTPUT
@@ -213,18 +219,32 @@ class SANSLoad(DataProcessorAlgorithm):
         self.setProperty(number_of_workspaces_name, counter)
 
     def _perform_initial_move(self, workspaces, state):
-        beam_coordinates = self.getProperty("BeamCoordinates").value
         move_name = "SANSMove"
         state_dict = state.property_manager
         move_options = {"SANSState": state_dict,
-                        "BeamCoordinates": beam_coordinates,
                         "MoveType": "InitialMove"}
+
+
+
+        # If beam centre was specified then use it
+        beam_coordinates = self.getProperty("BeamCoordinates").value
+        if beam_coordinates:
+            move_options.update({"BeamCoordinates": beam_coordinates})
+
+        # If component was specified then use it
+        component = self.getProperty("Component").value
+        if beam_coordinates:
+            move_options.update({"Component": component})
+
+
+
         move_alg = create_unmanaged_algorithm(move_name, **move_options)
 
-        for workspace in workspaces:
-            move_alg.setProperty("Workspace", workspace)
-            move_alg.execute()
-
+        # The workspaces are stored in a dict: workspace_names (sample_scatter, etc) : ListOfWorkspaces
+        for key, workspace_list in workspaces.items():
+            for workspace in workspace_list:
+                move_alg.setProperty("Workspace", workspace)
+                move_alg.execute()
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSLoad)
