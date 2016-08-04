@@ -16,7 +16,7 @@ class ToscaInstrument(Instrument):
         @param frequencies:   DFT frequencies for which resolution function should be calculated (frequencies in cm-1)
         Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
         """
-        return frequencies * frequencies * Constants.TOSCA_constant
+        return  np.multiply(np.multiply(frequencies, frequencies), Constants.TOSCA_constant)
 
 
     def convolve_with_resolution_function(self, frequencies=None, s_dft=None, points_per_peak=None, start=None):
