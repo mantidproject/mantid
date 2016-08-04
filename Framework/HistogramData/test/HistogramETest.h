@@ -30,6 +30,7 @@ public:
 #endif
     TS_ASSERT_THROWS_NOTHING(
         dynamic_cast<detail::FixedLengthVector<HistogramE> &>(e));
+    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Scalable<HistogramE> &>(e));
 #if __clang__
 #pragma clang diagnostic pop
 #endif
