@@ -174,13 +174,11 @@ public:
 
     // Test output values
     auto heightY = outWs->readY(0);
-    auto heightTest = std::vector<double>();
-    tableWs->getColumn("f1.f1.f0.Height")->numeric_fill(heightTest);
+    auto heightTest = tableWs->getColumn("f1.f1.f0.Height")->numeric_fill<>();
     TS_ASSERT_EQUALS(heightY, heightTest);
 
     auto ampY = outWs->readY(1);
-    auto ampTest = std::vector<double>();
-    tableWs->getColumn("f1.f1.f0.Amplitude")->numeric_fill(ampTest);
+    auto ampTest = tableWs->getColumn("f1.f1.f0.Amplitude")->numeric_fill<>();
     TS_ASSERT_EQUALS(ampY, ampTest);
 
     // Test axis units
@@ -223,23 +221,19 @@ public:
 
     // Test output values
     auto heightY = outWs->readY(0);
-    auto heightTest = std::vector<double>();
-    tableWs->getColumn("f1.f1.f0.Height")->numeric_fill(heightTest);
+    auto heightTest = tableWs->getColumn("f1.f1.f0.Height")->numeric_fill<>();
     TS_ASSERT_EQUALS(heightY, heightTest);
 
     auto ampY = outWs->readY(1);
-    auto ampTest = std::vector<double>();
-    tableWs->getColumn("f1.f1.f0.Amplitude")->numeric_fill(ampTest);
+    auto ampTest = tableWs->getColumn("f1.f1.f0.Amplitude")->numeric_fill<>();
     TS_ASSERT_EQUALS(ampY, ampTest);
 
     auto height1Y = outWs->readY(2);
-    auto height1Test = std::vector<double>();
-    tableWs->getColumn("f1.f1.f1.Height")->numeric_fill(height1Test);
+    auto height1Test = tableWs->getColumn("f1.f1.f1.Height")->numeric_fill<>();
     TS_ASSERT_EQUALS(height1Y, height1Test);
 
     auto height2Y = outWs->readY(3);
-    auto height2Test = std::vector<double>();
-    tableWs->getColumn("f1.f1.f2.Height")->numeric_fill(height2Test);
+    auto height2Test = tableWs->getColumn("f1.f1.f2.Height")->numeric_fill<>();
     TS_ASSERT_EQUALS(height2Y, height2Test);
 
     // Test axis units

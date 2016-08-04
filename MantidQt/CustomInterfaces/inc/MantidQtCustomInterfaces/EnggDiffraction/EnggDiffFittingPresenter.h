@@ -4,9 +4,9 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffFittingPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffFittingView.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
 
 #include <string>
 #include <vector>
@@ -106,7 +106,8 @@ public:
 
   void setBankItems();
 
-  void setRunNoItems(std::vector<std::string> runNumVector, bool multiRun);
+  void setRunNoItems(const std::vector<std::string> &runNumVector,
+                     bool multiRun);
 
   void setDefaultBank(const std::vector<std::string> &splittedBaseName,
                       const std::string &selectedFile);
@@ -143,6 +144,16 @@ private:
 
   void enableMultiRun(std::string firstRun, std::string lastRun,
                       std::vector<std::string> &fittingRunNoDirVec);
+
+  void browsePeaksToFit();
+
+  void addPeakToList();
+
+  void savePeakList();
+
+  std::string readPeaksFile(std::string fileDir);
+
+  void fittingWriteFile(const std::string &fileDir);
 
   // whether to use AlignDetectors to convert units
   static const bool g_useAlignDetectors;

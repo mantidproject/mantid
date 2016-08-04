@@ -5,6 +5,7 @@
 
 #include "MantidGeometry/Instrument/SampleEnvironmentSpecParser.h"
 #include "MantidGeometry/Instrument/Container.h"
+#include "MantidKernel/Material.h"
 
 #include "Poco/AutoPtr.h"
 #include "Poco/SAX/InputSource.h"

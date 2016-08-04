@@ -156,8 +156,17 @@ bool MantidEVWorker::loadAndConvertToMD(
       IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
       alg->setProperty("Filename", file_name);
       alg->setProperty("OutputWorkspace", ev_ws_name);
-      alg->setProperty("Precount", true);
+      alg->setProperty("FilterByTofMin", 1000.0);
+      alg->setProperty("FilterByTofMax", 16666.0);
       alg->setProperty("LoadMonitors", true);
+
+      if (!alg->execute())
+        return false;
+
+      alg = AlgorithmManager::Instance().create("FilterBadPulses");
+      alg->setProperty("InputWorkspace", ev_ws_name);
+      alg->setProperty("OutputWorkspace", ev_ws_name);
+      alg->setProperty("LowerCutoff", 25.0);
 
       if (!alg->execute())
         return false;
