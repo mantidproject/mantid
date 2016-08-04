@@ -127,10 +127,9 @@ class CalculateS(IOmodule):
             for overtone in range(Constants.overtones_num):
                 # COMMENT: at the moment only valid for Gamma point calculations
 
-                _value_dft.fill(0.0)
                 # TODO: calculation for the whole FBZ
                 for k in range(_num_k):
-
+                    _value_dft.fill(0.0)
                     # correction for acoustic modes at Gamma point
                     if np.linalg.norm(_abins_data_extracted["k_points_data"]["k_vectors"][k]) < Constants.small_k: start = 3
                     else: start = 0
@@ -140,6 +139,8 @@ class CalculateS(IOmodule):
                     # comment:  (_extracted_q_data[k][start:] * _dw[atom]) are equivalent to DW from  "Vibrational spectroscopy with neutrons...."
 
                     _value_dft[start:] = np.power(np.multiply(_extracted_q_data[k][start:], _msd[atom]),  overtone) * np.exp( -np.multiply(_extracted_q_data[k][start:], _dw[atom]))
+
+                    print "_value_dft=", _value_dft
 
                     # convolve value with instrumental resolution; resulting spectrum has broadened peaks with Gaussian-like shape
                     np.add(instrument.convolve_with_resolution_function(frequencies= np.multiply(_k_points_data["frequencies"][k], 1.0 / Constants.cm1_2_hartree) ,
@@ -184,7 +185,7 @@ class CalculateS(IOmodule):
         #
 
         _s_data = SData(temperature=self._temperature, sample_form=self._sample_form)
-        _s_data.set(items=dict(atoms=_items, frequencies=_frequencies))
+        _s_data.set(items=dict(atoms_data=_items, convoluted_frequencies=_frequencies))
 
         return _s_data
 
@@ -212,22 +213,12 @@ class CalculateS(IOmodule):
         self.addAttribute("sample_form", self._sample_form)
         self.addAttribute("filename", self._input_filename)
         extracted_data = data.extract()
-        self.addStructuredDataset("atoms_data", extracted_data["atoms"])
-        self.addNumpyDataset("convoluted_frequencies", extracted_data["frequencies"])
+        self.addStructuredDataset("atoms_data", extracted_data["atoms_data"])
+        self.addNumpyDataset("convoluted_frequencies", extracted_data["convoluted_frequencies"])
 
         self.save()
 
-        dim = extracted_data["convoluted_frequencies"].shape[0]
-        atoms = extracted_data["atoms"].shape[0]
-        _total_s_data = {"frequencies": extracted_data["convoluted_frequencies"],
-                         "total_s": np.zeros(dim, dtype=Constants.float_type)}
-
-        for atom in range(atoms):
-            np.add(total_s_data["total_s"],
-                   extracted_data["atoms"][atom][:, Constants.overtones_num],
-                   total_s_data["total_s"])
-
-        return data, _total_s_data
+        return data
 
 
 
@@ -243,19 +234,8 @@ class CalculateS(IOmodule):
                           list_of_attributes=["temperature", "sample_form", "filename"])
         _s_data = SData(temperature=_data["attributes"]["temperature"],
                         sample_form=_data["attributes"]["sample_form"])
-        _s_data.set(items=dict(atoms=_data["structured_datasets"]["atoms_data"],
-                               frequencies=_data["datasets"]["convoluted_frequencies"]))
+        _s_data.set(items=dict(atoms_data=_data["structured_datasets"]["atoms_data"],
+                               convoluted_frequencies=_data["datasets"]["convoluted_frequencies"]))
 
-        dim = _data["datasets"]["convoluted_frequencies"].shape[0]
-        atoms = _data["structured_datasets"]["atoms"].shape[0]
-
-        _total_s_data = {"frequencies": _data["datasets"]["convoluted_frequencies"],
-                         "total_s": np.zeros(dim, dtype=Constants.float_type)}
-
-        for atom in range(atoms):
-            np.add(total_s_data["total_s"],
-                   _data["structured_datasets"]["atoms_data"][atom][:, Constants.overtones_num],
-                   total_s_data["total_s"])
-
-        return _s_data, _total_s_data
+        return _s_data
 
