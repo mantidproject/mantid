@@ -47,6 +47,9 @@ public:
     return derived;
   }
 
+  /// Subtracts offset from each element in the container.
+  T &operator-=(const double offset) & { return (*this) += -offset; }
+
 protected:
   ~Offsetable() = default;
 };
@@ -56,6 +59,13 @@ template <class T, class = typename std::enable_if<
                        std::is_base_of<Offsetable<T>, T>::value>::type>
 inline T operator+(T lhs, const double rhs) {
   return lhs += rhs;
+}
+
+/// Subtracts rhs from each element in lhs.
+template <class T, class = typename std::enable_if<
+                       std::is_base_of<Offsetable<T>, T>::value>::type>
+inline T operator-(T lhs, const double rhs) {
+  return lhs += -rhs;
 }
 
 } // namespace detail
