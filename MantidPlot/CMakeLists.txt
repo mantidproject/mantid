@@ -134,6 +134,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/TSVSerialiser.cpp
                    src/UserFunction.cpp
                    src/VectorCurve.cpp
+                   src/WindowFactory.cpp
                    src/origin/OPJFile.cpp
                    src/plot2D/ImageSymbol.cpp
                    src/analysis/fft2D.cpp
@@ -335,6 +336,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/TSVSerialiser.h
                    src/UserFunction.h
                    src/VectorCurve.h
+                   src/WindowFactory.h
                    src/analysis/fft2D.h
                    src/origin/OPJFile.h
                    src/plot2D/ImageSymbol.h

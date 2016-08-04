@@ -2,6 +2,7 @@
 // Includes
 //-------------------------------------------
 #include "ScriptingWindow.h"
+#include "ApplicationWindow.h"
 #include "MultiTabScriptInterpreter.h"
 #include "ScriptingEnv.h"
 #include "ScriptFileInterpreter.h"
@@ -9,9 +10,9 @@
 #include "pixmaps.h"
 
 // Mantid
+#include "Mantid/IProjectSerialisable.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
-#include "ApplicationWindow.h"
 
 // MantidQt
 #include "MantidQtAPI/HelpWindow.h"
@@ -33,6 +34,8 @@
 #include <QTextStream>
 #include <QList>
 #include <QUrl>
+
+using namespace Mantid;
 
 namespace {
 /// static logger
@@ -430,11 +433,13 @@ std::string ScriptingWindow::saveToProject(ApplicationWindow *app) {
 void ScriptingWindow::loadFromProject(const std::string &lines,
                                       ApplicationWindow *app,
                                       const int fileVersion) {
-  Q_UNUSED(app);
   Q_UNUSED(fileVersion);
 
   TSVSerialiser sTSV(lines);
   QStringList files;
+
+  setWindowTitle("MantidPlot: " + app->scriptingEnv()->languageName() +
+                 " Window");
 
   auto scriptNames = sTSV.values("ScriptNames");
 

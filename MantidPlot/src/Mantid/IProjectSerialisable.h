@@ -1,7 +1,9 @@
 #ifndef MANTID_API_IPROJECTSERIALISABLE_H_
 #define MANTID_API_IPROJECTSERIALISABLE_H_
 
+#include "MantidKernel/System.h"
 #include <string>
+#include <stdexcept>
 
 class ApplicationWindow;
 
@@ -40,9 +42,16 @@ public:
   /// Virtual destructor (required by linker on some versions of OS X/Intel
   /// compiler)
   virtual ~IProjectSerialisable() {}
-  /// Loads the given lines from the project file and applies them.
-  virtual void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                               const int fileVersion) = 0;
+
+  static IProjectSerialisable *loadFromProject(const std::string &lines,
+                                               ApplicationWindow *app,
+                                               const int fileVersion) {
+    UNUSED_ARG(lines);
+    UNUSED_ARG(app);
+    UNUSED_ARG(fileVersion);
+    throw std::runtime_error("Not implemented");
+  }
+
   /// Serialises to a string that can be saved to a project file.
   virtual std::string saveToProject(ApplicationWindow *app) = 0;
 };

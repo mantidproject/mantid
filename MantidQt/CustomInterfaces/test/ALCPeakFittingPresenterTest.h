@@ -14,6 +14,8 @@
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h"
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h"
 
+#include <qwt_data.h>
+
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;

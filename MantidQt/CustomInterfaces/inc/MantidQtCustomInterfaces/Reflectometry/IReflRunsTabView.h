@@ -1,28 +1,30 @@
-#ifndef MANTID_CUSTOMINTERFACES_REFLMAINVIEW_H
-#define MANTID_CUSTOMINTERFACES_REFLMAINVIEW_H
-
-#include "MantidKernel/System.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
+#ifndef MANTID_CUSTOMINTERFACES_IREFLRUNSTABVIEW_H
+#define MANTID_CUSTOMINTERFACES_IREFLRUNSTABVIEW_H
 
 #include <set>
 #include <string>
+#include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
 
 namespace MantidWidgets {
 class DataProcessorCommand;
 }
+namespace API {
+class AlgorithmRunner;
+}
 
 namespace CustomInterfaces {
 
 using MantidWidgets::DataProcessorCommand;
+using API::AlgorithmRunner;
+class IReflRunsTabPresenter;
+class ReflSearchModel;
 
-/** @class ReflMainView
+/** @class IReflRunsTabView
 
-ReflMainView is the base view class for the Reflectometry Interface. It contains
-no QT specific functionality as that should be handled by a subclass.
+IReflRunsTabView is the base view class for the Reflectometry Interface. It
+contains no QT specific functionality as that should be handled by a subclass.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -46,21 +48,13 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport ReflMainView {
+class DLLExport IReflRunsTabView {
 public:
-  ReflMainView(){};
-  virtual ~ReflMainView(){};
+  IReflRunsTabView(){};
+  virtual ~IReflRunsTabView(){};
 
   // Connect the model
-  virtual void showSearch(ReflSearchModel_sptr model) = 0;
-
-  // Dialog/Prompt methods
-  virtual std::string askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue) = 0;
-  virtual void giveUserInfo(std::string prompt, std::string title) = 0;
-  virtual void giveUserCritical(std::string prompt, std::string title) = 0;
-  virtual void showAlgorithmDialog(const std::string &algorithm) = 0;
+  virtual void showSearch(boost::shared_ptr<ReflSearchModel> model) = 0;
 
   // Setter methods
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
@@ -78,10 +72,10 @@ public:
   virtual std::string getSearchString() const = 0;
   virtual std::string getTransferMethod() const = 0;
 
-  virtual boost::shared_ptr<IReflPresenter> getPresenter() const = 0;
+  virtual IReflRunsTabPresenter *getPresenter() const = 0;
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const = 0;
 };
 }
 }
-#endif
+#endif /* MANTID_CUSTOMINTERFACES_IREFLRUNSTABVIEW_H */

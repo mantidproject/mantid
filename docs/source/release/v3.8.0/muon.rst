@@ -33,6 +33,8 @@ Algorithms
 
 - :ref:`PlotAsymmetryByLogValue <algm-PlotAsymmetryByLogValue>`: If *run_start* or *run_end* are chosen as the log to use, the values are taken as seconds relative to the start time of the first run.
 
+- :ref:`LoadMuonNexus <algm-LoadMuonNexus>`: Fixed loading of certain v1 NeXus files converted from other formats that did not contain number of good frames.
+
 Fit Functions
 -------------
 
