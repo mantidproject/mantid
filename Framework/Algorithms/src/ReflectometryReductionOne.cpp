@@ -139,6 +139,13 @@ void ReflectometryReductionOne::init() {
                   "ranges that correspond to the direct beam in multi-detector "
                   "mode.");
 
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "DetectorEfficiencyCorrection", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "Applies flood correction. Must consist of either a single "
+                  "single data point, or a list of spectra with a single "
+                  "value.");
+
   this->initIndexInputs();
   this->initWavelengthInputs();
 
