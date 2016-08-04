@@ -50,9 +50,11 @@ Histogram operator/(Histogram histogram, const double factor) {
 }
 
 namespace {
-void checkSameXMode(const Histogram &hist1, const Histogram &hist2) {
+void checkSameXYMode(const Histogram &hist1, const Histogram &hist2) {
   if (hist1.xMode() != hist2.xMode())
     throw std::runtime_error("Invalid operation: Histogram::XModes must match");
+  if (hist1.yMode() != hist2.yMode())
+    throw std::runtime_error("Invalid operation: Histogram::YModes must match");
 }
 
 void checkSameX(const Histogram &hist1, const Histogram &hist2) {
@@ -64,7 +66,7 @@ void checkSameX(const Histogram &hist1, const Histogram &hist2) {
 
 /// Adds data in other Histogram to this Histogram, propagating uncertainties.
 Histogram &operator+=(Histogram &histogram, const Histogram &other) {
-  checkSameXMode(histogram, other);
+  checkSameXYMode(histogram, other);
   checkSameX(histogram, other);
   histogram.mutableY() += other.y();
   std::transform(histogram.e().cbegin(), histogram.e().cend(),
@@ -77,7 +79,7 @@ Histogram &operator+=(Histogram &histogram, const Histogram &other) {
 /// Subtracts data in other Histogram from this Histogram, propagating
 /// uncertainties.
 Histogram &operator-=(Histogram &histogram, const Histogram &other) {
-  checkSameXMode(histogram, other);
+  checkSameXYMode(histogram, other);
   checkSameX(histogram, other);
   histogram.mutableY() -= other.y();
   std::transform(histogram.e().cbegin(), histogram.e().cend(),

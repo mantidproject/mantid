@@ -104,6 +104,12 @@ public:
     TS_ASSERT_THROWS(hist1 + hist2, std::runtime_error);
   }
 
+  void test_plus_histogram_fail_yMode() {
+    const Histogram hist1(BinEdges{1, 2, 3}, Counts{4, 9});
+    const Histogram hist2(BinEdges{1, 2, 3}, Frequencies{4, 9});
+    TS_ASSERT_THROWS(hist1 + hist2, std::runtime_error);
+  }
+
   void test_plus_histogram_fail_x_length_mismatch() {
     const Histogram hist1(BinEdges{1, 2, 3}, Counts{4, 9});
     const Histogram hist2(BinEdges{1, 2}, Counts{1});
@@ -142,6 +148,12 @@ public:
   void test_minus_histogram_fail_xMode() {
     const Histogram hist1(BinEdges{1, 2, 3}, Counts{4, 9});
     const Histogram hist2(Points{1, 2, 3}, Counts{1, 2, 3});
+    TS_ASSERT_THROWS(hist1 - hist2, std::runtime_error);
+  }
+
+  void test_minus_histogram_fail_yMode() {
+    const Histogram hist1(BinEdges{1, 2, 3}, Counts{4, 9});
+    const Histogram hist2(BinEdges{1, 2, 3}, Frequencies{4, 9});
     TS_ASSERT_THROWS(hist1 - hist2, std::runtime_error);
   }
 
