@@ -44,6 +44,15 @@ operator*(const double factor, Histogram histogram);
 MANTID_HISTOGRAMDATA_DLL Histogram
 operator/(Histogram histogram, const double factor);
 
+MANTID_HISTOGRAMDATA_DLL Histogram &operator+=(Histogram &histogram,
+                                               const Histogram &other);
+MANTID_HISTOGRAMDATA_DLL Histogram &operator-=(Histogram &histogram,
+                                               const Histogram &other);
+MANTID_HISTOGRAMDATA_DLL Histogram
+operator+(Histogram histogram, const Histogram &other);
+MANTID_HISTOGRAMDATA_DLL Histogram
+operator-(Histogram histogram, const Histogram &other);
+
 } // namespace HistogramData
 } // namespace Mantid
 

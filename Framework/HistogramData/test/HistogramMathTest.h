@@ -74,6 +74,88 @@ public:
     TS_ASSERT_EQUALS(result.e()[0], 4.0);
     TS_ASSERT_EQUALS(result.e()[1], 6.0);
   }
+
+  void test_plus_histogram() {
+    const Histogram hist1(BinEdges{1, 2, 3}, Counts{4, 9});
+    const Histogram hist2(BinEdges{1, 2, 3}, Counts{1, 2});
+    auto hist = hist1 + hist2;
+    TS_ASSERT_EQUALS(hist.xMode(), hist1.xMode());
+    TS_ASSERT_EQUALS(hist.sharedX(), hist1.sharedX());
+    TS_ASSERT_EQUALS(hist.y()[0], 5.0);
+    TS_ASSERT_EQUALS(hist.y()[1], 11.0);
+    TS_ASSERT_DELTA(hist.e()[0], sqrt(5.0), 1e-14);
+    TS_ASSERT_DELTA(hist.e()[1], sqrt(11.0), 1e-14);
+  }
+
+  void test_plus_histogram_self() {
+    BinEdges edges{1, 2, 3};
+    Histogram hist(edges, Counts{4, 9});
+    hist += hist;
+    TS_ASSERT_EQUALS(hist.sharedX(), edges.cowData());
+    TS_ASSERT_EQUALS(hist.y()[0], 8.0);
+    TS_ASSERT_EQUALS(hist.y()[1], 18.0);
+    TS_ASSERT_DELTA(hist.e()[0], sqrt(8.0), 1e-14);
+    TS_ASSERT_DELTA(hist.e()[1], sqrt(18.0), 1e-14);
+  }
+
+  void test_plus_histogram_fail_xMode() {
+    const Histogram hist1(BinEdges{1, 2, 3}, Counts{4, 9});
+    const Histogram hist2(Points{1, 2, 3}, Counts{1, 2, 3});
+    TS_ASSERT_THROWS(hist1 + hist2, std::runtime_error);
+  }
+
+  void test_plus_histogram_fail_x_length_mismatch() {
+    const Histogram hist1(BinEdges{1, 2, 3}, Counts{4, 9});
+    const Histogram hist2(BinEdges{1, 2}, Counts{1});
+    TS_ASSERT_THROWS(hist1 + hist2, std::runtime_error);
+  }
+
+  void test_plus_histogram_fail_x_value_mismatch() {
+    const Histogram hist1(BinEdges{1, 2.0, 3}, Counts{4, 9});
+    const Histogram hist2(BinEdges{1, 2.1, 3}, Counts{1, 2});
+    TS_ASSERT_THROWS(hist1 + hist2, std::runtime_error);
+  }
+
+  void test_minus_histogram() {
+    const Histogram hist1(BinEdges{1, 2, 3}, Counts{4, 9});
+    const Histogram hist2(BinEdges{1, 2, 3}, Counts{1, 2});
+    auto hist = hist1 - hist2;
+    TS_ASSERT_EQUALS(hist.xMode(), hist1.xMode());
+    TS_ASSERT_EQUALS(hist.sharedX(), hist1.sharedX());
+    TS_ASSERT_EQUALS(hist.y()[0], 3.0);
+    TS_ASSERT_EQUALS(hist.y()[1], 7.0);
+    TS_ASSERT_DELTA(hist.e()[0], sqrt(5.0), 1e-14);
+    TS_ASSERT_DELTA(hist.e()[1], sqrt(11.0), 1e-14);
+  }
+
+  void test_minus_histogram_self() {
+    BinEdges edges{1, 2, 3};
+    Histogram hist(edges, Counts{4, 9});
+    hist -= hist;
+    TS_ASSERT_EQUALS(hist.sharedX(), edges.cowData());
+    TS_ASSERT_EQUALS(hist.y()[0], 0.0);
+    TS_ASSERT_EQUALS(hist.y()[1], 0.0);
+    TS_ASSERT_DELTA(hist.e()[0], sqrt(8.0), 1e-14);
+    TS_ASSERT_DELTA(hist.e()[1], sqrt(18.0), 1e-14);
+  }
+
+  void test_minus_histogram_fail_xMode() {
+    const Histogram hist1(BinEdges{1, 2, 3}, Counts{4, 9});
+    const Histogram hist2(Points{1, 2, 3}, Counts{1, 2, 3});
+    TS_ASSERT_THROWS(hist1 - hist2, std::runtime_error);
+  }
+
+  void test_minus_histogram_fail_x_length_mismatch() {
+    const Histogram hist1(BinEdges{1, 2, 3}, Counts{4, 9});
+    const Histogram hist2(BinEdges{1, 2}, Counts{1});
+    TS_ASSERT_THROWS(hist1 - hist2, std::runtime_error);
+  }
+
+  void test_minus_histogram_fail_x_value_mismatch() {
+    const Histogram hist1(BinEdges{1, 2.0, 3}, Counts{4, 9});
+    const Histogram hist2(BinEdges{1, 2.1, 3}, Counts{1, 2});
+    TS_ASSERT_THROWS(hist1 - hist2, std::runtime_error);
+  }
 };
 
 #endif /* MANTID_HISTOGRAMDATA_HISTOGRAMMATHTEST_H_ */
