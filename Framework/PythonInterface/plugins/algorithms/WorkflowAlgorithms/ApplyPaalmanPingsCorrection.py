@@ -19,7 +19,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
     _scaled_container = None
     _shift_can = False
     _shifted_container = None
-    _can_shift_amount = 0.0
+    _can_shift_factor = 0.0
     _can_ws_wavelength = None
     _sample_ws_wavelength = None
 
@@ -47,7 +47,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='CanScaleFactor', defaultValue=1.0,
                              doc='Factor to scale the can data')
 
-        self.declareProperty(name='CanShiftAmount', defaultValue=0.0,
+        self.declareProperty(name='CanShiftFactor', defaultValue=0.0,
                              doc='Amount by which to shift the container data')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
@@ -88,9 +88,9 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 prog_container.report('Shifting can')
                 ScaleX(InputWorkspace=self._can_ws_wavelength,
                        OutputWorkspace=self._shifted_container,
-                       Factor=self._can_shift_amount,
+                       Factor=self._can_shift_factor,
                        Operation='Add')
-                logger.information('Container data shifted by %f' % self._can_shift_amount)
+                logger.information('Container data shifted by %f' % self._can_shift_factor)
             else:
                 prog_container.report('Cloning Workspace')
                 CloneWorkspace(InputWorkspace=self._can_ws_wavelength,
@@ -162,7 +162,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             AddSampleLog(Workspace=self._output_ws_name,
                          LogName='container_shift',
                          LogType='Number',
-                         LogText=str(self._can_shift_amount))
+                         LogText=str(self._can_shift_factor))
 
         # Record the type of corrections applied
         prog_wrkflow.report('Adding correction type')
@@ -257,8 +257,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         self._can_scale_factor = self.getProperty('CanScaleFactor').value
         self._scale_can = self._can_scale_factor != 1.0
 
-        self._can_shift_amount = self.getProperty('CanShiftAmount').value
-        self._shift_can = self._can_shift_amount != 0.0
+        self._can_shift_factor = self.getProperty('CanShiftFactor').value
+        self._shift_can = self._can_shift_factor != 0.0
 
         # This temporary WS is needed because ConvertUnits does not like named WS in a Group
         self._corrections = '__converted_corrections'
