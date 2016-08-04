@@ -20,7 +20,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
     _shift_can = False
     _shifted_container = None
     _can_shift_factor = 0.0
-    _can_ws_wavelength = None
+    _scaled_container_wavelength = None
     _sample_ws_wavelength = None
 
 
@@ -75,26 +75,26 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                                        "Wavelength")
 
         if self._use_can:
-            # Units should be wavelength
-            can_unit = mtd[self._can_ws_name].getAxis(0).getUnit().unitID()
-            self._convert_units_wavelength(can_unit,
-                                           self._can_ws_name,
-                                           self._can_ws_wavelength,
-                                           "Wavelength")
+
 
             # Appy container shift if needed
             if self._shift_can:
                 # Use temp workspace so we don't modify data
                 prog_container.report('Shifting can')
-                ScaleX(InputWorkspace=self._can_ws_wavelength,
+                ScaleX(InputWorkspace=self._can_ws_name,
                        OutputWorkspace=self._shifted_container,
                        Factor=self._can_shift_factor,
                        Operation='Add')
                 logger.information('Container data shifted by %f' % self._can_shift_factor)
             else:
                 prog_container.report('Cloning Workspace')
-                CloneWorkspace(InputWorkspace=self._can_ws_wavelength,
+                CloneWorkspace(InputWorkspace=self._can_ws_name,
                                OutputWorkspace=self._shifted_container)
+
+
+
+
+
 
         # Apply container scale factor if needed
             if self._scale_can:
@@ -110,7 +110,12 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 CloneWorkspace(InputWorkspace=self._shifted_container,
                                OutputWorkspace=self._scaled_container)
 
-
+            # Units should be wavelength
+            can_unit = mtd[self._scaled_container].getAxis(0).getUnit().unitID()
+            self._convert_units_wavelength(can_unit,
+                                           self._scaled_container,
+                                           self._scaled_container_wavelength,
+                                           "Wavelength")
 
         prog_corr = Progress(self, start=0.2, end=0.6, nreports=2)
         if self._use_corrections:
@@ -139,8 +144,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             self._subtract()
             correction_type = 'can_subtraction'
             # Add container filename to log values
-            can_cut = self._can_ws_wavelength.index('_')
-            can_base = self._can_ws_wavelength[:can_cut]
+            can_cut = self._can_ws_name.index('_')
+            can_base = self._can_ws_name[:can_cut]
             prog_corr.report('Adding container filename')
             AddSampleLog(Workspace=self._output_ws_name,
                          LogName='container_filename',
@@ -197,8 +202,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             DeleteWorkspace(self._scaled_container)
         if self._shifted_container in mtd:
             DeleteWorkspace(self._shifted_container)
-        if self._can_ws_wavelength in mtd:
-            DeleteWorkspace(self._can_ws_wavelength)
+        if self._scaled_container_wavelength in mtd:
+            DeleteWorkspace(self._scaled_container_wavelength)
         if self._sample_ws_wavelength in mtd:
             DeleteWorkspace(self._sample_ws_wavelength)
         prog_wrkflow.report('Algorithm Complete')
@@ -264,7 +269,7 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         self._corrections = '__converted_corrections'
         self._scaled_container = '__scaled_container'
         self._shifted_container = '_shifted_container'
-        self._can_ws_wavelength = '_can_ws_wavelength'
+        self._scaled_container_wavelength = '_scaled_container_wavelength'
         self._sample_ws_wavelength = '_sample_ws_wavelength'
 
 
@@ -342,19 +347,19 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         """
 
         logger.information('Rebining container to ensure Minus')
-        RebinToWorkspace(WorkspaceToRebin=self._can_ws_wavelength,
+        RebinToWorkspace(WorkspaceToRebin=self._can_ws_name,
                          WorkspaceToMatch=self._sample_ws_wavelength,
-                         OutputWorkspace=self._can_ws_wavelength)
+                         OutputWorkspace=self._can_ws_name)
 
         logger.information('Using simple container subtraction')
 
         # Rebin can
-        RebinToWorkspace(WorkspaceToRebin=self._scaled_container,
+        RebinToWorkspace(WorkspaceToRebin=self._scaled_container_wavelength,
                          WorkspaceToMatch=self._sample_ws_wavelength,
-                         OutputWorkspace=self._scaled_container)
+                         OutputWorkspace=self._scaled_container_wavelength)
 
         Minus(LHSWorkspace=self._sample_ws_wavelength,
-              RHSWorkspace=self._scaled_container,
+              RHSWorkspace=self._scaled_container_wavelength,
               OutputWorkspace=self._output_ws_name)
 
 
@@ -381,12 +386,12 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         logger.information('Correcting sample and container')
         corrected_can_ws = '__corrected_can'
 
-        RebinToWorkspace(WorkspaceToRebin=self._scaled_container,
+        RebinToWorkspace(WorkspaceToRebin=self._scaled_container_wavelength,
                          WorkspaceToMatch=self._corrections + '_acc',
-                         OutputWorkspace=self._scaled_container)
+                         OutputWorkspace=self._scaled_container_wavelength)
 
         # Acc
-        Divide(LHSWorkspace=self._scaled_container,
+        Divide(LHSWorkspace=self._scaled_container_wavelength,
                RHSWorkspace=self._corrections + '_acc',
                OutputWorkspace=corrected_can_ws)
 
