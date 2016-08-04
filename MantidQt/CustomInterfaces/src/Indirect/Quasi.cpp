@@ -418,14 +418,13 @@ void Quasi::saveClicked() {
     "defaultsave.directory"));
   auto fitWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
   QString QfitWS = QString::fromStdString(fitWS);
-  const auto fitPath = saveDirectory.append(QfitWS).append(".nxs");
+  const auto fitPath = saveDirectory+QfitWS+".nxs";
   addSaveWorkspaceToQueue(QfitWS, fitPath);
 
-  QString saveDirectoryr = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString(
-    "defaultsave.directory"));
+
   auto resultWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
   QString QresultWS = QString::fromStdString(resultWS);
-  const auto resultPath = saveDirectory.append(QresultWS).append(".nxs");
+  const auto resultPath = saveDirectory+QresultWS+".nxs";
   addSaveWorkspaceToQueue(QresultWS, resultPath);
   m_batchAlgoRunner->executeBatchAsync();
 }
