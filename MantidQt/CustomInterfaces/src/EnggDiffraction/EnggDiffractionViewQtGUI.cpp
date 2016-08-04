@@ -615,7 +615,8 @@ void EnggDiffractionViewQtGUI::newCalibLoaded(const std::string &vanadiumNo,
   }
 }
 
-void EnggDiffractionViewQtGUI::enableCalibrateFocusFitUserActions(bool newState) {
+void EnggDiffractionViewQtGUI::enableCalibrateFocusFitUserActions(
+    bool newState) {
   // calibrate
   m_uiTabCalib.groupBox_make_new_calib->setEnabled(newState);
   m_uiTabCalib.groupBox_current_calib->setEnabled(newState);
@@ -630,7 +631,7 @@ void EnggDiffractionViewQtGUI::enableCalibrateFocusFitUserActions(bool newState)
 
   m_uiTabFocus.groupBox_cropped->setEnabled(newState);
   m_uiTabFocus.groupBox_texture->setEnabled(newState);
-  
+
   // Disable all focus output options except graph plotting
   m_uiTabFocus.checkBox_plot_focused_ws->setEnabled(newState);
   m_uiTabFocus.checkBox_save_output_files->setEnabled(newState);
