@@ -9,9 +9,9 @@
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
-#include "Qt/qmessagebox.h"
 
 #include <boost/algorithm/string/find.hpp>
+#include <QMessageBox>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
