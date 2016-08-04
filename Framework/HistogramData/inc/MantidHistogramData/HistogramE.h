@@ -1,6 +1,7 @@
 #ifndef MANTID_HISTOGRAMDATA_HISTOGRAME_H_
 #define MANTID_HISTOGRAMDATA_HISTOGRAME_H_
 
+#include "MantidHistogramData/Addable.h"
 #include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/FixedLengthVector.h"
 #include "MantidHistogramData/Scalable.h"
@@ -52,6 +53,7 @@ template <class FrequencyVariances, class HistogramE> class VectorOf;
 */
 class MANTID_HISTOGRAMDATA_DLL HistogramE
     : public detail::FixedLengthVector<HistogramE>,
+      public detail::Addable<HistogramE>,
       public detail::Scalable<HistogramE> {
 public:
   using detail::FixedLengthVector<HistogramE>::FixedLengthVector;

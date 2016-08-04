@@ -9,6 +9,9 @@ class Histogram;
 
 /** This header provides basic math operations for Histograms.
 
+  @author Simon Heybrock
+  @date 2016
+
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 

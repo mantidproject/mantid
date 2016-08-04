@@ -13,8 +13,8 @@ namespace detail {
 
 /** Addable
 
-  This class is an implementation detail of class like HistogramData::BinEdges
-  and HistogramData::HistogramX. By inheriting from it, a type becomes addable,
+  This class is an implementation detail of class like HistogramData::Counts and
+  HistogramData::HistogramY. By inheriting from it, a type becomes addable,
   i.e., an object can be added to another objects of the same type.
 
   @author Simon Heybrock
