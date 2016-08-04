@@ -39,6 +39,8 @@ public:
   LoadILL();
   /// Algorithm's name
   const std::string name() const override { return "LoadILL"; }
+  /// Returns a confidence value that this algorithm can load a file
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 };
 
 } // namespace DataHandling
