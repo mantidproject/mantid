@@ -42,6 +42,7 @@ set ( INC_FILES
 	inc/MantidHistogramData/PointVariances.h
 	inc/MantidHistogramData/Points.h
 	inc/MantidHistogramData/Scalable.h
+	inc/MantidHistogramData/SquareAddable.h
 	inc/MantidHistogramData/StandardDeviationVectorOf.h
 	inc/MantidHistogramData/Validation.h
 	inc/MantidHistogramData/VarianceVectorOf.h
@@ -77,6 +78,7 @@ set ( TEST_FILES
 	PointVariancesTest.h
 	PointsTest.h
 	ScalableTest.h
+	SquareAddableTest.h
 	StandardDeviationVectorOfTest.h
 	VarianceVectorOfTest.h
 	VectorOfTest.h
