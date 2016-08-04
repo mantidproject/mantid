@@ -64,7 +64,9 @@ public:
   HistogramY &operator=(HistogramY &&)& = default;
   // Multiple inheritance causes ambiguous overload, bring operators into scope.
   using detail::Addable<HistogramY>::operator+=;
+  using detail::Addable<HistogramY>::operator-=;
   using detail::Offsetable<HistogramY>::operator+=;
+  using detail::Offsetable<HistogramY>::operator-=;
 
   // These classes are friends, such that they can modify the length.
   friend class Histogram;

@@ -43,7 +43,7 @@ namespace detail {
 */
 template <class T> class Addable {
 public:
-  /// Element-wise addition of elements in container and other.
+  /// Element-wise addition of this and other.
   T &operator+=(const T &other) & {
     auto &derived = static_cast<T &>(*this);
     std::transform(derived.cbegin(), derived.cend(), other.begin(),
@@ -51,10 +51,25 @@ public:
     return derived;
   }
 
-  /// Element-wise addition of elements in lhs and rhs.
+  /// Element-wise subtraction of this and other.
+  T &operator-=(const T &other) & {
+    auto &derived = static_cast<T &>(*this);
+    std::transform(derived.cbegin(), derived.cend(), other.begin(),
+                   derived.begin(), std::minus<double>());
+    return derived;
+  }
+
+  /// Element-wise addition of lhs and rhs.
   T operator+(T rhs) const {
     auto &derived = static_cast<const T &>(*this);
     return rhs += derived;
+  }
+
+  /// Element-wise subtraction of lhs and rhs.
+  T operator-(const T &rhs) const {
+    auto &derived = static_cast<const T &>(*this);
+    T out(derived);
+    return out -= rhs;
   }
 
 protected:
