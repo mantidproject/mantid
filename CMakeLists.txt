@@ -54,7 +54,9 @@ include ( CommonSetup )
 ###########################################################################
 # Check for Qt (DarwinSetup below needs a variable from this)
 ###########################################################################
-find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg REQUIRED )
+if (ENABLE_MANTIDPLOT)
+  find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg REQUIRED )
+endif ()
 
 ###########################################################################
 # Find OpenGL
@@ -68,7 +70,9 @@ endif ()
 ###########################################################################
 # Set ParaView information since later items depend on it
 ###########################################################################
-include ( ParaViewSetup )
+if (ENABLE_MANTIDPLOT)
+  include ( ParaViewSetup )
+endif ()
 
 # We probably don't want this to run on every build.
 option(COVERALLS "Generate coveralls data" OFF)
@@ -81,18 +85,22 @@ endif()
 ###########################################################################
 # Find qwt. Needs to be version 5
 ###########################################################################
-find_package ( Qwt REQUIRED )
-if( QWT_VERSION VERSION_LESS 5.0 OR QWT_VERSION VERSION_EQUAL 6.0 OR
-    QWT_VERSION VERSION_GREATER 6.0 )
-  message ( FATAL_ERROR "Qwt version 5 is required, found: ${QWT_VERSION}" )
+if (ENABLE_MANTIDPLOT)
+  find_package ( Qwt REQUIRED )
+  if( QWT_VERSION VERSION_LESS 5.0 OR QWT_VERSION VERSION_EQUAL 6.0 OR
+      QWT_VERSION VERSION_GREATER 6.0 )
+    message ( FATAL_ERROR "Qwt version 5 is required, found: ${QWT_VERSION}" )
+  endif()
 endif()
 
 ###########################################################################
 # Find PyQt & sip
 ###########################################################################
-find_package ( PyQt4 REQUIRED )
-find_package ( SIP REQUIRED )
-separate_arguments ( PYQT4_SIP_FLAGS )
+if (ENABLE_MANTIDPLOT)
+  find_package ( PyQt4 REQUIRED )
+  find_package ( SIP REQUIRED )
+  separate_arguments ( PYQT4_SIP_FLAGS )
+endif()
 
 ###########################################################################
 # gsl is currently needed by Geometry, Algorithms, Curvefitting, & MantidPlot
@@ -184,7 +192,9 @@ endif()
 
 add_subdirectory ( scripts )
 
-add_subdirectory ( docs )
+if (ENABLE_MANTIDPLOT)
+  add_subdirectory ( docs )
+endif()
 
 # System test data target
 add_subdirectory ( Testing/SystemTests/scripts )
