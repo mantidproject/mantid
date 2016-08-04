@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 import mantid
 import numpy
 
@@ -79,7 +80,7 @@ class GetEiT0atSNS(mantid.api.PythonAlgorithm):
                 Tzero=alg[3]                                        #Extract incident energy and T0
                 mantid.simpleapi.DeleteWorkspace(wtemp)
             except Exception as e:
-                raise RuntimeError("Could not get Ei, and this is not a white beam run\n"+e.message)
+                raise RuntimeError("Could not get Ei, and this is not a white beam run\n"+str(e))
         self.setProperty("Ei",Ei)
         self.setProperty("T0",Tzero)
 
