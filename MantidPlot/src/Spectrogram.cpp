@@ -1055,10 +1055,10 @@ void Spectrogram::loadFromProject(const std::string &lines) {
       QwtLinearColorMap colorMap(c1, c2);
       colorMap.setMode((QwtLinearColorMap::Mode)mode);
 
-      for (auto it = stopVec.begin(); it != stopVec.end(); ++it) {
+      for (auto &part : stopVec) {
         std::vector<std::string> stopParts;
         double pos;
-        boost::split(stopParts, *it, boost::is_any_of("\t"));
+        boost::split(stopParts, part, boost::is_any_of("\t"));
         Mantid::Kernel::Strings::convert<double>(stopParts[0], pos);
         colorMap.addColorStop(pos,
                               QColor(QString::fromStdString(stopParts[1])));

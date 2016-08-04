@@ -1814,9 +1814,7 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
 
   if (tsv.hasSection("graph")) {
     auto graphSections = tsv.sections("graph");
-    for (auto it = graphSections.cbegin(); it != graphSections.cend(); ++it) {
-      auto graphLines = *it;
-
+    for (const auto &graphLines : graphSections) {
       TSVSerialiser gtsv(graphLines);
 
       if (gtsv.selectLine("ggeometry")) {
