@@ -58,6 +58,7 @@ public:
 
   void test_IN4_load() { loadDataFile("ILL/IN4/084446.nxs", 397); }
   void test_IN5_load() { loadDataFile("ILL/IN5/104007.nxs", 98305); }
+  void test_IN6_load() { loadDataFile("ILL/IN6/164192.nxs", 340); }
 };
 
 //------------------------------------------------------------------------------
