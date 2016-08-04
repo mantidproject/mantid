@@ -377,9 +377,12 @@ void GetEi::getPeakEstimates(double &height, int64_t &centreInd,
   height = Y[0];
   centreInd = 0;
 
+  background = std::accumulate(Y.begin(), Y.end(), 0.0);
   // then loop through all the Y values and find the tallest peak
-  std::accumulate(Y.begin(), Y.end(), background);
-  std::max(Y.begin(), Y.end(), height);
+  // Todo use std::max to find max element and record index?
+  auto maxHeight = std::max_element(Y.begin(), Y.end());
+  height = *maxHeight;
+  centreInd = std::distance(Y.begin(), maxHeight);
 
   background = background / static_cast<double>(Y.size());
   if (height < PEAK_THRESH_H * background) {
