@@ -47,7 +47,16 @@ Jump Fit
 Simulations
 ###########
 
+Density Of States
+~~~~~~~~~~~~~~~~~
+
+- :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` now allows for the parsing of isotopes from the *.phonon or *.castep file in the form 'element:isotope' 
+
+Load nMoldyn
+~~~~~~~~~~~~
+
 - New algorithm :ref:`LoadNMoldyn4Ascii1D <algm-LoadNMoldyn4Ascii1D>` has been added to allow 1D nmoldyn data to be loaded in Mantid
+
 
 Improvements
 ------------

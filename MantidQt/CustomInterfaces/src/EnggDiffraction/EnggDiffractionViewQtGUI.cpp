@@ -116,7 +116,11 @@ void EnggDiffractionViewQtGUI::initLayout() {
   doSetupTabSettings();
 
   m_presenter->notify(IEnggDiffractionPresenter::Start);
-  m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
+  // We need to delay the RB-number check for the pop-up (splash message)
+  // as it will be shown very early (before the interface
+  // window itself is shown) and that will cause a crash in Qt code on
+  // some platforms (windows 10, and 7 sometimes).
+  // so perform the check in the showEvent method to check on start up
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabCalib() {
@@ -1049,6 +1053,11 @@ void EnggDiffractionViewQtGUI::setPrefix(std::string prefix) {
 
   // rebin tab
   m_uiTabPreproc.MWRunFiles_preproc_run_num->setInstrumentOverride(prefixInput);
+}
+
+void EnggDiffractionViewQtGUI::showEvent(QShowEvent *) {
+  // make sure that the RB number is checked on interface startup/show
+  m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
 }
 
 void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {
