@@ -44,6 +44,8 @@ class QAppThreadCall(QtCore.QObject):
             self._store_func_props(*args, **kwargs)
             QtCore.QMetaObject.invokeMethod(self, "on_call",
                                             QtCore.Qt.BlockingQueuedConnection)
+            if self._exc is not None:
+                raise self._exc
             return self._retvalue
 
     @QtCore.pyqtSlot()
@@ -51,12 +53,16 @@ class QAppThreadCall(QtCore.QObject):
         """Perform a call to a GUI function across a
         thread and return the result
         """
-        self._retvalue = self.callable(*self._args, **self._kwargs)
+        try:
+            self._retvalue = self.callable(*self._args, **self._kwargs)
+        except Exception as exc:
+            self._exc = exc
 
     def _clear_func_props(self):
         self._args = None
         self._kwargs = None
         self._retvalue = None
+        self._exc = None
 
     def _store_func_props(self, *args, **kwargs):
         self._args = args
