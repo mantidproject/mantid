@@ -119,7 +119,7 @@ Workflow
 
 .. diagram:: ReflectometryReductionOne_HighLvl-v1_wkflw.dot
 
-.. diagram:: ReflectometryReductionOne-v1_wkflw.dot
+.. diagram:: ReflectometryReductionOne_LowLvl-v1_wkflw.dot
 
 
 Source Rotation
