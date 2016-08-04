@@ -61,7 +61,7 @@ public:
 
   void test_construct_from_empty_Frequencies_size_mismatch() {
     const Frequencies frequencies(0);
-    const BinEdges edges(2);
+    const BinEdges edges{1.0, 2.0};
     TS_ASSERT_THROWS(const Counts counts(frequencies, edges), std::logic_error);
   }
 
@@ -73,7 +73,7 @@ public:
 
   void test_construct_from_Frequencies_size_mismatch() {
     const Frequencies frequencies(2);
-    const BinEdges edges(2);
+    const BinEdges edges{1.0, 2.0};
     TS_ASSERT_THROWS(const Counts counts(frequencies, edges), std::logic_error);
   }
 
@@ -88,7 +88,7 @@ public:
 
   void test_move_construct_from_Frequencies() {
     Frequencies frequencies(1);
-    const BinEdges edges(2);
+    const BinEdges edges{1.0, 2.0};
     auto old_ptr = &frequencies[0];
     const Counts counts(std::move(frequencies), edges);
     TS_ASSERT(!frequencies);
@@ -98,7 +98,7 @@ public:
   void test_move_construct_from_Frequencies_and_cow() {
     Frequencies frequencies(1);
     const Frequencies copy(frequencies);
-    const BinEdges edges(2);
+    const BinEdges edges{1.0, 2.0};
     auto old_ptr = &frequencies[0];
     const Counts counts(std::move(frequencies), edges);
     // Moved from frequencies...
