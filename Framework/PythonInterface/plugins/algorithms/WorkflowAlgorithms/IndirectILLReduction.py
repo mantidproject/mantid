@@ -113,7 +113,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                              defaultValue=True,
                              doc='Whether the input data has two wings.')
 
-        self.declareProperty(name='UnmirrorOption',defaultValue=3,
+        self.declareProperty(name='UnmirrorOption',defaultValue=6,
                              validator=IntBoundedValidator(lower=0,upper=7),
                              doc='Unmirroring options: \n'
                                  '0 no unmirroring\n'

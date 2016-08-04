@@ -1,7 +1,8 @@
+# pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-import unittest, os
-import mantid
+import os
+import unittest
 from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 
@@ -21,10 +22,10 @@ class IndirectILLReductionTest(unittest.TestCase):
         #clean up any files we made
         for ws in self._output_workspaces[1:]:
             path = os.path.join(config['defaultsave.directory'], ws.name() + '.nxs')
-            if (os.path.isfile(path)):
+            if os.path.isfile(path):
                 try:
                     os.remove(path)
-                except IOError as e:
+                except IOError:
                     continue
 
         #reset output workspaces list
@@ -36,17 +37,23 @@ class IndirectILLReductionTest(unittest.TestCase):
         red = IndirectILLReduction(**self._args)
 
         self.assertTrue(isinstance(red, MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual(red.getAxis(0).getUnit().unitID(), "DeltaE")
 
     def test_mutlifile(self):
         self._args['Run'] = self._multi_run_name + '.nxs'
 
         red = IndirectILLReduction(**self._args)
 
-        self.assertTrue(isinstance(red, WorkspaceGroup), "Should be a group workspace")
-        self.assertEqual(red.size(),2)
-        self.assertTrue(isinstance(red.getItem(0), MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual(red.getItem(0).getAxis(0).getUnit().unitID(), "DeltaE")
+        self.assertTrue(isinstance(mtd['red'], WorkspaceGroup), "Should be a group workspace")
+        self.assertTrue(isinstance(mtd['red_left'], WorkspaceGroup), "Should be a group workspace")
+        self.assertTrue(isinstance(mtd['red_right'], WorkspaceGroup), "Should be a group workspace")
+
+        # red is a tuple of 3
+        self.assertEqual(len(red),3)
+
+        # mtd['red'] is a group workspace of 2
+        self.assertEqual(mtd['red'].size(), 2)
+        self.assertTrue(isinstance(mtd['red'].getItem(0), MatrixWorkspace), "Should be a matrix workspace")
+
 
     def test_sumruns(self):
         self._args['Run'] = self._multi_run_name + '.nxs'
@@ -55,13 +62,12 @@ class IndirectILLReductionTest(unittest.TestCase):
         red = IndirectILLReduction(**self._args)
 
         self.assertTrue(isinstance(red, MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual(red.getAxis(0).getUnit().unitID(), "DeltaE")
 
     def test_save_results(self):
         self._args['Run'] = self._run_name + '.nxs'
         self._args['Save'] = True
 
-        red = IndirectILLReduction(**self._args)
+        IndirectILLReduction(**self._args)
 
         path = os.path.join(config['defaultsave.directory'], 'red.nxs')
         self.assertTrue(os.path.isfile(path), path)
@@ -71,54 +77,8 @@ class IndirectILLReductionTest(unittest.TestCase):
 
         IndirectILLReduction(**self._args)
 
-        self.assertTrue(isinstance(mtd['red'], MatrixWorkspace), "Should be a matrix workspace")
-    '''
-    def test_mirror_mode(self):
-        self.kwargs['MirrorMode'] = True
-        self.kwargs['LeftWorkspace'] = self.kwargs['ReducedWorkspace'] + '_left'
-        self.kwargs['RightWorkspace'] = self.kwargs['ReducedWorkspace'] + '_right'
+        self.assertTrue(isinstance(mtd['146191_red'], MatrixWorkspace), "Should be a matrix workspace")
 
-        IndirectILLReduction(**self.kwargs)
-
-        red_workspace = mtd[self.kwargs['ReducedWorkspace']]
-        left_red_workspace = mtd[self.kwargs['LeftWorkspace']]
-        right_red_workspace = mtd[self.kwargs['RightWorkspace']]
-
-        self.assertTrue(isinstance(red_workspace, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual(red_workspace.getAxis(0).getUnit().unitID(), "DeltaE")
-
-        self.assertTrue(isinstance(left_red_workspace, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual(left_red_workspace.getAxis(0).getUnit().unitID(), "DeltaE")
-
-        self.assertTrue(isinstance(right_red_workspace, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual(right_red_workspace.getAxis(0).getUnit().unitID(), "DeltaE")
-
-    def test_mirror_mode_default_names(self):
-        self.kwargs['MirrorMode'] = True
-
-        self.assertRaises(RuntimeError, IndirectILLReduction, **self.kwargs)
-
-        left = self.kwargs['ReducedWorkspace'] + '_left'
-        right = self.kwargs['ReducedWorkspace'] + '_right'
-
-        self.assertTrue(mtd.doesExist(left))
-        self.assertTrue(mtd.doesExist(right))
-
-
-
-    def test_save_mirror_mode_output(self):
-        self.kwargs['Save'] = True
-        self.kwargs['MirrorMode'] = True
-        self.kwargs['LeftWorkspace'] = self.kwargs['ReducedWorkspace'] + '_left'
-        self.kwargs['RightWorkspace'] = self.kwargs['ReducedWorkspace'] + '_right'
-
-        self._output_workspaces = IndirectILLReduction(**self.kwargs)
-
-        for ws in self._output_workspaces[1:]:
-            path = os.path.join(config['defaultsave.directory'], ws.name() + '.nxs')
-            self.assertTrue(os.path.isfile(path))
-
-    '''
     def test_mapping_file_option(self):
         self._args['Run'] = self._run_name + '.nxs'
 
@@ -138,7 +98,7 @@ class IndirectILLReductionTest(unittest.TestCase):
 
         IndirectILLReduction(**self._args)
 
-        self.assertEqual(18, mtd['red'].getNumberHistograms())
+        self.assertEqual(18, mtd['146191_red'].getNumberHistograms())
 
 if __name__ == '__main__':
     unittest.main()
