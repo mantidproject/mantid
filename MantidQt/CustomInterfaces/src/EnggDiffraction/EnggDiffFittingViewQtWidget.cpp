@@ -102,6 +102,9 @@ void EnggDiffFittingViewQtWidget::doSetup() {
 
   connect(m_ui.pushButton_fit, SIGNAL(released()), this, SLOT(fitClicked()));
 
+  connect(m_ui.pushButton_fit_all, SIGNAL(released()), this,
+          SLOT(fitAllClicked()));
+
   // add peak by clicking the button
   connect(m_ui.pushButton_select_peak, SIGNAL(released()), SLOT(setPeakPick()));
 
@@ -210,6 +213,10 @@ EnggDiffFittingViewQtWidget::enggRunPythonCode(const std::string &pyCode) {
 
 void EnggDiffFittingViewQtWidget::fitClicked() {
   m_presenter->notify(IEnggDiffFittingPresenter::FitPeaks);
+}
+
+void EnggDiffFittingViewQtWidget::fitAllClicked() {
+  m_presenter->notify(IEnggDiffFittingPresenter::FitAllPeaks);
 }
 
 void EnggDiffFittingViewQtWidget::FittingRunNo() {

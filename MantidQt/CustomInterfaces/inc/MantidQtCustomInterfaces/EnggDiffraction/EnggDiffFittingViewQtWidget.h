@@ -98,6 +98,8 @@ public:
 
   std::string getFittingRunNo() const override;
 
+  void enableFitAllButton(bool enable) const override;
+
   void clearFittingComboBox() const override;
 
   void enableFittingComboBox(bool enable) const override;
@@ -127,6 +129,10 @@ public:
   void addBankItem(std::string bankID) override;
 
   void addRunNoItem(std::string runNo) override;
+
+  std::string getRunNoItem(int pos) override;
+
+  auto getRunNoItemSize();
 
   std::vector<std::string> getFittingRunNumVec() override;
 
@@ -174,6 +180,7 @@ private slots:
   void setPeakPick();
   void clearPeakList();
   void fitClicked();
+  void fitAllClicked();
   void FittingRunNo();
   void addClicked();
   void browseClicked();

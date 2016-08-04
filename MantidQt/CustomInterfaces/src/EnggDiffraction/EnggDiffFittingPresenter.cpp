@@ -78,6 +78,10 @@ void EnggDiffFittingPresenter::notify(
     processFitPeaks();
     break;
 
+  case IEnggDiffFittingPresenter::FitAllPeaks:
+    processFitAllPeaks();
+    break;
+
   case IEnggDiffFittingPresenter::addPeaks:
     addPeakToList();
     break;
