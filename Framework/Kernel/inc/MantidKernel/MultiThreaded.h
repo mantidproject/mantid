@@ -7,6 +7,20 @@ namespace Mantid {
 namespace Kernel {} // namespace
 } // namespace
 
+/* ===================== ThreadSafe ===================== */
+
+template <typename Arg>
+inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
+ThreadSafe(Arg workspace) {
+  return !workspace || workspace->threadSafe();
+}
+
+template <typename Arg, typename... Args>
+inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
+ThreadSafe(Arg workspace, Args... others) {
+  return (!workspace || workspace->threadSafe()) && ThreadSafe(others...);
+}
+
 // The syntax used to define a pragma within a macro is different on windows and
 // GCC
 #ifdef _MSC_VER
@@ -97,16 +111,6 @@ namespace Kernel {} // namespace
 #define PARALLEL_FOR2(workspace1, workspace2)                                   \
     PRAGMA(omp parallel for if ( ( !workspace1 || workspace1->threadSafe() ) && \
     ( !workspace2 || workspace2->threadSafe() ) ))
-
-/** Includes code to add OpenMP commands to run the next for loop in parallel.
-*	 All three workspaces are checked to ensure they are suitable for
-*multithreaded access
-*  but NULL workspaces are assumed to be safe
-*/
-#define PARALLEL_FOR3(workspace1, workspace2, workspace3)                      \
-    PRAGMA(omp parallel for if ( (!workspace1 || workspace1->threadSafe()) && \
-    ( !workspace2 || workspace2->threadSafe() ) && \
-    ( !workspace3 || workspace3->threadSafe() ) ))
 
 /** Ensures that the next execution line or block is only executed if
 * there are multple threads execting in this region

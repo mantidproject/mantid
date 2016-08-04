@@ -90,7 +90,7 @@ void MaskPeaksWorkspace::exec() {
 
   // Loop over peaks
   const std::vector<Peak> &peaks = peaksW->getPeaks();
-  PARALLEL_FOR3(m_inputW, peaksW, tablews)
+  PARALLEL_FOR_IF(ThreadSafe(m_inputW.get(), peaksW.get(), tablews.get()))
   for (int i = 0; i < static_cast<int>(peaks.size()); i++) { // NOLINT
     PARALLEL_START_INTERUPT_REGION
     const Peak &peak = peaks[i];

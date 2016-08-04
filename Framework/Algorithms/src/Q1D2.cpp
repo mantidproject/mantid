@@ -146,7 +146,7 @@ void Q1D2::exec() {
   const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.05, 1.0, numSpec + 1);
 
-  PARALLEL_FOR3(m_dataWS, outputWS, pixelAdj)
+  PARALLEL_FOR_IF(m_dataWS.get(), outputWS.get(), pixelAdj.get())
   for (int i = 0; i < numSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Get the pixel relating to this spectrum
