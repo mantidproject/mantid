@@ -1607,6 +1607,10 @@ private:
   QMenuBar *m_sharedMenuBar; ///< Pointer to the shared menubar
 #endif
 
+  /// Arguments parsed from the command line
+  bool m_exec_on_start;
+  bool m_quit_after_exec;
+  QString m_cmdline_filename;
   /// Exit code to set at application end
   int m_exitCode;
 
