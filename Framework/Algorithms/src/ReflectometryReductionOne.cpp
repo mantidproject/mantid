@@ -574,17 +574,19 @@ void ReflectometryReductionOne::exec() {
     auto monitorWS = inLam.get<1>();
 
     if (detectorEfficiencyCorrection.is_initialized()) {
-      // Rebin to the detector workspace
-      auto rebinToWorkspaceAlg =
-        this->createChildAlgorithm("RebinToWorkspace");
-      rebinToWorkspaceAlg->initialize();
-      rebinToWorkspaceAlg->setProperty("WorkspaceToRebin",
-        *detectorEfficiencyCorrection);
-      rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", detectorWS);
-      rebinToWorkspaceAlg->execute();
-      MatrixWorkspace_sptr decWS =
-        rebinToWorkspaceAlg->getProperty("OutputWorkspace");
-
+      MatrixWorkspace_sptr decWS = *detectorEfficiencyCorrection;
+      if (decWS->blocksize() > 1) {
+        // If using separate normalization constants for each spectra, rebin
+        // to the detector workspace 
+        auto rebinToWorkspaceAlg =
+          this->createChildAlgorithm("RebinToWorkspace");
+        rebinToWorkspaceAlg->initialize();
+        rebinToWorkspaceAlg->setProperty("WorkspaceToRebin",
+          *detectorEfficiencyCorrection);
+        rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", detectorWS);
+        rebinToWorkspaceAlg->execute();
+        decWS = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
+      }
       // Normalize by the direct beam.
       detectorWS = divide(detectorWS, decWS);
     }
