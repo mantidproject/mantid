@@ -54,6 +54,15 @@ class MANTID_HISTOGRAMDATA_DLL Counts
 public:
   using VectorOf<Counts, HistogramY>::VectorOf;
   using VectorOf<Counts, HistogramY>::operator=;
+  // Multiple inheritance causes ambiguous overload, bring operators into scope.
+  using detail::Addable<Counts>::operator+;
+  using detail::Addable<Counts>::operator+=;
+  using detail::Addable<Counts>::operator-;
+  using detail::Addable<Counts>::operator-=;
+  using detail::Offsetable<Counts>::operator+;
+  using detail::Offsetable<Counts>::operator+=;
+  using detail::Offsetable<Counts>::operator-;
+  using detail::Offsetable<Counts>::operator-=;
   /// Default constructor, creates a NULL object.
   Counts() = default;
   // The copy and move constructor and assignment are not captured properly by

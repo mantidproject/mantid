@@ -54,6 +54,15 @@ class MANTID_HISTOGRAMDATA_DLL Frequencies
 public:
   using VectorOf<Frequencies, HistogramY>::VectorOf;
   using VectorOf<Frequencies, HistogramY>::operator=;
+  // Multiple inheritance causes ambiguous overload, bring operators into scope.
+  using detail::Addable<Frequencies>::operator+;
+  using detail::Addable<Frequencies>::operator+=;
+  using detail::Addable<Frequencies>::operator-;
+  using detail::Addable<Frequencies>::operator-=;
+  using detail::Offsetable<Frequencies>::operator+;
+  using detail::Offsetable<Frequencies>::operator+=;
+  using detail::Offsetable<Frequencies>::operator-;
+  using detail::Offsetable<Frequencies>::operator-=;
   /// Default constructor, creates a NULL object.
   Frequencies() = default;
   // The copy and move constructor and assignment are not captured properly by
