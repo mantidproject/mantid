@@ -1,12 +1,13 @@
 #ifndef MANTID_HISTOGRAMDATA_COUNTS_H_
 #define MANTID_HISTOGRAMDATA_COUNTS_H_
 
+#include "MantidHistogramData/Addable.h"
 #include "MantidHistogramData/DllConfig.h"
-#include "MantidHistogramData/VectorOf.h"
+#include "MantidHistogramData/HistogramY.h"
 #include "MantidHistogramData/Iterable.h"
 #include "MantidHistogramData/Offsetable.h"
 #include "MantidHistogramData/Scalable.h"
-#include "MantidHistogramData/HistogramY.h"
+#include "MantidHistogramData/VectorOf.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -46,6 +47,7 @@ class Frequencies;
 */
 class MANTID_HISTOGRAMDATA_DLL Counts
     : public detail::VectorOf<Counts, HistogramY>,
+      public detail::Addable<Counts>,
       public detail::Iterable<Counts>,
       public detail::Offsetable<Counts>,
       public detail::Scalable<Counts> {
