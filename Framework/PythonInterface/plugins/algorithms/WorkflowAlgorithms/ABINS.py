@@ -2,7 +2,7 @@ import multiprocessing
 import numpy as np
 
 from mantid.api import AlgorithmFactory,  FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
-from mantid.simpleapi import  CreateWorkspace, CloneWorkspace, GroupWorkspaces, Scale, RenameWorkspace, SetSampleMaterial, DeleteWorkspace, Rebin, Load
+from mantid.simpleapi import  CreateWorkspace, CloneWorkspace, GroupWorkspaces, Scale, RenameWorkspace, SetSampleMaterial, DeleteWorkspace, Rebin, Load, SaveAscii
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty
 
 from AbinsModules import LoadCASTEP, CalculateS, Constants
@@ -119,7 +119,7 @@ class ABINS(PythonAlgorithm):
 
     def PyExec(self):
 
-        steps = 8
+        steps = 9
         begin = 0
         end = 1.0
         prog_reporter = Progress(self, begin, end, steps)
@@ -179,8 +179,16 @@ class ABINS(PythonAlgorithm):
         group = ','.join(_workspaces)
         GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
 
+        # 8) create workspaces with all sub-workspaces
         self.setProperty('OutputWorkspace', self._out_ws_name)
         prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
+
+        # 9) save workspaces to ascii_file
+        num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
+        for wrk_num in range(num_workspaces):
+            wrk = mtd[self._out_ws_name].getItem(wrk_num)
+            SaveAscii(InputWorkspace=wrk, Filename=wrk.getName()+".dat", Separator="Space", WriteSpectrumID=False)
+        prog_reporter.report("All workspaces have been saved to ASCII files.")
 
 
     def _create_partial_s_workspaces(self, atoms_symbol=None,s_data=None):
@@ -228,6 +236,7 @@ class ABINS(PythonAlgorithm):
                         VerticalAxisValues="S",
                         OutputWorkspace=workspace,
                         EnableLogging=False)
+
 
     def _set_total_workspace(self, partial_workspaces=None):
 
@@ -290,6 +299,7 @@ class ABINS(PythonAlgorithm):
                   Factor=self._scale)
 
         return _ws_name
+
 
     def _set_experimental_data_workspace(self):
         experimental_wrk = Load(self._experimentalFile)
@@ -405,6 +415,7 @@ class ABINS(PythonAlgorithm):
         :return:  True is pattern present in the line, otherwise False
         """
         return one_line and pattern in one_line.replace(" ", "")
+
 
     def _get_properties(self):
 
