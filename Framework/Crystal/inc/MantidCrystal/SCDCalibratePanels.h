@@ -165,7 +165,6 @@ public:
                      boost::shared_ptr<Geometry::ParameterMap> pmap,
                      boost::shared_ptr<const Geometry::ParameterMap> pmapSv);
 
-
   void LoadISawDetCal(boost::shared_ptr<const Geometry::Instrument> &instrument,
                       std::set<std::string> &AllBankName, double &T0,
                       double &L0, std::string filename,
@@ -183,11 +182,11 @@ private:
   /// Function to find peaks near detector edge
   bool edgePixel(DataObjects::PeaksWorkspace_sptr ws, std::string bankName,
                  int col, int row, int Edge);
- /// Function to calculate U
+  /// Function to calculate U
   void findU(DataObjects::PeaksWorkspace_sptr peaksWs);
   /// save workspaces
-  void saveNexus (std::string outputFile, API::MatrixWorkspace_sptr outputWS);
- /// Function to optimize L1
+  void saveNexus(std::string outputFile, API::MatrixWorkspace_sptr outputWS);
+  /// Function to optimize L1
   void findL1(int nPeaks, DataObjects::PeaksWorkspace_sptr peaksWs);
 
   void exec() override;
@@ -195,7 +194,6 @@ private:
   void init() override;
 
   API::ITableWorkspace_sptr Result;
-
 
   /**
    * Saves the new instrument to an xml file that can be used with the
@@ -209,7 +207,8 @@ private:
    * @param instrument   The instrument with the new values for the banks in
    *Groups
    */
-  void saveXmlFile(std::string const FileName, std::set<std::string> const AllBankNames,
+  void saveXmlFile(std::string const FileName,
+                   std::set<std::string> const AllBankNames,
                    Geometry::Instrument_const_sptr const instrument) const;
 };
 

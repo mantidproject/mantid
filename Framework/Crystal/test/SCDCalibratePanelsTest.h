@@ -47,7 +47,8 @@ public:
 
     // verify the results
     ITableWorkspace_sptr results =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("params_bank47");
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            "params_bank47");
     TS_ASSERT_DELTA(-0.00433, results->cell<double>(0, 1), 1e-4);
     TS_ASSERT_DELTA(0.00122, results->cell<double>(1, 1), 1e-4);
     TS_ASSERT_DELTA(0.00137, results->cell<double>(2, 1), 1e-4);
@@ -58,7 +59,8 @@ public:
     TS_ASSERT_DELTA(1.00021, results->cell<double>(7, 1), 1e-4);
     TS_ASSERT_DELTA(0.30116, results->cell<double>(8, 1), 1e-4);
     ITableWorkspace_sptr resultsL1 =
-        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("params_L1");
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            "params_L1");
     TS_ASSERT_DELTA(-0.00761, resultsL1->cell<double>(2, 1), .01);
   }
 };

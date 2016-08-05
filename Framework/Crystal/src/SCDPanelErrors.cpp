@@ -64,18 +64,21 @@ SCDPanelErrors::SCDPanelErrors() : m_setupFinished(false) {
  * @param inputW :: The workspace
  */
 
-void SCDPanelErrors::moveDetector(
-    double x, double y, double z, double rotx, double roty, double rotz,
-    double scalex, double scaley,
-    std::string detname, Workspace_sptr inputW) const {
+void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
+                                  double roty, double rotz, double scalex,
+                                  double scaley, std::string detname,
+                                  Workspace_sptr inputW) const {
   // CORELLI has sixteenpack under bank
   DataObjects::PeaksWorkspace_sptr inputP =
-        boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(inputW);
-  Geometry::Instrument_sptr inst = boost::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
-  if (inst->getName().compare("CORELLI") == 0.0 && detname != "moderator") detname.append("/sixteenpack");
+      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(inputW);
+  Geometry::Instrument_sptr inst =
+      boost::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
+  if (inst->getName().compare("CORELLI") == 0.0 && detname != "moderator")
+    detname.append("/sixteenpack");
 
-  if (x != 0.0 || y !=0.0 || z != 0.0) {
-    IAlgorithm_sptr alg1 = Mantid::API::AlgorithmFactory::Instance().create("MoveInstrumentComponent", -1);
+  if (x != 0.0 || y != 0.0 || z != 0.0) {
+    IAlgorithm_sptr alg1 = Mantid::API::AlgorithmFactory::Instance().create(
+        "MoveInstrumentComponent", -1);
     alg1->initialize();
     alg1->setChild(true);
     alg1->setLogging(false);
@@ -90,7 +93,8 @@ void SCDPanelErrors::moveDetector(
   }
 
   if (rotx != 0.0) {
-    IAlgorithm_sptr algx = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
+    IAlgorithm_sptr algx = Mantid::API::AlgorithmFactory::Instance().create(
+        "RotateInstrumentComponent", -1);
     algx->initialize();
     algx->setChild(true);
     algx->setLogging(false);
@@ -105,7 +109,8 @@ void SCDPanelErrors::moveDetector(
   }
 
   if (roty != 0.0) {
-    IAlgorithm_sptr algy = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
+    IAlgorithm_sptr algy = Mantid::API::AlgorithmFactory::Instance().create(
+        "RotateInstrumentComponent", -1);
     algy->initialize();
     algy->setChild(true);
     algy->setLogging(false);
@@ -120,7 +125,8 @@ void SCDPanelErrors::moveDetector(
   }
 
   if (rotz != 0.0) {
-    IAlgorithm_sptr algz = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
+    IAlgorithm_sptr algz = Mantid::API::AlgorithmFactory::Instance().create(
+        "RotateInstrumentComponent", -1);
     algz->initialize();
     algz->setChild(true);
     algz->setLogging(false);
@@ -136,8 +142,7 @@ void SCDPanelErrors::moveDetector(
   if (scalex != 1.0 || scaley != 1.0) {
     Geometry::IComponent_const_sptr comp = inst->getComponentByName(detname);
     boost::shared_ptr<const Geometry::RectangularDetector> rectDet =
-        boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(
-            comp);
+        boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
     if (rectDet) {
       Geometry::ParameterMap &pmap = inputP->instrumentParameters();
       pmap.addDouble(rectDet.get(), "scalex", scalex);
@@ -147,27 +152,33 @@ void SCDPanelErrors::moveDetector(
 }
 
 /// Evaluate the function for a list of arguments and given scaling factor
-void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xrotate, double yrotate, double zrotate,
-                             double scalex, double scaley, double *out, const double *xValues,
-                             const size_t nData) const {
+void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
+                          double xrotate, double yrotate, double zrotate,
+                          double scalex, double scaley, double *out,
+                          const double *xValues, const size_t nData) const {
   UNUSED_ARG(xValues);
   if (nData == 0)
     return;
 
   setupData();
 
-  moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex, scaley, m_bank, m_workspace);
+  moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex,
+               scaley, m_bank, m_workspace);
 
   DataObjects::PeaksWorkspace_sptr inputP =
-        boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
-  Geometry::Instrument_sptr inst = boost::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
-  Geometry::OrientedLattice lattice = inputP->mutableSample().getOrientedLattice();
-  for (int i = 0; i < inputP->getNumberPeaks(); i ++) {
+      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
+  Geometry::Instrument_sptr inst =
+      boost::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
+  Geometry::OrientedLattice lattice =
+      inputP->mutableSample().getOrientedLattice();
+  for (int i = 0; i < inputP->getNumberPeaks(); i++) {
     DataObjects::Peak peak = inputP->getPeak(i);
-    V3D hkl =  V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
-         boost::math::iround(peak.getL()));
+    V3D hkl =
+        V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
+            boost::math::iround(peak.getL()));
     V3D Q2 = lattice.qFromHKL(hkl);
-    DataObjects::Peak peak2(inst, peak.getDetectorID(),peak.getWavelength(), hkl, peak.getGoniometerMatrix());
+    DataObjects::Peak peak2(inst, peak.getDetectorID(), peak.getWavelength(),
+                            hkl, peak.getGoniometerMatrix());
     Units::Wavelength wl;
 
     wl.initialize(peak2.getL1(), peak2.getL2(), peak2.getScattering(), 0,
@@ -175,11 +186,12 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xr
 
     peak2.setWavelength(wl.singleFromTOF(peak.getTOF()));
     V3D Q3 = peak2.getQSampleFrame();
-    out[i*3] = Q3[0]-Q2[0];
-    out[i*3+1] = Q3[1]-Q2[1];
-    out[i*3+2] = Q3[2]-Q2[2];
+    out[i * 3] = Q3[0] - Q2[0];
+    out[i * 3 + 1] = Q3[1] - Q2[1];
+    out[i * 3 + 2] = Q3[2] - Q2[2];
   }
-  moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate, -scalex, -scaley, m_bank, m_workspace);
+  moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate, -scalex,
+               -scaley, m_bank, m_workspace);
 }
 
 /**
@@ -189,7 +201,7 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xr
  * @param nData :: The size of the data.
  */
 void SCDPanelErrors::function1D(double *out, const double *xValues,
-                                   const size_t nData) const {
+                                const size_t nData) const {
   const double xshift = getParameter("XShift");
   const double yshift = getParameter("YShift");
   const double zshift = getParameter("ZShift");
@@ -198,7 +210,8 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   const double zrotate = getParameter("ZRotate");
   const double scalex = getParameter("scaleWidth");
   const double scaley = getParameter("scaleHeight");
-  eval(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex, scaley, out, xValues, nData);
+  eval(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex, scaley, out,
+       xValues, nData);
 }
 
 /**
@@ -208,24 +221,21 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
  * @param xValues :: The function arguments
  * @param nData :: The size of xValues.
  */
-void SCDPanelErrors::functionDeriv1D(API::Jacobian *out,
-                                        const double *xValues,
-                                        const size_t nData) {
+void SCDPanelErrors::functionDeriv1D(API::Jacobian *out, const double *xValues,
+                                     const size_t nData) {
   FunctionDomain1DView domain(xValues, nData);
   this->calNumericalDeriv(domain, *out);
 }
 
 /// Clear all data
-void SCDPanelErrors::clear() const {
-  m_setupFinished = false;
-}
+void SCDPanelErrors::clear() const { m_setupFinished = false; }
 
 /** Set a value to attribute attName
  * @param attName :: The attribute name
  * @param value :: The new value
  */
 void SCDPanelErrors::setAttribute(const std::string &attName,
-                                     const IFunction::Attribute &value) {
+                                  const IFunction::Attribute &value) {
   if (attName == "FileName") {
     std::string fileName = value.asUnquotedString();
     if (fileName.empty()) {
@@ -267,8 +277,7 @@ void SCDPanelErrors::load(const std::string &fname) {
   loadAlg->setLogging(false);
   try {
     loadAlg->setPropertyValue("Filename", fname);
-    loadAlg->setPropertyValue("OutputWorkspace",
-                              "_SCDPanelErrors_fit_data_");
+    loadAlg->setPropertyValue("OutputWorkspace", "_SCDPanelErrors_fit_data_");
     loadAlg->execute();
   } catch (std::runtime_error &) {
     throw std::runtime_error(
@@ -294,8 +303,7 @@ void SCDPanelErrors::loadWorkspace(const std::string &wsName) const {
  * Load the points from a PeaksWorkspace
  * @param ws :: The workspace to load from
  */
-void SCDPanelErrors::loadWorkspace(
-    boost::shared_ptr<API::Workspace> ws) const {
+void SCDPanelErrors::loadWorkspace(boost::shared_ptr<API::Workspace> ws) const {
   m_workspace = ws;
   m_setupFinished = false;
 }
