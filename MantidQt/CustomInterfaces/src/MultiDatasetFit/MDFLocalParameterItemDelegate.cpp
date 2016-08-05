@@ -98,7 +98,10 @@ EditLocalParameterDialog *LocalParameterItemDelegate::owner() const {
  * @param i :: [input] Index of row
  */
 void LocalParameterItemDelegate::doSetValueToLog(int i) {
-  closeEditor(m_currentEditor);
+  if (m_currentEditor) {
+    closeEditor(m_currentEditor);
+    m_currentEditor = nullptr;
+  }
   emit setValueToLog(i);
 }
 
@@ -106,17 +109,23 @@ void LocalParameterItemDelegate::doSetValueToLog(int i) {
  * Slot: close the editor and re-emit the signal
  */
 void LocalParameterItemDelegate::doSetAllValuesToLog() {
-  closeEditor(m_currentEditor);
+  if (m_currentEditor) {
+    closeEditor(m_currentEditor);
+    m_currentEditor = nullptr;
+  }
   emit setAllValuesToLog();
 }
 
 /**
  * Data is about to be pasted into the table.
  * Prepare for this by:
- *   - closing the editor
+ *   - closing the editor (if one is open)
  */
 void LocalParameterItemDelegate::prepareForPastedData() {
-  closeEditor(m_currentEditor);
+  if (m_currentEditor) {
+    closeEditor(m_currentEditor);
+    m_currentEditor = nullptr;
+  }
 }
 
 } // MDF
