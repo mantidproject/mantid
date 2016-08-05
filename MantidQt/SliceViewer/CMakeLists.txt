@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/CompositePeaksPresenter.cpp
 	src/ConcretePeaksPresenter.cpp
+	src/CoordinateTransform.cpp
 	src/CustomTools.cpp
 	src/DimensionSliceWidget.cpp
 	src/EllipsoidPlaneSliceCalculator.cpp
@@ -34,6 +35,7 @@ set ( SRC_FILES
 set ( INC_FILES
 	inc/MantidQtSliceViewer/CompositePeaksPresenter.h
 	inc/MantidQtSliceViewer/ConcretePeaksPresenter.h
+	inc/MantidQtSliceViewer/CoordinateTransform.h
 	inc/MantidQtSliceViewer/CustomTools.h
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
 	inc/MantidQtSliceViewer/EllipsoidPlaneSliceCalculator.h

@@ -28,7 +28,12 @@
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidQtAPI/SignalBlocker.h"
 #include "MantidQtAPI/SignalRange.h"
+<<<<<<< HEAD
 #include "MantidQtAPI/TSVSerialiser.h"
+=======
+#include "MantidQtAPI/NonOrthogonal.h"
+#include "MantidQtAPI/QwtRasterDataMDNonOrthogonal.h"
+>>>>>>> Checkpointing Re #12110
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/CustomTools.h"
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
@@ -610,6 +615,8 @@ void SliceViewer::updateDimensionSliceWidgets() {
                        SLOT(rebinParamsChanged()));
       QObject::connect(widget, SIGNAL(changedNumBins(int, int)), this,
                        SLOT(rebinParamsChanged()));
+	  QObject::connect(widget, SIGNAL(changedShownDim(int, int, int)), this,
+		  SLOT(checkForHKLDimension(int, int, int)));
 
       // Save in this list
       m_dimWidgets.push_back(widget);
@@ -690,6 +697,15 @@ void SliceViewer::updateDimensionSliceWidgets() {
  */
 void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   m_ws = ws;
+
+  // If the workspace qualifies to be treated as a non-orthogonal workspace,
+  // then we swap to a QwtRasterDataMDNonOrthogonal
+
+  if (API::requiresSkewMatrix(ws)) {
+	  delete m_data;
+	  m_data = new API::QwtRasterDataMDNonOrthogonal();
+  }
+  m_coordinateTransform = createCoordinateTransform(ws+);
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
 
@@ -1491,6 +1507,11 @@ void SliceViewer::showInfoAt(double x, double y) {
     coords[d] = VMD_t(m_dimWidgets[d]->getSlicePoint());
   coords[m_dimX] = VMD_t(x);
   coords[m_dimY] = VMD_t(y);
+
+  // Perform non-orthogonal correction if required
+  m_coordinateTransform->transform(coords, m_dimX, m_dimY);
+
+
   signal_t signal =
       m_ws->getSignalWithMaskAtVMD(coords, this->m_data->getNormalization());
   ui.lblInfoX->setText(QString::number(x, 'g', 4));
@@ -1636,6 +1657,10 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim) {
   emit changedShownDim(m_dimX, m_dimY);
 }
 
+void SliceViewer::checkForHKLDimension(int index, int dim, int oldDim) 
+{
+
+}
 //==============================================================================
 //================================ PYTHON METHODS ==============================
 //==============================================================================
