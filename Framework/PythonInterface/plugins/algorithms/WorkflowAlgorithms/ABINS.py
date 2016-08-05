@@ -114,19 +114,12 @@ class ABINS(PythonAlgorithm):
         elif dft_filename == "CRYSTAL":
             issues["DFT program"] = "Support for CRYSTAL DFT program not implemented yet!"
 
-        sum_contributions = self.getProperty('SumContributions').value
-        atoms = self.getProperty('Atoms').value
-        calc_partial = len(atoms) > 0
-        if not calc_partial and sum_contributions:
-            issues['SumContributions'] = 'Cannot sum contributions when not calculating partial density of states'
-
-
         return issues
 
 
     def PyExec(self):
 
-        steps = 4
+        steps = 7
         begin = 0
         end = 1.0
         prog_reporter = Progress(self, begin, end, steps)
@@ -149,7 +142,7 @@ class ABINS(PythonAlgorithm):
                                   instrument_name=self._instrument, abins_data=dft_data,
                                   sample_form=self._sampleForm)
         s_data = s_calculator.getS()
-        prog_reporter.report("Dynamical structure factor is ready to be plotted.")
+        prog_reporter.report("Dynamical structure factors have been calculated.")
 
         # 4) get atoms for which S should be plotted
         _data  = dft_data.getAtomsData().extract()
@@ -165,34 +158,30 @@ class ABINS(PythonAlgorithm):
                 if not atom_symbol in all_atoms_symbols:
                     raise ValueError("User defined atom not present in the system.")
             atoms_symbol = self._atoms
+        prog_reporter.report("Atoms, for which dynamical structure factors should be plotted, have been determined.")
 
         # at the moment only types of atom, e.g, for  benzene three options -> 1) C, H;  2) C; 3) H
         # 5) create workspaces for atoms in interest
         partial_workspaces = self._create_partial_s_workspaces(atoms_symbol=atoms_symbol, s_data=s_data)
+        prog_reporter.report("Workspaces with partial dynamical structure factors have been constructed.")
 
-        # 6) Create an output workspace:
-        #           If  a user wants partial workspaces create an output workspace with all workspaces
-        #           If  a user wants total S from the selected atoms then create a workspace with total S and delete partial workspaces
+        # 6) Create a workspace with sum of all atoms if required
         if self._sum_contributions:
 
             total_workspace = self._set_total_workspace(partial_workspaces=partial_workspaces)
-            # Discard the partial workspaces
-            for partial_ws in partial_workspaces:
-                DeleteWorkspace(partial_ws)
 
-            # Rename the summed workspace, this will be the output
-            #RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._out_ws_name)
-            logger.debug('Summed workspace: ' + str(total_workspace))
+            partial_workspaces.insert(0, total_workspace)
+            group = ','.join(partial_workspaces)
 
         else:
 
             group = ','.join(partial_workspaces)
 
-            GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
-
-            logger.debug('Partial workspaces: ' + str(group))
+        GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
+        prog_reporter.report("Workspace with total S  has been constructed.")
 
         self.setProperty('OutputWorkspace', self._out_ws_name)
+        prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
 
 
     def _create_partial_s_workspaces(self, atoms_symbol=None,s_data=None):
@@ -242,7 +231,7 @@ class ABINS(PythonAlgorithm):
                         EnableLogging=False)
 
         unitx = mtd[workspace].getAxis(0).setUnit("Label")
-        unitx.setLabel("Wavenumber", 'cm^-1')
+        unitx.setLabel("Energy Loss", 'cm^-1')
 
     def _set_total_workspace(self, partial_workspaces=None):
 
@@ -258,7 +247,8 @@ class ABINS(PythonAlgorithm):
             self._create_s_workspace(_freq, _s_atoms, total_workspace)
 
             # Set correct units on total workspace
-            mtd[total_workspace].setYUnitLabel('Intensity')
+            mtd[total_workspace].setYUnitLabel("S /Arbitrary Units")
+            mtd[total_workspace].setYUnit("Arbitrary Units")
 
         # Otherwise just repackage the WS we have as the total
         else:
@@ -270,13 +260,13 @@ class ABINS(PythonAlgorithm):
 
     def _set_workspace(self, atom_name=None, frequencies=None, s_points=None):
 
-        _ws_name = self._out_ws_name + atom_name
+        _ws_name = self._out_ws_name + "_" +  atom_name
 
         self._create_s_workspace(freq=frequencies, s_points=np.copy(s_points), workspace=_ws_name)
 
         # Set correct units on workspace
-        mtd[_ws_name].setYUnitLabel('Intensity')
-        mtd[_ws_name].setYUnit('(D/A)^2/amu')
+        mtd[_ws_name].setYUnitLabel("S /Arbitrary Units")
+        mtd[_ws_name].setYUnit("Arbitrary Units")
 
         # Add the sample material to the workspace
         SetSampleMaterial(InputWorkspace=_ws_name, ChemicalFormula=atom_name)
