@@ -140,6 +140,8 @@ class CalculateS(IOmodule):
 
                     _value_dft[start:] = np.power(np.multiply(_extracted_q_data[k][start:], _msd[atom]),  overtone) * np.exp( -np.multiply(_extracted_q_data[k][start:], _dw[atom]))
 
+                    print "_value_dft=", _value_dft
+
                     # convolve value with instrumental resolution; resulting spectrum has broadened peaks with Gaussian-like shape
                     np.add(instrument.convolve_with_resolution_function(frequencies= np.multiply(_k_points_data["frequencies"][k], 1.0 / Constants.cm1_2_hartree) ,
                                                                         s_dft=_value_dft,
