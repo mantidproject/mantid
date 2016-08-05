@@ -615,8 +615,6 @@ void SliceViewer::updateDimensionSliceWidgets() {
                        SLOT(rebinParamsChanged()));
       QObject::connect(widget, SIGNAL(changedNumBins(int, int)), this,
                        SLOT(rebinParamsChanged()));
-	  QObject::connect(widget, SIGNAL(changedShownDim(int, int, int)), this,
-		  SLOT(checkForHKLDimension(int, int, int)));
 
       // Save in this list
       m_dimWidgets.push_back(widget);
@@ -705,7 +703,10 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
 	  delete m_data;
 	  m_data = new API::QwtRasterDataMDNonOrthogonal();
   }
-  m_coordinateTransform = createCoordinateTransform(ws+);
+  m_coordinateTransform = createCoordinateTransform(ws, m_dimX, m_dimY);
+  //disconnect and reconnect here
+  QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
+	  SLOT(checkForHKLDimension(size_t, size_t)));
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
 
@@ -1657,9 +1658,9 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim) {
   emit changedShownDim(m_dimX, m_dimY);
 }
 
-void SliceViewer::checkForHKLDimension(int index, int dim, int oldDim) 
+void SliceViewer::checkForHKLDimension(size_t dimX, size_t dimY)
 {
-
+	m_coordinateTransform->checkDimensionsForHKL(m_ws, dimX, dimY);
 }
 //==============================================================================
 //================================ PYTHON METHODS ==============================

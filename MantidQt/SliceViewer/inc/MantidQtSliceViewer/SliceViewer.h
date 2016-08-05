@@ -170,7 +170,7 @@ public slots:
   void showInfoAt(double, double);
 
   // Change in view slots
-  void checkForHKLDimension(int index, int dim, int oldDim);
+  void checkForHKLDimension(size_t dimX, size_t dimY);
   void changedShownDim(int index, int dim, int oldDim);
   void updateDisplaySlot(int index, double value);
   void resetZoom();
