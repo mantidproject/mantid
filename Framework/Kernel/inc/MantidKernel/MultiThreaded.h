@@ -5,6 +5,14 @@
 
 namespace Mantid {
 namespace Kernel {
+namespace Detail {
+
+/** Parallelism check
+ * Forwards boolean argument to OpenMP macro.
+ * @param Whether to execute in parallel.
+ * @return Whether to execute in parallel.
+ */
+inline bool threadSafe(bool condition) { return condition; }
 
 /** Thread-safety check
  * Checks the workspace to ensure it is suitable for multithreaded access.
@@ -31,6 +39,7 @@ threadSafe(Arg workspace, Args... others) {
   return (!workspace || workspace->threadSafe()) && threadSafe(others...);
 }
 
+} // namespace Detail
 } // namespace Kernel
 } // namespace Mantid
 
@@ -87,8 +96,8 @@ threadSafe(Arg workspace, Args... others) {
 *   "condition" must evaluate to TRUE in order for the
 *   code to be executed in parallel
 */
-#define PARALLEL_FOR_IF(condition)                                             \
-    PRAGMA(omp parallel for if (condition) )
+#define PARALLEL_FOR_IF(...)                                                   \
+    PRAGMA(omp parallel for if (Mantid::Kernel::Details::threadSafe(__VA_ARGS__) )
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
 *   This includes no checks to see if workspaces are suitable
@@ -175,7 +184,7 @@ threadSafe(Arg workspace, Args... others) {
 #else //_OPENMP
 
 /// Empty definitions - to enable set your complier to enable openMP
-#define PARALLEL_FOR_IF(condition)
+#define PARALLEL_FOR_IF(...)
 #define PARALLEL_FOR_NO_WSP_CHECK()
 #define PARALLEL_FOR_NOWS_CHECK_FIRSTPRIVATE(variable)
 #define PARALLEL_FOR_NO_WSP_CHECK_FIRSTPRIVATE2(variable1, variable2)
