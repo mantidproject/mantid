@@ -48,6 +48,12 @@ public:
   ColorBarWidget(QWidget *parent = 0);
   ~ColorBarWidget() override;
 
+  enum CheckboxStrategy {
+	  ADD_AUTOSCALE_CURRENT_SLICE = 0,
+	  ADD_AUTOSCALE_ON_LOAD = 1,
+	  ADD_AUTOSCALE_BOTH = 2
+  };
+
   void updateColorMap();
 
   void setViewRange(double min, double max);
@@ -55,6 +61,7 @@ public:
   void setMinimum(double min);
   void setMaximum(double max);
   void setRenderMode(bool rendering);
+  void setCheckBoxMode(CheckboxStrategy strategy);
 
   double getMinimum() const;
   double getMaximum() const;
@@ -73,6 +80,8 @@ public:
   bool getAutoScale() const;
 
   bool getAutoColorScaleforCurrentSlice() const;
+
+
 
 public slots:
   void changedMinimum();

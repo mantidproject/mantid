@@ -96,6 +96,41 @@ void ColorBarWidget::setRenderMode(bool rendering) {
   this->ui.dspnN->setVisible(visible);
 }
 
+/** Change which CheckBoxes are displayed in the widget
+*
+*	Available choices:
+*	 ADD_AUTOSCALE_CURRENT_SLICE
+*	 ADD_AUTOSCALE_ON_LOAD
+*	 ADD_AUTOSCALE_BOTH
+*
+* @param strategy :: select which checkboxes are shown
+*/
+void ColorBarWidget::setCheckBoxMode(CheckboxStrategy strategy) {
+  switch (strategy) {
+  case ADD_AUTOSCALE_CURRENT_SLICE:
+    ui.autoScale->setVisible(false);
+    ui.autoScale->setEnabled(false);
+    ui.autoScaleForCurrentSlice->setVisible(true);
+    ui.autoScaleForCurrentSlice->setEnabled(true);
+
+    break;
+
+  case ADD_AUTOSCALE_ON_LOAD:
+    ui.autoScale->setVisible(true);
+    ui.autoScale->setEnabled(true);
+    ui.autoScaleForCurrentSlice->setVisible(false);
+    ui.autoScaleForCurrentSlice->setEnabled(false);
+    break;
+
+  case ADD_AUTOSCALE_BOTH:
+    ui.autoScale->setVisible(true);
+    ui.autoScale->setEnabled(true);
+    ui.autoScaleForCurrentSlice->setVisible(true);
+    ui.autoScaleForCurrentSlice->setEnabled(true);
+    break;
+  }
+}
+
 // Get the current colorbar scaling type
 int ColorBarWidget::getScale() {
   // Get value from GUI
