@@ -396,6 +396,56 @@ void EnggDiffFittingPresenter::processLogMsg() {
   }
 }
 
+void EnggDiffFittingPresenter::processFitAllPeaks() {
+
+  const std::string focusedRunNo = m_view->getFittingRunNo();
+  std::string fittingPeaks = m_view->fittingPeaksData();
+
+  // validate fitting data as it will remain the same through out
+  const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
+  g_log.debug() << "the expected peaks are: " << fitPeaksData << '\n';
+
+  // create loop here
+  // Directory of the file is returned
+  // global vector could also be called?
+  // @shahroz
+
+  for (auto dir : g_multi_run_directories) {
+    g_log.error() << dir << std::endl;
+  }
+
+  std::vector<std::string> focusRunNoVec;
+  boost::split(focusRunNoVec, focusedRunNo, boost::is_any_of("-"));
+
+  if (!g_multi_run_directories.empty()) {
+
+    for (int i = 0; i < g_multi_run_directories.size(); i++) {
+      try {
+
+        inputChecksBeforeFitting(g_multi_run_directories[i], fitPeaksData);
+      } catch (std::invalid_argument &ia) {
+        m_view->userWarning("Error in the inputs required for fitting",
+                            ia.what());
+        return;
+      }
+    }
+  }
+
+  const std::string outWSName = "engggui_fitting_fit_peak_ws";
+  g_log.notice() << "EnggDiffraction GUI: starting new multi-run "
+                    "single peak fits into workspace '" +
+                        outWSName + "'. This "
+                                    "may take some seconds... \n";
+
+  m_view->showStatus("Fitting multi-run single peaks...");
+
+  // disable GUI to avoid any double threads
+  m_view->enableCalibrateFocusFitUserActions(false);
+  // startAsyncFittingWorker
+  // doFitting()
+  startAsyncFittingWorker(g_multi_run_directories, fitPeaksData);
+}
+
 void EnggDiffFittingPresenter::processFitPeaks() {
   const std::string focusedRunNo = m_view->getFittingRunNo();
   std::string fittingPeaks = m_view->fittingPeaksData();
