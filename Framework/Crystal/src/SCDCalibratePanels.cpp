@@ -330,7 +330,7 @@ void SCDCalibratePanels::exec() {
   int iSpectrum = -1;
   int icount = 0;
   //----------------- Calculate & Create Calculated vs Theoretical
-  //workspaces------------------,);
+  // workspaces------------------,);
   MatrixWorkspace_sptr ColWksp =
       Mantid::API::WorkspaceFactory::Instance().create(
           "Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
