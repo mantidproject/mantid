@@ -190,7 +190,6 @@ public:
     TS_ASSERT_EQUALS(dest[2], 9.8);
   }
 
-
   void test_empty_initializer_list_assignment() {
     std::initializer_list<double> empty_list;
     VectorOfTester values(1);
