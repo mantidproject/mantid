@@ -12,7 +12,7 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
     _map_file = None
     _peak_range = None
     _intensity_scale = None
-    _mirror_mode = None
+    _mirror_sense = None
 
 
     def category(self):
@@ -24,26 +24,27 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
 
 
     def PyInit(self):
-        self.declareProperty(FileProperty(name='Run', defaultValue='',
-                                          action=FileAction.Load),
-                             doc='Comma separated list of input files')
+        self.declareProperty(FileProperty(name='Run',defaultValue='',
+                                          action=FileAction.Load,
+                                          extensions=['nxs']),
+                             doc='List of input file (s)')
 
-        self.declareProperty(name='MirrorMode', defaultValue=False,
-                             doc='Data uses mirror mode')
+        self.declareProperty(name='MirrorSense', defaultValue=True,
+                             doc='Whether or not raw data have two wings')
 
         self.declareProperty(FileProperty(name='MapFile', defaultValue='',
                                           action=FileAction.OptionalLoad,
                                           extensions=['xml']),
-                             doc='Comma separated list of input files')
+                             doc='Detector grouping map file')
 
-        self.declareProperty(FloatArrayProperty(name='PeakRange', values=[0.0, 100.0],
+        self.declareProperty(FloatArrayProperty(name='PeakRange', values=[-0.01,0.01],
                                                 validator=FloatArrayMandatoryValidator()),
-                             doc='Peak range in energy transfer')
+                             doc='Peak range in energy transfer in meV')
 
         self.declareProperty(name='ScaleFactor', defaultValue=1.0,
                              doc='Intensity scaling factor')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', 'calib',
                                                direction=Direction.Output),
                              doc='Output workspace for calibration data')
 
@@ -51,54 +52,43 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
     def PyExec(self):
         self._setup()
 
-        temp_raw = '__raw'
-        temp_left = '__left'
-        temp_right = '__right'
-
         # Do an energy transfer reduction
-        IndirectILLReduction(Run=self._input_file,
-                             Analyser='silicon',
-                             Reflection='111',
-                             MirrorMode=self._mirror_mode,
-                             RawWorkspace=temp_raw,
-                             LeftWorkspace=temp_left,
-                             RightWorkspace=temp_right,
-                             ReducedWorkspace=self._out_ws,
-                             MapFile=self._map_file)
-
-        # Clean up unused workspaces
-        DeleteWorkspace(temp_raw)
-        if self._mirror_mode:
-            DeleteWorkspace(temp_left)
-            DeleteWorkspace(temp_right)
+        temp = IndirectILLReduction(Run=self._input_file,
+                                    MapFile=self._map_file,
+                                    SumRuns=True,
+                                    MirrorSense=self._mirror_sense,
+                                    UnmirrorOption=3)
 
         # Integrate within peak range
-        number_historgrams = mtd[self._out_ws].getNumberHistograms()
-        Integration(InputWorkspace=self._out_ws,
-                    OutputWorkspace=self._out_ws,
+        number_histograms = temp[0].getNumberHistograms()
+
+        ws_name = temp[0].getName()
+        Integration(InputWorkspace=ws_name,
+                    OutputWorkspace=ws_name,
                     RangeLower=float(self._peak_range[0]),
                     RangeUpper=float(self._peak_range[1]))
 
-        ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=self._out_ws,
-                                                               OutputWorkspace='__temp_ws_mask')
+        ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=ws_name,
+                                                               OutputWorkspace='temp_ws_mask')
         DeleteWorkspace(ws_mask)
 
         # Process automatic scaling
-        temp_sum = '__sum'
-        SumSpectra(InputWorkspace=self._out_ws,
-                   OutputWorkspace=temp_sum)
-        total = mtd[temp_sum].readY(0)[0]
-        DeleteWorkspace(temp_sum)
+        SumSpectra(InputWorkspace=ws_name,OutputWorkspace='temp_sum')
+        total = mtd['temp_sum'].readY(0)[0]
+        DeleteWorkspace('temp_sum')
 
         if self._intensity_scale is None:
-            self._intensity_scale = 1 / (total / (number_historgrams - num_zero_spectra))
+            self._intensity_scale = 1 / (total / (number_histograms - num_zero_spectra))
 
         # Apply scaling factor
-        Scale(InputWorkspace=self._out_ws,
+        Scale(InputWorkspace=ws_name,
               OutputWorkspace=self._out_ws,
               Factor=self._intensity_scale,
               Operation='Multiply')
 
+        DeleteWorkspace(ws_name)
+        DeleteWorkspace(temp[1])
+        DeleteWorkspace(temp[2])
 
         self.setProperty('OutputWorkspace', self._out_ws)
 
@@ -107,18 +97,16 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         """
         Gets properties.
         """
-
         self._input_file = self.getProperty('Run').value
         self._out_ws = self.getPropertyValue('OutputWorkspace')
 
         self._map_file = self.getPropertyValue('MapFile')
         self._peak_range = self.getProperty('PeakRange').value
-        self._mirror_mode = self.getProperty('MirrorMode').value
+        self._mirror_sense = self.getProperty('MirrorSense').value
 
         self._intensity_scale = self.getProperty('ScaleFactor').value
         if self._intensity_scale == 1.0:
             self._intensity_scale = None
-
 
     def validateInputs(self):
         """

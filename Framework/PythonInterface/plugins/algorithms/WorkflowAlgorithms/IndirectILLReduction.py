@@ -419,12 +419,12 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self.log().information('Unmirror 5: shift the right according to left of the vanadium and sum to left')
             # like 4, but take the reference from vanadium
             self._load_vanadium_run()
-            self._extract_workspace('van','left_van',x[start], x[mid])
-            self._convert_to_energy('left_van')
-            self._shift_spectra(right, 'left_van', 'right_shifted')
+            self._extract_workspace('van','right_van',x[start], x[mid])
+            self._convert_to_energy('right_van')
+            self._shift_spectra(right, 'right_van', 'right_shifted')
             self._perform_mirror(left, 'right_shifted', red)
             DeleteWorkspace('right_shifted')
-            DeleteWorkspace('left_van')
+            DeleteWorkspace('right_van')
             DeleteWorkspace('van')
 
         elif o == 6:

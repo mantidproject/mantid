@@ -21,19 +21,19 @@ class ILLIN16BCalibrationTest(unittest.TestCase):
 
     def test_happy_case_normal(self):
         calib_ws = ILLIN16BCalibration(Run='ILLIN16B_034745.nxs',
-                                       MirrorMode=False,
+                                       MirrorSense=False,
                                        PeakRange=[-0.001, 0.002])
 
-        self.assertEqual(calib_ws.getNumberHistograms(), 24)
+        self.assertEqual(calib_ws.getNumberHistograms(), 18)
         self.assertEqual(calib_ws.blocksize(), 1)
 
 
     def test_happy_case_mirror_mode(self):
         calib_ws = ILLIN16BCalibration(Run='ILLIN16B_034745.nxs',
-                                       MirrorMode=True,
+                                       MirrorSense=True,
                                        PeakRange=[-0.001, 0.002])
 
-        self.assertEqual(calib_ws.getNumberHistograms(), 24)
+        self.assertEqual(calib_ws.getNumberHistograms(), 18)
         self.assertEqual(calib_ws.blocksize(), 1)
 
 
@@ -41,7 +41,7 @@ class ILLIN16BCalibrationTest(unittest.TestCase):
         temp_map = TemporaryFileHelper(SAMPLE_GROUPING_XML, extension='.xml')
 
         calib_ws = ILLIN16BCalibration(Run='ILLIN16B_034745.nxs',
-                                       MirrorMode=True,
+                                       MirrorSense=True,
                                        MapFile=temp_map.getName(),
                                        PeakRange=[-0.001, 0.002])
 
