@@ -1,11 +1,12 @@
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
-from six.moves import range #pylint: disable=redefined-builtin
+from six.moves import range  # pylint: disable=redefined-builtin
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory
 from mantid.kernel import Direction
 import warnings
 
 _OUTPUTLEVEL = "NOOUTPUT"
+
 
 class SelectPowderDiffPeaks(PythonAlgorithm):
     """ Algorithm to select the powder diffraction peaks for Le Bail Fit
@@ -29,14 +30,14 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        self.declareProperty(ITableWorkspaceProperty("BraggPeakParameterWorkspace", "", Direction.Input),\
-                "Name of Table Workspace containing peak parameters.")
+        self.declareProperty(ITableWorkspaceProperty("BraggPeakParameterWorkspace", "", Direction.Input), \
+                             "Name of Table Workspace containing peak parameters.")
 
-        self.declareProperty(ITableWorkspaceProperty("ZscoreWorkspace", "", Direction.Input),\
-                "Name of Table Workspace containing z-score for the peak parametrs.")
+        self.declareProperty(ITableWorkspaceProperty("ZscoreWorkspace", "", Direction.Input), \
+                             "Name of Table Workspace containing z-score for the peak parametrs.")
 
-        self.declareProperty(ITableWorkspaceProperty("OutputBraggPeakParameterWorkspace", "", Direction.Output),\
-                "Name of Table Workspace containing the filtered peaks' parameters.")
+        self.declareProperty(ITableWorkspaceProperty("OutputBraggPeakParameterWorkspace", "", Direction.Output), \
+                             "Name of Table Workspace containing the filtered peaks' parameters.")
 
         self.declareProperty("MinimumPeakHeight", 0.0, "Minimum peak height allowed for the peaks to fit. ")
 
@@ -80,7 +81,6 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
 
         return
 
-
     def genBraggPeakParameterWorkspace(self, tablews):
         """ Create TableWorkspace containing peak parameters
         """
@@ -97,8 +97,7 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
 
         # 2. Sort the dictionary by d-spacing
         dspdict = {}
-        hkls = list(self.mPeaks.keys())
-        for hkl in hkls:
+        for hkl in self.mPeaks:
             dsp = self.mPeaks[hkl]["d_h"]
             dspdict[dsp] = hkl
         dhs = list(dspdict.keys())
@@ -128,7 +127,7 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
         Return: zscoredict
         """
         numrows = tablews.rowCount()
-        numcols  = tablews.columnCount()
+        numcols = tablews.columnCount()
         colnames = tablews.getColumnNames()
 
         peakparameterdict = {}
@@ -152,7 +151,7 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
     def filterByPeakHeight(self, minpeakheight):
         """ Filter by peak height
         """
-        for hkl in list(self.mPeaks.keys()):
+        for hkl in self.mPeaks:
             height = self.mPeaks[hkl]["Height"]
             wbuf = "Peak %d %d %d:  Height = %f " % (hkl[0], hkl[1], hkl[2], height)
             if height < minpeakheight:
@@ -167,12 +166,11 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
 
         return
 
-
     def filterByZscore(self, zscoredict, zscorefilter):
         """ Filter by zscore
         """
         # 1. Loop over peaks
-        for hkl in list(self.mPeaks.keys()):
+        for hkl in self.mPeaks:
 
             zscores = zscoredict[hkl]
 
@@ -180,23 +178,23 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
             errmsgout = False
 
             # 2. Loop over zscore filters
-            for parname in list(zscorefilter.keys()):
+            for parname in zscorefilter:
                 # Maximum allowed Z score
                 maxzscore = zscorefilter[parname]
                 # Convert to regular parameter name to parameter name in Zcore workspace
-                zparname = "Z_"+parname
+                zparname = "Z_" + parname
                 if zparname in zscores:
                     # Zscore table has this parameter's zscore
                     zscore = zscores[zparname]
                     if zscore > maxzscore:
                         deletethispeak = True
                         break
-                    # ENDIF
+                        # ENDIF
                 else:
                     # Zscore table has no such parameter
                     print("Warning! Zscore table has no parameter %s (from %s)" % (zparname, parname))
                     errmsgout = True
-                # ENDIF
+                    # ENDIF
             # ENDFOR Fitler
 
             # 3. Delete if
@@ -205,7 +203,7 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
 
             if errmsgout is True:
                 msg = "Parameters (keys):\t\t"
-                for key in list(zscores.keys()):
+                for key in zscores:
                     msg += "%s,\t\t" % (key)
                 print(msg)
 
@@ -223,9 +221,9 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
         if len(terms) % 2 == 1:
             raise NotImplementedError("Zscore filter is not defined correct.  It must have string and float in pair.")
 
-        for i in range(len(terms)/2):
-            parname = terms[2*i].strip()
-            maxzscore = float(terms[2*i+1])
+        for i in range(len(terms) / 2):
+            parname = terms[2 * i].strip()
+            maxzscore = float(terms[2 * i + 1])
             zscorefilter[parname] = maxzscore
 
         return zscorefilter

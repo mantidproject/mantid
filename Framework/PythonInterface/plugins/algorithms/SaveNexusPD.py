@@ -152,7 +152,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
             temp.attrs['units'] = units
 
     def _writeProtonCharge(self, nxentry, wksp):
-        if not 'gd_prtn_chrg' in list(wksp.run().keys()):
+        if not 'gd_prtn_chrg' in wksp.run():
             return  # nothing to do
 
         pcharge = wksp.run()['gd_prtn_chrg']
@@ -270,7 +270,7 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
                 wkspname = str(wksp)
 
             # check for the entry alread existing in append mode
-            if append and wkspname in list(handle.keys()):
+            if append and wkspname in handle.keys():
                 raise IOError("NXentry named '%s' already exists in '%s'" % \
                       (wkspname, filename))
 
