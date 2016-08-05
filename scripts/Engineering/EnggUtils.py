@@ -200,7 +200,7 @@ def getDetIDsForBank(bank):
 
     return detIDs
 
-def  generateOutputParTable(name, difa, difc, tzero):
+def generateOutputParTable(name, difa, difc, tzero):
     """
     Produces a table workspace with the two fitted calibration parameters
 
