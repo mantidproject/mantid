@@ -2,7 +2,7 @@ import multiprocessing
 import numpy as np
 
 from mantid.api import AlgorithmFactory,  FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
-from mantid.simpleapi import  CreateWorkspace, CloneWorkspace, GroupWorkspaces, Scale, RenameWorkspace, SetSampleMaterial, DeleteWorkspace
+from mantid.simpleapi import  CreateWorkspace, CloneWorkspace, GroupWorkspaces, Scale, RenameWorkspace, SetSampleMaterial, DeleteWorkspace, Rebin
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty
 
 from AbinsModules import LoadCASTEP, CalculateS, Constants
@@ -153,7 +153,7 @@ class ABINS(PythonAlgorithm):
 
         # 4) get atoms for which S should be plotted
         _data  = dft_data.getAtomsData().extract()
-        all_atoms_symbols = [atom["symbol"] for atom in _data]
+        all_atoms_symbols = set([atom["symbol"] for atom in _data])
 
         if len(self._atoms) == 0: # case: all atoms
             atoms_symbol = all_atoms_symbols
@@ -187,19 +187,13 @@ class ABINS(PythonAlgorithm):
         else:
 
             group = ','.join(partial_workspaces)
+
             GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
 
             logger.debug('Partial workspaces: ' + str(group))
 
         self.setProperty('OutputWorkspace', self._out_ws_name)
 
-    def _compute_workspace_for_s(self):
-        """
-        Puts calculated S into Mantid Workspace so that it can be easily visualise by Mantid utilities.
-        @return:
-        """
-
-        partial_workspaces, sum_workspace = self._produce_workspace_for_partial_S_workflow()
 
     def _create_partial_s_workspaces(self, atoms_symbol=None,s_data=None):
 
@@ -248,8 +242,7 @@ class ABINS(PythonAlgorithm):
                         EnableLogging=False)
 
         unitx = mtd[workspace].getAxis(0).setUnit("Label")
-        unitx.setLabel("Energy Shift", 'cm^-1')
-
+        unitx.setLabel("Wavenumber", 'cm^-1')
 
     def _set_total_workspace(self, partial_workspaces=None):
 
@@ -279,15 +272,14 @@ class ABINS(PythonAlgorithm):
 
         _ws_name = self._out_ws_name + atom_name
 
-        self._create_s_workspace(freq=frequencies, s_points=s_points, workspace=_ws_name)
+        self._create_s_workspace(freq=frequencies, s_points=np.copy(s_points), workspace=_ws_name)
 
-        # Set correct units on partial workspace
-
+        # Set correct units on workspace
         mtd[_ws_name].setYUnitLabel('Intensity')
+        mtd[_ws_name].setYUnit('(D/A)^2/amu')
 
         # Add the sample material to the workspace
-        SetSampleMaterial(InputWorkspace=_ws_name,
-                          ChemicalFormula=atom_name)
+        SetSampleMaterial(InputWorkspace=_ws_name, ChemicalFormula=atom_name)
 
         # Multiply intensity by scattering cross section
         scattering_x_section = None
@@ -303,8 +295,15 @@ class ABINS(PythonAlgorithm):
               Operation='Multiply',
               Factor=scattering_x_section)
 
-        #RenameWorkspace(self._out_ws_name,
-        #                OutputWorkspace=_ws_name)
+        # rebining
+        Rebin(Inputworkspace=_ws_name, Params=[Constants._bin_width] , OutputWorkspace=_ws_name)
+
+        # additional scaling  of each workspace if user wants it
+        if self._scale != 1:
+            Scale(InputWorkspace=_ws_name,
+                  OutputWorkspace=_ws_name,
+                  Operation='Multiply',
+                  Factor=self._scale)
 
         return _ws_name
 
