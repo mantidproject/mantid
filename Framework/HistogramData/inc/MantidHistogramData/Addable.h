@@ -4,6 +4,7 @@
 #include "MantidHistogramData/DllConfig.h"
 
 #include <algorithm>
+#include <stdexcept>
 #include <functional>
 #include <type_traits>
 
@@ -46,6 +47,7 @@ public:
   /// Element-wise addition of this and other.
   T &operator+=(const T &other) & {
     auto &derived = static_cast<T &>(*this);
+    checkLengths(derived, other);
     std::transform(derived.cbegin(), derived.cend(), other.begin(),
                    derived.begin(), std::plus<double>());
     return derived;
@@ -54,6 +56,7 @@ public:
   /// Element-wise subtraction of this and other.
   T &operator-=(const T &other) & {
     auto &derived = static_cast<T &>(*this);
+    checkLengths(derived, other);
     std::transform(derived.cbegin(), derived.cend(), other.begin(),
                    derived.begin(), std::minus<double>());
     return derived;
@@ -74,6 +77,12 @@ public:
 
 protected:
   ~Addable() = default;
+
+private:
+  void checkLengths(const T &v1, const T &v2) {
+    if (v1.size() != v2.size())
+      throw std::runtime_error("Cannot add vectors, lengths must match");
+  }
 };
 
 } // namespace detail

@@ -70,6 +70,15 @@ public:
     TS_ASSERT_DELTA(lhs[1], 0.18, 1e-14);
   }
 
+  void test_length_mismatch() {
+    AddableTester rhs1{1, 2};
+    const AddableTester rhs2{1, 2, 3};
+    TS_ASSERT_THROWS(rhs1 + rhs2, std::runtime_error);
+    TS_ASSERT_THROWS(rhs1 - rhs2, std::runtime_error);
+    TS_ASSERT_THROWS(rhs1 += rhs2, std::runtime_error);
+    TS_ASSERT_THROWS(rhs1 -= rhs2, std::runtime_error);
+  }
+
   void test_with_FixedLengthVector() {
     AddableTester2 lhs{0.1, 0.2};
     const AddableTester2 rhs{0.01, 0.02};
