@@ -2,7 +2,7 @@ import multiprocessing
 import numpy as np
 
 from mantid.api import AlgorithmFactory,  FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
-from mantid.simpleapi import  CreateWorkspace, CloneWorkspace, GroupWorkspaces, Scale, RenameWorkspace, SetSampleMaterial, DeleteWorkspace, Rebin
+from mantid.simpleapi import  CreateWorkspace, CloneWorkspace, GroupWorkspaces, Scale, RenameWorkspace, SetSampleMaterial, DeleteWorkspace, Rebin, Load
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty
 
 from AbinsModules import LoadCASTEP, CalculateS, Constants
@@ -119,7 +119,7 @@ class ABINS(PythonAlgorithm):
 
     def PyExec(self):
 
-        steps = 7
+        steps = 8
         begin = 0
         end = 1.0
         prog_reporter = Progress(self, begin, end, steps)
@@ -162,23 +162,22 @@ class ABINS(PythonAlgorithm):
 
         # at the moment only types of atom, e.g, for  benzene three options -> 1) C, H;  2) C; 3) H
         # 5) create workspaces for atoms in interest
-        partial_workspaces = self._create_partial_s_workspaces(atoms_symbol=atoms_symbol, s_data=s_data)
+        _workspaces = self._create_partial_s_workspaces(atoms_symbol=atoms_symbol, s_data=s_data)
         prog_reporter.report("Workspaces with partial dynamical structure factors have been constructed.")
 
         # 6) Create a workspace with sum of all atoms if required
         if self._sum_contributions:
 
-            total_workspace = self._set_total_workspace(partial_workspaces=partial_workspaces)
+            total_workspace = self._set_total_workspace(partial_workspaces=_workspaces)
+            _workspaces.insert(0, total_workspace)
+            prog_reporter.report("Workspace with total S  has been constructed.")
 
-            partial_workspaces.insert(0, total_workspace)
-            group = ','.join(partial_workspaces)
+        # 7) add experimental data to workspace
+        _workspaces.insert(0, self._set_experimental_data_workspace().getName())
+        prog_reporter.report("Workspace with with the experimental data has been constructed.")
 
-        else:
-
-            group = ','.join(partial_workspaces)
-
+        group = ','.join(_workspaces)
         GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
-        prog_reporter.report("Workspace with total S  has been constructed.")
 
         self.setProperty('OutputWorkspace', self._out_ws_name)
         prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
@@ -230,9 +229,6 @@ class ABINS(PythonAlgorithm):
                         OutputWorkspace=workspace,
                         EnableLogging=False)
 
-        unitx = mtd[workspace].getAxis(0).setUnit("Label")
-        unitx.setLabel("Energy Loss", 'cm^-1')
-
     def _set_total_workspace(self, partial_workspaces=None):
 
         total_workspace = self._out_ws_name + "_Total"
@@ -247,8 +243,7 @@ class ABINS(PythonAlgorithm):
             self._create_s_workspace(_freq, _s_atoms, total_workspace)
 
             # Set correct units on total workspace
-            mtd[total_workspace].setYUnitLabel("S /Arbitrary Units")
-            mtd[total_workspace].setYUnit("Arbitrary Units")
+            self._set_workspace_units(wrk=total_workspace)
 
         # Otherwise just repackage the WS we have as the total
         else:
@@ -265,8 +260,7 @@ class ABINS(PythonAlgorithm):
         self._create_s_workspace(freq=frequencies, s_points=np.copy(s_points), workspace=_ws_name)
 
         # Set correct units on workspace
-        mtd[_ws_name].setYUnitLabel("S /Arbitrary Units")
-        mtd[_ws_name].setYUnit("Arbitrary Units")
+        self._set_workspace_units(wrk=_ws_name)
 
         # Add the sample material to the workspace
         SetSampleMaterial(InputWorkspace=_ws_name, ChemicalFormula=atom_name)
@@ -296,6 +290,23 @@ class ABINS(PythonAlgorithm):
                   Factor=self._scale)
 
         return _ws_name
+
+    def _set_experimental_data_workspace(self):
+        experimental_wrk = Load(self._experimentalFile)
+        self._set_workspace_units(wrk=experimental_wrk.getName())
+        return experimental_wrk
+
+
+    def _set_workspace_units(self, wrk=None):
+        """
+
+        @param wrk: workspace which units should be set
+        """
+        unitx = mtd[wrk].getAxis(0).setUnit("Label")
+        unitx.setLabel("Energy Loss", 'cm^-1')
+
+        mtd[wrk].setYUnitLabel("S /Arbitrary Units")
+        mtd[wrk].setYUnit("Arbitrary Units")
 
 
     def _validate_crystal_input_file(self, filename=None):
