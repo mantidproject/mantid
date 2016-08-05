@@ -251,7 +251,7 @@ int main(int argc, char **argv) {
 
     app.connect(&app, SIGNAL(lastWindowClosed()), mw,
                 SLOT(exitWithPresetCode()));
-    QTimer::singleShot(0, mw, SLOT(about2Start()));
+    QTimer::singleShot(0, mw, SLOT(onAboutToStart()));
     return app.exec();
   } catch (std::exception &e) {
     QMessageBox::critical(

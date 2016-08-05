@@ -1087,7 +1087,7 @@ public slots:
   void setConfirmFolderClose(bool value) { confirmCloseFolder = value; }
   /** The very fist method to be executed as soon as the QApplication event loop
    * starts*/
-  void about2Start();
+  void onAboutToStart();
 
   /// Show/hide MantidPlot toolbars.
   void setToolbarsVisible(bool visible);

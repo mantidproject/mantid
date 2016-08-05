@@ -14692,14 +14692,15 @@ void ApplicationWindow::executeScriptFile(
 }
 
 /**
- * This is the slot for handing script exits when it returns successfully
+ * This is the slot for handing script execution errors. It is only
+ * attached by ::executeScriptFile which is only done in the '-xq'
+ * command line option.
  *
  * @param lineNumber The line number in the script that caused the error.
  */
 void ApplicationWindow::onScriptExecuteSuccess(const QString &message) {
   g_log.notice() << message.toStdString() << "\n";
   this->setExitCode(0);
-  this->exitWithPresetCode();
 }
 
 /**
@@ -14718,7 +14719,6 @@ void ApplicationWindow::onScriptExecuteError(const QString &message,
                 << scriptName.toStdString() << "\" encountered:\n"
                 << message.toStdString();
   this->setExitCode(1);
-  this->exitWithPresetCode();
 }
 
 /**
@@ -16235,10 +16235,9 @@ void ApplicationWindow::validateWindowPos(MdiSubWindow *w, int &x, int &y) {
  * Currently:
  *  - Update of Script Repository
  */
-void ApplicationWindow::about2Start() {
+void ApplicationWindow::onAboutToStart() {
   if (m_exec_on_start) {
     if (m_quit_after_exec) {
-      saved = true;
       try {
         // Script completion triggers close with correct code automatically
         executeScriptFile(m_cmdline_filename, Script::Asynchronous);
@@ -16246,8 +16245,9 @@ void ApplicationWindow::about2Start() {
         std::cerr << "Error thrown while running script file asynchronously '"
                   << exc.what() << "'\n";
         this->setExitCode(1);
-        this->exitWithPresetCode();
       }
+      saved = true;
+      this->close();
       return;
     } else {
       scriptingWindow->executeCurrentTab(Script::Asynchronous);
