@@ -4,6 +4,7 @@
 #include "MantidDataHandling/CreateSampleShape.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Material.h"
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -43,7 +44,7 @@ void CreateSampleShape::exec() {
   // Check it's valid and attach it to the workspace sample but preserve any
   // material
   if (shape->hasValidShape()) {
-    const auto &mat = workspace->sample().getMaterial();
+    const auto mat = workspace->sample().getMaterial();
     shape->setMaterial(mat);
     workspace->mutableSample().setShape(*shape);
   } else {

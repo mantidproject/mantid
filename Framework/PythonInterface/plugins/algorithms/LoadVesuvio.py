@@ -1,6 +1,7 @@
 #pylint: disable=no-init, unused-variable, too-many-lines
 # we need to disable unused_variable because ws.dataY(n) returns a reference  to the underlying c++ object
 # that can be modified inplace
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 import mantid.simpleapi as ms
@@ -352,7 +353,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 indices_thick = foil_map.get_indices(spectrum_no, foil_thin_periods)
                 raw_grp_indices = indices_thin + indices_thick
             elif self._diff_opt == "FoilInOut":
-                raw_grp_indices = range(0, self._nperiods)
+                raw_grp_indices = list(range(0, self._nperiods))
             else:
                 raise RuntimeError("Unknown single foil mode: %s." % (self._diff_opt))
 
@@ -421,7 +422,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         def to_int_list(str_param):
             """Return the list of numbers described by the string range"""
             elements = str_param.split("-")
-            return range(int(elements[0]),int(elements[1]) + 1) # range goes x_l,x_h-1
+            return list(range(int(elements[0]),int(elements[1]) + 1)) # range goes x_l,x_h-1
 
         # Attach parameters as attributes
         self._inst_prefix = isis.instrument("VESUVIO").shortName()
@@ -644,7 +645,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         if "-" in run_str:
             lower, upper = run_str.split("-")
             # Range goes lower to up-1 but we want to include the last number
-            runs = range(int(lower), int(upper)+1)
+            runs = list(range(int(lower), int(upper)+1))
 
         elif "," in run_str:
             runs =  run_str.split(",")
@@ -1096,7 +1097,7 @@ class SpectraToFoilPeriodMap(object):
            it reorders the 1:1 map to match this order
            numpy
         """
-        vals = np.array(self._one_to_one.values())
+        vals = np.array(list(self._one_to_one.values()))
         sorted_indices = arr.argsort()
         vals = vals[sorted_indices]
         arr = arr[sorted_indices]
