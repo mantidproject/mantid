@@ -94,7 +94,7 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
     def test_can_subtraction_with_can_shift(self):
         corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
                                            CanWorkspace=self._can_ws,
-                                           CanShiftAmount=0.03)
+                                           CanShiftFactor=0.03)
 
         self._verify_workspace(corr, 'can_subtraction')
 
@@ -126,7 +126,7 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
                                            CorrectionsWorkspace=self._corrections_ws,
                                            CanWorkspace=self._can_ws,
-                                           CanShiftAmount = 0.03)
+                                           CanShiftFactor = 0.03)
 
         self._verify_workspace(corr, 'sample_and_can_corrections')
 
