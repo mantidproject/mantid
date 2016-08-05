@@ -13493,6 +13493,10 @@ bool ApplicationWindow::isSilentStartup(const QString &arg) {
 }
 
 void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
+  m_exec_on_start = false;
+  m_quit_after_exec = false;
+  m_cmdline_filename = "";
+
   int num_args = args.count();
   if (num_args == 0) {
     initWindow();
@@ -13500,9 +13504,6 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
     return;
   }
 
-  m_exec_on_start = false;
-  m_quit_after_exec = false;
-  m_cmdline_filename = "";
   bool default_settings(false), unknown_opt_found(false);
   QString str;
   int filename_argindex(0), counter(0);
