@@ -44,7 +44,6 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         # empty can runs, comment, and factor
         self.ecRuns   = ''
-        self.ecCmnt   = ''
         self.ecFactor = self.DEF_ecFactor
 
         # data runs: [(runs,comment), ...]
@@ -73,7 +72,6 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('van_comment', self.vanCmnt)
 
         put('ec_runs',     self.ecRuns)
-        put('ec_comment',  self.ecCmnt)
         put('ec_factor',   self.ecFactor)
 
         for (runs, cmnt) in self.dataRuns:
@@ -123,7 +121,6 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.vanCmnt  = getStr('van_comment')
 
             self.ecRuns   = getStr('ec_runs')
-            self.ecCmnt   = getStr('ec_comment')
             self.ecFactor = getFlt('ec_factor', self.DEF_ecFactor)
 
             dataRuns = getStrLst('data_runs')
@@ -165,10 +162,6 @@ class TOFTOFScriptElement(BaseScriptElement):
         # must have a comment for runs
         if self.vanRuns and not self.vanCmnt:
             error('missing vanadium comment')
-
-        # must have a comment for runs
-        if self.ecRuns and not self.ecCmnt:
-            error('missing empty can comment')
 
         # must have rebinning energy (TODO ?)
         if not self.rebinEnergy:
@@ -224,7 +217,6 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("# empty can runs")
             l("%s = Load(Filename='%s')" % (wsRawEC, self.ecRuns))
             l("%s = TOFTOFMergeRuns(%s)" % (wsEC, wsRawEC))
-            l("%s.setComment('%s')"      % (wsEC, self.ecCmnt))
             l()
 
         # data runs

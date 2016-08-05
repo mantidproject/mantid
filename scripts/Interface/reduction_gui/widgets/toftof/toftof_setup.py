@@ -115,7 +115,6 @@ class TOFTOFSetupWidget(BaseWidget):
         self.vanCmnt       = QLineEdit()
 
         self.ecRuns        = QLineEdit()
-        self.ecCmnt        = QLineEdit()
         self.ecFactor      = QDoubleSpinBox()
 
         self.ecFactor.setRange(0, 1)
@@ -125,6 +124,13 @@ class TOFTOFSetupWidget(BaseWidget):
         self.rebinEnergy   = QLineEdit()
         self.rebinQ        = QLineEdit()
         self.maskDetectors = QLineEdit()
+
+        self.dataRunsView = QTableView(self)
+        self.dataRunsView.horizontalHeader().setStretchLastSection(True)
+        self.dataRunsView.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+
+        self.runDataModel = TOFTOFSetupWidget.DataRunModel(self)
+        self.dataRunsView.setModel(self.runDataModel)
 
         # ui controls
         self.btnDataDir          = QPushButton('Browse')
@@ -140,87 +146,95 @@ class TOFTOFSetupWidget(BaseWidget):
         self.rbtCorrectTOFSample = QRadioButton('sample')
 
         # ui layout
+        def _box(cls, widgets):
+            box = cls()
+            for w in widgets:
+                if isinstance(w, QLayout):
+                    box.addLayout(w)
+                elif isinstance(w, QWidget):
+                    box.addWidget(w)
+                else:
+                    box.addStretch(w)
+            return box
+
+        def hbox(widgets):
+            return _box(QHBoxLayout, widgets)
+
+        def vbox(widgets):
+            return _box(QVBoxLayout, widgets)
+
+        def label(text, tip):
+            l = QLabel(text)
+            if tip:
+                l.setToolTip(tip)
+            return l
+
+        gbDataDir = QGroupBox('Data search directory')
+        gbPrefix  = QGroupBox('Workspace prefix')
+        gbOptions = QGroupBox('Options')
+        gbInputs  = QGroupBox('Inputs')
+        gbBinning = QGroupBox('Binning')
+        gbData    = QGroupBox('Data')
+
         box = QVBoxLayout()
         self._layout.addLayout(box)
 
-        # data path
-        box.addWidget(QLabel('Data search directory'))
+        box.addLayout(hbox((gbDataDir, gbPrefix)))
+        box.addLayout(hbox((vbox((gbInputs, gbBinning, gbOptions, 1)), gbData)))
 
-        hbox = QHBoxLayout()
-        hbox.addWidget(self.dataDir)
-        hbox.addWidget(self.btnDataDir)
+        gbDataDir.setLayout(hbox((self.dataDir, self.btnDataDir)))
+        gbPrefix.setLayout(hbox((self.prefix,)))
 
-        box.addLayout(hbox)
+        grid = QGridLayout()
+        grid.addWidget(self.chkSubtractECVan,   0, 0, 1, 4)
+        grid.addWidget(label('Normalise','tip'),     1, 0)
+        grid.addWidget(self.rbtNormaliseNone,   1, 1)
+        grid.addWidget(self.rbtNormaliseMonitor,1, 2)
+        grid.addWidget(self.rbtNormaliseTime,   1, 3)
+        grid.addWidget(QLabel('Correct TOF'),   2, 0)
+        grid.addWidget(self.rbtCorrectTOFNone,  2, 1)
+        grid.addWidget(self.rbtCorrectTOFVan,   2, 2)
+        grid.addWidget(self.rbtCorrectTOFSample,2, 3)
+        grid.setColumnStretch(4, 1)
 
-        hbox = QHBoxLayout()
-        hbox.addWidget(self.chkSubtractECVan)
-        hbox.addStretch(1)
-
-        box.addLayout(hbox)
-
-        hbox = QHBoxLayout()
-        hbox.addWidget(QLabel('normalise'))
-        hbox.addWidget(self.rbtNormaliseNone)
-        hbox.addWidget(self.rbtNormaliseMonitor)
-        hbox.addWidget(self.rbtNormaliseTime)
-        hbox.addStretch(1)
+        gbOptions.setLayout(grid)
 
         btnGroup = QButtonGroup(self)
         btnGroup.addButton(self.rbtNormaliseNone)
         btnGroup.addButton(self.rbtNormaliseMonitor)
         btnGroup.addButton(self.rbtNormaliseTime)
 
-        box.addLayout(hbox)
-
-        hbox = QHBoxLayout()
-        hbox.addWidget(QLabel('correct TOF'))
-        hbox.addWidget(self.rbtCorrectTOFNone)
-        hbox.addWidget(self.rbtCorrectTOFVan)
-        hbox.addWidget(self.rbtCorrectTOFSample)
-        hbox.addStretch(1)
-
         btnGroup = QButtonGroup(self)
         btnGroup.addButton(self.rbtCorrectTOFNone)
         btnGroup.addButton(self.rbtCorrectTOFVan)
         btnGroup.addButton(self.rbtCorrectTOFSample)
 
-        box.addLayout(hbox)
-
-        # vanadium and EC
         grid = QGridLayout()
+        grid.addWidget(QLabel('Vanadium runs'), 0, 0)
+        grid.addWidget(self.vanRuns,            0, 1)
+        grid.addWidget(QLabel('Van. comment'),  1, 0)
+        grid.addWidget(self.vanCmnt,            1, 1)
+        grid.addWidget(QLabel('Empty can runs'),2, 0)
+        grid.addWidget(self.ecRuns,             2, 1)
+        grid.addWidget(QLabel('EC factor'),     3, 0)
+        grid.addWidget(self.ecFactor,           3, 1)
+        grid.addWidget(QLabel('mask detectors'),4, 0)
+        grid.addWidget(self.maskDetectors,      4, 1)
 
-        grid.addWidget(QLabel('workspace prefix'),0, 0)
-        grid.addWidget(self.prefix,               0, 1)
-        grid.addWidget(QLabel('vanadium runs'),   1, 0)
-        grid.addWidget(self.vanRuns,              1, 1)
-        grid.addWidget(QLabel('comment'),         1, 2)
-        grid.addWidget(self.vanCmnt,              1, 3)
+        gbInputs.setLayout(grid)
 
-        grid.addWidget(QLabel('EC runs'),         2, 0)
-        grid.addWidget(self.ecRuns,               2, 1)
-        grid.addWidget(QLabel('comment'),         2, 2)
-        grid.addWidget(self.ecCmnt,               2, 3)
-        grid.addWidget(QLabel('factor'),          2, 4)
-        grid.addWidget(self.ecFactor,             2, 5)
+        grid = QGridLayout()
+        grid.addWidget(QLabel('Energy'),        0, 0)
+        grid.addWidget(self.rebinEnergy,        0, 1)
+        grid.addWidget(QLabel('Q'),             1, 0)
+        grid.addWidget(self.rebinQ,             1, 1)
+        gbBinning.setLayout(grid)
 
-        grid.addWidget(QLabel('rebin in energy'), 3, 0)
-        grid.addWidget(self.rebinEnergy,          3, 1)
-        grid.addWidget(QLabel('rebin in Q'),      4, 0)
-        grid.addWidget(self.rebinQ,               4, 1)
-        grid.addWidget(QLabel('mask detectors'),  5, 0)
-        grid.addWidget(self.maskDetectors,        5, 1)
+        gbData.setLayout(hbox((self.dataRunsView,)))
 
-        box.addLayout(grid)
 
-        # data runs
-        self.dataRunsView = QTableView(self)
-        self.dataRunsView.horizontalHeader().setStretchLastSection(True)
-        self.dataRunsView.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
-        box.addWidget(self.dataRunsView)
 
-        self.runDataModel = TOFTOFSetupWidget.DataRunModel(self)
-        self.dataRunsView.setModel(self.runDataModel)
 
         # handle signals
         self.btnDataDir.clicked.connect(self._onDataSearchDir)
@@ -252,7 +266,6 @@ class TOFTOFSetupWidget(BaseWidget):
         el.vanCmnt       = getText(self.vanCmnt)
 
         el.ecRuns        = getText(self.ecRuns)
-        el.ecCmnt        = getText(self.ecCmnt)
         el.ecFactor      = self.ecFactor.value()
 
         el.dataRuns      = self.runDataModel.dataRuns
@@ -283,7 +296,6 @@ class TOFTOFSetupWidget(BaseWidget):
         self.vanCmnt.setText(el.vanCmnt)
 
         self.ecRuns.setText(el.ecRuns)
-        self.ecCmnt.setText(el.ecCmnt)
         self.ecFactor.setValue(el.ecFactor)
 
         self.runDataModel.dataRuns = el.dataRuns
