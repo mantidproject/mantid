@@ -579,7 +579,7 @@ void ReflectometryReductionOne::exec() {
         this->createChildAlgorithm("RebinToWorkspace");
       rebinToWorkspaceAlg->initialize();
       rebinToWorkspaceAlg->setProperty("WorkspaceToRebin",
-        detectorEfficiencyCorrection);
+        *detectorEfficiencyCorrection);
       rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", detectorWS);
       rebinToWorkspaceAlg->execute();
       MatrixWorkspace_sptr decWS =
