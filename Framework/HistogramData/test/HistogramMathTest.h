@@ -75,6 +75,17 @@ public:
     TS_ASSERT_EQUALS(result.e()[1], 6.0);
   }
 
+  void test_bad_factors() {
+    Histogram hist(BinEdges{1, 2, 3}, Counts{4, 9});
+    TS_ASSERT_THROWS(hist *= (-1.0), std::runtime_error);
+    TS_ASSERT_THROWS(hist * (-1.0), std::runtime_error);
+    TS_ASSERT_THROWS((-1.0) * hist, std::runtime_error);
+    TS_ASSERT_THROWS(hist /= (-1.0), std::runtime_error);
+    TS_ASSERT_THROWS(hist / (-1.0), std::runtime_error);
+    TS_ASSERT_THROWS(hist /= 0.0, std::runtime_error);
+    TS_ASSERT_THROWS(hist / 0.0, std::runtime_error);
+  }
+
   void test_plus_histogram() {
     const Histogram hist1(BinEdges{1, 2, 3}, Counts{4, 9});
     const Histogram hist2(BinEdges{1, 2, 3}, Counts{1, 2});

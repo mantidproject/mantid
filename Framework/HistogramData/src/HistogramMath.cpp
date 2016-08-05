@@ -2,22 +2,26 @@
 #include "MantidHistogramData/HistogramMath.h"
 
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 
 namespace Mantid {
 namespace HistogramData {
 
-/** Scales data in histogram by constant factor.
+/** Scales data in histogram by constant (non-negative) factor.
  *
  * Uncertainties are scaled by the same factor, such that the *relative*
- *uncertainties remain unchanged. */
+ * uncertainties remain unchanged. */
 Histogram &operator*=(Histogram &histogram, const double factor) {
+  if (factor < 0.0 || !std::isfinite(factor))
+    throw std::runtime_error("Invalid operation: Cannot scale Histogram by "
+                             "negative or infinite factor");
   histogram.mutableY() *= factor;
   histogram.mutableE() *= factor;
   return histogram;
 }
 
-/** Divides data in histogram by constant factor.
+/** Divides data in histogram by constant (positive) factor.
  *
  * Uncertainties are divided by the same factor, such that the *relative*
  * uncertainties remain unchanged. */
@@ -25,7 +29,7 @@ Histogram &operator/=(Histogram &histogram, const double factor) {
   return histogram *= 1.0 / factor;
 }
 
-/** Scales data in histogram by constant factor.
+/** Scales data in histogram by constant (non-negative) factor.
  *
  * Uncertainties are scaled by the same factor, such that the *relative*
  *uncertainties remain unchanged. */
@@ -33,7 +37,7 @@ Histogram operator*(Histogram histogram, const double factor) {
   return histogram *= factor;
 }
 
-/** Scales data in histogram by constant factor.
+/** Scales data in histogram by constant (non-negative) factor.
  *
  * Uncertainties are scaled by the same factor, such that the *relative*
  *uncertainties remain unchanged. */
@@ -41,7 +45,7 @@ Histogram operator*(const double factor, Histogram histogram) {
   return histogram *= factor;
 }
 
-/** Dividies data in histogram by constant factor.
+/** Dividies data in histogram by constant (positive) factor.
  *
  * Uncertainties are divided by the same factor, such that the *relative*
  * uncertainties remain unchanged. */
