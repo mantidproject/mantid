@@ -811,7 +811,14 @@ void LoadMuonNexus1::addGoodFrames(DataObjects::Workspace2D_sptr localWorkspace,
     try {
 
       handle.openPath("run/instrument/beam");
-      handle.openData("frames_good");
+      try {
+        handle.openData("frames_good");
+      } catch (::NeXus::Exception &) {
+        // If it's not there, read "frames" instead and assume they are good
+        g_log.warning("Could not read /run/instrument/beam/frames_good");
+        handle.openData("frames");
+        g_log.warning("Using run/instrument/beam/frames instead");
+      }
 
       // read frames_period_daq
       boost::scoped_array<int> dataVals(new int[1]);
@@ -821,7 +828,7 @@ void LoadMuonNexus1::addGoodFrames(DataObjects::Workspace2D_sptr localWorkspace,
       run.addProperty("goodfrm", dataVals[0]);
 
     } catch (::NeXus::Exception &) {
-      g_log.warning("Could not read /run/instrument/beam/frames_good");
+      g_log.warning("Could not read number of good frames");
     }
 
   } else {

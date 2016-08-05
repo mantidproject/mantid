@@ -130,8 +130,6 @@ public:
   void testCommonBinsValidator_isValid() {
     TS_ASSERT_EQUALS(binVal->isValid(ws1), "");
     TS_ASSERT_EQUALS(binVal->isValid(ws2), "");
-    ws1->dataX(0)[5] = 0.0;
-    TS_ASSERT_EQUALS(binVal->isValid(ws1), "");
     ws1->dataX(0)[5] = 1.1;
     TS_ASSERT_EQUALS(
         binVal->isValid(ws1),

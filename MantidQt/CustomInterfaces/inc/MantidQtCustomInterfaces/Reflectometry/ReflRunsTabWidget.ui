@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>reflMainWidget</class>
- <widget class="QMainWindow" name="reflMainWidget">
+ <class>ReflRunsTabWidget</class>
+ <widget class="QWidget" name="ReflRunsTabWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,13 +11,39 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>ISIS Reflectometry (Polref)</string>
+   <string>RunsTab</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="layoutMain">
     <property name="margin">
      <number>1</number>
     </property>
+     <item>
+       <widget class="QMenuBar" name="menuBar">
+         <property name="geometry">
+           <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>959</width>
+             <height>18</height>
+           </rect>
+         </property>
+         <property name="nativeMenuBar">
+           <bool>false</bool>
+         </property>
+         <widget class="QMenu" name="menuTable">
+           <property name="title">
+             <string>&amp;Reflectometry</string>
+           </property>
+         </widget>
+         <widget class="QMenu" name="menuRows">
+           <property name="title">
+             <string>&amp;Edit</string>
+           </property>
+         </widget>
+         <addaction name="menuTable"/>
+         <addaction name="menuRows"/>
+       </widget>
+     </item>
     <item>
      <widget class="QSplitter" name="splitterTables">
       <property name="sizePolicy">
@@ -29,7 +55,10 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <property name="childrenCollapsible">
+       <property name="styleSheet">
+        <string>QSplitter::handle { background-color:white }</string>
+       </property>
+       <property name="childrenCollapsible">
        <bool>true</bool>
       </property>
       <widget class="QGroupBox" name="groupSearchPane">
@@ -222,32 +251,6 @@
        </widget>
     </item>
    </layout>
-  </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>959</width>
-     <height>18</height>
-    </rect>
-   </property>
-   <property name="nativeMenuBar">
-    <bool>false</bool>
-   </property>
-   <widget class="QMenu" name="menuTable">
-    <property name="title">
-     <string>&amp;Reflectometry</string>
-    </property>
-   </widget>
-   <widget class="QMenu" name="menuRows">
-     <property name="title">
-       <string>&amp;Edit</string>
-     </property>
-   </widget>
-   <addaction name="menuTable"/>
-   <addaction name="menuRows"/>
-  </widget>
   <action name="actionSearch">
    <property name="icon">
     <iconset resource="../../../../MantidPlot/icons/icons.qrc">
@@ -277,13 +280,7 @@
   <tabstop>comboSearchInstrument</tabstop>
   <tabstop>tableSearchResults</tabstop>
  </tabstops>
-  <customwidgets>
-    <customwidget>
-      <class>MantidQt:MantidWidgets::QDataProcessorWidget</class>
-      <extends>QWidget</extends>
-      <header>MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h</header>
-    </customwidget>
-  </customwidgets>
+  <customwidgets/>
   <resources>
   <include location="../../../../MantidPlot/icons/icons.qrc"/>
  </resources>

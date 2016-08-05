@@ -120,7 +120,7 @@ private:
                                std::vector<int> &rangestartvec,
                                std::vector<int> &rangeendvec);
 
-  std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 
   void convertSpMasksToDetIDs(const API::MatrixWorkspace_sptr &SourceWS,
                               const std::vector<int32_t> &maskedSpecID,

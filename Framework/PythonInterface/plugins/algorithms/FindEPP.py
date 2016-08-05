@@ -1,6 +1,6 @@
 # pylint: disable=no-name-in-module
 from __future__ import (absolute_import, division, print_function)
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, ITableWorkspaceProperty, WorkspaceUnitValidator
+from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, ITableWorkspaceProperty
 from mantid.kernel import Direction
 from mantid.simpleapi import Fit, CreateEmptyTableWorkspace
 import numpy as np
@@ -25,8 +25,7 @@ class FindEPP(PythonAlgorithm):
 
     def PyInit(self):
         # input
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input,
-                                                     validator=WorkspaceUnitValidator("TOF")),
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input),
                              doc="Input Sample or Vanadium workspace")
 
         # output

@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as api
 import numpy as np
 import os
@@ -63,7 +64,7 @@ class LoadDNSLegacy(PythonAlgorithm):
             raise RuntimeError("Invalid coil currents table: " + str(err))
         poltable = []
         colnames = currents.dtype.names
-        poltable = [dict(zip(colnames, cur)) for cur in currents]
+        poltable = [dict(list(zip(colnames, cur))) for cur in currents]
         self.log().debug("Loaded polarisation table:\n" + str(poltable))
         return poltable
 
