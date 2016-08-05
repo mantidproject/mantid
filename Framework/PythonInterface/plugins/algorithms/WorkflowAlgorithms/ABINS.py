@@ -104,7 +104,11 @@ class ABINS(PythonAlgorithm):
 
         temperature = self.getPropertyValue("Temperature [K]")
         if temperature < 0:
-            issues["Temperature"] = "Temperature must be positive!"
+            issues["Temperature [K]"] = "Temperature must be positive!"
+
+        scale = self.getProperty("Scale")
+        if scale < 0:
+            issues["Scale"] = "Scale must be positive"
 
         dft_filename = self.getProperty("DFT program")
         if dft_filename == "CASTEP":
