@@ -185,6 +185,8 @@ private:
                  int col, int row, int Edge);
  /// Function to calculate U
   void findU(DataObjects::PeaksWorkspace_sptr peaksWs);
+  /// save workspaces
+  void saveNexus (std::string outputFile, API::MatrixWorkspace_sptr outputWS);
  /// Function to optimize L1
   void findL1(int nPeaks, DataObjects::PeaksWorkspace_sptr peaksWs);
 

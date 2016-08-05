@@ -188,7 +188,6 @@ set ( TEST_FILES
 	PredictFractionalPeaksTest.h
 	PredictPeaksTest.h
 	SCDCalibratePanelsTest.h
-	SCDPanelErrorsTest.h
 	SaveHKLTest.h
 	SaveIsawPeaksTest.h
 	SaveIsawUBTest.h

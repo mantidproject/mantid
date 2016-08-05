@@ -87,14 +87,6 @@ void SCDCalibratePanels::Quat2RotxRotyRotz(const Quat Q, double &Rotx,
   }
 }
 
-
-
-
-
-
-
-
-
 namespace { // anonymous namespace
             /**
              * Adds a tie to the IFunction.
@@ -223,7 +215,9 @@ void SCDCalibratePanels::exec() {
       }
     }
     int nBankPeaks = local->getNumberPeaks();
-    if (nBankPeaks < 8) {
+    int numOpt = 8;
+    if (!changeSize) numOpt -= 2;
+    if (nBankPeaks < numOpt) {
       g_log.notice() << "Too few peaks for " << iBank <<"\n";
       continue;
     }
@@ -337,9 +331,7 @@ void SCDCalibratePanels::exec() {
   MatrixWorkspace_sptr TofWksp =
       Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", MyBankNames.size(),
                                                        nPeaks, nPeaks);
-  setProperty("ColWorkspace", ColWksp);
-  setProperty("RowWorkspace", RowWksp);
-  setProperty("TofWorkspace", TofWksp);
+
   OrientedLattice lattice = peaksWs->mutableSample().getOrientedLattice();
   DblMatrix UB = lattice.getUB();
   // sort again since edge peaks can trace to other banks
@@ -378,6 +370,20 @@ void SCDCalibratePanels::exec() {
       // g_log.debug() << "Problem only in printing peaks\n";
     }
   }
+
+  string colFilename = getProperty("ColFilename");
+  string rowFilename = getProperty("RowFilename");
+  string tofFilename = getProperty("TofFilename");
+  saveNexus(colFilename, ColWksp);
+  saveNexus(rowFilename, RowWksp);
+  saveNexus(tofFilename, TofWksp);
+}
+
+void SCDCalibratePanels::saveNexus (std::string outputFile, MatrixWorkspace_sptr outputWS) {
+  IAlgorithm_sptr save = this->createChildAlgorithm("SaveNexus");
+  save->setProperty("InputWorkspace", outputWS);
+  save->setProperty("FileName", outputFile);
+  save->execute();
 }
 
 void SCDCalibratePanels::findL1(int nPeaks, DataObjects::PeaksWorkspace_sptr peaksWs) {
@@ -774,27 +780,27 @@ void SCDCalibratePanels::init() {
       "Path to an Mantid .xml description(for LoadParameterFile) file to "
       "save.");
 
-  declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "ColWorkspace", "ColWorkspace", Kernel::Direction::Output),
-      "Workspace comparing calculated and theoretical column of each peak.");
+    declareProperty(
+        Kernel::make_unique<FileProperty>("ColFilename", "ColCalcvsTheor.nxs",
+                                          FileProperty::Save, ".nxs"),
+    "Path to a NeXus file comparing calculated and theoretical column of each peak.");
 
-  declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "RowWorkspace", "RowWorkspace", Kernel::Direction::Output),
-      "Workspace comparing calculated and theoretical row of each peak.");
+    declareProperty(
+        Kernel::make_unique<FileProperty>("RowFilename", "RowCalcvsTheor.nxs",
+                                          FileProperty::Save, ".nxs"),
+    "Path to a NeXus file comparing calculated and theoretical row of each peak.");
 
-  declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "TofWorkspace", "TofWorkspace", Kernel::Direction::Output),
-      "Workspace comparing calculated and theoretical TOF of each peak.");
+    declareProperty(
+        Kernel::make_unique<FileProperty>("TofFilename", "TofCalcvsTheor.nxs",
+                                          FileProperty::Save, ".nxs"),
+    "Path to a NeXus file comparing calculated and theoretical TOF of each peak.");
 
   const string OUTPUTS("Outputs");
   setPropertyGroup("DetCalFilename", OUTPUTS);
   setPropertyGroup("XmlFilename", OUTPUTS);
-  setPropertyGroup("ColWorkspace", OUTPUTS);
-  setPropertyGroup("RowWorkspace", OUTPUTS);
-  setPropertyGroup("TofWorkspace", OUTPUTS);
+  setPropertyGroup("ColFilename", OUTPUTS);
+  setPropertyGroup("RowFilename", OUTPUTS);
+  setPropertyGroup("TofFilename", OUTPUTS);
 
 }
 void SCDCalibratePanels::updateBankParams(
