@@ -616,37 +616,37 @@ void EnggDiffractionViewQtGUI::newCalibLoaded(const std::string &vanadiumNo,
 }
 
 void EnggDiffractionViewQtGUI::enableCalibrateFocusFitUserActions(
-    bool newState) {
+    bool enable) {
   // calibrate
-  m_uiTabCalib.groupBox_make_new_calib->setEnabled(newState);
-  m_uiTabCalib.groupBox_current_calib->setEnabled(newState);
-  m_uiTabCalib.groupBox_calib_cropped->setEnabled(newState);
-  m_uiTabCalib.pushButton_new_cropped_calib->setEnabled(newState);
-  m_ui.pushButton_close->setEnabled(newState);
-  m_uiTabCalib.checkBox_PlotData_Calib->setEnabled(newState);
+  m_uiTabCalib.groupBox_make_new_calib->setEnabled(enable);
+  m_uiTabCalib.groupBox_current_calib->setEnabled(enable);
+  m_uiTabCalib.groupBox_calib_cropped->setEnabled(enable);
+  m_uiTabCalib.pushButton_new_cropped_calib->setEnabled(enable);
+  m_ui.pushButton_close->setEnabled(enable);
+  m_uiTabCalib.checkBox_PlotData_Calib->setEnabled(enable);
 
   // focus
-  m_uiTabFocus.MWRunFiles_run_num->setEnabled(newState);
-  m_uiTabFocus.pushButton_focus->setEnabled(newState);
+  m_uiTabFocus.MWRunFiles_run_num->setEnabled(enable);
+  m_uiTabFocus.pushButton_focus->setEnabled(enable);
 
-  m_uiTabFocus.groupBox_cropped->setEnabled(newState);
-  m_uiTabFocus.groupBox_texture->setEnabled(newState);
+  m_uiTabFocus.groupBox_cropped->setEnabled(enable);
+  m_uiTabFocus.groupBox_texture->setEnabled(enable);
 
   // Disable all focus output options except graph plotting
-  m_uiTabFocus.checkBox_plot_focused_ws->setEnabled(newState);
-  m_uiTabFocus.checkBox_save_output_files->setEnabled(newState);
-  m_uiTabFocus.comboBox_Multi_Runs->setEnabled(newState);
+  m_uiTabFocus.checkBox_plot_focused_ws->setEnabled(enable);
+  m_uiTabFocus.checkBox_save_output_files->setEnabled(enable);
+  m_uiTabFocus.comboBox_Multi_Runs->setEnabled(enable);
 
-  m_uiTabFocus.pushButton_stop_focus->setDisabled(newState);
-  m_uiTabFocus.pushButton_reset->setEnabled(newState);
+  m_uiTabFocus.pushButton_stop_focus->setDisabled(enable);
+  m_uiTabFocus.pushButton_reset->setEnabled(enable);
 
   // pre-processing
-  m_uiTabPreproc.MWRunFiles_preproc_run_num->setEnabled(newState);
-  m_uiTabPreproc.pushButton_rebin_time->setEnabled(newState);
-  m_uiTabPreproc.pushButton_rebin_multiperiod->setEnabled(newState);
+  m_uiTabPreproc.MWRunFiles_preproc_run_num->setEnabled(enable);
+  m_uiTabPreproc.pushButton_rebin_time->setEnabled(enable);
+  m_uiTabPreproc.pushButton_rebin_multiperiod->setEnabled(enable);
 
   // fitting
-  m_fittingWidget->enable(newState);
+  m_fittingWidget->enable(enable);
 }
 
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
