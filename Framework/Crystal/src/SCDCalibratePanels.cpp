@@ -779,9 +779,10 @@ void SCDCalibratePanels::init() {
                   "Lattice Parameter gamma in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
   declareProperty("changeL1", true, "Change the L1(source to sample) distance");
-  declareProperty("changePanelSize", false, "Change the height and width of the "
-                                           "detectors.  Implemented only for "
-                                           "RectangularDetectors.");
+  declareProperty("changePanelSize", false,
+                  "Change the height and width of the "
+                  "detectors.  Implemented only for "
+                  "RectangularDetectors.");
 
   declareProperty("EdgePixels", 0,
                   "Remove peaks that are at pixels this close to edge. ");
