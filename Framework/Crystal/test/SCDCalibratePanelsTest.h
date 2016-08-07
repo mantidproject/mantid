@@ -49,15 +49,15 @@ public:
     ITableWorkspace_sptr results =
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
             "params_bank47");
-    TS_ASSERT_DELTA(-0.00433, results->cell<double>(0, 1), 1e-4);
-    TS_ASSERT_DELTA(0.00122, results->cell<double>(1, 1), 1e-4);
-    TS_ASSERT_DELTA(0.00137, results->cell<double>(2, 1), 1e-4);
-    TS_ASSERT_DELTA(-0.14099, results->cell<double>(3, 1), 1e-4);
-    TS_ASSERT_DELTA(-0.11341, results->cell<double>(4, 1), 1e-4);
-    TS_ASSERT_DELTA(0.16836, results->cell<double>(5, 1), 1e-4);
-    TS_ASSERT_DELTA(1.00048, results->cell<double>(6, 1), 1e-4);
-    TS_ASSERT_DELTA(1.00021, results->cell<double>(7, 1), 1e-4);
-    TS_ASSERT_DELTA(0.30116, results->cell<double>(8, 1), 1e-4);
+    TS_ASSERT_DELTA(-0.0045, results->cell<double>(0, 1), 1e-4);
+    TS_ASSERT_DELTA(0.0013, results->cell<double>(1, 1), 1e-4);
+    TS_ASSERT_DELTA(0.0012, results->cell<double>(2, 1), 1e-4);
+    TS_ASSERT_DELTA(-0.0415, results->cell<double>(3, 1), 1e-4);
+    TS_ASSERT_DELTA(-0.0217, results->cell<double>(4, 1), 1e-4);
+    TS_ASSERT_DELTA(0.2695, results->cell<double>(5, 1), 1e-4);
+    TS_ASSERT_DELTA(1.0, results->cell<double>(6, 1), 1e-4);
+    TS_ASSERT_DELTA(1.0, results->cell<double>(7, 1), 1e-4);
+    TS_ASSERT_DELTA(0.2710, results->cell<double>(8, 1), 1e-4);
     ITableWorkspace_sptr resultsL1 =
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
             "params_L1");

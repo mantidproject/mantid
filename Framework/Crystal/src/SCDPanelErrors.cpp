@@ -190,8 +190,8 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
     out[i * 3 + 1] = Q3[1] - Q2[1];
     out[i * 3 + 2] = Q3[2] - Q2[2];
   }
-  moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate, -scalex,
-               -scaley, m_bank, m_workspace);
+  moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate, 1.0/scalex,
+               1.0/scaley, m_bank, m_workspace);
 }
 
 /**
