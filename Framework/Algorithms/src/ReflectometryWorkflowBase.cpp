@@ -444,14 +444,6 @@ ReflectometryWorkflowBase::toLamDetector(const std::string &processingCommands,
   cropWorkspaceAlg->execute();
   detectorWS = cropWorkspaceAlg->getProperty("OutputWorkspace");
 
-  auto rebinWorkspaceAlg = this->createChildAlgorithm("Rebin");
-  rebinWorkspaceAlg->initialize();
-  std::vector<double> params = {wavelengthStep};
-  rebinWorkspaceAlg->setProperty("Params", params);
-  rebinWorkspaceAlg->setProperty("InputWorkspace", detectorWS);
-  rebinWorkspaceAlg->execute();
-  detectorWS = rebinWorkspaceAlg->getProperty("OutputWorkspace");
-
   return detectorWS;
 }
 
