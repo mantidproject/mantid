@@ -169,8 +169,7 @@ void DiffractionFocussing2::exec() {
   // is irrelevant
   MantidVec weights_default(1, 1.0), emptyVec(1, 0.0), EOutDummy(nPoints);
 
-  // Set the spectrum number to the group number
-  SpectrumNumbers outSpecNums(m_validGroups);
+  std::vector<specnum_t> outSpecNums;
   std::vector<std::vector<detid_t>> outDetIDs;
 
   Progress *prog;
@@ -291,6 +290,8 @@ void DiffractionFocussing2::exec() {
       }
       prog->report();
     } // end of loop for input spectra
+    // Set the spectrum number to the group number
+    outSpecNums.push_back(group);
     outDetIDs.push_back(std::move(outSpecDetIDs));
 
     // Calculate the bin widths
@@ -325,8 +326,10 @@ void DiffractionFocussing2::exec() {
   } // end of loop for groups
   PARALLEL_CHECK_INTERUPT_REGION
 
-  out->setIndexTranslator(std::move(outSpecNums),
-                          DetectorIDs(std::move(outDetIDs)));
+  auto translator = out->indexTranslator();
+  translator.setSpectrumNumbers(std::move(outSpecNums));
+  translator.setDetectorIDs(std::move(outDetIDs));
+  out->setIndexTranslator(translator);
 
   delete prog;
 

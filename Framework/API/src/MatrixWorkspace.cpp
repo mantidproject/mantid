@@ -84,28 +84,38 @@ MatrixWorkspace::~MatrixWorkspace() {
   }
 }
 
-void MatrixWorkspace::setIndexTranslator(
-    Indexing::SpectrumNumbers &&spectrumNumbers,
-    Indexing::DetectorIDs &&detectorIDs) {
-  setIndexTranslator(Indexing::IndexTranslator(std::move(spectrumNumbers),
-                                               std::move(detectorIDs)));
+Indexing::IndexTranslator MatrixWorkspace::indexTranslator() const {
+  // Workaround while IndexTranslator is not stored in MatrixWorkspace: build
+  // translator based on data in ISpectrum.
+  std::vector<specnum_t> specNums;
+  std::vector<std::vector<specnum_t>> detIDs;
+  for (size_t i = 0; i < getNumberHistograms(); ++i) {
+    const auto &spec = getSpectrum(i);
+    specNums.push_back(spec.getSpectrumNo());
+    auto set = spec.getDetectorIDs();
+    detIDs.emplace_back(set.begin(), set.end());
+  }
+  // Note: This is the local size and the local vector of spectrum numbers and
+  // detector IDs. This will not work in an MPI run.
+  Indexing::IndexTranslator t(getNumberHistograms());
+  t.setSpectrumNumbers(std::move(specNums));
+  t.setDetectorIDs(std::move(detIDs));
+  return t;
 }
 
 void MatrixWorkspace::setIndexTranslator(
-    Indexing::IndexTranslator &&translator) {
+    const Indexing::IndexTranslator &translator) {
+  // Comparing the *local* size of the translator.
   if (translator.size() != getNumberHistograms())
     throw std::runtime_error("MatrixWorkspace::setIndexTranslator: Translator "
                              "size does not match number of histograms in "
                              "workspace");
 
-  auto &spectrumNumbers = translator.spectrumNumbers();
-  auto &detectorIDs = translator.detectorIDs();
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
     auto &spectrum = getSpectrum(i);
-    spectrum.setSpectrumNo(spectrumNumbers[i]);
-    if (!detectorIDs.empty())
-      spectrum.setDetectorIDs(
-          std::set<detid_t>(detectorIDs[i].begin(), detectorIDs[i].end()));
+    spectrum.setSpectrumNo(translator.spectrumNumber(i));
+    auto ids = translator.detectorIDs(i);
+    spectrum.setDetectorIDs(std::set<detid_t>(ids.begin(), ids.end()));
   }
 }
 

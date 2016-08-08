@@ -133,10 +133,12 @@ void AppendSpectra::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
   if (ws2min > ws1max)
     return;
 
+  auto translator = output->indexTranslator();
   // change the axis by adding the maximum existing spectrum number to the
   // current value
-  output->setIndexTranslator(SpectrumNumbers(
-      makeRange(0, static_cast<specnum_t>(output->getNumberHistograms() - 1))));
+  translator.setSpectrumNumbers(
+      makeRange(0, static_cast<specnum_t>(output->getNumberHistograms() - 1)));
+  output->setIndexTranslator(translator);
 }
 
 void AppendSpectra::combineLogs(const API::Run &lhs, const API::Run &rhs,

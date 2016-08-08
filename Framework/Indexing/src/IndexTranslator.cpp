@@ -1,30 +1,59 @@
 #include "MantidIndexing/IndexTranslator.h"
+#include "MantidKernel/make_cow.h"
 
 #include <algorithm>
 #include <functional>
+#include <numeric>
 
 namespace Mantid {
 namespace Indexing {
 
-IndexTranslator::IndexTranslator(SpectrumNumbers &&spectrumNumbers,
-                                 DetectorIDs &&detectorIDs)
-    : m_spectrumNumbers(std::move(spectrumNumbers)),
-      m_detectorIDs(std::move(detectorIDs)) {
-  if (m_detectorIDs.size() != 0)
-    if (m_spectrumNumbers.size() != m_detectorIDs.size())
-      throw std::runtime_error(
-          "IndexTranslator: Size mismatch between spectrum "
-          "number vector and detector ID vector");
+IndexTranslator::IndexTranslator(const size_t globalSize) {
+  // Default to spectrum numbers 1...globalSize
+  auto &specNums = m_spectrumNumbers.access();
+  specNums.resize(globalSize);
+  std::iota(specNums.begin(), specNums.end(), 1);
+
+  // Default to detector IDs 1..globalSize, with 1:1 mapping to spectra
+  auto &detIDs = m_detectorIDs.access();
+  for (size_t i = 0; i < globalSize; ++i)
+    detIDs.emplace_back(1, static_cast<detid_t>(i));
 }
 
-size_t IndexTranslator::size() const { return m_spectrumNumbers.size(); }
+void IndexTranslator::setSpectrumNumbers(
+    std::vector<specnum_t> &&spectrumNumbers) & {
+  if (m_spectrumNumbers->size() != spectrumNumbers.size())
+    throw std::runtime_error(
+        "IndexTranslator: Size mismatch when setting new spectrum numbers");
+  m_spectrumNumbers.access() = std::move(spectrumNumbers);
+}
 
-const std::vector<int32_t> &IndexTranslator::spectrumNumbers() const {
-  return m_spectrumNumbers.data();
+void IndexTranslator::setDetectorIDs(const std::vector<detid_t> &detectorIDs) &
+{
+  if (m_detectorIDs->size() != detectorIDs.size())
+    throw std::runtime_error(
+        "IndexTranslator: Size mismatch when setting new detector IDs");
+
+  auto &detIDs = m_detectorIDs.access();
+  for (size_t i = 0; i < detectorIDs.size(); ++i)
+    detIDs[i] = {detectorIDs[i]};
 }
-const std::vector<std::vector<int32_t>> &IndexTranslator::detectorIDs() const {
-  return m_detectorIDs.data();
+
+void IndexTranslator::setDetectorIDs(
+    std::vector<std::vector<detid_t>> &&detectorIDs) & {
+  if (m_detectorIDs->size() != detectorIDs.size())
+    throw std::runtime_error(
+        "IndexTranslator: Size mismatch when setting new detector IDs");
+
+  auto &detIDs = m_detectorIDs.access();
+  detIDs = std::move(detectorIDs);
+  for (auto &ids : detIDs) {
+    std::sort(ids.begin(), ids.end());
+    ids.erase(std::unique(ids.begin(), ids.end()), ids.end());
+  }
 }
+
+size_t IndexTranslator::size() const { return m_spectrumNumbers->size(); }
 
 } // namespace Indexing
 } // namespace Mantid

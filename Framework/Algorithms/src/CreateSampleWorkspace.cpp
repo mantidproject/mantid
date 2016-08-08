@@ -306,6 +306,13 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
   CountStandardDeviations e(CountVariances(y.cbegin(), y.cend()));
 
   auto retVal = createWorkspace<Workspace2D>(numPixels, numBins + 1, numBins);
+
+  auto translator = retVal->indexTranslator();
+  translator.setSpectrumNumbers(makeRange(1, numPixels));
+  translator.setDetectorIDs(
+      makeRange(start_at_pixelID, start_at_pixelID + numPixels - 1));
+  retVal->setIndexTranslator(translator);
+
   retVal->setInstrument(inst);
 
   for (size_t wi = 0; wi < static_cast<size_t>(numPixels); wi++) {
@@ -313,9 +320,6 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
     retVal->setCounts(wi, y);
     retVal->setCountStandardDeviations(wi, e);
   }
-  retVal->setIndexTranslator(
-      SpectrumNumbers(makeRange(1, numPixels)),
-      DetectorIDs(makeRange(start_at_pixelID, start_at_pixelID + numPixels)));
 
   return retVal;
 }
@@ -333,6 +337,12 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
 
   auto retVal = boost::make_shared<EventWorkspace>();
   retVal->initialize(numPixels, 1, 1);
+
+  auto translator = retVal->indexTranslator();
+  translator.setSpectrumNumbers(makeRange(1, numPixels));
+  translator.setDetectorIDs(
+      makeRange(start_at_pixelID, start_at_pixelID + numPixels - 1));
+  retVal->setIndexTranslator(translator);
 
   retVal->setInstrument(inst);
 
@@ -371,9 +381,6 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
     }
     workspaceIndex++;
   }
-  retVal->setIndexTranslator(
-      SpectrumNumbers(makeRange(1, numPixels)),
-      DetectorIDs(makeRange(start_at_pixelID, start_at_pixelID + numPixels)));
 
   return retVal;
 }

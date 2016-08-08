@@ -7,6 +7,10 @@
 #include <vector>
 
 namespace Mantid {
+
+using specnum_t = int32_t;
+using detid_t = int32_t;
+
 namespace Indexing {
 
 /** IndexTranslator : TODO: DESCRIPTION
@@ -34,8 +38,25 @@ namespace Indexing {
 */
 class MANTID_INDEXING_DLL IndexTranslator {
 public:
-  // size is global size?
-  explicit IndexTranslator(const size_t size);
+  // Create default translator. size is global size
+  // Default implies 1:1 spectrum numbers and detector IDs, each defined as
+  // (global) workspace index + 1
+  //
+  // Can we internally provide an optimization for the case of trivial mapping?
+  // We want to avoid complicated maps if it is just a simple offset, i.e.,
+  // SpectrumNumber = WorkspaceIndex + 1 (will always be more complex with MPI?).
+  explicit IndexTranslator(const size_t globalSize);
+
+  /// The *local* size, i.e., the number of spectra in this partition.
+  size_t size() const;
+
+  specnum_t spectrumNumber(const size_t index) const {
+    return (*m_spectrumNumbers)[index];
+  }
+
+  std::vector<detid_t> detectorIDs(const size_t index) const {
+    return (*m_detectorIDs)[index];
+  }
 
   // maybe this must be fixed at construction time? makes setting spectrum numbers etc. easier.
   // but how do we create a translator from an existing one with different partitioning?
@@ -48,14 +69,12 @@ public:
   // arguments are for all ranks
   // usually this builds maps, finds out which indices are local, ...
   void setSpectrumNumbers(std::vector<specnum_t> &&spectrumNumbers) &;
-  void setSpectrumNumbers(std::initializer_list<specnum_t> &&ilist) &;
+  //void setSpectrumNumbers(std::initializer_list<specnum_t> &&ilist) &;
 
   void setDetectorIDs(const std::vector<detid_t> &detectorIDs) &;
   void setDetectorIDs(std::vector<std::vector<detid_t>> &&detectorIDs) &;
-  void setDetectorIDs(std::initializer_list<detid_t> &&ilist) &;
-
-
-  size_t size() const;
+  //void setDetectorIDs(std::vector<std::vector<detid_t>> &&detectorIDs) &;
+  //void setDetectorIDs(std::initializer_list<detid_t> &&ilist) &;
 
   // Do we have this info? Build from info in spectra. But this would be
   // *local*? Yes, can do better only once we moved things out of ISpectrum.
@@ -67,7 +86,7 @@ public:
   // where is this needed?
   // MatrixWorkspace can use it to set spectrum Numbers in ISpectra
   // this must return only *local* spectrum numbers
-  std::vector<specnum_t> makeSpectrumNumberVector() const;
+  //std::vector<specnum_t> makeSpectrumNumberVector() const;
   //std::vector<specnum_t>
   //makeSpectrumNumberVector(const std::vector<size_t> &indices) const;
   //SpectrumIndexSet makeSpectrumIndexSet() const;
@@ -79,11 +98,11 @@ public:
 
 private:
   // temporarily: friend class MatrixWorkspace?
-  const std::vector<specnum_t> &spectrumNumbers() const &;
-  const std::vector<std::vector<detid_t>> &detectorIDs() const &;
+  //const std::vector<specnum_t> &spectrumNumbers() const &;
+  //const std::vector<std::vector<detid_t>> &detectorIDs() const &;
 
   Kernel::cow_ptr<std::vector<specnum_t>> m_spectrumNumbers;
-  Kernel::cow_ptr<std::vector<detid_t>> m_detectorIDs;
+  Kernel::cow_ptr<std::vector<std::vector<detid_t>>> m_detectorIDs;
 
   // unordered_map m_specNumToPartition
   // map m_specNumToLocal
@@ -94,6 +113,7 @@ private:
 } // namespace Mantid
 
 
+/*
 auto translator = ws.translator();
 translator.setSpectrumNumbers({1,2,3,4});
 ws.setTranslator(translator);
@@ -137,6 +157,7 @@ void MatrixWorkspace::setTranslator(const Translator &) {
 // sharing data in translators
 auto translator = inputWS.translator();
 outputWS.setTranslator(translator);
+*/
 
 
 #endif /* MANTID_INDEXING_INDEXTRANSLATOR_H_ */
