@@ -47,9 +47,9 @@ public:
   ~ColorBarWidget() override;
 
   enum CheckboxStrategy {
-	  ADD_AUTOSCALE_CURRENT_SLICE = 0,
-	  ADD_AUTOSCALE_ON_LOAD = 1,
-	  ADD_AUTOSCALE_BOTH = 2
+    ADD_AUTOSCALE_CURRENT_SLICE = 0,
+    ADD_AUTOSCALE_ON_LOAD = 1,
+    ADD_AUTOSCALE_BOTH = 2
   };
 
   void updateColorMap();
@@ -82,7 +82,7 @@ public:
 
   /// Set the tooltip text for Auto Scale on Load checkbox label
   void setAutoScaleTooltipText(const std::string &newText);
-  
+
   /// Set the tooltip text for Auto Scale for Current Slice checkbox label
   void setAutoScaleForCurrentSliceLabelText(const std::string &newText);
 
