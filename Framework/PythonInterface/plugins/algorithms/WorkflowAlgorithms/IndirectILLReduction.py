@@ -78,12 +78,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(FileProperty('VanadiumRun','',
                                           action=FileAction.OptionalLoad,
                                           extensions=['nxs']),
-                             doc='File path of vanadium run (s).')
+                             doc='File path of vanadium run.')
 
         self.declareProperty(FileProperty('MapFile', '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['xml']),
-                             doc='Filename of the map file to use. If left blank the default will be used.')
+                             doc='Filename of the detector grouping map file to use. \n'
+                                 'If left blank the default will be used.')
 
         # Other inputs
         self.declareProperty(MatrixWorkspaceProperty("CalibrationWorkspace", "",
@@ -407,11 +408,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         elif o == 1:
             self.log().information('Unmirror 1: return the left wing')
-            RenameWorkspace(InputWorkspace=left,OutputWorkspace=red)
+            CloneWorkspace(InputWorkspace=left,OutputWorkspace=red)
 
         elif o == 2:
             self.log().information('Unmirror 2: return the right wing')
-            RenameWorkspace(InputWorkspace=right,OutputWorkspace=red)
+            CloneWorkspace(InputWorkspace=right,OutputWorkspace=red)
 
         elif o == 3:
             self.log().information('Unmirror 3: sum the left and right wings')
