@@ -1,8 +1,9 @@
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidQtMantidWidgets/InstrumentView/DetXMLFile.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
+#include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -1179,5 +1180,64 @@ void InstrumentWidgetMaskTab::storeMask() {
 void InstrumentWidgetMaskTab::changedIntegrationRange(double, double) {
   enableApplyButtons();
 }
+
+void MantidQt::MantidWidgets::InstrumentWidgetMaskTab::loadFromProject(
+    const std::string &lines) {
+  TSVSerialiser tsv(lines);
+
+  if (tsv.selectSection("masktab")) {
+    std::string tabLines;
+    tsv >> tabLines;
+    TSVSerialiser tab(tabLines);
+
+    std::vector<QPushButton *> buttons{
+        m_move,         m_pointer,        m_ellipse,  m_rectangle,
+        m_ring_ellipse, m_ring_rectangle, m_free_draw};
+
+    tab.selectLine("ActiveTools");
+    for (auto button : buttons) {
+      bool value;
+      tab >> value;
+      button->setChecked(value);
+    }
+
+    std::vector<QRadioButton *> typeButtons{m_masking_on, m_grouping_on,
+                                            m_roi_on};
+
+    tab.selectLine("ActiveType");
+    for (auto type : typeButtons) {
+      bool value;
+      tab >> value;
+      type->setChecked(value);
+    }
+  }
+}
+
+std::string
+MantidQt::MantidWidgets::InstrumentWidgetMaskTab::saveToProject() const {
+  TSVSerialiser tsv;
+  TSVSerialiser tab;
+
+  std::vector<QPushButton *> buttons{
+      m_move,         m_pointer,        m_ellipse,  m_rectangle,
+      m_ring_ellipse, m_ring_rectangle, m_free_draw};
+
+  tab.writeLine("ActiveTools");
+  for (auto button : buttons) {
+    tab << button->isChecked();
+  }
+
+  std::vector<QRadioButton *> typeButtons{m_masking_on, m_grouping_on,
+                                          m_roi_on};
+
+  tab.writeLine("ActiveType");
+  for (auto type : typeButtons) {
+    tab << type->isChecked();
+  }
+
+  tsv.writeSection("masktab", tab.outputLines());
+  return tsv.outputLines();
+}
+
 } // MantidWidgets
 } // MantidQt
