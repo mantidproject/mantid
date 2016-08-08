@@ -30,8 +30,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(SCDCalibratePanels)
 
 namespace {
-constexpr double MAX_DET_HW_SCALE = 1.15;
-constexpr double MIN_DET_HW_SCALE = 0.85;
 constexpr double RAD_TO_DEG = 180. / M_PI;
 }
 
@@ -87,34 +85,6 @@ void SCDCalibratePanels::Quat2RotxRotyRotz(const Quat Q, double &Rotx,
   }
 }
 
-namespace { // anonymous namespace
-            /**
-             * Adds a tie to the IFunction.
-             * @param iFunc The function to add the tie to.
-             * @param tie Whether or not to actually do it.
-             * @param parName The name of the parameter to tie.
-             * @param value The value to tie it to.
-             */
-static inline void tie(IFunction_sptr &iFunc, const bool tie,
-                       const string &parName, const double value) {
-  if (!tie)
-    return;
-  std::ostringstream ss;
-  ss << std::fixed << value;
-  iFunc->tie(parName, ss.str());
-}
-
-static inline void constrain(IFunction_sptr &iFunc, const string &parName,
-                             const double min, const double max) {
-  std::ostringstream ss;
-  ss << std::fixed << min << "<" << parName << "<" << std::fixed << max;
-  IConstraint *constraint =
-      API::ConstraintFactory::Instance().createInitialized(iFunc.get(),
-                                                           ss.str());
-  iFunc->addConstraint(constraint);
-}
-
-} // end anonymous namespace
   //-----------------------------------------------------------------------------------------
   /**
     @param  ws           Name of workspace containing peaks
