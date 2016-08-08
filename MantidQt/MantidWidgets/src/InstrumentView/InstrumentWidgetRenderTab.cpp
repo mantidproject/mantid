@@ -734,8 +734,24 @@ QPointF InstrumentWidgetRenderTab::getUCorrection() const {
  */
 std::string
 MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
+  TSVSerialiser tab;
+
+  tab.writeLine("AxesView") << mAxisCombo->currentIndex();
+  tab.writeLine("AutoScaling") << m_autoscaling->isChecked();
+  tab.writeLine("DisplayAxes") << m_displayAxes->isChecked();
+  tab.writeLine("FlipView") << m_flipCheckBox->isChecked();
+  tab.writeLine("DisplayDetectorsOnly") << m_displayDetectorsOnly->isChecked();
+  tab.writeLine("DisplayWireframe") << m_wireframe->isChecked();
+  tab.writeLine("DisplayLighting") << m_lighting->isChecked();
+  tab.writeLine("UseOpenGL") << m_GLView->isChecked();
+  tab.writeLine("UseUCorrection") << m_UCorrection->isChecked();
+
   const auto colorMap = m_colorMapWidget->saveToProject();
-  return colorMap
+  tab.writeRaw(colorMap);
+
+  TSVSerialiser tsv;
+  tsv.writeSection("rendertab", tab.outputLines());
+  return tsv.outputLines();
 }
 
 /**
@@ -743,8 +759,48 @@ MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
  * @param lines :: lines defining the state of the render tab
  * @return a render tab window handle with settings restored
  */
-void InstrumentWidgetRenderTab::loadFromProject(
-    const std::string &lines) const {
+void InstrumentWidgetRenderTab::loadFromProject(const std::string &lines) {
+  TSVSerialiser tsv(lines);
+
+  if (tsv.selectSection("rendertab")) {
+    std::string tabLines;
+    tsv >> tabLines;
+    TSVSerialiser tab(tabLines);
+
+    bool autoScaling, displayAxes, flipView, displayDetectorsOnly,
+        displayWireframe, displayLighting, useOpenGL, useUCorrection;
+    int axesView;
+
+    tab.selectLine("AxesView");
+    tab >> axesView;
+    tab.selectLine("AutoScaling");
+    tab >> autoScaling;
+    tab.selectLine("DisplayAxes");
+    tab >> displayAxes;
+    tab.selectLine("FlipView");
+    tab >> flipView;
+    tab.selectLine("DisplayDetectorsOnly");
+    tab >> displayDetectorsOnly;
+    tab.selectLine("DisplayWireframe");
+    tab >> displayWireframe;
+    tab.selectLine("DisplayLighting");
+    tab >> displayLighting;
+    tab.selectLine("UseOpenGL");
+    tab >> useOpenGL;
+    tab.selectLine("UseUCorrection");
+    tab >> useUCorrection;
+
+    mAxisCombo->setCurrentIndex(axesView);
+    m_autoscaling->setChecked(autoScaling);
+    m_displayAxes->setChecked(displayAxes);
+    m_flipCheckBox->setChecked(flipView);
+    m_displayDetectorsOnly->setChecked(displayDetectorsOnly);
+    m_wireframe->setChecked(displayWireframe);
+    m_lighting->setChecked(displayLighting);
+    m_GLView->setChecked(useOpenGL);
+    m_UCorrection->setChecked(useUCorrection);
+  }
+
   m_colorMapWidget->loadFromProject(lines);
 }
 

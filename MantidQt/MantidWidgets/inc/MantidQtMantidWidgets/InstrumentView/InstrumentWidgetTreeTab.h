@@ -20,7 +20,7 @@ public:
   explicit InstrumentWidgetTreeTab(InstrumentWidget *instrWidget);
   void initSurface() override;
   /// Load settings for the widget tab from a project file
-  virtual void loadFromProject(const std::string &lines) const override{};
+  virtual void loadFromProject(const std::string &lines) override{};
   /// Save settings for the widget tab to a project file
   virtual std::string saveToProject() const override { return ""; };
 public slots:
