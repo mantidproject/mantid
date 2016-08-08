@@ -1,13 +1,10 @@
 #include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtMantidWidgets/ColorBarWidget.h"
 #include "MantidQtAPI/QScienceSpinBox.h"
-#include "qwt_scale_div.h"
 #include "MantidQtAPI/PowerScaleEngine.h"
-#include <iosfwd>
 #include <qwt_scale_map.h>
 #include <qwt_scale_widget.h>
 #include <QKeyEvent>
-#include <qwt_plot.h>
 #include <qwt_scale_engine.h>
 
 namespace MantidQt {
@@ -374,10 +371,36 @@ void ColorBarWidget::updateColorMap() {
 }
 
 //-------------------------------------------------------------------------------------------------
-/** Updatet the widget when changing min/max*/
+/** Update the widget when changing min/max*/
 void ColorBarWidget::updateMinMaxGUI() {
   ui.valMin->setValue(m_min);
   ui.valMax->setValue(m_max);
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Update the label text on the Auto Scale on Load label */
+void ColorBarWidget::setAutoScaleLabelText(const std::string &newText) {
+  ui.autoScale->setText(QString::fromStdString(newText));
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Update the tooltip text on the Auto Scale on Load label */
+void ColorBarWidget::setAutoScaleTooltipText(const std::string &newText) {
+  ui.autoScale->setToolTip(QString::fromStdString(newText));
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Update the label text on the Auto Scale for Current Slice on Load label */
+void ColorBarWidget::setAutoScaleForCurrentSliceLabelText(
+    const std::string &newText) {
+  ui.autoScaleForCurrentSlice->setToolTip(QString::fromStdString(newText));
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Update the tooltip text on the Auto Scale for Current Slice on Load label */
+void ColorBarWidget::setAutoScaleForCurrentSliceTooltipText(
+    const std::string &newText) {
+  ui.autoScaleForCurrentSlice->setToolTip(QString::fromStdString(newText));
 }
 
 /**
@@ -399,7 +422,7 @@ bool ColorBarWidget::getAutoScale() const { return ui.autoScale->isChecked(); }
  * Gets the state of the "Autoscale for current slice" checkbox
  * @returns true if it is checked else false
  */
-bool ColorBarWidget::getAutoColorScaleforCurrentSlice() const {
+bool ColorBarWidget::getAutoScaleforCurrentSlice() const {
   return ui.autoScaleForCurrentSlice->isChecked();
 }
 

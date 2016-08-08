@@ -80,6 +80,7 @@ void ImageROIViewQtWidget::initLayout() {
   m_ui.colorBarWidget->setAutoScale(true);
   m_ui.colorBarWidget->setCheckBoxMode(
       MantidWidgets::ColorBarWidget::ADD_AUTOSCALE_ON_LOAD);
+  //m_ui.colorBarWidget->setAutoScaleTooltipText("");
 
   readSettings();
 
@@ -206,7 +207,7 @@ void ImageROIViewQtWidget::saveSettings() const {
   qs.setValue("colorbar-power-exponent", m_ui.colorBarWidget->getExponent());
   qs.setValue("colorbar-autoscale", m_ui.colorBarWidget->getAutoScale());
   qs.setValue("colorbar-autoscale-current-slice",
-              m_ui.colorBarWidget->getAutoColorScaleforCurrentSlice());
+              m_ui.colorBarWidget->getAutoScaleforCurrentSlice());
 
   qs.setValue("interface-win-geometry", saveGeometry());
   qs.endGroup();
