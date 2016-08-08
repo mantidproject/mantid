@@ -1,10 +1,10 @@
-digraph PearlDiffractionISIS {
-    label="PearlDiffraction PEARL_run_focus"
+digraph pearlRunFocus {
+    label="PearlDiffraction pearl_run_focus"
     $global_style
     
     // Global prefix: Focus_run_
     
-    Focus_run_start             [label="Start PEARL_run_focus"]
+    Focus_run_start             [label="Start pearl_run_focus"]
     Focus_run_start_VanCalib    [label="Start with vanadium calibration"]
     Focus_run_start_without_VanCalib [label="Start without vanadium calibration"]
     
@@ -21,7 +21,37 @@ digraph PearlDiffractionISIS {
     Focus_run_param_vanadium_norm       [label="van_norm"]
     Focus_run_param_f_mode              [label="fmode"]
     Focus_run_param_focus_mode          [label="focus_mode"]
-
+    
+    //Read steps - suffix:read
+    Focus_run_global_calFile_read       [label="calfile"]
+    Focus_run_global_ext_read           [label="ext"]
+    Focus_run_global_groupFile_read     [label="groupfile"]
+    
+    //Vanadium calibration steps - suffix: VanCalib
+    Focus_run_global_vanFile_VanCalib   [label="vanfile"]
+    
+    //Use param style for out file names instead of labels    
+    //Focus Mode:'all' - suffix: FocusModeAll
+    SaveGSS_out_FocusModeAll            [label="GSS file"]
+    SaveNexus_out_FocusModeAll          [label="Nexus file"]
+    
+    //Focus Mode:'groups' - suffix: FocusModeGroups
+    SaveGSS_out_Mode1_FocusModeGroups   [label="GSS file"]
+    SaveGSS_out_Mode2_FocusModeGroups   [label="GSS file"]
+    SaveNexus_out_FocusModeGroups       [label="Nexus file"]
+    SaveGSS_out_range_FocusModeGroups   [label="GSS file"]
+    SaveNexus_out_range_FocusModeGroups [label="Nexus file"]
+    
+    //Focus Mode:'trans' - suffix: FocusModeTrans
+    SaveFocusedXYE_out_TOF_FocusModeTrans   [label="PRL<RunNumber>_tof_xye.dat"]
+    SaveFocusedXYE_out_dSpacing_FocusModeTrans  [label="PRL<RunNumber>_d_xye.dat"]
+    SaveNexus_out_FocusModeTrans        [label="Nexus file"]
+    SaveNexus_two_out_FocusModeTrans    [label="Nexus file"]
+    
+    //Focus Mode:'mods' - suffix: FocusModeMods
+    SaveGSS_out_FocusModeMods           [label="GSS file"]
+    SaveNexus_out_FocusModeMods         [label="Nexus file"]
+    
     
     } // End of params
     
@@ -90,12 +120,11 @@ digraph PearlDiffractionISIS {
     Plus_StepFour_FocusModeGroups       [label="Plus"]
     Scale_StepOne_FocusModeGroups       [label="Scale"]
     Scale_StepTwo_FocusModeGroups       [label="Scale"]
-    SaveGSS_Mode1_FocusModeGroups       [label="Save GSS File"]
-    SaveGSS_Mode2_FocusModeGroups       [label="Save GSS File"]
-    ConvertUnits_FocusModeGroups        [label="Convert Units"]
+    SaveGSS_FocusModeGroups             [label="Save GSS File"]
+    ConvertUnits_dSpacing_FocusModeGroups [label="Convert Units to dSpacing"]
     SaveNexus_FocusModeGroups           [label="Save Nexus File"]
     SaveGSS_Range_FocusModeGroups       [label="Save GSS File"]
-    ConvertUnits_PreSave_FocusModeGroups    [label="Convert Units"]
+    ConvertUnits_second_dSpacing_FocusModeGroups [label="Convert Units to dSpacing"]
     SaveNexus_Range_FocusModeGroups     [label="Save Nexus File"]
     Remove_temp_workspace_FocusModeGroups   [label="Remove intermediate workspaces"]
     
@@ -147,10 +176,14 @@ digraph PearlDiffractionISIS {
     // Read step - Suffix:read
     Focus_run_start                     -> Focus_run_get_calib_files_read
     Focus_run_get_calib_files_read      -> Focus_run_read
+    //Params passed to pearl_read
     Focus_run_param_current_run_number  -> Focus_run_read
+    Focus_run_global_ext_read           -> Focus_run_read
     Focus_run_read                      -> Rebin_read
     Rebin_read                          -> AlignDetectors_read
+    Focus_run_global_calFile_read       -> AlignDetectors_read
     AlignDetectors_read                 -> DiffractionFocusing_read
+    Focus_run_global_groupFile_read     -> DiffractionFocusing_read
     DiffractionFocusing_read            -> Focus_run_if_debug_mode_read
     
     // Debug mode is on (ie. don't remove temp workspaces)
@@ -186,6 +219,7 @@ digraph PearlDiffractionISIS {
     
     subgraph Focus_run_with_van_calib{
     //Vanadium calibration set to true
+    Focus_run_global_vanFile_VanCalib   -> LoadNexus_VanCalibTrue
     Focus_run_start_VanCalib            -> LoadNexus_VanCalibTrue           
     LoadNexus_VanCalibTrue              -> ExtractSingleSpectrum_VanCalibTrue
     ExtractSingleSpectrum_VanCalibTrue  -> Rebin_Step_One_VanCalibTrue
@@ -207,13 +241,15 @@ digraph PearlDiffractionISIS {
     subgraph Focus_run_FocusModeAll{
     //Focus mode set to 'all' steps - Suffix: FocusModeAll
     Focus_run_start_FocusModeAll        -> CloneWorkspace_FocusModeAll
-    CloneWorkspace_FocusModeAll         -> Plus_FocusModeAll
-    Plus_FocusModeAll                   -> Plus_FocusModeAll                [label="Input workspaces 1-9"]
+    CloneWorkspace_FocusModeAll         -> Plus_FocusModeAll                [label="Workspace 1"]
+    Plus_FocusModeAll                   -> Plus_FocusModeAll                [label="Workspaces 2-9"]
     Plus_FocusModeAll                   -> Scale_FocusModeAll               [label="Sum of all inputs"]
     Scale_FocusModeAll                  -> SaveGSS_FocusModeAll
-    SaveGSS_FocusModeAll                -> ConvertUnits_dSpacing_FocusModeAll   [label="Filename: 'PRL<cycleNumber>.gss'"]
+    SaveGSS_FocusModeAll                -> SaveGSS_out_FocusModeAll
+    SaveGSS_FocusModeAll                -> ConvertUnits_dSpacing_FocusModeAll  
     ConvertUnits_dSpacing_FocusModeAll  -> SaveNexus_FocusModeAll
-    SaveNexus_FocusModeAll              -> Focus_run_if_debug_mode_FocusModeAll [label="Filename: 'PRL<cycleNumber>.nxs'"]
+    SaveNexus_FocusModeAll              -> SaveNexus_out_FocusModeAll
+    SaveNexus_FocusModeAll              -> Focus_run_if_debug_mode_FocusModeAll
     //Finally debug mode test
     // Debug mode is off:
     Focus_run_if_debug_mode_FocusModeAll -> Remove_temp_workspace_FocusModeAll  [label="false"] 
@@ -233,19 +269,22 @@ digraph PearlDiffractionISIS {
     // Add left and right 90 degree bank modules
     Scale_StepOne_FocusModeGroups       -> Plus_StepFour_FocusModeGroups
     Plus_StepFour_FocusModeGroups       -> Scale_StepTwo_FocusModeGroups    [label="Add left and right banks (4-9)"]
-    Scale_StepTwo_FocusModeGroups       -> Focus_run_if_focus_mode_FocusModeGroups
+    Scale_StepTwo_FocusModeGroups       -> SaveGSS_FocusModeGroups
+    SaveGSS_FocusModeGroups             -> Focus_run_if_focus_mode_FocusModeGroups
+    Focus_run_if_focus_mode_FocusModeGroups
     Focus_run_param_focus_mode          -> Focus_run_if_focus_mode_FocusModeGroups
-    // Focus_mode '1' saving:
-    Focus_run_if_focus_mode_FocusModeGroups -> SaveGSS_Mode1_FocusModeGroups        [label="'1'"]
-    SaveGSS_Mode1_FocusModeGroups       -> ConvertUnits_FocusModeGroups             [label="Appending to Filename: 'PRL<cycleNumber>.gss'"]
-    // Focus Mode '2' saving:
-    Focus_run_if_focus_mode_FocusModeGroups -> SaveGSS_Mode2_FocusModeGroups        [label="'2'"]
-    SaveGSS_Mode2_FocusModeGroups       -> ConvertUnits_FocusModeGroups             [label="Not appending to Filename: 'PRL<cycleNumber>.gss'"]
-    ConvertUnits_FocusModeGroups        -> SaveNexus_FocusModeGroups
-    SaveNexus_FocusModeGroups           -> SaveGSS_Range_FocusModeGroups            [label="Filename: 'PRL_<cycleNumber>.nxs'"]
-    SaveGSS_Range_FocusModeGroups       -> ConvertUnits_PreSave_FocusModeGroups     [label="Appending to Filename: 'PRL<cycleNumber>.gss'"]
-    ConvertUnits_PreSave_FocusModeGroups -> SaveNexus_Range_FocusModeGroups 
-    SaveNexus_Range_FocusModeGroups     -> Focus_run_if_debug_mode_FocusModeGroups  [label="Appending to Filename: 'PRL<cycleNumber>.nxs'"]
+    Focus_run_if_focus_mode_FocusModeGroups -> SaveGSS_out_Mode1_FocusModeGroups    [label="'1' Appending to file"]
+    Focus_run_if_focus_mode_FocusModeGroups -> SaveGSS_out_Mode2_FocusModeGroups    [label="'2' Not appending to file"]
+    
+    SaveGSS_FocusModeGroups             -> ConvertUnits_dSpacing_FocusModeGroups 
+    ConvertUnits_dSpacing_FocusModeGroups -> SaveNexus_FocusModeGroups
+    SaveNexus_FocusModeGroups           -> SaveNexus_out_FocusModeGroups
+    SaveNexus_FocusModeGroups           -> SaveGSS_Range_FocusModeGroups
+    SaveGSS_Range_FocusModeGroups       -> SaveGSS_out_range_FocusModeGroups        [label="Appending to file"]
+    SaveGSS_Range_FocusModeGroups       -> ConvertUnits_second_dSpacing_FocusModeGroups
+    ConvertUnits_second_dSpacing_FocusModeGroups  -> SaveNexus_Range_FocusModeGroups 
+    SaveNexus_Range_FocusModeGroups     -> SaveNexus_out_range_FocusModeGroups      [label="Appending to file"]
+    SaveNexus_Range_FocusModeGroups     -> Focus_run_if_debug_mode_FocusModeGroups
     //Finally debug mode test - Debug mode is off
     Focus_run_if_debug_mode_FocusModeGroups -> Remove_temp_workspace_FocusModeGroups [label="false"]
     
@@ -254,10 +293,10 @@ digraph PearlDiffractionISIS {
     subgraph Focus_run_FocusModeTrans{
     //Focus mode set to 'trans' steps - Suffix: FocusModeTrans
     Focus_run_start_FocusModeTrans      -> CloneWorkspace_FocusModeTrans
-    CloneWorkspace_FocusModeTrans       -> Plus_FocusModeTrans
-    Plus_FocusModeTrans                 -> Plus_FocusModeTrans          [label="Workspaces 1-8"]
+    CloneWorkspace_FocusModeTrans       -> Plus_FocusModeTrans              [label="Workspace 1"]
+    Plus_FocusModeTrans                 -> Plus_FocusModeTrans              [label="Workspaces 2-9"]
     Plus_FocusModeTrans                 -> Scale_FocusModeTrans
-    Scale_FocusModeTrans                -> Focus_run_param_atten
+    Scale_FocusModeTrans                -> Focus_run_if_atten_FocusModeTrans
     Focus_run_param_atten               -> Focus_run_if_atten_FocusModeTrans  
     // If atten == true:
     Focus_run_if_atten_FocusModeTrans   -> ConvertUnits_dSpacing_atten_FocusModeTrans   [label="true"]
@@ -266,14 +305,17 @@ digraph PearlDiffractionISIS {
     Focus_run_atten                     -> ConvertUnits_TOF_atten_FocusModeTrans
     ConvertUnits_TOF_atten_FocusModeTrans -> SaveGSS_FocusModeTrans
     // Continuing algorithm 
-    Focus_run_if_atten_FocusModeTrans   -> SaveGSS_FocusModeTrans       [label="else"]
+    Focus_run_if_atten_FocusModeTrans   -> SaveGSS_FocusModeTrans           [label="else"]
     SaveGSS_FocusModeTrans              -> SaveFocusedXYE_TOF_FocusModeTrans
-    SaveFocusedXYE_TOF_FocusModeTrans   -> ConvertUnits_dSpacing_FocusModeTrans     [label="Filename: 'PRL<cycleNumber>_tof_xye.dat'"]
-    ConvertUnits_dSpacing_FocusModeTrans -> SaveFocusedXYE_dSpacing_FocusModeTrans  
-    SaveFocusedXYE_dSpacing_FocusModeTrans -> SaveNexus_FocusModeTrans  [label="Filename: 'PRL<cycleNumber>_d_xye.dat'"]
-    SaveNexus_FocusModeTrans            -> ConvertUnits_dSpacing_two_FocusModeTrans [label="Filename: 'PRL<cycleNumber>.nxs'"]
-    ConvertUnits_dSpacing_two_FocusModeTrans -> SaveNexus_two_FocusModeTrans        [label="Appending to Filename: 'PRL<cycleNumber>.nxs'"]
-    SaveNexus_two_FocusModeTrans        -> ConvertUnits_dSpacing_two_FocusModeTrans [label="Workspace 1-9"]
+    SaveFocusedXYE_TOF_FocusModeTrans   -> SaveFocusedXYE_out_TOF_FocusModeTrans
+    SaveFocusedXYE_TOF_FocusModeTrans   -> ConvertUnits_dSpacing_FocusModeTrans
+    ConvertUnits_dSpacing_FocusModeTrans -> SaveFocusedXYE_dSpacing_FocusModeTrans 
+    SaveFocusedXYE_dSpacing_FocusModeTrans -> SaveFocusedXYE_out_dSpacing_FocusModeTrans
+    SaveFocusedXYE_dSpacing_FocusModeTrans -> SaveNexus_FocusModeTrans
+    SaveNexus_FocusModeTrans            -> SaveNexus_out_FocusModeTrans
+    SaveNexus_FocusModeTrans            -> ConvertUnits_dSpacing_two_FocusModeTrans
+    ConvertUnits_dSpacing_two_FocusModeTrans -> SaveNexus_two_FocusModeTrans        [label="Workspaces 1-9"]
+    SaveNexus_two_FocusModeTrans        -> SaveNexus_two_out_FocusModeTrans         [label="Appending to file"]
     SaveNexus_two_FocusModeTrans        -> Focus_run_if_debug_mode_FocusModeTrans
     Focus_run_if_debug_mode_FocusModeTrans -> Remove_temp_workspace_FocusModeTrans  [label="true"]
     
@@ -282,9 +324,11 @@ digraph PearlDiffractionISIS {
     subgraph Focus_run_FocusModeMods{
     //Focus mode set to 'mods' steps - Suffix: FocusModeMods
     Focus_run_start_FocusModeMods       -> SaveGSS_FocusModeMods
-    SaveGSS_FocusModeMods               -> ConvertUnits_dSpacing_FocusModeMods      [label="Appending to Filename: 'PRL<cycleNumber>.gss'"]
+    SaveGSS_FocusModeMods               -> SaveGSS_out_FocusModeMods                [label="Appending to file"]
+    SaveGSS_FocusModeMods               -> ConvertUnits_dSpacing_FocusModeMods
     ConvertUnits_dSpacing_FocusModeMods -> SaveNexus_FocusModeMods
-    SaveNexus_FocusModeMods             -> Focus_run_if_debug_mode_FocusModeMods    [label="Appending to Filename: 'PRL<cycleNumber>.nxs'"]
+    SaveNexus_FocusModeMods             -> SaveNexus_out_FocusModeMods              [label="Appending to file"]
+    SaveNexus_FocusModeMods             -> Focus_run_if_debug_mode_FocusModeMods
     Focus_run_if_debug_mode_FocusModeMods -> Remove_temp_workspace_FocusModeMods    [label="true"]
     }
 }
