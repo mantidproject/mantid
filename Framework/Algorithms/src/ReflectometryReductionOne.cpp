@@ -538,8 +538,6 @@ void ReflectometryReductionOne::exec() {
   const std::string strAnalysisMode = getProperty("AnalysisMode");
   const bool isPointDetector =
       (pointDetectorAnalysis.compare(strAnalysisMode) == 0);
-  const bool isMultiDetector =
-      (multiDetectorAnalysis.compare(strAnalysisMode) == 0);
 
   const MinMax wavelengthInterval =
       this->getMinMax("WavelengthMin", "WavelengthMax");
