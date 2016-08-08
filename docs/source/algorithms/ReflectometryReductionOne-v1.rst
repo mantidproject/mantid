@@ -145,6 +145,13 @@ algorithms that may need to manipulate/use it.
     :height: 250px
     :align: center
 
+
+Processing Instructions
+#######################
+
+These enable a grouping pattern on workspace indexes to yield only the detectors of interest. It allows usage of the operators :literal:`,:+-` to specify or exclude specific indexes or to add
+spectra together. See :Ref:`algm-ExponentialCorrection` for further details on their usage.
+
 Usage
 -----
 
