@@ -57,7 +57,8 @@ Bugs Resolved
 
 SliceViewer Improvements
 ------------------------
-* When opening the sliceviewer, it will default to showing the first two non-integrated dimensions
+* When opening the SliceViewer, it will default to showing the first two non-integrated dimensions
+* The SliceViewer now uses bin centres instead of bin edges when slicing on a histogram workspace
 
 VSI Improvements
 ----------------
