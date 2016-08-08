@@ -80,19 +80,23 @@ class SANSPatchSensitivity(PythonAlgorithm):
     
     def __patch_workspace(self, tube_in_input_ws, in_ws, patch_ws):
         '''
-        Tube to patch!
-        patch_ws has the mask
-        For every tube, finds the masked pixels
+        @param tube_in_input_ws :: Tube to patch
+        @param in_ws: Workspace to patch
+        @param patch_ws: where the mask is defined
         
+        For every tube:
+            In patch_ws : finds the masked pixels_ids
+            In in_ws : Finds (id, Y, E) for the non-masked pixels in patch_ws
+            Calculates the polynomial for the non-masked pixels
+            Fits the  masked pixels_ids and sets Y and E in the in_ws
         '''
         
-        #lets iterate the tube
+        #Arrays to calculate the polynomial
         id_to_calculate_fit = []
         y_to_calculate_fit = []
         e_to_calculate_fit = []
-        
+        # Array that will be fit
         id_to_fit =[]
-        
         
         for pixel_idx in range(tube_in_input_ws.nelements()):
                 pixel_in_input_ws = tube_in_input_ws[pixel_idx]
@@ -111,7 +115,6 @@ class SANSPatchSensitivity(PythonAlgorithm):
         # Returns coeffcients for the polynomial fit
         py =  np.polyfit(id_to_calculate_fit, y_to_calculate_fit, degree)
         pe =  np.polyfit(id_to_calculate_fit, e_to_calculate_fit, degree)
-        
         
         for id in id_to_fit:
             vy = np.polyval(py,[id])
