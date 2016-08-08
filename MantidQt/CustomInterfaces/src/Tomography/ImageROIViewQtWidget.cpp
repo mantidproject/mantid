@@ -7,7 +7,6 @@
 
 #include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h"
-#include <MantidQtMantidWidgets/ColorBarWidget.h>
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
