@@ -16,7 +16,7 @@ namespace MantidWidgets {
 /** QDataProcessorWidget : Provides an interface for processing table
 data.
 
-Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -44,7 +44,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QDataProcessorWidget
 
   Q_OBJECT
 public:
-  QDataProcessorWidget(boost::shared_ptr<DataProcessorPresenter> presenter,
+  QDataProcessorWidget(std::unique_ptr<DataProcessorPresenter> presenter,
                        QWidget *parent = 0);
   ~QDataProcessorWidget() override;
 
@@ -52,21 +52,11 @@ public:
   void showTable(QDataProcessorTreeModel_sptr model) override;
 
   // Dialog/Prompt methods
-  std::string askUserString(const std::string &prompt, const std::string &title,
-                            const std::string &defaultValue) override;
-  bool askUserYesNo(std::string prompt, std::string title) override;
-  void giveUserWarning(std::string prompt, std::string title) override;
-  void giveUserCritical(std::string prompt, std::string title) override;
-  void showAlgorithmDialog(const std::string &algorithm) override;
-  void showImportDialog() override;
   std::string requestNotebookPath() override;
 
   // Settings
   void saveSettings(const std::map<std::string, QVariant> &options) override;
   void loadSettings(std::map<std::string, QVariant> &options) override;
-
-  // Plotting
-  void plotWorkspaces(const std::set<std::string> &workspaces) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -86,20 +76,15 @@ public:
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) override;
   void setClipboard(const std::string &text) override;
-  void setGlobalOptions(
-      const std::vector<std::string> &stages,
-      const std::vector<std::string> &algNames,
-      const std::vector<std::map<std::string, std::string>> &hints) override;
 
   // Accessor methods
   std::map<int, std::set<int>> getSelectedRows() const override;
   std::set<int> getSelectedGroups() const override;
   std::string getProcessInstrument() const override;
-  std::string getProcessingOptions(const std::string &name) const override;
   std::string getWorkspaceToOpen() const override;
   std::string getClipboard() const override;
 
-  boost::shared_ptr<DataProcessorPresenter> getTablePresenter() const override;
+  DataProcessorPresenter *getPresenter() const override;
 
 private:
   // initialise the interface
@@ -108,7 +93,7 @@ private:
   void setModel(const std::string &name) override;
 
   // the presenter
-  boost::shared_ptr<DataProcessorPresenter> m_presenter;
+  std::unique_ptr<DataProcessorPresenter> m_presenter;
   // the models
   QDataProcessorTreeModel_sptr m_model;
   // the interface

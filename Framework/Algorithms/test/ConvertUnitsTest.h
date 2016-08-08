@@ -243,7 +243,9 @@ public:
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
       auto &outX = output->x(i);
       for (size_t j = 0; j <= xsize; ++j) {
-        TS_ASSERT_EQUALS(outX[j], 2.0 * M_PI);
+        // Axis gets reversed by ConvertUnits to make it strictly increasing
+        TS_ASSERT_EQUALS(outX[j],
+                         2.0 * M_PI / (1.0 + static_cast<double>(xsize - j)));
       }
     }
 
@@ -545,6 +547,45 @@ public:
 
   void testExecEvent_RemainsSorted_Pulsetime_to_Energy() {
     do_testExecEvent_RemainsSorted(PULSETIME_SORT, "Energy");
+  }
+
+  void testDeltaEFailDoesNotAlterInPlaceWorkspace() {
+
+    std::string wsName =
+        "ConvertUnits_testDeltaEFailDoesNotAlterInPlaceWorkspace";
+    MatrixWorkspace_sptr ws =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 200,
+                                                                     false);
+    // set to a distribution
+    ws->setDistribution(true);
+    AnalysisDataService::Instance().add(wsName, ws);
+
+    // get a copy of some original values
+    auto originalUnit = ws->getAxis(0)->unit();
+    auto originalEMode = ws->getEMode();
+    TS_ASSERT_THROWS_ANYTHING(ws->getEFixed());
+    auto originalYdata = ws->readY(0);
+
+    ConvertUnits conv;
+    conv.initialize();
+    conv.setPropertyValue("InputWorkspace", wsName);
+    // in place conversion
+    conv.setPropertyValue("OutputWorkspace", wsName);
+    conv.setPropertyValue("Target", "DeltaE");
+    // do not set emode - this will cause a failure
+    // do not set efixed either
+    conv.execute();
+
+    TSM_ASSERT("Expected ConvertUnits to throw on deltaE conversion without "
+               "eMode or eFixed set",
+               !conv.isExecuted());
+
+    TS_ASSERT_EQUALS(originalUnit, ws->getAxis(0)->unit());
+    TS_ASSERT_EQUALS(originalEMode, ws->getEMode());
+    TS_ASSERT_THROWS_ANYTHING(ws->getEFixed());
+    TS_ASSERT_EQUALS(originalYdata, ws->readY(0));
+
+    AnalysisDataService::Instance().remove(wsName);
   }
 
 private:

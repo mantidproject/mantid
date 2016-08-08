@@ -47,7 +47,7 @@ namespace API {
 */
 class DLLExport ISpectrum {
 public:
-  ISpectrum();
+  ISpectrum() = default;
   ISpectrum(const specnum_t specNo);
   virtual ~ISpectrum() = default;
 
@@ -105,8 +105,23 @@ public:
     HistogramData::Histogram histogram(std::forward<T>(data)...);
     // Check for the special case EventList, it only accepts histograms without
     // Y and E data.
-    checkHistogram(histogram);
+    checkAndSanitizeHistogram(histogram);
     mutableHistogramRef() = std::move(histogram);
+  }
+
+  HistogramData::Histogram::YMode yMode() const {
+    return histogramRef().yMode();
+  }
+  void setYMode(HistogramData::Histogram::YMode ymode) {
+    mutableHistogramRef().setYMode(ymode);
+  }
+  void convertToCounts() {
+    checkIsYAndEWritable();
+    mutableHistogramRef().convertToCounts();
+  }
+  void convertToFrequencies() {
+    checkIsYAndEWritable();
+    mutableHistogramRef().convertToFrequencies();
   }
 
   HistogramData::BinEdges binEdges() const { return histogramRef().binEdges(); }
@@ -236,7 +251,7 @@ public:
   }
 
 protected:
-  virtual void checkHistogram(const HistogramData::Histogram &) const {}
+  virtual void checkAndSanitizeHistogram(HistogramData::Histogram &) {}
   virtual void checkWorksWithPoints() const {}
   virtual void checkIsYAndEWritable() const {}
 
@@ -247,15 +262,15 @@ protected:
   ISpectrum &operator=(const ISpectrum &) = default;
   ISpectrum &operator=(ISpectrum &&) = default;
 
-  /// The spectrum number of this spectrum
-  specnum_t m_specNo;
-
-  /// Set of the detector IDs associated with this spectrum
-  std::set<detid_t> detectorIDs;
-
 private:
   virtual const HistogramData::Histogram &histogramRef() const = 0;
   virtual HistogramData::Histogram &mutableHistogramRef() = 0;
+
+  /// The spectrum number of this spectrum
+  specnum_t m_specNo{0};
+
+  /// Set of the detector IDs associated with this spectrum
+  std::set<detid_t> detectorIDs;
 };
 
 } // namespace API

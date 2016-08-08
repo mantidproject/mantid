@@ -234,11 +234,10 @@ void FFT::transformBackward(boost::shared_array<double> &data, const int xSize,
                             const int ySize, const int dys,
                             const bool centerShift, const bool isComplex,
                             const int iReal, const int iImag, const double df) {
-
   for (int i = 0; i < ySize; i++) {
     int j = (ySize / 2 + i) % ySize;
-    data[2 * i] = m_inWS->dataY(iReal)[j];
-    data[2 * i + 1] = isComplex ? m_inImagWS->dataY(iImag)[j] : 0.;
+    data[2 * i] = m_inWS->y(iReal)[j];
+    data[2 * i + 1] = isComplex ? m_inImagWS->y(iImag)[j] : 0.;
   }
 
   gsl_fft_complex_inverse(data.get(), 1, ySize, m_wavetable, m_workspace);

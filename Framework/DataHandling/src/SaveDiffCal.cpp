@@ -101,18 +101,14 @@ std::map<std::string, std::string> SaveDiffCal::validateInputs() {
 void SaveDiffCal::writeDoubleFieldFromTable(H5::Group &group,
                                             const std::string &name) {
   auto column = m_calibrationWS->getColumn(name);
-  std::vector<double> data;
-  column->numeric_fill(data);
-  data.erase(data.begin() + m_numValues, data.end());
+  auto data = column->numeric_fill<>(m_numValues);
   H5Util::writeArray1D(group, name, data);
 }
 
 void SaveDiffCal::writeIntFieldFromTable(H5::Group &group,
                                          const std::string &name) {
   auto column = m_calibrationWS->getColumn(name);
-  std::vector<int32_t> data;
-  column->numeric_fill(data);
-  data.erase(data.begin() + m_numValues, data.end());
+  auto data = column->numeric_fill<int32_t>(m_numValues);
   H5Util::writeArray1D(group, name, data);
 }
 
@@ -121,8 +117,6 @@ void SaveDiffCal::writeIntFieldFromSVWS(
     H5::Group &group, const std::string &name,
     DataObjects::SpecialWorkspace2D_const_sptr ws) {
   auto detidCol = m_calibrationWS->getColumn("detid");
-  std::vector<detid_t> detids;
-  detidCol->numeric_fill(detids);
   bool isMask = bool(boost::dynamic_pointer_cast<const MaskWorkspace>(ws));
 
   // output array defaults to all one (one group, use the pixel)
@@ -153,8 +147,7 @@ void SaveDiffCal::generateDetidToIndex() {
   m_detidToIndex.clear();
 
   auto detidCol = m_calibrationWS->getColumn("detid");
-  std::vector<detid_t> detids;
-  detidCol->numeric_fill(detids);
+  auto detids = detidCol->numeric_fill<detid_t>();
 
   const size_t numDets = detids.size();
   for (size_t i = 0; i < numDets; ++i) {

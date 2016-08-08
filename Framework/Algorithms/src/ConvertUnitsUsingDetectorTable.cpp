@@ -649,8 +649,10 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::removeUnphysicalBins(
       result->mutableX(j).assign(edges.cbegin(), edges.cbegin() + k);
 
       // If the entire X range is not covered, generate fake values.
-      std::iota(result->mutableX(j).begin() + k, result->mutableX(j).end(),
-                workspace->x(j)[k] + 1);
+      if (k < maxBins) {
+        std::iota(result->mutableX(j).begin() + k, result->mutableX(j).end(),
+                  workspace->x(j)[k] + 1);
+      }
 
       result->mutableY(j)
           .assign(workspace->y(j).cbegin(), workspace->y(j).cbegin() + (k - 1));

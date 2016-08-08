@@ -125,6 +125,9 @@ private slots:
   void editDialog();
   void deleteDialog();
 
+  // Slot for tick boxes in options
+  void tickBoxClickedSlot(QTreeWidgetItem *widgetPtr, int column);
+
 private:
   void initPlotsPage();
   void initOptionsPage();
@@ -154,6 +157,18 @@ private:
   void populateProgramTree();
   void updateProgramTree();
 
+  // Options Window - Selected Options
+  void
+  buildTreeCategoryStructure(const QString &catNames, const bool isHidden,
+                             QMap<QString, QTreeWidgetItem *> &seenCategories);
+  QTreeWidgetItem *walkBackwardsThroughCategories(
+      const QString &catNames, int elementToCheck,
+      QMap<QString, QTreeWidgetItem *> &seenCategories,
+      Qt::CheckState childTickState);
+  void updateChildTickStatuses(QTreeWidgetItem &widgetPtr,
+                               const Qt::CheckState newState);
+  void correctTreePatrialTicks(QTreeWidgetItem &topLevelCat);
+
   // MD Plotting
   void initMdPlottingPage();
   void initMdPlottingGeneralTab();
@@ -161,7 +176,8 @@ private:
   void updateMdPlottingSettings();
   void setupMdPlottingConnections();
 
-  QTreeWidgetItem *createCheckedTreeItem(QString name, bool checkBoxState);
+  QTreeWidgetItem *createCheckedTreeItem(QString name,
+                                         Qt::CheckState checkBoxState);
   QStringList buildHiddenCategoryString(QTreeWidgetItem *parent = 0);
 
   std::map<std::string, std::map<std::string, std::string>> m_sendToSettings;

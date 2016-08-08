@@ -82,103 +82,103 @@ public:
     Material::ChemicalFormula cf;
 
     cf = Material::parseChemicalFormula("F14");
-    TS_ASSERT_EQUALS(cf.atoms.size(), 1);
-    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "F");
-    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 0);
-    TS_ASSERT_EQUALS(cf.numberAtoms[0], 14);
+    TS_ASSERT_EQUALS(cf.size(), 1);
+    TS_ASSERT_EQUALS(cf[0].atom->symbol, "F");
+    TS_ASSERT_EQUALS(cf[0].atom->a_number, 0);
+    TS_ASSERT_EQUALS(cf[0].multiplicity, 14);
 
     cf = Material::parseChemicalFormula("(F14)");
-    TS_ASSERT_EQUALS(cf.atoms.size(), 1);
-    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "F");
-    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 14);
-    TS_ASSERT_EQUALS(cf.numberAtoms[0], 1);
+    TS_ASSERT_EQUALS(cf.size(), 1);
+    TS_ASSERT_EQUALS(cf[0].atom->symbol, "F");
+    TS_ASSERT_EQUALS(cf[0].atom->a_number, 14);
+    TS_ASSERT_EQUALS(cf[0].multiplicity, 1);
 
     cf = Material::parseChemicalFormula("C15");
-    TS_ASSERT_EQUALS(cf.atoms.size(), 1);
-    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "C");
-    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 0);
-    TS_ASSERT_EQUALS(cf.numberAtoms[0], 15);
+    TS_ASSERT_EQUALS(cf.size(), 1);
+    TS_ASSERT_EQUALS(cf[0].atom->symbol, "C");
+    TS_ASSERT_EQUALS(cf[0].atom->a_number, 0);
+    TS_ASSERT_EQUALS(cf[0].multiplicity, 15);
 
     cf = Material::parseChemicalFormula("(C15)");
-    TS_ASSERT_EQUALS(cf.atoms.size(), 1);
-    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "C");
-    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 15);
-    TS_ASSERT_EQUALS(cf.numberAtoms[0], 1);
+    TS_ASSERT_EQUALS(cf.size(), 1);
+    TS_ASSERT_EQUALS(cf[0].atom->symbol, "C");
+    TS_ASSERT_EQUALS(cf[0].atom->a_number, 15);
+    TS_ASSERT_EQUALS(cf[0].multiplicity, 1);
 
     cf = Material::parseChemicalFormula("H2 O");
-    TS_ASSERT_EQUALS(cf.atoms.size(), 2);
-    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "H");
-    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 0);
-    TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
-    TS_ASSERT_EQUALS(cf.atoms[1]->symbol, "O");
-    TS_ASSERT_EQUALS(cf.atoms[1]->a_number, 0);
-    TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
+    TS_ASSERT_EQUALS(cf.size(), 2);
+    TS_ASSERT_EQUALS(cf[0].atom->symbol, "H");
+    TS_ASSERT_EQUALS(cf[0].atom->a_number, 0);
+    TS_ASSERT_EQUALS(cf[0].multiplicity, 2);
+    TS_ASSERT_EQUALS(cf[1].atom->symbol, "O");
+    TS_ASSERT_EQUALS(cf[1].atom->a_number, 0);
+    TS_ASSERT_EQUALS(cf[1].multiplicity, 1);
 
     cf = Material::parseChemicalFormula("(H1)2 O");
-    TS_ASSERT_EQUALS(cf.atoms.size(), 2);
-    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "H");
-    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 1);
-    TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
-    TS_ASSERT_EQUALS(cf.atoms[1]->symbol, "O");
-    TS_ASSERT_EQUALS(cf.atoms[1]->a_number, 0);
-    TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
+    TS_ASSERT_EQUALS(cf.size(), 2);
+    TS_ASSERT_EQUALS(cf[0].atom->symbol, "H");
+    TS_ASSERT_EQUALS(cf[0].atom->a_number, 1);
+    TS_ASSERT_EQUALS(cf[0].multiplicity, 2);
+    TS_ASSERT_EQUALS(cf[1].atom->symbol, "O");
+    TS_ASSERT_EQUALS(cf[1].atom->a_number, 0);
+    TS_ASSERT_EQUALS(cf[1].multiplicity, 1);
 
     cf = Material::parseChemicalFormula("D2 O");
-    TS_ASSERT_EQUALS(cf.atoms.size(), 2);
-    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "H");
-    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 2);
-    TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
-    TS_ASSERT_EQUALS(cf.atoms[1]->symbol, "O");
-    TS_ASSERT_EQUALS(cf.atoms[1]->a_number, 0);
-    TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
+    TS_ASSERT_EQUALS(cf.size(), 2);
+    TS_ASSERT_EQUALS(cf[0].atom->symbol, "H");
+    TS_ASSERT_EQUALS(cf[0].atom->a_number, 2);
+    TS_ASSERT_EQUALS(cf[0].multiplicity, 2);
+    TS_ASSERT_EQUALS(cf[1].atom->symbol, "O");
+    TS_ASSERT_EQUALS(cf[1].atom->a_number, 0);
+    TS_ASSERT_EQUALS(cf[1].multiplicity, 1);
 
     cf = Material::parseChemicalFormula("H2 O");
-    TS_ASSERT_EQUALS(cf.atoms.size(), 2);
-    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "H");
-    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 0);
-    TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
-    TS_ASSERT_EQUALS(cf.atoms[1]->symbol, "O");
-    TS_ASSERT_EQUALS(cf.atoms[1]->a_number, 0);
-    TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
+    TS_ASSERT_EQUALS(cf.size(), 2);
+    TS_ASSERT_EQUALS(cf[0].atom->symbol, "H");
+    TS_ASSERT_EQUALS(cf[0].atom->a_number, 0);
+    TS_ASSERT_EQUALS(cf[0].multiplicity, 2);
+    TS_ASSERT_EQUALS(cf[1].atom->symbol, "O");
+    TS_ASSERT_EQUALS(cf[1].atom->a_number, 0);
+    TS_ASSERT_EQUALS(cf[1].multiplicity, 1);
 
     cf = Material::parseChemicalFormula("H2-O");
-    TS_ASSERT_EQUALS(cf.atoms.size(), 2);
-    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "H");
-    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 0);
-    TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
-    TS_ASSERT_EQUALS(cf.atoms[1]->symbol, "O");
-    TS_ASSERT_EQUALS(cf.atoms[1]->a_number, 0);
-    TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
+    TS_ASSERT_EQUALS(cf.size(), 2);
+    TS_ASSERT_EQUALS(cf[0].atom->symbol, "H");
+    TS_ASSERT_EQUALS(cf[0].atom->a_number, 0);
+    TS_ASSERT_EQUALS(cf[0].multiplicity, 2);
+    TS_ASSERT_EQUALS(cf[1].atom->symbol, "O");
+    TS_ASSERT_EQUALS(cf[1].atom->a_number, 0);
+    TS_ASSERT_EQUALS(cf[1].multiplicity, 1);
 
     TS_ASSERT_THROWS(cf = Material::parseChemicalFormula("H2*O"),
                      std::runtime_error);
-    TS_ASSERT_EQUALS(cf.atoms.size(), 2);
-    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "H");
-    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 0);
-    TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
-    TS_ASSERT_EQUALS(cf.atoms[1]->symbol, "O");
-    TS_ASSERT_EQUALS(cf.atoms[1]->a_number, 0);
-    TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
+    TS_ASSERT_EQUALS(cf.size(), 2);
+    TS_ASSERT_EQUALS(cf[0].atom->symbol, "H");
+    TS_ASSERT_EQUALS(cf[0].atom->a_number, 0);
+    TS_ASSERT_EQUALS(cf[0].multiplicity, 2);
+    TS_ASSERT_EQUALS(cf[1].atom->symbol, "O");
+    TS_ASSERT_EQUALS(cf[1].atom->a_number, 0);
+    TS_ASSERT_EQUALS(cf[1].multiplicity, 1);
 
     cf = Material::parseChemicalFormula("(Li7)2");
-    TS_ASSERT_EQUALS(cf.atoms.size(), 1);
-    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "Li");
-    TS_ASSERT_EQUALS(cf.atoms[0]->a_number, 7);
-    TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
+    TS_ASSERT_EQUALS(cf.size(), 1);
+    TS_ASSERT_EQUALS(cf[0].atom->symbol, "Li");
+    TS_ASSERT_EQUALS(cf[0].atom->a_number, 7);
+    TS_ASSERT_EQUALS(cf[0].multiplicity, 2);
 
     cf = Material::parseChemicalFormula("Y-Ba2-Cu3-O6.56");
-    TS_ASSERT_EQUALS(cf.atoms.size(), 4);
-    for (auto it = cf.atoms.begin(); it != cf.atoms.end(); ++it) {
-      TS_ASSERT_EQUALS((*it)->a_number, 0);
+    TS_ASSERT_EQUALS(cf.size(), 4);
+    for (const auto &formulaUnit : cf) {
+      TS_ASSERT_EQUALS(formulaUnit.atom->a_number, 0);
     }
-    TS_ASSERT_EQUALS(cf.atoms[0]->symbol, "Y");
-    TS_ASSERT_EQUALS(cf.numberAtoms[0], 1);
-    TS_ASSERT_EQUALS(cf.atoms[1]->symbol, "Ba");
-    TS_ASSERT_EQUALS(cf.numberAtoms[1], 2);
-    TS_ASSERT_EQUALS(cf.atoms[2]->symbol, "Cu");
-    TS_ASSERT_EQUALS(cf.numberAtoms[2], 3);
-    TS_ASSERT_EQUALS(cf.atoms[3]->symbol, "O");
-    TS_ASSERT_DELTA(cf.numberAtoms[3], 6.56, .01);
+    TS_ASSERT_EQUALS(cf[0].atom->symbol, "Y");
+    TS_ASSERT_EQUALS(cf[0].multiplicity, 1);
+    TS_ASSERT_EQUALS(cf[1].atom->symbol, "Ba");
+    TS_ASSERT_EQUALS(cf[1].multiplicity, 2);
+    TS_ASSERT_EQUALS(cf[2].atom->symbol, "Cu");
+    TS_ASSERT_EQUALS(cf[2].multiplicity, 3);
+    TS_ASSERT_EQUALS(cf[3].atom->symbol, "O");
+    TS_ASSERT_DELTA(cf[3].multiplicity, 6.56, .01);
   }
 };
 #endif

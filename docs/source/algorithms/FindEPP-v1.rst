@@ -16,13 +16,6 @@ This utility algorithm attempts to search for the elastic peak position (EPP) in
 
 As a result, `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ with the following columns is produced: *WorkspaceIndex*, *PeakCentre*, *PeakCentreError*, *Sigma*, *SigmaError*, *Height*, *HeightError*, *chiSq* and *FitStatus*. Table rows correspond to the workspace indices.
 
-
-Restrictions on the input workspaces
-####################################
-
--  The unit of the X-axis must be **Time-of-flight**.
-
-
 Usage
 -----
 **Example: Find EPP in the given workspace.**
