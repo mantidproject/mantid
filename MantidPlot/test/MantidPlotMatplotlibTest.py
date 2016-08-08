@@ -22,8 +22,8 @@ except ImportError:
 class MantidPlotMatplotlibTest(unittest.TestCase):
 
     def tearDown(self):
-        if LooseVersion(mpl.__version__) >= '1.3.0':
-            plt.close('all')
+        if LooseVersion(mpl.__version__) >= '1.5.0':
+             plt.close('all')
         else:
             # Old versions of matplotlib.pyplot.close work without this
             # in a normal script session but fail here. The workaround
