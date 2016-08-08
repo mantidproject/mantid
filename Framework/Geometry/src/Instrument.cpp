@@ -4,6 +4,7 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include <boost/make_shared.hpp>
 #include <queue>

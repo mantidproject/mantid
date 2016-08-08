@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 import mantid.simpleapi
 from mantid.kernel import StringListValidator, FloatArrayProperty, FloatArrayMandatoryValidator,\
