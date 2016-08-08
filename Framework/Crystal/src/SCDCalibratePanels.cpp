@@ -295,8 +295,9 @@ void SCDCalibratePanels::exec() {
       }
       fit2_alg->setPropertyValue("Function", fun_str.str());
       std::ostringstream tie_str2;
-      tie_str2 << "XShift="<<xShift<<",YShift="<<yShift<<",ZShift="<<zShift
-          <<",XRotate="<<xRotate<<",YRotate="<<yRotate<<",ZRotate="<<zRotate;
+      tie_str2 << "XShift=" << xShift << ",YShift=" << yShift
+               << ",ZShift=" << zShift << ",XRotate=" << xRotate
+               << ",YRotate=" << yRotate << ",ZRotate=" << zRotate;
       fit2_alg->setProperty("Ties", tie_str2.str());
       fit2_alg->setProperty("InputWorkspace", q3DWS);
       fit2_alg->setProperty("CreateOutput", true);
@@ -309,7 +310,8 @@ void SCDCalibratePanels::exec() {
       fitWS = fit2_alg->getProperty("OutputWorkspace");
       AnalysisDataService::Instance().addOrReplace("fit2_" + iBank, fitWS);
       paramsWS = fit2_alg->getProperty("OutputParameters");
-      AnalysisDataService::Instance().addOrReplace("params2_" + iBank, paramsWS);
+      AnalysisDataService::Instance().addOrReplace("params2_" + iBank,
+                                                   paramsWS);
       scaleWidth = paramsWS->getRef<double>("Value", 6);
       scaleHeight = paramsWS->getRef<double>("Value", 7);
     }
