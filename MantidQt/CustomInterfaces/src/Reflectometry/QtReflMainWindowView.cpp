@@ -64,10 +64,11 @@ Show an critical error dialog
 @param prompt : The prompt to appear on the dialog
 @param title : The text for the title bar of the dialog
 */
-void QtReflMainWindowView::giveUserCritical(std::string prompt,
-                                            std::string title) {
-  QMessageBox::critical(this, QString(title.c_str()), QString(prompt.c_str()),
-                        QMessageBox::Ok, QMessageBox::Ok);
+void QtReflMainWindowView::giveUserCritical(const std::string &prompt,
+                                            const std::string &title) {
+  QMessageBox::critical(this, QString::fromStdString(title),
+                        QString::fromStdString(prompt), QMessageBox::Ok,
+                        QMessageBox::Ok);
 }
 
 /**
@@ -75,10 +76,11 @@ Show a warning dialog
 @param prompt : The prompt to appear on the dialog
 @param title : The text for the title bar of the dialog
 */
-void QtReflMainWindowView::giveUserWarning(std::string prompt,
-                                           std::string title) {
-  QMessageBox::warning(this, QString(title.c_str()), QString(prompt.c_str()),
-                       QMessageBox::Ok, QMessageBox::Ok);
+void QtReflMainWindowView::giveUserWarning(const std::string &prompt,
+                                           const std::string &title) {
+  QMessageBox::warning(this, QString::fromStdString(title),
+                       QString::fromStdString(prompt), QMessageBox::Ok,
+                       QMessageBox::Ok);
 }
 
 /**
@@ -86,9 +88,10 @@ Show an information dialog
 @param prompt : The prompt to appear on the dialog
 @param title : The text for the title bar of the dialog
 */
-void QtReflMainWindowView::giveUserInfo(std::string prompt, std::string title) {
-  QMessageBox::information(this, QString(title.c_str()),
-                           QString(prompt.c_str()), QMessageBox::Ok,
+void QtReflMainWindowView::giveUserInfo(const std::string &prompt,
+                                        const std::string &title) {
+  QMessageBox::information(this, QString::fromStdString(title),
+                           QString::fromStdString(prompt), QMessageBox::Ok,
                            QMessageBox::Ok);
 }
 
@@ -98,9 +101,10 @@ Ask the user a Yes/No question
 @param title : The text for the title bar of the dialog
 @returns a boolean true if Yes, false if No
 */
-bool QtReflMainWindowView::askUserYesNo(std::string prompt, std::string title) {
+bool QtReflMainWindowView::askUserYesNo(const std::string &prompt,
+                                        const std::string &title) {
   auto response = QMessageBox::question(
-      this, QString(title.c_str()), QString(prompt.c_str()),
+      this, QString::fromStdString(title), QString::fromStdString(prompt),
       QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
   if (response == QMessageBox::Yes) {
     return true;

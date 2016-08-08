@@ -19,6 +19,15 @@
 
 namespace Mantid {
 namespace Kernel {
+
+/// Flag for whether to sort items before returning
+enum class DataServiceSort { Sorted, Unsorted };
+/**
+ * Flag for whether to include hidden items when returning,
+ * Auto queries the class to determine this behavior
+ */
+enum class DataServiceHidden { Auto, Include, Exclude };
+
 /** DataService stores instances of a given type.
     This is a templated class, designed to be implemented as a
     singleton. For simplicity and naming conventions, specialized classes must
@@ -397,31 +406,54 @@ public:
     }
   }
 
-  /// Get the names of the data objects stored by the service
-  std::unordered_set<std::string> getObjectNames() const {
-    if (showingHiddenObjects())
-      return getObjectNamesInclHidden();
+  /**
+   * Returns a vector of strings containing all object names in the ADS
+   * @param sortState Whether to sort the output before returning. Defaults
+   * to unsorted
+   * @param hiddenState Whether to include hidden objects, Defaults to
+   * Auto which checks the current configuration to determine behavior.
+   * @return A vector of strings containing object names in the ADS
+   */
+  std::vector<std::string> getObjectNames(
+      DataServiceSort sortState = DataServiceSort::Unsorted,
+      DataServiceHidden hiddenState = DataServiceHidden::Auto) const {
 
-    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+    std::vector<std::string> foundNames;
 
-    std::unordered_set<std::string> names;
-    for (const auto &item : datamap) {
-      if (!isHiddenDataServiceObject(item.first)) {
-        names.insert(item.first);
+    // First test if auto flag is set whether to include hidden
+    if (hiddenState == DataServiceHidden::Auto) {
+      if (showingHiddenObjects()) {
+        hiddenState = DataServiceHidden::Include;
+      } else {
+        hiddenState = DataServiceHidden::Exclude;
       }
     }
-    return names;
-  }
 
-  /// Get the names of the data objects stored by the service
-  std::unordered_set<std::string> getObjectNamesInclHidden() const {
-    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
-
-    std::unordered_set<std::string> names;
-    for (const auto &item : datamap) {
-      names.insert(item.first);
+    // Use the scoping of an if to handle our lock for duration
+    if (hiddenState == DataServiceHidden::Include) {
+      // Getting hidden items
+      std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+      for (const auto &item : datamap) {
+        foundNames.push_back(item.first);
+      }
+      // Lock released at end of scope here
+    } else {
+      std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+      for (const auto &item : datamap) {
+        if (!isHiddenDataServiceObject(item.first)) {
+          // This item is not hidden add it
+          foundNames.push_back(item.first);
+        }
+      }
+      // Lock released at end of scope here
     }
-    return names;
+
+    // Now sort if told to
+    if (sortState == DataServiceSort::Sorted) {
+      std::sort(foundNames.begin(), foundNames.end());
+    }
+
+    return foundNames;
   }
 
   /// Get a vector of the pointers to the data objects stored by the service

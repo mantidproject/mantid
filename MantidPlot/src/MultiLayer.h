@@ -72,13 +72,12 @@ class WaterfallFillDialog;
  *could handle things like creating
  * tables by calling methods of Project instead of sending signals.
  */
-class MultiLayer : public MdiSubWindow, public Mantid::IProjectSerialisable {
+class MultiLayer : public MdiSubWindow {
   Q_OBJECT
 
 public:
-  MultiLayer(ApplicationWindow *parent = 0, int layers = 1, int rows = 1,
-             int cols = 1, const QString &label = "", const char *name = 0,
-             Qt::WFlags f = 0);
+  MultiLayer(QWidget *parent, int layers = 1, int rows = 1, int cols = 1,
+             const QString &label = "", const char *name = 0, Qt::WFlags f = 0);
   ~MultiLayer() override;
 
   QSize minimumSizeHint() const override;
@@ -105,8 +104,9 @@ public:
 
   void setWaterfallLayout(bool on = true);
 
-  void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion) override;
+  static IProjectSerialisable *loadFromProject(const std::string &lines,
+                                               ApplicationWindow *app,
+                                               const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
 
 public slots:

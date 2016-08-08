@@ -53,10 +53,14 @@ public:
   /// Dialog/Prompt methods
   std::string askUserString(const std::string &prompt, const std::string &title,
                             const std::string &defaultValue) override;
-  bool askUserYesNo(std::string prompt, std::string title) override;
-  void giveUserWarning(std::string prompt, std::string title) override;
-  void giveUserCritical(std::string prompt, std::string title) override;
-  void giveUserInfo(std::string prompt, std::string title) override;
+  bool askUserYesNo(const std::string &prompt,
+                    const std::string &title) override;
+  void giveUserWarning(const std::string &prompt,
+                       const std::string &title) override;
+  void giveUserCritical(const std::string &prompt,
+                        const std::string &title) override;
+  void giveUserInfo(const std::string &prompt,
+                    const std::string &title) override;
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
 
 private:

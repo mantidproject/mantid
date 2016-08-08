@@ -7,12 +7,14 @@
       - Keep the same parameters and work as a drop-in replacement for the old algorithm.
       - Reproduce the output of the old algorithm.
 """
+from __future__ import (absolute_import, division, print_function)
 import time
 import math
 import os
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
+from functools import reduce #pylint: disable=redefined-builtin
 
 class LiquidsReflectometryReduction(PythonAlgorithm):
     number_of_pixels_x=0
