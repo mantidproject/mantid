@@ -30,7 +30,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     _right_ws = 'right'
 
     # optional output workspaces with fixed names
-    # they will be prepended with _red_ws OR runnumber
+    # they will be prepended with _red_ws OR RunNumber
     _raw_ws = 'raw'
     _det_ws = 'detgrouped'
     _monitor_ws = 'monitor'
@@ -78,7 +78,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(FileProperty('VanadiumRun','',
                                           action=FileAction.OptionalLoad,
                                           extensions=['nxs']),
-                             doc='File path of vanadium run.')
+                             doc='File path of vanadium run. Used for UnmirrorOption=[5,7]')
 
         self.declareProperty(FileProperty('MapFile', '',
                                           action=FileAction.OptionalLoad,
@@ -179,18 +179,19 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
     def validateInputs(self):
 
+        # this is run before setUp, so need to get properties also here!
         issues = dict()
         # Unmirror options 5 and 7 require a Vanadium run as input workspace
-        if self._mirror_sense and (self._unmirror_option == 5 or self._unmirror_option == 7) \
-            and self._vanadium_file is None:
-            issues['UnmirrorOption'] = 'Given unmirror option requires vanadium run to be set'
+        if self.getProperty('MirrorSense').value and \
+            (self.getProperty('UnmirrorOption').value == 5 or self.getProperty('UnmirrorOption').value == 7) \
+            and self.getPropertyValue('VanadiumRun') == "":
+            issues['VanadiumRun'] = 'Given unmirror option requires vanadium run to be set'
 
         return issues
 
     def PyExec(self):
 
         self.setUp()
-        self.validateInputs()
 
         Load(Filename=self._run_file, OutputWorkspace=self._raw_ws)
         # this must be Load, to be able to treat multiple files

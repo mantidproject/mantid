@@ -31,6 +31,12 @@ ISIS Calibration
 - Add load log option to ISIS calibration interface
 
 
+ILL Reduction
+~~~~~~~~~~~~~~~~
+- Refactored :ref:`IndirectILLReduction <algm-IndirectILLReduction>` (and :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>`) algorithms to acommodate new requirements.
+  This includes now handling of multiple files, unmirroring logic, debug mode, etc.. Changes are incorporated in Indirect Data Reduction GUI.
+
+
 Data Analysis
 #############
 
