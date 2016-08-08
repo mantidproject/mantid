@@ -387,8 +387,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
         # Acsc
         s_api.Multiply(LHSWorkspace=corrected_can_ws,
-                 RHSWorkspace=self._corrections + '_acsc',
-                 OutputWorkspace=corrected_can_ws)
+                       RHSWorkspace=self._corrections + '_acsc',
+                       OutputWorkspace=corrected_can_ws)
         s_api.Minus(LHSWorkspace=self._sample_ws_wavelength,
                     RHSWorkspace=corrected_can_ws,
                     OutputWorkspace=self._output_ws_name)
