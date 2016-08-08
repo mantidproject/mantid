@@ -145,6 +145,14 @@ public:
     return this;
   }
 
+  template <typename T>
+  IPropertyManager *setProperty(const std::string &name, const std::vector<T> &value) {
+	  setTypedProperty(name, value,
+		  boost::is_convertible<T, boost::shared_ptr<DataItem>>());
+	  this->afterPropertySet(name);
+	  return this;
+  }
+
   /** Specialised version of setProperty template method to handle const char *
   *  @param name :: The name of the property (case insensitive)
   *  @param value :: The value to assign to the property
@@ -465,6 +473,24 @@ private:
     if (!error.empty()) {
       throw std::invalid_argument(error);
     }
+    return this;
+  }
+
+  template <typename T>
+  IPropertyManager *setTypedProperty(const std::string &name,
+                                     const std::vector<T> &value,
+                                     const boost::true_type &) {
+    std::vector<boost::shared_ptr<DataItem>> tmp(value.size());
+
+    for (size_t i = 0; i < value.size(); i++)
+      tmp[i] = boost::static_pointer_cast<DataItem>(value[i]);
+
+    std::string error = getPointerToProperty(name)->setDataItems(tmp);
+
+    if (!error.empty()) {
+      throw std::invalid_argument(error);
+    }
+
     return this;
   }
 };

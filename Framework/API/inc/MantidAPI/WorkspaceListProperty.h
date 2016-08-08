@@ -2,6 +2,7 @@
 #define MANTID_API_WORKSPACELISTPROPERTY_H_
 
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/DataItem.h"
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <vector>
@@ -117,6 +118,49 @@ public:
   /// Is the input workspace property optional?
   bool isOptional() const {
     return m_optional == PropertyMode::Optional;
+  }
+
+  std::string isValid() const override {
+    std::string error;
+    auto workspaces = SuperClass::m_value;
+
+    for (auto &wksp : workspaces) {
+      auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(wksp);
+
+      if (group) {
+        auto names = group->getNames();
+        if (std::any_of(names.cbegin(), names.cend(),
+                        [](const std::string &s) { return s.size() > 0; })) {
+          error = "WorkspaceGroups which exist in the ADS are not allowed.";
+          break;
+        }
+      }
+    }
+
+    return error + SuperClass::isValid();
+  }
+
+  std::string
+  setDataItems(const std::vector<boost::shared_ptr<Kernel::DataItem>> &items) override {
+    std::string error;
+
+    std::vector<boost::shared_ptr<TYPE>> tmp(items.size());
+
+    for (int i = 0; i < items.size(); i++)
+      tmp[i] = boost::dynamic_pointer_cast<TYPE>(items[i]);
+
+    auto valid =
+        !std::any_of(tmp.cbegin(), tmp.cend(),
+                     [](boost::shared_ptr<TYPE> x) { return x == nullptr; });
+
+    if (valid) {
+      SuperClass::m_value = tmp;
+    } else {
+      clear();
+      error = "Attempted to add one of more invalid types.";
+    }
+
+    return error + isValid();
   }
 
   /**

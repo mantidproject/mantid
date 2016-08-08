@@ -10,8 +10,8 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/WorkspaceListProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceListProperty.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include <gmock/gmock.h>
@@ -56,6 +56,31 @@ private:
     }
 
     virtual ~MyAlgorithm() {}
+  };
+
+  /**
+  * Helper class. Algorithms are instances of IPropertyManager
+  */
+  class MyAlgorithm2 : public Mantid::API::Algorithm {
+  public:
+    MyAlgorithm2() { this->setRethrows(true); }
+
+    virtual int version() const { return 1; }
+
+    virtual const std::string name() const { return "MyAlgorithm"; }
+
+    const std::string summary() const override { return "MyAlgorithm helper."; }
+
+    virtual void init() {
+      declareProperty(std::make_unique<WorkspaceListProperty<MatrixWorkspace>>(
+          "MyProperty", std::vector<MatrixWorkspace_sptr>(0)));
+    }
+
+    virtual void exec() {
+      std::vector<MatrixWorkspace_sptr> val = getProperty("MyProperty");
+    }
+
+    virtual ~MyAlgorithm2() {}
   };
 
 public:
@@ -154,8 +179,7 @@ public:
 
     alg.setProperty("MyProperty", ilist);
 
-    std::vector<Workspace_sptr> olist =
-        alg.getProperty("MyProperty");
+    std::vector<Workspace_sptr> olist = alg.getProperty("MyProperty");
 
     TS_ASSERT_EQUALS(olist.size(), ilist.size());
 
@@ -167,28 +191,68 @@ public:
     TS_ASSERT_EQUALS(ilist, tmpList);
   }
 
-  void test_workspace_groups() {
+  void test_multiple_types_with_specific_template() {
+    auto wksp = boost::make_shared<WorkspaceTester>();
+    auto tableWksp = boost::make_shared<TableWorkspaceTester>();
+    auto group = boost::make_shared<WorkspaceGroup>();
+
+    group->addWorkspace(boost::make_shared<WorkspaceTester>());
+    group->addWorkspace(boost::make_shared<WorkspaceTester>());
+
+    std::vector<Workspace_sptr> list{wksp, group};
+
+    MyAlgorithm2 alg; // Property template specified as MatrixWorkspace
+    alg.initialize();
+
+    TS_ASSERT_THROWS(alg.setProperty("MyProperty", list),
+                     std::invalid_argument);
+
+    list.pop_back();
+    list.push_back(tableWksp);
+
+    TS_ASSERT_THROWS(alg.setProperty("MyProperty", list),
+                     std::invalid_argument);
+  }
+
+  void test_set_property_workspace_groups() {
+    auto group = boost::make_shared<WorkspaceGroup>();
+    group->addWorkspace(boost::make_shared<WorkspaceTester>());
+    group->addWorkspace(boost::make_shared<WorkspaceTester>());
+
+    MyAlgorithm alg;
+    alg.initialize();
+
+    auto list = std::vector<Workspace_sptr>();
+
+    list.push_back(group);
+
+    alg.setProperty("MyProperty", list);
+
+    std::vector<Workspace_sptr> olist = alg.getProperty("MyProperty");
+
+    auto ogroup = boost::dynamic_pointer_cast<WorkspaceGroup>(olist[0]);
+
+    TS_ASSERT_EQUALS(group->size(), ogroup->size());
+
+    for (size_t i = 0; i < group->size(); i++)
+      TS_ASSERT_EQUALS(group->getItem(i), ogroup->getItem(i));
+  }
+
+  void test_workspace_groups_in_ads_fail() {
+	  auto a = boost::make_shared<WorkspaceTester>();
+	  auto b = boost::make_shared<WorkspaceTester>();
+
+	  AnalysisDataService::Instance().add("a", a);
+
 	  auto group = boost::make_shared<WorkspaceGroup>();
-	  group->addWorkspace(boost::make_shared<WorkspaceTester>());
-	  group->addWorkspace(boost::make_shared<WorkspaceTester>());
 
-	  MyAlgorithm alg;
-	  alg.initialize();
+	  group->addWorkspace(a);
+	  group->addWorkspace(b);
+	  std::vector<WorkspaceGroup_sptr> list{ group };
 
-	  auto list = std::vector<Workspace_sptr>();
-
-	  list.push_back(group);
-
-	  alg.setProperty("MyProperty", list);
-
-	  std::vector<Workspace_sptr> olist = alg.getProperty("MyProperty");
-
-	  auto ogroup = boost::dynamic_pointer_cast<WorkspaceGroup>(olist[0]);
-
-	  TS_ASSERT_EQUALS(group->size(), ogroup->size());
-	  
-	  for (size_t i = 0; i < group->size(); i++)
-		  TS_ASSERT_EQUALS(group->getItem(i), ogroup->getItem(i));
+	  TS_ASSERT_THROWS(
+		  WorkspaceListProperty<WorkspaceGroup>("Prop", list, Direction::Input),
+		  std::invalid_argument);
   }
 
   // TODO: Not sure what is the right thing to return here. One possibility
@@ -226,5 +290,4 @@ private:
     TS_ASSERT_EQUALS(wkspList, diList);
   }
 };
-
 #endif /* MANTID_API_WORKSPACELISTPROPERTYTEST_H_ */
