@@ -282,6 +282,37 @@ public:
     AnalysisDataService::Instance().remove(outputSpace);
   }
 
+  /// Test that spectrum numbers and detector IDs are set correctly
+  void testList_spectrumNumber_detectorID() {
+    LoadMuonNexus2 nxLoad;
+    nxLoad.initialize();
+    nxLoad.setChild(true);
+    nxLoad.setPropertyValue("FileName", "argus0026287.nxs");
+    nxLoad.setPropertyValue("OutputWorkspace", "__NotUsed");
+    nxLoad.setPropertyValue("SpectrumMin", "5");
+    nxLoad.setPropertyValue("SpectrumMax", "10");
+    nxLoad.setPropertyValue("SpectrumList", "29, 31");
+    TS_ASSERT_THROWS_NOTHING(nxLoad.execute());
+    TS_ASSERT(nxLoad.isExecuted());
+
+    Workspace_sptr outWS = nxLoad.getProperty("OutputWorkspace");
+    const auto loadedWS = boost::dynamic_pointer_cast<Workspace2D>(outWS);
+    TS_ASSERT(loadedWS);
+
+    // Check the right spectra have been loaded
+    const std::vector<Mantid::specnum_t> expectedSpectra{5, 6,  7,  8,
+                                                         9, 10, 29, 31};
+    TS_ASSERT_EQUALS(loadedWS->getNumberHistograms(), expectedSpectra.size());
+    for (size_t i = 0; i < loadedWS->getNumberHistograms(); ++i) {
+      const auto spec = loadedWS->getSpectrum(i);
+      TS_ASSERT_EQUALS(spec.getSpectrumNo(), expectedSpectra[i]);
+      // detector ID = spectrum number for this muon Nexus v2 file
+      const auto detIDs = spec.getDetectorIDs();
+      TS_ASSERT_EQUALS(detIDs.size(), 1);
+      TS_ASSERT_EQUALS(*detIDs.begin(), static_cast<int>(spec.getSpectrumNo()));
+    }
+  }
+
   void testExec1() {
     LoadMuonNexus2 nxLoad;
     nxLoad.initialize();
