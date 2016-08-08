@@ -81,13 +81,13 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
         self.assertEqual(2,  ws_nsf.getNumDims())
         # data array: spin-flip must be zero
         for i in range(24):
-            self.assertAlmostEqual(0.0, ws_sf.readY(i))
+            self.assertAlmostEqual(0.0, ws_sf.readY(i)[0])
         # data array: non spin-flip must be nsf - sf^2/nsf
         nsf = np.array(dataws_nsf.extractY())
         sf = np.array(dataws_sf.extractY())
         refdata = nsf + sf
         for i in range(24):
-            self.assertAlmostEqual(refdata[i], ws_nsf.readY(i))
+            self.assertAlmostEqual(refdata[i][0], ws_nsf.readY(i)[0])
 
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + 'SF')
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + 'NSF')

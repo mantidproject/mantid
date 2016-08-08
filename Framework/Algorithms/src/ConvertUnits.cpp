@@ -622,7 +622,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
     auto reverseX = make_cow<HistogramData::HistogramX>(WS->x(0).crbegin(),
                                                         WS->x(0).crend());
 
-    for (size_t j = 0; j < m_numberOfSpectra; ++j) {
+    for (size_t j = 0; j < numberOfSpectra; ++j) {
       WS->setSharedX(j, reverseX);
       std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());
       std::reverse(WS->dataE(j).begin(), WS->dataE(j).end());
