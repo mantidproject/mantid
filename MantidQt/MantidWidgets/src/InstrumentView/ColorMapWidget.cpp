@@ -344,7 +344,10 @@ std::string ColorMapWidget::saveToProject() const {
 void ColorMapWidget::loadFromProject(const std::string &lines) {
   TSVSerialiser tsv(lines);
   if (tsv.selectSection("colormap")) {
-    TSVSerialiser cm(tsv.sections("colormap")[0]);
+    std::string colorMapLines;
+    tsv >> colorMapLines;
+    TSVSerialiser cm(colorMapLines);
+
     int scaleType;
     double min, max, power;
     cm.selectLine("ScaleType");
