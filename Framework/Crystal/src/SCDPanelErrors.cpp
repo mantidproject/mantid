@@ -44,8 +44,8 @@ SCDPanelErrors::SCDPanelErrors() : m_setupFinished(false) {
   declareParameter("XRotate", 0.0, "Rotate angle in X");
   declareParameter("YRotate", 0.0, "Rotate angle in Y");
   declareParameter("ZRotate", 0.0, "Rotate angle in Z");
-  declareParameter("scaleWidth", 1.0, "Scale width of detector");
-  declareParameter("scaleHeight", 1.0, "Scale height of detector");
+  declareParameter("ScaleWidth", 1.0, "Scale width of detector");
+  declareParameter("ScaleHeight", 1.0, "Scale height of detector");
   declareAttribute("FileName", Attribute("", true));
   declareAttribute("Workspace", Attribute(""));
   declareAttribute("Bank", Attribute(""));
@@ -208,8 +208,8 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   const double xrotate = getParameter("XRotate");
   const double yrotate = getParameter("YRotate");
   const double zrotate = getParameter("ZRotate");
-  const double scalex = getParameter("scaleWidth");
-  const double scaley = getParameter("scaleHeight");
+  const double scalex = getParameter("ScaleWidth");
+  const double scaley = getParameter("ScaleHeight");
   eval(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex, scaley, out,
        xValues, nData);
 }

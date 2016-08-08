@@ -9,29 +9,31 @@
 Description
 -----------
 
-This algorithm calibrates sets of Rectangular Detectors in one
-instrument. The initial path, time offset,panel widths, panel heights,
+This algorithm calibrates panels of Rectangular Detectors in one
+instrument. The initial path, panel widths, panel heights,
 panel locations and orientation are all adjusted so the error in q
-positions from the theoretical q positions is minimized. Also, there are
-optimize options that take into account sample position and the need for
-rigid rotations.
+positions from the theoretical q positions is minimized. 
 
 Some features:
 
 1) The results can be saved to an ISAW-like DetCal file or in an xml
    file that can be used with the LoadParameter algorithm.
 
-2) There are several output tables indicating the results of the fit
+2) There are several output workspaces indicating the results of the fit
 
-   a. params Workspaces contains the results from fitting for each bank and for L1
-      * XShift, YShift,and ZShift are in meters
+   a. Workspaces beginning with 'params' contains the results from fitting for each bank and for L1.
+
+      * XShift, YShift,and ZShift are in meters.
+
       * XRotate, YRotate, and ZRotate are in degrees. 
 
-   b. fit Workspaces plot the differences in the calculated and theoretical Q vectors for each bank
+   b. Workspaces beginning with 'fit' contain the differences in the calculated and theoretical Q vectors for each peak.
       
-   d. ColFilename contains the calculated and theoretical column for each peak. To plot use python script in scripts/SCDCalibratePanelsResults.py
-   e. RowFilename contains the calculated and theoretical row for each peak. To plot use python script in scripts/SCDCalibratePanelsResults.py
-   f. TofFilename contains the calculated and theoretical TOF for each peak. 
+   c. ColFilename contains the calculated and theoretical column for each peak. Each spectra is labeled by the bank. To plot use python script, SCDCalibratePanelsResults.py
+
+   d. RowFilename contains the calculated and theoretical row for each peak. Each spectra is labeled by the bank. To plot use python script, SCDCalibratePanelsResults.py
+
+   e. TofFilename contains the calculated and theoretical TOF for each peak.  Each spectra is labeled by the bank.
 
 
 

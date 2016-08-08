@@ -47,7 +47,7 @@ public:
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Panel parameters, sample position,L0 and T0 are optimized to "
+    return "Panel parameters and L0 are optimized to "
            "minimize errors between theoretical and actual q values for the "
            "peaks";
   }
@@ -201,7 +201,7 @@ private:
    *
    * @param FileName     The filename to save this information to
    *
-   * @param Groups      The names of the banks in each group whose values are
+   * @param AllBankNames The names of the banks in each group whose values are
    *                         to be saved to the file
    *
    * @param instrument   The instrument with the new values for the banks in
