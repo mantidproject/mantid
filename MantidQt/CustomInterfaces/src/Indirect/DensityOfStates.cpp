@@ -109,6 +109,9 @@ void DensityOfStates::run() {
     bool sumContributions = m_uiForm.ckSumContributions->isChecked();
     dosAlgo->setProperty("SumContributions", sumContributions);
 
+    bool calcIndices = m_uiForm.ckCalcIndices->isChecked();
+    dosAlg->setProperty("CalculateIonIndices", calcIndices);
+
     std::vector<std::string> selectedIons;
     auto items = m_uiForm.lwIons->selectedItems();
     for (auto it = items.begin(); it != items.end(); ++it)
