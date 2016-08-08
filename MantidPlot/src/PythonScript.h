@@ -62,13 +62,15 @@ public:
   /// Create a PyObject that wraps this C++ instance
   PyObject *createSipInstanceFromMe();
 
-  // -------------------------- Print/error message handling ------------------
+  // -------------------------- I/O-like behaviour ------------------
   /// Connects the python stdout to a Qt signal
   inline void write(const QString &text) { emit print(text); }
   /// Simulate file-like object (required for IPython)
   inline void flush() {}
   /// Simulate file-like object (required for colorama)
-  inline bool closed() { return false; }
+  inline bool closed() const { return false; }
+  /// Simulate file-like object
+  inline bool isatty() const { return false; }
   /// Is the given code complete
   bool compilesToCompleteStatement(const QString &code) const override;
 
