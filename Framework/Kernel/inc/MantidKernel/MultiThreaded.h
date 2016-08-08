@@ -48,7 +48,7 @@ threadSafe(Arg workspace, Args... others) {
 #ifdef _MSC_VER
 #define PRAGMA __pragma
 #else //_MSC_VER
-#define PRAGMA(x) _Pragma(#x)
+#define PRAGMA(__VA_ARGS__) _Pragma(#__VA_ARGS__)
 #endif //_MSC_VER
 
 /** Begins a block to skip processing is the algorithm has been interupted
