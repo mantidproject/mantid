@@ -7,6 +7,14 @@
 
 class GroupWorkspacesTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static GroupWorkspacesTest *createSuite() {
+    return new GroupWorkspacesTest();
+  }
+
+  static void destroySuite(GroupWorkspacesTest *suite) { delete suite; }
+
   //========================= Success Cases
   //===========================================
   void testName() {
