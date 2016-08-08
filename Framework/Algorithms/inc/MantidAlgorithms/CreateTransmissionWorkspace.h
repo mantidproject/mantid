@@ -55,7 +55,7 @@ private:
       const OptionalDouble &stitchingStart,
       const OptionalDouble &stitchingDelta, const OptionalDouble &stitchingEnd,
       const OptionalDouble &stitchingStartOverlap,
-      const OptionalDouble &stitchingEndOverlap, const double &wavelengthStep);
+      const OptionalDouble &stitchingEndOverlap);
 
   void init() override;
   void exec() override;
