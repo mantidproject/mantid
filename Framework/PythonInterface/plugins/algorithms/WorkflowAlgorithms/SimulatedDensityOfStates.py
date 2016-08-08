@@ -516,12 +516,24 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 AND
                 The expected suffix for the partial workspace
         """
+        # Get the index of the element (if present)
+        import re
+        match = re.search(r'\d', ion_name)
+        element_index = ''
+        if match:
+            element_index = '_' + ion_name[match.start():]
+
+        # If the chemical is a isotope
         if ':' in ion_name:
             chemical = ion_name.split(':')[0]
             # Parse isotope to rounded int
             chemical_formula = '(' + chemical + str(int(round(isotope))) + ')'
-            ws_name_suffix = chemical + '('  + str(int(round(isotope))) + ')'
+            ws_name_suffix = chemical + '('  + str(int(round(isotope))) + ')' + element_index
             return chemical_formula, ws_name_suffix
+        # If the chemical has an index
+        if match:
+            chemical = ion_name[:match.start()]
+            return chemical, chemical + element_index
         else:
             return ion_name, ion_name
 
