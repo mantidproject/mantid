@@ -80,7 +80,11 @@ void ImageROIViewQtWidget::initLayout() {
   m_ui.colorBarWidget->setAutoScale(true);
   m_ui.colorBarWidget->setCheckBoxMode(
       MantidWidgets::ColorBarWidget::ADD_AUTOSCALE_ON_LOAD);
-  //m_ui.colorBarWidget->setAutoScaleTooltipText("");
+  m_ui.colorBarWidget->setAutoScaleTooltipText(
+      "This flag signals that the color scale range will be set automatically "
+      "to the current slice range when an image is loaded. Note that auto "
+      "scaling will be applied when an image is loaded for the very first "
+      "time.");
 
   readSettings();
 
