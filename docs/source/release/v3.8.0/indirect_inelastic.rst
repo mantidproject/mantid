@@ -41,8 +41,10 @@ Elwin
 - When using multiple input files, the naming convention for the outputworkspace contains the `first-final` run number.
   An example of this would be `osi92764-92767_graphite002_red_elwin_elf` for OSIRIS run between 92764-92767
 
-Jump Fit
-~~~~~~~~
+ConvFit
+~~~~~~~
+
+- Plotting and saving is now performed after the algorithm is run. These are push buttons at the bottom of the interface which are enabled post algorithm completion
 
 Simulations
 ###########
