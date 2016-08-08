@@ -80,8 +80,7 @@ bool MANTID_KERNEL_DLL isConstantValue(const std::vector<double> &arra);
  * @return a single vector containing all elements in v.
  */
 template <typename T>
-MANTID_KERNEL_DLL std::vector<T>
-flattenVector(const std::vector<std::vector<T>> &v) {
+std::vector<T> flattenVector(const std::vector<std::vector<T>> &v) {
   std::vector<T> flattened;
 
   for (const auto &subVector : v) {
