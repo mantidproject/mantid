@@ -1,9 +1,10 @@
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentTreeWidget.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidQtMantidWidgets/InstrumentView/GLActorVisitor.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentTreeWidget.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
+#include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
 
 #include <QVBoxLayout>
 #include <QMessageBox>
@@ -59,5 +60,41 @@ void InstrumentWidgetTreeTab::selectComponentByName(const QString &name) {
 void InstrumentWidgetTreeTab::showEvent(QShowEvent *) {
   getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
 }
+
+void MantidQt::MantidWidgets::InstrumentWidgetTreeTab::loadFromProject(
+    const std::string &lines) {
+  TSVSerialiser tsv(lines);
+
+  if (tsv.selectSection("treetab")) {
+    std::string tabLines;
+    tsv >> tabLines;
+    TSVSerialiser tab(tabLines);
+
+    std::string componentName;
+    if (tab.selectLine("SelectedComponent")) {
+      tab >> componentName;
+      selectComponentByName(QString::fromStdString(componentName));
+    }
+  }
+}
+
+std::string
+MantidQt::MantidWidgets::InstrumentWidgetTreeTab::saveToProject() const {
+  TSVSerialiser tsv;
+  TSVSerialiser tab;
+
+  auto index = m_instrumentTree->currentIndex();
+  auto model = index.model();
+
+  if (model) {
+    auto item = model->data(index);
+    auto name = item.value<QString>();
+    tab.writeLine("SelectedComponent") << name;
+  }
+
+  tsv.writeSection("treetab", tab.outputLines());
+  return tsv.outputLines();
+}
+
 } // MantidWidgets
 } // MantidQt
