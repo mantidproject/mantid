@@ -214,17 +214,31 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
               "Please try again");
         } else {
 
-          updateFittingDirVec(strBankDir, foc_file, false, runnoDirVector);
-          m_view->setFittingRunNumVec(runnoDirVector);
+          // foc_file - vector holding the file name split
+          // false for NOT multi-run
+          // runnoDirVector - giving empty vector here holding directory of
+          // selected vector
 
-          // add bank to the combo-box and list view
-          setBankItems();
-          setDefaultBank(splitBaseName, focusedFile);
-          runNoVec.clear();
-          runNoVec.push_back(splitBaseName[1]);
-          auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
-          if (!fittingMultiRunMode)
+          auto multiRunMode = m_view->getFittingMultiRunMode();
+          auto singleRunMode = m_view->getFittingSingleRunMode();
+
+          // if not run mode or bank mode: to avoid recreating widgets
+          if (!multiRunMode && !singleRunMode) {
+
+			updateFittingDirVec(strBankDir, foc_file, false, runnoDirVector);
+			m_view->setFittingRunNumVec(runnoDirVector);
+
+            // add bank to the combo-box
+            setBankItems();
+            // set the bank widget according to selected bank file
+            setDefaultBank(splitBaseName, strFocusedFile);
+            runNoVec.clear();
+            runNoVec.push_back(splitBaseName[1]);
+
+            // Skips this step if it is multiple run because widget already
+            // updated
             setRunNoItems(runNoVec, false);
+          }
         }
       }
       // assuming that no directory is found so look for number

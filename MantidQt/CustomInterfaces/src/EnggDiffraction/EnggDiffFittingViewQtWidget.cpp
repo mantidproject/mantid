@@ -36,6 +36,8 @@ const std::string EnggDiffFittingViewQtWidget::g_peaksListExt =
     "Other extensions/all files (*.*)";
 
 bool EnggDiffFittingViewQtWidget::m_fittingMutliRunMode = false;
+bool EnggDiffFittingViewQtWidget::m_fittingSingleRunMode = false;
+
 std::vector<std::string> EnggDiffFittingViewQtWidget::m_fitting_runno_dir_vec;
 
 EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
@@ -79,7 +81,7 @@ void EnggDiffFittingViewQtWidget::doSetup() {
           SLOT(browseFitFocusedRun()));
 
   connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(textEdited(const QString &)),
-          this, SLOT(resetFittingMultiMode()));
+          this, SLOT(resetFittingMode()));
 
   connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(editingFinished()), this,
           SLOT(FittingRunNo()));
@@ -263,6 +265,7 @@ void EnggDiffFittingViewQtWidget::resetFittingMultiMode() {
   // resets the global variable so the list view widgets
   // adds the run number to for single runs too
   m_fittingMutliRunMode = false;
+  m_fittingSingleRunMode = false;
 }
 
 void EnggDiffFittingViewQtWidget::setDataVector(
@@ -454,6 +457,10 @@ void EnggDiffFittingViewQtWidget::setFittingRunNo(const std::string &path) {
 
 std::string EnggDiffFittingViewQtWidget::getFittingRunNo() const {
   return m_ui.lineEdit_pushButton_run_num->text().toStdString();
+}
+
+void EnggDiffFittingViewQtWidget::enableFitAllButton(bool enable) const {
+  m_ui.pushButton_fit_all->setEnabled(enable);
 }
 
 void EnggDiffFittingViewQtWidget::clearFittingComboBox() const {
