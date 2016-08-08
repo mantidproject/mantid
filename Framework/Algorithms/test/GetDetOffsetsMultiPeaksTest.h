@@ -12,10 +12,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <cxxtest/TestSuite.h>
-
-#include <Poco/File.h>
-
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::Algorithms::GetDetOffsetsMultiPeaks;
@@ -49,14 +45,15 @@ public:
     AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const Mantid::MantidVec &X = WS->readX(0);
-    Mantid::MantidVec &Y = WS->dataY(0);
-    Mantid::MantidVec &E = WS->dataE(0);
-    for (size_t i = 0; i < Y.size(); ++i) {
-      const double x = (X[i] + X[i + 1]) / 2;
-      Y[i] = 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
-      E[i] = 0.001;
-    }
+
+    auto xvals = WS->points(0);
+    std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+                   [](const double x) {
+                     return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
+                   });
+
+    auto &E = WS->mutableE(0);
+    E.assign(E.size(), 0.001);
 
     // ---- Run algo -----
     if (!offsets.isInitialized())
@@ -81,7 +78,7 @@ public:
     if (!output)
       return;
 
-    TS_ASSERT_DELTA(output->dataY(0)[0], -0.002, 0.0002);
+    TS_ASSERT_DELTA(output->y(0)[0], -0.002, 0.0002);
 
     AnalysisDataService::Instance().remove(outputWS);
 
@@ -103,14 +100,15 @@ public:
         WorkspaceCreationHelper::CreateGroupedWorkspace2D(3, 200, 1.0);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const Mantid::MantidVec &X = WS->readX(0);
-    Mantid::MantidVec &Y = WS->dataY(0);
-    Mantid::MantidVec &E = WS->dataE(0);
-    for (size_t i = 0; i < Y.size(); ++i) {
-      const double x = (X[i] + X[i + 1]) / 2;
-      Y[i] = exp(-0.5 * pow((x - 10) / 1.0, 2));
-      E[i] = 0.001;
-    }
+
+    auto xvals = WS->points(0);
+    std::transform(
+        xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+        [](const double x) { return exp(-0.5 * pow((x - 10) / 1.0, 2)); });
+
+    auto &E = WS->mutableE(0);
+    E.assign(E.size(), 0.001);
+
     AnalysisDataService::Instance().addOrReplace("temp_event_ws3", WS);
 
     // ---- Run algo -----
@@ -159,14 +157,15 @@ public:
     AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const Mantid::MantidVec &X = WS->readX(0);
-    Mantid::MantidVec &Y = WS->dataY(0);
-    Mantid::MantidVec &E = WS->dataE(0);
-    for (size_t i = 0; i < Y.size(); ++i) {
-      const double x = (X[i] + X[i + 1]) / 2;
-      Y[i] = 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
-      E[i] = 0.001;
-    }
+
+    auto xvals = WS->points(0);
+    std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+                   [](const double x) {
+                     return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
+                   });
+
+    auto &E = WS->mutableE(0);
+    E.assign(E.size(), 0.001);
 
     // Create table workspace
     TableWorkspace_sptr fitWindowWS = boost::make_shared<TableWorkspace>();
@@ -206,8 +205,6 @@ public:
     if (!output)
       return;
 
-    // TS_ASSERT_DELTA( output->dataY(0)[0], -0.002, 0.0002);
-
     AnalysisDataService::Instance().remove(outputWS);
     AnalysisDataService::Instance().remove("PeakFitRangeTableWS");
 
@@ -231,14 +228,15 @@ public:
     AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const Mantid::MantidVec &X = WS->readX(0);
-    Mantid::MantidVec &Y = WS->dataY(0);
-    Mantid::MantidVec &E = WS->dataE(0);
-    for (size_t i = 0; i < Y.size(); ++i) {
-      const double x = (X[i] + X[i + 1]) / 2;
-      Y[i] = 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
-      E[i] = 0.001;
-    }
+
+    auto xvals = WS->points(0);
+    std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+                   [](const double x) {
+                     return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
+                   });
+
+    auto &E = WS->mutableE(0);
+    E.assign(E.size(), 0.001);
 
     // Create table workspace
     TableWorkspace_sptr fitWindowWS = boost::make_shared<TableWorkspace>();
@@ -278,8 +276,6 @@ public:
     if (!output)
       return;
 
-    // TS_ASSERT_DELTA( output->dataY(0)[0], -0.002, 0.0002);
-
     AnalysisDataService::Instance().remove(outputWS);
     AnalysisDataService::Instance().remove("PeakFitRangeTableWS");
 
@@ -303,19 +299,20 @@ public:
     AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const Mantid::MantidVec &X = WS->readX(0);
-    Mantid::MantidVec &Y = WS->dataY(0);
-    Mantid::MantidVec &E = WS->dataE(0);
-    for (size_t i = 0; i < Y.size(); ++i) {
-      const double x = (X[i] + X[i + 1]) / 2;
-      Y[i] = 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
-      E[i] = 0.001;
-    }
+
+    auto xvals = WS->points(0);
+    std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+                   [](const double x) {
+                     return 5.1 * exp(-0.5 * pow((x - 10) / 1.0, 2));
+                   });
+
+    auto &E = WS->mutableE(0);
+    E.assign(E.size(), 0.001);
 
     // Resolution workspace
     MatrixWorkspace_sptr resWS =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    resWS->dataY(0)[0] = 0.2;
+    resWS->mutableY(0)[0] = 0.2;
     AnalysisDataService::Instance().addOrReplace("temp_res_ws", resWS);
 
     // ---- Run algo -----
@@ -348,7 +345,7 @@ public:
     if (!output)
       return;
 
-    TS_ASSERT_DELTA(output->dataY(0)[0], -0.002, 0.0002);
+    TS_ASSERT_DELTA(output->y(0)[0], -0.002, 0.0002);
 
     AnalysisDataService::Instance().remove(outputWS);
 
@@ -378,7 +375,7 @@ public:
     // Resolution workspace
     MatrixWorkspace_sptr resWS =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    resWS->dataY(0)[0] = 0.2;
+    resWS->mutableY(0)[0] = 0.2;
     AnalysisDataService::Instance().addOrReplace("temp_res_ws", resWS);
 
     // ---- Run algo -----
@@ -411,7 +408,7 @@ public:
     if (!output)
       return;
 
-    TS_ASSERT_DELTA(output->dataY(0)[0], 0.0, 1.0E-20);
+    TS_ASSERT_DELTA(output->y(0)[0], 0.0, 1.0E-20);
 
     AnalysisDataService::Instance().remove(outputWS);
 
@@ -428,14 +425,11 @@ public:
   /** Generate noisy data in a workspace
    */
   void generateNoisyData(MatrixWorkspace_sptr WS) {
-    Mantid::MantidVec &Y = WS->dataY(0);
-    Mantid::MantidVec &E = WS->dataE(0);
-    for (size_t i = 0; i < Y.size(); ++i) {
-      Y[i] = static_cast<double>(rand() % 5);
-      E[i] = 0.01;
-    }
 
-    return;
+    auto &Y = WS->mutableY(0);
+    Y.assign(Y.size(), static_cast<double>(rand() % 5));
+    auto &E = WS->mutableE(0);
+    E.assign(E.size(), 0.01);
   }
 
 private:
@@ -463,14 +457,14 @@ public:
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
     for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
-      const Mantid::MantidVec &X = WS->readX(wi);
-      Mantid::MantidVec &Y = WS->dataY(wi);
-      Mantid::MantidVec &E = WS->dataE(wi);
-      for (int i = 0; i < static_cast<int>(Y.size()); ++i) {
-        const double x = (X[i] + X[i + 1]) / 2;
-        Y[i] = exp(-0.5 * pow((x - 10) / 1.0, 2));
-        E[i] = 0.001;
-      }
+
+      auto xvals = WS->points(0);
+      std::transform(
+          xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+          [](const double x) { return exp(-0.5 * pow((x - 10) / 1.0, 2)); });
+
+      auto &E = WS->mutableE(0);
+      E.assign(E.size(), 0.001);
     }
     AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
   }
@@ -491,7 +485,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = offsets.getProperty("OutputWorkspace"));
     if (!output)
       return;
-    TS_ASSERT_DELTA(output->dataY(0)[0], -0.00196, 0.0002);
+    TS_ASSERT_DELTA(output->mutableY(0)[0], -0.00196, 0.0002);
   }
 };
 

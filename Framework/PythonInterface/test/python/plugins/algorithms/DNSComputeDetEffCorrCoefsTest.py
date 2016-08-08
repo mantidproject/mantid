@@ -46,7 +46,7 @@ class DNSComputeDetEffCorrCoefsTest(unittest.TestCase):
         refdata = np.linspace(0.08, 1.92, 24)
         # data array
         for i in range(24):
-            self.assertAlmostEqual(refdata[i], ws.readY(i))
+            self.assertAlmostEqual(refdata[i], ws.readY(i)[0])
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
         return
 
@@ -115,8 +115,8 @@ class DNSComputeDetEffCorrCoefsTest(unittest.TestCase):
         refdata = np.linspace(0.08, 1.92, 24)
         # data array
         for i in range(24):
-            self.assertAlmostEqual(refdata[i], res1.readY(i))
-            self.assertAlmostEqual(refdata[i], res2.readY(i))
+            self.assertAlmostEqual(refdata[i], res1.readY(i)[0])
+            self.assertAlmostEqual(refdata[i], res2.readY(i)[0])
         wslist = [outputWorkspaceName, 'sfvana2', 'nsfvana2', 'sfbg2', 'nsfbg2']
         for wsname in wslist:
             run_algorithm("DeleteWorkspace", Workspace=wsname)

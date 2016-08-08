@@ -9,9 +9,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
-#include <sstream>
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -138,10 +135,10 @@ void GetDetectorOffsets::exec() {
         if (mask == 1.) {
           // Being masked
           maskWS->maskWorkspaceIndex(workspaceIndex);
-          maskWS->dataY(workspaceIndex)[0] = mask;
+          maskWS->mutableY(workspaceIndex)[0] = mask;
         } else {
           // Using the detector
-          maskWS->dataY(workspaceIndex)[0] = mask;
+          maskWS->mutableY(workspaceIndex)[0] = mask;
         }
       }
     }
@@ -175,10 +172,10 @@ void GetDetectorOffsets::exec() {
  */
 double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
   // Find point of peak centre
-  const MantidVec &yValues = inputW->readY(s);
+  const auto &yValues = inputW->y(s);
   auto it = std::max_element(yValues.cbegin(), yValues.cend());
   const double peakHeight = *it;
-  const double peakLoc = inputW->readX(s)[it - yValues.begin()];
+  const double peakLoc = inputW->x(s)[it - yValues.begin()];
   // Return if peak of Cross Correlation is nan (Happens when spectra is zero)
   // Pixel with large offset will be masked
   if (boost::math::isnan(peakHeight))
