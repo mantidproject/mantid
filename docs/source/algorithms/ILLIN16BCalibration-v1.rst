@@ -29,8 +29,7 @@ Usage
 .. testcode:: ExILLIN16BCalibration
 
     calibration_ws = ILLIN16BCalibration(Run='ILLIN16B_034745.nxs',
-                                         PeakRange=[-0.001,0.002],
-                                         MirrorMode=True)
+                                         PeakRange=[-0.015,0.015])
 
     print 'Calibration workspace has %d spectra and %d bin(s)' % (
            calibration_ws.getNumberHistograms(), calibration_ws.blocksize())
