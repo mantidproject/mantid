@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 import mantid.simpleapi as sapi
@@ -320,7 +321,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
             raise RuntimeError("Expecting a dictionary with fitting workspaces from 'Fit' but got an "
                                "empty dictionary")
         if 1 == len(curvesDict):
-            return curvesDict.values()[0]
+            return list(curvesDict.values())[0]
 
         keys = sorted(curvesDict)
         ws = curvesDict[keys[0]]
@@ -394,7 +395,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                                "histograms multiple of 3. Number of hsitograms found: %d"%
                                ws.getNumberHistograms())
 
-        for wi in range(0, ws.getNumberHistograms()/3):
+        for wi in range(0, int(ws.getNumberHistograms()/3)):
             indiv = EnggUtils.cropData(self, ws, [wi, wi+2])
             curves.update({wi: indiv})
 

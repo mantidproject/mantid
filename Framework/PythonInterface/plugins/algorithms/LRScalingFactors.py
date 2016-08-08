@@ -1,9 +1,11 @@
 #pylint: disable=invalid-name, no-init
+from __future__ import (absolute_import, division, print_function)
 import os
 import re
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
+from six import iteritems
 
 
 class LRScalingFactors(PythonAlgorithm):
@@ -147,7 +149,7 @@ class LRScalingFactors(PythonAlgorithm):
 
             # If the number of attenuators is zero, skip.
             if n_attenuator == 0:
-                if self.references.has_key(0):
+                if 0 in self.references:
                     raise RuntimeError("More than one run with zero attenuator was supplied.")
                 self.references[0] = {'index': i,
                                       'run': run,
@@ -296,7 +298,7 @@ class LRScalingFactors(PythonAlgorithm):
         """
         # Divide by the reference for this number of attenuators
         # and multiply by the reference ratio
-        if not self.references.has_key(n_attenuator):
+        if n_attenuator not in self.references:
             raise RuntimeError("No reference for %s attenuators: check run ordering." % n_attenuator)
         f_ws = "F_%s_%s" % (run, n_attenuator)
         Divide(LHSWorkspace=workspace_name,
@@ -391,7 +393,7 @@ class LRScalingFactors(PythonAlgorithm):
         fd.write("# y=a+bx\n#\n")
         fd.write("# LambdaRequested[Angstroms] S1H[mm] (S2/Si)H[mm] S1W[mm] (S2/Si)W[mm] a b error_a error_b\n#\n")
 
-        for k, v in scaling_file_meta.iteritems():
+        for k, v in iteritems(scaling_file_meta):
             fd.write("%s\n" % v)
         for item in scaling_file_content:
             fd.write("IncidentMedium=%s " % item["IncidentMedium"])

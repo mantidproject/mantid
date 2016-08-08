@@ -50,6 +50,7 @@ Improved
 - :ref:`FilterEvents <algm-FilterEvents>` now produces output
   workspaces with the same workspace numbers as specified by the
   ``SplittersWorkspace``.
+- :ref:`ConvertAxisByFormula <algm-ConvertAxisByFormula>` now supports instrument geometry vairables and several constants within the formula.  Axes are now reversed if the need to be to maintain increasing axis values.
 
 - :ref:`SavePlot1D <algm-SavePlot1D>` has options for writing out
   plotly html files.
@@ -79,6 +80,9 @@ Performance
   A moderate number of algorithms should experience a speedup and reduced memory consumption.
   If you experience unusual slowdowns, please contact the developer team.
 
+- :ref:`StripPeaks <algm-StripPeaks>` has a slight performance improvement from these changes.
+  
+  
 CurveFitting
 ------------
 
@@ -103,6 +107,7 @@ Bug Fixes
 ---------
 - Scripts generated from history including algorithms that added dynamic properties at run time (for example Fit, and Load) will not not include those dynamic properties in their script.  This means they will execute without warnings.
 - Cloning a ``MultiDomainFunction``, or serializing to a string and recreating it, now preserves the domains.
+- :ref:`EvaluateFunction <algm-EvaluateFunction>` now works from its dialog in the GUI as well as from a script
 
 
 |

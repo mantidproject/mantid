@@ -5,18 +5,11 @@
 namespace Mantid {
 namespace API {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ISpectrum::ISpectrum() : m_specNo(0), detectorIDs() {}
-
 /** Constructor with spectrum number
  * @param specNo :: spectrum # of the spectrum
  */
-ISpectrum::ISpectrum(const specnum_t specNo)
-    : m_specNo(specNo), detectorIDs() {}
+ISpectrum::ISpectrum(const specnum_t specNo) : m_specNo(specNo) {}
 
-//----------------------------------------------------------------------------------------------
 /** Copy spectrum number and detector IDs, but not X vector, from another
  *ISpectrum
  *
@@ -43,8 +36,6 @@ const MantidVec &ISpectrum::readY() const { return this->dataY(); }
 /// Deprecated, use e() instead. Returns the y error data const
 const MantidVec &ISpectrum::readE() const { return this->dataE(); }
 
-// =============================================================================================
-// --------------------------------------------------------------------------
 /** Add a detector ID to the set of detector IDs
  *
  * @param detID :: detector ID to insert in set.
@@ -58,8 +49,6 @@ void ISpectrum::addDetectorID(const detid_t detID) {
  * @param detIDs :: set of detector IDs to insert in set.
  */
 void ISpectrum::addDetectorIDs(const std::set<detid_t> &detIDs) {
-  if (detIDs.empty())
-    return;
   this->detectorIDs.insert(detIDs.begin(), detIDs.end());
 }
 
@@ -68,12 +57,9 @@ void ISpectrum::addDetectorIDs(const std::set<detid_t> &detIDs) {
  * @param detIDs :: vector of detector IDs to insert in set.
  */
 void ISpectrum::addDetectorIDs(const std::vector<detid_t> &detIDs) {
-  if (detIDs.empty())
-    return;
   this->detectorIDs.insert(detIDs.begin(), detIDs.end());
 }
 
-// --------------------------------------------------------------------------
 /** Clear the list of detector IDs, then add one.
  *
  * @param detID :: detector ID to insert in set.
@@ -96,37 +82,28 @@ void ISpectrum::setDetectorIDs(const std::set<detid_t> &detIDs) {
  *  @param detIDs The new list of detector ID numbers
  */
 void ISpectrum::setDetectorIDs(std::set<detid_t> &&detIDs) {
-#if !(defined(__INTEL_COMPILER))
   detectorIDs = std::move(detIDs);
-#else
-  detectorIDs = detIDs; // No moving on the Mac :(
-#endif
 }
 
-// --------------------------------------------------------------------------
 /** Return true if the given detector ID is in the list for this ISpectrum */
 bool ISpectrum::hasDetectorID(const detid_t detID) const {
   return (detectorIDs.find(detID) != detectorIDs.end());
 }
 
-// --------------------------------------------------------------------------
 /** Get a const reference to the detector IDs set.
  */
 const std::set<detid_t> &ISpectrum::getDetectorIDs() const {
   return this->detectorIDs;
 }
 
-// --------------------------------------------------------------------------
 /** Clear the detector IDs set.
  */
 void ISpectrum::clearDetectorIDs() { this->detectorIDs.clear(); }
 
-// --------------------------------------------------------------------------
 /** Get a mutable reference to the detector IDs set.
  */
 std::set<detid_t> &ISpectrum::getDetectorIDs() { return this->detectorIDs; }
 
-// ---------------------------------------------------------
 /// @return the spectrum number of this spectrum
 specnum_t ISpectrum::getSpectrumNo() const { return m_specNo; }
 
@@ -134,7 +111,6 @@ specnum_t ISpectrum::getSpectrumNo() const { return m_specNo; }
  * @param num :: the spectrum number of this spectrum */
 void ISpectrum::setSpectrumNo(specnum_t num) { m_specNo = num; }
 
-//---------------------------------------------------------
 /**
  * Gets the value of the use flag.
  * @returns true if DX has been set, else false

@@ -16,9 +16,9 @@ Single Crystal Diffraction
   instrument scientists and users to access data, calculate and refine UB matrix, merge multiple data sets
   for slice-view and peak integration.
 
-- :ref:`IntegratePeaksMDHKL <algm-IntegratePeaksMDHKL>` has been added to integrate data in HKL space.  The 
+- :ref:`IntegratePeaksMDHKL <algm-IntegratePeaksMDHKL>` has been added to integrate data in HKL space.  The
   main usage will be to normalize the data using
-  :ref:`MDNormSCD <algm-MDNormSCD>` and then integrate the resulting MDHistoWorkspace, 
+  :ref:`MDNormSCD <algm-MDNormSCD>` and then integrate the resulting MDHistoWorkspace,
   but it also integrates MDHistoWorkspaces and MDEventWorkspaces without normalizing.
   The MD data must be in units of HKL.  A 3D box is created for each peak and the background
   and peak data are separated.  The intensity and sigma of the intensity is found from the grid inside the peak and
@@ -29,10 +29,10 @@ Single Crystal Diffraction
    :width: 487
    :align: center
 
-  
+
 - Some improvements were done for creating peaks from python. :ref:`CreatePeaksWorkspace <algm-CreatePeaksWorkspace>`
-  copies the goniometer from the input MatrixWorkspace to PeaksWorkspace. createPeak for PeaksWorkspace copies goniometer 
-  from PeaksWorkspace to peak. setGoniometer for a peak can be done from python and setQLabFrame and setQSampleFrame works 
+  copies the goniometer from the input MatrixWorkspace to PeaksWorkspace. createPeak for PeaksWorkspace copies goniometer
+  from PeaksWorkspace to peak. setGoniometer for a peak can be done from python and setQLabFrame and setQSampleFrame works
   correctly now with one argument.
 
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has been rewritten to calibrate the position and rotations of
@@ -59,6 +59,20 @@ Powder Diffraction
   testing files being produced by the "new DAS" at SNS. This parameter
   has not been added to the Powder Diffraction interface and will be
   removed without notice.
+
+- :ref:`PDFFourierTransformSNSPowderReduction
+  <algm-PDFFourierTransformSNSPowderReduction>` has been modified to
+  look at the signal as well when looking at the ``Q``-range to use
+  for the transform.
+
+- :ref:`cry-powder-diffraction-ref`: S-Empty option has been enabled for
+   the Crystallography Powder Diffraction Script. In order to use the
+   S-Empty option, simply provide the S-Empty run number within the
+   ``.pref`` file.
+
+- :ref:`CorelliCrossCorrelate <algm-CorelliCrossCorrelate>`: The
+  weights applied to events have changed by a factor of the duty cycle
+  (:math:`c\approx0.498`) as requested by the instrument scientists.
 
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
 and

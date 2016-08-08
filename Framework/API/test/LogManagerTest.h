@@ -10,6 +10,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include <cmath>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -36,8 +37,9 @@ public:
   Property &operator+=(Property const *) override { return *this; }
 };
 
+template <typename T>
 void addTestTimeSeries(LogManager &run, const std::string &name) {
-  auto timeSeries = new TimeSeriesProperty<double>(name);
+  auto timeSeries = new TimeSeriesProperty<T>(name);
   timeSeries->addValue("2012-07-19T16:17:00", 2);
   timeSeries->addValue("2012-07-19T16:17:10", 3);
   timeSeries->addValue("2012-07-19T16:17:20", 4);
@@ -229,11 +231,78 @@ public:
                      std::invalid_argument);
   }
 
-  void
-  test_GetPropertyAsSingleValue_Throws_If_Type_Is_Not_Double_Or_TimeSeries_Double() {
+  void test_GetPropertyAsSingleValue_SingleValue_DoubleType() {
+    doTest_GetPropertyAsSingleValue_SingleType<double>(1.0);
+  }
+
+  void test_GetPropertyAsSingleValue_SingleValue_FloatType() {
+    doTest_GetPropertyAsSingleValue_SingleType<float>(1.0F);
+  }
+
+  void test_GetPropertyAsSingleValue_SingleValue_Int32Type() {
+    doTest_GetPropertyAsSingleValue_SingleType<int32_t>(1);
+  }
+
+  void test_GetPropertyAsSingleValue_SingleValue_Int64Type() {
+    doTest_GetPropertyAsSingleValue_SingleType<int64_t>(1L);
+  }
+
+  void test_GetPropertyAsSingleValue_SingleValue_Uint32Type() {
+    doTest_GetPropertyAsSingleValue_SingleType<uint32_t>(1U);
+  }
+
+  void test_GetPropertyAsSingleValue_SingleValue_Uint64Type() {
+    doTest_GetPropertyAsSingleValue_SingleType<uint64_t>(1UL);
+  }
+
+  void test_GetPropertyAsSingleValue_SingleValue_StringType() {
     LogManager runInfo;
-    const std::string name = "int_prop";
-    runInfo.addProperty(name, 1); // Adds an int property
+    const std::string name = "string_prop", value = "1";
+    runInfo.addProperty<std::string>(name, value);
+    double result = std::nan("1");
+    TS_ASSERT_THROWS_NOTHING(result = runInfo.getPropertyAsSingleValue(name));
+    TS_ASSERT_DELTA(1.0, result, 1e-12);
+  }
+
+  void test_GetPropertyAsSingleValue_TimeSeries_DoubleType() {
+    doTest_GetPropertyAsSingleValue_TimeSeriesType<double>();
+  }
+
+  void test_GetPropertyAsSingleValue_TimeSeries_FloatType() {
+    doTest_GetPropertyAsSingleValue_TimeSeriesType<float>();
+  }
+
+  void test_GetPropertyAsSingleValue_TimeSeries_Int32Type() {
+    doTest_GetPropertyAsSingleValue_TimeSeriesType<int32_t>();
+  }
+
+  void test_GetPropertyAsSingleValue_TimeSeries_Int64Type() {
+    doTest_GetPropertyAsSingleValue_TimeSeriesType<int64_t>();
+  }
+
+  void test_GetPropertyAsSingleValue_TimeSeries_Uint32Type() {
+    doTest_GetPropertyAsSingleValue_TimeSeriesType<uint32_t>();
+  }
+
+  void test_GetPropertyAsSingleValue_TimeSeries_Uint64Type() {
+    doTest_GetPropertyAsSingleValue_TimeSeriesType<uint64_t>();
+  }
+
+  void test_GetPropertyAsSingleValue_Throws_If_String_Is_Invalid() {
+    LogManager runInfo;
+    const std::string name = "string_prop";
+    runInfo.addProperty<std::string>(name, "hello"); // not a number
+
+    TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name),
+                     std::invalid_argument);
+  }
+
+  void
+  test_GetPropertyAsSingleValue_Throws_If_Type_Is_Not_Numeric_Or_TimeSeries_Numeric_Or_Valid_String() {
+    LogManager runInfo;
+    const std::string name = "bool_prop";
+    const bool value(false);
+    runInfo.addProperty<bool>(name, value); // Adds a bool property
 
     TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name),
                      std::invalid_argument);
@@ -243,7 +312,7 @@ public:
   test_GetPropertyAsSingleValue_Returns_Simple_Mean_By_Default_For_Time_Series() {
     LogManager runInfo;
     const std::string name = "series";
-    addTestTimeSeries(runInfo, name);
+    addTestTimeSeries<double>(runInfo, name);
 
     const double expectedValue(13.0);
     TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name), expectedValue,
@@ -254,7 +323,7 @@ public:
   test_GetPropertyAsSingleValue_Returns_Correct_SingleValue_For_Each_StatisticType() {
     LogManager runInfo;
     const std::string name = "series";
-    addTestTimeSeries(runInfo, name);
+    addTestTimeSeries<double>(runInfo, name);
 
     TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Mean), 13.0,
                     1e-12);
@@ -274,7 +343,7 @@ public:
   test_GetPropertyAsSingleValue_Returns_Expected_Single_Value_On_Successive_Calls_With_Different_Stat_Types() {
     LogManager run;
     const std::string name = "series";
-    addTestTimeSeries(run, name);
+    addTestTimeSeries<double>(run, name);
 
     TS_ASSERT_EQUALS(run.getPropertyAsSingleValue(name, Math::Mean), 13.0);
     TS_ASSERT_EQUALS(run.getPropertyAsSingleValue(name, Math::Mean), 13.0);
@@ -308,7 +377,7 @@ public:
     const std::string intProp("anIntProp");
     runInfo.addProperty(intProp, 99);
     const std::string tspProp("tsp");
-    addTestTimeSeries(runInfo, "tsp");
+    addTestTimeSeries<double>(runInfo, "tsp");
 
     // Check it's set up right
     TS_ASSERT_EQUALS(runInfo.getProperties().size(), 3);
@@ -336,7 +405,7 @@ public:
     const std::string intProp("anIntProp");
     runInfo.addProperty(intProp, 99);
     const std::string tspProp("tsp");
-    addTestTimeSeries(runInfo, "tsp");
+    addTestTimeSeries<double>(runInfo, "tsp");
 
     // Check it's set up right
     TS_ASSERT_EQUALS(runInfo.getProperties().size(), 3);
@@ -412,6 +481,27 @@ public:
     LogManager run3;
     run3.loadNexus(th.file, "");
   }
+
+private:
+  template <typename T>
+  void doTest_GetPropertyAsSingleValue_SingleType(const T value) {
+    LogManager runInfo;
+    const std::string name = "T_prop";
+    runInfo.addProperty<T>(name, value);
+    double result = std::nan("1");
+    TS_ASSERT_THROWS_NOTHING(result = runInfo.getPropertyAsSingleValue(name));
+    TS_ASSERT_EQUALS(value, static_cast<T>(result));
+  }
+
+  template <typename T> void doTest_GetPropertyAsSingleValue_TimeSeriesType() {
+    LogManager runInfo;
+    const std::string name = "T_series";
+    addTestTimeSeries<T>(runInfo, name);
+    const double expectedValue(13.0);
+    TS_ASSERT_DELTA(
+        runInfo.getPropertyAsSingleValue(name, Mantid::Kernel::Math::Mean),
+        expectedValue, 1e-12);
+  }
 };
 
 //---------------------------------------------------------------------------------------
@@ -428,7 +518,7 @@ public:
   static void destroySuite(LogManagerTestPerformance *suite) { delete suite; }
 
   LogManagerTestPerformance() : m_testRun(), m_propName("test") {
-    addTestTimeSeries(m_testRun, m_propName);
+    addTestTimeSeries<double>(m_testRun, m_propName);
   }
 
   void test_Accessing_Single_Value_From_Times_Series_A_Large_Number_Of_Times() {

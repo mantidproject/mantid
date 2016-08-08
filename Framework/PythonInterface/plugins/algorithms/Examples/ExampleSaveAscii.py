@@ -5,6 +5,8 @@ to write a workspace to file in ascii format.
 Note that the SaveAscii algorithm should be used instead in most cases.
 """
 
+# This __future__ import is for Python 2/3 compatibility
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 
