@@ -20,10 +20,8 @@ inline bool threadSafe(bool condition) { return condition; }
  * @param workspace Pointer to workspace to verify.
  * @return Whether workspace is threadsafe.
  */
-template <typename Arg>
-inline bool
-threadSafe(Arg workspace) {
-  static_assert(std::is_pointer<Arg>::value," Pass a non-owning raw pointer.");
+template <typename Arg> inline bool threadSafe(Arg workspace) {
+  static_assert(std::is_pointer<Arg>::value, " Pass a non-owning raw pointer.");
   return !workspace || workspace->threadSafe();
 }
 
@@ -35,9 +33,8 @@ threadSafe(Arg workspace) {
   * @return Whether workspace is threadsafe.
   */
 template <typename Arg, typename... Args>
-inline bool
-threadSafe(Arg workspace, Args... others) {
-  static_assert(std::is_pointer<Arg>::value," Pass a non-owning raw pointer.");
+inline bool threadSafe(Arg workspace, Args... others) {
+  static_assert(std::is_pointer<Arg>::value, " Pass a non-owning raw pointer.");
   return (!workspace || workspace->threadSafe()) && threadSafe(others...);
 }
 
