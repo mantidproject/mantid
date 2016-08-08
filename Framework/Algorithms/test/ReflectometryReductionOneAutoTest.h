@@ -96,7 +96,7 @@ public:
     createWorkspace->execute();
     m_TOF = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TOF");
 
-    createWorkspace->setProperty("UnitX", "Wavelength");
+    createWorkspace->setProperty("UnitX", "TOF");
     createWorkspace->setProperty("DataX", xDecData);
     createWorkspace->setProperty("DataY", yDecData);
     createWorkspace->setProperty("OutputWorkspace", "DECWS");
@@ -268,6 +268,13 @@ public:
     m_TOF->setInstrument(tempInst);
   }
 
+  void test_detector_efficiency_correction_bad_xunits_throws() {
+    auto alg = construct_standard_algorithm();
+    alg->setProperty("InputWorkspace", m_dataWorkspace);
+    alg->setProperty("DetectorEfficiencyCorrection", m_decWorkspace);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+  }
+
   void test_bad_detector_component_name_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("DetectorComponentName", "made-up");
@@ -279,6 +286,7 @@ public:
     alg->setProperty("SampleComponentName", "made-up");
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
+
   void test_exec() {
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
@@ -345,26 +353,6 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSQName);
     AnalysisDataService::Instance().remove(outWSLamName);
-  }
-
-  void test_exec_2() {
-    IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
-    alg->setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(alg->initialize());
-    TS_ASSERT_THROWS_NOTHING(
-      alg->setProperty("InputWorkspace", m_dataWorkspace));
-    TS_ASSERT_THROWS_NOTHING(
-      alg->setProperty("AnalysisMode", "PointDetectorAnalysis"));
-    TS_ASSERT_THROWS_NOTHING(
-      alg->setPropertyValue("OutputWorkspace", outWSQName));
-    TS_ASSERT_THROWS_NOTHING(
-      alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("MomentumTransferStep", 0.1));
-    TS_ASSERT_THROWS_NOTHING(
-      alg->setProperty("DetectorEfficiencyCorrection", m_decWorkspace))
-    alg->execute();
-    TS_ASSERT(alg->isExecuted());
   }
 
   void test_missing_instrument_parameters_throws() {
