@@ -485,10 +485,8 @@ void ConvolutionFitSequential::calculateEISF(
   auto columns = tableWs->getColumnNames();
   std::string height = searchForFitParams("Height", columns).at(0);
   std::string heightErr = searchForFitParams("Height_Err", columns).at(0);
-  auto heightY = std::vector<double>();
-  tableWs->getColumn(height)->numeric_fill(heightY);
-  auto heightE = std::vector<double>();
-  tableWs->getColumn(heightErr)->numeric_fill(heightE);
+  auto heightY = tableWs->getColumn(height)->numeric_fill<>();
+  auto heightE = tableWs->getColumn(heightErr)->numeric_fill<>();
 
   // Get amplitude column names
   auto ampNames = searchForFitParams("Amplitude", columns);
@@ -502,11 +500,9 @@ void ConvolutionFitSequential::calculateEISF(
   for (size_t i = 0; i < maxSize; i++) {
     // Get amplitude from column in table workspace
     std::string ampName = ampNames.at(i);
-    auto ampY = std::vector<double>();
-    tableWs->getColumn(ampName)->numeric_fill(ampY);
+    auto ampY = tableWs->getColumn(ampName)->numeric_fill<>();
     std::string ampErrorName = ampErrorNames.at(i);
-    auto ampErr = std::vector<double>();
-    tableWs->getColumn(ampErrorName)->numeric_fill(ampErr);
+    auto ampErr = tableWs->getColumn(ampErrorName)->numeric_fill<>();
 
     // Calculate EISF and EISF error
     // total = heightY + ampY

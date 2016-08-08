@@ -7,6 +7,13 @@ from mantid.kernel import PropertyManagerProperty, Direction, PropertyManager
 from mantid.api import Algorithm
 import numpy as np
 
+class FakeAlgorithm(Algorithm):
+    def PyInit(self):
+        self.declareProperty(PropertyManagerProperty("Args"))
+
+    def PyExec(self):
+        pass
+
 class PropertyManagerPropertyTest(unittest.TestCase):
 
     def test_default_constructor_raises_an_exception(self):
@@ -25,13 +32,6 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         self._check_object_attributes(arr, name, direc)
 
     def test_set_property_on_algorithm_from_dictionary(self):
-        class FakeAlgorithm(Algorithm):
-            def PyInit(self):
-                self.declareProperty(PropertyManagerProperty("Args"))
-
-            def PyExec(self):
-                pass
-        #
         fake = FakeAlgorithm()
         fake.initialize()
         fake.setProperty("Args", {'A': 1, 
@@ -76,6 +76,16 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         self.assertEqual("test", nested_l2_pmgr['I'].value)
         self.assertTrue('J' in nested_l2_pmgr)
         self.assertEqual(120.6, nested_l2_pmgr['J'].value)
+
+    def test_that_empty_sequence_in_property_manager_raises(self):
+        fake = FakeAlgorithm()
+        fake.initialize()
+        try:
+            fake.setProperty("Args", {'A': []})
+            has_raised = False
+        except RuntimeError:
+            has_raised = True
+        self.assertTrue(has_raised)
 
     def _check_object_attributes(self, prop, name, direction):
         self.assertEquals(prop.name, name)

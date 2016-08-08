@@ -136,10 +136,17 @@ public:
 
   void setFittingMultiRunMode(bool mode) override;
 
-  std::string fittingRunNoFactory(std::string bank, std::string fileName,
-                                  std::string &bankDir, std::string fileDir);
+  double getPeakCentre() const override;
 
-  std::string readPeaksFile(std::string fileDir);
+  bool peakPickerEnabled() const override;
+
+  std::string getPreviousDir() const override;
+
+  void setPreviousDir(const std::string &path) override;
+
+  std::string getOpenFile(const std::string &prevPath) override;
+
+  std::string getSaveFile(const std::string &prevPath) override;
 
   void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data,
                          std::vector<QwtPlotCurve *> &dataVector, bool focused);
@@ -147,10 +154,6 @@ public:
   void setPeakPickerEnabled(bool enabled);
 
   void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak);
-
-  double getPeakCentre() const;
-
-  void fittingWriteFile(const std::string &fileDir);
 
   void setZoomTool(bool enabled);
 
@@ -168,13 +171,13 @@ private slots:
   void browseFitFocusedRun();
   void resetFittingMultiMode();
   void setBankIdComboBox(int idx) override;
-  void browsePeaksToFit();
   void setPeakPick();
-  void addPeakToList();
-  void savePeakList();
   void clearPeakList();
   void fitClicked();
   void FittingRunNo();
+  void addClicked();
+  void browseClicked();
+  void saveClicked();
   void plotSeparateWindow();
   void setBankDir(int idx);
   void listViewFittingRun();

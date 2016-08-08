@@ -619,15 +619,13 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
   bool isInputEvents = static_cast<bool>(eventWS);
   size_t numberOfSpectra = WS->getNumberHistograms();
   if (WorkspaceHelpers::commonBoundaries(WS) && !isInputEvents) {
-    std::reverse(WS->mutableX(0).begin(), WS->mutableX(0).end());
-    std::reverse(WS->mutableY(0).begin(), WS->mutableY(0).end());
-    std::reverse(WS->mutableE(0).begin(), WS->mutableE(0).end());
+    auto reverseX = make_cow<HistogramData::HistogramX>(WS->x(0).crbegin(),
+                                                        WS->x(0).crend());
 
-    auto xVals = WS->sharedX(0);
-    for (size_t j = 1; j < m_numberOfSpectra; ++j) {
-      WS->setSharedX(j, xVals);
-      std::reverse(WS->mutableY(j).begin(), WS->mutableY(j).end());
-      std::reverse(WS->mutableE(j).begin(), WS->mutableE(j).end());
+    for (size_t j = 0; j < numberOfSpectra; ++j) {
+      WS->setSharedX(j, reverseX);
+      std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());
+      std::reverse(WS->dataE(j).begin(), WS->dataE(j).end());
       if (j % 100 == 0)
         interruption_point();
     }
@@ -740,8 +738,10 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
       result->mutableX(j).assign(edges.cbegin(), edges.cbegin() + k);
 
       // If the entire X range is not covered, generate fake values.
-      std::iota(result->mutableX(j).begin() + k, result->mutableX(j).end(),
-                workspace->x(j)[k] + 1);
+      if (k < maxBins) {
+        std::iota(result->mutableX(j).begin() + k, result->mutableX(j).end(),
+                  workspace->x(j)[k] + 1);
+      }
 
       result->mutableY(j)
           .assign(workspace->y(j).cbegin(), workspace->y(j).cbegin() + (k - 1));

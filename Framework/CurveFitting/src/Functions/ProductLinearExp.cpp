@@ -20,10 +20,10 @@ DECLARE_FUNCTION(ProductLinearExp)
 /** Constructor
 */
 ProductLinearExp::ProductLinearExp() {
-  declareParameter("A0", 1.0);
-  declareParameter("A1", 1.0);
-  declareParameter("Height", 1.0);
-  declareParameter("Lifetime", 1.0);
+  declareParameter("A0", 1.0, "Coefficient for constant term");
+  declareParameter("A1", 1.0, "Coefficient for linear term");
+  declareParameter("Height", 1.0, "Height");
+  declareParameter("Lifetime", 1.0, "Lifetime");
 }
 
 /**

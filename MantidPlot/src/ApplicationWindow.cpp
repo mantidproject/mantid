@@ -2562,6 +2562,7 @@ void ApplicationWindow::initPlot3D(Graph3D *plot) {
 
   customMenu(plot);
   customToolBars(plot);
+  emit modified();
 }
 
 void ApplicationWindow::exportMatrix() {
