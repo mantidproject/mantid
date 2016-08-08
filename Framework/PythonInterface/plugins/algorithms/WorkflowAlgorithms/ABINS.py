@@ -20,6 +20,7 @@ class ABINS(PythonAlgorithm):
     _instrument = None
     _atoms = None
     _sum_contributions = None
+    _overtones = None
     _scale_by_cross_section = None
     _output_workspace_name = None
     _calc_partial = None
@@ -44,13 +45,13 @@ class ABINS(PythonAlgorithm):
                              direction=Direction.Input,
                              defaultValue="CASTEP",
                              validator=StringListValidator(["CASTEP", "CRYSTAL"]),
-                             doc="DFT program which was used for phonon calculation.")
+                             doc="DFT program which was used for a phonon calculation.")
 
         self.declareProperty(FileProperty("Phonon File", "",
                              action=FileAction.Load,
                              direction=Direction.Input,
                              extensions=["phonon"]),
-                             doc="File with the data from phonon calculation.")
+                             doc="File with the data from a phonon calculation.")
 
         self.declareProperty(FileProperty("Experimental File", "",
                              action=FileAction.OptionalLoad,
@@ -80,14 +81,17 @@ class ABINS(PythonAlgorithm):
 
         self.declareProperty(StringArrayProperty("Atoms", Direction.Input),
                              doc="List of atoms to use to calculate partial S." \
-                                 "If left blank, total S will be calculated")
+                                 "If left blank, S for all types of atoms will be calculated")
 
         self.declareProperty(name='SumContributions', defaultValue=False,
                              doc="Sum the partial dynamical structure factors into a single workspace.")
 
+        self.declareProperty(name='Overtones', defaultValue=False,
+                             doc="In case it is set to True and sample has a form of  Powder workspaces for overtones will be calculated.")
+
         self.declareProperty(name='ScaleByCrossSection', defaultValue='Incoherent',
                              validator=StringListValidator(['Total', 'Incoherent', 'Coherent']),
-                             doc="Sum the partial dynamical structure factor by the scattering cross section.")
+                             doc="Sum the partial dynamical structure factors by the scattering cross section.")
 
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),
@@ -96,19 +100,17 @@ class ABINS(PythonAlgorithm):
 
     def validateInputs(self):
         """
-        Performs input validation.
-
-        Used to ensure the user is requesting a valid mode.
+        Performs input validation. Use to ensure the user has defined a consistent set of parameters.
         """
         issues = dict()
 
         temperature = self.getPropertyValue("Temperature [K]")
         if temperature < 0:
-            issues["Temperature [K]"] = "Temperature must be positive!"
+            issues["Temperature [K]"] = "Temperature must be positive."
 
         scale = self.getProperty("Scale")
         if scale < 0:
-            issues["Scale"] = "Scale must be positive"
+            issues["Scale"] = "Scale must be positive."
 
         dft_filename = self.getProperty("DFT program")
         if dft_filename == "CASTEP":
@@ -116,7 +118,13 @@ class ABINS(PythonAlgorithm):
             if not output["Valid"]:
                 issues["DFT program"] = output["Comment"]
         elif dft_filename == "CRYSTAL":
-            issues["DFT program"] = "Support for CRYSTAL DFT program not implemented yet!"
+            issues["DFT program"] = "Support for CRYSTAL DFT program not implemented yet."
+
+        overtones = self.getProperty("Overtones").value
+        sample_form = self.getProperty("Sample Form").value
+        if overtones and (sample_form != "Powder"):
+            issues["Overtones"] = "Workspaces with overtones can be created only for the Powder case scenario."
+
 
         return issues
 
@@ -166,17 +174,21 @@ class ABINS(PythonAlgorithm):
 
         # at the moment only types of atom, e.g, for  benzene three options -> 1) C, H;  2) C; 3) H
         # 5) create workspaces for atoms in interest
-        _workspaces = self._create_partial_s_workspaces(atoms_symbol=atoms_symbol, s_data=s_data)
+        _workspaces=None
+        if self._sampleForm == "Powder":
+            _workspaces = self._create_partial_s_powder_sum_workspaces(atoms_symbol=atoms_symbol, s_data=s_data)
+            if self._overtones:
+                _workspaces.extend(self._create_partial_s_overtones_workspaces(atoms_symbol=atoms_symbol, s_data=s_data))
         prog_reporter.report("Workspaces with partial dynamical structure factors have been constructed.")
 
         # 6) Create a workspace with sum of all atoms if required
         if self._sum_contributions:
 
-            total_workspace = self._set_total_workspace(partial_workspaces=_workspaces)
+            total_workspace = self._set_total_workspace(partial_workspaces=_workspaces[:len(atoms_symbol)])
             _workspaces.insert(0, total_workspace)
             prog_reporter.report("Workspace with total S  has been constructed.")
 
-        # 7) add experimental data to workspace
+        # 7) add experimental data to the collection of workspaces
         _workspaces.insert(0, self._set_experimental_data_workspace().getName())
         prog_reporter.report("Workspace with with the experimental data has been constructed.")
 
@@ -194,9 +206,46 @@ class ABINS(PythonAlgorithm):
             SaveAscii(InputWorkspace=wrk, Filename=wrk.getName()+".dat", Separator="Space", WriteSpectrumID=False)
         prog_reporter.report("All workspaces have been saved to ASCII files.")
 
+    def _create_partial_s_overtones_workspaces(self, atoms_symbol=None, s_data=None):
 
-    def _create_partial_s_workspaces(self, atoms_symbol=None,s_data=None):
+        """
 
+        @param atoms_symbol: list of atom types for which overtones should be created
+        @param s_data: dynamical factor data of type SData
+        @return: workspaces for list of atoms types, each workspace contains overtones of S for the particular atom type
+        """
+        s_data_extracted = s_data.extract()
+        freq = s_data_extracted["convoluted_frequencies"]
+        dim = freq.shape[0]
+        s_atom_data = np.zeros((dim, Constants.overtones_num), dtype=Constants.float_type) # stores all overtones for the particular type of atom
+        s_all_atoms  = s_data_extracted["atoms_data"]
+        num_atoms = len(s_all_atoms)
+
+        partial_workspaces = []
+
+        for atom_symbol in atoms_symbol:
+            s_atom_data.fill(0.0)
+            for num_atom in range(num_atoms):
+                if s_all_atoms[num_atom]["symbol"] == atom_symbol:
+                    np.add(s_atom_data, s_all_atoms[num_atom]["value"][:, :Constants.overtones_num], s_atom_data) # we sum S for all overtones over the atoms of the same type
+
+            # all overtones of  S for the given atom
+            partial_workspaces.append(self._set_workspace(atom_name=atom_symbol,
+                                                          postfix="_overtones",
+                                                          frequencies=freq,
+                                                          s_points=s_atom_data))
+
+
+        return partial_workspaces
+
+    def _create_partial_s_powder_sum_workspaces(self, atoms_symbol=None, s_data=None):
+
+        """
+        Creates workspaces for all types of atoms. Each workspace stores total S for the given atom.
+        @param atoms_symbol: list of atom types for which overtones should be created
+        @param s_data: dynamical factor data of type SData
+        @return: workspaces for list of atoms types, each workspace contains total S for the particular type of atom
+        """
         s_data_extracted = s_data.extract()
         freq = s_data_extracted["convoluted_frequencies"]
         dim = freq.shape[0]
@@ -205,7 +254,7 @@ class ABINS(PythonAlgorithm):
         num_atoms = len(s_all_atoms)
 
         partial_workspaces = []
-        total_workspace = None
+
 
         for atom_symbol in atoms_symbol:
             s_atom_data.fill(0.0)
@@ -214,7 +263,9 @@ class ABINS(PythonAlgorithm):
                     np.add(s_atom_data, s_all_atoms[num_atom]["value"][:,Constants.overtones_num], s_atom_data) # we sum total S over the atoms of the same type
 
             # total S for the given atom
-            partial_workspaces.append(self._set_workspace(atom_name=atom_symbol, frequencies=freq, s_points=s_atom_data))
+            partial_workspaces.append(self._set_workspace(atom_name=atom_symbol,
+                                                          frequencies=freq,
+                                                          s_points=s_atom_data))
 
 
         return partial_workspaces
@@ -231,19 +282,34 @@ class ABINS(PythonAlgorithm):
         # order x and y values before saving to workspace
         sorted_indices = freq.argsort()
         freq = freq[sorted_indices]
-        s_points = s_points[sorted_indices]
+        dim = None
+        if len(s_points.shape) == 2:
+            dim = s_points.shape[1]
+        else:
+            dim = 1
+
+        if dim > 1:
+            for n in range(dim):
+                s_points[:, n] = s_points[sorted_indices, n]
+        else:
+            s_points = s_points[sorted_indices]
+
+        s_points_raveled = np.ravel(s_points)
 
         CreateWorkspace(DataX=freq,
-                        DataY=s_points,
-                        NSpec=1,
-                        VerticalAxisUnit="Text",
-                        VerticalAxisValues="S",
+                        DataY=s_points_raveled,
+                        NSpec=dim,
+                        YUnitLabel="S",
                         OutputWorkspace=workspace,
                         EnableLogging=False)
 
 
     def _set_total_workspace(self, partial_workspaces=None):
 
+        """
+        @param partial_workspaces: list of workspaces which should be summed up to obtain total workspace
+        @return: workspace with total S from partial_workspaces
+        """
         total_workspace = self._out_ws_name + "_Total"
         # If there is more than one partial workspace need to sum first spectrum of all
         if len(partial_workspaces) > 1:
@@ -266,14 +332,28 @@ class ABINS(PythonAlgorithm):
         return total_workspace
 
 
-    def _set_workspace(self, atom_name=None, frequencies=None, s_points=None):
+    def _set_workspace(self, atom_name=None, postfix="" , frequencies=None, s_points=None):
 
-        _ws_name = self._out_ws_name + "_" +  atom_name
+        """
+        Creates workspace for the given frequencies and s_points with S data. After workspace is created it is rebined,
+        scaled by cross-section factor and optionally multiplied by the user defined scaling factor.
+
+        @param atom_name: symbol of atom for which workspace should be created
+        @param postfix: optional part of workspace name
+        @param frequencies: frequencies in the form of numpy array for which S(Q, omega) can be plotted
+        @param s_points: S(Q, omega)
+        @return: workspace for the given frequency and S data
+
+        """
+        _ws_name = self._out_ws_name + "_" +  atom_name + postfix
 
         self._create_s_workspace(freq=frequencies, s_points=np.copy(s_points), workspace=_ws_name)
 
         # Set correct units on workspace
         self._set_workspace_units(wrk=_ws_name)
+
+        # rebining
+        Rebin(Inputworkspace=_ws_name, Params=[Constants._bin_width] , OutputWorkspace=_ws_name)
 
         # Add the sample material to the workspace
         SetSampleMaterial(InputWorkspace=_ws_name, ChemicalFormula=atom_name)
@@ -292,10 +372,7 @@ class ABINS(PythonAlgorithm):
               Operation='Multiply',
               Factor=scattering_x_section)
 
-        # rebining
-        Rebin(Inputworkspace=_ws_name, Params=[Constants._bin_width] , OutputWorkspace=_ws_name)
-
-        # additional scaling  of each workspace if user wants it
+        # additional scaling  the workspace if user wants it
         if self._scale != 1:
             Scale(InputWorkspace=_ws_name,
                   OutputWorkspace=_ws_name,
@@ -306,6 +383,10 @@ class ABINS(PythonAlgorithm):
 
 
     def _set_experimental_data_workspace(self):
+        """
+        Loads experimental data into workspaces.
+        @return: workspace with experimental data
+        """
         experimental_wrk = Load(self._experimentalFile)
         self._set_workspace_units(wrk=experimental_wrk.getName())
         return experimental_wrk
@@ -313,9 +394,10 @@ class ABINS(PythonAlgorithm):
 
     def _set_workspace_units(self, wrk=None):
         """
-
+        Sets x and y units for a workspace.
         @param wrk: workspace which units should be set
         """
+
         unitx = mtd[wrk].getAxis(0).setUnit("Label")
         unitx.setLabel("Energy Loss", 'cm^-1')
 
@@ -412,7 +494,7 @@ class ABINS(PythonAlgorithm):
 
     def _compare_one_line(self, one_line, pattern):
         """
-
+        compares line in the the form of string with a pattern.
         :param one_line:  line in the for mof string to be compared
         :param pattern: string which should be present in the line after removing white spaces and setting all
                         letters to lower case
@@ -422,6 +504,9 @@ class ABINS(PythonAlgorithm):
 
 
     def _get_properties(self):
+        """
+        Loads all properities to object's attributes.
+        """
 
         self._dft_program = self.getProperty("DFT program").value
         self._phononFile = self.getProperty("Phonon File").value
@@ -432,6 +517,7 @@ class ABINS(PythonAlgorithm):
         self._instrument = self.getProperty("Instrument").value
         self._atoms = self.getProperty("Atoms").value
         self._sum_contributions = self.getProperty("SumContributions").value
+        self._overtones = self.getProperty("Overtones").value
         self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
         self._calc_partial = (len(self._atoms) > 0)
