@@ -91,14 +91,15 @@ public:
   * Assignment overload
   * @param right : rhs workspace list property type.
   */
-  WorkspaceListPropertyType &operator=(const WorkspaceListPropertyType &right) {
+  WorkspaceListPropertyType &
+  operator=(const WorkspaceListPropertyType &right) override {
     return SuperClass::operator=(right);
   }
 
   /**
   * Clone operation.
   */
-  WorkspaceListProperty<TYPE> *clone() const {
+  WorkspaceListProperty<TYPE> *clone() const override {
     return new WorkspaceListProperty<TYPE>(*this);
   }
 
@@ -148,7 +149,7 @@ public:
 
     std::vector<boost::shared_ptr<TYPE>> tmp(items.size());
 
-    for (int i = 0; i < items.size(); i++)
+    for (size_t i = 0; i < items.size(); i++)
       tmp[i] = boost::dynamic_pointer_cast<TYPE>(items[i]);
 
     auto valid =
