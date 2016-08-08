@@ -57,7 +57,7 @@ public:
   MatrixWorkspace_sptr m_dataWorkspace;
   MatrixWorkspace_sptr m_transWorkspace1;
   MatrixWorkspace_sptr m_transWorkspace2;
-  MatrixWorkspace_sptr m_decEmptyWorkspace;
+  MatrixWorkspace_sptr m_decWorkspace;
   WorkspaceGroup_sptr m_multiDetectorWorkspace;
   const std::string outWSQName;
   const std::string outWSLamName;
@@ -71,7 +71,10 @@ public:
         transWSName("ReflectometryReductionOneAutoTest_TransWS") {
     MantidVec xData = {0, 0, 0, 0};
     MantidVec yData = {0, 0, 0};
-    MantidVec noData = {};
+    MantidVec xDecData;
+    MantidVec yDecData;
+    xDecData.assign(1000, 1);
+    yDecData.assign(999, 1);
 
     auto createWorkspace =
         AlgorithmManager::Instance().create("CreateWorkspace");
@@ -93,11 +96,12 @@ public:
     createWorkspace->execute();
     m_TOF = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TOF");
 
-    createWorkspace->setProperty("DataX", noData);
-    createWorkspace->setProperty("DataY", noData);
-    createWorkspace->setProperty("OutputWorkspace", "DECEmpty");
+    createWorkspace->setProperty("UnitX", "Wavelength");
+    createWorkspace->setProperty("DataX", xDecData);
+    createWorkspace->setProperty("DataY", yDecData);
+    createWorkspace->setProperty("OutputWorkspace", "DECWS");
     createWorkspace->execute();
-    m_decEmptyWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("DECEmpty");
+    m_decWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("DECWS");
 
     IAlgorithm_sptr lAlg = AlgorithmManager::Instance().create("Load");
     lAlg->setChild(true);
@@ -264,18 +268,6 @@ public:
     m_TOF->setInstrument(tempInst);
   }
 
-  void test_detector_efficiency_correction_workspace_not_empty() {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("DetectorEfficiencyCorrection", m_decEmptyWorkspace);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
-  }
-
-  /*
-  void test_detector_efficiency_correction_spectra_not_greater_than_detector_workspace_spectra() {
-
-  }*/
-
-
   void test_bad_detector_component_name_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("DetectorComponentName", "made-up");
@@ -363,14 +355,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(
       alg->setProperty("InputWorkspace", m_dataWorkspace));
     TS_ASSERT_THROWS_NOTHING(
-      alg->setProperty("AnalysisMode", "MultiDetectorAnalysis"));
+      alg->setProperty("AnalysisMode", "PointDetectorAnalysis"));
     TS_ASSERT_THROWS_NOTHING(
       alg->setPropertyValue("OutputWorkspace", outWSQName));
     TS_ASSERT_THROWS_NOTHING(
       alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("MomentumTransferStep", 0.1));
     TS_ASSERT_THROWS_NOTHING(
-      alg->setProperty("DetectorEfficiencyCorrection", m_decEmptyWorkspace));
+      alg->setProperty("DetectorEfficiencyCorrection", m_decWorkspace))
     alg->execute();
     TS_ASSERT(alg->isExecuted());
   }

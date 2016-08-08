@@ -509,7 +509,6 @@ void ReflectometryReductionOne::exec() {
 
   OptionalMatrixWorkspace_sptr firstTransmissionRun;
   OptionalMatrixWorkspace_sptr secondTransmissionRun;
-  OptionalMatrixWorkspace_sptr detectorEfficiencyCorrection;
   OptionalDouble stitchingStart;
   OptionalDouble stitchingDelta;
   OptionalDouble stitchingEnd;
@@ -519,6 +518,12 @@ void ReflectometryReductionOne::exec() {
   getTransmissionRunInfo(firstTransmissionRun, secondTransmissionRun,
                          stitchingStart, stitchingDelta, stitchingEnd,
                          stitchingStartOverlap, stitchingEndOverlap);
+
+  OptionalMatrixWorkspace_sptr detectorEfficiencyCorrection;
+  MatrixWorkspace_sptr decTemp = getProperty("DetectorEfficiencyCorrection");
+  if (decTemp) {
+    detectorEfficiencyCorrection = decTemp;
+  }
 
   OptionalDouble theta;
   if (!isPropertyDefault("ThetaIn")) {
@@ -587,6 +592,7 @@ void ReflectometryReductionOne::exec() {
         rebinToWorkspaceAlg->execute();
         decWS = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
       }
+
       // Normalize by the direct beam.
       detectorWS = divide(detectorWS, decWS);
     }
