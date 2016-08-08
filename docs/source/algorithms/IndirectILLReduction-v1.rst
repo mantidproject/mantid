@@ -94,48 +94,68 @@ Workflow
 Usage
 -----
 
-**Example - Running IndirectILLReduction**
+**Example - IndirectILLReduction : minimal run**
 
 .. testcode:: ExIndirectILLReduction
 
-    IndirectILLReduction(Run='ILLIN16B_034745.nxs',
-                         RawWorkspace='raw_workspace',
-                         ReducedWorkspace='reduced_workspace')
+    IndirectILLReduction(Run='146190.nxs')
 
-    print "Reduced workspace has %d spectra" % mtd['reduced_workspace'].getNumberHistograms()
-    print "Raw workspace has %d spectra" % mtd['raw_workspace'].getNumberHistograms()
+    print "Reduced workspace has %d spectra" % mtd['146190_red'].getNumberHistograms()
+    print "Reduced workspace has %d bins" % mtd['146190_red'].blocksize()
+    print "Reduced left workspace has %d bins" % mtd['146190_left'].blocksize()
+    print "Reduced right workspace has %d bins" % mtd['146190_right'].blocksize()
 
 Output:
 
 .. testoutput:: ExIndirectILLReduction
 
-    Reduced workspace has 24 spectra
-    Raw workspace has 2057 spectra
+    Reduced workspace has 18 spectra
+    Reduced workspace has 1024 bins
+    Reduced left workspace has 1024 bins
+    Reduced right workspace has 1024 bins
 
-**Example - Running IndirectILLReduction in mirror mode**
+**Example - IndirectILLReduction : single run with handler**
 
-.. testcode:: ExIndirectILLReductionMirrorMode
+.. testcode:: ExIndirectILLReductionSingleRun
 
-    IndirectILLReduction(Run='ILLIN16B_034745.nxs',
-                         RawWorkspace='raw_workspace',
-                         ReducedWorkspace='reduced_workspace',
-                         LeftWorkspace='reduced_workspace_left',
-                         RightWorkspace='reduced_workspace_right',
-                         MirrorMode=True)
-
-    print "Raw workspace has %d spectra" % mtd['raw_workspace'].getNumberHistograms()
-    print "Reduced workspace has %d spectra" % mtd['reduced_workspace'].getNumberHistograms()
-    print "Reduced left workspace has %d spectra" % mtd['reduced_workspace_left'].getNumberHistograms()
-    print "Reduced right workspace has %d spectra" % mtd['reduced_workspace_right'].getNumberHistograms()
+    result = IndirectILLReduction(Run='146190.nxs')
+    print "result is now a tuple of %d workspaces" % len(result)
+    print "the first of which is the reduced one, called %s" % result[0].getName()
+    print "the second is the left wing, called %s" % result[1].getName()
+    print "the third is the right wing, called %s" % result[2].getName()
 
 Output:
 
-.. testoutput:: ExIndirectILLReductionMirrorMode
+.. testoutput:: ExIndirectILLReductionSingleRun
 
-    Raw workspace has 2057 spectra
-    Reduced workspace has 24 spectra
-    Reduced left workspace has 24 spectra
-    Reduced right workspace has 24 spectra
+    result is now a tuple of 3 workspaces
+    the first of which is the reduced one, called 146190_result
+    the second is the left wing, called 146190_left
+    the third is the right wing, called 146190_right
+
+**Example - IndirectILLReduction : multiple runs**
+
+.. testcode:: ExIndirectILLReductionMultipleRun
+
+    result = IndirectILLReduction(Run='146190:146191.nxs',UnmirrorOption=3)
+    print "result is now a tuple of %d %s" % (len(result),type(result[0]))
+    print "first item in the tuple is the reduced workspace group called %s" % result[0].getName()
+    print "it contains %d workspaces one for each run" % result[0].size()
+    print "first workspace is %s corresponding to run %i" % (result[0].getItem(0).getName(),result[0].getItem(0).getRunNumber())
+    print "second item in the tuple is the left workspace group called %s" % result[1].getName()
+    print "third item in the tuple is the left workspace group called %s" % result[2].getName()
+
+Output:
+
+.. testoutput:: ExIndirectILLReductionMultipleRun
+
+    result is now a tuple of 3 <class 'mantid.api._api.WorkspaceGroup'>
+    first item in the tuple is the reduced workspace group called result
+    it contains 2 workspaces one for each run
+    first workspace is 146190_result corresponding to run 146190
+    second item in the tuple is the left workspace group called result_left
+    third item in the tuple is the left workspace group called result_right
+
 
 .. categories::
 
