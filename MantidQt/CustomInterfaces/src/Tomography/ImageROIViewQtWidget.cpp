@@ -7,6 +7,7 @@
 
 #include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h"
+#include <MantidQtMantidWidgets/ColorBarWidget.h>
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -77,6 +78,8 @@ void ImageROIViewQtWidget::initLayout() {
 
   m_ui.colorBarWidget->setViewRange(1, 65536);
   m_ui.colorBarWidget->setAutoScale(true);
+  m_ui.colorBarWidget->setCheckBoxMode(
+      MantidWidgets::ColorBarWidget::ADD_AUTOSCALE_ON_LOAD);
 
   readSettings();
 
