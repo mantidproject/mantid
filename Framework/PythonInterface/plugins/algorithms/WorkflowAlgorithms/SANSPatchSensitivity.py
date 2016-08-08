@@ -52,15 +52,12 @@ class SANSPatchSensitivity(PythonAlgorithm):
         
         for tube_idx in range(number_of_tubes):
             if component[0].nelements() <=1:
+                # Handles EQSANS
                 tube = component[tube_idx][0]
             else:
+                # Handles Biosans/GPSANS
                 tube = component[tube_idx]
-            #lets iterate the tube
-
             self.__patch_workspace(tube, in_ws, patch_ws)
-            
-        
-
         
     
     def __get_component_to_patch(self, workspace):
@@ -82,6 +79,13 @@ class SANSPatchSensitivity(PythonAlgorithm):
         return component
     
     def __patch_workspace(self, tube_in_input_ws, in_ws, patch_ws):
+        '''
+        Tube to patch!
+        patch_ws has the mask
+        For every tube, finds the masked pixels
+        
+        '''
+        
         #lets iterate the tube
         id_to_calculate_fit = []
         y_to_calculate_fit = []
@@ -104,14 +108,16 @@ class SANSPatchSensitivity(PythonAlgorithm):
                     e_to_calculate_fit.append(in_ws.readE(detector_id).sum())
         
         degree = self.getProperty("DegreeOfThePolynomial").value
+        # Returns coeffcients for the polynomial fit
         py =  np.polyfit(id_to_calculate_fit, y_to_calculate_fit, degree)
         pe =  np.polyfit(id_to_calculate_fit, e_to_calculate_fit, degree)
         
+        
         for id in id_to_fit:
-            vy = np.polyval(py,id)
-            ve = np.polyval(pe,id)
-            in_ws.setY(id,np.array(vy))
-            in_ws.setE(id,np.array(ve))
+            vy = np.polyval(py,[id])
+            ve = np.polyval(pe,[id])
+            in_ws.setY(id,vy)
+            in_ws.setE(id,ve)
                 
 
 
