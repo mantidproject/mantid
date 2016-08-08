@@ -239,20 +239,20 @@ public:
   }
 
   void test_workspace_groups_in_ads_fail() {
-	  auto a = boost::make_shared<WorkspaceTester>();
-	  auto b = boost::make_shared<WorkspaceTester>();
+    auto a = boost::make_shared<WorkspaceTester>();
+    auto b = boost::make_shared<WorkspaceTester>();
 
-	  AnalysisDataService::Instance().add("a", a);
+    AnalysisDataService::Instance().add("a", a);
 
-	  auto group = boost::make_shared<WorkspaceGroup>();
+    auto group = boost::make_shared<WorkspaceGroup>();
 
-	  group->addWorkspace(a);
-	  group->addWorkspace(b);
-	  std::vector<WorkspaceGroup_sptr> list{ group };
+    group->addWorkspace(a);
+    group->addWorkspace(b);
+    std::vector<WorkspaceGroup_sptr> list{group};
 
-	  TS_ASSERT_THROWS(
-		  WorkspaceListProperty<WorkspaceGroup>("Prop", list, Direction::Input),
-		  std::invalid_argument);
+    TS_ASSERT_THROWS(
+        WorkspaceListProperty<WorkspaceGroup>("Prop", list, Direction::Input),
+        std::invalid_argument);
   }
 
   // TODO: Not sure what is the right thing to return here. One possibility

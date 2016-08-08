@@ -121,13 +121,13 @@ public:
   WorkspaceGroup &operator=(const WorkspaceGroup &) = delete;
 
   friend std::ostream &operator<<(std::ostream &os,
-	  const boost::shared_ptr<WorkspaceGroup> &ws) {
-	  return os << ws->m_name;
+                                  const boost::shared_ptr<WorkspaceGroup> &ws) {
+    return os << ws->m_name;
   }
 
-  friend std::istream &operator >> (std::istream &is,
-	  boost::shared_ptr<WorkspaceGroup> &ws) {
-	  return is >> ws->m_name;
+  friend std::istream &operator>>(std::istream &is,
+                                  boost::shared_ptr<WorkspaceGroup> &ws) {
+    return is >> ws->m_name;
   }
 
 private:

@@ -111,9 +111,10 @@ template <>
 MANTID_API_DLL std::vector<Mantid::API::Workspace_sptr>
 IPropertyManager::getValue<std::vector<Mantid::API::Workspace_sptr>>(
     const std::string &name) const {
-  PropertyWithValue<std::vector<Mantid::API::Workspace_sptr>> *prop = dynamic_cast<
-      PropertyWithValue<std::vector<Mantid::API::Workspace_sptr>> *>(
-      getPointerToProperty(name));
+  PropertyWithValue<std::vector<Mantid::API::Workspace_sptr>> *prop =
+      dynamic_cast<
+          PropertyWithValue<std::vector<Mantid::API::Workspace_sptr>> *>(
+          getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {

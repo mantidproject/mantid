@@ -102,8 +102,11 @@ public:
     return new WorkspaceListProperty<TYPE>(*this);
   }
 
-  //const WorkspaceListPropertyType  &operator() const { return SuperClass::operator()(); }
-  const WorkspaceListPropertyType &list() const { return SuperClass::operator()(); }
+  // const WorkspaceListPropertyType  &operator() const { return
+  // SuperClass::operator()(); }
+  const WorkspaceListPropertyType &list() const {
+    return SuperClass::operator()();
+  }
 
   /** Get the name of the workspace
   *  @return The workspace's name
@@ -116,9 +119,7 @@ public:
   std::string getDefault() const override { return ""; }
 
   /// Is the input workspace property optional?
-  bool isOptional() const {
-    return m_optional == PropertyMode::Optional;
-  }
+  bool isOptional() const { return m_optional == PropertyMode::Optional; }
 
   std::string isValid() const override {
     std::string error;
@@ -129,8 +130,9 @@ public:
 
       if (group) {
         auto names = group->getNames();
-        if (std::any_of(names.cbegin(), names.cend(),
-                        [](const std::string &s) { return s.size() > 0; })) {
+        if (std::any_of(names.cbegin(), names.cend(), [](const std::string &s) {
+              return AnalysisDataService::Instance().doesExist(s);
+            })) {
           error = "WorkspaceGroups which exist in the ADS are not allowed.";
           break;
         }
@@ -140,8 +142,8 @@ public:
     return error + SuperClass::isValid();
   }
 
-  std::string
-  setDataItems(const std::vector<boost::shared_ptr<Kernel::DataItem>> &items) override {
+  std::string setDataItems(
+      const std::vector<boost::shared_ptr<Kernel::DataItem>> &items) override {
     std::string error;
 
     std::vector<boost::shared_ptr<TYPE>> tmp(items.size());

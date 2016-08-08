@@ -441,20 +441,20 @@ IPropertyManager::getValue<Mantid::API::WorkspaceGroup_const_sptr>(
 template <>
 MANTID_API_DLL std::vector<Mantid::API::WorkspaceGroup_sptr>
 IPropertyManager::getValue<std::vector<Mantid::API::WorkspaceGroup_sptr>>(
-	const std::string &name) const {
-	PropertyWithValue<std::vector<Mantid::API::WorkspaceGroup_sptr>> *prop = dynamic_cast<
-		PropertyWithValue<std::vector<Mantid::API::WorkspaceGroup_sptr>> *>(
-			getPointerToProperty(name));
-	if (prop) {
-		return *prop;
-	}
-	else {
-		std::string message = "Attempt to assign property " + name +
-			" to incorrect type. Expected type "
-			"std::vector<boost::shared_ptr<Mantid::Kernel::"
-			"DataItem>>";
-		throw std::runtime_error(message);
-	}
+    const std::string &name) const {
+  PropertyWithValue<std::vector<Mantid::API::WorkspaceGroup_sptr>> *prop =
+      dynamic_cast<
+          PropertyWithValue<std::vector<Mantid::API::WorkspaceGroup_sptr>> *>(
+          getPointerToProperty(name));
+  if (prop) {
+    return *prop;
+  } else {
+    std::string message = "Attempt to assign property " + name +
+                          " to incorrect type. Expected type "
+                          "std::vector<boost::shared_ptr<Mantid::Kernel::"
+                          "DataItem>>";
+    throw std::runtime_error(message);
+  }
 }
 
 } // namespace Kernel

@@ -146,11 +146,12 @@ public:
   }
 
   template <typename T>
-  IPropertyManager *setProperty(const std::string &name, const std::vector<T> &value) {
-	  setTypedProperty(name, value,
-		  boost::is_convertible<T, boost::shared_ptr<DataItem>>());
-	  this->afterPropertySet(name);
-	  return this;
+  IPropertyManager *setProperty(const std::string &name,
+                                const std::vector<T> &value) {
+    setTypedProperty(name, value,
+                     boost::is_convertible<T, boost::shared_ptr<DataItem>>());
+    this->afterPropertySet(name);
+    return this;
   }
 
   /** Specialised version of setProperty template method to handle const char *
@@ -409,10 +410,10 @@ protected:
     template <typename T> operator std::vector<T>() {
       return pm.getValue<std::vector<T>>(prop);
     }
-	/// explicit specialization for std::vector
-	template <typename T> operator std::vector<boost::shared_ptr<T>>() {
-		return pm.getValue<std::vector<boost::shared_ptr<T>>>(prop);
-	}
+    /// explicit specialization for std::vector
+    template <typename T> operator std::vector<boost::shared_ptr<T>>() {
+      return pm.getValue<std::vector<boost::shared_ptr<T>>>(prop);
+    }
     /// explicit specialization for boost::shared_ptr
     template <typename T> operator boost::shared_ptr<T>() {
       return pm.getValue<boost::shared_ptr<T>>(prop);
