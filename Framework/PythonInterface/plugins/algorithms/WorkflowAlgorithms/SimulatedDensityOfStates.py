@@ -66,7 +66,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                              validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active', 'BondTable']),
                              doc="Type of intensities to extract and model (fundamentals-only) from .phonon.")
 
-        self.declareProperty(name='CalculateIonIndex', defaultValue=False,
+        self.declareProperty(name='CalculateIonIndices', defaultValue=False,
                              doc="Calculates the individual index of all Ions in the simulated data.")
 
         self.declareProperty(name='StickHeight', defaultValue=0.01,
@@ -324,7 +324,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self._bin_width = self.getProperty('BinWidth').value
         self._spec_type = self.getPropertyValue('SpectrumType')
         self._peak_func = self.getPropertyValue('Function')
-        self._calc_ion_index = self.getProperty('CalculateIonIndex').value
+        self._calc_ion_index = self.getProperty('CalculateIonIndices').value
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
         self._peak_width = self.getProperty('PeakWidth').value
         self._scale = self.getProperty('Scale').value

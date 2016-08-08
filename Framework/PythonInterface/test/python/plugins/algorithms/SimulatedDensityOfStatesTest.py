@@ -260,7 +260,7 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
         """
         wks_grp = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
                                            SpectrumType='DOS',
-                                           CalculateIonIndex=True,
+                                           CalculateIonIndices=True,
                                            Ions='H,C,O')
         self.assertEqual(20, len(wks_grp))
 
