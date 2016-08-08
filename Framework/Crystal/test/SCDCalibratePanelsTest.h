@@ -52,12 +52,12 @@ public:
     TS_ASSERT_DELTA(-0.0045, results->cell<double>(0, 1), 4e-4);
     TS_ASSERT_DELTA(0.0013, results->cell<double>(1, 1), 3e-4);
     TS_ASSERT_DELTA(0.0012, results->cell<double>(2, 1), 1e-4);
-    TS_ASSERT_DELTA(-0.0415, results->cell<double>(3, 1), 2e-2);
+    TS_ASSERT_DELTA(-0.0415, results->cell<double>(3, 1), 3e-2);
     TS_ASSERT_DELTA(-0.0217, results->cell<double>(4, 1), 6e-2);
-    TS_ASSERT_DELTA(0.2695, results->cell<double>(5, 1), 6e-2);
+    TS_ASSERT_DELTA(0.2695, results->cell<double>(5, 1), 0.2);
     TS_ASSERT_DELTA(1.0, results->cell<double>(6, 1), 1e-4);
     TS_ASSERT_DELTA(1.0, results->cell<double>(7, 1), 1e-4);
-    TS_ASSERT_DELTA(0.2710, results->cell<double>(8, 1), 3e-2);
+    TS_ASSERT_DELTA(0.2710, results->cell<double>(8, 1), 4e-2);
     ITableWorkspace_sptr resultsL1 =
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
             "params_L1");
