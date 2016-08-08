@@ -30,7 +30,7 @@ digraph pearlRunFocus {
     //Vanadium calibration steps - suffix: VanCalib
     Focus_run_global_vanFile_VanCalib   [label="vanfile"]
     
-    //Use param style for out file names instead of labels    
+    //--Use param style for out file names instead of labels--    
     //Focus Mode:'all' - suffix: FocusModeAll
     SaveGSS_out_FocusModeAll            [label="GSS file"]
     SaveNexus_out_FocusModeAll          [label="Nexus file"]
@@ -52,7 +52,10 @@ digraph pearlRunFocus {
     SaveGSS_out_FocusModeMods           [label="GSS file"]
     SaveNexus_out_FocusModeMods         [label="Nexus file"]
     
-    
+    //--Output workspaces--
+    Focus_run_atten_out_FocusModeTrans  [label="Workspace 'PRL<RunNumber>_noatten'"]
+    Focus_run_final_output              [label="Workspace 'PRL<RunNumber>'"]
+
     } // End of params
     
     subgraph processes {
@@ -71,6 +74,13 @@ digraph pearlRunFocus {
     Focus_run_process_FocusModeTrans    [label="Focus Mode: 'trans'"]
     Focus_run_process_FocusModeMods     [label="Focus Mode: 'mods'"]
     
+    // Remove intermediate workspaces steps
+    Remove_temp_workspace_read          [label="Remove intermediate workspaces"]
+    Remove_temp_workspace_VanCalib      [label="Remove intermediate workspaces"]
+    Remove_temp_workspace_FocusModeAll  [label="Remove intermediate workspaces"]
+    Remove_temp_workspace_FocusModeGroups   [label="Remove intermediate workspaces"]
+    Remove_temp_workspace_FocusModeTrans    [label="Remove intermediate workspaces"]
+    Remove_temp_workspace_FocusModeMods [label="Remove intermediate workspaces"]
     
     } //End of processes
     
@@ -81,9 +91,7 @@ digraph pearlRunFocus {
     AlignDetectors_read                 [label="Align Detectors"]
     DiffractionFocusing_read            [label="Diffraction Focussing"]
     Rebin_read                          [label="Rebin"]
-    Remove_temp_workspace_read          [label="Remove intermediate workspaces"]
-    
-    
+
     //Vanadium calibration steps if true - Suffix:VanCalibTrue
     LoadNexus_VanCalibTrue              [label="Load Nexus file"]
     ExtractSingleSpectrum_VanCalibTrue  [label="Extract single spectrum"]
@@ -99,10 +107,7 @@ digraph pearlRunFocus {
     ConvertUnits_TOF_VanCalibFalse      [label="Convert units to TOF"]
     Rebin_VanCalibFalse                 [label="Rebin"]
     CropWorkspace_VanCalibFalse         [label="Crop workspace"]
-    
-    //Vanadium calibration steps - Suffix: VanCalib
-    Remove_temp_workspace_VanCalib      [label="Remove intermediate workspaces"]
-    
+
     //Focus mode set to 'all' steps - Suffix: FocusModeAll
     CloneWorkspace_FocusModeAll         [label="Clone workspace"]
     Plus_FocusModeAll                   [label="Plus"]
@@ -110,8 +115,7 @@ digraph pearlRunFocus {
     SaveGSS_FocusModeAll                [label="Save GSS file"]
     ConvertUnits_dSpacing_FocusModeAll  [label="Convert units to dSpacing"]
     SaveNexus_FocusModeAll              [label="Save Nexus file"]
-    Remove_temp_workspace_FocusModeAll  [label="Remove intermediate workspaces"]
-    
+
     //Focus mode set to 'groups' steps - Suffix: FocusModeGroups
     CloneWorkspace_FocusModeGroups      [label="Clone Workspace"]
     Plus_StepOne_FocusModeGroups        [label="Plus"]
@@ -126,8 +130,7 @@ digraph pearlRunFocus {
     SaveGSS_Range_FocusModeGroups       [label="Save GSS File"]
     ConvertUnits_second_dSpacing_FocusModeGroups [label="Convert Units to dSpacing"]
     SaveNexus_Range_FocusModeGroups     [label="Save Nexus File"]
-    Remove_temp_workspace_FocusModeGroups   [label="Remove intermediate workspaces"]
-    
+
     //Focus mode set to 'trans' steps - Suffix: FocusModeTrans
     CloneWorkspace_FocusModeTrans       [label="Clone Workspace"]
     Plus_FocusModeTrans                 [label="Plus"]
@@ -142,14 +145,14 @@ digraph pearlRunFocus {
     SaveNexus_FocusModeTrans            [label="Save Nexus File"]
     ConvertUnits_dSpacing_two_FocusModeTrans [label="Convert Units to dSpacing"]
     SaveNexus_two_FocusModeTrans        [label="Save Nexus File"]
-    Remove_temp_workspace_FocusModeTrans    [label="Remove intermediate workspaces"]
-    
+
     //Focus mode set to 'mods' steps - Suffix: FocusModeMods
     SaveGSS_FocusModeMods               [label="Save GSS File"]
     ConvertUnits_dSpacing_FocusModeMods [label="Convert Units to dSpacing"]
     SaveNexus_FocusModeMods             [label="Save Nexus File"]
-    Remove_temp_workspace_FocusModeMods [label="Remove intermediate workspaces"]
     
+    LoadNexus_finalOutput               [label="Load Nexus file"]
+
     } //End of algorithms
     
     subgraph decisions {
@@ -187,10 +190,10 @@ digraph pearlRunFocus {
     DiffractionFocusing_read            -> Focus_run_if_debug_mode_read
     
     // Debug mode is on (ie. don't remove temp workspaces)
-    Focus_run_if_debug_mode_read        -> Remove_temp_workspace_read       [label="true"]
+    Focus_run_if_debug_mode_read        -> Remove_temp_workspace_read       [label="false"]
     Remove_temp_workspace_read          -> Focus_run_if_van_norm
     // Debug mode is off:
-    Focus_run_if_debug_mode_read        -> Focus_run_if_van_norm            [label="false"]
+    Focus_run_if_debug_mode_read        -> Focus_run_if_van_norm            [label="true"]
     
     //Vanadium calibration steps if true - Suffix:VanCalibTrue
     Focus_run_param_vanadium_norm       -> Focus_run_if_van_norm
@@ -214,7 +217,12 @@ digraph pearlRunFocus {
     Focus_run_switch_f_mode             -> Focus_run_process_FocusModeTrans [label="trans"]
     Focus_run_switch_f_mode             -> Focus_run_process_FocusModeMods  [label="mods"]
     
+    Focus_run_process_FocusModeAll      -> LoadNexus_finalOutput
+    Focus_run_process_FocusModeGroups   -> LoadNexus_finalOutput
+    Focus_run_process_FocusModeTrans    -> LoadNexus_finalOutput
+    Focus_run_process_FocusModeMods     -> LoadNexus_finalOutput
     
+    LoadNexus_finalOutput               -> Focus_run_final_output
     }
     
     subgraph Focus_run_with_van_calib{
@@ -302,6 +310,7 @@ digraph pearlRunFocus {
     Focus_run_if_atten_FocusModeTrans   -> ConvertUnits_dSpacing_atten_FocusModeTrans   [label="true"]
     ConvertUnits_dSpacing_atten_FocusModeTrans -> CloneWorkspace_atten_FocusModeTrans
     CloneWorkspace_atten_FocusModeTrans -> Focus_run_atten
+    CloneWorkspace_atten_FocusModeTrans -> Focus_run_atten_out_FocusModeTrans
     Focus_run_atten                     -> ConvertUnits_TOF_atten_FocusModeTrans
     ConvertUnits_TOF_atten_FocusModeTrans -> SaveGSS_FocusModeTrans
     // Continuing algorithm 
@@ -317,7 +326,7 @@ digraph pearlRunFocus {
     ConvertUnits_dSpacing_two_FocusModeTrans -> SaveNexus_two_FocusModeTrans        [label="Workspaces 1-9"]
     SaveNexus_two_FocusModeTrans        -> SaveNexus_two_out_FocusModeTrans         [label="Appending to file"]
     SaveNexus_two_FocusModeTrans        -> Focus_run_if_debug_mode_FocusModeTrans
-    Focus_run_if_debug_mode_FocusModeTrans -> Remove_temp_workspace_FocusModeTrans  [label="true"]
+    Focus_run_if_debug_mode_FocusModeTrans -> Remove_temp_workspace_FocusModeTrans  [label="false"]
     
     }
     
@@ -329,6 +338,6 @@ digraph pearlRunFocus {
     ConvertUnits_dSpacing_FocusModeMods -> SaveNexus_FocusModeMods
     SaveNexus_FocusModeMods             -> SaveNexus_out_FocusModeMods              [label="Appending to file"]
     SaveNexus_FocusModeMods             -> Focus_run_if_debug_mode_FocusModeMods
-    Focus_run_if_debug_mode_FocusModeMods -> Remove_temp_workspace_FocusModeMods    [label="true"]
+    Focus_run_if_debug_mode_FocusModeMods -> Remove_temp_workspace_FocusModeMods    [label="false"]
     }
 }
