@@ -1,10 +1,10 @@
 digraph PearlDiffractionISIS {
-    label="Focus Run PearlDiffractionISIS"
-    //$global_style
+    label="PearlDiffraction PEARL_run_focus"
+    $global_style
     
     // Global prefix: Focus_run_
     
-    Focus_run_start             [label="Start Focus Run"]
+    Focus_run_start             [label="Start PEARL_run_focus"]
     Focus_run_start_VanCalib    [label="Start with vanadium calibration"]
     Focus_run_start_without_VanCalib [label="Start without vanadium calibration"]
     
@@ -14,10 +14,10 @@ digraph PearlDiffractionISIS {
     Focus_run_start_FocusModeMods   [label="Focus Mode: 'mods'"]
     
     subgraph params {
-    //$param_style
+    $param_style
     
     Focus_run_param_atten               [label="atten"]
-    Focus_run_param_current_run_number  [label="number"]
+    Focus_run_param_current_run_number  [label="Cycle number"]
     Focus_run_param_vanadium_norm       [label="van_norm"]
     Focus_run_param_f_mode              [label="fmode"]
     Focus_run_param_focus_mode          [label="focus_mode"]
@@ -26,11 +26,11 @@ digraph PearlDiffractionISIS {
     } // End of params
     
     subgraph processes {
-    //$process_style
+    $process_style
 
     // Read steps - suffix:read
-    Focus_run_get_calib_files_read      [label="Get calibration files"]
-    Focus_run_read                      [label="Pearl Read"]
+    Focus_run_get_calib_files_read      [label="PEARL_getcalibfiles"]
+    Focus_run_read                      [label="PEARL_read"]
     Focus_run_atten                     [label="PEARL_atten"]
     
     // Subgraphs:
@@ -45,7 +45,7 @@ digraph PearlDiffractionISIS {
     } //End of processes
     
     subgraph algorithms {
-    //$algorithm_style
+    $algorithm_style
     
     // Read steps - suffix:read
     AlignDetectors_read                 [label="Align Detectors"]
@@ -124,7 +124,7 @@ digraph PearlDiffractionISIS {
     } //End of algorithms
     
     subgraph decisions {
-    //$decision_style
+    $decision_style
     
     // Debug checks
     Focus_run_if_debug_mode_read        [label="If debug mode"]
@@ -138,7 +138,7 @@ digraph PearlDiffractionISIS {
     Focus_run_switch_f_mode             [label="fmode set to:"]
     Focus_run_if_van_norm               [label="If van_norm"]
     Focus_run_if_focus_mode_FocusModeGroups [label="focus_mode set to:"]
-    Focus_run_if_atten_FocusModeTrans   [label="If trans:"]
+    Focus_run_if_atten_FocusModeTrans   [label="If atten:"]
     
     } //End of decisions
     

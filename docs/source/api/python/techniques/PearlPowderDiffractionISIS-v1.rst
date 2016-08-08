@@ -88,6 +88,13 @@ Requirement section.
 
 .. _pearl-powder-diffraction-usage-ref:
 
+Workflow
+--------
+
+PEARL Run Focus Workflow
+^^^^^^^^^^^^^^^^^^^^^^^^^
+.. diagram:: PEARL-Run_focus-wkflw.dot
+
 Usage
 -----
 
