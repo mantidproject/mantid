@@ -7,8 +7,8 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresWorker.h"
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
-#include <fstream>
 #include <boost/lexical_cast.hpp>
+#include <fstream>
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
@@ -176,23 +176,30 @@ void EnggDiffFittingPresenter::fittingFinished() {
 void EnggDiffFittingPresenter::fittingRunNoChanged() {
 
   try {
+    // receive the run number from the text-field
     auto strFocusedFile = m_view->getFittingRunNo();
-    auto focusedFile = strFocusedFile;
+
     // file name
     Poco::Path selectedfPath(strFocusedFile);
     Poco::Path bankDir;
 
-    // handling of vectors
+    // runnoDirVector - vector to hold the directory of
+    // all the banks for the selected run number
     auto runnoDirVector = m_view->getFittingRunNumVec();
     runnoDirVector.clear();
 
     std::string strFPath = selectedfPath.toString();
     // returns empty if no directory is found
+    // split directory if 'ENGINX_' found by '_.'
     std::vector<std::string> splitBaseName =
         m_view->splitFittingDirectory(strFPath);
+
     // runNo when single focused file selected
     std::vector<std::string> runNoVec;
 
+    // if input file is a directory and successfully splitBaseName
+    // or when default bank is set or changed, the text-field is updated with
+    // selected bank directory which would trigger this function again
     if (selectedfPath.isFile() && !splitBaseName.empty()) {
 
 #ifdef __unix__
@@ -200,9 +207,13 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 #else
       bankDir = (bankDir).expand(selectedfPath.parent().toString());
 #endif
+      // if vector is not empty and correct focus format file is selected
       if (!splitBaseName.empty() && splitBaseName.size() > 3) {
+        // regenerating the focus file name
         std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
                                splitBaseName[2] + "_" + splitBaseName[3];
+
+        // base directory to string for the selected bank file
         std::string strBankDir = bankDir.toString();
 
         if (strBankDir.empty()) {
@@ -225,8 +236,9 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
           // if not run mode or bank mode: to avoid recreating widgets
           if (!multiRunMode && !singleRunMode) {
 
-			updateFittingDirVec(strBankDir, foc_file, false, runnoDirVector);
-			m_view->setFittingRunNumVec(runnoDirVector);
+            updateFittingDirVec(strBankDir, foc_file, false, runnoDirVector);
+
+            m_view->setFittingRunNumVec(runnoDirVector);
 
             // add bank to the combo-box
             setBankItems();
@@ -241,9 +253,12 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
           }
         }
       }
-      // assuming that no directory is found so look for number
-      // if run number length greater
-    } else if (focusedFile.size() > 4) {
+      // if given a multi-run OR single number
+    } else if (strFocusedFile.size() > 4) {
+
+      // if multi-run number string finds '-' to define run number
+      // adds run number to widget on right and changes text-field
+      // single run number and trigger FittingRunNo changed again
       if (strFocusedFile.find("-") != std::string::npos) {
         std::vector<std::string> firstLastRunNoVec;
         boost::split(firstLastRunNoVec, strFocusedFile, boost::is_any_of("-"));
@@ -254,38 +269,55 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
           lastRun = firstLastRunNoVec[1];
 
           m_view->setFittingMultiRunMode(true);
+          // updatesFittingDirVec here too
+          // shahroz
+          g_multi_run_directories.clear();
           enableMultiRun(firstRun, lastRun, runnoDirVector);
         }
 
       } else {
-        // if given a single run number instead
         auto focusDir = m_view->focusingDir();
+        g_log.error() << strFocusedFile << std::endl;
 
-        if (focusDir.empty()) {
+        // true if string convertible to digit
+        auto isRunNumber = isDigit(strFocusedFile);
+
+        // if not valid parent dir and not valid single run number
+        if (focusDir.empty() || !isRunNumber) {
           m_view->userWarning(
               "Invalid Input",
               "Please check that a valid directory is "
               "set for Output Folder under Focusing Settings on the "
               "settings tab. "
               "Please try again");
-        } else {
+        }
+
+        // else - given or set to a single run number
+        else {
+
+          m_view->setFittingSingleRunMode(true);
 
           updateFittingDirVec(focusDir, strFocusedFile, false, runnoDirVector);
           m_view->setFittingRunNumVec(runnoDirVector);
-
           // add bank to the combo-box and list view
           setBankItems();
-          setDefaultBank(splitBaseName, focusedFile);
-          runNoVec.clear();
-          runNoVec.push_back(strFocusedFile);
+          setDefaultBank(splitBaseName, strFocusedFile);
 
           auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
-          if (!fittingMultiRunMode)
+          if (!fittingMultiRunMode) {
+            runNoVec.clear();
+            // pushing run number directory to list widget as its single run
+            // number
+            runNoVec.push_back(strFocusedFile);
             setRunNoItems(runNoVec, false);
+          }
         }
       }
     }
-    // set the directory here to the first in the vector if its not empty
+
+    // if single or multi run-number
+    // set the text-field to directory here to the first in
+    // the vector if its not empty
     if (!runnoDirVector.empty() && !selectedfPath.isFile()) {
       auto firstDir = runnoDirVector[0];
       m_view->setFittingRunNo(firstDir);
@@ -302,6 +334,14 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
                             static_cast<std::string>(re.what()));
     return;
   }
+
+  auto vec = m_view->getFittingRunNumVec();
+  g_log.warning() << "dir in the end" << std::endl;
+  for (auto dir : vec) {
+	  g_log.warning() << dir << std::endl;
+
+  }
+
 }
 
 void EnggDiffFittingPresenter::updateFittingDirVec(
@@ -321,8 +361,8 @@ void EnggDiffFittingPresenter::updateFittingDirVec(
         // check if it not any other file.. e.g: texture
         if (itbankFileName.find(focusedFile) != std::string::npos) {
           fittingRunNoDirVec.push_back(itFilePath);
-          if (multi_run)
-            return;
+		  if (multi_run)
+			  g_multi_run_directories.push_back(itFilePath);
         }
       }
       ++it;
@@ -357,6 +397,8 @@ void EnggDiffFittingPresenter::enableMultiRun(
     else if (firstNum <= lastNum) {
 
       for (int i = firstNum; i <= lastNum; i++) {
+        // push run number to vector so can be
+        // used to search for directories with given run no
         RunNumberVec.push_back(std::to_string(i));
       }
 
@@ -369,17 +411,20 @@ void EnggDiffFittingPresenter::enableMultiRun(
             "settings tab. "
             "Please try again");
       } else {
-        // if given a single run number instead
+
+		  // delete me
+		  auto size_ = RunNumberVec.size();
+
+        // if given a multi run number instead
         for (size_t i = 0; i < RunNumberVec.size(); i++) {
+          // save dir for every vector
           updateFittingDirVec(focusDir, RunNumberVec[i], true,
                               fittingRunNoDirVec);
         }
         int diff = (lastNum - firstNum) + 1;
-        auto global_vec_size = fittingRunNoDirVec.size();
-        if (size_t(diff) == global_vec_size) {
-
+        auto run_vec_size = RunNumberVec.size();
+        if (size_t(diff) == run_vec_size) {
           setRunNoItems(RunNumberVec, true);
-
           m_view->setBankEmit();
         }
       }
@@ -391,7 +436,7 @@ void EnggDiffFittingPresenter::enableMultiRun(
     }
   } else {
     m_view->userWarning("Invalid Run Number",
-                        "The specfied range of run number "
+                        "The specified range of run number "
                         "entered is invalid. Please try again");
   }
 }
@@ -612,6 +657,19 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
   MatrixWorkspace_sptr focusedWS;
   m_fittingFinishedOK = false;
 
+  // if the last directory in vector matches the input directory within this
+  // function then clear the vector
+  if (g_multi_run_directories.back() == focusedRunNo)
+    g_multi_run_directories.clear();
+
+  // @shahroz - delete me
+  g_log.error()
+      << "/////////////////////////////////////////////////////"
+         "/////////////////////////////////////////////////////////////////////"
+         "/"
+         "////////////////////////////////////////////////////////////////////"
+      << std::endl;
+
   // load the focused workspace file to perform single peak fits
   try {
     auto load =
@@ -626,7 +684,7 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
   } catch (std::runtime_error &re) {
     g_log.error()
         << "Error while loading focused data. "
-           "Could not run the algorithm Load succesfully for the Fit "
+           "Could not run the algorithm Load successfully for the Fit "
            "peaks (file name: " +
                focusedRunNo + "). Error description: " + re.what() +
                " Please check also the previous log messages for details.";
@@ -670,7 +728,8 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
 
   } catch (std::invalid_argument &ia) {
     g_log.error() << "Error, Fitting could not finish off correctly, " +
-                         std::string(ia.what()) << '\n';
+                         std::string(ia.what())
+                  << '\n';
     return;
   }
 }
@@ -928,7 +987,8 @@ void EnggDiffFittingPresenter::runEvaluateFunctionAlg(
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm EvaluateFunction, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 
@@ -945,7 +1005,8 @@ void EnggDiffFittingPresenter::runCropWorkspaceAlg(std::string workspaceName) {
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm CropWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 
@@ -962,7 +1023,8 @@ void EnggDiffFittingPresenter::runAppendSpectraAlg(std::string workspace1Name,
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm AppendWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 
@@ -979,7 +1041,8 @@ void EnggDiffFittingPresenter::runRebinToWorkspaceAlg(
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm RebinToWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 
@@ -1022,8 +1085,9 @@ void EnggDiffFittingPresenter::getDifcTzero(MatrixWorkspace_const_sptr wks,
     g_log.warning()
         << "Could not retrieve the DIFC, DIFA, TZERO values from the workspace "
         << wks->name() << ". Using default, which is not adjusted for this "
-                          "workspace/run: DIFA: " << difa << ", DIFC: " << difc
-        << ", TZERO: " << tzero << ". Error details: " << rexc.what() << '\n';
+                          "workspace/run: DIFA: "
+        << difa << ", DIFC: " << difc << ", TZERO: " << tzero
+        << ". Error details: " << rexc.what() << '\n';
   }
 }
 
@@ -1067,8 +1131,8 @@ void EnggDiffFittingPresenter::runAlignDetectorsAlg(std::string workspaceName) {
     row << detID << difc << difa << tzero;
   } catch (std::runtime_error &rexc) {
     g_log.error() << "Failed to prepare calibration table input to convert "
-                     "units with the algorithm " << algName
-                  << ". Error details: " << rexc.what() << '\n';
+                     "units with the algorithm "
+                  << algName << ". Error details: " << rexc.what() << '\n';
     return;
   }
 
@@ -1117,9 +1181,11 @@ void EnggDiffFittingPresenter::runConvertUnitsAlg(std::string workspaceName) {
     ConvertUnits->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm ConvertUnits to convert "
-                     "workspace to " << targetUnit
+                     "workspace to "
+                  << targetUnit
                   << ", Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 
@@ -1137,7 +1203,8 @@ void EnggDiffFittingPresenter::runCloneWorkspaceAlg(
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm CreateWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 
@@ -1202,17 +1269,21 @@ void EnggDiffFittingPresenter::setRunNoItems(
   try {
     if (!runNumVector.empty()) {
 
-      // delete previous bank added to the list
+      // delete previous run number added to the list
       m_view->clearFittingListWidget();
+
+      // enable fit button only when run number provided
+      m_view->enableFitAllButton(true);
 
       for (size_t i = 0; i < runNumVector.size(); i++) {
 
-        // get the last split in vector which will be bank
         std::string currentRun = (runNumVector[i]);
 
+        // adding to widget
         m_view->addRunNoItem(currentRun);
       }
 
+      // change to selected run number item
       if (multiRun) {
         m_view->enableFittingListWidget(true);
 
@@ -1228,7 +1299,7 @@ void EnggDiffFittingPresenter::setRunNoItems(
       // upon invalid file
       // disable the widgets when only one related file found
       m_view->enableFittingListWidget(false);
-
+      m_view->enableFitAllButton(false);
       m_view->clearFittingListWidget();
     }
 
@@ -1268,13 +1339,14 @@ void EnggDiffFittingPresenter::setDefaultBank(
 }
 
 bool EnggDiffFittingPresenter::isDigit(std::string text) {
+  // bool isDig = true;
   for (size_t i = 0; i < text.size(); i++) {
     char *str = &text[i];
-    if (std::isdigit(*str)) {
-      return true;
+    if (!std::isdigit(*str)) {
+      return false;
     }
   }
-  return false;
+  return true;
 }
 
 void EnggDiffFittingPresenter::plotFitPeaksCurves() {
