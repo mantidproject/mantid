@@ -95,6 +95,8 @@ private:
   void loadLogs(API::MatrixWorkspace_sptr ws, Mantid::NeXus::NXEntry &entry,
                 int period);
   void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);
+  std::map<int, std::set<int>>
+  loadDetectorMapping(const Mantid::NeXus::NXInt &spectrumIndex);
 };
 
 } // namespace DataHandling
