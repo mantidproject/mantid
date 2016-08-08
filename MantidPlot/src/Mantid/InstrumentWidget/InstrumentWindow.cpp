@@ -96,12 +96,11 @@ IProjectSerialisable *InstrumentWindow::loadFromProject(
 }
 
 std::string InstrumentWindow::saveToProject(ApplicationWindow *app) {
+  TSVSerialiser tsv, window;
+  window.writeRaw(app->windowGeometryInfo(this));
   auto widgetContents = m_instrumentWidget->saveToProject();
-  TSVSerialiser tsv;
-  tsv.writeRaw("<instrumentwindow>");
-  tsv.writeRaw(app->windowGeometryInfo(this));
-  tsv.writeRaw(widgetContents);
-  tsv.writeRaw("</instrumentwindow>");
+  window.writeRaw(widgetContents);
+  tsv.writeSection("instrumentwindow", window.outputLines());
   return tsv.outputLines();
 }
 
