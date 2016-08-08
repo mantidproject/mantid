@@ -226,16 +226,6 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0" colspan="2">
-            <widget class="QCheckBox" name="ckCalcIndices">
-              <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Calculate each index from each ion individually.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <property name="text">
-                <string>Calculate Ion indices</string>
-              </property>
-            </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -369,6 +359,16 @@
                   </item>
                  </widget>
                 </item>
+                <item row="4" column="0" colspan="2">
+                  <widget class="QCheckBox" name="ckCalcIndices">
+                    <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Calculate each index from each ion individually.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                      <string>Calculate Ion Indices</string>
+                    </property>
+                  </widget>
+                </item>
                 <item row="2" column="0" colspan="2">
                  <widget class="QCheckBox" name="ckSumContributions">
                   <property name="toolTip">
@@ -379,7 +379,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="4" column="0" colspan="2">
+                <item row="5" column="0" colspan="2">
                  <spacer name="verticalSpacer">
                   <property name="orientation">
                    <enum>Qt::Vertical</enum>
