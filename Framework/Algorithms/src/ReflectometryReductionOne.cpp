@@ -524,8 +524,8 @@ void ReflectometryReductionOne::exec() {
   if (decTemp) {
     if (decTemp->getAxis(0)->unit()->caption() != "Wavelength") {
       throw std::invalid_argument(
-        "Detector Efficiency Correction workspace x-units must be in "
-        "wavelength");
+          "Detector Efficiency Correction workspace x-units must be in "
+          "wavelength");
     }
     detectorEfficiencyCorrection = decTemp;
   }
@@ -587,12 +587,12 @@ void ReflectometryReductionOne::exec() {
       MatrixWorkspace_sptr decWS = *detectorEfficiencyCorrection;
       if (decWS->blocksize() > 1) {
         // If using separate normalization constants for each spectra, rebin
-        // to the detector workspace 
+        // to the detector workspace
         auto rebinToWorkspaceAlg =
-          this->createChildAlgorithm("RebinToWorkspace");
+            this->createChildAlgorithm("RebinToWorkspace");
         rebinToWorkspaceAlg->initialize();
         rebinToWorkspaceAlg->setProperty("WorkspaceToRebin",
-          *detectorEfficiencyCorrection);
+                                         *detectorEfficiencyCorrection);
         rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", detectorWS);
         rebinToWorkspaceAlg->execute();
         decWS = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
