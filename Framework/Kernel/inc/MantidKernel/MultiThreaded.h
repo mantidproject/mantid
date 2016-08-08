@@ -21,8 +21,9 @@ inline bool threadSafe(bool condition) { return condition; }
  * @return Whether workspace is threadsafe.
  */
 template <typename Arg>
-inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
+inline bool
 threadSafe(Arg workspace) {
+  static_assert(std::is_pointer<Arg>::value," Pass a non-owning raw pointer.");
   return !workspace || workspace->threadSafe();
 }
 
@@ -34,8 +35,9 @@ threadSafe(Arg workspace) {
   * @return Whether workspace is threadsafe.
   */
 template <typename Arg, typename... Args>
-inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
+inline bool
 threadSafe(Arg workspace, Args... others) {
+  static_assert(std::is_pointer<Arg>::value," Pass a non-owning raw pointer.");
   return (!workspace || workspace->threadSafe()) && threadSafe(others...);
 }
 
@@ -48,7 +50,7 @@ threadSafe(Arg workspace, Args... others) {
 #ifdef _MSC_VER
 #define PRAGMA __pragma
 #else //_MSC_VER
-#define PRAGMA(__VA_ARGS__) _Pragma(#__VA_ARGS__)
+#define PRAGMA(x) _Pragma(#x)
 #endif //_MSC_VER
 
 /** Begins a block to skip processing is the algorithm has been interupted
@@ -97,7 +99,7 @@ threadSafe(Arg workspace, Args... others) {
 *   code to be executed in parallel
 */
 #define PARALLEL_FOR_IF(...)                                                   \
-    PRAGMA(omp parallel for if (Mantid::Kernel::Details::threadSafe(__VA_ARGS__) )
+    PRAGMA(omp parallel for if (Mantid::Kernel::Detail::threadSafe(__VA_ARGS__) ) )
 
 /** Includes code to add OpenMP commands to run the next for loop in parallel.
 *   This includes no checks to see if workspaces are suitable
