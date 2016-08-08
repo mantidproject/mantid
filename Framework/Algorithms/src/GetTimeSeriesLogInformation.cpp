@@ -1,15 +1,9 @@
 #include "MantidAlgorithms/GetTimeSeriesLogInformation.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/IEventList.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
-#include "MantidDataObjects/Events.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <algorithm>
@@ -381,8 +375,8 @@ Workspace2D_sptr GetTimeSeriesLogInformation::calDistributions(
   Workspace2D_sptr distws = boost::dynamic_pointer_cast<Workspace2D>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, numbins,
                                                numbins));
-  MantidVec &vecDeltaT = distws->dataX(0);
-  MantidVec &vecCount = distws->dataY(0);
+  auto &vecDeltaT = distws->mutableX(0);
+  auto &vecCount = distws->mutableY(0);
 
   double countmin = dtmin;
   if (m_ignoreNegativeTime && dtmin < 0)

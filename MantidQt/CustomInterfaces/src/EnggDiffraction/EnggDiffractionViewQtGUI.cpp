@@ -634,7 +634,11 @@ void EnggDiffractionViewQtGUI::enableCalibrateFocusFitUserActions(bool enable) {
 
   m_uiTabFocus.groupBox_cropped->setEnabled(enable);
   m_uiTabFocus.groupBox_texture->setEnabled(enable);
-  m_uiTabFocus.groupBox_focus_output_options->setEnabled(enable);
+
+  // Disable all focus output options except graph plotting
+  m_uiTabFocus.checkBox_plot_focused_ws->setEnabled(enable);
+  m_uiTabFocus.checkBox_save_output_files->setEnabled(enable);
+  m_uiTabFocus.comboBox_Multi_Runs->setEnabled(enable);
 
   m_uiTabFocus.pushButton_stop_focus->setDisabled(enable);
   m_uiTabFocus.pushButton_reset->setEnabled(enable);
