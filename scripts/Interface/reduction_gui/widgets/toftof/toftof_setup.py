@@ -106,6 +106,13 @@ class TOFTOFSetupWidget(BaseWidget):
     def __init__(self, settings):
         BaseWidget.__init__(self, settings = settings)
 
+        inf = float('inf')
+
+        def setSpin(spin, min = -inf, max = +inf):
+            spin.setRange(min, max)
+            spin.setDecimals(3)
+            spin.setSingleStep(0.01)
+
         # ui data elements
         self.prefix        = QLineEdit()
 
@@ -117,12 +124,24 @@ class TOFTOFSetupWidget(BaseWidget):
         self.ecRuns        = QLineEdit()
         self.ecFactor      = QDoubleSpinBox()
 
-        self.ecFactor.setRange(0, 1)
-        self.ecFactor.setDecimals(3)
-        self.ecFactor.setSingleStep(0.01)
+        setSpin(self.ecFactor, 0, 1)
 
-        self.rebinEnergy   = QLineEdit()
-        self.rebinQ        = QLineEdit()
+        self.binEstart     = QDoubleSpinBox()
+        self.binEstep      = QDoubleSpinBox()
+        self.binEend       = QDoubleSpinBox()
+
+        setSpin(self.binEstart)
+        setSpin(self.binEstep)
+        setSpin(self.binEend)
+
+        self.binQstart     = QDoubleSpinBox()
+        self.binQstep      = QDoubleSpinBox()
+        self.binQend       = QDoubleSpinBox()
+
+        setSpin(self.binQstart)
+        setSpin(self.binQstep)
+        setSpin(self.binQend)
+
         self.maskDetectors = QLineEdit()
 
         self.dataRunsView = QTableView(self)
@@ -211,30 +230,36 @@ class TOFTOFSetupWidget(BaseWidget):
 
         grid = QGridLayout()
         grid.addWidget(QLabel('Vanadium runs'), 0, 0)
-        grid.addWidget(self.vanRuns,            0, 1)
+        grid.addWidget(self.vanRuns,            0, 1, 1, 3)
         grid.addWidget(QLabel('Van. comment'),  1, 0)
-        grid.addWidget(self.vanCmnt,            1, 1)
+        grid.addWidget(self.vanCmnt,            1, 1, 1, 3)
         grid.addWidget(QLabel('Empty can runs'),2, 0)
         grid.addWidget(self.ecRuns,             2, 1)
-        grid.addWidget(QLabel('EC factor'),     3, 0)
-        grid.addWidget(self.ecFactor,           3, 1)
-        grid.addWidget(QLabel('mask detectors'),4, 0)
-        grid.addWidget(self.maskDetectors,      4, 1)
+        grid.addWidget(QLabel('EC factor'),     2, 2)
+        grid.addWidget(self.ecFactor,           2, 3)
+        grid.addWidget(QLabel('Mask detectors'),3, 0)
+        grid.addWidget(self.maskDetectors,      3, 1, 1, 3)
 
         gbInputs.setLayout(grid)
 
         grid = QGridLayout()
-        grid.addWidget(QLabel('Energy'),        0, 0)
-        grid.addWidget(self.rebinEnergy,        0, 1)
-        grid.addWidget(QLabel('Q'),             1, 0)
-        grid.addWidget(self.rebinQ,             1, 1)
+        grid.addWidget(QLabel('start'),         0, 1)
+        grid.addWidget(QLabel('step'),          0, 2)
+        grid.addWidget(QLabel('end'),           0, 3)
+
+        grid.addWidget(QLabel('Energy'),        1, 0)
+        grid.addWidget(self.binEstart,          1, 1)
+        grid.addWidget(self.binEstep,           1, 2)
+        grid.addWidget(self.binEend,            1, 3)
+
+        grid.addWidget(QLabel('Q'),             2, 0)
+        grid.addWidget(self.binQstart,          2, 1)
+        grid.addWidget(self.binQstep,           2, 2)
+        grid.addWidget(self.binQend,            2, 3)
+
         gbBinning.setLayout(grid)
 
         gbData.setLayout(hbox((self.dataRunsView,)))
-
-
-
-
 
         # handle signals
         self.btnDataDir.clicked.connect(self._onDataSearchDir)
@@ -270,8 +295,14 @@ class TOFTOFSetupWidget(BaseWidget):
 
         el.dataRuns      = self.runDataModel.dataRuns
 
-        el.rebinEnergy   = getText(self.rebinEnergy)
-        el.rebinQ        = getText(self.rebinQ)
+        el.binEstart     = self.binEstart.value()
+        el.binEstep      = self.binEstep.value()
+        el.binEend       = self.binEend.value()
+
+        el.binQstart     = self.binQstart.value()
+        el.binQstep      = self.binQstep.value()
+        el.binQend       = self.binQend.value()
+
         el.maskDetectors = getText(self.maskDetectors)
 
         el.subtractECVan = self.chkSubtractECVan.isChecked()
@@ -301,8 +332,14 @@ class TOFTOFSetupWidget(BaseWidget):
         self.runDataModel.dataRuns = el.dataRuns
         self.runDataModel.reset()
 
-        self.rebinEnergy.setText(el.rebinEnergy)
-        self.rebinQ.setText(el.rebinQ)
+        self.binEstart.setValue(el.binEstart)
+        self.binEstep.setValue(el.binEstep)
+        self.binEend.setValue(el.binEend)
+
+        self.binQstart.setValue(el.binQstart)
+        self.binQstep.setValue(el.binQstep)
+        self.binQend.setValue(el.binQend)
+
         self.maskDetectors.setText(el.maskDetectors)
 
         self.chkSubtractECVan.setChecked(el.subtractECVan)

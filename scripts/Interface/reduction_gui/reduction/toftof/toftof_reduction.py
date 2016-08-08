@@ -22,6 +22,12 @@ class TOFTOFScriptElement(BaseScriptElement):
     # default values
     DEF_prefix     = 'ws'
     DEF_ecFactor   = 1.0
+    DEF_binEstart  = 0.0
+    DEF_binEstep   = 0.0
+    DEF_binEend    = 0.0
+    DEF_binQstart  = 0.0
+    DEF_binQstep   = 0.0
+    DEF_binQend    = 0.0
     DEF_subECVan   = False
     DEF_normalise  = NORM_NONE
     DEF_correctTof = CORR_TOF_NONE
@@ -50,8 +56,14 @@ class TOFTOFScriptElement(BaseScriptElement):
         self.dataRuns = []
 
         # additional parameters
-        self.rebinEnergy   = ''
-        self.rebinQ        = ''
+        self.binEstart     = self.DEF_binEstart
+        self.binEstep      = self.DEF_binEstep
+        self.binEend       = self.DEF_binEend
+
+        self.binQstart     = self.DEF_binQstart
+        self.binQstep      = self.DEF_binQstep
+        self.binQend       = self.DEF_binQend
+
         self.maskDetectors = ''
 
         # options
@@ -78,8 +90,14 @@ class TOFTOFScriptElement(BaseScriptElement):
             put('data_runs',    runs)
             put('data_comment', cmnt)
 
-        put('rebin_energy',   self.rebinEnergy)
-        put('rebin_q',        self.rebinQ)
+        put('rebin_energy_start', self.binEstart)
+        put('rebin_energy_step',  self.binEstep)
+        put('rebin_energy_end',   self.binEend)
+
+        put('rebin_q_start',  self.binQstart)
+        put('rebin_q_step',   self.binQstep)
+        put('rebin_q_end',    self.binQend)
+
         put('mask_detectors', self.maskDetectors)
 
         put('subtract_ecvan', self.subtractECVan)
@@ -128,8 +146,14 @@ class TOFTOFScriptElement(BaseScriptElement):
             for i in range(min(len(dataRuns), len(dataCmts))):
                 self.dataRuns.append((dataRuns[i], dataCmts[i]))
 
-            self.rebinEnergy   = getStr('rebin_energy')
-            self.rebinQ        = getStr('rebin_q')
+            self.binEstart = getFlt('rebin_energy_start', self.DEF_binEstart)
+            self.binEstep  = getFlt('rebin_energy_step',  self.DEF_binEstep)
+            self.binEend   = getFlt('rebin_energy_end',   self.DEF_binEend)
+
+            self.binQstart = getFlt('rebin_q_start',      self.DEF_binQstart)
+            self.binQstep  = getFlt('rebin_q_step',       self.DEF_binQstep)
+            self.binQend   = getFlt('rebin_q_end',        self.DEF_binQend)
+
             self.maskDetectors = getStr('mask_detectors')
 
             self.subtractECVan = getBool('subtract_ecvan')
@@ -157,19 +181,11 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         # must have some data runs
         if not self.dataRuns:
-            error('missig data runs')
+            error('missing data runs')
 
         # must have a comment for runs
         if self.vanRuns and not self.vanCmnt:
             error('missing vanadium comment')
-
-        # must have rebinning energy (TODO ?)
-        if not self.rebinEnergy:
-            error('missing rebin energy')
-
-        # must have rebinning Q (TODO ?)
-        if not self.rebinQ:
-            error('missing rebin Q')
 
         # generated script
         script = ['']
@@ -192,11 +208,10 @@ class TOFTOFScriptElement(BaseScriptElement):
         l()
         l("config.appendDataSearchDir('%s')"    % (self.dataDir))
         l()
-        l("ecFactor = '%f'"                     % (self.ecFactor))
-        l()
-        l("rebinEnergy = '%s'"                  % (self.rebinEnergy))
-        l("rebinQ = '%s'"                       % (self.rebinQ))
-        l()
+
+        dataRawGroup = []
+        dataGroup    = []
+        allGroup     = []
 
         # vanadium runs
         if self.vanRuns:
@@ -209,6 +224,8 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("%s.setComment('%s')"      % (wsVan, self.vanCmnt))
             l()
 
+            allGroup.append(wsVan)
+
         # empty can runs
         if self.ecRuns:
             wsRawEC = self.prefix + 'RawEC'
@@ -219,8 +236,9 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("%s = TOFTOFMergeRuns(%s)" % (wsEC, wsRawEC))
             l()
 
-        # data runs
-        dataGroup = []
+            allGroup.append(wsEC)
+
+        # data runs        
         for i, (runs, cmnt) in enumerate(self.dataRuns):
             if not runs:
                 error('missing data runs value')
@@ -232,43 +250,53 @@ class TOFTOFScriptElement(BaseScriptElement):
             wsRawData = self.prefix + 'RawData' + postfix
             wsData    = self.prefix + 'Data'    + postfix
 
+            dataRawGroup.append(wsRawData)
             dataGroup.append(wsData)
+            allGroup.append(wsData)
 
             l("# data runs %s" % (postfix))
             l("%s = Load(Filename='%s')" % (wsRawData, runs))
             l("%s = TOFTOFMergeRuns(%s)" % (wsData, wsRawData))
             l("%s.setComment('%s')"      % (wsData, cmnt))
             l()
+
             if 0 == i:
-                l("Ei = %s" % (logEi(wsData)))
-            else:
-                l("if abs(Ei - %s) > 0.0001:" % (logEi(wsData)))
-                l("    raise RuntimeError('bad Ei')")
-            l()
+                wsData0 = wsData
 
         def gr(list, postfix = ''):
             return ('[' + ', '.join(list) + ']' + postfix) if list else ''
 
+        gPrefix = 'g' + self.prefix
+        gDataRuns    = gPrefix + 'DataRuns'
+        gDataRawRuns = gPrefix + 'DataRawRuns'
+        gAll         = gPrefix + 'All'
+
         l("# grouping")
-        l("dataRunsNames = %s" % gr(dataGroup))
-        l("gDataRuns = GroupWorkspaces(dataRunsNames)")
-        l("gAll = GroupWorkspaces(%s%sdataRunsNames)" % (gr([wsVan],' + ') if self.vanRuns else '',\
-                                                         gr([wsEC], ' + ') if self.ecRuns  else ''))
+        l("%s = GroupWorkspaces(%s)" % (gDataRawRuns, gr(dataRawGroup)))
+        l("%s = GroupWorkspaces(%s)" % (gDataRuns,    gr(dataGroup)))
+        l("%s = GroupWorkspaces(%s)" % (gAll,         gr(allGroup)))
         l()
 
+        l("# Ei")
+        l("if CompareSampleLogs(%s, 'Ei', 0.001):" % (gAll))
+        l("    raise RuntimeError('Ei values do not match')")
+        l()
+        l("Ei = %s" % (logEi(wsData0)))
+        l()
+
+        gDetectorsToMask = gPrefix + 'DetectorsToMask'
         l("# mask detectors")
-        l("(detToMask, numberOfFailures) = FindDetectorsOutsideLimits(gAll)" )
-        l("MaskDetectors(gAll, MaskedWorkspace=detToMask)")
+        l("(%s, numberOfFailures) = FindDetectorsOutsideLimits(%s)" % (gDetectorsToMask, gAll))
+        l("MaskDetectors(%s, MaskedWorkspace=%s)" % (gAll, gDetectorsToMask))
 
         if self.maskDetectors:
-            l("MaskDetectors(gAll, '%s')" % (self.maskDetectors))
+            l("MaskDetectors(%s, '%s')" % (gAll, self.maskDetectors))
         l()
 
         if self.NORM_MONITOR == self.normalise:
-            gDataNorm = 'gDataNorm'
+            gDataNorm = gPrefix + 'Norm'
 
-            l("# normaliseto monitor")
-            l("%s = MonitorEfficiencyCorUser(gDataRuns)" % (gDataNorm))
+            l("# normalise to monitor")
 
             if self.vanRuns:
                 wsVanNorm = wsVan + 'Norm'
@@ -276,31 +304,32 @@ class TOFTOFScriptElement(BaseScriptElement):
             if self.ecRuns:
                 wsECNorm = wsEC + 'Norm'
                 l("%s = MonitorEfficiencyCorUser(%s)" % (wsECNorm, wsEC))
+                l("%s = MonitorEfficiencyCorUser(%s)" % (gDataNorm, gDataRuns))
             l()
 
         elif self.NORM_TIME == self.normalise:
-            gDataNorm = 'gDataNorm'
+            gDataNorm = gPrefix + 'Norm'
 
             # TODO (ask Wiebke how to do it best)
             l("# normalise to time")
-            l("names = []")
-            l("for ws in gDataRuns:")
-            l("    name = ws.getName() + '_norm'")
-            l("    names.append(name)")
-            l("    Scale(ws, 1/%s, 'Multiply', OutputWorkspace=name)" % (logTime('ws')))
-            l()
-            l("%s = GroupWorkspaces(names)" % (gDataNorm))
-
             if self.vanRuns:
                 wsVanNorm = wsVan + 'Norm'
                 l("%s = Scale(%s, 1/%s, 'Multiply')" % (wsVanNorm, wsVan, logTime(wsVan)))
             if self.ecRuns:
                 wsECNorm = wsEC + 'Norm'
                 l("%s = Scale(%s, 1/%s, 'Multiply')" % (wsECNorm, wsEC, logTime(wsEC)))
+            l("names = []")
+            l("for ws in %s:" % (gDataRuns))
+            l("    name = ws.getName() + 'Norm'")
+            l("    names.append(name)")
+            l("    Scale(ws, 1/%s, 'Multiply', OutputWorkspace=name)" % (logTime('ws')))
+            l()
+            l("%s = GroupWorkspaces(names)" % (gDataNorm))
+
             l()
 
         else: # none, simply use the not normalised workspaces
-            gDataNorm = 'gDataRuns'
+            gDataNorm = gDataRuns
 
             if self.vanRuns:
                 wsVanNorm = wsVan
@@ -308,75 +337,91 @@ class TOFTOFScriptElement(BaseScriptElement):
                 wsECNorm = wsEC
 
         if self.ecRuns:
+            gDataSubEC = gPrefix + 'DataSubEC'
+            scaledEC   = self.prefix + 'ScaledEC'
             l("# subtract empty can")
-            l("scaledEC = Scale(%s, Factor=ecFactor, Operation='Multiply')" % (wsECNorm))
-            l("gDataSubEC = Minus(%s, scaledEC)" % (gDataNorm))
+            l("ecFactor = '%f'" % (self.ecFactor))
+            l("%s = Scale(%s, Factor=ecFactor, Operation='Multiply')" % (scaledEC, wsECNorm))
+            l("%s = Minus(%s, %s)" % (gDataSubEC, gDataNorm, scaledEC))
             if self.subtractECVan:
                 wsVanSubEC = wsVan + 'SubEC'
-                l("%s = Minus(%s, scaledEC)" % (wsVanSubEC, wsVanNorm))
+                l("%s = Minus(%s, %s)" % (wsVanSubEC, wsVanNorm, scaledEC))
             l()
 
-        l("# group data for processing") # no empty can, es ist fertig
-        gData = 'gDataSubEC' if self.ecRuns else gDataNorm
+        l("# group data for processing") # without empty can
+        gDataSource = gDataSubEC if self.ecRuns else gDataNorm
+        gData = gPrefix + 'Data'
         if self.vanRuns:
             wsVanNorm = wsVanSubEC if self.subtractECVan else wsVanNorm
-            l("gData = GroupWorkspaces(%slist(%s.getNames()))" % (gr([wsVanNorm], ' + '), gData))
+            l("%s = GroupWorkspaces(%slist(%s.getNames()))" % (gData, gr([wsVanNorm], ' + '), gDataSource))
         else:
-            l("gData = CloneWorkspace(%s)" % (gData))
+            l("%s = CloneWorkspace(%s)" % (gData, gDataSource))
         l()
 
         if self.vanRuns:
+            gDataCorr = gData + 'Corr'
+            detCoeffs = self.prefix + 'DetCoeffs'
+            eppTable  = self.prefix + 'EppTable'
             l("# normalise to vanadium")
-            l("eppTable = FindEPP(%s)" % (wsVanNorm))
-            l("detCoeffs = ComputeCalibrationCoefVan(%s, eppTable)" % (wsVanNorm))
-            l("badDetectors = np.where(np.array(detCoeffs.extractY()).flatten() <= 0)[0]")
-            l("MaskDetectors(gData, DetectorList=badDetectors)")
-            l("gDataCorr = Divide(gData, detCoeffs)")
+            l("%s = FindEPP(%s)" % (eppTable, wsVanNorm))
+            l("%s = ComputeCalibrationCoefVan(%s, %s)" % (detCoeffs, wsVanNorm, eppTable))
+            l("badDetectors = np.where(np.array(%s.extractY()).flatten() <= 0)[0]" % (detCoeffs))
+            l("MaskDetectors(%s, DetectorList=badDetectors)" % (gData))
+            l("%s = Divide(%s, %s)" % (gDataCorr, gData, detCoeffs))
             l()
 
+        gDataCleanFrame = gData + 'CleanFrame'
         l("# remove half-filled time bins (clean frame)")
-        l("gDataCleanFrame = TOFTOFCropWorkspace(%s)" % ('gDataCorr' if self.vanRuns else 'gData'))
+        l("%s = TOFTOFCropWorkspace(%s)" % (gDataCleanFrame, gDataCorr if self.vanRuns else gData))
         l()
 
-        gData = 'gDataTofCorr'
+        gData2 = gData + 'TofCorr'
         if self.CORR_TOF_VAN == self.correctTof:
             l("# apply vanadium TOF correction")
-            l("%s = CorrectTOF(gDataCleanFrame, eppTable)" % (gData))
+            l("%s = CorrectTOF(%s, %s)" % (gData2, gDataCleanFrame, eppTable))
             l()
 
         elif self.CORR_TOF_SAMPLE == self.correctTof:
+            eppTables  = self.prefix + 'EppTables'
             l("# apply sample TOF correction")
-            l("eppTables = FindEPP(gData)")
-            l("%s = CorrectTOF(gDataCleanFrame, eppTables)" % (gData))
+            l("%s = FindEPP(%s)" % (eppTables, gData))
+            l("%s = CorrectTOF(%s, %s)" % (gData2, gDataCleanFrame, eppTables))
             l()
 
         else:
-            gData = 'gDataCleanFrame'
+            gData2 = gDataCleanFrame
 
+        gDataDeltaE = gData + 'DeltaE'
         l("# convert units")
-        l("gData_dEraw = ConvertUnits(%s, Target='DeltaE', EMode='Direct', EFixed=Ei)" % (gData))
-        l("ConvertToDistribution(gData_dEraw)")
+        l("%s = ConvertUnits(%s, Target='DeltaE', EMode='Direct', EFixed=Ei)" % (gDataDeltaE, gData2))
+        l("ConvertToDistribution(%s)" % (gDataDeltaE))
         l()
 
+        gDataCorrDeltaE = gData + 'CorrDeltaE'
         l("# correct for energy dependent detector efficiency")
-        l("gData_dEcorr = DetectorEfficiencyCorUser(gData_dEraw)")
+        l("%s = DetectorEfficiencyCorUser(%s)" % (gDataCorrDeltaE, gDataDeltaE))
         l()
 
+        gDataS = gData + 'S'
         l("# calculate S (Ki/kF correction)")
-        l("gData_S = CorrectKiKf(gData_dEcorr)")
+        l("%s = CorrectKiKf(%s)" % (gDataS, gDataCorrDeltaE))
         l()
 
-        l("# rebinEnergy")
-        l("mBData_dE = Rebin(gData_S, Params=rebinEnergy)")
+        gDataBinE = gData + 'BinE'
+        l("# binning")
+        l("rebinEnergy = '%f, %f, %f'" % (self.binEstart, self.binEstep, self.binEend))
+        l("%s = Rebin(%s, Params=rebinEnergy)" % (gDataBinE, gDataS))
         l()
 
+        gDataBinQ = gData + 'BinQ'
         l("# calculate momentum transfer Q for sample data")
-        l("mBData = SofQW3(mBData_dE, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei)")
+        l("rebinQ = '%f, %f, %f'" % (self.binQstart, self.binQstep, self.binQend))
+        l("%s = SofQW3(%s, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei)" % (gDataBinQ, gDataBinE))
         l()
 
         l("# make nice workspace names")
-        l("for ws in mBData:")
-        l("    RenameWorkspace(ws, OutputWorkspace=ws.getComment())")
+        l("for ws in %s:" % (gDataBinQ))
+        l("    RenameWorkspace(ws, OutputWorkspace='%s' + ws.getComment())" % (self.prefix))
 
         return script[0]
 
