@@ -22,24 +22,23 @@ Enabling ``MirrorSense=True`` on this algorithm will split the data for each spe
 two separate spectra, these form the **left** and **right** workspaces that are
 reduced independently and then summed according to ``UnmirrorOption`` as follows:
 
-0. No summing of left and right will be performed.
-The reduced workspace will containt both wings and x-axis will not be converted to energy transfer.
-MirrorSense=False will fall back to this option.
+0: No summing of left and right will be performed. The reduced workspace will containt both wings and x-axis will not be converted to energy transfer.
+``MirrorSense=False`` will fall back to this option.
 
-1. Left wing will be returned as reduced workspace.
+1: Left wing will be returned as reduced workspace.
 
-2. Right wing will be returned as reduced workspace.
+2: Right wing will be returned as reduced workspace.
 
-3. Left and right wings will be simply summed and returned as reduced workspace.
+3: Left and right wings will be simply summed and returned as reduced workspace.
 
-4. Peaks in the right wing will be positioned at peak positions in the left wing, and then they will be summed.
+4: Peaks in the right wing will be positioned at peak positions in the left wing, and then they will be summed.
 
-5. Right wing will be shifted with the offset of the peak positions of the right wing of the corresponding vanadium run.
+5: Right wing will be shifted with the offset of the peak positions of the right wing of the corresponding vanadium run.
 It will then be summed with left wing. ``VanadiumRun`` needs to be specified.
 
-6. Peaks in both, left and right wings will be centered at zero energy transfer and then they will be summed.
+6: Peaks in both, left and right wings will be centered at zero energy transfer and then they will be summed.
 
-7. Left and right wings will be shifted according to offsets of peak positions in corresponding vanadium run.
+7: Left and right wings will be shifted according to offsets of peak positions in corresponding vanadium run.
 They will then be summed and returned. ``VanadiumRun`` needs to be specified.
 
 The options ``4-6`` rely on :ref:`FindEPP <algm-FindEPP>` algorithm to find the peak positions.
@@ -54,7 +53,7 @@ The algorithm is capable of running over multiple files.
 Run needs to be specified following the Mantid conventions in `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_.
 When ``SumRuns=True``, all the numors will be merged while loading.
 Note, for **Range** and **Stepped Range** (see `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_), ``SumRuns`` will be ignored.
-Please use **Added Range** and **Added Stepped Range** instead.
+Please use **Added Range** and **Added Stepped Range** instead (see `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_).
 In case of multiple files specified, the output will be :ref:`WorkspaceGroup <WorkspaceGroup>`
 containing :ref:`MatrixWorkspace <MatrixWorkspace>` for each
 individual run in the input files list.
