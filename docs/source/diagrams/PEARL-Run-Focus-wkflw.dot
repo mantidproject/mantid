@@ -11,6 +11,7 @@ digraph PearlDiffractionISIS {
     Focus_run_start_FocusModeAll    [label="Focus Mode: 'all'"]
     Focus_run_start_FocusModeGroups [label="Focus Mode: 'groups'"]
     Focus_run_start_FocusModeTrans  [label="Focus Mode: 'trans'"]
+    Focus_run_start_FocusModeMods   [label="Focus Mode: 'mods'"]
     
     subgraph params {
     //$param_style
@@ -38,6 +39,7 @@ digraph PearlDiffractionISIS {
     Focus_run_process_FocusModeAll      [label="Focus Mode: 'all'"]
     Focus_run_process_FocusModeGroups   [label="Focus Mode: 'groups'"]
     Focus_run_process_FocusModeTrans    [label="Focus Mode: 'trans'"]
+    Focus_run_process_FocusModeMods     [label="Focus Mode: 'mods'"]
     
     
     } //End of processes
@@ -113,6 +115,12 @@ digraph PearlDiffractionISIS {
     SaveNexus_two_FocusModeTrans        [label="Save Nexus File"]
     Remove_temp_workspace_FocusModeTrans    [label="Remove intermediate workspaces"]
     
+    //Focus mode set to 'mods' steps - Suffix: FocusModeMods
+    SaveGSS_FocusModeMods               [label="Save GSS File"]
+    ConvertUnits_dSpacing_FocusModeMods [label="Convert Units to dSpacing"]
+    SaveNexus_FocusModeMods             [label="Save Nexus File"]
+    Remove_temp_workspace_FocusModeMods [label="Remove intermediate workspaces"]
+    
     } //End of algorithms
     
     subgraph decisions {
@@ -124,10 +132,11 @@ digraph PearlDiffractionISIS {
     Focus_run_if_debug_mode_FocusModeAll    [label="If debug mode"]
     Focus_run_if_debug_mode_FocusModeGroups [label="If debug mode"]
     Focus_run_if_debug_mode_FocusModeTrans  [label="If debug mode"]
+    Focus_run_if_debug_mode_FocusModeMods  [label="If debug mode"]
     
     
     Focus_run_switch_f_mode             [label="fmode set to:"]
-    Focus_run_if_van_norm               [label="If vanadium normalisation"]
+    Focus_run_if_van_norm               [label="If van_norm"]
     Focus_run_if_focus_mode_FocusModeGroups [label="focus_mode set to:"]
     Focus_run_if_atten_FocusModeTrans   [label="If trans:"]
     
@@ -144,11 +153,11 @@ digraph PearlDiffractionISIS {
     AlignDetectors_read                 -> DiffractionFocusing_read
     DiffractionFocusing_read            -> Focus_run_if_debug_mode_read
     
-    // Debug mode is off:
-    Focus_run_if_debug_mode_read        -> Remove_temp_workspace_read       [label="false"]
-    Remove_temp_workspace_read          -> Focus_run_if_van_norm
     // Debug mode is on (ie. don't remove temp workspaces)
-    Focus_run_if_debug_mode_read        -> Focus_run_if_van_norm            [label="true"]
+    Focus_run_if_debug_mode_read        -> Remove_temp_workspace_read       [label="true"]
+    Remove_temp_workspace_read          -> Focus_run_if_van_norm
+    // Debug mode is off:
+    Focus_run_if_debug_mode_read        -> Focus_run_if_van_norm            [label="false"]
     
     //Vanadium calibration steps if true - Suffix:VanCalibTrue
     Focus_run_param_vanadium_norm       -> Focus_run_if_van_norm
@@ -169,7 +178,8 @@ digraph PearlDiffractionISIS {
     Focus_run_param_f_mode              -> Focus_run_switch_f_mode  
     Focus_run_switch_f_mode             -> Focus_run_process_FocusModeAll   [label="all"]
     Focus_run_switch_f_mode             -> Focus_run_process_FocusModeGroups [label="groups"]
-    Focus_run_switch_f_mode             -> Focus_run_process_FocusModeTrans
+    Focus_run_switch_f_mode             -> Focus_run_process_FocusModeTrans [label="trans"]
+    Focus_run_switch_f_mode             -> Focus_run_process_FocusModeMods  [label="mods"]
     
     
     }
@@ -248,14 +258,15 @@ digraph PearlDiffractionISIS {
     Plus_FocusModeTrans                 -> Plus_FocusModeTrans          [label="Workspaces 1-8"]
     Plus_FocusModeTrans                 -> Scale_FocusModeTrans
     Scale_FocusModeTrans                -> Focus_run_param_atten
-    Focus_run_param_atten               -> Focus_run_if_atten_FocusModeTrans
-    Focus_run_if_atten_FocusModeTrans   -> SaveGSS_FocusModeTrans       [label="else"]
+    Focus_run_param_atten               -> Focus_run_if_atten_FocusModeTrans  
     // If atten == true:
-    Focus_run_if_atten_FocusModeTrans   -> ConvertUnits_atten_true_FocusModeTrans   [label="true"]
-    ConvertUnits_atten_FocusModeTrans   -> CloneWorkspace_atten_true_FocusModeTrans 
-    CloneWorkspace_atten_FocusModeTrans -> ConvertUnits_TOF_atten_true_FocusModeTrans
+    Focus_run_if_atten_FocusModeTrans   -> ConvertUnits_dSpacing_atten_FocusModeTrans   [label="true"]
+    ConvertUnits_dSpacing_atten_FocusModeTrans -> CloneWorkspace_atten_FocusModeTrans
+    CloneWorkspace_atten_FocusModeTrans -> Focus_run_atten
+    Focus_run_atten                     -> ConvertUnits_TOF_atten_FocusModeTrans
+    ConvertUnits_TOF_atten_FocusModeTrans -> SaveGSS_FocusModeTrans
     // Continuing algorithm 
-    Focus_run_if_atten_FocusModeTrans   -> SaveGSS_FocusModeTrans
+    Focus_run_if_atten_FocusModeTrans   -> SaveGSS_FocusModeTrans       [label="else"]
     SaveGSS_FocusModeTrans              -> SaveFocusedXYE_TOF_FocusModeTrans
     SaveFocusedXYE_TOF_FocusModeTrans   -> ConvertUnits_dSpacing_FocusModeTrans     [label="Filename: 'PRL<cycleNumber>_tof_xye.dat'"]
     ConvertUnits_dSpacing_FocusModeTrans -> SaveFocusedXYE_dSpacing_FocusModeTrans  
@@ -266,5 +277,14 @@ digraph PearlDiffractionISIS {
     SaveNexus_two_FocusModeTrans        -> Focus_run_if_debug_mode_FocusModeTrans
     Focus_run_if_debug_mode_FocusModeTrans -> Remove_temp_workspace_FocusModeTrans  [label="true"]
     
+    }
+    
+    subgraph Focus_run_FocusModeMods{
+    //Focus mode set to 'mods' steps - Suffix: FocusModeMods
+    Focus_run_start_FocusModeMods       -> SaveGSS_FocusModeMods
+    SaveGSS_FocusModeMods               -> ConvertUnits_dSpacing_FocusModeMods      [label="Appending to Filename: 'PRL<cycleNumber>.gss'"]
+    ConvertUnits_dSpacing_FocusModeMods -> SaveNexus_FocusModeMods
+    SaveNexus_FocusModeMods             -> Focus_run_if_debug_mode_FocusModeMods    [label="Appending to Filename: 'PRL<cycleNumber>.nxs'"]
+    Focus_run_if_debug_mode_FocusModeMods -> Remove_temp_workspace_FocusModeMods    [label="true"]
     }
 }
