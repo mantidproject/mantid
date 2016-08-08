@@ -57,6 +57,7 @@ public:
   MatrixWorkspace_sptr m_dataWorkspace;
   MatrixWorkspace_sptr m_transWorkspace1;
   MatrixWorkspace_sptr m_transWorkspace2;
+  MatrixWorkspace_sptr m_decEmptyWorkspace;
   WorkspaceGroup_sptr m_multiDetectorWorkspace;
   const std::string outWSQName;
   const std::string outWSLamName;
@@ -70,6 +71,7 @@ public:
         transWSName("ReflectometryReductionOneAutoTest_TransWS") {
     MantidVec xData = {0, 0, 0, 0};
     MantidVec yData = {0, 0, 0};
+    MantidVec noData = {};
 
     auto createWorkspace =
         AlgorithmManager::Instance().create("CreateWorkspace");
@@ -90,6 +92,12 @@ public:
     createWorkspace->setPropertyValue("OutputWorkspace", "TOF");
     createWorkspace->execute();
     m_TOF = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TOF");
+
+    createWorkspace->setProperty("DataX", noData);
+    createWorkspace->setProperty("DataY", noData);
+    createWorkspace->setProperty("OutputWorkspace", "DECEmpty");
+    createWorkspace->execute();
+    m_decEmptyWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("DECEmpty");
 
     IAlgorithm_sptr lAlg = AlgorithmManager::Instance().create("Load");
     lAlg->setChild(true);
@@ -256,6 +264,18 @@ public:
     m_TOF->setInstrument(tempInst);
   }
 
+  void test_detector_efficiency_correction_workspace_not_empty() {
+    auto alg = construct_standard_algorithm();
+    alg->setProperty("DetectorEfficiencyCorrection", m_decEmptyWorkspace);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+  }
+
+  /*
+  void test_detector_efficiency_correction_spectra_not_greater_than_detector_workspace_spectra() {
+
+  }*/
+
+
   void test_bad_detector_component_name_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("DetectorComponentName", "made-up");
@@ -333,6 +353,26 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSQName);
     AnalysisDataService::Instance().remove(outWSLamName);
+  }
+
+  void test_exec_2() {
+    IAlgorithm_sptr alg =
+      AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+    alg->setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg->initialize());
+    TS_ASSERT_THROWS_NOTHING(
+      alg->setProperty("InputWorkspace", m_dataWorkspace));
+    TS_ASSERT_THROWS_NOTHING(
+      alg->setProperty("AnalysisMode", "MultiDetectorAnalysis"));
+    TS_ASSERT_THROWS_NOTHING(
+      alg->setPropertyValue("OutputWorkspace", outWSQName));
+    TS_ASSERT_THROWS_NOTHING(
+      alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("MomentumTransferStep", 0.1));
+    TS_ASSERT_THROWS_NOTHING(
+      alg->setProperty("DetectorEfficiencyCorrection", m_decEmptyWorkspace));
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
   }
 
   void test_missing_instrument_parameters_throws() {
