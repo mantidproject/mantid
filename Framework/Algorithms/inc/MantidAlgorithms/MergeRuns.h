@@ -7,6 +7,7 @@
 #include <list>
 #include <vector>
 #include <boost/shared_ptr.hpp>
+#include <MantidAPI/MatrixWorkspace.h>
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
@@ -124,9 +125,15 @@ private:
       m_parentHistory->addChildHistory(m_history);
     }
   }
-  std::vector<std::string> getSampleLogsList(API::MatrixWorkspace_sptr &ws, const std::string &parameterName);
-  typedef pair<const std::string, double> sample_log_map;
-  sample_log_map m_sampleLogs;
+
+  typedef std::map<const std::string, double> sample_logs_map;
+  sample_logs_map m_sampleLogsAverage;
+  sample_logs_map m_sampleLogsMin;
+  sample_logs_map m_sampleLogsMax;
+  sample_logs_map m_sampleLogsSum;
+//  sample_logs_map m_sampleLogsList;
+//  sample_logs_map m_sampleLogsWarnIfDifferent;
+//  sample_logs_map m_sampleLogsFailIfDifferent;
 
   // Methods called by exec()
   using Mantid::API::Algorithm::validateInputs;
@@ -155,6 +162,10 @@ private:
   std::list<API::MatrixWorkspace_sptr> m_inMatrixWS;
   /// Addition tables for event workspaces
   std::vector<boost::shared_ptr<AdditionTable>> m_tables;
+
+  void createSampleLogsMaps(API::MatrixWorkspace_sptr ws, size_t numberOfFiles);
+  void updateSampleLogs(API::MatrixWorkspace_sptr ws, API::MatrixWorkspace_sptr outWS, size_t numberOfFiles);
+  void getSampleList(sample_logs_map &sampleLogMap, std::string sampleLogBehaviour, API::MatrixWorkspace_sptr ws);
 };
 
 } // namespace Algorithm

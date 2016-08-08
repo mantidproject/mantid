@@ -21,8 +21,18 @@
 		</parameter>
 
         <parameter name="sample_logs_average" type="string">
-            <value val="temperature, pressure" />
+            <value val="sample.temperature, sample.pressure" />
         </parameter>
+        <parameter name="sample_logs_min" type="string">
+            <value val="Detector.detrate" />
+        </parameter>
+        <parameter name="sample_logs_max" type="string">
+            <value val="Detector.detsum" />
+        </parameter>
+        <parameter name="sample_logs_sum" type="string">
+            <value val="monitor1.monrate" />
+        </parameter>
+
 
 	</component-link>
 
