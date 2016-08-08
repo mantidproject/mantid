@@ -216,10 +216,7 @@ void SCDCalibratePanels::exec() {
       }
     }
     int nBankPeaks = local->getNumberPeaks();
-    int numOpt = 8;
-    if (!changeSize)
-      numOpt -= 2;
-    if (nBankPeaks < numOpt) {
+    if (nBankPeaks < 6) {
       g_log.notice() << "Too few peaks for " << iBank << "\n";
       continue;
     }
@@ -260,16 +257,9 @@ void SCDCalibratePanels::exec() {
     std::ostringstream fun_str;
     fun_str << "name=SCDPanelErrors,Workspace=" + bankName << ",Bank=" << iBank;
     fit_alg->setPropertyValue("Function", fun_str.str());
-    Geometry::IComponent_const_sptr comp =
-        peaksWs->getInstrument()->getComponentByName(iBank);
-    boost::shared_ptr<const Geometry::RectangularDetector> rectDet =
-        boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
-    // Scaling only implemented for Rectangular Detectors
-    if (!rectDet || !changeSize) {
-      std::ostringstream tie_str;
-      tie_str << "ScaleWidth=1.0,ScaleHeight=1.0";
-      fit_alg->setProperty("Ties", tie_str.str());
-    }
+    std::ostringstream tie_str;
+    tie_str << "ScaleWidth=1.0,ScaleHeight=1.0";
+    fit_alg->setProperty("Ties", tie_str.str());
     fit_alg->setProperty("InputWorkspace", q3DWS);
     fit_alg->setProperty("CreateOutput", true);
     fit_alg->setProperty("Output", "fit");
@@ -288,10 +278,43 @@ void SCDCalibratePanels::exec() {
     double xRotate = paramsWS->getRef<double>("Value", 3);
     double yRotate = paramsWS->getRef<double>("Value", 4);
     double zRotate = paramsWS->getRef<double>("Value", 5);
-    double scaleWidth = paramsWS->getRef<double>("Value", 6);
-    double scaleHeight = paramsWS->getRef<double>("Value", 7);
+    double scaleWidth = 1.0;
+    double scaleHeight = 1.0;
+    // Scaling only implemented for Rectangular Detectors
+    Geometry::IComponent_const_sptr comp =
+        peaksWs->getInstrument()->getComponentByName(iBank);
+    boost::shared_ptr<const Geometry::RectangularDetector> rectDet =
+        boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
+    if (rectDet && changeSize) {
+      IAlgorithm_sptr fit2_alg;
+      try {
+        fit2_alg = createChildAlgorithm("Fit", -1, -1, false);
+      } catch (Exception::NotFoundError &) {
+        g_log.error("Can't locate Fit algorithm");
+        throw;
+      }
+      fit2_alg->setPropertyValue("Function", fun_str.str());
+      std::ostringstream tie_str2;
+      tie_str2 << "XShift="<<xShift<<",YShift="<<yShift<<",ZShift="<<zShift
+          <<",XRotate="<<xRotate<<",YRotate="<<yRotate<<",ZRotate="<<zRotate;
+      fit2_alg->setProperty("Ties", tie_str2.str());
+      fit2_alg->setProperty("InputWorkspace", q3DWS);
+      fit2_alg->setProperty("CreateOutput", true);
+      fit2_alg->setProperty("Output", "fit");
+      fit2_alg->executeAsChildAlg();
+      std::string fitStatus = fit2_alg->getProperty("OutputStatus");
+      double chisq = fit2_alg->getProperty("OutputChi2overDoF");
+      g_log.notice() << iBank << "  " << fitStatus << " Chi2overDoF " << chisq
+                     << "\n";
+      fitWS = fit2_alg->getProperty("OutputWorkspace");
+      AnalysisDataService::Instance().addOrReplace("fit2_" + iBank, fitWS);
+      paramsWS = fit2_alg->getProperty("OutputParameters");
+      AnalysisDataService::Instance().addOrReplace("params2_" + iBank, paramsWS);
+      scaleWidth = paramsWS->getRef<double>("Value", 6);
+      scaleHeight = paramsWS->getRef<double>("Value", 7);
+    }
     AnalysisDataService::Instance().remove(bankName);
-    PARALLEL_CRITICAL(afterFit) {
+    PARALLEL_CRITICAL(afterFit2) {
       SCDPanelErrors det;
       det.moveDetector(xShift, yShift, zShift, xRotate, yRotate, zRotate,
                        scaleWidth, scaleHeight, iBank, peaksWs);
