@@ -116,7 +116,8 @@ private:
   const Geometry::ParameterMap *m_paraMap;
   /// A lookup of previously seen shape objects used to save calculation time as
   /// most detectors have the same shape
-  std::map<const Geometry::Object *, std::pair<double, Kernel::V3D>> m_shapeCache;
+  std::map<const Geometry::Object *, std::pair<double, Kernel::V3D>>
+      m_shapeCache;
   /// Sample position
   Kernel::V3D m_samplePos;
   /// The spectra numbers that were skipped

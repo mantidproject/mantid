@@ -31,9 +31,9 @@ DECLARE_ALGORITHM(He3TubeEfficiency)
 
 /// Default constructor
 He3TubeEfficiency::He3TubeEfficiency()
-    : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(nullptr), m_shapeCache(),
-	m_samplePos(), m_spectraSkipped(), m_progress(nullptr) {
-	m_shapeCache.clear();
+    : Algorithm(), m_inputWS(), m_outputWS(), m_paraMap(nullptr),
+      m_shapeCache(), m_samplePos(), m_spectraSkipped(), m_progress(nullptr) {
+  m_shapeCache.clear();
 }
 
 /// Destructor
