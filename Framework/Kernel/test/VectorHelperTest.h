@@ -142,9 +142,8 @@ public:
 
   void test_flattenContainer_SingleSubvectorWithMultipleValues() {
     std::vector<std::vector<int>> input;
-    auto values = {3, 1, -1, -3, -5};
-    input.emplace_back(values);
-    const std::vector<int> expected(values);
+    input.emplace_back(std::vector<int>{3, 1, -1, -3, -5});
+    const std::vector<int> expected{3, 1, -1, -3, -5};
     const auto result = VectorHelper::flattenVector(input);
     TS_ASSERT_EQUALS(result.size(), expected.size());
     for (size_t i = 0; i < result.size(); ++i) {
