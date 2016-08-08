@@ -8,6 +8,8 @@ Reflectometry Changes
 ReflectometryReductionOne
 -------------------------
 
+- The 'Multidetector?' and 'Perform Direct Beam Normalisation' steps of the workflow have been replaced with 'Detector Efficiency Correction'
+
 ReflectometryReductionOneAuto
 -----------------------------
 
