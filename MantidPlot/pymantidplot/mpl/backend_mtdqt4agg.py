@@ -10,7 +10,12 @@ API without modification
 """
 from __future__ import division, print_function
 
-from matplotlib.backends.backend_qt4agg import QtCore, QtGui, draw_if_interactive #pylint: disable=unused-import
+try:
+    from matplotlib.backends.qt_compat import QtCore, QtGui
+except ImportError:
+    from matplotlib.backends.qt4_compat import QtCore, QtGui
+
+from matplotlib.backends.backend_qt4agg import draw_if_interactive #pylint: disable=unused-import
 from matplotlib.backends.backend_qt4agg import new_figure_manager as _new_fig_mgr_qt4agg
 from matplotlib.backends.backend_qt4agg import show as _show_qt4agg
 

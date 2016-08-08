@@ -7,9 +7,11 @@ import mantidplottests
 from mantidplottests import *
 import time
 import numpy as np
+from distutils.version import LooseVersion
 from PyQt4 import QtCore
 
 try:
+    import matplotlib as mpl
     import matplotlib.pyplot as plt
     import matplotlib.cm as cm
     import matplotlib.mlab as mlab
@@ -18,6 +20,15 @@ except ImportError:
     HAVE_MPL = False
 
 class MantidPlotMatplotlibTest(unittest.TestCase):
+
+    def tearDown(self):
+        if LooseVersion(mpl.__version__) >= '1.3.0':
+            plt.close('all')
+        else:
+            # Old versions of matplotlib.pyplot.close work without this
+            # in a normal script session but fail here. The workaround
+            # is to ensure this happens on the same thread too.
+            gui_cmd(plt.close, 'all')
 
     def test_1d_plot(self):
         x, y = np.arange(1.0,10.0), np.arange(1.0,10.)
