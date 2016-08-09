@@ -85,15 +85,15 @@ void SCDCalibratePanels::Quat2RotxRotyRotz(const Quat Q, double &Rotx,
   }
 }
 
-  //-----------------------------------------------------------------------------------------
-  /**
-    @param  ws           Name of workspace containing peaks
-    @param  bankName     Name of bank containing peak
-    @param  col          Column number containing peak
-    @param  row          Row number containing peak
-    @param  Edge         Number of edge points for each bank
-    @return True if peak is on edge
-  */
+//-----------------------------------------------------------------------------------------
+/**
+  @param  ws           Name of workspace containing peaks
+  @param  bankName     Name of bank containing peak
+  @param  col          Column number containing peak
+  @param  row          Row number containing peak
+  @param  Edge         Number of edge points for each bank
+  @return True if peak is on edge
+*/
 bool SCDCalibratePanels::edgePixel(PeaksWorkspace_sptr ws, std::string bankName,
                                    int col, int row, int Edge) {
   if (bankName.compare("None") == 0)
