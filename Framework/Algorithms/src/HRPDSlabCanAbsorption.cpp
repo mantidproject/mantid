@@ -97,10 +97,10 @@ void HRPDSlabCanAbsorption::exec() {
 
   const size_t numHists = workspace->getNumberHistograms();
   const size_t specSize = workspace->blocksize();
-  //
+
   Progress progress(this, 0.91, 1.0, numHists);
   for (size_t i = 0; i < numHists; ++i) {
-    MantidVec &Y = workspace->dataY(i);
+    auto &Y = workspace->mutableY(i);
 
     // Get detector position
     IDetector_const_sptr det;
