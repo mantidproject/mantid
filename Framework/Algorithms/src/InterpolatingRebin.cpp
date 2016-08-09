@@ -21,6 +21,7 @@ DECLARE_ALGORITHM(InterpolatingRebin)
 
 using namespace Kernel;
 using namespace API;
+using namespace HistogramData;
 
 /** Only calls its parent's (Rebin) init()
 *
@@ -147,12 +148,12 @@ void InterpolatingRebin::outputYandEValues(
   for (int hist = 0; hist < histnumber; ++hist) {
     // get const references to input Workspace arrays (no copying)
     const auto &XValues = inputW->binEdges(hist);
-    const MantidVec &YValues = inputW->readY(hist);
-    const MantidVec &YErrors = inputW->readE(hist);
+    const auto &YValues = inputW->y(hist);
+    const auto &YErrors = inputW->e(hist);
 
     // get references to output workspace data (no copying)
-    MantidVec &YValues_new = outputW->dataY(hist);
-    MantidVec &Errors_new = outputW->dataE(hist);
+    auto &YValues_new = outputW->mutableY(hist);
+    auto &Errors_new = outputW->mutableE(hist);
 
     try {
       // output data arrays are implicitly filled by function
@@ -200,12 +201,9 @@ void InterpolatingRebin::outputYandEValues(
 *  @throw invalid_argument if any output x-values are outside the range of input
 *x-values
 **/
-void InterpolatingRebin::cubicInterpolation(const HistogramData::BinEdges &xOld,
-                                            const MantidVec &yOld,
-                                            const MantidVec &eOld,
-                                            const HistogramData::BinEdges &xNew,
-                                            MantidVec &yNew,
-                                            MantidVec &eNew) const {
+void InterpolatingRebin::cubicInterpolation(
+    const BinEdges &xOld, const HistogramY &yOld, const HistogramE &eOld,
+    const BinEdges &xNew, HistogramY &yNew, HistogramE &eNew) const {
   // Make sure y and e vectors are of correct sizes
   const size_t size_old = yOld.size();
   if (size_old == 0)
@@ -279,7 +277,7 @@ void InterpolatingRebin::cubicInterpolation(const HistogramData::BinEdges &xOld,
   }
 
   if (!canInterpol) {
-    if (VectorHelper::isConstantValue(yOld)) {
+    if (VectorHelper::isConstantValue(yOld.rawData())) {
       double constantVal(yOld.front());
       // this copies the single y-value into the output array, errors are still
       // calculated from the nearest input data points
@@ -356,10 +354,10 @@ void InterpolatingRebin::cubicInterpolation(const HistogramData::BinEdges &xOld,
 */
 void InterpolatingRebin::noInterpolation(const HistogramData::BinEdges &xOld,
                                          const double yOld,
-                                         const MantidVec &eOld,
+                                         const HistogramE &eOld,
                                          const HistogramData::BinEdges &xNew,
-                                         MantidVec &yNew,
-                                         MantidVec &eNew) const {
+                                         HistogramY &yNew,
+                                         HistogramE &eNew) const {
   yNew.assign(yNew.size(), yOld);
   for (MantidVec::size_type i = 0; i < eNew.size(); ++i) {
     eNew[i] = estimateError(xOld.rawData(), eOld, xNew[i]);
@@ -377,8 +375,8 @@ void InterpolatingRebin::noInterpolation(const HistogramData::BinEdges &xOld,
 *  @param[in] xNew the value of x for at the point of interest
 *  @return the estimated error at that point
 */
-double InterpolatingRebin::estimateError(const MantidVec &xsOld,
-                                         const MantidVec &esOld,
+double InterpolatingRebin::estimateError(const HistogramX &xsOld,
+                                         const HistogramE &esOld,
                                          const double xNew) const {
   // find the first point in the array that has a higher value of x, we'll base
   // some of the error estimate on the error on this point

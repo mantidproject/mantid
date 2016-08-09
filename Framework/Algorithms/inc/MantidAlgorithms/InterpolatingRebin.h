@@ -9,6 +9,9 @@
 
 namespace Mantid {
 namespace HistogramData {
+class HistogramX;
+class HistogramE;
+class HistogramY;
 class BinEdges;
 }
 namespace Algorithms {
@@ -93,15 +96,18 @@ protected:
   void outputYandEValues(API::MatrixWorkspace_const_sptr inputW,
                          const HistogramData::BinEdges &XValues_new,
                          API::MatrixWorkspace_sptr outputW);
-  void cubicInterpolation(const HistogramData::BinEdges &xOld,
-                          const MantidVec &yOld, const MantidVec &eOld,
-                          const HistogramData::BinEdges &xNew, MantidVec &yNew,
-                          MantidVec &eNew) const;
+  void
+  InterpolatingRebin::cubicInterpolation(const HistogramData::BinEdges &xOld,
+                                         const HistogramData::HistogramY &yOld,
+                                         const HistogramData::HistogramE &eOld,
+                                         const HistogramData::BinEdges &xNew,
+                                         HistogramData::HistogramY &yNew,
+                                         HistogramData::HistogramE &eNew) const;
   void noInterpolation(const HistogramData::BinEdges &xOld, const double yOld,
-                       const MantidVec &eOld,
-                       const HistogramData::BinEdges &xNew, MantidVec &yNew,
-                       MantidVec &eNew) const;
-  double estimateError(const MantidVec &xsOld, const MantidVec &esOld,
+                       const HistogramData::HistogramE &eOld,
+                       const HistogramData::BinEdges &xNew, HistogramData::HistogramY &yNew,
+	  HistogramData::HistogramE &eNew) const;
+  double estimateError(const HistogramData::HistogramX &xsOld, const HistogramData::HistogramE &esOld,
                        const double xNew) const;
 };
 
