@@ -200,7 +200,7 @@ private slots:
   void samplesPathEditedByUser();
   void flatsPathEditedByUser();
   void darksPathEditedByUser();
-
+  
   /// For the filters tab
   void resetPrePostFilters();
 
