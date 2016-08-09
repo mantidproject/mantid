@@ -215,17 +215,18 @@ void LoadNexusProcessed::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
 
-  declareProperty("SpectrumMin", 1, mustBePositive,
+  // Use a static cast as MSVC sometimes gets confused and casts as int64
+  declareProperty("SpectrumMin", static_cast<int>(1), mustBePositive,
                   "Number of first spectrum to read.");
-  declareProperty("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive,
+  declareProperty("SpectrumMax", static_cast<int>(Mantid::EMPTY_INT()), mustBePositive,
                   "Number of last spectrum to read.");
   declareProperty(make_unique<ArrayProperty<int>>("SpectrumList"),
                   "List of spectrum numbers to read.");
-  declareProperty("EntryNumber", 0, mustBePositive,
+  declareProperty("EntryNumber", static_cast<int>(0), mustBePositive,
                   "0 indicates that every entry is loaded, into a separate "
                   "workspace within a group. "
                   "A positive number identifies one entry to be loaded, into "
-                  "one worskspace");
+                  "one workspace");
   declareProperty("LoadHistory", true,
                   "If true, the workspace history will be loaded");
   declareProperty(
@@ -380,7 +381,7 @@ void LoadNexusProcessed::exec() {
   size_t nWorkspaceEntries = (root.groups().size());
 
   // Check for an entry number property
-  size_t entrynumber = getProperty("EntryNumber");
+  int entrynumber = getProperty("EntryNumber");
   Property const *const entryNumberProperty = this->getProperty("EntryNumber");
   bool bDefaultEntryNumber = entryNumberProperty->isDefault();
 
@@ -1670,8 +1671,8 @@ std::map<std::string, std::string> LoadNexusProcessed::validateInputs() {
   using namespace std;
   map<string, string> errorList;
 
-  int64_t specMin = getProperty("SpectrumMin");
-  int64_t specMax = getProperty("SpectrumMax");
+  int specMin = getProperty("SpectrumMin");
+  int specMax = getProperty("SpectrumMax");
 
   // Check our range is not reversed
   if (specMax < specMin) {
