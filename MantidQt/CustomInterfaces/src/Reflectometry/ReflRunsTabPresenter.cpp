@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/ReflRunsTabPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -6,14 +6,16 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/UserCatalogInfo.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
-#include "MantidQtCustomInterfaces/Reflectometry/ReflMainView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 
 #include <boost/regex.hpp>
@@ -28,12 +30,20 @@ using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-ReflMainViewPresenter::ReflMainViewPresenter(
-    ReflMainView *mainView, ProgressableView *progressView,
-    boost::shared_ptr<DataProcessorPresenter> tablePresenter,
+
+/** Constructor
+* @param mainView :: [input] The view we're managing
+* @param progressableView :: [input] The view reporting progress
+* @param tablePresenter :: [input] The data processor presenter
+* @param searcher :: [input] The search implementation
+*/
+ReflRunsTabPresenter::ReflRunsTabPresenter(
+    IReflRunsTabView *mainView, ProgressableView *progressableView,
+    DataProcessorPresenter *tablePresenter,
     boost::shared_ptr<IReflSearcher> searcher)
-    : m_view(mainView), m_tablePresenter(tablePresenter),
-      m_progressView(progressView), m_searcher(searcher) {
+    : m_view(mainView), m_progressView(progressableView),
+      m_tablePresenter(tablePresenter), m_mainPresenter(),
+      m_searcher(searcher) {
 
   // Register this presenter as the workspace receiver
   // When doing so, the inner presenter will notify this
@@ -80,22 +90,31 @@ ReflMainViewPresenter::ReflMainViewPresenter(
   }
 }
 
-ReflMainViewPresenter::~ReflMainViewPresenter() {}
+ReflRunsTabPresenter::~ReflRunsTabPresenter() {}
+
+/** Accept a main presenter
+* @param mainPresenter :: [input] A main presenter
+*/
+void ReflRunsTabPresenter::acceptMainPresenter(
+    IReflMainWindowPresenter *mainPresenter) {
+
+  m_mainPresenter = mainPresenter;
+}
 
 /**
 Used by the view to tell the presenter something has changed
 */
-void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
+void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
   switch (flag) {
-  case IReflPresenter::SearchFlag:
+  case IReflRunsTabPresenter::SearchFlag:
     search();
     break;
-  case IReflPresenter::ICATSearchCompleteFlag: {
+  case IReflRunsTabPresenter::ICATSearchCompleteFlag: {
     auto algRunner = m_view->getAlgorithmRunner();
     IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
     populateSearch(searchAlg);
   } break;
-  case IReflPresenter::TransferFlag:
+  case IReflRunsTabPresenter::TransferFlag:
     transfer();
     break;
   }
@@ -104,7 +123,7 @@ void ReflMainViewPresenter::notify(IReflPresenter::Flag flag) {
 }
 
 /** Pushes the list of commands (actions) */
-void ReflMainViewPresenter::pushCommands() {
+void ReflRunsTabPresenter::pushCommands() {
 
   m_view->clearCommands();
 
@@ -130,7 +149,7 @@ void ReflMainViewPresenter::pushCommands() {
 }
 
 /** Searches for runs that can be used */
-void ReflMainViewPresenter::search() {
+void ReflRunsTabPresenter::search() {
   const std::string searchString = m_view->getSearchString();
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
@@ -141,10 +160,15 @@ void ReflMainViewPresenter::search() {
   // If we're not logged into a catalog, prompt the user to do so
   if (CatalogManager::Instance().getActiveSessions().empty()) {
     try {
-      m_view->showAlgorithmDialog("CatalogLogin");
+      std::stringstream pythonSrc;
+      pythonSrc << "try:\n";
+      pythonSrc << "  algm = CatalogLoginDialog()\n";
+      pythonSrc << "except:\n";
+      pythonSrc << "  pass\n";
+      m_mainPresenter->runPythonAlgorithm(pythonSrc.str());
     } catch (std::runtime_error &e) {
-      m_view->giveUserCritical("Error Logging in:\n" + std::string(e.what()),
-                               "login failed");
+      m_mainPresenter->giveUserCritical(
+          "Error Logging in:\n" + std::string(e.what()), "login failed");
     }
   }
   std::string sessionId;
@@ -155,7 +179,7 @@ void ReflMainViewPresenter::search() {
         CatalogManager::Instance().getActiveSessions().front()->getSessionId();
   } else {
     // there are no active sessions, we return here to avoid an exception
-    m_view->giveUserInfo(
+    m_mainPresenter->giveUserInfo(
         "Error Logging in: Please press 'Search' to try again.",
         "Login Failed");
     return;
@@ -174,7 +198,7 @@ void ReflMainViewPresenter::search() {
 /** Populates the search results table
 * @param searchAlg : [input] The search algorithm
 */
-void ReflMainViewPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
+void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   if (searchAlg->isExecuted()) {
     ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
     m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
@@ -186,7 +210,7 @@ void ReflMainViewPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
 /** Transfers the selected runs in the search results to the processing table
 * @return : The runs to transfer as a vector of maps
 */
-void ReflMainViewPresenter::transfer() {
+void ReflRunsTabPresenter::transfer() {
   // Build the input for the transfer strategy
   SearchResultMap runs;
   auto selectedRows = m_view->getSelectedSearchRows();
@@ -258,7 +282,7 @@ void ReflMainViewPresenter::transfer() {
 * @return new TransferStrategy
 */
 std::unique_ptr<ReflTransferStrategy>
-ReflMainViewPresenter::getTransferStrategy() {
+ReflRunsTabPresenter::getTransferStrategy() {
   const std::string currentMethod = m_view->getTransferMethod();
   std::unique_ptr<ReflTransferStrategy> rtnStrategy;
   if (currentMethod == MeasureTransferMethod) {
@@ -293,10 +317,10 @@ ReflMainViewPresenter::getTransferStrategy() {
 /**
 Used to tell the presenter something has changed in the ADS
 */
-void ReflMainViewPresenter::notify(WorkspaceReceiver::Flag flag) {
+void ReflRunsTabPresenter::notify(DataProcessorMainPresenter::Flag flag) {
 
   switch (flag) {
-  case WorkspaceReceiver::ADSChangedFlag:
+  case DataProcessorMainPresenter::ADSChangedFlag:
     pushCommands();
     break;
   }
@@ -304,7 +328,96 @@ void ReflMainViewPresenter::notify(WorkspaceReceiver::Flag flag) {
   // a flag we aren't handling.
 }
 
-const std::string ReflMainViewPresenter::MeasureTransferMethod = "Measurement";
-const std::string ReflMainViewPresenter::LegacyTransferMethod = "Description";
+/** Requests global pre-processing options. Options are supplied by the main
+* presenter
+* @return :: Global pre-processing options
+*/
+std::map<std::string, std::string>
+ReflRunsTabPresenter::getPreprocessingOptions() const {
+
+  std::map<std::string, std::string> options;
+  options["Run(s)"] = m_mainPresenter->getPlusOptions();
+  options["Transmission Run(s)"] = m_mainPresenter->getTransmissionOptions();
+
+  return options;
+}
+
+/** Requests global pre-processing options. Options are supplied by the main
+* presenter
+* @return :: Global pre-processing options
+*/
+std::string ReflRunsTabPresenter::getProcessingOptions() const {
+  return m_mainPresenter->getReductionOptions();
+}
+
+/** Requests global pre-processing options. Options are supplied by the main
+* presenter
+* @return :: Global pre-processing options
+*/
+std::string ReflRunsTabPresenter::getPostprocessingOptions() const {
+  return m_mainPresenter->getStitchOptions();
+}
+
+/**
+Tells the view to show an critical error dialog
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+*/
+void ReflRunsTabPresenter::giveUserCritical(std::string prompt,
+                                            std::string title) {
+
+  m_mainPresenter->giveUserCritical(prompt, title);
+}
+
+/**
+Tells the view to show a warning dialog
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+*/
+void ReflRunsTabPresenter::giveUserWarning(std::string prompt,
+                                           std::string title) {
+
+  m_mainPresenter->giveUserWarning(prompt, title);
+}
+
+/**
+Tells the view to ask the user a Yes/No question
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+@returns a boolean true if Yes, false if No
+*/
+bool ReflRunsTabPresenter::askUserYesNo(std::string prompt, std::string title) {
+
+  return m_mainPresenter->askUserYesNo(prompt, title);
+}
+
+/**
+Tells the view to ask the user to enter a string.
+@param prompt : The prompt to appear on the dialog
+@param title : The text for the title bar of the dialog
+@param defaultValue : The default value entered.
+@returns The user's string if submitted, or an empty string
+*/
+std::string
+ReflRunsTabPresenter::askUserString(const std::string &prompt,
+                                    const std::string &title,
+                                    const std::string &defaultValue) {
+
+  return m_mainPresenter->askUserString(prompt, title, defaultValue);
+}
+
+/**
+Tells the main presenter to run an algorithm as python code
+* @param pythonCode : [input] The algorithm as python code
+* @return : The result of the execution
+*/
+std::string
+ReflRunsTabPresenter::runPythonAlgorithm(const std::string &pythonCode) {
+
+  return m_mainPresenter->runPythonAlgorithm(pythonCode);
+}
+
+const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";
+const std::string ReflRunsTabPresenter::LegacyTransferMethod = "Description";
 }
 }

@@ -20,7 +20,7 @@ DataProcessorView is the base view class for the Data Processor User
 Interface. It contains no QT specific functionality as that should be handled by
 a subclass.
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -51,14 +51,6 @@ public:
   virtual void showTable(QDataProcessorTreeModel_sptr model) = 0;
 
   // Dialog/Prompt methods
-  virtual std::string askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue) = 0;
-  virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
-  virtual void giveUserWarning(std::string prompt, std::string title) = 0;
-  virtual void giveUserCritical(std::string prompt, std::string title) = 0;
-  virtual void showAlgorithmDialog(const std::string &algorithm) = 0;
-  virtual void showImportDialog() = 0;
   virtual std::string requestNotebookPath() = 0;
 
   // Settings
@@ -69,9 +61,6 @@ public:
   // produced
   virtual bool getEnableNotebook() = 0;
 
-  // Plotting
-  virtual void plotWorkspaces(const std::set<std::string> &workspaces) = 0;
-
   // Setter methods
   virtual void setTableList(const std::set<std::string> &tables) = 0;
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
@@ -80,10 +69,6 @@ public:
   virtual void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) = 0;
-  virtual void setGlobalOptions(
-      const std::vector<std::string> &stages,
-      const std::vector<std::string> &algNames,
-      const std::vector<std::map<std::string, std::string>> &hints) = 0;
   virtual void setClipboard(const std::string &text) = 0;
   virtual void setModel(const std::string &name) = 0;
 
@@ -93,9 +78,7 @@ public:
   virtual std::string getWorkspaceToOpen() const = 0;
   virtual std::string getClipboard() const = 0;
   virtual std::string getProcessInstrument() const = 0;
-  virtual std::string getProcessingOptions(const std::string &name) const = 0;
-  virtual boost::shared_ptr<DataProcessorPresenter>
-  getTablePresenter() const = 0;
+  virtual DataProcessorPresenter *getPresenter() const = 0;
 };
 }
 }

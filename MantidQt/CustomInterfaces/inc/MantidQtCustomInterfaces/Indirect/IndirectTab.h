@@ -148,6 +148,11 @@ protected:
 
   QString runPythonCode(QString vode, bool no_output = false);
 
+  /// Checks the ADS for a workspace named `workspaceName`,
+  /// opens a warning box for plotting/saving if none found
+  bool checkADSForPlotSaveWorkspace(const std::string &workspaceName,
+                                    const bool &plotting);
+
   /// Parent QWidget (if applicable)
   QWidget *m_parentWidget;
 
