@@ -218,8 +218,8 @@ void LoadNexusProcessed::init() {
   // Use a static cast as MSVC sometimes gets confused and casts as int64
   declareProperty("SpectrumMin", static_cast<int>(1), mustBePositive,
                   "Number of first spectrum to read.");
-  declareProperty("SpectrumMax", static_cast<int>(Mantid::EMPTY_INT()), mustBePositive,
-                  "Number of last spectrum to read.");
+  declareProperty("SpectrumMax", static_cast<int>(Mantid::EMPTY_INT()),
+                  mustBePositive, "Number of last spectrum to read.");
   declareProperty(make_unique<ArrayProperty<int>>("SpectrumList"),
                   "List of spectrum numbers to read.");
   declareProperty("EntryNumber", static_cast<int>(0), mustBePositive,
