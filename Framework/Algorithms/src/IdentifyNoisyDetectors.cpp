@@ -149,7 +149,6 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
   double mean = 0.0;
   double mean2 = 0.0;
 
-  // replace with CountStandardDeviations?
   for (int i = 0; i < nhist; i++) {
     if (valid->y(i)[0] > 0) {
       mean += values->y(i)[0];
@@ -175,9 +174,8 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
   double value(0.0);
   for (int i = 0; i < nhist; i++) {
 
-    value = values->readY(i)[0];
+    value = values->y(i)[0];
 
-    // ??? does this do anyhting
     if (value > upper) {
       valid->mutableY(i)[0] = 0.0;
     } else if (value < lower) {
