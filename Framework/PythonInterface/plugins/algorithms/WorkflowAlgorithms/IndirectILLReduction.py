@@ -195,6 +195,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self._instrument = mtd[self._raw_ws].getItem(0).getInstrument()
             self._load_config_files()
 
+            # if vanadium run needed, load once beforehand
+            # this needs to be after load_config_files and before reduce_run
+            if self._unmirror_option == 5 or self._unmirror_option == 7:
+                self._load_vanadium_run()
+
             # figure out number of progress reports, i.e. one for each input workspace/file
             progress = Progress(self, start=0.0, end=1.0, nreports = mtd[self._raw_ws].size())
 
@@ -223,6 +228,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self._instrument = mtd[self._raw_ws].getInstrument()
             self._load_config_files()
 
+            # if vanadium run needed, load once beforehand
+            # this needs to be after load_config_files and before reduce_run
+            if self._unmirror_option == 5 or self._unmirror_option == 7:
+                self._load_vanadium_run()
+
             run = str(mtd[self._raw_ws].getRunNumber())
             ws = run + '_' + self._raw_ws
             RenameWorkspace(InputWorkspace = self._raw_ws, OutputWorkspace = ws)
@@ -232,6 +242,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
             # after reduction, set output ws
             self._set_output_workspace_properties([run])
+
 
     def _load_config_files(self):
         """
@@ -431,13 +442,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         elif o == 5:
             self.log().information('Unmirror 5: shift the right according to right of the vanadium and sum to left')
-            self._load_vanadium_run()
             self._shift_spectra(right, 'right_van', 'right_shifted', 2)
             self._perform_mirror(left, 'right_shifted', red)
             DeleteWorkspace('right_shifted')
-            # remove vanadium ws
-            DeleteWorkspace('right_van')
-            DeleteWorkspace('left_van')
 
         elif o == 6:
             self.log().information('Unmirror 6: center both the right and the left and sum')
@@ -449,17 +456,18 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         elif o == 7:
             self.log().information('Unmirror 7: shift both the right and the left according to vanadium and sum')
-            self._load_vanadium_run()
             self._shift_spectra(left, 'left_van', 'left_shifted', 2)
             self._shift_spectra(right, 'right_van', 'right_shifted', 2)
             self._perform_mirror('left_shifted', 'right_shifted', red)
             DeleteWorkspace('left_shifted')
             DeleteWorkspace('right_shifted')
-            # remove vanadium ws
-            DeleteWorkspace('left_van')
-            DeleteWorkspace('right_van')
 
     def _set_output_workspace_properties(self, runlist):
+
+        # remove cached left and right of vanadium run
+        if self._unmirror_option == 5 or self._unmirror_option == 7:
+            DeleteWorkspace('left_van')
+            DeleteWorkspace('right_van')
 
         if len(runlist) > 1:
             # multiple runs
