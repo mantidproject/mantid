@@ -243,7 +243,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             # after reduction, set output ws
             self._set_output_workspace_properties([run])
 
-
     def _load_config_files(self):
         """
         Loads parameter and detector grouping map file
