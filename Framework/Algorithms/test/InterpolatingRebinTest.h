@@ -229,9 +229,9 @@ public:
             "InterpolatingRebinTest_out_nulldata");
     TS_ASSERT_EQUALS(rebindata->getNumberHistograms(), 2);
 
-	const auto &outX = rebindata->x(0);
-	const auto &outY = rebindata->y(0);
-	const auto &outE = rebindata->e(0);
+    const auto &outX = rebindata->x(0);
+    const auto &outY = rebindata->y(0);
+    const auto &outE = rebindata->e(0);
     TS_ASSERT_EQUALS(outX.size(), ceil((11 - 2.0) / 0.2) + 1);
     TS_ASSERT_EQUALS(outY.size(), ceil((11 - 2.0) / 0.2));
     TS_ASSERT_EQUALS(outE.size(), ceil((11 - 2.0) / 0.2));
@@ -252,9 +252,9 @@ public:
     TS_ASSERT_DELTA(outE[44], 0, 0.0001);
 
     // the second spectrum is NAN
-	const auto &outX1 = rebindata->x(1);
-	const auto &outY1 = rebindata->y(1);
-	const auto &outE1 = rebindata->e(1);
+    const auto &outX1 = rebindata->x(1);
+    const auto &outY1 = rebindata->y(1);
+    const auto &outE1 = rebindata->e(1);
     // test a random one
     TS_ASSERT_DELTA(outX1[7], 3.4, 0.00001);
     // check for numeric_limits<double>::quiet_NaN()
@@ -275,7 +275,7 @@ private:
 
     double j = 1.0;
     int i = 0;
-	
+
     for (; i < nBins; i++, j += 1.5) {
       retVal->mutableX(0)[i] = j * 0.5;
       retVal->mutableY(0)[i] = j;
@@ -293,13 +293,14 @@ private:
 
     // the first histogram has all zeros
     retVal->setBinEdges(0, nBins + 1, LinearGenerator(0.0, 1.0));
-	retVal->dataY(0).assign(retVal->dataY(0).size(), 0.0);
-	retVal->dataE(0).assign(retVal->dataE(0).size(), 0.0);
+    retVal->dataY(0).assign(retVal->dataY(0).size(), 0.0);
+    retVal->dataE(0).assign(retVal->dataE(0).size(), 0.0);
 
     // the second has NAN values
     retVal->setBinEdges(1, nBins + 1, LinearGenerator(0.0, 1.0));
-	retVal->dataY(1).assign(retVal->dataY(1).size(), std::numeric_limits<double>::quiet_NaN());
-	retVal->dataE(1).assign(retVal->dataE(1).size(), 2.0);
+    retVal->dataY(1).assign(retVal->dataY(1).size(),
+                            std::numeric_limits<double>::quiet_NaN());
+    retVal->dataE(1).assign(retVal->dataE(1).size(), 2.0);
 
     return retVal;
   }

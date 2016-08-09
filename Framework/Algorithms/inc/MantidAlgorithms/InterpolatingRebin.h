@@ -105,9 +105,11 @@ protected:
                                          HistogramData::HistogramE &eNew) const;
   void noInterpolation(const HistogramData::BinEdges &xOld, const double yOld,
                        const HistogramData::HistogramE &eOld,
-                       const HistogramData::BinEdges &xNew, HistogramData::HistogramY &yNew,
-	  HistogramData::HistogramE &eNew) const;
-  double estimateError(const HistogramData::HistogramX &xsOld, const HistogramData::HistogramE &esOld,
+                       const HistogramData::BinEdges &xNew,
+                       HistogramData::HistogramY &yNew,
+                       HistogramData::HistogramE &eNew) const;
+  double estimateError(const HistogramData::HistogramX &xsOld,
+                       const HistogramData::HistogramE &esOld,
                        const double xNew) const;
 };
 
