@@ -78,7 +78,6 @@ class TOFTOFSetupWidget(BaseWidget):
             return None
 
         def setData(self, index, text, role):
-
             row = index.row()
             col = index.column()
 
@@ -103,6 +102,31 @@ class TOFTOFSetupWidget(BaseWidget):
         def flags(self, index):
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
 
+    # tooltips
+    TIP_prefix  = ''
+    TIP_dataDir = ''
+    TIP_btnDataDir = ''
+    TIP_vanRuns = ''
+    TIP_vanCmnt = ''
+    TIP_ecRuns = ''
+    TIP_ecFactor = ''
+    TIP_binEstart = ''
+    TIP_binEstep = ''
+    TIP_binEend = ''
+    TIP_binQstart = ''
+    TIP_binQstep = ''
+    TIP_binQend = ''
+    TIP_maskDetectors = ''
+    TIP_dataRunsView = ''
+    TIP_chkSubtractECVan = ''
+    TIP_rbtNormaliseNone = ''
+    TIP_rbtNormaliseMonitor = ''
+    TIP_rbtNormaliseTime = ''
+
+    TIP_rbtCorrectTOFNone = ''
+    TIP_rbtCorrectTOFVan = ''
+    TIP_rbtCorrectTOFSample = ''
+
     def __init__(self, settings):
         BaseWidget.__init__(self, settings = settings)
 
@@ -113,38 +137,42 @@ class TOFTOFSetupWidget(BaseWidget):
             spin.setDecimals(3)
             spin.setSingleStep(0.01)
 
+        def tip(widget, text):
+          if text:
+            widget.setToolTip(text)
+          return widget
+
         # ui data elements
-        self.prefix        = QLineEdit()
+        self.prefix    = tip(QLineEdit(), self.TIP_prefix)
+        self.dataDir   = tip(QLineEdit(), self.TIP_dataDir)
 
-        self.dataDir       = QLineEdit()
+        self.vanRuns   = tip(QLineEdit(), self.TIP_vanRuns)
+        self.vanCmnt   = tip(QLineEdit(), self.TIP_vanCmnt)
 
-        self.vanRuns       = QLineEdit()
-        self.vanCmnt       = QLineEdit()
-
-        self.ecRuns        = QLineEdit()
-        self.ecFactor      = QDoubleSpinBox()
+        self.ecRuns    = tip(QLineEdit(), self.TIP_ecRuns)
+        self.ecFactor  = tip(QDoubleSpinBox(), self.TIP_ecFactor)
 
         setSpin(self.ecFactor, 0, 1)
 
-        self.binEstart     = QDoubleSpinBox()
-        self.binEstep      = QDoubleSpinBox()
-        self.binEend       = QDoubleSpinBox()
+        self.binEstart = tip(QDoubleSpinBox(), self.TIP_binEstart)
+        self.binEstep  = tip(QDoubleSpinBox(), self.TIP_binEstep)
+        self.binEend   = tip(QDoubleSpinBox(), self.TIP_binEend)
 
         setSpin(self.binEstart)
         setSpin(self.binEstep)
         setSpin(self.binEend)
 
-        self.binQstart     = QDoubleSpinBox()
-        self.binQstep      = QDoubleSpinBox()
-        self.binQend       = QDoubleSpinBox()
+        self.binQstart = tip(QDoubleSpinBox(), self.TIP_binQstart)
+        self.binQstep  = tip(QDoubleSpinBox(), self.TIP_binQstep)
+        self.binQend   = tip(QDoubleSpinBox(), self.TIP_binQend)
 
         setSpin(self.binQstart)
         setSpin(self.binQstep)
         setSpin(self.binQend)
 
-        self.maskDetectors = QLineEdit()
+        self.maskDetectors = tip(QLineEdit(), self.TIP_maskDetectors)
 
-        self.dataRunsView = QTableView(self)
+        self.dataRunsView  = tip(QTableView(self), self.TIP_dataRunsView)
         self.dataRunsView.horizontalHeader().setStretchLastSection(True)
         self.dataRunsView.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
@@ -152,17 +180,17 @@ class TOFTOFSetupWidget(BaseWidget):
         self.dataRunsView.setModel(self.runDataModel)
 
         # ui controls
-        self.btnDataDir          = QPushButton('Browse')
+        self.btnDataDir          = tip(QPushButton('Browse'), self.TIP_btnDataDir)
 
-        self.chkSubtractECVan    = QCheckBox('Subtract empty can from vanadium')
+        self.chkSubtractECVan    = tip(QCheckBox('Subtract empty can from vanadium'), self.TIP_chkSubtractECVan)
 
-        self.rbtNormaliseNone    = QRadioButton('none')
-        self.rbtNormaliseMonitor = QRadioButton('to monitor')
-        self.rbtNormaliseTime    = QRadioButton('to time')
+        self.rbtNormaliseNone    = tip(QRadioButton('none'), self.TIP_rbtNormaliseNone)
+        self.rbtNormaliseMonitor = tip(QRadioButton('to monitor'), self.TIP_rbtNormaliseMonitor)
+        self.rbtNormaliseTime    = tip(QRadioButton('to time'), self.TIP_rbtNormaliseTime)
 
-        self.rbtCorrectTOFNone   = QRadioButton('none')
-        self.rbtCorrectTOFVan    = QRadioButton('vanadium')
-        self.rbtCorrectTOFSample = QRadioButton('sample')
+        self.rbtCorrectTOFNone   = tip(QRadioButton('none'), self.TIP_rbtCorrectTOFNone)
+        self.rbtCorrectTOFVan    = tip(QRadioButton('vanadium'), self.TIP_rbtCorrectTOFVan)
+        self.rbtCorrectTOFSample = tip(QRadioButton('sample'), self.TIP_rbtCorrectTOFSample)
 
         # ui layout
         def _box(cls, widgets):
