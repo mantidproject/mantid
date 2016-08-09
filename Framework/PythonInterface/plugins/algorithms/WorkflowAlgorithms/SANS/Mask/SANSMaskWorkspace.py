@@ -48,8 +48,8 @@ class SANSMaskWorkspace(DataProcessorAlgorithm):
 
         # Perform the masking
         mask_info = state.mask
-
-        masker.mask_workspace(mask_info, workspace, component)
+        workspace = masker.mask_workspace(mask_info, workspace, component)
+        self.setProperty(SANSConstants.workspace, workspace)
 
     def _get_component(self):
         component_as_string = self.getProperty("Component").value

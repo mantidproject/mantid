@@ -1,4 +1,6 @@
 from math import (pi, cos, sin)
+
+
 def add_xml_shape(xml, complete_xml_element):
     """
         Add an arbitrary shape to region to be masked

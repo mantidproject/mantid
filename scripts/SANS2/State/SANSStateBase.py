@@ -6,7 +6,7 @@ import copy
 import inspect
 from functools import (partial)
 
-from mantid.kernel import (PropertyManager, std_vector_dbl, std_vector_str)
+from mantid.kernel import (PropertyManager, std_vector_dbl, std_vector_str, std_vector_int)
 
 
 # ---------------------------------------------------------------
@@ -238,6 +238,8 @@ def is_float_vector(value):
 def is_string_vector(value):
     return isinstance(value, std_vector_str)
 
+def is_int_vector(value):
+    return isinstance(value, std_vector_int)
 
 def get_module_and_class_name(instance):
     if inspect.isclass(instance):
@@ -406,6 +408,9 @@ def set_state_from_property_manager(instance, property_manager):
         elif is_string_vector(value):
             string_list_value = list(value)
             _set_element(instance, key, string_list_value)
+        elif is_int_vector(value):
+            int_list_value = list(value)
+            _set_element(instance, key, int_list_value)
         else:
             _set_element(instance, key, value)
 

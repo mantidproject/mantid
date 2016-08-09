@@ -97,7 +97,7 @@ def mask_with_mask_files(mask_info, workspace):
 
         # Masker
         mask_name = "MaskDetectors"
-        mask_options = {SANSConstants.workspace: workspace}
+        mask_options = {}
         mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
         for mask_file in mask_files:
             mask_file = find_full_file_path(mask_file)
@@ -107,17 +107,16 @@ def mask_with_mask_files(mask_info, workspace):
             load_alg.execute()
             masking_workspace = load_alg.getProperty(SANSConstants.output_workspace).value
             detector_list = list(yield_masked_det_ids(masking_workspace))
-
             # Mask the detector ids on the original workspace
+            mask_alg.setProperty(SANSConstants.workspace, workspace)
             mask_alg.setProperty("DetectorList", detector_list)
             mask_alg.execute()
-
-        workspace = mask_alg.getProperty(SANSConstants.workspace).value
+            workspace = mask_alg.getProperty(SANSConstants.workspace).value
     return workspace
 
 
 def mask_spectra(mask_info, workspace, spectra_block, detector_type):
-    # There are several spectra sepcifications which need to be evaluated
+    # There are several spectra specifications which need to be evaluated
     # 1. General singular spectrum numbers
     # 2. General spectrum ranges
     # 3. Detector-specific horizontal singular strips
@@ -150,16 +149,18 @@ def mask_spectra(mask_info, workspace, spectra_block, detector_type):
     # ---------------------------
     # Horizontal single spectrum
     # ---------------------------
-    single_horizontal_strip_mask = detector.single_horizontal_strip_mask
-    if single_horizontal_strip_mask:
-        total_spectra.extend(single_horizontal_strip_mask)
+    single_horizontal_strip_masks = detector.single_horizontal_strip_mask
+    if single_horizontal_strip_masks:
+        for single_horizontal_strip_mask in single_horizontal_strip_masks:
+            total_spectra.extend(spectra_block.get_block(single_horizontal_strip_mask, 0, 1, None))
 
     # ---------------------------
     # Vertical single spectrum
     # ---------------------------
-    single_vertical_strip_mask = detector.single_vertical_strip_mask
-    if single_vertical_strip_mask:
-        total_spectra.extend(single_vertical_strip_mask)
+    single_vertical_strip_masks = detector.single_vertical_strip_mask
+    if single_vertical_strip_masks:
+        for single_vertical_strip_mask in single_vertical_strip_masks:
+            total_spectra.extend(spectra_block.get_block(0, single_vertical_strip_mask, None, 1))
 
     # ---------------------------
     # Horizontal spectrum range
@@ -204,15 +205,13 @@ def mask_spectra(mask_info, workspace, spectra_block, detector_type):
 
     if block_cross_horizontal and block_cross_vertical:
         for horizontal, vertical in zip(block_cross_horizontal, block_cross_vertical):
-            x_dim = 1
-            y_dim = 1
-            total_spectra.extend(spectra_block.get_block(horizontal, vertical, y_dim, x_dim))
+            total_spectra.extend(spectra_block.get_block(horizontal, vertical, 1, 1))
 
     # Perform the masking
     if total_spectra:
         mask_name = "MaskDetectors"
         mask_options = {"Workspace": workspace,
-                        "SpectraList": set(total_spectra)}
+                        "SpectraList": total_spectra}
         mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
         mask_alg.execute()
         workspace = mask_alg.getProperty("Workspace").value
@@ -224,8 +223,7 @@ def mask_angle(mask_info, workspace):
     phi_mirror = mask_info.use_mask_phi_mirror
     phi_min = mask_info.phi_min
     phi_max = mask_info.phi_max
-
-    if phi_min and phi_max and phi_mirror:
+    if phi_min is not None and phi_max is not None and phi_mirror is not None:
         # Check for edge cases for the mirror
         if phi_mirror:
             if phi_min > phi_max:
@@ -237,13 +235,15 @@ def mask_angle(mask_info, workspace):
 
         # Create the phi mask and apply it if anything was created
         phi_mask = create_phi_mask('unique phi', [0, 0, 0], phi_min, phi_max, phi_mirror)
+
         if phi_mask:
             mask_name = "MaskDetectorsInShape"
-            mask_options = {"Workspace": workspace,
+            mask_options = {SANSConstants.workspace: workspace,
                             "ShapeXML": phi_mask}
             mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
             mask_alg.execute()
-            workspace = mask_alg.getProperty("OutputWorkspace").value
+            workspace = mask_alg.getProperty(SANSConstants.workspace).value
+
     return workspace
 
 
@@ -253,8 +253,7 @@ def mask_beam_stop(mask_info, workspace, instrument):
     beam_stop_arm_angle = mask_info.beam_stop_arm_angle
     beam_stop_arm_pos1 = mask_info.beam_stop_arm_pos1
     beam_stop_arm_pos2 = mask_info.beam_stop_arm_pos2
-
-    if beam_stop_arm_width and beam_stop_arm_angle:
+    if beam_stop_arm_width is not None and beam_stop_arm_angle is not None:
         if instrument is SANSInstrument.SANS2D:
             detector = workspace.getInstrument().getComponentByName('rear-detector')
             z_position = detector.getPos().getZ()
@@ -304,6 +303,7 @@ class MaskerISIS(Masker):
 
     def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
         # Perform bin masking
+
         workspace_to_mask = mask_bins(mask_info, workspace_to_mask, detector_type)
 
         # Perform cylinder masking
@@ -319,7 +319,8 @@ class MaskerISIS(Masker):
         workspace_to_mask = mask_angle(mask_info, workspace_to_mask)
 
         # Mask beam stop
-        mask_beam_stop(mask_info, workspace_to_mask, self._instrument)
+        return mask_beam_stop(mask_info, workspace_to_mask, self._instrument)
+
 
 class MaskFactory(object):
     def __init__(self):

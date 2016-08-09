@@ -5,6 +5,7 @@ from SANS2.State.StateBuilder.SANSStateMaskBuilder import get_mask_builder
 from SANS2.State.SANSStateData import SANSStateDataISIS
 from SANS2.Common.SANSConstants import SANSConstants
 
+
 class SANSStateMaskBuilderTest(unittest.TestCase):
     def test_that_mask_can_be_built(self):
         # Arrange
@@ -34,7 +35,6 @@ class SANSStateMaskBuilderTest(unittest.TestCase):
         strip_mask = state.detectors[SANSConstants.low_angle_bank].single_vertical_strip_mask
         self.assertTrue(len(strip_mask) == 3)
         self.assertTrue(strip_mask[2] == 3)
-
 
 
 if __name__ == '__main__':
