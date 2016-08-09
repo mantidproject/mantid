@@ -505,7 +505,7 @@ class ABINS(PythonAlgorithm):
 
     def _get_properties(self):
         """
-        Loads all properities to object's attributes.
+        Loads all properties to object's attributes.
         """
 
         self._dft_program = self.getProperty("DFTprogram").value
