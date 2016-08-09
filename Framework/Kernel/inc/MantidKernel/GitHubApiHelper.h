@@ -41,13 +41,15 @@ public:
   bool isAuthenticated();
 
 protected:
-  virtual void processResponseHeaders(const Poco::Net::HTTPResponse &res) override;
+  virtual void
+  processResponseHeaders(const Poco::Net::HTTPResponse &res) override;
   virtual int sendRequestAndProcess(Poco::Net::HTTPClientSession &session,
-    Poco::URI &uri, std::ostream &responseStream) override;
+                                    Poco::URI &uri,
+                                    std::ostream &responseStream) override;
+
 private:
   int processAnonymousRequest(const Poco::Net::HTTPResponse &response,
-    Poco::URI &uri,
-    std::ostream &responseStream);
+                              Poco::URI &uri, std::ostream &responseStream);
   void addAuthenticationToken() {
     addHeader("Authorization",
               "token 8ec7afc857540ee60af78cba1cf7779a6ed0b6b9");
