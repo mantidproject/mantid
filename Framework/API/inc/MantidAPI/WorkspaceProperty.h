@@ -334,7 +334,8 @@ public:
       for (auto it = vals.begin(); it != vals.end();) {
         // Remove any workspace that's not valid for this algorithm
         if (!tester.setValue(*it).empty()) {
-          vals.erase(
+          // Erase invalidates iterator so assign iterator returned from erase
+          it = vals.erase(
               it++); // Post-fix so that it erase the previous when returned
         } else
           ++it;
