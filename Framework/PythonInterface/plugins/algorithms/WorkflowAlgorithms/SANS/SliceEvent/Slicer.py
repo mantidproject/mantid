@@ -67,7 +67,7 @@ class ISISSlicer(Slicer):
         end_time = slice_info.end_time
 
         # If there are no slice limits specified, then
-        if len(start_time) == 0 or len(end_time) == 0:
+        if start_time is None or end_time is None or len(start_time) == 0 or len(end_time) == 0:
             return workspace, 1.0
 
         if len(start_time) > 1 or len(end_time) > 1:
@@ -112,12 +112,13 @@ class SliceEventFactory(object):
 
         # The factory is currently set up to
         # 1. Use NullSlicer when we have a histogram
-        # 2. Use ISISSlicer if we have an ISIS instrument and event data
+        # 3. Use ISISSlicer if we have an ISIS instrument and event data
         # 3. else raise error
         if isinstance(workspace, Workspace2D):
             slicer = NullSlicer()
         elif instrument_type is SANSInstrument.LARMOR or instrument_type is SANSInstrument.LOQ or \
                         instrument_type is SANSInstrument.SANS2D:
+
             slicer = ISISSlicer()
         else:
             slicer = NullSlicer()

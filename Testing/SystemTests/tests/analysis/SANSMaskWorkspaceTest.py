@@ -33,6 +33,12 @@ def get_non_masked_spectrum_numbers(workspace):
             yield workspace.getSpectrum(index).getSpectrumNo()
 
 
+def elements_in_range(range_start, range_stop, collection):
+    for element in collection:
+        if range_start <= element <= range_stop:
+            yield element
+
+
 # -----------------------------------------------
 # Tests for the SANSLoad algorithm
 # -----------------------------------------------
@@ -284,7 +290,7 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         if os.path.exists(file_name):
             os.remove(file_name)
 
-    def test_that_time_masking_is_applied(self):
+    def test_that_general_time_masking_is_applied(self):
         # Arrange
         data_builder = get_data_builder(SANSFacility.ISIS)
         data_builder.set_sample_scatter("SANS2D00028827")
@@ -292,8 +298,8 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         mask_builder = get_mask_builder(data_info)
 
         # Expected_spectra
-        bin_mask_general_start = [100., 12000.]
-        bin_mask_general_stop = [400., 13000.]
+        bin_mask_general_start = [30000., 67000.]
+        bin_mask_general_stop = [35000., 75000.]
 
         # bin_mask_start = [14000]
         # bin_mask_stop = FloatListParameter()
@@ -309,13 +315,66 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
 
         workspace = self._load_workspace(state, move_workspace=False)
 
+        tof_spectra_10_original = workspace.getSpectrum(10).getTofs()
+        tof_spectra_11_original = workspace.getSpectrum(11).getTofs()
+
         # Act
         workspace = self._run_mask(state, workspace, "LAB")
 
         # Assert
-        sample_spectra = [1345, 34967]
-        # Confirm that everything in the ranges 100-400  and 12000-13000 is set to 0
-        # TODO
+        # Confirm that everything in the ranges 30000-35000  and 67000-75000 is removed from the event list
+        tof_spectra_10_masked = workspace.getSpectrum(10).getTofs()
+        tof_spectra_11_masked = workspace.getSpectrum(11).getTofs()
+        # Spectrum 10
+        # Three events should have been removed
+        self.assertTrue(len(tof_spectra_10_masked) == len(tof_spectra_10_original) - 3)
+        # One event should have been removed
+        self.assertTrue(len(tof_spectra_11_masked) == len(tof_spectra_11_original) - 1)
+
+        # Make sure that there are no elements
+        for start, stop in zip(bin_mask_general_start, bin_mask_general_stop):
+            self.assertFalse(any(elements_in_range(start, stop, tof_spectra_10_masked)))
+            self.assertFalse(any(elements_in_range(start, stop, tof_spectra_11_masked)))
+
+    def test_that_detector_specific_time_masking_is_applied(self):
+        # Arrange
+        data_builder = get_data_builder(SANSFacility.ISIS)
+        data_builder.set_sample_scatter("SANS2D00028827")
+        data_info = data_builder.build()
+        mask_builder = get_mask_builder(data_info)
+
+        # Expected_spectra
+        bin_mask_start = [27000., 58000.]
+        bin_mask_stop = [45000., 61000.]
+
+        mask_builder.set_LAB_bin_mask_start(bin_mask_start)
+        mask_builder.set_LAB_bin_mask_stop(bin_mask_stop)
+
+        mask_info = mask_builder.build()
+
+        test_director = TestDirector()
+        test_director.set_states(data_state=data_info, mask_state=mask_info)
+        state = test_director.construct()
+
+        workspace = self._load_workspace(state, move_workspace=False)
+
+        # Is part of LAB
+        tof_spectra_23813_original = workspace.getSpectrum(23813).getTofs()
+
+        # Act
+        workspace = self._run_mask(state, workspace, "LAB")
+
+        # Assert
+        # Confirm that everything in the ranges 27000-45000  and 58000-61000 is removed from the event list
+        tof_spectra_23813_masked = workspace.getSpectrum(23813).getTofs()
+
+        # Spectrum 23813
+        # Five events should have been removed
+        self.assertTrue(len(tof_spectra_23813_masked) == len(tof_spectra_23813_original) - 5)
+
+        # Make sure that there are no elements
+        for start, stop in zip(bin_mask_start, bin_mask_stop):
+            self.assertFalse(any(elements_in_range(start, stop, tof_spectra_23813_masked)))
 
     def test_that_angle_masking_is_applied(self):
         # Arrange

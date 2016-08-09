@@ -12,6 +12,7 @@ back_single_monitor_entry = namedtuple('back_single_monitor_entry', 'monitor, st
 mask_angle_entry = namedtuple('mask_angle_entry', 'min, max, is_no_mirror')
 simple_range = namedtuple('simple_range', 'start, stop, step, step_type')
 complex_range = namedtuple('complex_steps', 'start, step1, mid, step2, stop, step_type')
+rebin_string_values = namedtuple('rebin_string_values', 'rebin_values')
 
 # Mask
 mask_line = namedtuple('mask_line', 'width, angle, x, y')
@@ -29,6 +30,8 @@ range_entry_fit = namedtuple('range_entry_fit', 'start, stop, fit_type')
 monitor_length = namedtuple('monitor_length', 'length, spectrum, interpolate')
 monitor_spectrum = namedtuple('monitor_spectrum', 'spectrum, is_trans, interpolate')
 monitor_file = namedtuple('monitor_file', 'file_path, detector_type')
+
+
 
 # -----------------------------------------------------------------
 # --- User File keywords ------------------------------------------

@@ -5,7 +5,7 @@ import copy
 from SANS2.State.SANSStateMove import (SANSStateMoveLOQ, SANSStateMoveSANS2D, SANSStateMoveLARMOR)
 from SANS2.State.StateBuilder.StateBuilderFunctions import (set_detector_names, set_monitor_names)
 from SANS2.State.SANSStateFunctions import (get_instrument_from_state_data)
-from SANS2.Common.SANSFileInformation import (get_instrument_paths_for_sans_file)
+from SANS2.Common.SANSFileInformation import (get_instrument_paths_for_sans_file, SANSFileInformationFactory)
 from SANS2.Common.SANSEnumerations import SANSInstrument
 from SANS2.State.StateBuilder.AutomaticSetters import automatic_setters
 
@@ -37,6 +37,12 @@ class SANSStateMoveLOQBuilder(object):
         self.state.validate()
         return copy.copy(self.state)
 
+    def convert_pos1(self, value):
+        return value / 1000.
+
+    def convert_pos2(self, value):
+        return value / 1000.
+
 
 class SANSStateMoveSANS2DBuilder(object):
     @automatic_setters(SANSStateMoveSANS2D, exclusions=["detector_name", "detector_name_short", "monitor_names"])
@@ -49,6 +55,12 @@ class SANSStateMoveSANS2DBuilder(object):
         self.state.validate()
         return copy.copy(self.state)
 
+    def convert_pos1(self, value):
+        return value / 1000.
+
+    def convert_pos2(self, value):
+        return value / 1000.
+
 
 class SANSStateMoveLARMORBuilder(object):
     @automatic_setters(SANSStateMoveLARMOR, exclusions=["detector_name",
@@ -57,10 +69,24 @@ class SANSStateMoveLARMORBuilder(object):
         super(SANSStateMoveLARMORBuilder, self).__init__()
         self.state = SANSStateMoveLARMOR()
         setup_idf_and_ipf_content(self.state, data_info)
+        self.conversion_value = 1000.
+        self._set_conversion_value(data_info)
+
+    def _set_conversion_value(self, data_info):
+        file_info_factory = SANSFileInformationFactory()
+        file_info = file_info_factory.create_sans_file_information(data_info.sample_scatter)
+        run_number = file_info.get_run_number()
+        self.conversion_value = 1000. if run_number >= 2217 else 1.
 
     def build(self):
         self.state.validate()
         return copy.copy(self.state)
+
+    def convert_pos1(self, value):
+        return value / self.conversion_value
+
+    def convert_pos2(self, value):
+        return value / 1000.
 
 
 # ------------------------------------------

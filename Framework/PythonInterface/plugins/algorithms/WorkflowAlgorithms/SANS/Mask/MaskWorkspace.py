@@ -303,7 +303,6 @@ class MaskerISIS(Masker):
 
     def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
         # Perform bin masking
-
         workspace_to_mask = mask_bins(mask_info, workspace_to_mask, detector_type)
 
         # Perform cylinder masking
@@ -332,6 +331,7 @@ class MaskFactory(object):
         Provides the appropriate masker.
 
         :param state: a SANSState object
+        :param detector_type: either HAB or LAB
         :return: the corresponding slicer
         """
         data_info = state.data

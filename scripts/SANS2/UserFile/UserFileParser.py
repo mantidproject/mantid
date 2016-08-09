@@ -6,8 +6,9 @@ import re
 from SANS2.Common.SANSEnumerations import (ISISReductionMode, DetectorType)
 from SANS2.UserFile.UserFileCommon import *
 
+
 # -----------------------------------------------------------------
-# --- Free Fuctions     ------------------------------------------
+# --- Free Functions     ------------------------------------------
 # -----------------------------------------------------------------
 def convert_string_to_float(to_convert):
     return float(to_convert.strip())
@@ -441,7 +442,7 @@ class LimitParser(UserFileComponentParser):
         L/QXY qxy1 qxy2 [dqxy[/LIN]]  or  L/QXY qxy1 qxy2 [dqxy[/LOG]]
         L/QXY qxy1,dqxy1,qxy3,dqxy2,qxy2 [/LIN]]  or  L/QXY qxy1,dqxy1,qxy3,dqxy2,qxy2 [/LOG]]
 
-        L/R r1 r2
+        L/R r1 r2  or undocumented L/R r1 r2 step where step is actually ignored
 
         L/WAV l1 l2 [dl[/LIN]  or  L/WAV l1 l2 [dl[/LOG]
         L/WAV l1,dl1,l3,dl2,l2 [/LIN]  or  L/WAV l1,dl1,l3,dl2,l2 [/LOG]
@@ -509,10 +510,11 @@ class LimitParser(UserFileComponentParser):
                                                   space_string + float_number + end_string)
 
         # Radius limits
+        # Note that we have to account for an undocumented potential step size (which is ignored
         self._radius = "\\s*R\\s*"
-        self._radius_pattern = re.compile(start_string + self._radius +
-                                          space_string + float_number +
-                                          space_string + float_number + end_string)
+        self._radius_string = start_string + self._radius + space_string + float_number + space_string + float_number +\
+                              "\\s*(" + float_number + ")?\\s*" + end_string
+        self._radius_pattern = re.compile(self._radius_string)
 
     def parse_line(self, line):
         # Get the settings, ie remove command
@@ -575,7 +577,7 @@ class LimitParser(UserFileComponentParser):
             output = self._extract_simple_pattern(event_binning, user_file_limits_events_binning_range)
         else:
             rebin_values = extract_float_list(event_binning)
-            output = {user_file_limits_events_binning: rebin_values}
+            output = {user_file_limits_events_binning: rebin_string_values(rebin_values=rebin_values)}
         return output
 
     def _extract_cut_limit(self, line):
@@ -589,7 +591,7 @@ class LimitParser(UserFileComponentParser):
 
     def _extract_radius_limit(self, line):
         radius_range_string = re.sub(self._radius, "", line)
-        radius_range = extract_float_range(radius_range_string)
+        radius_range = extract_float_list(radius_range_string, separator=" ")
         return {user_file_limits_radius: range_entry(start=radius_range[0],
                                                      stop=radius_range[1])}
 
@@ -1622,7 +1624,7 @@ class GravityParser(UserFileComponentParser):
     The GravityParser handles the following structure for
         GRAVITY ON
         GRAVITY OFF
-        GRAVITY/LEXTRA=l1
+        GRAVITY/LEXTRA=l1 or (non-standard) GRAVITY/LEXTRA l1
     """
     Type = "GRAVITY"
 
@@ -1635,7 +1637,7 @@ class GravityParser(UserFileComponentParser):
         self._on_off_pattern = re.compile(start_string + self._on_off + end_string)
 
         # Extra length
-        self._extra_length = "\\s*LEXTRA\\s*=\\s*"
+        self._extra_length = "\\s*LEXTRA\\s*(=|\\s)?\\s*"
         self._extra_length_pattern = re.compile(start_string + self._extra_length + float_number + end_string)
 
     def parse_line(self, line):

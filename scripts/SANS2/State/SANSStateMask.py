@@ -182,8 +182,9 @@ class SANSStateMaskISIS(SANSStateBase, SANSStateMask):
             is_invalid.update({"radius mask": "You have to either specify radius_min AND radius_max or none"})
 
         # Radius mask rule: the min radius must be less or equal to the max radius
-        if self.radius_max is not None and self.radius_min is not None and (self.radius_min > self.radius_max):
-            is_invalid.update({"radius mask": "radius_min has to be smaller than radius_max."})
+        if self.radius_max is not None and self.radius_min is not None:
+            if self.radius_min > 0 and self.radius_max > 0 and (self.radius_min > self.radius_max):
+                is_invalid.update({"radius mask": "radius_min has to be smaller than radius_max."})
 
         # --------------------
         # General bin mask

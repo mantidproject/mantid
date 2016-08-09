@@ -138,6 +138,7 @@ class UserFileStateDirectorISIS(object):
         # 4. Xtilt and Ytilt
         # 5. Sample offset
         # 6. Monitor 4 offset
+        # 7. Beam centre
 
         # ---------------------------
         # Correction for X, Y, Z
@@ -267,6 +268,25 @@ class UserFileStateDirectorISIS(object):
                 self._move_builder.set_monitor_4_offset(convert_mm_to_m(monitor_4_shift))
             else:
                 log_non_existing_field("set_monitor_4_offset")
+
+        # ---------------------------
+        # Beam Centre, this can be for HAB and LAB
+        # ---------------------------
+        if user_file_set_centre in user_file_items:
+            beam_centres = user_file_items[user_file_set_centre]
+            for beam_centre in beam_centres:
+                detector_type = beam_centre.detector_type
+                pos1 = beam_centre.pos1
+                pos2 = beam_centre.pos2
+                if detector_type is DetectorType.Hab:
+                    self._move_builder.set_HAB_sample_centre_pos1(self._move_builder.convert_pos1(pos1))
+                    self._move_builder.set_HAB_sample_centre_pos2(self._move_builder.convert_pos2(pos2))
+                elif detector_type is DetectorType.Lab:
+                    self._move_builder.set_LAB_sample_centre_pos1(self._move_builder.convert_pos1(pos1))
+                    self._move_builder.set_LAB_sample_centre_pos2(self._move_builder.convert_pos2(pos2))
+                else:
+                    raise RuntimeError("UserFileStateDirector: An unknown detector {0} was used for the"
+                                       " beam centre.".format(beam_centre.detector_type))
 
     def _set_up_reduction_state(self, user_file_items):
         # There are several things that can be extracted from the user file
@@ -664,7 +684,7 @@ class UserFileStateDirectorISIS(object):
             # Should the user have chosen several values, then the last element is selected
             check_if_contains_only_one_element(radii, user_file_limits_radius)
             radius = radii[-1]
-            if radius.start > radius.stop:
+            if radius.start > 0 and radius.stop > 0 and radius.start > radius.stop:
                 raise RuntimeError("UserFileStateDirector: The inner radius {0} appears to be larger that the outer"
                                    " radius {1} of the mask.".format(radius.start, radius.stop))
             self._mask_builder.set_radius_min(convert_mm_to_m(radius.start))

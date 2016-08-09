@@ -144,7 +144,8 @@ class LimitParserTest(unittest.TestCase):
 
     def test_that_event_time_limit_is_parsed_correctly(self):
         valid_settings = {"L  / EVEnTStime 0,-10,32,434,34523,35": {user_file_limits_events_binning:
-                                                                        [0, -10, 32, 434, 34523, 35]}}
+                                                                    rebin_string_values(rebin_values=[0, -10, 32,
+                                                                                                      434, 34523, 35])}}
 
         invalid_settings = {"L  / EEnTStime 0,-10,32,434,34523,35": RuntimeError,
                             "L/EVENTSTIME 123g, sdf": RuntimeError,
@@ -172,11 +173,13 @@ class LimitParserTest(unittest.TestCase):
         valid_settings = {"L/R 234 235": {user_file_limits_radius: range_entry(start=234,
                                                                                stop=235)},
                           "L / r   -234   235": {user_file_limits_radius: range_entry(start=-234,
-                                                                                      stop=235)}}
+                                                                                      stop=235)},
+                          "L / r   -234   235 454": {user_file_limits_radius: range_entry(start=-234,
+                                                                                          stop=235)}
+                          }
         invalid_settings = {"L/R/ 234 435": RuntimeError,
                             "L/Rr 234 435": RuntimeError,
                             "L/R 435": RuntimeError,
-                            "L/R 234 324 435": RuntimeError,
                             "L/R sdf": RuntimeError,
                             "L/R": RuntimeError}
 
@@ -767,9 +770,10 @@ class GravityParserTest(unittest.TestCase):
 
     def test_that_gravity_extra_length_is_parsed_correctly(self):
         valid_settings = {"Gravity/LExtra =23.5": {user_file_gravity_extra_length: 23.5},
-                          "Gravity  / lExtra =  23.5": {user_file_gravity_extra_length: 23.5}}
+                          "Gravity  / lExtra =  23.5": {user_file_gravity_extra_length: 23.5},
+                          "Gravity  / lExtra  23.5": {user_file_gravity_extra_length: 23.5}}
 
-        invalid_settings = {"Gravity/LExtra 23.5": RuntimeError,
+        invalid_settings = {"Gravity/LExtra - 23.5": RuntimeError,
                             "Gravity/LExtra =tw": RuntimeError}
 
         gravity_parser = GravityParser()

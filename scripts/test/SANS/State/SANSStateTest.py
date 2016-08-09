@@ -170,32 +170,34 @@ class SANSStateTest(unittest.TestCase):
         fake = FakeAlgorithm()
         fake.initialize()
         fake.setProperty("Args", serialized)
-        # property_manager = fake.getProperty("Args").value
+        property_manager = fake.getProperty("Args").value
 
-        # # Assert
-        # state_2 = SANSStateISIS()
-        # state_2.property_manager = property_manager
-        #
-        # self.assertTrue(state_2.data.sample_scatter == ws_name_sample)
-        # self.assertTrue(state_2.data.sample_scatter_period == period)
-        # self.assertTrue(state_2.data.can_scatter == ws_name_can)
-        # self.assertTrue(state_2.data.can_scatter_period == period)
-        #
-        # self.assertTrue(state_2.move.detectors[SANSConstants.low_angle_bank].x_translation_correction == test_value)
-        # self.assertTrue(state_2.move.detectors[SANSConstants.high_angle_bank].y_translation_correction == test_value)
-        # self.assertTrue(state_2.move.detectors[SANSConstants.high_angle_bank].detector_name == test_name)
-        # self.assertTrue(state_2.move.detectors[SANSConstants.high_angle_bank].detector_name_short == test_name)
-        #
-        # self.assertTrue(state_2.reduction.reduction_mode is ISISReductionMode.Merged)
-        # self.assertTrue(state_2.reduction.dimensionality is ReductionDimensionality.TwoDim)
-        # self.assertTrue(state_2.reduction.merge_shift == 12.65)
-        # self.assertTrue(state_2.reduction.merge_scale == 34.6)
-        # self.assertTrue(state_2.reduction.merge_fit_mode == FitModeForMerge.ShiftOnly)
-        #
-        # self.assertTrue(len(state_2.slice.start_time) == 3)
-        # self.assertTrue(len(state_2.slice.end_time) == 3)
-        # self.assertTrue(state_2.slice.start_time[1] == 123.4)
+        # Assert
+        state_2 = SANSStateISIS()
+        state_2.property_manager = property_manager
 
+        self.assertTrue(state_2.data.sample_scatter == ws_name_sample)
+        self.assertTrue(state_2.data.sample_scatter_period == period)
+        self.assertTrue(state_2.data.can_scatter == ws_name_can)
+        self.assertTrue(state_2.data.can_scatter_period == period)
+
+        self.assertTrue(state_2.move.detectors[SANSConstants.low_angle_bank].x_translation_correction == test_value)
+        self.assertTrue(state_2.move.detectors[SANSConstants.high_angle_bank].y_translation_correction == test_value)
+        self.assertTrue(state_2.move.detectors[SANSConstants.high_angle_bank].detector_name == test_name)
+        self.assertTrue(state_2.move.detectors[SANSConstants.high_angle_bank].detector_name_short == test_name)
+
+        self.assertTrue(state_2.reduction.reduction_mode is ISISReductionMode.Merged)
+        self.assertTrue(state_2.reduction.dimensionality is ReductionDimensionality.TwoDim)
+        self.assertTrue(state_2.reduction.merge_shift == 12.65)
+        self.assertTrue(state_2.reduction.merge_scale == 34.6)
+        self.assertTrue(state_2.reduction.merge_fit_mode == FitModeForMerge.ShiftOnly)
+
+        self.assertTrue(len(state_2.slice.start_time) == 3)
+        self.assertTrue(len(state_2.slice.end_time) == 3)
+        self.assertTrue(state_2.slice.start_time[1] == 123.4)
+
+        self.assertTrue(state_2.mask.radius_min == 10.)
+        self.assertTrue(state_2.mask.radius_max == 20.)
 
 if __name__ == '__main__':
     unittest.main()

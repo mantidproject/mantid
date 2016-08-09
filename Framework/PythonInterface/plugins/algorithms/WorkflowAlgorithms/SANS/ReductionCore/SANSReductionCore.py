@@ -25,15 +25,6 @@ class SANSReductionCore(DataProcessorAlgorithm):
         self.declareProperty(PropertyManagerProperty('SANSState'),
                              doc='A property manager which fulfills the SANSState contract.')
 
-        self.declareProperty("UseAdsOptimizations", True, direction=Direction.Input,
-                             doc="When enabled the ADS is being searched for already loaded and reduced workspaces. "
-                                 "Depending on your concrete reduction, this could provide a significant"
-                                 " performance boost")
-
-        allowed_detectors = StringListValidator(["LAB", "HAB"])
-        self.declareProperty("Component", "LAB", validator=allowed_detectors, direction=Direction.Input,
-                             doc="The component of the instrument which is to be reduced.")
-
         # WORKSPACES
         # Scatter Workspaces
         self.declareProperty(MatrixWorkspaceProperty('ScatterWorkspace', '',
@@ -58,16 +49,27 @@ class SANSReductionCore(DataProcessorAlgorithm):
         self.setPropertyGroup("TransmissionWorkspace", 'Data')
         self.setPropertyGroup("DirectWorkspace", 'Data')
 
+        self.declareProperty("UseOptimizations", True, direction=Direction.Input,
+                             doc="When enabled the ADS is being searched for already loaded and reduced workspaces. "
+                                 "Depending on your concrete reduction, this could provide a significant"
+                                 " performance boost")
+
+        allowed_detectors = StringListValidator(["LAB", "HAB"])
+        self.declareProperty("Component", "LAB", validator=allowed_detectors, direction=Direction.Input,
+                             doc="The component of the instrument which is to be reduced.")
+
         # ----------
         # OUTPUT
         # ----------
         self.declareProperty(MatrixWorkspaceProperty(SANSConstants.output_workspace, '', direction=Direction.Output),
                              doc='The output workspace.')
 
-        self.declareProperty(MatrixWorkspaceProperty('SumOfCounts', '', direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('SumOfCounts', '', optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The sum of the counts of the output workspace.')
 
-        self.declareProperty(MatrixWorkspaceProperty('SumOfNormFactors', '', direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('SumOfNormFactors', '', optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The sum of the counts of the output workspace.')
 
     def PyExec(self):
@@ -94,19 +96,19 @@ class SANSReductionCore(DataProcessorAlgorithm):
         #    In case of a histogram workspace, nothing happens.
         # --------------------------------------------------------------------------------------------------------------
         monitor_workspace = self.getProperty("ScatterMonitorWorkspace").value
-        workspace, monitor_workspace, slice_event_factor = SANSReductionCore._slice(state, workspace, monitor_workspace)
+        workspace, monitor_workspace, slice_event_factor = self._slice(state, workspace, monitor_workspace)
 
         # ------------------------------------------------------------
         # 4. Move the workspace into the correct position
         #    The detectors in the workspaces are set such that the beam centre is at (0,0). The position is
         #    a user-specified value which can be obtained with the help of the beam centre finder.
         # ------------------------------------------------------------
-        workspace = SANSReductionCore._move(state, workspace)
+        workspace = self._move(state, workspace, component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Apply masking (pixel masking and time masking)
         # --------------------------------------------------------------------------------------------------------------
-        workspace = SANSReductionCore._mask(state, workspace, component_as_string)
+        workspace = self._mask(state, workspace, component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Convert to Wavelength
@@ -148,13 +150,14 @@ class SANSReductionCore(DataProcessorAlgorithm):
         crop_alg.execute()
         return crop_alg.getProperty(SANSConstants.output_workspace).value
 
-    @staticmethod
-    def _slice(state, workspace, monitor_workspace):
+    def _slice(self, state, workspace, monitor_workspace):
         state_serialized = state.property_manager
         slice_name = "SANSSliceEvent"
         slice_options = {"SANSState": state_serialized,
                          SANSConstants.input_workspace: workspace,
-                         "InputWorkspaceMonitor": monitor_workspace}
+                         "InputWorkspaceMonitor": monitor_workspace,
+                         SANSConstants.output_workspace: SANSConstants.dummy,
+                         "OutputWorkspaceMonitor": "dummy2"}
         slice_alg = create_unmanaged_algorithm(slice_name, **slice_options)
         slice_alg.execute()
 
@@ -163,10 +166,9 @@ class SANSReductionCore(DataProcessorAlgorithm):
         slice_event_factor = slice_alg.getProperty("SliceEventFactor").value
         return workspace, monitor_workspace, slice_event_factor
 
-    @staticmethod
-    def _move(state, workspace):
+    def _move(self, state, workspace, component):
         # First we set the workspace to zero, since it might have been moved around by the user in the ADS
-        # Second we use the inital move to bring the workspace into the correct position
+        # Second we use the initial move to bring the workspace into the correct position
         state_serialized = state.property_manager
         move_name = "SANSMove"
         move_options = {"SANSState": state_serialized,
@@ -179,12 +181,12 @@ class SANSReductionCore(DataProcessorAlgorithm):
 
         # Do the initial move
         move_alg.setProperty("MoveType", "InitialMove")
+        move_alg.setProperty("Component", component)
         move_alg.setProperty(SANSConstants.workspace, workspace)
         move_alg.execute()
         return move_alg.getProperty(SANSConstants.workspace).value
 
-    @staticmethod
-    def _mask(state, workspace, component):
+    def _mask(self, state, workspace, component):
         state_serialized = state.property_manager
         mask_name = "SANSMaskWorkspace"
         mask_options = {"SANSState": state_serialized,
@@ -202,12 +204,6 @@ class SANSReductionCore(DataProcessorAlgorithm):
             state.validate()
         except ValueError as err:
             errors.update({"SANSSingleReduction": str(err)})
-
-        # Check the selected component.
-        scatter_workspace = self.getProperty("ScatterWorkspace").value
-        component = self.getProperty("Component").value
-        # TODO : better check
-
         return errors
 
     def _get_state(self):
