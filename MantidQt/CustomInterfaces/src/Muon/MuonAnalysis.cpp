@@ -2852,7 +2852,10 @@ void MuonAnalysis::dataToFitChanged() {
   if (m_fitDataPresenter) {
     m_fitDataPresenter->setGrouping(m_groupingHelper.parseGroupingTable());
     m_fitDataPresenter->setPlotType(parsePlotType(m_uiForm.frontPlotFuncs));
+    // Set busy cursor while workspaces are being created
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     m_fitDataPresenter->handleSelectedDataChanged(isOverwriteEnabled());
+    QApplication::restoreOverrideCursor();
   }
 }
 
