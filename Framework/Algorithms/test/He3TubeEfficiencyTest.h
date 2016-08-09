@@ -24,50 +24,50 @@ using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 
-namespace He3TubeEffeciencyHelper{
-	void createWorkspace2DInADS(const std::string inputWS) {
-		const int nspecs(4);
-		const int nbins(5);
+namespace He3TubeEffeciencyHelper {
+void createWorkspace2DInADS(const std::string inputWS) {
+  const int nspecs(4);
+  const int nbins(5);
 
-		auto space2D = createWorkspace<Workspace2D>(nspecs, nbins + 1, nbins);
-		space2D->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+  auto space2D = createWorkspace<Workspace2D>(nspecs, nbins + 1, nbins);
+  space2D->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
 
-		BinEdges x{ 0.1, 0.2, 0.3, 0.4, 0.5, 0.6 };
-		Counts y(nbins, 10.0);
-		CountStandardDeviations e(nbins, sqrt(5.0));
+  BinEdges x{0.1, 0.2, 0.3, 0.4, 0.5, 0.6};
+  Counts y(nbins, 10.0);
+  CountStandardDeviations e(nbins, sqrt(5.0));
 
-		for (int i = 0; i < nspecs; i++) {
-			space2D->setBinEdges(i, x);
-			space2D->setCounts(i, y);
-			space2D->setCountStandardDeviations(i, e);
-			space2D->getSpectrum(i).setSpectrumNo(i);
-		}
+  for (int i = 0; i < nspecs; i++) {
+    space2D->setBinEdges(i, x);
+    space2D->setCounts(i, y);
+    space2D->setCountStandardDeviations(i, e);
+    space2D->getSpectrum(i).setSpectrumNo(i);
+  }
 
-		AnalysisDataService::Instance().add(inputWS, space2D);
+  AnalysisDataService::Instance().add(inputWS, space2D);
 
-		LoadInstrument loader;
-		loader.initialize();
-		loader.setPropertyValue("Filename",
-			"IDFs_for_UNIT_TESTING/DUM_Definition.xml");
-		loader.setPropertyValue("Workspace", inputWS);
-		loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
-		loader.execute();
-	}
+  LoadInstrument loader;
+  loader.initialize();
+  loader.setPropertyValue("Filename",
+                          "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
+  loader.setPropertyValue("Workspace", inputWS);
+  loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
+  loader.execute();
+}
 
-	void createEventWorkspaceInADS(const std::string inputEvWS) {
-		EventWorkspace_sptr event =
-			WorkspaceCreationHelper::CreateEventWorkspace(4, 5, 5, 0, 0.9, 3, 0);
-		event->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
-		AnalysisDataService::Instance().add(inputEvWS, event);
+void createEventWorkspaceInADS(const std::string inputEvWS) {
+  EventWorkspace_sptr event =
+      WorkspaceCreationHelper::CreateEventWorkspace(4, 5, 5, 0, 0.9, 3, 0);
+  event->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+  AnalysisDataService::Instance().add(inputEvWS, event);
 
-		LoadInstrument loader;
-		loader.initialize();
-		loader.setPropertyValue("Filename",
-			"IDFs_for_UNIT_TESTING/DUM_Definition.xml");
-		loader.setPropertyValue("Workspace", inputEvWS);
-		loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
-		loader.execute();
-	}
+  LoadInstrument loader;
+  loader.initialize();
+  loader.setPropertyValue("Filename",
+                          "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
+  loader.setPropertyValue("Workspace", inputEvWS);
+  loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
+  loader.execute();
+}
 }
 class He3TubeEfficiencyTest : public CxxTest::TestSuite {
 public:
@@ -81,7 +81,7 @@ public:
   He3TubeEfficiencyTest() : inputWS("testInput"), inputEvWS("testEvInput") {}
 
   void testCorrection() {
-	  He3TubeEffeciencyHelper::createWorkspace2DInADS(inputWS);
+    He3TubeEffeciencyHelper::createWorkspace2DInADS(inputWS);
     He3TubeEfficiency alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
@@ -151,7 +151,7 @@ public:
   }
 
   void testBadTubeThickness() {
-	  He3TubeEffeciencyHelper::createWorkspace2DInADS(inputWS);
+    He3TubeEffeciencyHelper::createWorkspace2DInADS(inputWS);
     He3TubeEfficiency alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
@@ -177,7 +177,7 @@ public:
   }
 
   void testBadTubeThicknessEvents() {
-	He3TubeEffeciencyHelper::createEventWorkspaceInADS(inputEvWS);
+    He3TubeEffeciencyHelper::createEventWorkspaceInADS(inputEvWS);
     He3TubeEfficiency alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
@@ -213,43 +213,44 @@ private:
 
 class He3TubeEfficiencyTestPerformance : public CxxTest::TestSuite {
 public:
-	// This pair of boilerplate methods prevent the suite being created statically
-	// This means the constructor isn't called when running other tests
-	static He3TubeEfficiencyTestPerformance *createSuite() {
-		return new He3TubeEfficiencyTestPerformance();
-	}
-	static void destroySuite(He3TubeEfficiencyTestPerformance *suite) { delete suite; }
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static He3TubeEfficiencyTestPerformance *createSuite() {
+    return new He3TubeEfficiencyTestPerformance();
+  }
+  static void destroySuite(He3TubeEfficiencyTestPerformance *suite) {
+    delete suite;
+  }
 
-	void setUp() {
-		He3TubeEffeciencyHelper::createWorkspace2DInADS(inputWS);
-		He3TubeEffeciencyHelper::createEventWorkspaceInADS(inputEvWS);
-	}
+  void setUp() {
+    He3TubeEffeciencyHelper::createWorkspace2DInADS(inputWS);
+    He3TubeEffeciencyHelper::createEventWorkspaceInADS(inputEvWS);
+  }
 
-	void tearDown() {
-		AnalysisDataService::Instance().remove(inputWS);
-		AnalysisDataService::Instance().remove(inputEvWS);
-	}
+  void tearDown() {
+    AnalysisDataService::Instance().remove(inputWS);
+    AnalysisDataService::Instance().remove(inputEvWS);
+  }
 
-	void testMatrixWSPerformance() {
-		He3TubeEfficiency alg;
-		alg.setPropertyValue("InputWorkspace", inputWS);
-		alg.setPropertyValue("OutputWorkspace", inputWS);
-		alg.execute();
-		TS_ASSERT(alg.isExecuted());
-	}
+  void testMatrixWSPerformance() {
+    He3TubeEfficiency alg;
+    alg.setPropertyValue("InputWorkspace", inputWS);
+    alg.setPropertyValue("OutputWorkspace", inputWS);
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+  }
 
-	void testEventWSPerformance() {
-		He3TubeEfficiency alg;
-		alg.setPropertyValue("InputWorkspace", inputEvWS);
-		alg.setPropertyValue("OutputWorkspace", inputEvWS);
-		alg.execute();
-		TS_ASSERT(alg.isExecuted());
-	}
+  void testEventWSPerformance() {
+    He3TubeEfficiency alg;
+    alg.setPropertyValue("InputWorkspace", inputEvWS);
+    alg.setPropertyValue("OutputWorkspace", inputEvWS);
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+  }
 
 private:
-	const std::string inputWS;
-	const std::string inputEvWS;
+  const std::string inputWS;
+  const std::string inputEvWS;
 };
-
 
 #endif // HE3TUBEEFFICIENCYTEST_H_
