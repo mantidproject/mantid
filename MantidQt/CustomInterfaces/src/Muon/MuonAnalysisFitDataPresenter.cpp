@@ -199,9 +199,11 @@ void MuonAnalysisFitDataPresenter::createWorkspacesToFit(
       // Create here and add to the ADS
       std::string groupLabel;
       const auto ws = createWorkspace(name, groupLabel);
-      AnalysisDataService::Instance().add(name, ws);
-      if (!groupLabel.empty()) {
-        MuonAnalysisHelper::groupWorkspaces(groupLabel, {name});
+      if (ws) {
+        AnalysisDataService::Instance().add(name, ws);
+        if (!groupLabel.empty()) {
+          MuonAnalysisHelper::groupWorkspaces(groupLabel, {name});
+        }
       }
     }
   }
