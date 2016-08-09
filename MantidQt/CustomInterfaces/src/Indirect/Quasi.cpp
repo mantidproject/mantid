@@ -251,13 +251,15 @@ void Quasi::run() {
     auto paramNames = { "Amplitude", "FWHM", "Beta" };
     for (std::string paramName : paramNames) {
       if (plot == paramName || plot == "All") {
+          std::vector<int> spectraIndices;
         for (int i = 0; i <= numSpectra; i++) {
           auto axisLabel = resultWS->getAxis(1)->label(i);
-          std::vector<int> spectraIndices;
           auto found = axisLabel.find(paramName);
           if (found != std::string::npos) {
             spectraIndices.push_back(i);
-            MantidQt::CustomInterfaces::IndirectTab::plotSpectrum(QresultWS, spectraIndices.back());
+            if (spectraIndices.size() <= 3) {
+              MantidQt::CustomInterfaces::IndirectTab::plotSpectrum(QresultWS, spectraIndices.back());
+            }
           }
         }
       }
