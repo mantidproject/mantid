@@ -171,10 +171,9 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
   double lower = mean - 3 * stddev;
   double min = mean * 0.0001;
 
-  double value(0.0);
   for (int i = 0; i < nhist; i++) {
 
-    value = values->y(i)[0];
+    double value = values->y(i)[0];
 
     if (value > upper) {
       valid->mutableY(i)[0] = 0.0;

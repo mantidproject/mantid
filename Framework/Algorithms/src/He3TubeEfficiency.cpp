@@ -180,10 +180,9 @@ void He3TubeEfficiency::correctForEfficiency(std::size_t spectraIndex) {
   const auto wavelength = m_inputWS->points(spectraIndex);
   auto wavelenItr = wavelength.cbegin();
 
-  // not declared const to avoid declaration in tight loop for performance
-  /*const*/ double effcorr(0.0);
   for (; yOutItr != yOut.end(); ++yOutItr, ++eOutItr) {
-    effcorr = this->detectorEfficiency(exp_constant * (*wavelenItr), scale);
+    double effcorr =
+        this->detectorEfficiency(exp_constant * (*wavelenItr), scale);
 
     *yOutItr = (*yInItr) * effcorr;
     ++yInItr;
