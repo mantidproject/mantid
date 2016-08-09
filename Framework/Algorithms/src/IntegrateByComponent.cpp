@@ -90,8 +90,8 @@ void IntegrateByComponent::exec() {
         if (instrument->isMonitor(detids))
           continue;
 
-        const double yValue = integratedWS->readY(hists[i])[0];
-        const double eValue = integratedWS->readE(hists[i])[0];
+        const double yValue = integratedWS->y(hists[i])[0];
+        const double eValue = integratedWS->e(hists[i])[0];
 
         if (boost::math::isnan(yValue) || boost::math::isinf(yValue) ||
             boost::math::isnan(eValue) ||
@@ -131,8 +131,8 @@ void IntegrateByComponent::exec() {
         if (instrument->isMonitor(detids))
           continue;
 
-        const double yValue = integratedWS->readY(hists[i])[0];
-        const double eValue = integratedWS->readE(hists[i])[0];
+        const double yValue = integratedWS->y(hists[i])[0];
+        const double eValue = integratedWS->e(hists[i])[0];
         if (boost::math::isnan(yValue) || boost::math::isinf(yValue) ||
             boost::math::isnan(eValue) ||
             boost::math::isinf(eValue)) // NaNs/Infs
@@ -199,8 +199,7 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
   for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
     detid_t d = (*(countsWS->getSpectrum(i).getDetectorIDs().begin()));
     try {
-      std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> anc =
-          instrument->getDetector(d)->getAncestors();
+      auto anc = instrument->getDetector(d)->getAncestors();
 
       if (anc.size() < static_cast<size_t>(parents)) {
         g_log.warning("Too many levels up. Will ignore LevelsUp");
@@ -217,16 +216,10 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
   std::vector<std::vector<size_t>> speclist;
   std::vector<size_t> speclistsingle;
 
-  std::unordered_multimap<Mantid::Geometry::ComponentID, size_t>::iterator m_it,
-      s_it;
-
-  for (m_it = mymap.begin(); m_it != mymap.end(); m_it = s_it) {
+  auto s_it = mymap.begin();
+  for (auto m_it = mymap.begin(); m_it != mymap.end(); m_it = s_it) {
     Mantid::Geometry::ComponentID theKey = (*m_it).first;
-    std::pair<std::unordered_multimap<Mantid::Geometry::ComponentID,
-                                      size_t>::iterator,
-              std::unordered_multimap<Mantid::Geometry::ComponentID,
-                                      size_t>::iterator> keyRange =
-        mymap.equal_range(theKey);
+    auto keyRange =mymap.equal_range(theKey);
 
     // Iterate over all map elements with key == theKey
     speclistsingle.clear();
