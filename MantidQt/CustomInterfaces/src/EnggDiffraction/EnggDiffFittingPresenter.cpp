@@ -214,7 +214,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 
         std::string bankFileDir = bankDir.toString();
 
-		// browse the file
+        // browse the file
         browsedFile(strFocusedFile, runnoDirVector, splitBaseName, runNoVec,
                     bankFileDir);
       }
@@ -225,22 +225,11 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
       // adds run number to widget on right and changes text-field
       // single run number and trigger FittingRunNo changed again
       if (strFocusedFile.find("-") != std::string::npos) {
-        std::vector<std::string> firstLastRunNoVec;
-        boost::split(firstLastRunNoVec, strFocusedFile, boost::is_any_of("-"));
-        std::string firstRun;
-        std::string lastRun;
-        if (!firstLastRunNoVec.empty()) {
-          firstRun = firstLastRunNoVec[0];
-          lastRun = firstLastRunNoVec[1];
 
-          m_view->setFittingMultiRunMode(true);
-          enableMultiRun(firstRun, lastRun, runnoDirVector);
-        }
+        processMultiRun(strFocusedFile, runnoDirVector);
 
       } else {
         auto focusDir = m_view->focusingDir();
-        g_log.error() << strFocusedFile << std::endl;
-
         // true if string convertible to digit
         auto isRunNumber = isDigit(strFocusedFile);
 
@@ -257,25 +246,8 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
         // else - given or set to a single run number
         else {
 
-          // to identify the loop number - multi & single run
-          g_fitting_runno_counter++;
-
-          m_view->setFittingSingleRunMode(true);
-
-          updateFittingDirVec(focusDir, strFocusedFile, runnoDirVector);
-          m_view->setFittingRunNumVec(runnoDirVector);
-          // add bank to the combo-box and list view
-          setBankItems();
-          setDefaultBank(splitBaseName, strFocusedFile);
-
-          auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
-          if (!fittingMultiRunMode) {
-            runNoVec.clear();
-            // pushing run number directory to list widget as its single run
-            // number
-            runNoVec.push_back(strFocusedFile);
-            setRunNoItems(runNoVec, false);
-          }
+          processSingleRun(focusDir, strFocusedFile, runnoDirVector,
+                           splitBaseName, runNoVec);
         }
       }
     }
@@ -303,10 +275,9 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 }
 
 void EnggDiffFittingPresenter::browsedFile(
-    const std::string strFocusedFile,
-    std::vector<std::string> &runnoDirVector,
-    std::vector<std::string> &splitBaseName, std::vector<std::string> &runNoVec,
-    std::string &bankFileDir) {
+    const std::string strFocusedFile, std::vector<std::string> &runnoDirVector,
+    const std::vector<std::string> &splitBaseName,
+    std::vector<std::string> &runNoVec, const std::string &bankFileDir) {
   // to identify the loop number
   g_fitting_runno_counter++;
 
@@ -349,6 +320,49 @@ void EnggDiffFittingPresenter::browsedFile(
       // updated
       setRunNoItems(runNoVec, false);
     }
+  }
+}
+
+void EnggDiffFittingPresenter::processMultiRun(
+    const std::string strFocusedFile,
+    std::vector<std::string> &runnoDirVector) {
+  std::vector<std::string> firstLastRunNoVec;
+  boost::split(firstLastRunNoVec, strFocusedFile, boost::is_any_of("-"));
+  std::string firstRun;
+  std::string lastRun;
+  if (!firstLastRunNoVec.empty()) {
+    firstRun = firstLastRunNoVec[0];
+    lastRun = firstLastRunNoVec[1];
+
+    m_view->setFittingMultiRunMode(true);
+    enableMultiRun(firstRun, lastRun, runnoDirVector);
+  }
+}
+
+void EnggDiffFittingPresenter::processSingleRun(
+    const std::string &focusDir, const std::string &strFocusedFile,
+    std::vector<std::string> &runnoDirVector,
+    const std::vector<std::string> &splitBaseName,
+    std::vector<std::string> &runNoVec) {
+
+  // to identify the loop number - multi & single run
+  g_fitting_runno_counter++;
+
+  m_view->setFittingSingleRunMode(true);
+
+  updateFittingDirVec(focusDir, strFocusedFile, runnoDirVector);
+  m_view->setFittingRunNumVec(runnoDirVector);
+  // add bank to the combo-box and list view
+  setBankItems();
+  setDefaultBank(splitBaseName, strFocusedFile);
+
+  auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
+  if (!fittingMultiRunMode) {
+    runNoVec.clear();
+    // pushing run number directory to list widget as its single run
+    // number
+    runNoVec.push_back(strFocusedFile);
+    setRunNoItems(runNoVec, false);
   }
 }
 

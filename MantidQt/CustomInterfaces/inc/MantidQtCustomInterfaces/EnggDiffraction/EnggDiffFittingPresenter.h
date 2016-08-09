@@ -159,9 +159,18 @@ private:
 
   void browsedFile(const std::string strFocusedFile,
                    std::vector<std::string> &runnoDirVector,
-                   std::vector<std::string> &splitBaseName,
+                   const std::vector<std::string> &splitBaseName,
                    std::vector<std::string> &runNoVec,
-                   std::string &bankFileDir);
+                   const std::string &bankFileDir);
+
+  void processMultiRun(const std::string strFocusedFile,
+                       std::vector<std::string> &runnoDirVector);
+
+  void processSingleRun(const std::string &focusDir,
+                        const std::string &strFocusedFile,
+                        std::vector<std::string> &runnoDirVector,
+                        const std::vector<std::string> &splitBaseName,
+                        std::vector<std::string> &runNoVec);
 
   // whether to use AlignDetectors to convert units
   static const bool g_useAlignDetectors;
