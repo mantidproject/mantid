@@ -662,9 +662,12 @@ void MergeRuns::createSampleLogsMaps(MatrixWorkspace_sptr ws, size_t numberOfFil
   getSampleList(m_sampleLogsMin, "sample_logs_min", ws);
   getSampleList(m_sampleLogsMax, "sample_logs_max", ws);
   getSampleList(m_sampleLogsSum, "sample_logs_sum", ws);
+  getSampleListString(m_sampleLogsList, "sample_logs_list", ws);
+  getSampleListString(m_sampleLogsWarn, "sample_logs_warn", ws);
+  getSampleListString(m_sampleLogsFail, "sample_logs_fail", ws);
 }
 
-void MergeRuns::getSampleList(MergeRuns::sample_logs_map &sampleLogMap, std::string sampleLogBehaviour, MatrixWorkspace_sptr ws) {
+void MergeRuns::getSampleList(sample_logs_map_double &sampleLogMap, std::string sampleLogBehaviour, MatrixWorkspace_sptr ws) {
   std::string params = ws->getInstrument()->getParameterAsString(sampleLogBehaviour, false);
   StringTokenizer tokenizer(params, ",", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
   for (auto item : tokenizer.asVector()) {
@@ -673,30 +676,65 @@ void MergeRuns::getSampleList(MergeRuns::sample_logs_map &sampleLogMap, std::str
   }
 }
 
+void MergeRuns::getSampleListString(sample_logs_map_string &sampleLogMap, std::string sampleLogBehaviour, MatrixWorkspace_sptr ws) {
+  std::string params = ws->getInstrument()->getParameterAsString(sampleLogBehaviour, false);
+  StringTokenizer tokenizer(params, ",", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
+  for (auto item : tokenizer.asVector()) {
+    sampleLogMap[item] = ws->getLog(item)->value();
+    g_log.warning(sampleLogBehaviour + ":" + item + ":" + sampleLogMap[item]);
+  }
+}
+
 void MergeRuns::updateSampleLogs(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr outWS, size_t numberOfFiles) {
-
-  g_log.warning("Updating..." + std::to_string(m_sampleLogsAverage.size()));
-
   // Average
   for (auto log : m_sampleLogsAverage) {
     m_sampleLogsAverage[log.first] += ws->getLogAsSingleValue(log.first) / static_cast<double>(numberOfFiles);
+    outWS->getLog(log.first)->setValue(std::to_string(m_sampleLogsAverage[log.first]));
     g_log.warning(log.first + std::to_string(m_sampleLogsAverage[log.first]));
   }
 
   // Min
   for (auto log : m_sampleLogsMin) {
     m_sampleLogsMin[log.first] = std::min(ws->getLogAsSingleValue(log.first), outWS->getLogAsSingleValue(log.first));
+    outWS->getLog(log.first)->setValue(std::to_string(m_sampleLogsMin[log.first]));
     g_log.warning(log.first + std::to_string(m_sampleLogsMin[log.first]));
   }
 
   // Max
   for (auto log : m_sampleLogsMax) {
     m_sampleLogsMax[log.first] = std::max(ws->getLogAsSingleValue(log.first), outWS->getLogAsSingleValue(log.first));
+    outWS->getLog(log.first)->setValue(std::to_string(m_sampleLogsMax[log.first]));
     g_log.warning(log.first + std::to_string(m_sampleLogsMax[log.first]));
   }
 
+  // Sum
   for (auto log : m_sampleLogsSum) {
     m_sampleLogsSum[log.first] += ws->getLogAsSingleValue(log.first);
+    outWS->getLog(log.first)->setValue(std::to_string(m_sampleLogsSum[log.first]));
+    g_log.warning(log.first + std::to_string(m_sampleLogsSum[log.first]));
+  }
+
+  // List
+  for (auto log : m_sampleLogsList) {
+    m_sampleLogsList[log.first] = m_sampleLogsList[log.first] + ", " + ws->getLog(log.first)->value();
+    outWS->getLog(log.first)->setValue(m_sampleLogsList[log.first]);
+    g_log.warning(log.first + m_sampleLogsList[log.first]);
+  }
+
+  // Warn
+  for (auto log : m_sampleLogsWarn) {
+    if (m_sampleLogsWarn[log.first].compare(ws->getLog(log.first)->value()) != 0) {
+      g_log.warning("Warning, difference in sample log values for " + log.first + ". First workspace value: " + m_sampleLogsWarn[log.first] + ", second workspace value: " + ws->getLog(log.first)->value());
+    }
+    g_log.warning(log.first + std::to_string(m_sampleLogsSum[log.first]));
+  }
+
+  // Fail
+  for (auto log : m_sampleLogsFail) {
+    if (m_sampleLogsFail[log.first].compare(ws->getLog(log.first)->value()) != 0) {
+      g_log.error("Error, difference in sample log values for " + log.first + ". First workspace value: " + m_sampleLogsWarn[log.first] + ", second workspace value: " + ws->getLog(log.first)->value());
+      throw std::runtime_error("Different sample log values for " + log.first);
+    }
     g_log.warning(log.first + std::to_string(m_sampleLogsSum[log.first]));
   }
 

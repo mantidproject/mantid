@@ -126,14 +126,15 @@ private:
     }
   }
 
-  typedef std::map<const std::string, double> sample_logs_map;
-  sample_logs_map m_sampleLogsAverage;
-  sample_logs_map m_sampleLogsMin;
-  sample_logs_map m_sampleLogsMax;
-  sample_logs_map m_sampleLogsSum;
-//  sample_logs_map m_sampleLogsList;
-//  sample_logs_map m_sampleLogsWarnIfDifferent;
-//  sample_logs_map m_sampleLogsFailIfDifferent;
+  typedef std::map<const std::string, double> sample_logs_map_double;
+  sample_logs_map_double m_sampleLogsAverage;
+  sample_logs_map_double m_sampleLogsMin;
+  sample_logs_map_double m_sampleLogsMax;
+  sample_logs_map_double m_sampleLogsSum;
+  typedef std::map<const std::string, std::string> sample_logs_map_string;
+  sample_logs_map_string m_sampleLogsList;
+  sample_logs_map_string m_sampleLogsWarn;
+  sample_logs_map_string m_sampleLogsFail;
 
   // Methods called by exec()
   using Mantid::API::Algorithm::validateInputs;
@@ -165,7 +166,9 @@ private:
 
   void createSampleLogsMaps(API::MatrixWorkspace_sptr ws, size_t numberOfFiles);
   void updateSampleLogs(API::MatrixWorkspace_sptr ws, API::MatrixWorkspace_sptr outWS, size_t numberOfFiles);
-  void getSampleList(sample_logs_map &sampleLogMap, std::string sampleLogBehaviour, API::MatrixWorkspace_sptr ws);
+  void getSampleList(sample_logs_map_double &sampleLogMap, std::string sampleLogBehaviour, API::MatrixWorkspace_sptr ws);
+  void getSampleListString(sample_logs_map_string &sampleLogMap, std::string sampleLogBehaviour, API::MatrixWorkspace_sptr ws);
+
 };
 
 } // namespace Algorithm

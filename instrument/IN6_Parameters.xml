@@ -32,7 +32,15 @@
         <parameter name="sample_logs_sum" type="string">
             <value val="monitor1.monrate" />
         </parameter>
-
+        <parameter name="sample_logs_list" type="string">
+            <value val="run_number" />
+        </parameter>
+        <parameter name="sample_logs_warn" type="string">
+            <value val="Ei" />
+        </parameter>
+        <parameter name="sample_logs_fail" type="string">
+            <value val="EPP" />
+        </parameter>
 
 	</component-link>
 
