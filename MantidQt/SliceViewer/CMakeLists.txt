@@ -108,6 +108,7 @@ set ( UI_FILES
 
 set ( TEST_FILES
     test/CompositePeaksPresenterTest.h
+    test/CoordinateTransformTest.h
     test/ConcretePeaksPresenterTest.h
     test/EllipsoidPlaneSliceCalculatorTest.h
     test/PeakBoundingBoxTest.h
