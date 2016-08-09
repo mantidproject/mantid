@@ -403,10 +403,9 @@ void MantidDockWidget::setItemIcon(QTreeWidgetItem *item,
 * It is important that the workspace tree is modified only by this method.
 */
 void MantidDockWidget::updateTree() {
-  // [Removed]
   // do not update until the counter is zero
-  if (m_updateCount.deref())
-    return;
+  // if (m_updateCount.deref())
+  //   return;
 
   // find all expanded top-level entries
   QStringList expanded;
