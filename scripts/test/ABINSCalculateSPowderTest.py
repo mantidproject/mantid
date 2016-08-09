@@ -17,7 +17,7 @@ except ImportError:
     exir(1)
 
 
-from AbinsModules import CalculateS, LoadCASTEP
+from AbinsModules import CalculateS, LoadCASTEP, Constants
 
 class ABINSCalculateSPowderTest(unittest.TestCase):
     """
@@ -70,7 +70,8 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
     #       main test
     def test_good_case(self):
-        #self._good_case(name=self.C6H6)
+        Constants._pkt_per_peak = 50 # lower internal ABINS parameter for the purpose of this benchmark
+        self._good_case(name=self.C6H6)
         self._good_case(name=self.Si2)
 
 
@@ -105,10 +106,11 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
         correct_data = None
         with open(filename) as data_file:
             correct_data = json.loads(data_file.read().replace("\\n"    , " ").
-                                      replace("array" , "").
-                                      replace("(["    , "[").
-                                      replace("])"    , "]").
-                                      replace("'"     , '"'))
+                                      replace("array" ,   "").
+                                      replace("(["    ,  "[").
+                                      replace("])"    ,  "]").
+                                      replace("'"     ,  '"').
+                                      replace("0. "   ,"0.0"))
 
         for key in correct_data.keys():
             correct_data[key] = np.asarray(correct_data[key])
