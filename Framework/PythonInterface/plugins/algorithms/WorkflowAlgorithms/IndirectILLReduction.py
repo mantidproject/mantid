@@ -10,26 +10,13 @@ from mantid import config, logger, mtd
 from IndirectImport import import_mantidplot
 
 class IndirectILLReduction(DataProcessorAlgorithm):
-    """
-    Authors:
-    G.Vardanyan :  vardanyan@ill.fr
-    V.Reimund   :  reimund@ill.fr
-    This version is created on 01/08/2016 partly based on previous work by S.Howells et. Al.
-    This is an algorithm for data reduction from IN16B instrument at ILL.
-    It reads raw .nxs files and produces the reduced workspace with series of
-    manipulations performed dependent on the many input options.
-    This file is part of Mantid.
-    For the full documentation, see
-    http://docs.mantidproject.org/nightly/algorithms/IndirectILLReduction-v1.html?highlight=indirectillreduction
-    """
 
-    # Output workspaces
-    # these will be set in PyInit by user input
+    # Output workspaces, will be set in PyInit by user input
     _red_ws = 'red'
     _left_ws = 'left'
     _right_ws = 'right'
 
-    # optional output workspaces with fixed names
+    # Optional output workspaces with fixed names for ControlMode
     # they will be prepended with _red_ws OR RunNumber
     _raw_ws = 'raw'
     _det_ws = 'detgrouped'
@@ -275,22 +262,39 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         """
         Loads vanadium run into workspace and extracts left and right wings to use in shift spectra
         Used only in unmirror =5,7. Do not confuse with calibration workspace!
+        Note, in principle here recursion can be used, but for this _raw_ws needs to be made a ws property
+        otherwise, when running multiple files, after reducing first file with vanadium run, raw is overwritten!
         """
-        Load(Filename=self._vanadium_file, OutputWorkspace='van')
-
+        Load(Filename=self._vanadium_file,OutputWorkspace='van')
         LoadParameterFile(Workspace='van', Filename=self._parameter_file)
-
+        ExtractSingleSpectrum(InputWorkspace='van', OutputWorkspace='van_mon', WorkspaceIndex=0)
         GroupDetectors(InputWorkspace='van', OutputWorkspace='van', MapFile=self._map_file, Behaviour='Sum')
+        NormaliseToMonitor(InputWorkspace='van', OutputWorkspace='van', MonitorWorkspace='van_mon')
 
-        # there is problem with this
-        #ExtractSingleSpectrum(InputWorkspace='van', OutputWorkspace='van_mon', WorkspaceIndex=0)
-        #NormaliseToMonitor(InputWorkspace='van', OutputWorkspace='van', MonitorWorkspace='van_mon')
+        x = mtd['van'].readX(0)
+        start = 0
+        end = len(x) - 1
+        mid = int(end / 2)
 
-        #xmin, xmax = self._monitor_range('van_mon')
-        # Mask first and last bins, where monitor count was 0
-        #MaskBins(InputWorkspace='van', OutputWorkspace='van', XMin=0, XMax=xmin)
-        #MaskBins(InputWorkspace='van', OutputWorkspace='van', XMin=xmax, XMax=mtd['van'].blocksize())
-        #DeleteWorkspace('van_mon')
+        # get the left and right wings
+        self._extract_workspace('van', 'left_van', x[start], x[mid])
+        self._extract_workspace('van', 'right_van', x[mid], x[end])
+        self._extract_workspace('van_mon', 'left_van_mon', x[start], x[mid])
+        self._extract_workspace('van_mon', 'right_van_mon', x[mid], x[end])
+
+        # get sensible range from left monitor and mask correspondingly
+        # masking is critical, since nan and inf values are problematic for peak finding
+        xmin, xmax = self._monitor_range('left_van_mon')
+        MaskBins(InputWorkspace='left_van', OutputWorkspace='left_van', XMin=0, XMax=xmin)
+        MaskBins(InputWorkspace='left_van', OutputWorkspace='left_van', XMin=xmax, XMax=end)
+        DeleteWorkspace('left_van_mon')
+        # the same for the right
+        xmin, xmax = self._monitor_range('right_van_mon')
+        MaskBins(InputWorkspace='right_van', OutputWorkspace='right_van', XMin=0, XMax=xmin)
+        MaskBins(InputWorkspace='right_van', OutputWorkspace='right_van', XMin=xmax, XMax=end)
+        DeleteWorkspace('right_van_mon')
+        DeleteWorkspace('van')
+        DeleteWorkspace('van_mon')
 
     def _convert_to_energy(self, ws):
         """
@@ -428,13 +432,12 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         elif o == 5:
             self.log().information('Unmirror 5: shift the right according to right of the vanadium and sum to left')
             self._load_vanadium_run()
-            self._extract_workspace('van','right_van',x[mid], x[end])
-            self._convert_to_energy('right_van')
             self._shift_spectra(right, 'right_van', 'right_shifted', 2)
             self._perform_mirror(left, 'right_shifted', red)
             DeleteWorkspace('right_shifted')
+            # remove vanadium ws
             DeleteWorkspace('right_van')
-            DeleteWorkspace('van')
+            DeleteWorkspace('left_van')
 
         elif o == 6:
             self.log().information('Unmirror 6: center both the right and the left and sum')
@@ -447,18 +450,14 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         elif o == 7:
             self.log().information('Unmirror 7: shift both the right and the left according to vanadium and sum')
             self._load_vanadium_run()
-            self._extract_workspace('van', 'left_van', x[start], x[mid])
-            self._extract_workspace('van', 'right_van', x[mid], x[end])
-            self._convert_to_energy('left_van')
-            self._convert_to_energy('right_van')
             self._shift_spectra(left, 'left_van', 'left_shifted', 2)
             self._shift_spectra(right, 'right_van', 'right_shifted', 2)
             self._perform_mirror('left_shifted', 'right_shifted', red)
             DeleteWorkspace('left_shifted')
             DeleteWorkspace('right_shifted')
+            # remove vanadium ws
             DeleteWorkspace('left_van')
             DeleteWorkspace('right_van')
-            DeleteWorkspace('van')
 
     def _set_output_workspace_properties(self, runlist):
 
