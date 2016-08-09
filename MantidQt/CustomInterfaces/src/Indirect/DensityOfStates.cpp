@@ -27,6 +27,7 @@ DensityOfStates::DensityOfStates(QWidget *parent)
   m_uiForm.lwIons->setSelectionMode(QAbstractItemView::MultiSelection);
 }
 
+
 void DensityOfStates::setup() {}
 
 /**
@@ -107,11 +108,13 @@ void DensityOfStates::run() {
       dosAlgo->setProperty("ScaleByCrossSection",
                            crossSectionScaleType);
 
-    const auto sumContributions = m_uiForm.ckSumContributions->isChecked();
-    dosAlgo->setProperty("SumContributions", sumContributions);
-
-    const auto calcIndices = m_uiForm.ckCalcIndices->isChecked();
-    dosAlgo->setProperty("CalculateIonIndices", calcIndices);
+    const auto outputFormat = m_uiForm.cbOutputFormat->currentIndex();
+    if (outputFormat == 1) {
+      dosAlgo->setProperty("SumContributions", true);
+    }
+	if (outputFormat == 2){
+      dosAlgo->setProperty("CalculateIonIndices", true);
+    }
 
     std::vector<std::string> selectedIons;
     auto items = m_uiForm.lwIons->selectedItems();
@@ -196,7 +199,6 @@ void DensityOfStates::handleFileChange() {
     m_batchAlgoRunner->executeBatchAsync();
   } else {
     m_uiForm.lwIons->clear();
-    m_uiForm.ckSumContributions->setChecked(false);
     m_uiForm.ckCrossSectionScale->setChecked(false);
   }
 
@@ -204,7 +206,6 @@ void DensityOfStates::handleFileChange() {
   m_uiForm.lwIons->setEnabled(isPhononFile);
   m_uiForm.pbSelectAllIons->setEnabled(isPhononFile);
   m_uiForm.pbDeselectAllIons->setEnabled(isPhononFile);
-  m_uiForm.ckSumContributions->setEnabled(isPhononFile);
   m_uiForm.ckCrossSectionScale->setEnabled(isPhononFile);
 }
 
