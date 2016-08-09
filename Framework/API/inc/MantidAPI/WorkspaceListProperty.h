@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <vector>
-
 namespace Mantid {
 namespace API {
 
@@ -44,8 +43,8 @@ class DLLExport WorkspaceListProperty
           std::vector<boost::shared_ptr<TYPE>>> {
 public:
   /// Typedef the value type of this property with value.
-  typedef std::vector<boost::shared_ptr<TYPE>> WorkspaceListPropertyType;
-  typedef Kernel::PropertyWithValue<WorkspaceListPropertyType> SuperClass;
+  using WorkspaceListPropertyType = std::vector<boost::shared_ptr<TYPE>>;
+  using SuperClass = Kernel::PropertyWithValue<WorkspaceListPropertyType>;
 
   /**
   * WorkspaceListProperty
@@ -97,6 +96,14 @@ public:
   }
 
   /**
+  * Equivalence overload
+  * @param right: rhs workspace list property type.
+  */
+  const bool operator==(const WorkspaceListProperty &right) const {
+    return (m_optional == right.m_optional) && SuperClass::operator==(right);
+  }
+
+  /**
   * Clone operation.
   */
   WorkspaceListProperty<TYPE> *clone() const override {
@@ -122,6 +129,14 @@ public:
   /// Is the input workspace property optional?
   bool isOptional() const { return m_optional == PropertyMode::Optional; }
 
+  /** In addition to running the PropertyWithValue base class IValidator checks,
+  * this method ensures that any WorkspaceGroups added do not exist in the ADS.
+  * This check is performed because the lifetime of a workspace which both
+  * exist inside the ADS and a WorkspaceGroup cannot be guaranteed. If it is
+  * deleted in the ADS the shared_ptr reference is also automatically removed
+  * from the WorkspaceGroup. This can lead to a dangerous situation.
+  * @returns error string. Empty if no errors.
+  */
   std::string isValid() const override {
     std::string error;
     auto workspaces = SuperClass::m_value;
@@ -134,7 +149,8 @@ public:
         if (std::any_of(names.cbegin(), names.cend(), [](const std::string &s) {
               return AnalysisDataService::Instance().doesExist(s);
             })) {
-          error = "WorkspaceGroups which exist in the ADS are not allowed.";
+          error = "WorkspaceGroups with members in the ADS are not allowed for "
+                  "WorkspaceListProperty.";
           break;
         }
       }
@@ -176,6 +192,9 @@ private:
 
   /// Flag indicating whether the type is optional or not.
   PropertyMode::Type m_optional;
+
+  static_assert(std::is_convertible<TYPE, Mantid::Kernel::DataItem>::value,
+	  "Template argument TYPE must inherit DataItem");
 };
 
 } // namespace API

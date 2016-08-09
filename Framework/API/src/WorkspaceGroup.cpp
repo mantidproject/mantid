@@ -2,10 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Logger.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid {
 namespace API {
@@ -451,8 +451,8 @@ IPropertyManager::getValue<std::vector<Mantid::API::WorkspaceGroup_sptr>>(
   } else {
     std::string message = "Attempt to assign property " + name +
                           " to incorrect type. Expected type "
-                          "std::vector<boost::shared_ptr<Mantid::Kernel::"
-                          "DataItem>>";
+                          "std::vector<boost::shared_ptr<Mantid::API::"
+                          "WorkspaceGroup>>";
     throw std::runtime_error(message);
   }
 }

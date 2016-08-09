@@ -36,7 +36,7 @@ private:
   /**
   * Helper class. Algorithms are instances of IPropertyManager
   */
-  class MyAlgorithm : public Mantid::API::Algorithm {
+  template <typename T> class MyAlgorithm : public Mantid::API::Algorithm {
   public:
     MyAlgorithm() { this->setRethrows(true); }
 
@@ -47,40 +47,15 @@ private:
     const std::string summary() const override { return "MyAlgorithm helper."; }
 
     virtual void init() {
-      declareProperty(std::make_unique<WorkspaceListProperty<Workspace>>(
-          "MyProperty", std::vector<Workspace_sptr>(0)));
+      declareProperty(std::make_unique<WorkspaceListProperty<T>>(
+          "MyProperty", std::vector<boost::shared_ptr<T>>(0)));
     }
 
     virtual void exec() {
-      std::vector<Workspace_sptr> val = getProperty("MyProperty");
+      std::vector<boost::shared_ptr<T>> val = getProperty("MyProperty");
     }
 
     virtual ~MyAlgorithm() {}
-  };
-
-  /**
-  * Helper class. Algorithms are instances of IPropertyManager
-  */
-  class MyAlgorithm2 : public Mantid::API::Algorithm {
-  public:
-    MyAlgorithm2() { this->setRethrows(true); }
-
-    virtual int version() const { return 1; }
-
-    virtual const std::string name() const { return "MyAlgorithm"; }
-
-    const std::string summary() const override { return "MyAlgorithm helper."; }
-
-    virtual void init() {
-      declareProperty(std::make_unique<WorkspaceListProperty<MatrixWorkspace>>(
-          "MyProperty", std::vector<MatrixWorkspace_sptr>(0)));
-    }
-
-    virtual void exec() {
-      std::vector<MatrixWorkspace_sptr> val = getProperty("MyProperty");
-    }
-
-    virtual ~MyAlgorithm2() {}
   };
 
 public:
@@ -134,19 +109,16 @@ public:
         PropertyMode::Optional);
     propB = propA;
     TS_ASSERT_EQUALS(list, propA.list());
-    TS_ASSERT_EQUALS(propA.list(), propB.list());
     TS_ASSERT_EQUALS(propA.isOptional(), propB.isOptional());
+    TS_ASSERT_EQUALS(propA.list(), propB.list());
   }
 
   void test_clone() {
     auto list = createWorkspaceList();
-    WorkspaceListProperty<Workspace> *propOne =
-        new WorkspaceListProperty<Workspace>("PropA", list, Direction::Input,
+    WorkspaceListProperty<Workspace> propOne("PropA", list, Direction::Input,
                                              PropertyMode::Optional);
-    WorkspaceListProperty<Workspace> *propTwo = propOne->clone();
-    TS_ASSERT_DIFFERS(propOne, propTwo);
-    delete propOne;
-    delete propTwo;
+    WorkspaceListProperty<Workspace> propTwo = *propOne.clone();
+    TS_ASSERT_EQUALS(propOne, propTwo);
   }
 
   //------------------------------------------------------------------------------
@@ -154,7 +126,8 @@ public:
   // PropertyManager interfaces (such as Algorithm).
   //------------------------------------------------------------------------------
   void test_set_and_get_Property() {
-    MyAlgorithm alg;
+    using Alg = MyAlgorithm<Workspace>;
+    Alg alg;
     alg.initialize();
 
     auto ilist = createWorkspaceList();
@@ -174,7 +147,9 @@ public:
     ilist.push_back(a);
     ilist.push_back(b);
 
-    MyAlgorithm alg;
+    using Alg = MyAlgorithm<Workspace>;
+    Alg alg;
+    ;
     alg.initialize();
 
     alg.setProperty("MyProperty", ilist);
@@ -201,7 +176,8 @@ public:
 
     std::vector<Workspace_sptr> list{wksp, group};
 
-    MyAlgorithm2 alg; // Property template specified as MatrixWorkspace
+    using Alg = MyAlgorithm<MatrixWorkspace>;
+    Alg alg; // Property template specified as MatrixWorkspace
     alg.initialize();
 
     TS_ASSERT_THROWS(alg.setProperty("MyProperty", list),
@@ -214,12 +190,26 @@ public:
                      std::invalid_argument);
   }
 
+  void test_invalid_list_type_fail() {
+    std::vector<double> list;
+
+    list.push_back(10);
+
+    using Alg = MyAlgorithm<MatrixWorkspace>;
+    Alg alg; // Property template specified as MatrixWorkspace
+    alg.initialize();
+
+    TS_ASSERT_THROWS(alg.setProperty("MyProperty", list),
+                     std::invalid_argument);
+  }
+
   void test_set_property_workspace_groups() {
     auto group = boost::make_shared<WorkspaceGroup>();
     group->addWorkspace(boost::make_shared<WorkspaceTester>());
     group->addWorkspace(boost::make_shared<WorkspaceTester>());
 
-    MyAlgorithm alg;
+    using Alg = MyAlgorithm<Workspace>;
+    Alg alg;
     alg.initialize();
 
     auto list = std::vector<Workspace_sptr>();
@@ -262,7 +252,8 @@ public:
   // the workspace.
   void test_return_property_as_string() {
     auto ilist = createWorkspaceList();
-    MyAlgorithm alg;
+    using Alg = MyAlgorithm<Workspace>;
+    Alg alg;
     alg.initialize();
 
     alg.setProperty("MyProperty", ilist);

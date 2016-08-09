@@ -24,9 +24,6 @@ DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<double>)
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<std::string>)
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<std::vector<std::string>>)
 
-typedef std::vector<boost::shared_ptr<Mantid::Kernel::DataItem>>
-    DataItemSptrVec;
-
 namespace Mantid {
 namespace Kernel {
 // This template implementation has been left in because although you can't

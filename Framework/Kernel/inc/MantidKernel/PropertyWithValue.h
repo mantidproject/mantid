@@ -525,7 +525,7 @@ public:
    *  N.B. Problems found in validator are written to the log
    *  if you override this function to do checking outside a validator may want
    * to do more logging
-   *  @returns "" if the value is valid or a discription of the problemz
+   *  @returns "" if the value is valid or a discription of the problem
    */
   std::string isValid() const override { return m_validator->isValid(m_value); }
 

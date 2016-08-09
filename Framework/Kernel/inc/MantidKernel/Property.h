@@ -151,7 +151,7 @@ public:
   virtual std::string setDataItem(const boost::shared_ptr<DataItem>) = 0;
   virtual std::string
   setDataItems(const std::vector<boost::shared_ptr<DataItem>> &) {
-    return "This method is not implemented.";
+    return "This method is not implemented in "+type()+". ";
   }
   /// Get the default value for the property which is the value the property was
   /// initialised with

@@ -1,5 +1,5 @@
-#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
@@ -9,10 +9,10 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 
@@ -521,8 +521,8 @@ std::vector<size_t> MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(
       int index = det + offset;
       if (index < 0 || index >= outSize) {
         g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector("
-                         "): detector ID found (" << det
-                      << " at workspace index " << workspaceIndex
+                         "): detector ID found ("
+                      << det << " at workspace index " << workspaceIndex
                       << ") is invalid.\n";
       } else
         // Save it at that point.
@@ -2103,8 +2103,8 @@ IPropertyManager::getValue<std::vector<Mantid::API::MatrixWorkspace_sptr>>(
   } else {
     std::string message = "Attempt to assign property " + name +
                           " to incorrect type. Expected type "
-                          "std::vector<boost::shared_ptr<Mantid::Kernel::"
-                          "DataItem>>";
+                          "std::vector<boost::shared_ptr<Mantid::API::"
+                          "MatrixWorkspace>>";
     throw std::runtime_error(message);
   }
 }
