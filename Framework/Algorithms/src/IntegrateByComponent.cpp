@@ -219,7 +219,7 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
   auto s_it = mymap.begin();
   for (auto m_it = mymap.begin(); m_it != mymap.end(); m_it = s_it) {
     Mantid::Geometry::ComponentID theKey = (*m_it).first;
-    auto keyRange =mymap.equal_range(theKey);
+    auto keyRange = mymap.equal_range(theKey);
 
     // Iterate over all map elements with key == theKey
     speclistsingle.clear();

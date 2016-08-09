@@ -86,10 +86,9 @@ public:
     if (!result)
       return;
     for (size_t i = 0; i < result->getNumberHistograms() / 2; i++) {
-      TS_ASSERT_DELTA(result->y(i * 2)[0], result->y(i * 2 + 1)[0],
+      TS_ASSERT_DELTA(result->y(i * 2)[0], result->y(i * 2 + 1)[0], 1e-10);
+      TS_ASSERT_DELTA(static_cast<double>(i) * 4 + 1, result->y(i * 2 + 1)[0],
                       1e-10);
-      TS_ASSERT_DELTA(static_cast<double>(i) * 4 + 1,
-                      result->y(i * 2 + 1)[0], 1e-10);
     }
 
     // Remove workspace from the data service.
@@ -121,12 +120,9 @@ public:
     if (!result)
       return;
     for (size_t i = 0; i < result->getNumberHistograms() / 4; i++) {
-      TS_ASSERT_DELTA(result->y(i * 4)[0], result->y(i * 4 + 1)[0],
-                      1e-10);
-      TS_ASSERT_DELTA(result->y(i * 4)[0], result->y(i * 4 + 2)[0],
-                      1e-10);
-      TS_ASSERT_DELTA(result->y(i * 4)[0], result->y(i * 4 + 3)[0],
-                      1e-10);
+      TS_ASSERT_DELTA(result->y(i * 4)[0], result->y(i * 4 + 1)[0], 1e-10);
+      TS_ASSERT_DELTA(result->y(i * 4)[0], result->y(i * 4 + 2)[0], 1e-10);
+      TS_ASSERT_DELTA(result->y(i * 4)[0], result->y(i * 4 + 3)[0], 1e-10);
       TS_ASSERT_DELTA(static_cast<double>(i) * 8 + 3, result->y(i * 4)[0],
                       1e-10);
     }
