@@ -1,5 +1,4 @@
 #include "MantidAlgorithms/InvertMask.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 
