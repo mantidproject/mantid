@@ -9,8 +9,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 
-#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/detail/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -72,34 +72,38 @@ void FFTSmooth2::exec() {
   }
   // Create output
   API::MatrixWorkspace_sptr outWS = API::WorkspaceFactory::Instance().create(
-      inWS, send - s0, inWS->readX(0).size(), inWS->readY(0).size());
+      inWS, send - s0, inWS->x(0).size(), inWS->y(0).size());
 
   // Symmetrize the input spectrum
-  int dn = static_cast<int>(inWS->readY(0).size());
+  int dn = static_cast<int>(inWS->y(0).size());
   API::MatrixWorkspace_sptr symmWS = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", 1, inWS->readX(0).size() + dn, inWS->readY(0).size() + dn);
+      "Workspace2D", 1, inWS->x(0).size() + dn, inWS->y(0).size() + dn);
 
   Progress progress(this, 0, 1, 4 * (send - s0));
 
   for (int spec = s0; spec < send; spec++) {
     // Save the starting x value so it can be restored after all transforms.
-    double x0 = inWS->readX(spec)[0];
+    double x0 = inWS->x(spec)[0];
 
-    double dx = (inWS->readX(spec).back() - inWS->readX(spec).front()) /
-                (static_cast<double>(inWS->readX(spec).size()) - 1.0);
+    double dx = (inWS->x(spec).back() - inWS->x(spec).front()) /
+                (static_cast<double>(inWS->x(spec).size()) - 1.0);
 
     progress.report();
-    for (int i = 0; i < dn; i++) {
-      symmWS->dataX(0)[dn + i] = inWS->readX(spec)[i];
-      symmWS->dataY(0)[dn + i] = inWS->readY(spec)[i];
 
-      symmWS->dataX(0)[dn - i] = x0 - dx * i;
-      symmWS->dataY(0)[dn - i] = inWS->readY(spec)[i];
+    auto &symX = symmWS->mutableX(0);
+    auto &symY = symmWS->mutableY(0);
+
+    for (int i = 0; i < dn; i++) {
+      symX[dn + i] = inWS->x(spec)[i];
+      symY[dn + i] = inWS->y(spec)[i];
+
+      symX[dn - i] = x0 - dx * i;
+      symY[dn - i] = inWS->y(spec)[i];
     }
-    symmWS->dataY(0).front() = inWS->readY(spec).back();
-    symmWS->dataX(0).front() = x0 - dx * dn;
+    symY.front() = inWS->y(spec).back();
+    symX.front() = x0 - dx * dn;
     if (inWS->isHistogramData())
-      symmWS->dataX(0).back() = inWS->readX(spec).back();
+      symX.back() = inWS->x(spec).back();
 
     // setProperty("OutputWorkspace",symmWS); return;
 
@@ -184,15 +188,12 @@ void FFTSmooth2::exec() {
     dn = static_cast<int>(tmpWS->blocksize()) / 2;
 
     if (getProperty("AllSpectra")) {
-      outWS->dataX(spec)
-          .assign(inWS->readX(spec).begin(), inWS->readX(spec).end());
-      outWS->dataY(spec)
-          .assign(tmpWS->readY(0).begin() + dn, tmpWS->readY(0).end());
+      outWS->setSharedX(spec, inWS->sharedX(spec));
+      outWS->mutableY(spec)
+          .assign(tmpWS->y(0).cbegin() + dn, tmpWS->y(0).cend());
     } else {
-      outWS->dataX(0)
-          .assign(inWS->readX(spec).begin(), inWS->readX(spec).end());
-      outWS->dataY(0)
-          .assign(tmpWS->readY(0).begin() + dn, tmpWS->readY(0).end());
+      outWS->setSharedX(0, inWS->sharedX(spec));
+      outWS->mutableY(0).assign(tmpWS->y(0).cbegin() + dn, tmpWS->y(0).cend());
     }
   }
 
@@ -207,8 +208,8 @@ void FFTSmooth2::exec() {
  */
 void FFTSmooth2::zero(int n, API::MatrixWorkspace_sptr &unfilteredWS,
                       API::MatrixWorkspace_sptr &filteredWS) {
-  int mx = static_cast<int>(unfilteredWS->readX(0).size());
-  int my = static_cast<int>(unfilteredWS->readY(0).size());
+  int mx = static_cast<int>(unfilteredWS->x(0).size());
+  int my = static_cast<int>(unfilteredWS->y(0).size());
   int ny = my / n;
 
   if (ny == 0)
@@ -217,24 +218,14 @@ void FFTSmooth2::zero(int n, API::MatrixWorkspace_sptr &unfilteredWS,
   filteredWS =
       API::WorkspaceFactory::Instance().create(unfilteredWS, 2, mx, my);
 
-  const Mantid::MantidVec &Yr = unfilteredWS->readY(0);
-  const Mantid::MantidVec &Yi = unfilteredWS->readY(1);
-  const Mantid::MantidVec &X = unfilteredWS->readX(0);
+  filteredWS->setSharedX(0, unfilteredWS->sharedX(0));
+  filteredWS->setSharedX(1, unfilteredWS->sharedX(0));
 
-  Mantid::MantidVec &yr = filteredWS->dataY(0);
-  Mantid::MantidVec &yi = filteredWS->dataY(1);
-  Mantid::MantidVec &xr = filteredWS->dataX(0);
-  Mantid::MantidVec &xi = filteredWS->dataX(1);
+  std::copy(unfilteredWS->y(0).cbegin(), unfilteredWS->y(0).begin() + ny,
+            filteredWS->mutableY(0).begin());
 
-  xr.assign(X.begin(), X.end());
-  xi.assign(X.begin(), X.end());
-  yr.assign(Yr.size(), 0);
-  yi.assign(Yr.size(), 0);
-
-  for (int i = 0; i < ny; i++) {
-    yr[i] = Yr[i];
-    yi[i] = Yi[i];
-  }
+  std::copy(unfilteredWS->y(1).cbegin(), unfilteredWS->y(1).begin() + ny,
+            filteredWS->mutableY(1).begin());
 }
 
 /** Smoothing using Butterworth filter.
@@ -253,8 +244,8 @@ void FFTSmooth2::zero(int n, API::MatrixWorkspace_sptr &unfilteredWS,
 void FFTSmooth2::Butterworth(int n, int order,
                              API::MatrixWorkspace_sptr &unfilteredWS,
                              API::MatrixWorkspace_sptr &filteredWS) {
-  int mx = static_cast<int>(unfilteredWS->readX(0).size());
-  int my = static_cast<int>(unfilteredWS->readY(0).size());
+  int mx = static_cast<int>(unfilteredWS->x(0).size());
+  int my = static_cast<int>(unfilteredWS->y(0).size());
   int ny = my / n;
 
   if (ny == 0)
@@ -263,24 +254,19 @@ void FFTSmooth2::Butterworth(int n, int order,
   filteredWS =
       API::WorkspaceFactory::Instance().create(unfilteredWS, 2, mx, my);
 
-  const Mantid::MantidVec &Yr = unfilteredWS->readY(0);
-  const Mantid::MantidVec &Yi = unfilteredWS->readY(1);
-  const Mantid::MantidVec &X = unfilteredWS->readX(0);
+  filteredWS->setSharedX(0, unfilteredWS->sharedX(0));
+  filteredWS->setSharedX(1, unfilteredWS->sharedX(0));
 
-  Mantid::MantidVec &yr = filteredWS->dataY(0);
-  Mantid::MantidVec &yi = filteredWS->dataY(1);
-  Mantid::MantidVec &xr = filteredWS->dataX(0);
-  Mantid::MantidVec &xi = filteredWS->dataX(1);
-
-  xr.assign(X.begin(), X.end());
-  xi.assign(X.begin(), X.end());
-  yr.assign(Yr.size(), 0);
-  yi.assign(Yr.size(), 0);
+  auto &Yr = unfilteredWS->y(0);
+  auto &Yi = unfilteredWS->y(1);
+  auto &yr = filteredWS->mutableY(0);
+  auto &yi = filteredWS->mutableY(1);
 
   double cutoff = ny;
 
   for (int i = 0; i < my; i++) {
-    double scale = 1.0 / (1.0 + pow(i / cutoff, 2 * order));
+    double scale =
+        1.0 / (1.0 + pow(static_cast<double>(i) / cutoff, 2 * order));
     yr[i] = scale * Yr[i];
     yi[i] = scale * Yi[i];
   }

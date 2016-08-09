@@ -10,10 +10,15 @@
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+}
+
 namespace Algorithms {
 /// Get an index of a value in a sorted vector.  The index should be the item
 /// with value nearest to X
-size_t getVectorIndex(const MantidVec &vecx, double x);
+size_t getIndex(const HistogramData::HistogramX &vecx, double x);
 
 /** FitOneSinglePeak: a class to perform peak fitting on a single peak
   */

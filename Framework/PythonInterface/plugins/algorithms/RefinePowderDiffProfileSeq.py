@@ -1,4 +1,8 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
+from six.moves import range #pylint: disable=redefined-builtin
+
 from mantid.api import *
 import mantid.simpleapi as api
 from mantid.api import *
@@ -344,11 +348,11 @@ class SeqRefineProfile(object):
         infodict = {}
         numrows = readmews.rowCount()
         self.glog.information("Found %d rows in workspace %s" % (numrows, str(readmews)))
-        for r in xrange(numrows):
+        for r in range(numrows):
             functioncat = str(readmews.cell(r, 0)).strip()
             functiontype = str(readmews.cell(r, 1)).strip()
             infodict[functioncat] = functiontype.strip()
-        self.glog.information("README keys: %s" % (infodict.keys()))
+        self.glog.information("README keys: %s" % (list(infodict.keys())))
         self._peakType = infodict["Peak"]
         self.datawsname = infodict["Data"]
         self.wsindex = infodict["Spectrum"]
@@ -596,7 +600,7 @@ class SeqRefineProfile(object):
         # FIXME - Use Name[0], Value[1] as default
         numpars = outprofilews.rowCount()
         rwp = None
-        for i in xrange(numpars):
+        for i in range(numpars):
             parname = outprofilews.cell(i, 0)
             if parname.lower() == "rwp":
                 rwp = outprofilews.cell(i, 1)
@@ -722,7 +726,7 @@ def breakParametersGroups(tablews):
     """ Break the parameter groups.  Such that each parameter/row has an individual group
     """
     numrows = tablews.rowCount()
-    for ir in xrange(numrows):
+    for ir in range(numrows):
         tablews.setCell(ir, 4, ir)
 
     return
@@ -731,7 +735,7 @@ def resetParametersGroups(tablews):
     """ Set the group number to original setup
     """
     numrows = tablews.rowCount()
-    for ir in xrange(numrows):
+    for ir in range(numrows):
         parname = tablews.cell(ir, 0)
         if parname in ["Dtt1", "Dtt1t", "Dtt2t", "Zero", "Zerot", "Width", "Tcross"]:
             group = 0

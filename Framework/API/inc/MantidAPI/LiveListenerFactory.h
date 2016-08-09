@@ -73,17 +73,16 @@ private:
   ILiveListener *createUnwrapped(const std::string &className) const override;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder (needed for
-/// dllexport/dllimport).
-#ifdef _WIN32
-// this breaks new namespace declaration rules; need to find a better fix
-template class MANTID_API_DLL Kernel::SingletonHolder<LiveListenerFactoryImpl>;
-#endif /* _WIN32 */
-/// The specialisation of the SingletonHolder class that holds the
-/// LiveListenerFactory
 typedef Kernel::SingletonHolder<LiveListenerFactoryImpl> LiveListenerFactory;
 
 } // namespace API
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Kernel::SingletonHolder<Mantid::API::LiveListenerFactoryImpl>;
+}
+}
 
 #endif /* MANTID_API_LIVELISTENERFACTORYIMPL_H_ */

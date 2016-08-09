@@ -343,9 +343,6 @@ public:
 
   void loadWSFromFile(const std::string &wsname, const std::string &fileName);
 
-  MantidMatrix *openMatrixWorkspace(const std::string &wsName, int lower,
-                                    int upper);
-
   void saveProject(bool save);
   void enableSaveNexus(const QString &wsName);
   void disableSaveNexus();

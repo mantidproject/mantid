@@ -2,25 +2,14 @@
 #define MANTID_ALGORITHMS_GETTIMESERIESLOGINFORMATIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include <cmath>
-#include <fstream>
-#include <Poco/File.h>
 
 #include "MantidAlgorithms/GetTimeSeriesLogInformation.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/SplittersWorkspace.h"
-#include "MantidKernel/TimeSplitter.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/Column.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/EventList.h"
-#include "MantidDataObjects/Events.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid;
@@ -127,4 +116,34 @@ public:
   }
 };
 
+class GetTimeSeriesLogInformationTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static GetTimeSeriesLogInformationTestPerformance *createSuite() {
+    return new GetTimeSeriesLogInformationTestPerformance();
+  }
+  static void destroySuite(GetTimeSeriesLogInformationTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() {
+    inputWS = GetTimeSeriesLogInformationTest().createEventWorkspace();
+  }
+
+  void tearDown() {
+    Mantid::API::AnalysisDataService::Instance().remove("output");
+  }
+
+  void testPerformanceEventWS() {
+    Mantid::Algorithms::GetTimeSeriesLogInformation getTimeSeries;
+    getTimeSeries.initialize();
+    getTimeSeries.setProperty("InputWorkspace", inputWS);
+    getTimeSeries.setPropertyValue("OutputWorkspace", "output");
+    getTimeSeries.execute();
+  }
+
+private:
+  Mantid::DataObjects::EventWorkspace_sptr inputWS;
+};
 #endif /* MANTID_ALGORITHMS_GETTIMESERIESLOGINFORMATIONTEST_H_ */

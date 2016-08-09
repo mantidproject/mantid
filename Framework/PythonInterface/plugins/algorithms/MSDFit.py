@@ -1,7 +1,9 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
+from six.moves import range #pylint: disable=redefined-builtin
 
 
 class MSDFit(DataProcessorAlgorithm):
@@ -96,7 +98,7 @@ class MSDFit(DataProcessorAlgorithm):
 
         # Fit line to each of the spectra
         function = 'name=LinearBackground, A0=0, A1=0'
-        input_params = [self._input_ws + ',i%d' % i for i in xrange(self._spec_range[0],
+        input_params = [self._input_ws + ',i%d' % i for i in range(self._spec_range[0],
                                                                     self._spec_range[1] + 1)]
         input_params = ';'.join(input_params)
         PlotPeakByLogValue(Input=input_params,

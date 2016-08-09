@@ -1,10 +1,11 @@
 #pylint: disable=invalid-name,no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
 from mantid.simpleapi import *
 from mantid.kernel import StringMandatoryValidator, Direction
 from mantid import logger, config
 import os
-from itertools import ifilterfalse
+from six.moves import filterfalse
 
 class Intervals(object):
     # Having "*intervals" as a parameter instead of "intervals" allows us
@@ -124,7 +125,7 @@ class FileBackedWsIterator(object):
         # In the general case, we may or may not have checked for the existance
         # of the files previously, so before we even start iterating throw if
         # any are missing.
-        missing_files = list(ifilterfalse(os.path.exists, filenames))
+        missing_files = list(filterfalse(os.path.exists, filenames))
         if len(missing_files) > 0:
             raise ValueError("One or more files are missing: " +\
                 str(missing_files))

@@ -6,13 +6,20 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/PropertyManagerProperty.h"
 
 #include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <Poco/Path.h>
 
 namespace Mantid {
 namespace DataHandling {
+
+using Geometry::SampleEnvironment;
+using Kernel::Logger;
+using Kernel::V3D;
 
 namespace {
 
@@ -37,9 +44,49 @@ long getAxisIndex(const Kernel::PropertyManager &args) {
   }
   return axisIdx;
 }
+
+/**
+  * Return the centre coordinates of the base of a cylinder given the
+  * coordinates of the centre of the cylinder
+  * @param cylCentre Coordinates of centre of the cylinder (X,Y,Z) (in metres)
+  * @param height Height of the cylinder (in metres)
+  * @param axis The index of the height-axis of the cylinder
+  */
+V3D cylBaseCentre(const std::vector<double> &cylCentre, double height,
+                  long axisIdx) {
+  const V3D halfHeight = [&]() {
+    switch (axisIdx) {
+    case 0:
+      return V3D(0.5 * height, 0, 0);
+    case 1:
+      return V3D(0, 0.5 * height, 0);
+    case 2:
+      return V3D(0, 0, 0.5 * height);
+    default:
+      return V3D();
+    }
+  }();
+  return V3D(cylCentre[0], cylCentre[1], cylCentre[2]) - halfHeight;
 }
 
-using Geometry::SampleEnvironment;
+/**
+ * Create the xml tag require for a given axis index
+ * @param axisIdx Index 0,1,2 for the axis of a cylinder
+ * @return A string containing the axis tag for this index
+ */
+std::string axisXML(long axisIdx) {
+  switch (axisIdx) {
+  case 0:
+    return "<axis x=\"1\" y=\"0\" z=\"0\" />";
+  case 1:
+    return "<axis x=\"0\" y=\"1\" z=\"0\" />";
+  case 2:
+    return "<axis x=\"0\" y=\"0\" z=\"1\" />";
+  default:
+    return "";
+  }
+}
+}
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetSample)
@@ -225,14 +272,14 @@ void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
         for (const auto &prop : props) {
           // assume in cm
           const double val = args->getProperty(prop->name());
-          shapeArgs.insert(std::make_pair(
-              boost::algorithm::to_lower_copy(prop->name()), val * 0.01));
+          shapeArgs.emplace(boost::algorithm::to_lower_copy(prop->name()),
+                            val * 0.01);
         }
       }
       auto shapeObject = can->createSampleShape(shapeArgs);
       // Set the object directly on the sample ensuring we preserve the
       // material
-      const auto &mat = workspace->sample().getMaterial();
+      const auto mat = workspace->sample().getMaterial();
       shapeObject->setMaterial(mat);
       workspace->mutableSample().setShape(*shapeObject);
     } else {
@@ -265,15 +312,17 @@ SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager_sptr args) {
     result = args->getPropertyValue("Value");
   } else if (shape == "FlatPlate") {
     result = createFlatPlateXML(*args);
-  } else if (shape == "Cylinder") {
-    result = createCylinderXML(*args);
-  } else if (shape == "HollowCylinder") {
-    result = createHollowCylinderXML(*args);
+  } else if (boost::algorithm::ends_with(shape, "Cylinder")) {
+    result = createCylinderLikeXML(
+        *args, boost::algorithm::starts_with(shape, "Hollow"));
   } else {
     throw std::invalid_argument(
         "Unknown 'Shape' argument provided in "
         "'Geometry'. Allowed "
         "values=FlatPlate,CSG,Cylinder,HollowCylinder.");
+  }
+  if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
+    g_log.debug("XML shape definition:\n" + result + '\n');
   }
   return result;
 }
@@ -323,87 +372,42 @@ SetSample::createFlatPlateXML(const Kernel::PropertyManager &args) const {
 /**
  * Create the XML required to define a cylinder from the given args
  * @param args A user-supplied dict of args
+ * @param hollow True if an annulus is to be created
  * @return The XML definition string
  */
 std::string
-SetSample::createCylinderXML(const Kernel::PropertyManager &args) const {
+SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
+                                 bool hollow) const {
+  const std::string tag = hollow ? "hollow-cylinder" : "cylinder";
   double height = args.getProperty("Height");
-  double radius = args.getProperty("Radius");
-  std::vector<double> center = args.getProperty("Center");
-  // Expected to be a long so that the mapping from Python is simple
-  // Expected to be a long so that the mapping from Python is simple
-  long axisIdx = getAxisIndex(args);
-  // convert to metres
-  height *= 0.01;
-  radius *= 0.01;
-  std::transform(center.begin(), center.end(), center.begin(),
-                 [](double val) { return val *= 0.01; });
-
-  // Shift so that cylinder is centered at center position
-  const double cylinderBase = (-1e-03 * height) + center[axisIdx];
-
-  std::ostringstream xmlShapeStream;
-  xmlShapeStream << "<cylinder id=\"sample-shape\"> "
-                 << "<centre-of-bottom-base x=\"" << center[axisIdx]
-                 << "\" y=\"" << cylinderBase << "\" z=\"" << center[axisIdx]
-                 << "\" /> "
-                 << "<axis ";
-
-  if (axisIdx == 0)
-    xmlShapeStream << "x=\"1\" y=\"0\" z=\"0\" /> ";
-  else if (axisIdx == 1)
-    xmlShapeStream << "x=\"0\" y=\"1\" z=\"0\" /> ";
-  else
-    xmlShapeStream << "x=\"0\" y=\"0\" z=\"1\" /> ";
-
-  xmlShapeStream << "<radius val=\"" << radius << "\" /> "
-                 << "<height val=\"" << height << "\" /> "
-                 << "</cylinder>";
-
-  return xmlShapeStream.str();
-}
-
-/**
- * Create the XML required to define an annulus from the given args
- * @param args A user-supplied dict of args
- * @return The XML definition string
- */
-std::string
-SetSample::createHollowCylinderXML(const Kernel::PropertyManager &args) const {
-  double height = args.getProperty("Height");
-  double innerRadius = args.getProperty("InnerRadius");
-  double outerRadius = args.getProperty("OuterRadius");
-  std::vector<double> center = args.getProperty("Center");
-  // Expected to be a long so that the mapping from Python is simple
+  double innerRadius = hollow ? args.getProperty("InnerRadius") : 0.0;
+  double outerRadius =
+      hollow ? args.getProperty("OuterRadius") : args.getProperty("Radius");
+  std::vector<double> centre = args.getProperty("Center");
   long axisIdx = getAxisIndex(args);
   // convert to metres
   height *= 0.01;
   innerRadius *= 0.01;
   outerRadius *= 0.01;
-  std::transform(center.begin(), center.end(), center.begin(),
+  std::transform(centre.begin(), centre.end(), centre.begin(),
                  [](double val) { return val *= 0.01; });
-  // Shift so that cylinder is centered at center position
-  const double cylinderBase = (-1e-03 * height) + center[axisIdx];
+  // XML needs center position of bottom base but user specifies center of
+  // cylinder
+  const V3D baseCentre = cylBaseCentre(centre, height, axisIdx);
 
   std::ostringstream xmlShapeStream;
-  xmlShapeStream << "<hollow-cylinder id=\"sample-shape\"> "
-                 << "<centre-of-bottom-base x=\"" << center[axisIdx]
-                 << "\" y=\"" << cylinderBase << "\" z=\"" << center[axisIdx]
-                 << "\" /> "
-                 << "<axis ";
+  xmlShapeStream << "<" << tag << " id=\"sample-shape\"> "
+                 << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
+                 << baseCentre.Y() << "\" z=\"" << baseCentre.Z() << "\" /> "
+                 << axisXML(axisIdx) << "<height val=\"" << height << "\" /> ";
+  if (hollow) {
+    xmlShapeStream << "<inner-radius val=\"" << innerRadius << "\"/>"
+                   << "<outer-radius val=\"" << outerRadius << "\"/>";
 
-  if (axisIdx == 0)
-    xmlShapeStream << "x=\"1\" y=\"0\" z=\"0\" /> ";
-  else if (axisIdx == 1)
-    xmlShapeStream << "x=\"0\" y=\"1\" z=\"0\" /> ";
-  else
-    xmlShapeStream << "x=\"0\" y=\"0\" z=\"1\" /> ";
-
-  xmlShapeStream << "<inner-radius val=\"" << innerRadius << "\" /> "
-                 << "<outer-radius val=\"" << outerRadius << "\" /> "
-                 << "<height val=\"" << height << "\" /> "
-                 << "</hollow-cylinder>";
-
+  } else {
+    xmlShapeStream << "<radius val=\"" << outerRadius << "\"/>";
+  }
+  xmlShapeStream << "</" << tag << ">";
   return xmlShapeStream.str();
 }
 

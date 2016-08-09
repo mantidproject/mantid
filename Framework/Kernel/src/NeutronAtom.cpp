@@ -7,6 +7,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <math.h>
 
 namespace Mantid {
 
@@ -14,6 +15,17 @@ namespace PhysicalConstants {
 
 /// Reference wavelength for absorption cross section values.
 const double NeutronAtom::ReferenceLambda = 1.7982;
+
+namespace {
+const double INV_FOUR_PI = 1. / (4. * M_PI);
+}
+
+void calculateScatteringLengths(NeutronAtom *atom) {
+  // 1 barn = 100 fm
+  atom->tot_scatt_length = 10. * std::sqrt(atom->tot_scatt_xs * INV_FOUR_PI);
+  atom->coh_scatt_length = 10. * std::sqrt(atom->coh_scatt_xs * INV_FOUR_PI);
+  atom->inc_scatt_length = 10. * std::sqrt(atom->inc_scatt_xs * INV_FOUR_PI);
+}
 
 /**
  * Atom constructor
@@ -32,7 +44,9 @@ NeutronAtom::NeutronAtom(const uint16_t z, const double coh_b_real,
     : z_number(z), a_number(0), coh_scatt_length_real(coh_b_real),
       coh_scatt_length_img(0.), inc_scatt_length_real(inc_b_real),
       inc_scatt_length_img(0.), coh_scatt_xs(coh_xs), inc_scatt_xs(inc_xs),
-      tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
+      tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {
+  calculateScatteringLengths(this);
+}
 /**
  * Atom constructor
  * @param z :: The atomic number of the atom
@@ -51,7 +65,9 @@ NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
     : z_number(z), a_number(a), coh_scatt_length_real(coh_b_real),
       coh_scatt_length_img(0.), inc_scatt_length_real(inc_b_real),
       inc_scatt_length_img(0.), coh_scatt_xs(coh_xs), inc_scatt_xs(inc_xs),
-      tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
+      tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {
+  calculateScatteringLengths(this);
+}
 /**
  * Atom constructor
  * @param z :: The atomic number of the atom
@@ -73,7 +89,40 @@ NeutronAtom::NeutronAtom(const uint16_t z, const uint16_t a,
     : z_number(z), a_number(a), coh_scatt_length_real(coh_b_real),
       coh_scatt_length_img(coh_b_img), inc_scatt_length_real(inc_b_real),
       inc_scatt_length_img(inc_b_img), coh_scatt_xs(coh_xs),
-      inc_scatt_xs(inc_xs), tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {}
+      inc_scatt_xs(inc_xs), tot_scatt_xs(tot_xs), abs_scatt_xs(abs_xs) {
+  calculateScatteringLengths(this);
+}
+
+NeutronAtom::NeutronAtom(const NeutronAtom &other)
+    : z_number(other.z_number), a_number(other.a_number),
+      coh_scatt_length_real(other.coh_scatt_length_real),
+      coh_scatt_length_img(other.coh_scatt_length_img),
+      inc_scatt_length_real(other.inc_scatt_length_real),
+      inc_scatt_length_img(other.inc_scatt_length_img),
+      coh_scatt_xs(other.coh_scatt_xs), inc_scatt_xs(other.inc_scatt_xs),
+      tot_scatt_xs(other.tot_scatt_xs), abs_scatt_xs(other.abs_scatt_xs) {
+  calculateScatteringLengths(this);
+}
+
+NeutronAtom &NeutronAtom::operator=(const NeutronAtom &other) {
+  if (this == &other)
+    return *this;
+
+  z_number = other.z_number;
+  a_number = other.a_number;
+  coh_scatt_length_real = other.coh_scatt_length_real;
+  coh_scatt_length_img = other.coh_scatt_length_img;
+  inc_scatt_length_real = other.inc_scatt_length_real;
+  inc_scatt_length_img = other.inc_scatt_length_img;
+  coh_scatt_xs = other.coh_scatt_xs;
+  inc_scatt_xs = other.inc_scatt_xs;
+  tot_scatt_xs = other.tot_scatt_xs;
+  abs_scatt_xs = other.abs_scatt_xs;
+
+  calculateScatteringLengths(this);
+
+  return *this;
+}
 
 /**
  * DO NOT USE THIS! This constructor generates a complete garbage NeutronAtom
@@ -84,7 +133,8 @@ NeutronAtom::NeutronAtom()
     : z_number(0), a_number(0), coh_scatt_length_real(NAN),
       coh_scatt_length_img(NAN), inc_scatt_length_real(NAN),
       inc_scatt_length_img(NAN), coh_scatt_xs(NAN), inc_scatt_xs(NAN),
-      tot_scatt_xs(NAN), abs_scatt_xs(NAN) {}
+      tot_scatt_xs(NAN), abs_scatt_xs(NAN), tot_scatt_length(NAN),
+      coh_scatt_length(NAN), inc_scatt_length(NAN) {}
 
 /// @cond
 static const NeutronAtom H(1, -3.7390, 0., 1.7568, 80.26, 82.02, 0.3326);
@@ -642,6 +692,9 @@ NeutronAtom operator+(const NeutronAtom &left, const NeutronAtom &right) {
   result.inc_scatt_xs = left.inc_scatt_xs + right.inc_scatt_xs;
   result.tot_scatt_xs = left.tot_scatt_xs + right.tot_scatt_xs;
   result.abs_scatt_xs = left.abs_scatt_xs + right.abs_scatt_xs;
+  result.tot_scatt_length = left.tot_scatt_length + right.tot_scatt_length;
+  result.coh_scatt_length = left.coh_scatt_length + right.coh_scatt_length;
+  result.inc_scatt_length = left.inc_scatt_length + right.inc_scatt_length;
 
   return result;
 }
@@ -666,6 +719,9 @@ NeutronAtom operator*(const NeutronAtom &left, const double right) {
   result.inc_scatt_xs = left.inc_scatt_xs * right;
   result.tot_scatt_xs = left.tot_scatt_xs * right;
   result.abs_scatt_xs = left.abs_scatt_xs * right;
+  result.tot_scatt_length = left.tot_scatt_length * right;
+  result.coh_scatt_length = left.coh_scatt_length * right;
+  result.inc_scatt_length = left.inc_scatt_length * right;
 
   return result;
 }
@@ -699,8 +755,9 @@ NeutronAtom getNeutronAtom(const uint16_t z_number, const uint16_t a_number) {
 
   return *result;
 }
-const NeutronAtom getNeutronNoExceptions(const uint16_t z_number,
-                                         const uint16_t a_number) {
+
+NeutronAtom getNeutronNoExceptions(const uint16_t z_number,
+                                   const uint16_t a_number) {
 
   NeutronAtom temp(z_number, a_number, NAN, NAN, NAN, NAN, NAN,
                    NAN); // set to junk value
@@ -712,6 +769,14 @@ const NeutronAtom getNeutronNoExceptions(const uint16_t z_number,
     return temp;
   } else
     return *result;
+}
+
+NeutronAtom getNeutronNoExceptions(const NeutronAtom &other) {
+  if (other.z_number == 0) {
+    return NeutronAtom(other);
+  } else {
+    return getNeutronNoExceptions(other.z_number, other.a_number);
+  }
 }
 
 } // namespace PhysicalConstants

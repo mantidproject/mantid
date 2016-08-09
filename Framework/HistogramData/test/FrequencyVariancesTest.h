@@ -72,7 +72,7 @@ public:
 
   void test_construct_from_empty_CountVariances_size_mismatch() {
     const CountVariances counts(0);
-    const BinEdges edges(2);
+    const BinEdges edges{1.0, 2.0};
     TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges),
                      std::logic_error);
   }
@@ -86,7 +86,7 @@ public:
 
   void test_construct_from_CountVariances_size_mismatch() {
     const CountVariances counts(2);
-    const BinEdges edges(2);
+    const BinEdges edges{1.0, 2.0};
     TS_ASSERT_THROWS(const FrequencyVariances frequencies(counts, edges),
                      std::logic_error);
   }
@@ -102,7 +102,7 @@ public:
 
   void test_move_construct_from_CountVariances() {
     CountVariances counts(1);
-    const BinEdges edges(2);
+    const BinEdges edges{1.0, 2.0};
     auto old_ptr = &counts[0];
     const FrequencyVariances frequencies(std::move(counts), edges);
     TS_ASSERT(!counts);
@@ -112,7 +112,7 @@ public:
   void test_move_construct_from_CountVariances_and_cow() {
     CountVariances counts(1);
     const CountVariances copy(counts);
-    const BinEdges edges(2);
+    const BinEdges edges{1.0, 2.0};
     auto old_ptr = &counts[0];
     const FrequencyVariances frequencies(std::move(counts), edges);
     // Moved from counts...
@@ -133,7 +133,7 @@ public:
 
   void test_move_construct_from_CountStandardDeviations() {
     CountStandardDeviations counts(1);
-    const BinEdges edges(2);
+    const BinEdges edges{1.0, 2.0};
     auto old_ptr = &counts[0];
     // This implicitly constructs CountVariances first, so there is a
     // two-step move going on!

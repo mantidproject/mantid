@@ -368,12 +368,10 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
       TimeValueUnit<TYPE> temp(t_start, m_values[tstartindex].value());
       mp_copy.push_back(temp);
     } else {
-      mp_copy.push_back(
-          TimeValueUnit<TYPE>(t_start, m_values[tstartindex].value()));
+      mp_copy.emplace_back(t_start, m_values[tstartindex].value());
       for (size_t im = size_t(tstartindex + 1); im <= size_t(tstopindex);
            ++im) {
-        mp_copy.push_back(
-            TimeValueUnit<TYPE>(m_values[im].time(), m_values[im].value()));
+        mp_copy.emplace_back(m_values[im].time(), m_values[im].value());
       }
     }
   } // ENDFOR
@@ -615,7 +613,7 @@ void TimeSeriesProperty<TYPE>::makeFilterByValue(
         // boundaries are centred.
         // Otherwise, use the first 'bad' time.
         stop = centre ? lastTime + tol : t;
-        split.push_back(SplittingInterval(start, stop, 0));
+        split.emplace_back(start, stop, 0);
         // Reset the number of good ones, for next time
         numgood = 0;
       }
@@ -627,7 +625,7 @@ void TimeSeriesProperty<TYPE>::makeFilterByValue(
     // The log ended on "good" so we need to close it using the last time we
     // found
     stop = t + tol;
-    split.push_back(SplittingInterval(start, stop, 0));
+    split.emplace_back(start, stop, 0);
   }
 }
 
@@ -678,7 +676,7 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(
   double val = firstValue();
   if ((val >= min) && (val <= max)) {
     TimeSplitterType extraFilter;
-    extraFilter.push_back(SplittingInterval(range.begin(), firstTime(), 0));
+    extraFilter.emplace_back(range.begin(), firstTime(), 0);
     // Include everything from the start of the run to the first time measured
     // (which may be a null time interval; this'll be ignored)
     split = split | extraFilter;
@@ -688,7 +686,7 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(
   val = lastValue();
   if ((val >= min) && (val <= max)) {
     TimeSplitterType extraFilter;
-    extraFilter.push_back(SplittingInterval(lastTime(), range.end(), 0));
+    extraFilter.emplace_back(lastTime(), range.end(), 0);
     // Include everything from the start of the run to the first time measured
     // (which may be a null time interval; this'll be ignored)
     split = split | extraFilter;
@@ -767,7 +765,7 @@ double TimeSeriesProperty<TYPE>::timeAverageValue() const {
   double retVal = 0.0;
   try {
     TimeSplitterType filter;
-    filter.push_back(SplittingInterval(this->firstTime(), this->lastTime()));
+    filter.emplace_back(this->firstTime(), this->lastTime());
     retVal = this->averageValueInFilter(filter);
   } catch (std::exception &) {
     // just return nan
@@ -2145,8 +2143,7 @@ void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
 /// @cond
 // -------------------------- Macro to instantiation concrete types
 // --------------------------------
-#define INSTANTIATE(TYPE)                                                      \
-  template MANTID_KERNEL_DLL class TimeSeriesProperty<TYPE>;
+#define INSTANTIATE(TYPE) template class TimeSeriesProperty<TYPE>;
 
 // -------------------------- Concrete instantiation
 // -----------------------------------------------

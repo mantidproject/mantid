@@ -1,7 +1,7 @@
 #include "MantidDataHandling/DownloadInstrument.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/InternetHelper.h"
+#include "MantidKernel/GitHubApiHelper.h"
 
 // Poco
 #include <Poco/DateTimeFormat.h>
@@ -362,8 +362,8 @@ int DownloadInstrument::doDownloadFile(const std::string &urlFile,
   }
 
   int retStatus = 0;
-  InternetHelper inetHelper;
-  inetHelper.headers() = headers;
+  GitHubApiHelper inetHelper;
+  inetHelper.headers().insert(headers.begin(), headers.end());
   retStatus = inetHelper.downloadFile(urlFile, localFilePath);
   return retStatus;
 }
