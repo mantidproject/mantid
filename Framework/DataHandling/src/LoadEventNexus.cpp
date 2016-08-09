@@ -139,6 +139,7 @@ bool BankPulseTimes::equals(size_t otherNumPulse, std::string otherStartTime) {
 //==============================================================================================
 // Class ProcessBankData
 //==============================================================================================
+// FIXME-TODO- Move ProcessBankData to new files
 /** This task does the disk IO from loading the NXS file,
 * and so will be on a disk IO mutex */
 class ProcessBankData : public Task {
@@ -184,6 +185,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Run the data processing
+   * FIXME/TODO - split run() into readable methods
   */
   void run() override {
     // Local tof limits
