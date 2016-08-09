@@ -92,7 +92,7 @@ class ABINSCalculatePowderTest(unittest.TestCase):
         """Reads a correct values from ASCII file."""
         correct_data = None
         with open(filename) as data_file:
-            correct_data = json.loads(data_file.read().replace("\n"    , " ").
+            correct_data = json.loads(data_file.read().replace("\\n"    , " ").
                                                        replace("array" , "").
                                                        replace("(["    , "[").
                                                        replace("])"    , "]").

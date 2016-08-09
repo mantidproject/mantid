@@ -110,9 +110,8 @@ class CalculatePowder(IOmodule):
 
         data = self._calculate_powder()
 
-        self.addAttribute("temperature", self._temperature)
         self.addAttribute("filename", self._input_filename)
-        self.addStructuredDataset("data", data.extract())
+        self.addStructuredDataset("powder_data_%sK"%self._temperature, data.extract())
 
         self.save()
 
@@ -124,12 +123,13 @@ class CalculatePowder(IOmodule):
         Loads mean square displacements and Debye-Waller factors from an hdf file.
         @return: object of type PowderData with mean square displacements and Debye-Waller factors.
         """
-        _data = self.load(list_of_structured_datasets=["data"], list_of_attributes=["temperature"])
+        _data = self.load(list_of_structured_datasets=["powder_data_%sK"%self._temperature])
 
-        _powder_data = PowderData(temperature=_data["attributes"]["temperature"],
-                                  num_atoms=_data["structured_datasets"]["data"]["msd"].shape[0])
 
-        _powder_data.set(_data["structured_datasets"]["data"])
+        _powder_data = PowderData(temperature=self._temperature,
+                                  num_atoms=_data["structured_datasets"]["powder_data_%sK"%self._temperature]["msd"].shape[0])
+
+        _powder_data.set(_data["structured_datasets"]["powder_data_%sK"%self._temperature])
 
         return _powder_data
 
