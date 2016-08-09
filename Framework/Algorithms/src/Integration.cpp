@@ -149,13 +149,12 @@ void Integration::exec() {
 
     // Copy Axis values from previous workspace
     if (axisIsText) {
-      Mantid::API::TextAxis *newAxis =
-          dynamic_cast<Mantid::API::TextAxis *>(outputWorkspace->getAxis(1));
+      TextAxis *newAxis = dynamic_cast<TextAxis *>(outputWorkspace->getAxis(1));
       if (newAxis)
         newAxis->setLabel(outWI, localworkspace->getAxis(1)->label(i));
     } else if (axisIsNumeric) {
-      Mantid::API::NumericAxis *newAxis =
-          dynamic_cast<Mantid::API::NumericAxis *>(outputWorkspace->getAxis(1));
+      NumericAxis *newAxis =
+          dynamic_cast<NumericAxis *>(outputWorkspace->getAxis(1));
       if (newAxis)
         newAxis->setValue(outWI, (*(localworkspace->getAxis(1)))(i));
     }
@@ -168,31 +167,27 @@ void Integration::exec() {
     // Copy spectrum number, detector IDs
     outSpec.copyInfoFrom(inSpec);
 
-    // Retrieve the spectrum into a vector
-    const MantidVec &X = inSpec.readX();
-    const MantidVec &Y = inSpec.readY();
-    const MantidVec &E = inSpec.readE();
+    // Retrieve the spectrum into a vector (Histogram)
+    const auto &X = inSpec.x();
+    const auto &Y = inSpec.y();
+    const auto &E = inSpec.e();
 
     // If doing partial bins, we want to set the bin boundaries to the specified
     // values
     // regardless of whether they're 'in range' for this spectrum
     // Have to do this here, ahead of the 'continue' a bit down from here.
     if (incPartBins) {
-      outSpec.dataX()[0] = minRange;
-      outSpec.dataX()[1] = maxRange;
+      outSpec.mutableX()[0] = minRange;
+      outSpec.mutableX()[1] = maxRange;
     }
 
     // Find the range [min,max]
-    MantidVec::const_iterator lowit, highit;
-    if (minRange == EMPTY_DBL()) {
-      lowit = X.begin();
-    } else {
+    auto lowit = X.begin(), highit = X.end();
+    if (minRange != EMPTY_DBL()) {
       lowit = std::lower_bound(X.begin(), X.end(), minRange, tolerant_less());
     }
 
-    if (maxRange == EMPTY_DBL()) {
-      highit = X.end();
-    } else {
+    if (maxRange != EMPTY_DBL()) {
       highit = std::upper_bound(lowit, X.end(), maxRange, tolerant_less());
     }
 
@@ -204,8 +199,8 @@ void Integration::exec() {
     --highit; // (note: decrementing 'end()' is safe for vectors, at least
               // according to the C++ standard)
 
-    MantidVec::difference_type distmin = std::distance(X.begin(), lowit);
-    MantidVec::difference_type distmax = std::distance(X.begin(), highit);
+    auto distmin = std::distance(X.begin(), lowit);
+    auto distmax = std::distance(X.begin(), highit);
 
     double sumY = 0.0;
     double sumE = 0.0;
@@ -259,12 +254,12 @@ void Integration::exec() {
         sumE += eval * eval * fraction * fraction;
       }
     } else {
-      outSpec.dataX()[0] = lowit == X.end() ? *(lowit - 1) : *(lowit);
-      outSpec.dataX()[1] = *highit;
+      outSpec.mutableX()[0] = lowit == X.end() ? *(lowit - 1) : *(lowit);
+      outSpec.mutableX()[1] = *highit;
     }
 
-    outSpec.dataY()[0] = sumY;
-    outSpec.dataE()[0] = sqrt(sumE); // Propagate Gaussian error
+    outSpec.mutableY()[0] = sumY;
+    outSpec.mutableE()[0] = sqrt(sumE); // Propagate Gaussian error
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION
