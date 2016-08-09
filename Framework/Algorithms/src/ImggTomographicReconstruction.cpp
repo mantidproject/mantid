@@ -5,7 +5,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -301,12 +300,11 @@ ImggTomographicReconstruction::prepareInputData(
   for (int slice = 0; slice < static_cast<int>(wksg->size()); ++slice) {
     size_t startSlice = slice * oneSliceSize;
     for (size_t row = 0; row < ysize; ++row) {
-      const auto &dataY = fwks->getSpectrum(row).readY();
+      const auto &dataY = fwks->getSpectrum(row).y();
       size_t startRow = startSlice + row * ysize;
       // MSVC will produce C4244 warnings in <xutility> (double=>float
       // converstion)
-      // std::copy(dataY.begin(), dataY.end(), data->begin() + startRow);
-      std::transform(dataY.begin(), dataY.end(), data->begin() + startRow,
+      std::transform(dataY.cbegin(), dataY.cend(), data->begin() + startRow,
                      DoubleToFloatStd());
     }
   }
@@ -397,13 +395,13 @@ ImggTomographicReconstruction::buildOutputWks(const std::vector<float> &dataVol,
     size_t startSlice = slice * oneSliceSize;
     for (size_t row = 0; row < ysize; ++row) {
       auto &specRow = sliceWS->getSpectrum(row);
-      auto &dataX = specRow.dataX();
+      auto &dataX = specRow.mutableX();
       std::fill(dataX.begin(), dataX.end(), static_cast<double>(row));
 
       size_t startRow = startSlice + row * ysize;
       size_t endRow = startRow + xsize;
-      auto &dataY = specRow.dataY();
-      std::transform(dataVol.begin() + startRow, dataVol.begin() + endRow,
+      auto &dataY = specRow.mutableY();
+      std::transform(dataVol.cbegin() + startRow, dataVol.cbegin() + endRow,
                      dataY.begin(), DoubleToFloatStd());
     }
     wsGroup->addWorkspace(sliceWS);

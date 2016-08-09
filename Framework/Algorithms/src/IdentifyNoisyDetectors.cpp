@@ -10,6 +10,7 @@ namespace Mantid {
 namespace Algorithms {
 using namespace Kernel;
 using namespace API;
+using namespace HistogramData;
 
 DECLARE_ALGORITHM(IdentifyNoisyDetectors)
 

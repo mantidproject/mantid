@@ -5,7 +5,6 @@
 
 #include "MantidAlgorithms/ImggTomographicReconstruction.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/Exception.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -139,10 +138,10 @@ public:
       API::MatrixWorkspace_sptr projWS;
       TS_ASSERT_THROWS_NOTHING(
           projWS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(ws));
-      MantidVec &dataY = projWS->dataY(7);
+      auto &dataY = projWS->mutableY(7);
       TS_ASSERT_THROWS_NOTHING(std::fill(dataY.begin(), dataY.end(), 5000.0));
       for (size_t idx = 0; idx < static_cast<size_t>(ysize); ++idx) {
-        projWS->dataY(ysize)[ysize - idx - 1] = 987.6;
+        projWS->mutableY(ysize)[ysize - idx - 1] = 987.6;
       }
     }
 
@@ -185,9 +184,9 @@ public:
       TSM_ASSERT_EQUALS("Unexpected number of rows in output slices",
                         sliceWS->getNumberHistograms(), ysize);
       TSM_ASSERT_DELTA("Unexpected value in output pixel",
-                       sliceWS->readY(pix1y)[pix1x], referencePix1, 1e-4);
+                       sliceWS->y(pix1y)[pix1x], referencePix1, 1e-4);
       TSM_ASSERT_DELTA("Unexpected value in output pixel",
-                       sliceWS->readY(pix2y)[pix2x], referencePix2, 1e-4);
+                       sliceWS->y(pix2y)[pix2x], referencePix2, 1e-4);
     }
   }
 
@@ -249,9 +248,9 @@ public:
       TSM_ASSERT_EQUALS("Unexpected number of rows in output slices",
                         sliceWS->getNumberHistograms(), ysize);
       TSM_ASSERT_DELTA("Unexpected value in output pixel",
-                       sliceWS->readY(pix1y)[pix1x], referencePix1, 1e-4);
+                       sliceWS->y(pix1y)[pix1x], referencePix1, 1e-4);
       TSM_ASSERT_DELTA("Unexpected value in output pixel",
-                       sliceWS->readY(pix2y)[pix2x], referencePix2, 1e-4);
+                       sliceWS->y(pix2y)[pix2x], referencePix2, 1e-4);
     }
   }
 
