@@ -257,6 +257,10 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             else:
                 s_api.DeleteWorkspace(sum_workspace)
                 partial_ws_names = [ws.getName() for ws in partial_workspaces]
+                ### sort workspaces
+                if self._calc_ion_index:
+                    # Sort by index after '_'
+                    partial_ws_names.sort(key=lambda item: (int(item[(item.rfind('_')+1):])))
                 group = ','.join(partial_ws_names)
                 s_api.GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
 
