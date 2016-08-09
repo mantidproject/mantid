@@ -141,7 +141,7 @@ private:
                                 const std::string &expectedPeaks);
 
   void updateFittingDirVec(const std::string &bankDir,
-                           const std::string &focusedFile, const bool multi_run,
+                           const std::string &focusedFile,
                            std::vector<std::string> &fittingRunNoDirVec);
 
   void enableMultiRun(std::string firstRun, std::string lastRun,
@@ -157,14 +157,23 @@ private:
 
   void fittingWriteFile(const std::string &fileDir);
 
+
+  void browsedFile();
+
+
   // whether to use AlignDetectors to convert units
   static const bool g_useAlignDetectors;
+
+  static int g_fitting_runno_counter;
 
   // name of the workspace with the focused ws being used for fitting
   static const std::string g_focusedFittingWSName;
 
   /// true if the last fitting completed successfully
   bool m_fittingFinishedOK;
+
+  // directories of all the run numbers when multi-run option
+  std::vector<std::string> g_multi_run_directories;
 
   QThread *m_workerThread;
 

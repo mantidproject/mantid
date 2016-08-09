@@ -28,6 +28,8 @@ const bool EnggDiffFittingPresenter::g_useAlignDetectors = true;
 const std::string EnggDiffFittingPresenter::g_focusedFittingWSName =
     "engggui_fitting_focused_ws";
 
+int EnggDiffFittingPresenter::g_fitting_runno_counter = 0;
+
 /**
  * Constructs a presenter for a fitting tab/widget view, which has a
  * handle on the current calibration (produced and updated elsewhere).
@@ -209,6 +211,10 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 #endif
       // if vector is not empty and correct focus format file is selected
       if (!splitBaseName.empty() && splitBaseName.size() > 3) {
+
+        // to identify the loop number
+        g_fitting_runno_counter++;
+
         // regenerating the focus file name
         std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
                                splitBaseName[2] + "_" + splitBaseName[3];
@@ -236,7 +242,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
           // if not run mode or bank mode: to avoid recreating widgets
           if (!multiRunMode && !singleRunMode) {
 
-            updateFittingDirVec(strBankDir, foc_file, false, runnoDirVector);
+            updateFittingDirVec(strBankDir, foc_file, runnoDirVector);
 
             m_view->setFittingRunNumVec(runnoDirVector);
 
@@ -295,9 +301,12 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
         // else - given or set to a single run number
         else {
 
+          // to identify the loop number - multi & single run
+          g_fitting_runno_counter++;
+
           m_view->setFittingSingleRunMode(true);
 
-          updateFittingDirVec(focusDir, strFocusedFile, false, runnoDirVector);
+          updateFittingDirVec(focusDir, strFocusedFile, runnoDirVector);
           m_view->setFittingRunNumVec(runnoDirVector);
           // add bank to the combo-box and list view
           setBankItems();
@@ -319,6 +328,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     // set the text-field to directory here to the first in
     // the vector if its not empty
     if (!runnoDirVector.empty() && !selectedfPath.isFile()) {
+
       auto firstDir = runnoDirVector[0];
       m_view->setFittingRunNo(firstDir);
 
@@ -335,17 +345,16 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     return;
   }
 
-  auto vec = m_view->getFittingRunNumVec();
-  g_log.warning() << "dir in the end" << std::endl;
-  for (auto dir : vec) {
-	  g_log.warning() << dir << std::endl;
+}
 
-  }
+void EnggDiffFittingPresenter::browsedFile() {
 
+  // shahroz
+  // move browsed statement here
 }
 
 void EnggDiffFittingPresenter::updateFittingDirVec(
-    const std::string &bankDir, const std::string &focusedFile, bool multi_run,
+    const std::string &bankDir, const std::string &focusedFile,
     std::vector<std::string> &fittingRunNoDirVec) {
 
   try {
@@ -361,8 +370,9 @@ void EnggDiffFittingPresenter::updateFittingDirVec(
         // check if it not any other file.. e.g: texture
         if (itbankFileName.find(focusedFile) != std::string::npos) {
           fittingRunNoDirVec.push_back(itFilePath);
-		  if (multi_run)
-			  g_multi_run_directories.push_back(itFilePath);
+		  // if only first loop in Fitting Runno then add diectory
+          if (g_fitting_runno_counter == 1)
+            g_multi_run_directories.push_back(itFilePath);
         }
       }
       ++it;
@@ -412,14 +422,16 @@ void EnggDiffFittingPresenter::enableMultiRun(
             "Please try again");
       } else {
 
-		  // delete me
-		  auto size_ = RunNumberVec.size();
+        // delete me
+        auto size_ = RunNumberVec.size();
+
+        // to identify the loop number - multi & single run
+        g_fitting_runno_counter++;
 
         // if given a multi run number instead
         for (size_t i = 0; i < RunNumberVec.size(); i++) {
           // save dir for every vector
-          updateFittingDirVec(focusDir, RunNumberVec[i], true,
-                              fittingRunNoDirVec);
+          updateFittingDirVec(focusDir, RunNumberVec[i], fittingRunNoDirVec);
         }
         int diff = (lastNum - firstNum) + 1;
         auto run_vec_size = RunNumberVec.size();
@@ -659,16 +671,11 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
 
   // if the last directory in vector matches the input directory within this
   // function then clear the vector
-  if (g_multi_run_directories.back() == focusedRunNo)
+  if (g_multi_run_directories.back() == focusedRunNo) {
     g_multi_run_directories.clear();
-
-  // @shahroz - delete me
-  g_log.error()
-      << "/////////////////////////////////////////////////////"
-         "/////////////////////////////////////////////////////////////////////"
-         "/"
-         "////////////////////////////////////////////////////////////////////"
-      << std::endl;
+    m_view->setFittingMultiRunMode(false);
+    g_fitting_runno_counter = 0;
+  }
 
   // load the focused workspace file to perform single peak fits
   try {
@@ -1381,6 +1388,11 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
       g_log.warning() << "Peaks could not be plotted as the fitting process "
                          "did not finish correctly.\n";
       m_view->showStatus("No peaks could be fitted");
+
+      // incase fitting fails and does not reset the globals
+      g_multi_run_directories.clear();
+      m_view->setFittingMultiRunMode(false);
+      g_fitting_runno_counter = 0;
     }
 
   } catch (std::runtime_error) {
