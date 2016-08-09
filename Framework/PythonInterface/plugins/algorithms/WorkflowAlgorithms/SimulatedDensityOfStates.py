@@ -240,8 +240,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                     partial_ions[ion] = [i['index'] for i in ions if i['species'] == ion]
             else:
                 for ion in ions:
-                    ion_identifier = ion['species'] + str(ion['index'])
-                    partial_ions[ion_identifier] = ion['index']
+                    if ion['species'] in self._ions:
+                        ion_identifier = ion['species'] + str(ion['index'])
+                        partial_ions[ion_identifier] = ion['index']
 
             partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(partial_ions, frequencies, eigenvectors, weights)
 
@@ -255,7 +256,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
             else:
                 s_api.DeleteWorkspace(sum_workspace)
-
                 partial_ws_names = [ws.getName() for ws in partial_workspaces]
                 group = ','.join(partial_ws_names)
                 s_api.GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
@@ -334,7 +334,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
         self._calc_partial = (len(self._ions) > 0)
 
+
 #----------------------------------------------------------------------------------------
+
 
     def _convert_to_cartesian_coordinates(self, unit_cell, ions):
         """
@@ -446,8 +448,12 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             partial_ws.setYUnitLabel('Intensity')
 
             # Add the sample material to the workspace
+            match = re.search(r'\d', ion_name)
+            element_index = ion_name
+            if match:
+                element_index = ion_name[:match.start()]
             chemical, ws_suffix = self._parse_chemical_and_ws_name(ion_name,
-                                                                   self._element_isotope[ion_name])
+                                                                   self._element_isotope[element_index])
             partial_ws_name += ws_suffix
 
             s_api.SetSampleMaterial(InputWorkspace=self._out_ws_name,
