@@ -14,7 +14,7 @@
 //-----------------------------------------------------------------------------
 namespace Mantid {
 namespace PythonInterface {
-using Environment::CallMethod1;
+using Environment::callMethod;
 using namespace boost::python;
 
 /**
@@ -81,8 +81,7 @@ void IFunction1DAdapter::function1D(double *out, const double *xValues,
  */
 boost::python::object
 IFunction1DAdapter::function1D(const boost::python::object &xvals) const {
-  return CallMethod1<object, object>::dispatchWithException(
-      getSelf(), "function1D", xvals);
+  return callMethod<object, const object &>(getSelf(), "function1D", xvals);
 }
 
 /**
