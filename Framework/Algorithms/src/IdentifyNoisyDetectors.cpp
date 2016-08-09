@@ -118,8 +118,7 @@ void IdentifyNoisyDetectors::exec() {
   // can it be improved?
   for (int i = 0; i < nHist; i++) {
     stdDevWs->mutableX(i)[0] = 0.0;
-    stdDevWs->mutableY(i)[0] =
-        sqrt(int2->y(i)[0] - std::pow(int1->y(i)[0], 2));
+    stdDevWs->mutableY(i)[0] = sqrt(int2->y(i)[0] - std::pow(int1->y(i)[0], 2));
     outputWs->mutableX(i)[0] = 0.0;
     outputWs->mutableY(i)[0] = 1.0;
 
@@ -175,10 +174,10 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
 
   double value(0.0);
   for (int i = 0; i < nhist; i++) {
-	  
+
     value = values->readY(i)[0];
 
-	// ??? does this do anyhting
+    // ??? does this do anyhting
     if (value > upper) {
       valid->mutableY(i)[0] = 0.0;
     } else if (value < lower) {
