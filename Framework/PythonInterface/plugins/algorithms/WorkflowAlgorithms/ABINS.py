@@ -41,25 +41,25 @@ class ABINS(PythonAlgorithm):
     def PyInit(self):
 
         # Declare all properties
-        self.declareProperty(name="DFT program",
+        self.declareProperty(name="DFTprogram",
                              direction=Direction.Input,
                              defaultValue="CASTEP",
                              validator=StringListValidator(["CASTEP", "CRYSTAL"]),
                              doc="DFT program which was used for a phonon calculation.")
 
-        self.declareProperty(FileProperty("Phonon File", "",
+        self.declareProperty(FileProperty("PhononFile", "",
                              action=FileAction.Load,
                              direction=Direction.Input,
                              extensions=["phonon"]),
                              doc="File with the data from a phonon calculation.")
 
-        self.declareProperty(FileProperty("Experimental File", "",
+        self.declareProperty(FileProperty("ExperimentalFile", "",
                              action=FileAction.OptionalLoad,
                              direction=Direction.Input,
                              extensions=["raw", "dat"]),
                              doc="File with the experimental inelastic spectrum to compare.")
 
-        self.declareProperty(name="Temperature [K]",
+        self.declareProperty(name="Temperature[K]",
                              direction=Direction.Input,
                              defaultValue=10.0,
                              doc="Temperature in K for which dynamical structure factor S should be calculated.")
@@ -67,7 +67,7 @@ class ABINS(PythonAlgorithm):
         self.declareProperty(name='Scale', defaultValue=1.0,
                              doc='Scale the intensity by the given factor. Default is no scaling.')
 
-        self.declareProperty(name="Sample Form",
+        self.declareProperty(name="SampleForm",
                              direction=Direction.Input,
                              defaultValue="Powder",
                              validator=StringListValidator(["SingleCrystal", "Powder"]),
@@ -104,24 +104,24 @@ class ABINS(PythonAlgorithm):
         """
         issues = dict()
 
-        temperature = self.getPropertyValue("Temperature [K]")
+        temperature = self.getPropertyValue("Temperature[K]")
         if temperature < 0:
-            issues["Temperature [K]"] = "Temperature must be positive."
+            issues["Temperature[K]"] = "Temperature must be positive."
 
         scale = self.getProperty("Scale")
         if scale < 0:
             issues["Scale"] = "Scale must be positive."
 
-        dft_filename = self.getProperty("DFT program")
+        dft_filename = self.getProperty("DFTprogram")
         if dft_filename == "CASTEP":
             output = self._validate_castep_input_file(filename=dft_filename)
             if not output["Valid"]:
-                issues["DFT program"] = output["Comment"]
+                issues["DFTprogram"] = output["Comment"]
         elif dft_filename == "CRYSTAL":
-            issues["DFT program"] = "Support for CRYSTAL DFT program not implemented yet."
+            issues["DFTprogram"] = "Support for CRYSTAL DFT program not implemented yet."
 
         overtones = self.getProperty("Overtones").value
-        sample_form = self.getProperty("Sample Form").value
+        sample_form = self.getProperty("SampleForm").value
         if overtones and (sample_form != "Powder"):
             issues["Overtones"] = "Workspaces with overtones can be created only for the Powder case scenario."
 
@@ -508,12 +508,12 @@ class ABINS(PythonAlgorithm):
         Loads all properities to object's attributes.
         """
 
-        self._dft_program = self.getProperty("DFT program").value
-        self._phononFile = self.getProperty("Phonon File").value
-        self._experimentalFile = self.getProperty("Experimental File").value
-        self._temperature = self.getProperty("Temperature [K]").value
+        self._dft_program = self.getProperty("DFTprogram").value
+        self._phononFile = self.getProperty("PhononFile").value
+        self._experimentalFile = self.getProperty("ExperimentalFile").value
+        self._temperature = self.getProperty("Temperature[K]").value
         self._scale =  self.getProperty("Scale").value
-        self._sampleForm = self.getProperty("Sample Form").value
+        self._sampleForm = self.getProperty("SampleForm").value
         self._instrument = self.getProperty("Instrument").value
         self._atoms = self.getProperty("Atoms").value
         self._sum_contributions = self.getProperty("SumContributions").value
