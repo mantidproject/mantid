@@ -9,32 +9,32 @@ namespace Detail {
 
 /** Parallelism check
  * Forwards boolean argument to OpenMP macro.
- * @param Whether to execute in parallel.
- * @return Whether to execute in parallel.
+ * @param condition whether to execute in parallel.
+ * @return whether to execute in parallel.
  */
 inline bool threadSafe(bool condition) { return condition; }
 
 /** Thread-safety check
  * Checks the workspace to ensure it is suitable for multithreaded access.
  * NULL workspaces are assumed suitable
- * @param workspace Pointer to workspace to verify.
+ * @param workspace pointer to workspace to verify.
  * @return Whether workspace is threadsafe.
  */
 template <typename Arg> inline bool threadSafe(Arg workspace) {
-  static_assert(std::is_pointer<Arg>::value, " Pass a non-owning raw pointer.");
+  static_assert(std::is_pointer<Arg>::value, "Pass a non-owning raw pointer.");
   return !workspace || workspace->threadSafe();
 }
 
 /** Thread-safety check
   * Checks the workspace to ensure it is suitable for multithreaded access.
   * NULL workspaces are assumed suitable
-  * @param workspace Pointer to workspace to verify.
-  * @param others Pointers to all other workspaces which need to be checked.
-  * @return Whether workspace is threadsafe.
+  * @param workspace pointer to workspace to verify.
+  * @param others pointers to all other workspaces which need to be checked.
+  * @return whether workspace is threadsafe.
   */
 template <typename Arg, typename... Args>
 inline bool threadSafe(Arg workspace, Args... others) {
-  static_assert(std::is_pointer<Arg>::value, " Pass a non-owning raw pointer.");
+  static_assert(std::is_pointer<Arg>::value, "Pass a non-owning raw pointer.");
   return (!workspace || workspace->threadSafe()) && threadSafe(others...);
 }
 
