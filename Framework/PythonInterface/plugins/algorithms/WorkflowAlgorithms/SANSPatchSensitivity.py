@@ -59,6 +59,8 @@ class SANSPatchSensitivity(PythonAlgorithm):
                 tube = component[tube_idx]
             self.__patch_workspace(tube, in_ws, patch_ws)
         
+        api.ClearMaskFlag(Workspace=in_ws)
+        
     
     def __get_component_to_patch(self, workspace):
         '''
@@ -103,10 +105,10 @@ class SANSPatchSensitivity(PythonAlgorithm):
                 # ID will be the same in both WS
                 detector_id = pixel_in_input_ws.getID()
                 pixel_in_patch_ws  = patch_ws.getDetector(detector_id)
-                
+
                 if pixel_in_patch_ws.isMasked():
                     id_to_fit.append(detector_id)
-                else:
+                elif not pixel_in_input_ws.isMasked():
                     id_to_calculate_fit.append(detector_id)
                     y_to_calculate_fit.append(in_ws.readY(detector_id).sum())
                     e_to_calculate_fit.append(in_ws.readE(detector_id).sum())
@@ -121,7 +123,7 @@ class SANSPatchSensitivity(PythonAlgorithm):
             ve = np.polyval(pe,[id])
             in_ws.setY(id,vy)
             in_ws.setE(id,ve)
-                
+
 
 
 AlgorithmFactory.subscribe(SANSPatchSensitivity())
