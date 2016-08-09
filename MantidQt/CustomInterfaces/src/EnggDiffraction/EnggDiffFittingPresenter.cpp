@@ -185,8 +185,6 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     Poco::Path selectedfPath(strFocusedFile);
     Poco::Path bankDir;
 
-    // runnoDirVector - vector to hold the directory of
-    // all the banks for the selected run number?
     auto runnoDirVector = m_view->getFittingRunNumVec();
     runnoDirVector.clear();
 
@@ -222,16 +220,17 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     } else if (strFocusedFile.size() > 4) {
 
       // if multi-run number string finds '-' to define run number
-      // adds run number to widget on right and changes text-field
-      // single run number and trigger FittingRunNo changed again
       if (strFocusedFile.find("-") != std::string::npos) {
 
+        // adds run number to list widget on right and changes text-field
+        // to single run number and trigger FittingRunNo changed again
         processMultiRun(strFocusedFile, runnoDirVector);
 
       } else {
-        auto focusDir = m_view->focusingDir();
+
         // true if string convertible to digit
         auto isRunNumber = isDigit(strFocusedFile);
+        auto focusDir = m_view->focusingDir();
 
         // if not valid parent dir and not valid single run number
         if (focusDir.empty() || !isRunNumber) {
@@ -241,6 +240,8 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
               "set for Output Folder under Focusing Settings on the "
               "settings tab. "
               "Please try again");
+
+          m_view->enableFitAllButton(false);
         }
 
         // else - given or set to a single run number
@@ -302,12 +303,12 @@ void EnggDiffFittingPresenter::browsedFile(
     auto multiRunMode = m_view->getFittingMultiRunMode();
     auto singleRunMode = m_view->getFittingSingleRunMode();
 
+    updateFittingDirVec(bankFileDir, foc_file, runnoDirVector);
+
+    m_view->setFittingRunNumVec(runnoDirVector);
+
     // if not run mode or bank mode: to avoid recreating widgets
     if (!multiRunMode && !singleRunMode) {
-
-      updateFittingDirVec(bankFileDir, foc_file, runnoDirVector);
-
-      m_view->setFittingRunNumVec(runnoDirVector);
 
       // add bank to the combo-box
       setBankItems();
@@ -352,7 +353,10 @@ void EnggDiffFittingPresenter::processSingleRun(
 
   updateFittingDirVec(focusDir, strFocusedFile, runnoDirVector);
   m_view->setFittingRunNumVec(runnoDirVector);
+
   // add bank to the combo-box and list view
+  // recreates bank widget for every run (multi-run) depending on
+  // number of banks file found for given run number in folder
   setBankItems();
   setDefaultBank(splitBaseName, strFocusedFile);
 
@@ -487,19 +491,12 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 
   // validate fitting data as it will remain the same through out
   const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
-  g_log.debug() << "the expected peaks are: " << fitPeaksData << '\n';
+  g_log.debug() << "Focused files found peaks are: " << fitPeaksData << '\n';
 
-  // create loop here
-  // Directory of the file is returned
-  // global vector could also be called?
   // @shahroz
-
   for (auto dir : g_multi_run_directories) {
-    g_log.error() << dir << std::endl;
+    g_log.error() << dir << '\n';
   }
-
-  std::vector<std::string> focusRunNoVec;
-  boost::split(focusRunNoVec, focusedRunNo, boost::is_any_of("-"));
 
   if (!g_multi_run_directories.empty()) {
 
@@ -513,6 +510,10 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
         return;
       }
     }
+  } else {
+    m_view->userWarning("Error in the inputs required for fitting",
+                        "Invalid files have been selected for Fit All process");
+    m_view->enableFitAllButton(false);
   }
 
   const std::string outWSName = "engggui_fitting_fit_peak_ws";
@@ -544,6 +545,10 @@ void EnggDiffFittingPresenter::processFitPeaks() {
     m_view->userWarning("Error in the inputs required for fitting", ia.what());
     return;
   }
+
+  // disable so that user is forced to select file again
+  // otherwise empty vector will be passed
+  m_view->enableFitAllButton(false);
 
   const std::string outWSName = "engggui_fitting_fit_peak_ws";
   g_log.notice() << "EnggDiffraction GUI: starting new "
@@ -684,10 +689,15 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
 
   // if the last directory in vector matches the input directory within this
   // function then clear the vector
-  if (g_multi_run_directories.back() == focusedRunNo) {
-    g_multi_run_directories.clear();
-    m_view->setFittingMultiRunMode(false);
-    g_fitting_runno_counter = 0;
+  if (!g_multi_run_directories.empty()) {
+    auto lastDir = g_multi_run_directories.back() == focusedRunNo;
+    if (lastDir) {
+      g_multi_run_directories.clear();
+      m_view->setFittingMultiRunMode(false);
+      m_view->setFittingSingleRunMode(false);
+      g_fitting_runno_counter = 0;
+      m_view->enableFitAllButton(false);
+    }
   }
 
   // load the focused workspace file to perform single peak fits
@@ -1406,6 +1416,7 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
       g_multi_run_directories.clear();
       m_view->setFittingMultiRunMode(false);
       g_fitting_runno_counter = 0;
+      m_view->enableFitAllButton(false);
     }
 
   } catch (std::runtime_error) {
