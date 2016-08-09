@@ -23,7 +23,7 @@ public:
     inWS_hist->setDistribution(true);
 
     inWS_point = WorkspaceCreationHelper::Create2DWorkspace154(1, 1);
-    inWS_point->dataX(0)[0] = 3.0; // 1 is not a good number to test with
+    inWS_point->mutableX(0)[0] = 3.0; // 1 is not a good number to test with
     inWS_point->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
     inWS_point->setDistribution(true);
@@ -49,6 +49,7 @@ public:
   }
 
   void testGuinierSpheres() {
+
     TS_ASSERT_THROWS_NOTHING(iq.setProperty("InputWorkspace", inWS_hist));
     TS_ASSERT_THROWS_NOTHING(
         iq.setPropertyValue("TransformType", "Guinier (spheres)"));
@@ -56,9 +57,9 @@ public:
 
     Mantid::API::MatrixWorkspace_const_sptr outWS =
         iq.getProperty("OutputWorkspace");
-    TS_ASSERT_DELTA(outWS->readX(0)[0], 0.25, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readY(0)[0], 0.693147, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readE(0)[0], 0.707107, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->x(0)[0], 0.25, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 0.693147, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->e(0)[0], 0.707107, 1.0e-6);
 
     TS_ASSERT_EQUALS(outWS->YUnitLabel(), "Ln(I)");
     TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Q^2");
@@ -72,9 +73,9 @@ public:
 
     Mantid::API::MatrixWorkspace_const_sptr outWS =
         iq.getProperty("OutputWorkspace");
-    TS_ASSERT_DELTA(outWS->readX(0)[0], 9.0, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readY(0)[0], 2.708050, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readE(0)[0], 0.8, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->x(0)[0], 9.0, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 2.708050, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->e(0)[0], 0.8, 1.0e-6);
 
     TS_ASSERT_EQUALS(outWS->YUnitLabel(), "Ln(I x Q)");
     TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Q^2");
@@ -88,9 +89,9 @@ public:
 
     Mantid::API::MatrixWorkspace_const_sptr outWS =
         iq.getProperty("OutputWorkspace");
-    TS_ASSERT_DELTA(outWS->readX(0)[0], 0.25, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readY(0)[0], -0.693147, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readE(0)[0], 0.707107, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->x(0)[0], 0.25, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->y(0)[0], -0.693147, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->e(0)[0], 0.707107, 1.0e-6);
 
     TS_ASSERT_EQUALS(outWS->YUnitLabel(), "Ln(I x Q^2)");
     TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Q^2");
@@ -103,9 +104,9 @@ public:
 
     Mantid::API::MatrixWorkspace_const_sptr outWS =
         iq.getProperty("OutputWorkspace");
-    TS_ASSERT_DELTA(outWS->readX(0)[0], 9.0, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readY(0)[0], 0.2, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readE(0)[0], 0.16, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->x(0)[0], 9.0, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 0.2, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->e(0)[0], 0.16, 1.0e-6);
 
     TS_ASSERT_EQUALS(outWS->YUnitLabel(), "1/I");
     TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Q^2");
@@ -119,9 +120,9 @@ public:
 
     Mantid::API::MatrixWorkspace_const_sptr outWS =
         iq.getProperty("OutputWorkspace");
-    TS_ASSERT_DELTA(outWS->readX(0)[0], 0.25, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readY(0)[0], 0.707107, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readE(0)[0], 0.5, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->x(0)[0], 0.25, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 0.707107, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->e(0)[0], 0.5, 1.0e-6);
 
     TS_ASSERT_EQUALS(outWS->YUnitLabel(), "1/sqrt(I)");
     TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Q^2");
@@ -134,9 +135,9 @@ public:
 
     Mantid::API::MatrixWorkspace_const_sptr outWS =
         iq.getProperty("OutputWorkspace");
-    TS_ASSERT_DELTA(outWS->readX(0)[0], 3.0, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readY(0)[0], 15.0, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readE(0)[0], 12.0, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->x(0)[0], 3.0, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 15.0, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->e(0)[0], 12.0, 1.0e-6);
 
     TS_ASSERT_EQUALS(outWS->YUnitLabel(), "I x Q");
     TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "q");
@@ -149,9 +150,9 @@ public:
 
     Mantid::API::MatrixWorkspace_const_sptr outWS =
         iq.getProperty("OutputWorkspace");
-    TS_ASSERT_DELTA(outWS->readX(0)[0], 0.5, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readY(0)[0], 0.5, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readE(0)[0], 0.353553, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->x(0)[0], 0.5, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 0.5, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->e(0)[0], 0.353553, 1.0e-6);
 
     TS_ASSERT_EQUALS(outWS->YUnitLabel(), "I x Q^2");
     TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "q");
@@ -164,9 +165,9 @@ public:
 
     Mantid::API::MatrixWorkspace_const_sptr outWS =
         iq.getProperty("OutputWorkspace");
-    TS_ASSERT_DELTA(outWS->readX(0)[0], 3.0, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readY(0)[0], 405.0, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readE(0)[0], 324.0, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->x(0)[0], 3.0, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 405.0, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->e(0)[0], 324.0, 1.0e-6);
 
     TS_ASSERT_EQUALS(outWS->YUnitLabel(), "I x Q^4");
     TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "q");
@@ -179,9 +180,9 @@ public:
 
     Mantid::API::MatrixWorkspace_const_sptr outWS =
         iq.getProperty("OutputWorkspace");
-    TS_ASSERT_DELTA(outWS->readX(0)[0], -0.693147, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readY(0)[0], 0.693147, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readE(0)[0], 0.707107, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->x(0)[0], -0.693147, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 0.693147, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->e(0)[0], 0.707107, 1.0e-6);
 
     TS_ASSERT_EQUALS(outWS->YUnitLabel(), "Ln(I)");
     TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(), "Ln(Q)");
@@ -201,9 +202,9 @@ public:
 
     Mantid::API::MatrixWorkspace_const_sptr outWS =
         iq.getProperty("OutputWorkspace");
-    TS_ASSERT_DELTA(outWS->readX(0)[0], 1374.580706, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readY(0)[0], 1374.580706, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readE(0)[0], 2559.329130, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->x(0)[0], 1374.580706, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 1374.580706, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->e(0)[0], 2559.329130, 1.0e-6);
 
     TS_ASSERT_EQUALS(outWS->YUnitLabel(), "Q^2 x I^2 x Ln( Q^2 x I^2 x 2)");
     TS_ASSERT_EQUALS(outWS->getAxis(0)->unit()->caption(),
@@ -218,9 +219,9 @@ public:
 
     Mantid::API::MatrixWorkspace_const_sptr outWS =
         iq.getProperty("OutputWorkspace");
-    TS_ASSERT_DELTA(outWS->readX(0)[0], 0.5, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readY(0)[0], 0.25, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readE(0)[0], 0.707107, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->x(0)[0], 0.5, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 0.25, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->e(0)[0], 0.707107, 1.0e-6);
   }
 
   void testWorkspaceBackground() {
@@ -236,9 +237,9 @@ public:
     // was set in the previous test
     Mantid::API::MatrixWorkspace_const_sptr outWS =
         iq.getProperty("OutputWorkspace");
-    TS_ASSERT_DELTA(outWS->readX(0)[0], 3.0, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readY(0)[0], 4.5, 1.0e-6);
-    TS_ASSERT_DELTA(outWS->readE(0)[0], 15.0, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->x(0)[0], 3.0, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 4.5, 1.0e-6);
+    TS_ASSERT_DELTA(outWS->e(0)[0], 15.0, 1.0e-6);
   }
 
 private:

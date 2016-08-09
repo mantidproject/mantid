@@ -13,7 +13,6 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
@@ -118,8 +117,10 @@ void IQTransform::exec() {
   outputWS->setYUnit("");
   // Copy the data over. Assume single spectrum input (output will be).
   outputWS->setPoints(0, tmpWS->points(0));
-  MantidVec &Y = outputWS->dataY(0) = tmpWS->dataY(0);
-  outputWS->dataE(0) = tmpWS->dataE(0);
+  outputWS->setSharedY(0, tmpWS->sharedY(0));
+  outputWS->setSharedE(0, tmpWS->sharedE(0));
+
+  auto &Y = outputWS->mutableY(0);
 
   // Subtract a constant background if requested
   const double background = getProperty("BackgroundValue");
@@ -141,7 +142,8 @@ void IQTransform::exec() {
  *  @param Y :: The vector from which to subtract
  *  @param value :: The value to subtract from each data point
  */
-void IQTransform::subtractBackgroundValue(MantidVec &Y, const double value) {
+void IQTransform::subtractBackgroundValue(HistogramData::HistogramY &Y,
+                                          const double value) {
   g_log.debug() << "Subtracting the background value " << value
                 << " from the input workspace.\n";
   std::transform(Y.begin(), Y.end(), Y.begin(),
@@ -173,9 +175,9 @@ IQTransform::subtractBackgroundWS(API::MatrixWorkspace_sptr ws,
  * number
  */
 void IQTransform::guinierSpheres(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
   std::transform(X.begin(), X.end(), X.begin(),
                  VectorHelper::Squares<double>());
   std::transform(E.begin(), E.end(), Y.begin(), E.begin(),
@@ -193,9 +195,9 @@ void IQTransform::guinierSpheres(API::MatrixWorkspace_sptr ws) {
  * number
  */
 void IQTransform::guinierRods(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
   std::transform(E.begin(), E.end(), Y.begin(), E.begin(),
                  std::divides<double>());
   std::transform(Y.begin(), Y.end(), X.begin(), Y.begin(),
@@ -215,9 +217,9 @@ void IQTransform::guinierRods(API::MatrixWorkspace_sptr ws) {
  * number
  */
 void IQTransform::guinierSheets(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
   std::transform(E.begin(), E.end(), Y.begin(), E.begin(),
                  std::divides<double>());
   std::transform(X.begin(), X.end(), X.begin(),
@@ -236,9 +238,9 @@ void IQTransform::guinierSheets(API::MatrixWorkspace_sptr ws) {
  *  @param ws The workspace to be transformed
  */
 void IQTransform::zimm(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
   std::transform(X.begin(), X.end(), X.begin(),
                  VectorHelper::Squares<double>());
   for (size_t i = 0; i < Y.size(); ++i) {
@@ -260,9 +262,9 @@ void IQTransform::zimm(API::MatrixWorkspace_sptr ws) {
  *  @param ws The workspace to be transformed
  */
 void IQTransform::debyeBueche(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
   std::transform(X.begin(), X.end(), X.begin(),
                  VectorHelper::Squares<double>());
   for (size_t i = 0; i < Y.size(); ++i) {
@@ -283,9 +285,9 @@ void IQTransform::debyeBueche(API::MatrixWorkspace_sptr ws) {
  *  @param ws The workspace to be transformed
  */
 void IQTransform::holtzer(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
   std::transform(Y.begin(), Y.end(), X.begin(), Y.begin(),
                  std::multiplies<double>());
   std::transform(E.begin(), E.end(), X.begin(), E.begin(),
@@ -298,9 +300,9 @@ void IQTransform::holtzer(API::MatrixWorkspace_sptr ws) {
  *  @param ws The workspace to be transformed
  */
 void IQTransform::kratky(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
   MantidVec Q2(X.size());
   std::transform(X.begin(), X.end(), Q2.begin(),
                  VectorHelper::Squares<double>());
@@ -316,9 +318,9 @@ void IQTransform::kratky(API::MatrixWorkspace_sptr ws) {
  *  @param ws The workspace to be transformed
  */
 void IQTransform::porod(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
   MantidVec Q4(X.size());
   std::transform(X.begin(), X.end(), X.begin(), Q4.begin(),
                  VectorHelper::TimesSquares<double>());
@@ -336,9 +338,9 @@ void IQTransform::porod(API::MatrixWorkspace_sptr ws) {
  * number
  */
 void IQTransform::logLog(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
   std::transform(X.begin(), X.end(), X.begin(), VectorHelper::Log<double>());
   std::transform(E.begin(), E.end(), Y.begin(), E.begin(),
                  std::divides<double>());
@@ -358,9 +360,9 @@ void IQTransform::logLog(API::MatrixWorkspace_sptr ws) {
  * number
  */
 void IQTransform::general(API::MatrixWorkspace_sptr ws) {
-  MantidVec &X = ws->dataX(0);
-  MantidVec &Y = ws->dataY(0);
-  MantidVec &E = ws->dataE(0);
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
   const std::vector<double> C = getProperty("GeneralFunctionConstants");
   // Check for the correct number of elements
   if (C.size() != 10) {
