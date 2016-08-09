@@ -186,7 +186,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     Poco::Path bankDir;
 
     // runnoDirVector - vector to hold the directory of
-    // all the banks for the selected run number
+    // all the banks for the selected run number?
     auto runnoDirVector = m_view->getFittingRunNumVec();
     runnoDirVector.clear();
 
@@ -212,52 +212,11 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
       // if vector is not empty and correct focus format file is selected
       if (!splitBaseName.empty() && splitBaseName.size() > 3) {
 
-        // to identify the loop number
-        g_fitting_runno_counter++;
+        std::string bankFileDir = bankDir.toString();
 
-        // regenerating the focus file name
-        std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
-                               splitBaseName[2] + "_" + splitBaseName[3];
-
-        // base directory to string for the selected bank file
-        std::string strBankDir = bankDir.toString();
-
-        if (strBankDir.empty()) {
-          m_view->userWarning(
-              "Invalid Input",
-              "Please check that a valid directory is "
-              "set for Output Folder under Focusing Settings on the "
-              "settings tab. "
-              "Please try again");
-        } else {
-
-          // foc_file - vector holding the file name split
-          // false for NOT multi-run
-          // runnoDirVector - giving empty vector here holding directory of
-          // selected vector
-
-          auto multiRunMode = m_view->getFittingMultiRunMode();
-          auto singleRunMode = m_view->getFittingSingleRunMode();
-
-          // if not run mode or bank mode: to avoid recreating widgets
-          if (!multiRunMode && !singleRunMode) {
-
-            updateFittingDirVec(strBankDir, foc_file, runnoDirVector);
-
-            m_view->setFittingRunNumVec(runnoDirVector);
-
-            // add bank to the combo-box
-            setBankItems();
-            // set the bank widget according to selected bank file
-            setDefaultBank(splitBaseName, strFocusedFile);
-            runNoVec.clear();
-            runNoVec.push_back(splitBaseName[1]);
-
-            // Skips this step if it is multiple run because widget already
-            // updated
-            setRunNoItems(runNoVec, false);
-          }
-        }
+		// browse the file
+        browsedFile(strFocusedFile, runnoDirVector, splitBaseName, runNoVec,
+                    bankFileDir);
       }
       // if given a multi-run OR single number
     } else if (strFocusedFile.size() > 4) {
@@ -275,9 +234,6 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
           lastRun = firstLastRunNoVec[1];
 
           m_view->setFittingMultiRunMode(true);
-          // updatesFittingDirVec here too
-          // shahroz
-          g_multi_run_directories.clear();
           enableMultiRun(firstRun, lastRun, runnoDirVector);
         }
 
@@ -344,13 +300,56 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
                             static_cast<std::string>(re.what()));
     return;
   }
-
 }
 
-void EnggDiffFittingPresenter::browsedFile() {
+void EnggDiffFittingPresenter::browsedFile(
+    const std::string strFocusedFile,
+    std::vector<std::string> &runnoDirVector,
+    std::vector<std::string> &splitBaseName, std::vector<std::string> &runNoVec,
+    std::string &bankFileDir) {
+  // to identify the loop number
+  g_fitting_runno_counter++;
 
-  // shahroz
-  // move browsed statement here
+  // regenerating the focus file name
+  std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
+                         splitBaseName[2] + "_" + splitBaseName[3];
+
+  // if base directory of file is empty
+  if (bankFileDir.empty()) {
+    m_view->userWarning("Invalid Input",
+                        "Please check that a valid directory is "
+                        "set for Output Folder under Focusing Settings on the "
+                        "settings tab. "
+                        "Please try again");
+  } else {
+
+    // foc_file - vector holding the file name split
+    // false for NOT multi-run
+    // runnoDirVector - giving empty vector here holding directory of
+    // selected vector
+
+    auto multiRunMode = m_view->getFittingMultiRunMode();
+    auto singleRunMode = m_view->getFittingSingleRunMode();
+
+    // if not run mode or bank mode: to avoid recreating widgets
+    if (!multiRunMode && !singleRunMode) {
+
+      updateFittingDirVec(bankFileDir, foc_file, runnoDirVector);
+
+      m_view->setFittingRunNumVec(runnoDirVector);
+
+      // add bank to the combo-box
+      setBankItems();
+      // set the bank widget according to selected bank file
+      setDefaultBank(splitBaseName, strFocusedFile);
+      runNoVec.clear();
+      runNoVec.push_back(splitBaseName[1]);
+
+      // Skips this step if it is multiple run because widget already
+      // updated
+      setRunNoItems(runNoVec, false);
+    }
+  }
 }
 
 void EnggDiffFittingPresenter::updateFittingDirVec(
@@ -370,7 +369,7 @@ void EnggDiffFittingPresenter::updateFittingDirVec(
         // check if it not any other file.. e.g: texture
         if (itbankFileName.find(focusedFile) != std::string::npos) {
           fittingRunNoDirVec.push_back(itFilePath);
-		  // if only first loop in Fitting Runno then add diectory
+          // if only first loop in Fitting Runno then add diectory
           if (g_fitting_runno_counter == 1)
             g_multi_run_directories.push_back(itFilePath);
         }

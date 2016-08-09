@@ -157,9 +157,11 @@ private:
 
   void fittingWriteFile(const std::string &fileDir);
 
-
-  void browsedFile();
-
+  void browsedFile(const std::string strFocusedFile,
+                   std::vector<std::string> &runnoDirVector,
+                   std::vector<std::string> &splitBaseName,
+                   std::vector<std::string> &runNoVec,
+                   std::string &bankFileDir);
 
   // whether to use AlignDetectors to convert units
   static const bool g_useAlignDetectors;
