@@ -13,15 +13,6 @@ using namespace Mantid::Kernel;
 
 namespace Mantid {
 namespace Algorithms {
-namespace {
-
-/**
- *  Helper method used with the stl to determine whether values are negative
- * @param value : Value to check
- * @return : True if negative.
- */
-bool checkNotPositive(const int value) { return value < 0; }
-}
 
 //----------------------------------------------------------------------------------------------
 
