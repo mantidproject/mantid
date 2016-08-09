@@ -137,9 +137,11 @@ Histogram &operator/=(Histogram &histogram, const Histogram &other) {
   auto &e1 = histogram.mutableE();
   const auto &y2 = other.y();
   const auto &e2 = other.e();
-  for (size_t i = 0; i < y1.size(); ++i)
-    e1[i] = sqrt(pow(e1[i], 2) + pow(e2[i] * y1[i] / y2[i], 2)) / fabs(y2[i]);
-  y1 /= y2;
+  for (size_t i = 0; i < y1.size(); ++i) {
+    auto inv_y2 = 1.0 / y2[i];
+    e1[i] = sqrt(pow(e1[i], 2) + pow(e2[i] * y1[i] * inv_y2, 2)) * fabs(inv_y2);
+    y1[i] *= inv_y2;
+  }
   if (histogram.yMode() == other.yMode())
     histogram.setYMode(Histogram::YMode::Frequencies);
   return histogram;
