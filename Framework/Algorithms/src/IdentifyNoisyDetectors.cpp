@@ -114,12 +114,13 @@ void IdentifyNoisyDetectors::exec() {
 
   int2 = divide->getProperty("OutputWorkspace");
 
+  // can it be improved?
   for (int i = 0; i < nHist; i++) {
-    stdDevWs->dataX(i)[0] = 0.0;
-    stdDevWs->dataY(i)[0] =
-        sqrt(int2->readY(i)[0] - std::pow(int1->readY(i)[0], 2));
-    outputWs->dataX(i)[0] = 0.0;
-    outputWs->dataY(i)[0] = 1.0;
+    stdDevWs->mutableX(i)[0] = 0.0;
+    stdDevWs->mutableY(i)[0] =
+        sqrt(int2->y(i)[0] - std::pow(int1->y(i)[0], 2));
+    outputWs->mutableX(i)[0] = 0.0;
+    outputWs->mutableY(i)[0] = 1.0;
 
     progress.report();
   }
@@ -148,10 +149,11 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
   double mean = 0.0;
   double mean2 = 0.0;
 
+  // replace with CountStandardDeviations?
   for (int i = 0; i < nhist; i++) {
-    if (valid->readY(i)[0] > 0) {
-      mean += values->readY(i)[0];
-      mean2 += std::pow(values->readY(i)[0], 2);
+    if (valid->y(i)[0] > 0) {
+      mean += values->y(i)[0];
+      mean2 += std::pow(values->y(i)[0], 2);
       count++;
     }
 
@@ -170,14 +172,18 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
   double lower = mean - 3 * stddev;
   double min = mean * 0.0001;
 
+  double value(0.0);
   for (int i = 0; i < nhist; i++) {
-    double value = values->readY(i)[0];
+	  
+    value = values->readY(i)[0];
+
+	// ??? does this do anyhting
     if (value > upper) {
-      valid->dataY(i)[0] = 0.0;
+      valid->mutableY(i)[0] = 0.0;
     } else if (value < lower) {
-      valid->dataY(i)[0] = 0.0;
+      valid->mutableY(i)[0] = 0.0;
     } else if (value < min) {
-      valid->dataY(i)[0] = 0.0;
+      valid->mutableY(i)[0] = 0.0;
     }
 
     progress.report("Calculating StdDev...");
