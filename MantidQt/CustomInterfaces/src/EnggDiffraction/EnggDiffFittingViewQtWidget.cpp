@@ -261,7 +261,7 @@ void EnggDiffFittingViewQtWidget::listViewFittingRun() {
   }
 }
 
-void EnggDiffFittingViewQtWidget::resetFittingMultiMode() {
+void EnggDiffFittingViewQtWidget::resetFittingMode() {
   // resets the global variable so the list view widgets
   // adds the run number to for single runs too
   m_fittingMutliRunMode = false;
@@ -429,7 +429,7 @@ EnggDiffFittingViewQtWidget::getSaveFile(const std::string &prevPath) {
 }
 
 void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
-  resetFittingMultiMode();
+  resetFittingMode();
   QString prevPath = QString::fromStdString(focusingDir());
   if (prevPath.isEmpty()) {
     prevPath =
@@ -534,6 +534,8 @@ EnggDiffFittingViewQtWidget::splitFittingDirectory(std::string &selectedfPath) {
   std::string selectedbankfName = PocofPath.getBaseName();
   std::vector<std::string> splitBaseName;
   if (selectedbankfName.find("ENGINX_") != std::string::npos) {
+    // splits file by _ and .
+    // vector of (ENGINX, RUN-NUMBER, FOCUSED, BANK, NXS)
     boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_."));
   }
   return splitBaseName;
@@ -561,8 +563,17 @@ std::vector<std::string> EnggDiffFittingViewQtWidget::getFittingRunNumVec() {
 
 void EnggDiffFittingViewQtWidget::setFittingRunNumVec(
     std::vector<std::string> assignVec) {
+  // holds all the directories required
   m_fitting_runno_dir_vec.clear();
   m_fitting_runno_dir_vec = assignVec;
+}
+
+bool EnggDiffFittingViewQtWidget::getFittingSingleRunMode() {
+  return m_fittingSingleRunMode;
+}
+
+void EnggDiffFittingViewQtWidget::setFittingSingleRunMode(bool mode) {
+  m_fittingSingleRunMode = mode;
 }
 
 void EnggDiffFittingViewQtWidget::setFittingMultiRunMode(bool mode) {

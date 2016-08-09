@@ -244,7 +244,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
           m_view->enableFitAllButton(false);
         }
 
-        // else - given or set to a single run number
+        // else - given or hard-coded to a single run number
         else {
 
           processSingleRun(focusDir, strFocusedFile, runnoDirVector,
@@ -279,7 +279,7 @@ void EnggDiffFittingPresenter::browsedFile(
     const std::string strFocusedFile, std::vector<std::string> &runnoDirVector,
     const std::vector<std::string> &splitBaseName,
     std::vector<std::string> &runNoVec, const std::string &bankFileDir) {
-  // to identify the loop number
+  // to track the FittingRunnoChanged loop number
   g_fitting_runno_counter++;
 
   // regenerating the focus file name
@@ -296,17 +296,14 @@ void EnggDiffFittingPresenter::browsedFile(
   } else {
 
     // foc_file - vector holding the file name split
-    // false for NOT multi-run
     // runnoDirVector - giving empty vector here holding directory of
     // selected vector
-
-    auto multiRunMode = m_view->getFittingMultiRunMode();
-    auto singleRunMode = m_view->getFittingSingleRunMode();
-
     updateFittingDirVec(bankFileDir, foc_file, runnoDirVector);
 
     m_view->setFittingRunNumVec(runnoDirVector);
 
+    auto multiRunMode = m_view->getFittingMultiRunMode();
+    auto singleRunMode = m_view->getFittingSingleRunMode();
     // if not run mode or bank mode: to avoid recreating widgets
     if (!multiRunMode && !singleRunMode) {
 
@@ -346,7 +343,7 @@ void EnggDiffFittingPresenter::processSingleRun(
     const std::vector<std::string> &splitBaseName,
     std::vector<std::string> &runNoVec) {
 
-  // to identify the loop number - multi & single run
+  // to track the FittingRunnoChanged loop number
   g_fitting_runno_counter++;
 
   m_view->setFittingSingleRunMode(true);
@@ -387,7 +384,7 @@ void EnggDiffFittingPresenter::updateFittingDirVec(
         // check if it not any other file.. e.g: texture
         if (itbankFileName.find(focusedFile) != std::string::npos) {
           fittingRunNoDirVec.push_back(itFilePath);
-          // if only first loop in Fitting Runno then add diectory
+          // if only first loop in Fitting Runno then add directory
           if (g_fitting_runno_counter == 1)
             g_multi_run_directories.push_back(itFilePath);
         }
@@ -442,7 +439,7 @@ void EnggDiffFittingPresenter::enableMultiRun(
         // delete me
         auto size_ = RunNumberVec.size();
 
-        // to identify the loop number - multi & single run
+        // to track the FittingRunnoChanged loop number
         g_fitting_runno_counter++;
 
         // if given a multi run number instead
@@ -491,11 +488,10 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 
   // validate fitting data as it will remain the same through out
   const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
-  g_log.debug() << "Focused files found peaks are: " << fitPeaksData << '\n';
+  g_log.debug() << "Focused files found are: " << fitPeaksData << '\n';
 
-  // @shahroz
   for (auto dir : g_multi_run_directories) {
-    g_log.error() << dir << '\n';
+    g_log.debug() << dir << '\n';
   }
 
   if (!g_multi_run_directories.empty()) {
@@ -695,8 +691,8 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
       g_multi_run_directories.clear();
       m_view->setFittingMultiRunMode(false);
       m_view->setFittingSingleRunMode(false);
-      g_fitting_runno_counter = 0;
       m_view->enableFitAllButton(false);
+      g_fitting_runno_counter = 0;
     }
   }
 
@@ -1412,11 +1408,12 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
                          "did not finish correctly.\n";
       m_view->showStatus("No peaks could be fitted");
 
-      // incase fitting fails and does not reset the globals
+      // if fitting fails and does not reset the variables
       g_multi_run_directories.clear();
       m_view->setFittingMultiRunMode(false);
-      g_fitting_runno_counter = 0;
+      m_view->setFittingSingleRunMode(false);
       m_view->enableFitAllButton(false);
+      g_fitting_runno_counter = 0;
     }
 
   } catch (std::runtime_error) {

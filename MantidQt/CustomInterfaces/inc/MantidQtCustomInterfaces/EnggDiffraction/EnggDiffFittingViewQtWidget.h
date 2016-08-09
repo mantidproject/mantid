@@ -130,10 +130,6 @@ public:
 
   void addRunNoItem(std::string runNo) override;
 
-  std::string getRunNoItem(int pos) override;
-
-  auto getRunNoItemSize();
-
   std::vector<std::string> getFittingRunNumVec() override;
 
   void setFittingRunNumVec(std::vector<std::string> assignVec) override;
@@ -141,6 +137,10 @@ public:
   bool getFittingMultiRunMode() override;
 
   void setFittingMultiRunMode(bool mode) override;
+
+  bool getFittingSingleRunMode() override;
+
+  void setFittingSingleRunMode(bool mode) override;
 
   double getPeakCentre() const override;
 
@@ -175,7 +175,7 @@ signals:
 private slots:
   // slot of the fitting peaks per part of the interface
   void browseFitFocusedRun();
-  void resetFittingMultiMode();
+  void resetFittingMode();
   void setBankIdComboBox(int idx) override;
   void setPeakPick();
   void clearPeakList();
@@ -209,6 +209,9 @@ private:
 
   /// indentifier for fitting multi-run or single run input
   static bool m_fittingMutliRunMode;
+
+  /// indentifier for fitting multi-run or single run input
+  static bool m_fittingSingleRunMode;
 
   // vector holding directory of focused bank file
   static std::vector<std::string> m_fitting_runno_dir_vec;
