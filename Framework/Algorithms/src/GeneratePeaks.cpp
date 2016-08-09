@@ -14,6 +14,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidIndexing/IndexTranslator.h"
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -772,15 +773,16 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
     ws->setBinEdges(ip, xArrayEdges);
   }
   // Set spectrum numbers
-  std::map<specnum_t, specnum_t>::iterator spiter;
-  for (spiter = m_SpectrumMap.begin(); spiter != m_SpectrumMap.end();
-       ++spiter) {
-    specnum_t specid = spiter->first;
-    specnum_t wsindex = spiter->second;
-    g_log.debug() << "Build WorkspaceIndex-Spectrum  " << wsindex << " , "
-                  << specid << "\n";
-    ws->getSpectrum(wsindex).setSpectrumNo(specid);
+  std::vector<specnum_t> specNums;
+  for(const auto &item : m_SpectrumMap) {
+    specnum_t specid = item.first;
+    g_log.debug() << "Build WorkspaceIndex-Spectrum  " << specNums.size()
+                  << " , " << specid << "\n";
+    specNums.push_back(specid);
   }
+  auto translator = ws->indexTranslator();
+  translator.setSpectrumNumbers(std::move(specNums));
+  ws->setIndexTranslator(translator);
 
   return ws;
 }

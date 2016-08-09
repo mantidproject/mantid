@@ -7,6 +7,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Unit.h"
+#include "MantidIndexing/IndexTranslator.h"
 
 #include <fstream>
 #include <limits>
@@ -133,14 +134,17 @@ void DiffractionFocussing::exec() {
   API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(
       tmpW, resultIndeces.size(), newSize + 1, newSize);
 
+  std::vector<specnum_t> specNums;
+  const auto tmpTranslator = tmpW->indexTranslator();
   for (int64_t hist = 0; hist < static_cast<int64_t>(resultIndeces.size());
        hist++) {
     int64_t i = resultIndeces[hist];
     outputW->setHistogram(hist, tmpW->histogram(i));
-    auto &inSpec = tmpW->getSpectrum(i);
-    outputW->getSpectrum(hist).setSpectrumNo(inSpec.getSpectrumNo());
-    inSpec.setSpectrumNo(-1);
+    specNums.push_back(tmpTranslator.spectrumNumber(i));
   }
+  auto outputTranslator = outputW->indexTranslator();
+  outputTranslator.setSpectrumNumbers(std::move(specNums));
+  outputW->setIndexTranslator(outputTranslator);
 
   progress(1.);
 

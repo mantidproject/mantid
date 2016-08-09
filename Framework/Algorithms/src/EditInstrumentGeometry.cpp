@@ -5,6 +5,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidIndexing/IndexTranslator.h"
 
 #include <sstream>
 
@@ -303,6 +304,8 @@ void EditInstrumentGeometry::exec() {
   workspace->setInstrument(instrument);
 
   // Add/copy detector information
+  auto translator = workspace->indexTranslator();
+  std::vector<detid_t> detIDs;
   for (size_t i = 0; i < workspace->getNumberHistograms(); i++) {
     // Create a new detector.
     //    (Instrument will take ownership of pointer so no need to delete.)
@@ -324,17 +327,18 @@ void EditInstrumentGeometry::exec() {
     detector->setPos(pos);
 
     // Add new detector to spectrum and instrument
-    auto &spectrum = workspace->getSpectrum(i);
     // Good and do some debug output
-    g_log.debug() << "Orignal spectrum " << spectrum.getSpectrumNo() << "has "
-                  << spectrum.getDetectorIDs().size() << " detectors. \n";
+    g_log.debug() << "Orignal spectrum " << translator.spectrumNumber(i)
+                  << "has " << translator.detectorIDs(i).size()
+                  << " detectors. \n";
 
-    spectrum.clearDetectorIDs();
-    spectrum.addDetectorID(newdetid);
+    detIDs.push_back(newdetid);
     instrument->add(detector);
     instrument->markAsDetector(detector);
 
   } // ENDFOR workspace index
+  translator.setDetectorIDs(std::move(detIDs));
+  workspace->setIndexTranslator(translator);
 }
 
 } // namespace Mantid

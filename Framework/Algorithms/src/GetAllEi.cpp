@@ -13,6 +13,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidIndexing/IndexTranslator.h"
 
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
@@ -883,22 +884,25 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   wsIndex0 = inputWS->getIndexFromSpectrumNumber(specNum1);
   specnum_t specNum2 = getProperty("Monitor2SpecID");
   size_t wsIndex1 = inputWS->getIndexFromSpectrumNumber(specNum2);
-  auto &pSpectr1 = inputWS->getSpectrum(wsIndex0);
-  auto &pSpectr2 = inputWS->getSpectrum(wsIndex1);
   // assuming equally binned ws.
-  // auto bins       = inputWS->dataX(wsIndex0);
-  auto bins = pSpectr1.ptrX();
+  auto bins = inputWS->sharedX(wsIndex0);
   size_t XLength = bins->size();
   size_t YLength = inputWS->y(wsIndex0).size();
   auto working_ws =
       API::WorkspaceFactory::Instance().create(inputWS, 2, XLength, YLength);
+  // copy detector mapping
+  const auto inputTranslator = inputWS->indexTranslator();
+  auto translator = working_ws->indexTranslator();
+  translator.setSpectrumNumbers({specNum1, specNum2});
+  translator.setDetectorIDs({inputTranslator.detectorIDs(wsIndex0),
+                             inputTranslator.detectorIDs(wsIndex1)});
+  working_ws->setIndexTranslator(translator);
   // copy data --> very bad as implicitly assigns pointer
   // to bins array and bins array have to exist out of this routine
   // scope.
   // This does not matter in this case as below we convert units
   // which should decouple cow_pointer but very scary operation in
   // general.
-
   working_ws->setSharedX(0, bins);
   working_ws->setSharedX(1, bins);
 
@@ -910,17 +914,6 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   working_ws->setSharedE(0, inputWS->sharedE(wsIndex0));
   // error 2
   working_ws->setSharedE(1, inputWS->sharedE(wsIndex1));
-
-  // copy detector mapping
-  auto &spectrum1 = working_ws->getSpectrum(0);
-  spectrum1.setSpectrumNo(specNum1);
-  spectrum1.clearDetectorIDs();
-  spectrum1.addDetectorIDs(pSpectr1.getDetectorIDs());
-
-  auto &spectrum2 = working_ws->getSpectrum(1);
-  spectrum2.setSpectrumNo(specNum2);
-  spectrum2.clearDetectorIDs();
-  spectrum2.addDetectorIDs(pSpectr2.getDetectorIDs());
 
   if (inputWS->getAxis(0)->unit()->caption() != "Energy") {
     API::IAlgorithm_sptr conv = createChildAlgorithm("ConvertUnits");
