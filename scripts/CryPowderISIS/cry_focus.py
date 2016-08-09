@@ -1,4 +1,4 @@
-﻿#pylint: disable=too-many-arguments,unused-variable
+﻿# pylint: disable=too-many-arguments,unused-variable
 
 from mantid.simpleapi import *
 from os.path import join
@@ -106,7 +106,7 @@ def focus_one(EXPR_FILE, sampleAdd, scale, Norm, isfirst=False, NoAbs=False):
     (outname, uampstotal) = cry_sample.get_data_sum(sampleAdd, "sample", EXPR_FILE)
     if uampstotal < 1e-6:
         return "No usable data, Raw files probably not found: cannot create " + outname + "\n"
-    newCalFile = join(EXPR_FILE.user, EXPR_FILE.GrpFile) # where user and GrpFile is appended
+    newCalFile = join(EXPR_FILE.user, EXPR_FILE.GrpFile)  # where user and GrpFile is appended
     Integration(InputWorkspace="sample", OutputWorkspace="sampleSum")
     MaskDetectorsIf(InputWorkspace="sampleSum", InputCalFile=EXPR_FILE.Path2GrpFile, OutputCalFile=newCalFile,
                     Mode="DeselectIf", Operator="Equal", Value=10)
@@ -117,7 +117,7 @@ def focus_one(EXPR_FILE, sampleAdd, scale, Norm, isfirst=False, NoAbs=False):
         cry_vana.create_vana(EXPR_FILE, NoAbs)
     if EXPR_FILE.SEmptyFile[0] != "none":
         # === Optionally loads Sample Empty ===
-        # (dum1, uamps) = CRY_sample.get_data_sum(EXPR_FILE.SEmptyFile, "Sempty", EXPR_FILE)
+        (dum1, uamps) = cry_sample.get_data_sum(EXPR_FILE.SEmptyFile, "Sempty", EXPR_FILE)
         Minus(LHSWorkspace="sample", RHSWorkspace="Sempty", OutputWorkspace="sample")
         mtd.remove("Sempty")
     cry_load.align_fnc("sample", EXPR_FILE)

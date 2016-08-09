@@ -55,7 +55,8 @@ Progress Reporting
 
 Documentation
 #############
-* Added Ragged Workspace as a concept page
+
+- Added Ragged Workspace as a concept page
 
 Options Window
 ###############
@@ -65,12 +66,12 @@ Options Window
 Bugs Resolved
 -------------
 - Floating windows now always stay on top of the main window in OSX
+- The sliceviewer will now rebin an existing binned workspace correctly.
 - 2D plots now display correctly for point data workspaces as well as for histogram data
-
 
 SliceViewer Improvements
 ------------------------
-* When opening the sliceviewer, it will default to showing the first two non-integrated dimensions
+- When opening the sliceviewer, it will default to showing the first two non-integrated dimensions
 
 VSI Improvements
 ----------------

@@ -232,10 +232,10 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h
-	inc/MantidQtMantidWidgets/DataProcessorUI/WorkspaceReceiver.h
 	inc/MantidQtMantidWidgets/ErrorCurve.h
 	inc/MantidQtMantidWidgets/HintStrategy.h
 	inc/MantidQtMantidWidgets/IFunctionBrowser.h

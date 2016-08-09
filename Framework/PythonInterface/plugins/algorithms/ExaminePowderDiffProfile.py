@@ -1,7 +1,10 @@
 #pylint: disable=no-init, too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
+
+from six.moves import range
 
 _OUTPUTLEVEL = "NOOUTPUT"
 
@@ -191,7 +194,7 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
 
             # Fit background points
             functionstr = "name=%s,n=%d" % (self.backgroundtype, self.backgroundorder)
-            for iborder in xrange(self.backgroundorder+1):
+            for iborder in range(self.backgroundorder+1):
                 functionstr = "%s,A%d=%.5f" % (functionstr, iborder, 0.0)
             api.Fit(\
                     Function        =   functionstr,\

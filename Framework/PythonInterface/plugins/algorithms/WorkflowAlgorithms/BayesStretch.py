@@ -4,7 +4,7 @@ from IndirectImport import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
                         WorkspaceGroupProperty, Progress)
 from mantid.kernel import StringListValidator, Direction
-from mantid.simpleapi import *
+import mantid.simpleapi as s_api
 from mantid import config, logger
 import os
 import numpy as np
@@ -214,22 +214,28 @@ class BayesStretch(PythonAlgorithm):
 
         group = fname + '_Sigma,' + fname + '_Beta'
         fit_ws = fname + '_Fit'
-        GroupWorkspaces(InputWorkspaces=group,
-                        OutputWorkspace=fit_ws)
+        s_api.GroupWorkspaces(InputWorkspaces=group,
+                              OutputWorkspace=fit_ws)
         contour_ws = fname + '_Contour'
-        GroupWorkspaces(InputWorkspaces=groupZ,
-                        OutputWorkspace=contour_ws)
+        s_api.GroupWorkspaces(InputWorkspaces=groupZ,
+                              OutputWorkspace=contour_ws)
 
         #Add some sample logs to the output workspaces
         log_prog = Progress(self, start=0.8, end =1.0, nreports=6)
         log_prog.report('Copying Logs to Fit workspace')
-        CopyLogs(InputWorkspace=self._sam_name,
-                 OutputWorkspace=fit_ws)
+        copy_log_alg = self.createChildAlgorithm('CopyLogs', enableLogging=False)
+        copy_log_alg.setProperty('InputWorkspace', self._sam_name)
+        copy_log_alg.setProperty('OutputWorkspace',fit_ws)
+        copy_log_alg.execute()
+
         log_prog.report('Adding Sample logs to Fit workspace')
         self._add_sample_logs(fit_ws, self._erange, self._nbins[0])
+
         log_prog.report('Copying logs to Contour workspace')
-        CopyLogs(InputWorkspace=self._sam_name,
-                 OutputWorkspace=contour_ws)
+        copy_log_alg.setProperty('InputWorkspace',self._sam_name)
+        copy_log_alg.setProperty('OutputWorkspace',contour_ws)
+        copy_log_alg.execute()
+
         log_prog.report('Adding sample logs to Contour workspace')
         self._add_sample_logs(contour_ws, self._erange, self._nbins[0])
         log_prog.report('Finialising log copying')
@@ -286,15 +292,15 @@ class BayesStretch(PythonAlgorithm):
         if is_zp_ws:
             unit_x = 'MomentumTransfer'
 
-        CreateWorkspace(OutputWorkspace=name,
-                        DataX=xye[0], DataY=xye[1], DataE=xye[2],
-                        Nspec=num_spec, UnitX=unit_x,
-                        VerticalAxisUnit='MomentumTransfer',
-                        VerticalAxisValues=vert_axis)
+        ws = s_api.CreateWorkspace(OutputWorkspace=name,
+                                   DataX=xye[0], DataY=xye[1], DataE=xye[2],
+                                   Nspec=num_spec, UnitX=unit_x,
+                                   VerticalAxisUnit='MomentumTransfer',
+                                   VerticalAxisValues=vert_axis)
 
-        unitx = mtd[name].getAxis(0).setUnit("Label")
+        unitx = ws.getAxis(0).setUnit("Label")
         if is_zp_ws:
-            unity = mtd[name].getAxis(1).setUnit("Label")
+            unity = ws.getAxis(1).setUnit("Label")
             unitx.setLabel('beta' , '')
             unity.setLabel('sigma' , '')
         else:
