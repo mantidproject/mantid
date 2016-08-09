@@ -2826,11 +2826,11 @@ void ConfigDialog::updateMantidOptionsTab() {
   if (showinvisible_ws.toStdString() !=
       cfgSvc.getString("MantidOptions.InvisibleWorkspaces")) {
     cfgSvc.setString("MantidOptions.InvisibleWorkspaces",
-      showinvisible_ws.toStdString());
+                     showinvisible_ws.toStdString());
 
     // update the workspace tree
     if (ApplicationWindow *app =
-        dynamic_cast<ApplicationWindow *>(this->parentWidget())) {
+            dynamic_cast<ApplicationWindow *>(this->parentWidget())) {
       app->mantidUI->updateWorkspaces();
     }
   }
