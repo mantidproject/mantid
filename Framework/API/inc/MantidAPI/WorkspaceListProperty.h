@@ -194,7 +194,7 @@ private:
   PropertyMode::Type m_optional;
 
   static_assert(std::is_convertible<TYPE, Mantid::Kernel::DataItem>::value,
-	  "Template argument TYPE must inherit DataItem");
+                "Template argument TYPE must inherit DataItem");
 };
 
 } // namespace API
