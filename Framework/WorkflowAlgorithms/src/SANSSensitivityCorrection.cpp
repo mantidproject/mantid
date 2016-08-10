@@ -159,9 +159,8 @@ void SANSSensitivityCorrection::exec() {
     // First, try to determine whether we need to load data or a sensitivity
     // workspace...
     if (!floodWS && fileCheck(fileName)) {
-      g_log.debug()
-          << "SANSSensitivityCorrection :: Loading sensitivity file: "
-          << fileName << "\n";
+      g_log.debug() << "SANSSensitivityCorrection :: Loading sensitivity file: "
+                    << fileName << "\n";
       IAlgorithm_sptr loadAlg = createChildAlgorithm("Load", 0.1, 0.3);
       loadAlg->setProperty("Filename", fileName);
       loadAlg->executeAsChildAlg();
@@ -308,11 +307,12 @@ void SANSSensitivityCorrection::exec() {
         // Apply transmission correction as needed
         double floodTransmissionValue = getProperty("FloodTransmissionValue");
         double floodTransmissionError = getProperty("FloodTransmissionError");
-        
+
         if (!isEmpty(floodTransmissionValue)) {
-          g_log.debug()
-            << "SANSSensitivityCorrection :: Applying transmission to flood field\n";
-          IAlgorithm_sptr transAlg = createChildAlgorithm("ApplyTransmissionCorrection");
+          g_log.debug() << "SANSSensitivityCorrection :: Applying transmission "
+                           "to flood field\n";
+          IAlgorithm_sptr transAlg =
+              createChildAlgorithm("ApplyTransmissionCorrection");
           transAlg->setProperty("InputWorkspace", rawFloodWS);
           transAlg->setProperty("OutputWorkspace", rawFloodWS);
           transAlg->setProperty("TransmissionValue", floodTransmissionValue);
@@ -322,7 +322,7 @@ void SANSSensitivityCorrection::exec() {
           rawFloodWS = transAlg->getProperty("OutputWorkspace");
           m_output_message += "   |Applied transmission to flood field\n";
         }
-        
+
         // Calculate detector sensitivity
         IAlgorithm_sptr effAlg = createChildAlgorithm("CalculateEfficiency");
         effAlg->setProperty("InputWorkspace", rawFloodWS);

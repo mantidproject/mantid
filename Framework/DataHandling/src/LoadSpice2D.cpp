@@ -287,7 +287,6 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
     // 20160720: New wavelength will be a ratio
     m_dwavelength = m_wavelength * m_dwavelength;
 
-
     g_log.debug() << "setWavelength: " << m_wavelength << " , " << m_dwavelength
                   << '\n';
 
