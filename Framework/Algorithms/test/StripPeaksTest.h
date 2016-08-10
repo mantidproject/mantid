@@ -25,10 +25,10 @@ public:
     WS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
-    const Mantid::MantidVec &X = WS->readX(1);
-    Mantid::MantidVec &Y1 = WS->dataY(1);
-    Mantid::MantidVec &E1 = WS->dataE(1);
-    Mantid::MantidVec &Y0 = WS->dataY(0);
+    auto &X = WS->x(1);
+    auto &Y1 = WS->mutableY(1);
+    auto &E1 = WS->mutableE(1);
+    auto &Y0 = WS->mutableY(0);
     for (size_t i = 0; i < Y1.size(); ++i) {
       // Spectrum 0
       Y0[i] = 5000;
@@ -83,11 +83,11 @@ public:
     TS_ASSERT_EQUALS(nbins, input->blocksize());
 
     for (size_t i = 0; i < nhist; ++i) {
-      const auto &inX = input->readX(i);
-      const auto &inE = input->readE(i);
-      const auto &outX = output->readX(i);
-      const auto &outY = output->readY(i);
-      const auto &outE = output->readE(i);
+      const auto &inX = input->x(i);
+      const auto &inE = input->e(i);
+      const auto &outX = output->x(i);
+      const auto &outY = output->y(i);
+      const auto &outE = output->e(i);
       for (size_t j = 0; j < nbins; ++j) {
         TS_ASSERT_EQUALS(outX[j], inX[j]);
         TS_ASSERT_DELTA(outY[j], 5000.0, 0.5);
@@ -104,6 +104,52 @@ public:
 
 private:
   StripPeaks strip;
+};
+
+class StripPeaksTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    FrameworkManager::Instance();
+    MatrixWorkspace_sptr WS =
+        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 200, 0.5, 0.02);
+    WS->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+
+    auto X = WS->points(1);
+    auto &Y1 = WS->mutableY(1);
+    auto &E1 = WS->mutableE(1);
+    auto &Y0 = WS->mutableY(0);
+    for (size_t i = 0; i < Y1.size(); ++i) {
+      // Spectrum 0
+      Y0[i] = 5000;
+
+      // Spectrum 1
+      const double x = X[i];
+      double funcVal = 2500 * exp(-0.5 * pow((x - 3.14) / 0.022, 2));
+      funcVal += 1000 * exp(-0.5 * pow((x - 1.22) / 0.02, 2));
+      Y1[i] = 5000 + funcVal;
+      E1[i] = sqrt(Y1[i]);
+    }
+
+    AnalysisDataService::Instance().add("toStrip", WS);
+
+    // Setup algorithm and prep for run
+    stripAlg.initialize();
+    stripAlg.setPropertyValue("InputWorkspace", "toStrip");
+    stripAlg.setPropertyValue("OutputWorkspace", "Stripped");
+    stripAlg.setProperty("HighBackground", false);
+    stripAlg.setProperty("FWHM", 7);
+  }
+
+  void test_strip_peaks() { TS_ASSERT_THROWS_NOTHING(stripAlg.execute()); }
+
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("Stripped");
+    AnalysisDataService::Instance().remove("toStrip");
+  }
+
+private:
+  StripPeaks stripAlg;
 };
 
 #endif /*STRIPPEAKSTEST_H_*/

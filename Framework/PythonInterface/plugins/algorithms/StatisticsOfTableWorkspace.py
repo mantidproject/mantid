@@ -1,10 +1,12 @@
 #pylint: disable=no-init
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
 from mantid.kernel import Direction, Stats
 import mantid.simpleapi as ms
 from mantid import mtd, logger
 import numpy as np
+from six import iteritems
 
 
 def _stats_to_dict(stats):
@@ -58,13 +60,13 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
         for name in in_ws.getColumnNames():
             try:
                 col_stats = _stats_to_dict(Stats.getStatistics(np.array([float(v) for v in in_ws.column(name)])))
-                for statname in stats.keys():
+                for statname in stats:
                     stats[statname][name] = col_stats[statname]
                 out_ws.addColumn('float', name)
             except ValueError:
                 logger.notice('Column \'%s\' is not numerical, skipping' % name)
 
-        for name, stat in stats.items():
+        for name, stat in iteritems(stats):
             stat1 = dict(stat)
             stat1['statistic'] = name
             out_ws.addRow(stat1)

@@ -1,4 +1,5 @@
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
+from __future__ import (absolute_import, division, print_function)
 import re
 import datetime
 
@@ -82,9 +83,9 @@ class DNSdata(object):
             # try to parse parameters, perform nothing if not successfull: sample and userid may be empty
             self.run_number = res['file']
             self.experiment_number = res['exp']
-            if res.has_key('sample'):
+            if 'sample' in res:
                 self.sample_name = res['sample']
-            if res.has_key('userid'):
+            if 'userid' in res:
                 self.userid = res['userid']
             # parse block 1 (general information)
             b1splitted = [s.strip() for s in blocks[1].split('#')]

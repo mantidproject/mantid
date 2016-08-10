@@ -9,6 +9,7 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
+
 class PoldiCreatePeaksFromFileTest(unittest.TestCase):
     testname = None
 
@@ -29,7 +30,7 @@ class PoldiCreatePeaksFromFileTest(unittest.TestCase):
         ws = PoldiCreatePeaksFromFile(fileHelper.getName(), 0.7, 10.0)
 
         # Check output GroupWorkspace
-        self.assertEquals(ws.getNumberOfEntries(), 1)
+        self.assertEqual(ws.getNumberOfEntries(), 1)
         self.assertTrue(ws.contains("Silicon"))
 
         # Check that the ouput is identical to what's expected
@@ -53,7 +54,7 @@ class PoldiCreatePeaksFromFileTest(unittest.TestCase):
                                             }""")
         ws = PoldiCreatePeaksFromFile(fileHelper.getName(), 0.7, 10.0)
 
-        self.assertEquals(ws.getNumberOfEntries(), 1)
+        self.assertEqual(ws.getNumberOfEntries(), 1)
         self.assertTrue(ws.contains("SiliconCarbon"))
 
         ws_expected = PoldiCreatePeaksFromCell("F d -3 m", "Si 0 0 0 0.9 0.05; C 0 0 0 0.1 0.05", a=5.43,
@@ -83,7 +84,7 @@ class PoldiCreatePeaksFromFileTest(unittest.TestCase):
                                             }""")
         ws = PoldiCreatePeaksFromFile(fileHelper.getName(), 0.7, 10.0)
 
-        self.assertEquals(ws.getNumberOfEntries(), 2)
+        self.assertEqual(ws.getNumberOfEntries(), 2)
         self.assertTrue(ws.contains("SiliconCarbon"))
         self.assertTrue(ws.contains("Silicon"))
 
@@ -116,7 +117,6 @@ class PoldiCreatePeaksFromFileTest(unittest.TestCase):
         self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhLatticeMissing.getName(), 0.7, 10.0, 'ws'))
         self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhNoLattice.getName(), 0.7, 10.0, 'ws'))
         self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhInvalidLattice.getName(), 0.7, 10.0, 'ws'))
-
 
     def test_FileFaultySpaceGroupStrings(self):
         fhSgMissing = TemporaryFileHelper("""Silicon {
@@ -159,12 +159,11 @@ class PoldiCreatePeaksFromFileTest(unittest.TestCase):
         self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhAtomsNoBraces.getName(), 0.7, 10.0, 'ws'))
         self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhAtomsEmpty.getName(), 0.7, 10.0, 'ws'))
 
-
     def _tablesAreEqual(self, lhs, rhs):
-        self.assertEquals(lhs.rowCount(), rhs.rowCount(), msg="Row count of tables is different")
+        self.assertEqual(lhs.rowCount(), rhs.rowCount(), msg="Row count of tables is different")
 
         for r in range(lhs.rowCount()):
-            self.assertEquals(lhs.row(r), rhs.row(r), "Row " + str(r) + " of tables differ.")
+            self.assertEqual(lhs.row(r), rhs.row(r), "Row " + str(r) + " of tables differ.")
 
     def _cleanWorkspaces(self, wsList):
         for ws in wsList:

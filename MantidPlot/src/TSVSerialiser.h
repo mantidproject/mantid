@@ -1,6 +1,8 @@
 #ifndef MANTID_TSVSERIALISER_H_
 #define MANTID_TSVSERIALISER_H_
 
+#include "MantidKernel/CaseInsensitiveMap.h"
+
 #include <map>
 #include <sstream>
 #include <string>
@@ -33,6 +35,7 @@
 
   File change history is stored at: <https://github.com/mantidproject/mantid>
 */
+
 class TSVSerialiser {
 public:
   TSVSerialiser();
@@ -79,8 +82,8 @@ public:
   void writeInlineSection(const std::string &name, const std::string &body);
 
 private:
-  std::map<std::string, std::vector<std::string>> m_sections;
-  std::map<std::string, std::vector<std::string>> m_lines;
+  Mantid::Kernel::CaseInsensitiveMap<std::vector<std::string>> m_sections;
+  Mantid::Kernel::CaseInsensitiveMap<std::vector<std::string>> m_lines;
 
   std::vector<std::string> m_curValues;
   int m_curIndex;
