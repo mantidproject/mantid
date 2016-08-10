@@ -189,7 +189,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QCheckBox" name="ckMirrorMode">
+       <widget class="QCheckBox" name="ckMirrorSense">
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mirror Sense&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>

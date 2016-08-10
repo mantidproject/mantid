@@ -50,6 +50,12 @@ bool ILLEnergyTransfer::validate() {
   if (useMapFile && !m_uiForm.rfMapFile->isValid())
     uiv.addErrorMessage("Grouping file is invalid.");
 
+  // Validate vanadium file if it is being used
+  int useVanadiumRun = m_uiForm.sbUnmirrorOption->value();
+  if ((useVanadiumRun == 5 || useVanadiumRun == 7) &&
+      !m_uiForm.rfVanadiumRun->isValid())
+    uiv.addErrorMessage("Vanadium run is invalid.");
+
   // Show error message for errors
   if (!uiv.isAllInputValid())
     showMessageBox(uiv.generateErrorMessage());
@@ -87,26 +93,19 @@ void ILLEnergyTransfer::run() {
     reductionAlg->setProperty("MapFile", mapFilename.toStdString());
   }
 
-  // Set input options
+  // Set options
+  long int uo = m_uiForm.sbUnmirrorOption->value();
+  reductionAlg->setProperty("UnmirrorOption", uo);
   reductionAlg->setProperty("SumRuns", m_uiForm.ckSum->isChecked());
   reductionAlg->setProperty("MirrorSense", m_uiForm.ckMirrorSense->isChecked());
-  reductionAlg->setProperty("UnmirrorOption", m_uiForm.sbUnmirrorOption->value());
-
-  // Get the name format for output files
-  QFileInfo runFileInfo(runFilename);
-  QString outputFilenameBase = runFileInfo.baseName() + "_" +
-                               instDetails["analyser"] + "_" +
-                               instDetails["reflection"];
-  std::string outputFilenameBaseStd = outputFilenameBase.toStdString();
-
-  // Set output workspace properties
-  reductionAlg->setProperty("RawWorkspace", outputFilenameBaseStd + "_raw");
-  reductionAlg->setProperty("ReducedWorkspace", outputFilenameBaseStd + "_red");
-
-  // Set output options
   reductionAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
   reductionAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
-  reductionAlg->setProperty("ControlMode", m_uiForm.ckControlMode->isChecked());
+
+  // Vanadium run
+  if (uo == 5 || uo == 7) {
+    QString vanFilename = m_uiForm.rfVanadiumRun->getUserInput().toString();
+    reductionAlg->setProperty("VanadiumRun", vanFilename.toStdString());
+  }
 
   m_batchAlgoRunner->addAlgorithm(reductionAlg);
   m_batchAlgoRunner->executeBatchAsync();

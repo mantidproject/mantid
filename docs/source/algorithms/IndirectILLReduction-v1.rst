@@ -41,7 +41,7 @@ It will then be summed with left wing. ``VanadiumRun`` needs to be specified.
 7: Left and right wings will be shifted according to offsets of peak positions in corresponding vanadium run.
 They will then be summed and returned. ``VanadiumRun`` needs to be specified.
 
-The options ``4-6`` rely on :ref:`FindEPP <algm-FindEPP>` algorithm to find the peak positions.
+The options ``4-7`` rely on :ref:`FindEPP <algm-FindEPP>` algorithm to find the peak positions.
 
 These options are inherited identically from (and validated against) previous **LAMP** software, to enable smooth transition for the users.
 
