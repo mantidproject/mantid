@@ -9,8 +9,8 @@ Engineering Diffraction Testing
 Preamble
 ^^^^^^^^^
 This document is tailored towards developers intending to test the Engineering Diffraction
-interface. Whilst users may benefit from the extended examples provided in this document
-it is recommended they read :ref:`Engineering_Diffraction-ref:` which is tailored towards users.
+interface. Whilst users may benefit from the additional documentation provided in this document
+it is recommended they read :ref:`Engineering_Diffraction-ref` instead which is tailored towards users.
 
 The files used in the following examples are found within System test files within 
 `<MantidBuildDir>/ExternalData/Testing/Data/SystemTest` after building the *SystemTestData* target.
@@ -22,30 +22,105 @@ process their data. There are 5 tabs from which are ordered according to the mai
 These are:
 
 - Calibration - This is where a vanadium and cerium run are entered to calibrate the subsequent data.
-- Focus - This is where the data can be masked to only use specific detectors or all.
+- Focus - Where are the data across multiple spectra are summed into a single spectrum for later steps.
 - Pre-processing - Event workspaces have to be converted into histogram data before 
   focusing which can be completed here.
 - Fitting - The user uses their focused data here to interactively pick peaks for subsequent fitting.
 - Settings - This holds additional settings which may be of use during testing.
+
+.. _calibration-Engineering_Diffraction_test-ref:
 
 Calibration
 ^^^^^^^^^^^
 The first time the interface is opened it will be disabled except for the RB number entry box
 and a pop up box which should prompt for a RB number. For testing purposes this can be anything.
 
-If a vanadium calibration has not previously been run the `Current calibration` will be empty
-and the following files need selected and calibration run.
-- *Vanadium#* ENGINX00236516.nxs
-- *Calibration#* ENGINX00194547.nxs
+If a vanadium calibration has not previously been run the `Current calibration` will be empty.
+The following files can be used for the calibration run.
+
+- *Vanadium#*: ENGINX00236516.nxs
+
+- *Calibration#*: ENGINX00194547.nxs
 
 If `Current calibration` is populated the algorithm will attempt to use a cached calculation instead
 of recalculating the calibration. To force it to recalculate every time for testing purposes the
-option can be set under :ref:`settings-Engineering_Diffraction-ref:`.
+option can be set under :ref:`settings-Engineering_Diffraction_test-ref` .
 
 
+A cropped calibration can be used to limit the spectra considered during calibration. This can
+be useful if a subset of detectors are going to be used.
 
+.. _focus-Engineering_Diffraction_test-ref:
 
-.. _settings-Engineering_Diffraction_TestGuide-ref
+Focus
+^^^^^
+Focusing takes a workspace with histogram data and sums the spectra into a single spectrum.
+If the data is captured in event mode (i.e.. Event workspaces) it will first 
+need :ref:`preProcessing-Engineering_Diffraction_test-ref` .
+
+A .nxs file containing histogram data needs to be selected for example *ENGINX00193749.nxs*
+this can have all banks summed, specific spectra and list or use a detector grouping to create
+a texture. 
+
+Once the focus run has finished it will save a focused .nxs file in 
+
+`C:\\EnginX_Mantid\\User\\<RB Number>` or `~/EnginX_Mantid/User/<RB Number>` 
+
+and store a copy in `C:\\EnginX_Mantid\\Focus` or `~/EnginX_Mantid/Focus`. 
+
+The saved focused .nxs filename will be of the format
+`<INST>_<Run number>_focused_bank_<bank number>.nxs`
+
+.. _preProcessing-Engineering_Diffraction_test-ref:
+
+Pre-processing
+^^^^^^^^^^^^^^
+Pre-processing is used to convert event data into histogram data which can be subsequently
+focused. The optimal parameters for pre-processing are dependant on how the instrument was
+configured during the capture of the data.
+
+`Regular time binning` requires the bin width to be specified and will produce a histogram #
+workspace with TOF as the X axis. 
+
+If the multi-period data with pulse times is captured `Multi-period data` should be used instead
+with the delta in time on every step of the X axis entered. 
+
+Fitting
+^^^^^^^
+Fitting allows a user to plot the peaks from their focused nexus file obtained from 
+:ref:`focus-Engineering_Diffraction_test-ref` . The focused run can be entered by value
+`193749`, a range of runs `19000-19100` or by browsing for the focused file. 
+
+The banks available to plot are selected with the `Plot Bank` selector and then fit is clicked.
+Mantid will plot the peaks in the peak picker window, expected peaks can also be selected 
+to help the fitting process. Zoom in by dragging with the LMB and out by clicking the RMB.
+Peaks are selected by holding `Shift` whilst clicking the LMB on a peak similar to the fit interface.
+
+Once peaks are selected fit can be re-run with the expected peak list specified to attempt to
+create a better fitting. 
+
+.. _settings-Engineering_Diffraction_test-ref:
 
 Settings
 ^^^^^^^^^
+- `Input directories/folders`
+    Used as additional search locations when only a run number
+    is specified such as `193749`. These do not need to be set for the browse (full paths) to work.
+
+- `Pixel Calibration` 
+    Is used for a full calibration run. Before each run they perform a quick
+    calibration which is accounted for in the :ref:`calibration-Engineering_Diffraction_test-ref` tab.
+    Every couple of years they perform a long calibration which is then processed and used as a baseline
+    which is set here.
+
+- `Force recalculate` 
+    Useful whilst troubleshooting calibrations if you think a cached calibration
+    is incorrect or you are testing the calibration algorithm. However this incurs a significant speed
+    penalty as calibration is run every time instead of just reusing the results.
+
+- `Focusing settings` 
+    Allows the user to specify the output directory of their own focused runs
+    it defaults to `C:\\EnginX_Mantid\\Focus` or `~/EnginX_Mantid/Focus` but can be changed to 
+    suit the users needs.
+
+
