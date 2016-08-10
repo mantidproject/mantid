@@ -247,5 +247,69 @@ void SaveDiffFittingAscii::writeVal(const std::string &val, std::ofstream &file,
   }
 }
 
+std::map<std::string, std::string> SaveDiffFittingAscii::validateInputs() {
+  std::map<std::string, std::string> errors;
+
+  bool is_grp = true;
+
+  // check for null pointers - this is to protect against workspace groups
+  const std::string inputWS = getProperty("InputWorkspace");
+
+  WorkspaceGroup_sptr inWks =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(inputWS);
+  API::WorkspaceGroup_const_sptr inGrp =
+      boost::dynamic_pointer_cast<const API::WorkspaceGroup>(inWks);
+
+  const ITableWorkspace_sptr tbl_ws = getProperty("InputWorkspace");
+  if (tbl_ws) {
+    is_grp = false;
+  }
+
+  if (!inGrp && !tbl_ws) {
+    std::string message =
+        "The current version of this algorithm only "
+        "supports input workspaces of type TableWorkspace and WorkspaceGroup";
+    errors["InputWorkspace"] = message;
+  }
+
+  const std::string file = getProperty("Filename");
+  if (file.empty()) {
+    errors["Filename"] = "File name directory cannot be empty";
+  }
+
+  std::string runNumber = getPropertyValue("RunNumber");
+  std::vector<std::string> splitRunNum = splitList(runNumber);
+
+  std::string bankNumber = getPropertyValue("Bank");
+  std::vector<std::string> splitBank = splitList(bankNumber);
+
+  if (runNumber.empty()) {
+    errors["Bank"] = "Please provide a valid bank list";
+  }
+  if (splitBank.empty()) {
+    errors["Bank"] = "Please provide a valid bank list";
+  } else if (!is_grp) {
+    if (splitRunNum.size() > 1) {
+      errors["RunNumber"] = "One run number should be provided when a Table"
+                            "workspace is selected";
+    }
+    if (splitBank.size() > 1) {
+      errors["Bank"] = "One bank should be provided when a Table"
+                       "Workspace is selected";
+    }
+  } else {
+    if (splitRunNum.size() != inGrp->size()) {
+      errors["RunNumber"] = "Run number list size should match the number of "
+                            "TableWorkspaces in the GroupWorkspace selected";
+    }
+    if (splitBank.size() != inGrp->size()) {
+      errors["Bank"] = "Bank list size should match the number of "
+                       "TableWorkspaces in the GroupWorkspace selected";
+    }
+  }
+
+  return errors;
+}
+
 } // namespace DataHandling
 } // namespace Mantid

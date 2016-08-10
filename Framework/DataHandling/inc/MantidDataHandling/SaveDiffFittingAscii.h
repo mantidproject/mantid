@@ -43,6 +43,9 @@ private:
   /// final algorithm
   bool processGroups() override;
 
+  /// Cross-check properties with each other @see IAlgorithm::validateInputs
+  std::map<std::string, std::string> validateInputs() override;
+
   /// Main exec routine, called for group or individual workspace processing.
   void processAll(std::vector<API::ITableWorkspace_sptr> input_ws);
 
@@ -64,6 +67,7 @@ private:
 
   /// table_counter
   int m_counter;
+
 };
 } // namespace DataHandling
 } // namespace Mantid
