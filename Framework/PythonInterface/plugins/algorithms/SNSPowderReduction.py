@@ -70,7 +70,6 @@ def is_event_workspace(workspace):
     else:
         return workspace.id() == EVENT_WORKSPACE_ID
 
-
 def allEventWorkspaces(*args):
     """
     Purpose:
@@ -746,7 +745,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 if is_event_workspace(sumRun):
                     api.CompressEvents(InputWorkspace=sumRun, OutputWorkspace=sumRun,
                                        Tolerance=self.COMPRESS_TOL_TOF) # 10ns
-                    assert temp_ws is not None
                 # after adding all events, delete the current workspace.
                 api.DeleteWorkspace(out_ws_name)
             # ENDIF
