@@ -264,12 +264,12 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # call IndirectILLReduction for vanadium run with unmirror 1 and 2 to get left and right
 
         left_van = IndirectILLReduction(Run=self._vanadium_file,SumRuns=True,MirrorSense=True,
-                                   UnmirrorOption=1,MapFile=self._map_file,Analyser=self._analyser,
-                                   Reflection=self._reflection)
+                                        UnmirrorOption=1,MapFile=self._map_file,Analyser=self._analyser,
+                                        Reflection=self._reflection)
 
         right_van = IndirectILLReduction(Run=self._vanadium_file, SumRuns=True, MirrorSense=True,
-                                   UnmirrorOption=2, MapFile=self._map_file, Analyser=self._analyser,
-                                   Reflection=self._reflection)
+                                         UnmirrorOption=2, MapFile=self._map_file, Analyser=self._analyser,
+                                         Reflection=self._reflection)
 
         # note, that run number will be prepended, so need to rename
         RenameWorkspace(left_van.getName(),'left_van')
