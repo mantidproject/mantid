@@ -22,12 +22,9 @@ using namespace Mantid::API;
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveDiffFittingAscii)
 
-using namespace Kernel;
-using namespace API;
-
 /// Empty constructor
 SaveDiffFittingAscii::SaveDiffFittingAscii()
-    : Mantid::API::Algorithm(), m_sep(','), m_endl('\n'), m_counter(0) {}
+    : Mantid::API::Algorithm(), m_sep(','), m_counter(0) {}
 
 /// Initialisation method.
 void SaveDiffFittingAscii::init() {
@@ -77,10 +74,11 @@ void SaveDiffFittingAscii::exec() {
   if (!tbl_ws)
     throw std::runtime_error("Please provide an input workspace to be saved.");
 
-  m_workspaces.push_back(
+  std::vector<API::ITableWorkspace_sptr> input_ws;
+  input_ws.push_back(
       boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(tbl_ws));
 
-  processAll();
+  processAll(input_ws);
 }
 
 bool SaveDiffFittingAscii::processGroups() {
@@ -91,8 +89,10 @@ bool SaveDiffFittingAscii::processGroups() {
     WorkspaceGroup_sptr inputGroup =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
 
+    std::vector<API::ITableWorkspace_sptr> input_ws;
+
     for (int i = 0; i < inputGroup->getNumberOfEntries(); ++i) {
-      m_workspaces.push_back(
+      input_ws.push_back(
           boost::dynamic_pointer_cast<ITableWorkspace>(inputGroup->getItem(i)));
     }
 
@@ -106,18 +106,19 @@ bool SaveDiffFittingAscii::processGroups() {
   } catch (...) {
     g_log.error()
         << "Error while processing groups on SaveDiffFittingAscii algorithm. "
-        << m_endl;
+        << '\n';
   }
 
-  processAll();
+  processAll(input_ws);
 
   return true;
 }
 
-void SaveDiffFittingAscii::processAll() {
+void SaveDiffFittingAscii::processAll(
+    std::vector<API::ITableWorkspace_sptr> input_ws) {
 
   const std::string filename = getProperty("Filename");
-  std::string outFormat = getProperty("OutFormat");
+  const std::string outFormat = getProperty("OutFormat");
   std::string runNumList = getProperty("RunNumber");
   std::string bankList = getProperty("Bank");
 
@@ -157,9 +158,9 @@ void SaveDiffFittingAscii::processAll() {
   boost::split(splitBank, bankList, boost::is_any_of(","));
 
   // Create a progress reporting object
-  Progress progress(this, 0, 1, m_workspaces.size());
+  Progress progress(this, 0, 1, input_ws.size());
 
-  size_t breaker = m_workspaces.size();
+  size_t breaker = input_ws.size();
   if (outFormat == "AppendToExistingFile")
     breaker = 1;
 
@@ -170,15 +171,15 @@ void SaveDiffFittingAscii::processAll() {
     writeInfo(runNum, bank, file);
 
     // write header
-    std::vector<std::string> columnHeadings = m_workspaces[i]->getColumnNames();
+    std::vector<std::string> columnHeadings = input_ws[i]->getColumnNames();
     writeHeader(columnHeadings, file);
 
     // write out the data form the table workspace
     size_t columnSize = columnHeadings.size();
-    writeData(m_workspaces[i], file, columnSize);
+    writeData(input_ws[i], file, columnSize);
 
-    if (outFormat == "WriteGroupWorkspace" && (i + 1) != m_workspaces.size()) {
-      file << m_endl;
+    if (outFormat == "WriteGroupWorkspace" && (i + 1) != input_ws.size()) {
+      file << '\n';
     }
   }
   progress.report();
@@ -188,14 +189,15 @@ void SaveDiffFittingAscii::writeInfo(const std::string &runNumber,
                                      const std::string &bank,
                                      std::ofstream &file) {
 
-  file << "run number: " << runNumber << m_endl;
-  file << "bank: " << bank << m_endl;
+  file << "run number: " << runNumber << '\n';
+  file << "bank: " << bank << '\n';
   m_counter++;
 }
 
 void SaveDiffFittingAscii::writeHeader(std::vector<std::string> &columnHeadings,
                                        std::ofstream &file) {
-  for (auto &heading : columnHeadings) {
+  for (const auto &heading : columnHeadings) {
+    // Chi being the last header in the table workspace
     if (heading == "Chi") {
       writeVal(heading, file, true);
     } else {
@@ -211,7 +213,8 @@ void SaveDiffFittingAscii::writeData(API::ITableWorkspace_sptr workspace,
     TableRow row = workspace->getRow(rowIndex);
     for (size_t columnIndex = 0; columnIndex < columnSize; columnIndex++) {
 
-      auto row_str = boost::lexical_cast<std::string>(row.Double(columnIndex));
+      const auto row_str =
+          boost::lexical_cast<std::string>(row.Double(columnIndex));
       g_log.debug() << row_str << std::endl;
 
       if (columnIndex == columnSize - 1)
@@ -236,7 +239,7 @@ void SaveDiffFittingAscii::writeVal(const std::string &val, std::ofstream &file,
   }
 
   if (endline) {
-    file << m_endl;
+    file << '\n';
   } else {
     file << m_sep;
   }

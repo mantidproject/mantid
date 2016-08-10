@@ -44,7 +44,7 @@ private:
   bool processGroups() override;
 
   /// Main exec routine, called for group or individual workspace processing.
-  void processAll();
+  void processAll(std::vector<API::ITableWorkspace_sptr> input_ws);
 
   void writeInfo(const std::string &runNumber, const std::string &bank,
                  std::ofstream &file);
@@ -60,13 +60,8 @@ private:
   /// the separator
   const char m_sep;
 
-  /// next line
-  const char m_endl;
-
   /// table_counter
   int m_counter;
-
-  std::vector<API::ITableWorkspace_sptr> m_workspaces;
 };
 } // namespace DataHandling
 } // namespace Mantid
