@@ -120,8 +120,8 @@ IPropertyManager::getValue<std::vector<Mantid::API::Workspace_sptr>>(
   } else {
     std::string message = "Attempt to assign property " + name +
                           " to incorrect type. Expected type "
-                          "std::vector<boost::shared_ptr<Mantid::Kernel::"
-                          "DataItem>>";
+                          "std::vector<boost::shared_ptr<Mantid::API::"
+                          "Workspace>>";
     throw std::runtime_error(message);
   }
 }
