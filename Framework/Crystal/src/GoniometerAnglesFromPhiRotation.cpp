@@ -152,7 +152,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
     const std::string fft("FindUBUsingFFT");
     API::IAlgorithm_sptr findUB = this->createChildAlgorithm(fft);
     findUB->initialize();
-	PeaksWorkspace_sptr PR1 = getProperty("PeaksWorkspace1");
+    PeaksWorkspace_sptr PR1 = getProperty("PeaksWorkspace1");
     findUB->setProperty("PeaksWorkspace", PR1);
     findUB->setProperty("MIND", static_cast<double>(getProperty("MIND")));
     findUB->setProperty("MAXD", static_cast<double>(getProperty("MAXD")));
