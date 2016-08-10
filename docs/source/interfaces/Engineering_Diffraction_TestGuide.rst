@@ -40,12 +40,21 @@ The following files can be used for the calibration run.
 
 - *Vanadium#*: ENGINX00236516.nxs
 
-- *Calibration#*: ENGINX00194547.nxs
+- *Calibration#*: ENGINX00241391.nxs
 
+Once the calibration has completed if the calibration was successful plotting the spectra of the
+newly created workspaces will produce images similar to below:
+
+.. image:: ../images/EnggDiffExpectedVanCurve.png
+    :width: 300px
+.. image:: ../images/EnggDiffExpectedLinear.png
+    :width: 300px
+
+If the plot is incorrect check you haven't swapped the run numbers and they are both correct. 
+    
 If `Current calibration` is populated the algorithm will attempt to use a cached calculation instead
 of recalculating the calibration. To force it to recalculate every time for testing purposes the
 option can be set under :ref:`settings-Engineering_Diffraction_test-ref` .
-
 
 A cropped calibration can be used to limit the spectra considered during calibration. This can
 be useful if a subset of detectors are going to be used.
@@ -71,6 +80,11 @@ and store a copy in `C:\\EnginX_Mantid\\Focus` or `~/EnginX_Mantid/Focus`.
 The saved focused .nxs filename will be of the format
 `<INST>_<Run number>_focused_bank_<bank number>.nxs`
 
+Plotting the focused workspace should look similar to the image below:
+
+.. image:: ../images/EnggDiffExampleFocusOutput.png
+    :width: 300px
+
 .. _preProcessing-Engineering_Diffraction_test-ref:
 
 Pre-processing
@@ -90,6 +104,13 @@ Fitting
 Fitting allows a user to plot the peaks from their focused nexus file obtained from 
 :ref:`focus-Engineering_Diffraction_test-ref` . The focused run can be entered by value
 `193749`, a range of runs `19000-19100` or by browsing for the focused file. 
+
+After the fitting has run if it managed to fit any peaks it should look similar to below
+if there are no peaks and the display looks "corrupted" check the calibration was completed
+correctly:
+
+.. image:: ../images/EnggDiffExampleFitOutput.png
+    :width: 500px
 
 The banks available to plot are selected with the `Plot Bank` selector and then fit is clicked.
 Mantid will plot the peaks in the peak picker window, expected peaks can also be selected 
