@@ -452,9 +452,8 @@ public:
 
     for (int j = 0; j < 5; ++j) {
       auto &e = space2D->mutableE(j);
-      space2D->setPoints(j, Points(5, LinearGenerator(0, 0.9))); // assign X
-      space2D->setCounts(j,
-                         Counts(5, LinearGenerator(double(j), 2))); // assign Y
+      space2D->setPoints(j, 5, LinearGenerator(0, 0.9));       // assign X
+      space2D->setCounts(j, 5, LinearGenerator(double(j), 2)); // assign Y
       e.assign(e.size(), 1.0);
     }
 
@@ -506,7 +505,7 @@ public:
         x[k] = k * (1.0 + 1.0 * k);
       }
       space2D->setCounts(j,
-                         Counts(5, LinearGenerator(double(j), 2))); // assign Y
+                         5, LinearGenerator(double(j), 2)); // assign Y
       e.assign(e.size(), 1.0);
     }
 

@@ -115,12 +115,12 @@ void IdentifyNoisyDetectors::exec() {
 
   int2 = divide->getProperty("OutputWorkspace");
 
-  // can it be improved?
   for (int i = 0; i < nHist; i++) {
-    stdDevWs->mutableX(i)[0] = 0.0;
-    stdDevWs->mutableY(i)[0] = sqrt(int2->y(i)[0] - std::pow(int1->y(i)[0], 2));
-    outputWs->mutableX(i)[0] = 0.0;
-    outputWs->mutableY(i)[0] = 1.0;
+
+    outputWs->setHistogram(i, Points{0.0}, Counts{1.0});
+    stdDevWs->setSharedX(i, outputWs->sharedX(i));
+    auto stdDev = outputWs->countStandardDeviations(i);
+    stdDevWs->mutableY(i)[0] = stdDev[0];
 
     progress.report();
   }
@@ -171,10 +171,12 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
   double lower = mean - 3 * stddev;
   double min = mean * 0.0001;
 
+  // Counts c{ 0.0 };
   for (int i = 0; i < nhist; i++) {
 
     double value = values->y(i)[0];
 
+    // TODO valid->setCounts(i, c); ?
     if (value > upper) {
       valid->mutableY(i)[0] = 0.0;
     } else if (value < lower) {
