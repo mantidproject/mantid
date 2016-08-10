@@ -36,10 +36,10 @@ class SANSSingleReduction(DataProcessorAlgorithm):
 
         # Sample Scatter Workspaces
         self.declareProperty(MatrixWorkspaceProperty('SampleScatterWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
                              doc='The sample scatter workspace. This workspace does not contain monitors.')
         self.declareProperty(MatrixWorkspaceProperty('SampleScatterMonitorWorkspace', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+                                                     optional=PropertyMode.Mandatory, direction=Direction.Input),
                              doc='The sample scatter monitor workspace. This workspace only contains monitors.')
 
         # Sample Transmission Workspace
@@ -125,6 +125,7 @@ class SANSSingleReduction(DataProcessorAlgorithm):
         output_bundles = []
         output_parts_bundles = []
         for reduction_setting_bundle in reduction_setting_bundles:
+
             output_bundle, output_parts_bundle = run_core_reduction(reduction_alg,
                                                                     reduction_setting_bundle,
                                                                     use_optimizations)
@@ -215,6 +216,7 @@ class SANSSingleReduction(DataProcessorAlgorithm):
                                                 scatter_name, scatter_monitor_name, transmission_name, direct_name):
         # Get workspaces
         scatter_workspace = self.getProperty(scatter_name).value
+
         scatter_monitor_workspace = self.getProperty(scatter_monitor_name).value
         transmission_workspace = self.getProperty(transmission_name).value
         direct_workspace = self.getProperty(direct_name).value

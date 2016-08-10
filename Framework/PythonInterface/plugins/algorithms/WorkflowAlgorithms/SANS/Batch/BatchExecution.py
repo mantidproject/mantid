@@ -1,9 +1,13 @@
 from copy import deepcopy
+from collections import namedtuple
+
 from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
 from SANS2.Common.SANSEnumerations import SANSDataType
 
+batch_reduction_return_bundle = namedtuple('batch_reduction_return_bundle', 'state, lab, hab, merged')
 
-def single_reduction_for_batch(state, use_optimizations):
+
+def single_reduction_for_batch(state, use_optimizations, save_to_file=False):
     # Load the data
     workspace_to_name = {SANSDataType.SampleScatter: "SampleScatterWorkspace",
                          SANSDataType.SampleTransmission: "SampleTransmissionWorkspace",
@@ -23,27 +27,33 @@ def single_reduction_for_batch(state, use_optimizations):
     single_reduction_name = "SANSSingleReduction"
     single_reduction_options = {}
     reduction_alg = create_unmanaged_algorithm(single_reduction_name, **single_reduction_options)
+
+    batch_reduction_return_bundles = []
     for reduction_package in reduction_packages:
         # Set the properties on the algorithm
         set_properties_for_reduction_algorithm(reduction_alg, reduction_package,
                                                workspace_to_name, workspace_to_monitor)
-
         # Run the reduction
         reduction_alg.execute()
-
         # Get the output of the algorithm
-        # TODO
-
-    # Return output workspaces
-    # TODO
+        reduced_lab = reduction_alg.getProperty("OutputWorkspaceLAB").value
+        reduced_hab = reduction_alg.getProperty("OutputWorkspaceHAB").value
+        reduced_merged = reduction_alg.getProperty("OutputWorkspaceMerged").value
+        if save_to_file:
+            save_workspaces_to_file(reduced_lab, reduced_hab, reduced_merged)
+        else:
+            batch_reduction_return_bundles.append(batch_reduction_return_bundle(state=reduction_package.state,
+                                                                                lab=reduced_lab,
+                                                                                hab=reduced_hab,
+                                                                                merged=reduced_merged))
+    return batch_reduction_return_bundles
 
 
 def provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_to_monitor):
     # Load the data
-    data_info = state.data
-    data_dict = data_info.property_manager
+    state_serialized = state.property_manager
     load_name = "SANSLoad"
-    load_options = {"SANSState": data_dict,
+    load_options = {"SANSState": state_serialized,
                     "PublishToCache": use_optimizations,
                     "UseCached": use_optimizations,
                     "MoveWorkspace": False}
@@ -61,7 +71,6 @@ def provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_t
     workspaces = get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_to_name)
     monitors = get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_to_monitor)
 
-    # TODO: Consistency check here!!!!
     return workspaces, monitors
 
 
@@ -70,6 +79,7 @@ def get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_n
     for workspace_type, workspace_name in workspace_name_dict.items():
         count_id = workspace_to_count[workspace_type]
         number_of_workspaces = load_alg.getProperty(count_id).value
+        workspaces = []
         if number_of_workspaces > 1:
             workspaces = get_multi_period_workspaces(load_alg, workspace_name_dict[workspace_type],
                                                      number_of_workspaces)
@@ -132,9 +142,13 @@ def reduction_packages_require_splitting_for_event_slices(reduction_packages):
     # by the number of elements in start_tof
     reduction_package = reduction_packages[0]
     state = reduction_package.state
-    slice_event_info = state.slice_event
-    start_tof = slice_event_info.start_tof
-    return len(start_tof) > 1
+    slice_event_info = state.slice
+    start_time = slice_event_info.start_time
+    if start_time is not None and len(start_time) > 1:
+        requires_split = True
+    else:
+        requires_split = False
+    return requires_split
 
 
 def split_reduction_packages_for_event_packages(reduction_packages):
@@ -143,16 +157,16 @@ def split_reduction_packages_for_event_packages(reduction_packages):
     # requests 6 event slices, then we end up with 60 reductions!
     reduction_package = reduction_packages[0]
     state = reduction_package.state
-    slice_event_info = state.slice_event
-    start_tof = slice_event_info.start_tof
-    end_tof = slice_event_info.end_tof
+    slice_event_info = state.slice
+    start_time = slice_event_info.start_time
+    end_time = slice_event_info.end_time
 
     states = []
-    for start, end in zip(start_tof, end_tof):
+    for start, end in zip(start_time, end_time):
         state_copy = deepcopy(state)
-        slice_event_info = state_copy.slice_event
-        slice_event_info.start_tof = [start]
-        slice_event_info.end_tof = [end]
+        slice_event_info = state_copy.slice_
+        slice_event_info.start_time = [start]
+        slice_event_info.end_time = [end]
         states.append(state_copy)
 
     # Now that we have all the states spread them across the packages
@@ -187,32 +201,41 @@ def create_initial_reduction_packages(state, workspaces, monitors):
     :param monitors: The monitors contributing to the reduction
     :return: A set of "Reduction packages" where each reduction package defines a single reduction.
     """
-    # For loaded perid we create a package
+    # For loaded peri0d we create a package
     packages = []
     for index in range(0, len(workspaces[SANSDataType.SampleScatter])):
         workspaces_for_package = {}
         # For each workspace type, i.e sample scatter, can transmission, etc. find the correct workspace
         for workspace_type, workspace_list in workspaces.items():
             workspace = get_workspace_for_index(index, workspace_list)
-            workspaces_for_package.update({SANSDataType.SampleScatter: workspace})
+            workspaces_for_package.update({workspace_type: workspace})
 
         # For each monitor type, find the correct workspace
         monitors_for_package = {}
         for workspace_type, workspace_list in monitors.items():
             workspace = get_workspace_for_index(index, workspace_list)
-            monitors_for_package.update({SANSDataType.SampleScatter: workspace})
+            monitors_for_package.update({workspace_type: workspace})
         state_copy = deepcopy(state)
         packages.append(ReductionPackage(state_copy, workspaces_for_package, monitors_for_package))
     return packages
 
 
 def get_workspace_for_index(index, workspace_list):
+    """
+    Extracts the workspace from the list of workspaces. The index is set by the nth ScatterSample workspace.
+
+    There might be situation where there is no corresponding CanXXX workspace or SampleTransmission workspace etc,
+    since they are optional.
+
+    :param index: The index of the workspace from which to extract.
+    :param workspace_list: A list of workspaces.
+    :return: The workspace corresponding to the index or None
+    """
     if workspace_list:
         if index < len(workspace_list):
             workspace = workspace_list[index]
         else:
-            # TODO : log here
-            workspace = len(workspace_list) - 1
+            workspace = None
     else:
         workspace = None
     return workspace
@@ -227,12 +250,24 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
 
     # Set the workspaces
     workspaces = reduction_package.workspaces
-    for workspace_type, workspace in workspaces.items:
+    for workspace_type, workspace in workspaces.items():
         if workspace is not None:
             reduction_alg.setProperty(workspace_to_name[workspace_type], workspace)
 
     # Set the monitors
     monitors = reduction_package.monitors
-    for workspace_type, monitor in monitors.items:
+    for workspace_type, monitor in monitors.items():
         if monitor is not None:
             reduction_alg.setProperty(workspace_to_monitor[workspace_type], monitor)
+
+
+def save_workspaces_to_file(reduced_lab, reduced_hab, reduced_merge):
+    # TODO implement saving
+    if reduced_lab is not None:
+        pass
+
+    if reduced_hab is not None:
+        pass
+
+    if reduced_merge is not None:
+        pass

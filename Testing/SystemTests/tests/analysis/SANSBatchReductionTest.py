@@ -14,63 +14,21 @@ from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
 
 
 # -----------------------------------------------
-# Tests for the SANSSingleReduction algorithm
+# Tests for the SANSBatchReduction algorithm
 # -----------------------------------------------
-class SANSSingleReductionTest(unittest.TestCase):
-    def _load_workspace(self, state):
-        load_alg = AlgorithmManager.createUnmanaged("SANSLoad")
-        load_alg.setChild(True)
-        load_alg.initialize()
+class SANSBatchReductionTest(unittest.TestCase):
 
-        state_dict = state.property_manager
-        load_alg.setProperty("SANSState", state_dict)
-        load_alg.setProperty("PublishToCache", False)
-        load_alg.setProperty("UseCached", False)
-        load_alg.setProperty("MoveWorkspace", False)
+    def _run_batch_reduction(self, states, use_optimizations=False):
+        batch_reduction_name = "SANSBatchReduction"
+        batch_reduction_options = {"SANSStates": states,
+                                   "UseOptimizations": use_optimizations}
+
+        batch_reduction_alg = create_unmanaged_algorithm(batch_reduction_name, **batch_reduction_options)
 
         # Act
-        load_alg.execute()
-        self.assertTrue(load_alg.isExecuted())
-        sample_scatter = load_alg.getProperty("SampleScatterWorkspace").value
-        sample_scatter_monitor_workspace = load_alg.getProperty("SampleScatterMonitorWorkspace").value
-        return sample_scatter, sample_scatter_monitor_workspace
-
-    def _run_single_reduction(self, state, sample_scatter, sample_monitor, sample_transmission=None, sample_direct=None,
-                              can_scatter=None, can_monitor=None, can_transmission=None, can_direct=None,
-                              output_settings=None):
-        single_reduction_name = "SANSSingleReduction"
-        state_dict = state.property_manager
-
-        single_reduction_options = {"SANSState": state_dict,
-                                    "SampleScatterWorkspace": sample_scatter,
-                                    "SampleScatterMonitorWorkspace": sample_monitor}
-        if sample_transmission:
-            single_reduction_options.update({"SampleTransmissionWorkspace": sample_transmission})
-
-        if sample_direct:
-            single_reduction_options.update({"SampleDirectWorkspace": sample_direct})
-
-        if can_scatter:
-            single_reduction_options.update({"CanScatterWorkspace": can_scatter})
-
-        if can_monitor:
-            single_reduction_options.update({"CanScatterMonitorWorkspace": can_monitor})
-
-        if can_transmission:
-            single_reduction_options.update({"CanTransmissionWorkspace": can_transmission})
-
-        if can_direct:
-            single_reduction_options.update({"CanDirectWorkspace": can_direct})
-
-        if output_settings:
-            single_reduction_options.update(output_settings)
-
-        single_reduction_alg = create_unmanaged_algorithm(single_reduction_name, **single_reduction_options)
-
-        # Act
-        single_reduction_alg.execute()
-        self.assertTrue(single_reduction_alg.isExecuted())
-        return single_reduction_alg
+        batch_reduction_alg.execute()
+        self.assertTrue(batch_reduction_alg.isExecuted())
+        return batch_reduction_alg
 
     def _compare_workspace(self, workspace, reference_file_name):
         # Load the reference file
@@ -104,7 +62,7 @@ class SANSSingleReductionTest(unittest.TestCase):
 
         # Save the workspace out and reload it again. This makes equalizes it with the reference workspace
         f_name = os.path.join(mantid.config.getString('defaultsave.directory'),
-                              'SANS_temp_single_reduction_testout.nxs')
+                              'SANS_temp_batch_reduction_testout.nxs')
 
         save_name = "SaveNexus"
         save_options = {"Filename": f_name,
@@ -142,7 +100,7 @@ class SANSSingleReductionTest(unittest.TestCase):
         if os.path.exists(f_name):
             os.remove(f_name)
 
-    def test_that_single_reduction_evaluates_LAB(self):
+    def test_that_batch_reduction_evaluates_LAB(self):
         # Arrange
         # Build the data information
         data_builder = get_data_builder(SANSFacility.ISIS)
@@ -157,29 +115,29 @@ class SANSSingleReductionTest(unittest.TestCase):
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         state = user_file_director.construct()
 
-        # Load the sample workspaces
-        workspace, workspace_monitor = self._load_workspace(state)
-
         # Act
-        output_settings = {"OutputWorkspaceLAB": SANSConstants.dummy}
-        single_reduction_alg = self._run_single_reduction(state, sample_scatter=workspace,
-                                                          sample_monitor=workspace_monitor,
-                                                          output_settings=output_settings)
-        output_workspace = single_reduction_alg.getProperty("OutputWorkspaceLAB").value
+        states = {"1": state.property_manager}
+        batch_reduction_alg = self._run_batch_reduction(states, use_optimizations=False)
+
+        self.assertTrue(batch_reduction_alg.getProperty("NumberOfOutputWorkspacesLAB").value == 1)
+        self.assertTrue(batch_reduction_alg.getProperty("NumberOfOutputWorkspacesHAB").value == 0)
+        self.assertTrue(batch_reduction_alg.getProperty("NumberOfOutputWorkspacesMerged").value == 0)
+
+        output_workspace = batch_reduction_alg.getProperty("OutputWorkspaceLAB_1").value
 
         # Evaluate it up to a defined point
         reference_file_name = "SANS2D_ws_D20_reference_after_masking"
         self._compare_workspace(output_workspace, reference_file_name)
 
 
-class SANSReductionRunnerTest(stresstesting.MantidStressTest):
+class SANSReductionCoreRunnerTest(stresstesting.MantidStressTest):
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)
         self._success = False
 
     def runTest(self):
         suite = unittest.TestSuite()
-        suite.addTest(unittest.makeSuite(SANSSingleReductionTest, 'test'))
+        suite.addTest(unittest.makeSuite(SANSBatchReductionTest, 'test'))
         runner = unittest.TextTestRunner()
         res = runner.run(suite)
         if res.wasSuccessful():

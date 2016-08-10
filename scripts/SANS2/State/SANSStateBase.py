@@ -285,7 +285,6 @@ def create_module_and_class_name_from_encoded_string(class_type_id, module_name,
 def create_sub_state(value):
     # We are dealing with a sub state. We first have to create it and then populate it
     sub_state_class = provide_class(value)
-
     # Create the sub state, populate it and set it on the super state
     sub_state = sub_state_class()
     sub_state.property_manager = value
