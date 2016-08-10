@@ -186,9 +186,14 @@ void MuonAnalysisFitFunctionPresenter::handleFunctionLoaded(
 /**
  * Called when the number of datasets to fit is changed in the model.
  * Update the view with the new number of datasets.
+ *
+ * Clear errors in function browser as the data being fitted has changed, so
+ * these errors are now stale.
+ *
  * @param nDatasets :: [input] Number of datasets to fit
  */
 void MuonAnalysisFitFunctionPresenter::updateNumberOfDatasets(int nDatasets) {
+  m_funcBrowser->clearErrors();
   m_funcBrowser->setNumberOfDatasets(nDatasets);
 }
 
