@@ -432,56 +432,54 @@ void Quasi::saveClicked() {
 void Quasi::plotClicked() {
   // Output options
   std::string plot = m_uiForm.cbPlot->currentText().toStdString();
-  if (plot != "None") {
-    const auto resultName =
-        m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
-    if (plot == "Prob" || plot == "All") {
-      const auto probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
-      QString QprobWS = QString::fromStdString(probWS);
-      MantidQt::CustomInterfaces::IndirectTab::plotSpectrum(QprobWS, 1, 2);
-    }
-    if (plot == "Fit" || plot == "All") {
-      std::string fitName = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
-      fitName.pop_back();
-      fitName.append("_0");
-      QString QfitWS = QString::fromStdString(fitName);
-      MatrixWorkspace_sptr fitWS =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(fitName);
-      int fitSpectra = (int)fitWS->getNumberHistograms();
-      MantidQt::CustomInterfaces::IndirectTab::plotSpectrum(QfitWS, 0,
-                                                            (fitSpectra - 1));
-    }
+  const auto resultName =
+    m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
+  if (plot == "Prob" || plot == "All") {
+    const auto probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
+    QString QprobWS = QString::fromStdString(probWS);
+    MantidQt::CustomInterfaces::IndirectTab::plotSpectrum(QprobWS, 1, 2);
+  }
+  if (plot == "Fit" || plot == "All") {
+    std::string fitName = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
+    fitName.pop_back();
+    fitName.append("_0");
+    QString QfitWS = QString::fromStdString(fitName);
+    MatrixWorkspace_sptr fitWS =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(fitName);
+    int fitSpectra = (int)fitWS->getNumberHistograms();
+    MantidQt::CustomInterfaces::IndirectTab::plotSpectrum(QfitWS, 0,
+      (fitSpectra - 1));
+  }
 
-    MatrixWorkspace_sptr resultWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
-    int numSpectra = (int)resultWS->getNumberHistograms();
+  MatrixWorkspace_sptr resultWS =
+    AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
+  int numSpectra = (int)resultWS->getNumberHistograms();
 
-    QString QresultWS = QString::fromStdString(resultName);
-    auto paramNames = {"Amplitude", "FWHM", "Beta"};
-    for (std::string paramName : paramNames) {
+  QString QresultWS = QString::fromStdString(resultName);
+  auto paramNames = { "Amplitude", "FWHM", "Beta" };
+  for (std::string paramName : paramNames) {
 
-      if (plot == paramName || plot == "All") {
-        std::vector<int> spectraIndices = {};
-        for (int i = 0; i <= numSpectra; i++) {
-          auto axisLabel = resultWS->getAxis(1)->label(i);
+    if (plot == paramName || plot == "All") {
+      std::vector<int> spectraIndices = {};
+      for (int i = 0; i <= numSpectra; i++) {
+        auto axisLabel = resultWS->getAxis(1)->label(i);
 
-          auto found = axisLabel.find(paramName);
-          if (found != std::string::npos) {
-            spectraIndices.push_back(i);
-            if (spectraIndices.size() == 3) {
+        auto found = axisLabel.find(paramName);
+        if (found != std::string::npos) {
+          spectraIndices.push_back(i);
+          if (spectraIndices.size() == 3) {
 
-              QString pyInput = "from mantidplot import plotSpectrum\n";
-              pyInput += "plotSpectrum('";
-              pyInput += QresultWS;
-              pyInput += "', [";
-              pyInput += QString::number(spectraIndices[0]);
-              pyInput += ", ";
-              pyInput += QString::number(spectraIndices[1]);
-              pyInput += ", ";
-              pyInput += QString::number(spectraIndices[2]);
-              pyInput += "])\n";
-              m_pythonRunner.runPythonCode(pyInput);
-            }
+            QString pyInput = "from mantidplot import plotSpectrum\n";
+            pyInput += "plotSpectrum('";
+            pyInput += QresultWS;
+            pyInput += "', [";
+            pyInput += QString::number(spectraIndices[0]);
+            pyInput += ", ";
+            pyInput += QString::number(spectraIndices[1]);
+            pyInput += ", ";
+            pyInput += QString::number(spectraIndices[2]);
+            pyInput += "])\n";
+            m_pythonRunner.runPythonCode(pyInput);
           }
         }
       }
