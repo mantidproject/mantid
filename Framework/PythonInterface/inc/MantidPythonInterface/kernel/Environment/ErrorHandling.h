@@ -36,7 +36,7 @@ namespace Environment {
 /// as a C++ exception
 class DLLExport PythonException : public std::exception {
 public:
-  PythonException(bool withTrace = true) noexcept;
+  PythonException(bool withTrace = true);
   const char *what() const noexcept override { return m_msg.c_str(); }
 
 private:

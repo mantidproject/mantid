@@ -40,8 +40,7 @@ void tracebackToMsg(std::stringstream &msg, PyTracebackObject *traceback,
  * current Python exception state
  * @param withTrace If true, include the full traceback in the message
  */
-PythonException::PythonException(bool withTrace) noexcept : std::exception(),
-                                                            m_msg() {
+PythonException::PythonException(bool withTrace) : std::exception(), m_msg() {
   GlobalInterpreterLock gil;
   if (!PyErr_Occurred()) {
     throw std::runtime_error(
