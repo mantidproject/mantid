@@ -171,8 +171,8 @@ public:
     // The unordered workspace should show: 3, 131 259
     // The ordered workspace should show: 3, 4, 5
     std::array<size_t, 3> indices{0, 1, 2};
-    std::array<size_t, 3> expectedUnordered{3, 131, 259};
-    std::array<size_t, 3> expectedOrdered{3, 4, 5};
+    std::array<size_t, 3> expectedUnordered{{3, 131, 259}};
+    std::array<size_t, 3> expectedOrdered{{3, 4, 5}};
 
     for (auto index : indices) {
       const auto &specUnordered = unOrderedWorkspace->getSpectrum(index);
