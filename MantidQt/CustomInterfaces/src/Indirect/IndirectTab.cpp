@@ -305,7 +305,8 @@ void IndirectTab::plotSpectrum(const QString &workspaceName, int specStart,
 * @param workspaceNames List of names of workspaces to plot
 * @param wsIndices List of indices of spectra to plot
 */
-void IndirectTab::plotSpectra(const QStringList &workspaceNames, const std::vector<int> &wsIndices) {
+void IndirectTab::plotSpectra(const QStringList &workspaceNames,
+                              const std::vector<int> &wsIndices) {
   if (workspaceNames.isEmpty()) {
     return;
   }
@@ -333,7 +334,8 @@ void IndirectTab::plotSpectra(const QStringList &workspaceNames, const std::vect
 * @param workspaceName Name of workspace to plot
 * @param wsIndices List of indices of spectra to plot
 */
-void IndirectTab::plotSpectra(const QString &workspaceName, const std::vector<int> &wsIndices) {
+void IndirectTab::plotSpectra(const QString &workspaceName,
+                              const std::vector<int> &wsIndices) {
   if (workspaceName.isEmpty()) {
     return;
   }

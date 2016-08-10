@@ -432,8 +432,7 @@ void Quasi::saveClicked() {
 void Quasi::plotClicked() {
   // Output options
   std::string plot = m_uiForm.cbPlot->currentText().toStdString();
-  const auto resultName =
-    m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
+  const auto resultName = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
   if (plot == "Prob" || plot == "All") {
     const auto probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
     QString QprobWS = QString::fromStdString(probWS);
@@ -445,17 +444,17 @@ void Quasi::plotClicked() {
     fitName.append("_0");
     QString QfitWS = QString::fromStdString(fitName);
     MatrixWorkspace_sptr fitWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(fitName);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(fitName);
     int fitSpectra = (int)fitWS->getNumberHistograms();
-    IndirectTab::plotSpectra(QfitWS, { 0, 1, 2, 4 } );
+    IndirectTab::plotSpectra(QfitWS, {0, 1, 2, 4});
   }
 
   MatrixWorkspace_sptr resultWS =
-    AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
   int numSpectra = (int)resultWS->getNumberHistograms();
 
   QString QresultWS = QString::fromStdString(resultName);
-  auto paramNames = { "Amplitude", "FWHM", "Beta" };
+  auto paramNames = {"Amplitude", "FWHM", "Beta"};
   for (std::string paramName : paramNames) {
 
     if (plot == paramName || plot == "All") {
