@@ -43,6 +43,15 @@ public:
     TS_ASSERT_DELTA(lhs[1], 0.21, 1e-14);
   }
 
+  void test_minus_equals() {
+    OffsetableTester lhs{0.1, 0.2};
+    const double rhs = 0.01;
+    lhs -= rhs;
+    TS_ASSERT_EQUALS(lhs.size(), 2);
+    TS_ASSERT_DELTA(lhs[0], 0.09, 1e-14);
+    TS_ASSERT_DELTA(lhs[1], 0.19, 1e-14);
+  }
+
   void test_plus() {
     const OffsetableTester rhs1{0.1, 0.2};
     const double rhs2 = 0.01;
@@ -50,6 +59,15 @@ public:
     TS_ASSERT_EQUALS(lhs.size(), 2);
     TS_ASSERT_DELTA(lhs[0], 0.11, 1e-14);
     TS_ASSERT_DELTA(lhs[1], 0.21, 1e-14);
+  }
+
+  void test_minus() {
+    const OffsetableTester rhs1{0.1, 0.2};
+    const double rhs2 = 0.01;
+    const OffsetableTester lhs(rhs1 - rhs2);
+    TS_ASSERT_EQUALS(lhs.size(), 2);
+    TS_ASSERT_DELTA(lhs[0], 0.09, 1e-14);
+    TS_ASSERT_DELTA(lhs[1], 0.19, 1e-14);
   }
 
   void test_with_FixedLengthVector() {
