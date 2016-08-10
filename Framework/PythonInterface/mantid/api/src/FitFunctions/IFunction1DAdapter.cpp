@@ -14,7 +14,7 @@
 //-----------------------------------------------------------------------------
 namespace Mantid {
 namespace PythonInterface {
-using Environment::CallMethod1;
+using Environment::callMethod;
 using namespace boost::python;
 
 /**
@@ -54,7 +54,7 @@ void IFunction1DAdapter::function1D(double *out, const double *xValues,
   Py_DECREF(xvals);
   if (PyErr_Occurred()) {
     Py_XDECREF(result);
-    Environment::throwRuntimeError(true);
+    throw Environment::PythonException();
   }
 
   PyArrayObject *nparray = reinterpret_cast<PyArrayObject *>(result);
@@ -81,8 +81,7 @@ void IFunction1DAdapter::function1D(double *out, const double *xValues,
  */
 boost::python::object
 IFunction1DAdapter::function1D(const boost::python::object &xvals) const {
-  return CallMethod1<object, object>::dispatchWithException(
-      getSelf(), "function1D", xvals);
+  return callMethod<object, object>(getSelf(), "function1D", xvals);
 }
 
 /**
@@ -114,7 +113,7 @@ void IFunction1DAdapter::functionDeriv1D(API::Jacobian *out,
     // boost::python::objects when using boost::python::call_method
     PyEval_CallMethod(getSelf(), "functionDeriv1D", "(OO)", xvals, jacobian);
     if (PyErr_Occurred())
-      Environment::throwRuntimeError(true);
+      throw Environment::PythonException();
   } else {
     IFunction1D::functionDeriv1D(out, xValues, nData);
   }
