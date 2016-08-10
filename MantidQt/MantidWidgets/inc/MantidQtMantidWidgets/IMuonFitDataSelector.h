@@ -38,6 +38,7 @@ public:
   virtual QString getInstrumentName() const = 0;
   virtual QString getRuns() const = 0;
   virtual QString getSimultaneousFitLabel() const = 0;
+  virtual void setSimultaneousFitLabel(const QString &label) = 0;
   virtual int getDatasetIndex() const = 0;
   virtual void setDatasetNames(const QStringList &datasetNames) = 0;
 };

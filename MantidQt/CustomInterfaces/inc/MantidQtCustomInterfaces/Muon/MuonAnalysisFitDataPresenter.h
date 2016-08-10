@@ -114,6 +114,8 @@ public slots:
   void handleDatasetIndexChanged(int index);
   /// Open sequential fit dialog
   void openSequentialFitDialog();
+  /// Updates label to avoid overwriting existing results
+  void checkAndUpdateFitLabel(bool seq);
 
 private:
   /// Generate names of workspaces to be created
@@ -135,6 +137,8 @@ private:
       const Mantid::API::ITableWorkspace_sptr inputTable) const;
   /// Set up connections
   void doConnect();
+  /// Checks if current fit is simultaneous
+  bool isSimultaneousFit() const;
   /// Fit browser to update (non-owning pointer)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Data selector to get input from (non-owning pointer)

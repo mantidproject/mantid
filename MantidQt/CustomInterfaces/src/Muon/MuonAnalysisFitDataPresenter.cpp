@@ -100,6 +100,8 @@ void MuonAnalysisFitDataPresenter::doConnect() {
             SLOT(handleXRangeChangedGraphically(double, double)));
     connect(fitBrowser, SIGNAL(sequentialFitRequested()), this,
             SLOT(openSequentialFitDialog()));
+    connect(fitBrowser, SIGNAL(functionUpdateAndFitRequested(bool)), this,
+            SLOT(checkAndUpdateFitLabel(bool)));
   }
   if (const QObject *dataSelector = dynamic_cast<QObject *>(m_dataSelector)) {
     connect(dataSelector, SIGNAL(dataPropertiesChanged()), this,
@@ -433,20 +435,8 @@ void MuonAnalysisFitDataPresenter::handleSimultaneousFitLabelChanged() const {
 void MuonAnalysisFitDataPresenter::handleFitFinished(
     const QString &status) const {
   Q_UNUSED(status);
-  // Test if this was a simultaneous fit, or a co-add fit with multiple
-  // groups/periods
-  auto &dataSelector = m_dataSelector; // local ref
-  const bool isSimultaneousFit = [dataSelector]() {
-    if (dataSelector->getFitType() ==
-        IMuonFitDataSelector::FitType::Simultaneous) {
-      return true;
-    } else {
-      return dataSelector->getChosenGroups().size() > 1 ||
-             dataSelector->getPeriodSelections().size() > 1;
-    }
-  }();
   // If fitting was simultaneous, transform the results.
-  if (isSimultaneousFit) {
+  if (isSimultaneousFit()) {
     const auto label = m_dataSelector->getSimultaneousFitLabel();
     const auto groupName =
         MantidWidgets::MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX +
@@ -627,6 +617,46 @@ void MuonAnalysisFitDataPresenter::openSequentialFitDialog() {
   MuonSequentialFitDialog dialog(fitBrowser, this);
   dialog.exec();
   fitBrowser->blockSignals(false);
+}
+
+/**
+ * Called when user requests a fit. Before fit begins, if the fit label is
+ * active (simultaneous fit), check if it has already been used. If so,
+ * increment it to avoid overwriting the previous fit.
+ *
+ * @param seq :: [input] Whether fit is sequential (UNUSED)
+ */
+void MuonAnalysisFitDataPresenter::checkAndUpdateFitLabel(bool seq) {
+  Q_UNUSED(seq);
+  if (isSimultaneousFit()) {
+    auto &ads = AnalysisDataService::Instance();
+    const auto &label = m_dataSelector->getSimultaneousFitLabel().toStdString();
+    size_t i = 0;
+    std::string uniqueName = label;
+    while (ads.doesExist(
+        MantidWidgets::MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX +
+        uniqueName)) {
+      uniqueName = label + std::to_string(++i);
+    }
+    m_dataSelector->setSimultaneousFitLabel(QString::fromStdString(uniqueName));
+    m_fitBrowser->setSimultaneousLabel(uniqueName);
+  }
+}
+
+/**
+ * Test if this was a simultaneous fit, or a co-add fit with multiple
+ * groups/periods
+ *
+ * @returns :: True for simultaneous fit, else false
+ */
+bool MuonAnalysisFitDataPresenter::isSimultaneousFit() const {
+  if (m_dataSelector->getFitType() ==
+      IMuonFitDataSelector::FitType::Simultaneous) {
+    return true;
+  } else {
+    return m_dataSelector->getChosenGroups().size() > 1 ||
+           m_dataSelector->getPeriodSelections().size() > 1;
+  }
 }
 
 } // namespace CustomInterfaces

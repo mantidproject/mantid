@@ -76,6 +76,8 @@ public:
   QString getRuns() const override;
   /// Get label for simultaneous fit
   QString getSimultaneousFitLabel() const override;
+  /// Set label for simultaneous fit
+  void setSimultaneousFitLabel(const QString &label) override;
   /// Get index of selected dataset
   int getDatasetIndex() const override;
   /// Set names of datasets for selection

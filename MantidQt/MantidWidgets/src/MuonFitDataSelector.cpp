@@ -631,6 +631,14 @@ QString MuonFitDataSelector::getSimultaneousFitLabel() const {
 }
 
 /**
+ * Set text of simultaneous fit label
+ * @param label :: [input] Text to set as label
+ */
+void MuonFitDataSelector::setSimultaneousFitLabel(const QString &label) {
+  m_ui.txtSimFitLabel->setText(label);
+}
+
+/**
  * Enable the "Label" textbox if multiple groups or periods are selected.
  * Called when groups/periods selection changes.
  */
