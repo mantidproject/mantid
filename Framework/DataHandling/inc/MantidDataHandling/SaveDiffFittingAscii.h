@@ -43,8 +43,13 @@ private:
   /// final algorithm
   bool processGroups() override;
 
+  /// Cross-check properties with each other @see IAlgorithm::validateInputs
+  std::map<std::string, std::string> validateInputs() override;
+
   /// Main exec routine, called for group or individual workspace processing.
-  void processAll();
+  void processAll(std::vector<API::ITableWorkspace_sptr> input_ws);
+
+  std::vector<std::string> splitList(std::string strList);
 
   void writeInfo(const std::string &runNumber, const std::string &bank,
                  std::ofstream &file);
@@ -60,13 +65,8 @@ private:
   /// the separator
   const char m_sep;
 
-  /// next line
-  const char m_endl;
-
   /// table_counter
   int m_counter;
-
-  std::vector<API::ITableWorkspace_sptr> m_workspaces;
 };
 } // namespace DataHandling
 } // namespace Mantid

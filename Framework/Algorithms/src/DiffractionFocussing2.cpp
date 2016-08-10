@@ -1,3 +1,4 @@
+#include "MantidHistogramData/LogarithmicGenerator.h"
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -611,6 +612,8 @@ void DiffractionFocussing2::determineRebinParameters() {
       Xmin = Xmax / nPoints;
     if (Xmin <= 0)
       Xmin = 1.0;
+    if (Xmin == Xmax)
+      Xmin = Xmax / 2.0;
 
     if (Xmax < Xmin) // Should never happen
     {
@@ -627,14 +630,8 @@ void DiffractionFocussing2::determineRebinParameters() {
     // g_log.information(mess.str());
     mess.str("");
 
-    // Build up the X vector.
-    HistogramData::BinEdges xnew(xPoints);
-    auto &xnewData = xnew.mutableData();
-    xnewData[0] = Xmin;
-    for (int64_t j = 1; j < xPoints; j++) {
-      xnewData[j] = Xmin * (1.0 + step);
-      Xmin = xnewData[j];
-    }
+    HistogramData::BinEdges xnew(
+        xPoints, HistogramData::LogarithmicGenerator(Xmin, step));
     group2xvector[gpit->first] = xnew; // Register this vector in the map
   }
   // Not needed anymore

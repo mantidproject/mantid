@@ -22,12 +22,9 @@ using namespace Mantid::API;
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveDiffFittingAscii)
 
-using namespace Kernel;
-using namespace API;
-
 /// Empty constructor
 SaveDiffFittingAscii::SaveDiffFittingAscii()
-    : Mantid::API::Algorithm(), m_sep(','), m_endl('\n'), m_counter(0) {}
+    : Mantid::API::Algorithm(), m_sep(','), m_counter(0) {}
 
 /// Initialisation method.
 void SaveDiffFittingAscii::init() {
@@ -57,13 +54,10 @@ void SaveDiffFittingAscii::init() {
   std::vector<std::string> formats;
 
   formats.push_back("AppendToExistingFile");
-  formats.push_back("WriteGroupWorkspace");
   formats.push_back("OverwriteFile");
-  declareProperty(
-      "OutFormat", "AppendToExistingFile",
-      boost::make_shared<Kernel::StringListValidator>(formats),
-      "Append data to existing file or save multiple table workspaces"
-      "in a group workspace");
+  declareProperty("OutMode", "AppendToExistingFile",
+                  boost::make_shared<Kernel::StringListValidator>(formats),
+                  "Over write the file or append data to existing file");
 }
 
 /**
@@ -75,15 +69,18 @@ void SaveDiffFittingAscii::exec() {
   /// Workspace
   const ITableWorkspace_sptr tbl_ws = getProperty("InputWorkspace");
   if (!tbl_ws)
-    throw std::runtime_error("Please provide an input workspace to be saved.");
+    throw std::runtime_error(
+        "Please provide an input table workspace to be saved.");
 
-  m_workspaces.push_back(
+  std::vector<API::ITableWorkspace_sptr> input_ws;
+  input_ws.push_back(
       boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(tbl_ws));
 
-  processAll();
+  processAll(input_ws);
 }
 
 bool SaveDiffFittingAscii::processGroups() {
+
   try {
 
     std::string name = getPropertyValue("InputWorkspace");
@@ -91,8 +88,9 @@ bool SaveDiffFittingAscii::processGroups() {
     WorkspaceGroup_sptr inputGroup =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
 
+    std::vector<API::ITableWorkspace_sptr> input_ws;
     for (int i = 0; i < inputGroup->getNumberOfEntries(); ++i) {
-      m_workspaces.push_back(
+      input_ws.push_back(
           boost::dynamic_pointer_cast<ITableWorkspace>(inputGroup->getItem(i)));
     }
 
@@ -103,21 +101,22 @@ bool SaveDiffFittingAscii::processGroups() {
     setExecuted(true);
     notificationCenter().postNotification(
         new FinishedNotification(this, this->isExecuted()));
+
+    processAll(input_ws);
   } catch (...) {
     g_log.error()
         << "Error while processing groups on SaveDiffFittingAscii algorithm. "
-        << m_endl;
+        << '\n';
   }
-
-  processAll();
 
   return true;
 }
 
-void SaveDiffFittingAscii::processAll() {
+void SaveDiffFittingAscii::processAll(
+    std::vector<API::ITableWorkspace_sptr> input_ws) {
 
   const std::string filename = getProperty("Filename");
-  std::string outFormat = getProperty("OutFormat");
+  const std::string outMode = getProperty("OutMode");
   std::string runNumList = getProperty("RunNumber");
   std::string bankList = getProperty("Bank");
 
@@ -125,7 +124,7 @@ void SaveDiffFittingAscii::processAll() {
   bool exist = pFile.exists();
 
   bool appendToFile = false;
-  if (outFormat == "AppendToExistingFile")
+  if (outMode == "AppendToExistingFile")
     appendToFile = true;
 
   // Initialize the file stream
@@ -145,22 +144,17 @@ void SaveDiffFittingAscii::processAll() {
     file << "\n";
   }
 
-  std::vector<std::string> splitRunNum;
-  // remove spaces within string to produce constant format
-  runNumList.erase(std::remove(runNumList.begin(), runNumList.end(), ' '),
-                   runNumList.end());
-  boost::split(splitRunNum, runNumList, boost::is_any_of(","));
+  // reset counter
+  m_counter = 0;
 
-  std::vector<std::string> splitBank;
-  bankList.erase(std::remove(bankList.begin(), bankList.end(), ' '),
-                 bankList.end());
-  boost::split(splitBank, bankList, boost::is_any_of(","));
+  std::vector<std::string> splitRunNum = splitList(runNumList);
+  std::vector<std::string> splitBank = splitList(bankList);
 
   // Create a progress reporting object
-  Progress progress(this, 0, 1, m_workspaces.size());
+  Progress progress(this, 0, 1, input_ws.size());
 
-  size_t breaker = m_workspaces.size();
-  if (outFormat == "AppendToExistingFile")
+  size_t breaker = input_ws.size();
+  if (outMode == "AppendToExistingFile" && input_ws.size() == 1)
     breaker = 1;
 
   for (size_t i = 0; i < breaker; ++i) {
@@ -170,32 +164,42 @@ void SaveDiffFittingAscii::processAll() {
     writeInfo(runNum, bank, file);
 
     // write header
-    std::vector<std::string> columnHeadings = m_workspaces[i]->getColumnNames();
+    std::vector<std::string> columnHeadings = input_ws[i]->getColumnNames();
     writeHeader(columnHeadings, file);
 
     // write out the data form the table workspace
     size_t columnSize = columnHeadings.size();
-    writeData(m_workspaces[i], file, columnSize);
+    writeData(input_ws[i], file, columnSize);
 
-    if (outFormat == "WriteGroupWorkspace" && (i + 1) != m_workspaces.size()) {
-      file << m_endl;
+    if (input_ws.size() > 1 && (i + 1) != input_ws.size()) {
+      file << '\n';
     }
   }
   progress.report();
+}
+
+std::vector<std::string> SaveDiffFittingAscii::splitList(std::string strList) {
+  std::vector<std::string> splitList;
+  strList.erase(std::remove(strList.begin(), strList.end(), ' '),
+                strList.end());
+  boost::split(splitList, strList, boost::is_any_of(","));
+
+  return splitList;
 }
 
 void SaveDiffFittingAscii::writeInfo(const std::string &runNumber,
                                      const std::string &bank,
                                      std::ofstream &file) {
 
-  file << "run number: " << runNumber << m_endl;
-  file << "bank: " << bank << m_endl;
+  file << "run number: " << runNumber << '\n';
+  file << "bank: " << bank << '\n';
   m_counter++;
 }
 
 void SaveDiffFittingAscii::writeHeader(std::vector<std::string> &columnHeadings,
                                        std::ofstream &file) {
-  for (auto &heading : columnHeadings) {
+  for (const auto &heading : columnHeadings) {
+    // Chi being the last header in the table workspace
     if (heading == "Chi") {
       writeVal(heading, file, true);
     } else {
@@ -211,7 +215,8 @@ void SaveDiffFittingAscii::writeData(API::ITableWorkspace_sptr workspace,
     TableRow row = workspace->getRow(rowIndex);
     for (size_t columnIndex = 0; columnIndex < columnSize; columnIndex++) {
 
-      auto row_str = boost::lexical_cast<std::string>(row.Double(columnIndex));
+      const auto row_str =
+          boost::lexical_cast<std::string>(row.Double(columnIndex));
       g_log.debug() << row_str << std::endl;
 
       if (columnIndex == columnSize - 1)
@@ -236,10 +241,74 @@ void SaveDiffFittingAscii::writeVal(const std::string &val, std::ofstream &file,
   }
 
   if (endline) {
-    file << m_endl;
+    file << '\n';
   } else {
     file << m_sep;
   }
+}
+
+std::map<std::string, std::string> SaveDiffFittingAscii::validateInputs() {
+  std::map<std::string, std::string> errors;
+
+  bool is_grp = true;
+
+  // check for null pointers - this is to protect against workspace groups
+  const std::string inputWS = getProperty("InputWorkspace");
+
+  WorkspaceGroup_sptr inWks =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(inputWS);
+  API::WorkspaceGroup_const_sptr inGrp =
+      boost::dynamic_pointer_cast<const API::WorkspaceGroup>(inWks);
+
+  const ITableWorkspace_sptr tbl_ws = getProperty("InputWorkspace");
+  if (tbl_ws) {
+    is_grp = false;
+  }
+
+  if (!inGrp && !tbl_ws) {
+    std::string message =
+        "The current version of this algorithm only "
+        "supports input workspaces of type TableWorkspace and WorkspaceGroup";
+    errors["InputWorkspace"] = message;
+  }
+
+  const std::string file = getProperty("Filename");
+  if (file.empty()) {
+    errors["Filename"] = "File name directory cannot be empty";
+  }
+
+  std::string runNumber = getPropertyValue("RunNumber");
+  std::vector<std::string> splitRunNum = splitList(runNumber);
+
+  std::string bankNumber = getPropertyValue("Bank");
+  std::vector<std::string> splitBank = splitList(bankNumber);
+
+  if (runNumber.empty()) {
+    errors["Bank"] = "Please provide a valid bank list";
+  }
+  if (splitBank.empty()) {
+    errors["Bank"] = "Please provide a valid bank list";
+  } else if (!is_grp) {
+    if (splitRunNum.size() > 1) {
+      errors["RunNumber"] = "One run number should be provided when a Table"
+                            "workspace is selected";
+    }
+    if (splitBank.size() > 1) {
+      errors["Bank"] = "One bank should be provided when a Table"
+                       "Workspace is selected";
+    }
+  } else {
+    if (splitRunNum.size() != inGrp->size()) {
+      errors["RunNumber"] = "Run number list size should match the number of "
+                            "TableWorkspaces in the GroupWorkspace selected";
+    }
+    if (splitBank.size() != inGrp->size()) {
+      errors["Bank"] = "Bank list size should match the number of "
+                       "TableWorkspaces in the GroupWorkspace selected";
+    }
+  }
+
+  return errors;
 }
 
 } // namespace DataHandling

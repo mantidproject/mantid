@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi
 import mantid.api
 import mantid.kernel
@@ -150,7 +151,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 endelem = int(elem[1])
                 if endelem < startelem:
                     raise ValueError("The element after the hyphen needs to be greater or equal than the first element")
-                elemlist = range(startelem,endelem+1)
+                elemlist = list(range(startelem,endelem+1))
                 parsed.extend(elemlist)
         return parsed
 

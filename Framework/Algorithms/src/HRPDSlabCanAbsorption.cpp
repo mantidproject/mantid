@@ -7,6 +7,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/ListValidator.h"
 
 namespace Mantid {

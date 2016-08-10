@@ -11,6 +11,7 @@
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include <boost/algorithm/string/find.hpp>
+#include <QMessageBox>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -527,6 +528,30 @@ void IndirectTab::algorithmFinished(bool error) {
  */
 QString IndirectTab::runPythonCode(QString code, bool no_output) {
   return m_pythonRunner.runPythonCode(code, no_output);
+}
+
+/**
+ * Checks if the ADS contains a workspace and opens a message box if not
+ * @param workspaceName The name of the workspace to look for
+ * @param plotting if true use plotting error message, false use saving error
+ * message
+ * @return False if no workpsace found, True if workspace found
+ */
+bool IndirectTab::checkADSForPlotSaveWorkspace(const std::string &workspaceName,
+                                               const bool &plotting) {
+  const auto workspaceExists =
+      AnalysisDataService::Instance().doesExist(workspaceName);
+  if (workspaceExists) {
+    return true;
+  } else {
+    const std::string plotSave = plotting ? "plotting" : "saving";
+    const auto errorMessage = "Error while " + plotSave +
+                              ":\nThe workspace \"" + workspaceName +
+                              "\" could not be found.";
+    const char *textMessage = errorMessage.c_str();
+    QMessageBox::warning(NULL, tr("Workspace not found"), tr(textMessage));
+    return false;
+  }
 }
 
 } // namespace CustomInterfaces

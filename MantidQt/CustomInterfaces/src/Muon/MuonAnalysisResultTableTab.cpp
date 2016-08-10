@@ -39,16 +39,17 @@ using namespace MantidQt::MantidWidgets;
 const std::string MuonAnalysisResultTableTab::WORKSPACE_POSTFIX("_Workspace");
 const std::string MuonAnalysisResultTableTab::PARAMS_POSTFIX("_Parameters");
 const QString MuonAnalysisResultTableTab::RUN_NUMBER_LOG("run_number");
+const QString MuonAnalysisResultTableTab::RUN_START_LOG("run_start");
+const QString MuonAnalysisResultTableTab::RUN_END_LOG("run_end");
 const QStringList MuonAnalysisResultTableTab::NON_TIMESERIES_LOGS{
-    MuonAnalysisResultTableTab::RUN_NUMBER_LOG, "sample_temp",
-    "sample_magn_field"};
+    MuonAnalysisResultTableTab::RUN_NUMBER_LOG, RUN_START_LOG, RUN_END_LOG,
+    "sample_temp", "sample_magn_field"};
 
 /**
 * Constructor
 */
 MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis &uiForm)
-    : m_uiForm(uiForm), m_numLogsdisplayed(0), m_savedLogsState(),
-      m_unselectedFittings() {
+    : m_uiForm(uiForm), m_savedLogsState(), m_unselectedFittings() {
   // Connect the help button to the wiki page.
   connect(m_uiForm.muonAnalysisHelpResults, SIGNAL(clicked()), this,
           SLOT(helpResultsClicked()));
@@ -374,6 +375,7 @@ void MuonAnalysisResultTableTab::populateTables() {
   m_uiForm.valueTable->setRowCount(0);
 
   QStringList fittedWsList = getFittedWorkspaces();
+  fittedWsList.sort(); // sort by instrument then run (i.e. alphanumerically)
 
   if (!fittedWsList.isEmpty()) {
     // Populate the individual log values and fittings into their respective
@@ -459,21 +461,26 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
 
         // Check if we should display it
         if (NON_TIMESERIES_LOGS.contains(logName)) {
-          QVariant value;
 
           if (logName == RUN_NUMBER_LOG) { // special case
-            value = MuonAnalysisHelper::runNumberString(wsName, prop->value());
+            wsLogValues[RUN_NUMBER_LOG] =
+                MuonAnalysisHelper::runNumberString(wsName, prop->value());
+          } else if (logName == RUN_START_LOG || logName == RUN_END_LOG) {
+            wsLogValues[logName + " (text)"] =
+                QString::fromStdString(prop->value());
+            const auto seconds = static_cast<double>(DateAndTime(prop->value())
+                                                         .totalNanoseconds()) *
+                                 1.e-9;
+            wsLogValues[logName + " (s)"] = seconds;
           } else if (auto stringProp =
                          dynamic_cast<PropertyWithValue<std::string> *>(prop)) {
-            value = QString::fromStdString((*stringProp)());
+            wsLogValues[logName] = QString::fromStdString((*stringProp)());
           } else if (auto doubleProp =
                          dynamic_cast<PropertyWithValue<double> *>(prop)) {
-            value = (*doubleProp)();
+            wsLogValues[logName] = (*doubleProp)();
           } else {
             throw std::runtime_error("Unsupported non-timeseries log type");
           }
-
-          wsLogValues[logName] = value;
         }
       }
     }
@@ -519,10 +526,6 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
     m_uiForm.valueTable->setItem(row, 0, new QTableWidgetItem(*it));
   }
 
-  // Save the number of logs displayed
-  // XXX: this is redundant, as number of logs == number of rows
-  m_numLogsdisplayed = m_uiForm.valueTable->rowCount();
-
   // Add check boxes for the include column on log table, and make text
   // uneditable.
   for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++) {
@@ -544,15 +547,20 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
  */
 bool MuonAnalysisResultTableTab::logNameLessThan(const QString &logName1,
                                                  const QString &logName2) {
-  int index1 = NON_TIMESERIES_LOGS.indexOf(logName1);
-  int index2 = NON_TIMESERIES_LOGS.indexOf(logName2);
+  int index1 = NON_TIMESERIES_LOGS.indexOf(logName1.split(' ').first());
+  int index2 = NON_TIMESERIES_LOGS.indexOf(logName2.split(' ').first());
 
   if (index1 == -1 && index2 == -1) {
     // If both are timeseries logs - compare lexicographically ignoring the case
     return logName1.toLower() < logName2.toLower();
   } else if (index1 != -1 && index2 != -1) {
-    // If both timeseries - keep the order of non-timeseries logs list
-    return index1 < index2;
+    // If both non-timeseries - keep the order of non-timeseries logs list
+    if (index1 == index2) {
+      // Correspond to same log, compare lexicographically
+      return logName1.toLower() < logName2.toLower();
+    } else {
+      return index1 < index2;
+    }
   } else {
     // If one is timeseries and another is not - the one which is not is always
     // less
@@ -727,7 +735,7 @@ void MuonAnalysisResultTableTab::createTable() {
       // We use values of the first workspace to determine the type of the
       // column to add. It seems reasonable to assume
       // that log values with the same name will have same types.
-      QString typeName = m_logValues[wsSelected[0]][log].typeName();
+      QString typeName = m_logValues[wsSelected.first()][log].typeName();
       if (typeName == "double") {
         columnTypeName = "double";
         columnPlotType = 1;
@@ -743,6 +751,15 @@ void MuonAnalysisResultTableTab::createTable() {
           table->addColumn(columnTypeName, log.toStdString());
       newColumn->setPlotType(columnPlotType);
       newColumn->setReadOnly(false);
+    }
+
+    // Cache the start time of the first run
+    int64_t firstStart_ns(0);
+    if (const auto &firstWS =
+            Mantid::API::AnalysisDataService::Instance()
+                .retrieveWS<ExperimentInfo>(wsSelected.first().toStdString() +
+                                            WORKSPACE_POSTFIX)) {
+      firstStart_ns = firstWS->run().startTime().totalNanoseconds();
     }
 
     // Get param information
@@ -781,37 +798,40 @@ void MuonAnalysisResultTableTab::createTable() {
     }
 
     // Add data to table
-    for (auto itr = m_logValues.begin(); itr != m_logValues.end(); itr++) {
-      for (int i = 0; i < wsSelected.size(); ++i) {
-        if (wsSelected[i] == itr.key()) {
-          // Add new row
-          Mantid::API::TableRow row = table->appendRow();
+    for (const auto &wsName : wsSelected) {
+      Mantid::API::TableRow row = table->appendRow();
 
-          // Add log values to the row
-          QMap<QString, QVariant> &logValues = itr.value();
+      // Get log values for this row
+      const auto &logValues = m_logValues[wsName];
 
-          for (int j = 0; j < logsSelected.size(); j++) {
-            Mantid::API::Column_sptr c = table->getColumn(j);
-            QVariant &v = logValues[logsSelected[j]];
+      // Write log values in each column
+      for (int i = 0; i < logsSelected.size(); ++i) {
+        Mantid::API::Column_sptr col = table->getColumn(i);
+        const QVariant &v = logValues[logsSelected[i]];
 
-            if (c->isType<double>())
-              row << v.toDouble();
-            else if (c->isType<std::string>())
-              row << v.toString().toStdString();
-            else
-              throw std::runtime_error("Log value with name '" +
-                                       logsSelected[j].toStdString() +
-                                       "' in '" + wsSelected[i].toStdString() +
-                                       "' has unexpected type.");
+        if (col->isType<double>()) {
+          if (logsSelected[i].endsWith(" (s)")) {
+            // Convert relative to first start time
+            double seconds = v.toDouble();
+            const double firstStart_sec =
+                static_cast<double>(firstStart_ns) * 1.e-9;
+            row << seconds - firstStart_sec;
+          } else {
+            row << v.toDouble();
           }
-
-          // Add param values (presume params the same for all workspaces)
-          QMap<QString, double> paramsList =
-              wsParamsList.find(itr.key()).value();
-          for (int j = 0; j < paramsToDisplay.size(); ++j) {
-            row << paramsList.find(paramsToDisplay[j]).value();
-          }
+        } else if (col->isType<std::string>()) {
+          row << v.toString().toStdString();
+        } else {
+          throw std::runtime_error(
+              "Log value with name '" + logsSelected[i].toStdString() +
+              "' in '" + wsName.toStdString() + "' has unexpected type.");
         }
+      }
+
+      // Add param values (params same for all workspaces)
+      QMap<QString, double> paramsList = wsParamsList[wsName];
+      for (const auto &paramName : paramsToDisplay) {
+        row << paramsList[paramName];
       }
     }
 
@@ -906,7 +926,7 @@ QStringList MuonAnalysisResultTableTab::getSelectedWs() {
 */
 QStringList MuonAnalysisResultTableTab::getSelectedLogs() {
   QStringList logsSelected;
-  for (int i = 0; i < m_numLogsdisplayed; i++) {
+  for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++) {
     QCheckBox *includeCell =
         static_cast<QCheckBox *>(m_uiForm.valueTable->cellWidget(i, 1));
     if (includeCell->isChecked()) {

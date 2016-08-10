@@ -17,7 +17,7 @@ namespace Algorithms {
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - Comma sepatated list of names of the Workspace to take
+    <LI> InputWorkspace - Comma separated list of names of the Workspace to take
    as input </LI>
     <LI> OutputWorkspace - string to append or prefix of the names of the
    workspaces </LI>
@@ -59,6 +59,9 @@ public:
   int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Utility\\Workspaces"; }
+
+  /// Validator to check out name does not already exist
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   // Overridden Algorithm methods

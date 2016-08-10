@@ -77,7 +77,8 @@ PlotAsymmetryByLogValue::PlotAsymmetryByLogValue()
       m_int(true), m_red(-1), m_green(-1), m_minTime(-1.0), m_maxTime(-1.0),
       m_logName(), m_logFunc(), m_logValue(), m_redY(), m_redE(), m_greenY(),
       m_greenE(), m_sumY(), m_sumE(), m_diffY(), m_diffE(),
-      m_allProperties("default"), m_currResName("__PABLV_results") {}
+      m_allProperties("default"), m_currResName("__PABLV_results"),
+      m_firstStart_ns(0) {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
 *
@@ -809,6 +810,23 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
     end = run.getProperty("run_end")->value();
   }
 
+  // If this is the first run, cache the start time
+  if (m_firstStart_ns == 0) {
+    m_firstStart_ns = start.totalNanoseconds();
+  }
+
+  // If the log asked for is the start or end time, we already have these.
+  // Return it as a double in seconds, relative to start of first run
+  constexpr static double nanosec_to_sec = 1.e-9;
+  if (m_logName == "run_start") {
+    return static_cast<double>(start.totalNanoseconds() - m_firstStart_ns) *
+           nanosec_to_sec;
+  } else if (m_logName == "run_end") {
+    return static_cast<double>(end.totalNanoseconds() - m_firstStart_ns) *
+           nanosec_to_sec;
+  }
+
+  // Otherwise, try converting the log value to a double
   auto *property = run.getLogData(m_logName);
   if (!property) {
     throw std::invalid_argument("Log " + m_logName + " does not exist.");
