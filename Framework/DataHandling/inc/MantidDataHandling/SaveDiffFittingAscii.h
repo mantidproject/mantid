@@ -46,6 +46,8 @@ private:
   /// Main exec routine, called for group or individual workspace processing.
   void processAll(std::vector<API::ITableWorkspace_sptr> input_ws);
 
+  std::vector<std::string> splitList(std::string strList);
+
   void writeInfo(const std::string &runNumber, const std::string &bank,
                  std::ofstream &file);
 

@@ -54,13 +54,10 @@ void SaveDiffFittingAscii::init() {
   std::vector<std::string> formats;
 
   formats.push_back("AppendToExistingFile");
-  formats.push_back("WriteGroupWorkspace");
   formats.push_back("OverwriteFile");
-  declareProperty(
-      "OutFormat", "AppendToExistingFile",
-      boost::make_shared<Kernel::StringListValidator>(formats),
-      "Append data to existing file or save multiple table workspaces"
-      "in a group workspace");
+  declareProperty("OutMode", "AppendToExistingFile",
+                  boost::make_shared<Kernel::StringListValidator>(formats),
+                  "Over write the file or append data to existing file");
 }
 
 /**
@@ -72,7 +69,8 @@ void SaveDiffFittingAscii::exec() {
   /// Workspace
   const ITableWorkspace_sptr tbl_ws = getProperty("InputWorkspace");
   if (!tbl_ws)
-    throw std::runtime_error("Please provide an input workspace to be saved.");
+    throw std::runtime_error(
+        "Please provide an input table workspace to be saved.");
 
   std::vector<API::ITableWorkspace_sptr> input_ws;
   input_ws.push_back(
@@ -82,6 +80,7 @@ void SaveDiffFittingAscii::exec() {
 }
 
 bool SaveDiffFittingAscii::processGroups() {
+
   try {
 
     std::string name = getPropertyValue("InputWorkspace");
@@ -90,7 +89,6 @@ bool SaveDiffFittingAscii::processGroups() {
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
 
     std::vector<API::ITableWorkspace_sptr> input_ws;
-
     for (int i = 0; i < inputGroup->getNumberOfEntries(); ++i) {
       input_ws.push_back(
           boost::dynamic_pointer_cast<ITableWorkspace>(inputGroup->getItem(i)));
@@ -103,13 +101,13 @@ bool SaveDiffFittingAscii::processGroups() {
     setExecuted(true);
     notificationCenter().postNotification(
         new FinishedNotification(this, this->isExecuted()));
+
+    processAll(input_ws);
   } catch (...) {
     g_log.error()
         << "Error while processing groups on SaveDiffFittingAscii algorithm. "
         << '\n';
   }
-
-  processAll(input_ws);
 
   return true;
 }
@@ -118,7 +116,7 @@ void SaveDiffFittingAscii::processAll(
     std::vector<API::ITableWorkspace_sptr> input_ws) {
 
   const std::string filename = getProperty("Filename");
-  const std::string outFormat = getProperty("OutFormat");
+  const std::string outMode = getProperty("OutMode");
   std::string runNumList = getProperty("RunNumber");
   std::string bankList = getProperty("Bank");
 
@@ -126,7 +124,7 @@ void SaveDiffFittingAscii::processAll(
   bool exist = pFile.exists();
 
   bool appendToFile = false;
-  if (outFormat == "AppendToExistingFile")
+  if (outMode == "AppendToExistingFile")
     appendToFile = true;
 
   // Initialize the file stream
@@ -146,22 +144,17 @@ void SaveDiffFittingAscii::processAll(
     file << "\n";
   }
 
-  std::vector<std::string> splitRunNum;
-  // remove spaces within string to produce constant format
-  runNumList.erase(std::remove(runNumList.begin(), runNumList.end(), ' '),
-                   runNumList.end());
-  boost::split(splitRunNum, runNumList, boost::is_any_of(","));
+  // reset counter
+  m_counter = 0;
 
-  std::vector<std::string> splitBank;
-  bankList.erase(std::remove(bankList.begin(), bankList.end(), ' '),
-                 bankList.end());
-  boost::split(splitBank, bankList, boost::is_any_of(","));
+  std::vector<std::string> splitRunNum = splitList(runNumList);
+  std::vector<std::string> splitBank = splitList(bankList);
 
   // Create a progress reporting object
   Progress progress(this, 0, 1, input_ws.size());
 
   size_t breaker = input_ws.size();
-  if (outFormat == "AppendToExistingFile")
+  if (outMode == "AppendToExistingFile" && input_ws.size() == 1)
     breaker = 1;
 
   for (size_t i = 0; i < breaker; ++i) {
@@ -178,11 +171,20 @@ void SaveDiffFittingAscii::processAll(
     size_t columnSize = columnHeadings.size();
     writeData(input_ws[i], file, columnSize);
 
-    if (outFormat == "WriteGroupWorkspace" && (i + 1) != input_ws.size()) {
+    if (input_ws.size() > 1 && (i + 1) != input_ws.size()) {
       file << '\n';
     }
   }
   progress.report();
+}
+
+std::vector<std::string> SaveDiffFittingAscii::splitList(std::string strList) {
+  std::vector<std::string> splitList;
+  strList.erase(std::remove(strList.begin(), strList.end(), ' '),
+                strList.end());
+  boost::split(splitList, strList, boost::is_any_of(","));
+
+  return splitList;
 }
 
 void SaveDiffFittingAscii::writeInfo(const std::string &runNumber,
