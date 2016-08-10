@@ -27,7 +27,6 @@ DensityOfStates::DensityOfStates(QWidget *parent)
   m_uiForm.lwIons->setSelectionMode(QAbstractItemView::MultiSelection);
 }
 
-
 void DensityOfStates::setup() {}
 
 /**
@@ -103,16 +102,16 @@ void DensityOfStates::run() {
     dosAlgo->setProperty("SpectrumType", "DOS");
 
     const auto crossSectionScale = m_uiForm.ckCrossSectionScale->isChecked();
-    const auto crossSectionScaleType = m_uiForm.cbCrossSectionScale->currentText().toStdString();
+    const auto crossSectionScaleType =
+        m_uiForm.cbCrossSectionScale->currentText().toStdString();
     if (crossSectionScale)
-      dosAlgo->setProperty("ScaleByCrossSection",
-                           crossSectionScaleType);
+      dosAlgo->setProperty("ScaleByCrossSection", crossSectionScaleType);
 
     const auto outputFormat = m_uiForm.cbOutputFormat->currentIndex();
     if (outputFormat == 1) {
       dosAlgo->setProperty("SumContributions", true);
     }
-	if (outputFormat == 2){
+    if (outputFormat == 2) {
       dosAlgo->setProperty("CalculateIonIndices", true);
     }
 
