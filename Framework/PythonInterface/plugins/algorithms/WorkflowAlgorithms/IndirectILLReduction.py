@@ -11,7 +11,7 @@ from IndirectImport import import_mantidplot
 
 class IndirectILLReduction(DataProcessorAlgorithm):
 
-    # Output workspace, will be set in PyInit by user input
+    # Output workspace, will be set by user input
     _red_ws = 'red'
 
     # Optional output workspaces with fixed names for ControlMode
