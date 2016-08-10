@@ -123,7 +123,7 @@ public:
   * Equivalence overload
   * @param right: rhs workspace list property type.
   */
-  const bool operator==(const WorkspaceListProperty &right) const {
+  bool operator==(const WorkspaceListProperty &right) const {
     return (m_optional == right.m_optional) && SuperClass::operator==(right);
   }
 
