@@ -47,16 +47,26 @@ public:
     return derived;
   }
 
+  /// Subtracts offset from each element in the container.
+  T &operator-=(const double offset) & { return (*this) += -offset; }
+
+  /// Offsets each element in lhs by rhs.
+  T operator+(const double rhs) const {
+    auto &derived = static_cast<const T &>(*this);
+    T out(derived);
+    return out += rhs;
+  }
+
+  /// Subtracts rhs from each element in lhs.
+  T operator-(const double rhs) const {
+    auto &derived = static_cast<const T &>(*this);
+    T out(derived);
+    return out += -rhs;
+  }
+
 protected:
   ~Offsetable() = default;
 };
-
-/// Offsets each element in lhs by rhs.
-template <class T, class = typename std::enable_if<
-                       std::is_base_of<Offsetable<T>, T>::value>::type>
-inline T operator+(T lhs, const double rhs) {
-  return lhs += rhs;
-}
 
 } // namespace detail
 } // namespace HistogramData

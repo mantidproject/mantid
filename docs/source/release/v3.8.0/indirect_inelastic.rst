@@ -52,7 +52,8 @@ Simulations
 Density Of States
 ~~~~~~~~~~~~~~~~~
 
-- :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` now allows for the parsing of isotopes from the *.phonon or *.castep file in the form 'element:isotope' 
+- :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` now allows for the parsing of isotopes from the *.phonon or *.castep file in the form 'element:isotope'
+- Allow for the loading of separate indexes for each element via the Output Format combo box in the interface.
 
 Load nMoldyn
 ~~~~~~~~~~~~

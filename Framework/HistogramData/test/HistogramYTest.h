@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/Addable.h"
 #include "MantidHistogramData/FixedLengthVector.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidHistogramData/Offsetable.h"
@@ -32,6 +33,7 @@ public:
 #endif
     TS_ASSERT_THROWS_NOTHING(
         dynamic_cast<detail::FixedLengthVector<HistogramY> &>(y));
+    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Addable<HistogramY> &>(y));
     TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Offsetable<HistogramY> &>(y));
     TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Scalable<HistogramY> &>(y));
 #if __clang__
