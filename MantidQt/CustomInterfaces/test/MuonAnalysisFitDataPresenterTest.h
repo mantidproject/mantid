@@ -495,7 +495,8 @@ private:
     // test that all expected names are in the ADS
     const auto namesInADS = ads.getObjectNames();
     for (const QString &name : expectedNames) {
-      TS_ASSERT(namesInADS.find(name.toStdString()) != namesInADS.end());
+      TS_ASSERT(std::find(namesInADS.begin(), namesInADS.end(),
+                          name.toStdString()) != namesInADS.end());
     }
     // test that workspaces have been added to correct groups
     auto existingGroup = ads.retrieveWS<WorkspaceGroup>("MUSR00015189");
