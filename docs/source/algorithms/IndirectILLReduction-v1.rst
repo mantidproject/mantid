@@ -43,8 +43,6 @@ They will then be summed and returned. ``VanadiumRun`` needs to be specified.
 
 The options ``4-6`` rely on :ref:`FindEPP <algm-FindEPP>` algorithm to find the peak positions.
 
-Note that, left and right wings (before any x-axis shift) will anyway be returned regardless of the ``UnmirrorOption``.
-
 These options are inherited identically from (and validated against) previous **LAMP** software, to enable smooth transition for the users.
 
 Multiple File Reduction
@@ -74,11 +72,9 @@ If enabled, along with the reduced, left and right workspaces, many other worksp
 Output Naming Conventions
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 Note that to avoid confusion when running over multiple files,
-the unique run number will be automatically prepended to the workspace names.
+the unique run number will be automatically prepended to the output workspace name.
 
-A tuple containing three workspaces (reduced, left, right) will be returned.
-
-For multiple runs, the output workspaces will be grouped and
+For multiple runs, the output workspace will be grouped and
 :ref:`WorkspaceGroup <WorkspaceGroup>` will be returned,
 containing workspaces for each individual run.
 
@@ -102,8 +98,6 @@ Usage
 
     print "Reduced workspace has %d spectra" % mtd['146190_red'].getNumberHistograms()
     print "Reduced workspace has %d bins" % mtd['146190_red'].blocksize()
-    print "Reduced left workspace has %d bins" % mtd['146190_left'].blocksize()
-    print "Reduced right workspace has %d bins" % mtd['146190_right'].blocksize()
 
 Output:
 
@@ -111,51 +105,36 @@ Output:
 
     Reduced workspace has 18 spectra
     Reduced workspace has 1024 bins
-    Reduced left workspace has 1024 bins
-    Reduced right workspace has 1024 bins
 
 **Example - IndirectILLReduction : single run with handler**
 
 .. testcode:: ExIndirectILLReductionSingleRun
 
-    result = IndirectILLReduction(Run='146190.nxs')
-    print "result is now a tuple of %d workspaces" % len(result)
-    print "the first of which is the reduced one, called %s" % result[0].getName()
-    print "the second is the left wing, called %s" % result[1].getName()
-    print "the third is the right wing, called %s" % result[2].getName()
+    out = IndirectILLReduction(Run='146190.nxs')
+    print "out is now a reference to workspace, which is called %s" % out.getName()
 
 Output:
 
 .. testoutput:: ExIndirectILLReductionSingleRun
 
-    result is now a tuple of 3 workspaces
-    the first of which is the reduced one, called 146190_result
-    the second is the left wing, called 146190_left
-    the third is the right wing, called 146190_right
+    out is now a reference to workspace, which is called 146190_out
 
 **Example - IndirectILLReduction : multiple runs**
 
 .. testcode:: ExIndirectILLReductionMultipleRun
 
     result = IndirectILLReduction(Run='146190:146191.nxs',UnmirrorOption=3)
-    print "result is now a tuple of %d %s" % (len(result),type(result[0]))
-    print "first item in the tuple is the reduced workspace group called %s" % result[0].getName()
-    print "it contains %d workspaces one for each run" % result[0].size()
-    print "first workspace is %s corresponding to run %i" % (result[0].getItem(0).getName(),result[0].getItem(0).getRunNumber())
-    print "second item in the tuple is the left workspace group called %s" % result[1].getName()
-    print "third item in the tuple is the left workspace group called %s" % result[2].getName()
+    print "result is now the reduced workspace group called %s" % result.getName()
+    print "it contains %d workspaces, one for each run" % result.size()
+    print "first workspace is %s corresponding to run %i" % (result.getItem(0).getName(),result.getItem(0).getRunNumber())
 
 Output:
 
 .. testoutput:: ExIndirectILLReductionMultipleRun
 
-    result is now a tuple of 3 <class 'mantid.api._api.WorkspaceGroup'>
-    first item in the tuple is the reduced workspace group called result
-    it contains 2 workspaces one for each run
+    result is now the reduced workspace group called result
+    it contains 2 workspaces, one for each run
     first workspace is 146190_result corresponding to run 146190
-    second item in the tuple is the left workspace group called result_left
-    third item in the tuple is the left workspace group called result_right
-
 
 .. categories::
 

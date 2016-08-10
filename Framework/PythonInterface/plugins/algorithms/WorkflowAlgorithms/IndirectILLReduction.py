@@ -380,7 +380,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # first convert both to energy
         # it is crucial to do this first, since this sets the axis unit
         # which is needed for shift operations for unmirror > 3
-        # note, left and right are frozen from this point, regardless of unmirror option
+
         self._convert_to_energy(left)
         self._convert_to_energy(right)
 
