@@ -301,7 +301,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         focuspos = self._focusPos
         if self._lowResTOFoffset >= 0:
             # Dealing with the parameters for editing instrument parameters
-            if ("PrimaryFlightPath" in focuspos) is True:
+            if ("PrimaryFlightPath" in focuspos):
                 l1 = focuspos["PrimaryFlightPath"]
                 if l1 > 0:
                     specids = focuspos['SpectrumIDs'][:]
@@ -330,7 +330,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             assert isinstance(sam_ws_name, str), 'Returned from _focusAndSum() must be a string but not' \
                                                  '%s. ' % str(type(sam_ws_name))
 
-            # samRuns = [sam_ws_name]
             workspacelist.append(sam_ws_name)
             samwksplist.append(sam_ws_name)
         # ENDIF (SUM)
@@ -364,10 +363,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         for (samRunIndex, sam_ws_name) in enumerate(samwksplist):
             assert isinstance(sam_ws_name, str), 'Assuming that samRun is a string. But it is %s' % str(type(sam_ws_))
-            sam_ws = get_workspace(sam_ws_name)
-            if sam_ws.id() == EVENT_WORKSPACE_ID:
+            if is_event_workspace(sam_ws_name):
                 self.log().information('Sample Run %s:  starting number of events = %d.' % (
-                    sam_ws_name, sam_ws.getNumberEvents()))
+                    sam_ws_name, get_workspace(sam_ws_name).getNumberEvents()))
 
             # Get run information
             self._info = self._getinfo(sam_ws_name)
@@ -404,9 +402,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             if can_run_ws_name is not None:
                 # must convert the sample to a matrix workspace if the can run isn't one
                 if not allEventWorkspaces(can_run_ws_name, sam_ws_name):
-                    sam_ws = api.ConvertToMatrixWorkspace(InputWorkspace=sam_ws_name,
-                                                          OutputWorkspace=sam_ws_name)
-                    assert sam_ws is not None
+                    api.ConvertToMatrixWorkspace(InputWorkspace=sam_ws_name,
+                                                 OutputWorkspace=sam_ws_name)
 
                 # remove container run
                 api.RebinToWorkspace(WorkspaceToRebin=can_run_ws_name,
@@ -424,10 +421,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             if van_run_ws_name is not None:
                 # subtract vanadium run from sample run by division
-                sam_ws = get_workspace(sam_ws_name)
-                van_ws = get_workspace(van_run_ws_name)
-                num_hist_sam = sam_ws.getNumberHistograms()
-                num_hist_van = van_ws.getNumberHistograms()
+                num_hist_sam = get_workspace(sam_ws_name).getNumberHistograms()
+                num_hist_van = get_workspace(van_run_ws_name).getNumberHistograms()
                 assert num_hist_sam == num_hist_van, \
                     'Number of histograms of sample %d is not equal to van %d.' % (num_hist_sam, num_hist_van)
                 api.Divide(LHSWorkspace=sam_ws_name,
@@ -467,14 +462,14 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # convert everything into d-spacing as the final units
         if mpiRank == 0:
             workspacelist = set(workspacelist) # only do each workspace once
-            self.log().warning(str(workspacelist))
             for wksp in workspacelist:
-                wksp = str(wksp)
                 api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp,
                                  Target=self.getProperty("FinalDataUnits").value)
 
-            propertyName = "OutputWorkspace%s" % wksp
-            self.setProperty(propertyName, wksp)
+                propertyName = "OutputWorkspace%s" % wksp
+                if not self.existsProperty(propertyName):
+                    self.declareProperty(WorkspaceProperty(propertyName, wksp, Direction.Output))
+                self.setProperty(propertyName, wksp)
 
         return
 
@@ -555,39 +550,36 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     chunk["FilterByTimeStop"] = filterWall[1]
 
         # Call Mantid's Load algorithm to load complete or partial data
-        wksp = api.Load(Filename=filename, OutputWorkspace=out_ws_name, **chunk)
-        assert wksp is not None, 'Mantid Load algorithm does not return a workspace.'
+        api.Load(Filename=filename, OutputWorkspace=out_ws_name, **chunk)
 
         # Log output
-        if wksp.id() == EVENT_WORKSPACE_ID:
+        if is_event_workspace(out_ws_name):
             self.log().debug("Load run %s: number of events = %d. " % (os.path.split(filename)[-1],
-                                                                       wksp.getNumberEvents()))
+                                                                       get_workspace(out_ws_name).getNumberEvents()))
         if HAVE_MPI:
             msg = "MPI Task = %s ;" % (str(mpiRank))
-            if wksp.id() == EVENT_WORKSPACE_ID:
-                msg += "Number Events = " + str(wksp.getNumberEvents())
+            if is_event_workspace(out_ws_name):
+                msg += "Number Events = " + str(get_workspace(out_ws_name).getNumberEvents())
             self.log().debug(msg)
 
         # filter bad pulses
         if self._filterBadPulses > 0.:
             # record number of events of the original workspace
-            is_event_ws = isinstance(wksp, mantid.api.IEventWorkspace)
-            if is_event_ws is True:
+            if is_event_workspace(out_ws_name):
                 # Event workspace: record original number of events
-                num_original_events = wksp.getNumberEvents()
+                num_original_events = get_workspace(out_ws_name).getNumberEvents()
             else:
                 num_original_events = -1
 
             # filter bad pulse
-            wksp = api.FilterBadPulses(InputWorkspace=out_ws_name, OutputWorkspace=out_ws_name,
-                                       LowerCutoff=self._filterBadPulses)
-            assert wksp is not None, 'Returned value from FilterBadPulses cannot be None'
+            api.FilterBadPulses(InputWorkspace=out_ws_name, OutputWorkspace=out_ws_name,
+                                LowerCutoff=self._filterBadPulses)
 
-            if is_event_ws is True:
+            if is_event_workspace(out_ws_name):
                 # Event workspace
                 message = "FilterBadPulses reduces number of events from %d to %d (under %s percent) " \
-                          "of workspace %s." % (num_original_events, wksp.getNumberEvents(),
-                                                str(self._filterBadPulses), str(wksp))
+                          "of workspace %s." % (num_original_events, get_workspace(out_ws_name).getNumberEvents(),
+                                                str(self._filterBadPulses), out_ws_name)
                 self.log().information(message)
         # END-IF (filter bad pulse)
 
@@ -596,13 +588,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             donorLogfilename = self.getProperty("LogFilename").value
             if donorLogfilename is not None and len(donorLogfilename) > 0:
                 api.Load(Filename=donorLogfilename, MetaDataOnly=True, OutputWorkspace='temp_log_donor')
-                api.CopyLogs(InputWorkspace='temp_log_donor', OutputWorkspace=wksp,
+                api.CopyLogs(InputWorkspace='temp_log_donor', OutputWorkspace=out_ws_name,
                              MergeStrategy='MergeKeepExisting')
                 api.DeleteWorkspace('temp_log_donor')
-                wksp = mtd[str(wksp)]  # convert back to a pointer
-                print(wksp)
 
-        return wksp
+        return out_ws_name
 
     def _getStrategy(self, filename):
         """
@@ -674,15 +664,14 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # for ws_name in out_ws_name_list:
         for (filename, ws_name) in zip(filename_list, out_ws_name_list):
             self.log().debug("[Sum] processing %s" % filename)
-            temp_ws = api.LoadEventAndCompress(Filename=filename,
-                                               OutputWorkspace=ws_name,
-                                               MaxChunkSize=self._chunks,
-                                               FilterBadPulses=self._filterBadPulses,
-                                               CompressTOFTolerance=self.COMPRESS_TOL_TOF, **filterWall)
-            assert temp_ws is not None
-            if temp_ws.id() == EVENT_WORKSPACE_ID:
-                self.log().warning('Load event file %s, compress it and get %d events.' %
-                                   (filename, temp_ws.getNumberEvents()))
+            api.LoadEventAndCompress(Filename=filename,
+                                     OutputWorkspace=ws_name,
+                                     MaxChunkSize=self._chunks,
+                                     FilterBadPulses=self._filterBadPulses,
+                                     CompressTOFTolerance=self.COMPRESS_TOL_TOF, **filterWall)
+            if is_event_workspace(ws_name):
+                self.log().notice('Load event file %s, compress it and get %d events.' %
+                                  (filename, get_workspace(ws_name).getNumberEvents()))
 
             tempinfo = self._getinfo(ws_name)
             if sample_ws_name is None:
@@ -693,29 +682,26 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 # there is sample run workspace set up previously, then add current one to previous for summation
                 self.checkInfoMatch(info, tempinfo)
 
-                temp_ws = api.Plus(LHSWorkspace=sample_ws_name,
-                                   RHSWorkspace=ws_name,
-                                   OutputWorkspace=sample_ws_name,
-                                   ClearRHSWorkspace=allEventWorkspaces(sample_ws_name, ws_name))
-                assert temp_ws is not None
+                api.Plus(LHSWorkspace=sample_ws_name,
+                         RHSWorkspace=ws_name,
+                         OutputWorkspace=sample_ws_name,
+                         ClearRHSWorkspace=allEventWorkspaces(sample_ws_name, ws_name))
                 api.DeleteWorkspace(ws_name)
 
                 # comparess events
                 if is_event_workspace(sample_ws_name):
-                    temp_ws = api.CompressEvents(InputWorkspace=sample_ws_name, OutputWorkspace=sample_ws_name,
+                    api.CompressEvents(InputWorkspace=sample_ws_name, OutputWorkspace=sample_ws_name,
                                                  Tolerance=self.COMPRESS_TOL_TOF)  # 10ns
-                    assert temp_ws is not None
         # END-FOR
 
         # Normalize by current with new name
         if self._normalisebycurrent is True:
             self.log().warning('[SPECIAL DB] Normalize current to workspace %s' % sample_ws_name)
             # temp_ws = self.get_workspace(sample_ws_name)
-            if not (temp_ws.id() == EVENT_WORKSPACE_ID and temp_ws.getNumberEvents() == 0):
-                temp_ws = api.NormaliseByCurrent(InputWorkspace=sample_ws_name,
-                                                 OutputWorkspace=sample_ws_name)
-                assert temp_ws is not None
-                temp_ws.getRun()['gsas_monitor'] = 1
+            if not (is_event_workspace(sample_ws_name) and get_workspace(sample_ws_name).getNumberEvents() == 0):
+                api.NormaliseByCurrent(InputWorkspace=sample_ws_name,
+                                       OutputWorkspace=sample_ws_name)
+                get_workspace(sample_ws_name).getRun()['gsas_monitor'] = 1
             # END-IF
         # ENDI-IF
 
@@ -767,11 +753,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 # Non-first run. Add this run to current summed run
                 self.checkInfoMatch(info, tempinfo)
                 # add current workspace to sub sum
-                temp_ws = api.Plus(LHSWorkspace=sumRun, RHSWorkspace=out_ws_name, OutputWorkspace=sumRun,
-                                   ClearRHSWorkspace=allEventWorkspaces(sumRun, out_ws_name))
-                if is_event_workspace(temp_ws):
-                    temp_ws = api.CompressEvents(InputWorkspace=sumRun, OutputWorkspace=sumRun,
-                                                 Tolerance=self.COMPRESS_TOL_TOF) # 10ns
+                api.Plus(LHSWorkspace=sumRun, RHSWorkspace=out_ws_name, OutputWorkspace=sumRun,
+                         ClearRHSWorkspace=allEventWorkspaces(sumRun, out_ws_name))
+                if is_event_workspace(sumRun):
+                    api.CompressEvents(InputWorkspace=sumRun, OutputWorkspace=sumRun,
+                                       Tolerance=self.COMPRESS_TOL_TOF) # 10ns
                     assert temp_ws is not None
                 # after adding all events, delete the current workspace.
                 api.DeleteWorkspace(out_ws_name)
@@ -779,9 +765,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # ENDFOR (processing each)
 
         if self._normalisebycurrent is True:
-            temp_ws = api.NormaliseByCurrent(InputWorkspace=sumRun,
+            api.NormaliseByCurrent(InputWorkspace=sumRun,
                                              OutputWorkspace=sumRun)
-            temp_ws.getRun()['gsas_monitor'] = 1
+            get_workspace(sumRun).getRun()['gsas_monitor'] = 1
 
         return sumRun
 
@@ -821,18 +807,17 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # progress on chunk index
             chunk_index += 1
             # Load chunk, i.e., partial data into Mantid
-            raw_ws_chunk = self._loadData(filename, filterWall, **chunk)
-            raw_ws_name_chunk = raw_ws_chunk.name()
+            raw_ws_name_chunk = self._loadData(filename, filterWall, **chunk)
 
             if self._info is None:
                 self._info = self._getinfo(raw_ws_name_chunk)
 
             # Log information for current chunk
             self.__logChunkInfo(chunk)
-            if raw_ws_chunk.id() == EVENT_WORKSPACE_ID:
+            if is_event_workspace(raw_ws_name_chunk):
                 # Event workspace
                 self.log().debug("F1141C: There are %d events after data is loaded in workspace %s." % (
-                    raw_ws_chunk.getNumberEvents(), raw_ws_name_chunk))
+                    get_workspace(raw_ws_name_chunk).getNumberEvents(), raw_ws_name_chunk))
 
             # Split the workspace if it is required
             if do_split_raw_wksp is True:
@@ -865,30 +850,30 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 # Align and focus
                 # focuspos = self._focusPos
                 self.log().notice('Align and focus workspace %s' % out_ws_name_chunk_split)
-                out_ws_c_s = api.AlignAndFocusPowder(InputWorkspace=out_ws_name_chunk_split,
-                                                     OutputWorkspace=out_ws_name_chunk_split,
-                                                     CalFileName=calib,
-                                                     Params=self._binning,
-                                                     ResampleX=self._resampleX,
-                                                     Dspacing=self._bin_in_dspace,
-                                                     PreserveEvents=preserveEvents,
-                                                     RemovePromptPulseWidth=self._removePromptPulseWidth,
-                                                     CompressTolerance=self.COMPRESS_TOL_TOF,
-                                                     UnwrapRef=self._LRef,
-                                                     LowResRef=self._DIFCref,
-                                                     LowResSpectrumOffset=self._lowResTOFoffset,
-                                                     CropWavelengthMin=self._wavelengthMin,
-                                                     CropWavelengthMax=self._wavelengthMax,
-                                                     ReductionProperties="__snspowderreduction",
-                                                     **self._focusPos)
-                assert out_ws_c_s is not None
+                api.AlignAndFocusPowder(InputWorkspace=out_ws_name_chunk_split,
+                                        OutputWorkspace=out_ws_name_chunk_split,
+                                        CalFileName=calib,
+                                        Params=self._binning,
+                                        ResampleX=self._resampleX,
+                                        Dspacing=self._bin_in_dspace,
+                                        PreserveEvents=preserveEvents,
+                                        RemovePromptPulseWidth=self._removePromptPulseWidth,
+                                        CompressTolerance=self.COMPRESS_TOL_TOF,
+                                        UnwrapRef=self._LRef,
+                                        LowResRef=self._DIFCref,
+                                        LowResSpectrumOffset=self._lowResTOFoffset,
+                                        CropWavelengthMin=self._wavelengthMin,
+                                        CropWavelengthMax=self._wavelengthMax,
+                                        ReductionProperties="__snspowderreduction",
+                                        **self._focusPos)
                 # logging (ignorable)
-                for iws in range(out_ws_c_s.getNumberHistograms()):
-                    spec = out_ws_c_s.getSpectrum(iws)
-                    self.log().debug("[DBx131] ws %d: spectrum No = %d. " % (iws, spec.getSpectrumNo()))
-                if out_ws_c_s.id() == EVENT_WORKSPACE_ID:
+                #for iws in range(out_ws_c_s.getNumberHistograms()):
+                #    spec = out_ws_c_s.getSpectrum(iws)
+                #    self.log().debug("[DBx131] ws %d: spectrum No = %d. " % (iws, spec.getSpectrumNo()))
+                if is_event_workspace(out_ws_name_chunk_split):
                     self.log().information('After being aligned and focused, workspace %s: Number of events = %d '
-                                           'of chunk %d ' % (out_ws_c_s.name(), out_ws_c_s.getNumberEvents(),
+                                           'of chunk %d ' % (out_ws_name_chunk_split,
+                                                             get_workspace(out_ws_name_chunk_split).getNumberEvents(),
                                                              chunk_index))
             # END-FOR-Splits
 
@@ -911,11 +896,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 else:
                     # Add this chunk of workspace to the final one
                     clear_rhs_ws = allEventWorkspaces(output_wksp_list[split_index], output_ws_name_list[split_index])
-                    temp_out_ws = api.Plus(LHSWorkspace=output_wksp_list[split_index],
-                                           RHSWorkspace=output_ws_name_list[split_index],
-                                           OutputWorkspace=output_wksp_list[split_index],
-                                           ClearRHSWorkspace=clear_rhs_ws)
-                    assert temp_out_ws is not None
+                    api.Plus(LHSWorkspace=output_wksp_list[split_index],
+                             RHSWorkspace=output_ws_name_list[split_index],
+                             OutputWorkspace=output_wksp_list[split_index],
+                             ClearRHSWorkspace=clear_rhs_ws)
 
                     # Delete the chunk workspace
                     api.DeleteWorkspace(output_ws_name_list[split_index])
@@ -928,45 +912,38 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # Sum workspaces for all mpi tasks
         if HAVE_MPI:
             for split_index in range(num_out_wksp):
-                temp_ws = api.GatherWorkspaces(InputWorkspace=output_wksp_list[split_index],
-                                               PreserveEvents=preserveEvents,
-                                               AccumulationMethod="Add",
-                                               OutputWorkspace=output_wksp_list[split_index])
-                assert temp_ws is not None
+                api.GatherWorkspaces(InputWorkspace=output_wksp_list[split_index],
+                                     PreserveEvents=preserveEvents,
+                                     AccumulationMethod="Add",
+                                     OutputWorkspace=output_wksp_list[split_index])
         # ENDIF MPI
 
         if self._chunks > 0:
             # When chunks are added, proton charge is summed for all chunks
             for split_index in range(num_out_wksp):
-                temp_out_ws = get_workspace(output_wksp_list[split_index])
-                temp_out_ws.getRun().integrateProtonCharge()
+                get_workspace(output_wksp_list[split_index]).getRun().integrateProtonCharge()
         # ENDIF
 
         if (self.iparmFile is not None) and (len(self.iparmFile) > 0):
             # When chunks are added, add iparamFile
             for split_index in range(num_out_wksp):
-                temp_ws = get_workspace(output_wksp_list[split_index])
-                temp_ws.getRun()['iparm_file'] = self.iparmFile
+                get_workspace(output_wksp_list[split_index]).getRun()['iparm_file'] = self.iparmFile
 
         # Compress events
         for split_index in range(num_out_wksp):
-            temp_out_ws = get_workspace(output_wksp_list[split_index])
-            if temp_out_ws.id() == EVENT_WORKSPACE_ID:
-                temp_out_ws = api.CompressEvents(InputWorkspace=output_wksp_list[split_index],
-                                                 OutputWorkspace=output_wksp_list[split_index],
-                                                 Tolerance=self.COMPRESS_TOL_TOF) # 100ns
-                assert temp_out_ws is not None
-
+            if is_event_workspace(output_wksp_list[split_index]):
+                api.CompressEvents(InputWorkspace=output_wksp_list[split_index],
+                                   OutputWorkspace=output_wksp_list[split_index],
+                                   Tolerance=self.COMPRESS_TOL_TOF) # 100ns
             try:
                 if normalisebycurrent is True:
-                    temp_ws = api.NormaliseByCurrent(InputWorkspace=output_wksp_list[split_index],
+                    api.NormaliseByCurrent(InputWorkspace=output_wksp_list[split_index],
                                                      OutputWorkspace=output_wksp_list[split_index])
-                    temp_ws.getRun()['gsas_monitor'] = 1
+                    get_workspace(output_wksp_list[split_index]).getRun()['gsas_monitor'] = 1
             except RuntimeError as e:
                 self.log().warning(str(e))
 
             propertyName = "OutputWorkspace%s" % str(output_wksp_list[split_index])
-            self.log().warning(propertyName)
             self.declareProperty(WorkspaceProperty(propertyName, str(output_wksp_list[split_index]), Direction.Output))
             self.setProperty(propertyName, output_wksp_list[split_index])
             self._save(output_wksp_list[split_index], self._info, False, True)
@@ -1032,7 +1009,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self.log().notice("Saving 'pdfgetn' is deprecated. Use PDtoPDFgetN instead.")
             if "pdfgetn" in self._outTypes:
                 pdfwksp = str(wksp)+"_norm"
-                pdfwksp = api.SetUncertainties(InputWorkspace=wksp, OutputWorkspace=pdfwksp, SetError="sqrt")
+                api.SetUncertainties(InputWorkspace=wksp, OutputWorkspace=pdfwksp, SetError="sqrt")
                 api.SaveGSS(InputWorkspace=pdfwksp, Filename=filename+".getn", SplitFiles=False, Append=False,
                             MultiplyByBinWidth=False, Bank=info["bank"].value, Format="SLOG", ExtendedHeader=True)
                 api.DeleteWorkspace(pdfwksp)
@@ -1047,7 +1024,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                Format="TOPAS")
         if "nexus" in self._outTypes:
             api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits").value)
-            #api.Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._binning) # crop edges
             api.SaveNexus(InputWorkspace=wksp, Filename=filename+".nxs")
 
         # always save python script - this is broken because the history isn't
@@ -1075,7 +1051,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # Load data
         metawsname = "temp_" + getBasename(filename)
 
-        metawksp = api.Load(Filename=str(filename), OutputWorkspace=str(metawsname), MetaDataOnly=True)
+        api.Load(Filename=str(filename), OutputWorkspace=str(metawsname), MetaDataOnly=True)
+        metawksp = get_workspace(metawsname)
         if metawksp is None:
             self.log().warning("Unable to open file %s" % (filename))
             return (0.0, 0.0)
@@ -1291,16 +1268,15 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     van_bkgd_ws_name = self._loadAndSum([van_bkgd_run_number], van_bkgd_ws_name, **vanFilterWall)
 
                 van_bkgd_ws = get_workspace(van_bkgd_ws_name)
-                if van_bkgd_ws.id() == EVENT_WORKSPACE_ID and van_bkgd_ws.getNumberEvents() <= 0:
+                if van_bkgd_ws.id() == EVENT_WORKSPACE_ID and van_bkgd_ws.getNumberEvents() > 0:
                     # skip if background run is empty
                     pass
                 else:
                     clear_rhs_ws = allEventWorkspaces(van_run_ws_name, van_bkgd_ws_name)
-                    temp_ws = api.Minus(LHSWorkspace=van_run_ws_name,
-                                        RHSWorkspace=van_bkgd_ws_name,
-                                        OutputWorkspace=van_run_ws_name,
-                                        ClearRHSWorkspace=clear_rhs_ws)
-                    assert temp_ws is not None
+                    api.Minus(LHSWorkspace=van_run_ws_name,
+                              RHSWorkspace=van_bkgd_ws_name,
+                              OutputWorkspace=van_run_ws_name,
+                              ClearRHSWorkspace=clear_rhs_ws)
                 # remove vanadium background workspace
                 api.DeleteWorkspace(Workspace=van_bkgd_ws_name)
             # END-IF (vanadium background)
