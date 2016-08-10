@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name,bare-except
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -95,7 +95,7 @@ class SANSMask(PythonAlgorithm):
         component_name = self.getProperty("MaskedFullComponent").value
         if component_name:
             Logger("SANSMask").debug(
-                "Masking FULL component named %s." % 
+                "Masking FULL component named %s." %
                 component_name)
             self._mask_component(workspace, component_name)
 
@@ -140,7 +140,7 @@ class SANSMask(PythonAlgorithm):
                             masked_pixels.append([ix, iy])
                 except:
                     Logger("SANSMask").error(
-                        "Badly defined mask from configuration file: %s" % 
+                        "Badly defined mask from configuration file: %s" %
                         str(rec))
                     Logger("SANSMask").error(str(sys.exc_info()[1]))
             self._mask_pixels(masked_pixels, workspace, facility)
@@ -156,9 +156,9 @@ class SANSMask(PythonAlgorithm):
             side_to_mask = 1
         else:
             return
-        
+
         instrument = workspace.getInstrument()
-        
+
         if facility.upper() == "HFIR":
             ids = []
             # Get the default from the parameters file
@@ -166,10 +166,10 @@ class SANSMask(PythonAlgorithm):
                 component_name = instrument.getStringParameter('detector-name')[0]
             component = instrument.getComponentByName(component_name)
             if component.type() == 'RectangularDetector':
-                # id's at the bottom on every pixel                
+                # id's at the bottom on every pixel
                 ids_at_the_bottom = range(side_to_mask * component.idstep() + component.idstart(),
-                          component.idstart() + component.idstep() * component.nelements(),
-                          component.idstep() * 2)
+                                          component.idstart() + component.idstep() * component.nelements(),
+                                          component.idstep() * 2)
                 ids = [range(i, i + component.idstep()) for i in ids_at_the_bottom]
                 ids = [item for sublist in ids for item in sublist]  # flat list
             elif component.type() == 'CompAssembly' or component.type() == 'ObjCompAssembly' or component.type() == 'DetectorComponent':
@@ -179,7 +179,7 @@ class SANSMask(PythonAlgorithm):
                 ids = [component[i][j].getID() for i in idx_at_the_bottom for j in range(number_of_pixels_per_tube)]
             else:
                 Logger("SANSMask").warning("No Front/Back tubes masked for HFIR!")
-                return            
+                return
             self._mask_ids(list(ids), workspace)
         else:  # I'm at SNS
             if not instrument.hasParameter("number-of-x-pixels") \
@@ -187,17 +187,17 @@ class SANSMask(PythonAlgorithm):
                 Logger("SANSMask").error(
                     "Could not find number of pixels: skipping side masking")
                 return
-    
+
             nx = int(workspace.getInstrument().getNumberParameter(
                 "number-of-x-pixels")[0])
             ny = int(workspace.getInstrument().getNumberParameter(
                 "number-of-y-pixels")[0])
             id_side = []
-    
+
             for iy in range(ny):
                 for ix in range(side_to_mask, nx + side_to_mask, 2):
                     id_side.append([ix, iy])
-    
+
             self._mask_pixels(id_side, workspace, facility)
 
     def _mask_component(self, workspace, component_name):
@@ -209,8 +209,7 @@ class SANSMask(PythonAlgorithm):
             component = instrument.getComponentByName(component_name)
         except:
             Logger("SANSMask").error(
-                "Component not valid! %s" % 
-                component_name)
+                "Component not valid! %s" % component_name)
             return
 
         masked_detectors = []
@@ -223,7 +222,7 @@ class SANSMask(PythonAlgorithm):
             masked_detectors = list(ids_gen)
         else:
             Logger("SANSMask").error(
-                "Mask not applied. Component not valid: %s of type %s." % 
+                "Mask not applied. Component not valid: %s of type %s." %
                 (component.getName(), component.type()))
 
         api.MaskDetectors(Workspace=workspace, DetectorList=masked_detectors)
