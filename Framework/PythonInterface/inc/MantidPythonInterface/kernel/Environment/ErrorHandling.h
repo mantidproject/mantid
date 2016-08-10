@@ -23,6 +23,7 @@
 */
 #include "MantidKernel/System.h"
 #include <stdexcept>
+#include <string>
 
 /**
  * This file defines error handling code that transforms
