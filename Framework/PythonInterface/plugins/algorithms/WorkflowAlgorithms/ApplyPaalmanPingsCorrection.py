@@ -53,6 +53,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output corrections workspace.')
 
+
+    #pylint: disable=too-many-branches
     def PyExec(self):
         self._setup()
 
