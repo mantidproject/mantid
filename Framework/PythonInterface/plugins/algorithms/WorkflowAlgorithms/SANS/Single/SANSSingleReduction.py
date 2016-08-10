@@ -92,13 +92,13 @@ class SANSSingleReduction(DataProcessorAlgorithm):
         # This breaks our flexibility with the reduction mode. We need to check if we can populate this based on
         # the available reduction modes for the state input. TODO: check if this is possible
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceLAB', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The output workspace for the low-angle bank.')
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceHAB', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The output workspace for the high-angle bank.')
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspaceMerged', '',
-                                                     optional=PropertyMode.Optional, direction=Direction.Input),
+                                                     optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The output workspace for the merged reduction.')
 
     def PyExec(self):
@@ -106,10 +106,10 @@ class SANSSingleReduction(DataProcessorAlgorithm):
         state = self._get_state()
 
         # Get reduction mode
-        reduction_mode = SANSSingleReduction._get_reduction_mode(state)
+        reduction_mode = self._get_reduction_mode(state)
 
         # Decide which core reduction information to run, i.e. HAB, LAB, ALL, MERGED. In the case of ALL and MERGED,
-        # the required simple reduction modes need to be run. Normally this is HAB and LAB, ffuture implementations
+        # the required simple reduction modes need to be run. Normally this is HAB and LAB, future implementations
         # might have more detectors though (or different types)
         reduction_setting_bundles = self._get_reduction_setting_bundles(state, reduction_mode)
 
@@ -163,12 +163,10 @@ class SANSSingleReduction(DataProcessorAlgorithm):
         state.property_manager = state_property_manager
         return state
 
-    @staticmethod
-    def _get_reduction_mode(state):
+    def _get_reduction_mode(self, state):
         reduction_info = state.reduction
-        reduction_type = reduction_info.reduction_type
-        dimensionality = reduction_info.dimensionality
-        return reduction_type, dimensionality
+        reduction_mode = reduction_info.reduction_mode
+        return reduction_mode
 
     def _get_reduction_setting_bundles(self, state, reduction_mode):
         # We need to output the parts if we request a merged reduction mode. This is necessary for stitching later on.
@@ -205,9 +203,12 @@ class SANSSingleReduction(DataProcessorAlgorithm):
                                                                 scatter_monitor_name="CanScatterMonitorWorkspace",
                                                                 transmission_name="CanTransmissionWorkspace",
                                                                 direct_name="CanDirectWorkspace")
-
         reduction_setting_bundles = sample_info
-        reduction_setting_bundles.extend(can_info)
+
+        # Make sure that the can information has at least a scatter and a monitor workspace
+        for can_bundle in can_info:
+            if can_bundle.scatter_workspace is not None and can_bundle.scatter_monitor_workspace is not None:
+                reduction_setting_bundles.append(can_bundle)
         return reduction_setting_bundles
 
     def _create_reduction_bundles_for_data_type(self, state, data_type, reduction_modes, output_parts,

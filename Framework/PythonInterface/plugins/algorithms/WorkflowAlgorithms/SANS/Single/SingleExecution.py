@@ -3,14 +3,16 @@ from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
 from SANS.Single.StripEndNans import strip_end_nans
 from SANS.Single.MergeReductions import (MergeFactory, is_sample, is_can)
 from SANS.Single.Bundles import (OutputBundle, OutputPartsBundle)
+from SANS2.Common.SANSEnumerations import (ISISReductionMode)
 
 
-def run_core_reduction(reduction_alg, reduction_setting_bundle, use_optimizations, is_merge):
+def run_core_reduction(reduction_alg, reduction_setting_bundle, use_optimizations):
     # Get component to reduce
     component = get_component_to_reduce(reduction_setting_bundle)
     # Set the properties on the reduction algorithms
-    reduction_alg.setProperty("SANSState", reduction_setting_bundle.state)
-    reduction_alg.setProperty("UseAdsOptimizations", use_optimizations)
+    serialized_state = reduction_setting_bundle.state.property_manager
+    reduction_alg.setProperty("SANSState", serialized_state)
+    reduction_alg.setProperty("UseOptimizations", use_optimizations)
     reduction_alg.setProperty("Component", component)
     reduction_alg.setProperty("ScatterWorkspace", reduction_setting_bundle.scatter_workspace)
     reduction_alg.setProperty("ScatterMonitorWorkspace", reduction_setting_bundle.scatter_monitor_workspace)
@@ -18,8 +20,12 @@ def run_core_reduction(reduction_alg, reduction_setting_bundle, use_optimization
     if reduction_setting_bundle.transmission_workspace is not None:
         reduction_alg.setProperty("TransmissionWorkspace", reduction_setting_bundle.transmission_workspace)
 
-    if reduction_setting_bundle.direc_workspace is not None:
-        reduction_alg.setProperty("DirectWorkspace", reduction_setting_bundle.direc_workspace)
+    if reduction_setting_bundle.direct_workspace is not None:
+        reduction_alg.setProperty("DirectWorkspace", reduction_setting_bundle.direct_workspace)
+
+    reduction_alg.setProperty(SANSConstants.output_workspace, SANSConstants.dummy)
+    reduction_alg.setProperty("SumOfCounts", "dummy2")
+    reduction_alg.setProperty("SumOfNormFactors", "dummy3")
 
     # Run the reduction core
     reduction_alg.execute()
@@ -145,10 +151,11 @@ def get_component_to_reduce(reduction_setting_bundle):
     # Get the reduction mode
     reduction_mode = reduction_setting_bundle.reduction_mode
 
-    # Get the state information about the reduction
-    state = reduction_setting_bundle.state
-    reduction_info = state.reduction
-
-    # Determine the component name on the
-    detector_name_map = reduction_info.detector_name_map
-    return detector_name_map[reduction_mode]
+    if reduction_mode is ISISReductionMode.Lab:
+        reduction_mode_setting = "LAB"
+    elif reduction_mode is ISISReductionMode.Hab:
+        reduction_mode_setting = "HAB"
+    else:
+        raise RuntimeError("SingleExecution: An unknown reduction mode was selected: {}. "
+                           "Currently only Hab and Lab are supported.".format(reduction_mode))
+    return reduction_mode_setting
