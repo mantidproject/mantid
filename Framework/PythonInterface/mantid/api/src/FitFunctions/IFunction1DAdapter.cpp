@@ -81,7 +81,7 @@ void IFunction1DAdapter::function1D(double *out, const double *xValues,
  */
 boost::python::object
 IFunction1DAdapter::function1D(const boost::python::object &xvals) const {
-  return callMethod<object, const object &>(getSelf(), "function1D", xvals);
+  return callMethod<object, object>(getSelf(), "function1D", xvals);
 }
 
 /**

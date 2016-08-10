@@ -86,9 +86,10 @@ void IFunctionAdapter::declareAttribute(const std::string &name,
                                         const object &defaultValue) {
   auto attr = createAttributeFromPythonValue(defaultValue);
   IFunction::declareAttribute(name, attr);
-  if (PyObject_HasAttrString(getSelf(), "setAttributeValue")) {
+  try {
     callMethod<void, std::string, object>(getSelf(), "setAttributeValue", name,
                                           defaultValue);
+  } catch (UndefinedAttributeError &) {
   }
 }
 
@@ -133,11 +134,11 @@ IFunctionAdapter::getAttributeValue(const API::IFunction::Attribute &attr) {
  */
 void IFunctionAdapter::setAttribute(const std::string &attName,
                                     const Attribute &attr) {
-  if (PyObject_HasAttrString(getSelf(), "setAttributeValue")) {
+  try {
     object value = object(handle<>(getAttributeValue(attr)));
     callMethod<void, std::string, object>(getSelf(), "setAttributeValue",
                                           attName, value);
-  } else {
+  } catch (UndefinedAttributeError &) {
     IFunction::setAttribute(attName, attr);
   }
 }
