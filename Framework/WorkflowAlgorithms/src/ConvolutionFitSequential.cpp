@@ -133,27 +133,27 @@ void ConvolutionFitSequential::exec() {
   const std::string minimizer = getProperty("Minimizer");
 
   // Inspect function to obtain fit Type and background
-  std::vector<std::string> functionValues = findValuesFromFunction(function);
-  const std::string LorentzNum = functionValues[0];
-  const std::string funcName = functionValues[1];
+  const auto functionValues = findValuesFromFunction(function);
+  const auto LorentzNum = functionValues[0];
+  const auto funcName = functionValues[1];
 
   // Check if a delta function is being used
-  bool delta = false;
-  std::string usingDelta = "false";
+  auto delta = false;
+  auto usingDelta = "false";
   auto pos = function.find("Delta");
   if (pos != std::string::npos) {
     delta = true;
     usingDelta = "true";
   }
 
-  // Add logger information
+  // Log information to result log
   m_log.information("Input files: " + inputWs->getName());
   m_log.information("Fit type: Delta=" + usingDelta + "; Lorentzians=" +
                     LorentzNum);
   m_log.information("Background type: " + backType);
 
   // Output workspace name
-  std::string outputWsName = inputWs->getName();
+  auto outputWsName = inputWs->getName();
   pos = outputWsName.rfind('_');
   if (pos != std::string::npos) {
     outputWsName = outputWsName.substr(0, pos + 1);
@@ -173,7 +173,7 @@ void ConvolutionFitSequential::exec() {
   outputWsName += std::to_string(specMax);
 
   // Convert input workspace to get Q axis
-  const std::string tempFitWsName = "__convfit_fit_ws";
+  const auto tempFitWsName = "__convfit_fit_ws";
   convertInputToElasticQ(inputWs, tempFitWsName);
 
   Progress plotPeakStringProg(this, 0.0, 0.05, specMax - specMin);
@@ -187,7 +187,7 @@ void ConvolutionFitSequential::exec() {
   }
 
   // passWSIndex
-  bool passIndex = false;
+  auto passIndex = false;
   if (funcName.find("Diff") != std::string::npos ||
       funcName.find("Stretched") != std::string::npos) {
     passIndex = true;
@@ -222,11 +222,11 @@ void ConvolutionFitSequential::exec() {
   deleter->executeAsChildAlg();
   deleteProgress.report("Deleting PlotPeak Output");
 
-  std::string paramTableName = outputWsName + "_Parameters";
+  const auto paramTableName = outputWsName + "_Parameters";
   AnalysisDataService::Instance().add(paramTableName, outputWs);
 
   // Construct output workspace
-  std::string resultWsName = outputWsName + "_Result";
+  const auto resultWsName = outputWsName + "_Result";
 
   Progress workflowProg(this, 0.91, 0.94, 4);
   auto paramNames = std::vector<std::string>();
@@ -252,7 +252,6 @@ void ConvolutionFitSequential::exec() {
 
   // Run calcEISF if Delta
   if (delta) {
-    auto columns = outputWs->getColumnNames();
     calculateEISF(outputWs);
   }
 
@@ -332,12 +331,12 @@ void ConvolutionFitSequential::exec() {
   WorkspaceGroup_sptr groupWs =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWsName +
                                                                  "_Workspaces");
-  auto groupWsNames = groupWs->getNames();
+  const auto groupWsNames = groupWs->getNames();
   auto renamer = createChildAlgorithm("RenameWorkspace", enableLogging=false);
   Progress renamerProg(this, 0.98, 1.0, specMax + 1);
   for (int i = specMin; i < specMax + 1; i++) {
     renamer->setProperty("InputWorkspace", groupWsNames.at(i - specMin));
-    std::string outName = outputWsName + "_";
+    auto outName = outputWsName + "_";
     outName += std::to_string(i);
     outName += "_Workspace";
     renamer->setProperty("OutputWorkspace", outName);
@@ -481,26 +480,26 @@ void ConvolutionFitSequential::convertInputToElasticQ(
 void ConvolutionFitSequential::calculateEISF(
     API::ITableWorkspace_sptr &tableWs) {
   // Get height data from parameter table
-  auto columns = tableWs->getColumnNames();
-  std::string height = searchForFitParams("Height", columns).at(0);
-  std::string heightErr = searchForFitParams("Height_Err", columns).at(0);
+  const auto columns = tableWs->getColumnNames();
+  const auto height = searchForFitParams("Height", columns).at(0);
+  const auto heightErr = searchForFitParams("Height_Err", columns).at(0);
   auto heightY = tableWs->getColumn(height)->numeric_fill<>();
   auto heightE = tableWs->getColumn(heightErr)->numeric_fill<>();
 
   // Get amplitude column names
-  auto ampNames = searchForFitParams("Amplitude", columns);
-  auto ampErrorNames = searchForFitParams("Amplitude_Err", columns);
+  const auto ampNames = searchForFitParams("Amplitude", columns);
+  const auto ampErrorNames = searchForFitParams("Amplitude_Err", columns);
 
   // For each lorentzian, calculate EISF
-  size_t maxSize = ampNames.size();
+  const size_t maxSize = ampNames.size();
   if (ampErrorNames.size() > maxSize) {
     maxSize = ampErrorNames.size();
   }
   for (size_t i = 0; i < maxSize; i++) {
     // Get amplitude from column in table workspace
-    std::string ampName = ampNames.at(i);
+    const auto ampName = ampNames.at(i);
     auto ampY = tableWs->getColumn(ampName)->numeric_fill<>();
-    std::string ampErrorName = ampErrorNames.at(i);
+    const auto ampErrorName = ampErrorNames.at(i);
     auto ampErr = tableWs->getColumn(ampErrorName)->numeric_fill<>();
 
     // Calculate EISF and EISF error
@@ -554,10 +553,10 @@ void ConvolutionFitSequential::calculateEISF(
                    eisfErr.begin(), std::plus<double>());
 
     // Append the calculated values to the table workspace
-    std::string columnName =
+    auto columnName =
         ampName.substr(0, (ampName.size() - std::string("Amplitude").size()));
     columnName += "EISF";
-    std::string errorColumnName = ampErrorName.substr(
+    auto errorColumnName = ampErrorName.substr(
         0, (ampName.size() - std::string("Amplitude_Err").size()));
     errorColumnName += "EISF_Err";
 
@@ -585,8 +584,8 @@ void ConvolutionFitSequential::calculateEISF(
  */
 std::string
 ConvolutionFitSequential::convertBackToShort(const std::string &original) {
-  std::string result = original.substr(0, 3);
-  auto pos = original.find(' ');
+  auto result = original.substr(0, 3);
+  const auto pos = original.find(' ');
   if (pos != std::string::npos) {
     result += original.at(pos + 1);
   }
@@ -610,7 +609,7 @@ ConvolutionFitSequential::convertFuncToShort(const std::string &original) {
     } else {
       return "SFT";
     }
-    auto pos = original.find("Circle");
+    const auto pos = original.find("Circle");
     if (pos != std::string::npos) {
       result += "DC";
     } else {
