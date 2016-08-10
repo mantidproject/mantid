@@ -67,7 +67,6 @@ private:
 
   /// table_counter
   int m_counter;
-
 };
 } // namespace DataHandling
 } // namespace Mantid
