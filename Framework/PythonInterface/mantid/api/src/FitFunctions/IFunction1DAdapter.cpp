@@ -54,7 +54,7 @@ void IFunction1DAdapter::function1D(double *out, const double *xValues,
   Py_DECREF(xvals);
   if (PyErr_Occurred()) {
     Py_XDECREF(result);
-    Environment::throwRuntimeError(true);
+    throw Environment::PythonException();
   }
 
   PyArrayObject *nparray = reinterpret_cast<PyArrayObject *>(result);
@@ -113,7 +113,7 @@ void IFunction1DAdapter::functionDeriv1D(API::Jacobian *out,
     // boost::python::objects when using boost::python::call_method
     PyEval_CallMethod(getSelf(), "functionDeriv1D", "(OO)", xvals, jacobian);
     if (PyErr_Occurred())
-      Environment::throwRuntimeError(true);
+      throw Environment::PythonException();
   } else {
     IFunction1D::functionDeriv1D(out, xValues, nData);
   }

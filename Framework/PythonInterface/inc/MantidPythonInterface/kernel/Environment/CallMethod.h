@@ -33,14 +33,15 @@ namespace PythonInterface {
 namespace Environment {
 
 /// Defines an exception for an undefined attribute
-class UndefinedAttributeError : std::runtime_error {
-public:
-  UndefinedAttributeError() : std::runtime_error("") {}
+struct UndefinedAttributeError {
+  virtual ~UndefinedAttributeError() = default;
 };
 
 /**
  * Wrapper around boost::python::call_method to acquire GIL for duration
- * of call.
+ * of call. If the attribute does not exist then an UndefinedAttributeError
+ * is thrown, if the call raises a Python error then this is translated to
+ * a C++ exception object inheriting from std::exception
  * @param obj Pointer to Python object
  * @param methodName Name of the method call
  * @param args A list of arguments to forward to call_method
@@ -50,8 +51,12 @@ ReturnType callMethod(PyObject *obj, const char *methodName,
                       const Args &... args) {
   GlobalInterpreterLock gil;
   if (Environment::typeHasAttribute(obj, methodName)) {
-    return boost::python::call_method<ReturnType, Args...>(obj, methodName,
-                                                           args...);
+    try {
+      return boost::python::call_method<ReturnType, Args...>(obj, methodName,
+                                                             args...);
+    } catch (boost::python::error_already_set &) {
+      throw PythonException();
+    }
   } else {
     throw UndefinedAttributeError();
   }

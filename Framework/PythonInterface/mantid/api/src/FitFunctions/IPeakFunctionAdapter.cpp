@@ -94,7 +94,7 @@ void IPeakFunctionAdapter::functionLocal(double *out, const double *xValues,
   Py_DECREF(xvals);
   if (PyErr_Occurred()) {
     Py_DECREF(result);
-    Environment::throwRuntimeError(true);
+    throw Environment::PythonException();
   }
 
   PyArrayObject *nparray = reinterpret_cast<PyArrayObject *>(result);
@@ -154,7 +154,7 @@ void IPeakFunctionAdapter::functionDerivLocal(API::Jacobian *out,
   // boost::python::objects when using boost::python::call_method
   PyEval_CallMethod(getSelf(), "functionDerivLocal", "(OO)", xvals, jacobian);
   if (PyErr_Occurred())
-    Environment::throwRuntimeError(true);
+    throw Environment::PythonException();
 }
 
 /**

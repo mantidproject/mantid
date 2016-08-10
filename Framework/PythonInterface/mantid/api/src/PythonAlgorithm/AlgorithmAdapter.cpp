@@ -113,7 +113,7 @@ bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
     Environment::GlobalInterpreterLock gil;
     PyObject *result = PyObject_CallObject(m_isRunningObj, nullptr);
     if (PyErr_Occurred())
-      Environment::throwRuntimeError(true);
+      throw Environment::PythonException();
     if (PyBool_Check(result)) {
 #if PY_MAJOR_VERSION >= 3
       return static_cast<bool>(PyLong_AsLong(result));
