@@ -437,7 +437,7 @@ void Quasi::plotClicked() {
   if (plot == "Prob" || plot == "All") {
     const auto probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
     QString QprobWS = QString::fromStdString(probWS);
-    MantidQt::CustomInterfaces::IndirectTab::plotSpectrum(QprobWS, 1, 2);
+    IndirectTab::plotSpectrum(QprobWS, 1, 2);
   }
   if (plot == "Fit" || plot == "All") {
     std::string fitName = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
@@ -447,8 +447,7 @@ void Quasi::plotClicked() {
     MatrixWorkspace_sptr fitWS =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(fitName);
     int fitSpectra = (int)fitWS->getNumberHistograms();
-    MantidQt::CustomInterfaces::IndirectTab::plotSpectrum(QfitWS, 0,
-      (fitSpectra - 1));
+    IndirectTab::plotSpectra(QfitWS, { 0, 1, 2, 4 } );
   }
 
   MatrixWorkspace_sptr resultWS =
@@ -468,18 +467,7 @@ void Quasi::plotClicked() {
         if (found != std::string::npos) {
           spectraIndices.push_back(i);
           if (spectraIndices.size() == 3) {
-
-            QString pyInput = "from mantidplot import plotSpectrum\n";
-            pyInput += "plotSpectrum('";
-            pyInput += QresultWS;
-            pyInput += "', [";
-            pyInput += QString::number(spectraIndices[0]);
-            pyInput += ", ";
-            pyInput += QString::number(spectraIndices[1]);
-            pyInput += ", ";
-            pyInput += QString::number(spectraIndices[2]);
-            pyInput += "])\n";
-            m_pythonRunner.runPythonCode(pyInput);
+            IndirectTab::plotSpectra(QresultWS, spectraIndices);
           }
         }
       }
