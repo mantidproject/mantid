@@ -443,9 +443,6 @@ void Quasi::plotClicked() {
     fitName.pop_back();
     fitName.append("_0");
     QString QfitWS = QString::fromStdString(fitName);
-    MatrixWorkspace_sptr fitWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(fitName);
-    int fitSpectra = (int)fitWS->getNumberHistograms();
     IndirectTab::plotSpectra(QfitWS, {0, 1, 2, 4});
   }
 
