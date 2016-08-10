@@ -150,7 +150,7 @@ SpectraInfo extractMappingInfo(NXEntry &mtd_entry, Logger &logger) {
 * @param log : Information logger object
 * @return True only if multiperiod.
 */
-bool isMultiPeriodFile(size_t nWorkspaceEntries, Workspace_sptr sampleWS,
+bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS,
                        Logger &log) {
   bool isMultiPeriod = false;
   if (ExperimentInfo_sptr expInfo =
@@ -158,8 +158,8 @@ bool isMultiPeriodFile(size_t nWorkspaceEntries, Workspace_sptr sampleWS,
     const std::string nPeriodsLogEntryName = "nperiods";
     const Run &run = expInfo->run();
     if (run.hasProperty(nPeriodsLogEntryName)) {
-      const size_t nPeriods =
-          run.getPropertyValueAsType<size_t>(nPeriodsLogEntryName);
+      const int nPeriods =
+          run.getPropertyValueAsType<int>(nPeriodsLogEntryName);
       if (nPeriods == nWorkspaceEntries) {
         isMultiPeriod = true;
         log.information("Loading as MultiPeriod group workspace.");
