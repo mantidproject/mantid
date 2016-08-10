@@ -80,16 +80,6 @@ inline T operator*(const double lhs, T rhs) {
   return rhs *= lhs;
 }
 
-/// Divides lhs by each element in rhs.
-template <class T, class = typename std::enable_if<
-                       std::is_base_of<Scalable<T>, T>::value>::type>
-inline T operator/(const double lhs, T rhs) {
-  auto &derived = static_cast<T &>(rhs);
-  std::for_each(derived.begin(), derived.end(),
-                [=](double &value) { value = lhs / value; });
-  return derived;
-}
-
 } // namespace detail
 } // namespace HistogramData
 } // namespace Mantid

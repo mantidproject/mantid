@@ -78,14 +78,6 @@ public:
     TS_ASSERT_DELTA(lhs[1], 0.6, 1e-14);
   }
 
-  void test_divide_reverse_order() {
-    const ScalableTester rhs{0.1, 0.2};
-    const ScalableTester lhs(2.0 / rhs);
-    TS_ASSERT_EQUALS(lhs.size(), 2);
-    TS_ASSERT_DELTA(lhs[0], 20.0, 1e-14);
-    TS_ASSERT_DELTA(lhs[1], 10.0, 1e-14);
-  }
-
   void test_with_FixedLengthVector() {
     ScalableTester2 lhs{0.1, 0.2};
     const double rhs = 3.0;
