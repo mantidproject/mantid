@@ -59,6 +59,18 @@ option can be set under :ref:`settings-Engineering_Diffraction_test-ref` .
 A cropped calibration can be used to limit the spectra considered during calibration. This can
 be useful if a subset of detectors are going to be used.
 
+Negative Testing Ideas
+----------------------
+
+- Change the RB number (or remove it) and try immediately using controls such as close
+
+- Running calibrate with various fields left blank
+
+- Using files which aren't calibration files \- Mantid shouldn't crash
+
+- Using data from non calibration runs (i.e. any other run from that instrument) \- Mantid shouldn't crash
+
+
 .. _focus-Engineering_Diffraction_test-ref:
 
 Focus
@@ -84,6 +96,17 @@ Plotting the focused workspace should look similar to the image below:
 
 .. image:: ../images/EnggDiffExampleFocusOutput.png
     :width: 300px
+    
+Negative Testing Ideas
+----------------------
+
+- Using a .nxs file which doesn't have expected data \- Mantid shouldn't crash
+
+- Running focus with no banks selected
+
+- Using Cropped/Texture with bad inputs
+
+- Whilst the data is being focused only `Plot Data Representation` should be changeable 
 
 .. _preProcessing-Engineering_Diffraction_test-ref:
 
@@ -119,6 +142,18 @@ Peaks are selected by holding `Shift` whilst clicking the LMB on a peak similar 
 
 Once peaks are selected fit can be re-run with the expected peak list specified to attempt to
 create a better fitting. 
+
+Negative Testing Ideas
+----------------------
+- Using an unfocused .nxs file \- Mantid shouldn't crash
+
+- Enter an unusual file name combinations such as `ENGINX_1000-2000` which combines a filename and 
+  multi run number
+    
+- Enter bad input to expected peaks
+
+- Change any unlocked dialog boxes whilst `Fit` runs
+
 
 .. _settings-Engineering_Diffraction_test-ref:
 
