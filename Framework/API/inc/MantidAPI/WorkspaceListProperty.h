@@ -232,9 +232,6 @@ private:
 
   /// Flag indicating whether the type is optional or not.
   PropertyMode::Type m_optional;
-
-  static_assert(std::is_convertible<TYPE, Mantid::Kernel::DataItem>::value,
-                "Template argument TYPE must inherit DataItem");
 };
 
 } // namespace API
