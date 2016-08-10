@@ -83,9 +83,17 @@ public:
     auto list = std::vector<Workspace_sptr>();
 
     TS_ASSERT_THROWS_NOTHING(std::make_unique<WorkspaceListProperty<Workspace>>(
-        WorkspaceListProperty<Workspace>("MyWorkspaceProperty", list,
-                                         Direction::Input,
-                                         PropertyMode::Optional)));
+        "MyWorkspaceProperty", list, Direction::Input, PropertyMode::Optional));
+  }
+
+  void test_construct_single_workspace() {
+    auto wksp = boost::make_shared<WorkspaceTester>();
+    WorkspaceListProperty<Workspace> prop(
+        "MyWorkspaceProperty", wksp, Direction::Input, PropertyMode::Mandatory);
+
+    auto list = prop.list();
+
+    TS_ASSERT_EQUALS(wksp, list[0]);
   }
 
   void test_copy_construction() {
@@ -203,24 +211,37 @@ public:
                      std::invalid_argument);
   }
 
+  void test_set_property_single_workspace() {
+    auto wksp = boost::make_shared<WorkspaceTester>();
+    using Alg = MyAlgorithm<Workspace>;
+    Alg alg;
+
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MyProperty", wksp));
+
+    std::vector<Workspace_sptr> list = alg.getProperty("MyProperty");
+
+    TS_ASSERT_EQUALS(list[0], wksp);
+  }
+
   void test_set_property_workspace_groups() {
     auto group = boost::make_shared<WorkspaceGroup>();
     group->addWorkspace(boost::make_shared<WorkspaceTester>());
     group->addWorkspace(boost::make_shared<WorkspaceTester>());
 
-    using Alg = MyAlgorithm<Workspace>;
+    using Alg = MyAlgorithm<WorkspaceGroup>;
     Alg alg;
     alg.initialize();
 
-    auto list = std::vector<Workspace_sptr>();
+    auto list = std::vector<WorkspaceGroup_sptr>();
 
     list.push_back(group);
 
     alg.setProperty("MyProperty", list);
 
-    std::vector<Workspace_sptr> olist = alg.getProperty("MyProperty");
+    std::vector<WorkspaceGroup_sptr> olist = alg.getProperty("MyProperty");
 
-    auto ogroup = boost::dynamic_pointer_cast<WorkspaceGroup>(olist[0]);
+    auto ogroup = olist[0];
 
     TS_ASSERT_EQUALS(group->size(), ogroup->size());
 

@@ -49,6 +49,30 @@ public:
   /**
   * WorkspaceListProperty
   * @param name: Name of the property
+  * @param workspace: Single Workspace to hold
+  * @param direction : Property directoin
+  * @param optional : Optional or mandatory property
+  * @param validator : Validator to use
+  */
+  explicit WorkspaceListProperty(
+      const std::string &name, boost::shared_ptr<TYPE> workspace,
+      const unsigned int direction = Mantid::Kernel::Direction::Input,
+      const PropertyMode::Type optional = PropertyMode::Mandatory,
+      Mantid::Kernel::IValidator_sptr validator =
+          Mantid::Kernel::IValidator_sptr(new Kernel::NullValidator))
+      : Mantid::Kernel::PropertyWithValue<WorkspaceListPropertyType>(
+            name, WorkspaceListPropertyType(0), validator, direction),
+        m_optional(optional) {
+    WorkspaceListPropertyType list{workspace};
+    SuperClass::operator=(list);
+    auto errorMsg = isValid();
+    if (!errorMsg.empty())
+      throw std::invalid_argument(errorMsg);
+  }
+
+  /**
+  * WorkspaceListProperty
+  * @param name: Name of the property
   * @param workspaces: Workspaces to hold
   * @param direction : Property directoin
   * @param optional : Optional or mandatory property
@@ -159,6 +183,22 @@ public:
     return error + SuperClass::isValid();
   }
 
+  std::string
+  setDataItem(const boost::shared_ptr<Kernel::DataItem> item) override {
+    auto tmp = boost::dynamic_pointer_cast<TYPE>(item);
+    std::string error;
+
+    if (tmp) {
+      WorkspaceListPropertyType list{tmp};
+      SuperClass::m_value = list;
+    } else {
+      clear();
+      error = "Attempted to add an invalid workspace type.";
+    }
+
+    return error + isValid();
+  }
+
   std::string setDataItems(
       const std::vector<boost::shared_ptr<Kernel::DataItem>> &items) override {
     std::string error;
@@ -176,7 +216,7 @@ public:
       SuperClass::m_value = tmp;
     } else {
       clear();
-      error = "Attempted to add one of more invalid types.";
+      error = "Attempted to add one of more invalid workspace types.";
     }
 
     return error + isValid();
