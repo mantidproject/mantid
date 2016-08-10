@@ -138,17 +138,17 @@ bool Quasi::validate() {
 void Quasi::run() {
 
   auto saveDirectory = Mantid::Kernel::ConfigService::Instance().getString(
-    "defaultsave.directory");
+      "defaultsave.directory");
   if (saveDirectory.compare("") == 0) {
     const char *textMessage =
-      "BayesQuasi requires a default save directory and "
-      "one is not currently set."
-      " If run, the algorithm will default to saving files "
-      "to the current working directory."
-      " Would you still like to run the algorithm?";
+        "BayesQuasi requires a default save directory and "
+        "one is not currently set."
+        " If run, the algorithm will default to saving files "
+        "to the current working directory."
+        " Would you still like to run the algorithm?";
     int result = QMessageBox::question(NULL, tr("Save Directory"),
-      tr(textMessage), QMessageBox::Yes,
-      QMessageBox::No, QMessageBox::NoButton);
+                                       tr(textMessage), QMessageBox::Yes,
+                                       QMessageBox::No, QMessageBox::NoButton);
     if (result == QMessageBox::No) {
       return;
     }
@@ -164,16 +164,15 @@ void Quasi::run() {
   std::string resNormFile("");
 
   std::string sampleName =
-    m_uiForm.dsSample->getCurrentDataName().toStdString();
+      m_uiForm.dsSample->getCurrentDataName().toStdString();
   std::string resName =
-    m_uiForm.dsResolution->getCurrentDataName().toStdString();
+      m_uiForm.dsResolution->getCurrentDataName().toStdString();
 
   std::string program = m_uiForm.cbProgram->currentText().toStdString();
 
   if (program == "Lorentzians") {
     program = "QL";
-  }
-  else {
+  } else {
     program = "QSe";
   }
 
@@ -227,7 +226,7 @@ void Quasi::run() {
   m_QuasiAlg = runAlg;
   m_batchAlgoRunner->addAlgorithm(runAlg);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-    SLOT(algorithmComplete(bool)));
+          SLOT(algorithmComplete(bool)));
 
   m_batchAlgoRunner->executeBatchAsync();
 }
@@ -427,7 +426,7 @@ void Quasi::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-/** 
+/**
  * Handles plotting the selected plot when plot is clicked
  */
 void Quasi::plotClicked() {
@@ -435,7 +434,7 @@ void Quasi::plotClicked() {
   std::string plot = m_uiForm.cbPlot->currentText().toStdString();
   if (plot != "None") {
     const auto resultName =
-      m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
+        m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
     if (plot == "Prob" || plot == "All") {
       const auto probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
       QString QprobWS = QString::fromStdString(probWS);
@@ -447,17 +446,18 @@ void Quasi::plotClicked() {
       fitName.append("_0");
       QString QfitWS = QString::fromStdString(fitName);
       MatrixWorkspace_sptr fitWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(fitName);
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(fitName);
       int fitSpectra = (int)fitWS->getNumberHistograms();
-      MantidQt::CustomInterfaces::IndirectTab::plotSpectrum(QfitWS, 0, (fitSpectra - 1));
+      MantidQt::CustomInterfaces::IndirectTab::plotSpectrum(QfitWS, 0,
+                                                            (fitSpectra - 1));
     }
 
     MatrixWorkspace_sptr resultWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
     int numSpectra = (int)resultWS->getNumberHistograms();
 
     QString QresultWS = QString::fromStdString(resultName);
-    auto paramNames = { "Amplitude", "FWHM", "Beta" };
+    auto paramNames = {"Amplitude", "FWHM", "Beta"};
     for (std::string paramName : paramNames) {
 
       if (plot == paramName || plot == "All") {
@@ -488,7 +488,6 @@ void Quasi::plotClicked() {
     }
   }
 }
-
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
