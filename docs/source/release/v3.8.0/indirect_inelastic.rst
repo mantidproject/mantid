@@ -17,6 +17,12 @@ Algorithms
 Bayes
 #####
 
+Quasi
+~~~~~
+
+- Saving and plotting are performed after the algorithm is run via the use of push buttons at the bottom of the interface
+
+
 Stretch
 ~~~~~~~
 
