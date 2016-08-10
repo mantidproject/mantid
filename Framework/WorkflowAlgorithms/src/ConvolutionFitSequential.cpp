@@ -300,7 +300,7 @@ void ConvolutionFitSequential::exec() {
 
   Progress logAdderProg(this, 0.96, 0.97, 6);
   // Add String Logs
-  auto logAdder = createChildAlgorithm("AddSampleLog" , -1.0, -1.0, false);
+  auto logAdder = createChildAlgorithm("AddSampleLog", -1.0, -1.0, false);
   for (auto &sampleLogString : sampleLogStrings) {
     logAdder->setProperty("Workspace", resultWs);
     logAdder->setProperty("LogName", sampleLogString.first);
