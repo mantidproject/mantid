@@ -11,18 +11,18 @@ from IndirectImport import import_mantidplot
 
 class IndirectILLReduction(DataProcessorAlgorithm):
 
-    # Output workspaces, will be set in PyInit by user input
+    # Output workspace, will be set in PyInit by user input
     _red_ws = 'red'
-    _left_ws = 'left'
-    _right_ws = 'right'
 
     # Optional output workspaces with fixed names for ControlMode
-    # they will be prepended with _red_ws OR RunNumber
+    # they will be prepended with _red_ws (for multiple file) OR RunNumber (for single file)
     _raw_ws = 'raw'
     _det_ws = 'detgrouped'
     _monitor_ws = 'monitor'
     _mnorm_ws = 'mnorm'
     _vnorm_ws = 'vnorm'
+    _left_ws = 'left'
+    _right_ws = 'right'
 
     # Optional input calibration workspace
     _calib_ws = None
@@ -120,41 +120,26 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(name='Plot',defaultValue=False,
                              doc='Whether to plot the reduced workspace.')
 
-        # Output workspace properties
-        self.declareProperty(MatrixWorkspaceProperty("ReducedWorkspace", "red",
+        # Output workspace property
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "red",
                                                      optional=PropertyMode.Optional,
                                                      direction=Direction.Output),
                              doc="Name for the output reduced workspace created.")
-
-        self.declareProperty(MatrixWorkspaceProperty("ReducedLeftWorkspace", "left",
-                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
-                             doc="Name for the output reduced left workspace created.")
-
-        self.declareProperty(MatrixWorkspaceProperty("ReducedRightWorkspace", "right",
-                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
-                             doc="Name for the output reduced left workspace created.")
 
     def setUp(self):
 
         self._run_file = self.getPropertyValue('Run')
         self._vanadium_file = self.getPropertyValue('VanadiumRun')
-
-        self._red_ws = self.getPropertyValue('ReducedWorkspace')
-        self._left_ws = self.getPropertyValue('ReducedLeftWorkspace')
-        self._right_ws= self.getPropertyValue('ReducedRightWorkspace')
-
         self._analyser = self.getPropertyValue('Analyser')
         self._map_file = self.getPropertyValue('MapFile')
         self._reflection = self.getPropertyValue('Reflection')
-
         self._mirror_sense = self.getProperty('MirrorSense').value
         self._control_mode = self.getProperty('ControlMode').value
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
         self._sum_runs = self.getProperty('SumRuns').value
         self._unmirror_option = self.getProperty('UnmirrorOption').value
+        self._red_ws = self.getPropertyValue('OutputWorkspace')
 
         if not self._mirror_sense:
             self.log().warning('MirrorSense is OFF, UnmirrorOption will fall back to 0 (i.e. no unmirroring)')
@@ -180,7 +165,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         self.setUp()
 
-        Load(Filename=self._run_file, OutputWorkspace=self._raw_ws)
+        loaded_ws = self._red_ws + '_' + self._raw_ws
+
+        Load(Filename=self._run_file, OutputWorkspace=loaded_ws)
         # this must be Load, to be able to treat multiple files
         # when multiple files are loaded, _raw_ws will be a group workspace
         # containing workspaces having run numbers as names
@@ -189,10 +176,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.log().information('Loaded .nxs file(s) : %s' % self._run_file)
 
         # check if it is a workspace or workspace group and perform reduction correspondingly
-        if isinstance(mtd[self._raw_ws],WorkspaceGroup):
+        if isinstance(mtd[loaded_ws],WorkspaceGroup):
 
             # get instrument from the first ws in a group and load config files
-            self._instrument = mtd[self._raw_ws].getItem(0).getInstrument()
+            self._instrument = mtd[loaded_ws].getItem(0).getInstrument()
             self._load_config_files()
 
             # if vanadium run needed, load once beforehand
@@ -201,15 +188,15 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 self._load_vanadium_run()
 
             # figure out number of progress reports, i.e. one for each input workspace/file
-            progress = Progress(self, start=0.0, end=1.0, nreports = mtd[self._raw_ws].size())
+            progress = Progress(self, start=0.0, end=1.0, nreports = mtd[loaded_ws].size())
 
             # to collect the list of runs
             runlist = []
 
             # traverse over items in workspace group and reduce individually
-            for i in range(0, mtd[self._raw_ws].size()):
+            for i in range(0, mtd[loaded_ws].size()):
 
-                run = str(mtd[self._raw_ws].getItem(i).getRunNumber())
+                run = str(mtd[loaded_ws].getItem(i).getRunNumber())
                 runlist.append(run)
                 ws = run + '_' + self._raw_ws
                 RenameWorkspace(InputWorkspace = run, OutputWorkspace = ws)
@@ -225,7 +212,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         else:
             # get instrument name and laod config files
-            self._instrument = mtd[self._raw_ws].getInstrument()
+            self._instrument = mtd[loaded_ws].getInstrument()
             self._load_config_files()
 
             # if vanadium run needed, load once beforehand
@@ -233,9 +220,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             if self._unmirror_option == 5 or self._unmirror_option == 7:
                 self._load_vanadium_run()
 
-            run = str(mtd[self._raw_ws].getRunNumber())
+            run = str(mtd[loaded_ws].getRunNumber())
             ws = run + '_' + self._raw_ws
-            RenameWorkspace(InputWorkspace = self._raw_ws, OutputWorkspace = ws)
+            RenameWorkspace(InputWorkspace = loaded_ws, OutputWorkspace = ws)
 
             # reduce
             self._reduce_run(run)
@@ -271,40 +258,22 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     def _load_vanadium_run(self):
         """
         Loads vanadium run into workspace and extracts left and right wings to use in shift spectra
-        Used only in unmirror =5,7. Do not confuse with calibration workspace!
-        Note, in principle here recursion can be used, but for this _raw_ws needs to be made a ws property
-        otherwise, when running multiple files, after reducing first file with vanadium run, raw is overwritten!
+        Used only in unmirror =5,7. Maybe directly to Integrate as well?
+        Note the recursion!
         """
-        Load(Filename=self._vanadium_file,OutputWorkspace='van')
-        LoadParameterFile(Workspace='van', Filename=self._parameter_file)
-        ExtractSingleSpectrum(InputWorkspace='van', OutputWorkspace='van_mon', WorkspaceIndex=0)
-        GroupDetectors(InputWorkspace='van', OutputWorkspace='van', MapFile=self._map_file, Behaviour='Sum')
-        NormaliseToMonitor(InputWorkspace='van', OutputWorkspace='van', MonitorWorkspace='van_mon')
+        # call IndirectILLReduction for vanadium run with unmirror 1 and 2 to get left and right
 
-        x = mtd['van'].readX(0)
-        start = 0
-        end = len(x) - 1
-        mid = int(end / 2)
+        left_van = IndirectILLReduction(Run=self._vanadium_file,SumRuns=True,MirrorSense=True,
+                                   UnmirrorOption=1,MapFile=self._map_file,Analyser=self._analyser,
+                                   Reflection=self._reflection)
 
-        # get the left and right wings
-        self._extract_workspace('van', 'left_van', x[start], x[mid])
-        self._extract_workspace('van', 'right_van', x[mid], x[end])
-        self._extract_workspace('van_mon', 'left_van_mon', x[start], x[mid])
-        self._extract_workspace('van_mon', 'right_van_mon', x[mid], x[end])
+        right_van = IndirectILLReduction(Run=self._vanadium_file, SumRuns=True, MirrorSense=True,
+                                   UnmirrorOption=2, MapFile=self._map_file, Analyser=self._analyser,
+                                   Reflection=self._reflection)
 
-        # get sensible range from left monitor and mask correspondingly
-        # masking is critical, since nan and inf values are problematic for peak finding
-        xmin, xmax = self._monitor_range('left_van_mon')
-        MaskBins(InputWorkspace='left_van', OutputWorkspace='left_van', XMin=0, XMax=xmin)
-        MaskBins(InputWorkspace='left_van', OutputWorkspace='left_van', XMin=xmax, XMax=end)
-        DeleteWorkspace('left_van_mon')
-        # the same for the right
-        xmin, xmax = self._monitor_range('right_van_mon')
-        MaskBins(InputWorkspace='right_van', OutputWorkspace='right_van', XMin=0, XMax=xmin)
-        MaskBins(InputWorkspace='right_van', OutputWorkspace='right_van', XMin=xmax, XMax=end)
-        DeleteWorkspace('right_van_mon')
-        DeleteWorkspace('van')
-        DeleteWorkspace('van_mon')
+        # note, that run number will be prepended, so need to rename
+        RenameWorkspace(left_van.getName(),'left_van')
+        RenameWorkspace(right_van.getName(), 'right_van')
 
     def _convert_to_energy(self, ws):
         """
@@ -471,18 +440,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         if len(runlist) > 1:
             # multiple runs
             list_red = []
-            list_right = []
-            list_left = []
-
             # first group and set reduced ws
             for run in runlist:
                 list_red.append(run + '_' + self._red_ws)
-                list_right.append(run + '_' + self._right_ws)
-                list_left.append(run + '_' + self._left_ws)
 
             GroupWorkspaces(list_red, OutputWorkspace=self._red_ws)
-            GroupWorkspaces(list_left, OutputWorkspace=self._red_ws + '_' + self._left_ws)
-            GroupWorkspaces(list_right, OutputWorkspace=self._red_ws + '_' + self._right_ws)
+
+            self.setPropertyValue('OutputWorkspace', self._red_ws)
 
             if not self._control_mode:
                 # delete everything else
@@ -492,6 +456,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     DeleteWorkspace(run + '_' + self._det_ws)
                     DeleteWorkspace(run + '_' + self._monitor_ws)
                     DeleteWorkspace(run + '_' + self._vnorm_ws)
+                    DeleteWorkspace(run + '_' + self._left_ws)
+                    DeleteWorkspace(run + '_' + self._right_ws)
             else:
                 # group optional workspace properties
                 list_raw = []
@@ -499,6 +465,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 list_det = []
                 list_mnorm = []
                 list_vnorm = []
+                list_right = []
+                list_left = []
 
                 for run in runlist:
                     list_raw.append(run + '_' + self._raw_ws)
@@ -506,17 +474,17 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     list_det.append(run + '_' + self._det_ws)
                     list_mnorm.append(run + '_' + self._mnorm_ws)
                     list_vnorm.append(run + '_' + self._vnorm_ws)
+                    list_right.append(run + '_' + self._right_ws)
+                    list_left.append(run + '_' + self._left_ws)
 
                 GroupWorkspaces(list_raw, OutputWorkspace=self._red_ws + '_' + self._raw_ws)
                 GroupWorkspaces(list_monitor, OutputWorkspace=self._red_ws + '_' + self._monitor_ws)
                 GroupWorkspaces(list_det, OutputWorkspace=self._red_ws + '_' + self._det_ws)
                 GroupWorkspaces(list_mnorm, OutputWorkspace=self._red_ws + '_' +  self._mnorm_ws)
                 GroupWorkspaces(list_vnorm, OutputWorkspace=self._red_ws + '_' +  self._vnorm_ws)
-                DeleteWorkspace(self._raw_ws)
+                GroupWorkspaces(list_left, OutputWorkspace=self._red_ws + '_' + self._left_ws)
+                GroupWorkspaces(list_right, OutputWorkspace=self._red_ws + '_' + self._right_ws)
 
-            self.setPropertyValue('ReducedWorkspace', self._red_ws)
-            self.setPropertyValue('ReducedLeftWorkspace', self._red_ws + '_' + self._left_ws)
-            self.setPropertyValue('ReducedRightWorkspace', self._red_ws + '_' + self._right_ws)
 
             # save if needed
             if self._save:
@@ -530,18 +498,16 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
             # named temporaries
             red = runlist[0] + '_' + self._red_ws
+
             left = runlist[0] + '_' + self._left_ws
             right = runlist[0] + '_' + self._right_ws
-
             raw = runlist[0] + '_' + self._raw_ws
             mnorm = runlist[0] + '_' + self._mnorm_ws
             vnorm = runlist[0] + '_' + self._vnorm_ws
             det = runlist[0] + '_' + self._det_ws
             mon = runlist[0] + '_' + self._monitor_ws
 
-            self.setPropertyValue('ReducedWorkspace', red)
-            self.setPropertyValue('ReducedLeftWorkspace', left)
-            self.setPropertyValue('ReducedRightWorkspace', right)
+            self.setPropertyValue('OutputWorkspace', red)
 
             if not self._control_mode:
                 # Cleanup unused workspaces
@@ -550,6 +516,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 DeleteWorkspace(det)
                 DeleteWorkspace(mon)
                 DeleteWorkspace(vnorm)
+                DeleteWorkspace(left)
+                DeleteWorkspace(right)
 
             # save and plot
             if self._save:
