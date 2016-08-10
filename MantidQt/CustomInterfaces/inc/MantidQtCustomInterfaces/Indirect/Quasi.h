@@ -40,6 +40,8 @@ private slots:
   void algorithmComplete(bool error);
   // Handles saving of workspace
   void saveClicked();
+  // Handles plotting
+  void plotClicked();
 
 private:
   /// Current preview spectrum

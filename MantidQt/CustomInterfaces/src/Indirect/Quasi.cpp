@@ -63,6 +63,9 @@ Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
 
   // Post saving
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+
+  // Post plotting
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 }
 
 /**
@@ -135,17 +138,17 @@ bool Quasi::validate() {
 void Quasi::run() {
 
   auto saveDirectory = Mantid::Kernel::ConfigService::Instance().getString(
-      "defaultsave.directory");
+    "defaultsave.directory");
   if (saveDirectory.compare("") == 0) {
     const char *textMessage =
-        "BayesQuasi requires a default save directory and "
-        "one is not currently set."
-        " If run, the algorithm will default to saving files "
-        "to the current working directory."
-        " Would you still like to run the algorithm?";
+      "BayesQuasi requires a default save directory and "
+      "one is not currently set."
+      " If run, the algorithm will default to saving files "
+      "to the current working directory."
+      " Would you still like to run the algorithm?";
     int result = QMessageBox::question(NULL, tr("Save Directory"),
-                                       tr(textMessage), QMessageBox::Yes,
-                                       QMessageBox::No, QMessageBox::NoButton);
+      tr(textMessage), QMessageBox::Yes,
+      QMessageBox::No, QMessageBox::NoButton);
     if (result == QMessageBox::No) {
       return;
     }
@@ -161,15 +164,16 @@ void Quasi::run() {
   std::string resNormFile("");
 
   std::string sampleName =
-      m_uiForm.dsSample->getCurrentDataName().toStdString();
+    m_uiForm.dsSample->getCurrentDataName().toStdString();
   std::string resName =
-      m_uiForm.dsResolution->getCurrentDataName().toStdString();
+    m_uiForm.dsResolution->getCurrentDataName().toStdString();
 
   std::string program = m_uiForm.cbProgram->currentText().toStdString();
 
   if (program == "Lorentzians") {
     program = "QL";
-  } else {
+  }
+  else {
     program = "QSe";
   }
 
@@ -200,9 +204,6 @@ void Quasi::run() {
   long sampleBins = m_properties["SampleBinning"]->valueText().toLong();
   long resBins = m_properties["ResBinning"]->valueText().toLong();
 
-  // Output options
-  std::string plot = m_uiForm.cbPlot->currentText().toStdString();
-
   IAlgorithm_sptr runAlg = AlgorithmManager::Instance().create("BayesQuasi");
   runAlg->initialize();
   runAlg->setProperty("Program", program);
@@ -222,64 +223,14 @@ void Quasi::run() {
   runAlg->setProperty("UseResNorm", useResNorm);
   runAlg->setProperty("WidthFile", fixedWidthFile);
   runAlg->setProperty("Loop", sequence);
-  runAlg->execute();
 
   m_QuasiAlg = runAlg;
   m_batchAlgoRunner->addAlgorithm(runAlg);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(algorithmComplete(bool)));
+    SLOT(algorithmComplete(bool)));
 
   m_batchAlgoRunner->executeBatchAsync();
-
-  if (plot != "None") {
-    const auto resultName =
-        m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
-    if (plot == "Prob" || plot == "All") {
-      const auto probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
-      QString QprobWS = QString::fromStdString(probWS);
-      MantidQt::CustomInterfaces::IndirectTab::plotSpectrum(QprobWS, 1, 2);
-    }
-    if (plot == "Fit" || plot == "All") {
-      const auto fitWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
-      QString QfitWS = QString::fromStdString(fitWS);
-      MantidQt::CustomInterfaces::IndirectTab::plotSpectrum(QfitWS);
-    }
-    MatrixWorkspace_sptr resultWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
-    int numSpectra = (int)resultWS->getNumberHistograms();
-    QString QresultWS = QString::fromStdString(resultName);
-    auto paramNames = {"Amplitude", "FWHM", "Beta"};
-    for (std::string paramName : paramNames) {
-      if (plot == paramName || plot == "All") {
-        std::vector<int> spectraIndices = {};
-        for (int i = 0; i <= numSpectra; i++) {
-          auto axisLabel = resultWS->getAxis(1)->label(i);
-          auto found = axisLabel.find(paramName);
-          if (found != std::string::npos) {
-            spectraIndices.push_back(i);
-            if (spectraIndices.size() == 5) {
-
-              QString pyInput = "from mantidplot import plotSpectrum\n";
-
-              pyInput += "plotSpectrum('";
-              pyInput += QresultWS;
-              pyInput += "', [";
-              pyInput += QString::number(spectraIndices[0]);
-              pyInput += ", ";
-              pyInput += QString::number(spectraIndices[1]);
-              pyInput += ", ";
-              pyInput += QString::number(spectraIndices[2]);
-              pyInput += "])\n";
-
-              m_pythonRunner.runPythonCode(pyInput);
-            }
-          }
-        }
-      }
-    }
-  }
 }
-
 /**
  * Updates the data and fit curves on the mini plot.
  */
@@ -475,6 +426,69 @@ void Quasi::saveClicked() {
   addSaveWorkspaceToQueue(QresultWS, resultPath);
   m_batchAlgoRunner->executeBatchAsync();
 }
+
+/** 
+ * Handles plotting the selected plot when plot is clicked
+ */
+void Quasi::plotClicked() {
+  // Output options
+  std::string plot = m_uiForm.cbPlot->currentText().toStdString();
+  if (plot != "None") {
+    const auto resultName =
+      m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
+    if (plot == "Prob" || plot == "All") {
+      const auto probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
+      QString QprobWS = QString::fromStdString(probWS);
+      MantidQt::CustomInterfaces::IndirectTab::plotSpectrum(QprobWS, 1, 2);
+    }
+    if (plot == "Fit" || plot == "All") {
+      std::string fitName = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
+      fitName.pop_back();
+      fitName.append("_0");
+      QString QfitWS = QString::fromStdString(fitName);
+      MatrixWorkspace_sptr fitWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(fitName);
+      int fitSpectra = (int)fitWS->getNumberHistograms();
+      MantidQt::CustomInterfaces::IndirectTab::plotSpectrum(QfitWS, 0, (fitSpectra - 1));
+    }
+
+    MatrixWorkspace_sptr resultWS =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
+    int numSpectra = (int)resultWS->getNumberHistograms();
+
+    QString QresultWS = QString::fromStdString(resultName);
+    auto paramNames = { "Amplitude", "FWHM", "Beta" };
+    for (std::string paramName : paramNames) {
+
+      if (plot == paramName || plot == "All") {
+        std::vector<int> spectraIndices = {};
+        for (int i = 0; i <= numSpectra; i++) {
+          auto axisLabel = resultWS->getAxis(1)->label(i);
+
+          auto found = axisLabel.find(paramName);
+          if (found != std::string::npos) {
+            spectraIndices.push_back(i);
+            if (spectraIndices.size() == 3) {
+
+              QString pyInput = "from mantidplot import plotSpectrum\n";
+              pyInput += "plotSpectrum('";
+              pyInput += QresultWS;
+              pyInput += "', [";
+              pyInput += QString::number(spectraIndices[0]);
+              pyInput += ", ";
+              pyInput += QString::number(spectraIndices[1]);
+              pyInput += ", ";
+              pyInput += QString::number(spectraIndices[2]);
+              pyInput += "])\n";
+              m_pythonRunner.runPythonCode(pyInput);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
