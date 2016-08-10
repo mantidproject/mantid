@@ -58,6 +58,7 @@ public:
   QString getSimultaneousFitLabel() const override {
     return QString("UserSelectedFitLabel");
   }
+  MOCK_METHOD1(setSimultaneousFitLabel, void(const QString &));
   MOCK_CONST_METHOD0(getDatasetIndex, int());
   MOCK_METHOD1(setDatasetNames, void(const QStringList &));
 };
@@ -440,6 +441,41 @@ public:
     }
   }
 
+  void test_checkAndUpdateFitLabel_Simultaneous_ShouldUpdate() {
+    doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::Simultaneous,
+                                  {"fwd"}, {"1"}, true);
+  }
+
+  void test_checkAndUpdateFitLabel_SingleRun_NoUpdate() {
+    doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::Single,
+                                  {"fwd"}, {"1"}, false);
+  }
+
+  void test_checkAndUpdateFitLabel_CoAdd_NoUpdate() {
+    doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::CoAdd, {"fwd"},
+                                  {"1"}, false);
+  }
+
+  void test_checkAndUpdateFitLabel_SingleRun_MultipleGroups_ShouldUpdate() {
+    doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::Single,
+                                  {"fwd", "bwd"}, {"1"}, true);
+  }
+
+  void test_checkAndUpdateFitLabel_SingleRun_MultiplePeriods_ShouldUpdate() {
+    doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::Single,
+                                  {"fwd"}, {"1", "2"}, true);
+  }
+
+  void test_checkAndUpdateFitLabel_CoAdd_MultipleGroups_ShouldUpdate() {
+    doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::CoAdd,
+                                  {"fwd", "bwd"}, {"1"}, true);
+  }
+
+  void test_checkAndUpdateFitLabel_CoAdd_MultiplePeriods_ShouldUpdate() {
+    doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::CoAdd, {"fwd"},
+                                  {"1", "2"}, true);
+  }
+
 private:
   void doTest_handleSelectedDataChanged(IMuonFitDataSelector::FitType fitType) {
     auto &ads = AnalysisDataService::Instance();
@@ -662,6 +698,40 @@ private:
         }
       }
     }
+  }
+
+  /**
+   * Test checkAndUpdateFitLabel() with the given options
+   * @param fitType :: [input] Type of fit
+   * @param groups :: [input] Groups to fit
+   * @param periods :: [input] Periods to fit
+   * @param shouldUpdate :: [input] Whether or not to expect label to be updated
+   */
+  void doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType fitType,
+                                     const QStringList &groups,
+                                     const QStringList &periods,
+                                     bool shouldUpdate) {
+    ON_CALL(*m_dataSelector, getFitType()).WillByDefault(Return(fitType));
+    ON_CALL(*m_dataSelector, getChosenGroups()).WillByDefault(Return(groups));
+    ON_CALL(*m_dataSelector, getPeriodSelections())
+        .WillByDefault(Return(periods));
+
+    if (shouldUpdate) {
+      const auto &label = m_dataSelector->getSimultaneousFitLabel();
+      QString groupName = QString("MuonSimulFit_").append(label);
+      AnalysisDataService::Instance().add(groupName.toStdString(),
+                                          boost::make_shared<WorkspaceGroup>());
+      const auto &uniqueName = label + '1';
+      EXPECT_CALL(*m_fitBrowser, setSimultaneousLabel(uniqueName.toStdString()))
+          .Times(1);
+      EXPECT_CALL(*m_dataSelector, setSimultaneousFitLabel(uniqueName))
+          .Times(1);
+    } else {
+      EXPECT_CALL(*m_fitBrowser, setSimultaneousLabel(_)).Times(0);
+      EXPECT_CALL(*m_dataSelector, setSimultaneousFitLabel(_)).Times(0);
+    }
+    m_presenter->checkAndUpdateFitLabel(false);
+    AnalysisDataService::Instance().clear();
   }
 
   MockDataSelector *m_dataSelector;
