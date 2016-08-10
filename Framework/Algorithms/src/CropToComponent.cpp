@@ -73,7 +73,8 @@ void CropToComponent::init() {
           "ComponentNames"),
       "List of component names which are used to crop the workspace."
       "to.");
-  declareProperty("OrderByDetId", false, "Whether to order the elements of"
+  declareProperty("OrderByDetId", false,
+                  "Whether to order the elements of"
                   "the component by increasing detector ID.");
 }
 

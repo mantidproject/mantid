@@ -139,7 +139,8 @@ public:
     loader.setPropertyValue("OutputWorkspace", "in");
     loader.execute();
     Mantid::API::MatrixWorkspace_sptr workspace =
-        Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("in");
+        Mantid::API::AnalysisDataService::Instance()
+            .retrieveWS<Mantid::API::MatrixWorkspace>("in");
 
     std::vector<std::string> componentNames = {"main-detector-bank"};
 
@@ -155,7 +156,6 @@ public:
     TS_ASSERT(crop.isExecuted())
     Mantid::API::MatrixWorkspace_sptr unOrderedWorkspace =
         crop.getProperty("OutputWorkspace");
-
 
     crop.setProperty("InputWorkspace", workspace);
     crop.setProperty("OutputWorkspace", "ordered");
@@ -175,16 +175,16 @@ public:
     std::array<size_t, 3> expectedOrdered = {3, 4, 5};
 
     for (auto index : indices) {
-        const auto& specUnordered = unOrderedWorkspace->getSpectrum(index);
-        const auto& specOrdered = orderedWorkspace->getSpectrum(index);
-        TS_ASSERT_EQUALS(specUnordered.getSpectrumNo(), expectedUnordered[index]);
-        TS_ASSERT_EQUALS(specOrdered.getSpectrumNo(), expectedOrdered[index]);
+      const auto &specUnordered = unOrderedWorkspace->getSpectrum(index);
+      const auto &specOrdered = orderedWorkspace->getSpectrum(index);
+      TS_ASSERT_EQUALS(specUnordered.getSpectrumNo(), expectedUnordered[index]);
+      TS_ASSERT_EQUALS(specOrdered.getSpectrumNo(), expectedOrdered[index]);
     }
 
     // Clean up the ADS
     if (Mantid::API::AnalysisDataService::Instance().doesExist("in")) {
-        Mantid::API::AnalysisDataService::Instance().remove("in");
-      }
+      Mantid::API::AnalysisDataService::Instance().remove("in");
+    }
   }
 
 private:
