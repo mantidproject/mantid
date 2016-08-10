@@ -139,7 +139,7 @@ void ConvolutionFitSequential::exec() {
 
   // Check if a delta function is being used
   auto delta = false;
-  auto usingDelta = "false";
+  std::string usingDelta = "false";
   auto pos = function.find("Delta");
   if (pos != std::string::npos) {
     delta = true;
@@ -173,14 +173,14 @@ void ConvolutionFitSequential::exec() {
   outputWsName += std::to_string(specMax);
 
   // Convert input workspace to get Q axis
-  const auto tempFitWsName = "__convfit_fit_ws";
+  const std::string tempFitWsName = "__convfit_fit_ws";
   convertInputToElasticQ(inputWs, tempFitWsName);
 
   Progress plotPeakStringProg(this, 0.0, 0.05, specMax - specMin);
   // Construct plotpeak string
   std::string plotPeakInput;
   for (int i = specMin; i < specMax + 1; i++) {
-    std::string nextWs = tempFitWsName + ",i";
+    auto nextWs = tempFitWsName + ",i";
     nextWs += std::to_string(i);
     plotPeakInput += nextWs + ";";
     plotPeakStringProg.report("Constructing PlotPeak name");
@@ -212,7 +212,7 @@ void ConvolutionFitSequential::exec() {
 
   // Delete workspaces
   Progress deleteProgress(this, 0.90, 0.91, 2);
-  auto deleter = createChildAlgorithm("DeleteWorkspace", enableLogging=false);
+  auto deleter = createChildAlgorithm("DeleteWorkspace", -1.0, -1.0, false);
   deleter->setProperty("WorkSpace",
                        outputWsName + "_NormalisedCovarianceMatrices");
   deleter->executeAsChildAlg();
@@ -280,7 +280,7 @@ void ConvolutionFitSequential::exec() {
   AnalysisDataService::Instance().addOrReplace(resultWsName, resultWs);
 
   // Handle sample logs
-  auto logCopier = createChildAlgorithm("CopyLogs", enableLogging=false);
+  auto logCopier = createChildAlgorithm("CopyLogs", -1.0, -1.0, false);
   logCopier->setProperty("InputWorkspace", inputWs);
   logCopier->setProperty("OutputWorkspace", resultWs);
   logCopier->executeAsChildAlg();
@@ -300,7 +300,7 @@ void ConvolutionFitSequential::exec() {
 
   Progress logAdderProg(this, 0.96, 0.97, 6);
   // Add String Logs
-  auto logAdder = createChildAlgorithm("AddSampleLog", enableLogging=false);
+  auto logAdder = createChildAlgorithm("AddSampleLog" , -1.0, -1.0, false);
   for (auto &sampleLogString : sampleLogStrings) {
     logAdder->setProperty("Workspace", resultWs);
     logAdder->setProperty("LogName", sampleLogString.first);
@@ -332,7 +332,7 @@ void ConvolutionFitSequential::exec() {
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWsName +
                                                                  "_Workspaces");
   const auto groupWsNames = groupWs->getNames();
-  auto renamer = createChildAlgorithm("RenameWorkspace", enableLogging=false);
+  auto renamer = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
   Progress renamerProg(this, 0.98, 1.0, specMax + 1);
   for (int i = specMin; i < specMax + 1; i++) {
     renamer->setProperty("InputWorkspace", groupWsNames.at(i - specMin));
@@ -491,7 +491,7 @@ void ConvolutionFitSequential::calculateEISF(
   const auto ampErrorNames = searchForFitParams("Amplitude_Err", columns);
 
   // For each lorentzian, calculate EISF
-  const size_t maxSize = ampNames.size();
+  size_t maxSize = ampNames.size();
   if (ampErrorNames.size() > maxSize) {
     maxSize = ampErrorNames.size();
   }
