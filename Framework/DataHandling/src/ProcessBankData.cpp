@@ -1,5 +1,5 @@
 //ProcessBankData
-#include "MantidDataHandling/BankPulseTimes.h"
+#include "MantidDataHandling/ProcessBankData.h"
 
 ProcessBankData::ProcessBankData(LoadEventNexus *alg, std::string entry_name, Progress *prog,
                   boost::shared_array<uint32_t> event_id,

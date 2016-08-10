@@ -1,5 +1,17 @@
 // Process bank data
+#include "MantidKernel/Task.h"
+#include "MantidAPI/IFileLoader.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidKernel/Timer.h"
+
+#include <boost/shared_array.hpp>
+
+namespace Mantid{
+namespace DataHandling{
+
+using namespace Mantid;
+// using namespace Mantid::Geometry;
 
 //==============================================================================================
 // Class ProcessBankData
@@ -7,7 +19,7 @@
 // FIXME-TODO- Move ProcessBankData to new files
 /** This task does the disk IO from loading the NXS file,
 * and so will be on a disk IO mutex */
-class ProcessBankData : public Task {
+class ProcessBankData : public Mantid::Kernel::Task {
 public:
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -28,7 +40,7 @@ public:
   * @param max_event_id :: maximum detector ID to load
   * @return
   */
-  ProcessBankData(LoadEventNexus *alg, std::string entry_name, Progress *prog,
+  ProcessBankData(API::IFileLoader<Kernel::NexusDescriptor> *alg, std::string entry_name, API::Progress *prog,
                   boost::shared_array<uint32_t> event_id,
                   boost::shared_array<float> event_time_of_flight,
                   size_t numEvents, size_t startAt,
@@ -42,7 +54,7 @@ public:
 
 private:
   /// Algorithm being run
-  LoadEventNexus *alg;
+  API::IFileLoader<Kernel::NexusDescriptor> *alg;
   /// NXS path to bank
   std::string entry_name;
   /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace
@@ -51,7 +63,7 @@ private:
   /// Offset in the pixelID_to_wi_vector to use.
   detid_t pixelID_to_wi_offset;
   /// Progress reporting
-  Progress *prog;
+  API::Progress *prog;
   /// event pixel ID array
   boost::shared_array<uint32_t> event_id;
   /// event TOF array
@@ -75,3 +87,6 @@ private:
   /// timer for performance
   Mantid::Kernel::Timer m_timer;
 }; // END-DEF-CLASS ProcessBankData
+
+}
+}

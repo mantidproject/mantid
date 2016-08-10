@@ -55,7 +55,7 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>
   */
 class DLLExport LoadEventNexus
-    : public API::IFileLoader<Kernel::NexusDescriptor> {
+    : public Mantid::API::IFileLoader<Kernel::NexusDescriptor> {
 
 public:
   LoadEventNexus();
@@ -77,7 +77,7 @@ public:
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Mantid::Kernel::NexusDescriptor &descriptor) const override;
 
   /** Sets whether the pixel counts will be pre-counted.
    * @param value :: true if you want to precount. */
