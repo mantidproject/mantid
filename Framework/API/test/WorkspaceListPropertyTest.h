@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceListProperty.h"
 #include "MantidKernel/IValidator.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include <gmock/gmock.h>
 #include <vector>
@@ -47,7 +48,7 @@ private:
     const std::string summary() const override { return "MyAlgorithm helper."; }
 
     virtual void init() {
-      declareProperty(std::make_unique<WorkspaceListProperty<T>>(
+      declareProperty(Kernel::make_unique<WorkspaceListProperty<T>>(
           "MyProperty", std::vector<boost::shared_ptr<T>>(0)));
     }
 
@@ -73,17 +74,20 @@ public:
   void test_constructor() {
     auto list = createWorkspaceList();
 
-    TS_ASSERT_THROWS_NOTHING(std::make_unique<WorkspaceListProperty<Workspace>>(
-        WorkspaceListProperty<Workspace>("MyWorkspaceProperty", list,
-                                         Direction::Input,
-                                         PropertyMode::Mandatory)));
+    TS_ASSERT_THROWS_NOTHING(
+        Kernel::make_unique<WorkspaceListProperty<Workspace>>(
+            WorkspaceListProperty<Workspace>("MyWorkspaceProperty", list,
+                                             Direction::Input,
+                                             PropertyMode::Mandatory)));
   }
 
   void test_contruct_as_optional() {
     auto list = std::vector<Workspace_sptr>();
 
-    TS_ASSERT_THROWS_NOTHING(std::make_unique<WorkspaceListProperty<Workspace>>(
-        "MyWorkspaceProperty", list, Direction::Input, PropertyMode::Optional));
+    TS_ASSERT_THROWS_NOTHING(
+        Kernel::make_unique<WorkspaceListProperty<Workspace>>(
+            "MyWorkspaceProperty", list, Direction::Input,
+            PropertyMode::Optional));
   }
 
   void test_construct_single_workspace() {
