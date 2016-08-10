@@ -105,7 +105,7 @@ DataObjects::Workspace2D_sptr createTestingWS(bool noLogs = false) {
 
   return ws;
 }
-};
+}
 
 class GetAllEiTester : public GetAllEi {
 public:
