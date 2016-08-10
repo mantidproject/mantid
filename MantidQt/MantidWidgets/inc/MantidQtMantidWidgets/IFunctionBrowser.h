@@ -41,8 +41,6 @@ public:
   virtual void parameterChanged(const QString &funcIndex,
                                 const QString &paramName) = 0;
   virtual void updateParameters(const Mantid::API::IFunction &fun) = 0;
-  virtual double getParameter(const QString &funcIndex,
-                              const QString &paramName) const = 0;
   virtual void clear() = 0;
   virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clearErrors() = 0;

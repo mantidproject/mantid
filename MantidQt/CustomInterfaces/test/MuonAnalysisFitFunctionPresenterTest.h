@@ -28,7 +28,6 @@ public:
   MOCK_METHOD0(functionStructureChanged, void());
   MOCK_METHOD1(updateParameters, void(const Mantid::API::IFunction &));
   MOCK_METHOD2(parameterChanged, void(const QString &, const QString &));
-  MOCK_CONST_METHOD2(getParameter, double(const QString &, const QString &));
   MOCK_METHOD0(clear, void());
   MOCK_METHOD1(setErrorsEnabled, void(bool));
   MOCK_METHOD0(clearErrors, void());
@@ -58,8 +57,6 @@ public:
   MOCK_METHOD0(functionUpdateRequested, void());
   MOCK_METHOD1(functionUpdateAndFitRequested, void(bool));
   MOCK_CONST_METHOD0(getFunction, Mantid::API::IFunction_sptr());
-  MOCK_METHOD3(setParameterValue,
-               void(const QString &, const QString &, double));
   MOCK_CONST_METHOD0(getWorkspaceNamesToFit, std::vector<std::string>());
   MOCK_METHOD1(userChangedDatasetIndex, void(int));
   MOCK_METHOD1(setCompatibilityMode, void(bool));
@@ -159,13 +156,12 @@ public:
   }
 
   void test_handleParameterEdited() {
-    const double paramValue = 12.345;
     const QString funcIndex = "f0.", paramName = "A0";
-    ON_CALL(*m_funcBrowser, getParameter(funcIndex, paramName))
-        .WillByDefault(Return(paramValue));
-    EXPECT_CALL(*m_funcBrowser, getParameter(funcIndex, paramName)).Times(1);
-    EXPECT_CALL(*m_fitBrowser,
-                setParameterValue(funcIndex, paramName, paramValue)).Times(1);
+    EXPECT_CALL(*m_funcBrowser, getFunctionString())
+        .Times(1)
+        .WillOnce(Return("Test Function"));
+    EXPECT_CALL(*m_fitBrowser, setFunction(m_funcBrowser->getGlobalFunction()))
+        .Times(1);
     m_presenter->handleParameterEdited(funcIndex, paramName);
   }
 

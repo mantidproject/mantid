@@ -56,9 +56,6 @@ public:
   Mantid::API::IFunction_sptr getFunction() const override {
     return getFittingFunction();
   }
-  /// Set parameter value externally
-  void setParameterValue(const QString &funcIndex, const QString &paramName,
-                         double value) override;
   /// Set list of workspaces to fit
   void setWorkspaceNames(const QStringList &wsNames) override;
   /// Get output name

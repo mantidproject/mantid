@@ -108,8 +108,7 @@ public:
   void setParamError(const QString &funcIndex, const QString &paramName,
                      double error);
   /// Get a value of a parameter
-  double getParameter(const QString &funcIndex,
-                      const QString &paramName) const override;
+  double getParameter(const QString &funcIndex, const QString &paramName) const;
   /// Update the function parameter value
   void setParameter(const QString &paramName, double value);
   /// Update the function parameter error

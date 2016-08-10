@@ -141,13 +141,18 @@ void MuonAnalysisFitFunctionPresenter::handleFitFinished(
 /**
  * Called when user edits a parameter in the function browser.
  * Updates the parameter value in the fit property browser.
- * @param funcIndex :: [input] index of the function
- * @param paramName :: [input] parameter name
+ *
+ * The whole function is updated, so that the function in the fit property
+ * browser matches that in the function browser.
+ *
+ * @param funcIndex :: [input] index of the function (unused)
+ * @param paramName :: [input] parameter name (unused)
  */
 void MuonAnalysisFitFunctionPresenter::handleParameterEdited(
     const QString &funcIndex, const QString &paramName) {
-  const double value = m_funcBrowser->getParameter(funcIndex, paramName);
-  m_fitBrowser->setParameterValue(funcIndex, paramName, value);
+  Q_UNUSED(funcIndex);
+  Q_UNUSED(paramName);
+  updateFunction();
 }
 
 /**

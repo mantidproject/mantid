@@ -40,8 +40,6 @@ public:
   virtual void runFit() = 0;
   virtual void runSequentialFit() = 0;
   virtual Mantid::API::IFunction_sptr getFunction() const = 0;
-  virtual void setParameterValue(const QString &funcIndex,
-                                 const QString &paramName, double value) = 0;
   virtual std::vector<std::string> getWorkspaceNamesToFit() const = 0;
   virtual void setCompatibilityMode(bool enabled) = 0;
 signals:
