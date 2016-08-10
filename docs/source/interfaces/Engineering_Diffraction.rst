@@ -1,3 +1,5 @@
+.. _Engineering_Diffraction-ref:
+
 Engineering Diffraction
 =======================
 
