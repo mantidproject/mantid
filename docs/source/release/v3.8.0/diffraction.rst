@@ -49,11 +49,11 @@ Powder Diffraction
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has changed
   parameters. ``Instrument``, ``RunNumber``, and ``Extension`` have
   been replaced with a single ``Filename`` parameter. This has been
-  paired with changes to the Powder Diffraction interface as well. An
-  additional parameter, ``LogFilename``, has been added to aid in
-  testing files being produced by the "new DAS" at SNS. This parameter
-  has not been added to the Powder Diffraction interface and will be
-  removed without notice.
+  paired with changes to the Powder Diffraction interface as
+  well. There were also a variety of bugfixes related to the output
+  workspaces. While it did not affect the saved data files, the output
+  workspaces were not always correctly normalized or in the requested
+  units.
 
 - :ref:`PDFFourierTransformSNSPowderReduction
   <algm-PDFFourierTransformSNSPowderReduction>` has been modified to
