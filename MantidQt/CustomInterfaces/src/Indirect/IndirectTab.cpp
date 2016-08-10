@@ -316,7 +316,7 @@ void IndirectTab::plotSpectra(const QStringList &workspaceNames, const std::vect
 
   pyInput += "plotSpectrum(['";
   pyInput += workspaceNames.join("','");
-  pyInput += "'],";
+  pyInput += "'], [";
   pyInput += QString::number(wsIndices[0]);
   for (int i = 1; i < wsIndices.size(); i++) {
     pyInput += " ,";
@@ -329,7 +329,6 @@ void IndirectTab::plotSpectra(const QStringList &workspaceNames, const std::vect
 /**
 * Creates a spectrum plot of a single workspace with a set
 *  of spectra specified in a vector
-
 *
 * @param workspaceName Name of workspace to plot
 * @param wsIndices List of indices of spectra to plot
