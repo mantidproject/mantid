@@ -3,11 +3,13 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 
-import mantid
-import mantid.api
 import mantid.simpleapi as api
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, \
+    FileAction, FileProperty, ITableWorkspaceProperty, MultipleFileProperty, PropertyMode, \
+    WorkspaceProperty
+from mantid.kernel import ConfigService, Direction, FloatArrayProperty, \
+    FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, \
+    Property, PropertyManagerDataService, StringArrayProperty, StringListValidator
 # Use xrange in Python 2
 from six.moves import range #pylint: disable=redefined-builtin
 
@@ -296,7 +298,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         focuspos = self._focusPos
         if self._lowResTOFoffset >= 0:
             # Dealing with the parameters for editing instrument parameters
-            if ("PrimaryFlightPath" in focuspos):
+            if "PrimaryFlightPath" in focuspos:
                 l1 = focuspos["PrimaryFlightPath"]
                 if l1 > 0:
                     specids = focuspos['SpectrumIDs'][:]
@@ -677,7 +679,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 # comparess events
                 if is_event_workspace(sample_ws_name):
                     api.CompressEvents(InputWorkspace=sample_ws_name, OutputWorkspace=sample_ws_name,
-                                                 Tolerance=self.COMPRESS_TOL_TOF)  # 10ns
+                                       Tolerance=self.COMPRESS_TOL_TOF)  # 10ns
         # END-FOR
 
         # Normalize by current with new name
@@ -752,7 +754,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         if self._normalisebycurrent is True:
             api.NormaliseByCurrent(InputWorkspace=sumRun,
-                                             OutputWorkspace=sumRun)
+                                   OutputWorkspace=sumRun)
             get_workspace(sumRun).getRun()['gsas_monitor'] = 1
 
         return sumRun
@@ -924,7 +926,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             try:
                 if normalisebycurrent is True:
                     api.NormaliseByCurrent(InputWorkspace=output_wksp_list[split_index],
-                                                     OutputWorkspace=output_wksp_list[split_index])
+                                           OutputWorkspace=output_wksp_list[split_index])
                     get_workspace(output_wksp_list[split_index]).getRun()['gsas_monitor'] = 1
             except RuntimeError as e:
                 self.log().warning(str(e))
