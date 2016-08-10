@@ -481,8 +481,11 @@ void MuonAnalysisFitDataPresenter::handleFittedWorkspaces(
       addSpecialLogs(oldName, wsDetails);
       // Generate new name and rename workspace
       std::ostringstream newName;
-      newName << baseName << "_" << wsDetails.label << "_" << wsDetails.itemName
-              << "_" << wsDetails.periods;
+      newName << baseName << "_" << wsDetails.label << "_"
+              << wsDetails.itemName;
+      if (!wsDetails.periods.empty()) {
+        newName << "_" << wsDetails.periods;
+      }
       ads.rename(oldName, newName.str() + "_Workspace");
       // Generate new parameters table for this dataset
       const auto fitTable = generateParametersTable(wsName, paramsTable);
