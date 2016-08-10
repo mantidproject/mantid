@@ -3,6 +3,7 @@
                                 // dominance, we have no way around it with the
                                 // design
 #endif
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidAPI/AlgorithmProxy.h"
 
 #include <boost/python/class.hpp>
@@ -10,6 +11,8 @@
 
 using namespace Mantid::API;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(AlgorithmProxy)
 
 void export_algorithm_proxy() {
 

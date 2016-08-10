@@ -193,7 +193,7 @@ public:
       const Kernel::SpecialCoordinateSystem coordSystem) override;
   /// make the workspace file backed if it has not been already file backed;
   virtual void setFileBacked(const std::string &fileName);
-  virtual void setFileBacked() override;
+  void setFileBacked() override;
   /// if workspace was file-backed, this should clear file-backed information
   /// and close back-up files.
   void clearFileBacked(bool LoadFileBackedData) override;

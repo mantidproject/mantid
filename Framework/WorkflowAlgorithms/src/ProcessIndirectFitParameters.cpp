@@ -110,11 +110,10 @@ void ProcessIndirectFitParameters::exec() {
       convertToMatrix->setProperty("ColumnE", errColumns.at(j));
       convertToMatrix->setProperty("OutputWorkspace", columns.at(j));
       convertToMatrix->executeAsChildAlg();
-      MatrixWorkspace_sptr matrixFromTable =
-          convertToMatrix->getProperty("OutputWorkspace");
-      paramWorkspaces.push_back(matrixFromTable);
+      paramWorkspaces.push_back(
+          convertToMatrix->getProperty("OutputWorkspace"));
     }
-    workspaces.push_back(paramWorkspaces);
+    workspaces.push_back(std::move(paramWorkspaces));
   }
 
   Progress workflowProg = Progress(this, 0.5, 1.0, 10);
@@ -126,9 +125,9 @@ void ProcessIndirectFitParameters::exec() {
 
   // Get output workspace columns
   auto outputSpectraNames = std::vector<std::string>();
-  for (size_t i = 0; i < workspaces.size(); i++) {
-    for (size_t j = 0; j < workspaces[i].size(); j++) {
-      outputSpectraNames.push_back(workspaces[i][j]->YUnitLabel());
+  for (const auto &paramWorkspaces : workspaces) {
+    for (const auto &workspace : paramWorkspaces) {
+      outputSpectraNames.push_back(workspace->YUnitLabel());
     }
   }
 

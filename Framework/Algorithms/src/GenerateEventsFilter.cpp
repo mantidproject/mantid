@@ -3,12 +3,10 @@
 //----------------------------------------------------------------------
 
 #include "MantidAlgorithms/GenerateEventsFilter.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/Column.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 
@@ -175,8 +173,6 @@ void GenerateEventsFilter::init() {
 
   declareProperty("NumberOfThreads", EMPTY_INT(),
                   "Number of threads forced to use in the parallel mode. ");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -215,8 +211,6 @@ void GenerateEventsFilter::exec() {
     setProperty("OutputWorkspace", m_splitWS);
   }
   setProperty("InformationWorkspace", m_filterInfoWS);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -262,8 +256,6 @@ void GenerateEventsFilter::processInOutWorkspaces() {
                   "FastLog on. ");
     m_forFastLog = true;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -366,8 +358,6 @@ void GenerateEventsFilter::processInputTime() {
                       << "; Run start = " << runstarttime.toISO8601String()
                       << ", Run stop = " << m_runEndTime.toISO8601String()
                       << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -492,8 +482,6 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
       } // END-FOR
     }   // END-WHILE
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -632,8 +620,6 @@ void GenerateEventsFilter::setFilterByLogValue(std::string logname) {
 
   g_log.information() << "Minimum value = " << minvalue << ", "
                       << "maximum value = " << maxvalue << ".\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -682,8 +668,6 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
     ss << " decrease";
   }
   row << 0 << ss.str();
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -798,8 +782,6 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
         indexwsindexmap, logvalueranges, logboundary.compare("centre") == 0,
         filterincrease, filterdecrease, m_startTime, m_stopTime);
   }
-
-  return;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -847,7 +829,7 @@ void GenerateEventsFilter::makeFilterBySingleValue(
   DateAndTime start, stop;
 
   size_t progslot = 0;
-  string info("");
+  string info;
 
   for (int i = 0; i < m_dblLog->size(); i++) {
     lastTime = currT;
@@ -905,8 +887,6 @@ void GenerateEventsFilter::makeFilterBySingleValue(
     addNewTimeFilterSplitter(start, stop, wsindex, info);
     numgood = 0;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1007,8 +987,6 @@ void GenerateEventsFilter::makeMultipleFiltersByValues(
       logvalueranges, tol, filterIncrease, filterDecrease, startTime, stopTime);
 
   progress(1.0);
-
-  return;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -1180,8 +1158,6 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(
     }
 
     progress(1.0);
-
-    return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1423,8 +1399,6 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
     makeSplitterInVector(vecSplitTime, vecSplitGroup, start, stop, lastindex,
                          tol_ns, laststoptime);
   }
-
-  return;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -1588,8 +1562,6 @@ void GenerateEventsFilter::processIntegerValueFilter(int minvalue, int maxvalue,
                       << ": Number of splitters = " << m_vecSplitterGroup.size()
                       << ", Number of split info = "
                       << m_filterInfoWS->rowCount() << ".\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1712,8 +1684,6 @@ void GenerateEventsFilter::addNewTimeFilterSplitter(
     API::TableRow row = m_filterInfoWS->appendRow();
     row << wsindex << info;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1776,17 +1746,15 @@ void GenerateEventsFilter::generateSplittersInMatrixWorkspace() {
 
   m_filterWS =
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
-  MantidVec &dataX = m_filterWS->dataX(0);
+  auto &dataX = m_filterWS->mutableX(0);
   for (size_t i = 0; i < sizex; ++i) {
     dataX[i] = static_cast<double>(m_vecSplitterTime[i].totalNanoseconds());
   }
 
-  MantidVec &dataY = m_filterWS->dataY(0);
+  auto &dataY = m_filterWS->mutableY(0);
   for (size_t i = 0; i < sizey; ++i) {
     dataY[i] = static_cast<double>(m_vecSplitterGroup[i]);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1811,8 +1779,8 @@ void GenerateEventsFilter::generateSplittersInMatrixWorkspaceParallel() {
 
   m_filterWS =
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
-  MantidVec &dataX = m_filterWS->dataX(0);
-  MantidVec &dataY = m_filterWS->dataY(0);
+  auto &dataX = m_filterWS->mutableX(0);
+  auto &dataY = m_filterWS->mutableY(0);
 
   size_t index = 0;
   for (size_t i = 0; i < numThreads; ++i) {
@@ -1825,8 +1793,6 @@ void GenerateEventsFilter::generateSplittersInMatrixWorkspaceParallel() {
   }
   dataX[index] = static_cast<double>(
       m_vecSplitterTimeSet.back().back().totalNanoseconds());
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1842,8 +1808,6 @@ void GenerateEventsFilter::generateSplittersInSplitterWS() {
       m_splitWS->addSplitter(newsplit);
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

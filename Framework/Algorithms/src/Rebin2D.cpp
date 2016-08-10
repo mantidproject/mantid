@@ -202,9 +202,10 @@ Rebin2D::createOutputWorkspace(MatrixWorkspace_const_sptr parent,
   verticalAxis->title() = parent->getAxis(1)->title();
   outputWS->replaceAxis(1, verticalAxis);
 
+  HistogramData::BinEdges binEdges(newXBins);
   // Now set the axis values
   for (size_t i = 0; i < static_cast<size_t>(newYSize - 1); ++i) {
-    outputWS->setX(i, newXBins);
+    outputWS->setBinEdges(i, binEdges);
   }
 
   return outputWS;

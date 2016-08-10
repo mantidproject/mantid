@@ -94,7 +94,7 @@ public:
   getDetectorIDToWorkspaceIndexVector(Mantid::specnum_t &offset,
                                       bool dothrow) const;
   Kernel::DateAndTime getFirstPulseTime() const;
-  void setAllX(Kernel::cow_ptr<MantidVec> &x);
+  void setAllX(const HistogramData::BinEdges &x);
   size_t getNumberEvents() const;
   void resizeTo(const size_t size);
   void padSpectra(const std::vector<int32_t> &padding);

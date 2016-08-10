@@ -271,8 +271,6 @@ void ConvertSpiceDataToRealSpace::parseSampleLogs(
 
     logvecmap.emplace(logname, logvec);
   }
-
-  return;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -440,8 +438,6 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
 
   // Sort out anode id index list;
   std::sort(anodelist.begin(), anodelist.end());
-
-  return;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -528,8 +524,6 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
     // Add log to experiment info
     eilast->mutableRun().addLogData(templog);
   }
-
-  return;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -562,8 +556,6 @@ void ConvertSpiceDataToRealSpace::addExperimentInfos(
   combine_expinfo->mutableRun().addProperty(
       new PropertyWithValue<int>("run_number", -1));
   mdws->addExperimentInfo(combine_expinfo);
-
-  return;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -779,8 +771,6 @@ void ConvertSpiceDataToRealSpace::correctByDetectorEfficiency(
         ws->dataY(iws)[0] /= detiter->second;
     }
   }
-
-  return;
 }
 
 } // namespace DataHandling

@@ -253,8 +253,10 @@ void TomographyIfaceViewQtGUI::doSetupGeneralWidgets() {
   connect(m_ui.pushButton_help, SIGNAL(released()), this, SLOT(openHelpWin()));
   // note connection to the parent window, otherwise you'd be left
   // with an empty frame window
-  connect(m_ui.pushButton_close, SIGNAL(released()), this->parent(),
-          SLOT(close()));
+  if (this->parent()) {
+    connect(m_ui.pushButton_close, SIGNAL(released()), this->parent(),
+            SLOT(close()));
+  }
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionSetup() {

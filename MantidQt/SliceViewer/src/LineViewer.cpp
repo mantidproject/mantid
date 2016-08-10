@@ -5,6 +5,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/VMD.h"
+#include "MantidKernel/UsageService.h"
 #include "MantidQtSliceViewer/LineViewer.h"
 #include <qwt_plot_curve.h>
 #include <qwt_plot.h>
@@ -140,6 +141,9 @@ LineViewer::LineViewer(QWidget *parent)
                    SLOT(refreshPlot()));
   QObject::connect(m_lineOptions, SIGNAL(changedYLogScaling()), this,
                    SLOT(onToggleLogYAxis()));
+
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "SliceViewer->LineViewer", false);
 }
 
 LineViewer::~LineViewer() {}
@@ -474,7 +478,7 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   // If we are rebinning from an existing MDHistoWorkspace, and that workspace
   // has been created with basis vectors normalized, then we reapply that
   // setting here.
-  if (boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws)) {
+  if (m_ws->isMDHistoWorkspace()) {
     alg->setProperty("NormalizeBasisVectors", m_ws->allBasisNormalized());
   }
 

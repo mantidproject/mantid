@@ -212,6 +212,7 @@ void ISISCalibration::run() {
     m_outputCalibrationName += "_multi";
   m_outputCalibrationName += "_calib";
 
+  bool loadLog = m_uiForm.ckLoadLogFiles->isChecked();
   // Configure the calibration algorithm
   IAlgorithm_sptr calibrationAlg =
       AlgorithmManager::Instance().create("IndirectCalibration");
@@ -223,6 +224,7 @@ void ISISCalibration::run() {
   calibrationAlg->setProperty("DetectorRange", instDetectorRange.toStdString());
   calibrationAlg->setProperty("PeakRange", peakRange.toStdString());
   calibrationAlg->setProperty("BackgroundRange", backgroundRange.toStdString());
+  calibrationAlg->setProperty("LoadLogFiles", loadLog);
 
   if (m_uiForm.ckScale->isChecked()) {
     double scale = m_uiForm.spScale->value();
@@ -279,6 +281,7 @@ void ISISCalibration::run() {
     resAlg->setProperty("RebinParam", rebinString.toStdString());
     resAlg->setProperty("DetectorRange", resDetectorRange.toStdString());
     resAlg->setProperty("BackgroundRange", background.toStdString());
+    resAlg->setProperty("LoadLogFiles", loadLog);
 
     if (m_uiForm.ckResolutionScale->isChecked())
       resAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
@@ -499,6 +502,8 @@ void ISISCalibration::calPlotEnergy() {
   reductionAlg->setProperty("OutputWorkspace",
                             "__IndirectCalibration_reduction");
   reductionAlg->setProperty("SpectraRange", detRange.toStdString());
+  reductionAlg->setProperty("LoadLogFiles",
+                            m_uiForm.ckLoadLogFiles->isChecked());
   reductionAlg->execute();
 
   if (!reductionAlg->isExecuted()) {

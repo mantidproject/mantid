@@ -20,29 +20,28 @@ namespace MDAlgorithms {
 class DLLExport IntegratePeaksCWSD : public API::Algorithm {
 public:
   IntegratePeaksCWSD();
-  ~IntegratePeaksCWSD();
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "IntegratePeaksCWSD"; }
+  const std::string name() const override { return "IntegratePeaksCWSD"; }
 
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
+  const std::string summary() const override {
     return "Integrate single-crystal peaks in reciprocal space, for "
            "MDEventWorkspaces from reactor-source single crystal "
            "diffractometer.";
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; }
+  int version() const override { return 1; }
 
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "MDAlgorithms\\Peaks"; }
+  const std::string category() const override { return "MDAlgorithms\\Peaks"; }
 
 private:
   /// Initialise the properties
-  void init();
+  void init() override;
   /// Run the algorithm
-  void exec();
+  void exec() override;
 
   /// Process and check input properties
   void processInputs();

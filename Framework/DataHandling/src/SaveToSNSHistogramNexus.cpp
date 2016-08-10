@@ -547,7 +547,7 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
         if (!strcmp(current_path, link.targetPath)) {
           // Look for the bank name
           std::string path(current_path);
-          std::string bank("");
+          std::string bank;
 
           size_t a = path.rfind('/');
           if (a != std::string::npos && a > 0) {
@@ -717,8 +717,6 @@ void SaveToSNSHistogramNexus::exec() {
 
   if (ret == NX_ERROR)
     throw std::runtime_error("Nexus error while copying the file.");
-
-  return;
 }
 
 } // namespace NeXus

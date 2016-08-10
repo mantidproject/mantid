@@ -87,8 +87,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                              doc='Interpolate the correction workspaces to match the sample workspace')
 
         self.declareProperty(name='Emode', defaultValue='Elastic',
-                             validator=StringListValidator(['Elastic', 'Indirect']),
-                             doc='Emode: Elastic or Indirect')
+                             validator=StringListValidator(['Elastic', 'Indirect', 'Direct']),
+                             doc='Energy transfer mode')
         self.declareProperty(name='Efixed', defaultValue=1.0,
                              doc='Analyser energy')
 
@@ -281,7 +281,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         if self._emode == 'Elastic':
             self._elastic = self._waves[int(number_waves / 2)]
-        elif self._emode == 'Indirect':
+        else:
             self._elastic = math.sqrt(81.787 / self._efixed)  # elastic wavelength
 
         logger.information('Elastic lambda %f' % self._elastic)

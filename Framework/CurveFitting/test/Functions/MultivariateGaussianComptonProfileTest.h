@@ -4,11 +4,9 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h"
 
-#include "MantidAPI/FunctionDomain1D.h"
 #include "ComptonProfileTestHelpers.h"
 
 using Mantid::CurveFitting::Functions::MultivariateGaussianComptonProfile;
-using Mantid::CurveFitting::Functions::ComptonProfile;
 
 class MultivariateGaussianComptonProfileTest : public CxxTest::TestSuite {
 public:

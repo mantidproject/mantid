@@ -1,4 +1,5 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import (MatrixWorkspaceProperty, DataProcessorAlgorithm, AlgorithmFactory)
 from mantid.simpleapi import *
@@ -13,7 +14,7 @@ class NormaliseSpectra(DataProcessorAlgorithm):
 
 
     def category(self):
-        return 'Workflow\\MIDAS;PythonAlgorithms;Inelastic'
+        return 'Workflow\\MIDAS;Inelastic'
 
 
     def summary(self):

@@ -1,10 +1,13 @@
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
 
 #include <boost/python/class.hpp>
 
 using namespace Mantid::Geometry;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(SpaceGroupFactoryImpl)
 
 namespace {
 using namespace Mantid::PythonInterface;

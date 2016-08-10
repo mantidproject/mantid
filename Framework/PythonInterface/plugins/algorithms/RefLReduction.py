@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.simpleapi import *
 
@@ -76,7 +77,7 @@ class RefLReduction(PythonAlgorithm):
     #pylint: disable=too-many-locals, too-many-branches
     def PyExec(self):
 
-        print '-- > starting new Reflectometer Reduction ...'
+        print('-- > starting new Reflectometer Reduction ...')
 
         from reduction.instruments.reflectometer import wks_utility
 
@@ -89,7 +90,7 @@ class RefLReduction(PythonAlgorithm):
                 DeleteWorkspace(_mt)
 
         # retrieve settings from GUI
-        print '-> Retrieving settings from GUI'
+        print('-> Retrieving settings from GUI')
 
         #print 'RunNumbers: '  + str(self.getProperty("RunNumbers").value)
         #print 'NormalizationRunNumber: ' + str(self.getProperty("NormalizationRunNumber").value)
@@ -181,7 +182,7 @@ class RefLReduction(PythonAlgorithm):
         ws_event_data = wks_utility.loadNeXus(dataRunNumbers, 'data')
 
         is_nexus_detector_rotated_flag = wks_utility.isNexusTakeAfterRefDate(ws_event_data.getRun().getProperty('run_start').value)
-        print '-> is NeXus taken with new detector geometry: ' + str(is_nexus_detector_rotated_flag)
+        print('-> is NeXus taken with new detector geometry: ' + str(is_nexus_detector_rotated_flag))
 
         #dimension of the detector (256 by 304 pixels)
         if is_nexus_detector_rotated_flag:
@@ -193,7 +194,7 @@ class RefLReduction(PythonAlgorithm):
 
         ## retrieve general informations
         # calculate the central pixel (using weighted average)
-        print '-> retrieving general informations'
+        print('-> retrieving general informations')
         data_central_pixel = wks_utility.getCentralPixel(ws_event_data,
                                                          dataPeakRange,
                                                          is_nexus_detector_rotated_flag)

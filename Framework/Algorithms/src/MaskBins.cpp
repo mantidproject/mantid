@@ -68,7 +68,7 @@ void MaskBins::exec() {
 
   if (m_startX > m_endX) {
     std::stringstream msg;
-    msg << "XMax (" << m_startX << ") must be greater than XMin (" << m_endX
+    msg << "XMax (" << m_endX << ") must be greater than XMin (" << m_startX
         << ")";
     g_log.error(msg.str());
     throw std::invalid_argument(msg.str());
@@ -154,8 +154,6 @@ void MaskBins::exec() {
 
     } // ENDFOR(i)
   }   // ENDIFELSE(eventworkspace?)
-
-  return;
 }
 
 /** Execution code for EventWorkspaces

@@ -396,6 +396,7 @@ public:
     std::ifstream filestrm(filename.c_str());
     std::string line;
     int bin_no(1);
+    double x_value = 1.0;
     while (getline(filestrm, line)) {
       if (line[0] == '#')
         continue;
@@ -406,13 +407,14 @@ public:
       case 1:
       case 2:
       case 3:
-        TS_ASSERT_DELTA(x, 1.0, m_tol);
+        TS_ASSERT_DELTA(x, x_value, m_tol);
         TS_ASSERT_DELTA(y, 5.0, m_tol);
         TS_ASSERT_DELTA(e, 4.0, m_tol);
         break;
       default:
         TS_ASSERT(false);
       }
+      x_value += 1.0;
       ++bin_no;
     }
     filestrm.close();

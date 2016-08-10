@@ -12,6 +12,7 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::HistogramData;
 using namespace Mantid::DataObjects;
 
 using std::runtime_error;
@@ -67,8 +68,8 @@ public:
     // Modify EventList such that is does not contain default values.
     el.setSpectrumNo(42);
     MantidVec x{0.1, 0.2, 0.3};
-    el.setX(x);
-    el.setDx(x);
+    el.setX(make_cow<HistogramX>(x));
+    el.setSharedDx(Kernel::make_cow<HistogramData::HistogramDx>(x));
 
     EventList other;
     other = el;
@@ -78,7 +79,7 @@ public:
     TS_ASSERT_EQUALS(other.getSpectrumNo(), el.getSpectrumNo());
     TS_ASSERT_EQUALS(other.getDetectorIDs(), el.getDetectorIDs());
     TS_ASSERT_EQUALS(other.readX(), el.readX());
-    TS_ASSERT_EQUALS(other.readDx(), el.readDx());
+    TS_ASSERT_EQUALS(other.sharedDx(), el.sharedDx());
   }
 
   //==================================================================================
@@ -301,13 +302,8 @@ public:
   //==================================================================================
 
   /// Make a big bin holding all events
-  MantidVecPtr one_big_bin() {
-    // Generate the histrogram bins
-    MantidVecPtr x;
-    MantidVec &shared_x = x.access();
-    shared_x.push_back(0);
-    shared_x.push_back(1e10);
-    return x;
+  cow_ptr<HistogramX> one_big_bin() {
+    return make_cow<HistogramX>(std::initializer_list<double>{0, 1e10});
   }
 
   void test_MinusOperator_all_9_possibilites() {
@@ -766,10 +762,10 @@ public:
       // bins of 10 microsec
       shared_x.push_back(tof);
     }
-    el.setX(shared_x);
+    el.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
     const EventList el2(el);
-    TS_ASSERT(el2.constDataX() == shared_x);
+    TS_ASSERT(el2.readX() == shared_x);
   }
 
   void test_dataX() {
@@ -789,10 +785,10 @@ public:
       // bins of 10 microsec
       shared_x.push_back(tof);
     }
-    el.setX(shared_x);
+    el.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
     const EventList el2(el);
-    TS_ASSERT(el2.constDataX() == shared_x);
+    TS_ASSERT(el2.readX() == shared_x);
   }
 
   void test_empty_histogram() {
@@ -807,7 +803,7 @@ public:
     // Now do set up an X axis.
     this->test_setX();
     const EventList el3(el);
-    MantidVec X = el3.constDataX();
+    MantidVec X = el3.readX();
     boost::scoped_ptr<MantidVec> Y3(el3.makeDataY());
     // Histogram is 0, since I cleared all the events
     for (std::size_t i = 0; i < X.size() - 1; i++) {
@@ -834,7 +830,7 @@ public:
       this->test_setX();       // Set it up
       const EventList el3(el); // need to copy to a const method in order to
                                // access the data directly.
-      MantidVec X = el3.constDataX();
+      MantidVec X = el3.readX();
       boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
       boost::scoped_ptr<MantidVec> E(el3.makeDataE());
       TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
@@ -859,11 +855,11 @@ public:
       shared_x.push_back(pulse_time);
     }
 
-    eList.setX(shared_x);
+    eList.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
-    TS_ASSERT(eList.constDataX() == shared_x);
+    TS_ASSERT(eList.readX() == shared_x);
 
-    MantidVec X = eList.constDataX();
+    MantidVec X = eList.readX();
     MantidVec Y;
     MantidVec E;
 
@@ -885,11 +881,11 @@ public:
       shared_x.push_back(pulse_time);
     }
 
-    eList.setX(shared_x);
+    eList.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
-    TS_ASSERT(eList.constDataX() == shared_x);
+    TS_ASSERT(eList.readX() == shared_x);
 
-    MantidVec X = eList.constDataX();
+    MantidVec X = eList.readX();
     MantidVec Y;
     MantidVec E;
 
@@ -909,11 +905,11 @@ public:
       shared_x.push_back(time_at_sample);
     }
 
-    eList.setX(shared_x);
+    eList.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
-    TS_ASSERT(eList.constDataX() == shared_x);
+    TS_ASSERT(eList.readX() == shared_x);
 
-    MantidVec X = eList.constDataX();
+    MantidVec X = eList.readX();
     MantidVec Y;
     MantidVec E;
 
@@ -970,11 +966,11 @@ public:
                                                 // microseconds.
     }
 
-    this->el.setX(shared_x);
+    el.setX(make_cow<HistogramX>(shared_x));
     // Do we have the same data in X?
-    TS_ASSERT(el.constDataX() == shared_x);
+    TS_ASSERT(el.readX() == shared_x);
 
-    MantidVec X = el.constDataX();
+    MantidVec X = el.readX();
     MantidVec Y;
     MantidVec E;
 
@@ -1030,7 +1026,7 @@ public:
 
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
-    MantidVec X = el3.constDataX();
+    MantidVec X = el3.readX();
     boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
     boost::scoped_ptr<MantidVec> E(el3.makeDataE());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
@@ -1050,7 +1046,7 @@ public:
     this->test_setX();       // Set it up
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
-    MantidVec X = el3.constDataX();
+    MantidVec X = el3.readX();
     boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
     boost::scoped_ptr<MantidVec> E(el3.makeDataE());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
@@ -1073,12 +1069,12 @@ public:
     for (double tof = BIN_DELTA * 10; tof < BIN_DELTA * (NUMBINS + 1);
          tof += BIN_DELTA)
       shared_x.push_back(tof);
-    el.setX(shared_x);
+    el.setX(make_cow<HistogramX>(shared_x));
 
     // Get them back
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
-    MantidVec X = el3.constDataX();
+    MantidVec X = el3.readX();
     boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
 
@@ -1097,10 +1093,10 @@ public:
     for (double tof = BIN_DELTA * 10; tof < BIN_DELTA * (NUMBINS + 1);
          tof += BIN_DELTA)
       shared_x.push_back(tof);
-    el.setX(shared_x);
+    el.setX(make_cow<HistogramX>(shared_x));
     const EventList el3(el); // need to copy to a const method in order to
                              // access the data directly.
-    MantidVec X = el3.constDataX();
+    MantidVec X = el3.readX();
     boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
     for (std::size_t i = 0; i < Y->size(); i++) {
@@ -1112,7 +1108,7 @@ public:
     this->fake_data();
     this->test_setX();
     const EventList el3(el);
-    MantidVec X = el3.constDataX();
+    MantidVec X = el3.readX();
     boost::scoped_ptr<MantidVec> Y(el3.makeDataY());
     TS_ASSERT_EQUALS(Y->size(), X.size() - 1);
     for (std::size_t i = 0; i < X.size() - 1; i++) {
@@ -2467,6 +2463,147 @@ public:
         return ret;
     }
     return ret;
+  }
+
+  void test_readYE_throws_without_MRU() {
+    const EventList el;
+    TS_ASSERT_THROWS(el.readY(), std::runtime_error);
+    TS_ASSERT_THROWS(el.dataY(), std::runtime_error);
+    TS_ASSERT_THROWS(el.readE(), std::runtime_error);
+    TS_ASSERT_THROWS(el.dataE(), std::runtime_error);
+  }
+
+  void test_counts_works_without_MRU() {
+    EventList el;
+    TS_ASSERT_THROWS_NOTHING(el.counts());
+    TS_ASSERT_THROWS_NOTHING(el.countStandardDeviations());
+  }
+
+  void test_setPoints_fails() {
+    EventList el;
+    el.setHistogram(HistogramData::BinEdges{0, 2});
+    TS_ASSERT_THROWS_NOTHING(el.setBinEdges(HistogramData::BinEdges{0, 2}));
+    TS_ASSERT_THROWS(el.setPoints(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setPointVariances(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setPointStandardDeviations(1), std::runtime_error);
+  }
+
+  void test_setCounts_fails() {
+    EventList el;
+    el.setHistogram(HistogramData::BinEdges{0, 2});
+    TS_ASSERT_THROWS(el.setCounts(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setCountVariances(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setCountStandardDeviations(1), std::runtime_error);
+  }
+
+  void test_setFrequencies_fails() {
+    EventList el;
+    el.setHistogram(HistogramData::BinEdges{0, 2});
+    TS_ASSERT_THROWS(el.setFrequencies(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setFrequencyVariances(1), std::runtime_error);
+    TS_ASSERT_THROWS(el.setFrequencyStandardDeviations(1), std::runtime_error);
+  }
+
+  void test_setShared_fails() {
+    EventList el;
+    TS_ASSERT_THROWS_NOTHING(el.setSharedX(el.sharedX()));
+    TS_ASSERT_THROWS(el.setSharedY(el.sharedY()), std::runtime_error);
+    TS_ASSERT_THROWS(el.setSharedE(el.sharedE()), std::runtime_error);
+  }
+
+  void test_mutable_access_fails() {
+    EventList el;
+    TS_ASSERT_THROWS_NOTHING(el.mutableX());
+    TS_ASSERT_THROWS(el.mutableY(), std::runtime_error);
+    TS_ASSERT_THROWS(el.mutableE(), std::runtime_error);
+  }
+
+  void test_histogram() {
+    EventList el;
+    el += TofEvent(1);
+    el.setHistogram(HistogramData::BinEdges{0, 2, 4});
+    auto histogram = el.histogram();
+    TS_ASSERT(histogram.sharedY());
+    TS_ASSERT(histogram.sharedE());
+    el += TofEvent(1);
+    el += TofEvent(3);
+    TS_ASSERT_EQUALS(histogram.y()[0], 1.0);
+    TS_ASSERT_EQUALS(histogram.y()[1], 0.0);
+    auto updated = el.histogram();
+    TS_ASSERT_EQUALS(updated.y()[0], 2.0);
+    TS_ASSERT_EQUALS(updated.y()[1], 1.0);
+    TS_ASSERT_EQUALS(updated.e()[0], M_SQRT2);
+    TS_ASSERT_EQUALS(updated.e()[1], 1.0);
+  }
+
+  void test_histogram_no_mru() {
+    EventList el;
+    auto hist1 = el.histogram();
+    auto hist2 = el.histogram();
+    TS_ASSERT_EQUALS(hist1.sharedX(), hist2.sharedX());
+    TS_ASSERT_DIFFERS(hist1.sharedY(), hist2.sharedY());
+    TS_ASSERT_DIFFERS(hist1.sharedE(), hist2.sharedE());
+  }
+
+  void test_setHistogram() {
+    EventList el;
+    HistogramData::Histogram histogram(HistogramData::BinEdges{0, 2, 4});
+    TS_ASSERT_THROWS_NOTHING(el.setHistogram(histogram));
+    TS_ASSERT_EQUALS(el.sharedX(), histogram.sharedX());
+    histogram.setCounts(2);
+    TS_ASSERT_THROWS(el.setHistogram(histogram), std::runtime_error);
+    HistogramData::Histogram points(HistogramData::Points{0, 2});
+    TS_ASSERT_THROWS(el.setHistogram(points), std::runtime_error);
+  }
+
+  void test_YMode() {
+    EventList e;
+    TS_ASSERT_EQUALS(e.yMode(), HistogramData::Histogram::YMode::Counts);
+  }
+
+  void test_setHistogram_rejects_YMode_Frequencies() {
+    EventList e;
+    HistogramData::Histogram h(BinEdges(0));
+    h.setYMode(HistogramData::Histogram::YMode::Counts);
+    TS_ASSERT_THROWS_NOTHING(e.setHistogram(h));
+    h.setYMode(HistogramData::Histogram::YMode::Frequencies);
+    TS_ASSERT_THROWS(e.setHistogram(h), std::runtime_error);
+  }
+
+  void test_setHistogram_preserves_YMode_when_setting_uninitialized() {
+    EventList e;
+    HistogramData::Histogram h(BinEdges(0));
+    TS_ASSERT_EQUALS(h.yMode(), HistogramData::Histogram::YMode::Uninitialized);
+    TS_ASSERT_THROWS_NOTHING(e.setHistogram(h));
+    TS_ASSERT_EQUALS(e.yMode(), HistogramData::Histogram::YMode::Counts);
+  }
+
+  void test_histogram_has_correct_YMode() {
+    EventList e;
+    e.setYMode(HistogramData::Histogram::YMode::Frequencies);
+    TS_ASSERT_EQUALS(e.histogram().yMode(),
+                     HistogramData::Histogram::YMode::Frequencies);
+  }
+
+  void test_YMode_affects_event_data_interpretation() {
+    // Data generated from the events is put into the histogram as Y and E.
+    // Depending on the YMode, this is interpreted as Counts or Frequencies. In
+    // particular, data generated from events is *not* forcibly intepreted as
+    // counts, i.e., internally we do not use Histogram.setCounts(), since the
+    // bin width may be absorbed into the event weight.
+    EventList e;
+    e += TofEvent(1);
+    e += TofEvent(1);
+    e += TofEvent(3);
+    e.setHistogram(HistogramData::BinEdges{0, 2, 4});
+    auto countHist = e.histogram();
+    TS_ASSERT_EQUALS(countHist.counts()[0], 2.0);
+    TS_ASSERT_EQUALS(countHist.counts()[1], 1.0);
+    // Intepret events as if weighted by bin width, happens, e.g., in 'Divide'.
+    e.setYMode(HistogramData::Histogram::YMode::Frequencies);
+    auto freqHist = e.histogram();
+    TS_ASSERT_EQUALS(freqHist.counts()[0], 4.0);
+    TS_ASSERT_EQUALS(freqHist.counts()[1], 2.0);
   }
 };
 

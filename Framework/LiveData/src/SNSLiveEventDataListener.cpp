@@ -330,11 +330,9 @@ void SNSLiveEventDataListener::run() {
         " Thread is exiting.");
     m_isConnected = false;
 
-    m_backgroundException = boost::shared_ptr<std::runtime_error>(
-        new std::runtime_error("Unknown error in backgound thread"));
+    m_backgroundException = boost::make_shared<std::runtime_error>(
+        "Unknown error in backgound thread");
   }
-
-  return;
 }
 
 /// Parse a banked event packet

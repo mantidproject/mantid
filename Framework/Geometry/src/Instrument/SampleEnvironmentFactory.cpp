@@ -1,5 +1,6 @@
 #include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
 #include "MantidGeometry/Instrument/SampleEnvironmentSpecParser.h"
+#include "MantidKernel/Material.h"
 
 #include "Poco/File.h"
 #include "Poco/Path.h"
@@ -77,7 +78,7 @@ SampleEnvironment_uptr SampleEnvironmentFactory::create(
   } else {
     auto specUPtr = m_finder->find(facility, instrument, specName);
     spec = specUPtr.get();
-    specCache.insert(std::make_pair(cacheKey, std::move(specUPtr)));
+    specCache.emplace(cacheKey, std::move(specUPtr));
   }
   return spec->buildEnvironment(canName);
 }

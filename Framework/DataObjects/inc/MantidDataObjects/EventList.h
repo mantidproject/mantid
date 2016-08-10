@@ -6,20 +6,20 @@
 #endif
 #include "MantidAPI/IEventList.h"
 #include "MantidDataObjects/Events.h"
-#include "MantidDataObjects/EventWorkspaceMRU.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/cow_ptr.h"
 #include <cstddef>
 #include <iosfwd>
 #include <set>
 #include <vector>
-#include "MantidKernel/MultiThreaded.h"
 
 namespace Mantid {
 namespace DataObjects {
+class EventWorkspaceMRU;
 
 /// How the event list is sorted.
 enum EventSortType {
@@ -158,8 +158,6 @@ public:
 
   void setMRU(EventWorkspaceMRU *newMRU);
 
-  EventWorkspaceMRU *getMRU();
-
   void clearData() override;
 
   void reserve(size_t num) override;
@@ -182,66 +180,36 @@ public:
   EventSortType getSortType() const;
 
   // X-vector accessors. These reset the MRU for this spectrum
-  void setX(const MantidVecPtr::ptr_type &X) override;
-
-  void setX(const MantidVecPtr &X) override;
-
-  void setX(const MantidVec &X) override;
-
+  void setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) override;
   MantidVec &dataX() override;
   const MantidVec &dataX() const override;
-  const MantidVec &constDataX() const;
+  const MantidVec &readX() const override;
+  Kernel::cow_ptr<HistogramData::HistogramX> ptrX() const override;
 
-  // TODO: This overload will probably be needed in a future to work with Event
-  // data properly
-  // std::pair<double,double> getXDataRange()const;
+  MantidVec &dataDx() override;
+  const MantidVec &dataDx() const override;
+  const MantidVec &readDx() const override;
 
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVec & /*Y*/) override {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVec & /*Y*/, const MantidVec & /*E*/) override {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVecPtr & /*Y*/) override {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVecPtr & /*Y*/,
-               const MantidVecPtr & /*E*/) override {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVecPtr::ptr_type & /*Y*/) override {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
-  void setData(const MantidVecPtr::ptr_type & /*Y*/,
-               const MantidVecPtr::ptr_type & /*E*/) override {
-    throw std::runtime_error("EventList: cannot set Y or E data directly.");
-  }
-
-  /// Disallowed data accessors - can't modify Y/E on a EventList
+  /// Deprecated, use mutableY() instead. Disallowed data accessors - can't
+  /// modify Y/E on a EventList
   MantidVec &dataY() override {
     throw std::runtime_error(
         "EventList: non-const access to Y data is not possible.");
   }
-  /// Disallowed data accessors - can't modify Y/E on a EventList
+  /// Deprecated, use mutableE() instead. Disallowed data accessors - can't
+  /// modify Y/E on a EventList
   MantidVec &dataE() override {
     throw std::runtime_error(
         "EventList: non-const access to E data is not possible.");
   }
 
   // Allowed data accessors - read-only Y/E histogram VIEWS of an event list
-  /// Return a read-only Y histogram view of an event list
-  const MantidVec &dataY() const override { return constDataY(); }
-  /// Return a read-only E histogram view of an event list
-  const MantidVec &dataE() const override { return constDataE(); }
-
-  const MantidVec &constDataY() const;
-  const MantidVec &constDataE() const;
+  /// Deprecated, use y() instead. Return a read-only Y histogram view of an
+  /// event list
+  const MantidVec &dataY() const override;
+  /// Deprecated, use e() instead. Return a read-only E histogram view of an
+  /// event list
+  const MantidVec &dataE() const override;
 
   MantidVec *makeDataY() const;
   MantidVec *makeDataE() const;
@@ -357,7 +325,36 @@ public:
                           Mantid::Kernel::Unit *toUnit);
   void convertUnitsQuickly(const double &factor, const double &power);
 
+  /// Returns the Histogram associated with this spectrum. Y and E data is
+  /// computed from the event list.
+  HistogramData::Histogram histogram() const override;
+  HistogramData::Counts counts() const override;
+  HistogramData::CountVariances countVariances() const override;
+  HistogramData::CountStandardDeviations
+  countStandardDeviations() const override;
+  HistogramData::Frequencies frequencies() const override;
+  HistogramData::FrequencyVariances frequencyVariances() const override;
+  HistogramData::FrequencyStandardDeviations
+  frequencyStandardDeviations() const override;
+  const HistogramData::HistogramY &y() const override;
+  const HistogramData::HistogramE &e() const override;
+  Kernel::cow_ptr<HistogramData::HistogramY> sharedY() const override;
+  Kernel::cow_ptr<HistogramData::HistogramE> sharedE() const override;
+
+protected:
+  void checkAndSanitizeHistogram(HistogramData::Histogram &histogram) override;
+  void checkWorksWithPoints() const override;
+  void checkIsYAndEWritable() const override;
+
 private:
+  const HistogramData::Histogram &histogramRef() const override {
+    return m_histogram;
+  }
+  HistogramData::Histogram &mutableHistogramRef() override;
+
+  /// Histogram object holding the histogram data. Currently only X.
+  HistogramData::Histogram m_histogram;
+
   /// List of TofEvent (no weights).
   mutable std::vector<TofEvent> events;
 

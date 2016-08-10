@@ -1,5 +1,4 @@
 #include "MantidAlgorithms/GetDetOffsetsMultiPeaks.h"
-#include "MantidAlgorithms/GSLFunctions.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -19,7 +18,9 @@
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <gsl/gsl_multifit_nlin.h>
+#include <gsl/gsl_multimin.h>
+
 #include <sstream>
 
 namespace Mantid {
@@ -281,8 +282,6 @@ void GetDetOffsetsMultiPeaks::exec() {
   // Make summary
   progress(0.92, "Making summary");
   makeFitSummary();
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -380,8 +379,6 @@ void GetDetOffsetsMultiPeaks::processProperties() {
       throw std::runtime_error(
           "Input workspace does not match resolution workspace. ");
   }
-
-  return;
 }
 
 //-----------------------------------------------------------------------------------------
@@ -463,8 +460,6 @@ void GetDetOffsetsMultiPeaks::importFitWindowTableWorkspace(
       if (m_vecFitWindow[i].empty())
         m_vecFitWindow[i] = vec_univFitWindow;
   }
-
-  return;
 }
 
 //-----------------------------------------------------------------------------------------
@@ -515,10 +510,10 @@ void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
           if (offsetresult.mask > 0.9) {
             // Being masked
             m_maskWS->maskWorkspaceIndex(workspaceIndex);
-            m_maskWS->dataY(workspaceIndex)[0] = offsetresult.mask;
+            m_maskWS->mutableY(workspaceIndex)[0] = offsetresult.mask;
           } else {
             // Using the detector
-            m_maskWS->dataY(workspaceIndex)[0] = offsetresult.mask;
+            m_maskWS->mutableY(workspaceIndex)[0] = offsetresult.mask;
 
             // check the average value of delta(d)/d.  if it is far off the
             // theorical value, output
@@ -526,7 +521,7 @@ void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
             // that are too wide or narrow.
             // TODO - Delete the if statement below if it is never triggered.
             if (m_hasInputResolution) {
-              double pixelresolution = m_inputResolutionWS->readY(wi)[0];
+              double pixelresolution = m_inputResolutionWS->y(wi)[0];
               if (offsetresult.resolution > 10 * pixelresolution ||
                   offsetresult.resolution < 0.1 * pixelresolution)
                 g_log.warning() << "Spectrum " << wi
@@ -546,8 +541,6 @@ void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
-
-    return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -584,7 +577,7 @@ FitPeakOffsetResult GetDetOffsetsMultiPeaks::calculatePeakOffset(
     fr.fitoffsetstatus = "empty det";
   } else {
     // dead detector will be masked
-    const MantidVec &Y = m_inputWS->readY(wi);
+    const auto &Y = m_inputWS->y(wi);
     const int YLength = static_cast<int>(Y.size());
     double sumY = 0.0;
     size_t numNonEmptyBins = 0;
@@ -770,7 +763,6 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
   gsl_vector_free(x);
   gsl_vector_free(ss);
   gsl_multimin_fminimizer_free(s);
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -802,8 +794,6 @@ void deletePeaks(std::vector<size_t> &banned, std::vector<double> &peakPosToFit,
     vecDeltaDovD.erase(vecDeltaDovD.begin() + (*it));
   }
   banned.clear();
-
-  return;
 }
 }
 
@@ -835,12 +825,12 @@ int GetDetOffsetsMultiPeaks::fitSpectra(
     std::vector<double> &peakHeights, int &i_highestpeak, double &resolution,
     double &dev_resolution) {
   // Default overall fit range is the whole spectrum
-  const MantidVec &X = inputW->readX(wi);
+  const auto &X = inputW->x(wi);
   minD = X.front();
   maxD = X.back();
 
   // Trim in the edges based on where the data turns off of zero
-  const MantidVec &Y = inputW->readY(wi);
+  const auto &Y = inputW->y(wi);
   size_t minDindex = 0;
   for (; minDindex < Y.size(); ++minDindex) {
     if (Y[minDindex] > 0.) {
@@ -1035,7 +1025,7 @@ void GetDetOffsetsMultiPeaks::generatePeaksList(
     // - check peak's resolution
     double widthdevpos = width / centre;
     if (m_hasInputResolution) {
-      double recres = m_inputResolutionWS->readY(wi)[0];
+      double recres = m_inputResolutionWS->y(wi)[0];
       double resmax = recres * m_maxResFactor;
       double resmin = recres * m_minResFactor;
       if (widthdevpos < resmin || widthdevpos > resmax) {
@@ -1119,8 +1109,6 @@ void GetDetOffsetsMultiPeaks::generatePeaksList(
   Statistics widthDivPos = getStatistics(vec_widthDivPos);
   deltaDovD = widthDivPos.mean;
   dev_deltaDovD = widthDivPos.standard_deviation;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1170,8 +1158,6 @@ void GetDetOffsetsMultiPeaks::createInformationWorkspaces() {
   // Create resolution (delta(d)/d) workspace
   m_resolutionWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", numspec, 1, 1));
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1192,15 +1178,15 @@ void GetDetOffsetsMultiPeaks::addInfoToReportWS(
   m_infoTableWS->cell<double>(wi, 7) = offsetresult.highestpeakdev;
 
   // Peak width delta(d)/d
-  m_resolutionWS->dataX(wi)[0] = static_cast<double>(wi);
+  m_resolutionWS->mutableX(wi)[0] = static_cast<double>(wi);
   if (offsetresult.fitoffsetstatus.compare("success") == 0) {
     // Only add successfully calculated value
-    m_resolutionWS->dataY(wi)[0] = offsetresult.resolution;
-    m_resolutionWS->dataE(wi)[0] = offsetresult.dev_resolution;
+    m_resolutionWS->mutableY(wi)[0] = offsetresult.resolution;
+    m_resolutionWS->mutableE(wi)[0] = offsetresult.dev_resolution;
   } else {
     // Only add successfully calculated value
-    m_resolutionWS->dataY(wi)[0] = 0.0;
-    m_resolutionWS->dataE(wi)[0] = 0.0;
+    m_resolutionWS->mutableY(wi)[0] = 0.0;
+    m_resolutionWS->mutableE(wi)[0] = 0.0;
   }
 
   // Peak-fitting information:  Record: (found peak position) - (target peak
@@ -1254,8 +1240,6 @@ void GetDetOffsetsMultiPeaks::addInfoToReportWS(
     size_t icol = m_peakOffsetTableWS->columnCount() - 1;
     m_peakOffsetTableWS->cell<double>(wi, icol) = stddev;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1288,8 +1272,6 @@ void GetDetOffsetsMultiPeaks::removeEmptyRowsFromPeakOffsetTable() {
       ++icurrow;
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

@@ -2,6 +2,7 @@
 #from mantid.api import AlgorithmFactory
 #from mantid.simpleapi import PythonAlgorithm, WorkspaceProperty
 # from mantid.kernel import Direction
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import *
 import mantid.simpleapi
@@ -22,7 +23,7 @@ class LoadVisionElasticBS(PythonAlgorithm):
         return "This algorithm loads only the backscattering elastic detectors on VISION."
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "", action=FileAction.Load, extensions=["*.nxs.h5"]))
+        self.declareProperty(FileProperty("Filename", "", action=FileAction.Load, extensions=[".nxs.h5"]))
         self.declareProperty("Banks", "all")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output))
 

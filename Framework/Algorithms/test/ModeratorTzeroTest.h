@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_MODERATORTZEROTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -16,6 +17,8 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Algorithms;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::LinearGenerator;
 
 class ModeratorTzeroTest : public CxxTest::TestSuite {
 public:
@@ -239,20 +242,15 @@ private:
             numHists, numBins, true);
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    MantidVecPtr xdata;
-    xdata.access().resize(numBins + 1);
+    BinEdges xdata(numBins + 1, LinearGenerator(0.0, 4.0));
     const double peakHeight(1000.), peakCentre(7000.), sigmaSq(1000 * 1000.);
     // tof ranges from 0 to 16000 (units assumed micro-seconds
-    const double rescaling_factor(4.0);
     for (int ibin = 0; ibin < numBins; ++ibin) {
-      const double xValue = rescaling_factor * ibin;
       testWS->dataY(0)[ibin] =
-          peakHeight * exp(-0.5 * pow(xValue - peakCentre, 2.) / sigmaSq);
-      xdata.access()[ibin] = xValue;
+          peakHeight * exp(-0.5 * pow(xdata[ibin] - peakCentre, 2.) / sigmaSq);
     }
-    xdata.access()[numBins] = rescaling_factor * numBins;
     for (int ihist = 0; ihist < numHists; ihist++)
-      testWS->setX(ihist, xdata);
+      testWS->setBinEdges(ihist, xdata);
     return testWS;
   }
 
@@ -268,15 +266,13 @@ private:
     const size_t numHists = testWS->getNumberHistograms();
     for (size_t ihist = 0; ihist < numHists; ++ihist) {
       EventList &evlist = testWS->getSpectrum(ihist);
-      MantidVecPtr xdata;
-      xdata.access().resize(numBins + 1);
+      BinEdges xdata(numBins + 1, LinearGenerator(0.0, rescaling_factor));
       for (int ibin = 0; ibin <= numBins; ++ibin) {
         double tof = rescaling_factor * ibin;
         TofEvent tofevent(tof);
-        xdata.access()[ibin] = tof;
         evlist.addEventQuickly(tofevent); // insert event
       }
-      evlist.setX(xdata); // set the bins for the associated histogram
+      evlist.setX(xdata.cowData()); // set the bins for the associated histogram
     }
     return testWS;
   }

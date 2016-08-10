@@ -1,4 +1,5 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -107,14 +108,15 @@ class IndirectTransmission(PythonAlgorithm):
 
         logger.notice('Analyser : ' + analyser + reflection + ' with energy = ' + str(efixed))
 
-        result = SetSampleMaterial(InputWorkspace=workspace, ChemicalFormula=formula)
+        SetSampleMaterial(InputWorkspace=workspace, ChemicalFormula=formula)
 
         # Elastic wavelength
         wave = 1.8 * math.sqrt(25.2429 / efixed)
 
-        absorption_x_section = result[5] * wave / 1.7982
-        coherent_x_section = result[4]
-        incoherent_x_section = result[3]
+        material = mtd[str(workspace)].sample().getMaterial()
+        absorption_x_section = material.absorbXSection(wave)
+        coherent_x_section = material.cohScatterXSection()
+        incoherent_x_section = material.incohScatterXSection()
         scattering_s_section = incoherent_x_section + coherent_x_section
 
         thickness = float(thickness)
@@ -166,7 +168,7 @@ class IndirectTransmission(PythonAlgorithm):
         except ValueError:
             # If that fails then get it by taking from group of all detectors
             wsHandle = mtd[workspace]
-            spectra_list = range(0, wsHandle.getNumberHistograms())
+            spectra_list = list(range(0, wsHandle.getNumberHistograms()))
             GroupDetectors(InputWorkspace=workspace,
                            OutputWorkspace=workspace,
                            SpectraList=spectra_list)

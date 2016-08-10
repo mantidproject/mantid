@@ -80,7 +80,9 @@ API::Workspace_sptr LoadAscii2::readData(std::ifstream &file) {
   m_spectrumIDcount = 0;
 
   m_spectra.clear();
-  m_curSpectra = new DataObjects::Histogram1D();
+  m_curSpectra =
+      new DataObjects::Histogram1D(HistogramData::Histogram::XMode::Points,
+                                   HistogramData::Histogram::YMode::Counts);
   std::string line;
 
   std::list<std::string> columns;
@@ -206,10 +208,8 @@ void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace,
       // E in file
       localWorkspace->dataE(i) = m_spectra[i].readE();
     }
-    if (m_baseCols == 4) {
-      // DX in file
-      localWorkspace->dataDx(i) = m_spectra[i].readDx();
-    }
+    // DX could be NULL
+    localWorkspace->setSharedDx(i, m_spectra[i].sharedDx());
     if (m_spectrumIDcount != 0) {
       localWorkspace->getSpectrum(i)
           .setSpectrumNo(m_spectra[i].getSpectrumNo());
@@ -444,7 +444,7 @@ void LoadAscii2::addToCurrentSpectra(std::list<std::string> &columns) {
   case 4: {
     // E and DX in file, include both
     m_curSpectra->dataE().push_back(values[2]);
-    m_curSpectra->dataDx().push_back(values[3]);
+    m_curDx.push_back(values[3]);
     break;
   }
   }
@@ -501,12 +501,17 @@ void LoadAscii2::newSpectra() {
     if (m_curSpectra) {
       size_t specSize = m_curSpectra->size();
       if (specSize > 0 && specSize == m_lastBins) {
+        if (m_curSpectra->readX().size() == m_curDx.size())
+          m_curSpectra->setPointStandardDeviations(std::move(m_curDx));
         m_spectra.push_back(*m_curSpectra);
       }
       delete m_curSpectra;
     }
 
-    m_curSpectra = new DataObjects::Histogram1D();
+    m_curSpectra =
+        new DataObjects::Histogram1D(HistogramData::Histogram::XMode::Points,
+                                     HistogramData::Histogram::YMode::Counts);
+    m_curDx.clear();
     m_spectraStart = true;
   }
 }

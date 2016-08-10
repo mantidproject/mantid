@@ -54,6 +54,10 @@ private:
   // void exec();
   /// Return the TOF resolution for a particular wavelength
   double getTOFResolution(double wl) override;
+  /// Return the effective pixel size in the x-direction
+  double getEffectiveXPixelSize() override { return 0.011; };
+  /// Return the effective pixel size in the y-direction
+  double getEffectiveYPixelSize() override { return 0.007; };
 };
 
 } // namespace Algorithms

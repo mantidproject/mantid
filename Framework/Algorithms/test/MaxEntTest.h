@@ -475,7 +475,7 @@ public:
   void test_unevenlySpacedInputData() {
     auto ws = createWorkspaceReal(3, 0.0);
     Mantid::MantidVec xData{0, 1, 5};
-    ws->setX(0, xData);
+    ws->setPoints(0, xData);
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
     alg->setChild(true);

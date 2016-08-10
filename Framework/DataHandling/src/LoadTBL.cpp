@@ -283,7 +283,7 @@ void LoadTBL::exec() {
   if (!file) {
     throw Exception::FileError("Unable to open file: ", filename);
   }
-  std::string line = "";
+  std::string line;
 
   ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
@@ -320,6 +320,7 @@ void LoadTBL::exec() {
   if (isOld) {
     /**THIS IS ESSENTIALLY THE OLD LoadReflTBL CODE**/
     // create the column headings
+    auto colStitch = ws->addColumn("str", "StitchGroup");
     auto colRuns = ws->addColumn("str", "Run(s)");
     auto colTheta = ws->addColumn("str", "ThetaIn");
     auto colTrans = ws->addColumn("str", "TransRun(s)");
@@ -327,18 +328,13 @@ void LoadTBL::exec() {
     auto colQmax = ws->addColumn("str", "Qmax");
     auto colDqq = ws->addColumn("str", "dq/q");
     auto colScale = ws->addColumn("str", "Scale");
-    auto colStitch = ws->addColumn("int", "StitchGroup");
     auto colOptions = ws->addColumn("str", "Options");
 
-    colRuns->setPlotType(0);
-    colTheta->setPlotType(0);
-    colTrans->setPlotType(0);
-    colQmin->setPlotType(0);
-    colQmax->setPlotType(0);
-    colDqq->setPlotType(0);
-    colScale->setPlotType(0);
-    colStitch->setPlotType(0);
-    colOptions->setPlotType(0);
+    for (size_t i = 0; i < ws->columnCount(); i++) {
+      auto col = ws->getColumn(i);
+      col->setPlotType(0);
+    }
+
     // we are using the old ReflTBL format
     // where all of the entries are on one line
     // so we must reset the stream to reread the first line.
@@ -346,7 +342,7 @@ void LoadTBL::exec() {
     if (!file) {
       throw Exception::FileError("Unable to open file: ", filename);
     }
-    std::string line = "";
+    std::string line;
     int stitchID = 1;
     while (Kernel::Strings::extractToEOL(file, line)) {
       if (line == "" || line == ",,,,,,,,,,,,,,,,") {
@@ -354,18 +350,19 @@ void LoadTBL::exec() {
       }
       getCells(line, rowVec, 16, isOld);
       const std::string scaleStr = rowVec.at(16);
+      const std::string stitchStr = boost::lexical_cast<std::string>(stitchID);
 
       // check if the first run in the row has any data associated with it
       // 0 = runs, 1 = theta, 2 = trans, 3 = qmin, 4 = qmax
       if (rowVec[0] != "" || rowVec[1] != "" || rowVec[2] != "" ||
           rowVec[3] != "" || rowVec[4] != "") {
         TableRow row = ws->appendRow();
+        row << stitchStr;
         for (int i = 0; i < 5; ++i) {
           row << rowVec.at(i);
         }
         row << rowVec.at(15);
         row << scaleStr;
-        row << stitchID;
       }
 
       // check if the second run in the row has any data associated with it
@@ -373,12 +370,12 @@ void LoadTBL::exec() {
       if (rowVec[5] != "" || rowVec[6] != "" || rowVec[7] != "" ||
           rowVec[8] != "" || rowVec[9] != "") {
         TableRow row = ws->appendRow();
+        row << stitchStr;
         for (int i = 5; i < 10; ++i) {
           row << rowVec.at(i);
         }
         row << rowVec.at(15);
         row << scaleStr;
-        row << stitchID;
       }
 
       // check if the third run in the row has any data associated with it
@@ -386,13 +383,13 @@ void LoadTBL::exec() {
       if (rowVec[10] != "" || rowVec[11] != "" || rowVec[12] != "" ||
           rowVec[13] != "" || rowVec[14] != "") {
         TableRow row = ws->appendRow();
+        row << stitchStr;
         for (int i = 10; i < 17; ++i) {
           if (i == 16)
             row << scaleStr;
           else
             row << rowVec.at(i);
         }
-        row << stitchID;
       }
       ++stitchID;
       setProperty("OutputWorkspace", ws);
@@ -411,15 +408,7 @@ void LoadTBL::exec() {
           heading = columnHeadings.erase(heading);
         } else {
           Mantid::API::Column_sptr col;
-          // The Group column will always be second-to-last
-          // in the TBL file. This is the only column that
-          // should be of type "int".
-          if (*heading == columnHeadings.at(columnHeadings.size() - 2))
-            col = ws->addColumn("int", *heading);
-          else
-            // All other entries in the TableWorkspace will
-            // have a type of "str"
-            col = ws->addColumn("str", *heading);
+          col = ws->addColumn("str", *heading);
           col->setPlotType(0);
           heading++;
         }
@@ -435,12 +424,7 @@ void LoadTBL::exec() {
       // populate the columns with their values for this row.
       TableRow row = ws->appendRow();
       for (size_t i = 0; i < expectedCommas + 1; ++i) {
-        if (i == expectedCommas - 1)
-          // taking into consideration Group column
-          // of type "int"
-          row << boost::lexical_cast<int>(rowVec.at(i));
-        else
-          row << rowVec.at(i);
+        row << rowVec.at(i);
       }
     }
     setProperty("OutputWorkspace", ws);

@@ -1,3 +1,4 @@
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/RefAxis.h"
@@ -68,19 +69,21 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
   m_noVectors = NVectors;
   data.resize(m_noVectors);
 
-  MantidVecPtr t1, t2;
-  t1.access().resize(XLength); // this call initializes array to zero
-  t2.access().resize(YLength);
+  auto x = Kernel::make_cow<HistogramData::HistogramX>(
+      XLength, HistogramData::LinearGenerator(1.0, 1.0));
+  HistogramData::Counts y(YLength);
+  HistogramData::CountStandardDeviations e(YLength);
   for (size_t i = 0; i < m_noVectors; i++) {
     // Create the spectrum upon init
-    auto spec = new Histogram1D();
+    auto spec =
+        new Histogram1D(HistogramData::getHistogramXMode(XLength, YLength),
+                        HistogramData::Histogram::YMode::Counts);
     data[i] = spec;
     // Set the data and X
-    spec->setX(t1);
-    spec->setDx(t1);
-    spec->resetHasDx();
+    spec->setX(x);
     // Y,E arrays populated
-    spec->setData(t2, t2);
+    spec->setCounts(y);
+    spec->setCountStandardDeviations(e);
     // Default spectrum number = starts at 1, for workspace index 0.
     spec->setSpectrumNo(specnum_t(i + 1));
     spec->setDetectorID(detid_t(i + 1));
@@ -235,7 +238,7 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
     }
     PARALLEL_FOR_IF(parallelExecution)
     for (int i = 1; i < static_cast<int>(height); ++i) {
-      data[i]->setX(data[0]->dataX());
+      data[i]->setX(data[0]->ptrX());
     }
   }
 }
@@ -316,8 +319,8 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
 } // NamespaceMantid
 
 ///\cond TEMPLATE
-template DLLExport class Mantid::API::WorkspaceProperty<
-    Mantid::DataObjects::Workspace2D>;
+template class DLLExport
+    Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace2D>;
 
 namespace Mantid {
 namespace Kernel {

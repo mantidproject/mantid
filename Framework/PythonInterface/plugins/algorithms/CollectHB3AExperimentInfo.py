@@ -1,8 +1,11 @@
 #pylint: disable=no-init,invalid-name,too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
+
 import mantid
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
+from six.moves import range #pylint: disable=redefined-builtin
 import os
 
 class CollectHB3AExperimentInfo(PythonAlgorithm):
@@ -111,8 +114,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._collectPixelsPositions()
 
         # Set up ScanPtFileTable
-        self.log().warning('Scan numbers are %s.' % str(self._scanPtDict.keys()))
-        self.log().warning("Keys for scanPt2ThetaDict: %s." % str(self._scanPt2ThetaDict.keys()))
+        self.log().warning('Scan numbers are %s.' % str(list(self._scanPtDict.keys())))
+        self.log().warning("Keys for scanPt2ThetaDict: %s." % str(list(self._scanPt2ThetaDict.keys())))
 
         for scan_number in sorted(self._scanPtDict.keys()):
             self.log().warning('scan %d has Pt. as %s.' % (scan_number, str(self._scanPtDict[scan_number])))
@@ -126,7 +129,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                                                                                'found in scan-pt-2theta dict, ' \
                                                                                'whose keys are %s.' \
                                                                                '' % (scan_number, pt_number,
-                                                                                     str(self._scanPt2ThetaDict.keys()))
+                                                                                     str(list(self._scanPt2ThetaDict.keys())))
                     two_theta = self._scanPt2ThetaDict[(scan_number, pt_number)]
 
                     assert two_theta in self._detStartID
@@ -168,7 +171,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
     def _getExpScanPtDict(self):
         """ Get the scan-Pt. dictionary
         """
-        for iscan in xrange(len(self._scanList)):
+        for iscan in range(len(self._scanList)):
             # Loop over scan number
             scan = self._scanList[iscan]
 
@@ -177,7 +180,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
             spicetablews = self._loadSpiceFile(spicefilename)
             self._spiceTableDict[scan] = spicetablews
             if spicetablews is None:
-                self.glog.warning("Unable to access Exp %d Scan %d's SPICE file %s." % (self._expNumber, scan, spicefilename))
+                self.glog.warning("Unable to access Exp %d Scan %d's SPICE file %s." % (self._expNumber, scan,
+                                                                                        spicefilename))
 
             # Get list of Pts.
             if len(self._ptListList[iscan]) == 0:
@@ -206,7 +210,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
 
         # process Pt number
         self._ptListList = []
-        for i in xrange(len(rawptlist)):
+        for i in range(len(rawptlist)):
             curpt = rawptlist[i]
             if curpt == -1:
                 # begining of a scan
@@ -239,7 +243,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                     value: list of 2-tuple as (scan, pt)
         """
         # Scan every row of every SPICE table to get a dictionary with key as 2theta value
-        for scannumber in self._spiceTableDict.keys():
+        for scannumber in self._spiceTableDict:
             spicetable = self._spiceTableDict[scannumber]
             requiredptnumbers = self._scanPtDict[scannumber]
 
@@ -253,7 +257,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
             except IndexError as e:
                 raise IndexError("Either Pt. or 2theta is not found in columns: %d"%(str(e)))
 
-            for irow in xrange(spicetable.rowCount()):
+            for irow in range(spicetable.rowCount()):
                 ptnumber = spicetable.cell(irow, iColPtNumber)
                 if ptnumber in requiredptnumbers:
                     twotheta = spicetable.cell(irow, iCol2Theta)
@@ -261,19 +265,19 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                     exp_time = spicetable.cell(irow, iColTime)
                     self._monitorCountsDict[(scannumber, ptnumber)] = monitor
                     self._expDurationDict[(scannumber, ptnumber)] = exp_time
-                    if self._2thetaScanPtDict.has_key(twotheta) is False:
+                    if (twotheta in self._2thetaScanPtDict) is False:
                         self._2thetaScanPtDict[twotheta] = []
                     self._2thetaScanPtDict[twotheta].append((scannumber, ptnumber))
             # END-FOR
         # END-FOR
 
-        self.log().notice("[DB] Number of 2theta entries = %d." % (len(self._2thetaScanPtDict.keys())))
+        self.log().notice("[DB] Number of 2theta entries = %d." % (len(list(self._2thetaScanPtDict.keys()))))
 
         # Combine 2theta values within tolerance
         twothetalist = sorted(self._2thetaScanPtDict.keys())
 
         twotheta_prev = twothetalist[0]
-        for itt in xrange(1, len(twothetalist)):
+        for itt in range(1, len(twothetalist)):
             twotheta_curr = twothetalist[itt]
             if twotheta_curr - twotheta_prev < self._tol2Theta:
                 # two keys (2theta) are close enough, combine then
@@ -293,43 +297,53 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         # Reset the current starting detector ID
         self._currStartDetID = 0
 
-        for twotheta in sorted(self._2thetaScanPtDict.keys()):
-            if len(self._2thetaScanPtDict[twotheta]) == 0:
+        distinct_2theta_list = sorted(self._2thetaScanPtDict.keys())
+        num_distinct_2theta = len(distinct_2theta_list)
+
+        self.log().warning('Number of distinct 2theta is %d. They are %s.' % (num_distinct_2theta,
+                                                                              str(distinct_2theta_list)))
+
+        for index, two_theta in enumerate(distinct_2theta_list):
+            if len(self._2thetaScanPtDict[two_theta]) == 0:
                 raise RuntimeError("Logic error to have empty list.")
             else:
-                self.log().notice("[DB] Process pixels of detector centered at 2theta = %.5f." % (twotheta))
+                self.log().warning("[DB] For %d-th 2theta = %.5f. Number of Pts. is %d. "
+                                   "They are %s." % (index, two_theta, len(self._2thetaScanPtDict[two_theta]),
+                                                     str(self._2thetaScanPtDict[two_theta])))
 
             # Get scan/pt and set dictionary
-            self.log().debug("Processing detector @ 2theta = %.5f, " % (twotheta))
-            scannumber, ptnumber = self._2thetaScanPtDict[twotheta][0]
-            self.log().debug("self._2thetaScanPtDict: %s" % (self._2thetaScanPtDict[twotheta]))
+            self.log().debug("Processing detector @ 2theta = %.5f, " % (two_theta))
+            for scannumber, ptnumber in self._2thetaScanPtDict[two_theta]:
+                # scannumber, ptnumber = self._2thetaScanPtDict[two_theta][0]
+                self.log().debug("self._2thetaScanPtDict: %s" % (self._2thetaScanPtDict[two_theta]))
 
-            self._scanPt2ThetaDict[(scannumber, ptnumber)] = twotheta
-            self._detStartID[twotheta] = self._currStartDetID
+                self._scanPt2ThetaDict[(scannumber, ptnumber)] = two_theta
+                self._detStartID[two_theta] = self._currStartDetID
 
-            if self._doGenerateVirtualInstrument is True:
-                # Load detector counts file (.xml)
-                dataws = self._loadHB3ADetCountFile(scannumber, ptnumber)
+                if self._doGenerateVirtualInstrument is True:
+                    # Load detector counts file (.xml)
+                    dataws = self._loadHB3ADetCountFile(scannumber, ptnumber)
 
-                # write each detector's position and ID to table workspace
-                maxdetid = 0
-                for iws in xrange(dataws.getNumberHistograms()):
-                    detector = dataws.getDetector(iws)
-                    detpos = detector.getPos()
-                    newdetid = self._currStartDetID + detector.getID()
-                    if detector.getID() > maxdetid:
-                        maxdetid = detector.getID()
-                    self._myPixelInfoTableWS.addRow([newdetid, detpos.X(), detpos.Y(), detpos.Z(), detector.getID()])
-                # ENDFOR (iws)
+                    # write each detector's position and ID to table workspace
+                    maxdetid = 0
+                    for iws in range(dataws.getNumberHistograms()):
+                        detector = dataws.getDetector(iws)
+                        detpos = detector.getPos()
+                        newdetid = self._currStartDetID + detector.getID()
+                        if detector.getID() > maxdetid:
+                            maxdetid = detector.getID()
+                        self._myPixelInfoTableWS.addRow([newdetid, detpos.X(), detpos.Y(), detpos.Z(), detector.getID()])
+                    # ENDFOR (iws)
 
-            else:
-                # No need to generate virtual instrument information.
-                maxdetid = self._numPixelsDetector
+                else:
+                    # No need to generate virtual instrument information.
+                    maxdetid = self._numPixelsDetector
+                # END-IF-ELSE
 
-            # END-IF-ELSE
+                # Update start ID
+                self._currStartDetID += maxdetid
 
-            # Update start ID
-            self._currStartDetID += maxdetid
+            # END-FOR
         # ENDFOR
 
         return
@@ -340,7 +354,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         ptlist = []
 
         numrows = spicetablews.rowCount()
-        for irow in xrange(numrows):
+        for irow in range(numrows):
             pt = spicetablews.cell(irow, iColPt)
             ptlist.append(pt)
 

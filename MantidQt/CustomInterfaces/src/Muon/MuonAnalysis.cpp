@@ -62,12 +62,14 @@ namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(MuonAnalysis)
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::Muon;
 using namespace Mantid::Geometry;
+using namespace MuonAnalysisHelper;
 using Mantid::API::Workspace_sptr;
 using Mantid::API::Grouping;
 

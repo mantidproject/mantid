@@ -2,6 +2,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
+#include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -50,6 +51,9 @@ void initTypeLookup(PyTypeIndex &index) {
   // Version 2 also has the PyString_Type
   index.emplace(&PyString_Type, boost::make_shared<AsciiStrHandler>());
 #endif
+
+  // Handle a dictionary type
+  index.emplace(&PyDict_Type, boost::make_shared<MappingTypeHandler>());
 }
 
 /**
@@ -145,10 +149,10 @@ PropertyWithValueFactory::create(const std::string &name,
 const PropertyValueHandler &
 PropertyWithValueFactory::lookup(PyObject *const object) {
   // Check if object is array.
-  const auto ptype = isArray(object);
-  if (!ptype.empty()) {
+  const auto arrayType = isArray(object);
+  if (!arrayType.empty()) {
     const PyArrayIndex &arrayIndex = getArrayIndex();
-    auto ait = arrayIndex.find(ptype);
+    auto ait = arrayIndex.find(arrayType);
     if (ait != arrayIndex.end()) {
       return *(ait->second);
     }
@@ -173,6 +177,13 @@ PropertyWithValueFactory::lookup(PyObject *const object) {
  */
 const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
   if (PyList_Check(object) || PyTuple_Check(object)) {
+    // If we are dealing with an empty list/tuple, then we cannot deduce the
+    // ArrayType. We need to throw at this point.
+    if (PySequence_Size(object) < 1) {
+      throw std::runtime_error(
+          "Cannot have a sequence type of length zero in a mapping type.");
+    }
+
     PyObject *item = PySequence_Fast_GET_ITEM(object, 0);
     // Boolean can be cast to int, so check first.
     if (PyBool_Check(item)) {

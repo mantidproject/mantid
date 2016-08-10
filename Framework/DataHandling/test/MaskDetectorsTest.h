@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataHandling/MaskDetectors.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -23,6 +24,10 @@ using namespace Mantid::Geometry;
 using Mantid::MantidVecPtr;
 using Mantid::detid_t;
 using Mantid::specnum_t;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::LinearGenerator;
 
 class MaskDetectorsTest : public CxxTest::TestSuite {
 public:
@@ -56,7 +61,7 @@ public:
       EventWorkspace_sptr spaceEvent =
           boost::dynamic_pointer_cast<EventWorkspace>(space);
 
-      MantidVecPtr x, vec;
+      MantidVecPtr vec;
       vec.access().resize(5, 1.0);
       for (int j = 0; j < numspec; ++j) {
         // Just one event per pixel
@@ -65,21 +70,19 @@ public:
         spaceEvent->getSpectrum(j).setDetectorID(j);
         spaceEvent->getSpectrum(j).setSpectrumNo(j);
       }
-      x.access().push_back(0.0);
-      x.access().push_back(10.0);
-      spaceEvent->setAllX(x);
+      spaceEvent->setAllX(BinEdges{0.0, 10.0});
 
     } else if (!asMaskWorkspace) {
-      space = WorkspaceFactory::Instance().create("Workspace2D", numspec, 6, 5);
-      Workspace2D_sptr space2D =
-          boost::dynamic_pointer_cast<Workspace2D>(space);
+      auto space2D = createWorkspace<Workspace2D>(numspec, 6, 5);
+      space = space2D;
 
-      MantidVecPtr x, vec;
-      x.access().resize(6, 10.0);
-      vec.access().resize(5, 1.0);
+      BinEdges x(6, LinearGenerator(10.0, 1.0));
+      Counts y(5, 1.0);
+      CountStandardDeviations e(5, 1.0);
       for (int j = 0; j < numspec; ++j) {
-        space2D->setX(j, x);
-        space2D->setData(j, vec, vec);
+        space2D->setBinEdges(j, x);
+        space2D->setCounts(j, y);
+        space2D->setCountStandardDeviations(j, e);
         space2D->getSpectrum(j).setSpectrumNo(j);
         space2D->getSpectrum(j).setDetectorID(j);
       }

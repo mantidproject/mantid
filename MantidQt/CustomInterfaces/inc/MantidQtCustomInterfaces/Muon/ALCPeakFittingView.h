@@ -54,9 +54,9 @@ public:
   // -- IALCPeakFitting interface
   // ----------------------------------------------------------------
 
-  IFunction_const_sptr function(QString index) const override;
+  Mantid::API::IFunction_const_sptr function(QString index) const override;
   boost::optional<QString> currentFunctionIndex() const override;
-  IPeakFunction_const_sptr peakPicker() const override;
+  Mantid::API::IPeakFunction_const_sptr peakPicker() const override;
   void emitFitRequested();
 
 public slots:
@@ -65,11 +65,13 @@ public slots:
   void setDataCurve(const QwtData &data,
                     const std::vector<double> &errors) override;
   void setFittedCurve(const QwtData &data) override;
-  void setFunction(const IFunction_const_sptr &newFunction) override;
+  void
+  setFunction(const Mantid::API::IFunction_const_sptr &newFunction) override;
   void setParameter(const QString &funcIndex, const QString &paramName,
                     double value) override;
   void setPeakPickerEnabled(bool enabled) override;
-  void setPeakPicker(const IPeakFunction_const_sptr &peak) override;
+  void
+  setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) override;
   void displayError(const QString &message) override;
   void help() override;
   void plotGuess() override;

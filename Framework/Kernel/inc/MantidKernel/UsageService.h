@@ -79,7 +79,8 @@ public:
   bool isEnabled() const;
   /// Sets whether the UsageReporter is enabled
   void setEnabled(const bool enabled);
-
+  /// clear any buffers without sending any outstanding usage reports
+  void clear();
   /// flushes any buffers and sends any outstanding usage reports
   void flush();
   void shutdown();
@@ -137,17 +138,11 @@ private:
   Poco::ActiveMethod<int, std::string, UsageServiceImpl> m_featureActiveMethod;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
-#if defined(__APPLE__) && defined(__INTEL_COMPILER)
-inline
-#endif
-    template class MANTID_KERNEL_DLL
-        Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
-typedef MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<UsageServiceImpl>
-    UsageService;
+EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
+    Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
+typedef Mantid::Kernel::SingletonHolder<UsageServiceImpl> UsageService;
 
-} // namespace API
+} // namespace Kernel
 } // namespace Mantid
 
 #endif /* MANTID_KERNEL_USAGESERVICE_H_ */

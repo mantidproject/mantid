@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -22,6 +23,10 @@ using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using Mantid::detid_t;
 using Mantid::specnum_t;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::LinearGenerator;
 
 class GroupDetectorsTest : public CxxTest::TestSuite {
 public:
@@ -30,16 +35,15 @@ public:
 
   GroupDetectorsTest() {
     // Set up a small workspace for testing
-    MatrixWorkspace_sptr space =
-        WorkspaceFactory::Instance().create("Workspace2D", 5, 6, 5);
-    space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    MantidVecPtr x, vec;
-    x.access().resize(6, 10.0);
-    vec.access().resize(5, 1.0);
+    auto space2D = createWorkspace<Workspace2D>(5, 6, 5);
+    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    BinEdges x(6, LinearGenerator(10.0, 1.0));
+    Counts y(5, 1.0);
+    CountStandardDeviations e(5, 1.0);
     for (int j = 0; j < 5; ++j) {
-      space2D->setX(j, x);
-      space2D->setData(j, vec, vec);
+      space2D->setBinEdges(j, x);
+      space2D->setCounts(j, y);
+      space2D->setCountStandardDeviations(j, e);
       space2D->getSpectrum(j).setSpectrumNo(j);
       space2D->getSpectrum(j).setDetectorID(j);
     }
@@ -48,10 +52,10 @@ public:
       Detector *d = new Detector("det", i, 0);
       instr->markAsDetector(d);
     }
-    space->setInstrument(instr);
+    space2D->setInstrument(instr);
 
     // Register the workspace in the data service
-    AnalysisDataService::Instance().add("GroupTestWS", space);
+    AnalysisDataService::Instance().add("GroupTestWS", space2D);
   }
 
   void testName() { TS_ASSERT_EQUALS(grouper.name(), "GroupDetectors") }
@@ -109,7 +113,7 @@ public:
     MatrixWorkspace_sptr outputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "GroupTestWS");
-    std::vector<double> tens(6, 10.0);
+    std::vector<double> tens{10, 11, 12, 13, 14, 15};
     std::vector<double> ones(5, 1.0);
     std::vector<double> threes(5, 3.0);
     std::vector<double> zeroes(5, 0.0);

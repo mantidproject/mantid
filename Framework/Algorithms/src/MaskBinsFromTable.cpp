@@ -42,8 +42,6 @@ void MaskBinsFromTable::init() {
           "MaskingInformation", "", Direction::Input),
       "Input TableWorkspace containing parameters, XMin and "
       "XMax and either SpectraList or DetectorIDsList");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -58,8 +56,6 @@ void MaskBinsFromTable::exec() {
 
   // Mask bins for all
   maskBins(inputWS);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -123,8 +119,6 @@ void MaskBinsFromTable::maskBins(API::MatrixWorkspace_sptr dataws) {
   g_log.debug() << "About to set to output."
                 << "\n";
   setProperty("OutputWorkspace", outputws);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -203,8 +197,6 @@ void MaskBinsFromTable::processMaskBinWorkspace(
     m_xmaxVec.push_back(xmax);
     m_spectraVec.push_back(spectralist);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

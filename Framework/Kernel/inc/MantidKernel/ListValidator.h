@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/TypedValidator.h"
+#include "MantidKernel/Exception.h"
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
 #endif
@@ -46,36 +47,60 @@ namespace Kernel {
 template <typename TYPE> class ListValidator : public TypedValidator<TYPE> {
 public:
   /// Default constructor. Sets up an empty list of valid values.
-  ListValidator() : TypedValidator<TYPE>() {}
+  ListValidator() : TypedValidator<TYPE>(), m_allowMultiSelection(false) {}
 
   /** Constructor
-   *  @param values :: A set of values consisting of the valid values     */
-  explicit ListValidator(const std::set<TYPE> &values)
-      : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()) {}
+   *  @param values :: A set of values consisting of the valid values
+   *  @param allowMultiSelection :: True if the list allows multi selection
+   */
+  explicit ListValidator(const std::set<TYPE> &values,
+                         const bool allowMultiSelection = false)
+      : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
+        m_allowMultiSelection(allowMultiSelection) {
+    if (m_allowMultiSelection) {
+      throw Kernel::Exception::NotImplementedError(
+          "The List Validator does not support Multi selection yet");
+    }
+  }
 
   /** Constructor
    *  @param values :: An unordered set of values consisting of the valid values
+   *  @param allowMultiSelection :: True if the list allows multi selection
    */
-  explicit ListValidator(const std::unordered_set<TYPE> &values)
-      : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()) {}
+  explicit ListValidator(const std::unordered_set<TYPE> &values,
+                         const bool allowMultiSelection = false)
+      : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
+        m_allowMultiSelection(allowMultiSelection) {
+    if (m_allowMultiSelection) {
+      throw Kernel::Exception::NotImplementedError(
+          "The List Validator does not support Multi selection yet");
+    }
+  }
 
   /** Constructor
    *  @param values :: A vector of the valid values
    *  @param aliases :: Optional aliases for the valid values.
+   *  @param allowMultiSelection :: True if the list allows multi selection
    */
   explicit ListValidator(const std::vector<TYPE> &values,
                          const std::map<std::string, std::string> &aliases =
-                             std::map<std::string, std::string>())
+                             std::map<std::string, std::string>(),
+                         const bool allowMultiSelection = false)
       : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
-        m_aliases(aliases.begin(), aliases.end()) {
+        m_aliases(aliases.begin(), aliases.end()),
+        m_allowMultiSelection(allowMultiSelection) {
     for (auto aliasIt = m_aliases.begin(); aliasIt != m_aliases.end();
          ++aliasIt) {
       if (values.end() ==
           std::find(values.begin(), values.end(),
                     boost::lexical_cast<TYPE>(aliasIt->second))) {
         throw std::invalid_argument("Alias " + aliasIt->first +
-                                    " referes to invalid value " +
+                                    " refers to invalid value " +
                                     aliasIt->second);
+        if (m_allowMultiSelection) {
+          throw Kernel::Exception::NotImplementedError(
+              "The List Validator does not support Multi selection yet");
+        }
       }
     }
   }
@@ -121,6 +146,16 @@ public:
       throw std::invalid_argument("Unknown alias found " + alias);
     }
     return aliasIt->second;
+  }
+
+  bool isMultipleSelectionAllowed() override { return m_allowMultiSelection; }
+
+  void setMultipleSelectionAllowed(const bool isMultiSelectionAllowed) {
+    if (isMultiSelectionAllowed) {
+      throw Kernel::Exception::NotImplementedError(
+          "The List Validator does not support Multi selection yet");
+    }
+    m_allowMultiSelection = isMultiSelectionAllowed;
   }
 
 protected:
@@ -183,6 +218,9 @@ protected:
   std::vector<TYPE> m_allowedValues;
   /// The optional aliases for the allowed values.
   std::map<std::string, std::string> m_aliases;
+
+  /// if the validator should allow multiple selection
+  bool m_allowMultiSelection;
 };
 
 /// ListValidator<std::string> is used heavily
