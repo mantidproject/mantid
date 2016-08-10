@@ -297,6 +297,36 @@ void IndirectTab::plotSpectrum(const QString &workspaceName, int specStart,
 }
 
 /**
+* Creates a spectrum plot of one or more workspaces with a set
+*  of spectra specified in a vector
+*
+* This uses the plotSpectrum function from the Python API.
+*
+* @param workspaceNames List of names of workspaces to plot
+* @param wsIndices List of indices of spectra to plot
+*/
+void IndirectTab::plotSpectra(const QStringList &workspaceNames, const std::vector<int> &wsIndices) {
+  if (workspaceNames.isEmpty()) {
+    return;
+  }
+  if (wsIndices.empty()) {
+    return;
+  }
+  QString pyInput = "from mantidplot import plotSpectrum\n";
+
+  pyInput += "plotSpectrum(['";
+  pyInput += workspaceNames.join("','");
+  pyInput += "'],";
+  pyInput += QString::number(wsIndices[0]);
+  for (int i = 1; i < wsIndices.size(); i++) {
+    pyInput += " ,";
+    pyInput += QString::number(wsIndices[i]);
+  }
+  pyInput += "])\n";
+  m_pythonRunner.runPythonCode(pyInput);
+}
+
+/**
  * Plots a contour (2D) plot of a given workspace.
  *
  * This uses the plot2D function from the Python API.
