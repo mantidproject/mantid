@@ -6,8 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/BankPulseTimes.h"
-#include "MantidDataHandling/ProcessBankData.h"
-
 #include "MantidDataObjects/EventWorkspace.h"
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -21,10 +19,10 @@
 #include <mutex>
 #include <boost/lexical_cast.hpp>
 
-// using namespace Mantid;
+namespace Mantid {
 
-namespace Mantid{
-namespace DataHandling{
+namespace DataHandling {
+
 
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
@@ -116,7 +114,7 @@ public:
                     const std::string &top_entry_name, Algorithm *alg);
 
   static void loadSampleDataISIScompatibility(::NeXus::File &file,
-                                              DataHandling::EventWorkspaceCollection &WS);
+                                              EventWorkspaceCollection &WS);
 
   /// method used to return instrument name for some old ISIS files where it is
   /// not written properly within the instrument

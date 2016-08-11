@@ -1,10 +1,12 @@
 //ProcessBankData
 #include "MantidDataHandling/ProcessBankData.h"
+#include "MantidDataHandling/LoadEventNexus.h"
 
 namespace Mantid{
 namespace DataHandling{
 
-ProcessBankData::ProcessBankData(LoadEventNexus *alg, std::string entry_name, API::Progress *prog,
+ProcessBankData::ProcessBankData(LoadEventNexus *alg, std::string entry_name,
+                                 API::Progress *prog,
                   boost::shared_array<uint32_t> event_id,
                   boost::shared_array<float> event_time_of_flight,
                   size_t numEvents, size_t startAt,

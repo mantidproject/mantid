@@ -1,7 +1,11 @@
+#ifndef MANTID_DATAHANDLING_PROCESSBANKDATA_H
+#define MANTID_DATAHANDLING_PROCESSBANKDATA_H
+
 // Process bank data
 #include "MantidKernel/Task.h"
-#include "MantidAPI/IFileLoader.h"
+// #include "MantidAPI/IFileLoader.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidKernel/Timer.h"
 
@@ -39,8 +43,8 @@ public:
   * @param min_event_id ;: minimum detector ID to load
   * @param max_event_id :: maximum detector ID to load
   * @return
-  */
-  ProcessBankData(API::IFileLoader<Kernel::NexusDescriptor> *alg, std::string entry_name, API::Progress *prog,
+  */ // API::IFileLoader<Kernel::NexusDescriptor>
+  ProcessBankData(LoadEventNexus *alg, std::string entry_name, API::Progress *prog,
                   boost::shared_array<uint32_t> event_id,
                   boost::shared_array<float> event_time_of_flight,
                   size_t numEvents, size_t startAt,
@@ -54,7 +58,7 @@ public:
 
 private:
   /// Algorithm being run
-  API::IFileLoader<Kernel::NexusDescriptor> *alg;
+  LoadEventNexus *alg;
   /// NXS path to bank
   std::string entry_name;
   /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace
@@ -90,3 +94,5 @@ private:
 
 }
 }
+
+#endif

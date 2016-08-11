@@ -1,5 +1,6 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
+#include "MantidDataHandling/ProcessBankData.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -63,8 +64,6 @@ void copyLogs(const Mantid::DataHandling::EventWorkspaceCollection_sptr &from,
   }
 }
 }
-
-
 
 
 //==============================================================================================

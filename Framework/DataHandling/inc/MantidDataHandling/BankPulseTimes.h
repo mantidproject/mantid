@@ -1,3 +1,6 @@
+#ifndef MANTID_KERNEL_BANKPULSETIMES_H
+#define MANTID_KERNEL_BANKPULSETIMES_H
+
 #include "MantidKernel/Property.h"
 #include "MantidKernel/DateAndTime.h"
 
@@ -40,3 +43,4 @@ public:
   std::vector<int> periodNumbers;
 };
 
+#endif
