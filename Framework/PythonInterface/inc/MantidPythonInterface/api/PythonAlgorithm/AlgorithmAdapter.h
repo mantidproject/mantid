@@ -55,24 +55,16 @@ public:
   const std::string name() const override;
   /// Returns a version of the algorithm
   int version() const override;
-  /// A default version, chosen if there is no override
-  int defaultVersion() const;
   /// Returns the summary for the algorithm
   const std::string summary() const override;
-  /// Returns the summary for the algorithm
-  std::string defaultSummary() const;
   /// Returns a category of the algorithm.
   const std::string category() const override;
-  /// A default category, chosen if there is no override
-  std::string defaultCategory() const;
   /// Allow the isRunning method to be overridden
   bool isRunning() const override;
   /// Allow the cancel method to be overridden
   void cancel() override;
   /// A return of false will allow processing workspace groups as a whole
   bool checkGroups() override;
-  /// A default value for checkGroups, chosen if there is no override
-  bool checkGroupsDefault();
   /// Returns the validateInputs result of the algorithm.
   std::map<std::string, std::string> validateInputs() override;
   ///@}

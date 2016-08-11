@@ -1,4 +1,5 @@
 # pylint: disable=no-init,invalid-name,bare-except
+from __future__ import (absolute_import, division, print_function)
 import math
 import time
 import mantid

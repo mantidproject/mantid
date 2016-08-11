@@ -52,10 +52,9 @@ void ConvertTableToMatrixWorkspace::exec() {
   if (nrows == 0) {
     throw std::runtime_error("The input table is empty");
   }
-  std::vector<double> X(nrows);
-  std::vector<double> Y(nrows);
-  inputWorkspace->getColumn(columnX)->numeric_fill(X);
-  inputWorkspace->getColumn(columnY)->numeric_fill(Y);
+
+  auto X = inputWorkspace->getColumn(columnX)->numeric_fill<>();
+  auto Y = inputWorkspace->getColumn(columnY)->numeric_fill<>();
 
   MatrixWorkspace_sptr outputWorkspace =
       WorkspaceFactory::Instance().create("Workspace2D", 1, nrows, nrows);
@@ -64,9 +63,8 @@ void ConvertTableToMatrixWorkspace::exec() {
   outputWorkspace->mutableY(0).assign(Y.begin(), Y.end());
 
   if (!columnE.empty()) {
-    std::vector<double> E(nrows);
-    inputWorkspace->getColumn(columnE)->numeric_fill(E);
-    outputWorkspace->mutableE(0) = std::move(E);
+    outputWorkspace->mutableE(0) =
+        inputWorkspace->getColumn(columnE)->numeric_fill<>();
   }
 
   auto labelX = boost::dynamic_pointer_cast<Units::Label>(

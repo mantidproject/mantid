@@ -13,8 +13,8 @@ endif ()
 include_directories ( SYSTEM ${MPI_CXX_INCLUDE_PATH} )
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" ${MPI_CXX_COMPILE_FLAGS} )
 # Setting the linker flags doesn't seem to work right (or matter)
-#set ( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}" ${MPI_CXX_LINK_FLAGS} ) 
-  
+#set ( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}" ${MPI_CXX_LINK_FLAGS} )
+
 set ( BOOST_ROOT /usr/lib64/openmpi ) # This is where (boost-)openmpi winds up on rhel6
 find_package ( Boost COMPONENTS mpi serialization REQUIRED )
 include_directories( ${Boost_INCLUDE_DIRS} )
@@ -22,9 +22,7 @@ include_directories( ${Boost_INCLUDE_DIRS} )
 
 # Add a definition that's used to guard MPI-specific parts of the main code
 add_definitions ( -DMPI_BUILD )
-    
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/Testing/SystemTests/scripts )
-    
+
 # Add the ability to build a 'mantid-mpi' rpm
 set ( CPACK_PACKAGE_NAME mantid-mpi )
 include ( CPackCommon )
@@ -47,4 +45,3 @@ configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/../installers/LinuxInstaller/modulef
 )
 
 include ( CPack )
-

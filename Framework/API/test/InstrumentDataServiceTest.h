@@ -99,9 +99,9 @@ public:
 
   void testGetObjectNames() {
     InstrumentDataService::Instance().add("inst2", inst2);
-    std::unordered_set<std::string> names;
-    names.insert("inst1");
-    names.insert("inst2");
+    std::vector<std::string> names;
+    names.push_back("inst1");
+    names.push_back("inst2");
     auto result = InstrumentDataService::Instance().getObjectNames();
     TS_ASSERT_EQUALS(result, names);
     // Check with an empty store

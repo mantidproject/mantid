@@ -312,6 +312,7 @@ class RunList(object):
 #--------------------------------------------------------------------------------------------------
 #pylint: disable=too-many-instance-attributes
 #pylint: disable=too-many-public-methods
+#pylint: disable=attribute-defined-outside-init
 class RunDescriptor(PropDescriptor):
     """Descriptor to work with a run or list of runs specified
        either as run number (run file) or as

@@ -26,10 +26,14 @@ public:
     delete suite;
   }
 
-  // contructor
+  // constructor
   DetectorEfficiencyCorUserTest()
-      : m_inWSName("input_workspace"), m_outWSName("output_workspace") {
-    m_Ei = 3.27;
+      : m_Efs(m_numBins), m_inWSName("input_workspace"),
+        m_outWSName("output_workspace") {
+    for (size_t i = 0; i != m_Efs.size(); ++i) {
+      m_Efs[i] = 0.1 + 0.2 * static_cast<double>(i);
+    }
+    std::reverse(m_Efs.begin(), m_Efs.end());
 
     createInputWorkSpace();
   }
@@ -70,43 +74,60 @@ public:
     if (!inWS)
       return;
 
-    TS_ASSERT_DELTA(outWS->y(0).front(), inWS->y(0).front(), 1);
-    TS_ASSERT_DELTA(outWS->y(0).back(), inWS->y(0).back(), 0.5);
+    const auto eff0 = efficiency(m_Ei);
+    for (size_t i = 0; i != outWS->getNumberHistograms(); ++i) {
+      const auto &ys = outWS->counts(i);
+      const auto &es = outWS->countStandardDeviations(i);
+      for (size_t j = 0; j != ys.size(); ++j) {
+        const auto eff = efficiency(m_Efs[j]);
+        // By default, input workspace has y = 2, e = sqrt(2).
+        TS_ASSERT_DELTA(ys[j], 2 * eff0 / eff, 1e-6);
+        TS_ASSERT_DELTA(es[j], std::sqrt(2) * eff0 / eff, 1e-6);
+      }
+    }
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(m_outWSName);
   }
 
 private:
-  double m_Ei;
+  // Initial energy.
+  static constexpr double m_Ei = 3.27;
+  static const int m_numBins = 20;
+
+  static double efficiency(double e) {
+    return std::exp(-1.0 / std::sqrt(e)) *
+           (1.0 - std::exp(-1.0 / std::sqrt(e)));
+  }
+
+  // Final energies.
+  std::vector<double> m_Efs;
   const std::string m_inWSName, m_outWSName;
 
-  void createInputWorkSpace() {
+  void createInputWorkSpace() const {
     int numBanks = 1;
     int numPixels = 10;
-    int numBins = 20;
 
     DataObjects::Workspace2D_sptr dataws =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-            numBanks, numPixels, numBins);
+            numBanks, numPixels, m_numBins);
 
-    // WorkspaceCreationHelper::addNoise(dataws,10);
-    // np.linspace(2,5,21)
-    HistogramData::BinEdges binEdges = {
-        -10.,  -9.25, -8.5,  -7.75, -7.,  -6.25, -5.5, -4.75, -4.,  -3.25, -2.5,
-        -1.75, -1.,   -0.25, 0.5,   1.25, 2.,    2.75, 3.5,   4.25, 5.};
+    // Prepare energy bins.
+    std::vector<double> xs(m_Efs.size());
+    for (size_t i = 0; i != xs.size(); ++i) {
+      xs[i] = m_Ei - m_Efs[i];
+    }
 
     for (size_t wi = 0; wi < dataws->getNumberHistograms(); wi++) {
-      dataws->setBinEdges(wi, binEdges);
+      dataws->setBinEdges(wi,
+                          HistogramData::BinEdges(HistogramData::Points(xs)));
     }
-    // WorkspaceCreationHelper::DisplayDataX(dataws);
-
     dataws->getAxis(0)->setUnit("DeltaE");
-    dataws->mutableRun().addProperty("Ei",
-                                     boost::lexical_cast<std::string>(m_Ei));
+    dataws->mutableRun().addProperty("Ei", double(m_Ei));
+    // Efficiency formula should be the same as in efficiency().
     dataws->instrumentParameters().addString(
         dataws->getInstrument()->getChild(0).get(), "formula_eff",
-        "exp(-0.0565/sqrt(e))*(1.0-exp(-3.284/sqrt(e)))"); // IN5
+        "exp(-1.0/sqrt(e))*(1.0-exp(-1.0/sqrt(e)))");
 
     API::AnalysisDataService::Instance().addOrReplace(m_inWSName, dataws);
   }

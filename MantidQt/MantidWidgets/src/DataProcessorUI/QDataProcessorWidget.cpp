@@ -18,10 +18,12 @@ using namespace Mantid::API;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
+* @param presenter :: [input] A unique ptr to the presenter
+* @param parent :: [input] The parent of this view
 */
 QDataProcessorWidget::QDataProcessorWidget(
-    boost::shared_ptr<DataProcessorPresenter> presenter, QWidget *parent)
-    : MantidWidget(parent), m_presenter(presenter),
+    std::unique_ptr<DataProcessorPresenter> presenter, QWidget *parent)
+    : MantidWidget(parent), m_presenter(std::move(presenter)),
       m_openMap(new QSignalMapper(this)) {
 
   createTable();
@@ -78,7 +80,7 @@ this method is intended to be called by the presenter
 @param name : the string name of the workspace to be grabbed
 */
 void QDataProcessorWidget::setModel(const std::string &name) {
-  m_toOpen = name;
+  setModel(QString::fromStdString(name));
 }
 
 /**
@@ -277,100 +279,6 @@ void QDataProcessorWidget::showContextMenu(const QPoint &pos) {
 }
 
 /**
-Show an critical error dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void QDataProcessorWidget::giveUserCritical(std::string prompt,
-                                            std::string title) {
-  QMessageBox::critical(this, QString(title.c_str()), QString(prompt.c_str()),
-                        QMessageBox::Ok, QMessageBox::Ok);
-}
-
-/**
-Show a warning dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void QDataProcessorWidget::giveUserWarning(std::string prompt,
-                                           std::string title) {
-  QMessageBox::warning(this, QString(title.c_str()), QString(prompt.c_str()),
-                       QMessageBox::Ok, QMessageBox::Ok);
-}
-
-/**
-Ask the user a Yes/No question
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@returns a boolean true if Yes, false if No
-*/
-bool QDataProcessorWidget::askUserYesNo(std::string prompt, std::string title) {
-  auto response = QMessageBox::question(
-      this, QString(title.c_str()), QString(prompt.c_str()),
-      QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-  if (response == QMessageBox::Yes) {
-    return true;
-  }
-  return false;
-}
-
-/**
-Ask the user to enter a string.
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@param defaultValue : The default value entered.
-@returns The user's string if submitted, or an empty string
-*/
-std::string
-QDataProcessorWidget::askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue) {
-  bool ok;
-  QString text = QInputDialog::getText(
-      this, QString::fromStdString(title), QString::fromStdString(prompt),
-      QLineEdit::Normal, QString::fromStdString(defaultValue), &ok);
-  if (ok)
-    return text.toStdString();
-  return "";
-}
-
-/**
-Show the user the dialog for an algorithm
-* @param algorithm : [input] The algorithm
-*/
-void QDataProcessorWidget::showAlgorithmDialog(const std::string &algorithm) {
-  std::stringstream pythonSrc;
-  pythonSrc << "try:\n";
-  pythonSrc << "  algm = " << algorithm << "Dialog()\n";
-  pythonSrc << "except:\n";
-  pythonSrc << "  pass\n";
-  runPythonCode(QString::fromStdString(pythonSrc.str()), false);
-}
-
-/**
-Show the user the dialog for "LoadReflTBL"
-*/
-void QDataProcessorWidget::showImportDialog() {
-  std::stringstream pythonSrc;
-  pythonSrc << "try:\n";
-  pythonSrc << "  algm = "
-            << "LoadTBL"
-            << "Dialog()\n";
-  pythonSrc << "  print algm.getPropertyValue(\"OutputWorkspace\")\n";
-  pythonSrc << "except:\n";
-  pythonSrc << "  pass\n";
-  // outputWorkspaceName will hold the name of the workspace
-  // otherwise this should be an empty string.
-  QString outputWorkspaceName =
-      runPythonCode(QString::fromStdString(pythonSrc.str()), false);
-  m_toOpen = outputWorkspaceName.trimmed().toStdString();
-  // notifying the presenter that a new table should be opened
-  // The presenter will ask about any unsaved changes etc
-  // before opening the new table
-  m_presenter->notify(DataProcessorPresenter::OpenTableFlag);
-}
-
-/**
 Show the user file dialog to choose save location of notebook
 */
 std::string QDataProcessorWidget::requestNotebookPath() {
@@ -423,26 +331,6 @@ void QDataProcessorWidget::loadSettings(
   for (auto it = keys.begin(); it != keys.end(); ++it)
     options[it->toStdString()] = settings.value(*it);
   settings.endGroup();
-}
-
-/**
-Plot a set of workspaces
-* @param workspaces : [input] The list of workspaces as a set
-*/
-void QDataProcessorWidget::plotWorkspaces(
-    const std::set<std::string> &workspaces) {
-  if (workspaces.empty())
-    return;
-
-  std::stringstream pythonSrc;
-  pythonSrc << "base_graph = None\n";
-  for (auto ws = workspaces.begin(); ws != workspaces.end(); ++ws)
-    pythonSrc << "base_graph = plotSpectrum(\"" << *ws
-              << "\", 0, True, window = base_graph)\n";
-
-  pythonSrc << "base_graph.activeLayer().logLogAxes()\n";
-
-  runPythonCode(QString::fromStdString(pythonSrc.str()));
 }
 
 /**
@@ -516,47 +404,6 @@ void QDataProcessorWidget::setOptionsHintStrategy(HintStrategy *hintStrategy,
                                                   int column) {
   ui.viewTable->setItemDelegateForColumn(
       column, new HintingLineEditFactory(hintStrategy));
-}
-
-/**
-* Adds the specified HintingLineEdit widgets to this view. A hinting line edit
-* comes with a label and an algorithm's name. Headings are also shown.
-* @param stages : The stages, pre-process, process or post-process, as a vector
-* @param algNames : The algorithm names as a vector
-* @param hints : The hints for each algorithm as a vector
-*/
-void QDataProcessorWidget::setGlobalOptions(
-    const std::vector<std::string> &stages,
-    const std::vector<std::string> &algNames,
-    const std::vector<std::map<std::string, std::string>> &hints) {
-  // Headers
-  QLabel *stageHeader = new QLabel(QString::fromStdString("<b>Stage</b>"));
-  QLabel *algorithmHeader =
-      new QLabel(QString::fromStdString("<b>Algorithm</b>"));
-  QLabel *optionsHeader =
-      new QLabel(QString::fromStdString("<b>Global Options</b>"));
-  stageHeader->setMinimumHeight(30);
-  ui.processLayout->addWidget(stageHeader, 0, 0);
-  ui.processLayout->addWidget(algorithmHeader, 0, 1);
-  ui.processLayout->addWidget(optionsHeader, 0, 2);
-
-  int rows = static_cast<int>(stages.size());
-
-  for (int row = 0; row < rows; row++) {
-
-    // The title
-    QLabel *stageLabel =
-        new QLabel(QString::fromStdString(stages.at(row)), this);
-    stageLabel->setMinimumSize(100, 10);
-    ui.processLayout->addWidget(stageLabel, row + 1, 0);
-    // The name
-    QLabel *nameLabel =
-        new QLabel(QString::fromStdString(algNames.at(row)), this);
-    ui.processLayout->addWidget(new HintingLineEdit(this, hints.at(row)),
-                                row + 1, 2);
-    // The content
-    ui.processLayout->addWidget(nameLabel, row + 1, 1);
-  }
 }
 
 /**
@@ -634,9 +481,8 @@ std::string QDataProcessorWidget::getWorkspaceToOpen() const {
 Get a pointer to the presenter that's currently controlling this view.
 @returns A pointer to the presenter
 */
-boost::shared_ptr<DataProcessorPresenter>
-QDataProcessorWidget::getTablePresenter() const {
-  return m_presenter;
+DataProcessorPresenter *QDataProcessorWidget::getPresenter() const {
+  return m_presenter.get();
 }
 
 /**
@@ -651,30 +497,6 @@ std::string QDataProcessorWidget::getClipboard() const {
 * Clear the progress
 */
 void QDataProcessorWidget::clearProgress() { ui.progressBar->reset(); }
-
-/**
-* Returns the processing instructions for the specified algorithm
-* @param name : The name of the algorithm
-* @return : The processing instructions specified by the user
-*/
-std::string
-QDataProcessorWidget::getProcessingOptions(const std::string &name) const {
-
-  const int nrows = ui.processLayout->rowCount();
-  for (int r = 0; r < nrows; r++) {
-
-    auto widget = ui.processLayout->itemAtPosition(r + 1, 1)->widget();
-    auto text = static_cast<QLabel *>(widget)->text().toStdString();
-    if (text == name) {
-      // This is the algorithm for which we need the processing instructions
-      // (options)
-      auto widget = ui.processLayout->itemAtPosition(r + 1, 2)->widget();
-      auto text = static_cast<HintingLineEdit *>(widget)->text().toStdString();
-      return text;
-    }
-  }
-  return "";
-}
 
 } // namespace MantidWidgets
 } // namespace Mantid

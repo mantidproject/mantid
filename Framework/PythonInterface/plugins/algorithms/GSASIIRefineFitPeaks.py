@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import AlgorithmFactory, ITableWorkspaceProperty, FileAction, FileProperty, \
     MatrixWorkspaceProperty, Progress, PropertyMode, PythonAlgorithm
 from mantid.kernel import Direction, FloatArrayProperty, Property, StringListValidator
@@ -783,7 +784,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
         for idx in range(0, num_peaks):
             par_values = [ parm_dict[par_prefix + str(idx)] for par_prefix in par_prefixes]
-            print "par_values: ", par_values
+            print("par_values: ", par_values)
             table.addRow(par_values)
 
         for parm in parm_dict:
@@ -871,9 +872,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         # To grab parameters from the gs2 object:
         # G2gd.GetPatternTreeItemId(self,self.root,'Phases')
         with open(out_lattice_file, 'w') as lattice_txt:
-            print >>lattice_txt, "a, b, c, alpha, beta, gamma"
-            print >>lattice_txt, ("{0}, {1}, {2}, {3}, {4}, {5}".
-                                  format(latt_a, latt_b, latt_c, latt_alpha, latt_beta, latt_gamma))
+            print("a, b, c, alpha, beta, gamma", file=lattice_txt)
+            print(("{0}, {1}, {2}, {3}, {4}, {5}".
+                                  format(latt_a, latt_b, latt_c, latt_alpha, latt_beta, latt_gamma)), file=lattice_txt)
 
     def _prepare_save_gsas2_project(self, gs2, gs2_rd):
         """
@@ -908,7 +909,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         valuesdict = {
             'wtFactor':1.0,
             'Dummy':True,
-            'ranId':random.randint(0,sys.maxint),
+            'ranId':random.randint(0,sys.maxsize),
             'Offset':[0.0,0.0],'delOffset':0.02,'refOffset':-1.0,'refDelt':0.01,
             'qPlot':False,'dPlot':False,'sqrtPlot':False
         }

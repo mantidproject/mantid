@@ -322,25 +322,24 @@ public:
     if (this->direction() == Kernel::Direction::Input ||
         this->direction() == Kernel::Direction::InOut) {
       // If an input workspace, get the list of workspaces currently in the ADS
-      auto vals = AnalysisDataService::Instance().getObjectNames();
+      auto vals = AnalysisDataService::Instance().getObjectNames(
+          Mantid::Kernel::DataServiceSort::Sorted);
       if (isOptional()) // Insert an empty option
       {
-        vals.insert("");
+        vals.push_back("");
       }
       // Copy-construct a temporary workspace property to test the validity of
       // each workspace
       WorkspaceProperty<TYPE> tester(*this);
-      for (auto it = vals.begin(); it != vals.end();) {
-        // Remove any workspace that's not valid for this algorithm
-        if (!tester.setValue(*it).empty()) {
-          vals.erase(
-              it++); // Post-fix so that it erase the previous when returned
-        } else
-          ++it;
-      }
-      auto values = std::vector<std::string>(vals.begin(), vals.end());
-      std::sort(values.begin(), values.end());
-      return values;
+
+      // Remove any workspace that's not valid for this algorithm
+      auto eraseIter = remove_if(vals.begin(), vals.end(),
+                                 [&tester](const std::string &wsName) {
+                                   return !tester.setValue(wsName).empty();
+                                 });
+      // Erase everything past returned iterator afterwards for readability
+      vals.erase(eraseIter, vals.end());
+      return vals;
     } else {
       // For output workspaces, just return an empty set
       return std::vector<std::string>();

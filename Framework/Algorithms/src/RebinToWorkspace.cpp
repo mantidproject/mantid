@@ -3,6 +3,7 @@
 //------------------------------
 #include "MantidAlgorithms/RebinToWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/HistogramValidator.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -19,11 +20,17 @@ DECLARE_ALGORITHM(RebinToWorkspace)
 void RebinToWorkspace::init() {
   //  using namespace Mantid::DataObjects;
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-                      "WorkspaceToRebin", "", Kernel::Direction::Input),
-                  "The workspace on which to perform the algorithm");
+                      "WorkspaceToRebin", "", Kernel::Direction::Input,
+                      Kernel::make_unique<API::HistogramValidator>()),
+                  "The workspace on which to perform the algorithm "
+                  "This must be a Histogram workspace, not Point data. "
+                  "If this is a problem try ConvertToHistogram.");
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-                      "WorkspaceToMatch", "", Kernel::Direction::Input),
-                  "The workspace to match the bin boundaries against");
+                      "WorkspaceToMatch", "", Kernel::Direction::Input,
+                      Kernel::make_unique<API::HistogramValidator>()),
+                  "The workspace to match the bin boundaries against. "
+                  "This must be a Histogram workspace, not Point data. "
+                  "If this is a problem try ConvertToHistogram.");
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                Kernel::Direction::Output),

@@ -116,11 +116,17 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
 }
 
 /**
- * Clears all managed algorithm objects.
+ * Clears all managed algorithm objects that are not currently running.
  */
 void AlgorithmManagerImpl::clear() {
   std::lock_guard<std::mutex> _lock(this->m_managedMutex);
-  m_managed_algs.clear();
+  for (auto itAlg = m_managed_algs.begin(); itAlg != m_managed_algs.end();) {
+    if (!(*itAlg)->isRunning()) {
+      itAlg = m_managed_algs.erase(itAlg);
+    } else {
+      ++itAlg;
+    }
+  }
 }
 
 std::size_t AlgorithmManagerImpl::size() const { return m_managed_algs.size(); }

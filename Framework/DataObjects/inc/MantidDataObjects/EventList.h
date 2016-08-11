@@ -158,8 +158,6 @@ public:
 
   void setMRU(EventWorkspaceMRU *newMRU);
 
-  EventWorkspaceMRU *getMRU();
-
   void clearData() override;
 
   void reserve(size_t num) override;
@@ -344,7 +342,7 @@ public:
   Kernel::cow_ptr<HistogramData::HistogramE> sharedE() const override;
 
 protected:
-  void checkHistogram(const HistogramData::Histogram &histogram) const override;
+  void checkAndSanitizeHistogram(HistogramData::Histogram &histogram) override;
   void checkWorksWithPoints() const override;
   void checkIsYAndEWritable() const override;
 

@@ -41,9 +41,8 @@ const std::string MatrixWorkspace::yDimensionId = "yDimension";
 MatrixWorkspace::MatrixWorkspace(
     Mantid::Geometry::INearestNeighboursFactory *nnFactory)
     : IMDWorkspace(), ExperimentInfo(), m_axes(), m_isInitialized(false),
-      m_YUnit(), m_YUnitLabel(), m_isDistribution(false),
-      m_isCommonBinsFlagSet(false), m_isCommonBinsFlag(false), m_masks(),
-      m_indexCalculator(),
+      m_YUnit(), m_YUnitLabel(), m_isCommonBinsFlagSet(false),
+      m_isCommonBinsFlag(false), m_masks(), m_indexCalculator(),
       m_nearestNeighboursFactory(
           (nnFactory == nullptr) ? new NearestNeighboursFactory : nnFactory),
       m_nearestNeighbours() {}
@@ -57,7 +56,6 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
   m_isInitialized = other.m_isInitialized;
   m_YUnit = other.m_YUnit;
   m_YUnitLabel = other.m_YUnitLabel;
-  m_isDistribution = other.m_isDistribution;
   m_isCommonBinsFlagSet = other.m_isCommonBinsFlagSet;
   m_isCommonBinsFlag = other.m_isCommonBinsFlag;
   m_masks = other.m_masks;
@@ -926,13 +924,21 @@ void MatrixWorkspace::setYUnitLabel(const std::string &newLabel) {
 * TODO: For example: ????
 * @return whether workspace is a distribution or not
 */
-const bool &MatrixWorkspace::isDistribution() const { return m_isDistribution; }
+bool MatrixWorkspace::isDistribution() const {
+  return getSpectrum(0).yMode() == HistogramData::Histogram::YMode::Frequencies;
+}
 
 /** Set the flag for whether the Y-values are dimensioned
 *  @return whether workspace is now a distribution
 */
 void MatrixWorkspace::setDistribution(bool newValue) {
-  m_isDistribution = newValue;
+  if (isDistribution() == newValue)
+    return;
+  HistogramData::Histogram::YMode ymode =
+      newValue ? HistogramData::Histogram::YMode::Frequencies
+               : HistogramData::Histogram::YMode::Counts;
+  for (size_t i = 0; i < getNumberHistograms(); ++i)
+    getSpectrum(i).setYMode(ymode);
 }
 
 /**
@@ -1061,8 +1067,16 @@ void MatrixWorkspace::maskBin(const size_t &workspaceIndex,
   // this is the actual result of the masking that most algorithms and plotting
   // implementations will see, the bin mask flags defined above are used by only
   // some algorithms
-  this->dataY(workspaceIndex)[binIndex] *= (1 - weight);
-  this->dataE(workspaceIndex)[binIndex] *= (1 - weight);
+  // If the weight is 0, nothing more needs to be done after flagMasked above
+  // (i.e. NaN and Inf will also stay intact)
+  // If the weight is not 0, NaN and Inf values are set to 0,
+  // whereas other values are scaled by (1 - weight)
+  if (weight != 0.) {
+    double &y = this->mutableY(workspaceIndex)[binIndex];
+    (std::isnan(y) || std::isinf(y)) ? y = 0. : y *= (1 - weight);
+    double &e = this->mutableE(workspaceIndex)[binIndex];
+    (std::isnan(e) || std::isinf(e)) ? e = 0. : e *= (1 - weight);
+  }
 }
 
 /** Writes the masking weight to m_masks (doesn't alter y-values). Contains a
@@ -1555,7 +1569,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(
   }
 
   if (wi < nhist) {
-    const MantidVec &X = this->readX(wi);
+    const auto &X = this->binEdges(wi);
     auto it = std::lower_bound(X.cbegin(), X.cend(), x);
     if (it == X.end()) {
       // Out of range

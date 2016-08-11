@@ -44,6 +44,7 @@ private:
     MOCK_METHOD0(clearMDMasking, void());
     MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
                        Mantid::Kernel::SpecialCoordinateSystem());
+    MOCK_CONST_METHOD0(isMDHistoWorkspace, bool());
 
   private:
     MockMDWorkspace *doClone() const override {
