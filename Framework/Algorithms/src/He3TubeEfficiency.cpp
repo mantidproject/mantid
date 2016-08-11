@@ -126,8 +126,7 @@ void He3TubeEfficiency::exec() {
     } catch (std::out_of_range &) {
       // if we don't have all the data there will be spectra we can't correct,
       // avoid leaving the workspace part corrected
-      auto &dud = m_outputWS->mutableY(i);
-      dud.assign(dud.size(), 0);
+      m_outputWS->mutableY(i) = 0;
       PARALLEL_CRITICAL(deteff_invalid) {
         m_spectraSkipped.push_back(m_inputWS->getAxis(1)->spectraNo(i));
       }
