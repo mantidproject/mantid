@@ -19,12 +19,7 @@ public:
   void run() override;
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
-  /// Save the workspaces produces from the algorithm
-  void saveWorkspaces(const QString &fitWorkspace,
-                      const QString &contourWorkspace);
-  /// Plot the workspaces specified by the interface
-  void plotWorkspaces(const QString &fitWorkspace,
-                      const QString &contourWorkspace);
+
 
 private slots:
   /// Slot for when the min range on the range selector changes
@@ -35,12 +30,10 @@ private slots:
   void updateProperties(QtProperty *prop, double val) override;
   /// Slot to handle when a new sample file is available
   void handleSampleInputReady(const QString &filename);
-  /// Handle plotting and saving after algorithm completion
-  void algorithmComplete(const bool &error);
-  /// Handle plotting
-  void plotClicked();
-  /// Handle saving
-  void saveClicked();
+  /// Save the workspaces produces from the algorithm
+  void saveWorkspaces();
+  /// Plot the workspaces specified by the interface
+  void plotWorkspaces();
 
 private:
   // The ui form
