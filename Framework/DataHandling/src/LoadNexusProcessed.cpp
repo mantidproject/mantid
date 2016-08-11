@@ -378,7 +378,8 @@ void LoadNexusProcessed::exec() {
   m_cppFile = new ::NeXus::File(root.m_fileID);
 
   // Find out how many first level entries there are
-  size_t nWorkspaceEntries = (root.groups().size());
+  // Cast down to int as another property later on is an int
+  int nWorkspaceEntries = static_cast<int>((root.groups().size()));
 
   // Check for an entry number property
   int entrynumber = getProperty("EntryNumber");
@@ -461,7 +462,7 @@ void LoadNexusProcessed::exec() {
       g_log.information("Individual group loading");
     }
 
-    for (size_t p = 1; p <= nWorkspaceEntries; ++p) {
+    for (int p = 1; p <= nWorkspaceEntries; ++p) {
       std::ostringstream os;
       os << p;
 
