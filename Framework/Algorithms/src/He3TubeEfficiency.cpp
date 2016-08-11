@@ -168,30 +168,29 @@ void He3TubeEfficiency::correctForEfficiency(std::size_t spectraIndex) {
   const double scale = this->getProperty("ScaleFactor");
 
   const auto &yValues = m_inputWS->y(spectraIndex);
-  const auto &eValues = m_inputWS->e(spectraIndex);
-  auto yInItr = yValues.cbegin();
-  auto eInItr = eValues.cbegin();
-
   auto &yOut = m_outputWS->mutableY(spectraIndex);
-  auto &eOut = m_outputWS->mutableE(spectraIndex);
-  auto yOutItr = yOut.begin();
-  auto eOutItr = eOut.begin();
 
   const auto wavelength = m_inputWS->points(spectraIndex);
-  auto wavelenItr = wavelength.cbegin();
 
-  for (; yOutItr != yOut.end(); ++yOutItr, ++eOutItr) {
-    double effcorr =
-        this->detectorEfficiency(exp_constant * (*wavelenItr), scale);
+  std::transform(yValues.cbegin(), yValues.cend(), wavelength.cbegin(),
+                 yOut.begin(), [&](const double y, const double wavelen) {
+                   double effcorr =
+                       detectorEfficiency(exp_constant * wavelen, scale);
 
-    *yOutItr = (*yInItr) * effcorr;
-    ++yInItr;
+                   return y * effcorr;
+                 });
 
-    *eOutItr = (*eInItr) * effcorr;
-    ++eInItr;
+  const auto &eValues = m_inputWS->e(spectraIndex);
+  auto &eOut = m_outputWS->mutableE(spectraIndex);
 
-    ++wavelenItr;
-  }
+  // reset wavelength iterator
+  std::transform(eValues.cbegin(), eValues.cend(), wavelength.cbegin(),
+                 eOut.begin(), [&](const double e, const double wavelen) {
+                   double effcorr =
+                       this->detectorEfficiency(exp_constant * wavelen, scale);
+
+                   return e * effcorr;
+                 });
 }
 
 /**
