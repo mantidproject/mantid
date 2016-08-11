@@ -37,6 +37,10 @@ private slots:
   void handleSampleInputReady(const QString &filename);
   /// Handle plotting and saving after algorithm completion
   void algorithmComplete(const bool &error);
+  /// Handle plotting
+  void plotClicked();
+  /// Handle saving
+  void saveClicked();
 
 private:
   // The ui form

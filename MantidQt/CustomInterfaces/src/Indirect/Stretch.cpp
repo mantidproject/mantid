@@ -57,6 +57,10 @@ Stretch::Stretch(QWidget *parent) : IndirectBayesTab(parent) {
           SLOT(handleSampleInputReady(const QString &)));
   connect(m_uiForm.chkSequentialFit, SIGNAL(toggled(bool)), m_uiForm.cbPlot,
           SLOT(setEnabled(bool)));
+
+  // Connect the plot and save push buttons
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
 
 void Stretch::setup() {}
