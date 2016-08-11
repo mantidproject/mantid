@@ -231,13 +231,19 @@ void Quasi::run() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 /**
- * Updates the data and fit curves on the mini plot.
+ * Enable plotting and savimg and fit curves on the mini plot.
  */
 void Quasi::algorithmComplete(bool error) {
   if (error)
     return;
-  else
+  else {
     updateMiniPlot();
+    m_uiForm.cbPlot->setEnabled(true);
+    m_uiForm.pbPlot->setEnabled(true);
+    m_uiForm.pbSave->setEnabled(true);
+  }
+
+
 }
 
 void Quasi::updateMiniPlot() {
