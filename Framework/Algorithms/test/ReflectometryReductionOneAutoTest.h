@@ -57,7 +57,9 @@ public:
   MatrixWorkspace_sptr m_dataWorkspace;
   MatrixWorkspace_sptr m_transWorkspace1;
   MatrixWorkspace_sptr m_transWorkspace2;
-  MatrixWorkspace_sptr m_decWorkspace;
+  MatrixWorkspace_sptr m_decWorkspaceTOF;
+  MatrixWorkspace_sptr m_decWorkspaceZero;
+  MatrixWorkspace_sptr m_decWorkspaceNoZero;
   WorkspaceGroup_sptr m_multiDetectorWorkspace;
   const std::string outWSQName;
   const std::string outWSLamName;
@@ -71,6 +73,7 @@ public:
         transWSName("ReflectometryReductionOneAutoTest_TransWS") {
     MantidVec xData = {0, 0, 0, 0};
     MantidVec yData = {0, 0, 0};
+    MantidVec yDataNoZero = { 1, 1, 1 };
 
     auto createWorkspace =
         AlgorithmManager::Instance().create("CreateWorkspace");
@@ -95,10 +98,26 @@ public:
     createWorkspace->setProperty("UnitX", "TOF");
     createWorkspace->setProperty("DataX", xData);
     createWorkspace->setProperty("DataY", yData);
-    createWorkspace->setProperty("OutputWorkspace", "DECWS");
+    createWorkspace->setProperty("OutputWorkspace", "DECTOF");
     createWorkspace->execute();
-    m_decWorkspace =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("DECWS");
+    m_decWorkspaceTOF =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("DECTOF");
+
+    createWorkspace->setProperty("UnitX", "Wavelength");
+    createWorkspace->setProperty("DataX", xData);
+    createWorkspace->setProperty("DataY", yData);
+    createWorkspace->setProperty("OutputWorkspace", "DECZero");
+    createWorkspace->execute();
+    m_decWorkspaceZero =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("DECZero");
+
+    createWorkspace->setProperty("UnitX", "Wavelength");
+    createWorkspace->setProperty("DataX", xData);
+    createWorkspace->setProperty("DataY", yDataNoZero);
+    createWorkspace->setProperty("OutputWorkspace", "DECNoZero");
+    createWorkspace->execute();
+    m_decWorkspaceNoZero =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("DECNoZero");
 
     IAlgorithm_sptr lAlg = AlgorithmManager::Instance().create("Load");
     lAlg->setChild(true);
@@ -268,7 +287,21 @@ public:
   void test_detector_efficiency_correction_bad_xunits_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("InputWorkspace", m_dataWorkspace);
-    alg->setProperty("DetectorEfficiencyCorrection", m_decWorkspace);
+    alg->setProperty("DetectorEfficiencyCorrection", m_decWorkspaceTOF);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+  }
+
+  void test_detector_efficiency_correction_zero_values_throws() {
+    auto alg = construct_standard_algorithm();
+    alg->setProperty("InputWorkspace", m_dataWorkspace);
+    alg->setProperty("DetectorEfficiencyCorrection", m_decWorkspaceZero);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+  }
+
+  void test_detector_efficiency_correction_too_few_y_values_throws() {
+    auto alg = construct_standard_algorithm();
+    alg->setProperty("InputWorkspace", m_dataWorkspace);
+    alg->setProperty("DetectorEfficiencyCorrection", m_decWorkspaceNoZero);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 

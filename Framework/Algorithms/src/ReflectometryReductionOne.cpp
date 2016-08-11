@@ -527,6 +527,14 @@ void ReflectometryReductionOne::exec() {
           "Detector Efficiency Correction workspace x-units must be in "
           "wavelength");
     }
+    for (size_t i = 0; i < decTemp->getNumberHistograms(); i++) {
+      for (size_t j = 0; j < decTemp->blocksize(); j++) {
+        if (decTemp->y(i)[j] == 0) {
+          throw std::invalid_argument("The DetectorEfficiencyCorrection  "
+            "workspace cannot contain any zero values.");
+        }
+      }
+    }
     detectorEfficiencyCorrection = decTemp;
   }
 
@@ -586,6 +594,12 @@ void ReflectometryReductionOne::exec() {
       if (decWS->blocksize() > 1) {
         // If using separate normalization constants for each spectra, rebin
         // to the detector workspace
+        if (decWS->blocksize() < detectorWS->blocksize()) {
+          throw std::invalid_argument("The number of y-values in the detector "
+            "efficiency correction workspace must be greater than or equal to "
+            "those in the detector workspace");
+        }
+
         auto rebinToWorkspaceAlg =
             this->createChildAlgorithm("RebinToWorkspace");
         rebinToWorkspaceAlg->initialize();
