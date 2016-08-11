@@ -101,8 +101,7 @@ Usage
 
     # perform the algorithm
     SaveDiffFittingAscii(InputWorkspace = ws, Filename=savefile, RunNumber="21344", Bank = "1",
-    OutFormat = "AppendToExistingFile")
-
+    OutMode = "AppendToExistingFile")
 
     print "File Exists:", os.path.exists(savefile)
 
