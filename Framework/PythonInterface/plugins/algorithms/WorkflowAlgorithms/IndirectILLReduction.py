@@ -321,7 +321,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         @param run :: string of run number to reduce
         """
         self.log().information('Reducing run #' + run)
-        
+
         raw = run + '_' + self._raw_ws
         det = run + '_' + self._det_ws
         mon = run + '_' + self._monitor_ws
@@ -422,9 +422,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=red)
             Scale(InputWorkspace=red, OutputWorkspace=red, Factor=0.5, Operation='Multiply')
 
-<<<<<<< HEAD
     @classmethod
-    def _shift_spectra(self, ws1, ws2=None, shift_option_ws2_centered='False'):
+    def _shift_spectra(cls, ws1, ws2=None, shift_option_ws2_centered='False'):
         """
         If only ws1 is given as an input workspace, ws1 will be shifted such that peak positions of each single spectrum
         are centered around 0 meV
@@ -463,7 +462,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
             # Find peak positions in ws1
             __temp = ExtractSingleSpectrum(InputWorkspace=ws1, WorkspaceIndex=i)
-            peak_bin1 = self._get_peak_position(__temp)
+            peak_bin1 = cls._get_peak_position(__temp)
             DeleteWorkspace(__temp)
 
             # If only one workspace is given as an input, this workspace will be shifted
@@ -472,7 +471,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             else:
                 # Find peak positions in ws2
                 __temp2 = ExtractSingleSpectrum(InputWorkspace=ws2, WorkspaceIndex=i)
-                peak_bin2 = self._get_peak_position(__temp2)
+                peak_bin2 = cls._get_peak_position(__temp2)
                 DeleteWorkspace(__temp2)
 
                 if shift_option_ws2_centered is False:
@@ -530,8 +529,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         return ws_out_temp
 
-=======
->>>>>>> f42144017dfdf20f498b3199d1c0a48b510f7661
     def _set_output_workspace_properties(self, runlist):
 
         # remove cached left and right of vanadium run
