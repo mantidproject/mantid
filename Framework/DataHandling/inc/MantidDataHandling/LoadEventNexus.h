@@ -21,6 +21,10 @@
 #include <mutex>
 #include <boost/lexical_cast.hpp>
 
+// using namespace Mantid;
+
+namespace Mantid{
+namespace DataHandling{
 
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
@@ -55,7 +59,7 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>
   */
 class DLLExport LoadEventNexus
-    : public Mantid::API::IFileLoader<Kernel::NexusDescriptor> {
+    : public API::IFileLoader<Kernel::NexusDescriptor> {
 
 public:
   LoadEventNexus();
@@ -77,7 +81,7 @@ public:
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Mantid::Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
   /** Sets whether the pixel counts will be pre-counted.
    * @param value :: true if you want to precount. */
@@ -112,7 +116,7 @@ public:
                     const std::string &top_entry_name, Algorithm *alg);
 
   static void loadSampleDataISIScompatibility(::NeXus::File &file,
-                                              EventWorkspaceCollection &WS);
+                                              DataHandling::EventWorkspaceCollection &WS);
 
   /// method used to return instrument name for some old ISIS files where it is
   /// not written properly within the instrument

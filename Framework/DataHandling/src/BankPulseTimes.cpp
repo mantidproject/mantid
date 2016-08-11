@@ -1,5 +1,7 @@
 #include "MantidDataHandling/BankPulseTimes.h"
 
+using namespace Mantid::Kernel;
+
 //===============================================================================================
 // BankPulseTimes
 //===============================================================================================
@@ -19,7 +21,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
   file.openData("event_time_zero");
   // Read the offset (time zero)
   file.getAttr("offset", startTime);
-  DateAndTime start(startTime);
+  Mantid::Kernel::DateAndTime start(startTime);
   // Load the seconds offsets
   std::vector<double> seconds;
   file.getData(seconds);
@@ -45,7 +47,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
 //----------------------------------------------------------------------------------------------
 /** Constructor. Build from a vector of date and times.
 *  Handles a zero-sized vector */
-BankPulseTimes::BankPulseTimes(const std::vector<Kernel::DateAndTime> &times) {
+BankPulseTimes::BankPulseTimes(const std::vector<DateAndTime> &times) {
   numPulses = times.size();
   pulseTimes = nullptr;
   if (numPulses == 0)
