@@ -155,9 +155,10 @@ INSTANTIATE_CLONE(double)
 INSTANTIATE_CLONE(float)
 // Need further 1D specialisation for string
 INSTANTIATE_CLONE1D(std::string)
-INSTANTIATE_CLONEEMPTY(std::string)
 // Need further ND specialisation for bool
 INSTANTIATE_CLONEND(bool)
+INSTANTIATE_CLONEEMPTY(bool)
+
 ///@endcond
 }
 }
