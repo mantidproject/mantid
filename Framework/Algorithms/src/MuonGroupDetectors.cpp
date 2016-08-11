@@ -101,8 +101,8 @@ void MuonGroupDetectors::exec() {
     auto &Y = outWS->mutableY(groupIndex);
 
     for (auto &wsIndex : wsIndices) {
-	  outWS->mutableY(groupIndex) += inWS->y(wsIndex);
-	  inWS->mutableE(groupIndex) += inWS->e(wsIndex);
+      outWS->mutableY(groupIndex) += inWS->y(wsIndex);
+      inWS->mutableE(groupIndex) += inWS->e(wsIndex);
 
       // Detectors list of the group should contain all the detectors of
       // it's

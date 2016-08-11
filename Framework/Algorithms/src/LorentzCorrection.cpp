@@ -91,9 +91,9 @@ void LorentzCorrection::exec() {
     const double sinTheta = std::sin(twoTheta / 2);
     double sinThetaSq = sinTheta * sinTheta;
 
-	auto &inY = inWS->y(i);
-	auto &outY = outWS->mutableY(i);
-	auto &outE = outWS->mutableE(i);
+    auto &inY = inWS->y(i);
+    auto &outY = outWS->mutableY(i);
+    auto &outE = outWS->mutableE(i);
     const auto points = inWS->points(i);
     const auto pos = std::find(cbegin(points), cend(points), 0.0);
     if (pos != cend(points)) {

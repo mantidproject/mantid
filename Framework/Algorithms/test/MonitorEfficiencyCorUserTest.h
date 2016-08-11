@@ -130,45 +130,45 @@ private:
 
 class MonitorEfficiencyCorUserTestPerformance : public CxxTest::TestSuite {
 public:
-	static MonitorEfficiencyCorUserTestPerformance *createSuite() {
-		return new MonitorEfficiencyCorUserTestPerformance();
-	}
+  static MonitorEfficiencyCorUserTestPerformance *createSuite() {
+    return new MonitorEfficiencyCorUserTestPerformance();
+  }
 
-	static void destroySuite(MonitorEfficiencyCorUserTestPerformance * suite) {
-		delete suite;
-	}
+  static void destroySuite(MonitorEfficiencyCorUserTestPerformance *suite) {
+    delete suite;
+  }
 
-	MonitorEfficiencyCorUserTestPerformance() {
-		input = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-			100000, 2000, false, false, true, "TOFTOF");
+  MonitorEfficiencyCorUserTestPerformance() {
+    input = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        100000, 2000, false, false, true, "TOFTOF");
 
-		input->getAxis(0)->setUnit("TOF");
-		input->mutableRun().addProperty("Ei",
-			boost::lexical_cast<std::string>(3.27));
-		input->mutableRun().addProperty(
-			"monitor_counts", boost::lexical_cast<std::string>(1000));
+    input->getAxis(0)->setUnit("TOF");
+    input->mutableRun().addProperty("Ei",
+                                    boost::lexical_cast<std::string>(3.27));
+    input->mutableRun().addProperty("monitor_counts",
+                                    boost::lexical_cast<std::string>(1000));
 
-		input->instrumentParameters().addString(
-			input->getInstrument()->getChild(0).get(), "formula_mon_eff",
-			"sqrt(e/25.3)"); // TOFTOF
+    input->instrumentParameters().addString(
+        input->getInstrument()->getChild(0).get(), "formula_mon_eff",
+        "sqrt(e/25.3)"); // TOFTOF
 
-		API::AnalysisDataService::Instance().addOrReplace("input", input);
-	}
+    API::AnalysisDataService::Instance().addOrReplace("input", input);
+  }
 
-	void tearDown() {
-		API::AnalysisDataService::Instance().remove("input");
-		API::AnalysisDataService::Instance().remove("ouput");
-	}
+  void tearDown() {
+    API::AnalysisDataService::Instance().remove("input");
+    API::AnalysisDataService::Instance().remove("ouput");
+  }
 
-	void test_exec() {
-		MonitorEfficiencyCorUser alg;
-		alg.initialize();
-		alg.setPropertyValue("InputWorkspace", "input");
-		alg.setPropertyValue("OutputWorkspace", "output");
-		alg.execute();
-	}
+  void test_exec() {
+    MonitorEfficiencyCorUser alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "input");
+    alg.setPropertyValue("OutputWorkspace", "output");
+    alg.execute();
+  }
 
 private:
-	DataObjects::Workspace2D_sptr input;
+  DataObjects::Workspace2D_sptr input;
 };
 #endif /* MANTID_ALGORITHMS_MONITOREFFICIENCYCORUSERTEST_H_ */

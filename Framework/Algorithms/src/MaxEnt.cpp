@@ -352,8 +352,8 @@ void MaxEnt::exec() {
     outEvolTest->setSharedX(s, outEvolChi->sharedX(0));
 
     // Y values
-	outEvolChi->setCounts(s, std::move(evolChi));
-	outEvolTest->setCounts(s, std::move(evolTest));
+    outEvolChi->setCounts(s, std::move(evolChi));
+    outEvolTest->setCounts(s, std::move(evolTest));
     // No errors
 
   } // Next spectrum
