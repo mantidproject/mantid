@@ -75,7 +75,7 @@
          <string>Sum the input files</string>
         </property>
         <property name="text">
-         <string>Sum All</string>
+         <string>Sum Runs</string>
         </property>
         <property name="checked">
          <bool>false</bool>
@@ -216,22 +216,6 @@
         </property>
        </widget>
       </item>
-      <item alignment="Qt::AlignVCenter">
-       <widget class="QCheckBox" name="ckCalibSum">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="toolTip">
-         <string>Sum calibration files</string>
-        </property>
-        <property name="text">
-         <string>Sum</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
@@ -361,22 +345,25 @@
          <number>7</number>
         </property>
         <property name="value">
-         <number>7</number>
+         <number>6</number>
         </property>
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+       <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfVanadiumRun" native="true">
+        <property name="enabled">
+         <bool>true</bool>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-       </spacer>
+        <property name="label" stdset="0">
+         <string>Vanadium Run</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -388,28 +375,9 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QCheckBox" name="ckControlMode">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Maximum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Output intermediate workspaces along with the final reduced one</string>
-        </property>
-        <property name="text">
-         <string>Control Mode</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QCheckBox" name="ckPlot">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -422,10 +390,23 @@
         </property>
        </widget>
       </item>
-      <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>359</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
        <widget class="QCheckBox" name="ckSave">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Maximum">
+         <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -616,6 +597,38 @@
     <hint type="destinationlabel">
      <x>391</x>
      <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckMirrorSense</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>sbUnmirrorOption</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>76</x>
+     <y>298</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>148</x>
+     <y>297</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckMirrorSense</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>rfVanadiumRun</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>76</x>
+     <y>298</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>375</x>
+     <y>297</y>
     </hint>
    </hints>
   </connection>

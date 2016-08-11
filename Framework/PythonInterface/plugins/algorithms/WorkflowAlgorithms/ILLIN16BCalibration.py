@@ -60,9 +60,9 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
                                     UnmirrorOption=3)
 
         # Integrate within peak range
-        number_histograms = temp[0].getNumberHistograms()
+        number_histograms = temp.getNumberHistograms()
 
-        ws_name = temp[0].getName()
+        ws_name = temp.getName()
         Integration(InputWorkspace=ws_name,
                     OutputWorkspace=ws_name,
                     RangeLower=float(self._peak_range[0]),
@@ -87,8 +87,6 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
               Operation='Multiply')
 
         DeleteWorkspace(ws_name)
-        DeleteWorkspace(temp[1])
-        DeleteWorkspace(temp[2])
 
         self.setProperty('OutputWorkspace', self._out_ws)
 

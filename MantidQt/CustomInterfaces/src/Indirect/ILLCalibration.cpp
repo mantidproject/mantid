@@ -35,7 +35,7 @@ void ILLCalibration::run() {
   QMap<QString, QString> instDetails = getInstrumentDetails();
 
   IAlgorithm_sptr calibrationAlg =
-      AlgorithmManager::Instance().create("IndirectCalibration");
+      AlgorithmManager::Instance().create("ILLIN16BCalibration");
   calibrationAlg->initialize();
 
   // Handle einput files
@@ -43,8 +43,8 @@ void ILLCalibration::run() {
   calibrationAlg->setProperty("Run", runFilename.toStdString());
 
   // Set options
-  bool mirrorMode = m_uiForm.ckMirrorMode->isChecked();
-  calibrationAlg->setProperty("MirrorMode", mirrorMode);
+  bool mirrorSense = m_uiForm.ckMirrorSense->isChecked();
+  calibrationAlg->setProperty("MirrorSense", mirrorSense);
 
   bool useMapFile = m_uiForm.rdChoose->isChecked();
   if (useMapFile) {
@@ -62,9 +62,7 @@ void ILLCalibration::run() {
 
   // Get the name format for output files
   QFileInfo runFileInfo(runFilename);
-  QString outputWsName = runFileInfo.baseName() + "_" +
-                         instDetails["analyser"] + "_" +
-                         instDetails["reflection"] + "_calib";
+  QString outputWsName = runFileInfo.baseName() + "_calib";
 
   // Set output workspace properties
   calibrationAlg->setProperty("OutputWorkspace", outputWsName.toStdString());

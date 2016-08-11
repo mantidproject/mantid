@@ -42,22 +42,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QCheckBox" name="cbSum">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Sum All</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
@@ -189,7 +173,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QCheckBox" name="ckMirrorMode">
+       <widget class="QCheckBox" name="ckMirrorSense">
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mirror Sense&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>

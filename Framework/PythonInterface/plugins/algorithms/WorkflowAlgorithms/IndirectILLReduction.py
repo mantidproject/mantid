@@ -10,31 +10,19 @@ from mantid import config, logger, mtd
 from IndirectImport import import_mantidplot
 
 class IndirectILLReduction(DataProcessorAlgorithm):
-    """
-    Contact:
-    G.Vardanyan :  vardanyan@ill.fr
-    This version is created on 01/08/2016 partly based on previous work by S.Howells et. Al.
-    This is an algorithm for data reduction from IN16B instrument at ILL.
-    It reads raw .nxs files and produces the reduced workspace with series of
-    manipulations performed dependent on the many input options.
-    This file is part of Mantid.
-    For the full documentation, see
-    http://docs.mantidproject.org/nightly/algorithms/IndirectILLReduction-v1.html?highlight=indirectillreduction
-    """
 
-    # Output workspaces
-    # these will be set in PyInit by user input
+    # Output workspace, will be set by user input
     _red_ws = 'red'
-    _left_ws = 'left'
-    _right_ws = 'right'
 
-    # optional output workspaces with fixed names
-    # they will be prepended with _red_ws OR runnumber
+    # Optional output workspaces with fixed names for ControlMode
+    # they will be prepended with _red_ws (for multiple file) OR RunNumber (for single file)
     _raw_ws = 'raw'
     _det_ws = 'detgrouped'
     _monitor_ws = 'monitor'
     _mnorm_ws = 'mnorm'
     _vnorm_ws = 'vnorm'
+    _left_ws = 'left'
+    _right_ws = 'right'
 
     # Optional input calibration workspace
     _calib_ws = None
@@ -77,12 +65,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(FileProperty('VanadiumRun','',
                                           action=FileAction.OptionalLoad,
                                           extensions=['nxs']),
-                             doc='File path of vanadium run (s).')
+                             doc='File path of vanadium run. Used for UnmirrorOption=[5,7]')
 
         self.declareProperty(FileProperty('MapFile', '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['xml']),
-                             doc='Filename of the map file to use. If left blank the default will be used.')
+                             doc='Filename of the detector grouping map file to use. \n'
+                                 'If left blank the default will be used.')
 
         # Other inputs
         self.declareProperty(MatrixWorkspaceProperty("CalibrationWorkspace", "",
@@ -131,41 +120,26 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(name='Plot',defaultValue=False,
                              doc='Whether to plot the reduced workspace.')
 
-        # Output workspace properties
-        self.declareProperty(MatrixWorkspaceProperty("ReducedWorkspace", "red",
+        # Output workspace property
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "red",
                                                      optional=PropertyMode.Optional,
                                                      direction=Direction.Output),
                              doc="Name for the output reduced workspace created.")
-
-        self.declareProperty(MatrixWorkspaceProperty("ReducedLeftWorkspace", "left",
-                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
-                             doc="Name for the output reduced left workspace created.")
-
-        self.declareProperty(MatrixWorkspaceProperty("ReducedRightWorkspace", "right",
-                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
-                             doc="Name for the output reduced left workspace created.")
 
     def setUp(self):
 
         self._run_file = self.getPropertyValue('Run')
         self._vanadium_file = self.getPropertyValue('VanadiumRun')
-
-        self._red_ws = self.getPropertyValue('ReducedWorkspace')
-        self._left_ws = self.getPropertyValue('ReducedLeftWorkspace')
-        self._right_ws= self.getPropertyValue('ReducedRightWorkspace')
-
         self._analyser = self.getPropertyValue('Analyser')
         self._map_file = self.getPropertyValue('MapFile')
         self._reflection = self.getPropertyValue('Reflection')
-
         self._mirror_sense = self.getProperty('MirrorSense').value
         self._control_mode = self.getProperty('ControlMode').value
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
         self._sum_runs = self.getProperty('SumRuns').value
         self._unmirror_option = self.getProperty('UnmirrorOption').value
+        self._red_ws = self.getPropertyValue('OutputWorkspace')
 
         if not self._mirror_sense:
             self.log().warning('MirrorSense is OFF, UnmirrorOption will fall back to 0 (i.e. no unmirroring)')
@@ -177,20 +151,23 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
     def validateInputs(self):
 
+        # this is run before setUp, so need to get properties also here!
         issues = dict()
         # Unmirror options 5 and 7 require a Vanadium run as input workspace
-        if self._mirror_sense and (self._unmirror_option == 5 or self._unmirror_option == 7) \
-            and self._vanadium_file is None:
-            issues['UnmirrorOption'] = 'Given unmirror option requires vanadium run to be set'
+        if self.getProperty('MirrorSense').value and \
+            (self.getProperty('UnmirrorOption').value == 5 or self.getProperty('UnmirrorOption').value == 7) \
+            and self.getPropertyValue('VanadiumRun') == "":
+            issues['VanadiumRun'] = 'Given unmirror option requires vanadium run to be set'
 
         return issues
 
     def PyExec(self):
 
         self.setUp()
-        self.validateInputs()
 
-        Load(Filename=self._run_file, OutputWorkspace=self._raw_ws)
+        loaded_ws = self._red_ws + '_' + self._raw_ws
+
+        Load(Filename=self._run_file, OutputWorkspace=loaded_ws)
         # this must be Load, to be able to treat multiple files
         # when multiple files are loaded, _raw_ws will be a group workspace
         # containing workspaces having run numbers as names
@@ -199,22 +176,27 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.log().information('Loaded .nxs file(s) : %s' % self._run_file)
 
         # check if it is a workspace or workspace group and perform reduction correspondingly
-        if isinstance(mtd[self._raw_ws],WorkspaceGroup):
+        if isinstance(mtd[loaded_ws],WorkspaceGroup):
 
             # get instrument from the first ws in a group and load config files
-            self._instrument = mtd[self._raw_ws].getItem(0).getInstrument()
+            self._instrument = mtd[loaded_ws].getItem(0).getInstrument()
             self._load_config_files()
 
+            # if vanadium run needed, load once beforehand
+            # this needs to be after load_config_files and before reduce_run
+            if self._unmirror_option == 5 or self._unmirror_option == 7:
+                self._load_vanadium_run()
+
             # figure out number of progress reports, i.e. one for each input workspace/file
-            progress = Progress(self, start=0.0, end=1.0, nreports = mtd[self._raw_ws].size())
+            progress = Progress(self, start=0.0, end=1.0, nreports = mtd[loaded_ws].size())
 
             # to collect the list of runs
             runlist = []
 
             # traverse over items in workspace group and reduce individually
-            for i in range(0, mtd[self._raw_ws].size()):
+            for i in range(0, mtd[loaded_ws].size()):
 
-                run = str(mtd[self._raw_ws].getItem(i).getRunNumber())
+                run = str(mtd[loaded_ws].getItem(i).getRunNumber())
                 runlist.append(run)
                 ws = run + '_' + self._raw_ws
                 RenameWorkspace(InputWorkspace = run, OutputWorkspace = ws)
@@ -230,12 +212,17 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         else:
             # get instrument name and laod config files
-            self._instrument = mtd[self._raw_ws].getInstrument()
+            self._instrument = mtd[loaded_ws].getInstrument()
             self._load_config_files()
 
-            run = str(mtd[self._raw_ws].getRunNumber())
+            # if vanadium run needed, load once beforehand
+            # this needs to be after load_config_files and before reduce_run
+            if self._unmirror_option == 5 or self._unmirror_option == 7:
+                self._load_vanadium_run()
+
+            run = str(mtd[loaded_ws].getRunNumber())
             ws = run + '_' + self._raw_ws
-            RenameWorkspace(InputWorkspace = self._raw_ws, OutputWorkspace = ws)
+            RenameWorkspace(InputWorkspace = loaded_ws, OutputWorkspace = ws)
 
             # reduce
             self._reduce_run(run)
@@ -271,23 +258,22 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     def _load_vanadium_run(self):
         """
         Loads vanadium run into workspace and extracts left and right wings to use in shift spectra
-        Used only in unmirror =5,7. Do not confuse with calibration workspace!
+        Used only in unmirror =5,7. Maybe directly to Integrate as well?
+        Note the recursion!
         """
-        Load(Filename=self._vanadium_file, OutputWorkspace='van')
+        # call IndirectILLReduction for vanadium run with unmirror 1 and 2 to get left and right
 
-        LoadParameterFile(Workspace='van', Filename=self._parameter_file)
+        left_van = IndirectILLReduction(Run=self._vanadium_file,SumRuns=True,MirrorSense=True,
+                                        UnmirrorOption=1,MapFile=self._map_file,Analyser=self._analyser,
+                                        Reflection=self._reflection)
 
-        GroupDetectors(InputWorkspace='van', OutputWorkspace='van', MapFile=self._map_file, Behaviour='Sum')
+        right_van = IndirectILLReduction(Run=self._vanadium_file, SumRuns=True, MirrorSense=True,
+                                         UnmirrorOption=2, MapFile=self._map_file, Analyser=self._analyser,
+                                         Reflection=self._reflection)
 
-        # there is problem with this
-        #ExtractSingleSpectrum(InputWorkspace='van', OutputWorkspace='van_mon', WorkspaceIndex=0)
-        #NormaliseToMonitor(InputWorkspace='van', OutputWorkspace='van', MonitorWorkspace='van_mon')
-
-        #xmin, xmax = self._monitor_range('van_mon')
-        # Mask first and last bins, where monitor count was 0
-        #MaskBins(InputWorkspace='van', OutputWorkspace='van', XMin=0, XMax=xmin)
-        #MaskBins(InputWorkspace='van', OutputWorkspace='van', XMin=xmax, XMax=mtd['van'].blocksize())
-        #DeleteWorkspace('van_mon')
+        # note, that run number will be prepended, so need to rename
+        RenameWorkspace(left_van.getName(),'left_van')
+        RenameWorkspace(right_van.getName(), 'right_van')
 
     def _convert_to_energy(self, ws):
         """
@@ -335,7 +321,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         @param run :: string of run number to reduce
         """
         self.log().information('Reducing run #' + run)
-        # Double underscore for temporary workspace naming
+        
         raw = run + '_' + self._raw_ws
         det = run + '_' + self._det_ws
         mon = run + '_' + self._monitor_ws
@@ -398,182 +384,62 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         # Perform unmirror
         if self._unmirror_option == 0:
-            print('Unmirror 0: X-axis will not be converted to energy transfer.')
+            self.log().information('Unmirror 0: X-axis will not be converted to energy transfer.')
             CloneWorkspace(Inputworkspace=mnorm, OutputWorkspace=red)
 
         elif self._unmirror_option == 1:
-            print('Unmirror 1: return the left wing')
-            RenameWorkspace(InputWorkspace=left, OutputWorkspace=red)
+            self.log().information('Unmirror 1: return the left wing')
+            CloneWorkspace(InputWorkspace=left,OutputWorkspace=red)
 
         elif self._unmirror_option == 2:
-            print('Unmirror 2: return the right wing')
-            RenameWorkspace(InputWorkspace=right, OutputWorkspace=red)
+            self.log().information('Unmirror 2: return the right wing')
+            CloneWorkspace(InputWorkspace=right,OutputWorkspace=red)
 
         elif self._unmirror_option == 3:
-            print('Unmirror 3: sum the left and right wings')
+            self.log().information('Unmirror 3: sum the left and right wings')
 
         elif self._unmirror_option == 4:
-            print('Unmirror 4: shift the right according to left')
+            self.log().information('Unmirror 4: shift the right according to left')
             right = self._shift_spectra(right, left)
 
         elif self._unmirror_option == 5:
-            print('Unmirror 5: shift the right according to right of the vanadium')
-            option_vanadium_centered = 'True'
-            self._load_vanadium_run()
-            self._extract_workspace('van','right_van',x[mid], x[end])
-            self._convert_to_energy('right_van')
-            right = self._shift_spectra(right, 'right_van', option_vanadium_centered)
-            DeleteWorkspace('right_van')
-            DeleteWorkspace('van')
+            self.log().information('Unmirror 5: shift the right according to right of the vanadium and sum to left')
+            right = self._shift_spectra(right, 'right_van', True)
+            DeleteWorkspace('right_shifted')
 
         elif self._unmirror_option == 6:
-            print('Unmirror 6: center both the right and the left')
+            self.log().information('Unmirror 6: center both the right and the left')
             right = self._shift_spectra(right)
             left = self._shift_spectra(left)
 
         elif self._unmirror_option == 7:
-            print('Unmirror 7: shift both the right and the left according to vanadium')
-            option_vanadium_centered = 'True'
-            self._load_vanadium_run()
-            self._extract_workspace('van', 'left_van', x[start], x[mid])
-            self._extract_workspace('van', 'right_van', x[mid], x[end])
-            self._convert_to_energy('left_van')
-            self._convert_to_energy('right_van')
-            left = self._shift_spectra(left, 'left_van', option_vanadium_centered)
-            right = self._shift_spectra(right, 'right_van', option_vanadium_centered)
-            DeleteWorkspace('left_van')
-            DeleteWorkspace('right_van')
-            DeleteWorkspace('van')
+            self.log().information('Unmirror 7: shift both the right and the left according to vanadium and sum')
+            left = self._shift_spectra(left, 'left_van', True)
+            right = self._shift_spectra(right, 'right_van', True)
 
-        # Perform unmirror option by summing left and right workspaces
+	    # Perform unmirror option by summing left and right workspaces
         if self._unmirror_option > 2:
             Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=red)
             Scale(InputWorkspace=red, OutputWorkspace=red, Factor=0.5, Operation='Multiply')
 
-    @classmethod
-    def _shift_spectra(self, ws1, ws2=None, shift_option_ws2_centered='False'):
-        """
-        If only ws1 is given as an input workspace, ws1 will be shifted such that peak positions of each single spectrum
-        are centered around 0 meV
-        If in addition ws2 is given as an input workspace, ws1 will be shifted such that peak positions of ws1 and ws2
-        are identical and according to the peak position of ws2
-        The SampleLog data of the workspace will be lost
-        @param ws1                         ::   workspace to be shifted
-        @param ws2                         ::   optional workspace according to which ws1 will be shifted
-        @param shift_option_ws2_centered   ::   option to shift ws1 such that spectra correspond to ws2 centered
-        @return                            ::   shifted output workspace
-        """
-        number_spectra = mtd[ws1].getNumberHistograms()
-        size = mtd[ws1].blocksize()
-
-        if ws2 is not None and size != mtd[ws2].blocksize():
-            print('Input Workspaces should have the same blocksize')
-
-        mid_bin = int(size / 2)
-
-        # Initial values for bin range of output workspace. Bins outside this range will be masked
-        start_bin = 0
-        end_bin = size
-
-        # Temporary workspace names for the shifted workspace of each spectrum and the output workspace
-        shifted = '__shifted'
-        ws_out_temp = '__ws_out_temp'
-
-        # Shift each single spectrum of the input workspace ws1
-        for i in range(number_spectra):
-            # use mutableX etc
-
-            # Read X, Y, and E values, which will be shifted
-            x_values = np.array(mtd[ws1].readX(i))
-            y_values = np.array(mtd[ws1].readY(i))
-            e_values = np.array(mtd[ws1].readE(i))
-
-            # Find peak positions in ws1
-            __temp = ExtractSingleSpectrum(InputWorkspace=ws1, WorkspaceIndex=i)
-            peak_bin1 = self._get_peak_position(__temp)
-            DeleteWorkspace(__temp)
-
-            # If only one workspace is given as an input, this workspace will be shifted
-            if ws2 is None:
-                to_shift = peak_bin1 - mid_bin
-            else:
-                # Find peak positions in ws2
-                __temp2 = ExtractSingleSpectrum(InputWorkspace=ws2, WorkspaceIndex=i)
-                peak_bin2 = self._get_peak_position(__temp2)
-                DeleteWorkspace(__temp2)
-
-                if shift_option_ws2_centered is False:
-                    # ws1 will be shifted according to peak position of ws2
-                    to_shift = peak_bin1 - peak_bin2
-                else:
-                    # ws1 will be shifted according to centered peak of ws2
-                    to_shift = peak_bin2 - mid_bin
-
-            # Placeholder zeros to keep correct size of the spectrum, these bins will be masked
-            new_zeros = np.zeros(abs(to_shift), dtype='int32')
-
-            #print('%d bins of spectrum %d will be shifted' %(abs(to_shift), i))
-
-            if to_shift > 0:
-                # shift to the left
-                delete_bins = range(to_shift)
-                y_values = np.append(y_values, new_zeros)
-                e_values = np.append(e_values, new_zeros)
-
-                if (size - to_shift) < end_bin:
-                    # New left boundary for masking
-                    end_bin = size - to_shift
-            else:
-                # shift to the right
-                to_zero_bins = np.array(range(abs(to_shift)))
-                size_bins = np.ones(abs(to_shift), dtype='int32') * size
-                delete_bins = size_bins - to_zero_bins
-
-                y_values = np.insert(y_values, 0, new_zeros)
-                e_values = np.insert(e_values, 0, new_zeros)
-
-                if abs(to_shift) > start_bin:
-                    # New right boundary for masking
-                    start_bin = abs(to_shift)
-
-            y_values = np.delete(y_values, delete_bins)
-            e_values = np.delete(e_values, delete_bins)
-
-            if i == 0:
-                # Initial shifted spectrum 0
-                CreateWorkspace(OutputWorkspace=ws_out_temp, DataX=x_values, DataY=y_values, DataE=e_values, NSpec=1, UnitX='DeltaE')
-            else:
-                # Append all following shifted spectra > 0
-                CreateWorkspace(OutputWorkspace=shifted,DataX=x_values, DataY=y_values, DataE=e_values, NSpec=1, UnitX='DeltaE')
-                AppendSpectra(InputWorkspace1=ws_out_temp,InputWorkspace2=shifted,OutputWorkspace=ws_out_temp, MergeLogs=True)
-                DeleteWorkspace(shifted)
-
-        # Attention: MaskBins returns success, but does not set zeros?
-        # Mask bins to the left of the final bin range
-        MaskBins(InputWorkspace=ws_out_temp, OutputWorkspace=ws_out_temp, XMin=0, XMax=start_bin)
-        # Mask bins to the right of the final bin range
-        MaskBins(InputWorkspace=ws_out_temp, OutputWorkspace=ws_out_temp, XMin=end_bin, XMax=size)
-        print('Bin range is [%f, %f], bins outside this range are masked' %(start_bin, end_bin))
-
-        return ws_out_temp
 
     def _set_output_workspace_properties(self, runlist):
 
+        # remove cached left and right of vanadium run
+        if self._unmirror_option == 5 or self._unmirror_option == 7:
+            DeleteWorkspace('left_van')
+            DeleteWorkspace('right_van')
+
         if len(runlist) > 1:
             # multiple runs
-            __list_red = []
-            __list_right = []
-            __list_left = []
-
-            # Group and set reduced ws
+            list_red = []
+            # first group and set reduced ws
             for run in runlist:
-                __list_red.append(run + '_' + self._red_ws)
-                __list_right.append(run + '_' + self._right_ws)
-                __list_left.append(run + '_' + self._left_ws)
+                list_red.append(run + '_' + self._red_ws)
 
-            GroupWorkspaces(__list_red, OutputWorkspace=self._red_ws)
-            GroupWorkspaces(__list_left, OutputWorkspace=self._red_ws + '_' + self._left_ws)
-            GroupWorkspaces(__list_right, OutputWorkspace=self._red_ws + '_' + self._right_ws)
+            GroupWorkspaces(list_red, OutputWorkspace=self._red_ws)
+
+            self.setPropertyValue('OutputWorkspace', self._red_ws)
 
             if not self._control_mode:
                 # Delete everything else
@@ -583,31 +449,35 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     DeleteWorkspace(run + '_' + self._det_ws)
                     DeleteWorkspace(run + '_' + self._monitor_ws)
                     DeleteWorkspace(run + '_' + self._vnorm_ws)
+                    DeleteWorkspace(run + '_' + self._left_ws)
+                    DeleteWorkspace(run + '_' + self._right_ws)
             else:
-                # Group optional workspace properties
-                __list_raw = []
-                __list_monitor = []
-                __list_det = []
-                __list_mnorm = []
-                __list_vnorm = []
+                # group optional workspace properties
+                list_raw = []
+                list_monitor = []
+                list_det = []
+                list_mnorm = []
+                list_vnorm = []
+                list_right = []
+                list_left = []
 
                 for run in runlist:
-                    __list_raw.append(run + '_' + self._raw_ws)
-                    __list_monitor.append(run + '_' + self._monitor_ws)
-                    __list_det.append(run + '_' + self._det_ws)
-                    __list_mnorm.append(run + '_' + self._mnorm_ws)
-                    __list_vnorm.append(run + '_' + self._vnorm_ws)
+                    list_raw.append(run + '_' + self._raw_ws)
+                    list_monitor.append(run + '_' + self._monitor_ws)
+                    list_det.append(run + '_' + self._det_ws)
+                    list_mnorm.append(run + '_' + self._mnorm_ws)
+                    list_vnorm.append(run + '_' + self._vnorm_ws)
+                    list_right.append(run + '_' + self._right_ws)
+                    list_left.append(run + '_' + self._left_ws)
 
-                GroupWorkspaces(__list_raw, OutputWorkspace=self._red_ws + '_' + self._raw_ws)
-                GroupWorkspaces(__list_monitor, OutputWorkspace=self._red_ws + '_' + self._monitor_ws)
-                GroupWorkspaces(__list_det, OutputWorkspace=self._red_ws + '_' + self._det_ws)
-                GroupWorkspaces(__list_mnorm, OutputWorkspace=self._red_ws + '_' +  self._mnorm_ws)
-                GroupWorkspaces(__list_vnorm, OutputWorkspace=self._red_ws + '_' +  self._vnorm_ws)
-                DeleteWorkspace(self._raw_ws)
+                GroupWorkspaces(list_raw, OutputWorkspace=self._red_ws + '_' + self._raw_ws)
+                GroupWorkspaces(list_monitor, OutputWorkspace=self._red_ws + '_' + self._monitor_ws)
+                GroupWorkspaces(list_det, OutputWorkspace=self._red_ws + '_' + self._det_ws)
+                GroupWorkspaces(list_mnorm, OutputWorkspace=self._red_ws + '_' +  self._mnorm_ws)
+                GroupWorkspaces(list_vnorm, OutputWorkspace=self._red_ws + '_' +  self._vnorm_ws)
+                GroupWorkspaces(list_left, OutputWorkspace=self._red_ws + '_' + self._left_ws)
+                GroupWorkspaces(list_right, OutputWorkspace=self._red_ws + '_' + self._right_ws)
 
-            self.setPropertyValue('ReducedWorkspace', self._red_ws)
-            self.setPropertyValue('ReducedLeftWorkspace', self._red_ws + '_' + self._left_ws)
-            self.setPropertyValue('ReducedRightWorkspace', self._red_ws + '_' + self._right_ws)
 
             # Save if needed
             if self._save:
@@ -619,36 +489,36 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         else:
             # Single run
 
-            # Named temporaries
-            __red = runlist[0] + '_' + self._red_ws
-            __left = runlist[0] + '_' + self._left_ws
-            __right = runlist[0] + '_' + self._right_ws
+            # named temporaries
+            red = runlist[0] + '_' + self._red_ws
 
-            __raw = runlist[0] + '_' + self._raw_ws
-            __mnorm = runlist[0] + '_' + self._mnorm_ws
-            __vnorm = runlist[0] + '_' + self._vnorm_ws
-            __det = runlist[0] + '_' + self._det_ws
-            __mon = runlist[0] + '_' + self._monitor_ws
+            left = runlist[0] + '_' + self._left_ws
+            right = runlist[0] + '_' + self._right_ws
+            raw = runlist[0] + '_' + self._raw_ws
+            mnorm = runlist[0] + '_' + self._mnorm_ws
+            vnorm = runlist[0] + '_' + self._vnorm_ws
+            det = runlist[0] + '_' + self._det_ws
+            mon = runlist[0] + '_' + self._monitor_ws
 
-            self.setPropertyValue('ReducedWorkspace', __red)
-            self.setPropertyValue('ReducedLeftWorkspace', __left)
-            self.setPropertyValue('ReducedRightWorkspace', __right)
+            self.setPropertyValue('OutputWorkspace', red)
 
             if not self._control_mode:
                 # Cleanup unused workspaces
-                DeleteWorkspace(__raw)
-                DeleteWorkspace(__mnorm)
-                DeleteWorkspace(__det)
-                DeleteWorkspace(__mon)
-                DeleteWorkspace(__vnorm)
+                DeleteWorkspace(raw)
+                DeleteWorkspace(mnorm)
+                DeleteWorkspace(det)
+                DeleteWorkspace(mon)
+                DeleteWorkspace(vnorm)
+                DeleteWorkspace(left)
+                DeleteWorkspace(right)
 
             # Save and plot
             if self._save:
-                self._save_ws(__red)
+                self._save_ws(red)
 
             if self._plot:
                 SumSpectra(InputWorkspace=red, OutputWorkspace=red + '_sum_to_plot')
-                self._plot_ws(__red + '_sum_to_plot')
+                self._plot_ws(red + '_sum_to_plot')
                 # do not delete summed spectra while the plot is open
 
     # Static helper methods performing some generic manipulations
@@ -685,9 +555,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     @staticmethod
     def _get_peak_position(ws):
         """
-        Get single position of peak in single spectrum
-        :param ws        :: input workspace, must contain a single spectrum
-        :return          :: bin number of the peak position
+        Get bin of the peak of single spectrum
+        @param ws        :: input workspace, must contain a single spectrum
+        @return          :: bin number of the peak position
         """
 
         __fit_table = FindEPP(InputWorkspace=ws)
