@@ -1,9 +1,9 @@
 #ifndef MONTECARLOABSORPTIONTEST_H_
 #define MONTECARLOABSORPTIONTEST_H_
 
-#include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
@@ -15,6 +15,73 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+namespace {
+enum class Environment { SampleOnly, SamplePlusContainer, UserBeamSize };
+
+struct TestWorkspaceDescriptor {
+  int nspectra;
+  int nbins;
+  Environment sampleEnviron;
+  unsigned int emode;
+  double beamWidth;
+  double beamHeight;
+};
+
+Mantid::API::MatrixWorkspace_sptr
+setUpWS(const TestWorkspaceDescriptor &wsProps) {
+  using namespace Mantid::API;
+  using namespace Mantid::Geometry;
+  using namespace Mantid::Kernel;
+  namespace PhysicalConstants = Mantid::PhysicalConstants;
+
+  auto space = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+      wsProps.nspectra, wsProps.nbins);
+  // Needs to have units of wavelength
+  space->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+  auto inst = space->getInstrument();
+  auto &pmap = space->instrumentParameters();
+
+  if (wsProps.emode == DeltaEMode::Direct) {
+    pmap.addString(inst.get(), "deltaE-mode", "Direct");
+    const double efixed(12.0);
+    space->mutableRun().addProperty<double>("Ei", efixed);
+  } else if (wsProps.emode == DeltaEMode::Indirect) {
+    const double efixed(1.845);
+    pmap.addString(inst.get(), "deltaE-mode", "Indirect");
+    pmap.addDouble(inst.get(), "Efixed", efixed);
+  }
+  // Define a sample shape
+  Object_sptr sampleShape =
+      ComponentCreationHelper::createSphere(0.1, V3D(), "sample-sphere");
+  // And a material
+  sampleShape->setMaterial(
+      Material("Vanadium", PhysicalConstants::getNeutronAtom(23, 0), 0.072));
+  space->mutableSample().setShape(*sampleShape);
+
+  if (wsProps.sampleEnviron == Environment::SamplePlusContainer) {
+    const std::string id("container");
+    const double radius(0.11);
+    const double height(0.03);
+    const V3D baseCentre(0.0, -height / 2.0, 0.0);
+    const V3D axis(0.0, 1.0, 0.0);
+
+    ShapeFactory shapeMaker;
+    auto can = shapeMaker.createShape<Container>(
+        ComponentCreationHelper::cappedCylinderXML(radius, height, baseCentre,
+                                                   axis, id));
+    can->setMaterial(Material("CanMaterial",
+                              PhysicalConstants::getNeutronAtom(26, 0), 0.01));
+    SampleEnvironment *env = new SampleEnvironment("can", can);
+    space->mutableSample().setEnvironment(env);
+  } else if (wsProps.sampleEnviron == Environment::UserBeamSize) {
+    auto source = inst->getSource();
+    pmap.addDouble(source->getComponentID(), "beam-width", wsProps.beamWidth);
+    pmap.addDouble(source->getComponentID(), "beam-height", wsProps.beamHeight);
+  }
+  return space;
+}
+}
+
 class MonteCarloAbsorptionTest : public CxxTest::TestSuite {
 public:
   //---------------------------------------------------------------------------
@@ -22,8 +89,8 @@ public:
   //---------------------------------------------------------------------------
   void test_Workspace_With_Just_Sample_For_Elastic() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {5, 10, Environment::SampleOnly,
-                                       DeltaEMode::Elastic, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        5, 10, Environment::SampleOnly, DeltaEMode::Elastic, -1, -1};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
@@ -43,8 +110,8 @@ public:
 
   void test_Workspace_With_Just_Sample_For_Direct() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
-                                       DeltaEMode::Direct, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SampleOnly, DeltaEMode::Direct, -1, -1};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
@@ -57,8 +124,8 @@ public:
 
   void test_Workspace_With_Just_Sample_For_Indirect() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SampleOnly,
-                                       DeltaEMode::Indirect, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SampleOnly, DeltaEMode::Indirect, -1, -1};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
@@ -71,8 +138,8 @@ public:
 
   void test_Workspace_With_Sample_And_Container() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::SamplePlusContainer,
-                                       DeltaEMode::Elastic, -1, -1};
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::SamplePlusContainer, DeltaEMode::Elastic, -1, -1};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
@@ -85,8 +152,8 @@ public:
 
   void test_Workspace_Beam_Size_Set() {
     using Mantid::Kernel::DeltaEMode;
-    TestWorkspaceDescriptor wsProps = {1, 10, Environment::UserBeamSize,
-                                       DeltaEMode::Elastic, 0.18, 0.15};
+    TestWorkspaceDescriptor wsProps = {
+        1, 10, Environment::UserBeamSize, DeltaEMode::Elastic, 0.18, 0.15};
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
@@ -125,17 +192,6 @@ public:
   }
 
 private:
-  enum class Environment { SampleOnly, SamplePlusContainer, UserBeamSize };
-
-  struct TestWorkspaceDescriptor {
-    int nspectra;
-    int nbins;
-    Environment sampleEnviron;
-    unsigned int emode;
-    double beamWidth;
-    double beamHeight;
-  };
-
   Mantid::API::MatrixWorkspace_const_sptr
   runAlgorithm(const TestWorkspaceDescriptor &wsProps) {
     auto inputWS = setUpWS(wsProps);
@@ -143,61 +199,6 @@ private:
     TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("InputWorkspace", inputWS));
     mcabs->execute();
     return getOutputWorkspace(mcabs);
-  }
-
-  Mantid::API::MatrixWorkspace_sptr
-  setUpWS(const TestWorkspaceDescriptor &wsProps) {
-    using namespace Mantid::API;
-    using namespace Mantid::Geometry;
-    using namespace Mantid::Kernel;
-    namespace PhysicalConstants = Mantid::PhysicalConstants;
-
-    auto space = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        wsProps.nspectra, wsProps.nbins);
-    // Needs to have units of wavelength
-    space->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
-    auto inst = space->getInstrument();
-    auto &pmap = space->instrumentParameters();
-
-    if (wsProps.emode == DeltaEMode::Direct) {
-      pmap.addString(inst.get(), "deltaE-mode", "Direct");
-      const double efixed(12.0);
-      space->mutableRun().addProperty<double>("Ei", efixed);
-    } else if (wsProps.emode == DeltaEMode::Indirect) {
-      const double efixed(1.845);
-      pmap.addString(inst.get(), "deltaE-mode", "Indirect");
-      pmap.addDouble(inst.get(), "Efixed", efixed);
-    }
-    // Define a sample shape
-    Object_sptr sampleShape =
-        ComponentCreationHelper::createSphere(0.1, V3D(), "sample-sphere");
-    // And a material
-    sampleShape->setMaterial(
-        Material("Vanadium", PhysicalConstants::getNeutronAtom(23, 0), 0.072));
-    space->mutableSample().setShape(*sampleShape);
-
-    if (wsProps.sampleEnviron == Environment::SamplePlusContainer) {
-      const std::string id("container");
-      const double radius(0.11);
-      const double height(0.03);
-      const V3D baseCentre(0.0, -height / 2.0, 0.0);
-      const V3D axis(0.0, 1.0, 0.0);
-
-      ShapeFactory shapeMaker;
-      auto can = shapeMaker.createShape<Container>(
-          ComponentCreationHelper::cappedCylinderXML(radius, height, baseCentre,
-                                                     axis, id));
-      can->setMaterial(Material(
-          "CanMaterial", PhysicalConstants::getNeutronAtom(26, 0), 0.01));
-      SampleEnvironment *env = new SampleEnvironment("can", can);
-      space->mutableSample().setEnvironment(env);
-    } else if (wsProps.sampleEnviron == Environment::UserBeamSize) {
-      auto source = inst->getSource();
-      pmap.addDouble(source->getComponentID(), "beam-width", wsProps.beamWidth);
-      pmap.addDouble(source->getComponentID(), "beam-height",
-                     wsProps.beamHeight);
-    }
-    return space;
   }
 
   Mantid::API::IAlgorithm_sptr createAlgorithm() {
@@ -226,6 +227,60 @@ private:
     TS_ASSERT_EQUALS(wsProps.nspectra, outputWS->getNumberHistograms());
     TS_ASSERT_EQUALS(wsProps.nbins, outputWS->blocksize());
   }
+};
+
+class MonteCarloAbsorptionTestPerformance : public CxxTest::TestSuite {
+public:
+  static MonteCarloAbsorptionTestPerformance *createSuite() {
+    return new MonteCarloAbsorptionTestPerformance();
+  }
+
+  static void destroySuite(MonteCarloAbsorptionTestPerformance *suite) {
+    delete suite;
+  }
+
+  MonteCarloAbsorptionTestPerformance() {
+    TestWorkspaceDescriptor wsProps = {
+        10, 700, Environment::SampleOnly, Mantid::Kernel::DeltaEMode::Elastic,
+        -1, -1};
+
+    inputElastic = setUpWS(wsProps);
+
+    wsProps.emode = Mantid::Kernel::DeltaEMode::Direct;
+    inputDirect = setUpWS(wsProps);
+
+    wsProps.emode = Mantid::Kernel::DeltaEMode::Indirect;
+    inputIndirect = setUpWS(wsProps);
+  }
+
+  void test_exec_sample_elastic() {
+    Mantid::Algorithms::MonteCarloAbsorption alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputElastic);
+    alg.setPropertyValue("OutputWorkspace", "__unused_on_child");
+    alg.execute();
+  }
+
+  void test_exec_sample_direct() {
+    Mantid::Algorithms::MonteCarloAbsorption alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputDirect);
+    alg.setPropertyValue("OutputWorkspace", "__unused_on_child");
+    alg.execute();
+  }
+
+  void test_exec_sample_indirect() {
+    Mantid::Algorithms::MonteCarloAbsorption alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputIndirect);
+    alg.setPropertyValue("OutputWorkspace", "__unused_on_child");
+    alg.execute();
+  }
+
+private:
+  Mantid::API::Workspace_sptr inputElastic;
+  Mantid::API::Workspace_sptr inputDirect;
+  Mantid::API::Workspace_sptr inputIndirect;
 };
 
 #endif

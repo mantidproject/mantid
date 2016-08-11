@@ -2,9 +2,11 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidHistogramData/HistogramMath.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/MultiThreaded.h"
+
 
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
@@ -74,13 +76,7 @@ void MonitorEfficiencyCorUser::exec() {
   PARALLEL_FOR2(m_outputWS, m_inputWS)
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    auto &yOut = m_outputWS->mutableY(i);
-    auto &eOut = m_outputWS->mutableE(i);
-    auto &yIn = m_inputWS->y(i);
-    auto &eIn = m_inputWS->e(i);
-    m_outputWS->setSharedX(i, m_inputWS->sharedX(i));
-
-    applyMonEfficiency(numberOfChannels, yIn, eIn, eff0, yOut, eOut);
+    m_outputWS->setHistogram(i, m_inputWS->histogram(i) / eff0);
 
     prog.report("Detector Efficiency correction...");
     PARALLEL_END_INTERUPT_REGION
@@ -88,25 +84,6 @@ void MonitorEfficiencyCorUser::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   setProperty("OutputWorkspace", m_outputWS);
-}
-
-/**
- * Apply the monitor efficiency to a single spectrum
- * @param numberOfChannels Number of channels in a spectra (nbins - 1)
- * @param yIn spectrum counts
- * @param eIn spectrum errors
- * @param effVec efficiency values (to be divided by the counts)
- * @param yOut corrected spectrum counts
- * @param eOut corrected spectrum errors
- */
-void MonitorEfficiencyCorUser::applyMonEfficiency(
-    const size_t numberOfChannels, const HistogramY &yIn, const HistogramE &eIn,
-    const double effVec, HistogramY &yOut, HistogramE &eOut) {
-
-  for (unsigned int j = 0; j < numberOfChannels; ++j) {
-    yOut[j] = yIn[j] / effVec;
-    eOut[j] = eIn[j] / effVec;
-  }
 }
 
 /**

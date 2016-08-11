@@ -67,10 +67,8 @@ private:
     const double startX = 0;
     auto workspace = Create2DWorkspaceBinned(nSpectra, nBins, startX,
                                              deltaX); // Creates histogram data
-
-    auto size = workspace->mutableY(0).size();
-    workspace->mutableY(0).assign(size, 1.0);
-    workspace->mutableE(0).assign(size, 1.0);
+    workspace->mutableY(0) = 1.0;
+    workspace->mutableE(0) = 1.0;
 
     workspace->getAxis(0)->setUnit("Wavelength");
     workspace->setYUnit("Counts");

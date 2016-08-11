@@ -2,14 +2,14 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
-#include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
-#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
+#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
@@ -41,17 +41,6 @@ inline double toWavelength(double energy) {
       1e10 * PhysicalConstants::h /
       sqrt(2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV);
   return factor / sqrt(energy);
-}
-
-/// Get ith wavelength point for point data
-/// Assumes all checks on sizes have been done before calling
-double getWavelengthPointData(int i, const HistogramX &lambdas) {
-  return lambdas[i];
-}
-
-/// Get ith wavelength point for histogram data
-double getWavelengthHistogramData(int i, const HistogramX &lambdas) {
-  return 0.5 * (lambdas[i] + lambdas[i + 1]);
 }
 
 struct EFixedProvider {
@@ -166,19 +155,12 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
 
   // Configure strategy
   MCAbsorptionStrategy strategy(*beamProfile, inputWS.sample(), nevents);
-  typedef double (*LambdaPointProvider)(int, const HistogramX &);
-  LambdaPointProvider lambda;
-  if (inputWS.isHistogramData()) {
-    lambda = &getWavelengthHistogramData;
-  } else {
-    lambda = &getWavelengthPointData;
-  }
 
   PARALLEL_FOR1(outputWS)
   for (int64_t i = 0; i < nhists; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    auto &xvalues = outputWS->x(i);
+    auto xvalues = outputWS->points(i);
     auto &signal = outputWS->mutableY(i);
     auto &errors = outputWS->mutableE(i);
     // The input was cloned so clear the errors out
@@ -200,7 +182,7 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     // Simulation for each requested wavelength point
     for (int j = 0; j < nbins; j += lambdaStepSize) {
       prog.report(reportMsg);
-      const double lambdaStep = lambda(j, xvalues);
+      const double lambdaStep = xvalues[j];
       double lambdaIn(lambdaStep), lambdaOut(lambdaStep);
       if (efixed.emode() == DeltaEMode::Direct) {
         lambdaIn = lambdaFixed;

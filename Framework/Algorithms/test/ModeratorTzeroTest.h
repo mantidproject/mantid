@@ -1,16 +1,16 @@
 #ifndef MANTID_ALGORITHMS_MODERATORTZEROTEST_H_
 #define MANTID_ALGORITHMS_MODERATORTZEROTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidDataObjects/Events.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAlgorithms/ModeratorTzero.h"
+#include "MantidDataObjects/Events.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/ModeratorTzero.h"
 #include <cmath>
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -19,6 +19,27 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Algorithms;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
+
+namespace {
+void AddToIndirectInstrument(MatrixWorkspace_sptr &testWS,
+                             const bool &add_t0_formula = false,
+                             const bool &add_Efixed = false) {
+
+  if (add_t0_formula)
+    testWS->instrumentParameters().addString(
+        testWS->getInstrument()->getComponentID(), "t0_formula",
+        "50.-(50./52500)*incidentEnergy");
+
+  if (add_Efixed) {
+    const double evalue(2.082); // energy corresponding to the first order
+                                // Bragg peak in the analyzers
+    for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
+      testWS->instrumentParameters().addDouble(
+          testWS->getDetector(ihist)->getComponentID(), "Efixed", evalue);
+    }
+  }
+} // end of void AddToInstrument
+}
 
 class ModeratorTzeroTest : public CxxTest::TestSuite {
 public:
@@ -277,25 +298,57 @@ private:
     }
     return testWS;
   }
+};
 
-  void AddToIndirectInstrument(MatrixWorkspace_sptr &testWS,
-                               const bool &add_t0_formula = false,
-                               const bool &add_Efixed = false) {
+class ModeratorTzeroTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ModeratorTzeroTestPerformance *createSuite() {
+    return new ModeratorTzeroTestPerformance();
+  }
+  static void destroySuite(ModeratorTzeroTestPerformance *suite) {
+    AnalysisDataService::Instance().clear();
+    delete suite;
+  }
 
-    if (add_t0_formula)
-      testWS->instrumentParameters().addString(
-          testWS->getInstrument()->getComponentID(), "t0_formula",
-          "50.-(50./52500)*incidentEnergy");
+  void setUp() {
+    input = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        10000, 1000, true);
+    input->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
-    if (add_Efixed) {
-      const double evalue(2.082); // energy corresponding to the first order
-                                  // Bragg peak in the analyzers
-      for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-        testWS->instrumentParameters().addDouble(
-            testWS->getDetector(ihist)->getComponentID(), "Efixed", evalue);
-      }
-    }
-  } // end of void AddToInstrumen
+    AnalysisDataService::Instance().add("input", input);
+  }
+
+  void tearDown() { AnalysisDataService::Instance().remove("input"); }
+
+  void testExecIndirect() {
+    AddToIndirectInstrument(input, true, true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", input);
+    alg.setPropertyValue("OutputWorkspace", "input");
+    alg.setProperty("EMode", "Indirect");
+    alg.execute();
+  }
+
+  void testExecDirect() {
+    input->instrumentParameters().addString(
+        input->getInstrument()->getComponentID(), "t0_formula",
+        "101.9*incidentEnergy^(-0.41)*exp(-incidentEnergy/282.0)");
+    input->mutableRun().addProperty("Ei", 100.0, "meV", true);
+
+    alg.initialize();
+    alg.setProperty("InputWorkspace", input);
+    alg.setPropertyValue("OutputWorkspace", "input");
+    alg.setProperty("EMode", "Direct");
+    alg.execute();
+  }
+
+private:
+  ModeratorTzero alg;
+  MatrixWorkspace_sptr input;
+  MatrixWorkspace_sptr output;
 };
 
 #endif /*MANTID_ALGORITHMS_MODERATORTZEROTEST_H_*/

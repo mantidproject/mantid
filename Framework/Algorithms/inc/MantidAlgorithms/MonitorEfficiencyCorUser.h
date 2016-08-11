@@ -39,11 +39,6 @@ private:
 
   double calculateFormulaValue(const std::string &, double);
   std::string getValFromInstrumentDef(const std::string &);
-  void applyMonEfficiency(const size_t numberOfChannels,
-                          const HistogramData::HistogramY &yIn,
-                          const HistogramData::HistogramE &eIn,
-                          const double effVec, HistogramData::HistogramY &yOut,
-                          HistogramData::HistogramE &eOut);
 
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr m_inputWS;

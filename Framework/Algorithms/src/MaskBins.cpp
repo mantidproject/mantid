@@ -141,11 +141,9 @@ void MaskBins::exec() {
       else
         wi = i;
 
-      auto X = outputWS->binEdges(wi);
-
       MantidVec::difference_type startBinLoop(startBin), endBinLoop(endBin);
       if (!commonBins)
-        this->findIndices(X, startBinLoop, endBinLoop);
+        this->findIndices(outputWS->binEdges(wi), startBinLoop, endBinLoop);
 
       // Loop over masking each bin in the range
       for (int j = static_cast<int>(startBinLoop);

@@ -146,9 +146,7 @@ void ModeratorTzeroLinear::exec() {
       const double offset = (1 - scaling) * t_f - scaling * m_intercept;
       auto &inbins = inputWS->x(i);
       auto &outbins = outputWS->mutableX(i);
-      for (unsigned int j = 0; j < inbins.size(); j++) {
-        outbins[j] = scaling * inbins[j] + offset;
-      }
+	  outbins = scaling * inbins + offset;
     } else {
       outputWS->setSharedX(i, inputWS->sharedX(i));
     }

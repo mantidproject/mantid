@@ -8,6 +8,7 @@
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceComplex.h"
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceReal.h"
 #include "MantidAlgorithms/MaxEnt/MaxentTransformFourier.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -19,6 +20,8 @@ namespace Algorithms {
 
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::HistogramData::Points;
+using Mantid::HistogramData::LinearGenerator;
 
 using namespace API;
 using namespace Kernel;
@@ -271,6 +274,8 @@ void MaxEnt::exec() {
   outEvolTest = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
 
   npoints = complexImage ? npoints * 2 : npoints;
+
+  outEvolChi->setPoints(0, Points(niter, LinearGenerator(0.0, 1.0)));
   for (size_t s = 0; s < nspec; s++) {
 
     // Start distribution (flat background)
@@ -343,13 +348,12 @@ void MaxEnt::exec() {
 
     // Populate workspaces recording the evolution of Chi and Test
     // X values
-    std::iota(outEvolChi->mutableX(s).begin(),
-              outEvolChi->mutableX(s).begin() + niter, 0.0);
-    std::iota(outEvolTest->mutableX(s).begin(),
-              outEvolTest->mutableX(s).begin() + niter, 0.0);
+    outEvolChi->setSharedX(s, outEvolChi->sharedX(0));
+    outEvolTest->setSharedX(s, outEvolChi->sharedX(0));
+
     // Y values
-    outEvolChi->mutableY(s).assign(evolChi.begin(), evolChi.end());
-    outEvolTest->mutableY(s).assign(evolTest.begin(), evolTest.end());
+	outEvolChi->setCounts(s, std::move(evolChi));
+	outEvolTest->setCounts(s, std::move(evolTest));
     // No errors
 
   } // Next spectrum

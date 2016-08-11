@@ -9,6 +9,7 @@ namespace Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using namespace HistogramData;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MuonGroupDetectors)
@@ -98,17 +99,13 @@ void MuonGroupDetectors::exec() {
     outWS->getSpectrum(groupIndex).clearDetectorIDs();
 
     auto &Y = outWS->mutableY(groupIndex);
-    auto &E = outWS->mutableE(groupIndex);
 
     for (auto &wsIndex : wsIndices) {
-      for (size_t i = 0; i < inWS->blocksize(); ++i) {
-        // Sum the y values
-        Y[i] += inWS->y(wsIndex)[i];
-        // Sum the errors in quadrature
-        E[i] = sqrt(pow(E[i], 2) + pow(inWS->e(wsIndex)[i], 2));
-      }
+	  outWS->mutableY(groupIndex) += inWS->y(wsIndex);
+	  inWS->mutableE(groupIndex) += inWS->e(wsIndex);
 
-      // Detectors list of the group should contain all the detectors of it's
+      // Detectors list of the group should contain all the detectors of
+      // it's
       // elements
       outWS->getSpectrum(groupIndex)
           .addDetectorIDs(inWS->getSpectrum(wsIndex).getDetectorIDs());

@@ -208,8 +208,8 @@ void MultipleScatteringCylinderAbsorption::exec() {
   } else // histogram case
   {
     // Create the new workspace
-    MatrixWorkspace_sptr out_WS = WorkspaceFactory::Instance().create(
-        in_WS, NUM_HIST, in_WS->x(0).size(), in_WS->y(0).size());
+    MatrixWorkspace_sptr out_WS =
+        WorkspaceFactory::Instance().create(in_WS, NUM_HIST);
 
     for (int64_t index = 0; index < NUM_HIST; ++index) {
       IDetector_const_sptr det = in_WS->getDetector(index);

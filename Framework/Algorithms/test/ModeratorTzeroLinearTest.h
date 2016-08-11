@@ -1,17 +1,17 @@
 #ifndef MANTID_ALGORITHMS_MODERATORTZEROLINEARTEST_H_
 #define MANTID_ALGORITHMS_MODERATORTZEROLINEARTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidAlgorithms/ModeratorTzeroLinear.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/ModeratorTzeroLinear.h"
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Events.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -20,6 +20,30 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
+
+namespace {
+void AddToInstrument(MatrixWorkspace_sptr testWS,
+                     const bool &add_deltaE_mode = false,
+                     const bool &add_t0_formula = false) {
+  const double evalue(2.082); // energy corresponding to the first order Bragg
+                              // peak in the analyzers
+  if (add_deltaE_mode) {
+    testWS->instrumentParameters().addString(
+        testWS->getInstrument()->getComponentID(), "deltaE-mode", "indirect");
+    for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist)
+      testWS->instrumentParameters().addDouble(
+          testWS->getDetector(ihist)->getComponentID(), "Efixed", evalue);
+  }
+  if (add_t0_formula) {
+    testWS->instrumentParameters().addDouble(
+        testWS->getInstrument()->getComponentID(),
+        "Moderator.TimeZero.gradient", 11.0);
+    testWS->instrumentParameters().addDouble(
+        testWS->getInstrument()->getComponentID(),
+        "Moderator.TimeZero.intercept", -5.0);
+  }
+}
+}
 
 class ModeratorTzeroLinearTest : public CxxTest::TestSuite {
 public:
@@ -162,30 +186,40 @@ private:
     return testWS;
   }
 
-  void AddToInstrument(MatrixWorkspace_sptr testWS,
-                       const bool &add_deltaE_mode = false,
-                       const bool &add_t0_formula = false) {
-    const double evalue(2.082); // energy corresponding to the first order Bragg
-                                // peak in the analyzers
-    if (add_deltaE_mode) {
-      testWS->instrumentParameters().addString(
-          testWS->getInstrument()->getComponentID(), "deltaE-mode", "indirect");
-      for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist)
-        testWS->instrumentParameters().addDouble(
-            testWS->getDetector(ihist)->getComponentID(), "Efixed", evalue);
-    }
-    if (add_t0_formula) {
-      testWS->instrumentParameters().addDouble(
-          testWS->getInstrument()->getComponentID(),
-          "Moderator.TimeZero.gradient", 11.0);
-      testWS->instrumentParameters().addDouble(
-          testWS->getInstrument()->getComponentID(),
-          "Moderator.TimeZero.intercept", -5.0);
-    }
-  }
-
   ModeratorTzeroLinear alg;
 
 }; // end of class ModeratorTzeroLinearTest : public CxxTest::TestSuite
+
+class ModeratorTzeroLinearTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ModeratorTzeroLinearTestPerformance *createSuite() {
+    return new ModeratorTzeroLinearTestPerformance();
+  }
+  static void destroySuite(ModeratorTzeroLinearTestPerformance *suite) {
+    AnalysisDataService::Instance().clear();
+    delete suite;
+  }
+
+  ModeratorTzeroLinearTestPerformance() {
+    input = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        10000, 1000, true);
+    input->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("TOF");
+  }
+
+  void testExec() {
+    AddToInstrument(input, true, true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", input);
+    alg.setPropertyValue("OutputWorkspace", "output");
+    alg.execute();
+  }
+
+private:
+  ModeratorTzeroLinear alg;
+  MatrixWorkspace_sptr input;
+};
 
 #endif /* MANTID_ALGORITHMS_MODERATORTZEROLINEARTEST_H_ */
