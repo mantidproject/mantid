@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/SampleEnvironmentSpec.h"
+#include "MantidKernel/Material.h"
 #include <iosfwd>
 #include <unordered_map>
 
@@ -13,9 +14,6 @@ class Element;
 }
 
 namespace Mantid {
-namespace Kernel {
-class Material;
-}
 namespace Geometry {
 
 /**

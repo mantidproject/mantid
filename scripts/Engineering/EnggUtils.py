@@ -1,6 +1,7 @@
 #pylint: disable=invalid-name
 #pylint: disable=too-many-arguments
 # R0913: Too many arguments - strictly for write_ENGINX_GSAS_iparam_file()
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 import mantid.simpleapi as sapi
 
@@ -53,8 +54,8 @@ def read_in_expected_peaks(filename, expectedGiven):
             for a in readInArray:
                 for b in a:
                     exPeakArray.append(b)
-        except RuntimeError, ex:
-            raise RuntimeError("Error while reading file of expected peaks '%s': %s" % (filename, ex))
+        except RuntimeError as exc:
+            raise RuntimeError("Error while reading file of expected peaks '%s': %s" % (filename, exc))
 
         if not exPeakArray:
             # "File could not be read. Defaults in alternative option used."
@@ -199,7 +200,7 @@ def getDetIDsForBank(bank):
 
     return detIDs
 
-def  generateOutputParTable(name, difa, difc, tzero):
+def generateOutputParTable(name, difa, difc, tzero):
     """
     Produces a table workspace with the two fitted calibration parameters
 

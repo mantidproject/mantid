@@ -146,7 +146,7 @@ RunPythonScript::doExecuteScript(const std::string &script) const {
   try {
     boost::python::exec(script.c_str(), globals, locals);
   } catch (boost::python::error_already_set &) {
-    Environment::throwRuntimeError();
+    throw Environment::PythonException();
   }
   return locals;
 }
