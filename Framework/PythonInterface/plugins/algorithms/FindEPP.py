@@ -1,5 +1,5 @@
 # pylint: disable=no-name-in-module
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, ITableWorkspaceProperty, WorkspaceUnitValidator
+from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, ITableWorkspaceProperty
 from mantid.kernel import Direction
 from mantid.simpleapi import Fit, CreateEmptyTableWorkspace
 import numpy as np

@@ -13,7 +13,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     """
     Authors:
     G.Vardanyan :  vardanyan@ill.fr
-    V.Reimund   :  reimund@ill.fr
     This version is created on 01/08/2016 partly based on previous work by S.Howells et. Al.
     This is an algorithm for data reduction from IN16B instrument at ILL.
     It reads raw .nxs files and produces the reduced workspace with series of
@@ -355,23 +354,23 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         NormaliseToMonitor(InputWorkspace=det, OutputWorkspace=mnorm, MonitorWorkspace=mon)
 
-        # calibrate to vanadium calibration workspace if specified
+        # Calibrate to vanadium calibration workspace if specified
         # note, this is a one-column calibration workspace, it is not extracted from VanadiumRun (maybe it should?)
         if self._calib_ws != None:
             Divide(LHSWorkspace=mnorm, RHSWorkspace=self._calib_ws, OutputWorkspace=vnorm)
         else:
             CloneWorkspace(InputWorkspace=mnorm, OutputWorkspace=vnorm)
 
-        # get the start, end, mid points
+        # Get the start, end, mid points
         x = mtd[vnorm].readX(0)
         start = 0
         end = len(x) - 1
         mid = int(end / 2)
 
-        # get the left and right wings
+        # Get the left and right wings
         self._extract_workspace(vnorm, left, x[start], x[mid])
         self._extract_workspace(vnorm, right, x[mid], x[end])
-        # get the left and right monitors, needed to identify the masked bins
+        # Get the left and right monitors, needed to identify the masked bins
         self._extract_workspace(mon, 'left_mon', x[start], x[mid])
         self._extract_workspace(mon, 'right_mon', x[mid], x[end])
 
@@ -388,42 +387,41 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # Mask last bins, where monitor count was 0
         MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=xmax, XMax=end)
 
-        # delete the left and right monitors
+        # Delete the left and right monitors
         DeleteWorkspace('left_mon')
         DeleteWorkspace('right_mon')
 
-        # first convert both to energy
+        # Convert both to energy
         # it is crucial to do this first, since this sets the axis unit
         # which is needed for shift operations for unmirror > 3
         # note, left and right are frozen from this point, regardless of unmirror option
         self._convert_to_energy(left)
         self._convert_to_energy(right)
 
-        # finally perform unmirror
-        o = self._unmirror_option
-        if o == 0:
+        # Perform unmirror
+        if self._unmirror_option == 0:
             self.log().information('Unmirror 0: X-axis will not be converted to energy transfer.')
             CloneWorkspace(Inputworkspace=mnorm, OutputWorkspace=red)
 
-        elif o == 1:
+        elif self._unmirror_option == 1:
             self.log().information('Unmirror 1: return the left wing')
             RenameWorkspace(InputWorkspace=left,OutputWorkspace=red)
 
-        elif o == 2:
+        elif self._unmirror_option == 2:
             self.log().information('Unmirror 2: return the right wing')
             RenameWorkspace(InputWorkspace=right,OutputWorkspace=red)
 
-        elif o == 3:
+        elif self._unmirror_option == 3:
             self.log().information('Unmirror 3: sum the left and right wings')
             self._perform_mirror(left, right, red)
 
-        elif o == 4:
+        elif self._unmirror_option == 4:
             self.log().information('Unmirror 4: shift the right according to left and sum to left')
             self._shift_spectra(right, left, 'right_shifted',1)
             self._perform_mirror(left, 'right_shifted', red)
             DeleteWorkspace('right_shifted')
 
-        elif o == 5:
+        elif self._unmirror_option == 5:
             self.log().information('Unmirror 5: shift the right according to right of the vanadium and sum to left')
             self._load_vanadium_run()
             self._extract_workspace('van','right_van',x[mid], x[end])
@@ -434,7 +432,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             DeleteWorkspace('right_van')
             DeleteWorkspace('van')
 
-        elif o == 6:
+        elif self._unmirror_option == 6:
             self.log().information('Unmirror 6: center both the right and the left and sum')
             self._shift_spectra(right, right, 'right_shifted', 0)
             self._shift_spectra(left, left, 'left_shifted', 0)
@@ -442,7 +440,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             DeleteWorkspace('right_shifted')
             DeleteWorkspace('left_shifted')
 
-        elif o == 7:
+        elif self._unmirror_option == 7:
             self.log().information('Unmirror 7: shift both the right and the left according to vanadium and sum')
             self._load_vanadium_run()
             self._extract_workspace('van', 'left_van', x[start], x[mid])
@@ -466,7 +464,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             list_right = []
             list_left = []
 
-            # first group and set reduced ws
+            # Group and set reduced ws
             for run in runlist:
                 list_red.append(run + '_' + self._red_ws)
                 list_right.append(run + '_' + self._right_ws)
@@ -477,7 +475,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             GroupWorkspaces(list_right, OutputWorkspace=self._red_ws + '_' + self._right_ws)
 
             if not self._control_mode:
-                # delete everything else
+                # Delete everything else
                 for run in runlist:
                     DeleteWorkspace(run + '_' + self._raw_ws)
                     DeleteWorkspace(run + '_' + self._mnorm_ws)
@@ -485,7 +483,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     DeleteWorkspace(run + '_' + self._monitor_ws)
                     DeleteWorkspace(run + '_' + self._vnorm_ws)
             else:
-                # group optional workspace properties
+                # Group optional workspace properties
                 list_raw = []
                 list_monitor = []
                 list_det = []
@@ -510,7 +508,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self.setPropertyValue('ReducedLeftWorkspace', self._red_ws + '_' + self._left_ws)
             self.setPropertyValue('ReducedRightWorkspace', self._red_ws + '_' + self._right_ws)
 
-            # save if needed
+            # Save if needed
             if self._save:
                 self._save_ws(self._red_ws)
 
@@ -518,9 +516,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 self.log().warning('Automatic plotting for multiple files is disabled.')
 
         else:
-            # single run
+            # Single run
 
-            # named temporaries
+            # Named temporaries
             red = runlist[0] + '_' + self._red_ws
             left = runlist[0] + '_' + self._left_ws
             right = runlist[0] + '_' + self._right_ws
@@ -543,7 +541,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 DeleteWorkspace(mon)
                 DeleteWorkspace(vnorm)
 
-            # save and plot
+            # Save and plot
             if self._save:
                 self._save_ws(red)
 
@@ -552,7 +550,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 self._plot_ws(red + '_sum_to_plot')
                 # do not delete summed spectra while the plot is open
 
-    # static helper methods performing some generic manipulations
+    # Static helper methods performing some generic manipulations
     @staticmethod
     def _monitor_range(ws):
         """
@@ -594,7 +592,33 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         Plus(LHSWorkspace=ws1,RHSWorkspace=ws2,OutputWorkspace=ws_out)
         Scale(InputWorkspace=ws_out,OutputWorkspace=ws_out,Factor=0.5, Operation='Multiply')
 
-    @staticmethod
+    def _get_peak_position(ws, mid_bin, y_max_pos, x_mid, x_mid_tol):
+        fit_table = FindEPP(InputWorkspace=ws)
+
+        peak_position = fit_table.row(i)["PeakCentre"]
+        fit_status = fit_table.row(i)["FitStatus"]
+
+        if fit_status == 'success' and \
+                abs(peak_position - x_mid) < abs(x_mid_tol - x_mid):
+                # if fit is fine, take the position from it
+                peak_bin = temp.binIndexOf(peak_position)
+        else:
+                # if not, check the maximum of the distribution
+
+                if abs(y_max_pos - mid_bin) < tolerance:
+                        # check if it is reasonably close to the center
+                        peak_bin = y_imax
+                else:
+                        # if not, take the center (i.e. no shift at all)
+                        peak_bin = mid_bin
+
+        DeleteWorkspace(fit_table)
+        # cleanup by-products
+        DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
+        DeleteWorkspace('EPPfit_Parameters')
+
+        return peak_bin
+
     def _shift_spectra(ws1, ws2, ws_out, shift_option=0):
         """
         Shifts workspace horizontally corresponding to peak positions without shifting the x-axis
@@ -611,98 +635,72 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         mid_bin = int(size / 2)
         tolerance = int(mid_bin / 2)
 
-        if shift_option < 2:
-            # need to find peaks in ws1
-            fit_table1 = FindEPP(InputWorkspace=ws1)
-
-        if shift_option > 0:
-            # need to find peaks in ws2
-            fit_table2 = FindEPP(InputWorkspace=ws2)
 
         # shift each single spectrum in a workspace
         for i in range(number_spectra):
 
-            # ws1 is the workspace to shift, so we need temp1 and it's data regardless of shift_option
-            temp1 = ExtractSingleSpectrum(InputWorkspace=ws1, WorkspaceIndex=i)
+            temp = ExtractSingleSpectrum(InputWorkspace=ws1, WorkspaceIndex=i)
 
-            x_values = np.array(temp1.readX(0))
-            y_values = np.array(temp1.readY(0))
-            e_values = np.array(temp1.readE(0))
+            x_values = np.array(temp.readX(0))
+            y_values = np.array(temp.readY(0))
+            e_values = np.array(temp.readE(0))
+
+            DeleteWorkspace(temp)
 
             if shift_option < 2:
-                # 0 and 1 need peak positions in ws1
-                # find peak positions in ws1
-                peak_position1 = fit_table1.row(i)["PeakCentre"]
-                fit_status1 = fit_table1.row(i)["FitStatus"]
+                # Options 0 and 1 need peak positions in ws1
+                # Find peak positions in ws1
+                peak_bin1 = self._get_peak_position(ws1, mid_bin,
+                    np.argmax(y_values), x_values[mid_bin],
+                    x_values[mid_bin+tolerance])
 
-                if fit_status1 == 'success' and \
-                    abs(peak_position1 - x_values[mid_bin]) < abs(x_values[mid_bin+tolerance] - x_values[mid_bin]):
-                    # if fit is fine, take the position from it
-                    peak_bin1 = temp1.binIndexOf(peak_position1)
-                else:
-                    # if not, check the maximum of the distribution
-                    y_imax1 = np.argmax(y_values)
-                    if abs(y_imax1 - mid_bin) < tolerance:
-                        # check if it is reasonably close to the center
-                        peak_bin1 = y_imax1
-                    else:
-                        # if not, take the center (i.e. no shift at all)
-                        peak_bin1 = mid_bin
-
-            # cleanup temp1 regardless of shift option
-            DeleteWorkspace(temp1)
+                # Bins to shift
+                to_shift = peak_bin1 - mid_bin
 
             if shift_option > 0:
-                # 1 and 2 need peak positions in ws2
-                # find peak positions also in ws2
-                temp2 = ExtractSingleSpectrum(InputWorkspace=ws2, WorkspaceIndex=i)
-                y_values2 = np.array(temp2.readY(0))
+                # Options 1 and 2 need peak positions in ws2
+                temp2 = ExtractSingleSpectrum(InputWorkspace=ws1,
+                                              WorkspaceIndex=i)
+
                 x_values2 = np.array(temp2.readX(0))
-                peak_position2 = fit_table2.row(i)["PeakCentre"]
-                fit_status2 = fit_table2.row(i)["FitStatus"]
+                y_values2 = np.array(temp2.readY(0))
+                e_values2 = np.array(temp2.readE(0))
 
-                if fit_status2 == 'success' and \
-                    abs(peak_position2 - x_values2[mid_bin]) < abs(x_values2[mid_bin+tolerance] - x_values2[mid_bin]):
-                    peak_bin2 = temp2.binIndexOf(peak_position2)
-                else:
-                    y_imax2 = np.argmax(y_values2)
-                    if abs(y_imax2 - mid_bin) < tolerance:
-                        peak_bin2 = y_imax2
-                    else:
-                        peak_bin2 = mid_bin
-                DeleteWorkspace(temp2)
+                # Find peak positions in ws2
+                peak_bin2 = self._get_peak_position(ws2, mid_bin,
+                    np.argmax(y_values2), x_values[mid_bin],
+                    x_values[mid_bin+tolerance])
 
-            # compute how much to shift depending on the option
-            if shift_option == 0:
-                to_shift = peak_bin1 - mid_bin
-            elif shift_option == 1:
+            # Bins to shift
+            if shift_option == 1:
                 to_shift = peak_bin1 - peak_bin2
             elif shift_option == 2:
                 to_shift = peak_bin2 - mid_bin
 
-            # now do actual shit
+            # Shift single spectrum
             if to_shift > 0:
                 # shift to the left
-                for k in range(size):
-                    if k < size - to_shift:
-                        y_values[k] = y_values[k + to_shift]
-                        e_values[k] = e_values[k + to_shift]
-                    else:
-                        y_values[k] = 0
-                        e_values[k] = 0
+                y_values = np.append(y_values,
+                np.zeros(to_shift, dtype='int32'))
+                y_values = np.delete(y_values, range(to_shift))
+                e_values = np.append(e_values,
+                np.zeros(to_shift, dtype='int32'))
+                e_values = np.delete(e_values, range(to_shift))
                 mask_min = size - to_shift
                 mask_max = size
-            elif to_shift < 0:
+            else:
                 # shift to the right
-                for k in range(size-1,0,-1):
-                    if k > -to_shift:
-                        y_values[k] = y_values[k + to_shift]
-                        e_values[k] = e_values[k + to_shift]
-                    else:
-                        y_values[k] = 0
-                        e_values[k] = 0
+                to_zero_bins = np.array(range(abs(to_shift)))
+                size_bins = np.ones(to_shift, dtype='int32') * size
+                delete_bins = size_bins - to_zero_bins
+                y_values = np.insert(y_values, 0,
+                np.zeros(abs(to_shift)))
+                y_values = np.delete(y_values, delete_bins)
+                e_values = np.insert(e_values, 0,
+                np.zeros(abs(to_shift)))
+                e_values = np.delete(e_values, delete_bins)
                 mask_min = 0
-                mask_max = -to_shift
+                mask_max = abs(to_shift)
 
             if i==0:
                 CreateWorkspace(OutputWorkspace=ws_out, DataX=x_values, DataY=y_values, DataE=e_values, NSpec=1, UnitX='DeltaE')
@@ -716,14 +714,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     #MaskBins(InputWorkspace='temp', OutputWorkspace='temp',XMin=mask_min, XMax=mask_max)
                 AppendSpectra(InputWorkspace1=ws_out,InputWorkspace2='temp',OutputWorkspace=ws_out)
                 DeleteWorkspace('temp')
-
-        # cleanup by-products
-        DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
-        DeleteWorkspace('EPPfit_Parameters')
-        if shift_option < 2:
-            DeleteWorkspace(fit_table1)
-        if shift_option > 0:
-            DeleteWorkspace(fit_table2)
 
     @staticmethod
     def _save_ws(ws):
