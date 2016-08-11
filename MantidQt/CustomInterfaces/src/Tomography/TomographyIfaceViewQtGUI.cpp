@@ -2082,8 +2082,11 @@ std::string TomographyIfaceViewQtGUI::checkUserBrowseFile(
 }
 
 void TomographyIfaceViewQtGUI::resetPrePostFilters() {
-  auto reply = QMessageBox::question(this, "Reset Confirmation", "Are you sure you want to <br><strong>RESET ALL</strong> Filter settings?<br>This action cannot be undone!",
-                                     QMessageBox::Yes | QMessageBox::No);
+  auto reply = QMessageBox::question(
+      this, "Reset Confirmation", "Are you sure you want to <br><strong>RESET "
+                                  "ALL</strong> Filter settings?<br>This "
+                                  "action cannot be undone!",
+      QMessageBox::Yes | QMessageBox::No);
   // default constructors with factory defaults
   if (reply == QMessageBox::Yes) {
     TomoReconFiltersSettings def;
@@ -2100,8 +2103,11 @@ void TomographyIfaceViewQtGUI::systemSettingsNumericEdited() {
 }
 
 void TomographyIfaceViewQtGUI::resetSystemSettings() {
-  auto reply = QMessageBox::question(this, "Reset Confirmation", "Are you sure you want to <br><strong>RESET ALL</strong> System settings?<br>This action cannot be undone!",
-                                     QMessageBox::Yes | QMessageBox::No);
+  auto reply = QMessageBox::question(
+      this, "Reset Confirmation", "Are you sure you want to <br><strong>RESET "
+                                  "ALL</strong> System settings?<br>This "
+                                  "action cannot be undone!",
+      QMessageBox::Yes | QMessageBox::No);
   // default constructors with factory defaults
   if (reply == QMessageBox::Yes) {
     // From factory defaults
