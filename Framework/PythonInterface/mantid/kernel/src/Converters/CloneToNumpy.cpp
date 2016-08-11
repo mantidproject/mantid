@@ -47,12 +47,9 @@ template <> PyObject *clone1D(const std::vector<bool> &cvector) {
 }
 
 /**
- * Returns a new numpy array with the a copy of the data from array. A
- * specialization
- * exists for strings so that they simply create a standard python list.
+ * Returns a newm empty numpy array. A specialization exists for strings so that
+ * they simply create a standard python list.
  * @param carray :: A reference to a carray
- * @param ndims :: The dimensionality of the array
- * @param dims :: The length of the arrays in each dimension
  * @return
  */
 template <typename ElementType> PyObject *cloneEmpty(const ElementType *) {
@@ -116,10 +113,8 @@ PyObject *cloneND(const std::string *carray, const int ndims,
 }
 
 /**
-  * Returns a new python list of strings from the given array of strings.
+  * Returns a new, empty python list of strings.
   * @param carray :: A reference to a std::vector
-  * @param ndims :: The dimensionality of the array
-  * @param dims :: The length of the arrays in each dimension
   * @return
   */
 template <> PyObject *cloneEmpty(const std::string *) {
