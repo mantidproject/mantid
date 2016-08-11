@@ -77,6 +77,14 @@ void ImageROIViewQtWidget::initLayout() {
 
   m_ui.colorBarWidget->setViewRange(1, 65536);
   m_ui.colorBarWidget->setAutoScale(true);
+  m_ui.colorBarWidget->setCheckBoxMode(
+      MantidWidgets::ColorBarWidget::ADD_AUTOSCALE_ON_LOAD);
+  m_ui.colorBarWidget->setAutoScaleTooltipText(
+      "This flag signals that the color scale range\n"
+      "will be set automatically to the current slice range\n"
+      "when an image is loaded. Note that auto\n"
+      "scaling will be applied when an image is loaded\n"
+      "for the very first time.");
 
   readSettings();
 
@@ -203,7 +211,7 @@ void ImageROIViewQtWidget::saveSettings() const {
   qs.setValue("colorbar-power-exponent", m_ui.colorBarWidget->getExponent());
   qs.setValue("colorbar-autoscale", m_ui.colorBarWidget->getAutoScale());
   qs.setValue("colorbar-autoscale-current-slice",
-              m_ui.colorBarWidget->getAutoColorScaleforCurrentSlice());
+              m_ui.colorBarWidget->getAutoScaleforCurrentSlice());
 
   qs.setValue("interface-win-geometry", saveGeometry());
   qs.endGroup();
