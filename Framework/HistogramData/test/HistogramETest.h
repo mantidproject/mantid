@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/Addable.h"
 #include "MantidHistogramData/FixedLengthVector.h"
 #include "MantidHistogramData/HistogramE.h"
 
@@ -30,6 +31,8 @@ public:
 #endif
     TS_ASSERT_THROWS_NOTHING(
         dynamic_cast<detail::FixedLengthVector<HistogramE> &>(e));
+    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Addable<HistogramE> &>(e));
+    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Scalable<HistogramE> &>(e));
 #if __clang__
 #pragma clang diagnostic pop
 #endif
