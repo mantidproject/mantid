@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import Direction,IntArrayProperty, FloatArrayProperty
 import  mantid,math,numpy
@@ -59,12 +60,14 @@ class SortDetectors(PythonAlgorithm):
 
         if len(upstream)>0:
             upstream.sort(key=lambda x: x[1])
-            upinds=zip(*upstream)[0]
-            updist=zip(*upstream)[1]
+            zipped_upstream = list(zip(*upstream))
+            upinds=zipped_upstream[0]
+            updist=zipped_upstream[1]
         if len(downstream)>0:
             downstream.sort(key=lambda x: x[1])
-            downinds=zip(*downstream)[0]
-            downdist=zip(*downstream)[1]
+            zipped_downstream = list(zip(*downstream))
+            downinds=zipped_downstream[0]
+            downdist=zipped_downstream[1]
 
         self.setProperty("UpstreamSpectra", numpy.array(upinds))
         self.setProperty("UpstreamDetectorDistances", numpy.array(updist))

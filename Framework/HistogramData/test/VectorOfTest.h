@@ -119,7 +119,7 @@ public:
     TS_ASSERT_EQUALS(dest[3], src[3]);
   }
 
-  void test_value_assignment() {
+  void test_count_value_assignment() {
     VectorOfTester dest(1);
 
     dest.assign(3, 9.8);
@@ -178,6 +178,16 @@ public:
     TS_ASSERT_EQUALS(values[0], 0.1);
     TS_ASSERT_EQUALS(values[1], 0.2);
     TS_ASSERT_EQUALS(values[2], 0.3);
+  }
+  void test_value_assignment() {
+    VectorOfTester dest(3);
+
+    dest = 9.8;
+
+    TS_ASSERT_EQUALS(dest.size(), 3);
+    TS_ASSERT_EQUALS(dest[0], 9.8);
+    TS_ASSERT_EQUALS(dest[1], 9.8);
+    TS_ASSERT_EQUALS(dest[2], 9.8);
   }
 
   void test_empty_initializer_list_assignment() {

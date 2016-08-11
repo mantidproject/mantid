@@ -2,6 +2,7 @@
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
 
@@ -30,6 +31,7 @@
 namespace Mantid {
 namespace Geometry {
 
+using Kernel::Material;
 using Kernel::V3D;
 using Kernel::Quat;
 
@@ -81,7 +83,7 @@ Object &Object::operator=(const Object &A) {
     vtkCacheWriter = A.vtkCacheWriter;
     m_shapeXML = A.m_shapeXML;
     m_id = A.m_id;
-    m_material = A.m_material;
+    m_material = Kernel::make_unique<Material>(A.material());
 
     if (TopRule)
       createSurfaceList();
@@ -96,13 +98,18 @@ Object::~Object() = default;
  * @param material The new Material that the object is composed from
  */
 void Object::setMaterial(const Kernel::Material &material) {
-  m_material = material;
+  m_material = Mantid::Kernel::make_unique<Material>(material);
 }
 
 /**
  * @return The Material that the object is composed from
  */
-const Kernel::Material &Object::material() const { return m_material; }
+const Kernel::Material Object::material() const {
+  if (m_material)
+    return *m_material;
+  else
+    return Material();
+}
 
 /**
 * Returns whether this object has a valid shape

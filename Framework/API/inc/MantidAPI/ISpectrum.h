@@ -47,7 +47,7 @@ namespace API {
 */
 class DLLExport ISpectrum {
 public:
-  ISpectrum();
+  ISpectrum() = default;
   ISpectrum(const specnum_t specNo);
   virtual ~ISpectrum() = default;
 
@@ -262,15 +262,15 @@ protected:
   ISpectrum &operator=(const ISpectrum &) = default;
   ISpectrum &operator=(ISpectrum &&) = default;
 
-  /// The spectrum number of this spectrum
-  specnum_t m_specNo;
-
-  /// Set of the detector IDs associated with this spectrum
-  std::set<detid_t> detectorIDs;
-
 private:
   virtual const HistogramData::Histogram &histogramRef() const = 0;
   virtual HistogramData::Histogram &mutableHistogramRef() = 0;
+
+  /// The spectrum number of this spectrum
+  specnum_t m_specNo{0};
+
+  /// Set of the detector IDs associated with this spectrum
+  std::set<detid_t> detectorIDs;
 };
 
 } // namespace API

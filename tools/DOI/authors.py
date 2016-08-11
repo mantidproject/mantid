@@ -123,7 +123,8 @@ _translations = {
     'Moore'                   : 'Moore, Lamar',
     'Tom Perkins'             : 'Perkins, Tom',
     'Jan Burle'               : 'Burle, Jan',
-    'Duc Le'                  : 'Le, Duc'
+    'Duc Le'                  : 'Le, Duc',
+    'David Fairbrother'       : 'Fairbrother, David'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
