@@ -64,7 +64,7 @@ class ABINS(PythonAlgorithm):
                              defaultValue=10.0,
                              doc="Temperature in K for which dynamical structure factor S should be calculated.")
 
-        self.declareProperty(name='Scale', defaultValue=1.0,
+        self.declareProperty(name="Scale", defaultValue=1.0,
                              doc='Scale the intensity by the given factor. Default is no scaling.')
 
         self.declareProperty(name="SampleForm",
@@ -83,18 +83,18 @@ class ABINS(PythonAlgorithm):
                              doc="List of atoms to use to calculate partial S." \
                                  "If left blank, S for all types of atoms will be calculated")
 
-        self.declareProperty(name='SumContributions', defaultValue=False,
+        self.declareProperty(name="SumContributions", defaultValue=False,
                              doc="Sum the partial dynamical structure factors into a single workspace.")
 
-        self.declareProperty(name='Overtones', defaultValue=False,
+        self.declareProperty(name="Overtones", defaultValue=False,
                              doc="In case it is set to True and sample has a form of  Powder workspaces for overtones will be calculated.")
 
-        self.declareProperty(name='ScaleByCrossSection', defaultValue='Incoherent',
+        self.declareProperty(name="ScaleByCrossSection", defaultValue='Incoherent',
                              validator=StringListValidator(['Total', 'Incoherent', 'Coherent']),
                              doc="Sum the partial dynamical structure factors by the scattering cross section.")
 
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", '', Direction.Output),
                              doc="Name to give the output workspace.")
 
 
@@ -104,20 +104,22 @@ class ABINS(PythonAlgorithm):
         """
         issues = dict()
 
-        temperature = self.getPropertyValue("Temperature[K]")
+        temperature = self.getProperty("Temperature[K]").value
         if temperature < 0:
             issues["Temperature[K]"] = "Temperature must be positive."
 
-        scale = self.getProperty("Scale")
+        scale = self.getProperty("Scale").value
         if scale < 0:
             issues["Scale"] = "Scale must be positive."
 
-        dft_filename = self.getProperty("DFTprogram")
-        if dft_filename == "CASTEP":
-            output = self._validate_castep_input_file(filename=dft_filename)
-            if not output["Valid"]:
-                issues["DFTprogram"] = output["Comment"]
-        elif dft_filename == "CRYSTAL":
+        dft_program = self.getProperty("DFTprogram").value
+        phonon_filename = self.getProperty("PhononFile").value
+
+        if dft_program == "CASTEP":
+            output = self._validate_castep_input_file(filename=phonon_filename)
+            if output["Invalid"]:
+                issues["PhononFile"] = output["Comment"]
+        elif dft_program == "CRYSTAL":
             issues["DFTprogram"] = "Support for CRYSTAL DFT program not implemented yet."
 
         overtones = self.getProperty("Overtones").value
@@ -125,19 +127,20 @@ class ABINS(PythonAlgorithm):
         if overtones and (sample_form != "Powder"):
             issues["Overtones"] = "Workspaces with overtones can be created only for the Powder case scenario."
 
+        workspace_name = self.getPropertyValue("OutputWorkspace")
+        if workspace_name == "":
+            issues["OutputWorkspace"] = "Please specify name of workspace."
 
         return issues
 
 
     def PyExec(self):
-
+        # 1) get input parameters from a user
+        self._get_properties()
         steps = 9
         begin = 0
         end = 1.0
         prog_reporter = Progress(self, begin, end, steps)
-
-        # 1) get input parameters from a user
-        self._get_properties()
         prog_reporter.report("Input data from the user has been collected.")
 
         # 2) read dft data
@@ -188,23 +191,25 @@ class ABINS(PythonAlgorithm):
             _workspaces.insert(0, total_workspace)
             prog_reporter.report("Workspace with total S  has been constructed.")
 
-        # 7) add experimental data to the collection of workspaces
-        _workspaces.insert(0, self._set_experimental_data_workspace().getName())
-        prog_reporter.report("Workspace with with the experimental data has been constructed.")
+        # 7) add experimental data if available to the collection of workspaces
+        if self._experimentalFile != "":
+            _workspaces.insert(0, self._set_experimental_data_workspace().getName())
+            prog_reporter.report("Workspace with the experimental data has been constructed.")
 
         group = ','.join(_workspaces)
         GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
 
-        # 8) create workspaces with all sub-workspaces
-        self.setProperty('OutputWorkspace', self._out_ws_name)
-        prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
-
-        # 9) save workspaces to ascii_file
+        # 8) save workspaces to ascii_file
         num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
         for wrk_num in range(num_workspaces):
             wrk = mtd[self._out_ws_name].getItem(wrk_num)
             SaveAscii(InputWorkspace=wrk, Filename=wrk.getName()+".dat", Separator="Space", WriteSpectrumID=False)
         prog_reporter.report("All workspaces have been saved to ASCII files.")
+
+        # 9) create workspaces with all sub-workspaces
+        self.setProperty('OutputWorkspace', self._out_ws_name)
+        prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
+
 
     def _create_partial_s_overtones_workspaces(self, atoms_symbol=None, s_data=None):
 
@@ -421,27 +426,27 @@ class ABINS(PythonAlgorithm):
 
 
         :param filename: name of the file to check
-        :return: Dictionary with two entries "Valid", "Comment". Valid key can have two values: True/ False. As it
+        :return: Dictionary with two entries "Invalid", "Comment". Valid key can have two values: True/ False. As it
                  comes to "Comment" it is an empty string if Valid:True, otherwise stores description of the problem.
         """
-        logger.debug('Validate CASTEP phonon file: ' + str(partial_ions))
+        logger.debug("Validate CASTEP phonon file: ")
 
-        output = {"Valid": True, "Comment": ""}
+        output = {"Invalid": False, "Comment": ""}
         msg_err = "Invalid %s file. " %filename
         msg_rename = "Please rename your file and try again."
 
 
         # check name of file
         if "." not in filename:
-            output = {"Valid": False, "Comment": msg_err+" One dot '.' is expected in the name of file! " + msg_rename}
-            return output
-        elif filename.count(".") != 1:
-            output = {"Valid": False, "Comment": msg_err+" Only one dot should be in the name of file! " + msg_rename}
-            return output
-        elif filename[filename.find(".")].lower() != "phonon":
-            output = {"Valid": False, "Comment": msg_err+" The expected extension of file is phonon "
-                                                       "(case of letter does not matter)! " + msg_rename}
-            return output
+            return dict(Invalid=True, Comment=msg_err + " One dot '.' is expected in the name of file! " + msg_rename)
+
+        if filename.count(".") != 1:
+            return dict(Invalid=True, Comment=msg_err + " Only one dot should be in the name of file! " + msg_rename)
+
+        if filename[filename.find(".") + 1:].lower() != "phonon":
+            return dict(Invalid=True, Comment=msg_err + " The expected extension of file is phonon "
+                                                        "(case of letter does not matter)! " + msg_rename)
+
 
         # check a structure of the header part of file.
         # Here fortran convention is followed: case of letter does not matter
@@ -449,31 +454,27 @@ class ABINS(PythonAlgorithm):
 
             line = self._get_one_line(castep_file)
             if not self._compare_one_line(line, "beginheader"): # first line is BEGIN header
-                output = {"Valid": False, "Comment": msg_err+"The first line should be 'BEGIN header'."}
-                return output
+                return dict(Invalid=True, Comment=msg_err + "The first line should be 'BEGIN header'.")
+
 
             line = self._get_one_line(castep_file)
             if not self._compare_one_line(one_line=line, pattern="numberofions"):
+                return dict(Invalid=True, Comment=msg_err + "The second line should include 'Number of ions'.")
 
-                output = {"Valid": False, "Comment": msg_err+"The second line should include 'Number of ions'."}
-                return output
 
             line = self._get_one_line(castep_file)
             if not self._compare_one_line(one_line=line, pattern="numberofbranches"):
+                return dict(Invalid=True, Comment=msg_err + "The third line should include 'Number of branches'.")
 
-                output = {"Valid": False, "Comment": msg_err+"The third line should include 'Number of branches'."}
-                return output
 
             line = self._get_one_line(castep_file)
             if not self._compare_one_line(one_line=line, pattern="numberofwavevectors"):
-
-                output = {"Valid": False, "Comment": msg_err+"The fourth line should include 'Number of wavevectors'."}
+                return dict(Invalid=True, Comment=msg_err + "The fourth line should include 'Number of wavevectors'.")
 
             line = self._get_one_line(castep_file)
             if not self._compare_one_line(one_line=line,
                                           pattern="frequenciesin"):
-
-                output = {"Valid": False, "Comment": msg_err+"The fifth line should be 'Frequencies in'."}
+                return dict(Invalid=True, Comment=msg_err + "The fifth line should be 'Frequencies in'.")
 
         return output
 
@@ -484,10 +485,10 @@ class ABINS(PythonAlgorithm):
         :param file_obj:  file object from which reading is done
         :return: string containing one non empty line
         """
-        line = file_obj.readline().strip()
+        line = file_obj.readline().replace(" ","").lower()
 
         while line and line == "":
-            line = file_obj.readline().strip().lower()
+            line = file_obj.readline().replace(" ","").lower()
 
         return line
 

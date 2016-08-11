@@ -3,6 +3,7 @@
 ##
 
 set ( TEST_PY_FILES
+  ABINSTest.py
   AddSampleLogMultipleTest.py
   AlignComponentsTest.py
   ApplyPaalmanPingsCorrectionTest.py
