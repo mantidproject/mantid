@@ -530,8 +530,9 @@ void ReflectometryReductionOne::exec() {
     for (size_t i = 0; i < decTemp->getNumberHistograms(); i++) {
       for (size_t j = 0; j < decTemp->blocksize(); j++) {
         if (decTemp->y(i)[j] == 0) {
-          throw std::invalid_argument("The DetectorEfficiencyCorrection  "
-            "workspace cannot contain any zero values.");
+          throw std::invalid_argument(
+              "The DetectorEfficiencyCorrection  "
+              "workspace cannot contain any zero values.");
         }
       }
     }
@@ -596,8 +597,9 @@ void ReflectometryReductionOne::exec() {
         // to the detector workspace
         if (decWS->blocksize() < detectorWS->blocksize()) {
           throw std::invalid_argument("The number of y-values in the detector "
-            "efficiency correction workspace must be greater than or equal to "
-            "those in the detector workspace");
+                                      "efficiency correction workspace must be "
+                                      "greater than or equal to "
+                                      "those in the detector workspace");
         }
 
         auto rebinToWorkspaceAlg =

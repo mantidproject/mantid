@@ -73,7 +73,7 @@ public:
         transWSName("ReflectometryReductionOneAutoTest_TransWS") {
     MantidVec xData = {0, 0, 0, 0};
     MantidVec yData = {0, 0, 0};
-    MantidVec yDataNoZero = { 1, 1, 1 };
+    MantidVec yDataNoZero = {1, 1, 1};
 
     auto createWorkspace =
         AlgorithmManager::Instance().create("CreateWorkspace");
@@ -109,7 +109,7 @@ public:
     createWorkspace->setProperty("OutputWorkspace", "DECZero");
     createWorkspace->execute();
     m_decWorkspaceZero =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("DECZero");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("DECZero");
 
     createWorkspace->setProperty("UnitX", "Wavelength");
     createWorkspace->setProperty("DataX", xData);
@@ -117,7 +117,8 @@ public:
     createWorkspace->setProperty("OutputWorkspace", "DECNoZero");
     createWorkspace->execute();
     m_decWorkspaceNoZero =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("DECNoZero");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "DECNoZero");
 
     IAlgorithm_sptr lAlg = AlgorithmManager::Instance().create("Load");
     lAlg->setChild(true);
