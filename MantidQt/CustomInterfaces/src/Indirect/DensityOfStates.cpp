@@ -64,10 +64,10 @@ void DensityOfStates::run() {
   IAlgorithm_sptr dosAlgo =
       AlgorithmManager::Instance().create("SimulatedDensityOfStates");
 
-  QString filename = m_uiForm.mwInputFile->getFirstFilename();
+  const auto filename = m_uiForm.mwInputFile->getFirstFilename();
   QFileInfo inputFileInfo(filename);
-  QString specType = m_uiForm.cbSpectrumType->currentText();
-  bool isPhononFile = inputFileInfo.suffix() == "phonon";
+  const auto specType = m_uiForm.cbSpectrumType->currentText();
+  const auto isPhononFile = inputFileInfo.suffix() == "phonon";
 
   std::string filePropName("CASTEPFile");
   if (isPhononFile)
@@ -79,35 +79,41 @@ void DensityOfStates::run() {
   dosAlgo->setProperty(filePropName, filename.toStdString());
   dosAlgo->setProperty("OutputWorkspace", m_outputWsName.toStdString());
 
-  QString peakShape = m_uiForm.cbPeakShape->currentText();
-  dosAlgo->setProperty("Function", peakShape.toStdString());
+  const auto peakShape = m_uiForm.cbPeakShape->currentText().toStdString();
+  dosAlgo->setProperty("Function", peakShape);
 
-  QString peakWidth = m_uiForm.spPeakWidth->text();
-  dosAlgo->setProperty("PeakWidth", peakWidth.toStdString());
+  const auto peakWidth = m_uiForm.spPeakWidth->text().toStdString();
+  dosAlgo->setProperty("PeakWidth", peakWidth);
 
-  double binWidth = m_uiForm.spBinWidth->value();
+  const auto binWidth = m_uiForm.spBinWidth->value();
   dosAlgo->setProperty("BinWidth", binWidth);
 
-  double zeroThreshold = m_uiForm.spZeroThreshold->value();
+  const auto zeroThreshold = m_uiForm.spZeroThreshold->value();
   dosAlgo->setProperty("ZeroThreshold", zeroThreshold);
 
-  bool scale = m_uiForm.ckScale->isChecked();
-  double scaleFactor = m_uiForm.spScale->value();
-  if (scale)
+  const auto scale = m_uiForm.ckScale->isChecked();
+  if (scale) {
+    const auto scaleFactor = m_uiForm.spScale->value();
     dosAlgo->setProperty("Scale", scaleFactor);
+  }
 
   // Set spectrum type specific properties
   if (specType == "DensityOfStates") {
     dosAlgo->setProperty("SpectrumType", "DOS");
 
-    bool crossSectionScale = m_uiForm.ckCrossSectionScale->isChecked();
-    QString crossSectionScaleType = m_uiForm.cbCrossSectionScale->currentText();
+    const auto crossSectionScale = m_uiForm.ckCrossSectionScale->isChecked();
+    const auto crossSectionScaleType =
+        m_uiForm.cbCrossSectionScale->currentText().toStdString();
     if (crossSectionScale)
-      dosAlgo->setProperty("ScaleByCrossSection",
-                           crossSectionScaleType.toStdString());
+      dosAlgo->setProperty("ScaleByCrossSection", crossSectionScaleType);
 
-    bool sumContributions = m_uiForm.ckSumContributions->isChecked();
-    dosAlgo->setProperty("SumContributions", sumContributions);
+    const auto outputFormat = m_uiForm.cbOutputFormat->currentIndex();
+    if (outputFormat == 1) {
+      dosAlgo->setProperty("SumContributions", true);
+    }
+    if (outputFormat == 2) {
+      dosAlgo->setProperty("CalculateIonIndices", true);
+    }
 
     std::vector<std::string> selectedIons;
     auto items = m_uiForm.lwIons->selectedItems();
@@ -119,7 +125,7 @@ void DensityOfStates::run() {
   } else if (specType == "Raman") {
     dosAlgo->setProperty("SpectrumType", "Raman_Active");
 
-    double temperature = m_uiForm.spTemperature->value();
+    const auto temperature = m_uiForm.spTemperature->value();
     dosAlgo->setProperty("Temperature", temperature);
   }
 
@@ -130,11 +136,11 @@ void DensityOfStates::run() {
     BatchAlgorithmRunner::AlgorithmRuntimeProps saveProps;
     saveProps["InputWorkspace"] = m_outputWsName.toStdString();
 
-    QString filename = m_outputWsName + ".nxs";
+    const auto filename = (m_outputWsName + ".nxs").toStdString();
 
     IAlgorithm_sptr saveAlgo =
         AlgorithmManager::Instance().create("SaveNexusProcessed");
-    saveAlgo->setProperty("Filename", filename.toStdString());
+    saveAlgo->setProperty("Filename", filename);
 
     m_batchAlgoRunner->addAlgorithm(saveAlgo, saveProps);
   }
@@ -192,7 +198,6 @@ void DensityOfStates::handleFileChange() {
     m_batchAlgoRunner->executeBatchAsync();
   } else {
     m_uiForm.lwIons->clear();
-    m_uiForm.ckSumContributions->setChecked(false);
     m_uiForm.ckCrossSectionScale->setChecked(false);
   }
 
@@ -200,7 +205,6 @@ void DensityOfStates::handleFileChange() {
   m_uiForm.lwIons->setEnabled(isPhononFile);
   m_uiForm.pbSelectAllIons->setEnabled(isPhononFile);
   m_uiForm.pbDeselectAllIons->setEnabled(isPhononFile);
-  m_uiForm.ckSumContributions->setEnabled(isPhononFile);
   m_uiForm.ckCrossSectionScale->setEnabled(isPhononFile);
 }
 

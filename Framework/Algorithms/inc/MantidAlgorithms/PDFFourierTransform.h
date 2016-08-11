@@ -31,6 +31,12 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
+
+  size_t determineQminIndex(const std::vector<double> &Q,
+                            const std::vector<double> &FofQ);
+  size_t determineQmaxIndex(const std::vector<double> &Q,
+                            const std::vector<double> &FofQ);
+  double determineRho0();
 };
 
 } // namespace Mantid

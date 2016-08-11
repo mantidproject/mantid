@@ -100,6 +100,10 @@ public:
     m_data = ilist;
     return *this;
   }
+  FixedLengthVector &operator=(const double value) {
+    m_data.assign(m_data.size(), value);
+    return *this;
+  }
 
   bool empty() const { return m_data.empty(); }
   size_t size() const { return m_data.size(); }

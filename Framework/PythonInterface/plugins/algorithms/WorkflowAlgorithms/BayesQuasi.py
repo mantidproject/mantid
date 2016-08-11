@@ -572,7 +572,7 @@ class BayesQuasi(PythonAlgorithm):
             logger.information('Width file is ' + widthFile)
             # read ascii based width file
             try:
-                wfPath = FileFinder.getFullPath(widthFile)
+                wfPath = s_api.FileFinder.getFullPath(widthFile)
                 handle = open(wfPath, 'r')
                 asc = []
                 for line in handle:

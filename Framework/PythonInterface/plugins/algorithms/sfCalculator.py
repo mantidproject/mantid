@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name,too-many-arguments,too-many-lines,too-many-instance-attributes, too-many-locals,too-many-branches
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 import numpy as np
 import os.path
@@ -72,7 +73,7 @@ class sfCalculator(object):
     def __init__(self, numerator=None, denominator=None,
                  tof_range=None):
 
-        print '---> initialize calculation'
+        print('---> initialize calculation')
 
         if tof_range is None:
             self.tof_min = 10000
@@ -90,7 +91,7 @@ class sfCalculator(object):
 
     def setNumerator(self, minPeak, maxPeak, minBack, maxBack):
 
-        print '---> set numerator (' + self.numerator + ')'
+        print('---> set numerator (' + self.numerator + ')')
 
         if minPeak != 0:
             self.n_peak_pixel_min = minPeak
@@ -103,7 +104,7 @@ class sfCalculator(object):
 
     def setDenominator(self, minPeak, maxPeak, minBack, maxBack):
 
-        print '---> set denominator (' + self.denominator + ')'
+        print('---> set denominator (' + self.denominator + ')')
 
         if minPeak != 0:
             self.d_peak_pixel_min = minPeak
@@ -239,7 +240,7 @@ class sfCalculator(object):
             self.back_pixel_max = self.d_back_pixel_max
 
         nexus_file_numerator = filen
-        print '----> loading nexus file: ' + nexus_file_numerator
+        print('----> loading nexus file: ' + nexus_file_numerator)
         EventDataWks = LoadEventNexus(Filename=nexus_file_numerator)
 
         self.is_nexus_detector_rotated_flag = self.isNexusTakeAfterRefDate(EventDataWks.getRun().getProperty('run_start').value)
@@ -252,7 +253,7 @@ class sfCalculator(object):
             self.beta_pixel_nbr = 304  #will be integrated over this dimension
 
         proton_charge = self._getProtonCharge(EventDataWks)
-        print '----> rebinning '
+        print('----> rebinning ')
         HistoDataWks = Rebin(InputWorkspace=EventDataWks,\
               Params=self.rebin_parameters)
 
@@ -334,7 +335,7 @@ class sfCalculator(object):
 #        mt3 = mtd['DataWks']
         self._calculateFinalAxis(Workspace=DataWks,\
                            bNumerator=bNumerator)
-        print 'done with _calculateFinalAxis and back in calculatefinalaxis' #REMOVEME
+        print('done with _calculateFinalAxis and back in calculatefinalaxis') #REMOVEME
 
         #cleanup workspaces
         DeleteWorkspace(EventDataWks)
@@ -346,7 +347,7 @@ class sfCalculator(object):
 #         DeleteWorkspace(TransposeHistoFlatDataWks_2)
         DeleteWorkspace(DataWks)
 
-        print 'done with cleaning workspaces in line 247'
+        print('done with cleaning workspaces in line 247')
 
     def _calculateFinalAxis(self, Workspace=None, bNumerator=None):
         """
@@ -354,7 +355,7 @@ class sfCalculator(object):
         and denominator
         """
 
-        print '----> calculate final axis'
+        print('----> calculate final axis')
         mt = Workspace
         x_axis = mt.readX(0)[:]
         self.x_axis = x_axis
@@ -397,7 +398,7 @@ class sfCalculator(object):
             self.y_axis_error_denominator = counts_vs_tof_error[index_tof_min:index_tof_max].copy()
             self.x_axis_ratio = self.x_axis[index_tof_min:index_tof_max].copy()
 
-        print 'done with _calculateFinalAxis'
+        print('done with _calculateFinalAxis')
 
     def _createIntegratedWorkspace(self,
                                    InputWorkspace=None,
@@ -411,7 +412,7 @@ class sfCalculator(object):
         returns the new workspace handle
         """
 
-        print '-----> Create Integrated workspace '
+        print('-----> Create Integrated workspace ')
         x_axis = InputWorkspace.readX(0)[:]
         x_size = to_pixel - from_pixel + 1
         y_axis = np.zeros((self.alpha_pixel_nbr, len(x_axis) - 1))
@@ -706,7 +707,7 @@ class sfCalculator(object):
                         DataE=self.y_axis_error_ratio,\
                         Nspec=1)
 
-        print 'replaceSpecialValues'
+        print('replaceSpecialValues')
         DataToFit = ReplaceSpecialValues(InputWorkspace=DataToFit,\
                              NaNValue=0,\
                              NaNError=0,\
@@ -802,7 +803,7 @@ def recordSettings(a, b, error_a, error_b, name, instance):
     This function will record the various fitting parameters and the
     name of the ratio
     """
-    print '--> recoding settings'
+    print('--> recoding settings')
     a.append(instance.a)
     b.append(instance.b)
     error_a.append(instance.error_a)
@@ -853,7 +854,7 @@ def outputFittingParameters(a, b, error_a, error_b,
     9th column: error_b
     """
 
-    print '--> output fitting parameters'
+    print('--> output fitting parameters')
 
     bFileExist = False
     #First we need to check if the file already exist
@@ -1136,10 +1137,10 @@ def getSlitsValueAndLambda(full_list_runs,
                  lambda requested values
     """
     _nbr_files = len(full_list_runs)
-    print '> Retrieving Slits and Lambda Requested for each file:'
+    print('> Retrieving Slits and Lambda Requested for each file:')
     for i in range(_nbr_files):
         _full_file_name = full_list_runs[i]
-        print '-> ' + _full_file_name
+        print('-> ' + _full_file_name)
         tmpWks = LoadEventNexus(Filename=_full_file_name,\
                        MetaDataOnly='1')
 #        mt1 = mtd['tmpWks']
@@ -1186,7 +1187,7 @@ def calculateAndFit(numerator='',
                     tof_range=None):
     if list_objects==None:
         list_objects=[]
-    print '--> running calculate and fit algorithm'
+    print('--> running calculate and fit algorithm')
 
     cal1 = sfCalculator(numerator=numerator,
                         denominator=denominator,
@@ -1203,7 +1204,7 @@ def calculateAndFit(numerator='',
                         maxBack=list_peak_back_denominator[3])
 
     cal1.run()
-    print 'Done with cal1.run()'
+    print('Done with cal1.run()')
 
     if list_objects != [] and list_objects[-1] is not None:
         new_cal1 = cal1 * list_objects[-1]
@@ -1218,11 +1219,11 @@ def showhelp():
         Here the user will have information about how the command line
         works
     """
-    print 'sfCalculator help:'
-    print
-    print 'example:'
-    print ' > sfCalculator.calculate(string_runs="55889:0, 55890:1, 55891:1, 55892:2",'
-    print '                          list_'
+    print('sfCalculator help:')
+    print()
+    print('example:')
+    print(' > sfCalculator.calculate(string_runs="55889:0, 55890:1, 55891:1, 55892:2",')
+    print('                          list_')
 
 #if __name__ == '__main__':
 def calculate(string_runs=None,\
@@ -1362,7 +1363,7 @@ def calculate(string_runs=None,\
 
         for i in range(len(list_runs)):
 
-            print '> Working with index: ' + str(i)
+            print('> Working with index: ' + str(i))
             _attenuator = list_attenuator[i]
 
             if _attenuator == 0:
@@ -1376,15 +1377,15 @@ def calculate(string_runs=None,\
                     index_numerator = i
                     index_denominator = _index_first_A[_attenuator]
 
-                print '-> numerator  : ' + str(list_runs[index_numerator])
-                print '-> denominator: ' + str(list_runs[index_denominator])
+                print('-> numerator  : ' + str(list_runs[index_numerator]))
+                print('-> denominator: ' + str(list_runs[index_denominator]))
                 cal = calculateAndFit(numerator=list_runs[index_numerator],
                                       denominator=list_runs[index_denominator],
                                       list_peak_back_numerator=list_peak_back[index_numerator],
                                       list_peak_back_denominator=list_peak_back[index_denominator],
                                       list_objects=list_objects,
                                       tof_range=tof_range)
-                print '-> Done with Calculate and Fit'
+                print('-> Done with Calculate and Fit')
 
                 recordSettings(a, b, error_a, error_b, name, cal)
 
@@ -1416,7 +1417,7 @@ def calculate(string_runs=None,\
                                 finalS1W, finalS2W,
                                 output_file_name)
 
-        print 'Done !'
+        print('Done !')
 
 #    else:
 #        """
