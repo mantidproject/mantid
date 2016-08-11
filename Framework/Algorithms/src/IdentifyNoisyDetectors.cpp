@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include <numeric>
 
 namespace Mantid {
 namespace Algorithms {
@@ -116,11 +117,9 @@ void IdentifyNoisyDetectors::exec() {
   int2 = divide->getProperty("OutputWorkspace");
 
   for (int i = 0; i < nHist; i++) {
-
     outputWs->setHistogram(i, Points{0.0}, Counts{1.0});
     stdDevWs->setSharedX(i, outputWs->sharedX(i));
-    auto stdDev = outputWs->countStandardDeviations(i);
-    stdDevWs->mutableY(i)[0] = stdDev[0];
+    stdDevWs->mutableY(i)[0] = sqrt(int2->y(i)[0] - std::pow(int1->y(i)[0], 2));
 
     progress.report();
   }
@@ -148,7 +147,7 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
   int count = 0;
   double mean = 0.0;
   double mean2 = 0.0;
-
+  
   for (int i = 0; i < nhist; i++) {
     if (valid->y(i)[0] > 0) {
       mean += values->y(i)[0];
@@ -171,18 +170,15 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
   double lower = mean - 3 * stddev;
   double min = mean * 0.0001;
 
-  // Counts c{ 0.0 };
+  Counts counts{ 0.0 };
   for (int i = 0; i < nhist; i++) {
-
     double value = values->y(i)[0];
-
-    // TODO valid->setCounts(i, c); ?
     if (value > upper) {
-      valid->mutableY(i)[0] = 0.0;
+		valid->setCounts(i, counts);
     } else if (value < lower) {
-      valid->mutableY(i)[0] = 0.0;
+		valid->setCounts(i, counts);
     } else if (value < min) {
-      valid->mutableY(i)[0] = 0.0;
+		valid->setCounts(i, counts);
     }
 
     progress.report("Calculating StdDev...");

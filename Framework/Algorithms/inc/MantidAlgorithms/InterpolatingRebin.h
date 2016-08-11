@@ -8,12 +8,13 @@
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
-	namespace HistogramData {
-		class HistogramX;
-		class HistogramE;
-		class Histogram;
-		class BinEdges;
-	}
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+class HistogramE;
+class Histogram;
+class BinEdges;
+}
 namespace Algorithms {
 /**Uses cubic splines to interpolate the mean rate of change of the integral
   over the inputed data bins to that for the user supplied bins.
@@ -96,10 +97,14 @@ protected:
   void outputYandEValues(API::MatrixWorkspace_const_sptr inputW,
                          const HistogramData::BinEdges &XValues_new,
                          API::MatrixWorkspace_sptr outputW);
-  HistogramData::Histogram InterpolatingRebin::cubicInterpolation(
-	  const HistogramData::Histogram &oldHistogram, const HistogramData::BinEdges &xNew) const;
-  HistogramData::Histogram noInterpolation(const HistogramData::Histogram &oldHistogram,
-                       const HistogramData::BinEdges &xNew) const;
+  void InterpolatingRebin::cubicInterpolation(
+      const HistogramData::Histogram &oldHistogram,
+      const HistogramData::BinEdges &xNew, HistogramData::HistogramY &yNew,
+      HistogramData::HistogramE &eNew) const;
+  void noInterpolation(const HistogramData::Histogram &oldHistogram,
+                       const HistogramData::BinEdges &xNew,
+                       HistogramData::HistogramY &yNew,
+                       HistogramData::HistogramE &eNew) const;
   double estimateError(const HistogramData::HistogramX &xsOld,
                        const HistogramData::HistogramE &esOld,
                        const double xNew) const;

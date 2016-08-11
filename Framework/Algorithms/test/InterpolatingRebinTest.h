@@ -276,12 +276,16 @@ private:
     double j = 1.0;
     int i = 0;
 
+	auto &x = retVal->mutableX(0);
+	auto &y = retVal->mutableY(0);
+	auto &e = retVal->mutableE(0);
+	const auto &yConst = retVal->y(0);
     for (; i < nBins; i++, j += 1.5) {
-      retVal->mutableX(0)[i] = j * 0.5;
-      retVal->mutableY(0)[i] = j;
-      retVal->mutableE(0)[i] = retVal->y(0)[i] / 8;
+      x[i] = j * 0.5;
+      y[i] = j;
+      e[i] = yConst[i] / 8;
     }
-    retVal->mutableX(0)[i] = j * 0.5;
+    x[i] = j * 0.5;
 
     return retVal;
   }
@@ -293,14 +297,14 @@ private:
 
     // the first histogram has all zeros
     retVal->setBinEdges(0, nBins + 1, LinearGenerator(0.0, 1.0));
-    retVal->dataY(0).assign(retVal->dataY(0).size(), 0.0);
-    retVal->dataE(0).assign(retVal->dataE(0).size(), 0.0);
+    retVal->mutableY(0).assign(retVal->mutableY(0).size(), 0.0);
+    retVal->mutableE(0).assign(retVal->mutableE(0).size(), 0.0);
 
     // the second has NAN values
     retVal->setBinEdges(1, nBins + 1, LinearGenerator(0.0, 1.0));
-    retVal->dataY(1).assign(retVal->dataY(1).size(),
+    retVal->mutableY(1).assign(retVal->mutableY(1).size(),
                             std::numeric_limits<double>::quiet_NaN());
-    retVal->dataE(1).assign(retVal->dataE(1).size(), 2.0);
+    retVal->mutableE(1).assign(retVal->mutableE(1).size(), 2.0);
 
     return retVal;
   }
