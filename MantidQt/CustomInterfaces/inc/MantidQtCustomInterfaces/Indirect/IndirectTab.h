@@ -116,8 +116,8 @@ protected:
                    const std::vector<int> &wsIndices);
 
   /// Plot a spectrum plot with a given set of spectra of a given workspace
-  void IndirectTab::plotSpectra(const QString &workspaceName,
-                                const std::vector<int> &wsIndices);
+  void plotSpectra(const QString &workspaceName,
+                   const std::vector<int> &wsIndices);
 
   /// Plot a time bin plot given a list of workspace names
   void plotTimeBin(const QStringList &workspaceNames, int binIndex = 0);
