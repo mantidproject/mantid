@@ -63,7 +63,6 @@ void MonitorEfficiencyCorUser::exec() {
   // Calculate Efficiency for E = Ei
   const double eff0 = m_monitorCounts * calculateFormulaValue(effFormula, m_Ei);
 
-  const size_t numberOfChannels = this->m_inputWS->blocksize();
   // Calculate the number of spectra in this workspace
   const int numberOfSpectra =
       static_cast<int>(this->m_inputWS->getNumberHistograms());

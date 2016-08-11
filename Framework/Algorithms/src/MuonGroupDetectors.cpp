@@ -99,10 +99,11 @@ void MuonGroupDetectors::exec() {
     outWS->getSpectrum(groupIndex).clearDetectorIDs();
 
     auto &Y = outWS->mutableY(groupIndex);
+    auto &E = outWS->mutableE(groupIndex);
 
     for (auto &wsIndex : wsIndices) {
-      outWS->mutableY(groupIndex) += inWS->y(wsIndex);
-      inWS->mutableE(groupIndex) += inWS->e(wsIndex);
+      Y += inWS->y(wsIndex);
+      E += inWS->e(wsIndex);
 
       // Detectors list of the group should contain all the detectors of
       // it's
