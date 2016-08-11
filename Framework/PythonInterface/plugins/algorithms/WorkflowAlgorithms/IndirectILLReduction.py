@@ -422,6 +422,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=red)
             Scale(InputWorkspace=red, OutputWorkspace=red, Factor=0.5, Operation='Multiply')
 
+<<<<<<< HEAD
     @classmethod
     def _shift_spectra(self, ws1, ws2=None, shift_option_ws2_centered='False'):
         """
@@ -529,6 +530,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         return ws_out_temp
 
+=======
+>>>>>>> f42144017dfdf20f498b3199d1c0a48b510f7661
     def _set_output_workspace_properties(self, runlist):
 
         # remove cached left and right of vanadium run
