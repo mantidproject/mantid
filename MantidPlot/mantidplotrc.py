@@ -10,6 +10,13 @@
 # file.
 
 if __name__ == '__main__':
+    try:
+        import matplotlib as _mpl
+        _mpl.use("module://pymantidplot.mpl.backend_mtdqt4agg")
+        del _mpl
+    except ImportError:
+        pass
+
     from six import iteritems as _iteritems
 
     # Import MantidPlot python commands
