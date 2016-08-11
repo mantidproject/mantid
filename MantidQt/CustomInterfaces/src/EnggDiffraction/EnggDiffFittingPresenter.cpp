@@ -765,6 +765,31 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
   }
 }
 
+void MantidQt::CustomInterfaces::EnggDiffFittingPresenter::
+    runSaveDiffFittingAsciiAlg(const std::string &tableWorkspace,
+                               std::string &filePath) {
+  // save the results
+  // run the algorithm SaveDiffFittingAscii with output of EnggFitPeaks
+  auto saveDiffFit = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "SaveDiffFittingAscii");
+
+  try {
+    saveDiffFit->initialize();
+    saveDiffFit->setProperty("InputWorkspace", tableWorkspace);
+    saveDiffFit->setProperty("Filename", dir.toString());
+    saveDiffFit->setProperty("RunNumber", runNumber);
+    saveDiffFit->setProperty("Bank", bank);
+    saveDiffFit->setProperty("OutMode", "AppendToExistingFile");
+    saveDiffFit->execute();
+  } catch (std::exception &re) {
+    g_log.error() << "Could not run the algorithm SaveDiffFittingAscii "
+                     "successfully for bank, "
+                     // bank name
+                     "Error description: " +
+                         static_cast<std::string>(re.what()) +
+                         " Please check also the log message for detail.\n";
+  }
+}
 void EnggDiffFittingPresenter::runFittingAlgs(
     std::string focusedFitPeaksTableName, std::string focusedWSName) {
   // retrieve the table with parameters
