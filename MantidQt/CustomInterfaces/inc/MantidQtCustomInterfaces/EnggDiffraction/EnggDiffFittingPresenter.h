@@ -191,6 +191,9 @@ private:
   // name of the workspace with the focused ws being used for fitting
   static const std::string g_focusedFittingWSName;
 
+  // input run number - used for output file name
+  static std::string g_multi_run;
+
   /// true if the last fitting completed successfully
   bool m_fittingFinishedOK;
 

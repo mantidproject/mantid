@@ -30,6 +30,8 @@ const std::string EnggDiffFittingPresenter::g_focusedFittingWSName =
 
 int EnggDiffFittingPresenter::g_fitting_runno_counter = 0;
 
+std::string EnggDiffFittingPresenter::g_multi_run = "";
+
 /**
  * Constructs a presenter for a fitting tab/widget view, which has a
  * handle on the current calibration (produced and updated elsewhere).
@@ -232,6 +234,9 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
         // to single run number and trigger FittingRunNo changed again
         processMultiRun(strFocusedFile, runnoDirVector);
 
+        // set to input run - used for SaveDiffFittingAscii
+        g_multi_run = strFocusedFile;
+
       } else {
 
         // true if string convertible to digit
@@ -255,6 +260,9 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 
           processSingleRun(focusDir, strFocusedFile, runnoDirVector,
                            splitBaseName, runNoVec);
+
+          // set to input run - used for SaveDiffFittingAscii
+          g_multi_run = strFocusedFile;
         }
       }
     }
@@ -497,7 +505,7 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
   g_log.debug() << "Focused files found are: " << fitPeaksData << '\n';
 
   for (auto dir : g_multi_run_directories) {
-    g_log.error() << dir << '\n'; // shahroz
+    g_log.debug() << dir << '\n';
   }
 
   if (!g_multi_run_directories.empty()) {
@@ -755,6 +763,9 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
                          " Please check also the log message for detail.\n";
   }
 
+  auto fPath = focusedRunNo;
+  runSaveDiffFittingAsciiAlg(focusedFitPeaksTableName, fPath);
+
   try {
     runFittingAlgs(focusedFitPeaksTableName, g_focusedFittingWSName);
 
@@ -768,6 +779,25 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
 void MantidQt::CustomInterfaces::EnggDiffFittingPresenter::
     runSaveDiffFittingAsciiAlg(const std::string &tableWorkspace,
                                std::string &filePath) {
+
+  // split to get run number and bank
+  auto fileSplit = m_view->splitFittingDirectory(filePath);
+  // returns ['ENGINX', <RUN-NUMBER>, 'focused', `bank`, <BANK>, '.nxs']
+  auto runNumber = fileSplit[1];
+  auto bank = fileSplit[4];
+
+  // generate file name
+  std::string fileName;
+  if (!g_multi_run.empty()) {
+    fileName = "ENGINX_" + g_multi_run + "_Single_Peak_Fitting.csv";
+  } else {
+    fileName = "ENGINX_" + runNumber + "_Single_Peak_Fitting.csv";
+  }
+
+  // separate folder for Single Peak Fitting output;
+  auto dir = outFilesUserDir("SinglePeakFitting");
+  dir.append(fileName);
+
   // save the results
   // run the algorithm SaveDiffFittingAscii with output of EnggFitPeaks
   auto saveDiffFit = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
@@ -790,6 +820,7 @@ void MantidQt::CustomInterfaces::EnggDiffFittingPresenter::
                          " Please check also the log message for detail.\n";
   }
 }
+
 void EnggDiffFittingPresenter::runFittingAlgs(
     std::string focusedFitPeaksTableName, std::string focusedWSName) {
   // retrieve the table with parameters
