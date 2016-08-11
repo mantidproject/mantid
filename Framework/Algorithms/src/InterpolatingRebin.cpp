@@ -146,10 +146,6 @@ void InterpolatingRebin::outputYandEValues(
   const int histnumber = static_cast<int>(inputW->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, histnumber);
   for (int hist = 0; hist < histnumber; ++hist) {
-    // get const references to input Workspace arrays (no copying)
-    const auto &XValues = inputW->binEdges(hist);
-    const auto &YValues = inputW->y(hist);
-    const auto &YErrors = inputW->e(hist);
 
     // get references to output workspace data (no copying)
     auto &YValues_new = outputW->mutableY(hist);
