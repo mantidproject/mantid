@@ -422,7 +422,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=red)
             Scale(InputWorkspace=red, OutputWorkspace=red, Factor=0.5, Operation='Multiply')
 
-
     def _set_output_workspace_properties(self, runlist):
 
         # remove cached left and right of vanadium run
