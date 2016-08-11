@@ -664,5 +664,24 @@ void Shape2DCollection::eraseFree(const QPolygonF &polygon) {
     emit shapeChanged();
   }
 }
+
+void Shape2DCollection::loadFromProject(const std::string &lines)
+{
+  TSVSerialiser tsv(lines);
+  for (auto shapeLines : tsv.sections("shape")) {
+    Shape2D *shape = Shape2D::loadFromProject(shapeLines);
+    addShape(shape, false);
+  }
+}
+
+std::string Shape2DCollection::saveToProject() const
+{
+  TSVSerialiser tsv;
+  for(auto shape : m_shapes) {
+    tsv.writeSection("shape", shape->saveToProject());
+  }
+  return tsv.outputLines();
+}
+
 } // MantidWidgets
 } // MantidQt

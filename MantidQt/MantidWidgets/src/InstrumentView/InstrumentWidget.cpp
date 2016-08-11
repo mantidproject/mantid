@@ -1295,12 +1295,13 @@ std::string InstrumentWidget::saveToProject() const {
   // serialise widget properties
   tsv.writeLine("WorkspaceName") << getWorkspaceNameStdString();
   tsv.writeLine("SurfaceType") << getSurfaceType();
+  tsv.writeRaw(getSurface()->saveToProject());
   tsv.writeLine("CurrentTab") << getCurrentTab();
   tsv.writeLine("EnergyTransfer") << m_xIntegration->getMinimum()
                                   << m_xIntegration->getMaximum();
 
   // serialise widget subsections
-  tsv.writeSection("actor", m_instrumentActor->saveToProject());
+  tsv.writeRaw(m_instrumentActor->saveToProject());
   tsv.writeSection("tabs", saveTabs());
 
   return tsv.outputLines();
@@ -1339,6 +1340,12 @@ void InstrumentWidget::loadFromProject(const std::string &lines) {
     int surfaceType;
     tsv >> surfaceType;
     setSurfaceType(surfaceType);
+  }
+
+  if (tsv.selectSection("Surface")) {
+    std::string surfaceLines;
+    tsv >> surfaceLines;
+    getSurface()->loadFromProject(surfaceLines);
   }
 
   if (tsv.selectLine("CurrentTab")) {

@@ -155,6 +155,78 @@ bool Shape2D::isMasked(const QPointF &p) const {
   return m_fill_color != QColor() && contains(p);
 }
 
+
+Shape2D* Shape2D::loadFromProject(const std::string &lines)
+{
+  TSVSerialiser tsv(lines);
+  Shape2D *shape = nullptr;
+
+  if(tsv.selectLine("Type")) {
+    std::string type;
+    tsv >> type;
+
+    if(type == "ellipse") {
+      shape = Shape2DEllipse::loadFromProject(lines);
+    } else if (type == "rectangle") {
+      shape = Shape2DRectangle::loadFromProject(lines);
+    } else if (type == "ring") {
+      shape = Shape2DRing::loadFromProject(lines);
+    } else if (type == "free") {
+      shape = Shape2DFree::loadFromProject(lines);
+    }
+
+    if(shape && tsv.selectLine("Properties")) {
+      bool scalable, editing, selected, visible;
+      tsv >> scalable >> editing >> selected >> visible;
+
+      shape->setScalable(scalable);
+      shape->edit(editing);
+      shape->setSelected(selected);
+      shape->setVisible(visible);
+    }
+
+    if(shape && tsv.selectLine("Color")) {
+      int r, g, b, a;
+      tsv >> r >> g >> b >> a;
+      QColor color(r, g, b, a);
+      shape->setColor(color);
+    }
+
+    if(shape && tsv.selectLine("FillColor")) {
+      int r, g, b, a;
+      tsv >> r >> g >> b >> a;
+      QColor color(r, g, b, a);
+      shape->setFillColor(color);
+    }
+  }
+  return shape;
+}
+
+std::string Shape2D::saveToProject() const
+{
+  TSVSerialiser tsv;
+  bool props[] {
+   m_scalable,
+   m_editing,
+   m_selected,
+   m_visible };
+
+  tsv.writeLine("Properties");
+  for(auto prop : props) {
+    tsv << prop;
+  }
+
+  auto color = getColor();
+  tsv.writeLine("Color");
+  tsv << color.red() << color.green() << color.blue() << color.alpha();
+
+  auto fillColor = getFillColor();
+  tsv.writeLine("FillColor");
+  tsv << fillColor.red() << fillColor.green() << fillColor.blue() << fillColor.alpha();
+
+  return tsv.outputLines();
+}
+
 // --- Shape2DEllipse --- //
 
 Shape2DEllipse::Shape2DEllipse(const QPointF &center, double radius1,
@@ -261,6 +333,26 @@ void Shape2DEllipse::setPoint(const QString &prop, const QPointF &value) {
   }
 }
 
+Shape2D* Shape2DEllipse::loadFromProject(const std::string &lines) {
+  TSVSerialiser tsv(lines);
+  tsv.selectLine("Parameters");
+  double radius1, radius2, x, y;
+  tsv >> radius1 >> radius2 >> x >> y;
+  return new Shape2DEllipse(QPointF(x, y), radius1, radius2);
+}
+
+std::string Shape2DEllipse::saveToProject() const
+{
+  TSVSerialiser tsv;
+  double radius1 = getDouble("radius1");
+  double radius2 = getDouble("radius2");
+  auto centre = getPoint("centre");
+
+  tsv.writeLine("Type") << "ellipse";
+  tsv.writeLine("Parameters") << radius1 << radius2 << centre.x(), centre.y();
+  tsv.writeRaw(Shape2D::saveToProject());
+  return tsv.outputLines();
+}
 // --- Shape2DRectangle --- //
 
 Shape2DRectangle::Shape2DRectangle() { m_boundingRect = RectF(); }
@@ -297,6 +389,30 @@ void Shape2DRectangle::drawShape(QPainter &painter) const {
 
 void Shape2DRectangle::addToPath(QPainterPath &path) const {
   path.addRect(m_boundingRect.toQRectF());
+}
+
+Shape2D* Shape2DRectangle::loadFromProject(const std::string &lines) {
+  TSVSerialiser tsv(lines);
+  tsv.selectLine("Parameters");
+  double x0, y0, x1, y1;
+  tsv >> x0 >> y0 >> x1 >> y1;
+  QPointF point1(x0, y0);
+  QPointF point2(x1, y1);
+  return new Shape2DRectangle(point1, point2);
+}
+
+std::string Shape2DRectangle::saveToProject() const
+{
+  TSVSerialiser tsv;
+  auto x0 = m_boundingRect.x0();
+  auto x1 = m_boundingRect.x1();
+  auto y0 = m_boundingRect.y0();
+  auto y1 = m_boundingRect.y1();
+
+  tsv.writeLine("Type") << "rectangle";
+  tsv.writeLine("Parameters") << x0 << y0 << x1 << y1;
+  tsv.writeRaw(Shape2D::saveToProject());
+  return tsv.outputLines();
 }
 
 // --- Shape2DRing --- //
@@ -438,6 +554,35 @@ void Shape2DRing::setColor(const QColor &color) {
   m_outer_shape->setColor(color);
 }
 
+
+Shape2D* Shape2DRing::loadFromProject(const std::string &lines) {
+  TSVSerialiser tsv(lines);
+  tsv.selectLine("Parameters");
+  double xWidth, yWidth;
+  tsv >> xWidth >> yWidth;
+
+  tsv.selectSection("shape");
+  std::string baseShapeLines;
+  tsv >> baseShapeLines;
+
+  auto baseShape = Shape2D::loadFromProject(baseShapeLines);
+  return new Shape2DRing(baseShape, xWidth, yWidth);
+}
+
+std::string Shape2DRing::saveToProject() const
+{
+  TSVSerialiser tsv;
+  auto xWidth = getDouble("xwidth");
+  auto yWidth = getDouble("ywidth");
+  auto baseShape = getOuterShape();
+
+  tsv.writeLine("Type") << "ring";
+  tsv.writeLine("Parameters") << xWidth << yWidth;
+  tsv.writeSection("shape", baseShape->saveToProject());
+  tsv.writeRaw(Shape2D::saveToProject());
+  return tsv.outputLines();
+}
+
 //------------------------------------------------------------------------------
 
 /// Construct a zero-sized shape.
@@ -571,5 +716,42 @@ void Shape2DFree::subtractPolygon(const QPolygonF &polygon) {
   m_polygon = m_polygon.subtracted(polygon);
   resetBoundingRect();
 }
+
+Shape2D* Shape2DFree::loadFromProject(const std::string &lines) {
+  TSVSerialiser tsv(lines);
+  QPolygonF polygon;
+
+  size_t paramCount = tsv.values("Parameters").size()-1;
+
+  tsv.selectLine("Parameters");
+  for(size_t i = 0; i < paramCount; i+=2) {
+    double x, y;
+    tsv >> x >> y;
+    polygon << QPointF(x, y);
+  }
+
+  return new Shape2DFree(polygon);
+}
+
+std::string Shape2DFree::saveToProject() const
+{
+  TSVSerialiser tsv;
+
+  tsv.writeLine("Type") << "free";
+  tsv.writeLine("Parameters");
+  for(auto& point : m_polygon) {
+    tsv << point.x() << point.y();
+  }
+  tsv.writeRaw(Shape2D::saveToProject());
+  return tsv.outputLines();
+}
+
+Shape2DFree::Shape2DFree(const QPolygonF &polygon)
+  : m_polygon(polygon)
+{
+  resetBoundingRect();
+}
+
+
 } // MantidWidgets
 } // MantidQt

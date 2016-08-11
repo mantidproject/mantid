@@ -3,6 +3,7 @@
 #include "MantidQtMantidWidgets/InstrumentView/GLColor.h"
 #include "MantidQtMantidWidgets/InstrumentView/MantidGLWidget.h"
 #include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -716,5 +717,26 @@ QStringList ProjectionSurface::getPeaksWorkspaceNames() const {
   }
   return names;
 }
+
+void MantidQt::MantidWidgets::ProjectionSurface::loadFromProject(const std::string &lines)
+{
+  TSVSerialiser tsv(lines);
+
+  if(tsv.selectSection("shapes")) {
+    std::string shapesLines;
+    tsv >> shapesLines;
+    m_maskShapes.loadFromProject(shapesLines);
+  }
+}
+
+std::string MantidQt::MantidWidgets::ProjectionSurface::saveToProject() const
+{
+  TSVSerialiser tsv, surface;
+  surface.writeSection("shapes", m_maskShapes.saveToProject());
+//  surface.writeSection("peaks", m_peakShapes.saveToProject());
+  tsv.writeSection("surface", surface.outputLines());
+  return tsv.outputLines();
+}
+
 } // MantidWidgets
 } // MantidQt
