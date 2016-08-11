@@ -188,6 +188,19 @@ int TSVSerialiser::asInt(const size_t i) const {
   return ret;
 }
 
+size_t TSVSerialiser::asSize_t(const size_t i) const {
+  if (i >= m_curValues.size())
+    return 0;
+
+  std::string valStr = m_curValues.at(i);
+
+  std::stringstream valSS(valStr);
+  size_t ret;
+  valSS >> ret;
+
+  return ret;
+}
+
 double TSVSerialiser::asDouble(const size_t i) const {
   if (i >= m_curValues.size())
     return 0.00;
@@ -236,6 +249,11 @@ std::string TSVSerialiser::asString(const size_t i) const {
 
 TSVSerialiser &TSVSerialiser::operator>>(int &val) {
   val = asInt(m_curIndex++);
+  return *this;
+}
+
+TSVSerialiser &TSVSerialiser::operator>>(size_t &val) {
+  val = asSize_t(m_curIndex++);
   return *this;
 }
 
@@ -298,6 +316,11 @@ TSVSerialiser &TSVSerialiser::operator<<(const double &val) {
 }
 
 TSVSerialiser &TSVSerialiser::operator<<(const int &val) {
+  m_output << "\t" << val;
+  return *this;
+}
+
+TSVSerialiser &TSVSerialiser::operator<<(const size_t &val) {
   m_output << "\t" << val;
   return *this;
 }

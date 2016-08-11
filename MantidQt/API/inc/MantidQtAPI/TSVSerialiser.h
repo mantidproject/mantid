@@ -59,12 +59,14 @@ public:
   bool selectSection(const std::string &name, const size_t i = 0);
 
   int asInt(const size_t i) const;
+  size_t asSize_t(const size_t i) const;
   double asDouble(const size_t i) const;
   float asFloat(const size_t i) const;
   std::string asString(const size_t i) const;
   bool asBool(const size_t i) const;
 
   TSVSerialiser &operator>>(int &val);
+  TSVSerialiser &operator>>(size_t &val);
   TSVSerialiser &operator>>(double &val);
   TSVSerialiser &operator>>(float &val);
   TSVSerialiser &operator>>(std::string &val);
@@ -78,6 +80,7 @@ public:
   TSVSerialiser &operator<<(const QString &val);
   TSVSerialiser &operator<<(const double &val);
   TSVSerialiser &operator<<(const int &val);
+  TSVSerialiser &operator<<(const size_t &val);
   TSVSerialiser &operator<<(const bool &val);
 
   void writeRaw(const std::string &raw);
