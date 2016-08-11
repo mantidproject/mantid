@@ -22,17 +22,26 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 #include "MantidKernel/System.h"
+#include <stdexcept>
+#include <string>
 
 /**
  * This file defines error handling code that transforms
  * a Python error state to C++ exceptions.
  */
-
 namespace Mantid {
 namespace PythonInterface {
 namespace Environment {
-/// Convert Python error state to C++ exception
-DLLExport void throwRuntimeError(const bool withTrace = true);
+/// Exception type that captures the current Python error state
+/// as a C++ exception
+class DLLExport PythonException : public std::exception {
+public:
+  PythonException(bool withTrace = true);
+  const char *what() const noexcept override { return m_msg.c_str(); }
+
+private:
+  std::string m_msg;
+};
 }
 }
 }
