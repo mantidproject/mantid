@@ -277,7 +277,7 @@ void InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
     if (VectorHelper::isConstantValue(yOld.rawData())) {
       // this copies the single y-value into the output array, errors are still
       // calculated from the nearest input data points
-	  // this is as much as we need to do in this (trival) case
+      // this is as much as we need to do in this (trival) case
       noInterpolation(oldHistogram, xNew, yNew, eNew);
       return;
     } else { // some points are two close to the edge of the data

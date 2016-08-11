@@ -183,7 +183,7 @@ void IQTransform::guinierSpheres(API::MatrixWorkspace_sptr ws) {
   std::transform(Y.cbegin(), Y.cend(), Y.begin(),
                  VectorHelper::LogNoThrow<double>());
   std::transform(E.cbegin(), E.cend(), Y.begin(), E.begin(),
-	  std::divides<double>());
+                 std::divides<double>());
 
   ws->setYUnitLabel("Ln(I)");
   m_label->setLabel("Q^2");
@@ -199,14 +199,13 @@ void IQTransform::guinierRods(API::MatrixWorkspace_sptr ws) {
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
   std::transform(X.cbegin(), X.cend(), X.begin(),
-	  VectorHelper::Squares<double>());
+                 VectorHelper::Squares<double>());
   std::transform(Y.cbegin(), Y.cend(), X.begin(), Y.begin(),
                  std::multiplies<double>());
   std::transform(Y.cbegin(), Y.cend(), Y.begin(),
                  VectorHelper::LogNoThrow<double>());
   std::transform(E.cbegin(), E.cend(), Y.begin(), E.begin(),
-	  std::divides<double>());
-
+                 std::divides<double>());
 
   ws->setYUnitLabel("Ln(I x Q)");
   m_label->setLabel("Q^2");
@@ -229,7 +228,7 @@ void IQTransform::guinierSheets(API::MatrixWorkspace_sptr ws) {
   std::transform(Y.cbegin(), Y.cend(), Y.begin(),
                  VectorHelper::LogNoThrow<double>());
   std::transform(E.cbegin(), E.cend(), Y.begin(), E.begin(),
-	  std::divides<double>());
+                 std::divides<double>());
 
   ws->setYUnitLabel("Ln(I x Q^2)");
   m_label->setLabel("Q^2");
@@ -345,10 +344,9 @@ void IQTransform::logLog(API::MatrixWorkspace_sptr ws) {
   auto &E = ws->mutableE(0);
   std::transform(X.cbegin(), X.cend(), X.begin(), VectorHelper::Log<double>());
   std::transform(Y.cbegin(), Y.cend(), Y.begin(),
-	  VectorHelper::LogNoThrow<double>());
+                 VectorHelper::LogNoThrow<double>());
   std::transform(E.cbegin(), E.cend(), Y.begin(), E.begin(),
                  std::divides<double>());
-
 
   ws->setYUnitLabel("Ln(I)");
   m_label->setLabel("Ln(Q)");
