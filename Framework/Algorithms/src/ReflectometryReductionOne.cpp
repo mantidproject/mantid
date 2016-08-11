@@ -522,7 +522,7 @@ void ReflectometryReductionOne::exec() {
   OptionalMatrixWorkspace_sptr detectorEfficiencyCorrection;
   MatrixWorkspace_sptr decTemp = getProperty("DetectorEfficiencyCorrection");
   if (decTemp) {
-    if (decTemp->getAxis(0)->unit()->caption() != "Wavelength") {
+    if (decTemp->getAxis(0)->unit()->unitID() != "Wavelength") {
       throw std::invalid_argument(
           "Detector Efficiency Correction workspace x-units must be in "
           "wavelength");
