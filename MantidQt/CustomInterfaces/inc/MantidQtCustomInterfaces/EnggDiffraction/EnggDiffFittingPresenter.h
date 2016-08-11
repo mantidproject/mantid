@@ -7,6 +7,7 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffFittingPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffFittingView.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionParam.h"
 
 #include <string>
 #include <vector>
@@ -47,14 +48,16 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTIDQT_CUSTOMINTERFACES_DLL EnggDiffFittingPresenter
     : public QObject,
       public IEnggDiffFittingPresenter,
-      public IEnggDiffractionCalibration {
+      public IEnggDiffractionCalibration,
+      public IEnggDiffractionParam {
   // Q_OBJECT for 'connect' with thread/worker
   Q_OBJECT
 
 public:
   EnggDiffFittingPresenter(
       IEnggDiffFittingView *view,
-      boost::shared_ptr<IEnggDiffractionCalibration> mainCalib);
+      boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+      boost::shared_ptr<IEnggDiffractionParam> mainParam);
   ~EnggDiffFittingPresenter() override;
 
   void notify(IEnggDiffFittingPresenter::Notification notif) override;
@@ -62,6 +65,11 @@ public:
   /// From the IEnggDiffractionCalibration interface
   //@{
   std::vector<GSASCalibrationParms> currentCalibration() const override;
+  //@}
+
+  /// From the IEnggDiffractionCalibration interface
+  //@{
+  Poco::Path outFilesUserDir(const std::string &addToDir) override;
   //@}
 
   /// the fitting hard work that a worker / thread will run
@@ -77,6 +85,9 @@ public:
                      std::string &endX);
 
   void plotFitPeaksCurves();
+
+  void runSaveDiffFittingAsciiAlg(const std::string &tableWorkspace,
+                                  std::string &filePath);
 
   void runEvaluateFunctionAlg(const std::string &bk2BkExpFunction,
                               const std::string &InputName,
@@ -190,6 +201,9 @@ private:
 
   /// interface for the 'current' calibration
   boost::shared_ptr<IEnggDiffractionCalibration> m_mainCalib;
+
+  /// interface for the 'current' calibration
+  boost::shared_ptr<IEnggDiffractionParam> m_mainParam;
 
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffFittingView *const m_view;

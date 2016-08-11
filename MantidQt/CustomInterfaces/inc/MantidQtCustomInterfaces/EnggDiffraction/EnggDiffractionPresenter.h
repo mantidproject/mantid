@@ -8,6 +8,7 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionParam.h"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -53,7 +54,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTIDQT_CUSTOMINTERFACES_DLL EnggDiffractionPresenter
     : public QObject,
       public IEnggDiffractionPresenter,
-      public IEnggDiffractionCalibration {
+      public IEnggDiffractionCalibration,
+      public IEnggDiffractionParam {
   // Q_OBJECT for 'connect' with thread/worker
   Q_OBJECT
 
@@ -263,7 +265,7 @@ private:
 
   // returns a directory as a path, creating it if not found, and checking
   // errors
-  Poco::Path outFilesUserDir(const std::string &addToDir);
+  Poco::Path outFilesUserDir(const std::string &addToDir) override;
   Poco::Path outFilesGeneralDir(const std::string &addComponent);
   Poco::Path outFilesRootDir();
 

@@ -44,6 +44,7 @@ EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
     QWidget * /*parent*/, boost::shared_ptr<IEnggDiffractionUserMsg> mainMsg,
     boost::shared_ptr<IEnggDiffractionSettings> mainSettings,
     boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+    boost::shared_ptr<IEnggDiffractionParam> mainParam,
     boost::shared_ptr<IEnggDiffractionPythonRunner> mainPythonRunner)
     : IEnggDiffFittingView(), m_fittedDataVector(), m_mainMsgProvider(mainMsg),
       m_mainSettings(mainSettings), m_mainPythonRunner(mainPythonRunner),
@@ -51,7 +52,7 @@ EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
 
   initLayout();
 
-  m_presenter.reset(new EnggDiffFittingPresenter(this, mainCalib));
+  m_presenter.reset(new EnggDiffFittingPresenter(this, mainCalib, mainParam));
   m_presenter->notify(IEnggDiffFittingPresenter::Start);
 }
 

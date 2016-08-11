@@ -63,6 +63,7 @@ public:
       QWidget *parent, boost::shared_ptr<IEnggDiffractionUserMsg> mainMsg,
       boost::shared_ptr<IEnggDiffractionSettings> mainSettings,
       boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+      boost::shared_ptr<IEnggDiffractionParam> mainParam,
       boost::shared_ptr<IEnggDiffractionPythonRunner> mainPyhonRunner);
   ~EnggDiffFittingViewQtWidget() override;
 
