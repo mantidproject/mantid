@@ -147,13 +147,11 @@ void ResNorm::handleAlgorithmComplete(bool error) {
   if (error)
     return;
 
-  WorkspaceGroup_sptr fitWorkspaces =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          m_pythonExportWsName + "_Fit_Workspaces");
-  QString fitWsName("");
-  if (fitWorkspaces)
-    fitWsName =
-        QString::fromStdString(fitWorkspaces->getItem(m_previewSpec)->name());
+  // Enable plot and save
+  m_uiForm.cbPlot->setEnabled(true);
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+
   // Update preview plot
   previewSpecChanged(m_previewSpec);
 }
@@ -307,13 +305,19 @@ void ResNorm::previewSpecChanged(int value) {
 */
 
 void ResNorm::saveClicked() {
+
   const auto resWsName(m_uiForm.dsResolution->getCurrentDataName());
   const auto outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
   addSaveWorkspaceToQueue(outputWsName);
 
   m_pythonExportWsName = outputWsName.toStdString();
+  // Check workspace exists
+  IndirectTab::checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
+
+  addSaveWorkspaceToQueue(outputWsName);
   m_batchAlgoRunner->executeBatchAsync();
 }
+
 
 /**
 * Handles plotting when button is clicked
