@@ -319,7 +319,7 @@ void IndirectTab::plotSpectra(const QStringList &workspaceNames,
   pyInput += workspaceNames.join("','");
   pyInput += "'], [";
   pyInput += QString::number(wsIndices[0]);
-  for (int i = 1; i < wsIndices.size(); i++) {
+  for (size_t i = 1; i < wsIndices.size(); i++) {
     pyInput += " ,";
     pyInput += QString::number(wsIndices[i]);
   }
