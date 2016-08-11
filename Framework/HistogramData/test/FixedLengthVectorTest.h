@@ -13,6 +13,7 @@ struct FixedLengthVectorTester
     : public FixedLengthVector<FixedLengthVectorTester> {
   FixedLengthVectorTester() = default;
   using FixedLengthVector<FixedLengthVectorTester>::FixedLengthVector;
+  using FixedLengthVector<FixedLengthVectorTester>::operator=;
 };
 
 class FixedLengthVectorTest : public CxxTest::TestSuite {
@@ -91,6 +92,13 @@ public:
     TS_ASSERT_EQUALS(testee[1], 0.3);
   }
 
+  void test_generator_constructor() {
+    FixedLengthVectorTester testee(2, []() { return 0.1; });
+    TS_ASSERT_EQUALS(testee.size(), 2);
+    TS_ASSERT_EQUALS(testee[0], 0.1);
+    TS_ASSERT_EQUALS(testee[1], 0.1);
+  }
+
   void test_iterator_constructor_special_case() {
     // Used like this, we might think that the (count, value) constructor is
     // called. However, that would require converting the second int to a
@@ -126,7 +134,7 @@ public:
     TS_ASSERT_THROWS(dest.assign(src.cbegin(), src.cend()), std::logic_error);
   }
 
-  void test_value_assignment() {
+  void test_length_value_assignment() {
     FixedLengthVectorTester dest(4);
 
     dest.assign(4, 3.9);
@@ -229,6 +237,18 @@ public:
     TS_ASSERT_EQUALS(values.size(), 2);
     TS_ASSERT_EQUALS(values[0], 0.1);
     TS_ASSERT_EQUALS(values[1], 0.2);
+  }
+
+  void test_value_assignment() {
+    FixedLengthVectorTester dest(4);
+
+    dest = 3.9;
+
+    TS_ASSERT_EQUALS(dest.size(), 4);
+    TS_ASSERT_EQUALS(dest[0], 3.9);
+    TS_ASSERT_EQUALS(dest[1], 3.9);
+    TS_ASSERT_EQUALS(dest[2], 3.9);
+    TS_ASSERT_EQUALS(dest[3], 3.9);
   }
 
   void test_empty() {

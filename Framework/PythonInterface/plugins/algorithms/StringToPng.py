@@ -1,4 +1,6 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+from six import u
 import mantid
 
 class StringToPng(mantid.api.PythonAlgorithm):
@@ -40,7 +42,7 @@ class StringToPng(mantid.api.PythonAlgorithm):
         import matplotlib.pyplot as plt
         fig=plt.figure(figsize=(.1,.1))
         ax1=plt.axes(frameon=False)
-        ax1.text(0.,1,self.getProperty("String").valueAsStr.decode('string_escape'),va="center",fontsize=16)
+        ax1.text(0.,1,bytearray(u(self.getProperty("String").valueAsStr), 'utf-8').decode('unicode_escape'),va="center",fontsize=16)
         ax1.axes.get_xaxis().set_visible(False)
         ax1.axes.get_yaxis().set_visible(False)
         plt.show()

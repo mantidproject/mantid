@@ -53,7 +53,7 @@ private:
       boost::multi_index::indexed_by<
           boost::multi_index::sequenced<>,
           boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(
-              T, std::size_t, hashIndexFunction)>>> item_list;
+              T, std::uintptr_t, hashIndexFunction)>>> item_list;
 
   /// This typedef makes an ordered item list (you access it by the 1st index)
   typedef typename boost::multi_index::nth_index<item_list, 1>::type
@@ -135,10 +135,10 @@ public:
    *  @param index :: the key (index) for this T that you want to remove from
    * the MRU.
    */
-  void deleteIndex(const size_t index) {
+  void deleteIndex(const uintptr_t index) {
     std::lock_guard<std::mutex> _lock(m_mutex);
 
-    auto it = il.template get<1>().find((int)index);
+    auto it = il.template get<1>().find(index);
     if (it != il.template get<1>().end()) {
       delete (*it);
       il.template get<1>().erase(it);
@@ -154,10 +154,10 @@ public:
    *  @param index :: The index value to search the list for
    *  @return The object found, or NULL if not found.
    */
-  T *find(const size_t index) const {
+  T *find(const uintptr_t index) const {
     std::lock_guard<std::mutex> _lock(m_mutex);
 
-    auto it = il.template get<1>().find(int(index));
+    auto it = il.template get<1>().find(index);
     if (it == il.template get<1>().end()) {
       return nullptr;
     } else {

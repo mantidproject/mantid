@@ -119,7 +119,7 @@ private:
     space->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
 
-    space2D->setHistogram(0, BinEdges{0.0, 0.0, 0.0, 0.0, 4.0},
+    space2D->setHistogram(0, BinEdges{1e-14, 2e-14, 3e-14, 4e-14, 4.0},
                           Counts{10, 11, 12, 0},
                           CountVariances{5.0, 5.0, 5.0, 0.0});
 

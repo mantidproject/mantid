@@ -240,7 +240,12 @@ WorkspaceGroup_sptr MuonProcess::applyDTC(WorkspaceGroup_sptr wsGroup,
       dtc->setProperty("DeadTimeTable", dt);
       dtc->execute();
       result = dtc->getProperty("OutputWorkspace");
-      outWS->addWorkspace(result);
+      if (result) {
+        outWS->addWorkspace(result);
+      } else {
+        throw std::runtime_error("ApplyDeadTimeCorr failed to apply dead time "
+                                 "correction in MuonProcess");
+      }
     }
   }
   return outWS;

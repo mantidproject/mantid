@@ -143,6 +143,12 @@ public:
     delete iter;
   }
 
+  void test_set_workspace_twice() {
+    Tester1D tester;
+    tester.setHistograms();
+    tester.initialiseAndSetWorkspaceTwice();
+  }
+
 private:
   class Tester1D {
     // values defining the workspace
@@ -277,6 +283,20 @@ private:
         TS_ASSERT_DELTA(tmp, 0.0, 1e-14);
         ++j;
       }
+    }
+
+    void initialiseAndSetWorkspaceTwice() {
+      makeXValues();
+      makeWorkspace();
+      makeFunction();
+
+      EvaluateFunction alg;
+      TS_ASSERT_THROWS_NOTHING(alg.initialize())
+      TS_ASSERT(alg.isInitialized())
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+          "Function", boost::dynamic_pointer_cast<IFunction>(function)));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", workspace));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", workspace));
     }
   };
 };
