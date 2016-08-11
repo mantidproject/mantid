@@ -1,7 +1,7 @@
 import unittest
 import mantid
 
-from SANS2.Common.SANSEnumerations import (ISISReductionMode, DetectorType)
+from SANS2.Common.SANSEnumerations import (ISISReductionMode, DetectorType, RangeStepType)
 from SANS2.UserFile.UserFileParser import *
 
 
@@ -189,19 +189,19 @@ class LimitParserTest(unittest.TestCase):
     def test_that_q_limits_are_parsed_correctly(self):
         valid_settings = {"L/Q 12 34": {user_file_limits_q: simple_range(start=12, stop=34, step=None, step_type=None)},
                           "L/Q 12 34 2.7": {user_file_limits_q: simple_range(start=12, stop=34, step=2.7,
-                                                                             step_type="LIN")},
+                                                                             step_type=RangeStepType.Lin)},
                           "L/Q -12 34.6 2.7/LOG": {user_file_limits_q: simple_range(start=-12, stop=34.6, step=2.7,
-                                                                                    step_type="LOG")},
+                                                                                    step_type=RangeStepType.Log)},
                           "L/q -12 3.6 2 /LIN": {user_file_limits_q: simple_range(start=-12, stop=3.6, step=2,
-                                                                                  step_type="LIN")},
+                                                                                  step_type=RangeStepType.Lin)},
                           "L/q -12 ,  0.4  ,23 ,34.8, 3.6": {user_file_limits_q: complex_range(start=-12, step1=0.4,
-                                                             mid=23, step2=34.8,stop=3.6, step_type="LIN")},
+                                                             mid=23, step2=34.8,stop=3.6, step_type=RangeStepType.Lin)},
                           "L/q -12  , 0.4 , 23 ,34.8 ,3.6 /LIn": {user_file_limits_q: complex_range(start=-12,
                                                                                                     step1=0.4,
-                                                                  mid=23, step2=34.8, stop=3.6, step_type="LIN")},
+                                                        mid=23, step2=34.8, stop=3.6, step_type=RangeStepType.Lin)},
                           "L/q -12  , 0.4 , 23  ,34.8 ,3.6  /Log": {user_file_limits_q: complex_range(start=-12,
                                                                     step1=0.4, mid=23, step2=34.8, stop=3.6,
-                                                                    step_type="LOG")}}
+                                                                    step_type=RangeStepType.Log)}}
 
         invalid_settings = {"L/Q 12 2 3 4": RuntimeError,
                             "L/Q 12 2 3 4 23 3": RuntimeError,
@@ -217,19 +217,19 @@ class LimitParserTest(unittest.TestCase):
         valid_settings = {"L/QXY 12 34": {user_file_limits_qxy: simple_range(start=12, stop=34, step=None,
                                                                              step_type=None)},
                           "L/QXY 12 34 2.7": {user_file_limits_qxy: simple_range(start=12, stop=34, step=2.7,
-                                                                                 step_type="LIN")},
+                                                                                 step_type=RangeStepType.Lin)},
                           "L/QXY -12 34.6 2.7/LOG": {user_file_limits_qxy: simple_range(start=-12, stop=34.6,step=2.7,
-                                                                                        step_type="LOG")},
+                                                                                        step_type=RangeStepType.Log)},
                           "L/qxY -12 3.6 2 /LIN": {user_file_limits_qxy: simple_range(start=-12, stop=3.6, step=2,
-                                                                                      step_type="LIN")},
+                                                                                      step_type=RangeStepType.Lin)},
                           "L/qxy -12  , 0.4,  23, 34.8, 3.6": {user_file_limits_qxy: complex_range(start=-12, step1=0.4,
-                                                               mid=23, step2=34.8, stop=3.6, step_type="LIN")},
+                                                         mid=23, step2=34.8, stop=3.6, step_type=RangeStepType.Lin)},
                           "L/qXY -12  , 0.4 , 23 ,34.8 ,3.6 /LIn": {user_file_limits_qxy: complex_range(start=-12,
                                                                     step1=0.4, mid=23, step2=34.8, stop=3.6,
-                                                                    step_type="LIN")},
+                                                                    step_type=RangeStepType.Lin)},
                           "L/qXY -12   ,0.4,  23  ,34.8 ,3.6  /Log": {user_file_limits_qxy: complex_range(start=-12,
                                                                       step1=0.4, mid=23, step2=34.8, stop=3.6,
-                                                                      step_type="LOG")}}
+                                                                      step_type=RangeStepType.Log)}}
 
         invalid_settings = {"L/QXY 12 2 3 4": RuntimeError,
                             "L/QXY 12 2 3 4 23 3": RuntimeError,
@@ -245,21 +245,12 @@ class LimitParserTest(unittest.TestCase):
         valid_settings = {"L/WAV 12 34": {user_file_limits_wavelength: simple_range(start=12, stop=34, step=None,
                                                                              step_type=None)},
                           "L/waV 12 34 2.7": {user_file_limits_wavelength: simple_range(start=12, stop=34, step=2.7,
-                                                                                 step_type="LIN")},
+                                                                                 step_type=RangeStepType.Lin)},
                           "L/wAv -12 34.6 2.7/LOG": {user_file_limits_wavelength: simple_range(start=-12, stop=34.6,
                                                                                                step=2.7,
-                                                                                               step_type="LOG")},
+                                                                                        step_type=RangeStepType.Log)},
                           "L/WaV -12 3.6 2 /LIN": {user_file_limits_wavelength: simple_range(start=-12, stop=3.6,
-                                                                                             step=2, step_type="LIN")},
-                          "L/wav -12  , 0.4,  23 ,34.8 ,3.6": {user_file_limits_wavelength: complex_range(start=-12,
-                                                                                                          step1=0.4,
-                                                                       mid=23, step2=34.8, stop=3.6, step_type="LIN")},
-                          "L/wav -12  , 0.4 , 23 ,34.8, 3.6 /LIn": {user_file_limits_wavelength: complex_range(start=-12,
-                                                                        step1=0.4, mid=23, step2=34.8, stop=3.6,
-                                                                        step_type="LIN")},
-                          "L/wav -12 ,  0.4,  23  ,34.8 ,3.6  /Log": {user_file_limits_wavelength: complex_range(start=-12,
-                                                                      step1=0.4, mid=23, step2=34.8, stop=3.6,
-                                                                      step_type="LOG")}}
+                                                                                 step=2, step_type=RangeStepType.Lin)}}
 
         invalid_settings = {"L/WAV 12 2 3 4": RuntimeError,
                             "L/WAV 12 2 3 4 23 3": RuntimeError,

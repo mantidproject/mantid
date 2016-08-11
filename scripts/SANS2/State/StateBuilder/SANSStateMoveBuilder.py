@@ -4,8 +4,7 @@ import copy
 
 from SANS2.State.SANSStateMove import (SANSStateMoveLOQ, SANSStateMoveSANS2D, SANSStateMoveLARMOR)
 from SANS2.State.StateBuilder.StateBuilderFunctions import (set_detector_names, set_monitor_names)
-from SANS2.State.SANSStateFunctions import (get_instrument_from_state_data)
-from SANS2.Common.SANSFileInformation import (get_instrument_paths_for_sans_file, SANSFileInformationFactory)
+from SANS2.Common.SANSFileInformation import (get_instrument_paths_for_sans_file)
 from SANS2.Common.SANSEnumerations import SANSInstrument
 from SANS2.State.StateBuilder.AutomaticSetters import automatic_setters
 
@@ -73,9 +72,7 @@ class SANSStateMoveLARMORBuilder(object):
         self._set_conversion_value(data_info)
 
     def _set_conversion_value(self, data_info):
-        file_info_factory = SANSFileInformationFactory()
-        file_info = file_info_factory.create_sans_file_information(data_info.sample_scatter)
-        run_number = file_info.get_run_number()
+        run_number = data_info.sample_scatter_run_number
         self.conversion_value = 1000. if run_number >= 2217 else 1.
 
     def build(self):
@@ -95,7 +92,7 @@ class SANSStateMoveLARMORBuilder(object):
 def get_move_builder(data_info):
     # The data state has most of the information that we require to define the move. For the factory method, only
     # the instrument is of relevance.
-    instrument = get_instrument_from_state_data(data_info)
+    instrument = data_info.instrument
     if instrument is SANSInstrument.LOQ:
         return SANSStateMoveLOQBuilder(data_info)
     elif instrument is SANSInstrument.SANS2D:

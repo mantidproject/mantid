@@ -4,7 +4,6 @@ import copy
 
 from SANS2.State.SANSStateMask import (SANSStateMaskISIS)
 from SANS2.State.StateBuilder.StateBuilderFunctions import (set_detector_names, set_monitor_names)
-from SANS2.State.SANSStateFunctions import (get_instrument_from_state_data)
 from SANS2.Common.SANSEnumerations import SANSInstrument
 from SANS2.Common.SANSFileInformation import (get_instrument_paths_for_sans_file)
 from SANS2.State.StateBuilder.AutomaticSetters import (automatic_setters)
@@ -45,7 +44,7 @@ class SANSStateMaskBuilderISIS(object):
 def get_mask_builder(data_info):
     # The data state has most of the information that we require to define the move. For the factory method, only
     # the instrument is of relevance.
-    instrument = get_instrument_from_state_data(data_info)
+    instrument = data_info.instrument
     if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or instrument is SANSInstrument.SANS2D:
         return SANSStateMaskBuilderISIS(data_info)
     else:

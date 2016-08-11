@@ -3,7 +3,9 @@
 """State about the actual data which is to be reduced."""
 
 import json
-from SANS2.State.SANSStateBase import (SANSStateBase, StringParameter, PositiveIntegerParameter, sans_parameters)
+from SANS2.State.SANSStateBase import (SANSStateBase, StringParameter, PositiveIntegerParameter,
+                                       ClassTypeParameter, sans_parameters)
+from SANS2.Common.SANSEnumerations import SANSInstrument
 
 
 # ------------------------------------------------
@@ -34,6 +36,9 @@ class SANSStateDataISIS(SANSStateBase, SANSStateData):
 
     calibration = StringParameter()
 
+    sample_scatter_run_number = PositiveIntegerParameter()
+    instrument = ClassTypeParameter(SANSInstrument)
+
     def __init__(self):
         super(SANSStateDataISIS, self).__init__()
 
@@ -45,6 +50,10 @@ class SANSStateDataISIS(SANSStateBase, SANSStateData):
         self.can_scatter_period = SANSStateData.ALL_PERIODS
         self.can_transmission_period = SANSStateData.ALL_PERIODS
         self.can_direct_period = SANSStateData.ALL_PERIODS
+
+        # This should be reset by the builder. Setting this to NoInstrument ensure that we will trip early on,
+        # in case this is not set, for example by not using the builders.
+        self.instrument = SANSInstrument.NoInstrument
 
     def validate(self):
         is_invalid = dict()

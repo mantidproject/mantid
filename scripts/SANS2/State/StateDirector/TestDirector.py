@@ -4,8 +4,11 @@ from SANS2.State.StateBuilder.SANSStateMoveBuilder import get_move_builder
 from SANS2.State.StateBuilder.SANSStateReductionBuilder import get_reduction_builder
 from SANS2.State.StateBuilder.SANSStateSliceEventBuilder import get_slice_event_builder
 from SANS2.State.StateBuilder.SANSStateMaskBuilder import get_mask_builder
+from SANS2.State.StateBuilder.SANSStateWavelengthBuilder import get_wavelength_builder
 
-from SANS2.Common.SANSEnumerations import (SANSFacility, ISISReductionMode, ReductionDimensionality, FitModeForMerge)
+
+from SANS2.Common.SANSEnumerations import (SANSFacility, ISISReductionMode, ReductionDimensionality,
+                                           FitModeForMerge, RebinType, RangeStepType)
 
 
 class TestDirector(object):
@@ -17,13 +20,16 @@ class TestDirector(object):
         self.reduction_state = None
         self.slice_state = None
         self.mask_state = None
+        self.wavelength_state = None
 
-    def set_states(self, data_state=None, move_state=None, reduction_state=None, slice_state=None, mask_state=None):
+    def set_states(self, data_state=None, move_state=None, reduction_state=None, slice_state=None,
+                   mask_state=None, wavelength_state=None):
         self.data_state = data_state
         self.move_state = move_state
         self.reduction_state = reduction_state
         self.slice_state = slice_state
         self.mask_state = mask_state
+        self.wavelength_state = wavelength_state
 
     def construct(self):
         facility = SANSFacility.ISIS
@@ -66,6 +72,16 @@ class TestDirector(object):
             mask_builder.set_radius_max(20.0)
             self.mask_state = mask_builder.build()
 
+        # Build the SANSStateWavelength
+        if self.wavelength_state is None:
+            wavelength_builder = get_wavelength_builder()
+            wavelength_builder.set_wavelength_low(10.0)
+            wavelength_builder.set_wavelength_high(20.0)
+            wavelength_builder.set_wavelength_step(2.0)
+            wavelength_builder.set_wavelength_step_type(RangeStepType.Lin)
+            wavelength_builder.set_rebin_type(RebinType.Rebin)
+            self.wavelength_state = wavelength_builder.build()
+
         # Set the sub states on the SANSState
         state_builder = get_state_builder(self.data_state)
         state_builder.set_data(self.data_state)
@@ -73,4 +89,5 @@ class TestDirector(object):
         state_builder.set_reduction(self.reduction_state)
         state_builder.set_slice(self.slice_state)
         state_builder.set_mask(self.mask_state)
+        state_builder.set_wavelength(self.wavelength_state)
         return state_builder.build()

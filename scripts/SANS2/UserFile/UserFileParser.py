@@ -3,7 +3,7 @@
 import abc
 import re
 
-from SANS2.Common.SANSEnumerations import (ISISReductionMode, DetectorType)
+from SANS2.Common.SANSEnumerations import (ISISReductionMode, DetectorType, RangeStepType)
 from SANS2.UserFile.UserFileCommon import *
 
 
@@ -616,7 +616,10 @@ class LimitParser(UserFileComponentParser):
         if does_pattern_match(self._wavelength_simple_pattern, line):
             output = self._extract_simple_pattern(wavelength_range, user_file_limits_wavelength)
         else:
-            output = self._extract_complex_pattern(wavelength_range, user_file_limits_wavelength)
+            # This is not implemented in the old parser, hence disable here
+            # output = self._extract_complex_pattern(wavelength_range, user_file_limits_wavelength)
+            raise ValueError("Wavelength Limits: The expression {0} is currently not supported."
+                             " Use a simple pattern.".format(line))
         return output
 
     def _extract_simple_pattern(self, simple_range_input, tag):
@@ -661,7 +664,7 @@ class LimitParser(UserFileComponentParser):
                                    step_type=step_type)}
 
     def _get_step_type(self, range_string):
-        return "LOG" if re.search(self._log, range_string) is not None else "LIN"
+        return RangeStepType.Log if re.search(self._log, range_string) is not None else RangeStepType.Lin
 
     @staticmethod
     def get_type():

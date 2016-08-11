@@ -2,8 +2,7 @@ from abc import (ABCMeta, abstractmethod)
 from SANS2.Common.SANSConstants import SANSConstants
 from SANS2.Common.SANSEnumerations import (SANSInstrument, convert_detector_type_to_string)
 from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
-from SANS2.Common.SANSFileInformation import (find_full_file_path, SANSFileInformationFactory,
-                                              get_instrument_paths_for_sans_file)
+from SANS2.Common.SANSFileInformation import (find_full_file_path, get_instrument_paths_for_sans_file)
 from SANS.Mask.XMLShapes import (add_cylinder, add_outside_cylinder, create_phi_mask, create_line_mask)
 from SANS.Mask.MaskFunctions import (yield_masked_det_ids, SpectraBlock)
 
@@ -335,14 +334,11 @@ class MaskFactory(object):
         :return: the corresponding slicer
         """
         data_info = state.data
-        file_name = data_info.sample_scatter
-        file_information_factory = SANSFileInformationFactory()
-        file_information = file_information_factory.create_sans_file_information(file_name)
-        instrument = file_information.get_instrument()
-
+        instrument = data_info.instrument
         if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or \
                         instrument is SANSInstrument.SANS2D:
-            run_number = file_information.get_run_number()
+            run_number = data_info.sample_scatter_run_number
+            file_name = data_info.sample_scatter
             _, ipf_path = get_instrument_paths_for_sans_file(file_name)
             spectra_block = SpectraBlock(ipf_path, run_number, instrument, detector_type)
             masker = MaskerISIS(spectra_block, instrument)

@@ -22,6 +22,29 @@ class MoveType(object):
         pass
 
 
+def get_detector_for_component(move_info, component):
+    """
+    Get the detector for the selected component.
+
+    The detector can be either an actual component name or a HAB, LAB abbreviation
+    :param move_info: a SANSStateMove object
+    :param component: the selected component
+    :return: an equivalent detector to teh selected component or None
+    """
+    detectors = move_info.detectors
+    selected_detector = None
+    if component == "HAB":
+        selected_detector = detectors[SANSConstants.high_angle_bank]
+    elif component == "LAB":
+        selected_detector = detectors[SANSConstants.low_angle_bank]
+    else:
+        # Check if the component is part of the detector names
+        for _, detector in detectors.items():
+            if detector.detector_name == component or detector.detector_name_short == component:
+                selected_detector = detector
+    return selected_detector
+
+
 class SANSMove(DataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Move'
@@ -71,9 +94,8 @@ class SANSMove(DataProcessorAlgorithm):
 
         # Get the selected component and the beam coordinates
         move_info = state.move
-        component = self.getProperty("Component").value
-        coordinates = self._get_coordinates(move_info, component)
-        full_component_name = self._get_full_comonent_name(move_info, component)
+        full_component_name = self._get_full_component_name(move_info)
+        coordinates = self._get_coordinates(move_info, full_component_name)
 
         # Get which move operation the user wants to perform on the workspace. This can be:
         # 1. Initial move: Suitable when a workspace has been freshly loaded.
@@ -91,30 +113,45 @@ class SANSMove(DataProcessorAlgorithm):
             raise ValueError("SANSMove: The selection {0} for the  move type "
                              "is unknown".format(str(selected_move_type)))
 
-    def _get_full_comonent_name(self, move_info, component):
-        detectors = move_info.detectors
-        if component == "HAB":
-            selected_detector = detectors[SANSConstants.high_angle_bank]
-        else:
-            selected_detector = detectors[SANSConstants.low_angle_bank]
-        return selected_detector.detector_name
+    def _get_full_component_name(self, move_info):
+        """
+        Select the detector name for the input component.
+
+        The component can be either:
+        1. An actual component name for LAB or HAB
+        2. Or the word HAB, LAB which will then select the actual component name, e.g. main-detector-bank
+        :param move_info: a SANSStateMove object
+        :return: the full name of the component or an empty string if it is not found.
+        """
+        component = self.getProperty("Component").value
+        selected_detector = get_detector_for_component(move_info, component)
+        return selected_detector.detector_name if selected_detector is not None else ""
 
     def _get_move_type(self):
         move_type_input = self.getProperty("MoveType").value
         move_type_map = self._make_move_type_map()
         return move_type_map[move_type_input]
 
-    def _get_coordinates(self, move_info, component):
+    def _get_coordinates(self, move_info, full_component_name):
+        """
+        Gets the coordinates for a particular component.
+
+        If the coordinates were not specified by the user then the coordinates are taken from the move state.
+        There are several possible scenarios
+        1. component is specified => take the beam centre from the appropriate detector
+        2. component is not specified => take the beam centre from the LAB
+        :param move_info: a SANSStateMove object
+        :param full_component_name: The full component name as it is known to the Mantid instrument
+        :return:
+        """
         coordinates = self.getProperty("BeamCoordinates").value.tolist()
-        # If the coordinates were not specified by the user then the coordinates are taken from the move state.
-        # There are several possible scenarios
-        # 1. component is specified => take the beam centre from the appropriate detector
-        # 2. component is not specified => take the beam centre from the LAB
         if not coordinates:
+            # Get the selected detector
             detectors = move_info.detectors
-            if component is not None and component == "HAB":
-                selected_detector = detectors[SANSConstants.high_angle_bank]
-            else:
+            selected_detector = get_detector_for_component(move_info, full_component_name)
+
+            # If the detector is unknown take the position from the LAB
+            if selected_detector is None:
                 selected_detector = detectors[SANSConstants.low_angle_bank]
             pos1 = selected_detector.sample_centre_pos1
             pos2 = selected_detector.sample_centre_pos2

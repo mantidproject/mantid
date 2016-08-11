@@ -1,17 +1,20 @@
 import unittest
 import mantid
 
-from SANS2.State.SANSStateData import SANSStateDataISIS
+from SANS2.State.StateBuilder.SANSStateDataBuilder import get_data_builder
 from SANS2.State.StateBuilder.SANSStateReductionBuilder import get_reduction_builder
 from SANS2.Common.SANSEnumerations import (ISISReductionMode, ReductionDimensionality, FitModeForMerge)
 from SANS2.Common.SANSConstants import SANSConstants
+from SANS2.Common.SANSEnumerations import (SANSFacility, SANSInstrument)
 
 
 class SANSStateReductionBuilderTest(unittest.TestCase):
     def test_that_reduction_state_can_be_built(self):
         # Arrange
-        data_info = SANSStateDataISIS()
-        data_info.sample_scatter = "LOQ74044"
+        facility = SANSFacility.ISIS
+        data_builder = get_data_builder(facility)
+        data_builder.set_sample_scatter("LOQ74044")
+        data_info = data_builder.build()
 
         # Act
         builder = get_reduction_builder(data_info)

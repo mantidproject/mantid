@@ -16,6 +16,7 @@ from SANS2.State.SANSStateBase import (TypedParameter, DictParameter)
 # desirable for parameters which are set internally during the initialization phase of the builder.
 # -------------------------------------------------------------------------------------------------------------
 
+
 def forwarding_setter(value, builder_instance, attribute_name_list):
     # The first element of the attribute list is the state object itself
     instance = getattr(builder_instance, attribute_name_list[0])

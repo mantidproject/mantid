@@ -4,7 +4,7 @@ import mantid
 
 
 from SANS2.UserFile.UserFileStateDirector import UserFileStateDirectorISIS
-from SANS2.Common.SANSEnumerations import (SANSFacility, ISISReductionMode)
+from SANS2.Common.SANSEnumerations import (SANSFacility, ISISReductionMode, RangeStepType)
 from SANS2.State.StateBuilder.SANSStateDataBuilder import get_data_builder
 from SANS2.UserFile.UserFileCommon import *
 
@@ -53,6 +53,13 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         reduction = state.reduction
         self.assertTrue(reduction.reduction_mode is ISISReductionMode.Lab)
 
+    def _assert_wavelength(self, state):
+        wavelength = state.wavelength
+        self.assertTrue(wavelength.wavelength_low == 1.5)
+        self.assertTrue(wavelength.wavelength_high == 12.5)
+        self.assertTrue(wavelength.wavelength_step == 0.125)
+        self.assertTrue(wavelength.wavelength_step_type is RangeStepType.Lin)
+
     def test_state_can_be_created_from_valid_user_file_with_data_information(self):
         # Arrange
         data_builder = get_data_builder(SANSFacility.ISIS)
@@ -72,6 +79,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self._assert_move(state)
         self._assert_mask(state)
         self._assert_reduction(state)
+        self._assert_wavelength(state)
 
         # clean up
         if os.path.exists(user_file_path):

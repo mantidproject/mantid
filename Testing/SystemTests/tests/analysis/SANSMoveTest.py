@@ -9,12 +9,13 @@ from mantid.kernel import (Quat, V3D)
 from SANS.Move.SANSMoveWorkspaces import (SANSMoveFactory, SANSMoveLOQ, SANSMoveSANS2D, SANSMoveLARMORNewStyle,
                                           SANSMoveLARMOROldStyle)
 from SANS2.Common.SANSConstants import SANSConstants
+from SANS2.Common.SANSEnumerations import SANSFacility
 # Not clear why the names in the module are not found by Pylint, but it seems to get confused. Hence this check
 # needs to be disabled here.
 # pylint: disable=no-name-in-module
 from SANS2.State.StateDirector.TestDirector import TestDirector
 from SANS2.State.StateBuilder.SANSStateMoveBuilder import get_move_builder
-from SANS2.State.SANSStateData import SANSStateDataISIS
+from SANS2.State.StateBuilder.SANSStateDataBuilder import get_data_builder
 
 
 def load_workspace(file_name):
@@ -61,10 +62,10 @@ class SANSMoveFactoryTest(unittest.TestCase):
 class SANSMoveTest(unittest.TestCase):
     @staticmethod
     def _get_simple_state(sample_scatter, lab_x_translation_correction=None, lab_z_translation_correction=None):
-
         # Set the data
-        data_info = SANSStateDataISIS()
-        data_info.sample_scatter = sample_scatter
+        data_builder = get_data_builder(SANSFacility.ISIS)
+        data_builder.set_sample_scatter(sample_scatter)
+        data_info = data_builder.build()
 
         # Set the move parameters
         builder = get_move_builder(data_info)
@@ -166,6 +167,7 @@ class SANSMoveTest(unittest.TestCase):
         move_alg.setChild(True)
         move_alg.initialize()
         state_dict = state.property_manager
+
         move_alg.setProperty("SANSState", state_dict)
         move_alg.setProperty(SANSConstants.workspace, workspace)
         move_alg.setProperty("MoveType", move_type)
@@ -275,7 +277,7 @@ class SANSMoveTest(unittest.TestCase):
                                                                                  component_elementary_move,
                                                                                  component_elementary_move_key)
 
-        # Act + Assert for setting to zero position for all
+        # # Act + Assert for setting to zero position for all
         self.check_that_sets_to_zero(workspace, move_alg, state.move, comp_name=None)
 
     def test_that_LARMOR_new_style_can_move(self):

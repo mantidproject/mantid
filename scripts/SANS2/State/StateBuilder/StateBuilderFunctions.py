@@ -2,6 +2,7 @@
 from SANS2.Common.SANSConstants import SANSConstants
 from SANS2.Common.XMLParsing import (get_monitor_names_from_idf_file, get_named_elements_from_ipf_file)
 
+
 # ---------------------------------------------------
 #  Other free functions
 # ---------------------------------------------------

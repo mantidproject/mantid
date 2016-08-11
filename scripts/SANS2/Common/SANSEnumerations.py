@@ -183,6 +183,7 @@ def convert_fit_mode_for_merge_to_string(to_convert):
         selected_fit_mode = ""
     return selected_fit_mode
 
+
 # --------------------------
 #  Detectors
 # --------------------------
@@ -211,3 +212,25 @@ def convert_detector_type_to_string(to_convert):
         raise RuntimeError("Trying to convert a detector of type {0} to a string. Cannot handle this detector"
                            " type currently.".format(to_convert))
     return detector_type_string
+
+
+# --------------------------
+#  Ranges
+# --------------------------
+@inner_classes_with_name_space("Lin", "Log")
+class RangeStepType(object):
+    """
+    Defines the step type of a range
+    """
+    pass
+
+
+# --------------------------
+#  Rebin
+# --------------------------
+@inner_classes_with_name_space("Rebin", "InterpolatingRebin")
+class RebinType(object):
+    """
+    Defines the rebin types available
+    """
+    pass

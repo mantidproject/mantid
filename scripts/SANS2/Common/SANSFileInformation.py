@@ -224,7 +224,7 @@ def get_date_for_isis_nexus(file_name):
 
 
 def get_run_number_for_isis_nexus(file_name):
-    return get_top_level_nexus_entry(file_name, "run_number")
+    return int(get_top_level_nexus_entry(file_name, "run_number"))
 
 
 def get_event_mode_information(file_name):

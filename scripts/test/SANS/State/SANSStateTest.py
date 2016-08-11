@@ -10,8 +10,11 @@ from SANS2.State.SANSStateMove import (SANSStateMoveLOQ)
 from SANS2.State.SANSStateReduction import (SANSStateReductionISIS)
 from SANS2.State.SANSStateSliceEvent import (SANSStateSliceEventISIS)
 from SANS2.State.SANSStateMask import (SANSStateMaskISIS)
+from SANS2.State.SANSStateWavelength import (SANSStateWavelengthISIS)
+
 from SANS2.Common.SANSConstants import SANSConstants
-from SANS2.Common.SANSEnumerations import (ISISReductionMode, ReductionDimensionality, FitModeForMerge)
+from SANS2.Common.SANSEnumerations import (ISISReductionMode, ReductionDimensionality, FitModeForMerge,
+                                           RangeStepType, RebinType)
 
 
 class SANSStateTest(unittest.TestCase):
@@ -56,6 +59,15 @@ class SANSStateTest(unittest.TestCase):
         mask_state.radius_min = 10.0
         mask_state.radius_max = 20.0
         state.mask = mask_state
+
+        # Wavelength conversion
+        wavelength_state = SANSStateWavelengthISIS()
+        wavelength_state.wavelength_low = 10.0
+        wavelength_state.wavelength_high = 20.0
+        wavelength_state.wavelength_step = 2.0
+        wavelength_state.wavelength_step_type = RangeStepType.Lin
+        wavelength_state.rebin_type = RebinType.Rebin
+        state.wavelength = wavelength_state
 
         # Assert
         try:
@@ -164,6 +176,15 @@ class SANSStateTest(unittest.TestCase):
         mask_state.radius_max = 20.0
         state.mask = mask_state
 
+        # Wavelength conversion
+        wavelength_state = SANSStateWavelengthISIS()
+        wavelength_state.wavelength_low = 10.0
+        wavelength_state.wavelength_high = 20.0
+        wavelength_state.wavelength_step = 2.0
+        wavelength_state.wavelength_step_type = RangeStepType.Lin
+        wavelength_state.rebin_type = RebinType.Rebin
+        state.wavelength = wavelength_state
+
         # Act
         serialized = state.property_manager
 
@@ -198,6 +219,13 @@ class SANSStateTest(unittest.TestCase):
 
         self.assertTrue(state_2.mask.radius_min == 10.)
         self.assertTrue(state_2.mask.radius_max == 20.)
+
+        self.assertTrue(state_2.wavelength.wavelength_low == 10.0)
+        self.assertTrue(state_2.wavelength.wavelength_high == 20.0)
+        self.assertTrue(state_2.wavelength.wavelength_step == 2.0)
+        self.assertTrue(state_2.wavelength.wavelength_step_type is RangeStepType.Lin)
+        self.assertTrue(state_2.wavelength.rebin_type is RebinType.Rebin)
+
 
 if __name__ == '__main__':
     unittest.main()

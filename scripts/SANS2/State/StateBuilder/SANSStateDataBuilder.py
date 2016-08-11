@@ -5,6 +5,17 @@ import copy
 from SANS2.Common.SANSEnumerations import SANSFacility
 from SANS2.State.StateBuilder.AutomaticSetters import automatic_setters
 from SANS2.State.SANSStateData import SANSStateDataISIS
+from SANS2.Common.SANSFileInformation import SANSFileInformationFactory
+
+
+def set_information_from_file(data_info):
+    file_name = data_info.sample_scatter
+    file_information_factory = SANSFileInformationFactory()
+    file_information = file_information_factory.create_sans_file_information(file_name)
+    instrument = file_information.get_instrument()
+    run_number = file_information.get_run_number()
+    data_info.instrument = instrument
+    data_info.sample_scatter_run_number = run_number
 
 
 # ---------------------------------------
@@ -19,6 +30,12 @@ class SANSStateDataISISBuilder(object):
     def build(self):
         # Make sure that the product is in a valid state, ie not incomplete
         self.state.validate()
+
+        # There are some elements which need to be read from the file. This is currently:
+        # 1. instrument
+        # 2. sample_scatter_run_number
+        set_information_from_file(self.state)
+
         return copy.copy(self.state)
 
 

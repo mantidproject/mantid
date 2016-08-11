@@ -5,7 +5,6 @@ import copy
 from SANS2.Common.SANSEnumerations import SANSInstrument
 from SANS2.State.SANSState import SANSStateISIS
 from SANS2.State.StateBuilder.AutomaticSetters import (automatic_setters)
-from SANS2.State.SANSStateFunctions import get_instrument_from_state_data
 
 
 # ---------------------------------------
@@ -27,7 +26,7 @@ class SANStateISISBuilder(object):
 # Factory method for SANStateDataBuilder
 # ------------------------------------------
 def get_state_builder(data_info):
-    instrument = get_instrument_from_state_data(data_info)
+    instrument = data_info.instrument
     if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or instrument is SANSInstrument.SANS2D:
         return SANStateISISBuilder()
     else:

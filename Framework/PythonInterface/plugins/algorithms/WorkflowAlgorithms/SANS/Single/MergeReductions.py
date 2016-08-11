@@ -3,7 +3,6 @@
 from abc import (ABCMeta, abstractmethod)
 
 from SANS2.Common.SANSConstants import SANSConstants
-from SANS2.Common.SANSFileInformation import (SANSFileInformationFactory)
 from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
 from SANS2.Common.SANSEnumerations import (SANSInstrument, DataType, convert_fit_mode_for_merge_to_string)
 from SANS.Single.Bundles import MergeBundle
@@ -85,24 +84,13 @@ class MergeFactory(object):
         super(MergeFactory, self).__init__()
 
     @staticmethod
-    def _get_instrument_type(state):
-        # From the sample scattering workspace on the state, we can defer what the instrument is, hence
-        # 1. Get the file path to the sample scatter
-        # 2. Extract the instrument type via a SANSFileInformation object
-        data = state.data
-        file_name = data.sample_scatter
-
-        file_information_factory = SANSFileInformationFactory()
-        info = file_information_factory.create_sans_file_information(file_name)
-        return info.get_instrument()
-
-    @staticmethod
     def create_merger(state):
-        # The selection depends on the Facility.
-        instrument_type = MergeFactory._get_instrument_type(state)
+        # The selection depends on the facility/instrument
+        data_info = state.data
+        instrument = data_info.instrument
 
-        if instrument_type is SANSInstrument.LARMOR or instrument_type is SANSInstrument.LOQ or\
-           instrument_type is SANSInstrument.SANS2D:
+        if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or \
+                        instrument is SANSInstrument.SANS2D:
             merger = ISIS1DMerger()
         else:
             merger = NullMerger()

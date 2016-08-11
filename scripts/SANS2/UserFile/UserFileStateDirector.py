@@ -11,7 +11,7 @@ from SANS2.State.StateBuilder.SANSStateMaskBuilder import get_mask_builder
 from SANS2.State.StateBuilder.SANSStateMoveBuilder import get_move_builder
 from SANS2.State.StateBuilder.SANSStateReductionBuilder import get_reduction_builder
 from SANS2.State.StateBuilder.SANSStateSliceEventBuilder import get_slice_event_builder
-
+from SANS2.State.StateBuilder.SANSStateWavelengthBuilder import get_wavelength_builder
 
 
 def check_if_contains_only_one_element(to_check, element_name):
@@ -79,6 +79,7 @@ class UserFileStateDirectorISIS(object):
         self._move_builder = get_move_builder(self._data)
         self._reduction_builder = get_reduction_builder(self._data)
         self._slice_event_builder = get_slice_event_builder(self._data)
+        self._wavelength_builder = get_wavelength_builder(self._data)
 
     def set_user_file(self, user_file):
         file_path = find_full_file_path(user_file)
@@ -99,6 +100,9 @@ class UserFileStateDirectorISIS(object):
 
         # Move state
         self._set_up_move_state(user_file_items)
+
+        # Wavelength state
+        self._set_up_wavelength_state(user_file_items)
 
         # Slice event state
         # There does not seem to be a command for this currently -- this should be added in the future
@@ -124,6 +128,11 @@ class UserFileStateDirectorISIS(object):
         slice_event_state = self._slice_event_builder.build()
         slice_event_state.validate()
         self._state_builder.set_slice(slice_event_state)
+
+        # Wavelength conversion state
+        wavelength_state = self._wavelength_builder.build()
+        wavelength_state.validate()
+        self._state_builder.set_wavelength(wavelength_state)
 
         # Data state
         self._state_builder.set_data(self._data)
@@ -689,3 +698,13 @@ class UserFileStateDirectorISIS(object):
                                    " radius {1} of the mask.".format(radius.start, radius.stop))
             self._mask_builder.set_radius_min(convert_mm_to_m(radius.start))
             self._mask_builder.set_radius_max(convert_mm_to_m(radius.stop))
+
+    def _set_up_wavelength_state(self, user_file_items):
+        if user_file_limits_wavelength in user_file_items:
+            wavelength_limits = user_file_items[user_file_limits_wavelength]
+            check_if_contains_only_one_element(wavelength_limits, user_file_limits_wavelength)
+            wavelength_limits = wavelength_limits[-1]
+            self._wavelength_builder.set_wavelength_low(wavelength_limits.start)
+            self._wavelength_builder.set_wavelength_high(wavelength_limits.stop)
+            self._wavelength_builder.set_wavelength_step(wavelength_limits.step)
+            self._wavelength_builder.set_wavelength_step_type(wavelength_limits.step_type)

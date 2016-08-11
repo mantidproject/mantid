@@ -2,15 +2,19 @@ import unittest
 import mantid
 
 from SANS2.State.StateBuilder.SANSStateMaskBuilder import get_mask_builder
-from SANS2.State.SANSStateData import SANSStateDataISIS
+from SANS2.State.StateBuilder.SANSStateDataBuilder import get_data_builder
 from SANS2.Common.SANSConstants import SANSConstants
+from SANS2.Common.SANSEnumerations import (SANSFacility, SANSInstrument)
 
 
 class SANSStateMaskBuilderTest(unittest.TestCase):
     def test_that_mask_can_be_built(self):
         # Arrange
-        data_info = SANSStateDataISIS()
-        data_info.sample_scatter = "LOQ74044"
+        facility = SANSFacility.ISIS
+        data_builder = get_data_builder(facility)
+        data_builder.set_sample_scatter("LOQ74044")
+        data_builder.set_sample_scatter_period(3)
+        data_info = data_builder.build()
 
         # Act
         builder = get_mask_builder(data_info)

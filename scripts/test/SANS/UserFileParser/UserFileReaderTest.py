@@ -1,7 +1,7 @@
 import unittest
 import mantid
 import os
-from SANS2.Common.SANSEnumerations import (ISISReductionMode, DetectorType)
+from SANS2.Common.SANSEnumerations import (ISISReductionMode, DetectorType, RangeStepType)
 from SANS2.UserFile.UserFileReader import UserFileReader
 from SANS2.UserFile.UserFileCommon import *
 from UserFileTestHelper import create_user_file, sample_user_file
@@ -21,9 +21,9 @@ class UserFileReaderTest(unittest.TestCase):
 
         # Assert
         expected_values = {user_file_limits_wavelength: [simple_range(start=1.5, stop=12.5, step=0.125,
-                                                                      step_type="LIN")],
-                           user_file_limits_q: [complex_range(.001, .001, .0126, -.08, .2, step_type="LIN")],
-                           user_file_limits_qxy: [simple_range(0, 0.05, 0.001, "LIN")],
+                                                                      step_type=RangeStepType.Lin)],
+                           user_file_limits_q: [complex_range(.001, .001, .0126, -.08, .2, step_type=RangeStepType.Lin)],
+                           user_file_limits_qxy: [simple_range(0, 0.05, 0.001, RangeStepType.Lin)],
                            user_file_back_single_monitors: [back_single_monitor_entry(1, 35000, 65000),
                                                             back_single_monitor_entry(2, 85000, 98000)],
                            user_file_det_reduction_mode: [ISISReductionMode.Lab],

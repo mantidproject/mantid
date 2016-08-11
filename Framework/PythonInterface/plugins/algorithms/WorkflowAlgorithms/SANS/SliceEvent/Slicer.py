@@ -6,7 +6,6 @@ from mantid.dataobjects import Workspace2D
 from SANS2.Common.SANSFunctions import (get_charge_and_time, create_unmanaged_algorithm)
 from SANS2.Common.SANSConstants import SANSConstants
 from SANS2.Common.SANSEnumerations import (SANSInstrument)
-from SANS2.Common.SANSFileInformation import (SANSFileInformationFactory, get_extension_for_file_type)
 
 
 def slice_by_time(workspace, start_time=None, stop_time=None):
@@ -89,17 +88,6 @@ class SliceEventFactory(object):
         super(SliceEventFactory, self).__init__()
 
     @staticmethod
-    def _get_instrument_type(state):
-        data = state.data
-        # Get the correct slicer based on the sample scatter file from the data sub state
-        data.validate()
-
-        # Get the file information
-        factory = SANSFileInformationFactory()
-        sample_scatter_info = factory.create_sans_file_information(data.sample_scatter)
-        return sample_scatter_info.get_instrument()
-
-    @staticmethod
     def create_slicer(state, workspace):
         """
         Provides the appropriate slicer.
@@ -108,7 +96,8 @@ class SliceEventFactory(object):
         :param workspace: the workspace to slice
         :return: the corresponding slicer
         """
-        instrument_type = SliceEventFactory._get_instrument_type(state)
+        data_info = state.data
+        instrument = data_info.instrument
 
         # The factory is currently set up to
         # 1. Use NullSlicer when we have a histogram
@@ -116,9 +105,8 @@ class SliceEventFactory(object):
         # 3. else raise error
         if isinstance(workspace, Workspace2D):
             slicer = NullSlicer()
-        elif instrument_type is SANSInstrument.LARMOR or instrument_type is SANSInstrument.LOQ or \
-                        instrument_type is SANSInstrument.SANS2D:
-
+        elif instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or \
+                        instrument is SANSInstrument.SANS2D:
             slicer = ISISSlicer()
         else:
             slicer = NullSlicer()

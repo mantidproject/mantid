@@ -7,7 +7,6 @@ from SANS2.Common.SANSFileInformation import (get_instrument_paths_for_sans_file
 from SANS2.Common.XMLParsing import get_named_elements_from_ipf_file
 from SANS2.Common.SANSEnumerations import (SANSInstrument)
 from SANS2.Common.SANSConstants import SANSConstants
-from SANS2.State.SANSStateFunctions import get_instrument_from_state_data
 
 
 def setup_detectors_from_ipf(reduction_info, data_info):
@@ -52,7 +51,7 @@ class SANSStateReductionISISBuilder(object):
 def get_reduction_builder(data_info):
     # The data state has most of the information that we require to define the move. For the factory method, only
     # the instrument is of relevance.
-    instrument = get_instrument_from_state_data(data_info)
+    instrument = data_info.instrument
     if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or instrument is SANSInstrument.SANS2D:
         return SANSStateReductionISISBuilder(data_info)
     else:
