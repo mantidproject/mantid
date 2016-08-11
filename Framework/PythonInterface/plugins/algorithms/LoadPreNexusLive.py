@@ -25,6 +25,18 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
 
         filenames.sort()
 
+        runNumber = self.getProperty('RunNumber').value
+        if runNumber > 0:
+            # convert to substring to look for
+            runNumber = "%s_%d_live" % (instrument, runNumber)
+            self.log().information('Looking for %d' % runNumber)
+
+            filenames = [name for name in filenames
+                         if runNumber in name]
+            if len(filenames) <= 0:
+                raise RuntimeError("Failed to find live file '%s'" \
+                                   % runNumber)
+
         return os.path.join(livepath, filenames[-1])
 
     def findLogfile(self, instrument, runNumber):
@@ -60,6 +72,9 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
                              StringListValidator(instruments),
                              'Empty uses default instrument')
 
+        self.declareProperty('RunNumber', 0,
+                             doc='Live run number to use (Optional, Default=most recent)')
+
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                direction=Direction.Output))
 
@@ -82,7 +97,7 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
 
         eventFilename = self.findLivefile(instrument)
 
-        self.log().information("Loading '%s'" % eventFilename)
+        self.log().notice("Loading '%s'" % eventFilename)
         wkspName = self.getPropertyValue('OutputWorkspace')
         LoadEventPreNexus(EventFilename=eventFilename,
                           OutputWorkspace=wkspName)
