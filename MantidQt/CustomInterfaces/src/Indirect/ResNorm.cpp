@@ -321,14 +321,14 @@ void ResNorm::saveClicked() {
 
 void ResNorm::plotClicked() {
   WorkspaceGroup_sptr fitWorkspaces =
-    AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-      m_pythonExportWsName + "_Fit_Workspaces");
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+          m_pythonExportWsName + "_Fit_Workspaces");
 
   QString fitWsName("");
 
   if (fitWorkspaces)
     fitWsName =
-    QString::fromStdString(fitWorkspaces->getItem(m_previewSpec)->name());
+        QString::fromStdString(fitWorkspaces->getItem(m_previewSpec)->name());
 
   QString plotOptions(m_uiForm.cbPlot->currentText());
   if (plotOptions == "Intensity" || plotOptions == "All")
