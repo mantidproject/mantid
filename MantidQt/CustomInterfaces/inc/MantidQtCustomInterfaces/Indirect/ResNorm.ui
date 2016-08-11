@@ -163,9 +163,6 @@
         </item>
         <item>
          <widget class="QComboBox" name="cbPlot">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
           <item>
            <property name="text">
             <string>Intensity</string>
@@ -190,9 +187,6 @@
         </item>
         <item>
          <widget class="QPushButton" name="pbPlot">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
           <property name="text">
            <string>Plot</string>
           </property>
@@ -213,9 +207,6 @@
         </item>
         <item>
          <widget class="QPushButton" name="pbSave">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
           <property name="text">
            <string>Save</string>
           </property>
