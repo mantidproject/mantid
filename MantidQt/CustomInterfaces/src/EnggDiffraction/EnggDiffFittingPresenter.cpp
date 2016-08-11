@@ -112,6 +112,11 @@ EnggDiffFittingPresenter::currentCalibration() const {
   return m_mainCalib->currentCalibration();
 }
 
+Poco::Path
+EnggDiffFittingPresenter::outFilesUserDir(const std::string &addToDir) {
+  return m_mainParam->outFilesUserDir(addToDir);
+}
+
 void EnggDiffFittingPresenter::startAsyncFittingWorker(
     const std::vector<std::string> &focusedRunNo,
     const std::string &expectedPeaks) {
