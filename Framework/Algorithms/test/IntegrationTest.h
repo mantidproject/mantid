@@ -504,8 +504,7 @@ public:
       for (int k = 0; k < 5; ++k) {
         x[k] = k * (1.0 + 1.0 * k);
       }
-      space2D->setCounts(j,
-                         5, LinearGenerator(double(j), 2)); // assign Y
+      space2D->setCounts(j, 5, LinearGenerator(double(j), 2)); // assign Y
       e.assign(e.size(), 1.0);
     }
 

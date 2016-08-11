@@ -276,10 +276,10 @@ private:
     double j = 1.0;
     int i = 0;
 
-	auto &x = retVal->mutableX(0);
-	auto &y = retVal->mutableY(0);
-	auto &e = retVal->mutableE(0);
-	const auto &yConst = retVal->y(0);
+    auto &x = retVal->mutableX(0);
+    auto &y = retVal->mutableY(0);
+    auto &e = retVal->mutableE(0);
+    const auto &yConst = retVal->y(0);
     for (; i < nBins; i++, j += 1.5) {
       x[i] = j * 0.5;
       y[i] = j;
@@ -303,7 +303,7 @@ private:
     // the second has NAN values
     retVal->setBinEdges(1, nBins + 1, LinearGenerator(0.0, 1.0));
     retVal->mutableY(1).assign(retVal->mutableY(1).size(),
-                            std::numeric_limits<double>::quiet_NaN());
+                               std::numeric_limits<double>::quiet_NaN());
     retVal->mutableE(1).assign(retVal->mutableE(1).size(), 2.0);
 
     return retVal;

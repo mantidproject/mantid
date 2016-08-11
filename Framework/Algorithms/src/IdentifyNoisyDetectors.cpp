@@ -147,7 +147,7 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
   int count = 0;
   double mean = 0.0;
   double mean2 = 0.0;
-  
+
   for (int i = 0; i < nhist; i++) {
     if (valid->y(i)[0] > 0) {
       mean += values->y(i)[0];
@@ -170,15 +170,15 @@ void IdentifyNoisyDetectors::getStdDev(API::Progress &progress,
   double lower = mean - 3 * stddev;
   double min = mean * 0.0001;
 
-  Counts counts{ 0.0 };
+  Counts counts{0.0};
   for (int i = 0; i < nhist; i++) {
     double value = values->y(i)[0];
     if (value > upper) {
-		valid->setCounts(i, counts);
+      valid->setCounts(i, counts);
     } else if (value < lower) {
-		valid->setCounts(i, counts);
+      valid->setCounts(i, counts);
     } else if (value < min) {
-		valid->setCounts(i, counts);
+      valid->setCounts(i, counts);
     }
 
     progress.report("Calculating StdDev...");
