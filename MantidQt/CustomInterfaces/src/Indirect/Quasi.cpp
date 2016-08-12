@@ -433,11 +433,12 @@ void Quasi::saveClicked() {
 }
 
 /**
- * Handles plotting the selected plot when plot is clicked
- */
+* Handles plotting the selected plot when plot is clicked
+*/
 void Quasi::plotClicked() {
   // Output options
   std::string plot = m_uiForm.cbPlot->currentText().toStdString();
+  QString program = m_uiForm.cbProgram->currentText();
   const auto resultName = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
   if (plot == "Prob" || plot == "All") {
     const auto probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
@@ -449,28 +450,36 @@ void Quasi::plotClicked() {
     fitName.pop_back();
     fitName.append("_0");
     QString QfitWS = QString::fromStdString(fitName);
-    IndirectTab::plotSpectra(QfitWS, {0, 1, 2, 4});
+    if (program == "Lorentzians")
+      IndirectTab::plotSpectra(QfitWS, { 0, 1, 2, 4 });
+    else
+      IndirectTab::plotSpectra(QfitWS, { 0, 1, 2 });
   }
 
   MatrixWorkspace_sptr resultWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
+    AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
   int numSpectra = (int)resultWS->getNumberHistograms();
 
   QString QresultWS = QString::fromStdString(resultName);
-  auto paramNames = {"Amplitude", "FWHM", "Beta"};
+  auto paramNames = { "Amplitude", "FWHM", "Beta" };
   for (std::string paramName : paramNames) {
 
     if (plot == paramName || plot == "All") {
       std::vector<int> spectraIndices = {};
-      for (int i = 0; i <= numSpectra; i++) {
+      for (int i = 0; i < numSpectra; i++) {
         auto axisLabel = resultWS->getAxis(1)->label(i);
 
         auto found = axisLabel.find(paramName);
         if (found != std::string::npos) {
           spectraIndices.push_back(i);
-          if (spectraIndices.size() == 3) {
-            IndirectTab::plotSpectra(QresultWS, spectraIndices);
+
+          if (program == "Lorentzians") {
+            if (spectraIndices.size() > 3) {
+              IndirectTab::plotSpectra(QresultWS, spectraIndices);
+            }
           }
+          else
+            IndirectTab::plotSpectrum(QresultWS, spectraIndices[0]);
         }
       }
     }
