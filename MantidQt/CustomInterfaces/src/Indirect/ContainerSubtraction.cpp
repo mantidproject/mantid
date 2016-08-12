@@ -438,10 +438,6 @@ void ContainerSubtraction::absCorComplete(bool error) {
     addConvertUnitsStep(ws, m_originalSampleUnits, "", eMode);
   }
 
-  // Add save algorithms if required
-  bool save = m_uiForm.ckSave->isChecked();
-  if (save)
-    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
 
   if (m_uiForm.ckShiftCan->isChecked()) {
     IAlgorithm_sptr shiftLog =
@@ -461,6 +457,15 @@ void ContainerSubtraction::absCorComplete(bool error) {
           SLOT(postProcessComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 }
+
+/**
+ * Handles saving of workspace
+ */
+void ContainerSubtraction::saveClicked() {
+
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+}
+
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
