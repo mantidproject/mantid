@@ -395,10 +395,10 @@ void Quasi::handleProgramChange(int index) {
   int numberOptions = m_uiForm.cbPlot->count();
   switch (index) {
   case 0:
-    m_uiForm.cbPlot->setItemText(numberOptions - 1, "Prob");
+    m_uiForm.cbPlot->setItemText(numberOptions - 2, "Prob");
     break;
   case 1:
-    m_uiForm.cbPlot->setItemText(numberOptions - 1, "Beta");
+    m_uiForm.cbPlot->setItemText(numberOptions - 2, "Beta");
     break;
   }
 }
@@ -440,7 +440,7 @@ void Quasi::plotClicked() {
   std::string plot = m_uiForm.cbPlot->currentText().toStdString();
   QString program = m_uiForm.cbProgram->currentText();
   const auto resultName = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
-  if (plot == "Prob" || plot == "All") {
+  if ((plot == "Prob" || plot == "All") && (program == "Lorentzians")) {
     const auto probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
     QString QprobWS = QString::fromStdString(probWS);
     IndirectTab::plotSpectrum(QprobWS, 1, 2);
@@ -474,7 +474,7 @@ void Quasi::plotClicked() {
           spectraIndices.push_back(i);
 
           if (program == "Lorentzians") {
-            if (spectraIndices.size() > 3) {
+            if (spectraIndices.size() == 3) {
               IndirectTab::plotSpectra(QresultWS, spectraIndices);
             }
           }
