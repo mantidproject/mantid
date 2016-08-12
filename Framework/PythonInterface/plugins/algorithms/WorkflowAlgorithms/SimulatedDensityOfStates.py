@@ -8,6 +8,8 @@ from mantid.kernel import *
 from mantid.api import *
 import mantid.simpleapi as s_api
 
+from dos.load_phonon import parse_phonon_file
+
 PEAK_WIDTH_ENERGY_FLAG = 'energy'
 
 #pylint: disable=too-many-instance-attributes
@@ -173,6 +175,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         eigenvectors = file_data.get('eigenvectors', None)
         ion_data = file_data.get('ions', None)
         unit_cell = file_data.get('unit_cell', None)
+
+        self._num_ions = file_data['num_ions']
+        self._num_branches = file_data['num_branches']
 
         logger.debug('Unit cell: {0}'.format(unit_cell))
 
@@ -346,7 +351,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         else:
             s_api.DeleteWorkspace(sum_workspace)
             partial_ws_names = [ws.getName() for ws in partial_workspaces]
-            ### sort workspaces
+            # Sort workspaces
             if self._calc_ion_index:
                 # Sort by index after '_'
                 partial_ws_names.sort(key=lambda item: (int(item[(item.rfind('_')+1):])))
@@ -751,7 +756,13 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         ext = os.path.splitext(file_name)[1]
 
         if ext == '.phonon':
-            file_data = self._parse_phonon_file(file_name)
+            record_eigenvectors = self._calc_partial \
+                                   or (self._spec_type == 'DOS' and self._scale_by_cross_section != 'None') \
+                                   or self._spec_type == 'BondAnalysis'
+
+            file_data, element_isotopes = parse_phonon_file(file_name, record_eigenvectors)
+            self._element_isotope = element_isotopes
+
         elif ext == '.castep':
             if len(self._ions_of_interest) > 0:
                 raise ValueError("Cannot compute partial density of states from .castep files.")
@@ -763,372 +774,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         return file_data
 
-#----------------------------------------------------------------------------------------
-
-    def _parse_block_header(self, header_match, block_count):
-        """
-        Parse the header of a block of frequencies and intensities
-
-        @param header_match - the regex match to the header
-        @param block_count - the count of blocks found so far
-        @return weight for this block of values
-        """
-        # Found header block at start of frequencies
-        q1, q2, q3, weight = [float(x) for x in header_match.groups()]
-        q_vector = [q1, q2, q3]
-        if block_count > 1 and sum(q_vector) == 0:
-            weight = 0.0
-        return weight, q_vector
-
-#----------------------------------------------------------------------------------------
-
-    def _parse_phonon_file_header(self, f_handle):
-        """
-        Read information from the header of a <>.phonon file
-
-        @param f_handle - handle to the file.
-        @return List of ions in file as list of tuple of (ion, mode number)
-        """
-        file_data = {'ions': []}
-
-        while True:
-            line = f_handle.readline()
-
-            if not line:
-                raise IOError("Could not find any header information.")
-
-            if 'Number of ions' in line:
-                self._num_ions = int(line.strip().split()[-1])
-            elif 'Number of branches' in line:
-                self._num_branches = int(line.strip().split()[-1])
-            elif 'Unit cell vectors' in line:
-                file_data['unit_cell'] = self._parse_phonon_unit_cell_vectors(f_handle)
-            elif 'Fractional Co-ordinates' in line:
-                if self._num_ions is None:
-                    raise IOError("Failed to parse file. Invalid file header.")
-
-                # Extract the mode number for each of the ion in the data file
-                for _ in xrange(self._num_ions):
-                    line = f_handle.readline()
-                    line_data = line.strip().split()
-
-                    species = line_data[4]
-                    ion = {'species': species}
-                    ion['fract_coord'] = np.array([float(line_data[1]), float(line_data[2]), float(line_data[3])])
-                    ion['isotope_number'] = float(line_data[5])
-                    self._element_isotope[species] = float(line_data[5])
-                    # -1 to convert to zero based indexing
-                    ion['index'] = int(line_data[0]) - 1
-                    ion['bond_number'] = len([i for i in file_data['ions'] if i['species'] == species]) + 1
-                    file_data['ions'].append(ion)
-
-                logger.debug('All ions: ' + str(file_data['ions']))
-
-            if 'END header' in line:
-                if self._num_ions is None or self._num_branches is None:
-                    raise IOError("Failed to parse file. Invalid file header.")
-                return file_data
-
-#----------------------------------------------------------------------------------------
-
-    def _parse_phonon_freq_block(self, f_handle):
-        """
-        Iterator to parse a block of frequencies from a .phonon file.
-
-        @param f_handle - handle to the file.
-        """
-        prog_reporter = Progress(self, 0.0, 1.0, 1)
-        for _ in xrange(self._num_branches):
-            line = f_handle.readline()
-            line_data = line.strip().split()[1:]
-            line_data = [float(x) for x in line_data]
-            yield line_data
-
-        prog_reporter.report("Reading frequencies.")
-
-#----------------------------------------------------------------------------------------
-
-    def _parse_phonon_unit_cell_vectors(self, f_handle):
-        """
-        Parses the unit cell vectors in a .phonon file.
-
-        @param f_handle Handle to the file
-        @return Numpy array of unit vectors
-        """
-        data = []
-        for _ in range(3):
-            line = f_handle.readline()
-            line_data = line.strip().split()
-            line_data = [float(x) for x in line_data]
-            data.append(line_data)
-
-        return np.array(data)
-
-#----------------------------------------------------------------------------------------
-
-    def _parse_phonon_eigenvectors(self, f_handle):
-        vectors = []
-        prog_reporter = Progress(self, 0.0, 1.0, self._num_branches * self._num_ions)
-        for _ in xrange(self._num_ions * self._num_branches):
-            line = f_handle.readline()
-
-            if not line:
-                raise IOError("Could not parse file. Invalid file format.")
-
-            line_data = line.strip().split()
-            vector_componets = line_data[2::2]
-            vector_componets = [float(x) for x in vector_componets]
-            vectors.append(vector_componets)
-            prog_reporter.report("Reading eigenvectors.")
-
-        return np.asarray(vectors)
-
-#----------------------------------------------------------------------------------------
-
-    def _parse_phonon_file(self, file_name):
-        """
-        Read frequencies from a <>.phonon file
-
-        @param file_name - file path of the file to read
-        @return the frequencies, infra red and raman intensities and weights of frequency blocks
-        """
-        file_data = {}
-
-        # Header regex. Looks for lines in the following format:
-        #     q-pt=    1    0.000000  0.000000  0.000000      1.0000000000    0.000000  0.000000  1.000000
-        header_regex_str = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) (?: *(%(s)s)){0,4}" % {'s': self._float_regex}
-        header_regex = re.compile(header_regex_str)
-        eigenvectors_regex = re.compile(r"\s*Mode\s+Ion\s+X\s+Y\s+Z\s*")
-        block_count = 0
-
-        record_eigenvectors = self._calc_partial \
-                           or (self._spec_type == 'DOS' and self._scale_by_cross_section != 'None') \
-                           or self._spec_type == 'BondAnalysis'
-
-        frequencies, ir_intensities, raman_intensities, weights, q_vectors, eigenvectors = [], [], [], [], [], []
-        data_lists = (frequencies, ir_intensities, raman_intensities)
-        with open(file_name, 'rU') as f_handle:
-            file_data.update(self._parse_phonon_file_header(f_handle))
-
-            while True:
-                line = f_handle.readline()
-                # Check we've reached the end of file
-                if not line:
-                    break
-
-                # Check if we've found a block of frequencies
-                header_match = header_regex.match(line)
-                if header_match:
-                    block_count += 1
-
-                    weight, q_vector = self._parse_block_header(header_match, block_count)
-                    weights.append(weight)
-                    q_vectors.append(q_vector)
-
-                    # Parse block of frequencies
-                    for line_data in self._parse_phonon_freq_block(f_handle):
-                        for data_list, item in zip(data_lists, line_data):
-                            data_list.append(item)
-
-                vector_match = eigenvectors_regex.match(line)
-                if vector_match:
-                    if record_eigenvectors:
-                        # Parse eigenvectors for partial dos
-                        vectors = self._parse_phonon_eigenvectors(f_handle)
-                        eigenvectors.append(vectors)
-                    else:
-                        # Skip over eigenvectors
-                        for _ in xrange(self._num_ions * self._num_branches):
-                            line = f_handle.readline()
-                            if not line:
-                                raise IOError("Bad file format. Uexpectedly reached end of file.")
-
-        frequencies = np.asarray(frequencies)
-        ir_intensities = np.asarray(ir_intensities)
-        eigenvectors = np.asarray(eigenvectors)
-        raman_intensities = np.asarray(raman_intensities)
-        warray = np.repeat(weights, self._num_branches)
-
-        file_data.update({
-            'frequencies': frequencies,
-            'ir_intensities': ir_intensities,
-            'raman_intensities': raman_intensities,
-            'weights': warray,
-            'q_vectors':q_vectors,
-            'eigenvectors': eigenvectors
-            })
-
-        return file_data
-
-#----------------------------------------------------------------------------------------
-
-    def _parse_castep_file_header(self, f_handle):
-        """
-        Read information from the header of a <>.castep file
-
-        @param f_handle - handle to the file.
-        @return tuple of the number of ions and branches in the file
-        """
-        num_species, self._num_ions = 0, 0
-        while True:
-            line = f_handle.readline()
-
-            if not line:
-                raise IOError("Could not find any header information.")
-
-            if 'Total number of ions in cell =' in line:
-                self._num_ions = int(line.strip().split()[-1])
-            elif 'Total number of species in cell = ' in line:
-                num_species = int(line.strip().split()[-1])
-
-            if num_species > 0 and self._num_ions > 0:
-                self._num_branches = num_species * self._num_ions
-                return
-
-#----------------------------------------------------------------------------------------
-
-    def _parse_castep_freq_block(self, f_handle):
-        """
-        Iterator to parse a block of frequencies from a .castep file.
-
-        @param f_handle - handle to the file.
-        """
-        prog_reporter = Progress(self, 0.0, 1.0, 1)
-        for _ in xrange(self._num_branches):
-            line = f_handle.readline()
-            line_data = line.strip().split()[1:-1]
-            freq = line_data[1]
-            intensity_data = line_data[3:]
-
-            # Remove non-active intensities from data
-            intensities = []
-            for value, active in zip(intensity_data[::2], intensity_data[1::2]):
-                if self._spec_type == 'IR_Active' or self._spec_type == 'Raman_Active':
-                    if active == 'N' and value != 0:
-                        value = 0.0
-                intensities.append(value)
-
-            line_data = [freq] + intensities
-            line_data = [float(x) for x in line_data]
-            yield line_data
-
-        prog_reporter.report("Reading frequencies.")
-
-#----------------------------------------------------------------------------------------
-
-    def _find_castep_freq_block(self, f_handle, data_regex):
-        """
-        Find the start of the frequency block in a .castep file.
-        This will set the file pointer to the line before the start
-        of the block.
-
-        @param f_handle - handle to the file.
-        """
-        while True:
-            pos = f_handle.tell()
-            line = f_handle.readline()
-
-            if not line:
-                raise IOError("Could not parse frequency block. Invalid file format.")
-
-            if data_regex.match(line):
-                f_handle.seek(pos)
-                return
-
-#----------------------------------------------------------------------------------------
-
-    def _parse_castep_bond(self, bond_match):
-        """
-        Parses a regex match to obtain bond information.
-
-        @param bond_match Regex match to bond data line
-        @return A dictionary defining the bond
-        """
-        bond = dict()
-
-        bond['atom_a'] = (bond_match.group(1), int(bond_match.group(2)))
-        bond['atom_b'] = (bond_match.group(3), int(bond_match.group(4)))
-        bond['population'] = float(bond_match.group(5))
-        bond['length'] = float(bond_match.group(6))
-
-        return bond
-
-#----------------------------------------------------------------------------------------
-
-    def _parse_castep_file(self, file_name):
-        """
-        Read frequencies from a <>.castep file
-
-        @param file_name - file path of the file to read
-        @return the frequencies, infra red and raman intensities and weights of frequency blocks
-        """
-        # Header regex. Looks for lines in the following format:
-        # +  q-pt=    1 (  0.000000  0.000000  0.000000)     1.0000000000              +
-        header_regex_str = r" +\+ +q-pt= +\d+ \( *(?: *(%(s)s)) *(%(s)s) *(%(s)s)\) +(%(s)s) +\+" % {'s' : self._float_regex}
-        header_regex = re.compile(header_regex_str)
-
-        # Data regex. Looks for lines in the following format:
-        #     +     1      -0.051481   a          0.0000000  N            0.0000000  N     +
-        data_regex_str = r" +\+ +\d+ +(%(s)s)(?: +\w)? *(%(s)s)? *([YN])? *(%(s)s)? *([YN])? *\+" % {'s': self._float_regex}
-        data_regex = re.compile(data_regex_str)
-
-        # Atom bond regex. Looks for lines in the following format:
-        #   H 006 --    O 012               0.46        1.04206
-        bond_regex_str = r" +([A-z])+ +([0-9]+) +-- +([A-z]+) +([0-9]+) +(%(s)s) +(%(s)s)" % {'s': self._float_regex}
-        bond_regex = re.compile(bond_regex_str)
-
-        block_count = 0
-        frequencies, ir_intensities, raman_intensities, weights, q_vectors, bonds = [], [], [], [], [], []
-        data_lists = (frequencies, ir_intensities, raman_intensities)
-        with open(file_name, 'rU') as f_handle:
-            self._parse_castep_file_header(f_handle)
-
-            while True:
-                line = f_handle.readline()
-                # Check we've reached the end of file
-                if not line:
-                    break
-
-                # Check if we've found a block of frequencies
-                header_match = header_regex.match(line)
-                if header_match:
-                    block_count += 1
-                    weight, q_vector = self._parse_block_header(header_match, block_count)
-                    weights.append(weight)
-                    q_vectors.append(q_vector)
-
-                    # Move file pointer forward to start of intensity data
-                    self._find_castep_freq_block(f_handle, data_regex)
-
-                    # Parse block of frequencies
-                    for line_data in self._parse_castep_freq_block(f_handle):
-                        for data_list, item in zip(data_lists, line_data):
-                            data_list.append(item)
-
-                # Check if we've found a bond
-                bond_match = bond_regex.match(line)
-                if bond_match:
-                    bonds.append(self._parse_castep_bond(bond_match))
-
-        frequencies = np.asarray(frequencies)
-        ir_intensities = np.asarray(ir_intensities)
-        raman_intensities = np.asarray(raman_intensities)
-        warray = np.repeat(weights, self._num_branches)
-
-        file_data = {
-            'frequencies': frequencies,
-            'ir_intensities': ir_intensities,
-            'raman_intensities': raman_intensities,
-            'weights': warray,
-            'q_vectors':q_vectors
-            }
-
-        if len(bonds) > 0:
-            file_data['bonds'] = bonds
-
-        return file_data
-
-#----------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------
 
 try:
     import scipy.constants
