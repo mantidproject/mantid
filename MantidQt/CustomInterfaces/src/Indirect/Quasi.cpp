@@ -421,11 +421,13 @@ void Quasi::saveClicked() {
       Mantid::Kernel::ConfigService::Instance().getString(
           "defaultsave.directory"));
   const auto fitWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
+  IndirectTab::checkADSForPlotSaveWorkspace(fitWS, false);
   QString QfitWS = QString::fromStdString(fitWS);
   const auto fitPath = saveDirectory + QfitWS + ".nxs";
   addSaveWorkspaceToQueue(QfitWS, fitPath);
 
   const auto resultWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
+  IndirectTab::checkADSForPlotSaveWorkspace(resultWS, false);
   QString QresultWS = QString::fromStdString(resultWS);
   const auto resultPath = saveDirectory + QresultWS + ".nxs";
   addSaveWorkspaceToQueue(QresultWS, resultPath);
@@ -442,6 +444,8 @@ void Quasi::plotClicked() {
   const auto resultName = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
   if ((plot == "Prob" || plot == "All") && (program == "Lorentzians")) {
     const auto probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
+    // Check workspace exists
+    IndirectTab::checkADSForPlotSaveWorkspace(probWS, true);
     QString QprobWS = QString::fromStdString(probWS);
     IndirectTab::plotSpectrum(QprobWS, 1, 2);
   }
@@ -449,6 +453,7 @@ void Quasi::plotClicked() {
     std::string fitName = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
     fitName.pop_back();
     fitName.append("_0");
+    IndirectTab::checkADSForPlotSaveWorkspace(fitName, true);
     QString QfitWS = QString::fromStdString(fitName);
     if (program == "Lorentzians")
       IndirectTab::plotSpectra(QfitWS, { 0, 1, 2, 4 });
@@ -459,7 +464,7 @@ void Quasi::plotClicked() {
   MatrixWorkspace_sptr resultWS =
     AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
   int numSpectra = (int)resultWS->getNumberHistograms();
-
+  IndirectTab::checkADSForPlotSaveWorkspace(resultName, true);
   QString QresultWS = QString::fromStdString(resultName);
   auto paramNames = { "Amplitude", "FWHM", "Beta" };
   for (std::string paramName : paramNames) {
