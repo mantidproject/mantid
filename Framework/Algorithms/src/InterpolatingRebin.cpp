@@ -378,9 +378,10 @@ Histogram InterpolatingRebin::noInterpolation(const Histogram &oldHistogram,
 *  @param[in] xNew the value of x for at the point of interest
 *  @return the estimated error at that point
 */
-double InterpolatingRebin::estimateError(const HistogramData::HistogramX &xsOld,
-                                         const HistogramData::HistogramE &esOld,
+double InterpolatingRebin::estimateError(const std::vector<double> &xsOld,
+                                         const HistogramE &esOld,
                                          const double xNew) const {
+
   // find the first point in the array that has a higher value of x, we'll base
   // some of the error estimate on the error on this point
 

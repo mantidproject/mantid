@@ -105,7 +105,7 @@ protected:
   noInterpolation(const HistogramData::Histogram &oldHistogram,
                   const HistogramData::BinEdges &xNew) const;
 
-  double estimateError(const HistogramData::HistogramX &xsOld,
+  double estimateError(const std::vector<double> &xsOld,
                        const HistogramData::HistogramE &esOld,
                        const double xNew) const;
 };
