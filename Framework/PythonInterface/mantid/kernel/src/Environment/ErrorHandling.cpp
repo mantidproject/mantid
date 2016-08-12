@@ -4,10 +4,15 @@
 #include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
 #include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 
+#include <boost/python/extract.hpp>
+#include <boost/python/object.hpp>
 #include <frameobject.h> //Python
 
 #include <sstream>
 #include <stdexcept>
+
+using boost::python::extract;
+using boost::python::object;
 
 namespace Mantid {
 namespace PythonInterface {
@@ -24,36 +29,36 @@ void tracebackToMsg(std::stringstream &msg, PyTracebackObject *traceback,
     msg << "caused by";
 
   msg << " line " << traceback->tb_lineno << " in \'"
-      << PyBytes_AsString(traceback->tb_frame->f_code->co_filename) << "\'";
+      << extract<const char *>(traceback->tb_frame->f_code->co_filename)()
+      << "\'";
   tracebackToMsg(msg, traceback->tb_next, false);
 }
 }
 
 /**
- * Convert a python error state to a C++ exception
- * @param withTrace If true then a traceback will be included in the exception
- * message
- * @throws std::runtime_error
+ * Construct an exception object where the message is populated from the
+ * current Python exception state
+ * @param withTrace If true, include the full traceback in the message
  */
-void throwRuntimeError(const bool withTrace) {
+PythonException::PythonException(bool withTrace) : std::exception(), m_msg() {
   GlobalInterpreterLock gil;
   if (!PyErr_Occurred()) {
     throw std::runtime_error(
-        "ErrorHandling::throwRuntimeError - No Python error state set!");
+        "PythonException thrown but no Python error state set!");
   }
   PyObject *exception(nullptr), *value(nullptr), *traceback(nullptr);
   PyErr_Fetch(&exception, &value, &traceback);
   PyErr_NormalizeException(&exception, &value, &traceback);
   PyErr_Clear();
-  PyObject *str_repr = PyObject_Str(value);
-  std::stringstream msg;
-  if (value && str_repr) {
-    msg << PyBytes_AsString(str_repr);
+  PyObject *strRepr = PyObject_Str(value);
+  std::stringstream builder;
+  if (value && strRepr) {
+    builder << extract<const char *>(strRepr)();
   } else {
-    msg << "Unknown exception has occurred.";
+    builder << "Unknown exception has occurred.";
   }
   if (withTrace) {
-    tracebackToMsg(msg, reinterpret_cast<PyTracebackObject *>(traceback));
+    tracebackToMsg(builder, reinterpret_cast<PyTracebackObject *>(traceback));
   }
 
   // Ensure we decrement the reference count on the traceback and exception
@@ -64,8 +69,7 @@ void throwRuntimeError(const bool withTrace) {
   Py_XDECREF(traceback);
   Py_XDECREF(exception);
   Py_XDECREF(value);
-  // Raise this error as a C++ error
-  throw std::runtime_error(msg.str());
+  m_msg = builder.str();
 }
 }
 }

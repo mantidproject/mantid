@@ -7,6 +7,8 @@ Framework Changes
 
 - ``Facilities.xml`` was updated for changes to the SNS live data servers.
 
+- A cmake parameter ``ENABLE_MANTIDPLOT`` (default ``True``) was added to facilitate framework only builds.
+
 HistogramData
 -------------
 
@@ -22,7 +24,7 @@ Concepts
 
 - ``MatrixWorkspace`` : When masking bins or detectors with non-zero weights,
   undefined and infinite values and errors will be zeroed.
-- ``Lattice`` : Allow setting a UB matrix with negative determinant (improper rotation)  
+- ``Lattice`` : Allow setting a UB matrix with negative determinant (improper rotation)
 
 Algorithms
 ----------
@@ -56,12 +58,12 @@ Improved
   plotly html files.
 
 - :ref:`ConvertTableToMatrixWorkspace <algm-ConvertTableToMatrixWorkspace>`
-  had a bug where the table columns were in a reversed order in the dialogue's combo boxes. 
+  had a bug where the table columns were in a reversed order in the dialogue's combo boxes.
   This is now fixed and the order is correct.
 
 - :ref:`ConvertUnits <algm-ConvertUnits>` will no longer corrupt an in place workspace if the algorithm fails.
 
-- :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli 
+- :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
 
 - :ref:`RenameWorkspace <algm-RenameWorkspace>` and `RenameWorkspaces <algm-RenameWorkspaces>`
   now check if a Workspace with that name already exists in the ADS and gives
@@ -81,8 +83,8 @@ Performance
   If you experience unusual slowdowns, please contact the developer team.
 
 - :ref:`StripPeaks <algm-StripPeaks>` has a slight performance improvement from these changes.
-  
-  
+
+
 CurveFitting
 ------------
 

@@ -49,11 +49,11 @@ Powder Diffraction
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` has changed
   parameters. ``Instrument``, ``RunNumber``, and ``Extension`` have
   been replaced with a single ``Filename`` parameter. This has been
-  paired with changes to the Powder Diffraction interface as well. An
-  additional parameter, ``LogFilename``, has been added to aid in
-  testing files being produced by the "new DAS" at SNS. This parameter
-  has not been added to the Powder Diffraction interface and will be
-  removed without notice.
+  paired with changes to the Powder Diffraction interface as
+  well. There were also a variety of bugfixes related to the output
+  workspaces. While it did not affect the saved data files, the output
+  workspaces were not always correctly normalized or in the requested
+  units.
 
 - :ref:`PDFFourierTransformSNSPowderReduction
   <algm-PDFFourierTransformSNSPowderReduction>` has been modified to
@@ -68,6 +68,9 @@ Powder Diffraction
 - :ref:`CorelliCrossCorrelate <algm-CorelliCrossCorrelate>`: The
   weights applied to events have changed by a factor of the duty cycle
   (:math:`c\approx0.498`) as requested by the instrument scientists.
+  
+- :ref:`pearl-powder-diffraction-ref`: A workflow diagram for 
+  ``pearl_run_focus`` function has been created. 
 
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
 and
