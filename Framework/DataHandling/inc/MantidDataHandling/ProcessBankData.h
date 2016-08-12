@@ -15,12 +15,10 @@ namespace Mantid{
 namespace DataHandling{
 
 using namespace Mantid;
-// using namespace Mantid::Geometry;
 
 //==============================================================================================
 // Class ProcessBankData
 //==============================================================================================
-// FIXME-TODO- Move ProcessBankData to new files
 /** This task does the disk IO from loading the NXS file,
 * and so will be on a disk IO mutex */
 class ProcessBankData : public Mantid::Kernel::Task {
@@ -90,7 +88,7 @@ private:
   detid_t m_max_id;
   /// timer for performance
   Mantid::Kernel::Timer m_timer;
-}; // END-DEF-CLASS ProcessBankData
+}; // ENDDEF-CLASS ProcessBankData
 
 }
 }
