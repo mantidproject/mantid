@@ -23,7 +23,6 @@ namespace Mantid {
 
 namespace DataHandling {
 
-
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
   Load Event Nexus files.

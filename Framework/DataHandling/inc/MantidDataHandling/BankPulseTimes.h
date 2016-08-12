@@ -8,7 +8,6 @@
 
 using namespace ::NeXus;
 
-
 /** This class defines the pulse times for a specific bank.
  * Since some instruments (ARCS, VULCAN) have multiple preprocessors,
  * this means that some banks have different lists of pulse times.

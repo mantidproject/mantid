@@ -11,8 +11,8 @@
 
 #include <boost/shared_array.hpp>
 
-namespace Mantid{
-namespace DataHandling{
+namespace Mantid {
+namespace DataHandling {
 
 using namespace Mantid;
 
@@ -42,16 +42,15 @@ public:
   * @param max_event_id :: maximum detector ID to load
   * @return
   */ // API::IFileLoader<Kernel::NexusDescriptor>
-  ProcessBankData(LoadEventNexus *alg, std::string entry_name, API::Progress *prog,
-                  boost::shared_array<uint32_t> event_id,
+  ProcessBankData(LoadEventNexus *alg, std::string entry_name,
+                  API::Progress *prog, boost::shared_array<uint32_t> event_id,
                   boost::shared_array<float> event_time_of_flight,
                   size_t numEvents, size_t startAt,
                   boost::shared_ptr<std::vector<uint64_t>> event_index,
                   boost::shared_ptr<BankPulseTimes> thisBankPulseTimes,
                   bool have_weight, boost::shared_array<float> event_weight,
                   detid_t min_event_id, detid_t max_event_id);
-  
-  
+
   void run() override;
 
 private:
@@ -89,7 +88,6 @@ private:
   /// timer for performance
   Mantid::Kernel::Timer m_timer;
 }; // ENDDEF-CLASS ProcessBankData
-
 }
 }
 

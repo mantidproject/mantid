@@ -43,7 +43,6 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
     pulseTimes[i] = start + seconds[i];
 }
 
-
 //----------------------------------------------------------------------------------------------
 /** Constructor. Build from a vector of date and times.
 *  Handles a zero-sized vector */
@@ -74,5 +73,3 @@ bool BankPulseTimes::equals(size_t otherNumPulse, std::string otherStartTime) {
   return ((this->startTime == otherStartTime) &&
           (this->numPulses == otherNumPulse));
 }
-
-
