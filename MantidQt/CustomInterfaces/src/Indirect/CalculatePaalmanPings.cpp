@@ -37,6 +37,10 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
           SLOT(validateChemical()));
   connect(m_uiForm.leCanChemicalFormula, SIGNAL(editingFinished()), this,
           SLOT(validateChemical()));
+  // Connect slots for plot and save 
+  connect(m_uiForm.pbSave, SIGNAL(Clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(Clicked()), this, SLOT(plotClicked()));
+
   UserInputValidator uiv;
   if (uiv.checkFieldIsNotEmpty("Can Chemical Formula",
                                m_uiForm.leCanChemicalFormula,
