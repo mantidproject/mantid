@@ -150,10 +150,6 @@ void CalculatePaalmanPings::run() {
   // Add corrections algorithm to queue
   m_batchAlgoRunner->addAlgorithm(absCorAlgo, absCorProps);
 
-  // Add save algorithms if required
-  if (m_uiForm.ckSave->isChecked())
-    addSaveWorkspaceToQueue(outputWsName);
-
   // Run algorithm queue
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(absCorComplete(bool)));
@@ -429,5 +425,14 @@ void CalculatePaalmanPings::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
   }
 }
 
+/**
+ * Handles saving of workspace
+ */
+void CalculatePaalmanPings::saveClicked() {
+
+  addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+}
+
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt
