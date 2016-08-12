@@ -37,7 +37,7 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
           SLOT(validateChemical()));
   connect(m_uiForm.leCanChemicalFormula, SIGNAL(editingFinished()), this,
           SLOT(validateChemical()));
-  // Connect slots for plot and save 
+  // Connect slots for plot and save
   connect(m_uiForm.pbSave, SIGNAL(Clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(Clicked()), this, SLOT(plotClicked()));
 
@@ -298,14 +298,14 @@ void CalculatePaalmanPings::postProcessComplete(bool error) {
 
   if (error) {
     emit showMessageBox("Correction factor post processing failed.\nSee "
-      "Results Log for more details.");
+                        "Results Log for more details.");
     return;
   }
 
-    // Enable post processing plot and save
-    m_uiForm.cbPlotOutput->setEnabled(true);
-    m_uiForm.pbPlot->setEnabled(true);
-    m_uiForm.pbSave->setEnabled(true);
+  // Enable post processing plot and save
+  m_uiForm.cbPlotOutput->setEnabled(true);
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 void CalculatePaalmanPings::loadSettings(const QSettings &settings) {
@@ -443,7 +443,6 @@ void CalculatePaalmanPings::plotClicked() {
 
   if (plotType == "Both" || plotType == "Angle")
     plotTimeBin(QString::fromStdString(m_pythonExportWsName));
-
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt
