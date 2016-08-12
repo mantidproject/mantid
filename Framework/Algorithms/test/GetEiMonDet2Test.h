@@ -4,8 +4,23 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/GetEiMonDet2.h"
+#include "MantidAPI/Axis.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
+using namespace Mantid::PhysicalConstants;
+using namespace WorkspaceCreationHelper;
+
+// Some rather random numbers here.
+const double DETECTOR_DISTANCE = 15.78;
+const double EI = 66.6; // meV
+const double MONITOR_DISTANCE = 0.44;
 
 class GetEiMonDet2Test : public CxxTest::TestSuite {
 public:
@@ -28,6 +43,74 @@ public:
     GetEiMonDet2 algorithm;
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT(algorithm.isInitialized())
+  }
+
+  void testSuccessOnMinimumInput() {
+    const double realEi = 0.97 * EI;
+    const auto peaks = peakCentres(100, realEi, std::numeric_limits<double>::max());
+    std::vector<bool> successes(peaks.size(), true);
+    auto eppTable = createEPPTable(peaks, successes);
+    auto ws = createWorkspace();
+    GetEiMonDet2 algorithm;
+    TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
+    TS_ASSERT(algorithm.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorEPPTable", eppTable))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("DetectorSpectra", "1"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("MonitorSpectrumNumber", "0"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.execute())
+    TS_ASSERT(algorithm.isExecuted())
+    // TODO read output values
+  }
+
+private:
+  ITableWorkspace_sptr createEPPTable(const std::vector<double> &peakCentres, const std::vector<bool> &fitSuccesses, const std::string& centresColumnName = "PeakCentre", const std::string& successesColumnName = "FitStatus") {
+    ITableWorkspace_sptr ws = boost::make_shared<TableWorkspace>(peakCentres.size());
+    auto centreColumn = ws->addColumn("double", centresColumnName);
+    auto statusColumn = ws->addColumn("str", successesColumnName);
+    for(size_t i = 0; i != peakCentres.size(); ++i) {
+      centreColumn->cell<double>(i) = peakCentres[i];
+      statusColumn->cell<std::string>(i) = fitSuccesses[i] ? "success" : "failed";
+    }
+    return ws;
+  }
+
+  static void attachInstrument(MatrixWorkspace_sptr targetWs) {
+    // The reference frame used by createInstrumentForWorkspaceWithDistances
+    // is left handed with y pointing up, x along beam (2016-08-12).
+
+    const V3D sampleR(0, 0, 0);
+    // Source can be positioned arbitrarily.
+    const V3D sourceR(-2 * MONITOR_DISTANCE, 0, 0);
+    std::vector<V3D> detectorRs;
+    // Add monitor as the first detector --- it won't be marked as monitor,
+    // but here it matters not.
+    detectorRs.emplace_back(-MONITOR_DISTANCE, 0, 0);
+    // Add more detectors --- these should be treated as the real ones.
+    detectorRs.emplace_back(0, DETECTOR_DISTANCE, 0);
+    createInstrumentForWorkspaceWithDistances(targetWs, sampleR, sourceR, detectorRs);
+  }
+
+  static MatrixWorkspace_sptr createWorkspace() {
+    const size_t nDetectors = 1;
+    // Number of spectra = detectors + monitor.
+    auto ws = Create2DWorkspace(nDetectors + 1, 2);
+    ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    attachInstrument(ws);
+    ws->mutableRun().addProperty("Ei", EI, true);
+    return ws;
+  }
+
+  static std::vector<double> peakCentres(double timeAtMonitor, double energy, double pulseInterval) {
+    std::vector<double> centres;
+    centres.emplace_back(timeAtMonitor);
+    const double velocity = std::sqrt(2 * energy / NeutronMass);
+    double timeOfFlight = timeAtMonitor + (MONITOR_DISTANCE + DETECTOR_DISTANCE) / velocity;
+    while (timeOfFlight > pulseInterval) {
+      timeOfFlight -= pulseInterval;
+    }
+    centres.emplace_back(timeOfFlight);
+    return centres;
   }
 };
 
