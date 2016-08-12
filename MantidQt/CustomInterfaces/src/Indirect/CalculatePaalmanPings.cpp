@@ -226,7 +226,7 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
           "Sample and can workspaces must contain the same type of data.");
   }
 
-  // Show error mssage if needed
+  // Show error message if needed
   if (!uiv.isAllInputValid() && !silent)
     emit showMessageBox(uiv.generateErrorMessage());
 
@@ -301,15 +301,6 @@ void CalculatePaalmanPings::postProcessComplete(bool error) {
                         "Results Log for more details.");
     return;
   }
-
-  // Handle Mantid plotting
-  QString plotType = m_uiForm.cbPlotOutput->currentText();
-
-  if (plotType == "Both" || plotType == "Wavelength")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
-
-  if (plotType == "Both" || plotType == "Angle")
-    plotTimeBin(QString::fromStdString(m_pythonExportWsName));
 }
 
 void CalculatePaalmanPings::loadSettings(const QSettings &settings) {
@@ -430,8 +421,23 @@ void CalculatePaalmanPings::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
  */
 void CalculatePaalmanPings::saveClicked() {
 
+  checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
   addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
 }
+
+/**
+ * Handles mantid plotting of workspace
+ */
+void CalculatePaalmanPings::plotClicked() {
+
+  checkADSForPlotSaveWorkspace(m_pythonExportWsName, true);
+  QString plotType = m_uiForm.cbPlotOutput->currentText();
+
+  if (plotType == "Both" || plotType == "Wavelength")
+    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+
+  if (plotType == "Both" || plotType == "Angle")
+    plotTimeBin(QString::fromStdString(m_pythonExportWsName));
 
 }
 } // namespace CustomInterfaces
