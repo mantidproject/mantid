@@ -346,23 +346,23 @@ double LogManager::getPropertyAsSingleValue(
   const auto key = std::make_pair(name, statistic);
   if (!m_singleValueCache.getCache(key, singleValue)) {
     const Property *log = getProperty(name);
-    if (convertSingleValue(log, singleValue) ||
-        convertTimeSeriesToDouble(log, singleValue, statistic)) {
-      return singleValue;
-    } else if (const auto stringLog =
-                   dynamic_cast<const PropertyWithValue<std::string> *>(log)) {
-      // Try to lexically cast string to a double
-      try {
-        return std::stod(stringLog->value());
-      } catch (const std::invalid_argument &) {
+    if (!convertSingleValue(log, singleValue) &&
+        !convertTimeSeriesToDouble(log, singleValue, statistic)) {
+      if (const auto stringLog =
+              dynamic_cast<const PropertyWithValue<std::string> *>(log)) {
+        // Try to lexically cast string to a double
+        try {
+          singleValue = std::stod(stringLog->value());
+        } catch (const std::invalid_argument &) {
+          throw std::invalid_argument(
+              "Run::getPropertyAsSingleValue - Property \"" + name +
+              "\" cannot be converted to a numeric value.");
+        }
+      } else {
         throw std::invalid_argument(
             "Run::getPropertyAsSingleValue - Property \"" + name +
-            "\" cannot be converted to a numeric value.");
+            "\" is not a single numeric value or numeric time series.");
       }
-    } else {
-      throw std::invalid_argument(
-          "Run::getPropertyAsSingleValue - Property \"" + name +
-          "\" is not a single numeric value or numeric time series.");
     }
     // Put it in the cache
     m_singleValueCache.setCache(key, singleValue);
