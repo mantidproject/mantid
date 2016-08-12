@@ -322,9 +322,11 @@ search_patterns.each do |pattern|
         #exit 1
       end
       if( "@MAKE_VATES@" == "ON" )
-        if dependency.include? "@loader_path" && dependency.include? "libvtk"
-          p "ParaView libraries found Contents/Libraries. Is the vatesfiles list is complete?
-          exit 1
+        if dependency.include? "@loader_path"
+          if dependency.include? "libvtk"
+            p "ParaView libraries found Contents/Libraries. Is the vatesfiles list is complete?
+            exit 1
+          end
         end
         if dependency.include? "#{ParaView_dir}"
           p "issue with library: #{library} linking against: #{dependency}"
