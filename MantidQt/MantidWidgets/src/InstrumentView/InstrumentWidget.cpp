@@ -1336,16 +1336,17 @@ void InstrumentWidget::loadTabs(const std::string &lines) const {
  */
 void InstrumentWidget::loadFromProject(const std::string &lines) {
   TSVSerialiser tsv(lines);
+
   if (tsv.selectLine("SurfaceType")) {
     int surfaceType;
     tsv >> surfaceType;
     setSurfaceType(surfaceType);
   }
 
-  if (tsv.selectSection("Surface")) {
-    std::string surfaceLines;
-    tsv >> surfaceLines;
-    getSurface()->loadFromProject(surfaceLines);
+  if (tsv.selectSection("actor")) {
+    std::string actorLines;
+    tsv >> actorLines;
+    m_instrumentActor->loadFromProject(actorLines);
   }
 
   if (tsv.selectLine("CurrentTab")) {
@@ -1360,17 +1361,18 @@ void InstrumentWidget::loadFromProject(const std::string &lines) {
     setBinRange(min, max);
   }
 
-  if (tsv.selectSection("actor")) {
-    std::string actorLines;
-    tsv >> actorLines;
-    m_instrumentActor->loadFromProject(actorLines);
-  }
-
   if (tsv.selectSection("tabs")) {
     std::string tabLines;
     tsv >> tabLines;
     loadTabs(tabLines);
   }
+
+  if (tsv.selectSection("Surface")) {
+    std::string surfaceLines;
+    tsv >> surfaceLines;
+    getSurface()->loadFromProject(surfaceLines);
+  }
+  //  updateInstrumentView();
 }
 
 } // MantidWidgets

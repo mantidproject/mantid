@@ -716,5 +716,30 @@ void UnwrappedSurface::calcSize(UnwrappedDetector &udet) {
     m_height_max = udet.height;
 }
 
+void UnwrappedSurface::loadFromProject(const std::string &lines) {
+  ProjectionSurface::loadFromProject(lines);
+  TSVSerialiser tsv(lines);
+
+  if (tsv.selectLine("Zoom")) {
+    double x0, y0, x1, y1;
+    tsv >> x0 >> y0 >> x1 >> y1;
+    RectF bounds(QPointF(x0, y0), QPointF(x1, y1));
+
+    m_zoomStack.push(m_viewRect);
+    m_viewRect = bounds;
+    updateView();
+    emit updateInfoText();
+  }
+}
+
+std::string UnwrappedSurface::saveToProject() const {
+  TSVSerialiser tsv;
+  tsv.writeRaw(ProjectionSurface::saveToProject());
+  tsv.writeLine("Zoom");
+  tsv << m_viewRect.x0() << m_viewRect.y0();
+  tsv << m_viewRect.x1() << m_viewRect.y1();
+  return tsv.outputLines();
+}
+
 } // MantidWidgets
 } // MantidQt
