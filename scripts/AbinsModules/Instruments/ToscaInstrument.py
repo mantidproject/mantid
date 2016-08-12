@@ -2,7 +2,7 @@ import numpy as np
 import math
 
 from Instrument import  Instrument
-from AbinsModules import Constants
+from AbinsModules import AbinsParameters
 
 class ToscaInstrument(Instrument):
     """
@@ -16,7 +16,7 @@ class ToscaInstrument(Instrument):
         @param frequencies:   DFT frequencies for which resolution function should be calculated (frequencies in cm-1)
         Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
         """
-        return  np.multiply(np.multiply(frequencies, frequencies), Constants.TOSCA_constant)
+        return  np.multiply(np.multiply(frequencies, frequencies), AbinsParameters.TOSCA_constant)
 
 
     def convolve_with_resolution_function(self, frequencies=None, s_dft=None, points_per_peak=None, start=None):
@@ -31,12 +31,12 @@ class ToscaInstrument(Instrument):
         # noinspection PyTypeChecker
         all_points = points_per_peak * frequencies.shape[0]
 
-        broadened_spectrum = np.zeros(all_points, dtype=Constants.float_type)
+        broadened_spectrum = np.zeros(all_points, dtype=AbinsParameters.float_type)
         fwhm = 3 # approximate value for the full width at half maximum
         start_broaden = start * points_per_peak
         for indx, freq in np.ndenumerate(frequencies[start:]):
 
-            sigma = Constants.TOSCA_A * freq * freq + Constants.TOSCA_B * freq + Constants.TOSCA_C
+            sigma = AbinsParameters.TOSCA_A * freq * freq + AbinsParameters.TOSCA_B * freq + AbinsParameters.TOSCA_C
             points_freq = np.array(np.linspace(freq - fwhm * sigma, freq + fwhm * sigma, num=points_per_peak))
             start = indx[0] * points_per_peak + start_broaden
             broadened_spectrum[start:start + points_per_peak] = np.convolve(s_dft[indx[0]], self._gaussian(sigma=sigma, points=points_freq, center=freq) )
@@ -53,14 +53,14 @@ class ToscaInstrument(Instrument):
         @param start: 3 if acoustic modes at Gamma point, otherwise this should be set to zero
         """
         all_points = points_per_peak * frequencies.shape[0]
-        abscissa =  np.zeros(all_points, dtype=Constants.float_type)
+        abscissa =  np.zeros(all_points, dtype=AbinsParameters.float_type)
         # noinspection PyTypeChecker
         fwhm = 3 # approximate value for the full width at half maximum
         start_broaden = start * points_per_peak
 
         for indx, freq in np.ndenumerate(frequencies[start:]):
 
-            sigma = Constants.TOSCA_A * freq * freq + Constants.TOSCA_B * freq + Constants.TOSCA_C
+            sigma = AbinsParameters.TOSCA_A * freq * freq + AbinsParameters.TOSCA_B * freq + AbinsParameters.TOSCA_C
             points_freq = np.array(np.linspace(freq - fwhm * sigma, freq + fwhm * sigma, num=points_per_peak))
             start = indx[0] * points_per_peak + start_broaden
             abscissa[start:start + points_per_peak] = points_freq

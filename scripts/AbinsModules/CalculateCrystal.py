@@ -3,7 +3,7 @@ from CalculateDWCrystal import CalculateDWCrystal
 from DwCrystalData import DwCrystalData
 from CrystalData import CrystalData
 from AbinsData import AbinsData
-import Constants
+import AbinsParameters
 
 class CalculateCrystal(IOmodule):
     def __init__(self, filename=None, abins_data=None, temperature=None):
@@ -13,7 +13,7 @@ class CalculateCrystal(IOmodule):
         @param temperature:  temperature in K
         """
 
-        super(CalculateCrystal, self).__init__(input_filename=filename, group_name=Constants.crystal_data_group)
+        super(CalculateCrystal, self).__init__(input_filename=filename, group_name=AbinsParameters.crystal_data_group)
 
         if not isinstance(abins_data, AbinsData):
             raise ValueError("Object of AbinsData was expected.")

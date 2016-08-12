@@ -1,7 +1,7 @@
 import numpy as np
 
 # ABINS modules
-import Constants
+import AbinsParameters
 from IOmodule import IOmodule
 from QData import  QData
 from KpointsData import KpointsData
@@ -19,7 +19,7 @@ class CalculateQ(IOmodule):
         @param instrument: object of type  Instrument
         @param sample_form: form in which sample is (Powder or SingleCrystal)
         """
-        super(CalculateQ, self).__init__(input_filename=filename, group_name=Constants.Q_data_group)
+        super(CalculateQ, self).__init__(input_filename=filename, group_name=AbinsParameters.Q_data_group)
 
         if isinstance(instrument, Instrument):
             self._instrument = instrument
@@ -28,7 +28,7 @@ class CalculateQ(IOmodule):
         else:
             raise ValueError("Invalid instrument.")
 
-        if not sample_form in Constants.all_sample_forms:
+        if not sample_form in AbinsParameters.all_sample_forms:
             raise ValueError("Invalid value of the sample form. Please specify one of the two options: 'SingleCrystal', 'Powder'.")
         self._sample_form = sample_form
 
@@ -64,7 +64,7 @@ class CalculateQ(IOmodule):
 
         if self._sample_form == "Powder":
             for k in range(num_k):
-                self._Qvectors._append(self._instrument.calculate_q(frequencies=np.multiply(_k_data["frequencies"][k], 1.0 / Constants.cm1_2_hartree)))
+                self._Qvectors._append(self._instrument.calculate_q(frequencies=np.multiply(_k_data["frequencies"][k], 1.0 / AbinsParameters.cm1_2_hartree)))
         else:
             raise ValueError("SingleCrystal user case is not implemented.")
 

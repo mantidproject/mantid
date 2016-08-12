@@ -22,7 +22,7 @@ except ImportError:
     logger.warning("Failure of LoadCASTEPTest because h5py is unavailable.")
     exit(1)
 
-from AbinsModules import LoadCASTEP, Constants
+from AbinsModules import LoadCASTEP, AbinsParameters
 
 
 
@@ -123,14 +123,14 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         array = array.reshape(k,atoms,atoms * 3,3)
 
         correct_data["rearranged_data"]["k_points_data"]["weights"] = np.asarray(correct_data["rearranged_data"]["k_points_data"]["weights"])
-        correct_data["rearranged_data"]["k_points_data"]["frequencies"] = np.asarray(correct_data["rearranged_data"]["k_points_data"]["frequencies"]) * Constants.cm1_2_hartree
+        correct_data["rearranged_data"]["k_points_data"]["frequencies"] = np.asarray(correct_data["rearranged_data"]["k_points_data"]["frequencies"]) * AbinsParameters.cm1_2_hartree
         correct_data["rearranged_data"]["k_points_data"].update({"atomic_displacements": array})
         correct_data["datasets"].update({"atomic_displacements": array})
 
         for atom in correct_data["rearranged_data"]["atoms_data"]:
-            atom["mass"] = atom["mass"] * Constants.m_2_hartree
+            atom["mass"] = atom["mass"] * AbinsParameters.m_2_hartree
         for atom in correct_data["structured_datasets"]["atoms"]:
-            atom["mass"] = atom["mass"] * Constants.m_2_hartree
+            atom["mass"] = atom["mass"] * AbinsParameters.m_2_hartree
 
 
 

@@ -5,7 +5,7 @@ from IOmodule import IOmodule
 from KpointsData import KpointsData
 from AtomsData import  AtomsDaTa
 from AbinsData import AbinsData
-import Constants
+import AbinsParameters
 
 class GeneralDFTProgram(IOmodule):
     """
@@ -15,7 +15,7 @@ class GeneralDFTProgram(IOmodule):
 
     def __init__(self, input_DFT_filename=None):
 
-        super(GeneralDFTProgram, self).__init__(input_filename=input_DFT_filename, group_name=Constants.DFT_group)
+        super(GeneralDFTProgram, self).__init__(input_filename=input_DFT_filename, group_name=AbinsParameters.DFT_group)
 
         self._num_k = None
         self._num_atoms = None
@@ -184,12 +184,12 @@ class GeneralDFTProgram(IOmodule):
 
         atoms = AtomsDaTa(num_atoms=self._num_atoms)
         for atom in data["atoms"]:
-            atom["mass"] = atom["mass"] * Constants.m_2_hartree
+            atom["mass"] = atom["mass"] * AbinsParameters.m_2_hartree
         atoms.set(data["atoms"])
 
         k_points.set({"weights": data["weights"],  # 1D [k] (one entry corresponds to weight of one k-point)
-                      "k_vectors": data["k_vectors"], # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
-                      "frequencies": data["frequencies"] * Constants.cm1_2_hartree, # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
+                      "k_vectors": data["k_vectors"],  # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
+                      "frequencies": data["frequencies"] * AbinsParameters.cm1_2_hartree,  # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
                       "atomic_displacements": data["atomic_displacements"]}) # 4D array [k][atom_n][freq][3] (one entry corresponds to one coordinate for atom atom_n, frequency  freq and k-point k )
         _data = AbinsData()
         _data.set(k_points_data=k_points, atoms_data=atoms)

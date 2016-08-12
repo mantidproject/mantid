@@ -11,7 +11,7 @@ from PowderData import  PowderData
 from SData import SData
 from Instruments import Instrument
 
-import Constants
+import AbinsParameters
 
 class CalculateS(IOmodule):
     """
@@ -27,7 +27,7 @@ class CalculateS(IOmodule):
         @param instrument_name: name of instrument (str)
 
         """
-        super(CalculateS, self).__init__(input_filename=filename, group_name=Constants.S_data_group)
+        super(CalculateS, self).__init__(input_filename=filename, group_name=AbinsParameters.S_data_group)
 
         if not (isinstance(temperature, float) or isinstance(temperature, int)):
             raise ValueError("Invalid value of the temperature. Number was expected.")
@@ -35,7 +35,7 @@ class CalculateS(IOmodule):
             raise ValueError("Temperature cannot be negative.")
         self._temperature = temperature
 
-        if  sample_form in Constants.all_sample_forms:
+        if  sample_form in AbinsParameters.all_sample_forms:
             self._sample_form = sample_form
         else:
             raise  ValueError("Invalid sample form %s"%sample_form)
@@ -45,7 +45,7 @@ class CalculateS(IOmodule):
         else:
             raise ValueError("Object of type AbinsData was expected.")
 
-        if instrument_name in Constants.all_instruments:
+        if instrument_name in AbinsParameters.all_instruments:
             self._instrument_name = instrument_name
         else:
             raise ValueError("Unknown instrument %s" % instrument_name)
@@ -112,26 +112,26 @@ class CalculateS(IOmodule):
         _num_k = _k_points_data["k_vectors"].shape[0]
         _num_freq = _k_points_data["frequencies"].shape[1]
 
-        _factorials = [ np.math.factorial(n) for n in range(Constants.overtones_num)]
+        _factorials = [np.math.factorial(n) for n in range(AbinsParameters.overtones_num)]
 
-        _value = np.zeros( (Constants._pkt_per_peak * _num_freq, Constants.overtones_num + 1), dtype=Constants.float_type)
-        _frequencies = np.zeros(Constants._pkt_per_peak * _num_freq, dtype=Constants.float_type)
+        _value = np.zeros((AbinsParameters._pkt_per_peak * _num_freq, AbinsParameters.overtones_num + 1), dtype=AbinsParameters.float_type)
+        _frequencies = np.zeros(AbinsParameters._pkt_per_peak * _num_freq, dtype=AbinsParameters.float_type)
 
-        _value_dft = np.zeros( _num_freq, dtype=Constants.float_type) # DFT discrete peaks
-        _s_sum = Constants.overtones_num
+        _value_dft = np.zeros(_num_freq, dtype=AbinsParameters.float_type) # DFT discrete peaks
+        _s_sum = AbinsParameters.overtones_num
 
         for atom in range(_num_atoms):
 
             _value.fill(0.0)
 
-            for overtone in range(Constants.overtones_num):
+            for overtone in range(AbinsParameters.overtones_num):
                 # COMMENT: at the moment only valid for Gamma point calculations
 
                 # TODO: calculation for the whole FBZ
                 for k in range(_num_k):
                     _value_dft.fill(0.0)
                     # correction for acoustic modes at Gamma point
-                    if np.linalg.norm(_abins_data_extracted["k_points_data"]["k_vectors"][k]) < Constants.small_k: start = 3
+                    if np.linalg.norm(_abins_data_extracted["k_points_data"]["k_vectors"][k]) < AbinsParameters.small_k: start = 3
                     else: start = 0
 
                     # noinspection PyTypeChecker
@@ -141,9 +141,9 @@ class CalculateS(IOmodule):
                     _value_dft[start:] = np.power(np.multiply(_extracted_q_data[k][start:], _msd[atom]),  overtone) * np.exp( -np.multiply(_extracted_q_data[k][start:], _dw[atom]))
 
                     # convolve value with instrumental resolution; resulting spectrum has broadened peaks with Gaussian-like shape
-                    np.add(instrument.convolve_with_resolution_function(frequencies= np.multiply(_k_points_data["frequencies"][k], 1.0 / Constants.cm1_2_hartree) ,
+                    np.add(instrument.convolve_with_resolution_function(frequencies= np.multiply(_k_points_data["frequencies"][k], 1.0 / AbinsParameters.cm1_2_hartree),
                                                                         s_dft=_value_dft,
-                                                                        points_per_peak=Constants._pkt_per_peak,
+                                                                        points_per_peak=AbinsParameters._pkt_per_peak,
                                                                         start=start),
                            _value[:, overtone],
                            _value[:, overtone])
@@ -160,12 +160,12 @@ class CalculateS(IOmodule):
         for k in range(_num_k):
 
             # correction for acoustic modes at Gamma point
-            if np.linalg.norm(_abins_data_extracted["k_points_data"]["k_vectors"][k]) < Constants.small_k: start = 3
+            if np.linalg.norm(_abins_data_extracted["k_points_data"]["k_vectors"][k]) < AbinsParameters.small_k: start = 3
             else: start = 0
 
             np.add(_frequencies,
-                   np.multiply(instrument.produce_abscissa(frequencies=np.multiply(_k_points_data["frequencies"][k], 1.0 / Constants.cm1_2_hartree),
-                                                           points_per_peak=Constants._pkt_per_peak,
+                   np.multiply(instrument.produce_abscissa(frequencies=np.multiply(_k_points_data["frequencies"][k], 1.0 / AbinsParameters.cm1_2_hartree),
+                                                           points_per_peak=AbinsParameters._pkt_per_peak,
                                                            start=start),
                                _k_points_data["weights"][k]),
                    _frequencies)

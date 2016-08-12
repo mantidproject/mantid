@@ -17,7 +17,7 @@ except ImportError:
     exir(1)
 
 
-from AbinsModules import CalculateS, LoadCASTEP, Constants
+from AbinsModules import CalculateS, LoadCASTEP, AbinsParameters
 
 class ABINSCalculateSPowderTest(unittest.TestCase):
     """
@@ -70,7 +70,7 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
 
     #       main test
     def test_good_case(self):
-        Constants._pkt_per_peak = 50 # lower internal ABINS parameter for the purpose of this benchmark
+        AbinsParameters._pkt_per_peak = 50 # lower internal ABINS parameter for the purpose of this benchmark
         self._good_case(name=self.C6H6)
         self._good_case(name=self.Si2)
 

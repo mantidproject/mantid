@@ -4,7 +4,7 @@ from IOmodule import  IOmodule
 from PowderData import PowderData
 from QData import QData
 from AbinsData import AbinsData
-import Constants
+import AbinsParameters
 
 class CalculatePowder(IOmodule):
     """
@@ -22,7 +22,7 @@ class CalculatePowder(IOmodule):
         @param abins_data: object of type AbinsData with data from input DFT file
         @param temperature:  temperature in K
         """
-        super(CalculatePowder, self).__init__(input_filename=filename, group_name=Constants.powder_data_group)
+        super(CalculatePowder, self).__init__(input_filename=filename, group_name=AbinsParameters.powder_data_group)
 
         if not isinstance(abins_data, AbinsData):
             raise ValueError("Object of AbinsData was expected.")
@@ -46,7 +46,7 @@ class CalculatePowder(IOmodule):
 
         weights = _data["k_points_data"]["weights"]
         mass_hartree_factor  = [1.0 / (2 * atom["mass"]) for atom in _data["atoms_data"]]
-        temperature_hartree = self._temperature * Constants.k_2_hartree
+        temperature_hartree = self._temperature * AbinsParameters.k_2_hartree
         freq_hartree = _data["k_points_data"]["frequencies"]
         displacements = _data["k_points_data"]["atomic_displacements"]
 
@@ -79,7 +79,7 @@ class CalculatePowder(IOmodule):
                 temp_dw_freq = 0.0
 
                 # correction for acoustic modes at Gamma point
-                if np.linalg.norm(_data["k_points_data"]["k_vectors"][k]) < Constants.small_k: start = 3
+                if np.linalg.norm(_data["k_points_data"]["k_vectors"][k]) < AbinsParameters.small_k: start = 3
                 else: start = 0
 
                 for freq in range(start, num_freq):

@@ -4,7 +4,7 @@ import re
 # ABINS modules
 from GeneralDFTProgram import GeneralDFTProgram
 from AbinsData import AbinsData
-import Constants
+import AbinsParameters
 
 class LoadCASTEP(GeneralDFTProgram):
     """
@@ -140,7 +140,7 @@ class LoadCASTEP(GeneralDFTProgram):
         """
 
         dim = 3 # we have 3D space
-        vectors = np.zeros((self._num_atoms, self._num_phonons, dim), dtype=Constants.complex_type) # in general case eigenvectors are complex
+        vectors = np.zeros((self._num_atoms, self._num_phonons, dim), dtype=AbinsParameters.complex_type) # in general case eigenvectors are complex
         for freq in range(self._num_phonons):
             for atom in range(self._num_atoms):
 

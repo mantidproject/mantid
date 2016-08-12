@@ -5,7 +5,7 @@ from mantid.api import AlgorithmFactory,  FileAction, FileProperty, PythonAlgori
 from mantid.simpleapi import  CreateWorkspace, CloneWorkspace, GroupWorkspaces, Scale, RenameWorkspace, SetSampleMaterial, DeleteWorkspace, Rebin, Load, SaveAscii
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty
 
-from AbinsModules import LoadCASTEP, CalculateS, Constants
+from AbinsModules import LoadCASTEP, CalculateS, AbinsParameters
 
 
 class ABINS(PythonAlgorithm):
@@ -222,7 +222,7 @@ class ABINS(PythonAlgorithm):
         s_data_extracted = s_data.extract()
         freq = s_data_extracted["convoluted_frequencies"]
         dim = freq.shape[0]
-        s_atom_data = np.zeros((dim, Constants.overtones_num), dtype=Constants.float_type) # stores all overtones for the particular type of atom
+        s_atom_data = np.zeros((dim, AbinsParameters.overtones_num), dtype=AbinsParameters.float_type) # stores all overtones for the particular type of atom
         s_all_atoms  = s_data_extracted["atoms_data"]
         num_atoms = len(s_all_atoms)
 
@@ -232,7 +232,7 @@ class ABINS(PythonAlgorithm):
             s_atom_data.fill(0.0)
             for num_atom in range(num_atoms):
                 if s_all_atoms[num_atom]["symbol"] == atom_symbol:
-                    np.add(s_atom_data, s_all_atoms[num_atom]["value"][:, :Constants.overtones_num], s_atom_data) # we sum S for all overtones over the atoms of the same type
+                    np.add(s_atom_data, s_all_atoms[num_atom]["value"][:, :AbinsParameters.overtones_num], s_atom_data) # we sum S for all overtones over the atoms of the same type
 
             # all overtones of  S for the given atom
             partial_workspaces.append(self._set_workspace(atom_name=atom_symbol,
@@ -254,7 +254,7 @@ class ABINS(PythonAlgorithm):
         s_data_extracted = s_data.extract()
         freq = s_data_extracted["convoluted_frequencies"]
         dim = freq.shape[0]
-        s_atom_data = np.zeros(dim, dtype=Constants.float_type)
+        s_atom_data = np.zeros(dim, dtype=AbinsParameters.float_type)
         s_all_atoms  = s_data_extracted["atoms_data"]
         num_atoms = len(s_all_atoms)
 
@@ -265,7 +265,7 @@ class ABINS(PythonAlgorithm):
             s_atom_data.fill(0.0)
             for num_atom in range(num_atoms):
                 if s_all_atoms[num_atom]["symbol"] == atom_symbol:
-                    np.add(s_atom_data, s_all_atoms[num_atom]["value"][:,Constants.overtones_num], s_atom_data) # we sum total S over the atoms of the same type
+                    np.add(s_atom_data, s_all_atoms[num_atom]["value"][:, AbinsParameters.overtones_num], s_atom_data) # we sum total S over the atoms of the same type
 
             # total S for the given atom
             partial_workspaces.append(self._set_workspace(atom_name=atom_symbol,
@@ -358,7 +358,7 @@ class ABINS(PythonAlgorithm):
         self._set_workspace_units(wrk=_ws_name)
 
         # rebining
-        Rebin(Inputworkspace=_ws_name, Params=[Constants._bin_width] , OutputWorkspace=_ws_name)
+        Rebin(Inputworkspace=_ws_name, Params=[AbinsParameters._bin_width], OutputWorkspace=_ws_name)
 
         # Add the sample material to the workspace
         SetSampleMaterial(InputWorkspace=_ws_name, ChemicalFormula=atom_name)

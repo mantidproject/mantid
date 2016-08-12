@@ -24,7 +24,7 @@ except ImportError:
 from AbinsModules import  CalculateQ
 from AbinsModules import KpointsData
 from AbinsModules.InstrumentProducer import InstrumentProducer
-from AbinsModules import Constants
+from AbinsModules import AbinsParameters
 
 
 class ABINSCalculateQTest(unittest.TestCase):
@@ -70,9 +70,9 @@ class ABINSCalculateQTest(unittest.TestCase):
                                                          [[1.0,1.0,1.0],[1.0,1.0,111.0],[1.0,1.0,1.0],
                                                          [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0]]]]).astype(complex)}) # 12 atomic displacements
         extracted_raw_data = raw_data.extract()
-        correct_q_data = ( (extracted_raw_data["frequencies"][0] / Constants.cm1_2_hartree) *
-                           (extracted_raw_data["frequencies"][0] / Constants.cm1_2_hartree) /
-                           16.0)
+        correct_q_data = ((extracted_raw_data["frequencies"][0] / AbinsParameters.cm1_2_hartree) *
+                          (extracted_raw_data["frequencies"][0] / AbinsParameters.cm1_2_hartree) /
+                          16.0)
 
         producer = InstrumentProducer()
         tosca_instrument = producer.produceInstrument("TOSCA")
