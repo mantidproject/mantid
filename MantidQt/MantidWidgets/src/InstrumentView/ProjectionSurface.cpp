@@ -731,10 +731,15 @@ void MantidQt::MantidWidgets::ProjectionSurface::loadFromProject(const std::stri
 
 std::string MantidQt::MantidWidgets::ProjectionSurface::saveToProject() const
 {
-  TSVSerialiser tsv, surface;
-  surface.writeSection("shapes", m_maskShapes.saveToProject());
-//  surface.writeSection("peaks", m_peakShapes.saveToProject());
-  tsv.writeSection("surface", surface.outputLines());
+  TSVSerialiser tsv;
+  tsv.writeLine("BackgroundColor");
+  tsv << m_backgroundColor.red();
+  tsv << m_backgroundColor.green();
+  tsv << m_backgroundColor.blue();
+  tsv << m_backgroundColor.alpha();
+
+  tsv.writeSection("shapes", m_maskShapes.saveToProject());
+//  tsv.writeSection("peaks", m_peakShapes.saveToProject());
   return tsv.outputLines();
 }
 

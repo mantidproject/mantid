@@ -113,6 +113,10 @@ public:
 
   /// Apply the transformation to a vector
   void transform(Mantid::Kernel::V3D &pos) const;
+  /// Load settings for the widget tab from a project file
+  virtual void loadFromProject(const std::string &lines);
+  /// Save settings for the widget tab to a project file
+  virtual std::string saveToProject() const;
 
 protected:
   /// Correct for aspect ratio
