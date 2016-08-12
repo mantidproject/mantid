@@ -4,13 +4,7 @@
 #include "MantidAPI/LogManager.h"
 #include "MantidKernel/PropertyNexus.h"
 
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-
-#include <nexus/NeXusFile.hpp>
-
-#include <algorithm>
 
 namespace Mantid {
 namespace API {
@@ -367,6 +361,33 @@ double LogManager::getPropertyAsSingleValue(
     // Put it in the cache
     m_singleValueCache.setCache(key, singleValue);
   }
+  return singleValue;
+}
+
+/**
+ * Returns a property as a n integer, if the underlying value is an integer.
+ * Throws otherwise.
+ * @param name :: The name of the property
+ * @return A single integer value
+ * @throws std::invalid_argument if property is not an integer type
+ */
+int LogManager::getPropertyAsIntegerValue(const std::string &name) const {
+  int singleValue(0);
+  double discard(0);
+
+  Property *prop = getProperty(name);
+
+  if (convertSingleValue<int32_t>(prop, discard) ||
+      convertSingleValue<int64_t>(prop, discard) ||
+      convertSingleValue<uint32_t>(prop, discard) ||
+      convertSingleValue<uint64_t>(prop, discard)) {
+    singleValue = std::stoi(prop->value());
+  } else {
+    throw std::invalid_argument("Run::getPropertyAsIntegerValue - Property \"" +
+                                name +
+                                "\" cannot be converted to an integer value.");
+  }
+
   return singleValue;
 }
 
