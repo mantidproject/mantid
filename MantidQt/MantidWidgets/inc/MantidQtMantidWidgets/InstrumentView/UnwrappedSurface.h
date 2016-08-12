@@ -127,6 +127,9 @@ public:
   virtual void loadFromProject(const std::string &lines) override;
   /// Save settings for the widget tab to a project file
   virtual std::string saveToProject() const override;
+  /// Get a handle to a peaks workspace from a name
+  boost::shared_ptr<Mantid::API::IPeaksWorkspace>
+  retrievePeaksWorkspace(const std::string &name) const;
 
 protected slots:
 

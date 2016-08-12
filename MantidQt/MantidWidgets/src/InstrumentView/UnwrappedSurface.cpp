@@ -4,9 +4,10 @@
 #include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
 #include "MantidQtMantidWidgets/InstrumentView/PeakMarker2D.h"
 
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidQtMantidWidgets/InputController.h"
 
 #include <QRgb>
@@ -730,15 +731,47 @@ void UnwrappedSurface::loadFromProject(const std::string &lines) {
     updateView();
     emit updateInfoText();
   }
+
+  if (tsv.selectLine("PeaksWorkspaces")) {
+    size_t workspaceCount = tsv.values("PeaksWorkspaces").size();
+    for (size_t i = 0; i < workspaceCount; ++i) {
+      std::string name;
+      tsv >> name;
+      auto ws = retrievePeaksWorkspace(name);
+      if (ws)
+        setPeaksWorkspace(ws);
+    }
+  }
 }
 
 std::string UnwrappedSurface::saveToProject() const {
   TSVSerialiser tsv;
   tsv.writeRaw(ProjectionSurface::saveToProject());
+
   tsv.writeLine("Zoom");
   tsv << m_viewRect.x0() << m_viewRect.y0();
   tsv << m_viewRect.x1() << m_viewRect.y1();
+
+  tsv.writeLine("PeaksWorkspaces");
+  for (auto overlay : m_peakShapes) {
+    tsv << overlay->getPeaksWorkspace()->name();
+  }
+
   return tsv.outputLines();
+}
+
+boost::shared_ptr<Mantid::API::IPeaksWorkspace>
+UnwrappedSurface::retrievePeaksWorkspace(const std::string &name) const {
+  using namespace Mantid::API;
+  Workspace_sptr ws;
+  try {
+    ws = AnalysisDataService::Instance().retrieve(name);
+  } catch (std::runtime_error) {
+    // couldn't find the workspace in the ADS for some reason
+    // just fail silently. There's nothing more we can do.
+    return nullptr;
+  }
+  return boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(ws);
 }
 
 } // MantidWidgets

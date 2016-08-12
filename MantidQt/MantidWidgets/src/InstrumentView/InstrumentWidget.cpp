@@ -1372,7 +1372,8 @@ void InstrumentWidget::loadFromProject(const std::string &lines) {
     tsv >> surfaceLines;
     getSurface()->loadFromProject(surfaceLines);
   }
-  //  updateInstrumentView();
+
+  updateInstrumentView();
 }
 
 } // MantidWidgets
