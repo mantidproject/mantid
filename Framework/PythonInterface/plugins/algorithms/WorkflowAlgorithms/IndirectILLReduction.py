@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name,too-many-instance-attributes,too-many-locals,too-many-branches
+#pylint: disable=no-init,invalid-name,too-many-instance-attributes
 from __future__ import (absolute_import, division, print_function)
 
 import os.path
@@ -143,7 +143,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self._unmirror_option = 0
 
         if self._sum_runs:
-            self.log().information('All the runs will be summed')
+            self.log().notice('All the runs will be summed')
             self._run_file = self._run_file.replace(',', '+')
 
     def validateInputs(self):
@@ -433,8 +433,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         number_spectra = mtd[ws1].getNumberHistograms()
         size = mtd[ws1].blocksize()
 
-        if ws2 is not None and size != mtd[ws2].blocksize():
-            self.log().warning('Input Workspaces should have the same blocksize')
+        if ws2 is not None and \
+            (size != mtd[ws2].blocksize() or number_spectra != mtd[ws2].getNumberHistograms()):
+            self.log().warning('Input Workspaces should have the same bins and number of spectra')
 
         mid_bin = int(size / 2)
 
@@ -462,26 +463,29 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     # ws1 will be shifted according to centered peak of ws2
                     to_shift = peak_bin2 - mid_bin
 
-            self.log().debug('%d bins of spectrum %d will be shifted' %(abs(to_shift), i))
+            self.log().information('%d bins of spectrum %d will be shifted' %(abs(to_shift), i))
 
             # Shift Y and E values of spectrum i by a number of to_shift bins
-            mtd[ws1].setY(i, np.roll(mtd[ws1].dataY(i), to_shift))
-            mtd[ws1].setE(i, np.roll(mtd[ws1].dataE(i), to_shift))
+            # Note the - sign, since np.roll shifts right if the argument is positive
+            # while here if to_shift is positive, it means we need to shift to the left
+            mtd[ws1].setY(i, np.roll(mtd[ws1].dataY(i), -to_shift))
+            mtd[ws1].setE(i, np.roll(mtd[ws1].dataE(i), -to_shift))
 
             if to_shift > 0:
                 if (size - to_shift) < end_bin:
-                    # New left boundary for masking (right shift)
+                    # New left boundary for masking (left shift)
                     end_bin = size - to_shift
             else:
-                if to_shift < start_bin:
-                    # New right boundary for masking (left shift)
-                    start_bin = abs(to_shift)
+                if -to_shift > start_bin:
+                    # New right boundary for masking (right shift)
+                    start_bin = -to_shift
 
+        # there is still a problem with this!
         # Mask bins to the left of the final bin range
-        MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=0, XMax=start_bin)
+        # MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=0, XMax=start_bin)
         # Mask bins to the right of the final bin range
-        MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=end_bin, XMax=size)
-        self.log().debug('Bin range is [%f, %f], bins outside this range are masked' %(start_bin, end_bin))
+        # MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=end_bin, XMax=size)
+        self.log().notice('Bin range is [%f, %f], bins outside this range are masked' %(start_bin, end_bin))
 
     def _finalize(self, runlist):
 
@@ -582,7 +586,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     @staticmethod
     def _get_peak_position(ws, i):
         """
-        Get bin of the peak of single spectrum
+        Gives bin of the peak of i-th spectrum in the ws
         @param ws        :: input workspace
         @param i         :: spectrum index of input workspace
         @return          :: bin number of the peak position
@@ -591,13 +595,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         __fit_table = FindEPP(InputWorkspace=__temp)
 
-        DeleteWorkspace(__temp)
-
         # Mid bin number
-        mid_bin = int(mtd[ws].blocksize() / 2)
+        mid_bin = int(__temp.blocksize() / 2)
 
         # Bin number, where Y has its maximum
-        y_values = np.array(mtd[ws].readY(0))
+        y_values = np.array(__temp.readY(0))
 
         # Bin range: difference between mid bin and peak bin should be in this range
         tolerance = int(mid_bin / 2)
@@ -605,7 +607,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # Peak bin in energy
         peak_position = __fit_table.row(0)["PeakCentre"]
         # Peak bin number
-        peak_bin = mtd[ws].binIndexOf(peak_position)
+        peak_bin = __temp.binIndexOf(peak_position)
 
         # Reliable check for peak bin
         fit_status = __fit_table.row(0)["FitStatus"]
@@ -620,6 +622,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 peak_bin = mid_bin
 
         # Cleanup unused FindEPP tables
+        DeleteWorkspace(__temp)
         DeleteWorkspace(__fit_table)
         DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
         DeleteWorkspace('EPPfit_Parameters')
