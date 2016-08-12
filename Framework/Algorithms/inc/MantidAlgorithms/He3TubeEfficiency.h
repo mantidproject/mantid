@@ -8,6 +8,9 @@
 namespace Mantid {
 
 // forward declarations
+namespace HistogramData {
+class Points;
+}
 namespace Geometry {
 class IDetector;
 class Object;
@@ -83,6 +86,11 @@ private:
   void exec() override;
   void execEvent();
 
+  /// Calculates the efficiency correction from the points
+  void computeEfficiencyCorrection(std::vector<double> &effCorrection,
+                                   const HistogramData::Points &wavelength,
+                                   const double exp_constant,
+                                   const double scale) const;
   /// Correct the given spectra index for efficiency
   void correctForEfficiency(std::size_t spectraIndex);
   /// Sets the detector geometry cache if necessary

@@ -26,6 +26,8 @@ const double TOL = 1.0e-8;
 
 namespace Mantid {
 namespace Algorithms {
+
+using namespace HistogramData;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(He3TubeEfficiency)
 
@@ -171,25 +173,22 @@ void He3TubeEfficiency::correctForEfficiency(std::size_t spectraIndex) {
 
   const auto wavelength = m_inputWS->points(spectraIndex);
 
-  std::transform(yValues.cbegin(), yValues.cend(), wavelength.cbegin(),
-                 yOut.begin(), [&](const double y, const double wavelen) {
-                   double effcorr =
-                       detectorEfficiency(exp_constant * wavelen, scale);
+  // todo is it going to die? returning local var by reference
+  std::vector<double> effCorrection(wavelength.size());
 
-                   return y * effcorr;
-                 });
+  computeEfficiencyCorrection(effCorrection, wavelength, exp_constant, scale);
+
+  std::transform(
+      yValues.cbegin(), yValues.cend(), effCorrection.cbegin(), yOut.begin(),
+      [&](const double y, const double effcorr) { return y * effcorr; });
 
   const auto &eValues = m_inputWS->e(spectraIndex);
   auto &eOut = m_outputWS->mutableE(spectraIndex);
 
   // reset wavelength iterator
-  std::transform(eValues.cbegin(), eValues.cend(), wavelength.cbegin(),
-                 eOut.begin(), [&](const double e, const double wavelen) {
-                   double effcorr =
-                       this->detectorEfficiency(exp_constant * wavelen, scale);
-
-                   return e * effcorr;
-                 });
+  std::transform(
+      eValues.cbegin(), eValues.cend(), effCorrection.cbegin(), eOut.begin(),
+      [&](const double e, const double effcorr) { return e * effcorr; });
 }
 
 /**
@@ -462,6 +461,23 @@ void He3TubeEfficiency::execEvent() {
   outputWS->clearMRU();
 
   this->logErrors();
+}
+
+/** Private function to calculate the effeciency correction from
+* points(wavelength)
+* @param effCorrection :: Vector that will hold the values for each wavelength
+* @param wavelength :: The points calculated from the histogram
+* @param expConstant
+* @param scale
+*/
+void He3TubeEfficiency::computeEfficiencyCorrection(
+    std::vector<double> &effCorrection, const Points &xes,
+    const double expConstant, const double scale) const {
+
+  std::transform(xes.cbegin(), xes.cend(), effCorrection.begin(),
+                 [&](double wavelen) {
+                   return detectorEfficiency(expConstant * wavelen, scale);
+                 });
 }
 
 /**
