@@ -39,6 +39,16 @@ void RebinnedOutput::init(const std::size_t &NVectors,
   }
 }
 
+void RebinnedOutput::init(const std::size_t &NVectors,
+                          const HistogramData::Histogram &histogram) {
+  Workspace2D::init(NVectors, histogram);
+  std::size_t nHist = this->getNumberHistograms();
+  this->fracArea.resize(nHist);
+  for (std::size_t i = 0; i < nHist; ++i) {
+    this->fracArea[i].resize(histogram.y().size());
+  }
+}
+
 /**
  * Function that returns a fractional area array for a given index.
  * @param index :: the array to fetch

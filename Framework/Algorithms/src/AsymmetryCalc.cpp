@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/AsymmetryCalc.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 
@@ -127,10 +127,10 @@ void AsymmetryCalc::exec() {
   assert(tmpWS->blocksize() == blocksize);
 
   // Create a point data workspace with only one spectra for forward
-  API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(
-      inputWS, 1, blocksize, blocksize);
-
-  outputWS->setPoints(0, tmpWS->points(forward));
+  //API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(
+  //    inputWS, 1, blocksize, blocksize);
+  auto outputWS = API::create<API::HistoWorkspace>(
+      inputWS, 1, HistogramData::Histogram(tmpWS->points(forward)));
 
   // Calculate asymmetry for each time bin
   // F-aB / F+aB

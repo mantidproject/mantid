@@ -126,6 +126,21 @@ public:
     m_axes[0] = new Mantid::API::RefAxis(j, this);
     m_axes[1] = new Mantid::API::SpectraAxis(this);
   }
+  void init(const size_t &numspec,
+            const HistogramData::Histogram &histogram) override {
+    spec = numspec;
+    vec.resize(spec, SpectrumTester(histogram.xMode(), histogram.yMode()));
+    for (size_t i = 0; i < spec; i++) {
+      vec[i].setHistogram(histogram);
+      vec[i].addDetectorID(detid_t(i));
+      vec[i].setSpectrumNo(specnum_t(i + 1));
+    }
+
+    // Put an 'empty' axis in to test the getAxis method
+    m_axes.resize(2);
+    m_axes[0] = new Mantid::API::RefAxis(histogram.x().size(), this);
+    m_axes[1] = new Mantid::API::SpectraAxis(this);
+  }
   size_t size() const override { return vec.size() * blocksize(); }
   size_t blocksize() const override {
     return vec.empty() ? 0 : vec[0].dataY().size();

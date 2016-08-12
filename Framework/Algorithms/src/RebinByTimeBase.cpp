@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/RebinByTimeBase.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -112,8 +113,8 @@ void RebinByTimeBase::exec() {
 
   MantidVecPtr XValues_new;
   // create new X axis, with absolute times in seconds.
-  const int ntcnew = VectorHelper::createAxisFromRebinParams(
-      rebinningParams, XValues_new.access());
+  static_cast<void>(VectorHelper::createAxisFromRebinParams(
+      rebinningParams, XValues_new.access()));
 
   ConvertToRelativeTime transformToRelativeT(runStartTime);
 
@@ -122,9 +123,9 @@ void RebinByTimeBase::exec() {
   std::transform(XValues_new->begin(), XValues_new->end(),
                  OutXValues_scaled.begin(), transformToRelativeT);
 
-  outputWS = WorkspaceFactory::Instance().create("Workspace2D", histnumber,
-                                                 ntcnew, ntcnew - 1);
-  WorkspaceFactory::Instance().initializeFromParent(inWS, outputWS, true);
+  outputWS = create<DataObjects::Workspace2D>(
+      inWS, histnumber,
+      HistogramData::Histogram{HistogramData::BinEdges(*XValues_new)});
 
   // Copy all the axes
   for (int i = 1; i < inWS->axes(); i++) {

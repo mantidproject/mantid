@@ -99,6 +99,13 @@ public:
   /// Returns the storage mode of the Y data (Counts or Frequencies).
   YMode yMode() const noexcept { return m_yMode; }
 
+  /// Returns the size of the histogram, i.e., the number of Y data points.
+  size_t size() const {
+    if (xMode() == XMode::BinEdges)
+      return m_x->size() - 1;
+    return m_x->size();
+  }
+
   BinEdges binEdges() const;
   BinEdgeVariances binEdgeVariances() const;
   BinEdgeStandardDeviations binEdgeStandardDeviations() const;

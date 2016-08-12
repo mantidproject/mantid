@@ -187,6 +187,31 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
   m_isInitialized = true;
 }
 
+void MatrixWorkspace::initialize(const std::size_t &NVectors,
+                                 const HistogramData::Histogram &histogram) {
+  // Check validity of arguments
+  if (NVectors == 0 || histogram.x().size() == 0) {
+    throw std::out_of_range(
+        "All arguments to init must be positive and non-zero");
+  }
+
+  // Bypass the initialization if the workspace has already been initialized.
+  if (m_isInitialized)
+    return;
+
+  // Invoke init() method of the derived class inside a try/catch clause
+  try {
+    this->init(NVectors, histogram);
+  } catch (std::runtime_error &) {
+    throw;
+  }
+
+  m_indexCalculator = MatrixWSIndexCalculator(this->blocksize());
+  // Indicate that this workspace has been initialized to prevent duplicate
+  // attempts.
+  m_isInitialized = true;
+}
+
 //---------------------------------------------------------------------------------------
 /** Set the title of the workspace
 *

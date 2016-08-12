@@ -25,7 +25,14 @@
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
+namespace HistogramData {
+class Histogram;
+}
+namespace DataObjects {
+class EventWorkspace;
+}
 namespace API {
+class HistoWorkspace;
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
@@ -76,9 +83,10 @@ public:
   MatrixWorkspace_sptr create(const std::string &className,
                               const size_t &NVectors, const size_t &XLength,
                               const size_t &YLength) const;
+  MatrixWorkspace_sptr createNoInit(const std::string &className) const;
 
-  void initializeFromParent(const MatrixWorkspace_const_sptr parent,
-                            const MatrixWorkspace_sptr child,
+  void initializeFromParent(const MatrixWorkspace_const_sptr &parent,
+                            const MatrixWorkspace_sptr &child,
                             const bool differentSize) const;
   /// Create a ITableWorkspace
   boost::shared_ptr<ITableWorkspace>
@@ -108,6 +116,74 @@ boost::shared_ptr<T> createWorkspace(InitArgs... args) {
   return ws;
 }
 
+
+
+/*
+// Create from parent, same spectra, same bin edges
+auto ws = create<HistoWorkspace>(parentWS);
+
+// Create from parent, same spectra
+auto ws = create<HistoWorkspace>(parentWS, edges);
+
+// Create from parent, same spectra
+auto ws = create<HistoWorkspace>(parentWS, edges, counts);
+
+// Create from parent, extract some spectrum numbers
+// Option 1 (verbose):
+IndexTranslator translator(parentWS.indexTranslator(), spectrumNumbers);
+auto ws = create<HistoWorkspace>(parentWS, translator);
+// Option 2 (unclear notation):
+// Are spectrumNumbers arbitrary and new, or to be extracted from parentWS?
+auto ws = create<HistoWorkspace>(parentWS, spectrumNumbers);
+
+// rename IndexTranslator -> Indexer?
+
+template <class T, class... Args>
+std::unique_ptr<T> create(const MatrixWorkspace &parent, Args &&... args) {
+  // no translator, copy from parent
+  create<T>(parent, parent.indexTranslator(), std::forward<Args>(args)...);
+}
+
+template <class T, class... Args>
+std::unique_ptr<T> create(const MatrixWorkspace &parent,
+                          const IndexTranslator &translator, Args &&... args) {
+  // 1. Figure out (dynamic) target type:
+  // - Type is same as parent if T is base of parent
+  // - If T is not base of parent, conversion may occur. Currently only
+  //   supported for EventWorkspace
+  std::string id(parent->id());
+  if (std::is_base_of<HistoWorkspace, T>::value && id == "EventWorkspace") {
+    // drop events
+    // create Workspace2D or T, whichever is more derived?
+    // if T is more derived than Workspace2D there must be an error?
+    id = "Workspace2D";
+  }
+
+  auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create(id));
+  if (!ws)
+    throw std::runtime_error("Invalid conversion across workspace type hierarchy");
+
+  // args are used to construct histogram for initialization
+  if (sizeof...(args) == 0)
+    ws->initialize(translator, parent.x(0).size(), parent.blocksize());
+  else
+    ws->initialize(translator, std::forward<Args>(args)...);
+  WorkspaceFactory::Instance().initializeFromParent(parent, ws);
+
+}
+
+// TODO do not use sptr as argument
+template <class T>
+std::unique_ptr<T> create(const MatrixWorkspace_const_sptr &parent,
+                          const IndexTranslator &translator, // sets new spectrum numbers and spectrum-detector associations
+                          const BinEdges &edges) {}
+template <class T>
+std::unique_ptr<T> create(const MatrixWorkspace_const_sptr &parent,
+                          const std::vector<SpectrumNumber> &spectrumNumbers, // extract these spectra from parent
+                          const BinEdges &edges) {}
+                          */
+
+
 } // namespace API
 } // namespace Mantid
 
@@ -115,6 +191,134 @@ namespace Mantid {
 namespace Kernel {
 EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::WorkspaceFactoryImpl>;
+}
+}
+
+namespace Mantid {
+namespace API {
+
+//template <class T, class P, class... Args>
+//std::unique_ptr<T> create(const P &parent, Args &&... args) {
+//  return create<T>(parent, parent.getNumberHistograms(),
+//                   std::forward<Args>(args)...);
+//}
+
+  /*
+template <class T, class P>
+void initializeHelper(const P &parent, T &ws) {
+  if (ws.id() == "EventWorkspace")
+    ws.initialize(parent.getNumberHistograms(), parent.blocksize() + 1,
+                  parent.blocksize());
+  else
+    ws.initialize(parent.getNumberHistograms(), parent.x(0).size(),
+                  parent.blocksize());
+}
+
+template <class T, class P, class Size>
+void initializeHelper(const P &parent, T &ws, Size size) {
+  if (ws.id() == "EventWorkspace")
+    ws.initialize(size, parent.blocksize() + 1, parent.blocksize());
+  else
+    ws.initialize(size, parent.x(0).size(), parent.blocksize());
+}
+
+template <class T, class P, class... Args>
+void initializeHelper(const P &parent, T &ws, Args &&... args) {
+  ws.initialize(std::forward<Args>(args)...);
+}
+
+template <class T, class P, class... Args>
+boost::shared_ptr<T> create(const P &parent, Args &&... args) {
+  // 1. Figure out (dynamic) target type:
+  // - Type is same as parent if T is base of parent
+  // - If T is not base of parent, conversion may occur. Currently only
+  //   supported for EventWorkspace
+  std::string id(parent->id());
+  if (std::is_base_of<HistoWorkspace, T>::value && id == "EventWorkspace") {
+    // drop events
+    // create Workspace2D or T, whichever is more derived?
+    // if T is more derived than Workspace2D there must be an error?
+    id = "Workspace2D";
+  }
+
+  auto ws = boost::dynamic_pointer_cast<T>(
+      WorkspaceFactory::Instance().createNoInit(id));
+  if (!ws)
+    throw std::runtime_error(
+        "Invalid conversion across workspace type hierarchy");
+
+  // args are used to construct histogram for initialization
+  initializeHelper(*parent, *ws, std::forward<Args>(args)...);
+  WorkspaceFactory::Instance().initializeFromParent(
+      parent, ws, parent->y(0).size() != ws->y(0).size());
+
+  return ws;
+}
+*/
+
+/*
+template <class T>
+HistogramData::Histogram createEmptyHistogramFor(const HistogramData::Histogram &parent) {
+  return parent;
+}
+
+template <>
+HistogramData::Histogram
+createEmptyHistogramFor<DataObjects::EventWorkspace>(const HistogramData::Histogram &parent) {
+  return HistogramData::Histogram(parent.binEdges());
+}
+*/
+
+namespace detail {
+MANTID_API_DLL HistogramData::Histogram
+stripData(HistogramData::Histogram histogram);
+}
+
+template <class T, class P> boost::shared_ptr<T> create(const P &parent) {
+  // copy X??
+  return create<T>(parent, detail::stripData(parent->histogram(0)));
+}
+
+template <class T, class P>
+boost::shared_ptr<T> create(const P &parent, const size_t numSpectra) {
+  return create<T>(parent, numSpectra, detail::stripData(parent->histogram(0)));
+}
+
+template <class T, class P>
+boost::shared_ptr<T> create(const P &parent,
+                            const HistogramData::Histogram &histogram) {
+  return create<T>(parent, parent->getNumberHistograms(), histogram);
+}
+
+template <class T, class P>
+boost::shared_ptr<T> create(const P &parent, const size_t numSpectra,
+                            const HistogramData::Histogram &histogram) {
+  // 1. Figure out (dynamic) target type:
+  // - Type is same as parent if T is base of parent
+  // - If T is not base of parent, conversion may occur. Currently only
+  //   supported for EventWorkspace
+  std::string id(parent->id());
+  if (std::is_base_of<HistoWorkspace, T>::value && id == "EventWorkspace") {
+    // drop events
+    // create Workspace2D or T, whichever is more derived?
+    // if T is more derived than Workspace2D there must be an error?
+    id = "Workspace2D";
+  }
+
+  auto ws = boost::dynamic_pointer_cast<T>(
+      WorkspaceFactory::Instance().createNoInit(id));
+  if (!ws)
+    throw std::runtime_error(
+        "Invalid conversion across workspace type hierarchy");
+
+  ws->initialize(numSpectra, histogram);
+  // No! different size if ANY of the length params changed!
+  WorkspaceFactory::Instance().initializeFromParent(
+      parent, ws, parent->y(0).size() != ws->y(0).size());
+
+  return ws;
+}
+
 }
 }
 

@@ -518,15 +518,7 @@ void FilterEvents::createOutputWorkspaces() {
         add2output = false;
     }
 
-    // Generate one of the output workspaces & Copy geometry over. But we
-    // don't
-    // copy the data.
-    DataObjects::EventWorkspace_sptr optws =
-        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
-            API::WorkspaceFactory::Instance().create(
-                "EventWorkspace", m_eventWS->getNumberHistograms(), 2, 1));
-    API::WorkspaceFactory::Instance().initializeFromParent(m_eventWS, optws,
-                                                           false);
+    auto optws = create<DataObjects::EventWorkspace>(m_eventWS);
     m_outputWS.emplace(wsgroup, optws);
 
     // Add information, including title and comment, to output workspace

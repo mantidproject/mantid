@@ -21,7 +21,7 @@ DECLARE_WORKSPACE(Workspace2D)
 Workspace2D::Workspace2D() : m_noVectors(0) {}
 
 Workspace2D::Workspace2D(const Workspace2D &other)
-    : MatrixWorkspace(other), m_noVectors(other.m_noVectors),
+    : HistoWorkspace(other), m_noVectors(other.m_noVectors),
       m_monitorList(other.m_monitorList) {
   data.resize(m_noVectors);
 
@@ -92,6 +92,32 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
   // Add axes that reference the data
   m_axes.resize(2);
   m_axes[0] = new API::RefAxis(XLength, this);
+  m_axes[1] = new API::SpectraAxis(this);
+}
+
+void Workspace2D::init(const std::size_t &NVectors,
+                       const HistogramData::Histogram &histogram) {
+  m_noVectors = NVectors;
+  data.resize(m_noVectors);
+
+  HistogramData::Histogram initializedHistogram(histogram);
+  if(!histogram.sharedY()) {
+    initializedHistogram.setCounts(histogram.size(), 0.0);
+    initializedHistogram.setCountStandardDeviations(histogram.size(), 0.0);
+  }
+
+  for (size_t i = 0; i < m_noVectors; i++) {
+    data[i] = new Histogram1D(initializedHistogram.xMode(),
+                              initializedHistogram.yMode());
+    data[i]->setHistogram(initializedHistogram);
+    // Default spectrum number = starts at 1, for workspace index 0.
+    data[i]->setSpectrumNo(specnum_t(i + 1));
+    data[i]->setDetectorID(detid_t(i + 1));
+  }
+
+  // Add axes that reference the data
+  m_axes.resize(2);
+  m_axes[0] = new API::RefAxis(initializedHistogram.x().size(), this);
   m_axes[1] = new API::SpectraAxis(this);
 }
 

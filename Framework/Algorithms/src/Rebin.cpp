@@ -5,6 +5,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -162,18 +163,10 @@ void Rebin::exec() {
       eventOutputWS->setAllX(XValues_new);
     } else {
       //--------- Different output, OR you're inplace but not preserving Events
-      //--- create a Workspace2D -------
       g_log.information() << "Creating a Workspace2D from the EventWorkspace "
                           << eventInputWS->getName() << ".\n";
-
-      // Create a Workspace2D
-      // This creates a new Workspace2D through a torturous route using the
-      // WorkspaceFactory.
-      // The Workspace2D is created with an EMPTY CONSTRUCTOR
-      outputWS = WorkspaceFactory::Instance().create("Workspace2D", histnumber,
-                                                     ntcnew, ntcnew - 1);
-      WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                        true);
+      outputWS = create<DataObjects::Workspace2D>(
+          inputWS, histnumber, HistogramData::Histogram(XValues_new));
 
       // Initialize progress reporting.
       Progress prog(this, 0.0, 1.0, histnumber);
@@ -182,10 +175,6 @@ void Rebin::exec() {
       PARALLEL_FOR3(inputWS, eventInputWS, outputWS)
       for (int i = 0; i < histnumber; ++i) {
         PARALLEL_START_INTERUPT_REGION
-
-        // Set the X axis for each output histogram
-        outputWS->setBinEdges(i, XValues_new);
-
         // Get a const event list reference. eventInputWS->dataY() doesn't work.
         const EventList &el = eventInputWS->getSpectrum(i);
         MantidVec y_data, e_data;

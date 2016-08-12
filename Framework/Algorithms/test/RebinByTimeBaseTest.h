@@ -96,6 +96,8 @@ public:
   MOCK_CONST_METHOD1(getSpectrum,
                      const Mantid::API::IEventList &(const std::size_t));
   MOCK_METHOD3(init, void(const size_t &, const size_t &, const size_t &));
+  MOCK_METHOD2(init,
+               void(const size_t &, const Mantid::HistogramData::Histogram &));
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
                      Mantid::Kernel::SpecialCoordinateSystem());
 

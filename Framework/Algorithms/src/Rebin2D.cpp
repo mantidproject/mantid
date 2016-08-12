@@ -182,31 +182,23 @@ Rebin2D::createOutputWorkspace(MatrixWorkspace_const_sptr parent,
                                const bool useFractionalArea) const {
   using Kernel::VectorHelper::createAxisFromRebinParams;
   // First create the two sets of bin boundaries
-  const int newXSize =
-      createAxisFromRebinParams(getProperty("Axis1Binning"), newXBins);
+  static_cast<void>(
+      createAxisFromRebinParams(getProperty("Axis1Binning"), newXBins));
   const int newYSize =
       createAxisFromRebinParams(getProperty("Axis2Binning"), newYBins);
   // and now the workspace
+  HistogramData::Histogram histogram{HistogramData::BinEdges(newXBins)};
   MatrixWorkspace_sptr outputWS;
   if (!useFractionalArea) {
-    outputWS = WorkspaceFactory::Instance().create(parent, newYSize - 1,
-                                                   newXSize, newXSize - 1);
+    outputWS = create<MatrixWorkspace>(parent, newYSize - 1, histogram);
   } else {
-    outputWS = WorkspaceFactory::Instance().create(
-        "RebinnedOutput", newYSize - 1, newXSize, newXSize - 1);
-    WorkspaceFactory::Instance().initializeFromParent(parent, outputWS, true);
+    outputWS = create<RebinnedOutput>(parent, newYSize - 1, histogram);
   }
   Axis *const verticalAxis = new BinEdgeAxis(newYBins);
   // Meta data
   verticalAxis->unit() = parent->getAxis(1)->unit();
   verticalAxis->title() = parent->getAxis(1)->title();
   outputWS->replaceAxis(1, verticalAxis);
-
-  HistogramData::BinEdges binEdges(newXBins);
-  // Now set the axis values
-  for (size_t i = 0; i < static_cast<size_t>(newYSize - 1); ++i) {
-    outputWS->setBinEdges(i, binEdges);
-  }
 
   return outputWS;
 }

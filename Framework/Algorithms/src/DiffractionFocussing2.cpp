@@ -347,13 +347,7 @@ void DiffractionFocussing2::exec() {
  */
 void DiffractionFocussing2::execEvent() {
   // Create a new outputworkspace with not much in it
-  DataObjects::EventWorkspace_sptr out;
-  out = boost::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create("EventWorkspace",
-                                               m_validGroups.size(), 2, 1));
-  // Copy required stuff from it
-  API::WorkspaceFactory::Instance().initializeFromParent(m_matrixInputW, out,
-                                                         true);
+  auto out = create<EventWorkspace>(m_matrixInputW, m_validGroups.size());
 
   MatrixWorkspace_const_sptr outputWS = getProperty("OutputWorkspace");
   bool inPlace = (m_matrixInputW == outputWS);

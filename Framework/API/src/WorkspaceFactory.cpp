@@ -1,7 +1,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/HistoWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
@@ -86,7 +86,7 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
  *different sizes
  */
 void WorkspaceFactoryImpl::initializeFromParent(
-    const MatrixWorkspace_const_sptr parent, const MatrixWorkspace_sptr child,
+    const MatrixWorkspace_const_sptr &parent, const MatrixWorkspace_sptr &child,
     const bool differentSize) const {
   child->setTitle(parent->getTitle());
   child->setComment(parent->getComment());
@@ -168,6 +168,19 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string &className,
   return ws;
 }
 
+MatrixWorkspace_sptr
+WorkspaceFactoryImpl::createNoInit(const std::string &className) const {
+  MatrixWorkspace_sptr ws =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(this->create(className));
+
+  if (!ws) {
+    g_log.error("Workspace was not created");
+    throw std::runtime_error("Workspace was not created");
+  }
+
+  return ws;
+}
+
 /// Create a ITableWorkspace
 ITableWorkspace_sptr
 WorkspaceFactoryImpl::createTable(const std::string &className) const {
@@ -198,6 +211,14 @@ WorkspaceFactoryImpl::createPeaks(const std::string &className) const {
     throw;
   }
   return ws;
+}
+
+namespace detail {
+HistogramData::Histogram stripData(HistogramData::Histogram histogram) {
+  histogram.setSharedY(nullptr);
+  histogram.setSharedE(nullptr);
+  return histogram;
+}
 }
 
 } // namespace API

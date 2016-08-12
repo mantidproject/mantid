@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/HistoWorkspace.h"
 #include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid {
@@ -40,7 +40,7 @@ namespace DataObjects {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Workspace2D : public API::MatrixWorkspace {
+class DLLExport Workspace2D : public API::HistoWorkspace {
 public:
   /**
   Gets the name of the workspace type
@@ -96,6 +96,8 @@ protected:
   /// Called by initialize()
   void init(const std::size_t &NVectors, const std::size_t &XLength,
             const std::size_t &YLength) override;
+  void init(const std::size_t &NVectors,
+            const HistogramData::Histogram &histogram) override;
 
   /// The number of vectors in the workspace
   std::size_t m_noVectors;
