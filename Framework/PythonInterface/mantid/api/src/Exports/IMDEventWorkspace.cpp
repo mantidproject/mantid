@@ -23,11 +23,15 @@ void export_IMDEventWorkspace() {
       .def("getBoxController", (BoxController_sptr (IMDEventWorkspace::*)()) &
                                    IMDEventWorkspace::getBoxController,
            arg("self"), "Returns the BoxController used in this workspace")
-      .def("setDisplayNormalization", &IMDEventWorkspace::setDisplayNormalization,
-           (arg("self"),arg("normalization")),"Sets the visual normalization of"
+      .def("setDisplayNormalization",
+           &IMDEventWorkspace::setDisplayNormalization,
+           (arg("self"), arg("normalization")),
+           "Sets the visual normalization of"
            " the workspace.")
-      .def("setDisplayNormalizationHisto", &IMDEventWorkspace::setDisplayNormalizationHisto,
-           (arg("self"),arg("normalization")),"For MDEventWorkspaces sets"
+      .def("setDisplayNormalizationHisto",
+           &IMDEventWorkspace::setDisplayNormalizationHisto,
+           (arg("self"), arg("normalization")),
+           "For MDEventWorkspaces sets"
            " the visual normalization of dervied "
            "MDHistoWorkspaces.");
 
