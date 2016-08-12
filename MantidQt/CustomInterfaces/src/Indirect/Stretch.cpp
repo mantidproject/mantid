@@ -160,6 +160,21 @@ void Stretch::run() {
 
 }
 
+/**
+* Handles the saving and plotting of workspaces after execution
+*/
+void Stretch::algorithmComplete(const bool &error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+    SLOT(algorithmComplete(bool)));
+
+  if (error)
+    return;
+
+  // Enables plot and save
+  m_uiForm.cbPlot->setEnabled(true);
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+}
 
 /**
  * Handles the saving of workspaces post alogrithm completion

@@ -34,6 +34,7 @@ private slots:
   void saveWorkspaces();
   /// Plot the workspaces specified by the interface
   void plotWorkspaces();
+  void algorithmComplete(const bool &error);
 
 private:
   // The ui form
