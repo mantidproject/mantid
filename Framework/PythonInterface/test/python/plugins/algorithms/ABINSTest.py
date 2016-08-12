@@ -1,7 +1,7 @@
 import unittest
 from mantid import logger
 from mantid.api import ITableWorkspace
-from mantid.simpleapi import ABINS, Scale, CheckWorkspacesMatch
+from mantid.simpleapi import ABINS, Scale, CompareWorkspaces
 
 try:
     import scipy
@@ -32,9 +32,9 @@ class ABINSTest(unittest.TestCase):
         self._cross_section_factor = "Total"
         self._workspace_name = "output_workspace"
 
-
+    # test if algorithm react properly for wrong user input
     def test_wrong_input(self):
-        """Test if the correct behaviour in case input is not valid"""
+        """Test if the correct behaviour of algorithm in case input is not valid"""
 
         #  invalid CASTEP file missing:  Number of branches     6 in the header file
         self.assertRaises(RuntimeError, ABINS, PhononFile="Si2-sc_wrong.phonon", OutputWorkspace=self._workspace_name)
@@ -58,6 +58,7 @@ class ABINSTest(unittest.TestCase):
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._benzene_phonon_file, SampleForm="SingleCrystal", Overtones=True, OutputWorkspace=self._workspace_name)
 
 
+    # test if intermediate results are consistent
     def test_non_existing_atoms(self):
         """Test scenario in which  a user requests to create workspaces for atoms which do not exist in the system.
            In that case ABINS should terminate and give a user a meaningful message about wrong atoms to analyse.
@@ -75,8 +76,33 @@ class ABINSTest(unittest.TestCase):
         ref = ABINS(PhononFile=self._squaricn_phonon_file, OutputWorkspace="non_scaled_workspace")
         ref = Scale(ref, Factor=10)
 
-        result = CheckWorkspacesMatch(wks, ref)
-        self.assertEqual(result, 'Success!')
+        (result, messages) = CompareWorkspaces(wks, ref)
+        self.assertEqual(result, True)
+
+
+    def test_partial(self):
+
+
+        # By default workspaces for all atoms should be created
+        wks_all_atoms_explicitly = ABINS(PhononFile=self._squaricn_phonon_file,
+                                         Atoms="H, C, O",
+                                         OutputWorkspace="explicit")
+
+        wsk_all_atoms_default = ABINS(PhononFile=self._squaricn_phonon_file,
+                                      OutputWorkspace="default")
+
+        (result, messages) = CompareWorkspaces(wks_all_atoms_explicitly, wsk_all_atoms_default)
+        self.assertEqual(result, True)
+
+        workspaces = wks_all_atoms_explicitly.getNames()
+        self.assertEquals(len(workspaces), 3)
+
+
+    # main tests
+    def test_good_case(self):
+        pass
+
+
 
 if __name__=="__main__":
     unittest.main()
