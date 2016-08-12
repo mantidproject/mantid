@@ -19,13 +19,15 @@ using testing::Return;
 class EnggDiffFittingPresenterNoThread : public EnggDiffFittingPresenter {
 public:
   EnggDiffFittingPresenterNoThread(IEnggDiffFittingView *view)
-      : EnggDiffFittingPresenter(view, nullptr) {}
+      : EnggDiffFittingPresenter(view, nullptr, nullptr) {}
 
 private:
   // not async at all
-  void startAsyncFittingWorker(const std::string &focusedRunNo,
+  void startAsyncFittingWorker(const std::vector<std::string> &focusedRunNo,
                                const std::string &ExpectedPeaks) override {
-    doFitting(focusedRunNo, ExpectedPeaks);
+
+    std::string runNo = focusedRunNo[0];
+    doFitting(runNo, ExpectedPeaks);
     fittingFinished();
   }
 };
@@ -52,7 +54,7 @@ public:
   void setUp() override {
     m_view.reset(new testing::NiceMock<MockEnggDiffFittingView>());
     m_presenter.reset(new MantidQt::CustomInterfaces::EnggDiffFittingPresenter(
-        m_view.get(), nullptr));
+        m_view.get(), nullptr, nullptr));
 
     // default banks
     m_ex_enginx_banks.push_back(true);
@@ -87,7 +89,7 @@ public:
   void test_fitting_with_missing_param() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView,
-                                                              nullptr);
+                                                              nullptr, nullptr);
 
     EXPECT_CALL(mockView, getFittingRunNo()).Times(1).WillOnce(Return(""));
     EXPECT_CALL(mockView, fittingPeaksData()).Times(1).WillOnce(Return(""));
@@ -563,7 +565,7 @@ public:
   void test_shutDown() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView,
-                                                              nullptr);
+                                                              nullptr, nullptr);
 
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
     EXPECT_CALL(mockView, getFittingRunNo()).Times(0);

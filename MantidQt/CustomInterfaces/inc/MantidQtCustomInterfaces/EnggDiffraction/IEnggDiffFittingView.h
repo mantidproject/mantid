@@ -248,7 +248,6 @@ public:
    */
   virtual void setFittingMultiRunMode(bool mode) = 0;
 
-
   /**
   * to determine whether the current loop is multi-run or single to avoid
   * regenerating the list-view widget when not required
@@ -264,8 +263,6 @@ public:
   * @param mode true if its multi-run
   */
   virtual void setFittingSingleRunMode(bool mode) = 0;
-
-
 
   /**
    * generates and sets the curves on the fitting tab

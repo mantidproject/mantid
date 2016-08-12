@@ -53,7 +53,6 @@ private slots:
 
       auto runNo = m_multiRunNo[i];
       m_pres->doFitting(runNo, m_expectedPeaks);
-
     }
     emit finished();
   }
