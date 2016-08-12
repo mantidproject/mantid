@@ -354,11 +354,62 @@ public:
 
     EXPECT_CALL(mockView, focusingDir()).Times(0);
 
-    // No errors/0 warnings. File entered is not found
+    // No errors/1 warnings. File entered is not found
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
+  }
+
+  // Fit All Peaks test begin here
+  void test_fit_all_runno_valid_single_run() {
+    testing::NiceMock<MockEnggDiffFittingView> mockView;
+    EnggDiffFittingPresenterNoThread pres(&mockView);
+
+    EXPECT_CALL(mockView, getFittingRunNo()).Times(0);
+    EXPECT_CALL(mockView, fittingPeaksData())
+        .Times(1)
+        .WillOnce(Return("2.3445,3.3433,4.5664"));
+
+    EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
+
+    EXPECT_CALL(mockView, enableFitAllButton(testing::_)).Times(1);
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
+    // No errors/1 warnings. There will be an error log because dir vector
+    // is empty
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    pres.notify(IEnggDiffFittingPresenter::FitAllPeaks);
+  }
+
+  // This would test the fitting tab with invalid expected peaks but should only
+  // produce a warning
+  void test_fit_all_with_invalid_expected_peaks() {
+    testing::NiceMock<MockEnggDiffFittingView> mockView;
+    EnggDiffFittingPresenterNoThread pres(&mockView);
+
+    // inputs from user
+    EXPECT_CALL(mockView, fittingPeaksData())
+        .Times(1)
+        .WillOnce(Return(",3.5,7.78,r43d"));
+    EXPECT_CALL(mockView, setPeakList(testing::_)).Times(1);
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
+    // No errors/1 warnings. There will be an error log from the algorithms
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    pres.notify(IEnggDiffFittingPresenter::FitPeaks);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_browse_peaks_list() {
