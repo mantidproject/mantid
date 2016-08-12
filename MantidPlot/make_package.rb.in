@@ -185,7 +185,7 @@ if Dir.exist?("Contents/PlugIns")
   end
 else
   p "Contents/PlugIns not created by macdeployqt."
-  #exit 1
+  exit 1
 end
 
 # We only need one copy of openssl
