@@ -250,11 +250,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         """
         # call IndirectILLReduction for vanadium run with unmirror 1 and 2 to get left and right
 
-        left_van = IndirectILLReduction(Run=self._vanadium_file,SumRuns=True,MirrorSense=self._mirros_sense,
+        left_van = IndirectILLReduction(Run=self._vanadium_file,SumRuns=True,MirrorSense=self._mirror_sense,
                                         UnmirrorOption=1,MapFile=self._map_file,Analyser=self._analyser,
                                         Reflection=self._reflection)
 
-        right_van = IndirectILLReduction(Run=self._vanadium_file, SumRuns=True, MirrorSense=self._mirros_sense,
+        right_van = IndirectILLReduction(Run=self._vanadium_file, SumRuns=True, MirrorSense=self._mirror_sense,
                                          UnmirrorOption=2, MapFile=self._map_file, Analyser=self._analyser,
                                          Reflection=self._reflection)
 
