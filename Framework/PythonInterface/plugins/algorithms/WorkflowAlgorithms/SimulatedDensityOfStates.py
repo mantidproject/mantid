@@ -9,6 +9,7 @@ from mantid.api import *
 import mantid.simpleapi as s_api
 
 from dos.load_phonon import parse_phonon_file
+from dos.load_castep import parse_castep_file
 
 PEAK_WIDTH_ENERGY_FLAG = 'energy'
 
@@ -176,7 +177,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         ion_data = file_data.get('ions', None)
         unit_cell = file_data.get('unit_cell', None)
 
-        self._num_ions = file_data['num_ions']
         self._num_branches = file_data['num_branches']
 
         logger.debug('Unit cell: {0}'.format(unit_cell))
@@ -762,12 +762,14 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
             file_data, element_isotopes = parse_phonon_file(file_name, record_eigenvectors)
             self._element_isotope = element_isotopes
+            self._num_ions = file_data['num_ions']
 
         elif ext == '.castep':
             if len(self._ions_of_interest) > 0:
                 raise ValueError("Cannot compute partial density of states from .castep files.")
 
-            file_data = self._parse_castep_file(file_name)
+            ir_or_raman = self._spec_type == 'IR_Active' or self._spec_type == 'Raman_Active'
+            file_data = parse_castep_file(file_name, ir_or_raman)
 
         if file_data['frequencies'].size == 0:
             raise ValueError("Failed to load any frequencies from file.")
