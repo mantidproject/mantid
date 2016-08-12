@@ -400,22 +400,22 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         elif self._unmirror_option == 4:
             self.log().information('Unmirror 4: shift the right according to left')
-            right = self._shift_spectra(right, left)
+            self._shift_spectra(right, left)
 
         elif self._unmirror_option == 5:
             self.log().information('Unmirror 5: shift the right according to right of the vanadium and sum to left')
-            right = self._shift_spectra(right, 'right_van', True)
+            self._shift_spectra(right, 'right_van', True)
             DeleteWorkspace('right_shifted')
 
         elif self._unmirror_option == 6:
             self.log().information('Unmirror 6: center both the right and the left')
-            right = self._shift_spectra(right)
-            left = self._shift_spectra(left)
+            self._shift_spectra(right)
+            self._shift_spectra(left)
 
         elif self._unmirror_option == 7:
             self.log().information('Unmirror 7: shift both the right and the left according to vanadium and sum')
-            left = self._shift_spectra(left, 'left_van', True)
-            right = self._shift_spectra(right, 'right_van', True)
+            self._shift_spectra(left, 'left_van', True)
+            self._shift_spectra(right, 'right_van', True)
 
         # Perform unmirror option by summing left and right workspaces
         if self._unmirror_option > 2:
@@ -432,14 +432,14 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         The SampleLog data of the workspace will be lost
         @param ws1                         ::   workspace to be shifted
         @param ws2                         ::   optional workspace according to which ws1 will be shifted
-        @param shift_option                ::   option to shift ws1 by number of bins ws2 to center
+        @param shift_option                ::   option to shift ws1 by number of bins (ws2 to center)
         @return                            ::   shifted output workspace
         """
         number_spectra = mtd[ws1].getNumberHistograms()
         size = mtd[ws1].blocksize()
 
         if ws2 is not None and size != mtd[ws2].blocksize():
-            cls.log().information('Input Workspaces should have the same blocksize')
+            cls.log().warning('Input Workspaces should have the same blocksize')
 
         mid_bin = int(size / 2)
 
@@ -447,17 +447,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         start_bin = 0
         end_bin = size
 
-        # Temporary workspace names for the shifted workspace of each spectrum and the output workspace
-        shifted = '__shifted'
-        ws_out_temp = '__ws_out_temp'
-
         # Shift each single spectrum of the input workspace ws1
         for i in range(number_spectra):
-
-            # Read X, Y, and E values, which will be shifted
-            x_values = mtd[ws1].readX(i)
-            y_values = mtd[ws1].readY(i)
-            e_values = mtd[ws1].readE(i)
 
             # Find peak positions in ws1
             __temp = ExtractSingleSpectrum(InputWorkspace=ws1, WorkspaceIndex=i)
@@ -473,18 +464,18 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 peak_bin2 = cls._get_peak_position(__temp2)
                 DeleteWorkspace(__temp2)
 
-                if shift_option_ws2_centered is False:
+                if shift_option is False:
                     # ws1 will be shifted according to peak position of ws2
                     to_shift = peak_bin1 - peak_bin2
                 else:
                     # ws1 will be shifted according to centered peak of ws2
                     to_shift = peak_bin2 - mid_bin
 
-            #cls.log().information('%d bins of spectrum %d will be shifted' %(abs(to_shift), i))
+            cls.log().debug('%d bins of spectrum %d will be shifted' %(abs(to_shift), i))
 
-            # Shift Y and E values by to_shift bins
-            y_values = np.roll(y_values, to_shift)
-            e_values = np.roll(e_values, to_shift)
+            # Shift Y and E values of spectrum i by a number of to_shift bins
+            mtd[ws1].setY(i, np.roll(mtd[ws1].dataY(i), to_shift))
+            mtd[ws1].setE(i, np.roll(mtd[ws1].dataE(i), to_shift))
 
             if to_shift > 0:
                 if (size - to_shift) < end_bin:
@@ -495,22 +486,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     # New right boundary for masking (left shift)
                     start_bin = abs(to_shift)
 
-            if i == 0:
-                # Initial shifted spectrum 0
-                CreateWorkspace(OutputWorkspace=ws_out_temp, DataX=x_values, DataY=y_values, DataE=e_values, NSpec=1, UnitX='DeltaE')
-            else:
-                # Append all following shifted spectra > 0
-                CreateWorkspace(OutputWorkspace=shifted,DataX=x_values, DataY=y_values, DataE=e_values, NSpec=1, UnitX='DeltaE')
-                AppendSpectra(InputWorkspace1=ws_out_temp,InputWorkspace2=shifted,OutputWorkspace=ws_out_temp, MergeLogs=True)
-                DeleteWorkspace(shifted)
-
         # Mask bins to the left of the final bin range
-        MaskBins(InputWorkspace=ws_out_temp, OutputWorkspace=ws_out_temp, XMin=0, XMax=start_bin)
+        MaskBins(InputWorkspace=w1, OutputWorkspace=w1, XMin=0, XMax=start_bin)
         # Mask bins to the right of the final bin range
-        MaskBins(InputWorkspace=ws_out_temp, OutputWorkspace=ws_out_temp, XMin=end_bin, XMax=size)
+        MaskBins(InputWorkspace=w1, OutputWorkspace=w1, XMin=end_bin, XMax=size)
         cls.log().information('Bin range is [%f, %f], bins outside this range are masked' %(start_bin, end_bin))
-
-        return ws_out_temp
 
     def _set_output_workspace_properties(self, runlist):
 
