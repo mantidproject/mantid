@@ -442,6 +442,10 @@ void ContainerSubtraction::absCorComplete(bool error) {
         "LogText", boost::lexical_cast<std::string>(m_uiForm.spShift->value()));
     m_batchAlgoRunner->addAlgorithm(shiftLog);
   }
+  // Enable post process plotting and saving
+  m_uiForm.cbPlotOutput->setEnabled(true);
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 
   // Run algorithm queue
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
