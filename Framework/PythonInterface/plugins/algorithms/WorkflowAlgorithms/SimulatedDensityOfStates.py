@@ -23,7 +23,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
     _peak_width = None
     _scale = None
     _zero_threshold = None
-    _ions = None
+    _ions_of_interest = None
     _sum_contributions = None
     _scale_by_cross_section = None
     _calc_partial = None
@@ -178,112 +178,28 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         prog_reporter = Progress(self, 0.0, 1.0, 1)
 
-        # We want to output a table workspace with ion information
+        # Output a table workspace with ion information
         if self._spec_type == 'IonTable':
-            ion_table = s_api.CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
-            ion_table.addColumn('str', 'Species')
-            ion_table.addColumn('int', 'FileIndex')
-            ion_table.addColumn('int', 'Number')
-            ion_table.addColumn('float', 'FractionalX')
-            ion_table.addColumn('float', 'FractionalY')
-            ion_table.addColumn('float', 'FractionalZ')
-            ion_table.addColumn('float', 'CartesianX')
-            ion_table.addColumn('float', 'CartesianY')
-            ion_table.addColumn('float', 'CartesianZ')
-            ion_table.addColumn('float', 'Isotope')
+            self._create_ion_table(unit_cell, ions)
 
-            self._convert_to_cartesian_coordinates(unit_cell, ions)
-
-            for ion in ions:
-                ion_table.addRow([ion['species'],
-                                  ion['index'],
-                                  ion['bond_number'],
-                                  ion['fract_coord'][0],
-                                  ion['fract_coord'][1],
-                                  ion['fract_coord'][2],
-                                  ion['cartesian_coord'][0],
-                                  ion['cartesian_coord'][1],
-                                  ion['cartesian_coord'][2],
-                                  ion['isotope_number']])
-
-        # We want to output a table workspace with bond information
+        # Output a table workspace with bond information
         if self._spec_type == 'BondTable':
             bonds = file_data.get('bonds', None)
-            if bonds is None or len(bonds) == 0:
-                raise RuntimeError('No bonds found in CASTEP file')
+            self._create_bond_table(bonds)
 
-            bond_table = s_api.CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
-            bond_table.addColumn('str', 'SpeciesA')
-            bond_table.addColumn('int', 'NumberA')
-            bond_table.addColumn('str', 'SpeciesB')
-            bond_table.addColumn('int', 'NumberB')
-            bond_table.addColumn('float', 'Length')
-            bond_table.addColumn('float', 'Population')
-
-            for bond in bonds:
-                bond_table.addRow([bond['atom_a'][0],
-                                   bond['atom_a'][1],
-                                   bond['atom_b'][0],
-                                   bond['atom_b'][1],
-                                   bond['length'],
-                                   bond['population']])
-
-        # We want to calculate a partial DoS
+        # Calculate a partial DoS
         elif self._calc_partial and self._spec_type == 'DOS':
             logger.notice('Calculating partial density of states')
             prog_reporter.report('Calculating partial density of states')
+            self._calculate_partial_dos(ions, frequencies, eigenvectors, weights)
 
-            # Build a dictionary of ions that the user cares about
-            partial_ions = dict()
-            if not self._calc_ion_index:
-                for ion in self._ions:
-                    partial_ions[ion] = [i['index'] for i in ions if i['species'] == ion]
-            else:
-                for ion in ions:
-                    if ion['species'] in self._ions:
-                        ion_identifier = ion['species'] + str(ion['index'])
-                        partial_ions[ion_identifier] = ion['index']
-
-            partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(partial_ions, frequencies, eigenvectors, weights)
-
-            if self._sum_contributions:
-                # Discard the partial workspaces
-                for partial_ws in partial_workspaces:
-                    s_api.DeleteWorkspace(partial_ws)
-
-                # Rename the summed workspace, this will be the output
-                s_api.RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._out_ws_name)
-
-            else:
-                s_api.DeleteWorkspace(sum_workspace)
-                partial_ws_names = [ws.getName() for ws in partial_workspaces]
-                ### sort workspaces
-                if self._calc_ion_index:
-                    # Sort by index after '_'
-                    partial_ws_names.sort(key=lambda item: (int(item[(item.rfind('_')+1):])))
-                group = ','.join(partial_ws_names)
-                s_api.GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
-
-        # We want to calculate a total DoS with scaled intensities
+        # Calculate a total DoS with scaled intensities
         elif self._spec_type == 'DOS' and self._scale_by_cross_section != 'None':
             logger.notice('Calculating summed density of states with scaled intensities')
             prog_reporter.report('Calculating density of states')
+            self._calculate_total_dos_with_scale(ions, frequencies, eigenvectors, weights)
 
-            # Build a dict of all ions
-            all_ions = dict()
-            for ion in set([i['species'] for i in ions]):
-                all_ions[ion] = [i['index'] for i in ions if i['species'] == ion]
-
-            partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(all_ions, frequencies, eigenvectors, weights)
-
-            # Discard the partial workspaces
-            for partial_ws in partial_workspaces:
-                s_api.DeleteWorkspace(partial_ws)
-
-            # Rename the summed workspace, this will be the output
-            s_api.RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._out_ws_name)
-
-        # We want to calculate a total DoS without scaled intensities
+        # Calculate a total DoS without scaled intensities
         elif self._spec_type == 'DOS':
             logger.notice('Calculating summed density of states without scaled intensities')
             prog_reporter.report('Calculating density of states')
@@ -292,7 +208,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             out_ws.setYUnit('(D/A)^2/amu')
             out_ws.setYUnitLabel('Intensity')
 
-        # We want to calculate a DoS with IR active
+        # Calculate a DoS with IR active
         elif self._spec_type == 'IR_Active':
             if ir_intensities.size == 0:
                 raise ValueError('Could not load any IR intensities from file.')
@@ -304,7 +220,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             out_ws.setYUnit('(D/A)^2/amu')
             out_ws.setYUnitLabel('Intensity')
 
-        # We want to create a DoS with Raman active
+        # Create a DoS with Raman active
         elif self._spec_type == 'Raman_Active':
             if raman_intensities.size == 0:
                 raise ValueError('Could not load any Raman intensities from file.')
@@ -333,11 +249,132 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self._peak_width = self.getProperty('PeakWidth').value
         self._scale = self.getProperty('Scale').value
         self._zero_threshold = self.getProperty('ZeroThreshold').value
-        self._ions = self.getProperty('Ions').value
+        self._ions_of_interest = self.getProperty('Ions').value
         self._sum_contributions = self.getProperty('SumContributions').value
         self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
-        self._calc_partial = (len(self._ions) > 0)
+        self._calc_partial = (len(self._ions_of_interest) > 0)
 
+
+#----------------------------------------------------------------------------------------
+
+    def _create_ion_table(self, unit_cell, ions):
+        """
+        Creates an ion table from the data in the phonon/castep file
+        """
+        ion_table = s_api.CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
+        ion_table.addColumn('str', 'Species')
+        ion_table.addColumn('int', 'FileIndex')
+        ion_table.addColumn('int', 'Number')
+        ion_table.addColumn('float', 'FractionalX')
+        ion_table.addColumn('float', 'FractionalY')
+        ion_table.addColumn('float', 'FractionalZ')
+        ion_table.addColumn('float', 'CartesianX')
+        ion_table.addColumn('float', 'CartesianY')
+        ion_table.addColumn('float', 'CartesianZ')
+        ion_table.addColumn('float', 'Isotope')
+
+        self._convert_to_cartesian_coordinates(unit_cell, ions)
+
+        for ion in ions:
+            ion_table.addRow([ion['species'],
+                              ion['index'],
+                              ion['bond_number'],
+                              ion['fract_coord'][0],
+                              ion['fract_coord'][1],
+                              ion['fract_coord'][2],
+                              ion['cartesian_coord'][0],
+                              ion['cartesian_coord'][1],
+                              ion['cartesian_coord'][2],
+                              ion['isotope_number']])
+
+#----------------------------------------------------------------------------------------
+
+    def _create_bond_table(self, bonds):
+        """
+        Creates a bond table from the castep data
+        """
+        if bonds is None or len(bonds) == 0:
+            raise RuntimeError('No bonds found in CASTEP file')
+
+        bond_table = s_api.CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
+        bond_table.addColumn('str', 'SpeciesA')
+        bond_table.addColumn('int', 'NumberA')
+        bond_table.addColumn('str', 'SpeciesB')
+        bond_table.addColumn('int', 'NumberB')
+        bond_table.addColumn('float', 'Length')
+        bond_table.addColumn('float', 'Population')
+
+        for bond in bonds:
+            bond_table.addRow([bond['atom_a'][0],
+                               bond['atom_a'][1],
+                               bond['atom_b'][0],
+                               bond['atom_b'][1],
+                               bond['length'],
+                               bond['population']])
+
+
+#----------------------------------------------------------------------------------------
+
+    def _calculate_partial_dos(self, ions, frequencies, eigenvectors, weights):
+        """
+        Calculate the partial Density of States for all the ions of interest to the user
+        @param frequencies      :: frequency data from file
+        @param eigenvectors     :: eigenvector data from file
+        @param weights          :: weight data from file
+        """
+        # Build a dictionary of ions that the user cares about        
+        partial_ions = dict()
+        if not self._calc_ion_index:
+            for ion in self._ions_of_interest:
+                partial_ions[ion] = [i['index'] for i in ions if i['species'] == ion]
+        else:
+            for ion in ions:
+                if ion['species'] in self._ions_of_interest:
+                    ion_identifier = ion['species'] + str(ion['index'])
+                    partial_ions[ion_identifier] = ion['index']
+
+        partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(partial_ions, frequencies, eigenvectors, weights)
+
+        if self._sum_contributions:
+            # Discard the partial workspaces
+            for partial_ws in partial_workspaces:
+                s_api.DeleteWorkspace(partial_ws)
+
+            # Rename the summed workspace, this will be the output
+            s_api.RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._out_ws_name)
+
+        else:
+            s_api.DeleteWorkspace(sum_workspace)
+            partial_ws_names = [ws.getName() for ws in partial_workspaces]
+            ### sort workspaces
+            if self._calc_ion_index:
+                # Sort by index after '_'
+                partial_ws_names.sort(key=lambda item: (int(item[(item.rfind('_')+1):])))
+            group = ','.join(partial_ws_names)
+            s_api.GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
+
+#----------------------------------------------------------------------------------------
+
+    def _calculate_total_dos_with_scale(self, ions, frequencies, eigenvectors, weights):
+        """
+        Calculate the complete Density of States for all the ions of interest to the user with scaled intensities
+        @param frequencies      :: frequency data from file
+        @param eigenvectors     :: eigenvector data from file
+        @param weights          :: weight data from file
+        """
+        # Build a dict of all ions
+        all_ions = dict()
+        for ion in set([i['species'] for i in ions]):
+            all_ions[ion] = [i['index'] for i in ions if i['species'] == ion]
+
+        partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(all_ions, frequencies, eigenvectors, weights)
+
+        # Discard the partial workspaces
+        for partial_ws in partial_workspaces:
+            s_api.DeleteWorkspace(partial_ws)
+
+        # Rename the summed workspace, this will be the output
+        s_api.RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._out_ws_name)
 
 #----------------------------------------------------------------------------------------
 
@@ -516,6 +553,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         logger.debug('Summed workspace: ' + str(total_workspace))
 
         return partial_workspaces, total_workspace
+
 #----------------------------------------------------------------------------------------
     def _parse_chemical_and_ws_name(self, ion_name, isotope):
         """
@@ -527,7 +565,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 The expected suffix for the partial workspace
         """
         # Get the index of the element (if present)
-        import re
         match = re.search(r'\d', ion_name)
         element_index = ''
         if match:
@@ -716,7 +753,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         if ext == '.phonon':
             file_data = self._parse_phonon_file(file_name)
         elif ext == '.castep':
-            if len(self._ions) > 0:
+            if len(self._ions_of_interest) > 0:
                 raise ValueError("Cannot compute partial density of states from .castep files.")
 
             file_data = self._parse_castep_file(file_name)
