@@ -147,14 +147,10 @@ void InterpolatingRebin::outputYandEValues(
   Progress prog(this, 0.0, 1.0, histnumber);
   for (int hist = 0; hist < histnumber; ++hist) {
 
-    // get references to output workspace data (no copying)
-    auto &YValues_new = outputW->mutableY(hist);
-    auto &Errors_new = outputW->mutableE(hist);
-
     try {
       // output data arrays are implicitly filled by function
-      cubicInterpolation(inputW->histogram(hist), XValues_new, YValues_new,
-                         Errors_new);
+      outputW->setHistogram(
+          hist, cubicInterpolation(inputW->histogram(hist), XValues_new));
     } catch (std::exception &ex) {
       g_log.error() << "Error in rebin function: " << ex.what() << '\n';
       throw;
@@ -188,7 +184,7 @@ void InterpolatingRebin::outputYandEValues(
 *  @param[in] yOld the data's y-values that corrospond to the x-values, must be
 *1 element shorter than xOld.
 *  @param[in] eOld the error on each y-value, must be same length as yOld.
-*  @param[in] xNew x-values to rebin to, must be monotonically increasing
+*  @param[in] 1xNew x-values to rebin to, must be monotonically increasing
 *  @param[out] yNew is overwritten with the algorithm output. Must be allocated
 *and 1 element shorter than xnew.
 *  @param[out] eNew is overwritten with errors from the errors on the nearest
@@ -197,14 +193,15 @@ void InterpolatingRebin::outputYandEValues(
 *  @throw invalid_argument if any output x-values are outside the range of input
 *x-values
 **/
-void InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
-                                            const BinEdges &xNew,
-                                            HistogramY &yNew,
-                                            HistogramE &eNew) const {
+Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
+                                                 const BinEdges &xNew) const {
   const auto &yOld = oldHistogram.y();
 
   const size_t size_old = yOld.size();
-  const size_t size_new = yNew.size();
+  if (size_old == 0)
+    throw std::runtime_error("Empty spectrum found, aborting!");
+
+  const size_t size_new = xNew.size() - 1; // -1 because BinEdges
 
   // get the bin centres of the input data
   std::vector<double> xCensOld(size_new);
@@ -269,13 +266,13 @@ void InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
   const auto &xOld = oldHistogram.x();
   const auto &eOld = oldHistogram.e();
 
+  // No Interpolation branch
   if (!canInterpol) {
     if (VectorHelper::isConstantValue(yOld.rawData())) {
       // this copies the single y-value into the output array, errors are still
       // calculated from the nearest input data points
       // this is as much as we need to do in this (trival) case
-      noInterpolation(oldHistogram, xNew, yNew, eNew);
-      return;
+      return noInterpolation(oldHistogram, xNew);
     } else { // some points are two close to the edge of the data
 
       throw std::invalid_argument(
@@ -289,6 +286,13 @@ void InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
           boost::lexical_cast<std::string>(xNew.back()));
     }
   }
+
+  // Can Interpolate
+  // Create Histogram
+  Histogram newHistogram{xNew, Frequencies(xNew.size() - 1)};
+
+  auto &yNew = newHistogram.mutableY();
+  auto &eNew = newHistogram.mutableE();
 
   if ((!goodRangeLow) || (!goodRangeHigh)) {
     g_log.information() << "One or more points in the interpolation are near "
@@ -312,7 +316,7 @@ void InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
       throw std::runtime_error("Error setting up GSL spline functions");
     }
 
-    // create mew histograms
+    // todo std transform?
     for (size_t i = 0; i < size_new; ++i) {
       yNew[i] = gsl_spline_eval(spline, xCensNew[i], acc);
       //(basic) error estimate the based on a weighted mean of the errors of the
@@ -332,6 +336,8 @@ void InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
   }
   gsl_spline_free(spline);
   gsl_interp_accel_free(acc);
+
+  return newHistogram;
 }
 /** This can be used whenever the original spectrum is filled with only one
 * value. It is intended allow
@@ -345,16 +351,20 @@ void InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
 *  @param[out] eNew is overwritten with errors from the errors on the nearest
 * input data points
 */
-void InterpolatingRebin::noInterpolation(const Histogram &oldHistogram,
-                                         const BinEdges &xNew, HistogramY &yNew,
-                                         HistogramE &eNew) const {
-  // same size as in oldHistogram
+Histogram InterpolatingRebin::noInterpolation(const Histogram &oldHistogram,
+                                              const BinEdges &xNew) const {
+  Histogram newHistogram{xNew, Frequencies(xNew.size() - 1)};
+  auto &yNew = newHistogram.mutableY();
+  auto &eNew = newHistogram.mutableE();
+
   yNew.assign(yNew.size(), oldHistogram.y().front());
 
   const auto &xOldData = oldHistogram.x().rawData();
   const auto &eOld = oldHistogram.e();
   std::transform(xNew.cbegin(), xNew.cend(), eNew.begin(),
                  [&](double x) { return estimateError(xOldData, eOld, x); });
+
+  return newHistogram;
 }
 /**Estimates the error on each interpolated point by assuming it is similar to
 * the errors in

@@ -97,14 +97,14 @@ protected:
   void outputYandEValues(API::MatrixWorkspace_const_sptr inputW,
                          const HistogramData::BinEdges &XValues_new,
                          API::MatrixWorkspace_sptr outputW);
-  void InterpolatingRebin::cubicInterpolation(
+  HistogramData::Histogram InterpolatingRebin::cubicInterpolation(
       const HistogramData::Histogram &oldHistogram,
-      const HistogramData::BinEdges &xNew, HistogramData::HistogramY &yNew,
-      HistogramData::HistogramE &eNew) const;
-  void noInterpolation(const HistogramData::Histogram &oldHistogram,
-                       const HistogramData::BinEdges &xNew,
-                       HistogramData::HistogramY &yNew,
-                       HistogramData::HistogramE &eNew) const;
+      const HistogramData::BinEdges &xNew) const;
+
+  HistogramData::Histogram
+  noInterpolation(const HistogramData::Histogram &oldHistogram,
+                  const HistogramData::BinEdges &xNew) const;
+
   double estimateError(const HistogramData::HistogramX &xsOld,
                        const HistogramData::HistogramE &esOld,
                        const double xNew) const;
