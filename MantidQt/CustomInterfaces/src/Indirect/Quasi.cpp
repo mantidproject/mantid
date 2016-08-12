@@ -242,8 +242,6 @@ void Quasi::algorithmComplete(bool error) {
     m_uiForm.pbPlot->setEnabled(true);
     m_uiForm.pbSave->setEnabled(true);
   }
-
-
 }
 
 void Quasi::updateMiniPlot() {
@@ -456,17 +454,17 @@ void Quasi::plotClicked() {
     IndirectTab::checkADSForPlotSaveWorkspace(fitName, true);
     QString QfitWS = QString::fromStdString(fitName);
     if (program == "Lorentzians")
-      IndirectTab::plotSpectra(QfitWS, { 0, 1, 2, 4 });
+      IndirectTab::plotSpectra(QfitWS, {0, 1, 2, 4});
     else
-      IndirectTab::plotSpectra(QfitWS, { 0, 1, 2 });
+      IndirectTab::plotSpectra(QfitWS, {0, 1, 2});
   }
 
   MatrixWorkspace_sptr resultWS =
-    AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
   int numSpectra = (int)resultWS->getNumberHistograms();
   IndirectTab::checkADSForPlotSaveWorkspace(resultName, true);
   QString QresultWS = QString::fromStdString(resultName);
-  auto paramNames = { "Amplitude", "FWHM", "Beta" };
+  auto paramNames = {"Amplitude", "FWHM", "Beta"};
   for (std::string paramName : paramNames) {
 
     if (plot == paramName || plot == "All") {
@@ -482,8 +480,7 @@ void Quasi::plotClicked() {
             if (spectraIndices.size() == 3) {
               IndirectTab::plotSpectra(QresultWS, spectraIndices);
             }
-          }
-          else
+          } else
             IndirectTab::plotSpectrum(QresultWS, spectraIndices[0]);
         }
       }
