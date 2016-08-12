@@ -390,15 +390,6 @@ void ContainerSubtraction::postProcessComplete(bool error) {
   // Handle preview plot
   plotPreview(m_uiForm.spPreviewSpec->value());
 
-  // Handle Mantid plotting
-  QString plotType = m_uiForm.cbPlotOutput->currentText();
-
-  if (plotType == "Spectra" || plotType == "Both")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
-
-  if (plotType == "Contour" || plotType == "Both")
-    plot2D(QString::fromStdString(m_pythonExportWsName));
-
   // Clean up unwanted workspaces
   IAlgorithm_sptr deleteAlg =
       AlgorithmManager::Instance().create("DeleteWorkspace");
@@ -463,9 +454,25 @@ void ContainerSubtraction::absCorComplete(bool error) {
  */
 void ContainerSubtraction::saveClicked() {
 
-    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  // Check workspace exists
+  IndirectTab::checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
+  addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
 }
 
+/**
+ * Handles Mantid plotting of workspace
+ */
+void ContainerSubtraction::plotClicked() {
+  QString plotType = m_uiForm.cbPlotOutput->currentText();
+
+  IndirectTab::checkADSForPlotSaveWorkspace(m_pythonExportWsName, true);
+
+  if (plotType == "Spectra" || plotType == "Both")
+    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+
+  if (plotType == "Contour" || plotType == "Both")
+    plot2D(QString::fromStdString(m_pythonExportWsName));
+}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
