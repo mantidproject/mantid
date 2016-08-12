@@ -31,20 +31,14 @@ class IndirectILLReductionTest(unittest.TestCase):
         #reset output workspaces list
         self._output_workspaces = []
 
-    def test_minimal(self):
-        self._args['Run'] = self._run_name + '.nxs'
-
-        red = IndirectILLReduction(**self._args)
-        self.assertTrue(isinstance(red, MatrixWorkspace), "Should be a matrix workspace")
-
     def test_mutlifile(self):
         self._args['Run'] = self._multi_run_name + '.nxs'
 
         red = IndirectILLReduction(**self._args)
 
-        self.assertTrue(isinstance(mtd['red'], WorkspaceGroup), "Should be a group workspace")
-        self.assertEqual(mtd['red'].size(), 2)
-        self.assertTrue(isinstance(mtd['red'].getItem(0), MatrixWorkspace), "Should be a matrix workspace")
+        self.assertTrue(isinstance(red, WorkspaceGroup), "Should be a group workspace")
+        self.assertEqual(red.size(), 2)
+        self.assertTrue(isinstance(red.getItem(0), MatrixWorkspace), "Should be a matrix workspace")
 
 
     def test_sumruns(self):
@@ -52,7 +46,7 @@ class IndirectILLReductionTest(unittest.TestCase):
         self._args['SumRuns'] = True
 
         red = IndirectILLReduction(**self._args)
-        self.assertTrue(isinstance(red, MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEquals(red.size(), 1)
 
     def test_save_results(self):
         self._args['Run'] = self._run_name + '.nxs'
@@ -70,20 +64,20 @@ class IndirectILLReductionTest(unittest.TestCase):
 
         self.assertTrue(isinstance(mtd['146191_red'], MatrixWorkspace), "Should be a matrix workspace")
 
-    def test_control_mode(self):
+    def test_debug_mode(self):
         self._args['Run'] = self._run_name + '.nxs'
-        self._args['ControlMode'] = True
+        self._args['DebugMode'] = True
 
         IndirectILLReduction(**self._args)
 
-        self.assertTrue(isinstance(mtd['146191_red'], MatrixWorkspace), "Should be a matrix workspace")
-        self.assertTrue(isinstance(mtd['146191_raw'], MatrixWorkspace), "Should be a matrix workspace")
-        self.assertTrue(isinstance(mtd['146191_left'], MatrixWorkspace), "Should be a matrix workspace")
-        self.assertTrue(isinstance(mtd['146191_right'], MatrixWorkspace), "Should be a matrix workspace")
-        self.assertTrue(isinstance(mtd['146191_monitor'], MatrixWorkspace), "Should be a matrix workspace")
-        self.assertTrue(isinstance(mtd['146191_mnorm'], MatrixWorkspace), "Should be a matrix workspace")
-        self.assertTrue(isinstance(mtd['146191_vnorm'], MatrixWorkspace), "Should be a matrix workspace")
-        self.assertTrue(isinstance(mtd['146191_detgrouped'], MatrixWorkspace), "Should be a matrix workspace")
+        self.assertTrue(isinstance(mtd['red'], WorkspaceGroup), "Should be a group workspace")
+        self.assertTrue(isinstance(mtd['red_raw'], WorkspaceGroup), "Should be a group workspace")
+        self.assertTrue(isinstance(mtd['red_left'], WorkspaceGroup), "Should be a group workspace")
+        self.assertTrue(isinstance(mtd['red_right'], WorkspaceGroup), "Should be a group workspace")
+        self.assertTrue(isinstance(mtd['red_monitor'], WorkspaceGroup), "Should be a group workspace")
+        self.assertTrue(isinstance(mtd['red_mnorm'], WorkspaceGroup), "Should be a group workspace")
+        self.assertTrue(isinstance(mtd['red_vnorm'], WorkspaceGroup), "Should be a group workspace")
+        self.assertTrue(isinstance(mtd['red_detgrouped'], WorkspaceGroup), "Should be a group workspace")
 
     def test_mapping_file_option(self):
         self._args['Run'] = self._run_name + '.nxs'

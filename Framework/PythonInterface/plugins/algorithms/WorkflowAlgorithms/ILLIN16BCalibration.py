@@ -55,14 +55,14 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         # Do an energy transfer reduction
         temp = IndirectILLReduction(Run=self._input_file,
                                     MapFile=self._map_file,
-                                    SumRuns=True,
+                                    SumRuns=True,DebugMode=False,
                                     MirrorSense=self._mirror_sense,
                                     UnmirrorOption=3)
 
         # Integrate within peak range
-        number_histograms = temp.getNumberHistograms()
+        number_histograms = temp.getItem(0).getNumberHistograms()
 
-        ws_name = temp.getName()
+        ws_name = temp.getItem(0).getName()
         Integration(InputWorkspace=ws_name,
                     OutputWorkspace=ws_name,
                     RangeLower=float(self._peak_range[0]),
