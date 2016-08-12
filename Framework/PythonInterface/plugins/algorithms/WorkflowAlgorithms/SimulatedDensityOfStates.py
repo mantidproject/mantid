@@ -171,7 +171,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         raman_intensities = file_data['raman_intensities']
         weights = file_data['weights']
         eigenvectors = file_data.get('eigenvectors', None)
-        ions = file_data.get('ions', None)
+        ion_data = file_data.get('ions', None)
         unit_cell = file_data.get('unit_cell', None)
 
         logger.debug('Unit cell: {0}'.format(unit_cell))
@@ -180,7 +180,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         # Output a table workspace with ion information
         if self._spec_type == 'IonTable':
-            self._create_ion_table(unit_cell, ions)
+            self._create_ion_table(unit_cell, ion_data)
 
         # Output a table workspace with bond information
         if self._spec_type == 'BondTable':
@@ -191,13 +191,13 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         elif self._calc_partial and self._spec_type == 'DOS':
             logger.notice('Calculating partial density of states')
             prog_reporter.report('Calculating partial density of states')
-            self._calculate_partial_dos(ions, frequencies, eigenvectors, weights)
+            self._calculate_partial_dos(ion_data, frequencies, eigenvectors, weights)
 
         # Calculate a total DoS with scaled intensities
         elif self._spec_type == 'DOS' and self._scale_by_cross_section != 'None':
             logger.notice('Calculating summed density of states with scaled intensities')
             prog_reporter.report('Calculating density of states')
-            self._calculate_total_dos_with_scale(ions, frequencies, eigenvectors, weights)
+            self._calculate_total_dos_with_scale(ion_data, frequencies, eigenvectors, weights)
 
         # Calculate a total DoS without scaled intensities
         elif self._spec_type == 'DOS':
