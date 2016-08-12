@@ -9,6 +9,9 @@
 #include <vector>
 
 #include "qstring.h"
+#include <QPoint>
+#include <QColor>
+#include <QRect>
 
 /** Parses the formatting used in MantidPlot project files
 
@@ -64,6 +67,8 @@ public:
   float asFloat(const size_t i) const;
   std::string asString(const size_t i) const;
   bool asBool(const size_t i) const;
+  QRect asQRect(const size_t i) const;
+  QColor asQColor(const size_t i) const;
 
   TSVSerialiser &operator>>(int &val);
   TSVSerialiser &operator>>(size_t &val);
@@ -72,6 +77,8 @@ public:
   TSVSerialiser &operator>>(std::string &val);
   TSVSerialiser &operator>>(QString &val);
   TSVSerialiser &operator>>(bool &val);
+  TSVSerialiser &operator>>(QRect &val);
+  TSVSerialiser &operator>>(QColor &val);
 
   TSVSerialiser &writeLine(const std::string &name);
 
@@ -82,6 +89,8 @@ public:
   TSVSerialiser &operator<<(const int &val);
   TSVSerialiser &operator<<(const size_t &val);
   TSVSerialiser &operator<<(const bool &val);
+  TSVSerialiser &operator<<(const QRect &val);
+  TSVSerialiser &operator<<(const QColor &val);
 
   void writeRaw(const std::string &raw);
   void writeSection(const std::string &name, const std::string &body);
