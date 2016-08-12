@@ -451,9 +451,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         for i in range(number_spectra):
 
             # Find peak positions in ws1
-            __temp = ExtractSingleSpectrum(InputWorkspace=ws1, WorkspaceIndex=i)
-            peak_bin1 = cls._get_peak_position(__temp)
-            DeleteWorkspace(__temp)
+            peak_bin1 = cls._get_peak_position(i)
 
             # If only one workspace is given as an input, this workspace will be shifted
             if ws2 is None:
@@ -461,8 +459,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             else:
                 # Find peak positions in ws2
                 __temp2 = ExtractSingleSpectrum(InputWorkspace=ws2, WorkspaceIndex=i)
-                peak_bin2 = cls._get_peak_position(__temp2)
-                DeleteWorkspace(__temp2)
+                peak_bin2 = cls._get_peak_position(i)
 
                 if shift_option is False:
                     # ws1 will be shifted according to peak position of ws2
@@ -622,14 +619,17 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         ScaleX(InputWorkspace=ws_out, OutputWorkspace=ws_out, Factor=-x_start, Operation='Add')
 
     @staticmethod
-    def _get_peak_position(ws):
+    def _get_peak_position(i):
         """
         Get bin of the peak of single spectrum
-        @param ws        :: input workspace, must contain a single spectrum
+        @param i         :: spectrum index of input workspace
         @return          :: bin number of the peak position
         """
+        __temp = ExtractSingleSpectrum(InputWorkspace=ws1, WorkspaceIndex=i)
 
-        __fit_table = FindEPP(InputWorkspace=ws)
+        __fit_table = FindEPP(InputWorkspace=__temp)
+
+        DeleteWorkspace(__temp)
 
         # Mid bin number
         mid_bin = int(ws.blocksize() / 2)
