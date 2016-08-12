@@ -743,6 +743,7 @@ set ( TEST_FILES
 	GetAllEiTest.h
 	GetDetOffsetsMultiPeaksTest.h
 	GetDetectorOffsetsTest.h
+	GetEiMonDet2Test.h
 	GetEiTest.h
 	GetEiV1Test.h
 	GetTimeSeriesLogInformationTest.h
