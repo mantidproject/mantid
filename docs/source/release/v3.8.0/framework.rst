@@ -75,6 +75,8 @@ Deprecated
 MD Algorithms (VATES CLI)
 #########################
 
+- :ref:`MergeMD <algm-MergeMD>` now preserves the display normalization from the first workspace in the list
+
 Performance
 -----------
 
@@ -101,6 +103,7 @@ Python
   and :py:obj:`mantid.kernel.Material` has been modified to expose the
   individual atoms.
 - :py:obj:`mantid.geometry.OrientedLattice` set U with determinant -1 exposed to python
+- The setDisplayNormalization and setDisplayNormalizationHisto methods for MDEventWorkspaces are now exposed to Python
 
 Python Algorithms
 #################
