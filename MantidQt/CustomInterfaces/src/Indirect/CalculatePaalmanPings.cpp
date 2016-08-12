@@ -298,9 +298,14 @@ void CalculatePaalmanPings::postProcessComplete(bool error) {
 
   if (error) {
     emit showMessageBox("Correction factor post processing failed.\nSee "
-                        "Results Log for more details.");
+      "Results Log for more details.");
     return;
   }
+
+    // Enable post processing plot and save
+    m_uiForm.cbPlotOutput->setEnabled(true);
+    m_uiForm.pbPlot->setEnabled(true);
+    m_uiForm.pbSave->setEnabled(true);
 }
 
 void CalculatePaalmanPings::loadSettings(const QSettings &settings) {
