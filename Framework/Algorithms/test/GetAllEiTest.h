@@ -593,9 +593,9 @@ public:
   }
   static void destroySuite(GetAllEiTestPerformance *suite) { delete suite; }
 
-  void setUp() { inputMatrix = createTestingWS(false); }
+  void setUp() override { inputMatrix = createTestingWS(false); }
 
-  void tearDown() {
+  void tearDown() override {
     Mantid::API::AnalysisDataService::Instance().remove("monitor_peaks");
   }
 
