@@ -1,13 +1,23 @@
 from copy import deepcopy
 from collections import namedtuple
+from mantid.api import AnalysisDataService
 
 from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
-from SANS2.Common.SANSEnumerations import SANSDataType
+from SANS2.Common.SANSEnumerations import (SANSDataType, SaveType)
+from SANS2.Common.SANSConstants import SANSConstants
+
+
+class OutputMode(object):
+    class SaveToFile(object):
+        pass
+
+    class PublishToADS(object):
+        pass
 
 batch_reduction_return_bundle = namedtuple('batch_reduction_return_bundle', 'state, lab, hab, merged')
 
 
-def single_reduction_for_batch(state, use_optimizations, save_to_file=False):
+def single_reduction_for_batch(state, use_optimizations, output_mode):
     # Load the data
     workspace_to_name = {SANSDataType.SampleScatter: "SampleScatterWorkspace",
                          SANSDataType.SampleTransmission: "SampleTransmissionWorkspace",
@@ -25,10 +35,9 @@ def single_reduction_for_batch(state, use_optimizations, save_to_file=False):
 
     # Run single reduction
     single_reduction_name = "SANSSingleReduction"
-    single_reduction_options = {}
+    single_reduction_options = {"UseOptimizations": use_optimizations}
     reduction_alg = create_unmanaged_algorithm(single_reduction_name, **single_reduction_options)
 
-    batch_reduction_return_bundles = []
     for reduction_package in reduction_packages:
         # Set the properties on the algorithm
         set_properties_for_reduction_algorithm(reduction_alg, reduction_package,
@@ -39,14 +48,11 @@ def single_reduction_for_batch(state, use_optimizations, save_to_file=False):
         reduced_lab = reduction_alg.getProperty("OutputWorkspaceLAB").value
         reduced_hab = reduction_alg.getProperty("OutputWorkspaceHAB").value
         reduced_merged = reduction_alg.getProperty("OutputWorkspaceMerged").value
-        if save_to_file:
-            save_workspaces_to_file(reduced_lab, reduced_hab, reduced_merged)
-        else:
-            batch_reduction_return_bundles.append(batch_reduction_return_bundle(state=reduction_package.state,
-                                                                                lab=reduced_lab,
-                                                                                hab=reduced_hab,
-                                                                                merged=reduced_merged))
-    return batch_reduction_return_bundles
+
+        if output_mode is OutputMode.SaveToFile:
+            save_workspaces_to_file(reduced_lab, reduced_hab, reduced_merged, reduction_package.state)
+        elif output_mode is OutputMode.PublishToADS:
+            publish_to_ads(reduced_lab, reduced_hab, reduced_merged)
 
 
 def provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_to_monitor):
@@ -152,6 +158,13 @@ def reduction_packages_require_splitting_for_event_slices(reduction_packages):
 
 
 def split_reduction_packages_for_event_packages(reduction_packages):
+    """
+    Splits a reduction package object into several reduction package objects if it contains several event slice settings
+
+    We want to split this up here since each event slice is a full reduction cycle in itself.
+    :param reduction_packages: a list of reduction packages
+    :return: a list of reduction packages where each reduction setting contains only one event slice.
+    """
     # Since the state is the same for all reduction packages at this point we only need to create the split state once
     # for the first package and the apply to all the other packages. If we have 5 reduction packages and the user
     # requests 6 event slices, then we end up with 60 reductions!
@@ -242,6 +255,14 @@ def get_workspace_for_index(index, workspace_list):
 
 
 def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, workspace_to_name, workspace_to_monitor):
+    """
+    Sets up everything necessary on the reduction algorithm.
+
+    :param reduction_alg: a handle to the reduction algorithm
+    :param reduction_package: a reduction package object
+    :param workspace_to_name: the workspace to name map
+    :param workspace_to_monitor: a workspace to monitor map
+    """
     # Go through the elements of the reduction package and set them on the reduction algorithm
     # Set the SANSState
     state = reduction_package.state
@@ -261,13 +282,85 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
             reduction_alg.setProperty(workspace_to_monitor[workspace_type], monitor)
 
 
-def save_workspaces_to_file(reduced_lab, reduced_hab, reduced_merge):
-    # TODO implement saving
+def save_workspaces_to_file(reduced_lab, reduced_hab, reduced_merged, state):
+    """
+    Saves the reduced workspaces to a file
+
+    :param reduced_lab: a reduced workspace for LAB.
+    :param reduced_hab: a reduced workspace for HAB.
+    :param reduced_merged: a reduced worksapce for a merged operation.
+    :param state: a SANSState object
+    """
     if reduced_lab is not None:
-        pass
+        save_workspace_to_file(reduced_lab, state)
 
     if reduced_hab is not None:
-        pass
+        save_workspace_to_file(reduced_hab, state)
 
-    if reduced_merge is not None:
-        pass
+    if reduced_merged is not None:
+        save_workspace_to_file(reduced_merged, state)
+
+
+def publish_to_ads(reduced_lab, reduced_hab, reduced_merged):
+    """
+    Publish the reduced workspaces to the ADS
+
+    :param reduced_lab: a reduced workspace for LAB.
+    :param reduced_hab: a reduced workspace for HAB.
+    :param reduced_merged: a reduced worksapce for a merged operation.
+    """
+    if reduced_lab is not None:
+        do_publish_to_ads(reduced_lab)
+
+    if reduced_hab is not None:
+        do_publish_to_ads(reduced_hab)
+
+    if reduced_merged is not None:
+        do_publish_to_ads(reduced_merged)
+
+
+def do_publish_to_ads(workspace):
+    """
+    Gets the name of the workspace and adds it to the ADS
+
+    :param workspace: the workspace which is to be added to the ADS
+    """
+    workspace_name = get_workspace_name(workspace)
+    AnalysisDataService.addOrReplace(workspace_name, workspace)
+
+
+def save_workspace_to_file(workspace, state):
+    """
+    Saves the workspace to the different file formats specified in the state object.
+
+    Note that the name of the file can be stored in the state object. If it is not supplied then the workspace
+    name is used.
+    :param workspace: the workspace to be stored.
+    :param state: the SANSState object
+    """
+    save_info = state.save
+
+    save_name = "SANSSave"
+    save_options = {SANSConstants.input_workspace: workspace}
+    if save_info.file_name:
+        file_name = save_info.file_name
+    else:
+        file_name = get_workspace_name(workspace)
+    save_options.update({SANSConstants.file_name: file_name})
+
+    file_formats = save_info.file_format
+    if SaveType.Nexus is file_formats:
+        save_options.update({"Nexus": True})
+    if SaveType.CanSAS is file_formats:
+        save_options.update({"CanSAS": True})
+    if SaveType.NXcanSAS is file_formats:
+        save_options.update({"NXcanSAS": True})
+    if SaveType.NistQxy is file_formats:
+        save_options.update({"NistQxy": True})
+    if SaveType.RKH is file_formats:
+        save_options.update({"RKH": True})
+    if SaveType.CSV is file_formats:
+        save_options.update({"CSV": True})
+
+    save_alg = create_unmanaged_algorithm(save_name, **save_options)
+    save_alg.execute()

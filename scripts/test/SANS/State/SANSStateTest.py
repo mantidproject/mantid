@@ -11,6 +11,8 @@ from SANS2.State.SANSStateReduction import (SANSStateReductionISIS)
 from SANS2.State.SANSStateSliceEvent import (SANSStateSliceEventISIS)
 from SANS2.State.SANSStateMask import (SANSStateMaskISIS)
 from SANS2.State.SANSStateWavelength import (SANSStateWavelengthISIS)
+from SANS2.State.SANSStateSave import (SANSStateSaveISIS)
+
 
 from SANS2.Common.SANSConstants import SANSConstants
 from SANS2.Common.SANSEnumerations import (ISISReductionMode, ReductionDimensionality, FitModeForMerge,
@@ -68,6 +70,10 @@ class SANSStateTest(unittest.TestCase):
         wavelength_state.wavelength_step_type = RangeStepType.Lin
         wavelength_state.rebin_type = RebinType.Rebin
         state.wavelength = wavelength_state
+
+        # Save state
+        save_state = SANSStateSaveISIS()
+        save_state.file_name = "test_file_name"
 
         # Assert
         try:
@@ -185,6 +191,10 @@ class SANSStateTest(unittest.TestCase):
         wavelength_state.rebin_type = RebinType.Rebin
         state.wavelength = wavelength_state
 
+        # Save state
+        save_state = SANSStateSaveISIS()
+        save_state.file_name = "test_file_name"
+
         # Act
         serialized = state.property_manager
 
@@ -226,6 +236,7 @@ class SANSStateTest(unittest.TestCase):
         self.assertTrue(state_2.wavelength.wavelength_step_type is RangeStepType.Lin)
         self.assertTrue(state_2.wavelength.rebin_type is RebinType.Rebin)
 
+        self.assertTrue(state_2.save.file_name == "test_file_name")
 
 if __name__ == '__main__':
     unittest.main()

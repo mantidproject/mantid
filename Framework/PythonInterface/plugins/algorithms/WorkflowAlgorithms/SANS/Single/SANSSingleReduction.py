@@ -2,9 +2,8 @@
 
 """ SANSSingleReduction algorithm performs a single reduction."""
 
-from collections import namedtuple
 from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty,
-                           EnabledWhenProperty, PropertyCriterion, Property)
+                           PropertyCriterion, Property)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 
 from SANS2.State.SANSStateBase import create_deserialized_sans_state_from_property_manager
@@ -29,7 +28,7 @@ class SANSSingleReduction(DataProcessorAlgorithm):
         self.declareProperty(PropertyManagerProperty('SANSState'),
                              doc='A property manager which fulfills the SANSState contract.')
 
-        self.declareProperty("UseAdsOptimizations", True, direction=Direction.Input,
+        self.declareProperty("UseOptimizations", True, direction=Direction.Input,
                              doc="When enabled the ADS is being searched for already loaded and reduced workspaces. "
                                  "Depending on your concrete reduction, this could provide a significant"
                                  " performance boost")
@@ -114,7 +113,7 @@ class SANSSingleReduction(DataProcessorAlgorithm):
         reduction_setting_bundles = self._get_reduction_setting_bundles(state, reduction_mode)
 
         # Run core reductions
-        use_optimizations = self.getProperty("UseAdsOptimizations").value
+        use_optimizations = self.getProperty("UseOptimizations").value
 
         # Create the reduction core algorithm
         reduction_name = "SANSReductionCore"
@@ -144,7 +143,6 @@ class SANSSingleReduction(DataProcessorAlgorithm):
 
         # Set sample logs
         # Todo: Set sample log
-
         # Set the output workspaces
         self.set_output_workspaces(reduction_mode_vs_output_workspaces)
 

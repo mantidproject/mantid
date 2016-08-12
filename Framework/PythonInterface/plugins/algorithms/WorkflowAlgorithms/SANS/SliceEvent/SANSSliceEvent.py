@@ -41,7 +41,7 @@ class SANSSliceEvent(DataProcessorAlgorithm):
         # ---------------
         self.declareProperty('SliceEventFactor', defaultValue=1.0,
                              direction=Direction.Output,
-                             doc='The factor of the event slicing. This corresponds to the proporiton of the the total '
+                             doc='The factor of the event slicing. This corresponds to the proportion of the the total '
                                  'proton charge, which the slice corresponds to.')
 
         self.declareProperty(MatrixWorkspaceProperty(SANSConstants.output_workspace, '', direction=Direction.Output),

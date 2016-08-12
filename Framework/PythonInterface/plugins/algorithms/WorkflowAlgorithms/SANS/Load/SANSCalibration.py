@@ -42,7 +42,7 @@ def get_expected_calibration_workspace_name(full_file_path):
 def get_already_loaded_calibration_workspace(full_file_path):
     calibration_workspace_name = get_expected_calibration_workspace_name(full_file_path)
     if AnalysisDataService.doesExist(calibration_workspace_name):
-        output_ws = AnalysisDataService.retrive(calibration_workspace_name)
+        output_ws = AnalysisDataService.retrieve(calibration_workspace_name)
     else:
         output_ws = None
     return output_ws

@@ -327,7 +327,6 @@ class SANSLoadDataRunnerTest(stresstesting.MantidStressTest):
     def runTest(self):
         suite = unittest.TestSuite()
         suite.addTest(unittest.makeSuite(SANSLoadFactoryTest, 'test'))
-        # suite.addTest(unittest.makeSuite(SANSLoadDataTest, 'test'))
         suite.addTest(unittest.makeSuite(SANSLoadTest, 'test'))
         runner = unittest.TextTestRunner()
         res = runner.run(suite)

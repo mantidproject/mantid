@@ -12,6 +12,7 @@ from SANS2.State.StateBuilder.SANSStateMoveBuilder import get_move_builder
 from SANS2.State.StateBuilder.SANSStateReductionBuilder import get_reduction_builder
 from SANS2.State.StateBuilder.SANSStateSliceEventBuilder import get_slice_event_builder
 from SANS2.State.StateBuilder.SANSStateWavelengthBuilder import get_wavelength_builder
+from SANS2.State.StateBuilder.SANSStateSaveBuilder import get_save_builder
 
 
 def check_if_contains_only_one_element(to_check, element_name):
@@ -73,13 +74,13 @@ class UserFileStateDirectorISIS(object):
 
         self._user_file = None
 
-        # SliceEvent Builder
         self._state_builder = get_state_builder(self._data)
         self._mask_builder = get_mask_builder(self._data)
         self._move_builder = get_move_builder(self._data)
         self._reduction_builder = get_reduction_builder(self._data)
         self._slice_event_builder = get_slice_event_builder(self._data)
         self._wavelength_builder = get_wavelength_builder(self._data)
+        self._save_builder = get_save_builder(self._data)
 
     def set_user_file(self, user_file):
         file_path = find_full_file_path(user_file)
@@ -133,6 +134,11 @@ class UserFileStateDirectorISIS(object):
         wavelength_state = self._wavelength_builder.build()
         wavelength_state.validate()
         self._state_builder.set_wavelength(wavelength_state)
+
+        # Save state
+        save_state = self._save_builder.build()
+        save_state.validate()
+        self._state_builder.set_save(save_state)
 
         # Data state
         self._state_builder.set_data(self._data)

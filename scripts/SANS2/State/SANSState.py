@@ -10,6 +10,7 @@ from SANS2.State.SANSStateReduction import SANSStateReduction
 from SANS2.State.SANSStateSliceEvent import SANSStateSliceEvent
 from SANS2.State.SANSStateMask import SANSStateMask
 from SANS2.State.SANSStateWavelength import SANSStateWavelength
+from SANS2.State.SANSStateSave import SANSStateSave
 
 
 # -----------------------------------------------
@@ -42,6 +43,7 @@ class SANSStateISIS(SANSStateBase, SANSState):
     slice = TypedParameter(SANSStateSliceEvent, validator_sub_state)
     mask = TypedParameter(SANSStateMask, validator_sub_state)
     wavelength = TypedParameter(SANSStateWavelength, validator_sub_state)
+    save = TypedParameter(SANSStateSave, validator_sub_state)
 
     def __init__(self):
         super(SANSStateISIS, self).__init__()
@@ -62,6 +64,8 @@ class SANSStateISIS(SANSStateBase, SANSState):
             is_invalid.update("SANSStateISIS: The state object needs to include a SANSStateMask object.")
         if not self.wavelength:
             is_invalid.update("SANSStateISIS: The state object needs to include a SANSStateWavelength object.")
+        if not self.save:
+            is_invalid.update("SANSStateISIS: The state object needs to include a SANSStateSave object.")
 
         if is_invalid:
             raise ValueError("SANSState: There is an issue with your in put. See: {0}".format(json.dumps(is_invalid)))

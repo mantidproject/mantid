@@ -234,3 +234,14 @@ class RebinType(object):
     Defines the rebin types available
     """
     pass
+
+
+# --------------------------
+#  SaveType
+# --------------------------
+@inner_classes_with_name_space("Nexus", "NistQxy", "CanSAS", "RKH", "CSV", "NXcanSAS")
+class SaveType(object):
+    """
+    Defines the save types available
+    """
+    pass

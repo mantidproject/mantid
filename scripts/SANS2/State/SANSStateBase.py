@@ -35,6 +35,21 @@ def all_list_elements_are_of_type_and_not_empty(value, comparison_type, addition
     return is_of_type
 
 
+def all_list_elements_are_of_class_type_and_not_empty(value, comparison_type, additional_comparison=lambda x: True):
+    is_of_type = True
+    for element in value:
+        # Perform type check
+        if not issubclass(element, comparison_type):
+            is_of_type = False
+        # Perform additional check
+        if not additional_comparison(element):
+            is_of_type = False
+
+    if not value:
+        is_of_type = False
+    return is_of_type
+
+
 def all_list_elements_are_float_and_not_empty(value):
     typed_comparison = partial(all_list_elements_are_of_type_and_not_empty, comparison_type=float)
     return typed_comparison(value)
@@ -49,6 +64,10 @@ def all_list_elements_are_string_and_positive_and_not_empty(value):
     typed_comparison = partial(all_list_elements_are_of_type_and_not_empty, comparison_type=int,
                                additional_comparison=lambda x: x>=0)
     return typed_comparison(value)
+
+
+def all_list_elements_are_class_type(value):
+    pass
 
 
 # -------------------------------------------------------
@@ -87,7 +106,6 @@ class TypedParameter(object):
     def __set__(self, instance, value):
         # Perform a type check
         self._type_check(value)
-
         if self.validator(value):
             # The descriptor should be holding onto its own data and return a deepcopy of the data.
             copied_value = copy.deepcopy(value)
@@ -183,6 +201,12 @@ class PositiveIntegerListParameter(TypedParameter):
                                                            all_list_elements_are_string_and_positive_and_not_empty)
 
 
+class ClassTypeListParameter(TypedParameter):
+    def __init__(self, class_type):
+        typed_comparison = partial(all_list_elements_are_of_class_type_and_not_empty, comparison_type=class_type)
+        super(ClassTypeListParameter, self).__init__(list, typed_comparison)
+
+
 # ------------------------------------------------
 # SANSStateBase
 # ------------------------------------------------
@@ -238,8 +262,10 @@ def is_float_vector(value):
 def is_string_vector(value):
     return isinstance(value, std_vector_str)
 
+
 def is_int_vector(value):
     return isinstance(value, std_vector_int)
+
 
 def get_module_and_class_name(instance):
     if inspect.isclass(instance):
@@ -271,6 +297,18 @@ def provide_class(instance):
 
 def is_class_type_parameter(value):
     return isinstance(value, basestring) and class_type_parameter_id in value
+
+
+def is_vector_with_class_type_parameter(value):
+    is_vector_with_class_type = True
+    contains_str = is_string_vector(value)
+    if contains_str:
+        for element in value:
+            if not is_class_type_parameter(element):
+                is_vector_with_class_type = False
+    else:
+        is_vector_with_class_type = False
+    return is_vector_with_class_type
 
 
 def get_module_and_class_name_from_encoded_string(encoder, value):
@@ -326,7 +364,8 @@ def convert_state_to_dict(instance):
     for key, value in descriptor_values.iteritems():
         # If the value is a SANSBaseState then create a dict from it
         # If the value is a dict, then we need to check what the sub types are
-        # IF the value is a ClassTypeParameter, then we need to encode it
+        # If the value is a ClassTypeParameter, then we need to encode it
+        # If the value is a list of ClassTypeParameters, then we need to encode each element in the list
         if isinstance(value, SANSStateBase):
             sub_state_dict = value.property_manager
             value = sub_state_dict
@@ -341,14 +380,16 @@ def convert_state_to_dict(instance):
                 sub_dictionary.update({key_sub: sub_dictionary_value})
             value = sub_dictionary
         elif isinstance(descriptor_types[key], ClassTypeParameter):
-            # The module will only know about the outer class name, therefore we need
-            # 1. The module name
-            # 2. The name of the outer class
-            # 3. The name of the actual class
-            module_name, class_name = get_module_and_class_name(value)
-            outer_class_name = value.outer_class_name
-            class_name = outer_class_name + SEPARATOR_SERIAL + class_name
-            value = create_module_and_class_name_from_encoded_string(class_type_parameter_id, module_name, class_name)
+            value = get_serialized_class_type_parameter(value)
+        elif isinstance(descriptor_types[key], ClassTypeListParameter):
+            if value:
+                # If there are entries in the list, then convert them individually and place them into a list.
+                # The list will contain a sequence of serialized ClassTypeParameters
+                serialized_value = []
+                for element in value:
+                    serialized_element = get_serialized_class_type_parameter(element)
+                    serialized_value.append(serialized_element)
+                value = serialized_value
 
         state_dict.update({key: value})
     # Add information about the current state object, such as in which module it lives and what its name is
@@ -375,7 +416,11 @@ def set_state_from_property_manager(instance, property_manager):
         #                                 of Mantid algorithms, which can be string, int, float and containers of these
         #                                 types (and PropertyManagerProperties). We need a wider range of types, such
         #                                 as ClassTypeParameters. These are encoded (as good as possible) in a string
-        # 4. Normal values: all is fine, just populate them
+        # 4. Vector of strings with special meaning: See point 3)
+        # 5. Vector for float: This needs to handle Mantid's float array
+        # 6. Vector for string: This needs to handle Mantid's string array
+        # 7. Vector for int: This needs to handle Mantid's integer array
+        # 8. Normal values: all is fine, just populate them
         if type(value) is PropertyManager and is_state(value):
             sub_state = create_sub_state(value)
             setattr(instance, key, sub_state)
@@ -394,13 +439,14 @@ def set_state_from_property_manager(instance, property_manager):
                 dict_element.update({sub_dict_key: sub_dict_value_to_insert})
             setattr(instance, key, dict_element)
         elif is_class_type_parameter(value):
-            # We need to first get the outer class from the module
-            module_name, outer_class_name, class_name = \
-                get_module_and_class_name_from_encoded_string(class_type_parameter_id, value)
-            outer_class_type_parameter = provide_class_from_module_and_class_name(module_name, outer_class_name)
-            # From the outer class we can then retrieve the inner class which normally defines the users selection
-            class_type_parameter = getattr(outer_class_type_parameter, class_name)
+            class_type_parameter = get_deserialized_class_type_parameter(value)
             _set_element(instance, key, class_type_parameter)
+        elif is_vector_with_class_type_parameter(value):
+            class_type_list = []
+            for element in value:
+                class_type_parameter = get_deserialized_class_type_parameter(element)
+                class_type_list.append(class_type_parameter)
+            _set_element(instance, key, class_type_list)
         elif is_float_vector(value):
             float_list_value = list(value)
             _set_element(instance, key, float_list_value)
@@ -412,6 +458,26 @@ def set_state_from_property_manager(instance, property_manager):
             _set_element(instance, key, int_list_value)
         else:
             _set_element(instance, key, value)
+
+
+def get_serialized_class_type_parameter(value):
+    # The module will only know about the outer class name, therefore we need
+    # 1. The module name
+    # 2. The name of the outer class
+    # 3. The name of the actual class
+    module_name, class_name = get_module_and_class_name(value)
+    outer_class_name = value.outer_class_name
+    class_name = outer_class_name + SEPARATOR_SERIAL + class_name
+    return create_module_and_class_name_from_encoded_string(class_type_parameter_id, module_name, class_name)
+
+
+def get_deserialized_class_type_parameter(value):
+    # We need to first get the outer class from the module
+    module_name, outer_class_name, class_name = \
+        get_module_and_class_name_from_encoded_string(class_type_parameter_id, value)
+    outer_class_type_parameter = provide_class_from_module_and_class_name(module_name, outer_class_name)
+    # From the outer class we can then retrieve the inner class which normally defines the users selection
+    return getattr(outer_class_type_parameter, class_name)
 
 
 def create_deserialized_sans_state_from_property_manager(property_manager):

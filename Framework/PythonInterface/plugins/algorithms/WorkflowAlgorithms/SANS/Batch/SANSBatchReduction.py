@@ -8,7 +8,7 @@ from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, Algorit
                         PropertyMode, AnalysisDataService)
 
 from SANS2.State.SANSStateBase import create_deserialized_sans_state_from_property_manager
-from SANS.Batch.BatchExecution import single_reduction_for_batch
+from SANS.Batch.BatchExecution import (single_reduction_for_batch, OutputMode)
 
 
 class SANSBatchReduction(DataProcessorAlgorithm):
@@ -31,13 +31,10 @@ class SANSBatchReduction(DataProcessorAlgorithm):
                                  "Depending on your concrete reduction, this could provide a significant"
                                  " performance boost")
 
-        allowed_detectors = StringListValidator(["OnlyAsOutputWorkspace", "PublishToADS", "SaveToFile"])
-        self.declareProperty("OutputMode", "OnlyAsOutputWorkspace", validator=allowed_detectors, direction=Direction.Input,
-                             doc="There are three output modes available./n"
-                                 "OnlyAsOutputWorkspace: which allows the user to retrieve the output via the"
-                                 " properties OutputWorkspace1, OutputWorkspace2 and so on."
-                                 "PublishToADS: which provides an output property and publishes the"
-                                 " workspaces to the ADS. /n"
+        allowed_detectors = StringListValidator(["PublishToADS", "SaveToFile"])
+        self.declareProperty("OutputMode", "PublishToADS", validator=allowed_detectors, direction=Direction.Input,
+                             doc="There are two output modes available./n"
+                                 "PublishToADS: publishes the workspaces to the ADS. /n"
                                  "SaveToFile: Saves the workspaces to file.")
 
     def PyExec(self):
@@ -47,22 +44,12 @@ class SANSBatchReduction(DataProcessorAlgorithm):
         # Check if optimizations are to be used
         use_optimizations = self.getProperty("UseOptimizations").value
 
-        # Check how the ouput is to be handled
-        output_mode = self.getProperty("OutputMode").value
-        save_to_file = True if output_mode == "SaveToFile" else False
+        # Check how the output is to be handled
+        output_mode = self._get_output_mode()
 
         # We now iterate over each state, load the data and perform the reduction
-        batch_reduction_return_bundles = []
         for state in states:
-            bundles = single_reduction_for_batch(state, use_optimizations, save_to_file)
-            batch_reduction_return_bundles.extend(bundles)
-
-        # Handle the results
-        if output_mode == "OnlyAsOutputWorkspace":
-            self._set_output_workspaces(batch_reduction_return_bundles)
-        elif output_mode == "PublishToADS":
-            self._set_output_workspaces(batch_reduction_return_bundles)
-            self._publish_to_ads(batch_reduction_return_bundles)
+            single_reduction_for_batch(state, use_optimizations, output_mode)
 
     def validateInputs(self):
         errors = dict()
@@ -75,6 +62,16 @@ class SANSBatchReduction(DataProcessorAlgorithm):
             errors.update({"SANSBatchReduction": str(err)})
         return errors
 
+    def _get_output_mode(self):
+        output_mode = self.getProperty("OutputMode").value
+        if output_mode == "PublishToADS":
+            mode = OutputMode.PublishToADS
+        elif output_mode == "SaveToFile":
+            mode = OutputMode.SaveToFile
+        else:
+            raise ValueError("SANSBatchReduction: Unknown publication mode {0}".format(output_mode))
+        return mode
+
     def _get_states(self):
         # The property manager contains a collection of states
         outer_property_manager = self.getProperty("SANSStates").value
@@ -86,26 +83,6 @@ class SANSBatchReduction(DataProcessorAlgorithm):
             state.property_manager = inner_property_manager
             sans_states.append(state)
         return sans_states
-
-    def _set_output_workspaces(self, batch_reduction_return_bundles):
-        number_of_lab_workspaces = 0
-        number_of_hab_workspaces = 0
-        number_of_merged_workspaces = 0
-        for bundle in batch_reduction_return_bundles:
-            number_of_lab_workspaces = self._add_property(bundle.lab, "LAB", number_of_lab_workspaces)
-            number_of_hab_workspaces = self._add_property(bundle.hab, "HAB", number_of_hab_workspaces)
-            number_of_merged_workspaces = self._add_property(bundle.merged, "Merged", number_of_merged_workspaces)
-        # Now add a field about the total number of workspaces for each type
-        self.declareProperty("NumberOfOutputWorkspacesLAB", defaultValue=Property.EMPTY_INT,
-                             direction=Direction.Output, doc='The number of output workspaces for LAB.')
-        self.declareProperty("NumberOfOutputWorkspacesHAB", defaultValue=Property.EMPTY_INT,
-                             direction=Direction.Output, doc='The number of output workspaces for HAB.')
-        self.declareProperty("NumberOfOutputWorkspacesMerged", defaultValue=Property.EMPTY_INT,
-                             direction=Direction.Output,
-                             doc='The number of output workspaces for merged reduction mode')
-        self.setProperty("NumberOfOutputWorkspacesLAB", number_of_lab_workspaces)
-        self.setProperty("NumberOfOutputWorkspacesHAB", number_of_hab_workspaces)
-        self.setProperty("NumberOfOutputWorkspacesMerged", number_of_merged_workspaces)
 
     def _publish_to_ads(self, batch_reduction_return_bundles):
         for bundle in batch_reduction_return_bundles:

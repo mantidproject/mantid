@@ -166,7 +166,7 @@ def publish_workspaces_to_analysis_data_service(workspaces, workspace_monitors, 
     add_workspaces_to_analysis_data_service(workspaces, workspace_names, is_monitor=False)
 
     # If the workspace monitor exists, then add it to the ADS as well
-    if workspace_monitors is not None:
+    if workspace_monitors:
         add_workspaces_to_analysis_data_service(workspace_monitors, workspace_names, is_monitor=True)
 
 

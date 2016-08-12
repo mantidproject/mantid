@@ -4,6 +4,7 @@
 
 set ( TEST_PY_FILES
    SANSStateTest.py
+   SANSStateFunctionsTest.py
    SANSStateDataTest.py
    SANSStateDataBuilderTest.py
    SANSStateReductionTest.py
@@ -14,6 +15,8 @@ set ( TEST_PY_FILES
    SANSStateMaskBuilderTest.py
    SANSStateMoveTest.py
    SANSStateMoveBuilderTest.py
+   SANSStateSaveTest.py
+   SANSStateSaveBuilderTest.py
    SANSStateWavelengthTest.py
    SANSStateWavelengthBuilderTest.py
   )
