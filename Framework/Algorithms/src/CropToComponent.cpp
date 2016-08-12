@@ -74,7 +74,7 @@ void CropToComponent::init() {
       "List of component names which are used to crop the workspace."
       "to.");
   declareProperty("OrderByDetId", false,
-                  "Whether to order the elements of"
+                  "Whether to order the elements of "
                   "the component by increasing detector ID.");
 }
 
@@ -95,7 +95,7 @@ void CropToComponent::exec() {
   std::vector<detid_t> detectorIDs(detectors.size());
   getDetectorIDs(detectors, detectorIDs);
 
-  bool orderByDetID = getProperty("OrderByDetId");
+  const bool orderByDetID = getProperty("OrderByDetId");
   if (orderByDetID) {
     std::sort(detectorIDs.begin(), detectorIDs.end());
   }
