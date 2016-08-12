@@ -26,6 +26,8 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent)
           SLOT(updateCan()));
   connect(m_uiForm.spShift, SIGNAL(valueChanged(double)), this,
           SLOT(updateCan()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
   m_uiForm.spPreviewSpec->setMinimum(0);
   m_uiForm.spPreviewSpec->setMaximum(0);
