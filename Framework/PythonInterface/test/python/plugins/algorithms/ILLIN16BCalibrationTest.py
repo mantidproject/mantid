@@ -1,8 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-import mantid
-from mantid.simpleapi import ILLIN16BCalibration
+from mantid.simpleapi import *
 from testhelpers.tempfile_wrapper import TemporaryFileHelper
 
 

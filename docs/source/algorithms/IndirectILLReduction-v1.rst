@@ -22,8 +22,9 @@ Enabling ``MirrorSense=True`` on this algorithm will split the data for each spe
 two separate spectra, these form the **left** and **right** workspaces that are
 reduced independently and then summed according to ``UnmirrorOption`` as follows:
 
-0: No summing of left and right will be performed. The reduced workspace will containt both wings and x-axis will not be converted to energy transfer.
-``MirrorSense=False`` will fall back to this option.
+0: No summing of left and right will be performed.
+If ``MirrorSense=True`` the reduced workspace will containt both wings and x-axis will not be converted to energy transfer.
+If ``MirrorSense=False``, ``UnmirrorOption`` will fall back to ``0`` and x-axis will be converted to energy transfer.
 
 1: Left wing will be returned as reduced workspace.
 
@@ -52,9 +53,6 @@ Run needs to be specified following the Mantid conventions in `MultiFileLoading 
 When ``SumRuns=True``, all the numors will be merged while loading.
 Note, for **Range** and **Stepped Range** (see `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_), ``SumRuns`` will be ignored.
 Please use **Added Range** and **Added Stepped Range** instead (see `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_).
-In case of multiple files specified, the output will be :ref:`WorkspaceGroup <WorkspaceGroup>`
-containing :ref:`MatrixWorkspace <MatrixWorkspace>` for each
-individual run in the input files list.
 
 CalibrationWorkspace
 ~~~~~~~~~~~~~~~~~~~~
@@ -73,10 +71,8 @@ Output Naming Conventions
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 Note that to avoid confusion when running over multiple files,
 the unique run number will be automatically prepended to the output workspace name.
-
-For multiple runs, the output workspace will be grouped and
-:ref:`WorkspaceGroup <WorkspaceGroup>` will be returned,
-containing workspaces for each individual run.
+The output workspace will always be grouped and :ref:`WorkspaceGroup <WorkspaceGroup>` will be returned,
+containing workspaces for each individual run (i.e. one item for single run, many items for multiple runs).
 
 Energy Transfer Unit
 ~~~~~~~~~~~~~~~~~~~~
@@ -111,29 +107,29 @@ Output:
 .. testcode:: ExIndirectILLReductionSingleRun
 
     out = IndirectILLReduction(Run='146190.nxs')
-    print "out is now a reference to workspace, which is called %s" % out.getName()
+    print "out is now refers to a group workspace, which is called %s" % out.getName()
+    print "it contains %d item, which is called %s" % (out.size(),out.getItem(0).getName())
 
 Output:
 
 .. testoutput:: ExIndirectILLReductionSingleRun
 
-    out is now a reference to workspace, which is called 146190_out
+    out is now refers to a group workspace, which is called out
+    it contains 1 item, which is called 146190_out
 
 **Example - IndirectILLReduction : multiple runs**
 
 .. testcode:: ExIndirectILLReductionMultipleRun
 
-    result = IndirectILLReduction(Run='146190:146191.nxs',UnmirrorOption=3)
-    print "result is now the reduced workspace group called %s" % result.getName()
-    print "it contains %d workspaces, one for each run" % result.size()
+    result = IndirectILLReduction(Run='146190:146193.nxs',UnmirrorOption=3)
+    print "result contains %d workspaces, one for each run" % result.size()
     print "first workspace is %s corresponding to run %i" % (result.getItem(0).getName(),result.getItem(0).getRunNumber())
 
 Output:
 
 .. testoutput:: ExIndirectILLReductionMultipleRun
 
-    result is now the reduced workspace group called result
-    it contains 2 workspaces, one for each run
+    result contains 4 workspaces, one for each run
     first workspace is 146190_result corresponding to run 146190
 
 .. categories::
