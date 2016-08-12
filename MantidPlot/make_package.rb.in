@@ -319,7 +319,7 @@ search_patterns.each do |pattern|
     dependencies.split("\n").each do |dependency|
       if dependency.include? "/usr/local/"
         p "issue with library: #{library} linked against: #{dependency}"
-        #exit 1
+        exit 1
       end
       if( "@MAKE_VATES@" == "ON" )
         if dependency.include? "@loader_path"
