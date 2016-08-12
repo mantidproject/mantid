@@ -473,11 +473,13 @@ void EnggDiffFittingPresenter::enableMultiRun(
                           "One or more run file not found "
                           "from the specified range of runs."
                           "Please try again");
+      m_view->enableFitAllButton(false);
     }
   } else {
     m_view->userWarning("Invalid Run Number",
                         "The specified range of run number "
                         "entered is invalid. Please try again");
+    m_view->enableFitAllButton(false);
   }
 }
 
@@ -519,25 +521,26 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
         return;
       }
     }
+
+    const std::string outWSName = "engggui_fitting_fit_peak_ws";
+    g_log.notice() << "EnggDiffraction GUI: starting new multi-run "
+                      "single peak fits into workspace '" +
+                          outWSName + "'. This "
+                                      "may take some seconds... \n";
+
+    m_view->showStatus("Fitting multi-run single peaks...");
+
+    // disable GUI to avoid any double threads
+    m_view->enableCalibrateFocusFitUserActions(false);
+    // startAsyncFittingWorker
+    // doFitting()
+    startAsyncFittingWorker(g_multi_run_directories, fitPeaksData);
+
   } else {
     m_view->userWarning("Error in the inputs required for fitting",
                         "Invalid files have been selected for Fit All process");
     m_view->enableFitAllButton(false);
   }
-
-  const std::string outWSName = "engggui_fitting_fit_peak_ws";
-  g_log.notice() << "EnggDiffraction GUI: starting new multi-run "
-                    "single peak fits into workspace '" +
-                        outWSName + "'. This "
-                                    "may take some seconds... \n";
-
-  m_view->showStatus("Fitting multi-run single peaks...");
-
-  // disable GUI to avoid any double threads
-  m_view->enableCalibrateFocusFitUserActions(false);
-  // startAsyncFittingWorker
-  // doFitting()
-  startAsyncFittingWorker(g_multi_run_directories, fitPeaksData);
 }
 
 void EnggDiffFittingPresenter::processFitPeaks() {
