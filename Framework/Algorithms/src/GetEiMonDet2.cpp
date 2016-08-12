@@ -90,7 +90,6 @@ void GetEiMonDet2::exec() {
   if (!monitorWsProperty->isDefault()) {
     monitorWs = getProperty(PropertyNames::MONITOR_WORKSPACE);
     monitorEPPTable = getProperty(PropertyNames::MONITOR_EPP_TABLE);
-    // TODO check if monitorEPPTable is valid
   }
   else {
     monitorWs = detectorWs;
@@ -98,13 +97,13 @@ void GetEiMonDet2::exec() {
   }
   if (monitorWs == detectorWs) {
     if (std::find(detectorIndices.begin(), detectorIndices.end(), monitorIndex) != detectorIndices.end()) {
-      // TODO Throw something here.
+      throw std::runtime_error(PropertyNames::MONITOR_SPECTRUM_NUMBER + " is also listed in " + PropertyNames::DETECTOR_SPECTRA);
     }
   }
   double nominalIncidentEnergy = getProperty(PropertyNames::INCIDENT_ENERGY);
   if (nominalIncidentEnergy == EMPTY_DBL()) {
     if (!detectorWs->run().hasProperty("Ei")) {
-      // TODO throw
+      throw std::runtime_error("No " + PropertyNames::INCIDENT_ENERGY + " given and no Ei field found in sample logs");
     }
     nominalIncidentEnergy = std::stod(detectorWs->run().getProperty("Ei")->value());
   }
@@ -114,25 +113,36 @@ void GetEiMonDet2::exec() {
   const std::string FIT_STATUS_SUCCESS("success");
   auto peakPositionColumn = detectorEPPTable->getColumn(PEAK_CENTRE_COLUMN);
   auto fitStatusColumn = detectorEPPTable->getColumn(FIT_STATUS_COLUMN);
-  // TODO Check columns exist.
+  if (!peakPositionColumn || !fitStatusColumn) {
+    throw std::runtime_error("The workspace specified by " + PropertyNames::DETECTOR_EPP_TABLE + " doesn't seem to contain the expected table");
+  }
   // Average detector EPPs.
   double detectorEPP = 0.0;
   size_t n = 0;
   for (const auto index : detectorIndices) {
+    if (index >= peakPositionColumn->size()) {
+      throw std::runtime_error("Invalid value in " + PropertyNames::DETECTOR_SPECTRA);
+    }
     if (fitStatusColumn->cell<std::string>(index) == FIT_STATUS_SUCCESS) {
       detectorEPP += (*peakPositionColumn)[index];
       ++n;
     }
   }
   if (n == 0) {
-    // TODO Throw.
+    throw std::runtime_error("No successful detector fits found in " + PropertyNames::DETECTOR_EPP_TABLE);
   }
   detectorEPP /= static_cast<double>(n);
   // Monitor peak position.
   peakPositionColumn = monitorEPPTable->getColumn(PEAK_CENTRE_COLUMN);
   fitStatusColumn = monitorEPPTable->getColumn(FIT_STATUS_COLUMN);
+  if (!peakPositionColumn || !fitStatusColumn) {
+    throw std::runtime_error("The workspace specified by " + PropertyNames::DETECTOR_EPP_TABLE + " doesn't seem to contain the expected table");
+  }
+  if (monitorIndex < 0 || static_cast<size_t>(monitorIndex) >= peakPositionColumn->size()) {
+    throw std::runtime_error("Invalid " + PropertyNames::MONITOR_SPECTRUM_NUMBER);
+  }
   if (fitStatusColumn->cell<std::string>(monitorIndex) != FIT_STATUS_SUCCESS) {
-    // TODO throw
+    throw std::runtime_error("No successful monitor fit found in " + PropertyNames::MONITOR_EPP_TABLE);
   }
   const double monitorEPP = (*peakPositionColumn)[monitorIndex];
 
@@ -144,6 +154,9 @@ void GetEiMonDet2::exec() {
     // Skip detectors without EPP.
     if (fitStatusColumn->cell<std::string>(index) == FIT_STATUS_SUCCESS) {
       const auto detector = detectorWs->getDetector(index);
+      if (!detector) {
+        throw std::runtime_error("No detector specified by " + PropertyNames::DETECTOR_SPECTRA + " found");
+      }
       sampleToDetectorDistance += detector->getDistance(*sample);
       ++n;
     }
@@ -166,13 +179,13 @@ void GetEiMonDet2::exec() {
     // Neutrons hit the detectors in a later frame.
     const double pulseInterval = getProperty(PropertyNames::PULSE_INTERVAL);
     if (pulseInterval == EMPTY_DBL()) {
-      // TODO throw
+      std::runtime_error("Too small or negative time-of-flight and no " + PropertyNames::PULSE_INTERVAL + " specified");
     }
     ++delayFrameCount;
     timeOfFlight = delayFrameCount * pulseInterval - monitorEPP + detectorEPP;
   }
   if (timeOfFlight > upperTimeTolerance * nominalTimeOfFlight) {
-    // TODO throw or warn user.
+    std::runtime_error("Calculated time-of-flight too large");
   }
 
   const double velocity = flightLength / timeOfFlight * 1e6;
