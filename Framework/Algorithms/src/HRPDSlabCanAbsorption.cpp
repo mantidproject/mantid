@@ -100,7 +100,6 @@ void HRPDSlabCanAbsorption::exec() {
 
   Progress progress(this, 0.91, 1.0, numHists);
   for (size_t i = 0; i < numHists; ++i) {
-    auto &Y = workspace->mutableY(i);
 
     // Get detector position
     IDetector_const_sptr det;
@@ -131,6 +130,7 @@ void HRPDSlabCanAbsorption::exec() {
       angleFactor = 1.0 / std::abs(cos(theta));
     }
 
+    auto &Y = workspace->mutableY(i);
     const auto lambdas = workspace->points(i);
     for (size_t j = 0; j < specSize; ++j) {
       const double lambda = lambdas[j];
