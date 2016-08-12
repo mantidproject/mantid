@@ -497,7 +497,6 @@ void EnggDiffFittingPresenter::processLogMsg() {
 
 void EnggDiffFittingPresenter::processFitAllPeaks() {
 
-  const std::string focusedRunNo = m_view->getFittingRunNo();
   std::string fittingPeaks = m_view->fittingPeaksData();
 
   // validate fitting data as it will remain the same through out
