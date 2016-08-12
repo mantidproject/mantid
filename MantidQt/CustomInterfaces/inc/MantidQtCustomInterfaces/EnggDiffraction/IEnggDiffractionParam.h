@@ -40,8 +40,6 @@ class IEnggDiffractionParam {
 public:
   virtual ~IEnggDiffractionParam() = default;
 
-  // virtual std::string getRBNumber() const = 0;
-
   virtual Poco::Path outFilesUserDir(const std::string &addToDir) = 0;
 };
 

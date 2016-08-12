@@ -38,6 +38,7 @@ std::string EnggDiffFittingPresenter::g_multi_run = "";
  *
  * @param view the view that is attached to this presenter
  * @param mainCalib provides the current calibration parameters/status
+ * @param mainParam provides current params and functions
  */
 EnggDiffFittingPresenter::EnggDiffFittingPresenter(
     IEnggDiffFittingView *view,
@@ -450,9 +451,6 @@ void EnggDiffFittingPresenter::enableMultiRun(
             "Please try again");
       } else {
 
-        // delete me
-        auto size_ = RunNumberVec.size();
-
         // to track the FittingRunnoChanged loop number
         g_fitting_runno_counter++;
 
@@ -511,7 +509,7 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 
   if (!g_multi_run_directories.empty()) {
 
-    for (int i = 0; i < g_multi_run_directories.size(); i++) {
+    for (size_t i = 0; i < g_multi_run_directories.size(); i++) {
       try {
 
         inputChecksBeforeFitting(g_multi_run_directories[i], fitPeaksData);
