@@ -206,7 +206,7 @@ class ABINS(PythonAlgorithm):
             SaveAscii(InputWorkspace=wrk, Filename=wrk.getName()+".dat", Separator="Space", WriteSpectrumID=False)
         prog_reporter.report("All workspaces have been saved to ASCII files.")
 
-        # 9) create workspaces with all sub-workspaces
+        # 9) set  OutputWorkspace
         self.setProperty('OutputWorkspace', self._out_ws_name)
         prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
 

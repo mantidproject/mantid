@@ -32,7 +32,7 @@ class CalculatePowder(IOmodule):
             raise ValueError("Invalid value of temperature.")
         if temperature < 0:
             raise ValueError("Temperature cannot be negative.")
-        self._temperature = temperature # temperature in K
+        self._temperature = float(temperature) # temperature in K
 
 
     def _calculate_powder(self):

@@ -16,7 +16,8 @@ class DwCrystalData(GeneralData):
         """
         super(DwCrystalData, self).__init__()
 
-        if isinstance(temperature, int) and temperature > 0:
+        if (isinstance(temperature, int) or isinstance(temperature, float)) and \
+            temperature > 0:
             self._temperature = temperature
         else:
             raise ValueError("Improper value of temperature.")
