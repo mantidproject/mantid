@@ -429,7 +429,6 @@ void ContainerSubtraction::absCorComplete(bool error) {
     addConvertUnitsStep(ws, m_originalSampleUnits, "", eMode);
   }
 
-
   if (m_uiForm.ckShiftCan->isChecked()) {
     IAlgorithm_sptr shiftLog =
         AlgorithmManager::Instance().create("AddSampleLog");

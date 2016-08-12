@@ -30,7 +30,6 @@ private slots:
   /// Handles mantid plotting
   void plotClicked();
 
-
 private:
   void setup() override;
   void run() override;
