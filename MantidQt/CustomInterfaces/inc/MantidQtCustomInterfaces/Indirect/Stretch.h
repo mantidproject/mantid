@@ -20,7 +20,6 @@ public:
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
 
-
 private slots:
   /// Slot for when the min range on the range selector changes
   void minValueChanged(double min);

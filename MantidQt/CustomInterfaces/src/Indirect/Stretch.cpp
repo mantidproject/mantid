@@ -157,7 +157,6 @@ void Stretch::run() {
 
   m_uiForm.cbPlot->setEnabled(true);
   m_plotType = m_uiForm.cbPlot->currentText().toStdString();
-
 }
 
 /**
@@ -165,7 +164,7 @@ void Stretch::run() {
 */
 void Stretch::algorithmComplete(const bool &error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-    SLOT(algorithmComplete(bool)));
+             SLOT(algorithmComplete(bool)));
 
   if (error)
     return;
@@ -209,17 +208,16 @@ void Stretch::plotWorkspaces() {
 
   WorkspaceGroup_sptr fitWorkspace;
   fitWorkspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-    m_fitWorkspaceName);
+      m_fitWorkspaceName);
 
   auto sigma = QString::fromStdString(fitWorkspace->getItem(0)->getName());
   auto beta = QString::fromStdString(fitWorkspace->getItem(1)->getName());
   if (sigma.right(5).compare("Sigma") == 0) {
     if (beta.right(4).compare("Beta") == 0) {
     }
-  }
-  else {
+  } else {
     g_log.error(
-      "Beta and Sigma workspace were not found and could not be plotted.");
+        "Beta and Sigma workspace were not found and could not be plotted.");
   }
 
   QString pyInput = "from mantidplot import plot2D\n";

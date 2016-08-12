@@ -318,7 +318,6 @@ void ResNorm::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-
 /**
 * Handles plotting when button is clicked
 */
