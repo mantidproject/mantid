@@ -423,7 +423,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             Scale(InputWorkspace=red, OutputWorkspace=red, Factor=0.5, Operation='Multiply')
 
     @classmethod
-    def _shift_spectra(cls, ws1, ws2=None, shift_option_ws2_centered='False'):
+    def _shift_spectra(cls, ws1, ws2=None, shift_option='False'):
         """
         If only ws1 is given as an input workspace, ws1 will be shifted such that peak positions of each single spectrum
         are centered around 0 meV
@@ -432,14 +432,14 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         The SampleLog data of the workspace will be lost
         @param ws1                         ::   workspace to be shifted
         @param ws2                         ::   optional workspace according to which ws1 will be shifted
-        @param shift_option_ws2_centered   ::   option to shift ws1 such that spectra correspond to ws2 centered
+        @param shift_option                ::   option to shift ws1 by number of bins ws2 to center
         @return                            ::   shifted output workspace
         """
         number_spectra = mtd[ws1].getNumberHistograms()
         size = mtd[ws1].blocksize()
 
         if ws2 is not None and size != mtd[ws2].blocksize():
-            print('Input Workspaces should have the same blocksize')
+            cls.log().information('Input Workspaces should have the same blocksize')
 
         mid_bin = int(size / 2)
 
@@ -453,12 +453,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         # Shift each single spectrum of the input workspace ws1
         for i in range(number_spectra):
-            # use mutableX etc
 
             # Read X, Y, and E values, which will be shifted
-            x_values = np.array(mtd[ws1].readX(i))
-            y_values = np.array(mtd[ws1].readY(i))
-            e_values = np.array(mtd[ws1].readE(i))
+            x_values = mtd[ws1].readX(i)
+            y_values = mtd[ws1].readY(i)
+            e_values = mtd[ws1].readE(i)
 
             # Find peak positions in ws1
             __temp = ExtractSingleSpectrum(InputWorkspace=ws1, WorkspaceIndex=i)
@@ -481,35 +480,20 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     # ws1 will be shifted according to centered peak of ws2
                     to_shift = peak_bin2 - mid_bin
 
-            # Placeholder zeros to keep correct size of the spectrum, these bins will be masked
-            new_zeros = np.zeros(abs(to_shift), dtype='int32')
+            #cls.log().information('%d bins of spectrum %d will be shifted' %(abs(to_shift), i))
 
-            #print('%d bins of spectrum %d will be shifted' %(abs(to_shift), i))
+            # Shift Y and E values by to_shift bins
+            y_values = np.roll(y_values, to_shift)
+            e_values = np.roll(e_values, to_shift)
 
             if to_shift > 0:
-                # shift to the left
-                delete_bins = range(to_shift)
-                y_values = np.append(y_values, new_zeros)
-                e_values = np.append(e_values, new_zeros)
-
                 if (size - to_shift) < end_bin:
-                    # New left boundary for masking
+                    # New left boundary for masking (right shift)
                     end_bin = size - to_shift
             else:
-                # shift to the right
-                to_zero_bins = np.array(range(abs(to_shift)))
-                size_bins = np.ones(abs(to_shift), dtype='int32') * size
-                delete_bins = size_bins - to_zero_bins
-
-                y_values = np.insert(y_values, 0, new_zeros)
-                e_values = np.insert(e_values, 0, new_zeros)
-
                 if abs(to_shift) > start_bin:
-                    # New right boundary for masking
+                    # New right boundary for masking (left shift)
                     start_bin = abs(to_shift)
-
-            y_values = np.delete(y_values, delete_bins)
-            e_values = np.delete(e_values, delete_bins)
 
             if i == 0:
                 # Initial shifted spectrum 0
@@ -520,12 +504,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 AppendSpectra(InputWorkspace1=ws_out_temp,InputWorkspace2=shifted,OutputWorkspace=ws_out_temp, MergeLogs=True)
                 DeleteWorkspace(shifted)
 
-        # Attention: MaskBins returns success, but does not set zeros?
         # Mask bins to the left of the final bin range
         MaskBins(InputWorkspace=ws_out_temp, OutputWorkspace=ws_out_temp, XMin=0, XMax=start_bin)
         # Mask bins to the right of the final bin range
         MaskBins(InputWorkspace=ws_out_temp, OutputWorkspace=ws_out_temp, XMin=end_bin, XMax=size)
-        print('Bin range is [%f, %f], bins outside this range are masked' %(start_bin, end_bin))
+        cls.log().information('Bin range is [%f, %f], bins outside this range are masked' %(start_bin, end_bin))
 
         return ws_out_temp
 
