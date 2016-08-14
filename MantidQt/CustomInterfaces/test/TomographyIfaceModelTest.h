@@ -68,9 +68,9 @@ public:
     TSM_ASSERT_EQUALS("Unexpected number of reconstruction tools",
                       model.reconTools().size(), 5);
 
-    auto status = model.reconToolsStatus();
+    const auto status = model.reconToolsStatus();
 
-    std::vector<bool> expected = {true, true, false, false, true};
+    const std::vector<bool> expected = {true, true, false, false, true};
     TSM_ASSERT_EQUALS("Unexpected number of reconstruction tools (status)",
                       status.size(), 5);
     for (size_t idx = 0; idx < status.size(); ++idx) {
@@ -88,15 +88,16 @@ public:
         Mantid::Kernel::ConfigService::Instance().getFacility();
 
     Mantid::Kernel::ConfigService::Instance().setFacility("ISIS");
-
     auto isSupported = model.facilitySupported();
     TSM_ASSERT("This facility should be supported", isSupported);
 
-    Mantid::Kernel::ConfigService::Instance().setFacility("SNS");
-    TSM_ASSERT("This facility should not be supported", isSupported);
-
-    Mantid::Kernel::ConfigService::Instance().setFacility("ILL");
-    TSM_ASSERT("This facility should not be supported", isSupported);
+    const std::vector<std::string> otherFacilities = {"SNS", "HFIR", "ILL",
+                                                      "ANSTO", "TEST_LIVE"};
+    for (const auto &facility : otherFacilities) {
+      Mantid::Kernel::ConfigService::Instance().setFacility(facility);
+      TSM_ASSERT("This facility should not be supported",
+                 !model.facilitySupported());
+    }
 
     // restore facility
     Mantid::Kernel::ConfigService::Instance().setFacility(prevFac.name());
@@ -193,7 +194,7 @@ public:
 
     TSM_ASSERT_EQUALS("Should not be logged in", model.loggedIn(), "");
 
-    std::vector<std::string> ids = {"none", "inexistent"};
+    const std::vector<std::string> ids = {"none", "inexistent"};
     TSM_ASSERT_THROWS("Exception not thrown as expected - login local",
                       model.doCancelJobs("Local", ids), std::invalid_argument);
   }
