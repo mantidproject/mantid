@@ -98,15 +98,13 @@ void MuonGroupDetectors::exec() {
 
     // We will be setting them anew
     outWS->getSpectrum(groupIndex).clearDetectorIDs();
-    auto &Y = outWS->mutableY(groupIndex);
-    auto &E = outWS->mutableE(groupIndex);
+
+    // Using the first detector X values
+    outWS->setSharedX(groupIndex, inWS->sharedX(wsIndices.front()));
+
+    auto hist = outWS->histogram(groupIndex);
     for (auto &wsIndex : wsIndices) {
-      Y += inWS->y(wsIndex);
-      std::transform(inWS->e(wsIndex).cbegin(), inWS->e(wsIndex).cend(),
-                     E.cbegin(), E.begin(),
-                     [](const double lhs, const double rhs) {
-                       return sqrt(lhs * lhs + rhs * rhs);
-                     });
+      hist += inWS->histogram(wsIndex);
       // Detectors list of the group should contain all the detectors of
       // it's
       // elements
@@ -114,8 +112,7 @@ void MuonGroupDetectors::exec() {
           .addDetectorIDs(inWS->getSpectrum(wsIndex).getDetectorIDs());
     }
 
-    // Using the first detector X values
-    outWS->setSharedX(groupIndex, inWS->sharedX(wsIndices.front()));
+    outWS->setHistogram(groupIndex, hist);
 
     outWS->getSpectrum(groupIndex)
         .setSpectrumNo(static_cast<specnum_t>(groupIndex + 1));
