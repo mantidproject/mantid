@@ -52,10 +52,8 @@ public:
     auto status = model->computeResourcesStatus();
     TSM_ASSERT_EQUALS("Unexpected number of compute resources (status)",
                       status.size(), 2);
-    TSM_ASSERT_EQUALS("Unexpected status for first compute resource ",
-                      status[0], true);
-    TSM_ASSERT_EQUALS("Unexpected status for first compute resource ",
-                      status[1], true);
+    TSM_ASSERT("Unexpected status for first compute resource ", status[0]);
+    TSM_ASSERT("Unexpected status for second compute resource ", status[1]);
 
     TSM_ASSERT_THROWS_NOTHING("Problem in cleanup", model->cleanup());
   }
@@ -74,9 +72,8 @@ public:
     TSM_ASSERT_EQUALS("Unexpected number of reconstruction tools (status)",
                       status.size(), 5);
     for (size_t idx = 0; idx < status.size(); ++idx) {
-      TSM_ASSERT_EQUALS("Unexpected status for tool number " +
-                            std::to_string(idx + 1),
-                        status[idx], expected[idx]);
+      TSM_ASSERT("Unexpected status for tool number " + std::to_string(idx + 1),
+                 status[idx] == expected[idx]);
     }
   }
 
