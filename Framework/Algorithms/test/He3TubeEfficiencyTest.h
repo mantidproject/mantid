@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/He3TubeEfficiency.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/He3TubeEfficiency.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -210,47 +210,4 @@ private:
   const std::string inputWS;
   const std::string inputEvWS;
 };
-
-class He3TubeEfficiencyTestPerformance : public CxxTest::TestSuite {
-public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static He3TubeEfficiencyTestPerformance *createSuite() {
-    return new He3TubeEfficiencyTestPerformance();
-  }
-  static void destroySuite(He3TubeEfficiencyTestPerformance *suite) {
-    delete suite;
-  }
-
-  void setUp() {
-    He3TubeEffeciencyHelper::createWorkspace2DInADS(inputWS);
-    He3TubeEffeciencyHelper::createEventWorkspaceInADS(inputEvWS);
-  }
-
-  void tearDown() {
-    AnalysisDataService::Instance().remove(inputWS);
-    AnalysisDataService::Instance().remove(inputEvWS);
-  }
-
-  void testMatrixWSPerformance() {
-    He3TubeEfficiency alg;
-    alg.setPropertyValue("InputWorkspace", inputWS);
-    alg.setPropertyValue("OutputWorkspace", inputWS);
-    alg.execute();
-    TS_ASSERT(alg.isExecuted());
-  }
-
-  void testEventWSPerformance() {
-    He3TubeEfficiency alg;
-    alg.setPropertyValue("InputWorkspace", inputEvWS);
-    alg.setPropertyValue("OutputWorkspace", inputEvWS);
-    alg.execute();
-    TS_ASSERT(alg.isExecuted());
-  }
-
-private:
-  const std::string inputWS;
-  const std::string inputEvWS;
-};
-
 #endif // HE3TUBEEFFICIENCYTEST_H_
