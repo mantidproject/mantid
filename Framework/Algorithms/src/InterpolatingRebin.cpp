@@ -183,10 +183,12 @@ void InterpolatingRebin::outputYandEValues(
 *  @param[in] oldHistogram :: the histogram of the output workspace that will
 *be interpolated
 *  @param[in] xNew :: x-values to rebin to, must be monotonically increasing
-*  @return Histogram :: A new Histogram containing the BinEdges xNew and 
+*  @return Histogram :: A new Histogram containing the BinEdges xNew and
 *the calculated HistogramY and HistogramE
-*  @throw runtime_error :: if there is a problem executing one of the GSL functions
-*  @throw invalid_argument :: if any output x-values are outside the range of input
+*  @throw runtime_error :: if there is a problem executing one of the GSL
+*functions
+*  @throw invalid_argument :: if any output x-values are outside the range of
+*input
 *x-values
 **/
 Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
@@ -341,7 +343,7 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
 *  @param[in] oldHistogram :: the histogram of the output workspace that will
 *be interpolated
 *  @param[in] xNew :: x-values to rebin to, must be monotonically increasing
-*  @return Histogram :: A new Histogram containing the BinEdges xNew and 
+*  @return Histogram :: A new Histogram containing the BinEdges xNew and
 *the calculated HistogramY and HistogramE
 */
 Histogram InterpolatingRebin::noInterpolation(const Histogram &oldHistogram,
