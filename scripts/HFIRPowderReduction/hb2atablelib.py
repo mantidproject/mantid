@@ -1,5 +1,9 @@
 import NTableWidget as BaseTable
 
+"""
+This module includes several table widgets extended from NTalbeWidget
+"""
+
 
 class ScanInfoTable(BaseTable.NTableWidget):
     """ A customized table to present HB2A information
@@ -61,3 +65,45 @@ class ScanInfoTable(BaseTable.NTableWidget):
             self.SetupTable.append((col_name, 'str'))
             self._columnNameList.append(col_name)
         # END-FOR (col
+
+
+class ScanInfoSetupTable(BaseTable.NTableWidget):
+    """ A customized table to present HB2A information table setup
+    """
+    SetupTable = [('Item Name', 'str'),
+                  ('Use', 'checkbox')]
+
+    def __init__(self, parent):
+        """
+        Initialization
+        """
+        base.__init__(self, parent)
+
+        return
+
+
+    def get_setup(self):
+        """
+        """
+        num_rows = self.rowCount()
+        use_log_list = list()
+        for i_row in range(num_rows):
+            use_it = self.get_cell_value(i_row, self._colIndexUse)
+            if use_it:
+                item_name = self.get_cell_value(i_row, self._colIndexName)
+                use_log_list.append(item_name)
+        # END-FOR
+
+        return use_log_list
+
+
+    def setup(self):
+        """ Set up table
+        """
+        self.init_setup(self.TableSetup)
+
+        self._colIndexName = self.TableSetup.index(('Item Name', 'str'))
+        self._colIndexUse = self.TableSetup.index(('Use', 'checkbox'))
+
+        return
+
