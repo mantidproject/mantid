@@ -20,6 +20,8 @@ private:
 
 private slots:
   virtual void algorithmComplete(bool error);
+  void saveClicked();
+  void plotClicked();
 
 private:
   void addSaveWorkspace(QString wsName);
