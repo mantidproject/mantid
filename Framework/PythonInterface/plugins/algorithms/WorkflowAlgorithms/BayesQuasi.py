@@ -9,6 +9,7 @@ from mantid.kernel import StringListValidator, Direction
 import mantid.simpleapi as s_api
 from mantid import config, logger
 from IndirectCommon import *
+MTD_PLOT = import_mantidplot()
 
 if is_supported_f2py_platform():
     QLr     = import_f2py("QLres")
@@ -31,8 +32,6 @@ class BayesQuasi(PythonAlgorithm):
     _res_norm = None
     _wfile = None
     _loop = None
-    _save = None
-    _plot = None
 
     def category(self):
         return "Workflow\\MIDAS"
@@ -90,10 +89,6 @@ class BayesQuasi(PythonAlgorithm):
 
         self.declareProperty(name='Loop', defaultValue=True, doc='Switch Sequential fit On/Off')
 
-        self.declareProperty(name='Plot', defaultValue='', doc='Plot options')
-
-        self.declareProperty(name='Save', defaultValue=False, doc='Switch Save result to nxs file Off/On')
-
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspaceFit', '', direction=Direction.Output),
                              doc='The name of the fit output workspaces')
 
@@ -132,8 +127,6 @@ class BayesQuasi(PythonAlgorithm):
         self._res_norm = self.getProperty('UseResNorm').value
         self._wfile = self.getPropertyValue('WidthFile')
         self._loop = self.getProperty('Loop').value
-        self._save = self.getProperty('Save').value
-        self._plot = self.getPropertyValue('Plot')
 
     #pylint: disable=too-many-locals,too-many-statements
     def PyExec(self):
@@ -363,13 +356,9 @@ class BayesQuasi(PythonAlgorithm):
             s_api.CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,
                                   Nspec=3, UnitX='MomentumTransfer')
             outWS = self.C2Fw(fname)
-            if self._plot != 'None':
-                self.QuasiPlot(fname,self._plot,res_plot,self._loop)
         if self._program == 'QSe':
             comp_prog.report('Runnning C2Se')
             outWS = self.C2Se(fname)
-            if self._plot != 'None':
-                self.QuasiPlot(fname,self._plot,res_plot,self._loop)
 
         log_prog = Progress(self, start=0.8, end =1.0, nreports=8)
         #Add some sample logs to the output workspaces
@@ -382,15 +371,6 @@ class BayesQuasi(PythonAlgorithm):
         log_prog.report('Adding sample logs to Fit workspace')
         self._add_sample_logs(fitWS, prog, erange, nbins)
         log_prog.report('Finialising log copying')
-
-        if self._save:
-            log_prog.report('Saving workspaces')
-            fit_path = os.path.join(workdir,fitWS+'.nxs')
-            s_api.SaveNexusProcessed(InputWorkspace=fitWS, Filename=fit_path)
-            out_path = os.path.join(workdir, outWS+'.nxs')                    # path name for nxs file
-            s_api.SaveNexusProcessed(InputWorkspace=outWS, Filename=out_path)
-            logger.information('Output fit file created : ' + fit_path)
-            logger.information('Output paramter file created : ' + out_path)
 
         self.setProperty('OutputWorkspaceFit', fitWS)
         self.setProperty('OutputWorkspaceResult', outWS)
@@ -572,7 +552,7 @@ class BayesQuasi(PythonAlgorithm):
             logger.information('Width file is ' + widthFile)
             # read ascii based width file
             try:
-                wfPath = FileFinder.getFullPath(widthFile)
+                wfPath = s_api.FileFinder.getFullPath(widthFile)
                 handle = open(wfPath, 'r')
                 asc = []
                 for line in handle:
@@ -595,41 +575,6 @@ class BayesQuasi(PythonAlgorithm):
         widthE = PadArray(widthE,51)
 
         return widthY, widthE
-
-    def QuasiPlot(self, ws_stem,plot_type,res_plot,sequential):
-        if plot_type:
-            if sequential:
-                ws_name = ws_stem + '_Result'
-            if plot_type == 'Prob' or plot_type == 'All':
-                prob_ws = ws_stem+'_Prob'
-                if prob_ws in s_api.mtd.getObjectNames():
-                    MTD_PLOT.plotSpectrum(prob_ws,[1,2],False)
-
-            self._quasi_plot_parameters(ws_name, plot_type)
-
-        if plot_type == 'Fit' or plot_type == 'All':
-            fWS = ws_stem+'_Workspace_0'
-            MTD_PLOT.plotSpectrum(fWS,res_plot,False)
-
-
-    def _quasi_plot_parameters(self, ws_name, plot_type):
-        """
-        Plot a parameter if the user requested it and it exists
-        in the workspace
-
-        @param ws_name :: name of the workspace to plot from. This function expects it has a TextAxis
-        @param plot_type :: the name of the parameter to plot (or All if all parameters should
-                            be plotted)
-        """
-        num_spectra = s_api.mtd[ws_name].getNumberHistograms()
-        param_names = ['Amplitude', 'FWHM', 'Beta']
-
-        for param_name in param_names:
-            if plot_type == param_name or plot_type == 'All':
-                spectra_indicies = [i for i in range(num_spectra) if param_name in s_api.mtd[ws_name].getAxis(1).label(i)]
-
-                if len(spectra_indicies) > 0:
-                    plotSpectra(ws_name, param_name, indicies=spectra_indicies[:3])
 
     def C2Fw(self, sname):
         output_workspace = sname+'_Result'

@@ -18,6 +18,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
     _bin_width = None
     _spec_type = None
     _peak_func = None
+    _calc_ion_index = None
     _out_ws_name = None
     _peak_width = None
     _scale = None
@@ -64,6 +65,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self.declareProperty(name='SpectrumType', defaultValue='DOS',
                              validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active', 'BondTable']),
                              doc="Type of intensities to extract and model (fundamentals-only) from .phonon.")
+
+        self.declareProperty(name='CalculateIonIndices', defaultValue=False,
+                             doc="Calculates the individual index of all Ions in the simulated data.")
 
         self.declareProperty(name='StickHeight', defaultValue=0.01,
                              doc='Intensity of peaks in stick diagram.')
@@ -231,8 +235,14 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
             # Build a dictionary of ions that the user cares about
             partial_ions = dict()
-            for ion in self._ions:
-                partial_ions[ion] = [i['index'] for i in ions if i['species'] == ion]
+            if not self._calc_ion_index:
+                for ion in self._ions:
+                    partial_ions[ion] = [i['index'] for i in ions if i['species'] == ion]
+            else:
+                for ion in ions:
+                    if ion['species'] in self._ions:
+                        ion_identifier = ion['species'] + str(ion['index'])
+                        partial_ions[ion_identifier] = ion['index']
 
             partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(partial_ions, frequencies, eigenvectors, weights)
 
@@ -246,8 +256,11 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
             else:
                 s_api.DeleteWorkspace(sum_workspace)
-
                 partial_ws_names = [ws.getName() for ws in partial_workspaces]
+                ### sort workspaces
+                if self._calc_ion_index:
+                    # Sort by index after '_'
+                    partial_ws_names.sort(key=lambda item: (int(item[(item.rfind('_')+1):])))
                 group = ','.join(partial_ws_names)
                 s_api.GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
 
@@ -315,6 +328,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self._bin_width = self.getProperty('BinWidth').value
         self._spec_type = self.getPropertyValue('SpectrumType')
         self._peak_func = self.getPropertyValue('Function')
+        self._calc_ion_index = self.getProperty('CalculateIonIndices').value
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
         self._peak_width = self.getProperty('PeakWidth').value
         self._scale = self.getProperty('Scale').value
@@ -324,7 +338,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
         self._calc_partial = (len(self._ions) > 0)
 
+
 #----------------------------------------------------------------------------------------
+
 
     def _convert_to_cartesian_coordinates(self, unit_cell, ions):
         """
@@ -436,8 +452,12 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             partial_ws.setYUnitLabel('Intensity')
 
             # Add the sample material to the workspace
+            match = re.search(r'\d', ion_name)
+            element_index = ion_name
+            if match:
+                element_index = ion_name[:match.start()]
             chemical, ws_suffix = self._parse_chemical_and_ws_name(ion_name,
-                                                                   self._element_isotope[ion_name])
+                                                                   self._element_isotope[element_index])
             partial_ws_name += ws_suffix
 
             s_api.SetSampleMaterial(InputWorkspace=self._out_ws_name,
@@ -506,12 +526,24 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 AND
                 The expected suffix for the partial workspace
         """
+        # Get the index of the element (if present)
+        import re
+        match = re.search(r'\d', ion_name)
+        element_index = ''
+        if match:
+            element_index = '_' + ion_name[match.start():]
+
+        # If the chemical is a isotope
         if ':' in ion_name:
             chemical = ion_name.split(':')[0]
             # Parse isotope to rounded int
             chemical_formula = '(' + chemical + str(int(round(isotope))) + ')'
-            ws_name_suffix = chemical + '('  + str(int(round(isotope))) + ')'
+            ws_name_suffix = chemical + '('  + str(int(round(isotope))) + ')' + element_index
             return chemical_formula, ws_name_suffix
+        # If the chemical has an index
+        if match:
+            chemical = ion_name[:match.start()]
+            return chemical, chemical + element_index
         else:
             return ion_name, ion_name
 
