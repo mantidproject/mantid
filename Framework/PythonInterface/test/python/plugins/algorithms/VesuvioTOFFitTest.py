@@ -73,7 +73,7 @@ class VesuvioTOFFitTest(unittest.TestCase):
         alg.execute()
         fit_params = alg.getProperty("FitParameters").value
         f2_intensity = fit_params.row(9)
-        f3_intesnity = fit_params.row(12)
+        f3_intensity = fit_params.row(12)
 
         # Ensure the value of the f2.Intensity and f3.Intensity fit parameters are tied
         self.assertAlmostEqual(f2_intensity['Value'], f3_intensity['Value'])
