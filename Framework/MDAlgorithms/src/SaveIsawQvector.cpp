@@ -30,16 +30,6 @@ const std::size_t DIMS(3);
 const std::size_t BUFF_SIZE(DIMS * sizeof(float));
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveIsawQvector::SaveIsawQvector() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveIsawQvector::~SaveIsawQvector() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SaveIsawQvector::name() const { return "SaveIsawQvector"; }
 

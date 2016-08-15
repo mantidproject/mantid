@@ -1,11 +1,15 @@
 """Defines a set of helpers wrapped around the C++ TestHelpers package that
 are for use in unit tests only!
 """
+from __future__ import (absolute_import, division,
+                        print_function)
+
+from six import iteritems
 # Define all mantid exported classes first
 import mantid
 
 # Add workspace creation namespace
-import WorkspaceCreationHelper
+from . import WorkspaceCreationHelper
 
 # Define some pure-Python functions to add to the mix
 
@@ -48,7 +52,7 @@ def create_algorithm(name, **kwargs):
     if 'rethrow' in kwargs:
         alg.setRethrows(True)
         del kwargs['rethrow']
-    for key, value in kwargs.iteritems():
+    for key, value in iteritems(kwargs):
         alg.setProperty(key, value)
     return alg
 
@@ -66,7 +70,7 @@ def assertRaisesNothing(testobj, callable, *args, **kwargs):
     """
     try:
          return callable(*args, **kwargs)
-    except Exception, exc:
+    except Exception as exc:
         testobj.fail("Assertion error. An exception was caught where none was expected in %s. Message: %s"
                      % (callable.__name__, str(exc)))
 

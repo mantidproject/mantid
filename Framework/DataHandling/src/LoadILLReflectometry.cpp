@@ -30,20 +30,12 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadILLReflectometry::LoadILLReflectometry() {
-  m_wavelength = 0;
-  m_channelWidth = 0;
-  m_numberOfTubes = 0;         // number of tubes - X
-  m_numberOfPixelsPerTube = 0; // number of pixels per tube - Y
-  m_numberOfChannels = 0;      // time channels - Z
-  m_numberOfHistograms = 0;
-  m_supportedInstruments.emplace_back("D17");
-}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadILLReflectometry::~LoadILLReflectometry() {}
+LoadILLReflectometry::LoadILLReflectometry()
+    : m_numberOfTubes{0},         // number of tubes - X
+      m_numberOfPixelsPerTube{0}, // number of pixels per tube - Y
+      m_numberOfChannels{0},      // time channels - Z
+      m_numberOfHistograms{0}, m_wavelength{0}, m_channelWidth{0},
+      m_supportedInstruments{"D17"} {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

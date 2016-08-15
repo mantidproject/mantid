@@ -45,10 +45,6 @@ namespace DataHandling {
  */
 class DLLExport SaveRKH : public API::Algorithm {
 public:
-  /// Constructor
-  SaveRKH();
-  /// Virtual destructor
-  ~SaveRKH() override;
   /// Algorithm's name
   const std::string name() const override { return "SaveRKH"; }
   /// Summary of algorithms purpose
@@ -81,7 +77,7 @@ private:
   /// The input workspace
   API::MatrixWorkspace_const_sptr m_workspace;
   /// Whether this is a 2D dataset
-  bool m_2d;
+  bool m_2d{false};
   /// The output filehandle
   std::ofstream m_outRKH;
 };

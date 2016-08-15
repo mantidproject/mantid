@@ -102,7 +102,6 @@ void LoadMuonLog::exec() {
   } // end for
 
   // operation was a success and ended normally
-  return;
 }
 
 /** change each element of the string to lower case

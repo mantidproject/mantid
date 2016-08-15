@@ -33,6 +33,10 @@
 
 #include <nexus/NeXusException.hpp>
 
+#include <map>
+#include <string>
+#include <vector>
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -73,12 +77,6 @@ struct SpectraInfo {
       : nSpectra(_nSpectra), hasSpectra(_hasSpectra),
         spectraNumbers(_spectraNumbers), detectorIndex(_detectorIndex),
         detectorCount(_detectorCount), detectorList(_detectorList) {}
-
-  SpectraInfo(const SpectraInfo &other)
-      : nSpectra(other.nSpectra), hasSpectra(other.hasSpectra),
-        spectraNumbers(other.spectraNumbers),
-        detectorIndex(other.detectorIndex), detectorCount(other.detectorCount),
-        detectorList(other.detectorList) {}
 };
 
 // Helper typdef.
@@ -174,7 +172,7 @@ bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS,
 
 /// Default constructor
 LoadNexusProcessed::LoadNexusProcessed()
-    : m_shared_bins(false), m_xbins(), m_axis1vals(), m_list(false),
+    : m_shared_bins(false), m_xbins(0), m_axis1vals(), m_list(false),
       m_interval(false), m_spec_min(0), m_spec_max(Mantid::EMPTY_INT()),
       m_spec_list(), m_filtered_spec_idxs(), m_cppFile(nullptr) {}
 
@@ -258,7 +256,7 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
 
   const size_t nHistograms = periodWorkspace->getNumberHistograms();
   for (size_t i = 0; i < nHistograms; ++i) {
-    periodWorkspace->setX(i, tempMatrixWorkspace->refX(i));
+    periodWorkspace->setSharedX(i, tempMatrixWorkspace->sharedX(i));
   }
 
   // We avoid using `openEntry` or similar here because they're just wrappers
@@ -321,11 +319,11 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
 
     int64_t final(histIndex + blockSize);
     while (histIndex < final) {
-      MantidVec &Y = periodWorkspace->dataY(wsIndex);
+      auto &Y = periodWorkspace->mutableY(wsIndex);
       Y.assign(dataStart, dataEnd);
       dataStart += nChannels;
       dataEnd += nChannels;
-      MantidVec &E = periodWorkspace->dataE(wsIndex);
+      auto &E = periodWorkspace->mutableE(wsIndex);
       E.assign(errorStart, errorEnd);
       errorStart += nChannels;
       errorEnd += nChannels;
@@ -564,8 +562,8 @@ void LoadNexusProcessed::correctForWorkspaceNameClash(std::string &wsName) {
   bool noClash(false);
 
   for (int i = 0; !noClash; ++i) {
-    std::string wsIndex = ""; // dont use an index if there is no other
-                              // workspace
+    std::string wsIndex; // dont use an index if there is no other
+                         // workspace
     if (i > 0) {
       wsIndex = "_" + std::to_string(i);
     }
@@ -746,13 +744,14 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
 
       // Set the X axis
       if (this->m_shared_bins)
-        el.setX(this->m_xbins);
+        el.setHistogram(this->m_xbins);
       else {
-        MantidVec x;
-        x.resize(xbins.dim1());
+        MantidVec x(xbins.dim1());
         for (int i = 0; i < xbins.dim1(); i++)
           x[i] = xbins(static_cast<int>(wi), i);
-        el.setX(x);
+        // Workspace and el was just created, so we can just set a new histogram
+        // We can move x as it is not longer used after this point
+        el.setHistogram(HistogramData::BinEdges(std::move(x)));
       }
     }
 
@@ -813,7 +812,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
   do {
     std::string dataSetName = "column_" + std::to_string(columnNumber);
 
-    NXInfo info = nx_tw.getDataSetInfo(dataSetName.c_str());
+    NXInfo info = nx_tw.getDataSetInfo(dataSetName);
     if (info.stat == NX_ERROR) {
       // Assume we done last column of table
       break;
@@ -845,7 +844,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
       }
     } else if (info.rank == 2) {
       if (info.type == NX_CHAR) {
-        NXChar data = nx_tw.openNXChar(dataSetName.c_str());
+        NXChar data = nx_tw.openNXChar(dataSetName);
         std::string columnTitle = data.attributes("name");
         if (!columnTitle.empty()) {
           workspace->addColumn("str", columnTitle);
@@ -865,7 +864,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
       } else if (info.type == NX_INT32) {
         loadVectorColumn<int>(nx_tw, dataSetName, workspace, "vector_int");
       } else if (info.type == NX_FLOAT64) {
-        auto data = nx_tw.openNXDouble(dataSetName.c_str());
+        auto data = nx_tw.openNXDouble(dataSetName);
         if (data.attributes("interpret_as") == "V3D") {
           loadV3DColumn(data, workspace);
         } else {
@@ -894,13 +893,12 @@ void LoadNexusProcessed::loadVectorColumn(const NXData &tableData,
                                           const std::string &dataSetName,
                                           const ITableWorkspace_sptr &tableWs,
                                           const std::string &columnType) {
-  NXDataSetTyped<Type> data =
-      tableData.openNXDataSet<Type>(dataSetName.c_str());
+  NXDataSetTyped<Type> data = tableData.openNXDataSet<Type>(dataSetName);
   std::string columnTitle = data.attributes("name");
   if (!columnTitle.empty()) {
     tableWs->addColumn(columnType, columnTitle);
 
-    NXInfo info = tableData.getDataSetInfo(dataSetName.c_str());
+    NXInfo info = tableData.getDataSetInfo(dataSetName);
     const size_t rowCount = info.dims[0];
     const size_t blockSize = info.dims[1];
 
@@ -978,7 +976,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
   do {
     std::string str = "column_" + std::to_string(columnNumber);
 
-    NXInfo info = nx_tw.getDataSetInfo(str.c_str());
+    NXInfo info = nx_tw.getDataSetInfo(str);
     if (info.stat == NX_ERROR) {
       // Assume we done last column of table
       break;
@@ -991,7 +989,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     // here we assume that a peaks_table has always one column of doubles
 
     if (info.type == NX_FLOAT64) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       std::string columnTitle = nxDouble.attributes("name");
       if (!columnTitle.empty() && numberPeaks == 0) {
         numberPeaks = nxDouble.dim0();
@@ -1081,7 +1079,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
 
   for (const auto &str : columnNames) {
     if (!str.compare("column_1")) {
-      NXInt nxInt = nx_tw.openNXInt(str.c_str());
+      NXInt nxInt = nx_tw.openNXInt(str);
       nxInt.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1092,7 +1090,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_2")) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1102,7 +1100,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_3")) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1112,7 +1110,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_4")) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1122,7 +1120,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_5")) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1132,7 +1130,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_6")) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1142,7 +1140,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_7")) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1152,7 +1150,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_10")) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1162,7 +1160,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_14")) {
-      NXInt nxInt = nx_tw.openNXInt(str.c_str());
+      NXInt nxInt = nx_tw.openNXInt(str);
       nxInt.load();
 
       for (int r = 0; r < numberPeaks; r++) {
@@ -1173,7 +1171,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     }
 
     if (!str.compare("column_15")) {
-      NXDouble nxDouble = nx_tw.openNXDouble(str.c_str());
+      NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
       Kernel::Matrix<double> gm(3, 3, false);
       int k = 0;
@@ -1201,8 +1199,8 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
       peakFactoryEllipsoid->setSuccessor(peakFactorySphere);
       peakFactorySphere->setSuccessor(peakFactoryNone);
 
-      NXInfo info = nx_tw.getDataSetInfo(str.c_str());
-      NXChar data = nx_tw.openNXChar(str.c_str());
+      NXInfo info = nx_tw.getDataSetInfo(str);
+      NXChar data = nx_tw.openNXChar(str);
 
       const int maxShapeJSONLength = info.dims[1];
       data.load();
@@ -1490,7 +1488,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
     xlength = xbins.dim0();
     m_shared_bins = true;
     xbins.load();
-    m_xbins.access().assign(xbins(), xbins() + xlength);
+    m_xbins = HistogramData::HistogramX(xbins(), xbins() + xlength);
   } else {
     throw std::runtime_error("Unknown axis1 dimension encountered.");
   }
@@ -1661,6 +1659,38 @@ void LoadNexusProcessed::readInstrumentGroup(
                             spectraInfo.detectorList.get() + end));
     }
   }
+}
+
+/**
+ * Validates SpectrumMin and SpectrumMax conditions
+ * @return Returns a map indicating invalid input combinations
+ */
+std::map<std::string, std::string> LoadNexusProcessed::validateInputs() {
+  using namespace std;
+  map<string, string> errorList;
+
+  int64_t specMin = getProperty("SpectrumMin");
+  int64_t specMax = getProperty("SpectrumMax");
+
+  // Check our range is not reversed
+  if (specMax < specMin) {
+    errorList["SpectrumMin"] = "SpectrumMin must be smaller than SpectrumMax";
+    errorList["SpectrumMax"] = "SpectrumMax must be larger than SpectrumMin";
+  }
+
+  // Next check that SpecMax is less than maximum int
+  if (specMax > INT_MAX) {
+    errorList["SpectrumMax"] =
+        "SpectrumMax must be less than " + to_string(INT_MAX);
+  }
+
+  if (specMin > INT_MAX) {
+    errorList["SpectrumMin"] =
+        "SpectrumMin must be less than " + to_string(INT_MAX);
+  }
+
+  // Finished testing return any errors
+  return errorList;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1844,7 +1874,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   double *err_end = err_start + nchannels;
   double *farea_start = nullptr;
   double *farea_end = nullptr;
-  const int64_t nxbins(m_xbins->size());
+  const int64_t nxbins(m_xbins.size());
   double *xErrors_start = nullptr;
   double *xErrors_end = nullptr;
   RebinnedOutput_sptr rb_workspace;
@@ -1862,11 +1892,11 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
 
   int64_t final(hist + blocksize);
   while (hist < final) {
-    MantidVec &Y = local_workspace->dataY(hist);
+    auto &Y = local_workspace->mutableY(hist);
     Y.assign(data_start, data_end);
     data_start += nchannels;
     data_end += nchannels;
-    MantidVec &E = local_workspace->dataE(hist);
+    auto &E = local_workspace->mutableE(hist);
     E.assign(err_start, err_end);
     err_start += nchannels;
     err_end += nchannels;
@@ -1877,13 +1907,14 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       farea_end += nchannels;
     }
     if (hasXErrors) {
-      MantidVec &DX = local_workspace->dataDx(hist);
-      DX.assign(xErrors_start, xErrors_end);
+      local_workspace->setSharedDx(
+          hist, Kernel::make_cow<HistogramData::HistogramDx>(xErrors_start,
+                                                             xErrors_end));
       xErrors_start += nxbins;
       xErrors_end += nxbins;
     }
 
-    local_workspace->setX(hist, m_xbins);
+    local_workspace->setSharedX(hist, m_xbins.cowData());
     ++hist;
   }
 }
@@ -1921,7 +1952,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   double *err_end = err_start + nchannels;
   double *farea_start = nullptr;
   double *farea_end = nullptr;
-  const int64_t nxbins(m_xbins->size());
+  const int64_t nxbins(m_xbins.size());
   double *xErrors_start = nullptr;
   double *xErrors_end = nullptr;
   RebinnedOutput_sptr rb_workspace;
@@ -1939,11 +1970,11 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
 
   int64_t final(hist + blocksize);
   while (hist < final) {
-    MantidVec &Y = local_workspace->dataY(wsIndex);
+    auto &Y = local_workspace->mutableY(wsIndex);
     Y.assign(data_start, data_end);
     data_start += nchannels;
     data_end += nchannels;
-    MantidVec &E = local_workspace->dataE(wsIndex);
+    auto &E = local_workspace->mutableE(wsIndex);
     E.assign(err_start, err_end);
     err_start += nchannels;
     err_end += nchannels;
@@ -1954,12 +1985,13 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       farea_end += nchannels;
     }
     if (hasXErrors) {
-      MantidVec &DX = local_workspace->dataDx(wsIndex);
-      DX.assign(xErrors_start, xErrors_end);
+      local_workspace->setSharedDx(
+          wsIndex, Kernel::make_cow<HistogramData::HistogramDx>(xErrors_start,
+                                                                xErrors_end));
       xErrors_start += nxbins;
       xErrors_end += nxbins;
     }
-    local_workspace->setX(wsIndex, m_xbins);
+    local_workspace->setSharedX(wsIndex, m_xbins.cowData());
     ++hist;
     ++wsIndex;
   }
@@ -2021,11 +2053,11 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   }
 
   while (hist < final) {
-    MantidVec &Y = local_workspace->dataY(wsIndex);
+    auto &Y = local_workspace->mutableY(wsIndex);
     Y.assign(data_start, data_end);
     data_start += nchannels;
     data_end += nchannels;
-    MantidVec &E = local_workspace->dataE(wsIndex);
+    auto &E = local_workspace->mutableE(wsIndex);
     E.assign(err_start, err_end);
     err_start += nchannels;
     err_end += nchannels;
@@ -2036,12 +2068,13 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       farea_end += nchannels;
     }
     if (hasXErrors) {
-      MantidVec &DX = local_workspace->dataDx(wsIndex);
-      DX.assign(xErrors_start, xErrors_end);
+      local_workspace->setSharedDx(
+          wsIndex, Kernel::make_cow<HistogramData::HistogramDx>(xErrors_start,
+                                                                xErrors_end));
       xErrors_start += nxbins;
       xErrors_end += nxbins;
     }
-    MantidVec &X = local_workspace->dataX(wsIndex);
+    auto &X = local_workspace->mutableX(wsIndex);
     X.assign(xbin_start, xbin_end);
     xbin_start += nxbins;
     xbin_end += nxbins;
@@ -2068,7 +2101,6 @@ void LoadNexusProcessed::checkOptionalProperties(
 
   // Check validity of spectra list property, if set
   if (m_list) {
-    m_list = true;
     const int64_t minlist =
         *min_element(m_spec_list.begin(), m_spec_list.end());
     const int64_t maxlist =

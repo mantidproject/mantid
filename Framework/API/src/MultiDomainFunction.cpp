@@ -91,6 +91,11 @@ void MultiDomainFunction::getDomainIndices(size_t i, size_t nDomains,
   }
 }
 
+/// Get number of domains required by this function
+size_t MultiDomainFunction::getNumberDomains() const {
+  return getMaxIndex() + 1;
+}
+
 /// Function you want to fit to.
 /// @param domain :: The buffer for writing the calculated values. Must be big
 /// enough to accept dataSize() values
@@ -98,6 +103,11 @@ void MultiDomainFunction::function(const FunctionDomain &domain,
                                    FunctionValues &values) const {
   // works only on CompositeDomain
   if (!dynamic_cast<const CompositeDomain *>(&domain)) {
+    // make exception if a single member function is defined
+    if (m_maxIndex == 0 && nFunctions() == 1) {
+      getFunction(0)->function(domain, values);
+      return;
+    }
     throw std::invalid_argument(
         "Non-CompositeDomain passed to MultiDomainFunction.");
   }
@@ -137,6 +147,11 @@ void MultiDomainFunction::functionDeriv(const FunctionDomain &domain,
                                         Jacobian &jacobian) {
   // works only on CompositeDomain
   if (!dynamic_cast<const CompositeDomain *>(&domain)) {
+    // make exception if a single member function is defined
+    if (m_maxIndex == 0 && nFunctions() == 1) {
+      getFunction(0)->functionDeriv(domain, jacobian);
+      return;
+    }
     throw std::invalid_argument(
         "Non-CompositeDomain passed to MultiDomainFunction.");
   }
@@ -304,11 +319,9 @@ void MultiDomainFunction::setLocalAttribute(size_t i,
 
 /**
  * Split this function into independent functions. The number of functions in
- * the
- * returned vector must be equal to the number
+ * the returned vector must be equal to the number
  * of domains. The result of evaluation of the i-th function on the i-th domain
- * must be
- * the same as if this MultiDomainFunction was evaluated.
+ * must be the same as if this MultiDomainFunction was evaluated.
  */
 std::vector<IFunction_sptr>
 MultiDomainFunction::createEquivalentFunctions() const {

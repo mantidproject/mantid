@@ -28,16 +28,6 @@ namespace WorkflowAlgorithms {
 DECLARE_ALGORITHM(DgsReduction)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsReduction::DgsReduction() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsReduction::~DgsReduction() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsReduction::name() const { return "DgsReduction"; }
 

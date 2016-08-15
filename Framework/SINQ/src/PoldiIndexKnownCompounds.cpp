@@ -65,12 +65,6 @@ IndexCandidatePair::IndexCandidatePair(const PoldiPeak_sptr &measuredPeak,
   positionMatch = complementOfCloserPeak * candidateIntensity;
 }
 
-/// Default constructor
-PoldiIndexKnownCompounds::PoldiIndexKnownCompounds() {}
-
-/// Destructor
-PoldiIndexKnownCompounds::~PoldiIndexKnownCompounds() {}
-
 /// Returns the algorithm name
 const std::string PoldiIndexKnownCompounds::name() const {
   return "PoldiIndexKnownCompounds";

@@ -31,11 +31,6 @@ SlicingAlgorithm::SlicingAlgorithm()
       m_NormalizeBasisVectors(false) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SlicingAlgorithm::~SlicingAlgorithm() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SlicingAlgorithm::initSlicingProps() {

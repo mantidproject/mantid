@@ -23,12 +23,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //--------------------------------------------------------------------------
-/** Constructor
- */
-GoniometerAnglesFromPhiRotation::GoniometerAnglesFromPhiRotation()
-    : Algorithm() {}
-
-GoniometerAnglesFromPhiRotation::~GoniometerAnglesFromPhiRotation() {}
 
 void GoniometerAnglesFromPhiRotation::init() {
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
@@ -251,23 +245,17 @@ void GoniometerAnglesFromPhiRotation::exec() {
   //----------------------- Optimize around best
   //-------------------------------------------
 
-  //               --------Create Workspace -------------------
-  boost::shared_ptr<DataObjects::Workspace2D> ws =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * Npeaks,
-                                              3 * Npeaks));
-  MantidVecPtr Xvals, Yvals;
+  auto ws = createWorkspace<Workspace2D>(1, 3 * Npeaks, 3 * Npeaks);
+
+  MantidVec Xvals;
 
   for (int i = 0; i < Npeaks; ++i) {
-    Xvals.access().push_back(i);
-    Yvals.access().push_back(0.0);
-    Xvals.access().push_back(i);
-    Yvals.access().push_back(0.0);
-    Xvals.access().push_back(i);
-    Yvals.access().push_back(0.0);
+    Xvals.push_back(i);
+    Xvals.push_back(i);
+    Xvals.push_back(i);
   }
-  ws->setX(0, Xvals);
-  ws->setData(0, Yvals);
+
+  ws->setPoints(0, Xvals);
 
   //       -------------Set up other Fit function arguments------------------
   V3D dir(MinData[2], MinData[3], MinData[4]);

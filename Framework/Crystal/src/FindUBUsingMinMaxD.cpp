@@ -22,11 +22,6 @@ FindUBUsingMinMaxD::FindUBUsingMinMaxD() {
   deprecatedDate("2013-06-03");
 }
 
-//--------------------------------------------------------------------------
-/** Destructor
- */
-FindUBUsingMinMaxD::~FindUBUsingMinMaxD() {}
-
 const std::string FindUBUsingMinMaxD::name() const {
   return "FindUBUsingMinMaxD";
 }

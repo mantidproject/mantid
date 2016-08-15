@@ -1,8 +1,8 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPROCESSINGALGORITHM_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPROCESSINGALGORITHM_H
 
-#include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h"
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -39,8 +39,7 @@ public:
   // Constructor
   DataProcessorPreprocessingAlgorithm(
       const std::string &name, const std::string &prefix = "",
-      const std::set<std::string> &blacklist = std::set<std::string>(),
-      bool show = true);
+      const std::set<std::string> &blacklist = std::set<std::string>());
   // Default constructor
   DataProcessorPreprocessingAlgorithm();
   // Destructor
@@ -54,11 +53,9 @@ public:
   std::string outputProperty() const;
   // The prefix to add to the output property
   std::string prefix() const;
-  // If we want to show the info associated with this pre-processor
-  bool show() const;
 
 private:
-  // The prefix of the output workspace
+  // A prefix to the name of the pre-processed output ws
   std::string m_prefix;
   // The name of the LHS input property
   std::string m_lhs;
@@ -66,8 +63,6 @@ private:
   std::string m_rhs;
   // The name of the output proerty
   std::string m_outProperty;
-  // Indicates wheter or not the information will appear in the output ws name
-  bool m_show;
 };
 }
 }

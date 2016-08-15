@@ -62,14 +62,16 @@ def _equal_within_tolerance(self, expected, actual, tolerance=0.05):
     abs_difference = abs(expected - actual)
     self.assertTrue(abs_difference <= abs(tolerance_value))
 
-def _get_maximum_peak_height(workspace, ws_index):
+def _get_peak_height_and_index(workspace, ws_index):
     """
     returns the maximum height in y of a given spectrum of a workspace
     workspace is assumed to be a matrix workspace
     """
     y_data = workspace.readY(ws_index)
     peak_height = np.amax(y_data)
-    return peak_height
+    peak_bin = np.argmax(y_data)
+
+    return peak_height, peak_bin
 
 #====================================================================================
 
@@ -97,12 +99,12 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
 
-        index_one_first = -0.016289703
-        index_one_last = 0.0072029933
-        index_two_first = 1.057476742e-05
-        index_two_last = 7.023179770e-05
+        index_one_first = -0.013011414483
+        index_one_last = 0.00720741862173
+        index_two_first = 1.12713408816e-05
+        index_two_last = 6.90222280789e-05
         if _is_old_boost_version():
-            index_one_first = 7.798020e-04
+            index_one_first = 0.000631295911554
 
         _equal_within_tolerance(self, index_one_first, fitted_ws.readY(0)[0])
         _equal_within_tolerance(self, index_one_last, fitted_ws.readY(0)[-1])
@@ -146,16 +148,19 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
 
-        index_one_first = -0.00656639296531
-        index_one_last = 0.00720728978699
-        calc_data_height = 0.138704
+        index_one_first = -0.00553133541138
+        index_one_last = 0.00722053823154
+        calc_data_height_expected = 0.13302098172
+        calc_data_bin_expected = 635
         if _is_old_boost_version():
-            index_one_first = 0.000628498710145
-            index_two_first = -0.00487957546659
+            index_one_first = 0.000605572768745
 
         _equal_within_tolerance(self, index_one_first, fitted_ws.readY(0)[0])
         _equal_within_tolerance(self, index_one_last, fitted_ws.readY(0)[-1])
-        _equal_within_tolerance(self, calc_data_height, _get_maximum_peak_height(fitted_ws, 1))
+
+        calc_data_height_actual, calc_data_bin_actual = _get_peak_height_and_index(fitted_ws, 1)
+        _equal_within_tolerance(self, calc_data_height_expected, calc_data_height_actual)
+        self.assertTrue(abs(calc_data_bin_expected - calc_data_bin_actual) <= 1)
 
         fitted_params = self._fit_results[1]
         self.assertTrue(isinstance(fitted_params, MatrixWorkspace))
@@ -198,8 +203,8 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, bank1_data.readX(0)[0])
         self.assertAlmostEqual(562.0, bank1_data.readX(0)[-1])
 
-        _equal_within_tolerance(self, 8.03245852426e-05, bank1_data.readY(1)[0])
-        _equal_within_tolerance(self, 0.000559789299755, bank1_data.readY(1)[-1])
+        _equal_within_tolerance(self, 8.23840378769e-05, bank1_data.readY(1)[0])
+        _equal_within_tolerance(self, 0.000556695665501, bank1_data.readY(1)[-1])
 
         bank8 = fitted_banks[-1]
         self.assertTrue(isinstance(bank8, WorkspaceGroup))
@@ -210,8 +215,8 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, bank8_data.readX(0)[0])
         self.assertAlmostEqual(562.0, bank8_data.readX(0)[-1])
 
-        _equal_within_tolerance(self, 0.000279169151321, bank8_data.readY(1)[0])
-        _equal_within_tolerance(self, 0.000505355349359, bank8_data.readY(1)[-1])
+        _equal_within_tolerance(self, 0.00025454613205, bank8_data.readY(1)[0])
+        _equal_within_tolerance(self, 0.00050412575393, bank8_data.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, list))
@@ -250,8 +255,8 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         self.assertAlmostEqual(50.0, spec143_data.readX(0)[0])
         self.assertAlmostEqual(562.0, spec143_data.readX(0)[-1])
 
-        _equal_within_tolerance(self, 2.3090594752e-06, spec143_data.readY(1)[0])
-        _equal_within_tolerance(self, 3.51960367895e-05, spec143_data.readY(1)[-1])
+        _equal_within_tolerance(self, 2.27289862507e-06, spec143_data.readY(1)[0])
+        _equal_within_tolerance(self, 3.49287467421e-05, spec143_data.readY(1)[-1])
 
         spec144 = fitted_spec[-1]
         self.assertTrue(isinstance(spec144, WorkspaceGroup))
@@ -262,8 +267,8 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         self.assertAlmostEqual(50.0, spec144_data.readX(0)[0])
         self.assertAlmostEqual(562.0, spec144_data.readX(0)[-1])
 
-        _equal_within_tolerance(self, 7.79185212491e-06, spec144_data.readY(1)[0])
-        _equal_within_tolerance(self, 4.79448882168e-05, spec144_data.readY(1)[-1])
+        _equal_within_tolerance(self, 5.9811662524e-06, spec144_data.readY(1)[0])
+        _equal_within_tolerance(self, 4.7479831769e-05, spec144_data.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, list))

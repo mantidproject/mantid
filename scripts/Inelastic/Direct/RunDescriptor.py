@@ -312,6 +312,7 @@ class RunList(object):
 #--------------------------------------------------------------------------------------------------
 #pylint: disable=too-many-instance-attributes
 #pylint: disable=too-many-public-methods
+#pylint: disable=attribute-defined-outside-init
 class RunDescriptor(PropDescriptor):
     """Descriptor to work with a run or list of runs specified
        either as run number (run file) or as
@@ -516,7 +517,7 @@ class RunDescriptor(PropDescriptor):
         if not noutputs:
             try:
 #pylint: disable=unused-variable
-                noutputs,r = funcreturns.lhs_info('both')
+                noutputs,r = funcinspect.lhs_info('both')
 #pylint: disable=bare-except
             except:
                 noutputs=0
@@ -792,7 +793,7 @@ class RunDescriptor(PropDescriptor):
         self.synchronize_ws(value)
 
 #--------------------------------------------------------------------------------------------------------------------
-#pylint: disable=too-many-arguments
+#pylint: disable=too-many-arguments,redefined-outer-name
     def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
         """Chop part of the original workspace and sets it up to this run as new original.
 
@@ -1379,12 +1380,12 @@ class RunDescriptor(PropDescriptor):
             f_guess,index = self._run_list.get_file_guess(inst_name,run_num)
 
             wsp = self.load_file(inst_name,term_name,False,
-                                monitors_with_ws,False,file_hint=f_guess)
+                                 monitors_with_ws,False,file_hint=f_guess)
 
             wsp_name = wsp.name()
             wsp_mon_name = wsp_name + '_monitors'
             Plus(LHSWorkspace=sum_ws_name,RHSWorkspace=wsp_name,
-                OutputWorkspace=sum_ws_name,ClearRHSWorkspace=True)
+                 OutputWorkspace=sum_ws_name,ClearRHSWorkspace=True)
             #  AddedRunNumbers.append(run_num)
             AddedRunNumbers+=',' + str(run_num)
             if not monitors_with_ws:
@@ -1401,7 +1402,7 @@ class RunDescriptor(PropDescriptor):
         #RunDescriptor._sum_log_name,
         #             LogText=AddedRunNumbers,LogType='Number Series')
         AddSampleLog(Workspace=sum_ws_name,LogName = RunDescriptor._sum_log_name,
-                    LogText=AddedRunNumbers,LogType='String')
+                     LogText=AddedRunNumbers,LogType='String')
 
         if RunDescriptor._holder.cashe_sum_ws:
             # store workspace in cash for further usage
@@ -1515,7 +1516,7 @@ class RunDescriptorDependent(RunDescriptor):
         else:
             return self._host.get_ws_clone(clone_name)
 #pylint: disable=too-many-arguments
-#pylint: disable=too-many-public-methods
+#pylint: disable=too-many-public-methods,redefined-outer-name
     def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
         if self._has_own_value:
             return super(RunDescriptorDependent,self).chop_ws_part(origin,tof_range,rebin,chunk_num,n_chunks)

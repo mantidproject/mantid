@@ -584,13 +584,13 @@ double c_occupation_factor(const DoubleFortranVector &energy, double dimj,
 /// @param alpha_euler :: The alpha Euler angle. TOD: units.
 /// @param beta_euler :: The beta Euler angle. TOD: units.
 /// @param gamma_euler :: The gamma Euler angle. TOD: units.
-void calculateEigesystem(DoubleFortranVector &eigenvalues,
-                         ComplexFortranMatrix &eigenvectors,
-                         ComplexFortranMatrix &hamiltonian, int nre,
-                         const DoubleFortranVector &bmol,
-                         const DoubleFortranVector &bext,
-                         const ComplexFortranMatrix &bkq, double alpha_euler,
-                         double beta_euler, double gamma_euler) {
+void calculateEigensystem(DoubleFortranVector &eigenvalues,
+                          ComplexFortranMatrix &eigenvectors,
+                          ComplexFortranMatrix &hamiltonian, int nre,
+                          const DoubleFortranVector &bmol,
+                          const DoubleFortranVector &bext,
+                          const ComplexFortranMatrix &bkq, double alpha_euler,
+                          double beta_euler, double gamma_euler) {
   if (nre <= 0 || nre > maxNre) {
     throw std::out_of_range("nre is out of range");
   }

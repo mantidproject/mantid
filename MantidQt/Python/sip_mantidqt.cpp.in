@@ -10,4 +10,13 @@
 //  special debugging build of the Python library.
 #include <boost/python/detail/wrap_python.hpp>
 
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC visibility push(default)
+#endif
+
 #include "sipmantidqtpythonpart0.cpp"
+
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC visibility pop
+#endif

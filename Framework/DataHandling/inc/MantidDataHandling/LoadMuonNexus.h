@@ -67,8 +67,6 @@ class DLLExport LoadMuonNexus
 public:
   /// Default constructor
   LoadMuonNexus();
-  /// Destructor
-  ~LoadMuonNexus() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadMuonNexus"; }
   /// Summary of algorithms purpose

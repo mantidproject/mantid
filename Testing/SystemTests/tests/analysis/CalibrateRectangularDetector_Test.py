@@ -1,7 +1,7 @@
 #pylint: disable=invalid-name,no-init,attribute-defined-outside-init
 import stresstesting
-from mantid.simpleapi import *
 import os
+from mantid.simpleapi import *
 
 def _skip_test():
     """Helper function to determine if we run the test"""

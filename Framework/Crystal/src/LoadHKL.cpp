@@ -2,6 +2,7 @@
 #include "MantidCrystal/LoadHKL.h"
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/Utils.h"
 #include <fstream>
 
@@ -16,18 +17,6 @@ namespace Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadHKL)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadHKL::LoadHKL() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadHKL::~LoadHKL() {}
-
-//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

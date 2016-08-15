@@ -22,7 +22,7 @@ using Mantid::MantidVecPtr;
 /**
  * Default constructor
  */
-XDataConverter::XDataConverter() : m_sharedX(false), m_cachedX() {}
+XDataConverter::XDataConverter() : m_sharedX(false) {}
 
 //------------------------------------------------------------------------------
 // Private member functions
@@ -94,10 +94,12 @@ void XDataConverter::setXData(API::MatrixWorkspace_sptr outputWS,
                               const int index) {
   if (m_sharedX) {
     PARALLEL_CRITICAL(XDataConverter_para) {
-      if ((*m_cachedX).empty()) {
+      if (!m_cachedX) {
         PARALLEL_CRITICAL(XDataConverter_parb) {
-          m_cachedX.access().resize(getNewXSize(inputWS));
-          calculateXPoints(inputWS->readX(index), m_cachedX.access());
+          MantidVec tmp(getNewXSize(inputWS));
+          calculateXPoints(inputWS->readX(index), tmp);
+          m_cachedX =
+              Kernel::make_cow<HistogramData::HistogramX>(std::move(tmp));
         }
       }
     }

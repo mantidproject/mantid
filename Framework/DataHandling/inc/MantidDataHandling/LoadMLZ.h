@@ -37,7 +37,6 @@ namespace DataHandling {
 class DLLExport LoadMLZ : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadMLZ();
-  ~LoadMLZ() override;
 
   const std::string name() const override;
   int version() const override;

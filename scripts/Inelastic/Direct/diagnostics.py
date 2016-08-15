@@ -9,7 +9,7 @@ This workspace can be summed with other masked workspaces to accumulate
 masking and also passed to MaskDetectors to match masking there.
 """
 from mantid.simpleapi import *
-from mantid.kernel.funcreturns import lhs_info
+from mantid.kernel.funcinspect import lhs_info
 import os
 import Direct.RunDescriptor as RunDescriptor
 from Direct.PropertyManager import PropertyManager
@@ -99,9 +99,9 @@ def diagnose(white_int,**kwargs):
             test_results['First detector vanadium test:'] = ['white_mask cache global', num_failed]
         else:
             __white_masks, num_failed = do_white_test(white_int, parser.tiny, parser.huge,
-                                                    parser.van_out_lo, parser.van_out_hi,
-                                                    parser.van_lo, parser.van_hi,
-                                                    parser.van_sig, start_index, end_index)
+                                                      parser.van_out_lo, parser.van_out_hi,
+                                                      parser.van_lo, parser.van_hi,
+                                                      parser.van_sig, start_index, end_index)
             test_results['First detector vanadium test:'] = [str(__white_masks), num_failed]
             add_masking(white_int, __white_masks, start_index, end_index)
             if van_mask:

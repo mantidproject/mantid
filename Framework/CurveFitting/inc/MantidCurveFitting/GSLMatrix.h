@@ -99,7 +99,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_CURVEFITTING_DLL GSLMatrix {
 public:
   /// Constructor
-  GSLMatrix();
+  GSLMatrix() = default;
   /// Constructor
   GSLMatrix(const size_t nx, const size_t ny);
   /// Copy constructor
@@ -113,8 +113,6 @@ public:
   GSLMatrix(const GSLMatrixMult2 &mult2);
   /// Create this matrix from a product of three other matrices
   GSLMatrix(const GSLMatrixMult3 &mult3);
-  /// Destructor.
-  ~GSLMatrix();
 
   /// Copy assignment operator
   GSLMatrix &operator=(const GSLMatrix &M);

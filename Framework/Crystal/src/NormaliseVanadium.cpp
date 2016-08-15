@@ -79,8 +79,6 @@ void NormaliseVanadium::exec() {
 
     // Copy over bin boundaries
     const auto &inSpec = m_inputWS->getSpectrum(i);
-    inSpec.lockData(); // for MRU-related thread safety
-
     const MantidVec &Xin = inSpec.readX();
     correctionFactors->dataX(i) = Xin;
     const MantidVec &Yin = inSpec.readY();
@@ -137,8 +135,6 @@ void NormaliseVanadium::exec() {
       Y[j] = Yin[j] / normvalue;
       E[j] = Ein[j] / normvalue;
     }
-
-    inSpec.unlockData();
 
     prog.report();
 

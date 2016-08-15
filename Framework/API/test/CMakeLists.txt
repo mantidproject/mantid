@@ -14,6 +14,7 @@ if ( CXXTEST_FOUND )
   target_link_libraries( APITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             API
             Geometry
+            HistogramData
             Kernel
             Nexus
             ${JSONCPP_LIBRARIES}

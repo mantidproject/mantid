@@ -280,7 +280,6 @@ void V3D::operator()(const double xx, const double yy, const double zz) {
   x = xx;
   y = yy;
   z = zz;
-  return;
 }
 
 /**
@@ -351,7 +350,6 @@ void V3D::getSpherical(double &R, double &theta, double &phi) const {
   if (R != 0.0)
     theta = acos(z / R) * rad2deg;
   phi = atan2(y, x) * rad2deg;
-  return;
 }
 
 /**
@@ -587,10 +585,7 @@ std::vector<V3D> V3D::makeVectorsOrthogonal(std::vector<V3D> &vectors) {
   \todo Check Error handling
   @param IX :: Input Stream
 */
-void V3D::read(std::istream &IX) {
-  IX >> x >> y >> z;
-  return;
-}
+void V3D::read(std::istream &IX) { IX >> x >> y >> z; }
 
 void V3D::write(std::ostream &OX) const
 /**
@@ -599,7 +594,6 @@ void V3D::write(std::ostream &OX) const
 */
 {
   OX << x << " " << y << " " << z;
-  return;
 }
 
 /** @return the vector as a string "X Y Z" */
@@ -622,7 +616,6 @@ void V3D::fromString(const std::string &str) {
 */
 void V3D::printSelf(std::ostream &os) const {
   os << "[" << x << "," << y << "," << z << "]";
-  return;
 }
 
 /**
@@ -648,8 +641,6 @@ void V3D::readPrinted(std::istream &IX) {
   x = atof(in.substr(i + 1, c1 - i - 1).c_str());
   y = atof(in.substr(c1 + 1, c2 - c1 - 1).c_str());
   z = atof(in.substr(c2 + 1, j - c2 - 1).c_str());
-
-  return;
 }
 
 /**

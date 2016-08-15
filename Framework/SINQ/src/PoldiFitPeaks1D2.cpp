@@ -52,10 +52,6 @@ RefinedRange::RefinedRange(double xStart, double xEnd,
   setRangeBorders(xStart, xEnd);
 }
 
-RefinedRange::RefinedRange(const RefinedRange &other)
-    : m_peaks(other.m_peaks), m_xStart(other.m_xStart), m_xEnd(other.m_xEnd),
-      m_width(other.m_width) {}
-
 double RefinedRange::getWidth() const { return m_width; }
 
 bool RefinedRange::operator<(const RefinedRange &other) const {
@@ -117,10 +113,9 @@ bool operator<(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs) {
 DECLARE_ALGORITHM(PoldiFitPeaks1D2)
 
 PoldiFitPeaks1D2::PoldiFitPeaks1D2()
-    : m_peaks(), m_profileTemplate(), m_fitplots(new WorkspaceGroup),
-      m_fwhmMultiples(1.0), m_maxRelativeFwhm(0.02) {}
-
-PoldiFitPeaks1D2::~PoldiFitPeaks1D2() {}
+    : m_peaks(), m_profileTemplate(),
+      m_fitplots(boost::make_shared<WorkspaceGroup>()), m_fwhmMultiples(1.0),
+      m_maxRelativeFwhm(0.02) {}
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PoldiFitPeaks1D2::name() const { return "PoldiFitPeaks1D"; }

@@ -10,8 +10,6 @@
 #include <qwt_data.h>
 #include <boost/optional.hpp>
 
-using namespace Mantid::API;
-
 namespace MantidQt {
 namespace CustomInterfaces {
 /** IALCDataLoadingView : View interface for ALC Data Loading step

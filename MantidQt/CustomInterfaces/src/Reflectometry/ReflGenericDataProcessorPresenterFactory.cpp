@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h"
+#include "MantidKernel/make_unique.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -8,7 +9,7 @@ using namespace MantidQt::MantidWidgets;
 /**
 * Creates a Reflectometry Data Processor Presenter
 */
-boost::shared_ptr<GenericDataProcessorPresenter>
+std::unique_ptr<GenericDataProcessorPresenter>
 ReflGenericDataProcessorPresenterFactory::create() {
 
   // The whitelist, elements will appear in order in the table
@@ -26,7 +27,8 @@ ReflGenericDataProcessorPresenterFactory::create() {
                        "/><i>required</i><br />Runs may be given as run "
                        "numbers or workspace names. Multiple runs may be "
                        "added together by separating them with a '+'. <br "
-                       "/><br /><b>Example:</b> <samp>1234+1235+1236</samp>");
+                       "/><br /><b>Example:</b> <samp>1234+1235+1236</samp>",
+                       true);
   whitelist.addElement(
       "Angle", "ThetaIn",
       "<b>Angle used during the run.< / b><br / ><i>optional</i><br />Unit: "
@@ -80,29 +82,25 @@ ReflGenericDataProcessorPresenterFactory::create() {
 
   // Pre-processing instructions as a map:
   // Keys are the column names
-  // Values are the associated pre-processing algorithms
+  // Values are the pre-processing algorithms that will be applied to columns
   std::map<std::string, DataProcessorPreprocessingAlgorithm> preprocessMap = {
-      /*This pre-processor will be applied to column 'Run(s)'*/
-      {/*The name of the column*/ "Run(s)",
-       /*The pre-processor algorithm, 'Plus' by default*/ DataProcessorPreprocessingAlgorithm()},
-      /*This pre-processor will be applied to column 'Transmission Run(s)'*/
-      {/*The name of the column*/ "Transmission Run(s)",
-       /*The pre-processor algorithm: CreateTransmissionWorkspaceAuto*/
+      /* 'Plus' will be applied to column 'Run(s)'*/
+      {"Run(s)",
        DataProcessorPreprocessingAlgorithm(
-           "CreateTransmissionWorkspaceAuto",
-           /*Prefix for the output workspace*/
-           "TRANS_",
-           /*Blacklist of properties we don't want to show*/
+           "Plus", "TOF_", std::set<std::string>{"LHSWorkspace", "RHSWorkspace",
+                                                 "OutputWorkspace"})},
+      /* 'CreateTransmissionWorkspaceAuto' will be applied to column
+         'Transmission Run(s)'*/
+      {"Transmission Run(s)",
+       DataProcessorPreprocessingAlgorithm(
+           "CreateTransmissionWorkspaceAuto", "TRANS_",
            std::set<std::string>{"FirstTransmissionRun",
-                                 "SecondTransmissionRun", "OutputWorkspace"},
-           /*I don't want to show the transmission runs in the output ws
-              name*/
-           false)}};
+                                 "SecondTransmissionRun", "OutputWorkspace"})}};
 
   // The post-processor algorithm's name, 'Stitch1DMany' by default
   DataProcessorPostprocessingAlgorithm postprocessor;
 
-  return boost::make_shared<GenericDataProcessorPresenter>(
+  return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
       whitelist, preprocessMap, processor, postprocessor);
 }
 }

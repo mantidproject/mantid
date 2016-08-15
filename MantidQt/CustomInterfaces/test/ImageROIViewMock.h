@@ -1,9 +1,12 @@
 #ifndef MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H
 #define MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H
 
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 
 #include <gmock/gmock.h>
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockImageROIView : public MantidQt::CustomInterfaces::IImageROIView {
 public:
@@ -103,5 +106,7 @@ public:
   // void resetNormArea()
   MOCK_METHOD0(resetWidgetsOnNewStack, void());
 };
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTID_CUSTOMINTERFACES_IMAGEROIVIEWMOCK_H

@@ -1,6 +1,8 @@
 """Defines tests for the WorkspaceProperty types within
 Python algorithms
 """
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.api import PythonAlgorithm, WorkspaceProperty
 from mantid.kernel import Direction

@@ -25,16 +25,6 @@ using namespace Geometry;
 using namespace Poco;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveParameterFile::SaveParameterFile() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveParameterFile::~SaveParameterFile() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SaveParameterFile::name() const {
   return "SaveParameterFile";

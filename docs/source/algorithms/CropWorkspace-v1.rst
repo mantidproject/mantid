@@ -13,7 +13,7 @@ Extracts a 'block' from a workspace and places it in a new workspace
 (or, to look at it another way, lops bins or spectra off a workspace).
 
 CropWorkspace works on workspaces with common X arrays/bin boundaries or
-on so-called `ragged workspaces <http://www.mantidproject.org/Ragged_Workspace>`__. If the input
+on so-called :ref:`ragged workspace <Ragged_Workspace>`. If the input
 workspace has common bin boundaries/X values then cropping in X will
 lead to an output workspace with fewer bins than the input one. If the
 boundaries are not common then the output workspace will have the same

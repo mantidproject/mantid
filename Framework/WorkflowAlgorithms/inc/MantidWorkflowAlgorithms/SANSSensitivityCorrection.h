@@ -35,10 +35,6 @@ namespace WorkflowAlgorithms {
 */
 class DLLExport SANSSensitivityCorrection : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  SANSSensitivityCorrection() : API::Algorithm() { m_output_message = ""; }
-  /// Virtual destructor
-  ~SANSSensitivityCorrection() override {}
   /// Algorithm's name
   const std::string name() const override {
     return "SANSSensitivityCorrection";

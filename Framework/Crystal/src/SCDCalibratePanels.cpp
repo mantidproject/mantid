@@ -28,16 +28,10 @@ namespace Crystal {
 DECLARE_ALGORITHM(SCDCalibratePanels)
 
 namespace {
-const double MAX_DET_HW_SCALE = 1.15;
-const double MIN_DET_HW_SCALE = 0.85;
-const double RAD_TO_DEG = 180. / M_PI;
+constexpr double MAX_DET_HW_SCALE = 1.15;
+constexpr double MIN_DET_HW_SCALE = 0.85;
+constexpr double RAD_TO_DEG = 180. / M_PI;
 }
-
-SCDCalibratePanels::SCDCalibratePanels() : API::Algorithm() {
-  // g_log.setLevel(7);
-}
-
-SCDCalibratePanels::~SCDCalibratePanels() {}
 
 const std::string SCDCalibratePanels::name() const {
   return "SCDCalibratePanels";
@@ -117,12 +111,8 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
   //   X = peak index (repeated 3 times
   //   Y = 0. as the function evals to (Q-vec) - (UB * hkl * 2pi)
   //   E = the weighting as used in the cost function
-  Mantid::MantidVecPtr pX;
-  Mantid::MantidVec &xRef = pX.access();
-  Mantid::MantidVecPtr yvals;
-  Mantid::MantidVec &yvalB = yvals.access();
-  Mantid::MantidVecPtr errs;
-  Mantid::MantidVec &errB = errs.access();
+  Mantid::MantidVec xRef;
+  Mantid::MantidVec errB;
   bounds.clear();
   bounds.push_back(0);
 
@@ -155,18 +145,16 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
     bounds.push_back(N);
   } // for @ bank name
 
-  yvalB.assign(xRef.size(), 0.0);
-
   if (N < 4) // If not well indexed
     return boost::make_shared<DataObjects::Workspace2D>();
 
-  MatrixWorkspace_sptr mwkspc =
-      API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * N, 3 * N);
+  auto mwkspc = API::createWorkspace<Workspace2D>(1, N, N);
 
-  mwkspc->setX(0, pX);
-  mwkspc->setData(0, yvals, errs);
+  mwkspc->setPoints(0, xRef);
+  mwkspc->setCounts(0, xRef.size(), 0.0);
+  mwkspc->setCountStandardDeviations(0, std::move(errB));
 
-  return boost::dynamic_pointer_cast<DataObjects::Workspace2D>(mwkspc);
+  return mwkspc;
 }
 
 /**
@@ -767,7 +755,7 @@ void SCDCalibratePanels::exec() {
       // algorithm--------------------
 
       // set up the string for specifying groups
-      string BankNameString = "";
+      string BankNameString;
       // for (auto group = Groups.begin(); group != Groups.end(); ++group) {
       // if (group != Groups.begin())
       // BankNameString += "!";

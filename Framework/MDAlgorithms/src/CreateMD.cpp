@@ -77,16 +77,6 @@ bool all_given(const std::vector<std::vector<double>> &params) {
 DECLARE_ALGORITHM(CreateMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateMD::CreateMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateMD::~CreateMD() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string CreateMD::name() const { return "CreateMD"; }

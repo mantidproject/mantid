@@ -27,13 +27,13 @@ class OFFSPECReflRedOneAutoPolarizationCorrection(stresstesting.MantidStressTest
         CPp=[1]
         #run reflectometryReductionOneAuto
         __, _IvsLam_polCorr,__ = ReflectometryReductionOneAuto(inputWorkspace, AnalysisMode="MultiDetectorAnalysis",
-                                                              ProcessingInstructions="110-120",
-                                                              FirstTransmissionRun=transWorkspace,
-                                                              ThetaIn="1.2",WavelengthMin=2.0,
-                                                              WavelengthStep=0.05,
-                                                              WavelengthMax=12.0,CorrectionAlgorithm='None',
-                                                              PolarizationAnalysis='PA', MomentumTransferStep=0.1,
-                                                              CPp=CPp,CAp=CAp,CRho=CRho,CAlpha=CAlpha)
+                                                               ProcessingInstructions="110-120",
+                                                               FirstTransmissionRun=transWorkspace,
+                                                               ThetaIn="1.2",WavelengthMin=2.0,
+                                                               WavelengthStep=0.05,
+                                                               WavelengthMax=12.0,CorrectionAlgorithm='None',
+                                                               PolarizationAnalysis='PA', MomentumTransferStep=0.1,
+                                                               CPp=CPp,CAp=CAp,CRho=CRho,CAlpha=CAlpha)
         return True
 
     def validate(self):

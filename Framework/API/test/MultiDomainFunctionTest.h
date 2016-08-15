@@ -434,6 +434,22 @@ public:
     }
   }
 
+  void test_clone_preserves_domains() {
+    const auto copy = multi.clone();
+    TS_ASSERT_EQUALS(copy->getNumberDomains(), multi.getNumberDomains());
+  }
+
+  void test_string_representation() {
+    const std::string expected =
+        "composite=MultiDomainFunction,NumDeriv=true;"
+        "name=MultiDomainFunctionTest_Function,A=0,B=1,$domains=i;"
+        "name=MultiDomainFunctionTest_Function,A=0,B=2,$domains=i;"
+        "name=MultiDomainFunctionTest_Function,A=0,B=3,$domains=i;ties=(f1.A="
+        "f0.A,f2.A=f0.A)";
+    TS_ASSERT_EQUALS(multi.asString(), expected);
+    TS_ASSERT_EQUALS(multi.asString(), multi.clone()->asString());
+  }
+
 private:
   MultiDomainFunction multi;
   JointDomain domain;

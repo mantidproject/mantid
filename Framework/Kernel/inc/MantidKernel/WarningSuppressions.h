@@ -77,4 +77,22 @@
 #define GCC_DIAG_ON(x)
 #endif
 
+// Defining this macro separately since clang-tidy tries to add spaces around
+// the hyphen and we use it in a lot of test files.
+// clang-format off
+#if defined(GCC_VERSION) && GCC_VERSION >= 50000
+#define GCC_DIAG_OFF_SUGGEST_OVERRIDE GCC_DIAG_OFF(suggest-override)
+#define GCC_DIAG_ON_SUGGEST_OVERRIDE GCC_DIAG_ON(suggest-override)
+#else
+#define GCC_DIAG_OFF_SUGGEST_OVERRIDE
+#define GCC_DIAG_ON_SUGGEST_OVERRIDE
+#endif
+// clang-format on
+
+#ifdef GCC_VERSION
+#define GCC_UNUSED_FUNCTION __attribute__((unused))
+#else
+#define GCC_UNUSED_FUNCTION
+#endif
+
 #endif /*MANTID_KERNEL_WARNINGSUPPRESSIONS_H_*/

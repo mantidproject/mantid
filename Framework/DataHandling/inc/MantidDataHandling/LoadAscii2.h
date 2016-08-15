@@ -119,6 +119,7 @@ private:
   size_t m_lineNo;
   std::vector<DataObjects::Histogram1D> m_spectra;
   DataObjects::Histogram1D *m_curSpectra;
+  std::vector<double> m_curDx;
 };
 
 } // namespace DataHandling

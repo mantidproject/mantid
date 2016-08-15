@@ -140,14 +140,8 @@ void Q1D2::exec() {
   // the error on the normalisation
   MantidVec normError2(YOut.size(), 0.0);
 
-  // the averaged Q resolution. We need the a named dummy variable although it
-  // won't be
-  // used since we only want to create a reference to DX if it is really
-  // required. Referencing
-  // DX sets a flag which might not be desirable.
-  MantidVec dummy;
-  MantidVec &qResolutionOut =
-      useQResolution ? outputWS->dataDx(0) : outputWS->dataY(0);
+  // the averaged Q resolution.
+  HistogramData::HistogramDx qResolutionOut(QOut.size(), 0.0);
 
   const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.05, 1.0, numSpec + 1);
@@ -287,6 +281,7 @@ void Q1D2::exec() {
     if (qResolutionOut.size() > 1) {
       qResolutionOut.rbegin()[0] = qResolutionOut.rbegin()[1];
     }
+    outputWS->setBinEdgeStandardDeviations(0, std::move(qResolutionOut));
   }
 
   bool doOutputParts = getProperty("OutputParts");
@@ -295,9 +290,7 @@ void Q1D2::exec() {
         WorkspaceFactory::Instance().create(outputWS);
     ws_sumOfCounts->dataX(0) = outputWS->dataX(0);
     ws_sumOfCounts->dataY(0) = outputWS->dataY(0);
-    if (useQResolution) {
-      ws_sumOfCounts->dataDx(0) = outputWS->dataDx(0);
-    }
+    ws_sumOfCounts->setSharedDx(0, outputWS->sharedDx(0));
     for (size_t i = 0; i < outputWS->dataE(0).size(); i++) {
       ws_sumOfCounts->dataE(0)[i] = sqrt(outputWS->dataE(0)[i]);
     }
@@ -305,9 +298,7 @@ void Q1D2::exec() {
     MatrixWorkspace_sptr ws_sumOfNormFactors =
         WorkspaceFactory::Instance().create(outputWS);
     ws_sumOfNormFactors->dataX(0) = outputWS->dataX(0);
-    if (useQResolution) {
-      ws_sumOfNormFactors->dataDx(0) = outputWS->dataDx(0);
-    }
+    ws_sumOfNormFactors->setSharedDx(0, outputWS->sharedDx(0));
     for (size_t i = 0; i < ws_sumOfNormFactors->dataY(0).size(); i++) {
       ws_sumOfNormFactors->dataY(0)[i] = normSum[i];
       ws_sumOfNormFactors->dataE(0)[i] = sqrt(normError2[i]);
@@ -331,9 +322,9 @@ void Q1D2::exec() {
 API::MatrixWorkspace_sptr
 Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
   // Calculate the output binning
-  MantidVecPtr XOut;
-  size_t sizeOut = static_cast<size_t>(
-      VectorHelper::createAxisFromRebinParams(binParams, XOut.access()));
+  HistogramData::BinEdges XOut(0);
+  size_t sizeOut = static_cast<size_t>(VectorHelper::createAxisFromRebinParams(
+      binParams, XOut.mutableRawData()));
 
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS =
@@ -343,7 +334,7 @@ Q1D2::setUpOutputWorkspace(const std::vector<double> &binParams) const {
   outputWS->setYUnitLabel("1/cm");
 
   // Set the X vector for the output workspace
-  outputWS->setX(0, XOut);
+  outputWS->setBinEdges(0, XOut);
   outputWS->setDistribution(true);
 
   outputWS->getSpectrum(0).clearDetectorIDs();

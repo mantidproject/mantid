@@ -297,7 +297,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   // first, to make this easier.
   std::vector<std::string> flattenedAllUnresolvedFileNames =
       flattenFileNames(allUnresolvedFileNames);
-  std::string defaultExt = "";
+  std::string defaultExt;
   auto unresolvedFileName = flattenedAllUnresolvedFileNames.begin();
   for (; unresolvedFileName != flattenedAllUnresolvedFileNames.end();
        ++unresolvedFileName) {
@@ -345,7 +345,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
         useDefaultExt = false;
       }
 
-      std::string fullyResolvedFile = "";
+      std::string fullyResolvedFile;
 
       if (!useDefaultExt) {
         FileProperty slaveFileProp("Slave", "", FileProperty::Load, m_exts,

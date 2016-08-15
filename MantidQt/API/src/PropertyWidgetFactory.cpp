@@ -7,6 +7,7 @@
 #include "MantidQtAPI/TextPropertyWidget.h"
 #include "MantidQtAPI/OptionsPropertyWidget.h"
 #include "MantidQtAPI/FilePropertyWidget.h"
+#include <MantidQtAPI/ListPropertyWidget.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -48,8 +49,13 @@ PropertyWidgetFactory::createWidget(Mantid::Kernel::Property *prop,
     // CheckBox shown for BOOL properties
     return new BoolPropertyWidget(boolProp, parent, layout, row);
   } else if (!prop->allowedValues().empty() && !fileType && !multipleFileType) {
-    // Check if there are only certain allowed values for the property
-    return new OptionsPropertyWidget(prop, parent, layout, row);
+    if (prop->isMultipleSelectionAllowed()) {
+      // Check if there are only certain allowed values for the property
+      return new ListPropertyWidget(prop, parent, layout, row);
+    } else {
+      // Check if there are only certain allowed values for the property
+      return new OptionsPropertyWidget(prop, parent, layout, row);
+    }
   } else {
     if (fileType || multipleFileType) {
       return new FilePropertyWidget(prop, parent, layout, row);

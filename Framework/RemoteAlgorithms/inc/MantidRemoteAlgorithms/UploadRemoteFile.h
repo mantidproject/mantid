@@ -51,10 +51,6 @@ namespace RemoteAlgorithms {
 
 class DLLExport UploadRemoteFile : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  UploadRemoteFile() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~UploadRemoteFile() override {}
   /// Algorithm's name
   const std::string name() const override { return "UploadRemoteFile"; }
   /// Summary of algorithms purpose

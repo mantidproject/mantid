@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest, os
 import mantid
 from mantid.simpleapi import *
@@ -22,7 +24,7 @@ class IndirectILLReductionTest(unittest.TestCase):
             if (os.path.isfile(path)):
                 try:
                     os.remove(path)
-                except IOError, e:
+                except IOError as e:
                     continue
 
         #reset output workspaces list

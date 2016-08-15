@@ -12,12 +12,6 @@ DECLARE_ALGORITHM(StepScan)
 using namespace Kernel;
 using namespace API;
 
-/// Constructor
-StepScan::StepScan() {}
-
-/// Destructor
-StepScan::~StepScan() {}
-
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string StepScan::name() const { return "StepScan"; }
 

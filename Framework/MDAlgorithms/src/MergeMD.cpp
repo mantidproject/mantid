@@ -17,16 +17,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(MergeMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MergeMD::MergeMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MergeMD::~MergeMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MergeMD::name() const { return "MergeMD"; }
 
@@ -82,6 +72,8 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
   // dims anyway
   IMDEventWorkspace_const_sptr ws0 = m_workspaces[0];
   size_t numDims = ws0->getNumDims();
+  auto displNorm = ws0->displayNormalization();
+  auto displNormH = ws0->displayNormalizationHisto();
 
   // Extents to create.
   std::vector<coord_t> dimMin(numDims, +1e30f);
@@ -124,6 +116,8 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
 
   // Have the factory create it
   out = MDEventFactory::CreateMDWorkspace(numDims, ws0->getEventTypeName());
+  out->setDisplayNormalization(displNorm);
+  out->setDisplayNormalizationHisto(displNormH);
 
   // Give all the dimensions
   for (size_t d = 0; d < numDims; d++) {

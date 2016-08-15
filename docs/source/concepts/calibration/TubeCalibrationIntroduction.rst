@@ -47,7 +47,7 @@ Below is the plot of the integration counts in a single tube. The x-axis
 shows pixels (detector numbers, where the detectors are numbered 0 to
 511) and the y-axis shows integrated counts.
 
-.. figure:: ../../images/CalibrationAcquiredDataTube.png 
+.. figure:: ../../images/CalibrationAcquiredDataTube.png
   :alt:  Plot of the acquired Data in a single tube
 
   Plot of the acquired Data in a single tube
@@ -64,6 +64,8 @@ This calibration is done through three main steps:
 
 From now on, the calibration will be explained considering only peaks.
 For edges the operation are similar.
+
+.. _tubecalibintro-peak-pos-estimation:
 
 Peak position estimation
 ------------------------
@@ -132,8 +134,8 @@ in relation to the center of the tube to the 3D space where the tube is.
 Assuming that the units given for the position in the **IdealTube** and
 for the 3D space are the same, as in the picture below
 
-.. image:: ../../images/Changing_coordinates.png 
- 
+.. image:: ../../images/Changing_coordinates.png
+
 
 We have that the 3D position is:
 

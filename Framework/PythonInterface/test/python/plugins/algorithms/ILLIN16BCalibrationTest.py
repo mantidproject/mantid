@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 import mantid
 from mantid.simpleapi import ILLIN16BCalibration

@@ -41,8 +41,6 @@ public:
   // Constructor
   MaxentTransformFourier(MaxentSpace_sptr dataSpace,
                          MaxentSpace_sptr imageSpace);
-  // Destructor
-  virtual ~MaxentTransformFourier() = default;
   // Transfoms form image space to data space
   std::vector<double> imageToData(const std::vector<double> &image) override;
   // Transforms from data space to image space

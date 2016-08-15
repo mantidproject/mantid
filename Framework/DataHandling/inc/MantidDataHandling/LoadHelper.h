@@ -38,8 +38,7 @@ namespace DataHandling {
  */
 class DLLExport LoadHelper {
 public:
-  LoadHelper();
-  virtual ~LoadHelper();
+  virtual ~LoadHelper() = default;
 
   std::string findInstrumentNexusPath(const Mantid::NeXus::NXEntry &);
   std::string getStringFromNexusPath(const Mantid::NeXus::NXEntry &,

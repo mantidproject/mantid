@@ -289,7 +289,7 @@ public:
 
   std::string getParameterAsString(const std::string &pname,
                                    bool recursive = true) const override {
-    std::string retVal = "";
+    std::string retVal;
     if (m_map) {
       retVal = m_map->getString(this, pname, recursive);
     }

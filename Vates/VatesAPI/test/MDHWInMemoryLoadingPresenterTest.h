@@ -8,12 +8,13 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
-#include "MantidKernel/make_unique.h"
-#include <vtkUnstructuredGrid.h>
 #include <vtkSmartPointer.h>
+#include <vtkUnstructuredGrid.h>
 
 using namespace Mantid::VATES;
 using namespace Mantid::API;
@@ -26,10 +27,12 @@ private:
   // Helper type. Mocks a Workspace Provider.
   class MockWorkspaceProvider : public Mantid::VATES::WorkspaceProvider {
   public:
+    GCC_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD1(canProvideWorkspace, bool(std::string));
     MOCK_CONST_METHOD1(fetchWorkspace,
                        Mantid::API::Workspace_sptr(std::string));
     MOCK_CONST_METHOD1(disposeWorkspace, void(std::string));
+    GCC_DIAG_ON_SUGGEST_OVERRIDE
   };
 
   // Helper method. Generates and returns a valid IMDHistoWorkspace

@@ -1,21 +1,21 @@
 #ifndef MANTID_ALGORITHMS_FILTEREVENTSTEST_H_
 #define MANTID_ALGORITHMS_FILTEREVENTSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/FilterEvents.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAlgorithms/FilterEvents.h"
+#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
-#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/TimeSplitter.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <random>
 
@@ -498,7 +498,7 @@ public:
     if (outcorrws) {
       TS_ASSERT_EQUALS(outcorrws->getNumberHistograms(),
                        ws->getNumberHistograms());
-      TS_ASSERT_EQUALS(outcorrws->readX(0).size(), 2);
+      TS_ASSERT_EQUALS(outcorrws->x(0).size(), 2);
 
       Kernel::V3D samplepos = ws->getInstrument()->getSample()->getPos();
 
@@ -515,8 +515,8 @@ public:
         double shift = -l2 / sqrt(efix * 2. * PhysicalConstants::meV /
                                   PhysicalConstants::NeutronMass);
 
-        TS_ASSERT_DELTA(outcorrws->readY(iws)[0], 1., 1.0E-9);
-        TS_ASSERT_DELTA(outcorrws->readY(iws)[1], shift, 1.0E-9);
+        TS_ASSERT_DELTA(outcorrws->y(iws)[0], 1., 1.0E-9);
+        TS_ASSERT_DELTA(outcorrws->y(iws)[1], shift, 1.0E-9);
       }
     }
 
@@ -788,21 +788,6 @@ public:
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 1,
                                                                         true);
 
-    // L1 = 10
-    /*
-    Kernel::V3D samplepos = eventWS->getInstrument()->getSample()->getPos();
-    Kernel::V3D sourcepos = eventWS->getInstrument()->getSource()->getPos();
-    std::cout << "sample position: " << samplepos.toString() << "\n";
-    std::cout << "source position: " << sourcepos.toString() << "\n";
-    double l1 = samplepos.distance(sourcepos);
-    std::cout << "L1 = " << l1 << "\n";
-    for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i) {
-      Kernel::V3D detpos = eventWS->getDetector(i)->getPos();
-      double l2 = samplepos.distance(detpos);
-      std::cout << "detector " << i << ": L2 = " << l2 << "\n";
-    }
-    */
-
     Kernel::DateAndTime runstart(runstart_i64);
 
     // Create 1000 events
@@ -919,9 +904,9 @@ public:
                                                 size_y));
 
     for (size_t ix = 0; ix < size_x; ++ix)
-      splitterws->dataX(0)[ix] = static_cast<double>(time_vec[ix]);
+      splitterws->mutableX(0)[ix] = static_cast<double>(time_vec[ix]);
     for (size_t iy = 0; iy < size_y; ++iy)
-      splitterws->dataY(0)[iy] = static_cast<double>(index_vec[iy]);
+      splitterws->mutableY(0)[iy] = static_cast<double>(index_vec[iy]);
 
     return splitterws;
   }
@@ -1014,8 +999,6 @@ public:
           static_cast<int64_t>(time * pulselength + runstart));
       double tof = static_cast<double>(g1() % 1000);
       el += TofEvent(tof, pulsetime);
-      // std::cout << "Added 20th event as " << tof << ", " << pulsetime <<
-      // "\n";
     }
 
     return el;
@@ -1029,8 +1012,8 @@ public:
     MatrixWorkspace_sptr spws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, 11, 10));
 
-    MantidVec &vec_splitTimes = spws->dataX(0);
-    MantidVec &vec_splitGroup = spws->dataY(0);
+    auto &vec_splitTimes = spws->mutableX(0);
+    auto &vec_splitGroup = spws->mutableY(0);
 
     vec_splitTimes[0] = 1000000;
     vec_splitTimes[1] = 1300000;
@@ -1062,8 +1045,8 @@ public:
     MatrixWorkspace_sptr spws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, 11, 10));
 
-    MantidVec &vec_splitTimes = spws->dataX(0);
-    MantidVec &vec_splitGroup = spws->dataY(0);
+    auto &vec_splitTimes = spws->mutableX(0);
+    auto &vec_splitGroup = spws->mutableY(0);
 
     vec_splitTimes[0] = 1000000;
     vec_splitTimes[1] = 1300000; // Rule in  1,339,000

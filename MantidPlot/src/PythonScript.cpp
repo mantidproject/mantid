@@ -118,8 +118,8 @@ void PythonScript::setIdentifier(const QString &name) {
   if (QFileInfo(identifier).exists()) {
     QString scriptPath = QFileInfo(identifier).absoluteFilePath();
     // Make sure the __file__ variable is set
-    PyDict_SetItem(localDict, PyString_FromString("__file__"),
-                   PyString_FromString(scriptPath.toAscii().data()));
+    PyDict_SetItem(localDict, FROM_CSTRING("__file__"),
+                   FROM_CSTRING(scriptPath.toAscii().data()));
   }
 }
 
@@ -190,25 +190,16 @@ void PythonScript::sendLineChangeSignal(int lineNo, bool error) {
  */
 void PythonScript::generateAutoCompleteList() {
   ScopedPythonGIL gil;
-
-  PyObject *main_module = PyImport_AddModule("__main__");
-  PyObject *method =
-      PyString_FromString("_ScopeInspector_GetFunctionAttributes");
-  PyObject *keywords(NULL);
-  if (method && main_module) {
-    keywords = PyObject_CallMethodObjArgs(main_module, method, localDict, NULL);
-  } else {
-    return;
-  }
-  QStringList keywordList;
+  PyObject *keywords = PyObject_CallFunctionObjArgs(
+      PyDict_GetItemString(m_pythonEnv->globalDict(),
+                           "_ScopeInspector_GetFunctionAttributes"),
+      localDict, NULL);
   if (PyErr_Occurred() || !keywords) {
     PyErr_Print();
     return;
   }
-
-  keywordList = pythonEnv()->toStringList(keywords);
+  QStringList keywordList = pythonEnv()->toStringList(keywords);
   Py_DECREF(keywords);
-  Py_DECREF(method);
   emit autoCompleteListGenerated(keywordList);
 }
 
@@ -235,8 +226,8 @@ void PythonScript::emit_error() {
       PyObject_HasAttrString(exception, "code")) {
     // value is the return code handed to sys.exit
     long code = 0;
-    if (bool(value) && PyInt_Check(value)) {
-      code = PyInt_AsLong(value);
+    if (bool(value) && INT_CHECK(value)) {
+      code = TO_LONG(value);
     }
 
     // if we are returning 0 then cleanup and return
@@ -262,7 +253,7 @@ void PythonScript::emit_error() {
   if (traceback) {
     PyTracebackObject *tb = (PyTracebackObject *)traceback;
     lineNumber = tb->tb_lineno;
-    filename = PyString_AsString(tb->tb_frame->f_code->co_filename);
+    filename = TO_CSTRING(tb->tb_frame->f_code->co_filename);
   }
 
   // the error message is the full (formated) traceback
@@ -277,7 +268,7 @@ void PythonScript::emit_error() {
           value->ob_type
               ->tp_name); // This is fully qualified with the module name
       excTypeName = excTypeName.section(".", -1);
-      msgStream << excTypeName << ": " << PyString_AsString(str_repr);
+      msgStream << excTypeName << ": " << TO_CSTRING(str_repr);
     }
 
   } else {
@@ -356,8 +347,8 @@ void PythonScript::tracebackToMsg(QTextStream &msgStream,
     msgStream << "caused by";
 
   int lineno = traceback->tb_lineno;
-  QString filename = QString::fromAscii(
-      PyString_AsString(traceback->tb_frame->f_code->co_filename));
+  QString filename =
+      QString::fromAscii(TO_CSTRING(traceback->tb_frame->f_code->co_filename));
   if (filename == identifier().c_str()) {
     lineno = getRealLineNo(lineno);
     sendLineChangeSignal(lineno, true);
@@ -488,7 +479,7 @@ QVariant PythonScript::evaluateImpl() {
     pyret = PyObject_Call(compiledCode, empty_tuple, localDict);
     Py_DECREF(empty_tuple);
   } else {
-    pyret = PyEval_EvalCode((PyCodeObject *)compiledCode, localDict, localDict);
+    pyret = PyEval_EvalCode(CODE_OBJECT(compiledCode), localDict, localDict);
   }
   endStdoutRedirect();
   if (!pyret) {
@@ -510,11 +501,15 @@ QVariant PythonScript::evaluateImpl() {
   /* numeric types */
   else if (PyFloat_Check(pyret)) {
     qret = QVariant(PyFloat_AS_DOUBLE(pyret));
-  } else if (PyInt_Check(pyret)) {
-    qret = QVariant((qlonglong)PyInt_AS_LONG(pyret));
-  } else if (PyLong_Check(pyret)) {
+  } else if (INT_CHECK(pyret)) {
+    qret = QVariant((qlonglong)TO_LONG(pyret));
+  }
+#if !defined(IS_PY3K)
+  else if (PyLong_Check(pyret)) {
     qret = QVariant((qlonglong)PyLong_AsLongLong(pyret));
-  } else if (PyNumber_Check(pyret)) {
+  }
+#endif
+  else if (PyNumber_Check(pyret)) {
     PyObject *number = PyNumber_Float(pyret);
     if (number) {
       qret = QVariant(PyFloat_AS_DOUBLE(number));
@@ -528,6 +523,13 @@ QVariant PythonScript::evaluateImpl() {
   // could handle advanced types (such as PyList->QValueList) here if needed
   /* fallback: try to convert to (unicode) string */
   if (!qret.isValid()) {
+#if defined(IS_PY3K)
+    // In 3 everything is unicode
+    PyObject *pystring = PyObject_Str(pyret);
+    if (pystring) {
+      qret = QVariant(QString::fromUtf8(_PyUnicode_AsString(pystring)));
+    }
+#else
     PyObject *pystring = PyObject_Unicode(pyret);
     if (pystring) {
       PyObject *asUTF8 =
@@ -542,8 +544,8 @@ QVariant PythonScript::evaluateImpl() {
         Py_DECREF(pystring);
       }
     }
+#endif
   }
-
   Py_DECREF(pyret);
   if (PyErr_Occurred()) {
     if (PyErr_ExceptionMatches(PyExc_ValueError) ||
@@ -559,7 +561,8 @@ QVariant PythonScript::evaluateImpl() {
 }
 
 /**
- * On construction set a reference to a given value and at destruction reset it
+ * On construction set a reference to a given value and at destruction reset
+ * it
  * to its original
  */
 struct TemporaryValue {
@@ -585,7 +588,8 @@ void PythonScript::abortImpl() {
   //      interrupted using algorithm.cancel()
   //   2. Pure Python is executing and can be interrupted
   //      with a KeyboardInterrupt exception
-  // In both situations we issue a KeyboardInterrupt just in case the algorithm
+  // In both situations we issue a KeyboardInterrupt just in case the
+  // algorithm
   // hasn't implemented cancel() checking so that when control returns the
   // Python the
   // interrupt should be picked up.
@@ -680,7 +684,7 @@ PyObject *PythonScript::executeCompiledCode(PyObject *compiledCode) {
 
   InstallTrace traceInstall(*this);
   beginStdoutRedirect();
-  result = PyEval_EvalCode((PyCodeObject *)compiledCode, localDict, localDict);
+  result = PyEval_EvalCode(CODE_OBJECT(compiledCode), localDict, localDict);
   endStdoutRedirect();
   return result;
 }
@@ -750,7 +754,8 @@ PyObject *PythonScript::compileToByteCode(bool for_eval) {
     // Code contains statements (or errors) and we want to get a return
     // value from it.
     // So we wrap the code into a function definition,
-    // execute that (as Py_file_input) and store the function object in PyCode.
+    // execute that (as Py_file_input) and store the function object in
+    // PyCode.
     // See http://mail.python.org/pipermail/python-list/2001-June/046940.html
     // for why there isn't an easier way to do this in Python.
     PyErr_Clear(); // silently ignore errors
@@ -758,7 +763,7 @@ PyObject *PythonScript::compileToByteCode(bool for_eval) {
     Py_ssize_t i(0);
     QString signature = "";
     while (PyDict_Next(localDict, &i, &key, &value)) {
-      signature.append(PyString_AsString(key)).append(",");
+      signature.append(TO_CSTRING(key)).append(",");
     }
     signature.truncate(signature.length() - 1);
     std::string fdef = "def __doit__(" + signature.toStdString() + "):\n";
@@ -767,7 +772,7 @@ PyObject *PythonScript::compileToByteCode(bool for_eval) {
         Py_CompileString(fdef.c_str(), identifier().c_str(), Py_file_input);
     if (compiledCode) {
       PyObject *tmp = PyDict_New();
-      Py_XDECREF(PyEval_EvalCode((PyCodeObject *)compiledCode, localDict, tmp));
+      Py_XDECREF(PyEval_EvalCode(CODE_OBJECT(compiledCode), localDict, tmp));
       Py_DECREF(compiledCode);
       compiledCode = PyDict_GetItemString(tmp, "__doit__");
       Py_XINCREF(compiledCode);
@@ -801,7 +806,8 @@ void PythonScript::addHandle(const std::string &wsName,
 }
 
 /**
- * Listen to add/replace notifications from the ADS and add a Python variable of
+ * Listen to add/replace notifications from the ADS and add a Python variable
+ * of
  * the workspace name
  * to the current scope
  * @param wsName The name of the workspace
@@ -829,7 +835,8 @@ void PythonScript::clearADSHandle() {
        itr != m_workspaceHandles.cend();) {
     // This also erases the element from current set. The standard says that
     // erase only invalidates
-    // iterators of erased elements so we need to increment the iterator and get
+    // iterators of erased elements so we need to increment the iterator and
+    // get
     // back the previous value
     // i.e. the postfix operator
     this->deletePythonReference(*(itr++));
@@ -856,8 +863,7 @@ void PythonScript::addPythonReference(const std::string &wsName,
   PyObject *codeObj =
       Py_CompileString(code, "PythonScript::addPythonReference", Py_file_input);
   if (codeObj) {
-    PyObject *ret =
-        PyEval_EvalCode((PyCodeObject *)codeObj, localDict, localDict);
+    PyObject *ret = PyEval_EvalCode(CODE_OBJECT(codeObj), localDict, localDict);
     Py_XDECREF(ret);
   }
   if (PyErr_Occurred()) {
@@ -881,8 +887,7 @@ void PythonScript::deletePythonReference(const std::string &wsName) {
   PyObject *codeObj =
       Py_CompileString(code, "PythonScript::deleteHandle", Py_file_input);
   if (codeObj) {
-    PyObject *ret =
-        PyEval_EvalCode((PyCodeObject *)codeObj, localDict, localDict);
+    PyObject *ret = PyEval_EvalCode(CODE_OBJECT(codeObj), localDict, localDict);
     Py_XDECREF(ret);
   }
   if (PyErr_Occurred()) {

@@ -1,13 +1,16 @@
 #ifndef MOCKOBJECTS_H_
 #define MOCKOBJECTS_H_
 
-#include <gmock/gmock.h>
-#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidDataObjects/PeakShapeFactory.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include <gmock/gmock.h>
 
 namespace Mantid {
 namespace DataObjects {
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockPeakShapeFactory : public PeakShapeFactory {
 public:
@@ -33,5 +36,7 @@ public:
 };
 }
 }
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif /* MOCKOBJECTS_H_ */

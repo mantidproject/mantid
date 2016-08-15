@@ -111,8 +111,6 @@ void LoadLogsForSNSPulsedMagnet::exec() {
 
   // 4. Integrate answer
   addProperty();
-
-  return;
 }
 
 void LoadLogsForSNSPulsedMagnet::ParseDelayTimeLogFile() {
@@ -187,8 +185,6 @@ void LoadLogsForSNSPulsedMagnet::ParseDelayTimeLogFile() {
 
   m_numpulses = numpulses;
   m_delaytimes = delaytimes;
-
-  return;
 }
 
 #pragma pack(push, 4) // Make sure the structure is 16 bytes.
@@ -253,8 +249,6 @@ void LoadLogsForSNSPulsedMagnet::addProperty() {
 
   // Clean memory
   delete[] property;
-
-  return;
 }
 
 } // namespace Mantid

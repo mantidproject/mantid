@@ -3,17 +3,16 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionParameterDecorator.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Exception.h"
-
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/make_shared.hpp>
-
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -432,7 +431,9 @@ private:
   class MockTestableFunctionParameterDecorator
       : public TestableFunctionParameterDecorator {
   public:
+    GCC_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_METHOD1(beforeDecoratedFunctionSet, void(const IFunction_sptr &));
+    GCC_DIAG_ON_SUGGEST_OVERRIDE
   };
 };
 

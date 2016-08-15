@@ -1,4 +1,6 @@
 # pylint: disable=no-init,invalid-name,too-many-public-methods
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.geometry import CrystalStructure, ReflectionGenerator, ReflectionConditionFilter
 from mantid.kernel import V3D

@@ -30,7 +30,7 @@ Version Identification
 ######################
 
 To be identified as a version 2 muon nexus file, the nexus file must have a
-``IDF_version`` or ``idf_version`` item in its main group 
+``IDF_version`` or ``idf_version`` item in its main group
 with an integer value of ``2`` and also a
 ``definition`` item with string value ``"muonTD"`` or ``"pulsedTD"``,
 else it will be identified as version 1.
@@ -72,22 +72,22 @@ Here are more details of data loaded from the Nexus file:
 +----------------------------------+--------------------------------------------+----------------------------------------+
 | Instrument                       | group ``Instrument``                       | Workspace instrument                   |
 |                                  |                                            | as loaded by LoadInstrumentFromNexus   |
-+----------------------------------+--------------------------------------------+----------------------------------------+ 
++----------------------------------+--------------------------------------------+----------------------------------------+
 | Spectrum of each workspace index | [DET]``/spectrum_index``                   | Spectra-Detector mapping of workspace  |
-+----------------------------------+--------------------------------------------+----------------------------------------+ 
++----------------------------------+--------------------------------------------+----------------------------------------+
 | Title (optional)                 | ``title``                                  | ``title`` in workspace                 |
 +----------------------------------+--------------------------------------------+----------------------------------------+
 | Note orcomment (optional)        | ``note``                                   | ``comment`` in workspace               |
-+----------------------------------+--------------------------------------------+----------------------------------------+ 
++----------------------------------+--------------------------------------------+----------------------------------------+
 | Time Zero (optional)             | ``instrument/detector_fb/time_zero``       | TimeZero property                      |
 |                                  | if found                                   |                                        |
-+----------------------------------+--------------------------------------------+----------------------------------------+ 
++----------------------------------+--------------------------------------------+----------------------------------------+
 | First good time (optional)       | ``instrument/detector_fb/first_good_time`` | FirstGoodData property                 |
 |                                  | if found                                   |                                        |
-+----------------------------------+--------------------------------------------+----------------------------------------+ 
++----------------------------------+--------------------------------------------+----------------------------------------+
 | Run                              | various places as shown later on           | Run object of workspace                |
 +----------------------------------+--------------------------------------------+----------------------------------------+
-| Sample name                      | ``sample/name``                            | ``name`` in Sample Object of workspace | 
+| Sample name                      | ``sample/name``                            | ``name`` in Sample Object of workspace |
 +----------------------------------+--------------------------------------------+----------------------------------------+
 | Time series                      | ``sample/`` groups of class ``NXLog``      |  time series log in run object         |
 +----------------------------------+--------------------------------------------+----------------------------------------+
@@ -101,7 +101,7 @@ LoadMuonNexus does not run LoadNexuslogs to load run logs. Information is loaded
 +===========================+==================================+
 | ``title``                 | ``run_title``                    |
 +---------------------------+----------------------------------+
-| (data)                    | ``nspectra``                     | 
+| (data)                    | ``nspectra``                     |
 +---------------------------+----------------------------------+
 | ``start_time``            | ``run_start``                    |
 +---------------------------+----------------------------------+
@@ -123,15 +123,15 @@ Child Algorithms used
 
 The ChildAlgorithms used by LoadMuonNexus are:
 
--  :ref:`algm-LoadMuonNexus-v1` - this loads the muon nexus file if not identified as
-   version 2. It in turn uses the following child algorithm:
-   -  :ref:`algm-LoadMuonLog` - this reads log information from the Nexus file and uses
-      it to create TimeSeriesProperty entries in the workspace.
--  :ref:`algm-LoadInstrument` - this algorithm looks for an XML description of the
-   instrument and if found reads it.
--  :ref:`algm-LoadInstrumentFromNexus` - this is called if the normal
-   LoadInstrument fails. As the Nexus file has limited instrument data,
-   this only populates a few fields.
+* :ref:`algm-LoadMuonNexus-v1` - this loads the muon nexus file if not identified as
+  version 2. It in turn uses the following child algorithm:
+* :ref:`algm-LoadMuonLog` - this reads log information from the Nexus file and uses
+  it to create TimeSeriesProperty entries in the workspace.
+* :ref:`algm-LoadInstrument` - this algorithm looks for an XML description of the
+  instrument and if found reads it.
+* :ref:`algm-LoadInstrumentFromNexus` - this is called if the normal
+  LoadInstrument fails. As the Nexus file has limited instrument data,
+  this only populates a few fields.
 
 Previous Versions
 -----------------

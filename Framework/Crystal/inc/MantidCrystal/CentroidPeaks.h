@@ -17,9 +17,6 @@ namespace Crystal {
  */
 class DLLExport CentroidPeaks : public API::Algorithm {
 public:
-  CentroidPeaks();
-  ~CentroidPeaks() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "CentroidPeaks"; };
   /// Summary of algorithms purpose

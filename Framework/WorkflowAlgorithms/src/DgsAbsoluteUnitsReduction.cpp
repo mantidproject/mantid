@@ -18,16 +18,6 @@ namespace WorkflowAlgorithms {
 DECLARE_ALGORITHM(DgsAbsoluteUnitsReduction)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsAbsoluteUnitsReduction::DgsAbsoluteUnitsReduction() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsAbsoluteUnitsReduction::~DgsAbsoluteUnitsReduction() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsAbsoluteUnitsReduction::name() const {
   return "DgsAbsoluteUnitsReduction";

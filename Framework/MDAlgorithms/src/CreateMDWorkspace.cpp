@@ -14,6 +14,9 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 #include <cmath>
 
 namespace Mantid {
@@ -22,19 +25,35 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using boost::regex;
+
+/*
+ * The list of dimension names often looks like "[H,0,0],[0,K,0]" with "[H,0,0]"
+ * being the first dimension but getProperty returns a vector of
+ * the string split on every comma
+ * This function parses the string, and does not split on commas within brackets
+ */
+std::vector<std::string> parseNames(const std::string &names_string) {
+
+  // This regex has two parts which are separated by the "|" (or)
+  // The first part matches anything which is bounded by square brackets
+  // unless they contain square brackets (so that it only matches inner pairs)
+  // The second part matches anything that doesn't contain a comma
+  // NB, the order of the two parts matters
+
+  regex expression("\\[([^\\[]*)\\]|[^,]+");
+
+  boost::sregex_token_iterator iter(names_string.begin(), names_string.end(),
+                                    expression, 0);
+  boost::sregex_token_iterator end;
+
+  std::vector<std::string> names_result(iter, end);
+
+  return names_result;
+}
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateMDWorkspace)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateMDWorkspace::CreateMDWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateMDWorkspace::~CreateMDWorkspace() {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -53,8 +72,9 @@ void CreateMDWorkspace::init() {
                   "A comma separated list of min, max for each dimension,\n"
                   "specifying the extents of each dimension.");
 
-  declareProperty(make_unique<ArrayProperty<std::string>>("Names"),
-                  "A comma separated list of the name of each dimension.");
+  declareProperty(
+      make_unique<ArrayProperty<std::string>>("Names", Direction::Input),
+      "A comma separated list of the name of each dimension.");
 
   declareProperty(make_unique<ArrayProperty<std::string>>("Units"),
                   "A comma separated list of the units of each dimension.");
@@ -141,7 +161,9 @@ void CreateMDWorkspace::exec() {
   size_t ndims = static_cast<size_t>(ndims_prop);
 
   std::vector<double> extents = getProperty("Extents");
-  std::vector<std::string> names = getProperty("Names");
+  std::string dimensions_string = getPropertyValue("Names");
+  std::vector<std::string> names = parseNames(dimensions_string);
+
   std::vector<std::string> units = getProperty("Units");
   std::vector<std::string> frames = getProperty("Frames");
 

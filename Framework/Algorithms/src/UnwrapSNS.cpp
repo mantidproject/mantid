@@ -215,9 +215,9 @@ void UnwrapSNS::execEvent() {
     MantidVec time_bins;
     if (outW->dataX(0).size() > 2) {
       this->unwrapX(m_inputWS->dataX(workspaceIndex), time_bins, Ld);
-      outW->setX(workspaceIndex, time_bins);
+      outW->setBinEdges(workspaceIndex, time_bins);
     } else {
-      outW->setX(workspaceIndex, m_inputWS->dataX(workspaceIndex));
+      outW->setX(workspaceIndex, m_inputWS->refX(workspaceIndex));
     }
     if (numEvents > 0) {
       MantidVec times(numEvents);

@@ -61,8 +61,6 @@ std::ostream &operator<<(std::ostream &strm, const DetectorPosition &p) {
 class DLLExport LoadILLSANS : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadILLSANS();
-  ~LoadILLSANS() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

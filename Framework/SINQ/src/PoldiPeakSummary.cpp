@@ -17,16 +17,6 @@ using namespace Kernel;
 DECLARE_ALGORITHM(PoldiPeakSummary)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PoldiPeakSummary::PoldiPeakSummary() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PoldiPeakSummary::~PoldiPeakSummary() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string PoldiPeakSummary::name() const { return "PoldiPeakSummary"; }

@@ -72,10 +72,6 @@ class DLLExport LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
   };
 
 public:
-  // construction
-  LoadBBY() {}
-  ~LoadBBY() override {}
-
   // description
   int version() const override { return 1; }
   const std::string name() const override { return "LoadBBY"; }

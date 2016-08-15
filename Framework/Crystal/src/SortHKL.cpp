@@ -35,7 +35,7 @@ SortHKL::SortHKL() {
   m_refConds = getAllReflectionConditions();
 }
 
-SortHKL::~SortHKL() {}
+SortHKL::~SortHKL() = default;
 
 void SortHKL::init() {
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(

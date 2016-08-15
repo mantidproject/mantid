@@ -16,12 +16,6 @@ DECLARE_ALGORITHM(GroupDetectors)
 using namespace Kernel;
 using namespace API;
 
-/// (Empty) Constructor
-GroupDetectors::GroupDetectors() {}
-
-/// Destructor
-GroupDetectors::~GroupDetectors() {}
-
 void GroupDetectors::init() {
   declareProperty(
       make_unique<WorkspaceProperty<>>(

@@ -903,6 +903,8 @@ void SetupHFIRReduction::setupSensitivity(
     const double maxEff = getProperty("MaxEfficiency");
     const double sensitivityBeamCenterX = getProperty("SensitivityBeamCenterX");
     const double sensitivityBeamCenterY = getProperty("SensitivityBeamCenterY");
+    const std::string maskFullComponent =
+        getPropertyValue("MaskedFullComponent");
 
     IAlgorithm_sptr effAlg = createChildAlgorithm("SANSSensitivityCorrection");
     effAlg->setProperty("Filename", sensitivityFile);
@@ -910,6 +912,7 @@ void SetupHFIRReduction::setupSensitivity(
     effAlg->setProperty("DarkCurrentFile", sensitivityDarkCurrentFile);
     effAlg->setProperty("MinEfficiency", minEff);
     effAlg->setProperty("MaxEfficiency", maxEff);
+    effAlg->setProperty("MaskedFullComponent", maskFullComponent);
 
     // Beam center option for sensitivity data
     const std::string centerMethod =

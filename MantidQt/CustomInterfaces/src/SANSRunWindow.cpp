@@ -2383,7 +2383,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
   const States type = typeStr == "1D" ? OneD : TwoD;
 
   // Make sure that all settings are valid
-  if (!areSettingsValid()) {
+  if (!areSettingsValid(type)) {
     return;
   }
 
@@ -4412,10 +4412,19 @@ void SANSRunWindow::resetToM3IfNecessary() {
  * Check tha the Settings are valid. We need to do this for inputs which cannot
  * be checked with simple validators
  */
-bool SANSRunWindow::areSettingsValid() {
+bool SANSRunWindow::areSettingsValid(States type) {
   bool isValid = true;
   QString message;
   // ------------ GUI INPUT CHECKS ------------
+
+  // We currently do not allow a 2D reduction with a merged flag
+  auto isMergedReduction = m_uiForm.detbank_sel->currentIndex() == 3;
+  if (type == States::TwoD && isMergedReduction) {
+    isValid = false;
+    message +=
+        "A merged Detector Bank selection is currently not supported for 2D "
+        "reductions.\n";
+  }
 
   // R_MAX -- can be only >0 or -1
   auto r_max = m_uiForm.rad_max->text().simplified().toDouble();

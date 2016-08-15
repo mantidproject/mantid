@@ -16,16 +16,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(DivideMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DivideMD::DivideMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DivideMD::~DivideMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DivideMD::name() const { return "DivideMD"; }
 

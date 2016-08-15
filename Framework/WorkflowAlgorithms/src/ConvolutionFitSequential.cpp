@@ -32,16 +32,6 @@ using namespace Kernel;
 DECLARE_ALGORITHM(ConvolutionFitSequential)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvolutionFitSequential::ConvolutionFitSequential() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvolutionFitSequential::~ConvolutionFitSequential() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ConvolutionFitSequential::name() const {
@@ -120,7 +110,9 @@ void ConvolutionFitSequential::init() {
                   "The maximum number of iterations permitted",
                   Direction::Input);
 
-  declareProperty("OutputWorkspace", "", Direction::Output);
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "The OutputWorkspace containing the results of the fit.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -186,7 +178,7 @@ void ConvolutionFitSequential::exec() {
 
   Progress plotPeakStringProg(this, 0.0, 0.05, specMax - specMin);
   // Construct plotpeak string
-  std::string plotPeakInput = "";
+  std::string plotPeakInput;
   for (int i = specMin; i < specMax + 1; i++) {
     std::string nextWs = tempFitWsName + ",i";
     nextWs += std::to_string(i);
@@ -266,7 +258,7 @@ void ConvolutionFitSequential::exec() {
   }
 
   // Construct comma separated list for ProcessIndirectFitParameters
-  std::string paramNamesList = "";
+  std::string paramNamesList;
   const size_t maxNames = paramNames.size();
   for (size_t i = 0; i < maxNames; i++) {
     paramNamesList += paramNames.at(i);
@@ -287,6 +279,7 @@ void ConvolutionFitSequential::exec() {
   pifp->executeAsChildAlg();
 
   MatrixWorkspace_sptr resultWs = pifp->getProperty("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace(resultWsName, resultWs);
 
   // Handle sample logs
   auto logCopier = createChildAlgorithm("CopyLogs");
@@ -328,6 +321,7 @@ void ConvolutionFitSequential::exec() {
     logAdder->executeAsChildAlg();
     logAdderProg.report("Adding Numerical logs");
   }
+
   // Copy Logs to GroupWorkspace
   logCopier = createChildAlgorithm("CopyLogs", 0.97, 0.98, true);
   logCopier->setProperty("InputWorkspace", resultWs);
@@ -352,8 +346,7 @@ void ConvolutionFitSequential::exec() {
     renamerProg.report("Renaming group workspaces");
   }
 
-  AnalysisDataService::Instance().addOrReplace(resultWsName, resultWs);
-  setProperty("OutputWorkspace", resultWsName);
+  setProperty("OutputWorkspace", resultWs);
 }
 
 /**
@@ -376,8 +369,8 @@ bool ConvolutionFitSequential::checkForTwoLorentz(
 std::vector<std::string>
 ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
   std::vector<std::string> result;
-  std::string fitType = "";
-  std::string functionName = "";
+  std::string fitType;
+  std::string functionName;
   auto startPos = function.rfind("name=");
   if (startPos != std::string::npos) {
     fitType = function.substr(startPos, function.size());
@@ -492,10 +485,8 @@ void ConvolutionFitSequential::calculateEISF(
   auto columns = tableWs->getColumnNames();
   std::string height = searchForFitParams("Height", columns).at(0);
   std::string heightErr = searchForFitParams("Height_Err", columns).at(0);
-  auto heightY = std::vector<double>();
-  tableWs->getColumn(height)->numeric_fill(heightY);
-  auto heightE = std::vector<double>();
-  tableWs->getColumn(heightErr)->numeric_fill(heightE);
+  auto heightY = tableWs->getColumn(height)->numeric_fill<>();
+  auto heightE = tableWs->getColumn(heightErr)->numeric_fill<>();
 
   // Get amplitude column names
   auto ampNames = searchForFitParams("Amplitude", columns);
@@ -509,11 +500,9 @@ void ConvolutionFitSequential::calculateEISF(
   for (size_t i = 0; i < maxSize; i++) {
     // Get amplitude from column in table workspace
     std::string ampName = ampNames.at(i);
-    auto ampY = std::vector<double>();
-    tableWs->getColumn(ampName)->numeric_fill(ampY);
+    auto ampY = tableWs->getColumn(ampName)->numeric_fill<>();
     std::string ampErrorName = ampErrorNames.at(i);
-    auto ampErr = std::vector<double>();
-    tableWs->getColumn(ampErrorName)->numeric_fill(ampErr);
+    auto ampErr = tableWs->getColumn(ampErrorName)->numeric_fill<>();
 
     // Calculate EISF and EISF error
     // total = heightY + ampY
@@ -613,7 +602,7 @@ ConvolutionFitSequential::convertBackToShort(const std::string &original) {
  */
 std::string
 ConvolutionFitSequential::convertFuncToShort(const std::string &original) {
-  std::string result = "";
+  std::string result;
   if (original.compare("DeltaFunction") != 0) {
     if (original.at(0) == 'E') {
       result += "E";

@@ -39,16 +39,6 @@ namespace DataHandling {
 DECLARE_ALGORITHM(GenerateGroupingPowder)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-GenerateGroupingPowder::GenerateGroupingPowder() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-GenerateGroupingPowder::~GenerateGroupingPowder() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string GenerateGroupingPowder::name() const {
   return "GenerateGroupingPowder";

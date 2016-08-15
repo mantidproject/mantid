@@ -117,12 +117,7 @@ void IQTransform::exec() {
   m_label->setLabel("");
   outputWS->setYUnit("");
   // Copy the data over. Assume single spectrum input (output will be).
-  // Take the mid-point of histogram bins
-  if (tmpWS->isHistogramData()) {
-    VectorHelper::convertToBinCentre(tmpWS->readX(0), outputWS->dataX(0));
-  } else {
-    outputWS->setX(0, tmpWS->refX(0));
-  }
+  outputWS->setPoints(0, tmpWS->points(0));
   MantidVec &Y = outputWS->dataY(0) = tmpWS->dataY(0);
   outputWS->dataE(0) = tmpWS->dataE(0);
 

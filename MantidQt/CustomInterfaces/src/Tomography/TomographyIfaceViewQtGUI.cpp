@@ -253,8 +253,10 @@ void TomographyIfaceViewQtGUI::doSetupGeneralWidgets() {
   connect(m_ui.pushButton_help, SIGNAL(released()), this, SLOT(openHelpWin()));
   // note connection to the parent window, otherwise you'd be left
   // with an empty frame window
-  connect(m_ui.pushButton_close, SIGNAL(released()), this->parent(),
-          SLOT(close()));
+  if (this->parent()) {
+    connect(m_ui.pushButton_close, SIGNAL(released()), this->parent(),
+            SLOT(close()));
+  }
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
@@ -2080,9 +2082,16 @@ std::string TomographyIfaceViewQtGUI::checkUserBrowseFile(
 }
 
 void TomographyIfaceViewQtGUI::resetPrePostFilters() {
+  auto reply = QMessageBox::question(
+      this, "Reset Confirmation", "Are you sure you want to <br><strong>RESET "
+                                  "ALL</strong> Filter settings?<br>This "
+                                  "action cannot be undone!",
+      QMessageBox::Yes | QMessageBox::No);
   // default constructors with factory defaults
-  TomoReconFiltersSettings def;
-  setPrePostProcSettings(def);
+  if (reply == QMessageBox::Yes) {
+    TomoReconFiltersSettings def;
+    setPrePostProcSettings(def);
+  }
 }
 
 void TomographyIfaceViewQtGUI::systemSettingsEdited() {
@@ -2094,9 +2103,17 @@ void TomographyIfaceViewQtGUI::systemSettingsNumericEdited() {
 }
 
 void TomographyIfaceViewQtGUI::resetSystemSettings() {
-  // From factory defaults
-  TomoSystemSettings defaults;
-  updateSystemSettings(defaults);
+  auto reply = QMessageBox::question(
+      this, "Reset Confirmation", "Are you sure you want to <br><strong>RESET "
+                                  "ALL</strong> System settings?<br>This "
+                                  "action cannot be undone!",
+      QMessageBox::Yes | QMessageBox::No);
+  // default constructors with factory defaults
+  if (reply == QMessageBox::Yes) {
+    // From factory defaults
+    TomoSystemSettings defaults;
+    updateSystemSettings(defaults);
+  }
 }
 
 /**
@@ -2188,6 +2205,5 @@ void TomographyIfaceViewQtGUI::openHelpWin() {
   MantidQt::API::HelpWindow::showCustomInterface(
       NULL, QString("Tomographic_Reconstruction"));
 }
-
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -45,7 +45,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
             self.facility_name = 'SNS'
         dbmsg = '[SNS Powder Reduction]  Facility = %s,  Instrument = %s\n' \
                 'Auto-save Directory %s' % (self.facility_name, self.instrument_name,
-                       mantidconfigdir)
+                                            mantidconfigdir)
         Logger("DiffractionReductionScripter").debug(str(dbmsg))
 
         return
@@ -84,7 +84,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         # Information output
         wbuf = "Reduction script: (script is saved to %s; setup is saved to %s. \n" % (
-                file_name, autosavexmlfname)
+            file_name, autosavexmlfname)
         wbuf += script
         wbuf += "\n========== End of Script ==========="
         print wbuf
@@ -199,16 +199,16 @@ class DiffractionReductionScripter(BaseReductionScripter):
                     if filterdict["LogValueInterval"] != "":
                         # Filter by log value interval
                         script += "%sLogValueInterval       = '%s',\n" % (
-                                DiffractionReductionScripter.WIDTH,
-                                filterdict["LogValueInterval"])
+                            DiffractionReductionScripter.WIDTH,
+                            filterdict["LogValueInterval"])
                     script += "%sLogBoundary    = '%s',\n" % (
-                            DiffractionReductionScripter.WIDTH, filterdict["LogBoundary"])
+                        DiffractionReductionScripter.WIDTH, filterdict["LogBoundary"])
                     if filterdict["TimeTolerance"] != "":
                         script += "%sTimeTolerance  = '%s',\n" % (
-                                DiffractionReductionScripter.WIDTH, filterdict["TimeTolerance"])
+                            DiffractionReductionScripter.WIDTH, filterdict["TimeTolerance"])
                     if filterdict["LogValueTolerance"] != "":
                         script += "%sLogValueTolerance  = '%s',\n" % (
-                                DiffractionReductionScripter.WIDTH, filterdict["LogValueTolerance"])
+                            DiffractionReductionScripter.WIDTH, filterdict["LogValueTolerance"])
                 # ENDIF
                 script += ")\n"
 

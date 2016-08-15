@@ -7,8 +7,6 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/Muon/IALCBaselineModellingModel.h"
 
-using namespace Mantid::API;
-
 namespace MantidQt {
 namespace CustomInterfaces {
 /** ALCBaselineModellingModel : Concrete ALC Baseline Modelling step model
@@ -41,18 +39,20 @@ public:
   // -- IALCBaselineModellingModel interface
   // -----------------------------------------------------
 
-  MatrixWorkspace_const_sptr data() const override;
+  Mantid::API::MatrixWorkspace_const_sptr data() const override;
 
-  void fit(IFunction_const_sptr function,
+  void fit(Mantid::API::IFunction_const_sptr function,
            const std::vector<Section> &sections) override;
 
-  IFunction_const_sptr fittedFunction() const override {
+  Mantid::API::IFunction_const_sptr fittedFunction() const override {
     return m_fittedFunction;
   }
 
-  MatrixWorkspace_const_sptr correctedData() const override;
+  Mantid::API::MatrixWorkspace_const_sptr correctedData() const override;
 
-  ITableWorkspace_sptr parameterTable() const { return m_parameterTable; }
+  Mantid::API::ITableWorkspace_sptr parameterTable() const {
+    return m_parameterTable;
+  }
 
   const std::vector<Section> &sections() const { return m_sections; }
 
@@ -60,46 +60,47 @@ public:
   // ----------------------------------------------
 
   /// Set the data we should fit baseline for
-  void setData(MatrixWorkspace_const_sptr data);
+  void setData(Mantid::API::MatrixWorkspace_const_sptr data);
 
   /// Set the corrected data resulting from fit
-  void setCorrectedData(MatrixWorkspace_const_sptr data);
+  void setCorrectedData(Mantid::API::MatrixWorkspace_const_sptr data);
 
   /// Export data + baseline + corrected data as a single workspace
-  MatrixWorkspace_sptr exportWorkspace();
+  Mantid::API::MatrixWorkspace_sptr exportWorkspace();
 
   /// Export sections used for the last fit as a table workspace
-  ITableWorkspace_sptr exportSections();
+  Mantid::API::ITableWorkspace_sptr exportSections();
 
   /// Exports baseline model as a table workspace
-  ITableWorkspace_sptr exportModel();
+  Mantid::API::ITableWorkspace_sptr exportModel();
 
 private:
   /// Data used for fitting
-  MatrixWorkspace_const_sptr m_data;
+  Mantid::API::MatrixWorkspace_const_sptr m_data;
 
   /// Result function of the last fit
-  IFunction_const_sptr m_fittedFunction;
+  Mantid::API::IFunction_const_sptr m_fittedFunction;
 
   /// Fit table containing parameters and errors
-  ITableWorkspace_sptr m_parameterTable;
+  Mantid::API::ITableWorkspace_sptr m_parameterTable;
 
   /// Sections used for the last fit
   std::vector<Section> m_sections;
 
   // Setters for convenience
-  void setFittedFunction(IFunction_const_sptr function);
+  void setFittedFunction(Mantid::API::IFunction_const_sptr function);
 
   // Set errors in the ws after the fit
-  void setErrorsAfterFit(MatrixWorkspace_sptr data);
+  void setErrorsAfterFit(Mantid::API::MatrixWorkspace_sptr data);
 
   /// Disables points which shouldn't be used for fitting
-  static void disableUnwantedPoints(MatrixWorkspace_sptr ws,
+  static void disableUnwantedPoints(Mantid::API::MatrixWorkspace_sptr ws,
                                     const std::vector<Section> &sections);
 
   /// Enable previously disabled points
-  static void enableDisabledPoints(MatrixWorkspace_sptr destWs,
-                                   MatrixWorkspace_const_sptr sourceWs);
+  static void
+  enableDisabledPoints(Mantid::API::MatrixWorkspace_sptr destWs,
+                       Mantid::API::MatrixWorkspace_const_sptr sourceWs);
 };
 
 } // namespace CustomInterfaces

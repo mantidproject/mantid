@@ -96,14 +96,15 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmInputHistoryImpl>;
 };
 
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class EXPORT_OPT_MANTIDQT_API
-    Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl>;
-#endif /* _WIN32 */
-/// The specific instantiation of the templated type
-typedef EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<
-    AlgorithmInputHistoryImpl> AlgorithmInputHistory;
+typedef Mantid::Kernel::SingletonHolder<AlgorithmInputHistoryImpl>
+    AlgorithmInputHistory;
+}
+}
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTIDQT_API template class EXPORT_OPT_MANTIDQT_API
+    Mantid::Kernel::SingletonHolder<MantidQt::API::AlgorithmInputHistoryImpl>;
 }
 }
 

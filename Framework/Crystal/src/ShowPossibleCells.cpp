@@ -16,16 +16,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //--------------------------------------------------------------------------
-/** Constructor
- */
-ShowPossibleCells::ShowPossibleCells() {}
-
-//--------------------------------------------------------------------------
-/** Destructor
- */
-ShowPossibleCells::~ShowPossibleCells() {}
-
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ShowPossibleCells::init() {

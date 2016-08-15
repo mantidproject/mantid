@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import inspect
 import re
 
@@ -27,9 +29,9 @@ def make_decorator(algorithm_to_decorate):
 
         def execute(self, additional=None, verbose=False):
             if verbose:
-                print "Algorithm Parameters:"
-                print self.__parameters__
-                print
+                print("Algorithm Parameters:")
+                print(self.__parameters__)
+                print()
             out = self.__alg_subject(**self.__parameters__)
             return out
 

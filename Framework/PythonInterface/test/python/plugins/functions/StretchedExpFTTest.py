@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.kernel import *
 from mantid.api import *
@@ -61,7 +63,7 @@ class StretchedExpFTTest(unittest.TestCase):
     def testRegistered(self):
         try:
             FunctionFactory.createFunction('StretchedExpFT')
-        except RuntimeError, exc:
+        except RuntimeError as exc:
             self.fail('Could not create StretchedExpFT function: %s' % str(exc))
 
     def testGaussian(self):

@@ -23,10 +23,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
-
-from mantid.api import IFunction1D, FunctionFactory
+from __future__ import (absolute_import, division, print_function)
 import math
 import numpy as np
+from mantid.api import IFunction1D, FunctionFactory
 
 class GuinierPorod(IFunction1D):
     """
@@ -152,8 +152,8 @@ class GuinierPorod(IFunction1D):
         bgd = self.getParameterValue('Background')
 
         output = np.zeros(len(xvals), dtype=float)
-        for i in range(len(xvals)):
-            output[i] = scale * self._guinier_porod_core(xvals[i]) + bgd
+        for i,x in enumerate(xvals):
+            output[i] = scale * self._guinier_porod_core(x) + bgd
         return output
 
     def functionDeriv1D(self, xvals, jacobian):

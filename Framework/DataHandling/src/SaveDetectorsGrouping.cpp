@@ -37,16 +37,6 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(SaveDetectorsGrouping)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveDetectorsGrouping::SaveDetectorsGrouping() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveDetectorsGrouping::~SaveDetectorsGrouping() {}
-
 /// Define input parameters
 void SaveDetectorsGrouping::init() {
   declareProperty(
@@ -112,8 +102,6 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
     }
     it->second.insert(it->second.end(), detids.begin(), detids.end());
   }
-
-  return;
 }
 
 /*
@@ -158,8 +146,6 @@ void SaveDetectorsGrouping::convertToDetectorsRanges(
     groupdetidrangemap[groupid] = detranges;
 
   } // ENDFOR GroupID
-
-  return;
 }
 
 void SaveDetectorsGrouping::printToXML(

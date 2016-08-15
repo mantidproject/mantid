@@ -66,7 +66,10 @@ class VesuvioTests(unittest.TestCase):
         diff_mode = "SingleDifference"
         self._run_load("14188", "3-134", diff_mode, load_mon=True)
         self.assertTrue(mtd.doesExist('evs_raw_monitors'))
-        self.assertTrue(isinstance(mtd['evs_raw_monitors'], MatrixWorkspace))
+        monitor_ws = mtd['evs_raw_monitors']
+        self.assertTrue(isinstance(monitor_ws, MatrixWorkspace))
+        self.assertEqual(monitor_ws.readX(0)[0], 5)
+        self.assertEqual(monitor_ws.readX(0)[-1], 19990)
 
     def test_monitors_loaded_into_ADS_when_monitor_load_is_true_for_forward_scattering(self):
         diff_mode = "SingleDifference"
@@ -299,14 +302,14 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(sigma_l2, 0.023, places=tol_places)
         self.assertAlmostEqual(sigma_tof, 0.370, places=tol_places)
         if forward_scatter:
-            self.assertAlmostEqual(sigma_theta, 0.040, places=tol_places)
+            self.assertAlmostEqual(sigma_theta, 0.016, places=tol_places)
             if diff_mode == "DoubleDifference":
                 raise ValueError("Double difference is not compataible with forward scattering spectra")
             else:
                 self.assertAlmostEqual(sigma_gauss, 73, places=tol_places)
                 self.assertAlmostEqual(hwhm_lorentz, 24, places=tol_places)
         else:
-            self.assertAlmostEqual(sigma_theta, 0.0227, places=tol_places)
+            self.assertAlmostEqual(sigma_theta, 0.016, places=tol_places)
             if diff_mode == "DoubleDifference":
                 self.assertAlmostEqual(sigma_gauss, 88.7, places=tol_places)
                 self.assertAlmostEqual(hwhm_lorentz, 40.3, places=tol_places)

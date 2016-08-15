@@ -69,8 +69,6 @@ public:
                  std::string &Component_name, double ax, double bx, double cx,
                  double alphax, double betax, double gammax, double tolerance1);
 
-  ~SCDPanelErrors() override;
-
   std::string name() const override { return "SCDPanelErrors"; }
 
   const std::string category() const override { return "Calibrate"; }

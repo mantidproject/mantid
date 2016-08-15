@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress, InstrumentValidator, ITableWorkspaceProperty
 from mantid.kernel import Direction
 import numpy as np
@@ -79,7 +81,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
             return self.defaultT
         try:
             temperature = float(run.getProperty('temperature').value)
-        except ValueError, err:
+        except ValueError as err:
             self.log().warning("Error of getting temperature: " + err +
                                " T=293K is assumed for Debye-Waller factor.")
             return self.defaultT

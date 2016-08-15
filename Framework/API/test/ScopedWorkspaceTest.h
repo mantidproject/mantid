@@ -76,7 +76,10 @@ public:
   }
 
   void test_removedWhenOutOfScope() {
-    TS_ASSERT_EQUALS(m_ads.getObjectNamesInclHidden().size(), 0);
+    TS_ASSERT_EQUALS(
+        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                             Mantid::Kernel::DataServiceHidden::Include).size(),
+        0);
 
     { // Simulated scope
       MockWorkspace_sptr ws = MockWorkspace_sptr(new MockWorkspace);
@@ -88,11 +91,17 @@ public:
     }
 
     // Should be removed when goes out of scope
-    TS_ASSERT_EQUALS(m_ads.getObjectNamesInclHidden().size(), 0);
+    TS_ASSERT_EQUALS(
+        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                             Mantid::Kernel::DataServiceHidden::Include).size(),
+        0);
   }
 
   void test_removedWhenException() {
-    TS_ASSERT_EQUALS(m_ads.getObjectNamesInclHidden().size(), 0);
+    TS_ASSERT_EQUALS(
+        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                             Mantid::Kernel::DataServiceHidden::Include).size(),
+        0);
 
     try {
       MockWorkspace_sptr ws = MockWorkspace_sptr(new MockWorkspace);
@@ -108,11 +117,17 @@ public:
     } catch (...) {
     }
 
-    TS_ASSERT_EQUALS(m_ads.getObjectNamesInclHidden().size(), 0);
+    TS_ASSERT_EQUALS(
+        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                             Mantid::Kernel::DataServiceHidden::Include).size(),
+        0);
   }
 
   void test_workspaceGroups() {
-    TS_ASSERT_EQUALS(m_ads.getObjectNamesInclHidden().size(), 0);
+    TS_ASSERT_EQUALS(
+        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                             Mantid::Kernel::DataServiceHidden::Include).size(),
+        0);
 
     { // Simulated scope
       MockWorkspace_sptr ws1 = MockWorkspace_sptr(new MockWorkspace);
@@ -126,11 +141,18 @@ public:
       ScopedWorkspace testGroup;
       m_ads.add(testGroup.name(), wsGroup);
 
-      TS_ASSERT_EQUALS(m_ads.getObjectNamesInclHidden().size(), 3);
+      TS_ASSERT_EQUALS(
+          m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                               Mantid::Kernel::DataServiceHidden::Include)
+              .size(),
+          3);
     }
 
     // Whole group should be removed
-    TS_ASSERT_EQUALS(m_ads.getObjectNamesInclHidden().size(), 0);
+    TS_ASSERT_EQUALS(
+        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                             Mantid::Kernel::DataServiceHidden::Include).size(),
+        0);
   }
 
   void test_alreadyExistsInTheADS() {
@@ -164,7 +186,10 @@ public:
 
     TS_ASSERT_EQUALS(ws2->name(), test.name());
     TS_ASSERT(ws1->name().empty());
-    TS_ASSERT_EQUALS(m_ads.getObjectNamesInclHidden().size(), 1);
+    TS_ASSERT_EQUALS(
+        m_ads.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                             Mantid::Kernel::DataServiceHidden::Include).size(),
+        1);
   }
 
 private:

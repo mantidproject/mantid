@@ -62,7 +62,6 @@ void indexSort(const std::vector<T> &pVec, std::vector<int> &Index) {
   transform(pVec.begin(), pVec.end(), PartList.begin(), PIndex<T>());
   sort(PartList.begin(), PartList.end());
   transform(PartList.begin(), PartList.end(), Index.begin(), PSep<T>());
-  return;
 }
 template void indexSort(const std::vector<double> &, std::vector<int> &);
 template void indexSort(const std::vector<float> &, std::vector<int> &);
@@ -546,7 +545,6 @@ void Matrix<T>::deleteMem()
   }
   nx = 0;
   ny = 0;
-  return;
 }
 
 /**
@@ -571,7 +569,6 @@ template <typename T> void Matrix<T>::setMem(const size_t a, const size_t b) {
       V[i] = tmpX + (i * ny);
     }
   }
-  return;
 }
 
 /**
@@ -588,7 +585,6 @@ void Matrix<T>::swapRows(const size_t RowI, const size_t RowJ) {
       V[RowJ][k] = tmp;
     }
   }
-  return;
 }
 
 /**
@@ -605,7 +601,6 @@ void Matrix<T>::swapCols(const size_t colI, const size_t colJ) {
       V[k][colJ] = tmp;
     }
   }
-  return;
 }
 
 template <typename T>
@@ -621,7 +616,6 @@ void Matrix<T>::zeroMatrix()
       }
     }
   }
-  return;
 }
 
 template <typename T>
@@ -638,7 +632,6 @@ void Matrix<T>::identityMatrix()
       }
     }
   }
-  return;
 }
 template <typename T>
 void Matrix<T>::setColumn(const size_t nCol, const std::vector<T> &newCol) {
@@ -684,7 +677,6 @@ void Matrix<T>::rotate(const double tau, const double s, const int i,
   const T hh = V[k][m];
   V[i][j] = static_cast<T>(gg - s * (hh + gg * tau));
   V[k][m] = static_cast<T>(hh + s * (gg - hh * tau));
-  return;
 }
 
 template <typename T>
@@ -1030,7 +1022,6 @@ void Matrix<T>::normVert()
       V[i][j] /= sum;
     }
   }
-  return;
 }
 
 template <typename T>
@@ -1122,7 +1113,6 @@ void Matrix<T>::lubcmp(int *rowperm, int &interchange)
     }
   }
   delete[] vv;
-  return;
 }
 
 template <typename T>
@@ -1152,7 +1142,6 @@ void Matrix<T>::lubksb(const int *rowperm, double *b)
       sum -= V[i][j] * b[j];
     b[i] = sum / V[i][i];
   }
-  return;
 }
 
 template <typename T>
@@ -1223,8 +1212,6 @@ void Matrix<T>::sortEigen(Matrix<T> &DiagMatrix)
     }
     DiagMatrix[Icol][Icol] = X[index[Icol]];
   }
-
-  return;
 }
 
 template <typename T>
@@ -1433,7 +1420,6 @@ void Matrix<T>::print() const
  */
 {
   write(std::cout, 10);
-  return;
 }
 
 /** set matrix elements ito random values  in the range from  rMin to rMax*/
@@ -1479,7 +1465,6 @@ void Matrix<T>::write(std::ostream &Fh, const int blockCnt) const
   } while (BCnt < ny);
 
   Fh.flags(oldFlags);
-  return;
 }
 
 template <typename T>
@@ -1613,7 +1598,13 @@ void fillFromStream(std::istream &is, Kernel::Matrix<T> &in,
 
 // Symbol definitions for common types
 template class MANTID_KERNEL_DLL Matrix<double>;
-template class MANTID_KERNEL_DLL Matrix<int>;
+// The explicit template instantiation for int does not have an export macro
+// since this produces a warning on "gcc: warning: type attributes ignored after
+// type is already define" The reason for this is the use of Matrix<int>
+// in a template specialization above, causing an implicit sepcialization.
+// This, most likely, obtains a visibility setting from the general template
+// definition.
+template class Matrix<int>;
 template class MANTID_KERNEL_DLL Matrix<float>;
 
 template MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,

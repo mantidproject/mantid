@@ -500,7 +500,7 @@ class ReductionOptions(BaseScriptElement):
         """
         self.nx_pixels = ReductionOptions.nx_pixels
         self.ny_pixels = ReductionOptions.ny_pixels
-        #self.instrument_name = ''
+        # self.instrument_name = ''
         self.pixel_size = ReductionOptions.pixel_size
 
         self.scaling_factor = ReductionOptions.scaling_factor

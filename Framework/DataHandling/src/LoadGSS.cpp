@@ -91,8 +91,6 @@ void LoadGSS::exec() {
       loadGSASFile(filename, useBankAsSpectrum);
 
   setProperty("OutputWorkspace", outputWorkspace);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -433,7 +431,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 /** Convert a string containing number and unit to double
   */
 double LoadGSS::convertToDouble(std::string inputstring) {
-  std::string temps = "";
+  std::string temps;
   int isize = static_cast<int>(inputstring.size());
   for (int i = 0; i < isize; i++) {
     char thechar = inputstring[i];
@@ -526,8 +524,6 @@ void LoadGSS::createInstrumentGeometry(
     instrument->markAsDetector(detector);
 
   } // ENDFOR (i: spectrum)
-
-  return;
 }
 
 } // namespace

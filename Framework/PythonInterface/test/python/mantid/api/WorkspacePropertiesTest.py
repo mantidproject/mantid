@@ -1,6 +1,8 @@
 """Tests the construction of the various workspace
 property types
 """
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 import testhelpers
 from mantid.api import (WorkspaceProperty, WorkspaceGroupProperty, MatrixWorkspaceProperty,

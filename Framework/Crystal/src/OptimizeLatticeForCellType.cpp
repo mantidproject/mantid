@@ -24,12 +24,6 @@ using namespace API;
 using std::size_t;
 using namespace DataObjects;
 
-/// Constructor
-OptimizeLatticeForCellType::OptimizeLatticeForCellType() {}
-
-/// Destructor
-OptimizeLatticeForCellType::~OptimizeLatticeForCellType() {}
-
 //-----------------------------------------------------------------------------------------
 /** Initialisation method. Declares properties to be used in algorithm.
  */

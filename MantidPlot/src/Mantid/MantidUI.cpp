@@ -14,6 +14,8 @@
 #include "MantidMDCurveDialog.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidTable.h"
+#include "ProjectSerialiser.h"
+
 #include "../../MantidQt/MantidWidgets/ui_SequentialFitDialog.h"
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
@@ -251,7 +253,8 @@ void MantidUI::init() {
   } catch (...) {
     m_defaultFitFunction = NULL;
     m_fitFunction = NULL;
-    showCritical("The curve fitting plugin is missing");
+    g_log.warning("Curve fitting plugin not loaded. Some functionality will be "
+                  "unavailable.");
   }
 }
 
@@ -1369,7 +1372,8 @@ bool MantidUI::drop(QDropEvent *e) {
     QStringList pyFiles = extractPyFiles(e->mimeData()->urls());
     if (pyFiles.size() > 0) {
       try {
-        m_appWindow->openScriptWindow(pyFiles);
+        MantidQt::API::ProjectSerialiser serialiser(m_appWindow);
+        serialiser.openScriptWindow(pyFiles);
       } catch (std::runtime_error &error) {
         g_log.error()
             << "Failed to Load the python files. The reason for failure is: "
@@ -2090,53 +2094,6 @@ void MantidUI::enableSaveNexus(const QString &wsName) {
 
 void MantidUI::disableSaveNexus() { appWindow()->disableSaveNexus(); }
 
-/** This method is sueful for saving the currently loaded workspaces to project
-* file on save.
-*  saves the names of all the workspaces loaded into mantid workspace tree
-*  into a string and calls save nexus on each workspace to save the data to a
-* nexus file.
-* @param workingDir :: -working directory of teh current project
-*/
-QString MantidUI::saveToString(const std::string &workingDir) {
-  using namespace Mantid::API;
-
-  QString wsNames;
-  wsNames = "<mantidworkspaces>\n";
-  wsNames += "WorkspaceNames";
-  QTreeWidget *tree = m_exploreMantid->m_tree;
-  int count = tree->topLevelItemCount();
-  for (int i = 0; i < count; ++i) {
-    QTreeWidgetItem *item = tree->topLevelItem(i);
-    QString wsName = item->text(0);
-
-    Workspace_sptr ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
-        wsName.toStdString());
-    WorkspaceGroup_sptr group =
-        boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
-    // We don't split up multiperiod workspaces for performance reasons.
-    // There's significant optimisations we can perform on load if they're a
-    // single file.
-    if (ws->id() == "WorkspaceGroup" && group && !group->isMultiperiod()) {
-      wsNames += "\t";
-      wsNames += wsName;
-      std::vector<std::string> secondLevelItems = group->getNames();
-      for (size_t j = 0; j < secondLevelItems.size(); j++) {
-        wsNames += ",";
-        wsNames += QString::fromStdString(secondLevelItems[j]);
-        std::string fileName(workingDir + "//" + secondLevelItems[j] + ".nxs");
-        savedatainNexusFormat(fileName, secondLevelItems[j]);
-      }
-    } else {
-      wsNames += "\t";
-      wsNames += wsName;
-
-      std::string fileName(workingDir + "//" + wsName.toStdString() + ".nxs");
-      savedatainNexusFormat(fileName, wsName.toStdString());
-    }
-  }
-  wsNames += "\n</mantidworkspaces>\n";
-  return wsNames;
-}
 /**
 *  Prepares the Mantid Menu depending on the state of the active MantidMatrix.
 */
@@ -3492,27 +3449,6 @@ void MantidUI::loadWSFromFile(const std::string &wsName,
     executeAlgorithmAsync(alg, true /* wait for completion */);
   } catch (...) {
   }
-}
-
-MantidMatrix *MantidUI::openMatrixWorkspace(const std::string &wsName,
-                                            int lower, int upper) {
-  MatrixWorkspace_sptr ws;
-
-  if (AnalysisDataService::Instance().doesExist(wsName))
-    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
-
-  if (!ws)
-    return 0;
-
-  MantidMatrix *w = new MantidMatrix(
-      ws, appWindow(), "Mantid", QString::fromStdString(wsName), lower, upper);
-
-  if (!w)
-    return 0;
-
-  appWindow()->addMdiSubWindow(w);
-
-  return w;
 }
 
 bool MantidUI::workspacesDockPlot1To1() {

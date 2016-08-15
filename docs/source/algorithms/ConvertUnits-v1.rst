@@ -19,7 +19,7 @@ and a warning message will be output on the `logging <http://www.mantidproject.o
 service.
 
 If AlignBins is false or left at the default the output workspace may be
-a `Ragged Workspace <http://www.mantidproject.org/Ragged_Workspace>`__. If it is set to true then the
+a :ref:`ragged workspace <Ragged_Workspace>`. If it is set to true then the
 data is automatically `rebinned <http://www.mantidproject.org/Rebin>`__ to a regular grid so that the
 maximum and minimum X values will be maintained. It uses the same number
 of bins as the input data, and divides them linearly equally between the

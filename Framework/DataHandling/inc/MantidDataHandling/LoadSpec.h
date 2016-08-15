@@ -48,7 +48,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport LoadSpec : public API::Algorithm {
 public:
   LoadSpec();
-  ~LoadSpec() override {}
   const std::string name() const override { return "LoadSpec"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {

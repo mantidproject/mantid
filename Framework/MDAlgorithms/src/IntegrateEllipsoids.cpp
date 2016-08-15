@@ -196,16 +196,6 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegrateEllipsoids)
 
-//----------------------------------------------------------------------
-/** Constructor
- */
-IntegrateEllipsoids::IntegrateEllipsoids() {}
-
-//---------------------------------------------------------------------
-/** Destructor
- */
-IntegrateEllipsoids::~IntegrateEllipsoids() {}
-
 //---------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string IntegrateEllipsoids::name() const {

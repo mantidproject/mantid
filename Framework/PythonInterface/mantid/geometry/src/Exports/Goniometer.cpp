@@ -8,6 +8,8 @@
 #include <boost/python/overloads.hpp>
 
 using Mantid::Geometry::Goniometer;
+using Mantid::Kernel::DblMatrix;
+using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
 namespace //<unnamed>
@@ -28,19 +30,19 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getEulerAngles_overloads,
 
 /// Set the U vector via a numpy array
 void setR(Goniometer &self, const object &data) {
-  self.setR(Mantid::PythonInterface::Converters::PyObjectToMatrix(data)());
+  self.setR(Converters::PyObjectToMatrix(data)());
 }
 }
 
 void export_Goniometer() {
 
   // return_value_policy for read-only numpy array
-  typedef return_value_policy<Mantid::PythonInterface::Policies::MatrixToNumpy<
-      Mantid::PythonInterface::Converters::WrapReadOnly>> return_readonly_numpy;
+  typedef return_value_policy<Policies::MatrixToNumpy<Converters::WrapReadOnly>>
+      return_readonly_numpy;
 
   class_<Goniometer>("Goniometer", init<>(arg("self")))
       .def(init<Goniometer const &>((arg("self"), arg("other"))))
-      .def(init<Mantid::Kernel::DblMatrix>((arg("self"), arg("rot"))))
+      .def(init<DblMatrix>((arg("self"), arg("rot"))))
       .def("getEulerAngles", (&Goniometer::getEulerAngles),
            getEulerAngles_overloads(args("self", "convention"),
                                     "Default convention is \'YZX\'. Universal "

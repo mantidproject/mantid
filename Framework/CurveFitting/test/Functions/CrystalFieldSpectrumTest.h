@@ -30,7 +30,7 @@ public:
     fun.setAttributeValue("Temperature", 44.0);
     fun.setAttributeValue("ToleranceIntensity", 0.001);
     fun.setAttributeValue("FWHM", 1.5);
-    fun.buildSpectrumFunction();
+    fun.buildTargetFunction();
     auto attNames = fun.getAttributeNames();
     auto parNames = fun.getParameterNames();
     TS_ASSERT_EQUALS(fun.nAttributes(), attNames.size());
@@ -88,7 +88,7 @@ public:
     fun->setAttributeValue("Ion", "Ce");
     fun->setAttributeValue("Temperature", 44.0);
     fun->setAttributeValue("ToleranceIntensity", 0.001);
-    fun->buildSpectrumFunction();
+    fun->buildTargetFunction();
     fun->setParameter("f0.FWHM", 2.0);
     fun->setParameter("f1.FWHM", 20.0);
     fun->setParameter("f2.FWHM", 20.0);
@@ -120,7 +120,7 @@ public:
     fun->setAttributeValue("Temperature", 44.0);
     fun->setAttributeValue("ToleranceIntensity", 0.001);
     fun->setAttributeValue("PeakShape", "Gaussian");
-    fun->buildSpectrumFunction();
+    fun->buildTargetFunction();
     fun->setParameter("f0.Sigma", 10.0);
     fun->setParameter("f1.Sigma", 2.0);
     fun->setParameter("f2.Sigma", 3.0);

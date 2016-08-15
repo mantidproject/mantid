@@ -29,16 +29,6 @@ namespace DataHandling {
 DECLARE_FILELOADER_ALGORITHM(LoadPDFgetNFile)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadPDFgetNFile::LoadPDFgetNFile() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadPDFgetNFile::~LoadPDFgetNFile() {}
-
-//----------------------------------------------------------------------------------------------
 /**
  * Return the confidence with with this algorithm can load the file
  * @param descriptor A descriptor for the file
@@ -104,8 +94,6 @@ void LoadPDFgetNFile::exec() {
   generateDataWorkspace();
 
   setProperty("OutputWorkspace", outWS);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -162,8 +150,6 @@ void LoadPDFgetNFile::parseDataFile(std::string filename) {
     g_log.error() << errmsg.str() << '\n';
     throw std::runtime_error(errmsg.str());
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -220,8 +206,6 @@ void LoadPDFgetNFile::parseColumnNameLine(std::string line) {
     msgss << setw(-3) << i << ": " << setw(-10) << mColumnNames[i];
   }
   g_log.information() << msgss.str() << '\n';
-
-  return;
 }
 
 /** Parse data line
@@ -265,8 +249,6 @@ void LoadPDFgetNFile::parseDataLine(string line) {
 
     mData[i].push_back(tempvalue);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -291,7 +273,7 @@ void LoadPDFgetNFile::setUnit(Workspace2D_sptr ws) {
 
   // 2. Set Y
   string ycolname = mColumnNames[1];
-  string ylabel("");
+  string ylabel;
   if (ycolname.compare("G(r)") == 0) {
     ylabel = "PDF";
   } else if (ycolname.compare("S") == 0) {
@@ -300,8 +282,6 @@ void LoadPDFgetNFile::setUnit(Workspace2D_sptr ws) {
     ylabel = "Intensity";
   }
   ws->setYUnitLabel(ylabel);
-
-  return;
 }
 
 /** Generate output data workspace
@@ -396,8 +376,6 @@ void LoadPDFgetNFile::generateDataWorkspace() {
       E[index] = mData[2][baseindex + j];
     }
   }
-
-  return;
 }
 
 } // namespace DataHandling

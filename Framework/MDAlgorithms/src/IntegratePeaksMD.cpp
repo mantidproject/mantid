@@ -36,18 +36,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IntegratePeaksMD::IntegratePeaksMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IntegratePeaksMD::~IntegratePeaksMD() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksMD::init() {

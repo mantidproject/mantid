@@ -1,10 +1,10 @@
 #ifndef CREATESINGLEVALUEDWORKSPACETEST_H_
 #define CREATESINGLEVALUEDWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/CreateSingleValuedWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAlgorithms/CreateSingleValuedWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include <cxxtest/TestSuite.h>
 
 class CreateSingleValuedWorkspaceTest : public CxxTest::TestSuite {
 
@@ -43,9 +43,9 @@ public:
     TS_ASSERT(ws.get() != 0);
 
     // Test the data
-    TS_ASSERT_DELTA(single->dataX(0)[0], 0.0, 1e-08);
-    TS_ASSERT_DELTA(single->dataY(0)[0], 3.0, 1e-08);
-    TS_ASSERT_DELTA(single->dataE(0)[0], 0.0, 1e-08);
+    TS_ASSERT_DELTA(single->x(0)[0], 0.0, 1e-08);
+    TS_ASSERT_DELTA(single->y(0)[0], 3.0, 1e-08);
+    TS_ASSERT_DELTA(single->e(0)[0], 0.0, 1e-08);
   }
 
   void testInitWithErr() {
@@ -85,9 +85,9 @@ public:
     TS_ASSERT(ws.get() != 0);
 
     // Test the data
-    TS_ASSERT_DELTA(single->dataX(0)[0], 0.0, 1e-08);
-    TS_ASSERT_DELTA(single->dataY(0)[0], 5.0, 1e-08);
-    TS_ASSERT_DELTA(single->dataE(0)[0], 2.0, 1e-08);
+    TS_ASSERT_DELTA(single->x(0)[0], 0.0, 1e-08);
+    TS_ASSERT_DELTA(single->y(0)[0], 5.0, 1e-08);
+    TS_ASSERT_DELTA(single->e(0)[0], 2.0, 1e-08);
   }
 
 private:

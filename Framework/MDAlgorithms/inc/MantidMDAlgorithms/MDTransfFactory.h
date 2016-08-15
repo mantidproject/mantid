@@ -108,18 +108,18 @@ private:
       m_createdTransf;
 };
 
-/// Forward declaration of a specialization of SingletonHolder for
-/// AlgorithmFactoryImpl (needed for dllexport/dllimport) .
-#ifdef _WIN32
-// this breaks new namespace declaration rules; need to find a better fix
-template class MANTID_MDALGORITHMS_DLL
-    Mantid::Kernel::SingletonHolder<MDTransfFactoryImpl>;
-#endif /* _WIN32 */
 /// The specialization of the SingletonHolder class that holds the
 /// MDTransformations Factory
 typedef Kernel::SingletonHolder<MDTransfFactoryImpl> MDTransfFactory;
 
 } // namespace MDAlgorithms
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_MDALGORITHMS template class MANTID_MDALGORITHMS_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::MDAlgorithms::MDTransfFactoryImpl>;
+}
+}
 
 #endif

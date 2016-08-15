@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -71,7 +72,7 @@ private:
   /// Extract asymmetry and phase from fitting results
   void extractDetectorInfo(const API::ITableWorkspace_sptr &paramTab,
                            const API::ITableWorkspace_sptr &resultsTab,
-                           const int ispec);
+                           const Mantid::specnum_t spectrumNumber);
   /// Find frequency to use in sequential fit
   double getFrequency(const API::MatrixWorkspace_sptr &ws);
   /// Get frequency hint to use when finding frequency

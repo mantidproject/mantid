@@ -811,7 +811,7 @@ public:
     // See
     // http://docs.mantidproject.org/nightly/concepts/HowToDefineGeometricShape.html#hexahedron
     Hexahedron hex;
-    hex.lbb = V3D(0, 0, 0);
+    hex.lbb = V3D(0, 0, -2);
     hex.lfb = V3D(1, 0, 0);
     hex.rfb = V3D(1, 1, 0);
     hex.rbb = V3D(0, 1, 0);
@@ -829,7 +829,7 @@ public:
     TS_ASSERT_DELTA(bb.zMax(), 2, 0.0001);
     TS_ASSERT_DELTA(bb.xMin(), 0, 0.0001);
     TS_ASSERT_DELTA(bb.yMin(), 0, 0.0001);
-    TS_ASSERT_DELTA(bb.zMin(), 0, 0.0001);
+    TS_ASSERT_DELTA(bb.zMin(), -2, 0.0001);
   }
 
   void testdefineBoundingBox()
@@ -1115,10 +1115,7 @@ private:
     // Note that the testObject now manages the "new Plane"
     for (auto vc = SurfLine.cbegin(); vc != SurfLine.cend(); ++vc) {
       auto A = Geometry::SurfaceFactory::Instance()->processLine(vc->second);
-      if (!A) {
-        std::cerr << "Failed to process line " << vc->second << '\n';
-        exit(1);
-      }
+      TSM_ASSERT("Expected a non-null surface from the factory", A);
       A->setName(vc->first);
       SMap.insert(STYPE::value_type(vc->first,
                                     boost::shared_ptr<Surface>(A.release())));

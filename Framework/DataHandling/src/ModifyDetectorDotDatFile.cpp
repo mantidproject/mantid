@@ -19,18 +19,6 @@ namespace DataHandling {
 DECLARE_ALGORITHM(ModifyDetectorDotDatFile)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ModifyDetectorDotDatFile::ModifyDetectorDotDatFile() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ModifyDetectorDotDatFile::~ModifyDetectorDotDatFile() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ModifyDetectorDotDatFile::init() {

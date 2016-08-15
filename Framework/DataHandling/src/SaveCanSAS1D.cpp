@@ -17,6 +17,37 @@
 #include <boost/shared_ptr.hpp>
 
 //-----------------------------------------------------------------------------
+namespace {
+void encode(std::string &data) {
+  std::string buffer;
+  buffer.reserve(data.size());
+
+  for (auto &element : data) {
+    switch (element) {
+    case '&':
+      buffer.append("&amp;");
+      break;
+    case '\"':
+      buffer.append("&quot;");
+      break;
+    case '\'':
+      buffer.append("&apos;");
+      break;
+    case '<':
+      buffer.append("&lt;");
+      break;
+    case '>':
+      buffer.append("&gt;");
+      break;
+    default:
+      buffer.push_back(element);
+    }
+  }
+
+  data.swap(buffer);
+}
+}
+
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -26,12 +57,6 @@ namespace DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveCanSAS1D)
-
-/// constructor
-SaveCanSAS1D::SaveCanSAS1D() {}
-
-/// destructor
-SaveCanSAS1D::~SaveCanSAS1D() {}
 
 /// Overwrites Algorithm method.
 void SaveCanSAS1D::init() {
@@ -158,14 +183,6 @@ void SaveCanSAS1D::exec() {
   createSASProcessElement(sasProcess);
   m_outFile << sasProcess;
 
-  // Reduction process, if available
-  const std::string process_xml = getProperty("Process");
-  if (process_xml.size() > 0) {
-    m_outFile << "\n\t\t<SASProcess>\n";
-    m_outFile << process_xml;
-    m_outFile << "\n\t\t</SASProcess>\n";
-  }
-
   std::string sasNote = "\n\t\t<SASnote>";
   sasNote += "\n\t\t</SASnote>";
   m_outFile << sasNote;
@@ -286,7 +303,7 @@ void SaveCanSAS1D::writeHeader(const std::string &fileName) {
     m_outFile << "<?xml version=\"1.0\"?>\n"
               << "<?xml-stylesheet type=\"text/xsl\" "
                  "href=\"cansasxml-html.xsl\" ?>\n";
-    std::string sasroot = "";
+    std::string sasroot;
     createSASRootElement(sasroot);
     m_outFile << sasroot;
   } catch (std::fstream::failure &) {
@@ -415,19 +432,19 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
   std::string sasIBlockData;
   std::string sasIHistData;
   for (size_t i = 0; i < m_workspace->getNumberHistograms(); ++i) {
-    const MantidVec &xdata = m_workspace->readX(i);
+    auto intensities = m_workspace->points(i);
+    auto intensityDeltas = m_workspace->pointStandardDeviations(i);
+    if (!intensityDeltas)
+      intensityDeltas =
+          HistogramData::PointStandardDeviations(intensities.size(), 0.0);
     const MantidVec &ydata = m_workspace->readY(i);
     const MantidVec &edata = m_workspace->readE(i);
-    const MantidVec &dxdata = m_workspace->readDx(i);
-    const bool isHistogram = m_workspace->isHistogramData();
     for (size_t j = 0; j < m_workspace->blocksize(); ++j) {
       // x data is the QData in xml.If histogramdata take the mean
-      double intensity = isHistogram ? (xdata[j] + xdata[j + 1]) / 2 : xdata[j];
-      double dx = isHistogram ? (dxdata[j] + dxdata[j + 1]) / 2 : dxdata[j];
       std::stringstream x;
-      x << intensity;
+      x << intensities[j];
       std::stringstream dx_str;
-      dx_str << dx;
+      dx_str << intensityDeltas[j];
       sasIData = "\n\t\t\t<Idata><Q unit=\"1/A\">";
       sasIData += x.str();
       sasIData += "</Q>";
@@ -584,7 +601,7 @@ void SaveCanSAS1D::createSASProcessElement(std::string &sasProcess) {
   sasProcess += sasProcsvn;
 
   const API::Run &run = m_workspace->run();
-  std::string user_file("");
+  std::string user_file;
   if (run.hasProperty("UserFile")) {
     user_file = run.getLogData("UserFile")->value();
   }
@@ -595,7 +612,17 @@ void SaveCanSAS1D::createSASProcessElement(std::string &sasProcess) {
   // outFile<<sasProcuserfile;
   sasProcess += sasProcuserfile;
 
-  sasProcess += "\n\t\t\t<SASprocessnote/>";
+  // Reduction process note, if available
+  std::string process_xml = getProperty("Process");
+  if (!process_xml.empty()) {
+    std::string processNote = "\n\t\t\t<SASprocessnote>";
+    encode(process_xml);
+    processNote += process_xml;
+    processNote += "</SASprocessnote>";
+    sasProcess += processNote;
+  } else {
+    sasProcess += "\n\t\t\t<SASprocessnote/>";
+  }
 
   sasProcess += "\n\t\t</SASprocess>";
 }

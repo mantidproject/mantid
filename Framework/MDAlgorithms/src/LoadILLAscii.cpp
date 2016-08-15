@@ -41,19 +41,6 @@ using namespace API;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadILLAscii)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadILLAscii::LoadILLAscii() : m_instrumentName(""), m_wavelength(0) {
-  // Add here supported instruments by this loader
-  m_supportedInstruments.emplace_back("D2B");
-}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadILLAscii::~LoadILLAscii() {}
-
 /**
  * Return the confidence with with this algorithm can load the file
  * @param descriptor A descriptor for the file

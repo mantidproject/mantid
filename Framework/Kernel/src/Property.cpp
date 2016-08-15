@@ -40,7 +40,7 @@ Property::Property(const Property &right)
 }
 
 /// Virtual destructor
-Property::~Property() {}
+Property::~Property() = default;
 
 /** Get the property's name
  *  @return The name of the property
@@ -200,7 +200,6 @@ void Property::filterByTime(const Kernel::DateAndTime &start,
   UNUSED_ARG(start);
   UNUSED_ARG(stop);
   // Do nothing in general
-  return;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -217,7 +216,6 @@ void Property::splitByTime(std::vector<SplittingInterval> &splitter,
   UNUSED_ARG(splitter);
   UNUSED_ARG(outputs);
   UNUSED_ARG(isProtonCharge);
-  return;
 }
 
 } // End Kernel namespace

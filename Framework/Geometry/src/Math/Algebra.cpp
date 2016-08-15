@@ -247,8 +247,7 @@ int Algebra::setFunctionObjStr(const std::string &A)
         // Add to the number
         ipt += nCount;
       } else {
-        std::cout << "Algebra::setFunction: ncount==0\n";
-        exit(1);
+        throw std::invalid_argument("Algebra::setFunction: ncount==0");
       }
     } else if (A[ipt] == ':') {
       cx << "+";

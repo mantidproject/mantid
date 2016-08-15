@@ -33,11 +33,6 @@ DataProcessorAlgorithm::DataProcessorAlgorithm()
   enableHistoryRecordingForChild(true);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DataProcessorAlgorithm::~DataProcessorAlgorithm() {}
-
 //---------------------------------------------------------------------------------------------
 /** Create a Child Algorithm.  A call to this method creates a child algorithm
 *object.

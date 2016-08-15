@@ -3,9 +3,9 @@
 System test for CNCS reduction
 """
 
-from mantid.simpleapi import *
 import os
 import stresstesting
+from mantid.simpleapi import *
 
 class CNCSReductionTest(stresstesting.MantidStressTest):
     parFile=''

@@ -42,12 +42,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class DLLExport LoadNexusMonitors : public API::Algorithm {
 public:
-  /// Default constructor
-  LoadNexusMonitors();
-
-  /// Destructor
-  ~LoadNexusMonitors() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadNexusMonitors"; }
 

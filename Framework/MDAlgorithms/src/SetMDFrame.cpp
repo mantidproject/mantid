@@ -30,16 +30,6 @@ DECLARE_ALGORITHM(SetMDFrame)
 const std::string SetMDFrame::mdFrameSpecifier = "MDFrame";
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SetMDFrame::SetMDFrame() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SetMDFrame::~SetMDFrame() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string SetMDFrame::name() const { return "SetMDFrame"; }

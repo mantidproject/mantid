@@ -16,7 +16,7 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
-// using namespace Mantid::DataHandling;
+using Mantid::HistogramData::HistogramX;
 
 class ApplyDetailedBalanceTest : public CxxTest::TestSuite {
 public:
@@ -142,26 +142,24 @@ private:
     ws2D->initialize(nspecs, nbins + 1, nbins);
     ws2D->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
 
-    Mantid::MantidVecPtr xv, yv, ev;
+    Mantid::MantidVec xv;
     if (isHistogram) {
-      xv.access().resize(nbins + 1, 0.0);
+      xv.resize(nbins + 1, 0.0);
     } else {
-      xv.access().resize(nbins, 0.0);
+      xv.resize(nbins, 0.0);
     }
-    yv.access().resize(nbins, 0.0);
-    ev.access().resize(nbins, 0.0);
     for (int i = 0; i < nbins; ++i) {
-      xv.access()[i] = static_cast<double>((i - 2. - h) * 5.);
-      yv.access()[i] = 1.0 + i;
-      ev.access()[i] = std::sqrt(1.0 + i);
+      xv[i] = static_cast<double>((i - 2. - h) * 5.);
     }
     if (isHistogram) {
-      xv.access()[nbins] = static_cast<double>((nbins - 2.5) * 5.);
+      xv[nbins] = static_cast<double>((nbins - 2.5) * 5.);
     }
 
+    auto cow_xv = make_cow<HistogramX>(std::move(xv));
     for (int i = 0; i < nspecs; i++) {
-      ws2D->setX(i, xv);
-      ws2D->setData(i, yv, ev);
+      ws2D->setX(i, cow_xv);
+      ws2D->dataY(i) = {1, 2, 3, 4, 5};
+      ws2D->dataE(i) = {sqrt(1), sqrt(2), sqrt(3), sqrt(4), sqrt(5)};
       ws2D->getSpectrum(i).setSpectrumNo(i);
     }
 

@@ -16,10 +16,12 @@
 #include <boost/algorithm/string/trim.hpp>
 #endif
 
-#include <MantidKernel/StringTokenizer.h>
-#include <vector>
-#include <type_traits>
+#include <nexus/NeXusFile.hpp>
+
 #include "MantidKernel/IPropertySettings.h"
+#include <MantidKernel/StringTokenizer.h>
+#include <type_traits>
+#include <vector>
 
 namespace Mantid {
 
@@ -363,6 +365,8 @@ public:
     return new PropertyWithValue<TYPE>(*this);
   }
 
+  void saveProperty(::NeXus::File *file) override;
+
   /** Get the value of the property as a string
    *  @return The property's value
    */
@@ -542,6 +546,15 @@ public:
     return determineAllowedValues(m_value, *m_validator);
   }
 
+  /** Returns the set of valid values for this property, if such a set exists.
+  *  If not, it returns an empty vector.
+  *  @return Returns the set of valid values for this property, or it returns
+  * an empty vector.
+  */
+  bool isMultipleSelectionAllowed() override {
+    return m_validator->isMultipleSelectionAllowed();
+  }
+
   /**
    * Replace the current validator with the given one
    * @param newValidator :: A replacement validator
@@ -636,6 +649,29 @@ private:
   /// Private default constructor
   PropertyWithValue();
 };
+
+template <> void PropertyWithValue<float>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<double>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<int32_t>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<uint32_t>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<int64_t>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<uint64_t>::saveProperty(::NeXus::File *file);
+template <>
+void PropertyWithValue<std::string>::saveProperty(::NeXus::File *file);
+template <>
+void PropertyWithValue<std::vector<double>>::saveProperty(::NeXus::File *file);
+template <>
+void PropertyWithValue<std::vector<int32_t>>::saveProperty(::NeXus::File *file);
+
+template <typename TYPE>
+void PropertyWithValue<TYPE>::saveProperty(::NeXus::File * /*file*/) {
+  // AppleClang 7.3 and later gives a -Winfinite-recursion warning if I call the
+  // base class method. The function is small enough that reimplementing it
+  // isn't a big deal.
+  throw std::invalid_argument(
+      "PropertyWithValue::saveProperty - Cannot save '" + this->name() +
+      "', property type not implemented.");
+}
 
 template <typename TYPE>
 Logger PropertyWithValue<TYPE>::g_logger("PropertyWithValue");

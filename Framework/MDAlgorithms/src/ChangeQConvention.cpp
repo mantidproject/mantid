@@ -28,18 +28,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(ChangeQConvention)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ChangeQConvention::ChangeQConvention() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ChangeQConvention::~ChangeQConvention() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ChangeQConvention::init() {

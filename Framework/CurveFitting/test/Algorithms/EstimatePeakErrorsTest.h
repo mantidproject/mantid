@@ -283,8 +283,9 @@ private:
     std::vector<double> e(n, 1.0);
 
     fun.function(x, y);
-    ws->setX(0, x.toVector());
-    ws->getSpectrum(0).setData(y.toVector(), e);
+    ws->setPoints(0, x.toVector());
+    ws->dataY(0) = y.toVector();
+    ws->dataE(0) = e;
     assert(n == noise.size());
     for (size_t i = 0; i < n; ++i) {
       ws->dataY(0)[i] += noiseLevel * noise[i];

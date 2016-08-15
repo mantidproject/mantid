@@ -62,12 +62,14 @@ namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(MuonAnalysis)
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::Muon;
 using namespace Mantid::Geometry;
+using namespace MuonAnalysisHelper;
 using Mantid::API::Workspace_sptr;
 using Mantid::API::Grouping;
 
@@ -1844,16 +1846,23 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "";
 
   // Remove data and difference from given plot (keep fit and guess)
-  s << "def remove_data(window):";
+  // num_to_keep: number of previous fits to keep
+  s << "def remove_data(window, num_to_keep):";
   s << "  if window is None:";
   s << "    raise ValueError('No plot to remove data from')";
-  s << "  to_keep = ['Workspace-Calc', 'CompositeFunction']";
+  // Need to keep the last "num_to_keep" curves with
+  // "Workspace-Calc" in their name, plus guesses
   s << "  layer = window.activeLayer()";
   s << "  if layer is not None:";
-  s << "    for i in range(0, layer.numCurves()):";
-  s << "      if not any (x in layer.curveTitle(i) for x in to_keep):";
-  s << "        layer.removeCurve(i)";
-  s << "";
+  s << "    kept_fits = 0";
+  s << "    for i in range(layer.numCurves() - 1, -1, -1):"; // reversed
+  s << "      title = layer.curveTitle(i)";
+  s << "      if title == \"CompositeFunction\":";
+  s << "        continue"; // keep all guesses
+  s << "      if \"Workspace-Calc\" in title and kept_fits < num_to_keep:";
+  s << "        kept_fits = kept_fits + 1";
+  s << "        continue";           // keep last n fits
+  s << "      layer.removeCurve(i)"; // remove everything else
 
   // Plot data in the given window with given options
   s << "def plot_data(ws_name, errors, connect, window_to_use):";
@@ -1889,7 +1898,8 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
 
   // Plot the data!
   s << "win = get_window('%WSNAME%', '%PREV%', %USEPREV%)";
-  s << "remove_data(win)";
+  s << "if %FITSTOKEEP% != -1:";
+  s << "  remove_data(win, %FITSTOKEEP%)";
   s << "g = plot_data('%WSNAME%', %ERRORS%, %CONNECT%, win)";
   s << "format_graph(g, '%WSNAME%', %LOGSCALE%, %YAUTO%, '%YMIN%', '%YMAX%')";
 
@@ -1915,6 +1925,11 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   pyS.replace("%YAUTO%", params["YAxisAuto"]);
   pyS.replace("%YMIN%", params["YAxisMin"]);
   pyS.replace("%YMAX%", params["YAxisMax"]);
+  if (policy == MuonAnalysisOptionTab::PreviousWindow) {
+    pyS.replace("%FITSTOKEEP%", m_uiForm.spinBoxNPlotsToKeep->text());
+  } else {
+    pyS.replace("%FITSTOKEEP%", "-1");
+  }
 
   runPythonCode(pyS);
 }

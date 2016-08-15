@@ -128,7 +128,9 @@ void LoadSNSspec::exec() {
     }
   }
 
-  spectra.resize(spectra_nbr);
+  spectra.resize(spectra_nbr, DataObjects::Histogram1D(
+                                  HistogramData::Histogram::XMode::BinEdges,
+                                  HistogramData::Histogram::YMode::Counts));
   file.clear(); // end of file has been reached so we need to clear file state
   file.seekg(0, std::ios::beg); // go back to beginning of file
 

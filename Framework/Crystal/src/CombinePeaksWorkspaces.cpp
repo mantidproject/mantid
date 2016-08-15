@@ -15,14 +15,6 @@ using DataObjects::PeaksWorkspace_const_sptr;
 using DataObjects::PeaksWorkspace_sptr;
 using DataObjects::Peak;
 
-/** Constructor
- */
-CombinePeaksWorkspaces::CombinePeaksWorkspaces() {}
-
-/** Destructor
- */
-CombinePeaksWorkspaces::~CombinePeaksWorkspaces() {}
-
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CombinePeaksWorkspaces::name() const {
   return "CombinePeaksWorkspaces";

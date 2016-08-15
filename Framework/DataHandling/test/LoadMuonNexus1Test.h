@@ -928,6 +928,32 @@ public:
     }
   }
 
+  /**
+   * Some old data does not have run/instrument/beam/frames_good.
+   * Test that we can use run/instrument/beam/frames in this case to get a
+   * goodfrm value.
+   * Example file: MUT53591
+   */
+  void test_loadingNumGoodFrames_notPresent() {
+    LoadMuonNexus1 alg;
+    ScopedWorkspace outWsEntry;
+    try {
+      alg.initialize();
+      alg.setPropertyValue("Filename", "MUT00053591.NXS");
+      alg.setPropertyValue("OutputWorkspace", outWsEntry.name());
+      alg.execute();
+    } catch (const std::exception &error) {
+      TS_FAIL(error.what());
+    }
+    Workspace_sptr outWs = outWsEntry.retrieve();
+    TS_ASSERT(outWs);
+    const auto matrixWs = boost::dynamic_pointer_cast<MatrixWorkspace>(outWs);
+    TS_ASSERT(matrixWs);
+    if (matrixWs) {
+      checkProperty(matrixWs->run(), "goodfrm", 65500);
+    }
+  }
+
 private:
   LoadMuonNexus1 nxLoad, nxload2, nxload3;
   std::string outputSpace;

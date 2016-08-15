@@ -1,10 +1,13 @@
 #ifndef MANTID_CUSTOMINTERFACES_IMGGFORMATSCONVERTVIEWMOCK_H
 #define MANTID_CUSTOMINTERFACES_IMGGFORMATSCONVERTVIEWMOCK_H
 
-#include "MantidQtCustomInterfaces/Tomography/IImggFormatsConvertView.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtCustomInterfaces/Tomography/IImggFormatsConvertView.h"
 
 #include <gmock/gmock.h>
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 // This is a simple mock for the tomo interface view when using SCARF.
 class ImggFormatsConvertViewMock
@@ -67,4 +70,5 @@ public:
   MOCK_CONST_METHOD0(saveSettings, void());
 };
 
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 #endif // MANTID_CUSTOMINTERFACES_IMGGFORMATSCONVERTVIEWMOCK_H

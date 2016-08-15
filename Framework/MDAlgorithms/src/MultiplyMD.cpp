@@ -16,16 +16,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(MultiplyMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MultiplyMD::MultiplyMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MultiplyMD::~MultiplyMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MultiplyMD::name() const { return "MultiplyMD"; }
 

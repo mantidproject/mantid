@@ -507,9 +507,6 @@ void ConvertToDiffractionMDWorkspace::exec() {
     totalEvents = m_inEventWS->getNumberEvents();
   prog = boost::make_shared<Progress>(this, 0, 1.0, totalEvents);
 
-  // Is the addition of events thread-safe?
-  bool MultiThreadedAdding = m_inWS->threadSafe();
-
   // Create the thread pool that will run all of these.
   ThreadScheduler *ts = new ThreadSchedulerFIFO();
   ThreadPool tp(ts, 0);
@@ -523,53 +520,57 @@ void ConvertToDiffractionMDWorkspace::exec() {
     g_log.information() << cputim << ": initial setup. There are "
                         << lastNumBoxes << " MDBoxes.\n";
 
-  for (size_t wi = 0; wi < m_inWS->getNumberHistograms(); wi++) {
-    // Get an idea of how many events we'll be adding
-    size_t eventsAdding = m_inWS->blocksize();
-    if (m_inEventWS && !OneEventPerBin)
-      eventsAdding = m_inEventWS->getSpectrum(wi).getNumberEvents();
+  for (size_t wi = 0; wi < m_inWS->getNumberHistograms();) {
+    // 1. Determine next chunk of spectra to process
+    int start = static_cast<int>(wi);
+    for (; wi < m_inWS->getNumberHistograms(); ++wi) {
+      // Get an idea of how many events we'll be adding
+      size_t eventsAdding = m_inWS->blocksize();
+      if (m_inEventWS && !OneEventPerBin)
+        eventsAdding = m_inEventWS->getSpectrum(wi).getNumberEvents();
 
-    if (MultiThreadedAdding) {
-      // Equivalent to calling "this->convertSpectrum(wi)"
-      boost::function<void()> func =
-          boost::bind(&ConvertToDiffractionMDWorkspace::convertSpectrum, &*this,
-                      static_cast<int>(wi));
-      // Give this task to the scheduler
-      double cost = static_cast<double>(eventsAdding);
-      ts->push(new FunctionTask(func, cost));
-    } else {
-      // Not thread-safe. Just add right now
-      this->convertSpectrum(static_cast<int>(wi));
+      // Keep a running total of how many events we've added
+      eventsAdded += eventsAdding;
+      approxEventsInOutput += eventsAdding;
+
+      if (bc->shouldSplitBoxes(approxEventsInOutput, eventsAdded, lastNumBoxes))
+        break;
     }
 
-    // Keep a running total of how many events we've added
-    eventsAdded += eventsAdding;
-    approxEventsInOutput += eventsAdding;
-
-    if (bc->shouldSplitBoxes(approxEventsInOutput, eventsAdded, lastNumBoxes)) {
-      if (DODEBUG)
-        g_log.information() << cputim << ": Added tasks worth " << eventsAdded
-                            << " events. WorkspaceIndex " << wi << '\n';
-      // Do all the adding tasks
-      tp.joinAll();
-      if (DODEBUG)
-        g_log.information() << cputim
-                            << ": Performing the addition of these events.\n";
-
-      // Now do all the splitting tasks
-      ws->splitAllIfNeeded(ts);
-      if (ts->size() > 0)
-        prog->doReport("Splitting Boxes");
-      tp.joinAll();
-
-      // Count the new # of boxes.
-      lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
-      if (DODEBUG)
-        g_log.information() << cputim
-                            << ": Performing the splitting. There are now "
-                            << lastNumBoxes << " boxes.\n";
-      eventsAdded = 0;
+    // 2. Process next chunk of spectra (threaded)
+    PARALLEL_FOR1(m_inWS)
+    for (int i = start; i < static_cast<int>(wi); ++i) {
+      PARALLEL_START_INTERUPT_REGION
+      this->convertSpectrum(static_cast<int>(i));
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
+
+    // 3. Split boxes
+    if (DODEBUG)
+      g_log.information() << cputim << ": Added tasks worth " << eventsAdded
+                          << " events. WorkspaceIndex " << wi << std::endl;
+    // Do all the adding tasks
+    if (DODEBUG)
+      g_log.information() << cputim
+                          << ": Performing the addition of these events.\n";
+
+    // Now do all the splitting tasks
+    ws->splitAllIfNeeded(ts);
+    if (ts->size() > 0)
+      prog->doReport("Splitting Boxes");
+    // Note: For some reason removing this joinAll() increases the runtime
+    // significantly. Does it somehow affect threads in "ts" created by
+    // splitAllIfNeeded()?
+    tp.joinAll();
+
+    // Count the new # of boxes.
+    lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
+    if (DODEBUG)
+      g_log.information() << cputim
+                          << ": Performing the splitting. There are now "
+                          << lastNumBoxes << " boxes.\n";
+    eventsAdded = 0;
   }
 
   if (this->failedDetectorLookupCount > 0) {
@@ -582,23 +583,6 @@ void ConvertToDiffractionMDWorkspace::exec() {
                       << this->failedDetectorLookupCount
                       << " spectra. They have been skipped.\n";
   }
-
-  if (DODEBUG)
-    g_log.information() << cputim << ": We've added tasks worth " << eventsAdded
-                        << " events.\n";
-
-  tp.joinAll();
-  if (DODEBUG)
-    g_log.information() << cputim
-                        << ": Performing the FINAL addition of these events.\n";
-
-  // Do a final splitting of everything
-  ws->splitAllIfNeeded(ts);
-  tp.joinAll();
-  if (DODEBUG)
-    g_log.information()
-        << cputim << ": Performing the FINAL splitting of boxes. There are now "
-        << ws->getBoxController()->getTotalNumMDBoxes() << " boxes\n";
 
   // Recount totals at the end.
   cputim.reset();

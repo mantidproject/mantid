@@ -1,4 +1,5 @@
 #pylint: disable=too-many-public-methods,invalid-name
+from __future__ import (absolute_import, division, print_function)
 
 import unittest
 from mantid import logger
@@ -37,6 +38,7 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
     def setUp(self):
         self._phonon_file = 'squaricn.phonon'
         self._castep_file = 'squaricn.castep'
+        self._isotope_phonon = 'test_isotopes.phonon'
 
     def test_phonon_load(self):
         wks = SimulatedDensityOfStates(PHONONFile=self._phonon_file)
@@ -189,7 +191,7 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
                                        SpectrumType='IonTable')
 
         self.assertTrue(isinstance(wks, ITableWorkspace))
-        self.assertEqual(wks.columnCount(), 9)
+        self.assertEqual(wks.columnCount(), 10)
         self.assertEqual(wks.rowCount(), 20)
 
         all_species = wks.column('Species')
@@ -238,6 +240,46 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
             ws = wks_grp.getItem(idx)
             self.assertAlmostEqual(expected_x_min,ws.readX(0)[0])
             self.assertAlmostEqual(bin_width,(ws.readX(0)[1] - ws.readX(0)[0]))
+
+
+    def test_isotopes_are_parsed_correctly(self):
+        """
+        Test that isotopes in the file in the format `element:P` are valid
+        """
+        wks_grp = SimulatedDensityOfStates(PHONONFile=self._isotope_phonon,
+                                           SpectrumType='DOS',
+                                           Ions='H:P,C:P,O')
+        self.assertEqual(3, wks_grp.size())
+        self.assertEqual('wks_grp_C(13)', wks_grp.getItem(0).getName())
+        self.assertEqual('(C13)', wks_grp.getItem(0).sample().getMaterial().name())
+
+
+    def test_non_isotpe_element_indices_loading(self):
+        """
+        Test that the individual indices for each element can be loaded seperately
+        Tests parse_chemical_and_ws_name for non-isotope + indices
+        """
+        wks_grp = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
+                                           SpectrumType='DOS',
+                                           CalculateIonIndices=True,
+                                           Ions='H,C,O')
+        self.assertEqual(20, len(wks_grp))
+        self.assertEqual('wks_grp_H_0' , wks_grp.getItem(0).getName())
+        self.assertEqual('wks_grp_C_4' , wks_grp.getItem(4).getName())
+        self.assertEqual('wks_grp_O_12', wks_grp.getItem(12).getName())
+
+
+    def test_isotope_element_indices_loading(self):
+        """
+        """
+        wks_grp = SimulatedDensityOfStates(PHONONFile=self._isotope_phonon,
+                                           SpectrumType='DOS',
+                                           CalculateIonIndices=True,
+                                           Ions='H:P,C:P')
+        self.assertEqual(2, len(wks_grp))
+        self.assertEqual('wks_grp_C(13)_0', wks_grp.getItem(0).getName())
+        self.assertEqual('wks_grp_H(2)_1' , wks_grp.getItem(1).getName())
+
 
 if __name__=="__main__":
     unittest.main()

@@ -193,8 +193,6 @@ class DLLExport FindSXPeaks : public API::Algorithm {
 public:
   /// Default constructor
   FindSXPeaks();
-  /// Destructor
-  ~FindSXPeaks() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FindSXPeaks"; }
   /// Summary of algorithms purpose

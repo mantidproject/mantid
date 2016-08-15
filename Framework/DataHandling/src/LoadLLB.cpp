@@ -26,17 +26,9 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadLLB)
 /** Constructor
  */
 LoadLLB::LoadLLB()
-    : m_instrumentName(""), m_instrumentPath(""), m_localWorkspace(),
-      m_numberOfTubes(0), m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
-      m_numberOfHistograms(0), m_wavelength(0.0), m_channelWidth(0.0),
-      m_loader() {
-  m_supportedInstruments.emplace_back("MIBEMOL");
-}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadLLB::~LoadLLB() {}
+    : m_supportedInstruments{"MIBEMOL"}, m_numberOfTubes{0},
+      m_numberOfPixelsPerTube{0}, m_numberOfChannels{0},
+      m_numberOfHistograms{0}, m_wavelength{0.0}, m_channelWidth{0.0} {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name

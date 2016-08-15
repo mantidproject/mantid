@@ -45,8 +45,8 @@ This algorithm always uses a :ref:`calibration table
 <algm-ConvertDiffCal>` or :ref:`LoadCalFile <algm-LoadCalFile>` to
 produce.
 
-**Note:** the workspace that this algorithms outputs is a `Ragged
-Workspace <http://www.mantidproject.org/Ragged_Workspace>`__.
+**Note:** the workspace that this algorithms outputs is a 
+:ref:`ragged workspace <Ragged_Workspace>`.
 
 Restrictions on the input workspace
 ###################################

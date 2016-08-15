@@ -1,10 +1,11 @@
 #ifndef ILIVELISTENER_TEST_H_
 #define ILIVELISTENER_TEST_H_
 
+#include "MantidAPI/ILiveListener.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "MantidAPI/ILiveListener.h"
 
 using namespace Mantid::API;
 
@@ -14,6 +15,7 @@ public:
     // Set this flag to true for testing
     m_dataReset = true;
   }
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_CONST_METHOD0(name, std::string());
   MOCK_CONST_METHOD0(supportsHistory, bool());
   MOCK_CONST_METHOD0(buffersEvents, bool());
@@ -23,6 +25,7 @@ public:
   MOCK_METHOD0(isConnected, bool());
   MOCK_METHOD0(runStatus, RunStatus());
   MOCK_CONST_METHOD0(runNumber, int());
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 class ILiveListenerTest : public CxxTest::TestSuite {

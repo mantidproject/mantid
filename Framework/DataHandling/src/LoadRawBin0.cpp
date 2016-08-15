@@ -29,8 +29,6 @@ LoadRawBin0::LoadRawBin0()
       m_cache_options(), m_specTimeRegimes(), m_prog(0.0), m_lengthIn(0),
       m_perioids(), m_total_specs(0), m_timeChannelsVec() {}
 
-LoadRawBin0::~LoadRawBin0() {}
-
 /// Initialisation method.
 void LoadRawBin0::init() {
   LoadRawHelper::init();
@@ -86,7 +84,7 @@ void LoadRawBin0::exec() {
   m_total_specs = calculateWorkspaceSize();
 
   // no real X values for bin 0,so initialize this to zero
-  auto channelsVec = boost::make_shared<MantidVec>(1, 0);
+  auto channelsVec = boost::make_shared<HistogramData::HistogramX>(1, 0);
   m_timeChannelsVec.push_back(channelsVec);
 
   double histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);

@@ -2,7 +2,6 @@
 import stresstesting
 from mantid import *
 from mantid.simpleapi import *
-import sys
 
 
 class LiquidsReflectometryReductionWithBackgroundPreciseTest(stresstesting.MantidStressTest):

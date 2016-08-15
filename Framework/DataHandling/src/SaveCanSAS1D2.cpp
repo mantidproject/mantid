@@ -22,12 +22,6 @@ namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveCanSAS1D2)
 
-/// constructor
-SaveCanSAS1D2::SaveCanSAS1D2() {}
-
-/// destructor
-SaveCanSAS1D2::~SaveCanSAS1D2() {}
-
 /// Overwrites Algorithm method.
 void SaveCanSAS1D2::init() {
   SaveCanSAS1D::init();
@@ -143,14 +137,6 @@ void SaveCanSAS1D2::exec() {
   createSASProcessElement(sasProcess);
   m_outFile << sasProcess;
 
-  // Reduction process, if available
-  const std::string process_xml = getProperty("Process");
-  if (process_xml.size() > 0) {
-    m_outFile << "\n\t\t<SASprocess>\n";
-    m_outFile << process_xml;
-    m_outFile << "\n\t\t</SASprocess>\n";
-  }
-
   std::string sasNote = "\n\t\t<SASnote>";
   sasNote += "\n\t\t</SASnote>";
   m_outFile << sasNote;
@@ -246,7 +232,7 @@ void SaveCanSAS1D2::writeHeader(const std::string &fileName) {
     m_outFile
         << "<?xml version=\"1.0\"?>\n"
         << "<?xml-stylesheet type=\"text/xsl\" href=\"cansas1d.xsl\" ?>\n";
-    std::string sasroot = "";
+    std::string sasroot;
     createSASRootElement(sasroot);
     m_outFile << sasroot;
   } catch (std::fstream::failure &) {

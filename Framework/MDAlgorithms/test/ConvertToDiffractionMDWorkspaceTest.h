@@ -125,13 +125,12 @@ public:
     }
   }
 
-  void do_test_MINITOPAZ(EventType type, size_t numTimesToAdd = 1,
-                         bool OneEventPerBin = false,
+  void do_test_MINITOPAZ(EventType type, int numEventsPer, int numPixels,
+                         size_t numTimesToAdd = 1, bool OneEventPerBin = false,
                          bool MakeWorkspace2D = false) {
 
-    int numEventsPer = 100;
     EventWorkspace_sptr in_ws = Mantid::DataObjects::MDEventsTestHelper::
-        createDiffractionEventWorkspace(numEventsPer);
+        createDiffractionEventWorkspace(numEventsPer, numPixels);
     if (type == WEIGHTED)
       in_ws *= 2.0;
     if (type == WEIGHTED_NOTIME) {
@@ -201,22 +200,24 @@ public:
     AnalysisDataService::Instance().remove("test_md3");
   }
 
-  void test_MINITOPAZ() { do_test_MINITOPAZ(TOF); }
+  void test_MINITOPAZ() { do_test_MINITOPAZ(TOF, 100, 400); }
 
-  void test_MINITOPAZ_Weighted() { do_test_MINITOPAZ(WEIGHTED); }
+  void test_MINITOPAZ_Weighted() { do_test_MINITOPAZ(WEIGHTED, 100, 400); }
 
-  void test_MINITOPAZ_addToExistingWorkspace() { do_test_MINITOPAZ(TOF, 2); }
+  void test_MINITOPAZ_addToExistingWorkspace() {
+    do_test_MINITOPAZ(TOF, 100, 400, 2);
+  }
 
   void test_MINITOPAZ_OneEventPerBin_fromEventWorkspace() {
-    do_test_MINITOPAZ(TOF, 1, true, false);
+    do_test_MINITOPAZ(TOF, 100, 400, 1, true, false);
   }
 
   void test_MINITOPAZ_OneEventPerBin_fromWorkspace2D() {
-    do_test_MINITOPAZ(TOF, 1, true, true);
+    do_test_MINITOPAZ(TOF, 100, 400, 1, true, true);
   }
 
   void test_MINITOPAZ_fromWorkspace2D() {
-    do_test_MINITOPAZ(TOF, 1, false, true);
+    do_test_MINITOPAZ(TOF, 100, 400, 1, false, true);
   }
 };
 

@@ -4,6 +4,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "MockObjects.h"
 
@@ -22,6 +23,8 @@ using namespace Mantid::DataObjects;
 using namespace ::testing;
 using namespace Mantid::VATES;
 using Mantid::VATES::vtkPeakMarkerFactory;
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockPeakShape : public Peak {
 public:
@@ -49,6 +52,7 @@ public:
   MOCK_METHOD1(getPeak, Mantid::DataObjects::Peak &(int peakNum));
   MOCK_CONST_METHOD1(getPeak, const Mantid::DataObjects::Peak &(int peakNum));
 };
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 //=====================================================================================
 // Functional Tests

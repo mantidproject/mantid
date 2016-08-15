@@ -195,10 +195,10 @@ class BackCommandParser(object):
 
         # Now pass the arguments back in a defined format
         setting =  DarkRunSettings(mon = self._mon,
-                               run_number = self._run_number,
-                               time = self._use_time,
-                               mean = self._use_mean,
-                               mon_number = self._mon_number)
+                                   run_number = self._run_number,
+                                   time = self._use_time,
+                                   mean = self._use_mean,
+                                   mon_number = self._mon_number)
 
         # Reset the parse results just in case we want to use it again
         self._reset_parse_results()

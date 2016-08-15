@@ -56,6 +56,10 @@ private:
   void exec() override;
   /// Return the TOF resolution for a particular wavelength
   virtual double getTOFResolution(double wl);
+  /// Return the effective pixel size in the x-direction
+  virtual double getEffectiveXPixelSize();
+  /// Return the effective pixel size in the y-direction
+  virtual double getEffectiveYPixelSize();
   /// Wavelength resolution (constant for all wavelengths)
   double m_wl_resolution;
 };

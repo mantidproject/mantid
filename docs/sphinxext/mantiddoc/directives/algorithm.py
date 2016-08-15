@@ -1,4 +1,4 @@
-from mantiddoc.directives.base import AlgorithmBaseDirective
+from mantiddoc.directives.base import AlgorithmBaseDirective #pylint: disable=unused-import
 import os
 import re
 

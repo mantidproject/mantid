@@ -1,18 +1,19 @@
 #ifndef CONCRETE_PEAKS_PRESENTER_VSI_TEST_H_
 #define CONCRETE_PEAKS_PRESENTER_VSI_TEST_H_
 
-#include "MantidVatesAPI/ConcretePeaksPresenterVsi.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidVatesAPI/ViewFrustum.h"
+#include "MantidDataObjects/NoShape.h"
+#include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
-#include "MantidDataObjects/PeakShapeSpherical.h"
-#include "MantidDataObjects/PeakShapeEllipsoid.h"
-#include "MantidDataObjects/NoShape.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidVatesAPI/ConcretePeaksPresenterVsi.h"
+#include "MantidVatesAPI/ViewFrustum.h"
 #include "MockObjects.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -22,7 +23,7 @@
 
 using namespace ::testing;
 using namespace Mantid::VATES;
-
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 class MockPeakConcrete : public Mantid::DataObjects::Peak {
 public:
   MOCK_CONST_METHOD0(getHKL, Mantid::Kernel::V3D(void));
@@ -37,7 +38,7 @@ public:
   MOCK_METHOD1(getPeak, Mantid::DataObjects::Peak &(int peakNum));
   MOCK_CONST_METHOD1(getPeak, const Mantid::DataObjects::Peak &(int peakNum));
 };
-
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 class ConcretePeaksPresenterVsiTest : public CxxTest::TestSuite {
 public:
   void testSetupPresenterCorrectly() {

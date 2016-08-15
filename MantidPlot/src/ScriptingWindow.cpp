@@ -2,15 +2,17 @@
 // Includes
 //-------------------------------------------
 #include "ScriptingWindow.h"
+#include "ApplicationWindow.h"
 #include "MultiTabScriptInterpreter.h"
 #include "ScriptingEnv.h"
 #include "ScriptFileInterpreter.h"
+#include "TSVSerialiser.h"
 #include "pixmaps.h"
 
 // Mantid
+#include "Mantid/IProjectSerialisable.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
-#include "ApplicationWindow.h"
 
 // MantidQt
 #include "MantidQtAPI/HelpWindow.h"
@@ -32,6 +34,8 @@
 #include <QTextStream>
 #include <QList>
 #include <QUrl>
+
+using namespace Mantid;
 
 namespace {
 /// static logger
@@ -408,10 +412,55 @@ void ScriptingWindow::showPythonHelp() {
 }
 
 /**
- * calls MultiTabScriptInterpreter saveToString and
- *  saves the currently opened script file names to a string
+  * Calls MultiTabScriptInterpreter to save the currently opened
+  * script file names to a string.
+  *
+  * @param app :: the current application window instance
+  * @return script file names in the matid project format
+  */
+std::string ScriptingWindow::saveToProject(ApplicationWindow *app) {
+  (void)app; // suppress unused variable warnings
+  return m_manager->saveToString().toStdString();
+}
+
+/**
+ * Load script files from the project file
+ *
+ * @param lines :: raw lines from the project file
+ * @param app :: the current application window instance
+ * @param fileVersion :: the file version used when saved
  */
-QString ScriptingWindow::saveToString() { return m_manager->saveToString(); }
+void ScriptingWindow::loadFromProject(const std::string &lines,
+                                      ApplicationWindow *app,
+                                      const int fileVersion) {
+  Q_UNUSED(fileVersion);
+
+  TSVSerialiser sTSV(lines);
+  QStringList files;
+
+  setWindowTitle("MantidPlot: " + app->scriptingEnv()->languageName() +
+                 " Window");
+
+  auto scriptNames = sTSV.values("ScriptNames");
+
+  // Iterate, ignoring scriptNames[0] which is just "ScriptNames"
+  for (size_t i = 1; i < scriptNames.size(); ++i)
+    files.append(QString::fromStdString(scriptNames[i]));
+
+  loadFromFileList(files);
+}
+
+/**
+ * Load script files from a list of file names
+ * @param files :: List of file names to oepn
+ */
+void ScriptingWindow::loadFromFileList(const QStringList &files) {
+  for (auto file = files.begin(); file != files.end(); ++file) {
+    if (file->isEmpty())
+      continue;
+    openUnique(*file);
+  }
+}
 
 /**
  * Saves scripts file names to a string

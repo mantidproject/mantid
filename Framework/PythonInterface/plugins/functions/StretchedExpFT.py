@@ -24,14 +24,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
-
-from mantid.api import IFunction1D, FunctionFactory
-from numpy import interp
-import numpy as np
+from __future__ import (absolute_import, division, print_function)
 import copy
+import numpy as np
 import scipy.constants
 from scipy.fftpack import fft, fftfreq
 from scipy.special import gamma
+from mantid.api import IFunction1D, FunctionFactory
 
 class StretchedExpFT(IFunction1D):
     # Class variables
@@ -41,7 +40,7 @@ class StretchedExpFT(IFunction1D):
     def __init__(self):
         """declare some constants"""
         super(StretchedExpFT, self).__init__()
-        self._parmlist = list()
+        self._parmList = list()
 
     def category(self):
         return 'QuasiElastic'
@@ -64,6 +63,7 @@ class StretchedExpFT(IFunction1D):
         tau = self.getParameterValue('Tau')
         beta = self.getParameterValue('Beta')
         Centre = self.getParameterValue('Centre')
+
         for _, value in {'Height': height, 'Tau': tau, 'Beta': beta}.items():
             if value <= 0:
                 return None
@@ -112,7 +112,7 @@ class StretchedExpFT(IFunction1D):
         # Find corresponding energies
         energies = StretchedExpFT._planck_constant * fftfreq(2*nt, d=dt)  # standard ordering
         energies = np.concatenate([energies[nt:], energies[:nt]])  # increasing ordering
-        transform = p['Height'] * interp(xvals-p['Centre'], energies, fourier)
+        transform = p['Height'] * np.interp(xvals-p['Centre'], energies, fourier)
         return transform
 
     def fillJacobian(self, xvals, jacobian, partials):

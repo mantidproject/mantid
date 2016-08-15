@@ -96,22 +96,17 @@ void TOFSANSResolutionByPixel::exec() {
   // create interpolation table from sigmaModeratorVSwavelength
   Kernel::Interpolation lookUpTable;
 
-  const MantidVec xInterpolate = sigmaModeratorVSwavelength->readX(0);
+  const auto xInterpolate = sigmaModeratorVSwavelength->points(0);
   const MantidVec yInterpolate = sigmaModeratorVSwavelength->readY(0);
 
   // prefer the input to be a pointworkspace and create interpolation function
   if (sigmaModeratorVSwavelength->isHistogramData()) {
     g_log.notice() << "mid-points of SigmaModerator histogram bins will be "
                       "used for interpolation.";
+  }
 
-    for (size_t i = 0; i < xInterpolate.size() - 1; ++i) {
-      const double midpoint = (xInterpolate[i + 1] + xInterpolate[i]) / 2.0;
-      lookUpTable.addPoint(midpoint, yInterpolate[i]);
-    }
-  } else {
-    for (size_t i = 0; i < xInterpolate.size(); ++i) {
-      lookUpTable.addPoint(xInterpolate[i], yInterpolate[i]);
-    }
+  for (size_t i = 0; i < xInterpolate.size(); ++i) {
+    lookUpTable.addPoint(xInterpolate[i], yInterpolate[i]);
   }
 
   // Calculate the L1 distance

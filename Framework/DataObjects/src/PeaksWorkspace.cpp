@@ -192,7 +192,18 @@ const Peak &PeaksWorkspace::getPeak(const int peakNum) const {
 Geometry::IPeak *
 PeaksWorkspace::createPeak(Kernel::V3D QLabFrame,
                            boost::optional<double> detectorDistance) const {
-  return new Peak(this->getInstrument(), QLabFrame, detectorDistance);
+  Geometry::Goniometer goniometer = this->run().getGoniometer();
+
+  // create a peak using the qLab frame
+  auto peak = new Peak(this->getInstrument(), QLabFrame, detectorDistance);
+
+  // Set the goniometer
+  peak->setGoniometerMatrix(goniometer.getR());
+
+  // Take the run number from this
+  peak->setRunNumber(this->getRunNumber());
+
+  return peak;
 }
 
 /**

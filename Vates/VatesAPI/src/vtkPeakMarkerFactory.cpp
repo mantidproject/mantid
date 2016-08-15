@@ -231,12 +231,12 @@ vtkPeakMarkerFactory::create(ProgressAction &progressUpdating) const {
     } else if (shape.shapeName() ==
                Mantid::DataObjects::PeakShapeEllipsoid::ellipsoidShapeName()) {
       vtkNew<vtkFloatArray> transformSignal;
-      transformSignal->Allocate(1);
       transformSignal->SetNumberOfComponents(9);
+      transformSignal->SetNumberOfTuples(1);
       auto tensor = getTransformTensor(
           dynamic_cast<const Mantid::DataObjects::PeakShapeEllipsoid &>(shape),
           peak);
-      transformSignal->InsertNextTupleValue(tensor.data());
+      transformSignal->SetTypedTuple(0, tensor.data());
       peakDataSet->GetPointData()->SetTensors(transformSignal.GetPointer());
 
       vtkNew<vtkRegularPolygonSource> polygonSource;

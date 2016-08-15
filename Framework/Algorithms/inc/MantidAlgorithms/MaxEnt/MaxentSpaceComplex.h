@@ -31,10 +31,6 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL MaxentSpaceComplex : public MaxentSpace {
 public:
-  // Constructor
-  MaxentSpaceComplex() = default;
-  // Destructor
-  virtual ~MaxentSpaceComplex() = default;
   // Converts a given vector to a complex vector
   std::vector<double> toComplex(const std::vector<double> &values) override;
   // Converts to a complex vector

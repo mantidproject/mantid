@@ -82,16 +82,6 @@ using namespace ConnectedComponentMappingTypes;
 DECLARE_ALGORITHM(IntegratePeaksHybrid)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IntegratePeaksHybrid::IntegratePeaksHybrid() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IntegratePeaksHybrid::~IntegratePeaksHybrid() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string IntegratePeaksHybrid::name() const {
   return "IntegratePeaksHybrid";

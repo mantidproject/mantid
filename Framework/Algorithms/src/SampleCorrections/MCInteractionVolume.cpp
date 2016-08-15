@@ -3,6 +3,7 @@
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 
 namespace Mantid {
@@ -97,7 +98,7 @@ double MCInteractionVolume::calculateAbsorption(
       scatterPos = segItr->entryPoint + direc * length;
     }
     const auto &segObj = *(segItr->object);
-    const auto segMat = segObj.material();
+    const auto &segMat = segObj.material();
     atten *= attenuation(segMat.numberDensity(),
                          segMat.totalScatterXSection(lambdaBefore) +
                              segMat.absorbXSection(lambdaBefore),
@@ -116,7 +117,7 @@ double MCInteractionVolume::calculateAbsorption(
   for (const auto &segment : path2) {
     double length = segment.distInsideObject;
     const auto &segObj = *(segment.object);
-    const auto segMat = segObj.material();
+    const auto &segMat = segObj.material();
     atten *= attenuation(segMat.numberDensity(),
                          segMat.totalScatterXSection(lambdaAfter) +
                              segMat.absorbXSection(lambdaAfter),

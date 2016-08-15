@@ -1,12 +1,12 @@
 #pylint: disable=no-init,invalid-name,too-many-locals,too-many-lines
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
-
 import numpy as np
 import re
 import os.path
 import math
+
+from mantid.kernel import *
+from mantid.api import *
+import mantid.simpleapi as s_api
 
 PEAK_WIDTH_ENERGY_FLAG = 'energy'
 
@@ -18,6 +18,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
     _bin_width = None
     _spec_type = None
     _peak_func = None
+    _calc_ion_index = None
     _out_ws_name = None
     _peak_width = None
     _scale = None
@@ -28,6 +29,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
     _calc_partial = None
     _num_ions = None
     _num_branches = None
+    _element_isotope = dict()
 
 #----------------------------------------------------------------------------------------
 
@@ -63,6 +65,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self.declareProperty(name='SpectrumType', defaultValue='DOS',
                              validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active', 'BondTable']),
                              doc="Type of intensities to extract and model (fundamentals-only) from .phonon.")
+
+        self.declareProperty(name='CalculateIonIndices', defaultValue=False,
+                             doc="Calculates the individual index of all Ions in the simulated data.")
 
         self.declareProperty(name='StickHeight', defaultValue=0.01,
                              doc='Intensity of peaks in stick diagram.')
@@ -175,7 +180,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         # We want to output a table workspace with ion information
         if self._spec_type == 'IonTable':
-            ion_table = CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
+            ion_table = s_api.CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
             ion_table.addColumn('str', 'Species')
             ion_table.addColumn('int', 'FileIndex')
             ion_table.addColumn('int', 'Number')
@@ -185,6 +190,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             ion_table.addColumn('float', 'CartesianX')
             ion_table.addColumn('float', 'CartesianY')
             ion_table.addColumn('float', 'CartesianZ')
+            ion_table.addColumn('float', 'Isotope')
 
             self._convert_to_cartesian_coordinates(unit_cell, ions)
 
@@ -197,7 +203,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                                   ion['fract_coord'][2],
                                   ion['cartesian_coord'][0],
                                   ion['cartesian_coord'][1],
-                                  ion['cartesian_coord'][2]])
+                                  ion['cartesian_coord'][2],
+                                  ion['isotope_number']])
 
         # We want to output a table workspace with bond information
         if self._spec_type == 'BondTable':
@@ -205,7 +212,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             if bonds is None or len(bonds) == 0:
                 raise RuntimeError('No bonds found in CASTEP file')
 
-            bond_table = CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
+            bond_table = s_api.CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
             bond_table.addColumn('str', 'SpeciesA')
             bond_table.addColumn('int', 'NumberA')
             bond_table.addColumn('str', 'SpeciesB')
@@ -228,24 +235,34 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
             # Build a dictionary of ions that the user cares about
             partial_ions = dict()
-            for ion in self._ions:
-                partial_ions[ion] = [i['index'] for i in ions if i['species'] == ion]
+            if not self._calc_ion_index:
+                for ion in self._ions:
+                    partial_ions[ion] = [i['index'] for i in ions if i['species'] == ion]
+            else:
+                for ion in ions:
+                    if ion['species'] in self._ions:
+                        ion_identifier = ion['species'] + str(ion['index'])
+                        partial_ions[ion_identifier] = ion['index']
 
             partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(partial_ions, frequencies, eigenvectors, weights)
 
             if self._sum_contributions:
                 # Discard the partial workspaces
                 for partial_ws in partial_workspaces:
-                    DeleteWorkspace(partial_ws)
+                    s_api.DeleteWorkspace(partial_ws)
 
                 # Rename the summed workspace, this will be the output
-                RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._out_ws_name)
+                s_api.RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._out_ws_name)
 
             else:
-                DeleteWorkspace(sum_workspace)
-
-                group = ','.join(partial_workspaces)
-                GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
+                s_api.DeleteWorkspace(sum_workspace)
+                partial_ws_names = [ws.getName() for ws in partial_workspaces]
+                ### sort workspaces
+                if self._calc_ion_index:
+                    # Sort by index after '_'
+                    partial_ws_names.sort(key=lambda item: (int(item[(item.rfind('_')+1):])))
+                group = ','.join(partial_ws_names)
+                s_api.GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
 
         # We want to calculate a total DoS with scaled intensities
         elif self._spec_type == 'DOS' and self._scale_by_cross_section != 'None':
@@ -261,19 +278,19 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
             # Discard the partial workspaces
             for partial_ws in partial_workspaces:
-                DeleteWorkspace(partial_ws)
+                s_api.DeleteWorkspace(partial_ws)
 
             # Rename the summed workspace, this will be the output
-            RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._out_ws_name)
+            s_api.RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._out_ws_name)
 
         # We want to calculate a total DoS without scaled intensities
         elif self._spec_type == 'DOS':
             logger.notice('Calculating summed density of states without scaled intensities')
             prog_reporter.report('Calculating density of states')
 
-            self._compute_DOS(frequencies, np.ones_like(frequencies), weights)
-            mtd[self._out_ws_name].setYUnit('(D/A)^2/amu')
-            mtd[self._out_ws_name].setYUnitLabel('Intensity')
+            out_ws = self._compute_DOS(frequencies, np.ones_like(frequencies), weights)
+            out_ws.setYUnit('(D/A)^2/amu')
+            out_ws.setYUnitLabel('Intensity')
 
         # We want to calculate a DoS with IR active
         elif self._spec_type == 'IR_Active':
@@ -283,9 +300,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             logger.notice('Calculating IR intensities')
             prog_reporter.report('Calculating IR intensities')
 
-            self._compute_DOS(frequencies, ir_intensities, weights)
-            mtd[self._out_ws_name].setYUnit('(D/A)^2/amu')
-            mtd[self._out_ws_name].setYUnitLabel('Intensity')
+            out_ws = self._compute_DOS(frequencies, ir_intensities, weights)
+            out_ws.setYUnit('(D/A)^2/amu')
+            out_ws.setYUnitLabel('Intensity')
 
         # We want to create a DoS with Raman active
         elif self._spec_type == 'Raman_Active':
@@ -295,9 +312,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             logger.notice('Calculating Raman intensities')
             prog_reporter.report('Calculating Raman intensities')
 
-            self._compute_raman(frequencies, raman_intensities, weights)
-            mtd[self._out_ws_name].setYUnit('A^4')
-            mtd[self._out_ws_name].setYUnitLabel('Intensity')
+            out_ws = self._compute_raman(frequencies, raman_intensities, weights)
+            out_ws.setYUnit('A^4')
+            out_ws.setYUnitLabel('Intensity')
 
         self.setProperty('OutputWorkspace', self._out_ws_name)
 
@@ -311,6 +328,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self._bin_width = self.getProperty('BinWidth').value
         self._spec_type = self.getPropertyValue('SpectrumType')
         self._peak_func = self.getPropertyValue('Function')
+        self._calc_ion_index = self.getProperty('CalculateIonIndices').value
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
         self._peak_width = self.getProperty('PeakWidth').value
         self._scale = self.getProperty('Scale').value
@@ -320,7 +338,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
         self._calc_partial = (len(self._ions) > 0)
 
+
 #----------------------------------------------------------------------------------------
+
 
     def _convert_to_cartesian_coordinates(self, unit_cell, ions):
         """
@@ -423,65 +443,109 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         # Output each contribution to it's own workspace
         for ion_name, ions in partial_ions.items():
-            partial_ws_name = self._out_ws_name + '_' + ion_name
+            partial_ws_name = self._out_ws_name + '_'
 
-            self._compute_partial(ions, frequencies, eigenvectors, weights)
+            partial_ws = self._compute_partial(ions, frequencies, eigenvectors, weights)
 
             # Set correct units on partial workspace
-            mtd[self._out_ws_name].setYUnit('(D/A)^2/amu')
-            mtd[self._out_ws_name].setYUnitLabel('Intensity')
+            partial_ws.setYUnit('(D/A)^2/amu')
+            partial_ws.setYUnitLabel('Intensity')
 
             # Add the sample material to the workspace
-            SetSampleMaterial(InputWorkspace=self._out_ws_name,
-                              ChemicalFormula=ion_name)
+            match = re.search(r'\d', ion_name)
+            element_index = ion_name
+            if match:
+                element_index = ion_name[:match.start()]
+            chemical, ws_suffix = self._parse_chemical_and_ws_name(ion_name,
+                                                                   self._element_isotope[element_index])
+            partial_ws_name += ws_suffix
+
+            s_api.SetSampleMaterial(InputWorkspace=self._out_ws_name,
+                                    ChemicalFormula=chemical)
 
             # Multiply intensity by scatttering cross section
             if self._scale_by_cross_section == 'Incoherent':
-                scattering_x_section = mtd[self._out_ws_name].mutableSample().getMaterial().incohScatterXSection()
+                scattering_x_section = partial_ws.mutableSample().getMaterial().incohScatterXSection()
             elif self._scale_by_cross_section == 'Coherent':
-                scattering_x_section = mtd[self._out_ws_name].mutableSample().getMaterial().cohScatterXSection()
+                scattering_x_section = partial_ws.mutableSample().getMaterial().cohScatterXSection()
             elif self._scale_by_cross_section == 'Total':
-                scattering_x_section = mtd[self._out_ws_name].mutableSample().getMaterial().totalScatterXSection()
+                scattering_x_section = partial_ws.mutableSample().getMaterial().totalScatterXSection()
 
             if self._scale_by_cross_section != 'None':
-                Scale(InputWorkspace=self._out_ws_name,
-                      OutputWorkspace=self._out_ws_name,
-                      Operation='Multiply',
-                      Factor=scattering_x_section)
+                scale_alg = self.createChildAlgorithm('Scale')
+                scale_alg.setProperty('InputWorkspace',self._out_ws_name)
+                scale_alg.setProperty('OutputWorkspace',self._out_ws_name)
+                scale_alg.setProperty('Operation','Multiply')
+                scale_alg.setProperty('Factor', scattering_x_section)
+                scale_alg.execute()
 
-            partial_workspaces.append(partial_ws_name)
-            RenameWorkspace(self._out_ws_name,
-                            OutputWorkspace=partial_ws_name)
+
+            rename_alg = self.createChildAlgorithm('RenameWorkspace')
+            rename_alg.setProperty('InputWorkspace',self._out_ws_name)
+            rename_alg.setProperty('OutputWorkspace',partial_ws_name)
+            rename_alg.execute()
+            partial_workspaces.append(rename_alg.getProperty('OutputWorkspace').value)
 
         total_workspace = self._out_ws_name + "_Total"
 
         # If there is more than one partial workspace need to sum first spectrum of all
         if len(partial_workspaces) > 1:
-            data_x = mtd[partial_workspaces[0]].dataX(0)
-            dos_specs = np.zeros_like(mtd[partial_workspaces[0]].dataY(0))
-            stick_specs = np.zeros_like(mtd[partial_workspaces[0]].dataY(0))
+            initial_partial_ws = partial_workspaces[0]
+            data_x = initial_partial_ws.dataX(0)
+            dos_specs = np.zeros_like(initial_partial_ws.dataY(0))
+            stick_specs = np.zeros_like(initial_partial_ws.dataY(0))
 
             for partial_ws in partial_workspaces:
-                dos_specs += mtd[partial_ws].dataY(0)
-                stick_specs += mtd[partial_ws].dataY(1)
+                dos_specs += partial_ws.dataY(0)
+                stick_specs += partial_ws.dataY(1)
 
             stick_specs[stick_specs > 0.0] = self.getProperty('StickHeight').value
 
-            self._create_dos_workspace(data_x, dos_specs, stick_specs, total_workspace)
+            total_ws = self._create_dos_workspace(data_x, dos_specs, stick_specs, total_workspace)
 
             # Set correct units on total workspace
-            mtd[total_workspace].setYUnit('(D/A)^2/amu')
-            mtd[total_workspace].setYUnitLabel('Intensity')
+            total_ws.setYUnit('(D/A)^2/amu')
+            total_ws.setYUnitLabel('Intensity')
 
         # Otherwise just repackage the WS we have as the total
         else:
-            CloneWorkspace(InputWorkspace=partial_workspaces[0],
-                           OutputWorkspace=total_workspace)
+            s_api.CloneWorkspace(InputWorkspace=partial_workspaces[0],
+                                 OutputWorkspace=total_workspace)
 
         logger.debug('Partial workspaces: ' + str(partial_workspaces))
         logger.debug('Summed workspace: ' + str(total_workspace))
 
         return partial_workspaces, total_workspace
+#----------------------------------------------------------------------------------------
+    def _parse_chemical_and_ws_name(self, ion_name, isotope):
+        """
+        @param ion_name     :: Name of the element used
+        @param isotope      :: Isotope of the element
+        @return The chemical formula of the element and isotope
+                expected by SetSampleMaterial
+                AND
+                The expected suffix for the partial workspace
+        """
+        # Get the index of the element (if present)
+        import re
+        match = re.search(r'\d', ion_name)
+        element_index = ''
+        if match:
+            element_index = '_' + ion_name[match.start():]
+
+        # If the chemical is a isotope
+        if ':' in ion_name:
+            chemical = ion_name.split(':')[0]
+            # Parse isotope to rounded int
+            chemical_formula = '(' + chemical + str(int(round(isotope))) + ')'
+            ws_name_suffix = chemical + '('  + str(int(round(isotope))) + ')' + element_index
+            return chemical_formula, ws_name_suffix
+        # If the chemical has an index
+        if match:
+            chemical = ion_name[:match.start()]
+            return chemical, chemical + element_index
+        else:
+            return ion_name, ion_name
 
 #----------------------------------------------------------------------------------------
 
@@ -518,7 +582,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             intensities += block_intensities
 
         intensities = np.asarray(intensities)
-        self._compute_DOS(frequencies, intensities, weights)
+        return self._compute_DOS(frequencies, intensities, weights)
 
 
 #----------------------------------------------------------------------------------------
@@ -568,30 +632,37 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         dos_sticks = self._draw_sticks(peaks, dos.shape)
 
         data_x = np.arange(xmin, xmin + dos.size)
-        self._create_dos_workspace(data_x, dos, dos_sticks, self._out_ws_name)
+        out_ws = self._create_dos_workspace(data_x, dos, dos_sticks, self._out_ws_name)
 
         if self._scale != 1:
-            Scale(InputWorkspace=self._out_ws_name, OutputWorkspace=self._out_ws_name, Factor=self._scale)
+            scale_alg = self.createChildAlgorithm('Scale')
+            scale_alg.setProperty('InputWorkspace',out_ws)
+            scale_alg.setProperty('OutputWorkspace',out_ws)
+            scale_alg.setProperty('Operation','Multiply')
+            scale_alg.setProperty('Factor', self._scale)
+            scale_alg.execute()
 
         if self._bin_width != 1:
-            out_ws = mtd[self._out_ws_name]
             x_min = out_ws.readX(0)[0] - (self._bin_width/2.0)
             x_max = out_ws.readX(0)[-1] + (self._bin_width/2.0)
             rebin_param = "%f, %f, %f" % (x_min, self._bin_width, x_max)
-            Rebin(Inputworkspace=self._out_ws_name, Params=rebin_param, OutputWorkspace=self._out_ws_name)
+            out_ws = s_api.Rebin(Inputworkspace=out_ws, Params=rebin_param, OutputWorkspace=out_ws)
+
+        return out_ws
 
 #----------------------------------------------------------------------------------------
 
     def _create_dos_workspace(self, data_x, dos, dos_sticks, out_name):
-        CreateWorkspace(DataX=data_x,
-                        DataY=np.ravel(np.array([dos, dos_sticks])),
-                        NSpec=2,
-                        VerticalAxisUnit='Text',
-                        VerticalAxisValues=[self._peak_func, 'Stick'],
-                        OutputWorkspace=out_name,
-                        EnableLogging=False)
-        unitx = mtd[out_name].getAxis(0).setUnit("Label")
+        ws = s_api.CreateWorkspace(DataX=data_x,
+                                   DataY=np.ravel(np.array([dos, dos_sticks])),
+                                   NSpec=2,
+                                   VerticalAxisUnit='Text',
+                                   VerticalAxisValues=[self._peak_func, 'Stick'],
+                                   OutputWorkspace=out_name,
+                                   EnableLogging=False)
+        unitx = ws.getAxis(0).setUnit("Label")
         unitx.setLabel("Energy Shift", 'cm^-1')
+        return ws
 
 #----------------------------------------------------------------------------------------
 
@@ -628,7 +699,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         bose_occ = 1.0 / (np.exp(cm1_to_K * frequency_x_sections / self._temperature) - 1)
         x_sections[zero_mask] = factor / frequency_x_sections * (1 + bose_occ) * intensity_x_sections
 
-        self._compute_DOS(frequencies, x_sections, weights)
+        return self._compute_DOS(frequencies, x_sections, weights)
 
 #----------------------------------------------------------------------------------------
 
@@ -707,6 +778,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                     species = line_data[4]
                     ion = {'species': species}
                     ion['fract_coord'] = np.array([float(line_data[1]), float(line_data[2]), float(line_data[3])])
+                    ion['isotope_number'] = float(line_data[5])
+                    self._element_isotope[species] = float(line_data[5])
                     # -1 to convert to zero based indexing
                     ion['index'] = int(line_data[0]) - 1
                     ion['bond_number'] = len([i for i in file_data['ions'] if i['species'] == species]) + 1
@@ -840,13 +913,13 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         warray = np.repeat(weights, self._num_branches)
 
         file_data.update({
-                'frequencies': frequencies,
-                'ir_intensities': ir_intensities,
-                'raman_intensities': raman_intensities,
-                'weights': warray,
-                'q_vectors':q_vectors,
-                'eigenvectors': eigenvectors
-                })
+            'frequencies': frequencies,
+            'ir_intensities': ir_intensities,
+            'raman_intensities': raman_intensities,
+            'weights': warray,
+            'q_vectors':q_vectors,
+            'eigenvectors': eigenvectors
+            })
 
         return file_data
 
@@ -1006,12 +1079,12 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         warray = np.repeat(weights, self._num_branches)
 
         file_data = {
-                'frequencies': frequencies,
-                'ir_intensities': ir_intensities,
-                'raman_intensities': raman_intensities,
-                'weights': warray,
-                'q_vectors':q_vectors
-                }
+            'frequencies': frequencies,
+            'ir_intensities': ir_intensities,
+            'raman_intensities': raman_intensities,
+            'weights': warray,
+            'q_vectors':q_vectors
+            }
 
         if len(bonds) > 0:
             file_data['bonds'] = bonds

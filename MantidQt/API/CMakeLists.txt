@@ -10,6 +10,7 @@
 	src/HelpWindow.cpp
 	src/InterfaceFactory.cpp
 	src/InterfaceManager.cpp
+	src/ListPropertyWidget.cpp
 	src/ManageUserDirectories.cpp
 	src/MantidColorMap.cpp
 	src/MantidDialog.cpp
@@ -55,6 +56,7 @@ set ( MOC_FILES
   inc/MantidQtAPI/BoolPropertyWidget.h
   inc/MantidQtAPI/FilePropertyWidget.h
   inc/MantidQtAPI/GenericDialog.h
+  inc/MantidQtAPI/ListPropertyWidget.h
   inc/MantidQtAPI/ManageUserDirectories.h
   inc/MantidQtAPI/MantidDialog.h
   inc/MantidQtAPI/MantidHelpInterface.h

@@ -18,18 +18,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(CloneMDWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CloneMDWorkspace::CloneMDWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CloneMDWorkspace::~CloneMDWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CloneMDWorkspace::init() {

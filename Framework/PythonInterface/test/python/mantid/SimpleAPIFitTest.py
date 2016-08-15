@@ -1,6 +1,8 @@
 """
     Specifically tests the Fit function in the simple API
 """
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 import testhelpers
 import platform
@@ -86,7 +88,7 @@ class SimpleAPIFitTest(unittest.TestCase):
     def test_that_dialog_call_raises_runtime_error(self):
         try:
             FitDialog()
-        except RuntimeError, exc:
+        except RuntimeError as exc:
             msg = str(exc)
             if msg != "Can only display properties dialog in gui mode":
                 self.fail("Dialog function raised the correct exception type but the message was wrong: " + msg)

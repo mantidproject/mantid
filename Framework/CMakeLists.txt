@@ -1,5 +1,5 @@
 # This is mainly here so you don't get a complaint when running cmake
-cmake_minimum_required (VERSION 2.8.12)
+cmake_minimum_required (VERSION 3.5)
 
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../buildconfig/CMake")
@@ -49,13 +49,11 @@ set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} )
 ###########################################################################
 
 # Only available on Linux (specifically RedHat), and for a framework-only build
-if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
+if ( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
   set ( MPI_BUILD OFF CACHE BOOL "Enable MPI options" )
   if ( MPI_BUILD )
-  include ( MPISetup )
-        set ( MANTIDLIBS  ${MANTIDLIBS} ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES} )
-        find_package ( OpenGL REQUIRED )
-        find_package ( GSL REQUIRED )
+    include ( MPISetup )
+    set ( MANTIDLIBS  ${MANTIDLIBS} ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES} )
   endif ( MPI_BUILD )
 endif ()
 
@@ -68,6 +66,12 @@ add_dependencies ( check FrameworkTests )
 
 include_directories (Kernel/inc)
 add_subdirectory (Kernel)
+
+include_directories (HistogramData/inc)
+add_subdirectory (HistogramData)
+
+# HistogramData has header-only dependency on Kernel, so Kernel comes after.
+set ( MANTIDLIBS ${MANTIDLIBS} HistogramData )
 set ( MANTIDLIBS ${MANTIDLIBS} Kernel )
 
 include_directories (Geometry/inc)
@@ -131,7 +135,7 @@ add_subdirectory (ISISLiveData)
 # Add a custom target to build all of the Framework
 ###########################################################################
 
-set ( FRAMEWORK_LIBS Kernel Geometry API DataObjects
+set ( FRAMEWORK_LIBS Kernel HistogramData Geometry API DataObjects
                      PythonKernelModule PythonGeometryModule PythonAPIModule
                      PythonDataObjectsModule
                      DataHandling Nexus Algorithms CurveFitting ICat

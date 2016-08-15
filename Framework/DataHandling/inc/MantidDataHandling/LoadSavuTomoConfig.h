@@ -39,10 +39,6 @@ namespace DataHandling {
 */
 class DLLExport LoadSavuTomoConfig : public API::Algorithm {
 public:
-  LoadSavuTomoConfig();
-
-  ~LoadSavuTomoConfig() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadSavuTomoConfig"; }
   /// Summary of algorithms purpose

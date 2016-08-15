@@ -19,16 +19,6 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-BinaryOperationMD::BinaryOperationMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-BinaryOperationMD::~BinaryOperationMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string BinaryOperationMD::name() const {
   return "BinaryOperationMD";

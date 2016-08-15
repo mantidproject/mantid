@@ -16,10 +16,6 @@ namespace WorkflowAlgorithms {
 */
 class DLLExport SANSBeamFluxCorrection : public API::DataProcessorAlgorithm {
 public:
-  /// (Empty) Constructor
-  SANSBeamFluxCorrection() : API::DataProcessorAlgorithm() {}
-  /// Virtual destructor
-  ~SANSBeamFluxCorrection() override {}
   /// Algorithm's name
   const std::string name() const override { return "SANSBeamFluxCorrection"; }
   /// Summary of algorithms purpose

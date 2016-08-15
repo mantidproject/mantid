@@ -51,8 +51,6 @@ void ThermalNeutronBk2BkExpAlpha::function1D(double *out, const double *xValues,
     out[i] =
         corefunction(xValues[i], width, tcross, alph0, alph1, alph0t, alph1t);
   }
-
-  return;
 }
 
 /** Derivative: use numerical derivative

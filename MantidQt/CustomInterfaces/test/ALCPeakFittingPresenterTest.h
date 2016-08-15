@@ -6,14 +6,18 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h"
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h"
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h"
 
+#include <qwt_data.h>
+
 using namespace Mantid;
+using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 
@@ -27,6 +31,8 @@ operator<<(std::basic_ostream<CharType, CharTrait> &out,
   return out;
 }
 }
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockALCPeakFittingView : public IALCPeakFittingView {
 public:
@@ -167,7 +173,7 @@ public:
     EXPECT_CALL(
         *m_view,
         setDataCurve(AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1, 1E-8),
-                           QwtDataX(1, 1, 1E-8), QwtDataX(2, 1, 1E-8),
+                           QwtDataX(1, 2, 1E-8), QwtDataX(2, 3, 1E-8),
                            QwtDataY(0, 2, 1E-8), QwtDataY(1, 2, 1E-8),
                            QwtDataY(2, 2, 1E-8)),
                      AllOf(Property(&std::vector<double>::size, 3),
@@ -353,5 +359,5 @@ public:
     m_model->setError("Test error");
   }
 };
-
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 #endif /* MANTIDQT_CUSTOMINTERFACES_ALCPEAKFITTINGTEST_H_ */

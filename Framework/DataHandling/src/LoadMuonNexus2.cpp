@@ -225,7 +225,7 @@ void LoadMuonNexus2::doExec() {
           WorkspaceFactory::Instance().create(localWorkspace));
     }
 
-    std::string outws("");
+    std::string outws;
     if (m_numberOfPeriods > 1) {
       std::string outputWorkspace = "OutputWorkspace";
       std::stringstream suffix;

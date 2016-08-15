@@ -7,6 +7,7 @@
 #ifdef _MSC_VER
 #pragma warning(default : 4250)
 #endif
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>
@@ -19,6 +20,8 @@ using Mantid::API::Algorithm;
 using Mantid::PythonInterface::AlgorithmAdapter;
 using Mantid::Kernel::Direction;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(Algorithm)
 
 namespace {
 typedef AlgorithmAdapter<Algorithm> PythonAlgorithm;

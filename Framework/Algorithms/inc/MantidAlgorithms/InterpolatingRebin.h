@@ -8,6 +8,9 @@
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+namespace HistogramData {
+class BinEdges;
+}
 namespace Algorithms {
 /**Uses cubic splines to interpolate the mean rate of change of the integral
   over the inputed data bins to that for the user supplied bins.
@@ -88,14 +91,16 @@ protected:
   void exec() override;
 
   void outputYandEValues(API::MatrixWorkspace_const_sptr inputW,
-                         const MantidVecPtr &XValues_new,
+                         const HistogramData::BinEdges &XValues_new,
                          API::MatrixWorkspace_sptr outputW);
-  void cubicInterpolation(const MantidVec &xOld, const MantidVec &yOld,
-                          const MantidVec &eOld, const MantidVec &xNew,
-                          MantidVec &yNew, MantidVec &eNew) const;
-  void noInterpolation(const MantidVec &xOld, const double yOld,
-                       const MantidVec &eOld, const MantidVec &xNew,
-                       MantidVec &yNew, MantidVec &eNew) const;
+  void cubicInterpolation(const HistogramData::BinEdges &xOld,
+                          const MantidVec &yOld, const MantidVec &eOld,
+                          const HistogramData::BinEdges &xNew, MantidVec &yNew,
+                          MantidVec &eNew) const;
+  void noInterpolation(const HistogramData::BinEdges &xOld, const double yOld,
+                       const MantidVec &eOld,
+                       const HistogramData::BinEdges &xNew, MantidVec &yNew,
+                       MantidVec &eNew) const;
   double estimateError(const MantidVec &xsOld, const MantidVec &esOld,
                        const double xNew) const;
 };

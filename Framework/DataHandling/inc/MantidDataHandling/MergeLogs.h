@@ -36,9 +36,6 @@ namespace DataHandling {
 */
 class DLLExport Merge2WorkspaceLogs : public API::Algorithm {
 public:
-  Merge2WorkspaceLogs();
-  ~Merge2WorkspaceLogs() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "MergeLogs"; };
   /// Summary of algorithms purpose

@@ -8,10 +8,6 @@ namespace RemoteAlgorithms {
 
 class DLLExport DownloadRemoteFile : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  DownloadRemoteFile() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~DownloadRemoteFile() override {}
   /// Algorithm's name
   const std::string name() const override { return "DownloadRemoteFile"; }
   /// Summary of algorithms purpose

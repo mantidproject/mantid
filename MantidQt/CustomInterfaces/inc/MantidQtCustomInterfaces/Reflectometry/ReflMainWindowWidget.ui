@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RelMainWindowWidget</class>
+ <widget class="QMainWindow" name="RelMainWindowWidget">
+  <property name="geometry">
+   <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>959</width>
+     <height>346</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>ISIS Reflectometry (Polref)</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
+     <number>1</number>
+    </property>
+    <property name="spacing">
+     <number>1</number>
+    </property>
+    <item row="0" column="0">
+      <widget class="QTabWidget" name="mainTab">
+      </widget>/>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

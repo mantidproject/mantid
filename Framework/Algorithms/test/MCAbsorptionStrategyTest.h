@@ -3,8 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
 #include "MantidAlgorithms/SampleCorrections/IBeamProfile.h"
+#include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MonteCarloTesting.h"
 
 using Mantid::Algorithms::MCAbsorptionStrategy;
@@ -64,8 +65,10 @@ private:
   class MockBeamProfile final : public Mantid::Algorithms::IBeamProfile {
   public:
     using Mantid::Algorithms::IBeamProfile::Ray;
+    GCC_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD1(generatePoint,
                        Ray(Mantid::Kernel::PseudoRandomNumberGenerator &));
+    GCC_DIAG_ON_SUGGEST_OVERRIDE
   };
 
   MCAbsorptionStrategy createTestObject() {

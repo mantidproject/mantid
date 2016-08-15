@@ -8,6 +8,8 @@
 #ifndef SUBPROJECTS__MANTIDFRAMEWORK_DATAHANDLING_SRC_XMLHANDLER_H_
 #define SUBPROJECTS__MANTIDFRAMEWORK_DATAHANDLING_SRC_XMLHANDLER_H_
 
+#include "MantidKernel/System.h"
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -28,7 +30,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-class XmlHandler {
+class DLLExport XmlHandler {
 public:
   XmlHandler();
   XmlHandler(std::string);

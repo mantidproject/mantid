@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.api import AlgorithmID, AlgorithmManager
 from testhelpers import run_algorithm
@@ -82,7 +84,7 @@ class AlgorithmTest(unittest.TestCase):
         parent_alg = AlgorithmManager.createUnmanaged('Load')
         try:
             child_alg = parent_alg.createChildAlgorithm(name='Rebin',version=1,startProgress=0.5,endProgress=0.9,enableLogging=True)
-        except Exception,exc:
+        except Exception as exc:
             self.fail("Expected createChildAlgorithm not to throw but it did: %s" % (str(exc)))
 
         # Unknown keyword

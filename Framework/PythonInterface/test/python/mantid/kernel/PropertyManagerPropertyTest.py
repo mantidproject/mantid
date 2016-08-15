@@ -1,9 +1,18 @@
-"""Test the exposed PropertyManagerProperty
+﻿"""Test the exposed PropertyManagerProperty
 """
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.kernel import PropertyManagerProperty, Direction, PropertyManager
 from mantid.api import Algorithm
 import numpy as np
+
+class FakeAlgorithm(Algorithm):
+    def PyInit(self):
+        self.declareProperty(PropertyManagerProperty("Args"))
+
+    def PyExec(self):
+        pass
 
 class PropertyManagerPropertyTest(unittest.TestCase):
 
@@ -23,20 +32,20 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         self._check_object_attributes(arr, name, direc)
 
     def test_set_property_on_algorithm_from_dictionary(self):
-        class FakeAlgorithm(Algorithm):
-            def PyInit(self):
-                self.declareProperty(PropertyManagerProperty("Args"))
-
-            def PyExec(self):
-                pass
-        #
         fake = FakeAlgorithm()
         fake.initialize()
-        fake.setProperty("Args", {'A': 1, 'B':10.5, 'C':'String arg', 
-                         'D': [0.0,11.3]})
+        fake.setProperty("Args", {'A': 1, 
+                                  'B':10.5, 
+                                  'C':'String arg', 
+                                  'D': [0.0,11.3], 
+                                  'E':{'F':10.4, 
+                                       'G': [1.0,2.0, 3.0],
+                                       'H':{'I': "test",
+                                       'J': 120.6}}})
+
         pmgr = fake.getProperty("Args").value
         self.assertTrue(isinstance(pmgr, PropertyManager))
-        self.assertEqual(4, len(pmgr))
+        self.assertEqual(5, len(pmgr))
         self.assertTrue('A' in pmgr)
         self.assertEqual(1, pmgr['A'].value)
         self.assertTrue('B' in pmgr)
@@ -47,6 +56,36 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         array_value = pmgr['D'].value
         self.assertEqual(0.0,array_value[0])
         self.assertEqual(11.3,array_value[1])
+
+        # Check the level-1 nested property manager property
+        # Get the level1-nested property manager 
+        nested_l1_pmgr = pmgr['E'].value
+        self.assertEqual(3, len(nested_l1_pmgr))
+        self.assertTrue('F' in nested_l1_pmgr)
+        self.assertEqual(10.4, nested_l1_pmgr['F'].value)
+        self.assertTrue('G' in nested_l1_pmgr)
+        self.assertEqual(1., nested_l1_pmgr['G'].value[0])
+        self.assertEqual(2., nested_l1_pmgr['G'].value[1])
+        self.assertEqual(3., nested_l1_pmgr['G'].value[2])
+        self.assertTrue('H' in nested_l1_pmgr)
+        self.assertTrue(isinstance(nested_l1_pmgr['H'].value, PropertyManager))
+
+        # Get the level2-nested property manager 
+        nested_l2_pmgr = nested_l1_pmgr['H'].value
+        self.assertTrue('I' in nested_l2_pmgr)
+        self.assertEqual("test", nested_l2_pmgr['I'].value)
+        self.assertTrue('J' in nested_l2_pmgr)
+        self.assertEqual(120.6, nested_l2_pmgr['J'].value)
+
+    def test_that_empty_sequence_in_property_manager_raises(self):
+        fake = FakeAlgorithm()
+        fake.initialize()
+        try:
+            fake.setProperty("Args", {'A': []})
+            has_raised = False
+        except RuntimeError:
+            has_raised = True
+        self.assertTrue(has_raised)
 
     def _check_object_attributes(self, prop, name, direction):
         self.assertEquals(prop.name, name)

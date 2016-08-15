@@ -25,12 +25,6 @@ using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
 
-/// Constructor
-PeakIntegration::PeakIntegration() : API::Algorithm(), m_IC(false) {}
-
-/// Destructor
-PeakIntegration::~PeakIntegration() {}
-
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */

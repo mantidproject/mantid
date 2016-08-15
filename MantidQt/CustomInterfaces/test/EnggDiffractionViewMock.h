@@ -1,9 +1,14 @@
 #ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H
 
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
 
 #include <gmock/gmock.h>
+
+class QwtData;
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 // This is a simple mock for the tomo interface view when using SCARF.
 class MockEnggDiffractionView
@@ -87,14 +92,19 @@ public:
   MOCK_METHOD3(newCalibLoaded, void(const std::string &, const std::string &,
                                     const std::string &));
 
+  // virtual std::vector<GSASCalibrationParms> currentCalibration() const
+  MOCK_CONST_METHOD0(
+      currentCalibration,
+      std::vector<MantidQt::CustomInterfaces::GSASCalibrationParms>());
+
   // virtual std::string enggRunPythonCode(const std::string &pyCode)
   MOCK_METHOD1(enggRunPythonCode, std::string(const std::string &));
 
   // virtual void enableTabs(bool enable);
   MOCK_METHOD1(enableTabs, void(bool));
 
-  // virtual void enableCalibrateAndFocusActions(bool enable);
-  MOCK_METHOD1(enableCalibrateAndFocusActions, void(bool));
+  // virtual void enableCalibrateFocusFitUserActions(bool enable);
+  MOCK_METHOD1(enableCalibrateFocusFitUserActions, void(bool));
 
   // virtual std::string focusingDir() const;
   MOCK_CONST_METHOD0(focusingDir, std::string());
@@ -132,52 +142,8 @@ public:
   // virtual double rebinningPulsesPerPeriod() const;
   MOCK_CONST_METHOD0(rebinningPulsesTime, double());
 
-  // virtual std::string fittingRunNo() const;
-  MOCK_CONST_METHOD0(getFittingRunNo, std::string());
-
-  // virtual std::string fittingPeaksData() const;
-  MOCK_CONST_METHOD0(fittingPeaksData, std::string());
-
   // virtual bool focusedOutWorkspace() const;
   MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
-
-  // virtual Splits the fitting directory if the ENGINX found
-  MOCK_METHOD1(splitFittingDirectory,
-               std::vector<std::string>(std::string &selectedfPath));
-
-  // adds the number of banks to the combo-box widget on the interface
-  MOCK_METHOD2(addBankItems, void(std::vector<std::string> splittedBaseName,
-                                  QString selectedFile));
-
-  // adds the run number to the list view widget on the interface
-  MOCK_METHOD2(addRunNoItem,
-               void(std::vector<std::string> runNumVector, bool multiRun));
-
-  // checks if the text-inputted is a valid run
-  MOCK_METHOD1(isDigit, bool(std::string text));
-
-  // emits the signal within view when run number / bank changed
-  MOCK_METHOD0(setBankEmit, void());
-
-  // gets the set focus directory within the setting tab
-  MOCK_METHOD0(getFocusDir, std::string());
-
-  // gets the global vector in view containing focused file directory
-  MOCK_METHOD0(getFittingRunNumVec, std::vector<std::string>());
-
-  // sets the global vector in view containing focused file directory
-  MOCK_METHOD1(setFittingRunNumVec, void(std::vector<std::string> assignVec));
-
-  // sets the fitting run number according to path
-  MOCK_METHOD1(setFittingRunNo, void(QString path));
-
-  // To determine whether the current loop is multi-run or single to avoid
-  // regenerating the list - view widget when not required
-  MOCK_METHOD0(getFittingMultiRunMode, bool());
-
-  // sets the fitting mode to multi-run or single to avoid
-  // regenerating the list - view widget when not required
-  MOCK_METHOD1(setFittingMultiRunMode, void(bool mode));
 
   // virtual bool plotCalibWorkspace
   MOCK_CONST_METHOD0(plotCalibWorkspace, bool());
@@ -213,5 +179,6 @@ public:
   // virtual void plotCalibOutput();
   MOCK_METHOD1(plotCalibOutput, void(const std::string &pyCode));
 };
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

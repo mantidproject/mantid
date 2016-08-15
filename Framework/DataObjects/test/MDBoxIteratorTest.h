@@ -1,19 +1,20 @@
 #ifndef MANTID_DATAOBJECTS_MDBOXITERATORTEST_H_
 #define MANTID_DATAOBJECTS_MDBOXITERATORTEST_H_
 
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDBoxIterator.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDGridBox.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDPlane.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidDataObjects/MDBoxIterator.h"
-#include "MantidDataObjects/MDEventFactory.h"
-#include "MantidDataObjects/MDGridBox.h"
-#include "MantidDataObjects/MDBox.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
-#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -492,7 +493,9 @@ public:
             pBC(MDBox<MDLeanEvent<2>, 2>::getBoxController())
 
       {}
+      GCC_DIAG_OFF_SUGGEST_OVERRIDE
       MOCK_CONST_METHOD0(getIsMasked, bool());
+      GCC_DIAG_ON_SUGGEST_OVERRIDE
       ~MockMDBox() override { delete pBC; }
     };
 
@@ -568,8 +571,10 @@ public:
     /// Mock Skipping Policy Type to inject.
     class MockSkippingPolicy : public SkippingPolicy {
     public:
+      GCC_DIAG_OFF_SUGGEST_OVERRIDE
       MOCK_CONST_METHOD0(keepGoing, bool());
       MOCK_METHOD0(Die, void());
+      GCC_DIAG_ON_SUGGEST_OVERRIDE
       ~MockSkippingPolicy() override { Die(); }
     };
 

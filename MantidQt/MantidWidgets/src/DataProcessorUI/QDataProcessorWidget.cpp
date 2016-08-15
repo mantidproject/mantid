@@ -3,7 +3,7 @@
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTableModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 
 #include <QWidget>
@@ -18,10 +18,12 @@ using namespace Mantid::API;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
+* @param presenter :: [input] A unique ptr to the presenter
+* @param parent :: [input] The parent of this view
 */
 QDataProcessorWidget::QDataProcessorWidget(
-    boost::shared_ptr<DataProcessorPresenter> presenter, QWidget *parent)
-    : MantidWidget(parent), m_presenter(presenter),
+    std::unique_ptr<DataProcessorPresenter> presenter, QWidget *parent)
+    : MantidWidget(parent), m_presenter(std::move(presenter)),
       m_openMap(new QSignalMapper(this)) {
 
   createTable();
@@ -46,8 +48,11 @@ void QDataProcessorWidget::createTable() {
   ui.rowToolBar->addAction(QWhatsThis::createAction(this));
 
   // Allow rows and columns to be reordered
-  ui.viewTable->verticalHeader()->setMovable(true);
-  ui.viewTable->horizontalHeader()->setMovable(true);
+  QHeaderView *header = new QHeaderView(Qt::Horizontal);
+  header->setMovable(true);
+  header->setStretchLastSection(true);
+  header->setResizeMode(QHeaderView::ResizeToContents);
+  ui.viewTable->setHeader(header);
 
   // Re-emit a signal when the instrument changes
   connect(ui.comboProcessInstrument, SIGNAL(currentIndexChanged(int)), this,
@@ -75,22 +80,20 @@ this method is intended to be called by the presenter
 @param name : the string name of the workspace to be grabbed
 */
 void QDataProcessorWidget::setModel(const std::string &name) {
-  m_toOpen = name;
-  m_presenter->notify(DataProcessorPresenter::OpenTableFlag);
+  setModel(QString::fromStdString(name));
 }
 
 /**
 Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
-void QDataProcessorWidget::showTable(QDataProcessorTableModel_sptr model) {
+void QDataProcessorWidget::showTable(QDataProcessorTreeModel_sptr model) {
   m_model = model;
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),
           SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
           SLOT(tableUpdated(const QModelIndex &, const QModelIndex &)));
   ui.viewTable->setModel(m_model.get());
-  ui.viewTable->resizeColumnsToContents();
 }
 
 /**
@@ -119,20 +122,6 @@ void QDataProcessorWidget::setTableList(const std::set<std::string> &tables) {
 }
 
 /**
-This slot notifies the presenter that the "save" button has been pressed
-*/
-void QDataProcessorWidget::on_actionSaveTable_triggered() {
-  m_presenter->notify(DataProcessorPresenter::SaveFlag);
-}
-
-/**
-This slot notifies the presenter that the "save as" button has been pressed
-*/
-void QDataProcessorWidget::on_actionSaveTableAs_triggered() {
-  m_presenter->notify(DataProcessorPresenter::SaveAsFlag);
-}
-
-/**
 This slot notifies the presenter that the "append row" button has been pressed
 */
 void QDataProcessorWidget::on_actionAppendRow_triggered() {
@@ -140,17 +129,24 @@ void QDataProcessorWidget::on_actionAppendRow_triggered() {
 }
 
 /**
-This slot notifies the presenter that the "prepend row" button has been pressed
+This slot notifies the presenter that the "append group" button has been pressed
 */
-void QDataProcessorWidget::on_actionPrependRow_triggered() {
-  m_presenter->notify(DataProcessorPresenter::PrependRowFlag);
+void QDataProcessorWidget::on_actionAppendGroup_triggered() {
+  m_presenter->notify(DataProcessorPresenter::AppendGroupFlag);
 }
 
 /**
-This slot notifies the presenter that the "delete" button has been pressed
+This slot notifies the presenter that the "delete row" button has been pressed
 */
 void QDataProcessorWidget::on_actionDeleteRow_triggered() {
   m_presenter->notify(DataProcessorPresenter::DeleteRowFlag);
+}
+
+/**
+This slot notifies the presenter that the "delete group" button has been pressed
+*/
+void QDataProcessorWidget::on_actionDeleteGroup_triggered() {
+  m_presenter->notify(DataProcessorPresenter::DeleteGroupFlag);
 }
 
 /**
@@ -200,39 +196,11 @@ void QDataProcessorWidget::on_actionPasteSelected_triggered() {
 }
 
 /**
-This slot notifies the presenter that the "new table" button has been pressed
-*/
-void QDataProcessorWidget::on_actionNewTable_triggered() {
-  m_presenter->notify(DataProcessorPresenter::NewTableFlag);
-}
-
-/**
 This slot notifies the presenter that the "expand selection" button has been
 pressed
 */
 void QDataProcessorWidget::on_actionExpandSelection_triggered() {
   m_presenter->notify(DataProcessorPresenter::ExpandSelectionFlag);
-}
-
-/**
-This slot notifies the presenter that the "options..." button has been pressed
-*/
-void QDataProcessorWidget::on_actionOptionsDialog_triggered() {
-  m_presenter->notify(DataProcessorPresenter::OptionsDialogFlag);
-}
-
-/**
-This slot notifies the presenter that the "export table" button has been pressed
-*/
-void QDataProcessorWidget::on_actionExportTable_triggered() {
-  m_presenter->notify(DataProcessorPresenter::ExportTableFlag);
-}
-
-/**
-This slot notifies the presenter that the "import table" button has been pressed
-*/
-void QDataProcessorWidget::on_actionImportTable_triggered() {
-  m_presenter->notify(DataProcessorPresenter::ImportTableFlag);
 }
 
 /**
@@ -295,8 +263,8 @@ void QDataProcessorWidget::showContextMenu(const QPoint &pos) {
   menu->addAction(ui.actionPlotRow);
   menu->addAction(ui.actionPlotGroup);
   menu->addSeparator();
-  menu->addAction(ui.actionPrependRow);
   menu->addAction(ui.actionAppendRow);
+  menu->addAction(ui.actionAppendGroup);
   menu->addSeparator();
   menu->addAction(ui.actionGroupRows);
   menu->addAction(ui.actionCopySelected);
@@ -305,102 +273,9 @@ void QDataProcessorWidget::showContextMenu(const QPoint &pos) {
   menu->addAction(ui.actionClearSelected);
   menu->addSeparator();
   menu->addAction(ui.actionDeleteRow);
+  menu->addAction(ui.actionDeleteGroup);
 
   menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
-}
-
-/**
-Show an critical error dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void QDataProcessorWidget::giveUserCritical(std::string prompt,
-                                            std::string title) {
-  QMessageBox::critical(this, QString(title.c_str()), QString(prompt.c_str()),
-                        QMessageBox::Ok, QMessageBox::Ok);
-}
-
-/**
-Show a warning dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void QDataProcessorWidget::giveUserWarning(std::string prompt,
-                                           std::string title) {
-  QMessageBox::warning(this, QString(title.c_str()), QString(prompt.c_str()),
-                       QMessageBox::Ok, QMessageBox::Ok);
-}
-
-/**
-Ask the user a Yes/No question
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@returns a boolean true if Yes, false if No
-*/
-bool QDataProcessorWidget::askUserYesNo(std::string prompt, std::string title) {
-  auto response = QMessageBox::question(
-      this, QString(title.c_str()), QString(prompt.c_str()),
-      QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-  if (response == QMessageBox::Yes) {
-    return true;
-  }
-  return false;
-}
-
-/**
-Ask the user to enter a string.
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@param defaultValue : The default value entered.
-@returns The user's string if submitted, or an empty string
-*/
-std::string
-QDataProcessorWidget::askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue) {
-  bool ok;
-  QString text = QInputDialog::getText(
-      this, QString::fromStdString(title), QString::fromStdString(prompt),
-      QLineEdit::Normal, QString::fromStdString(defaultValue), &ok);
-  if (ok)
-    return text.toStdString();
-  return "";
-}
-
-/**
-Show the user the dialog for an algorithm
-* @param algorithm : [input] The algorithm
-*/
-void QDataProcessorWidget::showAlgorithmDialog(const std::string &algorithm) {
-  std::stringstream pythonSrc;
-  pythonSrc << "try:\n";
-  pythonSrc << "  algm = " << algorithm << "Dialog()\n";
-  pythonSrc << "except:\n";
-  pythonSrc << "  pass\n";
-  runPythonCode(QString::fromStdString(pythonSrc.str()), false);
-}
-
-/**
-Show the user the dialog for "LoadReflTBL"
-*/
-void QDataProcessorWidget::showImportDialog() {
-  std::stringstream pythonSrc;
-  pythonSrc << "try:\n";
-  pythonSrc << "  algm = "
-            << "LoadTBL"
-            << "Dialog()\n";
-  pythonSrc << "  print algm.getPropertyValue(\"OutputWorkspace\")\n";
-  pythonSrc << "except:\n";
-  pythonSrc << "  pass\n";
-  // outputWorkspaceName will hold the name of the workspace
-  // otherwise this should be an empty string.
-  QString outputWorkspaceName =
-      runPythonCode(QString::fromStdString(pythonSrc.str()), false);
-  m_toOpen = outputWorkspaceName.trimmed().toStdString();
-  // notifying the presenter that a new table should be opened
-  // The presenter will ask about any unsaved changes etc
-  // before opening the new table
-  m_presenter->notify(DataProcessorPresenter::OpenTableFlag);
 }
 
 /**
@@ -459,26 +334,6 @@ void QDataProcessorWidget::loadSettings(
 }
 
 /**
-Plot a set of workspaces
-* @param workspaces : [input] The list of workspaces as a set
-*/
-void QDataProcessorWidget::plotWorkspaces(
-    const std::set<std::string> &workspaces) {
-  if (workspaces.empty())
-    return;
-
-  std::stringstream pythonSrc;
-  pythonSrc << "base_graph = None\n";
-  for (auto ws = workspaces.begin(); ws != workspaces.end(); ++ws)
-    pythonSrc << "base_graph = plotSpectrum(\"" << *ws
-              << "\", 0, True, window = base_graph)\n";
-
-  pythonSrc << "base_graph.activeLayer().logLogAxes()\n";
-
-  runPythonCode(QString::fromStdString(pythonSrc.str()));
-}
-
-/**
 Set the range of the progress bar
 @param min : The minimum value of the bar
 @param max : The maxmimum value of the bar
@@ -504,17 +359,19 @@ bool QDataProcessorWidget::getEnableNotebook() {
 }
 
 /**
-Set which rows are selected
-@param rows : The set of rows to select
+Set which groups are selected
+@param groups : The set of groups to select
 */
-void QDataProcessorWidget::setSelection(const std::set<int> &rows) {
+void QDataProcessorWidget::setSelection(const std::set<int> &groups) {
+
   ui.viewTable->clearSelection();
   auto selectionModel = ui.viewTable->selectionModel();
 
-  for (auto row = rows.begin(); row != rows.end(); ++row)
-    selectionModel->select(ui.viewTable->model()->index((*row), 0),
+  for (auto group = groups.begin(); group != groups.end(); ++group) {
+    selectionModel->select(ui.viewTable->model()->index((*group), 0),
                            QItemSelectionModel::Select |
                                QItemSelectionModel::Rows);
+  }
 }
 
 /**
@@ -550,47 +407,6 @@ void QDataProcessorWidget::setOptionsHintStrategy(HintStrategy *hintStrategy,
 }
 
 /**
-* Adds the specified HintingLineEdit widgets to this view. A hinting line edit
-* comes with a label and an algorithm's name. Headings are also shown.
-* @param stages : The stages, pre-process, process or post-process, as a vector
-* @param algNames : The algorithm names as a vector
-* @param hints : The hints for each algorithm as a vector
-*/
-void QDataProcessorWidget::setGlobalOptions(
-    const std::vector<std::string> &stages,
-    const std::vector<std::string> &algNames,
-    const std::vector<std::map<std::string, std::string>> &hints) {
-  // Headers
-  QLabel *stageHeader = new QLabel(QString::fromStdString("<b>Stage</b>"));
-  QLabel *algorithmHeader =
-      new QLabel(QString::fromStdString("<b>Algorithm</b>"));
-  QLabel *optionsHeader =
-      new QLabel(QString::fromStdString("<b>Global Options</b>"));
-  stageHeader->setMinimumHeight(30);
-  ui.processLayout->addWidget(stageHeader, 0, 0);
-  ui.processLayout->addWidget(algorithmHeader, 0, 1);
-  ui.processLayout->addWidget(optionsHeader, 0, 2);
-
-  int rows = static_cast<int>(stages.size());
-
-  for (int row = 0; row < rows; row++) {
-
-    // The title
-    QLabel *stageLabel =
-        new QLabel(QString::fromStdString(stages.at(row)), this);
-    stageLabel->setMinimumSize(100, 10);
-    ui.processLayout->addWidget(stageLabel, row + 1, 0);
-    // The name
-    QLabel *nameLabel =
-        new QLabel(QString::fromStdString(algNames.at(row)), this);
-    ui.processLayout->addWidget(new HintingLineEdit(this, hints.at(row)),
-                                row + 1, 2);
-    // The content
-    ui.processLayout->addWidget(nameLabel, row + 1, 1);
-  }
-}
-
-/**
 Sets the contents of the system's clipboard
 @param text The contents of the clipboard
 */
@@ -607,18 +423,50 @@ std::string QDataProcessorWidget::getProcessInstrument() const {
 }
 
 /**
-Get the indices of the highlighted rows
-@returns a set of ints containing the highlighted row numbers
+Get the indices of the highlighted runs (rows)
+@returns :: a map where keys are group indices and values are sets containing
+the highlighted row numbers
 */
-std::set<int> QDataProcessorWidget::getSelectedRows() const {
-  std::set<int> rows;
+std::map<int, std::set<int>> QDataProcessorWidget::getSelectedRows() const {
+  std::map<int, std::set<int>> rows;
   auto selectionModel = ui.viewTable->selectionModel();
   if (selectionModel) {
     auto selectedRows = selectionModel->selectedRows();
-    for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it)
-      rows.insert(it->row());
+    for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
+
+      if (it->parent().isValid()) {
+        // This item is a run (row)
+        // Add run and corresponding group
+        int run = it->row();
+        int group = it->parent().row();
+        rows[group].insert(run);
+      }
+      // else :
+      // A group was selected, selected groups can be retrieved using
+      // getSelectedGroups()
+    }
   }
   return rows;
+}
+
+/**
+Get the indices of the highlighted groups
+@returns :: a sets containing
+the highlighted row numbers
+*/
+std::set<int> QDataProcessorWidget::getSelectedGroups() const {
+  std::set<int> groups;
+  auto selectionModel = ui.viewTable->selectionModel();
+  if (selectionModel) {
+    auto selectedRows = selectionModel->selectedRows();
+    for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
+      if (!it->parent().isValid()) {
+        // This group was selected
+        groups.insert(it->row());
+      }
+    }
+  }
+  return groups;
 }
 
 /**
@@ -633,9 +481,8 @@ std::string QDataProcessorWidget::getWorkspaceToOpen() const {
 Get a pointer to the presenter that's currently controlling this view.
 @returns A pointer to the presenter
 */
-boost::shared_ptr<DataProcessorPresenter>
-QDataProcessorWidget::getTablePresenter() const {
-  return m_presenter;
+DataProcessorPresenter *QDataProcessorWidget::getPresenter() const {
+  return m_presenter.get();
 }
 
 /**
@@ -650,30 +497,6 @@ std::string QDataProcessorWidget::getClipboard() const {
 * Clear the progress
 */
 void QDataProcessorWidget::clearProgress() { ui.progressBar->reset(); }
-
-/**
-* Returns the processing instructions for the specified algorithm
-* @param name : The name of the algorithm
-* @return : The processing instructions specified by the user
-*/
-std::string
-QDataProcessorWidget::getProcessingOptions(const std::string &name) const {
-
-  const int nrows = ui.processLayout->rowCount();
-  for (int r = 0; r < nrows; r++) {
-
-    auto widget = ui.processLayout->itemAtPosition(r + 1, 1)->widget();
-    auto text = static_cast<QLabel *>(widget)->text().toStdString();
-    if (text == name) {
-      // This is the algorithm for which we need the processing instructions
-      // (options)
-      auto widget = ui.processLayout->itemAtPosition(r + 1, 2)->widget();
-      auto text = static_cast<HintingLineEdit *>(widget)->text().toStdString();
-      return text;
-    }
-  }
-  return "";
-}
 
 } // namespace MantidWidgets
 } // namespace Mantid

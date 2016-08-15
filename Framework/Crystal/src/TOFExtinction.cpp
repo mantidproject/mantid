@@ -3,6 +3,7 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/ListValidator.h"
 #include <fstream>
@@ -19,18 +20,6 @@ namespace Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 // DECLARE_ALGORITHM(TOFExtinction)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-TOFExtinction::TOFExtinction() : m_smu(0.), m_amu(0.), m_radius(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-TOFExtinction::~TOFExtinction() {}
-
-//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -72,16 +61,13 @@ void TOFExtinction::exec() {
   if (peaksW != inPeaksW)
     peaksW = inPeaksW->clone();
 
-  const Kernel::Material *m_sampleMaterial =
-      &(inPeaksW->sample().getMaterial());
-  if (m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) !=
+  const auto sampleMaterial = inPeaksW->sample().getMaterial();
+  if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
       0.0) {
-    double rho = m_sampleMaterial->numberDensity();
+    double rho = sampleMaterial.numberDensity();
     m_smu =
-        m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) *
-        rho;
-    m_amu =
-        m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+        sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
+    m_amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
   } else {
     throw std::invalid_argument(
         "Could not retrieve LinearScatteringCoef from material");

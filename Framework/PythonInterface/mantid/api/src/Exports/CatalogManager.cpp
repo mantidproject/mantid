@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidAPI/CatalogManager.h"
 
 #include <boost/python/class.hpp>
@@ -9,6 +10,8 @@
 
 using namespace Mantid::API;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(CatalogManagerImpl)
 
 boost::python::object getActiveSessionsAsList(CatalogManagerImpl &self) {
   boost::python::list sessions;

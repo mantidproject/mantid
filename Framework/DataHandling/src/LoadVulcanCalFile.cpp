@@ -36,19 +36,6 @@ const size_t NUMBERDETECTORPERMODULE = 1232;
 const size_t NUMBERRESERVEDPERMODULE = 1250;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadVulcanCalFile::LoadVulcanCalFile()
-    : m_instrument(), m_groupingType(VULCAN_OFFSET_BANK), m_offsetFilename(""),
-      m_badPixFilename(""), m_tofOffsetsWS(), m_offsetsWS(), m_groupWS(),
-      m_maskWS(), m_doAlignEventWS(false), m_eventWS(), m_effLTheta() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadVulcanCalFile::~LoadVulcanCalFile() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadVulcanCalFile::init() {
@@ -213,8 +200,6 @@ void LoadVulcanCalFile::processInOutProperites() {
     m_doAlignEventWS = true;
   else
     m_doAlignEventWS = false;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -222,7 +207,7 @@ void LoadVulcanCalFile::processInOutProperites() {
   */
 void LoadVulcanCalFile::setupGroupingWorkspace() {
   // Get the right group option for CreateGroupingWorkspace
-  string groupdetby = "";
+  string groupdetby;
   switch (m_groupingType) {
   case VULCAN_OFFSET_BANK:
     groupdetby = "bank";
@@ -266,8 +251,6 @@ void LoadVulcanCalFile::setupGroupingWorkspace() {
                   "Set the output GroupingWorkspace. ");
   m_groupWS->mutableRun().addProperty("Filename", m_offsetFilename);
   setProperty("OutputGroupingWorkspace", m_groupWS);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -318,8 +301,6 @@ void LoadVulcanCalFile::setupMaskWorkspace() {
     }
   }
   g_log.information(msg.str());
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -340,8 +321,6 @@ void LoadVulcanCalFile::generateOffsetsWorkspace() {
 
   // Convert to Mantid offset values
   convertOffsets();
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -367,8 +346,6 @@ void LoadVulcanCalFile::readOffsetFile(
     detid_t detid = static_cast<detid_t>(pid);
     map_detoffset.emplace(detid, offset);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -497,8 +474,6 @@ void LoadVulcanCalFile::processOffsets(
     double offset = offsetiter->second + bankcorriter->second;
     m_tofOffsetsWS->dataY(iws)[0] = pow(10., offset);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -524,8 +499,6 @@ void LoadVulcanCalFile::alignEventWorkspace() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -598,8 +571,6 @@ void LoadVulcanCalFile::convertOffsets() {
                        1.;
     m_offsetsWS->dataY(iws)[0] = manoffset;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

@@ -16,7 +16,7 @@ DeprecatedAlgorithm::DeprecatedAlgorithm()
     : m_replacementAlgorithm(), m_replacementVersion(-1), m_deprecatedDate() {}
 
 /// Does nothing other than make the compiler happy.
-DeprecatedAlgorithm::~DeprecatedAlgorithm() {}
+DeprecatedAlgorithm::~DeprecatedAlgorithm() = default;
 
 /// The algorithm to use instead of this one.
 /// @param replacement Name of the algorithm that replaces the deprecated one

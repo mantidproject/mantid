@@ -19,16 +19,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(PeakIntensityVsRadius)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PeakIntensityVsRadius::PeakIntensityVsRadius() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeakIntensityVsRadius::~PeakIntensityVsRadius() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PeakIntensityVsRadius::name() const {
   return "PeakIntensityVsRadius";

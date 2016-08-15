@@ -37,8 +37,6 @@ class DLLExport SaveNXSPE : public API::Algorithm {
 public:
   /// Constructor
   SaveNXSPE();
-  /// Virtual dtor
-  ~SaveNXSPE() override {}
   const std::string name() const override { return "SaveNXSPE"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {

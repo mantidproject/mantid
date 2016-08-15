@@ -2,6 +2,7 @@
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 #include <boost/make_shared.hpp>
@@ -10,15 +11,42 @@
 
 using boost::python::dict;
 using boost::python::extract;
+using boost::python::handle;
 using boost::python::len;
 using boost::python::object;
 
 namespace Mantid {
 using Kernel::Direction;
 using Kernel::PropertyManager;
+using Kernel::PropertyManager_sptr;
 using Kernel::PropertyWithValue;
 namespace PythonInterface {
 namespace Registry {
+
+namespace {
+/**
+ * Create a new PropertyManager from the given dict
+ * @param mapping A wrapper around a Python dict instance
+ * @return A shared_ptr to a new PropertyManager
+ */
+PropertyManager_sptr createPropertyManager(const dict &mapping) {
+  auto pmgr = boost::make_shared<PropertyManager>();
+#if PY_MAJOR_VERSION >= 3
+  object view(mapping.attr("items")());
+  object itemIter(handle<>(PyObject_GetIter(view.ptr())));
+#else
+  object itemIter(mapping.attr("iteritems")());
+#endif
+  auto length = len(mapping);
+  for (ssize_t i = 0; i < length; ++i) {
+    const object keyValue(handle<>(PyIter_Next(itemIter.ptr())));
+    const std::string cppkey = extract<std::string>(keyValue[0])();
+    pmgr->declareProperty(PropertyWithValueFactory::create(cppkey, keyValue[1],
+                                                           Direction::Input));
+  }
+  return pmgr;
+}
+}
 
 /**
  * Sets the named property in the PropertyManager by extracting a new
@@ -29,22 +57,11 @@ namespace Registry {
  */
 void MappingTypeHandler::set(Kernel::IPropertyManager *alg,
                              const std::string &name,
-                             const boost::python::api::object &mapping) const {
+                             const object &mapping) const {
   if (!PyObject_TypeCheck(mapping.ptr(), &PyDict_Type)) {
     throw std::invalid_argument("Property " + name + " expects a dictionary");
   }
-  auto cppvalue = boost::make_shared<PropertyManager>();
-  dict pydict(mapping);
-  object iterkeys(pydict.iterkeys()), itervalues(pydict.itervalues());
-  auto length = len(pydict);
-  for (ssize_t i = 0; i < length; ++i) {
-    const auto pykey = iterkeys.attr("next")();
-    const auto pyvalue = itervalues.attr("next")();
-    const std::string cppkey = extract<std::string>(pykey)();
-    cppvalue->declareProperty(
-        PropertyWithValueFactory::create(cppkey, pyvalue, Direction::Input));
-  }
-  alg->setProperty(name, cppvalue);
+  alg->setProperty(name, createPropertyManager(dict(mapping)));
 }
 
 /**
@@ -57,16 +74,14 @@ void MappingTypeHandler::set(Kernel::IPropertyManager *alg,
  * @returns A pointer to a newly constructed property instance
  */
 std::unique_ptr<Kernel::Property>
-MappingTypeHandler::create(const std::string &name,
-                           const boost::python::api::object &defaultValue,
-                           const boost::python::api::object &validator,
+MappingTypeHandler::create(const std::string &name, const object &defaultValue,
+                           const boost::python::api::object &,
                            const unsigned int direction) const {
-  UNUSED_ARG(name);
-  UNUSED_ARG(defaultValue);
-  UNUSED_ARG(validator);
-  UNUSED_ARG(direction);
-  throw std::runtime_error("A mapping type property should use the "
-                           "PropertyManagerProperty directly");
+  // Wrap the property manager in a PropertyManagerProperty instance.
+  std::unique_ptr<Kernel::Property> valueProp =
+      Kernel::make_unique<Kernel::PropertyManagerProperty>(
+          name, createPropertyManager(dict(defaultValue)), direction);
+  return valueProp;
 }
 }
 }

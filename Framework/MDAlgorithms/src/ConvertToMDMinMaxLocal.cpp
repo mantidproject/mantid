@@ -18,16 +18,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(ConvertToMDMinMaxLocal)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-ConvertToMDMinMaxLocal::ConvertToMDMinMaxLocal() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-ConvertToMDMinMaxLocal::~ConvertToMDMinMaxLocal() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToMDMinMaxLocal::name() const {
   return "ConvertToMDMinMaxLocal";

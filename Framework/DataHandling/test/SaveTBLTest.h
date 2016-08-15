@@ -1,16 +1,16 @@
 #ifndef SAVETBLTEST_H_
 #define SAVETBLTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/SaveTBL.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include <fstream>
+#include "MantidDataHandling/SaveTBL.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -82,7 +82,9 @@ public:
         << "0.01"
         << "0.06"
         << "0.04"
-        << "2.0" << 4 << "";
+        << "2.0"
+        << "4"
+        << "";
 
     row = ws->appendRow();
     row << "13470"
@@ -91,7 +93,9 @@ public:
         << "0.035"
         << "0.3"
         << "0.04"
-        << "2.0" << 5 << "";
+        << "2.0"
+        << "5"
+        << "";
 
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
@@ -147,7 +151,9 @@ public:
         << "0.01"
         << "0.06"
         << "0.04"
-        << "2.0" << 1 << "";
+        << "2.0"
+        << "1"
+        << "";
     row = ws->appendRow();
     row << "13464"
         << "0.73"
@@ -155,7 +161,9 @@ public:
         << "0.012"
         << "0.064"
         << "0.04"
-        << "2.0" << 1 << "";
+        << "2.0"
+        << "1"
+        << "";
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
     alg->setRethrows(true);
@@ -169,7 +177,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(m_name));
   }
 
-  void testNonIntegerGroupColumn() {
+  void testIntegerGroupColumn() {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
     AnalysisDataService::Instance().addOrReplace(m_name, ws);
     auto colRuns = ws->addColumn("str", "Run(s)");
@@ -179,7 +187,7 @@ public:
     auto colQmax = ws->addColumn("str", "Qmax");
     auto colDqq = ws->addColumn("str", "dq/q");
     auto colScale = ws->addColumn("str", "Scale");
-    auto colGroup = ws->addColumn("str", "Group");
+    auto colGroup = ws->addColumn("int", "Group");
     auto colOptions = ws->addColumn("str", "Options");
     colRuns->setPlotType(0);
     colTheta->setPlotType(0);
@@ -196,9 +204,7 @@ public:
         << "0.01"
         << "0.06"
         << "0.04"
-        << "2.0"
-        << "1"
-        << "";
+        << "2.0" << 1 << "";
 
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
@@ -258,7 +264,7 @@ private:
     auto colQmax = ws->addColumn("str", "Qmax");
     auto colDqq = ws->addColumn("str", "dq/q");
     auto colScale = ws->addColumn("str", "Scale");
-    auto colStitch = ws->addColumn("int", "StitchGroup");
+    auto colStitch = ws->addColumn("str", "StitchGroup");
     auto colOptions = ws->addColumn("str", "Options");
 
     colRuns->setPlotType(0);
@@ -278,7 +284,9 @@ private:
         << "0.01"
         << "0.06"
         << "0.04"
-        << "2.0" << 1 << "";
+        << "2.0"
+        << "1"
+        << "";
 
     row = ws->appendRow();
     row << "13462"
@@ -287,7 +295,9 @@ private:
         << "0.035"
         << "0.3"
         << "0.04"
-        << "2.0" << 1 << "";
+        << "2.0"
+        << "1"
+        << "";
 
     row = ws->appendRow();
     row << "13470"
@@ -296,7 +306,9 @@ private:
         << "0.035"
         << "0.3"
         << "0.04"
-        << "2.0" << 1 << "";
+        << "2.0"
+        << "1"
+        << "";
 
     row = ws->appendRow();
     row << "13460"
@@ -305,7 +317,9 @@ private:
         << "0.01"
         << "0.06"
         << "0.04"
-        << "2.0" << 2 << "";
+        << "2.0"
+        << "2"
+        << "";
 
     row = ws->appendRow();
     row << "13462"
@@ -314,7 +328,9 @@ private:
         << "0.035"
         << "0.3"
         << "0.04"
-        << "2.0" << 2 << "";
+        << "2.0"
+        << "2"
+        << "";
 
     row = ws->appendRow();
     row << "13470"
@@ -323,7 +339,9 @@ private:
         << "0.035"
         << "0.3"
         << "0.04"
-        << "2.0" << 3 << "";
+        << "2.0"
+        << "3"
+        << "";
 
     row = ws->appendRow();
     row << "13460"
@@ -332,7 +350,9 @@ private:
         << "0.01"
         << "0.06"
         << "0.04"
-        << "2.0" << 0 << "";
+        << "2.0"
+        << "0"
+        << "";
 
     row = ws->appendRow();
     row << "13462"
@@ -341,7 +361,9 @@ private:
         << "0.035"
         << "0.3"
         << "0.4"
-        << "3.0" << 3 << "";
+        << "3.0"
+        << "3"
+        << "";
 
     row = ws->appendRow();
     row << "13470"
@@ -350,7 +372,9 @@ private:
         << "0.035"
         << "0.3"
         << "0.04"
-        << "2.0" << 4 << "";
+        << "2.0"
+        << "4"
+        << "";
 
     return ws;
   }

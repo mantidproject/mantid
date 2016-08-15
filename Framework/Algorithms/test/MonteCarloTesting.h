@@ -7,6 +7,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <gmock/gmock.h>
@@ -22,6 +23,7 @@ namespace MonteCarloTesting {
 // -----------------------------------------------------------------------------
 class MockRNG final : public Mantid::Kernel::PseudoRandomNumberGenerator {
 public:
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(nextValue, double());
   MOCK_METHOD2(nextValue, double(double, double));
   MOCK_METHOD2(nextInt, int(int, int));
@@ -30,6 +32,7 @@ public:
   MOCK_METHOD0(restore, void());
   MOCK_METHOD1(setSeed, void(size_t));
   MOCK_METHOD2(setRange, void(const double, const double));
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
 
 // -----------------------------------------------------------------------------

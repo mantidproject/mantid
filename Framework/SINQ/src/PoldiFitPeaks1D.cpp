@@ -26,12 +26,6 @@ using namespace CurveFitting;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PoldiFitPeaks1D)
 
-PoldiFitPeaks1D::PoldiFitPeaks1D()
-    : m_peaks(), m_profileTemplate(), m_backgroundTemplate(), m_profileTies(),
-      m_fwhmMultiples(1.0) {}
-
-PoldiFitPeaks1D::~PoldiFitPeaks1D() {}
-
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PoldiFitPeaks1D::name() const { return "PoldiFitPeaks1D"; }
 

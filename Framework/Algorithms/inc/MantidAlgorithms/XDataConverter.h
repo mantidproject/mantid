@@ -8,6 +8,9 @@
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramX;
+}
 namespace Algorithms {
 /**
   This is an abstract base class for sharing methods between algorithms that
@@ -76,7 +79,7 @@ private:
   /// Flag if the X data is shared
   bool m_sharedX;
   /// Cached data for shared X values
-  MantidVecPtr m_cachedX;
+  Kernel::cow_ptr<HistogramData::HistogramX> m_cachedX{nullptr};
 };
 
 } // namespace Algorithm

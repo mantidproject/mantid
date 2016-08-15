@@ -57,6 +57,9 @@ private:
   void exec() override;
 };
 
+std::string MANTID_DATAHANDLING_DLL
+makeCanSASRelaxedName(const std::string &input);
+
 } // namespace DataHandling
 } // namespace Mantid
 

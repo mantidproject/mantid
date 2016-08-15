@@ -74,12 +74,7 @@ public:
     }
 
     // Half the previous # of events
-    if (numPixels <= 1) {
-      TS_ASSERT_DELTA(output->getNumberEvents(), 100 * numPixels,
-                      PARALLEL_GET_MAX_THREADS * 2);
-    } else {
-      TS_ASSERT_EQUALS(output->getNumberEvents(), 100 * numPixels);
-    }
+    TS_ASSERT_EQUALS(output->getNumberEvents(), 100 * numPixels);
 
     // Event list is now of type WeightedEventNoTime
     TS_ASSERT_EQUALS(output->getEventType(), WEIGHTED_NOTIME);

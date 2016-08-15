@@ -108,6 +108,8 @@ public:
   const Mantid::Kernel::PropertyHistories &getProperties() const {
     return m_properties;
   }
+  /// get the string representation of a specified property
+  const std::string &getPropertyValue(const std::string &name) const;
   /// get the child histories of this history object
   const AlgorithmHistories &getChildHistories() const {
     return m_childHistories;

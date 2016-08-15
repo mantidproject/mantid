@@ -27,8 +27,8 @@ Usage
 .. testcode:: ReplicateMDExample1D
 
    import numpy as np
-   data = CreateMDHistoWorkspace(1, SignalInput=np.arange(100), ErrorInput=np.arange(100), NumberOfEvents=np.arange(100), Extents=[-10, 10], NumberOfBins=[100], Names='E', Units='MeV')
-   shape = CreateMDHistoWorkspace(2, SignalInput=np.tile([1], 10000), ErrorInput=np.tile([1], 10000), NumberOfEvents=np.tile([1], 10000), Extents=[-1,1, -10, 10], NumberOfBins=[100,100], Names='Q,E', Units='A^-1, MeV')
+   data = CreateMDHistoWorkspace(2, SignalInput=np.arange(20*30), ErrorInput=np.arange(20*30), NumberOfEvents=np.arange(20*30), Extents=[-10, 10, -1,1], NumberOfBins=[20, 30], Names='E,Qx', Units='MeV,A^-1')
+   shape = CreateMDHistoWorkspace(3, SignalInput=np.tile([1], 20*30*10), ErrorInput=np.tile([1], 20*30*10), NumberOfEvents=np.tile([1], 20*30*10), Extents=[-1,1, -10, 10, -10,10], NumberOfBins=[30,20,10], Names='Qx,E,Qy', Units='A^-1, MeV, A^-1')
 
    replicated = ReplicateMD(ShapeWorkspace=shape, DataWorkspace=data)
 
@@ -39,8 +39,8 @@ Output:
 
 .. testoutput:: ReplicateMDExample1D
 
-   Num dims: 2
-   Num points: 10000
+   Num dims: 3
+   Num points: 6000
 
 .. categories::
 

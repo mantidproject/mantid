@@ -127,7 +127,7 @@ void SampleEnvironmentSpecParser::parseMaterials(Poco::XML::Element *element) {
   MaterialXMLParser parser;
   while (node) {
     auto material = parser.parse(static_cast<Poco::XML::Element *>(node));
-    m_materials.insert(std::make_pair(material.name(), material));
+    m_materials.emplace(material.name(), material);
     node = nodeIter.nextNode();
   }
 }

@@ -214,23 +214,17 @@ void MDNormDirectSC::cacheInputs() {
 std::string MDNormDirectSC::inputEnergyMode() const {
   const auto &hist = m_inputWS->getHistory();
   const size_t nalgs = hist.size();
-  const auto &lastAlgorithm = hist.lastAlgorithm();
+  const auto &lastAlgHist = hist.getAlgorithmHistory(nalgs - 1);
+  const auto &penultimateAlgHist = hist.getAlgorithmHistory(nalgs - 2);
 
-  std::string emode("");
-  if (lastAlgorithm->name() == "ConvertToMD") {
-    emode = lastAlgorithm->getPropertyValue("dEAnalysisMode");
-  } else if ((lastAlgorithm->name() == "Load" ||
-              hist.lastAlgorithm()->name() == "LoadMD") &&
-             hist.getAlgorithmHistory(nalgs - 2)->name() == "ConvertToMD") {
+  std::string emode;
+  if (lastAlgHist->name() == "ConvertToMD") {
+    emode = lastAlgHist->getPropertyValue("dEAnalysisMode");
+  } else if ((lastAlgHist->name() == "Load" ||
+              lastAlgHist->name() == "LoadMD") &&
+             penultimateAlgHist->name() == "ConvertToMD") {
     // get dEAnalysisMode
-    PropertyHistories histvec =
-        hist.getAlgorithmHistory(nalgs - 2)->getProperties();
-    for (auto &hist : histvec) {
-      if (hist->name() == "dEAnalysisMode") {
-        emode = hist->value();
-        break;
-      }
-    }
+    emode = penultimateAlgHist->getPropertyValue("dEAnalysisMode");
   } else {
     throw std::invalid_argument("The last algorithm in the history of the "
                                 "input workspace is not ConvertToMD");

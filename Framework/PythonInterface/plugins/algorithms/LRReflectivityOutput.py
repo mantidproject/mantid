@@ -1,4 +1,5 @@
 # pylint: disable=no-init,invalid-name,bare-except
+from __future__ import (absolute_import, division, print_function)
 import math
 import time
 import mantid
@@ -85,7 +86,7 @@ class LRReflectivityOutput(PythonAlgorithm):
         # Get binning parameters
         binning_parameters = self.getProperty("OutputBinning").value
         header_list = ("DataRun", "NormRun", "TwoTheta(deg)", "LambdaMin(A)",
-                      "LambdaMax(A)", "Qmin(1/A)", "Qmax(1/A)", "SF_A", "SF_B", "PrimaryFrac")
+                       "LambdaMax(A)", "Qmin(1/A)", "Qmax(1/A)", "SF_A", "SF_B", "PrimaryFrac")
         header_info = "# %-9s %-9s %-14s %-14s %-12s %-12s %-12s %-12s %-12s %-12s\n" % header_list
         # Convert each histo to histograms and rebin to final binning
         for ws in scaled_ws_list:

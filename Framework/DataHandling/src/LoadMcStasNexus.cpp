@@ -19,16 +19,6 @@ using namespace API;
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStasNexus)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadMcStasNexus::LoadMcStasNexus() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadMcStasNexus::~LoadMcStasNexus() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string LoadMcStasNexus::name() const { return "LoadMcStasNexus"; }
 

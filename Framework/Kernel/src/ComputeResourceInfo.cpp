@@ -30,7 +30,7 @@ ComputeResourceInfo::ComputeResourceInfo(const FacilityInfo *fac,
 
   m_name = elem->getAttribute("name");
   if (m_name.empty()) {
-    std::string elemStr = "";
+    std::string elemStr;
     if (elem)
       elemStr = elem->innerText();
     throw std::runtime_error(

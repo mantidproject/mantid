@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import FunctionProperty,PythonAlgorithm, IFunction
 from testhelpers import assertRaisesNothing
 import unittest

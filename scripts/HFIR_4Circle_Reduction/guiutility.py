@@ -1,7 +1,126 @@
 #
 # GUI Utility Methods
 #
+import math
+import numpy
 from PyQt4 import QtGui
+
+
+def convert_str_to_matrix(matrix_str, matrix_shape):
+    """
+    Convert a string to matrix, which is a numpy ndarray
+    Requirements:
+    1. a string that can be converted to a matrix (2d array)
+    2. shape must be a tuple of integer
+    example: ub_str, (3, 3)
+    :param matrix_str:
+    :param matrix_shape:
+    :return: numpy.ndarray, len(shape) == 2
+    """
+    # check
+    assert isinstance(matrix_str, str)
+    assert isinstance(matrix_shape, tuple) and len(matrix_shape) == 2
+
+    # split matrix string to 9 elements and check
+    matrix_str = matrix_str.replace(',', ' ')
+    matrix_str = matrix_str.replace('\n', ' ')
+    matrix_terms = matrix_str.split()
+    assert len(matrix_terms) == 9, 'Matrix string split into %s with %d terms.' % (str(matrix_terms),
+                                                                                   len(matrix_terms))
+
+    # create matrix/ndarray and check dimension
+    assert matrix_shape[0] * matrix_shape[1] == len(matrix_terms)
+    matrix = numpy.ndarray(shape=matrix_shape, dtype='float')
+    term_index = 0
+    for i_row in xrange(len(matrix_shape[0])):
+        for j_col in xrange(len(matrix_shape[1])):
+            matrix_shape[i_row][j_col] = matrix_terms[term_index]
+            term_index += 1
+
+    return matrix
+
+
+def map_to_color(data_array, base_color, change_color_flag):
+    """ Map 1-D data to color list
+    :param data_array:
+    :param base_color:
+    :param change_color_flag:
+    :return:
+    """
+    def convert_value_to_color(base_color, change_color_flag, num_changes, num_steps_color, value):
+        """ Convert a value to color
+        :param base_color:
+        :param change_color_flag:
+        :param num_changes:
+        :param num_steps_color:
+        :param value:
+        :return:
+        """
+        assert 0 < num_changes <= 3
+        if num_changes == 1:
+            step_list = (value, 0, 0)
+        elif num_changes == 2:
+            step_list = (value / num_steps_color, value % num_steps_color, 0)
+        else:
+            num_steps_color_sq = num_steps_color*num_steps_color
+            d_2 = value / num_steps_color_sq
+            r_2 = value % num_steps_color_sq  # r_2 is for residue of d_2
+            d_1 = r_2 / num_steps_color
+            d_0 = r_2 % num_steps_color
+            step_list = (d_2, d_1, d_0)
+        # END-IF
+
+        step_list_index = 0
+
+        color_value_list = [None, None, None]
+
+        for i_color in xrange(3):
+            c_flag = change_color_flag[i_color]
+            if c_flag:
+                # this color will be changed for color map
+                c_step = step_list[step_list_index]
+                # color value = base value + max_change / step
+                color_value = base_color[i_color] + (0.9999 - base_color[i_color]) / num_steps_color * c_step
+                color_value = min(1.0 - 1.E-10, color_value)
+                step_list_index += 1
+            else:
+                # use bae color
+                color_value = base_color[i_color]
+            # ENDIF
+
+            # set
+            color_value_list[i_color] = color_value
+        # END-FOR
+
+        return color_value_list
+
+    # check
+    assert isinstance(data_array, list) or isinstance(data_array, numpy.ndarray)
+    assert len(base_color) == 3
+    assert len(change_color_flag) == 3
+
+    # create output list
+    array_size = len(data_array)
+    color_list = [None] * array_size
+
+    # examine color to change
+    num_changes = 0
+    for change_flag in change_color_flag:
+        if change_flag:
+            num_changes += 1
+    assert num_changes > 0, 'No color to change!'
+
+    # find out number of steps per color
+    num_steps_color = int(math.pow(float(max(data_array)), 1./num_changes)+0.5)
+
+    # calculate
+    for array_index in xrange(array_size):
+        value = data_array[array_index]
+        rgb = convert_value_to_color(base_color, change_color_flag, num_changes, num_steps_color, value)
+        color_list[array_index] = rgb
+    # END-FOR
+
+    return color_list
 
 
 def parse_float_array(array_str):
@@ -9,13 +128,11 @@ def parse_float_array(array_str):
     :param array_str:
     :return: boolean, list of floats/error message
     """
-    print array_str
-    assert isinstance(array_str, str)
+    assert isinstance(array_str, str), 'Input array for parsing must be of type string.'
     array_str = array_str.replace(',', ' ')
     array_str = array_str.replace('\n', ' ')
     array_str = array_str.replace('\t ', ' ')
     array_str = array_str.strip()
-    print '[DB] After processing: ', array_str
 
     float_str_list = array_str.split()
     float_list = list()
@@ -83,9 +200,15 @@ def parse_integer_list(array_str):
     return integer_list
 
 
-def parse_float_editors(line_edits):
+def parse_float_editors(line_edits, allow_blank=False):
     """
-    :param line_edits:
+    Requirements:
+    - line_edits: list of line edits
+    Guarantees:
+    - if 'allow blank' then use None for the value
+    - return a list of float
+    :param line_edits: list/line edit
+    :param allow_blank: flag to allow blanks
     :return: (True, list of floats); (False, error message)
     """
     # Set flag
@@ -104,27 +227,45 @@ def parse_float_editors(line_edits):
 
     for line_edit in line_edit_list:
         assert isinstance(line_edit, QtGui.QLineEdit)
-        try:
-            str_value = str(line_edit.text()).strip()
-            float_value = float(str_value)
-        except ValueError as value_err:
-            error_message += 'Unable to parse to integer. %s\n' % (str(value_err))
+        str_value = str(line_edit.text()).strip()
+        if len(str_value) == 0 and allow_blank:
+            # allow blank and use None
+            float_list.append(None)
         else:
-            float_list.append(float_value)
-        # END-TRY
+            # parse
+            try:
+                float_value = float(str_value)
+            except ValueError as value_err:
+                error_message += 'Unable to parse %s to float due to %s\n' % (str_value, value_err)
+            else:
+                float_list.append(float_value)
+            # END-TRY
+        # END-IF-ELSE
     # END-FOR
 
     if len(error_message) > 0:
         return False, error_message
     elif return_single_value is True:
+        # return single float mode
         return True, float_list[0]
+    else:
+        # Final check
+        assert len(line_edits) == len(float_list), 'Number of input line edits %d is not same as ' \
+                                                   'number of output floats %d.' % (len(line_edits),
+                                                                                    len(float_list))
 
     return True, float_list
 
 
-def parse_integers_editors(line_edits):
+def parse_integers_editors(line_edits, allow_blank=False):
     """
+    Requirements:
+    - line_edits: list of line edits
+    Guarantees:
+    - if 'allow blank' then use None for the value
+    - return a list of integers
     :param line_edits:
+    :param allow_blank: flag to allow empty string and return as a None
     :return: (True, list of integers); (False, error message)
     """
     # Set flag
@@ -139,21 +280,27 @@ def parse_integers_editors(line_edits):
         raise RuntimeError('Input is not LineEdit or list of LineEdit.')
 
     error_message = ''
-    integer_list = []
+    integer_list = list()
 
     for line_edit in line_edit_list:
         assert isinstance(line_edit, QtGui.QLineEdit)
-        try:
-            str_value = str(line_edit.text()).strip()
-            int_value = int(str_value)
-        except ValueError as value_err:
-            error_message += 'Unable to parse to integer. %s\n' % (str(value_err))
+        str_value = str(line_edit.text()).strip()
+        if len(str_value) == 0 and allow_blank:
+            # allowed empty string
+            integer_list.append(None)
         else:
-            if str_value != '%d' % int_value:
-                error_message += 'Value %s is not a proper integer.\n' % str_value
+            # normal case
+            try:
+                int_value = int(str_value)
+            except ValueError as value_err:
+                error_message += 'Unable to parse a line edit with value %s to integer. %s\n' % (str_value, value_err)
             else:
-                integer_list.append(int_value)
-        # END-TRY
+                if str_value != '%d' % int_value:
+                    error_message += 'Value %s is not a proper integer.\n' % str_value
+                else:
+                    integer_list.append(int_value)
+            # END-TRY
+        # END-IF-ELSE
     # END-FOR
 
     if len(error_message) > 0:

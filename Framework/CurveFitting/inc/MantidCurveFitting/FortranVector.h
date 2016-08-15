@@ -46,13 +46,15 @@ public:
   /// Constructor
   FortranVector();
   /// Constructor
-  FortranVector(const int n);
+  explicit FortranVector(const int n);
   /// Constructor
   FortranVector(const int iFrom, const int iTo);
   /// Resize the vector
   void allocate(int firstIndex, int lastIndex);
   /// Resize the vector with base 1
   void allocate(int newSize);
+  /// Get the length of the vector as an int.
+  int len() const;
 
   ElementConstType operator()(int i) const;
   ElementRefType operator()(int i);
@@ -152,6 +154,11 @@ operator[](int i) {
 template <class VectorClass>
 VectorClass FortranVector<VectorClass>::moveToBaseVector() {
   return VectorClass::move();
+}
+
+/// Get the length of the vector as an int.
+template <class VectorClass> int FortranVector<VectorClass>::len() const {
+  return static_cast<int>(this->size());
 }
 
 } // namespace CurveFitting

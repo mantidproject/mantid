@@ -1,14 +1,21 @@
-#pylint: disable=W0633,too-many-branches
-__author__ = 'wzz'
-
+#pylint: disable=W0633,R0913,too-many-branches
 import os
 import urllib2
 import socket
+import numpy
+
+from mantid.api import AnalysisDataService
+
+__author__ = 'wzz'
+
+
+NUM_DET_ROW = 256
 
 
 def check_url(url, read_lines=False):
     """ Check whether a URL is valid
     :param url:
+    :param read_lines
     :return: boolean, error message
     """
     lines = None
@@ -44,10 +51,148 @@ def check_url(url, read_lines=False):
     return url_good, error_message
 
 
+def convert_to_wave_length(m1_position):
+    """ Convert motor m1's position to HB3A's neutron wave length
+    Mapping:
+    m1 = -25.87 --> 1.0030
+       = -39.17 --> 1.5424
+    :param m1_position: float, m1's position
+    :return: wave length
+    """
+    assert isinstance(m1_position, float)
+
+    if abs(m1_position - (-25.870000)) < 0.2:
+        wave_length = 1.003
+    elif abs(m1_position - (-39.17)) < 0.2:
+        wave_length = 1.5424
+    else:
+        raise RuntimeError('m1 position %f is not a recognized position for wave length.' % m1_position)
+
+    return wave_length
+
+
+def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True):
+    """ Generate a Mantid RIO/Mask XML file
+    Requirements:
+    1. file_path is writable;
+    2. ll_corner and ur_corner are both 2-tuples
+    3. ll_corner is to the left-lower to ur corner
+    :param ll_corner:
+    :param ur_corner:
+    :param rectangular:
+    :return:
+    """
+    # check
+    assert isinstance(file_path, str), 'File path must be a string but not a %s.' % str(type(file_path))
+    assert len(ll_corner) == 2 and len(ur_corner) == 2
+
+    if rectangular is False:
+        raise RuntimeError('Non-rectangular detector is not supported yet.')
+
+    print '[INFO] Mask from %s to %s.' % (str(ll_corner), str(ur_corner))
+
+    # part 1
+    xml_str = '<?xml version="1.0"?>\n'
+    xml_str += '<detector-masking>\n'
+    xml_str += '     <group>\n'
+    xml_str += '          <detids>'
+
+    # part 2: all the masked detectors
+    start_row = int(ll_corner[0])
+    start_col = int(ll_corner[1])
+
+    end_row = int(ur_corner[0])
+    end_col = int(ur_corner[1])
+
+    assert start_col < end_col
+
+    det_sub_xml = ''
+    for col_number in xrange(start_col, end_col+1):
+        start_det_id = 1 + col_number * NUM_DET_ROW + start_row
+        end_det_id = 1 + col_number * NUM_DET_ROW + end_row
+        det_sub_xml += '%d-%d,' % (start_det_id, end_det_id)
+    # END-FOR
+    # remove last ','
+    det_sub_xml = det_sub_xml[:-1]
+    # add to xml string
+    xml_str += det_sub_xml
+
+    # part 3
+    xml_str += '</detids>\n'
+    xml_str += '     </group>\n'
+    xml_str += '</detector-masking>'
+
+    # write to file
+    xml_file = open(file_path, 'w')
+    xml_file.write(xml_str)
+    xml_file.close()
+
+    return
+
+
+def get_hb3a_wavelength(m1_motor_pos):
+    """ Get HB3A's wavelength according to motor 'm1''s position.
+    :param m1_motor_pos:
+    :return: wavelength.  None for no mapping
+    """
+    assert isinstance(m1_motor_pos, float), 'Motor m1\'s position must be float.'
+
+    # hard-coded HB3A m1 position and wavelength mapping
+    m1_pos_list = [(-25.870, 1.003),
+                   (-39.170, 1.5424)]
+
+    motor_pos_tolerance = 0.2
+
+    for m1_tup in m1_pos_list:
+        this_pos = m1_tup[0]
+        if abs(m1_motor_pos-this_pos) < motor_pos_tolerance:
+            return m1_tup[1]
+    # END-FOR
+
+    return None
+
+
+def get_mask_ws_name(exp_number, scan_number):
+    """
+    Generate a standard mask workspace's name based on the experiment number and scan number
+    It is assumed that a mask workspace will be applied to a scan; and
+    all Pts belonged to the same scan will use the same mask workspace
+    :param exp_number:
+    :param scan_number:
+    :return:
+    """
+    # check
+    assert isinstance(exp_number, int)
+    assert isinstance(scan_number, int)
+
+    mask_ws_name = 'Mask_Exp%d_Scan%d' % (exp_number, scan_number)
+
+    return mask_ws_name
+
+
+def get_mask_xml_temp(work_dir, exp_number, scan_number):
+    """
+    Generate a temporary mask file in xml format that is conformed to Mantid's format.
+    :param work_dir:
+    :param exp_number:
+    :param scan_number:
+    :return:
+    """
+    # check
+    assert isinstance(work_dir, str) and os.path.exists(work_dir)
+    assert isinstance(exp_number, int)
+    assert isinstance(scan_number, int)
+
+    file_name = os.path.join(work_dir, 'temp_mask_%d_%d.xml' % (exp_number, scan_number))
+
+    return file_name
+
+
 def get_scans_list(server_url, exp_no, return_list=False):
     """ Get list of scans under one experiment
     :param server_url:
     :param exp_no:
+    :param return_list: a flag to control the return value. If true, return a list; otherwise, message string
     :return: message
     """
     if server_url.endswith('/') is False:
@@ -140,10 +285,10 @@ def parse_int_array(int_array_str):
                 int_value = int(value_str)
                 if str(int_value) != value_str:
                     ret_status = False
-                    err_msg =  "Contains non-integer string %s." % value_str
+                    err_msg = "Contains non-integer string %s." % value_str
             except ValueError:
                 ret_status = False
-                err_msg = "String %s is not an integer." % (value_str)
+                err_msg = "String %s is not an integer." % value_str
             else:
                 integer_list.append(int_value)
 
@@ -157,10 +302,10 @@ def parse_int_array(int_array_str):
                     int_value = int(value_str)
                     if str(int_value) != value_str:
                         ret_status = False
-                        err_msg = "Contains non-integer string %s." % (value_str)
+                        err_msg = "Contains non-integer string %s." % value_str
                 except ValueError:
                     ret_status = False
-                    err_msg = "String %s is not an integer." % (value_str)
+                    err_msg = "String %s is not an integer." % value_str
                 else:
                     temp_list.append(int_value)
 
@@ -186,3 +331,336 @@ def parse_int_array(int_array_str):
         return False, err_msg
 
     return True, integer_list
+
+
+def get_det_xml_file_name(instrument_name, exp_number, scan_number, pt_number):
+    """
+    Get detector XML file name (from SPICE)
+    :param instrument_name:
+    :param exp_number:
+    :param scan_number:
+    :param pt_number:
+    :return:
+    """
+    # check
+    assert isinstance(instrument_name, str)
+    assert isinstance(exp_number, int), 'Experiment number must be an int but not %s.' % str(type(exp_number))
+    assert isinstance(scan_number, int), 'Scan number must be an int but not %s.' % str(type(scan_number))
+    assert isinstance(pt_number, int), 'Pt number must be an int but not %s.' % str(type(pt_number))
+
+    # get name
+    xml_file_name = '%s_exp%d_scan%04d_%04d.xml' % (instrument_name, exp_number,
+                                                    scan_number, pt_number)
+
+    return xml_file_name
+
+
+def get_det_xml_file_url(server_url, instrument_name, exp_number, scan_number, pt_number):
+    """ Get the URL to download the detector counts file in XML format
+    :param server_url:
+    :param instrument_name:
+    :param exp_number:
+    :param scan_number:
+    :param pt_number:
+    :return:
+    """
+    assert isinstance(server_url, str) and isinstance(instrument_name, str)
+    assert isinstance(exp_number, int) and isinstance(scan_number, int) and isinstance(pt_number, int)
+
+    base_file_name = get_det_xml_file_name(instrument_name, exp_number, scan_number, pt_number)
+    file_url = '%s/exp%d/Datafiles/%s' % (server_url, exp_number, base_file_name)
+
+    return file_url
+
+
+def get_spice_file_name(instrument_name, exp_number, scan_number):
+    """
+    Get standard HB3A SPICE file name from experiment number and scan number
+    :param instrument_name
+    :param exp_number:
+    :param scan_number:
+    :return:
+    """
+    assert isinstance(instrument_name, str)
+    assert isinstance(exp_number, int) and isinstance(scan_number, int)
+    file_name = '%s_exp%04d_scan%04d.dat' % (instrument_name, exp_number, scan_number)
+
+    return file_name
+
+
+def get_spice_file_url(server_url, instrument_name, exp_number, scan_number):
+    """ Get the SPICE file's URL from server
+    :param server_url:
+    :param instrument_name:
+    :param exp_number:
+    :param scan_number:
+    :return:
+    """
+    assert isinstance(server_url, str) and isinstance(instrument_name, str)
+    assert isinstance(exp_number, int) and isinstance(scan_number, int)
+
+    file_url = '%sexp%d/Datafiles/%s_exp%04d_scan%04d.dat' % (server_url, exp_number,
+                                                              instrument_name, exp_number, scan_number)
+
+    return file_url
+
+
+def get_spice_table_name(exp_number, scan_number):
+    """ Form the name of the table workspace for SPICE
+    :param exp_number:
+    :param scan_number:
+    :return:
+    """
+    table_name = 'HB3A_Exp%03d_%04d_SpiceTable' % (exp_number, scan_number)
+
+    return table_name
+
+
+def get_raw_data_workspace_name(exp_number, scan_number, pt_number):
+    """ Form the name of the matrix workspace to which raw pt. XML file is loaded
+    :param exp_number:
+    :param scan_number:
+    :param pt_number:
+    :return:
+    """
+    ws_name = 'HB3A_exp%d_scan%04d_%04d' % (exp_number, scan_number, pt_number)
+
+    return ws_name
+
+
+def get_integrated_peak_ws_name(exp_number, scan_number, pt_list, mask=False,
+                                normalized_by_monitor=False,
+                                normalized_by_time=False):
+    """
+    Get/form the integrated peak workspace's name
+    :param exp_number:
+    :param scan_number:
+    :param pt_list: a list OR None
+    :return:
+    """
+    # check
+    assert isinstance(exp_number, int)
+    assert isinstance(scan_number, int)
+    assert isinstance(pt_list, list) or pt_list is None
+    if isinstance(pt_list, list):
+        assert len(pt_list) > 0
+
+    # form the name
+    ws_name = 'Integrated_exp%d_scan%d' % (exp_number, scan_number)
+    if pt_list is not None:
+        ws_name += 'Pt%d_%d' % (pt_list[0], pt_list[-1])
+
+    if mask:
+        ws_name += '_Masked'
+
+    if normalized_by_monitor:
+        ws_name += '_NormMon'
+
+    if normalized_by_time:
+        ws_name += '_NormTime'
+
+    return ws_name
+
+
+def get_log_data(spice_table, log_name):
+    """
+    Purpose: Get the sample log data of a scan, which contains a few of Pt.
+    Requirements: SPICE table workspace and a valid log name (a column's name) in the table workspace
+    Guarantee: a numpy array is created and returned.  Each item is the log value for a Pt.
+    :param spice_table: SPICE TableWorkspace
+    :param log_name: the name of the log to get retrieve.
+    :return:
+    """
+    assert isinstance(log_name, str), 'Log name must be a string.'
+
+    col_names = spice_table.getColumnNames()
+    log_col_index = col_names.index(log_name)
+    if log_col_index >= len(col_names):
+        raise KeyError('Log name %s does not exist in SPICE table.' % log_name)
+
+    num_rows = spice_table.rowCount()
+    log_vector = numpy.ndarray((num_rows,), 'float')
+    for i in range(num_rows):
+        log_vector[i] = spice_table.cell(i, log_col_index)
+
+    return log_vector
+
+
+def get_step_motor_parameters(log_value_vector):
+    """
+    Calculate some statistic parameters of a motor log (motor position) of a scan containing Pt.
+    Requirements: input is a numpy array
+    Guarantee: the standard deviation of motor position, increment of motor position and standard deviation
+               of the increment of motor positions are calculated
+    :param log_value_vector:
+    :return: 3-tuple as (1) standard deviation of motor position, (2) average increment of the motor position,
+                    and (3) standard deviation of the increment of motor position.
+    """
+    std_dev = numpy.std(log_value_vector)
+
+    step_vector = log_value_vector[1:] - log_value_vector[:-1]
+    step_dev = numpy.std(step_vector)
+    step = sum(step_vector)/len(step_vector)
+
+    return std_dev, step, step_dev
+
+
+def get_merged_md_name(instrument_name, exp_no, scan_no, pt_list):
+    """
+    Build the merged scan's MDEventworkspace's name under convention
+    Requirements: experiment number and scan number are integer. Pt list is a list of integer
+    :param instrument_name:
+    :param exp_no:
+    :param scan_no:
+    :param pt_list:
+    :return:
+    """
+    # check
+    assert isinstance(instrument_name, str)
+    assert isinstance(exp_no, int) and isinstance(scan_no, int)
+    assert isinstance(pt_list, list)
+    assert len(pt_list) > 0
+
+    merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_MD' % (instrument_name, exp_no, scan_no,
+                                                     pt_list[0], pt_list[-1])
+
+    return merged_ws_name
+
+
+def get_merged_hkl_md_name(instrument_name, exp_no, scan_no, pt_list):
+    """
+    Build the merged scan's MDEventworkspace's name under convention
+    Requirements: experiment number and scan number are integer. Pt list is a list of integer
+    :param instrument_name:
+    :param exp_no:
+    :param scan_no:
+    :param pt_list:
+    :return:
+    """
+    # check
+    assert isinstance(instrument_name, str)
+    assert isinstance(exp_no, int) and isinstance(scan_no, int)
+    assert isinstance(pt_list, list)
+    assert len(pt_list) > 0
+
+    merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_HKL_MD' % (instrument_name, exp_no, scan_no,
+                                                         pt_list[0], pt_list[-1])
+
+    return merged_ws_name
+
+
+def get_merge_pt_info_ws_name(exp_no, scan_no):
+    """ Create the standard table workspace's name to contain the information to merge Pts. in a scan
+    :param exp_no:
+    :param scan_no:
+    :return:
+    """
+    ws_name = 'ScanPtInfo_Exp%d_Scan%d' % (exp_no, scan_no)
+
+    return ws_name
+
+
+def get_peak_ws_name(exp_number, scan_number, pt_number_list):
+    """
+    Form the name of the peak workspace
+    :param exp_number:
+    :param scan_number:
+    :param pt_number_list:
+    :return:
+    """
+    # check
+    assert isinstance(exp_number, int) and isinstance(scan_number, int)
+    assert isinstance(pt_number_list, list) and len(pt_number_list) > 0
+
+    ws_name = 'Peak_Exp%d_Scan%d_Pt%d_%d' % (exp_number, scan_number,
+                                             pt_number_list[0],
+                                             pt_number_list[-1])
+
+    return ws_name
+
+
+def get_single_pt_md_name(exp_number, scan_number, pt_number):
+    """ Form the name of the MDEvnetWorkspace for a single Pt. measurement
+    :param exp_number:
+    :param scan_number:
+    :param pt_number:
+    :return:
+    """
+    ws_name = 'HB3A_Exp%d_Scan%d_Pt%d_MD' % (exp_number, scan_number, pt_number)
+
+    return ws_name
+
+
+def get_wave_length(spice_table_name):
+    """ Get wave length from a SPICE table workspace for HB3A (4-circle)
+    Assumption: in a scan (all Pt. are in a same SPICE table), all m1 value should be same.
+    :param spice_table_name: name of the table workspace
+    :return: wave length
+    """
+    # check
+    assert isinstance(spice_table_name, str), 'Input SPICE table workspace name must be a string.'
+    assert AnalysisDataService.doesExist(spice_table_name)
+
+    spice_table_ws = AnalysisDataService.retrieve(spice_table_name)
+
+    # get the column
+    column_name_list = spice_table_ws.getColumnNames()
+    col_index_m1 = column_name_list.index('m1')
+    assert col_index_m1 < len(column_name_list), 'Column m1 cannot be found.'
+
+    m1_position = float(spice_table_ws.cell(0, col_index_m1))
+    wave_length = convert_to_wave_length(m1_position)
+
+    return wave_length
+
+
+def load_hb3a_md_data(file_name):
+    """ Load an ASCii file containing MDEvents and generated by mantid algorithm ConvertCWSDMDtoHKL()
+    :param file_name:
+    :return:
+    """
+    # check
+    assert isinstance(file_name, str) and os.path.exists(file_name)
+
+    # parse
+    data_file = open(file_name, 'r')
+    raw_lines = data_file.readlines()
+    data_file.close()
+
+    # construct ND data array
+    xyz_points = numpy.zeros((len(raw_lines), 3))
+    intensities = numpy.zeros((len(raw_lines), ))
+
+    # parse
+    for i in xrange(len(raw_lines)):
+        line = raw_lines[i].strip()
+
+        # skip empty line
+        if len(line) == 0:
+            continue
+
+        # set value
+        terms = line.split(',')
+        for j in xrange(3):
+            xyz_points[i][j] = float(terms[j])
+        intensities[i] = float(terms[3])
+    # END-FOR
+
+    return xyz_points, intensities
+
+
+def round_hkl(hkl):
+    """
+    Round HKL to nearest integer
+    :param hkl:
+    :return:
+    """
+    print type(hkl)
+
+    mi_h = round(hkl[0])
+    mi_k = round(hkl[1])
+    mi_l = round(hkl[2])
+
+    return mi_h, mi_k, mi_l
+
+

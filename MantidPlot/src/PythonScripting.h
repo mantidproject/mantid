@@ -54,7 +54,10 @@ public:
   /// Simulate file-like object (required for IPython)
   inline void flush() {}
   /// Simulate file-like object (required for colorama)
-  inline bool closed() { return false; }
+  inline bool closed() const { return false; }
+  /// Simulate file-like object
+  inline bool isatty() const { return false; }
+
   /// 'Fake' method needed for IPython import
   void set_parent(PyObject *) {}
 
@@ -120,8 +123,12 @@ private:
   bool start() override;
   /// Shutdown the environment
   void shutdown() override;
-  /// Run execfile on a given file
-  bool loadInitFile(const QString &path);
+  /// Configure python path
+  void setupPythonPath();
+  /// Configure sip
+  void setupSip();
+  /// Exec the mantidplotrc file
+  bool loadInitRCFile();
 
 private:
   /// The global dictionary

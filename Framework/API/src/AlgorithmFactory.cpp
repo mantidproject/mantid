@@ -25,7 +25,7 @@ AlgorithmFactoryImpl::AlgorithmFactoryImpl()
   g_log.debug() << "Algorithm Factory created.\n";
 }
 
-AlgorithmFactoryImpl::~AlgorithmFactoryImpl() {}
+AlgorithmFactoryImpl::~AlgorithmFactoryImpl() = default;
 
 /** Creates an instance of an algorithm
 * @param name :: the name of the Algrorithm to create
@@ -361,7 +361,7 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
       boost::split(categoryLayers, desc.category, boost::is_any_of("\\"));
 
       // Traverse each parent category, working our way from the top down.
-      std::string currentLayer = "";
+      std::string currentLayer;
       for (auto &categoryLayer : categoryLayers) {
         currentLayer.append(categoryLayer);
 

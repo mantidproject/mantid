@@ -35,12 +35,6 @@ namespace DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D2)
 
-/// constructor
-LoadCanSAS1D2::LoadCanSAS1D2() : LoadCanSAS1D() {}
-
-/// destructor
-LoadCanSAS1D2::~LoadCanSAS1D2() {}
-
 /// Overwrites Algorithm Init method.
 void LoadCanSAS1D2::init() {
   LoadCanSAS1D::init();
@@ -213,11 +207,16 @@ LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
 
         // setting the error vector
         Element *idevElem = elem->getChildElement("Tdev");
-        check(qElem, "Tdev");
-        nodeVal = idevElem->innerText();
-        std::stringstream e(nodeVal);
-        e >> d;
-        E[vecindex] = d;
+        if (idevElem) {
+          check(qElem, "Tdev");
+          nodeVal = idevElem->innerText();
+          std::stringstream e(nodeVal);
+          e >> d;
+          E[vecindex] = d;
+        } else {
+          E[vecindex] = std::sqrt(d);
+        }
+
         ++vecindex;
       }
     }

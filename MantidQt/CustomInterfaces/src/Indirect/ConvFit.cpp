@@ -210,6 +210,12 @@ void ConvFit::setup() {
           SLOT(showTieCheckbox(QString)));
   showTieCheckbox(m_uiForm.cbFitType->currentText());
 
+  // Post Plot and Save
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
+          SLOT(plotCurrentPreview()));
+
   m_previousFit = m_uiForm.cbFitType->currentText();
 
   updatePlotOptions();
@@ -287,10 +293,85 @@ void ConvFit::run() {
   cfs->setProperty("Minimizer",
                    minimizerString("$outputname_$wsindex").toStdString());
   cfs->setProperty("MaxIterations", maxIterations);
+  cfs->setProperty("OutputWorkspace", (m_baseName.toStdString() + "_Result"));
   m_batchAlgoRunner->addAlgorithm(cfs);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Handles saving the workspace when save is clicked
+ */
+void ConvFit::saveClicked() {
+  // check workspace exists
+  const auto resultName = m_baseName.toStdString() + "_Result";
+  const auto wsFound = checkADSForPlotSaveWorkspace(resultName, false);
+  // process workspace after check
+  if (wsFound) {
+    QString saveDir = QString::fromStdString(
+        Mantid::Kernel::ConfigService::Instance().getString(
+            "defaultsave.directory"));
+    // Check validity of save path
+    QString QresultWsName = QString::fromStdString(resultName);
+    const auto fullPath = saveDir.append(QresultWsName).append(".nxs");
+    addSaveWorkspaceToQueue(QresultWsName, fullPath);
+    m_batchAlgoRunner->executeBatchAsync();
+  } else {
+    return;
+  }
+}
+
+/**
+ * Handles plotting the workspace when plot is clicked
+ */
+void ConvFit::plotClicked() {
+
+  // check workspace exists
+  const auto resultName = m_baseName.toStdString() + "_Result";
+  const auto wsFound = checkADSForPlotSaveWorkspace(resultName, true);
+  if (wsFound) {
+    MatrixWorkspace_sptr resultWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
+    const auto plot = m_uiForm.cbPlotType->currentText().toStdString();
+
+    // Handle plot result
+    if (!(plot.compare("None") == 0)) {
+      if (plot.compare("All") == 0) {
+        const auto specEnd = (int)resultWs->getNumberHistograms();
+        for (int i = 0; i < specEnd; i++) {
+          IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
+                                    i, i);
+        }
+      } else {
+        const auto specNumber = m_uiForm.cbPlotType->currentIndex();
+        IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
+                                  specNumber, specNumber);
+      }
+    }
+  } else {
+    return;
+  }
+}
+
+/**
+ * Plots the current spectrum displayed in the preview plot
+ */
+void ConvFit::plotCurrentPreview() {
+  if (!m_cfInputWS) {
+    return;
+  }
+  if (m_cfInputWS->getName().compare(m_previewPlotData->getName()) == 0) {
+    // Plot only the sample curve
+    const auto workspaceIndex = m_uiForm.spPlotSpectrum->value();
+    IndirectTab::plotSpectrum(
+        QString::fromStdString(m_previewPlotData->getName()), workspaceIndex,
+        workspaceIndex);
+  } else {
+    // Plot Sample, Fit and Diff curve
+    IndirectTab::plotSpectrum(
+        QString::fromStdString(m_previewPlotData->getName()), 0, 2);
+  }
 }
 
 /**
@@ -305,40 +386,9 @@ void ConvFit::algorithmComplete(bool error) {
   if (error)
     return;
 
-  std::string resultName = m_baseName.toStdString() + "_Result";
+  const auto resultName = m_baseName.toStdString() + "_Result";
   MatrixWorkspace_sptr resultWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
-
-  const bool save = m_uiForm.ckSave->isChecked();
-
-  // Handle Save file
-  if (save) {
-    QString saveDir = QString::fromStdString(
-        Mantid::Kernel::ConfigService::Instance().getString(
-            "defaultsave.directory"));
-    // Check validity of save path
-    QString QresultWsName = QString::fromStdString(resultWs->getName());
-    QString fullPath = saveDir.append(QresultWsName).append(".nxs");
-    addSaveWorkspaceToQueue(QresultWsName, fullPath);
-  }
-
-  std::string plot = m_uiForm.cbPlotType->currentText().toStdString();
-
-  // Handle plot result
-  if (!(plot.compare("None") == 0)) {
-    if (plot.compare("All") == 0) {
-      int specEnd = (int)resultWs->getNumberHistograms();
-      for (int i = 0; i < specEnd; i++) {
-        IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
-                                  i, i);
-      }
-    } else {
-      // -1 to account for None in dropDown
-      int specNumber = m_uiForm.cbPlotType->currentIndex() - 1;
-      IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
-                                specNumber, specNumber);
-    }
-  }
 
   // Obtain WorkspaceGroup from ADS
   std::string groupName = m_baseName.toStdString() + "_Workspaces";
@@ -407,6 +457,8 @@ void ConvFit::algorithmComplete(bool error) {
   }
   m_batchAlgoRunner->executeBatchAsync();
   updatePlot();
+  m_uiForm.pbSave->setEnabled(true);
+  m_uiForm.pbPlot->setEnabled(true);
 }
 
 /**
@@ -1005,6 +1057,7 @@ void ConvFit::updatePlot() {
   int specNo = m_uiForm.spPlotSpectrum->text().toInt();
 
   m_uiForm.ppPlot->clear();
+  m_previewPlotData = m_cfInputWS;
   m_uiForm.ppPlot->addSpectrum("Sample", m_cfInputWS, specNo);
 
   try {
@@ -1039,6 +1092,7 @@ void ConvFit::updatePlot() {
       MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
           outputGroup->getItem(specNo - m_runMin));
       if (ws) {
+        m_previewPlotData = ws;
         m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
         m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
         if (m_uiForm.ckPlotGuess->isChecked()) {
@@ -1196,6 +1250,9 @@ void ConvFit::singleFitComplete(bool error) {
   // Plot the line on the mini plot
   m_uiForm.ppPlot->removeSpectrum("Guess");
   const auto resultName = m_singleFitOutputName + "_Workspace";
+  m_previewPlotData =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          resultName.toStdString());
   m_uiForm.ppPlot->addSpectrum("Fit", resultName, 1, Qt::red);
   m_uiForm.ppPlot->addSpectrum("Diff", resultName, 2, Qt::blue);
 
@@ -1531,7 +1588,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   double oneLValues[3] = {0.0, 0.0,
                           0.0}; // previous values for one lorentzian fit
   bool previouslyOneL = false;
-  // If the previosu fit was One Lorentzian and the new fit is Two Lorentzian
+  // If the previous fit was One Lorentzian and the new fit is Two Lorentzian
   // preserve the values of One Lorentzian Fit
   if (m_previousFit.compare("One Lorentzian") == 0 &&
       m_uiForm.cbFitType->currentText().compare("Two Lorentzians") == 0) {
@@ -1665,7 +1722,6 @@ void ConvFit::updatePlotOptions() {
   const bool deltaFunction = m_blnManager->value(m_properties["UseDeltaFunc"]);
   const int fitFunctionType = m_uiForm.cbFitType->currentIndex();
   QStringList plotOptions;
-  plotOptions << "None";
 
   if (deltaFunction && fitFunctionType < 3) {
     plotOptions << "Height";
