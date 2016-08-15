@@ -2174,7 +2174,8 @@ void EnggDiffractionPresenter::doRebinningTime(const std::string &runNo,
 void EnggDiffractionPresenter::inputChecksBeforeRebin(
     const std::string &runNo) {
   if (runNo.empty()) {
-    throw std::invalid_argument("The run to pre-process is invalid. The run" + g_runNumberErrorStr);
+    throw std::invalid_argument("The run to pre-process is invalid. The run" +
+                                g_runNumberErrorStr);
   }
 }
 
