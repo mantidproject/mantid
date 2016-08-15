@@ -3,14 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/Integration.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAlgorithms/Integration.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <MantidHistogramData/LinearGenerator.h>
 #include <MantidHistogramData/Points.h>
 
@@ -347,7 +347,7 @@ public:
   }
 
   void makeRealBinBoundariesWorkspace(const std::string inWsName) {
-    const unsigned int lenX = 11, lenY = 10, lenE = lenY;
+    const unsigned int lenX = 11, lenY = 10;
 
     // 1 difference, so it's holding BinEdges
     Workspace_sptr wsAsWs =
