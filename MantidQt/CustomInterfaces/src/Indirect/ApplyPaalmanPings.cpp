@@ -633,7 +633,6 @@ void ApplyPaalmanPings::plotClicked() {
 
   if (plotType == "Contour" || plotType == "Both")
     plot2D(QString::fromStdString(m_pythonExportWsName));
-
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

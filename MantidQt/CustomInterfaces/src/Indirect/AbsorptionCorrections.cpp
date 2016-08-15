@@ -27,6 +27,9 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   // Handle algorithm completion
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
+  // Handle plotting and saving
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 }
 
 void AbsorptionCorrections::setup() {}
