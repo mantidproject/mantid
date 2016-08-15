@@ -2,6 +2,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidHistogramData/HistogramMath.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -97,14 +98,15 @@ void MuonGroupDetectors::exec() {
 
     // We will be setting them anew
     outWS->getSpectrum(groupIndex).clearDetectorIDs();
-
     auto &Y = outWS->mutableY(groupIndex);
     auto &E = outWS->mutableE(groupIndex);
-
     for (auto &wsIndex : wsIndices) {
       Y += inWS->y(wsIndex);
-      E += inWS->e(wsIndex);
-
+      std::transform(inWS->e(wsIndex).cbegin(), inWS->e(wsIndex).cend(),
+                     E.cbegin(), E.begin(),
+                     [](const double lhs, const double rhs) {
+                       return sqrt(lhs * lhs + rhs * rhs);
+                     });
       // Detectors list of the group should contain all the detectors of
       // it's
       // elements
