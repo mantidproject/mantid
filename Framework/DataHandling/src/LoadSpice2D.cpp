@@ -565,11 +565,25 @@ LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
         metadata, "Header/sample_to_flange", "sample-si-window-distance", "mm");
   }
 
-  // sample_detector_distances
+  double total_sample_detector_distance;
+  if (metadata.find("Motor_Positions/sdd") != metadata.end()) {
+    // When sdd exists overrides all the distances
+    from_string<double>(total_sample_detector_distance,
+                        metadata["Motor_Positions/sdd"], std::dec);
+    total_sample_detector_distance *= 1000.0;
 
-  double total_sample_detector_distance = sample_detector_distance +
-                                          sample_detector_distance_offset +
-                                          sample_si_window_distance;
+    addRunProperty<double>("sample-detector-distance-offset", 0, "mm");
+    addRunProperty<double>("sample-detector-distance", sample_detector_distance, "mm");
+    addRunProperty<double>("sample-si-window-distance", 0, "mm");
+
+    g_log.debug() << "Sample-Detector-Distance from SDD tag = "
+                  << total_sample_detector_distance << '\n';
+
+  } else {
+    total_sample_detector_distance = sample_detector_distance +
+                                     sample_detector_distance_offset +
+                                     sample_si_window_distance;
+  }
   addRunProperty<double>("total-sample-detector-distance",
                          total_sample_detector_distance, "mm");
 
