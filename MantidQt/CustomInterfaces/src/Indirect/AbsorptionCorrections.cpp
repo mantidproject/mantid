@@ -120,21 +120,13 @@ void AbsorptionCorrections::run() {
 
   // Set the correction workspace to keep the factors if desired
   bool keepCorrectionFactors = m_uiForm.ckKeepFactors->isChecked();
-  QString outputFactorsWsName = outputBaseName + "_" + sampleShape + "_Factors";
+  QString m_outputFactorsWsName = outputBaseName + "_" + sampleShape + "_Factors";
   if (keepCorrectionFactors)
     absCorAlgo->setProperty("CorrectionsWorkspace",
-                            outputFactorsWsName.toStdString());
+                            m_outputFactorsWsName.toStdString());
 
   // Add correction algorithm to batch
   m_batchAlgoRunner->addAlgorithm(absCorAlgo);
-
-  // Add save algorithms if needed
-  bool save = m_uiForm.ckSave->isChecked();
-  if (save) {
-    addSaveWorkspace(outputWsName);
-    if (keepCorrectionFactors)
-      addSaveWorkspace(outputFactorsWsName);
-  }
 
   // Run algorithm batch
   m_batchAlgoRunner->executeBatchAsync();
@@ -308,6 +300,20 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
     shiftLog->execute();
   }
 }
+/**
+ * Handle saving of workspace
+ */
+void AbsorptionCorrections::saveClicked() {
+
+  checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
+  addSaveWorkspace(QString::fromStdString(m_pythonExportWsName));
+  bool keepCorrectionFactors = m_uiForm.ckKeepFactors->isChecked();
+  checkADSForPlotSaveWorkspace(m_outputFactorsWsName.toStdString(), false);
+  if (keepCorrectionFactors)
+    addSaveWorkspace(m_outputFactorsWsName);
+}
+
+
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
