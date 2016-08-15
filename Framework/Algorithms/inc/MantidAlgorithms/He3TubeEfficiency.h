@@ -2,8 +2,8 @@
 #define MANTID_ALGORITHM_HE3TUBEEFFICIENCY_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/V3D.h"
 
 namespace Mantid {
 
@@ -89,7 +89,7 @@ private:
   /// Calculates the efficiency correction from the points
   void computeEfficiencyCorrection(std::vector<double> &effCorrection,
                                    const HistogramData::Points &wavelength,
-                                   const double exp_constant,
+                                   const double expConstant,
                                    const double scale) const;
   /// Correct the given spectra index for efficiency
   void correctForEfficiency(std::size_t spectraIndex);

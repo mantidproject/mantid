@@ -2,8 +2,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
@@ -467,8 +467,8 @@ void He3TubeEfficiency::execEvent() {
 * points(wavelength)
 * @param effCorrection :: Vector that will hold the values for each wavelength
 * @param wavelength :: The points calculated from the histogram
-* @param expConstant
-* @param scale
+* @param expConstant :: The exponential constant
+* @param scale :: The scale factor
 */
 void He3TubeEfficiency::computeEfficiencyCorrection(
     std::vector<double> &effCorrection, const Points &xes,
