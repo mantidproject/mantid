@@ -205,7 +205,7 @@ public:
    * Highlights the RB number box to make it more visible if the
    * user needs to enter an RB number
    *
-   * @param Is the current value in RB Number valid 
+   * @param Is the current value in RB Number valid
    */
   virtual void highlightRbNumber(bool isValid) = 0;
 

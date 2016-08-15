@@ -659,12 +659,11 @@ void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
 }
 
 void EnggDiffractionViewQtGUI::highlightRbNumber(bool isValid) {
-	if (!isValid) {
-		m_ui.label_RBNumber->setStyleSheet("background-color: red; color : white;");
-	}
-	else {
-		m_ui.label_RBNumber->setStyleSheet("background-color: white");
-	}
+  if (!isValid) {
+    m_ui.label_RBNumber->setStyleSheet("background-color: red; color : white;");
+  } else {
+    m_ui.label_RBNumber->setStyleSheet("background-color: white");
+  }
 }
 
 std::vector<std::string> EnggDiffractionViewQtGUI::currentPreprocRunNo() const {
