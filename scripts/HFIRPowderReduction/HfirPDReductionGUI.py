@@ -244,6 +244,13 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_chkServer, QtCore.SIGNAL('clicked()'),
                      self.doCheckSrcServer)
 
+        # tab 'Information' (data mining)
+        self.connect(self.ui.pushButton_setInfoTable, QtCore.SIGNAL('clicked()'),
+                self.do_setup_info_table)
+
+        self.connect(self.ui.pushButton_mineData, QtCore.SIGNAL('clicked()'),
+                self.do_mine_data)
+
         # Define signal-event handling
 
         # define event handlers for matplotlib canvas
@@ -1607,6 +1614,72 @@ class MainWindow(QtGui.QMainWindow):
             wavelength = None
 
         self.ui.lineEdit_wavelength.setText(str(wavelength))
+
+        return
+
+    def do_setup_info_table(self):
+        """
+        Set up the information table by specifiying the items to view in the table
+        """
+        # read the first scan to find out the field
+        try:
+            exp_number = self.get_exp_number(throw=True)
+            scan_list = self.get_int_list(self.ui.lineEdit_infoScans, throw=True)
+        except ValueError as val_err:
+            self.pop_error_message(self, 'Unable to do data mining due to %s.' % str(val_err))
+            return
+        else:
+            scan_number = scan_list[0]
+
+        # load
+        log_name_list = self._myControl.get_log_names(exp_number, scan_number)
+
+        # pop up a window for user to select the log names and types for output in the table
+        self._scanInfoSetupWindow = self.ScanInfoSetupWindow(log_name_list)
+
+        return
+
+    # pysignal: 
+    def signal_info_setup_done(self, val):
+        """
+        Process the signal emit and recieved such that the info table setup is finished.
+        """
+        assert val == 1, 'communication value must be 1 but not %s of type %s.' % (str(val),
+                str(type(val)))
+
+        
+        # set up the table
+        table_setup_list = self._scanInfoSetupWindow.get_setup()
+        self.ui.tableWidget_scanInfoTable.setup(table_setup_list)
+
+
+        # enable the push button for data mining
+        self.ui.pushButton_mineData.setEnabled(True)
+
+        return
+
+    def do_mine_data(self):
+        """
+        Do data mining on all scans in the experiment
+        """
+        # read the first scan to find out the field
+        try:
+            exp_number = self.get_exp_number(throw=True)
+            scan_list = self.get_int_list(self.ui.lineEdit_infoScans, throw=True)
+        except ValueError as val_err:
+            self.pop_error_message(self, 'Unable to do data mining due to %s.' % str(val_err))
+            return
+
+        # load and scan the data
+        for scan_number in scan_list:
+            # load data
+            data_file_name = self._myControl.get_data_file(exp_number, scan_number)
+            self._myControl.loadSpicePDData(exp_number, scan_number, data_file_name)
+            log_info_dict = self._myControl.summarize_log_info(exp_number, scan_number)
+            log_inof_dict['Scan'] = scan_number
+            self.ui.tableWidget_scanInfoTable.add_scan_info(log_info_dict)
+        # END-FOR
+
 
         return
 

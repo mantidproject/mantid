@@ -259,8 +259,72 @@
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="currentIndex">
-           <number>3</number>
+           <number>0</number>
           </property>
+          <widget class="QWidget" name="tab_scanInfo">
+           <attribute name="title">
+            <string>Information</string>
+           </attribute>
+           <widget class="QLabel" name="label_infScan">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>30</y>
+              <width>62</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Scans</string>
+            </property>
+           </widget>
+           <widget class="QLineEdit" name="lineEdit_infoScans">
+            <property name="geometry">
+             <rect>
+              <x>80</x>
+              <y>30</y>
+              <width>161</width>
+              <height>21</height>
+             </rect>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="pushButton_mingData">
+            <property name="geometry">
+             <rect>
+              <x>560</x>
+              <y>30</y>
+              <width>114</width>
+              <height>32</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Scan Data</string>
+            </property>
+           </widget>
+           <widget class="ScanInfoTable" name="tableWidget">
+            <property name="geometry">
+             <rect>
+              <x>60</x>
+              <y>80</y>
+              <width>931</width>
+              <height>511</height>
+             </rect>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="pushButton_setInfoTable">
+            <property name="geometry">
+             <rect>
+              <x>420</x>
+              <y>30</y>
+              <width>114</width>
+              <height>32</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Set Table</string>
+            </property>
+           </widget>
+          </widget>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
             <string>Raw Detectors</string>
@@ -2202,7 +2266,7 @@
      <x>0</x>
      <y>0</y>
      <width>1107</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -2277,6 +2341,11 @@
    <class>MplFigureCanvas</class>
    <extends>QGraphicsView</extends>
    <header>MplFigureCanvas.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ScanInfoTable</class>
+   <extends>QTableWidget</extends>
+   <header>hb2atablelib.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
