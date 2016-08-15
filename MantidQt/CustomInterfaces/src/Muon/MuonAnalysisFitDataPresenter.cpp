@@ -622,7 +622,9 @@ void MuonAnalysisFitDataPresenter::openSequentialFitDialog() {
 /**
  * Called when user requests a fit. Before fit begins, if the fit label is
  * active (simultaneous fit), check if it has already been used. If so,
- * increment it to avoid overwriting the previous fit.
+ * ask the user whether to overwrite.
+ * If user chooses not to overwrite, increment the label to avoid overwriting
+ * the previous fit.
  *
  * @param seq :: [input] Whether fit is sequential (UNUSED)
  */
@@ -631,13 +633,27 @@ void MuonAnalysisFitDataPresenter::checkAndUpdateFitLabel(bool seq) {
   if (isSimultaneousFit()) {
     auto &ads = AnalysisDataService::Instance();
     const auto &label = m_dataSelector->getSimultaneousFitLabel().toStdString();
-    size_t i = 0;
+
     std::string uniqueName = label;
-    while (ads.doesExist(
-        MantidWidgets::MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX +
-        uniqueName)) {
-      uniqueName = label + std::to_string(++i);
+    if (ads.doesExist(
+            MantidWidgets::MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX +
+            label)) {
+      const bool overwrite = m_dataSelector->askUserWhetherToOverwrite();
+      if (!overwrite) {
+        // Take off '#n' suffix if already present, otherwise add one
+        const auto pos = uniqueName.find_last_of('#');
+        if (pos == std::string::npos) {
+          uniqueName += '#';
+        } else {
+          uniqueName.erase(pos + 1);
+        }
+        size_t version(2);
+        for (; ads.doesExist(uniqueName + std::to_string(version)); ++version)
+          ;
+        uniqueName += std::to_string(version);
+      }
     }
+
     m_dataSelector->setSimultaneousFitLabel(QString::fromStdString(uniqueName));
     m_fitBrowser->setSimultaneousLabel(uniqueName);
   }

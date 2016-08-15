@@ -82,6 +82,8 @@ public:
   int getDatasetIndex() const override;
   /// Set names of datasets for selection
   void setDatasetNames(const QStringList &datasetNames) override;
+  /// Ask user whether to overwrite label or not
+  bool askUserWhetherToOverwrite() override;
 
 public slots:
   /// Set number of periods in data

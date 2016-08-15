@@ -61,6 +61,7 @@ public:
   MOCK_METHOD1(setSimultaneousFitLabel, void(const QString &));
   MOCK_CONST_METHOD0(getDatasetIndex, int());
   MOCK_METHOD1(setDatasetNames, void(const QStringList &));
+  MOCK_METHOD0(askUserWhetherToOverwrite, bool());
 };
 
 /// Mock fit property browser
@@ -441,39 +442,71 @@ public:
     }
   }
 
-  void test_checkAndUpdateFitLabel_Simultaneous_ShouldUpdate() {
+  void test_checkAndUpdateFitLabel_Simultaneous_NoOverwrite_ShouldUpdate() {
     doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::Simultaneous,
-                                  {"fwd"}, {"1"}, true);
+                                  {"fwd"}, {"1"}, false, true);
   }
 
-  void test_checkAndUpdateFitLabel_SingleRun_NoUpdate() {
+  void test_checkAndUpdateFitLabel_Simultaneous_Overwrite_ShouldUpdate() {
+    doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::Simultaneous,
+                                  {"fwd"}, {"1"}, true, true);
+  }
+
+  void test_checkAndUpdateFitLabel_SingleRun_NoOverwrite_NoUpdate() {
     doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::Single,
-                                  {"fwd"}, {"1"}, false);
+                                  {"fwd"}, {"1"}, false, false);
   }
 
-  void test_checkAndUpdateFitLabel_CoAdd_NoUpdate() {
+  void test_checkAndUpdateFitLabel_CoAdd_NoOverwrite_NoUpdate() {
     doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::CoAdd, {"fwd"},
-                                  {"1"}, false);
+                                  {"1"}, false, false);
   }
 
-  void test_checkAndUpdateFitLabel_SingleRun_MultipleGroups_ShouldUpdate() {
+  void
+  test_checkAndUpdateFitLabel_SingleRun_MultipleGroups_NoOverwrite_ShouldUpdate() {
     doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::Single,
-                                  {"fwd", "bwd"}, {"1"}, true);
+                                  {"fwd", "bwd"}, {"1"}, false, true);
   }
 
-  void test_checkAndUpdateFitLabel_SingleRun_MultiplePeriods_ShouldUpdate() {
+  void
+  test_checkAndUpdateFitLabel_SingleRun_MultipleGroups_Overwrite_ShouldUpdate() {
     doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::Single,
-                                  {"fwd"}, {"1", "2"}, true);
+                                  {"fwd", "bwd"}, {"1"}, true, true);
   }
 
-  void test_checkAndUpdateFitLabel_CoAdd_MultipleGroups_ShouldUpdate() {
+  void
+  test_checkAndUpdateFitLabel_SingleRun_MultiplePeriods_NoOverwrite_ShouldUpdate() {
+    doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::Single,
+                                  {"fwd"}, {"1", "2"}, false, true);
+  }
+
+  void
+  test_checkAndUpdateFitLabel_SingleRun_MultiplePeriods_Overwrite_ShouldUpdate() {
+    doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::Single,
+                                  {"fwd"}, {"1", "2"}, true, true);
+  }
+
+  void
+  test_checkAndUpdateFitLabel_CoAdd_MultipleGroups_NoOverwrite_ShouldUpdate() {
     doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::CoAdd,
-                                  {"fwd", "bwd"}, {"1"}, true);
+                                  {"fwd", "bwd"}, {"1"}, false, true);
   }
 
-  void test_checkAndUpdateFitLabel_CoAdd_MultiplePeriods_ShouldUpdate() {
+  void
+  test_checkAndUpdateFitLabel_CoAdd_MultipleGroups_Overwrite_ShouldUpdate() {
+    doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::CoAdd,
+                                  {"fwd", "bwd"}, {"1"}, true, true);
+  }
+
+  void
+  test_checkAndUpdateFitLabel_CoAdd_MultiplePeriods_NoOverwrite_ShouldUpdate() {
     doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::CoAdd, {"fwd"},
-                                  {"1", "2"}, true);
+                                  {"1", "2"}, false, true);
+  }
+  void
+  test_checkAndUpdateFitLabel_CoAdd_MultiplePeriods_Overwrite_ShouldUpdate() {
+    doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType::CoAdd, {"fwd"},
+                                  {"1", "2"}, true, true);
   }
 
 private:
@@ -705,23 +738,26 @@ private:
    * @param fitType :: [input] Type of fit
    * @param groups :: [input] Groups to fit
    * @param periods :: [input] Periods to fit
+   * @param overwrite :: [input] Whether user chose to overwrite
    * @param shouldUpdate :: [input] Whether or not to expect label to be updated
    */
   void doTest_checkAndUpdateFitLabel(IMuonFitDataSelector::FitType fitType,
                                      const QStringList &groups,
-                                     const QStringList &periods,
+                                     const QStringList &periods, bool overwrite,
                                      bool shouldUpdate) {
     ON_CALL(*m_dataSelector, getFitType()).WillByDefault(Return(fitType));
     ON_CALL(*m_dataSelector, getChosenGroups()).WillByDefault(Return(groups));
     ON_CALL(*m_dataSelector, getPeriodSelections())
         .WillByDefault(Return(periods));
+    ON_CALL(*m_dataSelector, askUserWhetherToOverwrite())
+        .WillByDefault(Return(overwrite));
 
     if (shouldUpdate) {
       const auto &label = m_dataSelector->getSimultaneousFitLabel();
       QString groupName = QString("MuonSimulFit_").append(label);
       AnalysisDataService::Instance().add(groupName.toStdString(),
                                           boost::make_shared<WorkspaceGroup>());
-      const auto &uniqueName = label + '1';
+      const auto &uniqueName = overwrite ? label : label + "#2";
       EXPECT_CALL(*m_fitBrowser, setSimultaneousLabel(uniqueName.toStdString()))
           .Times(1);
       EXPECT_CALL(*m_dataSelector, setSimultaneousFitLabel(uniqueName))

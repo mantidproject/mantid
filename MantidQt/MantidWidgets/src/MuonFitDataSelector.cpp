@@ -710,5 +710,21 @@ void MuonFitDataSelector::setNextDataset() {
   }
 }
 
+/**
+ * Ask the user whether to overwrite the fit results with the current label,
+ * if those results already exist. Raises a messagebox with a yes/no choice.
+ * @returns :: True if user chose to overwrite, false if not.
+ */
+bool MuonFitDataSelector::askUserWhetherToOverwrite() {
+  const int choice = QMessageBox::question(
+      this, tr("MantidPlot - Overwrite Warning"),
+      getSimultaneousFitLabel() +
+          tr(" already exists. Do you want to replace it?"),
+      QMessageBox::Yes | QMessageBox::Default,
+      QMessageBox::No | QMessageBox::Escape);
+
+  return choice == QMessageBox::Yes;
+}
+
 } // namespace MantidWidgets
 } // namespace MantidQt
