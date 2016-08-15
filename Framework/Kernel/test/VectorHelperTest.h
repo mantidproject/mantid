@@ -6,6 +6,8 @@
 #include "MantidKernel/VectorHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <cstdlib>
+#include <numeric>
+#include <algorithm>
 
 using namespace Mantid::Kernel;
 
@@ -381,6 +383,112 @@ public:
 private:
   /// Testing bins
   std::vector<double> m_test_bins;
+};
+
+class VectorHelperTestPerformance : public CxxTest::TestSuite {
+public:
+  VectorHelperTestPerformance *createSuite() {
+    return new VectorHelperTestPerformance();
+  }
+  void destroySuite(VectorHelperTestPerformance *suite) { delete suite; }
+
+  VectorHelperTestPerformance() {
+    setupHistogram();
+    setupOutput();
+  }
+
+  void testRebinSmaller() {
+    for (size_t i = 0; i < iters; i++)
+      VectorHelper::rebin(binEdges, counts, errors, smallerBinEdges,
+                          newCountsSmaller, newErrorsSmaller, false, false);
+  }
+
+  void testRebinSmallerAdd() {
+    for (size_t i = 0; i < iters; i++)
+      VectorHelper::rebin(binEdges, counts, errors, smallerBinEdges,
+                          newCountsSmaller, newErrorsSmaller, false, true);
+  }
+
+  void testRebinSmallerFrequencies() {
+    for (size_t i = 0; i < iters; i++)
+      VectorHelper::rebin(binEdges, frequencies, errors, smallerBinEdges,
+                          newCountsSmaller, newErrorsSmaller, true, false);
+  }
+
+  void testRebinLarger() {
+    for (size_t i = 0; i < iters; i++)
+      VectorHelper::rebin(binEdges, counts, errors, largerBinEdges,
+                          newCountsLarger, newErrorsLarger, false, false);
+  }
+
+  void testRebinLargerAdd() {
+    for (size_t i = 0; i < iters; i++)
+      VectorHelper::rebin(binEdges, counts, errors, largerBinEdges,
+                          newCountsLarger, newErrorsLarger, false, true);
+  }
+
+  void testRebinLargerFrequencies() {
+    for (size_t i = 0; i < iters; i++)
+      VectorHelper::rebin(binEdges, frequencies, errors, largerBinEdges,
+                          newCountsLarger, newErrorsLarger, true, false);
+  }
+
+private:
+  const size_t binSize = 10000;
+  const size_t iters = 10000;
+  std::vector<double> binEdges;
+  std::vector<double> counts;
+  std::vector<double> frequencies;
+  std::vector<double> errors;
+  std::vector<double> smallerBinEdges;
+  std::vector<double> largerBinEdges;
+  std::vector<double> newCountsSmaller;
+  std::vector<double> newFrequenciesSmaller;
+  std::vector<double> newErrorsSmaller;
+  std::vector<double> newCountsLarger;
+  std::vector<double> newFrequenciesLarger;
+  std::vector<double> newErrorsLarger;
+
+  void setupHistogram() {
+    binEdges.resize(binSize);
+    frequencies.resize(binSize - 1);
+    counts.resize(binSize - 1);
+    errors.resize(binSize - 1);
+
+    std::iota(binEdges.begin(), binEdges.end(), 0);
+    std::generate(counts.begin(), counts.end(),
+                  []() { return static_cast<double>(rand() % 1000); });
+
+    for (size_t i = 0; i < counts.size(); i++)
+      frequencies[i] = counts[i] / (binEdges[i + 1] - binEdges[i]);
+
+    std::transform(counts.cbegin(), counts.cend(), errors.begin(),
+                   [](const double count) { return sqrt(count); });
+  }
+
+  void setupOutput() {
+    smallerBinEdges.resize(binSize * 2);
+    largerBinEdges.resize(binSize / 2);
+
+    auto binWidth = binEdges[1] - binEdges[0];
+
+    for (size_t i = 0; i < binSize - 1; i++) {
+      smallerBinEdges[2 * i] = binEdges[i];
+      smallerBinEdges[(2 * i) + 1] = (binEdges[i] + binEdges[i + 1]) / 2;
+    }
+    smallerBinEdges[2 * (binSize - 1)] = binEdges.back();
+    smallerBinEdges.back() = binEdges.back() + (binWidth / 2);
+
+    for (size_t i = 0; i < largerBinEdges.size(); i++)
+      largerBinEdges[i] = binEdges[(2 * i)];
+
+    newCountsSmaller.resize(smallerBinEdges.size() - 1);
+    newFrequenciesSmaller.resize(smallerBinEdges.size() - 1);
+    newErrorsSmaller.resize(smallerBinEdges.size() - 1);
+    newCountsLarger.resize(largerBinEdges.size() - 1);
+    newFrequenciesLarger.resize(largerBinEdges.size() - 1);
+    newErrorsLarger.resize(largerBinEdges.size() - 1);
+  }
 };
 
 #endif /* MANTID_KERNEL_VECTORHELPERTEST_H_ */
