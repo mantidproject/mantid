@@ -159,15 +159,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         # Run the algorithm
         self._get_properties()
 
-        castep_filename = self.getPropertyValue('CASTEPFile')
-        phonon_filename = self.getPropertyValue('PHONONFile')
-
-        if phonon_filename != '' and self._spec_type != 'BondTable':
-            file_data = self._read_data_from_file(phonon_filename)
-        elif castep_filename != '':
-            file_data = self._read_data_from_file(castep_filename)
-        else:
-            raise RuntimeError('No valid data file')
+        file_data = self._read_file()
 
         frequencies = file_data['frequencies']
         ir_intensities = file_data['ir_intensities']
@@ -259,6 +251,25 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
         self._calc_partial = (len(self._ions_of_interest) > 0)
 
+
+#----------------------------------------------------------------------------------------
+
+    def _read_file(self):
+        """
+        Decides if a castep or phonon file should be read then reads the file data
+        Raises RuntimeError if no valid file is found.
+
+        @return file_data dictionary holding all required data from the castep or phonon file
+        """
+        castep_filename = self.getPropertyValue('CASTEPFile')
+        phonon_filename = self.getPropertyValue('PHONONFile')
+
+        if phonon_filename != '' and self._spec_type != 'BondTable':
+            return self._read_data_from_file(phonon_filename)
+        elif castep_filename != '':
+            return self._read_data_from_file(castep_filename)
+        else:
+            raise RuntimeError('No valid data file')
 
 #----------------------------------------------------------------------------------------
 
@@ -721,8 +732,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         intensities = intensities[:self._num_branches]
         weights = weights[:self._num_branches]
 
-        # Speed of light in vaccum in m/s
-        #c = scipy.constants.c #unused for now
         # Wavelength of the laser
         laser_wavelength = 514.5e-9
         # Planck's constant
