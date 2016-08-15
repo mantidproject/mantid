@@ -290,9 +290,9 @@ void SANSSensitivityCorrection::exec() {
             "   |" + Poco::replace(dark_result, "\n", "\n   |") + "\n";
 
         // Look for solid angle correction algorithm
-        if (reductionManager->existsProperty("SolidAngleAlgorithm")) {
+        if (reductionManager->existsProperty("SANSSolidAngleCorrection")) {
           IAlgorithm_sptr solidAlg =
-              reductionManager->getProperty("SolidAngleAlgorithm");
+              reductionManager->getProperty("SANSSolidAngleCorrection");
           solidAlg->setChild(true);
           solidAlg->setProperty("InputWorkspace", rawFloodWS);
           solidAlg->setProperty("OutputWorkspace", rawFloodWS);
