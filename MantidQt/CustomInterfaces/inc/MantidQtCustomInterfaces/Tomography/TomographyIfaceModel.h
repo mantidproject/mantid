@@ -171,9 +171,7 @@ private:
                                std::vector<std::string> &opt) const;
 
   void checkWarningToolNotSetup(const std::string &tool,
-                                const std::string &settings,
-                                const std::string &cmd,
-                                const std::string &opt) const;
+                                const std::string &cmd) const;
 
   std::vector<std::string> makeTomoRecScriptOptions(bool local) const;
 
@@ -251,6 +249,15 @@ private:
 
   // Parameters set for the ROI, normalization region, etc.
   ImageStackPreParams m_imageStackPreParams;
+
+  // the main tomo_reconstruct.py or similar script (as it is distributed with
+  // Mantid)
+  static const std::string g_mainReconstructionScript;
+
+  // Names of reconstruction tools
+  static const std::string g_TomoPyTool;
+  static const std::string g_AstraTool;
+  static const std::string g_customCmdTool;
 
   // mutex for the job status info update operations
   QMutex *m_statusMutex;

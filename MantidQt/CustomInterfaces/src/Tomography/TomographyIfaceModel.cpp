@@ -28,6 +28,9 @@ Mantid::Kernel::Logger g_log("TomographyGUI");
 // names by which we know compute resourcess
 const std::string TomographyIfaceModel::g_SCARFName = "SCARF@STFC";
 
+const std::string TomographyIfaceModel::g_mainReconstructionScript =
+    "/Imaging/IMAT/tomo_reconstruct.py";
+
 // names by which we know image/tomography reconstruction tools (3rd party)
 const std::string TomographyIfaceModel::g_TomoPyTool = "TomoPy";
 const std::string TomographyIfaceModel::g_AstraTool = "Astra";
@@ -601,12 +604,12 @@ void TomographyIfaceModel::makeRunnableWithOptions(
   }
 
   std::string cmd;
-  const std::string mainScript = "/Imaging/IMAT/tomo_reconstruct.py";
   bool local = false;
   // TODO this is still incomplete, not all tools ready
   if ("local" == comp) {
     local = true;
-    cmd = m_systemSettings.m_local.m_reconScriptsPath + mainScript;
+    cmd = m_systemSettings.m_local.m_reconScriptsPath +
+          g_mainReconstructionScript;
   } else if (tool == g_TomoPyTool) {
     cmd = m_toolsSettings.tomoPy.toCommand();
     // this will make something like:
@@ -630,12 +633,16 @@ void TomographyIfaceModel::makeRunnableWithOptions(
 
   std::string longOpt;
   splitCmdLine(cmd, run, longOpt);
-  // TODO: this may not make sense any longer:
-  // checkWarningToolNotSetup(tool, cmd, run, opt);
+  checkWarningToolNotSetup(tool, cmd);
+
   if (local) {
     run = m_systemSettings.m_local.m_externalInterpreterPath;
+  } else {
+    // intentionally not using local style paths, as this goes to a server with
+    // unix file system
+    run = m_systemSettings.m_remote.m_basePathReconScripts +
+          g_mainReconstructionScript;
   }
-
   opt = makeTomoRecScriptOptions(local);
 }
 
@@ -655,8 +662,9 @@ TomographyIfaceModel::makeTomoRecScriptOptions(bool local) const {
   std::vector<std::string> opts;
 
   if (local) {
-    const std::string mainScript = "/Imaging/IMAT/tomo_reconstruct.py";
-    opts.emplace_back(m_systemSettings.m_local.m_reconScriptsPath + mainScript);
+    Poco::Path base(m_systemSettings.m_local.m_reconScriptsPath);
+    base.append(g_mainReconstructionScript);
+    opts.emplace_back(base.toString());
   }
 
   const std::string toolName = usingTool();
@@ -690,25 +698,23 @@ TomographyIfaceModel::makeTomoRecScriptOptions(bool local) const {
  * settings
  */
 void TomographyIfaceModel::checkWarningToolNotSetup(
-    const std::string &tool, const std::string &settings,
-    const std::string &cmd, const std::string &opt) const {
-  if (tool.empty() || settings.empty() || cmd.empty() || opt.empty()) {
+    const std::string &tool, const std::string &cmd) const {
+  if (tool.empty() || cmd.empty()) {
     const std::string detail =
         "Please define the settings of this tool. "
         "You have not defined any settings for this tool: " +
-        tool + ". Before running it you need to define its settings "
-               "(parameters). You can do so by clicking on the setup "
-               "button.";
+        tool +
+        ". Before running it you need to define its settings "
+        "(method, parameters, etc.). You can do so by clicking on the setup "
+        "button.";
     throw std::runtime_error("Cannot run the tool " + tool +
-                             " before its settings have been defined." +
-                             detail);
+                             " without setting it up." + detail);
   }
 }
 
 /**
  * Temporary helper to do an operation that shouldn't be needed any longer
- * when
- * the code is reorganized to use the tool settings objetcs better.
+ * when the code is reorganized to use the tool settings objects better.
  */
 void TomographyIfaceModel::splitCmdLine(const std::string &cmd,
                                         std::string &run,
