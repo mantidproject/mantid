@@ -392,7 +392,9 @@ void MuonAnalysisResultTableTab::refresh() {
 
   m_uiForm.sequentialFit->setEnabled(m_uiForm.fitLabelCombo->count() != 0);
   m_uiForm.simultaneousFit->setEnabled(
-      m_uiForm.cmbFitLabelSimultaneous->count() != 0);
+      m_uiForm.cmbFitLabelSimultaneous->count() > 0);
+  m_uiForm.multipleSimFits->setEnabled(
+      m_uiForm.cmbFitLabelSimultaneous->count() > 0);
 
   populateTables();
 }
