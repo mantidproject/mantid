@@ -5,6 +5,7 @@
 // Includes
 //----------------------
 #include "ui_MuonAnalysis.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include <QTableWidget>
 
 namespace Ui {
@@ -131,6 +132,10 @@ private:
   QStringList getSelectedLogs();
   std::string getFileName();
   QMap<int, int> getWorkspaceColors(const QStringList &wsList);
+
+  /// Removes errors for fixed parameters from table
+  void removeFixedParameterErrors(
+      const Mantid::API::ITableWorkspace_sptr table) const;
 
   Ui::MuonAnalysis &m_uiForm;
 
