@@ -37,7 +37,7 @@ void AbsorptionCorrections::run() {
   QString algorithmName = "Indirect" + sampleShape + "Absorption";
 
   IAlgorithm_sptr absCorAlgo =
-      AlgorithmManager::Instance().create(algorithmName.toStdString());
+    AlgorithmManager::Instance().create(algorithmName.toStdString());
   absCorAlgo->initialize();
 
   // Sample details
@@ -49,7 +49,7 @@ void AbsorptionCorrections::run() {
 
   QString sampleChemicalFormula = m_uiForm.leSampleChemicalFormula->text();
   absCorAlgo->setProperty("SampleChemicalFormula",
-                          sampleChemicalFormula.toStdString());
+    sampleChemicalFormula.toStdString());
 
   addShapeSpecificSampleOptions(absCorAlgo, sampleShape);
 
@@ -57,18 +57,18 @@ void AbsorptionCorrections::run() {
   bool useCan = m_uiForm.ckUseCan->isChecked();
   if (useCan) {
     std::string canWsName =
-        m_uiForm.dsCanInput->getCurrentDataName().toStdString();
+      m_uiForm.dsCanInput->getCurrentDataName().toStdString();
     std::string shiftedCanName = canWsName + "_shifted";
     IAlgorithm_sptr clone =
-        AlgorithmManager::Instance().create("CloneWorkspace");
+      AlgorithmManager::Instance().create("CloneWorkspace");
     clone->initialize();
     clone->setProperty("InputWorkspace", canWsName);
     clone->setProperty("OutputWorkspace", shiftedCanName);
     clone->execute();
 
     MatrixWorkspace_sptr shiftedCan =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            shiftedCanName);
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        shiftedCanName);
     if (m_uiForm.ckShiftCan->isChecked()) {
       IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
       scaleX->initialize();
@@ -78,7 +78,7 @@ void AbsorptionCorrections::run() {
       scaleX->setProperty("Operation", "Add");
       scaleX->execute();
       IAlgorithm_sptr rebin =
-          AlgorithmManager::Instance().create("RebinToWorkspace");
+        AlgorithmManager::Instance().create("RebinToWorkspace");
       rebin->initialize();
       rebin->setProperty("WorkspaceToRebin", shiftedCan);
       rebin->setProperty("WorkspaceToMatch", sampleWsName.toStdString());
@@ -96,14 +96,12 @@ void AbsorptionCorrections::run() {
 
       QString canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
       absCorAlgo->setProperty("CanChemicalFormula",
-                              canChemicalFormula.toStdString());
+        canChemicalFormula.toStdString());
     }
 
     addShapeSpecificCanOptions(absCorAlgo, sampleShape);
   }
 
-  bool plot = m_uiForm.ckPlot->isChecked();
-  absCorAlgo->setProperty("Plot", plot);
 
   // Generate workspace names
   int nameCutIndex = sampleWsName.lastIndexOf("_");
@@ -120,7 +118,7 @@ void AbsorptionCorrections::run() {
   QString outputFactorsWsName = outputBaseName + "_" + sampleShape + "_Factors";
   if (keepCorrectionFactors)
     absCorAlgo->setProperty("CorrectionsWorkspace",
-                            outputFactorsWsName.toStdString());
+      outputFactorsWsName.toStdString());
 
   // Add correction algorithm to batch
   m_batchAlgoRunner->addAlgorithm(absCorAlgo);
@@ -132,12 +130,13 @@ void AbsorptionCorrections::run() {
     if (keepCorrectionFactors)
       addSaveWorkspace(outputFactorsWsName);
   }
-
+  m_absCorAlgo = absCorAlgo;
   // Run algorithm batch
   m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
   m_pythonExportWsName = outputWsName.toStdString();
+
 }
 
 /**
@@ -304,6 +303,24 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
                                          m_uiForm.spCanShift->value()));
     shiftLog->execute();
   }
+  //Plot output
+
+  bool plot = m_uiForm.ckPlot->isChecked();
+  if (plot) {
+    QStringList plotData = { QString::fromStdString(m_pythonExportWsName),  m_uiForm.dsSampleInput->getCurrentDataName() };
+    auto outputFactorsWsName = m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
+    if (m_uiForm.ckKeepFactors->isChecked()) {
+      QStringList plotCorr = { QString::fromStdString(outputFactorsWsName) + "_ass" };
+      if (m_uiForm.ckUseCanCorrections->isChecked()) {
+        plotCorr.push_back(QString::fromStdString(outputFactorsWsName) + "_acc");
+        QString shiftedWs = QString::fromStdString(m_absCorAlgo->getPropertyValue("CanWorkspace"));
+        plotData.push_back(shiftedWs);
+      }
+      plotSpectrum(plotCorr, 0);
+    }
+    IndirectTab::plotSpectrum(plotData, 0);
+  }
+
 }
 
 } // namespace CustomInterfaces
