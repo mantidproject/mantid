@@ -306,8 +306,7 @@ size_t DownloadInstrument::removeOrphanedFiles(
     }
   } catch (Poco::Exception &ex) {
     g_log.error() << "DownloadInstrument: failed to delete file: "
-                  << ex.className() << " : " << ex.displayText()
-                  << '\n';
+                  << ex.className() << " : " << ex.displayText() << '\n';
     // silently ignore this exception.
   } catch (std::exception &ex) {
     std::stringstream ss;
