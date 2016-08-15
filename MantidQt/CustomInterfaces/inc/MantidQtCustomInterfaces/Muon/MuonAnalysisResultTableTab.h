@@ -111,6 +111,7 @@ private:
   void applyUserSettings();
   void populateLogsAndValues(const QStringList &fittedWsList);
   void populateFittings(const QStringList &fittedWsList);
+  void populateFittingsFromLabels(const QStringList &labelList);
 
   /// Creates the results table
   void createTable();

@@ -248,6 +248,15 @@ QStringList MuonAnalysisResultTableTab::getFittedWorkspaces() {
   } else if (m_uiForm.fitType->checkedButton() == m_uiForm.simultaneousFit) {
     return getMultipleFitWorkspaces(
         m_uiForm.cmbFitLabelSimultaneous->currentText(), false);
+  } else if (m_uiForm.fitType->checkedButton() == m_uiForm.multipleSimFits) {
+    // all simultaneously fitted workspaces
+    QStringList wsList;
+    for (int i = 0; i < m_uiForm.cmbFitLabelSimultaneous->count(); ++i) {
+      const auto names = getMultipleFitWorkspaces(
+          m_uiForm.cmbFitLabelSimultaneous->itemText(i), false);
+      wsList.append(names);
+    }
+    return wsList;
   } else {
     throw std::runtime_error("Unknown fit type option");
   }
@@ -435,7 +444,11 @@ void MuonAnalysisResultTableTab::populateTables() {
   if (!fittedWsList.isEmpty()) {
     // Populate the individual log values and fittings into their respective
     // tables.
-    populateFittings(fittedWsList);
+    if (m_uiForm.fitType->checkedButton() == m_uiForm.multipleSimFits) {
+      populateFittingsFromLabels(getFitLabels().second);
+    } else {
+      populateFittings(fittedWsList);
+    }
     populateLogsAndValues(fittedWsList);
 
     // Make sure all fittings are selected by default.
@@ -651,7 +664,58 @@ void MuonAnalysisResultTableTab::populateFittings(
     // Fill values and delete previous old ones.
     if (row < fittedWsList.size()) {
       QTableWidgetItem *item = new QTableWidgetItem(fittedWsList[row]);
-      item->setTextColor(colors.find(row).value);
+      item->setTextColor(colors.value(row));
+      m_uiForm.fittingResultsTable->setItem(row, 0, item);
+    } else
+      m_uiForm.fittingResultsTable->setItem(row, 0, NULL);
+  }
+}
+
+/**
+ * Populates fittings table with simultaneous fit labels.
+ * @param labelList :: [input] List of labels
+ */
+void MuonAnalysisResultTableTab::populateFittingsFromLabels(
+    const QStringList &labelList) {
+  // Add number of rows for the amount of fittings.
+  m_uiForm.fittingResultsTable->setRowCount(labelList.size());
+
+  // Add check boxes for the include column on fitting table, and make text
+  // uneditable.
+  for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); i++) {
+    m_uiForm.fittingResultsTable->setCellWidget(i, 1, new QCheckBox);
+
+    if (auto textItem = m_uiForm.fittingResultsTable->item(i, 0)) {
+      textItem->setFlags(textItem->flags() & (~Qt::ItemIsEditable));
+    }
+  }
+
+  // Get colors for label names in table
+  // Need to create a list of the first fitted workspace in each label group
+  auto &ads = AnalysisDataService::Instance();
+  QStringList wsList;
+  for (const auto &label : labelList) {
+    const std::string groupName =
+        MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX + label.toStdString();
+    if (const auto &wsGroup = ads.retrieveWS<WorkspaceGroup>(groupName)) {
+      if (!wsGroup->isEmpty()) {
+        const auto &names = wsGroup->getNames();
+        for (const auto &name : names) {
+          const auto pos = name.find(WORKSPACE_POSTFIX);
+          if (pos != std::string::npos) {
+            wsList.append(QString::fromStdString(name.substr(0, pos)));
+            break;
+          }
+        }
+      }
+    }
+  }
+  const auto colors = getWorkspaceColors(wsList);
+  for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); row++) {
+    // Fill values and delete previous old ones.
+    if (row < labelList.size()) {
+      QTableWidgetItem *item = new QTableWidgetItem(labelList[row]);
+      item->setTextColor(colors.value(row));
       m_uiForm.fittingResultsTable->setItem(row, 0, item);
     } else
       m_uiForm.fittingResultsTable->setItem(row, 0, NULL);
@@ -662,14 +726,14 @@ void MuonAnalysisResultTableTab::populateFittings(
 * Get the colors corresponding to their position in the workspace list.
 *
 * @param wsList :: List of all workspaces with fitted parameters.
-* @return colors :: List of colors (as numbers) with the key being position in
+* @return colors :: List of colors with the key being position in
 * wsList.
 */
-QMap<int, int>
+QMap<int, QColor>
 MuonAnalysisResultTableTab::getWorkspaceColors(const QStringList &wsList) {
-  QMap<int, int> colors; // position, color
+  QMap<int, QColor> colors; // position, color
   int posCount(0);
-  int colorCount(0);
+  size_t colorCount(0);
 
   while (wsList.size() != posCount) {
     // If a color has already been chosen for the current workspace then skip
@@ -687,7 +751,7 @@ MuonAnalysisResultTableTab::getWorkspaceColors(const QStringList &wsList) {
         firstParams.push_back(key);
       } while (paramRow.next());
 
-      colors.insert(posCount, colorCount);
+      colors.insert(posCount, getWorkspaceColor(colorCount));
 
       // Compare to all the other parameters. +1 don't compare with self.
       for (int i = (posCount + 1); i < wsList.size(); ++i) {
@@ -704,7 +768,7 @@ MuonAnalysisResultTableTab::getWorkspaceColors(const QStringList &wsList) {
           } while (paramRow.next());
 
           if (firstParams == nextParams) {
-            colors.insert(i, colorCount);
+            colors.insert(i, getWorkspaceColor(colorCount));
           }
         }
       }
