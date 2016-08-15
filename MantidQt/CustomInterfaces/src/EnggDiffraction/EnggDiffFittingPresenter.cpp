@@ -784,7 +784,11 @@ void MantidQt::CustomInterfaces::EnggDiffFittingPresenter::
   auto fileSplit = m_view->splitFittingDirectory(filePath);
   // returns ['ENGINX', <RUN-NUMBER>, 'focused', `bank`, <BANK>, '.nxs']
   auto runNumber = fileSplit[1];
-  auto bank = fileSplit[4];
+
+  // if a normal focused file assign bank number otherwise 'customised'
+  std::string bank = "customised";
+  if (fileSplit.size() == 5)
+    bank = fileSplit[4];
 
   // generate file name
   std::string fileName;
