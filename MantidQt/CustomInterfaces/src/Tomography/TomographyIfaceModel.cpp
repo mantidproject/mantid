@@ -692,10 +692,7 @@ TomographyIfaceModel::makeTomoRecScriptOptions(bool local) const {
  * parameter is missing).
  *
  * @param tool Name of the tool this warning applies to
- * @param settings current settings for the tool
  * @param cmd command/script/executable derived from the settings
- * @param opt options for that command/script/executable derived from the
- * settings
  */
 void TomographyIfaceModel::checkWarningToolNotSetup(
     const std::string &tool, const std::string &cmd) const {
