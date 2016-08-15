@@ -32,6 +32,25 @@ namespace {
 /// The string "Error"
 const static std::string ERROR_STRING("Error");
 constexpr static size_t ERROR_LENGTH(5);
+
+/// Colors for workspace (Black, Red, Green, Blue, Orange, Purple, if there are
+/// more than this then use black as default.)
+QColor getWorkspaceColor(size_t index) {
+  switch (index) {
+  case (1):
+    return QColor("red");
+  case (2):
+    return QColor("green");
+  case (3):
+    return QColor("blue");
+  case (4):
+    return QColor("orange");
+  case (5):
+    return QColor("purple");
+  default:
+    return QColor("black");
+  }
+}
 }
 
 namespace MantidQt {
@@ -626,33 +645,13 @@ void MuonAnalysisResultTableTab::populateFittings(
     }
   }
 
-  // Get colors, 0=Black, 1=Red, 2=Green, 3=Blue, 4=Orange, 5=Purple. (If there
-  // are more than this then use black as default.)
-  QMap<int, int> colors = getWorkspaceColors(fittedWsList);
+  // Get colors for workspace names in table
+  const auto colors = getWorkspaceColors(fittedWsList);
   for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); row++) {
     // Fill values and delete previous old ones.
     if (row < fittedWsList.size()) {
       QTableWidgetItem *item = new QTableWidgetItem(fittedWsList[row]);
-      const int color(colors.find(row).value());
-      switch (color) {
-      case (1):
-        item->setTextColor("red");
-        break;
-      case (2):
-        item->setTextColor("green");
-        break;
-      case (3):
-        item->setTextColor("blue");
-        break;
-      case (4):
-        item->setTextColor("orange");
-        break;
-      case (5):
-        item->setTextColor("purple");
-        break;
-      default:
-        item->setTextColor("black");
-      }
+      item->setTextColor(colors.find(row).value);
       m_uiForm.fittingResultsTable->setItem(row, 0, item);
     } else
       m_uiForm.fittingResultsTable->setItem(row, 0, NULL);
