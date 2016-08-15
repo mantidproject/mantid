@@ -35,7 +35,8 @@ Calibration
 The first time the interface is opened it will be disabled except for the RB number entry box
 and a pop up box which should prompt for a RB number. For testing purposes this can be anything.
 
-If a vanadium calibration has not previously been run the `Current calibration` will be empty.
+If a vanadium calibration has never been run the `Current calibration` will be empty. Once
+a calibration has been run these fields will retain their values for future runs of the program. 
 The following files can be used for the calibration run.
 
 - *Vanadium#*: ENGINX00236516.nxs

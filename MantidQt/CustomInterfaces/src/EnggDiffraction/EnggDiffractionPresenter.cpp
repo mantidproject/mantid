@@ -36,7 +36,8 @@ const std::string EnggDiffractionPresenter::g_shortMsgRBNumberRequired =
 const std::string EnggDiffractionPresenter::g_msgRBNumberRequired =
     std::string("An experiment reference number (or so called \"RB "
                 "number\" at ISIS) is "
-                "required to effectively use this interface. \n") +
+                "required to effectively use this interface, "
+                "this can be entered at the top of the screen. \n") +
     "The output calibration, focusing and fitting results will be "
     "saved in directories named using the RB number entered.";
 
@@ -2173,7 +2174,7 @@ void EnggDiffractionPresenter::doRebinningTime(const std::string &runNo,
 void EnggDiffractionPresenter::inputChecksBeforeRebin(
     const std::string &runNo) {
   if (runNo.empty()) {
-    throw std::invalid_argument("The run to pre-process" + g_runNumberErrorStr);
+    throw std::invalid_argument("The run to pre-process is invalid. The run" + g_runNumberErrorStr);
   }
 }
 

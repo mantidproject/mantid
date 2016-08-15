@@ -37,7 +37,7 @@ Close
   Close the interface
 
 Status at the bottom of the interface
-  Here there will be a short message that indicates whether the last
+  A short message will be displayed which indicates whether the last
   important calculations finished successfully, and when the interface
   is busy calculating (calibrating, focusing, fitting, etc.).
 
@@ -78,8 +78,8 @@ box has been enabled.
 
 The plot Calibrated Workspace check-box will enable user to plot
 vanadium curves and Ceria peaks. For Ceria peaks there will be two
-workspace generated and plotted, one for each bank, whereas for a
-cropped calibration there will only be only one workspace generated
+workspaces generated and plotted, one for each bank, whereas for a
+cropped calibration there will only be one workspace generated
 and plotted, depending on the selected bank or provided Spectrum
 IDs. The workspace contains difc and tzero data which is then
 utilised to plot the Ceria peaks per bank, the graph will plot Peaks
@@ -91,7 +91,7 @@ The calibration files are written into two different output
 directories. First, they are written to a user specific directory
 which for the ENGIN-X instrument on Windows systems is:
 
-`C:/EnginX_Mantid/<Username>/<RBNumber>/Calibration`
+`C:\\EnginX_Mantid\\<Username>\\<RBNumber>\\Calibration`
 
 On UNIX based platforms this path is:
 
@@ -99,7 +99,7 @@ On UNIX based platforms this path is:
 
 They are also copied into a general (all) output directory:
 
-`C:/EnginX_Mantid/Calibration` on Windows or
+`C:\\EnginX_Mantid\\Calibration` on Windows or
 
 `~/EnginX_Mantid/Calibration` on UNIX platforms.
 
@@ -219,8 +219,8 @@ number of focus runs that could not be processed.
 The focused data files are saved in NeXus format into the user
 specific and general directories (as with the calibration output
 files). That is the files are written into
-`C:/EnginX_Mantid/User/<RBNumber>/Calibration` and
-`C:/EnginX_Mantid/Calibration` on Windows, or
+`C:\\EnginX_Mantid\\User\\<RBNumber>\\Calibration` and
+`C:\\EnginX_Mantid\\Calibration` on Windows, or
 `~/EnginX_Mantid/User/<RBNumber>/Calibration` and
 `~/EnginX_Mantid/Calibration` on UNIX platforms.  See below for
 additional, optional outputs.
@@ -268,13 +268,13 @@ files by clicking the Output Files checkbox. This will generate three
 different files for each focused output workspace in Mantid. These
 files can be found with appropriate name within:
 
-`C:\EnginX_Mantid\<User>\<RBNumber>\Focus` on Windows or
+`C:\\EnginX_Mantid\\<User>\\<RBNumber>\\Focus` on Windows or
 
 `~/EnginX_Mantid/Foxus` on UNIX systems.
 
 The files are also copied to the general (all) output directory which is
 
-`C:\EnginX_Mantid\Focus` on Windows
+`C:\\EnginX_Mantid\\Focus` on Windows
 
 `~/EnginX_Mantid/Focus` under on UNIX systems
 
@@ -321,7 +321,7 @@ convention:
 
 - *engggui_preproc_by_pulse_time_ws*
 
-Focussing uses the algorithms :ref:`Rebin <algm-Rebin>` and :ref:`Rebin
+Focussing uses the algorithms :ref:`Rebin <algm-Rebin>` and :ref:`RebinByPulseTimes
 <algm-RebinByPulseTimes>` to bin the data in different ways when
 converting event data into histogram data.
 
@@ -332,7 +332,7 @@ Fitting
              early stage of definition and implementation. Not all
              options may be supported and/or consistent at the moment.
 			 
-.. warning:: The input workspace must be converted into a focussed file
+.. warning:: The input workspace must be converted into a focused file
 			 first. The steps to complete this are found here: :ref:`focus-Engineering_Diffraction-ref`
 
 The Fitting tab provides a graphical interface which fits an expected
@@ -442,7 +442,7 @@ as well. Users may also zoom-in to the graph by holding left-click
 and dragging a box on the plot, and zoom-out by left-clicking on
 the plot.
 
-When user is satisfied with the center position of the peak, you may
+When user is happy with the center position of the peak, you may
 add the selected peak to :ref:`ExpectedPeaks-Engineering_Diffraction-ref`
 list by clicking Add Peak button. User may rerun Fit process by
 clearing peaks list using Clear button and manually selecting peaking
