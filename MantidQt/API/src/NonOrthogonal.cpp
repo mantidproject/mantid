@@ -153,11 +153,11 @@ namespace
 
 	template <typename T> bool doRequiresSkewMatrix(T workspace)
 	{
-		const auto &sample = workspace->getExperimentInfo(0)->sample();
-		const auto &run = workspace->getExperimentInfo(0)->run();
-		auto specialCoordnateSystem = workspace->getSpecialCoordinateSystem();
 		auto requiresSkew(true);
 		try {
+			const auto &sample = workspace->getExperimentInfo(0)->sample();
+			const auto &run = workspace->getExperimentInfo(0)->run();
+			auto specialCoordnateSystem = workspace->getSpecialCoordinateSystem();
 			checkForSampleAndRunEntries(sample, run, specialCoordnateSystem);
 		}
 		catch (std::invalid_argument &) {
