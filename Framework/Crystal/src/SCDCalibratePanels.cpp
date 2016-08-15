@@ -341,7 +341,7 @@ void SCDCalibratePanels::exec() {
   DblMatrix UB = lattice.getUB();
   // sort again since edge peaks can trace to other banks
   peaksWs->sort(criteria);
-  PARALLEL_FOR3(ColWksp,RowWksp,TofWksp)
+  PARALLEL_FOR3(ColWksp, RowWksp, TofWksp)
   for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
     std::set<string>::iterator it = MyBankNames.begin();
@@ -359,7 +359,8 @@ void SCDCalibratePanels::exec() {
       Peak peak = peaksWs->getPeak(j);
       if (peak.getBankName() == bankName) {
         try {
-          V3D q_lab = (peak.getGoniometerMatrix() * UB) * peak.getHKL() * M_2_PI;
+          V3D q_lab =
+              (peak.getGoniometerMatrix() * UB) * peak.getHKL() * M_2_PI;
           Peak theoretical(peak.getInstrument(), q_lab);
           ColWksp->dataX(i)[icount] = peak.getCol();
           ColWksp->dataY(i)[icount] = theoretical.getCol();
@@ -370,7 +371,7 @@ void SCDCalibratePanels::exec() {
         } catch (...) {
           // g_log.debug() << "Problem only in printing peaks\n";
         }
-        icount ++;
+        icount++;
       }
     }
     PARALLEL_END_INTERUPT_REGION
