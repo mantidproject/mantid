@@ -236,6 +236,13 @@ endif()
 # for an explanation
 add_subdirectory( Framework/PostInstall )
 
+
+# Conda
+set ( ENABLE_CONDA CACHE BOOL "Switch to enable conda package generation")
+if ( ENABLE_CONDA )
+  include ( conda )
+endif ( ENABLE_CONDA )
+
 ###########################################################################
 # CPack settings
 ###########################################################################

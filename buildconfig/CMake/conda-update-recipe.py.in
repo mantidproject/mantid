@@ -1,0 +1,32 @@
+# -*- Python -*-
+
+version = "@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@"
+
+import subprocess as sp, shlex, os
+git_rev = sp.check_output("git rev-parse HEAD".split(), 
+                          cwd="@CMAKE_SOURCE_DIR@").strip()
+
+# checkout recipe
+if not os.path.exists('conda-recipes'):
+    cmd = 'git clone git@github.com:mantidproject/conda-recipes'
+    sp.check_call(cmd.split())
+else:
+    cmd = 'git pull'
+    sp.check_call(cmd.split(), cwd='conda-recipes')
+
+# change framework meta.yaml
+path = 'conda-recipes/framework/meta.yaml'
+header = []
+header.append('{% set version = "' + '%s' % version + '" %}')
+header.append('{% set git_rev = "' + '%s' % git_rev + '" %}')
+body = open(path, 'rt').read().split('\n')
+body = body[2:]
+open(path, 'wt').write('\n'.join(header+body))
+
+# commit
+cmd = 'git commit -m "update version and git_rev" framework/meta.yaml'
+sp.check_call(shlex.split(cmd), cwd="conda-recipes")
+
+# push
+cmd = 'git push'
+sp.check_call(cmd.split(), cwd="conda-recipes")
