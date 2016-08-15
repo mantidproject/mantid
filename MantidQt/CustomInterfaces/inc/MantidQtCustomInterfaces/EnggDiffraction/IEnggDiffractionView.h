@@ -202,6 +202,14 @@ public:
   virtual void enableTabs(bool enable) = 0;
 
   /**
+   * Highlights the RB number box to make it more visible if the
+   * user needs to enter an RB number
+   *
+   * @param Is the current value in RB Number valid 
+   */
+  virtual void highlightRbNumber(bool isValid) = 0;
+
+  /**
    * A (sample) run to focus
    *
    * @return run number, as a string

@@ -598,6 +598,7 @@ void EnggDiffractionPresenter::processRBNumberChange() {
   const std::string rbn = m_view->getRBNumber();
   auto valid = validateRBNumber(rbn);
   m_view->enableTabs(valid);
+  m_view->highlightRbNumber(valid);
   m_view->splashMessage(!valid, g_shortMsgRBNumberRequired,
                         g_msgRBNumberRequired);
   if (!valid) {
