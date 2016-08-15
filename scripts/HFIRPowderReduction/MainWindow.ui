@@ -288,7 +288,7 @@
              </rect>
             </property>
            </widget>
-           <widget class="QPushButton" name="pushButton_mingData">
+           <widget class="QPushButton" name="pushButton_mineData">
             <property name="geometry">
              <rect>
               <x>560</x>

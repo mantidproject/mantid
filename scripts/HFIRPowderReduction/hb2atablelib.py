@@ -10,13 +10,13 @@ class ScanInfoTable(BaseTable.NTableWidget):
     """
     SetupTable = [('Scan', 'int')]
 
-
     def __init__(self, parent):
         """ Initialization
         """
         BaseTable.NTableWidget.__init__(self, parent)
 
-        self._columnNameList.append('Scan')
+        # set up column name list
+        self._columnNameList = ['Scan']
 
         return
 
@@ -38,7 +38,7 @@ class ScanInfoTable(BaseTable.NTableWidget):
 
             if isinstance(log_value, int):
                 table_value = '%d' % log_value
-            elif instance(log_value,float):
+            elif isinstance(log_value,float):
                 table_value = '%.5f' % log_value
             else:
                 table_value = str(log_value)
@@ -48,7 +48,7 @@ class ScanInfoTable(BaseTable.NTableWidget):
 
         self.append_row(row_item_list)
 
-    def setup(self, table_colum_list):
+    def setup(self, table_column_list):
         """
         set up the table
         """
@@ -57,7 +57,6 @@ class ScanInfoTable(BaseTable.NTableWidget):
 
         # add the input column list
         for col_name in table_column_list:
-            :w
             # scan is always there!
             if col_name == 'Scan':
                 continue
@@ -67,7 +66,7 @@ class ScanInfoTable(BaseTable.NTableWidget):
         # END-FOR (col
 
 
-class ScanInfoSetupTable(BaseTable.NTableWidget):
+class ScanInfoSetupTableWidget(BaseTable.NTableWidget):
     """ A customized table to present HB2A information table setup
     """
     SetupTable = [('Item Name', 'str'),
@@ -77,7 +76,7 @@ class ScanInfoSetupTable(BaseTable.NTableWidget):
         """
         Initialization
         """
-        base.__init__(self, parent)
+        BaseTable.NTableWidget.__init__(self, parent)
 
         return
 

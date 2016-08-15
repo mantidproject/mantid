@@ -1,13 +1,10 @@
-#pylint: disable=invalid-name, relative-import, too-many-lines,too-many-instance-attributes,too-many-arguments
+#pylint: disable=invalid-name, relative-import, too-many-lines,too-many-instance-attributes,too-many-arguments, too-many-public-methods,too-many-branches,too-many-locals,too-many-statements
+
 ################################################################################
 # Main class for HFIR powder reduction GUI
 # Key word for future developing: FUTURE, NEXT, REFACTOR, RELEASE 2.0
 ################################################################################
 
-import numpy
-import os
-
-from ui_MainWindow import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -15,14 +12,15 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
+from ui_MainWindow import Ui_MainWindow  # import line for the UI python class
 import mantid
 from HfirPDReductionControl import *
 
-#----- default configuration ---------------
+""" default configuration """
 DEFAULT_SERVER = 'http://neutron.ornl.gov/user_data'
 DEFAULT_INSTRUMENT = 'hb2a'
 DEFAULT_WAVELENGTH = 2.4100
-#-------------------------------------------
+
 
 class EmptyError(Exception):
     """ Exception for finding empty input for integer or float
@@ -37,87 +35,6 @@ class EmptyError(Exception):
         return repr(self.value)
 
 
-class MultiScanTabState(object):
-    """ Description of the state of the multi-scan-tab is in
-    """
-    NO_OPERATION = 0
-    RELOAD_DATA = 1
-    REDUCE_DATA = 2
-
-    def __init__(self):
-        """ Initialization
-        :return:
-        """
-        self._expNo = -1
-        self._scanList = []
-        self._xMin = None
-        self._xMax = None
-        self._binSize = 0
-        self._unit = ''
-        self._plotRaw = False
-        self._useDetEfficiencyCorrection = False
-        self._excludeDetectors = []
-
-    def compare_state(self, tab_state):
-        """ Compare this tab state and another tab state
-        :param tab_state:
-        :return:
-        """
-        if isinstance(tab_state, MultiScanTabState) is False:
-            raise NotImplementedError('compare_state must have MultiScanTabStatus as input.')
-
-        if self._expNo != tab_state.getExpNumber() or self._scanList != tab_state.getScanList:
-            return self.RELOAD_DATA
-
-        for attname in self.__dict__.keys():
-            if self.__getattribute__(attname) != tab_state.__getattribute__(attname):
-                return self.REDUCE_DATA
-
-        return self.NO_OPERATION
-
-    def getExpNumber(self):
-        """ Get experiment number
-        :return:
-        """
-        return self._expNo
-
-    def getScanList(self):
-        """ Get the list of scans
-        :return:
-        """
-        return self._scanList[:]
-
-    #pyline: disable=too-many-arguments
-    def setup(self, exp_no, scan_list, min_x, max_x, bin_size, unit, raw, correct_det_eff, exclude_dets):
-        """
-        Set up the object
-        :param exp_no:
-        :param scan_list:
-        :param min_x:
-        :param max_x:
-        :param bin_size:
-        :param unit:
-        :param raw:
-        :param correct_det_eff:
-        :param exclude_dets:
-        :return:
-        """
-        self._expNo = int(exp_no)
-        if isinstance(scan_list, list) is False:
-            raise NotImplementedError('Scan_List must be list!')
-        self._scanList = scan_list
-        self._xMin = min_x
-        self._xMax = max_x
-        self._binSize = float(bin_size)
-        self._unit = str(unit)
-        self._plotRaw = raw
-        self._useDetEfficiencyCorrection = correct_det_eff
-        self._excludeDetectors = exclude_dets
-
-        return
-
-
-#pylint: disable=too-many-public-methods,too-many-branches,too-many-locals,too-many-statements
 class MainWindow(QtGui.QMainWindow):
     """ Class of Main Window (top)
     """
@@ -1623,7 +1540,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         # read the first scan to find out the field
         try:
-            exp_number = self.get_exp_number(throw=True)
+            exp_number = self.get_experiment_number(throw=True)
             scan_list = self.get_int_list(self.ui.lineEdit_infoScans, throw=True)
         except ValueError as val_err:
             self.pop_error_message(self, 'Unable to do data mining due to %s.' % str(val_err))
@@ -1763,9 +1680,34 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    #--------------------------------------------------------------------------
+    def get_experiment_number(self, throw):
+        """
+        Get experiment number
+        Args:
+            throw: if true, throw exception if experiment number (ui.lineEdit_expNumber) is empty or non-integer.
+                   otherwise, return None
+
+        Returns: integer or None
+
+        """
+        err = None
+        exp_number = None
+        try:
+            exp_number = self._getInteger(self.ui.lineEdit_expNo)
+        except EmptyError as err:
+            pass
+        except ValueError as err:
+            pass
+
+        if err is not None and throw:
+            # has error with experiment number and throw error
+            raise RuntimeError(str(err))
+
+        return exp_number
+
+    # --------------------------------------------------------------------------
     # Private methods to plot data
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def _plotIndividualDetCountsVsSampleLog(self, expno, scanno, detid, samplename, raw=True):
         """ Plot one specific detector's counts vs. one specified sample log's value
         along with all Pts.
