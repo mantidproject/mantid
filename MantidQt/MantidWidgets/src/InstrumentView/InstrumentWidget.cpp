@@ -1301,7 +1301,7 @@ std::string InstrumentWidget::saveToProject() const {
                                   << m_xIntegration->getMaximum();
 
   // serialise widget subsections
-  tsv.writeRaw(m_instrumentActor->saveToProject());
+  tsv.writeSection("actor", m_instrumentActor->saveToProject());
   tsv.writeSection("tabs", saveTabs());
 
   return tsv.outputLines();
@@ -1361,16 +1361,16 @@ void InstrumentWidget::loadFromProject(const std::string &lines) {
     setBinRange(min, max);
   }
 
-  if (tsv.selectSection("tabs")) {
-    std::string tabLines;
-    tsv >> tabLines;
-    loadTabs(tabLines);
-  }
-
   if (tsv.selectSection("Surface")) {
     std::string surfaceLines;
     tsv >> surfaceLines;
     getSurface()->loadFromProject(surfaceLines);
+  }
+
+  if (tsv.selectSection("tabs")) {
+    std::string tabLines;
+    tsv >> tabLines;
+    loadTabs(tabLines);
   }
 
   updateInstrumentView();

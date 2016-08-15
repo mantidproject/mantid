@@ -4,7 +4,6 @@
 #include <MantidQtMantidWidgets/WidgetDllOption.h>
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTab.h"
 #include "MantidQtMantidWidgets/InstrumentView/MantidGLWidget.h"
-
 #include "MantidGeometry/Instrument.h"
 
 #include <QFrame>
@@ -120,7 +119,7 @@ protected:
   void clearProperties();
   void setProperties();
   boost::shared_ptr<Mantid::API::MatrixWorkspace>
-  createMaskWorkspace(bool invertMask, bool temp = false);
+  createMaskWorkspace(bool invertMask, bool temp = false) const;
   void saveMaskingToWorkspace(bool invertMask = false);
   void saveMaskingToFile(bool invertMask = false);
   void saveMaskingToCalFile(bool invertMask = false);

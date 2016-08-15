@@ -1289,13 +1289,13 @@ bool FindComponentVisitor::visit(GLActor *actor) {
  * @return string representing the current state of the instrumet actor.
  */
 std::string InstrumentActor::saveToProject() const {
-  TSVSerialiser tsv, actor;
+  TSVSerialiser tsv;
   const std::string currentColorMap = getCurrentColorMap().toStdString();
 
   if (!currentColorMap.empty())
-    actor.writeLine("FileName") << currentColorMap;
+    tsv.writeLine("FileName") << currentColorMap;
 
-  tsv.writeSection("actor", actor.outputLines());
+  tsv.writeSection("binmasks", m_maskBinsData.saveToProject());
   return tsv.outputLines();
 }
 
@@ -1309,6 +1309,12 @@ void InstrumentActor::loadFromProject(const std::string &lines) {
     QString filename;
     tsv >> filename;
     loadColorMap(filename);
+  }
+
+  if (tsv.selectSection("binmasks")) {
+    std::string binMaskLines;
+    tsv >> binMaskLines;
+    m_maskBinsData.loadFromProject(binMaskLines);
   }
 }
 

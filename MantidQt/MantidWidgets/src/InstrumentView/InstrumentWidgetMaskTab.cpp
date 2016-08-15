@@ -9,6 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMaskWorkspace.h"
+#include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 // #include "MantidDataObjects/TableWorkspace.h"
@@ -646,7 +647,7 @@ void InstrumentWidgetMaskTab::clearMask() {
 * false the name will be unique.
 */
 Mantid::API::MatrixWorkspace_sptr
-InstrumentWidgetMaskTab::createMaskWorkspace(bool invertMask, bool temp) {
+InstrumentWidgetMaskTab::createMaskWorkspace(bool invertMask, bool temp) const {
   m_instrWidget->updateInstrumentView(); // to refresh the pick image
   Mantid::API::MatrixWorkspace_sptr inputWS =
       m_instrWidget->getInstrumentActor()->getMaskMatrixWorkspace();
@@ -1210,6 +1211,42 @@ void MantidQt::MantidWidgets::InstrumentWidgetMaskTab::loadFromProject(
       tab >> value;
       type->setChecked(value);
     }
+
+    if (tab.selectLine("MaskViewWorkspace")) {
+      // the view was masked. We should load reapply this from a cached
+      // workspace in the project folder
+      std::string maskWSName;
+      tab >> maskWSName;
+      std::string workingDir =
+          Mantid::Kernel::ConfigService::Instance().getString(
+              "project.workingdir");
+      std::string fileName = workingDir + "/" + maskWSName;
+
+      using namespace Mantid::API;
+      auto actor = m_instrWidget->getInstrumentActor();
+      auto workspace = actor->getWorkspace();
+      auto instrument = workspace->getInstrument();
+      auto instrumentName = instrument->getName();
+      std::string tempName = "__" + workspace->name() + "MaskView";
+
+      auto alg = AlgorithmManager::Instance().create("LoadMask", -1);
+      alg->initialize();
+      alg->setPropertyValue("Instrument", instrumentName);
+      alg->setPropertyValue("InputFile", fileName);
+      alg->setPropertyValue("OutputWorkspace", tempName);
+      alg->execute();
+
+      MatrixWorkspace_sptr maskWS =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(tempName);
+      AnalysisDataService::Instance().remove(tempName);
+
+      if (maskWS) {
+        actor->setMaskMatrixWorkspace(maskWS);
+        actor->updateColors();
+        m_instrWidget->updateInstrumentDetectors();
+        m_instrWidget->updateInstrumentView();
+      }
+    }
   }
 }
 
@@ -1233,6 +1270,31 @@ MantidQt::MantidWidgets::InstrumentWidgetMaskTab::saveToProject() const {
   tab.writeLine("ActiveType");
   for (auto type : typeButtons) {
     tab << type->isChecked();
+  }
+
+  using namespace Mantid::API;
+  using namespace Mantid::Kernel;
+  try {
+    auto actor = m_instrWidget->getInstrumentActor();
+    MatrixWorkspace_sptr outputWS = actor->getMaskMatrixWorkspace();
+    std::string workingDir =
+        ConfigService::Instance().getString("project.workingdir");
+    std::string wsName =
+        m_instrWidget->getWorkspaceName().toStdString() + "MaskView.xml";
+    std::string fileName = workingDir + "/" + wsName;
+
+    if (outputWS) {
+      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("SaveMask", -1);
+      alg->setProperty("InputWorkspace",
+                       boost::dynamic_pointer_cast<Workspace>(outputWS));
+      alg->setPropertyValue("OutputFile", fileName);
+      alg->execute();
+    }
+
+    tab.writeLine("MaskViewWorkspace") << wsName;
+  } catch (...) {
+    // just fail silently, if we can't save the mask then we should
+    // give up at this point.
   }
 
   tsv.writeSection("masktab", tab.outputLines());

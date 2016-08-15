@@ -4572,6 +4572,8 @@ void ApplicationWindow::openRecentProject(QAction *action) {
     // Have to change the working directory here because that is used when
     // finding the nexus files to load
     workingDir = QFileInfo(f).absolutePath();
+    ConfigService::Instance().setString("project.workingdir",
+                                        workingDir.toStdString());
     ApplicationWindow *a = open(fn, false, false);
     if (a && (fn.endsWith(".qti", Qt::CaseInsensitive) ||
               fn.endsWith(".qti~", Qt::CaseInsensitive) ||
@@ -4606,6 +4608,9 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
   newProject();
   m_mantidmatrixWindows.clear();
 
+  // store the working directory in the config service.
+  ConfigService::Instance().setString("project.workingdir",
+                                      workingDir.toStdString());
   projectname = filename;
   setWindowTitle("MantidPlot - " + filename);
 

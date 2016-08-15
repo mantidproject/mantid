@@ -1,6 +1,7 @@
 #include "MantidQtMantidWidgets/InstrumentView/MaskBinsData.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include <vector>
 
@@ -56,6 +57,40 @@ void MaskBinsData::subtractIntegratedSpectra(
 
 /// Clear the masking data
 void MaskBinsData::clear() { m_masks.clear(); }
+
+void MaskBinsData::loadFromProject(const std::string &lines) {
+  TSVSerialiser tsv(lines);
+  for (auto &maskLines : tsv.sections("Mask")) {
+    TSVSerialiser mask(maskLines);
+    mask.selectLine("Range");
+    double start, end;
+    mask >> start >> end;
+
+    QList<int> spectra;
+    const size_t numSpectra = mask.values("Spectra").size();
+    for (size_t i = 0; i < numSpectra; ++i) {
+      int spectrum;
+      mask >> spectrum;
+      spectra.append(spectrum);
+    }
+
+    addXRange(start, end, spectra);
+  }
+}
+
+std::string MaskBinsData::saveToProject() const {
+  TSVSerialiser tsv;
+  for (const auto &binMask : m_masks) {
+    TSVSerialiser mask;
+    mask.writeLine("Range") << binMask.start << binMask.end;
+    mask.writeLine("Spectra");
+    for (const int spectrum : binMask.spectra) {
+      mask << spectrum;
+    }
+    tsv.writeSection("Mask", mask.outputLines());
+  }
+  return tsv.outputLines();
+}
 
 } // MantidWidgets
 } // MantidQt
