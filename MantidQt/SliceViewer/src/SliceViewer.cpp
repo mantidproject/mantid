@@ -700,13 +700,13 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   // then we swap to a QwtRasterDataMDNonOrthogonal
 
   if (API::requiresSkewMatrix(ws)) {
-	  delete m_data;
-	  m_data = new API::QwtRasterDataMDNonOrthogonal();
+    delete m_data;
+    m_data = new API::QwtRasterDataMDNonOrthogonal();
   }
   m_coordinateTransform = createCoordinateTransform(ws, m_dimX, m_dimY);
-  //disconnect and reconnect here
+  // disconnect and reconnect here
   QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
-	  SLOT(checkForHKLDimension(size_t, size_t)));
+                   SLOT(checkForHKLDimension(size_t, size_t)));
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
 
@@ -1512,7 +1512,6 @@ void SliceViewer::showInfoAt(double x, double y) {
   // Perform non-orthogonal correction if required
   m_coordinateTransform->transform(coords, m_dimX, m_dimY);
 
-
   signal_t signal =
       m_ws->getSignalWithMaskAtVMD(coords, this->m_data->getNormalization());
   ui.lblInfoX->setText(QString::number(x, 'g', 4));
@@ -1658,9 +1657,8 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim) {
   emit changedShownDim(m_dimX, m_dimY);
 }
 
-void SliceViewer::checkForHKLDimension(size_t dimX, size_t dimY)
-{
-	m_coordinateTransform->checkDimensionsForHKL(m_ws, dimX, dimY);
+void SliceViewer::checkForHKLDimension(size_t dimX, size_t dimY) {
+  m_coordinateTransform->checkDimensionsForHKL(m_ws, dimX, dimY);
 }
 //==============================================================================
 //================================ PYTHON METHODS ==============================

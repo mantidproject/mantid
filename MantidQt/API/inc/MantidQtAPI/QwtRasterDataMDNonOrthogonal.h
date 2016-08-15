@@ -7,25 +7,27 @@
 #include "MantidKernel/Matrix.h"
 
 namespace MantidQt {
-	namespace API {
+namespace API {
 
-		class EXPORT_OPT_MANTIDQT_API QwtRasterDataMDNonOrthogonal : public QwtRasterDataMD {
-		public:
-			QwtRasterDataMDNonOrthogonal();
-			~QwtRasterDataMDNonOrthogonal() override;
-			QwtRasterDataMDNonOrthogonal *copy() const override;
+class EXPORT_OPT_MANTIDQT_API QwtRasterDataMDNonOrthogonal
+    : public QwtRasterDataMD {
+public:
+  QwtRasterDataMDNonOrthogonal();
+  ~QwtRasterDataMDNonOrthogonal() override;
+  QwtRasterDataMDNonOrthogonal *copy() const override;
 
-			void setWorkspace(Mantid::API::IMDWorkspace_const_sptr ws) override;
+  void setWorkspace(Mantid::API::IMDWorkspace_const_sptr ws) override;
 
-			double value(double x, double y) const override;
+  double value(double x, double y) const override;
 
-		protected:
-			void copyFrom(const QwtRasterDataMDNonOrthogonal &source, QwtRasterDataMDNonOrthogonal &dest) const;
-			Mantid::coord_t * m_lookPoint;
-			Mantid::coord_t m_skewMatrix[9];
-		};
+protected:
+  void copyFrom(const QwtRasterDataMDNonOrthogonal &source,
+                QwtRasterDataMDNonOrthogonal &dest) const;
+  Mantid::coord_t *m_lookPoint;
+  Mantid::coord_t m_skewMatrix[9];
+};
 
-	} // namespace SliceViewer
+} // namespace SliceViewer
 } // namespace Mantid
 
 #endif /* QwtRasterDataMDNonOrthogonal_H_ */

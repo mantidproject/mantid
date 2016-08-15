@@ -373,8 +373,8 @@ private:
   /// Logger
   Mantid::Kernel::Logger m_logger;
 
-  ///NonOrthogonal Fields
-  std::unique_ptr<CoordinateTransform> m_coordinateTransform; 
+  /// NonOrthogonal Fields
+  std::unique_ptr<CoordinateTransform> m_coordinateTransform;
 
   // -------------------------- Controllers ------------------------
   boost::shared_ptr<CompositePeaksPresenter> m_peaksPresenter;

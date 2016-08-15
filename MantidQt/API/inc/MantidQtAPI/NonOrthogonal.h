@@ -5,15 +5,15 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/Matrix.h"
 
+namespace MantidQt {
+namespace API {
+void EXPORT_OPT_MANTIDQT_API
+provideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
+                  Mantid::API::IMDWorkspace_const_sptr workspace);
 
-namespace MantidQt
-{
-	namespace API
-	{
-		void EXPORT_OPT_MANTIDQT_API provideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, Mantid::API::IMDWorkspace_const_sptr workspace);
-
-		bool EXPORT_OPT_MANTIDQT_API requiresSkewMatrix(Mantid::API::IMDWorkspace_const_sptr workspace);
-	}
+bool EXPORT_OPT_MANTIDQT_API
+requiresSkewMatrix(Mantid::API::IMDWorkspace_const_sptr workspace);
+}
 }
 
 #endif
