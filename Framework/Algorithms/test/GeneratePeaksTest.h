@@ -537,7 +537,7 @@ public:
     delete suite;
   }
 
-  void setUp() {
+  void setUp() override {
     FrameworkManager::Instance();
     peakparmsws = createTestPeakParameters2();
     AnalysisDataService::Instance().addOrReplace("TestParameterTable2",
@@ -546,7 +546,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("RawSampleBinWS", inputws);
   }
 
-  void tearDown() {
+  void tearDown() override {
     AnalysisDataService::Instance().remove("TestParameterTable2");
     AnalysisDataService::Instance().remove("RawSampleBinWS");
     AnalysisDataService::Instance().remove("Test02WS");

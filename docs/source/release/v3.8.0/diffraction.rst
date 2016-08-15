@@ -42,6 +42,9 @@ Engineering Diffraction
 - EnggFocus: bins are now masked at the beginning of the workflow
   (when using the option MaskBinsXMins)
 
+- :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>` an algorithm which saves a TableWorkspace containing
+  diffraction fitting results as an ASCII file
+
 
 Powder Diffraction
 ------------------
