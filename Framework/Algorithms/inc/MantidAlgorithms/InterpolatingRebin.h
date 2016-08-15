@@ -9,8 +9,6 @@
 
 namespace Mantid {
 namespace HistogramData {
-class HistogramX;
-class HistogramY;
 class HistogramE;
 class Histogram;
 class BinEdges;
@@ -97,9 +95,9 @@ protected:
   void outputYandEValues(API::MatrixWorkspace_const_sptr inputW,
                          const HistogramData::BinEdges &XValues_new,
                          API::MatrixWorkspace_sptr outputW);
-  HistogramData::Histogram InterpolatingRebin::cubicInterpolation(
-      const HistogramData::Histogram &oldHistogram,
-      const HistogramData::BinEdges &xNew) const;
+  HistogramData::Histogram
+  cubicInterpolation(const HistogramData::Histogram &oldHistogram,
+                     const HistogramData::BinEdges &xNew) const;
 
   HistogramData::Histogram
   noInterpolation(const HistogramData::Histogram &oldHistogram,
