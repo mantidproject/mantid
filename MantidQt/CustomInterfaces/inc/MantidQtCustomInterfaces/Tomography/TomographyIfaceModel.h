@@ -153,12 +153,9 @@ public:
 
   void updateTomoPathsConfig(const TomoPathsConfig &tc) { m_pathsConfig = tc; }
 
-  // Names of image reconstruction tools
-  static const std::string g_TomoPyTool;
-  static const std::string g_AstraTool;
+  // TODO: tools not yet available:
   static const std::string g_CCPiTool;
   static const std::string g_SavuTool;
-  static const std::string g_customCmdTool;
 
 private:
   /// retrieve info from compute resource into status table
