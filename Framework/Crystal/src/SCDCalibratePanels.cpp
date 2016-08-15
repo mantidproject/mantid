@@ -303,7 +303,9 @@ void SCDCalibratePanels::exec() {
       boost::const_pointer_cast<Geometry::Instrument>(peaksWs->getInstrument());
   Geometry::OrientedLattice lattice0 =
       peaksWs->mutableSample().getOrientedLattice();
+  PARALLEL_FOR1(peaksWs)
   for (int i = 0; i < nPeaks; i++) {
+    PARALLEL_START_INTERUPT_REGION
     DataObjects::Peak &peak = peaksWs->getPeak(i);
     V3D hkl =
         V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
@@ -312,7 +314,9 @@ void SCDCalibratePanels::exec() {
     peak.setInstrument(inst);
     peak.setQSampleFrame(Q2);
     peak.setHKL(hkl);
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
   // Find U again for optimized geometry and index peaks
   findU(peaksWs);
   // Save as DetCal and XML if requested
@@ -321,9 +325,6 @@ void SCDCalibratePanels::exec() {
   string XmlFileName = getProperty("XmlFilename");
   saveXmlFile(XmlFileName, MyBankNames, inst);
   // create table of theoretical vs calculated
-  int bankLast = -1;
-  int iSpectrum = -1;
-  int icount = 0;
   //----------------- Calculate & Create Calculated vs Theoretical
   // workspaces------------------,);
   MatrixWorkspace_sptr ColWksp =
@@ -340,41 +341,41 @@ void SCDCalibratePanels::exec() {
   DblMatrix UB = lattice.getUB();
   // sort again since edge peaks can trace to other banks
   peaksWs->sort(criteria);
-  for (int j = 0; j < nPeaks; ++j) {
-    const Geometry::IPeak &peak = peaksWs->getPeak(j);
-    string bankName = peak.getBankName();
-    if (bankName == "None" || MyBankNames.find(bankName) == MyBankNames.end()) {
-      // g_log.notice() << "Peak not mapped to detector: Number = " << j+1
-      // <<"\n";
-      continue;
-    }
+  PARALLEL_FOR3(ColWksp,RowWksp,TofWksp)
+  for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    std::set<string>::iterator it = MyBankNames.begin();
+    advance(it, i);
+    std::string bankName = *it;
     size_t k = bankName.find_last_not_of("0123456789");
     int bank = 0;
     if (k < bankName.length())
       bank = boost::lexical_cast<int>(bankName.substr(k + 1));
-    if (bank != bankLast) {
-      iSpectrum++;
-      ColWksp->getSpectrum(iSpectrum).setSpectrumNo(specnum_t(bank));
-      RowWksp->getSpectrum(iSpectrum).setSpectrumNo(specnum_t(bank));
-      TofWksp->getSpectrum(iSpectrum).setSpectrumNo(specnum_t(bank));
-      bankLast = bank;
-      icount = 0;
+    ColWksp->getSpectrum(i).setSpectrumNo(specnum_t(bank));
+    RowWksp->getSpectrum(i).setSpectrumNo(specnum_t(bank));
+    TofWksp->getSpectrum(i).setSpectrumNo(specnum_t(bank));
+    int icount = 0;
+    for (int j = 0; j < nPeaks; j++) {
+      Peak peak = peaksWs->getPeak(j);
+      if (peak.getBankName() == bankName) {
+        try {
+          V3D q_lab = (peak.getGoniometerMatrix() * UB) * peak.getHKL() * M_2_PI;
+          Peak theoretical(peak.getInstrument(), q_lab);
+          ColWksp->dataX(i)[icount] = peak.getCol();
+          ColWksp->dataY(i)[icount] = theoretical.getCol();
+          RowWksp->dataX(i)[icount] = peak.getRow();
+          RowWksp->dataY(i)[icount] = theoretical.getRow();
+          TofWksp->dataX(i)[icount] = peak.getTOF();
+          TofWksp->dataY(i)[icount] = theoretical.getTOF();
+        } catch (...) {
+          // g_log.debug() << "Problem only in printing peaks\n";
+        }
+        icount ++;
+      }
     }
-
-    try {
-      V3D q_lab = (peak.getGoniometerMatrix() * UB) * peak.getHKL() * M_2_PI;
-      Peak theoretical(peak.getInstrument(), q_lab);
-      ColWksp->dataX(iSpectrum)[icount] = peak.getCol();
-      ColWksp->dataY(iSpectrum)[icount] = theoretical.getCol();
-      RowWksp->dataX(iSpectrum)[icount] = peak.getRow();
-      RowWksp->dataY(iSpectrum)[icount] = theoretical.getRow();
-      TofWksp->dataX(iSpectrum)[icount] = peak.getTOF();
-      TofWksp->dataY(iSpectrum)[icount] = theoretical.getTOF();
-      icount++;
-    } catch (...) {
-      // g_log.debug() << "Problem only in printing peaks\n";
-    }
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   string colFilename = getProperty("ColFilename");
   string rowFilename = getProperty("RowFilename");
