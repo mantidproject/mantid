@@ -180,17 +180,13 @@ void InterpolatingRebin::outputYandEValues(
 *  errors on each input data point. The weighting is inversely proportional to
 *  the distance from the original data point to the new interpolated one.
 *
-*  @param[in] xOld the x-values of the data that will be intepolated
-*  @param[in] yOld the data's y-values that corrospond to the x-values, must be
-*1 element shorter than xOld.
-*  @param[in] eOld the error on each y-value, must be same length as yOld.
-*  @param[in] 1xNew x-values to rebin to, must be monotonically increasing
-*  @param[out] yNew is overwritten with the algorithm output. Must be allocated
-*and 1 element shorter than xnew.
-*  @param[out] eNew is overwritten with errors from the errors on the nearest
-*input data points. Must be allocated with the same number of points as ynew
-*  @throw runtime_error if there is a problem executing one of the GSL functions
-*  @throw invalid_argument if any output x-values are outside the range of input
+*  @param[in] oldHistogram :: the histogram of the output workspace that will
+*be interpolated
+*  @param[in] xNew :: x-values to rebin to, must be monotonically increasing
+*  @return Histogram :: A new Histogram containing the BinEdges xNew and 
+*the calculated HistogramY and HistogramE
+*  @throw runtime_error :: if there is a problem executing one of the GSL functions
+*  @throw invalid_argument :: if any output x-values are outside the range of input
 *x-values
 **/
 Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
@@ -342,14 +338,11 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
 /** This can be used whenever the original spectrum is filled with only one
 * value. It is intended allow
 *  some spectra with null like values, for example all zeros
-*  @param[in] xOld the x-values of the input data
-*  @param[in] yOld the value of y that will be copied to the output array
-*  @param[in] eOld the error on each y-value, must be same length as yOld.
-*  @param[in] xNew x-values to rebin to, must be monotonically increasing
-*  @param[out] yNew is overwritten with the value repeated for as many times as
-* there are x-values
-*  @param[out] eNew is overwritten with errors from the errors on the nearest
-* input data points
+*  @param[in] oldHistogram :: the histogram of the output workspace that will
+*be interpolated
+*  @param[in] xNew :: x-values to rebin to, must be monotonically increasing
+*  @return Histogram :: A new Histogram containing the BinEdges xNew and 
+*the calculated HistogramY and HistogramE
 */
 Histogram InterpolatingRebin::noInterpolation(const Histogram &oldHistogram,
                                               const BinEdges &xNew) const {
