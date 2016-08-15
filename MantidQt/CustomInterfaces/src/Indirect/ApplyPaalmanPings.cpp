@@ -421,10 +421,6 @@ void ApplyPaalmanPings::absCorComplete(bool error) {
     addConvertUnitsStep(ws, m_originalSampleUnits, "", eMode);
   }
 
-  // Add save algorithms if required
-  bool save = m_uiForm.ckSave->isChecked();
-  if (save)
-    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
   if (useCan) {
     if (useShift) {
       IAlgorithm_sptr shiftLog =
@@ -617,6 +613,14 @@ void ApplyPaalmanPings::plotPreview(int wsIndex) {
         Qt::red);
   }
 }
+/**
+ * Handles saving of the workspace
+ */
+void ApplyPaalmanPings::saveClicked() {
 
+  IndirectTab::checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
+  addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  m_batchAlgoRunner->executeBatchAsync();
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt
