@@ -825,7 +825,7 @@ endif ()
 add_dependencies( MantidPlot mantidqtpython CompilePyUI )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "@executable_path/")
+  set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "@executable_path;@executable_path/../Libraries")
 endif ()
 
 ###########################################################################
