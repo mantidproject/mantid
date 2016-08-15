@@ -87,13 +87,13 @@ void DownloadInstrument::exec() {
   } catch (Mantid::Kernel::Exception::InternetError &ex) {
     std::string errorText(ex.what());
     if (errorText.find("rate limit") != std::string::npos) {
-      g_log.notice() << "Instrument Definition Update: " << errorText << "\n";
+      g_log.notice() << "Instrument Definition Update: " << errorText << '\n';
     } else {
       // log the failure at Notice Level
       g_log.notice("Internet Connection Failed - cannot update instrument "
                    "definitions.");
       // log this error at information level
-      g_log.information() << errorText << "\n";
+      g_log.information() << errorText << '\n';
     }
     return;
   }
@@ -248,7 +248,7 @@ DownloadInstrument::getFileShas(const std::string &directoryPath) {
   } catch (Poco::Exception &ex) {
     g_log.error() << "DownloadInstrument: failed to parse the directory: "
                   << directoryPath << " : " << ex.className() << " : "
-                  << ex.displayText() << "\n";
+                  << ex.displayText() << '\n';
     // silently ignore this exception.
   } catch (std::exception &ex) {
     std::stringstream ss;
@@ -282,15 +282,14 @@ size_t DownloadInstrument::removeOrphanedFiles(
       if (filenamesToKeep.find(entryPath.getFileName()) ==
           filenamesToKeep.end()) {
         g_log.debug() << "File not found in remote instrument repository, will "
-                         "be deleted: "
-                      << entryPath.getFileName() << "\n";
+                         "be deleted: " << entryPath.getFileName() << '\n';
         filesToDelete.push_back(it->path());
       }
     }
   } catch (Poco::Exception &ex) {
     g_log.error() << "DownloadInstrument: failed to list the directory: "
                   << directoryPath << " : " << ex.className() << " : "
-                  << ex.displayText() << "\n";
+                  << ex.displayText() << '\n';
     // silently ignore this exception.
   } catch (std::exception &ex) {
     std::stringstream ss;
@@ -307,12 +306,12 @@ size_t DownloadInstrument::removeOrphanedFiles(
     }
   } catch (Poco::Exception &ex) {
     g_log.error() << "DownloadInstrument: failed to delete file: "
-                  << " : " << ex.className() << " : " << ex.displayText()
-                  << "\n";
+                  << ex.className() << " : " << ex.displayText()
+                  << '\n';
     // silently ignore this exception.
   } catch (std::exception &ex) {
     std::stringstream ss;
-    ss << "unknown exception while deleting  file. " << ex.what();
+    ss << "unknown exception while deleting file: " << ex.what();
     throw std::runtime_error(ss.str());
   }
 
