@@ -1538,21 +1538,31 @@ class MainWindow(QtGui.QMainWindow):
         """
         Set up the information table by specifiying the items to view in the table
         """
+        import InfoTableSetupWindow
+
         # read the first scan to find out the field
         try:
             exp_number = self.get_experiment_number(throw=True)
-            scan_list = self.get_int_list(self.ui.lineEdit_infoScans, throw=True)
-        except ValueError as val_err:
-            self.pop_error_message(self, 'Unable to do data mining due to %s.' % str(val_err))
-            return
-        else:
+            status, ret_obj = self._getIntArray(str(self.ui.lineEdit_infoScans.text()))
+            if status:
+                scan_list = ret_obj
+            else:
+                raise RuntimeError('Unable to parse scan number list due to %s.' % str(ret_obj))
             scan_number = scan_list[0]
+        except RuntimeError as run_err:
+            raise run_err
 
         # load
-        log_name_list = self._myControl.get_log_names(exp_number, scan_number)
+        # FIXME/TODO - Enable testing scan
+        # log_name_list = self._myControl.get_log_names(exp_number, scan_number)
+        log_name_list = ['Scan', 'Temp A', 'Temp B']
 
         # pop up a window for user to select the log names and types for output in the table
-        self._scanInfoSetupWindow = self.ScanInfoSetupWindow(log_name_list)
+        self._scanInfoSetupWindow = InfoTableSetupWindow.ScanInfoTableSetupWindow(self)
+        self._scanInfoSetupWindow.set_up_information('blabla')
+        self._scanInfoSetupWindow.add_log_names(log_name_list)
+
+        self._scanInfoSetupWindow.show()
 
         return
 
@@ -2584,10 +2594,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # Return with false
         if returnstatus is False:
-            return (False, errmsg)
+            return False, errmsg
 
-        return (True, intlist)
-
+        return True, intlist
 
     def _getXLabelFromUnit(self, unit):
         """ Get X-label from unit

@@ -69,8 +69,8 @@ class ScanInfoTable(BaseTable.NTableWidget):
 class ScanInfoSetupTableWidget(BaseTable.NTableWidget):
     """ A customized table to present HB2A information table setup
     """
-    SetupTable = [('Item Name', 'str'),
-                  ('Use', 'checkbox')]
+    TableSetupList = [('Item Name', 'str'),
+                      ('Use', 'checkbox')]
 
     def __init__(self, parent):
         """
@@ -78,8 +78,25 @@ class ScanInfoSetupTableWidget(BaseTable.NTableWidget):
         """
         BaseTable.NTableWidget.__init__(self, parent)
 
+        # column indexes
+        self._colIndexName = None
+        self._colIndexUse = None
+
         return
 
+    def add_item(self, item_name, use=True):
+        """
+        add an item to table
+        Returns:
+
+        """
+        # check
+        assert isinstance(item_name, str)
+
+        # add
+        self.append_row([item_name, use])
+
+        return
 
     def get_setup(self):
         """
@@ -95,14 +112,13 @@ class ScanInfoSetupTableWidget(BaseTable.NTableWidget):
 
         return use_log_list
 
-
     def setup(self):
         """ Set up table
         """
-        self.init_setup(self.TableSetup)
+        self.init_setup(self.TableSetupList)
 
-        self._colIndexName = self.TableSetup.index(('Item Name', 'str'))
-        self._colIndexUse = self.TableSetup.index(('Use', 'checkbox'))
+        self._colIndexName = self.TableSetupList.index(('Item Name', 'str'))
+        self._colIndexUse = self.TableSetupList.index(('Use', 'checkbox'))
 
         return
 
