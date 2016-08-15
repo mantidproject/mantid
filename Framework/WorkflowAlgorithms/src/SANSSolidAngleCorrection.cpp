@@ -82,8 +82,8 @@ void SANSSolidAngleCorrection::exec() {
   }
 
   // If the solid angle algorithm isn't in the reduction properties, add it
-  if (!reductionManager->existsProperty("SolidAngleAlgorithm")) {
-    auto algProp = make_unique<AlgorithmProperty>("SolidAngleAlgorithm");
+  if (!reductionManager->existsProperty("SANSSolidAngleCorrection")) {
+    auto algProp = make_unique<AlgorithmProperty>("SANSSolidAngleCorrection");
     algProp->setValue(toString());
     reductionManager->declareProperty(std::move(algProp));
   }
