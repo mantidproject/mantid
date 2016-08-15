@@ -13,21 +13,15 @@ from dos.load_castep import parse_castep_file
 
 PEAK_WIDTH_ENERGY_FLAG = 'energy'
 
-#pylint: disable=too-many-instance-attributes
+
 class SimulatedDensityOfStates(PythonAlgorithm):
 
-    _float_regex = None
-    _temperature = None
-    _bin_width = None
     _spec_type = None
     _peak_func = None
-    _calc_ion_index = None
     _out_ws_name = None
     _peak_width = None
-    _scale = None
     _zero_threshold = None
     _ions_of_interest = None
-    _sum_contributions = None
     _scale_by_cross_section = None
     _calc_partial = None
     _num_ions = None
@@ -101,8 +95,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),
                              doc="Name to give the output workspace.")
 
-        # Regex pattern for a floating point number
-        self._float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
 
 #----------------------------------------------------------------------------------------
 
@@ -154,13 +146,13 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
 #----------------------------------------------------------------------------------------
 
-    #pylint: disable=too-many-branches
     def PyExec(self):
         # Run the algorithm
         self._get_properties()
 
         file_data = self._read_file()
 
+        # Get variables from file_data
         frequencies = file_data['frequencies']
         ir_intensities = file_data['ir_intensities']
         raman_intensities = file_data['raman_intensities']
@@ -168,7 +160,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         eigenvectors = file_data.get('eigenvectors', None)
         ion_data = file_data.get('ions', None)
         unit_cell = file_data.get('unit_cell', None)
-
         self._num_branches = file_data['num_branches']
 
         logger.debug('Unit cell: {0}'.format(unit_cell))
@@ -237,17 +228,12 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         """
         Set the properties passed to the algorithm
         """
-        self._temperature = self.getProperty('Temperature').value
-        self._bin_width = self.getProperty('BinWidth').value
         self._spec_type = self.getPropertyValue('SpectrumType')
         self._peak_func = self.getPropertyValue('Function')
-        self._calc_ion_index = self.getProperty('CalculateIonIndices').value
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
         self._peak_width = self.getProperty('PeakWidth').value
-        self._scale = self.getProperty('Scale').value
         self._zero_threshold = self.getProperty('ZeroThreshold').value
         self._ions_of_interest = self.getProperty('Ions').value
-        self._sum_contributions = self.getProperty('SumContributions').value
         self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
         self._calc_partial = (len(self._ions_of_interest) > 0)
 
@@ -340,7 +326,10 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         """
         # Build a dictionary of ions that the user cares about        
         partial_ions = dict()
-        if not self._calc_ion_index:
+
+        calc_ion_index = self.getProperty('CalculateIonIndices').value
+
+        if not calc_ion_index:
             for ion in self._ions_of_interest:
                 partial_ions[ion] = [i['index'] for i in ions if i['species'] == ion]
         else:
@@ -351,7 +340,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(partial_ions, frequencies, eigenvectors, weights)
 
-        if self._sum_contributions:
+        if self.getProperty('SumContributions').value:
             # Discard the partial workspaces
             for partial_ws in partial_workspaces:
                 s_api.DeleteWorkspace(partial_ws)
@@ -363,7 +352,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             s_api.DeleteWorkspace(sum_workspace)
             partial_ws_names = [ws.getName() for ws in partial_workspaces]
             # Sort workspaces
-            if self._calc_ion_index:
+            if calc_ion_index:
                 # Sort by index after '_'
                 partial_ws_names.sort(key=lambda item: (int(item[(item.rfind('_')+1):])))
             group = ','.join(partial_ws_names)
@@ -687,18 +676,20 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         data_x = np.arange(xmin, xmin + dos.size)
         out_ws = self._create_dos_workspace(data_x, dos, dos_sticks, self._out_ws_name)
 
-        if self._scale != 1:
+        scale = self.getProperty('Scale').value
+        if scale != 1:
             scale_alg = self.createChildAlgorithm('Scale')
             scale_alg.setProperty('InputWorkspace',out_ws)
             scale_alg.setProperty('OutputWorkspace',out_ws)
             scale_alg.setProperty('Operation','Multiply')
-            scale_alg.setProperty('Factor', self._scale)
+            scale_alg.setProperty('Factor', scale)
             scale_alg.execute()
 
-        if self._bin_width != 1:
-            x_min = out_ws.readX(0)[0] - (self._bin_width/2.0)
-            x_max = out_ws.readX(0)[-1] + (self._bin_width/2.0)
-            rebin_param = "%f, %f, %f" % (x_min, self._bin_width, x_max)
+        bin_width = self.getProperty('BinWidth').value
+        if bin_width != 1:
+            x_min = out_ws.readX(0)[0] - (bin_width/2.0)
+            x_max = out_ws.readX(0)[-1] + (bin_width/2.0)
+            rebin_param = "%f, %f, %f" % (x_min, bin_width, x_max)
             out_ws = s_api.Rebin(Inputworkspace=out_ws, Params=rebin_param, OutputWorkspace=out_ws)
 
         return out_ws
@@ -747,7 +738,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         frequency_x_sections = frequencies[zero_mask]
         intensity_x_sections = intensities[zero_mask]
 
-        bose_occ = 1.0 / (np.exp(cm1_to_K * frequency_x_sections / self._temperature) - 1)
+        temperature = self.getProperty('Temperature').value
+
+        bose_occ = 1.0 / (np.exp(cm1_to_K * frequency_x_sections / temperature) - 1)
         x_sections[zero_mask] = factor / frequency_x_sections * (1 + bose_occ) * intensity_x_sections
 
         return self._compute_DOS(frequencies, x_sections, weights)
