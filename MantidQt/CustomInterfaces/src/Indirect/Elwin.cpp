@@ -181,8 +181,6 @@ void Elwin::run() {
       AlgorithmManager::Instance().create("ElasticWindowMultiple");
   elwinMultAlg->initialize();
 
-  elwinMultAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
-
   elwinMultAlg->setProperty("OutputInQ", qWorkspace);
   elwinMultAlg->setProperty("OutputInQSquared", qSquaredWorkspace);
   elwinMultAlg->setProperty("OutputELF", elfWorkspace);
