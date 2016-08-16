@@ -426,10 +426,23 @@ void MuonAnalysisResultTableTab::populateTables() {
     // Populate the individual log values and fittings into their respective
     // tables.
     if (m_uiForm.fitType->checkedButton() == m_uiForm.multipleSimFits) {
-      populateFittingsFromLabels(getFitLabels().second);
+      // Simultaneous fits: use labels
+      auto wsFromName = [](const QString &qs) {
+        const auto &wsGroup = retrieveWSChecked<WorkspaceGroup>(
+            MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX + qs.toStdString());
+        return boost::dynamic_pointer_cast<Workspace>(wsGroup);
+      };
+      populateFittings(getFitLabels().second, wsFromName);
     } else {
-      populateFittings(fittedWsList);
+      // Use fitted workspace names
+      auto wsFromName = [](const QString &qs) {
+        const auto &tab = retrieveWSChecked<ITableWorkspace>(qs.toStdString() +
+                                                             PARAMS_POSTFIX);
+        return boost::dynamic_pointer_cast<Workspace>(tab);
+      };
+      populateFittings(fittedWsList, wsFromName);
     }
+
     populateLogsAndValues(fittedWsList);
 
     // Make sure all fittings are selected by default.
@@ -618,55 +631,19 @@ bool MuonAnalysisResultTableTab::logNameLessThan(const QString &logName1,
 }
 
 /**
-* Populates the items (fitted workspaces) into their table.
-*
-* @param fittedWsList :: a workspace list containing ONLY the workspaces that
-* have parameter
-*                        tables associated with it.
-*/
-void MuonAnalysisResultTableTab::populateFittings(
-    const QStringList &fittedWsList) {
-  // Add number of rows  for the amount of fittings.
-  m_uiForm.fittingResultsTable->setRowCount(fittedWsList.size());
-
-  // Add check boxes for the include column on fitting table, and make text
-  // uneditable.
-  for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); i++) {
-    m_uiForm.fittingResultsTable->setCellWidget(i, 1, new QCheckBox);
-
-    if (auto textItem = m_uiForm.fittingResultsTable->item(i, 0)) {
-      textItem->setFlags(textItem->flags() & (~Qt::ItemIsEditable));
-    }
-  }
-
-  // Get colors for workspace names in table
-  std::vector<Workspace_sptr> workspaces;
-  for (const auto &name : fittedWsList) {
-    const auto paramWs =
-        retrieveWSChecked<ITableWorkspace>(name.toStdString() + PARAMS_POSTFIX);
-    workspaces.push_back(paramWs);
-  }
-  const auto colors = MuonAnalysisHelper::getWorkspaceColors(workspaces);
-
-  for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); row++) {
-    // Fill values and delete previous old ones.
-    if (row < fittedWsList.size()) {
-      QTableWidgetItem *item = new QTableWidgetItem(fittedWsList[row]);
-      item->setTextColor(colors.value(row));
-      m_uiForm.fittingResultsTable->setItem(row, 0, item);
-    } else
-      m_uiForm.fittingResultsTable->setItem(row, 0, NULL);
-  }
-}
-
-/**
- * Populates fittings table with simultaneous fit labels.
- * @param labelList :: [input] List of labels
+ * Populates fittings table with given workspace/label names.
+ * Can be used for workspace names that have associated param tables, or for
+ * simultaneous fit labels, just by passing in a different function.
+ *
+ * @param names :: [input] list of workspace names OR label names
+ * @param wsFromName :: [input] Function for getting workspaces from the given
+ * names
  */
-void MuonAnalysisResultTableTab::populateFittingsFromLabels(
-    const QStringList &labelList) {
+void MuonAnalysisResultTableTab::populateFittings(
+    const QStringList &names,
+    std::function<Workspace_sptr(const QString &)> wsFromName) {
   // Add number of rows for the amount of fittings.
-  m_uiForm.fittingResultsTable->setRowCount(labelList.size());
+  m_uiForm.fittingResultsTable->setRowCount(names.size());
 
   // Add check boxes for the include column on fitting table, and make text
   // uneditable.
@@ -678,26 +655,22 @@ void MuonAnalysisResultTableTab::populateFittingsFromLabels(
     }
   }
 
-  // Get colors for label names in table
-  // Need to create a vector of the groups
-  auto &ads = AnalysisDataService::Instance();
-  std::vector<Workspace_sptr> groups;
-  for (const auto &label : labelList) {
-    const std::string groupName =
-        MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX + label.toStdString();
-    if (const auto &wsGroup = ads.retrieveWS<WorkspaceGroup>(groupName)) {
-      groups.push_back(wsGroup);
-    }
+  // Get workspace names using the provided function
+  std::vector<Workspace_sptr> workspaces;
+  for (const auto &name : names) {
+    workspaces.push_back(wsFromName(name));
   }
-  const auto colors = MuonAnalysisHelper::getWorkspaceColors(groups);
+
+  // Get colors for names in table
+  const auto colors = MuonAnalysisHelper::getWorkspaceColors(workspaces);
   for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); row++) {
     // Fill values and delete previous old ones.
-    if (row < labelList.size()) {
-      QTableWidgetItem *item = new QTableWidgetItem(labelList[row]);
+    if (row < names.size()) {
+      QTableWidgetItem *item = new QTableWidgetItem(names[row]);
       item->setTextColor(colors.value(row));
       m_uiForm.fittingResultsTable->setItem(row, 0, item);
     } else
-      m_uiForm.fittingResultsTable->setItem(row, 0, NULL);
+      m_uiForm.fittingResultsTable->setItem(row, 0, nullptr);
   }
 }
 

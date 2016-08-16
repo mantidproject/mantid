@@ -7,6 +7,7 @@
 #include "ui_MuonAnalysis.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include <QTableWidget>
+#include <functional>
 
 namespace Ui {
 class MuonAnalysis;
@@ -110,8 +111,9 @@ private:
   void storeUserSettings();
   void applyUserSettings();
   void populateLogsAndValues(const QStringList &fittedWsList);
-  void populateFittings(const QStringList &fittedWsList);
-  void populateFittingsFromLabels(const QStringList &labelList);
+  void populateFittings(
+      const QStringList &names,
+      std::function<Mantid::API::Workspace_sptr(const QString &)> wsFromName);
 
   /// Creates the results table
   void createTable();
