@@ -648,8 +648,11 @@ void MuonAnalysisFitDataPresenter::checkAndUpdateFitLabel(bool seq) {
           uniqueName.erase(pos + 1);
         }
         size_t version(2);
-        for (; ads.doesExist(uniqueName + std::to_string(version)); ++version)
-          ;
+        while (ads.doesExist(
+            MantidWidgets::MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX +
+            uniqueName + std::to_string(version))) {
+          ++version;
+        }
         uniqueName += std::to_string(version);
       }
     }
