@@ -61,25 +61,30 @@ void InstrumentWidgetTreeTab::showEvent(QShowEvent *) {
   getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
 }
 
-void MantidQt::MantidWidgets::InstrumentWidgetTreeTab::loadFromProject(
-    const std::string &lines) {
+/** Load tree tab state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ */
+void InstrumentWidgetTreeTab::loadFromProject(const std::string &lines) {
   TSVSerialiser tsv(lines);
 
-  if (tsv.selectSection("treetab")) {
-    std::string tabLines;
-    tsv >> tabLines;
-    TSVSerialiser tab(tabLines);
+  if (!tsv.selectSection("treetab"))
+    return;
 
-    std::string componentName;
-    if (tab.selectLine("SelectedComponent")) {
-      tab >> componentName;
-      selectComponentByName(QString::fromStdString(componentName));
-    }
+  std::string tabLines;
+  tsv >> tabLines;
+  TSVSerialiser tab(tabLines);
+
+  std::string componentName;
+  if (tab.selectLine("SelectedComponent")) {
+    tab >> componentName;
+    selectComponentByName(QString::fromStdString(componentName));
   }
 }
 
-std::string
-MantidQt::MantidWidgets::InstrumentWidgetTreeTab::saveToProject() const {
+/** Save the state of the tree tab to a Mantid project file
+ * @return a string representing the state of the tree tab
+ */
+std::string InstrumentWidgetTreeTab::saveToProject() const {
   TSVSerialiser tsv;
   TSVSerialiser tab;
 

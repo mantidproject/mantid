@@ -769,63 +769,64 @@ MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
 void InstrumentWidgetRenderTab::loadFromProject(const std::string &lines) {
   TSVSerialiser tsv(lines);
 
-  if (tsv.selectSection("rendertab")) {
-    std::string tabLines;
-    tsv >> tabLines;
-    TSVSerialiser tab(tabLines);
+  if (!tsv.selectSection("rendertab"))
+    return;
 
-    bool autoScaling, displayAxes, flipView, displayDetectorsOnly,
-        displayWireframe, displayLighting, useOpenGL, useUCorrection;
-    int axesView;
+  std::string tabLines;
+  tsv >> tabLines;
+  TSVSerialiser tab(tabLines);
 
-    tab.selectLine("AxesView");
-    tab >> axesView;
-    tab.selectLine("AutoScaling");
-    tab >> autoScaling;
-    tab.selectLine("DisplayAxes");
-    tab >> displayAxes;
-    tab.selectLine("FlipView");
-    tab >> flipView;
-    tab.selectLine("DisplayDetectorsOnly");
-    tab >> displayDetectorsOnly;
-    tab.selectLine("DisplayWireframe");
-    tab >> displayWireframe;
-    tab.selectLine("DisplayLighting");
-    tab >> displayLighting;
-    tab.selectLine("UseOpenGL");
-    tab >> useOpenGL;
-    tab.selectLine("UseUCorrection");
-    tab >> useUCorrection;
+  bool autoScaling, displayAxes, flipView, displayDetectorsOnly,
+      displayWireframe, displayLighting, useOpenGL, useUCorrection;
+  int axesView;
 
-    mAxisCombo->setCurrentIndex(axesView);
-    m_autoscaling->setChecked(autoScaling);
-    m_displayAxes->setChecked(displayAxes);
-    m_flipCheckBox->setChecked(flipView);
-    m_displayDetectorsOnly->setChecked(displayDetectorsOnly);
-    m_wireframe->setChecked(displayWireframe);
-    m_lighting->setChecked(displayLighting);
-    m_GLView->setChecked(useOpenGL);
-    m_UCorrection->setChecked(useUCorrection);
+  tab.selectLine("AxesView");
+  tab >> axesView;
+  tab.selectLine("AutoScaling");
+  tab >> autoScaling;
+  tab.selectLine("DisplayAxes");
+  tab >> displayAxes;
+  tab.selectLine("FlipView");
+  tab >> flipView;
+  tab.selectLine("DisplayDetectorsOnly");
+  tab >> displayDetectorsOnly;
+  tab.selectLine("DisplayWireframe");
+  tab >> displayWireframe;
+  tab.selectLine("DisplayLighting");
+  tab >> displayLighting;
+  tab.selectLine("UseOpenGL");
+  tab >> useOpenGL;
+  tab.selectLine("UseUCorrection");
+  tab >> useUCorrection;
 
-    // peak options
-    auto surface = getSurface();
-    bool showLabels, showRows, showRelativeIntensity;
-    int labelPrecision;
+  mAxisCombo->setCurrentIndex(axesView);
+  m_autoscaling->setChecked(autoScaling);
+  m_displayAxes->setChecked(displayAxes);
+  m_flipCheckBox->setChecked(flipView);
+  m_displayDetectorsOnly->setChecked(displayDetectorsOnly);
+  m_wireframe->setChecked(displayWireframe);
+  m_lighting->setChecked(displayLighting);
+  m_GLView->setChecked(useOpenGL);
+  m_UCorrection->setChecked(useUCorrection);
 
-    tab.selectLine("ShowLabels");
-    tab >> showLabels;
-    tab.selectLine("ShowRows");
-    tab >> showRows;
-    tab.selectLine("LabelPrecision");
-    tab >> labelPrecision;
-    tab.selectLine("ShowRelativeIntensity");
-    tab >> showRelativeIntensity;
+  // peak options
+  auto surface = getSurface();
+  bool showLabels, showRows, showRelativeIntensity;
+  int labelPrecision;
 
-    surface->setShowPeakLabelsFlag(showLabels);
-    surface->setShowPeakRowsFlag(showRows);
-    surface->setPeakLabelPrecision(labelPrecision);
-    surface->setShowPeakRelativeIntensityFlag(showRelativeIntensity);
-  }
+  tab.selectLine("ShowLabels");
+  tab >> showLabels;
+  tab.selectLine("ShowRows");
+  tab >> showRows;
+  tab.selectLine("LabelPrecision");
+  tab >> labelPrecision;
+  tab.selectLine("ShowRelativeIntensity");
+  tab >> showRelativeIntensity;
+
+  surface->setShowPeakLabelsFlag(showLabels);
+  surface->setShowPeakRowsFlag(showRows);
+  surface->setPeakLabelPrecision(labelPrecision);
+  surface->setShowPeakRelativeIntensityFlag(showRelativeIntensity);
 
   m_colorMapWidget->loadFromProject(lines);
 }

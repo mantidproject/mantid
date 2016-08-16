@@ -44,9 +44,9 @@ public:
   void getMaskedDetectors(QList<int> &dets) const override;
   void resize(int, int) override;
   QString getInfoText() const override;
-  /// Load settings for the widget tab from a project file
+  /// Load settings for the 3D projection from a project file
   virtual void loadFromProject(const std::string &lines) override;
-  /// Save settings for the widget tab to a project file
+  /// Save settings for the 3D projection to a project file
   virtual std::string saveToProject() const override;
 
 signals:

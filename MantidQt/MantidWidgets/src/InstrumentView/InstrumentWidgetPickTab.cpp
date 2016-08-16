@@ -696,6 +696,55 @@ void InstrumentWidgetPickTab::savePlotToWorkspace() {
   m_plotController->savePlotToWorkspace();
 }
 
+/** Load pick tab state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ */
+void InstrumentWidgetPickTab::loadFromProject(const std::string &lines) {
+  TSVSerialiser tsv(lines);
+
+  if (!tsv.selectSection("picktab"))
+    return;
+
+  std::string tabLines;
+  tsv >> tabLines;
+  TSVSerialiser tab(tabLines);
+
+  // load active push button
+  std::vector<QPushButton *> buttons{
+      m_zoom,         m_edit,           m_ellipse,   m_rectangle,
+      m_ring_ellipse, m_ring_rectangle, m_free_draw, m_one,
+      m_tube,         m_peak,           m_peakSelect};
+
+  tab.selectLine("ActiveTools");
+  for (auto button : buttons) {
+    bool value;
+    tab >> value;
+    button->setChecked(value);
+  }
+}
+
+/** Save the state of the pick tab to a Mantid project file
+ * @return a string representing the state of the pick tab
+ */
+std::string InstrumentWidgetPickTab::saveToProject() const {
+  TSVSerialiser tsv;
+  TSVSerialiser tab;
+
+  // save active push button
+  std::vector<QPushButton *> buttons{
+      m_zoom,         m_edit,           m_ellipse,   m_rectangle,
+      m_ring_ellipse, m_ring_rectangle, m_free_draw, m_one,
+      m_tube,         m_peak,           m_peakSelect};
+
+  tab.writeLine("ActiveTools");
+  for (auto button : buttons) {
+    tab << button->isChecked();
+  }
+
+  tsv.writeSection("picktab", tab.outputLines());
+  return tsv.outputLines();
+}
+
 //=====================================================================================//
 
 /**
@@ -1629,50 +1678,6 @@ void DetectorPlotController::addPeak(double x, double y) {
         "Cannot create a Peak object because of the error:\n" +
             QString(e.what()));
   }
-}
-
-void MantidQt::MantidWidgets::InstrumentWidgetPickTab::loadFromProject(
-    const std::string &lines) {
-  TSVSerialiser tsv(lines);
-
-  if (tsv.selectSection("picktab")) {
-    std::string tabLines;
-    tsv >> tabLines;
-    TSVSerialiser tab(tabLines);
-
-    // load active push button
-    std::vector<QPushButton *> buttons{
-        m_zoom,         m_edit,           m_ellipse,   m_rectangle,
-        m_ring_ellipse, m_ring_rectangle, m_free_draw, m_one,
-        m_tube,         m_peak,           m_peakSelect};
-
-    tab.selectLine("ActiveTools");
-    for (auto button : buttons) {
-      bool value;
-      tab >> value;
-      button->setChecked(value);
-    }
-  }
-}
-
-std::string
-MantidQt::MantidWidgets::InstrumentWidgetPickTab::saveToProject() const {
-  TSVSerialiser tsv;
-  TSVSerialiser tab;
-
-  // save active push button
-  std::vector<QPushButton *> buttons{
-      m_zoom,         m_edit,           m_ellipse,   m_rectangle,
-      m_ring_ellipse, m_ring_rectangle, m_free_draw, m_one,
-      m_tube,         m_peak,           m_peakSelect};
-
-  tab.writeLine("ActiveTools");
-  for (auto button : buttons) {
-    tab << button->isChecked();
-  }
-
-  tsv.writeSection("picktab", tab.outputLines());
-  return tsv.outputLines();
 }
 
 } // MantidWidgets

@@ -38,9 +38,9 @@ public:
   virtual bool addToDisplayContextMenu(QMenu &) const { return false; }
   /// Get the projection surface
   boost::shared_ptr<ProjectionSurface> getSurface() const;
-  /// Load settings for the widget tab from a project file
+  /// Load state for the widget tab from a project file
   virtual void loadFromProject(const std::string &lines) = 0;
-  /// Save settings for the widget tab to a project file
+  /// Save state for the widget tab to a project file
   virtual std::string saveToProject() const = 0;
 
 protected:

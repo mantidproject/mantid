@@ -123,9 +123,9 @@ public:
   /// Zoom into an area of the screen
   void zoom(const QRectF &area);
   //@}
-  /// Load settings for the widget tab from a project file
+  /// Load settings for the unwrapped surface from a project file
   virtual void loadFromProject(const std::string &lines) override;
-  /// Save settings for the widget tab to a project file
+  /// Save settings for the unwrapped surface to a project file
   virtual std::string saveToProject() const override;
   /// Get a handle to a peaks workspace from a name
   boost::shared_ptr<Mantid::API::IPeaksWorkspace>

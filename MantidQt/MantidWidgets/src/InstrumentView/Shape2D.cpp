@@ -155,53 +155,76 @@ bool Shape2D::isMasked(const QPointF &p) const {
   return m_fill_color != QColor() && contains(p);
 }
 
-
+/** Load shape 2D state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ * @return a new shape2D with old state applied
+ */
 Shape2D* Shape2D::loadFromProject(const std::string &lines)
 {
   TSVSerialiser tsv(lines);
-  Shape2D *shape = nullptr;
 
-  if(tsv.selectLine("Type")) {
-    std::string type;
-    tsv >> type;
+  if (!tsv.selectLine("Type"))
+    return nullptr;
 
-    if(type == "ellipse") {
-      shape = Shape2DEllipse::loadFromProject(lines);
-    } else if (type == "rectangle") {
-      shape = Shape2DRectangle::loadFromProject(lines);
-    } else if (type == "ring") {
-      shape = Shape2DRing::loadFromProject(lines);
-    } else if (type == "free") {
-      shape = Shape2DFree::loadFromProject(lines);
-    }
+  std::string type;
+  tsv >> type;
 
-    if(shape && tsv.selectLine("Properties")) {
-      bool scalable, editing, selected, visible;
-      tsv >> scalable >> editing >> selected >> visible;
+  Shape2D *shape = loadShape2DFromType(type, lines);
+  if (!shape)
+    return nullptr;
 
-      shape->setScalable(scalable);
-      shape->edit(editing);
-      shape->setSelected(selected);
-      shape->setVisible(visible);
-    }
+  if (tsv.selectLine("Properties")) {
+    bool scalable, editing, selected, visible;
+    tsv >> scalable >> editing >> selected >> visible;
 
-    if(shape && tsv.selectLine("Color")) {
-      int r, g, b, a;
-      tsv >> r >> g >> b >> a;
-      QColor color(r, g, b, a);
-      shape->setColor(color);
-    }
-
-    if(shape && tsv.selectLine("FillColor")) {
-      int r, g, b, a;
-      tsv >> r >> g >> b >> a;
-      QColor color(r, g, b, a);
-      shape->setFillColor(color);
-    }
+    shape->setScalable(scalable);
+    shape->edit(editing);
+    shape->setSelected(selected);
+    shape->setVisible(visible);
   }
+
+  if (tsv.selectLine("Color")) {
+    QColor color;
+    tsv >> color;
+    shape->setColor(color);
+  }
+
+  if (tsv.selectLine("FillColor")) {
+    QColor color;
+    tsv >> color;
+    shape->setFillColor(color);
+  }
+
   return shape;
 }
 
+/**
+ * Instantiate different types of Shape2D from a string
+ *
+ * @param type :: a string representing the type e.g. ellipse
+ * @param lines :: Mantid project lines to parse state from
+ * @return a new instance of a Shape2D
+ */
+Shape2D *Shape2D::loadShape2DFromType(const std::string &type,
+                                      const std::string &lines) {
+  Shape2D *shape = nullptr;
+
+  if (type == "ellipse") {
+    shape = Shape2DEllipse::loadFromProject(lines);
+  } else if (type == "rectangle") {
+    shape = Shape2DRectangle::loadFromProject(lines);
+  } else if (type == "ring") {
+    shape = Shape2DRing::loadFromProject(lines);
+  } else if (type == "free") {
+    shape = Shape2DFree::loadFromProject(lines);
+  }
+
+  return shape;
+}
+
+/** Save the state of the shape 2D to a Mantid project file
+ * @return a string representing the state of the shape 2D
+ */
 std::string Shape2D::saveToProject() const
 {
   TSVSerialiser tsv;
@@ -217,12 +240,10 @@ std::string Shape2D::saveToProject() const
   }
 
   auto color = getColor();
-  tsv.writeLine("Color");
-  tsv << color.red() << color.green() << color.blue() << color.alpha();
+  tsv.writeLine("Color") << color;
 
   auto fillColor = getFillColor();
-  tsv.writeLine("FillColor");
-  tsv << fillColor.red() << fillColor.green() << fillColor.blue() << fillColor.alpha();
+  tsv.writeLine("FillColor") << fillColor;
 
   return tsv.outputLines();
 }
@@ -333,6 +354,10 @@ void Shape2DEllipse::setPoint(const QString &prop, const QPointF &value) {
   }
 }
 
+/** Load shape 2D state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ * @return a new shape2D in the shape of a ellipse
+ */
 Shape2D* Shape2DEllipse::loadFromProject(const std::string &lines) {
   TSVSerialiser tsv(lines);
   tsv.selectLine("Parameters");
@@ -341,6 +366,9 @@ Shape2D* Shape2DEllipse::loadFromProject(const std::string &lines) {
   return new Shape2DEllipse(QPointF(x, y), radius1, radius2);
 }
 
+/** Save the state of the shape 2D ellipe to a Mantid project file
+ * @return a string representing the state of the shape 2D
+ */
 std::string Shape2DEllipse::saveToProject() const
 {
   TSVSerialiser tsv;
@@ -391,6 +419,10 @@ void Shape2DRectangle::addToPath(QPainterPath &path) const {
   path.addRect(m_boundingRect.toQRectF());
 }
 
+/** Load shape 2D state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ * @return a new shape2D in the shape of a rectangle
+ */
 Shape2D* Shape2DRectangle::loadFromProject(const std::string &lines) {
   TSVSerialiser tsv(lines);
   tsv.selectLine("Parameters");
@@ -401,6 +433,9 @@ Shape2D* Shape2DRectangle::loadFromProject(const std::string &lines) {
   return new Shape2DRectangle(point1, point2);
 }
 
+/** Save the state of the shape 2D rectangle to a Mantid project file
+ * @return a string representing the state of the shape 2D
+ */
 std::string Shape2DRectangle::saveToProject() const
 {
   TSVSerialiser tsv;
@@ -554,7 +589,10 @@ void Shape2DRing::setColor(const QColor &color) {
   m_outer_shape->setColor(color);
 }
 
-
+/** Load shape 2D state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ * @return a new shape2D in the shape of a ring
+ */
 Shape2D* Shape2DRing::loadFromProject(const std::string &lines) {
   TSVSerialiser tsv(lines);
   tsv.selectLine("Parameters");
@@ -569,6 +607,9 @@ Shape2D* Shape2DRing::loadFromProject(const std::string &lines) {
   return new Shape2DRing(baseShape, xWidth, yWidth);
 }
 
+/** Save the state of the shape 2D ring to a Mantid project file
+ * @return a string representing the state of the shape 2D
+ */
 std::string Shape2DRing::saveToProject() const
 {
   TSVSerialiser tsv;
@@ -717,6 +758,10 @@ void Shape2DFree::subtractPolygon(const QPolygonF &polygon) {
   resetBoundingRect();
 }
 
+/** Load shape 2D state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ * @return a new freefrom shape2D
+ */
 Shape2D* Shape2DFree::loadFromProject(const std::string &lines) {
   TSVSerialiser tsv(lines);
   QPolygonF polygon;
@@ -733,6 +778,9 @@ Shape2D* Shape2DFree::loadFromProject(const std::string &lines) {
   return new Shape2DFree(polygon);
 }
 
+/** Save the state of the shape 2D to a Mantid project file
+ * @return a string representing the state of the shape 2D
+ */
 std::string Shape2DFree::saveToProject() const
 {
   TSVSerialiser tsv;

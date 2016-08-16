@@ -149,6 +149,11 @@ std::string TSVSerialiser::lineAsString(const std::string &name,
   return lines[i];
 }
 
+QString TSVSerialiser::lineAsQString(const std::string &name,
+                                     const size_t i) const {
+  return QString::fromStdString(lineAsString(name, i));
+}
+
 bool TSVSerialiser::selectLine(const std::string &name, const size_t i) {
   if (!hasLine(name))
     return false;
@@ -276,6 +281,13 @@ std::string TSVSerialiser::asString(const size_t i) const {
     return "";
 
   return m_curValues.at(i);
+}
+
+QString TSVSerialiser::asQString(const size_t i) const {
+  if (i >= m_curValues.size())
+    return "";
+
+  return QString::fromStdString(m_curValues.at(i));
 }
 
 TSVSerialiser &TSVSerialiser::operator>>(int &val) {

@@ -58,6 +58,9 @@ void MaskBinsData::subtractIntegratedSpectra(
 /// Clear the masking data
 void MaskBinsData::clear() { m_masks.clear(); }
 
+/** Load mask bins state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ */
 void MaskBinsData::loadFromProject(const std::string &lines) {
   TSVSerialiser tsv(lines);
   for (auto &maskLines : tsv.sections("Mask")) {
@@ -78,6 +81,9 @@ void MaskBinsData::loadFromProject(const std::string &lines) {
   }
 }
 
+/** Save the state of the mask bins to a Mantid project file
+ * @return a string representing the state of the mask bins
+ */
 std::string MaskBinsData::saveToProject() const {
   TSVSerialiser tsv;
   for (const auto &binMask : m_masks) {

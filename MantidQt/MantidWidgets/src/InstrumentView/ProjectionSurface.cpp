@@ -718,8 +718,10 @@ QStringList ProjectionSurface::getPeaksWorkspaceNames() const {
   return names;
 }
 
-void MantidQt::MantidWidgets::ProjectionSurface::loadFromProject(const std::string &lines)
-{
+/** Load projection surface state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ */
+void ProjectionSurface::loadFromProject(const std::string &lines) {
   TSVSerialiser tsv(lines);
 
   if (tsv.selectLine("BackgroundColor")) {
@@ -733,8 +735,10 @@ void MantidQt::MantidWidgets::ProjectionSurface::loadFromProject(const std::stri
   }
 }
 
-std::string MantidQt::MantidWidgets::ProjectionSurface::saveToProject() const
-{
+/** Save the state of the projection surface to a Mantid project file
+ * @return a string representing the state of the projection surface
+ */
+std::string ProjectionSurface::saveToProject() const {
   TSVSerialiser tsv;
   tsv.writeLine("BackgroundColor") << m_backgroundColor;
   tsv.writeSection("shapes", m_maskShapes.saveToProject());

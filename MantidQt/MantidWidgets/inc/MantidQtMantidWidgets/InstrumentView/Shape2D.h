@@ -180,9 +180,9 @@ protected:
   bool m_visible;  ///< flag to show or hide the shape
 
 private:
-  static Shape2D* loadShape2DRectangle(const std::string &lines);
-  static Shape2D* loadShape2DRing(const std::string &lines);
-  static Shape2D* loadShape2DFree(const std::string &lines);
+  /// Instantiate specifc shapes from a type string
+  static Shape2D *loadShape2DFromType(const std::string &type,
+                                      const std::string &lines);
 };
 
 /**
@@ -207,9 +207,9 @@ public:
   QStringList getPointNames() const override { return QStringList("center"); }
   QPointF getPoint(const QString &prop) const override;
   void setPoint(const QString &prop, const QPointF &value) override;
-  /// Load settings for the shape from a project file
+  /// Load state for the shape from a project file
   static Shape2D* loadFromProject(const std::string &lines);
-  /// Save settings for the widget tab to a project file
+  /// Save state for the shape to a project file
   virtual std::string saveToProject() const override;
 
 protected:
@@ -233,9 +233,9 @@ public:
     return m_boundingRect.contains(p);
   }
   void addToPath(QPainterPath &path) const override;
-  /// Load settings for the shape from a project file
+  /// Load state for the shape from a project file
   static Shape2D* loadFromProject(const std::string &lines);
-  /// Save settings for the widget tab to a project file
+  /// Save state for the shape to a project file
   virtual std::string saveToProject() const override;
 
 protected:
@@ -269,9 +269,9 @@ public:
   void setColor(const QColor &color) override;
   QColor getColor() const override { return m_outer_shape->getColor(); }
   const Shape2D *getOuterShape() const { return m_outer_shape; }
-  /// Load settings for the shape from a project file
+  /// Load state for the shape from a project file
   static Shape2D* loadFromProject(const std::string &lines);
-  /// Save settings for the widget tab to a project file
+  /// Save state for the shape to a project file
   virtual std::string saveToProject() const override;
 
 protected:
@@ -304,9 +304,9 @@ public:
   void addToPath(QPainterPath &path) const override;
   void addPolygon(const QPolygonF &polygon);
   void subtractPolygon(const QPolygonF &polygon);
-  /// Load settings for the shape from a project file
+  /// Load state for the shape from a project file
   static Shape2D* loadFromProject(const std::string &lines);
-  /// Save settings for the widget tab to a project file
+  /// Save state for the shape to a project file
   virtual std::string saveToProject() const override;
 
 protected:

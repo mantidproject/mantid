@@ -36,23 +36,23 @@
 #endif
 #endif
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
+#include <QAction>
+#include <QApplication>
+#include <QCheckBox>
+#include <QFileDialog>
 #include <QGridLayout>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QMenu>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QRadioButton>
-#include <QTextEdit>
-#include <QMenu>
-#include <QAction>
-#include <QLabel>
-#include <QMessageBox>
-#include <QApplication>
-#include <QFileDialog>
-#include <QToolTip>
-#include <QTemporaryFile>
-#include <QGroupBox>
-#include <QCheckBox>
 #include <QSettings>
+#include <QTemporaryFile>
+#include <QTextEdit>
+#include <QToolTip>
+#include <QVBoxLayout>
 
 #include "MantidQtAPI/FileDialogHandler.h"
 
@@ -1182,46 +1182,46 @@ void InstrumentWidgetMaskTab::changedIntegrationRange(double, double) {
   enableApplyButtons();
 }
 
-/** Load mask tab settings from a Mantid project file
- *
+/** Load mask tab state from a Mantid project file
  * @param lines :: lines from the project file to load state from
  */
 void InstrumentWidgetMaskTab::loadFromProject(const std::string &lines) {
   TSVSerialiser tsv(lines);
 
-  if (tsv.selectSection("masktab")) {
-    std::string tabLines;
-    tsv >> tabLines;
-    TSVSerialiser tab(tabLines);
+  if (!tsv.selectSection("masktab"))
+    return;
 
-    std::vector<QPushButton *> buttons{
-        m_move,         m_pointer,        m_ellipse,  m_rectangle,
-        m_ring_ellipse, m_ring_rectangle, m_free_draw};
+  std::string tabLines;
+  tsv >> tabLines;
+  TSVSerialiser tab(tabLines);
 
-    tab.selectLine("ActiveTools");
-    for (auto button : buttons) {
-      bool value;
-      tab >> value;
-      button->setChecked(value);
-    }
+  std::vector<QPushButton *> buttons{
+      m_move,         m_pointer,        m_ellipse,  m_rectangle,
+      m_ring_ellipse, m_ring_rectangle, m_free_draw};
 
-    std::vector<QRadioButton *> typeButtons{m_masking_on, m_grouping_on,
-                                            m_roi_on};
+  tab.selectLine("ActiveTools");
+  for (auto button : buttons) {
+    bool value;
+    tab >> value;
+    button->setChecked(value);
+  }
 
-    tab.selectLine("ActiveType");
-    for (auto type : typeButtons) {
-      bool value;
-      tab >> value;
-      type->setChecked(value);
-    }
+  std::vector<QRadioButton *> typeButtons{m_masking_on, m_grouping_on,
+                                          m_roi_on};
 
-    if (tab.selectLine("MaskViewWorkspace")) {
-      // the view was masked. We should load reapply this from a cached
-      // workspace in the project folder
-      std::string maskWSName;
-      tab >> maskWSName;
-      loadMaskViewFromProject(maskWSName);
-    }
+  tab.selectLine("ActiveType");
+  for (auto type : typeButtons) {
+    bool value;
+    tab >> value;
+    type->setChecked(value);
+  }
+
+  if (tab.selectLine("MaskViewWorkspace")) {
+    // the view was masked. We should load reapply this from a cached
+    // workspace in the project folder
+    std::string maskWSName;
+    tab >> maskWSName;
+    loadMaskViewFromProject(maskWSName);
   }
 }
 
@@ -1294,7 +1294,6 @@ InstrumentWidgetMaskTab::loadMask(const std::string &fileName) {
 }
 
 /** Save the state of the mask tab to a Mantid project file
- *
  * @return a string representing the state of the mask tab
  */
 std::string InstrumentWidgetMaskTab::saveToProject() const {

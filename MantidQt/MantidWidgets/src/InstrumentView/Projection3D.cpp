@@ -462,6 +462,9 @@ void Projection3D::setLightingModel(bool picking) const {
   }
 }
 
+/** Load 3D projection state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ */
 void Projection3D::loadFromProject(const std::string &lines)
 {
   ProjectionSurface::loadFromProject(lines);
@@ -474,6 +477,9 @@ void Projection3D::loadFromProject(const std::string &lines)
   }
 }
 
+/** Save the state of the 3D projection to a Mantid project file
+ * @return a string representing the state of the 3D projection
+ */
 std::string Projection3D::saveToProject() const
 {
   TSVSerialiser tsv;

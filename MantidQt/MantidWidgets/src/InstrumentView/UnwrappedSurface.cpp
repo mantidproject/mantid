@@ -717,6 +717,9 @@ void UnwrappedSurface::calcSize(UnwrappedDetector &udet) {
     m_height_max = udet.height;
 }
 
+/** Load unwrapped surface state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ */
 void UnwrappedSurface::loadFromProject(const std::string &lines) {
   ProjectionSurface::loadFromProject(lines);
   TSVSerialiser tsv(lines);
@@ -744,6 +747,30 @@ void UnwrappedSurface::loadFromProject(const std::string &lines) {
   }
 }
 
+/**
+ * Get a peaks workspace from the ADS
+ * @param name :: name of the workspace to retrieve
+ * @return a shared pointer to the fond peaks workspace
+ */
+Mantid::API::IPeaksWorkspace_sptr
+UnwrappedSurface::retrievePeaksWorkspace(const std::string &name) const {
+  using namespace Mantid::API;
+  Workspace_sptr ws = nullptr;
+
+  try {
+    ws = AnalysisDataService::Instance().retrieve(name);
+  } catch (std::runtime_error) {
+    // couldn't find the workspace in the ADS for some reason
+    // just fail silently. There's nothing more we can do.
+    return nullptr;
+  }
+
+  return boost::dynamic_pointer_cast<IPeaksWorkspace>(ws);
+}
+
+/** Save the state of the unwrapped surface to a Mantid project file
+ * @return a string representing the state of the surface
+ */
 std::string UnwrappedSurface::saveToProject() const {
   TSVSerialiser tsv;
   tsv.writeRaw(ProjectionSurface::saveToProject());
@@ -758,20 +785,6 @@ std::string UnwrappedSurface::saveToProject() const {
   }
 
   return tsv.outputLines();
-}
-
-boost::shared_ptr<Mantid::API::IPeaksWorkspace>
-UnwrappedSurface::retrievePeaksWorkspace(const std::string &name) const {
-  using namespace Mantid::API;
-  Workspace_sptr ws;
-  try {
-    ws = AnalysisDataService::Instance().retrieve(name);
-  } catch (std::runtime_error) {
-    // couldn't find the workspace in the ADS for some reason
-    // just fail silently. There's nothing more we can do.
-    return nullptr;
-  }
-  return boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(ws);
 }
 
 } // MantidWidgets

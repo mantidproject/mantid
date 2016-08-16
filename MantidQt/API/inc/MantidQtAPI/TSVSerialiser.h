@@ -57,6 +57,7 @@ public:
   std::vector<std::string> sections(const std::string &name) const;
 
   std::string lineAsString(const std::string &name, const size_t i = 0) const;
+  QString lineAsQString(const std::string &name, const size_t i = 0) const;
 
   bool selectLine(const std::string &name, const size_t i = 0);
   bool selectSection(const std::string &name, const size_t i = 0);
@@ -66,6 +67,7 @@ public:
   double asDouble(const size_t i) const;
   float asFloat(const size_t i) const;
   std::string asString(const size_t i) const;
+  QString asQString(const size_t i) const;
   bool asBool(const size_t i) const;
   QRect asQRect(const size_t i) const;
   QColor asQColor(const size_t i) const;
