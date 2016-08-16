@@ -62,6 +62,8 @@ void MSDFit::setup() {
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(plotFit()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
 
 void MSDFit::run() {
@@ -78,8 +80,7 @@ void MSDFit::run() {
   double xEnd = m_dblManager->value(m_properties["End"]);
   long specMin = m_uiForm.spSpectraMin->value();
   long specMax = m_uiForm.spSpectraMax->value();
-  bool plot = m_uiForm.ckPlot->isChecked();
-  bool save = m_uiForm.ckSave->isChecked();
+
 
   IAlgorithm_sptr msdAlg = AlgorithmManager::Instance().create("MSDFit");
   msdAlg->initialize();
@@ -88,7 +89,7 @@ void MSDFit::run() {
   msdAlg->setProperty("XEnd", xEnd);
   msdAlg->setProperty("SpecMin", specMin);
   msdAlg->setProperty("SpecMax", specMax);
-  msdAlg->setProperty("Plot", plot);
+  msdAlg->setProperty("Plot", false);
   msdAlg->setProperty("OutputWorkspace", m_pythonExportWsName);
 
   m_batchAlgoRunner->addAlgorithm(msdAlg);
@@ -107,6 +108,7 @@ void MSDFit::run() {
   }
 
   m_batchAlgoRunner->executeBatchAsync();
+
 }
 
 void MSDFit::singleFit() {
