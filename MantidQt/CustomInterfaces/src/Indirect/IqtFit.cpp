@@ -147,7 +147,6 @@ void IqtFit::setup() {
           SLOT(checkBoxUpdate(QtProperty *, bool)));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspace()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
-
 }
 
 void IqtFit::run() {
@@ -263,11 +262,11 @@ void IqtFit::plotWorkspace() {
  */
 void IqtFit::saveResult() {
   const auto workingdirectory =
-    Mantid::Kernel::ConfigService::Instance().getString(
-      "defaultsave.directory");
+      Mantid::Kernel::ConfigService::Instance().getString(
+          "defaultsave.directory");
   const auto filepath = workingdirectory + m_baseName + "_Result.nxs";
   addSaveWorkspaceToQueue(QString::fromStdString(m_baseName + "_Result"),
-    QString::fromStdString(filepath));
+                          QString::fromStdString(filepath));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
