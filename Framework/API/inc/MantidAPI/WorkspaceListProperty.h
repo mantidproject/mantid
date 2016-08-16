@@ -42,9 +42,11 @@ class DLLExport WorkspaceListProperty
     : public Mantid::Kernel::PropertyWithValue<
           std::vector<boost::shared_ptr<TYPE>>> {
 public:
-  /// Typedef the value type of this property with value.
+  /// Type alias the value type of this property with value.
   using WorkspaceListPropertyType = std::vector<boost::shared_ptr<TYPE>>;
   using SuperClass = Kernel::PropertyWithValue<WorkspaceListPropertyType>;
+  //Specify operator==
+  using Kernel::PropertyWithValue<WorkspaceListPropertyType>::operator==;
 
   /**
   * WorkspaceListProperty
@@ -123,7 +125,7 @@ public:
   * Equivalence overload
   * @param right: rhs workspace list property type.
   */
-  bool operator==(const WorkspaceListProperty &right) const {
+  virtual bool operator==(const WorkspaceListProperty &right) const {
     return (m_optional == right.m_optional) && SuperClass::operator==(right);
   }
 

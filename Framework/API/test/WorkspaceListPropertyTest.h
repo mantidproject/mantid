@@ -41,18 +41,18 @@ private:
   public:
     MyAlgorithm() { this->setRethrows(true); }
 
-    virtual int version() const { return 1; }
+    virtual int version() const override { return 1; }
 
-    virtual const std::string name() const { return "MyAlgorithm"; }
+    virtual const std::string name() const override { return "MyAlgorithm"; }
 
     const std::string summary() const override { return "MyAlgorithm helper."; }
 
-    virtual void init() {
+    virtual void init() override {
       declareProperty(Kernel::make_unique<WorkspaceListProperty<T>>(
           "MyProperty", std::vector<boost::shared_ptr<T>>(0)));
     }
 
-    virtual void exec() {
+    virtual void exec() override {
       std::vector<boost::shared_ptr<T>> val = getProperty("MyProperty");
     }
 
