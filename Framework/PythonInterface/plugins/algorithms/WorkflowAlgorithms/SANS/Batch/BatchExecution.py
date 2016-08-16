@@ -6,6 +6,8 @@ from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
 from SANS2.Common.SANSEnumerations import (SANSDataType, SaveType)
 from SANS2.Common.SANSConstants import SANSConstants
 from SANS2.State.SANSStateFunctions import get_output_workspace_name_from_workspace
+from SANS2.Common.SANSFileInformation import (get_extension_for_file_type, SANSFileInformationFactory)
+from SANS2.State.SANSStateData import SANSStateData
 
 
 class OutputMode(object):
@@ -68,6 +70,131 @@ def single_reduction_for_batch(state, use_optimizations, output_modes):
             save_workspaces_to_file(reduced_lab, reduced_hab, reduced_merged, reduction_package.state)
 
 
+def get_expected_workspace_names(file_information, is_transmission, period):
+    """
+    Creates the expected names for SANS workspaces.
+
+    SANS scientists expect the load workspaces to have certain, typical names. For example, the file SANS2D00022024.nxs
+    which is used as a transmission workspace translates into 22024_trans_nxs.
+    :param file_information: a file information object
+    :param is_transmission: if the file information is for a transmission or not
+    :param period: the period of interest
+    :return: a list of workspace names
+    """
+    suffix_file_type = get_extension_for_file_type(file_information)
+    if is_transmission:
+        suffix_data = SANSConstants.trans_suffix
+    else:
+        suffix_data = SANSConstants.sans_suffix
+
+    run_number = file_information.get_run_number()
+
+    # Three possibilities:
+    #  1. No period data => 22024_sans_nxs
+    #  2. Period data, but wants all => 22025p1_sans_nxs,  22025p2_sans_nxs, ...
+    #  3. Period data, select particular period => 22025p3_sans_nxs
+    if file_information.get_number_of_periods() == 1:
+        workspace_name = "{0}_{1}_{2}".format(run_number, suffix_data, suffix_file_type)
+        names = [workspace_name]
+    elif file_information.get_number_of_periods() > 1 and period is SANSStateData.ALL_PERIODS:
+        workspace_names = []
+        for period in range(1, file_information.get_number_of_periods() + 1):
+            workspace_names.append("{0}p{1}_{2}_{3}".format(run_number, period, suffix_data, suffix_file_type))
+        names = workspace_names
+    elif file_information.get_number_of_periods() > 1 and period is not SANSStateData.ALL_PERIODS:
+        workspace_name = "{0}p{1}_{2}_{3}".format(run_number, period, suffix_data, suffix_file_type)
+        names = [workspace_name]
+    else:
+        raise RuntimeError("SANSLoad: Cannot create workspace names.")
+    return names
+
+
+def set_output_workspace_on_load_algorithm_for_one_workspace_type(load_options, load_workspace_name, file_name, period,
+                                                                  is_transmission, file_info_factory,
+                                                                  load_monitor_name=None):
+    file_info = file_info_factory.create_sans_file_information(file_name)
+    workspace_names = get_expected_workspace_names(file_info, is_transmission=is_transmission, period=period)
+    count = 0
+    # Now we set the load options if we are dealing with multi-period data, then we need to
+    for workspace_name in workspace_names:
+        if count == 0:
+            load_options.update({load_workspace_name: workspace_name})
+            if load_monitor_name is not None:
+                monitor_name = workspace_name + "_monitors"
+                load_options.update({load_monitor_name: monitor_name})
+        else:
+            load_workspace_name_for_period = load_workspace_name + "_" + str(count)
+            load_options.update({load_workspace_name_for_period: workspace_name})
+            if load_monitor_name is not None:
+                load_monitor_name_for_period = load_monitor_name + "_" + str(count)
+                monitor_name = workspace_name + "_monitors"
+                load_options.update({load_monitor_name_for_period: monitor_name})
+        count += 1
+
+
+def set_output_workspaces_on_load_algorithm(load_options, state):
+    data = state.data
+    file_information_factory = SANSFileInformationFactory()
+
+    # SampleScatter and SampleScatterMonitor
+    set_output_workspace_on_load_algorithm_for_one_workspace_type(load_options=load_options,
+                                                                  load_workspace_name="SampleScatterWorkspace",
+                                                                  file_name=data.sample_scatter,
+                                                                  period=data.sample_scatter_period,
+                                                                  is_transmission=False,
+                                                                  file_info_factory=file_information_factory,
+                                                                  load_monitor_name="SampleScatterMonitorWorkspace")
+
+    # SampleTransmission
+    sample_transmission = data.sample_transmission
+    if sample_transmission:
+        set_output_workspace_on_load_algorithm_for_one_workspace_type(load_options=load_options,
+                                                                      load_workspace_name="SampleTransmissionWorkspace",
+                                                                      file_name=sample_transmission,
+                                                                      period=data.sample_transmission_period,
+                                                                      is_transmission=True,
+                                                                      file_info_factory=file_information_factory)
+    # SampleDirect
+    sample_direct = data.sample_direct
+    if sample_direct:
+        set_output_workspace_on_load_algorithm_for_one_workspace_type(load_options=load_options,
+                                                                      load_workspace_name="SampleDirectWorkspace",
+                                                                      file_name=sample_direct,
+                                                                      period=data.sample_direct_period,
+                                                                      is_transmission=True,
+                                                                      file_info_factory=file_information_factory)
+
+    # CanScatter + CanMonitor
+    can_scatter = data.can_scatter
+    if can_scatter:
+        set_output_workspace_on_load_algorithm_for_one_workspace_type(load_options=load_options,
+                                                                      load_workspace_name="CanScatterWorkspace",
+                                                                      file_name=can_scatter,
+                                                                      period=data.can_scatter_period,
+                                                                      is_transmission=False,
+                                                                      file_info_factory=file_information_factory,
+                                                                      load_monitor_name="CanScatterMonitorWorkspace")
+
+    # CanTransmission
+    can_transmission = data.can_transmission
+    if can_transmission:
+        set_output_workspace_on_load_algorithm_for_one_workspace_type(load_options=load_options,
+                                                                      load_workspace_name="CanTransmissionWorkspace",
+                                                                      file_name=can_transmission,
+                                                                      period=data.can_transmission_period,
+                                                                      is_transmission=True,
+                                                                      file_info_factory=file_information_factory)
+    # CanDirect
+    can_direct = data.can_direct
+    if can_direct:
+        set_output_workspace_on_load_algorithm_for_one_workspace_type(load_options=load_options,
+                                                                      load_workspace_name="CanDirectWorkspace",
+                                                                      file_name=can_direct,
+                                                                      period=data.can_direct_period,
+                                                                      is_transmission=True,
+                                                                      file_info_factory=file_information_factory)
+
+
 def provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_to_monitor):
     """
     Provide the data for reduction.
@@ -87,6 +214,10 @@ def provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_t
                     "PublishToCache": use_optimizations,
                     "UseCached": use_optimizations,
                     "MoveWorkspace": False}
+
+    # Set the output workspaces
+    set_output_workspaces_on_load_algorithm(load_options, state)
+
     load_alg = create_unmanaged_algorithm(load_name, **load_options)
     load_alg.execute()
 
@@ -98,18 +229,32 @@ def provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_t
                           SANSDataType.CanTransmission: "NumberOfCanTransmissionWorkspaces",
                           SANSDataType.CanDirect: "NumberOfCanDirectWorkspaces"}
 
-    workspaces = get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_to_name)
-    monitors = get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_to_monitor)
+    workspaces = get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_to_name, use_optimizations)
+    monitors = get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_to_monitor, use_optimizations)
     return workspaces, monitors
 
 
-def get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_name_dict):
+def add_loaded_workspace_to_ads(load_alg, workspace_property_name, workspace):
+    """
+    Adds a workspace with the name that was set on the output of the load algorithm to the ADS
+
+
+    :param load_alg: a handle to the load algorithm
+    :param workspace_property_name: the workspace property name
+    :param workspace: the workspace
+    """
+    workspace_name = load_alg.getProperty(workspace_property_name).valueAsStr
+    AnalysisDataService.addOrReplace(workspace_name, workspace)
+
+
+def get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_name_dict, use_optimizations):
     """
     Reads the workspaces from SANSLoad
 
     :param load_alg: a handle to the load algorithm
     :param workspace_to_count: a map from SANSDataType to the outpyt-number property name of SANSLoad for workspaces
     :param workspace_name_dict: a map of SANSDataType vs output-property name of SANSLoad for (monitor) workspaces
+    :param use_optimizations: if optimizations are selected, then we save out the loaded data
     :return: a map of SANSDataType vs list of workspaces (to handle multi-period data)
     """
     workspace_output = {}
@@ -119,23 +264,28 @@ def get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_n
         workspaces = []
         if number_of_workspaces > 1:
             workspaces = get_multi_period_workspaces(load_alg, workspace_name_dict[workspace_type],
-                                                     number_of_workspaces)
+                                                     number_of_workspaces, use_optimizations)
         else:
             workspace_id = workspace_name_dict[workspace_type]
             workspace = load_alg.getProperty(workspace_id).value
             if workspace is not None:
+                if use_optimizations:
+                    add_loaded_workspace_to_ads(load_alg, workspace_id, workspace)
                 workspaces.append(workspace)
         # Add the workspaces to the to the output
         workspace_output.update({workspace_type: workspaces})
     return workspace_output
 
 
-def get_multi_period_workspaces(load_alg, workspace_name, number_of_workspaces):
+def get_multi_period_workspaces(load_alg, workspace_name, number_of_workspaces, use_optimizations):
     # Create an output name for each workspace and retrieve it from the load algorithm
     workspaces = []
     for index in range(1, number_of_workspaces + 1):
         output_name = workspace_name + "_" + str(index)
-        workspaces.append(load_alg.getProperty(output_name).value)
+        workspace = load_alg.getProperty(output_name).value
+        workspaces.append(workspace)
+        if use_optimizations:
+            add_loaded_workspace_to_ads(load_alg, output_name, workspace)
     return workspaces
 
 
@@ -308,7 +458,7 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     state_dict = state.property_manager
     reduction_alg.setProperty("SANSState", state_dict)
 
-    # Set the workspaces
+    # Set the input workspaces
     workspaces = reduction_package.workspaces
     for workspace_type, workspace in workspaces.items():
         if workspace is not None:
@@ -319,6 +469,11 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     for workspace_type, monitor in monitors.items():
         if monitor is not None:
             reduction_alg.setProperty(workspace_to_monitor[workspace_type], monitor)
+
+    # Set the output workspaces
+    reduction_alg.setProperty("OutputWorkspaceLAB", SANSConstants.dummy)
+    reduction_alg.setProperty("OutputWorkspaceHAB", SANSConstants.dummy)
+    reduction_alg.setProperty("OutputWorkspaceMerged", SANSConstants.dummy)
 
 
 def save_workspaces_to_file(reduced_lab, reduced_hab, reduced_merged, state):

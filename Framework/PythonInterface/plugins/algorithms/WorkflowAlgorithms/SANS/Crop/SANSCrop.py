@@ -57,8 +57,6 @@ class SANSCrop(DataProcessorAlgorithm):
 
         # Change the file tag and set the output
         append_to_sans_file_tag(output_workspace, "_cropped")
-
-        self._set_file_tag_on_cropped(output_workspace)
         self.setProperty(SANSConstants.output_workspace, output_workspace)
         progress.report("Finished cropping")
 

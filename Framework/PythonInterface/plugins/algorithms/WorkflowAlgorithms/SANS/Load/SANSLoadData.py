@@ -4,7 +4,8 @@
 
 from abc import (ABCMeta, abstractmethod)
 from mantid.api import (AnalysisDataService)
-from SANS2.Common.SANSFileInformation import (SANSFileInformationFactory, SANSFileType, get_extension_for_file_type, find_full_file_path)
+from SANS2.Common.SANSFileInformation import (SANSFileInformationFactory, SANSFileType, get_extension_for_file_type,
+                                              find_full_file_path)
 from SANS2.State.SANSStateData import (SANSStateData)
 from SANS2.Common.SANSConstants import (SANSConstants)
 from SANS2.Common.SANSEnumerations import (SANSInstrument, SANSDataType, convert_from_data_type_to_string)
@@ -104,45 +105,6 @@ def get_expected_file_tags(file_information, is_transmission, period):
     elif file_information.get_number_of_periods() > 1 and period is not SANSStateData.ALL_PERIODS:
         file_tag_name = "{0}p{1}_{2}_{3}".format(file_path, period, suffix_data, suffix_file_type)
         names = [file_tag_name]
-    else:
-        raise RuntimeError("SANSLoad: Cannot create workspace names.")
-    return names
-
-
-def get_expected_workspace_names(file_information, is_transmission, period):
-    """
-    Creates the expected names for SANS workspaces.
-
-    SANS scientists expect the load workspaces to have certain, typical names. For example, the file SANS2D00022024.nxs
-    which is used as a transmission workspace translates into 22024_trans_nxs.
-    :param file_information: a file information object
-    :param is_transmission: if the file inforamation is for a transmission or not
-    :param period: the period of interest
-    :return: a list of workspace names
-    """
-    suffix_file_type = get_extension_for_file_type(file_information)
-    if is_transmission:
-        suffix_data = SANSConstants.trans_suffix
-    else:
-        suffix_data = SANSConstants.sans_suffix
-
-    run_number = file_information.get_run_number()
-
-    # Three possibilities:
-    #  1. No period data => 22024_sans_nxs
-    #  2. Period data, but wants all => 22025p1_sans_nxs,  22025p2_sans_nxs, ...
-    #  3. Period data, select particular period => 22025p3_sans_nxs
-    if file_information.get_number_of_periods() == 1:
-        workspace_name = "{0}_{1}_{2}".format(run_number, suffix_data, suffix_file_type)
-        names = [workspace_name]
-    elif file_information.get_number_of_periods() > 1 and period is SANSStateData.ALL_PERIODS:
-        workspace_names = []
-        for period in range(1, file_information.get_number_of_periods() + 1):
-            workspace_names.append("{0}p{1}_{2}_{3}".format(run_number, period, suffix_data, suffix_file_type))
-        names = workspace_names
-    elif file_information.get_number_of_periods() > 1 and period is not SANSStateData.ALL_PERIODS:
-        workspace_name = "{0}p{1}_{2}_{3}".format(run_number, period, suffix_data, suffix_file_type)
-        names = [workspace_name]
     else:
         raise RuntimeError("SANSLoad: Cannot create workspace names.")
     return names
