@@ -746,6 +746,14 @@ MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
   tab.writeLine("UseOpenGL") << m_GLView->isChecked();
   tab.writeLine("UseUCorrection") << m_UCorrection->isChecked();
 
+  // peak options
+  auto surface = getSurface();
+  tab.writeLine("ShowLabels") << surface->getShowPeakLabelsFlag();
+  tab.writeLine("ShowRows") << surface->getShowPeakRowsFlag();
+  tab.writeLine("LabelPrecision") << surface->getPeakLabelPrecision();
+  tab.writeLine("ShowRelativeIntensity");
+  tab << surface->getShowPeakRelativeIntensityFlag();
+
   const auto colorMap = m_colorMapWidget->saveToProject();
   tab.writeRaw(colorMap);
 
@@ -757,7 +765,6 @@ MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
 /**
  * Load the state of the render tab from a project file.
  * @param lines :: lines defining the state of the render tab
- * @return a render tab window handle with settings restored
  */
 void InstrumentWidgetRenderTab::loadFromProject(const std::string &lines) {
   TSVSerialiser tsv(lines);
@@ -799,6 +806,25 @@ void InstrumentWidgetRenderTab::loadFromProject(const std::string &lines) {
     m_lighting->setChecked(displayLighting);
     m_GLView->setChecked(useOpenGL);
     m_UCorrection->setChecked(useUCorrection);
+
+    // peak options
+    auto surface = getSurface();
+    bool showLabels, showRows, showRelativeIntensity;
+    int labelPrecision;
+
+    tab.selectLine("ShowLabels");
+    tab >> showLabels;
+    tab.selectLine("ShowRows");
+    tab >> showRows;
+    tab.selectLine("LabelPrecision");
+    tab >> labelPrecision;
+    tab.selectLine("ShowRelativeIntensity");
+    tab >> showRelativeIntensity;
+
+    surface->setShowPeakLabelsFlag(showLabels);
+    surface->setShowPeakRowsFlag(showRows);
+    surface->setPeakLabelPrecision(labelPrecision);
+    surface->setShowPeakRelativeIntensityFlag(showRelativeIntensity);
   }
 
   m_colorMapWidget->loadFromProject(lines);
