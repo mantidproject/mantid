@@ -81,7 +81,6 @@ void MSDFit::run() {
   long specMin = m_uiForm.spSpectraMin->value();
   long specMax = m_uiForm.spSpectraMax->value();
 
-
   IAlgorithm_sptr msdAlg = AlgorithmManager::Instance().create("MSDFit");
   msdAlg->initialize();
   msdAlg->setProperty("InputWorkspace", wsName.toStdString());
@@ -299,9 +298,8 @@ void MSDFit::saveClicked() {
  */
 void MSDFit::plotClicked() {
 
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_A1");
+  plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_A1");
 }
-
 
 } // namespace IDA
 } // namespace CustomInterfaces
