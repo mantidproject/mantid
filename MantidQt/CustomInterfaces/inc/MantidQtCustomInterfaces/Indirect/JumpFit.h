@@ -65,9 +65,6 @@ private:
   QtTreePropertyBrowser *m_jfTree;
 
   Mantid::API::IAlgorithm_sptr m_fitAlg;
-
-  // The state of plot result when the algorithm was run
-  bool m_plotResult;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

@@ -17,7 +17,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 JumpFit::JumpFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_jfTree(nullptr), m_plotResult(false) {
+    : IndirectDataAnalysisTab(parent), m_jfTree(nullptr), {
   m_uiForm.setupUi(parent);
 }
 
@@ -105,7 +105,6 @@ bool JumpFit::validate() {
  * script that runs JumpFit
  */
 void JumpFit::run() {
-  bool plot = m_uiForm.chkPlot->isChecked();
   bool save = m_uiForm.chkSave->isChecked();
   // Do noting with invalid data
   if (!m_uiForm.dsSample->isValid())
@@ -147,8 +146,6 @@ void JumpFit::run() {
     QString outWsName = outputName + "_Workspace";
     addSaveWorkspaceToQueue(outWsName);
   }
-  // update plot result state when run
-  m_plotResult = plot;
 
   // Connect algorithm runner to completion handler function
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -192,12 +189,6 @@ void JumpFit::fitAlgDone(bool error) {
     if (specName == "Diff")
       m_uiForm.ppPlot->addSpectrum("Diff", outputWorkspace, histIndex,
                                    Qt::blue);
-  }
-
-  // plot result
-  if (m_plotResult) {
-    std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
-    plotSpectrum(QString::fromStdString(outWsName), 0, 2);
   }
 
   // Update parameters in UI
@@ -553,6 +544,15 @@ void JumpFit::deletePlotGuessWorkspaces(const bool &removePlotGuess) {
   }
 }
 
+/** 
+ * Handles mantid plotting
+ */
+void JumpFit::plotClicked() {
+    std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
+    checkADSForPlotSaveWorkspace(outWsName, true);
+    plotSpectrum(QString::fromStdString(outWsName), 0, 2);
+  }
+}
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
