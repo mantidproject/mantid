@@ -675,7 +675,12 @@ void MuonAnalysisResultTableTab::populateFittings(
 
 void MuonAnalysisResultTableTab::onCreateTableClicked() {
   try {
-    createTable();
+    if (m_uiForm.fitType->checkedButton() == m_uiForm.multipleSimFits) {
+      // Special results table for multiple simultaneous fits at once
+      createMultipleFitsTable();
+    } else {
+      createTable(); // Regular results table
+    }
   } catch (Exception::NotFoundError &e) {
     std::ostringstream errorMsg;
     errorMsg << "Workspace required to create a table was not found:\n\n"
@@ -705,7 +710,7 @@ void MuonAnalysisResultTableTab::createTable() {
   }
 
   // Get the user selection
-  QStringList wsSelected = getSelectedWs();
+  QStringList wsSelected = getSelectedItemsToFit();
   QStringList logsSelected = getSelectedLogs();
 
   if ((wsSelected.size() == 0) || logsSelected.size() == 0) {
@@ -855,6 +860,31 @@ void MuonAnalysisResultTableTab::createTable() {
 }
 
 /**
+ * Creates the results table for multiple simultaneous fit labels at once
+ * and displays it, using user's selected logs/labels
+ */
+void MuonAnalysisResultTableTab::createMultipleFitsTable() {
+    if (m_logValues.size() == 0) {
+    QMessageBox::information(this, "Mantid - Muon Analysis",
+                             "No workspace found with suitable fitting.");
+    return;
+  }
+
+  // Get the user selection
+  QStringList labelsSelected = getSelectedItemsToFit();
+  QStringList logsSelected = getSelectedLogs();
+
+  if ((labelsSelected.size() == 0) || logsSelected.size() == 0) {
+    QMessageBox::information(this, "Mantid - Muon Analysis",
+                             "Please select options from both tables.");
+    return;
+  }
+ 
+
+
+}
+
+/**
 * See if the workspaces selected have the same parameters.
 *
 * @param wsList :: A list of workspaces with fitted parameters.
@@ -896,23 +926,19 @@ bool MuonAnalysisResultTableTab::haveSameParameters(const QStringList &wsList) {
 }
 
 /**
-* Get the user selected workspaces with _parameters files associated with it
-*
-* @return wsSelected :: A vector of QString's containing the workspace that are
-* selected.
-*/
-QStringList MuonAnalysisResultTableTab::getSelectedWs() {
-  QStringList wsSelected;
-  for (int i = 0; i < m_logValues.size(); i++) {
-    QCheckBox *includeCell = static_cast<QCheckBox *>(
+ * Get the user selected workspaces OR labels from the table
+ * @return :: list of selected workspaces/labels
+ */
+QStringList MuonAnalysisResultTableTab::getSelectedItemsToFit() {
+  QStringList items;
+  for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); ++i) {
+    const auto includeCell = static_cast<QCheckBox *>(
         m_uiForm.fittingResultsTable->cellWidget(i, 1));
     if (includeCell->isChecked()) {
-      QTableWidgetItem *wsName = static_cast<QTableWidgetItem *>(
-          m_uiForm.fittingResultsTable->item(i, 0));
-      wsSelected.push_back(wsName->text());
+      items.push_back(m_uiForm.fittingResultsTable->item(i, 0)->text());
     }
   }
-  return wsSelected;
+  return items;
 }
 
 /**

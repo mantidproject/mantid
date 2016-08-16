@@ -118,6 +118,9 @@ private:
   /// Creates the results table
   void createTable();
 
+  /// Creates the results table for multiple simultaneous fits at once
+  void createMultipleFitsTable();
+
   /// Returns a list of workspaces which should be displayed in the table
   QStringList getFittedWorkspaces();
 
@@ -131,7 +134,7 @@ private:
   std::pair<QStringList, QStringList> getFitLabels();
 
   bool haveSameParameters(const QStringList &wsList);
-  QStringList getSelectedWs();
+  QStringList getSelectedItemsToFit();
   QStringList getSelectedLogs();
   std::string getFileName();
 
