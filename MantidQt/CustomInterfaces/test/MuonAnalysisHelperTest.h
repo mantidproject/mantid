@@ -4,12 +4,13 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -688,6 +689,38 @@ public:
     TS_ASSERT_EQUALS(2, results.count());
     TS_ASSERT_EQUALS(results[0], QColor("black"));
     TS_ASSERT_EQUALS(results[1], QColor("red"));
+  }
+
+  void test_removeFixedParameterErrors() {
+    // Create table in function so that we will no longer have shared ownership
+    // of its columns when they are deleted
+    const auto table = []() {
+      auto tab = WorkspaceFactory::Instance().createTable();
+      /*auto col = */ tab->addColumn("str", "Run");
+      /*auto col = */ tab->addColumn("double", "A0");
+      /*auto col = */ tab->addColumn("double", "A0Error");
+      /*auto col = */ tab->addColumn("double", "A1");
+      /*auto col = */ tab->addColumn("double", "A1Error");
+      /*auto col = */ tab->addColumn("double", "Cost function");
+      /*auto col = */ tab->addColumn("double", "Cost function Error");
+
+      TableRow row1 = tab->appendRow();
+      TableRow row2 = tab->appendRow();
+      TableRow row3 = tab->appendRow();
+
+      row1 << "15189" << 2.5 << 0.0 << 3.0 << 0.0 << 0.5 << 0.0;
+      row2 << "15190" << 2.2 << 0.3 << 3.2 << 0.0 << 0.3 << 0.0;
+      row3 << "15191" << 2.3 << 0.2 << 3.1 << 0.0 << 0.4 << 0.0;
+      return tab;
+    }();
+
+    TS_ASSERT_THROWS_NOTHING(removeFixedParameterErrors(table));
+
+    TS_ASSERT_EQUALS(5, table->columnCount());
+    const auto names = table->getColumnNames();
+    const std::vector<std::string> expectedNames{"Run", "A0", "A0Error", "A1",
+                                                 "Cost function"};
+    TS_ASSERT_EQUALS(names, expectedNames);
   }
 
 private:

@@ -31,7 +31,6 @@
 namespace {
 /// The string "Error"
 const static std::string ERROR_STRING("Error");
-constexpr static size_t ERROR_LENGTH(5);
 }
 
 namespace MantidQt {
@@ -831,7 +830,7 @@ void MuonAnalysisResultTableTab::createTable() {
 
     // Remove error columns if all errors are zero
     // (because these correspond to fixed parameters)
-    removeFixedParameterErrors(table);
+    MuonAnalysisHelper::removeFixedParameterErrors(table);
 
     std::string tableName = getFileName();
 
@@ -852,46 +851,6 @@ void MuonAnalysisResultTableTab::createTable() {
     QMessageBox::information(
         this, "Mantid - Muon Analysis",
         "Please pick workspaces with the same fitted parameters");
-  }
-}
-
-/**
- * Removes error columns from the table if all errors are zero,
- * as these columns correspond to fixed parameters.
- * @param table :: [input, output] Pointer to TableWorkspace to edit
- */
-void MuonAnalysisResultTableTab::removeFixedParameterErrors(
-    const Mantid::API::ITableWorkspace_sptr table) const {
-  assert(table);
-  const size_t nRows = table->rowCount();
-  const auto colNames = table->getColumnNames();
-  std::vector<std::string> zeroErrorColumns;
-
-  for (const auto &name : colNames) {
-    // if name does not end with "Error", continue
-    const size_t nameLength = name.length();
-    if (nameLength < ERROR_LENGTH ||
-        name.compare(nameLength - ERROR_LENGTH, ERROR_LENGTH, ERROR_STRING)) {
-      continue;
-    }
-
-    auto col = table->getColumn(name);
-    bool allZeros = true;
-    // Check if all values in the column are zero
-    for (size_t iRow = 0; iRow < nRows; ++iRow) {
-      const double val = col->toDouble(iRow);
-      if (std::abs(val) > std::numeric_limits<double>::epsilon()) {
-        allZeros = false;
-        break;
-      }
-    }
-    if (allZeros) {
-      zeroErrorColumns.push_back(name);
-    }
-  }
-
-  for (const auto &name : zeroErrorColumns) {
-    table->removeColumn(name);
   }
 }
 

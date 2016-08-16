@@ -5,6 +5,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/DateAndTime.h"
 
@@ -129,8 +130,13 @@ MANTIDQT_CUSTOMINTERFACES_DLL void parseRunLabel(const std::string &label,
                                                  std::string &instrument,
                                                  std::vector<int> &runNumbers);
 
+/// Get colors for workspaces to go in table
 MANTIDQT_CUSTOMINTERFACES_DLL QMap<int, QColor> getWorkspaceColors(
     const std::vector<boost::shared_ptr<Mantid::API::Workspace>> &workspaces);
+
+/// Remove error columns for fixed parameters from a results table
+MANTIDQT_CUSTOMINTERFACES_DLL void
+removeFixedParameterErrors(const Mantid::API::ITableWorkspace_sptr table);
 
 /**
  * A class which deals with auto-saving the widget values. Widgets are

@@ -135,10 +135,6 @@ private:
   QStringList getSelectedLogs();
   std::string getFileName();
 
-  /// Removes errors for fixed parameters from table
-  void removeFixedParameterErrors(
-      const Mantid::API::ITableWorkspace_sptr table) const;
-
   Ui::MuonAnalysis &m_uiForm;
 
   // Log values for all the fitted workspaces
