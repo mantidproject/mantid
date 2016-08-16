@@ -82,9 +82,9 @@ public:
       std::vector<double> newCountsLarger(largerBinEdges.size() - 1);
       std::vector<double> newErrorsLarger(largerBinEdges.size() - 1);
 
-      Mantid::Kernel::VectorHelper::rebin(binEdges, counts, errors,
+      Mantid::Kernel::VectorHelper::rebinHistogram(binEdges, counts, errors,
                                           largerBinEdges, newCountsLarger,
-                                          newErrorsLarger, false, false);
+                                          newErrorsLarger, false);
     }
   }
 

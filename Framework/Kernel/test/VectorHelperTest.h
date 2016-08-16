@@ -398,7 +398,7 @@ public:
   }
 
   void testRebinSmaller() {
-    for (size_t i = 0; i < iters; i++) {
+    for (size_t i = 0; i < nIters; i++) {
       std::vector<double> newCountsSmaller(smallerBinEdges.size() - 1);
       std::vector<double> newErrorsSmaller(smallerBinEdges.size() - 1);
       VectorHelper::rebin(binEdges, counts, errors, smallerBinEdges,
@@ -407,7 +407,7 @@ public:
   }
 
   void testRebinSmallerFrequencies() {
-    for (size_t i = 0; i < iters; i++) {
+    for (size_t i = 0; i < nIters; i++) {
       std::vector<double> newFrequenciesSmaller(smallerBinEdges.size() - 1);
       std::vector<double> newErrorsSmaller(smallerBinEdges.size() - 1);
       VectorHelper::rebin(binEdges, frequencies, errors, smallerBinEdges,
@@ -416,7 +416,7 @@ public:
   }
 
   void testRebinLarger() {
-    for (size_t i = 0; i < iters; i++) {
+    for (size_t i = 0; i < nIters; i++) {
       std::vector<double> newCountsLarger(largerBinEdges.size() - 1);
       std::vector<double> newErrorsLarger(largerBinEdges.size() - 1);
 
@@ -426,7 +426,7 @@ public:
   }
 
   void testRebinLargerFrequencies() {
-    for (size_t i = 0; i < iters; i++) {
+    for (size_t i = 0; i < nIters; i++) {
       std::vector<double> newFrequenciesLarger(largerBinEdges.size() - 1);
       std::vector<double> newErrorsLarger(largerBinEdges.size() - 1);
       VectorHelper::rebin(binEdges, frequencies, errors, largerBinEdges,
@@ -436,7 +436,7 @@ public:
 
 private:
   const size_t binSize = 10000;
-  const size_t iters = 10000;
+  const size_t nIters = 10000;
   std::vector<double> binEdges;
   std::vector<double> counts;
   std::vector<double> frequencies;
