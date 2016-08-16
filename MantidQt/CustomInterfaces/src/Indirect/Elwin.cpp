@@ -244,7 +244,7 @@ void Elwin::unGroupInput(bool error) {
     ungroupAlg->execute();
   }
 
-  //Enable plot and save
+  // Enable plot and save
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
 }
