@@ -100,7 +100,7 @@ class SANSPatchSensitivity(PythonAlgorithm):
             pixel_in_input_ws = tube_in_input_ws[pixel_idx]
             # ID will be the same in both WS
             detector_id = pixel_in_input_ws.getID()
-            pixel_in_patch_ws  = patch_ws.getDetector(detector_id)
+            pixel_in_patch_ws  = patch_ws.getInstrument().getDetector(detector_id)
 
             if pixel_in_patch_ws.isMasked():
                 id_to_fit.append(detector_id)
@@ -115,10 +115,13 @@ class SANSPatchSensitivity(PythonAlgorithm):
         pe =  np.polyfit(id_to_calculate_fit, e_to_calculate_fit, degree)
 
         for id_ in id_to_fit:
+            # HUGE hack. There's no detector_id to spectrum_idx possibility
+            # spect_idx for biosans / gpsans is detector_id -1 
+            spec_idx = id_ - 1
             vy = np.polyval(py,[id_])
             ve = np.polyval(pe,[id_])
-            in_ws.setY(id_,vy)
-            in_ws.setE(id_,ve)
+            in_ws.setY(spec_idx,vy)
+            in_ws.setE(spec_idx,ve)
 
 
 
