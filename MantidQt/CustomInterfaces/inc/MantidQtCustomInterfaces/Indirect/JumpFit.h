@@ -17,7 +17,6 @@ public:
   void setup() override;
   bool validate() override;
   void run() override;
-  void runImpl(bool plot = false, bool save = false);
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
 

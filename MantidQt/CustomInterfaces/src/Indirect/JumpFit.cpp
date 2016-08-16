@@ -107,16 +107,6 @@ bool JumpFit::validate() {
 void JumpFit::run() {
   bool plot = m_uiForm.chkPlot->isChecked();
   bool save = m_uiForm.chkSave->isChecked();
-  runImpl(plot, save);
-}
-
-/**
- * Runs algorithm.
- *
- * @param plot Enable/disable plotting
- * @param save Enable/disable saving
- */
-void JumpFit::runImpl(bool plot, bool save) {
   // Do noting with invalid data
   if (!m_uiForm.dsSample->isValid())
     return;
@@ -132,7 +122,7 @@ void JumpFit::runImpl(bool plot, bool save) {
   int width = m_spectraList[widthText];
   const auto sample = m_uiForm.dsSample->getCurrentDataName().toStdString();
   QString outputName = getWorkspaceBasename(QString::fromStdString(sample)) +
-                       "_" + functionName + "_fit";
+    "_" + functionName + "_fit";
 
   const auto startX = m_dblManager->value(m_properties["QMin"]);
   const auto endX = m_dblManager->value(m_properties["QMax"]);
@@ -162,7 +152,7 @@ void JumpFit::runImpl(bool plot, bool save) {
 
   // Connect algorithm runner to completion handler function
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(fitAlgDone(bool)));
+    SLOT(fitAlgDone(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
