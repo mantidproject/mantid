@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>422</width>
-    <height>265</height>
+    <width>803</width>
+    <height>547</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -190,7 +190,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_8">
       <item>
-       <widget class="QCheckBox" name="ckPlot">
+       <widget class="QPushButton" name="pbPlot">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -216,7 +216,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QCheckBox" name="ckSave">
+       <widget class="QPushButton" name="pbSave">
         <property name="text">
          <string>Save Result</string>
         </property>
