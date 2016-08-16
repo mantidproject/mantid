@@ -1,16 +1,16 @@
 #ifndef NORMALISEBYCURRENTTEST_H_
 #define NORMALISEBYCURRENTTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/NormaliseByCurrent.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidAlgorithms/NormaliseByCurrent.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -63,7 +63,7 @@ public:
     if (!norm1.isInitialized())
       norm1.initialize();
 
-    const MantidVec &Y = inWS->readY(0);
+    const auto &Y = inWS->readY(0);
     double initValue = Y[0];
     bool checkNormFactor = true;
     if (initValue <= 0) {
@@ -85,10 +85,10 @@ public:
                 wsNameOut));
 
     for (size_t i = 0; i < output->getNumberHistograms(); i++) {
-      const MantidVec &inX = inWS->readX(i);
-      const MantidVec &X = output->readX(i);
-      const MantidVec &Y = output->dataY(i);
-      const MantidVec &E = output->dataE(i);
+      const auto &inX = inWS->x(i);
+      const auto &X = output->x(i);
+      const auto &Y = output->y(i);
+      const auto &E = output->e(i);
       for (size_t j = 0; j < Y.size(); j++) {
         TS_ASSERT_EQUALS(X[j], inX[j]);
         TS_ASSERT_EQUALS(Y[j], expectedY);
