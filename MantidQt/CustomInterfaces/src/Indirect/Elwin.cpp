@@ -250,6 +250,26 @@ void Elwin::unGroupInput(bool error) {
     ungroupAlg->setProperty("InputWorkspace", "IDA_Elwin_Input");
     ungroupAlg->execute();
   }
+  // Handle mantid plotting
+  if (m_uiForm.ckPlot->isChecked()) {
+
+    auto outputWs = m_elwinAlg->getPropertyValue("OutputInQ");
+    checkADSForPlotSaveWorkspace(outputWs, true);
+    plotSpectrum(QString::fromStdString(outputWs));
+
+    auto outputWsSquared = m_elwinAlg->getPropertyValue("OutputInQSquared");
+    checkADSForPlotSaveWorkspace(outputWsSquared, true);
+    plotSpectrum(QString::fromStdString(outputWsSquared));
+
+    auto elfWs = m_elwinAlg->getPropertyValue("OutputELF");
+    checkADSForPlotSaveWorkspace(elfWs, true);
+    plotSpectrum(QString::fromStdString(elfWs), 0, 9);
+
+    if (m_blnManager->value(m_properties["Normalise"])) {
+      auto eltWs = m_elwinAlg->getPropertyValue("OutputELT");
+      checkADSForPlotSaveWorkspace(eltWs, true);
+      plotSpectrum(QString::fromStdString(eltWs), 0, 9);
+    }
 }
 
 /**
