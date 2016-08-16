@@ -156,9 +156,9 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
     const OptionalDouble &stitchingEndOverlap) {
   /*make struct of optional inputs to refactor method arguments*/
   /*make a using statements defining OptionalInteger for MonitorIndex*/
-  auto trans1InLam = toLam(firstTransmissionRun, processingCommands,
-                           i0MonitorIndex, wavelengthInterval,
-                           wavelengthMonitorBackgroundInterval);
+  auto trans1InLam =
+      toLam(firstTransmissionRun, processingCommands, i0MonitorIndex,
+            wavelengthInterval, wavelengthMonitorBackgroundInterval);
   MatrixWorkspace_sptr trans1Detector = trans1InLam.get<0>();
   MatrixWorkspace_sptr trans1Monitor = trans1InLam.get<1>();
 

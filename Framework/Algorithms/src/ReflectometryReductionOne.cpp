@@ -583,8 +583,8 @@ void ReflectometryReductionOne::exec() {
         WorkspaceIndexList db = directBeam.get();
         std::stringstream buffer;
         buffer << db.front() << "-" << db.back();
-        MatrixWorkspace_sptr regionOfDirectBeamWS = this->toLamDetector(
-            buffer.str(), runWS, wavelengthInterval);
+        MatrixWorkspace_sptr regionOfDirectBeamWS =
+            this->toLamDetector(buffer.str(), runWS, wavelengthInterval);
 
         // Rebin to the detector workspace
         auto rebinToWorkspaceAlg =

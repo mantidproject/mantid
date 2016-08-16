@@ -473,8 +473,8 @@ ReflectometryWorkflowBase::toLam(MatrixWorkspace_sptr toConvert,
                                  const MinMax &wavelengthMinMax,
                                  const OptionalMinMax &backgroundMinMax) {
   // Detector Workspace Processing
-  MatrixWorkspace_sptr detectorWS = toLamDetector(
-      processingCommands, toConvert, wavelengthMinMax);
+  MatrixWorkspace_sptr detectorWS =
+      toLamDetector(processingCommands, toConvert, wavelengthMinMax);
 
   MatrixWorkspace_sptr monitorWS;
   if (monitorIndex.is_initialized() && backgroundMinMax.is_initialized()) {
