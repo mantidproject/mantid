@@ -261,7 +261,10 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
     def _create_ion_table(self, unit_cell, ions):
         """
-        Creates an ion table from the data in the phonon/castep file
+        Creates an ion table from the ions and unit cell in the file_data object
+        populated when the phonon/castep file is parsed.
+        @param unit_cell    :: The unit cell read from the castep/phonon file
+        @param ions         :: The ion data obtained from the castep/phonon file
         """
         ion_table = s_api.CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
         ion_table.addColumn('str', 'Species')
@@ -293,7 +296,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
     def _create_bond_table(self, bonds):
         """
-        Creates a bond table from the castep data
+        Creates a bond table from the bond data obtained when the castep file is read
+        @param bonds       :: The bond data read from the castep file
         """
         if bonds is None or len(bonds) == 0:
             raise RuntimeError('No bonds found in CASTEP file')
@@ -324,7 +328,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         @param eigenvectors     :: eigenvector data from file
         @param weights          :: weight data from file
         """
-        # Build a dictionary of ions that the user cares about        
+        # Build a dictionary of ions that the user cares about
         partial_ions = dict()
 
         calc_ion_index = self.getProperty('CalculateIonIndices').value
