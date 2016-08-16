@@ -30,8 +30,6 @@ const std::string EnggDiffFittingPresenter::g_focusedFittingWSName =
 
 int EnggDiffFittingPresenter::g_fitting_runno_counter = 0;
 
-std::string EnggDiffFittingPresenter::g_multi_run = "";
-
 /**
  * Constructs a presenter for a fitting tab/widget view, which has a
  * handle on the current calibration (produced and updated elsewhere).
@@ -179,6 +177,8 @@ void EnggDiffFittingPresenter::fittingFinished() {
   g_log.notice() << "EnggDiffraction GUI: plotting of peaks for single peak "
                     "fits has completed. \n";
 
+  // Reset once whole process is completed
+  g_multi_run.clear();
   // enable the GUI
   m_view->enableCalibrateFocusFitUserActions(true);
 }
@@ -194,8 +194,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     Poco::Path selectedfPath(strFocusedFile);
     Poco::Path bankDir;
 
-    auto runnoDirVector = m_view->getFittingRunNumVec();
-    runnoDirVector.clear();
+	std::vector<std::string> runnoDirVector;
 
     std::string strFPath = selectedfPath.toString();
     // returns empty if no directory is found
@@ -235,9 +234,6 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
         // to single run number and trigger FittingRunNo changed again
         processMultiRun(strFocusedFile, runnoDirVector);
 
-        // set to input run - used for SaveDiffFittingAscii
-        g_multi_run = strFocusedFile;
-
       } else {
 
         // true if string convertible to digit
@@ -261,9 +257,6 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 
           processSingleRun(focusDir, strFocusedFile, runnoDirVector,
                            splitBaseName, runNoVec);
-
-          // set to input run - used for SaveDiffFittingAscii
-          g_multi_run = strFocusedFile;
         }
       }
     }
@@ -501,8 +494,8 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 
   // validate fitting data as it will remain the same through out
   const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
-  g_log.debug() << "Focused files found are: " << fitPeaksData << '\n';
 
+  g_log.debug() << "Focused files found are: " << fitPeaksData << '\n';
   for (auto dir : g_multi_run_directories) {
     g_log.debug() << dir << '\n';
   }
@@ -530,6 +523,7 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
 
     // disable GUI to avoid any double threads
     m_view->enableCalibrateFocusFitUserActions(false);
+    m_view->enableFitAllButton(false);
     // startAsyncFittingWorker
     // doFitting()
     startAsyncFittingWorker(g_multi_run_directories, fitPeaksData);
@@ -792,8 +786,9 @@ void MantidQt::CustomInterfaces::EnggDiffFittingPresenter::
 
   // generate file name
   std::string fileName;
-  if (!g_multi_run.empty()) {
-    fileName = "ENGINX_" + g_multi_run + "_Single_Peak_Fitting.csv";
+  if (g_multi_run.size() > 1) {
+    fileName = "ENGINX_" + g_multi_run.front() + "-" + g_multi_run.back() +
+               "_Single_Peak_Fitting.csv";
   } else {
     fileName = "ENGINX_" + runNumber + "_Single_Peak_Fitting.csv";
   }
@@ -1364,6 +1359,7 @@ void EnggDiffFittingPresenter::setRunNoItems(
 
         // adding to widget
         m_view->addRunNoItem(currentRun);
+        g_multi_run.push_back(currentRun);
       }
 
       // change to selected run number item
