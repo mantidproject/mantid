@@ -403,12 +403,6 @@ public:
                           newCountsSmaller, newErrorsSmaller, false, false);
   }
 
-  void testRebinSmallerAdd() {
-    for (size_t i = 0; i < iters; i++)
-      VectorHelper::rebin(binEdges, counts, errors, smallerBinEdges,
-                          newCountsSmaller, newErrorsSmaller, false, true);
-  }
-
   void testRebinSmallerFrequencies() {
     for (size_t i = 0; i < iters; i++)
       VectorHelper::rebin(binEdges, frequencies, errors, smallerBinEdges,
@@ -419,12 +413,6 @@ public:
     for (size_t i = 0; i < iters; i++)
       VectorHelper::rebin(binEdges, counts, errors, largerBinEdges,
                           newCountsLarger, newErrorsLarger, false, false);
-  }
-
-  void testRebinLargerAdd() {
-    for (size_t i = 0; i < iters; i++)
-      VectorHelper::rebin(binEdges, counts, errors, largerBinEdges,
-                          newCountsLarger, newErrorsLarger, false, true);
   }
 
   void testRebinLargerFrequencies() {
