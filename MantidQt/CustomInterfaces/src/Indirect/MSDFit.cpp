@@ -93,22 +93,7 @@ void MSDFit::run() {
   msdAlg->setProperty("OutputWorkspace", m_pythonExportWsName);
 
   m_batchAlgoRunner->addAlgorithm(msdAlg);
-
-  // Handle saving results
-  if (save) {
-    API::BatchAlgorithmRunner::AlgorithmRuntimeProps saveInputProps;
-    saveInputProps["InputWorkspace"] = m_pythonExportWsName;
-
-    IAlgorithm_sptr saveAlg =
-        AlgorithmManager::Instance().create("SaveNexusProcessed");
-    saveAlg->initialize();
-    saveAlg->setProperty("Filename", m_pythonExportWsName + ".nxs");
-
-    m_batchAlgoRunner->addAlgorithm(saveAlg, saveInputProps);
-  }
-
   m_batchAlgoRunner->executeBatchAsync();
-
 }
 
 void MSDFit::singleFit() {
@@ -298,6 +283,25 @@ void MSDFit::updateRS(QtProperty *prop, double val) {
   else if (prop == m_properties["End"])
     fitRangeSelector->setMaximum(val);
 }
+
+/**
+ * Handles saving of workspace
+ */
+void MSDFit::saveClicked() {
+
+  checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
+  addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Handles mantid plotting
+ */
+void MSDFit::plotClicked() {
+
+    plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_A1");
+}
+
 
 } // namespace IDA
 } // namespace CustomInterfaces
