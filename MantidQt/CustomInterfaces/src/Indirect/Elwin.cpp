@@ -218,16 +218,6 @@ void Elwin::run() {
 
   m_batchAlgoRunner->addAlgorithm(elwinMultAlg, elwinInputProps);
 
-  // Configure Save algorithms
-  if (m_uiForm.ckSave->isChecked()) {
-    addSaveAlgorithm(qWorkspace);
-    addSaveAlgorithm(qSquaredWorkspace);
-    addSaveAlgorithm(elfWorkspace);
-
-    if (m_blnManager->value(m_properties["Normalise"]))
-      addSaveAlgorithm(eltWorkspace);
-  }
-
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(unGroupInput(bool)));
   m_batchAlgoRunner->executeBatchAsync();
@@ -255,8 +245,6 @@ void Elwin::unGroupInput(bool error) {
   //Enable plot and save
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
-
-
 }
 
 /**
@@ -506,9 +494,7 @@ void Elwin::updateRS(QtProperty *prop, double val) {
 /**
  * Handles mantid plotting
  */
-void Elwin::saveClicked() {
-
-  if (m_uiForm.ckPlot->isChecked()) {
+void Elwin::plotClicked() {
 
     auto outputWs = m_elwinAlg->getPropertyValue("OutputInQ");
     checkADSForPlotSaveWorkspace(outputWs, true);
@@ -527,7 +513,31 @@ void Elwin::saveClicked() {
       checkADSForPlotSaveWorkspace(eltWs, true);
       plotSpectrum(QString::fromStdString(eltWs), 0, 9);
     }
+}
+
+/**
+ * Handles saving of workspaces
+ */
+void Elwin::saveClicked() {
+
+  auto outputWs = m_elwinAlg->getPropertyValue("OutputInQ");
+  checkADSForPlotSaveWorkspace(outputWs, false);
+  addSaveWorkspaceToQueue(QString::fromStdString(outputWs));
+
+  auto outputWsSquared = m_elwinAlg->getPropertyValue("OutputInQSquared");
+  checkADSForPlotSaveWorkspace(outputWsSquared, true);
+  addSaveWorkspaceToQueue(QString::fromStdString(outputWsSquared));
+
+  auto elfWs = m_elwinAlg->getPropertyValue("OutputELF");
+  checkADSForPlotSaveWorkspace(elfWs, true);
+  addSaveWorkspaceToQueue(QString::fromStdString(elfWs));
+
+  if (m_blnManager->value(m_properties["Normalise"])) {
+    auto eltWs = m_elwinAlg->getPropertyValue("OutputELT");
+    checkADSForPlotSaveWorkspace(eltWs, true);
+    addSaveWorkspaceToQueue(QString::fromStdString(eltWs));
   }
+  m_batchAlgoRunner->executeBatchAsync();
 }
 } // namespace IDA
 } // namespace CustomInterfaces
