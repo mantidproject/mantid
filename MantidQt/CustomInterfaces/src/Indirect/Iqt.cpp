@@ -116,11 +116,6 @@ void Iqt::run() {
   IqtAlg->setProperty("DryRun", false);
 
   m_batchAlgoRunner->addAlgorithm(IqtAlg);
-
-  // Add save step
-  if (m_uiForm.ckSave->isChecked())
-    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
-
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -132,15 +127,21 @@ void Iqt::run() {
 void Iqt::algorithmComplete(bool error) {
   if (error)
     return;
+}
+/**
+ * Handle saving of workspace
+ */
+void Iqt::saveClicked() {
+  checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
+  addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+}
 
-  // Regular Plot
-  if (m_uiForm.ckPlot->isChecked())
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
-
-  // Tiled plot
-  if (m_uiForm.ckTile->isChecked()) {
-    PlotTiled();
-  }
+/**
+ * Handle mantid plotting
+ */
+void Iqt::plotClicked() {
+  checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
+  plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 }
 
 void Iqt::PlotTiled() {
