@@ -124,7 +124,7 @@ void MergeRuns::exec() {
       outWS = outWS + addee;
 
       // Update the sample logs
-      this->updateSampleLogs(*it, outWS, numberOfWSs);
+      this->updateSampleLogs(*it, outWS);
 
       m_progress->report();
     }
@@ -653,92 +653,67 @@ void MergeRuns::fillHistory() {
 }
 
 void MergeRuns::createSampleLogsMaps(MatrixWorkspace_sptr ws, size_t numberOfFiles) {
-  getSampleList(m_sampleLogsAverage, "sample_logs_average", ws);
-
-  for (auto log : m_sampleLogsAverage) {
-    m_sampleLogsAverage[log.first] /= static_cast<double>(numberOfFiles);
-  }
-
-  getSampleList(m_sampleLogsMin, "sample_logs_min", ws);
-  getSampleList(m_sampleLogsMax, "sample_logs_max", ws);
-  getSampleList(m_sampleLogsSum, "sample_logs_sum", ws);
-  getSampleListString(m_sampleLogsList, "sample_logs_list", ws);
-  getSampleListString(m_sampleLogsWarn, "sample_logs_warn", ws);
-  getSampleListString(m_sampleLogsFail, "sample_logs_fail", ws);
+  getSampleListDouble(average, "sample_logs_average", ws);
+  getSampleListDouble(min, "sample_logs_min", ws);
+  getSampleListDouble(max, "sample_logs_max", ws);
+  getSampleListDouble(sum, "sample_logs_sum", ws);
+  getSampleListString(list, "sample_logs_list", ws);
+  getSampleListString(warn, "sample_logs_warn", ws);
+  getSampleListString(fail, "sample_logs_fail", ws);
 }
 
-void MergeRuns::getSampleList(sample_logs_map_double &sampleLogMap, std::string sampleLogBehaviour, MatrixWorkspace_sptr ws) {
-  std::string params = ws->getInstrument()->getParameterAsString(sampleLogBehaviour, false);
+void MergeRuns::getSampleListDouble(MergeLogsDouble sampleLogBehaviour, std::string parameterName, MatrixWorkspace_sptr ws) {
+  std::string params = ws->getInstrument()->getParameterAsString(parameterName, false);
   StringTokenizer tokenizer(params, ",", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
   for (auto item : tokenizer.asVector()) {
-    sampleLogMap[item] = ws->getLogAsSingleValue(item);
-    g_log.warning(sampleLogBehaviour + ":" + item + ":" + std::to_string(sampleLogMap[item]));
+    m_logMap_double[item] = std::make_pair(ws->getLogAsSingleValue(item), sampleLogBehaviour);
   }
 }
 
-void MergeRuns::getSampleListString(sample_logs_map_string &sampleLogMap, std::string sampleLogBehaviour, MatrixWorkspace_sptr ws) {
-  std::string params = ws->getInstrument()->getParameterAsString(sampleLogBehaviour, false);
+void MergeRuns::getSampleListString(MergeLogsString sampleLogBehaviour, std::string parameterName, MatrixWorkspace_sptr ws) {
+  std::string params = ws->getInstrument()->getParameterAsString(parameterName, false);
   StringTokenizer tokenizer(params, ",", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
   for (auto item : tokenizer.asVector()) {
-    sampleLogMap[item] = ws->getLog(item)->value();
-    g_log.warning(sampleLogBehaviour + ":" + item + ":" + sampleLogMap[item]);
-  }
+      m_logMap_string[item] = std::make_pair(ws->getLog(item)->value(), sampleLogBehaviour);
+    }
 }
 
-void MergeRuns::updateSampleLogs(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr outWS, size_t numberOfFiles) {
-  // Average
-  for (auto log : m_sampleLogsAverage) {
-    m_sampleLogsAverage[log.first] += ws->getLogAsSingleValue(log.first) / static_cast<double>(numberOfFiles);
-    outWS->getLog(log.first)->setValue(std::to_string(m_sampleLogsAverage[log.first]));
-    g_log.warning(log.first + std::to_string(m_sampleLogsAverage[log.first]));
-  }
-
-  // Min
-  for (auto log : m_sampleLogsMin) {
-    m_sampleLogsMin[log.first] = std::min(ws->getLogAsSingleValue(log.first), outWS->getLogAsSingleValue(log.first));
-    outWS->getLog(log.first)->setValue(std::to_string(m_sampleLogsMin[log.first]));
-    g_log.warning(log.first + std::to_string(m_sampleLogsMin[log.first]));
-  }
-
-  // Max
-  for (auto log : m_sampleLogsMax) {
-    m_sampleLogsMax[log.first] = std::max(ws->getLogAsSingleValue(log.first), outWS->getLogAsSingleValue(log.first));
-    outWS->getLog(log.first)->setValue(std::to_string(m_sampleLogsMax[log.first]));
-    g_log.warning(log.first + std::to_string(m_sampleLogsMax[log.first]));
-  }
-
-  // Sum
-  for (auto log : m_sampleLogsSum) {
-    m_sampleLogsSum[log.first] += ws->getLogAsSingleValue(log.first);
-    outWS->getLog(log.first)->setValue(std::to_string(m_sampleLogsSum[log.first]));
-    g_log.warning(log.first + std::to_string(m_sampleLogsSum[log.first]));
-  }
-
-  // List
-  for (auto log : m_sampleLogsList) {
-    m_sampleLogsList[log.first] = m_sampleLogsList[log.first] + ", " + ws->getLog(log.first)->value();
-    outWS->getLog(log.first)->setValue(m_sampleLogsList[log.first]);
-    g_log.warning(log.first + m_sampleLogsList[log.first]);
-  }
-
-  // Warn
-  for (auto log : m_sampleLogsWarn) {
-    if (m_sampleLogsWarn[log.first].compare(ws->getLog(log.first)->value()) != 0) {
-      g_log.warning("Warning, difference in sample log values for " + log.first + ". First workspace value: " + m_sampleLogsWarn[log.first] + ", second workspace value: " + ws->getLog(log.first)->value());
+void MergeRuns::updateSampleLogs(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr outWS) {
+  for (auto item : m_logMap_double) {
+    switch (item.second.second) {
+    case average:
+      item.second.first += item.second.first;
+      break;
+    case min:
+      item.second.first = 2.0;
+      break;
+    case max:
+      item.second.first = 3.0;
+      break;
+    case sum:
+      item.second.first = 4.0;
+      break;
     }
-    g_log.warning(log.first + std::to_string(m_sampleLogsSum[log.first]));
+
+    outWS->getLog(item.first)->setValue(std::to_string(item.second.first));
   }
 
-  // Fail
-  for (auto log : m_sampleLogsFail) {
-    if (m_sampleLogsFail[log.first].compare(ws->getLog(log.first)->value()) != 0) {
-      g_log.error("Error, difference in sample log values for " + log.first + ". First workspace value: " + m_sampleLogsWarn[log.first] + ", second workspace value: " + ws->getLog(log.first)->value());
-      throw std::runtime_error("Different sample log values for " + log.first);
+  for (auto item : m_logMap_string) {
+    switch (item.second.second) {
+    case list:
+      item.second.first = "";
+      break;
+    case warn:
+      item.second.first = "";
+      break;
+    case fail:
+      item.second.first = "";
+      break;
     }
-    g_log.warning(log.first + std::to_string(m_sampleLogsSum[log.first]));
-  }
 
-}
+    outWS->getLog(item.first)->setValue(item.second.first);
+    }
+  }
 
 } // namespace Algorithm
 } // namespace Mantid
