@@ -129,6 +129,9 @@ MANTIDQT_CUSTOMINTERFACES_DLL void parseRunLabel(const std::string &label,
                                                  std::string &instrument,
                                                  std::vector<int> &runNumbers);
 
+MANTIDQT_CUSTOMINTERFACES_DLL QMap<int, QColor> getWorkspaceColors(
+    const std::vector<boost::shared_ptr<Mantid::API::Workspace>> &workspaces);
+
 /**
  * A class which deals with auto-saving the widget values. Widgets are
  * registered and then on any

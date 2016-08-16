@@ -1,15 +1,16 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
-#include "MantidKernel/InstrumentInfo.h"
-#include "MantidKernel/EmptyValues.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/StringTokenizer.h"
-
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <QLineEdit>
 #include <QCheckBox>
@@ -19,6 +20,27 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/scope_exit.hpp>
 #include <stdexcept>
+
+namespace {
+/// Colors for workspace (Black, Red, Green, Blue, Orange, Purple, if there are
+/// more than this then use black as default.)
+QColor getWorkspaceColor(size_t index) {
+  switch (index) {
+  case (1):
+    return QColor("red");
+  case (2):
+    return QColor("green");
+  case (3):
+    return QColor("blue");
+  case (4):
+    return QColor("orange");
+  case (5):
+    return QColor("purple");
+  default:
+    return QColor("black");
+  }
+}
+}
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -1022,6 +1044,98 @@ std::string generateWorkspaceName(const Muon::DatasetParams &params) {
   return workspaceName.str();
 }
 
+/**
+ * Get the colors corresponding to their position in the workspace list.
+ * Used in fittings table on results table tab.
+ *
+ * New color if:
+ * - different model used for fit
+ * - different number of runs (groups, periods) used in fit
+ *
+ * Colors: black, red, green, blue, orange, purple (if more, use black as
+ * default).
+ *
+ * @param wsList :: Vector of either workspace groups (containing parameter
+ * tables) or parameter tables themselves
+ * @return :: List of colors with the key being position in input vector.
+ */
+QMap<int, QColor>
+getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
+  QMap<int, QColor> colors; // position, color
+
+  // Vector of <number of runs in fit, parameters in fit> pairs
+  typedef std::pair<size_t, std::vector<std::string>> FitProp;
+  std::vector<FitProp> fitProperties;
+
+  // Get keys from parameter table
+  auto getKeysFromTable = [](const ITableWorkspace_sptr &tab) {
+    std::vector<std::string> keys;
+    if (tab) {
+      TableRow row = tab->getFirstRow();
+      do {
+        std::string key;
+        row >> key;
+        keys.push_back(key);
+      } while (row.next());
+    }
+    return keys;
+  };
+
+  // Get fit properties for each input workspace
+  for (const auto &ws : workspaces) {
+    size_t nRuns = 0;
+    std::vector<std::string> params;
+    if (const auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+      for (size_t i = 0; i < group->size(); ++i) {
+        const auto &ws = group->getItem(i);
+        if (ws->name().find("_Parameters") != std::string::npos) {
+          params = getKeysFromTable(
+              boost::dynamic_pointer_cast<ITableWorkspace>(ws));
+        } else if (ws->name().find("_Workspace") != std::string::npos) {
+          ++nRuns;
+        }
+      }
+    } else if (const auto table =
+                   boost::dynamic_pointer_cast<ITableWorkspace>(ws)) {
+      nRuns = 1;
+      params = getKeysFromTable(table);
+    } else {
+      throw std::invalid_argument(
+          "Unexpected workspace type for " + ws->name() +
+          " (expected WorkspaceGroup or ITableWorkspace)");
+    }
+    fitProperties.emplace_back(nRuns, params);
+  }
+
+  size_t colorCount(0);
+  colors[0] = getWorkspaceColor(colorCount);
+
+  if (fitProperties.size() > 1) {
+    FitProp firstProps = fitProperties.front();
+
+    while (colors.size() < fitProperties.size()) {
+      // Go through and assign same color to all similar sets
+      for (size_t i = 1; i < fitProperties.size(); ++i) {
+        if (fitProperties[i] == firstProps) {
+          colors[static_cast<int>(i)] = getWorkspaceColor(colorCount);
+        }
+      }
+
+      // Increment color for next set
+      ++colorCount;
+
+      // Get the first unassigned one to compare to next time
+      for (size_t i = 1; i < fitProperties.size(); ++i) {
+        if (!colors.contains(static_cast<int>(i))) {
+          firstProps = fitProperties[i];
+          break;
+        }
+      }
+    }
+  }
+
+  return colors;
+}
 } // namespace MuonAnalysisHelper
 } // namespace CustomInterfaces
 } // namespace Mantid
