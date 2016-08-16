@@ -279,6 +279,32 @@ public:
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 397);
   }
 
+  /*
+   * This test loads and sums 2 IN4 runs from ILL
+   * without instrument prefix and extension in the file names.
+   */
+  void test_ILLLoadMultipleFilesNoPrefixNoExt() {
+
+    ConfigService::Instance().setString("default.instrument", "IN4");
+    ConfigService::Instance().appendDataSearchSubDir("ILL/IN4/");
+
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "084446-084447");
+
+    std::string outputWS = "LoadTest_out";
+    loader.setPropertyValue("OutputWorkspace", outputWS);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    MatrixWorkspace_sptr output =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS);
+    MatrixWorkspace_sptr output2D =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+
+    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 397);
+  }
+
+
   void test_EventPreNeXus_WithNoExecute() {
     Load loader;
     loader.initialize();
