@@ -728,7 +728,7 @@ void ProjectionSurface::loadFromProject(const std::string &lines) {
     tsv >> m_backgroundColor;
   }
 
-  if(tsv.selectSection("shapes")) {
+  if (tsv.selectSection("shapes")) {
     std::string shapesLines;
     tsv >> shapesLines;
     m_maskShapes.loadFromProject(shapesLines);

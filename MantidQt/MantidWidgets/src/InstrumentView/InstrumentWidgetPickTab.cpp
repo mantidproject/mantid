@@ -711,9 +711,8 @@ void InstrumentWidgetPickTab::loadFromProject(const std::string &lines) {
 
   // load active push button
   std::vector<QPushButton *> buttons{
-      m_zoom,         m_edit,           m_ellipse,   m_rectangle,
-      m_ring_ellipse, m_ring_rectangle, m_free_draw, m_one,
-      m_tube,         m_peak,           m_peakSelect};
+      m_zoom, m_edit, m_ellipse, m_rectangle, m_ring_ellipse, m_ring_rectangle,
+      m_free_draw, m_one, m_tube, m_peak, m_peakSelect};
 
   tab.selectLine("ActiveTools");
   for (auto button : buttons) {
@@ -732,9 +731,8 @@ std::string InstrumentWidgetPickTab::saveToProject() const {
 
   // save active push button
   std::vector<QPushButton *> buttons{
-      m_zoom,         m_edit,           m_ellipse,   m_rectangle,
-      m_ring_ellipse, m_ring_rectangle, m_free_draw, m_one,
-      m_tube,         m_peak,           m_peakSelect};
+      m_zoom, m_edit, m_ellipse, m_rectangle, m_ring_ellipse, m_ring_rectangle,
+      m_free_draw, m_one, m_tube, m_peak, m_peakSelect};
 
   tab.writeLine("ActiveTools");
   for (auto button : buttons) {

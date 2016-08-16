@@ -469,8 +469,7 @@ void Viewport::transform(Mantid::Kernel::V3D &pos) const {
   pos += Mantid::Kernel::V3D(m_xTrans, m_yTrans, 0.0);
 }
 
-void Viewport::loadFromProject(const std::string &lines)
-{
+void Viewport::loadFromProject(const std::string &lines) {
   reset();
   TSVSerialiser tsv(lines);
 
@@ -485,7 +484,7 @@ void Viewport::loadFromProject(const std::string &lines)
   setZoom(zoom);
 
   tsv.selectLine("Rotation");
-  double w, a ,b, c;
+  double w, a, b, c;
   tsv >> w >> a >> b >> c;
   Mantid::Kernel::Quat quat(w, a, b, c);
   setRotation(quat);
@@ -497,7 +496,7 @@ std::string Viewport::saveToProject() const {
   tsv.writeLine("Zoom") << m_zoomFactor;
 
   tsv.writeLine("Rotation");
-  for(int i = 0; i < 4; ++i) {
+  for (int i = 0; i < 4; ++i) {
     tsv << m_quaternion[i];
   }
 

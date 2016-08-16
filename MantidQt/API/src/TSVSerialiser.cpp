@@ -246,7 +246,7 @@ bool TSVSerialiser::asBool(const size_t i) const {
 }
 
 QRect TSVSerialiser::asQRect(const size_t i) const {
-  if (i+3 >= m_curValues.size())
+  if (i + 3 >= m_curValues.size())
     return QRect();
 
   std::string valStr = m_curValues.at(i);
@@ -263,7 +263,7 @@ QRect TSVSerialiser::asQRect(const size_t i) const {
 }
 
 QColor TSVSerialiser::asQColor(const size_t i) const {
-  if (i+3 >= m_curValues.size())
+  if (i + 3 >= m_curValues.size())
     return QColor();
 
   std::string valStr = m_curValues.at(i);
@@ -386,24 +386,17 @@ TSVSerialiser &TSVSerialiser::operator<<(const bool &val) {
 TSVSerialiser &TSVSerialiser::operator<<(const QRect &val) {
   auto point0 = val.topLeft();
   auto point1 = val.bottomRight();
-  m_output << "\t"
-           << point0.x() << "\t"
-           << point0.y() << "\t"
-           << point1.x() << "\t"
-           << point1.y();
+  m_output << "\t" << point0.x() << "\t" << point0.y() << "\t" << point1.x()
+           << "\t" << point1.y();
   return *this;
 }
 
 TSVSerialiser &TSVSerialiser::operator<<(const QColor &val) {
 
-  m_output << "\t"
-           << val.red() << "\t"
-           << val.green() << "\t"
-           << val.blue() << "\t"
-           << val.alpha();
+  m_output << "\t" << val.red() << "\t" << val.green() << "\t" << val.blue()
+           << "\t" << val.alpha();
   return *this;
 }
-
 
 void TSVSerialiser::writeRaw(const std::string &raw) {
   if (m_midLine) {

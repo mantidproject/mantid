@@ -668,8 +668,7 @@ void Shape2DCollection::eraseFree(const QPolygonF &polygon) {
 /** Load shape 2D collection state from a Mantid project file
  * @param lines :: lines from the project file to load state from
  */
-void Shape2DCollection::loadFromProject(const std::string &lines)
-{
+void Shape2DCollection::loadFromProject(const std::string &lines) {
   TSVSerialiser tsv(lines);
   for (auto shapeLines : tsv.sections("shape")) {
     Shape2D *shape = Shape2D::loadFromProject(shapeLines);
@@ -680,10 +679,9 @@ void Shape2DCollection::loadFromProject(const std::string &lines)
 /** Save the state of the shape 2D collection to a Mantid project file
  * @return a string representing the state of the shape 2D collection
  */
-std::string Shape2DCollection::saveToProject() const
-{
+std::string Shape2DCollection::saveToProject() const {
   TSVSerialiser tsv;
-  for(auto shape : m_shapes) {
+  for (auto shape : m_shapes) {
     tsv.writeSection("shape", shape->saveToProject());
   }
   return tsv.outputLines();
