@@ -62,8 +62,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-enum MergeLogsDouble { average, min, max, sum };
-enum MergeLogsString { list, warn, fail };
+enum MergeLogType { average, min, max, sum, list, warn, fail };
 
 class DLLExport MergeRuns : public API::MultiPeriodGroupAlgorithm {
 public:
@@ -129,11 +128,8 @@ private:
     }
   }
 
-  typedef std::pair<double, MergeLogsDouble> doubleType;
-  typedef std::pair<std::string, MergeLogsString> stringType;
-
-  std::map<const std::string, doubleType> m_logMap_double;
-  std::map<const std::string, stringType> m_logMap_string;
+  typedef std::pair<Kernel::Property*, MergeLogType> propertyType;
+  std::map<const std::string, propertyType> m_logMap;
 
   // Methods called by exec()
   using Mantid::API::Algorithm::validateInputs;
@@ -163,9 +159,8 @@ private:
   /// Addition tables for event workspaces
   std::vector<boost::shared_ptr<AdditionTable>> m_tables;
 
-  void createSampleLogsMaps(API::MatrixWorkspace_sptr ws, size_t numberOfFiles);
-  void getSampleListDouble(MergeLogsDouble, std::string parameterName, API::MatrixWorkspace_sptr ws);
-  void getSampleListString(MergeLogsString, std::string parameterName, API::MatrixWorkspace_sptr ws);
+  void createSampleLogsMaps(API::MatrixWorkspace_sptr ws);
+  void getSampleList(MergeLogType, std::string parameterName, API::MatrixWorkspace_sptr ws);
   void updateSampleLogs(API::MatrixWorkspace_sptr ws, API::MatrixWorkspace_sptr outWS);
 //  sample_logs_map_string getSampleListString(SampleLogMergeType, std::string parameterName, API::MatrixWorkspace_sptr ws);
 

@@ -21,6 +21,31 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
+//namespace {
+///// Templated method to convert property to double
+//template<typename T>
+//bool convertSingleValue(const Property *property, double &value) {
+//  if (auto log = dynamic_cast<const PropertyWithValue<T> *>(property)) {
+//    value = static_cast<double>(*log);
+//    return true;
+//  } else {
+//    return false;
+//  }
+//}
+//
+///// Converts numeric property to double
+//bool convertSingleValue(const Property *property, double &value) {
+//  // The first one to succeed short-circuits and the value is returned.
+//  // If all fail, returns false.
+//  return convertSingleValue<double>(property, value) ||
+//      convertSingleValue<int32_t>(property, value) ||
+//      convertSingleValue<int64_t>(property, value) ||
+//      convertSingleValue<float>(property, value) ||
+//      convertSingleValue<uint32_t>(property, value) ||
+//      convertSingleValue<uint64_t>(property, value);
+//}
+//}
+
 /// Default constructor
 MergeRuns::MergeRuns()
     : MultiPeriodGroupAlgorithm(), m_progress(nullptr), m_inEventWS(),
@@ -98,7 +123,7 @@ void MergeRuns::exec() {
     std::list<boost::shared_ptr<Mantid::API::MatrixWorkspace>>::iterator it = m_inMatrixWS.begin();
 
     size_t numberOfWSs = m_inMatrixWS.size();
-    this->createSampleLogsMaps(*it, numberOfWSs);
+    this->createSampleLogsMaps(*it);
 
     // Take the first input workspace as the first argument to the addition
     MatrixWorkspace_sptr outWS = m_inMatrixWS.front();
@@ -652,66 +677,84 @@ void MergeRuns::fillHistory() {
   }
 }
 
-void MergeRuns::createSampleLogsMaps(MatrixWorkspace_sptr ws, size_t numberOfFiles) {
-  getSampleListDouble(average, "sample_logs_average", ws);
-  getSampleListDouble(min, "sample_logs_min", ws);
-  getSampleListDouble(max, "sample_logs_max", ws);
-  getSampleListDouble(sum, "sample_logs_sum", ws);
-  getSampleListString(list, "sample_logs_list", ws);
-  getSampleListString(warn, "sample_logs_warn", ws);
-  getSampleListString(fail, "sample_logs_fail", ws);
+void MergeRuns::createSampleLogsMaps(MatrixWorkspace_sptr ws) {
+  getSampleList(average, "sample_logs_average", ws);
+  getSampleList(min, "sample_logs_min", ws);
+  getSampleList(max, "sample_logs_max", ws);
+  getSampleList(sum, "sample_logs_sum", ws);
+  getSampleList(list, "sample_logs_list", ws);
+  getSampleList(warn, "sample_logs_warn", ws);
+  getSampleList(fail, "sample_logs_fail", ws);
 }
 
-void MergeRuns::getSampleListDouble(MergeLogsDouble sampleLogBehaviour, std::string parameterName, MatrixWorkspace_sptr ws) {
+void MergeRuns::getSampleList(MergeLogType sampleLogBehaviour, std::string parameterName, MatrixWorkspace_sptr ws) {
+  bool isNumeric;
+
   std::string params = ws->getInstrument()->getParameterAsString(parameterName, false);
   StringTokenizer tokenizer(params, ",", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
   for (auto item : tokenizer.asVector()) {
-    m_logMap_double[item] = std::make_pair(ws->getLogAsSingleValue(item), sampleLogBehaviour);
-  }
-}
-
-void MergeRuns::getSampleListString(MergeLogsString sampleLogBehaviour, std::string parameterName, MatrixWorkspace_sptr ws) {
-  std::string params = ws->getInstrument()->getParameterAsString(parameterName, false);
-  StringTokenizer tokenizer(params, ",", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
-  for (auto item : tokenizer.asVector()) {
-      m_logMap_string[item] = std::make_pair(ws->getLog(item)->value(), sampleLogBehaviour);
+    try {
+      ws->getLogAsSingleValue(item);
+      isNumeric = true;
+    } catch (std::invalid_argument) {
+      isNumeric = false;
     }
+
+    if (sampleLogBehaviour == list) {
+      Property* prop = ws->getLog(item);
+      Property* stringProperty = new PropertyWithValue<std::string>(item + "_list", prop->value(), Direction::Input);
+      m_logMap[item] = std::make_pair(stringProperty, sampleLogBehaviour);
+      ws->mutableRun().addProperty(item + "_list", ws->getLog(item)->value());
+    } else {
+      m_logMap[item] = std::make_pair(ws->getLog(item), sampleLogBehaviour);
+    }
+  }
 }
 
 void MergeRuns::updateSampleLogs(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr outWS) {
-  for (auto item : m_logMap_double) {
+  for (auto item : m_logMap) {
+    Property *wsProperty = ws->getLog(item.first);
+    Property *outWSProperty = outWS->getLog(item.first);
+
+    bool isNumeric;
+    double wsNumber;
+    double outWSNumber;
+
+    try {
+      wsNumber = ws->getLogAsSingleValue(item.first);
+      outWSNumber = outWS->getLogAsSingleValue(item.first);
+      isNumeric = true;
+    } catch (std::invalid_argument) {
+      isNumeric = false;
+    }
+
     switch (item.second.second) {
     case average:
-      item.second.first += item.second.first;
+      item.second.first->setValue(std::to_string(wsNumber + outWSNumber));
       break;
     case min:
-      item.second.first = 2.0;
+      item.second.first->setValue(std::to_string(std::min(wsNumber, outWSNumber)));
       break;
     case max:
-      item.second.first = 3.0;
+      item.second.first->setValue(std::to_string(std::max(wsNumber, outWSNumber)));
       break;
     case sum:
-      item.second.first = 4.0;
+      item.second.first->setValue(std::to_string(wsNumber + outWSNumber));
       break;
-    }
-
-    outWS->getLog(item.first)->setValue(std::to_string(item.second.first));
-  }
-
-  for (auto item : m_logMap_string) {
-    switch (item.second.second) {
     case list:
-      item.second.first = "";
+      item.second.first->setValue(item.second.first->value() + ", " + wsProperty->value());
+      outWS->getLog(item.first + "_list")->setValueFromProperty(*item.second.first);
+      g_log.warning(item.second.first->value() + " " + wsProperty->value());
       break;
     case warn:
-      item.second.first = "";
+      item.second.first->setValue("");
       break;
     case fail:
-      item.second.first = "";
+      item.second.first->setValue("");
       break;
     }
 
-    outWS->getLog(item.first)->setValue(item.second.first);
+    outWS->getLog(item.first)->setValueFromProperty(*item.second.first);
     }
   }
 
