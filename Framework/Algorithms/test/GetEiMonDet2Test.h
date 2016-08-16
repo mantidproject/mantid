@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/GetEiMonDet2.h"
+#include "MantidAlgorithms/ExtractSingleSpectrum.h"
 #include "MantidAPI/Axis.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
@@ -18,9 +19,17 @@ using namespace Mantid::PhysicalConstants;
 using namespace WorkspaceCreationHelper;
 
 // Some rather random numbers here.
-const double DETECTOR_DISTANCE = 15.78;
-const double EI = 66.6; // meV
-const double MONITOR_DISTANCE = 0.44;
+static constexpr double DETECTOR_DISTANCE = 1.78;
+static constexpr double EI = 66.6; // meV
+static constexpr double MONITOR_DISTANCE = 0.44;
+
+constexpr double velocity(const double energy) {
+  return std::sqrt(2 * energy * meV / NeutronMass);
+}
+
+constexpr double time_of_flight(const double velocity) {
+  return (MONITOR_DISTANCE + DETECTOR_DISTANCE) / velocity * 1e6;
+}
 
 class GetEiMonDet2Test : public CxxTest::TestSuite {
 public:
@@ -58,6 +67,51 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorEPPTable", eppTable))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("DetectorSpectra", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("MonitorSpectrumNumber", "0"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.execute())
+    TS_ASSERT(algorithm.isExecuted())
+    TS_ASSERT_DELTA(static_cast<decltype(realEi)>(algorithm.getProperty("IncidentEnergy")), realEi, 1e-6)
+  }
+
+  void testSuccessOnComplexInput() {
+    const double realEi = 1.18 * EI;
+    const double pulseInterval = std::floor(time_of_flight(velocity(EI)) / 2);
+    const double timeAtMonitor = 0.34 * pulseInterval;
+    auto detectorPeakCentres = peakCentres(timeAtMonitor, realEi, pulseInterval);
+    detectorPeakCentres.erase(detectorPeakCentres.begin());
+    std::vector<bool> successes(detectorPeakCentres.size(), true);
+    auto detectorEPPTable = createEPPTable(detectorPeakCentres, successes);
+    auto monitorPeakCentres = peakCentres(timeAtMonitor, realEi, pulseInterval);
+    monitorPeakCentres.erase(monitorPeakCentres.begin() + 1, monitorPeakCentres.end());
+    successes = std::vector<bool>(monitorPeakCentres.size(), true);
+    auto monitorEPPTable = createEPPTable(monitorPeakCentres, successes);
+    auto ws = createWorkspace();
+    ws->mutableRun().removeProperty("Ei");
+    const std::string extractedWsName("GetEiMonDet2Test_testSuccessOnComplexInput_extracted");
+    ExtractSingleSpectrum spectrumExtraction;
+    spectrumExtraction.initialize();
+    spectrumExtraction.setChild(true);
+    spectrumExtraction.setProperty("InputWorkspace", ws);
+    spectrumExtraction.setProperty("WorkspaceIndex", 0);
+    spectrumExtraction.setProperty("OutputWorkspace", extractedWsName);
+    spectrumExtraction.execute();
+    MatrixWorkspace_sptr monitorWs = spectrumExtraction.getProperty("OutputWorkspace");
+    spectrumExtraction.setProperty("InputWorkspace", ws);
+    spectrumExtraction.setProperty("WorkspaceIndex", 1);
+    spectrumExtraction.setProperty("OutputWorkspace", extractedWsName);
+    spectrumExtraction.execute();
+    MatrixWorkspace_sptr detectorWs = spectrumExtraction.getProperty("OutputWorkspace");
+    GetEiMonDet2 algorithm;
+    TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
+    TS_ASSERT(algorithm.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", detectorWs));
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorEPPTable", detectorEPPTable))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("DetectorSpectra", "0"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("EnergyTolerance", 20.0))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("IncidentEnergy", EI))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorWorkspace", monitorWs))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorEPPTable", monitorEPPTable))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorSpectrumNumber", 0))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("PulseInterval", pulseInterval))
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
     TS_ASSERT_DELTA(static_cast<decltype(realEi)>(algorithm.getProperty("IncidentEnergy")), realEi, 1e-6)
@@ -104,9 +158,7 @@ private:
   static std::vector<double> peakCentres(double timeAtMonitor, double energy, double pulseInterval) {
     std::vector<double> centres;
     centres.emplace_back(timeAtMonitor);
-    energy *= meV;
-    const double velocity = std::sqrt(2 * energy / NeutronMass);
-    double timeOfFlight = timeAtMonitor + (MONITOR_DISTANCE + DETECTOR_DISTANCE) / velocity * 1e6;
+    double timeOfFlight = timeAtMonitor + time_of_flight(velocity(energy));
     while (timeOfFlight > pulseInterval) {
       timeOfFlight -= pulseInterval;
     }

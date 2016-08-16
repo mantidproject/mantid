@@ -83,18 +83,15 @@ void GetEiMonDet2::exec() {
   // Remove duplicates from detectorIndices.
   std::sort(detectorIndices.begin(), detectorIndices.end());
   detectorIndices.erase(std::unique(detectorIndices.begin(), detectorIndices.end()), detectorIndices.end());
-  Property *monitorWsProperty = getProperty(PropertyNames::MONITOR_WORKSPACE);
-  MatrixWorkspace_const_sptr monitorWs;
-  ITableWorkspace_const_sptr monitorEPPTable;
-  const detid_t monitorIndex = getProperty(PropertyNames::MONITOR_SPECTRUM_NUMBER);
-  if (!monitorWsProperty->isDefault()) {
-    monitorWs = getProperty(PropertyNames::MONITOR_WORKSPACE);
-    monitorEPPTable = getProperty(PropertyNames::MONITOR_EPP_TABLE);
-  }
-  else {
+  MatrixWorkspace_const_sptr monitorWs = getProperty(PropertyNames::MONITOR_WORKSPACE);
+  if (!monitorWs) {
     monitorWs = detectorWs;
+  }
+  ITableWorkspace_const_sptr monitorEPPTable = getProperty(PropertyNames::MONITOR_EPP_TABLE);
+  if (!monitorEPPTable) {
     monitorEPPTable = detectorEPPTable;
   }
+  const detid_t monitorIndex = getProperty(PropertyNames::MONITOR_SPECTRUM_NUMBER);
   if (monitorWs == detectorWs) {
     if (std::find(detectorIndices.begin(), detectorIndices.end(), monitorIndex) != detectorIndices.end()) {
       throw std::runtime_error(PropertyNames::MONITOR_SPECTRUM_NUMBER + " is also listed in " + PropertyNames::DETECTOR_SPECTRA);
@@ -179,13 +176,13 @@ void GetEiMonDet2::exec() {
     // Neutrons hit the detectors in a later frame.
     const double pulseInterval = getProperty(PropertyNames::PULSE_INTERVAL);
     if (pulseInterval == EMPTY_DBL()) {
-      std::runtime_error("Too small or negative time-of-flight and no " + PropertyNames::PULSE_INTERVAL + " specified");
+      throw std::runtime_error("Too small or negative time-of-flight and no " + PropertyNames::PULSE_INTERVAL + " specified");
     }
     ++delayFrameCount;
     timeOfFlight = delayFrameCount * pulseInterval - monitorEPP + detectorEPP;
   }
   if (timeOfFlight > upperTimeTolerance * nominalTimeOfFlight) {
-    std::runtime_error("Calculated time-of-flight too large");
+    throw std::runtime_error("Calculated time-of-flight too large");
   }
 
   const double velocity = flightLength / timeOfFlight * 1e6;
