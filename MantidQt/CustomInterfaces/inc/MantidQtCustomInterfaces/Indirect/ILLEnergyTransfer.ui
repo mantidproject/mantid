@@ -389,6 +389,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Output workspace name</string>
+        </property>
         <property name="text">
          <string>result</string>
         </property>
@@ -444,6 +447,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="ckDebugMode">
+        <property name="toolTip">
+         <string>Whether to output intermediate workspaces</string>
+        </property>
         <property name="text">
          <string>DebugMode</string>
         </property>
