@@ -1,6 +1,7 @@
 import re
 import numpy as np
 
+import dos.load_helper as load_helper
 
 def parse_castep_file(file_name, ir_or_raman):
     """
@@ -12,7 +13,7 @@ def parse_castep_file(file_name, ir_or_raman):
 
     file_data = {}
 
-    float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
+    float_regex = load_helper.FLOAT_REGEX
     # Header regex. Looks for lines in the following format:
     # +  q-pt=    1 (  0.000000  0.000000  0.000000)     1.0000000000              +
     header_regex_str = r" +\+ +q-pt= +\d+ \( *(?: *(%(s)s)) *(%(s)s) *(%(s)s)\) +(%(s)s) +\+" % {'s' : float_regex}
@@ -45,7 +46,7 @@ def parse_castep_file(file_name, ir_or_raman):
             header_match = header_regex.match(line)
             if header_match:
                 block_count += 1
-                weight, q_vector = _parse_block_header(header_match, block_count)
+                weight, q_vector = load_helper._parse_block_header(header_match, block_count)
                 weights.append(weight)
                 q_vectors.append(q_vector)
 
@@ -105,23 +106,6 @@ def _parse_castep_file_header(f_handle):
         if num_species > 0 and file_data['num_ions'] > 0:
             file_data['num_branches'] = num_species * file_data['num_ions']
             return file_data
-
-#----------------------------------------------------------------------------------------
-
-def _parse_block_header(header_match, block_count):
-    """
-    Parse the header of a block of frequencies and intensities
-
-    @param header_match - the regex match to the header
-    @param block_count - the count of blocks found so far
-    @return weight for this block of values
-    """
-    # Found header block at start of frequencies
-    q1, q2, q3, weight = [float(x) for x in header_match.groups()]
-    q_vector = [q1, q2, q3]
-    if block_count > 1 and sum(q_vector) == 0:
-        weight = 0.0
-    return weight, q_vector
 
 #----------------------------------------------------------------------------------------
 

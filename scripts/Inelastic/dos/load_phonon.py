@@ -1,7 +1,7 @@
 import re
 import numpy as np
 
-from mantid import logger
+import dos.load_helper as load_helper
 
 element_isotope = dict()
 
@@ -16,7 +16,7 @@ def parse_phonon_file(file_name, record_eigenvectors):
 
     # Header regex. Looks for lines in the following format:
     #     q-pt=    1    0.000000  0.000000  0.000000      1.0000000000    0.000000  0.000000  1.000000
-    float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
+    float_regex = load_helper.FLOAT_REGEX
     header_regex_str = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) (?: *(%(s)s)){0,4}" % {'s': float_regex}
     header_regex = re.compile(header_regex_str)
     eigenvectors_regex = re.compile(r"\s*Mode\s+Ion\s+X\s+Y\s+Z\s*")
@@ -38,7 +38,7 @@ def parse_phonon_file(file_name, record_eigenvectors):
             if header_match:
                 block_count += 1
 
-                weight, q_vector = _parse_block_header(header_match, block_count)
+                weight, q_vector = load_helper._parse_block_header(header_match, block_count)
                 weights.append(weight)
                 q_vectors.append(q_vector)
 
@@ -82,23 +82,6 @@ def parse_phonon_file(file_name, record_eigenvectors):
 
 #----------------------------------------------------------------------------------------
 
-def _parse_block_header(header_match, block_count):
-    """
-    Parse the header of a block of frequencies and intensities
-
-    @param header_match - the regex match to the header
-    @param block_count - the count of blocks found so far
-    @return weight for this block of values
-    """
-    # Found header block at start of frequencies
-    q1, q2, q3, weight = [float(x) for x in header_match.groups()]
-    q_vector = [q1, q2, q3]
-    if block_count > 1 and sum(q_vector) == 0:
-        weight = 0.0
-    return weight, q_vector
-
-#----------------------------------------------------------------------------------------
-
 def _parse_phonon_file_header(f_handle):
     """
     Read information from the header of a <>.phonon file
@@ -138,8 +121,6 @@ def _parse_phonon_file_header(f_handle):
                 ion['index'] = int(line_data[0]) - 1
                 ion['bond_number'] = len([i for i in file_data['ions'] if i['species'] == species]) + 1
                 file_data['ions'].append(ion)
-
-            logger.debug('All ions: ' + str(file_data['ions']))
 
         if 'END header' in line:
             if file_data['num_ions'] is None or file_data['num_branches'] is None:
