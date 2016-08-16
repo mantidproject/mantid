@@ -52,6 +52,7 @@
 #include <QTemporaryFile>
 #include <QGroupBox>
 #include <QCheckBox>
+#include <QSettings>
 
 #include "MantidQtAPI/FileDialogHandler.h"
 
@@ -1235,8 +1236,9 @@ void InstrumentWidgetMaskTab::loadMaskViewFromProject(const std::string &name) {
   using namespace Mantid::API;
   using namespace Mantid::Kernel;
 
-  auto workingDir = ConfigService::Instance().getString("project.workingdir");
-  auto fileName = workingDir + "/" + name;
+  QSettings settings;
+  auto workingDir = settings.value("Project/WorkingDirectory", "").toString();
+  auto fileName = workingDir.toStdString() + "/" + name;
   auto maskWS = loadMask(fileName);
 
   if (!maskWS)
@@ -1284,9 +1286,9 @@ InstrumentWidgetMaskTab::loadMask(const std::string &fileName) {
   }
 
   // get the mask workspace and remove from ADS to clean up
-  auto maskWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(tempName);
-  AnalysisDataService::Instance().remove(tempName);
+  auto &ads = AnalysisDataService::Instance();
+  auto maskWS = ads.retrieveWS<MatrixWorkspace>(tempName);
+  ads.remove(tempName);
 
   return maskWS;
 }
@@ -1341,8 +1343,9 @@ bool InstrumentWidgetMaskTab::saveMaskViewToProject(
   using namespace Mantid::API;
   using namespace Mantid::Kernel;
 
-  auto workingDir = ConfigService::Instance().getString("project.workingdir");
-  auto fileName = workingDir + "/" + name;
+  QSettings settings;
+  auto workingDir = settings.value("Project/WorkingDirectory", "").toString();
+  auto fileName = workingDir.toStdString() + "/" + name;
 
   try {
     // get masked detector workspace from actor
