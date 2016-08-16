@@ -5,6 +5,7 @@ import mantidplottests
 from mantidplottests import *
 import shutil
 import numpy as np
+import re
 from PyQt4 import QtGui, QtCore
 
 
@@ -40,7 +41,7 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
                     "WorkspaceNames\tfake_workspace\n" \
                     "</mantidworkspaces>"
 
-        exp_contents = tokenise_project_file(file_text.split('\n'))
+        exp_contents = parse_project_file(file_text)
         contents = read_project_file(self._project_folder)
         self.assertEqual(contents, exp_contents)
 
@@ -55,20 +56,16 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
         contents = read_project_file(self._project_folder)
 
         # Check corrent number of windows
-        window_count = find_elements(contents, '<windows>')[0]
-        self.assertEqual(int(window_count[1]), 1)
+        self.assertEqual(int(contents['<windows>']), 1)
 
         # Check workspace list was written
-        workspace_list = find_elements(contents, 'WorkspaceNames')[0]
-
-        self.assertEqual(len(workspace_list), 2)
-        self.assertEqual(workspace_list[1], workspace_name)
+        workspace_list = contents['mantidworkspaces']['WorkspaceNames']
+        self.assertEqual(workspace_list, workspace_name)
 
         # Check plot was written
-        plot_titles = find_elements(contents, 'PlotTitle')[0]
-
-        self.assertEqual(len(plot_titles), 4)
-        self.assertEqual(plot_titles[1], workspace_name)
+        plot_titles = contents['multiLayer']['graph']['PlotTitle']
+        self.assertEqual(len(plot_titles), 3)
+        self.assertEqual(plot_titles[0], workspace_name)
 
     def test_project_file_1D_plot_with_labels_modified(self):
         workspace_name = "fake_workspace"
@@ -90,19 +87,19 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
         contents = read_project_file(self._project_folder)
 
         # Check corrent number of windows
-        window_count = find_elements(contents, '<windows>')[0]
-        self.assertEqual(int(window_count[1]), 1)
+        self.assertEqual(int(contents['<windows>']), 1)
 
         # Check plot title is correct
-        plot_title = find_elements(contents, 'PlotTitle')[0]
-        self.assertEqual(len(plot_title), 4)
-        self.assertEqual(plot_title[1], "Hello World")
+
+        plot_title = contents['multiLayer']['graph']['PlotTitle']
+        self.assertEqual(len(plot_title), 3)
+        self.assertEqual(plot_title[0], "Hello World")
 
         # Check axes titles are correct
-        axes_titles = find_elements(contents, 'AxesTitles')[0]
-        self.assertEqual(len(axes_titles), 3)
-        self.assertEqual(axes_titles[1], 'X Axis Modified')
-        self.assertEqual(axes_titles[2], 'Y Axis Modified')
+        axes_titles = contents['multiLayer']['graph']['AxesTitles']
+        self.assertEqual(len(axes_titles), 2)
+        self.assertEqual(axes_titles[0], 'X Axis Modified')
+        self.assertEqual(axes_titles[1], 'Y Axis Modified')
 
     def test_project_file_1D_plot_with_error_bars(self):
         workspace_name = "fake_workspace"
@@ -113,8 +110,8 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
 
         self.assert_project_files_saved(workspace_name)
         contents = read_project_file(self._project_folder)
-        error_bars = find_elements(contents, '<MantidYErrors>1')[0]
-        self.assertEqual(len(error_bars), 6)
+        error_bars = contents['multiLayer']['graph']['MantidYErrors']['1']
+        self.assertEqual(len(error_bars), 5)
 
     def test_project_file_1D_plot_with_axes_scaling(self):
         workspace_name = "fake_workspace"
@@ -135,19 +132,20 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
         contents = read_project_file(self._project_folder)
 
         # Check axis scales are as expected
-        scale1, scale2, scale3, scale4 = find_elements(contents, 'scale')
+        scales = contents['multiLayer']['graph']['scale']
+        scale1, scale2, scale3, scale4 = scales[0], scales[1], scales[2], scales[3]
 
-        self.assertAlmostEqual(float(scale1[2]), 110.6670313)
-        self.assertEqual(int(scale1[3]), 1000)
+        self.assertAlmostEqual(float(scale1[1]), 110.6670313)
+        self.assertEqual(int(scale1[2]), 1000)
 
-        self.assertAlmostEqual(float(scale2[2]), 110.6670313)
-        self.assertEqual(int(scale2[3]), 1000)
+        self.assertAlmostEqual(float(scale2[1]), 110.6670313)
+        self.assertEqual(int(scale2[2]), 1000)
 
-        self.assertEqual(int(scale3[2]), 0)
-        self.assertEqual(int(scale3[3]), 12)
+        self.assertEqual(int(scale3[1]), 0)
+        self.assertEqual(int(scale3[2]), 12)
 
-        self.assertEqual(int(scale4[2]), 0)
-        self.assertEqual(int(scale4[3]), 12)
+        self.assertEqual(int(scale4[1]), 0)
+        self.assertEqual(int(scale4[2]), 12)
 
     def test_serialise_with_no_data(self):
         workspace_name = "fake_workspace"
@@ -255,6 +253,65 @@ class MantidPlotProjectSerialiseTest(unittest.TestCase):
         graph = windows()[0]
         self.assertTrue('Graph' in str(graph))
 
+    def test_save_instrument_view(self):
+      workspace_name = 'fake_workspace'
+      instrument_name = 'IRIS'
+
+      # make a workspace with an instrument
+      CreateSampleWorkspace(OutputWorkspace=workspace_name)
+      LoadInstrument(Workspace=workspace_name, MonitorList='1,2',
+                     InstrumentName=instrument_name, RewriteSpectraMap=True)
+
+      window = getInstrumentView(workspace_name)
+
+      render_tab = window.getTab("Render")
+      # range options
+      render_tab.setMinValue(1.25)
+      render_tab.setMaxValue(1.75)
+      render_tab.setRange(1.35,1.85)
+      render_tab.showAxes(True)
+      # display options
+      render_tab.displayDetectorsOnly(True)
+      render_tab.setColorMapAutoscaling(True)
+      render_tab.setSurfaceType(InstrumentWidgetRenderTab.CYLINDRICAL_Y)
+      render_tab.flipUnwrappedView(True)
+
+      # pick tab
+      pick_tab = window.getTab(InstrumentWidget.PICK)
+      pick_tab.selectTool(InstrumentWidgetPickTab.PeakSelect)
+
+      # mask tab
+      mask_tab = window.getTab(InstrumentWidget.MASK)
+      mask_tab.setMode(InstrumentWidgetMaskTab.Group)
+      mask_tab.selectTool(InstrumentWidgetMaskTab.DrawEllipse)
+
+      tree_tab = window.getTab(InstrumentWidget.TREE)
+      tree_tab.selectComponentByName("graphite")
+
+      saveProjectAs(self._project_folder)
+
+      self.assert_project_files_saved(workspace_name)
+      contents = read_project_file(self._project_folder)
+
+      window_options = contents['instrumentwindow']
+      self.assertEquals(int(window_options['SurfaceType']), 2)
+      self.assertEquals(int(window_options['CurrentTab']), 0)
+
+      # render tab options
+      render_options = contents['instrumentwindow']['tabs']['rendertab']
+      self.assertEqual(bool(render_options["DisplayDetectorsOnly"]), True)
+      self.assertEqual(bool(render_options["AutoScaling"]), True)
+      self.assertEqual(bool(render_options["FlipView"]), True)
+
+      # pick tab options
+      pick_options = contents['instrumentwindow']['tabs']['picktab']
+      self.assertEqual(bool(pick_options['ActiveTools'][9]), True)
+
+      # mask tab options
+      mask_options = contents['instrumentwindow']['tabs']['masktab']
+      self.assertEqual(bool(mask_options['ActiveType'][1]), True)
+      self.assertEqual(bool(mask_options['ActiveTools'][2]), True)
+
     def assert_project_files_saved(self, workspace_name):
         """Check files were written to project folder """
         file_name = '%s.nxs' % workspace_name
@@ -287,12 +344,6 @@ def clear_mantid():
     # Start a blank project to remove anything else
     newProject()
 
-
-def find_elements(tokens, name):
-    """Find an element in the tokens parsed from the file """
-    return filter(lambda l: l[0] == name, tokens)
-
-
 def create_dummy_workspace(ws_name):
     """ Create a dummy mantid workspace with some data """
     X1 = np.linspace(0, 10, 100)
@@ -323,29 +374,55 @@ def remove_folder(folder_name):
     except:
         raise IOError('Could not clean up folder after test')
 
-
-def read_project_file(folder_name):
-    """ Read lines from a .mantid project file """
-
+def get_project_file_contents(folder_name):
+    """ Get the contents of a Mantid project file given the folder """
     if not os.path.isdir(folder_name):
         raise IOError('Path is not a directory')
 
     project_name = os.path.basename(folder_name) + '.mantid'
     project_file = os.path.join(folder_name, project_name)
 
-    if not os.path.isfile(project_file):
-        raise IOError('Project file could not be found')
-
     with open(project_file, 'r') as file_handle:
-        lines = file_handle.readlines()
+        contents = file_handle.read()
 
-    return tokenise_project_file(lines)
+    return contents
 
+def parse_project_file(contents, pattern=""):
+    """ Create a dictionary of the Mantid project file entries """
+    if pattern == "":
+        pattern_str = "<(?P<tag>[a-zA-Z]*)>(.*)</(?P=tag)>"
+        pattern = re.compile(pattern_str, flags=re.MULTILINE | re.DOTALL)
 
-def tokenise_project_file(lines):
-    """ Convert lines from a project file to a list of lists """
-    return map(lambda s: s.strip().split('\t'), lines)
+    match = re.findall(pattern, contents)
+    contents = re.sub(pattern, '', contents)
 
+    data = {}
+    # recursively parse sections
+    if len(match) > 0:
+        data = { x: y for x, y in match}
+        for key in data.keys():
+            data[key] = parse_project_file(data[key], pattern)
+
+    # parse individual property lines
+    lines = contents.strip().split('\n')
+    for line in lines:
+        properties = line.strip().split('\t')
+        key = properties[0]
+        values = properties[1:]
+        if key in data.keys():
+            if not isinstance(data[key], dict):
+                data[key] = {0: data[key]}
+            data[key][max(data[key])+1] = values
+        elif len(properties) == 2:
+            data[key] = values[0]
+        else:
+            data[key] = values
+    return data
+
+def read_project_file(folder_name):
+    """ Read and parse a Mantid project file """
+    contents = get_project_file_contents(folder_name)
+    return parse_project_file(contents)
 
 # Run the unit tests
 mantidplottests.runTests(MantidPlotProjectSerialiseTest)
