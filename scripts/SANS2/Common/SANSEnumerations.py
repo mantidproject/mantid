@@ -263,3 +263,19 @@ class SaveType(object):
     Defines the save types available
     """
     pass
+
+
+def convert_save_type_to_string(save_type):
+    if save_type is SaveType.Nexus:
+        as_string = "Nexus"
+    elif save_type is SaveType.NistQxy:
+        as_string = "NistQxy"
+    elif save_type is SaveType.CanSAS:
+        as_string = "CanSAS"
+    elif save_type is SaveType.RKH:
+        as_string = "RKH"
+    elif save_type is SaveType.CSV:
+        as_string = "CSV"
+    elif save_type is SaveType.NXcanSAS:
+        as_string = "NXcanSAS"
+    return as_string

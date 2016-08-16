@@ -4,10 +4,11 @@
 
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator,
                            FloatArrayProperty)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
+from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 
 from SANS.SliceEvent.Slicer import (SliceEventFactory, get_scaled_workspace)
 from SANS2.Common.SANSConstants import SANSConstants
+from SANS2.Common.SANSFunctions import append_to_sans_file_tag
 from SANS2.State.SANSStateBase import create_deserialized_sans_state_from_property_manager
 
 
@@ -55,20 +56,26 @@ class SANSSliceEvent(DataProcessorAlgorithm):
         state_property_manager = self.getProperty("SANSState").value
         state = create_deserialized_sans_state_from_property_manager(state_property_manager)
 
+        progress = Progress(self, start=0.0, end=1.0, nreports=3)
         # Get the correct SANS move strategy from the SANSMoveFactory
         input_workspace = self.getProperty(SANSConstants.input_workspace).value
         slicer = SliceEventFactory.create_slicer(state, input_workspace)
         slice_info = state.slice
 
         # Perform the slicing
+        progress.report("Starting to slice the workspace.")
         sliced_workspace, slice_factor = slicer.create_slice(input_workspace, slice_info)
 
         # Scale the monitor accordingly
+        progress.report("Scaling the monitors.")
         self.scale_monitors(slice_factor)
 
         # Set the outputs
+        append_to_sans_file_tag(sliced_workspace, "_sliced")
         self.setProperty(SANSConstants.output_workspace, sliced_workspace)
         self.setProperty("SliceEventFactor", slice_factor)
+        progress.report("Finished slicing.")
+
 
     def validateInputs(self):
         errors = dict()
@@ -86,6 +93,7 @@ class SANSSliceEvent(DataProcessorAlgorithm):
         monitor_workspace = self.getProperty("InputWorkspaceMonitor").value
         if slice_factor < 1.0:
             monitor_workspace = get_scaled_workspace(monitor_workspace, slice_factor)
+        append_to_sans_file_tag(monitor_workspace, "_sliced")
         self.setProperty("OutputWorkspaceMonitor", monitor_workspace)
 
 

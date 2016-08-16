@@ -4,12 +4,13 @@
 
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator,
                            FloatArrayProperty)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
+from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 
 from SANS.Mask.MaskWorkspace import MaskFactory
 from SANS2.State.SANSStateBase import create_deserialized_sans_state_from_property_manager
 from SANS2.Common.SANSConstants import SANSConstants
 from SANS2.Common.SANSEnumerations import DetectorType
+from SANS2.Common.SANSFunctions import append_to_sans_file_tag
 
 
 class SANSMaskWorkspace(DataProcessorAlgorithm):
@@ -47,9 +48,14 @@ class SANSMaskWorkspace(DataProcessorAlgorithm):
         masker = mask_factory.create_masker(state, component)
 
         # Perform the masking
+        number_of_masking_options = 7
+        progress = Progress(self, start=0.0, end=1.0, nreports=number_of_masking_options)
         mask_info = state.mask
-        workspace = masker.mask_workspace(mask_info, workspace, component)
+        workspace = masker.mask_workspace(mask_info, workspace, component, progress)
+
+        append_to_sans_file_tag(workspace, "_masked")
         self.setProperty(SANSConstants.workspace, workspace)
+        progress.report("Completed masking the workspace")
 
     def _get_component(self):
         component_as_string = self.getProperty("Component").value

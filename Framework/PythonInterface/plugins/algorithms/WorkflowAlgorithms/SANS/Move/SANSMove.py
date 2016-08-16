@@ -4,7 +4,7 @@
 
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator,
                            FloatArrayProperty)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
+from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 
 from SANS.Move.SANSMoveWorkspaces import SANSMoveFactory
 from SANS2.State.SANSStateBase import create_deserialized_sans_state_from_property_manager
@@ -102,16 +102,21 @@ class SANSMove(DataProcessorAlgorithm):
         # 2. Elementary displacement: Takes the degrees of freedom of the detector into account. This is normally used
         #    for beam center finding
         # 3. Set to zero: Set the component to its zero position
+        progress = Progress(self, start=0.0, end=1.0, nreports=2)
         selected_move_type = self._get_move_type()
         if selected_move_type is MoveType.ElementaryDisplacement:
+            progress.report("Starting elementary displacement")
             mover.move_with_elementary_displacement(move_info, workspace, coordinates, full_component_name)
         elif selected_move_type is MoveType.InitialMove:
+            progress.report("Starting initial move.")
             mover.move_initial(move_info, workspace, coordinates, full_component_name)
         elif selected_move_type is MoveType.SetToZero:
+            progress.report("Starting set to zero.")
             mover.set_to_zero(move_info, workspace, full_component_name)
         else:
             raise ValueError("SANSMove: The selection {0} for the  move type "
                              "is unknown".format(str(selected_move_type)))
+        progress.report("Completed move.")
 
     def _get_full_component_name(self, move_info):
         """

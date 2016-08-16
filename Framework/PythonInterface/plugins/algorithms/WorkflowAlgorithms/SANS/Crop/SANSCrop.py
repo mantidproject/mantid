@@ -4,11 +4,11 @@
 
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator,
                            FloatArrayProperty)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
+from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 
 from SANS2.Common.SANSConstants import SANSConstants
 from SANS2.Common.SANSEnumerations import DetectorType
-from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
+from SANS2.Common.SANSFunctions import (create_unmanaged_algorithm, append_to_sans_file_tag)
 
 
 class SANSCrop(DataProcessorAlgorithm):
@@ -43,6 +43,10 @@ class SANSCrop(DataProcessorAlgorithm):
         # Component to crop
         component = self._get_component(workspace)
 
+        progress = Progress(self, start=0.0, end=1.0, nreports=2)
+        progress.report("Starting to crop component {0}".format(component))
+
+        # Crop to the component
         crop_name = "CropToComponent"
         crop_options = {SANSConstants.input_workspace: workspace,
                         SANSConstants.output_workspace: SANSConstants.dummy,
@@ -50,7 +54,13 @@ class SANSCrop(DataProcessorAlgorithm):
         crop_alg = create_unmanaged_algorithm(crop_name, **crop_options)
         crop_alg.execute()
         output_workspace = crop_alg.getProperty(SANSConstants.output_workspace).value
+
+        # Change the file tag and set the output
+        append_to_sans_file_tag(output_workspace, "_cropped")
+
+        self._set_file_tag_on_cropped(output_workspace)
         self.setProperty(SANSConstants.output_workspace, output_workspace)
+        progress.report("Finished cropping")
 
     def _get_component(self, workspace):
         comp = self.getProperty("Component").value
@@ -72,6 +82,7 @@ class SANSCrop(DataProcessorAlgorithm):
         else:
             raise RuntimeError("SANSCrop: The instrument {0} is currently not supported.".format(instrument_name))
         return component
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSCrop)

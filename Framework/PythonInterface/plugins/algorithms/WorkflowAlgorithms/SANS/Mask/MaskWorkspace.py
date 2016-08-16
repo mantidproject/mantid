@@ -323,7 +323,7 @@ class Masker(object):
         super(Masker, self).__init__()
 
     @abstractmethod
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
+    def mask_workspace(self, mask_info, workspace_to_mask, detector_type, progress):
         pass
 
 
@@ -333,7 +333,7 @@ class NullMasker(Masker):
     def __init__(self):
         super(NullMasker, self).__init__()
 
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
+    def mask_workspace(self, mask_info, workspace_to_mask, detector_type, progress):
         _ = mask_info
         return workspace_to_mask
 
@@ -344,31 +344,38 @@ class MaskerISIS(Masker):
         self._spectra_block = spectra_block
         self._instrument = instrument
 
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
+    def mask_workspace(self, mask_info, workspace_to_mask, detector_type, progress):
         """
         Performs the different types of masks that are currently available for ISIS reductions.
 
         :param mask_info: a SANSStateMask object.
         :param workspace_to_mask: the workspace to mask.
         :param detector_type: the detector type which is currently used , i.e. HAB or LAB
+        :param progress: a Progress object
         :return: a masked workspace.
         """
         # Perform bin masking
+        progress.report("Performing bin masking.")
         workspace_to_mask = mask_bins(mask_info, workspace_to_mask, detector_type)
 
         # Perform cylinder masking
+        progress.report("Performing cylinder masking.")
         workspace_to_mask = mask_cylinder(mask_info, workspace_to_mask)
 
         # Apply the xml mask files
+        progress.report("Applying mask files.")
         workspace_to_mask = mask_with_mask_files(mask_info, workspace_to_mask)
 
         # Mask spectrum list
+        progress.report("Applying spectrum masks.")
         workspace_to_mask = mask_spectra(mask_info, workspace_to_mask, self._spectra_block, detector_type)
 
         # Mask angle
+        progress.report("Applying angle mask.")
         workspace_to_mask = mask_angle(mask_info, workspace_to_mask)
 
         # Mask beam stop
+        progress.report("Masking beam stop.")
         return mask_beam_stop(mask_info, workspace_to_mask, self._instrument)
 
 

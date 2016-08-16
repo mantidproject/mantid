@@ -4,8 +4,8 @@
 
 from mantid.kernel import (Direction)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
-                        FileProperty, FileAction)
-from SANS2.Common.SANSEnumerations import SaveType
+                        FileProperty, FileAction, Progress)
+from SANS2.Common.SANSEnumerations import (SaveType, convert_save_type_to_string)
 from SANS.Save.SaveWorkspace import (save_to_file, get_zero_error_free_workspace, file_format_with_append)
 from SANS2.Common.SANSConstants import SANSConstants
 
@@ -72,9 +72,12 @@ class SANSSave(DataProcessorAlgorithm):
 
         if use_zero_error_free:
             workspace = get_zero_error_free_workspace(workspace)
-
+        progress = Progress(self, start=0.0, end=1.0, nreports=len(file_formats) + 1)
         for file_format in file_formats:
+            progress_message = "Saving to {0}.".format(convert_save_type_to_string(file_format.file_format))
+            progress.report(progress_message)
             save_to_file(workspace, file_format, file_name)
+        progress.report("Finished saving workspace to files.")
 
     def validateInputs(self):
         errors = dict()

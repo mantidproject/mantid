@@ -5,9 +5,9 @@
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator,
                            FloatArrayProperty, Property)
 from mantid.dataobjects import EventWorkspace
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
+from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 from SANS2.Common.SANSConstants import SANSConstants
-from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
+from SANS2.Common.SANSFunctions import (create_unmanaged_algorithm, append_to_sans_file_tag)
 
 
 class SANSConvertToWavelength(DataProcessorAlgorithm):
@@ -46,8 +46,10 @@ class SANSConvertToWavelength(DataProcessorAlgorithm):
 
     def PyExec(self):
         workspace = self.getProperty(SANSConstants.input_workspace).value
+        progress = Progress(self, start=0.0, end=1.0, nreports=3)
 
         # Convert the units into wavelength
+        progress.report("Converting workspace to wavelength units.")
         workspace = self._convert_units_to_wavelength(workspace)
 
         # Get the rebin option
@@ -63,8 +65,11 @@ class SANSConvertToWavelength(DataProcessorAlgorithm):
                              SANSConstants.output_workspace: SANSConstants.dummy,
                              "Params": rebin_string}
         # # Perform the rebin
+        progress.report("Performing rebin.")
         workspace = self._perform_rebin(rebin_name, rebin_options)
+        append_to_sans_file_tag(workspace, "_toWavelength")
         self.setProperty(SANSConstants.output_workspace, workspace)
+        progress.report("Finished converting to wavelength.")
 
     def validateInputs(self):
         errors = dict()

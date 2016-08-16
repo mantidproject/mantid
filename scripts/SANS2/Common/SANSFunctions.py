@@ -4,6 +4,8 @@ from math import (acos, sqrt, degrees)
 from mantid.api import AlgorithmManager
 from mantid.kernel import (DateAndTime)
 from SANS2.Common.SANSConstants import SANSConstants
+from SANS2.Common.SANSLogTagger import (get_tag, has_tag, set_tag)
+
 
 # -------------------------------------------
 # Free functions
@@ -145,3 +147,16 @@ def add_to_sample_log(workspace, log_name, log_value, log_type):
                        "LogType": log_type}
     add_log_alg = create_unmanaged_algorithm(add_log_name, **add_log_options)
     add_log_alg.execute()
+
+
+def append_to_sans_file_tag(workspace, to_append):
+    """
+    Appends a string to the existing sans file tag.
+
+    :param workspace: the workspace which contains the sample logs with the sans file tag.
+    :param to_append: the additional tag
+    """
+    if has_tag(SANSConstants.sans_file_tag, workspace):
+        value = get_tag(SANSConstants.sans_file_tag, workspace)
+        value += to_append
+        set_tag(SANSConstants.sans_file_tag, value, workspace)
