@@ -41,7 +41,7 @@ class OFFSPECReflRedOneAuto(stresstesting.MantidStressTest):
         to check the Instrument definition or Instrument Parameters
         '''
         self.disableChecking = ["Instrument"]
-        return ("ivq_75_76_78","OFFSPECReflRedOneAuto_good_v4.nxs")
+        return ("ivq_75_76_78","OFFSPECReflRedOneAuto_good_v3.nxs")
 
     def requiredFiles(self):
         return ["OFFSPEC00027575.raw",
