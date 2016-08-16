@@ -167,7 +167,8 @@ void JumpFit::fitAlgDone(bool error) {
   // Ignore errors
   if (error)
     return;
-
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
   std::string outName = m_fitAlg->getPropertyValue("Output");
 
   // Get output workspace name
