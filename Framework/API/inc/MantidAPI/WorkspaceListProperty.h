@@ -45,7 +45,7 @@ public:
   /// Type alias the value type of this property with value.
   using WorkspaceListPropertyType = std::vector<boost::shared_ptr<TYPE>>;
   using SuperClass = Kernel::PropertyWithValue<WorkspaceListPropertyType>;
-  //Specify operator==
+  // Specify operator==
   using Kernel::PropertyWithValue<WorkspaceListPropertyType>::operator==;
 
   /**
