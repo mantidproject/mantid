@@ -7,6 +7,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UserStringParser.h"
@@ -19,14 +20,21 @@ using namespace Mantid::PhysicalConstants;
 namespace Mantid {
 namespace Algorithms {
 
+namespace IndexTypes {
+  const static std::string DETECTOR_ID("DetectorID");
+  const static std::string SPECTRUM_NUMBER("SpectrumNumber");
+  const static std::string WORKSPACE_INDEX("WorkspaceIndex");
+}
+
 namespace PropertyNames {
-  const static std::string DETECTOR_SPECTRA("DetectorSpectra");
   const static std::string DETECTOR_EPP_TABLE("DetectorEPPTable");
   const static std::string DETECTOR_WORKSPACE("DetectorWorkspace");
+  const static std::string DETECTORS("Detectors");
   const static std::string ENERGY_TOLERANCE("EnergyTolerance");
   const static std::string INCIDENT_ENERGY("IncidentEnergy");
+  const static std::string INDEX_TYPE("IndexType");
+  const static std::string MONITOR("Monitor");
   const static std::string MONITOR_EPP_TABLE("MonitorEPPTable");
-  const static std::string MONITOR_SPECTRUM_NUMBER("MonitorSpectrumNumber");
   const static std::string MONITOR_WORKSPACE("MonitorWorkspace");
   const static std::string PULSE_INTERVAL("PulseInterval");
 }
@@ -49,8 +57,11 @@ void GetEiMonDet2::init() {
   declareProperty(
       make_unique<WorkspaceProperty<ITableWorkspace>>(PropertyNames::DETECTOR_EPP_TABLE, "", Direction::Input),
       "EPP table corresponding to " + PropertyNames::DETECTOR_WORKSPACE);
+  const std::vector<std::string> indexTypes{IndexTypes::DETECTOR_ID, IndexTypes::SPECTRUM_NUMBER, IndexTypes::WORKSPACE_INDEX};
   declareProperty(
-      PropertyNames::DETECTOR_SPECTRA, "", "Formatting example: 1,3-7,10-15", mandatoryStringProperty);
+      PropertyNames::INDEX_TYPE, IndexTypes::DETECTOR_ID, boost::make_shared<StringListValidator>(indexTypes), "The type of indices " + PropertyNames::DETECTORS + " and " + PropertyNames::MONITOR + " refer to.");
+  declareProperty(
+      PropertyNames::DETECTORS, "", "Formatting example: 1,3-7,10-15", mandatoryStringProperty);
   declareProperty(
       make_unique<WorkspaceProperty<>>(PropertyNames::MONITOR_WORKSPACE, "", Direction::Input, PropertyMode::Optional, tofWorkspace),
       "If empty, " + PropertyNames::DETECTOR_WORKSPACE + " will be used");
@@ -59,7 +70,7 @@ void GetEiMonDet2::init() {
        "EPP table corresponding to " + PropertyNames::MONITOR_WORKSPACE);
   setPropertySettings(PropertyNames::MONITOR_EPP_TABLE, make_unique<EnabledWhenProperty>(PropertyNames::MONITOR_WORKSPACE, IS_NOT_DEFAULT));
   declareProperty(
-      PropertyNames::MONITOR_SPECTRUM_NUMBER, static_cast<detid_t>(EMPTY_INT()), mandatoryDetectorIdProperty);
+      PropertyNames::MONITOR, EMPTY_INT(), mandatoryDetectorIdProperty);
   declareProperty(
       PropertyNames::PULSE_INTERVAL, EMPTY_DBL(), "In microseconds");
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
@@ -70,16 +81,30 @@ void GetEiMonDet2::init() {
       PropertyNames::ENERGY_TOLERANCE, 10.0, boost::make_shared<BoundedValidator<double>>(0, 100), "Tolerance between calculated energy and " + PropertyNames::INCIDENT_ENERGY + ", in percents.");
 }
 
+template<typename T, typename Map>
+void mapIndices(const std::vector<unsigned int>& detectors, const T monitor, const Map& detectorIndexMap, const Map& monitorIndexMap, std::vector<size_t>& detectorIndices, size_t& monitorIndex) {
+  auto back = std::back_inserter(detectorIndices);
+  std::transform(detectors.cbegin(), detectors.cend(), back, [&detectorIndexMap](T i) {
+    try {
+      return detectorIndexMap.at(i);
+    }
+    catch (std::out_of_range& e) {
+      throw std::runtime_error(PropertyNames::DETECTORS + " out of range.");
+    }
+  });
+  try {
+    monitorIndex = monitorIndexMap.at(monitor);
+  }
+  catch (std::out_of_range& e) {
+    throw std::runtime_error(PropertyNames::MONITOR + " out of range.");
+  }
+}
+
 void GetEiMonDet2::exec() {
   // TODO report progress
   MatrixWorkspace_const_sptr detectorWs = getProperty(PropertyNames::DETECTOR_WORKSPACE);
   ITableWorkspace_const_sptr detectorEPPTable = getProperty(PropertyNames::DETECTOR_EPP_TABLE);
-  UserStringParser spectraListParser;
-  // TODO Convert all indices to workspace indices.
-  auto detectorIndices = VectorHelper::flattenVector(spectraListParser.parse(getProperty(PropertyNames::DETECTOR_SPECTRA)));
   // Remove duplicates from detectorIndices.
-  std::sort(detectorIndices.begin(), detectorIndices.end());
-  detectorIndices.erase(std::unique(detectorIndices.begin(), detectorIndices.end()), detectorIndices.end());
   MatrixWorkspace_const_sptr monitorWs = getProperty(PropertyNames::MONITOR_WORKSPACE);
   if (!monitorWs) {
     monitorWs = detectorWs;
@@ -88,10 +113,39 @@ void GetEiMonDet2::exec() {
   if (!monitorEPPTable) {
     monitorEPPTable = detectorEPPTable;
   }
-  const detid_t monitorIndex = getProperty(PropertyNames::MONITOR_SPECTRUM_NUMBER);
+  // Get the workspace indices for detectors and monitor, converting
+  // from detector id's or spectrum numbers if necessary.
+  std::vector<size_t> detectorIndices;
+  size_t monitorIndex;
+  UserStringParser spectraListParser;
+  const std::string indexType = getProperty(PropertyNames::INDEX_TYPE);
+  if (indexType == IndexTypes::DETECTOR_ID) {
+    const auto detectors = VectorHelper::flattenVector(spectraListParser.parse(getProperty(PropertyNames::DETECTORS)));
+    const detid_t monitor = getProperty(PropertyNames::MONITOR);
+    const auto detectorIndexMap = detectorWs->getDetectorIDToWorkspaceIndexMap();
+    const auto monitorIndexMap = monitorWs->getDetectorIDToWorkspaceIndexMap();
+    mapIndices<detid_t>(detectors, monitor, detectorIndexMap, monitorIndexMap, detectorIndices, monitorIndex);
+  }
+  else if (indexType == IndexTypes::SPECTRUM_NUMBER) {
+    const auto detectors(VectorHelper::flattenVector(spectraListParser.parse(getProperty(PropertyNames::DETECTORS))));
+    const specnum_t monitor = getProperty(PropertyNames::MONITOR);
+    const auto detectorIndexMap = detectorWs->getSpectrumToWorkspaceIndexMap();
+    const auto monitorIndexMap = monitorWs->getSpectrumToWorkspaceIndexMap();
+    mapIndices<specnum_t>(detectors, monitor, detectorIndexMap, monitorIndexMap, detectorIndices, monitorIndex);
+  }
+  else {
+    // There is a type mismatch between what UserStringParser returns
+    // (unsigned int) and workspace index (size_t), thus the moving.
+    auto detectors = VectorHelper::flattenVector(spectraListParser.parse(getProperty(PropertyNames::DETECTORS)));
+    auto back = std::back_inserter(detectorIndices);
+    std::move(detectors.begin(), detectors.end(), back);
+    monitorIndex = getProperty(PropertyNames::MONITOR);
+  }
+  std::sort(detectorIndices.begin(), detectorIndices.end());
+  detectorIndices.erase(std::unique(detectorIndices.begin(), detectorIndices.end()), detectorIndices.end());
   if (monitorWs == detectorWs) {
     if (std::find(detectorIndices.begin(), detectorIndices.end(), monitorIndex) != detectorIndices.end()) {
-      throw std::runtime_error(PropertyNames::MONITOR_SPECTRUM_NUMBER + " is also listed in " + PropertyNames::DETECTOR_SPECTRA);
+      throw std::runtime_error(PropertyNames::MONITOR + " is also listed in " + PropertyNames::DETECTORS);
     }
   }
   double nominalIncidentEnergy = getProperty(PropertyNames::INCIDENT_ENERGY);
@@ -115,7 +169,7 @@ void GetEiMonDet2::exec() {
   size_t n = 0;
   for (const auto index : detectorIndices) {
     if (index >= peakPositionColumn->size()) {
-      throw std::runtime_error("Invalid value in " + PropertyNames::DETECTOR_SPECTRA);
+      throw std::runtime_error("Invalid value in " + PropertyNames::DETECTORS);
     }
     if (fitStatusColumn->cell<std::string>(index) == FIT_STATUS_SUCCESS) {
       detectorEPP += (*peakPositionColumn)[index];
@@ -132,8 +186,8 @@ void GetEiMonDet2::exec() {
   if (!peakPositionColumn || !fitStatusColumn) {
     throw std::runtime_error("The workspace specified by " + PropertyNames::DETECTOR_EPP_TABLE + " doesn't seem to contain the expected table");
   }
-  if (monitorIndex < 0 || static_cast<size_t>(monitorIndex) >= peakPositionColumn->size()) {
-    throw std::runtime_error("Invalid " + PropertyNames::MONITOR_SPECTRUM_NUMBER);
+  if (static_cast<size_t>(monitorIndex) >= peakPositionColumn->size()) {
+    throw std::runtime_error("Invalid " + PropertyNames::MONITOR);
   }
   if (fitStatusColumn->cell<std::string>(monitorIndex) != FIT_STATUS_SUCCESS) {
     throw std::runtime_error("No successful monitor fit found in " + PropertyNames::MONITOR_EPP_TABLE);
@@ -149,7 +203,7 @@ void GetEiMonDet2::exec() {
     if (fitStatusColumn->cell<std::string>(index) == FIT_STATUS_SUCCESS) {
       const auto detector = detectorWs->getDetector(index);
       if (!detector) {
-        throw std::runtime_error("No detector specified by " + PropertyNames::DETECTOR_SPECTRA + " found");
+        throw std::runtime_error("No detector specified by " + PropertyNames::DETECTORS + " found");
       }
       sampleToDetectorDistance += detector->getDistance(*sample);
       ++n;

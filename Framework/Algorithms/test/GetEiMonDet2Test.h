@@ -65,8 +65,8 @@ public:
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorEPPTable", eppTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("DetectorSpectra", "1"))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("MonitorSpectrumNumber", "0"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Detectors", "1"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "0"))
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
     TS_ASSERT_DELTA(static_cast<decltype(realEi)>(algorithm.getProperty("IncidentEnergy")), realEi, 1e-6)
@@ -86,6 +86,7 @@ public:
     auto monitorEPPTable = createEPPTable(monitorPeakCentres, successes);
     auto ws = createWorkspace();
     ws->mutableRun().removeProperty("Ei");
+    // Break workspace into separate monitor and detector workspaces.
     const std::string extractedWsName("GetEiMonDet2Test_testSuccessOnComplexInput_extracted");
     ExtractSingleSpectrum spectrumExtraction;
     spectrumExtraction.initialize();
@@ -105,12 +106,13 @@ public:
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", detectorWs));
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorEPPTable", detectorEPPTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("DetectorSpectra", "0"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("IndexType", "SpectrumNumber"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Detectors", "2"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("EnergyTolerance", 20.0))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("IncidentEnergy", EI))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorWorkspace", monitorWs))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorEPPTable", monitorEPPTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorSpectrumNumber", 0))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Monitor", 1))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("PulseInterval", pulseInterval))
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
