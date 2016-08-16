@@ -304,7 +304,6 @@ public:
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 397);
   }
 
-
   void test_EventPreNeXus_WithNoExecute() {
     Load loader;
     loader.initialize();
