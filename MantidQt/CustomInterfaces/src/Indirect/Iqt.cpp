@@ -127,6 +127,9 @@ void Iqt::run() {
 void Iqt::algorithmComplete(bool error) {
   if (error)
     return;
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+  m_uiForm.pbTile->setEnabled(true);
 }
 /**
  * Handle saving of workspace
