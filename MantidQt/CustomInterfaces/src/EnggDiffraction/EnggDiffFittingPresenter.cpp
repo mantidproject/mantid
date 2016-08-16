@@ -194,7 +194,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     Poco::Path selectedfPath(strFocusedFile);
     Poco::Path bankDir;
 
-	std::vector<std::string> runnoDirVector;
+    std::vector<std::string> runnoDirVector;
 
     std::string strFPath = selectedfPath.toString();
     // returns empty if no directory is found
