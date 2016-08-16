@@ -137,6 +137,7 @@ void Iqt::algorithmComplete(bool error) {
 void Iqt::saveClicked() {
   checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
   addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 /**
