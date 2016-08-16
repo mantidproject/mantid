@@ -120,7 +120,7 @@ void JumpFit::run() {
   int width = m_spectraList[widthText];
   const auto sample = m_uiForm.dsSample->getCurrentDataName().toStdString();
   QString outputName = getWorkspaceBasename(QString::fromStdString(sample)) +
-    "_" + functionName + "_fit";
+                       "_" + functionName + "_fit";
 
   const auto startX = m_dblManager->value(m_properties["QMin"]);
   const auto endX = m_dblManager->value(m_properties["QMax"]);
@@ -141,7 +141,7 @@ void JumpFit::run() {
   m_batchAlgoRunner->addAlgorithm(m_fitAlg);
   // Connect algorithm runner to completion handler function
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-    SLOT(fitAlgDone(bool)));
+          SLOT(fitAlgDone(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -536,7 +536,7 @@ void JumpFit::deletePlotGuessWorkspaces(const bool &removePlotGuess) {
   }
 }
 
-/** 
+/**
  * Handles mantid plotting
  */
 void JumpFit::plotClicked() {
