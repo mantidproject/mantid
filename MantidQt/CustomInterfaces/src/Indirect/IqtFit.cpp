@@ -145,6 +145,9 @@ void IqtFit::setup() {
 
   connect(m_blnManager, SIGNAL(valueChanged(QtProperty *, bool)), this,
           SLOT(checkBoxUpdate(QtProperty *, bool)));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+
 }
 
 void IqtFit::run() {

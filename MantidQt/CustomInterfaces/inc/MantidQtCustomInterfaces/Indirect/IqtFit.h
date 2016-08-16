@@ -48,6 +48,8 @@ private slots:
   void unFixItem();
   void singleFitComplete(bool error);
   void algorithmComplete(bool error);
+  void saveClicked();
+  void plotClicked();
 
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
