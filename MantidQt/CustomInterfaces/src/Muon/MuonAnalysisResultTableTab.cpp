@@ -32,25 +32,6 @@ namespace {
 /// The string "Error"
 const static std::string ERROR_STRING("Error");
 constexpr static size_t ERROR_LENGTH(5);
-
-/// Colors for workspace (Black, Red, Green, Blue, Orange, Purple, if there are
-/// more than this then use black as default.)
-QColor getWorkspaceColor(size_t index) {
-  switch (index) {
-  case (1):
-    return QColor("red");
-  case (2):
-    return QColor("green");
-  case (3):
-    return QColor("blue");
-  case (4):
-    return QColor("orange");
-  case (5):
-    return QColor("purple");
-  default:
-    return QColor("black");
-  }
-}
 }
 
 namespace MantidQt {
@@ -659,7 +640,14 @@ void MuonAnalysisResultTableTab::populateFittings(
   }
 
   // Get colors for workspace names in table
-  const auto colors = getWorkspaceColors(fittedWsList);
+  std::vector<Workspace_sptr> workspaces;
+  for (const auto &name : fittedWsList) {
+    const auto paramWs =
+        retrieveWSChecked<ITableWorkspace>(name.toStdString() + PARAMS_POSTFIX);
+    workspaces.push_back(paramWs);
+  }
+  const auto colors = MuonAnalysisHelper::getWorkspaceColors(workspaces);
+
   for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); row++) {
     // Fill values and delete previous old ones.
     if (row < fittedWsList.size()) {
@@ -691,26 +679,17 @@ void MuonAnalysisResultTableTab::populateFittingsFromLabels(
   }
 
   // Get colors for label names in table
-  // Need to create a list of the first fitted workspace in each label group
+  // Need to create a vector of the groups
   auto &ads = AnalysisDataService::Instance();
-  QStringList wsList;
+  std::vector<Workspace_sptr> groups;
   for (const auto &label : labelList) {
     const std::string groupName =
         MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX + label.toStdString();
     if (const auto &wsGroup = ads.retrieveWS<WorkspaceGroup>(groupName)) {
-      if (!wsGroup->isEmpty()) {
-        const auto &names = wsGroup->getNames();
-        for (const auto &name : names) {
-          const auto pos = name.find(WORKSPACE_POSTFIX);
-          if (pos != std::string::npos) {
-            wsList.append(QString::fromStdString(name.substr(0, pos)));
-            break;
-          }
-        }
-      }
+      groups.push_back(wsGroup);
     }
   }
-  const auto colors = getWorkspaceColors(wsList);
+  const auto colors = MuonAnalysisHelper::getWorkspaceColors(groups);
   for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); row++) {
     // Fill values and delete previous old ones.
     if (row < labelList.size()) {
@@ -720,63 +699,6 @@ void MuonAnalysisResultTableTab::populateFittingsFromLabels(
     } else
       m_uiForm.fittingResultsTable->setItem(row, 0, NULL);
   }
-}
-
-/**
-* Get the colors corresponding to their position in the workspace list.
-*
-* @param wsList :: List of all workspaces with fitted parameters.
-* @return colors :: List of colors with the key being position in
-* wsList.
-*/
-QMap<int, QColor>
-MuonAnalysisResultTableTab::getWorkspaceColors(const QStringList &wsList) {
-  QMap<int, QColor> colors; // position, color
-  int posCount(0);
-  size_t colorCount(0);
-
-  while (wsList.size() != posCount) {
-    // If a color has already been chosen for the current workspace then skip
-    if (!colors.contains(posCount)) {
-      std::vector<std::string> firstParams;
-      // Find the first parameter table and use this as a comparison for all the
-      // other tables.
-      auto paramWs = retrieveWSChecked<ITableWorkspace>(
-          wsList[posCount].toStdString() + PARAMS_POSTFIX);
-
-      Mantid::API::TableRow paramRow = paramWs->getFirstRow();
-      do {
-        std::string key;
-        paramRow >> key;
-        firstParams.push_back(key);
-      } while (paramRow.next());
-
-      colors.insert(posCount, getWorkspaceColor(colorCount));
-
-      // Compare to all the other parameters. +1 don't compare with self.
-      for (int i = (posCount + 1); i < wsList.size(); ++i) {
-        if (!colors.contains(i)) {
-          std::vector<std::string> nextParams;
-          auto paramWs = retrieveWSChecked<ITableWorkspace>(
-              wsList[i].toStdString() + PARAMS_POSTFIX);
-
-          Mantid::API::TableRow paramRow = paramWs->getFirstRow();
-          do {
-            std::string key;
-            paramRow >> key;
-            nextParams.push_back(key);
-          } while (paramRow.next());
-
-          if (firstParams == nextParams) {
-            colors.insert(i, getWorkspaceColor(colorCount));
-          }
-        }
-      }
-      colorCount++;
-    }
-    posCount++;
-  }
-  return colors;
 }
 
 void MuonAnalysisResultTableTab::onCreateTableClicked() {

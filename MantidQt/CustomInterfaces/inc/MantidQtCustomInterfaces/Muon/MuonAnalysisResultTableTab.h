@@ -132,7 +132,6 @@ private:
   QStringList getSelectedWs();
   QStringList getSelectedLogs();
   std::string getFileName();
-  QMap<int, QColor> getWorkspaceColors(const QStringList &wsList);
 
   /// Removes errors for fixed parameters from table
   void removeFixedParameterErrors(
