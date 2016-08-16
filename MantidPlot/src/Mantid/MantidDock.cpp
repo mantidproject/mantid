@@ -404,8 +404,8 @@ void MantidDockWidget::setItemIcon(QTreeWidgetItem *item,
 */
 void MantidDockWidget::updateTree() {
   // do not update until the counter is zero
-  if (m_updateCount.deref())
-    return;
+  // if (m_updateCount.deref())
+  //   return;
 
   // find all expanded top-level entries
   QStringList expanded;

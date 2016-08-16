@@ -60,6 +60,10 @@ Improved
 - :ref:`SavePlot1D <algm-SavePlot1D>` has options for writing out
   plotly html files.
 
+<<<<<<< HEAD
+- :ref:`SofQW <algm-SofQW>` now replaces any NaNs in output workspace
+  with zeroes.
+=======
 - :ref:`ConvertTableToMatrixWorkspace <algm-ConvertTableToMatrixWorkspace>`
   had a bug where the table columns were in a reversed order in the dialogue's combo boxes.
   This is now fixed and the order is correct.
@@ -71,6 +75,7 @@ Improved
 - :ref:`RenameWorkspace <algm-RenameWorkspace>` and `RenameWorkspaces <algm-RenameWorkspaces>`
   now check if a Workspace with that name already exists in the ADS and gives
   the option to override it.
+>>>>>>> master
 
 Deprecated
 ##########

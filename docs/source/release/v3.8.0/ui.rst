@@ -73,6 +73,7 @@ Bugs Resolved
 - Floating windows now always stay on top of the main window in OSX
 - The sliceviewer will now rebin an existing binned workspace correctly.
 - 2D plots now display correctly for point data workspaces as well as for histogram data
+- Fixed a bug where checking or unchecking "show invisible workspaces" in View->Preferences->Mantid->Options would have no effect on workspaces loaded in the dock.
 
 SliceViewer Improvements
 ------------------------

@@ -124,7 +124,7 @@ Mantid for different testing tasks.
 
 .. testoutput:: ExConvertToMDNoQ
 
-   Resulting MD workspace has 805 events and 3 dimensions
+   Resulting MD workspace has 1200 events and 3 dimensions
    --------------------------------------------
 
 **Example - Convert Set of Event Workspaces (Horace scan) to 4D MD workspace, direct mode:**

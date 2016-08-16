@@ -123,6 +123,7 @@ void SofQW::exec() {
   childAlg->execute();
 
   MatrixWorkspace_sptr outputWS = childAlg->getProperty("OutputWorkspace");
+
   this->setProperty("OutputWorkspace", outputWS);
 
   // Progress reports & cancellation
