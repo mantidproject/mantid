@@ -100,7 +100,7 @@ void Elwin::setup() {
           SLOT(plotInput()));
   // Handle plot and save
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked())):
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
   // Set any default values
   m_dblManager->setValue(m_properties["IntegrationStart"], -0.02);
@@ -224,6 +224,8 @@ void Elwin::run() {
 
   // Set the result workspace for Python script export
   m_pythonExportWsName = qSquaredWorkspace;
+
+  m_elwinAlg = elwinMultAlg;
 }
 
 /**
@@ -496,23 +498,23 @@ void Elwin::updateRS(QtProperty *prop, double val) {
  */
 void Elwin::plotClicked() {
 
-    auto outputWs = m_elwinAlg->getPropertyValue("OutputInQ");
-    checkADSForPlotSaveWorkspace(outputWs, true);
-    plotSpectrum(QString::fromStdString(outputWs));
+  auto outputWs = m_elwinAlg->getPropertyValue("OutputInQ");
+  checkADSForPlotSaveWorkspace(outputWs, true);
+  plotSpectrum(QString::fromStdString(outputWs));
 
-    auto outputWsSquared = m_elwinAlg->getPropertyValue("OutputInQSquared");
-    checkADSForPlotSaveWorkspace(outputWsSquared, true);
-    plotSpectrum(QString::fromStdString(outputWsSquared));
+  auto outputWsSquared = m_elwinAlg->getPropertyValue("OutputInQSquared");
+  checkADSForPlotSaveWorkspace(outputWsSquared, true);
+  plotSpectrum(QString::fromStdString(outputWsSquared));
 
-    auto elfWs = m_elwinAlg->getPropertyValue("OutputELF");
-    checkADSForPlotSaveWorkspace(elfWs, true);
-    plotSpectrum(QString::fromStdString(elfWs), 0, 9);
+  auto elfWs = m_elwinAlg->getPropertyValue("OutputELF");
+  checkADSForPlotSaveWorkspace(elfWs, true);
+  plotSpectrum(QString::fromStdString(elfWs), 0, 9);
 
-    if (m_blnManager->value(m_properties["Normalise"])) {
-      auto eltWs = m_elwinAlg->getPropertyValue("OutputELT");
-      checkADSForPlotSaveWorkspace(eltWs, true);
-      plotSpectrum(QString::fromStdString(eltWs), 0, 9);
-    }
+  if (m_blnManager->value(m_properties["Normalise"])) {
+    auto eltWs = m_elwinAlg->getPropertyValue("OutputELT");
+    checkADSForPlotSaveWorkspace(eltWs, true);
+    plotSpectrum(QString::fromStdString(eltWs), 0, 9);
+  }
 }
 
 /**
