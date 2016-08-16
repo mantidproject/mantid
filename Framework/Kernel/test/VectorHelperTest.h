@@ -398,27 +398,40 @@ public:
   }
 
   void testRebinSmaller() {
-    for (size_t i = 0; i < iters; i++)
+    for (size_t i = 0; i < iters; i++) {
+      std::vector<double> newCountsSmaller(smallerBinEdges.size() - 1);
+      std::vector<double> newErrorsSmaller(smallerBinEdges.size() - 1);
       VectorHelper::rebin(binEdges, counts, errors, smallerBinEdges,
                           newCountsSmaller, newErrorsSmaller, false, false);
+    }
   }
 
   void testRebinSmallerFrequencies() {
-    for (size_t i = 0; i < iters; i++)
+    for (size_t i = 0; i < iters; i++) {
+      std::vector<double> newFrequenciesSmaller(smallerBinEdges.size() - 1);
+      std::vector<double> newErrorsSmaller(smallerBinEdges.size() - 1);
       VectorHelper::rebin(binEdges, frequencies, errors, smallerBinEdges,
-                          newCountsSmaller, newErrorsSmaller, true, false);
+                          newFrequenciesSmaller, newErrorsSmaller, true, false);
+    }
   }
 
   void testRebinLarger() {
-    for (size_t i = 0; i < iters; i++)
-      VectorHelper::rebin(binEdges, counts, errors, largerBinEdges,
-                          newCountsLarger, newErrorsLarger, false, false);
+	  for (size_t i = 0; i < iters; i++) {
+		  std::vector<double> newCountsLarger(largerBinEdges.size() - 1);
+		  std::vector<double> newErrorsLarger(largerBinEdges.size() - 1);
+
+		  VectorHelper::rebin(binEdges, counts, errors, largerBinEdges,
+			  newCountsLarger, newErrorsLarger, false, false);
+	  }
   }
 
   void testRebinLargerFrequencies() {
-    for (size_t i = 0; i < iters; i++)
-      VectorHelper::rebin(binEdges, frequencies, errors, largerBinEdges,
-                          newCountsLarger, newErrorsLarger, true, false);
+	  for (size_t i = 0; i < iters; i++) {
+		  std::vector<double> newFrequenciesLarger(largerBinEdges.size() - 1);
+		  std::vector<double> newErrorsLarger(largerBinEdges.size() - 1);
+		  VectorHelper::rebin(binEdges, frequencies, errors, largerBinEdges,
+			  newFrequenciesLarger, newErrorsLarger, true, false);
+	  }
   }
 
 private:
@@ -430,12 +443,6 @@ private:
   std::vector<double> errors;
   std::vector<double> smallerBinEdges;
   std::vector<double> largerBinEdges;
-  std::vector<double> newCountsSmaller;
-  std::vector<double> newFrequenciesSmaller;
-  std::vector<double> newErrorsSmaller;
-  std::vector<double> newCountsLarger;
-  std::vector<double> newFrequenciesLarger;
-  std::vector<double> newErrorsLarger;
 
   void setupHistogram() {
     binEdges.resize(binSize);
@@ -467,15 +474,8 @@ private:
     smallerBinEdges[2 * (binSize - 1)] = binEdges.back();
     smallerBinEdges.back() = binEdges.back() + (binWidth / 2);
 
-    for (size_t i = 0; i < largerBinEdges.size(); i++)
-      largerBinEdges[i] = binEdges[(2 * i)];
-
-    newCountsSmaller.resize(smallerBinEdges.size() - 1);
-    newFrequenciesSmaller.resize(smallerBinEdges.size() - 1);
-    newErrorsSmaller.resize(smallerBinEdges.size() - 1);
-    newCountsLarger.resize(largerBinEdges.size() - 1);
-    newFrequenciesLarger.resize(largerBinEdges.size() - 1);
-    newErrorsLarger.resize(largerBinEdges.size() - 1);
+	for (size_t i = 0; i < largerBinEdges.size(); i++)
+		largerBinEdges[i] = binEdges[(2 * i)];
   }
 };
 
