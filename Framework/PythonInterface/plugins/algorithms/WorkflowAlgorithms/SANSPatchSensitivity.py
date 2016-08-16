@@ -43,8 +43,9 @@ class SANSPatchSensitivity(PythonAlgorithm):
     def PyExec(self):
         in_ws = self.getProperty("InputWorkspace").value
         patch_ws = self.getProperty("PatchWorkspace").value
+        component_name = self.getProperty("ComponentName").value
 
-        component = self.__get_component_to_patch(in_ws)
+        component = self.__get_component_to_patch(in_ws, component_name)
         number_of_tubes = component.nelements()
 
         for tube_idx in range(number_of_tubes):
@@ -56,15 +57,14 @@ class SANSPatchSensitivity(PythonAlgorithm):
                 tube = component[tube_idx]
             self.__patch_workspace(tube, in_ws, patch_ws)
 
-        api.ClearMaskFlag(Workspace=in_ws)
+        api.ClearMaskFlag(Workspace=in_ws, ComponentName=component_name)
 
-    def __get_component_to_patch(self, workspace):
+    def __get_component_to_patch(self, workspace, component_name):
         '''
         Get the component name to apply the pacth
         Either from the field or from the IDF parameters
         '''
         instrument = workspace.getInstrument()
-        component_name = self.getProperty("ComponentName").value
 
         # Get the default from the parameters file
         if component_name is None or component_name == "":
@@ -111,6 +111,11 @@ class SANSPatchSensitivity(PythonAlgorithm):
 
         degree = self.getProperty("DegreeOfThePolynomial").value
         # Returns coeffcients for the polynomial fit
+        
+        if len(id_to_calculate_fit) <= 50 :
+            Logger("SANSPatchSensitivity").warning("Tube %s has not enough data for polyfit." % tube_in_input_ws.getFullName())
+            return
+            
         py =  np.polyfit(id_to_calculate_fit, y_to_calculate_fit, degree)
         pe =  np.polyfit(id_to_calculate_fit, e_to_calculate_fit, degree)
 
