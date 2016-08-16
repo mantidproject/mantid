@@ -9,6 +9,14 @@ from SANS2.Common.SANSEnumerations import (SANSInstrument)
 
 
 def slice_by_time(workspace, start_time=None, stop_time=None):
+    """
+    Performs a time slice
+
+    :param workspace: the workspace to slice.
+    :param start_time: the start time of the slice.
+    :param stop_time: the stop time of the slice.
+    :return: the sliced workspace.
+    """
     filter_name = "FilterByTime"
     filter_options = {SANSConstants.input_workspace: workspace,
                       SANSConstants.output_workspace: SANSConstants.dummy}
@@ -23,6 +31,13 @@ def slice_by_time(workspace, start_time=None, stop_time=None):
 
 
 def get_scaled_workspace(workspace, factor):
+    """
+    Scales a workspace by a specified factor.
+
+    :param workspace: the workspace to scale.
+    :param factor: the scale factor.
+    :return: the scaled workspace.
+    """
     scale_name = "Scale"
     scale_options = {SANSConstants.input_workspace: workspace,
                      SANSConstants.output_workspace: SANSConstants.dummy,

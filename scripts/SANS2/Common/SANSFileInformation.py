@@ -31,14 +31,23 @@ class SANSFileType(object):
 # Free Functions
 # -----------------------------------
 def find_full_file_path(file_name):
+    """
+    Gets the full path of a file name if it is available on the Mantid paths.
+
+    :param file_name: the name of the file.
+    :return: the full file path.
+    """
     return FileFinder.getFullPath(file_name)
 
 
 def find_sans_file(file_name):
     """
+    Finds a SANS file.
     The file can be specified as:
     1. file.ext or  path1 path2 file.ext
     2. run number
+    :param file_name: a file name or a run number.
+    :return: the full path.
     """
     full_path = find_full_file_path(file_name)
     if not full_path:
@@ -52,6 +61,12 @@ def find_sans_file(file_name):
 
 
 def get_extension_for_file_type(file_info):
+    """
+    Get the extension for a specific file type.
+
+    :param file_info: a SANSFileInformation object.
+    :return: the extension a stirng. This can be either nxs or raw.
+    """
     if file_info.get_type() == SANSFileType.ISISNexus or file_info.get_type() == SANSFileType.ISISNexusAdded():
         extension = "nxs"
     elif file_info.get_type() == SANSFileType.ISISRaw:
@@ -62,21 +77,48 @@ def get_extension_for_file_type(file_info):
 
 
 def get_number_of_periods(func, file_name):
+    """
+    Get the number of periods of the data in a file.
+
+    :param func: a function handle which extracts the relevant information.
+    :param file_name: the file name to the relevant file.
+    :return: the number of periods if it is applicable else 0.
+    """
     is_file_type, number_of_periods = func(file_name)
     return number_of_periods if is_file_type else 0
 
 
 def is_single_period(func, file_name):
+    """
+    Checks if a file contains only single period data.
+
+    :param func: a function handle which extracts the number of periods.
+    :param file_name: the name of the file.
+    :return: true if the number of periods is 1 else false.
+    """
     is_file_type, number_of_periods = func(file_name)
     return is_file_type and number_of_periods == 1
 
 
 def is_multi_period(func, file_name):
+    """
+    Checks if a file contains multi-period data.
+
+    :param func: a function handle which extracts the number of periods.
+    :param file_name: the name of the file.
+    :return: true if the number of periods is larger than one else false.
+    """
     is_file_type, number_of_periods = func(file_name)
     return is_file_type and number_of_periods >= 1
 
 
 def get_instrument_paths_for_sans_file(file_name):
+    """
+    Gets the Instrument Definition File (IDF) path and the Instrument Parameter Path (IPF) path associated with a file.
+
+    :param file_name: the file name is a name fo a SANS data file, e.g. SANS2D0001234
+    :return: the IDF path and the IPF path
+    """
     def get_file_location(path):
         return os.path.dirname(path)
 
@@ -158,8 +200,16 @@ def get_instrument_paths_for_sans_file(file_name):
                        "available for {0}".format(str(idf_path)))
 
 
-# ISIS Nexus
+# ----------------------------------------------
+# Methods for ISIS Nexus
+# ---------------------------------------------
 def get_isis_nexus_info(file_name):
+    """
+    Get information if is ISIS Nexus and the number of periods.
+
+    :param file_name: the full file path.
+    :return: if the file was a Nexus file and the number of periods.
+    """
     try:
         with h5.File(file_name) as h5_file:
             keys = h5_file.keys()
@@ -209,6 +259,13 @@ def get_instrument_name_for_isis_nexus(file_name):
 
 
 def get_top_level_nexus_entry(file_name, entry_name):
+    """
+    Gets the first entry in a Nexus file.
+
+    :param file_name: The file name
+    :param entry_name: the entry name
+    :return:
+    """
     with h5.File(file_name) as h5_file:
         # Open first entry
         keys = h5_file.keys()

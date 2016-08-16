@@ -27,6 +27,9 @@ def inner_classes_with_name_space(*inner_classes):
     return inner_class_builder
 
 
+# ---------------------------
+#  Instrument and facility types
+# --------------------------
 @inner_classes_with_name_space("LOQ", "LARMOR", "SANS2D", "NoInstrument")
 class SANSInstrument(object):
     pass
@@ -94,6 +97,24 @@ def convert_to_data_type(as_string):
     return data_type
 
 
+def convert_from_data_type_to_string(data_type):
+    if data_type is SANSDataType.SampleScatter:
+        as_string = "sample_scatter"
+    elif data_type is SANSDataType.SampleTransmission:
+        as_string = "sample_transmission"
+    elif data_type is SANSDataType.SampleDirect:
+        as_string = "sample_direct"
+    elif data_type is SANSDataType.CanScatter:
+        as_string = "can_scatter"
+    elif data_type is SANSDataType.CanTransmission:
+        as_string = "can_transmission"
+    elif data_type is SANSDataType.CanDirect:
+        as_string = "can_direct"
+    elif data_type is SANSDataType.Calibration:
+        as_string = "calibration"
+    return as_string
+
+
 # --------------------------
 #  Coordinate Definitions (3D)
 # --------------------------
@@ -126,9 +147,6 @@ class ISISReductionMode(ReductionMode):
     pass
 
 
-# --------------------------
-#  ReductionDimensionality
-# --------------------------
 @inner_classes_with_name_space("OneDim", "TwoDim")
 class ReductionDimensionality(object):
     """

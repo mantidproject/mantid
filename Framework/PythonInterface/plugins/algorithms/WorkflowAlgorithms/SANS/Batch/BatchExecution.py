@@ -5,6 +5,7 @@ from mantid.api import AnalysisDataService
 from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
 from SANS2.Common.SANSEnumerations import (SANSDataType, SaveType)
 from SANS2.Common.SANSConstants import SANSConstants
+from SANS2.State.SANSStateFunctions import get_output_workspace_name_from_workspace
 
 
 class OutputMode(object):
@@ -17,7 +18,18 @@ class OutputMode(object):
 batch_reduction_return_bundle = namedtuple('batch_reduction_return_bundle', 'state, lab, hab, merged')
 
 
-def single_reduction_for_batch(state, use_optimizations, output_mode):
+def single_reduction_for_batch(state, use_optimizations, output_modes):
+    """
+    Runs a single reduction.
+
+    This function creates reduction packages which essentially contain information for a single valid reduction, run it
+    and store the results according to the user specified setting (output_modes). Although this is considered a single
+    reduction it can contain still several reductions since the SANSState object can at this point contain slice
+    settings which require on reduction per time slice.
+    :param state: a SANSState object
+    :param use_optimizations: if true then the optimizations of child algorithms are enabled.
+    :param output_modes: a list of output options, i.e. saving to file and/or publishing to ADS
+    """
     # Load the data
     workspace_to_name = {SANSDataType.SampleScatter: "SampleScatterWorkspace",
                          SANSDataType.SampleTransmission: "SampleTransmissionWorkspace",
@@ -49,13 +61,25 @@ def single_reduction_for_batch(state, use_optimizations, output_mode):
         reduced_hab = reduction_alg.getProperty("OutputWorkspaceHAB").value
         reduced_merged = reduction_alg.getProperty("OutputWorkspaceMerged").value
 
-        if output_mode is OutputMode.SaveToFile:
-            save_workspaces_to_file(reduced_lab, reduced_hab, reduced_merged, reduction_package.state)
-        elif output_mode is OutputMode.PublishToADS:
+        # Perform output
+        if OutputMode.PublishToADS in output_modes:
             publish_to_ads(reduced_lab, reduced_hab, reduced_merged)
+        if OutputMode.SaveToFile in output_modes:
+            save_workspaces_to_file(reduced_lab, reduced_hab, reduced_merged, reduction_package.state)
 
 
 def provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_to_monitor):
+    """
+    Provide the data for reduction.
+
+
+    :param state: a SANSState object.
+    :param use_optimizations: if optimizations are enabled, then the load mechanism will search for workspaces on the
+                              ADS.
+    :param workspace_to_name: a map of SANSDataType vs output-property name of SANSLoad for workspaces
+    :param workspace_to_monitor: a map of SANSDataType vs output-property name of SANSLoad for monitor workspaces
+    :return: a list fo workspaces and a list of monitor workspaces
+    """
     # Load the data
     state_serialized = state.property_manager
     load_name = "SANSLoad"
@@ -76,11 +100,18 @@ def provide_loaded_data(state, use_optimizations, workspace_to_name, workspace_t
 
     workspaces = get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_to_name)
     monitors = get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_to_monitor)
-
     return workspaces, monitors
 
 
 def get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_name_dict):
+    """
+    Reads the workspaces from SANSLoad
+
+    :param load_alg: a handle to the load algorithm
+    :param workspace_to_count: a map from SANSDataType to the outpyt-number property name of SANSLoad for workspaces
+    :param workspace_name_dict: a map of SANSDataType vs output-property name of SANSLoad for (monitor) workspaces
+    :return: a map of SANSDataType vs list of workspaces (to handle multi-period data)
+    """
     workspace_output = {}
     for workspace_type, workspace_name in workspace_name_dict.items():
         count_id = workspace_to_count[workspace_type]
@@ -144,6 +175,14 @@ def get_reduction_packages(state, workspaces, monitors):
 
 
 def reduction_packages_require_splitting_for_event_slices(reduction_packages):
+    """
+    Creates reduction packages from a list of reduction packages by splitting up event slices.
+
+    The SANSSingleReduction algorithm can handle only a single time slice. For each time slice, we require an individual
+    reduction. Hence we split the states up at this point.
+    :param reduction_packages: a list of reduction packages.
+    :return: a list of reduction packages which has at leaset the same length as the input
+    """
     # Determine if the event slice sub-state object contains multiple event slice requests. This is given
     # by the number of elements in start_tof
     reduction_package = reduction_packages[0]
@@ -325,7 +364,7 @@ def do_publish_to_ads(workspace):
 
     :param workspace: the workspace which is to be added to the ADS
     """
-    workspace_name = get_workspace_name(workspace)
+    workspace_name = get_output_workspace_name_from_workspace(workspace)
     AnalysisDataService.addOrReplace(workspace_name, workspace)
 
 
@@ -345,7 +384,7 @@ def save_workspace_to_file(workspace, state):
     if save_info.file_name:
         file_name = save_info.file_name
     else:
-        file_name = get_workspace_name(workspace)
+        file_name = get_output_workspace_name_from_workspace(workspace)
     save_options.update({SANSConstants.file_name: file_name})
 
     file_formats = save_info.file_format

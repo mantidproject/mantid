@@ -11,6 +11,18 @@ from SANS.Mask.MaskFunctions import (yield_masked_det_ids, SpectraBlock)
 # Free functions
 # ------------------------------------------------------------------
 def mask_bins(mask_info, workspace, detector_type):
+    """
+    Masks the bins on a workspace
+
+    There are two parts to this:
+    1. A general time mask is applied to all spectra
+    2. A detector-specific time mask is applied depending on the detector_type
+    :param mask_info: a SANSStateMask object
+    :param workspace: the workspace which is about to be masked.
+    :param detector_type: the detector which is currently being investigated and which (potentially) requires
+                          additional masking
+    :return: the workspace
+    """
     # Mask the bins with the general setting
     bin_mask_general_start = mask_info.bin_mask_general_start
     bin_mask_general_stop = mask_info.bin_mask_general_stop
@@ -43,6 +55,15 @@ def mask_bins(mask_info, workspace, detector_type):
 
 
 def mask_cylinder(mask_info, workspace):
+    """
+    Masks  a (hollow) cylinder around (0,0)
+
+    Two radii can be specified for the cylinder mask. An inner radius (radius_min) and an outer radius(radius_max)
+    which specify a hollow cylinder mask.
+    :param mask_info: a SANSStateMask object.
+    :param workspace: the workspace which is about to be masked
+    :return: the masked workspace.
+    """
     radius_min = mask_info.radius_min
     radius_max = mask_info.radius_max
 
@@ -80,9 +101,9 @@ def mask_with_mask_files(mask_info, workspace):
     for MaskingWorkspaces as it is for the workspaces containing the data to be
     masked.  Basically, we get a mirror image of what we expect.  Instead, we
     have to extract the det IDs and use those via the DetectorList property.
-    :param mask_info: The mask state
-    :param workspace: The workspace to be masked
-    :return: The workspace with the mask files applied to it
+    :param mask_info: a SANSStateMask object.
+    :param workspace: the workspace to be masked.
+    :return: the masked workspace.
     """
     mask_files = mask_info.mask_files
     if mask_files:
@@ -115,15 +136,26 @@ def mask_with_mask_files(mask_info, workspace):
 
 
 def mask_spectra(mask_info, workspace, spectra_block, detector_type):
-    # There are several spectra specifications which need to be evaluated
-    # 1. General singular spectrum numbers
-    # 2. General spectrum ranges
-    # 3. Detector-specific horizontal singular strips
-    # 4. Detector-specific horizontal range strips
-    # 5. Detector-specific vertical singular strips
-    # 6. Detector-specific vertical range strips
-    # 7. Blocks
-    # 8. Cross Blocks
+    """
+    Masks particular spectra on the workspace.
+
+    There are several spectra specifications which need to be evaluated
+    1. General singular spectrum numbers
+    2. General spectrum ranges
+    3. Detector-specific horizontal singular strips
+    4. Detector-specific horizontal range strips
+    5. Detector-specific vertical singular strips
+    6. Detector-specific vertical range strips
+    7. Blocks
+    8. Cross Blocks
+    :param mask_info: a SANSStateMask object.
+    :param workspace: the workspace to be masked.
+    :param spectra_block: a SpectraBlock object, which contains instrument information to
+                          calculate the selected spectra.
+    :param detector_type: the selected detector type
+    :return: the masked workspace.
+    """
+
     total_spectra = []
 
     # ----------------------
@@ -218,7 +250,13 @@ def mask_spectra(mask_info, workspace, spectra_block, detector_type):
 
 
 def mask_angle(mask_info, workspace):
-    """ Creates a pizza slice mask on the detector"""
+    """
+    Creates a pizza slice mask on the detector around (0,0)
+
+    :param mask_info: a SANSStateMask object
+    :param workspace: the workspace which is to be masked.
+    :return: a masked workspace
+    """
     phi_mirror = mask_info.use_mask_phi_mirror
     phi_min = mask_info.phi_min
     phi_max = mask_info.phi_max
@@ -242,12 +280,18 @@ def mask_angle(mask_info, workspace):
             mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
             mask_alg.execute()
             workspace = mask_alg.getProperty(SANSConstants.workspace).value
-
     return workspace
 
 
 def mask_beam_stop(mask_info, workspace, instrument):
-    """ The beam stop is being masked here. Note that this is only implemented for SANS2D"""
+    """
+    The beam stop is being masked here. Note that this is only implemented for SANS2D
+
+    :param mask_info: a SANSStateMask object.
+    :param workspace: the workspace which is to be masked.
+    :param instrument: the instrument assoicated with the current workspace.
+    :return: a masked workspace
+    """
     beam_stop_arm_width = mask_info.beam_stop_arm_width
     beam_stop_arm_angle = mask_info.beam_stop_arm_angle
     beam_stop_arm_pos1 = mask_info.beam_stop_arm_pos1
@@ -301,6 +345,14 @@ class MaskerISIS(Masker):
         self._instrument = instrument
 
     def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
+        """
+        Performs the different types of masks that are currently available for ISIS reductions.
+
+        :param mask_info: a SANSStateMask object.
+        :param workspace_to_mask: the workspace to mask.
+        :param detector_type: the detector type which is currently used , i.e. HAB or LAB
+        :return: a masked workspace.
+        """
         # Perform bin masking
         workspace_to_mask = mask_bins(mask_info, workspace_to_mask, detector_type)
 

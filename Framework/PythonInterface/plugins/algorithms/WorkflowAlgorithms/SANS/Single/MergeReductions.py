@@ -18,10 +18,19 @@ class Merger(object):
 
 
 class ISIS1DMerger(Merger):
+    """
+    Class which handles ISIS-style merges.
+    """
     def __init__(self):
         super(ISIS1DMerger, self).__init__()
 
     def merge(self, reduction_mode_vs_output_bundles):
+        """
+        Merges two partial reductions to obtain a merged reduction.
+
+        :param reduction_mode_vs_output_bundles: a ReductionMode vs OutputBundle map
+        :return: a MergeBundle with the merged which contains the merged workspace.
+        """
         # Get the primary and secondary detectors for stitching. This is normally LAB and HAB, but in other scenarios
         # there might be completely different detectors. This approach allows future adjustments to the stitching
         # configuration. The data from the secondary detector will be stitched to the data from the primary detector.
@@ -99,6 +108,14 @@ class MergeFactory(object):
 
 
 def get_detectors_for_merge(output_bundles):
+    """
+    Extracts the merge strategy from the output bundles. This is the name of the primary and the secondary detector.
+
+    The merge strategy will let us know which two detectors are to be merged. This abstraction might be useful in the
+    future if we are dealing with more than two detector banks.
+    :param output_bundles: a ReductionMap vs OutputBundle map
+    :return: the primary detector and the secondary detector.
+    """
     reduction_settings_collection = output_bundles.itervalues().next()
     state = reduction_settings_collection[0].state
     reduction_info = state.reduction
@@ -106,6 +123,16 @@ def get_detectors_for_merge(output_bundles):
 
 
 def get_partial_workspaces(primary_detector, secondary_detector, reduction_mode_vs_output_bundles, is_data_type):
+    """
+    Get the partial workspaces for the primary and secondary detectors.
+
+    :param primary_detector: the primary detector (now normally ISISReductionMode.Lab)
+    :param secondary_detector: the secondary detector (now normally ISISReductionMode.Hab)
+    :param reduction_mode_vs_output_bundles: a ReductionMode vs OutputBundles map
+    :param is_data_type: the data type, i.e. if can or sample
+    :return: the primary count workspace, the primary normalization workspace, the secondary count workspace and the
+             secondary normalization workspace.
+    """
     # Get primary reduction information for specified data type, i.e. sample or can
     primary = reduction_mode_vs_output_bundles[primary_detector]
     primary_for_data_type = next((setting for setting in primary if is_data_type(setting)), None)
@@ -121,6 +148,12 @@ def get_partial_workspaces(primary_detector, secondary_detector, reduction_mode_
 
 
 def get_shift_and_scale_parameter(reduction_mode_vs_output_bundles):
+    """
+    Gets the shfit and scale parameter from a set of OutputBundles
+
+    :param reduction_mode_vs_output_bundles: a ReductionMode vs OutputBundle map
+    :return: the shift, scale and fit mode.
+    """
     reduction_settings_collection = reduction_mode_vs_output_bundles.itervalues().next()
     state = reduction_settings_collection[0].state
     reduction_info = state.reduction

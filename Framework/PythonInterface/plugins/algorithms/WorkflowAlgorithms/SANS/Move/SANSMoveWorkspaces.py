@@ -14,6 +14,15 @@ from SANS2.Common.SANSFunctions import (create_unmanaged_algorithm, get_single_v
 # Free functions
 # -------------------------------------------------
 def move_component(workspace, offsets, component_to_move):
+    """
+    Move an individial component on a workspace
+
+    :param workspace: the workspace which the component which is to be moved.
+    :param offsets: a Coordinate vs. Value map of offsets.
+    :param component_to_move: the name of a component on the instrument. This component must be name which exist.
+                              on the instrument.
+    :return:
+    """
     move_name = "MoveInstrumentComponent"
     move_options = {"Workspace": workspace,
                     "ComponentName": component_to_move,
@@ -32,10 +41,19 @@ def move_component(workspace, offsets, component_to_move):
     alg.execute()
 
 
-def rotate_component(workspace, angle, direction, component_to_move):
+def rotate_component(workspace, angle, direction, component_to_rotate):
+    """
+    Rotate a component on a workspace.
+
+    :param workspace: the workspace which contains the component which is to be rotated.
+    :param angle: the angle by which it is to be rotated in degrees.
+    :param direction: the rotation direction. This is a unit vector encoded as a Coordinate vs Value map.
+    :param component_to_rotate: name of the component which is to be rotated
+    :return:
+    """
     rotate_name = "RotateInstrumentComponent"
     rotate_options = {"Workspace": workspace,
-                      "ComponentName": component_to_move,
+                      "ComponentName": component_to_rotate,
                       "RelativeRotation": "1"}
     for key, value in direction.iteritems():
         if key is CanonicalCoordinates.X:
@@ -46,18 +64,36 @@ def rotate_component(workspace, angle, direction, component_to_move):
             rotate_options.update({"Z": value})
         else:
             raise RuntimeError("SANSMove: Trying to rotate the components along an unknown direction. "
-                               "See here: {0}".format(str(component_to_move)))
+                               "See here: {0}".format(str(component_to_rotate)))
     rotate_options.update({"Angle": angle})
     alg = create_unmanaged_algorithm(rotate_name, **rotate_options)
     alg.execute()
 
 
 def move_sample_holder(workspace, sample_offset, sample_offset_direction):
+    """
+    Moves the sample holder by specified amount.
+
+    :param workspace: the workspace which will have its sample holder moved.
+    :param sample_offset: the offset value
+    :param sample_offset_direction: the offset direction (can only be currently along a canonical direction)
+    """
     offset = {sample_offset_direction: sample_offset}
     move_component(workspace, offset, 'some-sample-holder')
 
 
 def apply_standard_displacement(move_info, workspace, coordinates, component):
+    """
+    Applies a standard displacement to a workspace.
+
+    A standard displacement means here that it is a displacement along X and Y since Z is normally the direction
+    of the beam.
+    :param move_info: a SANSStateMove object.
+    :param workspace: the workspace which is to moved.
+    :param coordinates: a list of coordinates by how much to move the component on the workspace. Note that currently
+                        only the first two entries are used.
+    :param component: the component which is to be moved.
+    """
     # Get the detector name
     component_name = move_info.detectors[component].detector_name
     # Offset
@@ -67,6 +103,12 @@ def apply_standard_displacement(move_info, workspace, coordinates, component):
 
 
 def is_zero_axis(axis):
+    """
+    Checks if the axis is potentially a null vector and hence not a useful axis at all.
+
+    :param axis: the axis to check.
+    :return: true if the axis is a null vector (or close to it) else false.
+    """
     total_value = 0.0
     for entry in axis:
         total_value += abs(entry)
@@ -74,6 +116,15 @@ def is_zero_axis(axis):
 
 
 def set_selected_components_to_original_position(workspace, component_names):
+    """
+    Sets a component to its original (non-moved) position, i.e. the position one obtains when using standard loading.
+
+    The way we know the original position/rotation is the base instrument. We look at the difference between the
+    instrument and the base instrument and perform a reverse operation.
+
+    :param workspace: the workspace which will have the move applied to it.
+    :param component_names: the name of the component which is to be moved.
+    """
     # First get the original rotation and position of the unaltered instrument components. This information
     # is stored in the base instrument
     instrument = workspace.getInstrument()
@@ -142,6 +193,11 @@ def set_components_to_original_for_isis(move_info, workspace, component):
     """
     This function resets the components for ISIS instruments. These are normally HAB, LAB, the monitors and
     the sample holder
+
+    :param move_info: a SANSStateMove object.
+    :param workspace: the workspace which is being reset.
+    :param component: the component which is being reset on the workspace. If this is not specified, then
+                      everything is being reset.
     """
     # We reset the HAB, the LAB, the sample holder and monitor 4
     if not component:
@@ -159,13 +215,20 @@ def set_components_to_original_for_isis(move_info, workspace, component):
 
 
 def get_detector_component(move_info, component):
+    """
+    Gets the detector component on the workspace
+
+    :param move_info: a SANSStateMove object.
+    :param component: A component name, ie a detector name or a short detector name as specified in the IPF.
+    :return: the key entry for detectors on the SANSStateMove object which corresponds to the input component.
+    """
     component_selection = component
     if component:
-        for detector_keys in move_info.detectors.keys():
-            is_name = component == move_info.detectors[detector_keys].detector_name
-            is_name_short = component == move_info.detectors[detector_keys].detector_name_short
+        for detector_key in move_info.detectors.keys():
+            is_name = component == move_info.detectors[detector_key].detector_name
+            is_name_short = component == move_info.detectors[detector_key].detector_name_short
             if is_name or is_name_short:
-                component_selection = detector_keys
+                component_selection = detector_key
     return component_selection
 
 

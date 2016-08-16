@@ -39,14 +39,14 @@ class SANSStateFunctionsTest(unittest.TestCase):
         except RuntimeError:
             did_raise = True
         self.assertTrue(did_raise)
-    #
-    # def test_that_creates_correct_workspace_name_for_1D(self):
-    #     # Arrange
-    #     state = SANSStateFunctionsTest._get_state()
-    #     # Act
-    #     output_workspace = get_output_workspace_name(state, ISISReductionMode.Lab)
-    #     # Assert
-    #     self.assertTrue("12345rear_1D12.0_34.0Phi12.0_56.0_t4.57_T12.37" == output_workspace)
+
+    def test_that_creates_correct_workspace_name_for_1D(self):
+        # Arrange
+        state = SANSStateFunctionsTest._get_state()
+        # Act
+        output_workspace = get_output_workspace_name(state, ISISReductionMode.Lab)
+        # Assert
+        self.assertTrue("12345rear_1D12.0_34.0Phi12.0_56.0_t4.57_T12.37" == output_workspace)
 
 
 if __name__ == '__main__':

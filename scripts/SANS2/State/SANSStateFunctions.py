@@ -1,6 +1,26 @@
 from SANS2.State.SANSStateData import SANSStateData
 from SANS2.Common.SANSEnumerations import (ReductionDimensionality, ISISReductionMode)
 from SANS2.Common.SANSConstants import SANSConstants
+from SANS2.Common.SANSFunctions import add_to_sample_log
+
+
+def add_workspace_name(workspace, state, reduction_mode):
+    """
+    Adds the default reduced workspace name to the sample logs
+
+    :param workspace: The output workspace
+    :param state: a SANSState object
+    :param reduction_mode: the reduction mode, i.e. LAB, HAB, MERGED
+    """
+    reduced_workspace_name = get_output_workspace_name(state, reduction_mode)
+    add_to_sample_log(workspace, SANSConstants.reduced_workspace_name_in_logs, reduced_workspace_name, "String")
+
+
+def get_output_workspace_name_from_workspace(workspace):
+    run = workspace.run()
+    if not run.hasProperty(SANSConstants.reduced_workspace_name_in_logs):
+        raise RuntimeError("The workspace does not seem to contain an entry for the output workspace name.")
+    return run.getProperty(SANSConstants.reduced_workspace_name_in_logs).value
 
 
 def get_output_workspace_name(state, reduction_mode):

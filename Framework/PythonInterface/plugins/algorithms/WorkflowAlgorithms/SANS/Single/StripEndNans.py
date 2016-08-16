@@ -5,7 +5,8 @@ from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
 
 def strip_end_nans(workspace):
     """
-    This function removes the INFs and NANs from the start and end of a 1D workspace
+    This function removes the INFs and NANs from the start and end of a 1D workspace.
+
     :param workspace: The workspace which is about to be trimmed
     :return: A trimmed NAN- and INF-trimmed workspace
     """

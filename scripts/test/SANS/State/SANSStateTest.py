@@ -74,6 +74,7 @@ class SANSStateTest(unittest.TestCase):
         # Save state
         save_state = SANSStateSaveISIS()
         save_state.file_name = "test_file_name"
+        state.save = save_state
 
         # Assert
         try:
@@ -194,6 +195,7 @@ class SANSStateTest(unittest.TestCase):
         # Save state
         save_state = SANSStateSaveISIS()
         save_state.file_name = "test_file_name"
+        state.save = save_state
 
         # Act
         serialized = state.property_manager

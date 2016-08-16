@@ -4,7 +4,7 @@
 
 from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty,
                            EnabledWhenProperty, PropertyCriterion)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
+from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 
 from SANS2.State.SANSStateBase import create_deserialized_sans_state_from_property_manager
 from SANS2.Common.SANSEnumerations import SANSDataType
@@ -27,7 +27,7 @@ class SANSLoad(DataProcessorAlgorithm):
                              doc='A property manager which fulfills the SANSState contract.')
 
         self.declareProperty("PublishToCache", True, direction=Direction.Input,
-                             doc="Publish the loaded files to a cache, in order to avoid reloading "
+                             doc="Publish the calibration workspace to a cache, in order to avoid reloading "
                                  "for subsequent runs.")
 
         self.declareProperty("UseCached", True, direction=Direction.Input,
@@ -63,85 +63,85 @@ class SANSLoad(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('SampleScatterMonitorWorkspace', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The sample scatter monitor workspace. This workspace only contains monitors.')
-        self.declareProperty('NumberOfSampleScatterWorkspaces', defaultValue=default_number_of_workspaces,
-                             direction=Direction.Output,
-                             doc='The number of workspace for sample scatter.')
-
-        # Sample Transmission Workspace
         self.declareProperty(MatrixWorkspaceProperty('SampleTransmissionWorkspace', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The sample transmission workspace.')
-        self.declareProperty('NumberOfSampleTransmissionWorkspaces', defaultValue=default_number_of_workspaces,
-                             direction=Direction.Output,
-                             doc='The number of workspace for sample transmission.')
-
-        # Sample Direct Workspace
         self.declareProperty(MatrixWorkspaceProperty('SampleDirectWorkspace', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The sample scatter direct workspace.')
-        self.declareProperty('NumberOfSampleDirectWorkspaces', defaultValue=default_number_of_workspaces,
-                             direction=Direction.Output,
-                             doc='The number of workspace for sample direct.')
 
         self.setPropertyGroup("SampleScatterWorkspace", 'Sample')
         self.setPropertyGroup("SampleScatterMonitorWorkspace", 'Sample')
         self.setPropertyGroup("SampleTransmissionWorkspace", 'Sample')
         self.setPropertyGroup("SampleDirectWorkspace", 'Sample')
 
-        # Can Scatter Workspaces
+        # Number of sample workspaces
+        self.declareProperty('NumberOfSampleScatterWorkspaces', defaultValue=default_number_of_workspaces,
+                             direction=Direction.Output,
+                             doc='The number of workspace for sample scatter.')
+        self.declareProperty('NumberOfSampleTransmissionWorkspaces', defaultValue=default_number_of_workspaces,
+                             direction=Direction.Output,
+                             doc='The number of workspace for sample transmission.')
+        self.declareProperty('NumberOfSampleDirectWorkspaces', defaultValue=default_number_of_workspaces,
+                             direction=Direction.Output,
+                             doc='The number of workspace for sample direct.')
+
+        # ------------------
+        # Monitor workspaces
+        # ------------------
         self.declareProperty(MatrixWorkspaceProperty('CanScatterWorkspace', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The can scatter workspace. This workspace does not contain monitors.')
         self.declareProperty(MatrixWorkspaceProperty('CanScatterMonitorWorkspace', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The can scatter monitor workspace. This workspace only contains monitors.')
-        self.declareProperty('NumberOfCanScatterWorkspaces', defaultValue=default_number_of_workspaces,
-                             direction=Direction.Output,
-                             doc='The number of workspace for can scatter.')
-
-        # Sample Transmission Workspace
         self.declareProperty(MatrixWorkspaceProperty('CanTransmissionWorkspace', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The can transmission workspace.')
-        self.declareProperty('NumberOfCanTransmissionWorkspaces', defaultValue=default_number_of_workspaces,
-                             direction=Direction.Output,
-                             doc='The number of workspace for can transmission.')
-
-        # Sample Direct Workspace
         self.declareProperty(MatrixWorkspaceProperty('CanDirectWorkspace', '',
                                                      optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The sample scatter direct workspace.')
-        self.declareProperty('NumberOfCanDirectWorkspaces', defaultValue=default_number_of_workspaces,
-                             direction=Direction.Output,
-                             doc='The number of workspace for can direct.')
-
         self.setPropertyGroup("CanScatterWorkspace", 'Can')
         self.setPropertyGroup("CanScatterMonitorWorkspace", 'Can')
         self.setPropertyGroup("CanTransmissionWorkspace", 'Can')
         self.setPropertyGroup("CanDirectWorkspace", 'Can')
+
+        self.declareProperty('NumberOfCanScatterWorkspaces', defaultValue=default_number_of_workspaces,
+                             direction=Direction.Output,
+                             doc='The number of workspace for can scatter.')
+        self.declareProperty('NumberOfCanTransmissionWorkspaces', defaultValue=default_number_of_workspaces,
+                             direction=Direction.Output,
+                             doc='The number of workspace for can transmission.')
+        self.declareProperty('NumberOfCanDirectWorkspaces', defaultValue=default_number_of_workspaces,
+                             direction=Direction.Output,
+                             doc='The number of workspace for can direct.')
 
     def PyExec(self):
         # Read the state
         state_property_manager = self.getProperty("SANSState").value
         state = create_deserialized_sans_state_from_property_manager(state_property_manager)
 
-        # Get the correct SANSLoader from the SANSLoaderFactory
-        load_factory = SANSLoadDataFactory()
-        loader = load_factory.create_loader(state)
-
         # Run the appropriate SANSLoader and get the workspaces and the workspace monitors
         use_cached = self.getProperty("UseCached").value
         publish_to_ads = self.getProperty("PublishToCache").value
         data = state.data
+        progress = self._get_progress_for_file_loading(data)
 
+        # Get the correct SANSLoader from the SANSLoaderFactory
+        load_factory = SANSLoadDataFactory()
+        loader = load_factory.create_loader(state)
         workspaces, workspace_monitors = loader.execute(data_info=data, use_cached=use_cached,
-                                                        publish_to_ads=publish_to_ads)
+                                                        publish_to_ads=publish_to_ads, progress=progress)
+        progress.report("Loaded the data.")
 
         # Check if a move has been requested and perform it. This can be useful if scientists want to load the data and
         # have it moved in order to inspect it with other tools
         move_workspaces = self.getProperty("MoveWorkspace").value
         if move_workspaces:
+            progress_move = Progress(self, start=0.8, end=1.0, nreports=2)
+            progress_move.report("Starting to move the workspaces.")
             self._perform_initial_move(workspaces, state)
+            progress_move.report("Finished moving the workspaces.")
 
         # Set output workspaces
         for workspace_type, workspace in workspaces.iteritems():
@@ -160,7 +160,107 @@ class SANSLoad(DataProcessorAlgorithm):
             state.property_manager = state_property_manager
             state.validate()
         except ValueError as err:
-            errors.update({"SANSLoad": str(err)})
+            errors.update({"SANSState": str(err)})
+
+        # We need to validate that the for each expected output workspace of the SANSState a output workspace name
+        # was supplied in the PyInit
+        # For sample scatter
+        sample_scatter = self.getProperty("SampleScatterWorkspace").value
+        sample_scatter_as_string = self.getProperty("SampleScatterWorkspace").valueAsStr
+        if sample_scatter is None and not sample_scatter_as_string:
+            errors.update({"SampleScatterWorkspace": "A sample scatter output workspace needs to be specified."})
+
+        # For sample scatter monitor
+        sample_scatter_monitor = self.getProperty("SampleScatterMonitorWorkspace").value
+        sample_scatter_monitor_as_string = self.getProperty("SampleScatterMonitorWorkspace").valueAsStr
+        if sample_scatter_monitor is None and not sample_scatter_monitor_as_string:
+            errors.update({"SampleScatterMonitorWorkspace": "A sample scatter output workspace needs to be specified."})
+
+        # ------------------------------------
+        # Check the optional output workspaces
+        # If they are specified in the SANSState, then we require them to be set on the output as well.
+        state = create_deserialized_sans_state_from_property_manager(state_property_manager)
+        data_info = state.data
+
+        # For sample transmission
+        sample_transmission = self.getProperty("SampleTransmissionWorkspace").value
+        sample_transmission_as_string = self.getProperty("SampleTransmissionWorkspace").valueAsStr
+        sample_transmission_was_set = sample_transmission is not None or len(sample_transmission_as_string) > 0
+
+        sample_transmission_from_state = data_info.sample_transmission
+        if not sample_transmission_was_set and sample_transmission_from_state is not None:
+            errors.update({"SampleTransmissionWorkspace": "You need to set the output for the sample transmission"
+                                                          " workspace since it is specified to be loaded in your "
+                                                          "reduction configuration."})
+        if sample_transmission_was_set and sample_transmission_from_state is None:
+            errors.update({"SampleTransmissionWorkspace": "You set an output workspace for sample transmission, "
+                                                          "although none is specified in the reduction configuration."})
+
+        # For sample direct
+        sample_direct = self.getProperty("SampleDirectWorkspace").value
+        sample_direct_as_string = self.getProperty("SampleDirectWorkspace").valueAsStr
+        sample_direct_was_set = sample_direct is not None or len(sample_direct_as_string) > 0
+
+        sample_direct_from_state = data_info.sample_direct
+        if not sample_direct_was_set and sample_direct_from_state is not None:
+            errors.update({"SampleDirectWorkspace": "You need to set the output for the sample direct"
+                                                    " workspace since it is specified to be loaded in your "
+                                                    "reduction configuration."})
+        if sample_direct_was_set and sample_direct_from_state is None:
+            errors.update({"SampleDirectWorkspace": "You set an output workspace for sample direct, "
+                                                    "although none is specified in the reduction configuration."})
+
+        # For can scatter + monitor
+        can_scatter = self.getProperty("CanScatterWorkspace").value
+        can_scatter_as_string = self.getProperty("CanScatterWorkspace").valueAsStr
+        can_scatter_was_set = can_scatter is not None or len(can_scatter_as_string) > 0
+
+        can_scatter_from_state = data_info.can_scatter
+        if not can_scatter_was_set and can_scatter_from_state is not None:
+            errors.update({"CanScatterWorkspace": "You need to set the output for the can scatter"
+                                                  " workspace since it is specified to be loaded in your "
+                                                  "reduction configuration."})
+        if can_scatter_was_set and can_scatter_from_state is None:
+            errors.update({"CanScatterWorkspace": "You set an output workspace for can scatter, "
+                                                  "although none is specified in the reduction configuration."})
+
+        # For can scatter monitor
+        can_scatter_monitor = self.getProperty("CanScatterMonitorWorkspace").value
+        can_scatter_monitor_as_string = self.getProperty("CanScatterMonitorWorkspace").valueAsStr
+        can_scatter_monitor_was_set = can_scatter_monitor is not None or len(can_scatter_monitor_as_string) > 0
+        if not can_scatter_monitor_was_set and can_scatter_monitor is not None:
+            errors.update({"CanScatterMonitorWorkspace": "You need to set the output for the can scatter monitor"
+                                                         " workspace since it is specified to be loaded in your "
+                                                         "reduction configuration."})
+        if can_scatter_monitor_was_set and can_scatter_monitor is None:
+            errors.update({"CanScatterMonitorWorkspace": "You set an output workspace for can scatter monitor, "
+                                                         "although none is specified in the reduction configuration."})
+
+        # For sample transmission
+        can_transmission = self.getProperty("CanTransmissionWorkspace").value
+        can_transmission_as_string = self.getProperty("CanTransmissionWorkspace").valueAsStr
+        can_transmission_was_set = can_transmission is not None or len(can_transmission_as_string) > 0
+        can_transmission_from_state = data_info.can_transmission
+        if not can_transmission_was_set and can_transmission_from_state is not None:
+            errors.update({"CanTransmissionWorkspace": "You need to set the output for the can transmission"
+                                                       " workspace since it is specified to be loaded in your "
+                                                       "reduction configuration."})
+        if can_transmission_was_set and can_transmission_from_state is None:
+            errors.update({"CanTransmissionWorkspace": "You set an output workspace for can transmission, "
+                                                       "although none is specified in the reduction configuration."})
+
+        # For can direct
+        can_direct = self.getProperty("CanDirectWorkspace").value
+        can_direct_as_string = self.getProperty("CanDirectWorkspace").valueAsStr
+        can_direct_was_set = can_direct is not None or len(can_direct_as_string) > 0
+        can_direct_from_state = data_info.can_direct
+        if not can_direct_was_set and can_direct_from_state is not None:
+            errors.update({"CanDirectWorkspace": "You need to set the output for the can direct"
+                                                 " workspace since it is specified to be loaded in your "
+                                                 "reduction configuration."})
+        if can_direct_was_set and can_direct_from_state is None:
+            errors.update({"CanDirectWorkspace": "You set an output workspace for can direct, "
+                                                 "although none is specified in the reduction configuration."})
         return errors
 
     def set_output_for_workspaces(self, workspace_type, workspaces):
@@ -224,8 +324,6 @@ class SANSLoad(DataProcessorAlgorithm):
         move_options = {"SANSState": state_dict,
                         "MoveType": "InitialMove"}
 
-
-
         # If beam centre was specified then use it
         beam_coordinates = self.getProperty("BeamCoordinates").value
         if beam_coordinates:
@@ -236,8 +334,6 @@ class SANSLoad(DataProcessorAlgorithm):
         if beam_coordinates:
             move_options.update({"Component": component})
 
-
-
         move_alg = create_unmanaged_algorithm(move_name, **move_options)
 
         # The workspaces are stored in a dict: workspace_names (sample_scatter, etc) : ListOfWorkspaces
@@ -245,6 +341,22 @@ class SANSLoad(DataProcessorAlgorithm):
             for workspace in workspace_list:
                 move_alg.setProperty("Workspace", workspace)
                 move_alg.execute()
+
+    def _get_progress_for_file_loading(self, data):
+        # Get the number of workspaces which are to be loaded
+        number_of_files_to_load = sum(x is not None for x in [data.sample_scatter, data.sample_transmission,
+                                                              data.sample_direct, data.can_transmission,
+                                                              data.can_transmission, data.can_direct,
+                                                              data.calibration])
+        progress_steps = number_of_files_to_load + 1
+        # Check if there is a move operation to be performed
+        uses_move = self.getProperty("MoveWorkspace").value
+
+        # The partitioning of the progress bar is 80% for loading if there is a move else 100%
+        end = 0.8 if uses_move else 1.0
+        progress = Progress(self, start=0.0, end=end, nreports=progress_steps)
+        return progress
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSLoad)

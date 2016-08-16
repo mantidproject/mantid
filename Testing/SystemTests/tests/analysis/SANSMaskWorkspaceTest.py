@@ -53,6 +53,8 @@ class SANSMaskWorkspaceTest(unittest.TestCase):
         load_alg.setProperty("PublishToCache", False)
         load_alg.setProperty("UseCached", False)
         load_alg.setProperty("MoveWorkspace", move_workspace)
+        load_alg.setProperty("SampleScatterWorkspace", "dummy")
+        load_alg.setProperty("SampleScatterMonitorWorkspace", "dummy")
 
         # Act
         load_alg.execute()

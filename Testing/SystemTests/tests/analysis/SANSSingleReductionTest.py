@@ -27,6 +27,10 @@ class SANSSingleReductionTest(unittest.TestCase):
         load_alg.setProperty("PublishToCache", False)
         load_alg.setProperty("UseCached", False)
         load_alg.setProperty("MoveWorkspace", False)
+        load_alg.setProperty("SampleScatterWorkspace", "dummy")
+        load_alg.setProperty("SampleScatterMonitorWorkspace", "dummy")
+        load_alg.setProperty("SampleTransmissionWorkspace", "dummy")
+        load_alg.setProperty("SampleDirectWorkspace", "dummy")
 
         # Act
         load_alg.execute()

@@ -30,16 +30,35 @@ def has_calibration_already_been_applied(workspace, full_file_path):
 
 
 def add_calibration_tag_to_workspace(workspace, full_file_path):
+    """
+    Adds a calibration tag to the workspace, which is the file path to the calibration file
+
+    This is used to determine if a calibration (and if the correct calibration) has been applied to a workspace.
+    :param workspace: the workspace to which the calibration tag is added
+    :param full_file_path: the full file path to the calibration file
+    """
     set_tag(SANSConstants.Calibration.calibration_workspace_tag, full_file_path, workspace)
 
 
 def get_expected_calibration_workspace_name(full_file_path):
+    """
+    Gets the name of the calibration file.
+
+    :param full_file_path: the full file path to the calibration file.
+    :return: the calibration file name.
+    """
     truncated_path = basename(full_file_path)
     file_name, _ = splitext(truncated_path)
     return file_name
 
 
 def get_already_loaded_calibration_workspace(full_file_path):
+    """
+    Gets a calibration workspace from the ADS if it exists.
+
+    :param full_file_path: the full file path to the calibration workspace
+    :return: a handle to the calibration workspace or None
+    """
     calibration_workspace_name = get_expected_calibration_workspace_name(full_file_path)
     if AnalysisDataService.doesExist(calibration_workspace_name):
         output_ws = AnalysisDataService.retrieve(calibration_workspace_name)
@@ -53,8 +72,8 @@ def get_calibration_workspace(full_file_path, use_loaded):
     Load the calibration workspace from the specified file
 
     :param full_file_path: Path to the calibration file.
-    :param use_loaded: Allows us to check for the calibration file on the ADS
-    :return: the calibration workspace
+    :param use_loaded: Allows us to check for the calibration file on the ADS.
+    :return: the calibration workspace.
     """
     calibration_workspace = None
     # Here we can avoid reloading of the calibration workspace
@@ -75,15 +94,28 @@ def get_calibration_workspace(full_file_path, use_loaded):
 
 
 def get_cloned_calibration_workspace(calibration_workspace):
+    """
+    Creates a clone from a calibration workspace, in order to consume it later.
+
+    :param calibration_workspace: the calibration workspace which is being cloned
+    :return: a cloned calibration workspace
+    """
     clone_name = "CloneWorkspace"
     clone_options = {SANSConstants.input_workspace: calibration_workspace,
-                     SANSConstants.output_workspace: "dummy"}
+                     SANSConstants.output_workspace: SANSConstants.dummy}
     alg = create_unmanaged_algorithm(clone_name, **clone_options)
     alg.execute()
     return alg.getProperty(SANSConstants.output_workspace).value
 
 
 def get_missing_parameters(calibration_workspace, workspace):
+    """
+    Get a list of missing parameter names which are on the data workspace but not on the calibration workspace.
+
+    :param calibration_workspace: the calibration workspace
+    :param workspace: the data workspace (which is to be calibrated later on).
+    :return: a list of parameters which exist on the data workspace but not on the calibration workspace.
+    """
     original_parameter_names = workspace.getInstrument().getParameterNames()
     calibration_workspace_instrument = calibration_workspace.getInstrument()
     missing_parameter_names = []
@@ -94,6 +126,14 @@ def get_missing_parameters(calibration_workspace, workspace):
 
 
 def apply_missing_parameters(calibration_workspace, workspace, missing_parameters):
+    """
+    Transfers missing properties from the data workspace to the calibration workspace.
+
+    :param calibration_workspace: the calibration workspace.
+    :param workspace: the data workspace.
+    :param missing_parameters: a list of missing parameters which exist on the data workspace but not on the calibration
+                               workspace.
+    """
     instrument = workspace.getInstrument()
     component_name = instrument.getName()
     set_instrument_parameter_options = {"Workspace": calibration_workspace,
@@ -120,6 +160,12 @@ def apply_missing_parameters(calibration_workspace, workspace, missing_parameter
 
 
 def calibrate(calibration_workspace, workspace_to_calibrate):
+    """
+    Performs a calibration. The instrument parameters are copied from the calibration workspace to the data workspace.
+
+    :param calibration_workspace: the calibration workspace
+    :param workspace_to_calibrate: the workspace which has the calibration applied to it.
+    """
     copy_instrument_name = "CopyInstrumentParameters"
     copy_instrument_options = {SANSConstants.input_workspace: calibration_workspace,
                                SANSConstants.output_workspace: workspace_to_calibrate}
@@ -128,11 +174,28 @@ def calibrate(calibration_workspace, workspace_to_calibrate):
 
 
 def add_to_ads(calibration_workspace, full_file_path):
+    """
+    Add the calibration file to the ADS. The file name is used to publish it to the ADS.
+
+    :param calibration_workspace: the calibration file which is to be published.
+    :param full_file_path: the file path to the calibration file.
+    """
     calibration_workspace_name = get_expected_calibration_workspace_name(full_file_path)
     AnalysisDataService.addOrReplace(calibration_workspace_name, calibration_workspace)
 
 
 def do_apply_calibration(full_file_path, workspaces_to_calibrate, use_loaded, publish_to_ads):
+    """
+    Applies calibration to a data workspace
+
+    :param full_file_path: the file path to the calibration file.
+    :param workspaces_to_calibrate: the workspace which is to be calibrated.
+    :param use_loaded: if already loaded calibration workspace is to be used.
+    :param publish_to_ads: if calibration workspace is to be added to the ADS.
+    """
+    # Load calibration workspace
+    calibration_workspace = get_calibration_workspace(full_file_path, use_loaded)
+
     # Check if the workspace has a calibration already applied to it and if it coincides with the
     # provided calibration file
     for workspaces in list(workspaces_to_calibrate.values()):
@@ -140,9 +203,6 @@ def do_apply_calibration(full_file_path, workspaces_to_calibrate, use_loaded, pu
         # GroupWorkspaces
         if has_calibration_already_been_applied(workspaces[0], full_file_path):
             continue
-
-        # Load calibration workspace
-        calibration_workspace = get_calibration_workspace(full_file_path, use_loaded)
 
         # Apply calibration to workspace
         # This means that we copy the Parameter Map (PM) from the calibration workspace to the
@@ -172,6 +232,16 @@ def do_apply_calibration(full_file_path, workspaces_to_calibrate, use_loaded, pu
 
 
 def apply_calibration(calibration_file_name, workspaces, monitor_workspaces, use_loaded, publish_to_ads):
+    """
+    Apply (tube) calibration to scatter workspaces and corresponding monitor workspaces.
+
+    :param calibration_file_name: the file name of the calibration file.
+    :param workspaces: a map with scatter workspaces for sample and can
+    :param monitor_workspaces: a map with scatter monitor workspaces for sample and can
+    :param use_loaded: if calibration file from ADS is to be used (if it exists)
+    :param publish_to_ads: if the calibration file should be published to the ADS
+    :return:
+    """
     full_file_path = find_full_file_path(calibration_file_name)
 
     # Check for the sample scatter and the can scatter workspaces

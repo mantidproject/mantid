@@ -2,6 +2,9 @@
 
 
 class SANSConstants(object):
+    """
+    The SANSConstants object is a convenient collection of constants which are used during the SANS reduction.
+    """
     monitor_suffix = "_monitors"
     input_workspace = "InputWorkspace"
 
@@ -26,6 +29,9 @@ class SANSConstants(object):
     sans2d = "SANS2D"
     larmor = "LARMOR"
     loq = "LOQ"
+
+    reduced_workspace_name_in_logs = "reduced_workspace_name"
+    sans_file_tag = "sans_file_tag"
 
     class Calibration(object):
         calibration_workspace_tag = "sans_applied_calibration_file"

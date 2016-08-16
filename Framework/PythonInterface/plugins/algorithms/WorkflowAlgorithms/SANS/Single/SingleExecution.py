@@ -7,6 +7,14 @@ from SANS2.Common.SANSEnumerations import (ISISReductionMode)
 
 
 def run_core_reduction(reduction_alg, reduction_setting_bundle, use_optimizations):
+    """
+    This function runs a core reduction. This is essentially half a reduction (either smaple or can).
+
+    :param reduction_alg: a handle to the reduction algorithm.
+    :param reduction_setting_bundle: a ReductionSettingBundle tuple
+    :param use_optimizations: a flag to check if optimizations should be used.
+    :return: an OutputBundle and an OutputPartsBundle
+    """
     # Get component to reduce
     component = get_component_to_reduce(reduction_setting_bundle)
     # Set the properties on the reduction algorithms
@@ -51,12 +59,15 @@ def run_core_reduction(reduction_alg, reduction_setting_bundle, use_optimization
 
 def get_final_output_workspaces(output_bundles):
     """
-    Several outputs which (potentially various reduction modes, e.g. HAB, and for the different data types
+    This function provides the final steps for the data reduction.
 
-    We provide here:
-      1. Can Subtraction
-      2. Data clean up
+    The final steps are:
+    1. Can Subtraction (if required)
+    2. Data clean up (if required)
+    :param output_bundles: A set of outputBundles
+    :return: a map of ReductionMode vs final output workspaces.
     """
+
     reduction_mode_vs_output_bundles = get_reduction_mode_vs_output_bundles(output_bundles)
 
     # For each reduction mode, we need to perform a can subtraction (and potential cleaning of the workspace)
@@ -84,6 +95,14 @@ def get_final_output_workspaces(output_bundles):
 
 
 def perform_can_subtraction(sample, can):
+    """
+    Subtracts the can from the sample workspace.
+
+    We need to manually take care of the q resolution issue here.
+    :param sample: the sample workspace
+    :param can: the can workspace.
+    :return: the subtracted workspace.
+    """
     subtraction_name = "Minus"
     subtraction_options = {"LHSWorkspace": sample,
                            "RHSWorkspace": can,
@@ -148,6 +167,12 @@ def get_reduction_mode_vs_output_bundles(output_bundles):
 
 
 def get_component_to_reduce(reduction_setting_bundle):
+    """
+    Gets the component to reduce as string. Currently we encode this as LAB or HAB.
+
+    :param reduction_setting_bundle: a  ReductionSettingBundle tuple.
+    :return: the reduction mode as a string
+    """
     # Get the reduction mode
     reduction_mode = reduction_setting_bundle.reduction_mode
 

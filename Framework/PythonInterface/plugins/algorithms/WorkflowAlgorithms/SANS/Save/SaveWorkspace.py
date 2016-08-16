@@ -14,11 +14,11 @@ file_format_with_append = namedtuple('file_format_with_append', 'file_format, ap
 
 def save_to_file(workspace, file_format, file_name):
     """
-    Save a workspace to a file
+    Save a workspace to a file.
 
-    :param workspace: the workspace to save
-    :param file_format: the selected file format type
-    :param file_name: the file name
+    :param workspace: the workspace to save.
+    :param file_format: the selected file format type.
+    :param file_name: the file name.
     :return:
     """
     save_options = {SANSConstants.input_workspace: workspace}

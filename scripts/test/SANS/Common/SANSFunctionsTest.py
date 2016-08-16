@@ -2,10 +2,17 @@ import unittest
 import mantid
 
 from mantid.kernel import (V3D, Quat)
-from SANS2.Common.SANSFunctions import quaternion_to_angle_and_axis
+from SANS2.Common.SANSFunctions import (quaternion_to_angle_and_axis, create_unmanaged_algorithm, add_to_sample_log)
 
 
-class SANSFUnctionsTest(unittest.TestCase):
+class SANSFunctionsTest(unittest.TestCase):
+    def _create_sample_workspace(self):
+        sample_name = "CreateSampleWorkspace"
+        sample_options = {"OutputWorkspace": "dummy"}
+        sample_alg = create_unmanaged_algorithm(sample_name, **sample_options)
+        sample_alg.execute()
+        return sample_alg.getProperty("OutputWorkspace").value
+
     def _do_test_quaternion(self, angle, axis, expected_axis=None):
         # Act
         quaternion = Quat(angle, axis)
@@ -40,6 +47,50 @@ class SANSFUnctionsTest(unittest.TestCase):
         # There shouldn't be an axis for angle 0
         self._do_test_quaternion(angle, axis)
 
+    def test_that_sample_log_is_added(self):
+        # Arrange
+        workspace = self._create_sample_workspace()
+        log_name = "TestName"
+        log_value = "TestValue"
+        log_type = "String"
+
+        # Act
+        add_to_sample_log(workspace, log_name, log_value, log_type)
+
+        # Assert
+        run = workspace.run()
+        self.assertTrue(run.hasProperty(log_name))
+        self.assertTrue(run.getProperty(log_name).value == log_value)
+
+    def test_that_sample_log_raises_for_non_string_type_arguments(self):
+        # Arrange
+        workspace = self._create_sample_workspace()
+        log_name = "TestName"
+        log_value = 123
+        log_type = "String"
+
+        # Act + Assert
+        try:
+            add_to_sample_log(workspace, log_name, log_value, log_type)
+            did_raise = False
+        except TypeError:
+            did_raise = True
+        self.assertTrue(did_raise)
+
+    def test_that_sample_log_raises_for_wrong_type_selection(self):
+        # Arrange
+        workspace = self._create_sample_workspace()
+        log_name = "TestName"
+        log_value = "test"
+        log_type = "sdfsdfsdf"
+
+        # Act + Assert
+        try:
+            add_to_sample_log(workspace, log_name, log_value, log_type)
+            did_raise = False
+        except ValueError:
+            did_raise = True
+        self.assertTrue(did_raise)
 
 if __name__ == '__main__':
     unittest.main()

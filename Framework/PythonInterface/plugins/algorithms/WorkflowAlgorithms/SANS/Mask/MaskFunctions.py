@@ -94,6 +94,10 @@ def get_geometry_information(ipf_path, detector_type):
 
 
 class SpectraBlock(object):
+    """
+    The SpectraBlock class maps a SANS-particular detector selection syntax to a detector selection on the actual
+    instrument.
+    """
     def __init__(self, ipf_path, run_number, instrument, detector_type):
         super(SpectraBlock, self).__init__()
         self._ipf_path = ipf_path

@@ -31,7 +31,7 @@ class SANSBatchReduction(DataProcessorAlgorithm):
                                  "Depending on your concrete reduction, this could provide a significant"
                                  " performance boost")
 
-        allowed_detectors = StringListValidator(["PublishToADS", "SaveToFile"])
+        allowed_detectors = StringListValidator(["PublishToADS", "SaveToFile", "Both"])
         self.declareProperty("OutputMode", "PublishToADS", validator=allowed_detectors, direction=Direction.Input,
                              doc="There are two output modes available./n"
                                  "PublishToADS: publishes the workspaces to the ADS. /n"
@@ -45,11 +45,11 @@ class SANSBatchReduction(DataProcessorAlgorithm):
         use_optimizations = self.getProperty("UseOptimizations").value
 
         # Check how the output is to be handled
-        output_mode = self._get_output_mode()
+        output_modes = self._get_output_modes()
 
         # We now iterate over each state, load the data and perform the reduction
         for state in states:
-            single_reduction_for_batch(state, use_optimizations, output_mode)
+            single_reduction_for_batch(state, use_optimizations, output_modes)
 
     def validateInputs(self):
         errors = dict()
@@ -62,12 +62,14 @@ class SANSBatchReduction(DataProcessorAlgorithm):
             errors.update({"SANSBatchReduction": str(err)})
         return errors
 
-    def _get_output_mode(self):
+    def _get_output_modes(self):
         output_mode = self.getProperty("OutputMode").value
         if output_mode == "PublishToADS":
-            mode = OutputMode.PublishToADS
+            mode = [OutputMode.PublishToADS]
         elif output_mode == "SaveToFile":
-            mode = OutputMode.SaveToFile
+            mode = [OutputMode.SaveToFile]
+        elif output_mode == "Both":
+            mode = [OutputMode.PublishToADS, OutputMode.SaveToFile]
         else:
             raise ValueError("SANSBatchReduction: Unknown publication mode {0}".format(output_mode))
         return mode

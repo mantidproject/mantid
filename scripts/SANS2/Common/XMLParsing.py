@@ -8,6 +8,15 @@ except ImportError:
 
 def get_named_elements_from_ipf_file(ipf_file, names_to_search, value_type):
     """
+    Gets a named element from the IPF
+
+    This is useful for detector names etc.
+    :param ipf_file: the path to the IPF
+    :param names_to_search: the names we want to search for on the XML file.
+    :param value_type: the type we expect for the names.
+    :return: a ElementName vs Value map
+    """
+    """
     Args:
         ipf_file: The path to the IPF
         names_to_search: A list of search names
@@ -29,6 +38,12 @@ def get_named_elements_from_ipf_file(ipf_file, names_to_search, value_type):
 
 
 def get_monitor_names_from_idf_file(idf_file):
+    """
+    Gets the monitor names from the IDF
+
+    :param idf_file: the path to the IDF
+    :return: a NumberAsString vs Monitor Name map
+    """
     def get_tag(tag_in):
         return "{http://www.mantidproject.org/IDF/1.0}" + tag_in
     output = {}

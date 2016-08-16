@@ -3,7 +3,7 @@
 from math import (acos, sqrt, degrees)
 from mantid.api import AlgorithmManager
 from mantid.kernel import (DateAndTime)
-
+from SANS2.Common.SANSConstants import SANSConstants
 
 # -------------------------------------------
 # Free functions
@@ -46,6 +46,15 @@ def get_log_value(run, log_name, log_type):
 
 
 def get_single_valued_logs_from_workspace(workspace, log_names, log_types, convert_from_millimeter_to_meter=False):
+    """
+    Gets non-array valued entries from the sample logs.
+
+    :param workspace: the workspace with the sample log.
+    :param log_names: the log names which are to be extracted.
+    :param log_types: the types of log entries, ie strings or numeric
+    :param convert_from_millimeter_to_meter:
+    :return:
+    """
     assert len(log_names) == len(log_types)
     # Find the desired log names.
     run = workspace.getRun()
@@ -60,6 +69,13 @@ def get_single_valued_logs_from_workspace(workspace, log_names, log_types, conve
 
 
 def create_unmanaged_algorithm(name, **kwargs):
+    """
+    Creates an unmanaged child algorithm and initializes it.
+
+    :param name: the name of the algorithm
+    :param kwargs: settings for the algorithm
+    :return: an initialized algorithm instance.
+    """
     alg = AlgorithmManager.createUnmanaged(name)
     alg.initialize()
     alg.setChild(True)
@@ -92,6 +108,12 @@ def quaternion_to_angle_and_axis(quaternion):
 
 
 def get_charge_and_time(workspace):
+    """
+    Gets the total charge and time from a workspace
+
+    :param workspace: the workspace from which we extract the charge and time.
+    :return: the charge, the time
+    """
     run = workspace.getRun()
     charges = run.getLogData('proton_charge')
     total_charge = sum(charges.value)
@@ -99,3 +121,27 @@ def get_charge_and_time(workspace):
     time_passed /= 1e6
     return total_charge, time_passed
 
+
+def add_to_sample_log(workspace, log_name, log_value, log_type):
+    """
+    Adds a sample log to the workspace
+
+    :param workspace: the workspace to whcih the sample log is added
+    :param log_name: the name of the log
+    :param log_value: the value of the log in string format
+    :param log_type: the log value type which can be String, Number, Number Series
+    """
+    if log_type not in ["String", "Number", "Number Series"]:
+        raise ValueError("Tryint go add {0} to the sample logs but it was passed "
+                         "as an unknown type of {1}".format(log_value, log_type))
+    if not isinstance(log_value, str):
+        raise TypeError("The value which is added to the sample logs needs to be passed as a string,"
+                        " but it is passed as {0}".format(type(log_value)))
+
+    add_log_name = "AddSampleLog"
+    add_log_options = {SANSConstants.workspace: workspace,
+                       "LogName": log_name,
+                       "LogText": log_value,
+                       "LogType": log_type}
+    add_log_alg = create_unmanaged_algorithm(add_log_name, **add_log_options)
+    add_log_alg.execute()

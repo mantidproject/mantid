@@ -7,8 +7,9 @@ from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayPropert
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 
 from SANS2.State.SANSStateBase import create_deserialized_sans_state_from_property_manager
+from SANS2.State.SANSStateFunctions import add_workspace_name
 from SANS2.Common.SANSEnumerations import (ReductionMode, DataType, OutputParts, ISISReductionMode)
-from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
+from SANS2.Common.SANSFunctions import (create_unmanaged_algorithm)
 from SANS.Single.SingleExecution import (run_core_reduction, get_final_output_workspaces,
                                          get_merge_bundle_for_merge_request)
 from SANS.Single.Bundles import ReductionSettingBundle
@@ -144,7 +145,7 @@ class SANSSingleReduction(DataProcessorAlgorithm):
         # Set sample logs
         # Todo: Set sample log
         # Set the output workspaces
-        self.set_output_workspaces(reduction_mode_vs_output_workspaces)
+        self.set_output_workspaces(reduction_mode_vs_output_workspaces, state)
 
     def validateInputs(self):
         errors = dict()
@@ -237,11 +238,19 @@ class SANSSingleReduction(DataProcessorAlgorithm):
         self.setProperty("OutScaleFactor", merge_bundle.scale)
         self.setProperty("OutShiftFactor", merge_bundle.shift)
 
-    def set_output_workspaces(self, reduction_mode_vs_output_workspaces):
+    def set_output_workspaces(self, reduction_mode_vs_output_workspaces, state):
+        """
+        Sets the output workspaces which can be HAB, LAB or Merged.
+
+        At this step we also provide a workspace name to the sample logs which can be used later on for saving
+        :param reduction_mode_vs_output_workspaces:  map from reduction mode to output workspace
+        :param state: a SANSState object
+        """
         # Note that this breaks the flexibility that we have established with the reduction mode. We have not hardcoded
         # HAB or LAB anywhere which means that in the future there could be other detectors of relevance. Here we
         # reference HAB and LAB directly since we currently don't want to rely on dynamic properties. See also in PyInit
         for reduction_mode, output_workspace in reduction_mode_vs_output_workspaces.items():
+            add_workspace_name(output_workspace, state, reduction_mode)
             if reduction_mode is ReductionMode.Merged:
                 self.setProperty("OutputWorkspaceMerged", output_workspace)
             elif reduction_mode is ISISReductionMode.Lab:
