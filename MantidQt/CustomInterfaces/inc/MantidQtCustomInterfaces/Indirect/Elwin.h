@@ -32,6 +32,8 @@ private slots:
   void maxChanged(double val);
   void updateRS(QtProperty *prop, double val);
   void unGroupInput(bool error);
+  void saveClicked();
+  void plotClicked();
 
 private:
   void addSaveAlgorithm(const std::string &workspaceName,

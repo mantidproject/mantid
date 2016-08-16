@@ -98,6 +98,9 @@ void Elwin::setup() {
           SLOT(newPreviewFileSelected(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(plotInput()));
+  // Handle plot and save
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked())):
 
   // Set any default values
   m_dblManager->setValue(m_properties["IntegrationStart"], -0.02);
@@ -268,6 +271,7 @@ void Elwin::unGroupInput(bool error) {
       checkADSForPlotSaveWorkspace(eltWs, true);
       plotSpectrum(QString::fromStdString(eltWs), 0, 9);
     }
+  }
 }
 
 /**
