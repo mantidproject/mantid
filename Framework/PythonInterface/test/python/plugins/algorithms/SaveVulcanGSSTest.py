@@ -1,4 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 
 import unittest
 import numpy
@@ -53,7 +54,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
 
         wbuf = ""
         tof = tof0
-        for n in xrange(numpts):
+        for n in range(numpts):
             wbuf += "%.4f " % (math.log(tof)/math.log(10.))
             tof = tof * (1 + delta)
        
@@ -77,7 +78,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         vece = []
 
         tof = tof0
-        for n in xrange(numpts):
+        for n in range(numpts):
             vecx.append(tof)
             vecy.append(math.sin(tof0))
             vece.append(1.)

@@ -25,8 +25,8 @@ login and through its `web portal
 <https://portal.scarf.rl.ac.uk/>`_. This resource is available for
 ISIS users.
 
-.. warning:: This interface is undergoing heavy works. The sections or
-             tabs are subject to changes and reorganization.New
+.. warning:: This interface is undergoing heavy works. The tabs are 
+			 subject to changes and reorganization.New
              functionality is being added and the pre-post-processing
              and reconstruction workflow is being modified based on
              feedback from initial test data.
@@ -42,7 +42,7 @@ jobs submitted recently.
    :align: right
    :scale: 50%
 
-In the setup tab you can set the details of the remote and/or local
+In the *Setup* tab you can set the details of the remote and/or local
 compute resources. Importantly, here is where you can set you username
 and password to log into the remote compute resource. To be able to
 run jobs remotely you first need to log into the remote compute
@@ -50,7 +50,7 @@ resource. Once you log in, an automatic mechanism will periodically
 query the status of jobs (for example every minute). You can also
 update it at any time by clicking on the refresh button.
 
-In this tab you also have to set the folders/directories where the
+In the *Setup* tab you also have to set the folders/directories where the
 input data for reconstruction jobs is found. This information is
 required every time you start analyzing a new dataset. The required
 fields are:
@@ -131,8 +131,7 @@ relevant file and data formats is given here:
 * FITS: `Flexible Image Transport System format
   <http://en.wikipedia.org/wiki/FITS>`__ used to store images in
   files. You can see the details on how FITS images can be loaded into
-  Mantid in the documentation of the algorithm LoadFITS
-  :ref:`LoadFITS <algm-LoadFITS>`.
+  Mantid in the documentation of the algorithm :ref:`LoadFITS <algm-LoadFITS>`.
 
 * TIFF: `Tagged Image File Format
   <http://en.wikipedia.org/wiki/Tagged_Image_File_Format>`__ images
@@ -146,7 +145,7 @@ relevant file and data formats is given here:
 
 These formats are used in different processing steps and parts of this
 interface. For example, you can visualize FITS and TIFF images in the
-**Run** tab and also in the **ROI, etc.** tab. As another example, the
+**Run** tab and also in the **ROI etc.** tab. As another example, the
 reconstruction tools typically need as inputs at least a stack of
 images which can be in different formats, including a set of FITS or
 TIFF files, or a single DLS NXTomo file. Other third party tools use
@@ -164,7 +163,7 @@ This is dependent on the facility and instrument.
 
 The path to the files of a particular tomographic reconstruction
 consists of several components. An example path would be (on a Windows
-system where the input/output data is on the drive "D":
+system where the input/output data is on the drive "D"):
 
 * D:/data/RB987654321/experiment_foo/
 
@@ -187,7 +186,7 @@ where:
 
 
 As the files are mirrored on the remote computer cluster, if a network
-drive have been added (or mapped) in the local system, for example
+drive has been added (or mapped) in the local system, for example
 using the drive "S:", then the following path would contain a similar
 tree of image files:
 
@@ -198,10 +197,11 @@ The equivalent on a non-Windows system would be for example:
 * /media/scarf/data/RB987654321/experiment_foo/
 
 These and related parameters can be inspected and modified in the
-sytem settings section (or **System** tab). Their default values are
+**System** tab. Their default values are
 set for the current setup of the IMAT analysis machine. The "Reset
 all" button resets all these settings to their factory defaults.  Note
-that the **System** section of the interface is currently work in
+that the **Reset all** button currently requires **no confirmation**. 
+The **System** tab of the interface is currently a work in
 progress and it may change significantly as required during
 commissioning of IMAT.
 
@@ -218,7 +218,7 @@ To be able to run jobs on a remote compute resource (cluster, supercomputer, etc
 * Log into the resource (in **Setup**)
 * Then in **Run** select the compute resource and setup one
   reconstruction tool
-* Use the **reconstruct** button in the **Run** tab of the interface
+* Use the *Reconstruct* button in the **Run** tab of the interface
 
 You can monitor the status of the jobs currently running (and recently
 run) on remote compute resources in the same tab.
@@ -229,13 +229,13 @@ Setting common parameters for the reconstruction jobs
 Before any reconstruction job is started several pre-/post-processing
 options would normally need to be fine tuned for the sample data to be
 processed correctly. The region of interest and the "air" region (or
-region for normalization) can be set visually in a specific tab. All
-other pre- and post-processing settings are defined in a separate tab.
+region for normalization) can be set visually in the *ROI etc* tab. All
+other pre- and post-processing settings are defined in the *Filters* tab.
 
 Regions
 ~~~~~~~
 
-Several parameters can be set in the **ROI etc.** section or tab. These
+Several parameters can be set in the **ROI etc.** tab. These
 parameters will be used for all the reconstruction jobs, regardless of
 the tool and/or reconstruction method used.
 
@@ -277,7 +277,7 @@ find the center of rotation automatically is disabled at present.
 If when selection a region the mouse is moved outside of the images,
 it is possible to continue the selection of the region (second corner)
 by clicking again inside the image. Alternatively, any selection can
-be reset at any point by using the "reset" buttons.
+be reset at any point by using the "Reset" buttons.
 
 When loading a stack of images, note that when the images are loaded
 from the folder(s) (directorie(s)) any files with unrecognized
@@ -285,7 +285,7 @@ extension or type (for example .txt) will be ignored. Normally a
 warning about this will be shown in the Mantid logs. Image files with
 the string **_SummedImg** at the end of their names will be skipped as
 well, as this is a convention used by some detectors/control software
-to generate summed images
+to generate summed images.
 
 Pre-/post-processing
 ~~~~~~~~~~~~~~~~~~~~
@@ -303,7 +303,7 @@ applied on the reconstructed volume produced by the algorithm.
 
 Among other options, normalization by flat and/or dark images can be
 enabled here. Note that this setting is global and will be effective
-for any input dataset. In the **Setup** section it is possible to
+for any input dataset. In the **Setup** tab it is possible to
 enable or disable them specifically for the dataset being processed.
 
 The tab also shows options to define what outputs should be produced
@@ -317,7 +317,7 @@ Results from reconstruction jobs
 --------------------------------
 
 The results are written into the output paths selected in the
-interface (in the *setup* section or tab). For every reconstructed
+interface (in the *Setup* tab). For every reconstructed
 volume a sequence of images (slices along the vertical axis) are
 written. In addition, two complementary outputs are generated in the
 same location:
