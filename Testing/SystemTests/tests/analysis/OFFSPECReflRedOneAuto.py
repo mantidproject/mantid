@@ -17,19 +17,16 @@ class OFFSPECReflRedOneAuto(stresstesting.MantidStressTest):
         #Process using ReflectometryReductionOneAuto
         ivq_75, __, __ = ReflectometryReductionOneAuto(offspec75,
                                                        ThetaIn=0.70,#2*th
-                                                       WavelengthStep=0.05,
                                                        MomentumTransferStep=1e-3,
                                                        FirstTransmissionRun=offspec85)
 
         ivq_76, __, __ = ReflectometryReductionOneAuto(offspec76,
                                                        ThetaIn=2.00,#2*th
-                                                       WavelengthStep=0.05,
                                                        MomentumTransferStep=1e-3,
                                                        FirstTransmissionRun=offspec85)
 
         ivq_78, __, __ = ReflectometryReductionOneAuto(offspec78,
                                                        ThetaIn=3.40,#2*th
-                                                       WavelengthStep=0.05,
                                                        MomentumTransferStep=1e-3,
                                                        FirstTransmissionRun=offspec85)
 
@@ -44,7 +41,7 @@ class OFFSPECReflRedOneAuto(stresstesting.MantidStressTest):
         to check the Instrument definition or Instrument Parameters
         '''
         self.disableChecking = ["Instrument"]
-        return ("ivq_75_76_78","OFFSPECReflRedOneAuto_good_v3.nxs")
+        return ("ivq_75_76_78","OFFSPECReflRedOneAuto_good_v4.nxs")
 
     def requiredFiles(self):
         return ["OFFSPEC00027575.raw",
