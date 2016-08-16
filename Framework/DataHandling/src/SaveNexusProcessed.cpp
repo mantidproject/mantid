@@ -146,8 +146,6 @@ void SaveNexusProcessed::doExec(Workspace_sptr inputWorkspace,
                                 Mantid::NeXus::NexusFileIO_sptr &nexusFile,
                                 const bool keepFile,
                                 optional_size_t entryNumber) {
-  // TODO: Remove?
-  NXMEnableErrorReporting();
 
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");

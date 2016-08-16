@@ -689,8 +689,6 @@ void nexus_print_error(void *pD, char *text) {
  *  @throw runtime_error Thrown if algorithm cannot execute
  */
 void SaveToSNSHistogramNexus::exec() {
-  // NXMSetError(NULL, nexus_print_error);
-  NXMEnableErrorReporting();
 
   // Retrieve the filename from the properties
   m_inputFilename = getPropertyValue("InputFileName");
