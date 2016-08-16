@@ -689,7 +689,7 @@ void SliceViewer::updateDimensionSliceWidgets() {
 }
 
 //------------------------------------------
-void SliceViewer::testNewMDATA(
+void SliceViewer::updateQWTRaster(
     Mantid::API::IMDWorkspace_sptr ws, size_t dimX, size_t dimY,
     bool nonOrthmData) // think want dimx and dimy here too
 {
@@ -703,6 +703,9 @@ void SliceViewer::testNewMDATA(
 
   m_coordinateTransform = createCoordinateTransform(ws, m_dimX, m_dimY);
   m_data->setWorkspace(ws);
+  this->setTransparentZeros(false);
+
+  updateDisplay();
 }
 //------------------------------------------------------------------------------
 /** Set the displayed workspace. Updates UI.
@@ -1685,10 +1688,10 @@ void SliceViewer::checkForHKLDimension(
   makeNewm_data = API::isHKLDimensions(m_ws, dimX, dimY);
   if (SliceViewer::m_usingQWTRasterNonOrthogonal != makeNewm_data) {
     if ((makeNewm_data == false) && (API::requiresSkewMatrix(m_ws))) {
-      testNewMDATA(m_ws, 0, 1, makeNewm_data);
+      updateQWTRaster(m_ws, 0, 1, makeNewm_data);
     }
     if ((makeNewm_data == true) && (API::requiresSkewMatrix(m_ws))) {
-      testNewMDATA(m_ws, 0, 1, makeNewm_data);
+      updateQWTRaster(m_ws, 0, 1, makeNewm_data);
     }
   }
   SliceViewer::m_usingQWTRasterNonOrthogonal = makeNewm_data;

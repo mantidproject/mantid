@@ -76,8 +76,9 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget,
 public:
   SliceViewer(QWidget *parent = 0);
   ~SliceViewer() override;
-  void SliceViewer::testNewMDATA(Mantid::API::IMDWorkspace_sptr ws, size_t dimX,
-                                 size_t dimY, bool nonOrthmData); // TEST
+  void SliceViewer::updateQWTRaster(Mantid::API::IMDWorkspace_sptr ws,
+                                    size_t dimX, size_t dimY,
+                                    bool nonOrthmData); // TEST
   void setWorkspace(const QString &wsName);
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
   Mantid::API::IMDWorkspace_sptr getWorkspace();
