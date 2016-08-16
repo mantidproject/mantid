@@ -6,4 +6,4 @@ load_phonon -- Parses a phonon file into a file data object
 
 from __future__ import absolute_import
 
-__all__=['load_castep','load_phonon']
+__all__=['load_castep','load_phonon', 'load_helper']
