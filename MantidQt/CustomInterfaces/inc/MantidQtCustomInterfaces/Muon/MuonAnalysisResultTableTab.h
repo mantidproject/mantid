@@ -133,7 +133,9 @@ private:
   /// Returns a list of labels user has made sequential/simultaneous fits for
   std::pair<QStringList, QStringList> getFitLabels();
 
-  bool haveSameParameters(const QStringList &wsList);
+  bool haveSameParameters(const QStringList &names,
+                          std::function<Mantid::API::ITableWorkspace_sptr(
+                              const QString &)> tableFromName);
   QStringList getSelectedItemsToFit();
   QStringList getSelectedLogs();
   std::string getFileName();

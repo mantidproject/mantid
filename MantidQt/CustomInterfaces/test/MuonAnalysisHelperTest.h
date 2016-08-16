@@ -723,6 +723,26 @@ public:
     TS_ASSERT_EQUALS(names, expectedNames);
   }
 
+  void test_haveSameParameters_Yes() {
+    const auto &tableOne = createResultsTable({"A0", "A1"});
+    const auto &tableTwo = createResultsTable({"A0", "A1"});
+    const auto &tableThree = createResultsTable({"A0", "A1"});
+    bool sameParams;
+    TS_ASSERT_THROWS_NOTHING(
+        sameParams = haveSameParameters({tableOne, tableTwo, tableThree}));
+    TS_ASSERT_EQUALS(true, sameParams);
+  }
+
+  void test_haveSameParameters_No() {
+    const auto &tableOne = createResultsTable({"A0", "A1"});
+    const auto &tableTwo = createResultsTable({"A0", "A1"});
+    const auto &tableThree = createResultsTable({"A0", "B1"});
+    bool sameParams;
+    TS_ASSERT_THROWS_NOTHING(
+        sameParams = haveSameParameters({tableOne, tableTwo, tableThree}));
+    TS_ASSERT_EQUALS(false, sameParams);
+  }
+
 private:
   // Creates a single-point workspace with instrument and runNumber set
   Workspace_sptr createWs(const std::string &instrName, int runNumber,

@@ -138,6 +138,10 @@ MANTIDQT_CUSTOMINTERFACES_DLL QMap<int, QColor> getWorkspaceColors(
 MANTIDQT_CUSTOMINTERFACES_DLL void
 removeFixedParameterErrors(const Mantid::API::ITableWorkspace_sptr table);
 
+/// Check if fit tables have same parameters
+MANTIDQT_CUSTOMINTERFACES_DLL bool haveSameParameters(
+    const std::vector<Mantid::API::ITableWorkspace_sptr> &tables);
+
 /**
  * A class which deals with auto-saving the widget values. Widgets are
  * registered and then on any

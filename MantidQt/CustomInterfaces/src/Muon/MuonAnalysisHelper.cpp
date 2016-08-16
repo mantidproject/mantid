@@ -43,6 +43,21 @@ QColor getWorkspaceColor(size_t index) {
 /// The string "Error"
 const static std::string ERROR_STRING("Error");
 constexpr static size_t ERROR_LENGTH(5);
+
+/// Get keys from parameter table
+std::vector<std::string>
+getKeysFromTable(const Mantid::API::ITableWorkspace_sptr &tab) {
+  std::vector<std::string> keys;
+  if (tab) {
+    Mantid::API::TableRow row = tab->getFirstRow();
+    do {
+      std::string key;
+      row >> key;
+      keys.push_back(key);
+    } while (row.next());
+  }
+  return keys;
+}
 }
 
 namespace MantidQt {
@@ -1070,20 +1085,6 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
   typedef std::pair<size_t, std::vector<std::string>> FitProp;
   std::vector<FitProp> fitProperties;
 
-  // Get keys from parameter table
-  auto getKeysFromTable = [](const ITableWorkspace_sptr &tab) {
-    std::vector<std::string> keys;
-    if (tab) {
-      TableRow row = tab->getFirstRow();
-      do {
-        std::string key;
-        row >> key;
-        keys.push_back(key);
-      } while (row.next());
-    }
-    return keys;
-  };
-
   // Get fit properties for each input workspace
   for (const auto &ws : workspaces) {
     size_t nRuns = 0;
@@ -1145,7 +1146,7 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
  * as these columns correspond to fixed parameters.
  * @param table :: [input, output] Pointer to TableWorkspace to edit
  */
-void removeFixedParameterErrors(const Mantid::API::ITableWorkspace_sptr table) {
+void removeFixedParameterErrors(const ITableWorkspace_sptr table) {
   assert(table);
   const size_t nRows = table->rowCount();
   const auto colNames = table->getColumnNames();
@@ -1177,6 +1178,26 @@ void removeFixedParameterErrors(const Mantid::API::ITableWorkspace_sptr table) {
   for (const auto &name : zeroErrorColumns) {
     table->removeColumn(name);
   }
+}
+
+/**
+ * Checks the given set of fit tables to see if all fits had same parameters.
+ * @param tables :: [input] Fit tables
+ * @returns :: True if all fits used same model, otherwise false.
+ */
+bool haveSameParameters(const std::vector<ITableWorkspace_sptr> &tables) {
+  bool sameParams = true;
+  if (tables.size() > 1) {
+    const auto &firstKeys = getKeysFromTable(tables.front());
+    for (size_t i = 1; i < tables.size(); ++i) {
+      const auto &keys = getKeysFromTable(tables[i]);
+      if (keys != firstKeys) {
+        sameParams = false;
+        break;
+      }
+    }
+  }
+  return sameParams;
 }
 } // namespace MuonAnalysisHelper
 } // namespace CustomInterfaces

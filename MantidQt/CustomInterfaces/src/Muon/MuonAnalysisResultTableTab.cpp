@@ -720,35 +720,43 @@ void MuonAnalysisResultTableTab::createTable() {
   }
 
   // Check workspaces have same parameters
-  if (haveSameParameters(wsSelected)) {
-    // Create the results table
-    Mantid::API::ITableWorkspace_sptr table =
-        Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  const auto tableFromName = [](const QString &qs) {
+    return retrieveWSChecked<ITableWorkspace>(qs.toStdString() +
+                                              PARAMS_POSTFIX);
+  };
+  if (!haveSameParameters(wsSelected, tableFromName)) {
+    QMessageBox::information(
+        this, "Mantid - Muon Analysis",
+        "Please pick workspaces with the same fitted parameters");
+    return;
+  }
+  // Create the results table
+  Mantid::API::ITableWorkspace_sptr table =
+      Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
 
-    // Add columns for log values
-    foreach (QString log, logsSelected) {
-      std::string columnTypeName;
-      int columnPlotType;
+  // Add columns for log values
+  foreach (QString log, logsSelected) {
+    std::string columnTypeName;
+    int columnPlotType;
 
-      // We use values of the first workspace to determine the type of the
-      // column to add. It seems reasonable to assume
-      // that log values with the same name will have same types.
-      QString typeName = m_logValues[wsSelected.first()][log].typeName();
-      if (typeName == "double") {
-        columnTypeName = "double";
-        columnPlotType = 1;
-      } else if (typeName == "QString") {
-        columnTypeName = "str";
-        columnPlotType = 6;
-      } else
-        throw std::runtime_error(
-            "Couldn't find appropriate column type for value with type " +
-            typeName.toStdString());
+    // We use values of the first workspace to determine the type of the
+    // column to add. It seems reasonable to assume
+    // that log values with the same name will have same types.
+    QString typeName = m_logValues[wsSelected.first()][log].typeName();
+    if (typeName == "double") {
+      columnTypeName = "double";
+      columnPlotType = 1;
+    } else if (typeName == "QString") {
+      columnTypeName = "str";
+      columnPlotType = 6;
+    } else
+      throw std::runtime_error(
+          "Couldn't find appropriate column type for value with type " +
+          typeName.toStdString());
 
-      Column_sptr newColumn =
-          table->addColumn(columnTypeName, log.toStdString());
-      newColumn->setPlotType(columnPlotType);
-      newColumn->setReadOnly(false);
+    Column_sptr newColumn = table->addColumn(columnTypeName, log.toStdString());
+    newColumn->setPlotType(columnPlotType);
+    newColumn->setReadOnly(false);
     }
 
     // Cache the start time of the first run
@@ -852,11 +860,6 @@ void MuonAnalysisResultTableTab::createTable() {
          << "  importTableWorkspace('" << tableName << "', True)\n";
 
     emit runPythonCode(QString::fromStdString(code.str()), false);
-  } else {
-    QMessageBox::information(
-        this, "Mantid - Muon Analysis",
-        "Please pick workspaces with the same fitted parameters");
-  }
 }
 
 /**
@@ -879,50 +882,49 @@ void MuonAnalysisResultTableTab::createMultipleFitsTable() {
                              "Please select options from both tables.");
     return;
   }
- 
+
+  // Lambda to find parameter table in the group for a given label
+  const auto tableFromName = [](const QString &qs) {
+    const auto &wsGroup = retrieveWSChecked<WorkspaceGroup>(
+        MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX + qs.toStdString());
+    const auto &names = wsGroup->getNames();
+    for (const auto &name : names) {
+      if (name.find(PARAMS_POSTFIX) != std::string::npos) {
+        return boost::dynamic_pointer_cast<ITableWorkspace>(
+            wsGroup->getItem(name));
+      }
+    }
+    return ITableWorkspace_sptr();
+  };
+
+  // Check workspaces have the same parameters
+  if (!haveSameParameters(labelsSelected, tableFromName)) {
+    QMessageBox::information(
+        this, "Mantid - Muon Analysis",
+        "Please pick workspaces with the same fitted parameters");
+    return;
+  }
 
 
 }
 
 /**
-* See if the workspaces selected have the same parameters.
+* See if the workspaces/labels selected have the same parameters.
 *
-* @param wsList :: A list of workspaces with fitted parameters.
-* @return bool :: Whether or not the wsList given share the same fitting
+* @param names :: A list of workspaces with fitted parameters OR labels.
+* @param tableFromName :: Function to get fit table from any given name.
+* @return bool :: Whether or not the names given share the same fitting
 * parameters.
 */
-bool MuonAnalysisResultTableTab::haveSameParameters(const QStringList &wsList) {
-  std::vector<std::string> firstParams;
-
-  // Find the first parameter table and use this as a comparison for all the
-  // other tables.
-  auto paramWs = retrieveWSChecked<ITableWorkspace>(wsList[0].toStdString() +
-                                                    PARAMS_POSTFIX);
-
-  Mantid::API::TableRow paramRow = paramWs->getFirstRow();
-  do {
-    std::string key;
-    paramRow >> key;
-    firstParams.push_back(key);
-  } while (paramRow.next());
-
-  // Compare to all the other parameters.
-  for (int i = 1; i < wsList.size(); ++i) {
-    std::vector<std::string> nextParams;
-    auto paramWs = retrieveWSChecked<ITableWorkspace>(wsList[i].toStdString() +
-                                                      PARAMS_POSTFIX);
-
-    Mantid::API::TableRow paramRow = paramWs->getFirstRow();
-    do {
-      std::string key;
-      paramRow >> key;
-      nextParams.push_back(key);
-    } while (paramRow.next());
-
-    if (!(firstParams == nextParams))
-      return false;
+bool MuonAnalysisResultTableTab::haveSameParameters(
+    const QStringList &names,
+    std::function<ITableWorkspace_sptr(const QString &)> tableFromName) {
+  std::vector<ITableWorkspace_sptr> tables;
+  for (const auto &name : names) {
+    tables.push_back(tableFromName(name));
   }
-  return true;
+
+  return MuonAnalysisHelper::haveSameParameters(tables);
 }
 
 /**
