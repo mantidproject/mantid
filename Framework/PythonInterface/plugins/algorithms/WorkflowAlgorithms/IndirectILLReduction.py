@@ -466,8 +466,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             # Shift Y and E values of spectrum i by a number of to_shift bins
             # Note the - sign, since np.roll shifts right if the argument is positive
             # while here if to_shift is positive, it means we need to shift to the left
-            mtd[ws1].setY(i, np.roll(mtd[ws1].dataY(i), -to_shift))
-            mtd[ws1].setE(i, np.roll(mtd[ws1].dataE(i), -to_shift))
+            mtd[ws1].setY(i, np.roll(mtd[ws1].dataY(i), int(-to_shift)))
+            mtd[ws1].setE(i, np.roll(mtd[ws1].dataE(i), int(-to_shift)))
 
             if (size - to_shift) < end_bin:
                 end_bin = size - to_shift
@@ -479,16 +479,14 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 self.log().notice('Shifting does not result in a new range for masking')
 
         # Mask bins to the left of the final bin range
-        start_left = self._getEnergyValue(ws1, 0)
-        end_left = self._getEnergyValue(ws1, -start_bin)
-        start_right = self._getEnergyValue(ws1, end_bin)
-        end_right = self._getEnergyValue(ws1, size)
+        __temp = mtd[ws1].readX(0)
 
         self.log().notice('Bin range is [%f, %f], mask bins outside of this range' % (-start_bin, end_bin))
-        self.log().notice('This corresponds to an energy range of [%f %f]' % (end_left, start_right))
-        MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=start_left, XMax=end_left)
-        # Mask bins to the right of the final bin range
-        MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=start_right, XMax=end_right)
+        self.log().notice('This corresponds to an energy range of [%f %f] meV' % (__temp[-start_bin], __temp[end_bin]))
+        # Mask bins to the left and right of the final bin range
+        MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=__temp[0], XMax=__temp[-start_bin])
+        MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=__temp[end_bin], XMax=__temp[size])
+        self.log().warning('MaskBins does not work as expected, compare with energy range (log notice)')
 
     def _finalize(self, runlist):
 
@@ -625,7 +623,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             else:
                 # Take the center (i.e. do no shift the spectrum)
                 peak_bin = mid_bin
-        else:
+
+        if fit_status == 'success':
             # Cleanup unused FindEPP tables
             DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
             DeleteWorkspace('EPPfit_Parameters')
@@ -633,12 +632,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         DeleteWorkspace(__fit_table)
 
         return peak_bin
-
-    @staticmethod
-    def _getEnergyValue(ws, bin):
-
-        _temp = mtd[ws].readX(0)
-        return _temp[bin]
 
     @staticmethod
     def _save_ws(ws):
