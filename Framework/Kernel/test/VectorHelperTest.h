@@ -4,10 +4,10 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VectorHelper.h"
-#include <cxxtest/TestSuite.h>
-#include <cstdlib>
-#include <numeric>
 #include <algorithm>
+#include <cstdlib>
+#include <cxxtest/TestSuite.h>
+#include <numeric>
 
 using namespace Mantid::Kernel;
 
@@ -416,22 +416,22 @@ public:
   }
 
   void testRebinLarger() {
-	  for (size_t i = 0; i < iters; i++) {
-		  std::vector<double> newCountsLarger(largerBinEdges.size() - 1);
-		  std::vector<double> newErrorsLarger(largerBinEdges.size() - 1);
+    for (size_t i = 0; i < iters; i++) {
+      std::vector<double> newCountsLarger(largerBinEdges.size() - 1);
+      std::vector<double> newErrorsLarger(largerBinEdges.size() - 1);
 
-		  VectorHelper::rebin(binEdges, counts, errors, largerBinEdges,
-			  newCountsLarger, newErrorsLarger, false, false);
-	  }
+      VectorHelper::rebin(binEdges, counts, errors, largerBinEdges,
+                          newCountsLarger, newErrorsLarger, false, false);
+    }
   }
 
   void testRebinLargerFrequencies() {
-	  for (size_t i = 0; i < iters; i++) {
-		  std::vector<double> newFrequenciesLarger(largerBinEdges.size() - 1);
-		  std::vector<double> newErrorsLarger(largerBinEdges.size() - 1);
-		  VectorHelper::rebin(binEdges, frequencies, errors, largerBinEdges,
-			  newFrequenciesLarger, newErrorsLarger, true, false);
-	  }
+    for (size_t i = 0; i < iters; i++) {
+      std::vector<double> newFrequenciesLarger(largerBinEdges.size() - 1);
+      std::vector<double> newErrorsLarger(largerBinEdges.size() - 1);
+      VectorHelper::rebin(binEdges, frequencies, errors, largerBinEdges,
+                          newFrequenciesLarger, newErrorsLarger, true, false);
+    }
   }
 
 private:
@@ -474,8 +474,8 @@ private:
     smallerBinEdges[2 * (binSize - 1)] = binEdges.back();
     smallerBinEdges.back() = binEdges.back() + (binWidth / 2);
 
-	for (size_t i = 0; i < largerBinEdges.size(); i++)
-		largerBinEdges[i] = binEdges[(2 * i)];
+    for (size_t i = 0; i < largerBinEdges.size(); i++)
+      largerBinEdges[i] = binEdges[(2 * i)];
   }
 };
 

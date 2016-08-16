@@ -1,9 +1,11 @@
 #ifndef REBINHISTOGRAM_TEST_H_
 #define REBINHISTOGRAM_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <vector>
 #include "MantidKernel/VectorHelper.h"
+#include <algorithm>
+#include <cxxtest/TestSuite.h>
+#include <numeric>
+#include <vector>
 
 /// @author Laurent C Chapon, ISIS Facility, Rutherford Appleton Laboratory
 /// 13/03/2009
@@ -49,6 +51,85 @@ public:
       TS_ASSERT_DELTA(returnY[i], yin[i], 1e-7);
       TS_ASSERT_DELTA(returnE[i], ein[i], 1e-7);
     }
+  }
+};
+
+class RebinHistogramTestPerformance : public CxxTest::TestSuite {
+public:
+  RebinHistogramTestPerformance *createSuite() {
+    return new RebinHistogramTestPerformance();
+  }
+
+  void destroySuite(RebinHistogramTestPerformance *suite) { delete suite; }
+
+  RebinHistogramTestPerformance() {
+	  setupHistogram();
+	  setupOutput();
+  }
+
+  void testRebinSmaller() {
+    for (size_t i = 0; i < nIters; i++) {
+      std::vector<double> newCountsSmaller(smallerBinEdges.size() - 1);
+      std::vector<double> newErrorsSmaller(smallerBinEdges.size() - 1);
+      Mantid::Kernel::VectorHelper::rebinHistogram(
+          binEdges, counts, errors, smallerBinEdges, newCountsSmaller,
+          newErrorsSmaller, false);
+    }
+  }
+
+  void testRebinLarger() {
+    for (size_t i = 0; i < nIters; i++) {
+      std::vector<double> newCountsLarger(largerBinEdges.size() - 1);
+      std::vector<double> newErrorsLarger(largerBinEdges.size() - 1);
+
+      Mantid::Kernel::VectorHelper::rebin(binEdges, counts, errors,
+                                          largerBinEdges, newCountsLarger,
+                                          newErrorsLarger, false, false);
+    }
+  }
+
+private:
+  const size_t binSize = 10000;
+  const size_t nIters = 10000;
+  std::vector<double> binEdges;
+  std::vector<double> counts;
+  std::vector<double> frequencies;
+  std::vector<double> errors;
+  std::vector<double> smallerBinEdges;
+  std::vector<double> largerBinEdges;
+
+  void setupHistogram() {
+    binEdges.resize(binSize);
+    frequencies.resize(binSize - 1);
+    counts.resize(binSize - 1);
+    errors.resize(binSize - 1);
+
+    std::iota(binEdges.begin(), binEdges.end(), 0);
+    std::generate(counts.begin(), counts.end(),
+                  []() { return static_cast<double>(rand() % 1000); });
+
+    for (size_t i = 0; i < counts.size(); i++)
+      frequencies[i] = counts[i] / (binEdges[i + 1] - binEdges[i]);
+
+    std::transform(counts.cbegin(), counts.cend(), errors.begin(),
+                   [](const double count) { return sqrt(count); });
+  }
+
+  void setupOutput() {
+    smallerBinEdges.resize(binSize * 2);
+    largerBinEdges.resize(binSize / 2);
+
+    auto binWidth = binEdges[1] - binEdges[0];
+
+    for (size_t i = 0; i < binSize - 1; i++) {
+      smallerBinEdges[2 * i] = binEdges[i];
+      smallerBinEdges[(2 * i) + 1] = (binEdges[i] + binEdges[i + 1]) / 2;
+    }
+    smallerBinEdges[2 * (binSize - 1)] = binEdges.back();
+    smallerBinEdges.back() = binEdges.back() + (binWidth / 2);
+
+    for (size_t i = 0; i < largerBinEdges.size(); i++)
+      largerBinEdges[i] = binEdges[(2 * i)];
   }
 };
 
