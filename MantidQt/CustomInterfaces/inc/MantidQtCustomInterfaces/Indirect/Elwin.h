@@ -39,6 +39,8 @@ private:
 
   Ui::Elwin m_uiForm;
   QtTreePropertyBrowser *m_elwTree;
+  // alg
+  Mantid::API::IAlgorithm_sptr m_elwinAlg;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
