@@ -4,10 +4,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -17,6 +19,19 @@ using namespace MantidQt::CustomInterfaces::MuonAnalysisHelper;
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+
+/// This is a wrapper for the ADS that automatically clears itself on
+/// destruction
+class RAII_ADS {
+public:
+  void add(const std::string &name, const Workspace_sptr &ws) {
+    AnalysisDataService::Instance().add(name, ws);
+  }
+  void addToGroup(const std::string &group, const std::string &name) {
+    AnalysisDataService::Instance().addToGroup(group, name);
+  }
+  virtual ~RAII_ADS() { AnalysisDataService::Instance().clear(); }
+};
 
 class MuonAnalysisHelperTest : public CxxTest::TestSuite {
 public:
@@ -534,6 +549,147 @@ public:
     TS_ASSERT_EQUALS(runs, expectedRuns);
   }
 
+  void test_getWorkspaceColors_singleRuns_allSame() {
+    const auto &tableOne = createResultsTable({"A0", "A1"});
+    const auto &tableTwo = createResultsTable({"A0", "A1"});
+    const auto &tableThree = createResultsTable({"A0", "A1"});
+    QMap<int, QColor> results;
+    TS_ASSERT_THROWS_NOTHING(
+        results = getWorkspaceColors({tableOne, tableTwo, tableThree}));
+    TS_ASSERT_EQUALS(3, results.count());
+    for (const auto &color : results) {
+      TS_ASSERT_EQUALS(color, QColor("black"));
+    }
+  }
+
+  void test_getWorkspaceColors_singleRuns_differentModels() {
+    const auto &tableOne = createResultsTable({"A0", "A1"});
+    const auto &tableTwo = createResultsTable({"A0", "A1"});
+    const auto &tableThree = createResultsTable({"Tau", "Delta"});
+    const auto &tableFour = createResultsTable({"A0", "A1"});
+    const auto &tableFive = createResultsTable({"Alpha", "Delta"});
+    QMap<int, QColor> results;
+    TS_ASSERT_THROWS_NOTHING(
+        results = getWorkspaceColors(
+            {tableOne, tableTwo, tableThree, tableFour, tableFive}));
+    TS_ASSERT_EQUALS(5, results.count());
+    TS_ASSERT_EQUALS(results[0], QColor("black"));
+    TS_ASSERT_EQUALS(results[1], QColor("black"));
+    TS_ASSERT_EQUALS(results[2], QColor("red"));
+    TS_ASSERT_EQUALS(results[3], QColor("black"));
+    TS_ASSERT_EQUALS(results[4], QColor("green"));
+  }
+
+  // This test uses WorkspaceGroups - since the names of the workspaces are
+  // important, it unfortunately has to use the ADS
+  void test_getWorkspaceColors_groups_allSame() {
+    RAII_ADS ads; // will clear itself on destruction
+
+    const auto &tableOne = createResultsTable({"A0", "A1"});
+    ads.add("MuonSimulFit_Label_Parameters", tableOne);
+    const auto &wsOne = createWs("MUSR", 15189);
+    ads.add("MuonSimulFit_Label_MUSR15189_Workspace", wsOne);
+    const auto &wsTwo = createWs("MUSR", 15190);
+    ads.add("MuonSimulFit_Label_MUSR15190_Workspace", wsTwo);
+    const auto &groupOne = boost::make_shared<WorkspaceGroup>();
+    ads.add("GroupOne", groupOne);
+    ads.addToGroup("GroupOne", "MuonSimulFit_Label_Parameters");
+    ads.addToGroup("GroupOne", "MuonSimulFit_Label_MUSR15189_Workspace");
+    ads.addToGroup("GroupOne", "MuonSimulFit_Label_MUSR15190_Workspace");
+
+    const auto &tableTwo = createResultsTable({"A0", "A1"});
+    ads.add("MuonSimulFit_Label#2_Parameters", tableOne);
+    const auto &wsThree = createWs("MUSR", 15191);
+    ads.add("MuonSimulFit_Label#2_MUSR15191_Workspace", wsThree);
+    const auto &wsFour = createWs("MUSR", 15192);
+    ads.add("MuonSimulFit_Label#2_MUSR15192_Workspace", wsFour);
+    const auto &groupTwo = boost::make_shared<WorkspaceGroup>();
+    ads.add("GroupTwo", groupTwo);
+    ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_Parameters");
+    ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_MUSR15191_Workspace");
+    ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_MUSR15192_Workspace");
+
+    QMap<int, QColor> results;
+    TS_ASSERT_THROWS_NOTHING(results =
+                                 getWorkspaceColors({groupOne, groupTwo}));
+    TS_ASSERT_EQUALS(2, results.count());
+    TS_ASSERT_EQUALS(results[0], QColor("black"));
+    TS_ASSERT_EQUALS(results[1], QColor("black"));
+  }
+
+  void test_getWorkspaceColors_groups_sameModel_differentNumberOfRuns() {
+    RAII_ADS ads; // will clear itself on destruction
+
+    const auto &tableOne = createResultsTable({"A0", "A1"});
+    ads.add("MuonSimulFit_Label_Parameters", tableOne);
+    const auto &wsOne = createWs("MUSR", 15189);
+    ads.add("MuonSimulFit_Label_MUSR15189_Workspace", wsOne);
+    const auto &wsTwo = createWs("MUSR", 15190);
+    ads.add("MuonSimulFit_Label_MUSR15190_Workspace", wsTwo);
+    const auto &wsThree = createWs("MUSR", 15191);
+    ads.add("MuonSimulFit_Label_MUSR15191_Workspace", wsThree);
+    const auto &groupOne = boost::make_shared<WorkspaceGroup>();
+    ads.add("GroupOne", groupOne);
+    ads.addToGroup("GroupOne", "MuonSimulFit_Label_Parameters");
+    ads.addToGroup("GroupOne", "MuonSimulFit_Label_MUSR15189_Workspace");
+    ads.addToGroup("GroupOne", "MuonSimulFit_Label_MUSR15190_Workspace");
+    ads.addToGroup("GroupOne", "MuonSimulFit_Label_MUSR15191_Workspace");
+
+    const auto &tableTwo = createResultsTable({"A0", "A1"});
+    ads.add("MuonSimulFit_Label#2_Parameters", tableOne);
+    const auto &wsFour = createWs("MUSR", 15192);
+    ads.add("MuonSimulFit_Label#2_MUSR15192_Workspace", wsFour);
+    const auto &wsFive = createWs("MUSR", 15193);
+    ads.add("MuonSimulFit_Label#2_MUSR15193_Workspace", wsFive);
+    const auto &groupTwo = boost::make_shared<WorkspaceGroup>();
+    ads.add("GroupTwo", groupTwo);
+    ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_Parameters");
+    ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_MUSR15192_Workspace");
+    ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_MUSR15193_Workspace");
+
+    QMap<int, QColor> results;
+    TS_ASSERT_THROWS_NOTHING(results =
+                                 getWorkspaceColors({groupOne, groupTwo}));
+    TS_ASSERT_EQUALS(2, results.count());
+    TS_ASSERT_EQUALS(results[0], QColor("black"));
+    TS_ASSERT_EQUALS(results[1], QColor("red"));
+  }
+
+  void test_getWorkspaceColors_groups_differentModel_sameNumberOfRuns() {
+    RAII_ADS ads; // will clear itself on destruction
+
+    const auto &tableOne = createResultsTable({"A0", "A1"});
+    ads.add("MuonSimulFit_Label_Parameters", tableOne);
+    const auto &wsOne = createWs("MUSR", 15189);
+    ads.add("MuonSimulFit_Label_MUSR15189_Workspace", wsOne);
+    const auto &wsTwo = createWs("MUSR", 15190);
+    ads.add("MuonSimulFit_Label_MUSR15190_Workspace", wsTwo);
+    const auto &groupOne = boost::make_shared<WorkspaceGroup>();
+    ads.add("GroupOne", groupOne);
+    ads.addToGroup("GroupOne", "MuonSimulFit_Label_Parameters");
+    ads.addToGroup("GroupOne", "MuonSimulFit_Label_MUSR15189_Workspace");
+    ads.addToGroup("GroupOne", "MuonSimulFit_Label_MUSR15190_Workspace");
+
+    const auto &tableTwo = createResultsTable({"Tau", "Delta"});
+    ads.add("MuonSimulFit_Label#2_Parameters", tableTwo);
+    const auto &wsThree = createWs("MUSR", 15191);
+    ads.add("MuonSimulFit_Label#2_MUSR15191_Workspace", wsThree);
+    const auto &wsFour = createWs("MUSR", 15192);
+    ads.add("MuonSimulFit_Label#2_MUSR15192_Workspace", wsFour);
+    const auto &groupTwo = boost::make_shared<WorkspaceGroup>();
+    ads.add("GroupTwo", groupTwo);
+    ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_Parameters");
+    ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_MUSR15191_Workspace");
+    ads.addToGroup("GroupTwo", "MuonSimulFit_Label#2_MUSR15192_Workspace");
+
+    QMap<int, QColor> results;
+    TS_ASSERT_THROWS_NOTHING(results =
+                                 getWorkspaceColors({groupOne, groupTwo}));
+    TS_ASSERT_EQUALS(2, results.count());
+    TS_ASSERT_EQUALS(results[0], QColor("black"));
+    TS_ASSERT_EQUALS(results[1], QColor("red"));
+  }
+
 private:
   // Creates a single-point workspace with instrument and runNumber set
   Workspace_sptr createWs(const std::string &instrName, int runNumber,
@@ -607,6 +763,28 @@ private:
     // test
     const QString result = runNumberString(wsName.str(), runs);
     TS_ASSERT_EQUALS(expected, result);
+  }
+
+  /// Create a results table with the given parameters
+  ITableWorkspace_sptr
+  createResultsTable(const std::vector<std::string> &params) {
+    auto table = WorkspaceFactory::Instance().createTable();
+    auto nameCol = table->addColumn("str", "Name");
+    nameCol->setPlotType(6); // label
+    auto valCol = table->addColumn("double", "Value");
+    valCol->setPlotType(2); // Y
+    auto errCol = table->addColumn("double", "Error");
+    errCol->setPlotType(5); // YErr
+
+    for (size_t i = 0; i < params.size(); ++i) {
+      TableRow row = table->appendRow();
+      row << params[i] << static_cast<double>(i) << 0.1;
+    }
+
+    TableRow chiSqRow = table->appendRow();
+    chiSqRow << "Cost function" << 0.5 << 0.0;
+
+    return table;
   }
 };
 
