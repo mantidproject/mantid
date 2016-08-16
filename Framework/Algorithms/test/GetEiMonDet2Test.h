@@ -60,7 +60,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("MonitorSpectrumNumber", "0"))
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
-    // TODO read output values
+    TS_ASSERT_DELTA(static_cast<decltype(realEi)>(algorithm.getProperty("IncidentEnergy")), realEi, 1e-6)
   }
 
 private:
@@ -104,8 +104,9 @@ private:
   static std::vector<double> peakCentres(double timeAtMonitor, double energy, double pulseInterval) {
     std::vector<double> centres;
     centres.emplace_back(timeAtMonitor);
+    energy *= meV;
     const double velocity = std::sqrt(2 * energy / NeutronMass);
-    double timeOfFlight = timeAtMonitor + (MONITOR_DISTANCE + DETECTOR_DISTANCE) / velocity;
+    double timeOfFlight = timeAtMonitor + (MONITOR_DISTANCE + DETECTOR_DISTANCE) / velocity * 1e6;
     while (timeOfFlight > pulseInterval) {
       timeOfFlight -= pulseInterval;
     }
