@@ -40,6 +40,9 @@ private slots:
   void generatePlotGuess();
   /// Add the plot guess to the mini plot
   void plotGuess(bool error);
+  /// Handles plotting and saving
+  void saveClicked();
+  void plotClicked();
 
 private:
   /// Gets a list of parameter names for a given fit function

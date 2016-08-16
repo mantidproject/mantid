@@ -70,6 +70,10 @@ void JumpFit::setup() {
 
   connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(generatePlotGuess()));
+
+  // Handle plotting and saving
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(PlotClicked()));
 }
 
 /**
