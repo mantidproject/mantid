@@ -224,7 +224,7 @@ endif ()
 install ( DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
 
 # Install the files (.desktop and icon) to create a menu item, but only if installing to /opt/Mantid
-if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_INSTALL_PREFIX STREQUAL "/opt/Mantid" )
+if ( ENABLE_MANTIDPLOT AND ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_INSTALL_PREFIX STREQUAL "/opt/Mantid" )
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/installers/LinuxInstaller/mantidplot.desktop
             DESTINATION /usr/share/applications )
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/MantidPlot_Icon_32offset.png
