@@ -17,7 +17,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 JumpFit::JumpFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_jfTree(nullptr), {
+    : IndirectDataAnalysisTab(parent), m_jfTree(nullptr) {
   m_uiForm.setupUi(parent);
 }
 
@@ -73,7 +73,7 @@ void JumpFit::setup() {
 
   // Handle plotting and saving
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(PlotClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 }
 
 /**
@@ -543,7 +543,7 @@ void JumpFit::plotClicked() {
   std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
   checkADSForPlotSaveWorkspace(outWsName, true);
   plotSpectrum(QString::fromStdString(outWsName), 0, 2);
-  }
+}
 
 /**
  * Handles saving of workspace
@@ -552,7 +552,7 @@ void JumpFit::saveClicked() {
   std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
   checkADSForPlotSaveWorkspace(outWsName, false);
   addSaveWorkspaceToQueue(QString::fromStdString(outWsName));
-  }
+  m_batchAlgoRunner->executeBatchAsync();
 }
 } // namespace IDA
 } // namespace CustomInterfaces
