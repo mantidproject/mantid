@@ -14,14 +14,11 @@ def parse_phonon_file(file_name, record_eigenvectors):
     """
     file_data = {}
 
-    # Header regex. Looks for lines in the following format:
-    #     q-pt=    1    0.000000  0.000000  0.000000      1.0000000000    0.000000  0.000000  1.000000
-    float_regex = load_helper.FLOAT_REGEX
-    header_regex_str = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) (?: *(%(s)s)){0,4}" % {'s': float_regex}
-    header_regex = re.compile(header_regex_str)
-    eigenvectors_regex = re.compile(r"\s*Mode\s+Ion\s+X\s+Y\s+Z\s*")
-    block_count = 0
+    # Get regex strings from load_helper
+    header_regex = re.compile(load_helper.PHONON_HEADER_REGEX)
+    eigenvectors_regex = re.compile(load_helper.PHONON_EIGENVEC_REGEX)
 
+    block_count = 0
     frequencies, ir_intensities, raman_intensities, weights, q_vectors, eigenvectors = [], [], [], [], [], []
     data_lists = (frequencies, ir_intensities, raman_intensities)
     with open(file_name, 'rU') as f_handle:

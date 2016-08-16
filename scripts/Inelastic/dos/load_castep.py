@@ -13,21 +13,10 @@ def parse_castep_file(file_name, ir_or_raman):
 
     file_data = {}
 
-    float_regex = load_helper.FLOAT_REGEX
-    # Header regex. Looks for lines in the following format:
-    # +  q-pt=    1 (  0.000000  0.000000  0.000000)     1.0000000000              +
-    header_regex_str = r" +\+ +q-pt= +\d+ \( *(?: *(%(s)s)) *(%(s)s) *(%(s)s)\) +(%(s)s) +\+" % {'s' : float_regex}
-    header_regex = re.compile(header_regex_str)
-
-    # Data regex. Looks for lines in the following format:
-    #     +     1      -0.051481   a          0.0000000  N            0.0000000  N     +
-    data_regex_str = r" +\+ +\d+ +(%(s)s)(?: +\w)? *(%(s)s)? *([YN])? *(%(s)s)? *([YN])? *\+" % {'s': float_regex}
-    data_regex = re.compile(data_regex_str)
-
-    # Atom bond regex. Looks for lines in the following format:
-    #   H 006 --    O 012               0.46        1.04206
-    bond_regex_str = r" +([A-z])+ +([0-9]+) +-- +([A-z]+) +([0-9]+) +(%(s)s) +(%(s)s)" % {'s': float_regex}
-    bond_regex = re.compile(bond_regex_str)
+    # Get Regex strings from load_helper
+    header_regex = re.compile(load_helper.CASTEP_HEADER_REGEX)
+    data_regex = re.compile(load_helper.CASTEP_DATA_REGEX)
+    bond_regex = re.compile(load_helper.CASTEP_BOND_REGEX)
 
     block_count = 0
     frequencies, ir_intensities, raman_intensities, weights, q_vectors, bonds = [], [], [], [], [], []
