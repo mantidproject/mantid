@@ -251,6 +251,11 @@ void Elwin::unGroupInput(bool error) {
     ungroupAlg->setProperty("InputWorkspace", "IDA_Elwin_Input");
     ungroupAlg->execute();
   }
+
+  //Enable plot and save
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+
   // Handle mantid plotting
   if (m_uiForm.ckPlot->isChecked()) {
 
