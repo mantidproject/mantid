@@ -63,28 +63,25 @@ public:
   void destroySuite(RebinHistogramTestPerformance *suite) { delete suite; }
 
   RebinHistogramTestPerformance() {
-	  setupHistogram();
-	  setupOutput();
+    setupHistogram();
+    setupOutput();
   }
 
   void testRebinSmaller() {
+    auto size = smallerBinEdges.size() - 1;
     for (size_t i = 0; i < nIters; i++) {
-      std::vector<double> newCountsSmaller(smallerBinEdges.size() - 1);
-      std::vector<double> newErrorsSmaller(smallerBinEdges.size() - 1);
       Mantid::Kernel::VectorHelper::rebinHistogram(
-          binEdges, counts, errors, smallerBinEdges, newCountsSmaller,
-          newErrorsSmaller, false);
+          binEdges, counts, errors, smallerBinEdges, std::vector<double>(size),
+          std::vector<double>(size), false);
     }
   }
 
   void testRebinLarger() {
+    auto size = largerBinEdges.size() - 1;
     for (size_t i = 0; i < nIters; i++) {
-      std::vector<double> newCountsLarger(largerBinEdges.size() - 1);
-      std::vector<double> newErrorsLarger(largerBinEdges.size() - 1);
-
-      Mantid::Kernel::VectorHelper::rebinHistogram(binEdges, counts, errors,
-                                          largerBinEdges, newCountsLarger,
-                                          newErrorsLarger, false);
+      Mantid::Kernel::VectorHelper::rebinHistogram(
+          binEdges, counts, errors, largerBinEdges, std::vector<double>(size),
+          std::vector<double>(size), false);
     }
   }
 
@@ -93,23 +90,18 @@ private:
   const size_t nIters = 10000;
   std::vector<double> binEdges;
   std::vector<double> counts;
-  std::vector<double> frequencies;
   std::vector<double> errors;
   std::vector<double> smallerBinEdges;
   std::vector<double> largerBinEdges;
 
   void setupHistogram() {
     binEdges.resize(binSize);
-    frequencies.resize(binSize - 1);
     counts.resize(binSize - 1);
     errors.resize(binSize - 1);
 
     std::iota(binEdges.begin(), binEdges.end(), 0);
     std::generate(counts.begin(), counts.end(),
                   []() { return static_cast<double>(rand() % 1000); });
-
-    for (size_t i = 0; i < counts.size(); i++)
-      frequencies[i] = counts[i] / (binEdges[i + 1] - binEdges[i]);
 
     std::transform(counts.cbegin(), counts.cend(), errors.begin(),
                    [](const double count) { return sqrt(count); });

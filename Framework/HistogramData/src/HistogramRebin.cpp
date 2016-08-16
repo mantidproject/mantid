@@ -20,7 +20,8 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
   auto &yold = input.y();
   auto &eold = input.e();
 
-  Counts newCounts(binEdges.size() - 1);
+  auto &xnew = binEdges.rawData();
+  Counts newCounts(xnew.size() - 1);
   CountVariances newCountVariances(newCounts.size());
   auto &ynew = newCounts.mutableData();
   auto &enew = newCountVariances.mutableData();
@@ -34,8 +35,8 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
   while ((inew < size_ynew) && (iold < size_yold)) {
     auto xo_low = xold[iold];
     auto xo_high = xold[iold + 1];
-    auto xn_low = binEdges[inew];
-    auto xn_high = binEdges[inew + 1];
+    auto xn_low = xnew[inew];
+    auto xn_high = xnew[inew + 1];
 
     if (xn_high <= xo_low)
       inew++; /* old and new bins do not overlap */
@@ -47,12 +48,12 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
       delta -= xo_low > xn_low ? xo_low : xn_low;
       width = xo_high - xo_low;
 
-      if (delta <= 0.0) {
+      if (delta <= 0.0 || width <= 0.0) {
         throw std::runtime_error("Negative or zero bin widths not allowed.");
       }
       auto factor = 1 / width;
-      ynew[inew] = yold[iold] * delta * factor;
-      enew[inew] = eold[iold] * eold[iold] * delta * factor;
+      ynew[inew] += yold[iold] * delta * factor;
+      enew[inew] += eold[iold] * eold[iold] * delta * factor;
 
       if (xn_high > xo_high) {
         iold++;
@@ -62,7 +63,8 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
     }
   }
 
-  return Histogram(binEdges, newCounts, newCountVariances);
+  return Histogram(binEdges, newCounts,
+                   CountStandardDeviations(std::move(newCountVariances)));
 }
 
 Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
@@ -75,6 +77,7 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
   auto &xold = input.x();
   auto &yold = input.y();
   auto &eold = input.e();
+  auto &xnew = binEdges.rawData();
   Frequencies newFrequencies(binEdges.size() - 1);
   FrequencyVariances newFrequencyVariances(newFrequencies.size());
   auto &ynew = newFrequencies.mutableData();
@@ -89,8 +92,8 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
   while ((inew < size_ynew) && (iold < size_yold)) {
     auto xo_low = xold[iold];
     auto xo_high = xold[iold + 1];
-    auto xn_low = binEdges[inew];
-    auto xn_high = binEdges[inew + 1];
+    auto xn_low = xnew[inew];
+    auto xn_high = xnew[inew + 1];
 
     if (xn_high <= xo_low)
       inew++; /* old and new bins do not overlap */
@@ -101,12 +104,12 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
       auto delta = xo_high < xn_high ? xo_high : xn_high;
       delta -= xo_low > xn_low ? xo_low : xn_low;
       width = xo_high - xo_low;
-      if (delta <= 0.0) {
+      if (delta <= 0.0 || width <= 0.0) {
         throw std::runtime_error("Negative or zero bin widths not allowed.");
       }
 
-      ynew[inew] = yold[iold] * delta;
-      enew[inew] = eold[iold] * eold[iold] * delta * width;
+      ynew[inew] += yold[iold] * delta;
+      enew[inew] += eold[iold] * eold[iold] * delta * width;
 
       if (xn_high > xo_high) {
         iold++;
@@ -120,12 +123,14 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
   * convert back to counts/unit time
   */
   for (size_t i = 0; i < size_ynew; ++i) {
-    width = binEdges[i + 1] - binEdges[i];
+    width = xnew[i + 1] - xnew[i];
     ynew[i] /= width;
     enew[i] = sqrt(enew[i]) / width;
   }
 
-  return Histogram(binEdges, newFrequencies, newFrequencyVariances);
+  return Histogram(
+      binEdges, newFrequencies,
+      FrequencyStandardDeviations(std::move(newFrequencyVariances)));
 }
 
 } // namespace HistogramData
