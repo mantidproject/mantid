@@ -105,7 +105,6 @@ bool JumpFit::validate() {
  * script that runs JumpFit
  */
 void JumpFit::run() {
-  bool save = m_uiForm.chkSave->isChecked();
   // Do noting with invalid data
   if (!m_uiForm.dsSample->isValid())
     return;
@@ -140,13 +139,6 @@ void JumpFit::run() {
   m_fitAlg->setProperty("Output", outputName.toStdString());
 
   m_batchAlgoRunner->addAlgorithm(m_fitAlg);
-
-  // Add save step if required
-  if (save) {
-    QString outWsName = outputName + "_Workspace";
-    addSaveWorkspaceToQueue(outWsName);
-  }
-
   // Connect algorithm runner to completion handler function
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
     SLOT(fitAlgDone(bool)));
@@ -548,9 +540,18 @@ void JumpFit::deletePlotGuessWorkspaces(const bool &removePlotGuess) {
  * Handles mantid plotting
  */
 void JumpFit::plotClicked() {
-    std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
-    checkADSForPlotSaveWorkspace(outWsName, true);
-    plotSpectrum(QString::fromStdString(outWsName), 0, 2);
+  std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
+  checkADSForPlotSaveWorkspace(outWsName, true);
+  plotSpectrum(QString::fromStdString(outWsName), 0, 2);
+  }
+
+/**
+ * Handles saving of workspace
+ */
+void JumpFit::saveClicked() {
+  std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
+  checkADSForPlotSaveWorkspace(outWsName, false);
+  addSaveWorkspaceToQueue(QString::fromStdString(outWsName));
   }
 }
 } // namespace IDA
