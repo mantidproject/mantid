@@ -285,6 +285,9 @@ void IqtFit::algorithmComplete(bool error) {
   updatePlot();
   plotWorkspace();
   saveResult();
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+  m_uiForm.cbPlotType->setEnabled(true);
 }
 
 /**
