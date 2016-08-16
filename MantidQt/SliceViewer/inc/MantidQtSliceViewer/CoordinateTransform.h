@@ -39,8 +39,8 @@ public:
                              size_t dimY) override;
 
 private:
-  Mantid::coord_t m_skewMatrix[9];
   bool m_dimensionsHKL;
+  Mantid::coord_t m_skewMatrix[9];
 };
 
 std::unique_ptr<CoordinateTransform> EXPORT_OPT_MANTIDQT_SLICEVIEWER

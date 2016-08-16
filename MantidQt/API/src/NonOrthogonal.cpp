@@ -8,6 +8,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
 
 #include <boost/pointer_cast.hpp>
 
@@ -196,6 +197,19 @@ bool requiresSkewMatrix(Mantid::API::IMDWorkspace_const_sptr workspace) {
                                 "workspace.");
   }
   return requiresSkewMatrix;
+}
+bool isHKLDimensions(Mantid::API::IMDWorkspace_const_sptr workspace,
+                     size_t dimX, size_t dimY) {
+  auto dimensionHKL = true;
+  size_t dimensionIndices[2] = {dimX, dimY};
+  for (auto dimensionIndex : dimensionIndices) {
+    auto dimension = workspace->getDimension(dimensionIndex);
+    const auto &frame = dimension->getMDFrame();
+    if (frame.name() != Mantid::Geometry::HKL::HKLName) {
+      dimensionHKL = false;
+    }
+  }
+  return dimensionHKL;
 }
 }
 }

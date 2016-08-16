@@ -13,6 +13,10 @@ provideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix,
 
 bool EXPORT_OPT_MANTIDQT_API
 requiresSkewMatrix(Mantid::API::IMDWorkspace_const_sptr workspace);
+
+bool EXPORT_OPT_MANTIDQT_API
+isHKLDimensions(Mantid::API::IMDWorkspace_const_sptr workspace, size_t dimX,
+                size_t dimY);
 }
 }
 

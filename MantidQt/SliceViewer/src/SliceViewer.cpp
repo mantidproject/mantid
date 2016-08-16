@@ -91,7 +91,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
           boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
-      m_peaksSliderWidget(NULL) {
+      m_peaksSliderWidget(NULL), m_usingQWTRasterNonOrthogonal(false) {
 
   ui.setupUi(this);
 
@@ -688,6 +688,22 @@ void SliceViewer::updateDimensionSliceWidgets() {
   }
 }
 
+//------------------------------------------
+void SliceViewer::testNewMDATA(
+    Mantid::API::IMDWorkspace_sptr ws, size_t dimX, size_t dimY,
+    bool nonOrthmData) // think want dimx and dimy here too
+{
+
+  delete m_data;
+  if (nonOrthmData == true) {
+    m_data = new API::QwtRasterDataMDNonOrthogonal();
+  } else {
+    m_data = new API::QwtRasterDataMD();
+  }
+
+  m_coordinateTransform = createCoordinateTransform(ws, m_dimX, m_dimY);
+  m_data->setWorkspace(ws);
+}
 //------------------------------------------------------------------------------
 /** Set the displayed workspace. Updates UI.
  *
@@ -699,7 +715,10 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   // If the workspace qualifies to be treated as a non-orthogonal workspace,
   // then we swap to a QwtRasterDataMDNonOrthogonal
 
-  if (API::requiresSkewMatrix(ws)) {
+  if ((API::requiresSkewMatrix(ws)) &&
+      (API::isHKLDimensions(m_ws, m_dimX, m_dimY))) { // can probably also check
+                                                      // axis here just in case
+                                                      // it opens with non orth
     delete m_data;
     m_data = new API::QwtRasterDataMDNonOrthogonal();
   }
@@ -1657,8 +1676,22 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim) {
   emit changedShownDim(m_dimX, m_dimY);
 }
 
-void SliceViewer::checkForHKLDimension(size_t dimX, size_t dimY) {
+void SliceViewer::checkForHKLDimension(
+    size_t dimX,
+    size_t dimY) {    // still need to stop it from making new m_data each time
+  bool makeNewm_data; // probably store previous HKL config and if not changed
+                      // don't do anything
   m_coordinateTransform->checkDimensionsForHKL(m_ws, dimX, dimY);
+  makeNewm_data = API::isHKLDimensions(m_ws, dimX, dimY);
+  if (SliceViewer::m_usingQWTRasterNonOrthogonal != makeNewm_data) {
+    if ((makeNewm_data == false) && (API::requiresSkewMatrix(m_ws))) {
+      testNewMDATA(m_ws, 0, 1, makeNewm_data);
+    }
+    if ((makeNewm_data == true) && (API::requiresSkewMatrix(m_ws))) {
+      testNewMDATA(m_ws, 0, 1, makeNewm_data);
+    }
+  }
+  SliceViewer::m_usingQWTRasterNonOrthogonal = makeNewm_data;
 }
 //==============================================================================
 //================================ PYTHON METHODS ==============================

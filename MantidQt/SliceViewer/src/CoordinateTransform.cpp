@@ -35,15 +35,7 @@ NonOrthogonalTransform::NonOrthogonalTransform(
 }
 void NonOrthogonalTransform::checkDimensionsForHKL(
     Mantid::API::IMDWorkspace_sptr ws, size_t dimX, size_t dimY) {
-  auto dimensionHKL = true;
-  size_t dimensionIndices[2] = {dimX, dimY};
-  for (auto dimensionIndex : dimensionIndices) {
-    auto dimension = ws->getDimension(dimensionIndex);
-    const auto &frame = dimension->getMDFrame();
-    if (frame.name() != Mantid::Geometry::HKL::HKLName) {
-      dimensionHKL = false;
-    }
-  }
+  bool dimensionHKL = API::isHKLDimensions(ws, dimX, dimY);
   m_dimensionsHKL = dimensionHKL;
 }
 void NonOrthogonalTransform::transform(Mantid::Kernel::VMD &coords, size_t dimX,
