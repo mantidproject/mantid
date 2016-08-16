@@ -78,6 +78,10 @@ void Iqt::setup() {
           SLOT(calculateBinning()));
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbTile, SIGNAL(clicked()), this, SLOT(PlotTiled()));
+
 }
 
 void Iqt::run() {

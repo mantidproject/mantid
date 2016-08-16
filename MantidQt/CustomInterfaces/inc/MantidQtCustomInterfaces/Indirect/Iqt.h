@@ -26,9 +26,11 @@ private slots:
   void updateRS(QtProperty *prop, double val);
   void updatePropertyValues(QtProperty *prop, double val);
   void calculateBinning();
+  void saveClicked();
+  void plotClicked();
+  void PlotTiled();
 
 private:
-  void PlotTiled();
 
   Ui::Iqt m_uiForm;
   QtTreePropertyBrowser *m_iqtTree;
