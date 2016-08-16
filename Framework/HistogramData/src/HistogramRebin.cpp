@@ -22,13 +22,12 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
 
   auto &xnew = binEdges.rawData();
   Counts newCounts(xnew.size() - 1);
-  CountVariances newCountVariances(newCounts.size());
+  CountVariances newCountVariances(xnew.size() - 1);
   auto &ynew = newCounts.mutableData();
   auto &enew = newCountVariances.mutableData();
 
-  auto size_ynew = ynew.size();
   auto size_yold = yold.size();
-
+  auto size_ynew = ynew.size();
   size_t iold = 0, inew = 0;
   double width;
 
@@ -77,15 +76,15 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
   auto &xold = input.x();
   auto &yold = input.y();
   auto &eold = input.e();
+
   auto &xnew = binEdges.rawData();
-  Frequencies newFrequencies(binEdges.size() - 1);
-  FrequencyVariances newFrequencyVariances(newFrequencies.size());
+  Frequencies newFrequencies(xnew.size() - 1);
+  FrequencyStandardDeviations newFrequencyStdDev(xnew.size() - 1);
   auto &ynew = newFrequencies.mutableData();
-  auto &enew = newFrequencyVariances.mutableData();
+  auto &enew = newFrequencyStdDev.mutableData();
 
   auto size_yold = yold.size();
   auto size_ynew = ynew.size();
-
   size_t iold = 0, inew = 0;
   double width;
 
@@ -101,8 +100,7 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
       iold++; /* old and new bins do not overlap */
     else {
       //        delta is the overlap of the bins on the x axis
-      auto delta = xo_high < xn_high ? xo_high : xn_high;
-      delta -= xo_low > xn_low ? xo_low : xn_low;
+      auto delta = std::min(xo_high, xn_high) - std::max(xo_low, xn_low);
       width = xo_high - xo_low;
       if (delta <= 0.0 || width <= 0.0) {
         throw std::runtime_error("Negative or zero bin widths not allowed.");
@@ -128,9 +126,7 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
     enew[i] = sqrt(enew[i]) / width;
   }
 
-  return Histogram(
-      binEdges, newFrequencies,
-      FrequencyStandardDeviations(std::move(newFrequencyVariances)));
+  return Histogram(binEdges, newFrequencies, newFrequencyStdDev);
 }
 
 } // namespace HistogramData
