@@ -883,6 +883,20 @@ void MuonAnalysisResultTableTab::createMultipleFitsTable() {
     return;
   }
 
+  // Get the workspaces corresponding to the selected labels
+  QStringList wsSelected;
+  for (const auto &label : labelsSelected) {
+    const auto &group = retrieveWSChecked<WorkspaceGroup>(
+        MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX + label.toStdString());
+    const auto &names = group->getNames();
+    for (const auto &name : names) {
+      const size_t pos = name.find(WORKSPACE_POSTFIX);
+      if (pos != std::string::npos) {
+        wsSelected.append(QString::fromStdString(name.substr(0, pos)));
+      }
+    }
+  }
+
   // Lambda to find parameter table in the group for a given label
   const auto tableFromName = [](const QString &qs) {
     const auto &wsGroup = retrieveWSChecked<WorkspaceGroup>(
@@ -905,7 +919,68 @@ void MuonAnalysisResultTableTab::createMultipleFitsTable() {
     return;
   }
 
+  // Create the results table
+  Mantid::API::ITableWorkspace_sptr table =
+      Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
 
+  // Add columns for log values
+  foreach (QString log, logsSelected) {
+    std::string columnTypeName;
+    int columnPlotType;
+
+    // We use values of the first workspace to determine the type of the
+    // column to add. It seems reasonable to assume
+    // that log values with the same name will have same types.
+    QString typeName = m_logValues[wsSelected.first()][log].typeName();
+    if (typeName == "double") {
+      columnTypeName = "double";
+      columnPlotType = 1;
+    } else if (typeName == "QString") {
+      columnTypeName = "str";
+      columnPlotType = 6;
+    } else
+      throw std::runtime_error(
+          "Couldn't find appropriate column type for value with type " +
+          typeName.toStdString());
+
+    Column_sptr newColumn = table->addColumn(columnTypeName, log.toStdString());
+    newColumn->setPlotType(columnPlotType);
+    newColumn->setReadOnly(false);
+  }
+
+  // Cache the start time of the first run. We don't know which label was first,
+  // so test them all.
+  int64_t firstStart_ns = std::numeric_limits<int64_t>::max();
+  for (const auto &wsName : wsSelected) {
+    if (const auto &ws = Mantid::API::AnalysisDataService::Instance()
+                             .retrieveWS<ExperimentInfo>(wsName.toStdString() +
+                                                         WORKSPACE_POSTFIX)) {
+      const int64_t start_ns = ws->run().startTime().totalNanoseconds();
+      if (start_ns < firstStart_ns) {
+        firstStart_ns = start_ns;
+      }
+    }
+  }
+
+  //////////////////////////// code to go here
+
+  table->appendRow(); // TEST ONLY
+
+  const std::string &tableName = getFileName();
+
+  // Save the table to the ADS
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(tableName, table);
+
+  // Python code to show a table on the screen
+  std::stringstream code;
+  code << "found = False\n"
+       << "for w in windows():\n"
+       << "  if w.windowLabel() == '" << tableName << "':\n"
+       << "    found = True; w.show(); w.setFocus()\n"
+       << "if not found:\n"
+       << "  importTableWorkspace('" << tableName << "', True)\n";
+
+  emit runPythonCode(QString::fromStdString(code.str()), false);
 }
 
 /**
