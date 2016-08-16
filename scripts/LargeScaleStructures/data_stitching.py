@@ -283,6 +283,12 @@ class DataSet(object):
                 point_data_ws = '%s_' % self._ws_name
                 ConvertToPointData(InputWorkspace=self._ws_name,
                                    OutputWorkspace=point_data_ws)
+                # Copy over the resolution
+                dq_original = mtd[self._ws_name].readDx(0)
+                dq_points = mtd[point_data_ws].dataDx(0)
+                for i in range(len(dq_points)):
+                    dq_points[i] = dq_original[i]
+
                 self._ws_name = point_data_ws
             self._ws_scaled = self._ws_name+"_scaled"
             if update_range:
