@@ -31,7 +31,6 @@ private slots:
   void PlotTiled();
 
 private:
-
   Ui::Iqt m_uiForm;
   QtTreePropertyBrowser *m_iqtTree;
   bool m_iqtResFileType;
