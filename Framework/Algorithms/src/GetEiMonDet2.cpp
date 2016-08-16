@@ -29,7 +29,6 @@ namespace PropertyNames {
   const static std::string MONITOR_SPECTRUM_NUMBER("MonitorSpectrumNumber");
   const static std::string MONITOR_WORKSPACE("MonitorWorkspace");
   const static std::string PULSE_INTERVAL("PulseInterval");
-  const static std::string WAVELENGTH("Wavelength");
 }
 
 // Register the algorithm into the algorithm factory.
@@ -69,8 +68,6 @@ void GetEiMonDet2::init() {
       PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositive, "Taken from the sample logs, if not specified.", Direction::InOut);
   declareProperty(
       PropertyNames::ENERGY_TOLERANCE, 10.0, boost::make_shared<BoundedValidator<double>>(0, 100), "Tolerance between calculated energy and " + PropertyNames::INCIDENT_ENERGY + ", in percents.");
-  declareProperty(
-      PropertyNames::WAVELENGTH, -1.0, Direction::Output);
 }
 
 void GetEiMonDet2::exec() {
@@ -187,10 +184,8 @@ void GetEiMonDet2::exec() {
 
   const double velocity = flightLength / timeOfFlight * 1e6;
   const double energy = 0.5 * NeutronMass * velocity * velocity / meV;
-  const double wavelength = h / (NeutronMass * velocity) * 1e10; // in Ångströms.
   // Set output properties.
   setProperty(PropertyNames::INCIDENT_ENERGY, energy);
-  setProperty(PropertyNames::WAVELENGTH, wavelength);
 }
 
 } // namespace Algorithms
