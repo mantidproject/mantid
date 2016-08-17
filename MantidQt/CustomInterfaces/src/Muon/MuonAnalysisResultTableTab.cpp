@@ -950,28 +950,10 @@ void MuonAnalysisResultTableTab::createMultipleFitsTable() {
 
   // Add columns for log values
   foreach (QString log, logsSelected) {
-    std::string columnTypeName;
-    int columnPlotType;
-
-    // We use values of the first workspace of the first label to determine the
-    // type of the column to add. It seems reasonable to assume that log values
-    // with the same name will have same types.
-    const auto &wsName = workspacesByLabel[labelsSelected.first()].front();
-    const QString &typeName =
-        m_logValues[QString::fromStdString(wsName)][log].typeName();
-    if (typeName == "double") {
-      columnTypeName = "double";
-      columnPlotType = 1;
-    } else if (typeName == "QString") {
-      columnTypeName = "str";
-      columnPlotType = 6;
-    } else
-      throw std::runtime_error(
-          "Couldn't find appropriate column type for value with type " +
-          typeName.toStdString());
-
-    Column_sptr newColumn = table->addColumn(columnTypeName, log.toStdString());
-    newColumn->setPlotType(columnPlotType);
+    // Despite type "str", this will still work for plotting if you put a number
+    // in it (like "100")
+    Column_sptr newColumn = table->addColumn("str", log.toStdString());
+    newColumn->setPlotType(1);
     newColumn->setReadOnly(false);
   }
 
@@ -1062,32 +1044,37 @@ void MuonAnalysisResultTableTab::createMultipleFitsTable() {
 
     row << labelName.toStdString();
 
-    //// Get log values for this row
-    // const auto &logValues = m_logValues[wsName];
+    // Get log values for this row and write in table
+    for (const auto &log : logsSelected) {
+      QStringList valuesPerWorkspace;
+      for (const auto &wsName : workspacesByLabel[labelName]) {
+        const auto &logValues = m_logValues[QString::fromStdString(wsName)];
+        const auto &val = logValues[log];
 
-    //// Write log values in each column
-    // for (int i = 0; i < logsSelected.size(); ++i) {
-    //  Mantid::API::Column_sptr col = table->getColumn(i);
-    //  const QVariant &v = logValues[logsSelected[i]];
+        // Special case: if log is time in sec, subtract the first start time
+        if (log.endsWith(" (s)")) {
+          auto seconds =
+              val.toDouble() - static_cast<double>(firstStart_ns) * 1.e-9;
+          valuesPerWorkspace.append(QString::number(seconds));
+        } else {
+          valuesPerWorkspace.append(logValues[log].toString());
+        }
+      }
 
-    //  if (col->isType<double>()) {
-    //    if (logsSelected[i].endsWith(" (s)")) {
-    //      // Convert relative to first start time
-    //      double seconds = v.toDouble();
-    //      const double firstStart_sec =
-    //          static_cast<double>(firstStart_ns) * 1.e-9;
-    //      row << seconds - firstStart_sec;
-    //    } else {
-    //      row << v.toDouble();
-    //    }
-    //  } else if (col->isType<std::string>()) {
-    //    row << v.toString().toStdString();
-    //  } else {
-    //    throw std::runtime_error(
-    //        "Log value with name '" + logsSelected[i].toStdString() +
-    //        "' in '" + wsName.toStdString() + "' has unexpected type.");
-    //  }
-    //}
+      // Range of values - use string comparison as works for numbers too
+      // Why not use std::minmax_element? To avoid MSVC warning: QT bug 41092
+      // (https://bugreports.qt.io/browse/QTBUG-41092)
+      valuesPerWorkspace.sort();
+      const auto &min = valuesPerWorkspace.front().toStdString();
+      const auto &max = valuesPerWorkspace.back().toStdString();
+      if (min == max) {
+        row << min;
+      } else {
+        std::ostringstream oss;
+        oss << min << '-' << max;
+        row << oss.str();
+      }
+    }
 
     //// Add param values (params same for all workspaces)
     // QMap<QString, double> paramsList = wsParamsList[wsName];
