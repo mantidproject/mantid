@@ -86,7 +86,26 @@ void ConvertUnits::init() {
 void ConvertUnits::exec() {
   // Get the workspaces
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  this->setupMemberVariables(inputWS);
+  MatrixWorkspace_sptr correctWS;
+  if (!inputWS->isHistogramData()) {
+    // not histogram data
+    // ConvertToHistogram
+    IAlgorithm_sptr convToHist = createChildAlgorithm("ConvertToHistogram");
+    convToHist->setProperty("InputWorkspace", inputWS);
+    convToHist->execute();
+    MatrixWorkspace_sptr temp = convToHist->getProperty("OutputWorkspace");
+    correctWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+
+    if (!correctWS->isHistogramData()) {
+      throw std::runtime_error(
+          "Failed to convert workspace from Points to Bins");
+    }
+
+  } else {
+    correctWS = inputWS;
+  }
+
+  this->setupMemberVariables(correctWS);
 
   // Check that the input workspace doesn't already have the desired unit.
   if (m_inputUnit->unitID() == m_outputUnit->unitID()) {
@@ -116,25 +135,16 @@ void ConvertUnits::exec() {
     }
   }
 
-  if (!inputWS->isHistogramData()) {
-    // not histogram data
-    // ConvertToHistogram
-    IAlgorithm_sptr convToHist = createChildAlgorithm("ConvertToHistogram");
-    convToHist->setProperty("InputWorkspace", inputWS);
-    convToHist->execute();
-    inputWS = convToHist->getProperty("OutputWorkspace");
-  }
-
-  if (inputWS->x(0).size() < 2) {
+  if (correctWS->x(0).size() < 2) {
     std::stringstream msg;
     msg << "Input workspace has invalid X axis binning parameters. Should have "
            "at least 2 values. Found "
-        << inputWS->x(0).size() << ".";
+        << correctWS->x(0).size() << ".";
     throw std::runtime_error(msg.str());
   }
-  if (inputWS->x(0).front() > inputWS->x(0).back() ||
-      inputWS->x(m_numberOfSpectra / 2).front() >
-          inputWS->x(m_numberOfSpectra / 2).back())
+  if (correctWS->x(0).front() > correctWS->x(0).back() ||
+      correctWS->x(m_numberOfSpectra / 2).front() >
+          correctWS->x(m_numberOfSpectra / 2).back())
     throw std::runtime_error("Input workspace has invalid X axis binning "
                              "parameters. X values should be increasing.");
 
@@ -145,9 +155,9 @@ void ConvertUnits::exec() {
   // If test fails, could also check whether a quick conversion in the opposite
   // direction has been entered
   {
-    outputWS = this->convertQuickly(inputWS, factor, power);
+    outputWS = this->convertQuickly(correctWS, factor, power);
   } else {
-    outputWS = this->convertViaTOF(m_inputUnit, inputWS);
+    outputWS = this->convertViaTOF(m_inputUnit, correctWS);
   }
 
   // If the units conversion has flipped the ascending direction of X, reverse
@@ -503,9 +513,7 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
   assert(static_cast<bool>(eventWS) == m_inputEvents); // Sanity check
 
   // Loop over the histograms (detector spectra)
-  PARALLEL_FOR1(outputWS)
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
-    PARALLEL_START_INTERUPT_REGION
     double efixed = efixedProp;
 
     // Now get the detector object for this histogram
@@ -545,9 +553,7 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     }
 
     prog.report("Convert to " + m_outputUnit->unitID());
-    PARALLEL_END_INTERUPT_REGION
   } // loop over spectra
-  PARALLEL_CHECK_INTERUPT_REGION
 
   if (failedDetectorCount != 0) {
     g_log.information() << "Unable to calculate sample-detector distance for "
