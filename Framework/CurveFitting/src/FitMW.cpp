@@ -43,8 +43,8 @@ using API::Jacobian;
 FitMW::FitMW(Kernel::IPropertyManager *fit,
              const std::string &workspacePropertyName,
              FitMW::DomainType domainType)
-    : IMWDomainCreator(fit, workspacePropertyName, domainType),
-      m_maxSize(0), m_normalise(false) {}
+    : IMWDomainCreator(fit, workspacePropertyName, domainType), m_maxSize(0),
+      m_normalise(false) {}
 
 /**
  * Constructor. Methods setWorkspace, setWorkspaceIndex and setRange must be
@@ -53,8 +53,8 @@ FitMW::FitMW(Kernel::IPropertyManager *fit,
  * @param domainType :: Type of the domain: Simple, Sequential, or Parallel.
  */
 FitMW::FitMW(FitMW::DomainType domainType)
-    : IMWDomainCreator(nullptr, std::string(), domainType),
-      m_maxSize(10), m_normalise(false) {}
+    : IMWDomainCreator(nullptr, std::string(), domainType), m_maxSize(10),
+      m_normalise(false) {}
 
 /**
  * Set all parameters
@@ -87,9 +87,9 @@ void FitMW::declareDatasetProperties(const std::string &suffix, bool addProp) {
     if (m_domainType != Simple) {
       auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
       mustBePositive->setLower(0);
-      declareProperty(new PropertyWithValue<int>(m_maxSizePropertyName, 1,
-                                                 mustBePositive),
-                      "The maximum number of values per a simple domain.");
+      declareProperty(
+          new PropertyWithValue<int>(m_maxSizePropertyName, 1, mustBePositive),
+          "The maximum number of values per a simple domain.");
     }
     declareProperty(
         new PropertyWithValue<bool>(m_normalisePropertyName, false),
@@ -216,8 +216,9 @@ FitMW::createOutputWorkspace(const std::string &baseName,
                              boost::shared_ptr<API::FunctionDomain> domain,
                              boost::shared_ptr<API::FunctionValues> values,
                              const std::string &outputWorkspacePropertyName) {
-  auto ws = IMWDomainCreator::createOutputWorkspace(baseName, function, domain, values, outputWorkspacePropertyName);
-  auto &mws = dynamic_cast<MatrixWorkspace&>(*ws);
+  auto ws = IMWDomainCreator::createOutputWorkspace(
+      baseName, function, domain, values, outputWorkspacePropertyName);
+  auto &mws = dynamic_cast<MatrixWorkspace &>(*ws);
 
   if (m_normalise && m_matrixWorkspace->isHistogramData()) {
     const MantidVec &X = mws.readX(0);

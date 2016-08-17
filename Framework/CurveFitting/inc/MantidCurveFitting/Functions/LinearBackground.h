@@ -59,10 +59,11 @@ protected:
   void init() override;
   /// Calculate histogram data.
   void histogram1D(double *out, double left, const double *right,
-                           const size_t nBins) const override;
+                   const size_t nBins) const override;
   /// Devivatives of the histogram.
-  void histogramDerivative1D(API::Jacobian *jacobian, double left, const double *right,
-                           const size_t nBins) const override;
+  void histogramDerivative1D(API::Jacobian *jacobian, double left,
+                             const double *right,
+                             const size_t nBins) const override;
 };
 
 } // namespace Functions

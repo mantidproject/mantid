@@ -80,10 +80,10 @@ public:
     TS_ASSERT_EQUALS(domain->size(), 10);
     TS_ASSERT_EQUALS(values->size(), 10);
     TS_ASSERT_EQUALS(ws->blocksize(), 10);
-    auto &h = dynamic_cast<FunctionDomain1DHistogram&>(*domain);
+    auto &h = dynamic_cast<FunctionDomain1DHistogram &>(*domain);
     auto &x = ws->readX(0);
     auto &y = ws->readY(0);
-    for(size_t j = 0; j < 10; ++j) {
+    for (size_t j = 0; j < 10; ++j) {
       TS_ASSERT_EQUALS(h[j], x[j + 1]);
     }
   }
@@ -108,7 +108,7 @@ public:
     fun.setParameter("FWHM", 1.0);
     fun.function(*domain, *values);
 
-    auto &d1d = dynamic_cast<FunctionDomain1D&>(*domain);
+    auto &d1d = dynamic_cast<FunctionDomain1D &>(*domain);
     TS_ASSERT_DELTA(values->getCalculated(0), 0.0302240668, 1e-9);
     TS_ASSERT_DELTA(values->getCalculated(1), 0.0433343771, 1e-9);
     TS_ASSERT_DELTA(values->getCalculated(2), 0.0640812259, 1e-9);
@@ -150,13 +150,14 @@ public:
     TS_ASSERT_DELTA(fun->getParameter("PeakCentre"), 0.0, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("FWHM"), 0.4, 1e-5);
 
-    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fit_Workspace");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "fit_Workspace");
     TS_ASSERT(outWS);
 
     auto &y = outWS->readY(0);
     auto &f = outWS->readY(1);
     auto &d = outWS->readY(2);
-    for(size_t i = 0; i < y.size(); ++i) {
+    for (size_t i = 0; i < y.size(); ++i) {
       TS_ASSERT_DELTA(y[i], f[i], 1e-5);
       TS_ASSERT_DELTA(d[i], 0.0, 1e-5);
     }
@@ -186,13 +187,13 @@ public:
       TS_ASSERT_DELTA(values[0], 0.6826 * a, 1e-3);
     }
     { // 2-sigma
-      FunctionDomain1DHistogram domain({-2.0*sigma, 2.0*sigma});
+      FunctionDomain1DHistogram domain({-2.0 * sigma, 2.0 * sigma});
       FunctionValues values(domain);
       fun.function(domain, values);
       TS_ASSERT_DELTA(values[0], 0.9544 * a, 1e-3);
     }
     { // 3-sigma
-      FunctionDomain1DHistogram domain({-3.0*sigma, 3.0*sigma});
+      FunctionDomain1DHistogram domain({-3.0 * sigma, 3.0 * sigma});
       FunctionValues values(domain);
       fun.function(domain, values);
       TS_ASSERT_DELTA(values[0], 0.9973 * a, 1e-3);
@@ -210,17 +211,19 @@ public:
     fit.execute();
     IFunction_sptr fun = fit.getProperty("Function");
 
-    TS_ASSERT_DELTA(fun->getParameter("Height"), 1.0 / 0.2 / sqrt(2.0*M_PI), 1e-5);
+    TS_ASSERT_DELTA(fun->getParameter("Height"), 1.0 / 0.2 / sqrt(2.0 * M_PI),
+                    1e-5);
     TS_ASSERT_DELTA(fun->getParameter("PeakCentre"), 0.0, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("Sigma"), 0.2, 1e-5);
 
-    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fit_Workspace");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "fit_Workspace");
     TS_ASSERT(outWS);
 
     auto &y = outWS->readY(0);
     auto &f = outWS->readY(1);
     auto &d = outWS->readY(2);
-    for(size_t i = 0; i < y.size(); ++i) {
+    for (size_t i = 0; i < y.size(); ++i) {
       TS_ASSERT_DELTA(y[i], f[i], 1e-5);
       TS_ASSERT_DELTA(d[i], 0.0, 1e-5);
     }
@@ -241,13 +244,14 @@ public:
 
     TS_ASSERT_DELTA(fun->getParameter("A0"), 3.1, 1e-5);
 
-    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fit_Workspace");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "fit_Workspace");
     TS_ASSERT(outWS);
 
     auto &y = outWS->readY(0);
     auto &f = outWS->readY(1);
     auto &d = outWS->readY(2);
-    for(size_t i = 0; i < y.size(); ++i) {
+    for (size_t i = 0; i < y.size(); ++i) {
       TS_ASSERT_DELTA(y[i], f[i], 1e-5);
       TS_ASSERT_DELTA(d[i], 0.0, 1e-5);
     }
@@ -269,13 +273,14 @@ public:
     TS_ASSERT_DELTA(fun->getParameter("A0"), 3.1, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("A1"), 0.3, 1e-5);
 
-    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fit_Workspace");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "fit_Workspace");
     TS_ASSERT(outWS);
 
     auto &y = outWS->readY(0);
     auto &f = outWS->readY(1);
     auto &d = outWS->readY(2);
-    for(size_t i = 0; i < y.size(); ++i) {
+    for (size_t i = 0; i < y.size(); ++i) {
       TS_ASSERT_DELTA(y[i], f[i], 1e-5);
       TS_ASSERT_DELTA(d[i], 0.0, 1e-5);
     }
@@ -287,7 +292,8 @@ public:
     auto ws = createGaussLinearWorkspace();
     Fit fit;
     fit.initialize();
-    fit.setProperty("Function", "name=LinearBackground;name=Gaussian,Height=1,Sigma=0.3");
+    fit.setProperty("Function",
+                    "name=LinearBackground;name=Gaussian,Height=1,Sigma=0.3");
     fit.setProperty("EvaluationType", "Histogram");
     fit.setProperty("InputWorkspace", ws);
     fit.setProperty("Output", "fit");
@@ -296,18 +302,20 @@ public:
 
     TS_ASSERT_DELTA(fun->getParameter("f0.A0"), 3.1, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("f0.A1"), 0.3, 1e-5);
-    TS_ASSERT_DELTA(fun->getParameter("f1.Height"), 1.0 / 0.2 / sqrt(2.0*M_PI), 1e-4);
+    TS_ASSERT_DELTA(fun->getParameter("f1.Height"),
+                    1.0 / 0.2 / sqrt(2.0 * M_PI), 1e-4);
     TS_ASSERT_DELTA(fun->getParameter("f1.PeakCentre"), 0.0, 1e-5);
     TS_ASSERT_DELTA(fun->getParameter("f1.Sigma"), 0.2, 1e-5);
 
-    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fit_Workspace");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "fit_Workspace");
     TS_ASSERT(outWS);
 
     auto &y = outWS->readY(0);
     auto &f = outWS->readY(1);
     auto &d = outWS->readY(2);
 
-    for(size_t i = 0; i < y.size(); ++i) {
+    for (size_t i = 0; i < y.size(); ++i) {
       TS_ASSERT_DELTA(y[i], f[i], 1e-5);
       TS_ASSERT_DELTA(d[i], 0.0, 1e-5);
     }
@@ -317,7 +325,7 @@ public:
 
   void test_distribution() {
     auto ws = createFlatWorkspace();
-    auto alg = AlgorithmFactory::Instance().create("ConvertToDistribution",-1);
+    auto alg = AlgorithmFactory::Instance().create("ConvertToDistribution", -1);
     alg->setChild(true);
     alg->initialize();
     alg->setProperty("Workspace", ws);
@@ -359,7 +367,8 @@ private:
     return ws2;
   }
 
-  MatrixWorkspace_sptr createFitWorkspace(const size_t ny, std::function<double(double)> fun) {
+  MatrixWorkspace_sptr createFitWorkspace(const size_t ny,
+                                          std::function<double(double)> fun) {
     MatrixWorkspace_sptr ws(new WorkspaceTester);
     size_t nx = ny + 1;
     double x0 = -1.0;
@@ -382,26 +391,27 @@ private:
 
   MatrixWorkspace_sptr createLorentzWorkspace(const size_t ny = 10) {
     double gamma = 0.2;
-    auto cumulFun = [gamma](double x){return atan(x / gamma) / M_PI;};
+    auto cumulFun = [gamma](double x) { return atan(x / gamma) / M_PI; };
     return createFitWorkspace(ny, cumulFun);
   }
 
   MatrixWorkspace_sptr createGaussWorkspace(const size_t ny = 10) {
     double sigma = 0.2;
-    auto cumulFun = [sigma](double x){return 0.5 * erf(x / sigma / sqrt(2.0));};
+    auto cumulFun =
+        [sigma](double x) { return 0.5 * erf(x / sigma / sqrt(2.0)); };
     return createFitWorkspace(ny, cumulFun);
   }
 
   MatrixWorkspace_sptr createFlatWorkspace(const size_t ny = 10) {
     double a = 3.1;
-    auto cumulFun = [a](double x){return a * x;};
+    auto cumulFun = [a](double x) { return a * x; };
     return createFitWorkspace(ny, cumulFun);
   }
 
   MatrixWorkspace_sptr createLinearWorkspace(const size_t ny = 10) {
     double a0 = 3.1;
     double a1 = 0.3;
-    auto cumulFun = [a0, a1](double x){return (a0 + 0.5 * a1 * x) * x;};
+    auto cumulFun = [a0, a1](double x) { return (a0 + 0.5 * a1 * x) * x; };
     return createFitWorkspace(ny, cumulFun);
   }
 
@@ -409,7 +419,9 @@ private:
     double a0 = 3.1;
     double a1 = 0.3;
     double sigma = 0.2;
-    auto cumulFun = [a0, a1, sigma](double x){return (a0 + 0.5 * a1 * x) * x + 0.5 * erf(x / sigma / sqrt(2.0));};
+    auto cumulFun = [a0, a1, sigma](double x) {
+      return (a0 + 0.5 * a1 * x) * x + 0.5 * erf(x / sigma / sqrt(2.0));
+    };
     return createFitWorkspace(ny, cumulFun);
   }
 };

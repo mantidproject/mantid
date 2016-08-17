@@ -85,7 +85,6 @@ protected:
   void setParameters() const override;
 
 private:
-
   /// Store maxSize property name
   std::string m_maxSizePropertyName;
   /// Store Normalise property name

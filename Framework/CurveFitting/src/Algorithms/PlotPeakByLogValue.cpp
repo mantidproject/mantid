@@ -283,7 +283,8 @@ void PlotPeakByLogValue::exec() {
             AlgorithmManager::Instance().createUnmanaged("Fit");
         fit->initialize();
         if (histogramFit) {
-          fit->setPropertyValue("EvaluationType", getPropertyValue("EvaluationType"));
+          fit->setPropertyValue("EvaluationType",
+                                getPropertyValue("EvaluationType"));
         }
         fit->setProperty("Function", ifun);
         fit->setProperty("InputWorkspace", data.ws);
@@ -596,7 +597,7 @@ PlotPeakByLogValue::makeNames() const {
       if (params.count() > 2 && !params[2].empty()) {
         period = boost::lexical_cast<int>(params[2]);
       }
-    } catch(boost::bad_lexical_cast &) {
+    } catch (boost::bad_lexical_cast &) {
       throw std::runtime_error("Incorrect value for a period: " + params[2]);
     }
     if (API::AnalysisDataService::Instance().doesExist(name)) {

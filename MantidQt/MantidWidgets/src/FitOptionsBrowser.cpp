@@ -193,7 +193,8 @@ void FitOptionsBrowser::createCommonProperties() {
   m_evaluationType = m_enumManager->addProperty("Evaluate Function As");
   {
     QStringList evaluationTypes;
-    evaluationTypes << "CentrePoint" << "Histogram";
+    evaluationTypes << "CentrePoint"
+                    << "Histogram";
     m_enumManager->setEnumNames(m_evaluationType, evaluationTypes);
     m_browser->addProperty(m_evaluationType);
     addProperty("EvaluationType", m_evaluationType,

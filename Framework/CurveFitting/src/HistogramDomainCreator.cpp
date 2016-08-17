@@ -19,8 +19,8 @@ using namespace API;
  * @param workspacePropertyName :: Name of the output property for a created
  * workspace in case a PropertyManager is used.
  */
-HistogramDomainCreator::HistogramDomainCreator(Kernel::IPropertyManager &manager,
-    const std::string &workspacePropertyName)
+HistogramDomainCreator::HistogramDomainCreator(
+    Kernel::IPropertyManager &manager, const std::string &workspacePropertyName)
     : IMWDomainCreator(&manager, workspacePropertyName) {}
 
 /**
@@ -37,11 +37,13 @@ void HistogramDomainCreator::createDomain(
   setParameters();
 
   if (!m_matrixWorkspace->isHistogramData()) {
-    throw std::runtime_error("Cannot create a histogram domain from point data.");
+    throw std::runtime_error(
+        "Cannot create a histogram domain from point data.");
   }
 
   if (m_domainType != Simple) {
-    throw std::runtime_error("Cannot create non-simple domain for histogram fitting.");
+    throw std::runtime_error(
+        "Cannot create non-simple domain for histogram fitting.");
   }
 
   const Mantid::MantidVec &X = m_matrixWorkspace->readX(m_workspaceIndex);
@@ -104,7 +106,6 @@ void HistogramDomainCreator::createDomain(
   }
   m_domain = boost::dynamic_pointer_cast<API::FunctionDomain1D>(domain);
   m_values = values;
-
 }
 
 /**
@@ -120,20 +121,22 @@ boost::shared_ptr<API::Workspace> HistogramDomainCreator::createOutputWorkspace(
     boost::shared_ptr<API::FunctionDomain> domain,
     boost::shared_ptr<API::FunctionValues> values,
     const std::string &outputWorkspacePropertyName) {
-  auto ws = IMWDomainCreator::createOutputWorkspace(baseName, function, domain, values, outputWorkspacePropertyName);
+  auto ws = IMWDomainCreator::createOutputWorkspace(
+      baseName, function, domain, values, outputWorkspacePropertyName);
 
   if (m_matrixWorkspace->isDistribution()) {
     // Convert the calculated values to distribution
-    auto &mws = dynamic_cast<MatrixWorkspace&>(*ws);
-    auto &bins = dynamic_cast<FunctionDomain1DHistogram&>(*domain);
+    auto &mws = dynamic_cast<MatrixWorkspace &>(*ws);
+    auto &bins = dynamic_cast<FunctionDomain1DHistogram &>(*domain);
     double left = bins.leftBoundary();
-    for(size_t iSpec = 1; iSpec < mws.getNumberHistograms(); ++iSpec) {
-      if (iSpec == 2) continue; // skip the diff spectrum
+    for (size_t iSpec = 1; iSpec < mws.getNumberHistograms(); ++iSpec) {
+      if (iSpec == 2)
+        continue; // skip the diff spectrum
       auto &x = mws.readX(iSpec);
       auto &y = mws.dataY(iSpec);
       auto &e = mws.dataE(iSpec);
       double left = bins.leftBoundary();
-      for(size_t i = 0; i < bins.size(); ++i) {
+      for (size_t i = 0; i < bins.size(); ++i) {
         double right = bins[i];
         double dx = right - left;
         y[i] /= dx;

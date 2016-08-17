@@ -106,19 +106,22 @@ void Lorentzian::functionDerivLocal(Jacobian *out, const double *xValues,
 /// @param out :: Output bin values (size == nBins) - integrals of the function
 ///    inside each bin.
 /// @param left :: The left-most bin boundary.
-/// @param right :: A pointer to an array of successive right bin boundaries (size = nBins).
+/// @param right :: A pointer to an array of successive right bin boundaries
+/// (size = nBins).
 /// @param nBins :: Number of bins.
 void Lorentzian::histogram1D(double *out, double left, const double *right,
-                          const size_t nBins) const {
+                             const size_t nBins) const {
 
   const double amplitude = getParameter("Amplitude");
   const double peakCentre = getParameter("PeakCentre");
   const double gamma = getParameter("FWHM");
   const double halfGamma = 0.5 * gamma;
 
-  auto cumulFun = [halfGamma, peakCentre](double x){return atan((x - peakCentre) / halfGamma) / M_PI;};
+  auto cumulFun = [halfGamma, peakCentre](double x) {
+    return atan((x - peakCentre) / halfGamma) / M_PI;
+  };
   double cLeft = cumulFun(left);
-  for(size_t i = 0; i < nBins; ++i) {
+  for (size_t i = 0; i < nBins; ++i) {
     double cRight = cumulFun(right[i]);
     out[i] = amplitude * (cRight - cLeft);
     cLeft = cRight;
@@ -128,28 +131,30 @@ void Lorentzian::histogram1D(double *out, double left, const double *right,
 /// Derivatives of the histogram.
 /// @param jacobian :: The output Jacobian.
 /// @param left :: The left-most bin boundary.
-/// @param right :: A pointer to an array of successive right bin boundaries (size = nBins).
+/// @param right :: A pointer to an array of successive right bin boundaries
+/// (size = nBins).
 /// @param nBins :: Number of bins.
-void Lorentzian::histogramDerivative1D(Jacobian *jacobian, double left, const double *right,
-  const size_t nBins) const {
+void Lorentzian::histogramDerivative1D(Jacobian *jacobian, double left,
+                                       const double *right,
+                                       const size_t nBins) const {
   const double amplitude = getParameter("Amplitude");
   const double c = getParameter("PeakCentre");
   const double g = getParameter("FWHM");
   const double g2 = g * g;
 
-  auto cumulFun = [g, c](double x){return atan((x - c) / g) / M_PI;};
-  auto denom = [g2, c](double x){return (g2 + 4*pow(c - x, 2)) * M_PI;};
+  auto cumulFun = [g, c](double x) { return atan((x - c) / g) / M_PI; };
+  auto denom = [g2, c](double x) { return (g2 + 4 * pow(c - x, 2)) * M_PI; };
 
   double xl = left;
   double denomLeft = denom(left);
   double cLeft = cumulFun(left);
-  for(size_t i = 0; i < nBins; ++i) {
+  for (size_t i = 0; i < nBins; ++i) {
     double xr = right[i];
     double denomRight = denom(xr);
     double cRight = cumulFun(xr);
     jacobian->set(i, 0, cRight - cLeft);
-    jacobian->set(i, 1, - 2.0 * (g / denomRight - g / denomLeft));
-    jacobian->set(i, 2, - 2.0 * ((xr - c) / denomRight - (xl - c) / denomLeft));
+    jacobian->set(i, 1, -2.0 * (g / denomRight - g / denomLeft));
+    jacobian->set(i, 2, -2.0 * ((xr - c) / denomRight - (xl - c) / denomLeft));
     //----------------------------------
     denomLeft = denomRight;
     cLeft = cRight;

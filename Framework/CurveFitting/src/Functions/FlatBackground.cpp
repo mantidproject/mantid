@@ -57,15 +57,16 @@ void FlatBackground::functionDeriv1D(API::Jacobian *out, const double *xValues,
 /// @param out :: Output bin values (size == nBins) - integrals of the function
 ///    inside each bin.
 /// @param left :: The left-most bin boundary.
-/// @param right :: A pointer to an array of successive right bin boundaries (size = nBins).
+/// @param right :: A pointer to an array of successive right bin boundaries
+/// (size = nBins).
 /// @param nBins :: Number of bins.
 void FlatBackground::histogram1D(double *out, double left, const double *right,
-                          const size_t nBins) const {
+                                 const size_t nBins) const {
 
   const double a0 = getParameter("A0");
 
   double cLeft = a0 * left;
-  for(size_t i = 0; i < nBins; ++i) {
+  for (size_t i = 0; i < nBins; ++i) {
     double cRight = a0 * right[i];
     out[i] = cRight - cLeft;
     cLeft = cRight;
@@ -75,13 +76,15 @@ void FlatBackground::histogram1D(double *out, double left, const double *right,
 /// Derivatives of the histogram.
 /// @param jacobian :: The output Jacobian.
 /// @param left :: The left-most bin boundary.
-/// @param right :: A pointer to an array of successive right bin boundaries (size = nBins).
+/// @param right :: A pointer to an array of successive right bin boundaries
+/// (size = nBins).
 /// @param nBins :: Number of bins.
-void FlatBackground::histogramDerivative1D(Jacobian *jacobian, double left, const double *right,
-  const size_t nBins) const {
+void FlatBackground::histogramDerivative1D(Jacobian *jacobian, double left,
+                                           const double *right,
+                                           const size_t nBins) const {
 
   double xl = left;
-  for(size_t i = 0; i < nBins; ++i) {
+  for (size_t i = 0; i < nBins; ++i) {
     double xr = right[i];
     jacobian->set(i, 0, xr - xl);
     xl = xr;

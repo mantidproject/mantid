@@ -48,8 +48,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport IMWDomainCreator : public API::IDomainCreator {
 public:
   /// Constructor
-  IMWDomainCreator(Kernel::IPropertyManager *fit, const std::string &workspacePropertyName,
-        DomainType domainType = Simple);
+  IMWDomainCreator(Kernel::IPropertyManager *fit,
+                   const std::string &workspacePropertyName,
+                   DomainType domainType = Simple);
   /// Declare properties that specify the dataset within the workspace to fit
   /// to.
   void declareDatasetProperties(const std::string &suffix = "",

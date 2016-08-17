@@ -43,7 +43,8 @@ IDomainCreator *createDomainCreator(const IFunction *fun,
   } else if (auto gfun = dynamic_cast<const IFunctionGeneral *>(fun)) {
     creator = new GeneralDomainCreator(*gfun, *manager, workspacePropertyName);
   } else {
-    bool histogramFit = manager->getPropertyValue("EvaluationType") == "Histogram";
+    bool histogramFit =
+        manager->getPropertyValue("EvaluationType") == "Histogram";
     if (histogramFit) {
       creator = new HistogramDomainCreator(*manager, workspacePropertyName);
     } else {

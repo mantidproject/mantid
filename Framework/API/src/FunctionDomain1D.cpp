@@ -160,6 +160,5 @@ double FunctionDomain1DHistogram::leftBoundary() const {
   return m_bins.front();
 }
 
-
 } // namespace API
 } // namespace Mantid

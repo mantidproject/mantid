@@ -1114,7 +1114,6 @@ bool FitPropertyBrowser::isHistogramFit() const {
   return m_evaluationTypes[i].toStdString() == "Histogram";
 }
 
-
 /// Get the max number of iterations
 int FitPropertyBrowser::maxIterations() const {
   return m_intManager->value(m_maxIterations);

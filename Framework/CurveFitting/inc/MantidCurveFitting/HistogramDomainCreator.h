@@ -8,7 +8,7 @@
 namespace Mantid {
 
 namespace API {
-  class FunctionDomain1DHistogram;
+class FunctionDomain1DHistogram;
 }
 
 namespace CurveFitting {
@@ -40,7 +40,7 @@ namespace CurveFitting {
 class DLLExport HistogramDomainCreator : public IMWDomainCreator {
 public:
   HistogramDomainCreator(Kernel::IPropertyManager &manager,
-                        const std::string &workspacePropertyName);
+                         const std::string &workspacePropertyName);
 
   void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
                     boost::shared_ptr<API::FunctionValues> &values,

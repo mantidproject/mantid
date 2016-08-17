@@ -139,7 +139,6 @@ private:
   size_t m_workspaceIndex;
 };
 
-
 /// Implements FunctionDomain1D as a set of bins for a histogram.
 /// operator[i] returns the right boundary of i-th bin.
 /// The left boundary of the first bin (#0) is returned by leftBoundary()

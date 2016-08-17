@@ -67,8 +67,8 @@ using API::Jacobian;
  * @param domainType :: Type of the domain: Simple, Sequential, or Parallel.
  */
 IMWDomainCreator::IMWDomainCreator(Kernel::IPropertyManager *fit,
-             const std::string &workspacePropertyName,
-             IMWDomainCreator::DomainType domainType)
+                                   const std::string &workspacePropertyName,
+                                   IMWDomainCreator::DomainType domainType)
     : API::IDomainCreator(
           fit, std::vector<std::string>(1, workspacePropertyName), domainType),
       m_workspaceIndex(-1), m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()),
@@ -106,7 +106,8 @@ void IMWDomainCreator::setParameters() const {
  * @param addProp :: allows for the declaration of certain properties of the
  * dataset
  */
-void IMWDomainCreator::declareDatasetProperties(const std::string &suffix, bool addProp) {
+void IMWDomainCreator::declareDatasetProperties(const std::string &suffix,
+                                                bool addProp) {
   m_workspaceIndexPropertyName = "WorkspaceIndex" + suffix;
   m_startXPropertyName = "StartX" + suffix;
   m_endXPropertyName = "EndX" + suffix;
@@ -189,7 +190,8 @@ std::pair<size_t, size_t> IMWDomainCreator::getXInterval() const {
       to = X.end() - 1;
     }
   }
-  return std::make_pair(std::distance(X.begin(), from), std::distance(X.begin(), to));
+  return std::make_pair(std::distance(X.begin(), from),
+                        std::distance(X.begin(), to));
 }
 
 /**
@@ -224,8 +226,9 @@ void IMWDomainCreator::initFunction(API::IFunction_sptr function) {
  * @param nhistograms The number of histograms
  * @param nyvalues The number of y values to hold
  */
-API::MatrixWorkspace_sptr IMWDomainCreator::createEmptyResultWS(const size_t nhistograms,
-                                                     const size_t nyvalues) {
+API::MatrixWorkspace_sptr
+IMWDomainCreator::createEmptyResultWS(const size_t nhistograms,
+                                      const size_t nyvalues) {
   size_t nxvalues(nyvalues);
   if (m_matrixWorkspace->isHistogramData())
     nxvalues += 1;
@@ -275,12 +278,11 @@ void IMWDomainCreator::setInitialValues(API::IFunction &function) {
  * @param values :: A API::FunctionValues instance containing the fitting data
  * @param outputWorkspacePropertyName :: The property name
  */
-boost::shared_ptr<API::Workspace>
-IMWDomainCreator::createOutputWorkspace(const std::string &baseName,
-                             API::IFunction_sptr function,
-                             boost::shared_ptr<API::FunctionDomain> domain,
-                             boost::shared_ptr<API::FunctionValues> values,
-                             const std::string &outputWorkspacePropertyName) {
+boost::shared_ptr<API::Workspace> IMWDomainCreator::createOutputWorkspace(
+    const std::string &baseName, API::IFunction_sptr function,
+    boost::shared_ptr<API::FunctionDomain> domain,
+    boost::shared_ptr<API::FunctionValues> values,
+    const std::string &outputWorkspacePropertyName) {
   if (!values) {
     throw std::logic_error("FunctionValues expected");
   }
@@ -487,7 +489,6 @@ void IMWDomainCreator::addFunctionValuesToWS(
     }
   }
 }
-
 
 } // namespace Algorithm
 } // namespace Mantid
