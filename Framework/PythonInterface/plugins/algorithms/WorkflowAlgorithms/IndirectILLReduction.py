@@ -247,13 +247,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         """
         # call IndirectILLReduction for vanadium run with unmirror 1 and 2 to get left and right
 
-        left_van = IndirectILLReduction(Run=self._vanadium_file,SumRuns=True,MirrorSense=self._mirror_sense,
-                                        UnmirrorOption=1,MapFile=self._map_file,Analyser=self._analyser,
-                                        Reflection=self._reflection)
+        left_van = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
+                                        Reflection=self._reflection, SumRuns=True, MirrorSense=self._mirror_sense,
+                                        UnmirrorOption=1)
 
-        right_van = IndirectILLReduction(Run=self._vanadium_file, SumRuns=True, MirrorSense=self._mirror_sense,
-                                         UnmirrorOption=2, MapFile=self._map_file, Analyser=self._analyser,
-                                         Reflection=self._reflection)
+        right_van = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
+                                         Reflection=self._reflection, SumRuns=True, MirrorSense=self._mirror_sense,
+                                         UnmirrorOption=2)
 
         # note, that run number will be prepended, so need to rename
         RenameWorkspace(left_van.getItem(0).getName(),'left_van')
@@ -337,16 +337,15 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         self._debug(red, vnorm)
 
-        # Get number of bins (end) and mid bin number
-        end = mtd[red].blocksize()
-        mid = int(end / 2)
+        # Number of bins
+        size = mtd[red].blocksize()
 
         # Get the left and right wings
-        self._extract_workspace(red, left, 0, mid)
-        self._extract_workspace(red, right, mid, end)
+        self._extract_workspace(red, left, 0, int(size / 2))
+        self._extract_workspace(red, right, int(size / 2), size)
         # Get the left and right monitors, needed to identify the masked bins
-        self._extract_workspace(mon, '__left_mon', 0, mid)
-        self._extract_workspace(mon, '__right_mon', mid, end)
+        self._extract_workspace(mon, '__left_mon', 0, int(size / 2))
+        self._extract_workspace(mon, '__right_mon', int(size / 2), size)
 
         # Mask bins out of monitor range (zero bins) for left and right wings
         xmin_left, xmax_left = self._monitor_range('__left_mon')
@@ -360,10 +359,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self.log().debug('Mask monitor bins smaller than %d' % xmin)
             MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=0, XMax=xmin)
             MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=0, XMax=xmin)
-        if xmax < end:
+        if xmax < size:
             self.log().debug('Mask monitor bins larger than %d' % xmax)
-            MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=xmax, XMax=end)
-            MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=xmax, XMax=end)
+            MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=xmax, XMax=size)
+            MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=xmax, XMax=size)
 
         # Delete the left and right monitors
         DeleteWorkspace('__left_mon')
@@ -374,11 +373,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._convert_to_energy(left)
         self._convert_to_energy(right)
 
-        # Initial bins out of which range masking will be performed
-        start_bin = 0
-        end_bin = end
-
-        self._perform_unmirror
+        # Get new reduced workspace
+        start_bin, end_bin = self._perform_unmirror(red, left, right)
 
         # Mask corrupted bins according to shifted workspaces
         # Reload X-values (now in meV)
@@ -400,11 +396,15 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             DeleteWorkspace(left)
             DeleteWorkspace(right)
 
-    def _perform_unmirror(self):
+    def _perform_unmirror(self, red, left, right):
         """
         Handling unmirror options and sum left and right wing if needed
         :return: reduced workspace
         """
+        # Initial bins out of which range masking will be performed
+        start_bin = 0
+        end_bin = mtd[red].blocksize()
+
         if self._unmirror_option == 0:
             self.log().information('Unmirror 0: X-axis will not be converted to energy transfer if mirror sense is ON')
             if not self._mirror_sense:
@@ -448,7 +448,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=red)
             Scale(InputWorkspace=red, OutputWorkspace=red, Factor=0.5, Operation='Multiply')
 
-        return red, start_bin, end_bin
+        return start_bin, end_bin
 
     def _shift_spectra(self, ws1, ws2=None, shift_option=False, masking=False):
         """
@@ -518,7 +518,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=x[0], XMax=x[start_bin])
             MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=x[end_bin], XMax=x[end])
 
-        return [-start_bin, end_bin]
+        return -start_bin, end_bin
 
     def _perform_masking(self, ws, xminbin, xmaxbin):
         """
