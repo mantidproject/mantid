@@ -16,7 +16,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Kernel;
@@ -30,91 +29,88 @@ using Mantid::HistogramData::Points;
 using Mantid::HistogramData::CountVariances;
 using Mantid::HistogramData::CountStandardDeviations;
 
+namespace {
+void setup_WS(std::string &inputSpace) {
+  // Set up a small workspace for testing
+  auto space2D = createWorkspace<Workspace2D>(256, 11, 10);
+  BinEdges x{0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
+  Counts a{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  CountVariances variances{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  CountStandardDeviations e(variances);
+  for (int j = 0; j < 256; ++j) {
+    space2D->setBinEdges(j, x);
+    space2D->setCounts(j, a);
+    space2D->setCountStandardDeviations(j, e);
+    // Just set the spectrum number to match the index
+    space2D->getSpectrum(j).setSpectrumNo(j);
+    space2D->getSpectrum(j).setDetectorID(j);
+  }
+  space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+
+  // Register the workspace in the data service
+  inputSpace = "testWorkspace";
+  AnalysisDataService::Instance().addOrReplace(inputSpace, space2D);
+
+  // Load the instrument data
+  Mantid::DataHandling::LoadInstrument loader;
+  loader.initialize();
+  // Path to test input file assumes Test directory checked out from SVN
+  const std::string inputFile =
+      ConfigService::Instance().getInstrumentDirectory() + "HET_Definition.xml";
+  loader.setPropertyValue("Filename", inputFile);
+  loader.setPropertyValue("Workspace", inputSpace);
+  loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
+  loader.execute();
+}
+
+void setup_Points_WS(std::string &inputSpace) {
+  // Set up a small workspace for testing
+  auto space2D = createWorkspace<Workspace2D>(256, 10, 10);
+
+  // these are the converted points from the BinEdges in setup_WS()
+  Points x{500, 1500, 2500, 3500, 4500, 5500, 6500, 7500, 8500, 9500};
+  Counts a{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  CountVariances variances{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  CountStandardDeviations e(variances);
+  for (int j = 0; j < 256; ++j) {
+    space2D->setPoints(j, x);
+    space2D->setCounts(j, a);
+    space2D->setCountStandardDeviations(j, e);
+    // Just set the spectrum number to match the index
+    space2D->getSpectrum(j).setSpectrumNo(j);
+    space2D->getSpectrum(j).setDetectorID(j);
+  }
+  space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+
+  // Register the workspace in the data service
+  inputSpace = "testWorkspace";
+  AnalysisDataService::Instance().addOrReplace(inputSpace, space2D);
+
+  // Load the instrument data
+  Mantid::DataHandling::LoadInstrument loader;
+  loader.initialize();
+  // Path to test input file assumes Test directory checked out from SVN
+  const std::string inputFile =
+      ConfigService::Instance().getInstrumentDirectory() + "HET_Definition.xml";
+  loader.setPropertyValue("Filename", inputFile);
+  loader.setPropertyValue("Workspace", inputSpace);
+  loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
+  loader.execute();
+}
+}
 class ConvertUnitsTest : public CxxTest::TestSuite {
 public:
-  void setup_WS() {
-    // Set up a small workspace for testing
-    auto space2D = createWorkspace<Workspace2D>(256, 11, 10);
-    BinEdges x{0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
-    Counts a{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    CountVariances variances{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    CountStandardDeviations e(variances);
-    for (int j = 0; j < 256; ++j) {
-      space2D->setBinEdges(j, x);
-      space2D->setCounts(j, a);
-      space2D->setCountStandardDeviations(j, e);
-      // Just set the spectrum number to match the index
-      space2D->getSpectrum(j).setSpectrumNo(j);
-      space2D->getSpectrum(j).setDetectorID(j);
-    }
-    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-
-    // Register the workspace in the data service
-    this->inputSpace = "testWorkspace";
-    AnalysisDataService::Instance().addOrReplace(inputSpace, space2D);
-
-    // Load the instrument data
-    Mantid::DataHandling::LoadInstrument loader;
-    loader.initialize();
-    // Path to test input file assumes Test directory checked out from SVN
-    const std::string inputFile =
-        ConfigService::Instance().getInstrumentDirectory() +
-        "HET_Definition.xml";
-    loader.setPropertyValue("Filename", inputFile);
-    loader.setPropertyValue("Workspace", this->inputSpace);
-    loader.setProperty("RewriteSpectraMap",
-                       Mantid::Kernel::OptionalBool(false));
-    loader.execute();
-  }
-
-  void setup_Points_WS() {
-    // Set up a small workspace for testing
-    auto space2D = createWorkspace<Workspace2D>(256, 10, 10);
-
-    // these are the converted points from the BinEdges in setup_WS()
-    Points x{500, 1500, 2500, 3500, 4500, 5500, 6500, 7500, 8500, 9500};
-    Counts a{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    CountVariances variances{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    CountStandardDeviations e(variances);
-    for (int j = 0; j < 256; ++j) {
-      space2D->setPoints(j, x);
-      space2D->setCounts(j, a);
-      space2D->setCountStandardDeviations(j, e);
-      // Just set the spectrum number to match the index
-      space2D->getSpectrum(j).setSpectrumNo(j);
-      space2D->getSpectrum(j).setDetectorID(j);
-    }
-    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-
-    // Register the workspace in the data service
-    this->inputSpace = "testWorkspace";
-    AnalysisDataService::Instance().addOrReplace(inputSpace, space2D);
-
-    // Load the instrument data
-    Mantid::DataHandling::LoadInstrument loader;
-    loader.initialize();
-    // Path to test input file assumes Test directory checked out from SVN
-    const std::string inputFile =
-        ConfigService::Instance().getInstrumentDirectory() +
-        "HET_Definition.xml";
-    loader.setPropertyValue("Filename", inputFile);
-    loader.setPropertyValue("Workspace", this->inputSpace);
-    loader.setProperty("RewriteSpectraMap",
-                       Mantid::Kernel::OptionalBool(false));
-    loader.execute();
-  }
-
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
   }
 
   void test_Exec_Points_Input() {
-    this->setup_Points_WS();
+    setup_Points_WS(inputSpace);
 
     ConvertUnits convertUnits;
     TS_ASSERT_THROWS_NOTHING(convertUnits.initialize());
-	TS_ASSERT(convertUnits.isInitialized());
+    TS_ASSERT(convertUnits.isInitialized());
     TS_ASSERT_THROWS_NOTHING(
         convertUnits.setPropertyValue("InputWorkspace", inputSpace));
     TS_ASSERT_THROWS_NOTHING(
@@ -182,7 +178,7 @@ public:
 
   void test_Points_Convert_Back_and_Forth() {
     // set up points WS with units TOF
-    this->setup_Points_WS();
+    setup_Points_WS(inputSpace);
 
     ConvertUnits convertUnits;
     TS_ASSERT_THROWS_NOTHING(convertUnits.initialize());
@@ -209,7 +205,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // This WILL RESET inputSpace to a WS with BinEdges!
-    this->setup_WS();
+    setup_WS(inputSpace);
     Workspace_sptr binEdgesWS;
     TS_ASSERT_THROWS_NOTHING(
         binEdgesWS = AnalysisDataService::Instance().retrieve(inputSpace));
@@ -224,10 +220,10 @@ public:
     Workspace2D_sptr output2D =
         boost::dynamic_pointer_cast<Workspace2D>(output);
 
-	// make sure that it is a histogram
-	TS_ASSERT(output2D->isHistogramData());
+    // make sure that it is a histogram
+    TS_ASSERT(output2D->isHistogramData());
 
-	// check if the units are successfully converted
+    // check if the units are successfully converted
     TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "TOF");
 
     // Test that X data is now bins, i.e. 1 bigger than Y
@@ -236,9 +232,9 @@ public:
     TS_ASSERT_EQUALS(output2D->y(101).size(), 10);
     TS_ASSERT_EQUALS(output2D->e(101).size(), 10);
 
-	// Compare to see if X values have changed
-	// Y values are 0, because ConvertUnits cannot 
-	// find the detector
+    // Compare to see if X values have changed
+    // Y values are 0, because ConvertUnits cannot
+    // find the detector
     const size_t xsize = output2D->blocksize();
     for (size_t i = 0; i < output2D->getNumberHistograms(); ++i) {
       auto &inX = binEdgesWS2D->x(i);
@@ -264,7 +260,7 @@ public:
    * workspace.
    */
   void test_Exec_Input_Same_Output_And_Same_Units() {
-    this->setup_WS();
+    setup_WS(inputSpace);
     if (!alg.isInitialized())
       alg.initialize();
 
@@ -293,7 +289,7 @@ public:
    * in-memory workspace.
    */
   void test_Exec_Input_different_Output_But_Same_Units() {
-    this->setup_WS();
+    setup_WS(inputSpace);
     if (!alg.isInitialized())
       alg.initialize();
 
@@ -319,7 +315,7 @@ public:
   }
 
   void testExec() {
-    this->setup_WS();
+    setup_WS(inputSpace);
     if (!alg.isInitialized())
       alg.initialize();
 
