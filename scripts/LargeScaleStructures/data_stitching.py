@@ -642,12 +642,12 @@ def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
         xmin, xmax = d.get_range()
         if is_q_range_limited:
             if i == 0:
-                xmax = q_max[i]
+                xmax = min(q_max[i], xmax)
             elif i < n_data_sets-1:
-                xmin = q_min[i-1]
-                xmax = q_max[i]
+                xmin = max(q_min[i-1], xmin)
+                xmax = min(q_max[i], xmax)
             elif i == n_data_sets-1:
-                xmin = q_min[i-1]
+                xmin = max(q_min[i-1], xmin)
 
         d.set_range(xmin, xmax)
 
