@@ -35,6 +35,8 @@ Algorithms
 
 - :ref:`LoadMuonNexus <algm-LoadMuonNexus>`: Fixed loading of certain v1 NeXus files converted from other formats that did not contain number of good frames.
 
+- :ref:`LoadMuonNexus <algm-LoadMuonNexus>`: Now loads the correct detector IDs, whether the whole file is loaded or just a selection of spectra. Correctly handles muon v2 Nexus files, in which one spectrum can map to multiple detectors.
+
 Fit Functions
 -------------
 
