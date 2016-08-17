@@ -37,9 +37,9 @@ Single Crystal Diffraction
 
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has been rewritten to calibrate the position and rotations of
   each panel independently in parallel.  There are options to calibrate the panel size and the L1 for all the panels.
-  Only the U of the UB matrix is refined.  There is a script, SCDCalibratePanelsResults.py, that takes the output of
+  Only the U of the UB matrix is refined.  There is a script, scripts/SCD_Reduction/SCDCalibratePanelsResults.py, that takes the output of
   this algorithm and plots the theoretical vs calculated position of each peak for each panel.  The RMSD in mm is
-  calculated and printed.
+  calculated and printed in a log file and on the plots.
 
 Engineering Diffraction
 -----------------------

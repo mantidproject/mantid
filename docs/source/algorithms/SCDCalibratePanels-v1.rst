@@ -9,10 +9,29 @@
 Description
 -----------
 
-This algorithm calibrates panels of Rectangular Detectors in one
-instrument. The initial path, panel widths, panel heights,
-panel locations and orientation are all adjusted so the error in q
-positions from the theoretical q positions is minimized. 
+This algorithm calibrates panels of Rectangular Detectors 
+or packs of tubes in an instrument.  The initial path,
+panel centers and orientations are adjusted so the error in Q
+positions from the theoretical Q positions is minimized. 
+Given a set of peaks indexed by :math:`(h_i, k_i, l_i)`, we
+modify the instrument parameters, p, and then find  Q in the sample frame,
+:math:`\rm \vec{Q}_{sample}` that mininizes the following:
+
+.. math::
+
+   \rm U \rm B \left(
+                               \begin{array}{c}
+                                 Round(h_i) \\
+                                 Round(k_i) \\
+                                 Round(l_i) \\
+                               \end{array}
+                             \right) 2\pi - \rm \vec{Q}_{sample,i}(\vec{p})
+
+B is fixed from the input lattice parameters, but U is modified by :ref:`CalculateUMatrix <algm-CalculateUMatrix>` 
+for all peaks before and after optimization.
+The initial path, L1, is optimized for all peaks before and after each panel or pack's parameters are optimized.
+The panels and packs' parameters are optimized in parallel.
+An option is available to adjust the panel widths and heights for Rectangular Detectors.
 
 Some features:
 
@@ -29,9 +48,9 @@ Some features:
 
    b. Workspaces beginning with 'fit' contain the differences in the calculated and theoretical Q vectors for each peak.
       
-   c. ColFilename contains the calculated and theoretical column for each peak. Each spectra is labeled by the bank. To plot use python script, SCDCalibratePanelsResults.py
+   c. ColFilename contains the calculated and theoretical column for each peak. Each spectra is labeled by the bank. To plot use python script, scripts/SCD_Reduction/SCDCalibratePanelsResults.py
 
-   d. RowFilename contains the calculated and theoretical row for each peak. Each spectra is labeled by the bank. To plot use python script, SCDCalibratePanelsResults.py
+   d. RowFilename contains the calculated and theoretical row for each peak. Each spectra is labeled by the bank. To plot use python script, scripts/SCD_Reduction/SCDCalibratePanelsResults.py
 
    e. TofFilename contains the calculated and theoretical TOF for each peak.  Each spectra is labeled by the bank.
 
