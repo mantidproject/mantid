@@ -76,7 +76,7 @@ public:
   /// Set a tie for a local parameter.
   void setLocalParameterTie(const QString &parName, int i, QString tie);
   /// Log a warning
-  static void logWarning(const std::string& msg);
+  static void logWarning(const std::string &msg);
 
   /// Make it public
   using API::UserSubWindow::runPythonCode;

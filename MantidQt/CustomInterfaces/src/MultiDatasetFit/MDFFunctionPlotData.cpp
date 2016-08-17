@@ -51,7 +51,7 @@ void MDFFunctionPlotData::setDomain(double startX, double endX, size_t nX) {
   Mantid::API::FunctionValues y(x);
   try {
     m_function->function(x, y);
-  } catch (std::exception& e) {
+  } catch (std::exception &e) {
     MultiDatasetFit::logWarning(e.what());
   }
   m_functionCurve->setData(x.getPointerAt(0), y.getPointerToCalculated(0),

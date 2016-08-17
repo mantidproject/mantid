@@ -716,10 +716,9 @@ void MultiDatasetFit::updateGuessFunction(const QString &, const QString &) {
 
 /// Log a warning
 /// @param msg :: A warning message to log.
-void MultiDatasetFit::logWarning(const std::string& msg) {
+void MultiDatasetFit::logWarning(const std::string &msg) {
   g_log.warning() << msg << std::endl;
 }
-
 
 } // CustomInterfaces
 } // MantidQt
