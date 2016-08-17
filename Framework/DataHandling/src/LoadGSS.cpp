@@ -15,10 +15,10 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/regex.hpp>
-#include <Poco/File.h>
-
 #include <fstream>
+#include <Poco/File.h>
 #include <sstream>
+#include <string>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
@@ -197,7 +197,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         boost::smatch result;
         if (boost::regex_search(inputLine.str(), result, L1_REG_EXP) &&
             result.size() == 2) {
-          primaryflightpath = atof(std::string(result[1]).c_str());
+          primaryflightpath = std::stod(std::string(result[1]));
 
         } else {
           std::stringstream msg;
@@ -220,9 +220,9 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         boost::smatch result;
         if (boost::regex_search(inputLine.str(), result, DET_POS_REG_EXP) &&
             result.size() == 4) {
-          totalpath = atof(std::string(result[1]).c_str());
-          tth = atof(std::string(result[2]).c_str());
-          difc = atof(std::string(result[3]).c_str());
+          totalpath = std::stod(std::string(result[1]));
+          tth = std::stod(std::string(result[2]));
+          difc = std::stod(std::string(result[3]));
         } else {
           std::stringstream msg;
           msg << "Failed to parse position from line \"" << inputLine.str()
@@ -468,7 +468,7 @@ double LoadGSS::convertToDouble(std::string inputstring) {
     }
   }
 
-  double rd = atof(temps.c_str());
+  double rd = std::stod(temps);
 
   return rd;
 }
