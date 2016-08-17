@@ -622,7 +622,7 @@ def Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
         scale=scale,
         save_output=save_output)
 
-def beam_center_gravitational_drop(beam_center_file, sdd=1.3):
+def beam_center_gravitational_drop(beam_center_file, sdd=1.13):
     '''
     This method is used for correcting for gravitational drop
     @param beam_center_file :: file where the beam center was found
