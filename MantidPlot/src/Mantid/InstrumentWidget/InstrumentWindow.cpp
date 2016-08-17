@@ -43,6 +43,8 @@ InstrumentWindow::~InstrumentWindow() {}
 /**
  * Load instrument window state from a Mantid project file
  * @param lines :: lines from the project file to load state from
+ * @param app :: handle to the application window
+ * @param fileVersion :: version of the Mantid project file
  * @return handle to the created instrument window
  */
 IProjectSerialisable *InstrumentWindow::loadFromProject(
