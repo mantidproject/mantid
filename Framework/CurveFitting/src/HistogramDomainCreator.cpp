@@ -128,7 +128,6 @@ boost::shared_ptr<API::Workspace> HistogramDomainCreator::createOutputWorkspace(
     // Convert the calculated values to distribution
     auto &mws = dynamic_cast<MatrixWorkspace &>(*ws);
     auto &bins = dynamic_cast<FunctionDomain1DHistogram &>(*domain);
-    double left = bins.leftBoundary();
     for (size_t iSpec = 1; iSpec < mws.getNumberHistograms(); ++iSpec) {
       if (iSpec == 2)
         continue; // skip the diff spectrum
