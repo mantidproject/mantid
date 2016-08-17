@@ -10,6 +10,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidCrystal/SCDPanelErrors.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include <fstream>
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -163,6 +164,9 @@ void SCDCalibratePanels::exec() {
   int nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
   bool changeL1 = getProperty("ChangeL1");
   bool changeSize = getProperty("ChangePanelSize");
+  std::vector<std::string> fit_workspaces;
+  std::vector<std::string> parameter_workspaces;
+
   if (changeL1)
     findL1(nPeaks, peaksWs);
   set<string> MyBankNames;
@@ -278,9 +282,9 @@ void SCDCalibratePanels::exec() {
       g_log.notice() << iBank << "  " << fitStatus << " Chi2overDoF " << chisq
                      << "\n";
       fitWS = fit2_alg->getProperty("OutputWorkspace");
-      AnalysisDataService::Instance().addOrReplace("fit2_" + iBank, fitWS);
+      AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS);
       paramsWS = fit2_alg->getProperty("OutputParameters");
-      AnalysisDataService::Instance().addOrReplace("params2_" + iBank,
+      AnalysisDataService::Instance().addOrReplace("params_" + iBank,
                                                    paramsWS);
       scaleWidth = paramsWS->getRef<double>("Value", 6);
       scaleHeight = paramsWS->getRef<double>("Value", 7);
@@ -290,6 +294,8 @@ void SCDCalibratePanels::exec() {
       SCDPanelErrors det;
       det.moveDetector(xShift, yShift, zShift, xRotate, yRotate, zRotate,
                        scaleWidth, scaleHeight, iBank, peaksWs);
+      parameter_workspaces.push_back("params_" + iBank);
+      fit_workspaces.push_back("fit_" + iBank);
     }
     PARALLEL_END_INTERUPT_REGION
   }
@@ -297,6 +303,23 @@ void SCDCalibratePanels::exec() {
   // Try again to optimize L1
   if (changeL1)
     findL1(nPeaks, peaksWs);
+  parameter_workspaces.push_back("params_L1");
+  fit_workspaces.push_back("fit_L1");
+  std::sort(parameter_workspaces.begin(), parameter_workspaces.end());
+  std::sort(fit_workspaces.begin(), fit_workspaces.end());
+
+  // collect output of fit for each spectrum into workspace groups
+  API::IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+  groupAlg->initialize();
+  groupAlg->setProperty("InputWorkspaces", parameter_workspaces);
+  groupAlg->setProperty("OutputWorkspace", "Fit_Parameters");
+  groupAlg->execute();
+
+  groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+  groupAlg->initialize();
+  groupAlg->setProperty("InputWorkspaces", fit_workspaces);
+  groupAlg->setProperty("OutputWorkspace", "Fit_Residuals");
+  groupAlg->execute();
 
   // Use new instrument for PeaksWorkspace
   Geometry::Instrument_sptr inst =
@@ -330,13 +353,15 @@ void SCDCalibratePanels::exec() {
   MatrixWorkspace_sptr ColWksp =
       Mantid::API::WorkspaceFactory::Instance().create(
           "Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
+  ColWksp->setInstrument(inst);
   MatrixWorkspace_sptr RowWksp =
       Mantid::API::WorkspaceFactory::Instance().create(
           "Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
+  RowWksp->setInstrument(inst);
   MatrixWorkspace_sptr TofWksp =
       Mantid::API::WorkspaceFactory::Instance().create(
           "Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
-
+  TofWksp->setInstrument(inst);
   OrientedLattice lattice = peaksWs->mutableSample().getOrientedLattice();
   DblMatrix UB = lattice.getUB();
   // sort again since edge peaks can trace to other banks

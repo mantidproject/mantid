@@ -31,7 +31,7 @@ B is fixed from the input lattice parameters, but U is modified by :ref:`Calcula
 for all peaks before and after optimization.
 The initial path, L1, is optimized for all peaks before and after each panel or pack's parameters are optimized.
 The panels and packs' parameters are optimized in parallel.
-An option is available to adjust the panel widths and heights for Rectangular Detectors.
+An option is available to adjust the panel widths and heights for Rectangular Detectors in a second iteration with all the other parameters fixed.
 
 Some features:
 
