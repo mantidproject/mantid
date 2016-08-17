@@ -21,6 +21,14 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
+namespace {
+std::string generateDifferenceMessage(std::string item, std::string wsName, std::string wsValue, std::string firstValue) {
+    std::stringstream stringstream;
+    stringstream << "Item \"" << item << "\" has different values in files! Found: " << wsValue << " in file " << wsName << " but value in first file value was: " <<  firstValue << "." << std::endl;
+    return stringstream.str();
+}
+}
+
 //namespace {
 ///// Templated method to convert property to double
 //template<typename T>
@@ -123,6 +131,7 @@ void MergeRuns::exec() {
     std::list<boost::shared_ptr<Mantid::API::MatrixWorkspace>>::iterator it = m_inMatrixWS.begin();
 
     size_t numberOfWSs = m_inMatrixWS.size();
+    int numberOfWSsAdded = 1;
     this->createSampleLogsMaps(*it);
 
     // Take the first input workspace as the first argument to the addition
@@ -146,10 +155,16 @@ void MergeRuns::exec() {
       }
 
       // Add the current workspace to the total
-      outWS = outWS + addee;
-
       // Update the sample logs
-      this->updateSampleLogs(*it, outWS);
+      try {
+        this->calculateUpdatedSampleLogs(*it, outWS, numberOfWSsAdded);
+        outWS = outWS + addee;
+        ++numberOfWSsAdded;
+        this->setUpdatedSampleLogs(outWS);
+      } catch (std::invalid_argument e) {
+        g_log.error() << "Could not merge run: " << it->get()->name() << ". Reason: \"" << e.what() << "\".";
+        this->resetSampleLogs(outWS);
+      }
 
       m_progress->report();
     }
@@ -688,18 +703,10 @@ void MergeRuns::createSampleLogsMaps(MatrixWorkspace_sptr ws) {
 }
 
 void MergeRuns::getSampleList(MergeLogType sampleLogBehaviour, std::string parameterName, MatrixWorkspace_sptr ws) {
-  bool isNumeric;
-
   std::string params = ws->getInstrument()->getParameterAsString(parameterName, false);
   StringTokenizer tokenizer(params, ",", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
-  for (auto item : tokenizer.asVector()) {
-    try {
-      ws->getLogAsSingleValue(item);
-      isNumeric = true;
-    } catch (std::invalid_argument) {
-      isNumeric = false;
-    }
 
+  for (auto item : tokenizer.asVector()) {
     if (sampleLogBehaviour == list) {
       Property* prop = ws->getLog(item);
       Property* stringProperty = new PropertyWithValue<std::string>(item + "_list", prop->value(), Direction::Input);
@@ -711,27 +718,31 @@ void MergeRuns::getSampleList(MergeLogType sampleLogBehaviour, std::string param
   }
 }
 
-void MergeRuns::updateSampleLogs(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr outWS) {
+void MergeRuns::calculateUpdatedSampleLogs(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr outWS, int numberOfWSsAdded) {
   for (auto item : m_logMap) {
     Property *wsProperty = ws->getLog(item.first);
-    Property *outWSProperty = outWS->getLog(item.first);
 
-    bool isNumeric;
     double wsNumber;
     double outWSNumber;
 
     try {
       wsNumber = ws->getLogAsSingleValue(item.first);
       outWSNumber = outWS->getLogAsSingleValue(item.first);
-      isNumeric = true;
     } catch (std::invalid_argument) {
-      isNumeric = false;
+      if (item.second.second == average ||
+          item.second.second == min ||
+          item.second.second == max ||
+          item.second.second == sum ) {
+        throw std::invalid_argument(item.first + " could not be converted to a numeric type");
+      }
     }
 
     switch (item.second.second) {
-    case average:
-      item.second.first->setValue(std::to_string(wsNumber + outWSNumber));
+    case average: {
+      double value = (wsNumber + outWSNumber) * ((numberOfWSsAdded + 1) / (double) (numberOfWSsAdded + 2));
+      item.second.first->setValue(std::to_string(value));
       break;
+    }
     case min:
       item.second.first->setValue(std::to_string(std::min(wsNumber, outWSNumber)));
       break;
@@ -744,19 +755,35 @@ void MergeRuns::updateSampleLogs(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr o
     case list:
       item.second.first->setValue(item.second.first->value() + ", " + wsProperty->value());
       outWS->getLog(item.first + "_list")->setValueFromProperty(*item.second.first);
-      g_log.warning(item.second.first->value() + " " + wsProperty->value());
       break;
     case warn:
-      item.second.first->setValue("");
+      if (item.second.first->value().compare(wsProperty->value()) != 0) {
+        g_log.warning() << generateDifferenceMessage(item.first, ws->name(), wsProperty->value(), item.second.first->value());
+      }
       break;
     case fail:
-      item.second.first->setValue("");
+      if (item.second.first->value().compare(wsProperty->value()) != 0) {
+        throw std::invalid_argument(generateDifferenceMessage(item.first, ws->name(), wsProperty->value(), item.second.first->value()));
+      }
       break;
     }
-
-    outWS->getLog(item.first)->setValueFromProperty(*item.second.first);
     }
   }
+
+void MergeRuns::setUpdatedSampleLogs(MatrixWorkspace_sptr ws) {
+  for (auto item : m_logMap) {
+    Property *outWSProperty = ws->getLog(item.first)->clone();
+//    outWSProperty->setValueFromProperty(*item.second.first);
+    ws->mutableRun().addProperty(outWSProperty, true);
+  }
+}
+
+void MergeRuns::resetSampleLogs(MatrixWorkspace_sptr ws) {
+  for (auto item : m_logMap) {
+    Property *wsProperty = ws->getLog(item.first);
+    item.second.first->setValue(wsProperty->value());
+  }
+}
 
 } // namespace Algorithm
 } // namespace Mantid

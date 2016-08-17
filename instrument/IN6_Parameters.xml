@@ -36,7 +36,7 @@
             <value val="run_number" />
         </parameter>
         <parameter name="sample_logs_warn" type="string">
-            <value val="Ei" />
+            <value val="Ei, end_time" />
         </parameter>
         <parameter name="sample_logs_fail" type="string">
             <value val="EPP" />

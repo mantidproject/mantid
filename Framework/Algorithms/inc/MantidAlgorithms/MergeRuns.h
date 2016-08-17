@@ -161,7 +161,10 @@ private:
 
   void createSampleLogsMaps(API::MatrixWorkspace_sptr ws);
   void getSampleList(MergeLogType, std::string parameterName, API::MatrixWorkspace_sptr ws);
-  void updateSampleLogs(API::MatrixWorkspace_sptr ws, API::MatrixWorkspace_sptr outWS);
+  void calculateUpdatedSampleLogs(API::MatrixWorkspace_sptr ws, API::MatrixWorkspace_sptr outWS, int numberOfWSsAdded);
+  void setUpdatedSampleLogs(API::MatrixWorkspace_sptr ws);
+  void resetSampleLogs(API::MatrixWorkspace_sptr ws);
+
 //  sample_logs_map_string getSampleListString(SampleLogMergeType, std::string parameterName, API::MatrixWorkspace_sptr ws);
 
 };
