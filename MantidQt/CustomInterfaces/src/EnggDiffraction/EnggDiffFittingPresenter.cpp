@@ -187,6 +187,7 @@ void EnggDiffFittingPresenter::fittingFinished() {
 void EnggDiffFittingPresenter::fittingRunNoChanged() {
 
   try {
+
     // receive the run number from the text-field
     auto strFocusedFile = m_view->getFittingRunNo();
 
@@ -292,7 +293,10 @@ void EnggDiffFittingPresenter::browsedFile(
     const std::vector<std::string> &splitBaseName,
     std::vector<std::string> &runNoVec, const std::string &bankFileDir) {
   // to track the FittingRunnoChanged loop number
-  g_fitting_runno_counter++;
+	if (g_fitting_runno_counter == 0)
+		g_multi_run_directories.clear();
+
+	g_fitting_runno_counter++;
 
   // regenerating the focus file name
   std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
@@ -356,6 +360,9 @@ void EnggDiffFittingPresenter::processSingleRun(
     std::vector<std::string> &runnoDirVector,
     const std::vector<std::string> &splitBaseName) {
 
+  if (g_fitting_runno_counter == 0)
+    g_multi_run_directories.clear();
+
   // to track the FittingRunnoChanged loop number
   g_fitting_runno_counter++;
 
@@ -383,9 +390,6 @@ void EnggDiffFittingPresenter::updateFittingDirVec(
     const std::string &focusDir, const std::string &runNumberVec,
     std::vector<std::string> &fittingRunNoDirVec,
     std::vector<std::string> &foundRunNumber) {
-
-  // rewrite the vector of run number which is available
-  // foundRunNumber; ?
 
   bool found = false;
 
@@ -460,6 +464,10 @@ void EnggDiffFittingPresenter::enableMultiRun(
             "settings tab. "
             "Please try again");
       } else {
+
+	    // clear previous directories set before updateFittingDirVec
+        if (g_fitting_runno_counter == 0)
+          g_multi_run_directories.clear();
 
         // to track the FittingRunnoChanged loop number
         g_fitting_runno_counter++;
@@ -725,9 +733,6 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
   if (!g_multi_run_directories.empty()) {
     auto lastDir = g_multi_run_directories.back() == focusedRunNo;
     if (lastDir) {
-      g_multi_run_directories.clear();
-      m_view->setFittingMultiRunMode(false);
-      m_view->setFittingSingleRunMode(false);
       m_view->enableFitAllButton(false);
       g_fitting_runno_counter = 0;
     }
@@ -1496,13 +1501,6 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
       g_log.warning() << "Peaks could not be plotted as the fitting process "
                          "did not finish correctly.\n";
       m_view->showStatus("No peaks could be fitted");
-
-      // if fitting fails and does not reset the variables
-      g_multi_run_directories.clear();
-      m_view->setFittingMultiRunMode(false);
-      m_view->setFittingSingleRunMode(false);
-      m_view->enableFitAllButton(false);
-      g_fitting_runno_counter = 0;
     }
 
   } catch (std::runtime_error) {
