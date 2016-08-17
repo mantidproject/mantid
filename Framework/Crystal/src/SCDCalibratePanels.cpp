@@ -284,8 +284,7 @@ void SCDCalibratePanels::exec() {
       fitWS = fit2_alg->getProperty("OutputWorkspace");
       AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS);
       paramsWS = fit2_alg->getProperty("OutputParameters");
-      AnalysisDataService::Instance().addOrReplace("params_" + iBank,
-                                                   paramsWS);
+      AnalysisDataService::Instance().addOrReplace("params_" + iBank, paramsWS);
       scaleWidth = paramsWS->getRef<double>("Value", 6);
       scaleHeight = paramsWS->getRef<double>("Value", 7);
     }
@@ -309,7 +308,8 @@ void SCDCalibratePanels::exec() {
   std::sort(fit_workspaces.begin(), fit_workspaces.end());
 
   // collect output of fit for each spectrum into workspace groups
-  API::IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+  API::IAlgorithm_sptr groupAlg =
+      AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
   groupAlg->initialize();
   groupAlg->setProperty("InputWorkspaces", parameter_workspaces);
   groupAlg->setProperty("OutputWorkspace", "Fit_Parameters");
