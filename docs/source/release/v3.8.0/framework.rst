@@ -66,6 +66,9 @@ Improved
 
 - :ref:`ConvertUnits <algm-ConvertUnits>` will no longer corrupt an in place workspace if the algorithm fails.
 
+- :ref:`ConvertUnits <algm-ConvertUnits>` now has the option to take a workspace with Points as input.
+  A property has been added that will make the algorithm convert the workspace to Bins automatically. The output space will also contain Bins.
+
 - :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
 
 - :ref:`RenameWorkspace <algm-RenameWorkspace>` and `RenameWorkspaces <algm-RenameWorkspaces>`
