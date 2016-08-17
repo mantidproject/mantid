@@ -15,44 +15,47 @@ panel centers and orientations are adjusted so the error in Q
 positions from the theoretical Q positions is minimized. 
 Given a set of peaks indexed by :math:`(h_i, k_i, l_i)`, we
 modify the instrument parameters, p, and then find  Q in the sample frame,
-:math:`\rm \vec{Q}_{sample}` that mininizes the following:
+:math:`\rm Q_{sample}` that mininizes the following:
 
 .. math::
 
-   \rm U \rm B \left(
+   \vert 2\pi \rm U \rm B \left(
                                \begin{array}{c}
-                                 Round(h_i) \\
-                                 Round(k_i) \\
-                                 Round(l_i) \\
+                                 NINT(h_i) \\
+                                 NINT(k_i) \\
+                                 NINT(l_i) \\
                                \end{array}
-                             \right) 2\pi - \rm \vec{Q}_{sample,i}(\vec{p})
+                             \right) - \rm Q_{sample,i}(p) \vert ^2
 
+NINT is the nearest integer function.
 B is fixed from the input lattice parameters, but U is modified by :ref:`CalculateUMatrix <algm-CalculateUMatrix>` 
 for all peaks before and after optimization.
 The initial path, L1, is optimized for all peaks before and after each panel or pack's parameters are optimized.
 The panels and packs' parameters are optimized in parallel.
 An option is available to adjust the panel widths and heights for Rectangular Detectors in a second iteration with all the other parameters fixed.
 
-Some features:
+OUTPUT workspaces and files:
 
-1) The results can be saved to an ISAW-like DetCal file or in an xml
-   file that can be used with the LoadParameter algorithm.
+1) The results are saved to an ISAW-like DetCal file and optionally in an xml
+   file that can be used with the :ref:`LoadParameter <algm-LoadParameter>` algorithm.
 
-2) There are several output workspaces indicating the results of the fit
+2) There are two output workspace groups that are output when this algorithm calls the :ref:`Fit <algm-Fit>` algorithm.
 
-   a. Workspaces beginning with 'params' contains the results from fitting for each bank and for L1.
+   a. Fit_Parameters: workspaces beginning with 'params' contains the results from fitting for each bank and for L1.
 
       * XShift, YShift,and ZShift are in meters.
 
       * XRotate, YRotate, and ZRotate are in degrees. 
 
-   b. Workspaces beginning with 'fit' contain the differences in the calculated and theoretical Q vectors for each peak.
+   b. Fit_Residuals: workspaces beginning with 'fit' contain the differences in the calculated and theoretical Q vectors for each peak.
       
-   c. ColFilename contains the calculated and theoretical column for each peak. Each spectra is labeled by the bank. To plot use python script, scripts/SCD_Reduction/SCDCalibratePanelsResults.py
+3) There are three output files that show the goodness of the calibration.
 
-   d. RowFilename contains the calculated and theoretical row for each peak. Each spectra is labeled by the bank. To plot use python script, scripts/SCD_Reduction/SCDCalibratePanelsResults.py
+   a. ColFilename contains the calculated and theoretical column for each peak. Each spectra is labeled by the bank. To plot use python script, scripts/SCD_Reduction/SCDCalibratePanelsResults.py
 
-   e. TofFilename contains the calculated and theoretical TOF for each peak.  Each spectra is labeled by the bank.
+   b. RowFilename contains the calculated and theoretical row for each peak. Each spectra is labeled by the bank. To plot use python script, scripts/SCD_Reduction/SCDCalibratePanelsResults.py
+
+   c. TofFilename contains the calculated and theoretical TOF for each peak.  Each spectra is labeled by the bank.
 
 
 
