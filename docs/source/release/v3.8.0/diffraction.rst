@@ -42,6 +42,9 @@ Engineering Diffraction
 - EnggFocus: bins are now masked at the beginning of the workflow
   (when using the option MaskBinsXMins)
 
+- :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>` an algorithm which saves a TableWorkspace containing
+  diffraction fitting results as an ASCII file
+
 
 Powder Diffraction
 ------------------
@@ -68,6 +71,9 @@ Powder Diffraction
 - :ref:`CorelliCrossCorrelate <algm-CorelliCrossCorrelate>`: The
   weights applied to events have changed by a factor of the duty cycle
   (:math:`c\approx0.498`) as requested by the instrument scientists.
+  
+- :ref:`pearl-powder-diffraction-ref`: A workflow diagram for 
+  ``pearl_run_focus`` function has been created. 
 
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
 and
