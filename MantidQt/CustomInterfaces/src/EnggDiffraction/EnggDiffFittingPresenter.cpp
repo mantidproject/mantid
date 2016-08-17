@@ -310,7 +310,9 @@ void EnggDiffFittingPresenter::browsedFile(
     // foc_file - vector holding the file name split
     // runnoDirVector - giving empty vector here holding directory of
     // selected vector
-    updateFittingDirVec(bankFileDir, foc_file, runnoDirVector);
+    // dummy vector not being used in this case
+    std::vector<std::string> dummy;
+    updateFittingDirVec(bankFileDir, foc_file, runnoDirVector, dummy);
 
     m_view->setFittingRunNumVec(runnoDirVector);
 
@@ -352,15 +354,17 @@ void EnggDiffFittingPresenter::processMultiRun(
 void EnggDiffFittingPresenter::processSingleRun(
     const std::string &focusDir, const std::string &strFocusedFile,
     std::vector<std::string> &runnoDirVector,
-    const std::vector<std::string> &splitBaseName,
-    std::vector<std::string> &runNoVec) {
+    const std::vector<std::string> &splitBaseName) {
 
   // to track the FittingRunnoChanged loop number
   g_fitting_runno_counter++;
 
   m_view->setFittingSingleRunMode(true);
 
-  updateFittingDirVec(focusDir, strFocusedFile, runnoDirVector);
+  // dummy vector will not be used
+
+  std::vector<std::string> foundRunNumber;
+  updateFittingDirVec(focusDir, strFocusedFile, runnoDirVector, foundRunNumber);
   m_view->setFittingRunNumVec(runnoDirVector);
 
   // add bank to the combo-box and list view
@@ -380,11 +384,17 @@ void EnggDiffFittingPresenter::processSingleRun(
 }
 
 void EnggDiffFittingPresenter::updateFittingDirVec(
-    const std::string &bankDir, const std::string &focusedFile,
-    std::vector<std::string> &fittingRunNoDirVec) {
+    const std::string &focusDir, const std::string &runNumberVec,
+    std::vector<std::string> &fittingRunNoDirVec,
+    std::vector<std::string> &foundRunNumber) {
+
+  // rewrite the vector of run number which is available
+  // foundRunNumber; ?
+
+  bool found = false;
 
   try {
-    std::string cwd(bankDir);
+    std::string cwd(focusDir);
     Poco::DirectoryIterator it(cwd);
     Poco::DirectoryIterator end;
     while (it != end) {
@@ -394,19 +404,26 @@ void EnggDiffFittingPresenter::updateFittingDirVec(
 
         std::string itbankFileName = itBankfPath.getBaseName();
         // check if it not any other file.. e.g: texture
-        if (itbankFileName.find(focusedFile) != std::string::npos) {
+        if (itbankFileName.find(runNumberVec) != std::string::npos) {
           fittingRunNoDirVec.push_back(itFilePath);
+          found = true;
+
           // if only first loop in Fitting Runno then add directory
-          if (g_fitting_runno_counter == 1)
+          if (g_fitting_runno_counter == 1) {
             g_multi_run_directories.push_back(itFilePath);
+          }
         }
       }
       ++it;
     }
+
+    if (found)
+      foundRunNumber.push_back(runNumberVec);
+
   } catch (std::runtime_error &re) {
     m_view->userWarning("Invalid file",
                         "File not found in the following directory; " +
-                            bankDir + ". " +
+                            focusDir + ". " +
                             static_cast<std::string>(re.what()));
   }
 }
@@ -451,15 +468,20 @@ void EnggDiffFittingPresenter::enableMultiRun(
         // to track the FittingRunnoChanged loop number
         g_fitting_runno_counter++;
 
-        // if given a multi run number instead
+        // rewrite the vector of run number which is available
+        std::vector<std::string> foundRunNumber;
+
         for (size_t i = 0; i < RunNumberVec.size(); i++) {
           // save dir for every vector
-          updateFittingDirVec(focusDir, RunNumberVec[i], fittingRunNoDirVec);
+          updateFittingDirVec(focusDir, RunNumberVec[i], fittingRunNoDirVec,
+                              foundRunNumber);
         }
+
         int diff = (lastNum - firstNum) + 1;
-        auto run_vec_size = RunNumberVec.size();
+        auto run_vec_size = foundRunNumber.size();
+
         if (size_t(diff) == run_vec_size) {
-          setRunNoItems(RunNumberVec, true);
+          setRunNoItems(foundRunNumber, true);
           m_view->setBankEmit();
         }
       }
