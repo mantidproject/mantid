@@ -19,13 +19,13 @@ modify the instrument parameters, p, and then find  Q in the sample frame,
 
 .. math::
 
-   \vert 2\pi \rm U \rm B \left(
+   \left\vert 2\pi \rm U \rm B \left(
                                \begin{array}{c}
                                  NINT(h_i) \\
                                  NINT(k_i) \\
                                  NINT(l_i) \\
                                \end{array}
-                             \right) - \rm Q_{sample,i}(p) \vert ^2
+                             \right) - \rm Q_{sample,i}(p) \right\vert ^2
 
 NINT is the nearest integer function.
 B is fixed from the input lattice parameters, but U is modified by :ref:`CalculateUMatrix <algm-CalculateUMatrix>` 
@@ -35,6 +35,7 @@ The panels and packs' parameters are optimized in parallel.
 An option is available to adjust the panel widths and heights for Rectangular Detectors in a second iteration with all the other parameters fixed.
 
 OUTPUT workspaces and files:
+============================
 
 1) The results are saved to an ISAW-like DetCal file and optionally in an xml
    file that can be used with the :ref:`LoadParameter <algm-LoadParameter>` algorithm.
