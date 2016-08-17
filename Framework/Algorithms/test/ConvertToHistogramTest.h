@@ -132,10 +132,13 @@ public:
     return new ConvertToHistogramTestPerformance();
   }
 
-  static void destroySuite(ConvertToHistogramTestPerformance *suite) { delete suite; }
+  static void destroySuite(ConvertToHistogramTestPerformance *suite) {
+    delete suite;
+  }
 
   void setUp() {
-    inputWS = WorkspaceCreationHelper::Create2DWorkspace123(20000, 10000, false);
+    inputWS =
+        WorkspaceCreationHelper::Create2DWorkspace123(20000, 10000, false);
   }
 
   void tearDown() {

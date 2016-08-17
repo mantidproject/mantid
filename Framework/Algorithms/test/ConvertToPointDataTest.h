@@ -167,7 +167,9 @@ public:
     return new ConvertToPointDataTestPerformance();
   }
 
-  static void destroySuite(ConvertToPointDataTestPerformance *suite) { delete suite; }
+  static void destroySuite(ConvertToPointDataTestPerformance *suite) {
+    delete suite;
+  }
 
   void setUp() {
     inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(20000, 10000);

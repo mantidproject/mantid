@@ -69,7 +69,7 @@ void XDataConverter::exec() {
   for (int i = 0; i < int(numSpectra); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-      // Copy over the Y and E data
+    // Copy over the Y and E data
     outputWS->setSharedY(i, inputWS->sharedY(i));
     outputWS->setSharedE(i, inputWS->sharedE(i));
     setXData(outputWS, inputWS, i);
