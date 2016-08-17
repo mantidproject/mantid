@@ -399,7 +399,9 @@ def parse_project_file(contents, pattern=""):
     data = {}
     # recursively parse sections
     if len(match) > 0:
-        data = { x: y for x, y in match}
+        data = {}
+        for x, y in match:
+            data[x] = y
         for key in data.keys():
             data[key] = parse_project_file(data[key], pattern)
 
