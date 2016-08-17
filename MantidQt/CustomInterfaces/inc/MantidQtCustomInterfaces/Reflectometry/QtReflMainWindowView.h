@@ -3,6 +3,7 @@
 
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/QtReflRunsTabView.h"
 #include "ui_ReflMainWindowWidget.h"
 
 namespace MantidQt {
@@ -40,6 +41,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class QtReflMainWindowView : public MantidQt::API::UserSubWindow,
                              public IReflMainWindowView {
+
 public:
   /// Constructor
   QtReflMainWindowView(QWidget *parent = 0);
@@ -63,14 +65,20 @@ public:
                     const std::string &title) override;
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
 
+protected:
+  // override of QWidget's closeEvent() as we want to check for unsaved changes
+  // in the runs tab before exiting the interface.
+  void closeEvent(QCloseEvent *event) override;
+
 private:
   /// Initializes the interface
   void initLayout() override;
+  /// Reference to the 'Runs' tab
+  QtReflRunsTabView *runsTab;
   /// Creates the 'Runs' tab
   IReflRunsTabPresenter *createRunsTab();
   /// Creates the 'Settings' tab
   IReflSettingsTabPresenter *createSettingsTab();
-
   /// Interface definition with widgets for the main interface window
   Ui::RelMainWindowWidget m_ui;
   /// The presenter handling this view

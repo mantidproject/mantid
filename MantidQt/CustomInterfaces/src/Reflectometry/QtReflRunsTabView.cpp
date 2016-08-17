@@ -74,24 +74,12 @@ void QtReflRunsTabView::initLayout() {
   connect(qDataProcessorWidget,
           SIGNAL(runAsPythonScript(const QString &, bool)), this,
           SIGNAL(runAsPythonScript(const QString &, bool)));
-  connect(this, SIGNAL(closeWindow()), this,
-          SLOT(checkUnsavedChangesBeforeExit()));
   // Create the presenter
   m_presenter = std::make_shared<ReflRunsTabPresenter>(
       this /* main view */,
       this /* Currently this concrete view is also responsible for prog reporting */,
       qDataProcessorWidget->getPresenter() /* The data processor presenter */);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
-}
-
-/**
-* Overriden from QWidget's closeEvent
-* @param event : type of Close event that needs to be handled
-*
-*/
-void QtReflRunsTabView::closeEvent(QCloseEvent *evt) {
-  emit closeWindow();
-  evt->accept();
 }
 
 /**

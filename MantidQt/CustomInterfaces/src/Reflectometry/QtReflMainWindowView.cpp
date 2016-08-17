@@ -5,6 +5,7 @@
 
 #include <qinputdialog.h>
 #include <qmessagebox.h>
+#include <QCloseEvent>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -15,7 +16,8 @@ DECLARE_SUBWINDOW(QtReflMainWindowView)
 /** Constructor
 */
 QtReflMainWindowView::QtReflMainWindowView(QWidget *parent)
-    : UserSubWindow(parent) {}
+    : UserSubWindow(parent) {
+}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -42,7 +44,7 @@ void QtReflMainWindowView::initLayout() {
 */
 IReflRunsTabPresenter *QtReflMainWindowView::createRunsTab() {
 
-  QtReflRunsTabView *runsTab = new QtReflRunsTabView(this);
+  runsTab = new QtReflRunsTabView(this);
   m_ui.mainTab->addTab(runsTab, QString("Runs"));
 
   return runsTab->getPresenter();
@@ -57,6 +59,16 @@ IReflSettingsTabPresenter *QtReflMainWindowView::createSettingsTab() {
   m_ui.mainTab->addTab(settingsTab, QString("Settings"));
 
   return settingsTab->getPresenter();
+}
+
+/**
+* Overriden from QWidget's closeEvent
+* @param event : type of Close event that needs to be handled
+*/
+void QtReflMainWindowView::closeEvent(QCloseEvent *event)
+{
+  runsTab->checkUnsavedChangesBeforeExit();
+  event->accept();
 }
 
 /**

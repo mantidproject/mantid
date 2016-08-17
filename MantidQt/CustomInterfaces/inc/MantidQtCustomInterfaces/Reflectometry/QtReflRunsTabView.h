@@ -93,13 +93,7 @@ public:
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
 
-// signal emitted when interface is closed
-signals:
-  void closeWindow();
-  // override of QWidget's closeEvent() as we want
-  // to check for unsaved changes before exiting the interface.
-protected:
-  void closeEvent(QCloseEvent *evt);
+  void checkUnsavedChangesBeforeExit();
 
 private:
   /// initialise the interface
@@ -127,7 +121,6 @@ private slots:
   void icatSearchComplete();
   void instrumentChanged(int index);
   void showSearchContextMenu(const QPoint &pos);
-  void checkUnsavedChangesBeforeExit();
 };
 
 } // namespace Mantid
