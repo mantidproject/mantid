@@ -68,22 +68,6 @@ def GetXYE(inWS,n,array_len):
     E=PadArray(Ein,array_len)
     return N,X,Y,E
 
-# Quest programs
-def CheckBetSig(nbs):
-    Nsig = int(nbs[1])
-    if Nsig == 0:
-        raise ValueError('Number of sigma points is Zero')
-    if Nsig > 200:
-        raise ValueError('Max number of sigma points is 200')
-
-    Nbet = int(nbs[0])
-    if Nbet == 0:
-        raise ValueError('Number of beta points is Zero')
-    if Nbet > 200:
-        raise ValueError('Max number of beta points is 200')
-
-    return Nbet,Nsig
-
 
 # ResNorm programs
 def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
