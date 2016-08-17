@@ -31,7 +31,7 @@ class IndirectILLReductionTest(unittest.TestCase):
         #reset output workspaces list
         self._output_workspaces = []
 
-    def test_mutlifile(self):
+    def test_multifile(self):
         self._args['Run'] = self._multi_run_name + '.nxs'
 
         red = IndirectILLReduction(**self._args)
@@ -39,7 +39,6 @@ class IndirectILLReductionTest(unittest.TestCase):
         self.assertTrue(isinstance(red, WorkspaceGroup), "Should be a group workspace")
         self.assertEqual(red.size(), 2)
         self.assertTrue(isinstance(red.getItem(0), MatrixWorkspace), "Should be a matrix workspace")
-
 
     def test_sumruns(self):
         self._args['Run'] = self._multi_run_name + '.nxs'
@@ -99,6 +98,9 @@ class IndirectILLReductionTest(unittest.TestCase):
         IndirectILLReduction(**self._args)
 
         self.assertEqual(18, mtd['146191_red'].getNumberHistograms())
+
+    # Tests related to function _shift_spectra
+    def test_sample_log
 
 if __name__ == '__main__':
     unittest.main()
