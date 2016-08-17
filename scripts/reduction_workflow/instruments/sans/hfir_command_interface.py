@@ -648,32 +648,39 @@ def beam_center_gravitational_drop(beam_center_file, sdd=1.13):
     beam_center_x = pm['LatestBeamCenterX'].value
     beam_center_y = pm['LatestBeamCenterY'].value
     Logger("CommandInterface").information("Beam Center before: [%.2f, %.2f] pixels"%(beam_center_x,beam_center_y))
-    print beam_center_x, beam_center_y
     
     try:    
         # check if the workspace still exists
-        ws = mantid.mtd[ "__beam_finder_" + os.path.splitext(beam_center_file)[0]]
+        wsname = "__beam_finder_" + os.path.splitext(beam_center_file)[0]
+        ws = mantid.mtd[wsname]
+        Logger("CommandInterface").debug("Using Workspace: %s."%(wsname))
     except KeyError:
-        # Let's try load
+        # Let's try loading the file. For some reason the beamcenter ws is not there...
         try:
             ws = Load(beam_center_file)
+            Logger("CommandInterface").debug("Using filename %s."%(beam_center_file))
         except:
             Logger("CommandInterface").error("Cannot read input file %s." %beam_center_file)
             return
     
     i = ws.getInstrument()
     y_pixel_size_mm = i.getNumberParameter('y-pixel-size')[0]
+    Logger("CommandInterface").debug("Y Pixel size = %.2f mm"%y_pixel_size_mm)
     y_pixel_size = y_pixel_size_mm * 1e-3 # In meters
     distance_detector1 = i.getComponentByName("detector1").getPos()[2]
     path_length = distance_detector1 - sdd
+    Logger("CommandInterface").debug("SDD detector1 = %.3f meters. SDD for wing = %.3f meters."%(distance_detector1,sdd))
+    Logger("CommandInterface").debug("Path length for gravitational drop = %.3f meters."%(path_length))
     r = ws.run()
     wavelength = r.getProperty("wavelength").value
+    Logger("CommandInterface").debug("Wavelength = %.2f A."%(wavelength))
     
     drop = calculate_neutron_drop(path_length,wavelength)
+    Logger("CommandInterface").debug("Gravitational drop = %.6f meters."%(drop))
     # 1 pixel -> y_pixel_size
     # x pixel -> drop    
     drop_in_pixels = drop / y_pixel_size
-    new_beam_center_y = beam_center_y-drop_in_pixels
+    new_beam_center_y = beam_center_y+drop_in_pixels
     Logger("CommandInterface").information("Beam Center after:   [%.2f, %.2f] pixels"%(beam_center_x,new_beam_center_y))
     return beam_center_x, new_beam_center_y
     
