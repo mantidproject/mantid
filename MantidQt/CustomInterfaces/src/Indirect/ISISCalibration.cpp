@@ -698,7 +698,7 @@ void ISISCalibration::pbRunFinished() {
 
   m_uiForm.leRunNo->setEnabled(true);
 }
-/** 
+/**
  * Handle saving of workspace
  */
 void ISISCalibration::saveClicked() {
