@@ -43,11 +43,12 @@ Description          : QtiPlot's main window
 #include <QSettings>
 #include <QSplitter>
 
+#include "Mantid/IProjectSerialisable.h"
 #include "MantidQtAPI/HelpWindow.h"
-#include "Table.h"
-#include "ScriptingEnv.h"
-#include "Scripted.h"
 #include "Script.h"
+#include "Scripted.h"
+#include "ScriptingEnv.h"
+#include "Table.h"
 
 class QPixmap;
 class QCloseEvent;
@@ -1091,6 +1092,16 @@ public slots:
 
   /// Show/hide MantidPlot toolbars.
   void setToolbarsVisible(bool visible);
+  /// Get a list of serialisable project windows
+  QList<Mantid::IProjectSerialisable *> getSerialisableWindows() {
+    return m_serialisableWindows;
+  }
+  /// Add a serialisable window
+  void addSerialisableWindow(Mantid::IProjectSerialisable *window) {
+    m_serialisableWindows.push_back(window);
+  }
+  /// Remove a serialisable window
+  void removeSerialisableWindow(Mantid::IProjectSerialisable *window);
 
   /// \name Tiled window
   //@{
@@ -1416,6 +1427,8 @@ private:
   QSet<QString> m_allCategories;
   // Map interfaces to their categories.
   QMap<QString, QSet<QString>> m_interfaceCategories;
+  /// Keep a list of serialisable windows
+  QList<Mantid::IProjectSerialisable *> m_serialisableWindows;
 
   mutable MdiSubWindow *d_active_window;
   MdiSubWindow *getActiveWindow() const;

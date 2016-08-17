@@ -9018,6 +9018,8 @@ void ApplicationWindow::removeWindowFromLists(MdiSubWindow *w) {
   if (hiddenWindows->contains(w)) {
     hiddenWindows->takeAt(hiddenWindows->indexOf(w));
   }
+
+  removeSerialisableWindow(w);
 }
 
 void ApplicationWindow::closeWindow(MdiSubWindow *window) {
@@ -9065,6 +9067,16 @@ void ApplicationWindow::closeWindow(MdiSubWindow *window) {
     }
   }
   emit modified();
+}
+
+/** Remove a serialisable window from the application
+ * @param window :: the window to remove
+ */
+void ApplicationWindow::removeSerialisableWindow(
+    Mantid::IProjectSerialisable *window) {
+  if (m_serialisableWindows.contains(window)) {
+    m_serialisableWindows.removeAt(m_serialisableWindows.indexOf(window));
+  }
 }
 
 void ApplicationWindow::about() {
@@ -15845,6 +15857,7 @@ void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showNormal) {
 void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showFloating,
                                         bool showNormal) {
   addListViewItem(w);
+  addSerialisableWindow(w);
   currentFolder()->addWindow(w);
 
   connect(w, SIGNAL(modifiedWindow(MdiSubWindow *)), this,
