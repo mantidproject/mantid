@@ -142,9 +142,10 @@ private:
   QStringList getSelectedLogs();
   std::string getFileName();
 
-  /// Finds which parameters in a fit were global
-  QStringList getGlobalParams(const QMap<QString, WSParameterList> &paramList);
-  QStringList getGlobalParams(const WSParameterList &paramList);
+  /// Finds if a parameter in a fit was global
+  bool isGlobal(const QString &param,
+                const QMap<QString, WSParameterList> &paramList);
+  bool isGlobal(const QString &param, const WSParameterList &paramList);
 
   Ui::MuonAnalysis &m_uiForm;
 
