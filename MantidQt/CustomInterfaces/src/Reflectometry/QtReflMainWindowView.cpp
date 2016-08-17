@@ -16,8 +16,7 @@ DECLARE_SUBWINDOW(QtReflMainWindowView)
 /** Constructor
 */
 QtReflMainWindowView::QtReflMainWindowView(QWidget *parent)
-    : UserSubWindow(parent) {
-}
+    : UserSubWindow(parent) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -65,8 +64,7 @@ IReflSettingsTabPresenter *QtReflMainWindowView::createSettingsTab() {
 * Overriden from QWidget's closeEvent
 * @param event : type of Close event that needs to be handled
 */
-void QtReflMainWindowView::closeEvent(QCloseEvent *event)
-{
+void QtReflMainWindowView::closeEvent(QCloseEvent *event) {
   runsTab->checkUnsavedChangesBeforeExit();
   event->accept();
 }

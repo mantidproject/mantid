@@ -1078,9 +1078,10 @@ void GenericDataProcessorPresenter::saveTableAs() {
 
 void GenericDataProcessorPresenter::checkForUnsavedChanges() {
   if (m_tableDirty && m_options["WarnDiscardChanges"].toBool()) {
-    if (m_mainPresenter->askUserYesNo("Your current table has unsaved changes. Are you "
-                                      "sure you want to discard them?",
-                                      "Start New Table?"))
+    if (m_mainPresenter->askUserYesNo(
+            "Your current table has unsaved changes. Are you "
+            "sure you want to discard them?",
+            "Start New Table?"))
       return;
     else
       exportTable();
