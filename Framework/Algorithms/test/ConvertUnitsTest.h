@@ -30,6 +30,8 @@ using Mantid::HistogramData::CountVariances;
 using Mantid::HistogramData::CountStandardDeviations;
 
 namespace {
+
+/// Creates a BinEdges workspace with TOF XUnits
 void setup_WS(std::string &inputSpace) {
   // Set up a small workspace for testing
   auto space2D = createWorkspace<Workspace2D>(256, 11, 10);
@@ -48,7 +50,6 @@ void setup_WS(std::string &inputSpace) {
   space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
   // Register the workspace in the data service
-  inputSpace = "testWorkspace";
   AnalysisDataService::Instance().addOrReplace(inputSpace, space2D);
 
   // Load the instrument data
@@ -63,6 +64,7 @@ void setup_WS(std::string &inputSpace) {
   loader.execute();
 }
 
+/// Creates a Points workspace with TOF XUnits
 void setup_Points_WS(std::string &inputSpace) {
   // Set up a small workspace for testing
   auto space2D = createWorkspace<Workspace2D>(256, 10, 10);
@@ -83,7 +85,6 @@ void setup_Points_WS(std::string &inputSpace) {
   space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
   // Register the workspace in the data service
-  inputSpace = "testWorkspace";
   AnalysisDataService::Instance().addOrReplace(inputSpace, space2D);
 
   // Load the instrument data
@@ -98,13 +99,23 @@ void setup_Points_WS(std::string &inputSpace) {
   loader.execute();
 }
 }
+
 class ConvertUnitsTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ConvertUnitsTest *createSuite() {
+    return new ConvertUnitsTest();
+  }
+  static void destroySuite(ConvertUnitsTest *suite) { delete suite; }
+
+  void setUp() override { inputSpace = "testWorkspace"; }
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
   }
 
+  /// Tests the execution of the algorithm with a Points Workspace
   void test_Exec_Points_Input() {
     setup_Points_WS(inputSpace);
 
@@ -176,6 +187,7 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 
+  /// Tests converting back and forth with a Points Workspace
   void test_Points_Convert_Back_and_Forth() {
     // set up points WS with units TOF
     setup_Points_WS(inputSpace);
@@ -785,11 +797,32 @@ public:
   }
   static void destroySuite(ConvertUnitsTestPerformance *suite) { delete suite; }
 
-  ConvertUnitsTestPerformance() {
+  void setUp() override {
     FrameworkManager::Instance().exec(
         "Load", "Filename=HET15869;OutputWorkspace=hist_tof");
     FrameworkManager::Instance().exec(
         "Load", "Filename=CNCS_7860_event;OutputWorkspace=event_tof");
+    std::string WSname = "inputWS";
+    setup_Points_WS(WSname);
+  }
+
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("outWS");
+    AnalysisDataService::Instance().remove("hist_wave");
+    AnalysisDataService::Instance().remove("hist_");
+    AnalysisDataService::Instance().remove("event_wave");
+    AnalysisDataService::Instance().remove("event_");
+  }
+
+  void test_points_workspace() {
+
+    ConvertUnits alg;
+	alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "inputWS");
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.setPropertyValue("Target", "Wavelength");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
   }
 
   void test_histogram_workspace() {
