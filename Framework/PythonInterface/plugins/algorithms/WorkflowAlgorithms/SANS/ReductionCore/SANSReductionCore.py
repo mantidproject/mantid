@@ -95,7 +95,7 @@ class SANSReductionCore(DataProcessorAlgorithm):
         #    If we are dealing with an event workspace as input, this will cut out a time-based (use-defined) slice.
         #    In case of a histogram workspace, nothing happens.
         # --------------------------------------------------------------------------------------------------------------
-        monitor_workspace = self.getProperty("ScatterMonitorWorkspace").value
+        monitor_workspace = self._get_monitor_workspace()
         workspace, monitor_workspace, slice_event_factor = self._slice(state, workspace, monitor_workspace)
 
         # ------------------------------------------------------------
@@ -212,6 +212,15 @@ class SANSReductionCore(DataProcessorAlgorithm):
         state.property_manager = state_property_manager
         return state
 
+    def _get_monitor_workspace(self):
+        monitor_workspace = self.getProperty("ScatterMonitorWorkspace").value
+
+        clone_name = "CloneWorkspace"
+        clone_options = {SANSConstants.input_workspace: monitor_workspace,
+                         SANSConstants.output_workspace: SANSConstants.dummy}
+        clone_alg = create_unmanaged_algorithm(clone_name, **clone_options)
+        clone_alg.execute()
+        return clone_alg.getProperty(SANSConstants.output_workspace).value
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSReductionCore)
