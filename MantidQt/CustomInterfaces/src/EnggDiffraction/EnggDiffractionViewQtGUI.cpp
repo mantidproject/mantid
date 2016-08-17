@@ -91,7 +91,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   boost::shared_ptr<EnggDiffractionViewQtGUI> sharedView(
       this, [](EnggDiffractionViewQtGUI *) {});
   m_fittingWidget = new EnggDiffFittingViewQtWidget(
-      m_ui.tabMain, sharedView, sharedView, fullPres, sharedView);
+      m_ui.tabMain, sharedView, sharedView, fullPres, fullPres, sharedView);
   m_ui.tabMain->addTab(m_fittingWidget, QString("Fitting"));
 
   QWidget *wSettings = new QWidget(m_ui.tabMain);
