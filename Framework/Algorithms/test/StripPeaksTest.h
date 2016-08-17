@@ -108,7 +108,7 @@ private:
 
 class StripPeaksTestPerformance : public CxxTest::TestSuite {
 public:
-  void setUp() {
+  void setUp() override {
     FrameworkManager::Instance();
     MatrixWorkspace_sptr WS =
         WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 200, 0.5, 0.02);
@@ -143,7 +143,7 @@ public:
 
   void test_strip_peaks() { TS_ASSERT_THROWS_NOTHING(stripAlg.execute()); }
 
-  void tearDown() {
+  void tearDown() override {
     AnalysisDataService::Instance().remove("Stripped");
     AnalysisDataService::Instance().remove("toStrip");
   }

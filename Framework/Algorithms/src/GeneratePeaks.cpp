@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 
 #include "MantidAlgorithms/GeneratePeaks.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -11,7 +10,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -23,6 +21,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 
 namespace Mantid {
 namespace Algorithms {
@@ -448,7 +447,7 @@ void GeneratePeaks::generatePeaks(
       double fwhm = thispeak->fwhm();
 
       //
-      const MantidVec &X = dataWS->dataX(wsindex);
+      const auto &X = dataWS->x(wsindex);
       double leftbound = centre - m_numPeakWidth * fwhm;
       if (ipeak > 0) {
         // Not left most peak.
@@ -485,8 +484,10 @@ void GeneratePeaks::generatePeaks(
       // Put to output
       std::size_t offset = (left - X.begin());
       std::size_t numY = values.size();
+
+      auto &dataY = dataWS->mutableY(wsindex);
       for (std::size_t i = 0; i < numY; i++) {
-        dataWS->dataY(wsindex)[i + offset] += values[i];
+        dataY[i + offset] += values[i];
       }
 
     } // ENDFOR(ipeak)
@@ -697,14 +698,13 @@ API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace() {
           << "Using input worksapce to generate output workspace!\n";
 
     outputWS = API::WorkspaceFactory::Instance().create(
-        inputWS, inputWS->getNumberHistograms(), inputWS->dataX(0).size(),
-        inputWS->dataY(0).size());
+        inputWS, inputWS->getNumberHistograms(), inputWS->x(0).size(),
+        inputWS->y(0).size());
 
     // Only copy the X-values from spectra with peaks specified in the table
     // workspace.
     for (const auto &iws : m_spectraSet) {
-      std::copy(inputWS->dataX(iws).begin(), inputWS->dataX(iws).end(),
-                outputWS->dataX(iws).begin());
+      outputWS->setSharedX(iws, inputWS->sharedX(iws));
     }
 
     m_newWSFromParent = true;
@@ -737,8 +737,8 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
   }
 
   double x0 = binparameters[0];
-  double dx = binparameters[1];
-  double xf = binparameters[2];
+  double dx = binparameters[1]; // binDelta
+  double xf = binparameters[2]; // max value
   if (x0 >= xf || (xf - x0) < dx || dx == 0.) {
     std::stringstream errss;
     errss << "Order of input binning parameters is not correct.  It is not "
@@ -748,9 +748,9 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
     throw std::invalid_argument(errss.str());
   }
 
-  // Determine number of x values
   std::vector<double> xarray;
   double xvalue = x0;
+
   while (xvalue <= xf) {
     // Push current value to vector
     xarray.push_back(xvalue);
@@ -763,12 +763,14 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
   }
   size_t numxvalue = xarray.size();
 
+  BinEdges xArrayEdges(xarray);
+
   // Create new workspace
   MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
       "Workspace2D", m_spectraSet.size(), numxvalue, numxvalue - 1);
-  for (size_t ip = 0; ip < m_spectraSet.size(); ip++)
-    std::copy(xarray.begin(), xarray.end(), ws->dataX(ip).begin());
-
+  for (size_t ip = 0; ip < m_spectraSet.size(); ip++) {
+    ws->setBinEdges(ip, xArrayEdges);
+  }
   // Set spectrum numbers
   std::map<specnum_t, specnum_t>::iterator spiter;
   for (spiter = m_SpectrumMap.begin(); spiter != m_SpectrumMap.end();

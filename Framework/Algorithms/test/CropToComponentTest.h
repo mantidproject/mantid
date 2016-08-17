@@ -7,7 +7,10 @@
 #include "MantidAlgorithms/CropToComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataHandling/LoadRaw3.h"
+
 #include <numeric>
+#include <array>
 
 class CropToComponentTest : public CxxTest::TestSuite {
 public:
@@ -126,6 +129,62 @@ public:
     crop.setProperty("ComponentNames", componentNames);
     TSM_ASSERT_THROWS("Invalid detector names will throw.", crop.execute(),
                       std::runtime_error)
+  }
+
+  void test_that_det_ids_can_be_ordered() {
+    // Arrange
+    Mantid::DataHandling::LoadRaw3 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "LOQ48097.raw");
+    loader.setPropertyValue("OutputWorkspace", "in");
+    loader.execute();
+    Mantid::API::MatrixWorkspace_sptr workspace =
+        Mantid::API::AnalysisDataService::Instance()
+            .retrieveWS<Mantid::API::MatrixWorkspace>("in");
+
+    std::vector<std::string> componentNames = {"main-detector-bank"};
+
+    // Act
+    Mantid::Algorithms::CropToComponent crop;
+    crop.setChild(true);
+    crop.initialize();
+    crop.setProperty("InputWorkspace", workspace);
+    crop.setProperty("OutputWorkspace", "unordered");
+    crop.setProperty("ComponentNames", componentNames);
+    crop.setProperty("OrderByDetId", false);
+    crop.execute();
+    TS_ASSERT(crop.isExecuted())
+    Mantid::API::MatrixWorkspace_sptr unOrderedWorkspace =
+        crop.getProperty("OutputWorkspace");
+
+    crop.setProperty("InputWorkspace", workspace);
+    crop.setProperty("OutputWorkspace", "ordered");
+    crop.setProperty("ComponentNames", componentNames);
+    crop.setProperty("OrderByDetId", true);
+    crop.execute();
+    TS_ASSERT(crop.isExecuted())
+    Mantid::API::MatrixWorkspace_sptr orderedWorkspace =
+        crop.getProperty("OutputWorkspace");
+
+    // Assert
+    // Test the first theree spectrum numbers.
+    // The unordered workspace should show: 3, 131 259
+    // The ordered workspace should show: 3, 4, 5
+    std::array<size_t, 3> indices{{0, 1, 2}};
+    std::array<size_t, 3> expectedUnordered{{3, 131, 259}};
+    std::array<size_t, 3> expectedOrdered{{3, 4, 5}};
+
+    for (auto index : indices) {
+      const auto &specUnordered = unOrderedWorkspace->getSpectrum(index);
+      const auto &specOrdered = orderedWorkspace->getSpectrum(index);
+      TS_ASSERT_EQUALS(specUnordered.getSpectrumNo(), expectedUnordered[index]);
+      TS_ASSERT_EQUALS(specOrdered.getSpectrumNo(), expectedOrdered[index]);
+    }
+
+    // Clean up the ADS
+    if (Mantid::API::AnalysisDataService::Instance().doesExist("in")) {
+      Mantid::API::AnalysisDataService::Instance().remove("in");
+    }
   }
 
 private:

@@ -73,6 +73,9 @@ void CropToComponent::init() {
           "ComponentNames"),
       "List of component names which are used to crop the workspace."
       "to.");
+  declareProperty("OrderByDetId", false,
+                  "Whether to order the elements of "
+                  "the component by increasing detector ID.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -91,7 +94,12 @@ void CropToComponent::exec() {
   // Get the detector IDs from the Detectors
   std::vector<detid_t> detectorIDs(detectors.size());
   getDetectorIDs(detectors, detectorIDs);
-  std::sort(detectorIDs.begin(), detectorIDs.end());
+
+  const bool orderByDetID = getProperty("OrderByDetId");
+  if (orderByDetID) {
+    std::sort(detectorIDs.begin(), detectorIDs.end());
+  }
+
   // Run ExtractSpectra in order to obtain the cropped workspace
   auto extract_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "ExtractSpectra");

@@ -43,6 +43,15 @@ public:
     TS_ASSERT_DELTA(lhs[1], 0.6, 1e-14);
   }
 
+  void test_divide_equals() {
+    ScalableTester lhs{0.1, 0.2};
+    const double rhs = 2.0;
+    lhs /= rhs;
+    TS_ASSERT_EQUALS(lhs.size(), 2);
+    TS_ASSERT_DELTA(lhs[0], 0.05, 1e-14);
+    TS_ASSERT_DELTA(lhs[1], 0.1, 1e-14);
+  }
+
   void test_times() {
     const ScalableTester rhs1{0.1, 0.2};
     const double rhs2 = 3.0;
@@ -50,6 +59,15 @@ public:
     TS_ASSERT_EQUALS(lhs.size(), 2);
     TS_ASSERT_DELTA(lhs[0], 0.3, 1e-14);
     TS_ASSERT_DELTA(lhs[1], 0.6, 1e-14);
+  }
+
+  void test_divide() {
+    const ScalableTester rhs1{0.1, 0.2};
+    const double rhs2 = 2.0;
+    const ScalableTester lhs(rhs1 / rhs2);
+    TS_ASSERT_EQUALS(lhs.size(), 2);
+    TS_ASSERT_DELTA(lhs[0], 0.05, 1e-14);
+    TS_ASSERT_DELTA(lhs[1], 0.1, 1e-14);
   }
 
   void test_times_reverse_order() {
