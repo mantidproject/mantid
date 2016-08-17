@@ -233,17 +233,10 @@ void ISISCalibration::run() {
     double scale = m_uiForm.spScale->value();
     calibrationAlg->setProperty("ScaleFactor", scale);
   }
-
-  bool save = m_uiForm.ckSave->isChecked();
-
   m_batchAlgoRunner->addAlgorithm(calibrationAlg);
 
   // Initially take the calibration workspace as the result
   m_pythonExportWsName = m_outputCalibrationName.toStdString();
-
-  // Add save algorithm to queue if ticked
-  if (save)
-    addSaveWorkspaceToQueue(m_outputCalibrationName);
 
   // Configure the resolution algorithm
   if (m_uiForm.ckCreateResolution->isChecked()) {
@@ -312,9 +305,6 @@ void ISISCalibration::run() {
       m_batchAlgoRunner->addAlgorithm(smoothAlg, smoothAlgInputProps);
     }
 
-    if (save)
-      addSaveWorkspaceToQueue(m_outputResolutionName);
-
     // When creating resolution file take the resolution workspace as the result
     m_pythonExportWsName = m_outputResolutionName.toStdString();
   }
@@ -331,7 +321,7 @@ void ISISCalibration::algorithmComplete(bool error) {
   if (error)
     return;
 
-  if (m_uiForm.ckPlot->isChecked()) {
+  /*if (m_uiForm.ckPlot->isChecked()) {
     plotTimeBin(m_outputCalibrationName);
 
     QStringList plotWorkspaces;
@@ -341,7 +331,7 @@ void ISISCalibration::algorithmComplete(bool error) {
         plotWorkspaces << m_outputResolutionName + "_pre_smooth";
     }
     plotSpectrum(plotWorkspaces);
-  }
+  }*/
   m_uiForm.pbSave->setEnabled(true);
   m_uiForm.pbPlot->setEnabled(true);
 }
@@ -719,6 +709,13 @@ void ISISCalibration::pbRunFinished() {
 
   m_uiForm.leRunNo->setEnabled(true);
 }
-
+/** 
+ * Handle saving of workspace
+ */
+void ISISCalibration::saveClicked() {
+  addSaveWorkspaceToQueue(m_outputCalibrationName);
+  addSaveWorkspaceToQueue(m_outputResolutionName);
+  m_batchAlgoRunner->executeBatchAsync();
+}
 } // namespace CustomInterfaces
 } // namespace Mantid
