@@ -138,10 +138,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._unmirror_option = self.getProperty('UnmirrorOption').value
         self._red_ws = self.getPropertyValue('OutputWorkspace')
 
-        if not self._mirror_sense:
-            self.log().warning('MirrorSense is OFF, UnmirrorOption will fall back to 0 (i.e. no unmirroring)')
-            self._unmirror_option = 0
-
         if self._sum_runs:
             self.log().notice('All the runs will be summed')
             self._run_file = self._run_file.replace(',', '+')
@@ -155,6 +151,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             (self.getProperty('UnmirrorOption').value == 5 or self.getProperty('UnmirrorOption').value == 7) \
             and self.getPropertyValue('VanadiumRun') == "":
             issues['VanadiumRun'] = 'Given unmirror option requires vanadium run to be set'
+
+        if self.getProperty('MirrorSense').value is False and self.getProperty('UnmirrorOption').value > 0:
+            issues['MirrorSense'] = 'When MirrorSense is OFF, UnmirrorOption must be 0 (i.e. no unmirroring)'
 
         return issues
 
@@ -333,7 +332,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         # Calibrate to vanadium calibration workspace if specified
         # note, this is a one-column calibration workspace, it is not extracted from VanadiumRun (maybe it should?)
-        if self._calib_ws != None:
+        if self._calib_ws is not None:
             Divide(LHSWorkspace=red, RHSWorkspace=self._calib_ws, OutputWorkspace=red)
 
         self._debug(red, vnorm)
@@ -373,6 +372,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._convert_to_energy(left)
         self._convert_to_energy(right)
 
+        startbin = None
+        endbin = None
+        startbin_left = None
+        startbin_right = None
+        endbin_left = None
+        endbin_right = None
+
         # Perform unmirror
         if self._unmirror_option == 0:
             self.log().information('Unmirror 0: X-axis will not be converted to energy transfer if mirror sense is ON')
@@ -392,26 +398,43 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         elif self._unmirror_option == 4:
             self.log().information('Unmirror 4: shift the right according to left')
-            self._shift_spectra(right, left)
+            startbin, endbin = self._shift_spectra(right, left)
 
         elif self._unmirror_option == 5:
             self.log().information('Unmirror 5: shift the right according to right of the vanadium and sum to left')
-            self._shift_spectra(right, 'right_van', True)
+            startbin, endbin = self._shift_spectra(right, 'right_van', True)
 
         elif self._unmirror_option == 6:
             self.log().information('Unmirror 6: center both the right and the left')
-            self._shift_spectra(right)
-            self._shift_spectra(left)
+            startbin_left, endbin_left = self._shift_spectra(left)
+            startbin_right, endbin_right = self._shift_spectra(right)
 
         elif self._unmirror_option == 7:
             self.log().information('Unmirror 7: shift both the right and the left according to vanadium and sum')
-            self._shift_spectra(left, 'left_van', True)
-            self._shift_spectra(right, 'right_van', True)
+            startbin_left, endbin_left = self._shift_spectra(left, 'left_van', True)
+            startbin_right, endbin_right = self._shift_spectra(right, 'right_van', True)
 
-        # Perform unmirror option by summing left and right workspaces
         if self._unmirror_option > 2:
+            # Perform unmirror option by summing left and right workspaces
             Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=red)
             Scale(InputWorkspace=red, OutputWorkspace=red, Factor=0.5, Operation='Multiply')
+
+        # Mask corrupted bins according to shifted left or/and right workspace
+
+        # Temporary workspace containing bin boundaries
+        __temp = mtd[red].readX(0)
+
+        # Case of two shifted workspaces
+        if self._unmirror_option > 5:
+            startbin = np.maximum(startbin_left, startbin_right)
+            endbin = np.minimum(endbin_left, endbin_right)
+
+        if self._unmirror_option > 3:
+            self.log().notice('Mask bin numbers smaller than %f and larger than %f' % (startbin, endbin))
+            self.log().notice('This corresponds to an energy range of [%f %f] meV' %(__temp[startbin], __temp[endbin]))
+            # Mask bins to the left and right of the final bin range
+            MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=__temp[0], XMax=__temp[startbin])
+            MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=__temp[endbin], XMax=__temp[mtd[red].blocksize()])
 
         # cleanup by-products if not needed
         if not self._debug_mode:
@@ -419,16 +442,16 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             DeleteWorkspace(left)
             DeleteWorkspace(right)
 
-    def _shift_spectra(self, ws1, ws2=None, shift_option=False):
+    def _shift_spectra(self, ws1, ws2=None, shift_option=False, masking=False):
         """
         If only ws1 is given, each single spectrum will be centered around 0 meV
         If in addition ws2 is given and shift_option is False, ws1 will be shifted to match the peak positions of ws2
         If in addition ws2 is given and shift_option is True, ws1 will be shifted by the
         number of bins that is required for ws2 to be centered
-        @param ws1                         ::   workspace to be shifted
+        @param ws1                         ::   input workspace that will be shifted
         @param ws2                         ::   optional workspace according to which ws1 will be shifted
         @param shift_option                ::   option to shift ws1 by number of bins (ws2 to center)
-        @return                            ::   shifted output workspace
+        @return                            ::   bins before and after masking are proposed to take place
         """
         number_spectra = mtd[ws1].getNumberHistograms()
         size = mtd[ws1].blocksize()
@@ -478,15 +501,22 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             else:
                 self.log().notice('Shifting does not result in a new range for masking')
 
+        start_bin = -start_bin
+
         # Mask bins to the left of the final bin range
+
+        # Temporary workspace containing bin boundaries
         __temp = mtd[ws1].readX(0)
 
-        self.log().notice('Bin range is [%f, %f], mask bins outside of this range' % (-start_bin, end_bin))
-        self.log().notice('This corresponds to an energy range of [%f %f] meV' % (__temp[-start_bin], __temp[end_bin]))
-        # Mask bins to the left and right of the final bin range
-        MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=__temp[0], XMax=__temp[-start_bin])
-        MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=__temp[end_bin], XMax=__temp[size])
-        self.log().warning('MaskBins does not work as expected, compare with energy range (log notice)')
+        if masking is True:
+            self.log().notice('Mask bin numbers smaller than %f and larger than %f' % (start_bin, end_bin))
+            self.log().notice('This corresponds to an unmasked energy range of [%f %f] meV' %
+                              (__temp[start_bin], __temp[end_bin]))
+            # Mask bins to the left and right of the final bin range
+            MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=__temp[0], XMax=__temp[start_bin])
+            MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=__temp[end_bin], XMax=__temp[size])
+
+        return [start_bin, end_bin]
 
     def _finalize(self, runlist):
 
