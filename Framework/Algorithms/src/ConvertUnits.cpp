@@ -74,6 +74,11 @@ void ConvertUnits::init() {
                   "have identical bin boundaries. This option is not "
                   "recommended (see "
                   "http://www.mantidproject.org/ConvertUnits).");
+
+  declareProperty("ConvertFromPointData", true,
+                  "If true (default is true) the Algorithm "
+                  "will run ConvertToHistogram\n"
+                  "and then proceed with ConvertUnits.");
 }
 
 /** Executes the algorithm
@@ -85,20 +90,34 @@ void ConvertUnits::init() {
 */
 void ConvertUnits::exec() {
   // Get the workspaces
+  bool acceptPointData = getProperty("ConvertFromPointData");
+
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+
+  // Holder for the correctWS, because if we're converting from
+  // PointData a new workspace is created
   MatrixWorkspace_sptr correctWS;
   if (!inputWS->isHistogramData()) {
-    // not histogram data
-    // ConvertToHistogram
-    IAlgorithm_sptr convToHist = createChildAlgorithm("ConvertToHistogram");
-    convToHist->setProperty("InputWorkspace", inputWS);
-    convToHist->execute();
-    MatrixWorkspace_sptr temp = convToHist->getProperty("OutputWorkspace");
-    correctWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
-    if (!correctWS->isHistogramData()) {
-      throw std::runtime_error(
-          "Failed to convert workspace from Points to Bins");
+    if (acceptPointData) {
+      g_log.information(
+          "ConvertFromPointData is checked. Running ConvertToHistogram\n");
+      // not histogram data
+      // ConvertToHistogram
+      IAlgorithm_sptr convToHist = createChildAlgorithm("ConvertToHistogram");
+      convToHist->setProperty("InputWorkspace", inputWS);
+      convToHist->execute();
+      MatrixWorkspace_sptr temp = convToHist->getProperty("OutputWorkspace");
+      correctWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+
+      if (!correctWS->isHistogramData()) {
+        throw std::runtime_error(
+            "Failed to convert workspace from Points to Bins");
+      }
+    } else {
+      throw std::runtime_error("Workspace contains points, you can either run "
+                               "ConvertToHistogram on it, or check "
+                               "ConvertFromPointData");
     }
 
   } else {
