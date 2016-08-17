@@ -1289,7 +1289,7 @@ bool FindComponentVisitor::visit(GLActor *actor) {
  * @return string representing the current state of the instrumet actor.
  */
 std::string InstrumentActor::saveToProject() const {
-  TSVSerialiser tsv;
+  API::TSVSerialiser tsv;
   const std::string currentColorMap = getCurrentColorMap().toStdString();
 
   if (!currentColorMap.empty())
@@ -1304,7 +1304,7 @@ std::string InstrumentActor::saveToProject() const {
  * @param lines :: string representing the current state of the instrumet actor.
  */
 void InstrumentActor::loadFromProject(const std::string &lines) {
-  TSVSerialiser tsv(lines);
+  API::TSVSerialiser tsv(lines);
   if (tsv.selectLine("FileName")) {
     QString filename;
     tsv >> filename;

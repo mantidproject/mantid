@@ -261,7 +261,7 @@ void Grid::copy(Grid *grid) {
 }
 
 std::string Grid::saveToString() {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
   tsv.writeLine("grid");
 
   tsv << xEnabled() << xMinEnabled();

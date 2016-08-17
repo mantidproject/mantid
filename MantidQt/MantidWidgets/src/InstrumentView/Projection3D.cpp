@@ -467,7 +467,7 @@ void Projection3D::setLightingModel(bool picking) const {
  */
 void Projection3D::loadFromProject(const std::string &lines) {
   ProjectionSurface::loadFromProject(lines);
-  TSVSerialiser tsv(lines);
+  API::TSVSerialiser tsv(lines);
 
   if (tsv.selectSection("Viewport")) {
     std::string viewportLines;
@@ -480,7 +480,7 @@ void Projection3D::loadFromProject(const std::string &lines) {
  * @return a string representing the state of the 3D projection
  */
 std::string Projection3D::saveToProject() const {
-  TSVSerialiser tsv;
+  API::TSVSerialiser tsv;
   tsv.writeRaw(ProjectionSurface::saveToProject());
   tsv.writeSection("Viewport", m_viewport.saveToProject());
   return tsv.outputLines();

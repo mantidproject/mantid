@@ -49,7 +49,7 @@ IProjectSerialisable *InstrumentWindow::loadFromProject(
     const std::string &lines, ApplicationWindow *app, const int fileVersion) {
   Q_UNUSED(fileVersion);
 
-  TSVSerialiser tsv(lines);
+  MantidQt::API::TSVSerialiser tsv(lines);
 
   if (!tsv.selectLine("WorkspaceName"))
     return nullptr;
@@ -103,7 +103,7 @@ IProjectSerialisable *InstrumentWindow::loadFromProject(
  * @return a string representing the state of the instrument window
  */
 std::string InstrumentWindow::saveToProject(ApplicationWindow *app) {
-  TSVSerialiser tsv, window;
+  MantidQt::API::TSVSerialiser tsv, window;
   window.writeRaw(app->windowGeometryInfo(this));
   auto widgetContents = m_instrumentWidget->saveToProject();
   window.writeRaw(widgetContents);

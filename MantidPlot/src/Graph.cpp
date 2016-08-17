@@ -5642,7 +5642,7 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
 
   enableAutoscaling(app->autoscale2DPlots);
 
-  TSVSerialiser tsv(lines);
+  MantidQt::API::TSVSerialiser tsv(lines);
 
   if (tsv.selectSection("Antialiasing")) {
     int aa;
@@ -6183,7 +6183,7 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
 
     std::vector<std::string> specSections = tsv.sections("spectrogram");
     for (auto it = specSections.begin(); it != specSections.end(); ++it) {
-      TSVSerialiser specTSV(*it);
+      MantidQt::API::TSVSerialiser specTSV(*it);
 
       if (specTSV.selectLine("workspace")) {
         std::string wsName;
@@ -6308,7 +6308,7 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
 }
 
 std::string Graph::saveToProject() {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
 
   tsv.writeLine("ggeometry") << pos().x() << pos().y()
                              << frameGeometry().width()
@@ -6620,7 +6620,7 @@ std::string Graph::saveCurve(int i) {
 }
 
 std::string Graph::saveScale() {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
   for (int i = 0; i < 4; i++) {
     tsv.writeLine("scale") << i;
 
@@ -6664,7 +6664,7 @@ std::string Graph::saveScale() {
 }
 
 std::string Graph::saveMarkers() {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
   for (int i = 0; i < d_images.size(); ++i) {
     auto mrkI = dynamic_cast<ImageMarker *>(d_plot->marker(d_images[i]));
     if (!mrkI)

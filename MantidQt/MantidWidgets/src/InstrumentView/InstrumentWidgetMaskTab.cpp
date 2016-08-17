@@ -1186,14 +1186,14 @@ void InstrumentWidgetMaskTab::changedIntegrationRange(double, double) {
  * @param lines :: lines from the project file to load state from
  */
 void InstrumentWidgetMaskTab::loadFromProject(const std::string &lines) {
-  TSVSerialiser tsv(lines);
+  API::TSVSerialiser tsv(lines);
 
   if (!tsv.selectSection("masktab"))
     return;
 
   std::string tabLines;
   tsv >> tabLines;
-  TSVSerialiser tab(tabLines);
+  API::TSVSerialiser tab(tabLines);
 
   std::vector<QPushButton *> buttons{
       m_move,         m_pointer,        m_ellipse,  m_rectangle,
@@ -1297,8 +1297,8 @@ InstrumentWidgetMaskTab::loadMask(const std::string &fileName) {
  * @return a string representing the state of the mask tab
  */
 std::string InstrumentWidgetMaskTab::saveToProject() const {
-  TSVSerialiser tsv;
-  TSVSerialiser tab;
+  API::TSVSerialiser tsv;
+  API::TSVSerialiser tab;
 
   std::vector<QPushButton *> buttons{
       m_move,         m_pointer,        m_ellipse,  m_rectangle,

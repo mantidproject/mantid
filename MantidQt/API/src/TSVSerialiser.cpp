@@ -10,6 +10,8 @@ namespace {
 Mantid::Kernel::Logger g_log("TSVSerialiser");
 }
 
+using namespace MantidQt::API;
+
 TSVSerialiser::TSVSerialiser() : m_curIndex(0), m_midLine(false) {}
 
 TSVSerialiser::TSVSerialiser(const std::string &lines)

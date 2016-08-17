@@ -65,14 +65,14 @@ void InstrumentWidgetTreeTab::showEvent(QShowEvent *) {
  * @param lines :: lines from the project file to load state from
  */
 void InstrumentWidgetTreeTab::loadFromProject(const std::string &lines) {
-  TSVSerialiser tsv(lines);
+  API::TSVSerialiser tsv(lines);
 
   if (!tsv.selectSection("treetab"))
     return;
 
   std::string tabLines;
   tsv >> tabLines;
-  TSVSerialiser tab(tabLines);
+  API::TSVSerialiser tab(tabLines);
 
   std::string componentName;
   if (tab.selectLine("SelectedComponent")) {
@@ -85,8 +85,7 @@ void InstrumentWidgetTreeTab::loadFromProject(const std::string &lines) {
  * @return a string representing the state of the tree tab
  */
 std::string InstrumentWidgetTreeTab::saveToProject() const {
-  TSVSerialiser tsv;
-  TSVSerialiser tab;
+  API::TSVSerialiser tsv, tab;
 
   auto index = m_instrumentTree->currentIndex();
   auto model = index.model();

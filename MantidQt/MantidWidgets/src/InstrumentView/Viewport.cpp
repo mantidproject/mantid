@@ -471,7 +471,7 @@ void Viewport::transform(Mantid::Kernel::V3D &pos) const {
 
 void Viewport::loadFromProject(const std::string &lines) {
   reset();
-  TSVSerialiser tsv(lines);
+  API::TSVSerialiser tsv(lines);
 
   tsv.selectLine("Translation");
   double xTrans, yTrans;
@@ -491,7 +491,7 @@ void Viewport::loadFromProject(const std::string &lines) {
 }
 
 std::string Viewport::saveToProject() const {
-  TSVSerialiser tsv;
+  API::TSVSerialiser tsv;
   tsv.writeLine("Translation") << m_xTrans << m_yTrans;
   tsv.writeLine("Zoom") << m_zoomFactor;
 

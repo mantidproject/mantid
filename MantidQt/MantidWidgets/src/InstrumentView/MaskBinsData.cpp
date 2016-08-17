@@ -62,9 +62,9 @@ void MaskBinsData::clear() { m_masks.clear(); }
  * @param lines :: lines from the project file to load state from
  */
 void MaskBinsData::loadFromProject(const std::string &lines) {
-  TSVSerialiser tsv(lines);
+  API::TSVSerialiser tsv(lines);
   for (auto &maskLines : tsv.sections("Mask")) {
-    TSVSerialiser mask(maskLines);
+    API::TSVSerialiser mask(maskLines);
     mask.selectLine("Range");
     double start, end;
     mask >> start >> end;
@@ -85,9 +85,9 @@ void MaskBinsData::loadFromProject(const std::string &lines) {
  * @return a string representing the state of the mask bins
  */
 std::string MaskBinsData::saveToProject() const {
-  TSVSerialiser tsv;
+  API::TSVSerialiser tsv;
   for (const auto &binMask : m_masks) {
-    TSVSerialiser mask;
+    API::TSVSerialiser mask;
     mask.writeLine("Range") << binMask.start << binMask.end;
     mask.writeLine("Spectra");
     for (const int spectrum : binMask.spectra) {

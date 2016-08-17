@@ -1758,7 +1758,7 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
 
   auto multiLayer = new MultiLayer(app, 0, rows, cols);
 
-  TSVSerialiser tsv(lines);
+  MantidQt::API::TSVSerialiser tsv(lines);
 
   multiLayer->blockSignals(true);
 
@@ -1805,7 +1805,7 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
     for (auto it = graphSections.cbegin(); it != graphSections.cend(); ++it) {
       auto graphLines = *it;
 
-      TSVSerialiser gtsv(graphLines);
+      MantidQt::API::TSVSerialiser gtsv(graphLines);
 
       if (gtsv.selectLine("ggeometry")) {
         int x = 0, y = 0, w = 0, h = 0;
@@ -1833,7 +1833,7 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
 }
 
 std::string MultiLayer::saveToProject(ApplicationWindow *app) {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
 
   tsv.writeRaw("<multiLayer>");
 

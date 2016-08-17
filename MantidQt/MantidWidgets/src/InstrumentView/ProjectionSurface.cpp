@@ -722,7 +722,7 @@ QStringList ProjectionSurface::getPeaksWorkspaceNames() const {
  * @param lines :: lines from the project file to load state from
  */
 void ProjectionSurface::loadFromProject(const std::string &lines) {
-  TSVSerialiser tsv(lines);
+  API::TSVSerialiser tsv(lines);
 
   if (tsv.selectLine("BackgroundColor")) {
     tsv >> m_backgroundColor;
@@ -739,7 +739,7 @@ void ProjectionSurface::loadFromProject(const std::string &lines) {
  * @return a string representing the state of the projection surface
  */
 std::string ProjectionSurface::saveToProject() const {
-  TSVSerialiser tsv;
+  API::TSVSerialiser tsv;
   tsv.writeLine("BackgroundColor") << m_backgroundColor;
   tsv.writeSection("shapes", m_maskShapes.saveToProject());
   return tsv.outputLines();

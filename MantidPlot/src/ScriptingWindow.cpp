@@ -435,7 +435,7 @@ void ScriptingWindow::loadFromProject(const std::string &lines,
                                       const int fileVersion) {
   Q_UNUSED(fileVersion);
 
-  TSVSerialiser sTSV(lines);
+  MantidQt::API::TSVSerialiser sTSV(lines);
   QStringList files;
 
   setWindowTitle("MantidPlot: " + app->scriptingEnv()->languageName() +

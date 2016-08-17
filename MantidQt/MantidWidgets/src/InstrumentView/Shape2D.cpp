@@ -160,7 +160,7 @@ bool Shape2D::isMasked(const QPointF &p) const {
  * @return a new shape2D with old state applied
  */
 Shape2D *Shape2D::loadFromProject(const std::string &lines) {
-  TSVSerialiser tsv(lines);
+  API::TSVSerialiser tsv(lines);
 
   if (!tsv.selectLine("Type"))
     return nullptr;
@@ -225,7 +225,7 @@ Shape2D *Shape2D::loadShape2DFromType(const std::string &type,
  * @return a string representing the state of the shape 2D
  */
 std::string Shape2D::saveToProject() const {
-  TSVSerialiser tsv;
+  API::TSVSerialiser tsv;
   bool props[]{m_scalable, m_editing, m_selected, m_visible};
 
   tsv.writeLine("Properties");
@@ -353,7 +353,7 @@ void Shape2DEllipse::setPoint(const QString &prop, const QPointF &value) {
  * @return a new shape2D in the shape of a ellipse
  */
 Shape2D *Shape2DEllipse::loadFromProject(const std::string &lines) {
-  TSVSerialiser tsv(lines);
+  API::TSVSerialiser tsv(lines);
   tsv.selectLine("Parameters");
   double radius1, radius2, x, y;
   tsv >> radius1 >> radius2 >> x >> y;
@@ -364,7 +364,7 @@ Shape2D *Shape2DEllipse::loadFromProject(const std::string &lines) {
  * @return a string representing the state of the shape 2D
  */
 std::string Shape2DEllipse::saveToProject() const {
-  TSVSerialiser tsv;
+  API::TSVSerialiser tsv;
   double radius1 = getDouble("radius1");
   double radius2 = getDouble("radius2");
   auto centre = getPoint("centre");
@@ -417,7 +417,7 @@ void Shape2DRectangle::addToPath(QPainterPath &path) const {
  * @return a new shape2D in the shape of a rectangle
  */
 Shape2D *Shape2DRectangle::loadFromProject(const std::string &lines) {
-  TSVSerialiser tsv(lines);
+  API::TSVSerialiser tsv(lines);
   tsv.selectLine("Parameters");
   double x0, y0, x1, y1;
   tsv >> x0 >> y0 >> x1 >> y1;
@@ -430,7 +430,7 @@ Shape2D *Shape2DRectangle::loadFromProject(const std::string &lines) {
  * @return a string representing the state of the shape 2D
  */
 std::string Shape2DRectangle::saveToProject() const {
-  TSVSerialiser tsv;
+  API::TSVSerialiser tsv;
   auto x0 = m_boundingRect.x0();
   auto x1 = m_boundingRect.x1();
   auto y0 = m_boundingRect.y0();
@@ -586,7 +586,7 @@ void Shape2DRing::setColor(const QColor &color) {
  * @return a new shape2D in the shape of a ring
  */
 Shape2D *Shape2DRing::loadFromProject(const std::string &lines) {
-  TSVSerialiser tsv(lines);
+  API::TSVSerialiser tsv(lines);
   tsv.selectLine("Parameters");
   double xWidth, yWidth;
   tsv >> xWidth >> yWidth;
@@ -603,7 +603,7 @@ Shape2D *Shape2DRing::loadFromProject(const std::string &lines) {
  * @return a string representing the state of the shape 2D
  */
 std::string Shape2DRing::saveToProject() const {
-  TSVSerialiser tsv;
+  API::TSVSerialiser tsv;
   auto xWidth = getDouble("xwidth");
   auto yWidth = getDouble("ywidth");
   auto baseShape = getOuterShape();
@@ -754,7 +754,7 @@ void Shape2DFree::subtractPolygon(const QPolygonF &polygon) {
  * @return a new freefrom shape2D
  */
 Shape2D *Shape2DFree::loadFromProject(const std::string &lines) {
-  TSVSerialiser tsv(lines);
+  API::TSVSerialiser tsv(lines);
   QPolygonF polygon;
 
   size_t paramCount = tsv.values("Parameters").size() - 1;
@@ -773,7 +773,7 @@ Shape2D *Shape2DFree::loadFromProject(const std::string &lines) {
  * @return a string representing the state of the shape 2D
  */
 std::string Shape2DFree::saveToProject() const {
-  TSVSerialiser tsv;
+  API::TSVSerialiser tsv;
 
   tsv.writeLine("Type") << "free";
   tsv.writeLine("Parameters");

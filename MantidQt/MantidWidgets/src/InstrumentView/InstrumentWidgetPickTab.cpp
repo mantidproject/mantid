@@ -700,14 +700,14 @@ void InstrumentWidgetPickTab::savePlotToWorkspace() {
  * @param lines :: lines from the project file to load state from
  */
 void InstrumentWidgetPickTab::loadFromProject(const std::string &lines) {
-  TSVSerialiser tsv(lines);
+  API::TSVSerialiser tsv(lines);
 
   if (!tsv.selectSection("picktab"))
     return;
 
   std::string tabLines;
   tsv >> tabLines;
-  TSVSerialiser tab(tabLines);
+  API::TSVSerialiser tab(tabLines);
 
   // load active push button
   std::vector<QPushButton *> buttons{
@@ -726,8 +726,7 @@ void InstrumentWidgetPickTab::loadFromProject(const std::string &lines) {
  * @return a string representing the state of the pick tab
  */
 std::string InstrumentWidgetPickTab::saveToProject() const {
-  TSVSerialiser tsv;
-  TSVSerialiser tab;
+  API::TSVSerialiser tsv, tab;
 
   // save active push button
   std::vector<QPushButton *> buttons{

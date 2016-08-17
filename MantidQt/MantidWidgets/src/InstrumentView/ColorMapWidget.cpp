@@ -327,7 +327,7 @@ void ColorMapWidget::mouseReleaseEvent(QMouseEvent * /*e*/) {
  * @return string representing the current state of the color map widget.
  */
 std::string ColorMapWidget::saveToProject() const {
-  TSVSerialiser tsv, cm;
+  API::TSVSerialiser tsv, cm;
   cm.writeLine("ScaleType") << getScaleType();
   cm.writeLine("Power") << getNth_power();
   cm.writeLine("MinValue") << getMinValue();
@@ -342,11 +342,11 @@ std::string ColorMapWidget::saveToProject() const {
  * widget.
  */
 void ColorMapWidget::loadFromProject(const std::string &lines) {
-  TSVSerialiser tsv(lines);
+  API::TSVSerialiser tsv(lines);
   if (tsv.selectSection("colormap")) {
     std::string colorMapLines;
     tsv >> colorMapLines;
-    TSVSerialiser cm(colorMapLines);
+    API::TSVSerialiser cm(colorMapLines);
 
     int scaleType;
     double min, max, power;

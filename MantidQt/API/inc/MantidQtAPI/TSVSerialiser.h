@@ -1,6 +1,7 @@
 #ifndef MANTID_TSVSERIALISER_H_
 #define MANTID_TSVSERIALISER_H_
 
+#include "DllOption.h"
 #include "MantidKernel/CaseInsensitiveMap.h"
 
 #include <map>
@@ -39,7 +40,10 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
-class TSVSerialiser {
+namespace MantidQt {
+namespace API {
+
+class EXPORT_OPT_MANTIDQT_API TSVSerialiser {
 public:
   TSVSerialiser();
 
@@ -108,5 +112,7 @@ private:
   std::stringstream m_output;
   bool m_midLine;
 };
+}
+}
 
 #endif

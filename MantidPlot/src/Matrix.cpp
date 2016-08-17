@@ -1534,7 +1534,7 @@ IProjectSerialisable *Matrix::loadFromProject(const std::string &lines,
   Mantid::Kernel::Strings::convert<int>(values[1], rows);
   Mantid::Kernel::Strings::convert<int>(values[2], cols);
 
-  TSVSerialiser tsv(newLines);
+  MantidQt::API::TSVSerialiser tsv(newLines);
   std::string gStr;
   if (tsv.hasLine("geometry")) {
     gStr = tsv.lineAsString("geometry");
@@ -1642,7 +1642,7 @@ IProjectSerialisable *Matrix::loadFromProject(const std::string &lines,
 }
 
 std::string Matrix::saveToProject(ApplicationWindow *app) {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
 
   tsv.writeRaw("<matrix>");
   tsv.writeLine(objectName().toStdString()) << numRows() << numCols()

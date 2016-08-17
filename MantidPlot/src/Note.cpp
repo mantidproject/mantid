@@ -155,7 +155,7 @@ IProjectSerialisable *Note::loadFromProject(const std::string &lines,
   app->setListViewDate(name, date);
   note->setBirthDate(date);
 
-  TSVSerialiser tsv(lines);
+  MantidQt::API::TSVSerialiser tsv(lines);
 
   if (tsv.hasLine("geometry")) {
     const QString geometry =
@@ -186,7 +186,7 @@ IProjectSerialisable *Note::loadFromProject(const std::string &lines,
 }
 
 std::string Note::saveToProject(ApplicationWindow *app) {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
   tsv.writeRaw("<note>");
   tsv.writeLine(name().toStdString()) << birthDate();
   tsv.writeRaw(app->windowGeometryInfo(this));

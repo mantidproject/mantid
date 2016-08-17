@@ -722,7 +722,7 @@ void UnwrappedSurface::calcSize(UnwrappedDetector &udet) {
  */
 void UnwrappedSurface::loadFromProject(const std::string &lines) {
   ProjectionSurface::loadFromProject(lines);
-  TSVSerialiser tsv(lines);
+  API::TSVSerialiser tsv(lines);
 
   if (tsv.selectLine("Zoom")) {
     double x0, y0, x1, y1;
@@ -772,7 +772,7 @@ UnwrappedSurface::retrievePeaksWorkspace(const std::string &name) const {
  * @return a string representing the state of the surface
  */
 std::string UnwrappedSurface::saveToProject() const {
-  TSVSerialiser tsv;
+  API::TSVSerialiser tsv;
   tsv.writeRaw(ProjectionSurface::saveToProject());
 
   tsv.writeLine("Zoom");

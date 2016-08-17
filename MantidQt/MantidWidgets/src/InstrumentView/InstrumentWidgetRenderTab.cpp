@@ -734,7 +734,7 @@ QPointF InstrumentWidgetRenderTab::getUCorrection() const {
  */
 std::string
 MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
-  TSVSerialiser tab;
+  API::TSVSerialiser tab;
 
   tab.writeLine("AxesView") << mAxisCombo->currentIndex();
   tab.writeLine("AutoScaling") << m_autoscaling->isChecked();
@@ -757,7 +757,7 @@ MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
   const auto colorMap = m_colorMapWidget->saveToProject();
   tab.writeRaw(colorMap);
 
-  TSVSerialiser tsv;
+  API::TSVSerialiser tsv;
   tsv.writeSection("rendertab", tab.outputLines());
   return tsv.outputLines();
 }
@@ -767,14 +767,14 @@ MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
  * @param lines :: lines defining the state of the render tab
  */
 void InstrumentWidgetRenderTab::loadFromProject(const std::string &lines) {
-  TSVSerialiser tsv(lines);
+  API::TSVSerialiser tsv(lines);
 
   if (!tsv.selectSection("rendertab"))
     return;
 
   std::string tabLines;
   tsv >> tabLines;
-  TSVSerialiser tab(tabLines);
+  API::TSVSerialiser tab(tabLines);
 
   bool autoScaling, displayAxes, flipView, displayDetectorsOnly,
       displayWireframe, displayLighting, useOpenGL, useUCorrection;
