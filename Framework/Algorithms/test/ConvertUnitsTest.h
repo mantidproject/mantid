@@ -104,9 +104,7 @@ class ConvertUnitsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvertUnitsTest *createSuite() {
-    return new ConvertUnitsTest();
-  }
+  static ConvertUnitsTest *createSuite() { return new ConvertUnitsTest(); }
   static void destroySuite(ConvertUnitsTest *suite) { delete suite; }
 
   void setUp() override { inputSpace = "testWorkspace"; }
@@ -817,7 +815,7 @@ public:
   void test_points_workspace() {
 
     ConvertUnits alg;
-	alg.initialize();
+    alg.initialize();
     alg.setPropertyValue("InputWorkspace", "inputWS");
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.setPropertyValue("Target", "Wavelength");
