@@ -926,6 +926,19 @@ void MuonAnalysisResultTableTab::createMultipleFitsTable() {
     return;
   }
 
+  // Check fits have the same number of runs
+  const size_t firstNumRuns = workspacesByLabel.begin()->second.size();
+  if (std::any_of(workspacesByLabel.begin(), workspacesByLabel.end(),
+                  [&firstNumRuns](
+                      const std::pair<QString, std::vector<std::string>> fit) {
+                    return fit.second.size() != firstNumRuns;
+                  })) {
+    QMessageBox::information(
+        this, "Mantid - Muon Analysis",
+        "Please pick fit labels with the same number of workspaces");
+    return;
+  }
+
   // Create the results table
   Mantid::API::ITableWorkspace_sptr table =
       Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
