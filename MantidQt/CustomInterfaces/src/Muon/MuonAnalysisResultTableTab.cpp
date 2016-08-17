@@ -923,6 +923,11 @@ void MuonAnalysisResultTableTab::createMultipleFitsTable() {
   Mantid::API::ITableWorkspace_sptr table =
       Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
 
+  // Add column for label
+  auto labelCol = table->addColumn("str", "Label");
+  labelCol->setPlotType(6);
+  labelCol->setReadOnly(false);
+
   // Add columns for log values
   foreach (QString log, logsSelected) {
     std::string columnTypeName;
@@ -962,9 +967,88 @@ void MuonAnalysisResultTableTab::createMultipleFitsTable() {
     }
   }
 
-  //////////////////////////// code to go here
+  // ------- testing --------
+      // Get param information
+    QMap<QString, QMap<QString, double>> wsParamsList;
+    QStringList paramsToDisplay;
+    for (int i = 0; i < wsSelected.size(); ++i) {
+      QMap<QString, double> paramsList;
+      auto paramWs = retrieveWSChecked<ITableWorkspace>(
+          wsSelected[i].toStdString() + PARAMS_POSTFIX);
 
-  table->appendRow(); // TEST ONLY
+      Mantid::API::TableRow paramRow = paramWs->getFirstRow();
+
+      // Loop over all rows and get values and errors.
+      do {
+        std::string key;
+        double value;
+        double error;
+        paramRow >> key >> value >> error;
+        if (i == 0) {
+          Column_sptr newValCol = table->addColumn("double", key);
+          newValCol->setPlotType(2);
+          newValCol->setReadOnly(false);
+
+          Column_sptr newErrorCol = table->addColumn("double", key + ERROR_STRING);
+          newErrorCol->setPlotType(5);
+          newErrorCol->setReadOnly(false);
+
+          paramsToDisplay.append(QString::fromStdString(key));
+          paramsToDisplay.append(QString::fromStdString(key + ERROR_STRING));
+        }
+        paramsList[QString::fromStdString(key)] = value;
+        paramsList[QString::fromStdString(key + ERROR_STRING)] = error;
+      } while (paramRow.next());
+
+      wsParamsList[wsSelected[i]] = paramsList;
+    }
+// ------ testing ---------
+
+        // Add data to table
+    for (const auto &labelName : labelsSelected) {
+      Mantid::API::TableRow row = table->appendRow();
+
+      row << labelName.toStdString();
+
+      //// Get log values for this row
+      //const auto &logValues = m_logValues[wsName];
+
+      //// Write log values in each column
+      //for (int i = 0; i < logsSelected.size(); ++i) {
+      //  Mantid::API::Column_sptr col = table->getColumn(i);
+      //  const QVariant &v = logValues[logsSelected[i]];
+
+      //  if (col->isType<double>()) {
+      //    if (logsSelected[i].endsWith(" (s)")) {
+      //      // Convert relative to first start time
+      //      double seconds = v.toDouble();
+      //      const double firstStart_sec =
+      //          static_cast<double>(firstStart_ns) * 1.e-9;
+      //      row << seconds - firstStart_sec;
+      //    } else {
+      //      row << v.toDouble();
+      //    }
+      //  } else if (col->isType<std::string>()) {
+      //    row << v.toString().toStdString();
+      //  } else {
+      //    throw std::runtime_error(
+      //        "Log value with name '" + logsSelected[i].toStdString() +
+      //        "' in '" + wsName.toStdString() + "' has unexpected type.");
+      //  }
+      //}
+
+      //// Add param values (params same for all workspaces)
+      //QMap<QString, double> paramsList = wsParamsList[wsName];
+      //for (const auto &paramName : paramsToDisplay) {
+      //  row << paramsList[paramName];
+      //}
+    }
+
+    // Remove error columns if all errors are zero
+    // (because these correspond to fixed parameters)
+    MuonAnalysisHelper::removeFixedParameterErrors(table);
+
+  //////////////////////////// code to go here
 
   const std::string &tableName = getFileName();
 
