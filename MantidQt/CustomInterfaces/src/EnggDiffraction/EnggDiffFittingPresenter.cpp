@@ -260,7 +260,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
         // else - given or hard-coded to a single run number
         else {
           processSingleRun(focusDir, strFocusedFile, runnoDirVector,
-                           splitBaseName, runNoVec);
+                           splitBaseName);
         }
       }
     }
@@ -375,11 +375,7 @@ void EnggDiffFittingPresenter::processSingleRun(
 
   auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
   if (!fittingMultiRunMode) {
-    runNoVec.clear();
-    // pushing run number directory to list widget as its single run
-    // number
-    runNoVec.push_back(strFocusedFile);
-    setRunNoItems(runNoVec, false);
+    setRunNoItems(foundRunNumber, false);
   }
 }
 
@@ -483,6 +479,14 @@ void EnggDiffFittingPresenter::enableMultiRun(
         if (size_t(diff) == run_vec_size) {
           setRunNoItems(foundRunNumber, true);
           m_view->setBankEmit();
+        } else {
+          m_view->userWarning(
+              "Run Number Not Found",
+              "The multi-run number specified could not be located "
+              "in the focused output directory. Please check that the "
+              "correct directory is set for Output Folder under Focusing "
+              "Settings "
+              "on the settings tab.");
         }
       }
     } else {
@@ -1405,6 +1409,13 @@ void EnggDiffFittingPresenter::setRunNoItems(
       m_view->enableFittingListWidget(false);
       m_view->enableFitAllButton(false);
       m_view->clearFittingListWidget();
+
+      m_view->userWarning(
+          "Run Number Not Found",
+          "The run number specified could not be located "
+          "in the focused output directory. Please check that the "
+          "correct directory is set for Output Folder under Focusing Settings "
+          "on the settings tab.");
     }
 
   } catch (std::runtime_error &re) {
