@@ -321,17 +321,6 @@ void ISISCalibration::algorithmComplete(bool error) {
   if (error)
     return;
 
-  /*if (m_uiForm.ckPlot->isChecked()) {
-    plotTimeBin(m_outputCalibrationName);
-
-    QStringList plotWorkspaces;
-    if (m_uiForm.ckCreateResolution->isChecked()) {
-      plotWorkspaces << m_outputResolutionName;
-      if (m_uiForm.ckSmoothResolution->isChecked())
-        plotWorkspaces << m_outputResolutionName + "_pre_smooth";
-    }
-    plotSpectrum(plotWorkspaces);
-  }*/
   m_uiForm.pbSave->setEnabled(true);
   m_uiForm.pbPlot->setEnabled(true);
 }
@@ -716,6 +705,21 @@ void ISISCalibration::saveClicked() {
   addSaveWorkspaceToQueue(m_outputCalibrationName);
   addSaveWorkspaceToQueue(m_outputResolutionName);
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Handle mantid plotting
+ */
+void ISISCalibration::plotClicked() {
+  plotTimeBin(m_outputCalibrationName);
+
+  QStringList plotWorkspaces;
+  if (m_uiForm.ckCreateResolution->isChecked()) {
+    plotWorkspaces << m_outputResolutionName;
+    if (m_uiForm.ckSmoothResolution->isChecked())
+      plotWorkspaces << m_outputResolutionName + "_pre_smooth";
+  }
+  plotSpectrum(plotWorkspaces);
 }
 } // namespace CustomInterfaces
 } // namespace Mantid
