@@ -573,7 +573,8 @@ LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
     total_sample_detector_distance *= 1000.0;
 
     addRunProperty<double>("sample-detector-distance-offset", 0, "mm");
-    addRunProperty<double>("sample-detector-distance", sample_detector_distance, "mm");
+    addRunProperty<double>("sample-detector-distance", sample_detector_distance,
+                           "mm");
     addRunProperty<double>("sample-si-window-distance", 0, "mm");
 
     g_log.debug() << "Sample-Detector-Distance from SDD tag = "
