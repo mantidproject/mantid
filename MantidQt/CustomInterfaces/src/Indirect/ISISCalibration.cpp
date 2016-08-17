@@ -339,6 +339,8 @@ void ISISCalibration::algorithmComplete(bool error) {
     }
     plotSpectrum(plotWorkspaces);
   }
+  m_uiForm.pbSave->setEnabled(true);
+  m_uiForm.pbPlot->setEnabled(true);
 }
 
 bool ISISCalibration::validate() {
