@@ -372,12 +372,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._convert_to_energy(left)
         self._convert_to_energy(right)
 
-        startbin = None
-        endbin = None
-        startbin_left = None
-        startbin_right = None
-        endbin_left = None
-        endbin_right = None
+        startbin = 0
+        endbin = end
 
         # Perform unmirror
         if self._unmirror_option == 0:
@@ -408,33 +404,27 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self.log().information('Unmirror 6: center both the right and the left')
             startbin_left, endbin_left = self._shift_spectra(left)
             startbin_right, endbin_right = self._shift_spectra(right)
+            startbin = np.maximum(startbin_left, startbin_right)
+            endbin = np.minimum(endbin_left, endbin_right)
 
         elif self._unmirror_option == 7:
             self.log().information('Unmirror 7: shift both the right and the left according to vanadium and sum')
             startbin_left, endbin_left = self._shift_spectra(left, 'left_van', True)
             startbin_right, endbin_right = self._shift_spectra(right, 'right_van', True)
+            startbin = np.maximum(startbin_left, startbin_right)
+            endbin = np.minimum(endbin_left, endbin_right)
 
         if self._unmirror_option > 2:
             # Perform unmirror option by summing left and right workspaces
             Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=red)
             Scale(InputWorkspace=red, OutputWorkspace=red, Factor=0.5, Operation='Multiply')
 
-        # Mask corrupted bins according to shifted left or/and right workspace
-
-        # Temporary workspace containing bin boundaries
-        __temp = mtd[red].readX(0)
-
-        # Case of two shifted workspaces
-        if self._unmirror_option > 5:
-            startbin = np.maximum(startbin_left, startbin_right)
-            endbin = np.minimum(endbin_left, endbin_right)
-
-        if self._unmirror_option > 3:
-            self.log().notice('Mask bin numbers smaller than %f and larger than %f' % (startbin, endbin))
-            self.log().notice('This corresponds to an energy range of [%f %f] meV' %(__temp[startbin], __temp[endbin]))
-            # Mask bins to the left and right of the final bin range
-            MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=__temp[0], XMax=__temp[startbin])
-            MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=__temp[endbin], XMax=__temp[mtd[red].blocksize()])
+        # Mask corrupted bins according to shifted workspaces
+        self.log().debug('Mask bin numbers smaller than %f and larger than %f' % (startbin, endbin))
+        self.log().notice('Bins out of the energy range [%f %f] meV will be masked' %(x[startbin], x[endbin]))
+        # Mask bins to the left and right of the final bin range
+        MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[0], XMax=x[startbin])
+        MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[endbin], XMax=x[end])
 
         # cleanup by-products if not needed
         if not self._debug_mode:
@@ -501,22 +491,34 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             else:
                 self.log().notice('Shifting does not result in a new range for masking')
 
-        start_bin = -start_bin
-
         # Mask bins to the left of the final bin range
+        if masking is True:
+            # Mask corrupted bins according to shifted workspaces
+            self.log().debug('Mask bin numbers smaller than %f and larger than %f' % (start_bin, end_bin))
+            self.log().notice('Bins out of the energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin]))
+            # Mask bins to the left and right of the final bin range
+            MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=x[0], XMax=x[startbin])
+            MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=x[endbin], XMax=x[end])
+
+        return [-start_bin, end_bin]
+
+    def _perform_masking(self, ws, xminbin, xmaxbin):
+        """
+        Calls MaskBins for masking bins before startbin and after endbin according to unmirror options
+        :param ws:          Input workspace to be masked
+        :param xminbin:        Bins smaller than xminbin will be masked
+        :param xmaxbin:        Bins larger than xmaxbin will be masked
+        """
 
         # Temporary workspace containing bin boundaries
-        __temp = mtd[ws1].readX(0)
+        __temp = mtd[ws].readX(0)
 
-        if masking is True:
-            self.log().notice('Mask bin numbers smaller than %f and larger than %f' % (start_bin, end_bin))
-            self.log().notice('This corresponds to an unmasked energy range of [%f %f] meV' %
-                              (__temp[start_bin], __temp[end_bin]))
-            # Mask bins to the left and right of the final bin range
-            MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=__temp[0], XMax=__temp[start_bin])
-            MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=__temp[end_bin], XMax=__temp[size])
-
-        return [start_bin, end_bin]
+        self.log().notice('Mask bin numbers smaller than %f and larger than %f' % (xminbin, xmaxbin))
+        self.log().notice('This corresponds to an energy range of [%f %f] meV' %(__temp[xminbin],
+                                                                                                 __temp[xmaxbin]))
+        # Mask bins to the left and right of the final bin range
+        MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=__temp[0], XMax=__temp[xminbin])
+        MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=__temp[xmaxbin], XMax=__temp[mtd[red].blocksize()])
 
     def _finalize(self, runlist):
 
