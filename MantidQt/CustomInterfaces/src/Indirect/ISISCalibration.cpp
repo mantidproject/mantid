@@ -702,7 +702,9 @@ void ISISCalibration::pbRunFinished() {
  * Handle saving of workspace
  */
 void ISISCalibration::saveClicked() {
+  checkADSForPlotSaveWorkspace(m_outputCalibrationName.toStdString(), false);
   addSaveWorkspaceToQueue(m_outputCalibrationName);
+  checkADSForPlotSaveWorkspace(m_outputResolutionName.toStdString(), false);
   addSaveWorkspaceToQueue(m_outputResolutionName);
   m_batchAlgoRunner->executeBatchAsync();
 }
@@ -711,10 +713,12 @@ void ISISCalibration::saveClicked() {
  * Handle mantid plotting
  */
 void ISISCalibration::plotClicked() {
-  plotTimeBin(m_outputCalibrationName);
 
+  plotTimeBin(m_outputCalibrationName);
+  checkADSForPlotSaveWorkspace(m_outputCalibrationName.toStdString(), true);
   QStringList plotWorkspaces;
   if (m_uiForm.ckCreateResolution->isChecked()) {
+    checkADSForPlotSaveWorkspace(m_outputResolutionName.toStdString(), true);
     plotWorkspaces << m_outputResolutionName;
     if (m_uiForm.ckSmoothResolution->isChecked())
       plotWorkspaces << m_outputResolutionName + "_pre_smooth";
