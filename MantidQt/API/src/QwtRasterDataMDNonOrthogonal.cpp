@@ -18,6 +18,8 @@ QwtRasterDataMDNonOrthogonal::QwtRasterDataMDNonOrthogonal()
   m_skewMatrix[6] = 0.0;
   m_skewMatrix[7] = 0.0;
   m_skewMatrix[8] = 1.0;
+
+  m_missingHKLdim = 0;
 }
 
 QwtRasterDataMDNonOrthogonal::~QwtRasterDataMDNonOrthogonal() {
@@ -55,6 +57,11 @@ double QwtRasterDataMDNonOrthogonal::value(double x, double y) const {
   m_lookPoint[m_dimY] = v1 * m_skewMatrix[0 + 3 * m_dimY] +
                         v2 * m_skewMatrix[1 + 3 * m_dimY] +
                         v3 * m_skewMatrix[2 + 3 * m_dimY];
+  m_lookPoint[m_missingHKLdim] = v1 * m_skewMatrix[0 + 3 * m_missingHKLdim] +
+	  v2 * m_skewMatrix[1 + 3 * m_missingHKLdim] +
+	  v3 * m_skewMatrix[2 + 3 * m_missingHKLdim];
+
+
 
   // Get the signal at that point
   signal_t value = 0;
@@ -83,7 +90,7 @@ double QwtRasterDataMDNonOrthogonal::value(double x, double y) const {
 */
 void QwtRasterDataMDNonOrthogonal::setWorkspace(IMDWorkspace_const_sptr ws) {
   QwtRasterDataMD::setWorkspace(ws);
-
+  m_missingHKLdim = 2;
   // Create a lookpoint
   if (m_lookPoint) {
     delete[] m_lookPoint;
@@ -103,6 +110,17 @@ void QwtRasterDataMDNonOrthogonal::setWorkspace(IMDWorkspace_const_sptr ws) {
     }
   }
 }
+
+
+void QwtRasterDataMDNonOrthogonal::setSliceParams(size_t dimX, size_t dimY,
+	Mantid::Geometry::IMDDimension_const_sptr X,
+	Mantid::Geometry::IMDDimension_const_sptr Y,
+	std::vector<Mantid::coord_t> &slicePoint) {
+	QwtRasterDataMD::setSliceParams(dimX, dimY, X, Y, slicePoint);
+	m_missingHKLdim = API::getMissingHKLDimensionIndex(m_ws, dimX, dimY);
+}
+
+
 
 //-------------------------------------------------------------------------
 /** Perform a copy of this data object */

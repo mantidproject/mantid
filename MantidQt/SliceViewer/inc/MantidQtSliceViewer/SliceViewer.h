@@ -76,9 +76,9 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget,
 public:
   SliceViewer(QWidget *parent = 0);
   ~SliceViewer() override;
-  void SliceViewer::updateQWTRaster(Mantid::API::IMDWorkspace_sptr ws,
+  void SliceViewer::switchQWTRaster(Mantid::API::IMDWorkspace_sptr ws,
                                     size_t dimX, size_t dimY,
-                                    bool nonOrthmData); // TEST
+                                    bool useNonOrthogonal);
   void setWorkspace(const QString &wsName);
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
   Mantid::API::IMDWorkspace_sptr getWorkspace();
@@ -89,7 +89,6 @@ public:
   Mantid::Kernel::VMD getSlicePoint() const { return m_slicePoint; }
   int getDimX() const;
   int getDimY() const;
-  bool m_usingQWTRasterNonOrthogonal;
   /// Methods for Python bindings
   QString getWorkspaceName() const;
   void setXYDim(int indexX, int indexY);
@@ -310,7 +309,7 @@ private:
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> m_dimensions;
 
   /// Data presenter
-  API::QwtRasterDataMD *m_data;
+  std::unique_ptr <API::QwtRasterDataMD> m_data;
 
   /// The X and Y dimensions being plotted
   Mantid::Geometry::IMDDimension_const_sptr m_X;

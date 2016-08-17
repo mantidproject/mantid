@@ -85,13 +85,13 @@ const QString SliceViewer::NumEventsNormalizationKey = "# Events";
 /** Constructor */
 SliceViewer::SliceViewer(QWidget *parent)
     : QWidget(parent), m_ws(), m_firstWorkspaceOpen(false), m_dimensions(),
-      m_data(NULL), m_X(), m_Y(), m_dimX(0), m_dimY(1), m_logColor(false),
+      m_data(nullptr), m_X(), m_Y(), m_dimX(0), m_dimY(1), m_logColor(false),
       m_fastRender(true), m_rebinMode(false), m_rebinLocked(true),
       m_mdSettings(new MantidQt::API::MdSettings()), m_logger("SliceViewer"),
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
           boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
-      m_peaksSliderWidget(NULL), m_usingQWTRasterNonOrthogonal(false) {
+      m_peaksSliderWidget(NULL) {
 
   ui.setupUi(this);
 
@@ -110,7 +110,7 @@ SliceViewer::SliceViewer(QWidget *parent)
                    this, SLOT(colorRangeChanged()));
 
   // ---- Set the color map on the data ------
-  m_data = new API::QwtRasterDataMD();
+  m_data = Kernel::make_unique<API::QwtRasterDataMD>();
   m_spect->setColorMap(m_colorBar->getColorMap());
   m_plot->autoRefresh();
 
@@ -215,7 +215,6 @@ void SliceViewer::updateAspectRatios() {
 /// Destructor
 SliceViewer::~SliceViewer() {
   saveSettings();
-  delete m_data;
   delete m_rescaler;
   // Don't delete Qt objects, I think these are auto-deleted
 }
@@ -689,16 +688,16 @@ void SliceViewer::updateDimensionSliceWidgets() {
 }
 
 //------------------------------------------
-void SliceViewer::updateQWTRaster(
+void SliceViewer::switchQWTRaster(
     Mantid::API::IMDWorkspace_sptr ws, size_t dimX, size_t dimY,
-    bool nonOrthmData) // think want dimx and dimy here too
+    bool useNonOrthogonal)
 {
 
-  delete m_data;
-  if (nonOrthmData == true) {
-    m_data = new API::QwtRasterDataMDNonOrthogonal();
+  
+  if (useNonOrthogonal) {
+	  m_data = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
   } else {
-    m_data = new API::QwtRasterDataMD();
+	  m_data = Kernel::make_unique<API::QwtRasterDataMD>();
   }
 
   m_coordinateTransform = createCoordinateTransform(ws, m_dimX, m_dimY);
@@ -722,8 +721,8 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
       (API::isHKLDimensions(m_ws, m_dimX, m_dimY))) { // can probably also check
                                                       // axis here just in case
                                                       // it opens with non orth
-    delete m_data;
-    m_data = new API::QwtRasterDataMDNonOrthogonal();
+	m_data = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
+   
   }
   m_coordinateTransform = createCoordinateTransform(ws, m_dimX, m_dimY);
   // disconnect and reconnect here
@@ -1681,20 +1680,22 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim) {
 
 void SliceViewer::checkForHKLDimension(
     size_t dimX,
-    size_t dimY) {    // still need to stop it from making new m_data each time
-  bool makeNewm_data; // probably store previous HKL config and if not changed
-                      // don't do anything
-  m_coordinateTransform->checkDimensionsForHKL(m_ws, dimX, dimY);
-  makeNewm_data = API::isHKLDimensions(m_ws, dimX, dimY);
-  if (SliceViewer::m_usingQWTRasterNonOrthogonal != makeNewm_data) {
-    if ((makeNewm_data == false) && (API::requiresSkewMatrix(m_ws))) {
-      updateQWTRaster(m_ws, 0, 1, makeNewm_data);
-    }
-    if ((makeNewm_data == true) && (API::requiresSkewMatrix(m_ws))) {
-      updateQWTRaster(m_ws, 0, 1, makeNewm_data);
-    }
-  }
-  SliceViewer::m_usingQWTRasterNonOrthogonal = makeNewm_data;
+    size_t dimY) {  
+	if (API::requiresSkewMatrix(m_ws)) {
+		m_coordinateTransform->checkDimensionsForHKL(m_ws, dimX, dimY);
+		auto isHKL = API::isHKLDimensions(m_ws, dimX, dimY);
+		auto isNonOrthogonalQWTRasterData = dynamic_cast<API::QwtRasterDataMDNonOrthogonal*>(m_data.get()) != nullptr;
+		// 4 cases to consider
+		// isHKL true and is isNonOrthgonalQWT true -> do nothing
+		// isHKL false and isNonOrthgonalQWT false -> do nothing
+		//isHKL false and isNonOrthgonalQWT true -> switch out new QWTRasterData 
+		//isHKL true and isNonOrthgonalQWT false -> switch out new QWTRasterDataNonorthogonal 
+		if (isHKL ^ isNonOrthogonalQWTRasterData) {
+			const auto useNonOrthogonal = isHKL;
+			switchQWTRaster(m_ws, dimX, dimY, useNonOrthogonal);
+		}
+	}
+	
 }
 //==============================================================================
 //================================ PYTHON METHODS ==============================

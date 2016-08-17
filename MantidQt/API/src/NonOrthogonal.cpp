@@ -202,7 +202,7 @@ bool isHKLDimensions(Mantid::API::IMDWorkspace_const_sptr workspace,
                      size_t dimX, size_t dimY) {
   auto dimensionHKL = true;
   size_t dimensionIndices[2] = {dimX, dimY};
-  for (auto dimensionIndex : dimensionIndices) {
+  for (auto &dimensionIndex : dimensionIndices) {
     auto dimension = workspace->getDimension(dimensionIndex);
     const auto &frame = dimension->getMDFrame();
     if (frame.name() != Mantid::Geometry::HKL::HKLName) {
@@ -211,5 +211,20 @@ bool isHKLDimensions(Mantid::API::IMDWorkspace_const_sptr workspace,
   }
   return dimensionHKL;
 }
+size_t getMissingHKLDimensionIndex(Mantid::API::IMDWorkspace_const_sptr workspace, size_t dimX,
+	size_t dimY)
+{
+	for (size_t i = 0; i < workspace->getNumDims(); ++i)
+	{
+		auto dimension = workspace->getDimension(i);
+		const auto &frame = dimension->getMDFrame();
+		if ((frame.name() == Mantid::Geometry::HKL::HKLName) && (i != dimX) && (i != dimY))
+		{
+			return i; 
+		}
+
+	}
 }
+}
+
 }
