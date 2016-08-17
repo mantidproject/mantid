@@ -263,7 +263,7 @@ public:
 
     // The expected result
     const auto expected = createExpectedResults(true, false);
-	Mantid::API::WorkspaceHelpers::makeDistribution(expected);
+    Mantid::API::WorkspaceHelpers::makeDistribution(expected);
 
     TS_ASSERT(workspacesEqual(expected, outputWS, 0.1, true));
   }
@@ -280,11 +280,11 @@ private:
     auto table = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
     table->addColumn("double", "X");
     table->addColumn("double", "Y");
-	double width = 0.1;
+    double width = 0.1;
     for (int i = 0; i < 100; i++) {
       const auto x = static_cast<double>(i) * width;
       Mantid::API::TableRow row = table->appendRow();
-      row << x << (isDistribution ? background(x)/width :background(x));
+      row << x << (isDistribution ? background(x) / width : background(x));
     }
     return table;
   }
