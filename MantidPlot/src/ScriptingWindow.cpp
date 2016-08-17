@@ -6,7 +6,7 @@
 #include "MultiTabScriptInterpreter.h"
 #include "ScriptingEnv.h"
 #include "ScriptFileInterpreter.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "pixmaps.h"
 
 // Mantid
@@ -435,7 +435,7 @@ void ScriptingWindow::loadFromProject(const std::string &lines,
                                       const int fileVersion) {
   Q_UNUSED(fileVersion);
 
-  TSVSerialiser sTSV(lines);
+  MantidQt::API::TSVSerialiser sTSV(lines);
   QStringList files;
 
   setWindowTitle("MantidPlot: " + app->scriptingEnv()->languageName() +

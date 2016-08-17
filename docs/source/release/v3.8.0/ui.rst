@@ -21,6 +21,7 @@ User Interface
 
 Instrument View
 ###############
+* The instrument view will now save the state of the window to a Mantid project file.
 
 Workspace Matrix View
 #####################
