@@ -12,7 +12,6 @@ if is_supported_f2py_platform():
     QLr     = import_f2py("QLres")
     QLd     = import_f2py("QLdata")
     Qse     = import_f2py("QLse")
-    Que     = import_f2py("Quest")
     resnorm = import_f2py("ResNorm")
 else:
     unsupported_message()
