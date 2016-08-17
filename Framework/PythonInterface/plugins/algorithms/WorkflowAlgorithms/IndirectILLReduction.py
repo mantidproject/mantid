@@ -348,18 +348,22 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._extract_workspace(mon, '__left_mon', 0, mid)
         self._extract_workspace(mon, '__right_mon', mid, end)
 
-        # Get sensible range from left monitor and mask correspondingly
-        xmin, xmax = self._monitor_range('__left_mon')
-        # Mask first bins, where monitor count was 0
-        MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=0, XMax=xmin)
-        # Mask last bins, where monitor count was 0
-        MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=xmax, XMax=end)
-        # the same for the right
-        xmin, xmax = self._monitor_range('__right_mon')
-        # Mask first bins, where monitor count was 0
-        MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=0, XMax=xmin)
-        # Mask last bins, where monitor count was 0
-        MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=xmax, XMax=end)
+        # Mask bins out of monitor range (zero bins) for left and right wings
+        xmin_left, xmax_left = self._monitor_range('__left_mon')
+        xmin_right, xmax_right = self._monitor_range('__right_mon')
+        # Determine global bins for masking
+        xmin = np.maximum(xmin_left, xmin_right)
+        xmax = np.minimum(xmax_left, xmax_right)
+
+        # Masking bins according to their bin numbers
+        if xmin > 0:
+            self.log().debug('Mask monitor bins smaller than %d' % xmin)
+            MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=0, XMax=xmin)
+            MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=0, XMax=xmin)
+        if xmax < end:
+            self.log().debug('Mask monitor bins larger than %d' % xmax)
+            MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=xmax, XMax=end)
+            MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=xmax, XMax=end)
 
         # Delete the left and right monitors
         DeleteWorkspace('__left_mon')
@@ -370,10 +374,37 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._convert_to_energy(left)
         self._convert_to_energy(right)
 
+        # Initial bins out of which range masking will be performed
         start_bin = 0
         end_bin = end
 
-        # Perform unmirror
+        self._perform_unmirror
+
+        # Mask corrupted bins according to shifted workspaces
+        # Reload X-values (now in meV)
+        x = mtd[red].readX(0)
+
+        # Mask bins out of final energy range
+        if start_bin > 0:
+            self.log().debug('Mask bins smaller than %d and larger than %d' % (start_bin, end_bin))
+            self.log().notice('Bins out of the energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin]))
+            MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[0], XMax=x[start_bin])
+        if end_bin < len(x) - 1:
+            self.log().debug('Mask bins smaller than %d and larger than %d' % (start_bin, end_bin))
+            self.log().notice('Bins out of the energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin]))
+            MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[end_bin], XMax=x[len(x) - 1])
+
+        # cleanup by-products if not needed
+        if not self._debug_mode:
+            DeleteWorkspace(mon)
+            DeleteWorkspace(left)
+            DeleteWorkspace(right)
+
+    def _perform_unmirror(self):
+        """
+        Handling unmirror options and sum left and right wing if needed
+        :return: reduced workspace
+        """
         if self._unmirror_option == 0:
             self.log().information('Unmirror 0: X-axis will not be converted to energy transfer if mirror sense is ON')
             if not self._mirror_sense:
@@ -417,20 +448,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=red)
             Scale(InputWorkspace=red, OutputWorkspace=red, Factor=0.5, Operation='Multiply')
 
-        # Mask corrupted bins according to shifted workspaces
-        # Reload X-values (now in meV)
-        x = mtd[red].readX(0)
-        self.log().debug('Mask bin numbers smaller than %d and larger than %d' % (start_bin, end_bin))
-        self.log().notice('Bins out of the energy range [%f %f] meV will be masked' %(x[start_bin], x[end_bin]))
-        # Mask bins to the left and right of the final bin range
-        MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[0], XMax=x[start_bin])
-        MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[end_bin], XMax=x[len(x) - 1])
-
-        # cleanup by-products if not needed
-        if not self._debug_mode:
-            DeleteWorkspace(mon)
-            DeleteWorkspace(left)
-            DeleteWorkspace(right)
+        return red, start_bin, end_bin
 
     def _shift_spectra(self, ws1, ws2=None, shift_option=False, masking=False):
         """
@@ -497,8 +515,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self.log().debug('Mask bin numbers smaller than %d and larger than %d' % (start_bin, end_bin))
             self.log().notice('Bins out of the energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin]))
             # Mask bins to the left and right of the final bin range
-            MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=x[0], XMax=x[startbin])
-            MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=x[endbin], XMax=x[end])
+            MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=x[0], XMax=x[start_bin])
+            MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=x[end_bin], XMax=x[end])
 
         return [-start_bin, end_bin]
 
