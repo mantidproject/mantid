@@ -10,9 +10,9 @@
 #include "pixmaps.h"
 
 // Mantid
-#include "Mantid/IProjectSerialisable.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 
 // MantidQt
 #include "MantidQtAPI/HelpWindow.h"

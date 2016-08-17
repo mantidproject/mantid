@@ -2494,9 +2494,9 @@ Graph3D::~Graph3D() {
     delete d_surface;
 }
 
-IProjectSerialisable *Graph3D::loadFromProject(const std::string &lines,
-                                               ApplicationWindow *app,
-                                               const int fileVersion) {
+MantidQt::API::IProjectSerialisable *
+Graph3D::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                         const int fileVersion) {
   Q_UNUSED(fileVersion);
   auto graph = new Graph3D("", app, "", 0);
 

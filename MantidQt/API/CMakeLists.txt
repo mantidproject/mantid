@@ -91,6 +91,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/HelpWindow.h
 	inc/MantidQtAPI/InterfaceFactory.h
 	inc/MantidQtAPI/InterfaceManager.h
+  inc/MantidQtAPI/IProjectSerialisable.h
 	inc/MantidQtAPI/MantidColorMap.h
 	inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
 	inc/MantidQtAPI/MantidQwtWorkspaceData.h

@@ -9073,7 +9073,7 @@ void ApplicationWindow::closeWindow(MdiSubWindow *window) {
  * @param window :: the window to remove
  */
 void ApplicationWindow::removeSerialisableWindow(
-    Mantid::IProjectSerialisable *window) {
+    MantidQt::API::IProjectSerialisable *window) {
   if (m_serialisableWindows.contains(window)) {
     m_serialisableWindows.removeAt(m_serialisableWindows.indexOf(window));
   }

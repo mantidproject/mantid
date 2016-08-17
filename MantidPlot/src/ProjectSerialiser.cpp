@@ -346,8 +346,8 @@ QString ProjectSerialiser::saveFolderSubWindows(Folder *folder) {
   // Write windows
   QList<MdiSubWindow *> windows = folder->windowsList();
   for (auto &w : windows) {
-    Mantid::IProjectSerialisable *ips =
-        dynamic_cast<Mantid::IProjectSerialisable *>(w);
+    MantidQt::API::IProjectSerialisable *ips =
+        dynamic_cast<MantidQt::API::IProjectSerialisable *>(w);
 
     if (ips) {
       text += QString::fromUtf8(ips->saveToProject(window).c_str());

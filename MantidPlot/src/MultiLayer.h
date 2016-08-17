@@ -32,12 +32,12 @@
 #ifndef MULTILAYER_H
 #define MULTILAYER_H
 
-#include "MdiSubWindow.h"
 #include "Graph.h"
-#include "Mantid/IProjectSerialisable.h"
-#include <QPushButton>
+#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MdiSubWindow.h"
 #include <QLayout>
 #include <QPointer>
+#include <QPushButton>
 
 class QLabel;
 class LayerButton;
@@ -104,9 +104,9 @@ public:
 
   void setWaterfallLayout(bool on = true);
 
-  static IProjectSerialisable *loadFromProject(const std::string &lines,
-                                               ApplicationWindow *app,
-                                               const int fileVersion);
+  static MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &lines, ApplicationWindow *app,
+                  const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
 
 public slots:
