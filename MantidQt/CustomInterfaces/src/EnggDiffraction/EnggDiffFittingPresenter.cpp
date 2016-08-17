@@ -235,13 +235,12 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
         processMultiRun(strFocusedFile, runnoDirVector);
 
       } else {
-
         // true if string convertible to digit
         auto isRunNumber = isDigit(strFocusedFile);
         auto focusDir = m_view->focusingDir();
 
         // if not valid parent dir and not valid single run number
-        if (focusDir.empty() || !isRunNumber) {
+        if (focusDir.empty()) {
           m_view->userWarning(
               "Invalid Input",
               "Please check that a valid directory is "
@@ -250,11 +249,16 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
               "Please try again");
 
           m_view->enableFitAllButton(false);
+        } else if (!isRunNumber) {
+
+          m_view->userWarning("Invalid Run Number",
+                              "Invalid format of run number has been entered. "
+                              "Please try again");
+          m_view->enableFitAllButton(false);
         }
 
         // else - given or hard-coded to a single run number
         else {
-
           processSingleRun(focusDir, strFocusedFile, runnoDirVector,
                            splitBaseName, runNoVec);
         }
@@ -461,15 +465,14 @@ void EnggDiffFittingPresenter::enableMultiRun(
       }
     } else {
       m_view->userWarning("Invalid Run Number",
-                          "One or more run file not found "
-                          "from the specified range of runs."
+                          "Invalid multi-run number range has been provided. "
                           "Please try again");
       m_view->enableFitAllButton(false);
     }
   } else {
     m_view->userWarning("Invalid Run Number",
-                        "The specified range of run number "
-                        "entered is invalid. Please try again");
+                        "Invalid format of multi-run number has been entered. "
+                        "Please try again");
     m_view->enableFitAllButton(false);
   }
 }
