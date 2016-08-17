@@ -168,7 +168,9 @@ void QwtRasterDataMDNonOrthogonal::copyFrom(
 
   for (size_t d = 0; d < 3; ++d) {
     dest.m_skewMatrix[d] = source.m_skewMatrix[d];
+
   }
+  dest.m_missingHKLdim = source.m_missingHKLdim;
 }
 
 } // namespace
