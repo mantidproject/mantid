@@ -6,7 +6,10 @@ from reduction_workflow.command_interface import *
 from reduction_workflow.find_data import *
 from reduction_workflow.instruments.sans import hfir_instrument
 from mantid.kernel import Logger
+from mantid.simpleapi import Load
+import mantid
 import os
+import os.path
 
 ## List of user commands ######################################################
 
@@ -618,3 +621,61 @@ def Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
         output_workspace=output_workspace,
         scale=scale,
         save_output=save_output)
+
+def beam_center_gravitational_drop(beam_center_file, sdd=1.3):
+    '''
+    This method is used for correcting for gravitational drop
+    @param beam_center_file :: file where the beam center was found
+    @param sdd :: sample detector distance to apply the beam center
+    '''
+    def calculate_neutron_drop(path_length,wavelength):
+        '''
+        Calculate the gravitational drop of the neutrons
+        path_length in meters
+        wavelength in Angstrom
+        '''
+        wavelength *= 1e-10
+        neutron_mass = 1.674927211e-27
+        g = 9.80665;
+        h = 6.62606896e-34
+        gm2_OVER_2h2 = g * neutron_mass * neutron_mass / (2.0 * h * h)
+        l2 = gm2_OVER_2h2 * path_length**2
+        return wavelength * wavelength * l2
+    
+    # Get beam center used in the previous reduction
+    
+    pm = mantid.PropertyManagerDataService[ReductionSingleton().property_manager]
+    beam_center_x = pm['LatestBeamCenterX'].value
+    beam_center_y = pm['LatestBeamCenterY'].value
+    Logger("CommandInterface").information("Beam Center before: [%.2f, %.2f] pixels"%(beam_center_x,beam_center_y))
+    print beam_center_x, beam_center_y
+    
+    try:    
+        # check if the workspace still exists
+        ws = mantid.mtd[ "__beam_finder_" + os.path.splitext(beam_center_file)[0]]
+    except KeyError:
+        # Let's try load
+        try:
+            ws = Load(beam_center_file)
+        except:
+            Logger("CommandInterface").error("Cannot read input file %s." %beam_center_file)
+            return
+    
+    i = ws.getInstrument()
+    y_pixel_size_mm = i.getNumberParameter('y-pixel-size')[0]
+    y_pixel_size = y_pixel_size_mm * 1e-3 # In meters
+    distance_detector1 = i.getComponentByName("detector1").getPos()[2]
+    path_length = distance_detector1 - sdd
+    r = ws.run()
+    wavelength = r.getProperty("wavelength").value
+    
+    drop = calculate_neutron_drop(path_length,wavelength)
+    # 1 pixel -> y_pixel_size
+    # x pixel -> drop    
+    drop_in_pixels = drop / y_pixel_size
+    new_beam_center_y = beam_center_y-drop_in_pixels
+    Logger("CommandInterface").information("Beam Center after:   [%.2f, %.2f] pixels"%(beam_center_x,new_beam_center_y))
+    return beam_center_x, new_beam_center_y
+    
+    
+                                   

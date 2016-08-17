@@ -35,9 +35,10 @@ void ClearMaskFlag::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>("Workspace", "",
                                                            Direction::InOut),
                   "Workspace to clear the mask flag of.");
-  declareProperty("ComponentName", "", "Specify the instrument component to "
-                                       "mask. If empty clears mask flag for "
-                                       "the whole instrument.");
+  declareProperty("ComponentName", "",
+                  "Specify the instrument component to clear the "
+                  "mask. If empty clears mask the flag for "
+                  "the whole instrument.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -53,7 +54,6 @@ void ClearMaskFlag::exec() {
   if (!componentName.empty()) {
     auto instrument = ws->getInstrument();
     auto component = instrument->getComponentByName(componentName);
-
     boost::shared_ptr<const Geometry::ICompAssembly> componentAssembly =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
 
