@@ -6,7 +6,7 @@
 
 .. properties::
 
-Description
+Description 
 -----------
 
 A workflow algorithm to generate a calibration workspace for the IN16B
