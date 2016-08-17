@@ -979,7 +979,6 @@ void MuonAnalysisResultTableTab::createMultipleFitsTable() {
 
   // ------- testing --------
   // Get param information
-  using WSParameterList = QMap<QString, QMap<QString, double>>;
   QMap<QString, WSParameterList> wsParamsByLabel;
   for (const auto &label : labelsSelected) {
     WSParameterList wsParamsList;
@@ -1009,8 +1008,8 @@ void MuonAnalysisResultTableTab::createMultipleFitsTable() {
   // ------ testing ---------
 
   // Add columns to table
-
-  //if (i == 0) {
+  const auto &paramNames = wsParamsByLabel.begin()->begin()->keys();
+  const auto &globalNames = getGlobalParams(wsParamsByLabel);
   //  Column_sptr newValCol = table->addColumn("double", key);
   //  newValCol->setPlotType(2);
   //  newValCol->setReadOnly(false);
@@ -1021,7 +1020,6 @@ void MuonAnalysisResultTableTab::createMultipleFitsTable() {
 
   //  paramsToDisplay.append(QString::fromStdString(key));
   //  paramsToDisplay.append(QString::fromStdString(key + ERROR_STRING));
-  //}
 
   // -------------------testing ----------------
 
@@ -1171,6 +1169,60 @@ std::string MuonAnalysisResultTableTab::getFileName() {
     }
   }
   return fileName;
+}
+
+/**
+ * In the supplied list of fit results, finds which parameters appear to have
+ * been global. The global params have the same value for all workspaces in a
+ * label.
+ * @param paramList :: [input] Map of label name to "WSParameterList" (itself a
+ * map of workspace name to <name, value> map)
+ * @returns :: List of global parameter names
+ */
+QStringList MuonAnalysisResultTableTab::getGlobalParams(
+    const QMap<QString, WSParameterList> &paramList) {
+  // It is safe to assume the same fit model was used for all labels.
+  // So just test the first:
+  return getGlobalParams(*paramList.begin());
+}
+
+/**
+ * In the supplied list of fit results, finds which parameters appear to have
+ * been global. The global params have the same value for all workspaces.
+ * @param paramList :: [input] map of workspace name to <name, value> map
+ * @returns :: List of global parameter names
+ */
+QStringList
+MuonAnalysisResultTableTab::getGlobalParams(const WSParameterList &paramList) {
+  auto params = paramList.begin()->keys();
+  // Remove the errors - just want the parameters
+  params.erase(
+      std::remove_if(params.begin(), params.end(),
+                     [](const QString &qs) { return qs.endsWith("Error"); }),
+      params.end());
+
+  // Lambda to find if a particular parameter is global
+  const auto isGlobal = [&paramList](const QString &key) {
+    double firstValue = paramList.begin()->value(key);
+    if (paramList.size() > 1) {
+      for (auto it = paramList.begin() + 1; it != paramList.end(); ++it) {
+        // If any parameter differs from the first it cannot be global
+        if (std::abs(it->value(key) - firstValue) >
+            std::numeric_limits<double>::epsilon()) {
+          return false;
+        }
+      }
+      return true; // All values are the same so it is global
+    } else {
+      return false; // Only one workspace so no globals
+    }
+  };
+
+  // Make a list of all the globals
+  QStringList globals;
+  std::copy_if(params.begin(), params.end(), std::back_inserter(globals),
+               isGlobal);
+  return globals;
 }
 }
 }

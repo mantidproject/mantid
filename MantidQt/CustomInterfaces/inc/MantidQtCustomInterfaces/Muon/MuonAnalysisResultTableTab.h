@@ -16,6 +16,7 @@ class MuonAnalysis;
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace Muon {
+typedef QMap<QString, QMap<QString, double>> WSParameterList;
 
 /**
 This is a Helper class for MuonAnalysis. In particular this helper class deals
@@ -133,12 +134,17 @@ private:
   /// Returns a list of labels user has made sequential/simultaneous fits for
   std::pair<QStringList, QStringList> getFitLabels();
 
+  /// Checks if named workspaces/labels have same fit models
   bool haveSameParameters(const QStringList &names,
                           std::function<Mantid::API::ITableWorkspace_sptr(
                               const QString &)> tableFromName);
   QStringList getSelectedItemsToFit();
   QStringList getSelectedLogs();
   std::string getFileName();
+
+  /// Finds which parameters in a fit were global
+  QStringList getGlobalParams(const QMap<QString, WSParameterList> &paramList);
+  QStringList getGlobalParams(const WSParameterList &paramList);
 
   Ui::MuonAnalysis &m_uiForm;
 
