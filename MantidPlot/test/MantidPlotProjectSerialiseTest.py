@@ -412,6 +412,8 @@ def parse_project_file(contents, pattern=""):
         key = properties[0]
         values = properties[1:]
         if key in data.keys():
+            # if it already exists then add multiple entries as a dictionary
+            # with numberical keys corresponding to the order added
             if not isinstance(data[key], dict):
                 data[key] = {0: data[key]}
             data[key][max(data[key])+1] = values
