@@ -48,6 +48,10 @@ IndirectMoments::IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent)
   // Update the preview plot when the algorithm completes
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(momentsAlgComplete(bool)));
+
+  // Plot and save
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -64,8 +68,6 @@ void IndirectMoments::run() {
   double eMin = m_dblManager->value(m_properties["EMin"]);
   double eMax = m_dblManager->value(m_properties["EMax"]);
 
-  bool plot = m_uiForm.ckPlot->isChecked();
-  bool save = m_uiForm.ckSave->isChecked();
 
   std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
 
@@ -75,8 +77,8 @@ void IndirectMoments::run() {
   momentsAlg->setProperty("Sample", workspaceName.toStdString());
   momentsAlg->setProperty("EnergyMin", eMin);
   momentsAlg->setProperty("EnergyMax", eMax);
-  momentsAlg->setProperty("Plot", plot);
-  momentsAlg->setProperty("Save", save);
+  momentsAlg->setProperty("Plot", false);
+  momentsAlg->setProperty("Save", false);
   momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
 
   if (m_uiForm.ckScale->isChecked())
@@ -127,9 +129,6 @@ void IndirectMoments::handleSampleInputReady(const QString &filename) {
 
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateProperties(QtProperty *, double)));
-
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
 
 /**
@@ -204,6 +203,16 @@ void IndirectMoments::momentsAlgComplete(bool error) {
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
 }
-
+/**
+ * Handle mantid plotting
+ */
+void IndirectMoments::plotClicked() {
+  QString outputWs = getWorkspaceBasename(m_uiForm.dsInput->getCurrentDataName()) + "_Moments";
+  bool plot = checkADSForPlotSaveWorkspace(outputWs.toStdString(), true);
+  if (plot) {
+    plotSpectrum(outputWs + "_M0");
+    plotSpectrum({ outputWs + "_M0", outputWs + "_M2" });
+  }
+}
 } // namespace CustomInterfaces
 } // namespace Mantid
