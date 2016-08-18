@@ -144,14 +144,14 @@ public:
     Workspace2D_sptr output2D =
         boost::dynamic_pointer_cast<Workspace2D>(output);
 
-    // make sure that it is a histogram
-    TS_ASSERT(output2D->isHistogramData());
+    // Test that X data is still Points (it was converted back)
+    TS_ASSERT(!output2D->isHistogramData());
 
     // Check that the output unit is correct
     TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "Wavelength");
 
-    // Test that X data is now bins
-    TS_ASSERT_EQUALS(output2D->x(101).size(), 11);
+    // Test that X data is still Points (it was converted back)
+    TS_ASSERT_EQUALS(output2D->x(101).size(), 10);
     // Test that Y & E data is unchanged
     TS_ASSERT_EQUALS(output2D->y(101).size(), 10);
     TS_ASSERT_EQUALS(output2D->e(101).size(), 10);
@@ -162,10 +162,9 @@ public:
 
     // Test that spectra that should have been zeroed have been
     TS_ASSERT_EQUALS(output2D->y(0)[1], 0);
-    TS_ASSERT_EQUALS(output2D->e(0)[9], 0);
+    TS_ASSERT_EQUALS(output2D->e(0)[8], 0);
     // Check that the data has truly been copied (i.e. isn't a reference to the
-    // same
-    //    vector in both workspaces)
+    // same vector in both workspaces)
     double test[10] = {11, 22, 33, 44, 55, 66, 77, 88, 99, 1010};
     Counts testY(test, test + 10);
     CountStandardDeviations testE(test, test + 10);
@@ -176,9 +175,11 @@ public:
 
     TS_ASSERT_EQUALS(input2D->y(111)[3], 3.0);
 
-    // Check that a couple of x bin boundaries have been correctly converted
-    TS_ASSERT_DELTA(output2D->x(103)[5], 1.5808, 0.0001);
-    TS_ASSERT_DELTA(output2D->x(103)[10], 3.1617, 0.0001);
+    // Check that a couple of x points have been correctly converted
+    TS_ASSERT_DELTA(output2D->x(103)[4], 1.4228, 0.0001);
+    TS_ASSERT_DELTA(output2D->x(103)[5], 1.7389, 0.0001);
+    TS_ASSERT_DELTA(output2D->x(103)[9], 3.0037, 0.0001);
+
     // Just check that an input bin boundary is unchanged
     TS_ASSERT_EQUALS(input2D->x(66)[4], 4500.0);
 
@@ -214,13 +215,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    // This WILL RESET inputSpace to a WS with BinEdges!
-    setup_WS(inputSpace);
-    Workspace_sptr binEdgesWS;
+    // get the input WS to compare values
+    Workspace_sptr pointsWS;
     TS_ASSERT_THROWS_NOTHING(
-        binEdgesWS = AnalysisDataService::Instance().retrieve(inputSpace));
-    Workspace2D_sptr binEdgesWS2D =
-        boost::dynamic_pointer_cast<Workspace2D>(binEdgesWS);
+        pointsWS = AnalysisDataService::Instance().retrieve(inputSpace));
+    Workspace2D_sptr pointsWS2D =
+        boost::dynamic_pointer_cast<Workspace2D>(pointsWS);
 
     // This is the WS with units converted back to TOF
     Workspace_sptr output;
@@ -230,36 +230,36 @@ public:
     Workspace2D_sptr output2D =
         boost::dynamic_pointer_cast<Workspace2D>(output);
 
-    // make sure that it is a histogram
-    TS_ASSERT(output2D->isHistogramData());
+    // Test that X data is still Points (it was converted back)
+    TS_ASSERT(!output2D->isHistogramData());
 
     // check if the units are successfully converted
     TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "TOF");
 
-    // Test that X data is now bins, i.e. 1 bigger than Y
-    TS_ASSERT_EQUALS(output2D->x(101).size(), 11);
+	// Test that X data is still Points (it was converted back)
+    TS_ASSERT_EQUALS(output2D->x(101).size(), 10);
     // Test that Y & E data is unchanged
     TS_ASSERT_EQUALS(output2D->y(101).size(), 10);
     TS_ASSERT_EQUALS(output2D->e(101).size(), 10);
 
-    // Compare to see if X values have changed
-    // Y values are 0, because ConvertUnits cannot
-    // find the detector
+	// Test that their size is the same
+	TS_ASSERT_EQUALS(output2D->blocksize(), pointsWS2D->blocksize());
+
+	// Test that spectra that should have been zeroed have been
+	TS_ASSERT_EQUALS(output2D->y(0)[1], 0);
+	TS_ASSERT_EQUALS(output2D->e(0)[8], 0);
+
+	// Compare to see if X values have changed
     const size_t xsize = output2D->blocksize();
     for (size_t i = 0; i < output2D->getNumberHistograms(); ++i) {
-      auto &inX = binEdgesWS2D->x(i);
+      auto &inX = pointsWS2D->x(i);
       auto &outX = output2D->x(i);
-      for (size_t j = 0; j <= xsize; ++j) {
-        TS_ASSERT_DELTA(outX[j], inX[j], 1e-2);
+      for (size_t j = 0; j < xsize; ++j) {
+        TS_ASSERT_DELTA(outX[j], inX[j], 1e-9);
       }
     }
 
     AnalysisDataService::Instance().remove(temp_ws_name);
-    AnalysisDataService::Instance().remove("output");
-
-    // make sure that it is a histogram
-    TS_ASSERT(output2D->isHistogramData());
-
     AnalysisDataService::Instance().remove("outWS");
   }
 
