@@ -10,7 +10,7 @@ from mantid import config, logger, mtd
 class FilterFiles(PythonAlgorithm):
 
     def category(self):
-        return "Workflow\\MIDAS;Inelastic\\Reduction"
+        return "DataHandling\\Raw"
 
     def summary(self):
         return 'Filters files by metadata criteria'
@@ -23,9 +23,13 @@ class FilterFiles(PythonAlgorithm):
         return issues
 
     def PyInit(self):
-        self.declareProperty(MultipleFileProperty('FileList',extensions=['nxs']),doc='List of files')
-        self.declareProperty(name='Criteria',defaultValue='',doc='Logical expresion for metadata criteria')
-        self.declareProperty(name='Result', defaultValue='', direction=Direction.Output, doc='Result string')
+        self.declareProperty(MultipleFileProperty('FileList',extensions=['nxs']),doc='List of input files')
+        self.declareProperty(name='Criteria',defaultValue='',
+                             doc='Logical expresion for metadata criteria using python syntax.'
+                                 'Provide full absolute names for nexus entries enclosed with $ symbol from both sides.')
+        self.declareProperty(name='Result', defaultValue='', direction=Direction.Output,
+                             doc='Plain string of the comma separated list of the fully resolved'
+                                 'absolute file names satisfying the given criteria.')
 
     def PyExec(self):
         outputfiles = []
@@ -55,7 +59,7 @@ class FilterFiles(PythonAlgorithm):
                     break
 
         if not outputfiles:
-            self.log().notice('No files where found. Please check FileList and/or Criteria')
+            self.log().notice('No files where found to satisfy the criteria. Please check the FileList and/or Criteria')
 
         self.setPropertyValue('Result',','.join(outputfiles))
 
