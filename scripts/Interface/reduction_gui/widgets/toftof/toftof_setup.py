@@ -11,7 +11,7 @@ class TOFTOFSetupWidget(BaseWidget):
     name = 'TOFTOF Reduction'
 
     class DataRunModel(QAbstractTableModel):
-        ''' The list of data runs and correspnding comments. '''
+        ''' The list of data runs and corresponding comments. '''
 
         def __init__(self, parent):
             QAbstractTableModel.__init__(self, parent)
@@ -106,19 +106,29 @@ class TOFTOFSetupWidget(BaseWidget):
     TIP_prefix  = ''
     TIP_dataDir = ''
     TIP_btnDataDir = ''
+
     TIP_vanRuns = ''
     TIP_vanCmnt = ''
+
     TIP_ecRuns = ''
     TIP_ecFactor = ''
+
+    TIP_binEon = ''
     TIP_binEstart = ''
     TIP_binEstep = ''
     TIP_binEend = ''
+
+    TIP_binQon = ''
     TIP_binQstart = ''
     TIP_binQstep = ''
     TIP_binQend = ''
+
     TIP_maskDetectors = ''
+
     TIP_dataRunsView = ''
+
     TIP_chkSubtractECVan = ''
+
     TIP_rbtNormaliseNone = ''
     TIP_rbtNormaliseMonitor = ''
     TIP_rbtNormaliseTime = ''
@@ -154,6 +164,7 @@ class TOFTOFSetupWidget(BaseWidget):
 
         setSpin(self.ecFactor, 0, 1)
 
+        self.binEon    = tip(QCheckBox(),      self.TIP_binEon)
         self.binEstart = tip(QDoubleSpinBox(), self.TIP_binEstart)
         self.binEstep  = tip(QDoubleSpinBox(), self.TIP_binEstep)
         self.binEend   = tip(QDoubleSpinBox(), self.TIP_binEend)
@@ -162,6 +173,7 @@ class TOFTOFSetupWidget(BaseWidget):
         setSpin(self.binEstep)
         setSpin(self.binEend)
 
+        self.binQon    = tip(QCheckBox(),      self.TIP_binQon)
         self.binQstart = tip(QDoubleSpinBox(), self.TIP_binQstart)
         self.binQstep  = tip(QDoubleSpinBox(), self.TIP_binQstep)
         self.binQend   = tip(QDoubleSpinBox(), self.TIP_binQend)
@@ -234,7 +246,7 @@ class TOFTOFSetupWidget(BaseWidget):
 
         grid = QGridLayout()
         grid.addWidget(self.chkSubtractECVan,   0, 0, 1, 4)
-        grid.addWidget(label('Normalise','tip'),     1, 0)
+        grid.addWidget(label('Normalise','tip'),1, 0)
         grid.addWidget(self.rbtNormaliseNone,   1, 1)
         grid.addWidget(self.rbtNormaliseMonitor,1, 2)
         grid.addWidget(self.rbtNormaliseTime,   1, 3)
@@ -271,32 +283,48 @@ class TOFTOFSetupWidget(BaseWidget):
         gbInputs.setLayout(grid)
 
         grid = QGridLayout()
-        grid.addWidget(QLabel('start'),         0, 1)
-        grid.addWidget(QLabel('step'),          0, 2)
-        grid.addWidget(QLabel('end'),           0, 3)
+        grid.addWidget(QLabel('on'),            0, 1)
+        grid.addWidget(QLabel('start'),         0, 2)
+        grid.addWidget(QLabel('step'),          0, 3)
+        grid.addWidget(QLabel('end'),           0, 4)
 
         grid.addWidget(QLabel('Energy'),        1, 0)
-        grid.addWidget(self.binEstart,          1, 1)
-        grid.addWidget(self.binEstep,           1, 2)
-        grid.addWidget(self.binEend,            1, 3)
+        grid.addWidget(self.binEon,             1, 1)
+        grid.addWidget(self.binEstart,          1, 2)
+        grid.addWidget(self.binEstep,           1, 3)
+        grid.addWidget(self.binEend,            1, 4)
 
         grid.addWidget(QLabel('Q'),             2, 0)
-        grid.addWidget(self.binQstart,          2, 1)
-        grid.addWidget(self.binQstep,           2, 2)
-        grid.addWidget(self.binQend,            2, 3)
+        grid.addWidget(self.binQon,             2, 1)
+        grid.addWidget(self.binQstart,          2, 2)
+        grid.addWidget(self.binQstep,           2, 3)
+        grid.addWidget(self.binQend,            2, 4)
+
+        for col in (0, 2, 3, 4):
+            grid.setColumnStretch(col, 1)
 
         gbBinning.setLayout(grid)
 
         gbData.setLayout(hbox((self.dataRunsView,)))
 
         # handle signals
-        self.btnDataDir.clicked.connect(self._onDataSearchDir)
+        self.btnDataDir.clicked.connect(self._onDataDir)
+        self.binEon.clicked.connect(self._onBinEon)
+        self.binQon.clicked.connect(self._onBinQon)
         self.runDataModel.selectCell.connect(self._onSelectedCell)
 
-    def _onDataSearchDir(self):
+    def _onDataDir(self):
         dirname = self.dir_browse_dialog()
         if dirname:
             self.dataDir.setText(dirname)
+
+    def _onBinEon(self, on):
+        for widget in (self.binEstart, self.binEstep, self.binEend):
+            widget.setEnabled(on)
+
+    def _onBinQon(self, on):
+        for widget in (self.binQstart, self.binQstep, self.binQend):
+            widget.setEnabled(on)
 
     def _onSelectedCell(self, row, col):
         index = self.runDataModel.index(row, col)
@@ -323,10 +351,12 @@ class TOFTOFSetupWidget(BaseWidget):
 
         el.dataRuns      = self.runDataModel.dataRuns
 
+        el.binEon        = self.binEon.isChecked()
         el.binEstart     = self.binEstart.value()
         el.binEstep      = self.binEstep.value()
         el.binEend       = self.binEend.value()
 
+        el.binQon        = self.binQon.isChecked()
         el.binQstart     = self.binQstart.value()
         el.binQstep      = self.binQstep.value()
         el.binQend       = self.binQend.value()
@@ -360,10 +390,12 @@ class TOFTOFSetupWidget(BaseWidget):
         self.runDataModel.dataRuns = el.dataRuns
         self.runDataModel.reset()
 
+        self.binEon.setChecked(el.binEon); self._onBinEon(el.binEon)
         self.binEstart.setValue(el.binEstart)
         self.binEstep.setValue(el.binEstep)
         self.binEend.setValue(el.binEend)
 
+        self.binQon.setChecked(el.binQon); self._onBinQon(el.binQon)
         self.binQstart.setValue(el.binQstart)
         self.binQstep.setValue(el.binQstep)
         self.binQend.setValue(el.binQend)

@@ -22,12 +22,17 @@ class TOFTOFScriptElement(BaseScriptElement):
     # default values
     DEF_prefix     = 'ws'
     DEF_ecFactor   = 1.0
+
+    DEF_binEon     = True
     DEF_binEstart  = 0.0
     DEF_binEstep   = 0.0
     DEF_binEend    = 0.0
+
+    DEF_binQon     = True
     DEF_binQstart  = 0.0
     DEF_binQstep   = 0.0
     DEF_binQend    = 0.0
+
     DEF_subECVan   = False
     DEF_normalise  = NORM_NONE
     DEF_correctTof = CORR_TOF_NONE
@@ -56,10 +61,12 @@ class TOFTOFScriptElement(BaseScriptElement):
         self.dataRuns = []
 
         # additional parameters
+        self.binEon        = self.DEF_binEon
         self.binEstart     = self.DEF_binEstart
         self.binEstep      = self.DEF_binEstep
         self.binEend       = self.DEF_binEend
 
+        self.binQon        = self.DEF_binQon
         self.binQstart     = self.DEF_binQstart
         self.binQstep      = self.DEF_binQstep
         self.binQend       = self.DEF_binQend
@@ -90,10 +97,12 @@ class TOFTOFScriptElement(BaseScriptElement):
             put('data_runs',    runs)
             put('data_comment', cmnt)
 
+        put('rebin_energy_on',    self.binEon)
         put('rebin_energy_start', self.binEstart)
         put('rebin_energy_step',  self.binEstep)
         put('rebin_energy_end',   self.binEend)
 
+        put('rebin_q_on',     self.binQon)
         put('rebin_q_start',  self.binQstart)
         put('rebin_q_step',   self.binQstep)
         put('rebin_q_end',    self.binQend)
@@ -118,19 +127,19 @@ class TOFTOFScriptElement(BaseScriptElement):
             dom = els[0]
 
             def getStr(tag, default = ''):
-                return BaseScriptElement.getStringElement(dom, tag, default)
+                return BaseScriptElement.getStringElement(dom, tag, default=default)
 
             def getInt(tag, default):
-                return BaseScriptElement.getIntElement(dom, tag, default)
+                return BaseScriptElement.getIntElement(dom, tag, default=default)
 
             def getFlt(tag, default):
-                return BaseScriptElement.getFloatElement(dom, tag, default)
+                return BaseScriptElement.getFloatElement(dom, tag, default=default)
 
             def getStrLst(tag):
                 return BaseScriptElement.getStringList(dom, tag)
 
-            def getBool(tag):
-                return BaseScriptElement.getBoolElement(dom, tag)
+            def getBol(tag, default):
+                return BaseScriptElement.getBoolElement(dom, tag, default=default)
 
             self.prefix   = getStr('prefix', self.DEF_prefix)
             self.dataDir  = getStr('data_dir')
@@ -146,19 +155,21 @@ class TOFTOFScriptElement(BaseScriptElement):
             for i in range(min(len(dataRuns), len(dataCmts))):
                 self.dataRuns.append((dataRuns[i], dataCmts[i]))
 
+            self.binEon    = getBol('rebin_energy_on',    self.DEF_binEon)
             self.binEstart = getFlt('rebin_energy_start', self.DEF_binEstart)
             self.binEstep  = getFlt('rebin_energy_step',  self.DEF_binEstep)
             self.binEend   = getFlt('rebin_energy_end',   self.DEF_binEend)
 
+            self.binQon    = getBol('rebin_q_on',         self.DEF_binQon)
             self.binQstart = getFlt('rebin_q_start',      self.DEF_binQstart)
             self.binQstep  = getFlt('rebin_q_step',       self.DEF_binQstep)
             self.binQend   = getFlt('rebin_q_end',        self.DEF_binQend)
 
             self.maskDetectors = getStr('mask_detectors')
 
-            self.subtractECVan = getBool('subtract_ecvan')
-            self.normalise     = getInt('normalise',   self.DEF_normalise)
-            self.correctTof    = getInt('correct_tof', self.DEF_correctTof)
+            self.subtractECVan = getBol('subtract_ecvan', self.DEF_subECVan)
+            self.normalise     = getInt('normalise',      self.DEF_normalise)
+            self.correctTof    = getInt('correct_tof',    self.DEF_correctTof)
 
     def to_script(self):
 
@@ -178,6 +189,16 @@ class TOFTOFScriptElement(BaseScriptElement):
                 error('missing vanadium run')
             if not self.ecRuns:
                 error('missing empty can run')
+
+        # binning parameters
+        def checkBinningParams(start, step, end):
+            if not (start < end and 0 < step and start + step <= end):
+                error('incorrect binning parameters')
+
+        if self.binEon:
+            checkBinningParams(self.binEstart, self.binEstep, self.binEend)
+        if self.binQon:
+            checkBinningParams(self.binQstart, self.binQstep, self.binQend)
 
         # must have some data runs
         if not self.dataRuns:
@@ -238,7 +259,7 @@ class TOFTOFScriptElement(BaseScriptElement):
 
             allGroup.append(wsEC)
 
-        # data runs        
+        # data runs
         for i, (runs, cmnt) in enumerate(self.dataRuns):
             if not runs:
                 error('missing data runs value')
@@ -407,21 +428,31 @@ class TOFTOFScriptElement(BaseScriptElement):
         l("%s = CorrectKiKf(%s)" % (gDataS, gDataCorrDeltaE))
         l()
 
-        gDataBinE = gData + 'BinE'
-        l("# binning")
-        l("rebinEnergy = '%f, %f, %f'" % (self.binEstart, self.binEstep, self.binEend))
-        l("%s = Rebin(%s, Params=rebinEnergy)" % (gDataBinE, gDataS))
-        l()
+        gLast = gDataS
+        if self.binEon:
+            gDataBinE = gData + 'BinE'
+            l("# energy binning")
+            l("rebinEnergy = '%f, %f, %f'" % (self.binEstart, self.binEstep, self.binEend))
+            l("%s = Rebin(%s, Params=rebinEnergy)" % (gDataBinE, gLast))
+            l()
+            gLast = gDataBinE
 
-        gDataBinQ = gData + 'BinQ'
-        l("# calculate momentum transfer Q for sample data")
-        l("rebinQ = '%f, %f, %f'" % (self.binQstart, self.binQstep, self.binQend))
-        l("%s = SofQW3(%s, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei)" % (gDataBinQ, gDataBinE))
-        l()
+        if self.binQon:
+            gDataBinQ = gData + 'SQW'
+            l("# calculate momentum transfer Q for sample data")
+            l("rebinQ = '%f, %f, %f'" % (self.binQstart, self.binQstep, self.binQend))
+            l("%s = SofQW3(%s, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei)" % (gDataBinQ, gLast))
+            l()
 
         l("# make nice workspace names")
-        l("for ws in %s:" % (gDataBinQ))
-        l("    RenameWorkspace(ws, OutputWorkspace='%s' + ws.getComment())" % (self.prefix))
+        l("for ws in %s:" % (gDataS))
+        l("    RenameWorkspace(ws, OutputWorkspace='%s_S_' + ws.getComment())" % (self.prefix))
+        if self.binEon:
+            l("for ws in %s:" % (gDataBinE))
+            l("    RenameWorkspace(ws, OutputWorkspace='%s_E_' + ws.getComment())" % (self.prefix))
+        if self.binQon:
+            l("for ws in %s:" % (gDataBinQ))
+            l("    RenameWorkspace(ws, OutputWorkspace='%s_SQW_' + ws.getComment())" % (self.prefix))
 
         return script[0]
 
