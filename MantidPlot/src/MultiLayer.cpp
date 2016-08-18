@@ -1790,17 +1790,6 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
     multiLayer->setAlignement(hor, vert);
   }
 
-  // waterfall must be updated after graphs have been loaded
-  // as it requires the graphs to exist first!
-  if (tsv.hasSection("waterfall")) {
-    const std::string wfStr = tsv.sections("waterfall").front();
-
-    if (wfStr == "1")
-      multiLayer->setWaterfallLayout(true);
-    else
-      multiLayer->setWaterfallLayout(false);
-  }
-
   multiLayer->blockSignals(false);
 
   QString label = caption;
@@ -1827,6 +1816,14 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
         }
       }
     }
+  }
+
+  // waterfall must be updated after graphs have been loaded
+  // as it requires the graphs to exist first!
+  if (tsv.hasSection("waterfall")) {
+    const std::string wfStr = tsv.sections("waterfall").front();
+    bool isWaterfall = (wfStr == "1");
+    multiLayer->setWaterfallLayout(isWaterfall);
   }
 
   return multiLayer;
