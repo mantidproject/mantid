@@ -140,7 +140,6 @@ FunctionDomain1DHistogram::FunctionDomain1DHistogram(
 }
 /**
   * Create a domain from a part of a vector.
-  * @param wi :: The workspace index of a spectrum the x-values come from.
   * @param from :: Iterator to start copying values from.
   * @param to :: Iterator to the end of the data.
   */

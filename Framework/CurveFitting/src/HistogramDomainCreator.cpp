@@ -14,7 +14,6 @@ using namespace API;
 
 /**
  * Constructor.
- * @param fun :: A function for which a domain is required.
  * @param manager :: Pointer to IPropertyManager (Algorithm) instance.
  * @param workspacePropertyName :: Name of the output property for a created
  * workspace in case a PropertyManager is used.
