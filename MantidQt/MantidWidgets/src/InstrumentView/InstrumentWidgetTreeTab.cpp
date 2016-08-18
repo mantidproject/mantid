@@ -1,9 +1,10 @@
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentTreeWidget.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidQtMantidWidgets/InstrumentView/GLActorVisitor.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentTreeWidget.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
+#include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
 
 #include <QVBoxLayout>
 #include <QMessageBox>
@@ -59,5 +60,45 @@ void InstrumentWidgetTreeTab::selectComponentByName(const QString &name) {
 void InstrumentWidgetTreeTab::showEvent(QShowEvent *) {
   getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
 }
+
+/** Load tree tab state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ */
+void InstrumentWidgetTreeTab::loadFromProject(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+
+  if (!tsv.selectSection("treetab"))
+    return;
+
+  std::string tabLines;
+  tsv >> tabLines;
+  API::TSVSerialiser tab(tabLines);
+
+  std::string componentName;
+  if (tab.selectLine("SelectedComponent")) {
+    tab >> componentName;
+    selectComponentByName(QString::fromStdString(componentName));
+  }
+}
+
+/** Save the state of the tree tab to a Mantid project file
+ * @return a string representing the state of the tree tab
+ */
+std::string InstrumentWidgetTreeTab::saveToProject() const {
+  API::TSVSerialiser tsv, tab;
+
+  auto index = m_instrumentTree->currentIndex();
+  auto model = index.model();
+
+  if (model) {
+    auto item = model->data(index);
+    auto name = item.value<QString>();
+    tab.writeLine("SelectedComponent") << name;
+  }
+
+  tsv.writeSection("treetab", tab.outputLines());
+  return tsv.outputLines();
+}
+
 } // MantidWidgets
 } // MantidQt

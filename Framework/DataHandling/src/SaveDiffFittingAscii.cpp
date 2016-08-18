@@ -113,7 +113,7 @@ bool SaveDiffFittingAscii::processGroups() {
 }
 
 void SaveDiffFittingAscii::processAll(
-    std::vector<API::ITableWorkspace_sptr> input_ws) {
+    const std::vector<API::ITableWorkspace_sptr> input_ws) {
 
   const std::string filename = getProperty("Filename");
   const std::string outMode = getProperty("OutMode");
@@ -196,8 +196,8 @@ void SaveDiffFittingAscii::writeInfo(const std::string &runNumber,
   m_counter++;
 }
 
-void SaveDiffFittingAscii::writeHeader(std::vector<std::string> &columnHeadings,
-                                       std::ofstream &file) {
+void SaveDiffFittingAscii::writeHeader(
+    const std::vector<std::string> &columnHeadings, std::ofstream &file) {
   for (const auto &heading : columnHeadings) {
     // Chi being the last header in the table workspace
     if (heading == "Chi") {
@@ -208,8 +208,9 @@ void SaveDiffFittingAscii::writeHeader(std::vector<std::string> &columnHeadings,
   }
 }
 
-void SaveDiffFittingAscii::writeData(API::ITableWorkspace_sptr workspace,
-                                     std::ofstream &file, size_t columnSize) {
+void SaveDiffFittingAscii::writeData(const API::ITableWorkspace_sptr workspace,
+                                     std::ofstream &file,
+                                     const size_t columnSize) {
 
   for (size_t rowIndex = 0; rowIndex < workspace->rowCount(); ++rowIndex) {
     TableRow row = workspace->getRow(rowIndex);
@@ -228,7 +229,7 @@ void SaveDiffFittingAscii::writeData(API::ITableWorkspace_sptr workspace,
 }
 
 void SaveDiffFittingAscii::writeVal(const std::string &val, std::ofstream &file,
-                                    bool endline) {
+                                    const bool endline) {
   std::string valStr = boost::lexical_cast<std::string>(val);
 
   // checking if it needs to be surrounded in

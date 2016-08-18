@@ -101,27 +101,30 @@ class QuestTest(stresstesting.MantidStressTest):
         return not platform.system() == "Windows"
 
     def runTest(self):
-        import IndirectBayes as Main
-        nbins = [1, 1]
-        nbs = [50, 30]
         sname = 'irs26176_graphite002_red'
         rname = 'irs26173_graphite002_res'
-        erange = [-0.5, 0.5]
-        fitOp = [True, 'Sloping', False, False] #elastic, background, width, resnorm
-        loopOp = False
-        plotOp = 'None'
-        saveOp = False
 
         spath = sname+'.nxs'   # path name for sample nxs file
-        LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
+        sample = LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
         rpath = rname+'.nxs'    # path name for res nxs file
-        LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
-        Main.QuestRun(sname,rname,nbs,erange,nbins,fitOp,loopOp,plotOp,saveOp)
+        res = LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
+        BayesStretch(SampleWorkspace=sample,
+                     ResolutionWorkspace=res,
+                     EMin=-0.5,
+                     EMax=0.5,
+                     SampleBins=1,
+                     Elastic=True,
+                     Background='Sloping',
+                     NumberSigma=30,
+                     NumberBeta=50,
+                     Loop=False,
+                     OutputWorkspaceFit='fit_group',
+                     OutputWorkspaceContour='contour_group')
 
     def validate(self):
         self.tolerance = 1e-1
         self.disableChecking.append('SpectraMap')
-        return 'irs26176_graphite002_Qst_Fit','ISISIndirectBayes_QuestTest.nxs'
+        return 'irs26176_graphite002_Stretch_Fit','ISISIndirectBayes_QuestTest.nxs'
 
     def cleanup(self):
         filenames = ['irs26176_graphite002_Qst.lpt','irs26176_graphite002_Qss.ql2',
