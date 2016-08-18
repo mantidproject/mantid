@@ -117,6 +117,9 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
   // Reverts run button back to normal when file finding has finished
   connect(m_uiForm.dsInputFiles, SIGNAL(fileFindingFinished()), this,
           SLOT(pbRunFinished()));
+  // Handles plotting and saving
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   // Set default UI state
   sliceTwoRanges(0, false);
