@@ -19,84 +19,215 @@ public:
   static HistogramRebinTest *createSuite() { return new HistogramRebinTest(); }
   static void destroySuite(HistogramRebinTest *suite) { delete suite; }
 
-  void testRebinCountsSmallerBins() {
-    auto hist = getCountsHistogram();
-    BinEdges smBins(20, LinearGenerator(0, 0.5));
-    Histogram histSmaller(Histogram::XMode::BinEdges, Histogram::YMode::Counts);
-
-    TS_ASSERT_THROWS_NOTHING(histSmaller = rebinCounts(hist, smBins));
-
-    for (int i = 0; i < hist.y().size(); i++) {
-      TS_ASSERT_EQUALS(hist.y()[i], histSmaller.y()[2 * i] * 2);
-      TS_ASSERT_EQUALS(hist.y()[i], histSmaller.y()[(2 * i) + 1] * 2);
-    }
+  void testExecRebinCounts() {
+    TS_ASSERT_THROWS_NOTHING(rebinCounts(
+        getCountsHistogram(), BinEdges(10, LinearGenerator(0, 0.5))));
   }
 
-  void testRebinCountsLargerBins() {
-    auto hist = getCountsHistogram();
-    BinEdges lgBins(5, LinearGenerator(0, 2));
-    Histogram histLarger(Histogram::XMode::BinEdges, Histogram::YMode::Counts);
-
-    TS_ASSERT_THROWS_NOTHING(histLarger = rebinCounts(hist, lgBins));
-
-    for (int i = 0; i < histLarger.y().size(); i++) {
-      TS_ASSERT_EQUALS(histLarger.y()[i],
-                       hist.y()[2 * i] + hist.y()[(2 * i) + 1]);
-    }
-  }
-
-  void testRebinCountsFailModes() {
-    auto hist = getFrequencyHistogram();
-    BinEdges edges(10, LinearGenerator(0, 10));
-
-    TS_ASSERT_THROWS(rebinCounts(hist, edges), std::runtime_error);
-
-    hist = Histogram(Histogram::XMode::Points, Histogram::YMode::Counts);
-    TS_ASSERT_THROWS(rebinCounts(hist, edges), std::runtime_error);
-
-    hist = Histogram(BinEdges(10, LinearGenerator(0, 0.5)));
-    TS_ASSERT_THROWS(rebinCounts(hist, edges), std::runtime_error);
-  }
-
-  void testRebinFrequenciesSmallerBins() {
-    auto hist = getFrequencyHistogram();
-    BinEdges smBins(20, LinearGenerator(0, 0.5));
-    Histogram histSmaller(Histogram::XMode::BinEdges,
-                          Histogram::YMode::Frequencies);
-
-    TS_ASSERT_THROWS_NOTHING(histSmaller = rebinFrequencies(hist, smBins));
-
-    for (int i = 0; i < hist.y().size(); i++) {
-      TS_ASSERT_EQUALS(hist.y()[i], histSmaller.y()[2 * i] * 2);
-      TS_ASSERT_EQUALS(hist.y()[i], histSmaller.y()[(2 * i) + 1] * 2);
-    }
-  }
-
-  void testRebinFrequenciesLargerBins() {
-    auto hist = getFrequencyHistogram();
-    BinEdges lgBins(5, LinearGenerator(0, 2));
-    Histogram histLarger(Histogram::XMode::BinEdges,
-                         Histogram::YMode::Frequencies);
-
-    TS_ASSERT_THROWS_NOTHING(histLarger = rebinFrequencies(hist, lgBins));
-
-    for (int i = 0; i < histLarger.y().size(); i++) {
-      TS_ASSERT_EQUALS(histLarger.y()[i],
-                       hist.y()[2 * i] + hist.y()[(2 * i) + 1]);
-    }
+  void testExecRebinFrequency() {
+    TS_ASSERT_THROWS_NOTHING(rebinFrequencies(
+        getFrequencyHistogram(), BinEdges(10, LinearGenerator(0, 0.5))));
   }
 
   void testRebinFrequenciesFailModes() {
-    auto hist = getCountsHistogram();
-    BinEdges edges(10, LinearGenerator(0, 10));
+    BinEdges edges(5, LinearGenerator(0, 2));
+    // Incorrect YMode
+    TS_ASSERT_THROWS(rebinFrequencies(getCountsHistogram(), edges),
+                     std::runtime_error);
+    // Incorrect XMode
+    TS_ASSERT_THROWS(rebinFrequencies(Histogram(Histogram::XMode::Points,
+                                                Histogram::YMode::Frequencies),
+                                      edges),
+                     std::runtime_error);
+    // No YMode set
+    TS_ASSERT_THROWS(
+        rebinFrequencies(Histogram(BinEdges(10, LinearGenerator(0, 0.5))),
+                         edges),
+        std::runtime_error);
+  }
 
-    TS_ASSERT_THROWS(rebinFrequencies(hist, edges), std::runtime_error);
+  void testRebinCountsFailModes() {
+    BinEdges edges(5, LinearGenerator(0, 2));
+    // Incorrect YMode
+    TS_ASSERT_THROWS(rebinCounts(getFrequencyHistogram(), edges),
+                     std::runtime_error);
+    // Incorrect XMode
+    TS_ASSERT_THROWS(rebinCounts(Histogram(Histogram::XMode::Points,
+                                           Histogram::YMode::Counts),
+                                 edges),
+                     std::runtime_error);
+    // No YMode set
+    TS_ASSERT_THROWS(
+        rebinCounts(Histogram(BinEdges(10, LinearGenerator(0, 0.5))), edges),
+        std::runtime_error);
+  }
 
-    hist = Histogram(Histogram::XMode::Points, Histogram::YMode::Frequencies);
-    TS_ASSERT_THROWS(rebinFrequencies(hist, edges), std::runtime_error);
+  void testRebinFailsBinEdgesInvalid() {
+    std::vector<double> binEdges{1, 2, 3, 3, 5, 7};
+    BinEdges edges(binEdges);
 
-    hist = Histogram(BinEdges(10, LinearGenerator(0, 0.5)));
+    TS_ASSERT_THROWS(rebinCounts(getCountsHistogram(), edges),
+                     std::runtime_error);
+    TS_ASSERT_THROWS(rebinFrequencies(getFrequencyHistogram(), edges),
+                     std::runtime_error);
+  }
+
+  void testRebinFailsInputBinEdgesInvalid() {
+    std::vector<double> binEdges{1, 2, 3, 3, 5, 7};
+    Histogram hist(BinEdges(std::move(binEdges)), Counts(5, 10));
+    BinEdges edges{1, 2, 3, 4, 5, 6};
+
+    TS_ASSERT_THROWS(rebinCounts(hist, edges), std::runtime_error);
     TS_ASSERT_THROWS(rebinFrequencies(hist, edges), std::runtime_error);
+  }
+
+  void testRebinIdenticalBins() {
+    auto histCounts = getCountsHistogram();
+    auto histFreq = getFrequencyHistogram();
+
+    auto outCounts = rebinCounts(histCounts, histCounts.binEdges());
+    auto outFreq = rebinFrequencies(histFreq, histFreq.binEdges());
+
+    TS_ASSERT_EQUALS(outCounts.x().rawData(), histCounts.x().rawData());
+    TS_ASSERT_EQUALS(outCounts.y().rawData(), histCounts.y().rawData());
+    TS_ASSERT_EQUALS(outCounts.e().rawData(), histCounts.e().rawData());
+
+    TS_ASSERT_EQUALS(outFreq.x().rawData(), histFreq.x().rawData());
+    TS_ASSERT_EQUALS(outFreq.y().rawData(), histFreq.y().rawData());
+    TS_ASSERT_EQUALS(outFreq.e().rawData(), histFreq.e().rawData());
+  }
+
+  void testBinEdgesOutsideInputBins() {
+    auto histCounts = getCountsHistogram();
+    auto histFreq = getFrequencyHistogram();
+
+    auto outCounts =
+        rebinCounts(histCounts, BinEdges(10, LinearGenerator(30, 1)));
+    auto outFreq =
+        rebinFrequencies(histFreq, BinEdges(5, LinearGenerator(100, 2)));
+
+    TS_ASSERT(std::all_of(outCounts.y().cbegin(), outCounts.y().cend(),
+                          [](const double i) { return i == 0; }));
+    TS_ASSERT(std::all_of(outFreq.y().cbegin(), outFreq.y().cend(),
+                          [](const double i) { return i == 0; }));
+  }
+
+  void testSplitBinSymmetric() {
+    // Handles the case where
+    // | | |   becomes:
+    // |||||
+    Histogram hist(BinEdges{0, 1, 2}, Counts{10, 10});
+    Histogram histFreq(BinEdges{0, 1, 2}, Frequencies{12, 12});
+    BinEdges edges{0, 0.5, 1, 1.5, 2};
+
+    auto outCounts = rebinCounts(hist, edges);
+    auto outFreq = rebinFrequencies(histFreq, edges);
+
+    for (size_t i = 0; i < outCounts.y().size(); i++) {
+      TS_ASSERT_EQUALS(outCounts.y()[i], 5.0);
+      TS_ASSERT_EQUALS(outFreq.y()[i], 12.0);
+    }
+  }
+
+  void testCombineMultipleBinsSymmetric() {
+    // Handles the case where
+    // |||||   becomes:
+    // | | |
+    Histogram hist(BinEdges(5, LinearGenerator(0, 1)), Counts{5, 7, 10, 6});
+    Histogram histFreq(BinEdges(5, LinearGenerator(0, 1)),
+                       Frequencies{3, 9, 8, 12});
+    BinEdges edges(3, LinearGenerator(0, 2));
+
+    auto outCounts = rebinCounts(hist, edges);
+    auto outFreq = rebinFrequencies(histFreq, edges);
+
+    for (size_t i = 0; i < outCounts.y().size(); i++) {
+      TS_ASSERT_EQUALS(outCounts.y()[i],
+                       hist.y()[2 * i] + hist.y()[(2 * i) + 1]);
+      TS_ASSERT_EQUALS(outFreq.y()[i],
+                       (histFreq.y()[2 * i] + histFreq.y()[(2 * i) + 1]) / 2);
+    }
+  }
+
+  void testSplitBinsAssymetric() {
+    // Handles the case where
+    // |  |  |   becomes:
+    // ||   ||
+    Histogram hist(BinEdges(3, LinearGenerator(0, 1)), Counts{15, 7});
+    Histogram histFreq(BinEdges(3, LinearGenerator(0, 1)), Frequencies{12, 20});
+    BinEdges edges{0, 0.5, 1.5, 2};
+
+    auto outCounts = rebinCounts(hist, edges);
+    auto outFreq = rebinFrequencies(histFreq, edges);
+
+    TS_ASSERT_EQUALS(outCounts.y()[0], hist.y()[0] / 2);
+    TS_ASSERT_EQUALS(outCounts.y()[1], (hist.y()[0] + hist.y()[1]) / 2);
+    TS_ASSERT_EQUALS(outCounts.y()[2], hist.y()[1] / 2);
+
+    TS_ASSERT_EQUALS(outFreq.y()[0], histFreq.y()[0]);
+    TS_ASSERT_EQUALS(outFreq.y()[1], (histFreq.y()[0] + histFreq.y()[1]) / 2);
+    TS_ASSERT_EQUALS(outFreq.y()[2], histFreq.y()[1]);
+  }
+
+  void testCombineBinsAssymetric() {
+    // Handles the case where
+    // ||   ||   becomes:
+    // |  |  |
+    Histogram hist(BinEdges{0, 0.5, 1.5, 2}, Counts{10, 18, 7});
+    Histogram histFreq(BinEdges{0, 0.5, 1.5, 2}, Frequencies{16, 32, 8});
+    BinEdges edges{0, 1, 2};
+
+    auto outCounts = rebinCounts(hist, edges);
+    auto outFreq = rebinFrequencies(histFreq, edges);
+
+    TS_ASSERT_EQUALS(outCounts.y()[0], hist.y()[0] + (hist.y()[1] / 2));
+    TS_ASSERT_EQUALS(outCounts.y()[1], (hist.y()[1] / 2) + hist.y()[2]);
+
+    TS_ASSERT_EQUALS(outFreq.y()[0], (histFreq.y()[0] + histFreq.y()[1]) / 2);
+    TS_ASSERT_EQUALS(outFreq.y()[1], (histFreq.y()[1] + histFreq.y()[2]) / 2);
+  }
+
+  void testSplitCombineBinsAssymetric() {
+    // Handles the case where
+    // | | | |   becomes:
+    // ||   ||
+    Histogram hist(BinEdges{0, 1, 2, 3}, Counts{100, 50, 216});
+    Histogram histFreq(BinEdges{0, 1, 2, 3}, Frequencies{210, 19, 80});
+    BinEdges edges{0, 0.5, 2.5, 3};
+
+    auto outCounts = rebinCounts(hist, edges);
+    auto outFreq = rebinFrequencies(histFreq, edges);
+
+    TS_ASSERT_EQUALS(outCounts.y()[0], hist.y()[0] / 2);
+    TS_ASSERT_EQUALS(outCounts.y()[1],
+                     ((hist.y()[0] + hist.y()[2]) / 2) + hist.y()[1]);
+    TS_ASSERT_EQUALS(outCounts.y()[2], hist.y()[2] / 2);
+
+    TS_ASSERT_EQUALS(outFreq.y()[0], histFreq.y()[0]);
+    TS_ASSERT_EQUALS(
+        outFreq.y()[1],
+        ((histFreq.y()[0] / 2) + histFreq.y()[1] + (histFreq.y()[2] / 2)) / 2);
+    TS_ASSERT_EQUALS(outFreq.y()[2], histFreq.y()[2]);
+  }
+
+  void testSplitCombineBinsAssymetric2() {
+    // Handles the case where
+    // ||   ||   becomes:
+    // | | | |
+    Histogram hist(BinEdges{0, 0.5, 2.5, 3}, Counts{10, 100, 30});
+    Histogram histFreq(BinEdges{0, 0.5, 2.5, 3}, Frequencies{17, 8, 15});
+    BinEdges edges{0, 1, 2, 3};
+
+    auto outCounts = rebinCounts(hist, edges);
+    auto outFreq = rebinFrequencies(histFreq, edges);
+
+    TS_ASSERT_EQUALS(outCounts.y()[0], hist.y()[0] + (hist.y()[1] / 4));
+    TS_ASSERT_EQUALS(outCounts.y()[1], hist.y()[1] / 2);
+    TS_ASSERT_EQUALS(outCounts.y()[2], (hist.y()[1] / 4) + hist.y()[2]);
+
+    TS_ASSERT_EQUALS(outFreq.y()[0], (histFreq.y()[0] + histFreq.y()[1]) / 2);
+    TS_ASSERT_EQUALS(outFreq.y()[1], histFreq.y()[1]);
+    TS_ASSERT_EQUALS(outFreq.y()[2], (histFreq.y()[1] + histFreq.y()[2]) / 2);
   }
 
 private:
