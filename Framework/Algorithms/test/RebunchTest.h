@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/Rebunch.h"
@@ -18,6 +19,7 @@ using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Points;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountVariances;
+using Mantid::HistogramData::LinearGenerator;
 
 class RebunchTest : public CxxTest::TestSuite {
 public:
@@ -182,7 +184,7 @@ private:
   }
 
   Workspace2D_sptr Create2DWorkspaceHist(int xlen, int ylen) {
-    BinEdges x1(xlen, 0.0);
+    BinEdges x1(xlen, LinearGenerator(0.0, 1.0));
 
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen, xlen, xlen - 1);
@@ -208,7 +210,7 @@ private:
   }
 
   Workspace2D_sptr Create2DWorkspacePnt(int xlen, int ylen) {
-    Points x1(xlen, 0.0);
+    Points x1(xlen, LinearGenerator(0.0, 1.0));
 
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen, xlen, xlen);

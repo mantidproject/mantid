@@ -1,5 +1,6 @@
 #include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
 #include "MantidGeometry/Instrument/SampleEnvironmentSpecParser.h"
+#include "MantidKernel/Material.h"
 
 #include "Poco/File.h"
 #include "Poco/Path.h"

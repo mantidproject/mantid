@@ -10,10 +10,15 @@ Description
 -----------
 
 This algorithm calculates asymmetry for a series of Muon workspaces. The
-input workspaces must be in Muon Nexus files which names follow the
+input workspaces must be in Muon Nexus files, the names of which follow the
 rule: the filename must begin with at least 1 letter and followed by a
 number. The input property FirstRun must be set to the file name with
-the smalest number and the LastRun to the one with the highest number.
+the smallest number and the LastRun to the one with the highest number.
+
+The output workspace contains asymmetry as the Y values, and the selected
+log values for X. The log values can be chosen as the mean, minimum, maximum,
+first or last if they are a time series. For start/end times, the values are
+in seconds relative to the start time of the first run.
 
 If the "Green" property is not set the output workspace will contain a
 single spectrum with asymmetry values. If the "Green" is set the output
@@ -40,7 +45,7 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example - Calculating assymetry for a series of MUSR runs:**
+**Example - Calculating asymmetry for a series of MUSR runs:**
 
 .. testcode:: ExSimple
 
@@ -60,7 +65,7 @@ Output:
    Y values (asymmetry): [ 0.14500665  0.136374    0.11987909]
    X values (sample magn. field): [ 1350.  1360.  1370.]
 
-**Example - Using both Red and Green period:**
+**Example - Using both Red and Green periods:**
 
 .. testcode:: ExRedGreen
 

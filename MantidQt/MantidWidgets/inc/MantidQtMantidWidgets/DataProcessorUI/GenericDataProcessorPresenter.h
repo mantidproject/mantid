@@ -24,7 +24,7 @@ GenericDataProcessorPresenter is a presenter class for the Data Processor
 Interface. It
 handles any interface functionality and model manipulation.
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -70,6 +70,7 @@ public:
   std::vector<std::unique_ptr<DataProcessorCommand>> publishCommands() override;
   void acceptViews(DataProcessorView *tableView,
                    ProgressableView *progressView) override;
+  void accept(DataProcessorMainPresenter *mainPresenter) override;
   void setModel(std::string name) override;
 
   // The following methods are public only for testing purposes
@@ -105,7 +106,7 @@ protected:
   // The number of columns
   int m_columns;
   // A workspace receiver we want to notify
-  WorkspaceReceiver *m_workspaceReceiver;
+  DataProcessorMainPresenter *m_mainPresenter;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
   // Index for column 'Group'
@@ -170,11 +171,11 @@ protected:
   // plotting
   void plotRow();
   void plotGroup();
+  void plotWorkspaces(const std::set<std::string> &workspaces);
+
   // options
   void showOptionsDialog();
   void initOptions();
-  // algorithms' hints
-  void createProcessLayout();
 
   // List of workspaces the user can open
   std::set<std::string> m_workspaceList;
@@ -189,7 +190,6 @@ protected:
                           Mantid::API::Workspace_sptr workspace) override;
   void saveNotebook(const std::set<int> &groups,
                     const std::map<int, std::set<int>> &rows);
-  void accept(WorkspaceReceiver *workspaceReceiver) override;
   std::vector<std::unique_ptr<DataProcessorCommand>> getTableList();
 
   void validateModel(Mantid::API::ITableWorkspace_sptr model);

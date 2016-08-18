@@ -408,7 +408,7 @@ void BinMD::exec() {
   IMDHistoWorkspaces is if they also happen to contain original workspaces
   that are MDEventWorkspaces.
   */
-  if (boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_inWS)) {
+  if (m_inWS->isMDHistoWorkspace()) {
     throw std::runtime_error(
         "Cannot rebin a workspace that is histogrammed and has no original "
         "workspace that is an MDEventWorkspace. "

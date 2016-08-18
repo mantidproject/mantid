@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGPRESENTER_H_
 
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionParam.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -44,6 +45,10 @@ public:
     Start,        ///< Start and setup interface
     FittingRunNo, ///< Creates widgets and handles multi/run numbers
     FitPeaks,     ///< Preforms single peak fits
+    FitAllPeaks,  ///< Preforms multiple runs in sequence single peak fits
+    addPeaks,     ///< Adds peak to the list
+    browsePeaks,  ///< Browse peaks to the list
+    savePeaks,    ///< Save the peaks list
     ShutDown,     ///< closing the interface
     LogMsg,       ///< need to send a message to the Mantid log system
   };

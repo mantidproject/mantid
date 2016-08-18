@@ -7,11 +7,14 @@
 #include "MantidKernel/MRUList.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidHistogramData/HistogramE.h"
+#include <cstdint>
 #include <vector>
 #include <mutex>
 
 namespace Mantid {
 namespace DataObjects {
+
+class EventList;
 
 //============================================================================
 //============================================================================
@@ -25,22 +28,22 @@ public:
    * Constructor.
    * @param the_index :: unique index into the workspace of this data
    */
-  TypeWithMarker(const size_t the_index) : m_index(the_index) {}
+  TypeWithMarker(const uintptr_t the_index) : m_index(the_index) {}
   TypeWithMarker(const TypeWithMarker &other) = delete;
   TypeWithMarker &operator=(const TypeWithMarker &other) = delete;
 
 public:
   /// Unique index value.
-  size_t m_index;
+  uintptr_t m_index;
 
   /// Pointer to a vector of data
   T m_data;
 
   /// Function returns a unique index, used for hashing for MRU list
-  size_t hashIndexFunction() const { return m_index; }
+  uintptr_t hashIndexFunction() const { return m_index; }
 
   /// Set the unique index value.
-  void setIndex(const size_t the_index) { m_index = the_index; }
+  void setIndex(const uintptr_t the_index) { m_index = the_index; }
 };
 
 //============================================================================
@@ -86,12 +89,12 @@ public:
 
   void clear();
 
-  YType findY(size_t thread_num, size_t index);
-  EType findE(size_t thread_num, size_t index);
-  void insertY(size_t thread_num, YType data, const size_t index);
-  void insertE(size_t thread_num, EType data, const size_t index);
+  YType findY(size_t thread_num, const EventList *index);
+  EType findE(size_t thread_num, const EventList *index);
+  void insertY(size_t thread_num, YType data, const EventList *index);
+  void insertE(size_t thread_num, EType data, const EventList *index);
 
-  void deleteIndex(size_t index);
+  void deleteIndex(const EventList *index);
 
   /** Return how many entries in the Y MRU list are used.
    * Only used in tests. It only returns the 0-th MRU list size.

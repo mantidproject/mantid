@@ -71,7 +71,7 @@
 #include "Mantid/MantidWSIndexDialog.h"
 #include "MantidQtSliceViewer/LinePlotOptions.h"
 
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 // Register the window into the WindowFactory
 DECLARE_WINDOW(MultiLayer)
@@ -1755,9 +1755,10 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
   Mantid::Kernel::Strings::convert<int>(values[2], cols);
   QString birthDate = QString::fromStdString(values[3]);
 
-  TSVSerialiser tsv(lines);
+  MantidQt::API::TSVSerialiser tsv(lines);
 
   auto multiLayer = new MultiLayer(app, 0, rows, cols);
+
   multiLayer->setBirthDate(birthDate);
   app->setListViewDate(caption, birthDate);
   multiLayer->blockSignals(true);
@@ -1811,7 +1812,7 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
   if (tsv.hasSection("graph")) {
     auto graphSections = tsv.sections("graph");
     for (const auto &graphLines : graphSections) {
-      TSVSerialiser gtsv(graphLines);
+      MantidQt::API::TSVSerialiser gtsv(graphLines);
 
       if (gtsv.selectLine("ggeometry")) {
         int x = 0, y = 0, w = 0, h = 0;
@@ -1848,7 +1849,7 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
 }
 
 std::string MultiLayer::saveToProject(ApplicationWindow *app) {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
 
   tsv.writeRaw("<multiLayer>");
 

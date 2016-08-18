@@ -75,9 +75,10 @@ void EventWorkspaceMRU::clear() {
  * @return pointer to the TypeWithMarker that has the data; NULL if not found.
  */
 Kernel::cow_ptr<HistogramData::HistogramY>
-EventWorkspaceMRU::findY(size_t thread_num, size_t index) {
+EventWorkspaceMRU::findY(size_t thread_num, const EventList *index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
-  auto result = m_bufferedDataY[thread_num]->find(index);
+  auto result = m_bufferedDataY[thread_num]->find(
+      reinterpret_cast<const std::uintptr_t>(index));
   if (result)
     return result->m_data;
   return YType(nullptr);
@@ -90,9 +91,10 @@ EventWorkspaceMRU::findY(size_t thread_num, size_t index) {
  * @return pointer to the TypeWithMarker that has the data; NULL if not found.
  */
 Kernel::cow_ptr<HistogramData::HistogramE>
-EventWorkspaceMRU::findE(size_t thread_num, size_t index) {
+EventWorkspaceMRU::findE(size_t thread_num, const EventList *index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
-  auto result = m_bufferedDataE[thread_num]->find(index);
+  auto result = m_bufferedDataE[thread_num]->find(
+      reinterpret_cast<const std::uintptr_t>(index));
   if (result)
     return result->m_data;
   return EType(nullptr);
@@ -105,9 +107,10 @@ EventWorkspaceMRU::findE(size_t thread_num, size_t index) {
  * @param index :: index of the data to insert
  */
 void EventWorkspaceMRU::insertY(size_t thread_num, YType data,
-                                const size_t index) {
+                                const EventList *index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexY);
-  auto yWithMarker = new TypeWithMarker<YType>(index);
+  auto yWithMarker =
+      new TypeWithMarker<YType>(reinterpret_cast<const std::uintptr_t>(index));
   yWithMarker->m_data = std::move(data);
   auto oldData = m_bufferedDataY[thread_num]->insert(yWithMarker);
   // And clear up the memory of the old one, if it is dropping out.
@@ -121,9 +124,10 @@ void EventWorkspaceMRU::insertY(size_t thread_num, YType data,
  * @param index :: index of the data to insert
  */
 void EventWorkspaceMRU::insertE(size_t thread_num, EType data,
-                                const size_t index) {
+                                const EventList *index) {
   std::lock_guard<std::mutex> _lock(m_changeMruListsMutexE);
-  auto eWithMarker = new TypeWithMarker<EType>(index);
+  auto eWithMarker =
+      new TypeWithMarker<EType>(reinterpret_cast<const std::uintptr_t>(index));
   eWithMarker->m_data = std::move(data);
   auto oldData = m_bufferedDataE[thread_num]->insert(eWithMarker);
   // And clear up the memory of the old one, if it is dropping out.
@@ -134,15 +138,15 @@ void EventWorkspaceMRU::insertE(size_t thread_num, EType data,
  *
  * @param index :: index to delete.
  */
-void EventWorkspaceMRU::deleteIndex(size_t index) {
+void EventWorkspaceMRU::deleteIndex(const EventList *index) {
   std::lock_guard<std::mutex> _lock1(m_changeMruListsMutexE);
   for (auto &data : m_bufferedDataE)
     if (data)
-      data->deleteIndex(index);
+      data->deleteIndex(reinterpret_cast<const std::uintptr_t>(index));
   std::lock_guard<std::mutex> _lock2(m_changeMruListsMutexY);
   for (auto &data : m_bufferedDataY)
     if (data)
-      data->deleteIndex(index);
+      data->deleteIndex(reinterpret_cast<const std::uintptr_t>(index));
 }
 
 } // namespace Mantid

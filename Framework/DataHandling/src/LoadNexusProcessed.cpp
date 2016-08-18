@@ -33,6 +33,10 @@
 
 #include <nexus/NeXusException.hpp>
 
+#include <map>
+#include <string>
+#include <vector>
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -252,7 +256,7 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
 
   const size_t nHistograms = periodWorkspace->getNumberHistograms();
   for (size_t i = 0; i < nHistograms; ++i) {
-    periodWorkspace->setX(i, tempMatrixWorkspace->refX(i));
+    periodWorkspace->setSharedX(i, tempMatrixWorkspace->sharedX(i));
   }
 
   // We avoid using `openEntry` or similar here because they're just wrappers
@@ -315,11 +319,11 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
 
     int64_t final(histIndex + blockSize);
     while (histIndex < final) {
-      MantidVec &Y = periodWorkspace->dataY(wsIndex);
+      auto &Y = periodWorkspace->mutableY(wsIndex);
       Y.assign(dataStart, dataEnd);
       dataStart += nChannels;
       dataEnd += nChannels;
-      MantidVec &E = periodWorkspace->dataE(wsIndex);
+      auto &E = periodWorkspace->mutableE(wsIndex);
       E.assign(errorStart, errorEnd);
       errorStart += nChannels;
       errorEnd += nChannels;
@@ -740,14 +744,14 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
 
       // Set the X axis
       if (this->m_shared_bins)
-        el.setX(this->m_xbins.cowData());
+        el.setHistogram(this->m_xbins);
       else {
-        MantidVec x;
-        x.resize(xbins.dim1());
+        MantidVec x(xbins.dim1());
         for (int i = 0; i < xbins.dim1(); i++)
           x[i] = xbins(static_cast<int>(wi), i);
         // Workspace and el was just created, so we can just set a new histogram
-        el.setX(make_cow<HistogramData::HistogramX>(x));
+        // We can move x as it is not longer used after this point
+        el.setHistogram(HistogramData::BinEdges(std::move(x)));
       }
     }
 
@@ -1657,6 +1661,38 @@ void LoadNexusProcessed::readInstrumentGroup(
   }
 }
 
+/**
+ * Validates SpectrumMin and SpectrumMax conditions
+ * @return Returns a map indicating invalid input combinations
+ */
+std::map<std::string, std::string> LoadNexusProcessed::validateInputs() {
+  using namespace std;
+  map<string, string> errorList;
+
+  int64_t specMin = getProperty("SpectrumMin");
+  int64_t specMax = getProperty("SpectrumMax");
+
+  // Check our range is not reversed
+  if (specMax < specMin) {
+    errorList["SpectrumMin"] = "SpectrumMin must be smaller than SpectrumMax";
+    errorList["SpectrumMax"] = "SpectrumMax must be larger than SpectrumMin";
+  }
+
+  // Next check that SpecMax is less than maximum int
+  if (specMax > INT_MAX) {
+    errorList["SpectrumMax"] =
+        "SpectrumMax must be less than " + to_string(INT_MAX);
+  }
+
+  if (specMin > INT_MAX) {
+    errorList["SpectrumMin"] =
+        "SpectrumMin must be less than " + to_string(INT_MAX);
+  }
+
+  // Finished testing return any errors
+  return errorList;
+}
+
 //-------------------------------------------------------------------------------------------------
 /**
 * Loads the information contained in non-Spectra (ie, Text or Numeric) axis
@@ -1856,11 +1892,11 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
 
   int64_t final(hist + blocksize);
   while (hist < final) {
-    MantidVec &Y = local_workspace->dataY(hist);
+    auto &Y = local_workspace->mutableY(hist);
     Y.assign(data_start, data_end);
     data_start += nchannels;
     data_end += nchannels;
-    MantidVec &E = local_workspace->dataE(hist);
+    auto &E = local_workspace->mutableE(hist);
     E.assign(err_start, err_end);
     err_start += nchannels;
     err_end += nchannels;
@@ -1878,7 +1914,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       xErrors_end += nxbins;
     }
 
-    local_workspace->setX(hist, m_xbins.cowData());
+    local_workspace->setSharedX(hist, m_xbins.cowData());
     ++hist;
   }
 }
@@ -1934,11 +1970,11 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
 
   int64_t final(hist + blocksize);
   while (hist < final) {
-    MantidVec &Y = local_workspace->dataY(wsIndex);
+    auto &Y = local_workspace->mutableY(wsIndex);
     Y.assign(data_start, data_end);
     data_start += nchannels;
     data_end += nchannels;
-    MantidVec &E = local_workspace->dataE(wsIndex);
+    auto &E = local_workspace->mutableE(wsIndex);
     E.assign(err_start, err_end);
     err_start += nchannels;
     err_end += nchannels;
@@ -1955,7 +1991,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       xErrors_start += nxbins;
       xErrors_end += nxbins;
     }
-    local_workspace->setX(wsIndex, m_xbins.cowData());
+    local_workspace->setSharedX(wsIndex, m_xbins.cowData());
     ++hist;
     ++wsIndex;
   }
@@ -2017,11 +2053,11 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   }
 
   while (hist < final) {
-    MantidVec &Y = local_workspace->dataY(wsIndex);
+    auto &Y = local_workspace->mutableY(wsIndex);
     Y.assign(data_start, data_end);
     data_start += nchannels;
     data_end += nchannels;
-    MantidVec &E = local_workspace->dataE(wsIndex);
+    auto &E = local_workspace->mutableE(wsIndex);
     E.assign(err_start, err_end);
     err_start += nchannels;
     err_end += nchannels;
@@ -2038,7 +2074,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       xErrors_start += nxbins;
       xErrors_end += nxbins;
     }
-    MantidVec &X = local_workspace->dataX(wsIndex);
+    auto &X = local_workspace->mutableX(wsIndex);
     X.assign(xbin_start, xbin_end);
     xbin_start += nxbins;
     xbin_end += nxbins;
@@ -2065,7 +2101,6 @@ void LoadNexusProcessed::checkOptionalProperties(
 
   // Check validity of spectra list property, if set
   if (m_list) {
-    m_list = true;
     const int64_t minlist =
         *min_element(m_spec_list.begin(), m_spec_list.end());
     const int64_t maxlist =
