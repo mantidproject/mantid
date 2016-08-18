@@ -215,12 +215,6 @@ void IndirectSymmetrise::algorithmComplete(bool error) {
   if (error)
     return;
 
-  if (m_uiForm.ckPlot->isChecked()) {
-    QStringList workspaces;
-    workspaces << m_uiForm.dsInput->getCurrentDataName()
-               << QString::fromStdString(m_pythonExportWsName);
-    plotSpectrum(workspaces);
-  }
   // Enable save and plot
   uiForm.pbPlot->setEnabled(true);
   uiForm.pbSave->setEnabled(true);
@@ -526,6 +520,16 @@ void IndirectSymmetrise::xRangeMaxChanged(double value) {
     m_dblManager->setValue(m_properties["EMin"], std::abs(value));
   }
 }
+/**
+ * Handles mantid plotting
+ */
+void IndirectSymmetrise::plotClicked() {
 
+  QStringList workspaces;
+  workspaces << m_uiForm.dsInput->getCurrentDataName()
+    << QString::fromStdString(m_pythonExportWsName);
+  plotSpectrum(workspaces);
+
+}
 } // namespace CustomInterfaces
 } // namespace Mantid
