@@ -238,7 +238,7 @@ void ISISDiagnostics::algorithmComplete(bool error) {
 
   for (size_t i = 0; i < sliceOutputGroup->size(); i++) {
     QString wsName =
-      QString::fromStdString(sliceOutputGroup->getItem(i)->name());
+        QString::fromStdString(sliceOutputGroup->getItem(i)->name());
   }
   // Enable plot and save buttons
   m_uiForm.pbSave->setEnabled(true);
