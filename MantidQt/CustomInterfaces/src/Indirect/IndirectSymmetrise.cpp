@@ -189,9 +189,6 @@ void IndirectSymmetrise::run() {
 
   m_batchAlgoRunner->addAlgorithm(symmetriseAlg);
 
-  if (m_uiForm.ckSave->isChecked())
-    addSaveWorkspaceToQueue(outputWorkspaceName);
-
   // Set the workspace name for Python script export
   m_pythonExportWsName = outputWorkspaceName.toStdString();
 
@@ -530,6 +527,15 @@ void IndirectSymmetrise::plotClicked() {
     << QString::fromStdString(m_pythonExportWsName);
   plotSpectrum(workspaces);
 
+}
+
+/**
+ * Handles saving of workspace
+ */
+void IndirectSymmetrise::saveClicked() {
+  bool save = checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
+  if (save)
+    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 }
 } // namespace CustomInterfaces
 } // namespace Mantid
