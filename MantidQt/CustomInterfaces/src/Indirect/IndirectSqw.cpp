@@ -182,7 +182,7 @@ void IndirectSqw::plotClicked() {
 
   else if (plotType == "Spectra") {
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      m_pythonExportWsName);
+        m_pythonExportWsName);
     int numHist = static_cast<int>(ws->getNumberHistograms());
     plotSpectrum(QString::fromStdString(m_pythonExportWsName), 0, numHist - 1);
   }
