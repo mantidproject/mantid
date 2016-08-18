@@ -102,9 +102,6 @@ void IndirectTransmission::transAlgDone(bool error) {
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
   QString outWsName = sampleWsName + "_trans";
 
-  if (m_uiForm.ckPlot->isChecked())
-    plotSpectrum(outWsName);
-
   WorkspaceGroup_sptr resultWsGroup =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
           outWsName.toStdString());
@@ -145,6 +142,16 @@ void IndirectTransmission::saveClicked() {
   if (save)
     addSaveWorkspaceToQueue(outputWs);
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Handle mantid plotting
+ */
+void IndirectTransmission::plotClicked() {
+  QString outputWs = (m_uiForm.dsSampleInput->getCurrentDataName() + "_trans");
+  bool plot = checkADSForPlotSaveWorkspace(outputWs.toStdString(), true);
+  if (plot)
+    plotSpectrum(outputWs);
 }
 } // namespace CustomInterfaces
 } // namespace Mantid
