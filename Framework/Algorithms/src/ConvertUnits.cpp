@@ -75,10 +75,11 @@ void ConvertUnits::init() {
                   "recommended (see "
                   "http://www.mantidproject.org/ConvertUnits).");
 
-  declareProperty("ConvertFromPointData", true,
-                  "When checked, if the Input Workspace contains Points\n"
-                  "the algorithm ConvertToHistogram will be run to convert\n"
-                  "the Points to Bins. The Output Workspace will contains Bins."
+  declareProperty(
+      "ConvertFromPointData", true,
+      "When checked, if the Input Workspace contains Points\n"
+      "the algorithm ConvertToHistogram will be run to convert\n"
+      "the Points to Bins. The Output Workspace will contains Bins.")
 }
 
 /** Executes the algorithm
