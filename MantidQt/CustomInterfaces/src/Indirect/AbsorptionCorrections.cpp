@@ -320,23 +320,22 @@ void AbsorptionCorrections::saveClicked() {
  */
 void AbsorptionCorrections::plotClicked() {
 
-    QStringList plotData = { QString::fromStdString(m_pythonExportWsName),
-      m_uiForm.dsSampleInput->getCurrentDataName() };
-    auto outputFactorsWsName =
+  QStringList plotData = {QString::fromStdString(m_pythonExportWsName),
+                          m_uiForm.dsSampleInput->getCurrentDataName()};
+  auto outputFactorsWsName =
       m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
-    if (m_uiForm.ckKeepFactors->isChecked()) {
-      QStringList plotCorr = { QString::fromStdString(outputFactorsWsName) +
-        "_ass" };
-      if (m_uiForm.ckUseCanCorrections->isChecked()) {
-        plotCorr.push_back(QString::fromStdString(outputFactorsWsName) +
-          "_acc");
-        QString shiftedWs = QString::fromStdString(
+  if (m_uiForm.ckKeepFactors->isChecked()) {
+    QStringList plotCorr = {QString::fromStdString(outputFactorsWsName) +
+                            "_ass"};
+    if (m_uiForm.ckUseCanCorrections->isChecked()) {
+      plotCorr.push_back(QString::fromStdString(outputFactorsWsName) + "_acc");
+      QString shiftedWs = QString::fromStdString(
           m_absCorAlgo->getPropertyValue("CanWorkspace"));
-        plotData.push_back(shiftedWs);
-      }
-      plotSpectrum(plotCorr, 0);
+      plotData.push_back(shiftedWs);
     }
-    IndirectTab::plotSpectrum(plotData, 0);
+    plotSpectrum(plotCorr, 0);
+  }
+  IndirectTab::plotSpectrum(plotData, 0);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt
