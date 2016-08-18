@@ -119,22 +119,6 @@ void IndirectSqw::run() {
 
   m_batchAlgoRunner->addAlgorithm(sampleLogAlg, inputToAddSampleLogProps);
 
-  // Save S(Q, w) workspace
-  if (m_uiForm.ckSave->isChecked()) {
-    QString saveFilename = sqwWsName + ".nxs";
-
-    IAlgorithm_sptr saveNexusAlg =
-        AlgorithmManager::Instance().create("SaveNexus");
-    saveNexusAlg->initialize();
-
-    saveNexusAlg->setProperty("Filename", saveFilename.toStdString());
-
-    BatchAlgorithmRunner::AlgorithmRuntimeProps inputToSaveNexusProps;
-    inputToSaveNexusProps["InputWorkspace"] = sqwWsName.toStdString();
-
-    m_batchAlgoRunner->addAlgorithm(saveNexusAlg, inputToSaveNexusProps);
-  }
-
   // Set the name of the result workspace for Python export
   m_pythonExportWsName = sqwWsName.toStdString();
 
@@ -191,7 +175,7 @@ void IndirectSqw::plotContour() {
  */
 void IndirectSqw::plotClicked() {
   QString plotType = m_uiForm.cbPlotType->currentText();
-
+  checkADSForPlotSaveWorkspace(m_pythonExportWsName, true);
   if (plotType == "Contour")
     plot2D(QString::fromStdString(m_pythonExportWsName));
 
@@ -203,5 +187,14 @@ void IndirectSqw::plotClicked() {
   }
 }
 
+/**
+ * Handles saving of workspaces
+ */
+void IndirectSqw::saveClicked() {
+  bool save = checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
+  if (save)
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  m_batchAlgoRunner->executeBatch();
+}
 } // namespace CustomInterfaces
 } // namespace Mantid
