@@ -34,8 +34,6 @@ definition file.
 If ConvertFromPointData is true, an input workspace
 contains Point data will be converted using `ConvertToHistogram <http://www.mantidproject.org/ConvertToHistogram>`__
 and then the algorithm will be run on the converted workspace.
-The output workspace will contain the bins created from ConvertToHistogram.
-If AlignBins is checked, the rebin will be run after the workspace has been converted.
 
 Restrictions on the input workspace
 ###################################
