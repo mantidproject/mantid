@@ -41,45 +41,45 @@ ConvertUnits::ConvertUnits()
 
 /// Initialisation method
 void ConvertUnits::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>();
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input, wsValidator),
-                  "Name of the input workspace");
-  declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
-                      "OutputWorkspace", "", Direction::Output),
-                  "Name of the output workspace, can be the same as the input");
+	auto wsValidator = boost::make_shared<CompositeValidator>();
+	wsValidator->add<WorkspaceUnitValidator>();
+	declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+		"InputWorkspace", "", Direction::Input, wsValidator),
+		"Name of the input workspace");
+	declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+		"OutputWorkspace", "", Direction::Output),
+		"Name of the output workspace, can be the same as the input");
 
-  // Extract the current contents of the UnitFactory to be the allowed values of
-  // the Target property
-  declareProperty("Target", "", boost::make_shared<StringListValidator>(
-                                    UnitFactory::Instance().getKeys()),
-                  "The name of the units to convert to (must be one of those "
-                  "registered in\n"
-                  "the Unit Factory)");
-  std::vector<std::string> propOptions{"Elastic", "Direct", "Indirect"};
-  declareProperty("EMode", "Elastic",
-                  boost::make_shared<StringListValidator>(propOptions),
-                  "The energy mode (default: elastic)");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
-  mustBePositive->setLower(0.0);
-  declareProperty("EFixed", EMPTY_DBL(), mustBePositive,
-                  "Value of fixed energy in meV : EI (EMode=Direct) or EF "
-                  "(EMode=Indirect) . Must be\n"
-                  "set if the target unit requires it (e.g. DeltaE)");
+	// Extract the current contents of the UnitFactory to be the allowed values of
+	// the Target property
+	declareProperty("Target", "", boost::make_shared<StringListValidator>(
+		UnitFactory::Instance().getKeys()),
+		"The name of the units to convert to (must be one of those "
+		"registered in\n"
+		"the Unit Factory)");
+	std::vector<std::string> propOptions{ "Elastic", "Direct", "Indirect" };
+	declareProperty("EMode", "Elastic",
+		boost::make_shared<StringListValidator>(propOptions),
+		"The energy mode (default: elastic)");
+	auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+	mustBePositive->setLower(0.0);
+	declareProperty("EFixed", EMPTY_DBL(), mustBePositive,
+		"Value of fixed energy in meV : EI (EMode=Direct) or EF "
+		"(EMode=Indirect) . Must be\n"
+		"set if the target unit requires it (e.g. DeltaE)");
 
-  declareProperty("AlignBins", false,
-                  "If true (default is false), rebins after conversion to "
-                  "ensure that all spectra in the output workspace\n"
-                  "have identical bin boundaries. This option is not "
-                  "recommended (see "
-                  "http://www.mantidproject.org/ConvertUnits).");
+	declareProperty("AlignBins", false,
+		"If true (default is false), rebins after conversion to "
+		"ensure that all spectra in the output workspace\n"
+		"have identical bin boundaries. This option is not "
+		"recommended (see "
+		"http://www.mantidproject.org/ConvertUnits).");
 
-  declareProperty(
-      "ConvertFromPointData", true,
-      "When checked, if the Input Workspace contains Points\n"
-      "the algorithm ConvertToHistogram will be run to convert\n"
-      "the Points to Bins. The Output Workspace will contains Bins.")
+	declareProperty(
+		"ConvertFromPointData", true,
+		"When checked, if the Input Workspace contains Points\n"
+		"the algorithm ConvertToHistogram will be run to convert\n"
+		"the Points to Bins. The Output Workspace will contains Bins.");
 }
 
 /** Executes the algorithm
