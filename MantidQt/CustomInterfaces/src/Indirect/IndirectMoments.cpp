@@ -203,6 +203,7 @@ void IndirectMoments::momentsAlgComplete(bool error) {
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
 }
+
 /**
  * Handle mantid plotting
  */
@@ -214,5 +215,16 @@ void IndirectMoments::plotClicked() {
     plotSpectrum({ outputWs + "_M0", outputWs + "_M2" });
   }
 }
+
+/**
+ * Handles saving of workspaces
+ */
+void IndirectMoments::saveClicked() {
+  QString outputWs = getWorkspaceBasename(m_uiForm.dsInput->getCurrentDataName()) + "_Moments";
+  bool save = checkADSForPlotSaveWorkspace(outputWs.toStdString(), false);
+  addSaveWorkspaceToQueue(outputWs);
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid
