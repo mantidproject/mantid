@@ -165,6 +165,10 @@ void IndirectSqw::sqwAlgDone(bool error) {
     int numHist = static_cast<int>(ws->getNumberHistograms());
     plotSpectrum(sqwWsName, 0, numHist - 1);
   }
+
+  // Enable save and plot
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 /**
