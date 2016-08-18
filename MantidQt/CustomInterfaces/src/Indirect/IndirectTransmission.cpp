@@ -50,11 +50,8 @@ void IndirectTransmission::run() {
   transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
 
   m_batchAlgoRunner->addAlgorithm(transAlg);
-
-  if (m_uiForm.ckSave->isChecked())
-    addSaveWorkspaceToQueue(outWsName);
-
   m_batchAlgoRunner->executeBatchAsync();
+
 }
 
 bool IndirectTransmission::validate() {
@@ -139,5 +136,15 @@ void IndirectTransmission::instrumentSet() {
   m_uiForm.dsCanInput->setInstrumentOverride(instDetails["instrument"]);
 }
 
+/**
+ * Handle saving of workspace
+ */
+void IndirectTransmission::saveClicked() {
+  QString outputWs = (m_uiForm.dsSampleInput->getCurrentDataName() + "_trans");
+  bool save = checkADSForPlotSaveWorkspace(outputWs.toStdString(), false);
+  if (save)
+    addSaveWorkspaceToQueue(outputWs);
+  m_batchAlgoRunner->executeBatchAsync();
+}
 } // namespace CustomInterfaces
 } // namespace Mantid
