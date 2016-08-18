@@ -243,6 +243,9 @@ void ISISDiagnostics::algorithmComplete(bool error) {
     if (m_uiForm.ckSave->isChecked())
       addSaveWorkspaceToQueue(wsName);
   }
+  // Enable plot and save buttons
+  m_uiForm.pbSave->setEnabled(true);
+  m_uiForm.pbPlot->setEnabled(true);
 
   // Update the preview plots
   sliceAlgDone(false);
