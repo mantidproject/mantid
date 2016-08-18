@@ -77,8 +77,6 @@ void IndirectMoments::run() {
   momentsAlg->setProperty("Sample", workspaceName.toStdString());
   momentsAlg->setProperty("EnergyMin", eMin);
   momentsAlg->setProperty("EnergyMax", eMax);
-  momentsAlg->setProperty("Plot", false);
-  momentsAlg->setProperty("Save", false);
   momentsAlg->setProperty("OutputWorkspace", outputWorkspaceName);
 
   if (m_uiForm.ckScale->isChecked())
