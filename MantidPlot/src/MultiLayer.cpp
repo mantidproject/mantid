@@ -1801,6 +1801,12 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
         app, multiLayer, QString::fromStdString(tsv.lineAsString("geometry")));
   }
 
+  bool isWaterfall = false;
+  if (tsv.hasSection("waterfall")) {
+    const std::string wfStr = tsv.sections("waterfall").front();
+    isWaterfall = (wfStr == "1");
+  }
+
   if (tsv.hasSection("graph")) {
     auto graphSections = tsv.sections("graph");
     for (const auto &graphLines : graphSections) {
@@ -1808,9 +1814,23 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
 
       if (gtsv.selectLine("ggeometry")) {
         int x = 0, y = 0, w = 0, h = 0;
-        gtsv >> x >> y >> w >> h;
+        gtsv >> x >> y;
 
-        auto *g = multiLayer->addLayer(x, y, w, h);
+        w = multiLayer->canvas->width();
+        w -= multiLayer->left_margin;
+        w -= multiLayer->right_margin;
+        w -= (multiLayer->d_cols - 1) * multiLayer->colsSpace;
+
+        h = multiLayer->canvas->height();
+        h -= multiLayer->top_margin;
+        h -= multiLayer->left_margin;
+        h -= (multiLayer->d_rows - 1) * multiLayer->rowsSpace;
+        h -= LayerButton::btnSize();
+
+        if (isWaterfall)
+          h -= LayerButton::btnSize(); // need an extra offset for the buttons
+
+        auto g = multiLayer->addLayer(x, y, w, h);
         if (g) {
           g->loadFromProject(graphLines, app, fileVersion);
         }
@@ -1820,11 +1840,8 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
 
   // waterfall must be updated after graphs have been loaded
   // as it requires the graphs to exist first!
-  if (tsv.hasSection("waterfall")) {
-    const std::string wfStr = tsv.sections("waterfall").front();
-    bool isWaterfall = (wfStr == "1");
-    multiLayer->setWaterfallLayout(isWaterfall);
-  }
+  multiLayer->setWaterfallLayout(isWaterfall);
+
 
   return multiLayer;
 }
