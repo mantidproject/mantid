@@ -51,7 +51,6 @@ void IndirectTransmission::run() {
 
   m_batchAlgoRunner->addAlgorithm(transAlg);
   m_batchAlgoRunner->executeBatchAsync();
-
 }
 
 bool IndirectTransmission::validate() {
