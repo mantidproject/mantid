@@ -57,7 +57,8 @@ public:
   const std::string summary() const override {
     // TODO rewrite
     return "Calculates the kinetic energy of neutrons leaving the source based "
-           "on the time it takes for them to travel between two monitors.";
+           "on the time it takes for them to travel between a monitor and some "
+           "detectors.";
   }
 
   /// Algorithm's version for identification overriding a virtual method

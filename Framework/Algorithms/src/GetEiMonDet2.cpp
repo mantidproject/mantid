@@ -54,32 +54,32 @@ void GetEiMonDet2::init() {
   declareProperty(
       make_unique<WorkspaceProperty<>>(PropertyNames::DETECTOR_WORKSPACE, "", Direction::Input,
                                        tofWorkspace),
-      "The X units of this workspace must be TOF in microseconds");
+      "A workspace containing the detector spectra.");
   declareProperty(
       make_unique<WorkspaceProperty<ITableWorkspace>>(PropertyNames::DETECTOR_EPP_TABLE, "", Direction::Input),
-      "EPP table corresponding to " + PropertyNames::DETECTOR_WORKSPACE);
+      "An EPP table corresponding to " + PropertyNames::DETECTOR_WORKSPACE + ".");
   const std::vector<std::string> indexTypes{IndexTypes::DETECTOR_ID, IndexTypes::SPECTRUM_NUMBER, IndexTypes::WORKSPACE_INDEX};
   declareProperty(
       PropertyNames::INDEX_TYPE, IndexTypes::DETECTOR_ID, boost::make_shared<StringListValidator>(indexTypes), "The type of indices " + PropertyNames::DETECTORS + " and " + PropertyNames::MONITOR + " refer to.");
   declareProperty(
-      PropertyNames::DETECTORS, "", "Formatting example: 1,3-7,10-15", mandatoryStringProperty);
+      PropertyNames::DETECTORS, "", "A list of detector ids/spectrum number/workspace indices.", mandatoryStringProperty);
   declareProperty(
       make_unique<WorkspaceProperty<>>(PropertyNames::MONITOR_WORKSPACE, "", Direction::Input, PropertyMode::Optional, tofWorkspace),
-      "If empty, " + PropertyNames::DETECTOR_WORKSPACE + " will be used");
+      "A Workspace containing the monitor spectrum. If empty, " + PropertyNames::DETECTOR_WORKSPACE + " will be used.");
   declareProperty(
       make_unique<WorkspaceProperty<ITableWorkspace>>(PropertyNames::MONITOR_EPP_TABLE,"", Direction::Input, PropertyMode::Optional),
-       "EPP table corresponding to " + PropertyNames::MONITOR_WORKSPACE);
+       "An EPP table corresponding to " + PropertyNames::MONITOR_WORKSPACE);
   setPropertySettings(PropertyNames::MONITOR_EPP_TABLE, make_unique<EnabledWhenProperty>(PropertyNames::MONITOR_WORKSPACE, IS_NOT_DEFAULT));
   declareProperty(
-      PropertyNames::MONITOR, EMPTY_INT(), mandatoryDetectorIdProperty);
+      PropertyNames::MONITOR, EMPTY_INT(), mandatoryDetectorIdProperty, "Monitor's detector id/spectrum number/workspace index.");
   declareProperty(
-      PropertyNames::PULSE_INTERVAL, EMPTY_DBL(), "In microseconds");
+      PropertyNames::PULSE_INTERVAL, EMPTY_DBL(), "Interval between neutron pulses, in microseconds.");
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
   declareProperty(
-      PropertyNames::NOMINAL_ENERGY, EMPTY_DBL(), mustBePositive, "Taken from the sample logs, if not specified.");
+      PropertyNames::NOMINAL_ENERGY, EMPTY_DBL(), mustBePositive, "Incident energy guess. Taken from the sample logs, if not specified.");
   declareProperty(
-      PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositive, "Taken from the sample logs, if not specified.", Direction::Output);
+      PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositive, "Calculated incident energy.", Direction::Output);
 }
 
 template<typename T, typename Map>
