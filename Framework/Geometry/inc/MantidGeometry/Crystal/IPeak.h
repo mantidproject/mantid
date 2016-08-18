@@ -21,7 +21,7 @@ class MANTID_GEOMETRY_DLL IPeak {
 public:
   virtual ~IPeak() = default;
 
-  virtual void setInstrument(Geometry::Instrument_const_sptr inst) = 0;
+  virtual void setInstrument(const Geometry::Instrument_const_sptr &inst) = 0;
 
   virtual int getDetectorID() const = 0;
   virtual void setDetectorID(int m_DetectorID) = 0;

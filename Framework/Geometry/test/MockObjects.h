@@ -58,7 +58,8 @@ Mock IPeak
 ------------------------------------------------------------*/
 class MockIPeak : public Mantid::Geometry::IPeak {
 public:
-  MOCK_METHOD1(setInstrument, void(Geometry::Instrument_const_sptr inst));
+  MOCK_METHOD1(setInstrument,
+               void(const Geometry::Instrument_const_sptr &inst));
   MOCK_CONST_METHOD0(getDetectorID, int());
   MOCK_METHOD1(setDetectorID, void(int m_DetectorID));
   MOCK_CONST_METHOD0(getDetector, Geometry::IDetector_const_sptr());

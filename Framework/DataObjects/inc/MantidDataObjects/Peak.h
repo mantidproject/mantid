@@ -43,6 +43,8 @@ public:
 
   /// Copy constructor
   Peak(const Peak &other);
+  Peak(Peak &&) noexcept = default;
+  Peak &operator=(Peak &&) noexcept = default;
 
   // Construct a peak from a reference to the interface
 
@@ -54,7 +56,7 @@ public:
   void removeContributingDetector(const int id);
   const std::set<int> &getContributingDetIDs() const;
 
-  void setInstrument(Geometry::Instrument_const_sptr inst) override;
+  void setInstrument(const Geometry::Instrument_const_sptr &inst) override;
   Geometry::IDetector_const_sptr getDetector() const override;
   Geometry::Instrument_const_sptr getInstrument() const override;
 
