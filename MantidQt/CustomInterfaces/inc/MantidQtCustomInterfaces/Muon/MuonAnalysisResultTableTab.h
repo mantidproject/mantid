@@ -117,10 +117,7 @@ private:
       std::function<Mantid::API::Workspace_sptr(const QString &)> wsFromName);
 
   /// Creates the results table
-  void createTable();
-
-  /// Creates the results table for multiple simultaneous fits at once
-  void createMultipleFitsTable();
+  void createTable(bool multipleFits);
 
   /// Returns a list of workspaces which should be displayed in the table
   QStringList getFittedWorkspaces();
@@ -134,18 +131,9 @@ private:
   /// Returns a list of labels user has made sequential/simultaneous fits for
   std::pair<QStringList, QStringList> getFitLabels();
 
-  /// Checks if named workspaces/labels have same fit models
-  bool haveSameParameters(const QStringList &names,
-                          std::function<Mantid::API::ITableWorkspace_sptr(
-                              const QString &)> tableFromName);
   QStringList getSelectedItemsToFit();
   QStringList getSelectedLogs();
   std::string getFileName();
-
-  /// Finds if a parameter in a fit was global
-  bool isGlobal(const QString &param,
-                const QMap<QString, WSParameterList> &paramList);
-  bool isGlobal(const QString &param, const WSParameterList &paramList);
 
   Ui::MuonAnalysis &m_uiForm;
 

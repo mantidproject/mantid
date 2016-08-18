@@ -13,6 +13,7 @@
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableCreator.h"
 #include "MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h"
 
 #include <boost/shared_ptr.hpp>
@@ -27,11 +28,6 @@
 #include <algorithm>
 
 //-----------------------------------------------------------------------------
-
-namespace {
-/// The string "Error"
-const static std::string ERROR_STRING("Error");
-}
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -675,12 +671,9 @@ void MuonAnalysisResultTableTab::populateFittings(
 
 void MuonAnalysisResultTableTab::onCreateTableClicked() {
   try {
-    if (m_uiForm.fitType->checkedButton() == m_uiForm.multipleSimFits) {
-      // Special results table for multiple simultaneous fits at once
-      createMultipleFitsTable();
-    } else {
-      createTable(); // Regular results table
-    }
+    const bool multipleFits =
+        m_uiForm.fitType->checkedButton() == m_uiForm.multipleSimFits;
+    createTable(multipleFits);
   } catch (Exception::NotFoundError &e) {
     std::ostringstream errorMsg;
     errorMsg << "Workspace required to create a table was not found:\n\n"
@@ -701,8 +694,9 @@ void MuonAnalysisResultTableTab::onCreateTableClicked() {
 
 /**
 * Creates the table using the information selected by the user in the tables
+* @param multipleFits :: [input] Whether table is for multiple fits or one single fit
 */
-void MuonAnalysisResultTableTab::createTable() {
+void MuonAnalysisResultTableTab::createTable(bool multipleFits) {
   if (m_logValues.size() == 0) {
     QMessageBox::information(this, "Mantid - Muon Analysis",
                              "No workspace found with suitable fitting.");
@@ -713,416 +707,15 @@ void MuonAnalysisResultTableTab::createTable() {
   QStringList wsSelected = getSelectedItemsToFit();
   QStringList logsSelected = getSelectedLogs();
 
-  if ((wsSelected.size() == 0) || logsSelected.size() == 0) {
-    QMessageBox::information(this, "Mantid - Muon Analysis",
-                             "Please select options from both tables.");
+  MuonAnalysisResultTableCreator creator(wsSelected, logsSelected, &m_logValues,
+                                         multipleFits);
+  ITableWorkspace_sptr table;
+  try {
+    table = creator.createTable();
+  } catch (const std::runtime_error &err) {
+    QMessageBox::information(this, "Mantid - Muon Analysis", err.what());
     return;
   }
-
-  // Check workspaces have same parameters
-  const auto tableFromName = [](const QString &qs) {
-    return retrieveWSChecked<ITableWorkspace>(qs.toStdString() +
-                                              PARAMS_POSTFIX);
-  };
-  if (!haveSameParameters(wsSelected, tableFromName)) {
-    QMessageBox::information(
-        this, "Mantid - Muon Analysis",
-        "Please pick workspaces with the same fitted parameters");
-    return;
-  }
-  // Create the results table
-  Mantid::API::ITableWorkspace_sptr table =
-      Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-
-  // Add columns for log values
-  foreach (QString log, logsSelected) {
-    std::string columnTypeName;
-    int columnPlotType;
-
-    // We use values of the first workspace to determine the type of the
-    // column to add. It seems reasonable to assume
-    // that log values with the same name will have same types.
-    QString typeName = m_logValues[wsSelected.first()][log].typeName();
-    if (typeName == "double") {
-      columnTypeName = "double";
-      columnPlotType = 1;
-    } else if (typeName == "QString") {
-      columnTypeName = "str";
-      columnPlotType = 6;
-    } else
-      throw std::runtime_error(
-          "Couldn't find appropriate column type for value with type " +
-          typeName.toStdString());
-
-    Column_sptr newColumn = table->addColumn(columnTypeName, log.toStdString());
-    newColumn->setPlotType(columnPlotType);
-    newColumn->setReadOnly(false);
-    }
-
-    // Cache the start time of the first run
-    int64_t firstStart_ns(0);
-    if (const auto &firstWS =
-            Mantid::API::AnalysisDataService::Instance()
-                .retrieveWS<ExperimentInfo>(wsSelected.first().toStdString() +
-                                            WORKSPACE_POSTFIX)) {
-      firstStart_ns = firstWS->run().startTime().totalNanoseconds();
-    }
-
-    // Get param information
-    QMap<QString, QMap<QString, double>> wsParamsList;
-    QStringList paramsToDisplay;
-    for (int i = 0; i < wsSelected.size(); ++i) {
-      QMap<QString, double> paramsList;
-      auto paramWs = retrieveWSChecked<ITableWorkspace>(
-          wsSelected[i].toStdString() + PARAMS_POSTFIX);
-
-      Mantid::API::TableRow paramRow = paramWs->getFirstRow();
-
-      // Loop over all rows and get values and errors.
-      do {
-        std::string key;
-        double value;
-        double error;
-        paramRow >> key >> value >> error;
-        if (i == 0) {
-          Column_sptr newValCol = table->addColumn("double", key);
-          newValCol->setPlotType(2);
-          newValCol->setReadOnly(false);
-
-          Column_sptr newErrorCol = table->addColumn("double", key + ERROR_STRING);
-          newErrorCol->setPlotType(5);
-          newErrorCol->setReadOnly(false);
-
-          paramsToDisplay.append(QString::fromStdString(key));
-          paramsToDisplay.append(QString::fromStdString(key + ERROR_STRING));
-        }
-        paramsList[QString::fromStdString(key)] = value;
-        paramsList[QString::fromStdString(key + ERROR_STRING)] = error;
-      } while (paramRow.next());
-
-      wsParamsList[wsSelected[i]] = paramsList;
-    }
-
-    // Add data to table
-    for (const auto &wsName : wsSelected) {
-      Mantid::API::TableRow row = table->appendRow();
-
-      // Get log values for this row
-      const auto &logValues = m_logValues[wsName];
-
-      // Write log values in each column
-      for (int i = 0; i < logsSelected.size(); ++i) {
-        Mantid::API::Column_sptr col = table->getColumn(i);
-        const QVariant &v = logValues[logsSelected[i]];
-
-        if (col->isType<double>()) {
-          if (logsSelected[i].endsWith(" (s)")) {
-            // Convert relative to first start time
-            double seconds = v.toDouble();
-            const double firstStart_sec =
-                static_cast<double>(firstStart_ns) * 1.e-9;
-            row << seconds - firstStart_sec;
-          } else {
-            row << v.toDouble();
-          }
-        } else if (col->isType<std::string>()) {
-          row << v.toString().toStdString();
-        } else {
-          throw std::runtime_error(
-              "Log value with name '" + logsSelected[i].toStdString() +
-              "' in '" + wsName.toStdString() + "' has unexpected type.");
-        }
-      }
-
-      // Add param values (params same for all workspaces)
-      QMap<QString, double> paramsList = wsParamsList[wsName];
-      for (const auto &paramName : paramsToDisplay) {
-        row << paramsList[paramName];
-      }
-    }
-
-    // Remove error columns if all errors are zero
-    // (because these correspond to fixed parameters)
-    MuonAnalysisHelper::removeFixedParameterErrors(table);
-
-    std::string tableName = getFileName();
-
-    // Save the table to the ADS
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(tableName, table);
-
-    // Python code to show a table on the screen
-    std::stringstream code;
-    code << "found = False\n"
-         << "for w in windows():\n"
-         << "  if w.windowLabel() == '" << tableName << "':\n"
-         << "    found = True; w.show(); w.setFocus()\n"
-         << "if not found:\n"
-         << "  importTableWorkspace('" << tableName << "', True)\n";
-
-    emit runPythonCode(QString::fromStdString(code.str()), false);
-}
-
-/**
- * Creates the results table for multiple simultaneous fit labels at once
- * and displays it, using user's selected logs/labels
- */
-void MuonAnalysisResultTableTab::createMultipleFitsTable() {
-    if (m_logValues.size() == 0) {
-    QMessageBox::information(this, "Mantid - Muon Analysis",
-                             "No workspace found with suitable fitting.");
-    return;
-  }
-
-  // Get the user selection
-  QStringList labelsSelected = getSelectedItemsToFit();
-  QStringList logsSelected = getSelectedLogs();
-
-  if ((labelsSelected.size() == 0) || logsSelected.size() == 0) {
-    QMessageBox::information(this, "Mantid - Muon Analysis",
-                             "Please select options from both tables.");
-    return;
-  }
-
-  // Get the workspaces corresponding to the selected labels
-  std::map<QString, std::vector<std::string>> workspacesByLabel;
-  for (const auto &label : labelsSelected) {
-    std::vector<std::string> wsNames;
-    const auto &group = retrieveWSChecked<WorkspaceGroup>(
-        MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX + label.toStdString());
-    for (const auto &name : group->getNames()) {
-      const size_t pos = name.find(WORKSPACE_POSTFIX);
-      if (pos != std::string::npos) {
-        wsNames.push_back(name.substr(0, pos));
-      }
-    }
-    if (wsNames.empty()) {
-      // This guarantees the list of workspaces for each label will not be empty
-      QMessageBox::information(
-          this, "Mantid - Muon Analysis",
-          QString("No fitted workspaces found for label ").append(label));
-      return;
-    }
-    workspacesByLabel[label] = wsNames;
-  }
-
-  // Lambda to find parameter table in the group for a given label
-  const auto tableFromName = [](const QString &qs) {
-    const auto &wsGroup = retrieveWSChecked<WorkspaceGroup>(
-        MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX + qs.toStdString());
-    for (const auto &name : wsGroup->getNames()) {
-      if (name.find(PARAMS_POSTFIX) != std::string::npos) {
-        return boost::dynamic_pointer_cast<ITableWorkspace>(
-            wsGroup->getItem(name));
-      }
-    }
-    return ITableWorkspace_sptr();
-  };
-
-  // Check workspaces have the same parameters
-  if (!haveSameParameters(labelsSelected, tableFromName)) {
-    QMessageBox::information(
-        this, "Mantid - Muon Analysis",
-        "Please pick workspaces with the same fitted parameters");
-    return;
-  }
-
-  // Check fits have the same number of runs
-  const size_t firstNumRuns = workspacesByLabel.begin()->second.size();
-  if (std::any_of(workspacesByLabel.begin(), workspacesByLabel.end(),
-                  [&firstNumRuns](
-                      const std::pair<QString, std::vector<std::string>> fit) {
-                    return fit.second.size() != firstNumRuns;
-                  })) {
-    QMessageBox::information(
-        this, "Mantid - Muon Analysis",
-        "Please pick fit labels with the same number of workspaces");
-    return;
-  }
-
-  // Create the results table
-  Mantid::API::ITableWorkspace_sptr table =
-      Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-
-  // Add column for label
-  auto labelCol = table->addColumn("str", "Label");
-  labelCol->setPlotType(6);
-  labelCol->setReadOnly(false);
-
-  // Add columns for log values
-  foreach (QString log, logsSelected) {
-    // Despite type "str", this will still work for plotting if you put a number
-    // in it (like "100")
-    Column_sptr newColumn = table->addColumn("str", log.toStdString());
-    newColumn->setPlotType(1);
-    newColumn->setReadOnly(false);
-  }
-
-  // Cache the start time of the first run. We don't know which label was first,
-  // so test them all.
-  int64_t firstStart_ns = std::numeric_limits<int64_t>::max();
-  for (const auto &label : labelsSelected) {
-    const auto &wsName = workspacesByLabel[label].front();
-    if (const auto &ws =
-            Mantid::API::AnalysisDataService::Instance()
-                .retrieveWS<ExperimentInfo>(wsName + WORKSPACE_POSTFIX)) {
-      const int64_t start_ns = ws->run().startTime().totalNanoseconds();
-      if (start_ns < firstStart_ns) {
-        firstStart_ns = start_ns;
-      }
-    }
-  }
-
-  // Get param information
-  QMap<QString, WSParameterList> wsParamsByLabel;
-  for (const auto &label : labelsSelected) {
-    WSParameterList wsParamsList;
-    for (size_t i = 0; i < workspacesByLabel[label].size(); ++i) {
-      QMap<QString, double> paramsList;
-      auto paramWs = retrieveWSChecked<ITableWorkspace>(
-          workspacesByLabel[label][i] + PARAMS_POSTFIX);
-
-      Mantid::API::TableRow paramRow = paramWs->getFirstRow();
-
-      // Loop over all rows and get values and errors.
-      do {
-        std::string key;
-        double value;
-        double error;
-        paramRow >> key >> value >> error;
-        paramsList[QString::fromStdString(key)] = value;
-        paramsList[QString::fromStdString(key + ERROR_STRING)] = error;
-      } while (paramRow.next());
-
-      wsParamsList[QString::fromStdString(workspacesByLabel[label][i])] =
-          paramsList;
-    }
-    wsParamsByLabel[label] = wsParamsList;
-  }
-
-  // Add columns to table
-  QStringList paramsToDisplay;
-  auto paramNames = wsParamsByLabel.begin()->begin()->keys();
-  // Remove the errors and cost function - just want the parameters
-  paramNames.erase(std::remove_if(paramNames.begin(), paramNames.end(),
-                                  [](const QString &qs) {
-                                    return qs.endsWith("Error") ||
-                                           qs.startsWith("Cost function");
-                                  }),
-                   paramNames.end());
-
-  // Add a new column (with error) to table
-  const auto addToTable = [&table, &paramsToDisplay](const QString &prefix,
-                                                     const QString &name) {
-    const std::string key = QString(prefix + name).toStdString();
-    Column_sptr newValCol = table->addColumn("double", key);
-    newValCol->setPlotType(2);
-    newValCol->setReadOnly(false);
-    Column_sptr newErrorCol = table->addColumn("double", key + ERROR_STRING);
-    newErrorCol->setPlotType(5);
-    newErrorCol->setReadOnly(false);
-    paramsToDisplay.append(name);
-    paramsToDisplay.append(name + QString::fromStdString(ERROR_STRING));
-  };
-
-  // Global: add one column (+ error)
-  // Local: add one per dataset (+ error)
-  for (const auto &param : paramNames) {
-    if (isGlobal(param, wsParamsByLabel)) {
-      addToTable("", param);
-    } else {
-      const int nDatasetsPerLabel = wsParamsByLabel.begin()->count();
-      for (int i = 0; i < nDatasetsPerLabel; ++i) {
-        addToTable('f' + QString::number(i) + '.', param);
-      }
-    }
-  }
-
-  // Add cost function - no error! - at the END of the table after params
-  auto chisqCol = table->addColumn("double", "Cost function value");
-  chisqCol->setPlotType(2);
-  chisqCol->setReadOnly(false);
-  paramsToDisplay.append("Cost function value");
-
-  // Add data to table
-  for (const auto &labelName : labelsSelected) {
-    Mantid::API::TableRow row = table->appendRow();
-    size_t columnIndex(0); // Which column we are writing to
-
-    row << labelName.toStdString();
-    columnIndex++;
-
-    // Get log values for this row and write in table
-    for (const auto &log : logsSelected) {
-      QStringList valuesPerWorkspace;
-      for (const auto &wsName : workspacesByLabel[labelName]) {
-        const auto &logValues = m_logValues[QString::fromStdString(wsName)];
-        const auto &val = logValues[log];
-
-        // Special case: if log is time in sec, subtract the first start time
-        if (log.endsWith(" (s)")) {
-          auto seconds =
-              val.toDouble() - static_cast<double>(firstStart_ns) * 1.e-9;
-          valuesPerWorkspace.append(QString::number(seconds));
-        } else {
-          valuesPerWorkspace.append(logValues[log].toString());
-        }
-      }
-
-      // Range of values - use string comparison as works for numbers too
-      // Why not use std::minmax_element? To avoid MSVC warning: QT bug 41092
-      // (https://bugreports.qt.io/browse/QTBUG-41092)
-      valuesPerWorkspace.sort();
-      const auto &min = valuesPerWorkspace.front().toStdString();
-      const auto &max = valuesPerWorkspace.back().toStdString();
-      if (min == max) {
-        row << min;
-      } else {
-        std::ostringstream oss;
-        oss << min << '-' << max;
-        row << oss.str();
-      }
-      columnIndex++;
-    }
-
-    // Parse column name - could be param name or f[n].param
-    const auto parseColumnName = [&paramsToDisplay](
-        const std::string &columnName) -> std::pair<int, std::string> {
-      if (paramsToDisplay.contains(QString::fromStdString(columnName))) {
-        return {0, columnName};
-      } else {
-        // column name is f[n].param
-        size_t pos = columnName.find_first_of('.');
-        if (pos != std::string::npos) {
-          try {
-            const auto &paramName = columnName.substr(pos + 1);
-            const auto wsIndex = std::stoi(columnName.substr(1, pos));
-            return {wsIndex, paramName};
-          } catch (const std::exception &ex) {
-            throw std::runtime_error("Failed to parse column name " +
-                                     columnName + ": " + ex.what());
-          }
-        } else {
-          throw std::runtime_error("Failed to parse column name " + columnName);
-        }
-      }
-    };
-
-    // Add param values
-    const auto &params = wsParamsByLabel[labelName];
-    while (columnIndex < table->columnCount()) {
-      const auto &parsedColName =
-          parseColumnName(table->getColumn(columnIndex)->name());
-      const QString wsName = params.keys().at(parsedColName.first);
-      const QString &paramName = QString::fromStdString(parsedColName.second);
-      row << params[wsName].value(paramName);
-      columnIndex++;
-    }
-  }
-
-  // Remove error columns if all errors are zero
-  // (because these correspond to fixed parameters)
-  MuonAnalysisHelper::removeFixedParameterErrors(table);
-
   const std::string &tableName = getFileName();
 
   // Save the table to the ADS
@@ -1138,25 +731,6 @@ void MuonAnalysisResultTableTab::createMultipleFitsTable() {
        << "  importTableWorkspace('" << tableName << "', True)\n";
 
   emit runPythonCode(QString::fromStdString(code.str()), false);
-}
-
-/**
-* See if the workspaces/labels selected have the same parameters.
-*
-* @param names :: A list of workspaces with fitted parameters OR labels.
-* @param tableFromName :: Function to get fit table from any given name.
-* @return bool :: Whether or not the names given share the same fitting
-* parameters.
-*/
-bool MuonAnalysisResultTableTab::haveSameParameters(
-    const QStringList &names,
-    std::function<ITableWorkspace_sptr(const QString &)> tableFromName) {
-  std::vector<ITableWorkspace_sptr> tables;
-  for (const auto &name : names) {
-    tables.push_back(tableFromName(name));
-  }
-
-  return MuonAnalysisHelper::haveSameParameters(tables);
 }
 
 /**
@@ -1223,46 +797,6 @@ std::string MuonAnalysisResultTableTab::getFileName() {
     }
   }
   return fileName;
-}
-
-/**
- * In the supplied list of fit results, finds if the given parameter appears to
- * have been global. The global params have the same value for all workspaces in
- * a label.
- * @param param :: [input] Name of parameter
- * @param paramList :: [input] Map of label name to "WSParameterList" (itself a
- * map of workspace name to <name, value> map)
- * @returns :: Whether the parameter was global
- */
-bool MuonAnalysisResultTableTab::isGlobal(
-    const QString &param, const QMap<QString, WSParameterList> &paramList) {
-  // It is safe to assume the same fit model was used for all labels.
-  // So just test the first:
-  return isGlobal(param, *paramList.begin());
-}
-
-/**
- * In the supplied list of fit results, finds if the given parameter appears to
- * have been global. The global params have the same value for all workspaces.
- * @param param :: [input] Name of parameter
- * @param paramList :: [input] Map of workspace name to <name, value> map
- * @returns :: Whether the parameter was global
- */
-bool MuonAnalysisResultTableTab::isGlobal(const QString &param,
-                                          const WSParameterList &paramList) {
-  const double firstValue = paramList.begin()->value(param);
-  if (paramList.size() > 1) {
-    for (auto it = paramList.begin() + 1; it != paramList.end(); ++it) {
-      // If any parameter differs from the first it cannot be global
-      if (std::abs(it->value(param) - firstValue) >
-          std::numeric_limits<double>::epsilon()) {
-        return false;
-      }
-    }
-    return true; // All values are the same so it is global
-  } else {
-    return false; // Only one workspace so no globals
-  }
 }
 }
 }

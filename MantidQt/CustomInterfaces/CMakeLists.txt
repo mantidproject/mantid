@@ -85,6 +85,7 @@ set ( SRC_FILES
 	src/Muon/MuonAnalysisFitFunctionPresenter.cpp
 	src/Muon/MuonAnalysisHelper.cpp
 	src/Muon/MuonAnalysisOptionTab.cpp
+	src/Muon/MuonAnalysisResultTableCreator.cpp
 	src/Muon/MuonAnalysisResultTableTab.cpp
 	src/Muon/MuonSequentialFitDialog.cpp
 	src/Reflectometry/MeasurementItem.cpp
@@ -153,8 +154,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/DynamicPDF/DisplayCurveFitTest.h
 	inc/MantidQtCustomInterfaces/DynamicPDF/SliceSelector.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h
-	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresWorker.h
+	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingViewQtWidget.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
 	inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
@@ -239,26 +240,27 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisFitFunctionPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
+	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableCreator.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
 	inc/MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/MeasurementItem.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainWindowView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/QtReflRunsTabView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h
-	inc/MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h
-	inc/MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h
-	inc/MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMainWindowPresenter.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflRunsTabPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMeasurementItemSource.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflRunsTabPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflTransferStrategy.h
@@ -511,6 +513,7 @@ set ( TEST_FILES
 	MuonAnalysisFitDataPresenterTest.h
 	MuonAnalysisFitFunctionPresenterTest.h
 	MuonAnalysisHelperTest.h
+	MuonAnalysisResultTableCreatorTest.h
 	ReflLegacyTransferStrategyTest.h
 	ReflMainWindowPresenterTest.h
 	ReflMeasureTransferStrategyTest.h
