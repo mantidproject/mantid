@@ -34,26 +34,6 @@ bool ConvertToPointData::isProcessingRequired(
 }
 
 /**
- * Checks the input workspace's X data structure is logical.
- * @param inputWS pointer to input workspace
- * @returns True if the X structure of the given input is what we expect, i.e.
- * NX=NY+1
- */
-bool ConvertToPointData::isWorkspaceLogical(
-    const MatrixWorkspace_sptr inputWS) const {
-  const size_t numBins = inputWS->blocksize();
-  const size_t numBoundaries = inputWS->x(0).size();
-  if (numBoundaries != (numBins + 1)) {
-    g_log.error() << "The number of bin boundaries must be one greater than "
-                     "the number of bins. "
-                  << "Found nbins=" << numBins
-                  << " and nBoundaries=" << numBoundaries << "\n";
-    return false;
-  }
-  return true;
-}
-
-/**
  * Returns the size of the new X vector
  * @param inputWS pointer to input workspace
  * @returns An integer giving the size of the new X vector

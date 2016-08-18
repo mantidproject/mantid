@@ -47,10 +47,6 @@ void XDataConverter::exec() {
     setProperty("OutputWorkspace", inputWS);
     return;
   }
-  if (!isWorkspaceLogical(inputWS)) {
-    throw std::runtime_error(
-        "Invalid InputWorkspace data structure. Check log for details.");
-  }
 
   const int numSpectra = static_cast<int>(inputWS->getNumberHistograms());
   const size_t numYValues = inputWS->blocksize();

@@ -54,9 +54,6 @@ private:
   /// Returns true if the algorithm needs to be run.
   bool
   isProcessingRequired(const API::MatrixWorkspace_sptr inputWS) const override;
-  /// Checks the input workspace is consistent, throwing if not
-  bool
-  isWorkspaceLogical(const API::MatrixWorkspace_sptr inputWS) const override;
   /// Returns the size of the new X vector
   std::size_t
   getNewXSize(const API::MatrixWorkspace_sptr inputWS) const override;

@@ -56,9 +56,6 @@ protected:
   /// Returns true if the algorithm needs to be run.
   virtual bool
   isProcessingRequired(const API::MatrixWorkspace_sptr inputWS) const = 0;
-  /// Checks the input workspace is consistent, throwing if not
-  virtual bool
-  isWorkspaceLogical(const API::MatrixWorkspace_sptr inputWS) const = 0;
   /// Returns the size of the new X vector
   virtual std::size_t
   getNewXSize(const API::MatrixWorkspace_sptr inputWS) const = 0;
