@@ -9,21 +9,13 @@ import sys
 import os
 import urllib2
 import math
-
 import numpy
 
 import HfirUtility as hutil
 
-# Import mantid
-curdir = os.getcwd()
-libpath = os.path.join(curdir.split('Code')[0], 'Code/debug/bin')
-if os.path.exists(libpath) is False:
-    libpath = os.path.join(curdir.split('Code')[0], 'Code/release/bin')
-sys.path.append(libpath)
+import mantid
 import mantid.simpleapi as api
 from mantid.simpleapi import AnalysisDataService
-#from mantid.kernel import ConfigService
-
 
 VanadiumPeakPositions = [0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,
                          0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401]

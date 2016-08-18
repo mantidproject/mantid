@@ -265,84 +265,73 @@
            <attribute name="title">
             <string>Information</string>
            </attribute>
-           <widget class="QLabel" name="label_infScan">
-            <property name="geometry">
-             <rect>
-              <x>20</x>
-              <y>30</y>
-              <width>62</width>
-              <height>16</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Scans</string>
-            </property>
-           </widget>
-           <widget class="QLineEdit" name="lineEdit_infoScans">
-            <property name="geometry">
-             <rect>
-              <x>80</x>
-              <y>30</y>
-              <width>161</width>
-              <height>21</height>
-             </rect>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pushButton_mineData">
-            <property name="geometry">
-             <rect>
-              <x>560</x>
-              <y>30</y>
-              <width>114</width>
-              <height>32</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Scan Data</string>
-            </property>
-           </widget>
-           <widget class="ScanInfoTable" name="tableWidget">
-            <property name="geometry">
-             <rect>
-              <x>60</x>
-              <y>80</y>
-              <width>931</width>
-              <height>511</height>
-             </rect>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For sample environment value with fluctuation, give out the average and standard deviation&lt;/p&gt;&lt;p&gt;== scan title ==&lt;/p&gt;&lt;p&gt;if scan title is like: &lt;/p&gt;&lt;p&gt;s1,xxxx &lt;/p&gt;&lt;p&gt;make s1 an individual column with value xxxxx&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pushButton_setInfoTable">
-            <property name="geometry">
-             <rect>
-              <x>420</x>
-              <y>30</y>
-              <width>114</width>
-              <height>32</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Set Table</string>
-            </property>
-           </widget>
-           <widget class="QPushButton" name="pushButton">
-            <property name="geometry">
-             <rect>
-              <x>880</x>
-              <y>30</y>
-              <width>114</width>
-              <height>32</height>
-             </rect>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sort selected columns&lt;/p&gt;&lt;p&gt;i.e., multiple column sorting&lt;/p&gt;&lt;p&gt;if there are more than 1 column to sort, then pop up a dialog for user to specifiy the order of these colums such as group temperature first and then wavelength&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Sort</string>
-            </property>
-           </widget>
+           <layout class="QVBoxLayout" name="verticalLayout_10">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_24">
+              <item>
+               <widget class="QLabel" name="label_infScan">
+                <property name="text">
+                 <string>Scans</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEdit_infoScans">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_setInfoTable">
+                <property name="text">
+                 <string>Set Table</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_mineData">
+                <property name="text">
+                 <string>Scan Data</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_sortInfoTable">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sort selected columns&lt;/p&gt;&lt;p&gt;i.e., multiple column sorting&lt;/p&gt;&lt;p&gt;if there are more than 1 column to sort, then pop up a dialog for user to specifiy the order of these colums such as group temperature first and then wavelength&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Sort</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="ScanInfoTable" name="tableWidget">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For sample environment value with fluctuation, give out the average and standard deviation&lt;/p&gt;&lt;p&gt;== scan title ==&lt;/p&gt;&lt;p&gt;if scan title is like: &lt;/p&gt;&lt;p&gt;s1,xxxx &lt;/p&gt;&lt;p&gt;make s1 an individual column with value xxxxx&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -2285,7 +2274,7 @@
      <x>0</x>
      <y>0</y>
      <width>1107</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

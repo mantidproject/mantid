@@ -38,15 +38,6 @@ class EmptyError(Exception):
 class MainWindow(QtGui.QMainWindow):
     """ Class of Main Window (top)
     """
-
-    # Copy to ui.setupUI
-    # # Version 3.0 + Import for ui_MainWindow.py
-    #     from MplFigureCanvas import Qt4MplCanvas
-
-    #     # Replace 'self.graphicsView = QtGui.QtGraphicsView' with the following
-    #     self.graphicsView = Qt4MplCanvas(self.centralwidget)
-    #     self.mainplot = self.graphicsView.getPlot()
-
     def __init__(self, parent=None):
         """ Initialization and set up
         """
@@ -167,6 +158,9 @@ class MainWindow(QtGui.QMainWindow):
 
         self.connect(self.ui.pushButton_mineData, QtCore.SIGNAL('clicked()'),
                 self.do_mine_data)
+
+        self.connect(self.ui.pushButton_sortInfoTable, QtCore.SIGNAL('clicked()'),
+                self.do_sort_info_table)
 
         # Define signal-event handling
 
@@ -1553,8 +1547,18 @@ class MainWindow(QtGui.QMainWindow):
             raise run_err
 
         # load
-        # FIXME/TODO - Enable testing scan
+        # FIXME/TODO/NOW: Expand from sample code below - Enable testing scan
+        # LoadSpiceAscii(Filename='/home/wzz/Projects/workspaces/Mantid/HB2A/HB2A_exp0496_scan0055.dat', 
+        # OutputWorkspace='HB2A_exp0496_scan0055_RawTable', RunInfoWorkspace='HB2A_exp0496_scan0055ExpInfo')
+        # table_ws = mtd['HB2A_exp0496_scan0055_RawTable']
+        # col_names = table_ws.getColumnNames()
+        # matrix_ws = mtd['HB2A_exp0496_scan0055ExpInfo']
+        # for p in matrix_ws.getRun().getProperties():
+        #    print p.name, p.value
+        # all p.value are strings
+
         # log_name_list = self._myControl.get_log_names(exp_number, scan_number)
+        # FIXME - remove this fake code
         log_name_list = ['Scan', 'Temp A', 'Temp B']
 
         # pop up a window for user to select the log names and types for output in the table
@@ -1565,6 +1569,15 @@ class MainWindow(QtGui.QMainWindow):
         self._scanInfoSetupWindow.show()
 
         return
+
+    def do_sort_info_table(self):
+        """
+        """
+        # FIXME/TODO/NOW: Implement from prototype
+        import InfoTableSortDialog
+        date, time, ok = InfoTableSortDialog.DateDialog.getDateTime()
+
+        print date, time, ok
 
     # pysignal: 
     def signal_info_setup_done(self, val):
