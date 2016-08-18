@@ -165,6 +165,10 @@ void GetEiMonDet2::exec() {
   if (!peakPositionColumn || !fitStatusColumn) {
     throw std::runtime_error("The workspace specified by " + PropertyNames::DETECTOR_EPP_TABLE + " doesn't seem to contain the expected table");
   }
+
+  // Average sample-to-detector distances.
+  const auto sample = detectorWs->getInstrument()->getSample();
+  double sampleToDetectorDistance = 0.0;
   // Average detector EPPs.
   double detectorEPP = 0.0;
   size_t n = 0;
@@ -173,15 +177,38 @@ void GetEiMonDet2::exec() {
       throw std::runtime_error("Invalid value in " + PropertyNames::DETECTORS);
     }
     if (fitStatusColumn->cell<std::string>(index) == FIT_STATUS_SUCCESS) {
-      detectorEPP += (*peakPositionColumn)[index];
-      ++n;
+      const auto detector = detectorWs->getDetector(index);
+      if (!detector) {
+        throw std::runtime_error("No detector specified by " + PropertyNames::DETECTORS + " found");
+      }
+      if (detector->isMonitor()) {
+        g_log.warning() << "Workspace index " << index << " should be detector, but is marked as monitor.\n";
+      }
+      if (!detector->isMasked()) {
+        const double d = detector->getDistance(*sample);
+        sampleToDetectorDistance += d;
+        const double epp = (*peakPositionColumn)[index];
+        detectorEPP += epp;
+        ++n;
+        g_log.debug() << "Including detector at workspace index " << index << " - distance: " << d << " EPP: " << epp << ".\n";
+      }
+      else {
+        g_log.debug() << "Excluding masked detector at workspace index " << index << ".\n";
+      }
+    }
+    else {
+      g_log.debug() << "Excluding detector with unsuccessful fit at workspace index " << index << ".\n";
     }
   }
   if (n == 0) {
     throw std::runtime_error("No successful detector fits found in " + PropertyNames::DETECTOR_EPP_TABLE);
   }
+  sampleToDetectorDistance /= static_cast<double>(n);
+  g_log.information() << "Average sample-to-detector distance: " << sampleToDetectorDistance << ".\n";
   detectorEPP /= static_cast<double>(n);
-  // Monitor peak position.
+  g_log.information() << "Average detector EPP: " << detectorEPP << ".\n";
+
+  // Monitor-to-sample distance.
   peakPositionColumn = monitorEPPTable->getColumn(PEAK_CENTRE_COLUMN);
   fitStatusColumn = monitorEPPTable->getColumn(FIT_STATUS_COLUMN);
   if (!peakPositionColumn || !fitStatusColumn) {
@@ -193,44 +220,42 @@ void GetEiMonDet2::exec() {
   if (fitStatusColumn->cell<std::string>(monitorIndex) != FIT_STATUS_SUCCESS) {
     throw std::runtime_error("No successful monitor fit found in " + PropertyNames::MONITOR_EPP_TABLE);
   }
-  const double monitorEPP = (*peakPositionColumn)[monitorIndex];
-
-  // Average sample-to-detector distances.
-  const auto sample = detectorWs->getInstrument()->getSample();
-  double sampleToDetectorDistance = 0.0;
-  n = 0;
-  for (const auto index : detectorIndices) {
-    // Skip detectors without EPP.
-    if (fitStatusColumn->cell<std::string>(index) == FIT_STATUS_SUCCESS) {
-      const auto detector = detectorWs->getDetector(index);
-      if (!detector) {
-        throw std::runtime_error("No detector specified by " + PropertyNames::DETECTORS + " found");
-      }
-      sampleToDetectorDistance += detector->getDistance(*sample);
-      ++n;
-    }
-  }
-  sampleToDetectorDistance /= static_cast<double>(n);
-  // Monitor-to-sample distance.
   const auto monitor = monitorWs->getDetector(monitorIndex);
+  if (monitor->isMasked()) {
+    throw std::runtime_error("Monitor spectrum is masked");
+  }
+  if (!monitor->isMonitor()) {
+    g_log.warning() << "The monitor spectrum is not actually marked as monitor.\n";
+  }
   const double monitorToSampleDistance = monitor->getDistance(*sample);
+  g_log.information() << "Monitor-to-sample distance: " << monitorToSampleDistance << ".\n";
+
+  // Monitor peak position.
+  const double monitorEPP = (*peakPositionColumn)[monitorIndex];
+  g_log.information() << "Monitor EPP: " << monitorEPP << ".\n";
 
   const double flightLength = sampleToDetectorDistance + monitorToSampleDistance;
 
   // Calculate actual time of flight from monitor to detectors.
   double timeOfFlight = detectorEPP - monitorEPP;
   const double nominalTimeOfFlight = flightLength / std::sqrt(2 * nominalIncidentEnergy * meV / NeutronMass) * 1e6; // In microseconds.
+  g_log.information() << "Nominal time-of-flight: " << nominalTimeOfFlight << ".\n";
   const double energyTolerance = 20;
   const double toleranceLimit = 1 / std::sqrt(1 + energyTolerance) * nominalTimeOfFlight;
   const double pulseInterval = getProperty(PropertyNames::PULSE_INTERVAL);
   const double pulseIntervalLimit = nominalTimeOfFlight - pulseInterval / 2;
   const double lowerTimeLimit = toleranceLimit > pulseIntervalLimit ? toleranceLimit : pulseIntervalLimit;
   const double upperTimeLimit = toleranceLimit > pulseIntervalLimit ? 1 / std::sqrt(1 - energyTolerance) * nominalTimeOfFlight : nominalTimeOfFlight + pulseInterval / 2;
+  g_log.notice() << "Expecting a final time-of-flight between " << lowerTimeLimit << " and " << upperTimeLimit << ".\n";
+  g_log.notice() << "Calculated time-of-flight: " << timeOfFlight << ".\n";
+  if (timeOfFlight <= lowerTimeLimit) {
+    g_log.notice() << "Calculated time-of-flight too small. Frame delay has to be taken into account.\n";
+  }
   unsigned delayFrameCount = 0;
   while (timeOfFlight <= lowerTimeLimit) {
     // Neutrons hit the detectors in a later frame.
     if (pulseInterval == EMPTY_DBL()) {
-      throw std::runtime_error("Too small or negative time-of-flight and no " + PropertyNames::PULSE_INTERVAL + " specified");
+      throw std::runtime_error("No " + PropertyNames::PULSE_INTERVAL + " specified");
     }
     ++delayFrameCount;
     timeOfFlight = delayFrameCount * pulseInterval - monitorEPP + detectorEPP;
@@ -241,6 +266,7 @@ void GetEiMonDet2::exec() {
 
   const double velocity = flightLength / timeOfFlight * 1e6;
   const double energy = 0.5 * NeutronMass * velocity * velocity / meV;
+  g_log.notice() << "Final time-of-flight:" << timeOfFlight << " which gives " << energy << " as " + PropertyNames::INCIDENT_ENERGY + ".\n";
   // Set output properties.
   setProperty(PropertyNames::INCIDENT_ENERGY, energy);
 }
