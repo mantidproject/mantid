@@ -84,16 +84,20 @@ void FitMW::declareDatasetProperties(const std::string &suffix, bool addProp) {
   m_normalisePropertyName = "Normalise" + suffix;
 
   if (addProp) {
-    if (m_domainType != Simple) {
+    if (m_domainType != Simple &&
+        !m_manager->existsProperty(m_maxSizePropertyName)) {
       auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
       mustBePositive->setLower(0);
       declareProperty(
           new PropertyWithValue<int>(m_maxSizePropertyName, 1, mustBePositive),
           "The maximum number of values per a simple domain.");
     }
-    declareProperty(
-        new PropertyWithValue<bool>(m_normalisePropertyName, false),
-        "An option to normalise the histogram data (divide be the bin width).");
+    if (!m_manager->existsProperty(m_normalisePropertyName)) {
+      declareProperty(
+          new PropertyWithValue<bool>(m_normalisePropertyName, false),
+          "An option to normalise the histogram data (divide be the bin "
+          "width).");
+    }
   }
 }
 
