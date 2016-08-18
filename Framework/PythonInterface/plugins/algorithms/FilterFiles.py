@@ -1,4 +1,4 @@
-#pylint: disable=eval-used
+#pylint: disable=eval-used,consider-using-enumerate
 from __future__ import (absolute_import, division, print_function)
 
 import h5py
@@ -7,7 +7,7 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid import config, logger, mtd
 
-class FilterFilesByMetaData(PythonAlgorithm):
+class FilterFiles(PythonAlgorithm):
 
     def category(self):
         return "Workflow\\MIDAS;Inelastic\\Reduction"
@@ -25,7 +25,7 @@ class FilterFilesByMetaData(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(MultipleFileProperty('FileList',extensions=['nxs']),doc='List of files')
         self.declareProperty(name='Criteria',defaultValue='',doc='Logical expresion for metadata criteria')
-        self.declareProperty(name='OutputFiles', defaultValue='',direction=Direction.Output, doc='Result string')
+        self.declareProperty(name='Result', defaultValue='', direction=Direction.Output, doc='Result string')
 
     def PyExec(self):
         outputfiles = []
@@ -37,14 +37,27 @@ class FilterFilesByMetaData(PythonAlgorithm):
                 for i in range(len(splitted)):
                     if i % 2 == 1:
                         # replace nexus entry names by their values
-                        toeval += str(nexusfile.get(splitted[i])[0])
+                        try:
+                            toeval += str(nexusfile.get(splitted[i])[0])
+                        except TypeError:
+                            self.log().warning('Nexus entry %s does not exist in file %s. Skipping the file.\n' \
+                                               % (splitted[i],run))
+                            toeval = 'False'
+                            break
                     else:
                         # keep other portions intact
                         toeval += splitted[i]
-                if eval(toeval):
-                    outputfiles.append(run)
+                try:
+                    if eval(toeval):
+                        outputfiles.append(run)
+                except SyntaxError:
+                    self.log().error('Invalid syntax. Please check Criteria.')
+                    break
 
-        self.setPropertyValue('OutputFiles',','.join(outputfiles))
+        if not outputfiles:
+            self.log().notice('No files where found. Please check FileList and/or Criteria')
+
+        self.setPropertyValue('Result',','.join(outputfiles))
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(FilterFilesByMetaData)
+AlgorithmFactory.subscribe(FilterFiles)
