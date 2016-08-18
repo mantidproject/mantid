@@ -68,7 +68,6 @@ void IndirectMoments::run() {
   double eMin = m_dblManager->value(m_properties["EMin"]);
   double eMax = m_dblManager->value(m_properties["EMax"]);
 
-
   std::string outputWorkspaceName = outputName.toStdString() + "_Moments";
 
   IAlgorithm_sptr momentsAlg =
@@ -206,11 +205,12 @@ void IndirectMoments::momentsAlgComplete(bool error) {
  * Handle mantid plotting
  */
 void IndirectMoments::plotClicked() {
-  QString outputWs = getWorkspaceBasename(m_uiForm.dsInput->getCurrentDataName()) + "_Moments";
+  QString outputWs =
+      getWorkspaceBasename(m_uiForm.dsInput->getCurrentDataName()) + "_Moments";
   bool plot = checkADSForPlotSaveWorkspace(outputWs.toStdString(), true);
   if (plot) {
     plotSpectrum(outputWs + "_M0");
-    plotSpectrum({ outputWs + "_M0", outputWs + "_M2" });
+    plotSpectrum({outputWs + "_M0", outputWs + "_M2"});
   }
 }
 
@@ -218,7 +218,8 @@ void IndirectMoments::plotClicked() {
  * Handles saving of workspaces
  */
 void IndirectMoments::saveClicked() {
-  QString outputWs = getWorkspaceBasename(m_uiForm.dsInput->getCurrentDataName()) + "_Moments";
+  QString outputWs =
+      getWorkspaceBasename(m_uiForm.dsInput->getCurrentDataName()) + "_Moments";
   bool save = checkADSForPlotSaveWorkspace(outputWs.toStdString(), false);
   addSaveWorkspaceToQueue(outputWs);
   m_batchAlgoRunner->executeBatchAsync();
