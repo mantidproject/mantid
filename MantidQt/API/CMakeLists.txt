@@ -42,6 +42,7 @@
 	src/SignalRange.cpp
 	src/SyncedCheckboxes.cpp
 	src/TextPropertyWidget.cpp
+  src/TSVSerialiser.cpp
 	src/UserSubWindow.cpp
 	src/VatesViewerInterface.cpp
         src/WidgetScrollbarDecorator.cpp
@@ -111,6 +112,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/SelectionNotificationService.h
 	inc/MantidQtAPI/SignalBlocker.h
 	inc/MantidQtAPI/SignalRange.h
+  inc/MantidQtAPI/TSVSerialiser.h
 	inc/MantidQtAPI/qwt_compat.h
         inc/MantidQtAPI/WidgetScrollbarDecorator.h
 )

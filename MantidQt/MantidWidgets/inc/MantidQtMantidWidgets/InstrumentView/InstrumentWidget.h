@@ -128,6 +128,13 @@ public:
       const std::string &wsName,
       const boost::shared_ptr<Mantid::API::Workspace> workspace);
 
+  /// Get the currently selected tab index
+  int getCurrentTab() const;
+  /// Load the widget from a Mantid project file.
+  void loadFromProject(const std::string &lines);
+  /// Save the widget to a Mantid projecy file.
+  std::string saveToProject() const;
+
 signals:
   void enableLighting(bool);
   void plot1D(const QString &, const std::set<int> &, bool);
@@ -280,6 +287,11 @@ private:
   void renameHandle(const std::string &oldName,
                     const std::string &newName) override;
   void clearADSHandle() override;
+
+  /// Load tabs on the widget form a project file
+  void loadTabs(const std::string &lines) const;
+  /// Save tabs on the widget to a string
+  std::string saveTabs() const;
 };
 
 } // MantidWidgets
