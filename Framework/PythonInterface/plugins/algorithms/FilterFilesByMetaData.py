@@ -25,22 +25,26 @@ class FilterFilesByMetaData(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(MultipleFileProperty('FileList',extensions=['nxs']),doc='List of files')
         self.declareProperty(name='Criteria',defaultValue='',doc='Logical expresion for metadata criteria')
+        self.declareProperty(name='OutputFiles', defaultValue='',direction=Direction.Output, doc='Result string')
 
     def PyExec(self):
         outputfiles = []
-        criteria = self.getPropertyValue('Criteria')
-        splitted = criteria.split('$')
+        splitted = self.getPropertyValue('Criteria').split('$')
 
         for run in self.getPropertyValue('FileList').replace('+', ',').split(','):
             with h5py.File(run,'r') as nexusfile:
                 toeval = ''
                 for i in range(len(splitted)):
-                        toeval += str(nexusfile.get(splitted[i])[0]) if i % 2 == 1 else splitted[i]
+                    if i % 2 == 1:
+                        # replace nexus entry names by their values
+                        toeval += str(nexusfile.get(splitted[i])[0])
+                    else:
+                        # keep other portions intact
+                        toeval += splitted[i]
                 if eval(toeval):
                     outputfiles.append(run)
 
-        print(','.join(outputfiles))
-        self.setPropertyValue('FileList',','.join(outputfiles))
+        self.setPropertyValue('OutputFiles',','.join(outputfiles))
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(FilterFilesByMetaData)
