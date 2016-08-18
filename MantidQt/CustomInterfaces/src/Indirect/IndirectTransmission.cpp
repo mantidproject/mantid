@@ -123,6 +123,10 @@ void IndirectTransmission::transAlgDone(bool error) {
   m_uiForm.ppPlot->addSpectrum(
       "Transmission", QString::fromStdString(resultWsNames[2]), 0, Qt::green);
   m_uiForm.ppPlot->resizeX();
+
+  // Enable plot and save
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 void IndirectTransmission::instrumentSet() {
