@@ -134,6 +134,9 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
           SLOT(xRangeMinChanged(double)));
   connect(negativeERaw, SIGNAL(maxValueChanged(double)), this,
           SLOT(xRangeMaxChanged(double)));
+  // Handle plotting and saving
+  connect(uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
   // Set default X range values
   m_dblManager->setValue(m_properties["EMin"], 0.1);
