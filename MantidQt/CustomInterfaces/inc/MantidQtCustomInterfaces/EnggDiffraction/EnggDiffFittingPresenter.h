@@ -139,7 +139,7 @@ protected slots:
   void fittingRunNoChanged();
 
 private:
-  bool isDigit(std::string text);
+  bool isDigit(std::string text) const;
 
   // Methods related single peak fits
   virtual void

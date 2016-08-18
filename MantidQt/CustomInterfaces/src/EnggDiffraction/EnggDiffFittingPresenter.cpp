@@ -293,10 +293,10 @@ void EnggDiffFittingPresenter::browsedFile(
     const std::vector<std::string> &splitBaseName,
     std::vector<std::string> &runNoVec, const std::string &bankFileDir) {
   // to track the FittingRunnoChanged loop number
-	if (g_fitting_runno_counter == 0)
-		g_multi_run_directories.clear();
+  if (g_fitting_runno_counter == 0)
+    g_multi_run_directories.clear();
 
-	g_fitting_runno_counter++;
+  g_fitting_runno_counter++;
 
   // regenerating the focus file name
   std::string foc_file = splitBaseName[0] + "_" + splitBaseName[1] + "_" +
@@ -465,7 +465,7 @@ void EnggDiffFittingPresenter::enableMultiRun(
             "Please try again");
       } else {
 
-	    // clear previous directories set before updateFittingDirVec
+        // clear previous directories set before updateFittingDirVec
         if (g_fitting_runno_counter == 0)
           g_multi_run_directories.clear();
 
@@ -685,10 +685,16 @@ void EnggDiffFittingPresenter::setDifcTzero(MatrixWorkspace_sptr wks) const {
     auto name = path.getBaseName();
     std::vector<std::string> chunks;
     boost::split(chunks, name, boost::is_any_of("_"));
-    if (!chunks.empty()) {
+    bool isNum = isDigit(chunks.back());
+    if (!chunks.empty() && isNum) {
       try {
         bankID = boost::lexical_cast<size_t>(chunks.back());
-      } catch (std::runtime_error &) {
+      } catch (std::runtime_error &re) {
+        g_log.error()
+            << "Unable to successfully apply DifcTzero to focused workspace. "
+               "Error description: " +
+                   static_cast<std::string>(re.what()) << '\n';
+        throw;
       }
     }
   }
@@ -759,6 +765,7 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
     return;
   }
 
+  // apply calibration to the focused workspace
   setDifcTzero(focusedWS);
 
   // run the algorithm EnggFitPeaks with workspace loaded above
@@ -1458,7 +1465,7 @@ void EnggDiffFittingPresenter::setDefaultBank(
     m_view->setFittingRunNo(selectedFile);
 }
 
-bool EnggDiffFittingPresenter::isDigit(std::string text) {
+bool EnggDiffFittingPresenter::isDigit(std::string text) const {
   // bool isDig = true;
   for (size_t i = 0; i < text.size(); i++) {
     char *str = &text[i];
