@@ -1011,38 +1011,45 @@ void MuonAnalysisResultTableTab::createMultipleFitsTable() {
                    paramNames.end());
 
   // Add a new column (with error) to table
-  const auto addToTable = [&table, &paramsToDisplay](const std::string &key) {
+  const auto addToTable = [&table, &paramsToDisplay](const QString &prefix,
+                                                     const QString &name) {
+    const std::string key = QString(prefix + name).toStdString();
     Column_sptr newValCol = table->addColumn("double", key);
     newValCol->setPlotType(2);
     newValCol->setReadOnly(false);
-    const std::string keyError = key + ERROR_STRING;
-    Column_sptr newErrorCol = table->addColumn("double", keyError);
+    Column_sptr newErrorCol = table->addColumn("double", key + ERROR_STRING);
     newErrorCol->setPlotType(5);
     newErrorCol->setReadOnly(false);
-    paramsToDisplay.append(QString::fromStdString(key));
-    paramsToDisplay.append(QString::fromStdString(keyError));
+    paramsToDisplay.append(name);
+    paramsToDisplay.append(name + QString::fromStdString(ERROR_STRING));
   };
 
-  // Global: add one column
-  // Local: add one per dataset
+  // Global: add one column (+ error)
+  // Local: add one per dataset (+ error)
   for (const auto &param : paramNames) {
     if (isGlobal(param, wsParamsByLabel)) {
-      addToTable(param.toStdString());
+      addToTable("", param);
     } else {
       const int nDatasetsPerLabel = wsParamsByLabel.begin()->count();
       for (int i = 0; i < nDatasetsPerLabel; ++i) {
-        addToTable(('f' + QString::number(i) + '.' + param).toStdString());
+        addToTable('f' + QString::number(i) + '.', param);
       }
     }
   }
 
-  // -------------------testing ----------------
+  // Add cost function - no error! - at the END of the table after params
+  auto chisqCol = table->addColumn("double", "Cost function value");
+  chisqCol->setPlotType(2);
+  chisqCol->setReadOnly(false);
+  paramsToDisplay.append("Cost function value");
 
   // Add data to table
   for (const auto &labelName : labelsSelected) {
     Mantid::API::TableRow row = table->appendRow();
+    size_t columnIndex(0); // Which column we are writing to
 
     row << labelName.toStdString();
+    columnIndex++;
 
     // Get log values for this row and write in table
     for (const auto &log : logsSelected) {
@@ -1074,20 +1081,47 @@ void MuonAnalysisResultTableTab::createMultipleFitsTable() {
         oss << min << '-' << max;
         row << oss.str();
       }
+      columnIndex++;
     }
 
-    //// Add param values (params same for all workspaces)
-    // QMap<QString, double> paramsList = wsParamsList[wsName];
-    // for (const auto &paramName : paramsToDisplay) {
-    //  row << paramsList[paramName];
-    //}
+    // Parse column name - could be param name or f[n].param
+    const auto parseColumnName = [&paramsToDisplay](
+        const std::string &columnName) -> std::pair<int, std::string> {
+      if (paramsToDisplay.contains(QString::fromStdString(columnName))) {
+        return {0, columnName};
+      } else {
+        // column name is f[n].param
+        size_t pos = columnName.find_first_of('.');
+        if (pos != std::string::npos) {
+          try {
+            const auto &paramName = columnName.substr(pos + 1);
+            const auto wsIndex = std::stoi(columnName.substr(1, pos));
+            return {wsIndex, paramName};
+          } catch (const std::exception &ex) {
+            throw std::runtime_error("Failed to parse column name " +
+                                     columnName + ": " + ex.what());
+          }
+        } else {
+          throw std::runtime_error("Failed to parse column name " + columnName);
+        }
+      }
+    };
+
+    // Add param values
+    const auto &params = wsParamsByLabel[labelName];
+    while (columnIndex < table->columnCount()) {
+      const auto &parsedColName =
+          parseColumnName(table->getColumn(columnIndex)->name());
+      const QString wsName = params.keys().at(parsedColName.first);
+      const QString &paramName = QString::fromStdString(parsedColName.second);
+      row << params[wsName].value(paramName);
+      columnIndex++;
+    }
   }
 
   // Remove error columns if all errors are zero
   // (because these correspond to fixed parameters)
   MuonAnalysisHelper::removeFixedParameterErrors(table);
-
-  //////////////////////////// code to go here
 
   const std::string &tableName = getFileName();
 
