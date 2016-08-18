@@ -391,9 +391,9 @@ void EnggDiffFittingPresenter::updateFittingDirVec(
     std::vector<std::string> &fittingRunNoDirVec,
     std::vector<std::string> &foundRunNumber) {
 
-  bool found = false;
-
   try {
+    bool found = false;
+
     std::string cwd(focusDir);
     Poco::DirectoryIterator it(cwd);
     Poco::DirectoryIterator end;
