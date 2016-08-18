@@ -25,6 +25,8 @@ IndirectTransmission::IndirectTransmission(IndirectDataReduction *idrUI,
           SLOT(dataLoaded()));
   connect(m_uiForm.dsCanInput, SIGNAL(dataReady(QString)), this,
           SLOT(dataLoaded()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
 
 //----------------------------------------------------------------------------------------------
